@@ -30,6 +30,8 @@ export declare class AudioPlayback {
 
 /** Persistent, serialized native desktop capture/input/accessibility session. */
 export declare class DesktopSession {
+  /** Pin this native window's owner for the lifetime of the session. */
+  pinWindow(id: string, pid: number): Promise<undefined>
   constructor(options?: DesktopSessionOptions | undefined | null)
   get capabilities(): DesktopCapabilities
   listDisplays(): Promise<Array<DesktopDisplay>>
@@ -42,6 +44,8 @@ export declare class DesktopSession {
   typeText(target: string, text: string, opts?: PointerOptions | undefined | null): Promise<undefined>
   keyChord(target: string, keys: Array<string>, opts?: PointerOptions | undefined | null): Promise<undefined>
   raiseWindow(windowId: string): Promise<undefined>
+  setWindowFrame(windowId: string, x: number, y: number, width: number, height: number): Promise<undefined>
+  invokeMenu(windowId: string, menuPath: Array<string>, opts?: PointerOptions | undefined | null): Promise<undefined>
   axSnapshot(target: string, opts?: AxSnapshotOptions | undefined | null): Promise<AxSnapshot>
   axQuery(target: string, query: AxQuery): Promise<Array<AxNode>>
   /**
@@ -56,6 +60,7 @@ export declare class DesktopSession {
   axParent(reference: string): Promise<AxNode | undefined | null>
   axPerform(reference: string, action: string): Promise<undefined>
   axSetValue(reference: string, value: string): Promise<undefined>
+  axInsertText(reference: string, text: string): Promise<undefined>
   axFocus(reference: string): Promise<undefined>
   axClick(reference: string, opts?: PointerOptions | undefined | null): Promise<undefined>
   close(): Promise<undefined>
@@ -896,7 +901,7 @@ export interface AxNode {
   title?: string
   value?: string
   description?: string
-  enabled: boolean
+  enabled?: boolean
   focused: boolean
   x?: number
   y?: number
@@ -915,8 +920,11 @@ export interface AxQuery {
 
 export interface AxSnapshot {
   text: string
+  nodes: Array<AxNode>
   nodeCount: number
   truncated: boolean
+  /** Subtrees omitted because their accessibility data could not be read. */
+  skipped: number
 }
 
 export interface AxSnapshotOptions {

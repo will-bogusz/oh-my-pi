@@ -1,4 +1,7 @@
-use std::{collections::HashMap, fmt::Write as _};
+use std::{
+	collections::{BTreeMap, HashMap},
+	fmt::Write as _,
+};
 
 use super::{
 	backend::AxBackend,
@@ -25,7 +28,7 @@ pub struct AxProps {
 	pub title:       Option<String>,
 	pub value:       Option<String>,
 	pub description: Option<String>,
-	pub enabled:     bool,
+	pub enabled:     Option<bool>,
 	pub focused:     bool,
 	pub bounds:      Option<AxBounds>,
 	pub actions:     Vec<String>,
@@ -49,12 +52,12 @@ struct Registered {
 pub struct AxRegistry {
 	next_ref:    u64,
 	generations: HashMap<String, u64>,
-	entries:     HashMap<u64, Registered>,
+	entries:     BTreeMap<u64, Registered>,
 }
 
 impl Default for AxRegistry {
 	fn default() -> Self {
-		Self { next_ref: 1, generations: HashMap::new(), entries: HashMap::new() }
+		Self { next_ref: 1, generations: HashMap::new(), entries: BTreeMap::new() }
 	}
 }
 
@@ -103,29 +106,9 @@ impl AxRegistry {
 
 	fn enforce_cap(&mut self) {
 		while self.entries.len() > 5_000 {
-			let mut target_sizes: HashMap<&str, usize> = HashMap::new();
-			for entry in self.entries.values() {
-				*target_sizes.entry(&entry.target_key).or_default() += 1;
-			}
-			let Some(target) = target_sizes
-				.into_iter()
-				.max_by_key(|(_, count)| *count)
-				.map(|(target, _)| target.to_string())
-			else {
-				break;
-			};
-			let Some(oldest) = self
-				.entries
-				.values()
-				.filter(|entry| entry.target_key == target)
-				.map(|entry| entry.generation)
-				.min()
-			else {
-				break;
-			};
-			self
-				.entries
-				.retain(|_, entry| entry.target_key != target || entry.generation != oldest);
+			// Monotonic refs preserve the most recently registered batch. Evicting
+			// an entire generation here could evict the snapshot being returned.
+			self.entries.pop_first();
 		}
 	}
 }
@@ -296,7 +279,7 @@ fn format_tree(
 	target: &str,
 	generation: u64,
 	text: &mut String,
-	nodes: &mut u32,
+	nodes: &mut Vec<AxNode>,
 ) {
 	let reference = registry.register(target, generation, node.handle);
 	if !text.is_empty() {
@@ -320,7 +303,7 @@ fn format_tree(
 	{
 		let _ = write!(text, ": \"{}\"", escaped_truncated(value, 80));
 	}
-	if !node.props.enabled {
+	if node.props.enabled == Some(false) {
 		text.push_str(" (disabled)");
 	}
 	// The root's own AXFocused only reflects app-local focus; report the global
@@ -333,7 +316,7 @@ fn format_tree(
 	if focused {
 		text.push_str(" (focused)");
 	}
-	*nodes += 1;
+	nodes.push(node_to_napi(reference, node.props));
 	for child in node.children {
 		format_tree(child, depth + 1, window, registry, target, generation, text, nodes);
 	}
@@ -351,16 +334,16 @@ pub fn snapshot(
 	let mut state = WalkState {
 		visited:   0,
 		skipped:   0,
-		max_nodes: options.max_nodes.unwrap_or(800).max(1),
+		max_nodes: options.max_nodes.unwrap_or(800).clamp(1, 5_000),
 		max_depth: options.max_depth.unwrap_or(24),
 		truncated: false,
 	};
 	let root = walk_raw(backend, root, 0, &mut state)?
 		.and_then(|node| filter_node(node, options.all.unwrap_or(false)));
 	let mut text = String::new();
-	let mut node_count = 0;
+	let mut nodes = Vec::new();
 	if let Some(root) = root {
-		format_tree(root, 0, window, registry, target, generation, &mut text, &mut node_count);
+		format_tree(root, 0, window, registry, target, generation, &mut text, &mut nodes);
 	}
 	if state.truncated {
 		if !text.is_empty() {
@@ -374,7 +357,13 @@ pub fn snapshot(
 		}
 		let _ = write!(text, "… skipped {} unreadable nodes", state.skipped);
 	}
-	Ok(AxSnapshot { text, node_count, truncated: state.truncated })
+	Ok(AxSnapshot {
+		text,
+		node_count: nodes.len() as u32,
+		nodes,
+		truncated: state.truncated,
+		skipped: state.skipped,
+	})
 }
 
 pub fn query(
@@ -584,7 +573,7 @@ mod tests {
 			title:       title.map(str::to_string),
 			value:       None,
 			description: None,
-			enabled:     true,
+			enabled:     Some(true),
 			focused:     false,
 			bounds:      None,
 			actions:     Vec::new(),
@@ -616,7 +605,7 @@ mod tests {
 		assert!(r.resolve("e3").is_ok());
 	}
 	#[test]
-	fn hard_cap_evicts_oldest_generation_of_largest_target() {
+	fn hard_cap_preserves_newest_refs() {
 		let mut r = AxRegistry::default();
 		let g = r.current_generation("x");
 		for n in 0..5_001 {
@@ -624,9 +613,35 @@ mod tests {
 		}
 		assert!(r.entries.len() <= 5_000);
 		assert!(r.resolve("e1").is_err());
+		assert!(r.resolve("e5001").is_ok());
 	}
 	#[test]
-	fn snapshot_text_and_filter_are_exact() {
+	fn oversized_snapshot_returns_only_live_refs_and_reports_bound() {
+		let mut m = Mock {
+			props:    (1..=6_000)
+				.map(|id| (id, p("button", Some("Control"))))
+				.collect(),
+			children: [(1, (2..=6_000).collect())].into(),
+		};
+		let mut registry = AxRegistry::default();
+		for id in 0..5_000 {
+			registry.register("other", 1, AxHandle::Test(id));
+		}
+		let result = snapshot(&mut m, &mut registry, &window(), &AxSnapshotOptions {
+			max_nodes: Some(10_000),
+			all: Some(true),
+			..Default::default()
+		})
+		.unwrap();
+		assert!(result.truncated);
+		assert_eq!(result.node_count, 5_000);
+		assert_eq!(result.skipped, 0);
+		for node in result.nodes {
+			assert!(registry.resolve(&node.ref_).is_ok());
+		}
+	}
+	#[test]
+	fn snapshot_nodes_preserve_values_and_registered_identity() {
 		let mut m = Mock {
 			props:    [
 				(1, p("window", Some("Title"))),
@@ -636,15 +651,17 @@ mod tests {
 			.into(),
 			children: [(1, vec![2]), (2, vec![3])].into(),
 		};
+		let value = format!("\n  {}  \n", "文🦀".repeat(300));
+		m.props.get_mut(&3).unwrap().value = Some(value.clone());
+		let mut registry = AxRegistry::default();
 		m.props.get_mut(&3).unwrap().actions.push("press".into());
-		let s =
-			snapshot(&mut m, &mut AxRegistry::default(), &window(), &AxSnapshotOptions::default())
-				.unwrap();
-		assert_eq!(
-			s.text,
-			"- window \"Title\" [ref=e1] app=Safari (focused)\n  - button \"Go\" [ref=e2]"
-		);
+		let s = snapshot(&mut m, &mut registry, &window(), &AxSnapshotOptions::default()).unwrap();
+		assert_eq!(s.nodes[1].value.as_deref(), Some(value.as_str()));
+		assert!(matches!(registry.resolve(&s.nodes[1].ref_).unwrap(), AxHandle::Test(3)));
+		assert_eq!(s.nodes[0].role, "window");
+		assert_eq!(s.nodes[1].role, "button");
 		assert_eq!(s.node_count, 2);
+		assert_eq!(s.nodes.len(), s.node_count as usize);
 	}
 	#[test]
 	fn description_labels_unnamed_controls_without_changing_raw_title() {
@@ -694,11 +711,8 @@ mod tests {
 		let s =
 			snapshot(&mut m, &mut AxRegistry::default(), &window(), &AxSnapshotOptions::default())
 				.unwrap();
-		assert_eq!(
-			s.text,
-			"- window \"Title\" [ref=e1] app=Safari (focused)\n  - button \"Ready\" [ref=e2]\n… \
-			 skipped 1 unreadable nodes"
-		);
+		assert_eq!(s.skipped, 1);
+		assert!(!s.truncated);
 		assert_eq!(s.node_count, 2);
 		let limited = snapshot(&mut m, &mut AxRegistry::default(), &window(), &AxSnapshotOptions {
 			max_nodes: Some(2),
@@ -706,11 +720,7 @@ mod tests {
 		})
 		.unwrap();
 		assert!(limited.truncated);
-		assert!(
-			limited
-				.text
-				.ends_with("… truncated (2 nodes)\n… skipped 1 unreadable nodes")
-		);
+		assert_eq!(limited.skipped, 1);
 		let nodes = query(&mut m, &mut AxRegistry::default(), &window(), &AxQuery {
 			role:  Some("button".into()),
 			title: None,

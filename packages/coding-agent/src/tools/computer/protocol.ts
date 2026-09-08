@@ -1,7 +1,7 @@
 import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
 import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 
-/** Hidden CLI selector that re-enters the computer worker host. */
+/** Hidden CLI selector that re-enters the isolated computer subprocess host. */
 export const COMPUTER_WORKER_ARG = "__omp_worker_computer";
 
 /** Frozen run settings transferred from the host session to the worker. */
@@ -35,12 +35,16 @@ export interface ComputerRunOk {
 
 /** Full-resolution screenshot emitted during one computer run. */
 export interface ComputerScreenshot {
+	/** Zero-based image ordinal in run displays; absent when captured silently. */
+	imageIndex?: number;
 	path: string;
 	width: number;
 	height: number;
 	sourceWidth?: number;
 	sourceHeight?: number;
 	target: string;
+	/** Observed app/window name for presentation; target remains the routing identity. */
+	label?: string;
 }
 
 /** Clone-safe error metadata returned across the worker boundary. */
@@ -59,9 +63,9 @@ export type ComputerWorkerOutbound =
 	| { type: "result"; id: string; ok: true; payload: ComputerRunOk }
 	| { type: "result"; id: string; ok: false; error: RunErrorPayload }
 	| { type: "tool-call"; id: string; runId: string; name: string; args: unknown }
-	| { type: "closed" };
+	| { type: "closed"; error?: RunErrorPayload };
 
-/** Transport used by the worker core in Bun workers and tests. */
+/** Transport used by the worker core in subprocess hosts and tests. */
 export interface ComputerWorkerTransport {
 	send(message: ComputerWorkerOutbound, transfer?: Bun.Transferable[]): void;
 	onMessage(handler: (message: ComputerWorkerInbound) => void): () => void;

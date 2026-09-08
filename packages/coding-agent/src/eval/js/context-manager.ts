@@ -233,18 +233,22 @@ export async function invokeJsTool(
 	session.pending.set(runId, pending);
 
 	const onAbort = (): void => {
-		if (pending.settled) return;
-		pending.aborted = true;
-		pending.settled = true;
+		if (pending.settled || pending.aborted) return;
 		const error = reasonToError(options.signal?.reason, "Tool invocation aborted");
-		for (const controller of pending.toolCalls.values()) controller.abort(error);
-		reject(error);
+		const drained = abortPendingCalls(pending, error);
+		const finish = (): void => {
+			if (pending.settled) return;
+			pending.settled = true;
+			reject(error);
+		};
+		if (drained) void drained.then(finish);
+		else finish();
 	};
 	if (options.signal?.aborted) onAbort();
 	else options.signal?.addEventListener("abort", onAbort, { once: true });
 
 	try {
-		if (!pending.settled) safeSend(session, { type: "tool", runId, ...request });
+		if (!pending.aborted) safeSend(session, { type: "tool", runId, ...request });
 		await promise;
 	} catch (error) {
 		return { ok: false, error: error instanceof Error ? error.message : String(error) };
@@ -401,19 +405,12 @@ async function runOnce(
 	session.pending.set(runId, pending);
 
 	const onAbort = (): void => {
+		if (pending.settled || pending.aborted) return;
 		const reason = options.runState.signal?.reason;
 		const abortError = reasonToError(reason, "Execution aborted");
-		// Stop delegated work at once — this is what kills spawned subagents —
-		// and refuse further bridge calls so the drain below stays bounded to
-		// phases that had already started.
-		pending.aborted = true;
-		for (const ctrl of pending.toolCalls.values()) ctrl.abort(abortError);
-		// A critical host phase ignores its abort once started (isolation
-		// worktree setup, merge/cherry-pick). Killing the worker now would
-		// settle the cell on top of a git operation still in progress, so wait
-		// for it. Hard-kill is still the only way to interrupt synchronous user
-		// code, hence it stays the terminal step either way.
-		const drained = pending.deferDepth > 0 ? pending.deferDrained?.promise : undefined;
+		const drained = abortPendingCalls(pending, abortError);
+		// Hard-kill remains necessary to interrupt synchronous cell code, after
+		// admitted host work has finished its protected completion phase.
 		if (drained) {
 			void drained.then(() => killSessionFor(session, abortError, { force: true }));
 			return;
@@ -622,6 +619,13 @@ function trackDeferPhase(pending: PendingRun, event: JsStatusEvent): void {
 	if (pending.deferDepth > 0) return;
 	pending.deferDrained?.resolve();
 	pending.deferDrained = undefined;
+}
+
+/** Stop admission immediately, but keep both cell and defined-tool callers waiting for protected host cleanup. */
+function abortPendingCalls(pending: PendingRun, error: Error): Promise<void> | undefined {
+	pending.aborted = true;
+	for (const controller of pending.toolCalls.values()) controller.abort(error);
+	return pending.deferDepth > 0 ? pending.deferDrained?.promise : undefined;
 }
 
 async function handleToolCall(session: JsSession, msg: Extract<WorkerOutbound, { type: "tool-call" }>): Promise<void> {

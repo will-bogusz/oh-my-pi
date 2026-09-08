@@ -2,6 +2,7 @@ import { expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { TempDir } from "@oh-my-pi/pi-utils";
+import { spawnComputerWorker } from "../../src/tools/computer/supervisor";
 
 it("imports the CLI entry graph without loading dotenv before profile bootstrap", async () => {
 	using tempDir = TempDir.createSync("@omp-js-process-import-");
@@ -27,25 +28,18 @@ it("imports the CLI entry graph without loading dotenv before profile bootstrap"
 	expect(stderr).toBe("");
 });
 
-async function pingComputerWorker(
-	entry: string,
-	id: string,
-	argv: string[] = ["__omp_worker_computer"],
-): Promise<unknown> {
-	const worker = new Worker(entry, {
-		type: "module",
-		argv,
-	});
+async function pingComputerWorker(entry: string, id: string): Promise<unknown> {
+	const worker = spawnComputerWorker({ cmd: [process.execPath, entry, "__omp_worker_computer"] });
 	const response = Promise.withResolvers<unknown>();
-	worker.addEventListener("message", event => {
-		if (event.data?.type === "pong" && event.data.id === id) response.resolve(event.data);
+	worker.onMessage(message => {
+		if (message.type === "pong" && message.id === id) response.resolve(message);
 	});
-	worker.addEventListener("error", event => response.reject(event.error ?? new Error(event.message)));
-	worker.postMessage({ type: "ping", id });
+	worker.onError(error => response.reject(error));
+	worker.send({ type: "ping", id });
 	try {
 		return await response.promise;
 	} finally {
-		worker.terminate();
+		await worker.terminate();
 	}
 }
 
@@ -81,35 +75,43 @@ it("dispatches the computer worker through the CLI host selector in a child proc
 	expect(stdout).toBe('{"type":"pong","id":"computer-cli-selector"}\n');
 });
 
-it("loads the computer worker module directly outside a declared CLI host", async () => {
-	const entry = new URL("../../src/tools/computer/worker-entry.ts", import.meta.url).href;
-	const response = await pingComputerWorker(entry, "computer-direct-module", []);
-	expect(response).toEqual({ type: "pong", id: "computer-direct-module" });
-});
-
 it("dispatches the computer worker from a single npm-style host bundle", async () => {
 	const packageDir = path.resolve(import.meta.dir, "../..");
 	const outDir = fs.mkdtempSync(path.join(packageDir, ".computer-worker-bundle-"));
 	try {
-		const output = await Bun.build({
-			entrypoints: [path.join(packageDir, "test/fixtures/computer-worker-bundled-host.ts")],
-			outdir: outDir,
-			naming: "cli.js",
-			target: "bun",
-			external: ["@oh-my-pi/pi-natives"],
-			define: { "process.env.PI_BUNDLED": JSON.stringify("true") },
-			throw: false,
-		});
-		expect(output.logs).toEqual([]);
-		expect(output.outputs.map(file => path.basename(file.path))).toEqual(["cli.js"]);
-		const response = await pingComputerWorker(output.outputs[0]!.path, "computer-npm-bundle");
+		const external = [
+			"@oh-my-pi/pi-natives",
+			"@huggingface/transformers",
+			"fastembed",
+			"onnxruntime-node",
+			"omp-legacy-pi-modules",
+			"puppeteer-core",
+			"@babel/parser",
+		];
+		// A fresh build process uses the distribution resolver rather than sharing
+		// Bun test's already-evaluated module graph and negative resolution cache.
+		const build = Bun.spawn(
+			[
+				process.execPath,
+				"build",
+				path.join(packageDir, "src/cli.ts"),
+				"--target=bun",
+				`--outdir=${outDir}`,
+				'--define=process.env.PI_BUNDLED="true"',
+				...external.map(name => `--external=${name}`),
+			],
+			{ cwd: packageDir, stdout: "ignore", stderr: "pipe" },
+		);
+		const [buildExitCode, buildStderr] = await Promise.all([build.exited, new Response(build.stderr).text()]);
+		expect(buildExitCode, buildStderr).toBe(0);
+		const response = await pingComputerWorker(path.join(outDir, "cli.js"), "computer-npm-bundle");
 		expect(response).toEqual({ type: "pong", id: "computer-npm-bundle" });
 	} finally {
 		fs.rmSync(outDir, { recursive: true, force: true });
 	}
 });
 
-it("keeps non-computer selectors isolated in a compiled single-entry worker host", async () => {
+it("dispatches computer subprocess and other selectors from one compiled worker host", async () => {
 	using tempDir = TempDir.createSync("@omp-compiled-worker-selector-");
 	const packageDir = path.resolve(import.meta.dir, "../..");
 	const outfile = path.join(tempDir.path(), process.platform === "win32" ? "worker-host.exe" : "worker-host");

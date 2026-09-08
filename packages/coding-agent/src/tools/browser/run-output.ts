@@ -12,6 +12,11 @@ import type { JsDisplayOutput } from "../../eval/js/shared/types";
 export class RunOutput {
 	readonly #displays: Array<TextContent | ImageContent> = [];
 	#textBuffer = "";
+	#imageCount = 0;
+
+	get imageCount(): number {
+		return this.#imageCount;
+	}
 
 	/** Buffer a stream-text chunk; it joins the entries at the next push or on finish(). */
 	pushText(chunk: string): void {
@@ -37,6 +42,7 @@ export class RunOutput {
 	push(entry: TextContent | ImageContent): void {
 		this.#flush();
 		this.#displays.push(entry);
+		if (entry.type === "image") this.#imageCount++;
 	}
 
 	/** Flush any remaining stream text and return the ordered entries. */

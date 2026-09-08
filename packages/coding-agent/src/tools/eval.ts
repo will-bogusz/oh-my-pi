@@ -11,11 +11,19 @@ import {
 import { jsBackend, pythonBackend } from "../eval";
 import type { ExecutorBackend, ExecutorBackendResult } from "../eval/backend";
 import { EVAL_TIMEOUT_PAUSE_OP, EVAL_TIMEOUT_RESUME_OP } from "../eval/bridge-timeout";
+import { readControlImageMetadata } from "../eval/control-images";
 import { IdleTimeout } from "../eval/idle-timeout";
 import { getEnabledEvalPreludes } from "../eval/preludes";
 import type { BackendProbeOptions } from "../eval/probe";
 import { defaultEvalSessionId } from "../eval/session-id";
-import type { EvalCellResult, EvalDisplayOutput, EvalLanguage, EvalStatusEvent, EvalToolDetails } from "../eval/types";
+import type {
+	ControlImageReference,
+	EvalCellResult,
+	EvalDisplayOutput,
+	EvalLanguage,
+	EvalStatusEvent,
+	EvalToolDetails,
+} from "../eval/types";
 import evalDescription from "../prompts/tools/eval.md" with { type: "text" };
 import evalCodeModeDescription from "../prompts/tools/eval-code-mode.md" with { type: "text" };
 import { DEFAULT_MAX_BYTES, OutputSink, type OutputSummary, TailBuffer } from "../session/streaming-output";
@@ -479,6 +487,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 		let latestText = "";
 		let latestDetails: EvalToolDetails | undefined;
 		let forwardUpdates = !startBackgrounded;
+		const backgroundUpdate = session.createBackgroundToolUpdateSink?.(_toolCallId, this.name, params);
 		const completion = Promise.withResolvers<ManagedEvalJobCompletion>();
 
 		const jobId = autoBgManager.register(
@@ -489,12 +498,15 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 					const result = await run(runSignal, (text, details) => {
 						latestText = text;
 						latestDetails = details;
-						void reportProgress(text, { async: { state: "running", jobId, type: "eval" } });
+						void reportProgress(text, { ...details, async: { state: "running", jobId, type: "eval" } });
 						if (forwardUpdates) emitToolUpdate?.(text, details);
 					});
 					const finalText = result.content.find(block => block.type === "text")?.text ?? "";
 					latestText = finalText;
-					latestDetails = result.details;
+					latestDetails = {
+						...result.details,
+						images: result.content.filter((block): block is ImageContent => block.type === "image"),
+					};
 					// Hand the full result (images included) to the foreground waiter
 					// before deciding the job's terminal state.
 					completion.resolve({ kind: "completed", result });
@@ -505,7 +517,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 						throw new ToolError(finalText || "Eval cell failed");
 					}
 					await reportProgress(finalText, {
-						...result.details,
+						...latestDetails,
 						async: { state: "completed", jobId, type: "eval" },
 					});
 					return finalText;
@@ -520,7 +532,12 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 					throw error;
 				}
 			},
-			{ ownerId: session.getAgentId?.() ?? undefined },
+			{
+				ownerId: session.getAgentId?.() ?? undefined,
+				onProgress: (text, details) => {
+					backgroundUpdate?.({ content: [{ type: "text", text }], details });
+				},
+			},
 		);
 
 		if (startBackgrounded) {
@@ -633,6 +650,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 			const tailBuffer = new TailBuffer(DEFAULT_MAX_BYTES * 2);
 			const jsonOutputs: unknown[] = [];
 			const images: ImageContent[] = [];
+			const controlImages: ControlImageReference[] = [];
 			const statusEvents: EvalStatusEvent[] = [];
 
 			const cellResults: EvalCellResult[] = cells.map(cell => ({
@@ -671,6 +689,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 				if (images.length > 0) {
 					details.images = images;
 				}
+				if (controlImages.length > 0) details.controlImages = [...controlImages];
 				if (statusEvents.length > 0) {
 					details.statusEvents = statusEvents;
 				}
@@ -795,11 +814,14 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 							data: resized.data,
 							mimeType: resized.mimeType,
 						};
+						const control = readControlImageMetadata(output.control);
+						if (control) controlImages.push({ index: images.length, ...control });
 						images.push(image);
 						cellDisplayOutputs.push({
 							type: "image",
 							data: image.data,
 							mimeType: image.mimeType,
+							...(control ? { control } : {}),
 						});
 						const dimensionNote = formatDimensionNote(resized);
 						if (dimensionNote) {
@@ -848,6 +870,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 						languages,
 						cells: cellResults,
 						jsonOutputs: jsonOutputs.length > 0 ? jsonOutputs : undefined,
+						controlImages: controlImages.length > 0 ? controlImages : undefined,
 						statusEvents: statusEvents.length > 0 ? statusEvents : undefined,
 						isError: true,
 					};
@@ -874,6 +897,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 						languages,
 						cells: cellResults,
 						jsonOutputs: jsonOutputs.length > 0 ? jsonOutputs : undefined,
+						controlImages: controlImages.length > 0 ? controlImages : undefined,
 						statusEvents: statusEvents.length > 0 ? statusEvents : undefined,
 						isError: true,
 					};
@@ -904,6 +928,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 				languages,
 				cells: cellResults,
 				jsonOutputs: jsonOutputs.length > 0 ? jsonOutputs : undefined,
+				controlImages: controlImages.length > 0 ? controlImages : undefined,
 				statusEvents: statusEvents.length > 0 ? statusEvents : undefined,
 			};
 			if (notice) details.notice = notice;

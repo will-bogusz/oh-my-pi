@@ -1831,6 +1831,8 @@ async function createAgentSessionScoped(options: CreateAgentSessionOptions): Pro
 			assertEvalExecutionAllowed: () => session?.assertEvalExecutionAllowed(),
 			trackEvalExecution: (execution, abortController) =>
 				session ? session.trackEvalExecution(execution, abortController) : execution,
+			createBackgroundToolUpdateSink: (toolCallId, toolName, args) =>
+				session?.createBackgroundToolUpdateSink(toolCallId, toolName, args),
 			getSessionId: () => sessionManager.getSessionId?.() ?? null,
 			isDisposed: () => session?.isDisposed ?? false,
 			getHindsightSessionState: () => session?.getHindsightSessionState(),

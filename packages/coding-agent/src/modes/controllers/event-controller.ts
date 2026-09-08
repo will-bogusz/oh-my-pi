@@ -1672,6 +1672,22 @@ export class EventController {
 		}
 	}
 
+	#updateCompletedToolComponent(
+		component: ToolExecutionHandle,
+		event: Extract<AgentSessionEvent, { type: "tool_execution_end" }>,
+	): void {
+		const asyncState = (event.result.details as { async?: { state?: string } } | undefined)?.async?.state;
+		const isBackgroundTask = (event.toolName === "task" || event.toolName === "eval") && asyncState === "running";
+		component.updateResult({ ...event.result, isError: event.isError }, isBackgroundTask, event.toolCallId);
+		if (isBackgroundTask) {
+			component.parkAsBackground();
+			this.#backgroundTaskCallIds.add(event.toolCallId);
+		} else {
+			this.ctx.pendingTools.delete(event.toolCallId);
+			this.#backgroundTaskCallIds.delete(event.toolCallId);
+		}
+	}
+
 	#settleHeldCompletionIfPresent(toolCallId: string, component: ToolExecutionHandle): void {
 		const event = this.#orphanedToolCompletions.get(toolCallId);
 		if (!event) return;
@@ -1694,8 +1710,7 @@ export class EventController {
 		component: ToolExecutionHandle,
 		event: Extract<AgentSessionEvent, { type: "tool_execution_end" }>,
 	): void {
-		component.updateResult({ ...event.result, isError: event.isError }, false, event.toolCallId);
-		this.ctx.pendingTools.delete(event.toolCallId);
+		this.#updateCompletedToolComponent(component, event);
 		if (
 			component instanceof ToolExecutionComponent &&
 			component.isDisplaceableBlock() &&
@@ -1793,16 +1808,7 @@ export class EventController {
 		} else {
 			const component = this.ctx.pendingTools.get(event.toolCallId);
 			if (component) {
-				const asyncState = (event.result.details as { async?: { state?: string } } | undefined)?.async?.state;
-				const isBackgroundTask = event.toolName === "task" && asyncState === "running";
-				component.updateResult({ ...event.result, isError: event.isError }, isBackgroundTask, event.toolCallId);
-				if (isBackgroundTask) {
-					component.parkAsBackground();
-					this.#backgroundTaskCallIds.add(event.toolCallId);
-				} else {
-					this.ctx.pendingTools.delete(event.toolCallId);
-					this.#backgroundTaskCallIds.delete(event.toolCallId);
-				}
+				this.#updateCompletedToolComponent(component, event);
 				if (component instanceof ToolExecutionComponent && component.isDisplaceableBlock()) {
 					if (event.toolName === "hub" && component.canBeDisplacedBy("hub")) {
 						// Remember the waiting poll so the next `hub` call can displace it.

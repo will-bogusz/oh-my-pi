@@ -15,13 +15,22 @@ import {
 } from "@oh-my-pi/pi-tui";
 import { getProjectDir, isRecord, logger, sanitizeText } from "@oh-my-pi/pi-utils";
 import { type PerFileDiffPreview, renderStreamingFallback } from "../../edit/renderer";
+import type { ControlImageMetadata } from "../../eval/types";
 import type { Theme } from "../../modes/theme/theme";
 import { getThemeEpoch, theme } from "../../modes/theme/theme";
 import { BASH_DEFAULT_PREVIEW_LINES } from "../../tools/bash";
 import { formatDefaultToolExecution } from "../../tools/default-renderer";
 import { EVAL_DEFAULT_PREVIEW_LINES } from "../../tools/eval";
 import { isWaitingPollDetails } from "../../tools/hub";
-import { formatStatusIcon, replaceTabs, resolveImageOptions } from "../../tools/render-utils";
+import {
+	formatExpandHint,
+	formatStatusIcon,
+	PREVIEW_LIMITS,
+	previewLine,
+	replaceTabs,
+	resolveImageOptions,
+	shortenPath,
+} from "../../tools/render-utils";
 import {
 	type FirstResultViewportRepaint,
 	type ToolActivitySummary,
@@ -31,7 +40,13 @@ import {
 import { TODO_STRIKE_TOTAL_FRAMES, type TodoToolDetails } from "../../tools/todo";
 import type { XdevState } from "../../tools/xdev";
 import type { EditMode } from "../../utils/edit-mode";
-import { isFramedBlockComponent, markFramedBlockComponent, renderStatusLine, WidthAwareText } from "../../tui";
+import {
+	fileHyperlink,
+	isFramedBlockComponent,
+	markFramedBlockComponent,
+	renderStatusLine,
+	WidthAwareText,
+} from "../../tui";
 import { convertImageToPng } from "../../utils/image-loading";
 import { sanitizeWithOptionalSixelPassthrough } from "../../utils/sixel";
 import { renderDiff } from "./diff";
@@ -55,6 +70,34 @@ function isTodoToolDetails(details: unknown): details is TodoToolDetails {
 interface ToolImageBlock {
 	data?: string;
 	mimeType?: string;
+	control?: ControlImageMetadata;
+}
+
+/** The ordinal follows eval's image list in both partial details and final content. */
+function withControlImageMetadata(images: ToolImageBlock[], details: unknown): ToolImageBlock[] {
+	if (!isRecord(details) || !Array.isArray(details.controlImages)) return images;
+	const previews = new Map<number, ControlImageMetadata>();
+	for (const entry of details.controlImages) {
+		if (
+			!isRecord(entry) ||
+			typeof entry.index !== "number" ||
+			!Number.isInteger(entry.index) ||
+			entry.index < 0 ||
+			entry.index >= images.length ||
+			(entry.kind !== "browser" && entry.kind !== "computer")
+		) {
+			continue;
+		}
+		previews.set(entry.index, {
+			kind: entry.kind,
+			label: typeof entry.label === "string" ? entry.label : undefined,
+			path: typeof entry.path === "string" ? entry.path : undefined,
+		});
+	}
+	return images.map((image, index) => {
+		const control = previews.get(index);
+		return control ? { ...image, control } : image;
+	});
 }
 
 function imageBlocksFromDetails(details: unknown): ToolImageBlock[] {
@@ -265,6 +308,7 @@ export class ToolExecutionComponent extends Container {
 	#multiFileBoxes: (Box | Spacer)[] = []; // Extra boxes for multi-file edit results
 	#imageComponents: Image[] = [];
 	#imageSpacers: Spacer[] = [];
+	#imageCaptions: WidthAwareText[] = [];
 	readonly #instanceId = ++toolExecutionInstanceSeq;
 	#toolName: string;
 	#toolLabel: string;
@@ -548,7 +592,9 @@ export class ToolExecutionComponent extends Container {
 		const details = this.#result.details;
 		const detailImages = imageBlocksFromDetails(details);
 		const xdevImages = isRecord(details) && isRecord(details.xdev) ? imageBlocksFromDetails(details.xdev.inner) : [];
-		return [...contentImages, ...detailImages, ...xdevImages];
+		return contentImages.length > 0
+			? [...withControlImageMetadata(contentImages, details), ...detailImages, ...xdevImages]
+			: [...withControlImageMetadata(detailImages, details), ...xdevImages];
 	}
 
 	/**
@@ -1194,31 +1240,78 @@ export class ToolExecutionComponent extends Container {
 			this.removeChild(spacer);
 		}
 		this.#imageSpacers = [];
+		for (const caption of this.#imageCaptions) {
+			this.removeChild(caption);
+		}
+		this.#imageCaptions = [];
 
 		if (this.#result) {
 			const imageBlocks = this.#getAllImageBlocks();
 
 			for (let i = 0; i < imageBlocks.length; i++) {
 				const img = imageBlocks[i];
-				if (TERMINAL.imageProtocol && this.#showImages && img.data && img.mimeType) {
-					// Use converted PNG for Kitty protocol if available
-					const converted = this.#convertedImages.get(i);
-					const imageData = converted?.data ?? img.data;
-					const imageMimeType = converted?.mimeType ?? img.mimeType;
-
-					// For Kitty, skip non-PNG images that haven't been converted yet
-					if (TERMINAL.imageProtocol === ImageProtocol.Kitty && imageMimeType !== "image/png") {
-						continue;
-					}
-
+				const converted = this.#convertedImages.get(i);
+				const imageData = converted?.data ?? img.data;
+				const imageMimeType = converted?.mimeType ?? img.mimeType;
+				const canRenderImage =
+					TERMINAL.imageProtocol &&
+					this.#showImages &&
+					imageData &&
+					imageMimeType &&
+					(TERMINAL.imageProtocol !== ImageProtocol.Kitty || imageMimeType === "image/png");
+				if (img.control) {
+					const control = img.control;
+					const dimensions =
+						img.data && img.mimeType ? (getImageDimensions(img.data, img.mimeType) ?? undefined) : undefined;
+					const caption = new WidthAwareText(
+						width => {
+							const name = control.kind === "browser" ? "Browser snapshot" : "Computer snapshot";
+							const label = control.label ? ` · ${sanitizeText(control.label)}` : "";
+							const title = theme.fg("dim", previewLine(`${name}${label}`, width));
+							const lines = [title];
+							if (!canRenderImage) {
+								lines.push(
+									theme.fg("dim", previewLine(imageFallback(img.mimeType ?? "image", dimensions), width)),
+								);
+							} else if (!this.#expanded) {
+								lines.push(truncateToWidth(formatExpandHint(theme), width));
+							}
+							if (control.path) {
+								const pathLabel = sanitizeText(replaceTabs(shortenPath(control.path)));
+								lines.push(theme.fg("dim", `Saved: ${fileHyperlink(control.path, pathLabel)}`));
+							}
+							return lines.join("\n");
+						},
+						0,
+						0,
+					);
 					const spacer = new Spacer(1);
 					this.addChild(spacer);
 					this.#imageSpacers.push(spacer);
+					this.addChild(caption);
+					this.#imageCaptions.push(caption);
+				}
+				if (canRenderImage && imageData && imageMimeType) {
+					// Use converted PNG for Kitty protocol if available
+					const spacer = new Spacer(1);
+					this.addChild(spacer);
+					this.#imageSpacers.push(spacer);
+					const options = resolveImageOptions();
+					if (img.control && !this.#expanded) {
+						options.maxWidthCells = Math.min(
+							options.maxWidthCells > 0 ? options.maxWidthCells : Infinity,
+							PREVIEW_LIMITS.CONTROL_IMAGE_COLUMNS,
+						);
+						options.maxHeightCells = Math.min(
+							options.maxHeightCells ?? Infinity,
+							PREVIEW_LIMITS.CONTROL_IMAGE_ROWS,
+						);
+					}
 					const imageComponent = new Image(
 						imageData,
 						imageMimeType,
 						{ fallbackColor: (s: string) => theme.fg("toolOutput", s) },
-						{ ...resolveImageOptions(), budget: this.#ui.imageBudget, imageKey: `te${this.#instanceId}:${i}` },
+						{ ...options, budget: this.#ui.imageBudget, imageKey: `te${this.#instanceId}:${i}` },
 					);
 					this.#imageComponents.push(imageComponent);
 					this.addChild(imageComponent);
@@ -1326,6 +1419,7 @@ export class ToolExecutionComponent extends Container {
 
 		if (imageBlocks.length > 0 && (!TERMINAL.imageProtocol || !this.#showImages)) {
 			const imageIndicators = imageBlocks
+				.filter(img => !img.control)
 				.map((img: any) => {
 					const dims = img.data ? (getImageDimensions(img.data, img.mimeType) ?? undefined) : undefined;
 					return imageFallback(img.mimeType, dims);

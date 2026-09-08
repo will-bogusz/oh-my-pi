@@ -1,17 +1,25 @@
 use std::{
-	collections::HashSet,
 	process::{Command, Stdio},
 	thread,
 	time::{Duration, Instant},
 };
 
 use image::{DynamicImage, Rgba, RgbaImage, imageops::FilterType};
-use xcap::{Monitor, Window};
+use objc2_app_kit::NSWorkspace;
+use objc2_core_foundation::{
+	CFBoolean, CFDictionary, CFNumber, CFNumberType, CFString, CFType, CGRect,
+};
+use objc2_core_graphics::{
+	CGRectMakeWithDictionaryRepresentation, CGWindowListCopyWindowInfo, CGWindowListOption,
+	kCGWindowBounds, kCGWindowIsOnscreen, kCGWindowName, kCGWindowNumber, kCGWindowOwnerName,
+	kCGWindowOwnerPID, kCGWindowSharingState,
+};
+use xcap::Monitor;
 
 use super::super::{
 	error::{CoreResult, DesktopError},
 	frame::{FrameGeometry, MAX_COMPOSITE_PIXELS},
-	types::{DesktopDisplay, DesktopWindow, DisplaySelector, Target},
+	types::{DesktopDisplay, DesktopWindow, DisplaySelector, Target, WindowPins},
 };
 const MAX_LISTED_WINDOWS: usize = 48;
 const MIN_WINDOW_EDGE: u32 = 16;
@@ -28,14 +36,15 @@ pub(super) fn capture_permission() -> bool {
 	unsafe { CGPreflightScreenCaptureAccess() }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub(super) struct MacCapture {
 	selector: DisplaySelector,
+	pins:     WindowPins,
 }
 
 impl MacCapture {
-	pub(super) const fn new(selector: DisplaySelector) -> Self {
-		Self { selector }
+	pub(super) fn new(selector: DisplaySelector) -> Self {
+		Self { selector, pins: WindowPins::default() }
 	}
 
 	pub(super) fn displays(&self) -> CoreResult<Vec<DesktopDisplay>> {
@@ -99,62 +108,36 @@ impl MacCapture {
 	// selector state.
 	#[allow(clippy::unused_self, reason = "keeps discovery on the backend capture object")]
 	pub(super) fn windows(&self) -> CoreResult<Vec<DesktopWindow>> {
-		if !capture_permission() {
-			return Err(DesktopError::permission_denied(
-				"macOS Screen Recording permission is not granted for this process",
-			));
-		}
-		let windows = Window::all().map_err(|error| {
-			DesktopError::capture_failed(format!("native window enumeration failed: {error}"))
-		})?;
-		let mut result = Vec::new();
-		let mut seen = HashSet::new();
-		for window in windows {
-			if result.len() >= MAX_LISTED_WINDOWS {
-				break;
-			}
-			let Ok(id) = window.id() else { continue };
-			if !seen.insert(id) || window.is_minimized().unwrap_or(true) {
-				continue;
-			}
-			let (Ok(x), Ok(y), Ok(width), Ok(height)) =
-				(window.x(), window.y(), window.width(), window.height())
-			else {
-				continue;
-			};
-			if width < MIN_WINDOW_EDGE || height < MIN_WINDOW_EDGE {
-				continue;
-			}
-			let title = window.title().unwrap_or_default();
-			let app = window.app_name().unwrap_or_default();
-			if title.is_empty() && app.is_empty() {
-				continue;
-			}
-			result.push(DesktopWindow {
-				id: id.to_string(),
-				title,
-				app,
-				pid: window.pid().ok(),
-				x,
-				y,
-				width,
-				height,
-				focused: window.is_focused().unwrap_or(false),
-			});
-		}
-		Ok(result)
+		window_metadata(
+			CGWindowListOption::OptionOnScreenOnly | CGWindowListOption::ExcludeDesktopElements,
+			0,
+		)
 	}
 
 	pub(super) fn window(&self, id: &str) -> CoreResult<DesktopWindow> {
-		self
-			.windows()?
+		let number = id
+			.parse::<u32>()
+			.map_err(|_| DesktopError::invalid_target(format!("invalid macOS window id '{id}'")))?;
+		let window = window_metadata(CGWindowListOption::OptionIncludingWindow, number)?
 			.into_iter()
 			.find(|window| window.id == id)
 			.ok_or_else(|| {
 				DesktopError::window_not_found(format!(
 					"window '{id}' was not found; it may be closed or minimized"
 				))
-			})
+			})?;
+		self.pins.validate(&window)?;
+		Ok(window)
+	}
+
+	pub(super) fn pin_window(&mut self, id: &str, pid: u32) -> CoreResult<()> {
+		let window = self.window(id)?;
+		if window.pid != Some(pid) {
+			return Err(DesktopError::invalid_target(format!(
+				"window '{id}' no longer belongs to process {pid}"
+			)));
+		}
+		self.pins.pin(id, pid)
 	}
 
 	pub(super) fn capture(&self, target: &Target) -> CoreResult<(RgbaImage, FrameGeometry)> {
@@ -175,6 +158,15 @@ impl MacCapture {
 			"-l".to_string(),
 			window_id.to_string(),
 		])?;
+		let after = self.window(id)?;
+		if after.pid != window.pid
+			|| (after.x, after.y, after.width, after.height)
+				!= (window.x, window.y, window.width, window.height)
+		{
+			return Err(DesktopError::invalid_coordinate_frame(
+				"window identity or geometry changed during capture; capture again",
+			));
+		}
 		if image.width() == 0 || image.height() == 0 {
 			return Err(DesktopError::capture_failed(format!(
 				"capture of window '{id}' returned an empty image"
@@ -334,4 +326,114 @@ fn run_screencapture(args: &[String]) -> CoreResult<RgbaImage> {
 			DesktopError::capture_failed(format!("failed to decode macOS screenshot: {error}"))
 		})
 		.map(DynamicImage::into_rgba8)
+}
+
+/// Read one coherent `WindowServer` roster. xcap's per-property window getters
+/// each enumerate that roster again; using them here made every identity guard
+/// perform hundreds of redundant `WindowServer` calls.
+fn window_metadata(options: CGWindowListOption, id: u32) -> CoreResult<Vec<DesktopWindow>> {
+	if !capture_permission() {
+		return Err(DesktopError::permission_denied(
+			"macOS Screen Recording permission is not granted for this process",
+		));
+	}
+	// The returned CF array owns every dictionary/value borrowed below.
+	let rows = CGWindowListCopyWindowInfo(options, id)
+		.ok_or_else(|| DesktopError::capture_failed("WindowServer metadata is unavailable"))?;
+	let foreground = NSWorkspace::sharedWorkspace()
+		.frontmostApplication()
+		.and_then(|app| u32::try_from(app.processIdentifier()).ok());
+	let mut windows = Vec::new();
+	for index in 0..rows.count() {
+		if windows.len() == MAX_LISTED_WINDOWS {
+			break;
+		}
+		// SAFETY: index is within the retained array, whose members are CF objects.
+		let value = unsafe { rows.value_at_index(index).cast::<CFType>().as_ref() };
+		if let Some(dictionary) = value.and_then(CFType::downcast_ref::<CFDictionary>)
+			&& let Some(window) = decode_window(dictionary, foreground)
+		{
+			windows.push(window);
+		}
+	}
+	Ok(windows)
+}
+
+fn dictionary_value<'a>(dictionary: &'a CFDictionary, key: &CFString) -> Option<&'a CFType> {
+	// SAFETY: The key is a live CFString; WindowServer dictionaries use CF object
+	// callbacks and retain values for at least the dictionary borrow's lifetime.
+	unsafe {
+		dictionary
+			.value((key as *const CFString).cast())
+			.cast::<CFType>()
+			.as_ref()
+	}
+}
+
+fn dictionary_number(dictionary: &CFDictionary, key: &CFString) -> Option<i64> {
+	let number = dictionary_value(dictionary, key)?.downcast_ref::<CFNumber>()?;
+	let mut value = 0i64;
+	// SAFETY: A checked CFNumber and correctly sized signed output are live.
+	unsafe { number.value(CFNumberType::SInt64Type, (&raw mut value).cast()) }.then_some(value)
+}
+
+#[allow(
+	clippy::cast_possible_truncation,
+	clippy::cast_sign_loss,
+	reason = "finite coordinates and dimensions are range-checked before conversion"
+)]
+fn decode_window(dictionary: &CFDictionary, foreground: Option<u32>) -> Option<DesktopWindow> {
+	// SAFETY: These framework-exported keys are immutable retained CFStrings.
+	let (id, pid, title, app, bounds) = unsafe {
+		if dictionary_number(dictionary, kCGWindowSharingState)? == 0
+			|| !dictionary_value(dictionary, kCGWindowIsOnscreen)?
+				.downcast_ref::<CFBoolean>()?
+				.value()
+		{
+			return None;
+		}
+		let id = u32::try_from(dictionary_number(dictionary, kCGWindowNumber)?).ok()?;
+		let pid = u32::try_from(dictionary_number(dictionary, kCGWindowOwnerPID)?).ok()?;
+		let title = dictionary_value(dictionary, kCGWindowName)
+			.and_then(CFType::downcast_ref::<CFString>)
+			.map(ToString::to_string)
+			.unwrap_or_default();
+		let app = dictionary_value(dictionary, kCGWindowOwnerName)
+			.and_then(CFType::downcast_ref::<CFString>)
+			.map(ToString::to_string)
+			.unwrap_or_default();
+		let dictionary =
+			dictionary_value(dictionary, kCGWindowBounds)?.downcast_ref::<CFDictionary>()?;
+		let mut bounds = CGRect::default();
+		if !CGRectMakeWithDictionaryRepresentation(Some(dictionary), &raw mut bounds) {
+			return None;
+		}
+		(id, pid, title, app, bounds)
+	};
+	let (x, y, width, height) =
+		(bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
+	if ![x, y, width, height].into_iter().all(f64::is_finite)
+		|| x < f64::from(i32::MIN)
+		|| x > f64::from(i32::MAX)
+		|| y < f64::from(i32::MIN)
+		|| y > f64::from(i32::MAX)
+		|| width < f64::from(MIN_WINDOW_EDGE)
+		|| width > f64::from(u32::MAX)
+		|| height < f64::from(MIN_WINDOW_EDGE)
+		|| height > f64::from(u32::MAX)
+		|| (title.is_empty() && app.is_empty())
+	{
+		return None;
+	}
+	Some(DesktopWindow {
+		id: id.to_string(),
+		pid: Some(pid),
+		title,
+		app,
+		x: x as i32,
+		y: y as i32,
+		width: width as u32,
+		height: height as u32,
+		focused: foreground == Some(pid),
+	})
 }

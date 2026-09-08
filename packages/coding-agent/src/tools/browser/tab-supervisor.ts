@@ -100,6 +100,8 @@ interface TabSessionBase<TBrowser extends BrowserHandle = BrowserHandle> {
 	 * DOM state stay alive for millisecond resume.
 	 */
 	frozen: boolean;
+	ownerActorId?: string;
+	onRelease?: () => Promise<void>;
 }
 
 export interface WorkerTabSession extends TabSessionBase<PuppeteerBrowserHandle> {
@@ -118,6 +120,10 @@ export interface CmuxTabSession extends TabSessionBase<CmuxBrowserHandle> {
 export type TabSession = WorkerTabSession | CmuxTabSession;
 
 export interface AcquireTabOptions {
+	ownerActorId?: string;
+	/** Exact provider target, bypassing title, URL and visibility heuristics. */
+	targetId?: string;
+	onRelease?: () => Promise<void>;
 	url?: string;
 	waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
 	viewport?: { width: number; height: number; deviceScaleFactor?: number };
@@ -451,6 +457,8 @@ async function acquireTabImpl(
 		persist: opts.persist ?? false,
 		lastActivityAt: Date.now(),
 		frozen: false,
+		ownerActorId: opts.ownerActorId,
+		onRelease: opts.onRelease,
 	};
 	worker.onMessage(msg => handleTabMessage(tab, msg));
 	tabs.set(name, tab);
@@ -529,6 +537,7 @@ async function acquireCmuxTab(
 			persist: opts.persist ?? false,
 			lastActivityAt: Date.now(),
 			frozen: false,
+			ownerActorId: opts.ownerActorId,
 		};
 		tabs.set(name, tab);
 		return { tab, created: true };
@@ -838,6 +847,11 @@ async function releaseTabInner(tab: TabSession, name: string, opts: ReleaseTabOp
 		}
 	}
 	await tab.worker.terminate().catch(() => undefined);
+	try {
+		await tab.onRelease?.();
+	} catch (error) {
+		cleanupError = error;
+	}
 	if (forced && tab.kindTag === "headless") {
 		try {
 			await waitForTabCleanup(
@@ -873,6 +887,13 @@ export async function releaseAllTabs(opts: ReleaseTabOptions = {}): Promise<numb
 	for (const name of names) {
 		if (await releaseTab(name, opts)) count++;
 	}
+	return count;
+}
+
+export async function releaseTabsForActor(actorId: string, opts: ReleaseTabOptions = {}): Promise<number> {
+	const names = [...tabs.values()].filter(tab => tab.ownerActorId === actorId).map(tab => tab.name);
+	let count = 0;
+	for (const name of names) if (await releaseTab(name, opts)) count++;
 	return count;
 }
 
@@ -1207,6 +1228,16 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 	const safeDir = getPuppeteerDir();
 	const browserWSEndpoint = browser.browser.wsEndpoint();
 	if (!browserWSEndpoint) throw new ToolError("Browser websocket endpoint is unavailable");
+	if (opts.targetId) {
+		return {
+			mode: "attach",
+			browserWSEndpoint,
+			safeDir,
+			targetId: opts.targetId,
+			timeoutMs: opts.timeoutMs,
+			activateForScreenshot: false,
+		};
+	}
 	if (browser.kind.kind === "headless") {
 		return {
 			mode: "headless",
@@ -1343,8 +1374,7 @@ async function recycleTimedOutWorkerTab(tab: WorkerTabSession, timeoutMs: number
 		safeDir: getPuppeteerDir(),
 		targetId: tab.targetId,
 		dialogs: tab.dialogPolicy,
-		// Unblock a wedged page (open JS dialog, hung navigation) before adopting it —
-		// otherwise init stalls, times out, and the tab gets force-killed.
+		// Clear abandoned request interception without answering a dialog or stopping navigation.
 		recover: true,
 		timeoutMs,
 		activateForScreenshot: tab.activateForScreenshot,

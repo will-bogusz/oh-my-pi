@@ -546,3 +546,38 @@ process.exit(0);
 		}
 	});
 });
+
+it("keeps an imported file module through the normal worker cell handoff", async () => {
+	const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-worker-file-alias-"));
+	const file = path.join(directory, "review.txt");
+	const text = "Alpine review — café Ω 3147\nApproved for export.\n";
+	await Bun.write(file, text);
+	const harness = createWorkerHarness();
+	const snapshot: SessionSnapshot = { cwd: directory, sessionId: "worker-file-alias", localRoots: {} };
+	try {
+		await initializeWorker(harness, snapshot);
+		const imported = waitForMessage(harness, m => m.type === "result" && m.runId === "import-alias");
+		harness.send({
+			type: "run",
+			runId: "import-alias",
+			code: 'var fs = await import("node:fs/promises");',
+			filename: "[import-alias].js",
+			snapshot,
+		});
+		expect(await imported).toMatchObject({ type: "result", ok: true });
+		const readback = waitForMessage(harness, m => m.type === "result" && m.runId === "read-alias");
+		const output = waitForMessage(harness, m => m.type === "text" && m.runId === "read-alias");
+		harness.send({
+			type: "run",
+			runId: "read-alias",
+			code: `(await fs.readFile(${JSON.stringify(file)}, "utf8")) === ${JSON.stringify(text)}`,
+			filename: "[read-alias].js",
+			snapshot,
+		});
+		expect(await readback).toMatchObject({ type: "result", ok: true });
+		expect(await output).toMatchObject({ type: "text", chunk: "true\n" });
+	} finally {
+		harness.send({ type: "close" });
+		await fs.rm(directory, { recursive: true, force: true });
+	}
+});

@@ -21,7 +21,18 @@
  * - real child session ids (OOPIFs, workers) — created by Chrome under the
  *   shared root session and passed through verbatim
  */
-import type { ExtToRelayMessage, RelayRpcRequest, RelayToExtMessage, TabSnapshot } from "./protocol";
+import {
+	type ExtToRelayMessage,
+	type DownloadFileQuery,
+	isTabSnapshot,
+	isDownloadFileQueries,
+	mergeTabSnapshot,
+	type RelayRpcRequest,
+	type RelayToExtMessage,
+	type TabSnapshot,
+} from "./protocol";
+import { DialogJournal, parseDialogRequest, type DialogState } from "../dialogs";
+import { ManagedChromeTabs } from "./managed-tabs";
 
 /** Transport-agnostic websocket surface the bridge writes to. */
 export interface RelaySocket {
@@ -71,6 +82,8 @@ interface TargetInfo {
 class CdpConnection {
 	discover = false;
 	autoAttach = false;
+	/** A connection with no CDP commands can hold an unresolved-dialog lease. */
+	leaseOnly = true;
 	/** Minted pseudo-sessions owned by this connection. */
 	readonly sessions = new Map<string, SessionRef>();
 	/** Tabs this connection claimed as drive targets (`OMP.claimTarget` / `Target.createTarget`). */
@@ -79,6 +92,8 @@ class CdpConnection {
 	constructor(
 		readonly id: number,
 		readonly socket: RelaySocket,
+		readonly leaseId?: string,
+		readonly leasedTab?: TabState,
 	) {}
 
 	sessionsForTab(tabId: number, kind?: "tab" | "page"): string[] {
@@ -94,6 +109,8 @@ class CdpConnection {
 class ExtensionReplacedError extends Error {}
 
 class TabState {
+	readonly dialogs = new DialogJournal();
+	readonly downloads = new Map<string, DownloadFileQuery>();
 	url: string;
 	title: string;
 	active: boolean;
@@ -175,10 +192,11 @@ function parseTargetId(targetId: string): { kind: "tab" | "page"; tabId: number 
 
 /**
  * Multiplexing CDP bridge between downstream puppeteer connections and the
- * relay extension. One instance per relay server; all state lives here so an
+ * relay extension. One bridge per paired browser instance; all state lives here so an
  * extension service-worker restart only has to re-handshake.
  */
 export class RelayBridge {
+	readonly managed: ManagedChromeTabs;
 	#tabs = new Map<number, TabState>();
 	#conns = new Map<number, CdpConnection>();
 	#connSeq = 0;
@@ -209,6 +227,35 @@ export class RelayBridge {
 	) {
 		this.#log = opts.log ?? (() => {});
 		this.#group = opts.group ?? null;
+		this.managed = new ManagedChromeTabs({
+			create: async (url, opener) => {
+				const result = (await this.#rpc({ op: "createTab", url, ...opener })) as { tab: TabSnapshot };
+				this.#onTabUpsert(result.tab);
+				return result.tab;
+			},
+			navigate: async (tabId, url) => {
+				await this.#rpc({ op: "navigateTab", tabId, url });
+			},
+			group: async (tabId, taskId, label) => {
+				if (!this.#group) return;
+				await this.#rpc({ op: "taskGroup", tabId, taskId, label });
+			},
+			reveal: async tabId => {
+				await this.#rpc({ op: "activateTab", tabId });
+			},
+			close: async tabId => {
+				await this.#rpc({ op: "removeTab", tabId });
+			},
+			invalidate: leaseId => {
+				for (const conn of this.#conns.values()) if (conn.leaseId === leaseId) conn.socket.close();
+			},
+		});
+	}
+
+	#visibleTo(conn: CdpConnection, tab: TabState): boolean {
+		if (!this.#eligible(tab)) return false;
+		if (conn.leaseId) return this.managed.tabForLease(conn.leaseId) === tab.tabId;
+		return this.managed.leaseForTab(tab.tabId) === undefined;
 	}
 
 	/** True once the extension has completed its hello handshake. */
@@ -253,6 +300,7 @@ export class RelayBridge {
 	extConnected(socket: RelaySocket): void {
 		if (this.#ext && this.#ext !== socket) {
 			this.#log("replacing extension socket");
+			this.managed.reset();
 			for (const tab of this.#tabs.values()) this.#resetRuntime(tab);
 			this.#rejectPendingExtensionRpcs(new ExtensionReplacedError());
 			this.#ext.close();
@@ -264,6 +312,7 @@ export class RelayBridge {
 		if (this.#ext !== socket) return;
 		this.#ext = null;
 		this.#extInfo = null;
+		this.managed.reset();
 		this.#rejectPendingExtensionRpcs(new Error("relay extension disconnected"));
 		for (const tab of this.#tabs.values()) {
 			tab.attached = false;
@@ -314,12 +363,55 @@ export class RelayBridge {
 			case "tabUpdated":
 				this.#onTabUpsert(msg.tab);
 				return;
+			case "tabActivated":
+				this.#onTabActivated(msg.tabId, msg.windowId);
+				return;
 			case "tabRemoved":
 				this.#onTabRemoved(msg.tabId);
 				return;
 			case "ping":
 				socket.send(JSON.stringify({ t: "pong" } satisfies RelayToExtMessage));
 				return;
+		}
+	}
+
+	/** Fresh metadata only: no debugger attach, navigation, grouping or activation. */
+	async refreshTabs(): Promise<void> {
+		const extension = this.#ext;
+		const result = await this.#rpc({ op: "queryTabs" });
+		if (extension !== this.#ext) throw new Error("Browser connection changed during discovery");
+		if (
+			!result ||
+			typeof result !== "object" ||
+			!("tabs" in result) ||
+			!Array.isArray(result.tabs) ||
+			!result.tabs.every(isTabSnapshot)
+		)
+			throw new Error("Extension does not provide fresh tab metadata. Reload the current OMP extension");
+		const seen = new Set<number>();
+		for (const tab of result.tabs) {
+			seen.add(tab.tabId);
+			this.#onTabUpsert(tab, { silent: true });
+		}
+		for (const tabId of this.#tabs.keys()) if (!seen.has(tabId)) this.#onTabRemoved(tabId);
+	}
+
+	#onTabActivated(tabId: number, windowId: number): void {
+		// Even an ineligible/unknown selected tab deactivates every known peer.
+		for (const tab of this.#tabs.values()) {
+			if (tab.windowId !== windowId) continue;
+			this.#onTabUpsert(
+				{
+					tabId: tab.tabId,
+					windowId: tab.windowId,
+					url: tab.url,
+					title: tab.title,
+					pinned: tab.pinned,
+					groupId: tab.groupId,
+					active: tab.tabId === tabId,
+				},
+				{ silent: true },
+			);
 		}
 	}
 
@@ -353,8 +445,15 @@ export class RelayBridge {
 	// ---- downstream (puppeteer) lifecycle -------------------------------------
 
 	/** Register a downstream CDP websocket; returns the connection id. */
-	cdpConnected(socket: RelaySocket): number {
-		const conn = new CdpConnection(++this.#connSeq, socket);
+	cdpConnected(socket: RelaySocket, leaseId?: string): number {
+		const tabId = leaseId ? this.managed.tabForLease(leaseId) : undefined;
+		const conn = new CdpConnection(
+			++this.#connSeq,
+			socket,
+			leaseId,
+			tabId === undefined ? undefined : this.#tabs.get(tabId),
+		);
+		if (leaseId) this.managed.connected(leaseId, conn.id);
 		this.#conns.set(conn.id, conn);
 		this.#log("cdp client connected", { conn: conn.id });
 		return conn.id;
@@ -364,7 +463,9 @@ export class RelayBridge {
 		const conn = this.#conns.get(connId);
 		if (!conn) return;
 		this.#conns.delete(connId);
+		if (conn.leaseId) this.managed.disconnected(conn.leaseId, connId);
 		const touched = new Set<number>();
+		if (conn.leasedTab && this.#tabs.get(conn.leasedTab.tabId) === conn.leasedTab) touched.add(conn.leasedTab.tabId);
 		for (const ref of conn.sessions.values()) touched.add(ref.tabId);
 		conn.sessions.clear();
 		// Tabs this client claimed leave the omp group unless another claimant
@@ -390,7 +491,15 @@ export class RelayBridge {
 			return;
 		}
 		if (typeof msg.id !== "number" || typeof msg.method !== "string") return;
-		void this.#handleCdpCommand(conn, msg).catch(err => {
+		conn.leaseOnly = false;
+		void (async () => {
+			const finish = conn.leaseId ? this.managed.beginOperation(conn.leaseId) : undefined;
+			try {
+				await this.#handleCdpCommand(conn, msg);
+			} finally {
+				finish?.();
+			}
+		})().catch(err => {
 			this.#replyError(conn, msg, err instanceof Error ? err.message : String(err));
 		});
 	}
@@ -398,6 +507,14 @@ export class RelayBridge {
 	// ---- command routing -------------------------------------------------------
 
 	async #handleCdpCommand(conn: CdpConnection, msg: CdpCommand): Promise<void> {
+		if (conn.leaseId && this.managed.tabForLease(conn.leaseId) === undefined) {
+			throw new Error("Chrome tab ownership is no longer valid");
+		}
+		if (msg.method === "Browser.setDownloadBehavior" || msg.method === "Page.setDownloadBehavior") {
+			throw new Error(
+				"Changing download behavior is not supported in existing Chrome. Downloads use this profile's settings; a requested download path has not been applied.",
+			);
+		}
 		const sessionId = msg.sessionId;
 		if (!sessionId) {
 			await this.#handleBrowserCommand(conn, msg);
@@ -426,6 +543,20 @@ export class RelayBridge {
 		sessionId: string,
 		ref: SessionRef,
 	): Promise<void> {
+		const tab = this.#tabs.get(ref.tabId);
+		if (!tab || !this.#visibleTo(conn, tab)) throw new Error("Chrome tab is outside this connection's ownership");
+		if (msg.method === "OMP.downloadFiles") {
+			if (!conn.leaseId) throw new Error("Download file lookup requires exact managed tab ownership");
+			if (!isDownloadFileQueries(msg.params?.queries)) throw new Error("Invalid observed-download queries");
+			const queries = msg.params.queries.map(query => {
+				const observed = tab.downloads.get(query.id);
+				if (!observed || observed.url !== query.url)
+					throw new Error("Download was not observed on this owned tab; its saved path is unknown");
+				return observed;
+			});
+			this.#reply(conn, msg, { lookup: await this.#rpc({ op: "downloadFiles", queries }) });
+			return;
+		}
 		if (msg.method === "Runtime.disable") {
 			ref.runtimeState = "disabled";
 			ref.runtimeEpoch++;
@@ -533,6 +664,11 @@ export class RelayBridge {
 		tabId: number,
 		realSessionId: string | undefined,
 	): Promise<void> {
+		const tab = this.#tabs.get(tabId);
+		if (!tab || !this.#visibleTo(conn, tab)) throw new Error("Chrome tab is outside this connection's ownership");
+		if (conn.leaseId && ["Page.bringToFront", "Page.close", "Browser.close"].includes(msg.method)) {
+			throw new Error("Use the explicit tab reveal/release lifecycle operation");
+		}
 		// Guard rail: a page session must never take the whole browser down.
 		if (msg.method === "Browser.close") {
 			this.#reply(conn, msg, {});
@@ -541,7 +677,7 @@ export class RelayBridge {
 		// Relay-private claim: the omp tab worker marks the page it was spawned
 		// to drive. Never forwarded — real Chrome rejects the unknown method.
 		if (msg.method === "OMP.claimTarget") {
-			this.#claimTab(conn, tabId);
+			if (!conn.leaseId) this.#claimTab(conn, tabId);
 			this.#reply(conn, msg, {});
 			return;
 		}
@@ -623,6 +759,12 @@ export class RelayBridge {
 	}
 
 	async #handleBrowserCommand(conn: CdpConnection, msg: CdpCommand): Promise<void> {
+		if (
+			conn.leaseId &&
+			["Target.createTarget", "Target.closeTarget", "Target.activateTarget", "Browser.close"].includes(msg.method)
+		) {
+			throw new Error("Use the explicit tab create/reveal/release lifecycle operation");
+		}
 		switch (msg.method) {
 			case "Browser.getVersion": {
 				this.#reply(conn, msg, {
@@ -640,7 +782,7 @@ export class RelayBridge {
 			case "Target.setDiscoverTargets": {
 				conn.discover = true;
 				for (const tab of this.#tabs.values()) {
-					if (!this.#eligible(tab)) continue;
+					if (!this.#visibleTo(conn, tab)) continue;
 					tab.announced = true;
 					this.#emit(conn, "Target.targetCreated", { targetInfo: this.#tabInfo(tab, tab.attached) });
 					this.#emit(conn, "Target.targetCreated", { targetInfo: this.#pageInfo(tab, tab.attached) });
@@ -650,7 +792,7 @@ export class RelayBridge {
 			}
 			case "Target.setAutoAttach": {
 				conn.autoAttach = true;
-				const tabs = [...this.#tabs.values()].filter(tab => this.#eligible(tab));
+				const tabs = [...this.#tabs.values()].filter(tab => this.#visibleTo(conn, tab));
 				await Promise.all(tabs.map(tab => this.#ensureAttached(tab)));
 				for (const tab of tabs) {
 					if (!tab.attached) {
@@ -667,7 +809,7 @@ export class RelayBridge {
 			case "Target.attachToTarget": {
 				const parsed = typeof msg.params?.targetId === "string" ? parseTargetId(msg.params.targetId) : null;
 				const tab = parsed ? this.#tabs.get(parsed.tabId) : undefined;
-				if (!parsed || !tab) {
+				if (!parsed || !tab || !this.#visibleTo(conn, tab)) {
 					this.#replyError(conn, msg, `No target with id ${String(msg.params?.targetId)}`);
 					return;
 				}
@@ -699,7 +841,8 @@ export class RelayBridge {
 			}
 			case "Target.closeTarget": {
 				const parsed = typeof msg.params?.targetId === "string" ? parseTargetId(msg.params.targetId) : null;
-				if (!parsed) {
+				const tab = parsed ? this.#tabs.get(parsed.tabId) : undefined;
+				if (!parsed || !tab || !this.#visibleTo(conn, tab)) {
 					this.#replyError(conn, msg, `No target with id ${String(msg.params?.targetId)}`);
 					return;
 				}
@@ -709,7 +852,10 @@ export class RelayBridge {
 			}
 			case "Target.activateTarget": {
 				const parsed = typeof msg.params?.targetId === "string" ? parseTargetId(msg.params.targetId) : null;
-				if (parsed) await this.#rpc({ op: "activateTab", tabId: parsed.tabId });
+				const tab = parsed ? this.#tabs.get(parsed.tabId) : undefined;
+				if (!parsed || !tab || !this.#visibleTo(conn, tab))
+					throw new Error("Tab is outside this connection's ownership");
+				await this.#rpc({ op: "activateTab", tabId: parsed.tabId });
 				this.#reply(conn, msg, {});
 				return;
 			}
@@ -717,7 +863,7 @@ export class RelayBridge {
 				const raw = typeof msg.params?.targetId === "string" ? msg.params.targetId : undefined;
 				const parsed = raw ? parseTargetId(raw) : null;
 				const tab = parsed ? this.#tabs.get(parsed.tabId) : undefined;
-				if (parsed && tab) {
+				if (parsed && tab && this.#visibleTo(conn, tab)) {
 					const info =
 						parsed.kind === "tab" ? this.#tabInfo(tab, tab.attached) : this.#pageInfo(tab, tab.attached);
 					this.#reply(conn, msg, { targetInfo: info });
@@ -740,9 +886,6 @@ export class RelayBridge {
 				this.#log("refusing Browser.close from downstream client", { conn: conn.id });
 				this.#reply(conn, msg, {});
 				return;
-			case "Browser.setDownloadBehavior":
-				this.#reply(conn, msg, {});
-				return;
 			case "Target.createBrowserContext":
 				this.#replyError(conn, msg, "Browser contexts are not supported by the omp browser relay");
 				return;
@@ -761,7 +904,21 @@ export class RelayBridge {
 	): void {
 		const tab = this.#tabs.get(tabId);
 		if (!tab) return;
+		if (!sourceSessionId && method === "Page.javascriptDialogOpening") tab.dialogs.opened(params ?? {});
+		if (!sourceSessionId && method === "Page.javascriptDialogClosed") {
+			tab.dialogs.closed();
+			queueMicrotask(() => this.#detachIfUnheld(tabId));
+		}
 		// Track real child sessions so downstream commands can route back.
+		if (
+			method === "Page.downloadWillBegin" &&
+			typeof params?.guid === "string" &&
+			typeof params.url === "string" &&
+			!tab.downloads.has(params.guid)
+		) {
+			if (tab.downloads.size >= 256) tab.downloads.delete(tab.downloads.keys().next().value!);
+			tab.downloads.set(params.guid, { id: params.guid, url: params.url, startedAt: Date.now() });
+		}
 		if (method === "Target.attachedToTarget") {
 			const child = params?.sessionId;
 			if (typeof child === "string") {
@@ -829,9 +986,8 @@ export class RelayBridge {
 	#onTabDetached(tabId: number, reason: string, relayInitiated: boolean): void {
 		const tab = this.#tabs.get(tabId);
 		if (!tab) return;
-		// Explicit source attribution comes from the extension that executed
-		// chrome.debugger.detach, so socket replacement cannot confuse this
-		// with a user cancellation or mutate an unrelated attach promise.
+		// The extension acknowledges successful explicit detach before its RPC
+		// result; native onDetach remains an independent user/browser event.
 		if (relayInitiated) {
 			// A replacement hello can observe the old attachment before the
 			// pending detach completes. Reconcile that stale snapshot unless a
@@ -840,6 +996,7 @@ export class RelayBridge {
 			return;
 		}
 		this.#log("tab detached", { tabId, reason });
+		this.managed.remove(tabId);
 		tab.attached = false;
 		tab.attaching = null;
 		this.#resetRuntime(tab);
@@ -851,6 +1008,7 @@ export class RelayBridge {
 	}
 
 	#onTabRemoved(tabId: number): void {
+		this.managed.remove(tabId);
 		const tab = this.#tabs.get(tabId);
 		if (!tab) return;
 		this.#retractTab(tab);
@@ -859,6 +1017,9 @@ export class RelayBridge {
 	}
 
 	#onTabUpsert(snap: TabSnapshot, opts: { silent?: boolean } = {}): void {
+		snap = mergeTabSnapshot(this.#tabs.get(snap.tabId), snap);
+		if (!INELIGIBLE_URL.test(snap.url)) this.managed.upsert(snap);
+		else this.managed.remove(snap.tabId);
 		let tab = this.#tabs.get(snap.tabId);
 		if (!tab) {
 			tab = new TabState(snap.tabId, snap);
@@ -879,12 +1040,12 @@ export class RelayBridge {
 		if (eligible && !tab.announced) {
 			tab.announced = true;
 			for (const conn of this.#conns.values()) {
-				if (!conn.discover) continue;
+				if (!conn.discover || !this.#visibleTo(conn, tab)) continue;
 				this.#emit(conn, "Target.targetCreated", { targetInfo: this.#tabInfo(tab, tab.attached) });
 				this.#emit(conn, "Target.targetCreated", { targetInfo: this.#pageInfo(tab, tab.attached) });
 			}
 			for (const conn of this.#conns.values()) {
-				if (!conn.autoAttach) continue;
+				if (!conn.autoAttach || !this.#visibleTo(conn, tab)) continue;
 				void this.#ensureAttached(tab).then(ok => {
 					if (ok) this.#emitTabAttached(conn, tab);
 				});
@@ -897,7 +1058,7 @@ export class RelayBridge {
 		}
 		if (eligible && tab.announced) {
 			for (const conn of this.#conns.values()) {
-				if (!conn.discover) continue;
+				if (!conn.discover || !this.#visibleTo(conn, tab)) continue;
 				this.#emit(conn, "Target.targetInfoChanged", { targetInfo: this.#tabInfo(tab, tab.attached) });
 				this.#emit(conn, "Target.targetInfoChanged", { targetInfo: this.#pageInfo(tab, tab.attached) });
 			}
@@ -1038,14 +1199,38 @@ export class RelayBridge {
 		this.#detachIfUnheld(ref.tabId);
 	}
 
-	/**
-	 * Release the tab's chrome.debugger attachment once no downstream session
-	 * holds it. Inert while the long-lived registry connection still holds one.
-	 */
+	/** Serialize dialog metadata only after the caller has validated the exact lease. */
+	dialogState(tabId: number): DialogState {
+		const tab = this.#tabs.get(tabId);
+		return tab?.attached ? tab.dialogs.snapshot() : { status: "unobserved", dialog: null };
+	}
+
+	async dialog(leaseId: string, owner: string, options: unknown, signal?: AbortSignal): Promise<DialogState> {
+		const lease = this.managed.get(leaseId, owner);
+		const tab = this.#tabs.get(lease.tab.tabId);
+		if (!tab?.attached) throw new Error("Dialog observation is unavailable: exact tab debugger is not attached");
+		const request = parseDialogRequest(options);
+		if (!("id" in request)) return tab.dialogs.snapshot();
+		const finish = this.managed.beginOperation(leaseId);
+		try {
+			if (signal?.aborted) throw new Error("Dialog response canceled before dispatch");
+			return await tab.dialogs.resolve(request, params =>
+				this.#rpc({ op: "send", tabId: tab.tabId, method: "Page.handleJavaScriptDialog", params }),
+			);
+		} finally {
+			finish();
+		}
+	}
+
 	#detachIfUnheld(tabId: number): void {
 		if (this.#sessionHolders(tabId).length > 0) return;
+		// A pending-dialog owner has a connection before it can initialize page
+		// sessions. Keep the original debugger across the decision and any next dialog.
+		for (const conn of this.#conns.values()) {
+			if (conn.leaseOnly && conn.leaseId && this.managed.tabForLease(conn.leaseId) === tabId) return;
+		}
 		const tab = this.#tabs.get(tabId);
-		if (!tab?.attached) return;
+		if (!tab?.attached || tab.dialogs.snapshot().status === "open") return;
 		tab.attached = false;
 		this.#resetRuntime(tab);
 		tab.reattachedAfterDetach = false;
@@ -1059,6 +1244,8 @@ export class RelayBridge {
 	}
 
 	#resetRuntime(tab: TabState): void {
+		tab.dialogs.reset();
+		tab.downloads.clear();
 		tab.runtimeContexts.clear();
 		tab.rootRuntimeEnabled = false;
 		tab.rootRuntimeEnabling = null;
@@ -1075,6 +1262,7 @@ export class RelayBridge {
 	}
 
 	#emitTabAttached(conn: CdpConnection, tab: TabState): void {
+		if (!this.#visibleTo(conn, tab)) return;
 		if (conn.sessionsForTab(tab.tabId, "tab").length > 0) return;
 		const sessionId = this.#mintSession(conn, "tab", tab.tabId);
 		this.#emit(conn, "Target.attachedToTarget", {
@@ -1085,8 +1273,8 @@ export class RelayBridge {
 	}
 
 	async #ensureAttached(tab: TabState): Promise<boolean> {
-		// The extension emits the detach echo before resolving the RPC. Awaiting
-		// prevents a replacement attach racing either operation.
+		// The extension acknowledges successful detach before resolving the RPC.
+		// Awaiting prevents a replacement attach racing either operation.
 		while (tab.detaching) await tab.detaching;
 		if (tab.attached) return true;
 		if (tab.banned || !this.#ext) return false;

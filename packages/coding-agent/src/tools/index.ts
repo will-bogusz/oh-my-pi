@@ -1,4 +1,10 @@
-import type { AgentOptions, AgentTelemetryConfig, AgentTool, AgentToolContext } from "@oh-my-pi/pi-agent-core";
+import type {
+	AgentOptions,
+	AgentTelemetryConfig,
+	AgentTool,
+	AgentToolContext,
+	AgentToolUpdateCallback,
+} from "@oh-my-pi/pi-agent-core";
 import type { EditStore } from "@oh-my-pi/pi-natives";
 import type { FetchImpl, ImageContent, Model, ServiceTierByFamily, ToolChoice } from "@oh-my-pi/pi-ai";
 import { logger } from "@oh-my-pi/pi-utils";
@@ -276,6 +282,12 @@ export interface ToolSession {
 	assertEvalExecutionAllowed?: () => void;
 	/** Track tool-owned eval work so session disposal can await/abort it like direct session eval runs. */
 	trackEvalExecution?<T>(execution: Promise<T>, abortController: AbortController): Promise<T>;
+	/** Display-only updates that remain valid after a tool returns a background job. */
+	createBackgroundToolUpdateSink?: (
+		toolCallId: string,
+		toolName: string,
+		args: unknown,
+	) => AgentToolUpdateCallback<unknown> | undefined;
 	/** Get tool-state session ID (distinct from the owning session for advisors). */
 	getSessionId?: () => string | null;
 	/** Get Hindsight runtime state for this agent session. */

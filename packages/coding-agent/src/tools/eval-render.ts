@@ -39,8 +39,10 @@ import {
 	formatTitle,
 	isFeedModelBadgeEnabled,
 	previewWindowRows,
+	PREVIEW_LIMITS,
 	replaceTabs,
 	shortenPath,
+	TRUNCATE_LENGTHS,
 	truncateToWidth,
 	wrapBrackets,
 } from "./render-utils";
@@ -103,21 +105,81 @@ function getRenderCells(args: EvalRenderArgs | undefined): EvalRenderCell[] {
 type AgentEventStatus = "pending" | "running" | "completed" | "failed" | "aborted";
 
 /**
- * Append or replace a status event. `agent` events are progress snapshots keyed
- * by `id`, so they coalesce in place (preserving first-seen order); every other
+ * Append or replace a status event. `agent` and `control` events are progress snapshots keyed
+ * by `id` within their operation, so they coalesce in place; every other
  * op is a discrete action and simply appends. Keeps the persisted event list
  * bounded even when a subagent emits hundreds of throttled progress ticks.
  */
 export function upsertStatusEvent(events: EvalStatusEvent[], event: EvalStatusEvent): void {
-	if (event.op === "agent" && typeof event.id === "string") {
+	if ((event.op === "agent" || event.op === "control") && typeof event.id === "string") {
 		const id = event.id;
-		const idx = events.findIndex(e => e.op === "agent" && e.id === id);
+		const idx = events.findIndex(e => e.op === event.op && e.id === id);
 		if (idx >= 0) {
 			events[idx] = event;
 			return;
 		}
 	}
 	events.push(event);
+}
+
+/** Control activity stays visible beside previews, independently of code/output expansion. */
+function renderControlProgressEvents(
+	events: EvalStatusEvent[],
+	theme: Theme,
+	expanded: boolean,
+	width: number,
+	canStillRun: boolean,
+	spinnerFrame?: number,
+): string[] {
+	const active = (event: EvalStatusEvent) => event.phase === "running" || event.phase === "stopping";
+	const recent = new Set(events.slice(-(expanded ? PREVIEW_LIMITS.EXPANDED_LINES : PREVIEW_LIMITS.COLLAPSED_LINES)));
+	const visible = events.filter(event => active(event) || recent.has(event));
+	return visible.map(event => {
+		const kind = event.kind === "browser" ? "Browser" : "Computer";
+		// A lost worker may never emit a terminal control event. A settled cell
+		// cannot prove release, but must not keep presenting its last spinner.
+		const phase = !canStillRun && active(event) ? "unknown" : eventString(event.phase);
+		const state =
+			phase === "unknown"
+				? "Outcome unconfirmed; inspect before retrying"
+				: phase === "released"
+					? "Control released"
+					: phase === "stopped"
+						? "Operation stopped"
+						: phase === "stopping"
+							? "Stopping; waiting for operations to finish"
+							: phase === "failed"
+								? "Failed; inspect before retrying"
+								: phase === "completed"
+									? "Operation complete"
+									: "Working";
+		const icon = formatStatusIcon(
+			phase === "failed" || phase === "unknown"
+				? "error"
+				: phase === "stopped"
+					? "aborted"
+					: active(event)
+						? "running"
+						: "done",
+			theme,
+			spinnerFrame,
+		);
+		const color =
+			phase === "failed" || phase === "unknown"
+				? "error"
+				: phase === "stopping" || phase === "stopped"
+					? "warning"
+					: "muted";
+		const target = eventString(event.target);
+		const action = eventString(event.action);
+		const clean = (value: string) =>
+			truncateToWidth(replaceTabs(sanitizeText(value)).replace(/[\r\n]/g, " "), TRUNCATE_LENGTHS.TITLE);
+		const detail = [target && clean(target), action && clean(action)].filter(Boolean).join(" · ");
+		return truncateToWidth(
+			`${icon} ${theme.fg("accent", kind)} ${theme.fg(color, state)}${detail ? theme.sep.dot + theme.fg("dim", detail) : ""}`,
+			width,
+		);
+	});
 }
 
 function eventString(value: unknown): string | undefined {
@@ -651,7 +713,8 @@ export const evalToolRenderer = {
 						const { cell, code, language } = displayCells[i];
 						const allEvents = cell.statusEvents ?? [];
 						const agentEvents = allEvents.filter(e => e.op === "agent");
-						const otherEvents = agentEvents.length > 0 ? allEvents.filter(e => e.op !== "agent") : allEvents;
+						const controlEvents = allEvents.filter(e => e.op === "control");
+						const otherEvents = allEvents.filter(e => e.op !== "agent" && e.op !== "control");
 						const statusLines = renderStatusEvents(otherEvents, uiTheme, expanded);
 						const outputContent = formatCellOutputLines(cell, expanded, previewLines, uiTheme, width);
 						const outputLines = [...outputContent.lines];
@@ -690,6 +753,19 @@ export const evalToolRenderer = {
 							uiTheme,
 						);
 						lines.push(...cellLines);
+						if (controlEvents.length > 0) {
+							lines.push(
+								...renderControlProgressEvents(
+									controlEvents,
+									uiTheme,
+									expanded,
+									width,
+									cell.status === "running" &&
+										(details?.async ? details.async.state === "running" : options.isPartial),
+									options.spinnerFrame,
+								),
+							);
+						}
 						if (agentEvents.length > 0) {
 							lines.push(...renderAgentProgressEvents(agentEvents, uiTheme, width, options.spinnerFrame));
 						}

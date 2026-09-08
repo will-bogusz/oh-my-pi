@@ -1,7 +1,10 @@
 def _make_computer():
     import re
+    from types import MappingProxyType
 
     def _encode_arg(value):
+        if isinstance(value, MappingProxyType):
+            return dict(value)
         if isinstance(value, re.Pattern):
             if not isinstance(value.pattern, str):
                 raise TypeError("computer helpers require regular expressions with string patterns")
@@ -57,32 +60,35 @@ def _make_computer():
         return {"method": method, "args": _arguments(args, kwargs)}
 
     class _Element:
-        __slots__ = ("ref", "role", "nativeRole", "title", "description", "enabled", "focused", "childCount")
+        __slots__ = ("ref", "role", "label", "value", "placeholder", "enabled", "selected", "actions", "bounds", "pid", "windowId", "_owner")
 
-        def __init__(self, snapshot):
+        def __init__(self, snapshot, identity=None):
             for field in self.__slots__:
-                setattr(self, field, snapshot.get(field))
+                if field == "_owner":
+                    continue
+                value = snapshot.get(field)
+                if field == "bounds" and isinstance(value, dict):
+                    value = MappingProxyType(dict(value))
+                if field == "actions" and isinstance(value, list):
+                    value = tuple(value)
+                object.__setattr__(self, field, value)
+            owner = identity
+            if owner is None and self.windowId is not None and self.pid is not None:
+                owner = {"id": self.windowId, "pid": self.pid}
+            object.__setattr__(self, "_owner", MappingProxyType(dict(owner)) if owner is not None else None)
+
+        def __setattr__(self, name, value):
+            raise AttributeError("computer element fields are immutable observation data")
 
         def __repr__(self):
             return f"<computer.Element ref={self.ref!r} role={self.role!r}>"
 
         async def _method(self, method, args, kwargs):
-            return await _call([_step("ref", (self.ref,), {}), _step(method, args, kwargs)])
-
-        async def value(self, *args, **kwargs):
-            return await self._method("value", args, kwargs)
+            chain = [_step("window", (dict(self._owner),), {})] if self._owner is not None else []
+            return await _call([*chain, _step("ref", (self.ref,), {}), _step(method, args, kwargs)])
 
         async def setValue(self, *args, **kwargs):
             return await self._method("setValue", args, kwargs)
-
-        async def bounds(self, *args, **kwargs):
-            return await self._method("bounds", args, kwargs)
-
-        async def attributes(self, *args, **kwargs):
-            return await self._method("attributes", args, kwargs)
-
-        async def actions(self, *args, **kwargs):
-            return await self._method("actions", args, kwargs)
 
         async def perform(self, *args, **kwargs):
             return await self._method("perform", args, kwargs)
@@ -93,28 +99,35 @@ def _make_computer():
         async def click(self, *args, **kwargs):
             return await self._method("click", args, kwargs)
 
-        async def focus(self, *args, **kwargs):
-            return await self._method("focus", args, kwargs)
+        async def doubleClick(self, *args, **kwargs):
+            return await self._method("doubleClick", args, kwargs)
 
-        async def parent(self):
-            snapshot = await self._method("parent", (), {})
-            return _Element(snapshot) if isinstance(snapshot, dict) else None
+        async def type(self, *args, **kwargs):
+            return await self._method("type", args, kwargs)
 
-        async def children(self):
-            return [_Element(snapshot) for snapshot in await self._method("children", (), {})]
+        async def scroll(self, *args, **kwargs):
+            return await self._method("scroll", args, kwargs)
 
     class _Window:
-        __slots__ = ("id", "app", "title", "pid", "bounds", "focused")
+        __slots__ = ("id", "app", "title", "pid", "bounds", "onScreen", "initialObservation", "inspectionError", "initialScreenshot", "screenshotError")
 
         def __init__(self, snapshot):
+            if not isinstance(snapshot.get("id"), str) or type(snapshot.get("pid")) is not int:
+                raise TypeError("computer window snapshot requires an exact id and PID")
             for field in self.__slots__:
-                setattr(self, field, snapshot.get(field))
+                value = snapshot.get(field)
+                if field == "bounds" and isinstance(value, dict):
+                    value = MappingProxyType(dict(value))
+                object.__setattr__(self, field, value)
+
+        def __setattr__(self, name, value):
+            raise AttributeError("computer window fields are immutable observation data")
 
         def __repr__(self):
             return f"<computer.Window id={self.id!r} app={self.app!r}>"
 
         async def _method(self, method, args, kwargs):
-            return await _call([_step("window", (self.id,), {}), _step(method, args, kwargs)])
+            return await _call([_step("window", ({"id": self.id, "pid": self.pid},), {}), _step(method, args, kwargs)])
 
         async def screenshot(self, *args, **kwargs):
             return await self._method("screenshot", args, kwargs)
@@ -125,8 +138,8 @@ def _make_computer():
         async def doubleClick(self, *args, **kwargs):
             return await self._method("doubleClick", args, kwargs)
 
-        async def move(self, *args, **kwargs):
-            return await self._method("move", args, kwargs)
+        async def hover(self, *args, **kwargs):
+            return await self._method("hover", args, kwargs)
 
         async def drag(self, *args, **kwargs):
             return await self._method("drag", args, kwargs)
@@ -140,19 +153,31 @@ def _make_computer():
         async def press(self, *args, **kwargs):
             return await self._method("press", args, kwargs)
 
-        async def raise_(self, *args, **kwargs):
-            return await self._method("raise", args, kwargs)
+        async def reveal(self, *args, **kwargs):
+            return await self._method("reveal", args, kwargs)
 
-        async def ax(self, *args, **kwargs):
-            return await self._method("ax", args, kwargs)
+        async def observe(self, *args, **kwargs):
+            return await self._method("observe", args, kwargs)
+
+        async def setValue(self, *args, **kwargs):
+            return await self._method("setValue", args, kwargs)
+
+        async def setFrame(self, *args, **kwargs):
+            return await self._method("setFrame", args, kwargs)
+
+        async def menu(self, *args, **kwargs):
+            return await self._method("menu", args, kwargs)
+
+        async def verify(self, *args, **kwargs):
+            return await _call([_step("verifyWindow", ({"id": self.id, "pid": self.pid}, *args), kwargs)])
 
         async def find(self, *args, **kwargs):
-            return [_Element(snapshot) for snapshot in await self._method("find", args, kwargs)]
+            return [_Element(snapshot, {"id": self.id, "pid": self.pid}) for snapshot in await self._method("find", args, kwargs)]
 
         async def ref(self, ref):
-            """Resolve a live accessibility element by its `[ref=eN]` tag."""
-            snapshot = await _call([_step("ref", (ref,), {})])
-            return _Element(snapshot) if isinstance(snapshot, dict) else None
+            """Resolve an opaque ref belonging to this exact window."""
+            snapshot = await self._method("ref", (ref,), {})
+            return _Element(snapshot, {"id": self.id, "pid": self.pid}) if isinstance(snapshot, dict) else None
 
     class _Clipboard:
         __slots__ = ()
@@ -174,6 +199,12 @@ def _make_computer():
 
         async def _method(self, method, args, kwargs):
             return await _call([_step(method, args, kwargs)])
+
+        async def apps(self, *args, **kwargs):
+            return await self._method("apps", args, kwargs)
+
+        async def launch(self, *args, **kwargs):
+            return await self._method("launch", args, kwargs)
 
         async def displays(self, *args, **kwargs):
             return await self._method("displays", args, kwargs)
@@ -205,25 +236,21 @@ def _make_computer():
         async def press(self, *args, **kwargs):
             return await self._method("press", args, kwargs)
 
-        async def window(self, *args, **kwargs):
-            """Resolve one window by opaque id or by `app`/`title` filter keywords."""
-            snapshot = await self._method("window", args, kwargs)
+        async def window(self, *args, screenshot=None, silent=None, maxDepth=None, maxElements=None, query=None, **kwargs):
+            """Acquire one exact window and its initial background inspection."""
+            selectors = _arguments(args, kwargs)
+            if len(selectors) != 1:
+                raise TypeError("computer.window expects one selector or filter keywords")
+            options = {key: value for key, value in {"screenshot": screenshot, "silent": silent, "maxDepth": maxDepth, "maxElements": maxElements, "query": query}.items() if value is not None}
+            snapshot = await self._method("acquireWindow", (selectors[0], options), {})
             return _Window(snapshot) if isinstance(snapshot, dict) else None
 
         async def focusedWindow(self):
             snapshot = await self._method("focusedWindow", (), {})
             return _Window(snapshot) if isinstance(snapshot, dict) else None
 
-        async def elementAt(self, x, y):
-            snapshot = await self._method("elementAt", (x, y), {})
-            return _Element(snapshot) if isinstance(snapshot, dict) else None
-
-        async def focusedElement(self):
-            snapshot = await self._method("focusedElement", (), {})
-            return _Element(snapshot) if isinstance(snapshot, dict) else None
-
         async def ref(self, ref):
-            """Resolve a live accessibility element by its `[ref=eN]` tag."""
+            """Resolve snapshot data, not native liveness; global AX eviction can require re-observation."""
             snapshot = await self._method("ref", (ref,), {})
             return _Element(snapshot) if isinstance(snapshot, dict) else None
 
@@ -238,9 +265,12 @@ def _make_computer():
             return details.get("value")
 
         async def capabilities(self):
-            """Return native backend capabilities and permission state, or None when unavailable."""
-            details = await _invoke("capabilities", {})
-            return details if "backend" in details else None
+            """Initialize the desktop and return backend capabilities and permission state."""
+            return await self._method("capabilities", (), {})
+
+        async def release(self):
+            """Drain and release capture/control resources; later calls start a fresh desktop worker."""
+            await _invoke("release", {})
 
         async def close(self):
             """End the persistent desktop session; later calls fail."""

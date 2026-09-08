@@ -400,3 +400,69 @@ describe("#10447 persisted background task board across a focus rebuild", () => 
 		expect(fixture.ctx.pendingTools.has("task-bg")).toBe(false);
 	});
 });
+
+describe("background Eval preview across a focus rebuild", () => {
+	it("replays its final control image into the original card after settling while unfocused", async () => {
+		const call: AgentMessage = {
+			role: "assistant",
+			content: [
+				{
+					type: "toolCall",
+					id: "eval-bg",
+					name: "eval",
+					arguments: { language: "js", code: "await computer.release()" },
+				},
+			],
+			api: "anthropic-messages",
+			provider: "anthropic",
+			model: "claude-sonnet-4-5",
+			stopReason: "toolUse",
+			usage,
+			timestamp: Date.now(),
+		};
+		const initial: ToolResultMessage = {
+			role: "toolResult",
+			toolCallId: "eval-bg",
+			toolName: "eval",
+			content: [{ type: "text", text: "Backgrounded" }],
+			details: { async: { state: "running", jobId: "job-bg", type: "eval" } },
+			isError: false,
+			timestamp: Date.now(),
+		};
+		const main = makeSession([call, initial], false, ["job-bg"]);
+		const fixture = createFixture(main);
+		await fixture.ctx.renderInitialMessages();
+		expect(fixture.ctx.pendingTools.has("eval-bg")).toBe(true);
+		await fixture.focus.focusAgent("Worker");
+		await main.emitToolUpdate({
+			type: "tool_execution_update",
+			toolCallId: "eval-bg",
+			toolName: "eval",
+			args: {},
+			partialResult: {
+				content: [{ type: "text", text: "Released" }],
+				details: {
+					async: { state: "completed", jobId: "job-bg", type: "eval" },
+					images: [
+						{
+							type: "image",
+							mimeType: "image/png",
+							data: (
+								await Bun.file(new URL("../../ai/test/data/red-circle.png", import.meta.url)).bytes()
+							).toBase64(),
+						},
+					],
+					controlImages: [
+						{ index: 0, kind: "computer", label: "Exact background fixture", path: "/tmp/rebuilt-fixture.png" },
+					],
+				},
+			},
+		});
+		await fixture.focus.unfocus();
+		const rendered = Bun.stripANSI(fixture.ctx.chatContainer.render(120).join("\n"));
+		expect(rendered).toContain("Computer snapshot");
+		expect(rendered).toContain("Exact background fixture");
+		expect(rendered).toContain("rebuilt-fixture.png");
+		expect(fixture.ctx.pendingTools.has("eval-bg")).toBe(false);
+	});
+});

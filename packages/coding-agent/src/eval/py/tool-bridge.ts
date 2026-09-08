@@ -9,6 +9,7 @@
  */
 import { logger, postmortem } from "@oh-my-pi/pi-utils";
 import type { ToolSession } from "../../tools";
+import { ToolAbortError } from "../../tools/tool-errors";
 import { callSessionTool, type JsStatusEvent } from "../js/tool-bridge";
 
 export interface PyToolBridgeEntry {
@@ -144,6 +145,7 @@ async function startServer(): Promise<BridgeServer> {
 				return Response.json({
 					ok: false,
 					error: err instanceof Error ? err.message : String(err),
+					...(err instanceof ToolAbortError ? { isAbort: true } : {}),
 				});
 			}
 		},

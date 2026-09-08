@@ -21,10 +21,17 @@ export default class BrowserRelay extends Command {
 	};
 
 	static flags = {
-		port: Flags.integer({ char: "p", description: "Port to listen on", default: DEFAULT_RELAY_PORT }),
-		token: Flags.string({ description: "Require the extension to present this token" }),
+		port: Flags.integer({
+			char: "p",
+			description: "Service port (install sets the extension default)",
+			default: DEFAULT_RELAY_PORT,
+		}),
+		id: Flags.string({ description: "Exact browser id to unpair (from list)" }),
 		dir: Flags.string({
 			description: "Extension install directory (install; default ~/.omp/browser-relay/extension)",
+		}),
+		name: Flags.string({
+			description: "Extension display name (install; default OMP Browser Relay)",
 		}),
 		"no-group": Flags.boolean({
 			description: "Don't gather controllable tabs into an 'omp' tab group",
@@ -36,7 +43,7 @@ export default class BrowserRelay extends Command {
 	static examples = [
 		"omp browser-relay install    # write the Chrome extension to disk + setup steps",
 		"omp browser-relay            # serve the relay on the default port",
-		"omp browser-relay -p 9333 --token s3cret",
+		"omp browser-relay pair -p 9333",
 	];
 
 	async run(): Promise<void> {
@@ -44,8 +51,9 @@ export default class BrowserRelay extends Command {
 		await runBrowserRelayCommand({
 			action: (args.action as BrowserRelayAction | undefined) ?? "serve",
 			port: flags.port,
-			token: flags.token,
+			id: flags.id,
 			dir: flags.dir,
+			name: flags.name,
 			group: !flags["no-group"],
 			verbose: flags.verbose,
 		});

@@ -1,0 +1,1097 @@
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
+import type { DesktopCapabilities, DesktopDisplay } from "@oh-my-pi/pi-natives";
+import { getNativesDir, withFileLock } from "@oh-my-pi/pi-utils";
+import { resizeImage } from "../../utils/image-resize";
+import { ToolError, throwIfAborted } from "../tool-errors";
+import {
+	assertCuaHostRuntime,
+	CUA_DRIVER_VERSION,
+	type CuaDriverHandle,
+	type CuaDriverMetadata,
+	type CuaRuntimeOptions,
+	type CuaToolResult,
+	loadCuaRuntime,
+} from "./cua-runtime";
+import type {
+	ActionOptions,
+	ComputerActionResult,
+	ComputerBounds,
+	ComputerElementSnapshot,
+	ComputerImage,
+	ComputerLaunchOptions,
+	ComputerObservation,
+	ComputerRelatedWindow,
+	ComputerOperationContext,
+	ComputerTarget,
+	ComputerWindowIdentity,
+	ObserveOptions,
+	WindowSelector,
+} from "./types";
+import type { ComputerBackend } from "./worker";
+
+import { observedSemanticActions } from "./semantic-actions";
+
+type Context = ComputerOperationContext;
+type Wire = Record<string, unknown>;
+interface Reply {
+	result: CuaToolResult;
+	data: Wire;
+}
+interface Binding {
+	window: ComputerWindowIdentity;
+	token: string;
+	snapshotId: string;
+	element: ComputerElementSnapshot;
+	doubleClickAtCenter: boolean;
+}
+interface Frame {
+	window: ComputerWindowIdentity;
+	image: ComputerImage;
+	sdkWidth: number;
+	sdkHeight: number;
+}
+interface PrimaryDisplay {
+	uuid: string;
+	nativeId: number;
+	bounds: ComputerBounds;
+	scale: number;
+}
+interface DesktopFrame {
+	display: PrimaryDisplay;
+	image: ComputerImage;
+}
+type VerificationStatus = "satisfied" | "unsatisfied" | "unknown";
+interface VerificationResult {
+	status: VerificationStatus;
+	stable: boolean;
+	elapsed_ms: number;
+	samples: number;
+	predicates: {
+		index: number;
+		status: VerificationStatus;
+		unknown_reason: string | null;
+		observed_json: string | null;
+	}[];
+}
+export interface CuaSessionOptions {
+	display?: string;
+	runtime?: CuaRuntimeOptions;
+	/** Per-instance SDK injection for regression tests; does not change global factories. */
+	driver?: CuaDriverHandle;
+	inputLockPath?: string;
+}
+function object(value: unknown, name: string): Wire {
+	if (!value || typeof value !== "object" || Array.isArray(value)) throw new ToolError(`Malformed Cua ${name}`);
+	return value as Wire;
+}
+function number(value: unknown, name: string): number {
+	if (typeof value !== "number" || !Number.isFinite(value)) throw new ToolError(`Malformed Cua ${name}`);
+	return value;
+}
+function string(value: unknown, name: string): string {
+	if (typeof value !== "string") throw new ToolError(`Malformed Cua ${name}`);
+	return value;
+}
+function relatedWindows(value: unknown): readonly ComputerRelatedWindow[] | undefined {
+	if (value === undefined || value === null) return undefined;
+	if (!Array.isArray(value)) throw new ToolError("Malformed Cua related windows");
+	return Object.freeze(
+		value.map(value => {
+			const row = object(value, "related window");
+			const pid = number(row.pid, "related window PID");
+			const id = number(row.window_id, "related window ID");
+			if (!Number.isSafeInteger(pid) || pid <= 0 || !Number.isSafeInteger(id) || id <= 0 || row.relation !== "sheet")
+				throw new ToolError("Malformed Cua related window identity");
+			return Object.freeze({
+				id: String(id),
+				pid,
+				title: string(row.title, "related window title"),
+				relation: "sheet" as const,
+			});
+		}),
+	);
+}
+function bounds(value: unknown): ComputerBounds {
+	const row = object(value, "bounds");
+	return Object.freeze({
+		x: number(row.x, "bounds.x"),
+		y: number(row.y, "bounds.y"),
+		width: number(row.width ?? row.w, "bounds.width"),
+		height: number(row.height ?? row.h, "bounds.height"),
+	});
+}
+function sameBounds(a: ComputerBounds, b: ComputerBounds): boolean {
+	return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+}
+function primaryDisplay(data: Wire, capture = false): PrimaryDisplay | undefined {
+	// Stock 0.23.2 has dimensions only. They cannot identify a display.
+	if (data.display_identity === undefined || data.screen_origin === undefined) return undefined;
+	const identity = object(data.display_identity, "display_identity");
+	const origin = object(data.screen_origin, "screen_origin");
+	const uuid = string(identity.uuid, "display UUID");
+	const nativeId = number(identity.native_id, "display native_id");
+	const width = number(capture ? data.screen_width : data.width, "screen width");
+	const height = number(capture ? data.screen_height : data.height, "screen height");
+	const scale = number(data.scale_factor, "screen scale_factor");
+	if (!uuid || !Number.isSafeInteger(nativeId) || nativeId < 1 || width <= 0 || height <= 0 || scale <= 0)
+		throw new ToolError("Malformed Cua primary display identity/geometry");
+	return Object.freeze({
+		uuid,
+		nativeId,
+		scale,
+		bounds: Object.freeze({
+			x: number(origin.x, "screen origin x"),
+			y: number(origin.y, "screen origin y"),
+			width,
+			height,
+		}),
+	});
+}
+function sameDisplay(a: PrimaryDisplay, b: PrimaryDisplay): boolean {
+	return a.uuid === b.uuid && a.nativeId === b.nativeId && a.scale === b.scale && sameBounds(a.bounds, b.bounds);
+}
+function windowArgs(window: Pick<ComputerWindowIdentity, "id" | "pid">): Wire {
+	const id = Number(window.id);
+	if (!Number.isSafeInteger(id) || id < 1 || !Number.isSafeInteger(window.pid) || window.pid < 1)
+		throw new ToolError("Invalid exact Cua window identity");
+	return { pid: window.pid, window_id: id };
+}
+function chordKeys(chord: string | string[]): string[] {
+	const keys = Array.isArray(chord) ? [...chord] : chord.split("+").map(key => key.trim());
+	if (!keys.length || keys.some(key => !key)) throw new ToolError("Invalid key chord");
+	return keys;
+}
+function delivery(options: ActionOptions): Wire {
+	return { delivery_mode: options.delivery ?? "background" };
+}
+function foreground(options: { delivery?: "background" | "foreground" }): void {
+	if (options.delivery !== "foreground") throw new ToolError("This desktop operation requires delivery: 'foreground'");
+}
+function unsupported(operation: string): never {
+	throw new ToolError(`Unsupported Cua operation: ${operation}`);
+}
+
+/**
+ * Candidate adapter. All desktop work, including capture, remains inside Cua.
+ *
+ * The worker factory may opt in with CuaComputerSession.create({ display }). For
+ * local SDK qualification only, pass runtime.experimentalNodeModules explicitly;
+ * this never changes the installed dependency graph. Restart the worker after
+ * rebuilding that native payload: loaded dynamic libraries cannot be hot-swapped.
+ *
+ * Requires the SDK capture/AX/mouse fixes under qualification. The pinned public
+ * package alone does not prove those fixes are present. Do not enable alongside
+ * the obsolete OMP ScreenCaptureKit bridge, whose Objective-C classes collide.
+ *
+ * SDK window hover is only cursor decoration and focused-window identity is
+ * unavailable. Display enumeration/capture/input cover the primary display only.
+ * Desktop pixels require the patched SDK display identity/origin extension; stock
+ * observations remain usable as images but never authorize coordinate dispatch.
+ * SDK desktop drags are straight two-point gestures. Desktop scroll accepts only
+ * one-axis multiples of 120 pixels (the SDK's line notch), up to 50 notches.
+ */
+export class CuaComputerSession implements ComputerBackend {
+	readonly #driver: CuaDriverHandle;
+	readonly #inputLock: string;
+	readonly #generation = crypto.randomUUID();
+	readonly #elements = new Map<string, Binding>();
+	readonly #frames = new Map<string, Frame>();
+	readonly metadata: CuaDriverMetadata;
+	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
+	#tail: Promise<unknown> = Promise.resolve();
+	#closed = false;
+	#closing?: Promise<void>;
+	#interruption?: Promise<void>;
+	get requiresReacquisition(): boolean {
+		return this.#interruption !== undefined;
+	}
+	#desktopFrame?: DesktopFrame;
+
+	private constructor(driver: CuaDriverHandle, inputLock: string, permissions: Wire, metadata: CuaDriverMetadata) {
+		this.#driver = driver;
+		this.#inputLock = inputLock;
+		this.metadata = Object.freeze({ ...metadata });
+		const capture = permissions.screen_recording === true;
+		const accessibility = permissions.accessibility === true;
+		this.capabilities = Object.freeze({
+			backend: "cua-sdk",
+			displayServer: "macos",
+			capture,
+			input: accessibility,
+			ax: accessibility,
+			backgroundWindowInput: accessibility,
+			deliveryModes: ["background", "foreground"],
+			capturePermission: capture ? "granted" : "not-granted",
+			inputPermission: accessibility ? "granted" : "not-granted",
+			axPermission: accessibility ? "granted" : "not-granted",
+			displayCount: 0,
+			driver: this.metadata,
+			displayCountKnown: false,
+			displayEnumeration: "primary only; other display count is unknown",
+			captureScope: "exact window or primary display",
+			desktopCoordinates: "primary display only; requires current UUID, native id, origin, size and scale metadata",
+			desktopDrag: "exactly two points; the SDK interpolates one straight drag",
+			windowDrag:
+				"foreground only; durationMs integer 0–10000 (default 500), steps integer 1–200 (default 20); background drag is unavailable",
+			desktopScroll: "one axis per action; pixel deltas must be multiples of 120, up to 6000",
+			backgroundInput: "best effort; use observation backgroundInput and fresh evidence, never assume delivery",
+			elementRefLifetime:
+				"Exact SDK snapshot, PID and window; re-observe after StaleRef. AX traversals can evict SDK snapshots.",
+			unsupported: ["window hover", "focusedWindow", "secondary display enumeration/capture/input"],
+		});
+	}
+
+	static async create(options: CuaSessionOptions = {}): Promise<CuaComputerSession> {
+		if (!options.driver) assertCuaHostRuntime();
+		if (options.display && !["all", "primary"].includes(options.display))
+			unsupported(`display selector '${options.display}'`);
+		const inputLock = options.inputLockPath ?? path.join(getNativesDir(), "computer-input");
+		await fs.mkdir(path.dirname(inputLock), { recursive: true });
+		const driver =
+			options.driver ?? (await loadCuaRuntime(options.runtime)).CuaDriver.create({ claudeCodeCompatibility: false });
+		try {
+			const metadata = await driver.metadata();
+			if (
+				metadata.driverVersion !== CUA_DRIVER_VERSION ||
+				metadata.contractVersion !== "0.7.0" ||
+				!metadata.embedded
+			)
+				throw new ToolError("Cua SDK version/embedded contract mismatch");
+			const permissions = await withFileLock(inputLock, () =>
+				driver.callTool("check_permissions", JSON.stringify({ prompt: false })),
+			);
+			if (permissions.isError) throw new ToolError(permissions.text);
+			return new CuaComputerSession(
+				driver,
+				inputLock,
+				object(JSON.parse(permissions.structuredJson ?? "{}"), "permissions"),
+				metadata,
+			);
+		} catch (error) {
+			try {
+				await driver.shutdown();
+			} finally {
+				driver.uniffiDestroy();
+			}
+			throw error;
+		}
+	}
+
+	#guard(context: Context): void {
+		throwIfAborted(context.signal);
+		if (this.#closed) throw new ToolError("Computer session closed or interrupted; acquire a fresh window");
+	}
+	async #schedule<T>(context: Context, name: string, mutation: boolean, dispatch: () => Promise<T>): Promise<T> {
+		if (mutation && context.readOnly) throw new ToolError(`read-only run: '${name}' requires read_only: false`);
+		this.#guard(context);
+		const run = () =>
+			withFileLock(this.#inputLock, async () => {
+				this.#guard(context);
+				// Shutdown signals native cooperative cancellation and waits
+				// for the admitted task's real lifetime. Keep the file lock
+				// until both the action and that cleanup acknowledgement settle.
+				const interrupt = (): void => {
+					this.#closed = true;
+					this.#interruption ??= this.#driver.shutdown();
+					void this.#interruption.catch(() => undefined);
+				};
+				context.signal.addEventListener("abort", interrupt, { once: true });
+				try {
+					const value = await dispatch();
+					throwIfAborted(context.signal);
+					return value;
+				} finally {
+					context.signal.removeEventListener("abort", interrupt);
+					await this.#interruption;
+				}
+			});
+		const pending = this.#tail.then(run, run);
+		this.#tail = pending.catch(() => undefined);
+		return pending;
+	}
+	async #call(name: string, args: Wire): Promise<Reply> {
+		const result = await this.#driver.callTool(name, JSON.stringify(args));
+		if (result.isError) {
+			let details: Wire | undefined;
+			try {
+				details = result.structuredJson ? object(JSON.parse(result.structuredJson), `${name} error`) : undefined;
+			} catch {
+				// Malformed optional details must not replace the original SDK failure.
+			}
+			const code = result.errorCode ?? (typeof details?.error === "string" ? details.error : "CuaError");
+			throw new ToolError(
+				`${code}: ${result.text}${details ? `\nDetails: ${JSON.stringify(details)}` : ""}`,
+				details,
+			);
+		}
+		return { result, data: object(JSON.parse(result.structuredJson ?? "{}"), `${name} result`) };
+	}
+	#windowRoster(data: Wire, selector: WindowSelector): ComputerWindowIdentity[] {
+		if (!Array.isArray(data.windows)) throw new ToolError("Malformed Cua window roster");
+		return data.windows
+			.map(value => {
+				const row = object(value, "window");
+				const window = {
+					id: String(number(row.window_id, "window_id")),
+					pid: number(row.pid, "pid"),
+					app: string(row.app_name, "app_name"),
+					title: string(row.title, "title"),
+					bounds: bounds(row.bounds),
+					onScreen: typeof row.is_on_screen === "boolean" ? row.is_on_screen : undefined,
+				};
+				windowArgs(window);
+				return Object.freeze(window);
+			})
+			.filter(
+				window =>
+					(selector.id === undefined || window.id === selector.id) &&
+					(selector.pid === undefined || window.pid === selector.pid) &&
+					(selector.app === undefined || window.app.toLowerCase().includes(selector.app.toLowerCase())) &&
+					(selector.title === undefined || window.title.toLowerCase().includes(selector.title.toLowerCase())),
+			);
+	}
+	async #windows(selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
+		const { data } = await this.#call("list_windows", {});
+		return this.#windowRoster(data, selector);
+	}
+	async #window(selector: string | WindowSelector): Promise<ComputerWindowIdentity> {
+		const filter = typeof selector === "string" ? { id: selector } : selector;
+		let matches = await this.#windows(filter);
+		const pid = matches[0]?.pid;
+		if (filter.id === undefined && matches.length > 1 && matches.every(window => window.pid === pid)) {
+			// WindowServer can include invisible app helpers. Only a complete,
+			// exact AXWindows mapping may narrow a broad selector; visibility,
+			// title, size and stacking order are not evidence of window ownership.
+			const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
+			const roster = this.#windowRoster(data, { pid });
+			matches = this.#windowRoster(data, filter).filter(window => window.pid === pid);
+			const metadata = data.accessibility_windows;
+			if (metadata !== undefined) {
+				const ax = object(metadata, "accessibility window metadata");
+				if (ax.pid !== pid) throw new ToolError("Mismatched Cua accessibility window process");
+				if (ax.complete === true) {
+					if (!Array.isArray(ax.windows)) throw new ToolError("Malformed Cua accessibility window roster");
+					const ids = new Set(
+						ax.windows.map(value => {
+							const row = object(value, "accessibility window");
+							const id = number(row.window_id, "accessibility window_id");
+							if (!Number.isInteger(id) || id <= 0 || id > 0xffff_ffff || row.role !== "AXWindow")
+								throw new ToolError("Malformed Cua accessibility window identity");
+							return String(id);
+						}),
+					);
+					// AX and CG are sequential snapshots. Missing CG identities mean
+					// the mapping cannot safely disambiguate this acquisition.
+					if (ids.size && [...ids].every(id => roster.some(window => window.id === id))) {
+						const applicationWindows = matches.filter(window => ids.has(window.id));
+						if (applicationWindows.length) matches = applicationWindows;
+					}
+				}
+			}
+		}
+		if (matches.length !== 1)
+			throw new ToolError(
+				`${matches.length ? "Ambiguous" : "Missing"} computer window ${JSON.stringify(selector)}: ${JSON.stringify(matches)}`,
+			);
+		return matches[0]!;
+	}
+	#current(window: Pick<ComputerWindowIdentity, "id" | "pid">): Promise<ComputerWindowIdentity> {
+		return this.#window({ id: window.id, pid: window.pid });
+	}
+	windows(context: Context, selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
+		return this.#schedule(context, "windows", false, () => this.#windows(selector));
+	}
+	window(context: Context, selector: string | WindowSelector): Promise<ComputerWindowIdentity> {
+		return this.#schedule(context, "window", false, () => this.#window(selector));
+	}
+	apps(context: Context): Promise<unknown> {
+		return this.#schedule(context, "apps", false, async () => (await this.#call("list_apps", {})).data);
+	}
+	displays(context: Context): Promise<DesktopDisplay[]> {
+		return this.#schedule(context, "displays", false, async () => {
+			const display = await this.#primaryDisplay();
+			if (!display) unsupported("display identity is unavailable in this SDK");
+			return [
+				{
+					id: display.uuid,
+					name: "Primary display",
+					...display.bounds,
+					scale: display.scale,
+					pixelX: 0,
+					pixelY: 0,
+					pixelWidth: Math.round(display.bounds.width * display.scale),
+					pixelHeight: Math.round(display.bounds.height * display.scale),
+					isPrimary: true,
+				},
+			];
+		});
+	}
+	focusedWindow(context: Context): Promise<ComputerWindowIdentity | null> {
+		return this.#schedule(context, "focusedWindow", false, async () =>
+			unsupported("focusedWindow; stacking order does not prove keyboard focus"),
+		);
+	}
+	#invalidate(window: Pick<ComputerWindowIdentity, "id" | "pid">): void {
+		for (const [ref, binding] of this.#elements)
+			if (binding.window.id === window.id && binding.window.pid === window.pid) this.#elements.delete(ref);
+	}
+	#binding(ref: string, window?: ComputerWindowIdentity): Binding {
+		const binding = this.#elements.get(ref);
+		if (this.#closed || !binding) throw new ToolError("StaleRef: observe the window again");
+		if (window && (binding.window.id !== window.id || binding.window.pid !== window.pid))
+			throw new ToolError("WrongWindow: element belongs to a different PID/window");
+		return binding;
+	}
+	element(ref: string, window?: ComputerWindowIdentity): ComputerElementSnapshot {
+		return this.#binding(ref, window).element;
+	}
+	elementWindow(ref: string): ComputerWindowIdentity {
+		return this.#binding(ref).window;
+	}
+
+	observe(
+		context: Context,
+		window: ComputerWindowIdentity,
+		options: ObserveOptions = {},
+	): Promise<ComputerObservation> {
+		return this.#schedule(context, "observe", false, async () => {
+			const { reply, current } = await this.#state(context, window, {
+				include_accessibility_tree: true,
+				include_screenshot: options.screenshot === true,
+				max_depth: options.maxDepth,
+				max_elements: options.maxElements,
+				query: options.query,
+			});
+			if (!Array.isArray(reply.data.elements)) throw new ToolError("Malformed Cua elements");
+			// A real window can have no matching AXWindow at all (canvas/custom UI).
+			// Preserve visual access without fabricating an actionable SDK snapshot.
+			const snapshotId = typeof reply.data.snapshot_id === "string" ? reply.data.snapshot_id : "unavailable";
+			if (snapshotId === "unavailable" && reply.data.elements.length)
+				throw new ToolError("Cua elements have no snapshot identity");
+			const rows: { depth: number; element: ComputerElementSnapshot }[] = [];
+			for (const value of reply.data.elements) {
+				const row = object(value, "element");
+				const token = string(row.element_token, "element_token");
+				const ref = `${this.#generation}/${crypto.randomUUID()}`;
+				if (row.background_actions != null && !Array.isArray(row.background_actions))
+					throw new ToolError("Malformed Cua background actions");
+				const actions = row.background_actions ?? row.actions;
+				const element = Object.freeze({
+					ref,
+					pid: current.pid,
+					windowId: current.id,
+					role: string(row.role, "role"),
+					label: typeof row.label === "string" ? row.label : "",
+					...(typeof row.value === "string" ? { value: row.value } : {}),
+					...(typeof row.placeholder === "string" ? { placeholder: row.placeholder } : {}),
+					...(typeof row.enabled === "boolean" ? { enabled: row.enabled } : {}),
+					...(typeof row.selected === "boolean" ? { selected: row.selected } : {}),
+					...(Array.isArray(actions) ? { actions: observedSemanticActions(actions) } : {}),
+					...(row.frame ? { bounds: bounds(row.frame) } : {}),
+				});
+				this.#elements.set(ref, {
+					window: current,
+					token,
+					snapshotId,
+					element,
+					doubleClickAtCenter: reply.data.element_double_click === "left_center_v1",
+				});
+				rows.push({
+					depth: typeof row.depth === "number" ? Math.max(0, Math.min(50, Math.floor(row.depth))) : 0,
+					element,
+				});
+			}
+			const observation: ComputerObservation = {
+				snapshotId,
+				window: current,
+				elements: rows.map(row => row.element),
+				complete:
+					reply.data.elements_complete === true &&
+					reply.data.ax_walk_timed_out !== true &&
+					reply.data.ax_walk_stop_reason == null,
+				backgroundInput: reply.data.background_input ?? null,
+				relatedWindows: relatedWindows(reply.data.related_windows),
+				tree: rows
+					.map(
+						({ depth, element }) =>
+							`${"  ".repeat(depth)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
+					)
+					.join("\n"),
+			};
+			if (!rows.length)
+				observation.tree =
+					typeof reply.data.degraded_reason === "string"
+						? reply.data.degraded_reason
+						: "No accessibility elements returned; completeness is unknown.";
+			if (observation.relatedWindows?.length)
+				observation.tree += `\nAttached sheets: ${JSON.stringify(observation.relatedWindows)}`;
+			if (reply.data.ax_walk_timed_out === true)
+				observation.tree +=
+					"\nAccessibility observation reached its time limit. The walk has finished; omitted controls and values remain unknown.";
+			else if (reply.data.ax_walk_stop_reason != null)
+				observation.tree +=
+					"\nAccessibility observation stopped because a native request could not complete. The walk has finished; omitted controls and values remain unknown.";
+			if (options.screenshot) {
+				try {
+					observation.screenshot = await this.#windowImage(context, current, reply, options.silent === true);
+				} catch (error) {
+					throwIfAborted(context.signal);
+					observation.screenshotError = error instanceof Error ? error.message : String(error);
+				}
+			}
+			return observation;
+		});
+	}
+	async #state(
+		context: Context,
+		window: ComputerWindowIdentity,
+		args: Wire,
+	): Promise<{ reply: Reply; current: ComputerWindowIdentity }> {
+		// Cua keeps one rendering lease per session. A screenshot request may stop
+		// the previous window's stream even when the new capture fails.
+		if (args.include_screenshot === true) this.#frames.clear();
+		else this.#frames.delete(window.id);
+		if (args.include_accessibility_tree !== false) this.#invalidate(window);
+		const current = await this.#current(window);
+		throwIfAborted(context.signal);
+		const reply = await this.#call("get_window_state", { ...windowArgs(current), ...args });
+		if (reply.data.pid !== current.pid || String(reply.data.window_id) !== current.id)
+			throw new ToolError("WrongWindow: Cua observation identity mismatch");
+		const after = await this.#current(current);
+		if (!sameBounds(current.bounds, after.bounds))
+			throw new ToolError("StaleFrame: window geometry changed during observation");
+		return { reply, current: after };
+	}
+	async #saveImage(
+		context: Context,
+		reply: Reply,
+		target: string,
+		silent: boolean,
+		label?: string,
+	): Promise<ComputerImage> {
+		if (reply.result.images.length !== 1) throw new ToolError("Screenshot unavailable or ambiguous");
+		const source = reply.result.images[0]!;
+		const width = number(reply.data.screenshot_width, "screenshot_width");
+		const height = number(reply.data.screenshot_height, "screenshot_height");
+		const resized = await resizeImage(
+			{ type: "image", data: source.dataBase64, mimeType: source.mimeType },
+			{ maxWidth: context.maxWidth, maxHeight: context.maxHeight, minDimension: 1, excludeWebP: true },
+		);
+		if (resized.decodeFailed || resized.originalWidth !== width || resized.originalHeight !== height)
+			throw new ToolError("Screenshot dimensions do not match its SDK coordinate frame");
+		const destination = path.join(
+			os.tmpdir(),
+			`omp-computer-${crypto.randomUUID()}.${resized.mimeType === "image/png" ? "png" : "jpg"}`,
+		);
+		await Bun.write(destination, resized.buffer);
+		throwIfAborted(context.signal);
+		const image = Object.freeze({
+			path: destination,
+			width: resized.width,
+			height: resized.height,
+			sourceWidth: width,
+			sourceHeight: height,
+			target,
+			...(label ? { label } : {}),
+		});
+		context.emitImage(image, { type: "image", data: resized.data, mimeType: resized.mimeType }, silent);
+		return image;
+	}
+	async #windowImage(
+		context: Context,
+		window: ComputerWindowIdentity,
+		reply: Reply,
+		silent: boolean,
+	): Promise<ComputerImage> {
+		if (reply.data.screenshot_frame_valid !== true) {
+			const failure = reply.data.screenshot_error;
+			if (failure && typeof failure === "object" && !Array.isArray(failure)) {
+				const details = failure as Wire;
+				if (typeof details.code === "string" && typeof details.reason === "string")
+					throw new ToolError(`${details.code}: ${details.reason}`);
+			}
+			throw new ToolError("Screenshot unavailable: Cua did not provide a valid image");
+		}
+		if (!sameBounds(bounds(reply.data.window_bounds), window.bounds))
+			throw new ToolError("StaleFrame: Cua did not provide a valid matching screenshot frame");
+		const image = await this.#saveImage(
+			context,
+			reply,
+			window.id,
+			silent,
+			`${window.app}: ${window.title || "Untitled window"}`,
+		);
+		this.#frames.set(window.id, {
+			window,
+			image,
+			sdkWidth: number(reply.data.screenshot_width, "screenshot_width"),
+			sdkHeight: number(reply.data.screenshot_height, "screenshot_height"),
+		});
+		return image;
+	}
+	captureWindow(
+		context: Context,
+		window: ComputerWindowIdentity,
+		options: { silent?: boolean } = {},
+	): Promise<ComputerImage> {
+		return this.#schedule(context, "captureWindow", false, async () => {
+			const { current, reply } = await this.#state(context, window, {
+				include_accessibility_tree: false,
+				include_screenshot: true,
+			});
+			return this.#windowImage(context, current, reply, options.silent === true);
+		});
+	}
+	#target(window: ComputerWindowIdentity, target?: ComputerTarget): Wire {
+		if (typeof target === "string") {
+			const ref = this.#binding(target, window);
+			return { ...windowArgs(window), element_token: ref.token, snapshot_id: ref.snapshotId };
+		}
+		if (!target) return windowArgs(window);
+		const frame = this.#frames.get(window.id);
+		if (!frame || frame.window.pid !== window.pid || !sameBounds(frame.window.bounds, window.bounds)) {
+			this.#frames.delete(window.id);
+			throw new ToolError("StaleFrame: capture the exact window again before a pixel action");
+		}
+		const [x, y] = target;
+		if (
+			!Number.isFinite(x) ||
+			!Number.isFinite(y) ||
+			x < 0 ||
+			y < 0 ||
+			x >= frame.image.width ||
+			y >= frame.image.height
+		)
+			throw new ToolError("InvalidCoordinates: point is outside the observed window image");
+		return {
+			...windowArgs(window),
+			x: (x * frame.sdkWidth) / frame.image.width,
+			y: (y * frame.sdkHeight) / frame.image.height,
+		};
+	}
+	async #action(name: string, args: Wire): Promise<ComputerActionResult> {
+		const { result, data } = await this.#call(name, args);
+		return {
+			text: result.text,
+			effect: typeof data.effect === "string" ? data.effect : "unverifiable",
+			evidence: data.evidence ?? null,
+			route: typeof data.route === "string" ? data.route : typeof data.path === "string" ? data.path : "cua-sdk",
+			delivery: data.delivery ?? args.delivery_mode ?? "background",
+			data,
+		};
+	}
+	#targetAction(
+		context: Context,
+		name: string,
+		window: ComputerWindowIdentity,
+		target: ComputerTarget | undefined,
+		args: Wire,
+	): Promise<ComputerActionResult> {
+		return this.#schedule(context, name, true, async () => {
+			const current = await this.#current(window);
+			throwIfAborted(context.signal);
+			return this.#action(name, { ...this.#target(current, target), ...args });
+		});
+	}
+	click(
+		context: Context,
+		window: ComputerWindowIdentity,
+		target: ComputerTarget,
+		options: ActionOptions = {},
+	): Promise<ComputerActionResult> {
+		return this.#schedule(context, "click", true, async () => {
+			const current = await this.#current(window);
+			throwIfAborted(context.signal);
+			if (typeof target === "string") {
+				const binding = this.#binding(target, current);
+				const supportedDouble =
+					binding.doubleClickAtCenter && options.count === 2 && (options.button ?? "left") === "left";
+				if (options.modifiers?.length || ((options.count ?? 1) !== 1 && !supportedDouble))
+					unsupported("counted or modified element click on this SDK; use a fresh screenshot and pixel target");
+			}
+			return this.#action("click", {
+				...this.#target(current, target),
+				...delivery(options),
+				button: options.button,
+				count: options.count,
+				modifier: options.modifiers,
+			});
+		});
+	}
+	type(
+		context: Context,
+		window: ComputerWindowIdentity,
+		text: string,
+		target?: ComputerTarget,
+		options: ActionOptions = {},
+	): Promise<ComputerActionResult> {
+		return this.#targetAction(context, "type_text", window, target, { text, ...delivery(options) });
+	}
+	setValue(
+		context: Context,
+		window: ComputerWindowIdentity,
+		ref: string,
+		value: string,
+	): Promise<ComputerActionResult> {
+		return this.#targetAction(context, "set_value", window, ref, { value });
+	}
+	press(
+		context: Context,
+		window: ComputerWindowIdentity,
+		chord: string | string[],
+		target?: ComputerTarget,
+		options: ActionOptions = {},
+	): Promise<ComputerActionResult> {
+		const keys = chordKeys(chord);
+		return this.#targetAction(context, keys.length === 1 ? "press_key" : "hotkey", window, target, {
+			...(keys.length === 1 ? { key: keys[0] } : { keys }),
+			...delivery(options),
+		});
+	}
+	perform(
+		context: Context,
+		window: ComputerWindowIdentity,
+		ref: string,
+		action: string,
+	): Promise<ComputerActionResult> {
+		if (!["press", "show_menu", "pick", "confirm", "cancel", "open"].includes(action))
+			unsupported(`AX action '${action}'`);
+		return this.#targetAction(context, "click", window, ref, { action, delivery_mode: "background" });
+	}
+	hover(
+		context: Context,
+		_window: ComputerWindowIdentity,
+		_x: number,
+		_y: number,
+		_options: ActionOptions = {},
+	): Promise<ComputerActionResult> {
+		return this.#schedule(context, "hover", true, async () =>
+			unsupported("window hover; move_cursor only moves an overlay in window scope"),
+		);
+	}
+	drag(
+		context: Context,
+		window: ComputerWindowIdentity,
+		from: [number, number],
+		to: [number, number],
+		options: ActionOptions & { durationMs?: number; steps?: number } = {},
+	): Promise<ComputerActionResult> {
+		return this.#schedule(context, "drag", true, async () => {
+			if (options.delivery !== "foreground") unsupported("background drag on macOS Cua; no input was sent");
+			if (
+				options.durationMs !== undefined &&
+				(!Number.isInteger(options.durationMs) || options.durationMs < 0 || options.durationMs > 10000)
+			)
+				throw new ToolError("Drag durationMs must be an integer from 0 to 10000");
+			if (
+				options.steps !== undefined &&
+				(!Number.isInteger(options.steps) || options.steps < 1 || options.steps > 200)
+			)
+				throw new ToolError("Drag steps must be an integer from 1 to 200");
+			const current = await this.#current(window);
+			const start = this.#target(current, from);
+			const end = this.#target(current, to);
+			throwIfAborted(context.signal);
+			return this.#action("drag", {
+				...windowArgs(current),
+				from_x: start.x,
+				from_y: start.y,
+				to_x: end.x,
+				to_y: end.y,
+				duration_ms: options.durationMs,
+				steps: options.steps,
+				modifier: options.modifiers,
+				button: options.button,
+				...delivery(options),
+			});
+		});
+	}
+	scroll(
+		context: Context,
+		window: ComputerWindowIdentity,
+		direction: "up" | "down" | "left" | "right",
+		target?: ComputerTarget,
+		options: ActionOptions & { amount?: number; by?: "line" | "page" } = {},
+	): Promise<ComputerActionResult> {
+		return this.#targetAction(context, "scroll", window, target, {
+			direction,
+			amount: options.amount,
+			by: options.by,
+			...delivery(options),
+		});
+	}
+	setFrame(context: Context, window: ComputerWindowIdentity, frame: ComputerBounds): Promise<ComputerActionResult> {
+		return this.#schedule(context, "setFrame", true, async () => {
+			const current = await this.#current(window);
+			this.#frames.delete(window.id);
+			this.#invalidate(window);
+			throwIfAborted(context.signal);
+			return this.#action("set_window_frame", {
+				...windowArgs(current),
+				x: frame.x,
+				y: frame.y,
+				width: frame.width,
+				height: frame.height,
+			});
+		});
+	}
+	menu(
+		context: Context,
+		window: ComputerWindowIdentity,
+		menuPath: string[],
+		options: ActionOptions = {},
+	): Promise<ComputerActionResult> {
+		return this.#schedule(context, "menu", true, async () => {
+			foreground(options);
+			const current = await this.#current(window);
+			throwIfAborted(context.signal);
+			return this.#action("invoke_menu", { ...windowArgs(current), path: menuPath });
+		});
+	}
+	verify(
+		context: Context,
+		window: Pick<ComputerWindowIdentity, "id" | "pid">,
+		expect: Record<string, unknown>[],
+		options: { timeoutMs?: number; stableSamples?: number } = {},
+	): Promise<VerificationResult> {
+		return this.#schedule(context, "verify", false, async () => {
+			windowArgs(window);
+			this.#invalidate(window);
+			this.#frames.delete(window.id);
+			const { data } = await this.#call("verify_state", {
+				...windowArgs(window),
+				expect,
+				timeout_ms: options.timeoutMs,
+				stable_samples: options.stableSamples,
+				include_screenshot: false,
+			});
+			const status = (value: unknown): VerificationStatus => {
+				if (value !== "satisfied" && value !== "unsatisfied" && value !== "unknown")
+					throw new ToolError("Malformed Cua verification status");
+				return value;
+			};
+			if (typeof data.stable !== "boolean" || !Array.isArray(data.predicates))
+				throw new ToolError("Malformed Cua verification");
+			return {
+				status: status(data.status),
+				stable: data.stable,
+				elapsed_ms: number(data.elapsed_ms, "elapsed_ms"),
+				samples: number(data.samples, "samples"),
+				predicates: data.predicates.map(value => {
+					const row = object(value, "predicate outcome");
+					return {
+						index: number(row.index, "predicate index"),
+						status: status(row.status),
+						unknown_reason: row.unknown_reason === null ? null : string(row.unknown_reason, "unknown_reason"),
+						observed_json: row.observed_json === null ? null : string(row.observed_json, "observed_json"),
+					};
+				}),
+			};
+		});
+	}
+	raise(context: Context, window: ComputerWindowIdentity): Promise<ComputerActionResult> {
+		return this.#schedule(context, "raise", true, async () => {
+			const current = await this.#current(window);
+			throwIfAborted(context.signal);
+			return this.#action("bring_to_front", windowArgs(current));
+		});
+	}
+	screenshot(context: Context, options: { silent?: boolean } = {}): Promise<ComputerImage> {
+		return this.#schedule(context, "screenshot", false, async () => {
+			this.#desktopFrame = undefined;
+			const before = await this.#primaryDisplay();
+			throwIfAborted(context.signal);
+			const reply = await this.#call("get_desktop_state", {});
+			const captured = primaryDisplay(reply.data, true);
+			const after = await this.#primaryDisplay();
+			if (before || captured || after) {
+				if (!before || !captured || !after || !sameDisplay(before, captured) || !sameDisplay(captured, after))
+					throw new ToolError("StaleFrame: primary display identity/geometry changed during capture");
+				if (
+					reply.data.screenshot_width !== Math.round(captured.bounds.width * captured.scale) ||
+					reply.data.screenshot_height !== Math.round(captured.bounds.height * captured.scale)
+				)
+					throw new ToolError("StaleFrame: primary screenshot dimensions do not match the display geometry");
+			}
+			const image = await this.#saveImage(context, reply, "primary", options.silent === true);
+			if (captured) this.#desktopFrame = { display: captured, image };
+			return image;
+		});
+	}
+	async #primaryDisplay(): Promise<PrimaryDisplay | undefined> {
+		return primaryDisplay((await this.#call("get_screen_size", {})).data);
+	}
+	async #desktopPoints(context: Context, points: [number, number][]): Promise<{ x: number; y: number }[]> {
+		const frame = this.#desktopFrame;
+		if (!frame)
+			throw new ToolError(
+				"MissingFrame: capture the primary desktop with an SDK that reports display identity before coordinate input",
+			);
+		try {
+			const current = await this.#primaryDisplay();
+			if (!current || !sameDisplay(frame.display, current))
+				throw new ToolError("StaleFrame: primary display identity/geometry changed; capture it again");
+		} catch (error) {
+			this.#desktopFrame = undefined;
+			throw error;
+		}
+		throwIfAborted(context.signal);
+		return points.map(([x, y]) => {
+			if (
+				!Number.isFinite(x) ||
+				!Number.isFinite(y) ||
+				x < 0 ||
+				y < 0 ||
+				x >= frame.image.width ||
+				y >= frame.image.height
+			)
+				throw new ToolError("InvalidCoordinates: point is outside the observed primary desktop image");
+			return {
+				x: (x * frame.image.sourceWidth) / frame.image.width,
+				y: (y * frame.image.sourceHeight) / frame.image.height,
+			};
+		});
+	}
+	desktopClick(context: Context, x: number, y: number, options: ActionOptions = {}): Promise<ComputerActionResult> {
+		return this.#schedule(context, "desktopClick", true, async () => {
+			foreground(options);
+			if (options.count !== undefined && (!Number.isSafeInteger(options.count) || options.count < 1))
+				throw new ToolError("Click count must be a positive integer");
+			const [point] = await this.#desktopPoints(context, [[x, y]]);
+			return this.#action("click", {
+				scope: "desktop",
+				...point,
+				button: options.button,
+				count: options.count,
+				modifier: options.modifiers,
+				delivery_mode: "foreground",
+			});
+		});
+	}
+	desktopMove(context: Context, x: number, y: number, options: ActionOptions = {}): Promise<ComputerActionResult> {
+		return this.#schedule(context, "desktopMove", true, async () => {
+			foreground(options);
+			const [point] = await this.#desktopPoints(context, [[x, y]]);
+			const result = await this.#action("move_cursor", { scope: "desktop", ...point });
+			return { ...result, delivery: "foreground" };
+		});
+	}
+	desktopDrag(
+		context: Context,
+		points: [number, number][],
+		options: ActionOptions = {},
+	): Promise<ComputerActionResult> {
+		return this.#schedule(context, "desktopDrag", true, async () => {
+			foreground(options);
+			if (points.length !== 2)
+				unsupported("desktop drag with anything other than two points; the SDK cannot preserve a multi-point path");
+			const [start, end] = await this.#desktopPoints(context, points);
+			return this.#action("drag", {
+				scope: "desktop",
+				from_x: start!.x,
+				from_y: start!.y,
+				to_x: end!.x,
+				to_y: end!.y,
+				modifier: options.modifiers,
+				button: options.button,
+				delivery_mode: "foreground",
+			});
+		});
+	}
+	desktopScroll(
+		context: Context,
+		x: number,
+		y: number,
+		options: { dx?: number; dy?: number; delivery?: "background" | "foreground" } = {},
+	): Promise<ComputerActionResult> {
+		return this.#schedule(context, "desktopScroll", true, async () => {
+			foreground(options);
+			const dx = options.dx ?? 0;
+			const dy = options.dy ?? 0;
+			if (!Number.isFinite(dx) || !Number.isFinite(dy) || (dx !== 0 && dy !== 0))
+				unsupported("desktop scroll must use one finite axis per action");
+			const delta = dx || dy;
+			if (delta === 0)
+				return {
+					text: "Zero scroll delta; no input dispatched.",
+					effect: "unchanged",
+					evidence: null,
+					route: "no-op",
+					delivery: "foreground",
+				};
+			if (delta % 120 !== 0 || Math.abs(delta) > 6000)
+				unsupported("desktop scroll deltas must be multiples of 120 pixels, up to 6000, matching SDK line notches");
+			const [point] = await this.#desktopPoints(context, [[x, y]]);
+			return this.#action("scroll", {
+				scope: "desktop",
+				...point,
+				direction: dx ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up",
+				amount: Math.abs(delta) / 120,
+				by: "line",
+				delivery_mode: "foreground",
+			});
+		});
+	}
+	desktopType(context: Context, text: string, options: ActionOptions = {}): Promise<ComputerActionResult> {
+		return this.#schedule(context, "desktopType", true, async () => {
+			foreground(options);
+			return this.#action("type_text", { scope: "desktop", text, delivery_mode: "foreground" });
+		});
+	}
+	desktopPress(
+		context: Context,
+		chord: string | string[],
+		options: ActionOptions = {},
+	): Promise<ComputerActionResult> {
+		return this.#schedule(context, "desktopPress", true, async () => {
+			foreground(options);
+			const keys = chordKeys(chord);
+			return this.#action(keys.length === 1 ? "press_key" : "hotkey", {
+				scope: "desktop",
+				...(keys.length === 1 ? { key: keys[0] } : { keys }),
+				delivery_mode: "foreground",
+			});
+		});
+	}
+	clipboardRead(context: Context): Promise<string> {
+		return this.#schedule(context, "clipboardRead", false, async () => {
+			const { data } = await this.#call("clipboard_read", { include_text: true });
+			return string(data.text, "clipboard text (clipboard may contain no plain text)");
+		});
+	}
+	clipboardWrite(context: Context, text: string): Promise<ComputerActionResult> {
+		return this.#schedule(context, "clipboardWrite", true, () => this.#action("clipboard_write", { text }));
+	}
+	launch(context: Context, options: ComputerLaunchOptions): Promise<ComputerActionResult> {
+		return this.#schedule(context, "launch", true, () =>
+			this.#action("launch_app", {
+				bundle_id: options.bundleId,
+				name: options.name,
+				urls: options.urls,
+				creates_new_application_instance: options.newInstance,
+			}),
+		);
+	}
+	async drain(): Promise<void> {
+		await this.#tail;
+		await this.#interruption;
+	}
+	close(): Promise<void> {
+		if (this.#closing) return this.#closing;
+		this.#closed = true;
+		this.#closing = (async () => {
+			await this.#tail;
+			try {
+				await (this.#interruption ?? withFileLock(this.#inputLock, () => this.#driver.shutdown()));
+			} finally {
+				this.#driver.uniffiDestroy();
+				this.#elements.clear();
+				this.#frames.clear();
+				this.#desktopFrame = undefined;
+			}
+		})();
+		return this.#closing;
+	}
+}

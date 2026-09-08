@@ -1,20 +1,22 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import * as os from "node:os";
-import * as path from "node:path";
 
+import type { DesktopCapabilities, DesktopDisplay } from "@oh-my-pi/pi-natives";
 import type {
-	AxNode,
-	AxQuery,
-	AxSnapshotOptions,
-	DesktopCapabilities,
-	DesktopDisplay,
-	DesktopPoint,
-	DesktopSessionOptions,
-	DesktopWindow,
-	PointerOptions,
-} from "@oh-my-pi/pi-natives";
+	ActionOptions,
+	ComputerActionResult,
+	ComputerBounds,
+	ComputerElementSnapshot,
+	ComputerImage,
+	ComputerLaunchOptions,
+	ComputerObservation,
+	ComputerTarget,
+	ComputerWindowIdentity,
+	ComputerWindowAcquisition,
+	ComputerOperationContext,
+	ObserveOptions,
+	WindowSelector,
+} from "./types";
 import * as postmortem from "@oh-my-pi/pi-utils/postmortem";
-import { Snowflake } from "@oh-my-pi/pi-utils/snowflake";
 import { JsRuntime, type RuntimeHooks } from "../../eval/js/shared/runtime";
 import { cloneSafe, RunOutput } from "../browser/run-output";
 import {
@@ -25,6 +27,7 @@ import {
 	waitForRun,
 } from "../run-scope";
 import { ToolAbortError, ToolError, throwIfAborted } from "../tool-errors";
+import { normalizeLaunchOptions, normalizeWindowSelector } from "./selectors";
 import type {
 	ComputerScreenshot,
 	ComputerSessionSnapshot,
@@ -34,54 +37,166 @@ import type {
 	ToolReply,
 } from "./protocol";
 
-/** Native desktop operations consumed by the script runtime. */
-export interface NativeDesktopSession {
-	readonly capabilities: DesktopCapabilities;
-	listDisplays(): Promise<DesktopDisplay[]>;
-	listWindows(): Promise<DesktopWindow[]>;
-	capture(
-		target: string,
-		caps?: { maxWidth?: number; maxHeight?: number } | null,
-	): Promise<{
-		data: Uint8Array;
-		width: number;
-		height: number;
-		sourceWidth: number;
-		sourceHeight: number;
-		target: string;
+/** Observed verification evidence; unavailable state must remain unknown. */
+export interface ComputerVerificationResult {
+	status: "satisfied" | "unsatisfied" | "unknown";
+	stable: boolean;
+	elapsed_ms: number;
+	samples: number;
+	predicates: Array<{
+		index: number;
+		status: "satisfied" | "unsatisfied" | "unknown";
+		unknown_reason: string | null;
+		observed_json: string | null;
 	}>;
-	click(target: string, x: number, y: number, opts?: PointerOptions | null): Promise<void>;
-	moveMouse(target: string, x: number, y: number, opts?: PointerOptions | null): Promise<void>;
-	drag(target: string, points: DesktopPoint[], opts?: PointerOptions | null): Promise<void>;
-	scroll(target: string, x: number, y: number, dx: number, dy: number, opts?: PointerOptions | null): Promise<void>;
-	typeText(target: string, text: string, opts?: PointerOptions | null): Promise<void>;
-	keyChord(target: string, keys: string[], opts?: PointerOptions | null): Promise<void>;
-	raiseWindow(windowId: string): Promise<void>;
-	axSnapshot(target: string, opts?: AxSnapshotOptions | null): Promise<{ text: string }>;
-	axQuery(target: string, query: AxQuery): Promise<AxNode[]>;
-	axElementAt(target: string, x: number, y: number): Promise<AxNode | null | undefined>;
-	axFocused(): Promise<AxNode | null | undefined>;
-	axNode(ref: string): Promise<AxNode>;
-	axAttributes(ref: string): Promise<Array<[string, string]>>;
-	axChildren(ref: string): Promise<AxNode[]>;
-	axParent(ref: string): Promise<AxNode | null | undefined>;
-	axPerform(ref: string, action: string): Promise<void>;
-	axSetValue(ref: string, value: string): Promise<void>;
-	axFocus(ref: string): Promise<void>;
-	axClick(ref: string, opts?: PointerOptions | null): Promise<void>;
-	close(): Promise<void>;
 }
 
-/** Creates the native session co-located with the computer worker runtime. */
-export type NativeDesktopSessionFactory = (options: DesktopSessionOptions) => NativeDesktopSession;
+/**
+ * Computer operations exposed to the interpreter, independent of a driver class.
+ * Implementations own exact window/ref/frame validation and operation admission;
+ * unsupported capabilities reject without an alternate target or input replay.
+ */
+export interface ComputerBackend {
+	/** Interrupted runtimes are drained and replaced before another run. */
+	readonly requiresReacquisition?: boolean;
+	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
 
-type WindowFilter = { app?: string; title?: string };
-type DeliveryOptions = { delivery?: string };
-type ScreenshotOptions = { silent?: boolean };
-type ClickOptions = DeliveryOptions & { button?: string; count?: number; modifiers?: string[] };
-type DragOptions = DeliveryOptions & { modifiers?: string[] };
-type ScrollOptions = DeliveryOptions & { dx?: number; dy?: number };
-type AxOptions = Pick<AxSnapshotOptions, "all" | "maxDepth">;
+	apps(context: ComputerOperationContext): Promise<unknown>;
+	displays(context: ComputerOperationContext): Promise<DesktopDisplay[]>;
+	windows(context: ComputerOperationContext, selector?: WindowSelector): Promise<ComputerWindowIdentity[]>;
+	window(context: ComputerOperationContext, selector: string | WindowSelector): Promise<ComputerWindowIdentity>;
+	focusedWindow(context: ComputerOperationContext): Promise<ComputerWindowIdentity | null>;
+	element(ref: string, window?: ComputerWindowIdentity): ComputerElementSnapshot;
+	elementWindow(ref: string): ComputerWindowIdentity;
+	observe(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		options?: ObserveOptions,
+	): Promise<ComputerObservation>;
+	captureWindow(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		options?: { silent?: boolean },
+	): Promise<ComputerImage>;
+	screenshot(context: ComputerOperationContext, options?: { silent?: boolean }): Promise<ComputerImage>;
+	verify(
+		context: ComputerOperationContext,
+		window: Pick<ComputerWindowIdentity, "id" | "pid">,
+		expect: Record<string, unknown>[],
+		options?: { timeoutMs?: number; stableSamples?: number },
+	): Promise<ComputerVerificationResult>;
+
+	click(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		target: ComputerTarget,
+		options?: ActionOptions,
+	): Promise<ComputerActionResult>;
+	type(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		text: string,
+		target?: ComputerTarget,
+		options?: ActionOptions,
+	): Promise<ComputerActionResult>;
+	press(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		chord: string | string[],
+		target?: ComputerTarget,
+		options?: ActionOptions,
+	): Promise<ComputerActionResult>;
+	setValue(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		ref: string,
+		value: string,
+	): Promise<ComputerActionResult>;
+	perform(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		ref: string,
+		action: string,
+	): Promise<ComputerActionResult>;
+	hover(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		x: number,
+		y: number,
+		options?: ActionOptions,
+	): Promise<ComputerActionResult>;
+	drag(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		from: [number, number],
+		to: [number, number],
+		options?: ActionOptions & { durationMs?: number; steps?: number },
+	): Promise<ComputerActionResult>;
+	scroll(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		direction: "up" | "down" | "left" | "right",
+		target?: ComputerTarget,
+		options?: ActionOptions & { amount?: number; by?: "line" | "page" },
+	): Promise<ComputerActionResult>;
+	setFrame(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		frame: ComputerBounds,
+	): Promise<ComputerActionResult>;
+	menu(
+		context: ComputerOperationContext,
+		window: ComputerWindowIdentity,
+		menuPath: string[],
+		options?: ActionOptions,
+	): Promise<ComputerActionResult>;
+	raise(context: ComputerOperationContext, window: ComputerWindowIdentity): Promise<ComputerActionResult>;
+
+	desktopClick(
+		context: ComputerOperationContext,
+		x: number,
+		y: number,
+		options?: ActionOptions,
+	): Promise<ComputerActionResult>;
+	desktopMove(
+		context: ComputerOperationContext,
+		x: number,
+		y: number,
+		options?: ActionOptions,
+	): Promise<ComputerActionResult>;
+	desktopDrag(
+		context: ComputerOperationContext,
+		points: [number, number][],
+		options?: ActionOptions,
+	): Promise<ComputerActionResult>;
+	desktopScroll(
+		context: ComputerOperationContext,
+		x: number,
+		y: number,
+		options?: { dx?: number; dy?: number; delivery?: "background" | "foreground" },
+	): Promise<ComputerActionResult>;
+	desktopType(context: ComputerOperationContext, text: string, options?: ActionOptions): Promise<ComputerActionResult>;
+	desktopPress(
+		context: ComputerOperationContext,
+		chord: string | string[],
+		options?: ActionOptions,
+	): Promise<ComputerActionResult>;
+	clipboardRead(context: ComputerOperationContext): Promise<string>;
+	clipboardWrite(context: ComputerOperationContext, text: string): Promise<ComputerActionResult>;
+	launch(context: ComputerOperationContext, options: ComputerLaunchOptions): Promise<ComputerActionResult>;
+
+	/** Wait for all admitted driver operations, including work whose caller aborted. */
+	drain(): Promise<void>;
+	/** Stop admission, drain operations, and release driver resources once. */
+	close(): Promise<void>;
+}
+export type ComputerBackendFactory = (options: { display: string }) => Promise<ComputerBackend>;
+
+type GestureOptions = ActionOptions & { durationMs?: number; steps?: number };
+type TextOptions = ActionOptions & { target?: ComputerTarget };
+type ScrollOptions = TextOptions & { amount?: number; by?: "line" | "page" };
+type Direction = "up" | "down" | "left" | "right";
+type ElementQuery = { role?: string; label?: string; value?: string; limit?: number };
 
 type PendingTool = { resolve(value: unknown): void; reject(reason?: unknown): void };
 interface ActiveRun {
@@ -131,181 +246,95 @@ function nativeError(error: unknown): ToolError {
 	return new ToolError(error instanceof Error ? error.message : String(error));
 }
 
-async function nativeCall<T>(signal: AbortSignal, call: () => Promise<T>): Promise<T> {
-	throwIfAborted(signal);
-	try {
-		const value = await call();
-		throwIfAborted(signal);
-		return value;
-	} catch (error) {
-		if (error instanceof ToolAbortError) throw error;
-		throw nativeError(error);
-	}
-}
-
-function pointerOptions(options?: ClickOptions | DragOptions | DeliveryOptions): PointerOptions | undefined {
-	if (!options) return undefined;
-	const mapped: PointerOptions = {};
-	if ("button" in options && options.button !== undefined) mapped.button = options.button;
-	if ("count" in options && options.count !== undefined) mapped.count = options.count;
-	if ("modifiers" in options && options.modifiers !== undefined) mapped.modifiers = options.modifiers;
-	if (options.delivery !== undefined) mapped.deliveryMode = options.delivery;
-	return mapped;
-}
-
-function chordKeys(chord: string | string[]): string[] {
-	return typeof chord === "string"
-		? chord
-				.split("+")
-				.map(key => key.trim())
-				.filter(Boolean)
-		: chord;
-}
-
-function matchesFilter(window: DesktopWindow, filter?: WindowFilter): boolean {
-	if (!filter) return true;
-	const app = filter.app?.toLocaleLowerCase();
-	const title = filter.title?.toLocaleLowerCase();
-	return (
-		(!app || window.app.toLocaleLowerCase().includes(app)) &&
-		(!title || window.title.toLocaleLowerCase().includes(title))
-	);
-}
-
-function guardRun(context: ComputerRunContext, method: string): void {
-	if (context.readOnly) throw new ToolError(`read-only run: '${method}' requires read_only: false`);
-	throwIfAborted(context.signal);
-}
-
-async function captureScreenshot(
-	session: NativeDesktopSession,
-	getContext: RunContextAccessor,
-	target: string,
-	options?: ScreenshotOptions,
-): Promise<{ path: string; width: number; height: number }> {
+function operationContext(getContext: RunContextAccessor): ComputerOperationContext {
 	const context = getContext();
-	const frame = await nativeCall(context.signal, () =>
-		session.capture(target, {
-			maxWidth: context.snapshot.captureMaxWidth,
-			maxHeight: context.snapshot.captureMaxHeight,
-		}),
-	);
-	const destination = path.join(os.tmpdir(), `omp-computer-${Snowflake.next()}.png`);
-	await Bun.write(destination, frame.data);
-	const scaled = frame.width !== frame.sourceWidth || frame.height !== frame.sourceHeight;
-	context.screenshots.push({
-		path: destination,
-		width: frame.width,
-		height: frame.height,
-		sourceWidth: frame.sourceWidth,
-		sourceHeight: frame.sourceHeight,
-		target: frame.target,
-	});
-	if (!options?.silent) {
-		context.output.push({
-			type: "text",
-			text: scaled
-				? `screenshot ${frame.target} ${frame.width}×${frame.height} (scaled from ${frame.sourceWidth}×${frame.sourceHeight}) → ${destination}`
-				: `screenshot ${frame.target} ${frame.width}×${frame.height} → ${destination}`,
-		});
-		context.output.push({
-			type: "image",
-			data: Buffer.from(frame.data.buffer, frame.data.byteOffset, frame.data.byteLength).toString("base64"),
-			mimeType: "image/png",
-		});
-	}
-	return { path: destination, width: frame.width, height: frame.height };
+	throwIfAborted(context.signal);
+	return {
+		signal: context.signal,
+		readOnly: context.readOnly,
+		maxWidth: context.snapshot.captureMaxWidth,
+		maxHeight: context.snapshot.captureMaxHeight,
+		emitImage: (image, content, silent) => {
+			throwIfAborted(context.signal);
+			const screenshot: ComputerScreenshot = { ...image };
+			context.screenshots.push(screenshot);
+			if (!silent) {
+				context.output.push({
+					type: "text",
+					text: `screenshot ${image.target} ${image.width}×${image.height} → ${image.path}`,
+				});
+				screenshot.imageIndex = context.output.imageCount;
+				context.output.push(content);
+			}
+		},
+	};
+}
+
+function mutationContext(getContext: RunContextAccessor): ComputerOperationContext {
+	const context = operationContext(getContext);
+	if (context.readOnly) throw new ToolError("read-only run: computer mutation requires read_only: false");
+	return context;
 }
 
 class El {
 	readonly ref: string;
+	readonly pid: number;
+	readonly windowId: string;
 	readonly role: string;
-	readonly nativeRole: string;
-	readonly title?: string;
-	readonly description?: string;
-	readonly enabled: boolean;
-	readonly focused: boolean;
-	readonly childCount: number;
-	readonly #session: NativeDesktopSession;
+	readonly label: string;
+	readonly value?: string;
+	readonly placeholder?: string;
+	readonly enabled?: boolean;
+	readonly selected?: boolean;
+	readonly actions?: readonly string[];
+	readonly bounds?: ComputerBounds;
+	readonly #session: ComputerBackend;
 	readonly #getContext: RunContextAccessor;
+	readonly #window: ComputerWindowIdentity;
 
-	constructor(session: NativeDesktopSession, getContext: RunContextAccessor, node: AxNode) {
+	constructor(
+		session: ComputerBackend,
+		getContext: RunContextAccessor,
+		window: ComputerWindowIdentity,
+		snapshot: ComputerElementSnapshot,
+	) {
 		this.#session = session;
 		this.#getContext = getContext;
-		this.ref = node.ref;
-		this.role = node.role;
-		this.nativeRole = node.nativeRole;
-		this.title = node.title;
-		this.description = node.description;
-		this.enabled = node.enabled;
-		this.focused = node.focused;
-		this.childCount = node.childCount;
+		this.#window = Object.freeze({ ...window, bounds: Object.freeze({ ...window.bounds }) });
+		this.ref = snapshot.ref;
+		this.pid = window.pid;
+		this.windowId = window.id;
+		this.role = snapshot.role;
+		this.label = snapshot.label;
+		this.value = snapshot.value;
+		this.placeholder = snapshot.placeholder;
+		this.enabled = snapshot.enabled;
+		this.selected = snapshot.selected;
+		this.actions = snapshot.actions ? Object.freeze([...snapshot.actions]) : undefined;
+		this.bounds = snapshot.bounds ? Object.freeze({ ...snapshot.bounds }) : undefined;
+		Object.freeze(this);
 	}
 
-	async value(): Promise<string | undefined> {
-		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axNode(this.ref))).value;
+	click(options?: ActionOptions) {
+		return this.#session.click(mutationContext(this.#getContext), this.#window, this.ref, options);
 	}
-
-	async setValue(value: string): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "setValue");
-		await nativeCall(context.signal, () => this.#session.axSetValue(this.ref, value));
+	doubleClick(options?: ActionOptions) {
+		return this.click({ ...options, count: 2 });
 	}
-
-	async bounds(): Promise<{ x: number; y: number; width: number; height: number } | null> {
-		const { signal } = this.#getContext();
-		const node = await nativeCall(signal, () => this.#session.axNode(this.ref));
-		if (node.x === undefined || node.y === undefined || node.width === undefined || node.height === undefined)
-			return null;
-		return { x: node.x, y: node.y, width: node.width, height: node.height };
+	setValue(value: string) {
+		return this.#session.setValue(mutationContext(this.#getContext), this.#window, this.ref, value);
 	}
-
-	async attributes(): Promise<Record<string, string>> {
-		const { signal } = this.#getContext();
-		return Object.fromEntries(await nativeCall(signal, () => this.#session.axAttributes(this.ref)));
+	type(text: string, options?: ActionOptions) {
+		return this.#session.type(mutationContext(this.#getContext), this.#window, text, this.ref, options);
 	}
-
-	async actions(): Promise<string[]> {
-		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axNode(this.ref))).actions ?? [];
+	press(chord: string | string[], options?: ActionOptions) {
+		return this.#session.press(mutationContext(this.#getContext), this.#window, chord, this.ref, options);
 	}
-
-	async perform(action: string): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "perform");
-		await nativeCall(context.signal, () => this.#session.axPerform(this.ref, action));
+	scroll(direction: Direction, options?: ScrollOptions) {
+		return this.#session.scroll(mutationContext(this.#getContext), this.#window, direction, this.ref, options);
 	}
-
-	async press(): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "press");
-		await nativeCall(context.signal, () => this.#session.axPerform(this.ref, "press"));
-	}
-
-	async click(options?: DeliveryOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "click");
-		await nativeCall(context.signal, () => this.#session.axClick(this.ref, pointerOptions(options)));
-	}
-
-	async focus(): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "focus");
-		await nativeCall(context.signal, () => this.#session.axFocus(this.ref));
-	}
-
-	async parent(): Promise<El | null> {
-		const { signal } = this.#getContext();
-		const node = await nativeCall(signal, () => this.#session.axParent(this.ref));
-		return node ? new El(this.#session, this.#getContext, node) : null;
-	}
-
-	async children(): Promise<El[]> {
-		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axChildren(this.ref))).map(
-			node => new El(this.#session, this.#getContext, node),
-		);
+	perform(action: string) {
+		return this.#session.perform(mutationContext(this.#getContext), this.#window, this.ref, action);
 	}
 }
 
@@ -313,111 +342,91 @@ class Win {
 	readonly id: string;
 	readonly app: string;
 	readonly title: string;
-	readonly pid?: number;
-	readonly bounds: { x: number; y: number; width: number; height: number };
-	readonly focused: boolean;
-	readonly #session: NativeDesktopSession;
+	readonly pid: number;
+	readonly bounds: ComputerBounds;
+	readonly onScreen?: boolean;
+	readonly #session: ComputerBackend;
 	readonly #getContext: RunContextAccessor;
+	readonly #window: ComputerWindowIdentity;
 
-	constructor(session: NativeDesktopSession, getContext: RunContextAccessor, window: DesktopWindow) {
+	constructor(session: ComputerBackend, getContext: RunContextAccessor, window: ComputerWindowIdentity) {
 		this.#session = session;
 		this.#getContext = getContext;
 		this.id = window.id;
 		this.app = window.app;
 		this.title = window.title;
 		this.pid = window.pid;
-		this.bounds = { x: window.x, y: window.y, width: window.width, height: window.height };
-		this.focused = window.focused;
+		this.bounds = Object.freeze({ ...window.bounds });
+		this.onScreen = window.onScreen;
+		this.#window = Object.freeze({ ...window, bounds: this.bounds });
+		Object.freeze(this);
 	}
 
-	screenshot(options?: ScreenshotOptions): Promise<{ path: string; width: number; height: number }> {
-		return captureScreenshot(this.#session, this.#getContext, this.id, options);
+	observe(options?: ObserveOptions) {
+		return this.#session.observe(operationContext(this.#getContext), this.#window, { screenshot: true, ...options });
 	}
-
-	async click(x: number, y: number, options?: ClickOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "click");
-		await nativeCall(context.signal, () => this.#session.click(this.id, x, y, pointerOptions(options)));
+	screenshot(options?: { silent?: boolean }) {
+		return this.#session.captureWindow(operationContext(this.#getContext), this.#window, options);
 	}
-
-	async doubleClick(x: number, y: number, options?: Omit<ClickOptions, "count">): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "doubleClick");
-		await nativeCall(context.signal, () =>
-			this.#session.click(this.id, x, y, pointerOptions({ ...options, count: 2 })),
+	async find(query: ElementQuery = {}): Promise<El[]> {
+		const observation = await this.observe({ screenshot: false });
+		const matches = observation.elements.filter(
+			element =>
+				(query.role === undefined || element.role.toLowerCase().includes(query.role.toLowerCase())) &&
+				(query.label === undefined || element.label.toLowerCase().includes(query.label.toLowerCase())) &&
+				(query.value === undefined || element.value === query.value),
 		);
+		return matches
+			.slice(0, query.limit ?? 40)
+			.map(element => new El(this.#session, this.#getContext, this.#window, element));
 	}
-
-	async move(x: number, y: number): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "move");
-		await nativeCall(context.signal, () => this.#session.moveMouse(this.id, x, y));
+	ref(ref: string): El {
+		return new El(this.#session, this.#getContext, this.#window, this.#session.element(ref, this.#window));
 	}
-
-	async drag(points: Array<[number, number]>, options?: DragOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "drag");
-		await nativeCall(context.signal, () =>
-			this.#session.drag(
-				this.id,
-				points.map(([x, y]) => ({ x, y })),
-				pointerOptions(options),
-			),
-		);
+	click(target: ComputerTarget, options?: ActionOptions) {
+		return this.#session.click(mutationContext(this.#getContext), this.#window, target, options);
 	}
-
-	async scroll(x: number, y: number, options: ScrollOptions = {}): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "scroll");
-		await nativeCall(context.signal, () =>
-			this.#session.scroll(this.id, x, y, options.dx ?? 0, options.dy ?? 0, pointerOptions(options)),
-		);
+	doubleClick(target: ComputerTarget, options?: ActionOptions) {
+		return this.click(target, { ...options, count: 2 });
 	}
-
-	async type(text: string, options?: DeliveryOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "type");
-		await nativeCall(context.signal, () => this.#session.typeText(this.id, text, pointerOptions(options)));
+	hover(x: number, y: number, options?: ActionOptions) {
+		return this.#session.hover(mutationContext(this.#getContext), this.#window, x, y, options);
 	}
-
-	async press(chord: string | string[], options?: DeliveryOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "press");
-		await nativeCall(context.signal, () =>
-			this.#session.keyChord(this.id, chordKeys(chord), pointerOptions(options)),
-		);
+	drag(from: [number, number], to: [number, number], options?: GestureOptions) {
+		return this.#session.drag(mutationContext(this.#getContext), this.#window, from, to, options);
 	}
-
-	async raise(): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "raise");
-		await nativeCall(context.signal, () => this.#session.raiseWindow(this.id));
+	scroll(direction: Direction, options?: ScrollOptions) {
+		return this.#session.scroll(mutationContext(this.#getContext), this.#window, direction, options?.target, options);
 	}
-
-	async ax(options?: AxOptions): Promise<string> {
-		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axSnapshot(this.id, options))).text;
+	type(text: string, options?: TextOptions) {
+		return this.#session.type(mutationContext(this.#getContext), this.#window, text, options?.target, options);
 	}
-
-	async find(query: AxQuery): Promise<El[]> {
-		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axQuery(this.id, query))).map(
-			node => new El(this.#session, this.#getContext, node),
-		);
+	press(chord: string | string[], options?: TextOptions) {
+		return this.#session.press(mutationContext(this.#getContext), this.#window, chord, options?.target, options);
 	}
-
-	async ref(ref: string): Promise<El> {
-		const { signal } = this.#getContext();
-		return new El(this.#session, this.#getContext, await nativeCall(signal, () => this.#session.axNode(ref)));
+	setValue(ref: string, value: string) {
+		return this.#session.setValue(mutationContext(this.#getContext), this.#window, ref, value);
+	}
+	setFrame(frame: ComputerBounds) {
+		return this.#session.setFrame(mutationContext(this.#getContext), this.#window, frame);
+	}
+	menu(menuPath: string[], options?: ActionOptions) {
+		return this.#session.menu(mutationContext(this.#getContext), this.#window, menuPath, options);
+	}
+	verify(expect: Record<string, unknown>[], options?: { timeoutMs?: number; stableSamples?: number }) {
+		return this.#session.verify(operationContext(this.#getContext), this.#window, expect, options);
+	}
+	reveal() {
+		return this.#session.raise(mutationContext(this.#getContext), this.#window);
 	}
 }
 
 /** Hosts the persistent JavaScript runtime and native desktop session. */
 export class ComputerWorkerCore {
 	readonly #transport: ComputerWorkerTransport;
-	readonly #createSession?: NativeDesktopSessionFactory;
+	readonly #createSession?: ComputerBackendFactory;
 	readonly #unsubscribe: () => void;
-	#session?: NativeDesktopSession;
+	#session?: ComputerBackend;
 	#runtime?: JsRuntime;
 	#active: ActiveRun | null = null;
 	/**
@@ -427,8 +436,9 @@ export class ComputerWorkerCore {
 	 */
 	readonly #runContexts = new AsyncLocalStorage<ComputerRunContext>();
 	#closed = false;
+	#drainFailed = false;
 
-	constructor(transport: ComputerWorkerTransport, createSession?: NativeDesktopSessionFactory) {
+	constructor(transport: ComputerWorkerTransport, createSession?: ComputerBackendFactory) {
 		this.#transport = transport;
 		this.#createSession = createSession;
 		this.#unsubscribe = transport.onMessage(message => this.handle(message));
@@ -455,16 +465,21 @@ export class ComputerWorkerCore {
 		}
 	}
 
-	async #ensureSession(snapshot: ComputerSessionSnapshot): Promise<NativeDesktopSession> {
+	async #ensureSession(snapshot: ComputerSessionSnapshot): Promise<ComputerBackend> {
 		if (this.#session) return this.#session;
 		try {
-			// The worker must answer its readiness handshake without loading the native
-			// addon; normal CLI startup and selector pings never execute desktop code.
-			const createSession =
-				this.#createSession ?? (await import("@oh-my-pi/pi-natives/desktop")).createDesktopSession;
-			this.#session = createSession({ display: snapshot.display });
-			return this.#session;
+			// This module imports native libraries. Defer its initialization until approved
+			// use so the readiness handshake and ordinary CLI startup remain native-free.
+			const createSession = this.#createSession ?? (await import("./backend")).createComputerBackend;
+			const session = await createSession({ display: snapshot.display });
+			if (this.#closed) {
+				await session.close();
+				throw new ToolAbortError("Computer operation stopped");
+			}
+			this.#session = session;
+			return session;
 		} catch (error) {
+			if (error instanceof ToolAbortError) throw error;
 			throw nativeError(error);
 		}
 	}
@@ -476,12 +491,18 @@ export class ComputerWorkerCore {
 	}
 
 	async #run(message: Extract<ComputerWorkerInbound, { type: "run" }>): Promise<void> {
-		if (this.#closed) {
+		if (this.#closed || this.#drainFailed) {
 			this.#transport.send({
 				type: "result",
 				id: message.id,
 				ok: false,
-				error: errorPayload(new ToolError("Computer worker is closed")),
+				error: errorPayload(
+					new ToolError(
+						this.#drainFailed
+							? "Computer worker cannot be reused after input completion failed; restart computer control"
+							: "Computer worker is closed",
+					),
+				),
 			});
 			return;
 		}
@@ -571,6 +592,20 @@ export class ComputerWorkerCore {
 			failure = { error };
 		} finally {
 			runAc.abort(postmortem.markExpectedCleanupError(new ToolAbortError("Computer run ended")));
+			// A language cancellation must also drain the backend's native work.
+			// Keep this run busy until native work settles so a terminal abort result
+			// cannot be followed by residual input or a new overlapping action.
+			try {
+				await this.#session?.drain();
+				if (this.#session?.requiresReacquisition) {
+					await this.#session.close();
+					this.#session = undefined;
+				}
+			} catch (error) {
+				this.#drainFailed = true;
+				// Losing input completion is a failure even if an earlier cancel won the JS race.
+				failure = { error: nativeError(error) };
+			}
 			if (this.#active?.id === message.id) this.#active = null;
 		}
 		if (failure !== undefined) {
@@ -638,103 +673,91 @@ export class ComputerWorkerCore {
 		return context;
 	};
 
-	#createDesktopScope(session: NativeDesktopSession): object {
+	#createDesktopScope(session: ComputerBackend): object {
 		const getContext = this.#currentRunContext;
-		const makeWin = (window: DesktopWindow): Win => new Win(session, getContext, window);
-		const el = (node: AxNode): El => new El(session, getContext, node);
-		const desktopTarget = new Win(session, getContext, {
-			id: "desktop",
-			app: "desktop",
-			title: "desktop",
-			x: 0,
-			y: 0,
-			width: 0,
-			height: 0,
-			focused: false,
-		});
 		return {
 			capabilities: (): DesktopCapabilities => {
-				const { signal } = getContext();
-				throwIfAborted(signal);
+				throwIfAborted(getContext().signal);
+				return session.capabilities;
+			},
+			apps: () => session.apps(operationContext(getContext)),
+			displays: () => session.displays(operationContext(getContext)),
+			windows: (selector: unknown = {}) =>
+				session.windows(operationContext(getContext), normalizeWindowSelector(selector)),
+			window: async (selector: unknown): Promise<Win> =>
+				new Win(
+					session,
+					getContext,
+					await session.window(operationContext(getContext), normalizeWindowSelector(selector, true)),
+				),
+			acquireWindow: async (selector: unknown, options: ObserveOptions = {}): Promise<ComputerWindowAcquisition> => {
+				const context = operationContext(getContext);
+				const window = await session.window(context, normalizeWindowSelector(selector, true));
 				try {
-					return session.capabilities;
+					const initialObservation = await session.observe(context, window, { screenshot: true, ...options });
+					return { ...initialObservation.window, initialObservation };
 				} catch (error) {
-					throw nativeError(error);
-				}
-			},
-			displays: async (): Promise<DesktopDisplay[]> => {
-				const { signal } = getContext();
-				return await nativeCall(signal, () => session.listDisplays());
-			},
-			windows: async (filter?: WindowFilter): Promise<DesktopWindow[]> => {
-				const { signal } = getContext();
-				return (await nativeCall(signal, () => session.listWindows())).filter(window =>
-					matchesFilter(window, filter),
-				);
-			},
-			window: async (selector: string | WindowFilter): Promise<Win> => {
-				const { signal } = getContext();
-				const windows = await nativeCall(signal, () => session.listWindows());
-				const matches =
-					typeof selector === "string"
-						? windows.filter(window => window.id === selector)
-						: windows.filter(window => matchesFilter(window, selector));
-				if (matches.length === 0) throw new ToolError(`no window matches ${JSON.stringify(selector)}`);
-				if (matches.length > 1) {
-					const candidates = matches
-						.map(window => `${window.id} ${window.app} ${JSON.stringify(window.title)}`)
-						.join("\n");
-					throw new ToolError(`multiple windows match ${JSON.stringify(selector)}:\n${candidates}`);
-				}
-				return makeWin(matches[0]!);
-			},
-			focusedWindow: async (): Promise<Win | null> => {
-				const { signal } = getContext();
-				const window = (await nativeCall(signal, () => session.listWindows())).find(candidate => candidate.focused);
-				return window ? makeWin(window) : null;
-			},
-			screenshot: (options?: ScreenshotOptions) => captureScreenshot(session, getContext, "desktop", options),
-			click: desktopTarget.click.bind(desktopTarget),
-			doubleClick: desktopTarget.doubleClick.bind(desktopTarget),
-			move: desktopTarget.move.bind(desktopTarget),
-			drag: desktopTarget.drag.bind(desktopTarget),
-			scroll: desktopTarget.scroll.bind(desktopTarget),
-			type: desktopTarget.type.bind(desktopTarget),
-			press: desktopTarget.press.bind(desktopTarget),
-			elementAt: async (x: number, y: number): Promise<El | null> => {
-				const { signal } = getContext();
-				const node = await nativeCall(signal, () => session.axElementAt("desktop", x, y));
-				return node ? el(node) : null;
-			},
-			focusedElement: async (): Promise<El | null> => {
-				const { signal } = getContext();
-				const node = await nativeCall(signal, () => session.axFocused());
-				return node ? el(node) : null;
-			},
-			ref: async (ref: string): Promise<El> => {
-				const { signal } = getContext();
-				return el(await nativeCall(signal, () => session.axNode(ref)));
-			},
-			clipboard: {
-				read: async (): Promise<string> => {
-					const { signal } = getContext();
-					throwIfAborted(signal);
-					// Clipboard access is part of the native desktop surface and remains
-					// outside the worker's readiness-only import graph.
-					const { readTextFromClipboard } = await import("../../utils/clipboard");
-					const text = await readTextFromClipboard();
-					throwIfAborted(signal);
-					return text;
-				},
-				write: async (text: string): Promise<void> => {
-					const context = getContext();
-					guardRun(context, "clipboard.write");
-					// Clipboard access is part of the native desktop surface and remains
-					// outside the worker's readiness-only import graph.
-					const { copyToClipboard } = await import("../../utils/clipboard");
-					await copyToClipboard(text);
 					throwIfAborted(context.signal);
-				},
+					if (error instanceof ToolAbortError || (error instanceof Error && error.name === "AbortError"))
+						throw error;
+					const result: ComputerWindowAcquisition = {
+						...window,
+						inspectionError: error instanceof Error ? error.message : String(error),
+					};
+					// AX and pixels are independent. Preserve exact identity when inspection
+					// fails so callers can recover without choosing or revealing another window.
+					if (options.screenshot !== false) {
+						try {
+							result.initialScreenshot = await session.captureWindow(context, window, {
+								silent: options.silent,
+							});
+						} catch (captureError) {
+							throwIfAborted(context.signal);
+							if (
+								captureError instanceof ToolAbortError ||
+								(captureError instanceof Error && captureError.name === "AbortError")
+							)
+								throw captureError;
+							result.screenshotError =
+								captureError instanceof Error ? captureError.message : String(captureError);
+						}
+					}
+					return result;
+				}
+			},
+			// Verification observes an exact historical identity; it must not reacquire a live handle.
+			verifyWindow: (
+				identity: Pick<ComputerWindowIdentity, "id" | "pid">,
+				expect: Record<string, unknown>[],
+				options?: { timeoutMs?: number; stableSamples?: number },
+			) => session.verify(operationContext(getContext), identity, expect, options),
+			focusedWindow: async (): Promise<Win | null> => {
+				const window = await session.focusedWindow(operationContext(getContext));
+				return window ? new Win(session, getContext, window) : null;
+			},
+			screenshot: (options?: { silent?: boolean }) => session.screenshot(operationContext(getContext), options),
+			launch: (options: unknown) => session.launch(mutationContext(getContext), normalizeLaunchOptions(options)),
+			ref: (ref: string): El => {
+				throwIfAborted(getContext().signal);
+				return new El(session, getContext, session.elementWindow(ref), session.element(ref));
+			},
+			click: (x: number, y: number, options?: ActionOptions) =>
+				session.desktopClick(mutationContext(getContext), x, y, options),
+			doubleClick: (x: number, y: number, options?: ActionOptions) =>
+				session.desktopClick(mutationContext(getContext), x, y, { ...options, count: 2 }),
+			move: (x: number, y: number, options?: ActionOptions) =>
+				session.desktopMove(mutationContext(getContext), x, y, options),
+			drag: (points: Array<[number, number]>, options?: ActionOptions) =>
+				session.desktopDrag(mutationContext(getContext), points, options),
+			scroll: (x: number, y: number, options?: ActionOptions & { dx?: number; dy?: number }) =>
+				session.desktopScroll(mutationContext(getContext), x, y, options),
+			type: (text: string, options?: ActionOptions) =>
+				session.desktopType(mutationContext(getContext), text, options),
+			press: (chord: string | string[], options?: ActionOptions) =>
+				session.desktopPress(mutationContext(getContext), chord, options),
+			clipboard: {
+				read: () => session.clipboardRead(operationContext(getContext)),
+				write: (text: string) => session.clipboardWrite(mutationContext(getContext), text),
 			},
 		};
 	}
@@ -742,15 +765,16 @@ export class ComputerWorkerCore {
 	async #close(): Promise<void> {
 		if (this.#closed) return;
 		this.#closed = true;
-		this.#active?.ac.abort(new ToolAbortError());
+		this.#active?.ac.abort(new ToolAbortError("Computer operation stopped"));
+		let cleanupError: RunErrorPayload | undefined;
 		try {
 			await this.#session?.close();
-		} catch {
-			// Closing is best-effort; the worker is exiting and has no request to report this against.
+		} catch (error) {
+			cleanupError = errorPayload(nativeError(error));
 		} finally {
 			this.#session = undefined;
 			this.#unsubscribe();
-			this.#transport.send({ type: "closed" });
+			this.#transport.send({ type: "closed", error: cleanupError });
 			this.#transport.close();
 		}
 	}

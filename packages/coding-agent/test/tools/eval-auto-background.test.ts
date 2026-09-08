@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import type { AgentToolContext } from "@oh-my-pi/pi-agent-core";
+import type { AgentToolContext, AgentToolResult } from "@oh-my-pi/pi-agent-core";
 import { AsyncJobManager } from "@oh-my-pi/pi-coding-agent/async";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import * as evalIndex from "@oh-my-pi/pi-coding-agent/eval";
+import type { ExecutorBackendResult } from "@oh-my-pi/pi-coding-agent/eval/backend";
+import type { EvalToolDetails } from "@oh-my-pi/pi-coding-agent/eval/types";
 import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { EvalTool } from "@oh-my-pi/pi-coding-agent/tools/eval";
@@ -171,6 +173,84 @@ describe("EvalTool auto-background", () => {
 		expect(updates).toEqual(updatesAtBackground);
 		await asyncJobManager.dispose();
 	});
+
+	it.each([false, true])(
+		"retains control activity and the final snapshot after background settlement (cancelled=%s)",
+		async cancelled => {
+			const gate = Promise.withResolvers<void>();
+			const updates: AgentToolResult<unknown>[] = [];
+			const started = Promise.withResolvers<void>();
+			const image = {
+				type: "image" as const,
+				mimeType: "image/png",
+				data: (await Bun.file(new URL("../../../ai/test/data/red-circle.png", import.meta.url)).bytes()).toBase64(),
+			};
+			const control = { kind: "computer" as const, label: "Exact fixture", path: "/tmp/fixture.png" };
+			const activity = { op: "control", id: "control-release", kind: "computer", action: "release" };
+			vi.spyOn(evalIndex.jsBackend, "execute").mockImplementation(
+				async (_code, options): Promise<ExecutorBackendResult> => {
+					options.onStatus?.({ ...activity, phase: "stopping" });
+					started.resolve();
+					await gate.promise;
+					const stopped = { ...activity, phase: cancelled ? "stopped" : "released" };
+					options.onStatus?.(stopped);
+					return {
+						output: cancelled ? "Execution cancelled" : "done",
+						exitCode: cancelled ? 130 : 0,
+						cancelled,
+						truncated: false,
+						artifactId: undefined,
+						totalLines: 1,
+						totalBytes: 4,
+						outputLines: 1,
+						outputBytes: 4,
+						displayOutputs: [
+							{ ...image, control },
+							{ type: "status", event: stopped },
+						],
+					};
+				},
+			);
+			const manager = new AsyncJobManager({});
+			try {
+				const session = makeSession(
+					Settings.isolated({ "eval.autoBackground.enabled": true, "eval.autoBackground.thresholdMs": 1 }),
+					manager,
+				);
+				session.createBackgroundToolUpdateSink = (id, name, args) => {
+					expect(id).toBe("control-cell");
+					expect(name).toBe("eval");
+					expect(args).toMatchObject({ language: "js" });
+					return update => {
+						updates.push(update);
+					};
+				};
+				const initial = await new EvalTool(session).execute("control-cell", {
+					language: "js",
+					code: "await computer.release()",
+				});
+				expect(initial.details?.async?.state).toBe("running");
+				await started.promise;
+				expect((updates.at(-1)!.details as EvalToolDetails).cells?.[0]?.statusEvents).toContainEqual({
+					...activity,
+					phase: "stopping",
+				});
+				const job = manager.getJob(initial.details!.async!.jobId)!;
+				gate.resolve();
+				await job.promise;
+				const terminal = updates.at(-1)?.details as EvalToolDetails;
+				expect(terminal.async?.state).toBe(cancelled ? "failed" : "completed");
+				expect(terminal.statusEvents).toContainEqual({ ...activity, phase: cancelled ? "stopped" : "released" });
+				expect(terminal.images).toEqual([image]);
+				expect(terminal.controlImages).toEqual([{ index: 0, ...control }]);
+				expect(job.latestDetails?.images).toEqual([image]);
+				expect(updates.at(-1)?.content.every(block => block.type === "text")).toBe(true);
+			} finally {
+				gate.resolve();
+				await manager.dispose();
+			}
+		},
+	);
 
 	it("backgrounds a running cell when the steering signal fires mid-wait", async () => {
 		const asyncJobManager = new AsyncJobManager({});

@@ -1,5 +1,6 @@
 def _make_browser():
     import re
+    from types import MappingProxyType
 
     def _require_name(name, label):
         if not isinstance(name, str) or not name:
@@ -56,17 +57,18 @@ def _make_browser():
             raise RuntimeError("browser returned invalid response details")
         return details
 
-    async def _call(name, chain):
-        details = await _invoke("call", {"name": name, "chain": chain})
+    async def _call(name, chain, handle=None):
+        details = await _invoke("call", {"name": name, "chain": chain, "handle": handle})
         return details.get("value")
 
     class _Element:
-        __slots__ = ("_name", "_handle_method", "_handle_value")
+        __slots__ = ("_name", "_handle_method", "_handle_value", "_handle")
 
-        def __init__(self, name, handle_method, handle_value):
+        def __init__(self, name, handle_method, handle_value, handle=None):
             self._name = name
             self._handle_method = handle_method
             self._handle_value = handle_value
+            self._handle = handle
 
         def __repr__(self):
             return (
@@ -81,6 +83,7 @@ def _make_browser():
                     {"method": self._handle_method, "args": [self._handle_value]},
                     {"method": method, "args": _arguments(args, kwargs)},
                 ],
+                self._handle,
             )
 
         async def click(self, *args, **kwargs):
@@ -123,10 +126,47 @@ def _make_browser():
             return await self._method("evaluate", args, kwargs)
 
     class _Tab:
-        __slots__ = ("_name",)
+        __slots__ = ("_name", "_handle", "_snapshot", "_initial", "_target")
 
-        def __init__(self, name):
+        def __init__(self, name, handle=None, initial=None):
             self._name = _require_name(name, "tab name")
+            self._handle = handle
+            self._initial = initial or {}
+            self._snapshot = (self._initial.get("initialObservation") or {}).get("snapshot")
+            target = self._initial.get("target")
+            self._target = MappingProxyType({key: target[key] for key in ("id", "browserId", "tabId")}) if target else None
+
+        @property
+        def target(self):
+            return self._target
+
+        @property
+        def initialDialog(self):
+            return self._initial.get("initialDialog")
+
+        @property
+        def initialObservation(self):
+            return self._initial.get("initialObservation")
+
+        @property
+        def initialTree(self):
+            return self._initial.get("initialTree")
+
+        @property
+        def initialScreenshot(self):
+            return self._initial.get("initialScreenshot")
+
+        @property
+        def inspectionError(self):
+            return self._initial.get("inspectionError")
+
+        @property
+        def treeError(self):
+            return self._initial.get("treeError")
+
+        @property
+        def screenshotError(self):
+            return self._initial.get("screenshotError")
 
         @property
         def name(self):
@@ -134,13 +174,20 @@ def _make_browser():
             return self._name
 
         def __repr__(self):
-            return f"<browser.Tab name={self._name!r}>"
+            target = f" target={self._target['id']!r}" if self._target else ""
+            return f"<browser.Tab name={self._name!r}{target}>"
 
         async def _method(self, method, args, kwargs):
-            return await _call(
+            value = await _call(
                 self._name,
                 [{"method": method, "args": _arguments(args, kwargs)}],
+                self._handle,
             )
+            if method == "observe" and isinstance(value, dict):
+                self._snapshot = value.get("snapshot")
+            if method == "goto":
+                self._snapshot = None
+            return value
 
         async def url(self, *args, **kwargs):
             return await self._method("url", args, kwargs)
@@ -193,6 +240,17 @@ def _make_browser():
         async def waitForUrl(self, *args, **kwargs):
             return await self._method("waitForUrl", args, kwargs)
 
+        async def dialog(self, options=None, **kwargs):
+            if not self._handle:
+                raise ValueError("Dialog inspection requires an existing managed Chrome handle")
+            if options is not None and (not isinstance(options, dict) or kwargs):
+                raise TypeError("dialog accepts one options dictionary or keyword arguments")
+            details = await _invoke("dialog", {"handle": self._handle, "dialog": options if options is not None else kwargs})
+            return details.get("value")
+
+        async def downloads(self, *args, **kwargs):
+            return await self._method("downloads", args, kwargs)
+
         async def evaluate(self, *args, **kwargs):
             return await self._method("evaluate", args, kwargs)
 
@@ -206,13 +264,14 @@ def _make_browser():
             """Return a synchronous handle for a numeric observed element id."""
             if isinstance(element_id, bool) or not isinstance(element_id, int):
                 raise TypeError("tab.id() expects an integer element id")
-            return _Element(self._name, "id", element_id)
+            return _Element(self._name, "ref" if self._snapshot else "id",
+                            f"{self._snapshot}:{element_id}" if self._snapshot else element_id, self._handle)
 
         def ref(self, ref_id):
             """Return a synchronous handle for an ARIA reference id."""
             if not isinstance(ref_id, str) or not ref_id:
                 raise TypeError("tab.ref() expects a non-empty reference id")
-            return _Element(self._name, "ref", ref_id)
+            return _Element(self._name, "ref", ref_id, self._handle)
 
         async def run(self, code, *, timeout=None):
             """Run a JavaScript code string in this tab and return its value."""
@@ -220,7 +279,7 @@ def _make_browser():
                 raise TypeError("tab.run() expects a JavaScript code string")
             details = await _invoke(
                 "run",
-                {"name": self._name, "code": code, "timeout": timeout},
+                {"name": self._name, "code": code, "timeout": timeout, "handle": self._handle},
             )
             return details.get("value")
 
@@ -228,8 +287,17 @@ def _make_browser():
             """Close this tab handle's host-side tab."""
             await _invoke(
                 "close",
-                {"name": self._name, "kill": kill, "timeout": timeout},
+                {"name": self._name, "kill": kill, "timeout": timeout, "handle": self._handle},
             )
+
+        async def reveal(self):
+            await _invoke("reveal", {"handle": self._handle})
+
+        async def retain(self):
+            await _invoke("retain", {"handle": self._handle})
+
+        async def release(self):
+            await _invoke("release", {"handle": self._handle})
 
     class _Browser:
         __slots__ = ()
@@ -248,6 +316,7 @@ def _make_browser():
             dialogs=None,
             timeout=None,
             persist=None,
+            observation=None,
         ):
             """Open or attach to a browser tab and return its handle."""
             if name is not None:
@@ -263,12 +332,42 @@ def _make_browser():
                     "dialogs": dialogs,
                     "timeout": timeout,
                     "persist": persist,
+                    "observation": observation,
                 },
             )
             opened_name = details.get("name")
             if not isinstance(opened_name, str) or not opened_name:
                 raise RuntimeError("browser.open() returned an invalid tab name")
-            return _Tab(opened_name)
+            return _Tab(opened_name, details.get("handle"), details.get("value"))
+
+        async def instances(self):
+            return (await _invoke("instances", {})).get("value")
+
+        async def discover(self, *, browserId=None):
+            return (await _invoke("discover", {"browserId": browserId})).get("value")
+
+        async def closeTab(self, tab_id, *, browserId=None, timeout=None):
+            if not isinstance(tab_id, str) or not tab_id:
+                raise TypeError("browser.closeTab expects an exact discovered tab id")
+            await _invoke("closeTab", {"id": tab_id, "browserId": browserId, "timeout": timeout})
+
+        async def create(self, *, url=None, label=None, timeout=None, browserId=None, observation=None):
+            details = await _invoke("create", {"url": url, "label": label, "timeout": timeout, "browserId": browserId, "observation": observation})
+            return _Tab(details.get("name"), details.get("handle"), details.get("value"))
+
+        async def claim(self, tab_id, *, label=None, timeout=None, browserId=None, observation=None):
+            details = await _invoke("claim", {"id": tab_id, "label": label, "timeout": timeout, "browserId": browserId, "observation": observation})
+            return _Tab(details.get("name"), details.get("handle"), details.get("value"))
+
+        async def getTab(self, selector, *, label=None, timeout=None, observation=None):
+            if isinstance(selector, str):
+                target = {"id": selector}
+            elif isinstance(selector, dict):
+                target = {"selector": selector}
+            else:
+                raise TypeError("browser.getTab expects an exact discovery id or a selector dictionary")
+            details = await _invoke("claim", {**target, "label": label, "timeout": timeout, "observation": observation})
+            return _Tab(details.get("name"), details.get("handle"), details.get("value"))
 
         def tab(self, name="main"):
             """Re-acquire a synchronous handle for an existing named tab."""

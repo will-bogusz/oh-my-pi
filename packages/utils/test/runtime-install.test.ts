@@ -267,6 +267,163 @@ describe("ensureRuntimeInstalled install lock", () => {
 		return path.join(root, "cache", "fixture-runtime");
 	}
 
+	test("rebuilds an incomplete graph after a lifecycle failure and publishes only its completed replacement", async () => {
+		const { spec, probe } = await makeFileDependency();
+		const runtimeDir = await makeRuntimeDir();
+		const source = spec.slice(5);
+		const ready = path.join(source, "ready");
+		const release = path.join(source, "release");
+		const fail = path.join(source, "fail");
+		await fs.writeFile(fail, "");
+		await fs.writeFile(
+			path.join(source, "package.json"),
+			JSON.stringify({
+				name: probe,
+				version: "1.0.0",
+				main: "finished.cjs",
+				scripts: { postinstall: `${JSON.stringify(process.execPath)} postinstall.cjs` },
+			}),
+		);
+		await fs.writeFile(
+			path.join(source, "postinstall.cjs"),
+			`const fs = require("node:fs");
+const path = require("node:path");
+fs.writeFileSync(${JSON.stringify(ready)}, __dirname);
+async function main() {
+  while (!fs.existsSync(${JSON.stringify(release)})) await Bun.sleep(10);
+  if (fs.existsSync(${JSON.stringify(fail)})) process.exit(17);
+  fs.writeFileSync(path.join(__dirname, "finished.cjs"), 'module.exports = "completed";');
+}
+main();`,
+		);
+		// Archive the fixture so lifecycle output belongs to the installed
+		// package, not Bun's external file-directory source.
+		const archive = path.join(source, "fixture.tgz");
+		const pack = Bun.spawn([process.execPath, "pm", "pack", "--filename", archive, "--ignore-scripts", "--quiet"], {
+			cwd: source,
+			env: { ...Bun.env, BUN_BE_BUN: "1" },
+			stdout: "ignore",
+			stderr: "pipe",
+		});
+		const packError = await new Response(pack.stderr).text();
+		if ((await pack.exited) !== 0) throw new Error(`Cannot pack lifecycle fixture: ${packError}`);
+		// Simulate a pre-fix interrupted tree: the probe exists, but its entry
+		// and lifecycle-generated files do not.
+		const publicPackage = path.join(runtimeDir, "node_modules", probe);
+		await fs.mkdir(publicPackage, { recursive: true });
+		await fs.copyFile(path.join(source, "package.json"), path.join(publicPackage, "package.json"));
+		const options = {
+			runtimeDir,
+			install: { dependencies: { [probe]: `file:${archive}` }, trustedDependencies: [probe] },
+			lockSleepMs: 10,
+		};
+		const first = ensureRuntimeInstalled(options);
+		// Attach rejection handling before the subprocess is allowed to fail.
+		const failure = first.then(
+			() => null,
+			error => error,
+		);
+		// The real bun lifecycle runs in another process: fake timers cannot
+		// drive it. Poll explicit filesystem barriers, never elapsed-time guesses.
+		try {
+			const deadline = Date.now() + 10_000;
+			while (!(await Bun.file(ready).exists())) {
+				if (Date.now() > deadline) throw new Error("Lifecycle script did not start");
+				await Bun.sleep(10);
+			}
+			const installingPackage = await fs.readFile(ready, "utf8");
+			expect(await Bun.file(path.join(installingPackage, "package.json")).exists()).toBe(true);
+			expect(resolveRuntimeModule(path.join(runtimeDir, "node_modules"), probe)).toBeNull();
+			await fs.writeFile(release, "");
+			expect(await failure).toBeInstanceOf(Error);
+			expect(resolveRuntimeModule(path.join(runtimeDir, "node_modules"), probe)).toBeNull();
+			await fs.rm(fail);
+			await fs.rm(ready);
+			await fs.rm(release);
+
+			const retry = ensureRuntimeInstalled(options);
+			const concurrent = ensureRuntimeInstalled(options);
+			try {
+				const retryDeadline = Date.now() + 10_000;
+				while (!(await Bun.file(ready).exists())) {
+					if (Date.now() > retryDeadline) throw new Error("Retry lifecycle script did not start");
+					await Bun.sleep(10);
+				}
+				expect(resolveRuntimeModule(path.join(runtimeDir, "node_modules"), probe)).toBeNull();
+			} finally {
+				await fs.writeFile(release, "");
+				await Promise.all([retry, concurrent]);
+			}
+			const entry = resolveRuntimeModule(path.join(runtimeDir, "node_modules"), probe);
+			expect(entry).not.toBeNull();
+			expect(Module.createRequire(import.meta.url)(entry!)).toBe("completed");
+			await fs.rm(ready);
+			const phases: string[] = [];
+			await ensureRuntimeInstalled({ ...options, onPhase: phase => phases.push(phase) });
+			expect(phases).toEqual([]);
+			expect(await Bun.file(ready).exists()).toBe(false);
+		} finally {
+			await fs.writeFile(release, "");
+			await first.catch(() => {});
+		}
+	}, 30_000);
+
+	test("resolves relative file dependencies and overrides from the runtime after atomic publication", async () => {
+		const runtimeDir = await makeRuntimeDir();
+		const sdk = path.join(runtimeDir, "sdk-package");
+		const native = path.join(runtimeDir, "native-package");
+		await fs.mkdir(sdk, { recursive: true });
+		await fs.mkdir(native, { recursive: true });
+		await fs.writeFile(
+			path.join(sdk, "package.json"),
+			JSON.stringify({
+				name: "omp-runtime-sdk",
+				version: "1.0.0",
+				main: "index.cjs",
+				dependencies: { "omp-runtime-native": "1.0.0" },
+			}),
+		);
+		await fs.writeFile(path.join(sdk, "index.cjs"), 'module.exports = require("omp-runtime-native");');
+		await fs.writeFile(
+			path.join(native, "package.json"),
+			JSON.stringify({ name: "omp-runtime-native", version: "1.0.0", main: "index.cjs" }),
+		);
+		await fs.writeFile(path.join(native, "index.cjs"), 'module.exports = "local-native";');
+		const install = {
+			dependencies: {
+				"omp-runtime-sdk": "file:./sdk-package",
+				"omp-runtime-native": "file:./native-package",
+			},
+			overrides: { "omp-runtime-native": "file:./native-package" },
+		};
+		await ensureRuntimeInstalled({ runtimeDir, install, probePackage: "omp-runtime-sdk" });
+		const entry = resolveRuntimeModule(path.join(runtimeDir, "node_modules"), "omp-runtime-sdk");
+		expect(entry).not.toBeNull();
+		expect(Module.createRequire(import.meta.url)(entry!)).toBe("local-native");
+		const manifest = await Bun.file(path.join(runtimeDir, "package.json")).json();
+		expect(manifest.dependencies).toEqual(install.dependencies);
+		expect(manifest.overrides).toEqual(install.overrides);
+	}, 15_000);
+
+	test("replaces a different completed fingerprint without mutating the accepted tree on failure", async () => {
+		const first = await makeFileDependency();
+		const second = await makeFileDependency();
+		const runtimeDir = await makeRuntimeDir();
+		await fs.writeFile(path.join(first.spec.slice(5), "index.js"), 'module.exports = "first";');
+		await fs.writeFile(path.join(second.spec.slice(5), "index.js"), 'module.exports = "second";');
+		await ensureRuntimeInstalled({ runtimeDir, install: { dependencies: { [first.probe]: first.spec } } });
+		const entry = path.join(runtimeDir, "node_modules", first.probe, "index.js");
+		await expect(
+			ensureRuntimeInstalled({
+				runtimeDir,
+				install: { dependencies: { [first.probe]: `file:${path.join(runtimeDir, "missing-source")}` } },
+			}),
+		).rejects.toThrow();
+		expect(await fs.readFile(entry, "utf8")).toBe('module.exports = "first";');
+		await ensureRuntimeInstalled({ runtimeDir, install: { dependencies: { [second.probe]: second.spec } } });
+		expect(await fs.readFile(entry, "utf8")).toBe('module.exports = "second";');
+	}, 15_000);
+
 	test("a stale legacy .lock directory does not block install and is cleared", async () => {
 		const { spec, probe } = await makeFileDependency();
 		const runtimeDir = await makeRuntimeDir();

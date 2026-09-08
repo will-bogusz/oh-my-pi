@@ -1,9 +1,11 @@
+import type { DialogState } from "./dialogs";
 import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
 
 export type Transferable = Bun.Transferable;
 
 export interface ObservationEntry {
 	id: number;
+	ref?: string;
 	role: string;
 	name?: string;
 	value?: string | number;
@@ -13,6 +15,7 @@ export interface ObservationEntry {
 }
 
 export interface Observation {
+	snapshot?: string;
 	url: string;
 	title?: string;
 	viewport: { width: number; height: number; deviceScaleFactor?: number };
@@ -28,11 +31,24 @@ export interface Observation {
 }
 
 export interface ScreenshotResult {
+	/** Zero-based position among emitted run images; absent for silent captures. */
+	imageIndex?: number;
 	dest: string;
 	mimeType: string;
 	bytes: number;
 	width: number;
 	height: number;
+}
+
+/** Independent inspection channels collected while acquiring a managed Chrome tab. */
+export interface InitialBrowserState {
+	initialDialog?: DialogState;
+	initialObservation?: Observation;
+	initialTree?: string;
+	initialScreenshot?: string;
+	inspectionError?: string;
+	treeError?: string;
+	screenshotError?: string;
 }
 
 export interface SessionSnapshot {
@@ -65,9 +81,8 @@ export type WorkerInitPayload =
 			waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
 			timeoutMs: number;
 			/**
-			 * Post-timeout recycle: before adopting the page, dismiss any open JS dialog and
-			 * stop a pending navigation so a blocked target cannot stall worker init (which
-			 * previously force-killed the tab). Never set for first-time Electron attach.
+			 * Post-timeout recycle: clear abandoned request interception before adopting
+			 * the exact page. Never answer dialogs or stop navigation implicitly.
 			 */
 			recover?: boolean;
 			/**

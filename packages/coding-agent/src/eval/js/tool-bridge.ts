@@ -3,9 +3,11 @@ import { toolWireSchema, validateToolArguments } from "@oh-my-pi/pi-ai";
 import { isRecord } from "@oh-my-pi/pi-utils";
 import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
 import type { ToolSession } from "../../tools";
-import { ToolError } from "../../tools/tool-errors";
+import { ToolAbortError, ToolError } from "../../tools/tool-errors";
 import { schemaDeclaresIntentField } from "../../utils/tool-schema";
-import { invokeEvalPrelude } from "../preludes";
+import { withBridgeTimeoutPause } from "../bridge-timeout";
+import { findEnabledEvalPrelude, invokeEvalPrelude } from "../preludes";
+import type { ControlActivityEvent, ControlImageMetadata } from "../types";
 import { EVAL_AGENT_BRIDGE_NAME, type EvalAgentHandleResult, runEvalAgent } from "../agent-bridge";
 import { EVAL_BUDGET_BRIDGE_NAME, type EvalBudgetResult, runEvalBudget } from "../budget-bridge";
 import { EVAL_COMPLETION_BRIDGE_NAME, type EvalCompletionHandleResult, runEvalCompletion } from "../completion-bridge";
@@ -42,7 +44,7 @@ type ToolValue =
 	| {
 			text: string;
 			details?: unknown;
-			images?: Array<{ mimeType: string; data: string }>;
+			images?: Array<{ mimeType: string; data: string; control?: ControlImageMetadata }>;
 			hasError?: boolean;
 	  };
 function toolResultHasError(result: AgentToolResult): boolean {
@@ -74,6 +76,69 @@ function parsePreludeRequest(args: unknown): { name: string; parameters: unknown
 		throw new ToolError("Invalid eval prelude bridge name");
 	}
 	return { name, parameters: args.parameters };
+}
+
+function controlActivity(
+	name: string,
+	args: unknown,
+	id: string,
+	options: ToolBridgeOptions,
+): ControlActivityEvent | undefined {
+	if ((name !== "browser" && name !== "computer") || !findEnabledEvalPrelude(options.session, name)) return;
+	const record = isRecord(args) ? args : {};
+	let action = typeof record.action === "string" ? record.action : "call";
+	if (action === "call" && Array.isArray(record.chain)) {
+		const last = record.chain.at(-1);
+		if (isRecord(last) && typeof last.method === "string") action = last.method;
+	}
+	// Only the operation name is presented, never code, typed values, selectors,
+	// function source or arbitrary arguments from a run/chain.
+	if (!/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(action)) action = "call";
+	const event: ControlActivityEvent = { op: "control", id, kind: name, action, phase: "running" };
+	if (name === "browser" && typeof record.name === "string") event.target = record.name;
+	if (name === "computer" && Array.isArray(record.chain)) {
+		const first = record.chain[0];
+		if (isRecord(first) && first.method === "window" && Array.isArray(first.args) && isRecord(first.args[0])) {
+			const selector = first.args[0];
+			if (typeof selector.id === "string" || typeof selector.id === "number") {
+				event.target = `window ${selector.id}${typeof selector.pid === "number" ? ` (PID ${selector.pid})` : ""}`;
+			}
+		}
+	}
+	return event;
+}
+
+function controlImageMap(
+	result: AgentToolResult,
+	imageCount: number,
+	activity: ControlActivityEvent | undefined,
+): Map<number, ControlImageMetadata> {
+	const images = new Map<number, ControlImageMetadata>();
+	const seen = new Set<number>();
+	if (!activity || !isRecord(result.details) || !Array.isArray(result.details.screenshots)) return images;
+	for (const screenshot of result.details.screenshots) {
+		if (!isRecord(screenshot)) continue;
+		const index = screenshot.imageIndex;
+		if (typeof index !== "number" || !Number.isSafeInteger(index) || index < 0 || index >= imageCount) continue;
+		// Duplicate indices are ambiguous; no last-writer path substitution.
+		if (seen.has(index)) {
+			images.delete(index);
+			continue;
+		}
+		seen.add(index);
+		const metadata: ControlImageMetadata = { kind: activity.kind };
+		const savedPath = activity.kind === "browser" ? screenshot.dest : screenshot.path;
+		if (typeof savedPath === "string" && savedPath.length > 0) metadata.path = savedPath;
+		const label =
+			activity.kind === "computer"
+				? typeof screenshot.label === "string" && screenshot.label.length > 0
+					? screenshot.label
+					: screenshot.target
+				: result.details.name;
+		if (typeof label === "string" && label.length > 0) metadata.label = label;
+		images.set(index, metadata);
+	}
+	return images;
 }
 
 function summarizeToolResult(
@@ -128,6 +193,7 @@ function normalizeAgentToolResult(
 	args: unknown,
 	result: AgentToolResult,
 	options: ToolBridgeOptions,
+	activity?: ControlActivityEvent,
 ): ToolValue {
 	const textBlocks = result.content.filter(
 		(content): content is { type: "text"; text: string } =>
@@ -139,7 +205,7 @@ function normalizeAgentToolResult(
 	);
 	const text = textBlocks.map(block => block.text).join("");
 	const hasError = toolResultHasError(result);
-	options.emitStatus?.(summarizeToolResult(name, args, result, text, hasError));
+	if (!activity) options.emitStatus?.(summarizeToolResult(name, args, result, text, hasError));
 	if (result.details === undefined && imageBlocks.length === 0 && !hasError) {
 		return text;
 	}
@@ -148,9 +214,11 @@ function normalizeAgentToolResult(
 		details: result.details,
 	};
 	if (imageBlocks.length > 0) {
-		value.images = imageBlocks.map(block => ({
+		const controls = controlImageMap(result, imageBlocks.length, activity);
+		value.images = imageBlocks.map((block, index) => ({
 			mimeType: block.mimeType,
 			data: block.data,
+			...(controls.has(index) ? { control: controls.get(index) } : {}),
 		}));
 	}
 	if (hasError) value.hasError = true;
@@ -161,21 +229,47 @@ export async function callSessionTool(name: string, args: unknown, options: Tool
 	if (name === "__prelude__") {
 		const request = parsePreludeRequest(args);
 		const toolCallId = `prelude-${request.name}-${crypto.randomUUID()}`;
-		try {
-			const result = await invokeEvalPrelude(request.name, request.parameters, {
-				session: options.session,
-				toolCallId,
-				signal: options.signal,
-				context: options.session.getToolContext?.(),
-			});
-			return normalizeAgentToolResult(request.name, request.parameters, result, options);
-		} catch (error) {
-			options.emitStatus?.({
-				op: request.name,
-				error: error instanceof Error ? error.message : String(error),
-			});
-			throw error;
+		const activity = controlActivity(request.name, request.parameters, toolCallId, options);
+		const emitPhase = (phase: ControlActivityEvent["phase"]) => {
+			if (activity) options.emitStatus?.({ ...activity, phase });
+		};
+		const releasing = activity?.action === "release" || activity?.action === "close";
+		const onAbort = () => emitPhase("stopping");
+		if (activity) {
+			emitPhase("running");
+			if (releasing || options.signal?.aborted) emitPhase("stopping");
+			options.signal?.addEventListener("abort", onAbort, { once: true });
 		}
+		const invoke = async (): Promise<ToolValue> => {
+			try {
+				const result = await invokeEvalPrelude(request.name, request.parameters, {
+					session: options.session,
+					toolCallId,
+					signal: options.signal,
+					context: options.session.getToolContext?.(),
+				});
+				emitPhase(
+					toolResultHasError(result) || options.signal?.aborted ? "failed" : releasing ? "released" : "completed",
+				);
+				return normalizeAgentToolResult(request.name, request.parameters, result, options, activity);
+			} catch (error) {
+				if (activity) emitPhase(error instanceof ToolAbortError ? "stopped" : "failed");
+				else
+					options.emitStatus?.({
+						op: request.name,
+						error: error instanceof Error ? error.message : String(error),
+					});
+				throw error;
+			} finally {
+				options.signal?.removeEventListener("abort", onAbort);
+			}
+		};
+		// Computer runs own a bounded native-operation budget. Keep the language
+		// runtime alive through cancellation drain and resource release so its
+		// final activity event cannot arrive after the Eval result has settled.
+		return activity?.kind === "computer"
+			? await withBridgeTimeoutPause(options.emitStatus, invoke, { deferExternalAbort: true })
+			: await invoke();
 	}
 	if (name === EVAL_COMPLETION_BRIDGE_NAME) {
 		return await runEvalCompletion(args, options);

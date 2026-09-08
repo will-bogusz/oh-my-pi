@@ -1,3 +1,5 @@
+import type { ControlImageMetadata } from "../../types";
+
 /**
  * Structured status payload emitted by helpers (`read`, `write`, `env`, etc.) and the
  * tool-call bridge. Surfaces to the model as part of `displays` so it has machine-readable
@@ -14,5 +16,5 @@ export interface JsStatusEvent {
  */
 export type JsDisplayOutput =
 	| { type: "json"; data: unknown }
-	| { type: "image"; data: string; mimeType: string }
+	| { type: "image"; data: string; mimeType: string; control?: ControlImageMetadata }
 	| { type: "status"; event: JsStatusEvent };

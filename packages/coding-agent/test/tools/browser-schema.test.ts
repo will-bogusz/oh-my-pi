@@ -3,6 +3,7 @@ import { createContext, runInContext } from "node:vm";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
+import { browserActorId } from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
 
 function makeSession(settings = Settings.isolated({ "browser.enabled": true })): ToolSession {
 	return {
@@ -15,6 +16,24 @@ function makeSession(settings = Settings.isolated({ "browser.enabled": true })):
 }
 
 describe("browser prelude", () => {
+	it("separates actors sharing an Eval kernel and keeps stable identified ownership across session wrappers", () => {
+		const first = {
+			...makeSession(),
+			getSessionId: () => "task",
+			getAgentId: () => "actor-a",
+			getEvalSessionId: () => "shared-kernel",
+		};
+		const second = { ...first, getAgentId: () => "actor-b" };
+		expect(browserActorId(first)).not.toBe(browserActorId(second));
+		expect(browserActorId({ ...first })).toBe(browserActorId(first));
+	});
+
+	it("isolates embedding sessions without identity getters while keeping a live session stable", () => {
+		const first = makeSession();
+		expect(browserActorId(first)).toBe(browserActorId(first));
+		expect(browserActorId(first)).not.toBe(browserActorId(makeSession()));
+	});
+
 	it("tracks the live browser capability setting", () => {
 		const settings = Settings.isolated();
 		settings.set("browser.enabled", false);

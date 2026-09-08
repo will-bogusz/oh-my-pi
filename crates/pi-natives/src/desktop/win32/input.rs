@@ -213,6 +213,16 @@ mod background {
 				"target window '{id}' is no longer present"
 			)));
 		}
+		let mut pid = 0;
+		// SAFETY: The validated HWND is queried without mutation; output is writable.
+		unsafe {
+			windows_sys::Win32::UI::WindowsAndMessaging::GetWindowThreadProcessId(hwnd, &mut pid)
+		};
+		crate::desktop::types::PLATFORM_WINDOW_PINS.with(|pins| {
+			pins
+				.borrow()
+				.validate_identity(id, (pid != 0).then_some(pid))
+		})?;
 		Ok(hwnd)
 	}
 

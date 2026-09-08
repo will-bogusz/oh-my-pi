@@ -2,7 +2,14 @@ import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import { withTimeout } from "@oh-my-pi/pi-utils/async";
 import * as logger from "@oh-my-pi/pi-utils/logger";
 import { Snowflake } from "@oh-my-pi/pi-utils/snowflake";
-import { workerHostEntry } from "@oh-my-pi/pi-utils/worker-host";
+import {
+	createWorkerHandle,
+	createWorkerSubprocess,
+	resolveWorkerSpawnCmd,
+	type WorkerSpawnCommand,
+	workerEnvFromParent,
+} from "../../subprocess/worker-client";
+import { safeSend as safeSendIpc } from "../../utils/ipc";
 import type { ToolSession } from "../index";
 import { ToolAbortError, ToolError } from "../tool-errors";
 import {
@@ -15,10 +22,13 @@ import {
 } from "./protocol";
 
 const START_TIMEOUT_MS = 10_000;
-const CLOSE_TIMEOUT_MS = 1_500;
-const GRACE_MS = 750;
+const CLOSE_TIMEOUT_MS = 15_000;
+// Cooperative input stops promptly, but bounded AX reads/capture shutdown
+// can need longer to acknowledge cleanup. A native task must own its release
+// throughout this period; this grace is not a substitute for cancellation.
+const GRACE_MS = 15_000;
 const SMOKE_TIMEOUT_MS = 5_000;
-const RESTART_MESSAGE = "computer worker restarted; captures and ax refs were reset";
+const TIMEOUT_MESSAGE = "Computer worker did not acknowledge cancellation before its deadline";
 
 /** Runs desktop scripts and owns their persistent worker session. */
 export interface ComputerController {
@@ -32,8 +42,9 @@ export interface ComputerController {
 	close(): Promise<void>;
 }
 
-/** Minimal Bun worker lifecycle surface used by the supervisor. */
+/** Subprocess lifetime ends only when terminate() has observed actual OS exit. */
 export interface ComputerWorkerHandle {
+	readonly pid?: number;
 	send(message: ComputerWorkerInbound): void;
 	onMessage(handler: (message: ComputerWorkerOutbound) => void): () => void;
 	onError(handler: (error: Error) => void): () => void;
@@ -44,6 +55,7 @@ export interface ComputerWorkerHandle {
 export interface ComputerSupervisorTimeouts {
 	startMs: number;
 	closeMs: number;
+	graceMs?: number;
 }
 
 const DEFAULT_TIMEOUTS: ComputerSupervisorTimeouts = {
@@ -68,44 +80,59 @@ interface PendingRun {
 	toolCalls: Map<string, AbortController>;
 }
 
-function wrapWorker(worker: Worker): ComputerWorkerHandle {
+/** Re-enters the CLI in a separate address space; never falls back to a thread. */
+export function spawnComputerWorker(
+	spawnCommand: WorkerSpawnCommand = resolveWorkerSpawnCmd(COMPUTER_WORKER_ARG),
+): ComputerWorkerHandle {
+	const spawned = createWorkerSubprocess<ComputerWorkerOutbound>({
+		spawnCommand,
+		env: workerEnvFromParent(),
+		exitLabel: "Computer worker",
+		reportCleanExit: true,
+		unref: false,
+		ownedProcessTree: true,
+	});
+	const base = createWorkerHandle<ComputerWorkerInbound, ComputerWorkerOutbound>(spawned, message =>
+		safeSendIpc(spawned.proc, message, "computer"),
+	);
+	const messages = new Set<(message: ComputerWorkerOutbound) => void>();
+	const errors = new Set<(error: Error) => void>();
+	const inbox: ComputerWorkerOutbound[] = [];
+	const earlyErrors: Error[] = [];
+	base.onMessage(message => {
+		if (!messages.size) inbox.push(message);
+		else for (const handler of messages) handler(message);
+	});
+	base.onError(error => {
+		if (!errors.size) earlyErrors.push(error);
+		else for (const handler of errors) handler(error);
+	});
+	let terminating: Promise<void> | undefined;
 	return {
-		send(message) {
-			worker.postMessage(message);
-		},
+		pid: spawned.proc.pid,
+		send: message => base.send(message),
 		onMessage(handler) {
-			const listener = (event: MessageEvent): void => handler(event.data as ComputerWorkerOutbound);
-			worker.addEventListener("message", listener);
-			return () => worker.removeEventListener("message", listener);
-		},
-		onError(handler) {
-			const onError = (event: ErrorEvent): void =>
-				handler(event.error instanceof Error ? event.error : new Error(event.message));
-			const onMessageError = (event: MessageEvent): void =>
-				handler(new Error(`Computer worker message error: ${String(event.data)}`));
-			const onClose = (): void => handler(new Error("Computer worker exited"));
-			worker.addEventListener("error", onError);
-			worker.addEventListener("messageerror", onMessageError);
-			worker.addEventListener("close", onClose);
+			messages.add(handler);
+			for (const message of inbox.splice(0)) handler(message);
 			return () => {
-				worker.removeEventListener("error", onError);
-				worker.removeEventListener("messageerror", onMessageError);
-				worker.removeEventListener("close", onClose);
+				messages.delete(handler);
 			};
 		},
-		async terminate() {
-			worker.terminate();
+		onError(handler) {
+			errors.add(handler);
+			for (const error of earlyErrors.splice(0)) handler(error);
+			return () => {
+				errors.delete(handler);
+			};
+		},
+		terminate() {
+			return (terminating ??= (async () => {
+				await base.terminate();
+				await spawned.proc.exited;
+				await spawned.stderrDrained;
+			})());
 		},
 	};
-}
-
-/** Spawns the computer worker through the active CLI host when available. */
-export function spawnComputerWorker(): ComputerWorkerHandle {
-	const hostEntry = workerHostEntry();
-	const worker = hostEntry
-		? new Worker(hostEntry, { type: "module", argv: [COMPUTER_WORKER_ARG] })
-		: new Worker(new URL("./worker-entry.ts", import.meta.url).href, { type: "module" });
-	return wrapWorker(worker);
 }
 
 function errorFromPayload(payload: RunErrorPayload): Error {
@@ -146,6 +173,11 @@ export class ComputerSupervisor implements ComputerController {
 	#pending = new Map<string, PendingRun>();
 	#nextId = 0;
 	#closed = false;
+	#closing?: Promise<void>;
+	#terminating?: Promise<void>;
+	#terminationFailure?: Error;
+	#cleanupFailure?: Error;
+	#cleanupAcknowledged = false;
 	#unsubscribeMessage?: () => void;
 	#unsubscribeError?: () => void;
 
@@ -176,6 +208,7 @@ export class ComputerSupervisor implements ComputerController {
 		if (this.#closed) throw new ToolError("Computer session is closed");
 		if (signal?.aborted) throw new ToolAbortError();
 		await this.#start();
+		if (this.#closed) throw new ToolAbortError("Computer operation stopped");
 		if (signal?.aborted) throw new ToolAbortError();
 
 		const id = `computer-${++this.#nextId}`;
@@ -191,14 +224,18 @@ export class ComputerSupervisor implements ComputerController {
 
 		try {
 			this.#worker?.send({ type: "run", id, code, timeoutMs, session: snapshot });
-			return await this.#raceWithGrace(promise, timeoutMs);
+			return await this.#raceWithGrace(promise, timeoutMs, signal);
 		} finally {
 			signal?.removeEventListener("abort", abort);
 			this.#pending.delete(id);
 		}
 	}
 
-	#start(): Promise<void> {
+	async #start(): Promise<void> {
+		if (this.#terminating) await this.#terminating;
+		if (this.#terminationFailure) throw this.#terminationFailure;
+		if (this.#cleanupFailure) throw this.#cleanupFailure;
+		if (this.#closed) throw new ToolError("Computer session is closed");
 		if (this.#startPromise) return this.#startPromise;
 		const started = Promise.withResolvers<void>();
 		this.#startReject = started.reject;
@@ -207,6 +244,7 @@ export class ComputerSupervisor implements ComputerController {
 			logger.debug("Starting computer worker");
 			const worker = this.#createWorker();
 			this.#worker = worker;
+			this.#cleanupAcknowledged = false;
 			this.#unsubscribeMessage = worker.onMessage(message => this.#handleMessage(message));
 			this.#unsubscribeError = worker.onError(error => {
 				void this.#workerFailed(error);
@@ -226,6 +264,10 @@ export class ComputerSupervisor implements ComputerController {
 	}
 
 	#handleMessage(message: ComputerWorkerOutbound): void {
+		if (message.type === "closed") {
+			this.#cleanupAcknowledged = !message.error;
+			return;
+		}
 		if (message.type === "ready") {
 			this.#startResolve?.();
 			this.#startResolve = undefined;
@@ -292,78 +334,166 @@ export class ComputerSupervisor implements ComputerController {
 		}
 	}
 
-	async #raceWithGrace(promise: Promise<ComputerRunOk>, timeoutMs: number): Promise<ComputerRunOk> {
-		const timeoutSignal = AbortSignal.timeout(timeoutMs + GRACE_MS);
+	async #raceWithGrace(
+		promise: Promise<ComputerRunOk>,
+		timeoutMs: number,
+		signal?: AbortSignal,
+	): Promise<ComputerRunOk> {
+		const grace = this.#timeouts.graceMs ?? GRACE_MS;
 		const timeout = Promise.withResolvers<never>();
-		const onTimeout = (): void => timeout.reject(new ToolError(RESTART_MESSAGE));
-		timeoutSignal.addEventListener("abort", onTimeout, { once: true });
+		let forced = false;
+		const expire = (error: Error): void => {
+			forced = true;
+			timeout.reject(error);
+		};
+		const deadline = setTimeout(() => expire(new ToolError(TIMEOUT_MESSAGE)), timeoutMs + grace);
+		let abortDeadline: Timer | undefined;
+		const onAbort = (): void => {
+			abortDeadline ??= setTimeout(() => expire(new ToolAbortError()), grace);
+		};
+		if (signal?.aborted) onAbort();
+		else signal?.addEventListener("abort", onAbort, { once: true });
 		try {
 			return await Promise.race([promise, timeout.promise]);
 		} catch (error) {
-			if (error instanceof ToolError && error.message === RESTART_MESSAGE) await this.#terminate(error);
-			throw error;
+			if (forced) await this.#terminate(error);
+			throw this.#cleanupFailure ?? error;
 		} finally {
-			timeoutSignal.removeEventListener("abort", onTimeout);
+			clearTimeout(deadline);
+			if (abortDeadline) clearTimeout(abortDeadline);
+			signal?.removeEventListener("abort", onAbort);
 		}
 	}
 
 	async #workerFailed(error: Error): Promise<void> {
 		logger.warn("Computer worker failed", { error: error.message });
-		await this.#terminate(error);
+		try {
+			await this.#terminate(error);
+		} catch (failure) {
+			logger.error("Computer process exit could not be confirmed", { error: String(failure) });
+		}
 	}
 
-	async #terminate(reason: unknown): Promise<void> {
+	#terminate(reason: unknown): Promise<void> {
+		if (this.#terminating) return this.#terminating;
 		const worker = this.#worker;
 		this.#worker = undefined;
-		this.#startPromise = undefined;
-		this.#startReject?.(reason);
-		this.#startReject = undefined;
-		this.#startResolve = undefined;
 		this.#unsubscribeMessage?.();
 		this.#unsubscribeMessage = undefined;
 		this.#unsubscribeError?.();
 		this.#unsubscribeError = undefined;
-		for (const pending of this.#pending.values()) {
+		const pendingRuns = [...this.#pending.values()];
+		if (worker && pendingRuns.length && !this.#cleanupAcknowledged) {
+			// OS exit stops the process, but cannot prove that admitted native work
+			// released held input. Do not convert that uncertainty to a clean abort
+			// or admit another controller automatically.
+			this.#cleanupFailure ??= new ToolError(
+				`Native cleanup could not be confirmed; computer control cannot restart in this session. ` +
+					`Input release and action effects are unconfirmed; inspect the target and input state before retrying. ` +
+					`Cause: ${reason instanceof Error ? reason.message : String(reason)}`,
+			);
+		}
+		for (const pending of pendingRuns) {
 			for (const controller of pending.toolCalls.values()) controller.abort(reason);
-			pending.reject(reason);
 		}
 		this.#pending.clear();
-		await worker?.terminate().catch(() => undefined);
+		this.#terminating = (async () => {
+			let failure = this.#cleanupFailure ?? reason;
+			try {
+				await worker?.terminate();
+			} catch (error) {
+				this.#terminationFailure = new ToolError(
+					`Computer process exit could not be confirmed; this session cannot restart: ${String(error)}`,
+				);
+				failure = this.#terminationFailure;
+				throw this.#terminationFailure;
+			} finally {
+				this.#startReject?.(failure);
+				this.#startReject = undefined;
+				this.#startResolve = undefined;
+				this.#startPromise = undefined;
+				this.#latestCapabilities = undefined;
+				for (const pending of pendingRuns) pending.reject(failure);
+			}
+		})();
+		const terminating = this.#terminating;
+		void terminating
+			.finally(() => {
+				if (this.#terminating === terminating) this.#terminating = undefined;
+			})
+			.catch(() => undefined);
+		return terminating;
 	}
 
-	async close(): Promise<void> {
-		if (this.#closed) return;
+	close(): Promise<void> {
+		return (this.#closing ??= this.#close());
+	}
+	async #close(): Promise<void> {
 		this.#closed = true;
+		if (this.#terminating) await this.#terminating;
 		const worker = this.#worker;
-		if (!worker) return;
+		if (!worker) {
+			if (this.#terminationFailure) throw this.#terminationFailure;
+			if (this.#cleanupFailure) throw this.#cleanupFailure;
+			return;
+		}
 		const closed = Promise.withResolvers<void>();
 		const unsubscribe = worker.onMessage(message => {
-			if (message.type === "closed") closed.resolve();
+			if (message.type === "closed") {
+				logger.debug("Computer worker cleanup acknowledged", {
+					pid: worker.pid,
+					success: !message.error,
+					error: message.error?.message,
+				});
+				if (message.error) closed.reject(errorFromPayload(message.error));
+				else closed.resolve();
+			}
 		});
+		let cleanupFailure: unknown;
 		try {
 			worker.send({ type: "close" });
 			await withTimeout(closed.promise, this.#timeouts.closeMs, "Timed out closing computer worker");
-		} catch {
-			// Forced termination below is the bounded close fallback.
+		} catch (error) {
+			cleanupFailure = error;
 		} finally {
 			unsubscribe();
-			await this.#terminate(new ToolError("Computer session closed"));
+			await this.#terminate(new ToolAbortError("Computer operation stopped"));
 		}
+		if (cleanupFailure) throw new ToolError(`Native cleanup could not be confirmed: ${String(cleanupFailure)}`);
 	}
 }
 
-const ownedSupervisors = new Map<string, Set<ComputerController>>();
+/** Session lifetime can release a worker without permanently closing the prelude. */
+export interface ComputerSessionLifetime {
+	release(): Promise<void>;
+	close(): Promise<void>;
+}
+
+const ownedSupervisors = new Map<string, Set<ComputerSessionLifetime>>();
 
 /** Registers a controller for owner-scoped session cleanup. */
-export function registerComputerController(ownerId: string | undefined, controller: ComputerController): () => void {
+export function registerComputerController(
+	ownerId: string | undefined,
+	controller: ComputerSessionLifetime,
+): () => void {
 	if (!ownerId) return () => {};
-	const controllers = ownedSupervisors.get(ownerId) ?? new Set<ComputerController>();
+	const controllers = ownedSupervisors.get(ownerId) ?? new Set<ComputerSessionLifetime>();
 	controllers.add(controller);
 	ownedSupervisors.set(ownerId, controllers);
 	return () => {
 		controllers.delete(controller);
 		if (controllers.size === 0) ownedSupervisors.delete(ownerId);
 	};
+}
+
+/** Drain current workers while retaining their session lifetimes for later use. */
+export async function releaseComputerResourcesForOwner(ownerId: string | undefined): Promise<void> {
+	if (!ownerId) return;
+	const controllers = ownedSupervisors.get(ownerId);
+	if (!controllers) return;
+	const results = await Promise.allSettled(Array.from(controllers, controller => controller.release()));
+	const errors = results.filter(result => result.status === "rejected").map(result => result.reason);
+	if (errors.length) throw new AggregateError(errors, "Computer resources could not be released");
 }
 
 /** Closes every computer session owned by an agent session. */

@@ -319,3 +319,19 @@ describe("browser selector timeout hint", () => {
 		expect(hint).toContain("hidden or covered");
 	});
 });
+
+it("counts actual emitted images independently from text and screenshot records", () => {
+	const output = new RunOutput();
+	expect(output.imageCount).toBe(0);
+	output.pushText("before");
+	output.pushDisplay({ type: "image", data: "arbitrary-display", mimeType: "image/png" });
+	output.push({ type: "text", text: "screenshot caption" });
+	expect(output.imageCount).toBe(1);
+	const screenshotIndex = output.imageCount;
+	output.push({ type: "image", data: "screenshot", mimeType: "image/png" });
+	output.pushText("after");
+	expect(output.imageCount).toBe(2);
+	expect(output.finish().filter(entry => entry.type === "image")[screenshotIndex]).toMatchObject({
+		data: "screenshot",
+	});
+});

@@ -1,0 +1,29 @@
+async ({ tab }, options) => {
+	const state = {};
+	const partial = (field, error) => {
+		if (tab.signal?.aborted) throw error;
+		state[field] = error instanceof Error ? error.message : String(error);
+	};
+	try {
+		state.initialObservation = await tab.observe({
+			includeAll: options.includeAll,
+			viewportOnly: options.viewportOnly,
+		});
+	} catch (error) {
+		partial("inspectionError", error);
+	}
+	try {
+		state.initialTree = await tab.ariaSnapshot();
+	} catch (error) {
+		partial("treeError", error);
+	}
+	if (options.screenshot !== false) {
+		try {
+			state.initialScreenshot = await tab.screenshot();
+		} catch (error) {
+			partial("screenshotError", error);
+		}
+	}
+	display(state);
+	return state;
+}

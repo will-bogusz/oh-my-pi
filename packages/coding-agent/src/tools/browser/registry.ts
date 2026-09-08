@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import { isCompiledBinary, logger, withTimeout, workerHostEntry } from "@oh-my-pi/pi-utils";
+import { isCompiledBinary, logger, toError, withTimeout, workerHostEntry } from "@oh-my-pi/pi-utils";
 import type { Subprocess } from "bun";
 import type { Browser, CDPSession } from "puppeteer-core";
 import { ToolAbortError, ToolError } from "../tool-errors";
@@ -199,11 +199,32 @@ async function openBrowserHandle(kind: BrowserKind, opts: AcquireBrowserOptions)
 		const cdpUrl = normalizeConnectedCdpUrl(kind.cdpUrl);
 		await waitForCdp(cdpUrl, 5_000, opts.signal);
 		const puppeteer = await loadPuppeteer();
-		const browser = await puppeteer.connect({
-			browserURL: cdpUrl,
-			defaultViewport: null,
-			protocolTimeout: BROWSER_PROTOCOL_TIMEOUT_MS,
-		});
+		let endpoint: { browserURL: string } | { browserWSEndpoint: string } = { browserURL: cdpUrl };
+		if (new URL(cdpUrl).pathname !== "/") {
+			// Puppeteer's browserURL resolves /json/version at the origin and drops
+			// path prefixes. Resolve scoped endpoints ourselves so the lease survives.
+			const response = await fetch(`${cdpUrl}/json/version`, { signal: opts.signal });
+			const info: unknown = await response.json();
+			if (
+				!response.ok ||
+				!info ||
+				typeof info !== "object" ||
+				!("webSocketDebuggerUrl" in info) ||
+				typeof info.webSocketDebuggerUrl !== "string"
+			) {
+				throw new ToolError("Scoped CDP discovery did not return a browser WebSocket endpoint");
+			}
+			endpoint = { browserWSEndpoint: info.webSocketDebuggerUrl };
+		}
+		const browser = await puppeteer
+			.connect({
+				...endpoint,
+				defaultViewport: null,
+				protocolTimeout: BROWSER_PROTOCOL_TIMEOUT_MS,
+			})
+			.catch(error => {
+				throw toError(error);
+			});
 		return {
 			key: browserKey(kind),
 			kind,

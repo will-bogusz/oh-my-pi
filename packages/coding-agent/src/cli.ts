@@ -39,7 +39,11 @@ import { LSP_MUX_WORKER_ARG } from "./lsp/mux/protocol";
 import { STATS_ACTIVITY_WORKER_ARG } from "./stats/activity-protocol";
 import rootLicense from "./tools/browser/relay/extension-assets/LICENSE.txt" with { type: "text" };
 import thirdPartyNotices from "./tools/browser/relay/extension-assets/THIRD-PARTY-NOTICES.txt" with { type: "text" };
-import { COMPUTER_WORKER_ARG } from "./tools/computer/protocol";
+import {
+	COMPUTER_WORKER_ARG,
+	type ComputerWorkerInbound,
+	type ComputerWorkerOutbound,
+} from "./tools/computer/protocol";
 
 if (Bun.semver.order(Bun.version, MIN_BUN_VERSION) < 0) {
 	process.stderr.write(
@@ -181,9 +185,19 @@ async function runWorkerEntrypoint(arg: string | undefined): Promise<boolean> {
 		return true;
 	}
 	if (arg === COMPUTER_WORKER_ARG) {
-		if (parentPort) installWorkerInbox(parentPort);
+		// Capture messages synchronously before the existing lazy computer import.
+		// This selector belongs to a subprocess, never a Bun worker thread.
+		if (parentPort) throw new Error("Computer runtime requires a subprocess host");
+		const inbox = installWorkerInbox(process);
 		const { startComputerWorker } = await import("./tools/computer/worker-entry");
-		startComputerWorker();
+		await runIpcSubprocessWorker<ComputerWorkerInbound, ComputerWorkerOutbound>(
+			transport =>
+				startComputerWorker({
+					send: transport.send,
+					onMessage: handler => inbox.bind(message => handler(message as ComputerWorkerInbound)),
+				}),
+			{ rethrowConnectedSendErrors: true },
+		);
 		return true;
 	}
 	if (arg === JS_EVAL_WORKER_ARG) {

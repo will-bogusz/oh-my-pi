@@ -102,7 +102,7 @@ With `eval.autoBackground.enabled` (default `false`), a cell that outlives `eval
 ### JavaScript (`js`)
 
 - Persistent worker VM keyed by `js:${sessionId}`; `reset` recreates the VM and is destructive to concurrent users of that session id.
-- Runs under Bun and exposes host globals including `Bun`, `Buffer`, `fetch`, `process`, `require`, `createRequire`, `fs`, and Web Crypto.
+- Runs under Bun and exposes host globals including `Bun`, `Buffer`, `fetch`, `process`, `require`, `createRequire`, `fs`, and Web Crypto. Rebinding a provided name, such as importing the promises API into `fs`, persists in that runtime across cells. Explicit run-scoped bindings can still be replaced by their owning controller.
 - Top-level `await` and bare `return` work through async wrapping.
 - Static top-level imports and dynamic imports are rewritten through the local module loader. Local filesystem imports are cache-busted between cells; bare package and scheme/URL imports retain normal cache identity.
 - Awaited regions can interleave with another session sharing the executor; synchronous code still blocks the worker event loop.

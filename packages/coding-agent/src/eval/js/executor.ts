@@ -1,6 +1,7 @@
 import { DEFAULT_MAX_BYTES, OutputSink } from "../../session/streaming-output";
 import type { ToolSession } from "../../tools";
 import { resolveOutputMaxColumns, resolveOutputSinkHeadBytes } from "../../tools/output-meta";
+import { ToolAbortError } from "../../tools/tool-errors";
 import { isEvalTimeoutControlEvent } from "../bridge-timeout";
 import { executeInVmContext, type JsDisplayOutput } from "./context-manager";
 import type { JsStatusEvent } from "./shared/types";
@@ -52,6 +53,7 @@ function getExecutionTimeoutMs(options: Pick<JsExecutorOptions, "deadlineMs" | "
 
 function isAbortError(error: unknown): boolean {
 	return (
+		error instanceof ToolAbortError ||
 		(error instanceof DOMException && (error.name === "AbortError" || error.name === "TimeoutError")) ||
 		(error instanceof Error && (error.name === "AbortError" || error.name === "TimeoutError"))
 	);
@@ -142,6 +144,8 @@ export async function executeJs(code: string, options: JsExecutorOptions): Promi
 			const timedOut = Boolean(timeoutSignal?.aborted) || isTimeoutReason(options.signal?.reason);
 			if (timedOut) {
 				outputSink.push(formatJsTimeoutAnnotation(legacyTimeoutMs ?? options.idleTimeoutMs));
+			} else if (error instanceof ToolAbortError) {
+				outputSink.push(error.message);
 			}
 			const summary = await outputSink.dump();
 			return {

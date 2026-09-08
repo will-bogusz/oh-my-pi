@@ -1,7 +1,13 @@
 import { describe, expect, it, vi } from "bun:test";
 import { executeAcpBuiltinSlashCommand } from "@oh-my-pi/pi-coding-agent/slash-commands/acp-builtins";
+import { lookupBuiltinSlashCommand } from "@oh-my-pi/pi-coding-agent/slash-commands/builtin-registry";
+import {
+	registerComputerController,
+	releaseComputerResourcesForOwner,
+} from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
 
 function acpRuntime(options?: { enabled?: boolean; available?: boolean }) {
+	const ownerId = crypto.randomUUID();
 	const store = {
 		"computer.enabled": options?.enabled ?? false,
 		"computer.display": "all",
@@ -28,22 +34,74 @@ function acpRuntime(options?: { enabled?: boolean; available?: boolean }) {
 		store["computer.enabled"] && options?.available !== false ? [{ name: "computer" }] : [],
 	);
 	const refreshBaseSystemPrompt = vi.fn(async () => {});
+	const abort = vi.fn(async () => releaseComputerResourcesForOwner(ownerId));
 	const output = vi.fn();
 	const runtime = {
 		session: {
+			abort,
+			getEvalKernelOwnerId: () => ownerId,
 			settings: { get, override, set },
 			getEvalPreludes,
 			refreshBaseSystemPrompt,
 		},
 		output,
 	};
-	return { getEvalPreludes, override, output, refreshBaseSystemPrompt, runtime, set, store };
+	return { ownerId, getEvalPreludes, override, output, refreshBaseSystemPrompt, runtime, set, store, abort };
 }
 
 const enabledStatus =
 	"Computer use: enabled · prelude: active · configured: display=all, maxWidth=1920, maxHeight=1200";
 
 describe("/computer slash command", () => {
+	it("off disables admission immediately but reports success only after resource release", async () => {
+		const h = acpRuntime({ enabled: true });
+		const started = Promise.withResolvers<void>();
+		const drained = Promise.withResolvers<void>();
+		let active = true;
+		const unregister = registerComputerController(h.ownerId, {
+			async release() {
+				started.resolve();
+				await drained.promise;
+				active = false;
+			},
+			async close() {},
+		});
+		try {
+			const off = Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer off", h.runtime]);
+			await started.promise;
+			expect(h.store["computer.enabled"]).toBe(false);
+			expect(active).toBe(true);
+			expect(h.output).not.toHaveBeenCalled();
+			drained.resolve();
+			await off;
+			expect(active).toBe(false);
+			expect(h.output).toHaveBeenCalledWith("Computer use disabled for this session.");
+			await Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer on", h.runtime]);
+			expect(h.store["computer.enabled"]).toBe(true);
+		} finally {
+			drained.resolve();
+			unregister();
+		}
+	});
+
+	it("off stays disabled and surfaces failed cleanup without claiming success", async () => {
+		const h = acpRuntime({ enabled: true });
+		const unregister = registerComputerController(h.ownerId, {
+			async release() {
+				throw new Error("exit was not confirmed");
+			},
+			async close() {},
+		});
+		try {
+			await expect(
+				Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer off", h.runtime]),
+			).rejects.toThrow("could not be released");
+			expect(h.store["computer.enabled"]).toBe(false);
+			expect(h.output).not.toHaveBeenCalled();
+		} finally {
+			unregister();
+		}
+	});
 	it("toggles a disabled session on and refreshes prelude guidance", async () => {
 		const h = acpRuntime({ enabled: false });
 		expect(await Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer", h.runtime])).toEqual({
@@ -52,6 +110,7 @@ describe("/computer slash command", () => {
 		expect(h.override).toHaveBeenCalledWith("computer.enabled", true);
 		expect(h.refreshBaseSystemPrompt).toHaveBeenCalledTimes(1);
 		expect(h.set).not.toHaveBeenCalled();
+		expect(h.abort).not.toHaveBeenCalled();
 		expect(h.output).toHaveBeenCalledWith(`Computer use enabled for this session. ${enabledStatus}`);
 	});
 
@@ -107,4 +166,67 @@ describe("/computer slash command", () => {
 		expect(h.override).not.toHaveBeenCalled();
 		expect(h.output).toHaveBeenCalledWith("Usage: /computer [on|off|status]");
 	});
+});
+
+it("TUI off shows stopping while resources drain and disabled only after completion", async () => {
+	const h = acpRuntime({ enabled: true });
+	const started = Promise.withResolvers<void>();
+	const drained = Promise.withResolvers<void>();
+	const showStatus = vi.fn();
+	const setText = vi.fn();
+	const unregister = registerComputerController(h.ownerId, {
+		async release() {
+			started.resolve();
+			await drained.promise;
+		},
+		async close() {},
+	});
+	try {
+		const handler = lookupBuiltinSlashCommand("computer")?.handleTui;
+		if (!handler) throw new Error("Missing computer TUI handler");
+		const pending = Reflect.apply(handler, undefined, [
+			{ args: "off" },
+			{ ctx: { session: h.runtime.session, showStatus, editor: { setText } } },
+		]);
+		await started.promise;
+		expect(h.store["computer.enabled"]).toBe(false);
+		expect(showStatus.mock.calls).toEqual([["Stopping computer use…"]]);
+		drained.resolve();
+		await pending;
+		expect(showStatus.mock.calls).toEqual([["Stopping computer use…"], ["Computer use disabled for this session."]]);
+	} finally {
+		drained.resolve();
+		unregister();
+	}
+});
+
+it("off stays disabled after successful drain even if prompt refresh fails", async () => {
+	const h = acpRuntime({ enabled: true });
+	const released = vi.fn(async () => {});
+	const unregister = registerComputerController(h.ownerId, { release: released, async close() {} });
+	h.refreshBaseSystemPrompt.mockImplementation(async () => {
+		throw new Error("prompt refresh failed");
+	});
+	try {
+		await expect(
+			Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer off", h.runtime]),
+		).rejects.toThrow("prompt refresh failed");
+		expect(released).toHaveBeenCalledTimes(1);
+		expect(h.store["computer.enabled"]).toBe(false);
+		expect(h.output).not.toHaveBeenCalled();
+	} finally {
+		unregister();
+	}
+});
+
+it("on restores its prior disabled setting when prompt refresh fails", async () => {
+	const h = acpRuntime({ enabled: false });
+	h.refreshBaseSystemPrompt.mockImplementation(async () => {
+		throw new Error("prompt refresh failed");
+	});
+	await expect(Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer on", h.runtime])).rejects.toThrow(
+		"prompt refresh failed",
+	);
+	expect(h.store["computer.enabled"]).toBe(false);
+	expect(h.output).not.toHaveBeenCalled();
 });

@@ -1,0 +1,176 @@
+{
+  "baseCommit": "87298bc207637b290854cbc79a934cef653447cb",
+  "patchSha256": "fe6f25ce356f9458aef2665a7a66efa6451eeb2df015fb8f311854300e71508b",
+  "files": [
+    {
+      "path": "libs/cua-driver/contract/manifest.json",
+      "sha256": "65d8a7efec18d6275abd60ae311c6bf5413f7abef115ed60e1fc43a3bf8f134a"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/cua-driver-contract/src/lib.rs",
+      "sha256": "cf194e1aa8b1eb30e4018efe6a9ff4f716a8d8757836678064b77142e2afa5dd"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/cua-driver-contract/src/outputs.rs",
+      "sha256": "75138a253c7aea8e1cede24e3bc3d15f452e1a99ca8799a0d05916175a03dc70"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/cua-driver-core/src/lib.rs",
+      "sha256": "2a77013b3d8b3a1c4c9f977103d6add13c6702b74bf560c212b59ffbd51c6236"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/cua-driver-core/src/operation.rs",
+      "sha256": "707b4e5a5e35373b5b152d13013cb917cdc61fdfc071e66af987fb2228d9b608"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/cua-driver-core/src/tool.rs",
+      "sha256": "eba74e0aea664a45f455b9a3f16c42a9bf0844877d48c2b9db2360fde229046d"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/cua-driver-sdk/src/abi.rs",
+      "sha256": "ad92617134b58eccad9b0d1521f2d87d31016319bdbab5f55b44d9a38e27258c"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/cua-driver-sdk/src/lib.rs",
+      "sha256": "5233cc5d5340911fa41841246f1873881d1f0ac98b1c076af4167581ab443157"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/cua-driver-sdk/src/runtime.rs",
+      "sha256": "a5fb926479ac07548fe5beefd36ba4b70d7fc2b25529cc7a7cc4dc423902f3e8"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/cua-driver/tests/capture_contract_test.rs",
+      "sha256": "82a824309cefceadb4fb25f7fd8b50304f37c3326b3c4f6f327d32150a2c2ad4"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/cua-driver/tests/harness_appkit_test.rs",
+      "sha256": "756156a6122950685ee311747f3906616ea1041d52357897f8e521aeebe87160"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/Cargo.toml",
+      "sha256": "fa3ccdfa57f3e226a67756ec6e553120ef832781136e92b7b3a74903e9b4c531"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/apps/mod.rs",
+      "sha256": "eaeb6657ac65a0ceacdf22402d319fde603d4a06c5f25e84bd6baa630c4c153c"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/apps/nsworkspace.rs",
+      "sha256": "b5db0502dc2f5b268c660ba1cbe3fba0a498d68e720d3adf69356fbf7959a1c6"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/ax/bindings.rs",
+      "sha256": "6775860ad640a41465c588053b678df6a6062de237ef962667f92cedf12c9e3d"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/ax/budget.rs",
+      "sha256": "3120ba29930aecb625fe2e4db669099d78c2d7ef61a7345ca7155a83094dfb53"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/ax/cache.rs",
+      "sha256": "b0734c12bcb969c17227026d7a6dfef0be0c31219478eb4166336578a803db3b"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/ax/exact_target.rs",
+      "sha256": "8eef59bc729e8325b5197c20c4542de1a579e6f44e81396e3ef7bdde64e0dc94"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/ax/mod.rs",
+      "sha256": "bc6bbbe0b1c62b79a7008e20bce87e99b65b81573107d1d8cb80fb2d60b4338f"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/ax/tree.rs",
+      "sha256": "7a2fa8ec63478a668b2966b6ef188ad2ec45fe4ace1c4024f661404c2cb0f955"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/ax/window_scope.rs",
+      "sha256": "4c97c8d6a30771d94bb052cb2665566c5d4413ff39c90e7d68e869db91c4e554"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/browser/consent_ui.rs",
+      "sha256": "d35a12eee0c9e01394e56f5d15e5bf78d05b26e992232371fadd175881086e06"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/browser/setup_ui.rs",
+      "sha256": "44b0429b58fa7c6cc4715f21c01bb9637e40e80a61ecc19615faba95b7eed0d2"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/capture.rs",
+      "sha256": "f538a925c98f4e619e8dbbaf82a2ca4925d9a1c04dced6ae0e56ec7c2787fc66"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/capture_lease.rs",
+      "sha256": "8b84519cd2960d33a9ecd0e57eb4017530bc07f5dad8ab0078ac8930e1f9180e"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/input/keyboard.rs",
+      "sha256": "bd2d76d02b9b638338dd600c5b7c7cc1f0c24bc1e7f782a720d79b2a2b8af596"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/input/mouse.rs",
+      "sha256": "f1a68565dfdccb7ec4ea45c8fa955a260d5c5beecf6c6849b19521eb71802702"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/lib.rs",
+      "sha256": "b52e651643a09ae4de651b4f16a1d5b7e49bd0e27617dfba8203400e3938e918"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/click.rs",
+      "sha256": "4ccd0cac1bace6dae95ff2dd4918f186901659610062fbcacf7d636806cf4bd3"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/drag.rs",
+      "sha256": "b39d445e8f78418ab273c83f9fd5a209e3319528e54cdb8376f0f16eb7fda7b9"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/get_desktop_state.rs",
+      "sha256": "9665a5f16527e581b892b1812272c7e7260582ea14cb437c5522a1f66dfb21b5"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/get_screen_size.rs",
+      "sha256": "1539a6b5ae06763916f183b0298950f37d8b3bc68bb0b8a6306e8f5be54db2ec"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/get_window_state.rs",
+      "sha256": "bbe45061f42e750ef88311de0bd080eb7ac439efee7e8bfb8a339689b7559e85"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/hotkey.rs",
+      "sha256": "08c930041d8b88cd6e9d2f363e26525848850bad534ded0ef542d9da14fbcf90"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/launch_app.rs",
+      "sha256": "fc989aefabf33c3bb7ac5ef6671bbe82831e858c56b2725cbce6e34dab6a6648"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/list_windows.rs",
+      "sha256": "45ef21bd67c3c1b70a3a6fee8512486cabc4ed73d40b111104696baf2857f8cf"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/mod.rs",
+      "sha256": "43cb505bdd230c69d6ec720cfc8658a0f69850e1e4d3b04d8543518fad2b9c53"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/move_cursor.rs",
+      "sha256": "5b61db118341b92a544f8419f9ce2f5a1d2a68724974252cd99f3015ee9f61db"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/press_key.rs",
+      "sha256": "24101499551c2fdfd0834622f6e9d6c050804491b8f38c3989114ccae408017f"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/scroll.rs",
+      "sha256": "37d5b42b35092952ae56980242aceab71a5436d6b2f0147d347a24cf907d062b"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/type_text.rs",
+      "sha256": "90895dee697c5cd5d4b00393f8f542f816a24f1eb860a7a977d35fcb009b8965"
+    },
+    {
+      "path": "libs/cua-driver/rust/crates/platform-macos/src/tools/type_text_chars.rs",
+      "sha256": "bad094d144e7f1526a672b500d98757abf8380b60b6c7ce78ce45e1f455463c4"
+    }
+  ],
+  "allFilesMatch": true,
+  "method": "git archive of affected base files, git apply --check, apply, byte comparison"
+}

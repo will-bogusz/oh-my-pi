@@ -3,6 +3,8 @@
  * legacy Jupyter MIME conventions. Pure function, no kernel coupling.
  */
 import { htmlToBasicMarkdown } from "../../web/scrapers/types";
+import { readControlImageMetadata } from "../control-images";
+import type { ControlImageMetadata } from "../types";
 
 /** Status event emitted by prelude helpers for TUI rendering. */
 export interface PythonStatusEvent {
@@ -14,7 +16,7 @@ export interface PythonStatusEvent {
 
 export type KernelDisplayOutput =
 	| { type: "json"; data: unknown }
-	| { type: "image"; data: string; mimeType: string }
+	| { type: "image"; data: string; mimeType: string; control?: ControlImageMetadata }
 	| { type: "markdown" }
 	| { type: "status"; event: PythonStatusEvent };
 
@@ -44,11 +46,12 @@ export async function renderKernelDisplay(content: Record<string, unknown>): Pro
 		return { text: "", outputs };
 	}
 
-	if (typeof data["image/png"] === "string") {
-		outputs.push({ type: "image", data: data["image/png"] as string, mimeType: "image/png" });
-	}
-	if (typeof data["image/jpeg"] === "string") {
-		outputs.push({ type: "image", data: data["image/jpeg"] as string, mimeType: "image/jpeg" });
+	const control = readControlImageMetadata(data["application/x-omp-control-image"]);
+	for (const mimeType of ["image/png", "image/jpeg", "image/webp"]) {
+		const image = data[mimeType];
+		if (typeof image === "string") {
+			outputs.push({ type: "image", data: image, mimeType, ...(control ? { control } : {}) });
+		}
 	}
 	if (data["application/json"] !== undefined) {
 		outputs.push({ type: "json", data: data["application/json"] });

@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<title>OMP Browser Relay settings</title>
+		<title>Connect this browser to OMP</title>
 		<style>
 			body {
 				font-family: system-ui, sans-serif;
@@ -38,16 +38,19 @@
 		</style>
 	</head>
 	<body>
-		<h1>OMP Browser Relay</h1>
-		<p class="hint">
-			The extension connects to a local <code>omp-browser-relay</code> process. Values here must match the flags the
-			relay was started with.
-		</p>
-		<label for="port">Relay port</label>
-		<input id="port" type="number" min="1" max="65535" />
-		<label for="token">Token (optional)</label>
-		<input id="token" type="text" autocomplete="off" />
-		<button id="save">Save</button><span id="status"></span>
+		<h1>Connect this browser to OMP</h1>
+		<p class="hint">Run <code>omp browser-relay pair</code>, then enter its code here. Give this browser profile a name you recognize, such as “Work Chrome”.</p>
+		<label for="label">Browser name</label>
+		<input id="label" type="text" maxlength="80" placeholder="Work Chrome" autocomplete="off" />
+		<label for="code">Pairing code</label>
+		<input id="code" type="password" autocomplete="off" placeholder="Code from OMP" />
+		<details><summary>Connection settings</summary>
+		<label for="port">Local port</label>
+		<input id="port" type="number" min="1" max="65535" /></details>
+		<button id="save">Save and connect</button><span id="status"></span>
+		<h2>Downloaded files</h2>
+		<p class="hint">Optionally let OMP find saved file paths for downloads it observes. Chrome grants access to download records; OMP queries a short time window and returns matching URLs. This does not change where Chrome saves files.</p>
+		<button id="downloads">Enable download file lookup</button><span id="downloads-status" role="status"></span>
 		<script src="options.js"></script>
 	</body>
 </html>

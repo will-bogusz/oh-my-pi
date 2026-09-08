@@ -31,6 +31,7 @@ import {
 	type AgentToolCall,
 	type AgentToolContext,
 	type AgentToolResult,
+	type AgentToolUpdateCallback,
 	type AgentTurnEndContext,
 	AppendOnlyContextManager,
 	type AsideMessage,
@@ -202,6 +203,7 @@ import { shutdownTinyTitleClient } from "../tiny/title-client";
 import type { ImageAttachmentEntry } from "../tools";
 import { resolveApproval } from "../tools/approval";
 import { type AskToolDetails, type AskToolInput, recoverAskQuestions } from "../tools/ask";
+import { releaseDeferredChromeTabsForOwner } from "../tools/browser/managed-chrome";
 import {
 	armIdleCloseForOwner,
 	cancelIdleCloseForOwner,
@@ -210,7 +212,7 @@ import {
 	releaseTabsForOwner,
 } from "../tools/browser/tab-supervisor";
 import type { CheckpointState, CompletedRewindState } from "../tools/checkpoint";
-import { releaseComputerSessionsForOwner } from "../tools/computer/supervisor";
+import { releaseComputerResourcesForOwner, releaseComputerSessionsForOwner } from "../tools/computer/supervisor";
 import { normalizeLocalScheme, resolveToCwd } from "../tools/path-utils";
 import {
 	buildResolveReminderMessage,
@@ -596,6 +598,16 @@ export class AgentSession {
 	#lastAppendOnlyResolution?: { enable: boolean; providerId: string | undefined };
 	#eventListeners: AgentSessionEventListener[] = [];
 	#activeToolExecutionUpdates = new Map<string, Extract<AgentSessionEvent, { type: "tool_execution_update" }>>();
+	#backgroundToolUpdates = new Map<
+		string,
+		{
+			sessionId: string;
+			toolName: string;
+			args: unknown;
+			active: boolean;
+			pending?: AgentToolResult<unknown>;
+		}
+	>();
 	#runStateListeners = new Set<(state: "running" | "idle") => void>();
 	#commandMetadataChangedListeners: CommandMetadataChangedListener[] = [];
 	#sessionChangeCallbacks = new Set<() => void>();
@@ -2464,7 +2476,11 @@ export class AgentSession {
 	 */
 	#subscriberEmitGate: Promise<void> = Promise.resolve();
 
-	async #emitSessionEvent(event: AgentSessionEvent, options: { detachExtensions?: boolean } = {}): Promise<void> {
+	async #emitSessionEvent(
+		event: AgentSessionEvent,
+		options: { detachExtensions?: boolean; sessionId?: string } = {},
+	): Promise<void> {
+		if (options.sessionId && (this.#isDisposed || options.sessionId !== this.sessionManager.getSessionId())) return;
 		if (event.type === "tool_execution_update") {
 			// Returned background calls have no later tool result to persist their
 			// terminal frame. Keep the latest update for future focus rebuilds;
@@ -2497,6 +2513,8 @@ export class AgentSession {
 				await extensionEmit;
 			}
 			await previousGate;
+			if (options.sessionId && (this.#isDisposed || options.sessionId !== this.sessionManager.getSessionId()))
+				return;
 			// Hold the wire-level agent_end until in-flight prompts unwind. Subscribers
 			// (rpc-mode, ACP, Cursor) treat agent_end as the "session is idle" signal;
 			// emitting while #promptInFlightCount > 0 lets a client fire its next
@@ -2510,6 +2528,20 @@ export class AgentSession {
 				return;
 			}
 			this.#emit(event);
+			if (event.type === "tool_execution_end") {
+				const background = this.#backgroundToolUpdates.get(event.toolCallId);
+				if (background) {
+					const state = (event.result.details as { async?: { state?: string } } | undefined)?.async?.state;
+					if (state === "running") {
+						// Flush only after subscribers have parked the initial card. A
+						// fast background completion must never precede its handoff.
+						background.active = true;
+						this.#flushBackgroundToolUpdate(event.toolCallId);
+					} else {
+						this.#backgroundToolUpdates.delete(event.toolCallId);
+					}
+				}
+			}
 		} finally {
 			releaseGate();
 		}
@@ -4319,6 +4351,45 @@ export class AgentSession {
 	}
 
 	/**
+	 * Display-only continuation of an existing call, independent of the agent
+	 * turn's closed EventStream. No messages, prompts, or job deliveries occur.
+	 */
+	createBackgroundToolUpdateSink(
+		toolCallId: string,
+		toolName: string,
+		args: unknown,
+	): AgentToolUpdateCallback<unknown> {
+		const background = { sessionId: this.sessionManager.getSessionId(), toolName, args, active: false };
+		this.#backgroundToolUpdates.set(toolCallId, background);
+		return partialResult => {
+			const current = this.#backgroundToolUpdates.get(toolCallId);
+			if (current !== background || this.#isDisposed || current.sessionId !== this.sessionManager.getSessionId())
+				return;
+			current.pending = partialResult;
+			this.#flushBackgroundToolUpdate(toolCallId);
+		};
+	}
+
+	#flushBackgroundToolUpdate(toolCallId: string): void {
+		const background = this.#backgroundToolUpdates.get(toolCallId);
+		if (!background?.active || !background.pending) return;
+		const partialResult = background.pending;
+		background.pending = undefined;
+		const state = (partialResult.details as { async?: { state?: string } } | undefined)?.async?.state;
+		if (state === "completed" || state === "failed") this.#backgroundToolUpdates.delete(toolCallId);
+		void this.#emitSessionEvent(
+			{
+				type: "tool_execution_update",
+				toolCallId,
+				toolName: background.toolName,
+				args: background.args,
+				partialResult,
+			},
+			{ sessionId: background.sessionId },
+		).catch(error => logger.warn("Background tool display update failed", { toolCallId, error: String(error) }));
+	}
+
+	/**
 	 * Observe authoritative run-state transitions before public `agent_end`
 	 * deferral, for lifecycle owners that must not remain stale while prompts unwind.
 	 */
@@ -4505,6 +4576,7 @@ export class AgentSession {
 	 */
 	beginDispose(): void {
 		this.#isDisposed = true;
+		this.#backgroundToolUpdates.clear();
 		this.#modelDiscoveryAbortController.abort();
 		this.#queuedMessageDrainBlocked = false;
 		this.#usagePreflightReadyForNextModelCall = false;
@@ -4571,7 +4643,10 @@ export class AgentSession {
 		if (!ownerId) return;
 		try {
 			const released = await withTimeout(
-				releaseTabsForOwner(ownerId, { kill: true }),
+				Promise.all([
+					releaseDeferredChromeTabsForOwner(ownerId),
+					releaseTabsForOwner(ownerId, { kill: true }),
+				]).then(counts => counts.reduce((sum, count) => sum + count, 0)),
 				3_000,
 				"Timed out releasing owned browser tabs during dispose",
 			);
@@ -5687,6 +5762,7 @@ export class AgentSession {
 		// still-cached background-task snapshot from the old conversation must not
 		// survive to be replayed by a focus rebuild in the reset session (#10447).
 		this.#activeToolExecutionUpdates.clear();
+		this.#backgroundToolUpdates.clear();
 	}
 
 	/**
@@ -7763,6 +7839,8 @@ export class AgentSession {
 		// leave any queued steer/follow-up visible for the user rather than
 		// auto-starting a fresh turn during cleanup.
 		this.#abortInProgress = true;
+		let computerCleanup: Promise<PromiseSettledResult<void>[]> | undefined;
+		let computerCleanupFailure: { error: unknown } | undefined;
 		try {
 			this.#titleGenerationAbortController.abort();
 			if (!this.#isDisposed) this.#titleGenerationAbortController = new AbortController();
@@ -7790,6 +7868,10 @@ export class AgentSession {
 			this.abortEval();
 			const postPromptDrain = this.#cancelPostPromptTasks();
 			this.agent.abort(options?.reason);
+			// Escape may land between computer calls, when the last screenshot's
+			// rendering lease is idle. Release only this actor's current resources;
+			// the enabled setting and reusable prelude survive the interruption.
+			computerCleanup = Promise.allSettled([releaseComputerResourcesForOwner(this.getEvalKernelOwnerId())]);
 			await postPromptDrain;
 			await this.agent.waitForIdle();
 			// `/compact` disconnects the agent subscription until its finally block.
@@ -7825,9 +7907,16 @@ export class AgentSession {
 				this.#preserveAdvisorCard(card);
 			}
 		} finally {
-			this.#abortInProgress = false;
-			this.#drainStrandedQueuedMessages();
+			try {
+				for (const result of (await computerCleanup) ?? []) {
+					if (result.status === "rejected") computerCleanupFailure = { error: result.reason };
+				}
+			} finally {
+				this.#abortInProgress = false;
+				this.#drainStrandedQueuedMessages();
+			}
 		}
+		if (computerCleanupFailure) throw computerCleanupFailure.error;
 	}
 
 	/**

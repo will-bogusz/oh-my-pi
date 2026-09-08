@@ -1,43 +1,25 @@
-// extension/background.ts
-var DEFAULT_PORT = 9224;
-var PING_INTERVAL_MS = 20000;
-var RECONNECT_MIN_MS = 1000;
-var RECONNECT_MAX_MS = 1e4;
-var ws = null;
-var reconnectDelay = RECONNECT_MIN_MS;
-var pingTimer = null;
-var relayInitiatedDetachTabs = new Set;
-async function loadSettings() {
-  const stored = await chrome.storage.local.get({ port: DEFAULT_PORT, token: "" });
-  const port = Number(stored.port);
-  return {
-    port: Number.isInteger(port) && port > 0 && port <= 65535 ? port : DEFAULT_PORT,
-    token: typeof stored.token === "string" ? stored.token : ""
-  };
+// extension/debugger-ownership.ts
+async function ownedDebuggerTabs(targets, probe) {
+  const owned = await Promise.all(targets.map(async (target) => {
+    if (!target.attached || target.tabId === undefined)
+      return;
+    try {
+      await probe(target.tabId);
+      return target.tabId;
+    } catch {
+      return;
+    }
+  }));
+  return owned.filter((tabId) => tabId !== undefined);
 }
-function snapshot(tab) {
-  if (tab.id === undefined)
-    return null;
-  return {
-    tabId: tab.id,
-    url: tab.url ?? tab.pendingUrl ?? "",
-    title: tab.title ?? "",
-    active: tab.active,
-    windowId: tab.windowId,
-    pinned: tab.pinned,
-    groupId: tab.groupId
-  };
-}
-var ompGroupTitle = null;
-var groupOps = Promise.resolve();
-function enqueueGroupOp(fn) {
-  const result = groupOps.then(fn, fn);
-  groupOps = result.catch(() => {});
-  return result;
-}
-async function groupTabs(tabIds, title, color) {
-  ompGroupTitle = title;
-  chrome.storage.session.set({ ompGroupTitle: title });
+
+// extension/task-groups.ts
+async function groupTabs(tabIds, title, color, taskId = "legacy") {
+  const stored = await chrome.storage.session.get({ taskGroups: {}, taskLabels: {} });
+  const groups = stored.taskGroups && typeof stored.taskGroups === "object" ? stored.taskGroups : {};
+  const labels = stored.taskLabels && typeof stored.taskLabels === "object" ? stored.taskLabels : {};
+  const taskTitle = typeof labels[taskId] === "string" ? labels[taskId] : title;
+  labels[taskId] = taskTitle;
   const byWindow = new Map;
   for (const tabId of tabIds) {
     try {
@@ -51,44 +33,108 @@ async function groupTabs(tabIds, title, color) {
   }
   const grouped = {};
   for (const [windowId, ids] of byWindow) {
-    const existing = await chrome.tabGroups.query({ title, windowId });
+    const key = JSON.stringify([taskId, windowId]);
+    const existing = (await chrome.tabGroups.query({ windowId })).find((group) => group.id === groups[key]);
     let groupId;
-    if (existing[0]) {
-      groupId = existing[0].id;
-      for (const dupe of existing.slice(1)) {
-        const dupeTabs = await chrome.tabs.query({ groupId: dupe.id });
-        const dupeIds = dupeTabs.map((tab) => tab.id).filter((id) => id !== undefined);
-        if (dupeIds.length > 0)
-          await chrome.tabs.group({ tabIds: dupeIds, groupId });
-      }
+    if (existing) {
+      groupId = existing.id;
       await chrome.tabs.group({ tabIds: ids, groupId });
     } else {
       groupId = await chrome.tabs.group({ tabIds: ids });
+      await chrome.tabGroups.update(groupId, { title: taskTitle, color });
     }
-    await chrome.tabGroups.update(groupId, { title, color });
+    groups[key] = groupId;
     for (const id of ids)
       grouped[String(id)] = groupId;
   }
+  await chrome.storage.session.set({ taskGroups: groups, taskLabels: labels });
   return { grouped };
 }
-async function restoreGroups() {
-  if (!ompGroupTitle) {
-    const stored = await chrome.storage.session.get({ ompGroupTitle: "" }).catch(() => ({ ompGroupTitle: "" }));
-    ompGroupTitle = typeof stored.ompGroupTitle === "string" && stored.ompGroupTitle ? stored.ompGroupTitle : null;
+
+// ../coding-agent/src/tools/browser/relay/protocol.ts
+function isDownloadFileQueries(value) {
+  return Array.isArray(value) && value.length <= 256 && value.every((entry) => entry && typeof entry === "object" && typeof entry.id === "string" && entry.id.length > 0 && typeof entry.url === "string" && entry.url.length > 0 && Number.isSafeInteger(entry.startedAt) && entry.startedAt > 0 && entry.startedAt < 8640000000000000 - 5000);
+}
+
+// extension/download-files.ts
+async function findDownloadFiles(queries, api) {
+  if (!isDownloadFileQueries(queries))
+    throw new Error("Invalid observed-download queries");
+  if (!await api.permissions.contains({ permissions: ["downloads"] }))
+    return { available: false, reason: "Saved download paths are not enabled. In this OMP extension's settings, choose Enable download file lookup and approve Chrome's permission prompt." };
+  const matches = [];
+  for (const query of queries) {
+    const lower = Math.max(0, query.startedAt - 5000), upper = query.startedAt + 5000;
+    const rows = await api.downloads.search({ startedAfter: new Date(lower).toISOString(), startedBefore: new Date(upper).toISOString(), limit: 101, orderBy: ["-startTime"] });
+    const candidates = rows.slice(0, 100).filter((row) => {
+      const at = Date.parse(row.startTime);
+      return Number.isFinite(at) && at >= lower && at <= upper && (row.url === query.url || row.finalUrl === query.url);
+    }).map((row) => ({ id: row.id, path: row.filename, url: row.url, finalUrl: row.finalUrl, referrer: row.referrer, startedAt: Date.parse(row.startTime), state: row.state, bytesReceived: row.bytesReceived, totalBytes: row.totalBytes, exists: row.exists }));
+    matches.push({ id: query.id, truncated: rows.length > 100, candidates });
   }
-  if (!ompGroupTitle)
-    return;
-  const groups = await chrome.tabGroups.query({ title: ompGroupTitle }).catch(() => []);
-  for (const group of groups) {
-    const tabs = await chrome.tabs.query({ groupId: group.id }).catch(() => []);
-    const ids = tabs.map((tab) => tab.id).filter((id) => id !== undefined);
-    if (ids.length > 0)
-      await chrome.tabs.ungroup(ids).catch(() => {});
-  }
+  return { available: true, correlation: "url-and-time-candidates", matches };
+}
+
+// extension/background.ts
+var PING_INTERVAL_MS = 20000;
+var RECONNECT_MIN_MS = 1000;
+var RECONNECT_MAX_MS = 1e4;
+var ws = null;
+var connecting = false;
+var relayReady = false;
+var pendingEvents = [];
+var reconnectDelay = RECONNECT_MIN_MS;
+var pingTimer = null;
+async function loadSettings() {
+  const response = await fetch(chrome.runtime.getURL("connection.json"));
+  const defaults = await response.json();
+  const defaultPort = defaults && typeof defaults === "object" && "port" in defaults ? defaults.port : undefined;
+  if (!response.ok || typeof defaultPort !== "number" || !Number.isInteger(defaultPort) || defaultPort < 1 || defaultPort > 65535)
+    throw new Error("Invalid extension connection configuration; reinstall the extension.");
+  const stored = await chrome.storage.local.get({ port: defaultPort, browserId: "", browserLabel: "", credential: "", pairingCode: "" });
+  const port = Number(stored.port);
+  const browserId = typeof stored.browserId === "string" && stored.browserId ? stored.browserId : crypto.randomUUID();
+  if (browserId !== stored.browserId)
+    await chrome.storage.local.set({ browserId });
+  return {
+    port: Number.isInteger(port) && port > 0 && port <= 65535 ? port : defaultPort,
+    browserId,
+    browserLabel: typeof stored.browserLabel === "string" ? stored.browserLabel : "",
+    credential: typeof stored.credential === "string" ? stored.credential : "",
+    pairingCode: typeof stored.pairingCode === "string" ? stored.pairingCode : ""
+  };
+}
+function snapshot(tab) {
+  if (tab.id === undefined)
+    return null;
+  return {
+    tabId: tab.id,
+    url: tab.url || tab.pendingUrl || "",
+    title: tab.title ?? "",
+    active: tab.active,
+    windowId: tab.windowId,
+    pinned: tab.pinned,
+    groupId: tab.groupId
+  };
+}
+var groupOps = Promise.resolve();
+function enqueueGroupOp(fn) {
+  const result = groupOps.then(fn, fn);
+  groupOps = result.catch(() => {});
+  return result;
 }
 function post(msg) {
-  if (ws?.readyState === WebSocket.OPEN)
-    ws.send(JSON.stringify(msg));
+  if (ws?.readyState !== WebSocket.OPEN)
+    return;
+  if (!relayReady) {
+    if (pendingEvents.length >= 20000) {
+      ws.close();
+      return;
+    }
+    pendingEvents.push(msg);
+    return;
+  }
+  ws.send(JSON.stringify(msg));
 }
 async function setBadge(connected) {
   try {
@@ -104,38 +150,38 @@ async function buildHello() {
     if (snap)
       snapshots.push(snap);
   }
-  const attachedTabIds = [];
-  for (const target of targets) {
-    if (target.attached && target.tabId !== undefined)
-      attachedTabIds.push(target.tabId);
-  }
+  const attachedTabIds = await ownedDebuggerTabs(targets, (tabId) => chrome.debugger.sendCommand({ tabId }, "Target.getTargetInfo"));
   const versionMatch = /Chrome\/[\d.]+/.exec(navigator.userAgent);
   return {
     t: "hello",
     userAgent: navigator.userAgent,
     browserVersion: versionMatch?.[0] ?? "Chrome/unknown",
+    extensionBuildId: "6b073335405833ea4a8669381b77235b641d70fffca253a7d068a30967b19244",
     tabs: snapshots,
     attachedTabIds
   };
 }
 async function runRpc(msg) {
   switch (msg.op) {
+    case "queryTabs":
+      return { tabs: (await chrome.tabs.query({})).map(snapshot).filter((tab) => tab !== null) };
+    case "downloadFiles":
+      return await findDownloadFiles(msg.queries, chrome);
     case "attach":
       await chrome.debugger.attach({ tabId: msg.tabId }, "1.3");
       return {};
     case "detach":
-      relayInitiatedDetachTabs.add(msg.tabId);
-      try {
-        await chrome.debugger.detach({ tabId: msg.tabId });
-        return {};
-      } catch (error) {
-        relayInitiatedDetachTabs.delete(msg.tabId);
-        throw error;
-      }
+      await chrome.debugger.detach({ tabId: msg.tabId });
+      post({ t: "detached", tabId: msg.tabId, reason: "target_closed", relayInitiated: true });
+      return {};
     case "send":
       return await chrome.debugger.sendCommand(msg.sessionId ? { tabId: msg.tabId, sessionId: msg.sessionId } : { tabId: msg.tabId }, msg.method, msg.params);
+    case "navigateTab": {
+      await chrome.tabs.update(msg.tabId, { url: msg.url });
+      return {};
+    }
     case "createTab": {
-      const tab = await chrome.tabs.create({ url: msg.url });
+      const tab = await chrome.tabs.create({ url: msg.url, active: false, windowId: msg.windowId, openerTabId: msg.openerTabId });
       const snap = snapshot(tab);
       if (!snap)
         throw new Error("created tab has no id");
@@ -152,12 +198,14 @@ async function runRpc(msg) {
     }
     case "group":
       return await enqueueGroupOp(() => groupTabs(msg.tabIds, msg.title, msg.color));
+    case "taskGroup":
+      return await enqueueGroupOp(() => groupTabs([msg.tabId], msg.label, "cyan", msg.taskId));
     case "ungroup":
       await enqueueGroupOp(() => chrome.tabs.ungroup(msg.tabIds).catch(() => {}));
       return {};
   }
 }
-function handleRelayMessage(raw) {
+async function handleRelayMessage(socket, raw) {
   let msg;
   try {
     msg = JSON.parse(raw);
@@ -166,8 +214,32 @@ function handleRelayMessage(raw) {
   }
   if (msg.t === "pong")
     return;
-  runRpc(msg).then((result) => post({ t: "rpcResult", id: msg.id, ok: true, result })).catch((err) => {
-    post({ t: "rpcResult", id: msg.id, ok: false, error: err instanceof Error ? err.message : String(err) });
+  if (msg.t === "authenticationError") {
+    await chrome.storage.local.set({ connectionError: msg.error });
+    socket.close();
+    return;
+  }
+  if (msg.t === "authenticated") {
+    if (msg.credential)
+      await chrome.storage.local.set({ credential: msg.credential, pairingCode: "", connectionError: "" });
+    const hello = await buildHello();
+    if (ws !== socket || socket.readyState !== WebSocket.OPEN)
+      return;
+    socket.send(JSON.stringify(hello));
+    relayReady = true;
+    for (const event of pendingEvents)
+      socket.send(JSON.stringify(event));
+    pendingEvents = [];
+    await chrome.storage.local.set({ connectionError: "" });
+    await setBadge(true);
+    return;
+  }
+  const reply = (response) => {
+    if (ws === socket && socket.readyState === WebSocket.OPEN && relayReady)
+      socket.send(JSON.stringify(response));
+  };
+  runRpc(msg).then((result) => reply({ t: "rpcResult", id: msg.id, ok: true, result })).catch((err) => {
+    reply({ t: "rpcResult", id: msg.id, ok: false, error: err instanceof Error ? err.message : String(err) });
   });
 }
 function scheduleReconnect() {
@@ -176,38 +248,53 @@ function scheduleReconnect() {
   setTimeout(() => void connect(), delay);
 }
 async function connect() {
-  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING))
+  if (connecting || ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING))
     return;
-  const settings = await loadSettings();
-  const url = `ws://127.0.0.1:${settings.port}/ext${settings.token ? `?token=${encodeURIComponent(settings.token)}` : ""}`;
-  const socket = new WebSocket(url);
-  ws = socket;
-  socket.onopen = () => {
-    reconnectDelay = RECONNECT_MIN_MS;
-    setBadge(true);
-    buildHello().then((hello) => post(hello));
-    clearInterval(pingTimer ?? undefined);
-    pingTimer = setInterval(() => post({ t: "ping" }), PING_INTERVAL_MS);
-  };
-  socket.onmessage = (event) => {
-    if (typeof event.data === "string")
-      handleRelayMessage(event.data);
-  };
-  socket.onclose = () => {
-    if (ws !== socket)
-      return;
-    ws = null;
-    if (pingTimer !== null) {
-      clearInterval(pingTimer);
-      pingTimer = null;
-    }
+  connecting = true;
+  try {
+    const settings = await loadSettings();
+    const healthResponse = await fetch(`http://127.0.0.1:${settings.port}/health`, { signal: AbortSignal.timeout(1500), redirect: "error" });
+    const health = healthResponse.ok ? await healthResponse.json() : undefined;
+    if (health?.service !== "omp-browser" || health.protocol !== 2)
+      throw new Error("This endpoint uses an older browser service. Use another port or update it after active tasks finish.");
+    const url = `ws://127.0.0.1:${settings.port}/ext`;
+    const socket = new WebSocket(url);
+    ws = socket;
+    relayReady = false;
+    pendingEvents = [];
+    socket.onopen = () => {
+      reconnectDelay = RECONNECT_MIN_MS;
+      socket.send(JSON.stringify({ t: "authenticate", auth: { id: settings.browserId, label: settings.browserLabel, credential: settings.credential || undefined, pairingCode: settings.pairingCode || undefined } }));
+      clearInterval(pingTimer ?? undefined);
+      pingTimer = setInterval(() => post({ t: "ping" }), PING_INTERVAL_MS);
+    };
+    socket.onmessage = (event) => {
+      if (typeof event.data === "string" && ws === socket)
+        handleRelayMessage(socket, event.data);
+    };
+    socket.onclose = () => {
+      if (ws !== socket)
+        return;
+      ws = null;
+      relayReady = false;
+      pendingEvents = [];
+      if (pingTimer !== null) {
+        clearInterval(pingTimer);
+        pingTimer = null;
+      }
+      setBadge(false);
+      scheduleReconnect();
+    };
+    socket.onerror = () => {
+      socket.close();
+    };
+  } catch (error) {
+    await chrome.storage.local.set({ connectionError: error instanceof Error ? error.message : String(error) });
     setBadge(false);
-    restoreGroups();
     scheduleReconnect();
-  };
-  socket.onerror = () => {
-    socket.close();
-  };
+  } finally {
+    connecting = false;
+  }
 }
 chrome.debugger.onEvent.addListener((source, method, params) => {
   if (source.tabId === undefined)
@@ -217,8 +304,10 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
 chrome.debugger.onDetach.addListener((source, reason) => {
   if (source.tabId === undefined)
     return;
-  const relayInitiated = relayInitiatedDetachTabs.delete(source.tabId);
-  post({ t: "detached", tabId: source.tabId, reason, relayInitiated });
+  post({ t: "detached", tabId: source.tabId, reason });
+});
+chrome.tabs.onActivated.addListener((info) => {
+  post({ t: "tabActivated", tabId: info.tabId, windowId: info.windowId });
 });
 chrome.tabs.onCreated.addListener((tab) => {
   const snap = snapshot(tab);
@@ -233,18 +322,36 @@ chrome.tabs.onUpdated.addListener((_tabId, _changeInfo, tab) => {
 chrome.tabs.onRemoved.addListener((tabId) => {
   post({ t: "tabRemoved", tabId });
 });
+chrome.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
+  post({ t: "tabRemoved", tabId: removedTabId });
+  chrome.tabs.get(addedTabId).then((tab) => {
+    const snap = snapshot(tab);
+    if (snap)
+      post({ t: "tabCreated", tab: snap });
+  }).catch(() => {
+    return;
+  });
+});
+chrome.action.onClicked.addListener(() => {
+  chrome.runtime.openOptionsPage();
+});
 chrome.alarms.create("omp-relay-keepalive", { periodInMinutes: 0.5 });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "omp-relay-keepalive")
     connect();
 });
-chrome.storage.onChanged.addListener((_changes, areaName) => {
-  if (areaName !== "local")
+chrome.runtime.onMessage.addListener((message) => {
+  if (!message || typeof message !== "object" || !("type" in message) || message.type !== "reconnect")
     return;
-  ws?.close();
+  if (ws) {
+    const previous = ws;
+    ws = null;
+    previous.close();
+  }
+  clearInterval(pingTimer ?? undefined);
+  setBadge(false);
   connect();
 });
-chrome.action.onClicked.addListener(() => void chrome.runtime.openOptionsPage());
 chrome.runtime.onInstalled.addListener(() => void connect());
 chrome.runtime.onStartup.addListener(() => void connect());
 connect();

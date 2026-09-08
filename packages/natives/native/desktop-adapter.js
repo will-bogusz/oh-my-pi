@@ -172,6 +172,11 @@ export function adaptDesktopSession(NativeDesktopSession) {
 			}
 		}
 
+		async pinWindow() {
+			this.#ensureOpen();
+			throw desktopError("InvalidTarget", "the installed native addon cannot pin window ownership; rebuild the native addon");
+		}
+
 		async listDisplays() {
 			this.#ensureOpen();
 			throw desktopError("CaptureFailed", "the installed native addon does not expose display enumeration");
@@ -276,6 +281,11 @@ export function adaptDesktopSession(NativeDesktopSession) {
 			throw desktopError("BackgroundUnavailable", "the installed native addon does not support window control");
 		}
 
+		async setWindowFrame() {
+			this.#ensureOpen();
+			throw desktopError("BackgroundUnavailable", "the installed native addon does not support window geometry");
+		}
+
 		async axSnapshot() {
 			this.#ensureOpen();
 			throw desktopError("AxUnsupported", "accessibility is unavailable in the installed native addon");
@@ -314,6 +324,10 @@ export function adaptDesktopSession(NativeDesktopSession) {
 		}
 
 		async axSetValue() {
+			return this.axSnapshot();
+		}
+
+		async axInsertText() {
 			return this.axSnapshot();
 		}
 

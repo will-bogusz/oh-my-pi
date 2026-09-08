@@ -11,6 +11,7 @@ import { describeLoopCondition } from "../modes/loop-condition";
 import { describeLoopLimitRuntime } from "../modes/loop-limit";
 import type { InteractiveModeContext } from "../modes/types";
 import type { AgentSession } from "../session/agent-session";
+import { USER_INTERRUPT_LABEL } from "../session/messages";
 import { commandConsumed, errorMessage, usage } from "./helpers/parse";
 import { handleSecurityCommand } from "./helpers/security";
 import type { ParsedSlashCommand, SlashCommandSpec, TuiSlashCommandRuntime } from "./types";
@@ -127,10 +128,16 @@ async function applyComputerUseToggle(session: AgentSession, enable: boolean): P
 		session.settings.override("computer.enabled", previous);
 		return "Computer use is unavailable in this session.";
 	}
+	// Disable admission before interrupting the agent. Merely draining the worker
+	// leaves the model running: it can interpret disabled access as a transient
+	// failure and continue the same task through another control route. The user
+	// interruption also drains this owner's resources and suppresses auto-resume.
+	if (!enable) await session.abort({ reason: USER_INTERRUPT_LABEL });
 	try {
 		await session.refreshBaseSystemPrompt();
 	} catch (error) {
-		session.settings.override("computer.enabled", previous);
+		// An off request must never restore admission after draining resources.
+		if (enable) session.settings.override("computer.enabled", previous);
 		throw error;
 	}
 	return enable
@@ -605,6 +612,7 @@ export const BUILTIN_MODE_SLASH_COMMANDS: ReadonlyArray<SlashCommandSpec> = [
 			if (!arg || arg === "toggle" || arg === "on" || arg === "off") {
 				const enable =
 					arg === "off" ? false : arg === "on" || !runtime.ctx.session.settings.get("computer.enabled");
+				if (!enable) runtime.ctx.showStatus("Stopping computer use…");
 				runtime.ctx.showStatus(await applyComputerUseToggle(runtime.ctx.session, enable));
 				runtime.ctx.editor.setText("");
 				return;

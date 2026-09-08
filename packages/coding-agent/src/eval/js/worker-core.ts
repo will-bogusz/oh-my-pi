@@ -1,4 +1,4 @@
-import { ToolError } from "../../tools/tool-errors";
+import { ToolAbortError, ToolError } from "../../tools/tool-errors";
 import { JsRuntime, type RuntimeHooks } from "./shared/runtime";
 import type {
 	RunErrorPayload,
@@ -81,7 +81,7 @@ function errorPayload(error: unknown): RunErrorPayload {
 }
 
 function errorFromPayload(payload: RunErrorPayload): Error {
-	const ctor = payload.isToolError ? ToolError : Error;
+	const ctor = payload.isAbort ? ToolAbortError : payload.isToolError ? ToolError : Error;
 	const error = new ctor(payload.message);
 	if (payload.name) error.name = payload.name;
 	if (payload.stack) error.stack = payload.stack;

@@ -6,6 +6,10 @@
 
 - Fixed `$which` capturing `Bun.which` at import on Linux and Windows, so `Bun.which` stubs installed later (e.g. per-test spies) are honoured and PATH-only language servers no longer leak into test results.
 
+### Changed
+
+- Fixed error conversion discarding the underlying failure and message from native error events.
+
 ## [18.1.13] - 2026-09-07
 
 ### Fixed

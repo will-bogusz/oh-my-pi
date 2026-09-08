@@ -156,6 +156,7 @@ interface ModuleResolver {
 interface ResolverRegistration {
 	runtimeNodeModules: string;
 	stubs: Record<string, string>;
+	pinnedSpecifiers?: Record<string, string>;
 }
 
 const REGISTRY = Symbol.for("omp.runtimeModuleResolver.registry");
@@ -188,12 +189,16 @@ export interface RuntimeResolverOptions {
 	runtimeNodeModules: string;
 	/** Bare specifier → absolute file path overrides (e.g. `sharp` → no-op stub). */
 	stubs?: Record<string, string>;
+	/** Exact bare specifiers owned by an isolated worker; override stock resolution. */
+	pinnedSpecifiers?: Record<string, string>;
 }
 
 /**
  * Patch `node:module`'s resolver (idempotently) so bare specifiers that the
  * stock compiled-binary resolver cannot find fall back to the registered
- * runtime caches. Stock resolution is tried first and kept for anything
+ * runtime caches. Explicit pinned specifiers take precedence in isolated
+ * workers whose native dependencies must not resolve through host ancestors.
+ * Otherwise stock resolution is tried first and kept for anything
  * outside the registered roots (bundled imports, node builtins, host or
  * extension trees). Multiple runtime roots may register; they are consulted
  * in registration order. Returns an uninstaller that drops the registration
@@ -214,11 +219,30 @@ export interface RuntimeResolverOptions {
  * (tiny-inference, fastembed); never install it in the main agent process,
  * where legacy-pi extensions rely on `createRequire` relative requires.
  */
-export function installRuntimeModuleResolver({ runtimeNodeModules, stubs = {} }: RuntimeResolverOptions): () => void {
+export function installRuntimeModuleResolver({
+	runtimeNodeModules,
+	stubs = {},
+	pinnedSpecifiers = {},
+}: RuntimeResolverOptions): () => void {
 	const registry = resolverRegistry();
+	for (const [specifier, destination] of Object.entries(pinnedSpecifiers)) {
+		if (
+			specifier.startsWith(".") ||
+			specifier.startsWith("node:") ||
+			path.isAbsolute(specifier) ||
+			!path.isAbsolute(destination)
+		)
+			throw new Error("Runtime pins require bare specifiers and absolute destinations");
+		for (const entry of registry) {
+			const previous = entry.pinnedSpecifiers?.[specifier];
+			if (previous && previous !== destination) throw new Error(`Conflicting runtime pin for ${specifier}`);
+		}
+	}
 	const existing = registry.find(entry => entry.runtimeNodeModules === runtimeNodeModules);
-	if (existing) Object.assign(existing.stubs, stubs);
-	else registry.push({ runtimeNodeModules, stubs: { ...stubs } });
+	if (existing) {
+		Object.assign(existing.stubs, stubs);
+		Object.assign((existing.pinnedSpecifiers ??= {}), pinnedSpecifiers);
+	} else registry.push({ runtimeNodeModules, stubs: { ...stubs }, pinnedSpecifiers: { ...pinnedSpecifiers } });
 
 	const resolver = (Module as unknown as { default?: ModuleResolver } & ModuleResolver).default ?? Module;
 	const target = resolver as unknown as ModuleResolver & { [PATCHED]?: () => void };
@@ -232,6 +256,12 @@ export function installRuntimeModuleResolver({ runtimeNodeModules, stubs = {} }:
 	const pristine = target._resolveFilename;
 	const original = pristine.bind(target);
 	target._resolveFilename = (request: string, parent: unknown, isMain: boolean, options?: unknown): string => {
+		// Bun createRequire may omit its parent even for a known bundle. Native
+		// artifacts need explicit pins rather than trusting an ancestor package.
+		for (const registration of resolverRegistry()) {
+			const pinned = registration.pinnedSpecifiers;
+			if (pinned && Object.hasOwn(pinned, request)) return pinned[request]!;
+		}
 		let stockResolved: string | null = null;
 		let stockError: unknown;
 		try {
@@ -297,7 +327,7 @@ export interface EnsureRuntimeInstalledOptions {
 	/** Directory owning the runtime `package.json` + `node_modules`. */
 	runtimeDir: string;
 	install: RuntimeInstallSpec;
-	/** Package whose installed manifest marks the runtime complete; defaults to the first dependency. */
+	/** Package whose installed manifest is checked alongside completed install evidence; defaults to the first dependency. */
 	probePackage?: string;
 	/** Phase notifications (progress UI); not emitted when already installed. */
 	onPhase?: (phase: RuntimeInstallPhase) => void;
@@ -400,6 +430,30 @@ async function runRuntimeInstall(runtimeDir: string): Promise<void> {
 	);
 }
 
+const RUNTIME_COMPLETION = ".omp-runtime-complete.json";
+
+/** Staging must not change what a caller's relative local package specifications mean. */
+function resolveLocalDependencies(runtimeDir: string, dependencies: Record<string, string>): Record<string, string> {
+	return Object.fromEntries(
+		Object.entries(dependencies)
+			.sort(([a], [b]) => a.localeCompare(b))
+			.map(([name, spec]) => [
+				name,
+				spec.startsWith("file:") ? `file:${path.resolve(runtimeDir, spec.slice(5))}` : spec,
+			]),
+	);
+}
+
+async function completedRuntime(nodeModules: string, fingerprint: string, probePackage: string): Promise<boolean> {
+	try {
+		if ((await fsp.readFile(path.join(nodeModules, RUNTIME_COMPLETION), "utf8")) !== fingerprint) return false;
+	} catch (error) {
+		if (isEnoent(error)) return false;
+		throw error;
+	}
+	return readManifest(path.join(nodeModules, ...probePackage.split("/"))) !== null;
+}
+
 /**
  * Materialize a pinned dependency set into `runtimeDir` (idempotent,
  * cross-process safe). Returns `runtimeDir`.
@@ -421,8 +475,14 @@ export async function ensureRuntimeInstalled(options: EnsureRuntimeInstalledOpti
 		}
 	}
 	if (!probePackage) throw new Error(`Runtime install at ${runtimeDir} declares no dependencies`);
-	const probeManifest = Bun.file(path.join(runtimeDir, "node_modules", ...probePackage.split("/"), "package.json"));
-	if (await probeManifest.exists()) return runtimeDir;
+	const stagedInstall: RuntimeInstallSpec = {
+		dependencies: resolveLocalDependencies(runtimeDir, install.dependencies),
+		overrides: resolveLocalDependencies(runtimeDir, install.overrides ?? {}),
+		trustedDependencies: [...new Set(install.trustedDependencies ?? [])].sort(),
+	};
+	const fingerprint = JSON.stringify({ version: 1, platform: process.platform, arch: process.arch, ...stagedInstall });
+	const nodeModules = path.join(runtimeDir, "node_modules");
+	if (await completedRuntime(nodeModules, fingerprint, probePackage)) return runtimeDir;
 
 	onPhase?.("initiate");
 	// withFileLock does not create parent directories; the runtime cache dir may
@@ -432,10 +492,32 @@ export async function ensureRuntimeInstalled(options: EnsureRuntimeInstalledOpti
 		`${runtimeDir}.install`,
 		() =>
 			withLegacyInstallLock(runtimeDir, lockSleepMs, async () => {
-				if (await probeManifest.exists()) return runtimeDir;
+				if (await completedRuntime(nodeModules, fingerprint, probePackage)) return runtimeDir;
 				await writeRuntimeManifest(runtimeDir, install);
-				onPhase?.("download");
-				await runRuntimeInstall(runtimeDir);
+				// A killed caller may leave bun running. Every attempt gets its own
+				// namespace; neither its writes nor its eventual exit can publish it.
+				const staging = await fsp.mkdtemp(`${runtimeDir}.install-`);
+				try {
+					await writeRuntimeManifest(staging, stagedInstall);
+					onPhase?.("download");
+					await runRuntimeInstall(staging);
+					const stagedModules = path.join(staging, "node_modules");
+					if (!readManifest(path.join(stagedModules, ...probePackage.split("/")))) {
+						throw new Error(`Runtime install at ${runtimeDir} has no valid manifest for ${probePackage}`);
+					}
+					await fsp.writeFile(path.join(stagedModules, RUNTIME_COMPLETION), fingerprint);
+					// Rename, never populate or repair the public tree in place. A crash
+					// between these renames leaves it absent, so the next caller rebuilds.
+					// Keep the old tree untouched until the replacement is complete.
+					try {
+						await fsp.rename(nodeModules, path.join(staging, "previous-node_modules"));
+					} catch (error) {
+						if (!isEnoent(error)) throw error;
+					}
+					await fsp.rename(stagedModules, nodeModules);
+				} finally {
+					await fsp.rm(staging, { recursive: true, force: true });
+				}
 				onPhase?.("done");
 				return runtimeDir;
 			}),

@@ -1,4 +1,3 @@
-import { renderRunArg } from "../run-code";
 import { ToolError } from "../tool-errors";
 
 /** One allowlisted method invocation in a computer call chain. */
@@ -7,19 +6,20 @@ export interface ComputerCallStep {
 	args: unknown[];
 }
 
-/** Approval tier a direct computer helper needs: inspection reads, input and mutation execute. */
 export type ComputerCallPolicy = "read" | "exec";
-
 type MethodPolicies = Readonly<Record<string, ComputerCallPolicy>>;
 
-/** Helpers callable on the `desktop` root; `window` and `ref` also anchor one-hop handle chains. */
 export const DESKTOP_METHODS: MethodPolicies = {
 	capabilities: "read",
+	apps: "read",
 	displays: "read",
 	windows: "read",
 	window: "read",
+	acquireWindow: "read",
+	verifyWindow: "read",
 	focusedWindow: "read",
 	screenshot: "read",
+	launch: "exec",
 	click: "exec",
 	doubleClick: "exec",
 	move: "exec",
@@ -27,98 +27,98 @@ export const DESKTOP_METHODS: MethodPolicies = {
 	scroll: "exec",
 	type: "exec",
 	press: "exec",
-	elementAt: "read",
-	focusedElement: "read",
 	ref: "read",
 	"clipboard.read": "read",
 	"clipboard.write": "exec",
 };
 
-/** Helpers callable on a window handle resolved through `desktop.window(id)`. */
 export const WINDOW_METHODS: MethodPolicies = {
+	observe: "read",
 	screenshot: "read",
+	find: "read",
+	ref: "read",
 	click: "exec",
 	doubleClick: "exec",
-	move: "exec",
+	hover: "exec",
 	drag: "exec",
 	scroll: "exec",
 	type: "exec",
 	press: "exec",
-	raise: "exec",
-	ax: "read",
-	find: "read",
-	ref: "read",
-};
-
-/** Helpers callable on an AX element handle resolved through `desktop.ref(ref)`. */
-export const ELEMENT_METHODS: MethodPolicies = {
-	value: "read",
 	setValue: "exec",
-	bounds: "read",
-	attributes: "read",
-	actions: "read",
-	perform: "exec",
-	press: "exec",
+	setFrame: "exec",
+	menu: "exec",
+	verify: "read",
+	reveal: "exec",
+};
+
+export const ELEMENT_METHODS: MethodPolicies = {
 	click: "exec",
-	focus: "exec",
-	parent: "read",
-	children: "read",
+	doubleClick: "exec",
+	setValue: "exec",
+	type: "exec",
+	press: "exec",
+	scroll: "exec",
+	perform: "exec",
 };
 
-/** Root methods whose result accepts one chained handle call, mapped to the handle's method table. */
-const HANDLE_ROOTS: Readonly<Record<string, { label: string; methods: MethodPolicies }>> = {
-	window: { label: "window", methods: WINDOW_METHODS },
-	ref: { label: "element", methods: ELEMENT_METHODS },
-};
-
-function describe(methods: MethodPolicies): string {
-	return Object.keys(methods).join(", ");
-}
-
-function renderStep(step: ComputerCallStep): string {
-	return `${step.method}(${step.args.map(renderRunArg).join(", ")})`;
-}
-
-function validateChain(chain: readonly ComputerCallStep[]): void {
-	if (chain.length === 0) {
+/** Validate the entire chain before rendering any caller-controlled method name. */
+function validateChain(chain: readonly ComputerCallStep[]): ComputerCallPolicy {
+	if (!Array.isArray(chain) || chain.length === 0) {
 		throw new ToolError("Action 'call' requires a non-empty 'chain'.");
 	}
-	if (chain.length > 2) {
-		throw new ToolError("Call chains support one handle hop at most; use computer.run(fn) for longer sequences.");
-	}
-	const root = chain[0]!;
-	if (!Object.hasOwn(DESKTOP_METHODS, root.method)) {
+	if (chain.length > 3) {
 		throw new ToolError(
-			`Unknown desktop method "${root.method}". Desktop helpers support: ${describe(DESKTOP_METHODS)}.`,
+			"Call chains support a window and element hop at most; use computer.run(fn) for longer sequences.",
 		);
 	}
-	if (chain.length === 1) return;
-	const handle = Object.hasOwn(HANDLE_ROOTS, root.method) ? HANDLE_ROOTS[root.method] : undefined;
-	if (!handle) {
-		throw new ToolError(
-			`Only desktop.window(id)/desktop.ref(ref) results accept a chained call; got desktop.${root.method}().`,
-		);
+	let methods = DESKTOP_METHODS;
+	let label = "desktop";
+	let policy: ComputerCallPolicy = "read";
+	for (let index = 0; index < chain.length; index++) {
+		const step = chain[index];
+		if (!step || typeof step.method !== "string" || !Array.isArray(step.args)) {
+			throw new ToolError("Each computer call step requires a method string and args array.");
+		}
+		if (!Object.hasOwn(methods, step.method)) {
+			throw new ToolError(
+				`Unknown ${label} method "${step.method}". ${label} helpers support: ${Object.keys(methods).join(", ")}.`,
+			);
+		}
+		if (methods[step.method] === "exec") policy = "exec";
+		if (index === chain.length - 1) continue;
+		if (methods === DESKTOP_METHODS && step.method === "window") {
+			methods = WINDOW_METHODS;
+			label = "window";
+		} else if ((methods === DESKTOP_METHODS || methods === WINDOW_METHODS) && step.method === "ref") {
+			methods = ELEMENT_METHODS;
+			label = "element";
+		} else {
+			throw new ToolError(
+				`Only desktop.window(...), desktop.ref(...) and window.ref(...) results accept a chained call; got ${label}.${step.method}().`,
+			);
+		}
 	}
-	const step = chain[1]!;
-	if (!Object.hasOwn(handle.methods, step.method)) {
-		throw new ToolError(
-			`Unknown ${handle.label} method "${step.method}". ${handle.label[0]!.toUpperCase()}${handle.label.slice(1)} handles support: ${describe(handle.methods)}.`,
-		);
-	}
+	return policy;
 }
 
-/** Whether every step of a direct computer call is inspection-only, so the run needs read approval. */
+/** Inspection-only chains receive read approval and execute under the read-only facade guard. */
 export function isReadOnlyComputerCall(chain: readonly ComputerCallStep[]): boolean {
-	validateChain(chain);
-	const root = chain[0]!;
-	if (chain.length === 1) return DESKTOP_METHODS[root.method] === "read";
-	return HANDLE_ROOTS[root.method]!.methods[chain[1]!.method] === "read";
+	return validateChain(chain) === "read";
 }
 
-/** Render an allowlisted desktop helper or handle call for the persistent computer runtime. */
+/** Render a validated desktop/window/element invocation without exposing arbitrary property access. */
 export function renderComputerCall(chain: readonly ComputerCallStep[]): string {
 	validateChain(chain);
-	const root = chain[0]!;
-	if (chain.length === 1) return `return await desktop.${renderStep(root)};`;
-	return `return await (await desktop.${renderStep(root)}).${renderStep(chain[1]!)};`;
+	let expression = "desktop";
+	for (let index = 0; index < chain.length; index++) {
+		const step = chain[index]!;
+		// Direct helpers accept data, never executable run-argument markers.
+		// JSON.parse also preserves "__proto__" as data rather than a literal setter.
+		const args = step.args.map(arg =>
+			arg === undefined ? "undefined" : `JSON.parse(${JSON.stringify(JSON.stringify(arg))})`,
+		);
+		expression = `await ${expression}.${step.method}(${args.join(", ")})`;
+		if (index < chain.length - 1) expression = `(${expression})`;
+	}
+	return `return ${expression};`;
 }

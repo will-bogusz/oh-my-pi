@@ -1,0 +1,45 @@
+{
+  "node_modules/@ubjs/core": {
+    "version": "0.31.0-3",
+    "resolved": "https://registry.npmjs.org/@ubjs/core/-/core-0.31.0-3.tgz",
+    "integrity": "sha512-39XrJgUZ2VVb561sSnkXPhczNoeBsNiSRArecsV0JE7CJq69ajFkcn9/tBAUS2NpgHkLIDU+z6Ks2+1wXnboxg==",
+    "license": "MPL-2.0"
+  },
+  "node_modules/@ubjs/node": {
+    "version": "0.31.0-3",
+    "resolved": "https://registry.npmjs.org/@ubjs/node/-/node-0.31.0-3.tgz",
+    "integrity": "sha512-qNMpi2LICNwxGXZyRF8fSDBSpbezyZbEsydrbiMPJOmtOWr4tmZIEl7jkWGHVGShoBvHfFo4eHp5B4UVP928Cg==",
+    "license": "MPL-2.0",
+    "optionalDependencies": {
+      "@ubjs/node-darwin-arm64": "0.31.0-3",
+      "@ubjs/node-darwin-x64": "0.31.0-3",
+      "@ubjs/node-linux-arm64-gnu": "0.31.0-3",
+      "@ubjs/node-linux-arm64-musl": "0.31.0-3",
+      "@ubjs/node-linux-x64-gnu": "0.31.0-3",
+      "@ubjs/node-linux-x64-musl": "0.31.0-3",
+      "@ubjs/node-win32-arm64-msvc": "0.31.0-3",
+      "@ubjs/node-win32-x64-msvc": "0.31.0-3"
+    }
+  },
+  "node_modules/uniffi-bindgen-react-native": {
+    "version": "0.31.0-3",
+    "resolved": "https://registry.npmjs.org/uniffi-bindgen-react-native/-/uniffi-bindgen-react-native-0.31.0-3.tgz",
+    "integrity": "sha512-br7giBJRr/j00rdMXhOZGMGuDWMAVUcxC9O3lco0KRqzEAxUz00+gegPW5tKamvKbrnj7NB682XUCYrcagtxFA==",
+    "dev": true,
+    "license": "MPL-2.0",
+    "bin": {
+      "ubrn": "bin/cli.cjs",
+      "uniffi-bindgen-react-native": "bin/cli.cjs"
+    }
+  },
+  "node_modules/@trycua/cua-driver": {
+    "version": "0.23.2",
+    "resolved": "https://registry.npmjs.org/@trycua/cua-driver/-/cua-driver-0.23.2.tgz",
+    "integrity": "sha512-OQZGxEbiPO5wHuxROptGF8D9HDiN4R8M1E58TsUsq0pyQ73fkWpLrVY6JEo3ZnE9e+cgH7mG36NV1cqaXj8BTw==",
+    "license": "MIT",
+    "dependencies": {
+      "@ubjs/core": "0.31.0-3",
+      "@ubjs/node": "0.31.0-3"
+    }
+  }
+}

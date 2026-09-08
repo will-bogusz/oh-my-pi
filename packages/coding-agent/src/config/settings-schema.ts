@@ -4377,7 +4377,7 @@ export const SETTINGS_SCHEMA = {
 			tab: "tools",
 			group: "Available Tools",
 			label: "Computer",
-			description: "Enable the scriptable host-desktop eval prelude (screenshots, input, accessibility)",
+			description: "Enable the host-desktop eval prelude (window observation, screenshots, and targeted actions)",
 		},
 	},
 
@@ -4388,7 +4388,7 @@ export const SETTINGS_SCHEMA = {
 			tab: "tools",
 			group: "Computer",
 			label: "Computer Display",
-			description: "Composite all displays or select a native display id",
+			description: "Primary display on Apple Silicon macOS; all displays or a native display id on other hosts",
 		},
 	},
 
@@ -4399,7 +4399,7 @@ export const SETTINGS_SCHEMA = {
 			tab: "tools",
 			group: "Computer",
 			label: "Computer Screenshot Width",
-			description: "Maximum composite screenshot width in pixels",
+			description: "Maximum desktop or window screenshot width in pixels",
 		},
 	},
 
@@ -4410,7 +4410,7 @@ export const SETTINGS_SCHEMA = {
 			tab: "tools",
 			group: "Computer",
 			label: "Computer Screenshot Height",
-			description: "Maximum composite screenshot height in pixels",
+			description: "Maximum desktop or window screenshot height in pixels",
 		},
 	},
 
@@ -4578,9 +4578,9 @@ export const SETTINGS_SCHEMA = {
 		ui: {
 			tab: "tools",
 			group: "Grep & Browser",
-			label: "Browser Relay",
+			label: "Existing Chrome browsers",
 			description:
-				"Drive your own Chrome tabs through the omp browser relay. Install the extension once (`omp browser-relay install`); the relay server auto-starts when the browser prelude needs it. Takes precedence over Browser CDP URL; set PI_BROWSER_RELAY=0 or PI_BROWSER_RELAY=1 to override.",
+				"Work in paired Chrome profiles using task tabs. Install the extension with `omp browser-relay install`, then use `omp browser-relay pair` and enter its code and a profile name in extension options. The local service starts when needed. Takes precedence over Browser CDP URL; PI_BROWSER_RELAY overrides this setting.",
 		},
 	},
 

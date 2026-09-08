@@ -1,50 +1,33 @@
-/**
- * HTTP + WebSocket server for the browser relay.
- *
- * Impersonates Chrome's CDP discovery endpoint so the omp browser tool (and
- * any puppeteer client) can connect with a plain `browserURL`:
- * - `GET /json/version` → 200 with `webSocketDebuggerUrl` once the extension
- *   is connected, 503 before that (clients like `waitForCdp` keep polling).
- * - `GET /json` / `/json/list` → attachable page targets (debugging aid).
- * - `WS /cdp` → downstream CDP clients (puppeteer).
- * - `WS /ext` → the Chrome extension (token-gated when configured).
- *
- * Binds loopback only: anything that can reach this port can drive the
- * user's logged-in browser.
- */
-import { RelayBridge } from "./bridge";
+/** Authenticated local browser broker. Each paired browser has its own CDP bridge. */
+import { RelayAccess } from "./access";
+import type { RelayBridge } from "./bridge";
+import { BrowserInstances } from "./instances";
 
-/** Options for {@link startRelayServer}. */
 export interface RelayServerOptions {
 	port: number;
-	/** Shared secret the extension must present as `?token=`; unset disables the check. */
-	token?: string;
-	/** Group tabs the agent actively drives under one per-window Chrome tab group (default on); `false` disables. */
+	/** Omit for an ephemeral in-memory broker; the production CLI supplies persistent endpoint access. */
+	access?: RelayAccess;
 	group?: boolean | { title: string; color: string };
 	log?: (message: string, data?: Record<string, unknown>) => void;
+	/** Keep an automatically started service available while a finite CLI's code is usable. */
+	onPairingCode?: (expiresAt: number) => Promise<void>;
 }
-
-/** A running relay server. */
 export interface RelayServer {
-	bridge: RelayBridge;
+	instances: BrowserInstances;
+	access: RelayAccess;
 	port: number;
 	stop(): void;
 }
-
 interface SocketData {
 	role: "cdp" | "ext";
+	bridge?: RelayBridge;
 	connId?: number;
+	leaseId?: string;
 }
-
 type RelayWebSocket = Bun.ServerWebSocket<SocketData>;
-
-const WS_KEEPALIVE_MS = 30_000;
-/** Screenshots travel base64-encoded through both websocket legs. */
-const MAX_PAYLOAD_BYTES = 256 * 1024 * 1024;
-/** Default appearance of the omp tab group. */
 const DEFAULT_GROUP = { title: "omp", color: "cyan" } as const;
-/** True when `raw` can serve as the authority of a `ws://` URL: no whitespace,
- *  slashes, userinfo, fragments, or control characters, and URL-parseable. */
+export const RELAY_PROTOCOL_VERSION = 2;
+
 function isWsAuthority(raw: string): boolean {
 	if (/[\s/\\@#?]|[\x00-\x1f]/.test(raw)) return false;
 	try {
@@ -54,19 +37,18 @@ function isWsAuthority(raw: string): boolean {
 	}
 }
 
-/** Start the relay server on 127.0.0.1. Throws if the port is taken. */
 export function startRelayServer(opts: RelayServerOptions): RelayServer {
 	const log = opts.log ?? (() => {});
 	const group =
 		opts.group === false ? null : opts.group === true || opts.group === undefined ? DEFAULT_GROUP : opts.group;
-	const bridge = new RelayBridge({ log, group });
+	const access = opts.access ?? new RelayAccess();
+	const instances = new BrowserInstances(access, { log, group });
 	const sockets = new Set<RelayWebSocket>();
-
 	const server = Bun.serve({
 		hostname: "127.0.0.1",
 		port: opts.port,
-		fetch(req, srv): Response | undefined {
-			const fallback = `127.0.0.1:${opts.port}`;
+		async fetch(req, srv): Promise<Response | undefined> {
+			const fallback = `127.0.0.1:${srv.port ?? opts.port}`;
 			const rawHost = req.headers.get("host")?.trim();
 			const host = rawHost && isWsAuthority(rawHost) ? rawHost : fallback;
 			const requestUrl =
@@ -74,84 +56,163 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 					? req.url.slice(`http://${rawHost}`.length)
 					: req.url;
 			const url = new URL(requestUrl, `http://${fallback}`);
-			const path = url.pathname.replace(/\/+$/, "") || "/";
-			if (path === "/cdp") {
-				// Browsers set Origin on websocket upgrades; native CDP clients
-				// don't. Reject any Origin so a web page can't drive the relay.
-				if (req.headers.get("origin")) return new Response("Forbidden", { status: 403 });
-				const data: SocketData = { role: "cdp" };
-				if (srv.upgrade(req, { data })) return undefined;
-				return new Response("websocket upgrade required", { status: 426 });
-			}
-			if (path === "/ext") {
+			const route = url.pathname.replace(/\/+$/, "") || "/";
+			// This liveness route exposes no tab/profile metadata or control capability.
+			if (route === "/health" && req.method === "GET")
+				return Response.json({ service: "omp-browser", protocol: RELAY_PROTOCOL_VERSION });
+			if (route === "/ext") {
 				const origin = req.headers.get("origin");
-				if (origin && !origin.startsWith("chrome-extension://")) {
+				if (origin && !/^chrome-extension:\/\/[a-p]{32}$/.test(origin))
 					return new Response("Forbidden", { status: 403 });
-				}
-				if (opts.token && url.searchParams.get("token") !== opts.token) {
-					return new Response("Unauthorized", { status: 401 });
-				}
-				const data: SocketData = { role: "ext" };
-				if (srv.upgrade(req, { data })) return undefined;
-				return new Response("websocket upgrade required", { status: 426 });
+				if (srv.upgrade(req, { data: { role: "ext" } })) return undefined;
+				return new Response("WebSocket upgrade required", { status: 426 });
 			}
-			if (req.method !== "GET") return new Response("Method not allowed", { status: 405 });
-			if (path === "/json/version") {
-				if (!bridge.ready) {
-					return Response.json({ error: "relay extension is not connected" }, { status: 503 });
+			// Neither cross-origin pages nor extension pages may use the local control plane.
+			if (req.headers.get("origin")) return new Response("Forbidden", { status: 403 });
+			if (route === "/managed") {
+				if (req.method !== "POST" || req.headers.get("content-type") !== "application/json")
+					return new Response("Forbidden", { status: 403 });
+				try {
+					const body: unknown = await req.json();
+					if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error("Invalid browser request");
+					const args = body as Record<string, unknown>;
+					const string = (key: string): string => {
+						const value = args[key];
+						if (typeof value !== "string" || !value.length || value.length > 8192)
+							throw new Error(`Invalid ${key}`);
+						return value;
+					};
+					const optional = (key: string): string | undefined =>
+						args[key] === undefined ? undefined : string(key);
+					// A worker's random parent lease permits only child creation, not listing,
+					// acquisition, pairing, or another actor's lifecycle operations.
+					if (args.action === "popup")
+						return Response.json(await instances.popup(string("id"), string("url"), req.signal));
+					if (!access.authorized(req.headers.get("authorization")))
+						return new Response("Local browser credential required", { status: 401 });
+					switch (args.action) {
+						case "instances":
+							return Response.json(instances.list());
+						case "pair": {
+							const pair = access.issueCode();
+							await opts.onPairingCode?.(pair.expiresAt);
+							return Response.json(pair);
+						}
+						case "unpair":
+							instances.unpair(string("id"));
+							break;
+						case "discover":
+							return Response.json(await instances.refresh(optional("owner"), optional("browserId")));
+						case "create":
+							return Response.json(
+								await instances.create(
+									string("url"),
+									string("owner"),
+									string("taskId"),
+									string("label"),
+									optional("browserId"),
+								),
+							);
+						case "claim":
+							return Response.json(
+								instances.claim(
+									string("id"),
+									string("owner"),
+									optional("taskId"),
+									optional("label"),
+									optional("browserId"),
+								),
+							);
+						case "dialog":
+							return Response.json(
+								await instances
+									.requireLease(string("id"))
+									.bridge.dialog(string("id"), string("owner"), args.dialog, req.signal),
+							);
+						case "get":
+							return Response.json(instances.get(string("id"), string("owner")));
+						case "closeTab":
+							await instances.closeTab(string("id"), string("owner"), optional("browserId"), req.signal);
+							break;
+						case "close":
+							await instances
+								.requireLease(string("id"))
+								.bridge.managed.close(string("id"), string("owner"), req.signal);
+							break;
+						case "retain":
+							instances.requireLease(string("id")).bridge.managed.retain(string("id"), string("owner"));
+							break;
+						case "reveal":
+							await instances.requireLease(string("id")).bridge.managed.reveal(string("id"), string("owner"));
+							break;
+						case "releasePreserving":
+							await instances
+								.requireLease(string("id"))
+								.bridge.managed.releasePreserving(string("id"), string("owner"));
+							break;
+						case "release":
+							await instances.requireLease(string("id")).bridge.managed.release(string("id"), string("owner"));
+							break;
+						default:
+							throw new Error("Unknown browser operation");
+					}
+					return Response.json({});
+				} catch (error) {
+					return Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 409 });
 				}
-				return Response.json(bridge.versionInfo(`ws://${host}/cdp`));
 			}
-			if (path === "/json" || path === "/json/list") {
-				return Response.json(bridge.listTargets());
+			const managedVersion = /^\/managed\/([^/]+)\/json\/version$/.exec(route);
+			if (managedVersion) {
+				const leaseId = managedVersion[1]!;
+				const instance = instances.forLease(leaseId);
+				if (!instance) return new Response("Stale tab ownership", { status: 410 });
+				return Response.json(instance.bridge.versionInfo(`ws://${host}/cdp?lease=${encodeURIComponent(leaseId)}`));
 			}
+			if (route === "/cdp") {
+				const leaseId = url.searchParams.get("lease");
+				if (!leaseId) return new Response("Acquire an exact tab before connecting", { status: 403 });
+				const instance = instances.forLease(leaseId);
+				if (!instance) return new Response("Stale tab ownership", { status: 410 });
+				if (srv.upgrade(req, { data: { role: "cdp", leaseId, bridge: instance.bridge } })) return undefined;
+				return new Response("WebSocket upgrade required", { status: 426 });
+			}
+			if (route === "/json/version" || route === "/json" || route === "/json/list")
+				return new Response("Use paired-browser discovery and exact tab acquisition", { status: 410 });
 			return new Response("Not found", { status: 404 });
 		},
 		websocket: {
-			maxPayloadLength: MAX_PAYLOAD_BYTES,
-			// Disabled: Bun caps idleTimeout at 255s, and the keepalive pings
-			// below already detect dead peers via the websocket close path.
+			maxPayloadLength: 256 * 1024 * 1024,
 			idleTimeout: 0,
 			open(ws: RelayWebSocket): void {
 				sockets.add(ws);
-				if (ws.data.role === "ext") {
-					bridge.extConnected(ws);
-				} else {
-					ws.data.connId = bridge.cdpConnected(ws);
-				}
+				if (ws.data.role === "ext") instances.extConnected(ws);
+				else ws.data.connId = ws.data.bridge!.cdpConnected(ws, ws.data.leaseId);
 			},
 			message(ws: RelayWebSocket, message: string | Buffer): void {
 				const text = typeof message === "string" ? message : new TextDecoder().decode(message);
-				if (ws.data.role === "ext") {
-					bridge.extMessage(ws, text);
-				} else if (ws.data.connId !== undefined) {
-					bridge.cdpMessage(ws.data.connId, text);
-				}
+				if (ws.data.role === "ext") instances.extMessage(ws, text);
+				else if (ws.data.connId !== undefined) ws.data.bridge!.cdpMessage(ws.data.connId, text);
 			},
 			close(ws: RelayWebSocket): void {
 				sockets.delete(ws);
-				if (ws.data.role === "ext") {
-					bridge.extClosed(ws);
-				} else if (ws.data.connId !== undefined) {
-					bridge.cdpClosed(ws.data.connId);
-				}
+				if (ws.data.role === "ext") instances.extClosed(ws);
+				else if (ws.data.connId !== undefined) ws.data.bridge!.cdpClosed(ws.data.connId);
 			},
 		},
 	});
-
-	// Puppeteer connections go silent while the agent is idle; protocol-level
-	// pings count as activity and keep them under the idle timeout.
 	const keepalive = setInterval(() => {
 		for (const ws of sockets) ws.ping();
-	}, WS_KEEPALIVE_MS);
+	}, 30_000);
 	keepalive.unref();
-
-	log("relay listening", { port: opts.port });
+	const port = server.port!;
+	log("relay listening", { port });
 	return {
-		bridge,
-		port: opts.port,
+		instances,
+		access,
+		port,
 		stop() {
 			clearInterval(keepalive);
+			instances.close();
 			server.stop(true);
 		},
 	};

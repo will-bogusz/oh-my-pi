@@ -16,6 +16,7 @@ import computerCodeModeDeclarations from "./computer/declarations.d.ts" with { t
 import computerJavascript from "./computer/prelude.js" with { type: "text" };
 import computerPython from "./computer/prelude.py" with { type: "text" };
 import { type ComputerController, ComputerSupervisor, registerComputerController } from "./computer/supervisor";
+import type { ComputerObservation, ComputerWindowAcquisition } from "./computer/types";
 import type { ToolSession } from "./index";
 import { renderFunctionRun } from "./run-code";
 import { ToolError, throwIfAborted } from "./tool-errors";
@@ -55,7 +56,12 @@ interface ComputerCallParams {
 	timeout?: number;
 }
 
-type ComputerParams = ComputerRunParams | ComputerCallParams | { action: "capabilities" } | { action: "close" };
+type ComputerParams =
+	| ComputerRunParams
+	| ComputerCallParams
+	| { action: "capabilities" }
+	| { action: "release" }
+	| { action: "close" };
 type ComputerParamsSchema = Type<ComputerParams>;
 
 const getComputerParamsSchema: () => ComputerParamsSchema = once(() =>
@@ -81,6 +87,7 @@ const getComputerParamsSchema: () => ComputerParamsSchema = once(() =>
 			"+": "reject",
 		})
 		.or({ action: "'capabilities'", "+": "reject" })
+		.or({ action: "'release'", "+": "reject" })
 		.or({ action: "'close'", "+": "reject" }),
 );
 
@@ -101,7 +108,7 @@ export type ComputerControllerFactory = (session: ToolSession) => ComputerContro
 /** Capability inspection, explicitly read-only runs, and inspection-only direct calls use read approval. */
 export function computerApproval(args: unknown): ToolApprovalDecision {
 	if (args === null || typeof args !== "object" || Array.isArray(args) || !("action" in args)) return "exec";
-	if (args.action === "capabilities") return "read";
+	if (args.action === "capabilities" || args.action === "release") return "read";
 	if (args.action === "call") {
 		// Malformed chains fall to exec here and fail schema validation at invoke time.
 		try {
@@ -119,18 +126,7 @@ export function createComputerPrelude(
 	createController: ComputerControllerFactory = currentSession =>
 		new ComputerSupervisor(currentSession, undefined, undefined, callSessionTool),
 ): EvalPreludeDefinition {
-	const controller = createController(session);
-	const unregisterOwner = registerComputerController(session.getEvalKernelOwnerId?.() ?? undefined, controller);
-	let closed = false;
-	const lifetime: ComputerLifetime = {
-		isClosed: () => closed,
-		close: async () => {
-			if (closed) return;
-			closed = true;
-			unregisterOwner();
-			await controller.close();
-		},
-	};
+	const lifetime = new ComputerLifetime(session, createController);
 
 	return {
 		name: "computer",
@@ -146,19 +142,77 @@ export function createComputerPrelude(
 			if (parsed instanceof type.errors) {
 				throw new ToolError(`computer received invalid arguments: ${parsed.summary}`);
 			}
-			return await invokeComputer(session, controller, parsed, context, lifetime);
+			try {
+				return await invokeComputer(session, parsed, context, lifetime);
+			} finally {
+				// A cancelled operation must release its rendering/input host as well as
+				// drain input. Retain the enabled setting and lifetime for lazy reuse.
+				if (context.signal?.aborted) await lifetime.release();
+			}
 		},
 	};
 }
 
-interface ComputerLifetime {
-	isClosed(): boolean;
-	close(): Promise<void>;
+class ComputerLifetime {
+	readonly #session: ToolSession;
+	readonly #createController: ComputerControllerFactory;
+	readonly #unregisterOwner: () => void;
+	#controller?: ComputerController;
+	#closed = false;
+	#releasing?: Promise<void>;
+	#closing?: Promise<void>;
+	#releaseFailure?: Error;
+
+	constructor(session: ToolSession, createController: ComputerControllerFactory) {
+		this.#session = session;
+		this.#createController = createController;
+		this.#unregisterOwner = registerComputerController(session.getEvalKernelOwnerId?.() ?? undefined, this);
+	}
+
+	isClosed(): boolean {
+		return this.#closed;
+	}
+
+	async controller(): Promise<ComputerController> {
+		if (this.#releasing) await this.#releasing;
+		if (this.#releaseFailure) throw this.#releaseFailure;
+		if (this.#closed) throw new ToolError("Computer session is closed");
+		if (!this.#session.settings.get("computer.enabled")) throw new ToolError("Computer use is disabled");
+		return (this.#controller ??= this.#createController(this.#session));
+	}
+
+	release(): Promise<void> {
+		if (this.#releasing) return this.#releasing;
+		if (this.#releaseFailure) return Promise.reject(this.#releaseFailure);
+		const controller = this.#controller;
+		if (!controller) return Promise.resolve();
+		// Detach before awaiting close. New calls wait for confirmed process exit;
+		// a failed close poisons this lifetime instead of creating a second driver.
+		this.#controller = undefined;
+		this.#releasing = (async () => {
+			try {
+				await controller.close();
+			} catch (error) {
+				this.#releaseFailure = new ToolError(
+					`Computer release failed; this session cannot restart: ${String(error)}`,
+				);
+				throw this.#releaseFailure;
+			}
+		})().finally(() => {
+			this.#releasing = undefined;
+		});
+		return this.#releasing;
+	}
+
+	close(): Promise<void> {
+		this.#closed = true;
+		this.#unregisterOwner();
+		return (this.#closing ??= this.release());
+	}
 }
 
 async function invokeComputer(
 	session: ToolSession,
-	controller: ComputerController,
 	params: ComputerParams,
 	context: EvalPreludeContext,
 	lifetime: ComputerLifetime,
@@ -169,9 +223,9 @@ async function invokeComputer(
 		case "run":
 		case "call":
 			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
-			return await runComputer(session, controller, params, context.signal);
+			return await runComputer(session, await lifetime.controller(), params, context.signal);
 		case "capabilities": {
-			const capabilities = lifetime.isClosed() ? undefined : await controller.capabilities();
+			const capabilities = lifetime.isClosed() ? undefined : await (await lifetime.controller()).capabilities();
 			throwIfAborted(context.signal);
 			return {
 				content: [
@@ -183,10 +237,14 @@ async function invokeComputer(
 				details: capabilities,
 			};
 		}
+		case "release":
+			await lifetime.release();
+			throwIfAborted(context.signal);
+			return { content: [{ type: "text", text: "Released computer resources" }], details: {} };
 		case "close":
 			await lifetime.close();
 			throwIfAborted(context.signal);
-			return { content: [{ type: "text", text: "Closed computer session" }] };
+			return { content: [{ type: "text", text: "Closed computer session" }], details: {} };
 	}
 }
 
@@ -244,10 +302,36 @@ async function runComputer(
 	if (run.returnValue !== undefined) details.value = run.returnValue;
 	populateCapabilityDetails(details, run.capabilities);
 
-	const text = run.displays
+	let text = run.displays
 		.filter((content): content is { type: "text"; text: string } => content.type === "text")
 		.map(content => content.text)
 		.join("\n");
+	const acquired =
+		params.action === "call" && params.chain.length === 1 && params.chain[0]?.method === "acquireWindow"
+			? (run.returnValue as ComputerWindowAcquisition)
+			: undefined;
+	const observation =
+		acquired?.initialObservation ??
+		(params.action === "call" && params.chain.at(-1)?.method === "observe"
+			? (run.returnValue as ComputerObservation)
+			: undefined);
+	const observedWindow = acquired ?? observation?.window;
+	if (observedWindow) {
+		text = [
+			`${observedWindow.app}: ${observedWindow.title || "Untitled window"} (window ${observedWindow.id}, PID ${observedWindow.pid})`,
+			observation?.tree,
+			observation && !observation.complete
+				? "Partial accessibility tree; omitted controls remain unknown."
+				: undefined,
+			acquired?.inspectionError ? `Initial inspection unavailable: ${acquired.inspectionError}` : undefined,
+			(observation?.screenshotError ?? acquired?.screenshotError)
+				? `Screenshot unavailable: ${observation?.screenshotError ?? acquired?.screenshotError}`
+				: undefined,
+			text,
+		]
+			.filter(Boolean)
+			.join("\n");
+	}
 	const cappedText = await enforceInlineByteCap(text, {
 		saveArtifact: full => saveComputerOutputArtifact(session, full),
 	});

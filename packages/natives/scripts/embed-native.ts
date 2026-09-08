@@ -94,12 +94,17 @@ if (available.length === 0) {
 	throw new Error(`No native addons found for ${platformTag}. Expected one of:\n${expected}`);
 }
 const packageJson = (await Bun.file(packageJsonPath).json()) as { version: string };
+const versionSentinel = `__piNativesV${packageJson.version.replace(/[^A-Za-z0-9]/g, "_")}`;
 
 const archiveFilename = `${archivePrefix}${platformTag}${archiveSuffix}`;
 const archivePath = path.join(nativeDir, archiveFilename);
 const archiveEntries: Record<string, Uint8Array> = {};
 for (const addon of available) {
-	archiveEntries[addon.filename] = await fs.readFile(addon.path);
+	const content = await fs.readFile(addon.path);
+	if (!content.includes(versionSentinel)) {
+		throw new Error(`Native addon ${addon.path} lacks ${versionSentinel}; rebuild or stage the matching native artifact before compiling.`);
+	}
+	archiveEntries[addon.filename] = content;
 }
 await Bun.write(archivePath, await new Bun.Archive(archiveEntries, { compress: "gzip", level: 9 }).bytes());
 

@@ -71,14 +71,15 @@ describe("browser screenshot activation", () => {
 		expect(activations).toBe(0);
 	});
 
-	it("rejects a background user-driven target instead of capturing sibling pixels", async () => {
+	it("does not activate or inspect visibility before background page capture", async () => {
 		const page = {
-			bringToFront: async () => undefined,
-			evaluate: async () => false,
+			bringToFront: async () => {
+				throw new Error("must not activate");
+			},
+			evaluate: async () => {
+				throw new Error("visibility is not a capture prerequisite");
+			},
 		};
-
-		await expect(preparePageForScreenshot(page as ScreenshotPage, undefined, false)).rejects.toThrow(
-			"The attached browser tab is not visible",
-		);
+		await preparePageForScreenshot(page as ScreenshotPage, undefined, false);
 	});
 });

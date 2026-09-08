@@ -391,6 +391,25 @@ async function demoteTopLevelLexicals(code: string, options: { publishGlobals?: 
 	}
 	if (targets.length === 0) return code;
 
+	// A script-level var redeclaration retains its earlier value. The async
+	// wrapper introduces a fresh function scope, whose hoisted undefined binding
+	// would otherwise hide that value before the declaration runs. Seed only
+	// user var bindings; a same-cell function declaration wins at hoisting time.
+	const hoistedFunctions = new Set(
+		targets.flatMap(({ node }) => (node.type === "FunctionDeclaration" ? getLexicalBindingNames(node) : [])),
+	);
+	const retainedVars = publishGlobals
+		? new Set(
+				targets.flatMap(({ node }) =>
+					node.type === "VariableDeclaration" && node.kind === "var" ? getLexicalBindingNames(node) : [],
+				),
+			)
+		: new Set<string>();
+	const seedVars = [...retainedVars]
+		.filter(name => !hoistedFunctions.has(name))
+		.map(name => `var ${name} = this[${JSON.stringify(name)}];`)
+		.join("\n");
+
 	targets.sort((a, b) => b.node.start - a.node.start);
 	let result = code;
 	for (const { node, demote } of targets) {
@@ -412,7 +431,11 @@ async function demoteTopLevelLexicals(code: string, options: { publishGlobals?: 
 		result =
 			result.slice(0, node.start) + appendGlobalBindingPublish(replacement, bindingNames) + result.slice(node.end);
 	}
-	return result;
+	if (!seedVars) return result;
+	// Keep directives and any interpreter header ahead of executable code.
+	const first = ast.program.body[0];
+	const offset = first && "start" in first && typeof first.start === "number" ? first.start : 0;
+	return `${result.slice(0, offset)}${seedVars}\n${result.slice(offset)}`;
 }
 
 async function returnFinalExpression(code: string): Promise<{ source: string; returned: boolean }> {

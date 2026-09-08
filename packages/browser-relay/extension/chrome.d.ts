@@ -45,17 +45,28 @@ interface ChromeDebuggerTargetInfo {
 }
 
 declare const chrome: {
+	permissions: {
+		contains(request: { permissions: string[] }): Promise<boolean>;
+	};
+	downloads: {
+		search(query: { startedAfter: string; startedBefore: string; limit: number; orderBy: string[] }): Promise<Array<{
+			id: number; filename: string; url: string; finalUrl: string; referrer: string; startTime: string;
+			state: "in_progress" | "complete" | "interrupted"; bytesReceived: number; totalBytes: number; exists: boolean;
+		}>>;
+	};
 	tabs: {
 		query(queryInfo: { url?: string; groupId?: number }): Promise<ChromeTab[]>;
 		get(tabId: number): Promise<ChromeTab>;
-		create(createProperties: { url?: string; active?: boolean }): Promise<ChromeTab>;
+		create(createProperties: { url?: string; active?: boolean; windowId?: number; openerTabId?: number }): Promise<ChromeTab>;
 		remove(tabId: number): Promise<void>;
-		update(tabId: number, updateProperties: { active?: boolean }): Promise<ChromeTab>;
+		update(tabId: number, updateProperties: { active?: boolean; url?: string }): Promise<ChromeTab>;
 		group(options: { tabIds: number[]; groupId?: number }): Promise<number>;
 		ungroup(tabIds: number[]): Promise<void>;
 		onCreated: ChromeEvent<(tab: ChromeTab) => void>;
+		onActivated: ChromeEvent<(info: { tabId: number; windowId: number }) => void>;
 		onUpdated: ChromeEvent<(tabId: number, changeInfo: ChromeTabChangeInfo, tab: ChromeTab) => void>;
 		onRemoved: ChromeEvent<(tabId: number, removeInfo: { windowId: number }) => void>;
+		onReplaced: ChromeEvent<(addedTabId: number, removedTabId: number) => void>;
 	};
 	tabGroups: {
 		query(queryInfo: { title?: string; windowId?: number }): Promise<Array<{ id: number; windowId: number; title?: string }>>;
@@ -97,7 +108,10 @@ declare const chrome: {
 		onClicked: ChromeEvent<(tab: ChromeTab) => void>;
 	};
 	runtime: {
+		getURL(path: string): string;
 		openOptionsPage(): Promise<void>;
+		sendMessage(message: unknown): Promise<unknown>;
+		onMessage: ChromeEvent<(message: unknown) => void>;
 		onInstalled: ChromeEvent<() => void>;
 		onStartup: ChromeEvent<() => void>;
 	};

@@ -25,6 +25,7 @@ export const TAB_VALUE_METHODS: readonly string[] = [
 	"scrollIntoView",
 	"select",
 	"uploadFile",
+	"downloads",
 	"waitForUrl",
 	"evaluate",
 ];

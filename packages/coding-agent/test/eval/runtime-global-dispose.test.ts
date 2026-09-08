@@ -1,4 +1,7 @@
 import { describe, expect, it } from "bun:test";
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
 import { JsRuntime, type RuntimeHooks } from "@oh-my-pi/pi-coding-agent/eval/js/shared/runtime";
 
 const GLOBAL_KEYS = ["__omp_import__", "read"] as const;
@@ -152,4 +155,50 @@ describe("JsRuntime global disposal", () => {
 			restoreGlobals(before);
 		}
 	});
+});
+
+it("preserves a rebound file module across ordinary cells and runtime switches", async () => {
+	const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-eval-module-persistence-"));
+	const file = path.join(directory, "review.txt");
+	const text = "Alpine review — café Ω 3147\nApproved for export.\n";
+	await Bun.write(file, text);
+	const globals = globalThis as Record<string, unknown>;
+	const original = { exists: "fs" in globals, value: globals.fs };
+	const first = new JsRuntime({ initialCwd: directory, sessionId: "file-alias-first" });
+	let second: JsRuntime | undefined;
+	try {
+		await first.run('var fs = await import("node:fs/promises");', undefined, hooks);
+		first.setCwd(directory);
+		first.setRunScope({});
+		expect(await first.run(`await fs.readFile(${JSON.stringify(file)}, "utf8")`, undefined, hooks)).toBe(text);
+		second = new JsRuntime({ initialCwd: directory, sessionId: "file-alias-second" });
+		expect(await second.run('fs.readFile === require("node:fs").readFile', undefined, hooks)).toBe(true);
+		await second.run('var fs = { ownAlias: "second" };', undefined, hooks);
+		expect(await first.run(`await fs.readFile(${JSON.stringify(file)}, "utf8")`, undefined, hooks)).toBe(text);
+		expect(await second.run("fs.ownAlias", undefined, hooks)).toBe("second");
+		second.dispose();
+		expect(await first.run(`await fs.readFile(${JSON.stringify(file)}, "utf8")`, undefined, hooks)).toBe(text);
+	} finally {
+		second?.dispose();
+		first.dispose();
+		expect("fs" in globals).toBe(original.exists);
+		expect(globals.fs).toBe(original.value);
+		await fs.rm(directory, { recursive: true, force: true });
+	}
+});
+
+it("preserves completed assignments from a failed cell when another runtime is constructed", async () => {
+	const first = new JsRuntime({ initialCwd: process.cwd(), sessionId: "failed-assignment-first" });
+	let second: JsRuntime | undefined;
+	try {
+		await expect(
+			first.run('var fs = { completed: 7 }; throw new Error("after assignment");', undefined, hooks),
+		).rejects.toThrow("after assignment");
+		second = new JsRuntime({ initialCwd: process.cwd(), sessionId: "failed-assignment-second" });
+		expect(await first.run("fs.completed", undefined, hooks)).toBe(7);
+		expect(await second.run('fs.readFile === require("node:fs").readFile', undefined, hooks)).toBe(true);
+	} finally {
+		first.dispose();
+		second?.dispose();
+	}
 });

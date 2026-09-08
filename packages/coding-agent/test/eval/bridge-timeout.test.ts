@@ -109,12 +109,14 @@ class TestCancelledError extends Error {
 	}
 }
 
-it("defers external aborts until an in-flight agent bridge call resumes", async () => {
+it("defers external aborts until every in-flight protected bridge call resumes", async () => {
 	const abortController = new AbortController();
 	const entered = Promise.withResolvers<void>();
 	const triggerAbort = Promise.withResolvers<void>();
 	const observed = Promise.withResolvers<boolean>();
 	const release = Promise.withResolvers<void>();
+	const resumedOne = Promise.withResolvers<boolean>();
+	const releaseLast = Promise.withResolvers<void>();
 	const kernel: GenericKernel<Record<string, string | null>> = {
 		async execute(_code, options) {
 			entered.resolve();
@@ -123,9 +125,19 @@ it("defers external aborts until an in-flight agent bridge call resumes", async 
 				type: "status",
 				event: { op: EVAL_TIMEOUT_PAUSE_OP, deferExternalAbort: true },
 			} satisfies KernelDisplayOutput);
+			options.onDisplay({
+				type: "status",
+				event: { op: EVAL_TIMEOUT_PAUSE_OP, deferExternalAbort: true },
+			} satisfies KernelDisplayOutput);
 			abortController.abort(new Error("external interrupt"));
 			observed.resolve(options.signal?.aborted ?? false);
 			await release.promise;
+			options.onDisplay({
+				type: "status",
+				event: { op: EVAL_TIMEOUT_RESUME_OP, deferExternalAbort: true },
+			} satisfies KernelDisplayOutput);
+			resumedOne.resolve(options.signal?.aborted ?? false);
+			await releaseLast.promise;
 			options.onDisplay({
 				type: "status",
 				event: { op: EVAL_TIMEOUT_RESUME_OP, deferExternalAbort: true },
@@ -150,6 +162,8 @@ it("defers external aborts until an in-flight agent bridge call resumes", async 
 	triggerAbort.resolve();
 	expect(await observed.promise).toBe(false);
 	release.resolve();
+	expect(await resumedOne.promise).toBe(false);
+	releaseLast.resolve();
 	const result = await resultPromise;
 	expect(result.cancelled).toBe(true);
 	expect(result.exitCode).toBeUndefined();

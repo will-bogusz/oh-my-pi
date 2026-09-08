@@ -1,0 +1,7 @@
+{
+  "checked": 89,
+  "failures": [],
+  "method_close_expected": 58108,
+  "method": "Stock 0.23.2 native/index.js initialization executed all 89 checksum guards during the successful v6 packaged replay; in-process dyld image inspection verified the loaded SDK SHA256. No checksum guards were bypassed.",
+  "binary_sha256": "36e6c7e0617f5b193a3b557ba5f9e6c77a84c11f13ef8113fbfda5f881ec6afb"
+}

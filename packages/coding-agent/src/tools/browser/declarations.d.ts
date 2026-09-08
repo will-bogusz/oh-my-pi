@@ -43,6 +43,8 @@ interface BrowserOpenOptions {
 	persist?: boolean;
 	/** Whole-operation timeout in seconds. */
 	timeout?: number;
+	/** Initial inspection options when opening a managed Chrome tab. */
+	observation?: BrowserInitialObservationOptions;
 }
 
 /** Options for releasing managed browser tabs. */
@@ -85,6 +87,34 @@ interface BrowserObserveOptions {
 	includeAll?: boolean;
 	/** Limit results to nodes inside the current viewport. */
 	viewportOnly?: boolean;
+}
+
+/** Initial Chrome inspection includes controls, readable text, and a viewport preview. */
+interface BrowserInitialObservationOptions extends BrowserObserveOptions {
+	/** Capture and display a background preview; defaults to true. */
+	screenshot?: boolean;
+}
+
+/** Exact Chrome discovery identity; independent of mutable title, URL, window, or task label. */
+interface BrowserTargetIdentity {
+	/** Discovery identity for matching popupOf, rediscovery, and explicit closeTab. */
+	readonly id: string;
+	/** Paired browser profile identity. */
+	readonly browserId: string;
+	/** Chrome tab number; unique only inside this browser profile. */
+	readonly tabId: number;
+}
+
+/** Every supplied field must match; multiple matches require an explicit choice. */
+interface BrowserTabSelector {
+	/** Exact title (case sensitive); requires title or url. */
+	title?: string;
+	/** Exact URL, including path/query. */
+	url?: string;
+	/** Narrow to a paired profile. */
+	browserId?: string;
+	/** Narrow to a Chrome window in that profile. */
+	windowId?: number;
 }
 
 /** Options for a Playwright-format ARIA snapshot. */
@@ -162,6 +192,8 @@ interface BrowserBoundingBox {
 
 /** One element in a structured browser observation. */
 interface BrowserObservationEntry {
+	/** Immutable observation reference accepted by tab.ref; invalidated by observation or navigation. */
+	ref?: string;
 	/** Numeric id accepted by `tab.id`. */
 	id: number;
 	/** Accessibility role. */
@@ -180,6 +212,8 @@ interface BrowserObservationEntry {
 
 /** Structured result returned by `tab.observe`. */
 interface BrowserObservation {
+	/** Unique observation identity. */
+	snapshot?: string;
 	/** Current page URL. */
 	url: string;
 	/** Current page title. */
@@ -226,6 +260,44 @@ interface BrowserAssert {
 	(condition: unknown, message?: string): asserts condition;
 }
 
+/** A download event observed on this page since acquisition. */
+interface BrowserDownload {
+	id: string;
+	url: string;
+	frameId: string;
+	suggestedFilename: string;
+	startedAt: number;
+	state: "started" | "inProgress" | "completed" | "canceled";
+	receivedBytes?: number;
+	totalBytes?: number;
+}
+
+interface BrowserDownloadFileCandidate {
+	id: number;
+	path: string;
+	url: string;
+	finalUrl: string;
+	referrer: string;
+	startedAt: number;
+	state: "in_progress" | "complete" | "interrupted";
+	bytesReceived: number;
+	totalBytes: number;
+	exists: boolean;
+}
+
+interface BrowserDownloads {
+	since: number;
+	omitted: number;
+	entries: BrowserDownload[];
+	files?:
+		| { available: false; reason: string }
+		| {
+				available: true;
+				correlation: "url-and-time-candidates";
+				matches: Array<{ id: string; truncated: boolean; candidates: BrowserDownloadFileCandidate[] }>;
+		  };
+}
+
 /** Browser-tab helpers whose behavior is shared by direct and run-realm handles. */
 interface BrowserTabHelpers {
 	/** Return the current page title. */
@@ -242,9 +314,9 @@ interface BrowserTabHelpers {
 	extract(format?: "text" | "markdown"): Promise<string>;
 	/** Click the element matching `selector`. */
 	click(selector: string): Promise<void>;
-	/** Type text into the element matching `selector`. */
+	/** Type individual key events into the element matching `selector`. */
 	type(selector: string, text: string): Promise<void>;
-	/** Replace the value of the element matching `selector`. */
+	/** Replace editable text. Managed Chrome uses browser text insertion, not individual key events. */
 	fill(selector: string, value: string): Promise<void>;
 	/** Press a keyboard key, optionally on a matching element. */
 	press(key: string, options?: BrowserPressOptions): Promise<void>;
@@ -260,6 +332,8 @@ interface BrowserTabHelpers {
 	select(selector: string, ...values: string[]): Promise<string[]>;
 	/** Upload files through the matching file input. */
 	uploadFile(selector: string, ...filePaths: string[]): Promise<void>;
+	/** Inspect this acquisition's download events, optionally with candidate saved paths. */
+	downloads(options?: { paths?: boolean }): Promise<BrowserDownloads>;
 	/** Wait for the current URL to match a string or regular expression. */
 	waitForUrl(pattern: string | RegExp, options?: BrowserWaitOptions): Promise<string>;
 }
@@ -268,9 +342,9 @@ interface BrowserTabHelpers {
 interface BrowserElement {
 	/** Click this element. */
 	click(): Promise<void>;
-	/** Type text into this element. */
+	/** Type individual key events into this element. */
 	type(text: string): Promise<void>;
-	/** Replace this element's value. */
+	/** Replace editable text. Managed Chrome uses browser text insertion, including empty replacement. */
 	fill(value: string): Promise<void>;
 	/** Press a keyboard key on this element. */
 	press(key: string): Promise<void>;
@@ -339,7 +413,44 @@ interface BrowserRunScope {
 }
 
 /** A named browser tab handle returned by `browser.open` or `browser.tab`. */
+interface BrowserDialogState {
+	status: "unobserved" | "closed" | "open";
+	dialog: {
+		id: string;
+		type: "alert" | "confirm" | "prompt" | "beforeunload";
+		message: string;
+		url: string;
+		defaultPrompt: string;
+	} | null;
+}
 interface BrowserTab extends BrowserTabHelpers {
+	readonly initialDialog?: BrowserDialogState;
+	/** Managed Chrome only. Uses the existing exact debugger attachment, independently of a blocked renderer. */
+	dialog(
+		options?: { action?: "inspect" } | { action: "accept" | "dismiss"; id: string; promptText?: string },
+	): Promise<BrowserDialogState>;
+	/** Exact Chrome identity. tab.id(...) is an element helper, not this identity. */
+	readonly target?: BrowserTargetIdentity;
+	/** First controls and snapshot refs; later observe() calls supersede these refs. */
+	readonly initialObservation?: BrowserObservation;
+	/** Readable page tree captured during acquisition, independently of control inspection. */
+	readonly initialTree?: string;
+	/** Local preview path captured during acquisition. */
+	readonly initialScreenshot?: string;
+	/** Partial control-inspection failure; missing state is unknown. */
+	readonly inspectionError?: string;
+	/** Partial readable-tree failure. */
+	readonly treeError?: string;
+	/** Partial preview failure. */
+	readonly screenshotError?: string;
+	/** Immutable actor-owned Chrome handle; display names do not confer ownership. */
+	readonly handle?: string;
+	/** Explicitly reveal this Chrome tab and focus its window. */
+	reveal(): Promise<void>;
+	/** Keep a task-created Chrome tab after release. */
+	retain(): Promise<void>;
+	/** Release ownership; preserve adopted/retained tabs and close other created tabs. */
+	release(): Promise<void>;
 	/** Immutable managed-tab name. */
 	readonly name: string;
 	/** Return the current page URL. */
@@ -359,12 +470,73 @@ interface BrowserTab extends BrowserTabHelpers {
 	): Promise<R>;
 	/** Run a JavaScript function body in the tab runtime. */
 	run<R = unknown>(code: string, options?: BrowserRunOptions): Promise<R>;
-	/** Release this managed tab. */
+	/** Close this Chrome tab, including adopted or retained pages. Other CDP handles only disconnect. */
 	close(options?: BrowserTabCloseOptions): Promise<void>;
 }
 
 /** Session-scoped browser facade available in JavaScript Eval. */
 declare const browser: {
+	/** Acquire a unique existing tab by exact title/URL or discovery id, including initial state. Never creates a tab. */
+	getTab(
+		selector: string | BrowserTabSelector,
+		options?: {
+			label?: string;
+			timeout?: number;
+			observation?: BrowserInitialObservationOptions;
+		},
+	): Promise<BrowserTab>;
+	/** Paired browser profiles, including offline ones. Labels are chosen during setup. */
+	instances(): Promise<
+		Array<{
+			id: string;
+			label: string;
+			connected: boolean;
+			generation?: string;
+			extension?: {
+				loadedBuildId?: string;
+				expectedBuildId: string;
+				status: "matching" | "different" | "unknown";
+			};
+		}>
+	>;
+	/** Discover exact existing Chrome tabs without attaching or activating them. */
+	discover(options?: { browserId?: string }): Promise<
+		Array<{
+			id: string;
+			browserId: string;
+			browserLabel: string;
+			tabId: number;
+			windowId: number;
+			title: string;
+			url: string;
+			active: boolean;
+			pinned: boolean;
+			groupId: number;
+			ownership: "available" | "this_actor" | "other_actor";
+			/** Discovery id of the task-owned parent that opened this popup. */
+			popupOf?: string;
+		}>
+	>;
+	/** Create a new inactive Chrome tab under a task label. */
+	create(options?: {
+		browserId?: string;
+		url?: string;
+		label?: string;
+		timeout?: number;
+		observation?: BrowserInitialObservationOptions;
+	}): Promise<BrowserTab>;
+	/** Exclusively claim an exact discovered Chrome tab; never navigate or regroup it. */
+	claim(
+		id: string,
+		options?: {
+			browserId?: string;
+			label?: string;
+			timeout?: number;
+			observation?: BrowserInitialObservationOptions;
+		},
+	): Promise<BrowserTab>;
+	/** Close an exact discovered Chrome tab without attaching or activating it. Refuses other actors' tabs. */
+	closeTab(id: string, options?: { browserId?: string; timeout?: number }): Promise<void>;
 	/** Open or reuse a tab and return its handle. */
 	open(options?: BrowserOpenOptions): Promise<BrowserTab>;
 	/** Return a handle for an existing named tab without opening it. */

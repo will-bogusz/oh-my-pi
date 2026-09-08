@@ -19,6 +19,10 @@ const repoRoot = path.resolve(root, "../..");
 const dist = path.join(root, "dist");
 const distExtension = path.join(dist, "extension");
 const assetsDir = path.resolve(root, "../coding-agent/src/tools/browser/relay/extension-assets");
+const buildMarker = "__OMP_EXTENSION_BUILD_SHA256_PLACEHOLDER__";
+
+// Bun's source-label comments use the process cwd, independently of build.root.
+process.chdir(root);
 
 await fs.rm(dist, { recursive: true, force: true });
 await fs.mkdir(distExtension, { recursive: true });
@@ -28,20 +32,48 @@ const bundle = await Bun.build({
 	outdir: distExtension,
 	target: "browser",
 	sourcemap: "none",
+	define: { __OMP_EXTENSION_BUILD_ID__: JSON.stringify(buildMarker) },
 });
 if (!bundle.success) {
 	for (const log of bundle.logs) console.error(log);
 	process.exit(1);
 }
 
-for (const file of ["manifest.json", "options.html", "options.js"]) {
+for (const file of ["manifest.json", "options.html", "options.js", "connection.json"]) {
 	await Bun.write(path.join(distExtension, file), Bun.file(path.join(root, "extension", file)));
 }
 for (const file of ["LICENSE", "THIRD-PARTY-NOTICES.txt"]) {
 	await Bun.write(path.join(distExtension, file), Bun.file(path.join(repoRoot, file)));
 }
 
-const zip = await $`zip -qr ../omp-browser-relay-extension.zip .`.cwd(distExtension).nothrow();
+// Hash the unstamped executable and UI/permission contract. Connection defaults
+// and custom display names are installation choices, not code revisions.
+const identityFiles = ["background.js", "manifest.json", "options.html", "options.js"];
+const identity = new Bun.CryptoHasher("sha256");
+for (const file of identityFiles) {
+	const contents = await Bun.file(path.join(distExtension, file)).text();
+	identity.update(JSON.stringify([file, contents]));
+}
+const buildId = identity.digest("hex");
+const backgroundFile = Bun.file(path.join(distExtension, "background.js"));
+const background = await backgroundFile.text();
+if (!background.includes(buildMarker)) throw new Error("Extension build identity was not embedded");
+await Bun.write(backgroundFile, background.replaceAll(buildMarker, buildId));
+await Bun.write(path.join(distExtension, "build-info.json"), `${JSON.stringify({ buildId })}\n`);
+
+const distributionFiles = (await fs.readdir(distExtension)).sort();
+// ZIP stores local timestamps and Unix modes. Keep identical source builds
+// identical across working directories, time zones, build times and umasks.
+const archiveTime = new Date("2000-01-01T00:00:00Z");
+for (const file of distributionFiles) {
+	const location = path.join(distExtension, file);
+	await fs.chmod(location, 0o644);
+	await fs.utimes(location, archiveTime, archiveTime);
+}
+const zip = await $`zip -Xq ../omp-browser-relay-extension.zip ${distributionFiles}`
+	.cwd(distExtension)
+	.env({ ...process.env, TZ: "UTC" })
+	.nothrow();
 if (zip.exitCode !== 0) {
 	console.error("zip failed:", zip.stderr.toString());
 	process.exit(1);
@@ -53,6 +85,8 @@ const embeddedAssets = [
 	["manifest.json", "manifest.json.txt"],
 	["options.html", "options.html.txt"],
 	["options.js", "options.js.txt"],
+	["connection.json", "connection.json.txt"],
+	["build-info.json", "build-info.json.txt"],
 	["LICENSE", "LICENSE.txt"],
 	["THIRD-PARTY-NOTICES.txt", "THIRD-PARTY-NOTICES.txt"],
 ] as const;

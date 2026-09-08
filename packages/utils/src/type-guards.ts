@@ -13,5 +13,22 @@ export function asRecord(value: unknown): Record<string, unknown> | null {
 }
 
 export function toError(value: unknown): Error {
-	return value instanceof Error ? value : new Error(String(value));
+	if (value instanceof Error) return value;
+	// WebSocket connection promises can reject with a native ErrorEvent. Its
+	// useful fields are inherited accessors, not own data properties.
+	if (typeof ErrorEvent !== "undefined" && value instanceof ErrorEvent) {
+		try {
+			const nested: unknown = value.error;
+			if (nested instanceof Error) return nested;
+		} catch {
+			// An unavailable host accessor must not mask the event's message.
+		}
+		try {
+			if (value.message) return new Error(value.message);
+		} catch {
+			// Keep conversion usable even when a host getter throws.
+		}
+		return new Error("An error event did not provide accessible details");
+	}
+	return new Error(String(value));
 }

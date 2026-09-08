@@ -415,6 +415,8 @@ if "__omp_prelude_loaded__" not in globals():
             ) from None
         if not isinstance(data, dict) or not data.get("ok"):
             msg = (data or {}).get("error") if isinstance(data, dict) else None
+            if isinstance(data, dict) and data.get("isAbort") is True:
+                raise KeyboardInterrupt(msg or "Operation interrupted")
             raise RuntimeError(msg or f"bridge call {name!r} failed")
         return data.get("value")
 
@@ -433,7 +435,11 @@ if "__omp_prelude_loaded__" not in globals():
             mime_type = image.get("mimeType")
             if not isinstance(data, str) or not isinstance(mime_type, str):
                 continue
-            _omp_display({mime_type: data}, raw=True)
+            bundle = {mime_type: data}
+            control = image.get("control")
+            if isinstance(control, dict) and control.get("kind") in ("browser", "computer"):
+                bundle["application/x-omp-control-image"] = control
+            _omp_display(bundle, raw=True)
             displayed += 1
         if displayed == 0:
             return value

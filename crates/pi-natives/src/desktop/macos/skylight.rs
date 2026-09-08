@@ -1,8 +1,6 @@
 use std::{
 	ffi::{CStr, c_void},
 	mem,
-	os::raw::{c_char, c_int, c_uint},
-	ptr,
 	sync::LazyLock,
 	thread,
 	time::Duration,
@@ -21,15 +19,36 @@ const EVENT_RECORD_KIND: u8 = 0x0d;
 const WINDOW_ID_OFFSET: usize = 0x3c;
 const FOCUS_MARKER_OFFSET: usize = 0x8a;
 
-unsafe extern "C" {
-	fn CGEventPostToPid(pid: pid_t, event: core_graphics::sys::CGEventRef);
-}
-
 #[repr(C)]
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
 struct ProcessSerialNumber {
 	high: u32,
 	low:  u32,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(super) struct BackgroundActivation {
+	target: ProcessSerialNumber,
+	pid:    pid_t,
+}
+
+impl BackgroundActivation {
+	pub(super) fn release(self) {
+		// Never deactivate an application the user has since brought foreground.
+		// Address the original WindowServer PSN, not a potentially reused PID.
+		let front = NSWorkspace::sharedWorkspace().frontmostApplication();
+		if front.is_none_or(|app| app.processIdentifier() == self.pid) {
+			return;
+		}
+		let Ok(spi) = required() else { return };
+		let mut record = [0u8; EVENT_RECORD_LENGTH];
+		record[0x04] = EVENT_RECORD_LENGTH_BYTE;
+		record[0x08] = EVENT_RECORD_KIND;
+		record[FOCUS_MARKER_OFFSET] = 0x02;
+		// SAFETY: The retained process identity and complete record remain live
+		// through this synchronous call. A departed process's PSN is not retargeted.
+		let _ = unsafe { (spi.post_record)(&self.target, record.as_ptr()) };
+	}
 }
 
 type SLEventPostToPidFn = unsafe extern "C" fn(pid_t, *mut c_void);
@@ -43,12 +62,6 @@ type GetProcessForPIDFn = unsafe extern "C" fn(pid_t, *mut ProcessSerialNumber) 
 type CGEventSetWindowLocationFn = unsafe extern "C" fn(*mut c_void, CGPoint);
 type SLPSSetFrontProcessWithOptionsFn =
 	unsafe extern "C" fn(*const ProcessSerialNumber, u32, u32) -> i32;
-type SLEventSetAuthenticationMessageFn = unsafe extern "C" fn(*mut c_void, *mut c_void);
-type ObjcGetClassFn = unsafe extern "C" fn(*const c_char) -> *mut c_void;
-type SelRegisterNameFn = unsafe extern "C" fn(*const c_char) -> *mut c_void;
-type ClassRespondsToSelectorFn = unsafe extern "C" fn(*mut c_void, *mut c_void) -> bool;
-type AuthenticationFactoryFn =
-	unsafe extern "C" fn(*mut c_void, *mut c_void, *mut c_void, c_int, c_uint) -> *mut c_void;
 
 #[derive(Clone, Copy)]
 struct PsnLookup {
@@ -72,7 +85,6 @@ struct RequiredSpi {
 	post_to_pid:         SLEventPostToPidFn,
 	set_integer:         SLEventSetIntegerValueFieldFn,
 	post_record:         SLPSPostEventRecordToFn,
-	get_front:           SLPSGetFrontProcessFn,
 	set_window_location: CGEventSetWindowLocationFn,
 	psn:                 PsnLookup,
 }
@@ -84,17 +96,7 @@ struct ForegroundSpi {
 	psn:       PsnLookup,
 }
 
-#[derive(Clone, Copy)]
-struct AuthenticationSpi {
-	set_message:       SLEventSetAuthenticationMessageFn,
-	objc_get_class:    ObjcGetClassFn,
-	sel_register_name: SelRegisterNameFn,
-	class_responds:    ClassRespondsToSelectorFn,
-	factory:           AuthenticationFactoryFn,
-}
-
 static REQUIRED: LazyLock<Option<RequiredSpi>> = LazyLock::new(resolve_required);
-static AUTHENTICATION: LazyLock<Option<AuthenticationSpi>> = LazyLock::new(resolve_authentication);
 static FOREGROUND: LazyLock<Option<ForegroundSpi>> = LazyLock::new(resolve_foreground);
 
 pub(super) fn is_available() -> bool {
@@ -125,7 +127,6 @@ fn resolve_required() -> Option<RequiredSpi> {
 		post_to_pid: symbol(c"SLEventPostToPid")?,
 		set_integer: symbol(c"SLEventSetIntegerValueField")?,
 		post_record: symbol(c"SLPSPostEventRecordTo")?,
-		get_front: symbol(c"_SLPSGetFrontProcess")?,
 		set_window_location: symbol(c"CGEventSetWindowLocation")?,
 		psn,
 	})
@@ -183,7 +184,6 @@ pub(super) fn stamp_event(
 	phase: i64,
 	click_state: i64,
 	button_number: i64,
-	click_group: i64,
 ) -> CoreResult<()> {
 	let spi = required()?;
 	let ptr = event_ptr(event);
@@ -196,7 +196,8 @@ pub(super) fn stamp_event(
 		(spi.set_integer)(ptr, 7, 3);
 		(spi.set_integer)(ptr, 40, i64::from(pid));
 		(spi.set_integer)(ptr, 51, i64::from(wid));
-		(spi.set_integer)(ptr, 58, click_group);
+		// Field 58 is the event timestamp, not a click-group identifier. Leave
+		// Quartz's timestamp intact so receivers can order and age input normally.
 		(spi.set_integer)(ptr, 91, i64::from(wid));
 		(spi.set_integer)(ptr, 92, i64::from(wid));
 		(spi.set_window_location)(ptr, window_local);
@@ -204,40 +205,25 @@ pub(super) fn stamp_event(
 	Ok(())
 }
 
-pub(super) fn post_dual(pid: pid_t, event: &CGEvent) -> CoreResult<()> {
+pub(super) fn post_pointer(pid: pid_t, event: &CGEvent) -> CoreResult<()> {
 	let spi = required()?;
-	// SAFETY: `event` remains retained for both posts and `post_to_pid` was
-	// atomically resolved with its exact ABI.
+	// Posting through both SkyLight and CoreGraphics delivers two copies to raw
+	// AppKit views. Each pointer event must enter the target queue exactly once.
+	// SAFETY: `event` remains retained and `post_to_pid` has its probed exact ABI.
 	unsafe { (spi.post_to_pid)(pid, event_ptr(event)) };
-	// The public post supplements a successful SkyLight post for plain AppKit; it
-	// is never a fallback. SAFETY: `event` remains retained for the synchronous
-	// public CoreGraphics post.
-	unsafe { CGEventPostToPid(pid, event.as_ptr()) };
 	Ok(())
 }
 
+#[allow(clippy::unnecessary_wraps, reason = "matches the fallible keyboard dispatch callback")]
 pub(super) fn post_keyboard(pid: pid_t, event: &CGEvent) -> CoreResult<()> {
-	let spi = required()?;
-	attach_keyboard_authentication(pid, event);
-	// The authenticated SkyLight route reaches Chromium and AppKit. Posting the
-	// same event through the public per-pid queue as well would deliver every key
-	// twice. SAFETY: `event` remains retained and the exact symbol is part of the
-	// required atomic probe.
-	unsafe { (spi.post_to_pid)(pid, event_ptr(event)) };
+	// Use the ordinary process event queue exactly once. Authenticated private
+	// posting bypasses Chromium's native menu dispatch, breaking Command chords.
+	event.post_to_pid(pid);
 	Ok(())
 }
 
-pub(super) fn activate_without_raise(pid: pid_t, wid: u32) -> CoreResult<()> {
+pub(super) fn activate_without_raise(pid: pid_t, wid: u32) -> CoreResult<BackgroundActivation> {
 	let spi = required()?;
-	let mut previous = ProcessSerialNumber::default();
-	// SAFETY: `previous` is writable and exactly the 8-byte PSN record expected by
-	// this SPI.
-	if unsafe { (spi.get_front)(&mut previous) } != 0 {
-		return Err(DesktopError::background_unavailable(format!(
-			"window {wid} could not resolve the front process for background input; retry with \
-			 delivery:\"foreground\" or use ax actions",
-		)));
-	}
 	let target = process_psn(spi.psn, pid, wid).ok_or_else(|| {
 		DesktopError::background_unavailable(format!(
 			"window {wid} could not resolve its process serial number for background input; retry \
@@ -248,22 +234,20 @@ pub(super) fn activate_without_raise(pid: pid_t, wid: u32) -> CoreResult<()> {
 	record[0x04] = EVENT_RECORD_LENGTH_BYTE;
 	record[0x08] = EVENT_RECORD_KIND;
 	record[WINDOW_ID_OFFSET..WINDOW_ID_OFFSET + 4].copy_from_slice(&wid.to_le_bytes());
-	record[FOCUS_MARKER_OFFSET] = 0x02;
-	// SAFETY: Both PSNs and the complete 248-byte record live through the
-	// synchronous SPI call.
-	let defocused = unsafe { (spi.post_record)(&previous, record.as_ptr()) } == 0;
+	// Activate only the target's event handling. Deactivating the unrelated
+	// foreground process causes a real Chromium blur even without a global
+	// application switch, disrupting the user's current interaction.
 	record[FOCUS_MARKER_OFFSET] = 0x01;
-	// SAFETY: Both PSNs and the complete 248-byte record live through the
-	// synchronous SPI call.
+	// SAFETY: The target PSN and complete record live through the synchronous call.
 	let focused = unsafe { (spi.post_record)(&target, record.as_ptr()) } == 0;
-	if !defocused || !focused {
+	if !focused {
 		return Err(DesktopError::background_unavailable(format!(
 			"window {wid} rejected the 248-byte SkyLight focus-without-raise record; retry with \
 			 delivery:\"foreground\" or use ax actions",
 		)));
 	}
 	thread::sleep(Duration::from_millis(50));
-	Ok(())
+	Ok(BackgroundActivation { target, pid })
 }
 
 pub(super) fn with_foreground<T>(
@@ -355,60 +339,4 @@ fn process_psn(lookup: PsnLookup, pid: pid_t, wid: u32) -> Option<ProcessSerialN
 	} else {
 		None
 	}
-}
-
-fn resolve_authentication() -> Option<AuthenticationSpi> {
-	Some(AuthenticationSpi {
-		set_message:       symbol(c"SLEventSetAuthenticationMessage")?,
-		objc_get_class:    symbol(c"objc_getClass")?,
-		sel_register_name: symbol(c"sel_registerName")?,
-		class_responds:    symbol(c"class_respondsToSelector")?,
-		factory:           symbol(c"objc_msgSend")?,
-	})
-}
-
-fn attach_keyboard_authentication(pid: pid_t, event: &CGEvent) {
-	let Some(spi) = AUTHENTICATION.as_ref() else {
-		return;
-	};
-	// SAFETY: Both C strings are static; runtime lookup functions have their exact
-	// Objective-C ABI.
-	let class = unsafe { (spi.objc_get_class)(c"SLSEventAuthenticationMessage".as_ptr()) };
-	// SAFETY: The selector C string is static and NUL-terminated.
-	let selector =
-		unsafe { (spi.sel_register_name)(c"messageWithEventRecord:pid:version:".as_ptr()) };
-	if class.is_null() || selector.is_null() {
-		return;
-	}
-	// SAFETY: This guard is required because macOS 14 has the class but lacks the
-	// macOS 15+ factory selector.
-	if !unsafe { (spi.class_responds)(class, selector) } {
-		return;
-	}
-	// __CGEvent stores its SLSEventRecord pointer after CFRuntimeBase and a padded
-	// u32.
-	let event_raw = event_ptr(event);
-	let mut record = ptr::null_mut();
-	for offset in [24usize, 32, 16] {
-		// SAFETY: These are the known pointer-aligned candidate slots in __CGEvent;
-		// read_unaligned avoids alignment assumptions.
-		let candidate =
-			unsafe { ptr::read_unaligned(event_raw.cast::<u8>().add(offset).cast::<*mut c_void>()) };
-		if !candidate.is_null() {
-			record = candidate;
-			break;
-		}
-	}
-	if record.is_null() {
-		return;
-	}
-	// SAFETY: Class response was checked before invoking this exact factory
-	// signature.
-	let message = unsafe { (spi.factory)(class, selector, record, pid, 0) };
-	if message.is_null() {
-		return;
-	}
-	// SAFETY: The event and autoreleased authentication object are alive for the
-	// synchronous attachment.
-	unsafe { (spi.set_message)(event_raw, message) };
 }

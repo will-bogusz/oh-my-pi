@@ -118,7 +118,7 @@ process.stdout.write(String(await probeRelayServer(url)));`,
 			expect(stderr).toBe("");
 			expect(exitCode).toBe(0);
 			expect(stdout).toBe("true");
-			expect(relayHits).toBe(1);
+			expect(relayHits).toBe(2);
 			expect(proxyHits).toBe(0);
 		} finally {
 			if (child.exitCode === null) child.kill();
@@ -146,19 +146,25 @@ process.stdout.write(String(await probeRelayServer(url)));`,
 		}
 	});
 
-	it("stays alive while a consumer in another project holds the global broker lease", async () => {
-		const home = await fs.mkdtemp(path.join(os.tmpdir(), "omp-relay-global-"));
-		const firstProject = path.join(home, "project-a");
-		const secondProject = path.join(home, "project-b");
-		const firstMarker = path.join(home, "first-ready");
-		const secondMarker = path.join(home, "second-ready");
-		const globalRuntimeDir = path.join(home, ".omp", "run", "daemons", "global", "browser-relay");
-		const cdpUrl = `http://127.0.0.1:${await findFreeCdpPort()}`;
-		const scriptPath = path.join(home, "consumer.ts");
-		await Promise.all([fs.mkdir(firstProject), fs.mkdir(secondProject)]);
-		await Bun.write(
-			scriptPath,
-			`
+	for (const separatePorts of [false, true])
+		it(
+			separatePorts
+				? "starts a second endpoint without replacing the first endpoint's daemon"
+				: "stays alive while a consumer in another project holds the global broker lease",
+			async () => {
+				const home = await fs.mkdtemp(path.join(os.tmpdir(), "omp-relay-global-"));
+				const firstProject = path.join(home, "project-a");
+				const secondProject = path.join(home, "project-b");
+				const firstMarker = path.join(home, "first-ready");
+				const secondMarker = path.join(home, "second-ready");
+				const globalRuntimeDir = path.join(home, ".omp", "run", "daemons", "global", "browser-relay");
+				const cdpUrl = `http://127.0.0.1:${await findFreeCdpPort()}`;
+				const secondCdpUrl = separatePorts ? `http://127.0.0.1:${await findFreeCdpPort()}` : cdpUrl;
+				const scriptPath = path.join(home, "consumer.ts");
+				await Promise.all([fs.mkdir(firstProject), fs.mkdir(secondProject)]);
+				await Bun.write(
+					scriptPath,
+					`
 import { closeDaemonClients } from ${JSON.stringify(path.resolve(import.meta.dir, "../../src/launch/client.ts"))};
 import { ensureRelayDaemon } from ${JSON.stringify(path.resolve(import.meta.dir, "../../src/tools/browser/relay/daemon.ts"))};
 
@@ -176,65 +182,71 @@ try {
 	await closeDaemonClients();
 }
 `,
+				);
+
+				const spawnConsumer = (cwd: string, profile: string, marker: string, url = cdpUrl) =>
+					observeConsumer(
+						Bun.spawn([process.execPath, scriptPath], {
+							cwd,
+							env: {
+								...process.env,
+								HOME: home,
+								USERPROFILE: home,
+								PI_CONFIG_DIR: ".omp",
+								OMP_PROFILE: profile,
+								OMP_DAEMON_IDLE_GRACE_MS: "200",
+								OMP_TEST_RELAY_URL: url,
+								OMP_TEST_READY_MARKER: marker,
+							},
+							stdin: "pipe",
+							stdout: "ignore",
+							stderr: "pipe",
+						}),
+					);
+
+				const first = spawnConsumer(firstProject, "profile-a", firstMarker);
+				try {
+					await waitForConsumerReady(first, firstMarker, 15_000);
+					expect(await probeRelayServer(cdpUrl)).toBeTrue();
+
+					const second = spawnConsumer(secondProject, "profile-b", secondMarker, secondCdpUrl);
+					try {
+						await waitForConsumerReady(second, secondMarker, 15_000);
+						expect(await probeRelayServer(secondCdpUrl)).toBeTrue();
+						expect(await probeRelayServer(cdpUrl)).toBeTrue();
+						await stopConsumer(first);
+						// The global broker's real idle clock must pass while the second client remains connected.
+						await Bun.sleep(500);
+						expect(await probeRelayServer(cdpUrl)).toBeTrue();
+						expect(await probeRelayServer(secondCdpUrl)).toBeTrue();
+
+						await stopConsumer(second);
+						expect(await waitUntil(async () => !(await probeRelayServer(cdpUrl)), 5_000)).toBeTrue();
+						expect(await waitUntil(async () => !(await probeRelayServer(secondCdpUrl)), 5_000)).toBeTrue();
+					} finally {
+						await terminateConsumer(second);
+					}
+				} finally {
+					await terminateConsumer(first);
+					const rescue = await createDaemonBrokerClient(globalRuntimeDir, {
+						runtimeDir: globalRuntimeDir,
+						idleGraceMs: 200,
+					});
+					try {
+						await rescue.request({ op: "shutdown" });
+					} catch {
+						// The last-client grace may already have stopped the broker.
+					}
+					rescue.close();
+					await fs.rm(home, { recursive: true, force: true });
+				}
+				// Budget must exceed the sum of the bounds inside the test: two 15s marker waits
+				// plus the 5s shutdown probe are 35s of legitimate waiting, so a 30s cap let a
+				// loaded runner kill the test mid-`waitUntil` and report only "timed out after
+				// 30000ms" instead of the marker assertion that actually failed. Each consumer is
+				// a cold `bun` process importing the daemon module graph, so the spawns are slow
+				// exactly when the machine is busy.
+			},
+			60_000,
 		);
-
-		const spawnConsumer = (cwd: string, profile: string, marker: string) =>
-			observeConsumer(
-				Bun.spawn([process.execPath, scriptPath], {
-					cwd,
-					env: {
-						...process.env,
-						HOME: home,
-						USERPROFILE: home,
-						PI_CONFIG_DIR: ".omp",
-						OMP_PROFILE: profile,
-						OMP_DAEMON_IDLE_GRACE_MS: "200",
-						OMP_TEST_RELAY_URL: cdpUrl,
-						OMP_TEST_READY_MARKER: marker,
-					},
-					stdin: "pipe",
-					stdout: "ignore",
-					stderr: "pipe",
-				}),
-			);
-
-		const first = spawnConsumer(firstProject, "profile-a", firstMarker);
-		try {
-			await waitForConsumerReady(first, firstMarker, 15_000);
-			expect(await probeRelayServer(cdpUrl)).toBeTrue();
-
-			const second = spawnConsumer(secondProject, "profile-b", secondMarker);
-			try {
-				await waitForConsumerReady(second, secondMarker, 15_000);
-				await stopConsumer(first);
-				// The global broker's real idle clock must pass while the second client remains connected.
-				await Bun.sleep(500);
-				expect(await probeRelayServer(cdpUrl)).toBeTrue();
-
-				await stopConsumer(second);
-				expect(await waitUntil(async () => !(await probeRelayServer(cdpUrl)), 5_000)).toBeTrue();
-			} finally {
-				await terminateConsumer(second);
-			}
-		} finally {
-			await terminateConsumer(first);
-			const rescue = await createDaemonBrokerClient(globalRuntimeDir, {
-				runtimeDir: globalRuntimeDir,
-				idleGraceMs: 200,
-			});
-			try {
-				await rescue.request({ op: "shutdown" });
-			} catch {
-				// The last-client grace may already have stopped the broker.
-			}
-			rescue.close();
-			await fs.rm(home, { recursive: true, force: true });
-		}
-		// Budget must exceed the sum of the bounds inside the test: two 15s marker waits
-		// plus the 5s shutdown probe are 35s of legitimate waiting, so a 30s cap let a
-		// loaded runner kill the test mid-`waitUntil` and report only "timed out after
-		// 30000ms" instead of the marker assertion that actually failed. Each consumer is
-		// a cold `bun` process importing the daemon module graph, so the spawns are slow
-		// exactly when the machine is busy.
-	}, 60_000);
 });

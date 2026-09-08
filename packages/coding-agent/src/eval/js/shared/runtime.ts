@@ -8,6 +8,7 @@ import * as util from "node:util";
 
 import * as logger from "@oh-my-pi/pi-utils/logger";
 
+import { readControlImageMetadata } from "../../control-images";
 import type { EvalPreludeSource } from "../worker-protocol";
 import { createHelpers, type HelperBundle } from "./helpers";
 import { awaitMaybePromise, indirectEval } from "./indirect-eval";
@@ -40,9 +41,10 @@ function surfaceBridgedToolImages(value: unknown, hooks: RuntimeHooks): unknown 
 	let displayed = 0;
 	for (const image of images) {
 		if (!image || typeof image !== "object") continue;
-		const { data, mimeType } = image as { data?: unknown; mimeType?: unknown };
+		const { data, mimeType, control } = image as { data?: unknown; mimeType?: unknown; control?: unknown };
 		if (typeof data !== "string" || typeof mimeType !== "string") continue;
-		hooks.onDisplay({ type: "image", data, mimeType });
+		const metadata = readControlImageMetadata(control);
+		hooks.onDisplay({ type: "image", data, mimeType, ...(metadata ? { control: metadata } : {}) });
 		displayed++;
 	}
 	if (displayed === 0) return value;
@@ -594,6 +596,9 @@ function claimGlobalKey(key: string, owner: symbol): void {
 		stack = { base: snapshotGlobal(key), entries: [] };
 		GLOBAL_STACKS.set(key, stack);
 	}
+	// Save the outgoing owner's live assignments before installing another runtime.
+	const active = stack.entries.at(-1);
+	if (active) recordGlobalValue(key, active.owner);
 	stack.entries.push({ owner, value: (globalThis as Record<string, unknown>)[key] });
 }
 
@@ -637,6 +642,10 @@ function activateGlobalOwner(owner: symbol, keys: Iterable<string>, action: stri
 		const stack = GLOBAL_STACKS.get(key);
 		const index = stack?.entries.findIndex(entry => entry.owner === owner) ?? -1;
 		if (!stack || index === -1) throw new Error(`Cannot ${action} on a disposed JS runtime`);
+		// A cell may rebind a convenience name such as fs. Re-activation must
+		// preserve that owner's value, including assignments before a thrown error.
+		const active = stack.entries.at(-1);
+		if (active) recordGlobalValue(key, active.owner);
 		const entry = stack.entries[index];
 		stack.entries.splice(index, 1);
 		stack.entries.push(entry);

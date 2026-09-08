@@ -52,6 +52,9 @@ export function resolveImageOptions(): { maxWidthCells: number; maxHeightCells?:
 
 /** Preview limits for collapsed/expanded views */
 export const PREVIEW_LIMITS = {
+	/** Maximum dimensions of a collapsed browser/computer observation image. */
+	CONTROL_IMAGE_COLUMNS: 48,
+	CONTROL_IMAGE_ROWS: 8,
 	/** Lines shown in collapsed view */
 	COLLAPSED_LINES: 3,
 	/** Lines shown in expanded view */

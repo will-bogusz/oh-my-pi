@@ -9,7 +9,9 @@
 	const serializeFunction = (label, fn) => {
 		const source = String(fn);
 		if (source.includes("[native code]")) {
-			throw new TypeError(`${label} cannot serialize a native or bound function; pass an arrow or function expression`);
+			throw new TypeError(
+				`${label} cannot serialize a native or bound function; pass an arrow or function expression`,
+			);
 		}
 		return source;
 	};
@@ -43,32 +45,40 @@
 		}
 	};
 
-	const windowFields = ["id", "app", "title", "pid", "bounds", "focused"];
+	const windowFields = ["id", "app", "title", "pid", "bounds", "onScreen"];
 	const windowValueMethods = [
 		"screenshot",
 		"click",
 		"doubleClick",
-		"move",
+		"hover",
 		"drag",
 		"scroll",
 		"type",
 		"press",
-		"raise",
-		"ax",
-	];
-	const elementFields = ["ref", "role", "nativeRole", "title", "description", "enabled", "focused", "childCount"];
-	const elementValueMethods = [
-		"value",
+		"reveal",
+		"observe",
 		"setValue",
-		"bounds",
-		"attributes",
-		"actions",
-		"perform",
-		"press",
-		"click",
-		"focus",
+		"setFrame",
+		"menu",
 	];
+	const elementFields = [
+		"ref",
+		"role",
+		"label",
+		"value",
+		"placeholder",
+		"enabled",
+		"selected",
+		"actions",
+		"bounds",
+		"pid",
+		"windowId",
+	];
+	const elementValueMethods = ["click", "doubleClick", "setValue", "type", "press", "scroll", "perform"];
 	const desktopValueMethods = [
+		"capabilities",
+		"apps",
+		"launch",
 		"displays",
 		"windows",
 		"screenshot",
@@ -83,34 +93,49 @@
 
 	const copyFields = (target, fields, snapshot) => {
 		for (const field of fields) {
-			if (snapshot[field] !== undefined) Object.defineProperty(target, field, { value: snapshot[field], enumerable: true });
+			if (snapshot[field] !== undefined) {
+				let value = snapshot[field];
+				if (field === "bounds" && value !== null) value = Object.freeze({ ...value });
+				if (field === "actions" && Array.isArray(value)) value = Object.freeze([...value]);
+				Object.defineProperty(target, field, { value, enumerable: true });
+			}
 		}
 	};
-	const makeElement = snapshot => {
+	const makeElement = (snapshot, identity) => {
 		const element = {};
 		copyFields(element, elementFields, snapshot);
 		defineMethod(element, "toString", () => `<element ${snapshot.ref} ${snapshot.role}>`);
-		const via = next => [step("ref", [snapshot.ref]), next];
+		const owner =
+			identity ??
+			(snapshot.windowId !== undefined && snapshot.pid !== undefined
+				? { id: snapshot.windowId, pid: snapshot.pid }
+				: undefined);
+		const via = next => [...(owner ? [step("window", [owner])] : []), step("ref", [snapshot.ref]), next];
 		defineValueMethods(element, elementValueMethods, via);
-		defineMethod(element, "parent", async () => {
-			const parent = await callValue(via(step("parent", [])));
-			return parent ? makeElement(parent) : null;
-		});
-		defineMethod(element, "children", async () => (await callValue(via(step("children", [])))).map(makeElement));
 		return Object.freeze(element);
 	};
-	const resolveElement = async chain => {
+	const resolveElement = async (chain, identity) => {
 		const snapshot = await callValue(chain);
-		return snapshot ? makeElement(snapshot) : null;
+		return snapshot ? makeElement(snapshot, identity) : null;
 	};
 	const makeWindow = snapshot => {
+		if (typeof snapshot.id !== "string" || !Number.isInteger(snapshot.pid)) {
+			throw new TypeError("computer window snapshot requires an exact id and PID");
+		}
 		const win = {};
 		copyFields(win, windowFields, snapshot);
+		for (const field of ["initialObservation", "inspectionError", "initialScreenshot", "screenshotError"]) {
+			if (snapshot[field] !== undefined) Object.defineProperty(win, field, { value: snapshot[field] });
+		}
 		defineMethod(win, "toString", () => `<window ${snapshot.id} ${snapshot.app}>`);
-		const via = next => [step("window", [snapshot.id]), next];
+		const identity = { id: snapshot.id, pid: snapshot.pid };
+		const via = next => [step("window", [identity]), next];
 		defineValueMethods(win, windowValueMethods, via);
-		defineMethod(win, "find", async query => (await callValue(via(step("find", [query])))).map(makeElement));
-		defineMethod(win, "ref", ref => resolveElement([step("ref", [ref])]));
+		defineMethod(win, "verify", (...args) => callValue([step("verifyWindow", [identity, ...args])]));
+		defineMethod(win, "find", async query =>
+			(await callValue(via(step("find", [query])))).map(item => makeElement(item, identity)),
+		);
+		defineMethod(win, "ref", ref => resolveElement(via(step("ref", [ref])), identity));
 		return Object.freeze(win);
 	};
 	const resolveWindow = async chain => {
@@ -120,10 +145,9 @@
 
 	const computer = {};
 	defineValueMethods(computer, desktopValueMethods, next => [next]);
-	computer.window = selector => resolveWindow([step("window", [selector])]);
+	computer.window = (selector, options) =>
+		resolveWindow([step("acquireWindow", [selector, validateOptions("computer.window", options)])]);
 	computer.focusedWindow = () => resolveWindow([step("focusedWindow", [])]);
-	computer.elementAt = (x, y) => resolveElement([step("elementAt", [x, y])]);
-	computer.focusedElement = () => resolveElement([step("focusedElement", [])]);
 	computer.ref = ref => resolveElement([step("ref", [ref])]);
 	computer.clipboard = Object.freeze({
 		read: () => callValue([step("clipboard.read", [])]),
@@ -146,9 +170,8 @@
 		const details = await invoke("run", parameters);
 		return details.value;
 	};
-	computer.capabilities = async () => {
-		const details = await invoke("capabilities", {});
-		return "backend" in details ? details : undefined;
+	computer.release = async () => {
+		await invoke("release", {});
 	};
 	computer.close = async () => {
 		await invoke("close", {});

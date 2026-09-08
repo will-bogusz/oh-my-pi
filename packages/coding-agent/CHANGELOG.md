@@ -22,6 +22,55 @@
 - Live task dispatch now reloads added, changed, removed, and deleted project task and retry settings before resolving subagents ([#11191](https://github.com/can1357/oh-my-pi/issues/11191)).
 - Reset `/loop` iterations combined with `--while` / `--until` no longer keep submitting without resetting when vibe mode is enabled while the condition command is still running; the loop now disables itself instead ([#10858](https://github.com/can1357/oh-my-pi/pull/10858)).
 
+### Changed
+
+- Native window acquisition now includes initial background inspection; use `win.initialObservation` for the first state. Explicit foreground activation is named `win.reveal()` in JavaScript and Python, replacing `raise()` / `raise_()`.
+- Managed Chrome `tab.close()` now closes the actual tab, including adopted or retained pages; use `tab.release()` for cleanup that preserves those pages.
+- Added background element double-clicks with the current macOS Cua runtime, without requiring screenshot coordinates.
+- Native observations identify attached sheets separately so their controls can be acquired with the correct window target.
+- Expose observed semantic actions in computer snapshots and element handles, including native file-item confirmation.
+- Inspect and answer observed JavaScript dialogs on an exact managed Chrome tab while its page is blocked, using current dialog IDs.
+- Added `tab.downloads()` to inspect page-scoped download IDs, progress and completion without changing Chrome's download settings.
+- Added optional saved-file candidate lookup with `tab.downloads({paths:true})`, explicit extension permission setup, and ambiguity reporting.
+- Chrome acquisition now includes initial controls, readable page text and a background preview; `tab.target` exposes exact browser/tab discovery identity independently of element helpers.
+- Added `browser.getTab` to inspect a unique existing Chrome tab by exact title or URL, with explicit ambiguity handling across profiles and windows.
+- Added `browser.closeTab(id)` to close an exact discovered Chrome tab without attaching page control or activating Chrome.
+- Added `browser-relay install --name` for distinct extension display names when independent installations coexist, avoiding Chrome's duplicate debugger-warning collision without hiding its safety warning.
+- Browser confirmations now preserve the page’s pending save when an observed-element click pauses for a decision.
+- Async JavaScript Eval cells preserve an existing `var` value when it is read before a same-cell redeclaration.
+- Native window observations now show current accessibility state automatically, and native previews identify the app and window by name.
+- Disabling computer use now interrupts the active agent turn so it cannot continue the same task through another control route.
+- Browser connection diagnostics now distinguish the executing extension build from exported files, including different builds and unverified legacy connections.
+- Preserved custom browser extension names during updates and clarified reload instructions for already-paired profiles.
+- Cancelling Cua input now requests native cleanup, retires the interrupted session, and reports failed cleanup instead of silently acknowledging it.
+- Crashed or forcibly stopped computer runs retain unconfirmed cleanup failures and prevent automatic reuse instead of reporting a clean stop.
+- Computer drag guidance now exposes Cua timing options and accurately reports that macOS drag requires foreground delivery.
+- Slow native accessibility reads now stop within a shared traversal budget and identify partial state instead of leaving the walk running after a timeout.
+- Native action reply errors now distinguish an uncertain outcome and direct the agent to verify the result before retrying.
+- JavaScript eval preserves rebound globals across cells and runtime switches, including imported file APIs used to verify saved results.
+- File-panel snapshots exclude native Open actions that the driver refuses in background mode.
+- New macOS apps launch without activation instead of being forcibly hidden, keeping native file dialogs usable in the background.
+- Keep computer use on the verified native runtime when an older SDK is installed in an ancestor directory.
+- Reclaim Chrome tabs with observed pending dialogs, answer them before page initialization, and preserve unresolved work when the task ends.
+- Keep failed browser calls from leaving dialog handlers that answer later prompts, and preserve browser observers when clearing call-owned listeners.
+- Report unsupported download-directory changes in existing Chrome instead of claiming they were applied.
+- Preserve partially completed Chrome pages when acquisition or cleanup fails, and drain local workers even when remote recovery is unconfirmed.
+- Verify explicit macOS app paths against the running installation, preserve accessory-app identity, and reject ambiguous file handoffs before dispatch.
+- macOS computer use can capture hidden windows, requests hidden launch for new apps, and preserves the visibility of running apps without restoring old foreground focus.
+- Computer window ambiguity now includes matching identities so the agent can select the intended document directly.
+- Keep accessibility selectors responsive in inactive Chrome tabs, with page preparation and cleanup spanning the complete operation.
+- Accept app name/path shorthand for native launch, validate options before dispatch, and resolve exact macOS app bundle paths through Cua's background launch route.
+- Avoid native acquisition ambiguity caused by extra WindowServer records when complete application accessibility identities resolve the intended window; retain explicit access to all discovered windows.
+- Successful page closure no longer becomes a popup-cleanup error; accepted child work and genuine failures remain visible.
+- Fixed failed browser connections displaying `[object ErrorEvent]` instead of the connection failure.
+- Preserve genuine browser debugger cancellation after explicit release and reacquisition; explicit detach now acknowledges completion without consuming a later native cancellation event.
+- Stop automatically printing full browser discovery inventories before callers can select the fields they need; structured instance and tab results remain available.
+- Keep window screenshots available when accessibility observation fails, without invalidating existing element refs; expose partial-observation capture errors.
+- Moved computer control into a lazy, isolated OS child process with verified resource cleanup and exact window/PID targeting. Apple Silicon macOS uses the maintained Cua SDK payload; other hosts use OMP's native adapter. Failures never select another backend or retry in the foreground.
+- Fixed native background input lifecycle with a session-scoped macOS responsiveness lease, current-reference invalidation, complete-observation verification, and cancellation-safe input dispatch. Keyboard workflows still require an explicit editor click and application readback.
+- Keep macOS background keyboard input available with a proven system sharing indicator while retaining ordinary and lookalike sibling-window refusal. Exclude the physical cursor from exact-window screenshots so a cursor crossing the edge cannot change their coordinate frame.
+- Browser guidance now filters discovery before display and closes requested tabs without unnecessary page acquisition.
+
 ## [18.1.15] - 2026-09-08
 
 ### Added

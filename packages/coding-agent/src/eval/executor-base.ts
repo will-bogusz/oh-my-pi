@@ -228,6 +228,7 @@ function createBridgeAbortShield(source: AbortSignal | undefined): BridgeAbortSh
 		}
 		if (event.op !== EVAL_TIMEOUT_RESUME_OP || pauseDepth === 0) return;
 		pauseDepth--;
+		if (pauseDepth > 0) return;
 		if (shield.abortRequested && !controller.signal.aborted) controller.abort(abortReason);
 	};
 	shield.dispose = (): void => {

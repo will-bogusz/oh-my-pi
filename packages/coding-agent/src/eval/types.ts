@@ -21,10 +21,32 @@ export interface EvalStatusEvent {
 	[key: string]: unknown;
 }
 
+/** Host-attributed browser/computer image provenance, independent of image bytes. */
+export interface ControlImageMetadata {
+	kind: "browser" | "computer";
+	label?: string;
+	path?: string;
+}
+
+export interface ControlImageReference extends ControlImageMetadata {
+	/** Zero-based ordinal among tool result image blocks, excluding text. */
+	index: number;
+}
+
+export interface ControlActivityEvent extends EvalStatusEvent {
+	op: "control";
+	id: string;
+	kind: "browser" | "computer";
+	action: string;
+	target?: string;
+	/** Stopped ends this operation; only released confirms an explicit cleanup succeeded. */
+	phase: "running" | "stopping" | "completed" | "released" | "stopped" | "failed";
+}
+
 /** Display output captured during eval execution across supported backends. */
 export type EvalDisplayOutput =
 	| { type: "json"; data: unknown }
-	| { type: "image"; data: string; mimeType: string }
+	| { type: "image"; data: string; mimeType: string; control?: ControlImageMetadata }
 	| { type: "markdown"; text?: string }
 	| { type: "status"; event: EvalStatusEvent };
 
@@ -47,6 +69,7 @@ export interface EvalToolDetails {
 	cells?: EvalCellResult[];
 	jsonOutputs?: unknown[];
 	images?: ImageContent[];
+	controlImages?: ControlImageReference[];
 	statusEvents?: EvalStatusEvent[];
 	isError?: boolean;
 	meta?: OutputMeta;

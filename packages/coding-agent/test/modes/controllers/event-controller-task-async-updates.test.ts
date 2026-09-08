@@ -129,6 +129,59 @@ describe("EventController async update finalization", () => {
 		expect(component.isTranscriptBlockFinalized()).toBe(true);
 	});
 
+	it("keeps a returned Eval card live across the next turn and attaches its final control image", async () => {
+		const { controller, pendingTools } = createFixture();
+		await controller.handleEvent({
+			type: "tool_execution_start",
+			toolCallId: "tc-eval",
+			toolName: "eval",
+			args: { language: "js", code: "await computer.release()" },
+		});
+		const component = pendingTools.get("tc-eval")!;
+		sealed.push(component);
+		await controller.handleEvent({
+			type: "tool_execution_end",
+			toolCallId: "tc-eval",
+			toolName: "eval",
+			isError: false,
+			result: {
+				content: [{ type: "text", text: "Backgrounded" }],
+				details: { async: { state: "running", jobId: "eval-1", type: "eval" } },
+			},
+		});
+		await controller.handleEvent({ type: "agent_start" });
+		expect(pendingTools.get("tc-eval")).toBe(component);
+		await controller.handleEvent({
+			type: "tool_execution_update",
+			toolCallId: "tc-eval",
+			toolName: "eval",
+			args: {},
+			partialResult: {
+				content: [{ type: "text", text: "Released" }],
+				details: {
+					async: { state: "completed", jobId: "eval-1", type: "eval" },
+					statusEvents: [{ op: "control", id: "release", kind: "computer", action: "release", phase: "released" }],
+					images: [
+						{
+							type: "image",
+							mimeType: "image/png",
+							data: (
+								await Bun.file(new URL("../../../../ai/test/data/red-circle.png", import.meta.url)).bytes()
+							).toBase64(),
+						},
+					],
+					controlImages: [{ index: 0, kind: "computer", label: "Fixture", path: "/tmp/final-fixture.png" }],
+				},
+			},
+		});
+		expect(pendingTools.has("tc-eval")).toBe(false);
+		expect(component.isTranscriptBlockFinalized()).toBe(true);
+		const rendered = Bun.stripANSI(component.render(100).join("\n"));
+		expect(rendered).toContain("Computer snapshot");
+		expect(rendered).toContain("final-fixture.png");
+		expect(rendered).not.toContain("Working");
+	});
+
 	it("finalizes a backgrounded Bash block without tracking later job updates", async () => {
 		const { controller, pendingTools } = createFixture();
 		await controller.handleEvent({

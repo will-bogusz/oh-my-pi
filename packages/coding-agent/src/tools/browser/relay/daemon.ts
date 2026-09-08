@@ -12,8 +12,8 @@
  * the global broker lease before probing, then adopt that external server
  * without attempting another bind.
  */
-import { logger } from "@oh-my-pi/pi-utils";
-import { daemonClientForGlobal } from "../../../launch/client";
+import { getGlobalDaemonRuntimeDir, logger } from "@oh-my-pi/pi-utils";
+import { createDaemonBrokerClient, daemonClientForGlobal, type DaemonBrokerClient } from "../../../launch/client";
 import { describeQuietly, stopQuietly, waitReady } from "../../../launch/ensure";
 import { resolveWorkerSpawnCmd } from "../../../subprocess/worker-client";
 import { throwIfAborted } from "../../tool-errors";
@@ -29,8 +29,73 @@ const PROBE_TIMEOUT_MS = 1_500;
 /** probe→describe→start rounds; bounds cross-process races and wedged-relay replacement. */
 const ENSURE_ATTEMPTS = 3;
 
-/** True when the relay HTTP server answers /json/version at all (200 = extension connected, 503 = waiting for it). */
+/** A code-entry window leases the broker independently of the finite pairing CLI. */
+export class RelayPairingLease {
+	readonly #runtimeDir: string;
+	#client: Promise<DaemonBrokerClient> | undefined;
+	#timer: NodeJS.Timeout | undefined;
+	#expiresAt = 0;
+	#closed = false;
+
+	constructor(runtimeDir = getGlobalDaemonRuntimeDir(RELAY_BROKER_SCOPE)) {
+		this.#runtimeDir = runtimeDir;
+	}
+
+	async holdUntil(expiresAt: number): Promise<void> {
+		if (this.#closed) throw new Error("Browser pairing setup has closed");
+		if (!Number.isSafeInteger(expiresAt) || expiresAt <= Date.now())
+			throw new Error("Browser pairing code has already expired");
+		this.#expiresAt = Math.max(this.#expiresAt, expiresAt);
+		clearTimeout(this.#timer);
+		const pending = (this.#client ??= createDaemonBrokerClient(this.#runtimeDir, {
+			runtimeDir: this.#runtimeDir,
+		}));
+		try {
+			const client = await pending;
+			await client.request({ op: "ping" });
+			if (this.#closed || this.#client !== pending) throw new Error("Browser pairing setup has closed");
+			clearTimeout(this.#timer);
+			this.#timer = setTimeout(
+				() => {
+					this.#timer = undefined;
+					this.#client = undefined;
+					this.#expiresAt = 0;
+					client.close();
+				},
+				Math.max(0, this.#expiresAt - Date.now()),
+			);
+		} catch (error) {
+			if (this.#client === pending) {
+				this.#client = undefined;
+				this.#expiresAt = 0;
+				clearTimeout(this.#timer);
+			}
+			await pending.then(
+				client => client.close(),
+				() => {},
+			);
+			throw error;
+		}
+	}
+
+	async close(): Promise<void> {
+		this.#closed = true;
+		clearTimeout(this.#timer);
+		const pending = this.#client;
+		this.#client = undefined;
+		await pending?.then(
+			client => client.close(),
+			() => {},
+		);
+	}
+}
+
+/** Recognize current liveness and healthy older services without replacing either endpoint. */
 export async function probeRelayServer(cdpUrl: string): Promise<boolean> {
+	const health = await probeCdpStatus(`${cdpUrl}/health`, { timeoutMs: PROBE_TIMEOUT_MS });
+	if (health !== null && health >= 200 && health < 300) return true;
+	// Preserve a healthy older endpoint. The acquisition layer reports its protocol
+	// mismatch instead of replacing another task’s service.
 	const status = await probeCdpStatus(`${cdpUrl}/json/version`, { timeoutMs: PROBE_TIMEOUT_MS });
 	return status === 503 || (status !== null && status >= 200 && status < 300);
 }
@@ -58,6 +123,9 @@ export async function ensureRelayDaemon(opts: { cdpUrl: string; signal?: AbortSi
 	} catch {
 		return false;
 	}
+	// Broker records must identify the listening endpoint. A failed custom-port
+	// probe must never be treated as proof that another port's daemon is wedged.
+	const daemonName = port === "9224" ? RELAY_DAEMON_NAME : `${RELAY_DAEMON_NAME}.${port}`;
 	// Open the lazy client before probing. Merely caching SocketDaemonClient
 	// would not create the broker connection (and therefore would hold no lease).
 	const client = await daemonClientForGlobal(RELAY_BROKER_SCOPE);
@@ -70,12 +138,12 @@ export async function ensureRelayDaemon(opts: { cdpUrl: string; signal?: AbortSi
 		// A manual serve or concurrent global-broker start may have won the
 		// port since the last round; adopt it instead of fighting the bind.
 		if (await probeRelayServer(opts.cdpUrl)) return true;
-		const existing = await describeQuietly(client, RELAY_DAEMON_NAME, "Browser relay", opts.signal);
+		const existing = await describeQuietly(client, daemonName, "Browser relay", opts.signal);
 		if (existing && existing.state !== "exited" && existing.state !== "failed") {
-			if (existing.readyAt === undefined) await waitReady(client, RELAY_DAEMON_NAME, "Browser relay", opts.signal);
+			if (existing.readyAt === undefined) await waitReady(client, daemonName, "Browser relay", opts.signal);
 			if (await probeRelayServer(opts.cdpUrl)) return true;
 			// Live record but nothing listening: replace the wedged daemon.
-			await stopQuietly(client, RELAY_DAEMON_NAME, "Browser relay", opts.signal);
+			await stopQuietly(client, daemonName, "Browser relay", opts.signal);
 			continue;
 		}
 		try {
@@ -83,7 +151,7 @@ export async function ensureRelayDaemon(opts: { cdpUrl: string; signal?: AbortSi
 				{
 					op: "start",
 					spec: {
-						name: RELAY_DAEMON_NAME,
+						name: daemonName,
 						application: spawn.cmd[0]!,
 						args: [...spawn.cmd.slice(1), "--port", port],
 						env: {},
@@ -99,12 +167,12 @@ export async function ensureRelayDaemon(opts: { cdpUrl: string; signal?: AbortSi
 			);
 			if (started.op !== "start") continue;
 			if (await probeRelayServer(opts.cdpUrl)) return true;
-			await stopQuietly(client, RELAY_DAEMON_NAME, "Browser relay", opts.signal);
+			await stopQuietly(client, daemonName, "Browser relay", opts.signal);
 		} catch (error) {
 			throwIfAborted(opts.signal);
 			// Lost a cross-process start race; the next round adopts the winner.
 			logger.debug("Browser relay start contention", {
-				name: RELAY_DAEMON_NAME,
+				name: daemonName,
 				error: error instanceof Error ? error.message : String(error),
 			});
 		}

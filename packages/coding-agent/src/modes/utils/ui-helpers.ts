@@ -693,7 +693,7 @@ export class UiHelpers {
 					const asyncDetails = (message.details as { async?: { state?: string; jobId?: string } } | undefined)
 						?.async;
 					const isBackgroundTask =
-						message.toolName === "task" &&
+						(message.toolName === "task" || message.toolName === "eval") &&
 						asyncDetails?.state === "running" &&
 						(activeToolExecutionUpdates.some(event => event.toolCallId === message.toolCallId) ||
 							runningAsyncJobs.some(job => job.id === asyncDetails.jobId));

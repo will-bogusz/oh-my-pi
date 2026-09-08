@@ -1,0 +1,79 @@
+(binding, deadline, runId) => {
+	const previous = globalThis[binding + "Policy"];
+	if (previous) {
+		previous.deadline = deadline;
+		if (previous.runId !== runId) previous.requests = [];
+		previous.runId = runId;
+		return;
+	}
+	const policy = { deadline, runId, requests: [] };
+	globalThis[binding + "Policy"] = policy;
+	const active = () => Date.now() < policy.deadline;
+	const nativeOpen = window.open;
+	const nativeSubmit = HTMLFormElement.prototype.submit;
+	const request = (url, error) => {
+		// The host rechecks its run signal; page state alone never grants ownership.
+		const queued = { id: Array.from(crypto.getRandomValues(new Uint32Array(4))).join("-"), runId: policy.runId, url, error };
+		policy.requests.push(queued);
+		// Initial document scripts can run before Puppeteer's exposed binding has
+		// reacquired its execution context. Keep a queue for the host's final drain.
+		try { void globalThis[binding](queued).catch(() => {}); } catch {}
+	};
+	const external = target => target && !["_self", "_parent", "_top", window.name].includes(target.toLowerCase());
+	const open = (url, target) => {
+		if (target.toLowerCase() !== "_blank") {
+			request(undefined, "Named-window popups need an explicit browser.create/claim operation");
+			return;
+		}
+		request(new URL(url || "about:blank", document.baseURI).href);
+	};
+	const managedOpen = function (url, target = "_blank", features) {
+		target = String(target || "_blank");
+		if (!active() || !external(target)) return nativeOpen.call(this, url, target, features);
+		open(String(url ?? "about:blank"), String(target));
+		return null;
+	};
+	window.open = managedOpen;
+	const link = event => {
+		if (!active() || event.defaultPrevented) return;
+		const anchor = event
+			.composedPath()
+			.find(node => node instanceof HTMLAnchorElement || node instanceof HTMLAreaElement);
+		if (!anchor || anchor.hasAttribute("download")) return;
+		const target = event.button === 1 || event.ctrlKey || event.metaKey || event.shiftKey ? "_blank" : anchor.target || document.querySelector("base[target]")?.target;
+		if (!external(target)) return;
+		event.preventDefault();
+		open(anchor.href, target);
+	};
+	const submission = event => {
+		const target =
+			event.submitter?.formTarget || event.target.target || document.querySelector("base[target]")?.target;
+		if (!active() || !external(target)) return;
+		event.preventDefault();
+		request(
+			undefined,
+			"Background new-window form submission is unsupported; open and fill the destination explicitly",
+		);
+	};
+	window.addEventListener("click", link, true);
+	window.addEventListener("auxclick", link, true);
+	window.addEventListener("submit", submission, true);
+	const managedSubmit = function () {
+		const target = this.target || document.querySelector("base[target]")?.target;
+		if (!active() || !external(target)) return nativeSubmit.call(this);
+		request(
+			undefined,
+			"Background new-window form submission is unsupported; open and fill the destination explicitly",
+		);
+	};
+	HTMLFormElement.prototype.submit = managedSubmit;
+	policy.dispose = () => {
+		policy.deadline = 0;
+		if (window.open === managedOpen) window.open = nativeOpen;
+		if (HTMLFormElement.prototype.submit === managedSubmit) HTMLFormElement.prototype.submit = nativeSubmit;
+		window.removeEventListener("click", link, true);
+		window.removeEventListener("auxclick", link, true);
+		window.removeEventListener("submit", submission, true);
+		delete globalThis[binding + "Policy"];
+	};
+}

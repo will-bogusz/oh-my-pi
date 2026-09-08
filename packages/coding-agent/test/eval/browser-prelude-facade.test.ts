@@ -93,6 +93,75 @@ afterAll(async () => {
 });
 
 describe("browser JavaScript facade", () => {
+	it("keeps Chrome handles and element references bound when labels and observation slots repeat", async () => {
+		const calls: Array<Record<string, unknown>> = [];
+		let nextHandle = 0;
+		let nextSnapshot = 0;
+		const prelude = createBrowserPrelude(makeSession());
+		const context = createContext({
+			__omp_display__: () => {},
+			__omp_prelude__: async (_name: string, parameters: Record<string, unknown>) => {
+				calls.push(parameters);
+				if (parameters.action === "create")
+					return {
+						details: {
+							name: "Same label",
+							handle: `handle-${++nextHandle}`,
+							value: {
+								target: { id: `discovery-${nextHandle}`, browserId: `profile-${nextHandle}`, tabId: 1 },
+								initialObservation: { snapshot: `initial-${nextHandle}`, elements: [{ id: 1 }] },
+								initialTree: "Save changes",
+								initialDialog: { status: "open", dialog: { id: "dialog-first" } },
+							},
+						},
+					};
+				if (firstChainMethod(parameters) === "observe")
+					return { details: { value: { snapshot: `snapshot-${++nextSnapshot}`, elements: [{ id: 1 }] } } };
+				return { details: {} };
+			},
+		});
+		runInContext(prelude.javascript!, context);
+		await runInContext(
+			`(async () => {
+			await browser.instances();
+			await browser.discover({browserId:"work-profile"});
+			globalThis.first = await browser.create({label: "Same label",browserId:"work-profile"});
+			globalThis.savedElement = first.id(1);
+			globalThis.second = await browser.create({label: "Same label"});
+			await first.observe();
+			await savedElement.click();
+			await second.retain();
+		})()`,
+			context,
+		);
+		expect(calls[0]).toMatchObject({ action: "instances" });
+		expect(calls[1]).toMatchObject({ action: "discover", browserId: "work-profile" });
+		expect(calls[2]).toMatchObject({ action: "create", browserId: "work-profile" });
+		expect(calls.at(-2)).toMatchObject({
+			handle: "handle-1",
+			chain: [
+				{ method: "ref", args: ["initial-1:1"] },
+				{ method: "click", args: [] },
+			],
+		});
+		expect(calls.at(-1)).toMatchObject({ handle: "handle-2", action: "retain" });
+		expect(runInContext("[first.target, second.target]", context)).toEqual([
+			{ id: "discovery-1", browserId: "profile-1", tabId: 1 },
+			{ id: "discovery-2", browserId: "profile-2", tabId: 1 },
+		]);
+		expect(() => runInContext('"use strict"; first.target.id = "discovery-2"', context)).toThrow();
+		expect(runInContext("first.initialObservation.snapshot", context)).toBe("initial-1");
+		await runInContext(
+			'first.dialog({action:"accept",id:first.initialDialog.dialog.id,promptText:"café Ω"})',
+			context,
+		);
+		expect(calls.at(-1)).toEqual({
+			action: "dialog",
+			handle: "handle-1",
+			dialog: { action: "accept", id: "dialog-first", promptText: "café Ω" },
+		});
+	});
+
 	it("builds handles, chains, markers, and direct values against the shipped VM prelude", async () => {
 		const calls: unknown[] = [];
 		const displays: unknown[] = [];
@@ -302,6 +371,75 @@ describe("browser facade in real Eval runtimes", () => {
 		expect(result.exitCode).toBe(0);
 		expect(calls).toContainEqual({ action: "open", name: "py-opts", timeout: 7, persist: true });
 		expect(calls).toContainEqual({ action: "open", name: "py-plain" });
+	});
+
+	it("binds Python's initial controls to their acquisition snapshot and keeps discovery identity immutable", async () => {
+		const calls: unknown[] = [];
+		let definitions: readonly EvalPreludeDefinition[] = [];
+		const session = makeSession(() => definitions);
+		definitions = [
+			{
+				...createBrowserPrelude(session),
+				async invoke(parameters) {
+					calls.push(parameters);
+					if (field(parameters, "action") === "claim")
+						return {
+							content: [],
+							details: {
+								name: "Same label",
+								handle: "py-held-tab",
+								value: {
+									target: { id: "py-discovery", browserId: "py-profile", tabId: 7 },
+									initialObservation: { snapshot: "initial-py", elements: [{ id: 2, role: "button" }] },
+									initialDialog: { status: "open", dialog: { id: "dialog-py" } },
+								},
+							},
+						};
+					return { content: [], details: { value: { snapshot: "replacement-py", elements: [{ id: 2 }] } } };
+				},
+			},
+		];
+		const result = await executePython(
+			`tab = await browser.getTab({"title": "Same label"}, observation={"screenshot": False})
+element = tab.id(tab.initialObservation["elements"][0]["id"])
+await tab.dialog(action="accept", id=tab.initialDialog["dialog"]["id"], promptText="café Ω")
+await tab.dialog({"action":"inspect"})
+await tab.observe()
+await element.click()
+try:
+    tab.target["id"] = "another-tab"
+except TypeError:
+    print("immutable")
+print(tab.target["id"])
+print(tab.initialObservation["snapshot"])
+`,
+			{
+				cwd: process.cwd(),
+				sessionId: `browser-initial-py-${crypto.randomUUID()}`,
+				toolSession: session,
+				kernelMode: "per-call",
+			},
+		);
+		expect(result.exitCode).toBe(0);
+		expect(result.output.trim().split("\n")).toEqual(["immutable", "py-discovery", "initial-py"]);
+		expect(calls).toContainEqual({
+			action: "dialog",
+			handle: "py-held-tab",
+			dialog: { action: "accept", id: "dialog-py", promptText: "café Ω" },
+		});
+		expect(calls).toContainEqual({ action: "dialog", handle: "py-held-tab", dialog: { action: "inspect" } });
+		expect(calls.at(-1)).toMatchObject({
+			handle: "py-held-tab",
+			chain: [
+				{ method: "ref", args: ["initial-py:2"] },
+				{ method: "click", args: [] },
+			],
+		});
+		expect(calls[0]).toMatchObject({
+			action: "claim",
+			selector: { title: "Same label" },
+			observation: { screenshot: false },
+		});
 	});
 });
 
