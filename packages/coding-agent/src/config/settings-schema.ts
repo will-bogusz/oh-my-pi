@@ -4388,7 +4388,19 @@ export const SETTINGS_SCHEMA = {
 			tab: "tools",
 			group: "Computer",
 			label: "Computer Display",
-			description: "Primary display on Apple Silicon macOS; all displays or a native display id on other hosts",
+			description: "Display selector for the native driver; only the primary display is supported today",
+		},
+	},
+
+	"computer.releaseOnSettle": {
+		type: "boolean",
+		default: true,
+		ui: {
+			tab: "tools",
+			group: "Computer",
+			label: "Release Computer Driver When The Agent Stops",
+			description:
+				"When the agent finishes its work and hands control back, end the desktop-control driver child so the macOS screen-sharing indicator goes away. The next computer call starts a fresh driver; the prelude and its settings are untouched.",
 		},
 	},
 
@@ -4626,6 +4638,18 @@ export const SETTINGS_SCHEMA = {
 			label: "Freeze Browser Tabs On Turn End",
 			description:
 				"Freeze OMP-owned headless browser tabs when a turn settles so animated pages stop burning CPU/GPU while idle. Tabs unfreeze automatically on next use; pass persist:true on open to opt a tab out.",
+		},
+	},
+	"browser.refs": {
+		type: "enum",
+		values: ["uuid", "compact"] as const,
+		default: "compact",
+		ui: {
+			tab: "tools",
+			group: "Grep & Browser",
+			label: "Browser Element Refs",
+			description:
+				"Shape of the element refs returned by tab.observe(). 'uuid' emits snapshot-bound '<observation-uuid>:<n>' tokens that go stale on every observation. 'compact' emits 'e1'..'eN' per observation and self-heals a ref whose node was replaced by re-querying the accessibility tree by role/name/nth.",
 		},
 	},
 	"browser.idleCloseSec": {

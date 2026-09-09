@@ -14,21 +14,25 @@ Paired Chrome profiles
                                                    │
                            ┌───────────────────────┼────────────────────┐
                            ▼                       ▼                    ▼
-                        reveal()                retain()             release()
+                        reveal()                keep()               release()
                      explicit focus         keep on release       end ownership
 ```
 
-The prelude is available while Eval and `browser.enabled` are enabled. It is not a standalone AgentTool. Browser and computer handles are separate APIs.
+The prelude is available while Eval and `browser.enabled` are enabled. It is not a standalone AgentTool. Browser and computer handles are separate APIs. The model-facing prompt (`packages/coding-agent/src/prompts/tools/browser.md`) is deliberately short — acquisition, identity, the observe → act → verify loop, refs, keep/release, dialogs, popups and the other modes — and this page is the long-form contract behind it.
 
 ## Existing Chrome setup and discovery
 
-For a known existing page, start with `await browser.getTab({ title: "Exact page title" })` or an exact `url`. Python uses `await browser.getTab({"title": "Exact page title"})`. A unique match is acquired with initial state in one call. Every supplied field must match exactly; optional `browserId` and `windowId` disambiguate profiles/windows. Multiple matches return a choice of exact IDs; no match creates nothing. `getTab(id)` accepts an already discovered ID. Lookup rechecks the selected page metadata during acquisition and releases a changed match without navigation or input.
+For a known existing page, start with `await browser.getTab({ title: "page title" })` or a `url`. Python uses `await browser.getTab({"title": "page title"})`. A unique match is acquired with initial state in one call. `title` and `url` match as trimmed, case-insensitive substrings and combine; a tab's title is whatever the page put there this second (notification counts, live scores), so requiring the whole string made selection by the names a model can see unusable. Optional `browserId` and `windowId` disambiguate profiles/windows. Multiple matches return a choice of exact IDs; ambiguity is always an error, never a silent first match. No match creates nothing. `getTab(id)` accepts an already discovered ID. Lookup rechecks the selected page metadata during acquisition and releases a changed match without navigation or input.
 
 Install the extension with `omp browser-relay install`, load the generated directory through Chrome's **Load unpacked** flow, and run `omp browser-relay pair`. Click the extension's toolbar button to open Options, choose a setup name such as Work Chrome, and enter the one-use pairing code. Repeat for each profile. See the [extension guide](../../packages/browser-relay/README.md) for custom ports, independent installations, and connection recovery.
 
-When keeping an older extension loaded, install the new custom-port copy into a separate directory with a distinct display name: `omp browser-relay install --dir /absolute/new/extension --port 9333 --name "OMP Browser Relay 9333"`. Load that directory, run `omp browser-relay pair --port 9333`, and set `browser.relayUrl` to `http://127.0.0.1:9333` in the intended settings scope. Fresh installations use the installed port default; existing profile-local saved connection settings and pairing take precedence. The optional name is trimmed, must be nonempty, and changes the manifest name and toolbar settings title, not browser-instance identity or the pairing label. The default remains **OMP Browser Relay**.
+When keeping an older extension loaded, install the new custom-port copy into a separate directory with a distinct display name: `omp browser-relay install --dir /absolute/new/extension --port 9333 --name "Oh My Pi 9333"`. Load that directory, run `omp browser-relay pair --port 9333`, and set `browser.relayUrl` to `http://127.0.0.1:9333` in the intended settings scope. Fresh installations use the installed port default; existing profile-local saved connection settings and pairing take precedence. The optional name is trimmed, must be nonempty, and changes the manifest name and toolbar settings title, not browser-instance identity or the pairing label. The default remains **Oh My Pi**.
 
 Chromium compares debugger infobar message text: identical extension manifest names can automatically cancel the newer debugger even when the copies have different extension IDs. Distinct names preserve the visible warning; never suppress that warning with silent-debugger/infobar flags. A different name does not resolve another debugger owning the same tab.
+
+Chrome shows that warning once per debugger attach and removes it about five seconds after the last detach. The relay gives attachments back rather than holding them: a tab loses its debugger once nothing drives it, when the host ends a task or turn, when the relay socket stays closed for two seconds, and when Chrome unloads the extension's worker. Ownership, page state and tab groups survive; the next command reattaches, restores that tab's root debugger state, and the warning appears again. A tab with an open JavaScript dialog keeps its debugger, since nothing else can answer the dialog.
+
+Existing installations keep the display name they were installed with. Pass `--name "Oh My Pi"` to adopt the current default on an already installed copy.
 
 `browser.instances()` returns paired profiles, including disconnected ones, as `{ id, label, connected, generation? }`. Labels are chosen during setup; they are not inferred account or profile identities. Use the exact `id` as `browserId`. With multiple connected profiles, `create` requires an explicit selection.
 
@@ -63,7 +67,7 @@ Inspection channels fail independently: `inspectionError`, `treeError`, or `scre
 
 For an explicit request to close a tab, use `await browser.closeTab(id, { browserId?, timeout? })` directly from discovery. It does not attach a debugger or page worker, regroup the tab, or activate Chrome. Another actor's ownership is rejected; your own controlled tab can be closed this way. Discover again after closure to verify the remaining inventory. Stale IDs cannot close a replacement tab after removal or browser reconnection.
 
-## Create, retain, release, and reveal
+## Create, keep, release, and reveal
 
 ```js
 const profiles = (await browser.instances()).filter(profile => profile.connected);
@@ -81,7 +85,7 @@ display(await tab.observe());
 display(await tab.extract("text"));
 await tab.screenshot();
 
-await tab.retain();
+await tab.keep();
 await tab.release();
 ```
 
@@ -92,15 +96,17 @@ Keep the immutable handle returned by `create` or `claim`. Its `name` is a displ
 | Operation                      | Effect on a managed Chrome tab                                                           |
 | ------------------------------ | ---------------------------------------------------------------------------------------- |
 | `tab.reveal()`                 | Selects the tab and focuses its Chrome window explicitly.                                |
-| `tab.retain()`                 | Marks a task-created tab to survive release; keeps ownership until release.              |
-| `tab.release()`                | Releases ownership and invalidates the handle. Closes only unretained task-created tabs. |
-| `tab.close()`                  | Physically closes this exact Chrome tab, including adopted or retained pages.             |
+| `tab.keep()`                   | Leaves this page open for the user when the task ends, instead of closing it.            |
+| `tab.release()`                | Hands the tab back and invalidates the handle. Closes only task-created tabs not kept.   |
+| `tab.close()`                  | Physically closes this exact Chrome tab, including a claimed or kept page.                |
 | `browser.closeTab(id)`         | Physically closes an exact discovered Chrome tab without acquiring page control.          |
 | `browser.close({ all: true })` | Releases this actor's tabs across browser modes; does not release another actor's tabs.  |
 
-Adopted user tabs and retained result tabs survive release. Another actor can discover and claim a released result by its current exact discovery ID. `retain`, `release`, and `reveal` require a managed Chrome handle returned by `create`, `claim`, or relay-mode `open`; use `close` for other modes.
+Claimed user tabs and kept result tabs survive release. Another actor can discover and claim a released result by its current exact discovery ID. `keep`, `release`, and `reveal` require a managed Chrome handle returned by `create`, `claim`, or relay-mode `open`; use `close` for other modes.
 
-Migration: managed Chrome handles previously treated `tab.close()` as release. Change end-of-task cleanup to `tab.release()` when adopted or retained pages should survive. Keep `tab.close()` for an intended physical closure. The older root `browser.close({ all: true })` remains an actor-wide cleanup operation; it is not a request to physically close every discovered tab.
+There is no cross-turn lease. When the agent stops, every lease this session holds is handed back: tabs it created are closed, tabs it claimed and tabs marked `keep()` stay open, the task tab group dissolves, and the remaining `chrome.debugger` attachments are detached so Chrome's "OMP is debugging this browser" bar disappears. The next turn re-claims by exact tab ID. While a tab is attached, the extension swaps its favicon for a cursor glyph (installed over the debugger attachment on first real attach, re-applied across the page's own navigations, restored on release); merely claiming a tab attaches nothing and leaves the tab strip untouched.
+
+Migration: managed Chrome handles previously treated `tab.close()` as release, and `tab.retain()` is now `tab.keep()`. Change end-of-task cleanup to `tab.release()` when claimed or kept pages should survive. Keep `tab.close()` for an intended physical closure. The older root `browser.close({ all: true })` remains an actor-wide cleanup operation; it is not a request to physically close every discovered tab.
 
 Inspection, screenshots, and managed input do not implicitly reveal the tab or focus Chrome. Keep reveal separate from ordinary work and use it only when a foreground handoff is intended.
 
@@ -134,6 +140,15 @@ A new observation or navigation invalidates managed Chrome references. Re-render
 
 Managed Chrome `ariaSnapshot()` is a read-only structural view. Its `[ref=eN]` slots are not action references; use `observe()` references for actions. Numeric IDs inside `tab.run` are also rejected on managed Chrome because they lack snapshot identity. Other Puppeteer modes retain their legacy numeric observation IDs and ARIA references.
 
+#### Ref shape (`browser.refs`)
+
+`browser.refs` selects how `observe()` mints those refs:
+
+- `compact` (default): `e1`…`eN`, restarted by every observation, so the ids stay short whatever the observation count. Each ref also records the element's `backendNodeId` and its role/name/position. When the handle dies — the usual re-render replacing every node — OMP re-queries the accessibility tree with the observation's own filter, takes the node that still carries the recorded `backendNodeId`, else the recorded role/name/position, and acts on that. Only a ref whose element is no longer in the tree is reported stale.
+- `uuid`: `<observation-uuid>:<n>` with page-lifetime element numbers. A ref names exactly one observation; a dead element handle fails the action and asks for a new observation, with no healing.
+
+Both styles accept the ref exactly as observed, plus `tab.id(n)` for the current observation. `ariaSnapshot()`'s `[ref=eN]` slots stay separate: with `compact` refs, an `eN` that the current observation minted resolves to that element, and any other `eN` still resolves against the last ARIA snapshot.
+
 ### Selectors and input
 
 Selectors accept CSS and Puppeteer `aria/…`, `text/…`, `xpath/…`, and `pierce/…` query handlers. Playwright-only pseudos such as `:has-text()` and `:visible` are rejected.
@@ -152,9 +167,7 @@ Downloads in existing Chrome use that profile's ordinary download settings. `Bro
 
 This is a current-page event record, not the profile's download history: earlier downloads and other tabs are excluded, and a new acquisition starts a new record. The latest 256 starts are retained; `omitted` reports older entries dropped from this bounded record. Missing records are unknown, and a disconnected observation channel produces an explicit error. These Page-domain events are available in the qualified Chromium runtime but deprecated upstream; other providers may not expose them. `suggestedFilename` is not a saved path: browser settings, duplicate names and native dialogs can change the destination. Verify the actual file separately before claiming a location.
 
-For saved destinations, `await tab.downloads({paths:true})` adds a `files` lookup. Enable **download file lookup** in this profile's OMP extension settings when wanted; the optional Chrome permission is requested only by that button. Missing permission, old service/extension versions, or provider failures return `files: {available:false, reason}` while retaining completion observations. Both the service and extension must support this feature.
-
-With permission, `files` contains `{available:true, correlation:"url-and-time-candidates", matches}`. Each match identifies an observed download `id`, a `truncated` flag, and candidate files with Chrome's numeric download ID, actual `path`, URLs/referrer, start time, state, byte counts and cached existence flag. The relay accepts only GUIDs observed on the owned tab and supplies its own timestamp; the extension searches within five seconds either side and filters exact original/final URLs. Results are capped at 100 per observed start. Chrome's file records contain no source tab ID, so this correlation does not prove ownership. Multiple candidates, empty results and truncated searches remain unresolved; inspect the actual intended file before reporting its path. Delayed starts outside this time window remain unknown. Lookup never initiates, moves, cancels or retries transfers, changes profile settings, or asks for permission from agent code.
+There is no saved-destination lookup: `tab.downloads()` reports page-scoped ids, states and byte counts only. To confirm where a file landed, check the filesystem directly. The extension asks for no download permission at all.
 
 ## JavaScript dialogs in managed Chrome
 
@@ -203,7 +216,7 @@ tab = await browser.create(browserId=profiles[0]["id"], label="Documentation rev
 observation = await tab.observe(viewportOnly=True)
 display(observation)
 title = await tab.run("return await tab.title();", timeout=30)
-await tab.retain()
+await tab.keep()
 await tab.release()
 ```
 
@@ -215,7 +228,7 @@ Use `await browser.discover(browserId=...)` and `await browser.claim(tab_id, lab
 
 | Mode                                                 | Acquisition and explicit close behavior                                                                                                                               |
 | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Managed Chrome (`app.relay: true`, or relay default) | Every `open` creates a new inactive task tab; `name` supplies its label. `app.target` substring selection is rejected. Handle `close` physically closes the tab; `release` applies retention. |
+| Managed Chrome (`app.relay: true`, or relay default) | Every `open` creates a new inactive task tab; `name` supplies its label. `app.target` substring selection is rejected. Handle `close` physically closes the tab; `release` hands it back (kept and claimed pages survive). |
 | Headless                                             | Opens or reuses a named OMP-owned page in project-shared Chromium with stealth patches. Close closes that page.                                                       |
 | Spawned (`app.path`)                                 | Starts or reuses a CDP-enabled browser/Electron executable; `app.args` applies here. The process remains open unless `kill: true` releases its last managed tab.      |
 | Connected (`app.cdp_url`)                            | Attaches through an HTTP CDP discovery endpoint; `app.target` can select a page by URL/title substring on this legacy path. Close disconnects and preserves the page. |
@@ -225,13 +238,17 @@ Use `create({ browserId, ... })` for explicit paired-profile selection and `clai
 
 Other modes use named tabs. `browser.tab(name = "main")` returns a proxy for an already-open named tab and does not open one. Reusing a name across browser kinds is rejected until the old tab is closed. `browser.close({ name?, all?, kill?, timeout? })` and `tab.close({ kill?, timeout? })` release these tabs. `kill` does not terminate an attached Chrome/CDP browser.
 
+Headless tabs the session owns are frozen at turn settle (`browser.freezeOnTurnEnd`, default on) so animated pages stop burning CPU/GPU, and unfrozen on the next use; tabs idle past `browser.idleCloseSec` (default 1800) are closed by a sweep that also runs opportunistically during long turns. `persist: true` on `open` opts one tab out of both (for example a multi-step login); the creator may flip it later by reopening the same name, and an explicit `browser.close` still releases it. Connected, relay, spawned and cmux tabs are never frozen or reaped.
+
 ## Popups, interruptions, and recovery
 
-During a managed Chrome operation, supported new-window links and `window.open` create inactive children reserved to the same actor, in the source window and task group. Discover a child by `popupOf` and `ownership: "this_actor"`, then claim its exact ID. Each claimed child needs its own retain/release decision. Unclaimed children survive parent release and become available for recovery.
+When a page you own opens a child tab — a new-window link, `window.open`, a `target=_blank` form — Chrome creates it natively and the browser service leases it to the opener's owner from `chrome.tabs.onCreated`, inactive, in the same window and task group. `await tab.popups()` lists the children of that exact tab; `browser.discover()` also shows them with `popupOf` and `ownership: "this_actor"`. Claim a child's exact ID to drive it. Children are treated like any tab the task opened at the end of the work.
 
-Background popups support HTTP(S) and `about:blank` destinations and return no `WindowProxy`. Named windows and new-window form submissions fail visibly. The containment policy ends with the operation, preserving ordinary user popup behavior between operations. It is not a sandbox against page scripts that bypass the installed hooks.
+Because Chrome's own popup path runs, `window.open` returns a real `WindowProxy`, named windows work, and new-window form submissions are not special-cased. Nothing is monkeypatched in the page.
 
-Each acquired tab permits one active run. A timeout or abort can recycle its worker and invalidate handles. Unplanned teardown preserves task pages, including partially created pages, for recovery. Failed acquisition and teardown use one preserving-release request; they never follow failed retention with a potentially destructive release. Local workers drain even when server recovery cannot be confirmed, and the error identifies the exact tab for rediscovery. Older services reject this recovery operation explicitly; their existing orphan recovery remains available after disconnection. If a process disappears, the broker releases orphaned ownership after its final scoped connection has been absent for 30 seconds and admitted work has drained. An idle connected task keeps ownership; a reconnect within the grace preserves it. Physical pages and groups survive this recovery.
+Each acquired tab permits one active run. A timeout or abort can recycle its worker and invalidate handles; unplanned teardown preserves task pages, including partially created pages, for rediscovery, and the error identifies the exact tab. Ownership is a lease on the relay: a live scoped connection suspends its timer, and otherwise one five-minute idle grace applies, re-armed by every touch of that lease (claim, get, dialog, `popups`, any begun operation) and on disconnect. If the OMP process disappears, the relay releases the orphaned lease after that grace has elapsed; pages and groups survive for exact rediscovery and claim.
+
+Settle is automatic: when the turn ends, `agent-session.ts` runs `releaseChromeTabsForOwner` (each owned handle → `releaseTab { close: !keep && created }`) followed by `detachChromeDebuggersForOwner`, both bounded at five seconds. `keep()` is a local decision on the handle and costs no relay call until settle. A claim on a renderer blocked by a JavaScript dialog succeeds without attaching a page worker; the worker attaches on the first page call after the dialog is answered.
 
 Reconnecting a paired profile invalidates that profile's old handles without replacing other profiles' sessions. Discover the current exact ID and claim again. Never use a stale label, URL match, or new `open` call as proof that the old task was recovered.
 
