@@ -69,6 +69,7 @@ export class BrowserInstances {
 	#instances = new Map<string, Instance>();
 	#pending = new Map<RelaySocket, Pending>();
 	#sockets = new Map<RelaySocket, Instance>();
+	#awaitingHello = new Set<() => void>();
 	#options: {
 		log?: (message: string, data?: Record<string, unknown>) => void;
 		group?: boolean;
@@ -87,6 +88,25 @@ export class BrowserInstances {
 	}
 	get ready(): boolean {
 		return [...this.#instances.values()].some(instance => instance.bridge.ready);
+	}
+	/**
+	 * A freshly started relay answers HTTP before the paired extension has
+	 * reconnected (its retry lands within ~1 s), so the first request of a
+	 * session would otherwise see zero browsers. When a browser is paired but
+	 * none is connected, wait up to `graceMs` for the first hello; unpaired or
+	 * already-connected relays return at once.
+	 */
+	settled(graceMs = 3000): Promise<void> {
+		if (this.ready || this.#instances.size === 0) return Promise.resolve();
+		return new Promise(resolve => {
+			const done = () => {
+				clearTimeout(timer);
+				this.#awaitingHello.delete(done);
+				resolve();
+			};
+			const timer = setTimeout(done, graceMs);
+			this.#awaitingHello.add(done);
+		});
 	}
 	list(): BrowserInstance[] {
 		return [...this.#instances.values()].map(instance => ({
@@ -152,6 +172,7 @@ export class BrowserInstances {
 			this.#sockets.set(socket, instance);
 			instance.bridge.extConnected(socket);
 			instance.bridge.extMessage(socket, raw);
+			for (const wake of this.#awaitingHello) wake();
 		} catch (error) {
 			clearTimeout(pending.timer);
 			this.#pending.delete(socket);

@@ -201,3 +201,48 @@ it("revokes pending reconnects before allowing the same browser to pair afresh",
 		instances.close();
 	}
 });
+
+it("holds a fresh relay's first request until the paired extension reconnects, and never waits when nothing is paired", async () => {
+	const unpaired = new BrowserInstances(new RelayAccess());
+	try {
+		const started = performance.now();
+		await unpaired.settled(2000);
+		expect(performance.now() - started).toBeLessThan(200);
+	} finally {
+		unpaired.close();
+	}
+	const access = new RelayAccess();
+	const instances = new BrowserInstances(access);
+	try {
+		// Pair, then drop the socket: the relay knows a browser exists but it is
+		// not connected, which is exactly the state right after a daemon start.
+		const paired = pair(instances, "profile_instance_a", "Work Chrome");
+		instances.extClosed(paired.socket);
+		expect(instances.ready).toBe(false);
+		const waited = instances.settled(2000).then(() => performance.now());
+		const started = performance.now();
+		const replacement = new Socket();
+		instances.extConnected(replacement);
+		instances.extMessage(
+			replacement,
+			JSON.stringify({
+				t: "authenticate",
+				auth: { id: "profile_instance_a", label: "Work Chrome", credential: paired.credential },
+			}),
+		);
+		instances.extMessage(replacement, JSON.stringify(hello));
+		expect((await waited) - started).toBeLessThan(200);
+		expect(instances.ready).toBe(true);
+		// Once connected, settled never blocks.
+		const again = performance.now();
+		await instances.settled(2000);
+		expect(performance.now() - again).toBeLessThan(50);
+		instances.extClosed(replacement);
+		// Still disconnected after the grace: give up rather than hang the request.
+		const grace = performance.now();
+		await instances.settled(150);
+		expect(performance.now() - grace).toBeGreaterThanOrEqual(140);
+	} finally {
+		instances.close();
+	}
+});

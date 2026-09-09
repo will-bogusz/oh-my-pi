@@ -79,6 +79,7 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 						args[key] === undefined ? undefined : string(key);
 					if (!access.authorized(req.headers.get("authorization")))
 						return new Response("Local browser credential required", { status: 401 });
+					if (args.action !== "pair" && args.action !== "unpair") await instances.settled();
 					switch (args.action) {
 						case "instances":
 							return Response.json(instances.list());
