@@ -72,3 +72,15 @@ export function visibleBrowserAvailable(): Promise<boolean> {
 	})();
 	return visibleProbe;
 }
+
+/**
+ * Resolved Chromium path for suites that launch their own browser instead of
+ * going through `acquireBrowser`. Pair it with `chromiumAvailable()`: this
+ * throws rather than returning undefined so a gated body can never fall back
+ * to whatever browser puppeteer would pick on its own.
+ */
+export async function chromiumExecutable(): Promise<string> {
+	const executable = await ensureChromiumExecutable();
+	if (!executable) throw new Error("No Chromium executable; gate this test on chromiumAvailable()");
+	return executable;
+}

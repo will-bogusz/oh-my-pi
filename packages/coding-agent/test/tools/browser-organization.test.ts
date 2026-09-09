@@ -42,8 +42,11 @@ function profile(relay: RelayServer, id: string) {
 				let result: unknown = {};
 				let error: string | undefined;
 				if (message.op === "queryTabs") result = { tabs: [...tabs.values()] };
-				else if (message.op === "removeTab") tabs.delete(message.tabId);
-				else if (message.op === "taskGroup") {
+				else if (message.op === "releaseTab") {
+					const row = tabs.get(message.tabId);
+					if (row) row.groupId = -1;
+					if (message.close) tabs.delete(message.tabId);
+				} else if (message.op === "group") {
 					const row = tabs.get(message.tabId);
 					if (row) row.groupId = 9;
 				} else if (message.op === "createTab") {
@@ -93,7 +96,11 @@ it("closes discovered tabs through JS and Python without page attachment, across
 			getAgentId: () => "organizer",
 			getSessionFile: () => null,
 			getSessionSpawns: () => null,
-			settings: Settings.isolated({ "browser.enabled": true, "browser.relayUrl": `http://127.0.0.1:${relay.port}` }),
+			settings: Settings.isolated({
+				"browser.enabled": true,
+				"browser.relay": true,
+				"browser.relayUrl": `http://127.0.0.1:${relay.port}`,
+			}),
 		};
 		const prelude = createBrowserPrelude(session);
 		session.getEvalPreludes = () => [prelude];
@@ -112,8 +119,7 @@ it("closes discovered tabs through JS and Python without page attachment, across
 		);
 		expect([...work.tabs.keys()]).toEqual([2]);
 		expect([...personal.tabs.keys()]).toEqual([1, 2]);
-		expect(work.tabs.get(2)!.active).toBe(true);
-		expect(work.requests.map(request => request.op)).toEqual(["queryTabs", "removeTab"]);
+		expect(work.requests.map(request => request.op)).toEqual(["queryTabs", "releaseTab"]);
 		expect(personal.requests).toEqual([]);
 		await expect(vm.runInContext("browser.closeTab(target.id)", context)).rejects.toThrow("stale");
 
@@ -133,74 +139,39 @@ print([tab["tabId"] for tab in remaining])`,
 		expect(python.exitCode).toBe(0);
 		expect(python.output.trim().split("\n").at(-1)).toBe("[2]");
 		expect([...personal.tabs.keys()]).toEqual([2]);
-		expect(personal.requests.map(request => request.op)).toEqual(["queryTabs", "removeTab", "queryTabs"]);
+		expect(personal.requests.map(request => request.op)).toEqual(["queryTabs", "releaseTab", "queryTabs"]);
 	} finally {
 		credential.mockRestore();
 		relay.stop();
 	}
 }, 15_000);
 
-it("rejects a mismatched profile or another actor before sending a physical close", async () => {
+it("rejects a mismatched profile or another actor, keeps a page when asked and closes it when told", async () => {
 	const relay = startRelayServer({ port: 0 });
 	try {
 		const work = profile(relay, "work-profile-fixture");
 		profile(relay, "personal-profile-fixture");
 		const found = relay.instances.discover("owner", "work-profile-fixture")[0]!;
-		const request = (action: string, owner: string, id: string, browserId?: string) =>
+		const request = (action: string, owner: string, id: string, extra: Record<string, unknown> = {}) =>
 			fetch(`http://127.0.0.1:${relay.port}/managed`, {
 				method: "POST",
 				headers: { "content-type": "application/json", authorization: `Bearer ${relay.access.controlToken}` },
-				body: JSON.stringify({ action, owner, id, browserId }),
+				body: JSON.stringify({ action, owner, id, ...extra }),
 			});
-		expect((await request("closeTab", "owner", found.id, "personal-profile-fixture")).status).toBe(409);
+		expect((await request("closeTab", "owner", found.id, { browserId: "personal-profile-fixture" })).status).toBe(409);
 		const lease = relay.instances.claim(found.id, "owner");
 		expect((await request("closeTab", "other", found.id)).status).toBe(409);
-		expect((await request("close", "other", lease.id)).status).toBe(409);
+		expect((await request("releaseTab", "other", lease.id, { close: true })).status).toBe(409);
 		expect(work.requests).toEqual([]);
-		expect((await request("close", "owner", lease.id)).status).toBe(200);
+		// Keeping hands the page back to the user: ownership goes, the tab stays.
+		expect((await request("releaseTab", "owner", lease.id, { close: false })).status).toBe(200);
+		expect([...work.tabs.keys()]).toEqual([1, 2]);
+		expect(relay.instances.discover("owner", "work-profile-fixture")[0]!.ownership).toBe("available");
+		const reclaimed = relay.instances.claim(found.id, "owner");
+		expect((await request("releaseTab", "owner", reclaimed.id, { close: true })).status).toBe(200);
 		expect([...work.tabs.keys()]).toEqual([2]);
-		expect(work.requests.map(request => request.op)).toEqual(["removeTab"]);
+		expect(work.requests.map(request => request.op)).toEqual(["releaseTab", "releaseTab"]);
 	} finally {
-		relay.stop();
-	}
-});
-
-it("failed page-control attachment preserves a newly created page and exposes failed recovery without closing it", async () => {
-	const relay = startRelayServer({ port: 0 });
-	const credential = spyOn(access, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
-	const connect = spyOn(registry, "acquireBrowser").mockRejectedValue(new Error("Attachment interrupted"));
-	try {
-		const work = profile(relay, "recovery-profile");
-		const session: ToolSession = {
-			cwd: import.meta.dir,
-			hasUI: false,
-			getSessionFile: () => null,
-			getSessionSpawns: () => null,
-			settings: Settings.isolated({ "browser.enabled": true, "browser.relayUrl": `http://127.0.0.1:${relay.port}` }),
-		};
-		await expect(
-			acquireChromeTab(session, { action: "create", url: "https://example.test/result", timeoutMs: 1000 }),
-		).rejects.toThrow("Attachment interrupted");
-		const created = relay.instances.discover().find(tab => tab.url.endsWith("/result"))!;
-		expect(created.ownership).toBe("available");
-		expect([...work.tabs.keys()]).toEqual([1, 2, 3]);
-		expect(work.requests.map(request => request.op)).toEqual(["createTab", "taskGroup"]);
-		const lease = relay.instances.claim(created.id, "next");
-		const manager = relay.instances.requireLease(lease.id).bridge.managed;
-		await manager.releasePreserving(lease.id, "next");
-		const fail = spyOn(manager, "releasePreserving").mockRejectedValue(new Error("Recovery unavailable"));
-		try {
-			await expect(
-				acquireChromeTab(session, { action: "create", url: "https://example.test/uncertain", timeoutMs: 1000 }),
-			).rejects.toThrow("Cleanup also failed");
-			expect([...work.tabs.keys()]).toEqual([1, 2, 3, 4]);
-			expect(work.requests.map(request => request.op)).toEqual(["createTab", "taskGroup", "createTab", "taskGroup"]);
-		} finally {
-			fail.mockRestore();
-		}
-	} finally {
-		connect.mockRestore();
-		credential.mockRestore();
 		relay.stop();
 	}
 });

@@ -235,43 +235,12 @@ async function openBrowserHandle(kind: BrowserKind, opts: AcquireBrowserOptions)
 		};
 	}
 	if (kind.kind === "relay") {
-		const cdpUrl = normalizeConnectedCdpUrl(kind.cdpUrl);
-		// Loopback relays are owned by a machine-global broker and auto-started
-		// on demand (the extension dials in on its own). Hosts without a CLI
-		// worker entry (bun test, SDK embedding) never spawn brokers. Remote
-		// relay URLs must already be serving.
-		let autoStarted = false;
-		if (isLoopbackRelayUrl(cdpUrl) && (isCompiledBinary() || workerHostEntry() !== null)) {
-			autoStarted = await ensureRelayDaemon({ cdpUrl, signal: opts.signal });
-		}
-		// The relay answers /json/version with 503 until its extension dials in.
-		// A freshly revived extension service worker can take up to ~30s (its
-		// keepalive alarm) to reconnect, so give the handshake that long.
-		try {
-			await waitForCdp(cdpUrl, RELAY_EXTENSION_WAIT_MS, opts.signal);
-		} catch (err) {
-			if (err instanceof ToolAbortError) throw err;
-			if (err instanceof Error && err.name === "AbortError") throw err;
-			throw new ToolError(
-				autoStarted
-					? `omp browser relay is serving at ${cdpUrl} but its extension never connected. Install it with \`omp browser-relay install\` and check the toolbar badge shows "on".`
-					: `omp browser relay is not reachable at ${cdpUrl}. Start it with \`omp browser-relay\` (or check the endpoint), and make sure the OMP Browser Relay extension is loaded in Chrome.`,
-			);
-		}
-		const puppeteer = await loadPuppeteer();
-		const browser = await puppeteer.connect({
-			browserURL: cdpUrl,
-			defaultViewport: null,
-			protocolTimeout: BROWSER_PROTOCOL_TIMEOUT_MS,
-		});
-		return {
-			key: browserKey(kind),
-			kind,
-			browser,
-			cdpUrl,
-			refCount: 0,
-			stealth: { browserSession: null, override: null },
-		};
+		// The relay is not a general CDP endpoint: every connection is scoped to
+		// one leased tab (`/cdp?lease=`), which `acquireChromeTab` opens. There is
+		// nothing browser-wide to attach to.
+		throw new ToolError(
+			"Existing Chrome browsers are driven per tab. Use browser.discover() then browser.claim(id), or browser.create().",
+		);
 	}
 
 	const exe = kind.path;

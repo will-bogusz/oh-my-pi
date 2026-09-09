@@ -46,9 +46,6 @@ import {
 } from "./aria/aria-snapshot";
 import { applyStealthPatches, applyViewport, BROWSER_PROTOCOL_TIMEOUT_MS, loadPuppeteerInWorker } from "./launch";
 import { TabDownloadMonitor, type TabDownloads } from "./downloads";
-import { ManagedPopupPolicy } from "./managed-popups";
-import { localBrowserRequest } from "./relay/local-http";
-import type { DiscoveredChromeTab } from "./relay/managed-tabs";
 import { extractReadableFromHtml, type ReadableFormat } from "./readable";
 
 import { cloneSafe, RunOutput } from "./run-output";
@@ -56,6 +53,7 @@ import type {
 	Observation,
 	ObservationEntry,
 	ReadyInfo,
+	RefStyle,
 	RunErrorPayload,
 	ScreenshotResult,
 	SessionSnapshot,
@@ -247,14 +245,17 @@ interface TabApi {
 	type(selector: string, text: string): Promise<void>;
 	fill(selector: string, value: string): Promise<void>;
 	press(key: KeyInput, opts?: { selector?: string }): Promise<void>;
-	scroll(deltaX: number, deltaY: number): Promise<void>;
+	scroll(
+		deltaXOrDirection: number | ScrollDirection,
+		deltaYOrOptions?: number | { by?: number | "page" },
+	): Promise<void>;
 	drag(from: DragTarget, to: DragTarget): Promise<void>;
 	waitFor(selector: string, opts?: { timeout?: number }): Promise<ActionableHandle>;
 	evaluate<R, TArgs extends unknown[]>(fn: string | ((...args: TArgs) => R | Promise<R>), ...args: TArgs): Promise<R>;
 	scrollIntoView(selector: string): Promise<void>;
 	select(selector: string, ...values: string[]): Promise<string[]>;
 	uploadFile(selector: string, ...filePaths: string[]): Promise<void>;
-	downloads(options?: { paths?: boolean }): Promise<TabDownloads>;
+	downloads(): Promise<TabDownloads>;
 	waitForUrl(pattern: string | RegExp, opts?: { timeout?: number }): Promise<string>;
 	waitForResponse(
 		pattern: string | RegExp | ((response: HTTPResponse) => boolean | Promise<boolean>),
@@ -311,6 +312,76 @@ function isInteractiveNode(node: SerializedAXNode): boolean {
 		node.expanded !== undefined ||
 		node.focused === true
 	);
+}
+
+/**
+ * What one observed element needs to be found again. The handle is the fast
+ * path; `backendNodeId` identifies the exact DOM node even after its JavaScript
+ * handle dies with its execution context; role/name/nth re-finds an equivalent
+ * node after a re-render replaced the original (self-healing refs, modelled on
+ * agent-browser's `RefEntry`/`resolve_element_center`).
+ */
+interface RefEntry {
+	handle: ElementHandle;
+	role: string;
+	name: string;
+	/** Position among the observation's entries sharing this role+name; unset when it was unique. */
+	nth?: number;
+	backendNodeId?: number;
+}
+
+/**
+ * Disambiguating index per entry: the position among same role+name siblings,
+ * or `undefined` when that pair identified exactly one element in the
+ * observation (a unique pair needs no index and survives reordering).
+ */
+export function assignRefNths(entries: readonly { role: string; name?: string }[]): (number | undefined)[] {
+	const seen = new Map<string, number>();
+	const positions = entries.map(entry => {
+		const key = `${entry.role}\u0000${entry.name ?? ""}`;
+		const nth = seen.get(key) ?? 0;
+		seen.set(key, nth + 1);
+		return { key, nth };
+	});
+	return positions.map(({ key, nth }) => ((seen.get(key) ?? 0) > 1 ? nth : undefined));
+}
+
+/**
+ * Numeric element id behind a ref token, or null when the token belongs to a
+ * different observation (uuid style) or is not a ref at all (e.g. an ARIA
+ * snapshot ref, which the caller resolves through the page instead).
+ */
+export function parseRefToken(token: string, observationId: string): number | null {
+	const trimmed = token.trim();
+	const separator = trimmed.lastIndexOf(":");
+	if (separator >= 0) {
+		if (trimmed.slice(0, separator) !== observationId) return null;
+		const id = Number(trimmed.slice(separator + 1));
+		return Number.isSafeInteger(id) && id > 0 ? id : null;
+	}
+	const compact = /^e(\d+)$/.exec(trimmed);
+	if (!compact) return null;
+	const id = Number(compact[1]);
+	return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+
+/**
+ * Which re-queried candidate is the ref's element: the exact same DOM node when
+ * one of them still carries the recorded `backendNodeId`, else the candidate at
+ * the recorded position (or the only/first one when the role+name pair was
+ * unique). Null when nothing matches and the ref is genuinely stale.
+ */
+export function chooseHealedIndex(
+	candidates: readonly (number | undefined)[],
+	target: { backendNodeId?: number; nth?: number },
+): number | null {
+	if (candidates.length === 0) return null;
+	if (target.backendNodeId !== undefined) {
+		const exact = candidates.indexOf(target.backendNodeId);
+		if (exact >= 0) return exact;
+	}
+	const index = target.nth ?? 0;
+	return index < candidates.length ? index : null;
 }
 
 function asElementHandle(handle: unknown): ElementHandle | null {
@@ -688,6 +759,52 @@ async function typeViaHandle(
 	}
 }
 
+export type ScrollDirection = "up" | "down" | "left" | "right";
+
+const SCROLL_DIRECTIONS: Readonly<Record<ScrollDirection, { x: number; y: number }>> = {
+	up: { x: 0, y: -1 },
+	down: { x: 0, y: 1 },
+	left: { x: -1, y: 0 },
+	right: { x: 1, y: 0 },
+};
+
+/**
+ * Accept both scroll forms. `scroll(0, 600)` is pixel deltas; `scroll("down")`
+ * and `scroll("down", { by: "page" })` are one viewport step, which is what
+ * models reach for and used to reach CDP as `deltaX: "down"` — a protocol
+ * error rather than a scroll. A page step is 90% of the viewport so the
+ * boundary content stays visible.
+ */
+async function resolveScrollDeltas(
+	page: Page,
+	deltaXOrDirection: number | ScrollDirection,
+	deltaYOrOptions: number | { by?: number | "page" } | undefined,
+	signal: AbortSignal | undefined,
+): Promise<{ deltaX: number; deltaY: number }> {
+	if (typeof deltaXOrDirection === "number") {
+		const deltaY = deltaYOrOptions ?? 0;
+		if (typeof deltaY !== "number" || !Number.isFinite(deltaXOrDirection) || !Number.isFinite(deltaY))
+			throw new ToolError(
+				'tab.scroll() takes pixel deltas (tab.scroll(0, 600)) or a direction (tab.scroll("down", { by: "page" }))',
+			);
+		return { deltaX: deltaXOrDirection, deltaY };
+	}
+	const unit = SCROLL_DIRECTIONS[deltaXOrDirection as ScrollDirection];
+	if (!unit)
+		throw new ToolError(
+			`tab.scroll() direction must be one of up, down, left, right (got ${JSON.stringify(deltaXOrDirection)})`,
+		);
+	const by = typeof deltaYOrOptions === "number" ? deltaYOrOptions : (deltaYOrOptions?.by ?? "page");
+	if (typeof by === "number") {
+		if (!Number.isFinite(by) || by < 0) throw new ToolError("tab.scroll() `by` must be a non-negative pixel count");
+		return { deltaX: unit.x * by, deltaY: unit.y * by };
+	}
+	if (by !== "page") throw new ToolError('tab.scroll() `by` must be a pixel count or "page"');
+	const { viewport } = await readPageMetrics(page, signal);
+	const step = Math.max(1, Math.round((unit.x === 0 ? viewport.height : viewport.width) * 0.9));
+	return { deltaX: unit.x * step, deltaY: unit.y * step };
+}
+
 /**
  * Use Puppeteer's protocol scroll, frame-aware point calculation, and trusted mouse
  * input without its IntersectionObserver prerequisite. Hidden tabs can suspend that
@@ -979,7 +1096,7 @@ async function collectObservationEntries(
 				if (node.multiline) states.push("multiline");
 				if (node.modal) states.push("modal");
 				if (node.focused) states.push("focused");
-				core.cacheElement(id, handle as ElementHandle);
+				core.cacheElement(id, handle as ElementHandle, node);
 				entries.push({
 					id,
 					role: node.role,
@@ -997,6 +1114,27 @@ async function collectObservationEntries(
 	for (const child of node.children ?? []) {
 		await collectObservationEntries(core, child, entries, options);
 	}
+}
+
+/**
+ * Candidates for a self-healing ref: every node the observation's own filter
+ * would have emitted whose role and name match the recorded ones, in document
+ * order, so the recorded `nth` indexes the same sequence it was minted from.
+ */
+function collectRoleNameMatches(
+	node: SerializedAXNode,
+	target: { role: string; name: string },
+	options: { includeAll: boolean },
+	matches: SerializedAXNode[],
+): void {
+	if (
+		(options.includeAll || isInteractiveNode(node)) &&
+		node.role === target.role &&
+		(node.name ?? "") === target.name
+	) {
+		matches.push(node);
+	}
+	for (const child of node.children ?? []) collectRoleNameMatches(child, target, options, matches);
 }
 
 async function resolveActionableQueryHandlerClickTarget(handles: ElementHandle[]): Promise<ElementHandle | null> {
@@ -1179,11 +1317,13 @@ export class WorkerCore {
 	#browser?: Browser;
 	#page?: Page;
 	#targetId?: string;
-	#elementCache = new Map<number, ElementHandle>();
+	#elementCache = new Map<number, RefEntry>();
 	#elementCounter = 0;
 	#observationId: string = crypto.randomUUID();
+	#refStyle: RefStyle = "uuid";
+	/** Filter the live ref map was minted with, replayed when re-querying for a heal. */
+	#refFilter: { includeAll: boolean; viewportOnly: boolean } = { includeAll: false, viewportOnly: false };
 	#managedChrome = false;
-	#popups?: ManagedPopupPolicy;
 	#active: ActiveRun | null = null;
 	#runtime: JsRuntime | null = null;
 	#unsub: () => void;
@@ -1267,8 +1407,8 @@ export class WorkerCore {
 		return this.#elementCounter;
 	}
 
-	cacheElement(id: number, handle: ElementHandle): void {
-		this.#elementCache.set(id, handle);
+	cacheElement(id: number, handle: ElementHandle, node: { role: string; name?: string }): void {
+		this.#elementCache.set(id, { handle, role: node.role, name: node.name ?? "" });
 	}
 
 	async #handleMessage(msg: WorkerInbound): Promise<void> {
@@ -1337,7 +1477,6 @@ export class WorkerCore {
 				const page = await target.page();
 				if (!page) throw new ToolError(`Target ${payload.targetId} is no longer available on the attached browser`);
 				this.#page = page;
-				await this.#claimRelayTarget(page);
 				this.#observeDialogs();
 				if (payload.dialogs) this.#applyDialogPolicy(payload.dialogs);
 			}
@@ -1349,22 +1488,6 @@ export class WorkerCore {
 				});
 			} catch (error) {
 				this.#downloadObservationError = toError(error).message;
-			}
-			if (this.#managedChrome) {
-				const endpoint = new URL(payload.browserWSEndpoint);
-				const leaseId = endpoint.searchParams.get("lease")!;
-				this.#popups = new ManagedPopupPolicy(this.#page, async (url, signal) => {
-					throwIfAborted(signal);
-					const response = await localBrowserRequest(`http://${endpoint.host}/managed`, {
-						method: "POST",
-						headers: { "content-type": "application/json" },
-						body: JSON.stringify({ action: "popup", id: leaseId, url }),
-						signal,
-					});
-					if (!response.ok) throw new Error(await response.text());
-					return (await response.json()) as DiscoveredChromeTab;
-				});
-				await this.#popups.install();
 			}
 			if (payload.url) {
 				await this.#page.goto(payload.url, {
@@ -1394,26 +1517,6 @@ export class WorkerCore {
 			return target;
 		}
 		throw new ToolError(`Target ${targetId} is no longer available on the attached browser`);
-	}
-
-	/**
-	 * Tell the omp browser relay this worker drives the adopted page, so the
-	 * relay adds it to the per-window "omp" tab group. Best-effort: plain CDP
-	 * backends (real Chrome, cmux) reject the relay-private method.
-	 */
-	async #claimRelayTarget(page: Page): Promise<void> {
-		let session: CDPSession | undefined;
-		try {
-			session = await page.createCDPSession();
-			// Puppeteer's protocol map cannot express the relay-private method; the
-			// send signature is otherwise identical.
-			const raw = session as unknown as { send(method: string): Promise<unknown> };
-			await raw.send("OMP.claimTarget");
-		} catch {
-			// Not the omp relay; nothing to claim.
-		} finally {
-			await session?.detach().catch(() => undefined);
-		}
 	}
 
 	/**
@@ -1526,9 +1629,7 @@ export class WorkerCore {
 		const timeoutSignal = AbortSignal.timeout(msg.timeoutMs);
 		const ac = new AbortController();
 		const runAc = new AbortController();
-		const popupAc = new AbortController();
 		const signal = AbortSignal.any([timeoutSignal, ac.signal, runAc.signal]);
-		const popupSignal = AbortSignal.any([timeoutSignal, ac.signal, popupAc.signal]);
 		const output = new RunOutput();
 		const screenshots: ScreenshotResult[] = [];
 		const floatingFailure = Promise.withResolvers<never>();
@@ -1558,7 +1659,6 @@ export class WorkerCore {
 				await untilAborted(signal, () => this.#pendingPageCleanup!);
 				this.#pendingPageCleanup = undefined;
 			}
-			await this.#popups?.begin(popupSignal, msg.timeoutMs);
 			if (this.#managedChrome) {
 				backgroundPage = prepareBackgroundPage(this.#requirePage(), signal);
 				await backgroundPage.ready;
@@ -1668,24 +1768,6 @@ export class WorkerCore {
 					await cleanup();
 				} catch (error) {
 					failure = { error };
-				}
-			}
-			// Keep popup interception active through focus restoration: focus/blur
-			// handlers can open children too. Surface cleanup errors on successful runs.
-			if (this.#popups) {
-				if (failure) popupAc.abort(new ToolAbortError("Browser run failed"));
-				try {
-					const children = await untilAborted(failure ? AbortSignal.timeout(1000) : popupSignal, () =>
-						this.#popups!.finish({ pageBlocked: blockedByDialog }),
-					);
-					if (children.length)
-						output.pushText(
-							`Background popups: ${JSON.stringify(children)}. Use browser.discover() then claim the exact child id.\n`,
-						);
-				} catch (error) {
-					if (!failure) failure = { error };
-				} finally {
-					popupAc.abort(new ToolAbortError("Browser popup scope ended"));
 				}
 			}
 			failure = this.#foldFloatingRejections(active, failure);
@@ -1931,7 +2013,10 @@ export class WorkerCore {
 						throw err;
 					}
 				}),
-			observe: opts => op("tab.observe()", quickOpMs, sig => this.#collectObservation({ ...opts, signal: sig })),
+			observe: opts =>
+				op("tab.observe()", quickOpMs, sig =>
+					this.#collectObservation({ ...opts, refs: session.refs, signal: sig }),
+				),
 			ariaSnapshot: (selector, opts) =>
 				op(
 					selector ? `tab.ariaSnapshot(${JSON.stringify(selector)})` : "tab.ariaSnapshot()",
@@ -2083,10 +2168,11 @@ export class WorkerCore {
 					}
 					await untilAborted(sig, () => page.keyboard.press(key));
 				}),
-			scroll: (deltaX, deltaY) =>
-				op("tab.scroll()", actionOpMs, sig =>
-					untilAborted(sig, () => dispatchScroll(() => page.mouse.wheel({ deltaX, deltaY }))),
-				),
+			scroll: (deltaXOrDirection, deltaYOrOptions) =>
+				op("tab.scroll()", actionOpMs, async sig => {
+					const deltas = await resolveScrollDeltas(page, deltaXOrDirection, deltaYOrOptions, sig);
+					await untilAborted(sig, () => dispatchScroll(() => page.mouse.wheel(deltas)));
+				}),
 			drag: (from, to) => op("tab.drag()", actionOpMs, sig => this.#drag(from, to, sig)),
 			waitFor: (selector, opts) => {
 				const w = waitMs(opts?.timeout);
@@ -2179,21 +2265,13 @@ export class WorkerCore {
 				const w = waitMs(opts?.timeout);
 				return op("tab.waitForUrl()", w, sig => this.#waitForUrl(pattern, w, sig));
 			},
-			downloads: options =>
-				op("tab.downloads()", quickOpMs, async sig => {
+			downloads: () =>
+				op("tab.downloads()", quickOpMs, () => {
 					if (!this.#downloads)
 						throw new ToolError(
 							`Download observation unavailable: ${this.#downloadObservationError ?? "not initialized"}`,
 						);
-					if (!options?.paths) return this.#downloads.snapshot();
-					if (this.#managedChrome) return await untilAborted(sig, () => this.#downloads!.snapshotWithFiles());
-					return {
-						...this.#downloads.snapshot(),
-						files: {
-							available: false,
-							reason: "Saved-path lookup requires an existing Chrome tab with the OMP extension.",
-						},
-					};
+					return Promise.resolve(this.#downloads.snapshot());
 				}),
 			waitForResponse: (pattern, opts) => {
 				const w = waitMs(opts?.timeout);
@@ -2207,12 +2285,10 @@ export class WorkerCore {
 				return enrich(await this.#resolveCachedHandle(id));
 			},
 			ref: async id => {
-				const separator = id.lastIndexOf(":");
-				if (separator >= 0) {
-					if (id.slice(0, separator) !== this.#observationId)
-						throw new ToolError("The element reference belongs to an old observation. Observe the tab again.");
-					return enrich(await this.#resolveCachedHandle(Number(id.slice(separator + 1))));
-				}
+				const elementId = parseRefToken(id, this.#observationId);
+				if (elementId !== null) return enrich(await this.#resolveCachedHandle(elementId));
+				if (id.includes(":"))
+					throw new ToolError("The element reference belongs to an old observation. Observe the tab again.");
 				return enrich(await this.#resolveAriaRef(id));
 			},
 		};
@@ -2221,19 +2297,38 @@ export class WorkerCore {
 	async #collectObservation(options: {
 		includeAll?: boolean;
 		viewportOnly?: boolean;
+		refs?: RefStyle;
 		signal?: AbortSignal;
 	}): Promise<Observation> {
 		const page = this.#requirePage();
+		const refStyle = options.refs ?? "uuid";
 		this.#clearElementCache();
+		// Compact refs restart at e1 for every observation, so the ids stay
+		// small no matter how many observations a run takes.
+		if (refStyle === "compact") this.#elementCounter = 0;
+		this.#refStyle = refStyle;
 		const includeAll = options.includeAll ?? false;
 		const observationId = this.#observationId;
 		const viewportOnly = options.viewportOnly ?? false;
+		this.#refFilter = { includeAll, viewportOnly };
 		const snapshot = (await untilAborted(options.signal, () =>
 			page.accessibility.snapshot({ interestingOnly: !includeAll }),
 		)) as SerializedAXNode | null;
 		if (!snapshot) throw new ToolError("Accessibility snapshot unavailable");
 		const entries: ObservationEntry[] = [];
 		await collectObservationEntries(this, snapshot, entries, { includeAll, viewportOnly });
+		if (refStyle === "compact") {
+			// Disambiguating index only. Reading each element's `backendNodeId` here
+			// costs one CDP round-trip per element — measured at 6 observations of a
+			// 680-element page over the extension relay, that alone blew a 30 s cell
+			// budget — and buys nothing on a first heal, which re-queries by
+			// role/name/nth anyway. The heal records the id it landed on instead.
+			const nths = assignRefNths(entries);
+			entries.forEach((entry, index) => {
+				const cached = this.#elementCache.get(entry.id);
+				if (cached) cached.nth = nths[index];
+			});
+		}
 		const { viewport, scroll } = await readPageMetrics(page, options.signal);
 		if (observationId !== this.#observationId)
 			throw new ToolError("The page changed while observing it. Observe again.");
@@ -2243,7 +2338,10 @@ export class WorkerCore {
 			title: (await untilAborted(options.signal, () => page.title())) as string,
 			viewport,
 			scroll,
-			elements: entries.map(entry => ({ ...entry, ref: `${observationId}:${entry.id}` })),
+			elements: entries.map(entry => ({
+				...entry,
+				ref: refStyle === "compact" ? `e${entry.id}` : `${observationId}:${entry.id}`,
+			})),
 		};
 	}
 
@@ -2482,20 +2580,73 @@ export class WorkerCore {
 	}
 
 	async #resolveCachedHandle(id: number): Promise<ElementHandle> {
-		const handle = this.#elementCache.get(id);
-		if (!handle) throw new ToolError(`Unknown element id ${id}. Run tab.observe() to refresh the element list.`);
-		try {
-			const isConnected = (await handle.evaluate(el => el.isConnected)) as boolean;
-			if (!isConnected) {
-				this.#clearElementCache();
-				throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
-			}
-		} catch (err) {
-			if (err instanceof ToolError) throw err;
+		const entry = this.#elementCache.get(id);
+		if (!entry) throw new ToolError(`Unknown element id ${id}. Run tab.observe() to refresh the element list.`);
+		if (await this.#handleStillLive(entry.handle)) return entry.handle;
+		// uuid refs are snapshot-bound by contract: a dead handle means the whole
+		// observation is void, so drop it and make the model observe again.
+		if (this.#refStyle !== "compact") {
 			this.#clearElementCache();
 			throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
 		}
-		return handle;
+		return await this.#healRef(id, entry);
+	}
+
+	async #handleStillLive(handle: ElementHandle): Promise<boolean> {
+		try {
+			return (await handle.evaluate(el => el.isConnected)) as boolean;
+		} catch {
+			return false;
+		}
+	}
+
+	/**
+	 * Re-find a compact ref whose handle died: re-query the accessibility tree
+	 * with the minting observation's filter and take the node that still carries
+	 * the `backendNodeId` a previous heal recorded, else the recorded
+	 * role/name/nth position. Only a re-query that finds nothing is a stale ref.
+	 */
+	async #healRef(id: number, entry: RefEntry): Promise<ElementHandle> {
+		const page = this.#requirePage();
+		const stale = new ToolError(
+			`Element ref e${id} (${entry.role}${entry.name ? ` ${JSON.stringify(entry.name)}` : ""}) is stale: ` +
+				`it is gone from the page. Run tab.observe() again.`,
+		);
+		const snapshot = (await page.accessibility.snapshot({
+			interestingOnly: !this.#refFilter.includeAll,
+		})) as SerializedAXNode | null;
+		if (!snapshot) throw stale;
+		const matches: SerializedAXNode[] = [];
+		collectRoleNameMatches(snapshot, entry, { includeAll: this.#refFilter.includeAll }, matches);
+		const candidates: { handle: ElementHandle; backendNodeId?: number }[] = [];
+		for (const node of matches) {
+			const handle = asElementHandle(await node.elementHandle());
+			if (!handle) continue;
+			if (this.#refFilter.viewportOnly && !(await handle.isIntersectingViewport().catch(() => false))) {
+				void handle.dispose().catch(() => undefined);
+				continue;
+			}
+			candidates.push({ handle, backendNodeId: await handle.backendNodeId().catch(() => undefined) });
+		}
+		const chosen = chooseHealedIndex(
+			candidates.map(candidate => candidate.backendNodeId),
+			entry,
+		);
+		for (const [index, candidate] of candidates.entries()) {
+			if (index !== chosen) void candidate.handle.dispose().catch(() => undefined);
+		}
+		if (chosen === null) {
+			this.#elementCache.delete(id);
+			void entry.handle.dispose().catch(() => undefined);
+			throw stale;
+		}
+		const healed = candidates[chosen];
+		const exact = entry.backendNodeId !== undefined && healed.backendNodeId === entry.backendNodeId;
+		void entry.handle.dispose().catch(() => undefined);
+		entry.handle = healed.handle;
+		entry.backendNodeId = healed.backendNodeId;
+		this.#log("debug", "Healed browser element ref", { ref: `e${id}`, role: entry.role, name: entry.name, exact });
+		return healed.handle;
 	}
 
 	async #resolveAriaRef(id: string): Promise<ElementHandle> {
@@ -2532,14 +2683,15 @@ export class WorkerCore {
 			this.#requirePage().locator(normalizeSelector(selector)).setTimeout(timeoutMs).waitHandle({ signal: sig }),
 		)) as ElementHandle;
 	}
+
 	#clearElementCache(): void {
 		this.#observationId = crypto.randomUUID();
 		if (this.#elementCache.size === 0) {
 			return;
 		}
-		const handles = [...this.#elementCache.values()];
+		const entries = [...this.#elementCache.values()];
 		this.#elementCache.clear();
-		for (const handle of handles) void handle.dispose().catch(() => undefined);
+		for (const entry of entries) void entry.handle.dispose().catch(() => undefined);
 	}
 
 	/** Best-effort `Page.stopLoading` so an abandoned navigation cannot stall later ops. */
@@ -2563,7 +2715,6 @@ export class WorkerCore {
 		this.#uninstallRejectionGuard();
 		this.#clearElementCache();
 		const page = this.#page;
-		await this.#popups?.dispose().catch(() => undefined);
 		await this.#downloads?.dispose().catch(() => undefined);
 		if (this.#dialogHandler && page && !page.isClosed()) page.off("dialog", this.#dialogHandler);
 		if (this.#mode === "headless" && page && !page.isClosed()) await page.close().catch(() => undefined);

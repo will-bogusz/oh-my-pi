@@ -130,21 +130,38 @@ describe("browser JavaScript facade", () => {
 			globalThis.second = await browser.create({label: "Same label"});
 			await first.observe();
 			await savedElement.click();
-			await second.retain();
+			await second.keep();
+			globalThis.children = await second.popups();
 		})()`,
 			context,
 		);
 		expect(calls[0]).toMatchObject({ action: "instances" });
 		expect(calls[1]).toMatchObject({ action: "discover", browserId: "work-profile" });
 		expect(calls[2]).toMatchObject({ action: "create", browserId: "work-profile" });
-		expect(calls.at(-2)).toMatchObject({
+		expect(calls.at(-3)).toMatchObject({
 			handle: "handle-1",
 			chain: [
 				{ method: "ref", args: ["initial-1:1"] },
 				{ method: "click", args: [] },
 			],
 		});
-		expect(calls.at(-1)).toMatchObject({ handle: "handle-2", action: "retain" });
+		expect(calls.at(-2)).toMatchObject({ handle: "handle-2", action: "keep" });
+		expect(calls.at(-1)).toMatchObject({ handle: "handle-2", action: "popups" });
+		// Both handles share the label, so a name lookup must resolve the tab
+		// that owns the name now rather than dropping the handle entirely.
+		await runInContext('browser.tab("Same label").reveal()', context);
+		expect(calls.at(-1)).toMatchObject({ handle: "handle-2", action: "reveal" });
+		// The prompt's identity rule is `tab.target`; a name lookup must carry it.
+		expect(runInContext('browser.tab("Same label").target', context)).toEqual({
+			id: "discovery-2",
+			browserId: "profile-2",
+			tabId: 1,
+		});
+		await runInContext('browser.tab("Same label").release()', context);
+		// A released handle stops answering to its name instead of being reused.
+		await expect(runInContext('browser.tab("Same label").reveal()', context)).rejects.toThrow(
+			"reveal requires a Chrome tab returned by create or claim",
+		);
 		expect(runInContext("[first.target, second.target]", context)).toEqual([
 			{ id: "discovery-1", browserId: "profile-1", tabId: 1 },
 			{ id: "discovery-2", browserId: "profile-2", tabId: 1 },
@@ -406,6 +423,9 @@ await tab.dialog(action="accept", id=tab.initialDialog["dialog"]["id"], promptTe
 await tab.dialog({"action":"inspect"})
 await tab.observe()
 await element.click()
+await tab.keep()
+await tab.popups()
+await browser.tab("Same label").reveal()
 try:
     tab.target["id"] = "another-tab"
 except TypeError:
@@ -428,7 +448,12 @@ print(tab.initialObservation["snapshot"])
 			dialog: { action: "accept", id: "dialog-py", promptText: "café Ω" },
 		});
 		expect(calls).toContainEqual({ action: "dialog", handle: "py-held-tab", dialog: { action: "inspect" } });
-		expect(calls.at(-1)).toMatchObject({
+		expect(calls).toContainEqual({ action: "keep", handle: "py-held-tab" });
+		expect(calls).toContainEqual({ action: "popups", handle: "py-held-tab" });
+		// A name lookup carries the handle: managed Chrome tabs are only
+		// addressable by handle, and the label is not unique.
+		expect(calls.at(-1)).toMatchObject({ action: "reveal", handle: "py-held-tab" });
+		expect(calls.find(call => JSON.stringify(field(call, "chain") ?? "").includes('"ref"'))).toMatchObject({
 			handle: "py-held-tab",
 			chain: [
 				{ method: "ref", args: ["initial-py:2"] },

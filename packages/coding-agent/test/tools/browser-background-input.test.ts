@@ -5,6 +5,9 @@ import {
 	withBackgroundInput,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import puppeteer, { type Page } from "puppeteer-core";
+import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
+
+const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
 it("keeps a page prepared through selection and serialized inputs, draining before restoration", async () => {
 	const events: string[] = [];
@@ -164,11 +167,11 @@ it("refuses subsequent input if focus restoration failed", async () => {
 	expect(events).toEqual(["enable", "input", "restore"]);
 });
 
-it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+it.skipIf(!CHROMIUM_AVAILABLE)(
 	"replaces and clears framework-observed text through trusted browser input",
 	async () => {
 		const browser = await puppeteer.launch({
-			executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+			executablePath: await chromiumExecutable(),
 			headless: true,
 			protocolTimeout: 5000,
 		});

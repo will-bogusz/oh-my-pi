@@ -557,6 +557,7 @@ export async function runInTab(name: string, opts: RunInTabOptions): Promise<Run
 			cwd: opts.session.cwd,
 			browserScreenshotDir: expandBrowserScreenshotDir(opts.session),
 			excludeWebP: webpExclusionForModel(opts.session.getActiveModel?.()),
+			refs: opts.session.settings.get("browser.refs"),
 		},
 	);
 }

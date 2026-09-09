@@ -1,6 +1,6 @@
 import { type } from "@oh-my-pi/omptype";
 import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { logger, untilAborted } from "@oh-my-pi/pi-utils";
+import { logger, prompt, untilAborted } from "@oh-my-pi/pi-utils";
 import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
 import browserDescription from "../prompts/tools/browser.md" with { type: "text" };
 import type { ToolSession } from "../sdk";
@@ -15,14 +15,15 @@ import { resolveCmuxKind } from "./browser/cmux/rpc";
 import {
 	acquireChromeTab,
 	browserActorId,
+	chromeChildTabs,
 	chromeLifecycle,
 	chromeDialog,
-	resumeChromePage,
+	ensureChromePage,
 	closeChromeTab,
 	discoverChromeTabs,
 	listChromeInstances,
 	isManagedChromeHandle,
-	preserveChromeTab,
+	releaseChromeTab,
 	releaseChromeTabsForActor,
 	requireChromeHandle,
 	selectChromeTab,
@@ -81,7 +82,7 @@ const tabCallStepSchema = type({
 
 const browserSchema = type({
 	action: type(
-		"'open' | 'close' | 'closeTab' | 'dialog' | 'run' | 'call' | 'instances' | 'discover' | 'create' | 'claim' | 'reveal' | 'retain' | 'release'",
+		"'open' | 'close' | 'closeTab' | 'dialog' | 'popups' | 'run' | 'call' | 'instances' | 'discover' | 'create' | 'claim' | 'reveal' | 'keep' | 'release'",
 	).describe("operation"),
 	"dialog?": "unknown",
 	"handle?": "string",
@@ -180,7 +181,11 @@ function resolveBrowserKind(params: BrowserParams, session: ToolSession): Browse
 export function createBrowserPrelude(session: ToolSession): EvalPreludeDefinition {
 	return {
 		name: "browser",
-		documentation: browserDescription,
+		// The static prompt states only what both `browser.refs` styles share;
+		// the active style's own contract is rendered in.
+		documentation: prompt.render(browserDescription, {
+			compactRefs: session.settings.get("browser.refs") === "compact",
+		}),
 		javascript: browserJavascript,
 		python: browserPython,
 		exports: ["browser"],
@@ -255,8 +260,22 @@ async function invokeBrowser(
 				);
 				return toolResult(details).done();
 			}
-			if (["close", "release", "retain", "reveal"].includes(parsed.action)) {
-				const action = parsed.action as "close" | "release" | "retain" | "reveal";
+			if (parsed.action === "popups") {
+				const deadline = AbortSignal.timeout(timeoutMs);
+				const children = await chromeChildTabs(
+					handle,
+					context.signal ? AbortSignal.any([context.signal, deadline]) : deadline,
+				);
+				details.value = children;
+				if (children.length === 0) return toolResult(details).done();
+				return toolResult(details)
+					.text(
+						`${children.length} child tab${children.length === 1 ? "" : "s"} opened from ${JSON.stringify(handle.label)}; browser.claim(id) to drive one.`,
+					)
+					.done();
+			}
+			if (["close", "release", "keep", "reveal"].includes(parsed.action)) {
+				const action = parsed.action as "close" | "release" | "keep" | "reveal";
 				const deadline = AbortSignal.timeout(timeoutMs);
 				await chromeLifecycle(
 					handle,
@@ -269,14 +288,14 @@ async function invokeBrowser(
 			}
 			if (parsed.action !== "run" && parsed.action !== "call")
 				throw new ToolError("Invalid operation for an existing Chrome handle");
-			await resumeChromePage(handle, session, timeoutMs, context.signal);
+			await ensureChromePage(handle, session, timeoutMs, context.signal);
 			return await runBrowser(session, handle.id, parsed, details, timeoutMs, context.signal);
 		}
 		if (parsed.action === "closeTab") {
 			if (!parsed.id) throw new ToolError("closeTab requires the exact id returned by browser.discover()");
 			const deadline = AbortSignal.timeout(timeoutMs);
 			const signal = context.signal ? AbortSignal.any([context.signal, deadline]) : deadline;
-			await closeChromeTab(session, parsed.id, signal, parsed.browserId);
+			await closeChromeTab(session, parsed.id, signal, { browserId: parsed.browserId, relay: parsed.app?.relay });
 			return toolResult(details)
 				.text(`Closed Chrome tab ${JSON.stringify(parsed.id)}`)
 				.done();
@@ -284,10 +303,11 @@ async function invokeBrowser(
 		if (parsed.action === "instances" || parsed.action === "discover") {
 			const deadline = AbortSignal.timeout(timeoutMs);
 			const signal = context.signal ? AbortSignal.any([context.signal, deadline]) : deadline;
+			const access = { browserId: parsed.browserId, relay: parsed.app?.relay };
 			details.value =
 				parsed.action === "instances"
-					? await listChromeInstances(session, signal)
-					: await discoverChromeTabs(session, signal, parsed.browserId);
+					? await listChromeInstances(session, signal, access)
+					: await discoverChromeTabs(session, signal, access);
 			// Let callers select which inventory fields enter the transcript.
 			return toolResult(details).done();
 		}
@@ -305,7 +325,13 @@ async function invokeBrowser(
 					"getTab selectors cannot be combined with an id, creation, or a second browser selection",
 				);
 			const selected = parsed.selector
-				? selectChromeTab(await discoverChromeTabs(session, signal, parsed.selector.browserId), parsed.selector)
+				? selectChromeTab(
+						await discoverChromeTabs(session, signal, {
+							browserId: parsed.selector.browserId,
+							relay: parsed.app?.relay,
+						}),
+						parsed.selector,
+					)
 				: undefined;
 			const handle = await acquireChromeTab(session, {
 				action: parsed.action === "claim" ? "claim" : "create",
@@ -316,16 +342,19 @@ async function invokeBrowser(
 				label: parsed.label ?? parsed.name ?? selected?.title,
 				timeoutMs,
 				signal,
+				relay: parsed.app?.relay,
 			});
 			details.handle = handle.id;
 			details.name = handle.label;
 			details.url = handle.lease.tab.url;
 			try {
 				throwIfAborted(signal);
-				if (handle.deferred) {
+				// A dialog-blocked renderer cannot be observed: Chrome never hands
+				// out the page while a modal is up. The claim still succeeded, and
+				// answering the dialog is what unblocks the page.
+				if (handle.lease.dialog?.status === "open") {
 					details.value = {
 						created: handle.lease.created,
-						retained: handle.lease.retained,
 						target: handle.lease.tab,
 						initialDialog: handle.lease.dialog,
 					};
@@ -333,7 +362,7 @@ async function invokeBrowser(
 						displays: [
 							{
 								type: "text",
-								text: `Claimed Chrome tab ${JSON.stringify(handle.label)} with a pending dialog. Inspect initialDialog or tab.dialog(); answer its exact id before page interaction.\n${JSON.stringify(handle.lease.dialog)}`,
+								text: `Claimed Chrome tab ${JSON.stringify(handle.label)} with an open dialog. Inspect initialDialog or tab.dialog(); answer its exact id before page interaction.\n${JSON.stringify(handle.lease.dialog)}`,
 							},
 						],
 						returnValue: details.value,
@@ -349,7 +378,6 @@ async function invokeBrowser(
 				throwIfAborted(signal);
 				details.value = {
 					created: handle.lease.created,
-					retained: handle.lease.retained,
 					target: handle.lease.tab,
 					...(initial.returnValue as InitialBrowserState),
 				};
@@ -359,11 +387,10 @@ async function invokeBrowser(
 				});
 				return await browserRunResult(session, details, initial);
 			} catch (error) {
-				// A cancelled/failed acquisition cannot return its handle to the caller.
-				// Preserve created work, then release this exact lease for rediscovery.
+				// A cancelled/failed observation cannot return its handle to the
+				// caller. Hand the tab back, closing only a page OMP just opened.
 				try {
-					const cleanupSignal = AbortSignal.timeout(3000);
-					await preserveChromeTab(handle, cleanupSignal);
+					await releaseChromeTab(handle, handle.lease.created, AbortSignal.timeout(3000));
 				} catch (cleanupError) {
 					throw new ToolError(
 						`Chrome acquisition failed for ${handle.lease.tab.id}: ${String(error)}. Cleanup also failed: ${String(cleanupError)}. Rediscover this exact tab before continuing.`,

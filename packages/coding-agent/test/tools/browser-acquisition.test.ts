@@ -67,7 +67,7 @@ it("propagates cancellation instead of returning a partially acquired page", asy
 	expect(calls).toEqual([]);
 });
 
-it("preserves cancelled acquisition and surfaces unconfirmed recovery separately", async () => {
+it("hands a cancelled acquisition back, closing only a page it opened, and reports unconfirmed cleanup", async () => {
 	const session: ToolSession = {
 		cwd: import.meta.dir,
 		hasUI: false,
@@ -85,7 +85,6 @@ it("preserves cancelled acquisition and surfaces unconfirmed recovery separately
 			id: "lease",
 			targetId: "PAGE7",
 			created: true,
-			retained: false,
 			browserId: "profile",
 			browserLabel: "Fixture profile",
 			tab: {
@@ -107,9 +106,11 @@ it("preserves cancelled acquisition and surfaces unconfirmed recovery separately
 	let retentionFails = false;
 	const acquire = spyOn(managed, "acquireChromeTab").mockResolvedValue(handle);
 	const run = spyOn(supervisor, "runInTab").mockRejectedValue(new ToolAbortError("Cancelled inspection"));
-	const lifecycle = spyOn(managed, "preserveChromeTab").mockImplementation(async target => {
+	const closes: boolean[] = [];
+	const lifecycle = spyOn(managed, "releaseChromeTab").mockImplementation(async (target, close) => {
 		expect(target.lease.id).toBe("lease");
-		calls.push("preserve");
+		calls.push("release");
+		closes.push(close);
 		if (retentionFails) throw new Error("Retention unconfirmed");
 	});
 	try {
@@ -117,13 +118,16 @@ it("preserves cancelled acquisition and surfaces unconfirmed recovery separately
 		await expect(
 			prelude.invoke({ action: "create", url: "http://fixture/" }, { session, toolCallId: "cancel" }),
 		).rejects.toThrow("Cancelled inspection");
-		expect(calls).toEqual(["preserve"]);
+		expect(calls).toEqual(["release"]);
+		// The caller never received this handle, so the tab OMP just created is
+		// litter rather than work to preserve.
+		expect(closes).toEqual([true]);
 		calls.length = 0;
 		retentionFails = true;
 		await expect(
 			prelude.invoke({ action: "create", url: "http://fixture/" }, { session, toolCallId: "failed-cleanup" }),
 		).rejects.toThrow("Cleanup also failed: Error: Retention unconfirmed");
-		expect(calls).toEqual(["preserve"]);
+		expect(calls).toEqual(["release"]);
 	} finally {
 		lifecycle.mockRestore();
 		run.mockRestore();
@@ -131,7 +135,7 @@ it("preserves cancelled acquisition and surfaces unconfirmed recovery separately
 	}
 });
 
-it("requires an unambiguous title/URL match across browser profiles and windows", () => {
+it("matches title/URL substrings case-insensitively and refuses an ambiguous selector", () => {
 	const base = {
 		url: "https://fixture.test/form",
 		title: "Enrollment",
@@ -151,10 +155,17 @@ it("requires an unambiguous title/URL match across browser profiles and windows"
 	expect(() => managed.selectChromeTab(rows, { title: "Enrollment" })).toThrow("ambiguous (3 matches)");
 	expect(managed.selectChromeTab(rows, { title: "Enrollment", browserId: "personal" }).id).toBe("b");
 	expect(managed.selectChromeTab(rows, { url: base.url, browserId: "work", windowId: 4 }).id).toBe("c");
+	// A page's own live title is what a model can see; matching it must not
+	// depend on reproducing the whole string or its casing.
+	expect(managed.selectChromeTab(rows, { title: " enROLL ", browserId: "personal" }).id).toBe("b");
+	expect(managed.selectChromeTab(rows, { url: "/form", browserId: "personal" }).id).toBe("b");
 	expect(() => managed.selectChromeTab(rows, { title: "Enrollment", url: "https://fixture.test/other" })).toThrow(
 		"No Chrome tab matches",
 	);
-	expect(() => managed.selectChromeTab(rows, { title: "enrollment" })).toThrow("No Chrome tab matches");
-	expect(() => managed.selectChromeTab(rows, { browserId: "work" })).toThrow("requires an exact title or URL");
+	expect(() => managed.selectChromeTab(rows, { title: "Enrollment Confirmation" })).toThrow("No Chrome tab matches");
+	expect(() => managed.selectChromeTab(rows, { browserId: "work" })).toThrow("requires a title or URL substring");
+	expect(() => managed.selectChromeTab(rows, { title: "  ", browserId: "work" })).toThrow(
+		"requires a title or URL substring",
+	);
 	expect(() => managed.selectChromeTab(rows, { title: "Enrollment", windowId: 1.5 })).toThrow("positive integer");
 });

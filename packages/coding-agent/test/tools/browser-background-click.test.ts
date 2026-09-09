@@ -6,6 +6,9 @@ import {
 	toActionableHandle,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import puppeteer, { type ElementHandle } from "puppeteer-core";
+import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
+
+const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
 it("does not dispatch a timed-out quiet click when scrolling later completes", async () => {
 	const started = Promise.withResolvers<void>();
@@ -77,11 +80,11 @@ it("checks cancellation again after geometry and before trusted pointer input", 
 });
 
 // Opt-in real Chromium regression, without a visible browser or user profile.
-it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+it.skipIf(!CHROMIUM_AVAILABLE)(
 	"clicks with trusted input while real Puppeteer waits on a suspended intersection observer",
 	async () => {
 		const browser = await puppeteer.launch({
-			executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+			executablePath: await chromiumExecutable(),
 			headless: true,
 			protocolTimeout: 5000,
 			defaultViewport: null,

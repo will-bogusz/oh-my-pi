@@ -2,12 +2,11 @@ import { expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import {
-	lookupDownloadFiles,
-	TabDownloadMonitor,
-	type TabDownload,
-} from "@oh-my-pi/pi-coding-agent/tools/browser/downloads";
+import { TabDownloadMonitor, type TabDownload } from "@oh-my-pi/pi-coding-agent/tools/browser/downloads";
 import puppeteer from "puppeteer-core";
+import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
+
+const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
 async function waitForDownload(monitor: TabDownloadMonitor, state: TabDownload["state"]): Promise<TabDownload> {
 	const deadline = Date.now() + 5000;
@@ -19,7 +18,7 @@ async function waitForDownload(monitor: TabDownloadMonitor, state: TabDownload["
 	throw new Error(`No ${state} download: ${JSON.stringify(monitor.snapshot())}`);
 }
 
-it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+it.skipIf(!CHROMIUM_AVAILABLE)(
 	"observes page-scoped completion and cancellation by GUID, and refuses stale state after detach",
 	async () => {
 		const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-download-test-"));
@@ -52,7 +51,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			},
 		});
 		const browser = await puppeteer.launch({
-			executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+			executablePath: await chromiumExecutable(),
 			headless: true,
 			protocolTimeout: 5000,
 		});
@@ -102,30 +101,3 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 	},
 	15000,
 );
-
-it("reports old, malformed, or mismatched file lookup responses without inventing destinations", async () => {
-	const queries = [{ id: "owned", url: "https://example.com/file", startedAt: 123 }];
-	for (const response of [
-		undefined,
-		{},
-		{ lookup: { available: true, correlation: "url-and-time-candidates", matches: [null] } },
-		{
-			lookup: {
-				available: true,
-				correlation: "url-and-time-candidates",
-				matches: [{ id: "other", truncated: false, candidates: [] }],
-			},
-		},
-	]) {
-		expect(await lookupDownloadFiles({ send: async () => response }, queries)).toMatchObject({ available: false });
-	}
-	const unavailable = await lookupDownloadFiles(
-		{
-			send: async () => {
-				throw new Error("Method not found");
-			},
-		},
-		queries,
-	);
-	expect(unavailable).toMatchObject({ available: false, reason: expect.stringContaining("Method not found") });
-});

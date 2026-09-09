@@ -91,14 +91,19 @@
 		}
 		return Object.freeze(element);
 	};
+	/** Name -> { handle, target } of a managed Chrome tab, so `browser.tab(name)` keeps its identity. */
+	const identitiesByName = new Map();
 	const makeTab = (name, handle, initial = {}) => {
 		const tab = {};
 		let snapshot = initial.initialObservation?.snapshot;
-		if (handle) Object.defineProperty(tab, "handle", { value: handle, enumerable: true });
-		if (initial.target) {
-			const { id, browserId, tabId } = initial.target;
-			Object.defineProperty(tab, "target", { value: Object.freeze({ id, browserId, tabId }), enumerable: true });
+		const target = initial.target
+			? Object.freeze({ id: initial.target.id, browserId: initial.target.browserId, tabId: initial.target.tabId })
+			: identitiesByName.get(name)?.target;
+		if (handle) {
+			Object.defineProperty(tab, "handle", { value: handle, enumerable: true });
+			identitiesByName.set(name, { handle, target });
 		}
+		if (target) Object.defineProperty(tab, "target", { value: target, enumerable: true });
 		for (const field of [
 			"initialObservation",
 			"initialDialog",
@@ -132,6 +137,10 @@
 			if (!handle) throw new Error("Dialog inspection requires an existing managed Chrome handle");
 			return (await invoke("dialog", { handle, dialog: validateOptions("tab.dialog", options) })).value;
 		};
+		tab.popups = async () => {
+			if (!handle) throw new Error("Popup discovery requires an existing managed Chrome handle");
+			return (await invoke("popups", { handle })).value;
+		};
 		tab.run = async (fnOrCode, options) => {
 			if (typeof fnOrCode !== "function" && typeof fnOrCode !== "string") {
 				throw new TypeError("tab.run() expects a function or code string");
@@ -150,11 +159,13 @@
 		};
 		tab.close = async options => {
 			const opts = validateOptions("tab.close", options);
+			if (identitiesByName.get(name)?.handle === handle) identitiesByName.delete(name);
 			await invoke("close", { ...opts, name, ...(handle ? { handle } : {}) });
 		};
-		for (const action of ["reveal", "retain", "release"]) {
+		for (const action of ["reveal", "keep", "release"]) {
 			tab[action] = async () => {
 				if (!handle) throw new Error(`${action} requires a Chrome tab returned by create or claim`);
+				if (action === "release" && identitiesByName.get(name)?.handle === handle) identitiesByName.delete(name);
 				await invoke(action, { handle });
 			};
 		}
@@ -204,7 +215,9 @@
 			if (typeof name !== "string" || name.length === 0) {
 				throw new TypeError("browser.tab() expects a tab name");
 			}
-			return makeTab(name);
+			// Managed Chrome tabs are addressed by their immutable handle, never by
+			// the display label, so a name lookup has to carry the handle across.
+			return makeTab(name, identitiesByName.get(name)?.handle);
 		},
 		async close(options) {
 			await invoke("close", validateOptions("browser.close", options));

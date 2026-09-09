@@ -203,7 +203,10 @@ import { shutdownTinyTitleClient } from "../tiny/title-client";
 import type { ImageAttachmentEntry } from "../tools";
 import { resolveApproval } from "../tools/approval";
 import { type AskToolDetails, type AskToolInput, recoverAskQuestions } from "../tools/ask";
-import { releaseDeferredChromeTabsForOwner } from "../tools/browser/managed-chrome";
+import {
+	releaseChromeTabsForOwner,
+	releaseDeferredChromeTabsForOwner,
+} from "../tools/browser/managed-chrome";
 import {
 	armIdleCloseForOwner,
 	cancelIdleCloseForOwner,
@@ -1189,7 +1192,23 @@ export class AgentSession {
 			this.#canAutoContinueForFollowUp() &&
 			this.agent.hasQueuedMessages();
 		const ircContinuation = canDrain && !this.#isDisposed && !this.#planModeState?.enabled && this.#irc.hasPending();
-		this.#emit(queuedContinuation || ircContinuation ? { ...pending, isTerminal: false } : pending);
+		const emitted = queuedContinuation || ircContinuation ? { ...pending, isTerminal: false } : pending;
+		this.#emit(emitted);
+		this.#onAgentEndEmitted(emitted);
+	}
+
+	/**
+	 * The session has genuinely stopped: this `agent_end` is not a scheduled
+	 * continuation, a tail-arriving queued follow-up, or an IRC wake. Release
+	 * the user-visible surfaces the run was holding. Routed through the emit
+	 * sites rather than the maintenance routing above because only here is
+	 * `isTerminal` final — {@link #flushPendingAgentEnd} can downgrade a
+	 * maintenance-terminal settle when work lands in the tail window.
+	 */
+	#onAgentEndEmitted(event: AgentSessionEvent): void {
+		if (event.type !== "agent_end" || event.isTerminal === false) return;
+		this.#settleOwnedActorSurfaces();
+		this.#disposeControlPreviewsAtSettle();
 	}
 
 	/**
@@ -2528,6 +2547,7 @@ export class AgentSession {
 				return;
 			}
 			this.#emit(event);
+			this.#onAgentEndEmitted(event);
 			if (event.type === "tool_execution_end") {
 				const background = this.#backgroundToolUpdates.get(event.toolCallId);
 				if (background) {
@@ -3314,6 +3334,9 @@ export class AgentSession {
 			const ttsrAbortPendingAtAgentEnd = this.#ttsr.abortPending;
 			const emitAgentEndNotification = async (options?: { willContinue?: boolean }) => {
 				this.#emitRunState("idle");
+				// The terminal-settle release of user-visible surfaces rides on the
+				// emitted event instead of this flag: `isTerminal` here is only a
+				// proposal, which #flushPendingAgentEnd can still downgrade.
 				// Public agent_end is held out of the eager display pass and emitted
 				// here after maintenance routing, tagged isTerminal so subscribers can
 				// tell final settles from scheduled continuations.
@@ -4701,6 +4724,93 @@ export class AgentSession {
 		}
 	}
 
+	/**
+	 * Terminal-settle release of the user-visible surfaces this session was
+	 * driving. Distinct from {@link #settleOwnedBrowserTabs}, which runs on
+	 * every `turn_end` (each provider round trip) and is deliberately
+	 * non-destructive: freezing a headless tab is invisible and reversible,
+	 * whereas closing the user's Chrome tabs or killing the desktop worker
+	 * mid-task would destroy state the next tool call needs. This runs only
+	 * where the agent has actually stopped and handed control back — the
+	 * terminal `agent_end`, i.e. no retry, no compaction continuation, no
+	 * queued todo/plan reminder, no pending async-job wake.
+	 *
+	 * Two surfaces, both of which the user can see from across the room:
+	 * - Managed Chrome tabs of this session's actors: every lease is handed
+	 *   back — tabs OMP opened are closed, tabs claimed from the user (and
+	 *   anything the model called `tab.keep()` on) are left open. The debugger
+	 *   attachments go with them, so the "OMP is debugging this browser"
+	 *   infobar disappears rather than sitting over the user's window.
+	 * - The computer worker: `release()`, not `close()`, so the purple
+	 *   screen-sharing pill disappears while the prelude stays reusable. A
+	 *   `close()` here would poison the lifetime for the rest of the session.
+	 *
+	 * Detached and bounded: it is invoked from the `agent_end` emit path and
+	 * must never delay the public event, the TUI going idle, or the next
+	 * prompt. Session dispose repeats both sweeps with harder options, so a
+	 * timeout here only costs latency on the visible teardown.
+	 */
+	#settleOwnedActorSurfaces(): void {
+		const generation = this.#promptGeneration;
+		void (async () => {
+			// Yield once so a follow-up prompt that is already queued (auto-continue
+			// racing this emit, a hub wake, a user message typed during the stream)
+			// bumps the generation before we tear anything down.
+			await Promise.resolve();
+			if (this.#promptGeneration !== generation || this.#isDisposed) return;
+			const ownerId = this.sessionManager.getSessionId();
+			if (ownerId) {
+				try {
+					const swept = await withTimeout(
+						releaseChromeTabsForOwner(ownerId),
+						5_000,
+						"Timed out releasing managed Chrome tabs at settle",
+					);
+					if (swept.released + swept.kept > 0) {
+						logger.debug("Released managed Chrome tabs at settle", { ownerId, ...swept });
+					}
+				} catch (error) {
+					logger.warn("Failed to release managed Chrome tabs at settle", { error: String(error) });
+				}
+			}
+			if (this.settings.get("computer.releaseOnSettle")) {
+				try {
+					await withTimeout(
+						releaseComputerResourcesForOwner(this.getEvalKernelOwnerId()),
+						5_000,
+						"Timed out releasing computer resources at settle",
+					);
+				} catch (error) {
+					// A release failure poisons only that lifetime; the next computer
+					// call reports it. Nothing here may escape into the event flow.
+					logger.warn("Failed to release computer resources at settle", { error: String(error) });
+				}
+			}
+		})();
+	}
+
+	/**
+	 * Turn-end preview policy: superseded observation stills leave the model
+	 * transcript once the session has genuinely stopped (see
+	 * {@link SessionMaintenance.disposeControlPreviews}). Detached and
+	 * generation-guarded like {@link #settleOwnedActorSurfaces}: a follow-up
+	 * already queued wins, and the next terminal settle catches up because the
+	 * sweep walks the whole branch.
+	 */
+	#disposeControlPreviewsAtSettle(): void {
+		const generation = this.#promptGeneration;
+		void (async () => {
+			await Promise.resolve();
+			if (this.#promptGeneration !== generation || this.#isDisposed) return;
+			try {
+				const { removed } = await this.#maintenance.disposeControlPreviews();
+				if (removed > 0) logger.debug("Disposed superseded control previews at settle", { removed });
+			} catch (error) {
+				logger.warn("Failed to dispose control previews at settle", { error: String(error) });
+			}
+		})();
+	}
+
 	async #releaseOwnedComputerSessions(ownerId: string | undefined): Promise<void> {
 		if (!ownerId) return;
 		try {
@@ -5492,6 +5602,10 @@ export class AgentSession {
 	/** Strip image content from the current branch and persist the rewrite. */
 	dropImages(): Promise<{ removed: number }> {
 		return this.#maintenance.dropImages();
+	}
+	/** Strip superseded browser/computer observation stills from the model transcript; the renderer keeps them. */
+	disposeControlPreviews(): Promise<{ removed: number }> {
+		return this.#maintenance.disposeControlPreviews();
 	}
 
 	/** Reduce stored context with the selected shake strategy. */

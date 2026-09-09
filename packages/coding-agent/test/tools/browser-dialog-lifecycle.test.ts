@@ -7,12 +7,15 @@ import type {
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
 import { WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import puppeteer from "puppeteer-core";
+import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
-it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+const CHROMIUM_AVAILABLE = await chromiumAvailable();
+
+it.skipIf(!CHROMIUM_AVAILABLE)(
 	"removes failed-run dialog handlers and preserves controller observers during user listener removal",
 	async () => {
 		const browser = await puppeteer.launch({
-			executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+			executablePath: await chromiumExecutable(),
 			headless: true,
 			protocolTimeout: 5000,
 		});

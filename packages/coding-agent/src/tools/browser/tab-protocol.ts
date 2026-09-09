@@ -3,6 +3,9 @@ import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
 
 export type Transferable = Bun.Transferable;
 
+/** How `tab.observe()` mints the `ref` of each observed element. */
+export type RefStyle = "uuid" | "compact";
+
 export interface ObservationEntry {
 	id: number;
 	ref?: string;
@@ -56,6 +59,8 @@ export interface SessionSnapshot {
 	browserScreenshotDir?: string;
 	/** Force non-WebP screenshot encoding (e.g. for Ollama). Unset honors `OMP_NO_WEBP`. */
 	excludeWebP?: boolean;
+	/** Ref shape for observations in this run; unset behaves as `"uuid"`. */
+	refs?: RefStyle;
 }
 
 export type WorkerInitPayload =

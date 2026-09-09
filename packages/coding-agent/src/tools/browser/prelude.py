@@ -125,6 +125,9 @@ def _make_browser():
         async def evaluate(self, *args, **kwargs):
             return await self._method("evaluate", args, kwargs)
 
+    # Name -> (handle, target) of a managed Chrome tab, so `browser.tab(name)` keeps its identity.
+    _identities_by_name = {}
+
     class _Tab:
         __slots__ = ("_name", "_handle", "_snapshot", "_initial", "_target")
 
@@ -134,7 +137,13 @@ def _make_browser():
             self._initial = initial or {}
             self._snapshot = (self._initial.get("initialObservation") or {}).get("snapshot")
             target = self._initial.get("target")
-            self._target = MappingProxyType({key: target[key] for key in ("id", "browserId", "tabId")}) if target else None
+            if target:
+                self._target = MappingProxyType({key: target[key] for key in ("id", "browserId", "tabId")})
+            else:
+                remembered = _identities_by_name.get(self._name)
+                self._target = remembered[1] if remembered else None
+            if handle:
+                _identities_by_name[self._name] = (handle, self._target)
 
         @property
         def target(self):
@@ -248,6 +257,11 @@ def _make_browser():
             details = await _invoke("dialog", {"handle": self._handle, "dialog": options if options is not None else kwargs})
             return details.get("value")
 
+        async def popups(self):
+            if not self._handle:
+                raise ValueError("Popup discovery requires an existing managed Chrome handle")
+            return (await _invoke("popups", {"handle": self._handle})).get("value")
+
         async def downloads(self, *args, **kwargs):
             return await self._method("downloads", args, kwargs)
 
@@ -268,7 +282,7 @@ def _make_browser():
                             f"{self._snapshot}:{element_id}" if self._snapshot else element_id, self._handle)
 
         def ref(self, ref_id):
-            """Return a synchronous handle for an ARIA reference id."""
+            """Return a synchronous handle for an observation ref or an ARIA reference id."""
             if not isinstance(ref_id, str) or not ref_id:
                 raise TypeError("tab.ref() expects a non-empty reference id")
             return _Element(self._name, "ref", ref_id, self._handle)
@@ -285,6 +299,8 @@ def _make_browser():
 
         async def close(self, *, kill=None, timeout=None):
             """Close this tab handle's host-side tab."""
+            if (_identities_by_name.get(self._name) or (None,))[0] == self._handle:
+                _identities_by_name.pop(self._name, None)
             await _invoke(
                 "close",
                 {"name": self._name, "kill": kill, "timeout": timeout, "handle": self._handle},
@@ -293,10 +309,13 @@ def _make_browser():
         async def reveal(self):
             await _invoke("reveal", {"handle": self._handle})
 
-        async def retain(self):
-            await _invoke("retain", {"handle": self._handle})
+        async def keep(self):
+            """Leave this page open for the user when the task ends."""
+            await _invoke("keep", {"handle": self._handle})
 
         async def release(self):
+            if (_identities_by_name.get(self._name) or (None,))[0] == self._handle:
+                _identities_by_name.pop(self._name, None)
             await _invoke("release", {"handle": self._handle})
 
     class _Browser:
@@ -371,7 +390,10 @@ def _make_browser():
 
         def tab(self, name="main"):
             """Re-acquire a synchronous handle for an existing named tab."""
-            return _Tab(_require_name(name, "browser.tab()"))
+            # Managed Chrome tabs are addressed by their immutable handle, never
+            # by the display label, so a name lookup has to carry the handle.
+            resolved = _require_name(name, "browser.tab()")
+            return _Tab(resolved, (_identities_by_name.get(resolved) or (None,))[0])
 
         async def close(self, *, name=None, all=None, kill=None, timeout=None):
             """Close one or all managed browser tabs."""
