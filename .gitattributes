@@ -55,3 +55,6 @@ poetry.lock -text
 # Changelogs are append-mostly; auto-merge by unioning both sides.
 packages/*/CHANGELOG.md merge=union
 
+
+# Vendored native driver executables are opaque binaries.
+vendor/cua-driver/**/cua-driver binary

@@ -1088,6 +1088,42 @@ export interface DesktopSessionOptions {
   display?: string
 }
 
+/**
+ * One on-screen `WindowServer` record on any CGWindow layer.
+ *
+ * Separate from [`DesktopWindow`] on purpose: this is an observation of what
+ * the display shows, including the accessory layers that carry system
+ * authentication, permission and lock panels. It is never a capture or input
+ * target, and it is not filtered by sharing state, size or title, because a
+ * secure panel publishes none of those.
+ */
+export interface DesktopSystemWindow {
+  /** `kCGWindowNumber`, decimal, matching `DesktopWindow::id`. */
+  id: string
+  /** `kCGWindowOwnerPID`. */
+  pid: number
+  /** `kCGWindowOwnerName` — the owner process name, not a bundle id. */
+  app: string
+  /**
+   * `kCGWindowName`; empty without Screen Recording permission and for the
+   * system panels that publish no name.
+   */
+  title: string
+  x: number
+  y: number
+  width: number
+  height: number
+  /**
+   * `kCGWindowLayer`: 0 for ordinary app windows, 20-25 for Dock and menu
+   * bar, 1000 for the screen-saver level macOS gives SecurityAgent panels.
+   */
+  layer: number
+  /** `kCGWindowAlpha`; 0 marks an invisible overlay. */
+  alpha: number
+  /** Front-to-back position in the roster; 0 is the topmost window. */
+  zIndex: number
+}
+
 /** One capturable top-level window in global logical desktop coordinates. */
 export interface DesktopWindow {
   /**
@@ -1109,6 +1145,27 @@ export interface DesktopWindow {
   height: number
   /** Whether the window currently holds input focus. */
   focused: boolean
+}
+
+/**
+ * Sample the on-screen window roster across every CGWindow layer.
+ *
+ * Sessionless and permission-free, so an interruption check costs one
+ * `WindowServer` round trip and no capture/AX state. Reports the accessory
+ * layers that `DesktopSession::list_windows` and the Cua driver both filter
+ * away, which is where macOS puts authentication, permission and lock panels.
+ * Returns an empty roster off macOS.
+ */
+export declare function desktopWindowRoster(): DesktopWindowRoster
+
+/** On-screen window roster plus the frontmost application, sampled together. */
+export interface DesktopWindowRoster {
+  /**
+   * `NSWorkspace.frontmostApplication`; absent at the login window and
+   * screen saver, and unreliable while a SecurityAgent panel is up.
+   */
+  frontmostPid?: number
+  windows: Array<DesktopSystemWindow>
 }
 
 /**

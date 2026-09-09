@@ -1,25 +1,26 @@
-import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import type { DesktopCapabilities, DesktopDisplay } from "@oh-my-pi/pi-natives";
-import { getNativesDir, withFileLock } from "@oh-my-pi/pi-utils";
+import * as logger from "@oh-my-pi/pi-utils/logger";
 import { resizeImage } from "../../utils/image-resize";
 import { ToolError, throwIfAborted } from "../tool-errors";
+import type { ComputerBackend, ComputerBackendFactory } from "./backend";
+import { type CuaDriver, type CuaDriverFactory, type CuaToolResult, spawnVendoredCuaDriver } from "./driver";
 import {
-	assertCuaHostRuntime,
-	CUA_DRIVER_VERSION,
-	type CuaDriverHandle,
-	type CuaDriverMetadata,
-	type CuaRuntimeOptions,
-	type CuaToolResult,
-	loadCuaRuntime,
-} from "./cua-runtime";
+	classifyWindow,
+	describeInterruption,
+	rosterInterruption,
+	sampleWindowRoster,
+	type WindowRosterSample,
+} from "./interruption";
+import { observedSemanticActions } from "./semantic-actions";
 import type {
 	ActionOptions,
 	ComputerActionResult,
 	ComputerBounds,
 	ComputerElementSnapshot,
 	ComputerImage,
+	ComputerInterruption,
 	ComputerLaunchOptions,
 	ComputerObservation,
 	ComputerRelatedWindow,
@@ -29,9 +30,6 @@ import type {
 	ObserveOptions,
 	WindowSelector,
 } from "./types";
-import type { ComputerBackend } from "./worker";
-
-import { observedSemanticActions } from "./semantic-actions";
 
 type Context = ComputerOperationContext;
 type Wire = Record<string, unknown>;
@@ -77,10 +75,10 @@ interface VerificationResult {
 }
 export interface CuaSessionOptions {
 	display?: string;
-	runtime?: CuaRuntimeOptions;
-	/** Per-instance SDK injection for regression tests; does not change global factories. */
-	driver?: CuaDriverHandle;
-	inputLockPath?: string;
+	/** Spawns the driver child; a dead child is replaced through this on the next call. */
+	spawn?: CuaDriverFactory;
+	/** WindowServer roster used for interruption checks; tests inject a quiet desktop. */
+	sampleRoster?: () => WindowRosterSample;
 }
 function object(value: unknown, name: string): Wire {
 	if (!value || typeof value !== "object" || Array.isArray(value)) throw new ToolError(`Malformed Cua ${name}`);
@@ -93,6 +91,25 @@ function number(value: unknown, name: string): number {
 function string(value: unknown, name: string): string {
 	if (typeof value !== "string") throw new ToolError(`Malformed Cua ${name}`);
 	return value;
+}
+/** Signal 0 probes existence without delivering anything; EPERM still means alive. */
+function processAlive(pid: number): boolean {
+	try {
+		process.kill(pid, 0);
+		return true;
+	} catch (error) {
+		return (error as NodeJS.ErrnoException).code === "EPERM";
+	}
+}
+/** CGWindow owner that hosts macOS CrashReporter alerts ("<app> quit unexpectedly"). */
+const CRASH_ALERT_HOST = "usernotificationcenter";
+/** The pid a failed `launch_app` reports in its error details, if any. */
+function launchedPid(error: unknown): number | undefined {
+	const pid = error instanceof ToolError ? error.context?.pid : undefined;
+	return typeof pid === "number" ? pid : undefined;
+}
+function crashAlertGuidance(pid: number, alert: ComputerInterruption): string {
+	return `Launched app (pid ${pid}) exited and ${describeInterruption(alert)} — a crash report. Do not relaunch; acquire {id:"${alert.windowId}",pid:${alert.pid}}, observe it, press its "Ignore" button, then tell the user.`;
 }
 function relatedWindows(value: unknown): readonly ComputerRelatedWindow[] | undefined {
 	if (value === undefined || value === null) return undefined;
@@ -174,49 +191,49 @@ function unsupported(operation: string): never {
 }
 
 /**
- * Candidate adapter. All desktop work, including capture, remains inside Cua.
+ * Maps computer operations onto `cua-driver` tools over one supervised child.
+ * All desktop work, including capture, happens in the driver process.
  *
- * The worker factory may opt in with CuaComputerSession.create({ display }). For
- * local SDK qualification only, pass runtime.experimentalNodeModules explicitly;
- * this never changes the installed dependency graph. Restart the worker after
- * rebuilding that native payload: loaded dynamic libraries cannot be hot-swapped.
+ * Operations are serialized per session. Aborting an operation's signal
+ * cancels the driver call cooperatively and the session stays usable; a
+ * child that exits (crash, or killed after ignoring a cancel) is respawned by
+ * the next operation, with element refs and pixel frames invalidated.
  *
- * Requires the SDK capture/AX/mouse fixes under qualification. The pinned public
- * package alone does not prove those fixes are present. Do not enable alongside
- * the obsolete OMP ScreenCaptureKit bridge, whose Objective-C classes collide.
- *
- * SDK window hover is only cursor decoration and focused-window identity is
+ * Driver window hover is only cursor decoration and focused-window identity is
  * unavailable. Display enumeration/capture/input cover the primary display only.
- * Desktop pixels require the patched SDK display identity/origin extension; stock
+ * Desktop pixels require the driver's display identity/origin extension; stock
  * observations remain usable as images but never authorize coordinate dispatch.
- * SDK desktop drags are straight two-point gestures. Desktop scroll accepts only
- * one-axis multiples of 120 pixels (the SDK's line notch), up to 50 notches.
+ * Desktop drags are straight two-point gestures. Desktop scroll accepts only
+ * one-axis multiples of 120 pixels (the driver's line notch), up to 50 notches.
  */
 export class CuaComputerSession implements ComputerBackend {
-	readonly #driver: CuaDriverHandle;
-	readonly #inputLock: string;
-	readonly #generation = crypto.randomUUID();
+	readonly #spawn: CuaDriverFactory;
+	readonly #sampleRoster: () => WindowRosterSample;
 	readonly #elements = new Map<string, Binding>();
 	readonly #frames = new Map<string, Frame>();
-	readonly metadata: CuaDriverMetadata;
 	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
+	#driver: CuaDriver;
+	#generation = crypto.randomUUID();
 	#tail: Promise<unknown> = Promise.resolve();
+	/** Signal of the operation currently holding the serialized tail. */
+	#signal?: AbortSignal;
 	#closed = false;
 	#closing?: Promise<void>;
-	#interruption?: Promise<void>;
-	get requiresReacquisition(): boolean {
-		return this.#interruption !== undefined;
-	}
 	#desktopFrame?: DesktopFrame;
 
-	private constructor(driver: CuaDriverHandle, inputLock: string, permissions: Wire, metadata: CuaDriverMetadata) {
+	private constructor(
+		driver: CuaDriver,
+		spawn: CuaDriverFactory,
+		sampleRoster: () => WindowRosterSample,
+		permissions: Wire,
+	) {
 		this.#driver = driver;
-		this.#inputLock = inputLock;
-		this.metadata = Object.freeze({ ...metadata });
+		this.#spawn = spawn;
+		this.#sampleRoster = sampleRoster;
 		const capture = permissions.screen_recording === true;
 		const accessibility = permissions.accessibility === true;
 		this.capabilities = Object.freeze({
-			backend: "cua-sdk",
+			backend: "cua-driver",
 			displayServer: "macos",
 			capture,
 			input: accessibility,
@@ -227,92 +244,119 @@ export class CuaComputerSession implements ComputerBackend {
 			inputPermission: accessibility ? "granted" : "not-granted",
 			axPermission: accessibility ? "granted" : "not-granted",
 			displayCount: 0,
-			driver: this.metadata,
+			driver: Object.freeze({ version: driver.version, transport: "mcp --direct" }),
 			displayCountKnown: false,
 			displayEnumeration: "primary only; other display count is unknown",
 			captureScope: "exact window or primary display",
 			desktopCoordinates: "primary display only; requires current UUID, native id, origin, size and scale metadata",
-			desktopDrag: "exactly two points; the SDK interpolates one straight drag",
+			desktopDrag: "exactly two points; the driver interpolates one straight drag",
 			windowDrag:
 				"foreground only; durationMs integer 0–10000 (default 500), steps integer 1–200 (default 20); background drag is unavailable",
 			desktopScroll: "one axis per action; pixel deltas must be multiples of 120, up to 6000",
 			backgroundInput: "best effort; use observation backgroundInput and fresh evidence, never assume delivery",
 			elementRefLifetime:
-				"Exact SDK snapshot, PID and window; re-observe after StaleRef. AX traversals can evict SDK snapshots.",
+				"Exact driver snapshot, PID and window; re-observe after StaleRef. AX traversals can evict driver snapshots.",
 			unsupported: ["window hover", "focusedWindow", "secondary display enumeration/capture/input"],
 		});
 	}
 
 	static async create(options: CuaSessionOptions = {}): Promise<CuaComputerSession> {
-		if (!options.driver) assertCuaHostRuntime();
 		if (options.display && !["all", "primary"].includes(options.display))
 			unsupported(`display selector '${options.display}'`);
-		const inputLock = options.inputLockPath ?? path.join(getNativesDir(), "computer-input");
-		await fs.mkdir(path.dirname(inputLock), { recursive: true });
-		const driver =
-			options.driver ?? (await loadCuaRuntime(options.runtime)).CuaDriver.create({ claudeCodeCompatibility: false });
+		const spawn = options.spawn ?? spawnVendoredCuaDriver;
+		const driver = await spawn();
 		try {
-			const metadata = await driver.metadata();
-			if (
-				metadata.driverVersion !== CUA_DRIVER_VERSION ||
-				metadata.contractVersion !== "0.7.0" ||
-				!metadata.embedded
-			)
-				throw new ToolError("Cua SDK version/embedded contract mismatch");
-			const permissions = await withFileLock(inputLock, () =>
-				driver.callTool("check_permissions", JSON.stringify({ prompt: false })),
-			);
+			const permissions = await driver.callTool("check_permissions", { prompt: false });
 			if (permissions.isError) throw new ToolError(permissions.text);
 			return new CuaComputerSession(
 				driver,
-				inputLock,
+				spawn,
+				options.sampleRoster ?? sampleWindowRoster,
 				object(JSON.parse(permissions.structuredJson ?? "{}"), "permissions"),
-				metadata,
 			);
 		} catch (error) {
-			try {
-				await driver.shutdown();
-			} finally {
-				driver.uniffiDestroy();
-			}
+			await driver.kill({ force: true });
 			throw error;
 		}
 	}
 
+	/** The live child, replacing one that exited. Cached refs and frames die with the old child. */
+	async #liveDriver(): Promise<CuaDriver> {
+		if (this.#driver.alive) return this.#driver;
+		logger.warn("cua-driver child is gone; respawning", { previousPid: this.#driver.pid });
+		this.#driver = await this.#spawn();
+		this.#generation = crypto.randomUUID();
+		this.#elements.clear();
+		this.#frames.clear();
+		this.#desktopFrame = undefined;
+		return this.#driver;
+	}
+
 	#guard(context: Context): void {
 		throwIfAborted(context.signal);
-		if (this.#closed) throw new ToolError("Computer session closed or interrupted; acquire a fresh window");
+		if (this.#closed) throw new ToolError("Computer session is closed");
 	}
-	async #schedule<T>(context: Context, name: string, mutation: boolean, dispatch: () => Promise<T>): Promise<T> {
+	/**
+	 * Pre-dispatch gate for every mutation. While a system prompt owns the
+	 * screen an action either lands invisibly behind it (background routes are
+	 * pid-addressed and AX writes bypass the WindowServer) or lands *in* it
+	 * (foreground delivery posts to the HID tap, which is the password field).
+	 * Both are wrong, so nothing is dispatched.
+	 *
+	 * One exemption: an AX action aimed at a crash alert this session caused
+	 * (`#crashAlerts`, recorded by `launch`) — that is how the agent presses
+	 * "Ignore" on the report for its own crashed app instead of leaving it
+	 * on the user's screen.
+	 */
+	#refuseWhenInterrupted(name: string, crashAlertTarget?: string): void {
+		const interruption = rosterInterruption(this.#sampleRoster());
+		if (!interruption) return;
+		if (
+			crashAlertTarget !== undefined &&
+			interruption.windowId === crashAlertTarget &&
+			interruption.app.trim().toLowerCase() === CRASH_ALERT_HOST &&
+			this.#crashAlerts.has(crashAlertTarget)
+		)
+			return;
+		throw new ToolError(
+			`Interrupted: ${describeInterruption(interruption)}. '${name}' was not dispatched; tell the user what is asking and wait for them. Never type, click or send keys at it. Reading is still allowed: acquire {id:"${interruption.windowId}",pid:${interruption.pid}} and observe it to see what it says — the system alert host also carries crash reports and other alerts, and the user needs to know which one it is.`,
+			{ interruptedBy: interruption },
+		);
+	}
+	/** Window ids of CrashReporter alerts raised by apps this session launched; see `launch`. */
+	readonly #crashAlerts = new Set<string>();
+	/**
+	 * `crashAlertTarget`: only the AX semantic route (`perform`) passes its
+	 * window id, so the crash-alert exemption can never reach a keystroke,
+	 * pointer or value write — those routes have no business on any alert.
+	 */
+	async #schedule<T>(
+		context: Context,
+		name: string,
+		mutation: boolean,
+		dispatch: () => Promise<T>,
+		crashAlertTarget?: string,
+	): Promise<T> {
 		if (mutation && context.readOnly) throw new ToolError(`read-only run: '${name}' requires read_only: false`);
 		this.#guard(context);
-		const run = () =>
-			withFileLock(this.#inputLock, async () => {
-				this.#guard(context);
-				// Shutdown signals native cooperative cancellation and waits
-				// for the admitted task's real lifetime. Keep the file lock
-				// until both the action and that cleanup acknowledgement settle.
-				const interrupt = (): void => {
-					this.#closed = true;
-					this.#interruption ??= this.#driver.shutdown();
-					void this.#interruption.catch(() => undefined);
-				};
-				context.signal.addEventListener("abort", interrupt, { once: true });
-				try {
-					const value = await dispatch();
-					throwIfAborted(context.signal);
-					return value;
-				} finally {
-					context.signal.removeEventListener("abort", interrupt);
-					await this.#interruption;
-				}
-			});
+		const run = async (): Promise<T> => {
+			this.#guard(context);
+			if (mutation) this.#refuseWhenInterrupted(name, crashAlertTarget);
+			this.#signal = context.signal;
+			try {
+				const value = await dispatch();
+				throwIfAborted(context.signal);
+				return value;
+			} finally {
+				this.#signal = undefined;
+			}
+		};
 		const pending = this.#tail.then(run, run);
 		this.#tail = pending.catch(() => undefined);
 		return pending;
 	}
 	async #call(name: string, args: Wire): Promise<Reply> {
-		const result = await this.#driver.callTool(name, JSON.stringify(args));
+		const result = await (await this.#liveDriver()).callTool(name, args, this.#signal);
 		if (result.isError) {
 			let details: Wire | undefined;
 			try {
@@ -328,33 +372,67 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 		return { result, data: object(JSON.parse(result.structuredJson ?? "{}"), `${name} result`) };
 	}
-	#windowRoster(data: Wire, selector: WindowSelector): ComputerWindowIdentity[] {
+	/**
+	 * Cua enumerates CGWindow layer 0 only, which is exactly where the system
+	 * panels are not: a keychain prompt is a layer-1000 SecurityAgent window.
+	 * The WindowServer sample supplies `kind` for the rows Cua does report and
+	 * contributes the classified rows it cannot see, with their real geometry —
+	 * Cua reports a placeholder rectangle and `onScreen: false` for the
+	 * off-screen ghost windows those owners also keep.
+	 */
+	#windowRoster(data: Wire, selector: WindowSelector, sample?: WindowRosterSample): ComputerWindowIdentity[] {
 		if (!Array.isArray(data.windows)) throw new ToolError("Malformed Cua window roster");
-		return data.windows
-			.map(value => {
-				const row = object(value, "window");
-				const window = {
-					id: String(number(row.window_id, "window_id")),
-					pid: number(row.pid, "pid"),
-					app: string(row.app_name, "app_name"),
-					title: string(row.title, "title"),
-					bounds: bounds(row.bounds),
-					onScreen: typeof row.is_on_screen === "boolean" ? row.is_on_screen : undefined,
-				};
-				windowArgs(window);
-				return Object.freeze(window);
-			})
-			.filter(
-				window =>
-					(selector.id === undefined || window.id === selector.id) &&
-					(selector.pid === undefined || window.pid === selector.pid) &&
-					(selector.app === undefined || window.app.toLowerCase().includes(selector.app.toLowerCase())) &&
-					(selector.title === undefined || window.title.toLowerCase().includes(selector.title.toLowerCase())),
-			);
+		const onScreen = new Map((sample?.windows ?? []).map(window => [window.id, window]));
+		const windows: ComputerWindowIdentity[] = data.windows.map(value => {
+			const row = object(value, "window");
+			const window = {
+				id: String(number(row.window_id, "window_id")),
+				pid: number(row.pid, "pid"),
+				app: string(row.app_name, "app_name"),
+				title: string(row.title, "title"),
+				bounds: bounds(row.bounds),
+				onScreen: typeof row.is_on_screen === "boolean" ? row.is_on_screen : undefined,
+				layer: number(row.layer, "layer"),
+				// An owner's off-screen placeholder window is not the panel itself.
+				kind: onScreen.has(String(row.window_id))
+					? classifyWindow({ app: string(row.app_name, "app_name") })
+					: ("other" as const),
+			};
+			windowArgs(window);
+			return Object.freeze(window);
+		});
+		if (sample) {
+			const known = new Set(windows.map(window => window.id));
+			for (const row of sample.windows) {
+				const kind = classifyWindow(row);
+				// Menus, tooltips, the Dock and the rest of the accessory layers
+				// stay out for the reason Cua filters them: they swamp the roster.
+				if (kind === "other" || known.has(row.id)) continue;
+				windows.push(
+					Object.freeze({
+						id: row.id,
+						pid: row.pid,
+						app: row.app,
+						title: row.title,
+						bounds: Object.freeze({ x: row.x, y: row.y, width: row.width, height: row.height }),
+						onScreen: true,
+						layer: row.layer,
+						kind,
+					}),
+				);
+			}
+		}
+		return windows.filter(
+			window =>
+				(selector.id === undefined || window.id === selector.id) &&
+				(selector.pid === undefined || window.pid === selector.pid) &&
+				(selector.app === undefined || window.app.toLowerCase().includes(selector.app.toLowerCase())) &&
+				(selector.title === undefined || window.title.toLowerCase().includes(selector.title.toLowerCase())),
+		);
 	}
 	async #windows(selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
 		const { data } = await this.#call("list_windows", {});
-		return this.#windowRoster(data, selector);
+		return this.#windowRoster(data, selector, this.#sampleRoster());
 	}
 	async #window(selector: string | WindowSelector): Promise<ComputerWindowIdentity> {
 		const filter = typeof selector === "string" ? { id: selector } : selector;
@@ -365,8 +443,9 @@ export class CuaComputerSession implements ComputerBackend {
 			// exact AXWindows mapping may narrow a broad selector; visibility,
 			// title, size and stacking order are not evidence of window ownership.
 			const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
-			const roster = this.#windowRoster(data, { pid });
-			matches = this.#windowRoster(data, filter).filter(window => window.pid === pid);
+			const sample = this.#sampleRoster();
+			const roster = this.#windowRoster(data, { pid }, sample);
+			matches = this.#windowRoster(data, filter, sample).filter(window => window.pid === pid);
 			const metadata = data.accessibility_windows;
 			if (metadata !== undefined) {
 				const ax = object(metadata, "accessibility window metadata");
@@ -533,6 +612,19 @@ export class CuaComputerSession implements ComputerBackend {
 			else if (reply.data.ax_walk_stop_reason != null)
 				observation.tree +=
 					"\nAccessibility observation stopped because a native request could not complete. The walk has finished; omitted controls and values remain unknown.";
+			// Document apps: the app's own dirty bit and file path (absent = the app
+			// reports neither). AX value writes never reach disk, so this is how the
+			// model tells "text changed" from "saved".
+			if (typeof reply.data.document_path === "string") observation.documentPath = reply.data.document_path;
+			if (typeof reply.data.document_edited === "boolean") observation.documentEdited = reply.data.document_edited;
+			if (observation.documentPath !== undefined || observation.documentEdited !== undefined)
+				observation.tree += `\nDocument: ${observation.documentPath ?? "(path unknown)"}${observation.documentEdited === undefined ? "" : observation.documentEdited ? " — unsaved changes" : " — no unsaved changes flagged (setValue writes are not flagged; check the disk)"}`;
+			// An observation is the model's picture of the environment; a system
+			// prompt over it is part of that picture even though the AX tree of
+			// the target window looks entirely normal underneath.
+			observation.interruptedBy = rosterInterruption(this.#sampleRoster());
+			if (observation.interruptedBy)
+				observation.tree += `\n⚠️ Interrupted: ${describeInterruption(observation.interruptedBy)}. Actions on any window are refused until it is answered; tell the user what is asking.`;
 			if (options.screenshot) {
 				try {
 					observation.screenshot = await this.#windowImage(context, current, reply, options.silent === true);
@@ -609,10 +701,17 @@ export class CuaComputerSession implements ComputerBackend {
 			const failure = reply.data.screenshot_error;
 			if (failure && typeof failure === "object" && !Array.isArray(failure)) {
 				const details = failure as Wire;
+				// The driver bounds its capture-start wait; the accessibility tree in
+				// the same reply is still good, only the pixels are missing.
+				if (details.code === "capture_timeout")
+					throw new ToolError(
+						`capture_timeout: the window did not deliver a frame within ${String(details.waited_ms ?? "?")} ms; accessibility state is still current — retry the screenshot or continue with refs`,
+						details,
+					);
 				if (typeof details.code === "string" && typeof details.reason === "string")
 					throw new ToolError(`${details.code}: ${details.reason}`);
 			}
-			throw new ToolError("Screenshot unavailable: Cua did not provide a valid image");
+			throw new ToolError("Screenshot unavailable: the driver did not provide a valid image");
 		}
 		if (!sameBounds(bounds(reply.data.window_bounds), window.bounds))
 			throw new ToolError("StaleFrame: Cua did not provide a valid matching screenshot frame");
@@ -671,14 +770,25 @@ export class CuaComputerSession implements ComputerBackend {
 			y: (y * frame.sdkHeight) / frame.image.height,
 		};
 	}
+	/**
+	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
+	 * window found now appeared while this action ran — a prompt the action
+	 * itself provoked, or the user's own. The action is not retracted; the
+	 * result says the environment changed under it, and the next mutation is
+	 * refused until the panel goes away.
+	 */
 	async #action(name: string, args: Wire): Promise<ComputerActionResult> {
 		const { result, data } = await this.#call(name, args);
+		const interruptedBy = rosterInterruption(this.#sampleRoster());
 		return {
-			text: result.text,
+			text: interruptedBy
+				? `${result.text}\n⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
+				: result.text,
 			effect: typeof data.effect === "string" ? data.effect : "unverifiable",
 			evidence: data.evidence ?? null,
 			route: typeof data.route === "string" ? data.route : typeof data.path === "string" ? data.path : "cua-sdk",
 			delivery: data.delivery ?? args.delivery_mode ?? "background",
+			interruptedBy,
 			data,
 		};
 	}
@@ -688,12 +798,19 @@ export class CuaComputerSession implements ComputerBackend {
 		window: ComputerWindowIdentity,
 		target: ComputerTarget | undefined,
 		args: Wire,
+		crashAlertTarget?: string,
 	): Promise<ComputerActionResult> {
-		return this.#schedule(context, name, true, async () => {
-			const current = await this.#current(window);
-			throwIfAborted(context.signal);
-			return this.#action(name, { ...this.#target(current, target), ...args });
-		});
+		return this.#schedule(
+			context,
+			name,
+			true,
+			async () => {
+				const current = await this.#current(window);
+				throwIfAborted(context.signal);
+				return this.#action(name, { ...this.#target(current, target), ...args });
+			},
+			crashAlertTarget,
+		);
 	}
 	click(
 		context: Context,
@@ -701,24 +818,32 @@ export class CuaComputerSession implements ComputerBackend {
 		target: ComputerTarget,
 		options: ActionOptions = {},
 	): Promise<ComputerActionResult> {
-		return this.#schedule(context, "click", true, async () => {
-			const current = await this.#current(window);
-			throwIfAborted(context.signal);
-			if (typeof target === "string") {
-				const binding = this.#binding(target, current);
-				const supportedDouble =
-					binding.doubleClickAtCenter && options.count === 2 && (options.button ?? "left") === "left";
-				if (options.modifiers?.length || ((options.count ?? 1) !== 1 && !supportedDouble))
-					unsupported("counted or modified element click on this SDK; use a fresh screenshot and pixel target");
-			}
-			return this.#action("click", {
-				...this.#target(current, target),
-				...delivery(options),
-				button: options.button,
-				count: options.count,
-				modifier: options.modifiers,
-			});
-		});
+		return this.#schedule(
+			context,
+			"click",
+			true,
+			async () => {
+				const current = await this.#current(window);
+				throwIfAborted(context.signal);
+				if (typeof target === "string") {
+					const binding = this.#binding(target, current);
+					const supportedDouble =
+						binding.doubleClickAtCenter && options.count === 2 && (options.button ?? "left") === "left";
+					if (options.modifiers?.length || ((options.count ?? 1) !== 1 && !supportedDouble))
+						unsupported("counted or modified element click on this SDK; use a fresh screenshot and pixel target");
+				}
+				return this.#action("click", {
+					...this.#target(current, target),
+					...delivery(options),
+					button: options.button,
+					count: options.count,
+					modifier: options.modifiers,
+				});
+			},
+			// A background click on an element ref is the AX press route, so it
+			// may address a crash alert this session caused (see the gate).
+			typeof target === "string" && options.delivery !== "foreground" ? window.id : undefined,
+		);
 	}
 	type(
 		context: Context,
@@ -758,7 +883,7 @@ export class CuaComputerSession implements ComputerBackend {
 	): Promise<ComputerActionResult> {
 		if (!["press", "show_menu", "pick", "confirm", "cancel", "open"].includes(action))
 			unsupported(`AX action '${action}'`);
-		return this.#targetAction(context, "click", window, ref, { action, delivery_mode: "background" });
+		return this.#targetAction(context, "click", window, ref, { action, delivery_mode: "background" }, window.id);
 	}
 	hover(
 		context: Context,
@@ -1065,18 +1190,69 @@ export class CuaComputerSession implements ComputerBackend {
 		return this.#schedule(context, "clipboardWrite", true, () => this.#action("clipboard_write", { text }));
 	}
 	launch(context: Context, options: ComputerLaunchOptions): Promise<ComputerActionResult> {
-		return this.#schedule(context, "launch", true, () =>
-			this.#action("launch_app", {
-				bundle_id: options.bundleId,
-				name: options.name,
-				urls: options.urls,
-				creates_new_application_instance: options.newInstance,
-			}),
-		);
+		return this.#schedule(context, "launch", true, async () => {
+			let result: ComputerActionResult;
+			try {
+				result = await this.#action("launch_app", {
+					bundle_id: options.bundleId,
+					name: options.name,
+					urls: options.urls,
+					creates_new_application_instance: options.newInstance,
+				});
+			} catch (error) {
+				// The driver reports an app that died during launch as a failed launch
+				// (LAUNCH_TARGET_CHANGED, process_running:false). Its crash alert still
+				// lands on the user's screen a moment later, so watch for it here too.
+				const pid = launchedPid(error);
+				if (pid === undefined) throw error;
+				const alert = await this.#watchCrashAlert(context, pid);
+				if (!alert) throw error;
+				throw new ToolError(
+					`${error instanceof Error ? error.message : String(error)}\n${crashAlertGuidance(pid, alert)}`,
+					{ interruptedBy: alert },
+				);
+			}
+			const data = result.data as { pid?: unknown } | undefined;
+			const pid = typeof data?.pid === "number" ? data.pid : undefined;
+			// An app that traps at startup queues a CrashReporter alert (UserNotificationCenter)
+			// a moment after launch_app returns. Watch briefly so the crash surfaces as an
+			// interruption naming the alert instead of a "launched" result that invites a retry.
+			for (let waited = 0; !result.interruptedBy && waited < 2_000; waited += 250) {
+				await Bun.sleep(250);
+				throwIfAborted(context.signal);
+				result.interruptedBy = rosterInterruption(this.#sampleRoster());
+			}
+			if (result.interruptedBy) {
+				result.text +=
+					pid !== undefined && this.#recordCrashAlert(pid, result.interruptedBy)
+						? `\n⚠️ ${crashAlertGuidance(pid, result.interruptedBy)}`
+						: `\n⚠️ Interrupted after launch: ${describeInterruption(result.interruptedBy)}. Tell the user what is asking and wait; actions are refused until it is answered.`;
+			}
+			return result;
+		});
+	}
+	/** Poll up to 2 s for the crash alert of a launched app that already died. */
+	async #watchCrashAlert(context: Context, pid: number): Promise<ComputerInterruption | undefined> {
+		for (let waited = 0; waited < 2_000; waited += 250) {
+			await Bun.sleep(250);
+			throwIfAborted(context.signal);
+			const interruption = rosterInterruption(this.#sampleRoster());
+			if (interruption && this.#recordCrashAlert(pid, interruption)) return interruption;
+		}
+		return undefined;
+	}
+	/**
+	 * The alert is this session's to dismiss only when the app it launched is
+	 * already gone and the alert host is CrashReporter's: a live app that raised
+	 * a permission prompt is the user's call.
+	 */
+	#recordCrashAlert(pid: number, interruption: ComputerInterruption): boolean {
+		if (processAlive(pid) || interruption.app.trim().toLowerCase() !== CRASH_ALERT_HOST) return false;
+		this.#crashAlerts.add(interruption.windowId);
+		return true;
 	}
 	async drain(): Promise<void> {
 		await this.#tail;
-		await this.#interruption;
 	}
 	close(): Promise<void> {
 		if (this.#closing) return this.#closing;
@@ -1084,9 +1260,8 @@ export class CuaComputerSession implements ComputerBackend {
 		this.#closing = (async () => {
 			await this.#tail;
 			try {
-				await (this.#interruption ?? withFileLock(this.#inputLock, () => this.#driver.shutdown()));
+				await this.#driver.kill();
 			} finally {
-				this.#driver.uniffiDestroy();
 				this.#elements.clear();
 				this.#frames.clear();
 				this.#desktopFrame = undefined;
@@ -1095,3 +1270,7 @@ export class CuaComputerSession implements ComputerBackend {
 		return this.#closing;
 	}
 }
+
+/** Default backend factory: one vendored driver child per session. */
+export const createCuaBackend: ComputerBackendFactory = options =>
+	CuaComputerSession.create({ display: options.display });

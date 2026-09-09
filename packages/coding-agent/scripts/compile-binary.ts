@@ -1,7 +1,7 @@
 // Deep import: the pi-utils barrel loads the host native addon, which is
 // absent on cross-compiling release runners.
 import { USER_AGENT } from "@oh-my-pi/pi-utils/dirs";
-import { createCuaArtifactPlugin } from "./cua-artifact-plugin";
+import { createCuaDriverPlugin } from "./cua-driver-plugin";
 import { buildDocsIndexPayload } from "./generate-docs-index";
 import { createLegacyPiVirtualModulePlugin } from "./legacy-pi-virtual-module";
 
@@ -53,7 +53,7 @@ export async function compileCodingAgent(options: CodingAgentCompileOptions): Pr
 			},
 			plugins: [
 				await createLegacyPiVirtualModulePlugin(),
-				await createCuaArtifactPlugin(options.repoRoot, options.target),
+				await createCuaDriverPlugin(options.repoRoot, options.target),
 			],
 			compile: {
 				// Bun's process-wide fetch User-Agent default. Any explicit

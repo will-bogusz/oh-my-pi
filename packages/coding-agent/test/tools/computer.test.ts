@@ -1,30 +1,25 @@
 import { afterAll, describe, expect, it, spyOn } from "bun:test";
 import { createContext, runInContext } from "node:vm";
+import { type } from "@oh-my-pi/omptype";
+import type { AgentTool } from "@oh-my-pi/pi-agent-core";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { callSessionTool } from "@oh-my-pi/pi-coding-agent/eval/js/tool-bridge";
 import type { EvalPreludeDefinition } from "@oh-my-pi/pi-coding-agent/eval/preludes";
 import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-agent/eval/py/executor";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { computerApproval, createComputerPrelude } from "@oh-my-pi/pi-coding-agent/tools/computer";
+import type { ComputerBackend } from "@oh-my-pi/pi-coding-agent/tools/computer/backend";
 import { isReadOnlyComputerCall, renderComputerCall } from "@oh-my-pi/pi-coding-agent/tools/computer/call";
-import type {
-	ComputerSessionSnapshot,
-	ComputerWorkerInbound,
-	ComputerWorkerOutbound,
-	ComputerWorkerTransport,
-} from "@oh-my-pi/pi-coding-agent/tools/computer/protocol";
-import {
-	type ComputerController,
-	ComputerSupervisor,
-	type ComputerWorkerHandle,
-} from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
-import { ComputerWorkerCore, type ComputerBackend } from "@oh-my-pi/pi-coding-agent/tools/computer/worker";
+import { ComputerSupervisor } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
 import type {
 	ComputerActionResult,
 	ComputerElementSnapshot,
 	ComputerObservation,
+	ComputerOperationContext,
+	ComputerRunOk,
+	ComputerSessionSnapshot,
 	ComputerTarget,
 	ComputerWindowIdentity,
-	ComputerOperationContext,
 	ObserveOptions,
 	WindowSelector,
 } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
@@ -71,22 +66,7 @@ const windowFixture: ComputerWindowIdentity = {
 /** Stateful fixture; unsupported operations fail rather than silently succeeding. */
 class FakeBackend implements ComputerBackend {
 	async drain(): Promise<void> {}
-	readonly metadata = {
-		driverVersion: "fixture",
-		contractVersion: "1",
-		toolsListSchemaVersion: "1",
-		capabilityVersion: "1",
-		mcpProtocolVersion: "1",
-		pid: 1,
-		embedded: true,
-	};
-	readonly permissions = {};
-	readonly capabilities = {
-		...capabilities,
-		driver: this.metadata,
-		permissions: this.permissions,
-		native: capabilities,
-	};
+	readonly capabilities = { ...capabilities };
 	currentWindow = structuredClone(windowFixture);
 	windowAbsent = false;
 	readonly pins = new Map<string, number>();
@@ -254,41 +234,6 @@ class FakeBackend implements ComputerBackend {
 	}
 }
 
-class MemoryTransport implements ComputerWorkerTransport {
-	readonly outbound: ComputerWorkerOutbound[] = [];
-	#handler?: (message: ComputerWorkerInbound) => void;
-	#waiters = new Set<{
-		predicate: (message: ComputerWorkerOutbound) => boolean;
-		resolve: (message: ComputerWorkerOutbound) => void;
-	}>();
-
-	send(message: ComputerWorkerOutbound): void {
-		this.outbound.push(message);
-		for (const waiter of this.#waiters) {
-			if (!waiter.predicate(message)) continue;
-			this.#waiters.delete(waiter);
-			waiter.resolve(message);
-		}
-	}
-	onMessage(handler: (message: ComputerWorkerInbound) => void): () => void {
-		this.#handler = handler;
-		return () => {
-			if (this.#handler === handler) this.#handler = undefined;
-		};
-	}
-	close(): void {}
-	inbound(message: ComputerWorkerInbound): void {
-		this.#handler?.(message);
-	}
-	waitFor(predicate: (message: ComputerWorkerOutbound) => boolean): Promise<ComputerWorkerOutbound> {
-		const existing = this.outbound.find(predicate);
-		if (existing) return Promise.resolve(existing);
-		const pending = Promise.withResolvers<ComputerWorkerOutbound>();
-		this.#waiters.add({ predicate, resolve: pending.resolve });
-		return pending.promise;
-	}
-}
-
 const snapshot = (readOnly = false): ComputerSessionSnapshot => ({
 	cwd: import.meta.dir,
 	sessionId: crypto.randomUUID(),
@@ -298,17 +243,21 @@ const snapshot = (readOnly = false): ComputerSessionSnapshot => ({
 	readOnly,
 });
 
-async function runWorker(
-	transport: MemoryTransport,
-	id: string,
+type SupervisorRun = { ok: true; payload: ComputerRunOk } | { ok: false; error: Error };
+
+/** Runs desktop code on a real supervisor, reporting its failure as data. */
+async function runSupervisor(
+	supervisor: ComputerSupervisor,
 	code: string,
 	readOnly = false,
 	timeoutMs = 2_000,
-): Promise<Extract<ComputerWorkerOutbound, { type: "result" }>> {
-	transport.inbound({ type: "run", id, code, timeoutMs, session: snapshot(readOnly) });
-	const message = await transport.waitFor(candidate => candidate.type === "result" && candidate.id === id);
-	if (message.type !== "result") throw new Error(`Expected computer result, received ${message.type}`);
-	return message;
+	signal?: AbortSignal,
+): Promise<SupervisorRun> {
+	try {
+		return { ok: true, payload: await supervisor.run(code, timeoutMs, snapshot(readOnly), signal) };
+	} catch (error) {
+		return { ok: false, error: error instanceof Error ? error : new Error(String(error)) };
+	}
 }
 
 function toolSession(): ToolSession {
@@ -326,26 +275,15 @@ afterAll(async () => {
 });
 
 function fixturePrelude(session: ToolSession, backend: FakeBackend | (() => FakeBackend)) {
-	return createComputerPrelude(session, () => {
-		const transport = new MemoryTransport();
-		new ComputerWorkerCore(transport, async () => (typeof backend === "function" ? backend() : backend));
-		let sequence = 0;
-		const controller: ComputerController = {
-			async run(code, timeoutMs, state) {
-				const result = await runWorker(transport, `prelude-${++sequence}`, code, state.readOnly, timeoutMs);
-				if (!result.ok) throw new Error(result.error.message);
-				return result.payload;
-			},
-			async capabilities() {
-				throw new Error("Cached capabilities must not be used by the direct helper");
-			},
-			async close() {
-				transport.inbound({ type: "close" });
-				await transport.waitFor(message => message.type === "closed");
-			},
-		};
-		return controller;
-	});
+	return createComputerPrelude(
+		session,
+		currentSession =>
+			new ComputerSupervisor(
+				currentSession,
+				async () => (typeof backend === "function" ? backend() : backend),
+				callSessionTool,
+			),
+	);
 }
 
 function javascriptFixture(createBackend?: () => FakeBackend) {
@@ -370,7 +308,7 @@ function javascriptFixture(createBackend?: () => FakeBackend) {
 	return { backend, realm, displays };
 }
 
-describe("computer preludes through the worker", () => {
+describe("computer preludes through the session", () => {
 	it("normalizes launch shorthand and rejects malformed or read-only launch before driver dispatch", async () => {
 		const { backend, realm } = javascriptFixture();
 		const launch = spyOn(backend, "launch").mockResolvedValue({
@@ -406,7 +344,7 @@ describe("computer preludes through the worker", () => {
 		}
 	});
 
-	it("launches through Python shorthand and keyword options using the same guarded worker", async () => {
+	it("launches through Python shorthand and keyword options using the same guarded session", async () => {
 		let definitions: readonly EvalPreludeDefinition[] = [];
 		const session: ToolSession = { ...toolSession(), getEvalPreludes: () => definitions };
 		const backend = new FakeBackend();
@@ -613,7 +551,7 @@ describe("computer preludes through the worker", () => {
 		expect(computerApproval({ action: "release" })).toBe("read");
 	});
 
-	it("Python release starts a fresh worker and rejects a retained element without closing application state", async () => {
+	it("Python release starts a fresh backend and rejects a retained element without closing application state", async () => {
 		let definitions: readonly EvalPreludeDefinition[] = [];
 		const session: ToolSession = { ...toolSession(), getEvalPreludes: () => definitions };
 		const backends: FakeBackend[] = [];
@@ -753,6 +691,44 @@ describe("computer preludes through the worker", () => {
 		]);
 	});
 
+	it("lets a ref handle act without being awaited first, in JavaScript and Python", async () => {
+		const { backend, realm } = javascriptFixture();
+		expect(
+			await runInContext(
+				`(async () => {
+			const win = await computer.window("42");
+			const state = await win.observe({ screenshot: false });
+			const ref = state.elements[0].ref;
+			await win.ref(ref).click();
+			const after = await win.observe({ screenshot: false });
+			return [after.elements[0].value, (await win.ref(after.elements[0].ref)).role];
+		})()`,
+				realm,
+			),
+		).toEqual(["1", "button"]);
+		let definitions: readonly EvalPreludeDefinition[] = [];
+		const session: ToolSession = { ...toolSession(), getEvalPreludes: () => definitions };
+		const pyBackend = new FakeBackend();
+		definitions = [fixturePrelude(session, pyBackend)];
+		const result = await executePython(
+			[
+				'win = await computer.window("42")',
+				"state = await win.observe(screenshot=False)",
+				'await win.ref(state["elements"][0]["ref"]).click()',
+				"after = await win.observe(screenshot=False)",
+				'print(after["elements"][0]["value"], (await win.ref(after["elements"][0]["ref"])).role)',
+			].join("\n"),
+			{
+				cwd: process.cwd(),
+				sessionId: `computer-py-${crypto.randomUUID()}`,
+				toolSession: session,
+				kernelMode: "per-call",
+			},
+		);
+		expect(result.exitCode).toBe(0);
+		expect(result.output.trim().split("\n").at(-1)).toBe("1 button");
+	});
+
 	it("keeps snapshots immutable and never retargets a held window when its ID is reused", async () => {
 		const { backend, realm } = javascriptFixture();
 		expect(
@@ -858,58 +834,12 @@ describe("computer preludes through the worker", () => {
 	});
 });
 
-describe("computer worker round trips", () => {
-	it("includes native cleanup failure in its close receipt", async () => {
-		const transport = new MemoryTransport();
-		class FailingClose extends FakeBackend {
-			override async close() {
-				throw new Error("native release failed");
-			}
-		}
-		new ComputerWorkerCore(transport, async () => new FailingClose());
-		await runWorker(transport, "ready-close", "return 1");
-		transport.inbound({ type: "close" });
-		const receipt = await transport.waitFor(message => message.type === "closed");
-		expect(receipt).toMatchObject({ type: "closed", error: { isToolError: true, message: "native release failed" } });
-	});
-
-	it("drains and closes an interrupted backend before creating its replacement", async () => {
-		const transport = new MemoryTransport();
-		const entered = Promise.withResolvers<void>();
-		const release = Promise.withResolvers<void>();
-		class InterruptedBackend extends FakeBackend {
-			readonly requiresReacquisition = true;
-			override async close() {
-				entered.resolve();
-				await release.promise;
-				await super.close();
-			}
-		}
-		const retired = new InterruptedBackend();
-		let created = 0;
-		new ComputerWorkerCore(transport, async () => (++created === 1 ? retired : new FakeBackend()));
-		const run = runWorker(transport, "retire", "return 1");
-		try {
-			await entered.promise;
-			expect(created).toBe(1);
-			expect(transport.outbound.some(message => message.type === "result")).toBe(false);
-		} finally {
-			release.resolve();
-		}
-		expect((await run).ok).toBe(true);
-		expect(retired.closeCount).toBe(1);
-		expect(created).toBe(2);
-		expect((await runWorker(transport, "next", "return 2")).ok).toBe(true);
-		expect(created).toBe(2);
-	});
-
+describe("computer supervisor round trips", () => {
 	it("derives exec for a nested element action and blocks dispatch under read-only authority", async () => {
-		const transport = new MemoryTransport();
 		const backend = new FakeBackend();
-		new ComputerWorkerCore(transport, async () => backend);
-		const observed = await runWorker(
-			transport,
-			"observe",
+		const supervisor = new ComputerSupervisor(toolSession(), async () => backend);
+		const observed = await runSupervisor(
+			supervisor,
 			'(await desktop.window("42")).observe({ screenshot: false })',
 			true,
 		);
@@ -920,52 +850,47 @@ describe("computer worker round trips", () => {
 			{ method: "click", args: [] },
 		];
 		expect(computerApproval({ action: "call", chain })).toBe("exec");
-		const blocked = await runWorker(transport, "blocked", renderComputerCall(chain), true);
+		const blocked = await runSupervisor(supervisor, renderComputerCall(chain), true);
 		expect(blocked.ok).toBe(false);
 		expect(backend.clickCount).toBe(0);
-		const clicked = await runWorker(transport, "clicked", renderComputerCall(chain), isReadOnlyComputerCall(chain));
+		const clicked = await runSupervisor(supervisor, renderComputerCall(chain), isReadOnlyComputerCall(chain));
 		expect(clicked.ok).toBe(true);
 		expect(backend.value).toBe("1");
 	});
 
 	it("rejects stale and wrong-window refs without changing fixture state", async () => {
-		const transport = new MemoryTransport();
 		const backend = new FakeBackend();
-		new ComputerWorkerCore(transport, async () => backend);
-		const first = await runWorker(
-			transport,
-			"hold-ref",
+		const supervisor = new ComputerSupervisor(toolSession(), async () => backend);
+		const first = await runSupervisor(
+			supervisor,
 			'globalThis.win = await desktop.window("42"); await win.observe({ screenshot: false }); globalThis.el = win.ref("e1"); await win.observe({ screenshot: false });',
 		);
 		expect(first.ok).toBe(true);
-		expect((await runWorker(transport, "stale", "await el.click()")).ok).toBe(false);
+		expect((await runSupervisor(supervisor, "await el.click()")).ok).toBe(false);
 		backend.currentWindow.id = "43";
-		expect((await runWorker(transport, "wrong-owner", '(await desktop.window("43")).ref("e2")')).ok).toBe(false);
+		expect((await runSupervisor(supervisor, '(await desktop.window("43")).ref("e2")')).ok).toBe(false);
 		expect(backend.clickCount).toBe(0);
 	});
 
-	it("binds worker handles privately to their original PID", async () => {
-		const transport = new MemoryTransport();
+	it("binds window handles privately to their original PID", async () => {
 		const backend = new FakeBackend();
-		new ComputerWorkerCore(transport, async () => backend);
+		const supervisor = new ComputerSupervisor(toolSession(), async () => backend);
 		expect(
 			(
-				await runWorker(
-					transport,
-					"hold-identity",
+				await runSupervisor(
+					supervisor,
 					'globalThis.win = await desktop.window("42"); Reflect.set(win, "pid", 456); Reflect.set(win.bounds, "x", 999);',
 				)
 			).ok,
 		).toBe(true);
 		backend.currentWindow.pid = 456;
-		expect((await runWorker(transport, "reused-id", "await win.click([1, 1])")).ok).toBe(false);
+		expect((await runSupervisor(supervisor, "await win.click([1, 1])")).ok).toBe(false);
 		expect(backend.clickCount).toBe(0);
 	});
 
 	it("keeps image output and silent capture metadata in their current run", async () => {
-		const transport = new MemoryTransport();
-		new ComputerWorkerCore(transport, async () => new FakeBackend());
-		const visible = await runWorker(transport, "visible-image", "await desktop.screenshot()");
+		const supervisor = new ComputerSupervisor(toolSession(), async () => new FakeBackend());
+		const visible = await runSupervisor(supervisor, "await desktop.screenshot()");
 		expect(visible.ok).toBe(true);
 		if (visible.ok) {
 			expect(visible.payload.displays.filter(block => block.type === "image")).toEqual([
@@ -973,16 +898,15 @@ describe("computer worker round trips", () => {
 			]);
 			expect(visible.payload.screenshots[0].imageIndex).toBe(0);
 		}
-		const silent = await runWorker(transport, "silent-image", "await desktop.screenshot({ silent: true })");
+		const silent = await runSupervisor(supervisor, "await desktop.screenshot({ silent: true })");
 		expect(silent.ok).toBe(true);
 		if (silent.ok) {
 			expect(silent.payload.displays).toEqual([]);
 			expect(silent.payload.screenshots).toHaveLength(1);
 			expect(silent.payload.screenshots[0].imageIndex).toBeUndefined();
 		}
-		const mixed = await runWorker(
-			transport,
-			"mixed-image",
+		const mixed = await runSupervisor(
+			supervisor,
 			'display({ type: "image", data: "AA==", mimeType: "image/png" }); await desktop.screenshot(); await desktop.screenshot({ silent: true }); await desktop.screenshot()',
 		);
 		expect(mixed.ok).toBe(true);
@@ -991,20 +915,62 @@ describe("computer worker round trips", () => {
 	});
 
 	it("rejects an aborted run with an abort error", async () => {
-		const transport = new MemoryTransport();
-		new ComputerWorkerCore(transport, async () => new FakeBackend());
-		transport.inbound({ type: "run", id: "abort", code: "await wait(5_000)", timeoutMs: 5_000, session: snapshot() });
-		await Promise.resolve();
-		transport.inbound({ type: "abort", id: "abort" });
-		const result = await transport.waitFor(message => message.type === "result" && message.id === "abort");
-		expect(result.type).toBe("result");
-		if (result.type !== "result" || result.ok) return;
-		expect(result.error.isAbort).toBe(true);
+		const backend = new FakeBackend();
+		const entered = Promise.withResolvers<void>();
+		backend.displays = async () => {
+			entered.resolve();
+			return [display];
+		};
+		const supervisor = new ComputerSupervisor(toolSession(), async () => backend);
+		const abort = new AbortController();
+		const pending = runSupervisor(
+			supervisor,
+			"await desktop.displays(); await wait(5_000)",
+			false,
+			5_000,
+			abort.signal,
+		);
+		await entered.promise;
+		abort.abort();
+		const result = await pending;
+		expect(result.ok).toBe(false);
+		if (result.ok) return;
 		expect(result.error.name).toBe("ToolAbortError");
 	});
 
+	it("serves the next run from the same backend after an aborted run", async () => {
+		const backend = new FakeBackend();
+		const entered = Promise.withResolvers<void>();
+		backend.displays = async () => {
+			entered.resolve();
+			return [display];
+		};
+		let created = 0;
+		const supervisor = new ComputerSupervisor(toolSession(), async () => {
+			created++;
+			return backend;
+		});
+		const abort = new AbortController();
+		const aborted = runSupervisor(
+			supervisor,
+			"await desktop.displays(); await wait(5_000)",
+			false,
+			5_000,
+			abort.signal,
+		);
+		await entered.promise;
+		abort.abort();
+		expect((await aborted).ok).toBe(false);
+		expect(backend.closeCount).toBe(0);
+		const next = await runSupervisor(supervisor, 'await (await desktop.window({id:"42",pid:123})).click([5,5])');
+		expect(next.ok).toBe(true);
+		expect(backend.clickCount).toBe(1);
+		expect(created).toBe(1);
+		await supervisor.close();
+		expect(backend.closeCount).toBe(1);
+	});
+
 	it("withholds cancellation completion and rejects overlapping work until admitted input settles", async () => {
-		const transport = new MemoryTransport();
 		const backend = new FakeBackend();
 		const entered = Promise.withResolvers<void>();
 		const release = Promise.withResolvers<void>();
@@ -1022,20 +988,24 @@ describe("computer worker round trips", () => {
 			draining.resolve();
 			await nativeInput;
 		};
-		new ComputerWorkerCore(transport, async () => backend);
-		const pending = runWorker(
-			transport,
-			"drain-cancel",
+		const supervisor = new ComputerSupervisor(toolSession(), async () => backend);
+		const abort = new AbortController();
+		let settled = false;
+		const pending = runSupervisor(
+			supervisor,
 			'await (await desktop.window({id:"42",pid:123})).click([5,5])',
-		);
+			false,
+			2_000,
+			abort.signal,
+		).finally(() => {
+			settled = true;
+		});
 		try {
 			await entered.promise;
-			transport.inbound({ type: "abort", id: "drain-cancel" });
+			abort.abort();
 			await Promise.race([draining.promise, pending]);
-			expect(transport.outbound.some(message => message.type === "result" && message.id === "drain-cancel")).toBe(
-				false,
-			);
-			const overlapping = await runWorker(transport, "overlapping", "return 1");
+			expect(settled).toBe(false);
+			const overlapping = await runSupervisor(supervisor, "return 1");
 			expect(overlapping.ok).toBe(false);
 			if (!overlapping.ok) expect(overlapping.error.message).toContain("busy");
 			expect(backend.clickCount).toBe(0);
@@ -1044,37 +1014,14 @@ describe("computer worker round trips", () => {
 		}
 		const cancelled = await pending;
 		expect(cancelled.ok).toBe(false);
-		if (!cancelled.ok) expect(cancelled.error.isAbort).toBe(true);
+		if (!cancelled.ok) expect(cancelled.error.name).toBe("ToolAbortError");
 		expect(backend.clickCount).toBe(1);
-		const next = await runWorker(transport, "after-drain", "return 2");
+		const next = await runSupervisor(supervisor, "return 2");
 		expect(next.ok).toBe(true);
 		if (next.ok) expect(next.payload.returnValue).toBe(2);
 	});
 
-	it("refuses reuse after input completion fails while still allowing resource cleanup", async () => {
-		const transport = new MemoryTransport();
-		const backend = new FakeBackend();
-		backend.drain = async () => {
-			throw new Error("Input transport lost during completion");
-		};
-		new ComputerWorkerCore(transport, async () => backend);
-		const first = await runWorker(transport, "drain-failed", "return 1");
-		expect(first.ok).toBe(false);
-		if (!first.ok) expect(first.error.message).toContain("Input transport lost");
-		const retry = await runWorker(
-			transport,
-			"no-reuse",
-			'await (await desktop.window({id:"42",pid:123})).click([5,5])',
-		);
-		expect(retry.ok).toBe(false);
-		expect(backend.clickCount).toBe(0);
-		transport.inbound({ type: "close" });
-		await transport.waitFor(message => message.type === "closed");
-		expect(backend.closeCount).toBe(1);
-	});
-
 	it("reports a failed input drain as failure even when cancellation won the language race", async () => {
-		const transport = new MemoryTransport();
 		const backend = new FakeBackend();
 		const entered = Promise.withResolvers<void>();
 		const release = Promise.withResolvers<void>();
@@ -1087,69 +1034,91 @@ describe("computer worker round trips", () => {
 			await release.promise;
 			throw new Error("Input transport lost during completion");
 		};
-		new ComputerWorkerCore(transport, async () => backend);
-		const pending = runWorker(
-			transport,
-			"cancel-drain-failed",
+		const supervisor = new ComputerSupervisor(toolSession(), async () => backend);
+		const abort = new AbortController();
+		const pending = runSupervisor(
+			supervisor,
 			'await (await desktop.window({id:"42",pid:123})).click([5,5])',
+			false,
+			2_000,
+			abort.signal,
 		);
 		await entered.promise;
-		transport.inbound({ type: "abort", id: "cancel-drain-failed" });
+		abort.abort();
 		release.resolve();
 		const result = await pending;
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
-			expect(result.error.isAbort).toBe(false);
+			expect(result.error.name).toBe("ToolError");
 			expect(result.error.message).toContain("Input transport lost");
 		}
-		const retry = await runWorker(transport, "no-reuse-after-cancel", "return 1");
-		expect(retry.ok).toBe(false);
-		transport.inbound({ type: "close" });
-		await transport.waitFor(message => message.type === "closed");
 	});
 
-	it("reports the worker watchdog timeout budget explicitly", async () => {
-		const transport = new MemoryTransport();
-		new ComputerWorkerCore(transport, async () => new FakeBackend());
+	it("keeps the session usable after a failed input drain and releases the backend once", async () => {
+		const backend = new FakeBackend();
+		let drains = 0;
+		backend.drain = async () => {
+			if (++drains === 1) throw new Error("Input transport lost during completion");
+		};
+		const supervisor = new ComputerSupervisor(toolSession(), async () => backend);
+		const failed = await runSupervisor(supervisor, "return 1");
+		expect(failed.ok).toBe(false);
+		if (!failed.ok) expect(failed.error.message).toContain("Input transport lost");
+		const retry = await runSupervisor(supervisor, 'await (await desktop.window({id:"42",pid:123})).click([5,5])');
+		expect(retry.ok).toBe(true);
+		expect(backend.clickCount).toBe(1);
+		await supervisor.close();
+		expect(backend.closeCount).toBe(1);
+		expect((await runSupervisor(supervisor, "return 1")).ok).toBe(false);
+	});
 
-		const result = await runWorker(transport, "timeout", "await wait(5_000)", false, 10);
+	it("reports the run timeout budget explicitly", async () => {
+		const supervisor = new ComputerSupervisor(toolSession(), async () => new FakeBackend());
+		const result = await runSupervisor(supervisor, "await wait(5_000)", false, 10);
 		expect(result.ok).toBe(false);
 		if (result.ok) return;
-		expect(result.error).toMatchObject({
-			isToolError: true,
-		});
+		expect(result.error.name).toBe("ToolError");
+		expect(result.error.message).toContain("timed out after 10ms");
 	});
 
 	it("round-trips tool calls and resolves the in-script promise", async () => {
-		const transport = new MemoryTransport();
-		new ComputerWorkerCore(transport, async () => new FakeBackend());
-		const resultPromise = runWorker(transport, "bridge", "await tool.echo({ value: 7 })");
-		const call = await transport.waitFor(message => message.type === "tool-call" && message.runId === "bridge");
-		expect(call).toMatchObject({ type: "tool-call", runId: "bridge", name: "echo", args: { value: 7 } });
-		if (call.type !== "tool-call") return;
-		transport.inbound({ type: "tool-reply", id: call.id, reply: { ok: true, value: { echoed: 7 } } });
-		const result = await resultPromise;
+		const echo = {
+			name: "echo",
+			label: "echo",
+			description: "echo fixture",
+			parameters: type({}),
+			concurrency: "parallel",
+			execute: async (_id: string, args: unknown) => ({
+				content: [{ type: "text", text: JSON.stringify(args) }],
+				details: {},
+			}),
+		} as unknown as AgentTool;
+		const session: ToolSession = {
+			...toolSession(),
+			getToolByName: name => (name === "echo" ? echo : undefined),
+		};
+		const supervisor = new ComputerSupervisor(session, async () => new FakeBackend(), callSessionTool);
+		const result = await runSupervisor(supervisor, "await tool.echo({ value: 7 })");
 		expect(result.ok).toBe(true);
-		if (result.ok) expect(result.payload.returnValue).toEqual({ echoed: 7 });
+		if (!result.ok) return;
+		const returned = result.payload.returnValue as { text: string; details: unknown };
+		expect(JSON.parse(returned.text)).toMatchObject({ value: 7 });
+		expect(returned.details).toEqual({});
 	});
 
 	it("captures without accessibility while preserving current element refs", async () => {
-		const transport = new MemoryTransport();
 		const backend = new FakeBackend();
-		new ComputerWorkerCore(transport, async () => backend);
-
-		const first = await runWorker(
-			transport,
-			"retain-window-screenshot",
+		const supervisor = new ComputerSupervisor(toolSession(), async () => backend);
+		const first = await runSupervisor(
+			supervisor,
 			'globalThis.retainedWin = await desktop.window("42"); globalThis.retainedElement = await retainedWin.ref((await retainedWin.observe({ screenshot: false })).elements[0].ref)',
 		);
 		expect(first.ok).toBe(true);
 		backend.observe = async () => {
 			throw new Error("Accessibility is unavailable");
 		};
-		const second = await runWorker(
-			transport,
-			"reuse-window-screenshot",
+		const second = await runSupervisor(
+			supervisor,
 			"await globalThis.retainedWin.screenshot({ silent: true }); await globalThis.retainedElement.click()",
 		);
 		expect(second.ok).toBe(true);
@@ -1162,43 +1131,24 @@ describe("computer worker round trips", () => {
 	});
 
 	it("applies the current read-only policy to a retained writable window", async () => {
-		const transport = new MemoryTransport();
 		const native = new FakeBackend();
-		new ComputerWorkerCore(transport, async () => native);
-
-		const first = await runWorker(
-			transport,
-			"retain-writable-window",
-			'globalThis.retainedWin = await desktop.window("42")',
-		);
+		const supervisor = new ComputerSupervisor(toolSession(), async () => native);
+		const first = await runSupervisor(supervisor, 'globalThis.retainedWin = await desktop.window("42")');
 		expect(first.ok).toBe(true);
-		const second = await runWorker(
-			transport,
-			"reuse-window-read-only",
-			"await globalThis.retainedWin.click([1, 1])",
-			true,
-		);
+		const second = await runSupervisor(supervisor, "await globalThis.retainedWin.click([1, 1])", true);
 		expect(second.ok).toBe(false);
 		if (second.ok) return;
-		expect(second.error.isToolError).toBe(true);
+		expect(second.error.name).toBe("ToolError");
 		expect(native.clickCount).toBe(0);
 	});
 
 	it("allows a retained read-only window to mutate in a later exec run", async () => {
-		const transport = new MemoryTransport();
 		const native = new FakeBackend();
-		new ComputerWorkerCore(transport, async () => native);
-
-		const first = await runWorker(
-			transport,
-			"retain-read-only-window",
-			'globalThis.retainedWin = await desktop.window("42")',
-			true,
-		);
+		const supervisor = new ComputerSupervisor(toolSession(), async () => native);
+		const first = await runSupervisor(supervisor, 'globalThis.retainedWin = await desktop.window("42")', true);
 		expect(first.ok).toBe(true);
-		const second = await runWorker(
-			transport,
-			"reuse-window-exec",
+		const second = await runSupervisor(
+			supervisor,
 			"await globalThis.retainedWin.screenshot({ silent: true }); await globalThis.retainedWin.click([1, 1])",
 		);
 		expect(second.ok).toBe(true);
@@ -1206,16 +1156,14 @@ describe("computer worker round trips", () => {
 	});
 
 	it("denies async continuations leaked from an ended run the next run's authority", async () => {
-		const transport = new MemoryTransport();
 		const native = new FakeBackend();
-		new ComputerWorkerCore(transport, async () => native);
+		const supervisor = new ComputerSupervisor(toolSession(), async () => native);
 
 		// Run 1 (exec) leaks a promise continuation that clicks once triggered.
 		// The continuation is registered inside run 1's async context, so it must
 		// retain run 1's (aborted) context even when it executes during run 2.
-		const first = await runWorker(
-			transport,
-			"leak-continuation",
+		const first = await runSupervisor(
+			supervisor,
 			[
 				'globalThis.leakWin = await desktop.window("42");',
 				"globalThis.leakErr = null;",
@@ -1227,71 +1175,12 @@ describe("computer worker round trips", () => {
 		expect(first.ok).toBe(true);
 		// Run 2 (exec) fires the leaked continuation and awaits its settlement; the
 		// click must fail with run 1's abort instead of borrowing run 2's policy.
-		const second = await runWorker(
-			transport,
-			"leak-victim",
+		const second = await runSupervisor(
+			supervisor,
 			"globalThis.fireLeak(); await globalThis.leakDone; globalThis.leakErr",
 		);
 		expect(second.ok).toBe(true);
 		if (second.ok) expect(String(second.payload.returnValue)).toContain("Computer run ended");
 		expect(native.clickCount).toBe(0);
-	});
-});
-
-class SupervisorWorker implements ComputerWorkerHandle {
-	readonly #respond: boolean;
-	#messageHandlers = new Set<(message: ComputerWorkerOutbound) => void>();
-	#terminated = false;
-
-	constructor(respond: boolean) {
-		this.#respond = respond;
-	}
-	send(message: ComputerWorkerInbound): void {
-		if (message.type === "run" && this.#respond) {
-			queueMicrotask(() =>
-				this.#emit({
-					type: "result",
-					id: message.id,
-					ok: true,
-					payload: { displays: [], returnValue: "fresh", screenshots: [], capabilities },
-				}),
-			);
-		} else if (message.type === "close") {
-			queueMicrotask(() => this.#emit({ type: "closed" }));
-		}
-	}
-	onMessage(handler: (message: ComputerWorkerOutbound) => void): () => void {
-		this.#messageHandlers.add(handler);
-		queueMicrotask(() => this.#emit({ type: "ready" }));
-		return () => this.#messageHandlers.delete(handler);
-	}
-	onError(_handler: (error: Error) => void): () => void {
-		return () => {};
-	}
-	async terminate(): Promise<void> {
-		this.#terminated = true;
-	}
-	#emit(message: ComputerWorkerOutbound): void {
-		if (this.#terminated) return;
-		for (const handler of this.#messageHandlers) handler(message);
-	}
-}
-
-describe("computer supervisor recovery", () => {
-	it("does not silently replace a timed-out worker whose native cleanup is unconfirmed", async () => {
-		let workers = 0;
-		const supervisor = new ComputerSupervisor(toolSession(), () => new SupervisorWorker(++workers > 1), {
-			graceMs: 20,
-			startMs: 200,
-			closeMs: 200,
-		});
-		await expect(supervisor.run("await new Promise(() => {})", 5, snapshot())).rejects.toEqual(
-			expect.objectContaining({
-				name: "ToolError",
-			}),
-		);
-		await expect(supervisor.run("41 + 1", 1_000, snapshot())).rejects.toThrow("cannot restart");
-		expect(workers).toBe(1);
-		await expect(supervisor.close()).rejects.toThrow("Native cleanup could not be confirmed");
 	});
 });

@@ -11,15 +11,17 @@ use objc2_core_foundation::{
 };
 use objc2_core_graphics::{
 	CGRectMakeWithDictionaryRepresentation, CGWindowListCopyWindowInfo, CGWindowListOption,
-	kCGWindowBounds, kCGWindowIsOnscreen, kCGWindowName, kCGWindowNumber, kCGWindowOwnerName,
-	kCGWindowOwnerPID, kCGWindowSharingState,
+	kCGWindowAlpha, kCGWindowBounds, kCGWindowIsOnscreen, kCGWindowLayer, kCGWindowName,
+	kCGWindowNumber, kCGWindowOwnerName, kCGWindowOwnerPID, kCGWindowSharingState,
 };
 use xcap::Monitor;
 
 use super::super::{
 	error::{CoreResult, DesktopError},
 	frame::{FrameGeometry, MAX_COMPOSITE_PIXELS},
-	types::{DesktopDisplay, DesktopWindow, DisplaySelector, Target, WindowPins},
+	types::{
+		DesktopDisplay, DesktopSystemWindow, DesktopWindow, DisplaySelector, Target, WindowPins,
+	},
 };
 const MAX_LISTED_WINDOWS: usize = 48;
 const MIN_WINDOW_EDGE: u32 = 16;
@@ -357,6 +359,83 @@ fn window_metadata(options: CGWindowListOption, id: u32) -> CoreResult<Vec<Deskt
 		}
 	}
 	Ok(windows)
+}
+
+/// Read every on-screen `WindowServer` record, accessory layers included.
+///
+/// [`window_metadata`] answers "what can I capture and drive": it drops
+/// unshared, tiny and off-screen windows and never reports a layer. System
+/// authentication, permission and lock panels fail those filters — a
+/// SecurityAgent keychain prompt is an unshared, untitled layer-1000 window —
+/// so interruption detection needs the unfiltered roster.
+///
+/// Screen Recording permission is not required; without it `kCGWindowName` is
+/// empty while owner, layer and geometry stay exact.
+#[allow(clippy::cast_sign_loss, reason = "CFArray count and roster index are non-negative")]
+pub(super) fn system_window_roster() -> CoreResult<(Option<u32>, Vec<DesktopSystemWindow>)> {
+	// The returned CF array owns every dictionary/value borrowed below.
+	let rows = CGWindowListCopyWindowInfo(
+		CGWindowListOption::OptionOnScreenOnly | CGWindowListOption::ExcludeDesktopElements,
+		0,
+	)
+	.ok_or_else(|| DesktopError::capture_failed("WindowServer metadata is unavailable"))?;
+	let frontmost = NSWorkspace::sharedWorkspace()
+		.frontmostApplication()
+		.and_then(|app| u32::try_from(app.processIdentifier()).ok());
+	let mut windows = Vec::with_capacity(rows.count() as usize);
+	for index in 0..rows.count() {
+		// SAFETY: index is within the retained array, whose members are CF objects.
+		let value = unsafe { rows.value_at_index(index).cast::<CFType>().as_ref() };
+		if let Some(dictionary) = value.and_then(CFType::downcast_ref::<CFDictionary>)
+			&& let Some(window) = decode_system_window(dictionary, windows.len() as u32)
+		{
+			windows.push(window);
+		}
+	}
+	Ok((frontmost, windows))
+}
+
+fn dictionary_double(dictionary: &CFDictionary, key: &CFString) -> Option<f64> {
+	let number = dictionary_value(dictionary, key)?.downcast_ref::<CFNumber>()?;
+	let mut value = 0f64;
+	// SAFETY: A checked CFNumber and correctly sized double output are live.
+	unsafe { number.value(CFNumberType::Float64Type, (&raw mut value).cast()) }.then_some(value)
+}
+
+fn decode_system_window(dictionary: &CFDictionary, z_index: u32) -> Option<DesktopSystemWindow> {
+	// SAFETY: These framework-exported keys are immutable retained CFStrings.
+	unsafe {
+		let id = u32::try_from(dictionary_number(dictionary, kCGWindowNumber)?).ok()?;
+		let pid = u32::try_from(dictionary_number(dictionary, kCGWindowOwnerPID)?).ok()?;
+		let layer = i32::try_from(dictionary_number(dictionary, kCGWindowLayer)?).ok()?;
+		let alpha = dictionary_double(dictionary, kCGWindowAlpha).unwrap_or(1.0);
+		let title = dictionary_value(dictionary, kCGWindowName)
+			.and_then(CFType::downcast_ref::<CFString>)
+			.map(ToString::to_string)
+			.unwrap_or_default();
+		let app = dictionary_value(dictionary, kCGWindowOwnerName)
+			.and_then(CFType::downcast_ref::<CFString>)
+			.map(ToString::to_string)
+			.unwrap_or_default();
+		let rect = dictionary_value(dictionary, kCGWindowBounds)?.downcast_ref::<CFDictionary>()?;
+		let mut bounds = CGRect::default();
+		if !CGRectMakeWithDictionaryRepresentation(Some(rect), &raw mut bounds) {
+			return None;
+		}
+		Some(DesktopSystemWindow {
+			id: id.to_string(),
+			pid,
+			app,
+			title,
+			x: bounds.origin.x,
+			y: bounds.origin.y,
+			width: bounds.size.width,
+			height: bounds.size.height,
+			layer,
+			alpha,
+			z_index,
+		})
+	}
 }
 
 fn dictionary_value<'a>(dictionary: &'a CFDictionary, key: &CFString) -> Option<&'a CFType> {

@@ -11,3 +11,12 @@ export function createDesktopSession(options) {
 	DesktopSession ??= adaptDesktopSession(loadNative().DesktopSession);
 	return new DesktopSession(options);
 }
+
+/**
+ * Sample the on-screen window roster across every CGWindow layer, through the
+ * same lazy addon load as createDesktopSession. Needs no desktop session: the
+ * Cua-backed worker calls this without owning one.
+ */
+export function desktopWindowRoster() {
+	return loadNative().desktopWindowRoster();
+}

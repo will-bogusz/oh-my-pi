@@ -1,0 +1,7 @@
+{
+ "platform": "darwin-arm64",
+ "version": "0.24.0",
+ "sha256": "730f6954e4e607a0ec84508eb05514b575a8fa42908600e221efdce8adab71d3",
+ "source": "github.com/will-bogusz/cua branch will/omp commit 05a24d64 (menus, electron, readback, reveal/sheet fixes on fa6ceb80) (cargo build --release -p cua-driver --bin cua-driver)",
+ "bytes": 30601152
+}

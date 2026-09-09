@@ -9,14 +9,18 @@ import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes
 import computerDescription from "../prompts/tools/computer.md" with { type: "text" };
 import { enforceInlineByteCap } from "../session/streaming-output";
 import { type ComputerCallStep, isReadOnlyComputerCall, renderComputerCall } from "./computer/call";
-import type { ComputerScreenshot, ComputerSessionSnapshot } from "./computer/protocol";
 // @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
 import computerCodeModeDeclarations from "./computer/declarations.d.ts" with { type: "text" };
 // @ts-expect-error Bun imports this JavaScript source as text instead of evaluating its module shape.
 import computerJavascript from "./computer/prelude.js" with { type: "text" };
 import computerPython from "./computer/prelude.py" with { type: "text" };
 import { type ComputerController, ComputerSupervisor, registerComputerController } from "./computer/supervisor";
-import type { ComputerObservation, ComputerWindowAcquisition } from "./computer/types";
+import type {
+	ComputerObservation,
+	ComputerScreenshot,
+	ComputerSessionSnapshot,
+	ComputerWindowAcquisition,
+} from "./computer/types";
 import type { ToolSession } from "./index";
 import { renderFunctionRun } from "./run-code";
 import { ToolError, throwIfAborted } from "./tool-errors";
@@ -124,7 +128,7 @@ export function computerApproval(args: unknown): ToolApprovalDecision {
 export function createComputerPrelude(
 	session: ToolSession,
 	createController: ComputerControllerFactory = currentSession =>
-		new ComputerSupervisor(currentSession, undefined, undefined, callSessionTool),
+		new ComputerSupervisor(currentSession, undefined, callSessionTool),
 ): EvalPreludeDefinition {
 	const lifetime = new ComputerLifetime(session, createController);
 
@@ -142,13 +146,9 @@ export function createComputerPrelude(
 			if (parsed instanceof type.errors) {
 				throw new ToolError(`computer received invalid arguments: ${parsed.summary}`);
 			}
-			try {
-				return await invokeComputer(session, parsed, context, lifetime);
-			} finally {
-				// A cancelled operation must release its rendering/input host as well as
-				// drain input. Retain the enabled setting and lifetime for lazy reuse.
-				if (context.signal?.aborted) await lifetime.release();
-			}
+			// An aborted operation cancels its driver call and drains; the driver
+			// child stays up for the next call. Turn settle releases it.
+			return await invokeComputer(session, parsed, context, lifetime);
 		},
 	};
 }
@@ -225,15 +225,11 @@ async function invokeComputer(
 			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
 			return await runComputer(session, await lifetime.controller(), params, context.signal);
 		case "capabilities": {
-			const capabilities = lifetime.isClosed() ? undefined : await (await lifetime.controller()).capabilities();
+			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
+			const capabilities = await (await lifetime.controller()).capabilities();
 			throwIfAborted(context.signal);
 			return {
-				content: [
-					{
-						type: "text",
-						text: capabilities ? stringifyReturnValue(capabilities) : "Computer capabilities unavailable",
-					},
-				],
+				content: [{ type: "text", text: stringifyReturnValue(capabilities) }],
 				details: capabilities,
 			};
 		}

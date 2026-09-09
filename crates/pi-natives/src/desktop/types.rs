@@ -43,6 +43,48 @@ pub struct DesktopWindow {
 	pub focused: bool,
 }
 
+/// One on-screen `WindowServer` record on any CGWindow layer.
+///
+/// Separate from [`DesktopWindow`] on purpose: this is an observation of what
+/// the display shows, including the accessory layers that carry system
+/// authentication, permission and lock panels. It is never a capture or input
+/// target, and it is not filtered by sharing state, size or title, because a
+/// secure panel publishes none of those.
+#[napi(object)]
+#[derive(Debug, Clone)]
+pub struct DesktopSystemWindow {
+	/// `kCGWindowNumber`, decimal, matching `DesktopWindow::id`.
+	pub id:      String,
+	/// `kCGWindowOwnerPID`.
+	pub pid:     u32,
+	/// `kCGWindowOwnerName` — the owner process name, not a bundle id.
+	pub app:     String,
+	/// `kCGWindowName`; empty without Screen Recording permission and for the
+	/// system panels that publish no name.
+	pub title:   String,
+	pub x:       f64,
+	pub y:       f64,
+	pub width:   f64,
+	pub height:  f64,
+	/// `kCGWindowLayer`: 0 for ordinary app windows, 20-25 for Dock and menu
+	/// bar, 1000 for the screen-saver level macOS gives SecurityAgent panels.
+	pub layer:   i32,
+	/// `kCGWindowAlpha`; 0 marks an invisible overlay.
+	pub alpha:   f64,
+	/// Front-to-back position in the roster; 0 is the topmost window.
+	pub z_index: u32,
+}
+
+/// On-screen window roster plus the frontmost application, sampled together.
+#[napi(object)]
+#[derive(Debug, Clone)]
+pub struct DesktopWindowRoster {
+	/// `NSWorkspace.frontmostApplication`; absent at the login window and
+	/// screen saver, and unreliable while a SecurityAgent panel is up.
+	pub frontmost_pid: Option<u32>,
+	pub windows:       Vec<DesktopSystemWindow>,
+}
+
 #[napi(object)]
 pub struct DesktopCapture {
 	pub data:           Uint8Array,

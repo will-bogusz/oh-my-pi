@@ -1198,6 +1198,26 @@ impl DesktopSession {
 		task::blocking("desktop.close", (), move |_| c.close().map_err(Into::into))
 	}
 }
+
+/// Sample the on-screen window roster across every CGWindow layer.
+///
+/// Sessionless and permission-free, so an interruption check costs one
+/// `WindowServer` round trip and no capture/AX state. Reports the accessory
+/// layers that `DesktopSession::list_windows` and the Cua driver both filter
+/// away, which is where macOS puts authentication, permission and lock panels.
+/// Returns an empty roster off macOS.
+#[napi]
+pub fn desktop_window_roster() -> Result<DesktopWindowRoster> {
+	#[cfg(target_os = "macos")]
+	{
+		let (frontmost_pid, windows) = macos::system_window_roster().map_err(napi::Error::from)?;
+		Ok(DesktopWindowRoster { frontmost_pid, windows })
+	}
+	#[cfg(not(target_os = "macos"))]
+	{
+		Ok(DesktopWindowRoster { frontmost_pid: None, windows: Vec::new() })
+	}
+}
 impl DesktopSession {
 	fn unit(
 		&self,

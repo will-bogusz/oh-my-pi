@@ -17,6 +17,13 @@ use super::{
 	},
 };
 
+/// Unfiltered on-screen window roster; see [`capture::system_window_roster`].
+/// Free of session state so interruption checks need no desktop session.
+pub(super) fn system_window_roster()
+-> CoreResult<(Option<u32>, Vec<super::types::DesktopSystemWindow>)> {
+	capture::system_window_roster()
+}
+
 pub struct MacosBackend {
 	capture: MacCapture,
 	input:   MacInput,

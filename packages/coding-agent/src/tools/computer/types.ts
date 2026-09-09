@@ -1,3 +1,35 @@
+import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
+import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
+
+/** Frozen run settings captured from the host session for one computer run. */
+export interface ComputerSessionSnapshot {
+	cwd: string;
+	sessionId: string;
+	captureMaxWidth: number;
+	captureMaxHeight: number;
+	display: string;
+	readOnly: boolean;
+}
+/** Successful computer run output. */
+export interface ComputerRunOk {
+	displays: Array<TextContent | ImageContent>;
+	returnValue: unknown;
+	screenshots: ComputerScreenshot[];
+	capabilities?: DesktopCapabilities;
+}
+/** Full-resolution screenshot emitted during one computer run. */
+export interface ComputerScreenshot {
+	/** Zero-based image ordinal in run displays; absent when captured silently. */
+	imageIndex?: number;
+	path: string;
+	width: number;
+	height: number;
+	sourceWidth?: number;
+	sourceHeight?: number;
+	target: string;
+	/** Observed app/window name for presentation; target remains the routing identity. */
+	label?: string;
+}
 export interface ComputerBounds {
 	x: number;
 	y: number;
@@ -11,6 +43,21 @@ export interface ComputerLaunchOptions {
 	urls?: string[];
 	newInstance?: boolean;
 }
+/**
+ * What a window is, by owner process. `auth` is a system authentication panel
+ * (keychain, admin rights, Touch ID), `permission` a TCC consent dialog,
+ * `lock` the login window or screen saver, `app-modal` a panel one process
+ * hosts for another (open/save/share). Everything else is `other`.
+ */
+export type ComputerWindowKind = "auth" | "permission" | "lock" | "app-modal" | "other";
+/** System UI that took the screen; carried by refusals, actions and observations. */
+export interface ComputerInterruption {
+	app: string;
+	pid: number;
+	windowId: string;
+	title: string;
+	kind: ComputerWindowKind;
+}
 export interface ComputerWindowIdentity {
 	id: string;
 	pid: number;
@@ -18,6 +65,9 @@ export interface ComputerWindowIdentity {
 	title: string;
 	bounds: ComputerBounds;
 	onScreen?: boolean;
+	/** CGWindow layer: 0 for ordinary windows, 1000 for system auth panels. */
+	layer?: number;
+	kind?: ComputerWindowKind;
 }
 export interface ComputerElementSnapshot {
 	ref: string;
@@ -67,7 +117,13 @@ export interface ComputerObservation {
 	backgroundInput: unknown;
 	/** Attached surfaces have separate identities and must be acquired before input. */
 	relatedWindows?: readonly ComputerRelatedWindow[];
+	/** Document window's file (`file://` URL); absent when the app reports none. */
+	documentPath?: string;
+	/** The app's own unsaved-changes flag; absent when the app reports none. */
+	documentEdited?: boolean;
 	screenshot?: ComputerImage;
+	/** System UI covering the screen when this observation was taken. */
+	interruptedBy?: ComputerInterruption;
 	screenshotError?: string;
 }
 export interface ComputerWindowAcquisition extends ComputerWindowIdentity {
@@ -82,6 +138,12 @@ export interface ComputerActionResult {
 	evidence: unknown;
 	route?: string;
 	delivery: unknown;
+	/**
+	 * System UI that appeared while this action ran. The action itself was
+	 * dispatched, so its evidence still describes the target; the environment
+	 * changed under it and the next action will be refused.
+	 */
+	interruptedBy?: ComputerInterruption;
 	data?: unknown;
 }
 export interface ObserveOptions {

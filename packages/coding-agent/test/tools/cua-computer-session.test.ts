@@ -2,9 +2,9 @@ import { expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { CuaDriverHandle, CuaToolResult } from "@oh-my-pi/pi-coding-agent/tools/computer/cua-runtime";
-import { ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import { CuaComputerSession } from "@oh-my-pi/pi-coding-agent/tools/computer/cua-session";
+import type { CuaDriver, CuaToolResult } from "@oh-my-pi/pi-coding-agent/tools/computer/driver";
+import { ToolAbortError, ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import type { ComputerImage, ComputerOperationContext } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
 
 type Wire = Record<string, unknown>;
@@ -24,6 +24,7 @@ async function fixture() {
 		title: "Editor",
 		bounds: { x: 10, y: 20, width: 200, height: 100 },
 		is_on_screen: true,
+		layer: 0,
 	};
 	const state = {
 		sequence: 0,
@@ -35,28 +36,34 @@ async function fixture() {
 		relatedWindows: undefined as unknown,
 		failCapture: false,
 		wrongIdentity: false,
-		shutdowns: 0,
-		destroyed: 0,
+		kills: 0,
+		cancelled: [] as string[],
 		displayIdentity: true,
 		display: { uuid: "display-uuid", nativeId: 7, x: 0, y: 0, width: 2, height: 1, scale: 2 },
 		hook: undefined as ((name: string, args: Wire) => Promise<CuaToolResult | undefined>) | undefined,
 	};
-	const driver: CuaDriverHandle = {
-		async metadata() {
-			return {
-				driverVersion: "0.23.2",
-				contractVersion: "0.7.0",
-				toolsListSchemaVersion: "1",
-				capabilityVersion: "1",
-				mcpProtocolVersion: "2025-06-18",
-				pid: 900,
-				embedded: true,
-			};
+	const driver: CuaDriver = {
+		version: "0.24.0",
+		pid: 900,
+		get alive() {
+			return state.kills === 0;
 		},
-		async callTool(name, json) {
-			const args = JSON.parse(json) as Wire;
+		async callTool(name, args, signal) {
 			calls.push({ name, args });
-			const override = await state.hook?.(name, args);
+			const settled = state.hook?.(name, args);
+			const onAbort = (): void => {
+				state.cancelled.push(name);
+			};
+			signal?.addEventListener("abort", onAbort, { once: true });
+			let override: CuaToolResult | undefined;
+			try {
+				override = await settled;
+			} finally {
+				signal?.removeEventListener("abort", onAbort);
+			}
+			// Mirror the real child: a cancelled call answers with the typed envelope.
+			if (signal?.aborted && state.cancelled.includes(name))
+				throw new ToolAbortError(`Computer action ${name} cancelled; partial: {}`);
 			if (override) return override;
 			if (name === "check_permissions") return reply({ accessibility: true, screen_recording: true });
 			if (name === "list_windows") return reply({ windows: [row] });
@@ -119,14 +126,14 @@ async function fixture() {
 			if (name === "type_text") state.value += String(args.text);
 			return reply({ effect: "unverifiable", evidence: { posted: true } });
 		},
-		async shutdown() {
-			state.shutdowns++;
-		},
-		uniffiDestroy() {
-			state.destroyed++;
+		async kill() {
+			state.kills++;
 		},
 	};
-	const session = await CuaComputerSession.create({ driver, inputLockPath: path.join(directory, "input") });
+	const session = await CuaComputerSession.create({
+		spawn: async () => driver,
+		sampleRoster: () => ({ windows: [], elapsedMs: 0 }),
+	});
 	const context: ComputerOperationContext = {
 		signal: new AbortController().signal,
 		readOnly: false,
@@ -537,7 +544,7 @@ it("uses advertised native element double-click without converting cached bounds
 	}
 });
 
-it("signals shutdown on abort, drains admitted input, and requires a fresh session", async () => {
+it("cancels the driver call on abort, drains admitted input, and keeps the session usable", async () => {
 	const f = await fixture();
 	const entered = Promise.withResolvers<void>();
 	const release = Promise.withResolvers<void>();
@@ -558,18 +565,18 @@ it("signals shutdown on abort, drains admitted input, and requires a fresh sessi
 		const drain = f.session.drain().then(() => {
 			drained = true;
 		});
-		const next = f.session.type(f.context, f.window, "second").catch((error: unknown) => error);
+		const next = f.session.type(f.context, f.window, "second");
 		await Bun.sleep(10);
 		expect(drained).toBe(false);
 		expect(f.calls.filter(call => call.name === "type_text")).toHaveLength(1);
 		release.resolve();
-		expect(await rejected).toBeInstanceOf(Error);
+		expect(await rejected).toBeInstanceOf(ToolAbortError);
 		await drain;
-		expect(await next).toBeInstanceOf(Error);
-		expect(f.state.value).toBe("first");
-		expect(f.state.shutdowns).toBe(1);
-		expect(f.session.requiresReacquisition).toBe(true);
-		expect(f.calls.filter(call => call.name === "type_text")).toHaveLength(1);
+		expect(f.state.cancelled).toEqual(["type_text"]);
+		expect(f.state.kills).toBe(0);
+		expect((await next).text).toBeString();
+		expect(f.state.value).toBe("second");
+		expect(f.calls.filter(call => call.name === "type_text")).toHaveLength(2);
 	} finally {
 		release.resolve();
 		await f.close();
@@ -603,7 +610,7 @@ it("does not dispatch input when cancellation arrives during target validation",
 	}
 });
 
-it("close waits for admitted input and destroys the SDK exactly once", async () => {
+it("close waits for admitted input and ends the driver child exactly once", async () => {
 	const f = await fixture();
 	const entered = Promise.withResolvers<void>();
 	const release = Promise.withResolvers<void>();
@@ -620,12 +627,11 @@ it("close waits for admitted input and destroys the SDK exactly once", async () 
 		const first = f.session.close();
 		const second = f.session.close();
 		expect(first).toBe(second);
-		expect(f.state.shutdowns).toBe(0);
+		expect(f.state.kills).toBe(0);
 		release.resolve();
 		await Promise.all([action, first]);
 		expect(f.state.value).toBe("complete");
-		expect(f.state.shutdowns).toBe(1);
-		expect(f.state.destroyed).toBe(1);
+		expect(f.state.kills).toBe(1);
 		await expect(f.session.windows(f.context)).rejects.toThrow("closed");
 	} finally {
 		release.resolve();

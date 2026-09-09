@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import * as path from "node:path";
+import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import { withTimeout } from "@oh-my-pi/pi-utils/async";
 import { Settings } from "../../src/config/settings";
 import { disposeVmContextsByOwner, invokeJsTool } from "../../src/eval/js/context-manager";
@@ -9,15 +9,59 @@ import type { EvalPreludeDefinition } from "../../src/eval/preludes";
 import type { EvalStatusEvent, EvalToolDetails } from "../../src/eval/types";
 import type { ToolSession } from "../../src/tools";
 import { createComputerPrelude } from "../../src/tools/computer";
-import {
-	ComputerSupervisor,
-	type ComputerWorkerHandle,
-	spawnComputerWorker,
-} from "../../src/tools/computer/supervisor";
+import type { ComputerBackend } from "../../src/tools/computer/backend";
+import { ComputerSupervisor } from "../../src/tools/computer/supervisor";
 import { EvalTool } from "../../src/tools/eval";
 
+const capabilities: DesktopCapabilities = {
+	backend: "fake",
+	displayServer: "memory",
+	capture: true,
+	input: true,
+	ax: true,
+	backgroundWindowInput: true,
+	deliveryModes: ["background", "foreground"],
+	capturePermission: "granted",
+	inputPermission: "granted",
+	axPermission: "granted",
+	displayCount: 1,
+};
+
+/**
+ * Backend whose one reachable operation blocks until the test completes it, so
+ * a cancelled run stays busy through `drain()`. The scripts below only reach
+ * `apps`, `drain`, `close` and `capabilities`.
+ */
+class GatedBackend {
+	closeCount = 0;
+	readonly #started: { resolve: () => void };
+	readonly #gate = Promise.withResolvers<void>();
+	#pending?: Promise<unknown>;
+	readonly capabilities = capabilities;
+
+	constructor(started: { resolve: () => void }) {
+		this.#started = started;
+	}
+
+	async apps(): Promise<unknown> {
+		this.#started.resolve();
+		this.#pending = this.#gate.promise.then(() => []);
+		return this.#pending;
+	}
+	async drain(): Promise<void> {
+		await this.#pending;
+	}
+	async close(): Promise<void> {
+		this.closeCount++;
+	}
+	/** Lets the admitted native operation finish. */
+	complete(): void {
+		this.#gate.resolve();
+	}
+}
+
 describe("computer turn cancellation", () => {
-	it("a JS-defined tool waits for native drain and exit before returning interrupted, then reuses its kernel with a fresh computer", async () => {
+	it("a JS-defined tool waits for native drain before returning interrupted, then reuses its kernel and backend", async () => {
 		const owner = `defined-computer-abort-${crypto.randomUUID()}`;
 		const started = Promise.withResolvers<void>();
 		const session: ToolSession = {
@@ -29,36 +73,15 @@ describe("computer turn cancellation", () => {
 			getEvalKernelOwnerId: () => owner,
 			getEvalPreludes: () => [definition],
 		};
-		const workers: ComputerWorkerHandle[] = [];
-		let exits = 0;
+		const backends: GatedBackend[] = [];
 		const definition: EvalPreludeDefinition = createComputerPrelude(
 			session,
-			() =>
-				new ComputerSupervisor(
-					session,
-					() => {
-						const worker = spawnComputerWorker({
-							cmd: [
-								process.execPath,
-								path.resolve(import.meta.dir, "../fixtures/computer-subprocess-lifecycle.ts"),
-							],
-						});
-						workers.push(worker);
-						worker.onMessage(message => {
-							if (message.type === "pong" && message.id === "operation-started") started.resolve();
-						});
-						return {
-							send: message => worker.send(message),
-							onMessage: handler => worker.onMessage(handler),
-							onError: handler => worker.onError(handler),
-							terminate: async () => {
-								await worker.terminate();
-								exits++;
-							},
-						};
-					},
-					{ startMs: 5_000, closeMs: 1_000, graceMs: 1_000 },
-				),
+			currentSession =>
+				new ComputerSupervisor(currentSession, async () => {
+					const backend = new GatedBackend(started);
+					backends.push(backend);
+					return backend as unknown as ComputerBackend;
+				}),
 		);
 		const signal = new AbortController();
 		try {
@@ -76,33 +99,35 @@ describe("computer turn cancellation", () => {
 			});
 			await withTimeout(started.promise, 5_000, "Defined tool did not enter native operation");
 			signal.abort();
+			// Proving the invocation does NOT settle needs real loop progress across
+			// the kernel's IPC/HTTP hops; a fake clock cannot advance them.
 			await Bun.sleep(20);
 			expect(settled).toBe(false);
-			expect(exits).toBe(0);
-			workers[0].send({ type: "ping", id: "release" });
+			expect(backends[0].closeCount).toBe(0);
+			backends[0].complete();
 			const stopped = await pending;
 			expect(stopped.ok).toBe(false);
-			expect(exits).toBe(1);
+			expect(backends[0].closeCount).toBe(0);
 			const resumed = await invokeJsTool(
 				{ op: "call", name: "nativeWork", args: { code: "return 42" } },
 				{ sessionKey: owner, ownerId: owner, session },
 			);
 			expect(resumed).toMatchObject({ ok: true, value: 42 });
-			expect(workers).toHaveLength(2);
-			expect(exits).toBe(1);
+			expect(backends).toHaveLength(1);
+			expect(backends[0].closeCount).toBe(0);
 			expect(session.settings.get("computer.enabled")).toBe(true);
 			await definition.invoke({ action: "release" }, { session, toolCallId: "release" });
-			expect(exits).toBe(2);
+			expect(backends[0].closeCount).toBe(1);
 		} finally {
 			signal.abort();
-			await Promise.allSettled(workers.map(worker => worker.terminate()));
+			for (const backend of backends) backend.complete();
 			await definition.invoke({ action: "close" }, { session, toolCallId: "cleanup" }).catch(() => undefined);
 			await disposeVmContextsByOwner(owner);
 		}
 	}, 20_000);
 
 	for (const language of ["js", "py"] as const) {
-		it(`${language} withholds final Eval cancellation through native drain and process exit, then reacquires`, async () => {
+		it(`${language} withholds final Eval cancellation through native drain, then reuses its backend`, async () => {
 			const owner = `computer-abort-${language}-${crypto.randomUUID()}`;
 			const started = Promise.withResolvers<void>();
 			const stopping = Promise.withResolvers<void>();
@@ -116,38 +141,16 @@ describe("computer turn cancellation", () => {
 				getEvalKernelOwnerId: () => owner,
 				getEvalPreludes: () => [definition],
 			};
-			const workers: ComputerWorkerHandle[] = [];
-			const exited: boolean[] = [];
+			const backends: GatedBackend[] = [];
+			let completed = false;
 			const definition: EvalPreludeDefinition = createComputerPrelude(
 				session,
-				() =>
-					new ComputerSupervisor(
-						session,
-						() => {
-							const worker = spawnComputerWorker({
-								cmd: [
-									process.execPath,
-									path.resolve(import.meta.dir, "../fixtures/computer-subprocess-lifecycle.ts"),
-								],
-							});
-							const index = workers.length;
-							workers.push(worker);
-							exited.push(false);
-							worker.onMessage(message => {
-								if (message.type === "pong" && message.id === "operation-started") started.resolve();
-							});
-							return {
-								send: message => worker.send(message),
-								onMessage: handler => worker.onMessage(handler),
-								onError: handler => worker.onError(handler),
-								terminate: async () => {
-									await worker.terminate();
-									exited[index] = true;
-								},
-							};
-						},
-						{ startMs: 5_000, closeMs: 1_000, graceMs: 1_000 },
-					),
+				currentSession =>
+					new ComputerSupervisor(currentSession, async () => {
+						const backend = new GatedBackend(started);
+						backends.push(backend);
+						return backend as unknown as ComputerBackend;
+					}),
 			);
 			const tool = new EvalTool(session);
 			const controller = new AbortController();
@@ -165,7 +168,7 @@ describe("computer turn cancellation", () => {
 							if (event.op !== "control" || typeof event.phase !== "string") continue;
 							phases.push(event.phase);
 							if (event.phase === "stopping") stopping.resolve();
-							if (event.phase === "stopped") expect(exited[0]).toBe(true);
+							if (event.phase === "stopped") expect(completed).toBe(true);
 						}
 					},
 				)
@@ -176,26 +179,32 @@ describe("computer turn cancellation", () => {
 				await withTimeout(started.promise, 5_000, "Native operation did not start");
 				controller.abort();
 				await withTimeout(stopping.promise, 2_000, "No stopping status");
+				// Same negative assertion: only real loop progress can show the result
+				// is still withheld while the native operation is gated.
 				await Bun.sleep(20);
 				expect(settled).toBe(false);
-				expect(exited[0]).toBe(false);
 				expect(phases).not.toContain("stopped");
-				workers[0].send({ type: "ping", id: "release" });
+				completed = true;
+				backends[0].complete();
 				const result = await execution;
-				expect(exited[0]).toBe(true);
 				const finalEvents: EvalStatusEvent[] = result.details?.statusEvents ?? [];
 				expect(finalEvents.filter(event => event.op === "control").at(-1)?.phase).toBe("stopped");
 				expect(finalEvents.some(event => event.phase === "released")).toBe(false);
+				expect(backends[0].closeCount).toBe(0);
 				expect(session.settings.get("computer.enabled")).toBe(true);
+				// The cancelled cell's kernel is interrupted asynchronously, so a late
+				// SIGINT can still land on it; drop it before the follow-up cell. The
+				// computer session under test belongs to the ToolSession, not the kernel.
+				await disposeKernelSessionsByOwner(owner);
 				const next = await tool.execute(`${owner}-fresh`, { language, code: "await computer.run('return 2')" });
 				expect(next.details?.isError).not.toBe(true);
-				expect(workers).toHaveLength(2);
-				expect(exited[1]).toBe(false);
+				expect(backends).toHaveLength(1);
+				expect(backends[0].closeCount).toBe(0);
 				await tool.execute(`${owner}-release`, { language, code: "await computer.release()" });
-				expect(exited[1]).toBe(true);
+				expect(backends[0].closeCount).toBe(1);
 			} finally {
 				controller.abort();
-				await Promise.allSettled(workers.map(worker => worker.terminate()));
+				for (const backend of backends) backend.complete();
 				await execution.catch(() => undefined);
 				await definition.invoke({ action: "close" }, { session, toolCallId: "cleanup" }).catch(() => undefined);
 				await disposeVmContextsByOwner(owner);

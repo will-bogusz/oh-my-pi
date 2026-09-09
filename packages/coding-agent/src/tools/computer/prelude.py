@@ -63,7 +63,7 @@ def _make_computer():
         __slots__ = ("ref", "role", "label", "value", "placeholder", "enabled", "selected", "actions", "bounds", "pid", "windowId", "_owner")
 
         def __init__(self, snapshot, identity=None):
-            for field in self.__slots__:
+            for field in _Element.__slots__:
                 if field == "_owner":
                     continue
                 value = snapshot.get(field)
@@ -108,8 +108,20 @@ def _make_computer():
         async def scroll(self, *args, **kwargs):
             return await self._method("scroll", args, kwargs)
 
+
+    class _LazyElement(_Element):
+        """An `_Element` built from a bare ref; awaiting it fetches the full snapshot."""
+        __slots__ = ("_resolve",)
+
+        def __init__(self, snapshot, identity, resolve):
+            super().__init__(snapshot, identity)
+            object.__setattr__(self, "_resolve", resolve)
+
+        def __await__(self):
+            return self._resolve().__await__()
+
     class _Window:
-        __slots__ = ("id", "app", "title", "pid", "bounds", "onScreen", "initialObservation", "inspectionError", "initialScreenshot", "screenshotError")
+        __slots__ = ("id", "app", "title", "pid", "bounds", "onScreen", "layer", "kind", "initialObservation", "inspectionError", "initialScreenshot", "screenshotError")
 
         def __init__(self, snapshot):
             if not isinstance(snapshot.get("id"), str) or type(snapshot.get("pid")) is not int:
@@ -174,10 +186,15 @@ def _make_computer():
         async def find(self, *args, **kwargs):
             return [_Element(snapshot, {"id": self.id, "pid": self.pid}) for snapshot in await self._method("find", args, kwargs)]
 
-        async def ref(self, ref):
-            """Resolve an opaque ref belonging to this exact window."""
-            snapshot = await self._method("ref", (ref,), {})
-            return _Element(snapshot, {"id": self.id, "pid": self.pid}) if isinstance(snapshot, dict) else None
+        def ref(self, ref):
+            """A ref handle: act directly (`await win.ref(r).click()`) or `await win.ref(r)` for the snapshot."""
+            identity = {"id": self.id, "pid": self.pid}
+
+            async def resolve():
+                snapshot = await self._method("ref", (ref,), {})
+                return _Element(snapshot, identity) if isinstance(snapshot, dict) else None
+
+            return _LazyElement({"ref": ref}, identity, resolve)
 
     class _Clipboard:
         __slots__ = ()
@@ -249,10 +266,14 @@ def _make_computer():
             snapshot = await self._method("focusedWindow", (), {})
             return _Window(snapshot) if isinstance(snapshot, dict) else None
 
-        async def ref(self, ref):
-            """Resolve snapshot data, not native liveness; global AX eviction can require re-observation."""
-            snapshot = await self._method("ref", (ref,), {})
-            return _Element(snapshot) if isinstance(snapshot, dict) else None
+        def ref(self, ref):
+            """A ref handle: act directly or await it for snapshot data (not native liveness)."""
+
+            async def resolve():
+                snapshot = await self._method("ref", (ref,), {})
+                return _Element(snapshot) if isinstance(snapshot, dict) else None
+
+            return _LazyElement({"ref": ref}, None, resolve)
 
         async def run(self, code, *, read_only=None, timeout=None):
             """Run a JavaScript code string in the persistent desktop session and return its value."""

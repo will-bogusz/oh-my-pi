@@ -45,7 +45,7 @@
 		}
 	};
 
-	const windowFields = ["id", "app", "title", "pid", "bounds", "onScreen"];
+	const windowFields = ["id", "app", "title", "pid", "bounds", "onScreen", "layer", "kind"];
 	const windowValueMethods = [
 		"screenshot",
 		"click",
@@ -118,6 +118,19 @@
 		const snapshot = await callValue(chain);
 		return snapshot ? makeElement(snapshot, identity) : null;
 	};
+	/**
+	 * A ref handle that acts without a round trip (`win.ref(r).click()`) and
+	 * still resolves to the full snapshot when awaited (`await win.ref(r)`).
+	 */
+	const lazyElement = (chain, ref, identity) => {
+		const element = makeElement({ ref }, identity);
+		const resolved = () => resolveElement(chain, identity);
+		return Object.freeze(
+			Object.create(element, {
+				then: { value: (onFulfilled, onRejected) => resolved().then(onFulfilled, onRejected) },
+			}),
+		);
+	};
 	const makeWindow = snapshot => {
 		if (typeof snapshot.id !== "string" || !Number.isInteger(snapshot.pid)) {
 			throw new TypeError("computer window snapshot requires an exact id and PID");
@@ -135,7 +148,7 @@
 		defineMethod(win, "find", async query =>
 			(await callValue(via(step("find", [query])))).map(item => makeElement(item, identity)),
 		);
-		defineMethod(win, "ref", ref => resolveElement(via(step("ref", [ref])), identity));
+		defineMethod(win, "ref", ref => lazyElement(via(step("ref", [ref])), ref, identity));
 		return Object.freeze(win);
 	};
 	const resolveWindow = async chain => {
@@ -148,7 +161,7 @@
 	computer.window = (selector, options) =>
 		resolveWindow([step("acquireWindow", [selector, validateOptions("computer.window", options)])]);
 	computer.focusedWindow = () => resolveWindow([step("focusedWindow", [])]);
-	computer.ref = ref => resolveElement([step("ref", [ref])]);
+	computer.ref = ref => lazyElement([step("ref", [ref])], ref);
 	computer.clipboard = Object.freeze({
 		read: () => callValue([step("clipboard.read", [])]),
 		write: text => callValue([step("clipboard.write", [text])]),
