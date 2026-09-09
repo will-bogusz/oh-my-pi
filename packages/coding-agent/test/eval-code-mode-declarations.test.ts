@@ -87,7 +87,7 @@ test("browser and computer preludes expose their handle and function-run declara
 			return { displays: [], returnValue: undefined, screenshots: [] };
 		},
 		async capabilities() {
-			return undefined;
+			throw new Error("declarations do not touch the driver");
 		},
 		async close() {},
 	})).codeModeDeclarations;
@@ -119,6 +119,10 @@ test("browser and computer preludes expose their handle and function-run declara
 	]) {
 		expect(computerDeclarations).toContain(declaration);
 	}
+	// Both files ride along in every Code Mode eval description; keep them
+	// signature-only (verbs and the types needed to call them, no prose).
+	expect(Buffer.byteLength(browserDeclarations)).toBeLessThanOrEqual(8 * 1024);
+	expect(Buffer.byteLength(computerDeclarations)).toBeLessThanOrEqual(7.5 * 1024);
 });
 
 test("EvalTool advertises only tools authorized for its bridge", () => {

@@ -245,7 +245,8 @@ describe("control activity and exact image provenance", () => {
 		const finalImages = result.content.filter(content => content.type === "image");
 		expect(finalImages).toHaveLength(5);
 		expect(finalImages[2].data).not.toBe(imageOutputs[2].data);
-		expect(result.details?.images).toBeUndefined();
+		// The renderer's list carries every displayed image; nothing was superseded here.
+		expect(result.details?.images).toHaveLength(5);
 	});
 
 	it("preserves computer screenshot provenance through the real Python HTTP/prelude/MIME display route", async () => {

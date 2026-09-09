@@ -49,7 +49,14 @@ import {
 	readToolSupersedeKey,
 } from "@oh-my-pi/pi-agent-core/compaction/pruning";
 import type { ProtectedToolMatcher } from "@oh-my-pi/pi-agent-core/compaction/tool-protection";
-import type { AssistantMessage, CodexCompactionContext, Message, Model, ProviderSessionState } from "@oh-my-pi/pi-ai";
+import type {
+	AssistantMessage,
+	CodexCompactionContext,
+	Message,
+	Model,
+	ProviderSessionState,
+	ToolResultMessage,
+} from "@oh-my-pi/pi-ai";
 import * as AIError from "@oh-my-pi/pi-ai/error";
 import { preferredDialect } from "@oh-my-pi/pi-catalog/identity";
 import { modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
@@ -58,6 +65,8 @@ import * as snapcompact from "@oh-my-pi/snapcompact";
 import type { ModelRegistry } from "../config/model-registry";
 import { MODEL_ROLE_IDS } from "../config/model-roles";
 import type { CompactionSettings as ConfiguredCompactionSettings, Settings } from "../config/settings";
+import { controlImageTarget, readControlImageReferences } from "../eval/control-images";
+import type { ControlImageReference } from "../eval/types";
 import type { ExtensionRunner, SessionBeforeCompactResult } from "../extensibility/extensions";
 import type { CompactOptions, ContextUsage } from "../extensibility/extensions/types";
 import type { GoalModeState } from "../goals/state";
@@ -78,7 +87,12 @@ import {
 	resolveMethodSettings,
 	resolveSpeculationMethod,
 } from "./compaction-methods";
-import { assistantTurnProducedOutput, convertToLlm, stripImagesFromMessage } from "./messages";
+import {
+	assistantTurnProducedOutput,
+	convertToLlm,
+	stripImagesFromMessage,
+	stripSupersededControlPreviews,
+} from "./messages";
 import { isTerminalTextAssistantAnswer } from "./queued-messages";
 import {
 	resolveCompactionConfiguredTarget,
@@ -619,6 +633,46 @@ export class SessionMaintenance {
 		const sessionContext = this.#host.buildDisplaySessionContext();
 		this.#host.agent.replaceMessages(sessionContext.messages);
 		this.#host.resetAdvisorRuntimes("drop-images");
+		this.#host.closeCodexProviderSessionsForHistoryRewrite();
+		return { removed };
+	}
+
+	/**
+	 * Turn-end preview policy: observation stills (browser/computer control
+	 * images) leave the model-facing transcript once the turn settles — the
+	 * counterpart of Codex disposing its picture-in-picture preview at turn end.
+	 * The still of the latest result for each control target (a browser tab, a
+	 * computer window) stays so the next turn can start from what was last
+	 * seen; every earlier still for that target goes. The renderer keeps showing
+	 * every image from `details.images`. Same rewrite contract as
+	 * {@link dropImages}; no-op when nothing is superseded.
+	 */
+	async disposeControlPreviews(): Promise<{ removed: number }> {
+		const branchEntries = this.#host.sessionManager.getBranch();
+		const results: { message: ToolResultMessage; references: ControlImageReference[] }[] = [];
+		const latestByTarget = new Map<string, ToolResultMessage>();
+		for (const entry of branchEntries) {
+			if (entry.type !== "message" || entry.message.role !== "toolResult") continue;
+			const references = readControlImageReferences(entry.message.details);
+			if (!references) continue;
+			results.push({ message: entry.message, references });
+			for (const reference of references) latestByTarget.set(controlImageTarget(reference), entry.message);
+		}
+		let removed = 0;
+		for (const { message, references } of results) {
+			removed += stripSupersededControlPreviews(
+				message,
+				references,
+				reference => latestByTarget.get(controlImageTarget(reference)) === message,
+			);
+		}
+		if (removed === 0) {
+			return { removed: 0 };
+		}
+		await this.#host.sessionManager.rewriteEntries();
+		const sessionContext = this.#host.buildDisplaySessionContext();
+		this.#host.agent.replaceMessages(sessionContext.messages);
+		this.#host.resetAdvisorRuntimes("dispose-control-previews");
 		this.#host.closeCodexProviderSessionsForHistoryRewrite();
 		return { removed };
 	}

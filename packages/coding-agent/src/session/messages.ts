@@ -20,11 +20,14 @@ import type {
 	Message,
 	MessageAttribution,
 	TextContent,
+	ToolResultMessage,
 	UserMessage,
 } from "@oh-my-pi/pi-ai";
 import * as AIError from "@oh-my-pi/pi-ai/error";
 import { isRecord, logger, prompt } from "@oh-my-pi/pi-utils";
 import { COLLAB_PROMPT_MESSAGE_TYPE } from "@oh-my-pi/pi-wire";
+import { modelFacingImageOrdinals } from "../eval/control-images";
+import type { ControlImageReference } from "../eval/types";
 import userInterjectionTemplate from "../prompts/steering/user-interjection.md" with { type: "text" };
 import { formatTitleConversationContext, type TitleConversationTurn } from "../tiny/message-preproc";
 
@@ -892,6 +895,49 @@ function stripImagesFromMessageContent(message: AgentMessage): number {
 		default:
 			return 0;
 	}
+}
+
+/**
+ * Drop superseded control stills (browser/computer observation previews) from
+ * a tool result's model-facing content, leaving `details.images` — the
+ * renderer's list — intact. `keep(reference)` decides per still; images with
+ * no control metadata always stay. Content ordinals map through the
+ * per-result preview policy (`modelFacingImageOrdinals`); a result whose
+ * content no longer matches that shape (already stripped by
+ * {@link stripImagesFromMessage}) is left alone. Same in-place contract as
+ * {@link stripImagesFromMessage}: callers persist and replay afterwards.
+ */
+export function stripSupersededControlPreviews(
+	message: ToolResultMessage,
+	references: readonly ControlImageReference[],
+	keep: (reference: ControlImageReference) => boolean,
+): number {
+	const details = isRecord(message.details) ? message.details : undefined;
+	const rendered = details && Array.isArray(details.images) ? details.images : undefined;
+	if (!rendered || rendered.length === 0) return 0;
+	const ordinals = modelFacingImageOrdinals(rendered.length, references);
+	const contentImageCount = message.content.reduce((count, part) => (part.type === "image" ? count + 1 : count), 0);
+	if (contentImageCount !== ordinals.length) return 0;
+	let seen = 0;
+	let removed = 0;
+	const kept: (TextContent | ImageContent)[] = [];
+	for (const part of message.content) {
+		if (part.type !== "image") {
+			kept.push(part);
+			continue;
+		}
+		const ordinal = ordinals[seen++];
+		const reference = references.find(candidate => candidate.index === ordinal);
+		if (!reference || keep(reference)) {
+			kept.push(part);
+		} else {
+			removed++;
+		}
+	}
+	if (removed === 0) return 0;
+	message.content = kept;
+	invalidateMessageCache(message);
+	return removed;
 }
 
 /**

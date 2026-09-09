@@ -11,7 +11,7 @@ import {
 import { jsBackend, pythonBackend } from "../eval";
 import type { ExecutorBackend, ExecutorBackendResult } from "../eval/backend";
 import { EVAL_TIMEOUT_PAUSE_OP, EVAL_TIMEOUT_RESUME_OP } from "../eval/bridge-timeout";
-import { readControlImageMetadata } from "../eval/control-images";
+import { modelFacingImageOrdinals, readControlImageMetadata } from "../eval/control-images";
 import { IdleTimeout } from "../eval/idle-timeout";
 import { getEnabledEvalPreludes } from "../eval/preludes";
 import type { BackendProbeOptions } from "../eval/probe";
@@ -505,7 +505,9 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 					latestText = finalText;
 					latestDetails = {
 						...result.details,
-						images: result.content.filter((block): block is ImageContent => block.type === "image"),
+						images:
+							result.details?.images ??
+							result.content.filter((block): block is ImageContent => block.type === "image"),
 					};
 					// Hand the full result (images included) to the foreground waiter
 					// before deciding the job's terminal state.
@@ -703,6 +705,38 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 				emitUpdate?.(tailBuffer.text(), buildUpdateDetails());
 			};
 
+			// Preview policy: the model-facing content carries one still per control
+			// target (the last displayed); `details.images` keeps every displayed
+			// image so the renderer still shows them after the turn-end strip
+			// (`SessionMaintenance.disposeControlPreviews`).
+			const finalResult = async (
+				outputText: string,
+				combinedOutput: string,
+				isError: boolean,
+			): Promise<AgentToolResult<EvalToolDetails | undefined>> => {
+				const summaryForMeta = await summarizeFinal(combinedOutput, finalizeOutput);
+				const details: EvalToolDetails = {
+					language: languages[0],
+					languages,
+					cells: cellResults,
+					jsonOutputs: jsonOutputs.length > 0 ? jsonOutputs : undefined,
+					controlImages: controlImages.length > 0 ? controlImages : undefined,
+					statusEvents: statusEvents.length > 0 ? statusEvents : undefined,
+				};
+				if (isError) details.isError = true;
+				if (notice) details.notice = notice;
+				let modelImages = images;
+				if (controlImages.length > 0) {
+					details.images = images;
+					modelImages = modelFacingImageOrdinals(images.length, controlImages).map(index => images[index]);
+				}
+				const builder = toolResult(details)
+					.content([{ type: "text", text: outputText }, ...modelImages])
+					.truncationFromSummary(summaryForMeta, { direction: "tail" });
+				if (isError) builder.error();
+				return builder.done();
+			};
+
 			const sessionFile = session.getSessionFile?.() ?? undefined;
 			const kernelOwnerId = session.getEvalKernelOwnerId?.() ?? undefined;
 			const { path: artifactPath, id: artifactId } = (await session.allocateOutputArtifact?.("eval")) ?? {};
@@ -862,25 +896,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 					pushUpdate();
 					const errorMsg = result.output || "Command aborted";
 					const combinedOutput = cellOutputs.join("\n\n");
-					const outputText = combinedOutput || errorMsg;
-
-					const summaryForMeta = await summarizeFinal(combinedOutput, finalizeOutput);
-					const details: EvalToolDetails = {
-						language: languages[0],
-						languages,
-						cells: cellResults,
-						jsonOutputs: jsonOutputs.length > 0 ? jsonOutputs : undefined,
-						controlImages: controlImages.length > 0 ? controlImages : undefined,
-						statusEvents: statusEvents.length > 0 ? statusEvents : undefined,
-						isError: true,
-					};
-					if (notice) details.notice = notice;
-
-					return toolResult(details)
-						.content([{ type: "text", text: outputText }, ...images])
-						.truncationFromSummary(summaryForMeta, { direction: "tail" })
-						.error()
-						.done();
+					return await finalResult(combinedOutput || errorMsg, combinedOutput, true);
 				}
 
 				if (result.exitCode !== 0 && result.exitCode !== undefined) {
@@ -890,24 +906,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 					const outputText = combinedOutput
 						? `${combinedOutput}\n\nCommand exited with code ${result.exitCode}`
 						: `Command exited with code ${result.exitCode}`;
-
-					const summaryForMeta = await summarizeFinal(combinedOutput, finalizeOutput);
-					const details: EvalToolDetails = {
-						language: languages[0],
-						languages,
-						cells: cellResults,
-						jsonOutputs: jsonOutputs.length > 0 ? jsonOutputs : undefined,
-						controlImages: controlImages.length > 0 ? controlImages : undefined,
-						statusEvents: statusEvents.length > 0 ? statusEvents : undefined,
-						isError: true,
-					};
-					if (notice) details.notice = notice;
-
-					return toolResult(details)
-						.content([{ type: "text", text: outputText }, ...images])
-						.truncationFromSummary(summaryForMeta, { direction: "tail" })
-						.error()
-						.done();
+					return await finalResult(outputText, combinedOutput, true);
 				}
 
 				cellResult.status = "complete";
@@ -921,22 +920,7 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 				(hasImages
 					? `(displayed ${images.length} image${images.length === 1 ? "" : "s"}; no text output)`
 					: "(no output)");
-			const summaryForMeta = await summarizeFinal(combinedOutput, finalizeOutput);
-
-			const details: EvalToolDetails = {
-				language: languages[0],
-				languages,
-				cells: cellResults,
-				jsonOutputs: jsonOutputs.length > 0 ? jsonOutputs : undefined,
-				controlImages: controlImages.length > 0 ? controlImages : undefined,
-				statusEvents: statusEvents.length > 0 ? statusEvents : undefined,
-			};
-			if (notice) details.notice = notice;
-
-			return toolResult(details)
-				.content([{ type: "text", text: outputText }, ...images])
-				.truncationFromSummary(summaryForMeta, { direction: "tail" })
-				.done();
+			return await finalResult(outputText, combinedOutput, false);
 		} finally {
 			if (!outputDumped) {
 				try {

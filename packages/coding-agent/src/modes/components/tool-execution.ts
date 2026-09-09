@@ -583,18 +583,19 @@ export class ToolExecutionComponent extends Container {
 	/**
 	 * Get all image blocks from result content and details.
 	 * Some tools (like generate_image) store images in details to avoid bloating
-	 * model context. Xdev-dispatched tools preserve those details under
-	 * details.xdev.inner.
+	 * model context; eval keeps every displayed image there while its content
+	 * carries only the model-facing stills, which the turn-end preview strip
+	 * removes. `details.images` is therefore the render list whenever present.
+	 * Xdev-dispatched tools preserve those details under details.xdev.inner.
 	 */
 	#getAllImageBlocks(): ToolImageBlock[] {
 		if (!this.#result) return [];
-		const contentImages = this.#result.content.filter(block => block.type === "image");
 		const details = this.#result.details;
 		const detailImages = imageBlocksFromDetails(details);
 		const xdevImages = isRecord(details) && isRecord(details.xdev) ? imageBlocksFromDetails(details.xdev.inner) : [];
-		return contentImages.length > 0
-			? [...withControlImageMetadata(contentImages, details), ...detailImages, ...xdevImages]
-			: [...withControlImageMetadata(detailImages, details), ...xdevImages];
+		const images =
+			detailImages.length > 0 ? detailImages : this.#result.content.filter(block => block.type === "image");
+		return [...withControlImageMetadata(images, details), ...xdevImages];
 	}
 
 	/**
