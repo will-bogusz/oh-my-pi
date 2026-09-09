@@ -24,6 +24,7 @@ test("extension payload, embedded assets and ZIP stay identical across checkout 
 			"packages/browser-relay/extension",
 			"packages/browser-relay/scripts/build-extension.ts",
 			"packages/coding-agent/src/tools/browser/relay/protocol.ts",
+			"packages/coding-agent/src/tools/browser/relay/lease-badge.ts",
 			"LICENSE",
 			"THIRD-PARTY-NOTICES.txt",
 		]) {

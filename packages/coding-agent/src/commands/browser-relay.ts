@@ -31,7 +31,7 @@ export default class BrowserRelay extends Command {
 			description: "Extension install directory (install; default ~/.omp/browser-relay/extension)",
 		}),
 		name: Flags.string({
-			description: "Extension display name (install; default OMP Browser Relay)",
+			description: "Extension display name (install; default Oh My Pi)",
 		}),
 		"no-group": Flags.boolean({
 			description: "Don't gather controllable tabs into an 'omp' tab group",

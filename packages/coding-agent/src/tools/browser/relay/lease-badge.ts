@@ -1,0 +1,76 @@
+/**
+ * Favicon badge for a leased tab: while OMP owns a tab, its favicon is a
+ * cursor glyph, restored the moment the lease ends. Codex marks driven tabs the
+ * same way and it is the only in-strip signal the user gets for a background
+ * tab whose debugger infobar they cannot see.
+ *
+ * Injected over the tab's existing `chrome.debugger` attachment rather than
+ * through a content script: `chrome.scripting`/`content_scripts` would need
+ * `<all_urls>` host permission (a "read and change all your data on all
+ * websites" install prompt) for a cosmetic badge, while the debugger
+ * attachment is already there for the whole lease. Pages that refuse
+ * injection (chrome://, Web Store, CSP'd data: icons) simply keep their icon.
+ */
+
+const GLYPH_SVG =
+	'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
+	'<path d="M7 2.5 26 16.5l-8.6 1 4.7 8.6-4.2 2.4-4.7-8.6L7 25.5z" fill="#111" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>' +
+	"</svg>";
+
+/**
+ * Idempotent, and re-applied on every document: the badge has to survive the
+ * page's own late `<link rel=icon>` insertions (and its own navigations, via
+ * `Page.addScriptToEvaluateOnNewDocument`) without the relay polling.
+ */
+export const LEASE_BADGE_INSTALL = `(() => {
+	if (window.top !== window) return;
+	// Only a real HTML document takes its icon from <link rel=icon> and
+	// re-reads it when one is removed. Chrome's PDF viewer accepts the badge
+	// and then keeps it after the restore — a tab that looks driven forever —
+	// so a document we cannot un-badge is never badged.
+	if (document.contentType !== "text/html" && document.contentType !== "application/xhtml+xml") return;
+	const KEY = "__ompLeaseBadge";
+	if (window[KEY]) { window[KEY].apply(); return; }
+	const href = "data:image/svg+xml," + encodeURIComponent(${JSON.stringify(GLYPH_SVG)});
+	let originals = null;
+	const apply = () => {
+		const head = document.head;
+		if (!head) return;
+		const site = [...head.querySelectorAll("link[rel~='icon' i]")].filter(link => !link.hasAttribute("data-omp-badge"));
+		if (site.length) {
+			originals ??= [];
+			for (const link of site) {
+				originals.push(link.outerHTML);
+				link.remove();
+			}
+		}
+		if (head.querySelector("link[data-omp-badge]")) return;
+		const badge = document.createElement("link");
+		badge.setAttribute("rel", "icon");
+		badge.setAttribute("data-omp-badge", "");
+		badge.setAttribute("href", href);
+		head.append(badge);
+	};
+	const observer = new MutationObserver(() => apply());
+	window[KEY] = {
+		apply,
+		restore: () => {
+			observer.disconnect();
+			delete window[KEY];
+			for (const badge of document.querySelectorAll("link[data-omp-badge]")) badge.remove();
+			if (!originals || !document.head) return;
+			const template = document.createElement("template");
+			template.innerHTML = originals.join("");
+			document.head.append(template.content);
+		},
+	};
+	const watch = () => {
+		if (!document.head) return false;
+		apply();
+		observer.observe(document.head, { childList: true });
+		return true;
+	};
+	if (!watch()) new MutationObserver((_, self) => { if (watch()) self.disconnect(); }).observe(document.documentElement, { childList: true, subtree: true });
+})()`;
+
+export const LEASE_BADGE_RESTORE = `window.__ompLeaseBadge?.restore()`;

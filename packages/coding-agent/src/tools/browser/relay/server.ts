@@ -7,7 +7,8 @@ export interface RelayServerOptions {
 	port: number;
 	/** Omit for an ephemeral in-memory broker; the production CLI supplies persistent endpoint access. */
 	access?: RelayAccess;
-	group?: boolean | { title: string; color: string };
+	/** Put driven tabs in their owner's Chrome tab group; default on. */
+	group?: boolean;
 	log?: (message: string, data?: Record<string, unknown>) => void;
 	/** Keep an automatically started service available while a finite CLI's code is usable. */
 	onPairingCode?: (expiresAt: number) => Promise<void>;
@@ -18,14 +19,8 @@ export interface RelayServer {
 	port: number;
 	stop(): void;
 }
-interface SocketData {
-	role: "cdp" | "ext";
-	bridge?: RelayBridge;
-	connId?: number;
-	leaseId?: string;
-}
+type SocketData = { role: "ext" } | { role: "cdp"; bridge: RelayBridge; leaseId: string; connId?: number };
 type RelayWebSocket = Bun.ServerWebSocket<SocketData>;
-const DEFAULT_GROUP = { title: "omp", color: "cyan" } as const;
 export const RELAY_PROTOCOL_VERSION = 2;
 
 function isWsAuthority(raw: string): boolean {
@@ -39,10 +34,8 @@ function isWsAuthority(raw: string): boolean {
 
 export function startRelayServer(opts: RelayServerOptions): RelayServer {
 	const log = opts.log ?? (() => {});
-	const group =
-		opts.group === false ? null : opts.group === true || opts.group === undefined ? DEFAULT_GROUP : opts.group;
 	const access = opts.access ?? new RelayAccess();
-	const instances = new BrowserInstances(access, { log, group });
+	const instances = new BrowserInstances(access, { log, group: opts.group ?? true });
 	const sockets = new Set<RelayWebSocket>();
 	const server = Bun.serve({
 		hostname: "127.0.0.1",
@@ -84,10 +77,6 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 					};
 					const optional = (key: string): string | undefined =>
 						args[key] === undefined ? undefined : string(key);
-					// A worker's random parent lease permits only child creation, not listing,
-					// acquisition, pairing, or another actor's lifecycle operations.
-					if (args.action === "popup")
-						return Response.json(await instances.popup(string("id"), string("url"), req.signal));
 					if (!access.authorized(req.headers.get("authorization")))
 						return new Response("Local browser credential required", { status: 401 });
 					switch (args.action) {
@@ -103,13 +92,19 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 							break;
 						case "discover":
 							return Response.json(await instances.refresh(optional("owner"), optional("browserId")));
+						// Turn/task end: drop the debugger attachments (and Chrome's
+						// infobar) without giving up tab ownership or page state.
+						case "detachDebuggers":
+							return Response.json({
+								detached: await instances.detachDebuggers(optional("owner"), optional("browserId")),
+							});
 						case "create":
 							return Response.json(
 								await instances.create(
 									string("url"),
 									string("owner"),
 									string("taskId"),
-									string("label"),
+									optional("label"),
 									optional("browserId"),
 								),
 							);
@@ -134,25 +129,18 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 						case "closeTab":
 							await instances.closeTab(string("id"), string("owner"), optional("browserId"), req.signal);
 							break;
-						case "close":
-							await instances
-								.requireLease(string("id"))
-								.bridge.managed.close(string("id"), string("owner"), req.signal);
-							break;
-						case "retain":
-							instances.requireLease(string("id")).bridge.managed.retain(string("id"), string("owner"));
-							break;
 						case "reveal":
 							await instances.requireLease(string("id")).bridge.managed.reveal(string("id"), string("owner"));
 							break;
-						case "releasePreserving":
-							await instances
-								.requireLease(string("id"))
-								.bridge.managed.releasePreserving(string("id"), string("owner"));
+						// Hand a tab back to the user. `close: false` keeps the page:
+						// ungrouped, debugger detached, no longer owned.
+						case "releaseTab":
+							if (typeof args.close !== "boolean") throw new Error("Invalid close");
+							await instances.releaseTab(string("id"), string("owner"), args.close, req.signal);
 							break;
-						case "release":
-							await instances.requireLease(string("id")).bridge.managed.release(string("id"), string("owner"));
-							break;
+						// Tabs the browser opened from this one, auto-leased to its owner.
+						case "childTabs":
+							return Response.json({ tabs: instances.childTabs(string("id"), string("owner")) });
 						default:
 							throw new Error("Unknown browser operation");
 					}
@@ -186,17 +174,17 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 			open(ws: RelayWebSocket): void {
 				sockets.add(ws);
 				if (ws.data.role === "ext") instances.extConnected(ws);
-				else ws.data.connId = ws.data.bridge!.cdpConnected(ws, ws.data.leaseId);
+				else ws.data.connId = ws.data.bridge.cdpConnected(ws, ws.data.leaseId);
 			},
 			message(ws: RelayWebSocket, message: string | Buffer): void {
 				const text = typeof message === "string" ? message : new TextDecoder().decode(message);
 				if (ws.data.role === "ext") instances.extMessage(ws, text);
-				else if (ws.data.connId !== undefined) ws.data.bridge!.cdpMessage(ws.data.connId, text);
+				else if (ws.data.connId !== undefined) ws.data.bridge.cdpMessage(ws.data.connId, text);
 			},
 			close(ws: RelayWebSocket): void {
 				sockets.delete(ws);
 				if (ws.data.role === "ext") instances.extClosed(ws);
-				else if (ws.data.connId !== undefined) ws.data.bridge!.cdpClosed(ws.data.connId);
+				else if (ws.data.connId !== undefined) ws.data.bridge.cdpClosed(ws.data.connId);
 			},
 		},
 	});

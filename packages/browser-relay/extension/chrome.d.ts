@@ -21,6 +21,8 @@ interface ChromeTab {
 	pinned: boolean;
 	/** -1 when ungrouped. */
 	groupId: number;
+	/** Set when the browser opened this tab from another one. */
+	openerTabId?: number;
 }
 
 interface ChromeTabChangeInfo {
@@ -114,5 +116,6 @@ declare const chrome: {
 		onMessage: ChromeEvent<(message: unknown) => void>;
 		onInstalled: ChromeEvent<() => void>;
 		onStartup: ChromeEvent<() => void>;
+		onSuspend: ChromeEvent<() => void>;
 	};
 };

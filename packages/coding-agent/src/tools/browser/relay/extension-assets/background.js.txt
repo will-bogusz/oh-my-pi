@@ -13,78 +13,194 @@ async function ownedDebuggerTabs(targets, probe) {
   return owned.filter((tabId) => tabId !== undefined);
 }
 
-// extension/task-groups.ts
-async function groupTabs(tabIds, title, color, taskId = "legacy") {
-  const stored = await chrome.storage.session.get({ taskGroups: {}, taskLabels: {} });
-  const groups = stored.taskGroups && typeof stored.taskGroups === "object" ? stored.taskGroups : {};
-  const labels = stored.taskLabels && typeof stored.taskLabels === "object" ? stored.taskLabels : {};
-  const taskTitle = typeof labels[taskId] === "string" ? labels[taskId] : title;
-  labels[taskId] = taskTitle;
-  const byWindow = new Map;
-  for (const tabId of tabIds) {
-    try {
-      const tab = await chrome.tabs.get(tabId);
-      if (tab.pinned || tab.id === undefined)
-        continue;
-      const bucket = byWindow.get(tab.windowId) ?? [];
-      bucket.push(tab.id);
-      byWindow.set(tab.windowId, bucket);
-    } catch {}
+class DebuggerAttachments {
+  #tabs = new Set;
+  #detach;
+  #graceMs;
+  #pending = null;
+  #log;
+  #surrender;
+  constructor(opts) {
+    this.#detach = opts.detach;
+    this.#graceMs = opts.graceMs ?? 2000;
+    this.#surrender = opts.surrender;
+    this.#log = opts.log ?? (() => {});
   }
-  const grouped = {};
-  for (const [windowId, ids] of byWindow) {
-    const key = JSON.stringify([taskId, windowId]);
-    const existing = (await chrome.tabGroups.query({ windowId })).find((group) => group.id === groups[key]);
-    let groupId;
-    if (existing) {
-      groupId = existing.id;
-      await chrome.tabs.group({ tabIds: ids, groupId });
-    } else {
-      groupId = await chrome.tabs.group({ tabIds: ids });
-      await chrome.tabGroups.update(groupId, { title: taskTitle, color });
-    }
-    groups[key] = groupId;
-    for (const id of ids)
-      grouped[String(id)] = groupId;
+  attached(tabId) {
+    this.#tabs.add(tabId);
   }
-  await chrome.storage.session.set({ taskGroups: groups, taskLabels: labels });
-  return { grouped };
+  detached(tabId) {
+    this.#tabs.delete(tabId);
+  }
+  tabs() {
+    return [...this.#tabs];
+  }
+  async detachAll(tabIds) {
+    const targets = (tabIds ?? this.tabs()).filter((tabId) => this.#tabs.has(tabId));
+    const detached = await Promise.all(targets.map(async (tabId) => {
+      this.#tabs.delete(tabId);
+      try {
+        await this.#detach(tabId);
+        return tabId;
+      } catch (error) {
+        this.#log("detach failed", { tabId, error: String(error) });
+        return;
+      }
+    }));
+    return detached.filter((tabId) => tabId !== undefined);
+  }
+  scheduleRelease() {
+    const open = this.#pending;
+    if (open)
+      return open.promise;
+    const pending = Promise.withResolvers();
+    const timer = setTimeout(() => {
+      this.#pending = null;
+      this.#log("releasing debugger attachments", { tabs: this.#tabs.size });
+      const held = [...this.#tabs];
+      pending.resolve((async () => {
+        await this.#surrender?.(held).catch((error) => {
+          this.#log("surrender failed", { error: String(error) });
+        });
+        return await this.detachAll();
+      })());
+    }, this.#graceMs);
+    this.#pending = { promise: pending.promise, resolve: pending.resolve, timer };
+    return pending.promise;
+  }
+  hold() {
+    const pending = this.#pending;
+    if (!pending)
+      return;
+    this.#pending = null;
+    clearTimeout(pending.timer);
+    pending.resolve([]);
+  }
+  releaseNow() {
+    this.hold();
+    for (const tabId of this.#tabs)
+      this.#detach(tabId).catch(() => {});
+    this.#tabs.clear();
+  }
 }
 
-// ../coding-agent/src/tools/browser/relay/protocol.ts
-function isDownloadFileQueries(value) {
-  return Array.isArray(value) && value.length <= 256 && value.every((entry) => entry && typeof entry === "object" && typeof entry.id === "string" && entry.id.length > 0 && typeof entry.url === "string" && entry.url.length > 0 && Number.isSafeInteger(entry.startedAt) && entry.startedAt > 0 && entry.startedAt < 8640000000000000 - 5000);
+// extension/tab-groups.ts
+async function groupTab(tabId, owner, label) {
+  let tab;
+  try {
+    tab = await chrome.tabs.get(tabId);
+  } catch {}
+  if (!tab || tab.pinned || tab.id === undefined)
+    return {};
+  const stored = await chrome.storage.session.get({ ownerGroups: {} });
+  const groups = stored.ownerGroups && typeof stored.ownerGroups === "object" ? stored.ownerGroups : {};
+  const key = JSON.stringify([owner, tab.windowId]);
+  const existing = (await chrome.tabGroups.query({ windowId: tab.windowId })).find((group) => group.id === groups[key]);
+  let groupId;
+  if (existing) {
+    groupId = existing.id;
+    await chrome.tabs.group({ tabIds: [tab.id], groupId });
+  } else {
+    groupId = await chrome.tabs.group({ tabIds: [tab.id] });
+    await chrome.tabGroups.update(groupId, { title: label, color: "cyan" });
+  }
+  groups[key] = groupId;
+  await chrome.storage.session.set({ ownerGroups: groups });
+  return { groupId };
+}
+async function releaseOwnerGroups() {
+  const stored = await chrome.storage.session.get({ ownerGroups: {} });
+  const groups = stored.ownerGroups && typeof stored.ownerGroups === "object" ? stored.ownerGroups : {};
+  await chrome.storage.session.set({ ownerGroups: {} });
+  const released = [];
+  for (const groupId of new Set(Object.values(groups))) {
+    const tabs = await chrome.tabs.query({ groupId }).catch(() => []);
+    const tabIds = tabs.map((tab) => tab.id).filter((id) => id !== undefined);
+    if (!tabIds.length)
+      continue;
+    await chrome.tabs.ungroup(tabIds).catch(() => {});
+    released.push(...tabIds);
+  }
+  return released;
 }
 
-// extension/download-files.ts
-async function findDownloadFiles(queries, api) {
-  if (!isDownloadFileQueries(queries))
-    throw new Error("Invalid observed-download queries");
-  if (!await api.permissions.contains({ permissions: ["downloads"] }))
-    return { available: false, reason: "Saved download paths are not enabled. In this OMP extension's settings, choose Enable download file lookup and approve Chrome's permission prompt." };
-  const matches = [];
-  for (const query of queries) {
-    const lower = Math.max(0, query.startedAt - 5000), upper = query.startedAt + 5000;
-    const rows = await api.downloads.search({ startedAfter: new Date(lower).toISOString(), startedBefore: new Date(upper).toISOString(), limit: 101, orderBy: ["-startTime"] });
-    const candidates = rows.slice(0, 100).filter((row) => {
-      const at = Date.parse(row.startTime);
-      return Number.isFinite(at) && at >= lower && at <= upper && (row.url === query.url || row.finalUrl === query.url);
-    }).map((row) => ({ id: row.id, path: row.filename, url: row.url, finalUrl: row.finalUrl, referrer: row.referrer, startedAt: Date.parse(row.startTime), state: row.state, bytesReceived: row.bytesReceived, totalBytes: row.totalBytes, exists: row.exists }));
-    matches.push({ id: query.id, truncated: rows.length > 100, candidates });
-  }
-  return { available: true, correlation: "url-and-time-candidates", matches };
-}
+// ../coding-agent/src/tools/browser/relay/lease-badge.ts
+var GLYPH_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' + '<path d="M7 2.5 26 16.5l-8.6 1 4.7 8.6-4.2 2.4-4.7-8.6L7 25.5z" fill="#111" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>' + "</svg>";
+var LEASE_BADGE_INSTALL = `(() => {
+	if (window.top !== window) return;
+	// Only a real HTML document takes its icon from <link rel=icon> and
+	// re-reads it when one is removed. Chrome's PDF viewer accepts the badge
+	// and then keeps it after the restore — a tab that looks driven forever —
+	// so a document we cannot un-badge is never badged.
+	if (document.contentType !== "text/html" && document.contentType !== "application/xhtml+xml") return;
+	const KEY = "__ompLeaseBadge";
+	if (window[KEY]) { window[KEY].apply(); return; }
+	const href = "data:image/svg+xml," + encodeURIComponent(${JSON.stringify(GLYPH_SVG)});
+	let originals = null;
+	const apply = () => {
+		const head = document.head;
+		if (!head) return;
+		const site = [...head.querySelectorAll("link[rel~='icon' i]")].filter(link => !link.hasAttribute("data-omp-badge"));
+		if (site.length) {
+			originals ??= [];
+			for (const link of site) {
+				originals.push(link.outerHTML);
+				link.remove();
+			}
+		}
+		if (head.querySelector("link[data-omp-badge]")) return;
+		const badge = document.createElement("link");
+		badge.setAttribute("rel", "icon");
+		badge.setAttribute("data-omp-badge", "");
+		badge.setAttribute("href", href);
+		head.append(badge);
+	};
+	const observer = new MutationObserver(() => apply());
+	window[KEY] = {
+		apply,
+		restore: () => {
+			observer.disconnect();
+			delete window[KEY];
+			for (const badge of document.querySelectorAll("link[data-omp-badge]")) badge.remove();
+			if (!originals || !document.head) return;
+			const template = document.createElement("template");
+			template.innerHTML = originals.join("");
+			document.head.append(template.content);
+		},
+	};
+	const watch = () => {
+		if (!document.head) return false;
+		apply();
+		observer.observe(document.head, { childList: true });
+		return true;
+	};
+	if (!watch()) new MutationObserver((_, self) => { if (watch()) self.disconnect(); }).observe(document.documentElement, { childList: true, subtree: true });
+})()`;
+var LEASE_BADGE_RESTORE = `window.__ompLeaseBadge?.restore()`;
 
 // extension/background.ts
 var PING_INTERVAL_MS = 20000;
 var RECONNECT_MIN_MS = 1000;
 var RECONNECT_MAX_MS = 1e4;
+var DETACH_GRACE_MS = 2000;
 var ws = null;
 var connecting = false;
 var relayReady = false;
 var pendingEvents = [];
 var reconnectDelay = RECONNECT_MIN_MS;
 var pingTimer = null;
+var attachments = new DebuggerAttachments({
+  detach: (tabId) => chrome.debugger.detach({ tabId }),
+  graceMs: DETACH_GRACE_MS,
+  surrender: async (held) => {
+    for (const tabId of held) {
+      await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression: LEASE_BADGE_RESTORE }).catch(() => {
+        return;
+      });
+    }
+    await releaseOwnerGroups();
+  }
+});
 async function loadSettings() {
   const response = await fetch(chrome.runtime.getURL("connection.json"));
   const defaults = await response.json();
@@ -151,12 +267,14 @@ async function buildHello() {
       snapshots.push(snap);
   }
   const attachedTabIds = await ownedDebuggerTabs(targets, (tabId) => chrome.debugger.sendCommand({ tabId }, "Target.getTargetInfo"));
+  for (const tabId of attachedTabIds)
+    attachments.attached(tabId);
   const versionMatch = /Chrome\/[\d.]+/.exec(navigator.userAgent);
   return {
     t: "hello",
     userAgent: navigator.userAgent,
     browserVersion: versionMatch?.[0] ?? "Chrome/unknown",
-    extensionBuildId: "6b073335405833ea4a8669381b77235b641d70fffca253a7d068a30967b19244",
+    extensionBuildId: "3aefc617680ca7e499f6a7bab178d13659cbe08926af81a3481341ff6e592e65",
     tabs: snapshots,
     attachedTabIds
   };
@@ -165,44 +283,43 @@ async function runRpc(msg) {
   switch (msg.op) {
     case "queryTabs":
       return { tabs: (await chrome.tabs.query({})).map(snapshot).filter((tab) => tab !== null) };
-    case "downloadFiles":
-      return await findDownloadFiles(msg.queries, chrome);
     case "attach":
       await chrome.debugger.attach({ tabId: msg.tabId }, "1.3");
+      attachments.attached(msg.tabId);
       return {};
     case "detach":
+      attachments.detached(msg.tabId);
       await chrome.debugger.detach({ tabId: msg.tabId });
       post({ t: "detached", tabId: msg.tabId, reason: "target_closed", relayInitiated: true });
       return {};
+    case "detachAll":
+      return { detached: await attachments.detachAll(msg.tabIds) };
     case "send":
       return await chrome.debugger.sendCommand(msg.sessionId ? { tabId: msg.tabId, sessionId: msg.sessionId } : { tabId: msg.tabId }, msg.method, msg.params);
-    case "navigateTab": {
-      await chrome.tabs.update(msg.tabId, { url: msg.url });
-      return {};
-    }
     case "createTab": {
-      const tab = await chrome.tabs.create({ url: msg.url, active: false, windowId: msg.windowId, openerTabId: msg.openerTabId });
+      const tab = await chrome.tabs.create({ url: msg.url, active: false });
       const snap = snapshot(tab);
       if (!snap)
         throw new Error("created tab has no id");
       return { tab: snap };
     }
-    case "removeTab":
-      await chrome.tabs.remove(msg.tabId);
-      return {};
     case "activateTab": {
-      const tab = await chrome.tabs.get(msg.tabId);
-      await chrome.windows.update(tab.windowId, { focused: true });
+      if (msg.focusWindow) {
+        const tab = await chrome.tabs.get(msg.tabId);
+        await chrome.windows.update(tab.windowId, { focused: true });
+      }
       await chrome.tabs.update(msg.tabId, { active: true });
       return {};
     }
     case "group":
-      return await enqueueGroupOp(() => groupTabs(msg.tabIds, msg.title, msg.color));
-    case "taskGroup":
-      return await enqueueGroupOp(() => groupTabs([msg.tabId], msg.label, "cyan", msg.taskId));
-    case "ungroup":
-      await enqueueGroupOp(() => chrome.tabs.ungroup(msg.tabIds).catch(() => {}));
-      return {};
+      return await enqueueGroupOp(() => groupTab(msg.tabId, msg.owner, msg.label));
+    case "releaseTab":
+      return await enqueueGroupOp(async () => {
+        await chrome.tabs.ungroup([msg.tabId]).catch(() => {});
+        if (msg.close)
+          await chrome.tabs.remove(msg.tabId);
+        return {};
+      });
   }
 }
 async function handleRelayMessage(socket, raw) {
@@ -227,6 +344,7 @@ async function handleRelayMessage(socket, raw) {
       return;
     socket.send(JSON.stringify(hello));
     relayReady = true;
+    attachments.hold();
     for (const event of pendingEvents)
       socket.send(JSON.stringify(event));
     pendingEvents = [];
@@ -283,6 +401,7 @@ async function connect() {
         pingTimer = null;
       }
       setBadge(false);
+      attachments.scheduleRelease();
       scheduleReconnect();
     };
     socket.onerror = () => {
@@ -291,6 +410,7 @@ async function connect() {
   } catch (error) {
     await chrome.storage.local.set({ connectionError: error instanceof Error ? error.message : String(error) });
     setBadge(false);
+    attachments.scheduleRelease();
     scheduleReconnect();
   } finally {
     connecting = false;
@@ -304,6 +424,7 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
 chrome.debugger.onDetach.addListener((source, reason) => {
   if (source.tabId === undefined)
     return;
+  attachments.detached(source.tabId);
   post({ t: "detached", tabId: source.tabId, reason });
 });
 chrome.tabs.onActivated.addListener((info) => {
@@ -311,7 +432,11 @@ chrome.tabs.onActivated.addListener((info) => {
 });
 chrome.tabs.onCreated.addListener((tab) => {
   const snap = snapshot(tab);
-  if (snap)
+  if (!snap)
+    return;
+  if (tab.openerTabId !== undefined)
+    post({ t: "tabOpened", tab: snap, openerTabId: tab.openerTabId });
+  else
     post({ t: "tabCreated", tab: snap });
 });
 chrome.tabs.onUpdated.addListener((_tabId, _changeInfo, tab) => {
@@ -320,6 +445,7 @@ chrome.tabs.onUpdated.addListener((_tabId, _changeInfo, tab) => {
     post({ t: "tabUpdated", tab: snap });
 });
 chrome.tabs.onRemoved.addListener((tabId) => {
+  attachments.detached(tabId);
   post({ t: "tabRemoved", tabId });
 });
 chrome.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
@@ -354,4 +480,5 @@ chrome.runtime.onMessage.addListener((message) => {
 });
 chrome.runtime.onInstalled.addListener(() => void connect());
 chrome.runtime.onStartup.addListener(() => void connect());
+chrome.runtime.onSuspend.addListener(() => attachments.releaseNow());
 connect();

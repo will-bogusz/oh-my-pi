@@ -39,6 +39,7 @@ async function runBackground(directory: string, initial: ExtensionStorage = {}) 
 		},
 		onInstalled: event(),
 		onStartup: event(),
+		onSuspend: event(),
 		onMessage: event(),
 	};
 	const context = createContext({
@@ -89,25 +90,12 @@ async function runBackground(directory: string, initial: ExtensionStorage = {}) 
 	return { requests, storage, click: () => click?.(), optionsOpened: () => optionsOpened };
 }
 
-interface OptionsPermissions {
-	contains(request: { permissions: string[] }): Promise<boolean>;
-	request(request: { permissions: string[] }): Promise<boolean>;
-	remove(request: { permissions: string[] }): Promise<boolean>;
-}
-
 async function runOptions(
 	directory: string,
 	stored: ExtensionStorage = {},
-	permissions: OptionsPermissions = {
-		contains: async () => false,
-		request: async () => false,
-		remove: async () => false,
-	},
-	clickDownload = false,
 ) {
 	const ready = Promise.withResolvers<void>();
 	let status = "";
-	let downloadClick: (() => Promise<void> | void) | undefined;
 	const elements: Record<
 		string,
 		{
@@ -117,15 +105,8 @@ async function runOptions(
 			addEventListener: (event: string, callback: () => Promise<void> | void) => void;
 		}
 	> = {};
-	for (const name of ["port", "label", "code", "save", "downloads", "downloads-status"])
-		elements[name] = {
-			value: "",
-			textContent: "",
-			disabled: false,
-			addEventListener: (_event, callback) => {
-				if (name === "downloads") downloadClick = callback;
-			},
-		};
+	for (const name of ["port", "label", "code", "save"])
+		elements[name] = { value: "", textContent: "", disabled: false, addEventListener: () => {} };
 	const context = createContext({
 		Response,
 		fetch: async () => new Response(Bun.file(path.join(directory, "connection.json"))),
@@ -141,7 +122,6 @@ async function runOptions(
 					: elements[name],
 		},
 		chrome: {
-			permissions,
 			runtime: { getURL: (name: string) => `chrome-extension://fixture/${name}` },
 			storage: {
 				local: { get: async (defaults: ExtensionStorage) => ({ ...defaults, ...stored }) },
@@ -151,7 +131,6 @@ async function runOptions(
 	});
 	runInContext(await Bun.file(path.join(directory, "options.js")).text(), context);
 	await ready.promise;
-	if (clickDownload) await downloadClick?.();
 	return { port: elements.port!.value, disabled: elements.save!.disabled, status };
 }
 
@@ -175,30 +154,6 @@ describe("browser extension installation", () => {
 		expect(background.requests.at(-1)).toBe("http://127.0.0.1:19444/health");
 	});
 
-	it("requests or removes download permission only from the explicit settings button", async () => {
-		const directory = await install(DEFAULT_RELAY_PORT);
-		let granted = false;
-		const actions: string[] = [];
-		const permissions: OptionsPermissions = {
-			contains: async () => granted,
-			request: async ({ permissions }) => {
-				actions.push(`request:${permissions.join(",")}`);
-				granted = true;
-				return true;
-			},
-			remove: async ({ permissions }) => {
-				actions.push(`remove:${permissions.join(",")}`);
-				granted = false;
-				return true;
-			},
-		};
-		await runOptions(directory, {}, permissions);
-		expect(actions).toEqual([]);
-		await runOptions(directory, {}, permissions, true);
-		expect(actions).toEqual(["request:downloads"]);
-		await runOptions(directory, {}, permissions, true);
-		expect(actions).toEqual(["request:downloads", "remove:downloads"]);
-	});
 	it.each([DEFAULT_RELAY_PORT, 19443])(
 		"uses install port %i for the first connection and settings page",
 		async port => {

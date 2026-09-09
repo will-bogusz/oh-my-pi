@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed the extension's display name to **Oh My Pi**. Existing installations keep their current name unless `omp browser-relay install --name "Oh My Pi"` is passed, so a refresh never silently changes the debugger warning a loaded copy shows.
+
+### Fixed
+
+- The extension now hands its `chrome.debugger` attachments back instead of holding them for a whole session, so Chrome's "started debugging this browser" bar no longer outlives the work that caused it. Attachments are released when the host ends a task or turn, when the relay socket stays closed for two seconds, and when Chrome unloads the extension's worker; the next command reattaches and restores the tab's root debugger state.
+- When the relay is gone for good — its socket stays closed past the reconnect grace — the extension now hands the tabs it was driving back by itself: it restores their favicons over the still-live attachment and takes them out of the groups it created, so a killed or crashed relay no longer leaves tabs marked, grouped and owned by nothing.
+- Selecting a tab no longer implies raising its window: the relay can put the user's own tab back after Chrome opens a `target="_blank"` child without touching window focus.
+- Documents whose favicon Chrome will not re-read, such as PDFs in its built-in viewer, are no longer badged; a PDF tab kept after a task used to wear the cursor glyph permanently.
+
 ## [18.0.7] - 2026-08-26
 
 ### Changed

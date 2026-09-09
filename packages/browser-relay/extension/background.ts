@@ -10,9 +10,9 @@
  * and re-dials after Chrome reaps it while disconnected.
  */
 import type { ExtToRelayMessage, RelayToExtMessage, TabSnapshot } from "../../coding-agent/src/tools/browser/relay/protocol";
-import { ownedDebuggerTabs } from "./debugger-ownership";
-import { groupTabs } from "./task-groups";
-import { findDownloadFiles } from "./download-files";
+import { DebuggerAttachments, ownedDebuggerTabs } from "./debugger-ownership";
+import { groupTab, releaseOwnerGroups } from "./tab-groups";
+import { LEASE_BADGE_RESTORE } from "../../coding-agent/src/tools/browser/relay/lease-badge";
 
 // The distribution build embeds this into the worker, so a reconnect reports
 // executing code rather than whichever files happen to be on disk now.
@@ -21,6 +21,8 @@ declare const __OMP_EXTENSION_BUILD_ID__: string;
 const PING_INTERVAL_MS = 20_000;
 const RECONNECT_MIN_MS = 1_000;
 const RECONNECT_MAX_MS = 10_000;
+/** Reconnect window a dropped relay socket gets before its attachments are released. */
+const DETACH_GRACE_MS = 2_000;
 
 let ws: WebSocket | null = null;
 let connecting = false;
@@ -28,6 +30,26 @@ let relayReady = false;
 let pendingEvents: ExtToRelayMessage[] = [];
 let reconnectDelay = RECONNECT_MIN_MS;
 let pingTimer: NodeJS.Timeout | null = null;
+/**
+ * Chrome holds a `chrome.debugger` attachment (and shows its debugging
+ * infobar) until this extension detaches or unloads, so every end of relay
+ * authority has to give the attachments back explicitly.
+ */
+const attachments = new DebuggerAttachments({
+	detach: tabId => chrome.debugger.detach({ tabId }),
+	graceMs: DETACH_GRACE_MS,
+	surrender: async held => {
+		// Relay authority is gone for good: nothing else will ever release
+		// these leases, so hand the tabs back here. The favicon first — only
+		// this still-live attachment can reach the page — then the groups.
+		for (const tabId of held) {
+			await chrome.debugger
+				.sendCommand({ tabId }, "Runtime.evaluate", { expression: LEASE_BADGE_RESTORE })
+				.catch(() => undefined);
+		}
+		await releaseOwnerGroups();
+	},
+});
 
 interface RelaySettings {
 	port: number;
@@ -113,6 +135,9 @@ async function buildHello(): Promise<ExtToRelayMessage> {
 	const attachedTabIds = await ownedDebuggerTabs(targets, tabId =>
 		chrome.debugger.sendCommand({ tabId }, "Target.getTargetInfo"),
 	);
+	// A worker restart loses the tracking set while Chrome keeps the
+	// attachments; the probe is the only authority on what we still hold.
+	for (const tabId of attachedTabIds) attachments.attached(tabId);
 	const versionMatch = /Chrome\/[\d.]+/.exec(navigator.userAgent);
 	return {
 		t: "hello",
@@ -128,49 +153,53 @@ async function runRpc(msg: Extract<RelayToExtMessage, { t: "rpc" }>): Promise<un
 	switch (msg.op) {
 		case "queryTabs":
 			return { tabs: (await chrome.tabs.query({})).map(snapshot).filter(tab => tab !== null) };
-		case "downloadFiles":
-			return await findDownloadFiles(msg.queries, chrome);
 		case "attach":
 			await chrome.debugger.attach({ tabId: msg.tabId }, "1.3");
+			attachments.attached(msg.tabId);
 			return {};
 		case "detach":
+			attachments.detached(msg.tabId);
 			await chrome.debugger.detach({ tabId: msg.tabId });
 			// Chrome's explicit detach does not emit onDetach. Acknowledge it
 			// before the RPC result so the relay can safely serialize reattachment.
 			post({ t: "detached", tabId: msg.tabId, reason: "target_closed", relayInitiated: true });
 			return {};
+		case "detachAll":
+			// The host ended a task or turn. Give the tabs back so Chrome takes
+			// its debugging infobar down; the relay reattaches lazily on next use.
+			return { detached: await attachments.detachAll(msg.tabIds) };
 		case "send":
 			return await chrome.debugger.sendCommand(
 				msg.sessionId ? { tabId: msg.tabId, sessionId: msg.sessionId } : { tabId: msg.tabId },
 				msg.method,
 				msg.params,
 			);
-		case "navigateTab": {
-			await chrome.tabs.update(msg.tabId, { url: msg.url });
-			return {};
-		}
 		case "createTab": {
-			const tab = await chrome.tabs.create({ url: msg.url, active: false, windowId: msg.windowId, openerTabId: msg.openerTabId });
+			const tab = await chrome.tabs.create({ url: msg.url, active: false });
 			const snap = snapshot(tab);
 			if (!snap) throw new Error("created tab has no id");
 			return { tab: snap };
 		}
-		case "removeTab":
-			await chrome.tabs.remove(msg.tabId);
-			return {};
 		case "activateTab": {
-			const tab = await chrome.tabs.get(msg.tabId);
-			await chrome.windows.update(tab.windowId, { focused: true });
+			// Selecting a tab is not the same as raising its window: an adopted
+			// popup only needs the user's own tab selected again.
+			if (msg.focusWindow) {
+				const tab = await chrome.tabs.get(msg.tabId);
+				await chrome.windows.update(tab.windowId, { focused: true });
+			}
 			await chrome.tabs.update(msg.tabId, { active: true });
 			return {};
 		}
 		case "group":
-			return await enqueueGroupOp(() => groupTabs(msg.tabIds, msg.title, msg.color));
-		case "taskGroup":
-			return await enqueueGroupOp(() => groupTabs([msg.tabId], msg.label, "cyan", msg.taskId));
-		case "ungroup":
-			await enqueueGroupOp(() => chrome.tabs.ungroup(msg.tabIds).catch(() => {}));
-			return {};
+			return await enqueueGroupOp(() => groupTab(msg.tabId, msg.owner, msg.label));
+		case "releaseTab":
+			// Leaving the group BEFORE the tab closes is what keeps Chrome from
+			// saving the emptied group as a chip in the bookmarks bar.
+			return await enqueueGroupOp(async () => {
+				await chrome.tabs.ungroup([msg.tabId]).catch(() => {});
+				if (msg.close) await chrome.tabs.remove(msg.tabId);
+				return {};
+			});
 	}
 }
 
@@ -193,6 +222,8 @@ async function handleRelayMessage(socket: WebSocket, raw: string): Promise<void>
 		if (ws !== socket || socket.readyState !== WebSocket.OPEN) return;
 		socket.send(JSON.stringify(hello));
 		relayReady = true;
+		// Authority restored: whatever the previous socket's close armed stays ours.
+		attachments.hold();
 		for (const event of pendingEvents) socket.send(JSON.stringify(event));
 		pendingEvents = [];
 		await chrome.storage.local.set({ connectionError: "" });
@@ -250,6 +281,10 @@ async function connect(): Promise<void> {
 				pingTimer = null;
 			}
 			void setBadge(false);
+			// The relay is gone. A reconnect within the grace keeps the debugger
+			// attachments (and the tabs' state); otherwise they go back to Chrome so
+			// its debugging infobar disappears instead of outliving the task.
+			void attachments.scheduleRelease();
 			scheduleReconnect();
 		};
 		socket.onerror = () => {
@@ -258,6 +293,7 @@ async function connect(): Promise<void> {
 	} catch (error) {
 		await chrome.storage.local.set({ connectionError: error instanceof Error ? error.message : String(error) });
 		void setBadge(false);
+		void attachments.scheduleRelease();
 		scheduleReconnect();
 	} finally {
 		connecting = false;
@@ -273,6 +309,7 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
 
 chrome.debugger.onDetach.addListener((source, reason) => {
 	if (source.tabId === undefined) return;
+	attachments.detached(source.tabId);
 	// Native onDetach always represents user/browser termination, even while
 	// an explicit detach RPC is pending.
 	post({ t: "detached", tabId: source.tabId, reason });
@@ -284,7 +321,11 @@ chrome.tabs.onActivated.addListener(info => {
 
 chrome.tabs.onCreated.addListener(tab => {
 	const snap = snapshot(tab);
-	if (snap) post({ t: "tabCreated", tab: snap });
+	if (!snap) return;
+	// A tab the browser opened from another tab. The relay decides whether the
+	// opener is one of its own; page script never gets to claim anything.
+	if (tab.openerTabId !== undefined) post({ t: "tabOpened", tab: snap, openerTabId: tab.openerTabId });
+	else post({ t: "tabCreated", tab: snap });
 });
 
 chrome.tabs.onUpdated.addListener((_tabId, _changeInfo, tab) => {
@@ -293,6 +334,7 @@ chrome.tabs.onUpdated.addListener((_tabId, _changeInfo, tab) => {
 });
 
 chrome.tabs.onRemoved.addListener(tabId => {
+	attachments.detached(tabId);
 	post({ t: "tabRemoved", tabId });
 });
 
@@ -323,5 +365,8 @@ chrome.runtime.onMessage.addListener(message => {
 
 chrome.runtime.onInstalled.addListener(() => void connect());
 chrome.runtime.onStartup.addListener(() => void connect());
+// Chrome keeps this extension's debugger attachments after it reaps the
+// worker, infobar included. Unloading is the last chance to hand them back.
+chrome.runtime.onSuspend.addListener(() => attachments.releaseNow());
 
 void connect();

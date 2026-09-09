@@ -98,7 +98,7 @@ async function runInstall(
 	}
 	await Bun.write(path.join(dir, "connection.json"), `${JSON.stringify({ port })}\n`);
 	console.log(
-		`${previousName ? "Updated" : "Installed"} the ${displayName ?? "OMP Browser Relay"} extension files at ${dir}`,
+		`${previousName ? "Updated" : "Installed"} the ${displayName ?? "Oh My Pi"} extension files at ${dir}`,
 	);
 	console.log("");
 	if (previousName) {

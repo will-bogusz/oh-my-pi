@@ -86,9 +86,14 @@ async function connectExtension(relay: RelayServer): Promise<WebSocket> {
 	);
 	ws.addEventListener("message", event => {
 		const value = JSON.parse(String(event.data)) as { t?: string; op?: string; id?: number };
-		if (value.t === "rpc" && value.op === "queryTabs")
+		if (value.t === "rpc")
 			ws.send(
-				JSON.stringify({ t: "rpcResult", id: value.id, ok: true, result: { tabs: relay.instances.discover() } }),
+				JSON.stringify({
+					t: "rpcResult",
+					id: value.id,
+					ok: true,
+					result: value.op === "queryTabs" ? { tabs: relay.instances.discover() } : {},
+				}),
 			);
 		if (value.t === "authenticated") {
 			ws.send(JSON.stringify(EXTENSION_HELLO));
@@ -189,9 +194,10 @@ describe("browser relay discovery endpoint", () => {
 		const port = await startReadyRelay();
 		const base = `http://127.0.0.1:${port}`;
 		const commands: string[] = [];
+		// Debugger traffic only: discovery and tab lifecycle must never attach.
 		extension!.addEventListener("message", event => {
 			const msg = JSON.parse(String(event.data)) as { op?: string };
-			if (msg.op !== "queryTabs") commands.push(String(event.data));
+			if (msg.op === "attach" || msg.op === "detach" || msg.op === "send") commands.push(String(event.data));
 		});
 		extension!.send(
 			JSON.stringify({
@@ -217,7 +223,7 @@ describe("browser relay discovery endpoint", () => {
 				},
 				body: JSON.stringify(args),
 			});
-		await relay!.instances.select().bridge.managed.release(lease.id, "host-test");
+		await relay!.instances.releaseTab(lease.id, "host-test", false);
 		let discovered: DiscoveredChromeTab[] = [];
 		for (let attempt = 0; attempt < 20 && discovered.length < 2; attempt++)
 			discovered = (await (await request({ action: "discover" })).json()) as DiscoveredChromeTab[];
@@ -235,7 +241,7 @@ describe("browser relay discovery endpoint", () => {
 			"webSocketDebuggerUrl",
 			`ws://127.0.0.1:${port}/cdp?lease=${claimedLease.id}`,
 		);
-		expect((await request({ action: "release", id: claimedLease.id, owner: "actor A" })).status).toBe(200);
+		expect((await request({ action: "releaseTab", id: claimedLease.id, owner: "actor A", close: false })).status).toBe(200);
 		expect((await fetch(`${base}/managed/${claimedLease.id}/json/version`)).status).toBe(410);
 		expect(commands).toEqual([]);
 	});

@@ -3,30 +3,6 @@ const portInput = document.getElementById("port");
 const labelInput = document.getElementById("label");
 const codeInput = document.getElementById("code");
 const status = document.getElementById("status");
-const downloadsButton = document.getElementById("downloads");
-const downloadsStatus = document.getElementById("downloads-status");
-let downloadEnabled = false;
-downloadsButton.disabled = true;
-async function updateDownloadPermission() {
-	const enabled = await chrome.permissions.contains({ permissions: ["downloads"] });
-	downloadEnabled = enabled;
-	downloadsButton.textContent = enabled ? "Disable download file lookup" : "Enable download file lookup";
-	downloadsStatus.textContent = enabled ? "Enabled" : "Not enabled";
-	downloadsButton.disabled = false;
-	return enabled;
-}
-downloadsButton.addEventListener("click", async () => {
-	downloadsButton.disabled = true;
-	try {
-		// request must remain in the user's click handler.
-		if (downloadEnabled)
-			await chrome.permissions.remove({ permissions: ["downloads"] });
-		else await chrome.permissions.request({ permissions: ["downloads"] });
-		await updateDownloadPermission();
-	} catch (error) { downloadsStatus.textContent = error instanceof Error ? error.message : String(error); }
-	finally { downloadsButton.disabled = false; }
-});
-updateDownloadPermission().catch(error => { downloadsStatus.textContent = String(error); });
 let paired = false;
 let connectedPort;
 const save = document.getElementById("save");

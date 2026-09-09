@@ -48,9 +48,6 @@
 		<label for="port">Local port</label>
 		<input id="port" type="number" min="1" max="65535" /></details>
 		<button id="save">Save and connect</button><span id="status"></span>
-		<h2>Downloaded files</h2>
-		<p class="hint">Optionally let OMP find saved file paths for downloads it observes. Chrome grants access to download records; OMP queries a short time window and returns matching URLs. This does not change where Chrome saves files.</p>
-		<button id="downloads">Enable download file lookup</button><span id="downloads-status" role="status"></span>
 		<script src="options.js"></script>
 	</body>
 </html>

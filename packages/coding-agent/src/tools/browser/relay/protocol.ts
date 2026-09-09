@@ -39,69 +39,32 @@ export function mergeTabSnapshot(previous: TabSnapshot | undefined, next: TabSna
 	return { ...next, url: next.url || previous?.url || "" };
 }
 
-export interface DownloadFileQuery {
-	id: string;
-	url: string;
-	startedAt: number;
-}
-
-export interface DownloadFileCandidate {
-	id: number;
-	path: string;
-	url: string;
-	finalUrl: string;
-	referrer: string;
-	startedAt: number;
-	state: "in_progress" | "complete" | "interrupted";
-	bytesReceived: number;
-	totalBytes: number;
-	/** Chrome's cached existence flag; verify the actual file separately. */
-	exists: boolean;
-}
-
-export type DownloadFileLookup =
-	| { available: false; reason: string }
-	| {
-			available: true;
-			correlation: "url-and-time-candidates";
-			matches: Array<{ id: string; truncated: boolean; candidates: DownloadFileCandidate[] }>;
-	  };
-
-export function isDownloadFileQueries(value: unknown): value is DownloadFileQuery[] {
-	return (
-		Array.isArray(value) &&
-		value.length <= 256 &&
-		value.every(
-			entry =>
-				entry &&
-				typeof entry === "object" &&
-				typeof entry.id === "string" &&
-				entry.id.length > 0 &&
-				typeof entry.url === "string" &&
-				entry.url.length > 0 &&
-				Number.isSafeInteger(entry.startedAt) &&
-				entry.startedAt > 0 &&
-				entry.startedAt < 8_640_000_000_000_000 - 5000,
-		)
-	);
-}
-
 /** RPCs the relay may ask the extension to perform. */
 export type RelayRpcRequest =
 	| { op: "queryTabs" }
-	| { op: "downloadFiles"; queries: DownloadFileQuery[] }
 	| { op: "attach"; tabId: number }
 	| { op: "detach"; tabId: number }
+	/** Release the extension's debugger attachments (default: all it owns) and report which. */
+	| { op: "detachAll"; tabIds?: number[] }
 	| { op: "send"; tabId: number; sessionId?: string; method: string; params?: Record<string, unknown> }
-	| { op: "createTab"; url: string; windowId?: number; openerTabId?: number }
-	| { op: "navigateTab"; tabId: number; url: string }
-	| { op: "removeTab"; tabId: number }
-	| { op: "activateTab"; tabId: number }
-	| { op: "taskGroup"; tabId: number; taskId: string; label: string }
-	/** Add tabs to the per-window omp group (created/reused by title), remembering prior membership. */
-	| { op: "group"; tabIds: number[]; title: string; color: string }
-	/** Return tabs to their pre-omp group (or ungroup); no-op for tabs the relay never grouped. */
-	| { op: "ungroup"; tabIds: number[] };
+	| { op: "createTab"; url: string }
+	/**
+	 * Select a tab. `focusWindow` raises its window too — a deliberate reveal;
+	 * without it the tab is only selected, which is how a `target=_blank` child
+	 * hands the visible tab back to the user without touching window focus.
+	 */
+	| { op: "activateTab"; tabId: number; focusWindow: boolean }
+	/**
+	 * Put one tab in the owner's tab group, created on first use per window and
+	 * titled `label`; one group per owner, reused by every later claim.
+	 */
+	| { op: "group"; tabId: number; owner: string; label: string }
+	/**
+	 * Hand a tab back to the user: leave its group, then close it when asked.
+	 * Ungrouping first is what keeps Chrome from saving the (now empty) group
+	 * as a chip in the bookmarks bar.
+	 */
+	| { op: "releaseTab"; tabId: number; close: boolean };
 
 /** Messages sent relay → extension. */
 export type RelayToExtMessage =
@@ -125,6 +88,12 @@ export type ExtToRelayMessage =
 	| { t: "cdpEvent"; tabId: number; sessionId?: string; method: string; params?: Record<string, unknown> }
 	| { t: "detached"; tabId: number; reason: string; relayInitiated?: boolean }
 	| { t: "tabCreated"; tab: TabSnapshot }
+	/**
+	 * A tab opened by another tab (`window.open`, target=_blank, native popup).
+	 * When the opener holds a lease the relay leases the child to the opener's
+	 * owner, in the same group, and serves it from the `childTabs` action.
+	 */
+	| { t: "tabOpened"; tab: TabSnapshot; openerTabId: number }
 	| { t: "tabUpdated"; tab: TabSnapshot }
 	| { t: "tabRemoved"; tabId: number }
 	| { t: "tabActivated"; tabId: number; windowId: number }

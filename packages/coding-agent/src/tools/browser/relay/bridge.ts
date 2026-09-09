@@ -23,9 +23,7 @@
  */
 import {
 	type ExtToRelayMessage,
-	type DownloadFileQuery,
 	isTabSnapshot,
-	isDownloadFileQueries,
 	mergeTabSnapshot,
 	type RelayRpcRequest,
 	type RelayToExtMessage,
@@ -33,6 +31,7 @@ import {
 } from "./protocol";
 import { DialogJournal, parseDialogRequest, type DialogState } from "../dialogs";
 import { ManagedChromeTabs } from "./managed-tabs";
+import { LEASE_BADGE_INSTALL, LEASE_BADGE_RESTORE } from "./lease-badge";
 
 /** Transport-agnostic websocket surface the bridge writes to. */
 export interface RelaySocket {
@@ -82,17 +81,13 @@ interface TargetInfo {
 class CdpConnection {
 	discover = false;
 	autoAttach = false;
-	/** A connection with no CDP commands can hold an unresolved-dialog lease. */
-	leaseOnly = true;
 	/** Minted pseudo-sessions owned by this connection. */
 	readonly sessions = new Map<string, SessionRef>();
-	/** Tabs this connection claimed as drive targets (`OMP.claimTarget` / `Target.createTarget`). */
-	readonly claims = new Set<number>();
 
 	constructor(
 		readonly id: number,
 		readonly socket: RelaySocket,
-		readonly leaseId?: string,
+		readonly leaseId: string,
 		readonly leasedTab?: TabState,
 	) {}
 
@@ -110,7 +105,6 @@ class ExtensionReplacedError extends Error {}
 
 class TabState {
 	readonly dialogs = new DialogJournal();
-	readonly downloads = new Map<string, DownloadFileQuery>();
 	url: string;
 	title: string;
 	active: boolean;
@@ -127,15 +121,29 @@ class TabState {
 	attaching: Promise<boolean> | null = null;
 	/** Relay-initiated detach in flight; reattach serializes behind it. */
 	detaching: Promise<void> | null = null;
+	/** Badge script installed for the lease, removed when the lease ends. */
+	badgeScriptId: string | undefined;
 	/** A successful attach completed after the most recently requested relay detach. */
 	reattachedAfterDetach = false;
-	/** True after the relay put this tab in the omp group; `ompGroupId` holds that group. */
-	grouped = false;
-	/** Group RPC in flight — suppresses duplicate requests from load-time tabUpdated bursts. */
-	grouping = false;
-	ompGroupId: number | undefined;
-	/** User pulled the tab out of the omp group — never re-group it. */
-	groupOptOut = false;
+	/** Root CDP commands in flight; a puppeteer wait blocks inside one, so an idle detach must not fire. */
+	inflight = 0;
+	/** Armed while attached: hands the debugger back after {@link DEBUGGER_IDLE_MS} of CDP silence. */
+	idleTimer: NodeJS.Timeout | undefined;
+	/** Last `Page.windowOpen` this tab reported, for opener attribution Chrome gets wrong. */
+	windowOpenedAt = 0;
+	/**
+	 * Last root-session `Target.setAutoAttach` params, replayed after a
+	 * reattach: Chrome drops the tab's child sessions on detach and only
+	 * rediscovers OOPIFs/workers once auto-attach is armed again.
+	 */
+	rootAutoAttach: Record<string, unknown> | undefined;
+	/**
+	 * Root-session domain enables the drivers asked for (`"Page.enable"` → its
+	 * params), minus any later `disable`. Chrome resets every domain on the
+	 * client it detaches and puppeteer never re-enables, so a reattach has to
+	 * put these back or dialog/download/lifecycle events stop silently.
+	 */
+	readonly rootEnabled = new Map<string, Record<string, unknown> | undefined>();
 	/** Real Chrome session ids (OOPIF/worker children) living under this tab's root session. */
 	readonly realSessions = new Set<string>();
 	/** Live execution contexts from the shared root debugger session. */
@@ -174,6 +182,14 @@ const INELIGIBLE_URL = /^(chrome|devtools|edge|view-source|chrome-extension|chro
 const RPC_TIMEOUT_MS = 20_000;
 const CDP_ERROR_METHOD_NOT_FOUND = -32601;
 const CDP_ERROR_SERVER = -32000;
+/**
+ * How long an attached tab may sit without CDP traffic before its
+ * `chrome.debugger` attachment — and with it Chrome's "being debugged" infobar
+ * — goes back. The bar then tracks the work (last step + ~10 s), not the turn.
+ */
+const DEBUGGER_IDLE_MS = 10_000;
+/** How stale a `Page.windowOpen` may be and still explain a new tab. */
+const WINDOW_OPEN_MATCH_MS = 3_000;
 
 function tabTargetId(tabId: number): string {
 	return `TAB${tabId}`;
@@ -211,51 +227,46 @@ export class RelayBridge {
 	/** Real child session id → owning tab, learned from `Target.attachedToTarget` events. */
 	#realSessionTabs = new Map<string, number>();
 	#log: (message: string, data?: Record<string, unknown>) => void;
-	/** Tab-group appearance for driven tabs; null disables grouping. */
-	#group: { title: string; color: string } | null;
-	/** Tabs awaiting the next group RPC; drained one batch at a time. */
-	#groupQueue: TabState[] = [];
-	/** True while {@link #drainGroupQueue} runs — group RPCs must never overlap. */
-	#groupDraining = false;
+	/** Mark the tabs OMP drives (owner tab group + favicon glyph); off leaves the strip untouched. */
+	#markTabs: boolean;
+	/** Idle window after which an attached tab's debugger goes back; 0 keeps it for the whole lease. */
+	#idleMs: number;
 
 	constructor(
 		opts: {
 			log?: (message: string, data?: Record<string, unknown>) => void;
-			/** Group tabs the agent actively drives under one per-window Chrome tab group. */
-			group?: { title: string; color: string } | null;
+			/** Mark tabs the agent drives: one Chrome tab group per owner, plus a favicon glyph. */
+			group?: boolean;
+			/** Hand a tab's debugger back after this long without CDP traffic; 0 keeps it for the lease. */
+			debuggerIdleMs?: number;
 		} = {},
 	) {
 		this.#log = opts.log ?? (() => {});
-		this.#group = opts.group ?? null;
+		this.#markTabs = opts.group ?? false;
+		this.#idleMs = opts.debuggerIdleMs ?? DEBUGGER_IDLE_MS;
 		this.managed = new ManagedChromeTabs({
-			create: async (url, opener) => {
-				const result = (await this.#rpc({ op: "createTab", url, ...opener })) as { tab: TabSnapshot };
+			create: async url => {
+				const result = (await this.#rpc({ op: "createTab", url })) as { tab: TabSnapshot };
 				this.#onTabUpsert(result.tab);
 				return result.tab;
 			},
-			navigate: async (tabId, url) => {
-				await this.#rpc({ op: "navigateTab", tabId, url });
-			},
-			group: async (tabId, taskId, label) => {
-				if (!this.#group) return;
-				await this.#rpc({ op: "taskGroup", tabId, taskId, label });
+			group: async (tabId, owner, label) => {
+				if (!this.#markTabs) return;
+				await this.#rpc({ op: "group", tabId, owner, label });
 			},
 			reveal: async tabId => {
-				await this.#rpc({ op: "activateTab", tabId });
+				await this.#rpc({ op: "activateTab", tabId, focusWindow: true });
 			},
-			close: async tabId => {
-				await this.#rpc({ op: "removeTab", tabId });
-			},
+			release: (tabId, close) => this.#releaseTab(tabId, close),
 			invalidate: leaseId => {
 				for (const conn of this.#conns.values()) if (conn.leaseId === leaseId) conn.socket.close();
 			},
 		});
 	}
 
+	/** A connection only ever sees the one tab its lease owns. */
 	#visibleTo(conn: CdpConnection, tab: TabState): boolean {
-		if (!this.#eligible(tab)) return false;
-		if (conn.leaseId) return this.managed.tabForLease(conn.leaseId) === tab.tabId;
-		return this.managed.leaseForTab(tab.tabId) === undefined;
+		return this.#eligible(tab) && this.managed.tabForLease(conn.leaseId) === tab.tabId;
 	}
 
 	/** True once the extension has completed its hello handshake. */
@@ -274,16 +285,6 @@ export class RelayBridge {
 			"WebKit-Version": "",
 			webSocketDebuggerUrl: wsUrl,
 		};
-	}
-
-	/** Payload for `GET /json/list` (debugging aid; per-target endpoints are not served). */
-	listTargets(): Array<Record<string, string>> {
-		const out: Array<Record<string, string>> = [];
-		for (const tab of this.#tabs.values()) {
-			if (!this.#eligible(tab)) continue;
-			out.push({ id: pageTargetId(tab.tabId), type: "page", title: tab.title, url: tab.url });
-		}
-		return out;
 	}
 
 	// ---- extension lifecycle -------------------------------------------------
@@ -318,15 +319,7 @@ export class RelayBridge {
 			tab.attached = false;
 			tab.attaching = null;
 			this.#resetRuntime(tab);
-			// The extension dissolves omp groups on disconnect (or died along
-			// with them); grouping state is unknowable until the next hello.
-			// Without this reset, the next hello's groupId=-1 snapshots would
-			// read as the user dragging every tab out (permanent opt-out).
-			tab.grouped = false;
-			tab.grouping = false;
-			tab.ompGroupId = undefined;
 		}
-		this.#groupQueue.length = 0;
 	}
 
 	extMessage(socket: RelaySocket, raw: string): void {
@@ -360,6 +353,13 @@ export class RelayBridge {
 			case "tabCreated":
 				this.#onTabUpsert(msg.tab);
 				return;
+			case "tabOpened": {
+				// Read the window's visible tab before the child's own snapshot lands.
+				const displaced = msg.tab.active ? this.#visibleTab(msg.tab.windowId, msg.tab.tabId) : undefined;
+				this.#onTabUpsert(msg.tab);
+				void this.#adoptChild(msg.tab, msg.openerTabId, displaced);
+				return;
+			}
 			case "tabUpdated":
 				this.#onTabUpsert(msg.tab);
 				return;
@@ -396,6 +396,53 @@ export class RelayBridge {
 		for (const tabId of this.#tabs.keys()) if (!seen.has(tabId)) this.#onTabRemoved(tabId);
 	}
 
+	/**
+	 * Hand back the `chrome.debugger` attachments this bridge holds so Chrome
+	 * takes its "started debugging this browser" infobar down. Tab ownership,
+	 * page state and downstream sessions survive; the next command sent to one
+	 * of these tabs reattaches lazily.
+	 *
+	 * `owner` restricts the release to one actor's leased tabs: a turn ending
+	 * must not rip the debugger off a tab another actor is still driving. A tab
+	 * with an open JavaScript dialog keeps its debugger — nothing else can
+	 * answer that dialog.
+	 *
+	 * Returns the tabs Chrome confirmed detached.
+	 */
+	async detachDebuggers(opts: { owner?: string } = {}): Promise<number[]> {
+		const scope = opts.owner === undefined ? undefined : new Set(this.managed.tabsForOwner(opts.owner));
+		const tabs = [...this.#tabs.values()].filter(
+			tab =>
+				tab.attached && (scope === undefined || scope.has(tab.tabId)) && tab.dialogs.snapshot().status !== "open",
+		);
+		if (!tabs.length) return [];
+		for (const tab of tabs) {
+			tab.attached = false;
+			this.#touchTab(tab);
+			this.#resetRuntime(tab);
+			tab.reattachedAfterDetach = false;
+		}
+		const tabIds = tabs.map(tab => tab.tabId);
+		const request = this.#rpc({ op: "detachAll", tabIds });
+		// Reattachment serializes behind the release, exactly as for one tab.
+		const settled = request.then(
+			() => {},
+			() => {},
+		);
+		for (const tab of tabs) tab.detaching = settled;
+		try {
+			const result = await request;
+			const detached =
+				result && typeof result === "object" && "detached" in result && Array.isArray(result.detached)
+					? result.detached.filter((tabId): tabId is number => Number.isInteger(tabId))
+					: [];
+			this.#log("released debugger attachments", { requested: tabIds.length, detached: detached.length });
+			return detached;
+		} finally {
+			for (const tab of tabs) if (tab.detaching === settled) tab.detaching = null;
+		}
+	}
+
 	#onTabActivated(tabId: number, windowId: number): void {
 		// Even an ineligible/unknown selected tab deactivates every known peer.
 		for (const tab of this.#tabs.values()) {
@@ -413,6 +460,56 @@ export class RelayBridge {
 				{ silent: true },
 			);
 		}
+	}
+
+	/** The tab this window currently shows, ignoring `exclude` (a child that just appeared). */
+	#visibleTab(windowId: number, exclude?: number): number | undefined {
+		for (const tab of this.#tabs.values()) {
+			if (tab.windowId === windowId && tab.active && tab.tabId !== exclude) return tab.tabId;
+		}
+		return undefined;
+	}
+
+	/**
+	 * A tab the browser opened from another tab. Chrome's `openerTabId` is not
+	 * trustworthy for a CDP-synthesized click — it attributes the child to the
+	 * window's active tab — so an opener that holds no lease falls back to the
+	 * leased tab that just reported `Page.windowOpen` on its own debugger
+	 * session, which only the real opener can have done.
+	 *
+	 * Chrome opens `target=_blank` children active and the extension cannot ask
+	 * it not to, so an adopted child hands the window's visible tab straight
+	 * back: agent work never changes what the user is looking at.
+	 */
+	async #adoptChild(snap: TabSnapshot, openerTabId: number, displaced?: number): Promise<void> {
+		const opener = this.#resolveOpener(openerTabId);
+		this.#log("tab opened", { tabId: snap.tabId, reportedOpener: openerTabId, opener, active: snap.active });
+		if (opener === undefined) return;
+		// The visible tab goes back first and on its own round trip: the user
+		// looks at the child for exactly as long as this takes, so it must not
+		// queue behind the child's grouping. No window focus either — the child
+		// never became the user's foreground concern.
+		const restored =
+			displaced === undefined
+				? undefined
+				: this.#rpc({ op: "activateTab", tabId: displaced, focusWindow: false }).catch(() => undefined);
+		await this.managed.adoptChild(snap, opener);
+		await restored;
+	}
+
+	/** Which leased tab opened a child: Chrome's answer when it is one of ours, else the `Page.windowOpen` witness. */
+	#resolveOpener(openerTabId: number): number | undefined {
+		if (this.managed.leaseForTab(openerTabId) !== undefined) return openerTabId;
+		const cutoff = Date.now() - WINDOW_OPEN_MATCH_MS;
+		let best: TabState | undefined;
+		for (const tab of this.#tabs.values()) {
+			if (tab.windowOpenedAt < cutoff || this.managed.leaseForTab(tab.tabId) === undefined) continue;
+			if (!best || tab.windowOpenedAt > best.windowOpenedAt) best = tab;
+		}
+		if (!best) return undefined;
+		// One witness explains one child; a second popup needs its own event.
+		best.windowOpenedAt = 0;
+		return best.tabId;
 	}
 
 	#onHello(msg: Extract<ExtToRelayMessage, { t: "hello" }>): void {
@@ -438,22 +535,21 @@ export class RelayBridge {
 				});
 			}
 		}
-		this.#syncGrouping();
 		this.#log("extension connected", { tabs: this.#tabs.size, version: msg.browserVersion });
 	}
 
 	// ---- downstream (puppeteer) lifecycle -------------------------------------
 
 	/** Register a downstream CDP websocket; returns the connection id. */
-	cdpConnected(socket: RelaySocket, leaseId?: string): number {
-		const tabId = leaseId ? this.managed.tabForLease(leaseId) : undefined;
+	cdpConnected(socket: RelaySocket, leaseId: string): number {
+		const tabId = this.managed.tabForLease(leaseId);
 		const conn = new CdpConnection(
 			++this.#connSeq,
 			socket,
 			leaseId,
 			tabId === undefined ? undefined : this.#tabs.get(tabId),
 		);
-		if (leaseId) this.managed.connected(leaseId, conn.id);
+		this.managed.connected(leaseId, conn.id);
 		this.#conns.set(conn.id, conn);
 		this.#log("cdp client connected", { conn: conn.id });
 		return conn.id;
@@ -463,19 +559,11 @@ export class RelayBridge {
 		const conn = this.#conns.get(connId);
 		if (!conn) return;
 		this.#conns.delete(connId);
-		if (conn.leaseId) this.managed.disconnected(conn.leaseId, connId);
+		this.managed.disconnected(conn.leaseId, connId);
 		const touched = new Set<number>();
 		if (conn.leasedTab && this.#tabs.get(conn.leasedTab.tabId) === conn.leasedTab) touched.add(conn.leasedTab.tabId);
 		for (const ref of conn.sessions.values()) touched.add(ref.tabId);
 		conn.sessions.clear();
-		// Tabs this client claimed leave the omp group unless another claimant
-		// remains — session holders don't count: the long-lived registry
-		// connection holds sessions on every tab without driving any of them.
-		for (const tabId of conn.claims) {
-			const tab = this.#tabs.get(tabId);
-			if (tab) this.#syncTabGrouping(tab);
-		}
-		conn.claims.clear();
 		// Drop the debugger (and its infobar) from tabs nobody drives anymore.
 		for (const tabId of touched) this.#detachIfUnheld(tabId);
 		this.#log("cdp client closed", { conn: connId });
@@ -491,13 +579,12 @@ export class RelayBridge {
 			return;
 		}
 		if (typeof msg.id !== "number" || typeof msg.method !== "string") return;
-		conn.leaseOnly = false;
 		void (async () => {
-			const finish = conn.leaseId ? this.managed.beginOperation(conn.leaseId) : undefined;
+			const finish = this.managed.beginOperation(conn.leaseId);
 			try {
 				await this.#handleCdpCommand(conn, msg);
 			} finally {
-				finish?.();
+				finish();
 			}
 		})().catch(err => {
 			this.#replyError(conn, msg, err instanceof Error ? err.message : String(err));
@@ -507,7 +594,7 @@ export class RelayBridge {
 	// ---- command routing -------------------------------------------------------
 
 	async #handleCdpCommand(conn: CdpConnection, msg: CdpCommand): Promise<void> {
-		if (conn.leaseId && this.managed.tabForLease(conn.leaseId) === undefined) {
+		if (this.managed.tabForLease(conn.leaseId) === undefined) {
 			throw new Error("Chrome tab ownership is no longer valid");
 		}
 		if (msg.method === "Browser.setDownloadBehavior" || msg.method === "Page.setDownloadBehavior") {
@@ -545,18 +632,6 @@ export class RelayBridge {
 	): Promise<void> {
 		const tab = this.#tabs.get(ref.tabId);
 		if (!tab || !this.#visibleTo(conn, tab)) throw new Error("Chrome tab is outside this connection's ownership");
-		if (msg.method === "OMP.downloadFiles") {
-			if (!conn.leaseId) throw new Error("Download file lookup requires exact managed tab ownership");
-			if (!isDownloadFileQueries(msg.params?.queries)) throw new Error("Invalid observed-download queries");
-			const queries = msg.params.queries.map(query => {
-				const observed = tab.downloads.get(query.id);
-				if (!observed || observed.url !== query.url)
-					throw new Error("Download was not observed on this owned tab; its saved path is unknown");
-				return observed;
-			});
-			this.#reply(conn, msg, { lookup: await this.#rpc({ op: "downloadFiles", queries }) });
-			return;
-		}
 		if (msg.method === "Runtime.disable") {
 			ref.runtimeState = "disabled";
 			ref.runtimeEpoch++;
@@ -645,9 +720,86 @@ export class RelayBridge {
 		}
 	}
 
+	/**
+	 * Remember root-session state Chrome throws away when it detaches a
+	 * debugger, so {@link RelayBridge.detachDebuggers} stays invisible to the
+	 * connections that set it up. `Runtime.enable` never reaches here — the
+	 * bridge owns root Runtime itself.
+	 */
+	#recordRootState(tab: TabState, msg: CdpCommand): void {
+		if (msg.method === "Target.setAutoAttach") {
+			tab.rootAutoAttach = msg.params;
+			return;
+		}
+		const toggle = /^(\w+)\.(enable|disable)$/.exec(msg.method);
+		if (!toggle) return;
+		if (toggle[2] === "enable") tab.rootEnabled.set(`${toggle[1]!}.enable`, msg.params);
+		else tab.rootEnabled.delete(`${toggle[1]!}.enable`);
+	}
+
+	/**
+	 * Put a freshly reattached tab back the way its drivers left it. Issued in
+	 * parallel: the reattach should cost one round trip, not one per domain. A
+	 * single failed restore costs that domain's events, never the attach.
+	 */
+	async #restoreRoot(tab: TabState): Promise<void> {
+		const restore = [...tab.rootEnabled].map(([method, params]) =>
+			this.#rpc({ op: "send", tabId: tab.tabId, method, params }),
+		);
+		if (tab.rootAutoAttach)
+			restore.push(
+				this.#rpc({ op: "send", tabId: tab.tabId, method: "Target.setAutoAttach", params: tab.rootAutoAttach }),
+			);
+		// Sessions that already enabled Runtime will never ask a second time.
+		if (this.#runtimeWanted(tab.tabId))
+			restore.push(
+				this.#rpc({ op: "send", tabId: tab.tabId, method: "Runtime.enable" }).then(() => {
+					tab.rootRuntimeEnabled = true;
+				}),
+			);
+		if (!restore.length) return;
+		for (const result of await Promise.allSettled(restore)) {
+			if (result.status === "rejected")
+				this.#log("root state restore failed", { tabId: tab.tabId, error: String(result.reason) });
+		}
+	}
+
+	/** Whether a downstream page session still believes this tab's Runtime is enabled. */
+	#runtimeWanted(tabId: number): boolean {
+		for (const conn of this.#conns.values()) {
+			for (const ref of conn.sessions.values()) {
+				if (ref.kind === "page" && ref.tabId === tabId && ref.runtimeState === "enabled") return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Every CDP command bound for a tab's root session goes through here so a
+	 * released debugger costs one attach on next use instead of a failed
+	 * command. `banned` (the user dismissed the infobar) still refuses.
+	 */
+	async #sendToTab(
+		tab: TabState,
+		method: string,
+		params?: Record<string, unknown>,
+		sessionId?: string,
+	): Promise<unknown> {
+		if (!tab.attached && !(await this.#ensureAttached(tab)))
+			throw new Error(`Chrome debugger could not attach to tab ${tab.tabId} (${tab.url})`);
+		tab.inflight++;
+		this.#touchTab(tab);
+		try {
+			return await this.#rpc({ op: "send", tabId: tab.tabId, sessionId, method, params });
+		} finally {
+			tab.inflight--;
+			this.#touchTab(tab);
+		}
+	}
+
 	async #cycleRuntime(tab: TabState): Promise<void> {
-		await this.#rpc({ op: "send", tabId: tab.tabId, method: "Runtime.disable" });
-		await this.#rpc({ op: "send", tabId: tab.tabId, method: "Runtime.enable" });
+		await this.#sendToTab(tab, "Runtime.disable");
+		await this.#sendToTab(tab, "Runtime.enable");
 	}
 
 	#replayRuntimeContexts(conn: CdpConnection, sessionId: string, ref: SessionRef, tab: TabState): void {
@@ -666,57 +818,16 @@ export class RelayBridge {
 	): Promise<void> {
 		const tab = this.#tabs.get(tabId);
 		if (!tab || !this.#visibleTo(conn, tab)) throw new Error("Chrome tab is outside this connection's ownership");
-		if (conn.leaseId && ["Page.bringToFront", "Page.close", "Browser.close"].includes(msg.method)) {
+		if (["Page.bringToFront", "Page.close", "Browser.close"].includes(msg.method)) {
 			throw new Error("Use the explicit tab reveal/release lifecycle operation");
 		}
-		// Guard rail: a page session must never take the whole browser down.
-		if (msg.method === "Browser.close") {
-			this.#reply(conn, msg, {});
-			return;
-		}
-		// Relay-private claim: the omp tab worker marks the page it was spawned
-		// to drive. Never forwarded — real Chrome rejects the unknown method.
-		if (msg.method === "OMP.claimTarget") {
-			if (!conn.leaseId) this.#claimTab(conn, tabId);
-			this.#reply(conn, msg, {});
-			return;
-		}
+		if (!realSessionId) this.#recordRootState(tab, msg);
 		try {
-			const result = await this.#rpc({
-				op: "send",
-				tabId,
-				sessionId: realSessionId,
-				method: msg.method,
-				params: msg.params,
-			});
+			const result = await this.#sendToTab(tab, msg.method, msg.params, realSessionId);
 			this.#reply(conn, msg, (result as Record<string, unknown> | undefined) ?? {});
 		} catch (err) {
 			this.#replyError(conn, msg, err instanceof Error ? err.message : String(err));
 		}
-	}
-
-	/**
-	 * Record `conn` as a driver of the tab and reconcile grouping. Claims are
-	 * explicit (worker adoption or tab creation) rather than inferred from
-	 * command traffic: target discovery scans every page with the same
-	 * commands a driver sends, so inference would sweep all tabs.
-	 */
-	#claimTab(conn: CdpConnection, tabId: number): void {
-		const tab = this.#tabs.get(tabId);
-		if (!tab) return;
-		if (!conn.claims.has(tabId)) {
-			conn.claims.add(tabId);
-			this.#log("tab claimed", { conn: conn.id, tabId });
-		}
-		this.#syncTabGrouping(tab);
-	}
-
-	/** True while any downstream connection claims the tab as its drive target. */
-	#claimed(tabId: number): boolean {
-		for (const conn of this.#conns.values()) {
-			if (conn.claims.has(tabId)) return true;
-		}
-		return false;
 	}
 
 	/** Tab pseudo-sessions only exist to satisfy puppeteer's Target hierarchy. */
@@ -760,7 +871,6 @@ export class RelayBridge {
 
 	async #handleBrowserCommand(conn: CdpConnection, msg: CdpCommand): Promise<void> {
 		if (
-			conn.leaseId &&
 			["Target.createTarget", "Target.closeTarget", "Target.activateTarget", "Browser.close"].includes(msg.method)
 		) {
 			throw new Error("Use the explicit tab create/reveal/release lifecycle operation");
@@ -829,36 +939,6 @@ export class RelayBridge {
 				this.#reply(conn, msg, {});
 				return;
 			}
-			case "Target.createTarget": {
-				const url =
-					typeof msg.params?.url === "string" && msg.params.url.length > 0 ? msg.params.url : "about:blank";
-				const result = (await this.#rpc({ op: "createTab", url })) as { tab: TabSnapshot };
-				this.#onTabUpsert(result.tab);
-				// Creating a tab is an explicit act of driving it.
-				this.#claimTab(conn, result.tab.tabId);
-				this.#reply(conn, msg, { targetId: pageTargetId(result.tab.tabId) });
-				return;
-			}
-			case "Target.closeTarget": {
-				const parsed = typeof msg.params?.targetId === "string" ? parseTargetId(msg.params.targetId) : null;
-				const tab = parsed ? this.#tabs.get(parsed.tabId) : undefined;
-				if (!parsed || !tab || !this.#visibleTo(conn, tab)) {
-					this.#replyError(conn, msg, `No target with id ${String(msg.params?.targetId)}`);
-					return;
-				}
-				await this.#rpc({ op: "removeTab", tabId: parsed.tabId });
-				this.#reply(conn, msg, { success: true });
-				return;
-			}
-			case "Target.activateTarget": {
-				const parsed = typeof msg.params?.targetId === "string" ? parseTargetId(msg.params.targetId) : null;
-				const tab = parsed ? this.#tabs.get(parsed.tabId) : undefined;
-				if (!parsed || !tab || !this.#visibleTo(conn, tab))
-					throw new Error("Tab is outside this connection's ownership");
-				await this.#rpc({ op: "activateTab", tabId: parsed.tabId });
-				this.#reply(conn, msg, {});
-				return;
-			}
 			case "Target.getTargetInfo": {
 				const raw = typeof msg.params?.targetId === "string" ? msg.params.targetId : undefined;
 				const parsed = raw ? parseTargetId(raw) : null;
@@ -881,11 +961,6 @@ export class RelayBridge {
 				});
 				return;
 			}
-			case "Browser.close":
-				// Never close the user's browser; acknowledge and ignore.
-				this.#log("refusing Browser.close from downstream client", { conn: conn.id });
-				this.#reply(conn, msg, {});
-				return;
 			case "Target.createBrowserContext":
 				this.#replyError(conn, msg, "Browser contexts are not supported by the omp browser relay");
 				return;
@@ -904,21 +979,17 @@ export class RelayBridge {
 	): void {
 		const tab = this.#tabs.get(tabId);
 		if (!tab) return;
+		// Any traffic on this tab is work in progress: the debugger stays.
+		this.#touchTab(tab);
 		if (!sourceSessionId && method === "Page.javascriptDialogOpening") tab.dialogs.opened(params ?? {});
-		if (!sourceSessionId && method === "Page.javascriptDialogClosed") {
-			tab.dialogs.closed();
-			queueMicrotask(() => this.#detachIfUnheld(tabId));
-		}
+		// A closed dialog is not a lifecycle end: the page may open the next one
+		// immediately, and only an attached debugger sees it. The attachment goes
+		// back when sessions end, on release, or at turn end.
+		if (!sourceSessionId && method === "Page.javascriptDialogClosed") tab.dialogs.closed();
+		// The only signal that names the page which opened a popup, and the one
+		// `chrome.tabs.onCreated` misattributes for a synthesized click.
+		if (!sourceSessionId && method === "Page.windowOpen") tab.windowOpenedAt = Date.now();
 		// Track real child sessions so downstream commands can route back.
-		if (
-			method === "Page.downloadWillBegin" &&
-			typeof params?.guid === "string" &&
-			typeof params.url === "string" &&
-			!tab.downloads.has(params.guid)
-		) {
-			if (tab.downloads.size >= 256) tab.downloads.delete(tab.downloads.keys().next().value!);
-			tab.downloads.set(params.guid, { id: params.guid, url: params.url, startedAt: Date.now() });
-		}
 		if (method === "Target.attachedToTarget") {
 			const child = params?.sessionId;
 			if (typeof child === "string") {
@@ -995,15 +1066,15 @@ export class RelayBridge {
 			if (!tab.reattachedAfterDetach) tab.attached = false;
 			return;
 		}
-		this.#log("tab detached", { tabId, reason });
-		this.managed.remove(tabId);
+		// Ownership outlives the attachment: the user cancelling the infobar (or
+		// Chrome dropping it on a `chrome://` navigation) makes the tab
+		// undrivable, not the user's again. Dropping the lease here is what left
+		// tabs behind in an "Oh My Pi" group with nothing able to release them.
+		this.#log("tab detached", { tabId, reason, leased: this.managed.leaseForTab(tabId) !== undefined });
 		tab.attached = false;
 		tab.attaching = null;
 		this.#resetRuntime(tab);
 		tab.banned = true;
-		// The user dismissed the debugger infobar (or the attach was torn
-		// down): release the tab's omp-group membership too.
-		this.#syncTabGrouping(tab);
 		this.#retractTab(tab);
 	}
 
@@ -1013,12 +1084,15 @@ export class RelayBridge {
 		if (!tab) return;
 		this.#retractTab(tab);
 		this.#tabs.delete(tabId);
-		for (const conn of this.#conns.values()) conn.claims.delete(tabId);
 	}
 
 	#onTabUpsert(snap: TabSnapshot, opts: { silent?: boolean } = {}): void {
 		snap = mergeTabSnapshot(this.#tabs.get(snap.tabId), snap);
-		if (!INELIGIBLE_URL.test(snap.url)) this.managed.upsert(snap);
+		// A leased tab stays tracked whatever it navigates to, so its owner can
+		// still release or close it; only unleased pages a debugger can never
+		// attach to drop out of discovery, keeping them unclaimable.
+		if (!INELIGIBLE_URL.test(snap.url) || this.managed.leaseForTab(snap.tabId) !== undefined)
+			this.managed.upsert(snap);
 		else this.managed.remove(snap.tabId);
 		let tab = this.#tabs.get(snap.tabId);
 		if (!tab) {
@@ -1026,17 +1100,10 @@ export class RelayBridge {
 			this.#tabs.set(snap.tabId, tab);
 		} else {
 			if (tab.url !== snap.url) tab.banned = false;
-			// The user dragging a tab out of the omp group is an opt-out; the
-			// relay never fights the user over grouping.
-			if (tab.grouped && tab.ompGroupId !== undefined && snap.groupId !== tab.ompGroupId) {
-				tab.grouped = false;
-				tab.groupOptOut = true;
-			}
 			tab.update(snap);
 		}
 		if (opts.silent) return;
 		const eligible = this.#eligible(tab);
-		this.#syncTabGrouping(tab);
 		if (eligible && !tab.announced) {
 			tab.announced = true;
 			for (const conn of this.#conns.values()) {
@@ -1065,84 +1132,114 @@ export class RelayBridge {
 		}
 	}
 
-	// ---- tab grouping -----------------------------------------------------------
+	// ---- lease presentation ------------------------------------------------------
 
-	/** A tab belongs in the omp group when claimed by a client, controllable, unpinned, not user-opted-out, and not already in a user group. */
-	#groupWorthy(tab: TabState): boolean {
-		if (!this.#claimed(tab.tabId) || !this.#eligible(tab) || tab.pinned || tab.groupOptOut) return false;
-		return tab.grouped || tab.groupId === -1;
+	/**
+	 * Mark a leased tab in the tab strip: swap its favicon for a cursor glyph,
+	 * and keep it swapped across the page's own navigations. Best-effort — a
+	 * page that refuses injection simply keeps its own icon.
+	 */
+	async #showLeaseBadge(tabId: number): Promise<void> {
+		const tab = this.#tabs.get(tabId);
+		if (!tab) return;
+		try {
+			const installed = (await this.#sendToTab(tab, "Page.addScriptToEvaluateOnNewDocument", {
+				source: LEASE_BADGE_INSTALL,
+			})) as { identifier?: string } | undefined;
+			tab.badgeScriptId = installed?.identifier;
+			await this.#sendToTab(tab, "Runtime.evaluate", { expression: LEASE_BADGE_INSTALL });
+		} catch (err) {
+			this.#log("lease badge skipped", { tabId, error: err instanceof Error ? err.message : String(err) });
+		}
 	}
 
-	/** Re-group every claimed tab (extension hello / reconnect). */
-	#syncGrouping(): void {
-		if (!this.#group) return;
-		const worthy = [...this.#tabs.values()].filter(tab => this.#groupWorthy(tab) && !tab.grouped && !tab.grouping);
-		if (worthy.length > 0) this.#requestGroup(worthy);
-	}
-
-	/** Reconcile one tab's group membership after a lifecycle event. */
-	#syncTabGrouping(tab: TabState): void {
-		if (!this.#group) return;
-		if (this.#groupWorthy(tab)) {
-			if (!tab.grouped && !tab.grouping) this.#requestGroup([tab]);
-			return;
+	/** The install identifier is the proof something was swapped; without it there is nothing to put back. */
+	async #hideLeaseBadge(tab: TabState): Promise<void> {
+		if (tab.badgeScriptId === undefined) return;
+		try {
+			await this.#sendToTab(tab, "Page.removeScriptToEvaluateOnNewDocument", { identifier: tab.badgeScriptId });
+			await this.#sendToTab(tab, "Runtime.evaluate", { expression: LEASE_BADGE_RESTORE });
+		} catch (err) {
+			this.#log("lease badge restore skipped", {
+				tabId: tab.tabId,
+				error: err instanceof Error ? err.message : String(err),
+			});
 		}
-		if (tab.grouped) {
-			tab.grouped = false;
-			tab.ompGroupId = undefined;
-			void this.#rpc({ op: "ungroup", tabIds: [tab.tabId] }).catch(() => {});
-		}
+		tab.badgeScriptId = undefined;
 	}
 
 	/**
-	 * Queue tabs for grouping and drain serially. Overlapping group RPCs race
-	 * the extension's non-atomic query→create→set-title sequence and mint
-	 * duplicate omp groups, so at most one group RPC is ever in flight.
+	 * Hand a tab back to the user: its own favicon, no debugger, out of the
+	 * owner's group, closed only when asked. Restoring and detaching before
+	 * the extension touches the group — and ungrouping before any close —
+	 * leaves the strip as if OMP had never driven the tab.
 	 */
-	#requestGroup(tabs: TabState[]): void {
-		if (!this.#group) return;
-		for (const tab of tabs) {
-			tab.grouping = true;
-			this.#groupQueue.push(tab);
+	async #releaseTab(tabId: number, close: boolean): Promise<void> {
+		const tab = this.#tabs.get(tabId);
+		if (tab) {
+			if (!close) await this.#hideLeaseBadge(tab);
+			await this.#detachTab(tab);
 		}
-		if (!this.#groupDraining) void this.#drainGroupQueue();
+		await this.#rpc({ op: "releaseTab", tabId, close });
+		// Tracked only because it was leased: with the lease gone a page no
+		// debugger can attach to leaves discovery, so nobody can claim it.
+		if (tab && INELIGIBLE_URL.test(tab.url)) this.managed.remove(tabId);
 	}
 
-	async #drainGroupQueue(): Promise<void> {
-		const group = this.#group;
-		if (!group) return;
-		this.#groupDraining = true;
-		try {
-			while (this.#groupQueue.length > 0) {
-				const batch = this.#groupQueue.splice(0);
-				const tabIds = batch.map(tab => tab.tabId);
-				try {
-					const result = await this.#rpc({ op: "group", tabIds, title: group.title, color: group.color });
-					// Extension replies { grouped: { [tabId]: groupId } }; validate per entry.
-					const grouped: Record<string, unknown> =
-						result &&
-						typeof result === "object" &&
-						"grouped" in result &&
-						result.grouped &&
-						typeof result.grouped === "object"
-							? (result.grouped as Record<string, unknown>)
-							: {};
-					for (const tab of batch) {
-						const groupId = grouped[String(tab.tabId)];
-						if (typeof groupId !== "number") continue;
-						tab.grouped = true;
-						tab.ompGroupId = groupId;
-					}
-					this.#log("grouped tabs", { tabIds, grouped });
-				} catch (err) {
-					this.#log("tab grouping failed", { error: err instanceof Error ? err.message : String(err) });
-				} finally {
-					for (const tab of batch) tab.grouping = false;
-				}
-			}
-		} finally {
-			this.#groupDraining = false;
+	/**
+	 * Detach one tab's `chrome.debugger` without touching downstream sessions:
+	 * the lease ending, and the tab going idle mid-lease, both land here.
+	 */
+	async #detachTab(tab: TabState): Promise<void> {
+		if (!tab.attached) return;
+		tab.attached = false;
+		this.#touchTab(tab);
+		this.#resetRuntime(tab);
+		tab.reattachedAfterDetach = false;
+		const done = this.#rpc({ op: "detach", tabId: tab.tabId }).then(
+			() => {},
+			() => {},
+		);
+		tab.detaching = done;
+		await done;
+		if (tab.detaching === done) tab.detaching = null;
+	}
+
+	/**
+	 * Rearm a tab's idle detach. Chrome shows its debugging infobar for exactly
+	 * as long as the attachment lives, so the attachment tracks the work: about
+	 * {@link DEBUGGER_IDLE_MS} after the last CDP message the debugger goes
+	 * back, while the lease, the group, the glyph and every downstream
+	 * puppeteer session survive. {@link RelayBridge.#sendToTab} reattaches and
+	 * {@link RelayBridge.#restoreRoot} puts the domains back, so the next
+	 * command is unaffected. Called after every detach too: with the attachment
+	 * gone there is nothing left to arm.
+	 */
+	#touchTab(tab: TabState): void {
+		clearTimeout(tab.idleTimer);
+		tab.idleTimer = undefined;
+		if (!tab.attached || this.#idleMs <= 0) return;
+		tab.idleTimer = setTimeout(() => {
+			tab.idleTimer = undefined;
+			this.#idleDetach(tab);
+		}, this.#idleMs);
+		tab.idleTimer.unref();
+	}
+
+	#idleDetach(tab: TabState): void {
+		// A command may be blocked in the page (puppeteer's waits run inside
+		// one), and only an attached debugger can see or answer a dialog.
+		if (tab.inflight > 0 || tab.dialogs.snapshot().status === "open") {
+			this.#touchTab(tab);
+			return;
 		}
+		if (!tab.attached || tab.detaching) return;
+		this.#log("idle detach", {
+			tabId: tab.tabId,
+			idleMs: this.#idleMs,
+			holders: this.#sessionHolders(tab.tabId).length,
+		});
+		void this.#detachTab(tab);
 	}
 
 	/** Tear a tab out of every downstream connection (closed, detached, or now ineligible). */
@@ -1224,32 +1321,37 @@ export class RelayBridge {
 
 	#detachIfUnheld(tabId: number): void {
 		if (this.#sessionHolders(tabId).length > 0) return;
-		// A pending-dialog owner has a connection before it can initialize page
-		// sessions. Keep the original debugger across the decision and any next dialog.
-		for (const conn of this.#conns.values()) {
-			if (conn.leaseOnly && conn.leaseId && this.managed.tabForLease(conn.leaseId) === tabId) return;
-		}
 		const tab = this.#tabs.get(tabId);
 		if (!tab?.attached || tab.dialogs.snapshot().status === "open") return;
-		tab.attached = false;
-		this.#resetRuntime(tab);
-		tab.reattachedAfterDetach = false;
-		const done = this.#rpc({ op: "detach", tabId })
-			.then(() => {})
-			.catch(() => {})
-			.finally(() => {
-				if (tab.detaching === done) tab.detaching = null;
-			});
-		tab.detaching = done;
+		void this.#detachTab(tab);
 	}
 
+	/**
+	 * Everything the debugger session owned is gone with the attachment: the
+	 * cached document handle, the injected utility world and every element
+	 * handle a driver still holds are dead object ids, even though the page and
+	 * its execution contexts are untouched.
+	 *
+	 * `Runtime.executionContextsCleared` is what a downstream puppeteer needs
+	 * to hear to drop them and re-acquire on next use (and to re-run pending
+	 * wait tasks against the fresh context). Without it the next command reuses
+	 * a stale object id and fails with "Could not find object with given id",
+	 * which is what makes an idle detach invisible instead of a regression.
+	 */
 	#resetRuntime(tab: TabState): void {
 		tab.dialogs.reset();
-		tab.downloads.clear();
 		tab.runtimeContexts.clear();
 		tab.rootRuntimeEnabled = false;
 		tab.rootRuntimeEnabling = null;
 		tab.runtimeGeneration++;
+		for (const conn of this.#conns.values()) {
+			for (const [pageSession, ref] of conn.sessions) {
+				if (ref.kind !== "page" || ref.tabId !== tab.tabId) continue;
+				ref.runtimeContexts.clear();
+				if (ref.runtimeState === "disabled") continue;
+				conn.socket.send(JSON.stringify({ sessionId: pageSession, method: "Runtime.executionContextsCleared" }));
+			}
+		}
 	}
 
 	/** Connections currently holding any session on a tab. */
@@ -1280,9 +1382,20 @@ export class RelayBridge {
 		if (tab.banned || !this.#ext) return false;
 		if (tab.attaching) return await tab.attaching;
 		const attempt = this.#rpc({ op: "attach", tabId: tab.tabId })
-			.then(() => {
+			.then(async () => {
 				tab.attached = true;
 				tab.reattachedAfterDetach = true;
+				this.#log("debugger attached", {
+					tabId: tab.tabId,
+					leased: this.managed.leaseForTab(tab.tabId) !== undefined,
+				});
+				// An attach nobody follows up on still has to expire.
+				this.#touchTab(tab);
+				await this.#restoreRoot(tab);
+				// Driving starts here, so this is where the tab strip learns about
+				// it — including after a turn-end detach dropped the glyph's script.
+				if (this.#markTabs && this.managed.leaseForTab(tab.tabId) !== undefined)
+					void this.#showLeaseBadge(tab.tabId);
 				return true;
 			})
 			.catch(err => {

@@ -69,13 +69,13 @@ export class BrowserInstances {
 	#sockets = new Map<RelaySocket, Instance>();
 	#options: {
 		log?: (message: string, data?: Record<string, unknown>) => void;
-		group?: { title: string; color: string } | null;
+		group?: boolean;
 	};
 	constructor(
 		access: RelayAccess,
 		options: {
 			log?: (message: string, data?: Record<string, unknown>) => void;
-			group?: { title: string; color: string } | null;
+			group?: boolean;
 		} = {},
 	) {
 		this.access = access;
@@ -200,6 +200,19 @@ export class BrowserInstances {
 		return this.discover(owner, browserId);
 	}
 
+	/**
+	 * Release debugger attachments across connected browsers. `owner` scopes it
+	 * to one actor's tabs; omitting it releases every attachment the relay holds
+	 * (process or daemon shutdown).
+	 */
+	async detachDebuggers(owner?: string, browserId?: string): Promise<number[]> {
+		const instances = browserId
+			? [this.select(browserId)]
+			: [...this.#instances.values()].filter(instance => instance.bridge.ready);
+		const detached = await Promise.all(instances.map(instance => instance.bridge.detachDebuggers({ owner })));
+		return detached.flat();
+	}
+
 	#tab(instance: Instance, tab: DiscoveredChromeTab): InstanceTab {
 		return { ...tab, browserId: instance.id, browserLabel: instance.label };
 	}
@@ -212,7 +225,7 @@ export class BrowserInstances {
 			tab: this.#tab(instance, lease.tab),
 		};
 	}
-	async create(url: string, owner: string, taskId: string, label: string, browserId?: string): Promise<InstanceLease> {
+	async create(url: string, owner: string, taskId: string, label?: string, browserId?: string): Promise<InstanceLease> {
 		const instance = this.select(browserId);
 		return this.#lease(instance, await instance.bridge.managed.create(url, owner, taskId, label));
 	}
@@ -243,9 +256,12 @@ export class BrowserInstances {
 		const instance = this.requireLease(id);
 		return this.#lease(instance, instance.bridge.managed.get(id, owner));
 	}
-	async popup(id: string, url: string, signal?: AbortSignal): Promise<InstanceTab> {
+	async releaseTab(id: string, owner: string, close: boolean, signal?: AbortSignal): Promise<void> {
+		await this.requireLease(id).bridge.managed.releaseTab(id, owner, close, signal);
+	}
+	childTabs(id: string, owner: string): InstanceTab[] {
 		const instance = this.requireLease(id);
-		return this.#tab(instance, await instance.bridge.managed.popup(id, url, signal));
+		return instance.bridge.managed.childTabs(id, owner).map(tab => this.#tab(instance, tab));
 	}
 	unpair(id: string): void {
 		this.access.unpair(id);
