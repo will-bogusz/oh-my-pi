@@ -135,7 +135,9 @@ async function chromeEndpoint(session: ToolSession, signal?: AbortSignal, forced
 	const health = response.ok ? ((await response.json()) as { service?: string; protocol?: number }) : undefined;
 	if (health?.service !== "omp-browser" || health.protocol !== 2)
 		throw new ToolError(
-			"This endpoint uses an older browser service. Keep active tasks running and choose a separate endpoint, or update after they finish.",
+			`The browser relay at ${url} is an older service (no protocol-2 /health), so this build cannot use it. ` +
+				"Point browser.relayUrl at the relay your extension is paired to (`omp browser-relay list` shows it), " +
+				"or stop the stale relay on that port; do not retry against this endpoint.",
 		);
 	return url;
 }
