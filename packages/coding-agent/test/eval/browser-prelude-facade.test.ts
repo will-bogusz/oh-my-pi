@@ -130,7 +130,7 @@ describe("browser JavaScript facade", () => {
 			globalThis.second = await browser.create({label: "Same label"});
 			await first.observe();
 			await savedElement.click();
-			await second.keep();
+			await second.reveal();
 			globalThis.children = await second.popups();
 		})()`,
 			context,
@@ -145,7 +145,7 @@ describe("browser JavaScript facade", () => {
 				{ method: "click", args: [] },
 			],
 		});
-		expect(calls.at(-2)).toMatchObject({ handle: "handle-2", action: "keep" });
+		expect(calls.at(-2)).toMatchObject({ handle: "handle-2", action: "reveal" });
 		expect(calls.at(-1)).toMatchObject({ handle: "handle-2", action: "popups" });
 		// Both handles share the label, so a name lookup must resolve the tab
 		// that owns the name now rather than dropping the handle entirely.
@@ -423,7 +423,7 @@ await tab.dialog(action="accept", id=tab.initialDialog["dialog"]["id"], promptTe
 await tab.dialog({"action":"inspect"})
 await tab.observe()
 await element.click()
-await tab.keep()
+await tab.reveal()
 await tab.popups()
 await browser.tab("Same label").reveal()
 try:
@@ -448,7 +448,7 @@ print(tab.initialObservation["snapshot"])
 			dialog: { action: "accept", id: "dialog-py", promptText: "café Ω" },
 		});
 		expect(calls).toContainEqual({ action: "dialog", handle: "py-held-tab", dialog: { action: "inspect" } });
-		expect(calls).toContainEqual({ action: "keep", handle: "py-held-tab" });
+		expect(calls).toContainEqual({ action: "reveal", handle: "py-held-tab" });
 		expect(calls).toContainEqual({ action: "popups", handle: "py-held-tab" });
 		// A name lookup carries the handle: managed Chrome tabs are only
 		// addressable by handle, and the label is not unique.

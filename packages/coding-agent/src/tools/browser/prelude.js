@@ -162,7 +162,7 @@
 			if (identitiesByName.get(name)?.handle === handle) identitiesByName.delete(name);
 			await invoke("close", { ...opts, name, ...(handle ? { handle } : {}) });
 		};
-		for (const action of ["reveal", "keep", "release"]) {
+		for (const action of ["reveal", "release"]) {
 			tab[action] = async () => {
 				if (!handle) throw new Error(`${action} requires a Chrome tab returned by create or claim`);
 				if (action === "release" && identitiesByName.get(name)?.handle === handle) identitiesByName.delete(name);

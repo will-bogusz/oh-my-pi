@@ -186,7 +186,6 @@ interface BrowserTab extends BrowserTabHelpers {
 	): Promise<BrowserDialogState>;
 	popups(): Promise<BrowserDiscoveredTab[]>;
 	reveal(): Promise<void>;
-	keep(): Promise<void>;
 	release(): Promise<void>;
 	close(options?: { kill?: boolean; timeout?: number }): Promise<void>;
 }

@@ -83,7 +83,7 @@ const tabCallStepSchema = type({
 
 const browserSchema = type({
 	action: type(
-		"'open' | 'close' | 'closeTab' | 'dialog' | 'popups' | 'run' | 'call' | 'instances' | 'discover' | 'create' | 'claim' | 'reveal' | 'keep' | 'release'",
+		"'open' | 'close' | 'closeTab' | 'dialog' | 'popups' | 'run' | 'call' | 'instances' | 'discover' | 'create' | 'claim' | 'reveal' | 'release'",
 	).describe("operation"),
 	"dialog?": "unknown",
 	"handle?": "string",
@@ -275,8 +275,8 @@ async function invokeBrowser(
 					)
 					.done();
 			}
-			if (["close", "release", "keep", "reveal"].includes(parsed.action)) {
-				const action = parsed.action as "close" | "release" | "keep" | "reveal";
+			if (["close", "release", "reveal"].includes(parsed.action)) {
+				const action = parsed.action as "close" | "release" | "reveal";
 				const deadline = AbortSignal.timeout(timeoutMs);
 				await chromeLifecycle(
 					handle,

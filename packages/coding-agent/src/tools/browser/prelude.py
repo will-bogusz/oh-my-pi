@@ -309,10 +309,6 @@ def _make_browser():
         async def reveal(self):
             await _invoke("reveal", {"handle": self._handle})
 
-        async def keep(self):
-            """Leave this page open for the user when the task ends."""
-            await _invoke("keep", {"handle": self._handle})
-
         async def release(self):
             if (_identities_by_name.get(self._name) or (None,))[0] == self._handle:
                 _identities_by_name.pop(self._name, None)

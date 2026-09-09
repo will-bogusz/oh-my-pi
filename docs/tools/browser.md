@@ -14,8 +14,8 @@ Paired Chrome profiles
                                                    │
                            ┌───────────────────────┼────────────────────┐
                            ▼                       ▼                    ▼
-                        reveal()                keep()               release()
-                     explicit focus         keep on release       end ownership
+                        reveal()                close()              release()
+                     explicit focus         close own tab         end ownership
 ```
 
 The prelude is available while Eval and `browser.enabled` are enabled. It is not a standalone AgentTool. Browser and computer handles are separate APIs. The model-facing prompt (`packages/coding-agent/src/prompts/tools/browser.md`) is deliberately short — acquisition, identity, the observe → act → verify loop, refs, keep/release, dialogs, popups and the other modes — and this page is the long-form contract behind it.
@@ -67,7 +67,7 @@ Inspection channels fail independently: `inspectionError`, `treeError`, or `scre
 
 For an explicit request to close a tab, use `await browser.closeTab(id, { browserId?, timeout? })` directly from discovery. It does not attach a debugger or page worker, regroup the tab, or activate Chrome. Another actor's ownership is rejected; your own controlled tab can be closed this way. Discover again after closure to verify the remaining inventory. Stale IDs cannot close a replacement tab after removal or browser reconnection.
 
-## Create, keep, release, and reveal
+## Create, release, close, and reveal
 
 ```js
 const profiles = (await browser.instances()).filter(profile => profile.connected);
@@ -85,8 +85,7 @@ display(await tab.observe());
 display(await tab.extract("text"));
 await tab.screenshot();
 
-await tab.keep();
-await tab.release();
+await tab.close();
 ```
 
 `browser.create({ browserId?, url?, label?, timeout? })` always creates a new inactive Chrome tab; the URL defaults to `about:blank`. Task-created tabs share a group per task and window unless grouping is disabled. The first task label remains stable when later scratch tabs use different labels. Adopted tabs keep their existing grouping.
@@ -96,17 +95,16 @@ Keep the immutable handle returned by `create` or `claim`. Its `name` is a displ
 | Operation                      | Effect on a managed Chrome tab                                                           |
 | ------------------------------ | ---------------------------------------------------------------------------------------- |
 | `tab.reveal()`                 | Selects the tab and focuses its Chrome window explicitly.                                |
-| `tab.keep()`                   | Leaves this page open for the user when the task ends, instead of closing it.            |
-| `tab.release()`                | Hands the tab back and invalidates the handle. Closes only task-created tabs not kept.   |
-| `tab.close()`                  | Physically closes this exact Chrome tab, including a claimed or kept page.                |
+| `tab.release()`                | Hands the tab back open and invalidates the handle. Never closes the page.               |
+| `tab.close()`                  | Physically closes this exact Chrome tab, including a claimed page.                       |
 | `browser.closeTab(id)`         | Physically closes an exact discovered Chrome tab without acquiring page control.          |
 | `browser.close({ all: true })` | Releases this actor's tabs across browser modes; does not release another actor's tabs.  |
 
-Claimed user tabs and kept result tabs survive release. Another actor can discover and claim a released result by its current exact discovery ID. `keep`, `release`, and `reveal` require a managed Chrome handle returned by `create`, `claim`, or relay-mode `open`; use `close` for other modes.
+Every page survives release, created or claimed. Another actor can discover and claim a released page by its current exact discovery ID. `release` and `reveal` require a managed Chrome handle returned by `create`, `claim`, or relay-mode `open`; use `close` for other modes.
 
-There is no cross-turn lease. When the agent stops, every lease this session holds is handed back: tabs it created are closed, tabs it claimed and tabs marked `keep()` stay open, the task tab group dissolves, and the remaining `chrome.debugger` attachments are detached so Chrome's "OMP is debugging this browser" bar disappears. The next turn re-claims by exact tab ID. While a tab is attached, the extension swaps its favicon for a cursor glyph (installed over the debugger attachment on first real attach, re-applied across the page's own navigations, restored on release); merely claiming a tab attaches nothing and leaves the tab strip untouched.
+There is no cross-turn lease and no automatic closing. When the agent stops, every lease this session holds is handed back: all pages stay open, the task tab group dissolves, and the remaining `chrome.debugger` attachments are detached so Chrome's "OMP is debugging this browser" bar disappears. The user can take over a half-finished page (sign in, pick a link) and ask the agent to continue on it; the next turn re-claims by exact tab ID. Cleanup is the model's: it closes the tabs it opened once they are no longer useful and leaves anything the user asked to see. This is deliberately not Codex's turn-scoped "ephemeral unless marked" model, whose marks expire each turn. While a tab is attached, the extension swaps its favicon for a cursor glyph (installed over the debugger attachment on first real attach, re-applied across the page's own navigations, restored on release); merely claiming a tab attaches nothing and leaves the tab strip untouched.
 
-Migration: managed Chrome handles previously treated `tab.close()` as release, and `tab.retain()` is now `tab.keep()`. Change end-of-task cleanup to `tab.release()` when claimed or kept pages should survive. Keep `tab.close()` for an intended physical closure. The older root `browser.close({ all: true })` remains an actor-wide cleanup operation; it is not a request to physically close every discovered tab.
+Migration: managed Chrome handles previously treated `tab.close()` as release, and `tab.retain()`/`tab.keep()` no longer exist because nothing is auto-closed. Use `tab.release()` to hand a page back and `tab.close()` for an intended physical closure. The older root `browser.close({ all: true })` remains an actor-wide cleanup operation; it is not a request to physically close every discovered tab.
 
 Inspection, screenshots, and managed input do not implicitly reveal the tab or focus Chrome. Keep reveal separate from ordinary work and use it only when a foreground handoff is intended.
 
@@ -216,8 +214,7 @@ tab = await browser.create(browserId=profiles[0]["id"], label="Documentation rev
 observation = await tab.observe(viewportOnly=True)
 display(observation)
 title = await tab.run("return await tab.title();", timeout=30)
-await tab.keep()
-await tab.release()
+await tab.close()
 ```
 
 Use `await browser.discover(browserId=...)` and `await browser.claim(tab_id, label=...)` for an existing tab. Use `await browser.closeTab(tab_id, browserId=...)` for physical closure without page control. Python `tab.run` accepts a JavaScript string only, not a Python callable. `browser.open(name=..., url=...)`, synchronous `browser.tab(name)`, and `browser.close(name=...)` remain available for the named-tab modes below.
@@ -228,7 +225,7 @@ Use `await browser.discover(browserId=...)` and `await browser.claim(tab_id, lab
 
 | Mode                                                 | Acquisition and explicit close behavior                                                                                                                               |
 | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Managed Chrome (`app.relay: true`, or relay default) | Every `open` creates a new inactive task tab; `name` supplies its label. `app.target` substring selection is rejected. Handle `close` physically closes the tab; `release` hands it back (kept and claimed pages survive). |
+| Managed Chrome (`app.relay: true`, or relay default) | Every `open` creates a new inactive task tab; `name` supplies its label. `app.target` substring selection is rejected. Handle `close` physically closes the tab; `release` hands it back open. |
 | Headless                                             | Opens or reuses a named OMP-owned page in project-shared Chromium with stealth patches. Close closes that page.                                                       |
 | Spawned (`app.path`)                                 | Starts or reuses a CDP-enabled browser/Electron executable; `app.args` applies here. The process remains open unless `kill: true` releases its last managed tab.      |
 | Connected (`app.cdp_url`)                            | Attaches through an HTTP CDP discovery endpoint; `app.target` can select a page by URL/title substring on this legacy path. Close disconnects and preserves the page. |
@@ -248,7 +245,7 @@ Because Chrome's own popup path runs, `window.open` returns a real `WindowProxy`
 
 Each acquired tab permits one active run. A timeout or abort can recycle its worker and invalidate handles; unplanned teardown preserves task pages, including partially created pages, for rediscovery, and the error identifies the exact tab. Ownership is a lease on the relay: a live scoped connection suspends its timer, and otherwise one five-minute idle grace applies, re-armed by every touch of that lease (claim, get, dialog, `popups`, any begun operation) and on disconnect. If the OMP process disappears, the relay releases the orphaned lease after that grace has elapsed; pages and groups survive for exact rediscovery and claim.
 
-Settle is automatic: when the turn ends, `agent-session.ts` runs `releaseChromeTabsForOwner` (each owned handle → `releaseTab { close: !keep && created }`) followed by `detachChromeDebuggersForOwner`, both bounded at five seconds. `keep()` is a local decision on the handle and costs no relay call until settle. A claim on a renderer blocked by a JavaScript dialog succeeds without attaching a page worker; the worker attaches on the first page call after the dialog is answered.
+Settle is automatic: when the turn ends, `agent-session.ts` runs `releaseChromeTabsForOwner` (each owned handle → `releaseTab { close: false }`) followed by `detachChromeDebuggersForOwner`, both bounded at five seconds. A claim on a renderer blocked by a JavaScript dialog succeeds without attaching a page worker; the worker attaches on the first page call after the dialog is answered.
 
 Reconnecting a paired profile invalidates that profile's old handles without replacing other profiles' sessions. Discover the current exact ID and claim again. Never use a stale label, URL match, or new `open` call as proof that the old task was recovered.
 

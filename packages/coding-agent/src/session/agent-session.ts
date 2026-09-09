@@ -204,7 +204,6 @@ import type { ImageAttachmentEntry } from "../tools";
 import { resolveApproval } from "../tools/approval";
 import { type AskToolDetails, type AskToolInput, recoverAskQuestions } from "../tools/ask";
 import {
-	closeCreatedChromeTabsForOwner,
 	releaseChromeTabsForOwner,
 	releaseDeferredChromeTabsForOwner,
 } from "../tools/browser/managed-chrome";
@@ -4666,9 +4665,6 @@ export class AgentSession {
 	async #releaseOwnedBrowserTabs(ownerId: string | undefined): Promise<void> {
 		if (!ownerId) return;
 		try {
-			// A print-mode exit disposes right behind the terminal settle; closing a
-			// tab whose lease that sweep is still handing back would be refused.
-			await withTimeout(this.#settlingSurfaces, 5_000, "Timed out waiting for the settle sweep during dispose");
 			const released = await withTimeout(
 				Promise.all([
 					releaseChromeTabsForOwner(ownerId),
@@ -4678,15 +4674,8 @@ export class AgentSession {
 				3_000,
 				"Timed out releasing owned browser tabs during dispose",
 			);
-			// Leases are gone; now the session's own tabs (not kept, not already
-			// closed) leave with it.
-			const closed = await withTimeout(
-				closeCreatedChromeTabsForOwner(ownerId),
-				3_000,
-				"Timed out closing session-created Chrome tabs during dispose",
-			);
-			if (released + closed > 0) {
-				logger.debug("Released owned browser tabs during dispose", { ownerId, released, closed });
+			if (released > 0) {
+				logger.debug("Released owned browser tabs during dispose", { ownerId, released });
 			}
 		} catch (error) {
 			logger.warn("Failed to release owned browser tabs during dispose", { error: String(error) });
@@ -4764,7 +4753,7 @@ export class AgentSession {
 	 */
 	#settleOwnedActorSurfaces(): void {
 		const generation = this.#promptGeneration;
-		this.#settlingSurfaces = (async () => {
+		void (async () => {
 			// Yield once so a follow-up prompt that is already queued (auto-continue
 			// racing this emit, a hub wake, a user message typed during the stream)
 			// bumps the generation before we tear anything down.
@@ -4801,8 +4790,6 @@ export class AgentSession {
 		})();
 	}
 
-	/** The in-flight settle sweep; dispose waits for it so its lease releases land before the session's tabs close. */
-	#settlingSurfaces: Promise<void> = Promise.resolve();
 
 	/**
 	 * Turn-end preview policy: superseded observation stills leave the model

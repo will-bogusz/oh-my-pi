@@ -1,7 +1,6 @@
 import { expect, it, spyOn } from "bun:test";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import {
-	closeCreatedChromeTabsForOwner,
 	ensureChromePage,
 	type ManagedChromeHandle,
 	releaseChromeTabsForOwner,
@@ -191,12 +190,11 @@ it("claims a dialog-blocked tab without renderer setup or a side connection, and
 });
 
 /**
- * The settle/dispose ladder, end to end through the relay wire: at turn end
- * every tab is handed back open (the user may take it over); when the
- * session ends, the tabs OMP opened are closed unless the model called
- * keep() on them.
+ * The settle contract, end to end through the relay wire: at turn end every
+ * tab OMP holds is handed back open — created or claimed alike. Nothing is
+ * auto-closed; the model closes what it opened when it is done with it.
  */
-it("hands every tab back open at settle and closes only un-kept created tabs when the session ends", async () => {
+it("hands every tab back open at settle and never closes one on the model's behalf", async () => {
 	const requests: Array<Record<string, unknown>> = [];
 	const server = Bun.serve({
 		hostname: "127.0.0.1",
@@ -227,7 +225,7 @@ it("hands every tab back open at settle and closes only un-kept created tabs whe
 					},
 					tab: { ...tabSnapshot, id: `page-${requests.length}`, tabId: 90 + requests.length },
 				} satisfies InstanceLease);
-			if (body.action === "releaseTab" || body.action === "closeTab") return Response.json({});
+			if (body.action === "releaseTab") return Response.json({});
 			throw new Error(`Unexpected operation ${String(body.action)}`);
 		},
 	});
@@ -248,26 +246,15 @@ it("hands every tab back open at settle and closes only un-kept created tabs whe
 	try {
 		const prelude = createBrowserPrelude(session);
 		const context = { session, toolCallId: "settle" };
-		const closing = (await prelude.invoke({ action: "create", timeout: 1 }, context)).details as { handle: string };
-		const keeping = (await prelude.invoke({ action: "create", timeout: 1 }, context)).details as { handle: string };
-		await prelude.invoke({ action: "keep", handle: keeping.handle, timeout: 1 }, context);
-		// `keep` is a local decision: it costs no relay round trip, because the
-		// lease does not survive the turn either way.
+		const first = (await prelude.invoke({ action: "create", timeout: 1 }, context)).details as { handle: string };
+		const second = (await prelude.invoke({ action: "create", timeout: 1 }, context)).details as { handle: string };
 		expect(requests.map(request => request.action)).toEqual(["create", "create"]);
 
 		expect(await releaseChromeTabsForOwner("settle-owner")).toBe(2);
 		const releases = requests.filter(request => request.action === "releaseTab");
-		// Both pages stay open at turn end; only the leases end.
 		expect(releases.map(request => request.close)).toEqual([false, false]);
-		expect(() => requireChromeHandle(closing.handle, session)).toThrow("stale");
-		expect(() => requireChromeHandle(keeping.handle, session)).toThrow("stale");
-
-		// Session end: the created tab nobody kept goes; the kept one stays.
-		expect(await closeCreatedChromeTabsForOwner("settle-owner")).toBe(1);
-		const closes = requests.filter(request => request.action === "closeTab");
-		expect(closes).toEqual([expect.objectContaining({ id: "page-1", owner: "settle-owner", browserId: "profile" })]);
-		// Idempotent: a second sweep has nothing left.
-		expect(await closeCreatedChromeTabsForOwner("settle-owner")).toBe(0);
+		expect(() => requireChromeHandle(first.handle, session)).toThrow("stale");
+		expect(() => requireChromeHandle(second.handle, session)).toThrow("stale");
 	} finally {
 		await releaseDeferredChromeTabsForOwner("settle-owner");
 		token.mockRestore();
