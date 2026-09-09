@@ -175,11 +175,10 @@ export async function closeChromeTab(
 	opts: ChromeAccessOptions = {},
 ): Promise<void> {
 	const owner = actor(session).owner;
-	await chromeRequest(
-		await chromeEndpoint(session, signal, opts.relay),
-		{ action: "closeTab", id, owner, browserId: opts.browserId },
-		signal,
-	);
+	const url = await chromeEndpoint(session, signal, opts.relay);
+	await chromeRequest(url, { action: "closeTab", id, owner, browserId: opts.browserId }, signal);
+	const sessionId = session.getSessionId?.();
+	if (sessionId) createdTabsBySession.get(sessionId)?.delete(`${url} ${id}`);
 	// Organization can also close a tab already controlled by this actor.
 	for (const handle of handles.values()) {
 		if (handle.owner === owner && handle.lease.tab.id === id) await forgetChromeHandle(handle);
@@ -208,6 +207,31 @@ export async function releaseChromeTabsForActor(session: ToolSession, signal?: A
 }
 
 /**
+ * Tabs OMP opened, per owning agent session, that are still the session's
+ * litter: closed when the session ends unless the model called `keep()`,
+ * the model closed them itself, or the user closed them. Keyed by relay
+ * endpoint + stable tab id so the entry outlives the handle (a released
+ * handle is forgotten; the tab is not).
+ */
+const createdTabsBySession = new Map<string, Map<string, { url: string; id: string; browserId: string }>>();
+
+function createdKey(handle: ManagedChromeHandle): string {
+	return `${handle.url} ${handle.lease.tab.id}`;
+}
+
+function rememberCreatedTab(handle: ManagedChromeHandle): void {
+	if (!handle.ownerSessionId || !handle.lease.created) return;
+	let tabs = createdTabsBySession.get(handle.ownerSessionId);
+	if (!tabs) createdTabsBySession.set(handle.ownerSessionId, (tabs = new Map()));
+	tabs.set(createdKey(handle), { url: handle.url, id: handle.lease.tab.id, browserId: handle.lease.browserId });
+}
+
+function forgetCreatedTab(handle: ManagedChromeHandle): void {
+	if (!handle.ownerSessionId) return;
+	createdTabsBySession.get(handle.ownerSessionId)?.delete(createdKey(handle));
+}
+
+/**
  * Dispose-time sweep for handles the ordinary tab reaper cannot see: a tab
  * claimed across an open JavaScript dialog has no page worker until the
  * dialog is answered, so nothing in the tabs map names it. Teardown hands
@@ -229,39 +253,58 @@ export async function releaseDeferredChromeTabsForOwner(ownerId: string): Promis
 	return owned.length;
 }
 
-/** Outcome of one turn-settle sweep over an agent session's managed Chrome tabs. */
-export interface ChromeSettleResult {
-	/** Handles handed back; tabs OMP created are physically closed. */
-	released: number;
-	/** Handles handed back with the page left open because the model called `keep()`. */
-	kept: number;
+/**
+ * Session-end sweep: close the tabs this session opened and nobody kept. A
+ * tab the user already closed is simply gone from the relay; that is not a
+ * failure. Runs after every lease is released, so a close here is a plain
+ * user-visible close, not a lease operation.
+ */
+export async function closeCreatedChromeTabsForOwner(ownerId: string, signal?: AbortSignal): Promise<number> {
+	const tabs = createdTabsBySession.get(ownerId);
+	if (!tabs) return 0;
+	createdTabsBySession.delete(ownerId);
+	let closed = 0;
+	for (const tab of tabs.values()) {
+		try {
+			await chromeRequest(
+				tab.url,
+				{ action: "closeTab", id: tab.id, owner: ownerId, browserId: tab.browserId },
+				signal ?? AbortSignal.timeout(3000),
+			);
+			closed++;
+		} catch (error) {
+			logger.debug("Session-end Chrome tab close skipped", {
+				tab: tab.id,
+				error: error instanceof Error ? error.message : String(error),
+			});
+		}
+	}
+	return closed;
 }
 
 /**
  * Turn-settle sweep over the managed Chrome tabs of one agent session
  * (issue #8246 follow-up). At the terminal settle the model is done, so
  * every lease it still holds is dead weight the user can see: the
- * "OMP is debugging this browser" infobar, the coloured task group, and
- * (for tabs OMP opened) the tabs themselves.
+ * "OMP is debugging this browser" infobar and the coloured task group.
  *
- * Every lease is handed back; the only question is whether the page survives.
- * `tab.keep()` and a tab claimed from the user leave it open, a tab OMP
- * opened is closed. There is no cross-turn lease — the next turn re-claims by
- * exact tab id.
+ * Every lease is handed back and every page stays open — the user can take
+ * over a half-finished tab (sign in, pick the right link) and ask the model
+ * to continue on it. Tabs OMP opened are closed when the session ends
+ * ({@link closeCreatedChromeTabsForOwner}) unless `tab.keep()` was called.
+ * There is no cross-turn lease — the next turn re-claims by exact tab id.
  *
  * Best-effort and never throws: a settle sweep that fails must not break the
  * event flow, and session dispose reaps whatever is left.
  */
-export async function releaseChromeTabsForOwner(ownerId: string, signal?: AbortSignal): Promise<ChromeSettleResult> {
-	const result: ChromeSettleResult = { released: 0, kept: 0 };
-	if (!ownerId) return result;
+export async function releaseChromeTabsForOwner(ownerId: string, signal?: AbortSignal): Promise<number> {
+	if (!ownerId) return 0;
 	const owned = [...handles.values()].filter(handle => handle.ownerSessionId === ownerId && !handle.released);
+	let released = 0;
 	for (const handle of owned) {
-		const keep = handle.keep === true;
 		try {
-			await releaseChromeTab(handle, !keep && handle.lease.created, signal ?? AbortSignal.timeout(3000));
-			if (keep) result.kept++;
-			else result.released++;
+			await releaseChromeTab(handle, false, signal ?? AbortSignal.timeout(3000));
+			released++;
 		} catch (error) {
 			// One wedged tab must not abandon the rest of the sweep; the next
 			// settle (or dispose) retries whatever is still registered.
@@ -271,7 +314,7 @@ export async function releaseChromeTabsForOwner(ownerId: string, signal?: AbortS
 			});
 		}
 	}
-	return result;
+	return released;
 }
 
 export async function acquireChromeTab(
@@ -326,17 +369,23 @@ export async function acquireChromeTab(
 			await initializeChromePage(handle, session, opts);
 		}
 		handles.set(handle.id, handle);
+		rememberCreatedTab(handle);
 		return handle;
 	} catch (error) {
+		// Ask before the lease ends: the relay only answers for a live lease.
+		const revoked = await explainRevokedChromeControl(handle, error);
+		if (revoked) rememberCreatedTab(handle);
 		try {
-			// The caller never got this handle, so a tab OMP just created is litter.
-			await releaseChromeTab(handle, lease.created, AbortSignal.timeout(3000));
+			// The caller never got this handle. A tab OMP just created is litter,
+			// unless Chrome revoked control of it: then it is the user's next step.
+			await releaseChromeTab(handle, lease.created && !revoked, AbortSignal.timeout(3000));
 		} catch (cleanupError) {
 			throw new ToolError(
 				`Chrome acquisition failed for ${lease.tab.id}: ${String(error)}. Cleanup also failed: ${String(cleanupError)}`,
 			);
 		}
 		if (error instanceof ToolAbortError || (error instanceof Error && error.name === "AbortError")) throw error;
+		if (revoked) throw revoked;
 		throw new ToolError(
 			`Chrome acquisition failed for tab ${lease.tab.id} in browser ${lease.browserId}: ${String(error)}. Control was released without closing a page you did not open. Discover and claim this exact tab to inspect its current state before continuing.`,
 		);
@@ -360,6 +409,7 @@ export async function releaseChromeTab(
 		// local retirement first so its release callback cannot dispatch recovery twice.
 		handle.released = true;
 		handles.delete(handle.id);
+		if (close) forgetCreatedTab(handle);
 		try {
 			await chromeRequest(
 				handle.url,
@@ -387,21 +437,18 @@ export async function chromeLifecycle(
 	action: "keep" | "reveal" | "release" | "close",
 	signal?: AbortSignal,
 ): Promise<void> {
-	// `keep` is a local decision applied at release time; there is nothing for
+	// `keep` takes the tab out of the session-end sweep; there is nothing for
 	// the relay to remember, because the lease does not survive the turn.
 	if (action === "keep") {
 		handle.keep = true;
+		forgetCreatedTab(handle);
 		return;
 	}
 	if (action === "reveal") {
 		await chromeRequest(handle.url, { action, id: handle.lease.id, owner: handle.owner }, signal);
 		return;
 	}
-	await releaseChromeTab(
-		handle,
-		action === "close" || (handle.lease.created && !handle.keep),
-		signal ?? AbortSignal.timeout(3000),
-	);
+	await releaseChromeTab(handle, action === "close", signal ?? AbortSignal.timeout(3000));
 }
 
 /** Local-only retirement, for a tab that is already gone from Chrome. */
@@ -409,6 +456,40 @@ async function forgetChromeHandle(handle: ManagedChromeHandle): Promise<void> {
 	handle.released = true;
 	handles.delete(handle.id);
 	await releaseTab(handle.id);
+}
+
+const LOST_CONTROL = /Target closed|TargetCloseError|no longer available|could not attach|Cannot attach|focus state could not be restored/;
+
+/**
+ * A page call that died because Chrome ended OMP's debugger session reads as
+ * "Target closed" from puppeteer, which the model takes for a closed tab.
+ * When the relay still holds the (open) tab and knows why it cannot be
+ * driven, say that instead — the user can finish the step by hand and the
+ * model can claim the tab again afterwards. Anything else is left alone.
+ */
+export async function explainRevokedChromeControl(
+	handle: ManagedChromeHandle,
+	error: unknown,
+): Promise<ToolError | undefined> {
+	if (!(error instanceof Error) || !LOST_CONTROL.test(error.message)) return undefined;
+	let lease: InstanceLease;
+	try {
+		lease = await chromeRequest<InstanceLease>(
+			handle.url,
+			{ action: "get", id: handle.lease.id, owner: handle.owner },
+			AbortSignal.timeout(1500),
+		);
+	} catch {
+		return undefined;
+	}
+	const revoked = lease.debugger?.revoked;
+	if (!revoked) return undefined;
+	return new ToolError(
+		`OMP lost control of ${JSON.stringify(handle.label)} at ${lease.tab.url}: ${revoked}. ` +
+			"The tab is still open in the user's Chrome and OMP cannot attach while that is the case. " +
+			"Do not close it. Ask the user to complete this step themselves (for example, sign in), " +
+			"then discover and claim the tab again.",
+	);
 }
 
 /** Dialog control bypasses the renderer and a worker blocked by the modal. */

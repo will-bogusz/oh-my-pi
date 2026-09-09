@@ -1,6 +1,6 @@
 import type { DialogState } from "../dialogs";
 import { RelayAccess, type BrowserAuthentication } from "./access";
-import { RelayBridge, type RelaySocket } from "./bridge";
+import { type DebuggerState, RelayBridge, type RelaySocket } from "./bridge";
 import buildInfo from "./extension-assets/build-info.json.txt" with { type: "text" };
 import type { ChromeTabLease, DiscoveredChromeTab } from "./managed-tabs";
 import { isTabSnapshot, type ExtToRelayMessage } from "./protocol";
@@ -27,6 +27,8 @@ export interface InstanceTab extends DiscoveredChromeTab {
 }
 export interface InstanceLease extends ChromeTabLease {
 	dialog?: DialogState;
+	/** Whether OMP can drive the tab right now; `revoked` says why not when the tab is open but undebuggable. */
+	debugger?: DebuggerState;
 	browserId: string;
 	browserLabel: string;
 	tab: InstanceTab;
@@ -220,6 +222,7 @@ export class BrowserInstances {
 		return {
 			...lease,
 			dialog: instance.bridge.dialogState(lease.tab.tabId),
+			debugger: instance.bridge.debuggerState(lease.tab.tabId),
 			browserId: instance.id,
 			browserLabel: instance.label,
 			tab: this.#tab(instance, lease.tab),

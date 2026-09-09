@@ -1,6 +1,7 @@
 import { expect, it, spyOn } from "bun:test";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import {
+	closeCreatedChromeTabsForOwner,
 	ensureChromePage,
 	type ManagedChromeHandle,
 	releaseChromeTabsForOwner,
@@ -139,7 +140,7 @@ it("claims a dialog-blocked tab without renderer setup or a side connection, and
 			requests.push(body);
 			if (body.action === "claim") return Response.json(lease);
 			if (body.action === "dialog") return Response.json(lease.dialog);
-			if (body.action === "releaseTab") return Response.json({});
+			if (body.action === "releaseTab" || body.action === "closeTab") return Response.json({});
 			throw new Error(`Unexpected operation ${String(body.action)}`);
 		},
 	});
@@ -175,7 +176,7 @@ it("claims a dialog-blocked tab without renderer setup or a side connection, and
 			prelude.invoke({ action: "run", handle: details.handle, code: "await tab.observe()", timeout: 1 }, context),
 		).rejects.toThrow("open dialog");
 		// The turn-settle sweep finds it even though no page worker names it.
-		expect(await releaseChromeTabsForOwner("dialog-dispose")).toEqual({ released: 1, kept: 0 });
+		expect(await releaseChromeTabsForOwner("dialog-dispose")).toBe(1);
 		expect(() => requireChromeHandle(details.handle, session)).toThrow("stale");
 		const release = requests.find(request => request.action === "releaseTab");
 		// A tab claimed from the user is handed back, never closed.
@@ -190,10 +191,12 @@ it("claims a dialog-blocked tab without renderer setup or a side connection, and
 });
 
 /**
- * The two-way settle ladder, end to end through the relay wire: a tab OMP
- * opened is closed, unless the model asked to leave it for the user.
+ * The settle/dispose ladder, end to end through the relay wire: at turn end
+ * every tab is handed back open (the user may take it over); when the
+ * session ends, the tabs OMP opened are closed unless the model called
+ * keep() on them.
  */
-it("closes tabs OMP created at settle and keeps the ones the model called keep() on", async () => {
+it("hands every tab back open at settle and closes only un-kept created tabs when the session ends", async () => {
 	const requests: Array<Record<string, unknown>> = [];
 	const server = Bun.serve({
 		hostname: "127.0.0.1",
@@ -224,7 +227,7 @@ it("closes tabs OMP created at settle and keeps the ones the model called keep()
 					},
 					tab: { ...tabSnapshot, id: `page-${requests.length}`, tabId: 90 + requests.length },
 				} satisfies InstanceLease);
-			if (body.action === "releaseTab") return Response.json({});
+			if (body.action === "releaseTab" || body.action === "closeTab") return Response.json({});
 			throw new Error(`Unexpected operation ${String(body.action)}`);
 		},
 	});
@@ -252,13 +255,19 @@ it("closes tabs OMP created at settle and keeps the ones the model called keep()
 		// lease does not survive the turn either way.
 		expect(requests.map(request => request.action)).toEqual(["create", "create"]);
 
-		expect(await releaseChromeTabsForOwner("settle-owner")).toEqual({ released: 1, kept: 1 });
+		expect(await releaseChromeTabsForOwner("settle-owner")).toBe(2);
 		const releases = requests.filter(request => request.action === "releaseTab");
-		expect(releases).toHaveLength(2);
-		expect(releases.find(request => request.close === true)).toBeDefined();
-		expect(releases.find(request => request.close === false)).toBeDefined();
+		// Both pages stay open at turn end; only the leases end.
+		expect(releases.map(request => request.close)).toEqual([false, false]);
 		expect(() => requireChromeHandle(closing.handle, session)).toThrow("stale");
 		expect(() => requireChromeHandle(keeping.handle, session)).toThrow("stale");
+
+		// Session end: the created tab nobody kept goes; the kept one stays.
+		expect(await closeCreatedChromeTabsForOwner("settle-owner")).toBe(1);
+		const closes = requests.filter(request => request.action === "closeTab");
+		expect(closes).toEqual([expect.objectContaining({ id: "page-1", owner: "settle-owner", browserId: "profile" })]);
+		// Idempotent: a second sweep has nothing left.
+		expect(await closeCreatedChromeTabsForOwner("settle-owner")).toBe(0);
 	} finally {
 		await releaseDeferredChromeTabsForOwner("settle-owner");
 		token.mockRestore();

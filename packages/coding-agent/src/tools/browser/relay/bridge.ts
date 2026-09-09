@@ -103,6 +103,37 @@ class CdpConnection {
 /** Transport replacement is retryable and must not permanently ban a tab. */
 class ExtensionReplacedError extends Error {}
 
+/** Debugger attachment of one tab as the lease's owner sees it. */
+export interface DebuggerState {
+	attached: boolean;
+	/** Present while Chrome will not let OMP drive the tab even though it is open. */
+	revoked?: string;
+}
+
+/**
+ * Chrome ends an extension's debugger session with `target_closed` for more
+ * than a closed tab: it also force-detaches when a frame the extension may
+ * not debug commits in the page — most often another extension's
+ * `chrome-extension://` UI, which is what password managers inject into
+ * sign-in forms. The tab stays open; only OMP's control ends.
+ */
+function describeDetach(reason: string): string {
+	if (reason === "canceled_by_user") return "the user cancelled OMP's debugging of this tab from Chrome's infobar";
+	return (
+		"Chrome revoked OMP's debugger on this tab while the tab stayed open, usually because another " +
+		"extension (a password manager, for example) embedded its own UI in the page"
+	);
+}
+
+function describeAttachFailure(message: string): string {
+	if (/chrome-extension:\/\/ URL of different extension/i.test(message))
+		return (
+			"another extension (a password manager, for example) has embedded its UI in this page, and Chrome " +
+			"does not let OMP debug a page containing another extension's frame"
+		);
+	return message;
+}
+
 class TabState {
 	readonly dialogs = new DialogJournal();
 	url: string;
@@ -116,6 +147,8 @@ class TabState {
 	attached = false;
 	/** Set when attach failed or the user cancelled the debugger; cleared on navigation. */
 	banned = false;
+	/** Why the debugger cannot be (re)attached while `banned`, in the model's terms. */
+	banReason: string | undefined;
 	/** Whether targets for this tab were announced to discovering connections. */
 	announced = false;
 	attaching: Promise<boolean> | null = null;
@@ -786,7 +819,9 @@ export class RelayBridge {
 		sessionId?: string,
 	): Promise<unknown> {
 		if (!tab.attached && !(await this.#ensureAttached(tab)))
-			throw new Error(`Chrome debugger could not attach to tab ${tab.tabId} (${tab.url})`);
+			throw new Error(
+				`Chrome debugger could not attach to tab ${tab.tabId} (${tab.url})${tab.banReason ? `: ${tab.banReason}` : ""}`,
+			);
 		tab.inflight++;
 		this.#touchTab(tab);
 		try {
@@ -924,7 +959,7 @@ export class RelayBridge {
 					return;
 				}
 				if (!(await this.#ensureAttached(tab))) {
-					this.#replyError(conn, msg, `Cannot attach to tab ${tab.tabId} (${tab.url})`);
+					this.#replyError(conn, msg, `Cannot attach to tab ${tab.tabId} (${tab.url})${tab.banReason ? `: ${tab.banReason}` : ""}`);
 					return;
 				}
 				const sessionId = this.#mintSession(conn, parsed.kind, tab.tabId);
@@ -1075,6 +1110,7 @@ export class RelayBridge {
 		tab.attaching = null;
 		this.#resetRuntime(tab);
 		tab.banned = true;
+		tab.banReason = describeDetach(reason);
 		this.#retractTab(tab);
 	}
 
@@ -1099,7 +1135,10 @@ export class RelayBridge {
 			tab = new TabState(snap.tabId, snap);
 			this.#tabs.set(snap.tabId, tab);
 		} else {
-			if (tab.url !== snap.url) tab.banned = false;
+			if (tab.url !== snap.url) {
+				tab.banned = false;
+				tab.banReason = undefined;
+			}
 			tab.update(snap);
 		}
 		if (opts.silent) return;
@@ -1296,6 +1335,14 @@ export class RelayBridge {
 		this.#detachIfUnheld(ref.tabId);
 	}
 
+	/** Whether the exact tab can be driven right now, and if not, why not. */
+	debuggerState(tabId: number): DebuggerState {
+		const tab = this.#tabs.get(tabId);
+		if (!tab) return { attached: false, revoked: "the tab is gone from Chrome" };
+		if (tab.attached) return { attached: true };
+		return tab.banned ? { attached: false, revoked: tab.banReason ?? describeDetach("target_closed") } : { attached: false };
+	}
+
 	/** Serialize dialog metadata only after the caller has validated the exact lease. */
 	dialogState(tabId: number): DialogState {
 		const tab = this.#tabs.get(tabId);
@@ -1404,7 +1451,10 @@ export class RelayBridge {
 					url: tab.url,
 					error: err instanceof Error ? err.message : String(err),
 				});
-				if (!(err instanceof ExtensionReplacedError)) tab.banned = true;
+				if (!(err instanceof ExtensionReplacedError)) {
+					tab.banned = true;
+					tab.banReason = describeAttachFailure(err instanceof Error ? err.message : String(err));
+				}
 				return false;
 			})
 			.finally(() => {

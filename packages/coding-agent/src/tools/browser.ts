@@ -19,6 +19,7 @@ import {
 	chromeLifecycle,
 	chromeDialog,
 	ensureChromePage,
+	explainRevokedChromeControl,
 	closeChromeTab,
 	discoverChromeTabs,
 	listChromeInstances,
@@ -288,8 +289,12 @@ async function invokeBrowser(
 			}
 			if (parsed.action !== "run" && parsed.action !== "call")
 				throw new ToolError("Invalid operation for an existing Chrome handle");
-			await ensureChromePage(handle, session, timeoutMs, context.signal);
-			return await runBrowser(session, handle.id, parsed, details, timeoutMs, context.signal);
+			try {
+				await ensureChromePage(handle, session, timeoutMs, context.signal);
+				return await runBrowser(session, handle.id, parsed, details, timeoutMs, context.signal);
+			} catch (error) {
+				throw (await explainRevokedChromeControl(handle, error)) ?? error;
+			}
 		}
 		if (parsed.action === "closeTab") {
 			if (!parsed.id) throw new ToolError("closeTab requires the exact id returned by browser.discover()");
