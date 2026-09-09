@@ -4392,18 +4392,6 @@ export const SETTINGS_SCHEMA = {
 		},
 	},
 
-	"computer.releaseOnSettle": {
-		type: "boolean",
-		default: true,
-		ui: {
-			tab: "tools",
-			group: "Computer",
-			label: "Release Computer Driver When The Agent Stops",
-			description:
-				"When the agent finishes its work and hands control back, end the desktop-control driver child so the macOS screen-sharing indicator goes away. The next computer call starts a fresh driver; the prelude and its settings are untouched.",
-		},
-	},
-
 	"computer.maxWidth": {
 		type: "number",
 		default: 3840,

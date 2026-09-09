@@ -4774,18 +4774,16 @@ export class AgentSession {
 					logger.warn("Failed to release managed Chrome tabs at settle", { error: String(error) });
 				}
 			}
-			if (this.settings.get("computer.releaseOnSettle")) {
-				try {
-					await withTimeout(
-						releaseComputerResourcesForOwner(this.getEvalKernelOwnerId()),
-						5_000,
-						"Timed out releasing computer resources at settle",
-					);
-				} catch (error) {
-					// A release failure poisons only that lifetime; the next computer
-					// call reports it. Nothing here may escape into the event flow.
-					logger.warn("Failed to release computer resources at settle", { error: String(error) });
-				}
+			try {
+				await withTimeout(
+					releaseComputerResourcesForOwner(this.getEvalKernelOwnerId()),
+					5_000,
+					"Timed out releasing computer resources at settle",
+				);
+			} catch (error) {
+				// A release failure poisons only that lifetime; the next computer
+				// call reports it. Nothing here may escape into the event flow.
+				logger.warn("Failed to release computer resources at settle", { error: String(error) });
 			}
 		})();
 	}
