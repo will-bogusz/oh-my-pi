@@ -8,7 +8,7 @@ import * as managed from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome
 import * as supervisor from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 
-it("reports missing inspection channels while preserving independently readable text", async () => {
+it("reports missing inspection channels and displays only the errors, never the state blob", async () => {
 	const calls: string[] = [];
 	const displays: unknown[] = [];
 	const context = createContext({
@@ -16,10 +16,6 @@ it("reports missing inspection channels while preserving independently readable 
 			observe: async () => {
 				calls.push("controls");
 				throw new Error("AX unavailable");
-			},
-			ariaSnapshot: async () => {
-				calls.push("tree");
-				return '- paragraph "Saved result"';
 			},
 			screenshot: async () => {
 				calls.push("capture");
@@ -33,13 +29,20 @@ it("reports missing inspection channels while preserving independently readable 
 	expect(result.initialScreenshot).toBeUndefined();
 	expect(result.inspectionError).toContain("AX unavailable");
 	expect(result.screenshotError).toContain("Capture unavailable");
-	expect(result.initialTree).toContain("Saved result");
-	expect(calls).toEqual(["controls", "tree", "capture"]);
-	expect(displays).toEqual([result]);
+	expect(calls).toEqual(["controls", "capture"]);
+	expect(displays).toEqual([{ inspectionError: result.inspectionError, screenshotError: result.screenshotError }]);
 	calls.length = 0;
+	displays.length = 0;
 	const textOnly = await runInContext(`(${initialObservationCode})({tab}, {screenshot: false})`, context);
-	expect(calls).toEqual(["controls", "tree"]);
+	expect(calls).toEqual(["controls"]);
 	expect(textOnly.screenshotError).toBeUndefined();
+	// A clean acquisition adds nothing: observe() printed the tree already.
+	context.tab.observe = async () => ({ tree: "url: x\ne1 button \"Go\"", elements: [] });
+	context.tab.screenshot = async () => "/tmp/shot.webp";
+	displays.length = 0;
+	const clean = await runInContext(`(${initialObservationCode})({tab}, {})`, context);
+	expect(clean.initialObservation.tree).toContain('e1 button "Go"');
+	expect(displays).toEqual([]);
 });
 
 it("propagates cancellation instead of returning a partially acquired page", async () => {
@@ -51,9 +54,6 @@ it("propagates cancellation instead of returning a partially acquired page", asy
 			observe: async () => {
 				controller.abort();
 				throw new ToolAbortError("Cancelled inspection");
-			},
-			ariaSnapshot: async () => {
-				calls.push("tree");
 			},
 			screenshot: async () => {
 				calls.push("capture");

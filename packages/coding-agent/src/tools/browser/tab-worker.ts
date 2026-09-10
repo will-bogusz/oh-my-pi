@@ -46,12 +46,27 @@ import {
 } from "./aria/aria-snapshot";
 import { applyStealthPatches, applyViewport, BROWSER_PROTOCOL_TIMEOUT_MS, loadPuppeteerInWorker } from "./launch";
 import { TabDownloadMonitor, type TabDownloads } from "./downloads";
+import { navigateMainFrame, watchMainFrameNavigation } from "./navigation";
+import {
+	axNodeKey,
+	buildTreeLines,
+	flattenSnapshot,
+	hasBusyIndicator,
+	matchRefs,
+	type ObservedNode,
+	type RefRecord,
+	renderTree,
+	renderTreeDiff,
+	roleNamePositions,
+	sameDocument,
+	type TreeHeader,
+	type TreeLine,
+} from "./observation";
 import { extractReadableFromHtml, type ReadableFormat } from "./readable";
 
 import { cloneSafe, RunOutput } from "./run-output";
 import type {
 	Observation,
-	ObservationEntry,
 	ReadyInfo,
 	RefStyle,
 	RunErrorPayload,
@@ -80,26 +95,6 @@ declare global {
 		readonly visibilityState: "visible" | "hidden";
 	};
 }
-
-const INTERACTIVE_AX_ROLES = new Set([
-	"button",
-	"link",
-	"textbox",
-	"combobox",
-	"listbox",
-	"option",
-	"checkbox",
-	"radio",
-	"switch",
-	"tab",
-	"menuitem",
-	"menuitemcheckbox",
-	"menuitemradio",
-	"slider",
-	"spinbutton",
-	"searchbox",
-	"treeitem",
-]);
 
 const LEGACY_SELECTOR_PREFIXES = ["p-aria/", "p-text/", "p-xpath/", "p-pierce/"] as const;
 
@@ -237,7 +232,7 @@ interface TabApi {
 		url: string,
 		opts?: { waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2" },
 	): Promise<void>;
-	observe(opts?: { includeAll?: boolean; viewportOnly?: boolean }): Promise<Observation>;
+	observe(opts?: ObserveOptions): Promise<Observation>;
 	ariaSnapshot(selector?: string, opts?: AriaSnapshotOptions): Promise<string>;
 	screenshot(opts?: ScreenshotOptions): Promise<string>;
 	extract(format?: ReadableFormat): Promise<string>;
@@ -303,47 +298,27 @@ export function normalizeSelector(selector: string): string {
 	return selector;
 }
 
-function isInteractiveNode(node: SerializedAXNode): boolean {
-	if (INTERACTIVE_AX_ROLES.has(node.role)) return true;
-	return (
-		node.checked !== undefined ||
-		node.pressed !== undefined ||
-		node.selected !== undefined ||
-		node.expanded !== undefined ||
-		node.focused === true
-	);
+interface ObserveOptions {
+	includeAll?: boolean;
+	viewportOnly?: boolean;
+	/** Render only what changed since the previous observation of this document (default when one exists). */
+	diff?: boolean;
+	/** Print the tree into the run output (default true). */
+	display?: boolean;
 }
 
 /**
- * What one observed element needs to be found again. The handle is the fast
- * path; `backendNodeId` identifies the exact DOM node even after its JavaScript
- * handle dies with its execution context; role/name/nth re-finds an equivalent
- * node after a re-render replaced the original (self-healing refs, modelled on
- * agent-browser's `RefEntry`/`resolve_element_center`).
+ * What one ref needs to find its element again. The handle is the fast path;
+ * `adopt` resolves it lazily from the minting snapshot; `nodeKey` identifies
+ * the exact DOM node even after its JavaScript handle dies with its execution
+ * context; role/name/position re-finds an equivalent node after a re-render
+ * replaced the original (self-healing refs, modelled on agent-browser's
+ * `RefEntry`/`resolve_element_center`). Entries outlive the observation that
+ * minted them so a ref keeps naming the same element for the tab lifetime.
  */
-interface RefEntry {
-	handle: ElementHandle;
-	role: string;
-	name: string;
-	/** Position among the observation's entries sharing this role+name; unset when it was unique. */
-	nth?: number;
-	backendNodeId?: number;
-}
-
-/**
- * Disambiguating index per entry: the position among same role+name siblings,
- * or `undefined` when that pair identified exactly one element in the
- * observation (a unique pair needs no index and survives reordering).
- */
-export function assignRefNths(entries: readonly { role: string; name?: string }[]): (number | undefined)[] {
-	const seen = new Map<string, number>();
-	const positions = entries.map(entry => {
-		const key = `${entry.role}\u0000${entry.name ?? ""}`;
-		const nth = seen.get(key) ?? 0;
-		seen.set(key, nth + 1);
-		return { key, nth };
-	});
-	return positions.map(({ key, nth }) => ((seen.get(key) ?? 0) > 1 ? nth : undefined));
+interface RefEntry extends RefRecord {
+	handle?: ElementHandle;
+	adopt?: () => Promise<ElementHandle | null>;
 }
 
 /**
@@ -367,21 +342,20 @@ export function parseRefToken(token: string, observationId: string): number | nu
 
 /**
  * Which re-queried candidate is the ref's element: the exact same DOM node when
- * one of them still carries the recorded `backendNodeId`, else the candidate at
- * the recorded position (or the only/first one when the role+name pair was
- * unique). Null when nothing matches and the ref is genuinely stale.
+ * one of them still carries the recorded node key, else the candidate at the
+ * recorded position (the only/first one when the role+name pair was unique).
+ * Null when nothing matches and the ref is genuinely stale.
  */
 export function chooseHealedIndex(
-	candidates: readonly (number | undefined)[],
-	target: { backendNodeId?: number; nth?: number },
+	candidates: readonly (string | undefined)[],
+	target: { nodeKey?: string; position: number },
 ): number | null {
 	if (candidates.length === 0) return null;
-	if (target.backendNodeId !== undefined) {
-		const exact = candidates.indexOf(target.backendNodeId);
+	if (target.nodeKey !== undefined) {
+		const exact = candidates.indexOf(target.nodeKey);
 		if (exact >= 0) return exact;
 	}
-	const index = target.nth ?? 0;
-	return index < candidates.length ? index : null;
+	return target.position < candidates.length ? target.position : null;
 }
 
 function asElementHandle(handle: unknown): ElementHandle | null {
@@ -582,7 +556,12 @@ export function toActionableHandle(
 const backgroundInputQueues = new WeakMap<Page, Promise<void>>();
 const backgroundInputFailures = new WeakMap<Page, Error>();
 const backgroundPageScopes = new WeakMap<Page, BackgroundPageScope>();
-const INPUT_RESTORE_TIMEOUT_MS = 1000;
+/**
+ * A cross-document navigation started by the click we just dispatched leaves this
+ * CDP call unanswered for as long as Chrome takes to swap documents (and often
+ * processes), so the window has to outlast a commit, not a round trip.
+ */
+const INPUT_RESTORE_TIMEOUT_MS = 3000;
 
 interface BackgroundPageScope {
 	ready: Promise<void>;
@@ -591,6 +570,7 @@ interface BackgroundPageScope {
 }
 
 async function restoreBackgroundPage(page: Page, pending: Promise<unknown>): Promise<void> {
+	const navigation = watchMainFrameNavigation(page);
 	await withTimeout(
 		pending
 			.catch(() => undefined)
@@ -599,15 +579,29 @@ async function restoreBackgroundPage(page: Page, pending: Promise<unknown>): Pro
 			}),
 		INPUT_RESTORE_TIMEOUT_MS,
 		"Timed out restoring Chrome page focus state",
-	).catch(error => {
-		if (page.isClosed()) return;
-		const failure = new ToolError(
-			`Chrome page focus state could not be restored: ${String(error)}. ` +
-				"Page activity is uncertain; release this handle and observe before acting again.",
-		);
-		backgroundInputFailures.set(page, failure);
-		throw failure;
-	});
+	)
+		.catch(async error => {
+			if (page.isClosed()) return;
+			const excuse = await navigation.excuse(error);
+			if (excuse) {
+				// The page navigated: focus emulation is a per-renderer setting the new
+				// document did not inherit, and the handle is fine. Retry once for the
+				// same-process case, then let the caller carry on either way.
+				await withTimeout(
+					page.emulateFocusedPage(false),
+					INPUT_RESTORE_TIMEOUT_MS,
+					"Timed out restoring Chrome page focus state",
+				).catch(() => undefined);
+				return;
+			}
+			const failure = new ToolError(
+				`Chrome page focus state could not be restored: ${String(error)}. ` +
+					"The page navigated or is busy; observe again before acting.",
+			);
+			backgroundInputFailures.set(page, failure);
+			throw failure;
+		})
+		.finally(() => navigation.stop());
 }
 
 /** Prepare a complete managed run, including accessibility queries, without selecting its tab. */
@@ -1065,76 +1059,44 @@ async function createTrackedHeadlessPage(browser: Browser, reportTarget: (target
 	return page;
 }
 
-async function collectObservationEntries(
-	core: WorkerCore,
-	node: SerializedAXNode,
-	entries: ObservationEntry[],
-	options: { viewportOnly: boolean; includeAll: boolean },
-): Promise<void> {
-	if (options.includeAll || isInteractiveNode(node)) {
-		const handle = await node.elementHandle();
-		if (handle) {
-			let inViewport = true;
-			if (options.viewportOnly) {
-				try {
-					inViewport = await handle.isIntersectingViewport();
-				} catch {
-					inViewport = false;
-				}
-			}
-			if (inViewport) {
-				const id = core.nextElementId();
-				const states: string[] = [];
-				if (node.disabled) states.push("disabled");
-				if (node.checked !== undefined) states.push(`checked=${String(node.checked)}`);
-				if (node.pressed !== undefined) states.push(`pressed=${String(node.pressed)}`);
-				if (node.selected !== undefined) states.push(`selected=${String(node.selected)}`);
-				if (node.expanded !== undefined) states.push(`expanded=${String(node.expanded)}`);
-				if (node.required) states.push("required");
-				if (node.readonly) states.push("readonly");
-				if (node.multiselectable) states.push("multiselectable");
-				if (node.multiline) states.push("multiline");
-				if (node.modal) states.push("modal");
-				if (node.focused) states.push("focused");
-				core.cacheElement(id, handle as ElementHandle, node);
-				entries.push({
-					id,
-					role: node.role,
-					name: node.name,
-					value: node.value,
-					description: node.description,
-					keyshortcuts: node.keyshortcuts,
-					states,
-				});
-			} else {
-				await handle.dispose();
-			}
-		}
-	}
-	for (const child of node.children ?? []) {
-		await collectObservationEntries(core, child, entries, options);
-	}
-}
+/** Upper bound on the wait for a page to settle before an observation snapshots it. */
+const SETTLE_BUDGET_MS = 3_000;
+/** DOM-mutation quiet window that counts as settled. */
+const SETTLE_DOM_QUIET_MS = 300;
+/** Network idle window that counts as settled. */
+const SETTLE_NETWORK_IDLE_MS = 1_000;
+/** Re-check cadence while the tree still shows a loading indicator. */
+const SETTLE_BUSY_POLL_MS = 250;
 
 /**
- * Candidates for a self-healing ref: every node the observation's own filter
- * would have emitted whose role and name match the recorded ones, in document
- * order, so the recorded `nth` indexes the same sequence it was minted from.
+ * Wait for the page to go quiet — no DOM mutations for 300 ms or no network
+ * traffic for 1 s, whichever comes first — so an observation taken right after
+ * an action sees the result instead of the spinner. Bounded and never throws:
+ * the snapshot that follows shows whatever is there.
  */
-function collectRoleNameMatches(
-	node: SerializedAXNode,
-	target: { role: string; name: string },
-	options: { includeAll: boolean },
-	matches: SerializedAXNode[],
-): void {
-	if (
-		(options.includeAll || isInteractiveNode(node)) &&
-		node.role === target.role &&
-		(node.name ?? "") === target.name
-	) {
-		matches.push(node);
-	}
-	for (const child of node.children ?? []) collectRoleNameMatches(child, target, options, matches);
+async function settlePage(page: Page, signal: AbortSignal | undefined, budgetMs: number): Promise<void> {
+	// The network wait also carries the caller's abort: aborting it ends the race.
+	const network = new AbortController();
+	const onAbort = () => network.abort();
+	signal?.addEventListener("abort", onAbort, { once: true });
+	const domQuiet = page
+		.evaluate(
+			`new Promise(resolve => {
+				const quiet = ${SETTLE_DOM_QUIET_MS}, max = ${budgetMs};
+				let timer = setTimeout(done, quiet);
+				const deadline = setTimeout(done, max);
+				const observer = new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(done, quiet); });
+				observer.observe(document, { childList: true, subtree: true, attributes: true, characterData: true });
+				function done() { observer.disconnect(); clearTimeout(timer); clearTimeout(deadline); resolve(); }
+			})`,
+		)
+		.catch(() => undefined);
+	const networkQuiet = page
+		.waitForNetworkIdle({ idleTime: SETTLE_NETWORK_IDLE_MS, timeout: budgetMs, signal: network.signal })
+		.catch(() => undefined);
+	await Promise.race([domQuiet, networkQuiet]);
+	network.abort();
+	signal?.removeEventListener("abort", onAbort);
 }
 
 async function resolveActionableQueryHandlerClickTarget(handles: ElementHandle[]): Promise<ElementHandle | null> {
@@ -1317,12 +1279,15 @@ export class WorkerCore {
 	#browser?: Browser;
 	#page?: Page;
 	#targetId?: string;
-	#elementCache = new Map<number, RefEntry>();
-	#elementCounter = 0;
+	/** Every ref minted on this tab; numbers are never reused, entries outlive their observation. */
+	#refs = new Map<number, RefEntry>();
+	#refCounter = 0;
 	#observationId: string = crypto.randomUUID();
 	#refStyle: RefStyle = "uuid";
-	/** Filter the live ref map was minted with, replayed when re-querying for a heal. */
-	#refFilter: { includeAll: boolean; viewportOnly: boolean } = { includeAll: false, viewportOnly: false };
+	/** Whether the refs were minted with `includeAll`, replayed when re-querying for a heal. */
+	#refIncludeAll = false;
+	/** Previous tree of this tab, the baseline a diff observation renders against. */
+	#lastTree?: { url: string; filter: { includeAll: boolean; viewportOnly: boolean }; lines: TreeLine[] };
 	#managedChrome = false;
 	#active: ActiveRun | null = null;
 	#runtime: JsRuntime | null = null;
@@ -1400,15 +1365,6 @@ export class WorkerCore {
 			});
 		}
 		return failure;
-	}
-
-	nextElementId(): number {
-		this.#elementCounter += 1;
-		return this.#elementCounter;
-	}
-
-	cacheElement(id: number, handle: ElementHandle, node: { role: string; name?: string }): void {
-		this.#elementCache.set(id, { handle, role: node.role, name: node.name ?? "" });
 	}
 
 	async #handleMessage(msg: WorkerInbound): Promise<void> {
@@ -1490,10 +1446,12 @@ export class WorkerCore {
 				this.#downloadObservationError = toError(error).message;
 			}
 			if (payload.url) {
-				await this.#page.goto(payload.url, {
-					// Default to "load" because dev servers with HMR/WS never reach networkidle.
-					waitUntil: payload.waitUntil ?? "load",
-					timeout: payload.timeoutMs,
+				// Default to "load" because dev servers with HMR/WS never reach networkidle.
+				await navigateMainFrame(this.#page, payload.url, {
+					label: `navigate to ${JSON.stringify(payload.url)}`,
+					timeoutMs: payload.timeoutMs,
+					waitUntil: payload.waitUntil,
+					stopLoading: () => this.#stopLoading(),
 				});
 			}
 			this.#targetId = await targetIdForPage(this.#page);
@@ -1994,29 +1952,24 @@ export class WorkerCore {
 			goto: (url, opts) =>
 				op(`tab.goto(${JSON.stringify(url)})`, INF, async sig => {
 					this.#clearElementCache();
-					try {
-						// Default to "load" because dev servers with HMR/WS never reach networkidle.
-						// budgetBound (not the full cell) so a hung navigation fails named and
-						// catchable inside the run instead of dying with the whole cell.
-						await untilAborted(sig, () =>
-							page.goto(url, { waitUntil: opts?.waitUntil ?? "load", timeout: budgetBound }),
-						);
-					} catch (err) {
-						if (err instanceof Error && err.name === "TimeoutError") {
-							// Abandon the hung navigation NOW — a still-pending load stalls every
-							// later op on this page and cascades into more opaque timeouts.
-							await this.#stopLoading();
-							throw new ToolError(
-								`tab.goto(${JSON.stringify(url)}) timed out after ${budgetBound}ms; pending navigation stopped — retry with a longer tool timeout or waitUntil:"domcontentloaded"`,
-							);
-						}
-						throw err;
-					}
+					// Default to "load" because dev servers with HMR/WS never reach networkidle.
+					// budgetBound (not the full cell) so a hung navigation fails named and
+					// catchable inside the run instead of dying with the whole cell. A timeout
+					// abandons the pending load NOW: it would stall every later op on this page.
+					await navigateMainFrame(page, url, {
+						label: `tab.goto(${JSON.stringify(url)})`,
+						timeoutMs: budgetBound,
+						waitUntil: opts?.waitUntil,
+						signal: sig,
+						stopLoading: () => this.#stopLoading(),
+					});
 				}),
 			observe: opts =>
-				op("tab.observe()", quickOpMs, sig =>
-					this.#collectObservation({ ...opts, refs: session.refs, signal: sig }),
-				),
+				op("tab.observe()", quickOpMs, async sig => {
+					const observation = await this.#collectObservation({ ...opts, refs: session.refs, signal: sig });
+					if (opts?.display !== false) output.push({ type: "text", text: observation.tree });
+					return observation;
+				}),
 			ariaSnapshot: (selector, opts) =>
 				op(
 					selector ? `tab.ariaSnapshot(${JSON.stringify(selector)})` : "tab.ariaSnapshot()",
@@ -2044,8 +1997,12 @@ export class WorkerCore {
 				op(describeScreenshot(opts), quickOpMs, sig =>
 					this.#captureScreenshot(session, output, screenshots, sig, opts),
 				),
-			extract: (format = "markdown") =>
+			extract: (format = "text") =>
 				op(`tab.extract(${JSON.stringify(format)})`, quickOpMs, async sig => {
+					if (format !== "text" && format !== "markdown")
+						throw new ToolError(
+							`tab.extract(format) takes "text" or "markdown" (positional string, default "text"); received ${JSON.stringify(format)}`,
+						);
 					const html = (await untilAborted(sig, () => page.content())) as string;
 					const result = await extractReadableFromHtml(html, page.url(), format);
 					if (!result) {
@@ -2294,53 +2251,123 @@ export class WorkerCore {
 		};
 	}
 
-	async #collectObservation(options: {
-		includeAll?: boolean;
-		viewportOnly?: boolean;
-		refs?: RefStyle;
-		signal?: AbortSignal;
-	}): Promise<Observation> {
+	#snapshot(includeAll: boolean, signal?: AbortSignal): Promise<SerializedAXNode> {
+		return untilAborted(signal, async () => {
+			const snapshot = (await this.#requirePage().accessibility.snapshot({
+				interestingOnly: !includeAll,
+				includeIframes: true,
+			})) as SerializedAXNode | null;
+			if (!snapshot) throw new ToolError("Accessibility snapshot unavailable");
+			return snapshot;
+		});
+	}
+
+	async #collectObservation(options: ObserveOptions & { refs?: RefStyle; signal?: AbortSignal }): Promise<Observation> {
 		const page = this.#requirePage();
+		const { signal } = options;
 		const refStyle = options.refs ?? "uuid";
-		this.#clearElementCache();
-		// Compact refs restart at e1 for every observation, so the ids stay
-		// small no matter how many observations a run takes.
-		if (refStyle === "compact") this.#elementCounter = 0;
-		this.#refStyle = refStyle;
 		const includeAll = options.includeAll ?? false;
-		const observationId = this.#observationId;
 		const viewportOnly = options.viewportOnly ?? false;
-		this.#refFilter = { includeAll, viewportOnly };
-		const snapshot = (await untilAborted(options.signal, () =>
-			page.accessibility.snapshot({ interestingOnly: !includeAll }),
-		)) as SerializedAXNode | null;
-		if (!snapshot) throw new ToolError("Accessibility snapshot unavailable");
-		const entries: ObservationEntry[] = [];
-		await collectObservationEntries(this, snapshot, entries, { includeAll, viewportOnly });
-		if (refStyle === "compact") {
-			// Disambiguating index only. Reading each element's `backendNodeId` here
-			// costs one CDP round-trip per element — measured at 6 observations of a
-			// 680-element page over the extension relay, that alone blew a 30 s cell
-			// budget — and buys nothing on a first heal, which re-queries by
-			// role/name/nth anyway. The heal records the id it landed on instead.
-			const nths = assignRefNths(entries);
-			entries.forEach((entry, index) => {
-				const cached = this.#elementCache.get(entry.id);
-				if (cached) cached.nth = nths[index];
-			});
+		this.#clearElementCache();
+		this.#refStyle = refStyle;
+		this.#refIncludeAll = includeAll;
+		const observationId = this.#observationId;
+
+		const started = Date.now();
+		await settlePage(page, signal, SETTLE_BUDGET_MS);
+		let snapshot = await this.#snapshot(includeAll, signal);
+		while (hasBusyIndicator(snapshot)) {
+			const remaining = SETTLE_BUDGET_MS - (Date.now() - started);
+			if (remaining <= 0) break;
+			await untilAborted(signal, () => Bun.sleep(Math.min(SETTLE_BUSY_POLL_MS, remaining)));
+			snapshot = await this.#snapshot(includeAll, signal);
 		}
-		const { viewport, scroll } = await readPageMetrics(page, options.signal);
+
+		let nodes = flattenSnapshot(snapshot, { includeAll });
+		// Handles are adopted lazily on first use; only the viewport filter needs
+		// them now, and only for the nodes that could get a ref.
+		const eager = new Map<ObservedNode, ElementHandle>();
+		if (viewportOnly) {
+			const kept: ObservedNode[] = [];
+			for (const node of nodes) {
+				if (!node.actionable || !node.ax) {
+					kept.push(node);
+					continue;
+				}
+				const handle = asElementHandle(await untilAborted(signal, () => node.ax!.elementHandle()));
+				if (handle && (await handle.isIntersectingViewport().catch(() => false))) {
+					eager.set(node, handle);
+					kept.push(node);
+				} else void handle?.dispose().catch(() => undefined);
+			}
+			nodes = kept;
+		}
+
+		const actionable = nodes.filter(node => node.actionable && node.ax);
+		const refs = matchRefs(
+			actionable.map(node => ({ role: node.role, name: node.name, nodeKey: axNodeKey(node.ax!) })),
+			this.#refs,
+			() => ++this.#refCounter,
+		);
+		const positions = roleNamePositions(actionable);
+		const refByNode = new Map<ObservedNode, number>();
+		actionable.forEach((node, index) => {
+			const ref = refs[index];
+			const ax = node.ax!;
+			refByNode.set(node, ref);
+			this.#refs.set(ref, {
+				role: node.role,
+				name: node.name,
+				position: positions[index],
+				nodeKey: axNodeKey(ax),
+				handle: eager.get(node),
+				adopt: () => ax.elementHandle(),
+			});
+		});
+		const lines = buildTreeLines(
+			nodes,
+			nodes.map(node => refByNode.get(node)),
+		);
+
+		const { viewport, scroll } = await readPageMetrics(page, signal);
 		if (observationId !== this.#observationId)
 			throw new ToolError("The page changed while observing it. Observe again.");
+		const url = page.url();
+		const title = (await untilAborted(signal, () => page.title())) as string;
+		const focusedNode = actionable.find(node => node.ax!.focused === true);
+		const focused = focusedNode ? `e${refByNode.get(focusedNode)}` : undefined;
+		const header: TreeHeader = { url, title, scroll: { y: scroll.y, scrollHeight: scroll.scrollHeight }, focused };
+		const previous = this.#lastTree;
+		const filter = { includeAll, viewportOnly };
+		// Diff only against the same document observed with the same filter;
+		// anything else needs the full tree to be readable.
+		const baseline =
+			options.diff !== false &&
+			previous &&
+			sameDocument(previous.url, url) &&
+			previous.filter.includeAll === includeAll &&
+			previous.filter.viewportOnly === viewportOnly
+				? previous
+				: undefined;
+		const tree = baseline ? renderTreeDiff(header, baseline.lines, lines) : renderTree(header, lines);
+		this.#lastTree = { url, filter, lines };
 		return {
 			snapshot: observationId,
-			url: page.url(),
-			title: (await untilAborted(options.signal, () => page.title())) as string,
+			url,
+			title,
 			viewport,
 			scroll,
-			elements: entries.map(entry => ({
-				...entry,
-				ref: refStyle === "compact" ? `e${entry.id}` : `${observationId}:${entry.id}`,
+			focused,
+			tree,
+			elements: actionable.map((node, index) => ({
+				id: refs[index],
+				ref: refStyle === "compact" ? `e${refs[index]}` : `${observationId}:${refs[index]}`,
+				role: node.role,
+				name: node.name || undefined,
+				value: node.value,
+				description: node.description,
+				keyshortcuts: node.keyshortcuts,
+				states: node.states,
 			})),
 		};
 	}
@@ -2580,9 +2607,24 @@ export class WorkerCore {
 	}
 
 	async #resolveCachedHandle(id: number): Promise<ElementHandle> {
-		const entry = this.#elementCache.get(id);
-		if (!entry) throw new ToolError(`Unknown element id ${id}. Run tab.observe() to refresh the element list.`);
-		if (await this.#handleStillLive(entry.handle)) return entry.handle;
+		const entry = this.#refs.get(id);
+		if (!entry)
+			throw new ToolError(`Unknown element ref e${id}: no observation of this tab minted it. Run tab.observe().`);
+		if (entry.handle) {
+			if (await this.#handleStillLive(entry.handle)) return entry.handle;
+			void entry.handle.dispose().catch(() => undefined);
+			entry.handle = undefined;
+		}
+		const adopt = entry.adopt;
+		if (adopt) {
+			entry.adopt = undefined;
+			const handle = asElementHandle(await adopt().catch(() => null));
+			if (handle && (await this.#handleStillLive(handle))) {
+				entry.handle = handle;
+				return handle;
+			}
+			void handle?.dispose().catch(() => undefined);
+		}
 		// uuid refs are snapshot-bound by contract: a dead handle means the whole
 		// observation is void, so drop it and make the model observe again.
 		if (this.#refStyle !== "compact") {
@@ -2603,50 +2645,33 @@ export class WorkerCore {
 	/**
 	 * Re-find a compact ref whose handle died: re-query the accessibility tree
 	 * with the minting observation's filter and take the node that still carries
-	 * the `backendNodeId` a previous heal recorded, else the recorded
-	 * role/name/nth position. Only a re-query that finds nothing is a stale ref.
+	 * the recorded node key, else the recorded role/name/position. Only a
+	 * re-query that finds nothing is a stale ref.
 	 */
 	async #healRef(id: number, entry: RefEntry): Promise<ElementHandle> {
-		const page = this.#requirePage();
 		const stale = new ToolError(
 			`Element ref e${id} (${entry.role}${entry.name ? ` ${JSON.stringify(entry.name)}` : ""}) is stale: ` +
 				`it is gone from the page. Run tab.observe() again.`,
 		);
-		const snapshot = (await page.accessibility.snapshot({
-			interestingOnly: !this.#refFilter.includeAll,
-		})) as SerializedAXNode | null;
+		const snapshot = await this.#snapshot(this.#refIncludeAll).catch(() => null);
 		if (!snapshot) throw stale;
-		const matches: SerializedAXNode[] = [];
-		collectRoleNameMatches(snapshot, entry, { includeAll: this.#refFilter.includeAll }, matches);
-		const candidates: { handle: ElementHandle; backendNodeId?: number }[] = [];
-		for (const node of matches) {
-			const handle = asElementHandle(await node.elementHandle());
-			if (!handle) continue;
-			if (this.#refFilter.viewportOnly && !(await handle.isIntersectingViewport().catch(() => false))) {
-				void handle.dispose().catch(() => undefined);
-				continue;
-			}
-			candidates.push({ handle, backendNodeId: await handle.backendNodeId().catch(() => undefined) });
-		}
+		const candidates = flattenSnapshot(snapshot, { includeAll: this.#refIncludeAll }).filter(
+			node => node.actionable && node.ax && node.role === entry.role && node.name === entry.name,
+		);
 		const chosen = chooseHealedIndex(
-			candidates.map(candidate => candidate.backendNodeId),
+			candidates.map(candidate => axNodeKey(candidate.ax!)),
 			entry,
 		);
-		for (const [index, candidate] of candidates.entries()) {
-			if (index !== chosen) void candidate.handle.dispose().catch(() => undefined);
-		}
-		if (chosen === null) {
-			this.#elementCache.delete(id);
-			void entry.handle.dispose().catch(() => undefined);
-			throw stale;
-		}
-		const healed = candidates[chosen];
-		const exact = entry.backendNodeId !== undefined && healed.backendNodeId === entry.backendNodeId;
-		void entry.handle.dispose().catch(() => undefined);
-		entry.handle = healed.handle;
-		entry.backendNodeId = healed.backendNodeId;
+		if (chosen === null) throw stale;
+		const healed = candidates[chosen].ax!;
+		const handle = asElementHandle(await healed.elementHandle().catch(() => null));
+		if (!handle) throw stale;
+		const nodeKey = axNodeKey(healed);
+		const exact = entry.nodeKey !== undefined && nodeKey === entry.nodeKey;
+		entry.handle = handle;
+		entry.nodeKey = nodeKey;
 		this.#log("debug", "Healed browser element ref", { ref: `e${id}`, role: entry.role, name: entry.name, exact });
-		return healed.handle;
+		return handle;
 	}
 
 	async #resolveAriaRef(id: string): Promise<ElementHandle> {
@@ -2684,14 +2709,19 @@ export class WorkerCore {
 		)) as ElementHandle;
 	}
 
+	/**
+	 * Detach every ref from the page: handles are disposed and lazy adoption
+	 * dropped, the observation id rotates. The records stay so the next
+	 * observation hands the same numbers to the same elements and a compact
+	 * ref used in between still heals by role/name.
+	 */
 	#clearElementCache(): void {
 		this.#observationId = crypto.randomUUID();
-		if (this.#elementCache.size === 0) {
-			return;
+		for (const entry of this.#refs.values()) {
+			if (entry.handle) void entry.handle.dispose().catch(() => undefined);
+			entry.handle = undefined;
+			entry.adopt = undefined;
 		}
-		const entries = [...this.#elementCache.values()];
-		this.#elementCache.clear();
-		for (const entry of entries) void entry.handle.dispose().catch(() => undefined);
 	}
 
 	/** Best-effort `Page.stopLoading` so an abandoned navigation cannot stall later ops. */

@@ -9,12 +9,8 @@ import type {
 	WorkerInbound,
 	WorkerOutbound,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
-import {
-	assignRefNths,
-	chooseHealedIndex,
-	parseRefToken,
-	WorkerCore,
-} from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
+import { matchRefs, type RefRecord } from "@oh-my-pi/pi-coding-agent/tools/browser/observation";
+import { chooseHealedIndex, parseRefToken, WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import puppeteer from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
@@ -33,28 +29,51 @@ it("documents the configured ref style to the model", () => {
 		};
 		return createBrowserPrelude(session).documentation ?? "";
 	};
-	const reRenderWarning = "A re-render between observation and action also invalidates";
-	expect(documentationFor("compact")).toContain("Refs are `e1`…`eN`");
-	expect(documentationFor("compact")).not.toContain(reRenderWarning);
-	expect(documentationFor("uuid")).toContain(reRenderWarning);
-	expect(documentationFor("uuid")).not.toContain("`e1`…`eN`");
+	const snapshotToken = "`<snapshot>:<n>`";
+	const sharedRefs = "carries the same refs";
+	expect(documentationFor("compact")).toContain(sharedRefs);
+	expect(documentationFor("compact")).not.toContain(snapshotToken);
+	expect(documentationFor("uuid")).toContain(snapshotToken);
+	expect(documentationFor("uuid")).not.toContain(sharedRefs);
 	expect(documentationFor("uuid")).not.toContain("{{");
+	expect(documentationFor("compact").split(/\s+/).length).toBeLessThanOrEqual(650);
 });
 
-// Ref minting: a role+name pair that identifies exactly one element needs no
-// index (and so survives reordering); ambiguous pairs get their position.
-it("indexes only the ambiguous role+name pairs of an observation", () => {
+// Ref stability: the same DOM node keeps its number; a re-render that replaced
+// the node still matches by role/name/position; only new nodes mint numbers,
+// which are never reused.
+it("keeps refs across observations and mints fresh numbers only for new nodes", () => {
+	let counter = 0;
+	const mint = () => ++counter;
+	const previous = new Map<number, RefRecord>();
+	const first = matchRefs(
+		[
+			{ role: "button", name: "Save", nodeKey: "L:1" },
+			{ role: "button", name: "Delete", nodeKey: "L:2" },
+			{ role: "button", name: "Delete", nodeKey: "L:3" },
+		],
+		previous,
+		mint,
+	);
+	expect(first).toEqual([1, 2, 3]);
+	previous.set(1, { role: "button", name: "Save", position: 0, nodeKey: "L:1" });
+	previous.set(2, { role: "button", name: "Delete", position: 0, nodeKey: "L:2" });
+	previous.set(3, { role: "button", name: "Delete", position: 1, nodeKey: "L:3" });
+	// Same node renamed keeps its ref; a replaced node re-matches by
+	// role/name/position; a new node mints the next number.
 	expect(
-		assignRefNths([
-			{ role: "button", name: "Save" },
-			{ role: "textbox", name: "Search" },
-			{ role: "button", name: "Delete" },
-			{ role: "button", name: "Delete" },
-			{ role: "button", name: "Delete" },
-			{ role: "checkbox" },
-			{ role: "checkbox" },
-		]),
-	).toEqual([undefined, undefined, 0, 1, 2, 0, 1]);
+		matchRefs(
+			[
+				{ role: "button", name: "Saving…", nodeKey: "L:1" },
+				{ role: "button", name: "Delete", nodeKey: "L:9" },
+				{ role: "button", name: "Delete", nodeKey: "L:3" },
+				{ role: "link", name: "Home", nodeKey: "L:4" },
+			],
+			previous,
+			mint,
+		),
+	).toEqual([1, 2, 3, 4]);
+	expect(counter).toBe(4);
 });
 
 it("reads the element id out of both compact and snapshot-bound ref tokens", () => {
@@ -73,13 +92,12 @@ it("reads the element id out of both compact and snapshot-bound ref tokens", () 
 // Fallback selection: exact node identity beats position, position beats
 // nothing, and "no candidate at all" is the only genuinely stale ref.
 it("prefers the recorded node, then the recorded position, when re-querying a ref", () => {
-	expect(chooseHealedIndex([41, 42, 43], { backendNodeId: 42, nth: 0 })).toBe(1);
-	expect(chooseHealedIndex([41, 42, 43], { backendNodeId: 99, nth: 2 })).toBe(2);
-	expect(chooseHealedIndex([41, 42], { nth: 1 })).toBe(1);
-	expect(chooseHealedIndex([41, 42], {})).toBe(0);
-	expect(chooseHealedIndex([undefined, undefined], { backendNodeId: 42 })).toBe(0);
-	expect(chooseHealedIndex([], { backendNodeId: 42, nth: 0 })).toBeNull();
-	expect(chooseHealedIndex([41], { nth: 3 })).toBeNull();
+	expect(chooseHealedIndex(["L:41", "L:42", "L:43"], { nodeKey: "L:42", position: 0 })).toBe(1);
+	expect(chooseHealedIndex(["L:41", "L:42", "L:43"], { nodeKey: "L:99", position: 2 })).toBe(2);
+	expect(chooseHealedIndex(["L:41", "L:42"], { position: 1 })).toBe(1);
+	expect(chooseHealedIndex([undefined, undefined], { nodeKey: "L:42", position: 0 })).toBe(0);
+	expect(chooseHealedIndex([], { nodeKey: "L:42", position: 0 })).toBeNull();
+	expect(chooseHealedIndex(["L:41"], { position: 3 })).toBeNull();
 });
 
 it.skipIf(!CHROMIUM_AVAILABLE)(
@@ -147,7 +165,7 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			};
 
 			await render();
-			// Compact refs are small integers, restarting at e1 for every observation.
+			// Compact refs are small integers that stay put across observations of the same nodes.
 			expect(
 				await run(
 					"compact-observe",

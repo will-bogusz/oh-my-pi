@@ -107,10 +107,8 @@
 		for (const field of [
 			"initialObservation",
 			"initialDialog",
-			"initialTree",
 			"initialScreenshot",
 			"inspectionError",
-			"treeError",
 			"screenshotError",
 		]) {
 			if (initial[field] !== undefined) Object.defineProperty(tab, field, { value: initial[field] });

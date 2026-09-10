@@ -158,20 +158,12 @@ def _make_browser():
             return self._initial.get("initialObservation")
 
         @property
-        def initialTree(self):
-            return self._initial.get("initialTree")
-
-        @property
         def initialScreenshot(self):
             return self._initial.get("initialScreenshot")
 
         @property
         def inspectionError(self):
             return self._initial.get("inspectionError")
-
-        @property
-        def treeError(self):
-            return self._initial.get("treeError")
 
         @property
         def screenshotError(self):
@@ -358,8 +350,8 @@ def _make_browser():
         async def instances(self):
             return (await _invoke("instances", {})).get("value")
 
-        async def discover(self, *, browserId=None):
-            return (await _invoke("discover", {"browserId": browserId})).get("value")
+        async def discover(self, *, browserId=None, full=None):
+            return (await _invoke("discover", {"browserId": browserId, "full": full})).get("value")
 
         async def closeTab(self, tab_id, *, browserId=None, timeout=None):
             if not isinstance(tab_id, str) or not tab_id:

@@ -30,6 +30,11 @@ export interface Observation {
 		scrollWidth: number;
 		scrollHeight: number;
 	};
+	/** Ref of the focused actionable node, e.g. `e26`. */
+	focused?: string;
+	/** Header plus one node per line (indent = depth), or the diff since the previous observation. */
+	tree: string;
+	/** Actionable nodes only; the tree carries text and structure. */
 	elements: ObservationEntry[];
 }
 
@@ -47,10 +52,8 @@ export interface ScreenshotResult {
 export interface InitialBrowserState {
 	initialDialog?: DialogState;
 	initialObservation?: Observation;
-	initialTree?: string;
 	initialScreenshot?: string;
 	inspectionError?: string;
-	treeError?: string;
 	screenshotError?: string;
 }
 

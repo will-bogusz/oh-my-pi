@@ -97,6 +97,7 @@ declare const chrome: {
 		session: {
 			get(keys: Record<string, unknown>): Promise<Record<string, unknown>>;
 			set(items: Record<string, unknown>): Promise<void>;
+			remove(keys: string | string[]): Promise<void>;
 		};
 		onChanged: ChromeEvent<(changes: Record<string, unknown>, areaName: string) => void>;
 	};
@@ -111,6 +112,8 @@ declare const chrome: {
 	};
 	runtime: {
 		getURL(path: string): string;
+		/** Restarts the extension; every context, this worker included, is torn down. */
+		reload(): void;
 		openOptionsPage(): Promise<void>;
 		sendMessage(message: unknown): Promise<unknown>;
 		onMessage: ChromeEvent<(message: unknown) => void>;

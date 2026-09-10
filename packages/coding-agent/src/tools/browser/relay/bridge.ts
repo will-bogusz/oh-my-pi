@@ -31,7 +31,7 @@ import {
 } from "./protocol";
 import { DialogJournal, parseDialogRequest, type DialogState } from "../dialogs";
 import { ManagedChromeTabs } from "./managed-tabs";
-import { LEASE_BADGE_INSTALL, LEASE_BADGE_RESTORE } from "./lease-badge";
+import { CURSOR_OVERLAY_INSTALL, CURSOR_OVERLAY_REMOVE, LEASE_BADGE_INSTALL, LEASE_BADGE_RESTORE } from "./lease-badge";
 
 /** Transport-agnostic websocket surface the bridge writes to. */
 export interface RelaySocket {
@@ -156,6 +156,8 @@ class TabState {
 	detaching: Promise<void> | null = null;
 	/** Badge script installed for the lease, removed when the lease ends. */
 	badgeScriptId: string | undefined;
+	/** Cursor-overlay script installed alongside the badge; drives the in-page arrow. */
+	cursorScriptId: string | undefined;
 	/** A successful attach completed after the most recently requested relay detach. */
 	reattachedAfterDetach = false;
 	/** Root CDP commands in flight; a puppeteer wait blocks inside one, so an idle detach must not fire. */
@@ -171,10 +173,12 @@ class TabState {
 	 */
 	rootAutoAttach: Record<string, unknown> | undefined;
 	/**
-	 * Root-session domain enables the drivers asked for (`"Page.enable"` → its
-	 * params), minus any later `disable`. Chrome resets every domain on the
-	 * client it detaches and puppeteer never re-enables, so a reattach has to
-	 * put these back or dialog/download/lifecycle events stop silently.
+	 * Root-session state the drivers asked for: domain enables (`"Page.enable"` →
+	 * its params) minus any later `disable`, plus init-time `*.set*Enabled`
+	 * switches (`Page.setLifecycleEventsEnabled`) keyed by method, in the order
+	 * they arrived. Chrome resets every domain on the client it detaches and
+	 * puppeteer never sends them again, so a reattach has to put these back or
+	 * dialog/download/lifecycle events stop silently.
 	 */
 	readonly rootEnabled = new Map<string, Record<string, unknown> | undefined>();
 	/** Real Chrome session ids (OOPIF/worker children) living under this tab's root session. */
@@ -386,13 +390,10 @@ export class RelayBridge {
 			case "tabCreated":
 				this.#onTabUpsert(msg.tab);
 				return;
-			case "tabOpened": {
-				// Read the window's visible tab before the child's own snapshot lands.
-				const displaced = msg.tab.active ? this.#visibleTab(msg.tab.windowId, msg.tab.tabId) : undefined;
+			case "tabOpened":
 				this.#onTabUpsert(msg.tab);
-				void this.#adoptChild(msg.tab, msg.openerTabId, displaced);
+				void this.#adoptChild(msg.tab, msg.openerTabId);
 				return;
-			}
 			case "tabUpdated":
 				this.#onTabUpsert(msg.tab);
 				return;
@@ -495,14 +496,6 @@ export class RelayBridge {
 		}
 	}
 
-	/** The tab this window currently shows, ignoring `exclude` (a child that just appeared). */
-	#visibleTab(windowId: number, exclude?: number): number | undefined {
-		for (const tab of this.#tabs.values()) {
-			if (tab.windowId === windowId && tab.active && tab.tabId !== exclude) return tab.tabId;
-		}
-		return undefined;
-	}
-
 	/**
 	 * A tab the browser opened from another tab. Chrome's `openerTabId` is not
 	 * trustworthy for a CDP-synthesized click — it attributes the child to the
@@ -510,24 +503,18 @@ export class RelayBridge {
 	 * leased tab that just reported `Page.windowOpen` on its own debugger
 	 * session, which only the real opener can have done.
 	 *
-	 * Chrome opens `target=_blank` children active and the extension cannot ask
-	 * it not to, so an adopted child hands the window's visible tab straight
-	 * back: agent work never changes what the user is looking at.
+	 * Whatever Chrome did with the selection stands. Chrome opens a
+	 * `target=_blank` child active and raises its window, and a raised window
+	 * showing the page the click asked for is what a new tab is supposed to
+	 * look like; putting the previously active tab back only makes OMP look
+	 * like it opened a tab and then showed the wrong one. A child Chrome
+	 * created inactive needs nothing either way.
 	 */
-	async #adoptChild(snap: TabSnapshot, openerTabId: number, displaced?: number): Promise<void> {
+	async #adoptChild(snap: TabSnapshot, openerTabId: number): Promise<void> {
 		const opener = this.#resolveOpener(openerTabId);
 		this.#log("tab opened", { tabId: snap.tabId, reportedOpener: openerTabId, opener, active: snap.active });
 		if (opener === undefined) return;
-		// The visible tab goes back first and on its own round trip: the user
-		// looks at the child for exactly as long as this takes, so it must not
-		// queue behind the child's grouping. No window focus either — the child
-		// never became the user's foreground concern.
-		const restored =
-			displaced === undefined
-				? undefined
-				: this.#rpc({ op: "activateTab", tabId: displaced, focusWindow: false }).catch(() => undefined);
 		await this.managed.adoptChild(snap, opener);
-		await restored;
 	}
 
 	/** Which leased tab opened a child: Chrome's answer when it is one of ours, else the `Page.windowOpen` witness. */
@@ -765,9 +752,18 @@ export class RelayBridge {
 			return;
 		}
 		const toggle = /^(\w+)\.(enable|disable)$/.exec(msg.method);
-		if (!toggle) return;
-		if (toggle[2] === "enable") tab.rootEnabled.set(`${toggle[1]!}.enable`, msg.params);
-		else tab.rootEnabled.delete(`${toggle[1]!}.enable`);
+		if (toggle) {
+			if (toggle[2] === "enable") tab.rootEnabled.set(`${toggle[1]!}.enable`, msg.params);
+			else tab.rootEnabled.delete(`${toggle[1]!}.enable`);
+			return;
+		}
+		// Init-time switches are lost with the debugger just like a domain enable, and
+		// drivers send them once: puppeteer's FrameManager issues
+		// `Page.setLifecycleEventsEnabled` at attach and never again, so without the
+		// replay every navigation wait after an idle detach waits for lifecycle events
+		// Chrome stopped emitting. Insertion order is kept so a switch still follows
+		// the `enable` its domain needs.
+		if (/^\w+\.set\w*Enabled$/.test(msg.method)) tab.rootEnabled.set(msg.method, msg.params);
 	}
 
 	/**
@@ -857,12 +853,30 @@ export class RelayBridge {
 			throw new Error("Use the explicit tab reveal/release lifecycle operation");
 		}
 		if (!realSessionId) this.#recordRootState(tab, msg);
+		this.#paintCursor(tab, msg);
 		try {
 			const result = await this.#sendToTab(tab, msg.method, msg.params, realSessionId);
 			this.#reply(conn, msg, (result as Record<string, unknown> | undefined) ?? {});
 		} catch (err) {
 			this.#replyError(conn, msg, err instanceof Error ? err.message : String(err));
 		}
+	}
+
+	/**
+	 * Move the in-page arrow to the point OMP is about to click. Dispatched
+	 * before the input it mirrors and never awaited: the click path keeps its
+	 * latency, and an overlay that lost a frame is a cosmetic miss.
+	 * `Input.dispatchMouseEvent` coordinates are viewport CSS pixels, exactly
+	 * what a `position:fixed` overlay wants.
+	 */
+	#paintCursor(tab: TabState, msg: CdpCommand): void {
+		if (tab.cursorScriptId === undefined || msg.method !== "Input.dispatchMouseEvent") return;
+		const type = msg.params?.type;
+		if (type !== "mouseMoved" && type !== "mousePressed") return;
+		const { x, y } = msg.params as { x?: unknown; y?: unknown };
+		if (typeof x !== "number" || typeof y !== "number") return;
+		const expression = `window.__ompCursor?.move(${x},${y})${type === "mousePressed" ? ";window.__ompCursor?.press()" : ""}`;
+		void this.#sendToTab(tab, "Runtime.evaluate", { expression }).catch(() => {});
 	}
 
 	/** Tab pseudo-sessions only exist to satisfy puppeteer's Target hierarchy. */
@@ -1174,9 +1188,11 @@ export class RelayBridge {
 	// ---- lease presentation ------------------------------------------------------
 
 	/**
-	 * Mark a leased tab in the tab strip: swap its favicon for a cursor glyph,
-	 * and keep it swapped across the page's own navigations. Best-effort — a
-	 * page that refuses injection simply keeps its own icon.
+	 * Mark a leased tab for the user: swap its favicon for a cursor glyph, and
+	 * arm the in-page pointer overlay so a driven tab that becomes visible
+	 * shows where OMP is clicking. Both survive the page's own navigations via
+	 * the per-document install. Best-effort — a page that refuses injection
+	 * simply keeps its own icon and shows no arrow.
 	 */
 	async #showLeaseBadge(tabId: number): Promise<void> {
 		const tab = this.#tabs.get(tabId);
@@ -1187,6 +1203,11 @@ export class RelayBridge {
 			})) as { identifier?: string } | undefined;
 			tab.badgeScriptId = installed?.identifier;
 			await this.#sendToTab(tab, "Runtime.evaluate", { expression: LEASE_BADGE_INSTALL });
+			const cursor = (await this.#sendToTab(tab, "Page.addScriptToEvaluateOnNewDocument", {
+				source: CURSOR_OVERLAY_INSTALL,
+			})) as { identifier?: string } | undefined;
+			tab.cursorScriptId = cursor?.identifier;
+			await this.#sendToTab(tab, "Runtime.evaluate", { expression: CURSOR_OVERLAY_INSTALL });
 		} catch (err) {
 			this.#log("lease badge skipped", { tabId, error: err instanceof Error ? err.message : String(err) });
 		}
@@ -1194,10 +1215,16 @@ export class RelayBridge {
 
 	/** The install identifier is the proof something was swapped; without it there is nothing to put back. */
 	async #hideLeaseBadge(tab: TabState): Promise<void> {
-		if (tab.badgeScriptId === undefined) return;
+		if (tab.badgeScriptId === undefined && tab.cursorScriptId === undefined) return;
 		try {
-			await this.#sendToTab(tab, "Page.removeScriptToEvaluateOnNewDocument", { identifier: tab.badgeScriptId });
-			await this.#sendToTab(tab, "Runtime.evaluate", { expression: LEASE_BADGE_RESTORE });
+			if (tab.badgeScriptId !== undefined) {
+				await this.#sendToTab(tab, "Page.removeScriptToEvaluateOnNewDocument", { identifier: tab.badgeScriptId });
+				await this.#sendToTab(tab, "Runtime.evaluate", { expression: LEASE_BADGE_RESTORE });
+			}
+			if (tab.cursorScriptId !== undefined) {
+				await this.#sendToTab(tab, "Page.removeScriptToEvaluateOnNewDocument", { identifier: tab.cursorScriptId });
+				await this.#sendToTab(tab, "Runtime.evaluate", { expression: CURSOR_OVERLAY_REMOVE });
+			}
 		} catch (err) {
 			this.#log("lease badge restore skipped", {
 				tabId: tab.tabId,
@@ -1205,6 +1232,7 @@ export class RelayBridge {
 			});
 		}
 		tab.badgeScriptId = undefined;
+		tab.cursorScriptId = undefined;
 	}
 
 	/**

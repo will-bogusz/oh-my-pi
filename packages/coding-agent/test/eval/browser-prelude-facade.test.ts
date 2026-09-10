@@ -110,7 +110,6 @@ describe("browser JavaScript facade", () => {
 							value: {
 								target: { id: `discovery-${nextHandle}`, browserId: `profile-${nextHandle}`, tabId: 1 },
 								initialObservation: { snapshot: `initial-${nextHandle}`, elements: [{ id: 1 }] },
-								initialTree: "Save changes",
 								initialDialog: { status: "open", dialog: { id: "dialog-first" } },
 							},
 						},
@@ -522,6 +521,9 @@ describe("browser facade Chromium helper E2E", () => {
 
 				const observation = await runInContext("__e2eTab.observe()", context);
 				expect(field(observation, "elements")).toBeArray();
+				// The facade prints the tree itself; the model does not wrap observe() in display().
+				expect(field(observation, "tree")).toContain('button "Go"');
+				expect(displayed.at(-1)).toBe(field(observation, "tree"));
 				const buttonId = await runInContext(
 					'(async () => { const observation = await __e2eTab.observe(); return observation.elements.find(element => element.name === "Go").id; })()',
 					context,

@@ -194,6 +194,9 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 	}, 30_000);
 	keepalive.unref();
 	const port = server.port!;
+	// The bound port, not the requested one: an ephemeral relay still has to be
+	// able to spell out the reinstall command for a build-skewed extension.
+	instances.port = port;
 	log("relay listening", { port });
 	return {
 		instances,

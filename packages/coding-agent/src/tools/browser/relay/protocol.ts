@@ -49,9 +49,11 @@ export type RelayRpcRequest =
 	| { op: "send"; tabId: number; sessionId?: string; method: string; params?: Record<string, unknown> }
 	| { op: "createTab"; url: string }
 	/**
-	 * Select a tab. `focusWindow` raises its window too — a deliberate reveal;
-	 * without it the tab is only selected, which is how a `target=_blank` child
-	 * hands the visible tab back to the user without touching window focus.
+	 * Select a tab. `focusWindow` raises its window too — a deliberate reveal.
+	 * Adoption never sends this: when Chrome raises and selects a page-opened
+	 * child, that child is what the user expects a new tab to look like, and
+	 * putting the displaced tab back only makes OMP look like it showed the
+	 * wrong page.
 	 */
 	| { op: "activateTab"; tabId: number; focusWindow: boolean }
 	/**
@@ -70,7 +72,12 @@ export type RelayRpcRequest =
 export type RelayToExtMessage =
 	| ({ t: "rpc"; id: number } & RelayRpcRequest)
 	| { t: "pong" }
-	| { t: "authenticated"; credential?: string }
+	/**
+	 * `expectedBuildId` is the extension build this relay was built against.
+	 * Additive and optional in both directions: an older relay omits it and an
+	 * older extension ignores it, so neither side's handshake changes shape.
+	 */
+	| { t: "authenticated"; credential?: string; expectedBuildId?: string }
 	| { t: "authenticationError"; error: string };
 
 /** Messages sent extension → relay. */

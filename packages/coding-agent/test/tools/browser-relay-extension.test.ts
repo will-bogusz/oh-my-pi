@@ -147,15 +147,26 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				ownership: "this_actor",
 				popupOf: parentTab.id,
 			});
-			// …and the tab the user was looking at is the visible one again.
+			// …and Chrome's own selection stands: the child it raised and selected
+			// stays the visible tab, which is what a new tab is supposed to look
+			// like. Nothing selects the tab the child displaced.
 			for (let attempt = 0; attempt < 200; attempt++) {
 				const active = (await relay.instances.refresh("actor")).filter(candidate => candidate.active);
-				if (active.length === 1 && active[0]!.tabId === visibleBefore[0]!.tabId) break;
+				if (active.length === 1 && active[0]!.tabId === opened!.tabId) break;
 				await Bun.sleep(25);
 			}
 			expect((await relay.instances.refresh("actor")).filter(candidate => candidate.active)).toMatchObject([
-				{ tabId: visibleBefore[0]!.tabId },
+				{ tabId: opened!.tabId },
 			]);
+			// The click also placed the in-page arrow, in a closed shadow root the
+			// page cannot read, on the tab OMP drove.
+			for (let attempt = 0; attempt < 40; attempt++) {
+				if (await page.evaluate("!!document.querySelector('[data-omp-cursor]')")) break;
+				await Bun.sleep(25);
+			}
+			expect(await page.evaluate("document.querySelector('[data-omp-cursor]')?.shadowRoot ?? 'closed'")).toBe(
+				"closed",
+			);
 			const child = relay.instances.claim(opened!.id, "actor");
 			const childBrowser = await connect(child.id);
 			const childPage = await childBrowser

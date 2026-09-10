@@ -1,12 +1,14 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { findFreeCdpPort } from "@oh-my-pi/pi-coding-agent/tools/browser/attach";
 import { type RelayServer, startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
+import { EXPECTED_EXTENSION_BUILD_ID } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 import type { ChromeTabLease, DiscoveredChromeTab } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/managed-tabs";
 
 const EXTENSION_HELLO = {
 	t: "hello",
 	userAgent: "test",
 	browserVersion: "Chrome/151.0.0.0",
+	extensionBuildId: EXPECTED_EXTENSION_BUILD_ID,
 	tabs: [
 		{ tabId: 1, url: "https://example.com", title: "Human", active: true, windowId: 1, pinned: false, groupId: -1 },
 	],

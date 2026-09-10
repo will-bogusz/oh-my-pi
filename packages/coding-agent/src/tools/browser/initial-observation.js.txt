@@ -5,17 +5,13 @@ async ({ tab }, options) => {
 		state[field] = error instanceof Error ? error.message : String(error);
 	};
 	try {
+		// observe() prints the tree itself; the state only carries what code needs.
 		state.initialObservation = await tab.observe({
 			includeAll: options.includeAll,
 			viewportOnly: options.viewportOnly,
 		});
 	} catch (error) {
 		partial("inspectionError", error);
-	}
-	try {
-		state.initialTree = await tab.ariaSnapshot();
-	} catch (error) {
-		partial("treeError", error);
 	}
 	if (options.screenshot !== false) {
 		try {
@@ -24,6 +20,8 @@ async ({ tab }, options) => {
 			partial("screenshotError", error);
 		}
 	}
-	display(state);
+	const errors = {};
+	for (const field of ["inspectionError", "screenshotError"]) if (state[field]) errors[field] = state[field];
+	if (Object.keys(errors).length > 0) display(errors);
 	return state;
 }

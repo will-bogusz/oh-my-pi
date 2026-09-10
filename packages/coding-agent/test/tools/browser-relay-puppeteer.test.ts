@@ -2,6 +2,7 @@ import { expect, it } from "bun:test";
 import type { RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
 import type { RelayToExtMessage } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
 import { startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
+import { EXPECTED_EXTENSION_BUILD_ID } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 import {
 	acquireBrowser,
 	type BrowserHandle,
@@ -39,6 +40,7 @@ it("publishes the leased page to both real Puppeteer connections", async () => {
 			t: "hello",
 			userAgent: "test",
 			browserVersion: "Chrome/150.0.0.0",
+			extensionBuildId: EXPECTED_EXTENSION_BUILD_ID,
 			attachedTabIds: [],
 			tabs: [
 				{

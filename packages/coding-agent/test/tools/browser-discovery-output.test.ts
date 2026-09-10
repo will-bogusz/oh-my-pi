@@ -76,3 +76,59 @@ it("keeps browser discovery structured without implicitly printing unrelated tab
 		listInstances.mockRestore();
 	}
 });
+
+// Discovery has to fit a cell: 25+ tabs must stay under the inline cap with
+// just what a choice needs; `full` brings back the relay's whole record.
+it("projects discovery to the fields a tab choice needs unless full is requested", async () => {
+	const instances: BrowserInstance[] = [{ id: "work-browser", label: "Work Chrome", connected: true }];
+	const tabs: InstanceTab[] = Array.from({ length: 26 }, (_, index) => ({
+		id: `discovered-${index}`,
+		tabId: index + 1,
+		browserId: "work-browser",
+		browserLabel: "Work Chrome",
+		title: `Page title number ${index} · Example App`,
+		url: `https://app.example.test/some/deep/path/${index}?with=query`,
+		active: index === 1,
+		windowId: 1,
+		pinned: false,
+		groupId: -1,
+		ownership: "available",
+		...(index === 3 ? { popupOf: "discovered-2" } : {}),
+	}));
+	const listInstances = spyOn(managedChrome, "listChromeInstances").mockResolvedValue(instances);
+	const discoverTabs = spyOn(managedChrome, "discoverChromeTabs").mockResolvedValue(tabs);
+	try {
+		const session: ToolSession = {
+			cwd: import.meta.dir,
+			hasUI: false,
+			getSessionFile: () => null,
+			getSessionSpawns: () => null,
+			settings: Settings.isolated({ "browser.enabled": true }),
+		};
+		const prelude = createBrowserPrelude(session);
+		session.getEvalPreludes = () => [prelude];
+		const context = vm.createContext({
+			__omp_display__: () => {},
+			__omp_prelude__: (name: string, parameters: unknown) =>
+				callSessionTool("__prelude__", { name, parameters }, { session }),
+		});
+		vm.runInContext(prelude.javascript, context);
+		const compact: unknown[] = await vm.runInContext("browser.discover({})", context);
+		expect(compact).toHaveLength(26);
+		expect(compact[3]).toEqual({
+			id: "discovered-3",
+			title: tabs[3].title,
+			url: tabs[3].url,
+			active: false,
+			ownership: "available",
+			popupOf: "discovered-2",
+		});
+		expect(Object.keys(compact[0] as object)).toEqual(["id", "title", "url", "active", "ownership"]);
+		expect(JSON.stringify(compact, null, 2).length).toBeLessThan(6_000);
+		const full: unknown[] = await vm.runInContext("browser.discover({ full: true })", context);
+		expect(full[3]).toEqual(tabs[3]);
+	} finally {
+		discoverTabs.mockRestore();
+		listInstances.mockRestore();
+	}
+});

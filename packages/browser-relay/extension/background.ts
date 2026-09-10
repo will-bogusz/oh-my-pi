@@ -12,7 +12,7 @@
 import type { ExtToRelayMessage, RelayToExtMessage, TabSnapshot } from "../../coding-agent/src/tools/browser/relay/protocol";
 import { DebuggerAttachments, ownedDebuggerTabs } from "./debugger-ownership";
 import { groupTab, releaseOwnerGroups } from "./tab-groups";
-import { LEASE_BADGE_RESTORE } from "../../coding-agent/src/tools/browser/relay/lease-badge";
+import { CURSOR_OVERLAY_REMOVE, LEASE_BADGE_RESTORE } from "../../coding-agent/src/tools/browser/relay/lease-badge";
 
 // The distribution build embeds this into the worker, so a reconnect reports
 // executing code rather than whichever files happen to be on disk now.
@@ -40,12 +40,12 @@ const attachments = new DebuggerAttachments({
 	graceMs: DETACH_GRACE_MS,
 	surrender: async held => {
 		// Relay authority is gone for good: nothing else will ever release
-		// these leases, so hand the tabs back here. The favicon first — only
-		// this still-live attachment can reach the page — then the groups.
+		// these leases, so hand the tabs back here. The page marks first —
+		// only this still-live attachment can reach the page — then the groups.
 		for (const tabId of held) {
-			await chrome.debugger
-				.sendCommand({ tabId }, "Runtime.evaluate", { expression: LEASE_BADGE_RESTORE })
-				.catch(() => undefined);
+			for (const expression of [LEASE_BADGE_RESTORE, CURSOR_OVERLAY_REMOVE]) {
+				await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression }).catch(() => undefined);
+			}
 		}
 		await releaseOwnerGroups();
 	},
@@ -125,6 +125,38 @@ async function setBadge(connected: boolean): Promise<void> {
 	}
 }
 
+/** Identity of the executing worker; absent only in an unbuilt (source-loaded) extension. */
+const buildId: string | undefined = typeof __OMP_EXTENSION_BUILD_ID__ === "string" ? __OMP_EXTENSION_BUILD_ID__ : undefined;
+/** Session-scoped guard: which expected build this worker already reloaded for. */
+const RELOAD_GUARD_KEY = "reloadedFor";
+
+/**
+ * A relay built against another extension build cannot drive this worker
+ * correctly — the RPC contract moved under it — and the files on disk are
+ * usually already the new ones, so reloading picks them up without the user
+ * visiting chrome://extensions. Once per expected build: a stale install
+ * directory reloads to the same old id, and repeating that is a loop.
+ * Returns true when a reload was started; the caller must then stop.
+ */
+async function reloadForBuildSkew(expected: string | undefined): Promise<boolean> {
+	if (!expected) return false;
+	try {
+		if (expected === buildId) {
+			// Parity restored: a later skew to this id deserves its own reload.
+			await chrome.storage.session.remove(RELOAD_GUARD_KEY);
+			return false;
+		}
+		const stored = await chrome.storage.session.get({ [RELOAD_GUARD_KEY]: "" });
+		if (stored[RELOAD_GUARD_KEY] === expected) return false;
+		await chrome.storage.session.set({ [RELOAD_GUARD_KEY]: expected });
+	} catch {
+		// Session storage is the only loop guard there is; without it, never reload.
+		return false;
+	}
+	chrome.runtime.reload();
+	return true;
+}
+
 async function buildHello(): Promise<ExtToRelayMessage> {
 	const [tabs, targets] = await Promise.all([chrome.tabs.query({}), chrome.debugger.getTargets()]);
 	const snapshots: TabSnapshot[] = [];
@@ -143,7 +175,7 @@ async function buildHello(): Promise<ExtToRelayMessage> {
 		t: "hello",
 		userAgent: navigator.userAgent,
 		browserVersion: versionMatch?.[0] ?? "Chrome/unknown",
-		extensionBuildId: typeof __OMP_EXTENSION_BUILD_ID__ === "string" ? __OMP_EXTENSION_BUILD_ID__ : undefined,
+		extensionBuildId: buildId,
 		tabs: snapshots,
 		attachedTabIds,
 	};
@@ -218,6 +250,8 @@ async function handleRelayMessage(socket: WebSocket, raw: string): Promise<void>
 	}
 	if (msg.t === "authenticated") {
 		if (msg.credential) await chrome.storage.local.set({ credential: msg.credential, pairingCode: "", connectionError: "" });
+		// Credential first: the reloaded worker has to be able to authenticate.
+		if (await reloadForBuildSkew(msg.expectedBuildId)) return;
 		const hello = await buildHello();
 		if (ws !== socket || socket.readyState !== WebSocket.OPEN) return;
 		socket.send(JSON.stringify(hello));

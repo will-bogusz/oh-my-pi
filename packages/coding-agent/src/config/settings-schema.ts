@@ -4637,7 +4637,7 @@ export const SETTINGS_SCHEMA = {
 			group: "Grep & Browser",
 			label: "Browser Element Refs",
 			description:
-				"Shape of the element refs returned by tab.observe(). 'uuid' emits snapshot-bound '<observation-uuid>:<n>' tokens that go stale on every observation. 'compact' emits 'e1'..'eN' per observation and self-heals a ref whose node was replaced by re-querying the accessibility tree by role/name/nth.",
+				"Shape of the element refs returned by tab.observe(). 'uuid' emits snapshot-bound '<observation-uuid>:<n>' tokens that go stale on every observation. 'compact' emits 'e1'..'eN' refs that stay stable for the tab (the same element keeps its number, new elements get new numbers) and self-heals a ref whose node was replaced by re-querying the accessibility tree by role/name/position.",
 		},
 	},
 	"browser.idleCloseSec": {

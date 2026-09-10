@@ -34,6 +34,8 @@ it("does not dispatch a timed-out quiet click when scrolling later completes", a
 			page: () => ({
 				isClosed: () => false,
 				emulateFocusedPage: async () => {},
+				on: () => undefined,
+				off: () => undefined,
 				mouse: { click: async () => clicks++ },
 			}),
 		},
@@ -71,6 +73,8 @@ it("checks cancellation again after geometry and before trusted pointer input", 
 			page: () => ({
 				isClosed: () => false,
 				emulateFocusedPage: async () => {},
+				on: () => undefined,
+				off: () => undefined,
 				mouse: { click: async () => clicks++ },
 			}),
 		},

@@ -9,16 +9,23 @@ import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
+/** Puppeteer `Page` stub; the focus restore also watches the page's navigation events. */
+function fakePage(overrides: {
+	isClosed?: () => boolean;
+	emulateFocusedPage: (enabled: boolean) => Promise<void>;
+}): Page {
+	return { isClosed: () => false, on: () => undefined, off: () => undefined, ...overrides } as unknown as Page;
+}
+
 it("keeps a page prepared through selection and serialized inputs, draining before restoration", async () => {
 	const events: string[] = [];
 	const entered = Promise.withResolvers<void>();
 	const finish = Promise.withResolvers<void>();
-	const page = {
-		isClosed: () => false,
+	const page = fakePage({
 		emulateFocusedPage: async (enabled: boolean) => {
 			events.push(enabled ? "enable" : "restore");
 		},
-	} as unknown as Page;
+	});
 	const scope = prepareBackgroundPage(page);
 	await scope.ready;
 	events.push("lookup");
@@ -50,15 +57,14 @@ it("restores late page preparation after cancellation and rejects reuse after fa
 	const events: string[] = [];
 	const entered = Promise.withResolvers<void>();
 	const finish = Promise.withResolvers<void>();
-	const page = {
-		isClosed: () => false,
+	const page = fakePage({
 		emulateFocusedPage: async (enabled: boolean) => {
 			events.push(enabled ? "enable" : "restore");
 			if (!enabled) throw new Error("connection lost");
 			entered.resolve();
 			await finish.promise;
 		},
-	} as unknown as Page;
+	});
 	const cancelled = new AbortController();
 	const scope = prepareBackgroundPage(page, cancelled.signal);
 	const rejected = scope.ready.catch((error: unknown) => String(error));
@@ -80,13 +86,13 @@ it("restores late page preparation after cancellation and rejects reuse after fa
 it("finishes preparation cleanup when the target closed during the run", async () => {
 	const events: boolean[] = [];
 	let closed = false;
-	const page = {
+	const page = fakePage({
 		isClosed: () => closed,
 		emulateFocusedPage: async (enabled: boolean) => {
 			if (closed) throw new Error("Target closed");
 			events.push(enabled);
 		},
-	} as unknown as Page;
+	});
 	const scope = prepareBackgroundPage(page);
 	await scope.ready;
 	closed = true;
@@ -98,12 +104,11 @@ it("keeps input serialized when a waiting action is cancelled", async () => {
 	const events: string[] = [];
 	const entered = Promise.withResolvers<void>();
 	const finish = Promise.withResolvers<void>();
-	const page = {
-		isClosed: () => false,
+	const page = fakePage({
 		emulateFocusedPage: async (enabled: boolean) => {
 			events.push(enabled ? "enable" : "restore");
 		},
-	} as unknown as Page;
+	});
 	const first = withBackgroundInput(page, undefined, async () => {
 		events.push("first");
 		entered.resolve();
@@ -127,8 +132,7 @@ it("restores a late focus enable after cancellation without dispatching input", 
 	const events: string[] = [];
 	const started = Promise.withResolvers<void>();
 	const enabled = Promise.withResolvers<void>();
-	const page = {
-		isClosed: () => false,
+	const page = fakePage({
 		emulateFocusedPage: async (value: boolean) => {
 			events.push(value ? "enable" : "restore");
 			if (value) {
@@ -136,7 +140,7 @@ it("restores a late focus enable after cancellation without dispatching input", 
 				await enabled.promise;
 			}
 		},
-	} as unknown as Page;
+	});
 	const cancelled = new AbortController();
 	const pending = withBackgroundInput(page, cancelled.signal, async () => events.push("input"));
 	const rejected = pending.catch((error: unknown) => String(error));
@@ -151,13 +155,12 @@ it("restores a late focus enable after cancellation without dispatching input", 
 
 it("refuses subsequent input if focus restoration failed", async () => {
 	const events: string[] = [];
-	const page = {
-		isClosed: () => false,
+	const page = fakePage({
 		emulateFocusedPage: async (enabled: boolean) => {
 			events.push(enabled ? "enable" : "restore");
 			if (!enabled) throw new Error("connection lost");
 		},
-	} as unknown as Page;
+	});
 	await expect(withBackgroundInput(page, undefined, async () => events.push("input"))).rejects.toThrow(
 		"could not be restored",
 	);

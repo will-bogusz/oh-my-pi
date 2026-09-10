@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { RelayAccess } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/access";
 import type { RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
-import { BrowserInstances } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
+import { BrowserInstances, EXPECTED_EXTENSION_BUILD_ID } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 
 const hello = {
 	t: "hello",
@@ -33,7 +33,12 @@ class Socket implements RelaySocket {
 		this.closed = true;
 	}
 }
-function pair(instances: BrowserInstances, id: string, label: string): { socket: Socket; credential: string } {
+function pair(
+	instances: BrowserInstances,
+	id: string,
+	label: string,
+	extensionBuildId?: string,
+): { socket: Socket; credential: string } {
 	const socket = new Socket();
 	instances.extConnected(socket);
 	instances.extMessage(
@@ -41,15 +46,15 @@ function pair(instances: BrowserInstances, id: string, label: string): { socket:
 		JSON.stringify({ t: "authenticate", auth: { id, label, pairingCode: instances.access.issueCode().code } }),
 	);
 	const credential = socket.messages[0]!.credential as string;
-	instances.extMessage(socket, JSON.stringify(hello));
+	instances.extMessage(socket, JSON.stringify({ ...hello, extensionBuildId }));
 	return { socket, credential };
 }
 
 it("keeps paired instances concurrent and isolates identical physical tab numbers and reconnects", () => {
 	const instances = new BrowserInstances(new RelayAccess());
 	try {
-		const first = pair(instances, "profile_instance_a", "Work Chrome");
-		const second = pair(instances, "profile_instance_b", "Personal Chrome");
+		const first = pair(instances, "profile_instance_a", "Work Chrome", EXPECTED_EXTENSION_BUILD_ID);
+		const second = pair(instances, "profile_instance_b", "Personal Chrome", EXPECTED_EXTENSION_BUILD_ID);
 		expect(first.socket.closed).toBe(false);
 		expect(instances.list().filter(browser => browser.connected)).toHaveLength(2);
 		expect(() => instances.select()).toThrow("Multiple browsers");
@@ -71,7 +76,7 @@ it("keeps paired instances concurrent and isolates identical physical tab number
 			}),
 		);
 		expect(first.socket.closed).toBe(false);
-		instances.extMessage(replacement, JSON.stringify(hello));
+		instances.extMessage(replacement, JSON.stringify({ ...hello, extensionBuildId: EXPECTED_EXTENSION_BUILD_ID }));
 		expect(first.socket.closed).toBe(true);
 		expect(second.socket.closed).toBe(false);
 		expect(instances.forLease(a.id)).toBeUndefined();
@@ -242,6 +247,47 @@ it("holds a fresh relay's first request until the paired extension reconnects, a
 		const grace = performance.now();
 		await instances.settled(150);
 		expect(performance.now() - grace).toBeGreaterThanOrEqual(140);
+	} finally {
+		instances.close();
+	}
+});
+
+it("refuses to hand out a tab from a Chrome running another extension build, and says how to fix it", () => {
+	const instances = new BrowserInstances(new RelayAccess());
+	instances.port = 54_837;
+	try {
+		const stale = "0".repeat(64);
+		const { socket } = pair(instances, "profile_instance_a", "Work Chrome", stale);
+		// The handshake carries the expected build so the extension can reload itself.
+		expect(socket.messages[0]).toMatchObject({
+			t: "authenticated",
+			expectedBuildId: EXPECTED_EXTENSION_BUILD_ID,
+		});
+		const found = instances.discover()[0]!;
+		for (const acquire of [
+			() => instances.claim(found.id, "owner"),
+			() => instances.create("https://example.com/", "owner", "task"),
+		]) {
+			expect(acquire).toThrow(stale);
+			expect(acquire).toThrow(EXPECTED_EXTENSION_BUILD_ID);
+			expect(acquire).toThrow("omp browser-relay install");
+			expect(acquire).toThrow("--port 54837");
+		}
+		// A build too old to report an id is skew too: nothing here can be trusted.
+		pair(instances, "profile_instance_b", "Personal Chrome");
+		const legacy = instances.discover().find(candidate => candidate.browserId === "profile_instance_b")!;
+		expect(() => instances.claim(legacy.id, "owner")).toThrow("too old to report its id");
+	} finally {
+		instances.close();
+	}
+});
+
+it("hands out a tab and keeps holding it while the extension build matches", () => {
+	const instances = new BrowserInstances(new RelayAccess());
+	try {
+		pair(instances, "profile_instance_a", "Work Chrome", EXPECTED_EXTENSION_BUILD_ID);
+		const lease = instances.claim(instances.discover()[0]!.id, "owner");
+		expect(instances.get(lease.id, "owner").tab.tabId).toBe(1);
 	} finally {
 		instances.close();
 	}

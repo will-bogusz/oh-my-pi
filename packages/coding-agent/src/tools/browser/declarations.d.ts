@@ -9,8 +9,14 @@ interface BrowserWaitForSelectorOptions extends BrowserWaitOptions {
 	hidden?: boolean;
 }
 interface BrowserObserveOptions {
+	/** every node gets a ref (default: controls only) */
 	includeAll?: boolean;
+	/** only controls inside the viewport get refs */
 	viewportOnly?: boolean;
+	/** false: full tree instead of the diff since the previous observation */
+	diff?: boolean;
+	/** false: do not print the tree (it is printed by default) */
+	display?: boolean;
 }
 interface BrowserInitialObservationOptions extends BrowserObserveOptions {
 	screenshot?: boolean;
@@ -49,6 +55,10 @@ interface BrowserObservation {
 	title?: string;
 	viewport: { width: number; height: number; deviceScaleFactor?: number };
 	scroll: { x: number; y: number; width: number; height: number; scrollWidth: number; scrollHeight: number };
+	focused?: string;
+	/** text tree (or diff vs previous observation); printed automatically */
+	tree: string;
+	/** controls only; refs stable for the tab */
 	elements: {
 		ref?: string;
 		id: number;
@@ -60,16 +70,23 @@ interface BrowserObservation {
 		states: string[];
 	}[];
 }
+/** compact discovery row; `{ full: true }` adds the rest */
 interface BrowserDiscoveredTab {
 	id: string;
-	browserId: string;
-	tabId: number;
-	windowId: number;
 	title: string;
 	url: string;
 	active: boolean;
 	ownership: "available" | "this_actor" | "other_actor";
 	popupOf?: string;
+	browserId?: string;
+}
+interface BrowserDiscoveredTabFull extends BrowserDiscoveredTab {
+	browserId: string;
+	browserLabel: string;
+	tabId: number;
+	windowId: number;
+	pinned: boolean;
+	groupId: number;
 }
 interface BrowserDialogState {
 	status: "unobserved" | "closed" | "open";
@@ -96,10 +113,12 @@ interface BrowserDownloads {
 interface BrowserTabHelpers {
 	title(): Promise<string>;
 	goto(url: string, options?: { waitUntil?: BrowserWaitUntil }): Promise<void>;
+	/** settles, prints the tree (diff by default), returns it */
 	observe(options?: BrowserObserveOptions): Promise<BrowserObservation>;
 	ariaSnapshot(selector?: string, options?: { depth?: number; boxes?: boolean }): Promise<string>;
 	/** returns the saved path */
 	screenshot(options?: { selector?: string; fullPage?: boolean; silent?: boolean }): Promise<string>;
+	/** readable article text; positional string, default "text" */
 	extract(format?: "text" | "markdown"): Promise<string>;
 	click(selector: string): Promise<void>;
 	type(selector: string, text: string): Promise<void>;
@@ -137,7 +156,7 @@ interface BrowserElement {
 }
 interface BrowserTabRealm extends BrowserTabHelpers {
 	name: string;
-	/** raw Puppeteer page */
+	/** Puppeteer, not Playwright (no locator()) */
 	page: unknown;
 	signal?: AbortSignal;
 	url(): string;
@@ -153,7 +172,7 @@ interface BrowserTabRealm extends BrowserTabHelpers {
 }
 interface BrowserRunScope {
 	tab: BrowserTabRealm;
-	/** raw Puppeteer page / browser */
+	/** Puppeteer */
 	page: unknown;
 	browser: unknown;
 	wait: {
@@ -167,11 +186,9 @@ interface BrowserTab extends BrowserTabHelpers {
 	handle?: string;
 	target?: { id: string; browserId: string; tabId: number };
 	initialObservation?: BrowserObservation;
-	initialTree?: string;
 	/** saved path */
 	initialScreenshot?: string;
 	inspectionError?: string;
-	treeError?: string;
 	screenshotError?: string;
 	initialDialog?: BrowserDialogState;
 	url(): Promise<string>;
@@ -184,7 +201,7 @@ interface BrowserTab extends BrowserTabHelpers {
 	dialog(
 		options?: { action?: "inspect" } | { action: "accept" | "dismiss"; id: string; promptText?: string },
 	): Promise<BrowserDialogState>;
-	popups(): Promise<BrowserDiscoveredTab[]>;
+	popups(): Promise<BrowserDiscoveredTabFull[]>;
 	reveal(): Promise<void>;
 	release(): Promise<void>;
 	close(options?: { kill?: boolean; timeout?: number }): Promise<void>;
@@ -194,7 +211,8 @@ declare const browser: {
 		selector: string | { title?: string; url?: string; browserId?: string; windowId?: number },
 		options?: Omit<BrowserAcquireOptions, "browserId">,
 	): Promise<BrowserTab>;
-	discover(options?: { browserId?: string }): Promise<BrowserDiscoveredTab[]>;
+	discover(options?: { browserId?: string; full?: false }): Promise<BrowserDiscoveredTab[]>;
+	discover(options: { browserId?: string; full: true }): Promise<BrowserDiscoveredTabFull[]>;
 	claim(id: string, options?: BrowserAcquireOptions): Promise<BrowserTab>;
 	create(options?: BrowserAcquireOptions & { url?: string }): Promise<BrowserTab>;
 	closeTab(id: string, options?: { browserId?: string; timeout?: number }): Promise<void>;

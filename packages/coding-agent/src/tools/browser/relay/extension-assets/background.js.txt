@@ -177,6 +177,62 @@ var LEASE_BADGE_INSTALL = `(() => {
 	if (!watch()) new MutationObserver((_, self) => { if (watch()) self.disconnect(); }).observe(document.documentElement, { childList: true, subtree: true });
 })()`;
 var LEASE_BADGE_RESTORE = `window.__ompLeaseBadge?.restore()`;
+var CURSOR_OVERLAY_INSTALL = `(() => {
+	if (window.top !== window) return;
+	const KEY = "__ompCursor";
+	if (window[KEY]) return;
+	// Glyph tip inside a 24px box scaled from the 32-unit viewBox: the arrow
+	// point, not the box corner, has to land on the dispatched coordinates.
+	const TIP_X = 24 * 7 / 32, TIP_Y = 24 * 2.5 / 32;
+	let host = null, arrow = null, pressTimer = 0, x = 0, y = 0;
+	const paint = (scale) => {
+		arrow.style.transform = "translate3d(" + (x - TIP_X) + "px," + (y - TIP_Y) + "px,0) scale(" + scale + ")";
+	};
+	const mount = () => {
+		if (host && host.isConnected) return true;
+		const root = document.documentElement;
+		if (!root) return false;
+		host = document.createElement("div");
+		host.setAttribute("data-omp-cursor", "");
+		host.setAttribute("aria-hidden", "true");
+		host.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:2147483647;border:0;margin:0;padding:0;background:none;contain:strict";
+		const shadow = host.attachShadow({ mode: "closed" });
+		arrow = document.createElement("div");
+		arrow.style.cssText = "position:fixed;top:0;left:0;width:24px;height:24px;opacity:0;pointer-events:none;" +
+			"transform-origin:" + TIP_X + "px " + TIP_Y + "px;will-change:transform;" +
+			"filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));" +
+			"transition:transform 120ms ease-out,opacity 120ms ease-out";
+		arrow.innerHTML = ${JSON.stringify(GLYPH_SVG.replace("<svg ", '<svg width="24" height="24" style="display:block" '))};
+		shadow.append(arrow);
+		root.append(host);
+		return true;
+	};
+	window[KEY] = {
+		move: (nx, ny) => {
+			if (!mount()) return;
+			x = nx; y = ny;
+			arrow.style.opacity = "1";
+			paint(1);
+		},
+		press: () => {
+			if (!host || !host.isConnected) return;
+			clearTimeout(pressTimer);
+			paint(0.7);
+			pressTimer = setTimeout(() => paint(1), 120);
+		},
+		hide: () => {
+			if (arrow) arrow.style.opacity = "0";
+		},
+		remove: () => {
+			clearTimeout(pressTimer);
+			delete window[KEY];
+			for (const node of document.querySelectorAll("[data-omp-cursor]")) node.remove();
+			host = null;
+			arrow = null;
+		},
+	};
+})()`;
+var CURSOR_OVERLAY_REMOVE = `window.__ompCursor?.remove()`;
 
 // extension/background.ts
 var PING_INTERVAL_MS = 20000;
@@ -194,9 +250,11 @@ var attachments = new DebuggerAttachments({
   graceMs: DETACH_GRACE_MS,
   surrender: async (held) => {
     for (const tabId of held) {
-      await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression: LEASE_BADGE_RESTORE }).catch(() => {
-        return;
-      });
+      for (const expression of [LEASE_BADGE_RESTORE, CURSOR_OVERLAY_REMOVE]) {
+        await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression }).catch(() => {
+          return;
+        });
+      }
     }
     await releaseOwnerGroups();
   }
@@ -258,6 +316,26 @@ async function setBadge(connected) {
     await chrome.action.setBadgeBackgroundColor({ color: connected ? "#1a7f37" : "#8b8b8b" });
   } catch {}
 }
+var buildId = "9a2ccac0333f29c45814baa3aa2bc7ae67eb23870fbc8661b8d57fec2cf7c05e";
+var RELOAD_GUARD_KEY = "reloadedFor";
+async function reloadForBuildSkew(expected) {
+  if (!expected)
+    return false;
+  try {
+    if (expected === buildId) {
+      await chrome.storage.session.remove(RELOAD_GUARD_KEY);
+      return false;
+    }
+    const stored = await chrome.storage.session.get({ [RELOAD_GUARD_KEY]: "" });
+    if (stored[RELOAD_GUARD_KEY] === expected)
+      return false;
+    await chrome.storage.session.set({ [RELOAD_GUARD_KEY]: expected });
+  } catch {
+    return false;
+  }
+  chrome.runtime.reload();
+  return true;
+}
 async function buildHello() {
   const [tabs, targets] = await Promise.all([chrome.tabs.query({}), chrome.debugger.getTargets()]);
   const snapshots = [];
@@ -274,7 +352,7 @@ async function buildHello() {
     t: "hello",
     userAgent: navigator.userAgent,
     browserVersion: versionMatch?.[0] ?? "Chrome/unknown",
-    extensionBuildId: "3aefc617680ca7e499f6a7bab178d13659cbe08926af81a3481341ff6e592e65",
+    extensionBuildId: buildId,
     tabs: snapshots,
     attachedTabIds
   };
@@ -339,6 +417,8 @@ async function handleRelayMessage(socket, raw) {
   if (msg.t === "authenticated") {
     if (msg.credential)
       await chrome.storage.local.set({ credential: msg.credential, pairingCode: "", connectionError: "" });
+    if (await reloadForBuildSkew(msg.expectedBuildId))
+      return;
     const hello = await buildHello();
     if (ws !== socket || socket.readyState !== WebSocket.OPEN)
       return;

@@ -99,6 +99,12 @@ export function cmuxSnapshotToObservation(
 	const title =
 		(typeof result.title === "string" && result.title.length > 0 ? result.title : undefined) ??
 		(typeof result.page?.title === "string" && result.page.title.length > 0 ? result.page.title : undefined);
+	const header = `url: ${url}${title ? ` | title: ${title}` : ""} | scroll: ${geometry.scrollY}/${geometry.scrollHeight}`;
+	// cmux hands back Playwright-style YAML with `[ref=eN]` slots; that is the readable tree here.
+	const body =
+		typeof result.snapshot === "string" && result.snapshot.length > 0
+			? result.snapshot
+			: elements.map(element => `e${element.id} ${element.role}${element.name ? ` ${JSON.stringify(element.name)}` : ""}`).join("\n");
 	return {
 		url,
 		title,
@@ -111,6 +117,7 @@ export function cmuxSnapshotToObservation(
 			scrollWidth: geometry.scrollWidth,
 			scrollHeight: geometry.scrollHeight,
 		},
+		tree: `${header}\n${body}`,
 		elements,
 	};
 }

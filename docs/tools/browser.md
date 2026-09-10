@@ -36,34 +36,35 @@ Existing installations keep the display name they were installed with. Pass `--n
 
 `browser.instances()` returns paired profiles, including disconnected ones, as `{ id, label, connected, generation? }`. Labels are chosen during setup; they are not inferred account or profile identities. Use the exact `id` as `browserId`. With multiple connected profiles, `create` requires an explicit selection.
 
-`browser.discover({ browserId? })` returns fresh tab inventory without attaching to pages, navigating, or activating Chrome. Each entry includes:
+`browser.discover({ browserId?, full? })` returns fresh tab inventory without attaching to pages, navigating, or activating Chrome. The default projection is what a tab choice needs, sized to fit a cell even for dozens of tabs:
 
 - `id`: exact discovery identity accepted by `claim` and `closeTab`; distinct from a returned handle and the numeric Chrome `tabId`.
-- `browserId`, `browserLabel`, `tabId`, `windowId`, `title`, `url`, `pinned`, and `groupId`.
+- `title`, `url`.
 - `active`: whether this tab is selected in its window; it does not mean Chrome is the foreground application.
 - `ownership`: `"available"`, `"this_actor"`, or `"other_actor"`.
 - `popupOf`, when present: the discovery identity of the task-owned parent tab.
+- `browserId`, only when the inventory spans several connected profiles.
+
+`{ full: true }` adds `browserId`, `browserLabel`, `tabId`, `windowId`, `pinned`, and `groupId`.
 
 Chrome-internal, DevTools, Web Store, and other-extension pages are not attachable and are omitted. A tab with another debugger attached may also refuse a claim.
 
 Instance and tab discovery return structured data without automatically printing the inventory. Use `display` only for fields needed by the task; filtering the returned value does not implicitly expose other tab titles or URLs.
 
 ```js
-const matches = (await browser.discover())
-  .filter(tab => tab.title === "Workshop reservation")
-  .map(({ id, browserLabel, windowId, title, url }) => ({ id, browserLabel, windowId, title, url }));
-display(matches);
+const matches = (await browser.discover()).filter(tab => tab.title.includes("Workshop reservation"));
+display(matches.map(({ id, title, url }) => ({ id, title, url })));
 ```
 
 Filter and select fields before display in the same Eval cell. Show a full inventory only when the request calls for it. For requested closure, pass the matching exact IDs directly to `closeTab`; page acquisition is unnecessary.
 
 After inspecting the inventory, pass the selected entry's exact `id` to `browser.claim(id, { label? })`. A discovered ID already identifies its browser. Claim is exclusive to the calling actor and never navigates or changes the tab's group. Labels, titles, URLs, and numeric tab IDs cannot substitute for that identity.
 
-Chrome `claim` and `create` return the exact handle with initial inspection already displayed: `initialObservation` holds actionable controls and their snapshot refs, `initialTree` holds readable page text, and `initialScreenshot` holds the local preview path. Use these before requesting another observation. Passing `observation: { screenshot: false }` skips capture; `includeAll` and `viewportOnly` configure the control observation. JavaScript and Python expose the same fields; Python passes `observation={"screenshot": False}`.
+Chrome `claim` and `create` return the exact handle with the first observation already printed: the tree (page text, controls with refs, embedded documents) appears in the tool result, `initialObservation` holds the same observation for code (`elements` with refs), and `initialScreenshot` holds the local preview path. Use these before requesting another observation. Passing `observation: { screenshot: false }` skips capture; `includeAll` and `viewportOnly` configure the observation. JavaScript and Python expose the same fields; Python passes `observation={"screenshot": False}`.
 
 The immutable `tab.target` contains `{id, browserId, tabId}`. Use `tab.target.id` to match fresh discovery entries or a child's `popupOf`; in Python use `tab.target["id"]`. This identity survives tab movement and navigation; current URL, title, window, selection and ownership come from fresh discovery. `tab.id(n)` is an element helper and cannot identify a browser tab.
 
-Inspection channels fail independently: `inspectionError`, `treeError`, or `screenshotError` identifies missing state while preserving a usable acquired handle. A whole-run cancellation or cleanup failure does not report successful acquisition. OMP attempts to preserve the exact tab and release ownership for rediscovery; cleanup failures remain explicit. Initial observations describe acquisition time, and later observations/navigation invalidate their old refs.
+Inspection channels fail independently: `inspectionError` or `screenshotError` identifies missing state while preserving a usable acquired handle; only those errors are printed. A whole-run cancellation or cleanup failure does not report successful acquisition. OMP attempts to preserve the exact tab and release ownership for rediscovery; cleanup failures remain explicit.
 
 For an explicit request to close a tab, use `await browser.closeTab(id, { browserId?, timeout? })` directly from discovery. It does not attach a debugger or page worker, regroup the tab, or activate Chrome. Another actor's ownership is rejected; your own controlled tab can be closed this way. Discover again after closure to verify the remaining inventory. Stale IDs cannot close a replacement tab after removal or browser reconnection.
 
@@ -102,7 +103,7 @@ Keep the immutable handle returned by `create` or `claim`. Its `name` is a displ
 
 Every page survives release, created or claimed. Another actor can discover and claim a released page by its current exact discovery ID. `release` and `reveal` require a managed Chrome handle returned by `create`, `claim`, or relay-mode `open`; use `close` for other modes.
 
-There is no cross-turn lease and no automatic closing. When the agent stops, every lease this session holds is handed back: all pages stay open, the task tab group dissolves, and the remaining `chrome.debugger` attachments are detached so Chrome's "OMP is debugging this browser" bar disappears. The user can take over a half-finished page (sign in, pick a link) and ask the agent to continue on it; the next turn re-claims by exact tab ID. Cleanup is the model's: it closes the tabs it opened once they are no longer useful and leaves anything the user asked to see. This is deliberately not Codex's turn-scoped "ephemeral unless marked" model, whose marks expire each turn. While a tab is attached, the extension swaps its favicon for a cursor glyph (installed over the debugger attachment on first real attach, re-applied across the page's own navigations, restored on release); merely claiming a tab attaches nothing and leaves the tab strip untouched.
+There is no cross-turn lease and no automatic closing. When the agent stops, every lease this session holds is handed back: all pages stay open, the task tab group dissolves, and the remaining `chrome.debugger` attachments are detached so Chrome's "OMP is debugging this browser" bar disappears. The user can take over a half-finished page (sign in, pick a link) and ask the agent to continue on it; the next turn re-claims by exact tab ID. Cleanup is the model's: it closes the tabs it opened once they are no longer useful and leaves anything the user asked to see. This is deliberately not Codex's turn-scoped "ephemeral unless marked" model, whose marks expire each turn. While a tab is attached, the extension swaps its favicon for a cursor glyph and installs an in-page arrow that follows OMP's clicks (both over the debugger attachment on first real attach, re-applied across the page's own navigations, removed on release); merely claiming a tab attaches nothing and leaves the tab strip untouched.
 
 Migration: managed Chrome handles previously treated `tab.close()` as release, and `tab.retain()`/`tab.keep()` no longer exist because nothing is auto-closed. Use `tab.release()` to hand a page back and `tab.close()` for an intended physical closure. The older root `browser.close({ all: true })` remains an actor-wide cleanup operation; it is not a request to physically close every discovered tab.
 
@@ -112,29 +113,46 @@ Inspection, screenshots, and managed input do not implicitly reveal the tab or f
 
 Direct helpers cross the host bridge and return structured values:
 
-- Navigation: `url()`, `title()`, `goto(url, { waitUntil? })`.
-- Inspection: `observe({ includeAll?, viewportOnly? })`, `ariaSnapshot(selector?, { depth?, boxes? })`, `screenshot({ selector?, fullPage?, silent? })`, `extract("markdown" | "text")`, `downloads()`.
+- Navigation: `url()`, `title()`, `goto(url, { waitUntil? })` — resolves when the main frame commits and reaches the requested phase; child frames that never finish loading (cross-origin iframes) do not hold it, a same-document target (identical URL, or only the fragment differs) resolves on the current document, and a timeout stops the pending navigation and reports the URL and `readyState` reached.
+- Inspection: `observe({ includeAll?, viewportOnly?, diff?, display? })`, `ariaSnapshot(selector?, { depth?, boxes? })`, `screenshot({ selector?, fullPage?, silent? })`, `extract(format?)` with `format` a positional `"text"` (default) or `"markdown"` — anything else, including `{}`, is a `ToolError` naming both — and `downloads()`.
 - Interaction: `click(selector)`, `type(selector, text)`, `fill(selector, value)`, `press(key, { selector? })`, `scroll(dx, dy)`, `drag(from, to)`, `scrollIntoView(selector)`, `select(selector, ...values)`, `uploadFile(selector, ...paths)`.
 - Waiting: `waitFor(selector, { timeout? })`, `waitForSelector(selector, { timeout?, visible?, hidden? })`, `waitForUrl(stringOrRegExp, { timeout? })`.
 - Page execution: `evaluate(fnOrSource, ...args)`.
 
 Direct `waitFor` and `waitForSelector` return booleans. Their timeouts are in milliseconds. Whole-operation timeouts on acquisition, close, and `tab.run` are in seconds, default to 30, and are clamped to 1–300, subject to `tools.maxTimeout`.
 
-### Observation references
+### Observation
 
-Managed Chrome `observe()` returns a `snapshot` and element entries containing both a numeric `id` and a snapshot-bound `ref`. Resolve an element from the observation, then act with its exact reference:
+`observe()` is the page reader. It waits for the page to settle — no DOM mutations for 300 ms or no network traffic for 1 s, whichever comes first, then re-checks while the tree still shows a loading indicator (`aria-busy`, an indeterminate progressbar, a "Loading…" node), bounded at about 3 s and never failing on the bound — snapshots the accessibility tree with every iframe's document included (cross-origin ones through their own CDP session), prints the tree into the cell, and returns `{ snapshot, url, title, viewport, scroll, focused?, tree, elements }`. `elements` lists the actionable nodes only, each with a `ref`; the tree carries the text.
+
+The tree is one node per line, indent = depth, refs only on actionable nodes; text is never truncated, hrefs are omitted unless `includeAll`:
+
+```text
+url: https://app.gusto.com/…/401k/contributions | title: 401(k) contributions | scroll: 0/2140 | focused: e26
+navigation
+  e1 link "Home"
+main
+  heading "401(k)"
+  text "Account ID: 23I1202C-F8V93"
+  e26 tab "Contributions" [selected]
+  [iframe my.guideline.com]
+    text "$1,387 / pay period"
+    e40 textbox "Amount in percent" = "14.5"
+```
+
+When the same tab was observed before on the same document with the same filter, the default output is the diff: the header, then only added (`+`) and changed (`~`) lines under their unchanged ancestors, `removed: e12, e40-e47` (plus a count of removed unreferenced nodes), and `unchanged: N nodes`; a page with nothing changed prints one line saying so. `{ diff: false }` prints the full tree, a different document always does, and `{ display: false }` returns the observation without printing. Acquisition runs the same observation, so `claim`/`create`/`getTab` print the first tree.
+
+Act, then observe in the same cell; the settle wait replaces sleeps and the diff shows what the action did:
 
 ```js
-const observation = await tab.observe();
+const observation = await tab.observe({ display: false });
 const search = observation.elements.find(element => element.role === "textbox" && element.name === "Search");
 if (!search?.ref) throw new Error("Search field is not exposed in this observation");
 await tab.ref(search.ref).fill("background browser control");
-display(await tab.observe());
+await tab.observe();
 ```
 
 `tab.ref(ref)` and `tab.id(number)` return synchronous `BrowserElement` proxies. On the direct facade, `tab.id` binds the number to the most recent observation. Handles support `click`, `type`, `fill`, `press`, `hover`, `focus`, `select`, `uploadFile`, `scrollIntoView`, `boundingBox`, `isVisible`, `isHidden`, and `evaluate`. A string passed to element `evaluate` is a function expression invoked with the element as its first argument.
-
-A new observation or navigation invalidates managed Chrome references. Re-renders can also make an element unavailable. Re-observe and resolve again; do not reuse an old reference based on matching numbers. Prefer observing and acting in the same Eval cell.
 
 Managed Chrome `ariaSnapshot()` is a read-only structural view. Its `[ref=eN]` slots are not action references; use `observe()` references for actions. Numeric IDs inside `tab.run` are also rejected on managed Chrome because they lack snapshot identity. Other Puppeteer modes retain their legacy numeric observation IDs and ARIA references.
 
@@ -142,10 +160,10 @@ Managed Chrome `ariaSnapshot()` is a read-only structural view. Its `[ref=eN]` s
 
 `browser.refs` selects how `observe()` mints those refs:
 
-- `compact` (default): `e1`…`eN`, restarted by every observation, so the ids stay short whatever the observation count. Each ref also records the element's `backendNodeId` and its role/name/position. When the handle dies — the usual re-render replacing every node — OMP re-queries the accessibility tree with the observation's own filter, takes the node that still carries the recorded `backendNodeId`, else the recorded role/name/position, and acts on that. Only a ref whose element is no longer in the tree is reported stale.
-- `uuid`: `<observation-uuid>:<n>` with page-lifetime element numbers. A ref names exactly one observation; a dead element handle fails the action and asks for a new observation, with no healing.
+- `compact` (default): `e1`…`eN`, stable for the tab's lifetime. Every observation hands the same number to the same DOM node (matched by its backend node id), else to the same role/name/position (a re-render that replaced the node); new nodes get fresh numbers and numbers are never reused, so a diff's `+`/`~`/`removed` refs mean what they say and a ref remembered from an earlier observation still names its element. Element handles are adopted lazily on first use. When one dies — the usual re-render replacing every node — OMP re-queries the accessibility tree with the observation's own filter, takes the node that still carries the recorded id, else the recorded role/name/position, and acts on that. Only a ref whose element is no longer in the tree is reported stale.
+- `uuid`: `<observation-uuid>:<n>` with page-lifetime element numbers. A ref names exactly one observation; a dead element handle fails the action and asks for a new observation, with no healing. The tree still prints `eN`; the token to act with is `elements[i].ref`.
 
-Both styles accept the ref exactly as observed, plus `tab.id(n)` for the current observation. `ariaSnapshot()`'s `[ref=eN]` slots stay separate: with `compact` refs, an `eN` that the current observation minted resolves to that element, and any other `eN` still resolves against the last ARIA snapshot.
+Both styles accept the ref exactly as observed, plus `tab.id(n)` for the current observation. `ariaSnapshot()`'s `[ref=eN]` slots stay separate: with `compact` refs, an `eN` that an observation minted resolves to that element, and any other `eN` still resolves against the last ARIA snapshot.
 
 ### Selectors and input
 
@@ -153,7 +171,7 @@ Selectors accept CSS and Puppeteer `aria/…`, `text/…`, `xpath/…`, and `pie
 
 Use `tab.select(selector, "option-value")` or `tab.ref(ref).select("option-value")` for `<select>` elements. Values must be strings, not `{ label: ... }` objects; read the options when displayed labels differ from their values. `fill` does not support selects.
 
-Managed Chrome `fill` replaces editable text through browser text insertion, including Unicode and empty replacement. `type` sends individual key events; `press` sends keys and shortcuts. Each managed run temporarily emulates page focus before selector lookup and observation, keeping it through input and restoring it during cleanup. This lets accessibility queries progress in an inactive tab without selecting it or focusing Chrome. Page scripts can observe this emulation, including focus and visibility events. Restoration failure ends reuse of the handle; release and rediscover before continuing. Check the result with a fresh observation; successful dispatch does not prove the application accepted the input.
+Managed Chrome `fill` replaces editable text through browser text insertion, including Unicode and empty replacement. `type` sends individual key events; `press` sends keys and shortcuts. Each managed run temporarily emulates page focus before selector lookup and observation, keeping it through input and restoring it during cleanup. This lets accessibility queries progress in an inactive tab without selecting it or focusing Chrome. Page scripts can observe this emulation, including focus and visibility events. A focus restore that stalls because the action navigated the page is not a failure: it is retried after the commit and the handle stays usable; a genuine failure says the page navigated or is busy and to observe again, never to release the handle. Check the result with a fresh observation; successful dispatch does not prove the application accepted the input.
 
 ### Files
 
@@ -193,7 +211,7 @@ const hrefs = await tab.run(async ({ page }) => {
 const title = await tab.run(async ({ tab }, suffix) => (await tab.title()) + suffix, { args: ["!"], timeout: 10 });
 ```
 
-Functions receive `{ tab, page, browser, wait, assert }` as their first argument. Additional `args` follow it. Plain data, functions, and `RegExp` values are serialized; the function cannot capture Eval-cell closures. Code strings use the same names as globals and allow top-level `await`.
+Functions receive `{ tab, page, browser, wait, assert }` as their first argument. `page`, `browser` and every `frame` are **Puppeteer** objects, not Playwright: there is no `locator()`; use `page.$`/`page.$$eval`, `frame.evaluate`, `page.waitForSelector`. Additional `args` follow it. Plain data, functions, and `RegExp` values are serialized; the function cannot capture Eval-cell closures. Code strings use the same names as globals and allow top-level `await`.
 
 The inner `tab` includes handle-returning `waitFor`/`waitForSelector` and run-scoped `waitForNavigation`/`waitForResponse`. Start a navigation or response wait before the action that triggers it. Request interception lasts only for the current run.
 
@@ -211,8 +229,7 @@ if len(profiles) != 1:
     raise RuntimeError("Choose an exact browserId from browser.instances() first")
 
 tab = await browser.create(browserId=profiles[0]["id"], label="Documentation review", url="https://example.com")
-observation = await tab.observe(viewportOnly=True)
-display(observation)
+observation = await tab.observe(viewportOnly=True)  # prints the tree
 title = await tab.run("return await tab.title();", timeout=30)
 await tab.close()
 ```
@@ -239,7 +256,7 @@ Headless tabs the session owns are frozen at turn settle (`browser.freezeOnTurnE
 
 ## Popups, interruptions, and recovery
 
-When a page you own opens a child tab — a new-window link, `window.open`, a `target=_blank` form — Chrome creates it natively and the browser service leases it to the opener's owner from `chrome.tabs.onCreated`, inactive, in the same window and task group. `await tab.popups()` lists the children of that exact tab; `browser.discover()` also shows them with `popupOf` and `ownership: "this_actor"`. Claim a child's exact ID to drive it. Children are treated like any tab the task opened at the end of the work.
+When a page you own opens a child tab — a new-window link, `window.open`, a `target=_blank` form — Chrome creates it natively and the browser service leases it to the opener's owner from `chrome.tabs.onCreated`, in the same window and task group; whatever Chrome did with the tab selection stands, because putting the displaced tab back only makes OMP look like it opened a tab and then showed the wrong one. `await tab.popups()` lists the children of that exact tab; `browser.discover()` also shows them with `popupOf` and `ownership: "this_actor"`. Claim a child's exact ID to drive it. Children are treated like any tab the task opened at the end of the work.
 
 Because Chrome's own popup path runs, `window.open` returns a real `WindowProxy`, named windows work, and new-window form submissions are not special-cased. Nothing is monkeypatched in the page.
 
@@ -282,6 +299,6 @@ Observation images appear as compact snapshots in collapsed tool output; expandi
 
 Run the extension installer against the same directory used for the loaded unpacked extension. Updates preserve its custom display name unless `--name` is supplied. Reload that entry in Chrome’s extension manager to load the new files. Existing browser labels, pairing credentials and saved connection settings remain in Chrome; updating files does not require a new pairing code. An exported directory alone does not prove that Chrome has loaded or reloaded it.
 
-After reconnecting, `omp browser-relay list` (with `--port` for a custom endpoint) and `browser.instances()` report `extension.status`. `matching` means the connected worker reported the build bundled with the running service; `different` means another build is executing, without assuming which is newer. `unknown` means disconnected or an older extension that cannot report its build. Older services omit these diagnostics entirely. Update the service after its active work finishes as well as reloading the extension when migrating versions.
+After reconnecting, `omp browser-relay list` (with `--port` for a custom endpoint) and `browser.instances()` report `extension.status`. `matching` means the connected worker reported the build bundled with the running service; `different` means another build is executing, without assuming which is newer. `unknown` means disconnected or an older extension that cannot report its build. `create`, `claim` and `getTab` refuse a `different` or `unknown` build outright, naming the loaded and expected ids and the `omp browser-relay install` + chrome://extensions Reload fix; an extension new enough to understand the handshake reloads itself on the next connect instead. Older services omit these diagnostics entirely. Update the service after its active work finishes as well as reloading the extension when migrating versions.
 
 `loadedBuildId` comes from code embedded in the executing worker, not a fresh read of files on disk. `expectedBuildId` identifies the service’s bundled extension; the export’s `build-info.json` carries the same identity. The reproducible digest covers the unstamped worker, options UI and base manifest. Custom display names and connection defaults do not change code identity. A matching build establishes version alignment, not permission grants or successful task execution.

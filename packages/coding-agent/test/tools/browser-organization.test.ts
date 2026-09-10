@@ -9,6 +9,7 @@ import { acquireChromeTab } from "@oh-my-pi/pi-coding-agent/tools/browser/manage
 import * as registry from "@oh-my-pi/pi-coding-agent/tools/browser/registry";
 import * as access from "@oh-my-pi/pi-coding-agent/tools/browser/relay/access";
 import type { RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
+import { EXPECTED_EXTENSION_BUILD_ID } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 import type {
 	RelayRpcRequest,
 	RelayToExtMessage,
@@ -76,6 +77,7 @@ function profile(relay: RelayServer, id: string) {
 			t: "hello",
 			userAgent: "fixture",
 			browserVersion: "Chrome/150",
+			extensionBuildId: EXPECTED_EXTENSION_BUILD_ID,
 			attachedTabIds: [],
 			tabs: [...tabs.values()],
 		}),
@@ -127,7 +129,7 @@ it("closes discovered tabs through JS and Python without page attachment, across
 			`tabs = await browser.discover(browserId="personal-profile-fixture")
 target = next(tab for tab in tabs if not tab["active"])
 await browser.closeTab(target["id"], browserId="personal-profile-fixture")
-remaining = await browser.discover(browserId="personal-profile-fixture")
+remaining = await browser.discover(browserId="personal-profile-fixture", full=True)
 print([tab["tabId"] for tab in remaining])`,
 			{
 				cwd: import.meta.dir,

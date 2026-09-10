@@ -1,11 +1,14 @@
+import * as path from "node:path";
+import { getBrowserRelayDir } from "@oh-my-pi/pi-utils";
 import type { DialogState } from "../dialogs";
 import { RelayAccess, type BrowserAuthentication } from "./access";
 import { type DebuggerState, RelayBridge, type RelaySocket } from "./bridge";
 import buildInfo from "./extension-assets/build-info.json.txt" with { type: "text" };
 import type { ChromeTabLease, DiscoveredChromeTab } from "./managed-tabs";
-import { isTabSnapshot, type ExtToRelayMessage } from "./protocol";
+import { isTabSnapshot, type ExtToRelayMessage, type RelayToExtMessage } from "./protocol";
 
-const expectedExtensionBuildId: string = JSON.parse(buildInfo).buildId;
+/** Identity of the extension build shipped with this relay; the parity gate's yardstick. */
+export const EXPECTED_EXTENSION_BUILD_ID: string = JSON.parse(buildInfo).buildId;
 
 export interface ExtensionBuildStatus {
 	/** Only present while connected; never inferred from exported files. */
@@ -70,6 +73,11 @@ export class BrowserInstances {
 	#pending = new Map<RelaySocket, Pending>();
 	#sockets = new Map<RelaySocket, Instance>();
 	#awaitingHello = new Set<() => void>();
+	/**
+	 * Bound port of the relay serving these instances, set once it is listening.
+	 * Only used to spell out the reinstall command a build-skewed extension needs.
+	 */
+	port: number | undefined;
 	#options: {
 		log?: (message: string, data?: Record<string, unknown>) => void;
 		group?: boolean;
@@ -116,11 +124,11 @@ export class BrowserInstances {
 			generation: instance.generation,
 			extension: {
 				loadedBuildId: instance.bridge.ready ? instance.extensionBuildId : undefined,
-				expectedBuildId: expectedExtensionBuildId,
+				expectedBuildId: EXPECTED_EXTENSION_BUILD_ID,
 				status:
 					!instance.bridge.ready || !instance.extensionBuildId
 						? "unknown"
-						: instance.extensionBuildId === expectedExtensionBuildId
+						: instance.extensionBuildId === EXPECTED_EXTENSION_BUILD_ID
 							? "matching"
 							: "different",
 			},
@@ -153,7 +161,16 @@ export class BrowserInstances {
 						...pending.authenticated,
 						bridge: new RelayBridge(this.#options),
 					});
-				socket.send(JSON.stringify({ t: "authenticated", credential: result.credential }));
+				// The build this relay expects travels with the handshake so a
+				// skewed extension can reload itself instead of waiting for the
+				// user to notice; extensions that predate the field ignore it.
+				socket.send(
+					JSON.stringify({
+						t: "authenticated",
+						credential: result.credential,
+						expectedBuildId: EXPECTED_EXTENSION_BUILD_ID,
+					} satisfies Extract<RelayToExtMessage, { t: "authenticated" }>),
+				);
 				return;
 			}
 			if (!validHello(message)) throw new Error("Invalid browser hello; healthy connection preserved");
@@ -249,12 +266,33 @@ export class BrowserInstances {
 			tab: this.#tab(instance, lease.tab),
 		};
 	}
+	/**
+	 * A Chrome running some other build of the extension contradicts the relay
+	 * silently — a v0.2 worker focuses the window on an `activateTab` that asked
+	 * it not to — so the skew is refused where a tab is acquired instead of
+	 * surfacing later as Chrome doing the opposite of what the model asked.
+	 * Only checked while connected: a disconnected instance has its own errors.
+	 */
+	#requireExtensionParity(instance: Instance): void {
+		if (!instance.bridge.ready || instance.extensionBuildId === EXPECTED_EXTENSION_BUILD_ID) return;
+		const dir = path.join(getBrowserRelayDir(), "extension");
+		const port = this.port === undefined ? "" : ` --port ${this.port}`;
+		throw new Error(
+			`Chrome ${JSON.stringify(instance.label)} is running a different build of the OMP extension than this relay: ` +
+				`loaded ${instance.extensionBuildId ?? "(a build too old to report its id)"}, expected ${EXPECTED_EXTENSION_BUILD_ID}. ` +
+				`Refresh it with: omp browser-relay install --dir ${dir}${port} --name ${JSON.stringify(instance.label)} — ` +
+				"then open chrome://extensions and click Reload on that extension. " +
+				"Once Chrome runs a build that supports it, the extension reloads itself on the next connect.",
+		);
+	}
 	async create(url: string, owner: string, taskId: string, label?: string, browserId?: string): Promise<InstanceLease> {
 		const instance = this.select(browserId);
+		this.#requireExtensionParity(instance);
 		return this.#lease(instance, await instance.bridge.managed.create(url, owner, taskId, label));
 	}
 	claim(id: string, owner: string, taskId?: string, label?: string, browserId?: string): InstanceLease {
 		const instance = this.#forTab(id, browserId);
+		this.#requireExtensionParity(instance);
 		return this.#lease(instance, instance.bridge.managed.claim(id, owner, taskId, label));
 	}
 	#forTab(id: string, browserId?: string): Instance {
@@ -278,6 +316,7 @@ export class BrowserInstances {
 	}
 	get(id: string, owner: string): InstanceLease {
 		const instance = this.requireLease(id);
+		this.#requireExtensionParity(instance);
 		return this.#lease(instance, instance.bridge.managed.get(id, owner));
 	}
 	async releaseTab(id: string, owner: string, close: boolean, signal?: AbortSignal): Promise<void> {

@@ -38,6 +38,7 @@ import {
 	releaseBrowser,
 } from "./browser/registry";
 import { resolveRelayKind } from "./browser/relay/kind";
+import type { InstanceTab } from "./browser/relay/instances";
 import type { InitialBrowserState, RunResultOk, ScreenshotResult } from "./browser/tab-protocol";
 import type { OutputMeta } from "./output-meta";
 import {
@@ -121,6 +122,7 @@ const browserSchema = type({
 	"all?": type("boolean").describe("release every managed tab"),
 	"kill?": type("boolean").describe("also kill spawned-app browsers"),
 	"persist?": type("boolean").describe("keep tab live across turn settle and idle close"),
+	"full?": type("boolean").describe("discover: return every tab field instead of the compact projection"),
 });
 
 type BrowserParams = typeof browserSchema.infer;
@@ -305,14 +307,20 @@ async function invokeBrowser(
 				.text(`Closed Chrome tab ${JSON.stringify(parsed.id)}`)
 				.done();
 		}
-		if (parsed.action === "instances" || parsed.action === "discover") {
+		if (parsed.action === "instances") {
 			const deadline = AbortSignal.timeout(timeoutMs);
 			const signal = context.signal ? AbortSignal.any([context.signal, deadline]) : deadline;
-			const access = { browserId: parsed.browserId, relay: parsed.app?.relay };
-			details.value =
-				parsed.action === "instances"
-					? await listChromeInstances(session, signal, access)
-					: await discoverChromeTabs(session, signal, access);
+			details.value = await listChromeInstances(session, signal, {
+				browserId: parsed.browserId,
+				relay: parsed.app?.relay,
+			});
+			return toolResult(details).done();
+		}
+		if (parsed.action === "discover") {
+			const deadline = AbortSignal.timeout(timeoutMs);
+			const signal = context.signal ? AbortSignal.any([context.signal, deadline]) : deadline;
+			const tabs = await discoverChromeTabs(session, signal, { browserId: parsed.browserId, relay: parsed.app?.relay });
+			details.value = parsed.full ? tabs : compactDiscoveredTabs(tabs);
 			// Let callers select which inventory fields enter the transcript.
 			return toolResult(details).done();
 		}
@@ -635,6 +643,24 @@ async function saveBrowserOutputArtifact(session: ToolSession, fullText: string)
 	} catch {
 		return undefined;
 	}
+}
+
+/**
+ * Fields a tab choice needs — always present so `tab["active"]` is safe in
+ * Python — plus `browserId` only when the inventory spans profiles.
+ * Everything else is `{ full: true }`.
+ */
+export function compactDiscoveredTabs(tabs: readonly InstanceTab[]): Record<string, unknown>[] {
+	const multiProfile = new Set(tabs.map(tab => tab.browserId)).size > 1;
+	return tabs.map(({ id, title, url, active, ownership, popupOf, browserId }) => ({
+		id,
+		title,
+		url,
+		active,
+		ownership,
+		...(popupOf !== undefined ? { popupOf } : {}),
+		...(multiProfile ? { browserId } : {}),
+	}));
 }
 
 function describeBrowser(handle: BrowserHandle): string {

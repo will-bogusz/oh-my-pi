@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { createContext, runInContext } from "node:vm";
 import { RelayBridge, type RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
+import { EXPECTED_EXTENSION_BUILD_ID } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 import type {
 	RelayRpcRequest,
 	RelayToExtMessage,
@@ -233,7 +234,9 @@ async function release(
 	close = false,
 ): Promise<void> {
 	const done = bridge.managed.releaseTab(leaseId, owner, close);
-	for (let round = 0; round < 4; round++) {
+	// Enough rounds for the serialized hand-back: badge restore, cursor removal,
+	// detach, then the extension's own releaseTab.
+	for (let round = 0; round < 8; round++) {
 		await flush();
 		for (const op of ["send", "detach", "releaseTab"] as const) ack(bridge, ext, op);
 	}
@@ -291,7 +294,7 @@ describe("RelayBridge tab groups", () => {
 		expect(bridge.managed.discover("owner-a").find(candidate => candidate.tabId === 1)?.ownership).toBe("available");
 	});
 
-	it("adopts a popup Chrome blames on the visible tab, and hands that tab straight back", async () => {
+	it("adopts a popup Chrome blames on the visible tab, and leaves Chrome's selection alone", async () => {
 		const bridge = new RelayBridge({ group: true });
 		const ext = new FakeExtSocket();
 		// Tab 3 is what the user is looking at; tab 1 is the leased background tab.
@@ -321,13 +324,14 @@ describe("RelayBridge tab groups", () => {
 			{ tabId: 5, ownership: "this_actor", popupOf: parent.tab.id },
 		]);
 		expect(ext.rpcs("group").map(rpc => rpc.tabId)).toEqual([5]);
-		// The user's tab is selected again, without raising the window.
-		expect(ext.rpcs("activateTab")).toEqual([expect.objectContaining({ tabId: 3, focusWindow: false })]);
+		// Chrome raised and selected the child; putting tab 3 back would show the
+		// user the page they did not just open. Adoption never selects anything.
+		expect(ext.rpcs("activateTab")).toEqual([]);
 		// One witness explains one popup: the next unexplained tab stays the user's.
 		bridge.extMessage(ext, JSON.stringify({ t: "tabOpened", tab: tab({ tabId: 6, active: true }), openerTabId: 3 }));
 		await flush();
 		expect(bridge.managed.discover("owner-a").find(candidate => candidate.tabId === 6)?.ownership).toBe("available");
-		expect(ext.rpcs("activateTab")).toHaveLength(1);
+		expect(ext.rpcs("activateTab")).toEqual([]);
 	});
 
 	it("keeps a leased tab releasable after it navigates somewhere no debugger can attach", async () => {
@@ -1541,4 +1545,172 @@ it("gives Chrome its debugger back on host request and on worker unload, in the 
 	suspend();
 	await flush();
 	expect(detached).toEqual([1, 2]);
+});
+
+/**
+ * Build skew is the relay's to announce and the extension's to fix: a worker
+ * whose RPC contract no longer matches the relay is worse than no worker, and
+ * the files on disk are usually already the new ones.
+ */
+it("reloads the built extension worker once for an expected build it is not running", async () => {
+	const session: Record<string, unknown> = {};
+	const event = () => ({ addListener: () => {} });
+	const boot = async (expectedBuildId: string): Promise<{ sent: string[]; reloads: number }> => {
+		const sent: string[] = [];
+		let reloads = 0;
+		class ExtensionSocket {
+			static OPEN = 1;
+			static CONNECTING = 0;
+			readyState = 1;
+			onmessage?: (event: { data: string }) => void;
+			onopen?: () => void;
+			send(text: string): void {
+				const message = JSON.parse(text) as { t: string };
+				sent.push(message.t);
+				if (message.t === "authenticate")
+					this.onmessage?.({ data: JSON.stringify({ t: "authenticated", expectedBuildId }) });
+			}
+			close(): void {}
+			constructor() {
+				queueMicrotask(() => this.onopen?.());
+			}
+		}
+		const context = createContext({
+			AbortSignal,
+			Response,
+			crypto,
+			navigator: { userAgent: "Chrome/151.0.0.0" },
+			WebSocket: ExtensionSocket,
+			setTimeout: () => 0,
+			clearTimeout: () => {},
+			setInterval: () => 0,
+			clearInterval: () => {},
+			fetch: async (url: string) =>
+				Response.json(url.endsWith("connection.json") ? { port: 19443 } : { service: "omp-browser", protocol: 2 }),
+			chrome: {
+				runtime: {
+					getURL: (name: string) => `chrome-extension://fixture/${name}`,
+					reload: () => {
+						reloads++;
+					},
+					onInstalled: event(),
+					onStartup: event(),
+					onMessage: event(),
+					onSuspend: event(),
+				},
+				storage: {
+					local: { get: async (defaults: object) => defaults, set: async () => {} },
+					session: {
+						get: async (defaults: Record<string, unknown>) => ({ ...defaults, ...session }),
+						set: async (values: Record<string, unknown>) => {
+							Object.assign(session, values);
+						},
+						remove: async (key: string) => {
+							delete session[key];
+						},
+					},
+				},
+				action: { setBadgeText: async () => {}, setBadgeBackgroundColor: async () => {}, onClicked: event() },
+				alarms: { create: () => {}, onAlarm: event() },
+				debugger: { getTargets: async () => [], onEvent: event(), onDetach: event() },
+				tabs: {
+					query: async () => [{ id: 1, ...tab({ tabId: 1 }) }],
+					onCreated: event(),
+					onUpdated: event(),
+					onRemoved: event(),
+					onReplaced: event(),
+					onActivated: event(),
+				},
+			},
+		});
+		runInContext(
+			await Bun.file(
+				new URL("../../src/tools/browser/relay/extension-assets/background.js.txt", import.meta.url),
+			).text(),
+			context,
+		);
+		for (let tick = 0; tick < 200 && reloads === 0 && !sent.includes("hello"); tick++) await Promise.resolve();
+		return { sent, reloads };
+	};
+	const stale = "0".repeat(64);
+	const skewed = await boot(stale);
+	// Nothing is reported to a relay this worker cannot serve correctly.
+	expect(skewed).toEqual({ reloads: 1, sent: ["authenticate"] });
+	expect(session).toEqual({ reloadedFor: stale });
+	// A stale install directory reloads to the same build; reloading again loops.
+	expect(await boot(stale)).toMatchObject({ reloads: 0, sent: ["authenticate", "hello"] });
+	// The committed worker is the build the relay ships, so parity clears the guard.
+	expect(await boot(EXPECTED_EXTENSION_BUILD_ID)).toMatchObject({ reloads: 0 });
+	expect(session).toEqual({});
+});
+
+describe("RelayBridge lease presentation", () => {
+	/** Answer pending `send` RPCs, giving each injected script its own identifier. */
+	function ackSends(bridge: RelayBridge, ext: FakeExtSocket): void {
+		for (const rpc of ext.pending("send")) {
+			ext.markAcked(rpc.id);
+			bridge.extMessage(
+				ext,
+				JSON.stringify({ t: "rpcResult", id: rpc.id, ok: true, result: { identifier: `script-${rpc.id}` } }),
+			);
+		}
+	}
+
+	it("installs the badge and cursor overlay on a leased tab, paints the pointer ahead of the input, and takes both back", async () => {
+		const bridge = new RelayBridge({ group: true });
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const lease = bridge.managed.claim(discovered(bridge, 1), "owner");
+		const cdp = new FakeCdpSocket();
+		const connection = bridge.cdpConnected(cdp, lease.id);
+		const sessionId = await attachPage(bridge, ext, cdp, connection, 1);
+		// The install is four serialized round trips: add + evaluate, twice.
+		for (let round = 0; round < 4; round++) {
+			ackSends(bridge, ext);
+			await flush();
+		}
+		const installs = ext.rpcs("send").filter(rpc => rpc.method === "Page.addScriptToEvaluateOnNewDocument");
+		expect(installs).toHaveLength(2);
+		expect(String(installs[1]?.params?.source)).toContain("data-omp-cursor");
+		const before = ext.rpcs("send").length;
+		bridge.cdpMessage(
+			connection,
+			JSON.stringify({
+				id: ++msgSeq,
+				sessionId,
+				method: "Input.dispatchMouseEvent",
+				params: { type: "mousePressed", x: 120, y: 48, button: "left" },
+			}),
+		);
+		await flush();
+		// The arrow is placed before the click it mirrors, and never awaited.
+		expect(ext.rpcs("send").slice(before)).toMatchObject([
+			{
+				method: "Runtime.evaluate",
+				params: { expression: "window.__ompCursor?.move(120,48);window.__ompCursor?.press()" },
+			},
+			{ method: "Input.dispatchMouseEvent" },
+		]);
+		ackSends(bridge, ext);
+		await flush();
+		const afterPress = ext.rpcs("send").length;
+		bridge.cdpMessage(
+			connection,
+			JSON.stringify({
+				id: ++msgSeq,
+				sessionId,
+				method: "Input.dispatchMouseEvent",
+				params: { type: "mouseReleased", x: 120, y: 48, button: "left" },
+			}),
+		);
+		await flush();
+		// Releasing the button moves nothing, so it costs no extra round trip.
+		expect(ext.rpcs("send").slice(afterPress)).toMatchObject([{ method: "Input.dispatchMouseEvent" }]);
+		ackSends(bridge, ext);
+		await flush();
+		await release(bridge, ext, lease.id, "owner");
+		const removals = ext.rpcs("send").filter(rpc => rpc.method === "Page.removeScriptToEvaluateOnNewDocument");
+		expect(removals.map(rpc => rpc.params?.identifier)).toEqual(installs.map(rpc => `script-${rpc.id}`));
+		expect(ext.rpcs("send").map(rpc => rpc.params?.expression)).toContain("window.__ompCursor?.remove()");
+	});
 });
