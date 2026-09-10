@@ -1,7 +1,4 @@
-diff --git a/node_modules/puppeteer-core/.bun-tag-2e714b457f0bd8e8 b/.bun-tag-2e714b457f0bd8e8
-new file mode 100644
-index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
-diff --git a/node_modules/puppeteer-core/.bun-tag-a797aeb3ca2bd69f b/.bun-tag-a797aeb3ca2bd69f
+diff --git a/node_modules/puppeteer-core/.bun-tag-f6b71be083df18d4 b/.bun-tag-f6b71be083df18d4
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/lib/puppeteer/api/ElementHandle.js b/lib/puppeteer/api/ElementHandle.js
@@ -325,7 +322,7 @@ index 4e27013ad8f9b89ee13913e55bba243cc8bf9662..42c4bf547443aa01955dde6f4e0f4d53
                      // @ts-expect-error: In a different context.
                      globalThis[name] = undefined;
 diff --git a/lib/puppeteer/cdp/FrameManager.js b/lib/puppeteer/cdp/FrameManager.js
-index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..2116367ee34bb86948bf956c2afa2f693ce14c96 100644
+index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..d8ca81eb4394f885ccbf3695cf510526da9b47ec 100644
 --- a/lib/puppeteer/cdp/FrameManager.js
 +++ b/lib/puppeteer/cdp/FrameManager.js
 @@ -13,6 +13,7 @@ import { disposeSymbol } from '../util/disposable.js';
@@ -336,7 +333,7 @@ index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..2116367ee34bb86948bf956c2afa2f69
  import { isTargetClosedError } from './Connection.js';
  import { CdpDeviceRequestPromptManager } from './DeviceRequestPrompt.js';
  import { ExecutionContext } from './ExecutionContext.js';
-@@ -43,6 +44,10 @@ export class FrameManager extends EventEmitter {
+@@ -43,6 +44,15 @@ export class FrameManager extends EventEmitter {
       * frameNavigated event usually contains the latest information.
       */
      #frameNavigatedReceived = new Set();
@@ -344,10 +341,15 @@ index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..2116367ee34bb86948bf956c2afa2f69
 +    // frameNavigated/init/load triggers don't stomp each other's contexts.
 +    #acquireQueued = new Set();
 +    #acquirePromises = new Map();
++    // xxx-stealth: per-frame document generation, bumped on every committed
++    // cross-document navigation. A context acquisition carries the generation
++    // it started on; ids resolved against a document that has since been
++    // replaced are discarded instead of installed.
++    #navigationGeneration = new Map();
      #deviceRequestPromptManagerMap = new WeakMap();
      #frameTreeHandled;
      get timeoutSettings() {
-@@ -191,9 +196,18 @@ export class FrameManager extends EventEmitter {
+@@ -191,9 +201,18 @@ export class FrameManager extends EventEmitter {
                      this.#frameTreeHandled?.resolve();
                  }),
                  client.send('Page.setLifecycleEventsEnabled', { enabled: true }),
@@ -369,7 +371,7 @@ index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..2116367ee34bb86948bf956c2afa2f69
                  ...(frame
                      ? Array.from(this.#scriptsToEvaluateOnNewDocument.values())
                      : []).map(script => {
-@@ -346,6 +360,7 @@ export class FrameManager extends EventEmitter {
+@@ -346,10 +365,14 @@ export class FrameManager extends EventEmitter {
              return;
          }
          frame = new CdpFrame(this, frameId, parentFrameId, session);
@@ -377,7 +379,14 @@ index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..2116367ee34bb86948bf956c2afa2f69
          this._frameTree.addFrame(frame);
          this.emit(FrameManagerEvent.FrameAttached, frame);
      }
-@@ -376,6 +391,177 @@ export class FrameManager extends EventEmitter {
+     async #onFrameNavigated(framePayload, navigationType) {
++        // xxx-stealth: bump before the first await so the new generation is
++        // visible to acquisitions that resume on a microtask after this event.
++        this.#navigationGeneration.set(framePayload.id, (this.#navigationGeneration.get(framePayload.id) ?? 0) + 1);
+         const frameId = framePayload.id;
+         const isMainFrame = !framePayload.parentId;
+         let frame = this._frameTree.getById(frameId);
+@@ -376,6 +399,218 @@ export class FrameManager extends EventEmitter {
          frame._navigated(framePayload);
          this.emit(FrameManagerEvent.FrameNavigated, frame);
          frame.emit(FrameEvent.FrameNavigated, navigationType);
@@ -417,14 +426,42 @@ index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..2116367ee34bb86948bf956c2afa2f69
 +            this.#acquireQueued.add(id);
 +            return existing;
 +        }
-+        const promise = this.#doAcquireWorlds(frame).finally(() => {
++        const promise = this.#acquireCurrentWorlds(frame).finally(() => {
 +            this.#acquirePromises.delete(id);
 +            if (this.#acquireQueued.delete(id) && this.frame(id)) {
-+                void this.#acquireWorlds(frame);
++                // Nobody is awaiting this refresh; its failure reaches the next
++                // caller through their own acquisition.
++                this.#acquireWorlds(frame).catch(debugCatchError);
 +            }
 +        });
 +        this.#acquirePromises.set(id, promise);
 +        return promise;
++    }
++    // xxx-stealth: acquire the contexts of the document that is still current
++    // when the acquisition finishes. Probes sent against one document can only
++    // answer with that document's context ids; if a navigation committed while
++    // they were in flight those ids are already dead, and installing them
++    // leaves the world permanently pointed at a context Chrome no longer knows
++    // ("Cannot find context with specified id" on every later evaluate, with
++    // nothing left to invalidate it). Discard them and acquire the document
++    // that replaced them. This repeats only when a navigation superseded the
++    // acquisition — never on a failure, which is reported instead.
++    async #acquireCurrentWorlds(frame) {
++        const id = frame._id;
++        for (;;) {
++            const generation = this.#navigationGeneration.get(id) ?? 0;
++            const from = frame.url();
++            const acquired = await this.#doAcquireWorlds(frame, generation);
++            if ((this.#navigationGeneration.get(id) ?? 0) === generation) {
++                if (acquired) {
++                    return;
++                }
++                throw new Error(`Could not acquire an execution context for ${frame.url() || '<unknown url>'} (frame ${id}): the document answered the acquisition probes without a main world`);
++            }
++            if (!this.frame(id)) {
++                throw new Error(`Could not acquire an execution context for ${from || '<unknown url>'} (frame ${id}): the frame was detached while it navigated to ${frame.url() || '<unknown url>'}`);
++            }
++        }
 +    }
 +    // xxx-stealth: true when `frame` is the top frame of its CDP session
 +    // (the page main frame, or an OOP iframe root). Only such frames can resolve
@@ -442,8 +479,12 @@ index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..2116367ee34bb86948bf956c2afa2f69
 +    }
 +    // xxx-stealth: pull-acquire a frame's main + utility execution contexts
 +    // without Runtime.enable, then feed them into the normal push pipeline.
-+    async #doAcquireWorlds(frame) {
++    // `generation` is the frame's document generation this acquisition belongs
++    // to; nothing is installed once a navigation has moved past it. Returns
++    // whether both worlds were resolved and installed.
++    async #doAcquireWorlds(frame, generation) {
 +        const session = frame.client;
++        const superseded = () => (this.#navigationGeneration.get(frame._id) ?? 0) !== generation;
 +        // xxx-stealth: never pre-dispose here. IsolatedWorld.setContext
 +        // already disposes the previous context when a fresh one is installed, and
 +        // a transiently-failed resolve (common while a navigation is mid-flight)
@@ -460,6 +501,9 @@ index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..2116367ee34bb86948bf956c2afa2f69
 +            })
 +                .catch(debugCatchError);
 +            const utilityId = iso && typeof iso.executionContextId === 'number' ? iso.executionContextId : undefined;
++            if (superseded()) {
++                return false;
++            }
 +            if (utilityId !== undefined) {
 +                this.#onExecutionContextCreated({
 +                    id: utilityId,
@@ -470,36 +514,42 @@ index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..2116367ee34bb86948bf956c2afa2f69
 +            }
 +            // Main world: resolve this frame's main execution context id.
 +            const id = await this.#resolveMainContextId(session, frame, utilityId);
-+            if (id !== undefined) {
-+                this.#onExecutionContextCreated({
-+                    id,
-+                    name: '',
-+                    origin: '',
-+                    auxData: { frameId: frame._id, isDefault: true },
-+                }, session);
-+                // xxx-stealth: re-install exposed-function bindings into the
-+                // freshly acquired main world. Normally the binding wrapper is
-+                // (re)installed when Chrome fires executionContextCreated; with that
-+                // event silenced we must re-add the native binding for this context
-+                // id and re-run the wrapper init source ourselves on every navigation.
-+                for (const binding of this.#bindings) {
-+                    void session
-+                        .send('Runtime.addBinding', {
-+                        name: CDP_BINDING_PREFIX + binding.name,
-+                        executionContextId: id,
-+                    })
-+                        .catch(() => { });
-+                    void session
-+                        .send('Runtime.evaluate', {
-+                        expression: binding.initSource,
-+                        contextId: id,
-+                    })
-+                        .catch(() => { });
-+                }
++            if (superseded()) {
++                return false;
 +            }
++            if (id === undefined) {
++                return false;
++            }
++            this.#onExecutionContextCreated({
++                id,
++                name: '',
++                origin: '',
++                auxData: { frameId: frame._id, isDefault: true },
++            }, session);
++            // xxx-stealth: re-install exposed-function bindings into the
++            // freshly acquired main world. Normally the binding wrapper is
++            // (re)installed when Chrome fires executionContextCreated; with that
++            // event silenced we must re-add the native binding for this context
++            // id and re-run the wrapper init source ourselves on every navigation.
++            for (const binding of this.#bindings) {
++                void session
++                    .send('Runtime.addBinding', {
++                    name: CDP_BINDING_PREFIX + binding.name,
++                    executionContextId: id,
++                })
++                    .catch(() => { });
++                void session
++                    .send('Runtime.evaluate', {
++                    expression: binding.initSource,
++                    contextId: id,
++                })
++                    .catch(() => { });
++            }
++            return utilityId !== undefined;
 +        }
 +        catch (error) {
 +            debugCatchError(error);
++            return false;
 +        }
 +    }
 +    // xxx-stealth: resolve a frame's MAIN-world execution context id without
@@ -555,8 +605,17 @@ index 2322aa136a47b446e2a7b2c4f0bc751f2fb821d0..2116367ee34bb86948bf956c2afa2f69
      }
      async #createIsolatedWorld(session, name) {
          const key = `${session.id()}:${name}`;
+@@ -494,6 +729,8 @@ export class FrameManager extends EventEmitter {
+         for (const child of frame.childFrames()) {
+             this.#removeFramesRecursively(child);
+         }
++        // xxx-stealth: a detached frame keeps no document generation.
++        this.#navigationGeneration.delete(frame._id);
+         this._frameTree.removeFrame(frame);
+         this.emit(FrameManagerEvent.FrameDetached, frame);
+         frame.emit(FrameEvent.FrameDetached, frame);
 diff --git a/lib/puppeteer/cdp/IsolatedWorld.js b/lib/puppeteer/cdp/IsolatedWorld.js
-index b0619734a9eeb884f3ac4ffff39b540226aaf818..7e577d8a0200f0201742fd0a471edc9792c35a3f 100644
+index b0619734a9eeb884f3ac4ffff39b540226aaf818..07423af5e721b59b68d01a9078b584915fa4cc3d 100644
 --- a/lib/puppeteer/cdp/IsolatedWorld.js
 +++ b/lib/puppeteer/cdp/IsolatedWorld.js
 @@ -21,6 +21,13 @@ export class IsolatedWorld extends Realm {
@@ -573,19 +632,17 @@ index b0619734a9eeb884f3ac4ffff39b540226aaf818..7e577d8a0200f0201742fd0a471edc97
      constructor(frameOrWorker, timeoutSettings, worldId) {
          super(timeoutSettings);
          this.#frameOrWorker = frameOrWorker;
-@@ -72,6 +79,19 @@ export class IsolatedWorld extends Realm {
+@@ -72,6 +79,17 @@ export class IsolatedWorld extends Realm {
       * Waits for the next context to be set on the isolated world.
       */
      async #waitForExecutionContext() {
-+        // xxx-stealth: pull the context on demand before falling back to
-+        // waiting for a (never-arriving) push event.
++        // xxx-stealth: pull the context on demand. With Runtime.enable off no
++        // push event can ever arrive, so a swallowed acquisition failure would
++        // park the caller here for the whole default timeout and then blame a
++        // destroyed context. Let the acquirer's error through instead: it names
++        // the document and the navigation that defeated the acquisition.
 +        if (this.#contextProvider && !this.#context && !this.disposed) {
-+            try {
-+                await this.#contextProvider();
-+            }
-+            catch {
-+                // fall through to the event wait below
-+            }
++            await this.#contextProvider();
 +            if (this.#context) {
 +                return this.#context;
 +            }
@@ -594,7 +651,7 @@ index b0619734a9eeb884f3ac4ffff39b540226aaf818..7e577d8a0200f0201742fd0a471edc97
          const result = await firstValueFrom(fromEmitterEvent(this.#emitter, 'context').pipe(raceWith(fromEmitterEvent(this.#emitter, 'disposed').pipe(map(() => {
              // The message has to match the CDP message expected by the WaitTask class.
 diff --git a/lib/puppeteer/cdp/WebWorker.js b/lib/puppeteer/cdp/WebWorker.js
-index 3d68f887920ded269eb641273a5a13dee235ae1d..dcdd86c8697c0dbd2dd2162c9a739dd9fa2afc96 100644
+index 3d68f887920ded269eb641273a5a13dee235ae1d..b4cc8fc1bcdfaf7fa58e169f8fe27225ac494e44 100644
 --- a/lib/puppeteer/cdp/WebWorker.js
 +++ b/lib/puppeteer/cdp/WebWorker.js
 @@ -29,9 +29,21 @@ export class CdpWebWorker extends WebWorker {
