@@ -5,7 +5,9 @@ import path from "node:path";
 import { runBrowserRelayCommand } from "@oh-my-pi/pi-coding-agent/cli/browser-relay-cli";
 import type { InstanceTab } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 import { startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
-import { clickInBackground } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
+import { clickNode } from "@oh-my-pi/pi-coding-agent/tools/browser/cdp";
+import { withBackgroundInput } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
+import type { ElementHandle, Page } from "puppeteer-core";
 import puppeteer, { type Browser } from "puppeteer-core";
 
 // Keep stock timer/occlusion scheduling and popup blocking in real-extension qualification.
@@ -15,6 +17,18 @@ const stockBackgroundPolicy = [
 	"--disable-renderer-backgrounding",
 	"--disable-popup-blocking",
 ];
+
+/** Trusted click on a handle's node, on the session that owns it. */
+async function clickHandle(page: Page, handle: ElementHandle, timeoutMs: number): Promise<void> {
+	const session = page.mainFrame().client;
+	const { node } = (await session.send("DOM.describeNode", { objectId: handle.id! })) as {
+		node: { backendNodeId: number };
+	};
+	const signal = AbortSignal.timeout(timeoutMs);
+	await withBackgroundInput(page, signal, () =>
+		clickNode({ session, backendNodeId: node.backendNodeId, label: "link" }, 1, signal),
+	);
+}
 
 it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 	"leases a tab the browser opens from an owned tab, through the real extension",
@@ -127,7 +141,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			if (!link) throw new Error("Missing popup link");
 			const visibleBefore = (await relay.instances.refresh("actor")).filter(candidate => candidate.active);
 			expect(visibleBefore).toHaveLength(1);
-			await clickInBackground(link, {}, AbortSignal.timeout(5000));
+			await clickHandle(page, link, 5000);
 			const parentTab = relay.instances.get(parent.id, "actor").tab;
 			// The child appears, is adopted and is grouped over several Chrome
 			// round trips; wait for the settled state rather than the first sight.
@@ -214,11 +228,15 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				.find(target => target.type() === "page")
 				?.page();
 			if (!pdfPage) throw new Error("Missing PDF page");
-			for (let attempt = 0; attempt < 40; attempt++) {
-				if ((await pdfPage.evaluate("document.contentType")) === "application/pdf") break;
+			// A freshly leased target has no frame tree for a beat, and the PDF
+			// viewer swaps documents once more on top of that: poll through both.
+			let contentType: unknown;
+			for (let attempt = 0; attempt < 100; attempt++) {
+				contentType = await pdfPage.evaluate("document.contentType").catch(() => undefined);
+				if (contentType === "application/pdf") break;
 				await Bun.sleep(50);
 			}
-			expect(await pdfPage.evaluate("document.contentType")).toBe("application/pdf");
+			expect(contentType).toBe("application/pdf");
 			expect(await pdfPage.evaluate("document.querySelectorAll('link[data-omp-badge]').length")).toBe(0);
 		} finally {
 			for (const client of clients) await client.disconnect();
@@ -511,7 +529,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			expect(await page.$eval("#p", element => element.textContent)).toBe("page");
 			const link = await page.waitForSelector("#lnk");
 			if (!link) throw new Error("Missing link");
-			await clickInBackground(link, {}, AbortSignal.timeout(8000));
+			await clickHandle(page, link, 8000);
 			expect(events.filter(event => event.message === "debugger attached").length).toBeGreaterThanOrEqual(2);
 			// A handle minted before the detach is the one casualty: its object id
 			// died with the attachment, which is why the detach announces the loss.

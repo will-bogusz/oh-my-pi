@@ -1,4 +1,4 @@
-import type { ElementHandle, JSHandle, Page } from "puppeteer-core";
+import type { Page } from "puppeteer-core";
 import { ToolError } from "../../tool-errors";
 import ariaBundle from "./aria-snapshot.bundle.txt" with { type: "text" };
 // `aria-snapshot.bundle.txt` is a generated, committed artifact: Playwright's
@@ -15,56 +15,31 @@ export interface AriaSnapshotOptions {
 }
 
 /**
- * Page-side evaluators built ONCE here in the worker — never inside the page, so
- * page CSP never applies. They run the generated Playwright ARIA-snapshot bundle
+ * Page-side scripts that run the generated Playwright ARIA-snapshot bundle
  * (CJS, see scripts/generate-aria-snapshot.ts) in a throwaway module scope.
- *
- * Puppeteer serializes these functions to a CDP `Runtime.evaluate` in the page's
- * MAIN world (the only world where the bundle's `_ariaRef` ref expandos live —
- * isolated-world locators/query-handlers cannot see them). Nothing is installed
- * on `window`; the only footprint is the `_ariaRef` markers the snapshot writes,
- * which are the price of actionable `[ref=eN]` ids.
+ * They are built here in the worker, never inside the page, so page CSP never
+ * applies, and they go to the page's MAIN world — the only world where the
+ * bundle's `_ariaRef` expandos live. Nothing is installed on `window`; the only
+ * footprint is those markers, the price of actionable `[ref=eN]` ids. Ids are
+ * renumbered from e1 on each snapshot and remain valid until the next one.
  */
-function buildEvaluator(params: string, call: string): (...args: unknown[]) => unknown {
-	return new Function(
-		...params.split(",").map(p => p.trim()),
-		`var module = { exports: {} };\n${ariaBundle}\nreturn module.exports.${call};`,
-	) as unknown as (...args: unknown[]) => unknown;
-}
-
-// Handles (root) must stay top-level args: Puppeteer only unwraps JSHandles
-// passed positionally to page.evaluate, never ones nested inside an object.
-const evaluateAriaSnapshot = buildEvaluator("root, request", "ariaSnapshot(root, request)");
-const evaluateResolveRef = buildEvaluator("ref", "resolveAriaRef(ref)");
-
 /**
- * Capture a Playwright-format ARIA snapshot of `root` (or the whole document when
- * null). Always runs in `ai` mode so every node carries a `[ref=eN]` id; resolve
- * those to elements with {@link resolveAriaRefHandle}. Ids are renumbered from e1
- * on each call and remain valid until the next snapshot.
+ * The bundle as a `Runtime.callFunctionOn` declaration that snapshots `this`.
+ * Lets the worker scope a snapshot to an element it addressed by backend node
+ * id, without ever holding a puppeteer handle.
  */
-export async function captureAriaSnapshot(
-	page: Page,
-	root: ElementHandle | null,
-	options: AriaSnapshotOptions = {},
-): Promise<string> {
+export function buildAriaSnapshotFunction(options: AriaSnapshotOptions = {}): string {
 	const request = { depth: options.depth, boxes: options.boxes };
-	return (await page.evaluate(evaluateAriaSnapshot as never, root as never, request as never)) as string;
+	return `function(){var module={exports:{}};\n${ariaBundle}\nreturn module.exports.ariaSnapshot(this,${JSON.stringify(request)});}`;
 }
 
 /**
- * Resolve a `[ref=eN]` id from the latest snapshot to a live `ElementHandle`, or
- * null when the ref no longer matches any element. Runs in the main world so it
- * sees the `_ariaRef` expandos the snapshot wrote.
+ * Expression evaluating to the element a `[ref=eN]` id from the latest snapshot
+ * names, or null. Must run in the main world, where the `_ariaRef` expandos the
+ * snapshot wrote live.
  */
-export async function resolveAriaRefHandle(page: Page, ref: string): Promise<ElementHandle | null> {
-	const handle = (await page.evaluateHandle(evaluateResolveRef as never, ref as never)) as JSHandle;
-	const element = handle.asElement();
-	if (!element) {
-		await handle.dispose().catch(() => undefined);
-		return null;
-	}
-	return element as ElementHandle;
+export function buildAriaRefScript(ref: string): string {
+	return `(function(){var module={exports:{}};\n${ariaBundle}\nreturn module.exports.resolveAriaRef(${JSON.stringify(ref)});})()`;
 }
 
 const ARIA_REF_PREFIXES = ["aria-ref=", "aria-ref/", "ariaref/"];

@@ -1,5 +1,5 @@
 import { expect, it } from "bun:test";
-import type { SerializedAXNode } from "puppeteer-core";
+import type { AxNode } from "@oh-my-pi/pi-coding-agent/tools/browser/observation";
 import type {
 	ReadyInfo,
 	RefStyle,
@@ -21,15 +21,14 @@ import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
-function ax(role: string, name?: string, extra: Partial<SerializedAXNode> = {}, children?: SerializedAXNode[]): SerializedAXNode {
+function ax(role: string, name?: string, extra: Partial<AxNode> = {}, children?: AxNode[]): AxNode {
 	return {
 		role,
 		name,
 		loaderId: "L",
-		elementHandle: async () => null,
 		...extra,
 		...(children ? { children } : {}),
-	} as SerializedAXNode;
+	};
 }
 
 const GUSTO_LIKE = ax("RootWebArea", "401(k) contributions", { url: "https://app.gusto.com/401k" }, [

@@ -10,7 +10,7 @@ import type {
 	WorkerOutbound,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
 import { matchRefs, type RefRecord } from "@oh-my-pi/pi-coding-agent/tools/browser/observation";
-import { chooseHealedIndex, parseRefToken, WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
+import { parseRefToken, WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import puppeteer from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
@@ -89,19 +89,8 @@ it("reads the element id out of both compact and snapshot-bound ref tokens", () 
 	expect(parseRefToken("button", observation)).toBeNull();
 });
 
-// Fallback selection: exact node identity beats position, position beats
-// nothing, and "no candidate at all" is the only genuinely stale ref.
-it("prefers the recorded node, then the recorded position, when re-querying a ref", () => {
-	expect(chooseHealedIndex(["L:41", "L:42", "L:43"], { nodeKey: "L:42", position: 0 })).toBe(1);
-	expect(chooseHealedIndex(["L:41", "L:42", "L:43"], { nodeKey: "L:99", position: 2 })).toBe(2);
-	expect(chooseHealedIndex(["L:41", "L:42"], { position: 1 })).toBe(1);
-	expect(chooseHealedIndex([undefined, undefined], { nodeKey: "L:42", position: 0 })).toBe(0);
-	expect(chooseHealedIndex([], { nodeKey: "L:42", position: 0 })).toBeNull();
-	expect(chooseHealedIndex(["L:41"], { position: 3 })).toBeNull();
-});
-
 it.skipIf(!CHROMIUM_AVAILABLE)(
-	"heals a compact ref whose node was replaced, where a uuid ref goes stale",
+	"re-attaches a ref to the equivalent node on the next observation, and fails until then",
 	async () => {
 		const browser = await puppeteer.launch({
 			executablePath: await chromiumExecutable(),
@@ -179,14 +168,17 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 				["e1", "e2", "e3"],
 			]);
 
-			// A React-style re-render replaces every node: the observation's handles
-			// are all detached, but the refs still name the same elements.
+			// A React-style re-render replaces every node. The ref survives because
+			// the next observation re-matches it to the equivalent node by
+			// role/name/position — that re-match is the whole healing story now, and
+			// the number the model already holds keeps working.
 			const healed = await run(
 				"compact-heal",
 				`await tab.observe();
 				 await tab.evaluate(() => {
 					 document.body.innerHTML = document.body.innerHTML;
 				 });
+				 await tab.observe();
 				 const element = await tab.ref("e2");
 				 await element.click();
 				 return await tab.evaluate(() =>
@@ -195,6 +187,27 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 				"compact",
 			);
 			expect(healed).toEqual(["First:", "Second:1", "Third:"]);
+
+			// Without that observation the ref names a node the page dropped, and
+			// the action says so instead of guessing at a replacement.
+			await render();
+			result = Promise.withResolvers<Extract<WorkerOutbound, { type: "result" }>>();
+			receive({
+				type: "run",
+				id: "compact-unobserved",
+				name: "refs fixture",
+				code: `await tab.observe();
+					 await tab.evaluate(() => {
+						 document.body.innerHTML = document.body.innerHTML;
+					 });
+					 await (await tab.ref("e2")).click();`,
+				timeoutMs: 8_000,
+				session: { cwd: process.cwd(), refs: "compact" },
+			});
+			const unobserved = await result.promise;
+			expect(unobserved.ok).toBe(false);
+			if (unobserved.ok) throw new Error("a replaced node was clicked without a fresh observation");
+			expect(unobserved.error.message).toContain("stale");
 
 			// The uuid style keeps its snapshot-bound contract: same sequence, hard stale.
 			await render();

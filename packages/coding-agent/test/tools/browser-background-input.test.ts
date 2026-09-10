@@ -1,9 +1,6 @@
 import { expect, it } from "bun:test";
-import {
-	fillInBackground,
-	prepareBackgroundPage,
-	withBackgroundInput,
-} from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
+import { fillNode } from "@oh-my-pi/pi-coding-agent/tools/browser/cdp";
+import { prepareBackgroundPage, withBackgroundInput } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import puppeteer, { type Page } from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
@@ -183,20 +180,26 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			await page.setContent(
 				'<input value="old" data-model="old" data-events="" onbeforeinput="this.dataset.events += event.type + String(event.isTrusted) + String.fromCharCode(44)" oninput="this.dataset.model=this.value;this.dataset.events += event.type + String(event.isTrusted) + String.fromCharCode(44)"><div contenteditable="true">previous</div>',
 			);
-			const input = await page.$("input");
-			const editor = await page.$("div");
-			if (!input || !editor) throw new Error("missing editable fixture");
-			await fillInBackground(input, "ASCII Ω café", AbortSignal.timeout(2000));
+			const session = page.mainFrame().client;
+			const node = async (selector: string) => {
+				const document = await session.send("DOM.getDocument", { depth: 0 });
+				const found = await session.send("DOM.querySelector", { nodeId: document.root.nodeId, selector });
+				const described = await session.send("DOM.describeNode", { nodeId: found.nodeId });
+				return { session, backendNodeId: described.node.backendNodeId, label: selector };
+			};
+			const input = await node("input");
+			const editor = await node("div");
+			await withBackgroundInput(page, undefined, () => fillNode(input, "ASCII Ω café", AbortSignal.timeout(2000)));
 			expect(await page.$eval("input", el => el.getAttribute("data-model"))).toBe("ASCII Ω café");
 			expect(await page.$eval("input", el => el.getAttribute("data-events"))).toBe("beforeinputtrue,inputtrue,");
-			await fillInBackground(input, "", AbortSignal.timeout(2000));
+			await withBackgroundInput(page, undefined, () => fillNode(input, "", AbortSignal.timeout(2000)));
 			expect(await page.$eval("input", el => el.getAttribute("data-model"))).toBe("");
 			expect(await page.$eval("input", el => el.getAttribute("data-events"))).toBe(
 				"beforeinputtrue,inputtrue,beforeinputtrue,inputtrue,",
 			);
-			await fillInBackground(editor, "Replaced Ω", AbortSignal.timeout(2000));
+			await withBackgroundInput(page, undefined, () => fillNode(editor, "Replaced Ω", AbortSignal.timeout(2000)));
 			expect(await page.$eval("div", el => el.textContent)).toBe("Replaced Ω");
-			await fillInBackground(editor, "", AbortSignal.timeout(2000));
+			await withBackgroundInput(page, undefined, () => fillNode(editor, "", AbortSignal.timeout(2000)));
 			expect(await page.$eval("div", el => el.textContent)).toBe("");
 		} finally {
 			await browser.close();

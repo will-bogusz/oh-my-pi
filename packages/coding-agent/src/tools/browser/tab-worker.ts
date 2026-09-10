@@ -7,16 +7,9 @@ import type { HTMLElement } from "@oh-my-pi/pi-utils/dom";
 import type {
 	Browser,
 	CDPSession,
-	ClickOptions,
 	Dialog,
-	ElementHandle,
-	ElementScreenshotOptions,
 	HTTPResponse,
-	KeyboardTypeOptions,
-	KeyInput,
-	KeyPressOptions,
 	Page,
-	SerializedAXNode,
 	Target,
 } from "puppeteer-core";
 import { JsRuntime, type RuntimeHooks } from "../../eval/js/shared/runtime";
@@ -40,14 +33,44 @@ import { ToolAbortError, ToolError, throwIfAborted } from "../tool-errors";
 import {
 	type AriaSnapshotOptions,
 	assertSelectorString,
-	captureAriaSnapshot,
+	buildAriaRefScript,
+	buildAriaSnapshotFunction,
+	buildAriaSnapshotScript,
 	parseAriaRefSelector,
-	resolveAriaRefHandle,
 } from "./aria/aria-snapshot";
+import {
+	awaitSelector,
+	boundingBox,
+	callExpression,
+	callOnNode,
+	type CdpNode,
+	clickNode,
+	currentEntry,
+	evaluateExpression,
+	fillNode,
+	focusNode,
+	hoverNode,
+	isDocumentGoneError,
+	nodeFromExpression,
+	type PageLayout,
+	pageLayout,
+	type Point,
+	pressChord,
+	type Rect,
+	scrollIntoView,
+	selectOptions,
+	resolveSelector,
+	sessionOffset,
+	setFileInput,
+	snapshotAccessibility,
+	typeIntoNode,
+	waitForDomQuiet,
+} from "./cdp";
 import { applyStealthPatches, applyViewport, BROWSER_PROTOCOL_TIMEOUT_MS, loadPuppeteerInWorker } from "./launch";
 import { TabDownloadMonitor, type TabDownloads } from "./downloads";
 import { navigateMainFrame, watchMainFrameNavigation } from "./navigation";
 import {
+	type AxNode,
 	axNodeKey,
 	buildTreeLines,
 	flattenSnapshot,
@@ -79,9 +102,9 @@ import type {
 } from "./tab-protocol";
 
 declare module "puppeteer-core" {
-	interface Frame {
-		/** Puppeteer's main JavaScript realm, retained by our pinned runtime patch. */
-		mainRealm(): Realm;
+	interface JSHandle<T> {
+		/** Remote object id (`@internal` upstream, present at runtime); `T` is puppeteer's own parameter. */
+		readonly id: string | undefined;
 	}
 }
 
@@ -120,7 +143,6 @@ const PLAYWRIGHT_ONLY_SELECTOR_RE =
 
 type DialogPolicy = "accept" | "dismiss";
 type DragTarget = string | { readonly x: number; readonly y: number };
-type ActionabilityResult = { ok: true; x: number; y: number } | { ok: false; reason: string };
 /** Last JS dialog seen on the page; kept for timeout attribution until handled or navigation. */
 interface OpenDialogInfo {
 	type: string;
@@ -157,12 +179,12 @@ const OP_DEADLINE_SLACK_MS = CELL_BUDGET_SLACK_MS;
  * should cost ~2s, not the full action ceiling. Explicit `{ timeout }` waits opt out.
  */
 const ZERO_MATCH_FAIL_FAST_MS = 2_000;
+/** Poll cadence for `tab.waitForUrl()`; the frame url updates on navigation events, not on a timer. */
+const URL_POLL_MS = 100;
 /** Poll cadence for the zero-match watchdog. */
 const ZERO_MATCH_POLL_MS = 250;
 /** Cleanup must settle inside the supervisor's 750ms post-run grace window. */
 const REQUEST_INTERCEPTION_CLEANUP_TIMEOUT_MS = 500;
-/** Bound cleanup window after a timed-out raw handle action. */
-const HANDLE_ACTION_INVALIDATION_TIMEOUT_MS = 500;
 
 export interface OpTimeouts {
 	/** Largest per-op deadline allowed — strictly below the cell budget. */
@@ -239,13 +261,13 @@ interface TabApi {
 	click(selector: string): Promise<void>;
 	type(selector: string, text: string): Promise<void>;
 	fill(selector: string, value: string): Promise<void>;
-	press(key: KeyInput, opts?: { selector?: string }): Promise<void>;
+	press(key: string, opts?: { selector?: string }): Promise<void>;
 	scroll(
 		deltaXOrDirection: number | ScrollDirection,
 		deltaYOrOptions?: number | { by?: number | "page" },
 	): Promise<void>;
 	drag(from: DragTarget, to: DragTarget): Promise<void>;
-	waitFor(selector: string, opts?: { timeout?: number }): Promise<ActionableHandle>;
+	waitFor(selector: string, opts?: { timeout?: number }): Promise<TabElement>;
 	evaluate<R, TArgs extends unknown[]>(fn: string | ((...args: TArgs) => R | Promise<R>), ...args: TArgs): Promise<R>;
 	scrollIntoView(selector: string): Promise<void>;
 	select(selector: string, ...values: string[]): Promise<string[]>;
@@ -259,14 +281,41 @@ interface TabApi {
 	waitForSelector(
 		selector: string,
 		opts?: { timeout?: number; visible?: boolean; hidden?: boolean },
-	): Promise<ActionableHandle | null>;
+	): Promise<TabElement | null>;
 	waitForNavigation(opts?: {
 		waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
 		timeout?: number;
 	}): Promise<HTTPResponse | null>;
-	id(n: number): Promise<ActionableHandle>;
-	ref(id: string): Promise<ActionableHandle>;
+	id(n: number): Promise<TabElement>;
+	ref(id: string): Promise<TabElement>;
 }
+
+/**
+ * What `tab.ref()`, `tab.id()` and the selector waits hand model code. Mirrors
+ * `BrowserElement` in the code-mode declarations: same names, same positional
+ * arguments, nothing puppeteer-shaped leaking through.
+ */
+export interface TabElement {
+	click(options?: { count?: number }): Promise<void>;
+	type(text: string): Promise<void>;
+	fill(value: string): Promise<void>;
+	press(key: string): Promise<void>;
+	hover(): Promise<void>;
+	focus(): Promise<void>;
+	select(...values: string[]): Promise<string[]>;
+	uploadFile(...filePaths: string[]): Promise<void>;
+	scrollIntoView(): Promise<void>;
+	boundingBox(): Promise<Rect | null>;
+	isVisible(): Promise<boolean>;
+	isHidden(): Promise<boolean>;
+	evaluate<R, TArgs extends unknown[]>(
+		fn: string | ((element: unknown, ...args: TArgs) => R | Promise<R>),
+		...args: TArgs
+	): Promise<R>;
+}
+
+/** Per-op fail-fast wrapper an element's methods run inside. */
+type ElementOp = <T>(label: string, fn: (signal: AbortSignal) => Promise<T>) => Promise<T>;
 
 export function normalizeSelector(selector: string): string {
 	assertSelectorString(selector);
@@ -308,17 +357,18 @@ interface ObserveOptions {
 }
 
 /**
- * What one ref needs to find its element again. The handle is the fast path;
- * `adopt` resolves it lazily from the minting snapshot; `nodeKey` identifies
- * the exact DOM node even after its JavaScript handle dies with its execution
- * context; role/name/position re-finds an equivalent node after a re-render
- * replaced the original (self-healing refs, modelled on agent-browser's
- * `RefEntry`/`resolve_element_center`). Entries outlive the observation that
- * minted them so a ref keeps naming the same element for the tab lifetime.
+ * What one ref needs to act on its element again: the DOM node's backend id and
+ * the CDP session that owns its frame — nothing live, so a navigation can only
+ * make the node unknown, never leave a dead object behind. `nodeKey` identifies
+ * the exact DOM node and role/name/position an equivalent one, so the next
+ * observation re-attaches the same number to the same element (that re-match is
+ * the healing: a ref is repaired by observing, never behind the model's back).
+ * Entries outlive the observation that minted them so a ref keeps naming the
+ * same element for the tab lifetime.
  */
 interface RefEntry extends RefRecord {
-	handle?: ElementHandle;
-	adopt?: () => Promise<ElementHandle | null>;
+	session: CDPSession;
+	backendNodeId: number;
 }
 
 /**
@@ -338,219 +388,6 @@ export function parseRefToken(token: string, observationId: string): number | nu
 	if (!compact) return null;
 	const id = Number(compact[1]);
 	return Number.isSafeInteger(id) && id > 0 ? id : null;
-}
-
-/**
- * Which re-queried candidate is the ref's element: the exact same DOM node when
- * one of them still carries the recorded node key, else the candidate at the
- * recorded position (the only/first one when the role+name pair was unique).
- * Null when nothing matches and the ref is genuinely stale.
- */
-export function chooseHealedIndex(
-	candidates: readonly (string | undefined)[],
-	target: { nodeKey?: string; position: number },
-): number | null {
-	if (candidates.length === 0) return null;
-	if (target.nodeKey !== undefined) {
-		const exact = candidates.indexOf(target.nodeKey);
-		if (exact >= 0) return exact;
-	}
-	return target.position < candidates.length ? target.position : null;
-}
-
-function asElementHandle(handle: unknown): ElementHandle | null {
-	return handle ? (handle as ElementHandle) : null;
-}
-
-/** ElementHandle enriched with the `fill()` the tool docs promise on handles from `tab.id()`/`tab.ref()`/`tab.waitFor()`. */
-export type ActionableHandle = ElementHandle & { fill(value: string): Promise<void> };
-
-/**
- * A named per-op guard: runs `fn` inside the active run's fail-fast deadline and
- * in-flight tracking (the same wrapper `tab.click(selector)` uses), so a stalled
- * handle action rejects with a named error before the cell budget instead of
- * hanging on puppeteer's protocol timeout.
- */
-export type HandleOpGuard = <T>(label: string, fn: (signal: AbortSignal) => Promise<T>) => Promise<T>;
-
-/**
- * Every `ElementHandle` method that dispatches input, pointer/touch, drag, or navigation
- * work and can therefore stall on a busy page. When {@link toActionableHandle} is given a
- * guard, each is routed through the per-op fail-fast wrapper; without it the inherited
- * puppeteer method runs outside the op map and a stall consumes the whole cell (issue #9535).
- * Pure reads (`boundingBox`, `screenshot`, `evaluate`, queries) are omitted — they are not
- * user-driven actions and keep their native puppeteer behavior.
- */
-const GUARDED_HANDLE_METHODS = [
-	"click",
-	"type",
-	"hover",
-	"tap",
-	"focus",
-	"press",
-	"select",
-	"uploadFile",
-	"scrollIntoView",
-	"drag",
-	"dragEnter",
-	"dragOver",
-	"drop",
-	"dragAndDrop",
-	"touchStart",
-	"touchMove",
-	"touchEnd",
-	"autofill",
-] as const satisfies readonly (keyof ElementHandle)[];
-
-type GuardedHandleMethod = (typeof GUARDED_HANDLE_METHODS)[number];
-type RawHandleMethod = (...args: unknown[]) => Promise<unknown>;
-
-interface RawHandleMethods {
-	interactive: Partial<Record<GuardedHandleMethod, RawHandleMethod>>;
-	type: ElementHandle["type"];
-	invalidatedBy?: string;
-}
-
-/** Symbol-keyed original methods travel with each cached handle without enumerating or colliding. */
-const RAW_HANDLE_METHODS = Symbol("browser.rawHandleMethods");
-
-type HandleWithRawMethods = ActionableHandle & { [RAW_HANDLE_METHODS]?: RawHandleMethods };
-
-async function runGuardedHandleAction<T>(
-	handle: ElementHandle,
-	state: RawHandleMethods,
-	label: string,
-	signal: AbortSignal,
-	action: () => Promise<T>,
-	invalidate?: () => Promise<void>,
-): Promise<T> {
-	if (state.invalidatedBy) {
-		throw new ToolError(
-			`${label} cannot run: this handle was invalidated after ${state.invalidatedBy} timed out; ` +
-				"run tab.observe() or tab.ariaSnapshot() to resolve a fresh handle",
-		);
-	}
-	throwIfAborted(signal);
-	const pending = action();
-	try {
-		return await untilAborted(signal, () => pending);
-	} catch (error) {
-		if (!signal.aborted) throw error;
-		state.invalidatedBy = label;
-		void pending.catch(() => undefined);
-		await withTimeout(
-			Promise.all([handle.dispose().catch(() => undefined), invalidate?.().catch(() => undefined)]),
-			HANDLE_ACTION_INVALIDATION_TIMEOUT_MS,
-			`Timed out invalidating ${label}`,
-		).catch(() => undefined);
-		throw error;
-	}
-}
-
-/**
- * Attach `fill()` to a puppeteer ElementHandle before handing it to user code and,
- * when a `guard` is supplied, route every interactive method ({@link GUARDED_HANDLE_METHODS})
- * through the same fail-fast per-op wrapper as the selector-based helpers — so
- * `(await tab.id(n)).click()` fails fast with `handle.click() timed out after …ms`
- * instead of stalling until the whole browser cell expires. Repeated enrichment is
- * idempotent: cached handles are always rewrapped from their original bound methods,
- * never from wrappers retaining an earlier run's guard. A timed-out action invalidates
- * and disposes its handle before surfacing the named error, so catching it cannot
- * dispatch a duplicate retry through the stale handle. Puppeteer handles expose
- * `type()` but no `fill()`; the `fill()` semantics mirror the selector-based
- * `tab.fill()`: focus, clear any existing value, then type.
- */
-export function toActionableHandle(
-	handle: ElementHandle,
-	guard?: HandleOpGuard,
-	invalidate?: () => Promise<void>,
-	background = false,
-): ActionableHandle {
-	const enriched = handle as HandleWithRawMethods;
-	const methods = enriched as unknown as Partial<Record<GuardedHandleMethod, RawHandleMethod>>;
-	const preserved = enriched[RAW_HANDLE_METHODS];
-	if (!guard) {
-		if (preserved) {
-			for (const method of GUARDED_HANDLE_METHODS) {
-				const original = preserved.interactive[method];
-				if (original) methods[method] = original;
-			}
-		}
-		enriched.fill = value => fillViaHandle(enriched, value, undefined, preserved?.type);
-		return enriched;
-	}
-
-	let originals = preserved;
-	if (!originals) {
-		const interactive: Partial<Record<GuardedHandleMethod, RawHandleMethod>> = {};
-		for (const method of GUARDED_HANDLE_METHODS) {
-			const original = methods[method];
-			if (typeof original === "function") interactive[method] = original.bind(enriched);
-		}
-		originals = { interactive, type: enriched.type.bind(enriched) };
-		enriched[RAW_HANDLE_METHODS] = originals;
-	}
-
-	for (const method of GUARDED_HANDLE_METHODS) {
-		if (method === "type") continue;
-		const original = originals.interactive[method];
-		if (!original) continue;
-		methods[method] = (...args) =>
-			guard(`handle.${method}()`, signal =>
-				runGuardedHandleAction(
-					enriched,
-					originals,
-					`handle.${method}()`,
-					signal,
-					() => {
-						if (background && method === "click")
-							return clickInBackground(enriched, args[0] as Readonly<ClickOptions> | undefined, signal);
-						if (background && method === "hover")
-							return pointerInBackground(enriched, undefined, signal, (page, x, y) => page.mouse.move(x, y));
-						if (background && method === "press")
-							return withBackgroundInput(enriched.frame.page(), signal, async () => {
-								await focusHandleForInput(enriched, signal);
-								await untilAborted(signal, () =>
-									enriched.frame.page().keyboard.press(args[0] as KeyInput, args[1] as KeyPressOptions),
-								);
-							});
-						return original(...args);
-					},
-					invalidate,
-				),
-			);
-	}
-	enriched.type = (text, options) =>
-		guard<void>("handle.type()", signal =>
-			runGuardedHandleAction(
-				enriched,
-				originals,
-				"handle.type()",
-				signal,
-				() =>
-					background
-						? withBackgroundInput(enriched.frame.page(), signal, () =>
-								typeViaHandle(enriched, text, options, signal),
-							)
-						: typeViaHandle(enriched, text, options, signal),
-				invalidate,
-			),
-		);
-	enriched.fill = value =>
-		guard<void>("handle.fill()", signal =>
-			runGuardedHandleAction(
-				enriched,
-				originals,
-				"handle.fill()",
-				signal,
-				() =>
-					background
-						? fillInBackground(enriched, value, signal)
-						: fillViaHandle(enriched, value, signal, text => typeViaHandle(enriched, text, { delay: 0 }, signal)),
-				invalidate,
-			),
-		);
-	return enriched;
 }
 
 const backgroundInputQueues = new WeakMap<Page, Promise<void>>();
@@ -679,80 +516,6 @@ export async function withBackgroundInput<T>(
 	}
 }
 
-async function focusHandleForInput(handle: ElementHandle, signal?: AbortSignal): Promise<void> {
-	await untilAborted(signal, () =>
-		handle.evaluate(el => {
-			const node = el as unknown as { focus(): void };
-			node.focus();
-		}),
-	);
-	throwIfAborted(signal);
-}
-
-/** Replace the selected contents through Chrome's IME/text input path, including ASCII. */
-export async function fillInBackground(handle: ElementHandle, value: string, signal?: AbortSignal): Promise<void> {
-	const page = handle.frame.page();
-	await withBackgroundInput(page, signal, async () => {
-		await focusHandleForInput(handle, signal);
-		const selected = await untilAborted(signal, () =>
-			handle.evaluate(el => {
-				const node = el as unknown as {
-					tagName: string;
-					disabled?: boolean;
-					readOnly?: boolean;
-					value: string;
-					selectionStart: number | null;
-					selectionEnd: number | null;
-					setSelectionRange(start: number, end: number): void;
-					select(): void;
-					isContentEditable: boolean;
-					textContent: string | null;
-					ownerDocument: {
-						createRange(): { selectNodeContents(node: unknown): void };
-						getSelection(): { removeAllRanges(): void; addRange(range: unknown): void } | null;
-					};
-				};
-				if (node.disabled || node.readOnly) throw new Error("The field is disabled or read-only");
-				if (node.tagName === "INPUT" || node.tagName === "TEXTAREA") {
-					try {
-						node.setSelectionRange(0, node.value.length);
-					} catch {
-						node.select();
-					}
-					if (node.selectionStart !== 0 || node.selectionEnd !== node.value.length)
-						throw new Error("The field does not support text selection for replacement");
-					return node.value.length;
-				}
-				if (!node.isContentEditable) throw new Error("fill requires an editable text field");
-				const selection = node.ownerDocument.getSelection();
-				if (!selection) throw new Error("The editable field has no text selection");
-				const range = node.ownerDocument.createRange();
-				range.selectNodeContents(node);
-				selection.removeAllRanges();
-				selection.addRange(range);
-				return node.textContent?.length ?? 0;
-			}),
-		);
-		throwIfAborted(signal);
-		if (value) await untilAborted(signal, () => page.keyboard.sendCharacter(value));
-		else if (selected > 0) await untilAborted(signal, () => page.keyboard.press("Backspace"));
-	});
-}
-
-/** Focus once, then type one code point at a time so abort stops before the next key dispatch. */
-async function typeViaHandle(
-	handle: ElementHandle,
-	text: string,
-	options: Readonly<KeyboardTypeOptions> | undefined,
-	signal: AbortSignal,
-): Promise<void> {
-	await focusHandleForInput(handle, signal);
-	for (const character of text) {
-		throwIfAborted(signal);
-		await untilAborted(signal, () => handle.frame.page().keyboard.type(character, options));
-	}
-}
-
 export type ScrollDirection = "up" | "down" | "left" | "right";
 
 const SCROLL_DIRECTIONS: Readonly<Record<ScrollDirection, { x: number; y: number }>> = {
@@ -799,90 +562,34 @@ async function resolveScrollDeltas(
 	return { deltaX: unit.x * step, deltaY: unit.y * step };
 }
 
-/**
- * Use Puppeteer's protocol scroll, frame-aware point calculation, and trusted mouse
- * input without its IntersectionObserver prerequisite. Hidden tabs can suspend that
- * observer indefinitely. Abort each preparation stage so late readiness cannot send
- * input after the action deadline; this never activates the tab.
- */
-export async function clickInBackground(
-	handle: ElementHandle,
-	options: Readonly<ClickOptions> = {},
-	signal?: AbortSignal,
-): Promise<void> {
-	await pointerInBackground(handle, options.offset, signal, (page, x, y) => page.mouse.click(x, y, options));
+/** Viewport and document geometry as an observation reports them. */
+function metricsFromLayout(page: Page, layout: PageLayout): Pick<Observation, "viewport" | "scroll"> {
+	return {
+		viewport: {
+			width: layout.viewport.width,
+			height: layout.viewport.height,
+			// Attached pages have no emulated viewport, so Chrome has no scale to report.
+			deviceScaleFactor: page.viewport()?.deviceScaleFactor,
+		},
+		scroll: {
+			x: layout.scroll.x,
+			y: layout.scroll.y,
+			width: layout.viewport.width,
+			height: layout.viewport.height,
+			scrollWidth: layout.scroll.scrollWidth,
+			scrollHeight: layout.scroll.scrollHeight,
+		},
+	};
 }
 
-async function pointerInBackground(
-	handle: ElementHandle,
-	offset: ClickOptions["offset"],
-	signal: AbortSignal | undefined,
-	dispatch: (page: Page, x: number, y: number) => Promise<void>,
-): Promise<void> {
-	const page = handle.frame.page();
-	await withBackgroundInput(page, signal, async () => {
-		const rawScroll = (handle as HandleWithRawMethods)[RAW_HANDLE_METHODS]?.interactive.scrollIntoView;
-		await untilAborted(signal, () => (rawScroll ? rawScroll() : handle.scrollIntoView()));
-		const { x, y } = await untilAborted(signal, () => handle.clickablePoint(offset));
-		throwIfAborted(signal);
-		await untilAborted(signal, () => dispatch(page, x, y));
-	});
-}
-
-/** Attached pages have no emulated viewport; report their measured coordinates. */
+/** Measured page geometry, straight from the compositor — the page runs nothing for it. */
 export async function readPageMetrics(
 	page: Page,
 	signal?: AbortSignal,
 ): Promise<Pick<Observation, "viewport" | "scroll">> {
-	return await untilAborted(signal, () =>
-		page.evaluate(() => {
-			const win = globalThis as unknown as {
-				scrollX: number;
-				scrollY: number;
-				innerWidth: number;
-				innerHeight: number;
-				devicePixelRatio: number;
-				document: { documentElement: { scrollWidth: number; scrollHeight: number } };
-			};
-			const doc = win.document.documentElement;
-			return {
-				viewport: { width: win.innerWidth, height: win.innerHeight, deviceScaleFactor: win.devicePixelRatio },
-				scroll: {
-					x: win.scrollX,
-					y: win.scrollY,
-					width: win.innerWidth,
-					height: win.innerHeight,
-					scrollWidth: doc.scrollWidth,
-					scrollHeight: doc.scrollHeight,
-				},
-			};
-		}),
-	);
+	return metricsFromLayout(page, await pageLayout(page.mainFrame().client, signal));
 }
 
-/** Focus, clear any existing value, then retype — shared by `tab.fill(aria-ref)` and enriched handles. */
-async function fillViaHandle(
-	handle: ElementHandle,
-	value: string,
-	signal?: AbortSignal,
-	type: (text: string) => Promise<unknown> = text => handle.type(text, { delay: 0 }),
-): Promise<void> {
-	await untilAborted(signal, () =>
-		handle.evaluate(el => {
-			const node = el as unknown as { value?: string; focus?: () => void };
-			node.focus?.();
-			if ("value" in node) node.value = "";
-		}),
-	);
-	await untilAborted(signal, () => type(value));
-}
-
-/**
- * Strip `user:pass@` from a URL before surfacing it in tool outputs / details
- * so Basic Auth credentials don't leak into transcripts. Returns the original
- * string verbatim when it doesn't parse as a URL or when there are no
- * credentials to redact.
- */
 function redactUrlCredentials(url: string): string {
 	if (!url || (!url.includes("@") && !url.includes("//"))) return url;
 	try {
@@ -1067,152 +774,32 @@ const SETTLE_DOM_QUIET_MS = 300;
 const SETTLE_NETWORK_IDLE_MS = 1_000;
 /** Re-check cadence while the tree still shows a loading indicator. */
 const SETTLE_BUSY_POLL_MS = 250;
+/** How many box models one viewport filter asks for at a time. */
+const VIEWPORT_PROBE_BATCH = 32;
 
 /**
  * Wait for the page to go quiet — no DOM mutations for 300 ms or no network
  * traffic for 1 s, whichever comes first — so an observation taken right after
- * an action sees the result instead of the spinner. Bounded and never throws:
- * the snapshot that follows shows whatever is there.
+ * an action sees the result instead of the spinner. Bounded by the budget it is
+ * given. The DOM wait is one evaluate against the session's current document:
+ * if that document is replaced under it the call rejects, which is the caller's
+ * signal that a navigation happened, not an error to swallow.
  */
 async function settlePage(page: Page, signal: AbortSignal | undefined, budgetMs: number): Promise<void> {
 	// The network wait also carries the caller's abort: aborting it ends the race.
 	const network = new AbortController();
 	const onAbort = () => network.abort();
 	signal?.addEventListener("abort", onAbort, { once: true });
-	const domQuiet = page
-		.evaluate(
-			`new Promise(resolve => {
-				const quiet = ${SETTLE_DOM_QUIET_MS}, max = ${budgetMs};
-				let timer = setTimeout(done, quiet);
-				const deadline = setTimeout(done, max);
-				const observer = new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(done, quiet); });
-				observer.observe(document, { childList: true, subtree: true, attributes: true, characterData: true });
-				function done() { observer.disconnect(); clearTimeout(timer); clearTimeout(deadline); resolve(); }
-			})`,
-		)
-		.catch(() => undefined);
+	const domQuiet = waitForDomQuiet(page.mainFrame().client, SETTLE_DOM_QUIET_MS, budgetMs, signal);
 	const networkQuiet = page
 		.waitForNetworkIdle({ idleTime: SETTLE_NETWORK_IDLE_MS, timeout: budgetMs, signal: network.signal })
 		.catch(() => undefined);
-	await Promise.race([domQuiet, networkQuiet]);
-	network.abort();
-	signal?.removeEventListener("abort", onAbort);
-}
-
-async function resolveActionableQueryHandlerClickTarget(handles: ElementHandle[]): Promise<ElementHandle | null> {
-	const candidates: Array<{
-		handle: ElementHandle;
-		rect: { x: number; y: number; w: number; h: number };
-		ownedProxy?: ElementHandle;
-	}> = [];
-	for (const handle of handles) {
-		let clickable: ElementHandle = handle;
-		let clickableProxy: ElementHandle | null = null;
-		try {
-			const proxy = await handle.evaluateHandle(el => {
-				const target =
-					(el as Element).closest(
-						'a,button,[role="button"],[role="link"],input[type="button"],input[type="submit"]',
-					) ?? el;
-				return target;
-			});
-			clickableProxy = asElementHandle(proxy.asElement());
-			if (clickableProxy) clickable = clickableProxy;
-		} catch {}
-		try {
-			const intersecting = await clickable.isIntersectingViewport();
-			if (!intersecting) continue;
-			const rect = (await clickable.evaluate(el => {
-				const r = (el as Element).getBoundingClientRect();
-				return { x: r.left, y: r.top, w: r.width, h: r.height };
-			})) as { x: number; y: number; w: number; h: number };
-			if (rect.w < 1 || rect.h < 1) continue;
-			candidates.push({ handle: clickable, rect, ownedProxy: clickableProxy ?? undefined });
-		} catch {
-		} finally {
-			if (clickableProxy && clickableProxy !== handle && clickable !== clickableProxy) {
-				await clickableProxy.dispose().catch(() => undefined);
-			}
-		}
+	try {
+		await Promise.race([domQuiet, networkQuiet]);
+	} finally {
+		network.abort();
+		signal?.removeEventListener("abort", onAbort);
 	}
-	if (!candidates.length) return null;
-	candidates.sort((a, b) => a.rect.y - b.rect.y || a.rect.x - b.rect.x);
-	const winner = candidates[0]?.handle ?? null;
-	for (let i = 1; i < candidates.length; i++) {
-		const candidate = candidates[i]!;
-		if (candidate.ownedProxy) await candidate.ownedProxy.dispose().catch(() => undefined);
-	}
-	return winner;
-}
-
-async function isClickActionable(handle: ElementHandle): Promise<ActionabilityResult> {
-	return (await handle.evaluate(el => {
-		const element = el as HTMLElement;
-		const style = globalThis.getComputedStyle(element);
-		if (style.display === "none") return { ok: false as const, reason: "display:none" };
-		if (style.visibility === "hidden") return { ok: false as const, reason: "visibility:hidden" };
-		if (style.pointerEvents === "none") return { ok: false as const, reason: "pointer-events:none" };
-		if (Number(style.opacity) === 0) return { ok: false as const, reason: "opacity:0" };
-		const r = element.getBoundingClientRect();
-		if (r.width < 1 || r.height < 1) return { ok: false as const, reason: "zero-size" };
-		const left = Math.max(0, Math.min(globalThis.innerWidth, r.left));
-		const right = Math.max(0, Math.min(globalThis.innerWidth, r.right));
-		const top = Math.max(0, Math.min(globalThis.innerHeight, r.top));
-		const bottom = Math.max(0, Math.min(globalThis.innerHeight, r.bottom));
-		if (right - left < 1 || bottom - top < 1) return { ok: false as const, reason: "off-viewport" };
-		const x = Math.floor((left + right) / 2);
-		const y = Math.floor((top + bottom) / 2);
-		const topEl = globalThis.document.elementFromPoint(x, y);
-		if (!topEl) return { ok: false as const, reason: "elementFromPoint-null" };
-		if (topEl === element || element.contains(topEl) || (topEl as Element).contains(element))
-			return { ok: true as const, x, y };
-		return { ok: false as const, reason: "obscured" };
-	})) as ActionabilityResult;
-}
-
-async function clickQueryHandlerText(
-	page: Page,
-	selector: string,
-	timeoutMs: number,
-	signal?: AbortSignal,
-): Promise<void> {
-	const timeoutSignal = AbortSignal.timeout(timeoutMs);
-	const clickSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
-	const start = Date.now();
-	let lastSeen = 0;
-	let lastReason: string | null = null;
-	while (Date.now() - start < timeoutMs) {
-		throwIfAborted(clickSignal);
-		const handles = (await untilAborted(clickSignal, () => page.$$(selector))) as ElementHandle[];
-		try {
-			lastSeen = handles.length;
-			const target = await resolveActionableQueryHandlerClickTarget(handles);
-			if (!target) {
-				lastReason = handles.length ? "no-visible-candidate" : "no-matches";
-				await untilAborted(clickSignal, () => Bun.sleep(100));
-				continue;
-			}
-			const actionability = await isClickActionable(target);
-			if (!actionability.ok) {
-				lastReason = actionability.reason;
-				await untilAborted(clickSignal, () => Bun.sleep(100));
-				continue;
-			}
-			try {
-				await untilAborted(clickSignal, () => target.click());
-				return;
-			} catch (err) {
-				lastReason = err instanceof Error ? err.message : String(err);
-				await untilAborted(clickSignal, () => Bun.sleep(100));
-			}
-		} finally {
-			await Promise.all(handles.map(async handle => handle.dispose().catch(() => undefined)));
-		}
-	}
-	throw new ToolError(
-		`Timed out clicking ${selector} (seen ${lastSeen} matches; last reason: ${lastReason ?? "unknown"}). ` +
-			"If there are multiple matching elements, use observe + tab.id() or a more specific selector.",
-	);
 }
 
 /**
@@ -1283,9 +870,6 @@ export class WorkerCore {
 	#refs = new Map<number, RefEntry>();
 	#refCounter = 0;
 	#observationId: string = crypto.randomUUID();
-	#refStyle: RefStyle = "uuid";
-	/** Whether the refs were minted with `includeAll`, replayed when re-querying for a heal. */
-	#refIncludeAll = false;
 	/** Previous tree of this tab, the baseline a diff observation renders against. */
 	#lastTree?: { url: string; filter: { includeAll: boolean; viewportOnly: boolean }; lines: TreeLine[] };
 	#managedChrome = false;
@@ -1518,7 +1102,7 @@ export class WorkerCore {
 		page.on("framenavigated", frame => {
 			if (frame === page.mainFrame()) {
 				this.#openDialog = undefined;
-				this.#clearElementCache();
+				this.#invalidateRefs();
 			}
 		});
 	}
@@ -1870,9 +1454,7 @@ export class WorkerCore {
 		while (!signal.aborted) {
 			let count: number | null = null;
 			try {
-				const handles = await page.$$(resolved);
-				count = handles.length;
-				for (const handle of handles) void handle.dispose().catch(() => undefined);
+				count = (await resolveSelector(page, resolved, signal)).length;
 			} catch {
 				// Inconclusive probe — keep polling without advancing toward failure.
 			}
@@ -1896,14 +1478,11 @@ export class WorkerCore {
 	async #selectorTimeoutHint(selector: string): Promise<string> {
 		if (parseAriaRefSelector(selector) !== null) return "";
 		try {
-			const handles = await Promise.race([
-				this.#requirePage().$$(normalizeSelector(selector)),
+			const matches = await Promise.race([
+				resolveSelector(this.#requirePage(), normalizeSelector(selector)),
 				Bun.sleep(1_000).then(() => null),
 			]);
-			if (!handles) return "";
-			const count = handles.length;
-			for (const handle of handles) void handle.dispose().catch(() => undefined);
-			return formatSelectorMatchHint(count);
+			return matches ? formatSelectorMatchHint(matches.length) : "";
 		} catch {
 			return "";
 		}
@@ -1928,30 +1507,24 @@ export class WorkerCore {
 			fn: (sig: AbortSignal) => Promise<T>,
 			selectorOpts?: { selector?: string; zeroMatchAfterMs?: number },
 		): Promise<T> => markHandled(this.#runOp(active, label, signal, perOpMs, fn, selectorOpts));
-		// Hand user-facing handles the fail-fast per-op guard so their interactive
-		// methods (`.click()`, `.type()`, …) can't outrun the cell budget (issue #9535).
-		const enrich = (handle: ElementHandle): ActionableHandle =>
-			toActionableHandle(
-				handle,
-				(label, fn) => op(label, actionOpMs, fn),
-				async () => {
-					// Raw Puppeteer actions have no AbortSignal. Invalidate their handles,
-					// but preserve a modal's suspended page handler for the later decision.
-					// stopLoading can otherwise abort the handler's post-dialog fetch.
-					this.#clearElementCache();
-					if (!this.#managedChrome || !this.#openDialog) await this.#stopLoading();
-				},
-				this.#managedChrome,
-			);
+		// Element methods run through the same fail-fast per-op wrapper as the
+		// selector helpers, so `(await tab.ref("e12")).click()` can't outrun the
+		// cell budget (issue #9535).
+		const element = (node: CdpNode): TabElement =>
+			this.#createElement(node, session.cwd, (label, fn) => op(label, actionOpMs, fn));
+		// Managed Chrome drives a tab the user is not looking at: pointer and
+		// keyboard input need page focus emulation held around the dispatch.
+		const input = <T>(sig: AbortSignal, action: () => Promise<T>): Promise<T> =>
+			this.#managedChrome ? withBackgroundInput(page, sig, action) : action();
 		return {
 			name,
 			page,
 			signal,
 			url: () => page.url(),
-			title: () => op("tab.title()", INF, sig => untilAborted(sig, () => page.title())),
+			title: () => op("tab.title()", INF, async sig => (await currentEntry(page.mainFrame().client, sig)).title),
 			goto: (url, opts) =>
 				op(`tab.goto(${JSON.stringify(url)})`, INF, async sig => {
-					this.#clearElementCache();
+					this.#invalidateRefs();
 					// Default to "load" because dev servers with HMR/WS never reach networkidle.
 					// budgetBound (not the full cell) so a hung navigation fails named and
 					// catchable inside the run instead of dying with the whole cell. A timeout
@@ -1975,22 +1548,16 @@ export class WorkerCore {
 					selector ? `tab.ariaSnapshot(${JSON.stringify(selector)})` : "tab.ariaSnapshot()",
 					quickOpMs,
 					async sig => {
-						let root: ElementHandle | null = null;
-						if (selector) {
-							root = (await untilAborted(sig, () =>
-								page.$(normalizeSelector(selector)),
-							)) as ElementHandle | null;
-							if (!root)
-								throw new ToolError(
-									`tab.ariaSnapshot: selector ${JSON.stringify(selector)} matched no element`,
-								);
-						}
-						try {
-							const snapshot = await untilAborted(sig, () => captureAriaSnapshot(page, root, opts));
-							return this.#managedChrome ? snapshot.replace(/ \[ref=e\d+\]/g, "") : snapshot;
-						} finally {
-							await root?.dispose().catch(() => undefined);
-						}
+						const snapshot = selector
+							? await callOnNode(
+									await this.#selectorNode(selector, quickOpMs, "present", sig),
+									buildAriaSnapshotFunction(opts),
+									[],
+									sig,
+								)
+							: await evaluateExpression(page.mainFrame().client, buildAriaSnapshotScript(undefined, opts), sig);
+						const text = String(snapshot);
+						return this.#managedChrome ? text.replace(/ \[ref=e\d+\]/g, "") : text;
 					},
 				),
 			screenshot: opts =>
@@ -2023,30 +1590,8 @@ export class WorkerCore {
 					`tab.click(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
-						if (this.#managedChrome) {
-							const handle = await this.#resolveActionHandle(selector, actionOpMs, sig);
-							try {
-								await clickInBackground(handle, undefined, sig);
-							} finally {
-								await handle.dispose().catch(() => undefined);
-							}
-							return;
-						}
-						if (parseAriaRefSelector(selector) !== null) {
-							const handle = await this.#resolveAriaRef(selector);
-							try {
-								await untilAborted(sig, () => handle.click());
-							} finally {
-								await handle.dispose().catch(() => undefined);
-							}
-							return;
-						}
-						const resolved = normalizeSelector(selector);
-						if (resolved.startsWith("text/")) await clickQueryHandlerText(page, resolved, actionOpMs, sig);
-						else
-							await untilAborted(sig, () =>
-								page.locator(resolved).setTimeout(actionOpMs).click({ signal: sig }),
-							);
+						const node = await this.#selectorNode(selector, actionOpMs, "visible", sig);
+						await input(sig, () => clickNode(node, 1, sig));
 					},
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
@@ -2055,14 +1600,8 @@ export class WorkerCore {
 					`tab.type(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
-						const handle = await this.#resolveActionHandle(selector, actionOpMs, sig);
-						try {
-							if (this.#managedChrome)
-								await withBackgroundInput(page, sig, () => typeViaHandle(handle, text, { delay: 0 }, sig));
-							else await untilAborted(sig, () => handle.type(text, { delay: 0 }));
-						} finally {
-							await handle.dispose().catch(() => undefined);
-						}
+						const node = await this.#selectorNode(selector, actionOpMs, "present", sig);
+						await input(sig, () => typeIntoNode(node, text, sig));
 					},
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
@@ -2071,59 +1610,20 @@ export class WorkerCore {
 					`tab.fill(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
-						if (this.#managedChrome) {
-							const handle = await this.#resolveActionHandle(selector, actionOpMs, sig);
-							try {
-								await fillInBackground(handle, value, sig);
-							} finally {
-								await handle.dispose().catch(() => undefined);
-							}
-							return;
-						}
-						if (parseAriaRefSelector(selector) !== null) {
-							const handle = await this.#resolveAriaRef(selector);
-							try {
-								await fillViaHandle(handle, value, sig);
-							} finally {
-								await handle.dispose().catch(() => undefined);
-							}
-							return;
-						}
-						await untilAborted(sig, () =>
-							page.locator(normalizeSelector(selector)).setTimeout(actionOpMs).fill(value, { signal: sig }),
-						);
+						const node = await this.#selectorNode(selector, actionOpMs, "present", sig);
+						await input(sig, () => fillNode(node, value, sig));
 					},
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			press: (key, opts) =>
 				op(`tab.press(${JSON.stringify(key)})`, actionOpMs, async sig => {
-					if (this.#managedChrome) {
-						await withBackgroundInput(page, sig, async () => {
-							if (opts?.selector) {
-								const handle = await this.#resolveActionHandle(opts.selector, actionOpMs, sig);
-								try {
-									await focusHandleForInput(handle, sig);
-								} finally {
-									await handle.dispose().catch(() => undefined);
-								}
-							}
-							throwIfAborted(sig);
-							await untilAborted(sig, () => page.keyboard.press(key));
-						});
-						return;
-					}
 					const selector = opts?.selector;
-					if (selector) {
-						if (parseAriaRefSelector(selector) !== null) {
-							const handle = await this.#resolveAriaRef(selector);
-							try {
-								await untilAborted(sig, () => handle.focus());
-							} finally {
-								await handle.dispose().catch(() => undefined);
-							}
-						} else await untilAborted(sig, () => page.focus(normalizeSelector(selector)));
-					}
-					await untilAborted(sig, () => page.keyboard.press(key));
+					const node = selector ? await this.#selectorNode(selector, actionOpMs, "present", sig) : undefined;
+					await input(sig, async () => {
+						if (node) await focusNode(node, sig);
+						throwIfAborted(sig);
+						await pressChord(page.mainFrame().client, key, sig);
+					});
 				}),
 			scroll: (deltaXOrDirection, deltaYOrOptions) =>
 				op("tab.scroll()", actionOpMs, async sig => {
@@ -2136,7 +1636,7 @@ export class WorkerCore {
 				return op(
 					`tab.waitFor(${JSON.stringify(selector)})`,
 					w,
-					async sig => enrich(await this.#resolveActionHandle(selector, w, sig)),
+					async sig => element(await this.#selectorNode(selector, w, "present", sig)),
 					{ selector, zeroMatchAfterMs: opts?.timeout === undefined ? ZERO_MATCH_FAIL_FAST_MS : undefined },
 				);
 			},
@@ -2146,16 +1646,10 @@ export class WorkerCore {
 					`tab.waitForSelector(${JSON.stringify(selector)})`,
 					w,
 					async sig => {
-						if (parseAriaRefSelector(selector) !== null) return enrich(await this.#resolveAriaRef(selector));
-						const handle = (await untilAborted(sig, () =>
-							page.waitForSelector(normalizeSelector(selector), {
-								timeout: w,
-								visible: opts?.visible,
-								hidden: opts?.hidden,
-								signal: sig,
-							}),
-						)) as ElementHandle | null;
-						return handle ? enrich(handle) : null;
+						if (parseAriaRefSelector(selector) !== null) return element(await this.#ariaRefNode(selector, sig));
+						const state = opts?.hidden ? "hidden" : opts?.visible ? "visible" : "present";
+						const node = await awaitSelector(page, normalizeSelector(selector), { timeoutMs: w, state }, sig);
+						return node ? element(node) : null;
 					},
 					{
 						selector,
@@ -2174,34 +1668,17 @@ export class WorkerCore {
 			},
 			evaluate: (fn, ...args) =>
 				op("tab.evaluate()", INF, sig =>
-					untilAborted(sig, () =>
-						typeof fn === "string"
-							? page.mainFrame().mainRealm().evaluate(fn)
-							: page
-									.mainFrame()
-									.mainRealm()
-									.evaluate(fn as (...a: unknown[]) => unknown, ...args),
+					evaluateExpression(
+						page.mainFrame().client,
+						typeof fn === "string" ? fn : callExpression(String(fn), args),
+						sig,
 					),
 				) as never,
 			scrollIntoView: selector =>
 				op(
 					`tab.scrollIntoView(${JSON.stringify(selector)})`,
 					actionOpMs,
-					async sig => {
-						const handle = await this.#resolveActionHandle(selector, actionOpMs, sig);
-						try {
-							await untilAborted(sig, () =>
-								handle.evaluate(el => {
-									const target = el as unknown as {
-										scrollIntoView: (opts: { behavior: string; block: string; inline: string }) => void;
-									};
-									target.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
-								}),
-							);
-						} finally {
-							await handle.dispose().catch(() => undefined);
-						}
-					},
+					async sig => await scrollIntoView(await this.#selectorNode(selector, actionOpMs, "present", sig), sig),
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			select: (selector, ...values) =>
@@ -2239,27 +1716,109 @@ export class WorkerCore {
 					throw new ToolError(
 						"Use tab.ref(observation.elements[i].ref) so the action retains its observation identity",
 					);
-				return enrich(await this.#resolveCachedHandle(id));
+				return element(this.#refNode(id));
 			},
 			ref: async id => {
 				const elementId = parseRefToken(id, this.#observationId);
-				if (elementId !== null) return enrich(await this.#resolveCachedHandle(elementId));
+				if (elementId !== null) return element(this.#refNode(elementId));
 				if (id.includes(":"))
 					throw new ToolError("The element reference belongs to an old observation. Observe the tab again.");
-				return enrich(await this.#resolveAriaRef(id));
+				return element(await this.#ariaRefNode(id));
 			},
 		};
 	}
 
-	#snapshot(includeAll: boolean, signal?: AbortSignal): Promise<SerializedAXNode> {
-		return untilAborted(signal, async () => {
-			const snapshot = (await this.#requirePage().accessibility.snapshot({
-				interestingOnly: !includeAll,
-				includeIframes: true,
-			})) as SerializedAXNode | null;
-			if (!snapshot) throw new ToolError("Accessibility snapshot unavailable");
-			return snapshot;
-		});
+	/**
+	 * Settle the page, then snapshot it — restarting whenever the main frame
+	 * navigates mid-collection. `observe()` promises the settled tree of the
+	 * document the caller ends up on, and "click, then observe" in one cell is
+	 * the ordinary way to use it, so a navigation is a reason to look again, not
+	 * a failure. Every attempt shares the one settle budget; only exhausting it
+	 * fails, and it never grows.
+	 */
+	async #settledSnapshot(
+		page: Page,
+		includeAll: boolean,
+		deadline: number,
+		signal?: AbortSignal,
+	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string }> {
+		for (;;) {
+			const observationId = this.#observationId;
+			const remaining = deadline - Date.now();
+			if (remaining <= 0) throw new ToolError("The page changed while observing it. Observe again.");
+			const attempt = await this.#snapshotOnce(page, includeAll, remaining, deadline, signal).catch(error => {
+				// The document answering our calls went away: the only cause is a
+				// navigation, which the next attempt collects instead.
+				if (isDocumentGoneError(error) || observationId !== this.#observationId) return null;
+				throw error;
+			});
+			if (attempt && observationId === this.#observationId) return attempt;
+		}
+	}
+
+	async #snapshotOnce(
+		page: Page,
+		includeAll: boolean,
+		budgetMs: number,
+		deadline: number,
+		signal?: AbortSignal,
+	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string }> {
+		const session = page.mainFrame().client;
+		await settlePage(page, signal, budgetMs);
+		let snapshot = await snapshotAccessibility(page, { includeAll }, signal);
+		while (hasBusyIndicator(snapshot)) {
+			const remaining = deadline - Date.now();
+			if (remaining <= 0) break;
+			await untilAborted(signal, () => Bun.sleep(Math.min(SETTLE_BUSY_POLL_MS, remaining)));
+			snapshot = await snapshotAccessibility(page, { includeAll }, signal);
+		}
+		const [layout, entry] = await Promise.all([pageLayout(session, signal), currentEntry(session, signal)]);
+		return { snapshot, layout, url: entry.url, title: entry.title };
+	}
+
+	/**
+	 * Drop every node whose box does not reach the viewport. One box model per
+	 * candidate, in bounded batches so a long page cannot flood the connection.
+	 */
+	async #filterToViewport(
+		page: Page,
+		nodes: readonly ObservedNode[],
+		layout: PageLayout,
+		signal?: AbortSignal,
+	): Promise<ObservedNode[]> {
+		const offsets = new Map<CDPSession, Point>();
+		const kept: ObservedNode[] = [];
+		const candidates = nodes.filter(node => node.actionable && node.ax?.frame);
+		for (let start = 0; start < candidates.length; start += VIEWPORT_PROBE_BATCH) {
+			const batch = candidates.slice(start, start + VIEWPORT_PROBE_BATCH);
+			const boxes = await Promise.all(
+				batch.map(async node => {
+					const frame = node.ax!.frame!;
+					let offset = offsets.get(frame.session);
+					if (!offset) {
+						offset = await sessionOffset(page, frame.session, signal);
+						offsets.set(frame.session, offset);
+					}
+					return await boundingBox(
+						{ session: frame.session, backendNodeId: node.ax!.backendNodeId!, label: node.role },
+						offset,
+						signal,
+					);
+				}),
+			);
+			batch.forEach((node, index) => {
+				const box = boxes[index];
+				if (!box) return;
+				const visible =
+					box.x + box.width > 0 &&
+					box.y + box.height > 0 &&
+					box.x < layout.viewport.width &&
+					box.y < layout.viewport.height;
+				if (visible) kept.push(node);
+			});
+		}
+		const inViewport = new Set(kept);
+		return nodes.filter(node => !candidates.includes(node) || inViewport.has(node));
 	}
 
 	async #collectObservation(options: ObserveOptions & { refs?: RefStyle; signal?: AbortSignal }): Promise<Observation> {
@@ -2268,42 +1827,15 @@ export class WorkerCore {
 		const refStyle = options.refs ?? "uuid";
 		const includeAll = options.includeAll ?? false;
 		const viewportOnly = options.viewportOnly ?? false;
-		this.#clearElementCache();
-		this.#refStyle = refStyle;
-		this.#refIncludeAll = includeAll;
+		this.#invalidateRefs();
+		const deadline = Date.now() + SETTLE_BUDGET_MS;
+		const { snapshot, layout, url, title } = await this.#settledSnapshot(page, includeAll, deadline, signal);
 		const observationId = this.#observationId;
 
-		const started = Date.now();
-		await settlePage(page, signal, SETTLE_BUDGET_MS);
-		let snapshot = await this.#snapshot(includeAll, signal);
-		while (hasBusyIndicator(snapshot)) {
-			const remaining = SETTLE_BUDGET_MS - (Date.now() - started);
-			if (remaining <= 0) break;
-			await untilAborted(signal, () => Bun.sleep(Math.min(SETTLE_BUSY_POLL_MS, remaining)));
-			snapshot = await this.#snapshot(includeAll, signal);
-		}
-
 		let nodes = flattenSnapshot(snapshot, { includeAll });
-		// Handles are adopted lazily on first use; only the viewport filter needs
-		// them now, and only for the nodes that could get a ref.
-		const eager = new Map<ObservedNode, ElementHandle>();
-		if (viewportOnly) {
-			const kept: ObservedNode[] = [];
-			for (const node of nodes) {
-				if (!node.actionable || !node.ax) {
-					kept.push(node);
-					continue;
-				}
-				const handle = asElementHandle(await untilAborted(signal, () => node.ax!.elementHandle()));
-				if (handle && (await handle.isIntersectingViewport().catch(() => false))) {
-					eager.set(node, handle);
-					kept.push(node);
-				} else void handle?.dispose().catch(() => undefined);
-			}
-			nodes = kept;
-		}
+		if (viewportOnly) nodes = await this.#filterToViewport(page, nodes, layout, signal);
 
-		const actionable = nodes.filter(node => node.actionable && node.ax);
+		const actionable = nodes.filter(node => node.actionable && node.ax?.frame);
 		const refs = matchRefs(
 			actionable.map(node => ({ role: node.role, name: node.name, nodeKey: axNodeKey(node.ax!) })),
 			this.#refs,
@@ -2320,8 +1852,8 @@ export class WorkerCore {
 				name: node.name,
 				position: positions[index],
 				nodeKey: axNodeKey(ax),
-				handle: eager.get(node),
-				adopt: () => ax.elementHandle(),
+				session: ax.frame!.session,
+				backendNodeId: ax.backendNodeId!,
 			});
 		});
 		const lines = buildTreeLines(
@@ -2329,11 +1861,15 @@ export class WorkerCore {
 			nodes.map(node => refByNode.get(node)),
 		);
 
-		const { viewport, scroll } = await readPageMetrics(page, signal);
-		if (observationId !== this.#observationId)
-			throw new ToolError("The page changed while observing it. Observe again.");
-		const url = page.url();
-		const title = (await untilAborted(signal, () => page.title())) as string;
+		const viewport = { ...layout.viewport, deviceScaleFactor: page.viewport()?.deviceScaleFactor };
+		const scroll = {
+			x: layout.scroll.x,
+			y: layout.scroll.y,
+			width: layout.viewport.width,
+			height: layout.viewport.height,
+			scrollWidth: layout.scroll.scrollWidth,
+			scrollHeight: layout.scroll.scrollHeight,
+		};
 		const focusedNode = actionable.find(node => node.ax!.focused === true);
 		const focused = focusedNode ? `e${refByNode.get(focusedNode)}` : undefined;
 		const header: TreeHeader = { url, title, scroll: { y: scroll.y, scrollHeight: scroll.scrollHeight }, focused };
@@ -2387,30 +1923,19 @@ export class WorkerCore {
 		const captureMime = "image/png" as const;
 		let buffer: Buffer;
 		if (opts.selector) {
-			const handle =
-				parseAriaRefSelector(opts.selector) !== null
-					? await this.#resolveAriaRef(opts.selector)
-					: asElementHandle(await untilAborted(signal, () => page.$(normalizeSelector(opts.selector!))));
-			if (!handle) throw new ToolError("Screenshot selector did not resolve to an element");
-			try {
-				// Bring the element into view with a single instant scroll instead of puppeteer's
-				// scrollIntoViewIfNeeded(), whose IntersectionObserver promise can stall indefinitely
-				// on continuously-animating pages (WebGL / backdrop-filter "glass" effects). Best-effort.
-				await untilAborted(signal, () =>
-					handle.evaluate(el => {
-						const target = el as unknown as {
-							scrollIntoView: (opts: { behavior: string; block: string; inline: string }) => void;
-						};
-						target.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
-					}),
-				).catch(() => undefined);
-				// scrollIntoView:false skips the same IntersectionObserver check inside screenshot();
-				// captureBeyondViewport (puppeteer's default) still renders the clipped region.
-				const shotOpts: ElementScreenshotOptions = { type: captureType, scrollIntoView: false };
-				buffer = (await untilAborted(signal, () => handle.screenshot(shotOpts))) as Buffer;
-			} finally {
-				await handle.dispose().catch(() => undefined);
-			}
+			const node = await this.#selectorNode(opts.selector, QUICK_OP_TIMEOUT_MS, "present", signal);
+			// Best-effort: a clipped capture of an off-screen element still renders.
+			await scrollIntoView(node, signal).catch(() => undefined);
+			const box = await boundingBox(node, await sessionOffset(page, node.session, signal), signal);
+			if (!box) throw new ToolError(`Screenshot selector ${JSON.stringify(opts.selector)} has no visible box`);
+			const shot = await untilAborted(signal, () =>
+				page.mainFrame().client.send("Page.captureScreenshot", {
+					format: captureType,
+					clip: { x: box.x, y: box.y, width: box.width, height: box.height, scale: 1 },
+					captureBeyondViewport: true,
+				}),
+			);
+			buffer = Buffer.from(shot.data, "base64");
 		} else {
 			buffer = (await untilAborted(signal, () => page.screenshot({ type: captureType, fullPage }))) as Buffer;
 		}
@@ -2455,95 +1980,36 @@ export class WorkerCore {
 
 	async #drag(from: DragTarget, to: DragTarget, signal: AbortSignal): Promise<void> {
 		const page = this.#requirePage();
-		const resolveDragPoint = async (
-			target: DragTarget,
-			role: "from" | "to",
-		): Promise<{ x: number; y: number; handle?: ElementHandle }> => {
+		const resolveDragPoint = async (target: DragTarget, role: "from" | "to"): Promise<Point> => {
 			if (typeof target === "string") {
-				const handle =
-					parseAriaRefSelector(target) !== null
-						? await this.#resolveAriaRef(target)
-						: asElementHandle(await untilAborted(signal, () => page.$(normalizeSelector(target))));
-				if (!handle) throw new ToolError(`Drag ${role} selector did not resolve: ${target}`);
-				const box = (await untilAborted(signal, () => handle.boundingBox())) as {
-					x: number;
-					y: number;
-					width: number;
-					height: number;
-				} | null;
-				if (!box) {
-					await handle.dispose().catch(() => undefined);
-					throw new ToolError(`Drag ${role} element has no bounding box (likely not visible): ${target}`);
-				}
-				return { x: box.x + box.width / 2, y: box.y + box.height / 2, handle };
+				const node = await this.#selectorNode(target, ACTION_OP_TIMEOUT_MS, "present", signal);
+				const box = await boundingBox(node, await sessionOffset(page, node.session, signal), signal);
+				if (!box) throw new ToolError(`Drag ${role} element has no bounding box (likely not visible): ${target}`);
+				return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 			}
 			if (
 				target !== null &&
 				typeof target === "object" &&
-				typeof (target as { x: unknown }).x === "number" &&
-				typeof (target as { y: unknown }).y === "number"
+				typeof target.x === "number" &&
+				typeof target.y === "number"
 			) {
-				return { x: (target as { x: number }).x, y: (target as { y: number }).y };
+				return { x: target.x, y: target.y };
 			}
 			throw new ToolError(
 				`Drag ${role} must be a selector string or { x: number, y: number } point. Got: ${typeof target}`,
 			);
 		};
 		const start = await resolveDragPoint(from, "from");
-		let end: { x: number; y: number; handle?: ElementHandle } | undefined;
-		try {
-			end = await resolveDragPoint(to, "to");
-			await untilAborted(signal, () => page.mouse.move(start.x, start.y));
-			await untilAborted(signal, () => page.mouse.down());
-			await untilAborted(signal, () => page.mouse.move(end!.x, end!.y, { steps: 12 }));
-			await untilAborted(signal, () => page.mouse.up());
-		} finally {
-			if (start.handle) await start.handle.dispose().catch(() => undefined);
-			if (end?.handle) await end.handle.dispose().catch(() => undefined);
-		}
+		const end = await resolveDragPoint(to, "to");
+		await untilAborted(signal, () => page.mouse.move(start.x, start.y));
+		await untilAborted(signal, () => page.mouse.down());
+		await untilAborted(signal, () => page.mouse.move(end.x, end.y, { steps: 12 }));
+		await untilAborted(signal, () => page.mouse.up());
 	}
 
 	async #select(selector: string, values: string[], timeoutMs: number, signal: AbortSignal): Promise<string[]> {
-		const handle = await this.#resolveActionHandle(selector, timeoutMs, signal);
-		try {
-			return (await untilAborted(signal, () =>
-				handle.evaluate((el, vals) => {
-					interface SelectOption {
-						value: string;
-						selected: boolean;
-					}
-					interface SelectLike {
-						tagName: string;
-						options: ArrayLike<SelectOption>;
-						dispatchEvent: (event: unknown) => boolean;
-					}
-					const select = el as unknown as SelectLike;
-					if (select?.tagName !== "SELECT") throw new Error("tab.select() requires a <select> element");
-					const EventCtor = (
-						globalThis as unknown as { Event: new (type: string, init?: { bubbles: boolean }) => unknown }
-					).Event;
-					const wanted = new Set(vals as string[]);
-					// Assign the full selection first, then read back: on a single
-					// <select>, un-selecting the current option mid-loop leaves the
-					// browser reporting it selected until another option takes over,
-					// which double-counted the old value in the returned list.
-					for (let i = 0; i < select.options.length; i++) {
-						const opt = select.options[i] as SelectOption;
-						opt.selected = wanted.has(opt.value);
-					}
-					const selected: string[] = [];
-					for (let i = 0; i < select.options.length; i++) {
-						const opt = select.options[i] as SelectOption;
-						if (opt.selected) selected.push(opt.value);
-					}
-					select.dispatchEvent(new EventCtor("input", { bubbles: true }));
-					select.dispatchEvent(new EventCtor("change", { bubbles: true }));
-					return selected;
-				}, values),
-			)) as string[];
-		} finally {
-			await handle.dispose().catch(() => undefined);
-		}
+		const node = await this.#selectorNode(selector, timeoutMs, "present", signal);
+		return await selectOptions(node, values, signal);
 	}
 
 	async #uploadFile(
@@ -2554,41 +2020,33 @@ export class WorkerCore {
 		session: SessionSnapshot,
 	): Promise<void> {
 		if (!filePaths.length) throw new ToolError("tab.uploadFile() requires at least one file path");
-		const handle = await this.#resolveActionHandle(selector, timeoutMs, signal);
-		try {
-			const absolute = filePaths.map(filePath => resolveToCwd(filePath, session.cwd));
-			const upload = handle as unknown as { uploadFile: (...paths: string[]) => Promise<void> };
-			const tagName = (await untilAborted(signal, () =>
-				handle.evaluate(el => (el as unknown as { tagName: string }).tagName),
-			)) as string;
-			if (tagName !== "INPUT")
-				throw new ToolError(
-					`tab.uploadFile() requires an <input type="file"> element (got <${tagName.toLowerCase()}>)`,
-				);
-			await untilAborted(signal, () => upload.uploadFile(...absolute));
-		} finally {
-			await handle.dispose().catch(() => undefined);
-		}
+		const node = await this.#selectorNode(selector, timeoutMs, "present", signal);
+		await setFileInput(
+			node,
+			filePaths.map(filePath => resolveToCwd(filePath, session.cwd)),
+			signal,
+		);
 	}
 
+	/**
+	 * Wait for the address bar, not for the page: the frame url puppeteer keeps
+	 * is event-driven, so this survives the navigations it exists to watch. A
+	 * page-side wait task would not — an isolated-world one never re-runs after
+	 * a document swap, and this helper is used across exactly that.
+	 */
 	async #waitForUrl(pattern: string | RegExp, timeout: number, signal: AbortSignal): Promise<string> {
 		const page = this.#requirePage();
-		const isRegex = pattern instanceof RegExp;
-		const matcher = isRegex ? pattern.source : pattern;
-		const flags = isRegex ? pattern.flags : "";
-		await untilAborted(signal, () =>
-			page.waitForFunction(
-				(m: string, isRe: boolean, fl: string) => {
-					const url = (globalThis as unknown as { location: { href: string } }).location.href;
-					return isRe ? new RegExp(m, fl).test(url) : url.includes(m);
-				},
-				{ timeout, polling: 200, signal },
-				matcher,
-				isRegex,
-				flags,
-			),
-		);
-		return page.url();
+		const matches = (url: string) => (pattern instanceof RegExp ? pattern.test(url) : url.includes(pattern));
+		const deadline = Date.now() + timeout;
+		for (;;) {
+			const url = page.url();
+			if (matches(url)) return url;
+			if (Date.now() >= deadline)
+				throw new ToolError(
+					`tab.waitForUrl(${JSON.stringify(String(pattern))}) timed out after ${timeout}ms; the page is at ${page.url()}`,
+				);
+			await untilAborted(signal, () => Bun.sleep(Math.min(URL_POLL_MS, Math.max(1, deadline - Date.now()))));
+		}
 	}
 
 	async #waitForResponse(
@@ -2606,122 +2064,127 @@ export class WorkerCore {
 		return (await untilAborted(signal, () => page.waitForResponse(predicate, { timeout, signal }))) as HTTPResponse;
 	}
 
-	async #resolveCachedHandle(id: number): Promise<ElementHandle> {
+	/**
+	 * The DOM node a ref points at: the backend node id and the session that owns
+	 * its frame, both recorded by the observation that minted the ref. Nothing is
+	 * resolved here — the node is addressed at action time, so a navigation in
+	 * between cannot leave a dead handle behind, only a node id the page no
+	 * longer knows, which every action reports as stale.
+	 */
+	#refNode(id: number): CdpNode {
 		const entry = this.#refs.get(id);
 		if (!entry)
 			throw new ToolError(`Unknown element ref e${id}: no observation of this tab minted it. Run tab.observe().`);
-		if (entry.handle) {
-			if (await this.#handleStillLive(entry.handle)) return entry.handle;
-			void entry.handle.dispose().catch(() => undefined);
-			entry.handle = undefined;
-		}
-		const adopt = entry.adopt;
-		if (adopt) {
-			entry.adopt = undefined;
-			const handle = asElementHandle(await adopt().catch(() => null));
-			if (handle && (await this.#handleStillLive(handle))) {
-				entry.handle = handle;
-				return handle;
-			}
-			void handle?.dispose().catch(() => undefined);
-		}
-		// uuid refs are snapshot-bound by contract: a dead handle means the whole
-		// observation is void, so drop it and make the model observe again.
-		if (this.#refStyle !== "compact") {
-			this.#clearElementCache();
-			throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
-		}
-		return await this.#healRef(id, entry);
-	}
-
-	async #handleStillLive(handle: ElementHandle): Promise<boolean> {
-		try {
-			return (await handle.evaluate(el => el.isConnected)) as boolean;
-		} catch {
-			return false;
-		}
+		return {
+			session: entry.session,
+			backendNodeId: entry.backendNodeId,
+			label: `e${id}`,
+		};
 	}
 
 	/**
-	 * Re-find a compact ref whose handle died: re-query the accessibility tree
-	 * with the minting observation's filter and take the node that still carries
-	 * the recorded node key, else the recorded role/name/position. Only a
-	 * re-query that finds nothing is a stale ref.
+	 * A selector answered by the page as it is now: a backend node id plus the
+	 * session that owns it, resolved fresh on every call and never kept.
+	 * `present` returns the first match, `visible` waits for one with a box.
 	 */
-	async #healRef(id: number, entry: RefEntry): Promise<ElementHandle> {
-		const stale = new ToolError(
-			`Element ref e${id} (${entry.role}${entry.name ? ` ${JSON.stringify(entry.name)}` : ""}) is stale: ` +
-				`it is gone from the page. Run tab.observe() again.`,
-		);
-		const snapshot = await this.#snapshot(this.#refIncludeAll).catch(() => null);
-		if (!snapshot) throw stale;
-		const candidates = flattenSnapshot(snapshot, { includeAll: this.#refIncludeAll }).filter(
-			node => node.actionable && node.ax && node.role === entry.role && node.name === entry.name,
-		);
-		const chosen = chooseHealedIndex(
-			candidates.map(candidate => axNodeKey(candidate.ax!)),
-			entry,
-		);
-		if (chosen === null) throw stale;
-		const healed = candidates[chosen].ax!;
-		const handle = asElementHandle(await healed.elementHandle().catch(() => null));
-		if (!handle) throw stale;
-		const nodeKey = axNodeKey(healed);
-		const exact = entry.nodeKey !== undefined && nodeKey === entry.nodeKey;
-		entry.handle = handle;
-		entry.nodeKey = nodeKey;
-		this.#log("debug", "Healed browser element ref", { ref: `e${id}`, role: entry.role, name: entry.name, exact });
-		return handle;
+	async #selectorNode(
+		selector: string,
+		timeoutMs: number,
+		state: "present" | "visible",
+		signal?: AbortSignal,
+	): Promise<CdpNode> {
+		if (parseAriaRefSelector(selector) !== null) return await this.#ariaRefNode(selector, signal);
+		const node = await awaitSelector(this.#requirePage(), normalizeSelector(selector), { timeoutMs, state }, signal);
+		if (!node) throw new ToolError(`Selector ${JSON.stringify(selector)} matched no element`);
+		return node;
 	}
 
-	async #resolveAriaRef(id: string): Promise<ElementHandle> {
+	/**
+	 * `aria-ref=eN` names a slot in the last ARIA snapshot, and only that
+	 * snapshot's own script can map it. Resolve it once, pin the result to a
+	 * backend node id, and release the object in the same call.
+	 */
+	async #ariaRefNode(selector: string, signal?: AbortSignal): Promise<CdpNode> {
 		if (this.#managedChrome)
 			throw new ToolError(
 				"ARIA snapshots are read-only for managed Chrome. Use an immutable ref from tab.observe() to act.",
 			);
-		const ref = parseAriaRefSelector(id) ?? id.trim();
-		const handle = await resolveAriaRefHandle(this.#requirePage(), ref);
-		if (!handle) {
+		const ref = parseAriaRefSelector(selector) ?? selector.trim();
+		const node = await nodeFromExpression(
+			this.#requirePage().mainFrame().client,
+			buildAriaRefScript(ref),
+			`aria-ref=${ref}`,
+			signal,
+		);
+		if (!node)
 			throw new ToolError(
 				`Unknown ARIA ref ${JSON.stringify(ref)}. Run tab.ariaSnapshot() to refresh refs (they renumber each snapshot).`,
 			);
-		}
-		return handle;
+		return node;
 	}
 
 	/**
-	 * Resolve a selector to an ElementHandle for handle-based actions. An
-	 * `aria-ref=eN` selector resolves against the latest ariaSnapshot's refs
-	 * (main world); anything else goes through the normal locator wait.
+	 * The element surface model code drives. Every method addresses the node by
+	 * backend id on the session that owns its frame, at call time, so no
+	 * navigation between two statements can leave it holding a dead object.
 	 */
-	async #resolveActionHandle(selector: string, timeoutMs: number, sig: AbortSignal): Promise<ElementHandle> {
-		if (parseAriaRefSelector(selector) !== null) return this.#resolveAriaRef(selector);
-		if (this.#managedChrome) {
-			const handle = await this.#requirePage().waitForSelector(normalizeSelector(selector), {
-				timeout: timeoutMs,
-				signal: sig,
-			});
-			if (!handle) throw new ToolError(`Selector ${JSON.stringify(selector)} matched no element`);
-			return handle as ElementHandle;
-		}
-		return (await untilAborted(sig, () =>
-			this.#requirePage().locator(normalizeSelector(selector)).setTimeout(timeoutMs).waitHandle({ signal: sig }),
-		)) as ElementHandle;
+	#createElement(node: CdpNode, cwd: string, op: ElementOp): TabElement {
+		const page = this.#requirePage();
+		// Managed Chrome drives a tab the user is not looking at: pointer and
+		// keyboard input need page focus emulation held around the dispatch.
+		const input = <T>(signal: AbortSignal, action: () => Promise<T>): Promise<T> =>
+			this.#managedChrome ? withBackgroundInput(page, signal, action) : action();
+		return {
+			click: options =>
+				op(`${node.label}.click()`, sig => input(sig, () => clickNode(node, options?.count ?? 1, sig))),
+			hover: () => op(`${node.label}.hover()`, sig => input(sig, () => hoverNode(node, sig))),
+			type: text => op(`${node.label}.type()`, sig => input(sig, () => typeIntoNode(node, text, sig))),
+			fill: value => op(`${node.label}.fill()`, sig => input(sig, () => fillNode(node, value, sig))),
+			press: key =>
+				op(`${node.label}.press()`, sig =>
+					input(sig, async () => {
+						await focusNode(node, sig);
+						await pressChord(node.session, key, sig);
+					}),
+				),
+			focus: () => op(`${node.label}.focus()`, sig => focusNode(node, sig)),
+			scrollIntoView: () => op(`${node.label}.scrollIntoView()`, sig => scrollIntoView(node, sig)),
+			select: (...values) => op(`${node.label}.select()`, sig => selectOptions(node, values, sig)),
+			uploadFile: (...filePaths) =>
+				op(`${node.label}.uploadFile()`, sig => {
+					if (!filePaths.length) throw new ToolError("uploadFile() requires at least one file path");
+					return setFileInput(
+						node,
+						filePaths.map(filePath => resolveToCwd(filePath, cwd)),
+						sig,
+					);
+				}),
+			boundingBox: () =>
+				op(`${node.label}.boundingBox()`, async sig =>
+					boundingBox(node, await sessionOffset(page, node.session, sig), sig),
+				),
+			isVisible: () =>
+				op(`${node.label}.isVisible()`, async sig =>
+					Boolean(await boundingBox(node, await sessionOffset(page, node.session, sig), sig)),
+				),
+			isHidden: () =>
+				op(`${node.label}.isHidden()`, async sig =>
+					!(await boundingBox(node, await sessionOffset(page, node.session, sig), sig)),
+				),
+			evaluate: (fn, ...args) =>
+				op(`${node.label}.evaluate()`, sig =>
+					callOnNode(node, `function (...args) { return (${String(fn)}).apply(null, [this, ...args]); }`, args, sig),
+				) as never,
+		};
 	}
 
 	/**
-	 * Detach every ref from the page: handles are disposed and lazy adoption
-	 * dropped, the observation id rotates. The records stay so the next
-	 * observation hands the same numbers to the same elements and a compact
-	 * ref used in between still heals by role/name.
+	 * Void every ref: the observation id rotates, so a `uuid` ref minted before
+	 * this point is rejected by contract. The records stay so the next
+	 * observation hands the same numbers to the same elements.
 	 */
-	#clearElementCache(): void {
+	#invalidateRefs(): void {
 		this.#observationId = crypto.randomUUID();
-		for (const entry of this.#refs.values()) {
-			if (entry.handle) void entry.handle.dispose().catch(() => undefined);
-			entry.handle = undefined;
-			entry.adopt = undefined;
-		}
 	}
 
 	/** Best-effort `Page.stopLoading` so an abandoned navigation cannot stall later ops. */
@@ -2743,7 +2206,6 @@ export class WorkerCore {
 	async #close(): Promise<void> {
 		this.#unsub();
 		this.#uninstallRejectionGuard();
-		this.#clearElementCache();
 		const page = this.#page;
 		await this.#downloads?.dispose().catch(() => undefined);
 		if (this.#dialogHandler && page && !page.isClosed()) page.off("dialog", this.#dialogHandler);

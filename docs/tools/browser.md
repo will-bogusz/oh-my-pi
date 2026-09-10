@@ -125,6 +125,8 @@ Direct `waitFor` and `waitForSelector` return booleans. Their timeouts are in mi
 
 `observe()` is the page reader. It waits for the page to settle — no DOM mutations for 300 ms or no network traffic for 1 s, whichever comes first, then re-checks while the tree still shows a loading indicator (`aria-busy`, an indeterminate progressbar, a "Loading…" node), bounded at about 3 s and never failing on the bound — snapshots the accessibility tree with every iframe's document included (cross-origin ones through their own CDP session), prints the tree into the cell, and returns `{ snapshot, url, title, viewport, scroll, focused?, tree, elements }`. `elements` lists the actionable nodes only, each with a `ref`; the tree carries the text.
 
+`observe()` returns the settled tree of the document the cell ends up on. A click that navigates while the observation is already collecting is the ordinary case, not a failure: collection restarts against the new document inside the same settle budget. Only a page that never stops navigating exhausts that budget, and then the call fails with "The page changed while observing it. Observe again."
+
 The tree is one node per line, indent = depth, refs only on actionable nodes; text is never truncated, hrefs are omitted unless `includeAll`:
 
 ```text
@@ -152,7 +154,7 @@ await tab.ref(search.ref).fill("background browser control");
 await tab.observe();
 ```
 
-`tab.ref(ref)` and `tab.id(number)` return synchronous `BrowserElement` proxies. On the direct facade, `tab.id` binds the number to the most recent observation. Handles support `click`, `type`, `fill`, `press`, `hover`, `focus`, `select`, `uploadFile`, `scrollIntoView`, `boundingBox`, `isVisible`, `isHidden`, and `evaluate`. A string passed to element `evaluate` is a function expression invoked with the element as its first argument.
+`tab.ref(ref)` and `tab.id(number)` return synchronous `BrowserElement` proxies. On the direct facade, `tab.id` binds the number to the most recent observation. Handles support `click` (`{ count: 2 }` double-clicks), `type`, `fill`, `press`, `hover`, `focus`, `select`, `uploadFile`, `scrollIntoView`, `boundingBox`, `isVisible`, `isHidden`, and `evaluate`. A string passed to element `evaluate` is a function expression invoked with the element as its first argument. `press` takes one key or a chord — `"Enter"`, `"Control+a"`, `"Shift+Tab"` — with US-layout key names. `boundingBox` reports the border box in root-viewport CSS pixels (an element inside an out-of-process iframe is converted through its frame chain) and returns `null` when the element has no box; `isVisible`/`isHidden` answer the same question.
 
 Managed Chrome `ariaSnapshot()` is a read-only structural view. Its `[ref=eN]` slots are not action references; use `observe()` references for actions. Numeric IDs inside `tab.run` are also rejected on managed Chrome because they lack snapshot identity. Other Puppeteer modes retain their legacy numeric observation IDs and ARIA references.
 
@@ -160,8 +162,8 @@ Managed Chrome `ariaSnapshot()` is a read-only structural view. Its `[ref=eN]` s
 
 `browser.refs` selects how `observe()` mints those refs:
 
-- `compact` (default): `e1`…`eN`, stable for the tab's lifetime. Every observation hands the same number to the same DOM node (matched by its backend node id), else to the same role/name/position (a re-render that replaced the node); new nodes get fresh numbers and numbers are never reused, so a diff's `+`/`~`/`removed` refs mean what they say and a ref remembered from an earlier observation still names its element. Element handles are adopted lazily on first use. When one dies — the usual re-render replacing every node — OMP re-queries the accessibility tree with the observation's own filter, takes the node that still carries the recorded id, else the recorded role/name/position, and acts on that. Only a ref whose element is no longer in the tree is reported stale.
-- `uuid`: `<observation-uuid>:<n>` with page-lifetime element numbers. A ref names exactly one observation; a dead element handle fails the action and asks for a new observation, with no healing. The tree still prints `eN`; the token to act with is `elements[i].ref`.
+- `compact` (default): `e1`…`eN`, stable for the tab's lifetime. Every observation hands the same number to the same DOM node (matched by its backend node id), else to the same role/name/position (a re-render that replaced the node); new nodes get fresh numbers and numbers are never reused, so a diff's `+`/`~`/`removed` refs mean what they say and a ref remembered from an earlier observation still names its element. A ref records only that backend node id and the CDP session owning its frame, so a navigation between two statements cannot invalidate it. Acting on a ref whose node the page has since replaced or dropped reports it stale and asks for a fresh observation; that observation re-attaches the number to the equivalent node, which is the only repair there is — OMP never re-finds an element behind your back.
+- `uuid`: `<observation-uuid>:<n>` with page-lifetime element numbers. A ref names exactly one observation, and a token from an older one is refused outright. The tree still prints `eN`; the token to act with is `elements[i].ref`.
 
 Both styles accept the ref exactly as observed, plus `tab.id(n)` for the current observation. `ariaSnapshot()`'s `[ref=eN]` slots stay separate: with `compact` refs, an `eN` that an observation minted resolves to that element, and any other `eN` still resolves against the last ARIA snapshot.
 

@@ -1,86 +1,79 @@
 import { expect, it } from "bun:test";
-import {
-	clickInBackground,
-	type HandleOpGuard,
-	readPageMetrics,
-	toActionableHandle,
-} from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
-import puppeteer, { type ElementHandle } from "puppeteer-core";
+import { clickNode } from "@oh-my-pi/pi-coding-agent/tools/browser/cdp";
+import { readPageMetrics } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
+import puppeteer, { type CDPSession } from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
-it("does not dispatch a timed-out quiet click when scrolling later completes", async () => {
+const BOX = { content: [0, 0, 40, 0, 40, 20, 0, 20], border: [0, 0, 40, 0, 40, 20, 0, 20] };
+
+// An action that outran its deadline must be over: a scroll that only finishes
+// afterwards may not go on to dispatch the click the caller already gave up on.
+it("does not dispatch a timed-out click when scrolling later completes", async () => {
 	const started = Promise.withResolvers<void>();
 	const scroll = Promise.withResolvers<void>();
 	const finished = Promise.withResolvers<void>();
-	let points = 0;
-	let clicks = 0;
-	let disposed = false;
-	const handle = {
-		click: async () => {
-			throw new Error("raw click must not wait for IntersectionObserver");
+	const sent: string[] = [];
+	const session = {
+		send: async (method: string) => {
+			sent.push(method);
+			if (method === "DOM.scrollIntoViewIfNeeded") {
+				started.resolve();
+				await scroll.promise;
+				finished.resolve();
+				return {};
+			}
+			if (method === "DOM.getBoxModel") return { model: BOX };
+			return {};
 		},
-		scrollIntoView: async () => {
-			started.resolve();
-			await scroll.promise;
-			finished.resolve();
-		},
-		clickablePoint: async () => {
-			points++;
-			return { x: 10, y: 20 };
-		},
-		frame: {
-			page: () => ({
-				isClosed: () => false,
-				emulateFocusedPage: async () => {},
-				on: () => undefined,
-				off: () => undefined,
-				mouse: { click: async () => clicks++ },
-			}),
-		},
-		type: async () => {},
-		dispose: async () => {
-			disposed = true;
-		},
-	} as unknown as ElementHandle;
+	} as unknown as CDPSession;
 	const deadline = new AbortController();
-	const guard: HandleOpGuard = (_label, action) => action(deadline.signal);
-	const enriched = toActionableHandle(handle, guard, undefined, true);
-	const pending = enriched.click();
+	const pending = clickNode({ session, backendNodeId: 7, label: "e1" }, 1, deadline.signal);
 	await started.promise;
 	deadline.abort(new Error("quiet click deadline"));
 	await expect(pending).rejects.toThrow("quiet click deadline");
 	scroll.resolve();
 	await finished.promise;
 	await Promise.resolve();
-	expect(disposed).toBe(true);
-	expect(points).toBe(0);
-	expect(clicks).toBe(0);
-	await expect(enriched.click()).rejects.toThrow("invalidated");
+	expect(sent).toEqual(["DOM.scrollIntoViewIfNeeded"]);
 });
 
+// A node that is there but has no box is a different failure from a node the
+// page dropped, and neither may be reported as a click that happened.
+it("refuses to click a node with no box and names the ref", async () => {
+	const session = {
+		send: async (method: string) => {
+			if (method === "DOM.getBoxModel") throw new Error("Could not compute box model.");
+			if (method === "DOM.resolveNode") return { object: { objectId: "1" } };
+			if (method === "Runtime.callFunctionOn") return { result: { value: true } };
+			return {};
+		},
+	} as unknown as CDPSession;
+	await expect(clickNode({ session, backendNodeId: 7, label: "e12" }, 1)).rejects.toThrow(
+		"e12 has no box to act on",
+	);
+});
+
+// Cancellation is re-checked after the geometry read: a lease released while
+// the box was being measured must not still land a click.
 it("checks cancellation again after geometry and before trusted pointer input", async () => {
 	const deadline = new AbortController();
-	let clicks = 0;
-	const handle = {
-		scrollIntoView: async () => {},
-		clickablePoint: async () => {
-			deadline.abort(new Error("lease released"));
-			return { x: 10, y: 20 };
+	const sent: string[] = [];
+	const session = {
+		send: async (method: string) => {
+			sent.push(method);
+			if (method === "DOM.getBoxModel") {
+				deadline.abort(new Error("lease released"));
+				return { model: BOX };
+			}
+			return {};
 		},
-		frame: {
-			page: () => ({
-				isClosed: () => false,
-				emulateFocusedPage: async () => {},
-				on: () => undefined,
-				off: () => undefined,
-				mouse: { click: async () => clicks++ },
-			}),
-		},
-	} as unknown as ElementHandle;
-	await expect(clickInBackground(handle, {}, deadline.signal)).rejects.toThrow("lease released");
-	expect(clicks).toBe(0);
+	} as unknown as CDPSession;
+	await expect(clickNode({ session, backendNodeId: 7, label: "e1" }, 1, deadline.signal)).rejects.toThrow(
+		"lease released",
+	);
+	expect(sent).toEqual(["DOM.scrollIntoViewIfNeeded", "DOM.getBoxModel"]);
 });
 
 // Opt-in real Chromium regression, without a visible browser or user profile.
@@ -124,8 +117,13 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			expect(await utility.evaluate("globalThis.observerWaits")).toBe(1);
 			expect(originalFinished).toBe(false);
 			expect(await page.evaluate("document.querySelector('input').dataset.events")).toBe("");
-			const guard: HandleOpGuard = (_label, action) => action(AbortSignal.timeout(2000));
-			await toActionableHandle(handle, guard, undefined, true).click();
+			const session = page.mainFrame().client;
+			const described = await session.send("DOM.describeNode", { objectId: handle.id! });
+			await clickNode(
+				{ session, backendNodeId: described.node.backendNodeId, label: "e1" },
+				1,
+				AbortSignal.timeout(2000),
+			);
 			expect(await page.evaluate("document.querySelector('input').checked")).toBe(true);
 			expect(await page.evaluate("document.querySelector('input').dataset.events")).toBe("true,");
 			expect(originalFinished).toBe(false);

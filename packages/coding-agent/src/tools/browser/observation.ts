@@ -1,20 +1,264 @@
-import type { SerializedAXNode } from "puppeteer-core";
+import type { CDPSession } from "puppeteer-core";
 
-declare module "puppeteer-core" {
-	interface SerializedAXNode {
-		/** Set by puppeteer's serializer (`@internal` upstream, present at runtime): the DOM node behind this AX node. */
-		backendNodeId?: number;
-		/** Loader of the document the node belongs to; distinguishes equal backend ids across frames. */
-		loaderId?: string;
+/**
+ * Observation model shared by the tab worker: serializing Chrome's raw
+ * accessibility payloads into displayable nodes, keeping element refs stable
+ * across observations, rendering the tree, and diffing it against the previous
+ * one. Pure functions only — the worker owns sessions, frames and timing.
+ */
+
+/** The CDP session and document an accessibility node was read from. */
+export interface AxFrame {
+	/** Session owning the node's frame: every action on the node dispatches here. */
+	readonly session: CDPSession;
+	readonly frameId: string;
+	/** Document generation: distinguishes equal backend ids across frames and navigations. */
+	readonly loaderId: string;
+}
+
+/** The `Accessibility.AXNode` fields the serializer reads, structurally compatible with CDP's. */
+export interface AxPayload {
+	nodeId: string;
+	ignored: boolean;
+	role?: { value?: unknown };
+	name?: { value?: unknown };
+	value?: { value?: unknown };
+	description?: { value?: unknown };
+	properties?: readonly { name: string; value: { value?: unknown } }[];
+	childIds?: readonly string[];
+	backendDOMNodeId?: number;
+}
+
+/** One serialized accessibility node: puppeteer's `SerializedAXNode` shape, read over CDP. */
+export interface AxNode {
+	role: string;
+	name?: string;
+	value?: string | number;
+	description?: string;
+	keyshortcuts?: string;
+	roledescription?: string;
+	valuetext?: string;
+	url?: string;
+	disabled?: boolean;
+	expanded?: boolean;
+	focused?: boolean;
+	modal?: boolean;
+	multiline?: boolean;
+	multiselectable?: boolean;
+	readonly?: boolean;
+	required?: boolean;
+	selected?: boolean;
+	busy?: boolean;
+	checked?: boolean | "mixed";
+	pressed?: boolean | "mixed";
+	level?: number;
+	children?: AxNode[];
+	/** The DOM node behind this accessibility node, in its own frame's id space. */
+	backendNodeId?: number;
+	/** Loader of the document the node belongs to. */
+	loaderId?: string;
+	/** Session and frame the node came from; absent only on hand-built fixtures. */
+	frame?: AxFrame;
+}
+
+/** Roles whose children Chrome exposes as implementation detail, not content. */
+const TEXT_ONLY_ROLES: Record<string, true> = { LineBreak: true, text: true, InlineTextBox: true, StaticText: true };
+/** Roles the ARIA/HTML specs give presentational children only. */
+const PRESENTATIONAL_CHILD_ROLES: Record<string, true> = {
+	"doc-cover": true,
+	"graphics-symbol": true,
+	img: true,
+	image: true,
+	Meter: true,
+	scrollbar: true,
+	slider: true,
+	separator: true,
+	progressbar: true,
+};
+const CONTROL_ROLES: Record<string, true> = {
+	button: true,
+	checkbox: true,
+	ColorWell: true,
+	combobox: true,
+	DisclosureTriangle: true,
+	listbox: true,
+	menu: true,
+	menubar: true,
+	menuitem: true,
+	menuitemcheckbox: true,
+	menuitemradio: true,
+	radio: true,
+	scrollbar: true,
+	searchbox: true,
+	slider: true,
+	spinbutton: true,
+	switch: true,
+	tab: true,
+	textbox: true,
+	tree: true,
+	treeitem: true,
+};
+const LANDMARK_ROLES: Record<string, true> = {
+	banner: true,
+	complementary: true,
+	contentinfo: true,
+	form: true,
+	main: true,
+	navigation: true,
+	region: true,
+	search: true,
+};
+
+/** A payload plus the derived state the interesting-node filter needs. */
+interface AxTreeNode {
+	payload: AxPayload;
+	properties: Map<string, unknown>;
+	role: string;
+	name: string;
+	description: string;
+	children: AxTreeNode[];
+	/** Document of the iframe this node owns, already serialized. */
+	embedded?: AxNode;
+	focusableChild?: boolean;
+}
+
+function treeNode(payload: AxPayload): AxTreeNode {
+	const properties = new Map<string, unknown>();
+	for (const property of payload.properties ?? []) properties.set(property.name.toLowerCase(), property.value.value);
+	if (payload.name) properties.set("name", payload.name.value);
+	if (payload.value) properties.set("value", payload.value.value);
+	if (payload.description) properties.set("description", payload.description.value);
+	return {
+		payload,
+		properties,
+		role: typeof payload.role?.value === "string" ? payload.role.value : "Unknown",
+		name: typeof payload.name?.value === "string" ? payload.name.value : "",
+		description: typeof payload.description?.value === "string" ? payload.description.value : "",
+		children: [],
+	};
+}
+
+function hasFocusableChild(node: AxTreeNode): boolean {
+	if (node.focusableChild === undefined) {
+		node.focusableChild = node.children.some(
+			child => child.properties.get("focusable") === true || hasFocusableChild(child),
+		);
 	}
+	return node.focusableChild;
+}
+
+function isLeafNode(node: AxTreeNode): boolean {
+	if (!node.children.length) return true;
+	const editable = node.properties.has("editable");
+	const richlyEditable = node.properties.get("editable") === "richtext";
+	const plainTextField = richlyEditable ? false : editable || node.role === "textbox" || node.role === "searchbox";
+	if (plainTextField || TEXT_ONLY_ROLES[node.role]) return true;
+	if (PRESENTATIONAL_CHILD_ROLES[node.role]) return true;
+	if (hasFocusableChild(node)) return false;
+	return node.role === "heading" && Boolean(node.name);
+}
+
+/** Chrome's own "would a screen reader announce this" test, as puppeteer's serializer applies it. */
+function isInteresting(node: AxTreeNode, insideControl: boolean): boolean {
+	if (node.role === "Ignored" || node.properties.get("hidden") === true || node.payload.ignored) return false;
+	if (LANDMARK_ROLES[node.role]) return true;
+	const live = node.properties.get("live");
+	if (
+		node.properties.get("focusable") === true ||
+		node.properties.get("editable") === "richtext" ||
+		node.properties.get("busy") === true ||
+		(typeof live === "string" && live !== "off") ||
+		node.properties.get("modal") === true ||
+		node.properties.has("errormessage") ||
+		node.properties.has("details") ||
+		node.properties.has("roledescription")
+	)
+		return true;
+	if (CONTROL_ROLES[node.role]) return true;
+	if (insideControl) return false;
+	return isLeafNode(node) && Boolean(node.name || node.description);
+}
+
+function collectInteresting(collection: Set<AxTreeNode>, node: AxTreeNode, insideControl: boolean): void {
+	if (isInteresting(node, insideControl) || node.embedded) collection.add(node);
+	if (isLeafNode(node)) return;
+	const nested = insideControl || CONTROL_ROLES[node.role] === true;
+	for (const child of node.children) collectInteresting(collection, child, nested);
+}
+
+const AX_STRING_PROPERTIES = ["name", "value", "description", "keyshortcuts", "roledescription", "valuetext", "url"] as const;
+const AX_BOOLEAN_PROPERTIES = [
+	"disabled",
+	"expanded",
+	"focused",
+	"modal",
+	"multiline",
+	"multiselectable",
+	"readonly",
+	"required",
+	"selected",
+	"busy",
+] as const;
+
+function serialize(node: AxTreeNode, frame: AxFrame): AxNode {
+	const serialized: AxNode = { role: node.role, backendNodeId: node.payload.backendDOMNodeId, loaderId: frame.loaderId, frame };
+	for (const key of AX_STRING_PROPERTIES) {
+		const value = node.properties.get(key);
+		if (value !== undefined) serialized[key] = String(value);
+	}
+	for (const key of AX_BOOLEAN_PROPERTIES) {
+		// A RootWebArea reports whether its frame has focus, not whether focus is on the node.
+		if (key === "focused" && node.role === "RootWebArea") continue;
+		if (node.properties.has(key)) serialized[key] = Boolean(node.properties.get(key));
+	}
+	for (const key of ["checked", "pressed"] as const) {
+		if (!node.properties.has(key)) continue;
+		const value = node.properties.get(key);
+		serialized[key] = value === "mixed" ? "mixed" : value === "true" || value === true;
+	}
+	const level = node.properties.get("level");
+	if (level !== undefined) serialized.level = Number(level);
+	return serialized;
+}
+
+function serializeTree(node: AxTreeNode, frame: AxFrame, interesting: Set<AxTreeNode> | undefined): AxNode[] {
+	const children: AxNode[] = [];
+	for (const child of node.children) children.push(...serializeTree(child, frame, interesting));
+	if (interesting && !interesting.has(node)) return children;
+	const serialized = serialize(node, frame);
+	if (node.embedded) children.push(node.embedded);
+	if (children.length) serialized.children = children;
+	return [serialized];
 }
 
 /**
- * Observation model shared by the tab worker: flattening puppeteer's
- * accessibility snapshot into displayable nodes, keeping element refs stable
- * across observations, rendering the tree, and diffing it against the
- * previous one. Pure functions only — the worker owns handles and timing.
+ * Serialize one frame's `Accessibility.getFullAXTree` payloads into a node tree,
+ * splicing each embedded document under the iframe element that owns it.
+ * `includeAll` keeps every node; otherwise only the ones a screen reader would
+ * announce survive, which is what makes the default tree readable.
  */
+export function buildAxTree(
+	payloads: readonly AxPayload[],
+	frame: AxFrame,
+	options: { includeAll: boolean; embedded?: ReadonlyMap<number, AxNode> },
+): AxNode | null {
+	const byId = new Map<string, AxTreeNode>();
+	for (const payload of payloads) byId.set(payload.nodeId, treeNode(payload));
+	for (const node of byId.values()) {
+		for (const childId of node.payload.childIds ?? []) {
+			const child = byId.get(childId);
+			if (child) node.children.push(child);
+		}
+		const backendNodeId = node.payload.backendDOMNodeId;
+		if (backendNodeId !== undefined) node.embedded = options.embedded?.get(backendNodeId);
+	}
+	const root = byId.values().next().value;
+	if (!root) return null;
+	if (options.includeAll) return serializeTree(root, frame, undefined)[0] ?? null;
+	const interesting = new Set<AxTreeNode>();
+	collectInteresting(interesting, root, false);
+	return serializeTree(root, frame, interesting)[0] ?? null;
+}
 
 const INTERACTIVE_AX_ROLES: Record<string, true> = {
 	button: true,
@@ -37,7 +281,7 @@ const INTERACTIVE_AX_ROLES: Record<string, true> = {
 };
 
 /** Nodes the model can act on: control roles or anything carrying a state. */
-export function isInteractiveNode(node: SerializedAXNode): boolean {
+export function isInteractiveNode(node: AxNode): boolean {
 	if (INTERACTIVE_AX_ROLES[node.role]) return true;
 	return (
 		node.checked !== undefined ||
@@ -66,10 +310,10 @@ export interface ObservedNode {
 	/** Set on the boundary line of an embedded document: the iframe's host. */
 	iframe?: string;
 	/** The snapshot node behind an actionable line; absent on iframe boundaries. */
-	ax?: SerializedAXNode;
+	ax?: AxNode;
 }
 
-function nodeStates(node: SerializedAXNode): string[] {
+function nodeStates(node: AxNode): string[] {
 	const states: string[] = [];
 	const tristate = (label: string, value: boolean | "mixed" | undefined) => {
 		if (value === undefined) return;
@@ -89,7 +333,7 @@ function nodeStates(node: SerializedAXNode): string[] {
 	return states;
 }
 
-function frameHost(root: SerializedAXNode): string {
+function frameHost(root: AxNode): string {
 	const url = root.url ?? "";
 	try {
 		const parsed = new URL(url);
@@ -104,9 +348,9 @@ function frameHost(root: SerializedAXNode): string {
  * header; an iframe's root becomes a `[iframe host]` boundary line with the
  * embedded document indented beneath it, so cross-origin content reads inline.
  */
-export function flattenSnapshot(root: SerializedAXNode, options: { includeAll: boolean }): ObservedNode[] {
+export function flattenSnapshot(root: AxNode, options: { includeAll: boolean }): ObservedNode[] {
 	const nodes: ObservedNode[] = [];
-	const visit = (node: SerializedAXNode, depth: number, parentName: string): void => {
+	const visit = (node: AxNode, depth: number, parentName: string): void => {
 		const children = node.children ?? [];
 		if (LAYOUT_ROLES[node.role]) return;
 		if (node.role === "Iframe") {
@@ -155,8 +399,8 @@ export function flattenSnapshot(root: SerializedAXNode, options: { includeAll: b
 const SPINNER_ROLES: Record<string, true> = { StaticText: true, text: true, img: true, image: true, status: true, alert: true, generic: true, paragraph: true };
 
 /** Whether the page still shows a loading indicator the observation should wait out. */
-export function hasBusyIndicator(root: SerializedAXNode): boolean {
-	const busy = (node: SerializedAXNode): boolean => {
+export function hasBusyIndicator(root: AxNode): boolean {
+	const busy = (node: AxNode): boolean => {
 		if (node.busy === true) return true;
 		// A progressbar with a value is a meter; only an indeterminate one is "still loading".
 		if (node.role === "progressbar" && node.value === undefined && node.valuetext === undefined) return true;
@@ -167,7 +411,7 @@ export function hasBusyIndicator(root: SerializedAXNode): boolean {
 }
 
 /** Identity of the DOM node behind a snapshot node, unique across frames for one document lifetime. */
-export function axNodeKey(node: SerializedAXNode): string | undefined {
+export function axNodeKey(node: AxNode): string | undefined {
 	if (node.backendNodeId === undefined) return undefined;
 	return `${node.loaderId ?? ""}:${node.backendNodeId}`;
 }

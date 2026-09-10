@@ -137,7 +137,7 @@ interface BrowserTabHelpers {
 	waitForUrl(pattern: string | RegExp, options?: BrowserWaitOptions): Promise<string>;
 }
 interface BrowserElement {
-	click(): Promise<void>;
+	click(options?: { count?: number }): Promise<void>;
 	type(text: string): Promise<void>;
 	fill(value: string): Promise<void>;
 	press(key: string): Promise<void>;
