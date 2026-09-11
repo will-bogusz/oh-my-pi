@@ -17,6 +17,7 @@ async function fixture() {
 	const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-cua-session-"));
 	const calls: { name: string; args: Wire }[] = [];
 	const images: ComputerImage[] = [];
+	const texts: string[] = [];
 	const row = {
 		window_id: 1,
 		pid: 101,
@@ -142,6 +143,9 @@ async function fixture() {
 		emitImage(image) {
 			images.push(image);
 		},
+		emitText(text) {
+			texts.push(text);
+		},
 	};
 	const window = await session.window(context, { id: "1", pid: 101 });
 	return {
@@ -152,6 +156,7 @@ async function fixture() {
 		row,
 		calls,
 		images,
+		texts,
 		async close() {
 			await session.close();
 			await Promise.all(images.map(image => fs.rm(image.path, { force: true })));

@@ -101,6 +101,12 @@ export interface ComputerOperationContext {
 	maxWidth: number;
 	maxHeight: number;
 	emitImage(image: ComputerImage, content: { type: "image"; data: string; mimeType: string }, silent: boolean): void;
+	/**
+	 * Put action text into the cell's own output. A reply that doubts its own
+	 * delivery has to reach the model even when the cell discards the returned
+	 * result — otherwise a silent no-op is indistinguishable from success.
+	 */
+	emitText(text: string): void;
 }
 export interface ComputerRelatedWindow {
 	id: string;

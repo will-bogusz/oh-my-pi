@@ -15,6 +15,7 @@ import type { ComputerBackend } from "./backend";
 import { normalizeLaunchOptions, normalizeWindowSelector } from "./selectors";
 import type {
 	ActionOptions,
+	ComputerActionResult,
 	ComputerBounds,
 	ComputerElementSnapshot,
 	ComputerOperationContext,
@@ -65,7 +66,29 @@ function operationContext(getContext: RunContextAccessor): ComputerOperationCont
 				context.output.push(content);
 			}
 		},
+		emitText: text => {
+			throwIfAborted(context.signal);
+			context.output.push({ type: "text", text });
+		},
 	};
+}
+
+/**
+ * Effects that mean the driver dispatched but doubts the target reacted:
+ * `no_observed_change` (nothing about the target changed after delivery) and
+ * `suspected_noop` (the element never advertised the action). Both are the
+ * silent-no-op shape, so their text is pushed into the cell output instead of
+ * living only in a return value the cell is free to drop.
+ */
+const UNDELIVERED_EFFECTS: Record<string, true> = { no_observed_change: true, suspected_noop: true };
+
+async function reported(
+	context: ComputerOperationContext,
+	action: Promise<ComputerActionResult>,
+): Promise<ComputerActionResult> {
+	const result = await action;
+	if (UNDELIVERED_EFFECTS[result.effect] && result.text) context.emitText(result.text);
+	return result;
 }
 
 function mutationContext(getContext: RunContextAccessor): ComputerOperationContext {
@@ -114,25 +137,31 @@ class El {
 	}
 
 	click(options?: ActionOptions) {
-		return this.#session.click(mutationContext(this.#getContext), this.#window, this.ref, options);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.click(context, this.#window, this.ref, options));
 	}
 	doubleClick(options?: ActionOptions) {
 		return this.click({ ...options, count: 2 });
 	}
 	setValue(value: string) {
-		return this.#session.setValue(mutationContext(this.#getContext), this.#window, this.ref, value);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.setValue(context, this.#window, this.ref, value));
 	}
 	type(text: string, options?: ActionOptions) {
-		return this.#session.type(mutationContext(this.#getContext), this.#window, text, this.ref, options);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.type(context, this.#window, text, this.ref, options));
 	}
 	press(chord: string | string[], options?: ActionOptions) {
-		return this.#session.press(mutationContext(this.#getContext), this.#window, chord, this.ref, options);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.press(context, this.#window, chord, this.ref, options));
 	}
 	scroll(direction: Direction, options?: ScrollOptions) {
-		return this.#session.scroll(mutationContext(this.#getContext), this.#window, direction, this.ref, options);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.scroll(context, this.#window, direction, this.ref, options));
 	}
 	perform(action: string) {
-		return this.#session.perform(mutationContext(this.#getContext), this.#window, this.ref, action);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.perform(context, this.#window, this.ref, action));
 	}
 }
 
@@ -187,7 +216,8 @@ class Win {
 		return new El(this.#session, this.#getContext, this.#window, this.#session.element(ref, this.#window));
 	}
 	click(target: ComputerTarget, options?: ActionOptions) {
-		return this.#session.click(mutationContext(this.#getContext), this.#window, target, options);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.click(context, this.#window, target, options));
 	}
 	doubleClick(target: ComputerTarget, options?: ActionOptions) {
 		return this.click(target, { ...options, count: 2 });
@@ -196,25 +226,31 @@ class Win {
 		return this.#session.hover(mutationContext(this.#getContext), this.#window, x, y, options);
 	}
 	drag(from: [number, number], to: [number, number], options?: GestureOptions) {
-		return this.#session.drag(mutationContext(this.#getContext), this.#window, from, to, options);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.drag(context, this.#window, from, to, options));
 	}
 	scroll(direction: Direction, options?: ScrollOptions) {
-		return this.#session.scroll(mutationContext(this.#getContext), this.#window, direction, options?.target, options);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.scroll(context, this.#window, direction, options?.target, options));
 	}
 	type(text: string, options?: TextOptions) {
-		return this.#session.type(mutationContext(this.#getContext), this.#window, text, options?.target, options);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.type(context, this.#window, text, options?.target, options));
 	}
 	press(chord: string | string[], options?: TextOptions) {
-		return this.#session.press(mutationContext(this.#getContext), this.#window, chord, options?.target, options);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.press(context, this.#window, chord, options?.target, options));
 	}
 	setValue(ref: string, value: string) {
-		return this.#session.setValue(mutationContext(this.#getContext), this.#window, ref, value);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.setValue(context, this.#window, ref, value));
 	}
 	setFrame(frame: ComputerBounds) {
 		return this.#session.setFrame(mutationContext(this.#getContext), this.#window, frame);
 	}
 	menu(menuPath: string[], options?: ActionOptions) {
-		return this.#session.menu(mutationContext(this.#getContext), this.#window, menuPath, options);
+		const context = mutationContext(this.#getContext);
+		return reported(context, this.#session.menu(context, this.#window, menuPath, options));
 	}
 	verify(expect: Record<string, unknown>[], options?: { timeoutMs?: number; stableSamples?: number }) {
 		return this.#session.verify(operationContext(this.#getContext), this.#window, expect, options);

@@ -107,6 +107,7 @@ describe("cua session over a driver child", () => {
 			maxWidth: 1,
 			maxHeight: 1,
 			emitImage() {},
+			emitText() {},
 		};
 		try {
 			expect(spawned).toHaveLength(1);
