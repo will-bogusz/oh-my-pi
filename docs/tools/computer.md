@@ -14,7 +14,7 @@ The model-facing prompt (`packages/coding-agent/src/prompts/tools/computer.md`) 
 - Interruption gate: `packages/coding-agent/src/tools/computer/interruption.ts`
 - Prompt and safety: `packages/coding-agent/src/prompts/{tools/computer,system/computer-safety}.md`
 
-`computer.enabled` defaults to false; Eval must be enabled. `/computer` toggles the current session. `computer.maxWidth`/`maxHeight` default to 3840/2400, subject to model-transport capture caps. There is no backend selector: native control is the vendored `cua-driver` on Apple Silicon macOS. Hosts without a vendored driver report that native control is unavailable; a failure never selects another driver or input route.
+`computer.enabled` defaults to false; Eval must be enabled. `/computer` toggles the current session. `computer.maxWidth`/`maxHeight` default to 3840/2400, subject to model-transport capture caps. There is no backend selector: native control is the vendored `cua-driver` for the host, on Apple Silicon macOS or X11 Linux (see [Platforms](#platforms)). Hosts without a vendored driver report that native control is unavailable; a failure never selects another driver or input route.
 
 ### The driver child
 
@@ -149,7 +149,7 @@ Desktop pixel input requires a current primary-display screenshot with matching 
 
 ## Interruptions
 
-macOS draws authentication, permission and lock UI from separate processes on window layers above 0, where neither the driver's window inventory nor an AX walk of the target sees it. OMP samples the WindowServer roster (`interruption.ts`) before every mutation and after every observation. Every window carries `layer` (0 = ordinary window) and `kind`:
+macOS draws authentication, permission and lock UI from separate processes on window layers above 0, where neither the driver's window inventory nor an AX walk of the target sees it. OMP samples the WindowServer roster (`interruption.ts`) before every mutation and after every observation. The gate is macOS-only by construction (`process.platform === "darwin"`; see [Platforms](#platforms)). Every window carries `layer` (0 = ordinary window) and `kind`:
 
 | `kind` | Owner processes | Blocks mutations |
 | --- | --- | --- |
@@ -164,6 +164,39 @@ While a blocking window is on screen, every mutation is refused before dispatch 
 Reading is still allowed. Acquire the interrupting window with `computer.window({ id: interruptedBy.windowId, pid: interruptedBy.pid })` and observe it so the user is told exactly which prompt is asking — the system alert host also carries crash reports and other alerts, and the refusal deliberately does not assert which one it is. Then stop and wait for the user.
 
 One exemption: a crash alert for an app this session launched. `launch()` records the alert's window id when the launched process has already exited, and the gate then permits an AX action aimed at exactly that window, so the agent can observe the report and press its "Ignore" button instead of leaving it on the user's screen. Do not relaunch the crashed app. Permission prompts raised by live apps stay fully refused.
+
+## Platforms
+
+Native control is the vendored `cua-driver` for the host's `<platform>-<arch>` key. Two hosts are supported: `darwin-arm64` (everything above) and `linux-x64` on X11. The driver child is local, so the host platform is the backend platform; the model-facing prompt, the safety block and `computer.capabilities()` all follow it.
+
+### Linux (X11)
+
+Supported today: window inventory, AT-SPI tree observation, per-window capture, background element `click`/`setValue` through AT-SPI, foreground pointer and key input through XTEST, `scroll`, `drag`, `setFrame`, `invoke_menu`, clipboard read/write, `verify`, and `launch` by executable name or absolute path (`bundleId` is macOS-only and ignored).
+
+Unsupported, and refused with the same typed errors as anywhere else: `displays()` and every desktop-root coordinate action (`computer.click/doubleClick/move/drag/scroll/type/press`), because the Linux driver reports no display identity or screen origin; `focusedWindow()`; window `hover`. Wayland is not in scope — `check_permissions` reports it, and a Wayland session has no supported input path here.
+
+Shape differences OMP absorbs rather than demanding the driver change:
+
+| Field | Linux behaviour | What OMP does |
+| --- | --- | --- |
+| `layer` | never emitted (X11 has no window-layer concept) | optional; a window without one reports no `layer` |
+| `pid` | `null` for a titled window whose owner set no `_NET_WM_PID` | that row is dropped: nothing can address it |
+| `screenshot_frame_valid` | set only to `false`, only on a capture error | a capture is valid when it is not denied, carries exactly one image part, and reports `window_bounds` |
+| `elements_complete` | hard-coded `false` (the AT-SPI walker has no exhaustive-walk proof) | `complete` also accepts `returned_element_count === total_element_count` |
+| `check_permissions` | `{ x11, wayland, wayland_enabled, atspi, dbus_session_bus_address, xsend_event }` | `capture`/`input` = `x11`, `ax` = `atspi`, `backgroundWindowInput` = `atspi || x11`, `displayServer` = `x11`/`wayland`; the raw report is exposed as `capabilities.permissions`. X11 has no permission model, so the permission fields read `not-applicable`. `x11: false` fails session acquisition with the driver's own report. |
+| interruptions | no system-owned window layer to sample | the roster gate, `launch`'s crash-alert poll and the crash-alert exemption are macOS-only; `interruptedBy` is never set |
+
+Refusal semantics. `background_unavailable` means **nothing was dispatched**: GTK, Qt, Chromium and WebKitGTK ignore `XSendEvent`, so synthetic keys and pixel clicks have no focus-free route into them. The driver names the route that works, and OMP restates it in prelude vocabulary (`{ delivery: "foreground" }`) at the error boundary while the structured reason stays verbatim on the error. Foreground is a first-class route on this backend, not an escalation of last resort — it needs a running EWMH window manager, and without one the driver refuses with `foreground_unavailable` instead. OMP never escalates on its own. `effect: "unverifiable"` is the ordinary shape of a successful Linux action (observed on AT-SPI clicks and XTEST typing that provably landed): it means the driver has no post-condition proof, so verify by re-observing rather than repeating the action.
+
+### Bench display prerequisites
+
+A headless Linux host needs a display session built for this, not `xvfb-run`:
+
+- `Xvfb :N -screen 0 <W>x<H>x24 -ac -dpi 96 -extension GLX`. `-extension GLX` avoids a `libEGL`/vendor-driver `SIGABRT` on NVIDIA hosts; where the argv is fixed (upstream's own tests spawn their Xvfb), export `__EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json` instead so the mesa EGL vendor is used. Set `DISPLAY` (and `XAUTHORITY`) explicitly in OMP's environment; it is inherited by the driver child unchanged.
+- A private session bus and its own accessibility registry: `dbus-daemon --session --print-address` plus `at-spi-bus-launcher --launch-immediately` with `DBUS_SESSION_BUS_ADDRESS` pointing at it. A machine-wide registry that resolves `org.a11y.Bus` but never replies degrades every tree to one element with `degraded_reason: "atspi_walk_failed: …"` — and `check_permissions` still reports `atspi: true`, because that check only resolves the name.
+- An EWMH window manager (openbox is enough) — without one, foreground delivery has nothing to raise or focus.
+- A compositing manager (`picom --backend xrender` or `xcompmgr`) so occluded windows keep rendering for capture, and a clipboard manager if clipboard content must outlive the driver child.
+- Chrome/Chromium needs `--force-renderer-accessibility`; without it the page tree is empty and the browser degrades to screenshot-only.
 
 ## Run, approval, and lifecycle
 

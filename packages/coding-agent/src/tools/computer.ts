@@ -3,7 +3,7 @@ import type { AgentToolResult, ToolApprovalDecision } from "@oh-my-pi/pi-agent-c
 import type { Model } from "@oh-my-pi/pi-ai";
 import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
 import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
-import { once } from "@oh-my-pi/pi-utils";
+import { once, prompt } from "@oh-my-pi/pi-utils";
 import { callSessionTool } from "../eval/js/tool-bridge";
 import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
 import computerDescription from "../prompts/tools/computer.md" with { type: "text" };
@@ -134,7 +134,10 @@ export function createComputerPrelude(
 
 	return {
 		name: "computer",
-		documentation: computerDescription,
+		// The prelude contract is the same everywhere; the backend's delivery
+		// routes, tree source and interruption model are not. The driver child
+		// is local, so the host platform selects the variant.
+		documentation: prompt.render(computerDescription, { linux: process.platform === "linux" }),
 		javascript: computerJavascript,
 		python: computerPython,
 		exports: ["computer"],

@@ -1020,6 +1020,8 @@ export async function buildSystemPrompt(options: BuildSystemPromptOptions = {}):
 		securityEnabled,
 		browserEnabled,
 		computerEnabled,
+		// The driver child is local, so the host platform is the backend platform.
+		linuxHost: process.platform === "linux",
 		hasObsidian: hasObsidian(),
 		includeWorkspaceTree,
 		renderMermaid,
@@ -1033,7 +1035,7 @@ export async function buildSystemPrompt(options: BuildSystemPromptOptions = {}):
 	const rendered = prompt.render(resolvedCustomPrompt ? customSystemPromptTemplate : systemPromptTemplate, data);
 	const systemPrompt = [rendered];
 	if (computerEnabled) {
-		systemPrompt.push(computerSafetyPrompt.trim());
+		systemPrompt.push(prompt.render(computerSafetyPrompt, { linux: process.platform === "linux" }).trim());
 	}
 	// Custom prompt templates already render context files and append text; the
 	// project footer still carries environment, cwd, workspace, and dir-context.
