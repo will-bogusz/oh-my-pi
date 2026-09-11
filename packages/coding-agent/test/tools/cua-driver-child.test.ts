@@ -3,6 +3,7 @@ import * as path from "node:path";
 import { CuaDriverChild, CuaDriverExitedError } from "@oh-my-pi/pi-coding-agent/tools/computer/driver";
 import { CuaComputerSession } from "@oh-my-pi/pi-coding-agent/tools/computer/cua-session";
 import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
+import { parseDriverManifest, vendoredDriver } from "@oh-my-pi/pi-coding-agent/tools/computer/vendored";
 
 const fixture = path.resolve(import.meta.dir, "../fixtures/fake-cua-driver.ts");
 
@@ -121,5 +122,34 @@ describe("cua session over a driver child", () => {
 			await session.close();
 			expect(spawned.every(child => !child.alive)).toBe(true);
 		}
+	});
+});
+
+describe("vendored driver manifests", () => {
+	// Shape the goliath build writes beside `vendor/cua-driver/linux-x64/cua-driver`.
+	const linux = {
+		platform: "linux-x64",
+		version: "0.28.0",
+		sha256: "05a7b58e15c5e2b2db07e48bdc8cdbb653ebaea3424221ee3720bb8c3c25488f",
+		source: "fork e7e141ae + portal-input, glibc 2.39",
+		bytes: 50459264,
+	};
+	it("accepts a linux-x64 manifest and keeps the platform key authoritative", () => {
+		expect(parseDriverManifest(linux, "linux-x64")).toEqual({
+			platform: "linux-x64",
+			version: "0.28.0",
+			sha256: linux.sha256,
+			source: linux.source,
+		});
+		// A driver built for another host never stands in for this one.
+		expect(() => parseDriverManifest(linux, "darwin-arm64")).toThrow(
+			"Malformed cua-driver manifest for darwin-arm64",
+		);
+		expect(() => parseDriverManifest({ ...linux, sha256: "deadbeef" }, "linux-x64")).toThrow(
+			"Malformed cua-driver manifest",
+		);
+	});
+	it("reports no driver for a platform that is not vendored", async () => {
+		expect(await vendoredDriver("linux-riscv64")).toBeUndefined();
 	});
 });

@@ -57,8 +57,10 @@ async function handle(message: {
 		case "get_config":
 			toolResult(id, { version: "fake-1.0" });
 			return;
+		// Both backends' key sets: this stand-in runs on whichever host the
+		// suite runs on, and each platform reads only its own keys.
 		case "check_permissions":
-			toolResult(id, { accessibility: true, screen_recording: true });
+			toolResult(id, { accessibility: true, screen_recording: true, x11: true, atspi: true, xsend_event: true });
 			return;
 		case "list_apps":
 			toolResult(id, { apps: [], pid: process.pid });

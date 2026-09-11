@@ -3,6 +3,9 @@ import { createContext, runInContext } from "node:vm";
 import { type } from "@oh-my-pi/omptype";
 import type { AgentTool } from "@oh-my-pi/pi-agent-core";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { prompt } from "@oh-my-pi/pi-utils";
+import computerSafetyPrompt from "../../src/prompts/system/computer-safety.md" with { type: "text" };
+import computerDescription from "../../src/prompts/tools/computer.md" with { type: "text" };
 import { callSessionTool } from "@oh-my-pi/pi-coding-agent/eval/js/tool-bridge";
 import type { EvalPreludeDefinition } from "@oh-my-pi/pi-coding-agent/eval/preludes";
 import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-agent/eval/py/executor";
@@ -1182,5 +1185,38 @@ describe("computer supervisor round trips", () => {
 		expect(second.ok).toBe(true);
 		if (second.ok) expect(String(second.payload.returnValue)).toContain("Computer run ended");
 		expect(native.clickCount).toBe(0);
+	});
+});
+
+describe("computer prompt variants", () => {
+	const render = (template: string, linux: boolean): string => prompt.render(template, { linux });
+	it("states each backend's own routes and never the other's vocabulary", () => {
+		const darwin = render(computerDescription, false);
+		const linux = render(computerDescription, true);
+		for (const absent of ["AT-SPI", "X11", "xdotool", "AT-SPI tree"]) expect(darwin).not.toContain(absent);
+		for (const absent of ["AppleScript", "TCC", "screencapture", "Apple Silicon"])
+			expect(linux).not.toContain(absent);
+		// The Linux backend's own contract, stated where the model reads it.
+		expect(linux).toContain("AT-SPI tree");
+		expect(linux).toContain("`background_unavailable` refusal means nothing was dispatched");
+		expect(linux).toContain("foreground_unavailable");
+		expect(linux).toContain("window manager");
+		expect(linux).toContain("`computer.displays()` and desktop-root input");
+		expect(linux).toContain('effect: "unverifiable"');
+		expect(darwin).toContain("password/TCC prompt");
+		expect(linux).toContain("`interruptedBy` is never set");
+	});
+	it("scopes the never-escalate rule to unverified deliveries on both backends", () => {
+		for (const linux of [false, true]) {
+			const safety = render(computerSafetyPrompt, linux);
+			expect(safety).toContain("An unverified or doubted delivery is never a reason to escalate");
+			expect(safety).toContain("intended retry, not an escalation");
+		}
+		expect(render(computerSafetyPrompt, true)).not.toContain("AppleScript");
+	});
+	it("renders the host's variant into the live prelude documentation", () => {
+		const session = toolSession();
+		const prelude = fixturePrelude(session, new FakeBackend());
+		expect(prelude.documentation).toBe(render(computerDescription, process.platform === "linux"));
 	});
 });

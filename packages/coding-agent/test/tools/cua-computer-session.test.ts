@@ -2,31 +2,126 @@ import { expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
+import { fromJsonSchema, type } from "@oh-my-pi/omptype";
 import { CuaComputerSession } from "@oh-my-pi/pi-coding-agent/tools/computer/cua-session";
 import type { CuaDriver, CuaToolResult } from "@oh-my-pi/pi-coding-agent/tools/computer/driver";
 import { ToolAbortError, ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import type { ComputerImage, ComputerOperationContext } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
+/** Upstream's generated tool contract at `e7e141ae` (`libs/cua-driver/contract/manifest.json`). */
+import contract from "../fixtures/cua-contract-manifest.json";
 
 type Wire = Record<string, unknown>;
+/** A `list_windows` row: the fields OMP reads, plus whatever the platform adds. */
+type WindowRow = Wire & {
+	window_id: number;
+	pid: number;
+	app_name: string;
+	title: string;
+	bounds: { x: number; y: number; width: number; height: number };
+};
 const PNG = "iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAEklEQVR4nGP4z8DwHxkzoAsAAA8hD/EEN8afAAAAAElFTkSuQmCC";
 function reply(data: Wire, images: CuaToolResult["images"] = []): CuaToolResult {
 	return { text: "SDK response", structuredJson: JSON.stringify(data), isError: false, images };
 }
 
-async function fixture() {
+/**
+ * Recorded from cua-driver 0.28.0 on goliath (Ubuntu 24.04, Xvfb + openbox,
+ * Chrome and one xterm on `:99`) and trimmed to the fields OMP reads:
+ * `~/tmp/adhoc/2026-09-11-cua-linux-build/probe-run1/{01-check_permissions,02-list_windows}.json`,
+ * `probe-run2/{01-get_window_state,04-type_text}.json`.
+ */
+const LINUX = {
+	permissions: {
+		atspi: true,
+		dbus_session_bus_address: "unix:path=/tmp/dbus-YrSRdOAAUT,guid=7b1cc4071885ba8d2787cf076aa470e1",
+		wayland: false,
+		wayland_enabled: false,
+		x11: true,
+		xsend_event: true,
+	},
+	// No row carries `layer`: X11 has no window-layer concept to report.
+	xterm: {
+		app_name: "XTerm",
+		bounds: { height: 316, width: 484, x: 21, y: 562 },
+		height: 316,
+		is_on_screen: true,
+		pid: 1167787,
+		title: "will@goliath: ~",
+		width: 484,
+		window_id: 4194316,
+		x: 21,
+		y: 562,
+		z_index: 0,
+	},
+	chrome: {
+		app_name: "Google-chrome",
+		bounds: { height: 800, width: 1100, x: 40, y: 20 },
+		height: 800,
+		is_on_screen: true,
+		pid: 1167788,
+		title: "ClickMatrix - Google Chrome",
+		width: 1100,
+		window_id: 6291459,
+		x: 40,
+		y: 20,
+		z_index: 1,
+	},
+	// Contract-shaped, not recorded: `pid` is nullable and X11 reports null for
+	// a titled window whose owner set no `_NET_WM_PID`.
+	pidless: {
+		app_name: "unknown",
+		bounds: { height: 24, width: 1440, x: 0, y: 0 },
+		height: 24,
+		is_on_screen: true,
+		pid: null,
+		title: "xdg-desktop-portal",
+		width: 1440,
+		window_id: 8388610,
+		x: 0,
+		y: 0,
+		z_index: 2,
+	},
+	refusal: {
+		text: 'Background delivery is not available: the requested target has no focus-free input backend; the remaining XTest/X11 route can only deliver to the globally focused widget. Retry this action with delivery_mode:"foreground"; Cua Driver will activate the target for the action and restore the previous foreground afterward.',
+		code: "background_unavailable",
+		detail:
+			"the requested target has no focus-free input backend; the remaining XTest/X11 route can only deliver to the globally focused widget",
+		escalation: {
+			reason: 'background input is unavailable on this surface; retry this action with delivery_mode:"foreground".',
+			recommended: "foreground",
+		},
+		suggestion: 'Retry this action with delivery_mode:"foreground".',
+	},
+	// The fork's typed shape for the X11 foreground failure upstream still
+	// reports untyped; OMP matches the structured code, never the text.
+	foregroundRefusal: {
+		text: "foreground_unavailable: no EWMH-compliant window manager is running on this display, so the target cannot be activated.",
+		code: "foreground_unavailable",
+		detail: "no EWMH-compliant window manager is running on this display, so the target cannot be activated",
+	},
+} as const;
+
+async function fixture(options: { platform?: NodeJS.Platform } = {}) {
+	const platform = options.platform ?? "darwin";
+	const linux = platform === "linux";
 	const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-cua-session-"));
 	const calls: { name: string; args: Wire }[] = [];
+	/** Structured payload of every non-error reply, for contract conformance. */
+	const replies: { name: string; data: Wire }[] = [];
 	const images: ComputerImage[] = [];
 	const texts: string[] = [];
-	const row = {
-		window_id: 1,
-		pid: 101,
-		app_name: "Fixture",
-		title: "Editor",
-		bounds: { x: 10, y: 20, width: 200, height: 100 },
-		is_on_screen: true,
-		layer: 0,
-	};
+	const row: WindowRow = linux
+		? { ...LINUX.chrome }
+		: {
+				window_id: 1,
+				pid: 101,
+				app_name: "Fixture",
+				title: "Editor",
+				bounds: { x: 10, y: 20, width: 200, height: 100 },
+				is_on_screen: true,
+				layer: 0,
+				z_index: 0,
+			};
 	const state = {
 		sequence: 0,
 		value: "" as string | undefined,
@@ -42,6 +137,85 @@ async function fixture() {
 		displayIdentity: true,
 		display: { uuid: "display-uuid", nativeId: 7, x: 0, y: 0, width: 2, height: 1, scale: 2 },
 		hook: undefined as ((name: string, args: Wire) => Promise<CuaToolResult | undefined>) | undefined,
+	};
+	const answer = (name: string, args: Wire): CuaToolResult => {
+		if (name === "check_permissions")
+			return reply(linux ? LINUX.permissions : { accessibility: true, screen_recording: true });
+		if (name === "list_windows") return reply({ windows: linux ? [LINUX.xterm, row, LINUX.pidless] : [row] });
+		if (name === "list_apps") return reply({ apps: [] });
+		if (name === "get_screen_size" || name === "get_desktop_state") {
+			const display = state.display;
+			const identity = state.displayIdentity
+				? {
+						display_identity: { uuid: display.uuid, native_id: display.nativeId },
+						screen_origin: { x: display.x, y: display.y },
+					}
+				: {};
+			if (name === "get_screen_size")
+				return reply({ width: display.width, height: display.height, scale_factor: display.scale, ...identity });
+			return reply(
+				{
+					display: "primary",
+					platform: linux ? "linux" : "macos",
+					screen_width: display.width,
+					screen_height: display.height,
+					scale_factor: display.scale,
+					screenshot_width: 4,
+					screenshot_height: 2,
+					screenshot_mime_type: "image/png",
+					...identity,
+				},
+				[{ dataBase64: PNG, mimeType: "image/png" }],
+			);
+		}
+		if (name === "get_window_state") {
+			state.sequence++;
+			// Linux sets `screenshot_frame_valid` only to false, only on a
+			// capture error; macOS sets it true on success.
+			const frameValid = linux
+				? state.failCapture
+					? { screenshot_frame_valid: false }
+					: {}
+				: { screenshot_frame_valid: !state.failCapture };
+			return reply(
+				{
+					pid: state.wrongIdentity ? 999 : row.pid,
+					window_id: row.window_id,
+					snapshot_id: `s${state.sequence}`,
+					// Hard-coded false on Linux; equal counts are the only
+					// evidence there that the walk was not clipped.
+					elements_complete: false,
+					...(linux ? { returned_element_count: 1, total_element_count: 1, element_count: 1 } : {}),
+					related_windows: state.relatedWindows,
+					element_double_click: state.elementDoubleClick,
+					elements: [
+						{
+							element_index: 1,
+							element_token: `s${state.sequence}:1`,
+							role: linux ? "push button" : "AXTextField",
+							label: linux ? "B3" : "Editor",
+							value: state.value,
+							placeholder: state.placeholder,
+							actions: state.actions ?? (linux ? ["press", "showContextMenu"] : undefined),
+							background_actions: state.backgroundActions,
+							enabled: false,
+							selected: false,
+							depth: 0,
+							frame: { x: 10, y: 20, w: 200, h: 100 },
+						},
+					],
+					window_bounds: row.bounds,
+					...frameValid,
+					screenshot_width: 4,
+					screenshot_height: 2,
+					screenshot_mime_type: "image/png",
+				},
+				args.include_screenshot && !state.failCapture ? [{ dataBase64: PNG, mimeType: "image/png" }] : [],
+			);
+		}
+		if (name === "set_value") state.value = String(args.value);
+		if (name === "type_text") state.value += String(args.text);
+		return reply({ effect: "unverifiable", evidence: null, route: "accessibility" });
 	};
 	const driver: CuaDriver = {
 		version: "0.24.0",
@@ -65,73 +239,17 @@ async function fixture() {
 			// Mirror the real child: a cancelled call answers with the typed envelope.
 			if (signal?.aborted && state.cancelled.includes(name))
 				throw new ToolAbortError(`Computer action ${name} cancelled; partial: {}`);
-			if (override) return override;
-			if (name === "check_permissions") return reply({ accessibility: true, screen_recording: true });
-			if (name === "list_windows") return reply({ windows: [row] });
-			if (name === "get_screen_size" || name === "get_desktop_state") {
-				const display = state.display;
-				const identity = state.displayIdentity
-					? {
-							display_identity: { uuid: display.uuid, native_id: display.nativeId },
-							screen_origin: { x: display.x, y: display.y },
-						}
-					: {};
-				if (name === "get_screen_size")
-					return reply({ width: display.width, height: display.height, scale_factor: display.scale, ...identity });
-				return reply(
-					{
-						screen_width: display.width,
-						screen_height: display.height,
-						scale_factor: display.scale,
-						screenshot_width: 4,
-						screenshot_height: 2,
-						...identity,
-					},
-					[{ dataBase64: PNG, mimeType: "image/png" }],
-				);
-			}
-			if (name === "get_window_state") {
-				state.sequence++;
-				return reply(
-					{
-						pid: state.wrongIdentity ? 999 : row.pid,
-						window_id: row.window_id,
-						snapshot_id: `s${state.sequence}`,
-						elements_complete: false,
-						related_windows: state.relatedWindows,
-						element_double_click: state.elementDoubleClick,
-						elements: [
-							{
-								element_token: `s${state.sequence}:1`,
-								role: "AXTextField",
-								label: "Editor",
-								value: state.value,
-								placeholder: state.placeholder,
-								actions: state.actions,
-								background_actions: state.backgroundActions,
-								enabled: false,
-								selected: false,
-								depth: 0,
-								frame: { x: 10, y: 20, w: 200, h: 100 },
-							},
-						],
-						window_bounds: row.bounds,
-						screenshot_frame_valid: !state.failCapture,
-						screenshot_width: 4,
-						screenshot_height: 2,
-					},
-					args.include_screenshot && !state.failCapture ? [{ dataBase64: PNG, mimeType: "image/png" }] : [],
-				);
-			}
-			if (name === "set_value") state.value = String(args.value);
-			if (name === "type_text") state.value += String(args.text);
-			return reply({ effect: "unverifiable", evidence: { posted: true } });
+			const result = override ?? answer(name, args);
+			if (!result.isError && result.structuredJson)
+				replies.push({ name, data: JSON.parse(result.structuredJson) as Wire });
+			return result;
 		},
 		async kill() {
 			state.kills++;
 		},
 	};
 	const session = await CuaComputerSession.create({
+		platform,
 		spawn: async () => driver,
 		sampleRoster: () => ({ windows: [], elapsedMs: 0 }),
 	});
@@ -147,7 +265,7 @@ async function fixture() {
 			texts.push(text);
 		},
 	};
-	const window = await session.window(context, { id: "1", pid: 101 });
+	const window = await session.window(context, { id: String(row.window_id), pid: row.pid as number });
 	return {
 		session,
 		context,
@@ -155,6 +273,7 @@ async function fixture() {
 		state,
 		row,
 		calls,
+		replies,
 		images,
 		texts,
 		async close() {
@@ -1123,5 +1242,192 @@ it("uses reported background capabilities instead of advertising a known refused
 		await expect(f.session.observe(f.context, f.window)).rejects.toThrow("Malformed Cua background actions");
 	} finally {
 		await f.close();
+	}
+});
+
+it("maps each backend's own permission report without inventing the other's fields", async () => {
+	const linux = await fixture({ platform: "linux" });
+	const darwin = await fixture();
+	try {
+		expect(linux.session.capabilities).toMatchObject({
+			displayServer: "x11",
+			capture: true,
+			input: true,
+			ax: true,
+			backgroundWindowInput: true,
+			capturePermission: "not-applicable",
+			axPermission: "not-applicable",
+			permissions: LINUX.permissions,
+		});
+		expect(darwin.session.capabilities).toMatchObject({
+			displayServer: "macos",
+			capture: true,
+			ax: true,
+			capturePermission: "granted",
+			permissions: { accessibility: true, screen_recording: true },
+		});
+	} finally {
+		await Promise.all([linux.close(), darwin.close()]);
+	}
+});
+
+it("keeps a Linux roster addressable: no layer claimed, unowned windows dropped", async () => {
+	const f = await fixture({ platform: "linux" });
+	try {
+		const windows = await f.session.windows(f.context, {});
+		// The `pid: null` row (8388610) names no process any driver call could address.
+		expect(windows.map(window => window.id)).toEqual(["4194316", "6291459"]);
+		expect(windows.map(window => window.layer)).toEqual([undefined, undefined]);
+		expect(f.window).toMatchObject({ id: "6291459", pid: 1167788, app: "Google-chrome", onScreen: true });
+	} finally {
+		await f.close();
+	}
+});
+
+it("refuses a Linux session without X11 using the driver's own report, and only on Linux", async () => {
+	const text = "X11 display: ❌ cannot open display :99\nAT-SPI (D-Bus): ✅ org.a11y.Bus reachable";
+	const kills: string[] = [];
+	const spawn = (label: string) => async (): Promise<CuaDriver> => ({
+		version: "0.28.0",
+		pid: 901,
+		alive: true,
+		async callTool() {
+			return {
+				text,
+				isError: false,
+				images: [],
+				structuredJson: JSON.stringify({ ...LINUX.permissions, x11: false }),
+			};
+		},
+		async kill() {
+			kills.push(label);
+		},
+	});
+	await expect(CuaComputerSession.create({ platform: "linux", spawn: spawn("linux") })).rejects.toThrow(
+		"cannot open display :99",
+	);
+	expect(kills).toEqual(["linux"]);
+	// macOS keys off its own grants; an unrelated X11 key must not gate it.
+	const macos = await CuaComputerSession.create({ platform: "darwin", spawn: spawn("darwin") });
+	expect(macos.capabilities.capture).toBe(false);
+	await macos.close();
+});
+
+it("surfaces both Linux refusals verbatim and restates their route in prelude vocabulary", async () => {
+	const f = await fixture({ platform: "linux" });
+	try {
+		f.state.hook = async name =>
+			name === "type_text"
+				? {
+						text: LINUX.refusal.text,
+						isError: true,
+						images: [],
+						errorCode: LINUX.refusal.code,
+						structuredJson: JSON.stringify({
+							code: LINUX.refusal.code,
+							detail: LINUX.refusal.detail,
+							escalation: LINUX.refusal.escalation,
+							suggestion: LINUX.refusal.suggestion,
+						}),
+					}
+				: undefined;
+		const refused = await f.session.type(f.context, f.window, "echo hi\n").catch((error: unknown) => error);
+		if (!(refused instanceof ToolError)) throw new Error("Expected the background refusal");
+		expect(refused.message).toStartWith("background_unavailable: Background delivery is not available:");
+		expect(refused.message).toContain("no focus-free input backend");
+		expect(refused.message).toContain('{ delivery: "foreground" }');
+		// The driver's wire vocabulary never reaches the model as advice it cannot type.
+		expect(refused.message).not.toContain("delivery_mode");
+		// The structured reason stays exactly as the driver reported it.
+		expect(refused.context).toMatchObject({ code: "background_unavailable", suggestion: LINUX.refusal.suggestion });
+		// A refusal is not a retry: nothing was dispatched and nothing re-sent.
+		expect(f.calls.filter(call => call.name === "type_text")).toHaveLength(1);
+		f.state.hook = async name =>
+			name === "press_key"
+				? {
+						text: LINUX.foregroundRefusal.text,
+						isError: true,
+						images: [],
+						errorCode: LINUX.foregroundRefusal.code,
+						structuredJson: JSON.stringify({
+							code: LINUX.foregroundRefusal.code,
+							detail: LINUX.foregroundRefusal.detail,
+						}),
+					}
+				: undefined;
+		const blocked = await f.session
+			.press(f.context, f.window, "Return", undefined, { delivery: "foreground" })
+			.catch((error: unknown) => error);
+		if (!(blocked instanceof ToolError)) throw new Error("Expected the foreground refusal");
+		expect(blocked.message).toStartWith("foreground_unavailable:");
+		expect(blocked.message).toContain("no EWMH-compliant window manager");
+		expect(f.calls.filter(call => call.name === "press_key")).toHaveLength(1);
+	} finally {
+		await f.close();
+	}
+});
+
+it("reads a Linux capture and tree that report neither a frame flag nor an exhaustive walk", async () => {
+	const f = await fixture({ platform: "linux" });
+	try {
+		const observation = await f.session.observe(f.context, f.window, { screenshot: true });
+		// `elements_complete` is hard-coded false on Linux; equal counts carry the answer.
+		expect(observation.complete).toBe(true);
+		expect(observation.tree).not.toContain("completeness is unknown");
+		expect(observation.elements[0]!.actions).toEqual(["press"]);
+		// No `screenshot_frame_valid` key at all, and the pixels are still usable.
+		expect(observation.screenshotError).toBeUndefined();
+		expect(observation.screenshot?.target).toBe("6291459");
+		f.state.hook = async name =>
+			name === "get_window_state"
+				? reply({
+						pid: 1167788,
+						window_id: 6291459,
+						snapshot_id: "s00000002",
+						elements_complete: false,
+						returned_element_count: 1,
+						total_element_count: 182,
+						elements: [{ element_index: 0, element_token: "s00000002:0", role: "frame", label: "B3", depth: 0 }],
+						window_bounds: LINUX.chrome.bounds,
+					})
+				: undefined;
+		const clipped = await f.session.observe(f.context, f.window);
+		expect(clipped.complete).toBe(false);
+		f.state.hook = undefined;
+		f.state.failCapture = true;
+		const failed = await f.session.observe(f.context, f.window, { screenshot: true });
+		expect(failed.screenshotError).toContain("Screenshot unavailable");
+	} finally {
+		await f.close();
+	}
+});
+
+it("answers every contracted tool with a payload upstream's success schema accepts", async () => {
+	const schemas = new Map(
+		(contract.tools as { name: string; success_output_schema?: unknown }[])
+			.filter(tool => tool.success_output_schema !== undefined)
+			.map(tool => [tool.name, fromJsonSchema(tool.success_output_schema)] as const),
+	);
+	for (const platform of ["darwin", "linux"] as const) {
+		const f = await fixture({ platform });
+		try {
+			await f.session.observe(f.context, f.window, { screenshot: true });
+			await f.session.click(f.context, f.window, [1, 0]);
+			await f.session.type(f.context, f.window, "hi");
+			await f.session.press(f.context, f.window, "Return");
+			await f.session.scroll(f.context, f.window, "down");
+			await f.session.apps(f.context);
+			await f.session.screenshot(f.context, { silent: true });
+			const contracted = f.replies.filter(({ name }) => schemas.has(name));
+			// list_windows, get_window_state, list_apps, get_screen_size,
+			// get_desktop_state and the four input tools.
+			expect(new Set(contracted.map(({ name }) => name)).size).toBeGreaterThanOrEqual(8);
+			for (const { name, data } of contracted) {
+				const validated = schemas.get(name)!(data);
+				expect(validated instanceof type.errors ? `${name}: ${validated.summary}` : name).toBe(name);
+			}
+		} finally {
+			await f.close();
+		}
 	}
 });
