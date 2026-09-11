@@ -1,5 +1,6 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, jest } from "bun:test";
 import { createContext, runInContext } from "node:vm";
+import { CURSOR_OVERLAY_INSTALL } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/lease-badge";
 import { RelayBridge, type RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
 import { EXPECTED_EXTENSION_BUILD_ID } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 import type {
@@ -1120,11 +1121,24 @@ describe("RelayBridge attachment release", () => {
 		ack(bridge, ext, "send");
 		await flush();
 		const child = "REAL-CHILD-SESSION";
-		const attached = { sessionId: child, targetInfo: { targetId: "OOPIF", type: "iframe", url: "" }, waitingForDebugger: true };
-		bridge.extMessage(ext, JSON.stringify({ t: "cdpEvent", tabId: 1, method: "Target.attachedToTarget", params: attached }));
+		const attached = {
+			sessionId: child,
+			targetInfo: { targetId: "OOPIF", type: "iframe", url: "" },
+			waitingForDebugger: true,
+		};
 		bridge.extMessage(
 			ext,
-			JSON.stringify({ t: "cdpEvent", tabId: 1, sessionId: child, method: "Page.lifecycleEvent", params: { name: "load" } }),
+			JSON.stringify({ t: "cdpEvent", tabId: 1, method: "Target.attachedToTarget", params: attached }),
+		);
+		bridge.extMessage(
+			ext,
+			JSON.stringify({
+				t: "cdpEvent",
+				tabId: 1,
+				sessionId: child,
+				method: "Page.lifecycleEvent",
+				params: { name: "load" },
+			}),
 		);
 		const announcements = cdp.messages.filter(
 			message =>
@@ -1707,53 +1721,86 @@ describe("RelayBridge lease presentation", () => {
 		}
 	}
 
-	it("installs the badge and cursor overlay on a leased tab, paints the pointer ahead of the input, and takes both back", async () => {
-		const bridge = new RelayBridge({ group: true });
+	/** A leased, attached tab with the badge and cursor overlay already installed. */
+	async function leased(options: {
+		active: boolean;
+		log?: (message: string, data?: Record<string, unknown>) => void;
+	}) {
+		const bridge = new RelayBridge({ group: true, log: options.log });
 		const ext = new FakeExtSocket();
-		connect(bridge, ext, [tab({ tabId: 1 })]);
+		connect(bridge, ext, [tab({ tabId: 1, active: options.active })]);
 		const lease = bridge.managed.claim(discovered(bridge, 1), "owner");
 		const cdp = new FakeCdpSocket();
 		const connection = bridge.cdpConnected(cdp, lease.id);
-		const sessionId = await attachPage(bridge, ext, cdp, connection, 1);
-		// The install is four serialized round trips: add + evaluate, twice.
+		const attachId = ++msgSeq;
+		bridge.cdpMessage(
+			connection,
+			JSON.stringify({
+				id: attachId,
+				method: "Target.attachToTarget",
+				params: { targetId: "PAGE1", flatten: true },
+			}),
+		);
+		ack(bridge, ext, "attach");
+		// The attach answers only after the install's four serialized round trips
+		// (add + evaluate, twice): a first command may never outrun the per-document script.
 		for (let round = 0; round < 4; round++) {
-			ackSends(bridge, ext);
 			await flush();
+			expect(cdp.sessionFor(attachId)).toBeUndefined();
+			ackSends(bridge, ext);
 		}
+		await flush();
+		const sessionId = cdp.sessionFor(attachId);
+		if (!sessionId) throw new Error("attachToTarget did not answer after the lease presentation install");
+		return { bridge, cdp, connection, ext, lease, sessionId };
+	}
+
+	function mouse(
+		bridge: RelayBridge,
+		connection: number,
+		sessionId: string,
+		type: "mouseMoved" | "mousePressed" | "mouseReleased",
+		x = 120,
+		y = 48,
+	): void {
+		bridge.cdpMessage(
+			connection,
+			JSON.stringify({
+				id: ++msgSeq,
+				sessionId,
+				method: "Input.dispatchMouseEvent",
+				params: { type, x, y, button: "left" },
+			}),
+		);
+	}
+
+	it("installs the badge and cursor overlay on a leased tab, holds a click until the pointer arrives, and takes both back", async () => {
+		const { bridge, connection, ext, lease, sessionId } = await leased({ active: true });
 		const installs = ext.rpcs("send").filter(rpc => rpc.method === "Page.addScriptToEvaluateOnNewDocument");
 		expect(installs).toHaveLength(2);
 		expect(String(installs[1]?.params?.source)).toContain("data-omp-cursor");
 		const before = ext.rpcs("send").length;
-		bridge.cdpMessage(
-			connection,
-			JSON.stringify({
-				id: ++msgSeq,
-				sessionId,
-				method: "Input.dispatchMouseEvent",
-				params: { type: "mousePressed", x: 120, y: 48, button: "left" },
-			}),
-		);
+		mouse(bridge, connection, sessionId, "mousePressed");
 		await flush();
-		// The arrow is placed before the click it mirrors, and never awaited.
+		// The click is not in Chrome yet: only the move is, and it is awaited.
 		expect(ext.rpcs("send").slice(before)).toMatchObject([
 			{
 				method: "Runtime.evaluate",
-				params: { expression: "window.__ompCursor?.move(120,48);window.__ompCursor?.press()" },
+				params: {
+					awaitPromise: true,
+					expression: "window.__ompCursor?.move(120,48).then(() => window.__ompCursor?.press())",
+				},
 			},
-			{ method: "Input.dispatchMouseEvent" },
+		]);
+		ackSends(bridge, ext);
+		await flush();
+		expect(ext.rpcs("send").slice(before + 1)).toMatchObject([
+			{ method: "Input.dispatchMouseEvent", params: { type: "mousePressed" } },
 		]);
 		ackSends(bridge, ext);
 		await flush();
 		const afterPress = ext.rpcs("send").length;
-		bridge.cdpMessage(
-			connection,
-			JSON.stringify({
-				id: ++msgSeq,
-				sessionId,
-				method: "Input.dispatchMouseEvent",
-				params: { type: "mouseReleased", x: 120, y: 48, button: "left" },
-			}),
-		);
+		mouse(bridge, connection, sessionId, "mouseReleased");
 		await flush();
 		// Releasing the button moves nothing, so it costs no extra round trip.
 		expect(ext.rpcs("send").slice(afterPress)).toMatchObject([{ method: "Input.dispatchMouseEvent" }]);
@@ -1763,5 +1810,254 @@ describe("RelayBridge lease presentation", () => {
 		const removals = ext.rpcs("send").filter(rpc => rpc.method === "Page.removeScriptToEvaluateOnNewDocument");
 		expect(removals.map(rpc => rpc.params?.identifier)).toEqual(installs.map(rpc => `script-${rpc.id}`));
 		expect(ext.rpcs("send").map(rpc => rpc.params?.expression)).toContain("window.__ompCursor?.remove()");
+	});
+
+	it("keeps a click's press ahead of the release puppeteer issued alongside it", async () => {
+		const { bridge, connection, ext, sessionId } = await leased({ active: true });
+		const before = ext.rpcs("send").length;
+		// Puppeteer fires a click's three events together and awaits all of them.
+		for (const type of ["mouseMoved", "mousePressed", "mouseReleased"] as const) {
+			mouse(bridge, connection, sessionId, type);
+		}
+		for (let round = 0; round < 8; round++) {
+			await flush();
+			ackSends(bridge, ext);
+		}
+		await flush();
+		expect(
+			ext
+				.rpcs("send")
+				.slice(before)
+				.map(
+					rpc => `${rpc.method}:${rpc.params?.type ?? (rpc.params?.awaitPromise === true ? "awaited" : "loose")}`,
+				),
+		).toEqual([
+			"Runtime.evaluate:loose",
+			"Input.dispatchMouseEvent:mouseMoved",
+			"Runtime.evaluate:awaited",
+			"Input.dispatchMouseEvent:mousePressed",
+			"Input.dispatchMouseEvent:mouseReleased",
+		]);
+	});
+
+	it("paints hover motion without waiting for it", async () => {
+		const { bridge, connection, ext, sessionId } = await leased({ active: true });
+		const before = ext.rpcs("send").length;
+		mouse(bridge, connection, sessionId, "mouseMoved", 200, 300);
+		await flush();
+		// Both out at once: the move is fired and forgotten, so the input never queued behind it.
+		expect(ext.rpcs("send").slice(before)).toMatchObject([
+			{ method: "Runtime.evaluate", params: { expression: "window.__ompCursor?.move(200,300)" } },
+			{ method: "Input.dispatchMouseEvent", params: { type: "mouseMoved" } },
+		]);
+		expect(ext.rpcs("send").at(before)?.params?.awaitPromise).toBeUndefined();
+	});
+
+	it("neither paints nor waits on a tab that is not the visible one in its window", async () => {
+		const { bridge, connection, ext, sessionId } = await leased({ active: false });
+		const before = ext.rpcs("send").length;
+		mouse(bridge, connection, sessionId, "mousePressed");
+		mouse(bridge, connection, sessionId, "mouseMoved", 200, 300);
+		for (let round = 0; round < 4; round++) {
+			await flush();
+			ackSends(bridge, ext);
+		}
+		await flush();
+		expect(
+			ext
+				.rpcs("send")
+				.slice(before)
+				.map(rpc => rpc.method),
+		).toEqual(["Input.dispatchMouseEvent", "Input.dispatchMouseEvent"]);
+	});
+
+	it("forwards the click when the pointer fails or never arrives, and says so once per tab", async () => {
+		const logged: string[] = [];
+		const { bridge, connection, ext, sessionId } = await leased({
+			active: true,
+			log: message => logged.push(message),
+		});
+		const firstMove = ext.rpcs("send").length;
+		mouse(bridge, connection, sessionId, "mousePressed");
+		await flush();
+		nack(bridge, ext, "send", "overlay is gone");
+		await flush();
+		expect(ext.rpcs("send").slice(firstMove + 1)).toMatchObject([{ method: "Input.dispatchMouseEvent" }]);
+		expect(logged.filter(message => message === "cursor paint failed")).toHaveLength(1);
+		ackSends(bridge, ext);
+		await flush();
+		// A move that resolves never, not with an error: the click has to leave on
+		// the arrival deadline rather than sit out the whole RPC timeout.
+		const stalledMove = ext.rpcs("send").length;
+		jest.useFakeTimers();
+		try {
+			mouse(bridge, connection, sessionId, "mousePressed", 640, 480);
+			await flush();
+			expect(ext.rpcs("send").slice(stalledMove)).toHaveLength(1);
+			jest.advanceTimersByTime(1_499);
+			await flush();
+			expect(ext.rpcs("send").slice(stalledMove)).toHaveLength(1);
+			jest.advanceTimersByTime(2);
+			await flush();
+			expect(ext.rpcs("send").slice(stalledMove + 1)).toMatchObject([{ method: "Input.dispatchMouseEvent" }]);
+		} finally {
+			jest.useRealTimers();
+		}
+		// Still one line: a cosmetic path that keeps failing must not keep talking.
+		expect(logged.filter(message => message === "cursor paint failed")).toHaveLength(1);
+	});
+});
+
+/** Style properties the overlay writes; everything else it sets is ignored. */
+interface StubStyle {
+	cssText: string;
+	transform: string;
+	opacity: string;
+	setProperty(key: string, value: string): void;
+}
+
+interface StubNode {
+	style: StubStyle;
+	children: StubNode[];
+	isConnected: boolean;
+	shadow: StubNode | undefined;
+	alt: string;
+	src: string;
+	width: number;
+	height: number;
+	draggable: boolean;
+	append(...kids: StubNode[]): void;
+	setAttribute(key: string, value: string): void;
+	attachShadow(): StubNode;
+	remove(): void;
+}
+
+interface CursorApi {
+	move(x: number, y: number): Promise<void>;
+	press(): void;
+	hide(): void;
+	remove(): void;
+}
+
+describe("cursor overlay page script", () => {
+	function stubNode(): StubNode {
+		const style: StubStyle = { cssText: "", transform: "", opacity: "", setProperty: () => {} };
+		const node: StubNode = {
+			style,
+			children: [],
+			isConnected: true,
+			shadow: undefined,
+			alt: "",
+			src: "",
+			width: 0,
+			height: 0,
+			draggable: true,
+			append: (...kids) => node.children.push(...kids),
+			setAttribute: () => {},
+			attachShadow: () => {
+				node.shadow = stubNode();
+				return node.shadow;
+			},
+			remove: () => {
+				node.isConnected = false;
+			},
+		};
+		return node;
+	}
+
+	/** Enough of a document for the overlay to mount into and be stepped frame by frame. */
+	function installOverlay(): {
+		api: CursorApi;
+		hosts: StubNode[];
+		style: () => StubStyle;
+		conceal: () => void;
+		drive: (settled: () => boolean) => Promise<number>;
+	} {
+		const hosts: StubNode[] = [];
+		let clock = 0;
+		let queued: ((ts: number) => void) | null = null;
+		const root = stubNode();
+		root.append = (...kids) => hosts.push(...kids);
+		const document = {
+			documentElement: root,
+			visibilityState: "visible",
+			createElement: () => stubNode(),
+			addEventListener: () => {},
+			removeEventListener: () => {},
+			querySelectorAll: () => hosts,
+		};
+		const context = createContext({}) as Record<string, unknown>;
+		Object.assign(context, {
+			addEventListener: () => {},
+			cancelAnimationFrame: () => {
+				queued = null;
+			},
+			document,
+			innerHeight: 800,
+			innerWidth: 1280,
+			performance: { now: () => clock },
+			removeEventListener: () => {},
+			requestAnimationFrame: (callback: (ts: number) => void) => {
+				queued = callback;
+				return 1;
+			},
+			self: context,
+			top: context,
+			visualViewport: { width: 1280, height: 800, addEventListener: () => {}, removeEventListener: () => {} },
+			window: context,
+		});
+		runInContext(CURSOR_OVERLAY_INSTALL, context);
+		const api = context.__ompCursor as CursorApi | undefined;
+		if (!api) throw new Error("the overlay did not install");
+		return {
+			api,
+			hosts,
+			conceal: () => {
+				document.visibilityState = "hidden";
+			},
+			// The host's shadow root holds the clipping layer, which holds the glyph box.
+			style: () => hosts[0]!.shadow!.children[0]!.children[0]!.style,
+			drive: async (settled: () => boolean) => {
+				let frames = 0;
+				while (frames < 900 && !settled()) {
+					const callback = queued;
+					if (!callback) break;
+					queued = null;
+					clock += 1000 / 60;
+					callback(clock);
+					await flush();
+					frames++;
+				}
+				return frames;
+			},
+		};
+	}
+
+	it("travels to the point and only then resolves, leaving the glyph on it", async () => {
+		const overlay = installOverlay();
+		let arrived = false;
+		void overlay.api.move(1100, 700).then(() => {
+			arrived = true;
+		});
+		await flush();
+		// Still in the air: nothing resolves until the glyph is on the target.
+		expect(arrived).toBe(false);
+		expect(overlay.style().transform).not.toStartWith("translate3d(1088px, 688px, 0)");
+		const frames = await overlay.drive(() => arrived);
+		expect(arrived).toBe(true);
+		expect(frames).toBeGreaterThan(10);
+		// The pivot is the centre of the 24px glyph box, so the box lands 12px up-left.
+		expect(overlay.style().transform).toStartWith("translate3d(1088px, 688px, 0)");
+		expect(overlay.style().opacity).toBe("1");
+	});
+
+	it("resolves without animating while the tab is hidden, and cleans itself off the page", async () => {
+		const overlay = installOverlay();
+		overlay.conceal();
+		await overlay.api.move(400, 400);
+		expect(overlay.style().transform).toStartWith("translate3d(388px, 388px, 0)");
+		expect(overlay.style().opacity).toBe("0");
+		overlay.api.remove();
+		expect(overlay.hosts.every(host => !host.isConnected)).toBe(true);
 	});
 });

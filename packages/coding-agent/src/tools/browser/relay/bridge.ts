@@ -174,6 +174,10 @@ class TabState {
 	badgeScriptId: string | undefined;
 	/** Cursor-overlay script installed alongside the badge; drives the in-page arrow. */
 	cursorScriptId: string | undefined;
+	/** A cursor paint already failed on this tab; the next ones stay silent. */
+	cursorPaintFailed = false;
+	/** Tail of this tab's forwarded mouse events; keeps them in the order the driver sent them. */
+	mouseTail: Promise<void> = Promise.resolve();
 	/** A successful attach completed after the most recently requested relay detach. */
 	reattachedAfterDetach = false;
 	/** Root CDP commands in flight; a puppeteer wait blocks inside one, so an idle detach must not fire. */
@@ -243,6 +247,13 @@ const CDP_ERROR_SERVER = -32000;
 const DEBUGGER_IDLE_MS = 10_000;
 /** How stale a `Page.windowOpen` may be and still explain a new tab. */
 const WINDOW_OPEN_MATCH_MS = 3_000;
+/**
+ * How long a click waits for the in-page cursor to reach it before going
+ * anyway — Codex's own arrival timeout (`Vf` in their service worker). The
+ * wait is what makes the pointer readable: without it the click lands while
+ * the glyph is still in the air.
+ */
+const CURSOR_ARRIVAL_TIMEOUT_MS = 1_500;
 
 function tabTargetId(tabId: number): string {
 	return `TAB${tabId}`;
@@ -870,30 +881,77 @@ export class RelayBridge {
 			throw new Error("Use the explicit tab reveal/release lifecycle operation");
 		}
 		if (!realSessionId) this.#recordRootState(tab, msg);
-		this.#paintCursor(tab, msg);
-		try {
-			const result = await this.#sendToTab(tab, msg.method, msg.params, realSessionId);
-			this.#reply(conn, msg, (result as Record<string, unknown> | undefined) ?? {});
-		} catch (err) {
-			this.#replyError(conn, msg, err instanceof Error ? err.message : String(err));
+		const send = async (): Promise<void> => {
+			// Only a click on a visible tab has anything to wait for; everything
+			// else must reach Chrome in the same turn it was forwarded.
+			const arrival = this.#paintCursor(tab, msg);
+			if (arrival) await arrival;
+			try {
+				const result = await this.#sendToTab(tab, msg.method, msg.params, realSessionId);
+				this.#reply(conn, msg, (result as Record<string, unknown> | undefined) ?? {});
+			} catch (err) {
+				this.#replyError(conn, msg, err instanceof Error ? err.message : String(err));
+			}
+		};
+		if (msg.method !== "Input.dispatchMouseEvent") {
+			await send();
+			return;
 		}
+		// A mouse event means nothing out of order, and puppeteer dispatches a
+		// click's move/press/release concurrently — so the moment the press
+		// waits for the pointer, the release it was issued with would overtake
+		// it. One queue per tab keeps Chrome seeing what the driver asked for.
+		const queued = tab.mouseTail.then(send, send);
+		tab.mouseTail = queued;
+		await queued;
 	}
 
 	/**
-	 * Move the in-page arrow to the point OMP is about to click. Dispatched
-	 * before the input it mirrors and never awaited: the click path keeps its
-	 * latency, and an overlay that lost a frame is a cosmetic miss.
+	 * Move the in-page arrow to the point OMP is about to click.
 	 * `Input.dispatchMouseEvent` coordinates are viewport CSS pixels, exactly
 	 * what a `position:fixed` overlay wants.
+	 *
+	 * A click on a tab the user is looking at waits for the glyph to arrive
+	 * (Codex does the same, off `isVisible`): the pointer only communicates
+	 * anything if it is at the target when the target reacts. Everything else
+	 * — hover motion, and any tab that is not the visible one in its window —
+	 * costs the click path nothing: a hidden tab gets no animation frames, so
+	 * there is nothing to see and nothing to wait for. Failures are swallowed
+	 * here and nowhere else; the cursor is cosmetic and must never cost a click.
 	 */
-	#paintCursor(tab: TabState, msg: CdpCommand): void {
-		if (tab.cursorScriptId === undefined || msg.method !== "Input.dispatchMouseEvent") return;
+	#paintCursor(tab: TabState, msg: CdpCommand): Promise<void> | undefined {
+		if (tab.cursorScriptId === undefined || msg.method !== "Input.dispatchMouseEvent" || !tab.active) return;
 		const type = msg.params?.type;
 		if (type !== "mouseMoved" && type !== "mousePressed") return;
 		const { x, y } = msg.params as { x?: unknown; y?: unknown };
 		if (typeof x !== "number" || typeof y !== "number") return;
-		const expression = `window.__ompCursor?.move(${x},${y})${type === "mousePressed" ? ";window.__ompCursor?.press()" : ""}`;
-		void this.#sendToTab(tab, "Runtime.evaluate", { expression }).catch(() => {});
+		const move = `window.__ompCursor?.move(${x},${y})`;
+		if (type === "mouseMoved") {
+			void this.#sendToTab(tab, "Runtime.evaluate", { expression: move }).catch(() => {});
+			return;
+		}
+		return this.#awaitCursorArrival(tab, `${move}.then(() => window.__ompCursor?.press())`);
+	}
+
+	async #awaitCursorArrival(tab: TabState, expression: string): Promise<void> {
+		const arrival = this.#sendToTab(tab, "Runtime.evaluate", { expression, awaitPromise: true });
+		const deadline = Promise.withResolvers<never>();
+		const timer = setTimeout(
+			() => deadline.reject(new Error("cursor did not arrive in time")),
+			CURSOR_ARRIVAL_TIMEOUT_MS,
+		);
+		try {
+			await Promise.race([arrival, deadline.promise]);
+		} catch (err) {
+			if (tab.cursorPaintFailed) return;
+			tab.cursorPaintFailed = true;
+			this.#log("cursor paint failed", {
+				tabId: tab.tabId,
+				error: err instanceof Error ? err.message : String(err),
+			});
+		} finally {
+			clearTimeout(timer);
+		}
 	}
 
 	/** Tab pseudo-sessions only exist to satisfy puppeteer's Target hierarchy. */
@@ -990,7 +1048,11 @@ export class RelayBridge {
 					return;
 				}
 				if (!(await this.#ensureAttached(tab))) {
-					this.#replyError(conn, msg, `Cannot attach to tab ${tab.tabId} (${tab.url})${tab.banReason ? `: ${tab.banReason}` : ""}`);
+					this.#replyError(
+						conn,
+						msg,
+						`Cannot attach to tab ${tab.tabId} (${tab.url})${tab.banReason ? `: ${tab.banReason}` : ""}`,
+					);
 					return;
 				}
 				const sessionId = this.#mintSession(conn, parsed.kind, tab.tabId);
@@ -1116,7 +1178,9 @@ export class RelayBridge {
 		// child attach/detach goes only to sessions that armed auto-attach.
 		const childEvent = method === "Target.attachedToTarget" || method === "Target.detachedFromTarget";
 		for (const conn of this.#conns.values()) {
-			for (const pageSession of childEvent ? conn.autoAttachSessionsForTab(tabId) : conn.sessionsForTab(tabId, "page")) {
+			for (const pageSession of childEvent
+				? conn.autoAttachSessionsForTab(tabId)
+				: conn.sessionsForTab(tabId, "page")) {
 				conn.socket.send(JSON.stringify({ sessionId: pageSession, method, params }));
 			}
 		}
@@ -1226,6 +1290,7 @@ export class RelayBridge {
 				source: CURSOR_OVERLAY_INSTALL,
 			})) as { identifier?: string } | undefined;
 			tab.cursorScriptId = cursor?.identifier;
+			tab.cursorPaintFailed = false;
 			await this.#sendToTab(tab, "Runtime.evaluate", { expression: CURSOR_OVERLAY_INSTALL });
 		} catch (err) {
 			this.#log("lease badge skipped", { tabId, error: err instanceof Error ? err.message : String(err) });
@@ -1388,7 +1453,9 @@ export class RelayBridge {
 		const tab = this.#tabs.get(tabId);
 		if (!tab) return { attached: false, revoked: "the tab is gone from Chrome" };
 		if (tab.attached) return { attached: true };
-		return tab.banned ? { attached: false, revoked: tab.banReason ?? describeDetach("target_closed") } : { attached: false };
+		return tab.banned
+			? { attached: false, revoked: tab.banReason ?? describeDetach("target_closed") }
+			: { attached: false };
 	}
 
 	/** Serialize dialog metadata only after the caller has validated the exact lease. */
@@ -1489,8 +1556,11 @@ export class RelayBridge {
 				await this.#restoreRoot(tab);
 				// Driving starts here, so this is where the tab strip learns about
 				// it — including after a turn-end detach dropped the glyph's script.
+				// Awaited: the per-document install has to be registered before the
+				// first forwarded command can navigate, or the new document has no
+				// overlay until the next reattach. Best-effort inside, never throws.
 				if (this.#markTabs && this.managed.leaseForTab(tab.tabId) !== undefined)
-					void this.#showLeaseBadge(tab.tabId);
+					await this.#showLeaseBadge(tab.tabId);
 				return true;
 			})
 			.catch(err => {
