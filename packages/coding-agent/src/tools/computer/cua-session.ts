@@ -79,6 +79,11 @@ export interface CuaSessionOptions {
 	spawn?: CuaDriverFactory;
 	/** WindowServer roster used for interruption checks; tests inject a quiet desktop. */
 	sampleRoster?: () => WindowRosterSample;
+	/**
+	 * Host the driver child runs on. The driver is a local child, so this is
+	 * `process.platform`; tests pin it to exercise the other backend.
+	 */
+	platform?: NodeJS.Platform;
 }
 function object(value: unknown, name: string): Wire {
 	if (!value || typeof value !== "object" || Array.isArray(value)) throw new ToolError(`Malformed Cua ${name}`);
@@ -186,6 +191,21 @@ function delivery(options: ActionOptions): Wire {
 function foreground(options: { delivery?: "background" | "foreground" }): void {
 	if (options.delivery !== "foreground") throw new ToolError("This desktop operation requires delivery: 'foreground'");
 }
+/**
+ * The driver advertises its own wire vocabulary in refusal text and escalation
+ * advice (`delivery_mode: "foreground"`); the prelude takes
+ * `{ delivery: "foreground" }`. Rewriting at the error boundary keeps a typed
+ * refusal's own suggestion executable as written. Structured details stay
+ * verbatim on the error's context.
+ */
+const DELIVERY_MODE_VOCABULARY = /delivery_mode\s*:\s*"(background|foreground)"/g;
+function preludeVocabulary<T>(value: T): T {
+	if (typeof value === "string") return value.replace(DELIVERY_MODE_VOCABULARY, '{ delivery: "$1" }') as T;
+	if (Array.isArray(value)) return value.map(entry => preludeVocabulary(entry)) as T;
+	if (value && typeof value === "object")
+		return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, preludeVocabulary(entry)])) as T;
+	return value;
+}
 function unsupported(operation: string): never {
 	throw new ToolError(`Unsupported Cua operation: ${operation}`);
 }
@@ -209,6 +229,7 @@ function unsupported(operation: string): never {
 export class CuaComputerSession implements ComputerBackend {
 	readonly #spawn: CuaDriverFactory;
 	readonly #sampleRoster: () => WindowRosterSample;
+	readonly #platform: NodeJS.Platform;
 	readonly #elements = new Map<string, Binding>();
 	readonly #frames = new Map<string, Frame>();
 	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
@@ -226,54 +247,74 @@ export class CuaComputerSession implements ComputerBackend {
 		spawn: CuaDriverFactory,
 		sampleRoster: () => WindowRosterSample,
 		permissions: Wire,
+		platform: NodeJS.Platform,
 	) {
 		this.#driver = driver;
 		this.#spawn = spawn;
 		this.#sampleRoster = sampleRoster;
-		const capture = permissions.screen_recording === true;
+		this.#platform = platform;
+		// The two backends answer `check_permissions` with disjoint keys:
+		// macOS reports TCC grants (`accessibility`, `screen_recording`),
+		// Linux reports reachability (`x11`, `wayland`, `atspi`, `xsend_event`).
+		// Nothing is synthesized: an unreported key stays false.
+		const linux = platform === "linux";
+		const x11 = permissions.x11 === true;
+		const atspi = permissions.atspi === true;
 		const accessibility = permissions.accessibility === true;
+		const capture = linux ? x11 : permissions.screen_recording === true;
+		const input = linux ? x11 : accessibility;
+		const ax = linux ? atspi : accessibility;
+		// X11 has no permission model; reachability is the booleans above.
+		const state = (granted: boolean): string => (linux ? "not-applicable" : granted ? "granted" : "not-granted");
 		this.capabilities = Object.freeze({
 			backend: "cua-driver",
-			displayServer: "macos",
+			displayServer: linux ? (permissions.wayland === true ? "wayland" : "x11") : "macos",
 			capture,
-			input: accessibility,
-			ax: accessibility,
-			backgroundWindowInput: accessibility,
+			input,
+			ax,
+			backgroundWindowInput: linux ? atspi || x11 : accessibility,
 			deliveryModes: ["background", "foreground"],
-			capturePermission: capture ? "granted" : "not-granted",
-			inputPermission: accessibility ? "granted" : "not-granted",
-			axPermission: accessibility ? "granted" : "not-granted",
+			capturePermission: state(capture),
+			inputPermission: state(input),
+			axPermission: state(ax),
 			displayCount: 0,
+			permissions: Object.freeze({ ...permissions }),
 			driver: Object.freeze({ version: driver.version, transport: "mcp --direct" }),
 			displayCountKnown: false,
 			displayEnumeration: "primary only; other display count is unknown",
 			captureScope: "exact window or primary display",
-			desktopCoordinates: "primary display only; requires current UUID, native id, origin, size and scale metadata",
+			desktopCoordinates: linux
+				? "unavailable; the Linux driver reports no display identity, so desktop-root input is refused"
+				: "primary display only; requires current UUID, native id, origin, size and scale metadata",
 			desktopDrag: "exactly two points; the driver interpolates one straight drag",
 			windowDrag:
 				"foreground only; durationMs integer 0–10000 (default 500), steps integer 1–200 (default 20); background drag is unavailable",
 			desktopScroll: "one axis per action; pixel deltas must be multiples of 120, up to 6000",
-			backgroundInput: "best effort; use observation backgroundInput and fresh evidence, never assume delivery",
+			backgroundInput: linux
+				? 'toolkit-dependent; a typed background_unavailable refusal means nothing was dispatched — retry with { delivery: "foreground" }'
+				: "best effort; use observation backgroundInput and fresh evidence, never assume delivery",
 			elementRefLifetime:
 				"Exact driver snapshot, PID and window; re-observe after StaleRef. AX traversals can evict driver snapshots.",
-			unsupported: ["window hover", "focusedWindow", "secondary display enumeration/capture/input"],
+			unsupported: linux
+				? ["window hover", "focusedWindow", "displays", "desktop-root input", "interruption detection"]
+				: ["window hover", "focusedWindow", "secondary display enumeration/capture/input"],
 		});
 	}
 
 	static async create(options: CuaSessionOptions = {}): Promise<CuaComputerSession> {
 		if (options.display && !["all", "primary"].includes(options.display))
 			unsupported(`display selector '${options.display}'`);
+		const platform = options.platform ?? process.platform;
 		const spawn = options.spawn ?? spawnVendoredCuaDriver;
 		const driver = await spawn();
 		try {
 			const permissions = await driver.callTool("check_permissions", { prompt: false });
 			if (permissions.isError) throw new ToolError(permissions.text);
-			return new CuaComputerSession(
-				driver,
-				spawn,
-				options.sampleRoster ?? sampleWindowRoster,
-				object(JSON.parse(permissions.structuredJson ?? "{}"), "permissions"),
-			);
+			const reported = object(JSON.parse(permissions.structuredJson ?? "{}"), "permissions");
+			// Without an X11 connection the Linux driver answers every window
+			// call with an opaque X error; its own report says what is missing.
+			if (platform === "linux" && reported.x11 !== true) throw new ToolError(permissions.text);
+			return new CuaComputerSession(driver, spawn, options.sampleRoster ?? sampleWindowRoster, reported, platform);
 		} catch (error) {
 			await driver.kill({ force: true });
 			throw error;
@@ -297,6 +338,23 @@ export class CuaComputerSession implements ComputerBackend {
 		if (this.#closed) throw new ToolError("Computer session is closed");
 	}
 	/**
+	 * The only place interruption detection is decided. Every caller — the
+	 * pre-dispatch gate, observations, action replies and `launch`'s crash
+	 * watch — goes through here, and off macOS it is always "no sample".
+	 *
+	 * The WindowServer roster is a macOS concept: `pi-natives` has no other
+	 * implementation, and X11 has no equivalent of a layer-1000 SecurityAgent
+	 * window. Leaving the gate to an empty roster would state the same
+	 * behaviour by accident; this states it.
+	 */
+	#roster(): WindowRosterSample | undefined {
+		return this.#platform === "darwin" ? this.#sampleRoster() : undefined;
+	}
+	#interruption(): ComputerInterruption | undefined {
+		const sample = this.#roster();
+		return sample && rosterInterruption(sample);
+	}
+	/**
 	 * Pre-dispatch gate for every mutation. While a system prompt owns the
 	 * screen an action either lands invisibly behind it (background routes are
 	 * pid-addressed and AX writes bypass the WindowServer) or lands *in* it
@@ -309,7 +367,7 @@ export class CuaComputerSession implements ComputerBackend {
 	 * on the user's screen.
 	 */
 	#refuseWhenInterrupted(name: string, crashAlertTarget?: string): void {
-		const interruption = rosterInterruption(this.#sampleRoster());
+		const interruption = this.#interruption();
 		if (!interruption) return;
 		if (
 			crashAlertTarget !== undefined &&
@@ -365,8 +423,12 @@ export class CuaComputerSession implements ComputerBackend {
 				// Malformed optional details must not replace the original SDK failure.
 			}
 			const code = result.errorCode ?? (typeof details?.error === "string" ? details.error : "CuaError");
+			// A typed refusal (`background_unavailable`, `foreground_unavailable`)
+			// carries the driver's own reason and the one escalation that works.
+			// Both survive verbatim; only the route is restated in the vocabulary
+			// the caller can actually type. Nothing is retried here.
 			throw new ToolError(
-				`${code}: ${result.text}${details ? `\nDetails: ${JSON.stringify(details)}` : ""}`,
+				`${code}: ${preludeVocabulary(result.text)}${details ? `\nDetails: ${JSON.stringify(preludeVocabulary(details))}` : ""}`,
 				details,
 			);
 		}
@@ -383,8 +445,13 @@ export class CuaComputerSession implements ComputerBackend {
 	#windowRoster(data: Wire, selector: WindowSelector, sample?: WindowRosterSample): ComputerWindowIdentity[] {
 		if (!Array.isArray(data.windows)) throw new ToolError("Malformed Cua window roster");
 		const onScreen = new Map((sample?.windows ?? []).map(window => [window.id, window]));
-		const windows: ComputerWindowIdentity[] = data.windows.map(value => {
+		const windows: ComputerWindowIdentity[] = [];
+		for (const value of data.windows) {
 			const row = object(value, "window");
+			// X11 reports a titled window whose owner set no `_NET_WM_PID` with
+			// `pid: null` (contract-legal). Every driver call is pid-addressed,
+			// so such a row names nothing this session can observe or act on.
+			if (row.pid === null) continue;
 			const window = {
 				id: String(number(row.window_id, "window_id")),
 				pid: number(row.pid, "pid"),
@@ -392,15 +459,17 @@ export class CuaComputerSession implements ComputerBackend {
 				title: string(row.title, "title"),
 				bounds: bounds(row.bounds),
 				onScreen: typeof row.is_on_screen === "boolean" ? row.is_on_screen : undefined,
-				layer: number(row.layer, "layer"),
+				// Contract-optional and absent on Linux; only macOS stacks system
+				// panels on a layer. Unknown stays unknown.
+				...(typeof row.layer === "number" ? { layer: row.layer } : {}),
 				// An owner's off-screen placeholder window is not the panel itself.
 				kind: onScreen.has(String(row.window_id))
 					? classifyWindow({ app: string(row.app_name, "app_name") })
 					: ("other" as const),
 			};
 			windowArgs(window);
-			return Object.freeze(window);
-		});
+			windows.push(Object.freeze(window));
+		}
 		if (sample) {
 			const known = new Set(windows.map(window => window.id));
 			for (const row of sample.windows) {
@@ -432,7 +501,7 @@ export class CuaComputerSession implements ComputerBackend {
 	}
 	async #windows(selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
 		const { data } = await this.#call("list_windows", {});
-		return this.#windowRoster(data, selector, this.#sampleRoster());
+		return this.#windowRoster(data, selector, this.#roster());
 	}
 	async #window(selector: string | WindowSelector): Promise<ComputerWindowIdentity> {
 		const filter = typeof selector === "string" ? { id: selector } : selector;
@@ -443,7 +512,7 @@ export class CuaComputerSession implements ComputerBackend {
 			// exact AXWindows mapping may narrow a broad selector; visibility,
 			// title, size and stacking order are not evidence of window ownership.
 			const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
-			const sample = this.#sampleRoster();
+			const sample = this.#roster();
 			const roster = this.#windowRoster(data, { pid }, sample);
 			matches = this.#windowRoster(data, filter, sample).filter(window => window.pid === pid);
 			const metadata = data.accessibility_windows;
@@ -586,8 +655,13 @@ export class CuaComputerSession implements ComputerBackend {
 				snapshotId,
 				window: current,
 				elements: rows.map(row => row.element),
+				// `elements_complete` is hard-coded false on Linux (the AT-SPI
+				// walker has no exhaustive-walk proof), so an equal returned/total
+				// count is the only evidence there that nothing was clipped.
 				complete:
-					reply.data.elements_complete === true &&
+					(reply.data.elements_complete === true ||
+						(typeof reply.data.returned_element_count === "number" &&
+							reply.data.returned_element_count === reply.data.total_element_count)) &&
 					reply.data.ax_walk_timed_out !== true &&
 					reply.data.ax_walk_stop_reason == null,
 				backgroundInput: reply.data.background_input ?? null,
@@ -622,7 +696,7 @@ export class CuaComputerSession implements ComputerBackend {
 			// An observation is the model's picture of the environment; a system
 			// prompt over it is part of that picture even though the AX tree of
 			// the target window looks entirely normal underneath.
-			observation.interruptedBy = rosterInterruption(this.#sampleRoster());
+			observation.interruptedBy = this.#interruption();
 			if (observation.interruptedBy)
 				observation.tree += `\n⚠️ Interrupted: ${describeInterruption(observation.interruptedBy)}. Actions on any window are refused until it is answered; tell the user what is asking.`;
 			if (options.screenshot) {
@@ -697,7 +771,15 @@ export class CuaComputerSession implements ComputerBackend {
 		reply: Reply,
 		silent: boolean,
 	): Promise<ComputerImage> {
-		if (reply.data.screenshot_frame_valid !== true) {
+		// `screenshot_frame_valid` is a contract-optional tri-state: macOS sets
+		// it true on success, Linux only ever sets it false on a capture error.
+		// A valid frame is therefore "not denied, one image part, and geometry
+		// to bind it to" — absence is not failure and never fabricates pixels.
+		if (
+			reply.data.screenshot_frame_valid === false ||
+			reply.result.images.length !== 1 ||
+			reply.data.window_bounds === undefined
+		) {
 			const failure = reply.data.screenshot_error;
 			if (failure && typeof failure === "object" && !Array.isArray(failure)) {
 				const details = failure as Wire;
@@ -779,7 +861,7 @@ export class CuaComputerSession implements ComputerBackend {
 	 */
 	async #action(name: string, args: Wire): Promise<ComputerActionResult> {
 		const { result, data } = await this.#call(name, args);
-		const interruptedBy = rosterInterruption(this.#sampleRoster());
+		const interruptedBy = this.#interruption();
 		return {
 			text: interruptedBy
 				? `${result.text}\n⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
@@ -1217,10 +1299,12 @@ export class CuaComputerSession implements ComputerBackend {
 			// An app that traps at startup queues a CrashReporter alert (UserNotificationCenter)
 			// a moment after launch_app returns. Watch briefly so the crash surfaces as an
 			// interruption naming the alert instead of a "launched" result that invites a retry.
-			for (let waited = 0; !result.interruptedBy && waited < 2_000; waited += 250) {
+			// macOS-only: no other platform draws that alert, and polling an
+			// always-empty roster would only cost the launch two seconds.
+			for (let waited = 0; this.#platform === "darwin" && !result.interruptedBy && waited < 2_000; waited += 250) {
 				await Bun.sleep(250);
 				throwIfAborted(context.signal);
-				result.interruptedBy = rosterInterruption(this.#sampleRoster());
+				result.interruptedBy = this.#interruption();
 			}
 			if (result.interruptedBy) {
 				result.text +=
@@ -1231,12 +1315,13 @@ export class CuaComputerSession implements ComputerBackend {
 			return result;
 		});
 	}
-	/** Poll up to 2 s for the crash alert of a launched app that already died. */
+	/** Poll up to 2 s for the crash alert of a launched app that already died; macOS-only. */
 	async #watchCrashAlert(context: Context, pid: number): Promise<ComputerInterruption | undefined> {
+		if (this.#platform !== "darwin") return undefined;
 		for (let waited = 0; waited < 2_000; waited += 250) {
 			await Bun.sleep(250);
 			throwIfAborted(context.signal);
-			const interruption = rosterInterruption(this.#sampleRoster());
+			const interruption = this.#interruption();
 			if (interruption && this.#recordCrashAlert(pid, interruption)) return interruption;
 		}
 		return undefined;

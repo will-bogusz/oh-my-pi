@@ -15,7 +15,12 @@ export interface VendoredDriver {
 
 const VENDOR_DIR = path.resolve(import.meta.dir, "../../../../../vendor/cua-driver");
 
-function manifestRow(value: unknown, platform: string): Omit<VendoredDriver, "filePath"> {
+/**
+ * One platform directory's `manifest.json`, validated. The platform key must
+ * match the directory it was read from: a driver built for another host is a
+ * mismatch, not a fallback.
+ */
+export function parseDriverManifest(value: unknown, platform: string): Omit<VendoredDriver, "filePath"> {
 	if (!value || typeof value !== "object") throw new ToolError(`Malformed cua-driver manifest for ${platform}`);
 	const row = value as Record<string, unknown>;
 	if (
@@ -47,5 +52,5 @@ export async function vendoredDriver(platform: string): Promise<VendoredDriver |
 		if (isEnoent(error)) return undefined;
 		throw error;
 	}
-	return { ...manifestRow(manifest, platform), filePath: path.join(directory, "cua-driver") };
+	return { ...parseDriverManifest(manifest, platform), filePath: path.join(directory, "cua-driver") };
 }

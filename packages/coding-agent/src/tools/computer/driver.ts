@@ -91,8 +91,9 @@ function hash(bytes: Uint8Array): string {
 /**
  * The installed executable for this host, copied from the vendored file into
  * the natives cache the first time (or after a driver update). The path is
- * fixed rather than content-addressed: macOS TCC keys an unbundled binary's
- * grants by path, so replacing the file in place keeps the record stable.
+ * fixed rather than content-addressed for macOS: TCC keys an unbundled
+ * binary's grants by path, so replacing the file in place keeps the grant
+ * record stable. Other hosts share the layout; it costs them nothing.
  * `manifest.json` beside it names the installed sha256. No network.
  */
 export async function installCuaDriver(platform: string = DRIVER_PLATFORM): Promise<string> {
