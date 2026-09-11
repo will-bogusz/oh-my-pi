@@ -67,6 +67,13 @@ interface SessionRef {
 	runtimeEnabling: Promise<void> | null;
 	/** Monotonic ownership token for enable rollback and replay. */
 	runtimeEpoch: number;
+	/**
+	 * This session armed `Target.setAutoAttach`. Chrome reports a real child
+	 * target (OOPIF, worker) only on the session that asked; fanning it to
+	 * every page session would announce one child id twice and puppeteer
+	 * silently replaces the first session object, losing its replies.
+	 */
+	autoAttach: boolean;
 }
 
 interface TargetInfo {
@@ -95,6 +102,15 @@ class CdpConnection {
 		const out: string[] = [];
 		for (const [sessionId, ref] of this.sessions) {
 			if (ref.tabId === tabId && (!kind || ref.kind === kind)) out.push(sessionId);
+		}
+		return out;
+	}
+
+	/** Page sessions that armed `Target.setAutoAttach`: the only ones Chrome would report children on. */
+	autoAttachSessionsForTab(tabId: number): string[] {
+		const out: string[] = [];
+		for (const [sessionId, ref] of this.sessions) {
+			if (ref.tabId === tabId && ref.kind === "page" && ref.autoAttach) out.push(sessionId);
 		}
 		return out;
 	}
@@ -663,6 +679,7 @@ export class RelayBridge {
 			return;
 		}
 		if (msg.method !== "Runtime.enable") {
+			if (msg.method === "Target.setAutoAttach") ref.autoAttach = msg.params?.autoAttach === true;
 			await this.#forwardToTab(conn, msg, ref.tabId, undefined);
 			return;
 		}
@@ -1054,10 +1071,10 @@ export class RelayBridge {
 		}
 		if (sourceSessionId) {
 			// Event from a real child session: pass through verbatim to every
-			// connection that observes this tab.
+			// connection that was told about the child.
 			const payload = JSON.stringify({ sessionId: sourceSessionId, method, params });
 			for (const conn of this.#conns.values()) {
-				if (conn.sessionsForTab(tabId, "page").length > 0) conn.socket.send(payload);
+				if (conn.autoAttachSessionsForTab(tabId).length > 0) conn.socket.send(payload);
 			}
 			return;
 		}
@@ -1095,9 +1112,11 @@ export class RelayBridge {
 			}
 			return;
 		}
-		// Other root-session events fan out once per minted page session.
+		// Other root-session events fan out once per minted page session. Real
+		// child attach/detach goes only to sessions that armed auto-attach.
+		const childEvent = method === "Target.attachedToTarget" || method === "Target.detachedFromTarget";
 		for (const conn of this.#conns.values()) {
-			for (const pageSession of conn.sessionsForTab(tabId, "page")) {
+			for (const pageSession of childEvent ? conn.autoAttachSessionsForTab(tabId) : conn.sessionsForTab(tabId, "page")) {
 				conn.socket.send(JSON.stringify({ sessionId: pageSession, method, params }));
 			}
 		}
@@ -1347,6 +1366,7 @@ export class RelayBridge {
 			runtimeContexts: new Set(),
 			runtimeEnabling: null,
 			runtimeEpoch: 0,
+			autoAttach: false,
 		});
 		return sessionId;
 	}
@@ -1541,6 +1561,8 @@ export class RelayBridge {
 		const { promise, resolve, reject } = Promise.withResolvers<unknown>();
 		const timer = setTimeout(() => {
 			this.#pendingRpc.delete(id);
+			const detail = req.op === "send" ? { tabId: req.tabId, sessionId: req.sessionId, method: req.method } : {};
+			this.#log("extension rpc timed out", { op: req.op, timeoutMs, ...detail });
 			reject(new Error(`extension rpc '${req.op}' timed out after ${timeoutMs}ms`));
 		}, timeoutMs);
 		this.#pendingRpc.set(id, { resolve, reject, timer });

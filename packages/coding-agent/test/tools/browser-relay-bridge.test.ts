@@ -1098,6 +1098,57 @@ describe("RelayBridge attachment release", () => {
 		).toEqual(received);
 	});
 
+	it("reports a real child target once, on the page session that armed auto-attach", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const cdp = new FakeCdpSocket();
+		const conn = connectCdp(bridge, cdp, 1);
+		// Puppeteer's page session arms auto-attach; a transient
+		// `page.createCDPSession()` on the same page never does.
+		const manager = await attachPage(bridge, ext, cdp, conn, 1);
+		const transient = await attachPage(bridge, ext, cdp, conn, 1);
+		bridge.cdpMessage(
+			conn,
+			JSON.stringify({
+				id: ++msgSeq,
+				sessionId: manager,
+				method: "Target.setAutoAttach",
+				params: { autoAttach: true, waitForDebuggerOnStart: true, flatten: true },
+			}),
+		);
+		ack(bridge, ext, "send");
+		await flush();
+		const child = "REAL-CHILD-SESSION";
+		const attached = { sessionId: child, targetInfo: { targetId: "OOPIF", type: "iframe", url: "" }, waitingForDebugger: true };
+		bridge.extMessage(ext, JSON.stringify({ t: "cdpEvent", tabId: 1, method: "Target.attachedToTarget", params: attached }));
+		bridge.extMessage(
+			ext,
+			JSON.stringify({ t: "cdpEvent", tabId: 1, sessionId: child, method: "Page.lifecycleEvent", params: { name: "load" } }),
+		);
+		const announcements = cdp.messages.filter(
+			message =>
+				message.method === "Target.attachedToTarget" &&
+				typeof message.params === "object" &&
+				message.params !== null &&
+				"sessionId" in message.params &&
+				message.params.sessionId === child,
+		);
+		expect(announcements.map(message => message.sessionId)).toEqual([manager]);
+		expect(cdp.messages.filter(message => message.sessionId === child).map(message => message.method)).toEqual([
+			"Page.lifecycleEvent",
+		]);
+		expect(transient).not.toBe(manager);
+		// Commands on the child route to Chrome under the real session and answer the caller.
+		const commandId = ++msgSeq;
+		bridge.cdpMessage(conn, JSON.stringify({ id: commandId, sessionId: child, method: "Target.getTargetInfo" }));
+		await flush();
+		expect(ext.rpcs("send").at(-1)).toMatchObject({ tabId: 1, sessionId: child, method: "Target.getTargetInfo" });
+		ack(bridge, ext, "send", { targetInfo: attached.targetInfo });
+		await flush();
+		expect(cdp.messages.find(message => message.id === commandId)).toMatchObject({ sessionId: child });
+	});
+
 	it("holds a pipelined duplicate Runtime.enable until the in-flight enable settles", async () => {
 		const bridge = new RelayBridge({});
 		const ext = new FakeExtSocket();
