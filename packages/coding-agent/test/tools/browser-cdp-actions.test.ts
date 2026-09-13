@@ -478,3 +478,32 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	},
 	60_000,
 );
+
+// The tree shows option labels; the values are page-internal keys.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"selects an option by its label or its value and reports what an unmatched one could have been",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(FIELDS_PAGE, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				expect(await run<string[]>('return await tab.select("#fuel", "Electric");')).toEqual(["ele"]);
+				expect(await run<string[]>('return await tab.select("#fuel", "pet");')).toEqual(["pet"]);
+				const refused = await runError('await tab.select("#fuel", "Diesel");');
+				expect(refused).toContain('matched no option for "Diesel"');
+				expect(refused).toContain('"Petrol"="pet"');
+				// The refusal leaves the page alone rather than clearing the field.
+				expect(await run<string>('return await tab.evaluate(() => document.getElementById("fuel").value);')).toBe(
+					"pet",
+				);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);

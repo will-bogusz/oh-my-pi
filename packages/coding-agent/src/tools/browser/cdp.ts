@@ -477,10 +477,24 @@ export async function typeIntoNode(node: CdpNode, text: string, signal?: AbortSi
 const SELECT_OPTIONS = `function (values) {
 	const select = this;
 	if (select.tagName !== "SELECT") throw new Error("select() requires a <select> element");
+	const options = Array.from(select.options);
+	// A caller reading the page names an option by the label it shows; the
+	// value is a page-internal key that often differs from it.
+	const names = option => [option.value, option.label, (option.textContent || "").trim()];
+	const missing = values.filter(value => !options.some(option => names(option).includes(value)));
+	if (missing.length) {
+		const shown = options.slice(0, 30).map(option =>
+			option.label === option.value
+				? JSON.stringify(option.value)
+				: JSON.stringify(option.label) + "=" + JSON.stringify(option.value));
+		throw new Error(
+			"select() matched no option for " + missing.map(value => JSON.stringify(value)).join(", ") +
+			"; this <select> offers " + (shown.join(", ") + (options.length > 30 ? ", …" : "")));
+	}
 	const wanted = new Set(values);
-	for (const option of select.options) option.selected = wanted.has(option.value);
+	for (const option of options) option.selected = names(option).some(name => wanted.has(name));
 	const selected = [];
-	for (const option of select.options) if (option.selected) selected.push(option.value);
+	for (const option of options) if (option.selected) selected.push(option.value);
 	select.dispatchEvent(new Event("input", { bubbles: true }));
 	select.dispatchEvent(new Event("change", { bubbles: true }));
 	return selected;
