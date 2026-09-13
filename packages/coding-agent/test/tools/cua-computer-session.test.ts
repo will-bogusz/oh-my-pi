@@ -352,11 +352,49 @@ it("returns exact candidates without inspecting one when broad acquisition remai
 			expect(failure).toBeInstanceOf(Error);
 			if (!(failure instanceof Error)) throw new Error("Expected ambiguous acquisition to fail");
 			expect(failure.message).toContain("Ambiguous");
-			expect(failure.message).toContain('"id":"1","pid":101');
-			expect(failure.message).toContain('"id":"2","pid":101');
-			expect(failure.message).toContain('"title":"Second"');
+			expect(failure.message).toContain("2 windows match");
+			expect(failure.message).toContain('computer.window("1")');
+			expect(failure.message).toContain('- id "1" pid 101 Fixture "Editor" 200×100 at (10,20)');
+			expect(failure.message).toContain('- id "2" pid 101 Fixture "Second" 200×100 at (10,20) offscreen');
 			expect(f.calls.every(call => call.name === "list_windows")).toBe(true);
 		}
+	} finally {
+		await f.close();
+	}
+});
+
+it("names the launch option and each candidate's document when acquisition resolves no window", async () => {
+	const f = await fixture();
+	try {
+		// Nothing matched: an app selector can be launched in the same call, an
+		// exact identity cannot.
+		await expect(f.session.window(f.context, { app: "Absent" })).rejects.toThrow(
+			'If "Absent" is not running yet, launch and acquire it in one call with computer.window({"app":"Absent"}, { launch: true })',
+		);
+		await expect(f.session.window(f.context, { id: "7", pid: 101 })).rejects.toThrow(
+			'Missing computer window {"id":"7","pid":101}: nothing matches it. Run computer.windows() to see what is open.',
+		);
+		// Two restored documents of one app share its name, so the file each
+		// window reported when it was last observed is what tells them apart. A
+		// window never observed carries no path, and nothing is invented for it.
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows") return reply({ windows: [f.row, { ...f.row, window_id: 2 }] });
+			if (name !== "get_window_state") return undefined;
+			return reply({
+				pid: f.row.pid,
+				window_id: args.window_id,
+				snapshot_id: "s-doc",
+				elements: [],
+				document_path: "file:///Users/will/Desktop/Project%20File%20List.workflow",
+			});
+		};
+		await f.session.observe(f.context, f.window, { screenshot: false });
+		const failure = await f.session.window(f.context, { app: "Fixture" }).catch((error: unknown) => error);
+		const message = (failure as Error).message;
+		expect(message).toContain(
+			'- id "1" pid 101 Fixture "Editor" 200×100 at (10,20) document=file:///Users/will/Desktop/Project%20File%20List.workflow',
+		);
+		expect(message.endsWith('- id "2" pid 101 Fixture "Editor" 200×100 at (10,20)')).toBe(true);
 	} finally {
 		await f.close();
 	}

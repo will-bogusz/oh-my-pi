@@ -273,11 +273,25 @@ const LAUNCHED_WINDOW_TIMEOUT_MS = 15_000;
 const LAUNCHED_WINDOW_POLL_MS = 250;
 
 /**
+ * A `Missing` acquisition tells the model to try `{ launch: true }`, which is
+ * exactly what just ran, so the one-call path states what happened instead of
+ * sending it back around the same loop. An `Ambiguous` failure keeps its own
+ * candidate list: that one is actionable as written.
+ */
+function launchedNothing(selector: WindowSelector, error: unknown): unknown {
+	if (!(error instanceof ToolError) || !error.message.startsWith("Missing computer window")) return error;
+	return new ToolError(
+		`Missing computer window ${JSON.stringify(selector)}: launched ${JSON.stringify(selector.app)} and no window of it could be acquired — it opened none within ${LAUNCHED_WINDOW_TIMEOUT_MS / 1000} s, or the one it opened is already gone. Run computer.windows() to see what it did open.`,
+		error.context,
+	);
+}
+
+/**
  * `{ launch: true }` collapses the three-call acquisition every native run
  * started with — `window()` throws `Missing`, `launch()`, `window()` again —
  * into one call. Nothing is launched while a window already matches, and the
- * wait is bounded: an app that opens no window ends in the same `Missing`
- * error, with the candidates it did produce.
+ * wait is bounded: an app that opens no window ends in a `Missing` error that
+ * says so, and one that opens several ends in the candidate list.
  */
 async function launchAndAcquire(
 	session: ComputerBackend,
@@ -295,7 +309,9 @@ async function launchAndAcquire(
 	for (;;) {
 		const context = operationContext(getContext);
 		if ((await session.windows(context, selector)).length || Date.now() >= deadline)
-			return session.window(context, selector);
+			return await session.window(context, selector).catch((error: unknown) => {
+				throw launchedNothing(selector, error);
+			});
 		await Bun.sleep(LAUNCHED_WINDOW_POLL_MS);
 	}
 }

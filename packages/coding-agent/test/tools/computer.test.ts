@@ -14,6 +14,7 @@ import { computerApproval, createComputerPrelude } from "@oh-my-pi/pi-coding-age
 import type { ComputerBackend } from "@oh-my-pi/pi-coding-agent/tools/computer/backend";
 import { isReadOnlyComputerCall, renderComputerCall } from "@oh-my-pi/pi-coding-agent/tools/computer/call";
 import { ComputerSupervisor } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
+import { ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import type {
 	ComputerActionResult,
 	ComputerElementSnapshot,
@@ -94,7 +95,10 @@ class FakeBackend implements ComputerBackend {
 	}
 	async window(context: ComputerOperationContext, selector: string | WindowSelector) {
 		const windows = await this.windows(context, typeof selector === "string" ? { id: selector } : selector);
-		if (windows.length !== 1) throw new Error("Missing window identity");
+		// The real backend's shape: the runtime reads this prefix to tell an
+		// unresolved acquisition from any other failure.
+		if (windows.length !== 1)
+			throw new ToolError(`Missing computer window ${JSON.stringify(selector)}: nothing matches it.`);
 		const window = windows[0]!;
 		if (this.pins.has(window.id) && this.pins.get(window.id) !== window.pid)
 			throw new Error("InvalidTarget: owner changed");
@@ -386,6 +390,18 @@ describe("computer preludes through the session", () => {
 				),
 			).rejects.toThrow("read-only");
 			expect(launch).toHaveBeenCalledTimes(1);
+			// A window that is gone by the time the launch is acquired must not be
+			// told to launch again: that is the call it just made.
+			const vanished = spyOn(backend, "window").mockRejectedValue(
+				new ToolError('Missing computer window {"app":"Code"}: nothing matches it. If "Code" is not running yet…'),
+			);
+			const failure = await runInContext('computer.window({app:"Code"}, {launch:true})', realm).catch(
+				(error: unknown) => error as Error,
+			);
+			vanished.mockRestore();
+			expect(launch).toHaveBeenCalledTimes(2);
+			expect(failure.message).toContain('launched "Code" and no window of it could be acquired');
+			expect(failure.message).not.toContain("launch: true");
 		} finally {
 			launch.mockRestore();
 			await runInContext("computer.close()", realm);

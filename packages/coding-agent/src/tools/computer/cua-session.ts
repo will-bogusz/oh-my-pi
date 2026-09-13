@@ -274,6 +274,12 @@ export class CuaComputerSession implements ComputerBackend {
 	readonly #platform: NodeJS.Platform;
 	readonly #elements = new Map<string, Binding>();
 	readonly #frames = new Map<string, Frame>();
+	/**
+	 * The file each observed window said it was showing, by window id. Only
+	 * `get_window_state` reads `AXDocument`, so this is what acquisition knows
+	 * about a candidate without walking it again.
+	 */
+	readonly #documents = new Map<string, string>();
 	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
 	#driver: CuaDriver;
 	/**
@@ -375,6 +381,7 @@ export class CuaComputerSession implements ComputerBackend {
 		this.#driver = await this.#spawn();
 		this.#elements.clear();
 		this.#frames.clear();
+		this.#documents.clear();
 		this.#desktopFrame = undefined;
 		return this.#driver;
 	}
@@ -549,6 +556,44 @@ export class CuaComputerSession implements ComputerBackend {
 		const { data } = await this.#call("list_windows", {});
 		return this.#windowRoster(data, selector, this.#roster());
 	}
+	/**
+	 * Acquisition is the first call of every native run, so both failures name
+	 * their own way out. Nothing matched: an `{ app }` selector may name an app
+	 * that is not running, which `{ launch: true }` starts and acquires in the
+	 * same call — an exact id/pid cannot be launched, so it is only told what
+	 * lists the alternatives. Several matched: one line per candidate with the
+	 * exact id to acquire, so picking one costs no `windows()` round trip.
+	 * Document windows are the ambiguous case that a title cannot settle (two
+	 * restored Automator workflows, one of them "Untitled"), so the file an
+	 * earlier observation of that window reported is printed beside it.
+	 */
+	#unresolved(selector: string | WindowSelector, matches: ComputerWindowIdentity[]): ToolError {
+		const named = JSON.stringify(selector);
+		const app = typeof selector === "string" ? undefined : selector.app;
+		if (!matches.length)
+			return new ToolError(
+				`Missing computer window ${named}: nothing matches it. ${
+					app === undefined
+						? "Run computer.windows() to see what is open"
+						: `If ${JSON.stringify(app)} is not running yet, launch and acquire it in one call with computer.window(${named}, { launch: true }); otherwise run computer.windows() to see what is open`
+				}.`,
+			);
+		return new ToolError(
+			`Ambiguous computer window ${named}: ${matches.length} windows match. Acquire one by its exact id, e.g. computer.window(${JSON.stringify(matches[0]!.id)}):\n${matches
+				.map(window => this.#candidate(window))
+				.join("\n")}`,
+		);
+	}
+	#candidate(window: ComputerWindowIdentity): string {
+		const document = this.#documents.get(window.id);
+		return `- id ${JSON.stringify(window.id)} pid ${window.pid} ${window.app} ${JSON.stringify(window.title)} ${
+			window.bounds.width
+		}×${window.bounds.height} at (${window.bounds.x},${window.bounds.y})${
+			window.onScreen === false ? " offscreen" : ""
+		}${window.kind !== undefined && window.kind !== "other" ? ` kind=${window.kind}` : ""}${
+			document === undefined ? "" : ` document=${document}`
+		}`;
+	}
 	async #window(selector: string | WindowSelector): Promise<ComputerWindowIdentity> {
 		const filter = typeof selector === "string" ? { id: selector } : selector;
 		let matches = await this.#windows(filter);
@@ -585,10 +630,7 @@ export class CuaComputerSession implements ComputerBackend {
 				}
 			}
 		}
-		if (matches.length !== 1)
-			throw new ToolError(
-				`${matches.length ? "Ambiguous" : "Missing"} computer window ${JSON.stringify(selector)}: ${JSON.stringify(matches)}`,
-			);
+		if (matches.length !== 1) throw this.#unresolved(selector, matches);
 		return matches[0]!;
 	}
 	#current(window: Pick<ComputerWindowIdentity, "id" | "pid">): Promise<ComputerWindowIdentity> {
@@ -756,6 +798,10 @@ export class CuaComputerSession implements ComputerBackend {
 			// reports neither). AX value writes never reach disk, so this is how the
 			// model tells "text changed" from "saved".
 			if (typeof reply.data.document_path === "string") observation.documentPath = reply.data.document_path;
+			// Kept for the next ambiguous acquisition of this app: a document
+			// window's file identifies it where its title does not.
+			if (observation.documentPath === undefined) this.#documents.delete(current.id);
+			else this.#documents.set(current.id, observation.documentPath);
 			if (typeof reply.data.document_edited === "boolean") observation.documentEdited = reply.data.document_edited;
 			if (observation.documentPath !== undefined || observation.documentEdited !== undefined)
 				observation.tree += `\nDocument: ${observation.documentPath ?? "(path unknown)"}${observation.documentEdited === undefined ? "" : observation.documentEdited ? " — unsaved changes" : " — no unsaved changes flagged (setValue writes are not flagged; check the disk)"}`;
@@ -1473,6 +1519,7 @@ export class CuaComputerSession implements ComputerBackend {
 			} finally {
 				this.#elements.clear();
 				this.#frames.clear();
+				this.#documents.clear();
 				this.#desktopFrame = undefined;
 			}
 		})();
