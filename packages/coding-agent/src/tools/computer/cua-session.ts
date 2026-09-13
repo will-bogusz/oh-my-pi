@@ -234,7 +234,12 @@ export class CuaComputerSession implements ComputerBackend {
 	readonly #frames = new Map<string, Frame>();
 	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
 	#driver: CuaDriver;
-	#generation = crypto.randomUUID();
+	/**
+	 * Monotonic source of public element refs (`n1`, `n2`, …). Never reset: a
+	 * respawn clears `#elements`, and a counter that restarted would hand a
+	 * dead ref from the previous child a live binding in the new one.
+	 */
+	#refSeq = 0;
 	#tail: Promise<unknown> = Promise.resolve();
 	/** Signal of the operation currently holding the serialized tail. */
 	#signal?: AbortSignal;
@@ -326,7 +331,6 @@ export class CuaComputerSession implements ComputerBackend {
 		if (this.#driver.alive) return this.#driver;
 		logger.warn("cua-driver child is gone; respawning", { previousPid: this.#driver.pid });
 		this.#driver = await this.#spawn();
-		this.#generation = crypto.randomUUID();
 		this.#elements.clear();
 		this.#frames.clear();
 		this.#desktopFrame = undefined;
@@ -622,7 +626,10 @@ export class CuaComputerSession implements ComputerBackend {
 			for (const value of reply.data.elements) {
 				const row = object(value, "element");
 				const token = string(row.element_token, "element_token");
-				const ref = `${this.#generation}/${crypto.randomUUID()}`;
+				// `#elements` is the only binding: it carries the exact window, driver
+				// snapshot and element token, and rejects a ref it does not hold. The
+				// ref itself only has to be unique for this session's lifetime.
+				const ref = `n${++this.#refSeq}`;
 				if (row.background_actions != null && !Array.isArray(row.background_actions))
 					throw new ToolError("Malformed Cua background actions");
 				const actions = row.background_actions ?? row.actions;

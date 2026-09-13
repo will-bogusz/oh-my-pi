@@ -217,11 +217,13 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		if (name === "type_text") state.value += String(args.text);
 		return reply({ effect: "unverifiable", evidence: null, route: "accessibility" });
 	};
+	/** Cleared by `crash()`; the next `spawn` restores it, as a real respawn would. */
+	let live = true;
 	const driver: CuaDriver = {
 		version: "0.24.0",
 		pid: 900,
 		get alive() {
-			return state.kills === 0;
+			return live && state.kills === 0;
 		},
 		async callTool(name, args, signal) {
 			calls.push({ name, args });
@@ -250,7 +252,10 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 	};
 	const session = await CuaComputerSession.create({
 		platform,
-		spawn: async () => driver,
+		spawn: async () => {
+			live = true;
+			return driver;
+		},
 		sampleRoster: () => ({ windows: [], elapsedMs: 0 }),
 	});
 	const context: ComputerOperationContext = {
@@ -272,6 +277,9 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		window,
 		state,
 		row,
+		crash: () => {
+			live = false;
+		},
 		calls,
 		replies,
 		images,
@@ -523,6 +531,28 @@ it("rejects expired public refs, wrong-window refs, and recycled window owners",
 		f.row.pid = 102;
 		await expect(f.session.type(f.context, f.window, "no")).rejects.toThrow("Missing");
 		expect(f.calls.some(call => call.name === "click" || call.name === "type_text")).toBe(false);
+	} finally {
+		await f.close();
+	}
+});
+
+it("numbers element refs compactly and never reissues one a later observation invalidated", async () => {
+	const f = await fixture();
+	try {
+		const first = await f.session.observe(f.context, f.window);
+		expect(first.elements.map(element => element.ref)).toEqual(["n1"]);
+		expect(first.tree).toStartWith("- [n1] AXTextField");
+		const second = await f.session.observe(f.context, f.window);
+		expect(second.elements.map(element => element.ref)).toEqual(["n2"]);
+		// The dead ref must not resolve to the live element that replaced it.
+		expect(() => f.session.element("n1")).toThrow("StaleRef");
+		// A replaced child clears the map; a counter that restarted would hand
+		// `n1`/`n2` from the dead child a binding in the new one.
+		f.crash();
+		const third = await f.session.observe(f.context, f.window);
+		expect(third.elements.map(element => element.ref)).toEqual(["n3"]);
+		expect(() => f.session.element("n2")).toThrow("StaleRef");
+		expect(f.session.element("n3").role).toBe("AXTextField");
 	} finally {
 		await f.close();
 	}
