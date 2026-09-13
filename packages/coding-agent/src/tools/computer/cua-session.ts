@@ -236,6 +236,8 @@ function preludeVocabulary<T>(value: T): T {
 function unsupported(operation: string): never {
 	throw new ToolError(`Unsupported Cua operation: ${operation}`);
 }
+/** macOS rows whose `AXPress` needs the menu already open; see `#menuBarRoute`. */
+const MENU_BAR_ROLES: Record<string, true> = { AXMenuBar: true, AXMenuBarItem: true };
 /**
  * `set_value` writes `AXValue` and then drives the app's own end-of-edit
  * gesture, reporting in `committed` whether the value survived it. Only that
@@ -1023,6 +1025,35 @@ export class CuaComputerSession implements ComputerBackend {
 			data,
 		};
 	}
+	/**
+	 * A menu bar item reports `AXEnabled` only while its own menu is open, so
+	 * the driver refuses the press before dispatch — and neither escalation it
+	 * suggests (foreground delivery, `bring_to_front`) opens a menu. Every
+	 * macOS tree carries these rows advertising `press`, and the route that
+	 * does drive them is `menu(path)`, which the driver has no way to name
+	 * because it addressed one element, not a path. The ref's own role is what
+	 * identifies the case; the driver's text survives in front of it.
+	 */
+	#menuBarRoute(target: ComputerTarget | undefined): string | undefined {
+		if (typeof target !== "string") return undefined;
+		const element = this.#elements.get(target)?.element;
+		if (!element || MENU_BAR_ROLES[element.role] !== true) return undefined;
+		return `\nThat ref is a ${element.role}: an AX action on it only lands while its menu is already open, and no delivery mode opens one. Drive the menu instead: win.menu([${
+			element.label ? JSON.stringify(element.label) : '"<menu>"'
+		}, "<item>"], { delivery: "foreground" }).`;
+	}
+	/** Dispatch that can name the route a refused menu bar action actually needs. */
+	async #dispatch(name: string, args: Wire, target: ComputerTarget | undefined): Promise<ComputerActionResult> {
+		try {
+			return await this.#action(name, args);
+		} catch (error) {
+			// An aborted call is not a ToolError and keeps its own identity.
+			if (!(error instanceof ToolError)) throw error;
+			const route = this.#menuBarRoute(target);
+			if (route === undefined) throw error;
+			throw new ToolError(`${error.message}${route}`, error.context);
+		}
+	}
 	#targetAction(
 		context: Context,
 		name: string,
@@ -1038,7 +1069,7 @@ export class CuaComputerSession implements ComputerBackend {
 			async () => {
 				const current = await this.#current(window);
 				throwIfAborted(context.signal);
-				return this.#action(name, { ...this.#target(current, target), ...args });
+				return this.#dispatch(name, { ...this.#target(current, target), ...args }, target);
 			},
 			crashAlertTarget,
 		);
@@ -1070,13 +1101,17 @@ export class CuaComputerSession implements ComputerBackend {
 						point = pixel;
 					}
 				}
-				return this.#action("click", {
-					...this.#target(current, point),
-					...delivery(options),
-					button: options.button,
-					count: options.count,
-					modifier: options.modifiers,
-				});
+				return this.#dispatch(
+					"click",
+					{
+						...this.#target(current, point),
+						...delivery(options),
+						button: options.button,
+						count: options.count,
+						modifier: options.modifiers,
+					},
+					target,
+				);
 			},
 			// A background click on an element ref is the AX press route, so it
 			// may address a crash alert this session caused (see the gate). A

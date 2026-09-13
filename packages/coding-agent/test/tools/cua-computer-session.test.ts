@@ -124,6 +124,9 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 			};
 	const state = {
 		sequence: 0,
+		/** Overrides the row's platform-default role/label (menu bar rows, etc.). */
+		role: undefined as string | undefined,
+		label: undefined as string | undefined,
 		value: "" as string | undefined,
 		placeholder: "Hint, not value" as string | undefined,
 		/** `AXHelp`/AT-SPI description: absent on most rows, "" when the provider has none. */
@@ -201,8 +204,8 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 						{
 							element_index: 1,
 							element_token: `s${state.sequence}:1`,
-							role: linux ? "push button" : "AXTextField",
-							label: linux ? "B3" : "Editor",
+							role: state.role ?? (linux ? "push button" : "AXTextField"),
+							label: state.label ?? (linux ? "B3" : "Editor"),
 							value: state.value,
 							placeholder: state.placeholder,
 							help: state.help,
@@ -592,6 +595,45 @@ it("renders provider help and description when the row carries them", async () =
 		expect(observation.elements[0]!.description).toBeUndefined();
 		expect(observation.tree).not.toContain(" help=");
 		expect(observation.tree).not.toContain(" description=");
+	} finally {
+		await f.close();
+	}
+});
+
+it("names the menu route when the driver refuses an action on a menu bar row", async () => {
+	const f = await fixture();
+	const refusal = {
+		text: 'refusing AXPress: the target reports AXEnabled=false. Retry this action with delivery_mode:"foreground" or call bring_to_front first',
+		structuredJson: JSON.stringify({ error: "ax_action_refused" }),
+		isError: true,
+		errorCode: "ax_action_refused",
+		images: [],
+	};
+	const refused = async (action: Promise<unknown>): Promise<string> => {
+		try {
+			await action;
+		} catch (error) {
+			return error instanceof Error ? error.message : String(error);
+		}
+		throw new Error("Expected the driver refusal to surface");
+	};
+	try {
+		f.state.role = "AXMenuBarItem";
+		f.state.label = "File";
+		const menuBarRef = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		f.state.hook = async name => (name === "click" ? refusal : undefined);
+		const failure = await refused(f.session.perform(f.context, f.window, menuBarRef, "press"));
+		// The driver's own refusal survives in front of the route it cannot name.
+		expect(failure).toContain("refusing AXPress: the target reports AXEnabled=false");
+		expect(failure).toContain("That ref is a AXMenuBarItem");
+		expect(failure).toContain('win.menu(["File", "<item>"], { delivery: "foreground" })');
+		// An ordinary control's refusal is left exactly as the driver wrote it.
+		f.state.role = "AXTextField";
+		f.state.label = "Editor";
+		const ordinaryRef = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const plain = await refused(f.session.click(f.context, f.window, ordinaryRef));
+		expect(plain).toContain("refusing AXPress");
+		expect(plain).not.toContain("win.menu");
 	} finally {
 		await f.close();
 	}
