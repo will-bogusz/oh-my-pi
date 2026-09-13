@@ -472,6 +472,31 @@ it("never calls a budget-capped tree complete without the walker's own verdict",
 	}
 });
 
+it("speaks each backend's own key vocabulary instead of forwarding the caller's", async () => {
+	for (const platform of ["darwin", "linux"] as const) {
+		const f = await fixture({ platform });
+		const mac = platform === "darwin";
+		try {
+			// An unknown modifier is not refused on the macOS keystroke path: it is
+			// dropped and the base key types on its own.
+			await f.session.press(f.context, f.window, "super+a", undefined, { delivery: "foreground" });
+			expect(f.calls.at(-1)).toMatchObject({ name: "hotkey", args: { keys: [mac ? "cmd" : "super", "a"] } });
+			await f.session.press(f.context, f.window, "Cmd+Shift+D", undefined, { delivery: "foreground" });
+			expect(f.calls.at(-1)).toMatchObject({
+				name: "hotkey",
+				args: { keys: [mac ? "Cmd" : "super", "Shift", "D"] },
+			});
+			await f.session.press(f.context, f.window, ["ArrowDown"], undefined, { delivery: "foreground" });
+			expect(f.calls.at(-1)).toMatchObject({ name: "press_key", args: { key: "down" } });
+			// Names the driver already knows are passed through untouched.
+			await f.session.press(f.context, f.window, "Return", undefined, { delivery: "foreground" });
+			expect(f.calls.at(-1)).toMatchObject({ name: "press_key", args: { key: "Return" } });
+		} finally {
+			await f.close();
+		}
+	}
+});
+
 it("preserves absent and whitespace values independently from provider placeholder text", async () => {
 	const f = await fixture();
 	try {

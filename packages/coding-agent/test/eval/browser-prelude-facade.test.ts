@@ -322,8 +322,7 @@ describe("browser facade in real Eval runtimes", () => {
 				...shipped,
 				async invoke(parameters) {
 					if (field(parameters, "action") === "open") return { content: [], details: { name: "echo-js" } };
-					if (firstChainMethod(parameters) === "title")
-						return { content: [], details: { value: "Docs" } };
+					if (firstChainMethod(parameters) === "title") return { content: [], details: { value: "Docs" } };
 					return {
 						content: [{ type: "text", text: tree }],
 						details: { value: { snapshot: "s1", elements: [{ id: 5 }] }, rendered: true },

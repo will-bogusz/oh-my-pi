@@ -180,10 +180,37 @@ function windowArgs(window: Pick<ComputerWindowIdentity, "id" | "pid">): Wire {
 		throw new ToolError("Invalid exact Cua window identity");
 	return { pid: window.pid, window_id: id };
 }
-function chordKeys(chord: string | string[]): string[] {
+/**
+ * Names each backend does not know, mapped to the one it does. The macOS
+ * driver's modifier set is `cmd|command|shift|option|alt|ctrl|control|fn`
+ * (`tools/hotkey.rs`) and the X11 driver's is `shift|ctrl|control|alt|super|
+ * meta|win` (`input/mod.rs: key_name_to_keysym`), so the same chord has two
+ * spellings. An unknown name is not a refusal on the macOS keystroke path: the
+ * modifier is dropped and the base key types on its own, which is how `super+a`
+ * typed "a" into a name field during the bench.
+ */
+const MACOS_KEY_ALIASES: Readonly<Record<string, string>> = {
+	super: "cmd",
+	meta: "cmd",
+	win: "cmd",
+	windows: "cmd",
+};
+const X11_KEY_ALIASES: Readonly<Record<string, string>> = {
+	cmd: "super",
+	command: "super",
+	windows: "super",
+	option: "alt",
+};
+/** DOM key names; both drivers spell the arrows bare. */
+const ARROW_KEY = /^arrow(up|down|left|right)$/;
+function chordKeys(chord: string | string[], platform: NodeJS.Platform): string[] {
 	const keys = Array.isArray(chord) ? [...chord] : chord.split("+").map(key => key.trim());
 	if (!keys.length || keys.some(key => !key)) throw new ToolError("Invalid key chord");
-	return keys;
+	const aliases = platform === "darwin" ? MACOS_KEY_ALIASES : X11_KEY_ALIASES;
+	return keys.map(key => {
+		const lower = key.toLowerCase();
+		return ARROW_KEY.exec(lower)?.[1] ?? aliases[lower] ?? key;
+	});
 }
 function delivery(options: ActionOptions): Wire {
 	return { delivery_mode: options.delivery ?? "background" };
@@ -664,8 +691,7 @@ export class CuaComputerSession implements ComputerBackend {
 			// reached, so every budget-capped walk called itself complete. Without
 			// a verdict a requested `maxElements` is a budget the walk may have
 			// hit, and no count can argue that away.
-			const walkFinished =
-				reply.data.ax_walk_timed_out !== true && reply.data.ax_walk_stop_reason == null;
+			const walkFinished = reply.data.ax_walk_timed_out !== true && reply.data.ax_walk_stop_reason == null;
 			const countedWhole =
 				typeof reply.data.returned_element_count === "number" &&
 				reply.data.returned_element_count === reply.data.total_element_count;
@@ -966,7 +992,7 @@ export class CuaComputerSession implements ComputerBackend {
 		target?: ComputerTarget,
 		options: ActionOptions = {},
 	): Promise<ComputerActionResult> {
-		const keys = chordKeys(chord);
+		const keys = chordKeys(chord, this.#platform);
 		return this.#targetAction(context, keys.length === 1 ? "press_key" : "hotkey", window, target, {
 			...(keys.length === 1 ? { key: keys[0] } : { keys }),
 			...delivery(options),
@@ -1269,7 +1295,7 @@ export class CuaComputerSession implements ComputerBackend {
 	): Promise<ComputerActionResult> {
 		return this.#schedule(context, "desktopPress", true, async () => {
 			foreground(options);
-			const keys = chordKeys(chord);
+			const keys = chordKeys(chord, this.#platform);
 			return this.#action(keys.length === 1 ? "press_key" : "hotkey", {
 				scope: "desktop",
 				...(keys.length === 1 ? { key: keys[0] } : { keys }),
