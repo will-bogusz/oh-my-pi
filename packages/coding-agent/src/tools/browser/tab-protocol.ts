@@ -123,6 +123,12 @@ export interface RunResultOk {
 	screenshots: ScreenshotResult[];
 	/** `returnValue` is the observation this run already printed or suppressed. */
 	rendered?: boolean;
+	/**
+	 * The run finished, but tab-scoped browser state could not be restored
+	 * afterwards. The result is real and is delivered; the supervisor recycles
+	 * the tab behind it.
+	 */
+	recoverTab?: boolean;
 }
 
 export interface RunErrorPayload {

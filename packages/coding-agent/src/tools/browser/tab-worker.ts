@@ -611,12 +611,22 @@ interface RunPageScope {
 }
 
 /** Run-owned event handlers cannot survive a failed cell or remove controller observers. */
-function createRunPageScope(page: Page): RunPageScope {
+export function createRunPageScope(page: Page): RunPageScope {
 	const handlers: { type: unknown; original: unknown; registered: unknown }[] = [];
 	const on = page.on;
 	const off = page.off;
+	const setRequestInterception = page.setRequestInterception;
+	// Only a run that turned interception on needs it turned off. Puppeteer's
+	// `NetworkManager` starts with no recorded protocol state, so a bare
+	// `setRequestInterception(false)` is not a no-op: it fans out
+	// `Network.setCacheDisabled` + `Fetch.disable` and can outlive the cleanup
+	// budget on a page that never intercepted anything.
+	let intercepting = false;
 	const descriptors = Object.fromEntries(
-		["on", "off", "once", "removeAllListeners"].map(name => [name, Object.getOwnPropertyDescriptor(page, name)]),
+		["on", "off", "once", "removeAllListeners", "setRequestInterception"].map(name => [
+			name,
+			Object.getOwnPropertyDescriptor(page, name),
+		]),
 	);
 	const remove = (index: number): void => {
 		const [entry] = handlers.splice(index, 1);
@@ -663,6 +673,13 @@ function createRunPageScope(page: Page): RunPageScope {
 			},
 		},
 		removeAllListeners: { configurable: true, value: removeAll },
+		setRequestInterception: {
+			configurable: true,
+			value: async (value: unknown): Promise<void> => {
+				await Reflect.apply(setRequestInterception, page, [value]);
+				intercepting = value === true;
+			},
+		},
 	});
 
 	return {
@@ -674,6 +691,7 @@ function createRunPageScope(page: Page): RunPageScope {
 				else Reflect.deleteProperty(page, name);
 			}
 			await resume;
+			if (!intercepting) return;
 			try {
 				await withTimeout(
 					page.setRequestInterception(false),
@@ -1179,6 +1197,8 @@ export class WorkerCore {
 		const signal = AbortSignal.any([timeoutSignal, ac.signal, runAc.signal]);
 		const output = new RunOutput();
 		const screenshots: ScreenshotResult[] = [];
+		/** A completed run whose tab state could not be restored; the result still stands. */
+		let recoverTab: unknown;
 		const floatingFailure = Promise.withResolvers<never>();
 		const active: ActiveRun = {
 			id: msg.id,
@@ -1314,7 +1334,11 @@ export class WorkerCore {
 				try {
 					await cleanup();
 				} catch (error) {
-					failure = { error };
+					// Work the cell already finished is never retracted over tab
+					// bookkeeping: the result stands and the supervisor recycles the
+					// tab whose browser state could not be restored.
+					if (completed) recoverTab = error;
+					else failure = { error };
 				}
 			}
 			failure = this.#foldFloatingRejections(active, failure);
@@ -1325,6 +1349,10 @@ export class WorkerCore {
 			return;
 		}
 		if (completed) {
+			if (recoverTab)
+				this.#log("warn", "Browser tab state could not be restored after a completed run; recycling the tab", {
+					error: recoverTab instanceof Error ? recoverTab.message : String(recoverTab),
+				});
 			await this.#postReadyInfo();
 			this.#transport.send({
 				type: "result",
@@ -1335,6 +1363,7 @@ export class WorkerCore {
 					returnValue: cloneSafe(returnValue),
 					screenshots,
 					...(returnValue !== undefined && returnValue === active.presented ? { rendered: true } : {}),
+					...(recoverTab ? { recoverTab: true } : {}),
 				},
 			});
 		}
