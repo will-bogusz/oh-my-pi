@@ -7,6 +7,7 @@
 - `/rename` without a title now generates a session name from recent conversation using the configured tiny model.
 - Added opt-in experimental notes-backed context windows with persistent branch-local notes, searchable original session history, retained latest user requests, and a model-callable rollover tool, including in Code Mode.
 - `/loop` accepts `--until '<cmd>'` / `--while '<cmd>'` to gate each iteration on a shell command's exit status, so a loop can stop on real project state instead of only a count or duration. ([#10858](https://github.com/can1357/oh-my-pi/pull/10858) by [@andyhite](https://github.com/andyhite))
+- The `computer` prelude now runs on Linux (X11 + AT-SPI) through a vendored `linux-x64` cua-driver 0.28.0 alongside the `darwin-arm64` build: the prompt renders per backend, typed `background_unavailable` refusals name the `{ delivery: "foreground" }` route in prelude vocabulary, and `computer.capabilities()` reports the backend's real capture/input/AX state. Both vendored drivers come from the same fork stack (`cua-driver` 0.28.0); the macOS binary is code-signed with a stable identity so rebuilt drivers keep their permission grants.
 
 ### Fixed
 
