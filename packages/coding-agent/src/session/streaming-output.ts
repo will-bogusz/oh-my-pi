@@ -72,6 +72,16 @@ export interface OutputSinkOptions {
 	 * writes still respect the budget. Default 0 = no per-line cap.
 	 */
 	maxColumns?: number;
+	/**
+	 * Whether the first line of the stream counts against `maxColumns`. Console
+	 * output someone printed on purpose is often a single long line — a JSON
+	 * dump, a page's extracted text — and cutting it hides the whole answer
+	 * while the inline byte budget already bounds it. The cap earns its keep
+	 * against output that keeps producing wide lines, so callers whose output is
+	 * a printed value pass `false` and every later line stays capped. Default
+	 * true. Ignored when `maxColumns` is 0.
+	 */
+	capFirstLine?: boolean;
 	onChunk?: (chunk: string) => void;
 	/** Minimum ms between onChunk calls. 0 = every chunk (default). */
 	chunkThrottleMs?: number;
@@ -793,6 +803,8 @@ export class OutputSink {
 	#columnEllipsisAdded = false;
 	#columnDroppedBytes = 0;
 	#columnTruncatedLines = 0;
+	/** Lines completed so far; the first line may be exempt from the cap. */
+	#columnLineIndex = 0;
 	#file?: {
 		path: string;
 		artifactId?: string;
@@ -814,6 +826,7 @@ export class OutputSink {
 	readonly #onChunk?: (chunk: string) => void;
 	readonly #chunkThrottleMs: number;
 	readonly #maxColumns: number;
+	readonly #capFirstLine: boolean;
 
 	// Optional artifact-on-disk cap. When `#artifactMaxBytes > 0` the file sink
 	// owns a head budget + a rolling tail buffer; once the head is closed,
@@ -837,6 +850,7 @@ export class OutputSink {
 			spillThreshold = DEFAULT_MAX_BYTES,
 			headBytes = 0,
 			maxColumns = 0,
+			capFirstLine = true,
 			onChunk,
 			chunkThrottleMs = 0,
 			artifactMaxBytes = ARTIFACT_DEFAULT_MAX_BYTES,
@@ -847,6 +861,7 @@ export class OutputSink {
 		this.#spillThreshold = spillThreshold;
 		this.#headLimit = Math.max(0, Math.min(headBytes, Math.floor(spillThreshold / 2)));
 		this.#maxColumns = Math.max(0, maxColumns);
+		this.#capFirstLine = capFirstLine;
 		this.#onChunk = onChunk;
 		this.#chunkThrottleMs = chunkThrottleMs;
 		this.#artifactMaxBytes = Math.max(0, artifactMaxBytes);
@@ -976,7 +991,10 @@ export class OutputSink {
 			const segEnd = nlIdx === -1 ? chunk.length : nlIdx;
 			if (segEnd > cursor) {
 				const segment = chunk.substring(cursor, segEnd);
-				if (this.#columnEllipsisAdded) {
+				if (!this.#capFirstLine && this.#columnLineIndex === 0) {
+					// The whole output may be this one line; the byte budget bounds it.
+					parts.push(segment);
+				} else if (this.#columnEllipsisAdded) {
 					// Past the cap; drop until newline.
 					this.#columnDroppedBytes += Buffer.byteLength(segment, "utf-8");
 				} else {
@@ -1010,6 +1028,7 @@ export class OutputSink {
 			parts.push(NL);
 			this.#currentLineBytes = 0;
 			this.#columnEllipsisAdded = false;
+			this.#columnLineIndex++;
 			cursor = nlIdx + 1;
 		}
 		return parts.join("");
@@ -1225,6 +1244,7 @@ export class OutputSink {
 		this.#totalLines = countNewlines(text);
 		this.#sawData = text.length > 0;
 		this.#truncated = false;
+		this.#columnLineIndex = 0;
 		this.#currentLineBytes = 0;
 		this.#columnEllipsisAdded = false;
 		this.#columnDroppedBytes = 0;

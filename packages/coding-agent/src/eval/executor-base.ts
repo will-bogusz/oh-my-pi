@@ -448,6 +448,9 @@ export async function executeWithKernelBase<
 		artifactId: options?.artifactId,
 		headBytes: resolveOutputSinkHeadBytes(settings),
 		maxColumns: resolveOutputMaxColumns(settings),
+		// A cell's output is a value someone chose to print; a lone wide line is
+		// the answer, not terminal noise.
+		capFirstLine: false,
 	});
 
 	const displayOutputs: KernelDisplayOutput[] = [];

@@ -746,6 +746,9 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 				artifactId,
 				headBytes: resolveOutputSinkHeadBytes(session.settings),
 				maxColumns: resolveOutputMaxColumns(session.settings),
+				// A cell's output is a value someone chose to print; a lone wide
+				// line is the answer, not terminal noise.
+				capFirstLine: false,
 				onChunk: chunk => {
 					appendTail(chunk);
 					if (activeLiveCell) {

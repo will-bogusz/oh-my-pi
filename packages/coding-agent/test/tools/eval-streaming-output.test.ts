@@ -93,19 +93,39 @@ describe("EvalTool live stdout streaming", () => {
 			_code: string,
 			options: { onChunk?: (chunk: string) => void },
 		) => {
-			const output = "x".repeat(50);
+			// The first line of a cell's output is exempt from the cap, so the
+			// capped line here is a later one.
+			const output = `first\n${"x".repeat(50)}\n`;
 			options.onChunk?.(output);
 			return baseResult({ output });
 		}) as never);
 
 		const result = await new EvalTool(makeSession(settings)).execute(
 			"call-column-cap",
-			{ language: "js", code: "print('x'.repeat(50))" },
+			{ language: "js", code: "print('first');\nprint('x'.repeat(50))" },
 			undefined,
 			undefined,
 		);
 
 		expect(result.details?.meta?.truncation).toBeUndefined();
+		expect(formatOutputNotice(result.details?.meta)).toContain("Some lines truncated to 8 chars");
+	});
+
+	it("hands back a printed line wider than the column cap instead of cutting the answer", async () => {
+		const settings = Settings.isolated();
+		settings.set("tools.outputMaxColumns", 8);
+		const wide = "x".repeat(50);
+		const result = await new EvalTool(makeSession(settings)).execute(
+			"call-wide-line",
+			{ language: "js", code: `print("${wide}");\nprint("${wide}");` },
+			undefined,
+			undefined,
+		);
+
+		const text = result.content.map(part => (part.type === "text" ? part.text : "")).join("\n");
+		// The first printed line survives whole; the second one still pays the cap.
+		expect(text).toContain(wide);
+		expect(text).toContain("…");
 		expect(formatOutputNotice(result.details?.meta)).toContain("Some lines truncated to 8 chars");
 	});
 });

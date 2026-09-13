@@ -870,4 +870,25 @@ describe("OutputSink maxColumns (per-line cap)", () => {
 		// elided + dropped + kept ≤ totalBytes (with a small slack for the marker/newlines).
 		expect(elided + dropped).toBeLessThan(dumped.totalBytes);
 	});
+
+	test("capFirstLine:false keeps a lone wide line whole and still caps later ones", async () => {
+		const sink = new OutputSink({ maxColumns: 8, spillThreshold: 100_000, capFirstLine: false });
+		const wide = "x".repeat(50);
+		// Split mid-line: the exemption is streaming state, not a whole-chunk look.
+		await sink.push(wide.slice(0, 20));
+		await sink.push(wide.slice(20));
+		const single = await sink.dump();
+		expect(single.output).toBe(wide);
+		expect(single.columnTruncatedLines).toBeUndefined();
+
+		const many = new OutputSink({ maxColumns: 8, spillThreshold: 100_000, capFirstLine: false });
+		await many.push(`${wide}\n${wide}\nshort`);
+		const dumped = await many.dump();
+		const lines = dumped.output.split("\n");
+		expect(lines[0]).toBe(wide);
+		expect(lines[1]).toEndWith("…");
+		expect(lines[1]!.length).toBeLessThan(wide.length);
+		expect(lines[2]).toBe("short");
+		expect(dumped.columnTruncatedLines).toBe(1);
+	});
 });

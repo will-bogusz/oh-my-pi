@@ -96,6 +96,9 @@ export async function executeJs(code: string, options: JsExecutorOptions): Promi
 		spillThreshold: DEFAULT_MAX_BYTES,
 		headBytes: resolveOutputSinkHeadBytes(options.session.settings),
 		maxColumns: resolveOutputMaxColumns(options.session.settings),
+		// A cell's output is a value someone chose to print; a lone wide line is
+		// the answer, not terminal noise.
+		capFirstLine: false,
 		onChunk: chunk => options.onChunk?.(chunk),
 	});
 	const legacyTimeoutMs = getExecutionTimeoutMs(options);
