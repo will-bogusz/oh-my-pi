@@ -78,6 +78,14 @@ export interface ComputerElementSnapshot {
 	value?: string;
 	/** A field hint reported by the provider, separate from its raw value. */
 	placeholder?: string;
+	/**
+	 * Provider-authored guidance for the control (macOS `AXHelp`, AT-SPI
+	 * description): what it does, which its role and label often do not say.
+	 * Absent when the provider offers none — most rows have neither.
+	 */
+	help?: string;
+	/** Accessible description, when it says something the label does not. */
+	description?: string;
 	/** Unavailable platform state stays undefined; never infer enabled or disabled. */
 	enabled?: boolean;
 	selected?: boolean;

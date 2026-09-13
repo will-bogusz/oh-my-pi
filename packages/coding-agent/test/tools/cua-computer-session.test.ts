@@ -126,6 +126,9 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		sequence: 0,
 		value: "" as string | undefined,
 		placeholder: "Hint, not value" as string | undefined,
+		/** `AXHelp`/AT-SPI description: absent on most rows, "" when the provider has none. */
+		help: undefined as string | undefined,
+		description: undefined as string | undefined,
 		actions: undefined as unknown,
 		backgroundActions: undefined as unknown,
 		elementDoubleClick: undefined as unknown,
@@ -202,6 +205,8 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 							label: linux ? "B3" : "Editor",
 							value: state.value,
 							placeholder: state.placeholder,
+							help: state.help,
+							description: state.description,
 							actions: state.actions ?? (linux ? ["press", "showContextMenu"] : undefined),
 							background_actions: state.backgroundActions,
 							enabled: false,
@@ -519,6 +524,36 @@ it("preserves absent and whitespace values independently from provider placehold
 		observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]!.placeholder).toBeUndefined();
 		expect(observation.tree).not.toContain(" placeholder=");
+	} finally {
+		await f.close();
+	}
+});
+
+it("renders provider help and description when the row carries them", async () => {
+	const f = await fixture();
+	try {
+		// Neither field is guaranteed: an older driver omits both keys.
+		let observation = await f.session.observe(f.context, f.window);
+		expect(observation.elements[0]!.help).toBeUndefined();
+		expect(observation.elements[0]!.description).toBeUndefined();
+		expect(observation.tree).not.toContain(" help=");
+		expect(observation.tree).not.toContain(" description=");
+		f.state.help = 'Send the "draft" Ω';
+		f.state.description = "Compose button";
+		observation = await f.session.observe(f.context, f.window);
+		expect(observation.elements[0]).toMatchObject({ help: f.state.help, description: f.state.description });
+		expect(observation.tree).toContain(
+			`description=${JSON.stringify(f.state.description)} help=${JSON.stringify(f.state.help)}`,
+		);
+		// A provider that says "none" with an empty string, and a description
+		// that only repeats the label, add nothing to the line.
+		f.state.help = "";
+		f.state.description = "Editor";
+		observation = await f.session.observe(f.context, f.window);
+		expect(observation.elements[0]!.help).toBeUndefined();
+		expect(observation.elements[0]!.description).toBeUndefined();
+		expect(observation.tree).not.toContain(" help=");
+		expect(observation.tree).not.toContain(" description=");
 	} finally {
 		await f.close();
 	}

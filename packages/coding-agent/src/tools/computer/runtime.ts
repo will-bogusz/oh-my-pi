@@ -107,6 +107,8 @@ class El {
 	readonly label: string;
 	readonly value?: string;
 	readonly placeholder?: string;
+	readonly help?: string;
+	readonly description?: string;
 	readonly enabled?: boolean;
 	readonly selected?: boolean;
 	readonly actions?: readonly string[];
@@ -131,6 +133,8 @@ class El {
 		this.label = snapshot.label;
 		this.value = snapshot.value;
 		this.placeholder = snapshot.placeholder;
+		this.help = snapshot.help;
+		this.description = snapshot.description;
 		this.enabled = snapshot.enabled;
 		this.selected = snapshot.selected;
 		this.actions = snapshot.actions ? Object.freeze([...snapshot.actions]) : undefined;

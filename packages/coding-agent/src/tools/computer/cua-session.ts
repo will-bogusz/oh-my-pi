@@ -668,6 +668,16 @@ export class CuaComputerSession implements ComputerBackend {
 					label: typeof row.label === "string" ? row.label : "",
 					...(typeof row.value === "string" ? { value: row.value } : {}),
 					...(typeof row.placeholder === "string" ? { placeholder: row.placeholder } : {}),
+					// Semantics the provider authored but role/label do not carry. An
+					// empty string is the driver's way of saying "none", and a
+					// description that merely repeats the label is pure noise.
+					...(typeof row.help === "string" && row.help ? { help: row.help } : {}),
+					...(typeof row.description === "string" &&
+					row.description &&
+					row.description !== row.label &&
+					row.description !== row.value
+						? { description: row.description }
+						: {}),
 					...(typeof row.enabled === "boolean" ? { enabled: row.enabled } : {}),
 					...(typeof row.selected === "boolean" ? { selected: row.selected } : {}),
 					...(Array.isArray(actions) ? { actions: observedSemanticActions(actions) } : {}),
@@ -710,7 +720,7 @@ export class CuaComputerSession implements ComputerBackend {
 				tree: rows
 					.map(
 						({ depth, element }) =>
-							`${"  ".repeat(depth)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
+							`${"  ".repeat(depth)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.description !== undefined ? ` description=${JSON.stringify(element.description)}` : ""}${element.help !== undefined ? ` help=${JSON.stringify(element.help)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
 					)
 					.join("\n"),
 			};

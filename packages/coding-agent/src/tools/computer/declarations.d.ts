@@ -93,6 +93,8 @@ interface ComputerElement {
 	label: string;
 	value?: string;
 	placeholder?: string;
+	help?: string;
+	description?: string;
 	enabled?: boolean;
 	selected?: boolean;
 	actions?: string[];

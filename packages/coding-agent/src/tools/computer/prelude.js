@@ -73,6 +73,8 @@
 		"label",
 		"value",
 		"placeholder",
+		"help",
+		"description",
 		"enabled",
 		"selected",
 		"actions",
