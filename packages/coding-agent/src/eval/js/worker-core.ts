@@ -311,7 +311,7 @@ export class WorkerCore {
 			runtime.setCwd(snapshot.cwd);
 			runtime.syncPreludes(snapshot.preludes ?? []);
 			const value = await runtime.run(code, filename, hooks, { runId, cwd: snapshot.cwd });
-			runtime.displayValue(value, hooks);
+			runtime.displayFinalValue(value, hooks);
 			result = { type: "result", runId, ok: true };
 		} catch (error) {
 			result = { type: "result", runId, ok: false, error: errorPayload(error) };

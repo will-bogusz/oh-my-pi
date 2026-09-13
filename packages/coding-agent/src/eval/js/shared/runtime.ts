@@ -51,6 +51,14 @@ function surfaceBridgedToolImages(value: unknown, hooks: RuntimeHooks): unknown 
 	return { ...rest, images: `(${displayed} image${displayed === 1 ? "" : "s"} displayed)` };
 }
 
+/**
+ * Values a control prelude has already presented to the model — an observation
+ * tree the host rendered into the call's own text, or one the caller asked not
+ * to display. A cell ending in `await tab.observe()` would otherwise print the
+ * tree once and its JSON again as the trailing expression.
+ */
+const PRESENTED = new WeakSet<object>();
+
 export interface RunContext {
 	runId: string;
 	hooks: RuntimeHooks;
@@ -371,6 +379,15 @@ export class JsRuntime {
 		}
 	}
 
+	/**
+	 * Echo a cell's trailing expression. An explicit `display(value)` always
+	 * prints; this path skips what a control prelude already presented.
+	 */
+	displayFinalValue(value: unknown, hooks: RuntimeHooks): void {
+		if (value !== null && typeof value === "object" && PRESENTED.has(value)) return;
+		this.displayValue(value, hooks);
+	}
+
 	displayValue(value: unknown, hooks: RuntimeHooks | undefined = this.#als.getStore()?.hooks): void {
 		if (value === undefined) return;
 		if (!hooks) {
@@ -506,6 +523,9 @@ export class JsRuntime {
 				hooks.onText(buffer.endsWith("\n") ? buffer : `${buffer}\n`);
 			},
 			__omp_display__: (value: unknown) => this.displayValue(value),
+			__omp_presented__: (value: unknown) => {
+				if (value !== null && typeof value === "object") PRESENTED.add(value);
+			},
 			__omp_set_final_expr__: (value: unknown) => {
 				const context = this.#als.getStore();
 				if (!context) {

@@ -100,6 +100,8 @@ interface ComputerPreludeDetails {
 	readOnly?: boolean;
 	screenshots: ComputerScreenshot[];
 	value?: unknown;
+	/** `value` is already in this result's text; the cell must not echo it. */
+	rendered?: boolean;
 	backend?: string;
 	capturePermission?: string;
 	inputPermission?: string;
@@ -330,6 +332,9 @@ async function runComputer(
 		]
 			.filter(Boolean)
 			.join("\n");
+		// The window header, tree and screenshot notes above are this value's
+		// rendering; the prelude suppresses the cell's own echo of it.
+		details.rendered = true;
 	}
 	const cappedText = await enforceInlineByteCap(text, {
 		saveArtifact: full => saveComputerOutputArtifact(session, full),

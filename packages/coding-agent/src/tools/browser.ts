@@ -137,6 +137,8 @@ interface BrowserPreludeDetails {
 	viewport?: { width: number; height: number; deviceScaleFactor?: number };
 	screenshots?: ScreenshotResult[];
 	value?: unknown;
+	/** `value` is the observation this call already printed; the cell must not echo it. */
+	rendered?: boolean;
 }
 
 function resolveBrowserKind(params: BrowserParams, session: ToolSession): BrowserKind {
@@ -611,9 +613,10 @@ async function runBrowser(
 async function browserRunResult(
 	session: ToolSession,
 	details: BrowserPreludeDetails,
-	{ displays, screenshots }: RunResultOk,
+	{ displays, screenshots, rendered }: RunResultOk,
 ): Promise<AgentToolResult<unknown>> {
 	if (screenshots.length) details.screenshots = screenshots;
+	if (rendered) details.rendered = true;
 	const content = [...displays];
 	const textOnly = content
 		.filter((part): part is { type: "text"; text: string } => part.type === "text")

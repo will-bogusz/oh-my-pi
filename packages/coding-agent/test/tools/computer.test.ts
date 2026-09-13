@@ -294,8 +294,10 @@ function javascriptFixture(createBackend?: () => FakeBackend) {
 	const session = toolSession();
 	const prelude = fixturePrelude(session, createBackend ?? backend);
 	const displays: unknown[] = [];
+	const presented: unknown[] = [];
 	const realm = createContext({
 		__omp_display__: (value: unknown) => displays.push(value),
+		__omp_presented__: (value: unknown) => presented.push(value),
 		__omp_prelude__: async (_name: string, parameters: unknown) => {
 			const result = await prelude.invoke(parameters, { session, toolCallId: "fixture" });
 			return {
@@ -308,7 +310,7 @@ function javascriptFixture(createBackend?: () => FakeBackend) {
 		},
 	});
 	runInContext(prelude.javascript, realm);
-	return { backend, realm, displays };
+	return { backend, realm, displays, presented };
 }
 
 describe("computer preludes through the session", () => {
@@ -411,6 +413,25 @@ describe("computer preludes through the session", () => {
 		} finally {
 			inspection.mockRestore();
 			raise.mockRestore();
+			await runInContext("computer.close()", realm);
+		}
+	});
+
+	it("marks the observation it rendered so the cell never serializes the same tree again", async () => {
+		const { realm, displays, presented } = javascriptFixture();
+		try {
+			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
+			const observed = await runInContext(
+				"win.observe({screenshot:false}).then(observation => (globalThis.observed = observation))",
+				realm,
+			);
+			expect(displays.join("\n")).toContain("button [ref=e2]");
+			expect(presented.at(-1)).toBe(observed);
+			// An action renders no tree of its own, so its result is still the
+			// cell's to echo.
+			await runInContext("win.click(observed.elements[0].ref)", realm);
+			expect(presented.at(-1)).toBe(observed);
+		} finally {
 			await runInContext("computer.close()", realm);
 		}
 	});

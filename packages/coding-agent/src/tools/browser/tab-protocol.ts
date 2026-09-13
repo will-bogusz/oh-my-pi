@@ -121,6 +121,8 @@ export interface RunResultOk {
 	displays: Array<TextContent | ImageContent>;
 	returnValue: unknown;
 	screenshots: ScreenshotResult[];
+	/** `returnValue` is the observation this run already printed or suppressed. */
+	rendered?: boolean;
 }
 
 export interface RunErrorPayload {

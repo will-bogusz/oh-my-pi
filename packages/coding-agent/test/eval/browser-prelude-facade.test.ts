@@ -312,6 +312,56 @@ describe("browser facade in real Eval runtimes", () => {
 		});
 	});
 
+	it("prints a tree the tab already rendered once, whoever the cell's trailing expression is", async () => {
+		const tree = 'https://example.test | Docs\n- button "Save" [ref=e5]';
+		let definitions: readonly EvalPreludeDefinition[] = [];
+		const session = makeSession(() => definitions);
+		const shipped = createBrowserPrelude(session);
+		definitions = [
+			{
+				...shipped,
+				async invoke(parameters) {
+					if (field(parameters, "action") === "open") return { content: [], details: { name: "echo-js" } };
+					if (firstChainMethod(parameters) === "title")
+						return { content: [], details: { value: "Docs" } };
+					return {
+						content: [{ type: "text", text: tree }],
+						details: { value: { snapshot: "s1", elements: [{ id: 5 }] }, rendered: true },
+					};
+				},
+			},
+		];
+		const options = { cwd: process.cwd(), sessionId: `browser-echo-js-${crypto.randomUUID()}`, session };
+		const echoed = await executeJs(
+			[
+				'const tab = await browser.open({ name: "echo-js" });',
+				"const observation = await tab.observe();",
+				"print(`elements=${observation.elements.length}`);",
+				"await tab.observe()",
+			].join("\n"),
+			options,
+		);
+		expect(echoed.exitCode).toBe(0);
+		expect(echoed.output.trim().split("\n")).toEqual([...tree.split("\n"), "elements=1", ...tree.split("\n")]);
+		// The tree reaches the model as the tab's own text. Re-serializing the same
+		// observation as the cell's value is what the bench measured as pure waste.
+		expect(echoed.displayOutputs.filter(output => output.type === "json")).toEqual([]);
+		// Values the host did not render still echo, and an explicit display of a
+		// rendered value is the caller's own decision.
+		const kept = await executeJs(
+			['const tab = await browser.open({ name: "echo-js" });', "await tab.title()"].join("\n"),
+			options,
+		);
+		expect(kept.output.trim()).toBe("Docs");
+		const forced = await executeJs(
+			['const tab = await browser.open({ name: "echo-js" });', "display(await tab.observe())"].join("\n"),
+			options,
+		);
+		expect(forced.displayOutputs.filter(output => output.type === "json")).toEqual([
+			{ type: "json", data: { snapshot: "s1", elements: [{ id: 5 }] } },
+		]);
+	});
+
 	it("unwraps values, prints host text, and preserves Python helper chains in a real kernel", async () => {
 		const calls: unknown[] = [];
 		let definitions: readonly EvalPreludeDefinition[] = [];

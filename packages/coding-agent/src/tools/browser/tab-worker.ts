@@ -831,6 +831,11 @@ interface ActiveRun {
 	/** Helper invocations currently awaiting the page/network, keyed by op id. */
 	inflight: Map<number, InflightOp>;
 	opCounter: number;
+	/**
+	 * Most recent observation this run printed (or was told not to print with
+	 * `display:false`). When the cell returns it, the eval echo is suppressed.
+	 */
+	presented?: object;
 }
 
 /** Human-readable label for a screenshot op, used in op tracking + timeout errors. */
@@ -1325,7 +1330,12 @@ export class WorkerCore {
 				type: "result",
 				id: msg.id,
 				ok: true,
-				payload: { displays: output.finish(), returnValue: cloneSafe(returnValue), screenshots },
+				payload: {
+					displays: output.finish(),
+					returnValue: cloneSafe(returnValue),
+					screenshots,
+					...(returnValue !== undefined && returnValue === active.presented ? { rendered: true } : {}),
+				},
 			});
 		}
 	}
@@ -1541,6 +1551,7 @@ export class WorkerCore {
 				op("tab.observe()", quickOpMs, async sig => {
 					const observation = await this.#collectObservation({ ...opts, refs: session.refs, signal: sig });
 					if (opts?.display !== false) output.push({ type: "text", text: observation.tree });
+					active.presented = observation;
 					return observation;
 				}),
 			ariaSnapshot: (selector, opts) =>

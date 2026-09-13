@@ -30,7 +30,13 @@
 		if (response && typeof response.text === "string" && response.text.length > 0) {
 			globalThis.__omp_display__(response.text);
 		}
-		return response && typeof response.details === "object" && response.details !== null ? response.details : {};
+		const details =
+			response && typeof response.details === "object" && response.details !== null ? response.details : {};
+		// The host already rendered this value (an observation tree) into the
+		// text above; the cell must not print it a second time as its trailing
+		// expression.
+		if (details.rendered === true) globalThis.__omp_presented__?.(details.value);
+		return details;
 	};
 	const callValue = async chain => {
 		const details = await invoke("call", { chain });

@@ -30,7 +30,13 @@
 		if (response && typeof response.text === "string" && response.text.length > 0) {
 			globalThis.__omp_display__(response.text);
 		}
-		return response && typeof response.details === "object" && response.details !== null ? response.details : {};
+		const details =
+			response && typeof response.details === "object" && response.details !== null ? response.details : {};
+		// The tab already printed this value (an observation tree), or the caller
+		// asked it not to with `display:false`. Either way the cell must not print
+		// it again as its trailing expression.
+		if (details.rendered === true) globalThis.__omp_presented__?.(details.value);
+		return details;
 	};
 	const callValue = async (name, chain, handle) => {
 		const details = await invoke("call", { name, chain, ...(handle ? { handle } : {}) });
