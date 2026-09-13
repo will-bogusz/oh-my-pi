@@ -559,6 +559,39 @@ it("renders provider help and description when the row carries them", async () =
 	}
 });
 
+it("reports whether a written value survived the app's own end-of-edit", async () => {
+	const f = await fixture();
+	try {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const write = async (data: Wire, text: string) => {
+			f.state.hook = async name =>
+				name === "set_value" ? { text, structuredJson: JSON.stringify(data), isError: false, images: [] } : undefined;
+			return f.session.setValue(f.context, f.window, ref, "Project_File_List");
+		};
+		const lost = await write(
+			{ committed: false },
+			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write.",
+		);
+		expect(lost.committed).toBe(false);
+		expect(lost.text).toContain(
+			"committed=false — a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write",
+		);
+		expect(lost.text).toContain("read it back before relying on it");
+		const kept = await write({ committed: true }, "✅ Set AXValue on [1] AXTextField. Committed via tab.");
+		expect(kept.committed).toBe(true);
+		expect(kept.text).toContain("committed=true");
+		// The flag stands on its own when the driver states no reason.
+		const bare = await write({ committed: false }, "📨 Sent (unverified) AXValue on [1] AXTextField.");
+		expect(bare.text).toContain("committed=false — the driver reported no reason");
+		// Contract-optional: a driver that reports no flag renders none.
+		const silent = await write({ effect: "unverifiable" }, "✅ Set AXValue on [1] AXSlider.");
+		expect(silent.committed).toBeUndefined();
+		expect(silent.text).toBe("✅ Set AXValue on [1] AXSlider.");
+	} finally {
+		await f.close();
+	}
+});
+
 for (const failedSwitch of [false, true]) {
 	it(`requires a new capture after ${failedSwitch ? "a failed" : "a successful"} switch to another window`, async () => {
 		const f = await fixture();

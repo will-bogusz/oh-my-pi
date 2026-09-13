@@ -153,6 +153,12 @@ export interface ComputerActionResult {
 	route?: string;
 	delivery: unknown;
 	/**
+	 * Whether the app's own editing pipeline kept a written value. Reported by
+	 * `setValue` when the driver could judge the end-of-edit gesture; absent
+	 * when it has none to drive or does not report the flag at all.
+	 */
+	committed?: boolean;
+	/**
 	 * System UI that appeared while this action ran. The action itself was
 	 * dispatched, so its evidence still describes the target; the environment
 	 * changed under it and the next action will be refused.

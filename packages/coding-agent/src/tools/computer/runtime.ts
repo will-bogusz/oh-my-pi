@@ -89,7 +89,9 @@ async function reported(
 	action: Promise<ComputerActionResult>,
 ): Promise<ComputerActionResult> {
 	const result = await action;
-	if (UNDELIVERED_EFFECTS[result.effect] && result.text) context.emitText(result.text);
+	// `committed: false` is the same shape by another route: the write was
+	// accepted and echoed back while the app kept its own value.
+	if ((UNDELIVERED_EFFECTS[result.effect] || result.committed === false) && result.text) context.emitText(result.text);
 	return result;
 }
 

@@ -85,6 +85,8 @@ interface ComputerAction {
 	data?: unknown;
 	route?: string;
 	delivery: unknown;
+	/** `setValue`: whether the app's editing pipeline kept the written value. */
+	committed?: boolean;
 	interruptedBy?: ComputerInterruption;
 }
 interface ComputerElement {

@@ -178,6 +178,8 @@ class FakeBackend implements ComputerBackend {
 		this.value = String(this.clickCount);
 		return { text: "", effect: "verified", evidence: { count: this.clickCount }, delivery: "background" };
 	}
+	/** What the driver judged about the app's end-of-edit, when it judged anything. */
+	committed?: boolean;
 	async setValue(
 		context: ComputerOperationContext,
 		window: ComputerWindowIdentity,
@@ -187,7 +189,16 @@ class FakeBackend implements ComputerBackend {
 		await this.window(context, { id: window.id, pid: window.pid });
 		this.element(ref, window);
 		this.value = value;
-		return { text: "", effect: "verified", evidence: { value }, delivery: "background" };
+		return {
+			text:
+				this.committed === false
+					? "📨 Sent (unverified) AXValue on [1] AXTextField.\ncommitted=false — the app may still hold its own value."
+					: "",
+			effect: "verified",
+			evidence: { value },
+			delivery: "background",
+			...(this.committed === undefined ? {} : { committed: this.committed }),
+		};
 	}
 	unsupported = async (): Promise<never> => {
 		throw new Error("Unsupported fixture operation");
@@ -463,6 +474,27 @@ describe("computer preludes through the session", () => {
 			// cell's to echo.
 			await runInContext("win.click(observed.elements[0].ref)", realm);
 			expect(presented.at(-1)).toBe(observed);
+		} finally {
+			await runInContext("computer.close()", realm);
+		}
+	});
+
+	it("pushes an uncommitted write into the cell output instead of leaving it in a dropped value", async () => {
+		const { backend, realm, displays } = javascriptFixture();
+		try {
+			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
+			displays.length = 0;
+			// A committed write is ordinary: the cell decides whether to echo it.
+			backend.committed = true;
+			expect((await runInContext('win.setValue(win.initialObservation.elements[0].ref, "kept")', realm)).committed).toBe(
+				true,
+			);
+			expect(displays).toEqual([]);
+			// An uncommitted one may have lost the edit, so the model reads it
+			// even though this cell throws the result away.
+			backend.committed = false;
+			await runInContext('win.setValue(win.initialObservation.elements[0].ref, "lost")', realm);
+			expect(displays.join("\n")).toContain("committed=false");
 		} finally {
 			await runInContext("computer.close()", realm);
 		}

@@ -236,6 +236,21 @@ function preludeVocabulary<T>(value: T): T {
 function unsupported(operation: string): never {
 	throw new ToolError(`Unsupported Cua operation: ${operation}`);
 }
+/**
+ * `set_value` writes `AXValue` and then drives the app's own end-of-edit
+ * gesture, reporting in `committed` whether the value survived it. Only that
+ * flag separates a written field from a lost one: a value the app's editing
+ * pipeline never accepted still reads back correctly through the AX tree, and
+ * a Save-panel filename written that way was discarded. The flag is
+ * contract-optional — a driver that reports none renders nothing — and the
+ * driver's own reason sentence rides along with it when there is one.
+ */
+const NOT_COMMITTED_REASON = /not committed:\s*([^.]+)/i;
+function commitNote(committed: boolean, text: string): string {
+	if (committed) return "committed=true";
+	const reason = NOT_COMMITTED_REASON.exec(text)?.[1]?.trim();
+	return `committed=false — ${reason ?? "the driver reported no reason"}. The app may still hold its own value; read it back before relying on it.`;
+}
 
 /**
  * Maps computer operations onto `cua-driver` tools over one supervised child.
@@ -942,14 +957,22 @@ export class CuaComputerSession implements ComputerBackend {
 	async #action(name: string, args: Wire): Promise<ComputerActionResult> {
 		const { result, data } = await this.#call(name, args);
 		const interruptedBy = this.#interruption();
+		const committed = typeof data.committed === "boolean" ? data.committed : undefined;
 		return {
-			text: interruptedBy
-				? `${result.text}\n⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
-				: result.text,
+			text: [
+				result.text,
+				committed === undefined ? undefined : commitNote(committed, result.text),
+				interruptedBy
+					? `⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
+					: undefined,
+			]
+				.filter(line => line !== undefined)
+				.join("\n"),
 			effect: typeof data.effect === "string" ? data.effect : "unverifiable",
 			evidence: data.evidence ?? null,
 			route: typeof data.route === "string" ? data.route : typeof data.path === "string" ? data.path : "cua-sdk",
 			delivery: data.delivery ?? args.delivery_mode ?? "background",
+			...(committed === undefined ? {} : { committed }),
 			interruptedBy,
 			data,
 		};
