@@ -430,3 +430,51 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	},
 	60_000,
 );
+
+const FIELDS_PAGE = `<!doctype html><title>Fields</title>
+<input id="email" type="email" aria-label="Email" value="old@example.test">
+<input id="amount" type="number" aria-label="Amount" value="42">
+<input id="colour" type="color" aria-label="Colour" value="#112233">
+<select id="fuel" aria-label="Fuel">
+  <option value="pet">Petrol</option>
+  <option value="ele">Electric</option>
+</select>`;
+
+// `email`/`number` are plain text boxes whose selection offsets read null, so a
+// read-back of the selection cannot be the proof that fill may replace them.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"fills inputs that report no selection range and refuses the ones with no text to replace",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(FIELDS_PAGE, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				const values = await run<{ email: string; amount: string }>(
+					`await tab.fill("#email", "new@example.test");
+					 await tab.fill("#amount", "77");
+					 return await tab.evaluate(() => ({
+						 email: document.getElementById("email").value,
+						 amount: document.getElementById("amount").value,
+					 }));`,
+				);
+				expect(values).toEqual({ email: "new@example.test", amount: "77" });
+				const cleared = await run<string>(
+					`await tab.fill("#email", "");
+					 return await tab.evaluate(() => document.getElementById("email").value);`,
+				);
+				expect(cleared).toBe("");
+				// A picker is not a text box: it still has no replaceable text.
+				expect(await runError('await tab.fill("#colour", "#445566");')).toContain(
+					"does not support text selection",
+				);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);

@@ -433,6 +433,15 @@ const SELECT_FIELD_CONTENTS = `function () {
 	if (node.disabled || node.readOnly) throw new Error("The field is disabled or read-only");
 	if (node.tagName === "INPUT" || node.tagName === "TEXTAREA") {
 		try { node.setSelectionRange(0, node.value.length); } catch { node.select(); }
+		// The selection API does not apply to email and number inputs: the range
+		// call throws, select() still selects the whole value, and the offsets
+		// read null. Missing offsets are not a missing selection there, so the
+		// read-back can only speak for the types that report one.
+		if (node.selectionStart === null && node.selectionEnd === null) {
+			if (node.type !== "email" && node.type !== "number")
+				throw new Error("The field does not support text selection for replacement");
+			return node.value.length;
+		}
 		if (node.selectionStart !== 0 || node.selectionEnd !== node.value.length)
 			throw new Error("The field does not support text selection for replacement");
 		return node.value.length;
