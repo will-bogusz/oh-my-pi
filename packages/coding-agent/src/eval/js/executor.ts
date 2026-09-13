@@ -1,7 +1,7 @@
 import { DEFAULT_MAX_BYTES, OutputSink } from "../../session/streaming-output";
 import type { ToolSession } from "../../tools";
 import { resolveOutputMaxColumns, resolveOutputSinkHeadBytes } from "../../tools/output-meta";
-import { ToolAbortError } from "../../tools/tool-errors";
+import { ToolAbortError, ToolError, renderError } from "../../tools/tool-errors";
 import { isEvalTimeoutControlEvent } from "../bridge-timeout";
 import { executeInVmContext, type JsDisplayOutput } from "./context-manager";
 import type { JsStatusEvent } from "./shared/types";
@@ -64,6 +64,18 @@ function isTimeoutReason(reason: unknown): boolean {
 		(reason instanceof DOMException && reason.name === "TimeoutError") ||
 		(reason instanceof Error && reason.name === "TimeoutError")
 	);
+}
+
+/**
+ * What a failed cell reports. A `ToolError` is a harness-authored refusal: its
+ * trace names harness source (`cua-session.ts`, `cdp.ts`, the tool bridge),
+ * never the cell, so it adds file paths and thousands of tokens over the
+ * message that already explains the refusal. Any other error may come from the
+ * cell's own code, where the trace names the line that threw.
+ */
+function cellFailure(error: unknown): string {
+	if (error instanceof ToolError) return `${error.name}: ${renderError(error)}`;
+	return error instanceof Error ? (error.stack ?? error.message) : String(error);
 }
 
 function formatJsTimeoutAnnotation(timeoutMs: number | undefined): string {
@@ -161,8 +173,7 @@ export async function executeJs(code: string, options: JsExecutorOptions): Promi
 				displayOutputs,
 			};
 		}
-		const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
-		outputSink.push(message);
+		outputSink.push(cellFailure(error));
 		const summary = await outputSink.dump();
 		return {
 			output: summary.output,

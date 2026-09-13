@@ -7,6 +7,7 @@ import type { EvalPreludeDefinition } from "@oh-my-pi/pi-coding-agent/eval/prelu
 import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-agent/eval/py/executor";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
+import { ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import { chromiumAvailable } from "../tools/chromium-probe";
 
 interface FacadeResponse {
@@ -359,6 +360,34 @@ describe("browser facade in real Eval runtimes", () => {
 		expect(forced.displayOutputs.filter(output => output.type === "json")).toEqual([
 			{ type: "json", data: { snapshot: "s1", elements: [{ id: 5 }] } },
 		]);
+	});
+
+	it("reports a refusal from the browser bridge without the harness stack behind it", async () => {
+		const refusal = "fill needs a text input; this node reported no selection range";
+		let definitions: readonly EvalPreludeDefinition[] = [];
+		const session = makeSession(() => definitions);
+		const shipped = createBrowserPrelude(session);
+		definitions = [
+			{
+				...shipped,
+				async invoke(parameters) {
+					if (field(parameters, "action") === "open") return { content: [], details: { name: "refusing" } };
+					throw new ToolError(refusal);
+				},
+			},
+		];
+		const options = { cwd: process.cwd(), sessionId: `browser-refusal-js-${crypto.randomUUID()}`, session };
+		const refused = await executeJs(
+			['const tab = await browser.open({ name: "refusing" });', 'await tab.fill("#email", "a@b.c");'].join("\n"),
+			options,
+		);
+		expect(refused.exitCode).toBe(1);
+		expect(refused.output.trim()).toBe(`ToolError: ${refusal}`);
+		// The cell's own failure keeps the trace: those frames name the cell.
+		const own = await executeJs("throw new Error('cell broke');", options);
+		expect(own.exitCode).toBe(1);
+		expect(own.output).toContain("cell broke");
+		expect(own.output).toContain("at ");
 	});
 
 	it("unwraps values, prints host text, and preserves Python helper chains in a real kernel", async () => {
