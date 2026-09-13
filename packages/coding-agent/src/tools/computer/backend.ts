@@ -103,8 +103,8 @@ export interface ComputerBackend {
 	drag(
 		context: ComputerOperationContext,
 		window: ComputerWindowIdentity,
-		from: [number, number],
-		to: [number, number],
+		from: ComputerTarget,
+		to: ComputerTarget,
 		options?: ActionOptions & { durationMs?: number; steps?: number },
 	): Promise<ComputerActionResult>;
 	scroll(

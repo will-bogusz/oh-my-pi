@@ -136,7 +136,7 @@ interface ComputerWindow extends ComputerWindowInfo {
 	click(target: ComputerTarget, options?: ComputerClickOptions): Promise<ComputerAction>;
 	doubleClick(target: ComputerTarget, options?: Omit<ComputerClickOptions, "count">): Promise<ComputerAction>;
 	hover(x: number, y: number, options?: ComputerDeliveryOptions): Promise<ComputerAction>;
-	drag(from: ComputerPoint, to: ComputerPoint, options?: ComputerDragOptions): Promise<ComputerAction>;
+	drag(from: ComputerTarget, to: ComputerTarget, options?: ComputerDragOptions): Promise<ComputerAction>;
 	scroll(direction: ComputerDirection, options?: ComputerScrollOptions): Promise<ComputerAction>;
 	type(text: string, options?: ComputerTargetOptions): Promise<ComputerAction>;
 	press(chord: string | string[], options?: ComputerTargetOptions): Promise<ComputerAction>;

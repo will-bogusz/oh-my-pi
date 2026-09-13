@@ -231,7 +231,7 @@ class Win {
 	hover(x: number, y: number, options?: ActionOptions) {
 		return this.#session.hover(mutationContext(this.#getContext), this.#window, x, y, options);
 	}
-	drag(from: [number, number], to: [number, number], options?: GestureOptions) {
+	drag(from: ComputerTarget, to: ComputerTarget, options?: GestureOptions) {
 		const context = mutationContext(this.#getContext);
 		return reported(context, this.#session.drag(context, this.#window, from, to, options));
 	}

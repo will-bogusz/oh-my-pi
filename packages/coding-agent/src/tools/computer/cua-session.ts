@@ -320,7 +320,7 @@ export class CuaComputerSession implements ComputerBackend {
 				: "primary display only; requires current UUID, native id, origin, size and scale metadata",
 			desktopDrag: "exactly two points; the driver interpolates one straight drag",
 			windowDrag:
-				"foreground only; durationMs integer 0–10000 (default 500), steps integer 1–200 (default 20); background drag is unavailable",
+				"foreground only; each end is an element ref (needs its own observed bounds and a current window screenshot) or a pixel point; durationMs integer 0–10000 (default 500), steps integer 1–200 (default 20); background drag is unavailable",
 			desktopScroll: "one axis per action; pixel deltas must be multiples of 120, up to 6000",
 			backgroundInput: linux
 				? 'toolkit-dependent; a typed background_unavailable refusal means nothing was dispatched — retry with { delivery: "foreground" }'
@@ -922,6 +922,16 @@ export class CuaComputerSession implements ComputerBackend {
 			((box.y + box.height / 2 - area.y) * frame.image.height) / area.height,
 		];
 	}
+	/** One end of a drag: a ref is the point its own bounds name, a point is itself. */
+	#dragEnd(window: ComputerWindowIdentity, end: ComputerTarget, side: "from" | "to"): ComputerTarget {
+		if (typeof end !== "string") return end;
+		const pixel = this.#elementPixel(window, this.#binding(end, window).element);
+		if (!pixel)
+			unsupported(
+				`drag ${side} an element with no observed bounds or no current window screenshot; capture the window again (observe({ screenshot: true })) and drag pixel points`,
+			);
+		return pixel;
+	}
 	/**
 	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
 	 * window found now appeared while this action ran — a prompt the action
@@ -1062,11 +1072,18 @@ export class CuaComputerSession implements ComputerBackend {
 			unsupported("window hover; move_cursor only moves an overlay in window scope"),
 		);
 	}
+	/**
+	 * A drag is a pixel gesture on both backends — neither driver takes a pair
+	 * of elements — so a ref end is resolved to the point its own observed
+	 * bounds name, exactly as a modified click is. Refusing a ref outright
+	 * would be a harness limit, not a platform one: `drag` reads as
+	 * ref-capable beside `click(token | [x,y])` and was used that way.
+	 */
 	drag(
 		context: Context,
 		window: ComputerWindowIdentity,
-		from: [number, number],
-		to: [number, number],
+		from: ComputerTarget,
+		to: ComputerTarget,
 		options: ActionOptions & { durationMs?: number; steps?: number } = {},
 	): Promise<ComputerActionResult> {
 		return this.#schedule(context, "drag", true, async () => {
@@ -1082,8 +1099,8 @@ export class CuaComputerSession implements ComputerBackend {
 			)
 				throw new ToolError("Drag steps must be an integer from 1 to 200");
 			const current = await this.#current(window);
-			const start = this.#target(current, from);
-			const end = this.#target(current, to);
+			const start = this.#target(current, this.#dragEnd(current, from, "from"));
+			const end = this.#target(current, this.#dragEnd(current, to, "to"));
 			throwIfAborted(context.signal);
 			return this.#action("drag", {
 				...windowArgs(current),

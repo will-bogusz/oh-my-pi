@@ -1131,6 +1131,36 @@ it("maps requested window drag timing and observed pixels to the SDK wire contra
 	}
 });
 
+it("drags between element refs at their own observed bounds", async () => {
+	const f = await fixture();
+	try {
+		const observation = await f.session.observe(f.context, f.window, { screenshot: true });
+		const ref = observation.elements[0]!.ref;
+		// The ref's centre: (1, 0.5) of the 2×1 image, (2, 1) in SDK pixels.
+		await f.session.drag(f.context, f.window, ref, [0, 0], { delivery: "foreground" });
+		expect(f.calls.at(-1)).toEqual({
+			name: "drag",
+			args: { pid: 101, window_id: 1, from_x: 2, from_y: 1, to_x: 0, to_y: 0, delivery_mode: "foreground" },
+		});
+		await f.session.drag(f.context, f.window, ref, ref, { delivery: "foreground", steps: 10 });
+		expect(f.calls.at(-1)?.args).toMatchObject({ from_x: 2, from_y: 1, to_x: 2, to_y: 1, steps: 10 });
+		// No frame and no bounds are the only refusals, and neither dispatches.
+		f.calls.length = 0;
+		const treeOnly = await f.session.observe(f.context, f.window, { screenshot: false });
+		await expect(
+			f.session.drag(f.context, f.window, treeOnly.elements[0]!.ref, [0, 0], { delivery: "foreground" }),
+		).rejects.toThrow("drag from an element with no observed bounds or no current window screenshot");
+		f.state.elementFrame = undefined;
+		const boundless = await f.session.observe(f.context, f.window, { screenshot: true });
+		await expect(
+			f.session.drag(f.context, f.window, [0, 0], boundless.elements[0]!.ref, { delivery: "foreground" }),
+		).rejects.toThrow("drag to an element with no observed bounds");
+		expect(f.calls.some(call => call.name === "drag")).toBe(false);
+	} finally {
+		await f.close();
+	}
+});
+
 it("rejects ungrounded, out-of-bounds, background, and unrepresentable desktop gestures", async () => {
 	const f = await fixture();
 	try {
