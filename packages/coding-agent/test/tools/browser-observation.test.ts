@@ -282,6 +282,29 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			expect(typed.returnValue).toContain('textbox "Amount in percent" = "15"');
 			expect(typed.returnValue).toContain('text "Account ID: 23I1202C-F8V93"');
 
+			// A tree nobody saw is not a baseline: the next printed diff is still
+			// measured against the last tree the reader actually got.
+			const hidden = await run<{ invisible: string; shown: string }>(
+				"hidden-baseline",
+				`const add = name => tab.evaluate(\`(() => {
+					 const extra = document.createElement("button");
+					 extra.textContent = "\${name}";
+					 document.querySelector("nav").prepend(extra);
+				 })()\`);
+				 await add("Hidden step");
+				 const invisible = await tab.observe({ display: false });
+				 await add("Visible step");
+				 const shown = await tab.observe();
+				 return { invisible: invisible.tree, shown: shown.tree };`,
+			);
+			expect(hidden.returnValue.invisible).toContain('button "Hidden step"');
+			expect(hidden.returnValue.shown).toContain("diff vs previous observation");
+			expect(hidden.returnValue.shown).toContain('button "Hidden step"');
+			expect(hidden.returnValue.shown).toContain('button "Visible step"');
+			expect(hidden.displays.map(part => (part.type === "text" ? part.text : "")).join("\n")).not.toContain(
+				"Hidden step\n",
+			);
+
 			// extract validates its positional format argument.
 			result = Promise.withResolvers<Extract<WorkerOutbound, { type: "result" }>>();
 			receive({

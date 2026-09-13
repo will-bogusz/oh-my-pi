@@ -1926,7 +1926,10 @@ export class WorkerCore {
 				? previous
 				: undefined;
 		const tree = baseline ? renderTreeDiff(header, baseline.lines, lines) : renderTree(header, lines);
-		this.#lastTree = { url, filter, lines };
+		// A diff is only readable against a tree the reader has seen. An
+		// observation taken with `display:false` was never printed, so it cannot
+		// become the baseline the next printed diff is measured from.
+		if (options.display !== false) this.#lastTree = { url, filter, lines };
 		return {
 			snapshot: observationId,
 			url,
