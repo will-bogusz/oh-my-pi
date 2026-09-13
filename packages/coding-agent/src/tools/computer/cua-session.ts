@@ -894,6 +894,25 @@ export class CuaComputerSession implements ComputerBackend {
 		};
 	}
 	/**
+	 * Modifiers and click counts are a pixel-route capability here: the element
+	 * route posts a bare AX press that carries neither. The ref's own observed
+	 * bounds name the point — its centre, converted out of global desktop
+	 * coordinates into the cached frame's pixels, so the pixel action is checked
+	 * against the same live frame a model-supplied point would be. Without
+	 * bounds or without a frame there is no honest point, and only then is the
+	 * click refused.
+	 */
+	#elementPixel(window: ComputerWindowIdentity, element: ComputerElementSnapshot): ComputerTarget | undefined {
+		const frame = this.#frames.get(window.id);
+		const box = element.bounds;
+		if (!frame || !box) return undefined;
+		const area = frame.window.bounds;
+		return [
+			((box.x + box.width / 2 - area.x) * frame.image.width) / area.width,
+			((box.y + box.height / 2 - area.y) * frame.image.height) / area.height,
+		];
+	}
+	/**
 	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
 	 * window found now appeared while this action ran — a prompt the action
 	 * itself provoked, or the user's own. The action is not retracted; the
@@ -948,15 +967,22 @@ export class CuaComputerSession implements ComputerBackend {
 			async () => {
 				const current = await this.#current(window);
 				throwIfAborted(context.signal);
+				let point = target;
 				if (typeof target === "string") {
 					const binding = this.#binding(target, current);
 					const supportedDouble =
 						binding.doubleClickAtCenter && options.count === 2 && (options.button ?? "left") === "left";
-					if (options.modifiers?.length || ((options.count ?? 1) !== 1 && !supportedDouble))
-						unsupported("counted or modified element click on this SDK; use a fresh screenshot and pixel target");
+					if (options.modifiers?.length || ((options.count ?? 1) !== 1 && !supportedDouble)) {
+						const pixel = this.#elementPixel(current, binding.element);
+						if (!pixel)
+							unsupported(
+								"counted or modified click on an element with no observed bounds or no current window screenshot; capture the window again and use a pixel target",
+							);
+						point = pixel;
+					}
 				}
 				return this.#action("click", {
-					...this.#target(current, target),
+					...this.#target(current, point),
 					...delivery(options),
 					button: options.button,
 					count: options.count,
@@ -964,8 +990,15 @@ export class CuaComputerSession implements ComputerBackend {
 				});
 			},
 			// A background click on an element ref is the AX press route, so it
-			// may address a crash alert this session caused (see the gate).
-			typeof target === "string" && options.delivery !== "foreground" ? window.id : undefined,
+			// may address a crash alert this session caused (see the gate). A
+			// counted or modified click leaves that route for pixels, which have
+			// no business on an alert.
+			typeof target === "string" &&
+				!options.modifiers?.length &&
+				(options.count ?? 1) === 1 &&
+				options.delivery !== "foreground"
+				? window.id
+				: undefined,
 		);
 	}
 	type(

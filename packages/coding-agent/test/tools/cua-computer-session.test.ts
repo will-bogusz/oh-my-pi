@@ -129,6 +129,8 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		actions: undefined as unknown,
 		backgroundActions: undefined as unknown,
 		elementDoubleClick: undefined as unknown,
+		/** Absent on rows whose provider reported no frame: the ref has no point. */
+		elementFrame: { x: 10, y: 20, w: 200, h: 100 } as Wire | undefined,
 		relatedWindows: undefined as unknown,
 		/** The fork's walker verdict; absent on 0.28.0 and earlier. */
 		truncated: undefined as boolean | undefined,
@@ -205,7 +207,7 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 							enabled: false,
 							selected: false,
 							depth: 0,
-							frame: { x: 10, y: 20, w: 200, h: 100 },
+							frame: state.elementFrame,
 						},
 					],
 					window_bounds: row.bounds,
@@ -692,26 +694,52 @@ it("keeps visual access for windows with no AX snapshot without inventing elemen
 	}
 });
 
-it("refuses semantic modifiers and click counts the SDK would silently ignore", async () => {
+it("clicks a ref's own bounds as pixels when modifiers or a count leave the element route", async () => {
 	const f = await fixture();
 	try {
-		const observation = await f.session.observe(f.context, f.window);
+		const observation = await f.session.observe(f.context, f.window, { screenshot: true });
 		const ref = observation.elements[0]!.ref;
-		await expect(f.session.click(f.context, f.window, ref, { count: 2 })).rejects.toThrow("pixel target");
+		// The element covers the whole 200x100 pt window, so its centre is the
+		// window centre: (1, 0.5) of the 2x1 image, (2, 1) in SDK pixels.
+		await f.session.click(f.context, f.window, ref, { modifiers: ["shift"], delivery: "foreground" });
+		expect(f.calls.at(-1)).toEqual({
+			name: "click",
+			args: { pid: 101, window_id: 1, x: 2, y: 1, modifier: ["shift"], delivery_mode: "foreground" },
+		});
+		await f.session.click(f.context, f.window, ref, { count: 3, button: "right" });
+		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 1, count: 3, button: "right" });
+		expect(f.calls.at(-1)?.args.element_token).toBeUndefined();
+	} finally {
+		await f.close();
+	}
+});
+
+it("refuses a counted or modified ref click only with no frame or no observed bounds", async () => {
+	const f = await fixture();
+	try {
+		// A tree-only observation drops the window's cached frame, so the ref's
+		// global bounds have no pixel space to land in.
+		const treeOnly = await f.session.observe(f.context, f.window);
+		await expect(f.session.click(f.context, f.window, treeOnly.elements[0]!.ref, { count: 2 })).rejects.toThrow(
+			"capture the window again",
+		);
+		f.state.elementFrame = undefined;
+		const boundless = await f.session.observe(f.context, f.window, { screenshot: true });
+		expect(boundless.elements[0]!.bounds).toBeUndefined();
 		await expect(
-			f.session.click(f.context, f.window, ref, { modifiers: ["shift"], delivery: "foreground" }),
-		).rejects.toThrow("pixel target");
+			f.session.click(f.context, f.window, boundless.elements[0]!.ref, { modifiers: ["shift"] }),
+		).rejects.toThrow("no observed bounds");
 		expect(f.calls.some(call => call.name === "click")).toBe(false);
 	} finally {
 		await f.close();
 	}
 });
 
-it("uses advertised native element double-click without converting cached bounds into pixels", async () => {
+it("prefers the advertised native element double-click over the pixel fallback", async () => {
 	const f = await fixture();
 	try {
 		f.state.elementDoubleClick = "left_center_v1";
-		const observation = await f.session.observe(f.context, f.window);
+		const observation = await f.session.observe(f.context, f.window, { screenshot: true });
 		const ref = observation.elements[0]!.ref;
 		await f.session.click(f.context, f.window, ref, { count: 2 });
 		const clicks = f.calls.filter(call => call.name === "click");
@@ -726,19 +754,17 @@ it("uses advertised native element double-click without converting cached bounds
 		});
 		expect(clicks[0]!.args.x).toBeUndefined();
 		expect(clicks[0]!.args.y).toBeUndefined();
-		await expect(f.session.click(f.context, f.window, ref, { count: 2, button: "right" })).rejects.toThrow(
-			"pixel target",
-		);
-		await expect(f.session.click(f.context, f.window, ref, { count: 2, modifiers: ["shift"] })).rejects.toThrow(
-			"pixel target",
-		);
+		// Everything the native route does not advertise takes the bounds route.
+		await f.session.click(f.context, f.window, ref, { count: 2, button: "right" });
+		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 1, count: 2, button: "right" });
+		await f.session.click(f.context, f.window, ref, { count: 2, modifiers: ["shift"] });
+		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 1, count: 2, modifier: ["shift"] });
 		f.state.elementDoubleClick = undefined;
-		const legacy = await f.session.observe(f.context, f.window);
+		const legacy = await f.session.observe(f.context, f.window, { screenshot: true });
 		await expect(f.session.click(f.context, f.window, ref, { count: 2 })).rejects.toThrow("StaleRef");
-		await expect(f.session.click(f.context, f.window, legacy.elements[0]!.ref, { count: 2 })).rejects.toThrow(
-			"pixel target",
-		);
-		expect(f.calls.filter(call => call.name === "click")).toHaveLength(1);
+		await f.session.click(f.context, f.window, legacy.elements[0]!.ref, { count: 2 });
+		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 1, count: 2 });
+		expect(f.calls.at(-1)?.args.element_token).toBeUndefined();
 	} finally {
 		await f.close();
 	}
