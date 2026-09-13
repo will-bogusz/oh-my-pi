@@ -658,19 +658,27 @@ export class CuaComputerSession implements ComputerBackend {
 					element,
 				});
 			}
+			// Only the walker knows whether it clipped the tree. `truncated` is its
+			// explicit verdict and `elements_complete` its older positive proof.
+			// Equal returned/total counts prove nothing: both count what the walk
+			// reached, so every budget-capped walk called itself complete. Without
+			// a verdict a requested `maxElements` is a budget the walk may have
+			// hit, and no count can argue that away.
+			const walkFinished =
+				reply.data.ax_walk_timed_out !== true && reply.data.ax_walk_stop_reason == null;
+			const countedWhole =
+				typeof reply.data.returned_element_count === "number" &&
+				reply.data.returned_element_count === reply.data.total_element_count;
+			const complete =
+				walkFinished &&
+				(typeof reply.data.truncated === "boolean"
+					? !reply.data.truncated
+					: reply.data.elements_complete === true || (options.maxElements === undefined && countedWhole));
 			const observation: ComputerObservation = {
 				snapshotId,
 				window: current,
 				elements: rows.map(row => row.element),
-				// `elements_complete` is hard-coded false on Linux (the AT-SPI
-				// walker has no exhaustive-walk proof), so an equal returned/total
-				// count is the only evidence there that nothing was clipped.
-				complete:
-					(reply.data.elements_complete === true ||
-						(typeof reply.data.returned_element_count === "number" &&
-							reply.data.returned_element_count === reply.data.total_element_count)) &&
-					reply.data.ax_walk_timed_out !== true &&
-					reply.data.ax_walk_stop_reason == null,
+				complete,
 				backgroundInput: reply.data.background_input ?? null,
 				relatedWindows: relatedWindows(reply.data.related_windows),
 				tree: rows

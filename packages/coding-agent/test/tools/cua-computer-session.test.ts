@@ -130,6 +130,8 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		backgroundActions: undefined as unknown,
 		elementDoubleClick: undefined as unknown,
 		relatedWindows: undefined as unknown,
+		/** The fork's walker verdict; absent on 0.28.0 and earlier. */
+		truncated: undefined as boolean | undefined,
 		failCapture: false,
 		wrongIdentity: false,
 		kills: 0,
@@ -182,10 +184,12 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 					pid: state.wrongIdentity ? 999 : row.pid,
 					window_id: row.window_id,
 					snapshot_id: `s${state.sequence}`,
-					// Hard-coded false on Linux; equal counts are the only
-					// evidence there that the walk was not clipped.
+					// Hard-coded false by both 0.28.0 walkers, which also count only
+					// what they reached, so neither the flag nor the counts can deny
+					// a clip. `truncated` is the fork's verdict.
 					elements_complete: false,
 					...(linux ? { returned_element_count: 1, total_element_count: 1, element_count: 1 } : {}),
+					...(state.truncated === undefined ? {} : { truncated: state.truncated }),
 					related_windows: state.relatedWindows,
 					element_double_click: state.elementDoubleClick,
 					elements: [
@@ -446,6 +450,23 @@ it("observes semantics without images and preserves raw empty values and false s
 			name: "set_value",
 			args: { pid: 101, window_id: 1, element_token: "s1:1", snapshot_id: "s1", value: "" },
 		});
+	} finally {
+		await f.close();
+	}
+});
+
+it("never calls a budget-capped tree complete without the walker's own verdict", async () => {
+	const f = await fixture({ platform: "linux" });
+	try {
+		// What a capped walk reports: returned === total, because both count the
+		// nodes it reached. The request itself is the reason it cannot be proof.
+		expect((await f.session.observe(f.context, f.window, { maxElements: 1 })).complete).toBe(false);
+		expect((await f.session.observe(f.context, f.window)).complete).toBe(true);
+		// A walker that states its verdict is believed either way.
+		f.state.truncated = false;
+		expect((await f.session.observe(f.context, f.window, { maxElements: 1 })).complete).toBe(true);
+		f.state.truncated = true;
+		expect((await f.session.observe(f.context, f.window)).complete).toBe(false);
 	} finally {
 		await f.close();
 	}
