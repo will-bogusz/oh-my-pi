@@ -46,4 +46,35 @@ describe("browser readable extraction", () => {
 		expect(result?.text).toContain("Apps SDK");
 		expect(result?.text).toContain("Build once, run in many places");
 	});
+
+	it("breaks extracted text at block boundaries instead of returning one line", async () => {
+		const html = `<!doctype html>
+			<html>
+				<head><title>Rates</title><style>p { color: red }</style></head>
+				<body>
+					<main>
+						<h1>Fares</h1>
+						<p>One <em>way</em> costs $2.40.</p>
+						<ul><li>Adult</li><li>Senior</li></ul>
+						<table><tr><td>Zone 1</td><td>$2.40</td></tr></table>
+						<p>Transfers are free.<br>Passes are not.</p>
+					</main>
+				</body>
+			</html>`;
+
+		const result = await extractReadableFromHtml(html, "https://example.com/fares", "text");
+		const lines = result?.text?.split("\n").filter(line => line.length > 0);
+
+		expect(lines).toBeDefined();
+		// Every block stands on its own line, inline markup does not break one,
+		// and the stylesheet is not content.
+		expect(lines).toContain("Fares");
+		expect(lines).toContain("One way costs $2.40.");
+		expect(lines).toContain("Adult");
+		expect(lines).toContain("Senior");
+		expect(lines).toContain("Transfers are free.");
+		expect(lines).toContain("Passes are not.");
+		expect(result?.text).not.toContain("color: red");
+		expect(result?.text).toMatch(/Zone 1\s*\$2\.40/);
+	});
 });

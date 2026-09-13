@@ -37,6 +37,83 @@ async function loadDom(): Promise<typeof DomNs> {
 }
 
 /**
+ * Elements that end a line of prose. `textContent` concatenates across them,
+ * which turns a whole article into one line — unreadable, and the first thing
+ * any per-line budget cuts.
+ */
+const BLOCK_TAGS: Readonly<Record<string, true>> = {
+	ADDRESS: true,
+	ARTICLE: true,
+	ASIDE: true,
+	BLOCKQUOTE: true,
+	BR: true,
+	CAPTION: true,
+	DD: true,
+	DETAILS: true,
+	DIALOG: true,
+	DIV: true,
+	DL: true,
+	DT: true,
+	FIELDSET: true,
+	FIGCAPTION: true,
+	FIGURE: true,
+	FOOTER: true,
+	FORM: true,
+	H1: true,
+	H2: true,
+	H3: true,
+	H4: true,
+	H5: true,
+	H6: true,
+	HEADER: true,
+	HR: true,
+	LI: true,
+	MAIN: true,
+	NAV: true,
+	OL: true,
+	P: true,
+	PRE: true,
+	SECTION: true,
+	SUMMARY: true,
+	TABLE: true,
+	TD: true,
+	TH: true,
+	TR: true,
+	UL: true,
+};
+const SKIP_TAGS: Readonly<Record<string, true>> = { SCRIPT: true, STYLE: true, NOSCRIPT: true, TEMPLATE: true };
+
+/**
+ * Text of a subtree with a line break wherever the document has a block
+ * boundary. Whitespace inside a line is collapsed the way a renderer collapses
+ * it; `<pre>` keeps its own.
+ */
+function blockText(root: DomNs.Node): string {
+	const parts: string[] = [];
+	const walk = (node: DomNs.Node, preserve: boolean): void => {
+		if (node.nodeType === 3) {
+			parts.push(preserve ? (node.textContent ?? "") : (node.textContent ?? "").replace(/\s+/g, " "));
+			return;
+		}
+		if (node.nodeType !== 1) return;
+		const tag = (node as DomNs.Element).tagName?.toUpperCase() ?? "";
+		if (SKIP_TAGS[tag]) return;
+		const block = BLOCK_TAGS[tag] === true;
+		if (block) parts.push("\n");
+		for (const child of Array.from(node.childNodes)) walk(child, preserve || tag === "PRE");
+		if (block) parts.push("\n");
+	};
+	walk(root, false);
+	return parts
+		.join("")
+		.split("\n")
+		.map(line => line.trim())
+		.join("\n")
+		.replace(/\n{3,}/g, "\n\n")
+		.trim();
+}
+
+/**
  * Extract readable content from raw HTML.
  * Tries Readability (article-isolation scoring) first, then falls back to a
  * CSS selector chain over the same pre-parsed DOM. Returns null if neither
@@ -53,7 +130,12 @@ export async function extractReadableFromHtml(
 	// --- Primary: Readability article extraction ---
 	const article = new Readability(document).parse();
 	if (article) {
-		const result = await toReadableResult(url, format, article.textContent, article.content, {
+		// Readability returns the article as markup plus a `textContent` that has
+		// no block boundaries in it at all; re-read its own markup for the breaks.
+		// The markup is a fragment, so it needs a body to parse into.
+		const body = article.content ? parseHTML(`<body>${article.content}</body>`).document.body : null;
+		const text = body ? blockText(body) : article.textContent;
+		const result = await toReadableResult(url, format, text, article.content, {
 			title: article.title,
 			byline: article.byline,
 			excerpt: article.excerpt,
@@ -74,7 +156,7 @@ export async function extractReadableFromHtml(
 	for (const el of candidates) {
 		if (!el) continue;
 		const innerHTML = el.innerHTML?.trim();
-		const textContent = el.textContent?.trim();
+		const textContent = blockText(el);
 		if (!innerHTML || !textContent) continue;
 		const result = await toReadableResult(url, format, textContent, innerHTML, {
 			title: document.title,
