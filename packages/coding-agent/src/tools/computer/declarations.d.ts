@@ -190,8 +190,12 @@ interface ComputerRunOptions {
 	read_only?: boolean;
 	timeout?: number;
 }
+interface ComputerAcquireOptions extends ComputerObserveOptions {
+	/** launch the app the `{ app }` selector names when no window matches it yet */
+	launch?: boolean;
+}
 declare const computer: Omit<ComputerDesktop, "window"> & {
-	window(selector: string | number | ComputerWindowFilter, options?: ComputerObserveOptions): Promise<ComputerWindow>;
+	window(selector: string | number | ComputerWindowFilter, options?: ComputerAcquireOptions): Promise<ComputerWindow>;
 	run<R>(
 		fn: (scope: ComputerRunScope, ...args: unknown[]) => R | Promise<R>,
 		options?: ComputerRunOptions,

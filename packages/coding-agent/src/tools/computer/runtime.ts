@@ -26,7 +26,9 @@ import type {
 	ComputerWindowAcquisition,
 	ComputerWindowIdentity,
 	ComputerWindowKind,
+	AcquireOptions,
 	ObserveOptions,
+	WindowSelector,
 } from "./types";
 
 type GestureOptions = ActionOptions & { durationMs?: number; steps?: number };
@@ -260,6 +262,38 @@ class Win {
 	}
 }
 
+/** A launched app gets this long to put its window on the WindowServer. */
+const LAUNCHED_WINDOW_TIMEOUT_MS = 15_000;
+const LAUNCHED_WINDOW_POLL_MS = 250;
+
+/**
+ * `{ launch: true }` collapses the three-call acquisition every native run
+ * started with — `window()` throws `Missing`, `launch()`, `window()` again —
+ * into one call. Nothing is launched while a window already matches, and the
+ * wait is bounded: an app that opens no window ends in the same `Missing`
+ * error, with the candidates it did produce.
+ */
+async function launchAndAcquire(
+	session: ComputerBackend,
+	getContext: RunContextAccessor,
+	selector: WindowSelector,
+): Promise<ComputerWindowIdentity> {
+	if (selector.app === undefined || selector.id !== undefined || selector.pid !== undefined)
+		throw new ToolError(
+			"launch: true needs an { app } selector to name what to launch, and refuses an exact id/pid — those address a window that already exists",
+		);
+	if ((await session.windows(operationContext(getContext), selector)).length)
+		return session.window(operationContext(getContext), selector);
+	await session.launch(mutationContext(getContext), { name: selector.app });
+	const deadline = Date.now() + LAUNCHED_WINDOW_TIMEOUT_MS;
+	for (;;) {
+		const context = operationContext(getContext);
+		if ((await session.windows(context, selector)).length || Date.now() >= deadline)
+			return session.window(context, selector);
+		await Bun.sleep(LAUNCHED_WINDOW_POLL_MS);
+	}
+}
+
 function createDesktopScope(session: ComputerBackend, getContext: RunContextAccessor): object {
 	return {
 		capabilities: (): DesktopCapabilities => {
@@ -275,11 +309,16 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 				getContext,
 				await session.window(operationContext(getContext), normalizeWindowSelector(selector, true)),
 			),
-		acquireWindow: async (selector: unknown, options: ObserveOptions = {}): Promise<ComputerWindowAcquisition> => {
+		acquireWindow: async (selector: unknown, options: AcquireOptions = {}): Promise<ComputerWindowAcquisition> => {
+			const { launch, ...observeOptions } = options;
+			const target = normalizeWindowSelector(selector, true);
+			const window =
+				launch === true
+					? await launchAndAcquire(session, getContext, target)
+					: await session.window(operationContext(getContext), target);
 			const context = operationContext(getContext);
-			const window = await session.window(context, normalizeWindowSelector(selector, true));
 			try {
-				const initialObservation = await session.observe(context, window, { screenshot: true, ...options });
+				const initialObservation = await session.observe(context, window, { screenshot: true, ...observeOptions });
 				return { ...initialObservation.window, initialObservation };
 			} catch (error) {
 				throwIfAborted(context.signal);
@@ -290,9 +329,11 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 				};
 				// AX and pixels are independent. Preserve exact identity when inspection
 				// fails so callers can recover without choosing or revealing another window.
-				if (options.screenshot !== false) {
+				if (observeOptions.screenshot !== false) {
 					try {
-						result.initialScreenshot = await session.captureWindow(context, window, { silent: options.silent });
+						result.initialScreenshot = await session.captureWindow(context, window, {
+							silent: observeOptions.silent,
+						});
 					} catch (captureError) {
 						throwIfAborted(context.signal);
 						if (

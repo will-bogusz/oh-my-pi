@@ -159,6 +159,10 @@ export interface ObserveOptions {
 	maxElements?: number;
 	query?: string;
 }
+export interface AcquireOptions extends ObserveOptions {
+	/** Launch the app the `{ app }` selector names when no window matches it yet. */
+	launch?: boolean;
+}
 export interface WindowSelector {
 	id?: string;
 	pid?: number;

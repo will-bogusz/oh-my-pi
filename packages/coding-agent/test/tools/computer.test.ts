@@ -349,6 +349,38 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
+	it("launches the app its selector names and acquires the window in the same call", async () => {
+		const { backend, realm, displays } = javascriptFixture();
+		backend.windowAbsent = true;
+		const launch = spyOn(backend, "launch").mockImplementation(async () => {
+			backend.windowAbsent = false;
+			return { text: "launched", effect: "unverifiable", evidence: null, delivery: "background" };
+		});
+		try {
+			const acquired = await runInContext('computer.window({app:"Code"}, {launch:true, screenshot:false})', realm);
+			expect(launch.mock.calls[0]![1]).toEqual({ name: "Code" });
+			expect(acquired.id).toBe("42");
+			expect(displays.join("\n")).toContain("button [ref=e1]");
+			// Nothing is launched while a window already matches the selector.
+			await runInContext('computer.window({app:"Code"}, {launch:true, screenshot:false})', realm);
+			expect(launch).toHaveBeenCalledTimes(1);
+			// An exact id/pid addresses a window that exists; there is nothing to launch.
+			await expect(runInContext('computer.window("42", {launch:true})', realm)).rejects.toThrow("launch: true");
+			// Launching is a mutation, whatever tier the acquisition itself is.
+			backend.windowAbsent = true;
+			await expect(
+				runInContext(
+					'computer.run(({desktop}) => desktop.acquireWindow({app:"Code"},{launch:true}), {read_only:true})',
+					realm,
+				),
+			).rejects.toThrow("read-only");
+			expect(launch).toHaveBeenCalledTimes(1);
+		} finally {
+			launch.mockRestore();
+			await runInContext("computer.close()", realm);
+		}
+	});
+
 	it("launches through Python shorthand and keyword options using the same guarded session", async () => {
 		let definitions: readonly EvalPreludeDefinition[] = [];
 		const session: ToolSession = { ...toolSession(), getEvalPreludes: () => definitions };

@@ -85,6 +85,13 @@ function validateChain(chain: readonly ComputerCallStep[]): ComputerCallPolicy {
 			);
 		}
 		if (methods[step.method] === "exec") policy = "exec";
+		// `acquireWindow` inspects, except with `{ launch: true }`, which starts an
+		// application. That is an exec effect behind a read-tier method name.
+		if (methods === DESKTOP_METHODS && step.method === "acquireWindow") {
+			const options = step.args[1];
+			if (options !== null && typeof options === "object" && Reflect.get(options, "launch") === true)
+				policy = "exec";
+		}
 		if (index === chain.length - 1) continue;
 		if (methods === DESKTOP_METHODS && step.method === "window") {
 			methods = WINDOW_METHODS;

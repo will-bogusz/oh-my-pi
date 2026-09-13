@@ -62,6 +62,13 @@ describe("computer call boundary", () => {
 		expect(isReadOnlyComputerCall([{ method: "clipboard.read", args: [] }])).toBe(true);
 		expect(isReadOnlyComputerCall([{ method: "clipboard.write", args: ["x"] }])).toBe(false);
 		expect(isReadOnlyComputerCall([{ method: "launch", args: [{ name: "Fixture" }] }])).toBe(false);
+		expect(
+			isReadOnlyComputerCall([{ method: "acquireWindow", args: [{ app: "Fixture" }, { screenshot: false }] }]),
+		).toBe(true);
+		// The same inspection method starts an application when asked to.
+		expect(isReadOnlyComputerCall([{ method: "acquireWindow", args: [{ app: "Fixture" }, { launch: true }] }])).toBe(
+			false,
+		);
 	});
 
 	it("rejects obsolete methods and forged traversal before rendering or approving", () => {
