@@ -61,6 +61,13 @@ export const ELEMENT_METHODS: MethodPolicies = {
 	perform: "exec",
 };
 
+/**
+ * The verbs an acquired handle answers to, for the footer of an acquisition
+ * result. Derived from the tables that gate every handle call, so the list a
+ * model reads cannot drift from the list the boundary accepts.
+ */
+export const COMPUTER_HANDLE_VERBS = `win: ${Object.keys(WINDOW_METHODS).join(" · ")} — el: ${Object.keys(ELEMENT_METHODS).join(" · ")} — computer.help() for signatures`;
+
 /** Validate the entire chain before rendering any caller-controlled method name. */
 function validateChain(chain: readonly ComputerCallStep[]): ComputerCallPolicy {
 	if (!Array.isArray(chain) || chain.length === 0) {

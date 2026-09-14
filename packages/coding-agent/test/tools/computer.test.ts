@@ -12,7 +12,9 @@ import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-age
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { computerApproval, createComputerPrelude } from "@oh-my-pi/pi-coding-agent/tools/computer";
 import type { ComputerBackend } from "@oh-my-pi/pi-coding-agent/tools/computer/backend";
-import { isReadOnlyComputerCall, renderComputerCall } from "@oh-my-pi/pi-coding-agent/tools/computer/call";
+import { COMPUTER_HANDLE_VERBS, isReadOnlyComputerCall, renderComputerCall } from "@oh-my-pi/pi-coding-agent/tools/computer/call";
+// @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
+import computerDeclarations from "../../src/tools/computer/declarations.d.ts" with { type: "text" };
 import { ComputerSupervisor } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
 import { ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import type {
@@ -1019,6 +1021,32 @@ describe("computer preludes through the session", () => {
 		const printed = displays.join("\n");
 		expect(printed).toContain("interface ComputerWindow");
 		expect(printed).toContain("interface ComputerElement");
+	});
+
+	it("names the handle's verbs once with the acquisition and declares every one it names", async () => {
+		const { realm, displays } = javascriptFixture();
+		try {
+			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
+			const footers = displays
+				.join("\n")
+				.split("\n")
+				.filter(line => line.startsWith("win: "));
+			expect(footers).toEqual([COMPUTER_HANDLE_VERBS]);
+			const verbs = footers[0]!
+				.replace("win: ", "")
+				.replace(" — computer.help() for signatures", "")
+				.split(" — el: ")
+				.flatMap(group => group.split(" · "));
+			expect(verbs).toContain("menu");
+			for (const verb of verbs) expect(computerDeclarations).toContain(`\n\t${verb}(`);
+			// The surface is stated with the handle, not repeated by every read
+			// of the same window.
+			displays.length = 0;
+			await runInContext("win.observe({screenshot:false})", realm);
+			expect(displays.join("\n")).not.toContain("computer.help() for signatures");
+		} finally {
+			await runInContext("computer.close()", realm);
+		}
 	});
 
 	it("prints the same typed API through the Python prelude", async () => {

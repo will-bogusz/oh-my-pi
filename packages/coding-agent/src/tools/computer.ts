@@ -8,7 +8,12 @@ import { callSessionTool } from "../eval/js/tool-bridge";
 import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
 import computerDescription from "../prompts/tools/computer.md" with { type: "text" };
 import { enforceInlineByteCap } from "../session/streaming-output";
-import { type ComputerCallStep, isReadOnlyComputerCall, renderComputerCall } from "./computer/call";
+import {
+	COMPUTER_HANDLE_VERBS,
+	type ComputerCallStep,
+	isReadOnlyComputerCall,
+	renderComputerCall,
+} from "./computer/call";
 // @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
 import computerCodeModeDeclarations from "./computer/declarations.d.ts" with { type: "text" };
 // @ts-expect-error Bun imports this JavaScript source as text instead of evaluating its module shape.
@@ -339,6 +344,9 @@ async function runComputer(
 				? `Screenshot unavailable: ${observation?.screenshotError ?? acquired?.screenshotError}`
 				: undefined,
 			text,
+			// Once, with the handle itself: an observe of the same window repeats
+			// the tree, never the surface the model already holds.
+			acquired?.initialObservation ? COMPUTER_HANDLE_VERBS : undefined,
 		]
 			.filter(Boolean)
 			.join("\n");
