@@ -28,6 +28,7 @@ import type {
 	ComputerWindowKind,
 	AcquireOptions,
 	ObserveOptions,
+	WindowResolveOptions,
 	WindowSelector,
 } from "./types";
 
@@ -274,9 +275,8 @@ const LAUNCHED_WINDOW_POLL_MS = 250;
 
 /**
  * A `Missing` acquisition tells the model to try `{ launch: true }`, which is
- * exactly what just ran, so the one-call path states what happened instead of
- * sending it back around the same loop. An `Ambiguous` failure keeps its own
- * candidate list: that one is actionable as written.
+ * now what every `{ app }` acquisition already did, so the one-call path
+ * states what happened instead of sending it back around the same loop.
  */
 function launchedNothing(selector: WindowSelector, error: unknown): unknown {
 	if (!(error instanceof ToolError) || !error.message.startsWith("Missing computer window")) return error;
@@ -287,29 +287,31 @@ function launchedNothing(selector: WindowSelector, error: unknown): unknown {
 }
 
 /**
- * `{ launch: true }` collapses the three-call acquisition every native run
- * started with — `window()` throws `Missing`, `launch()`, `window()` again —
- * into one call. Nothing is launched while a window already matches, and the
- * wait is bounded: an app that opens no window ends in a `Missing` error that
- * says so, and one that opens several ends in the candidate list.
+ * Launching collapses the three-call acquisition every native run started
+ * with — `window()` throws `Missing`, `launch()`, `window()` again — into
+ * one call, and it is what an `{ app }` selector matching nothing means.
+ * Nothing is launched while a window already matches, and the wait is
+ * bounded: an app that opens no window ends in a `Missing` error that says
+ * so, and one that opens several is acquired at its frontmost window.
  */
 async function launchAndAcquire(
 	session: ComputerBackend,
 	getContext: RunContextAccessor,
 	selector: WindowSelector,
+	options: WindowResolveOptions,
 ): Promise<ComputerWindowIdentity> {
 	if (selector.app === undefined || selector.id !== undefined || selector.pid !== undefined)
 		throw new ToolError(
 			"launch: true needs an { app } selector to name what to launch, and refuses an exact id/pid — those address a window that already exists",
 		);
 	if ((await session.windows(operationContext(getContext), selector)).length)
-		return session.window(operationContext(getContext), selector);
+		return session.window(operationContext(getContext), selector, options);
 	await session.launch(mutationContext(getContext), { name: selector.app });
 	const deadline = Date.now() + LAUNCHED_WINDOW_TIMEOUT_MS;
 	for (;;) {
 		const context = operationContext(getContext);
 		if ((await session.windows(context, selector)).length || Date.now() >= deadline)
-			return await session.window(context, selector).catch((error: unknown) => {
+			return await session.window(context, selector, options).catch((error: unknown) => {
 				throw launchedNothing(selector, error);
 			});
 		await Bun.sleep(LAUNCHED_WINDOW_POLL_MS);
@@ -325,19 +327,23 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 		apps: () => session.apps(operationContext(getContext)),
 		displays: () => session.displays(operationContext(getContext)),
 		windows: (selector: unknown = {}) => session.windows(operationContext(getContext), normalizeWindowSelector(selector)),
-		window: async (selector: unknown): Promise<Win> =>
+		window: async (selector: unknown, options: WindowResolveOptions = {}): Promise<Win> =>
 			new Win(
 				session,
 				getContext,
-				await session.window(operationContext(getContext), normalizeWindowSelector(selector, true)),
+				await session.window(operationContext(getContext), normalizeWindowSelector(selector, true), options),
 			),
 		acquireWindow: async (selector: unknown, options: AcquireOptions = {}): Promise<ComputerWindowAcquisition> => {
-			const { launch, ...observeOptions } = options;
+			const { launch, ambiguous, ...observeOptions } = options;
 			const target = normalizeWindowSelector(selector, true);
+			// An `{ app }` selector that matches nothing is an app that is not
+			// running; an exact id/pid names a window that already exists and is
+			// never a launch request, whatever the default says.
 			const window =
-				launch === true
-					? await launchAndAcquire(session, getContext, target)
-					: await session.window(operationContext(getContext), target);
+				launch === true ||
+				(launch === undefined && target.app !== undefined && target.id === undefined && target.pid === undefined)
+					? await launchAndAcquire(session, getContext, target, { ambiguous })
+					: await session.window(operationContext(getContext), target, { ambiguous });
 			const context = operationContext(getContext);
 			try {
 				const initialObservation = await session.observe(context, window, { screenshot: true, ...observeOptions });

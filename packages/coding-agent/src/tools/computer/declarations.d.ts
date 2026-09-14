@@ -50,6 +50,8 @@ interface ComputerWindowInfo {
 	title: string;
 	bounds: ComputerBounds;
 	onScreen?: boolean;
+	/** Stacking order where the platform reports one; higher is closer to the front. */
+	zIndex?: number;
 }
 interface ComputerScreenshotResult {
 	path: string;
@@ -156,7 +158,10 @@ interface ComputerDesktop {
 	apps(): Promise<unknown>;
 	displays(): Promise<(ComputerBounds & { id: string; name: string; scale: number; isPrimary: boolean })[]>;
 	windows(filter?: ComputerWindowFilter): Promise<ComputerWindowInfo[]>;
-	window(selector: string | number | ComputerWindowFilter): Promise<ComputerWindow>;
+	window(
+		selector: string | number | ComputerWindowFilter,
+		options?: ComputerResolveOptions,
+	): Promise<ComputerWindow>;
 	focusedWindow(): Promise<ComputerWindow | null>;
 	screenshot(options?: { silent?: boolean }): Promise<ComputerScreenshotResult>;
 	launch(
@@ -194,8 +199,20 @@ interface ComputerRunOptions {
 	read_only?: boolean;
 	timeout?: number;
 }
-interface ComputerAcquireOptions extends ComputerObserveOptions {
-	/** launch the app the `{ app }` selector names when no window matches it yet */
+interface ComputerResolveOptions {
+	/**
+	 * Several windows match: `"front"` (default) acquires the frontmost and
+	 * names the ones it passed over, `"throw"` fails with every candidate id.
+	 */
+	ambiguous?: "front" | "throw";
+}
+interface ComputerAcquireOptions extends ComputerObserveOptions, ComputerResolveOptions {
+	/**
+	 * Launch the app the `{ app }` selector names when no window matches it
+	 * yet — the default for an `{ app }` selector, so one call covers "start
+	 * it if needed, then acquire it". `false` acquires only what is already
+	 * open; an exact id/pid never launches anything.
+	 */
 	launch?: boolean;
 }
 declare const computer: Omit<ComputerDesktop, "window"> & {

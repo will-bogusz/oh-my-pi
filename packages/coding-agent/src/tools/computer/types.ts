@@ -67,6 +67,12 @@ export interface ComputerWindowIdentity {
 	onScreen?: boolean;
 	/** CGWindow layer: 0 for ordinary windows, 1000 for system auth panels. */
 	layer?: number;
+	/**
+	 * Stacking order as the platform reports it: higher is closer to the
+	 * front. Absent when it reports none, and then nothing may be inferred
+	 * from roster order.
+	 */
+	zIndex?: number;
 	kind?: ComputerWindowKind;
 }
 export interface ComputerElementSnapshot {
@@ -173,8 +179,22 @@ export interface ObserveOptions {
 	maxElements?: number;
 	query?: string;
 }
-export interface AcquireOptions extends ObserveOptions {
-	/** Launch the app the `{ app }` selector names when no window matches it yet. */
+/** How a selector several windows match is settled. */
+export interface WindowResolveOptions {
+	/**
+	 * `front` acquires the frontmost match and names the others it passed
+	 * over; `throw` refuses and lists every candidate. Acquisition defaults to
+	 * `front` — the frontmost window is the one the user is looking at, and a
+	 * model that has never seen the ids cannot pick between them.
+	 */
+	ambiguous?: "front" | "throw";
+}
+export interface AcquireOptions extends ObserveOptions, WindowResolveOptions {
+	/**
+	 * Launch the app the `{ app }` selector names when no window matches it
+	 * yet. Defaults to true for an `{ app }` selector; an exact id/pid
+	 * addresses a window that already exists and never launches anything.
+	 */
 	launch?: boolean;
 }
 export interface WindowSelector {

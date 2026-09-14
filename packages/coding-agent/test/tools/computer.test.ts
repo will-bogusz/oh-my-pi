@@ -408,6 +408,34 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
+	it("reads an app selector that matches nothing as a launch request unless launching is refused", async () => {
+		const { backend, realm } = javascriptFixture();
+		backend.windowAbsent = true;
+		const launch = spyOn(backend, "launch").mockImplementation(async () => {
+			backend.windowAbsent = false;
+			return { text: "launched", effect: "unverifiable", evidence: null, delivery: "background" };
+		});
+		try {
+			// No `launch` option: an { app } selector matching nothing names an
+			// app that is not running, and acquisition starts it.
+			expect((await runInContext('computer.window({app:"Code"}, {screenshot:false})', realm)).id).toBe("42");
+			expect(launch.mock.calls[0]![1]).toEqual({ name: "Code" });
+			// `{ launch: false }` acquires only what is already open.
+			backend.windowAbsent = true;
+			await expect(
+				runInContext('computer.window({app:"Code"}, {launch:false, screenshot:false})', realm),
+			).rejects.toThrow("Missing computer window");
+			// An exact id addresses a window that exists; the default launches nothing.
+			await expect(runInContext('computer.window("42", {screenshot:false})', realm)).rejects.toThrow(
+				"Missing computer window",
+			);
+			expect(launch).toHaveBeenCalledTimes(1);
+		} finally {
+			launch.mockRestore();
+			await runInContext("computer.close()", realm);
+		}
+	});
+
 	it("launches through Python shorthand and keyword options using the same guarded session", async () => {
 		let definitions: readonly EvalPreludeDefinition[] = [];
 		const session: ToolSession = { ...toolSession(), getEvalPreludes: () => definitions };

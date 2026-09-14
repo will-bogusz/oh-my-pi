@@ -28,6 +28,7 @@ import type {
 	ComputerTarget,
 	ComputerWindowIdentity,
 	ObserveOptions,
+	WindowResolveOptions,
 	WindowSelector,
 } from "./types";
 
@@ -517,6 +518,9 @@ export class CuaComputerSession implements ComputerBackend {
 				// Contract-optional and absent on Linux; only macOS stacks system
 				// panels on a layer. Unknown stays unknown.
 				...(typeof row.layer === "number" ? { layer: row.layer } : {}),
+				// The driver's own stacking report, higher towards the front. Null
+				// means it has none, and no order may be read out of the array.
+				...(typeof row.z_index === "number" ? { zIndex: row.z_index } : {}),
 				// An owner's off-screen placeholder window is not the panel itself.
 				kind: onScreen.has(String(row.window_id))
 					? classifyWindow({ app: string(row.app_name, "app_name") })
@@ -596,7 +600,30 @@ export class CuaComputerSession implements ComputerBackend {
 			document === undefined ? "" : ` document=${document}`
 		}`;
 	}
-	async #window(selector: string | WindowSelector): Promise<ComputerWindowIdentity> {
+	/**
+	 * Frontmost of several matches. `z_index` is the driver's own stacking
+	 * report and only comparable while every candidate carries one; the
+	 * WindowServer sample, ordered front to back, is the fallback. Neither:
+	 * stacking order is genuinely unknown and nothing may be picked.
+	 */
+	#frontmost(matches: ComputerWindowIdentity[]): ComputerWindowIdentity | undefined {
+		if (matches.every(window => window.zIndex !== undefined))
+			return matches.reduce((front, window) => (window.zIndex! > front.zIndex! ? window : front));
+		for (const row of this.#roster()?.windows ?? []) {
+			const match = matches.find(window => window.id === row.id);
+			if (match) return match;
+		}
+		return undefined;
+	}
+	/**
+	 * `note`: several matches are the app's own doing (two restored documents
+	 * of one workflow), and a model that has never seen the ids cannot pick
+	 * between them. Where a note can be delivered, acquisition takes the
+	 * frontmost window — the one the user is looking at — and says which
+	 * others it passed over. Without one (every internal re-resolution of an
+	 * exact id/pid, where several matches mean something is wrong) it refuses.
+	 */
+	async #window(selector: string | WindowSelector, note?: (text: string) => void): Promise<ComputerWindowIdentity> {
 		const filter = typeof selector === "string" ? { id: selector } : selector;
 		let matches = await this.#windows(filter);
 		const pid = matches[0]?.pid;
@@ -632,8 +659,16 @@ export class CuaComputerSession implements ComputerBackend {
 				}
 			}
 		}
-		if (matches.length !== 1) throw this.#unresolved(selector, matches);
-		return matches[0]!;
+		if (matches.length === 1) return matches[0]!;
+		const front = matches.length > 1 && note ? this.#frontmost(matches) : undefined;
+		if (!front || !note) throw this.#unresolved(selector, matches);
+		note(
+			`Ambiguous computer window ${JSON.stringify(selector)}: ${matches.length} windows match; acquired the frontmost, id ${JSON.stringify(front.id)}. Passed over ${matches
+				.filter(window => window !== front)
+				.map(window => `id ${JSON.stringify(window.id)} ${JSON.stringify(window.title)}`)
+				.join(", ")} — acquire one of those by its exact id to work on it instead.`,
+		);
+		return front;
 	}
 	#current(window: Pick<ComputerWindowIdentity, "id" | "pid">): Promise<ComputerWindowIdentity> {
 		return this.#window({ id: window.id, pid: window.pid });
@@ -641,8 +676,14 @@ export class CuaComputerSession implements ComputerBackend {
 	windows(context: Context, selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
 		return this.#schedule(context, "windows", false, () => this.#windows(selector));
 	}
-	window(context: Context, selector: string | WindowSelector): Promise<ComputerWindowIdentity> {
-		return this.#schedule(context, "window", false, () => this.#window(selector));
+	window(
+		context: Context,
+		selector: string | WindowSelector,
+		options: WindowResolveOptions = {},
+	): Promise<ComputerWindowIdentity> {
+		return this.#schedule(context, "window", false, () =>
+			this.#window(selector, options.ambiguous === "throw" ? undefined : text => context.emitText(text)),
+		);
 	}
 	apps(context: Context): Promise<unknown> {
 		return this.#schedule(context, "apps", false, async () => (await this.#call("list_apps", {})).data);

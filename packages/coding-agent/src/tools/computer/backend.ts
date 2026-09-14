@@ -11,6 +11,7 @@ import type {
 	ComputerTarget,
 	ComputerWindowIdentity,
 	ObserveOptions,
+	WindowResolveOptions,
 	WindowSelector,
 } from "./types";
 
@@ -39,7 +40,11 @@ export interface ComputerBackend {
 	apps(context: ComputerOperationContext): Promise<unknown>;
 	displays(context: ComputerOperationContext): Promise<DesktopDisplay[]>;
 	windows(context: ComputerOperationContext, selector?: WindowSelector): Promise<ComputerWindowIdentity[]>;
-	window(context: ComputerOperationContext, selector: string | WindowSelector): Promise<ComputerWindowIdentity>;
+	window(
+		context: ComputerOperationContext,
+		selector: string | WindowSelector,
+		options?: WindowResolveOptions,
+	): Promise<ComputerWindowIdentity>;
 	focusedWindow(context: ComputerOperationContext): Promise<ComputerWindowIdentity | null>;
 	element(ref: string, window?: ComputerWindowIdentity): ComputerElementSnapshot;
 	elementWindow(ref: string): ComputerWindowIdentity;

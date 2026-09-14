@@ -3,10 +3,12 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { fromJsonSchema, type } from "@oh-my-pi/omptype";
+import type { DesktopSystemWindow } from "@oh-my-pi/pi-natives";
 import { CuaComputerSession } from "@oh-my-pi/pi-coding-agent/tools/computer/cua-session";
 import type { CuaDriver, CuaToolResult } from "@oh-my-pi/pi-coding-agent/tools/computer/driver";
 import { ToolAbortError, ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import type { ComputerImage, ComputerOperationContext } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
+import type { WindowRosterSample } from "@oh-my-pi/pi-coding-agent/tools/computer/interruption";
 /** Upstream's generated tool contract at `e7e141ae` (`libs/cua-driver/contract/manifest.json`). */
 import contract from "../fixtures/cua-contract-manifest.json";
 
@@ -101,6 +103,23 @@ const LINUX = {
 	},
 } as const;
 
+/** A WindowServer roster row; the sample is ordered front to back. */
+function systemWindow(row: { id: string; title: string; zIndex?: number }): DesktopSystemWindow {
+	return {
+		id: row.id,
+		pid: 101,
+		app: "Fixture",
+		title: row.title,
+		x: 10,
+		y: 20,
+		width: 200,
+		height: 100,
+		layer: 0,
+		alpha: 1,
+		zIndex: row.zIndex ?? 0,
+	};
+}
+
 async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 	const platform = options.platform ?? "darwin";
 	const linux = platform === "linux";
@@ -140,6 +159,8 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		relatedWindows: undefined as unknown,
 		/** The fork's walker verdict; absent on 0.28.0 and earlier. */
 		truncated: undefined as boolean | undefined,
+		/** WindowServer sample; absent means macOS reported no roster at all. */
+		roster: undefined as WindowRosterSample | undefined,
 		failCapture: false,
 		wrongIdentity: false,
 		kills: 0,
@@ -270,7 +291,7 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 			live = true;
 			return driver;
 		},
-		sampleRoster: () => ({ windows: [], elapsedMs: 0 }),
+		sampleRoster: () => state.roster ?? { windows: [], elapsedMs: 0 },
 	});
 	const context: ComputerOperationContext = {
 		signal: new AbortController().signal,
@@ -336,7 +357,37 @@ it("acquires the sole application-declared window without hiding raw helper iden
 	}
 });
 
-it("returns exact candidates without inspecting one when broad acquisition remains ambiguous", async () => {
+it("acquires the frontmost match and names the windows it passed over", async () => {
+	const f = await fixture();
+	try {
+		// One app, two restored documents: the frontmost is the one the user is
+		// looking at, and the others are named with the ids that pick them.
+		const second = { ...f.row, window_id: 2, title: "Second", z_index: 3 };
+		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [f.row, second] }) : undefined);
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "2", zIndex: 3 });
+		expect(f.texts.join("\n")).toContain('2 windows match; acquired the frontmost, id "2"');
+		expect(f.texts.join("\n")).toContain('Passed over id "1" "Editor"');
+		// The WindowServer roster orders what the driver reports no stacking for.
+		f.state.roster = {
+			windows: [systemWindow({ id: "1", title: "Editor" }), systemWindow({ id: "2", title: "Second", zIndex: 1 })],
+			elapsedMs: 0,
+		};
+		f.state.hook = async name =>
+			name === "list_windows"
+				? reply({ windows: [{ ...f.row, z_index: null }, { ...second, z_index: null }] })
+				: undefined;
+		f.texts.length = 0;
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "1" });
+		expect(f.texts.join("\n")).toContain('acquired the frontmost, id "1"');
+		// Neither source orders them: stacking is unknown and nothing is picked.
+		f.state.roster = undefined;
+		await expect(f.session.window(f.context, { app: "Fixture" })).rejects.toThrow("Ambiguous");
+	} finally {
+		await f.close();
+	}
+});
+
+it("returns exact candidates without inspecting one when asked to refuse an ambiguous selector", async () => {
 	const f = await fixture();
 	const second = { ...f.row, window_id: 2, title: "Second", is_on_screen: false };
 	const axWindow = { window_id: 1, role: "AXWindow" };
@@ -351,7 +402,9 @@ it("returns exact candidates without inspecting one when broad acquisition remai
 			f.state.hook = async name =>
 				name === "list_windows" ? reply({ windows: [f.row, second], accessibility_windows: metadata }) : undefined;
 			f.calls.length = 0;
-			const failure = await f.session.window(f.context, { app: "Fixture" }).catch((error: unknown) => error);
+			const failure = await f.session
+				.window(f.context, { app: "Fixture" }, { ambiguous: "throw" })
+				.catch((error: unknown) => error);
 			expect(failure).toBeInstanceOf(Error);
 			if (!(failure instanceof Error)) throw new Error("Expected ambiguous acquisition to fail");
 			expect(failure.message).toContain("Ambiguous");
@@ -392,7 +445,9 @@ it("names the launch option and each candidate's document when acquisition resol
 			});
 		};
 		await f.session.observe(f.context, f.window, { screenshot: false });
-		const failure = await f.session.window(f.context, { app: "Fixture" }).catch((error: unknown) => error);
+		const failure = await f.session
+			.window(f.context, { app: "Fixture" }, { ambiguous: "throw" })
+			.catch((error: unknown) => error);
 		const message = (failure as Error).message;
 		expect(message).toContain(
 			'- id "1" pid 101 Fixture "Editor" 200×100 at (10,20) document=file:///Users/will/Desktop/Project%20File%20List.workflow',
@@ -430,7 +485,7 @@ it("does not resolve across processes or retarget after the requested window dis
 			if (args.include_accessibility_metadata) throw new Error("Must not ask one process to resolve another");
 			return reply({ windows: [f.row, { ...f.row, pid: 102, window_id: 2 }] });
 		};
-		await expect(f.session.window(f.context, { app: "Fixture" })).rejects.toThrow("Ambiguous");
+		await expect(f.session.window(f.context, { app: "Fixture" }, { ambiguous: "throw" })).rejects.toThrow("Ambiguous");
 		f.state.hook = async (name, args) =>
 			name === "list_windows"
 				? reply({

@@ -121,7 +121,7 @@ def _make_computer():
             return self._resolve().__await__()
 
     class _Window:
-        __slots__ = ("id", "app", "title", "pid", "bounds", "onScreen", "layer", "kind", "initialObservation", "inspectionError", "initialScreenshot", "screenshotError")
+        __slots__ = ("id", "app", "title", "pid", "bounds", "onScreen", "layer", "zIndex", "kind", "initialObservation", "inspectionError", "initialScreenshot", "screenshotError")
 
         def __init__(self, snapshot):
             if not isinstance(snapshot.get("id"), str) or type(snapshot.get("pid")) is not int:
@@ -253,12 +253,12 @@ def _make_computer():
         async def press(self, *args, **kwargs):
             return await self._method("press", args, kwargs)
 
-        async def window(self, *args, screenshot=None, silent=None, maxDepth=None, maxElements=None, query=None, **kwargs):
+        async def window(self, *args, launch=None, ambiguous=None, screenshot=None, silent=None, maxDepth=None, maxElements=None, query=None, **kwargs):
             """Acquire one exact window and its initial background inspection."""
             selectors = _arguments(args, kwargs)
             if len(selectors) != 1:
                 raise TypeError("computer.window expects one selector or filter keywords")
-            options = {key: value for key, value in {"screenshot": screenshot, "silent": silent, "maxDepth": maxDepth, "maxElements": maxElements, "query": query}.items() if value is not None}
+            options = {key: value for key, value in {"launch": launch, "ambiguous": ambiguous, "screenshot": screenshot, "silent": silent, "maxDepth": maxDepth, "maxElements": maxElements, "query": query}.items() if value is not None}
             snapshot = await self._method("acquireWindow", (selectors[0], options), {})
             return _Window(snapshot) if isinstance(snapshot, dict) else None
 

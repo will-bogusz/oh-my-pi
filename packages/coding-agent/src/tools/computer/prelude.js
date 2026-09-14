@@ -51,7 +51,7 @@
 		}
 	};
 
-	const windowFields = ["id", "app", "title", "pid", "bounds", "onScreen", "layer", "kind"];
+	const windowFields = ["id", "app", "title", "pid", "bounds", "onScreen", "layer", "zIndex", "kind"];
 	const windowValueMethods = [
 		"screenshot",
 		"click",
