@@ -203,8 +203,14 @@ class Win {
 		Object.freeze(this);
 	}
 
+	/**
+	 * Tree-only unless `{ screenshot: true }` is asked for. A capture cost the
+	 * bench ~90 images a leg, ~70 k tokens of them on default observations the
+	 * model had already decided to read as text; acquisition still captures
+	 * one, so the first look at a window is still visual.
+	 */
 	observe(options?: ObserveOptions) {
-		return this.#session.observe(operationContext(this.#getContext), this.#window, { screenshot: true, ...options });
+		return this.#session.observe(operationContext(this.#getContext), this.#window, options);
 	}
 	screenshot(options?: { silent?: boolean }) {
 		return this.#session.captureWindow(operationContext(this.#getContext), this.#window, options);

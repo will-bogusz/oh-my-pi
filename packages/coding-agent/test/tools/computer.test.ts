@@ -157,7 +157,7 @@ class FakeBackend implements ComputerBackend {
 			elements: [element],
 			complete: this.complete,
 			backgroundInput: true,
-			...(options.screenshot === false ? {} : { screenshot: this.image(context, window.id, options.silent) }),
+			...(options.screenshot === true ? { screenshot: this.image(context, window.id, options.silent) } : {}),
 		};
 	}
 	element(ref: string, window?: ComputerWindowIdentity) {
@@ -432,6 +432,28 @@ describe("computer preludes through the session", () => {
 			expect(launch).toHaveBeenCalledTimes(1);
 		} finally {
 			launch.mockRestore();
+			await runInContext("computer.close()", realm);
+		}
+	});
+
+	it("observes the tree without a screenshot unless the call asks for one", async () => {
+		const { backend, realm } = javascriptFixture();
+		const captured = spyOn(backend, "image");
+		try {
+			// Acquisition still shows the window once.
+			await runInContext('computer.window("42").then(win => (globalThis.win = win))', realm);
+			expect(await runInContext("win.initialObservation.screenshot.target", realm)).toBe("42");
+			expect(captured).toHaveBeenCalledTimes(1);
+			// Every observation after it is tree-only until one is asked for.
+			expect(await runInContext("win.observe().then(state => state.screenshot === undefined)", realm)).toBe(true);
+			expect(await runInContext("win.find({}).then(found => found.length)", realm)).toBe(1);
+			expect(captured).toHaveBeenCalledTimes(1);
+			expect(await runInContext("win.observe({screenshot:true}).then(state => state.screenshot.target)", realm)).toBe(
+				"42",
+			);
+			expect(captured).toHaveBeenCalledTimes(2);
+		} finally {
+			captured.mockRestore();
 			await runInContext("computer.close()", realm);
 		}
 	});

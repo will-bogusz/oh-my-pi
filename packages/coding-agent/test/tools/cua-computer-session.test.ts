@@ -882,16 +882,26 @@ it("maps resized image coordinates to the exact SDK image and invalidates failed
 	}
 });
 
-it("invalidates pixel frames on geometry changes and AX-only re-observation", async () => {
+it("invalidates pixel frames when the window moves and keeps them across AX-only reads", async () => {
 	const f = await fixture();
 	try {
 		await f.session.captureWindow(f.context, f.window);
 		f.row.bounds.x++;
 		await expect(f.session.click(f.context, f.window, [1, 0])).rejects.toThrow("StaleFrame");
-		await f.session.captureWindow(f.context, f.window);
-		await f.session.observe(f.context, f.window);
-		await expect(f.session.click(f.context, f.window, [1, 0])).rejects.toThrow("StaleFrame");
 		expect(f.calls.some(call => call.name === "click")).toBe(false);
+		await f.session.captureWindow(f.context, f.window);
+		// An AX-only observation or a verify captures nothing and moves nothing,
+		// so the frame the last capture bound is still the live one. The explicit
+		// flag is the call `find()` makes.
+		await f.session.observe(f.context, f.window);
+		await f.session.observe(f.context, f.window, { screenshot: false });
+		f.state.hook = async name =>
+			name === "verify_state"
+				? reply({ status: "satisfied", stable: true, elapsed_ms: 1, samples: 1, predicates: [] })
+				: undefined;
+		await f.session.verify(f.context, f.window, []);
+		await f.session.click(f.context, f.window, [1, 0]);
+		expect(f.calls.at(-1)?.args).toMatchObject({ pid: 101, window_id: 1, x: 2, y: 0 });
 	} finally {
 		await f.close();
 	}
@@ -1360,7 +1370,12 @@ it("drags between element refs at their own observed bounds", async () => {
 		expect(f.calls.at(-1)?.args).toMatchObject({ from_x: 2, from_y: 1, to_x: 2, to_y: 1, steps: 10 });
 		// No frame and no bounds are the only refusals, and neither dispatches.
 		f.calls.length = 0;
-		const treeOnly = await f.session.observe(f.context, f.window, { screenshot: false });
+		// A failed capture leaves the window with no frame; the tree read that
+		// follows it neither restores one nor invalidates anything.
+		f.state.failCapture = true;
+		await expect(f.session.captureWindow(f.context, f.window)).rejects.toThrow("Screenshot unavailable");
+		const treeOnly = await f.session.observe(f.context, f.window);
+		f.state.failCapture = false;
 		await expect(
 			f.session.drag(f.context, f.window, treeOnly.elements[0]!.ref, [0, 0], { delivery: "foreground" }),
 		).rejects.toThrow("drag from an element with no observed bounds or no current window screenshot");

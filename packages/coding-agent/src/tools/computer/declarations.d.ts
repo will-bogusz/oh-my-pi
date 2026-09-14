@@ -25,6 +25,11 @@ interface ComputerTargetOptions extends ComputerDeliveryOptions {
 	target?: ComputerTarget;
 }
 interface ComputerObserveOptions {
+	/**
+	 * Capture the window's pixels alongside the tree. Default false —
+	 * acquisition takes one initial screenshot, and pixel actions need a
+	 * current frame, so ask for one when you are going to click coordinates.
+	 */
 	screenshot?: boolean;
 	silent?: boolean;
 	maxDepth?: number;

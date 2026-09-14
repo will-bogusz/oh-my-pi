@@ -888,9 +888,11 @@ export class CuaComputerSession implements ComputerBackend {
 		args: Wire,
 	): Promise<{ reply: Reply; current: ComputerWindowIdentity }> {
 		// Cua keeps one rendering lease per session. A screenshot request may stop
-		// the previous window's stream even when the new capture fails.
+		// the previous window's stream even when the new capture fails, so it
+		// drops every frame. An AX-only read captures nothing and invalidates
+		// nothing: pixels stay valid until the window's own geometry moves,
+		// which `#target` checks against the live bounds on every use.
 		if (args.include_screenshot === true) this.#frames.clear();
-		else this.#frames.delete(window.id);
 		if (args.include_accessibility_tree !== false) this.#invalidate(window);
 		const current = await this.#current(window);
 		throwIfAborted(context.signal);
@@ -1329,7 +1331,6 @@ export class CuaComputerSession implements ComputerBackend {
 		return this.#schedule(context, "verify", false, async () => {
 			windowArgs(window);
 			this.#invalidate(window);
-			this.#frames.delete(window.id);
 			const { data } = await this.#call("verify_state", {
 				...windowArgs(window),
 				expect,
