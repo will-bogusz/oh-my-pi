@@ -165,6 +165,13 @@ export interface ComputerActionResult {
 	 */
 	committed?: boolean;
 	/**
+	 * The driver's escalation advice for this reply, in the vocabulary the
+	 * caller types. Present only when the reply carried one its own text did
+	 * not already name, and then the cell output carries the result too: a
+	 * route that lives solely in a returned value is a route the cell can drop.
+	 */
+	escalation?: string;
+	/**
 	 * System UI that appeared while this action ran. The action itself was
 	 * dispatched, so its evidence still describes the target; the environment
 	 * changed under it and the next action will be refused.

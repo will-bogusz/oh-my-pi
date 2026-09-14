@@ -109,6 +109,8 @@ interface ComputerAction {
 	delivery: unknown;
 	/** `setValue`: whether the app's editing pipeline kept the written value. */
 	committed?: boolean;
+	/** The route the driver says would land when it doubts this one did. */
+	escalation?: string;
 	interruptedBy?: ComputerInterruption;
 }
 interface ComputerElement {

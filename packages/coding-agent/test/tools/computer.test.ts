@@ -175,6 +175,8 @@ class FakeBackend implements ComputerBackend {
 		this.element(ref);
 		return this.bindings.get(ref)!.window;
 	}
+	/** The rung the driver named when it doubted this one landed; absent when it named none. */
+	escalation?: string;
 	async click(
 		context: ComputerOperationContext,
 		window: ComputerWindowIdentity,
@@ -184,7 +186,13 @@ class FakeBackend implements ComputerBackend {
 		if (typeof target === "string") this.element(target, window);
 		this.clickCount++;
 		this.value = String(this.clickCount);
-		return { text: "", effect: "verified", evidence: { count: this.clickCount }, delivery: "background" };
+		return {
+			text: this.escalation === undefined ? "" : `✅ Posted click to pid 123.\n${this.escalation}`,
+			effect: "verified",
+			evidence: { count: this.clickCount },
+			delivery: "background",
+			...(this.escalation === undefined ? {} : { escalation: this.escalation }),
+		};
 	}
 	/** What the driver judged about the app's end-of-edit, when it judged anything. */
 	committed?: boolean;
@@ -672,7 +680,7 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
-	it("pushes an uncommitted write into the cell output instead of leaving it in a dropped value", async () => {
+	it("pushes a doubted write or route into the cell output instead of a dropped value", async () => {
 		const { backend, realm, displays } = javascriptFixture();
 		try {
 			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
@@ -688,6 +696,17 @@ describe("computer preludes through the session", () => {
 			backend.committed = false;
 			await runInContext('win.setValue(win.initialObservation.elements[0].ref, "lost")', realm);
 			expect(displays.join("\n")).toContain("committed=false");
+			// Same shape by a third route: the driver dispatched, doubts the rung
+			// landed, and names the one that would. A cell that drops the result
+			// still reads it.
+			backend.committed = undefined;
+			displays.length = 0;
+			await runInContext("win.click(win.initialObservation.elements[0].ref)", realm);
+			expect(displays).toEqual([]);
+			backend.escalation =
+				'⚠️ The driver escalates this action (delivery_failed): the route it names is { delivery: "foreground" }.';
+			await runInContext("win.click(win.initialObservation.elements[0].ref)", realm);
+			expect(displays.join("\n")).toContain('{ delivery: "foreground" }');
 		} finally {
 			await runInContext("computer.close()", realm);
 		}

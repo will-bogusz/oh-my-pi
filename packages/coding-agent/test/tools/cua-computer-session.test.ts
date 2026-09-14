@@ -741,6 +741,113 @@ it("keeps the menu bar out of observations and names the route that drives it", 
 	}
 });
 
+/**
+ * Contacts' own menu bar as cua-driver 0.28.0 renders it (trimmed), recorded
+ * from `get_window_state` on pid 95531. The rows without an element index are
+ * the ones a closed menu reports disabled: `New Card` — the item the bench
+ * was reaching for — is one of them, so it is in this markdown and in no
+ * `elements[]` array.
+ */
+const CONTACTS_MENU_BAR = `- [1] AXWindow "Contacts"
+  - [2] AXButton "Edit" [actions=[press]]
+- [703] AXMenuBar [id=_NS:722 actions=[cancel]]
+  - [704] AXMenuBarItem "Apple" [actions=[cancel,press,pick]]
+    - [705] AXMenu [actions=[cancel]]
+      - [706] AXMenuItem "About This Mac" [id=_aboutThisMacRequested: actions=[cancel,press,pick]]
+  - [707] AXMenuBarItem "Contacts" [id=_NS:726 actions=[cancel,press,pick]]
+    - [708] AXMenu [id=_NS:730 actions=[cancel]]
+      - AXMenuItem "Show All"
+      - [709] AXMenuItem "Quit Contacts" [id=_NS:249 actions=[cancel,press,pick]]
+  - [710] AXMenuBarItem "File" [id=_NS:760 actions=[cancel,press,pick]]
+    - [711] AXMenu [id=_NS:764 actions=[cancel]]
+      - AXMenuItem "New Card"
+      - AXMenuItem "New List"
+      - AXMenuItem "Close"
+      - [712] AXMenuItem "Close All" [id=closeAll: actions=[cancel,press,pick]]
+      - [713] AXMenuItem "Import…" [id=_NS:333 actions=[cancel,press,pick]]
+      - [714] AXMenuItem "Export" [id=_NS:770 actions=[cancel,press,pick]]
+        - [715] AXMenu [id=_NS:774 actions=[cancel]]
+      - AXMenuItem "Print…"
+  - [716] AXMenuBarItem "Window" [id=_NS:835 actions=[cancel,press,pick]]
+    - [717] AXMenu [id=_NS:839 actions=[cancel]]
+      - AXMenuItem "Minimize"
+
+AX tree reached its element/depth limit (2000 nodes, depth 3). This is partial state; omitted controls and values remain unknown.`;
+
+it("names the menus and the matched menu's items when a menu path is refused", async () => {
+	const f = await fixture();
+	/** The driver's own refusal envelope, and the rendered tree it refused against. */
+	const refuses = (message: string, markdown = CONTACTS_MENU_BAR): void => {
+		f.state.hook = async name =>
+			name === "invoke_menu"
+				? {
+						text: message,
+						structuredJson: JSON.stringify({
+							status: "refused",
+							refusal: { code: "menu_path_unavailable", message },
+						}),
+						isError: true,
+						images: [],
+					}
+				: name === "get_window_state"
+					? reply({ pid: 101, window_id: 1, snapshot_id: "s", elements: [], tree_markdown: markdown })
+					: undefined;
+	};
+	const refused = async (path: string[]): Promise<string> => {
+		try {
+			await f.session.menu(f.context, f.window, path, { delivery: "foreground" });
+		} catch (error) {
+			return error instanceof Error ? error.message : String(error);
+		}
+		throw new Error("Expected the menu refusal to surface");
+	};
+	try {
+		// A ref held across the refusal stays live: naming the menus reads the
+		// rendered tree and mints nothing.
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		refuses("invoke_menu: path segment 1 was not found");
+		const missing = await refused(["File", "New Contact"]);
+		// The driver's own refusal survives in front of what it could not name.
+		expect(missing).toContain("invoke_menu: path segment 1 was not found");
+		expect(missing).toContain('Menu path ["File","New Contact"] has no "New Contact" under File.');
+		expect(missing).toContain("Menus: Apple · Contacts · File · Window.");
+		expect(missing).toContain("File: New Card · New List · Close · Close All · Import… · Export · Print….");
+		expect(missing).toContain("matched exactly");
+		expect(f.session.element(ref).ref).toBe(ref);
+		// Pixels are never captured for a listing, and the walk stays shallow:
+		// the menu bar is the walker's last sibling, so a deeper request spends
+		// the budget inside the window and loses the bar itself.
+		expect(f.calls.filter(call => call.name === "get_window_state").at(-1)!.args).toMatchObject({
+			include_accessibility_tree: true,
+			include_screenshot: false,
+			max_depth: 3,
+		});
+		// A top-level miss has only the menu bar to report.
+		refuses("invoke_menu: path segment 0 was not found");
+		const unknownMenu = await refused(["Contact", "New Card"]);
+		expect(unknownMenu).toContain('Menu path ["Contact","New Card"] has no "Contact" in the menu bar.');
+		expect(unknownMenu).not.toContain("New Card ·");
+		// Two items of one menu share a title: the listing shows both.
+		refuses(
+			"invoke_menu: path segment 1 is ambiguous",
+			CONTACTS_MENU_BAR.replace('AXMenuItem "New List"', 'AXMenuItem "New Card"'),
+		);
+		expect(await refused(["File", "New Card"])).toContain(
+			'Menu path ["File","New Card"] matches more than one "New Card" under File.',
+		);
+		// A refusal whose reason is not a path segment is left exactly as
+		// written, and costs no walk.
+		const walks = f.calls.filter(call => call.name === "get_window_state").length;
+		refuses("invoke_menu: target exposes no AXMenuBar");
+		const noBar = await refused(["File", "New Card"]);
+		expect(noBar).toContain("invoke_menu: target exposes no AXMenuBar");
+		expect(noBar).not.toContain("Menus:");
+		expect(f.calls.filter(call => call.name === "get_window_state").length).toBe(walks);
+	} finally {
+		await f.close();
+	}
+});
+
 it("reports whether a written value survived the app's own end-of-edit", async () => {
 	const f = await fixture();
 	try {
@@ -769,6 +876,51 @@ it("reports whether a written value survived the app's own end-of-edit", async (
 		const silent = await write({ effect: "unverifiable" }, "✅ Set AXValue on [1] AXSlider.");
 		expect(silent.committed).toBeUndefined();
 		expect(silent.text).toBe("✅ Set AXValue on [1] AXSlider.");
+	} finally {
+		await f.close();
+	}
+});
+
+it("names the rung a dispatched action's own escalation points at", async () => {
+	const f = await fixture();
+	const pressed = async (data: Wire, text: string) => {
+		f.state.hook = async name =>
+			name === "hotkey" ? { text, structuredJson: JSON.stringify(data), isError: false, images: [] } : undefined;
+		return f.session.press(f.context, f.window, "cmd+n");
+	};
+	try {
+		// Recorded from cua-driver 0.28.0: a background chord answers as if it
+		// landed and names its route in the structured payload alone. The bench
+		// read the sentence, saw no new contact, and never learned the rung.
+		const dropped = await pressed(
+			{
+				delivery: { mode: "background" },
+				effect: "unverifiable",
+				escalation: { reason: "delivery_failed", target: "foreground" },
+				route: "synthetic_events",
+			},
+			"Pressed cmd+n on pid 101.",
+		);
+		expect(dropped.text).toContain("Pressed cmd+n on pid 101.");
+		expect(dropped.text).toContain("(delivery_failed)");
+		expect(dropped.text).toContain('{ delivery: "foreground" }');
+		expect(dropped.escalation).toBe(dropped.text.split("\n")[1]);
+		// An escalation the reply's own text already spells is not restated, and
+		// the driver's wire vocabulary never survives as advice.
+		const named = await pressed(
+			{ effect: "unverifiable", escalation: { recommended: "foreground" } },
+			'⚠️ Unverified. To deliver a real click, click this control\'s pixel center with delivery_mode:"foreground".',
+		);
+		expect(named.text).toContain('{ delivery: "foreground" }');
+		expect(named.text).not.toContain("delivery_mode");
+		expect(named.escalation).toBeUndefined();
+		// A rung this surface cannot type is not turned into advice.
+		const elsewhere = await pressed(
+			{ effect: "unverifiable", escalation: { target: "session", reason: "permission_required" } },
+			"Pressed cmd+n on pid 101.",
+		);
+		expect(elsewhere.text).toBe("Pressed cmd+n on pid 101.");
+		expect(elsewhere.escalation).toBeUndefined();
 	} finally {
 		await f.close();
 	}

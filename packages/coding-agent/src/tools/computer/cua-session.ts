@@ -240,6 +240,136 @@ function unsupported(operation: string): never {
 /** macOS rows whose `AXPress` needs the menu already open; see `#menuBarRoute`. */
 const MENU_BAR_ROLES: Record<string, true> = { AXMenuBar: true, AXMenuBarItem: true };
 /**
+ * `invoke_menu` refuses with the failing segment's index and nothing else:
+ * `path segment 1 was not found`. The titles it could not match are exactly
+ * the ones an observation cannot show either — a closed menu reports its
+ * items `AXEnabled=false`, so the driver withholds their element index and
+ * `elements[]` carries only the few that are enabled while the menu is shut
+ * (Contacts' File menu arrives as "Close All · Import… · Export", without the
+ * "New Card" the caller was reaching for). Every row, display-only ones
+ * included, is in `tree_markdown` of the same reply, so the menu bar is read
+ * from there and the refusal names what the menus actually offer.
+ */
+const MENU_REFUSAL_SEGMENT = /path segment (\d+) (was not found|is ambiguous)/;
+const MENU_ROW = /^(\s*)- (?:\[\d+\] )?(AXMenuBarItem|AXMenuBar|AXMenuItem|AXMenu)(?: "((?:[^"\\]|\\.)*)")?(?: |$)/;
+/** Titles a refusal lists before it counts the rest. */
+const MENU_TITLE_LIMIT = 40;
+interface MenuNode {
+	title: string;
+	items: MenuNode[];
+}
+/**
+ * The menu bar of one rendered driver tree. An untitled `AXMenu` container
+ * between an item and its own items is transparent, exactly as the driver's
+ * own path resolution treats it (`semantic_children`), so a node's `items`
+ * are the titles a path segment can name under it.
+ */
+function menuBarTree(markdown: string): MenuNode[] {
+	const roots: MenuNode[] = [];
+	let base: number | undefined;
+	const stack: { indent: number; node: MenuNode }[] = [];
+	for (const line of markdown.split("\n")) {
+		const row = MENU_ROW.exec(line);
+		const indent = row ? row[1]!.length : 0;
+		if (base === undefined) {
+			if (row?.[2] !== "AXMenuBar") continue;
+			base = indent;
+			stack.push({ indent, node: { title: "", items: roots } });
+			continue;
+		}
+		// The menu bar is one sibling of the window's own subtree; the first row
+		// at or above its indent ends it, matched or not.
+		if (!row || indent <= base) break;
+		while (stack.length > 1 && stack[stack.length - 1]!.indent >= indent) stack.pop();
+		const parent = stack[stack.length - 1]!.node;
+		if (row[2] === "AXMenu" || row[2] === "AXMenuBar") {
+			stack.push({ indent, node: parent });
+			continue;
+		}
+		const node: MenuNode = { title: (row[3] ?? "").trim(), items: [] };
+		parent.items.push(node);
+		stack.push({ indent, node });
+	}
+	return roots;
+}
+/** The items under one exactly-resolved path, or undefined when it does not resolve. */
+function menuItemsAt(roots: readonly MenuNode[], path: readonly string[]): readonly MenuNode[] | undefined {
+	let items: readonly MenuNode[] = roots;
+	for (const segment of path) {
+		const matches = items.filter(node => node.title === segment.trim());
+		if (matches.length !== 1) return undefined;
+		items = matches[0]!.items;
+	}
+	return items;
+}
+function menuTitles(items: readonly MenuNode[]): string {
+	const listed = items.slice(0, MENU_TITLE_LIMIT).map(node => node.title || "(untitled)");
+	return `${listed.join(" · ")}${items.length > listed.length ? ` · (+${items.length - listed.length} more)` : ""}`;
+}
+/**
+ * The deepest level of the refused path the rendered tree actually carries,
+ * and its items. The menu bar is the last sibling the walker reaches, so a
+ * deeper walk does not buy submenu items — it spends the budget inside the
+ * window and loses the bar entirely (Contacts: `max_depth: 3` renders the
+ * whole bar in ~0.4 s, `max_depth: 5` gives up after 10 s without ever
+ * reaching it). One level of items is what a refusal can reliably name.
+ */
+const MENU_WALK_DEPTH = 3;
+function menuListing(
+	roots: readonly MenuNode[],
+	prefix: readonly string[],
+): { trail: readonly string[]; items: readonly MenuNode[] } {
+	for (let depth = prefix.length; depth > 0; depth--) {
+		const items = menuItemsAt(roots, prefix.slice(0, depth));
+		if (items?.length) return { trail: prefix.slice(0, depth), items };
+	}
+	return { trail: [], items: [] };
+}
+/**
+ * What the menu bar offers where the path stopped resolving: the top-level
+ * titles, plus the items of the deepest prefix the tree carries. Segments are
+ * matched exactly, so the listing is the whole answer — ellipsis characters,
+ * capitals and all.
+ */
+function menuRefusalNames(markdown: string, path: readonly string[], failed: number, ambiguous: boolean): string {
+	const roots = menuBarTree(markdown);
+	if (!roots.length) return "";
+	const segment = path[failed] ?? "";
+	const listing = menuListing(roots, path.slice(0, failed));
+	const trail = listing.trail.join(" › ");
+	return `Menu path ${JSON.stringify(path)} ${
+		ambiguous ? `matches more than one ${JSON.stringify(segment)}` : `has no ${JSON.stringify(segment)}`
+	}${failed ? ` under ${path.slice(0, failed).join(" › ")}` : " in the menu bar"}. Menus: ${menuTitles(roots)}.${
+		listing.items.length ? ` ${trail}: ${menuTitles(listing.items)}.` : ""
+	} Segment titles are matched exactly.`;
+}
+/**
+ * The driver's own escalation advice: the rung it believes would land, on a
+ * reply whose text does not say so. A background chord always answers
+ * `Pressed cmd+n on pid 92857.` with `escalation: { target: "foreground",
+ * reason: "delivery_failed" }` in the structured payload alone — the bench
+ * read the sentence, watched nothing happen, and never learned the route.
+ * Only targets this surface can type are named; anything else stays in
+ * `data` rather than becoming advice the caller cannot follow.
+ */
+const ESCALATION_ROUTES: Readonly<Record<string, string>> = {
+	foreground: 'the route it names is { delivery: "foreground" } — re-run the action that way',
+	pixel: "the route it names is a pixel action — observe({ screenshot: true }), then click the control's own pixel centre",
+};
+function escalationRoute(data: Wire, text: string): string | undefined {
+	const escalation = data.escalation;
+	if (!escalation || typeof escalation !== "object" || Array.isArray(escalation)) return undefined;
+	const row = escalation as Wire;
+	// `target` is the contract's field; `recommended` is what the untyped
+	// replies still write, and both name the same rung.
+	const target = typeof row.target === "string" ? row.target : row.recommended;
+	if (typeof target !== "string") return undefined;
+	const route = ESCALATION_ROUTES[target];
+	if (route === undefined || text.includes(`delivery: "${target}"`)) return undefined;
+	const reason = typeof row.reason === "string" ? row.reason : undefined;
+	return `⚠️ The driver escalates this action${reason ? ` (${reason})` : ""}: ${route}.`;
+}
+/**
  * `set_value` writes `AXValue` and then drives the app's own end-of-edit
  * gesture, reporting in `committed` whether the value survived it. Only that
  * flag separates a written field from a lost one: a value the app's editing
@@ -1068,10 +1198,16 @@ export class CuaComputerSession implements ComputerBackend {
 		const { result, data } = await this.#call(name, args);
 		const interruptedBy = this.#interruption();
 		const committed = typeof data.committed === "boolean" ? data.committed : undefined;
+		// The driver writes its own advice in wire vocabulary on the success path
+		// too ("click this control's pixel center with delivery_mode:foreground");
+		// a next step is only executable if it is spelled the way the caller types.
+		const reported = preludeVocabulary(result.text);
+		const escalation = escalationRoute(data, reported);
 		return {
 			text: [
-				result.text,
-				committed === undefined ? undefined : commitNote(committed, result.text),
+				reported,
+				committed === undefined ? undefined : commitNote(committed, reported),
+				escalation,
 				interruptedBy
 					? `⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
 					: undefined,
@@ -1083,6 +1219,7 @@ export class CuaComputerSession implements ComputerBackend {
 			route: typeof data.route === "string" ? data.route : typeof data.path === "string" ? data.path : "cua-sdk",
 			delivery: data.delivery ?? args.delivery_mode ?? "background",
 			...(committed === undefined ? {} : { committed }),
+			...(escalation === undefined ? {} : { escalation }),
 			interruptedBy,
 			data,
 		};
@@ -1311,6 +1448,28 @@ export class CuaComputerSession implements ComputerBackend {
 			});
 		});
 	}
+	/**
+	 * The titles the refused path could have named, read from the same window
+	 * whose menu bar the driver just resolved against. No ref is minted and
+	 * none is invalidated: this walks the rendered tree only.
+	 */
+	async #menuNames(window: ComputerWindowIdentity, menuPath: string[], error: ToolError): Promise<string | undefined> {
+		const details = error.context;
+		const refusal = details && typeof details === "object" ? (details as Wire).refusal : undefined;
+		const code = refusal && typeof refusal === "object" ? (refusal as Wire).code : undefined;
+		if (code !== "menu_path_unavailable") return undefined;
+		const refused = MENU_REFUSAL_SEGMENT.exec(error.message);
+		const failed = refused ? Number(refused[1]) : undefined;
+		if (failed === undefined || failed >= menuPath.length) return undefined;
+		const { data } = await this.#call("get_window_state", {
+			...windowArgs(window),
+			include_accessibility_tree: true,
+			include_screenshot: false,
+			max_depth: MENU_WALK_DEPTH,
+		});
+		if (typeof data.tree_markdown !== "string") return undefined;
+		return menuRefusalNames(data.tree_markdown, menuPath, failed, refused![2] === "is ambiguous") || undefined;
+	}
 	menu(
 		context: Context,
 		window: ComputerWindowIdentity,
@@ -1321,7 +1480,17 @@ export class CuaComputerSession implements ComputerBackend {
 			foreground(options);
 			const current = await this.#current(window);
 			throwIfAborted(context.signal);
-			return this.#action("invoke_menu", { ...windowArgs(current), path: menuPath });
+			try {
+				return await this.#action("invoke_menu", { ...windowArgs(current), path: menuPath });
+			} catch (error) {
+				// An aborted call is not a ToolError and keeps its own identity;
+				// a refusal the menu bar cannot explain stays exactly as written.
+				if (!(error instanceof ToolError)) throw error;
+				const names = await this.#menuNames(current, menuPath, error).catch(() => undefined);
+				throwIfAborted(context.signal);
+				if (names === undefined) throw error;
+				throw new ToolError(`${error.message}\n${names}`, error.context);
+			}
 		});
 	}
 	verify(
