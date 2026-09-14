@@ -7,6 +7,12 @@ export interface ComputerSessionSnapshot {
 	sessionId: string;
 	captureMaxWidth: number;
 	captureMaxHeight: number;
+	/**
+	 * Pixel count one capture may carry before the model's own transport
+	 * re-resizes it behind our back; 0 when the transport keeps what it is
+	 * given and only the box above applies.
+	 */
+	captureMaxPixels: number;
 	display: string;
 	readOnly: boolean;
 }
@@ -26,6 +32,11 @@ export interface ComputerScreenshot {
 	height: number;
 	sourceWidth?: number;
 	sourceHeight?: number;
+	surface?: "window" | "display";
+	pointWidth?: number;
+	pointHeight?: number;
+	/** Image pixels per point of the captured surface; 1 is point-for-point. */
+	scale?: number;
 	target: string;
 	/** Observed app/window name for presentation; target remains the routing identity. */
 	label?: string;
@@ -97,6 +108,7 @@ export interface ComputerElementSnapshot {
 	selected?: boolean;
 	/** Observed semantic actions accepted by perform; absence means unavailable. */
 	actions?: readonly string[];
+	/** Observed geometry in points, in display coordinates. */
 	bounds?: ComputerBounds;
 }
 export interface ComputerImage {
@@ -105,6 +117,18 @@ export interface ComputerImage {
 	height: number;
 	sourceWidth: number;
 	sourceHeight: number;
+	/** What the point grid belongs to, and so which space coordinates are in. */
+	surface: "window" | "display";
+	/** Point size of the captured surface: a window's bounds, a display's mode. */
+	pointWidth: number;
+	pointHeight: number;
+	/**
+	 * Image pixels per point of the captured surface. 1 is what this capture
+	 * path holds to: a coordinate read off the image is a coordinate an action
+	 * takes. Anything smaller means the surface itself outgrew the frame
+	 * budget, and the result that carries the image says so.
+	 */
+	scale: number;
 	target: string;
 	/** Observed app/window name for presentation; target remains the routing identity. */
 	label?: string;
@@ -114,6 +138,8 @@ export interface ComputerOperationContext {
 	readOnly: boolean;
 	maxWidth: number;
 	maxHeight: number;
+	/** Pixel-count ceiling one capture must stay under; 0 leaves only the box. */
+	maxPixels: number;
 	emitImage(image: ComputerImage, content: { type: "image"; data: string; mimeType: string }, silent: boolean): void;
 	/**
 	 * Put action text into the cell's own output. A reply that doubts its own

@@ -77,14 +77,24 @@ function operationContext(getContext: RunContextAccessor): ComputerOperationCont
 		readOnly: context.readOnly,
 		maxWidth: context.snapshot.captureMaxWidth,
 		maxHeight: context.snapshot.captureMaxHeight,
+		maxPixels: context.snapshot.captureMaxPixels,
 		emitImage: (image, content, silent) => {
 			throwIfAborted(context.signal);
 			const screenshot: ComputerScreenshot = { ...image };
 			context.screenshots.push(screenshot);
 			if (!silent) {
+				// A capture is normally its surface's own point grid, so the
+				// coordinates the model reads off it are the coordinates actions
+				// take. When the surface outgrew the frame budget the image is
+				// smaller than that grid, and the only place that can be said is
+				// beside the pixels it is true of.
+				const grid =
+					image.width === Math.round(image.pointWidth) && image.height === Math.round(image.pointHeight)
+						? `1 px = 1 ${image.surface} point`
+						: `${image.surface} ${Math.round(image.pointWidth)}×${Math.round(image.pointHeight)} points at ${image.scale.toFixed(2)}× — divide image pixels by ${image.scale.toFixed(2)} for the ${image.surface} points every action takes`;
 				context.output.push({
 					type: "text",
-					text: `screenshot ${image.target} ${image.width}×${image.height} → ${image.path}`,
+					text: `screenshot ${image.target} ${image.width}×${image.height} (${grid}) → ${image.path}`,
 				});
 				screenshot.imageIndex = context.output.imageCount;
 				context.output.push(content);

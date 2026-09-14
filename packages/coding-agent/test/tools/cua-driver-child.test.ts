@@ -107,6 +107,7 @@ describe("cua session over a driver child", () => {
 			readOnly: false,
 			maxWidth: 1,
 			maxHeight: 1,
+			maxPixels: 0,
 			emitImage() {},
 			emitText() {},
 		};

@@ -1,3 +1,9 @@
+/**
+ * `[x, y]` in points: window-local for a window's own actions, display
+ * coordinates for `computer.*` ones. Captures arrive on that same grid, so a
+ * point read off a screenshot is a point an action takes, and an element's
+ * `bounds` (also points) convert by subtracting the window's origin.
+ */
 type ComputerPoint = [number, number];
 type ComputerTarget = string | ComputerPoint;
 type ComputerDirection = "up" | "down" | "left" | "right";
@@ -35,9 +41,10 @@ interface ComputerTargetOptions extends ComputerDeliveryOptions {
 }
 interface ComputerObserveOptions {
 	/**
-	 * Capture the window's pixels alongside the tree. Default false —
-	 * acquisition takes one initial screenshot, and pixel actions need a
-	 * current frame, so ask for one when you are going to click coordinates.
+	 * Capture the window's pixels alongside the tree, at the window's own
+	 * point size. Default false — acquisition takes one initial screenshot,
+	 * and coordinate actions need a current frame, so ask for one when you
+	 * are going to click coordinates.
 	 */
 	screenshot?: boolean;
 	silent?: boolean;
@@ -57,6 +64,7 @@ interface ComputerWindowFilter {
 	app?: string;
 	title?: string;
 }
+/** Points, in display coordinates: window frames and element boxes alike. */
 interface ComputerBounds {
 	x: number;
 	y: number;
@@ -77,6 +85,17 @@ interface ComputerScreenshotResult {
 	path: string;
 	width: number;
 	height: number;
+	/** Which space this capture's points are in: a window's, or the display's. */
+	surface: "window" | "display";
+	/** Point size of what was captured: the window's bounds, or the display. */
+	pointWidth: number;
+	pointHeight: number;
+	/**
+	 * Image pixels per point. 1 — the normal case — means a coordinate read
+	 * off this image is a coordinate an action takes; below 1 the surface
+	 * outgrew the frame budget and image pixels divide by it.
+	 */
+	scale: number;
 	target: string;
 	label?: string;
 }

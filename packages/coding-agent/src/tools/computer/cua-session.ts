@@ -45,6 +45,12 @@ interface Binding {
 	element: ComputerElementSnapshot;
 	doubleClickAtCenter: boolean;
 }
+/**
+ * One window's live capture. `image` is what the model was shown, sized to
+ * the window's own point grid; `sdkWidth`/`sdkHeight` are the pixels the
+ * driver delivered, which is the space its pixel rungs read coordinates in.
+ * Actions are given window points and converted against both.
+ */
 interface Frame {
 	window: ComputerWindowIdentity;
 	image: ComputerImage;
@@ -147,6 +153,28 @@ function bounds(value: unknown): ComputerBounds {
 }
 function sameBounds(a: ComputerBounds, b: ComputerBounds): boolean {
 	return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+}
+/**
+ * Byte budget for one saved capture. Well above what a UI frame at point size
+ * costs as JPEG, because `resizeImage` pays a tight budget in dimensions and
+ * a capture that shrank to save bytes would no longer be its window's grid.
+ */
+const CAPTURE_MAX_BYTES = 4 * 1024 * 1024;
+/** A captured surface in points: a window's bounds, or a display's mode. */
+interface Surface {
+	width: number;
+	height: number;
+}
+/**
+ * Image pixels per point for one capture. Retina captures come in at the
+ * backing scale and are brought back down to the surface's own point grid, so
+ * what the model measures on the image is what an action takes. Only a
+ * surface too large for the transport's frame budget goes below 1.
+ */
+function captureScale(context: Context, surface: Surface): number {
+	if (!(surface.width > 0) || !(surface.height > 0)) return 1;
+	const area = context.maxPixels > 0 ? Math.sqrt(context.maxPixels / (surface.width * surface.height)) : 1;
+	return Math.min(1, context.maxWidth / surface.width, context.maxHeight / surface.height, area);
 }
 function primaryDisplay(data: Wire, capture = false): PrimaryDisplay | undefined {
 	// Stock 0.23.2 has dimensions only. They cannot identify a display.
@@ -354,7 +382,7 @@ function menuRefusalNames(markdown: string, path: readonly string[], failed: num
  */
 const ESCALATION_ROUTES: Readonly<Record<string, string>> = {
 	foreground: 'the route it names is { delivery: "foreground" } — re-run the action that way',
-	pixel: "the route it names is a pixel action — observe({ screenshot: true }), then click the control's own pixel centre",
+	pixel: "the route it names is a coordinate action — observe({ screenshot: true }), then click the control's own centre off that screenshot",
 };
 function escalationRoute(data: Wire, text: string): string | undefined {
 	const escalation = data.escalation;
@@ -393,6 +421,12 @@ function commitNote(committed: boolean, text: string): string {
  * cancels the driver call cooperatively and the session stays usable; a
  * child that exits (crash, or killed after ignoring a cancel) is respawned by
  * the next operation, with element refs and pixel frames invalidated.
+ *
+ * Coordinates are points, never capture pixels: window actions take
+ * window-local points and desktop actions display points, which is also the
+ * grid every capture is delivered on and the grid element bounds are
+ * reported in. The driver's own rungs read the frame it delivered, so each
+ * dispatch converts points into that frame.
  *
  * Driver window hover is only cursor decoration and focused-window identity is
  * unavailable. Display enumeration/capture/input cover the primary display only.
@@ -469,12 +503,14 @@ export class CuaComputerSession implements ComputerBackend {
 			displayCountKnown: false,
 			displayEnumeration: "primary only; other display count is unknown",
 			captureScope: "exact window or primary display",
+			coordinates:
+				"window actions take window-local points, desktop actions display points; captures are delivered on that same grid, so a coordinate read off a screenshot needs no arithmetic",
 			desktopCoordinates: linux
 				? "unavailable; the Linux driver reports no display identity, so desktop-root input is refused"
 				: "primary display only; requires current UUID, native id, origin, size and scale metadata",
 			desktopDrag: "exactly two points; the driver interpolates one straight drag",
 			windowDrag:
-				"foreground only; each end is an element ref (needs its own observed bounds and a current window screenshot) or a pixel point; durationMs integer 0–10000 (default 500), steps integer 1–200 (default 20); background drag is unavailable",
+				"foreground only; each end is an element ref (needs its own observed bounds and a current window screenshot) or a window point; durationMs integer 0–10000 (default 500), steps integer 1–200 (default 20); background drag is unavailable",
 			desktopScroll: "one axis per action; pixel deltas must be multiples of 120, up to 6000",
 			backgroundInput: linux
 				? 'toolkit-dependent; a typed background_unavailable refusal means nothing was dispatched — retry with { delivery: "foreground" }'
@@ -1028,7 +1064,21 @@ export class CuaComputerSession implements ComputerBackend {
 		if (args.include_accessibility_tree !== false) this.#invalidate(window);
 		const current = await this.#current(window);
 		throwIfAborted(context.signal);
-		const reply = await this.#call("get_window_state", { ...windowArgs(current), ...args });
+		// The driver caps the capture's long edge for us, so the window's own
+		// point grid is produced once, from the raw Retina frame, instead of
+		// being resampled again here out of a frame it already shrank.
+		const capture =
+			args.include_screenshot === true
+				? {
+						max_dimension: Math.max(
+							1,
+							Math.round(
+								Math.max(current.bounds.width, current.bounds.height) * captureScale(context, current.bounds),
+							),
+						),
+					}
+				: {};
+		const reply = await this.#call("get_window_state", { ...windowArgs(current), ...args, ...capture });
 		if (reply.data.pid !== current.pid || String(reply.data.window_id) !== current.id)
 			throw new ToolError("WrongWindow: Cua observation identity mismatch");
 		const after = await this.#current(current);
@@ -1036,20 +1086,38 @@ export class CuaComputerSession implements ComputerBackend {
 			throw new ToolError("StaleFrame: window geometry changed during observation");
 		return { reply, current: after };
 	}
+	/**
+	 * Write one delivered capture at the surface's own point size and hand it
+	 * to the model. The driver already caps what it sends, so the resize here
+	 * is a no-op on the window path and the only downscale on the desktop
+	 * path, which has no cap of its own. The byte budget is deliberately
+	 * loose: a capture that loses dimensions to compression would silently
+	 * leave the point grid the coordinate contract rests on.
+	 */
 	async #saveImage(
 		context: Context,
 		reply: Reply,
 		target: string,
 		silent: boolean,
+		kind: "window" | "display",
+		surface?: Surface,
 		label?: string,
 	): Promise<ComputerImage> {
 		if (reply.result.images.length !== 1) throw new ToolError("Screenshot unavailable or ambiguous");
 		const source = reply.result.images[0]!;
 		const width = number(reply.data.screenshot_width, "screenshot_width");
 		const height = number(reply.data.screenshot_height, "screenshot_height");
+		const points = surface ?? { width, height };
+		const scale = captureScale(context, points);
 		const resized = await resizeImage(
 			{ type: "image", data: source.dataBase64, mimeType: source.mimeType },
-			{ maxWidth: context.maxWidth, maxHeight: context.maxHeight, minDimension: 1, excludeWebP: true },
+			{
+				maxWidth: Math.min(width, Math.max(1, Math.round(points.width * scale))),
+				maxHeight: Math.min(height, Math.max(1, Math.round(points.height * scale))),
+				minDimension: 1,
+				maxBytes: CAPTURE_MAX_BYTES,
+				excludeWebP: true,
+			},
 		);
 		if (resized.decodeFailed || resized.originalWidth !== width || resized.originalHeight !== height)
 			throw new ToolError("Screenshot dimensions do not match its SDK coordinate frame");
@@ -1065,6 +1133,10 @@ export class CuaComputerSession implements ComputerBackend {
 			height: resized.height,
 			sourceWidth: width,
 			sourceHeight: height,
+			surface: kind,
+			pointWidth: points.width,
+			pointHeight: points.height,
+			scale: resized.width / points.width,
 			target,
 			...(label ? { label } : {}),
 		});
@@ -1108,6 +1180,8 @@ export class CuaComputerSession implements ComputerBackend {
 			reply,
 			window.id,
 			silent,
+			"window",
+			window.bounds,
 			`${window.app}: ${window.title || "Untitled window"}`,
 		);
 		this.#frames.set(window.id, {
@@ -1131,6 +1205,14 @@ export class CuaComputerSession implements ComputerBackend {
 			return this.#windowImage(context, current, reply, options.silent === true);
 		});
 	}
+	/**
+	 * One action's target. A point is window-local, in points — the same grid
+	 * the capture is delivered on and the same grid an element's own bounds
+	 * are in, so a coordinate read off the screenshot and a coordinate derived
+	 * from the tree mean the same thing. The driver reads its pixel rungs in
+	 * the frame it delivered, so the conversion is that frame over the
+	 * window's points: identity whenever the capture is point-for-point.
+	 */
 	#target(window: ComputerWindowIdentity, target?: ComputerTarget): Wire {
 		if (typeof target === "string") {
 			const ref = this.#binding(target, window);
@@ -1142,50 +1224,43 @@ export class CuaComputerSession implements ComputerBackend {
 			this.#frames.delete(window.id);
 			throw new ToolError("StaleFrame: capture the exact window again before a pixel action");
 		}
+		const area = frame.window.bounds;
 		const [x, y] = target;
-		if (
-			!Number.isFinite(x) ||
-			!Number.isFinite(y) ||
-			x < 0 ||
-			y < 0 ||
-			x >= frame.image.width ||
-			y >= frame.image.height
-		)
-			throw new ToolError("InvalidCoordinates: point is outside the observed window image");
+		if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= area.width || y >= area.height)
+			throw new ToolError(
+				`InvalidCoordinates: (${x}, ${y}) is outside the window's ${Math.round(area.width)}×${Math.round(area.height)} pt frame`,
+			);
 		return {
 			...windowArgs(window),
-			x: (x * frame.sdkWidth) / frame.image.width,
-			y: (y * frame.sdkHeight) / frame.image.height,
+			x: (x * frame.sdkWidth) / area.width,
+			y: (y * frame.sdkHeight) / area.height,
 		};
 	}
 	/**
 	 * Modifiers and click counts are a pixel-route capability here: the element
 	 * route posts a bare AX press that carries neither. The ref's own observed
-	 * bounds name the point — its centre, converted out of global desktop
-	 * coordinates into the cached frame's pixels, so the pixel action is checked
-	 * against the same live frame a model-supplied point would be. Without
-	 * bounds or without a frame there is no honest point, and only then is the
-	 * click refused.
+	 * bounds name the point — its centre, moved out of global desktop
+	 * coordinates into the window's own, so the action is checked against the
+	 * same live frame a model-supplied point would be. Without bounds or
+	 * without a frame there is no honest point, and only then is the click
+	 * refused.
 	 */
-	#elementPixel(window: ComputerWindowIdentity, element: ComputerElementSnapshot): ComputerTarget | undefined {
+	#elementPoint(window: ComputerWindowIdentity, element: ComputerElementSnapshot): ComputerTarget | undefined {
 		const frame = this.#frames.get(window.id);
 		const box = element.bounds;
 		if (!frame || !box) return undefined;
 		const area = frame.window.bounds;
-		return [
-			((box.x + box.width / 2 - area.x) * frame.image.width) / area.width,
-			((box.y + box.height / 2 - area.y) * frame.image.height) / area.height,
-		];
+		return [box.x + box.width / 2 - area.x, box.y + box.height / 2 - area.y];
 	}
 	/** One end of a drag: a ref is the point its own bounds name, a point is itself. */
 	#dragEnd(window: ComputerWindowIdentity, end: ComputerTarget, side: "from" | "to"): ComputerTarget {
 		if (typeof end !== "string") return end;
-		const pixel = this.#elementPixel(window, this.#binding(end, window).element);
-		if (!pixel)
+		const point = this.#elementPoint(window, this.#binding(end, window).element);
+		if (!point)
 			unsupported(
-				`drag ${side} an element with no observed bounds or no current window screenshot; capture the window again (observe({ screenshot: true })) and drag pixel points`,
+				`drag ${side} an element with no observed bounds or no current window screenshot; capture the window again (observe({ screenshot: true })) and drag window points`,
 			);
-		return pixel;
+		return point;
 	}
 	/**
 	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
@@ -1292,12 +1367,12 @@ export class CuaComputerSession implements ComputerBackend {
 					const supportedDouble =
 						binding.doubleClickAtCenter && options.count === 2 && (options.button ?? "left") === "left";
 					if (options.modifiers?.length || ((options.count ?? 1) !== 1 && !supportedDouble)) {
-						const pixel = this.#elementPixel(current, binding.element);
-						if (!pixel)
+						const centre = this.#elementPoint(current, binding.element);
+						if (!centre)
 							unsupported(
-								"counted or modified click on an element with no observed bounds or no current window screenshot; capture the window again and use a pixel target",
+								"counted or modified click on an element with no observed bounds or no current window screenshot; capture the window again and click its centre in window points",
 							);
-						point = pixel;
+						point = centre;
 					}
 				}
 				return this.#dispatch(
@@ -1557,7 +1632,20 @@ export class CuaComputerSession implements ComputerBackend {
 				)
 					throw new ToolError("StaleFrame: primary screenshot dimensions do not match the display geometry");
 			}
-			const image = await this.#saveImage(context, reply, "primary", options.silent === true);
+			// `get_desktop_state` has no cap of its own and always answers at the
+			// display's native pixels, so this is where the desktop frame comes
+			// back to display points. The reported mode size is what makes that
+			// grid knowable even on a driver that cannot identify the display —
+			// such a capture is a picture only, never a coordinate frame.
+			const mode = { width: Number(reply.data.screen_width), height: Number(reply.data.screen_height) };
+			const image = await this.#saveImage(
+				context,
+				reply,
+				"primary",
+				options.silent === true,
+				"display",
+				mode.width > 0 && mode.height > 0 ? mode : undefined,
+			);
 			if (captured) this.#desktopFrame = { display: captured, image };
 			return image;
 		});
@@ -1580,19 +1668,17 @@ export class CuaComputerSession implements ComputerBackend {
 			throw error;
 		}
 		throwIfAborted(context.signal);
+		const area = frame.display.bounds;
 		return points.map(([x, y]) => {
-			if (
-				!Number.isFinite(x) ||
-				!Number.isFinite(y) ||
-				x < 0 ||
-				y < 0 ||
-				x >= frame.image.width ||
-				y >= frame.image.height
-			)
-				throw new ToolError("InvalidCoordinates: point is outside the observed primary desktop image");
+			if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= area.width || y >= area.height)
+				throw new ToolError(
+					`InvalidCoordinates: (${x}, ${y}) is outside the primary display's ${Math.round(area.width)}×${Math.round(area.height)} pt frame`,
+				);
+			// Desktop rungs read the native display PNG, so display points are
+			// multiplied back up by the capture's own backing scale.
 			return {
-				x: (x * frame.image.sourceWidth) / frame.image.width,
-				y: (y * frame.image.sourceHeight) / frame.image.height,
+				x: (x * frame.image.sourceWidth) / area.width,
+				y: (y * frame.image.sourceHeight) / area.height,
 			};
 		});
 	}

@@ -32,13 +32,15 @@ import { renderFunctionRun } from "./run-code";
 import { ToolError, throwIfAborted } from "./tool-errors";
 import { clampTimeout } from "./tool-timeouts";
 
-// Image transports that cannot preserve native screenshot detail resize frames
-// without returning transformed dimensions. Keep their native coordinate frames
-// below the empirically verified threshold so pointer actions match what the
-// model sees. Claude paths predate the resolved transport capability and retain
-// their established model-family fallback.
-const COORDINATE_SAFE_MAX_CAPTURE_WIDTH = 1280;
-const COORDINATE_SAFE_MAX_CAPTURE_HEIGHT = 896;
+// Image transports that re-resize a frame past their own vision budget report
+// nothing back, so the model reads coordinates off pixels OMP never measured.
+// Anthropic's budget is 1568 px on the long edge and ~1.15 M pixels of area
+// (1280x896, the shape this was first verified at). Keeping a capture inside
+// it is what lets the delivered frame stay the window's own point grid: a
+// 1033x900 pt window is 930 k pixels and survives intact, where a box alone
+// would have shaved it to 1028x896 for nothing.
+const COORDINATE_SAFE_MAX_CAPTURE_EDGE = 1568;
+const COORDINATE_SAFE_MAX_CAPTURE_PIXELS = 1280 * 896;
 
 function usesCoordinateSafeImageSizing(model: Model | undefined): boolean {
 	if (!model) return false;
@@ -299,11 +301,12 @@ async function runComputer(
 		cwd: session.cwd,
 		sessionId: session.getEvalSessionId?.() ?? session.getSessionId?.() ?? "computer",
 		captureMaxWidth: coordinateSafe
-			? Math.min(configuredMaxWidth, COORDINATE_SAFE_MAX_CAPTURE_WIDTH)
+			? Math.min(configuredMaxWidth, COORDINATE_SAFE_MAX_CAPTURE_EDGE)
 			: configuredMaxWidth,
 		captureMaxHeight: coordinateSafe
-			? Math.min(configuredMaxHeight, COORDINATE_SAFE_MAX_CAPTURE_HEIGHT)
+			? Math.min(configuredMaxHeight, COORDINATE_SAFE_MAX_CAPTURE_EDGE)
 			: configuredMaxHeight,
+		captureMaxPixels: coordinateSafe ? COORDINATE_SAFE_MAX_CAPTURE_PIXELS : 0,
 		display: session.settings.get("computer.display") ?? "all",
 		readOnly,
 	};

@@ -296,8 +296,9 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 	const context: ComputerOperationContext = {
 		signal: new AbortController().signal,
 		readOnly: false,
-		maxWidth: 2,
-		maxHeight: 1,
+		maxWidth: 3840,
+		maxHeight: 2400,
+		maxPixels: 0,
 		emitImage(image) {
 			images.push(image);
 		},
@@ -962,7 +963,7 @@ for (const failedSwitch of [false, true]) {
 			expect(f.calls.filter(call => call.name === "click")).toHaveLength(posted);
 			if (!failedSwitch) await f.session.click(f.context, second, [1, 0]);
 			await f.session.captureWindow(f.context, f.window);
-			await f.session.click(f.context, f.window, [1, 0]);
+			await f.session.click(f.context, f.window, [100, 0]);
 			expect(f.calls.at(-1)?.args).toMatchObject({ pid: 101, window_id: 1, x: 2, y: 0 });
 			await expect(f.session.click(f.context, second, [1, 0])).rejects.toThrow("StaleFrame");
 		} finally {
@@ -1008,28 +1009,77 @@ it("numbers element refs compactly and never reissues one a later observation in
 	}
 });
 
-it("maps resized image coordinates to the exact SDK image and invalidates failed captures", async () => {
+it("asks for the window's point grid and takes coordinates in it", async () => {
 	const f = await fixture();
 	try {
 		const image = await f.session.captureWindow(f.context, f.window);
+		// The driver is asked to deliver the 200x100 pt window's long edge, so
+		// the frame the model reads is the grid its coordinates are in.
+		const captured = f.calls.filter(call => call.name === "get_window_state").at(-1);
+		expect(captured?.args).toMatchObject({ include_screenshot: true, max_dimension: 200 });
 		expect(image).toMatchObject({
-			width: 2,
-			height: 1,
+			width: 4,
+			height: 2,
 			sourceWidth: 4,
 			sourceHeight: 2,
+			pointWidth: 200,
+			pointHeight: 100,
 			target: "1",
 			label: "Fixture: Editor",
 		});
-		await f.session.click(f.context, f.window, [1, 0]);
+		// This fixture driver ignores the cap and answers 4x2 px for a 200x100
+		// pt window, so a point converts by the frame it actually delivered.
+		await f.session.click(f.context, f.window, [100, 0]);
 		expect(f.calls.at(-1)).toEqual({
 			name: "click",
 			args: { pid: 101, window_id: 1, x: 2, y: 0, delivery_mode: "background" },
 		});
-		await expect(f.session.click(f.context, f.window, [2, 0])).rejects.toThrow("InvalidCoordinates");
+		await expect(f.session.click(f.context, f.window, [200, 0])).rejects.toThrow("InvalidCoordinates");
 		f.state.failCapture = true;
 		await expect(f.session.captureWindow(f.context, f.window)).rejects.toThrow("Screenshot unavailable");
-		await expect(f.session.click(f.context, f.window, [1, 0])).rejects.toThrow("StaleFrame");
+		await expect(f.session.click(f.context, f.window, [100, 0])).rejects.toThrow("StaleFrame");
 		expect(f.calls.filter(call => call.name === "click")).toHaveLength(1);
+	} finally {
+		await f.close();
+	}
+});
+
+it("delivers a Retina capture at point size and keeps coordinates point-for-point", async () => {
+	const f = await fixture();
+	try {
+		// A 2x capture of a 2x1 pt window: 4x2 px in, the window's own 2x1 grid out.
+		f.row.bounds.width = 2;
+		f.row.bounds.height = 1;
+		const window = await f.session.window(f.context, { id: "1", pid: 101 });
+		const image = await f.session.captureWindow(f.context, window);
+		expect(f.calls.filter(call => call.name === "get_window_state").at(-1)?.args).toMatchObject({
+			max_dimension: 2,
+		});
+		expect(image).toMatchObject({ width: 2, height: 1, pointWidth: 2, pointHeight: 1, scale: 1 });
+		await f.session.click(f.context, window, [1, 0]);
+		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 0 });
+	} finally {
+		await f.close();
+	}
+});
+
+it("downscales a surface past the frame budget and reports the scale it landed on", async () => {
+	const f = await fixture();
+	try {
+		f.row.bounds.width = 4;
+		f.row.bounds.height = 2;
+		// Half the area of the 4x2 pt window: the grid cannot be kept, so the
+		// capture is smaller than the window and says so.
+		f.context.maxPixels = 2;
+		const window = await f.session.window(f.context, { id: "1", pid: 101 });
+		const image = await f.session.captureWindow(f.context, window);
+		expect(f.calls.filter(call => call.name === "get_window_state").at(-1)?.args).toMatchObject({
+			max_dimension: 2,
+		});
+		expect(image).toMatchObject({ width: 2, height: 1, pointWidth: 4, pointHeight: 2, scale: 0.5 });
+		// Coordinates stay window points whatever the image cost.
+		await f.session.click(f.context, window, [2, 1]);
+		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 1 });
 	} finally {
 		await f.close();
 	}
@@ -1053,7 +1103,7 @@ it("invalidates pixel frames when the window moves and keeps them across AX-only
 				? reply({ status: "satisfied", stable: true, elapsed_ms: 1, samples: 1, predicates: [] })
 				: undefined;
 		await f.session.verify(f.context, f.window, []);
-		await f.session.click(f.context, f.window, [1, 0]);
+		await f.session.click(f.context, f.window, [100, 0]);
 		expect(f.calls.at(-1)?.args).toMatchObject({ pid: 101, window_id: 1, x: 2, y: 0 });
 	} finally {
 		await f.close();
@@ -1099,20 +1149,20 @@ it("keeps visual access for windows with no AX snapshot without inventing elemen
 			complete: false,
 		});
 		expect(observation.screenshot).toBeDefined();
-		await f.session.click(f.context, f.window, [1, 0]);
+		await f.session.click(f.context, f.window, [100, 0]);
 		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 0, pid: 101, window_id: 1 });
 	} finally {
 		await f.close();
 	}
 });
 
-it("clicks a ref's own bounds as pixels when modifiers or a count leave the element route", async () => {
+it("clicks a ref's own bounds as window points when modifiers or a count leave the element route", async () => {
 	const f = await fixture();
 	try {
 		const observation = await f.session.observe(f.context, f.window, { screenshot: true });
 		const ref = observation.elements[0]!.ref;
 		// The element covers the whole 200x100 pt window, so its centre is the
-		// window centre: (1, 0.5) of the 2x1 image, (2, 1) in SDK pixels.
+		// window centre: (100, 50) pt, (2, 1) in the delivered 4x2 px frame.
 		await f.session.click(f.context, f.window, ref, { modifiers: ["shift"], delivery: "foreground" });
 		expect(f.calls.at(-1)).toEqual({
 			name: "click",
@@ -1478,7 +1528,7 @@ it("maps requested window drag timing and observed pixels to the SDK wire contra
 	const f = await fixture();
 	try {
 		await f.session.captureWindow(f.context, f.window);
-		await f.session.drag(f.context, f.window, [0, 0], [1, 0], {
+		await f.session.drag(f.context, f.window, [0, 0], [100, 0], {
 			delivery: "foreground",
 			durationMs: 5000,
 			steps: 100,
@@ -1513,7 +1563,7 @@ it("drags between element refs at their own observed bounds", async () => {
 	try {
 		const observation = await f.session.observe(f.context, f.window, { screenshot: true });
 		const ref = observation.elements[0]!.ref;
-		// The ref's centre: (1, 0.5) of the 2×1 image, (2, 1) in SDK pixels.
+		// The ref's centre: (100, 50) pt of the 200×100 pt window, (2, 1) in SDK pixels.
 		await f.session.drag(f.context, f.window, ref, [0, 0], { delivery: "foreground" });
 		expect(f.calls.at(-1)).toEqual({
 			name: "drag",

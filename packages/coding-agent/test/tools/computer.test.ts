@@ -128,8 +128,21 @@ class FakeBackend implements ComputerBackend {
 		await this.window(context, { id: window.id, pid: window.pid });
 		return this.image(context, window.id, options.silent);
 	}
+	/** Pixels per point of the next capture; below 1 is a surface past the frame budget. */
+	captureScale = 1;
 	image(context: ComputerOperationContext, target: string, silent = false) {
-		const image = { path: "/fixture/capture.png", width: 64, height: 32, sourceWidth: 64, sourceHeight: 32, target };
+		const image = {
+			path: "/fixture/capture.png",
+			width: Math.round(64 * this.captureScale),
+			height: Math.round(32 * this.captureScale),
+			sourceWidth: 128,
+			sourceHeight: 64,
+			surface: target === "desktop" ? ("display" as const) : ("window" as const),
+			pointWidth: 64,
+			pointHeight: 32,
+			scale: this.captureScale,
+			target,
+		};
 		context.emitImage(image, { type: "image", data: "iVBORw==", mimeType: "image/png" }, silent);
 		return image;
 	}
@@ -267,8 +280,9 @@ class FakeBackend implements ComputerBackend {
 const snapshot = (readOnly = false): ComputerSessionSnapshot => ({
 	cwd: import.meta.dir,
 	sessionId: crypto.randomUUID(),
-	captureMaxWidth: 1280,
-	captureMaxHeight: 896,
+	captureMaxWidth: 1568,
+	captureMaxHeight: 1568,
+	captureMaxPixels: 1280 * 896,
 	display: "all",
 	readOnly,
 });
@@ -1266,6 +1280,26 @@ describe("computer supervisor round trips", () => {
 		expect(mixed.ok).toBe(true);
 		if (mixed.ok)
 			expect(mixed.payload.screenshots.map(screenshot => screenshot.imageIndex)).toEqual([1, undefined, 2]);
+	});
+
+	it("says beside each capture which grid its pixels are on", async () => {
+		const backend = new FakeBackend();
+		const supervisor = new ComputerSupervisor(toolSession(), async () => backend);
+		const said = async (): Promise<string> => {
+			const run = await runSupervisor(supervisor, "await desktop.screenshot()");
+			if (!run.ok) throw run.error;
+			return run.payload.displays
+				.filter((block): block is { type: "text"; text: string } => block.type === "text")
+				.map(block => block.text)
+				.join("\n");
+		};
+		expect(await said()).toContain("screenshot desktop 64×32 (1 px = 1 display point)");
+		// A surface too large for the frame budget cannot keep its grid, so the
+		// result carries the number the model needs to convert what it reads.
+		backend.captureScale = 0.5;
+		expect(await said()).toContain(
+			"screenshot desktop 32×16 (display 64×32 points at 0.50× — divide image pixels by 0.50 for the display points every action takes)",
+		);
 	});
 
 	it("rejects an aborted run with an abort error", async () => {
