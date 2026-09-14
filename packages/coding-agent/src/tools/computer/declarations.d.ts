@@ -30,6 +30,12 @@ interface ComputerObserveOptions {
 	maxDepth?: number;
 	maxElements?: number;
 	query?: string;
+	/**
+	 * Include the menu bar. Excluded by default: its rows only respond while
+	 * their own menu is open, and `win.menu(path)` is the route that drives
+	 * them.
+	 */
+	menubar?: boolean;
 }
 interface ComputerWindowFilter {
 	id?: string | number;

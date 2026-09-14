@@ -178,6 +178,12 @@ export interface ObserveOptions {
 	maxDepth?: number;
 	maxElements?: number;
 	query?: string;
+	/**
+	 * Include the window's `AXMenuBar` subtrees. They are excluded by default:
+	 * a menu bar row only responds while its own menu is open, so `menu(path)`
+	 * is the route, and the rows are a fifth of a macOS tree.
+	 */
+	menubar?: boolean;
 }
 /** How a selector several windows match is settled. */
 export interface WindowResolveOptions {

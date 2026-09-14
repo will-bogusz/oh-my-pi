@@ -675,7 +675,8 @@ it("names the menu route when the driver refuses an action on a menu bar row", a
 	try {
 		f.state.role = "AXMenuBarItem";
 		f.state.label = "File";
-		const menuBarRef = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		// A menu bar row only has a ref at all when the observation asked for one.
+		const menuBarRef = (await f.session.observe(f.context, f.window, { menubar: true })).elements[0]!.ref;
 		f.state.hook = async name => (name === "click" ? refusal : undefined);
 		const failure = await refused(f.session.perform(f.context, f.window, menuBarRef, "press"));
 		// The driver's own refusal survives in front of the route it cannot name.
@@ -689,6 +690,51 @@ it("names the menu route when the driver refuses an action on a menu bar row", a
 		const plain = await refused(f.session.click(f.context, f.window, ordinaryRef));
 		expect(plain).toContain("refusing AXPress");
 		expect(plain).not.toContain("win.menu");
+	} finally {
+		await f.close();
+	}
+});
+
+it("keeps the menu bar out of observations and names the route that drives it", async () => {
+	const f = await fixture();
+	const elements = [
+		{ element_index: 1, element_token: "s:1", role: "AXWindow", label: "Editor", depth: 0 },
+		{ element_index: 2, element_token: "s:2", role: "AXMenuBar", label: "", depth: 1 },
+		{
+			element_index: 3,
+			element_token: "s:3",
+			role: "AXMenuBarItem",
+			label: "File",
+			depth: 2,
+			enabled: true,
+			actions: ["press"],
+		},
+		{ element_index: 4, element_token: "s:4", role: "AXMenu", label: "", depth: 3 },
+		{ element_index: 5, element_token: "s:5", role: "AXButton", label: "Save", depth: 1 },
+	];
+	try {
+		f.state.hook = async name =>
+			name === "get_window_state"
+				? reply({ pid: 101, window_id: 1, snapshot_id: "s", truncated: false, elements })
+				: undefined;
+		const hidden = await f.session.observe(f.context, f.window);
+		expect(hidden.elements.map(element => element.role)).toEqual(["AXWindow", "AXButton"]);
+		// The whole subtree goes, not just the rows that carry the role.
+		expect(hidden.tree).not.toContain("AXMenu");
+		expect(hidden.tree).toContain("Menu bar hidden (3 rows)");
+		expect(hidden.tree).toContain('win.menu(["<menu>", "<item>"], { delivery: "foreground" })');
+		// No ref is spent on a row that was never published.
+		expect(hidden.elements.map(element => element.ref)).toEqual(["n1", "n2"]);
+		const shown = await f.session.observe(f.context, f.window, { menubar: true });
+		expect(shown.elements.map(element => element.role)).toEqual([
+			"AXWindow",
+			"AXMenuBar",
+			"AXMenuBarItem",
+			"AXMenu",
+			"AXButton",
+		]);
+		expect(shown.tree).not.toContain("Menu bar hidden");
+		expect(shown.complete).toBe(true);
 	} finally {
 		await f.close();
 	}

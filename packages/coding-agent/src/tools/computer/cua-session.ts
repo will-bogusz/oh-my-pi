@@ -750,8 +750,26 @@ export class CuaComputerSession implements ComputerBackend {
 			if (snapshotId === "unavailable" && reply.data.elements.length)
 				throw new ToolError("Cua elements have no snapshot identity");
 			const rows: { depth: number; element: ComputerElementSnapshot }[] = [];
+			// The menu bar is a fifth of a macOS tree (22 kB of one 31 kB walk),
+			// every row of it advertises `press`, and every such press is refused
+			// because a menu bar item reports `AXEnabled` only while its menu is
+			// open. `menu(path)` drives it instead, so the rows stay out unless
+			// they are asked for, and a ref is never minted for one.
+			let menuBarDepth: number | undefined;
+			let menuBarRows = 0;
 			for (const value of reply.data.elements) {
 				const row = object(value, "element");
+				const depth = typeof row.depth === "number" ? Math.max(0, Math.min(50, Math.floor(row.depth))) : 0;
+				if (menuBarDepth !== undefined && depth > menuBarDepth) {
+					menuBarRows++;
+					continue;
+				}
+				menuBarDepth = undefined;
+				if (options.menubar !== true && MENU_BAR_ROLES[string(row.role, "role")] === true) {
+					menuBarDepth = depth;
+					menuBarRows++;
+					continue;
+				}
 				const token = string(row.element_token, "element_token");
 				// `#elements` is the only binding: it carries the exact window, driver
 				// snapshot and element token, and rejects a ref it does not hold. The
@@ -790,10 +808,7 @@ export class CuaComputerSession implements ComputerBackend {
 					element,
 					doubleClickAtCenter: reply.data.element_double_click === "left_center_v1",
 				});
-				rows.push({
-					depth: typeof row.depth === "number" ? Math.max(0, Math.min(50, Math.floor(row.depth))) : 0,
-					element,
-				});
+				rows.push({ depth, element });
 			}
 			// Only the walker knows whether it clipped the tree. `truncated` is its
 			// explicit verdict and `elements_complete` its older positive proof.
@@ -829,6 +844,8 @@ export class CuaComputerSession implements ComputerBackend {
 					typeof reply.data.degraded_reason === "string"
 						? reply.data.degraded_reason
 						: "No accessibility elements returned; completeness is unknown.";
+			if (menuBarRows)
+				observation.tree += `\nMenu bar hidden (${menuBarRows} rows): its items only respond while their own menu is open, so drive it with win.menu(["<menu>", "<item>"], { delivery: "foreground" }); observe({ menubar: true }) shows them.`;
 			if (observation.relatedWindows?.length)
 				observation.tree += `\nAttached sheets: ${JSON.stringify(observation.relatedWindows)}`;
 			if (reply.data.ax_walk_timed_out === true)
