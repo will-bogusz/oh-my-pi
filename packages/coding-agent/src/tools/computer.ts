@@ -15,6 +15,7 @@ import computerCodeModeDeclarations from "./computer/declarations.d.ts" with { t
 import computerJavascript from "./computer/prelude.js" with { type: "text" };
 import computerPython from "./computer/prelude.py" with { type: "text" };
 import { type ComputerController, ComputerSupervisor, registerComputerController } from "./computer/supervisor";
+import { elideObservationTree } from "./computer/tree-elide";
 import type {
 	ComputerObservation,
 	ComputerScreenshot,
@@ -338,6 +339,7 @@ async function runComputer(
 	}
 	const cappedText = await enforceInlineByteCap(text, {
 		saveArtifact: full => saveComputerOutputArtifact(session, full),
+		elide: elideObservationTree,
 	});
 	const content: AgentToolResult<ComputerPreludeDetails>["content"] = [];
 	if (cappedText) content.push({ type: "text", text: cappedText });

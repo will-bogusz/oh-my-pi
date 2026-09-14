@@ -635,6 +635,14 @@ export function truncateMiddle(content: string, options: TruncationOptions = {})
 // Inline byte cap — final defense at the tool-result boundary
 // =============================================================================
 
+/** Replacement text from a structure-aware elider, with its own notice line. */
+export interface StructuralElisionResult {
+	/** Text that fits the budget the elider was given. */
+	text: string;
+	/** One-line summary of what was removed, appended below the text. */
+	notice: string;
+}
+
 /** Options for {@link enforceInlineByteCap}. */
 export interface InlineByteCapOptions {
 	/** Inline byte budget. Defaults to {@link DEFAULT_MAX_BYTES}. */
@@ -645,7 +653,20 @@ export interface InlineByteCapOptions {
 	 * elided bytes stay recoverable.
 	 */
 	saveArtifact?: (full: string) => string | undefined | Promise<string | undefined>;
+	/**
+	 * Structure-aware elider, tried before the byte-window cut for results
+	 * whose shape carries meaning (an accessibility tree). It receives the
+	 * budget its `text` plus `notice` must fit; returning undefined falls back
+	 * to the head/tail cut below.
+	 */
+	elide?: (text: string, budget: number) => StructuralElisionResult | undefined;
 }
+
+/**
+ * Room left for a structural elision's notice line and the artifact footer,
+ * which are composed after the elider has already met its budget.
+ */
+const STRUCTURAL_ELISION_RESERVE = 192;
 
 /** Drop the partial last line of a head window (keep it if there is no newline at all). */
 function trimHeadToLineBoundary(text: string): string {
@@ -663,11 +684,14 @@ function trimTailToLineBoundary(text: string): string {
 /**
  * Final-defense inline size guard for tool results.
  *
- * No-op when `text` fits within `maxBytes` (the common path). Otherwise keeps
- * ~60% of the budget from the head and ~25% from the tail — cut on line
- * boundaries, never splitting a multi-byte UTF-8 sequence — with an elision
- * marker between. The remaining ~15% is slack for the marker and the optional
- * `[raw output: artifact://<id>]` footer, so the result stays under `maxBytes`.
+ * No-op when `text` fits within `maxBytes` (the common path). An `elide` hook
+ * gets first refusal on over-cap text, so results whose structure carries the
+ * meaning lose their least load-bearing parts instead of a contiguous band.
+ * Otherwise keeps ~60% of the budget from the head and ~25% from the tail —
+ * cut on line boundaries, never splitting a multi-byte UTF-8 sequence — with
+ * an elision marker between. The remaining ~15% is slack for the marker and
+ * the optional `[raw output: artifact://<id>]` footer, so the result stays
+ * under `maxBytes`.
  */
 export async function enforceInlineByteCap(text: string, options: InlineByteCapOptions): Promise<string> {
 	const maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES;
@@ -675,11 +699,19 @@ export async function enforceInlineByteCap(text: string, options: InlineByteCapO
 	const totalBytes = Buffer.byteLength(text, "utf-8");
 	if (totalBytes <= maxBytes) return text;
 
-	const head = trimHeadToLineBoundary(truncateHeadBytes(text, Math.floor(maxBytes * 0.6)).text);
-	const tail = trimTailToLineBoundary(truncateTailBytes(text, Math.floor(maxBytes * 0.25)).text);
-	const elidedBytes = Math.max(0, totalBytes - Buffer.byteLength(head, "utf-8") - Buffer.byteLength(tail, "utf-8"));
-	const marker = `[…${elidedBytes}B elided…]`;
-	let composed = `${head}\n${marker}\n${tail}`;
+	const structural = options.elide?.(text, maxBytes - STRUCTURAL_ELISION_RESERVE);
+	let composed: string;
+	if (structural) {
+		composed = structural.notice ? `${structural.text}\n${structural.notice}` : structural.text;
+	} else {
+		const head = trimHeadToLineBoundary(truncateHeadBytes(text, Math.floor(maxBytes * 0.6)).text);
+		const tail = trimTailToLineBoundary(truncateTailBytes(text, Math.floor(maxBytes * 0.25)).text);
+		const elidedBytes = Math.max(
+			0,
+			totalBytes - Buffer.byteLength(head, "utf-8") - Buffer.byteLength(tail, "utf-8"),
+		);
+		composed = `${head}\n[…${elidedBytes}B elided…]\n${tail}`;
+	}
 
 	const artifactId = await options.saveArtifact?.(text);
 	if (artifactId) {
