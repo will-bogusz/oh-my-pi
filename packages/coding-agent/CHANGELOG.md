@@ -11,6 +11,10 @@
 
 ### Fixed
 
+- `computer`: an accessibility action the application answers with `-25200`/`-25205`/`-25206` (Contacts' Edit/Done, a text field taking focus) is now reported as dispatched with an unverified effect and the window state that followed it, instead of failing the call — an `observe()` written after the action in the same cell still runs.
+- A tree-only observation (what `win.find()` issues) no longer drops the window's cached screenshot frame, so a pixel action taken after a `find` no longer fails with StaleFrame.
+- Oversized computer observations are now elided structurally — long `value=` text, textless/decorative rows and the deepest subtrees go first, actionable rows last — instead of losing a middle band of the accessibility tree; the `artifact://` link to the full text stays.
+- Python's `computer.window(...)` accepts `launch=`/`ambiguous=` keywords; it previously treated `launch=` as a selector field.
 - Read error and preview rendering now sanitizes tabs and Windows-style CRLF (e.g. ssh host-key failures, tab-indented fetched content) so raw output can no longer tear the result frame.
 - Unset `tiny` model roles now honor the configured `@smol` fallback in direct execution and the `/models` Roles view ([#11311](https://github.com/can1357/oh-my-pi/issues/11311)).
 - Extension Control Center (`/extensions`) search now accepts `j` and `k`, so extensions like `jira`/`json` are searchable; bare `j`/`k` no longer move the list selection (use arrow keys or the configured `tui.select.up`/`down`) ([#11350](https://github.com/can1357/oh-my-pi/issues/11350)).
@@ -25,6 +29,13 @@
 
 ### Changed
 
+- `computer.window({ app })` now launches the app when nothing matches it yet and acquires the window in the same call; `{ launch: false }` acquires only what is already open, and an exact id/pid never launches. Because acquisition may start an application, that call is exec-tier rather than read-tier.
+- When several windows match a selector, acquisition takes the frontmost and names the ids it passed over instead of failing; `{ ambiguous: "throw" }` restores the candidate-list error. Window info also carries `zIndex` where the platform reports stacking.
+- `win.observe()` no longer captures a screenshot; `observe({ screenshot: true })` does, and acquisition still takes one initial image.
+- Observations exclude the menu bar by default — its rows only respond while their own menu is open — and the tree says how many rows were hidden and that `win.menu(path)` drives them; `observe({ menubar: true })` includes them.
+- `win.find()` matches `role`, `label` and `value` as case-insensitive substrings, accepts `title` as a name for `label`, and takes `{ exact: true }` for whole-string equality.
+- The `computer` tool prompt is half its former size (1 700 → 853 words) and the `browser` prompt loses its remaining reference bullet (681 → 640): per-method signature lists, observation return-field enumerations and the non-modifier key vocabulary now live in the Code Mode declarations, the two `computer` backend variants share one body instead of duplicating it, and the prose states the new acquisition and observation defaults. Per turn the model now reads 699 words of `computer` documentation on macOS (was 1 058) and 673 on Linux (was 1 027).
+- Directly operating a computer window or a browser tab no longer earns a todo list: the model is told that such a task is one deliverable however many clicks it takes, unless you ask for a list or the request carries 3+ independent deliverables.
 - Chrome's "started debugging this browser" bar now tracks the work instead of the turn: a driven tab's debugger goes back about ten seconds after its last command and is picked up again, transparently, on the next one. The attachment is held while a command is in flight and while a JavaScript dialog is open, and a detach tells the page's driver its object handles died so the next step re-acquires them instead of failing.
 - A tab the browser opens from a driven page (`target="_blank"`, `window.open`) is now recognised by which page reported opening it, not by Chrome's opener id — which names the window's visible tab for a synthesized click — so those children are always adopted into their opener's task group; the tab the user was looking at is selected again immediately, without raising the window.
 - A driven tab that navigates somewhere Chrome refuses to debug (`chrome://…`), or whose debugger the user cancels, stays owned instead of silently losing its lease: it can no longer be driven, but it is still listed and is taken out of the task group and closed at the end of the task.
