@@ -1,5 +1,8 @@
 import { describe, expect, it } from "bun:test";
+// @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
+import browserDeclarations from "../../src/tools/browser/declarations.d.ts" with { type: "text" };
 import {
+	BROWSER_TAB_VERBS,
 	ELEMENT_METHODS,
 	renderTabCall,
 	TAB_HANDLE_METHODS,
@@ -57,6 +60,26 @@ describe("renderTabCall", () => {
 			"isHidden",
 			"evaluate",
 		]);
+	});
+
+	it("names every allowlisted verb in the acquisition footer and declares each one it names", () => {
+		const [tabGroup, elementGroup] = BROWSER_TAB_VERBS.replace("tab: ", "")
+			.replace(" (via tab.id()/tab.ref()) — browser.help() for signatures", "")
+			.split(" — el: ");
+		const tabVerbs = tabGroup!.split(" · ");
+		const elementVerbs = elementGroup!.split(" · ");
+		// The footer is the allowlist, not a hand-kept copy of it.
+		expect(tabVerbs.map(verb => verb.replace(/\(.*$/, ""))).toEqual([...TAB_VALUE_METHODS, ...TAB_PRESENCE_METHODS]);
+		expect(elementVerbs.map(verb => verb.replace(/\(.*$/, ""))).toEqual([...ELEMENT_METHODS]);
+		// Playwright's selectOption cost the bench five failed calls; the shape
+		// that replaces it travels with the name on both surfaces.
+		expect(tabVerbs).toContain("select(...values)");
+		expect(elementVerbs).toContain("select(...values)");
+		// Declared as a member of the tab or element interface — `evaluate` and
+		// friends open with a type parameter instead of the argument list.
+		for (const verb of [...tabVerbs, ...elementVerbs])
+			expect(browserDeclarations).toMatch(new RegExp(`\\n\\t${verb.replace(/\(.*$/, "")}[(<]`));
+		expect(BROWSER_TAB_VERBS.split("\n")).toHaveLength(1);
 	});
 
 	it("renders value, presence, and one-hop element calls byte-for-byte", () => {

@@ -7,6 +7,7 @@ import type { EvalPreludeDefinition } from "@oh-my-pi/pi-coding-agent/eval/prelu
 import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-agent/eval/py/executor";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
+import { BROWSER_TAB_VERBS } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-call";
 import { ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import { chromiumAvailable } from "../tools/chromium-probe";
 
@@ -613,6 +614,11 @@ describe("browser facade Chromium helper E2E", () => {
 					"(async () => { globalThis.__e2eTab = await browser.open({ name: __name__, url: __url__ }); })()",
 					context,
 				);
+				// The verbs ride the acquisition, once. Their absence is what the
+				// 20260914 bench leg paid for in `selectOption` TypeErrors and
+				// 8 KB `browser.help()` recoveries.
+				expect(displayed.filter(text => String(text).includes(BROWSER_TAB_VERBS))).toHaveLength(1);
+				expect(String(displayed.at(-1)).split("\n").at(-1)).toBe(BROWSER_TAB_VERBS);
 				await runInContext('__e2eTab.click("text/Go")', context);
 				const title = await runInContext("__e2eTab.title()", context);
 				expect(typeof title).toBe("string");
@@ -628,6 +634,8 @@ describe("browser facade Chromium helper E2E", () => {
 				// The facade prints the tree itself; the model does not wrap observe() in display().
 				expect(field(observation, "tree")).toContain('button "Go"');
 				expect(displayed.at(-1)).toBe(field(observation, "tree"));
+				// Reading the same tab again repeats the tree, never the verbs.
+				expect(displayed.filter(text => String(text).includes("browser.help() for signatures"))).toHaveLength(1);
 				const buttonId = await runInContext(
 					'(async () => { const observation = await __e2eTab.observe(); return observation.elements.find(element => element.name === "Go").id; })()',
 					context,

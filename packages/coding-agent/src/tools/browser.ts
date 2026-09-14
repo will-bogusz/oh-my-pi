@@ -52,7 +52,7 @@ import {
 	releaseTab,
 	runInTab,
 } from "./browser/tab-supervisor";
-import { renderTabCall } from "./browser/tab-call";
+import { BROWSER_TAB_VERBS, renderTabCall } from "./browser/tab-call";
 import { resolveToCwd } from "./path-utils";
 import { renderFunctionRun } from "./run-code";
 import { ToolAbortError, ToolError, throwIfAborted } from "./tool-errors";
@@ -385,7 +385,7 @@ async function invokeBrowser(
 						displays: [
 							{
 								type: "text",
-								text: `Claimed Chrome tab ${JSON.stringify(handle.label)} with an open dialog. Inspect initialDialog or tab.dialog(); answer its exact id before page interaction.\n${JSON.stringify(handle.lease.dialog)}`,
+								text: `Claimed Chrome tab ${JSON.stringify(handle.label)} with an open dialog. Inspect initialDialog or tab.dialog(); answer its exact id before page interaction.\n${JSON.stringify(handle.lease.dialog)}\n${BROWSER_TAB_VERBS}`,
 							},
 						],
 						returnValue: details.value,
@@ -408,6 +408,10 @@ async function invokeBrowser(
 					type: "text",
 					text: `${parsed.action === "claim" ? "Claimed" : "Created inactive"} Chrome tab ${JSON.stringify(handle.label)}\nTarget: ${handle.lease.tab.id}\nURL: ${details.url}`,
 				});
+				// Once, with the handle itself: the verbs are what the acquisition
+				// hands over, and a later observe() of the same tab repeats the
+				// tree without repeating them.
+				initial.displays.push({ type: "text", text: BROWSER_TAB_VERBS });
 				return await browserRunResult(session, details, initial);
 			} catch (error) {
 				// A cancelled/failed observation cannot return its handle to the
@@ -548,6 +552,9 @@ async function openBrowser(
 			`${verb} tab ${JSON.stringify(name)} on ${describeBrowser(browser)}`,
 			`URL: ${url}`,
 			title ? `Title: ${title}` : null,
+			// Stated with the handle this call hands over, exactly once: no
+			// helper on it prints them again.
+			BROWSER_TAB_VERBS,
 		].filter((line): line is string => typeof line === "string");
 		return toolResult(details).text(lines.join("\n")).done();
 	} catch (error) {

@@ -53,6 +53,24 @@ export const ELEMENT_METHODS: readonly string[] = [
 	"evaluate",
 ];
 
+/**
+ * Verbs whose name alone was guessed wrong. `select` reads as Playwright's
+ * `selectOption` until the shape is printed beside it, which the bench paid
+ * for five times in one leg.
+ */
+const VERB_SHAPES: Readonly<Record<string, string>> = { select: "select(...values)" };
+
+/**
+ * The verbs a tab and its element handles answer to, for the footer of an
+ * acquisition result. Derived from the tables that gate every call, so the
+ * list a model reads cannot drift from the list the boundary accepts.
+ */
+export const BROWSER_TAB_VERBS = `tab: ${[...TAB_VALUE_METHODS, ...TAB_PRESENCE_METHODS]
+	.map(method => VERB_SHAPES[method] ?? method)
+	.join(" · ")} — el: ${ELEMENT_METHODS.map(method => VERB_SHAPES[method] ?? method).join(" · ")} (via ${TAB_HANDLE_METHODS.map(
+	method => `tab.${method}()`,
+).join("/")}) — browser.help() for signatures`;
+
 const DIRECT_METHODS_DESCRIPTION = [...TAB_VALUE_METHODS, ...TAB_PRESENCE_METHODS].join(", ");
 const ELEMENT_METHODS_DESCRIPTION = ELEMENT_METHODS.join(", ");
 
