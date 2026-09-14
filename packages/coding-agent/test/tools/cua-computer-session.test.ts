@@ -927,6 +927,46 @@ it("names the rung a dispatched action's own escalation points at", async () => 
 	}
 });
 
+it("sends a suspected no-op back to observe before it sends it to pixels", async () => {
+	const f = await fixture();
+	const suspected = {
+		delivery: { mode: "background" },
+		effect: "suspected_noop",
+		escalation: { reason: "suspected_noop", target: "pixel" },
+		route: "accessibility",
+	};
+	const dispatched = async (text: string) => {
+		f.state.hook = async name =>
+			name === "hotkey"
+				? { text, structuredJson: JSON.stringify(suspected), isError: false, images: [] }
+				: undefined;
+		return f.session.press(f.context, f.window, "cmd+n");
+	};
+	try {
+		// Recorded from the 09-14 Contacts leg: the press had landed and the
+		// menu opened a moment after the driver stopped watching, and the
+		// coordinate rung the escalation named is the one Contacts swallows.
+		const watched = await dispatched(
+			'✅ Performed AXPress on [15] AXMenuButton "".\n⚠️ Unverified: no change observed within 505 ms (element state, app focus, window contents, new windows).',
+		);
+		expect(watched.text).toContain("(suspected_noop)");
+		expect(watched.text).toContain("the driver saw no change within 505 ms — observe() once");
+		expect(watched.text).toContain("if the tree is unchanged, click the control's own centre off a screenshot");
+		expect(watched.text.indexOf("observe() once")).toBeLessThan(watched.text.indexOf("off a screenshot"));
+		// A driver that says how long it watched is quoted the same way.
+		const settled = await dispatched(
+			"⚠️ Unverified: the target was watched for 2000 ms after the dispatch and nothing changed.",
+		);
+		expect(settled.text).toContain("the driver saw no change within 2000 ms — observe() once");
+		// No window in the reply: the doubt is still named, without a number.
+		const bare = await dispatched('✅ Performed AXPress on [15] AXMenuButton "".');
+		expect(bare.text).toContain("the driver could not confirm this landed — observe() once");
+		expect(bare.text).not.toContain(" ms");
+	} finally {
+		await f.close();
+	}
+});
+
 for (const failedSwitch of [false, true]) {
 	it(`requires a new capture after ${failedSwitch ? "a failed" : "a successful"} switch to another window`, async () => {
 		const f = await fixture();

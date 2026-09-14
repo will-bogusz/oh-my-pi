@@ -380,10 +380,28 @@ function menuRefusalNames(markdown: string, path: readonly string[], failed: num
  * Only targets this surface can type are named; anything else stays in
  * `data` rather than becoming advice the caller cannot follow.
  */
-const ESCALATION_ROUTES: Readonly<Record<string, string>> = {
-	foreground: 'the route it names is { delivery: "foreground" } — re-run the action that way',
-	pixel: "the route it names is a coordinate action — observe({ screenshot: true }), then click the control's own centre off that screenshot",
+const ESCALATION_ROUTES: Readonly<Record<string, (text: string) => string>> = {
+	foreground: () => 'the route it names is { delivery: "foreground" } — re-run the action that way',
+	pixel: pixelEscalation,
 };
+/**
+ * The driver watches a dispatched action for a fixed window and calls a
+ * target that did not move in time a suspected no-op. On Contacts that window
+ * expired before the app opened the menu the press had already asked for, and
+ * the coordinate rung the escalation names is the one that app swallows — the
+ * run that recovered simply observed again. So the advice leads with the
+ * cheap route that worked and keeps pixels as the fallback, and it quotes the
+ * window the driver actually watched, since that is the whole basis of the
+ * doubt. Both spellings appear in the wild: the released driver says "no
+ * change observed within N ms", ours says how long it watched.
+ */
+const NO_CHANGE_WINDOW = /watched for (\d+) ms after the dispatch|no change observed within (\d+) ms/;
+function pixelEscalation(text: string): string {
+	const window = NO_CHANGE_WINDOW.exec(text);
+	const ms = window?.[1] ?? window?.[2];
+	const doubt = ms ? `the driver saw no change within ${ms} ms` : "the driver could not confirm this landed";
+	return `${doubt} — observe() once; if the tree is unchanged, click the control's own centre off a screenshot`;
+}
 function escalationRoute(data: Wire, text: string): string | undefined {
 	const escalation = data.escalation;
 	if (!escalation || typeof escalation !== "object" || Array.isArray(escalation)) return undefined;
@@ -392,7 +410,7 @@ function escalationRoute(data: Wire, text: string): string | undefined {
 	// replies still write, and both name the same rung.
 	const target = typeof row.target === "string" ? row.target : row.recommended;
 	if (typeof target !== "string") return undefined;
-	const route = ESCALATION_ROUTES[target];
+	const route = ESCALATION_ROUTES[target]?.(text);
 	if (route === undefined || text.includes(`delivery: "${target}"`)) return undefined;
 	const reason = typeof row.reason === "string" ? row.reason : undefined;
 	return `⚠️ The driver escalates this action${reason ? ` (${reason})` : ""}: ${route}.`;
