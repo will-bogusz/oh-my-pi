@@ -337,7 +337,7 @@ async function runComputer(
 			`${observedWindow.app}: ${observedWindow.title || "Untitled window"} (window ${observedWindow.id}, PID ${observedWindow.pid})`,
 			observation?.tree,
 			observation && !observation.complete
-				? "Partial accessibility tree; omitted controls remain unknown."
+				? 'Partial accessibility tree; omitted controls remain unknown — narrow the next observe ({ maxDepth } or { query: "<text>" }) or read the screenshot before concluding a control is absent.'
 				: undefined,
 			acquired?.inspectionError ? `Initial inspection unavailable: ${acquired.inspectionError}` : undefined,
 			(observation?.screenshotError ?? acquired?.screenshotError)

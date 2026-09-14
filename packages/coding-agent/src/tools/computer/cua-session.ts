@@ -846,8 +846,8 @@ export class CuaComputerSession implements ComputerBackend {
 						: "No accessibility elements returned; completeness is unknown.";
 			if (menuBarRows)
 				observation.tree += `\nMenu bar hidden (${menuBarRows} rows): its items only respond while their own menu is open, so drive it with win.menu(["<menu>", "<item>"], { delivery: "foreground" }); observe({ menubar: true }) shows them.`;
-			if (observation.relatedWindows?.length)
-				observation.tree += `\nAttached sheets: ${JSON.stringify(observation.relatedWindows)}`;
+			for (const sheet of observation.relatedWindows ?? [])
+				observation.tree += `\nAttached sheet ${JSON.stringify(sheet.title)} (id ${sheet.id}): a separate window that takes its own input — acquire it with computer.window("${sheet.id}") to drive it.`;
 			if (reply.data.ax_walk_timed_out === true)
 				observation.tree +=
 					"\nAccessibility observation reached its time limit. The walk has finished; omitted controls and values remain unknown.";

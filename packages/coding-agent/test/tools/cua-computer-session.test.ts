@@ -1516,12 +1516,20 @@ it("preserves attached sheet identities without converting them into parent elem
 	const f = await fixture();
 	try {
 		expect((await f.session.observe(f.context, f.window)).relatedWindows).toBeUndefined();
-		f.state.relatedWindows = [{ pid: 202, window_id: 42, title: "Import", relation: "sheet" }];
+		f.state.relatedWindows = [
+			{ pid: 202, window_id: 42, title: "Import", relation: "sheet" },
+			{ pid: 202, window_id: 43, title: "Save", relation: "sheet" },
+		];
 		const observation = await f.session.observe(f.context, f.window);
-		expect(observation.relatedWindows).toEqual([{ pid: 202, id: "42", title: "Import", relation: "sheet" }]);
+		expect(observation.relatedWindows).toEqual([
+			{ pid: 202, id: "42", title: "Import", relation: "sheet" },
+			{ pid: 202, id: "43", title: "Save", relation: "sheet" },
+		]);
+		// Each sheet names the call that acquires it, not a JSON dump.
 		expect(observation.tree).toContain(
-			'Attached sheets: [{"id":"42","pid":202,"title":"Import","relation":"sheet"}]',
+			'Attached sheet "Import" (id 42): a separate window that takes its own input — acquire it with computer.window("42") to drive it.',
 		);
+		expect(observation.tree).toContain('acquire it with computer.window("43") to drive it.');
 		expect(observation.elements).toHaveLength(1);
 		expect(observation.elements[0]!.label).toBe("Editor");
 		expect(Object.isFrozen(observation.relatedWindows)).toBe(true);

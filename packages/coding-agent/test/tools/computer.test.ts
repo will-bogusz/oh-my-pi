@@ -538,7 +538,7 @@ describe("computer preludes through the session", () => {
 			const observed = await runInContext("win.observe({screenshot:false})", realm);
 			expect(observed.elements[0].value).toBe("1");
 			expect(displays.join("\n")).toContain("button [ref=e2]");
-			expect(displays.join("\n")).toContain("omitted controls remain unknown");
+			expect(displays.join("\n")).toContain("omitted controls remain unknown — narrow the next observe");
 			expect(observed.complete).toBe(false);
 			expect(displays.join("\n")).not.toContain("button [ref=e1]");
 			await expect(runInContext("win.click(win.initialObservation.elements[0].ref)", realm)).rejects.toThrow(
