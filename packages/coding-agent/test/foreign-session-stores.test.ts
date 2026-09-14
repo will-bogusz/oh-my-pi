@@ -332,6 +332,106 @@ describe("CodexSessionStore", () => {
 		expect(calls).toEqual(new Set(["call-codex", "call-web"]));
 		expect(resultCount).toBe(2);
 	});
+
+	it("attributes Codex token usage to the assistant message each record follows", async () => {
+		const root = path.join(tempRoot, ".codex");
+		const cwd = path.join(tempRoot, "codex-project");
+		const id = "55555555-5555-4555-8555-555555555555";
+		const sessionPath = path.join(root, "sessions", `rollout-${id}.jsonl`);
+		const turnUsage = {
+			input_tokens: 12_000,
+			cached_input_tokens: 8000,
+			cache_write_input_tokens: 0,
+			output_tokens: 40,
+			reasoning_output_tokens: 25,
+			total_tokens: 12_040,
+		};
+		await writeJsonl(sessionPath, [
+			{ type: "session_meta", timestamp: "2025-01-01T00:00:00.000Z", payload: { id, cwd } },
+			{ type: "turn_context", timestamp: "2025-01-01T00:00:01.000Z", payload: { model: "gpt-5.3-codex" } },
+			{
+				type: "response_item",
+				timestamp: "2025-01-01T00:00:02.000Z",
+				payload: { type: "message", role: "user", content: [{ type: "input_text", text: "Inspect" }] },
+			},
+			{
+				type: "response_item",
+				timestamp: "2025-01-01T00:00:03.000Z",
+				payload: { type: "reasoning", summary: [{ type: "summary_text", text: "Plan" }] },
+			},
+			{
+				type: "response_item",
+				timestamp: "2025-01-01T00:00:04.000Z",
+				payload: { type: "function_call", call_id: "call-usage", name: "read", arguments: "{}" },
+			},
+			{
+				type: "token_usage_record",
+				timestamp: "2025-01-01T00:00:05.000Z",
+				payload: { usage: turnUsage, turn_token_usage: turnUsage },
+			},
+			{
+				type: "response_item",
+				timestamp: "2025-01-01T00:00:06.000Z",
+				payload: { type: "function_call_output", call_id: "call-usage", output: "file contents" },
+			},
+			{
+				type: "event_msg",
+				timestamp: "2025-01-01T00:00:07.000Z",
+				payload: { type: "token_count", info: { total_token_usage: turnUsage, last_token_usage: turnUsage } },
+			},
+			{
+				type: "response_item",
+				timestamp: "2025-01-01T00:00:08.000Z",
+				payload: { type: "message", role: "assistant", content: [{ type: "output_text", text: "Done" }] },
+			},
+			{
+				type: "event_msg",
+				timestamp: "2025-01-01T00:00:09.000Z",
+				payload: {
+					type: "token_count",
+					info: {
+						last_token_usage: {
+							input_tokens: 20_000,
+							cached_input_tokens: 12_000,
+							output_tokens: 11,
+							total_tokens: 20_011,
+						},
+					},
+				},
+			},
+		]);
+
+		const manager = await new CodexSessionStore(root).load({
+			source: "codex",
+			id,
+			path: sessionPath,
+			cwd,
+			created: new Date("2025-01-01T00:00:00.000Z"),
+			modified: new Date("2025-01-01T00:00:09.000Z"),
+		});
+
+		const assistants = manager
+			.getEntries()
+			.flatMap(entry => (entry.type === "message" && entry.message.role === "assistant" ? [entry.message] : []));
+		expect(assistants).toHaveLength(3);
+		// The reasoning item shares its response with the tool call, so usage lands on the call it precedes.
+		expect(assistants[0]?.usage).toMatchObject({ input: 0, output: 0, cacheRead: 0, totalTokens: 0 });
+		expect(assistants[1]?.usage).toMatchObject({
+			input: 4000,
+			cacheRead: 8000,
+			cacheWrite: 0,
+			output: 40,
+			reasoningTokens: 25,
+			totalTokens: 12_040,
+		});
+		// The trailing message has no token_usage_record, so the token_count event supplies its usage.
+		expect(assistants[2]?.usage).toMatchObject({
+			input: 8000,
+			cacheRead: 12_000,
+			output: 11,
+			totalTokens: 20_011,
+		});
+	});
 });
 
 describe("foreign session persistence", () => {

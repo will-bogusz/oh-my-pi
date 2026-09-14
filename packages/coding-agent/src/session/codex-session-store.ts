@@ -47,6 +47,8 @@ interface ConvertedRecord {
 	title?: string;
 	timestamp?: number;
 	compaction?: CodexCompaction;
+	/** Set once a per-response `token_usage_record` supplied this message's usage. */
+	usageReported?: boolean;
 }
 
 const EMPTY_USAGE: AssistantMessage["usage"] = {
@@ -171,6 +173,56 @@ function assistantMessage(
 		stopReason,
 		timestamp,
 	};
+}
+
+/**
+ * Reads one Codex usage block (`token_usage_record.payload.usage` or a
+ * `token_count` event's `last_token_usage`) into OMP's usage shape. Codex counts
+ * cached prompt tokens inside `input_tokens`; OMP's `input` is the uncached
+ * bucket only, so the cached tokens are subtracted out.
+ */
+function codexUsage(value: unknown): AssistantMessage["usage"] | undefined {
+	if (!isRecord(value)) return undefined;
+	const promptTokens = numberField(value, "input_tokens") ?? 0;
+	const cacheRead = numberField(value, "cached_input_tokens") ?? 0;
+	const cacheWrite = numberField(value, "cache_write_input_tokens") ?? 0;
+	const output = numberField(value, "output_tokens") ?? 0;
+	if (promptTokens === 0 && output === 0) return undefined;
+	const input = Math.max(0, promptTokens - cacheRead);
+	const reasoningTokens = numberField(value, "reasoning_output_tokens");
+	return {
+		input,
+		output,
+		cacheRead,
+		cacheWrite,
+		totalTokens: numberField(value, "total_tokens") ?? input + cacheRead + cacheWrite + output,
+		reasoningTokens,
+		// Codex rollouts carry no pricing; cost stays zero rather than guessing a rate.
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+	};
+}
+
+/**
+ * Attaches usage to the assistant message the record follows — the newest
+ * assistant message of the turn in progress. `authoritative` marks per-response
+ * `token_usage_record` data, which outranks the `token_count` event fallback.
+ */
+function applyUsage(
+	records: ConvertedRecord[],
+	usage: AssistantMessage["usage"] | undefined,
+	authoritative: boolean,
+): void {
+	if (!usage) return;
+	for (let index = records.length - 1; index >= 0; index--) {
+		const record = records[index];
+		const message = record.message;
+		if (message?.role === "user") return;
+		if (message?.role !== "assistant") continue;
+		if (record.usageReported && !authoritative) return;
+		message.usage = usage;
+		record.usageReported = authoritative;
+		return;
+	}
 }
 
 async function firstJsonRecord(filePath: string): Promise<Record<string, unknown> | undefined> {
@@ -572,9 +624,17 @@ export class CodexSessionStore implements ForeignSessionStore {
 					model = nextModel;
 					item = { model, timestamp };
 				}
+			} else if (record.type === "token_usage_record") {
+				applyUsage(converted, codexUsage(record.payload.usage), true);
+				continue;
 			} else if (record.type === "response_item") {
 				item = convertedResponseItem(record.payload, timestamp, model, toolNames);
 			} else if (record.type === "event_msg") {
+				if (stringField(record.payload, "type") === "token_count") {
+					const info = isRecord(record.payload.info) ? record.payload.info : undefined;
+					applyUsage(converted, codexUsage(info?.last_token_usage), false);
+					continue;
+				}
 				item = convertedEvent(
 					record.payload,
 					timestamp,
