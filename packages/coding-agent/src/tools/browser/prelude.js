@@ -191,6 +191,10 @@
 		async instances() {
 			return (await invoke("instances", {})).value;
 		},
+		// The host prints the typed API; returning it too would print it twice.
+		async help() {
+			await invoke("help", {});
+		},
 		async discover(options) {
 			return (await invoke("discover", validateOptions("browser.discover", options))).value;
 		},

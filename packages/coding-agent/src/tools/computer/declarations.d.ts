@@ -256,6 +256,8 @@ declare const computer: Omit<ComputerDesktop, "window"> & {
 		options?: ComputerRunOptions,
 	): Promise<Awaited<R>>;
 	run<R = unknown>(code: string, options?: ComputerRunOptions): Promise<R>;
+	/** Print this declaration file — every interface and signature above. Read tier, no driver call. */
+	help(): Promise<void>;
 	release(): Promise<void>;
 	close(): Promise<void>;
 };

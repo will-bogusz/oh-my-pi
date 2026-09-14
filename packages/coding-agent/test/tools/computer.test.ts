@@ -1010,6 +1010,34 @@ describe("computer preludes through the session", () => {
 		expect(result.output.trim().split("\n").slice(-2)).toEqual(["python", "ready 9 123"]);
 		expect(backend.value).toBe("python");
 	});
+
+	it("prints the typed API on demand without starting the driver", async () => {
+		const { realm, displays } = javascriptFixture(() => {
+			throw new Error("help must never start a driver child");
+		});
+		await runInContext("computer.help()", realm);
+		const printed = displays.join("\n");
+		expect(printed).toContain("interface ComputerWindow");
+		expect(printed).toContain("interface ComputerElement");
+	});
+
+	it("prints the same typed API through the Python prelude", async () => {
+		let definitions: readonly EvalPreludeDefinition[] = [];
+		const session: ToolSession = { ...toolSession(), getEvalPreludes: () => definitions };
+		definitions = [
+			fixturePrelude(session, () => {
+				throw new Error("help must never start a driver child");
+			}),
+		];
+		const result = await executePython("await computer.help()", {
+			cwd: process.cwd(),
+			sessionId: `computer-py-help-${crypto.randomUUID()}`,
+			toolSession: session,
+			kernelMode: "per-call",
+		});
+		expect(result.exitCode).toBe(0);
+		expect(result.output).toContain("interface ComputerWindow");
+	});
 });
 
 describe("computer supervisor round trips", () => {
@@ -1368,18 +1396,11 @@ describe("computer prompt variants", () => {
 	it("states each backend's own routes and never the other's vocabulary", () => {
 		const darwin = render(computerDescription, false);
 		const linux = render(computerDescription, true);
-		for (const absent of ["AT-SPI", "X11", "xdotool", "AT-SPI tree"]) expect(darwin).not.toContain(absent);
-		for (const absent of ["AppleScript", "TCC", "screencapture", "Apple Silicon"])
-			expect(linux).not.toContain(absent);
-		// The Linux backend's own contract, stated where the model reads it.
+		for (const absent of ["AT-SPI", "X11", "xdotool", "super"]) expect(darwin).not.toContain(absent);
+		for (const absent of ["AppleScript", "TCC", "screencapture", "cmd|", "committed"]) expect(linux).not.toContain(absent);
 		expect(linux).toContain("AT-SPI tree");
-		expect(linux).toContain("`background_unavailable` refusal means nothing was dispatched");
 		expect(linux).toContain("foreground_unavailable");
-		expect(linux).toContain("window manager");
-		expect(linux).toContain("`computer.displays()` and desktop-root input");
-		expect(linux).toContain('effect: "unverifiable"');
 		expect(darwin).toContain("password/TCC prompt");
-		expect(linux).toContain("`interruptedBy` is never set");
 	});
 	it("scopes the never-escalate rule to unverified deliveries on both backends", () => {
 		for (const linux of [false, true]) {

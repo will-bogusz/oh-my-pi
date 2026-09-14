@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { computerApproval } from "@oh-my-pi/pi-coding-agent/tools/computer";
 import {
 	isReadOnlyComputerCall,
 	renderComputerCall,
@@ -74,6 +75,10 @@ describe("computer call boundary", () => {
 			true,
 		);
 		expect(isReadOnlyComputerCall([{ method: "acquireWindow", args: ["42", { screenshot: false }] }])).toBe(true);
+	});
+
+	it("reads the typed API at the read tier, with no chain and no driver", () => {
+		expect(computerApproval({ action: "help" })).toBe("read");
 	});
 
 	it("rejects obsolete methods and forged traversal before rendering or approving", () => {

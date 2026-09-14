@@ -84,7 +84,7 @@ const tabCallStepSchema = type({
 
 const browserSchema = type({
 	action: type(
-		"'open' | 'close' | 'closeTab' | 'dialog' | 'popups' | 'run' | 'call' | 'instances' | 'discover' | 'create' | 'claim' | 'reveal' | 'release'",
+		"'open' | 'close' | 'closeTab' | 'dialog' | 'popups' | 'run' | 'call' | 'instances' | 'discover' | 'create' | 'claim' | 'reveal' | 'release' | 'help'",
 	).describe("operation"),
 	"dialog?": "unknown",
 	"handle?": "string",
@@ -195,7 +195,9 @@ export function createBrowserPrelude(session: ToolSession): EvalPreludeDefinitio
 		python: browserPython,
 		exports: ["browser"],
 		codeModeDeclarations: browserDeclarations,
-		approval: "exec",
+		// Documentation is the one browser action that touches no tab.
+		approval: args =>
+			args !== null && typeof args === "object" && "action" in args && args.action === "help" ? "read" : "exec",
 		enabled: () => session.settings.get("browser.enabled"),
 		invoke: (parameters, context) => invokeBrowser(session, parameters, context),
 	};
@@ -244,6 +246,12 @@ async function invokeBrowser(
 		const timeoutMs = timeoutSeconds * 1000;
 		const name = parsed.name ?? DEFAULT_TAB_NAME;
 		const details: BrowserPreludeDetails = { action: parsed.action, name };
+		if (parsed.action === "help") {
+			const text = await enforceInlineByteCap(browserDeclarations, {
+				saveArtifact: full => saveBrowserOutputArtifact(session, full),
+			});
+			return toolResult(details).text(text).done();
+		}
 		const managedOpen = parsed.action === "open" && resolveBrowserKind(parsed, session).kind === "relay";
 		if (!parsed.handle && !managedOpen && ["open", "close", "run", "call"].includes(parsed.action) && !parsed.all) {
 			const namedTab = getTab(name);

@@ -219,5 +219,7 @@ declare const browser: {
 	instances(): Promise<{ id: string; label: string; connected: boolean }[]>;
 	open(options?: BrowserOpenOptions): Promise<BrowserTab>;
 	tab(name?: string): BrowserTab;
+	/** Print this declaration file — every interface and signature above. Read tier, no tab needed. */
+	help(): Promise<void>;
 	close(options?: BrowserCloseOptions): Promise<void>;
 };

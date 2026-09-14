@@ -191,6 +191,10 @@
 		const details = await invoke("run", parameters);
 		return details.value;
 	};
+	// The host prints the typed API; returning it too would print it twice.
+	computer.help = async () => {
+		await invoke("help", {});
+	};
 	computer.release = async () => {
 		await invoke("release", {});
 	};

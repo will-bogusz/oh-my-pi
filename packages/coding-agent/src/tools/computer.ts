@@ -65,6 +65,7 @@ type ComputerParams =
 	| ComputerRunParams
 	| ComputerCallParams
 	| { action: "capabilities" }
+	| { action: "help" }
 	| { action: "release" }
 	| { action: "close" };
 type ComputerParamsSchema = Type<ComputerParams>;
@@ -92,6 +93,7 @@ const getComputerParamsSchema: () => ComputerParamsSchema = once(() =>
 			"+": "reject",
 		})
 		.or({ action: "'capabilities'", "+": "reject" })
+		.or({ action: "'help'", "+": "reject" })
 		.or({ action: "'release'", "+": "reject" })
 		.or({ action: "'close'", "+": "reject" }),
 );
@@ -112,10 +114,10 @@ interface ComputerPreludeDetails {
 /** Creates the session-scoped controller used by the computer prelude. */
 export type ComputerControllerFactory = (session: ToolSession) => ComputerController;
 
-/** Capability inspection, explicitly read-only runs, and inspection-only direct calls use read approval. */
+/** Documentation, capability inspection, explicitly read-only runs, and inspection-only direct calls use read approval. */
 export function computerApproval(args: unknown): ToolApprovalDecision {
 	if (args === null || typeof args !== "object" || Array.isArray(args) || !("action" in args)) return "exec";
-	if (args.action === "capabilities" || args.action === "release") return "read";
+	if (args.action === "capabilities" || args.action === "release" || args.action === "help") return "read";
 	if (args.action === "call") {
 		// Malformed chains fall to exec here and fail schema validation at invoke time.
 		try {
@@ -238,6 +240,13 @@ async function invokeComputer(
 				content: [{ type: "text", text: stringifyReturnValue(capabilities) }],
 				details: capabilities,
 			};
+		}
+		// Documentation, not desktop state: no driver child, alive or closed.
+		case "help": {
+			const text = await enforceInlineByteCap(computerCodeModeDeclarations, {
+				saveArtifact: full => saveComputerOutputArtifact(session, full),
+			});
+			return { content: [{ type: "text", text }], details: { screenshots: [] } };
 		}
 		case "release":
 			await lifetime.release();

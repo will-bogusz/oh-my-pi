@@ -264,6 +264,32 @@ describe("browser JavaScript facade", () => {
 			{ action: "close", name: "docs" },
 		]);
 	});
+
+	it("prints the typed API on demand through the real host action", async () => {
+		const displays: unknown[] = [];
+		const session = makeSession();
+		const prelude = createBrowserPrelude(session);
+		const context = createContext({
+			__omp_display__: (value: unknown) => displays.push(value),
+			__omp_prelude__: async (_name: string, parameters: unknown) => {
+				const result = await prelude.invoke(parameters, { session, toolCallId: "browser-help" });
+				return {
+					details: result.details,
+					text: result.content
+						.filter((block): block is { type: "text"; text: string } => block.type === "text")
+						.map(block => block.text)
+						.join("\n"),
+				};
+			},
+		});
+		runInContext(prelude.javascript, context);
+
+		await runInContext("browser.help()", context);
+		expect(displays.join("\n")).toContain("interface BrowserTab");
+		expect(typeof prelude.approval === "function" ? prelude.approval({ action: "help" }) : prelude.approval).toBe(
+			"read",
+		);
+	});
 });
 
 describe("browser facade in real Eval runtimes", () => {

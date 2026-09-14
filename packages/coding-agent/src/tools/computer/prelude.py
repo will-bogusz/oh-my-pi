@@ -289,6 +289,10 @@ def _make_computer():
             """Initialize the desktop and return backend capabilities and permission state."""
             return await self._method("capabilities", (), {})
 
+        async def help(self):
+            """Print the typed computer API: every interface and signature the handles expose."""
+            await _invoke("help", {})
+
         async def release(self):
             """Drain and release capture/control resources; later calls start a fresh desktop worker."""
             await _invoke("release", {})

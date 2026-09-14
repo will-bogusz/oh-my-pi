@@ -350,6 +350,10 @@ def _make_browser():
         async def instances(self):
             return (await _invoke("instances", {})).get("value")
 
+        async def help(self):
+            """Print the typed browser API: every interface and signature the handles expose."""
+            await _invoke("help", {})
+
         async def discover(self, *, browserId=None, full=None):
             return (await _invoke("discover", {"browserId": browserId, "full": full})).get("value")
 
