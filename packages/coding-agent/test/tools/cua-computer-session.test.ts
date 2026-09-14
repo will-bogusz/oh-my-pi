@@ -882,6 +882,123 @@ it("reports whether a written value survived the app's own end-of-edit", async (
 	}
 });
 
+it("carries a write nothing proved into the next observation of its own window", async () => {
+	const f = await fixture();
+	const observed = async () => (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+	const written = (data: Wire) => {
+		f.state.hook = async name => (name === "set_value" ? reply(data) : undefined);
+	};
+	try {
+		// The graded loss: `setValue` on a Save panel's filename field, chained
+		// behind an `observe` in one cell, so the only reply that could have said
+		// the app discarded the name was never displayed.
+		const dropped = await observed();
+		expect((await f.session.setValue(f.context, f.window, dropped, "Project_File_List.txt")).committed).toBeUndefined();
+		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
+			`setValue on ${dropped} "Editor" is not proven committed — re-read the field before building on it`,
+		);
+		// Spent by that read: it is the re-read the sentence asked for.
+		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("not proven committed");
+		// Proof is the driver's own verdict on a reply that read the value back
+		// and names no better route.
+		written({ committed: true, effect: "confirmed", evidence: [{ kind: "value_readback" }] });
+		expect((await f.session.setValue(f.context, f.window, await observed(), "Project_File_List.txt")).committed).toBe(
+			true,
+		);
+		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("not proven committed");
+		written({
+			committed: true,
+			effect: "confirmed",
+			escalation: { reason: "delivery_failed", target: "foreground" },
+		});
+		await f.session.setValue(f.context, f.window, await observed(), "Project_File_List.txt");
+		expect((await f.session.observe(f.context, f.window)).tree).toContain("setValue on n");
+		// `type` reports no commit flag at all, and answered `confirmed` for the
+		// one write Automator took and for the three it ignored.
+		f.state.hook = undefined;
+		const typed = await observed();
+		await f.session.type(f.context, f.window, "Project_File_List.txt", typed);
+		await f.session.type(f.context, f.window, "Project_File_List.txt", typed);
+		const carried = await f.session.observe(f.context, f.window);
+		expect(carried.tree.split("\n")[0]).toBe(
+			`type on ${typed} "Editor" is not proven committed — re-read the field before building on it`,
+		);
+		// One sentence per write, however often the same write is repeated.
+		expect(carried.tree.split("\n")[1]).toContain("- [n");
+		// A partial delivery is the one refusal that still wrote.
+		const partial = await observed();
+		f.state.hook = async name =>
+			name === "type_text"
+				? {
+						text: "type_text incomplete: delivered 0 of 21 character(s) via CGEvent (30ms delay); retry only the remaining suffix",
+						errorCode: "type_text_incomplete",
+						isError: true,
+						images: [],
+					}
+				: undefined;
+		await expect(f.session.type(f.context, f.window, "Project_File_List.txt", partial)).rejects.toThrow(
+			"type_text_incomplete",
+		);
+		f.state.hook = undefined;
+		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
+			`type on ${partial} "Editor" is not proven committed — re-read the field before building on it`,
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("holds an unproven write against its own window and shows it beside that window's pixels", async () => {
+	const f = await fixture();
+	const second = { ...f.row, window_id: 2, title: "Second" };
+	try {
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows") return reply({ windows: [f.row, second] });
+			if (name !== "get_window_state") return undefined;
+			return reply(
+				{
+					pid: 101,
+					window_id: args.window_id,
+					snapshot_id: `w${String(args.window_id)}`,
+					elements: [
+						{
+							element_index: 1,
+							element_token: `w${String(args.window_id)}:1`,
+							role: "AXTextField",
+							label: "Save as:",
+							depth: 0,
+						},
+					],
+					window_bounds: f.row.bounds,
+					screenshot_frame_valid: true,
+					screenshot_width: 4,
+					screenshot_height: 2,
+					screenshot_mime_type: "image/png",
+				},
+				args.include_screenshot ? [{ dataBase64: PNG, mimeType: "image/png" }] : [],
+			);
+		};
+		const other = await f.session.window(f.context, { id: "2", pid: 101 });
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		await f.session.setValue(f.context, f.window, ref, "Project_File_List.txt");
+		// Another window's read answers for its own state and carries nothing.
+		expect((await f.session.observe(f.context, other)).tree).not.toContain("not proven committed");
+		f.texts.length = 0;
+		await f.session.captureWindow(f.context, other);
+		expect(f.texts).toEqual([]);
+		// A capture has no text of its own, so the doubt is pushed into the cell.
+		await f.session.captureWindow(f.context, f.window);
+		expect(f.texts).toEqual([
+			`setValue on ${ref} "Save as:" is not proven committed — re-read the field before building on it`,
+		]);
+		f.texts.length = 0;
+		await f.session.captureWindow(f.context, f.window);
+		expect(f.texts).toEqual([]);
+	} finally {
+		await f.close();
+	}
+});
+
 it("names the rung a dispatched action's own escalation points at", async () => {
 	const f = await fixture();
 	const pressed = async (data: Wire, text: string) => {

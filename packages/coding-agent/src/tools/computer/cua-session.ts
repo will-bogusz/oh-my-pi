@@ -430,6 +430,12 @@ function commitNote(committed: boolean, text: string): string {
 	const reason = NOT_COMMITTED_REASON.exec(text)?.[1]?.trim();
 	return `committed=false — ${reason ?? "the driver reported no reason"}. The app may still hold its own value; read it back before relying on it.`;
 }
+/**
+ * A partial `type_text` is the one refusal that still wrote: the driver names
+ * how many characters it delivered and the suffix to retry, so the field holds
+ * neither its old value nor the requested one.
+ */
+const INCOMPLETE_TYPING = "type_text_incomplete";
 
 /**
  * Maps computer operations onto `cua-driver` tools over one supervised child.
@@ -465,6 +471,11 @@ export class CuaComputerSession implements ComputerBackend {
 	 * about a candidate without walking it again.
 	 */
 	readonly #documents = new Map<string, string>();
+	/**
+	 * What each window's writes left unproven, one sentence per write, in the
+	 * order they were made. The next read of that window reports and clears them.
+	 */
+	readonly #writes = new Map<string, Set<string>>();
 	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
 	#driver: CuaDriver;
 	/**
@@ -1050,13 +1061,17 @@ export class CuaComputerSession implements ComputerBackend {
 			else this.#documents.set(current.id, observation.documentPath);
 			if (typeof reply.data.document_edited === "boolean") observation.documentEdited = reply.data.document_edited;
 			if (observation.documentPath !== undefined || observation.documentEdited !== undefined)
-				observation.tree += `\nDocument: ${observation.documentPath ?? "(path unknown)"}${observation.documentEdited === undefined ? "" : observation.documentEdited ? " — unsaved changes" : " — no unsaved changes flagged (setValue writes are not flagged; check the disk)"}`;
+				observation.tree += `\nDocument: ${observation.documentPath ?? "(path unknown)"}${observation.documentEdited === undefined ? "" : observation.documentEdited ? " — unsaved changes" : " — no unsaved changes flagged"}`;
 			// An observation is the model's picture of the environment; a system
 			// prompt over it is part of that picture even though the AX tree of
 			// the target window looks entirely normal underneath.
 			observation.interruptedBy = this.#interruption();
 			if (observation.interruptedBy)
 				observation.tree += `\n⚠️ Interrupted: ${describeInterruption(observation.interruptedBy)}. Actions on any window are refused until it is answered; tell the user what is asking.`;
+			// The write that decided what this tree means may have been dispatched
+			// by a cell that displayed only this read.
+			const doubted = this.#doubtedWrites(current.id);
+			if (doubted.length) observation.tree = `${doubted.join("\n")}\n${observation.tree}`;
 			if (options.screenshot) {
 				try {
 					observation.screenshot = await this.#windowImage(context, current, reply, options.silent === true);
@@ -1220,6 +1235,9 @@ export class CuaComputerSession implements ComputerBackend {
 				include_accessibility_tree: false,
 				include_screenshot: true,
 			});
+			// An image carries no text of its own, so an unproven write goes in
+			// front of the pixels it is true of.
+			for (const doubt of this.#doubtedWrites(current.id)) context.emitText(doubt);
 			return this.#windowImage(context, current, reply, options.silent === true);
 		});
 	}
@@ -1417,6 +1435,54 @@ export class CuaComputerSession implements ComputerBackend {
 				: undefined,
 		);
 	}
+	/**
+	 * A write nothing proved, held against the window it was made on. Both
+	 * write routes answer `effect: "confirmed"` with a value readback for a
+	 * value the app's editing pipeline took and for one it discarded, and the
+	 * reply carrying that doubt is the cell's to drop: the bench wrote a
+	 * Save-panel filename, chained an `observe` behind it in the same cell, and
+	 * the only signal it had was never displayed. So the doubt outlives its own
+	 * call and is spent on the next read of that window — the observation or
+	 * capture whose conclusions would rest on the written value. Proof is the
+	 * driver's own commit verdict on a reply that read the state back and names
+	 * no better route; anything short of that is carried.
+	 */
+	async #write(
+		window: ComputerWindowIdentity,
+		operation: "setValue" | "type",
+		target: ComputerTarget | undefined,
+		dispatched: Promise<ComputerActionResult>,
+	): Promise<ComputerActionResult> {
+		const doubt = `${operation} on ${this.#writeTarget(target)} is not proven committed — re-read the field before building on it`;
+		try {
+			const result = await dispatched;
+			if (result.committed !== true || result.effect !== "confirmed" || result.escalation !== undefined)
+				this.#doubt(window.id, doubt);
+			return result;
+		} catch (error) {
+			if (error instanceof ToolError && error.message.startsWith(INCOMPLETE_TYPING)) this.#doubt(window.id, doubt);
+			throw error;
+		}
+	}
+	/** The element a write addressed, as the observation the caller read named it. */
+	#writeTarget(target: ComputerTarget | undefined): string {
+		if (target === undefined) return "the window's focused element";
+		if (typeof target !== "string") return `(${target[0]},${target[1]})`;
+		const label = this.#elements.get(target)?.element.label;
+		return label ? `${target} ${JSON.stringify(label)}` : target;
+	}
+	/** One sentence per unproven write, and never the same one twice. */
+	#doubt(windowId: string, sentence: string): void {
+		const doubts = this.#writes.get(windowId);
+		if (doubts) doubts.add(sentence);
+		else this.#writes.set(windowId, new Set([sentence]));
+	}
+	#doubtedWrites(windowId: string): readonly string[] {
+		const doubts = this.#writes.get(windowId);
+		if (!doubts) return [];
+		this.#writes.delete(windowId);
+		return [...doubts];
+	}
 	type(
 		context: Context,
 		window: ComputerWindowIdentity,
@@ -1424,7 +1490,12 @@ export class CuaComputerSession implements ComputerBackend {
 		target?: ComputerTarget,
 		options: ActionOptions = {},
 	): Promise<ComputerActionResult> {
-		return this.#targetAction(context, "type_text", window, target, { text, ...delivery(options) });
+		return this.#write(
+			window,
+			"type",
+			target,
+			this.#targetAction(context, "type_text", window, target, { text, ...delivery(options) }),
+		);
 	}
 	setValue(
 		context: Context,
@@ -1432,7 +1503,7 @@ export class CuaComputerSession implements ComputerBackend {
 		ref: string,
 		value: string,
 	): Promise<ComputerActionResult> {
-		return this.#targetAction(context, "set_value", window, ref, { value });
+		return this.#write(window, "setValue", ref, this.#targetAction(context, "set_value", window, ref, { value }));
 	}
 	press(
 		context: Context,
