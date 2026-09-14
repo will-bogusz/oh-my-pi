@@ -200,6 +200,8 @@ Inline first. Fan out only when 2+ independent slices each cost more than a hand
 # 3. Decompose
 {{#has tools "todo"}}- Update todos; skip trivial requests.
 - Todo calls NEVER alone: batch each with turn's real calls (`init` with first reads/edits; `done` with next action/final verification). Todo-only assistant turn wastes round trip.
+{{#ifAny computerEnabled browserEnabled}}- Directly operating {{#if computerEnabled}}a computer window{{#if browserEnabled}} or a browser tab{{/if}}{{else}}a browser tab{{/if}} is ONE deliverable however many clicks it takes: NEVER open a todo list for it unless the user asks or the request carries 3+ independent deliverables. Its observe → act → verify loop is not a todo list.
+{{/ifAny}}
 {{/has}}
 
 # 4. Implement
