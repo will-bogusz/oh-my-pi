@@ -1244,6 +1244,9 @@ it("asks for the window's point grid and takes coordinates in it", async () => {
 			args: { pid: 101, window_id: 1, x: 2, y: 0, delivery_mode: "background" },
 		});
 		await expect(f.session.click(f.context, f.window, [200, 0])).rejects.toThrow("InvalidCoordinates");
+		await expect(
+			f.session.click(f.context, f.window, { x: 10, y: 10 } as unknown as [number, number]),
+		).rejects.toThrow('InvalidCoordinates: a point is [x, y] in points read off the last screenshot, not {"x":10,"y":10}');
 		f.state.failCapture = true;
 		await expect(f.session.captureWindow(f.context, f.window)).rejects.toThrow("Screenshot unavailable");
 		await expect(f.session.click(f.context, f.window, [100, 0])).rejects.toThrow("StaleFrame");

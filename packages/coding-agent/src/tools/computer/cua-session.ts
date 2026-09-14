@@ -155,6 +155,12 @@ function bounds(value: unknown): ComputerBounds {
 function sameBounds(a: ComputerBounds, b: ComputerBounds): boolean {
 	return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
+function pointPair(point: unknown): [number, number] {
+	if (Array.isArray(point) && point.length === 2) return [Number(point[0]), Number(point[1])];
+	throw new ToolError(
+		`InvalidCoordinates: a point is [x, y] in points read off the last screenshot, not ${JSON.stringify(point)}`,
+	);
+}
 /**
  * Byte budget for one saved capture. Well above what a UI frame at point size
  * costs as JPEG, because `resizeImage` pays a tight budget in dimensions and
@@ -1293,7 +1299,7 @@ export class CuaComputerSession implements ComputerBackend {
 			throw new ToolError("StaleFrame: capture the exact window again before a pixel action");
 		}
 		const area = frame.window.bounds;
-		const [x, y] = target;
+		const [x, y] = pointPair(target);
 		if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= area.width || y >= area.height)
 			throw new ToolError(
 				`InvalidCoordinates: (${x}, ${y}) is outside the window's ${Math.round(area.width)}×${Math.round(area.height)} pt frame`,
@@ -1790,7 +1796,8 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 		throwIfAborted(context.signal);
 		const area = frame.display.bounds;
-		return points.map(([x, y]) => {
+		return points.map((point) => {
+			const [x, y] = pointPair(point);
 			if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= area.width || y >= area.height)
 				throw new ToolError(
 					`InvalidCoordinates: (${x}, ${y}) is outside the primary display's ${Math.round(area.width)}×${Math.round(area.height)} pt frame`,
