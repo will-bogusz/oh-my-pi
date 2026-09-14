@@ -300,18 +300,96 @@ class Win {
 /** A launched app gets this long to put its window on the WindowServer. */
 const LAUNCHED_WINDOW_TIMEOUT_MS = 15_000;
 const LAUNCHED_WINDOW_POLL_MS = 250;
+/** Rows a miss lists before it counts the rest. */
+const LISTED_WINDOWS = 12;
+/** Owners whose windows are plumbing: XPC hosts, panel services, agents. */
+const SERVICE_APP = /Service$/;
+/** Either driver's refusal when a name is not an installed app at all. */
+const NOT_AN_APP = /is not an executable on PATH|No installed macOS app found/i;
 
 /**
- * A `Missing` acquisition tells the model to try `{ launch: true }`, which is
- * now what every `{ app }` acquisition already did, so the one-call path
- * states what happened instead of sending it back around the same loop.
+ * What is open, inside the failure that needs it. Recovery from a miss has
+ * always been the same `computer.windows()` round trip, so the roster that
+ * call would return is spent here instead — ranked and filtered the way a
+ * person would name windows, because a working Mac reported 124 rows for the
+ * twelve windows it actually had. Titled windows on screen come first,
+ * frontmost first; their untitled neighbours follow, one row per app; XPC
+ * service owners and everything off screen are left to `computer.windows()`.
+ * Repeats collapse to a count: a dozen identical document windows do not say
+ * anything twelve times.
  */
-function launchedNothing(selector: WindowSelector, error: unknown): unknown {
-	if (!(error instanceof ToolError) || !error.message.startsWith("Missing computer window")) return error;
-	return new ToolError(
-		`Missing computer window ${JSON.stringify(selector)}: launched ${JSON.stringify(selector.app)} and no window of it could be acquired — it opened none within ${LAUNCHED_WINDOW_TIMEOUT_MS / 1000} s, or the one it opened is already gone. Run computer.windows() to see what it did open.`,
-		error.context,
-	);
+function openWindows(windows: readonly ComputerWindowIdentity[]): string {
+	if (windows.length === 0) return "Nothing is open.";
+	// The driver stacks higher-towards-the-front where it reports a zIndex at
+	// all; a row without one may not be ordered against the array, so it sorts
+	// last and keeps the roster's own sequence.
+	const named = windows
+		.filter(window => window.onScreen !== false && !SERVICE_APP.test(window.app))
+		.sort((a, b) => (b.zIndex ?? Number.MIN_SAFE_INTEGER) - (a.zIndex ?? Number.MIN_SAFE_INTEGER));
+	const titled = new Map<string, { id: string; app: string; title: string; count: number }>();
+	const untitled = new Map<string, { id: string; app: string; title: string; count: number }>();
+	for (const window of named) {
+		const rows = window.title ? titled : untitled;
+		const key = window.title ? `${window.app}\u0000${window.title}` : window.app;
+		const row = rows.get(key);
+		if (row) row.count += 1;
+		else rows.set(key, { id: window.id, app: window.app, title: window.title, count: 1 });
+	}
+	const rows = [...titled.values(), ...untitled.values()];
+	if (rows.length === 0)
+		return `No app window is on screen; computer.windows() lists ${windows.length} service or off-screen row${
+			windows.length === 1 ? "" : "s"
+		}.`;
+	const listed = rows
+		.slice(0, LISTED_WINDOWS)
+		.map(
+			row =>
+				`[${row.id}] ${row.app}${row.title ? ` — ${JSON.stringify(row.title)}` : ""}${
+					row.count > 1 ? ` (x ${row.count})` : ""
+				}`,
+		);
+	return `Open windows: ${listed.join(", ")}${
+		rows.length > listed.length ? `, and ${rows.length - listed.length} more` : ""
+	}.`;
+}
+
+function isMissedWindow(error: unknown): error is ToolError {
+	return error instanceof ToolError && error.message.startsWith("Missing computer window");
+}
+
+/**
+ * A miss is the first call of a native run as often as a hit is, and only this
+ * layer knows what became of it — whether a launch was refused, impossible, or
+ * opened nothing — so the sentence and the roster are composed here. The
+ * roster is best-effort: a driver that cannot list windows still reports the
+ * miss it was asked about.
+ */
+async function missedWindow(
+	session: ComputerBackend,
+	getContext: RunContextAccessor,
+	error: ToolError,
+	head: string,
+): Promise<ToolError> {
+	let windows: readonly ComputerWindowIdentity[] | undefined;
+	try {
+		windows = await session.windows(operationContext(getContext), {});
+	} catch {
+		windows = undefined;
+	}
+	return new ToolError(windows === undefined ? head : `${head} ${openWindows(windows)}`, error.context);
+}
+
+/** Resolve one window, naming what is open when nothing matches it. */
+async function resolveWindow(
+	session: ComputerBackend,
+	getContext: RunContextAccessor,
+	selector: WindowSelector,
+	options: WindowResolveOptions,
+): Promise<ComputerWindowIdentity> {
+	return await session.window(operationContext(getContext), selector, options).catch(async (error: unknown) => {
+		if (!isMissedWindow(error)) throw error;
+		throw await missedWindow(session, getContext, error, error.message);
+	});
 }
 
 /**
@@ -333,14 +411,39 @@ async function launchAndAcquire(
 			"launch: true needs an { app } selector to name what to launch, and refuses an exact id/pid — those address a window that already exists",
 		);
 	if ((await session.windows(operationContext(getContext), selector)).length)
-		return session.window(operationContext(getContext), selector, options);
-	await session.launch(mutationContext(getContext), { name: selector.app });
+		return await resolveWindow(session, getContext, selector, options);
+	await session.launch(mutationContext(getContext), { name: selector.app }).catch(async (error: unknown) => {
+		if (!(error instanceof ToolError)) throw error;
+		// Two facts, and until now the first one was invisible: the filter
+		// matched no open window, and the name it carries is not startable —
+		// a launch refusal alone reads as if the window question never arose.
+		throw await missedWindow(
+			session,
+			getContext,
+			error,
+			`No open window matches ${JSON.stringify(selector)} and ${
+				NOT_AN_APP.test(error.message) ? "it is not an installed app" : `launching it failed: ${error.message}`
+			}.`,
+		);
+	});
 	const deadline = Date.now() + LAUNCHED_WINDOW_TIMEOUT_MS;
 	for (;;) {
 		const context = operationContext(getContext);
 		if ((await session.windows(context, selector)).length || Date.now() >= deadline)
-			return await session.window(context, selector, options).catch((error: unknown) => {
-				throw launchedNothing(selector, error);
+			return await session.window(context, selector, options).catch(async (error: unknown) => {
+				if (!isMissedWindow(error)) throw error;
+				// A `Missing` acquisition used to tell the model to try
+				// `{ launch: true }`, which is what this call already did.
+				throw await missedWindow(
+					session,
+					getContext,
+					error,
+					`Missing computer window ${JSON.stringify(selector)}: launched ${JSON.stringify(
+						selector.app,
+					)} and no window of it could be acquired — it opened none within ${
+						LAUNCHED_WINDOW_TIMEOUT_MS / 1000
+					} s, or the one it opened is already gone.`,
+				);
 			});
 		await Bun.sleep(LAUNCHED_WINDOW_POLL_MS);
 	}
@@ -359,7 +462,7 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 			new Win(
 				session,
 				getContext,
-				await session.window(operationContext(getContext), normalizeWindowSelector(selector, true), options),
+				await resolveWindow(session, getContext, normalizeWindowSelector(selector, true), options),
 			),
 		acquireWindow: async (selector: unknown, options: AcquireOptions = {}): Promise<ComputerWindowAcquisition> => {
 			const { launch, ambiguous, ...observeOptions } = options;
@@ -371,7 +474,7 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 				launch === true ||
 				(launch === undefined && target.app !== undefined && target.id === undefined && target.pid === undefined)
 					? await launchAndAcquire(session, getContext, target, { ambiguous })
-					: await session.window(operationContext(getContext), target, { ambiguous });
+					: await resolveWindow(session, getContext, target, { ambiguous });
 			const context = operationContext(getContext);
 			try {
 				const initialObservation = await session.observe(context, window, { screenshot: true, ...observeOptions });

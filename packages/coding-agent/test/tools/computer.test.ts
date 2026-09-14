@@ -75,6 +75,8 @@ class FakeBackend implements ComputerBackend {
 	readonly capabilities = { ...capabilities };
 	currentWindow = structuredClone(windowFixture);
 	windowAbsent = false;
+	/** Windows no selector in these tests matches, for the roster a miss names. */
+	extraWindows: ComputerWindowIdentity[] = [];
 	readonly pins = new Map<string, number>();
 	clickCount = 0;
 	closeCount = 0;
@@ -85,7 +87,7 @@ class FakeBackend implements ComputerBackend {
 	actions?: readonly string[];
 	readonly bindings = new Map<string, { window: ComputerWindowIdentity; element: ComputerElementSnapshot }>();
 	async windows(_context: ComputerOperationContext, selector: WindowSelector = {}) {
-		return (this.windowAbsent ? [] : [this.currentWindow])
+		return (this.windowAbsent ? [] : [this.currentWindow, ...this.extraWindows])
 			.filter(
 				w =>
 					(selector.id === undefined || w.id === selector.id) &&
@@ -432,6 +434,105 @@ describe("computer preludes through the session", () => {
 				"Missing computer window",
 			);
 			expect(launch).toHaveBeenCalledTimes(1);
+		} finally {
+			launch.mockRestore();
+			await runInContext("computer.close()", realm);
+		}
+	});
+
+	it("names the open windows when a selector misses, launchable or not", async () => {
+		const { backend, realm } = javascriptFixture();
+		const launch = spyOn(backend, "launch").mockRejectedValue(
+			new ToolError(
+				"Failed to launch: 'text editor' is not an executable on PATH and matches no installed .desktop application. Call list_apps and round-trip its launch_path.",
+			),
+		);
+		try {
+			// The bench's opening call on a native task: the prompt named a role,
+			// not a binary, so the filter matched nothing and the name was not
+			// startable. The launch refusal alone said only the second half.
+			const missed = await runInContext('computer.window({app:"text editor"}, {screenshot:false})', realm).catch(
+				(error: unknown) => error as Error,
+			);
+			expect(missed.message).toBe(
+				'No open window matches {"app":"text editor"} and it is not an installed app. Open windows: [42] Code — "Editor".',
+			);
+			// Refusing the launch reports the same roster.
+			const refused = await runInContext(
+				'computer.window({app:"text editor"}, {launch:false, screenshot:false})',
+				realm,
+			).catch((error: unknown) => error as Error);
+			expect(refused.message).toContain('Open windows: [42] Code — "Editor".');
+			expect(launch).toHaveBeenCalledTimes(1);
+			// Any other launch failure keeps the driver's own reason beside the
+			// fact that nothing matched.
+			launch.mockRejectedValue(new ToolError("Failed to launch: APP_PATH_CONFLICT"));
+			const conflict = await runInContext('computer.window({app:"Absent"}, {screenshot:false})', realm).catch(
+				(error: unknown) => error as Error,
+			);
+			expect(conflict.message).toBe(
+				'No open window matches {"app":"Absent"} and launching it failed: Failed to launch: APP_PATH_CONFLICT. Open windows: [42] Code — "Editor".',
+			);
+			// Ranked the way a person names windows: titled and on screen first,
+			// frontmost first, then untitled neighbours collapsed per app. A
+			// service owner and anything off screen are left to windows().
+			backend.extraWindows = [
+				...[7, 8].map(id => ({ ...windowFixture, id: String(id), app: "Finder", title: "Desktop", zIndex: 9 })),
+				...Array.from({ length: 4 }, (_, index) => ({
+					...windowFixture,
+					id: String(200 + index),
+					app: "Preview",
+					title: "",
+				})),
+				{ ...windowFixture, id: "300", app: "Open and Save Panel Service", title: "" },
+				{ ...windowFixture, id: "301", app: "Cursor", title: "", onScreen: false },
+				{ ...windowFixture, id: "302", app: "Safari", title: "Minimized report", onScreen: false },
+			];
+			const ranked = await runInContext('computer.window({app:"Absent"}, {screenshot:false})', realm).catch(
+				(error: unknown) => error as Error,
+			);
+			expect(ranked.message).toContain(
+				'Open windows: [7] Finder — "Desktop" (x 2), [42] Code — "Editor", [200] Preview (x 4).',
+			);
+			expect(ranked.message).not.toContain("Panel Service");
+			expect(ranked.message).not.toContain("Minimized report");
+			// Bounded: the roster is spent on orientation, not on a transcript of
+			// every document window.
+			backend.extraWindows = Array.from({ length: 15 }, (_, index) => ({
+				...windowFixture,
+				id: String(100 + index),
+				app: "Terminal",
+				title: `shell ${index}`,
+				zIndex: 100 - index,
+			}));
+			const crowded = await runInContext('computer.window({app:"Absent"}, {screenshot:false})', realm).catch(
+				(error: unknown) => error as Error,
+			);
+			expect(crowded.message).toContain('Open windows: [100] Terminal — "shell 0", [101] Terminal — "shell 1", ');
+			expect(crowded.message).toContain('[111] Terminal — "shell 11", and 4 more.');
+			expect(crowded.message).not.toContain("shell 12");
+			// Nothing a person would name, and the roster still says so.
+			backend.extraWindows = [];
+			backend.currentWindow = { ...windowFixture, app: "Creative Cloud Core Service", title: "" };
+			const plumbing = await runInContext('computer.window({app:"Absent"}, {screenshot:false})', realm).catch(
+				(error: unknown) => error as Error,
+			);
+			expect(plumbing.message).toContain(
+				"No app window is on screen; computer.windows() lists 1 service or off-screen row.",
+			);
+			backend.currentWindow = structuredClone(windowFixture);
+			// A driver that cannot list windows still reports the miss itself.
+			const blind = spyOn(backend, "windows").mockImplementation(async (_context, selector = {}) => {
+				if (selector.app === undefined) throw new ToolError("list_windows failed");
+				return [];
+			});
+			const alone = await runInContext('computer.window({app:"Absent"}, {screenshot:false})', realm).catch(
+				(error: unknown) => error as Error,
+			);
+			blind.mockRestore();
+			expect(alone.message).toBe(
+				'No open window matches {"app":"Absent"} and launching it failed: Failed to launch: APP_PATH_CONFLICT.',
+			);
 		} finally {
 			launch.mockRestore();
 			await runInContext("computer.close()", realm);

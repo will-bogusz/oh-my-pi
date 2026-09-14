@@ -423,13 +423,14 @@ it("names the launch option and each candidate's document when acquisition resol
 	const f = await fixture();
 	try {
 		// Nothing matched: an app selector can be launched in the same call, an
-		// exact identity cannot.
+		// exact identity cannot. Neither sends the caller to `windows()` — the
+		// runtime appends that roster to the miss it reports.
 		await expect(f.session.window(f.context, { app: "Absent" })).rejects.toThrow(
 			'If "Absent" is not running yet, launch and acquire it in one call with computer.window({"app":"Absent"}, { launch: true })',
 		);
-		await expect(f.session.window(f.context, { id: "7", pid: 101 })).rejects.toThrow(
-			'Missing computer window {"id":"7","pid":101}: nothing matches it. Run computer.windows() to see what is open.',
-		);
+		const exact = await f.session.window(f.context, { id: "7", pid: 101 }).catch((error: unknown) => error);
+		if (!(exact instanceof Error)) throw new Error("Expected an exact-identity miss to fail");
+		expect(exact.message).toBe('Missing computer window {"id":"7","pid":101}: nothing matches it.');
 		// Two restored documents of one app share its name, so the file each
 		// window reported when it was last observed is what tells them apart. A
 		// window never observed carries no path, and nothing is invented for it.

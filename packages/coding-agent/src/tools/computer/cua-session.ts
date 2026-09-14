@@ -566,23 +566,25 @@ export class CuaComputerSession implements ComputerBackend {
 	 * Acquisition is the first call of every native run, so both failures name
 	 * their own way out. Nothing matched: an `{ app }` selector may name an app
 	 * that is not running, which `{ launch: true }` starts and acquires in the
-	 * same call — an exact id/pid cannot be launched, so it is only told what
-	 * lists the alternatives. Several matched: one line per candidate with the
-	 * exact id to acquire, so picking one costs no `windows()` round trip.
-	 * Document windows are the ambiguous case that a title cannot settle (two
-	 * restored Automator workflows, one of them "Untitled"), so the file an
-	 * earlier observation of that window reported is printed beside it.
+	 * same call. What else is open is not named here — the runtime appends that
+	 * roster to every miss it reports, because only it knows whether a launch
+	 * was refused, impossible, or opened nothing. Several matched: one line per
+	 * candidate with the exact id to acquire, so picking one costs no
+	 * `windows()` round trip. Document windows are the ambiguous case that a
+	 * title cannot settle (two restored Automator workflows, one of them
+	 * "Untitled"), so the file an earlier observation of that window reported
+	 * is printed beside it.
 	 */
 	#unresolved(selector: string | WindowSelector, matches: ComputerWindowIdentity[]): ToolError {
 		const named = JSON.stringify(selector);
 		const app = typeof selector === "string" ? undefined : selector.app;
 		if (!matches.length)
 			return new ToolError(
-				`Missing computer window ${named}: nothing matches it. ${
+				`Missing computer window ${named}: nothing matches it.${
 					app === undefined
-						? "Run computer.windows() to see what is open"
-						: `If ${JSON.stringify(app)} is not running yet, launch and acquire it in one call with computer.window(${named}, { launch: true }); otherwise run computer.windows() to see what is open`
-				}.`,
+						? ""
+						: ` If ${JSON.stringify(app)} is not running yet, launch and acquire it in one call with computer.window(${named}, { launch: true }).`
+				}`,
 			);
 		return new ToolError(
 			`Ambiguous computer window ${named}: ${matches.length} windows match. Acquire one by its exact id, e.g. computer.window(${JSON.stringify(matches[0]!.id)}):\n${matches
