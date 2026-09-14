@@ -358,16 +358,17 @@ it("acquires the sole application-declared window without hiding raw helper iden
 	}
 });
 
-it("acquires the frontmost match and names the windows it passed over", async () => {
+it("acquires the front document window and names the windows it passed over", async () => {
 	const f = await fixture();
 	try {
-		// One app, two restored documents: the frontmost is the one the user is
-		// looking at, and the others are named with the ids that pick them.
+		// One app, two restored documents: the front one is what the user is
+		// working in, and the others are named with the ids that pick them.
 		const second = { ...f.row, window_id: 2, title: "Second", z_index: 3 };
 		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [f.row, second] }) : undefined);
 		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "2", zIndex: 3 });
-		expect(f.texts.join("\n")).toContain('2 windows match; acquired the frontmost, id "2"');
-		expect(f.texts.join("\n")).toContain('Passed over id "1" "Editor"');
+		expect(f.texts.join("\n")).toBe(
+			'Ambiguous computer window {"app":"Fixture"}: 2 windows match; acquired the front document window, id "2" "Second"; also open: [1] "Editor" — acquire one by its exact id to work on it instead.',
+		);
 		// The WindowServer roster orders what the driver reports no stacking for.
 		f.state.roster = {
 			windows: [systemWindow({ id: "1", title: "Editor" }), systemWindow({ id: "2", title: "Second", zIndex: 1 })],
@@ -379,10 +380,61 @@ it("acquires the frontmost match and names the windows it passed over", async ()
 				: undefined;
 		f.texts.length = 0;
 		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "1" });
-		expect(f.texts.join("\n")).toContain('acquired the frontmost, id "1"');
+		expect(f.texts.join("\n")).toContain('acquired the front document window, id "1" "Editor"');
 		// Neither source orders them: stacking is unknown and nothing is picked.
 		f.state.roster = undefined;
 		await expect(f.session.window(f.context, { app: "Fixture" })).rejects.toThrow("Ambiguous");
+	} finally {
+		await f.close();
+	}
+});
+
+it("passes over an app's panels, off-screen windows and attached sheets to reach its document", async () => {
+	const f = await fixture();
+	// Automator's own doing: the document the user is working in, a second
+	// document behind it, an untitled floating library panel, a minimized
+	// document and the Save sheet the front document itself owns.
+	const rows = [
+		{ ...f.row, window_id: 2, title: "T10Name.workflow", z_index: 4 },
+		{ ...f.row, window_id: 3, title: "", z_index: 9 },
+		{ ...f.row, window_id: 4, title: "T10Old.workflow", z_index: 1, is_on_screen: false },
+		{ ...f.row, window_id: 5, title: "Save", z_index: 12 },
+		{ ...f.row, window_id: 1, title: "T10Start.workflow", z_index: 6 },
+	];
+	try {
+		f.state.label = "Save as:";
+		f.state.relatedWindows = [{ pid: 101, window_id: 5, title: "Save", relation: "sheet" }];
+		f.state.hook = async name => (name === "list_windows" ? reply({ windows: rows }) : undefined);
+		// Nothing in a window roster says "sheet" and this driver publishes no
+		// AXWindows mapping either, so a sheet nobody has observed is the front
+		// titled window and is acquired as one.
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "5" });
+		// The parent's own walk is what names it — and it walks the sheet's
+		// controls as its own, so a ref minted there acts on the parent's
+		// window, which is how a Save panel is driven at all.
+		const parent = await f.session.observe(f.context, await f.session.window(f.context, { id: "1", pid: 101 }));
+		expect(parent.relatedWindows).toEqual([{ pid: 101, id: "5", title: "Save", relation: "sheet" }]);
+		await f.session.setValue(f.context, parent.window, parent.elements[0]!.ref, "Project_File_List.txt");
+		expect(f.calls.at(-1)).toMatchObject({ name: "set_value", args: { window_id: 1, pid: 101 } });
+		f.texts.length = 0;
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "1" });
+		expect(f.texts.join("\n")).toBe(
+			'Ambiguous computer window {"app":"Fixture"}: 5 windows match; acquired the front document window, id "1" "T10Start.workflow"; also open: [5] "Save", [2] "T10Name.workflow", [4] "T10Old.workflow", [3] "" — acquire one by its exact id to work on it instead.',
+		);
+		// The sheet is gone: its id stops being excluded the moment the parent
+		// that reported it is observed without it.
+		f.state.relatedWindows = undefined;
+		await f.session.observe(f.context, await f.session.window(f.context, { id: "1", pid: 101 }));
+		f.texts.length = 0;
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "5" });
+		expect(f.texts.join("\n")).toContain('acquired the front document window, id "5" "Save"');
+		// An app showing no document window at all is still acquired, at its
+		// frontmost window, and the sentence says so.
+		f.state.hook = async name =>
+			name === "list_windows" ? reply({ windows: [rows[1]!, { ...rows[3]!, title: "" }] }) : undefined;
+		f.texts.length = 0;
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "5" });
+		expect(f.texts.join("\n")).toContain('acquired the frontmost window, id "5" ""; also open: [3] ""');
 	} finally {
 		await f.close();
 	}

@@ -13,6 +13,7 @@ import {
 	sampleWindowRoster,
 	type WindowRosterSample,
 } from "./interruption";
+import { appWindows } from "./roster";
 import { observedSemanticActions } from "./semantic-actions";
 import type {
 	ActionOptions,
@@ -472,6 +473,14 @@ export class CuaComputerSession implements ComputerBackend {
 	 */
 	readonly #documents = new Map<string, string>();
 	/**
+	 * Attached sheets by window id, each against the window that reported it.
+	 * Only `get_window_state` sees the relation — a sheet is an ordinary
+	 * CGWindow row of its app — so acquisition reads it out of what the last
+	 * observation of the parent said, and the parent replaces its own entries
+	 * every time it is observed.
+	 */
+	readonly #sheets = new Map<string, string>();
+	/**
 	 * What each window's writes left unproven, one sentence per write, in the
 	 * order they were made. The next read of that window reports and clears them.
 	 */
@@ -801,10 +810,12 @@ export class CuaComputerSession implements ComputerBackend {
 	 * Frontmost of several matches. `z_index` is the driver's own stacking
 	 * report and only comparable while every candidate carries one; the
 	 * WindowServer sample, ordered front to back, is the fallback. Neither:
-	 * stacking order is genuinely unknown and nothing may be picked.
+	 * stacking order is genuinely unknown and nothing may be picked. One
+	 * candidate has nothing to order and needs neither.
 	 */
-	#frontmost(matches: ComputerWindowIdentity[]): ComputerWindowIdentity | undefined {
-		if (matches.every(window => window.zIndex !== undefined))
+	#frontmost(matches: readonly ComputerWindowIdentity[]): ComputerWindowIdentity | undefined {
+		if (matches.length === 1) return matches[0];
+		if (matches.length > 1 && matches.every(window => window.zIndex !== undefined))
 			return matches.reduce((front, window) => (window.zIndex! > front.zIndex! ? window : front));
 		for (const row of this.#roster()?.windows ?? []) {
 			const match = matches.find(window => window.id === row.id);
@@ -813,12 +824,26 @@ export class CuaComputerSession implements ComputerBackend {
 		return undefined;
 	}
 	/**
+	 * An app's own windows are not interchangeable, and `{ app: "Automator" }`
+	 * means the document the user is working in. Its panels, inspectors and
+	 * attached sheets run in the same process and match the same selector, and
+	 * a sheet stacks above the document it belongs to while being driven
+	 * through that document's own refs — acquiring one costs a step and lands
+	 * on the wrong window. So a document window is on screen, carries a title,
+	 * and is not a sheet: `#sheets` is how a sheet is known at all, because
+	 * only `get_window_state` reports the relation and a window roster does not.
+	 */
+	#isDocument(window: ComputerWindowIdentity): boolean {
+		return window.onScreen !== false && window.title !== "" && !this.#sheets.has(window.id);
+	}
+	/**
 	 * `note`: several matches are the app's own doing (two restored documents
 	 * of one workflow), and a model that has never seen the ids cannot pick
-	 * between them. Where a note can be delivered, acquisition takes the
-	 * frontmost window — the one the user is looking at — and says which
-	 * others it passed over. Without one (every internal re-resolution of an
-	 * exact id/pid, where several matches mean something is wrong) it refuses.
+	 * between them. Where a note can be delivered, acquisition takes the front
+	 * document window — the one the user is working in — and names the rest,
+	 * so picking another costs no `windows()` round trip. Without a note
+	 * (every internal re-resolution of an exact id/pid, where several matches
+	 * mean something is wrong) it refuses.
 	 */
 	async #window(selector: string | WindowSelector, note?: (text: string) => void): Promise<ComputerWindowIdentity> {
 		const filter = typeof selector === "string" ? { id: selector } : selector;
@@ -857,13 +882,15 @@ export class CuaComputerSession implements ComputerBackend {
 			}
 		}
 		if (matches.length === 1) return matches[0]!;
-		const front = matches.length > 1 && note ? this.#frontmost(matches) : undefined;
+		const documents = matches.filter(window => this.#isDocument(window));
+		const front = note ? this.#frontmost(documents.length ? documents : matches) : undefined;
 		if (!front || !note) throw this.#unresolved(selector, matches);
 		note(
-			`Ambiguous computer window ${JSON.stringify(selector)}: ${matches.length} windows match; acquired the frontmost, id ${JSON.stringify(front.id)}. Passed over ${matches
-				.filter(window => window !== front)
-				.map(window => `id ${JSON.stringify(window.id)} ${JSON.stringify(window.title)}`)
-				.join(", ")} — acquire one of those by its exact id to work on it instead.`,
+			`Ambiguous computer window ${JSON.stringify(selector)}: ${matches.length} windows match; acquired the ${
+				documents.length ? "front document window" : "frontmost window"
+			}, id ${JSON.stringify(front.id)} ${JSON.stringify(front.title)}; also open: ${appWindows(
+				matches.filter(window => window !== front),
+			)} — acquire one by its exact id to work on it instead.`,
 		);
 		return front;
 	}
@@ -1043,8 +1070,13 @@ export class CuaComputerSession implements ComputerBackend {
 						: "No accessibility elements returned; completeness is unknown.";
 			if (menuBarRows)
 				observation.tree += `\nMenu bar hidden (${menuBarRows} rows): its items only respond while their own menu is open, so drive it with win.menu(["<menu>", "<item>"], { delivery: "foreground" }); observe({ menubar: true }) shows them.`;
-			for (const sheet of observation.relatedWindows ?? [])
+			// This window's sheets, as of this walk: a sheet that has gone away
+			// must stop excluding an id acquisition could pick.
+			for (const [sheet, parent] of this.#sheets) if (parent === current.id) this.#sheets.delete(sheet);
+			for (const sheet of observation.relatedWindows ?? []) {
+				this.#sheets.set(sheet.id, current.id);
 				observation.tree += `\nAttached sheet ${JSON.stringify(sheet.title)} (id ${sheet.id}): a separate window that takes its own input — acquire it with computer.window("${sheet.id}") to drive it.`;
+			}
 			if (reply.data.ax_walk_timed_out === true)
 				observation.tree +=
 					"\nAccessibility observation reached its time limit. The walk has finished; omitted controls and values remain unknown.";

@@ -256,8 +256,9 @@ interface ComputerRunOptions {
 }
 interface ComputerResolveOptions {
 	/**
-	 * Several windows match: `"front"` (default) acquires the frontmost and
-	 * names the ones it passed over, `"throw"` fails with every candidate id.
+	 * Several windows match: `"front"` (default) acquires the app's front
+	 * document window and names the ones it passed over, `"throw"` fails with
+	 * every candidate id.
 	 */
 	ambiguous?: "front" | "throw";
 }

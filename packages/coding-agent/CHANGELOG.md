@@ -31,7 +31,7 @@
 ### Changed
 
 - `computer.window({ app })` now launches the app when nothing matches it yet and acquires the window in the same call; `{ launch: false }` acquires only what is already open, and an exact id/pid never launches. Because acquisition may start an application, that call is exec-tier rather than read-tier.
-- When several windows match a selector, acquisition takes the frontmost and names the ids it passed over instead of failing; `{ ambiguous: "throw" }` restores the candidate-list error. Window info also carries `zIndex` where the platform reports stacking.
+- When several windows match a selector, acquisition takes the app's front document window — on screen, titled, and not one of its own attached sheets — and names the ids it passed over instead of failing; `{ ambiguous: "throw" }` restores the candidate-list error. Window info also carries `zIndex` where the platform reports stacking.
 - `win.observe()` no longer captures a screenshot; `observe({ screenshot: true })` does, and acquisition still takes one initial image.
 - Observations exclude the menu bar by default — its rows only respond while their own menu is open — and the tree says how many rows were hidden and that `win.menu(path)` drives them; `observe({ menubar: true })` includes them.
 - `win.find()` matches `role`, `label` and `value` as case-insensitive substrings, accepts `title` as a name for `label`, and takes `{ exact: true }` for whole-string equality.

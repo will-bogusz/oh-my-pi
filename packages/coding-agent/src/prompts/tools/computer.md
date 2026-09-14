@@ -4,7 +4,7 @@ Control real host application windows from JavaScript or Python Eval with `compu
 Entry points: `await computer.window(selector)` acquires ONE window — `selector` is an id or `{ app?, title?, id?, pid? }` — and prints its tree; `computer.windows(filter)` lists without acquiring; `computer.run(fnOrCode)` runs a multi-step function with `{ desktop, wait, assert }` (no closures; full host access, not a sandbox). Everything else lives on the handle you get back and is listed with it; `computer.help()` prints the full typed API when a signature matters. Python: same names, keyword options.
 
 Model
-- A window is acquired, never focused. An `{ app }` that is not running is launched and acquired in the same call; several matches yield the frontmost and name the rest.
+- A window is acquired, never focused. An `{ app }` that is not running is launched and acquired in the same call; several matches yield its front document window and name the rest.
 - An observation is the accessibility tree at one instant. Its refs (`n7`) belong to that observation and that window; the next `observe` or `find` retires them. `StaleRef` means re-observe, never guess.
 - A screenshot is one window's frame. Pixels mean something only in the latest frame of that same window; AX `bounds` are desktop-global. Coordinates, modified or counted clicks and drag ends are pixel actions and need a current frame — `observe()` is tree-only unless you ask for one.
 - Delivery is background by default: accessibility routes that touch nothing on screen. Foreground briefly makes the window key and exists for what only real input can do — drag, menus, pixel targets, keys at a window that is not key. The runtime never escalates for you.

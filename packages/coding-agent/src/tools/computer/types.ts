@@ -221,10 +221,11 @@ export interface ObserveOptions {
 /** How a selector several windows match is settled. */
 export interface WindowResolveOptions {
 	/**
-	 * `front` acquires the frontmost match and names the others it passed
+	 * `front` acquires the app's front document window — on screen, titled and
+	 * not one of its own attached sheets — and names the others it passed
 	 * over; `throw` refuses and lists every candidate. Acquisition defaults to
-	 * `front` — the frontmost window is the one the user is looking at, and a
-	 * model that has never seen the ids cannot pick between them.
+	 * `front`: that window is the one the user is working in, and a model that
+	 * has never seen the ids cannot pick between them.
 	 */
 	ambiguous?: "front" | "throw";
 }

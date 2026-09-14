@@ -12,6 +12,7 @@ import {
 } from "../run-scope";
 import { ToolAbortError, ToolError, throwIfAborted } from "../tool-errors";
 import type { ComputerBackend } from "./backend";
+import { openWindows } from "./roster";
 import { normalizeLaunchOptions, normalizeWindowSelector } from "./selectors";
 import type {
 	ActionOptions,
@@ -316,58 +317,8 @@ class Win {
 /** A launched app gets this long to put its window on the WindowServer. */
 const LAUNCHED_WINDOW_TIMEOUT_MS = 15_000;
 const LAUNCHED_WINDOW_POLL_MS = 250;
-/** Rows a miss lists before it counts the rest. */
-const LISTED_WINDOWS = 12;
-/** Owners whose windows are plumbing: XPC hosts, panel services, agents. */
-const SERVICE_APP = /Service$/;
 /** Either driver's refusal when a name is not an installed app at all. */
 const NOT_AN_APP = /is not an executable on PATH|No installed macOS app found/i;
-
-/**
- * What is open, inside the failure that needs it. Recovery from a miss has
- * always been the same `computer.windows()` round trip, so the roster that
- * call would return is spent here instead — ranked and filtered the way a
- * person would name windows, because a working Mac reported 124 rows for the
- * twelve windows it actually had. Titled windows on screen come first,
- * frontmost first; their untitled neighbours follow, one row per app; XPC
- * service owners and everything off screen are left to `computer.windows()`.
- * Repeats collapse to a count: a dozen identical document windows do not say
- * anything twelve times.
- */
-function openWindows(windows: readonly ComputerWindowIdentity[]): string {
-	if (windows.length === 0) return "Nothing is open.";
-	// The driver stacks higher-towards-the-front where it reports a zIndex at
-	// all; a row without one may not be ordered against the array, so it sorts
-	// last and keeps the roster's own sequence.
-	const named = windows
-		.filter(window => window.onScreen !== false && !SERVICE_APP.test(window.app))
-		.sort((a, b) => (b.zIndex ?? Number.MIN_SAFE_INTEGER) - (a.zIndex ?? Number.MIN_SAFE_INTEGER));
-	const titled = new Map<string, { id: string; app: string; title: string; count: number }>();
-	const untitled = new Map<string, { id: string; app: string; title: string; count: number }>();
-	for (const window of named) {
-		const rows = window.title ? titled : untitled;
-		const key = window.title ? `${window.app}\u0000${window.title}` : window.app;
-		const row = rows.get(key);
-		if (row) row.count += 1;
-		else rows.set(key, { id: window.id, app: window.app, title: window.title, count: 1 });
-	}
-	const rows = [...titled.values(), ...untitled.values()];
-	if (rows.length === 0)
-		return `No app window is on screen; computer.windows() lists ${windows.length} service or off-screen row${
-			windows.length === 1 ? "" : "s"
-		}.`;
-	const listed = rows
-		.slice(0, LISTED_WINDOWS)
-		.map(
-			row =>
-				`[${row.id}] ${row.app}${row.title ? ` — ${JSON.stringify(row.title)}` : ""}${
-					row.count > 1 ? ` (x ${row.count})` : ""
-				}`,
-		);
-	return `Open windows: ${listed.join(", ")}${
-		rows.length > listed.length ? `, and ${rows.length - listed.length} more` : ""
-	}.`;
-}
 
 function isMissedWindow(error: unknown): error is ToolError {
 	return error instanceof ToolError && error.message.startsWith("Missing computer window");
