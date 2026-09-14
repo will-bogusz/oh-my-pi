@@ -1,6 +1,15 @@
 type ComputerPoint = [number, number];
 type ComputerTarget = string | ComputerPoint;
 type ComputerDirection = "up" | "down" | "left" | "right";
+/**
+ * A chord: `"cmd+a"`, `"Return"`, or `["cmd", "shift", "p"]`. Modifiers are
+ * spelled per platform — macOS `cmd`/`command`/`option`/`alt`/`ctrl`/
+ * `control`/`shift`/`fn`, X11 `super`/`meta`/`win`/`alt`/`ctrl`/`shift` — and
+ * `super`/`meta`/`win`/`cmd`/`option` are translated between them, as are
+ * DOM arrow names (`ArrowDown` → `down`). Any other unknown name is not: the
+ * macOS keystroke path drops the modifier and types the base key on its own.
+ */
+type ComputerChord = string | string[];
 interface ComputerDeliveryOptions {
 	delivery?: "background" | "foreground";
 }
@@ -120,7 +129,7 @@ interface ComputerElement {
 	doubleClick(options?: Omit<ComputerClickOptions, "count">): Promise<ComputerAction>;
 	setValue(value: string): Promise<ComputerAction>;
 	type(text: string, options?: ComputerDeliveryOptions): Promise<ComputerAction>;
-	press(chord: string | string[], options?: ComputerDeliveryOptions): Promise<ComputerAction>;
+	press(chord: ComputerChord, options?: ComputerDeliveryOptions): Promise<ComputerAction>;
 	scroll(direction: ComputerDirection, options?: Omit<ComputerScrollOptions, "target">): Promise<ComputerAction>;
 	perform(action: string): Promise<ComputerAction>;
 }
@@ -145,7 +154,21 @@ interface ComputerWindow extends ComputerWindowInfo {
 	screenshotError?: string;
 	observe(options?: ComputerObserveOptions): Promise<ComputerObservation>;
 	screenshot(options?: { silent?: boolean }): Promise<ComputerScreenshotResult>;
-	find(query: { role?: string; label?: string; value?: string; limit?: number }): Promise<ComputerElement[]>;
+	/**
+	 * Elements of the window's current tree. `role`, `label` and `value` match
+	 * case-insensitive substrings of what the tree shows — `{ value: "555" }`
+	 * finds a phone field — unless `{ exact: true }` asks for whole-string
+	 * equality. `title` is accepted as a name for `label`. Costs one AX read
+	 * and mints fresh refs, exactly like `observe()`.
+	 */
+	find(query: {
+		role?: string;
+		label?: string;
+		title?: string;
+		value?: string;
+		exact?: boolean;
+		limit?: number;
+	}): Promise<ComputerElement[]>;
 	/** Act on it directly (`win.ref(r).click()`) or await it for snapshot fields. */
 	ref(token: string): ComputerElement & PromiseLike<ComputerElement | null>;
 	click(target: ComputerTarget, options?: ComputerClickOptions): Promise<ComputerAction>;
@@ -154,7 +177,7 @@ interface ComputerWindow extends ComputerWindowInfo {
 	drag(from: ComputerTarget, to: ComputerTarget, options?: ComputerDragOptions): Promise<ComputerAction>;
 	scroll(direction: ComputerDirection, options?: ComputerScrollOptions): Promise<ComputerAction>;
 	type(text: string, options?: ComputerTargetOptions): Promise<ComputerAction>;
-	press(chord: string | string[], options?: ComputerTargetOptions): Promise<ComputerAction>;
+	press(chord: ComputerChord, options?: ComputerTargetOptions): Promise<ComputerAction>;
 	setValue(ref: string, value: string): Promise<ComputerAction>;
 	setFrame(bounds: ComputerBounds): Promise<ComputerAction>;
 	menu(path: string[], options: ComputerForegroundOptions): Promise<ComputerAction>;
@@ -194,7 +217,7 @@ interface ComputerDesktop {
 		options: ComputerForegroundOptions & { dx?: number; dy?: number },
 	): Promise<ComputerAction>;
 	type(text: string, options: ComputerForegroundOptions): Promise<ComputerAction>;
-	press(chord: string | string[], options: ComputerForegroundOptions): Promise<ComputerAction>;
+	press(chord: ComputerChord, options: ComputerForegroundOptions): Promise<ComputerAction>;
 	clipboard: { read(): Promise<string>; write(text: string): Promise<ComputerAction> };
 }
 interface ComputerRunScope {

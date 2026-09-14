@@ -36,7 +36,28 @@ type GestureOptions = ActionOptions & { durationMs?: number; steps?: number };
 type TextOptions = ActionOptions & { target?: ComputerTarget };
 type ScrollOptions = TextOptions & { amount?: number; by?: "line" | "page" };
 type Direction = "up" | "down" | "left" | "right";
-type ElementQuery = { role?: string; label?: string; value?: string; limit?: number };
+type ElementQuery = {
+	role?: string;
+	label?: string;
+	/** Accepted for `label`: an element's own name is its label, not a title. */
+	title?: string;
+	value?: string;
+	exact?: boolean;
+	limit?: number;
+};
+
+/**
+ * One `find` field. Absent asks nothing; a value is a case-insensitive
+ * substring unless `{ exact: true }`, because the model queries what it read
+ * in the tree — `value: "555"` against a phone field, a lowercased label —
+ * and exact matching answered those with an empty list. A field the row does
+ * not carry at all never matches.
+ */
+function matched(observed: string | undefined, wanted: string | undefined, exact: boolean | undefined): boolean {
+	if (wanted === undefined) return true;
+	if (observed === undefined) return false;
+	return exact === true ? observed === wanted : observed.toLowerCase().includes(wanted.toLowerCase());
+}
 
 interface ComputerRunContext {
 	signal: AbortSignal;
@@ -217,11 +238,12 @@ class Win {
 	}
 	async find(query: ElementQuery = {}): Promise<El[]> {
 		const observation = await this.observe({ screenshot: false });
+		const label = query.label ?? query.title;
 		const matches = observation.elements.filter(
 			element =>
-				(query.role === undefined || element.role.toLowerCase().includes(query.role.toLowerCase())) &&
-				(query.label === undefined || element.label.toLowerCase().includes(query.label.toLowerCase())) &&
-				(query.value === undefined || element.value === query.value),
+				matched(element.role, query.role, query.exact) &&
+				matched(element.label, label, query.exact) &&
+				matched(element.value, query.value, query.exact),
 		);
 		return matches
 			.slice(0, query.limit ?? 40)

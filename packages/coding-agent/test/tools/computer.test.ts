@@ -458,6 +458,30 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
+	it("finds elements by case-insensitive substring and by whole value when asked", async () => {
+		const { backend, realm } = javascriptFixture();
+		backend.value = "555-0100";
+		try {
+			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
+			const hits = (query: string): Promise<string[]> =>
+				runInContext(`win.find(${query}).then(found => found.map(element => element.label))`, realm);
+			// What the model read in the tree is what it queries with.
+			expect(await hits('{value:"555"}')).toEqual(["Increment"]);
+			expect(await hits('{label:"increment"}')).toEqual(["Increment"]);
+			expect(await hits('{role:"BUTTON", value:"0100"}')).toEqual(["Increment"]);
+			// `title` names the same field a window filter calls a title.
+			expect(await hits('{title:"Incre"}')).toEqual(["Increment"]);
+			expect(await hits('{value:"555", exact:true}')).toEqual([]);
+			expect(await hits('{value:"555-0100", exact:true}')).toEqual(["Increment"]);
+			expect(await hits('{label:"Missing"}')).toEqual([]);
+			// A field the row does not carry never matches.
+			backend.value = undefined as unknown as string;
+			expect(await hits('{value:"555"}')).toEqual([]);
+		} finally {
+			await runInContext("computer.close()", realm);
+		}
+	});
+
 	it("launches through Python shorthand and keyword options using the same guarded session", async () => {
 		let definitions: readonly EvalPreludeDefinition[] = [];
 		const session: ToolSession = { ...toolSession(), getEvalPreludes: () => definitions };
