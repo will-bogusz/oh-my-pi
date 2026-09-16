@@ -55,8 +55,8 @@ function usesCoordinateSafeImageSizing(model: Model | undefined): boolean {
 }
 
 /**
- * The typed surface of each handle, once per session with the first handle
- * of its kind: a model that has the acquisition in front of it is about to
+ * The typed surface of both handles, once per session with the first
+ * acquisition: a model that has the acquisition in front of it is about to
  * call these, and the alternative was a `computer.help()` round trip for the
  * whole declaration file. Later handles get the verb list alone.
  */
@@ -66,6 +66,10 @@ const windowSignatures = once(() =>
 const elementSignatures = once(() =>
 	handleSignatures(computerCodeModeDeclarations as string, "ComputerElement", "el handle:"),
 );
+function handleSurface(lifetime: ComputerLifetime): string {
+	if (!lifetime.teach("window")) return COMPUTER_HANDLE_VERBS;
+	return lifetime.teach("element") ? `${windowSignatures()}\n${elementSignatures()}` : windowSignatures();
+}
 
 interface ComputerRunParams {
 	action: "run";
@@ -372,12 +376,8 @@ async function runComputer(
 			text,
 			// Once, with the handle itself: an observe of the same window repeats
 			// the tree, never the surface the model already holds. The first
-			// handle of the session is the one that states its types.
-			acquired?.initialObservation
-				? lifetime.teach("window")
-					? windowSignatures()
-					: COMPUTER_HANDLE_VERBS
-				: undefined,
+			// acquisition of the session is the one that states its types.
+			acquired?.initialObservation ? handleSurface(lifetime) : undefined,
 		]
 			.filter(Boolean)
 			.join("\n");

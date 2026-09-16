@@ -1164,19 +1164,35 @@ describe("computer preludes through the session", () => {
 		expect(printed).toContain("interface ComputerElement");
 	});
 
-	it("states the handle's typed surface once a session and its verbs with every later handle", async () => {
+	it("states both handle surfaces once a session and their verbs with every later handle", async () => {
 		const { realm, displays } = javascriptFixture();
+		const element = handleSignatures(computerDeclarations as string, "ComputerElement", "el handle:");
 		try {
 			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
 			// The first acquisition of the session teaches the API it hands over.
 			expect(displays.join("\n")).toContain(
 				handleSignatures(computerDeclarations as string, "ComputerWindow", "win handle:"),
 			);
+			// The element surface is the route several controls advertise in the
+			// tree beside it; a run that never writes `.ref(` still needs it.
+			expect(displays.join("\n")).toContain(element);
+			expect(displays.join("\n")).toContain("perform(action: string)");
 			// Every verb the boundary accepts is declared and shown with its types.
 			for (const verb of Object.keys(WINDOW_METHODS)) {
 				expect(computerDeclarations).toContain(`\n\t${verb}(`);
 				expect(displays.join("\n")).toContain(`\n  ${verb}(`);
 			}
+			for (const verb of Object.keys(ELEMENT_METHODS)) expect(element).toContain(`\n  ${verb}(`);
+			displays.length = 0;
+			await runInContext(
+				"win.observe({screenshot:false}).then(state => (globalThis.ref = state.elements[0].ref))",
+				realm,
+			);
+			// The surface is stated with the handle, not repeated by every read
+			// of the same window or by the first ref taken out of it.
+			await runInContext("win.ref(ref).click()", realm);
+			expect(displays.join("\n")).not.toContain("el handle:");
+			expect(displays.join("\n")).not.toContain("computer.help() for signatures");
 			displays.length = 0;
 			await runInContext('computer.window("42", {screenshot:false})', realm);
 			const footers = displays
@@ -1185,32 +1201,6 @@ describe("computer preludes through the session", () => {
 				.filter(line => line.startsWith("win: "));
 			expect(footers).toEqual([COMPUTER_HANDLE_VERBS]);
 			expect(displays.join("\n")).not.toContain("win handle:");
-			// The surface is stated with the handle, not repeated by every read
-			// of the same window.
-			displays.length = 0;
-			await runInContext("win.observe({screenshot:false})", realm);
-			expect(displays.join("\n")).not.toContain("computer.help() for signatures");
-		} finally {
-			await runInContext("computer.close()", realm);
-		}
-	});
-
-	it("states the element handle's typed surface with the first ref of the session and never again", async () => {
-		const { realm, displays } = javascriptFixture();
-		const element = handleSignatures(computerDeclarations as string, "ComputerElement", "el handle:");
-		try {
-			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
-			await runInContext(
-				"win.observe({screenshot:false}).then(state => (globalThis.ref = state.elements[0].ref))",
-				realm,
-			);
-			expect(displays.join("\n")).not.toContain("el handle:");
-			displays.length = 0;
-			await runInContext("win.ref(ref).click()", realm);
-			expect(displays.join("\n")).toContain(element);
-			for (const verb of Object.keys(ELEMENT_METHODS)) expect(element).toContain(`\n  ${verb}(`);
-			displays.length = 0;
-			await runInContext("win.ref(ref).click()", realm);
 			expect(displays.join("\n")).not.toContain("el handle:");
 		} finally {
 			await runInContext("computer.close()", realm);
