@@ -507,7 +507,6 @@ it("returns exact candidates without inspecting one when asked to refuse an ambi
 		for (const metadata of [
 			undefined,
 			{ pid: 101, complete: false, windows: [axWindow] },
-			{ pid: 101, complete: true, windows: [] },
 			{ pid: 101, complete: true, windows: [axWindow, { window_id: 2, role: "AXWindow", minimized: true }] },
 			{ pid: 101, complete: true, windows: [axWindow, { window_id: 3, role: "AXWindow" }] },
 		]) {
@@ -526,6 +525,133 @@ it("returns exact candidates without inspecting one when asked to refuse an ambi
 			expect(failure.message).toContain('- id "2" pid 101 Fixture "Second" 200×100 at (10,20) offscreen');
 			expect(f.calls.every(call => call.name === "list_windows")).toBe(true);
 		}
+	} finally {
+		await f.close();
+	}
+});
+
+/**
+ * T10 `long-native-automator/omp-1`: TextEdit pid 758 had 7 CGWindow rows,
+ * five of them identical 1728×33 untitled ghosts, and
+ * `accessibility_windows: { complete: true, windows: [] }` — no AXWindow
+ * behind any of them. Acquisition read the empty roster as "no information",
+ * took the highest `z_index`, and handed back a window whose every input
+ * route the driver refuses `off_space_or_ax_unresolved`.
+ */
+it("refuses an acquisition whose every candidate row takes no input", async () => {
+	const f = await fixture();
+	const ghost = (id: number, zIndex: number) => ({
+		...f.row,
+		window_id: id,
+		title: "",
+		is_on_screen: false,
+		z_index: zIndex,
+		bounds: { x: 0, y: 0, width: 1728, height: 33 },
+	});
+	try {
+		f.state.hook = async name =>
+			name === "list_windows"
+				? reply({
+						windows: [ghost(52, 122), ghost(51, 69), ghost(50, 65)],
+						accessibility_windows: { pid: 101, complete: true, windows: [] },
+					})
+				: undefined;
+		f.calls.length = 0;
+		const failure = await f.session.window(f.context, { app: "Fixture" }).catch((error: unknown) => error);
+		if (!(failure instanceof Error)) throw new Error("Expected the input-dead acquisition to be refused");
+		expect(failure.message).toContain(
+			"Fixture: pid 101 has 3 WindowServer rows and no accessibility window; every input route to them is refused. Bring it to this Space or reopen its document, then acquire again.",
+		);
+		expect(failure.message).toContain('- id "52" pid 101 Fixture "" 1728×33 at (0,0) offscreen');
+		// Nothing was observed or dispatched on a window that cannot answer.
+		expect(f.calls.every(call => call.name === "list_windows")).toBe(true);
+		// One AXWindow, and it is not among the rows this selector matched: the
+		// recovery is its id, which the refusal hands over.
+		f.state.hook = async name =>
+			name === "list_windows"
+				? reply({
+						windows: [
+							{ ...ghost(52, 122), title: "Ghost" },
+							{ ...ghost(51, 69), title: "Ghost" },
+							{ ...f.row, window_id: 12360, title: "Notes.txt" },
+						],
+						accessibility_windows: {
+							pid: 101,
+							complete: true,
+							windows: [{ window_id: 12360, role: "AXWindow" }],
+						},
+					})
+				: undefined;
+		await expect(f.session.window(f.context, { app: "Fixture", title: "Ghost" })).rejects.toThrow(
+			'1 accessibility window, none of them among the 2 this selector matched; every input route to them is refused. Acquire one of its accessibility windows by id instead: [12360] "Notes.txt".',
+		);
+		// An AX-backed row among the ghosts is simply the one acquisition takes.
+		await expect(f.session.window(f.context, { app: "Fixture" })).resolves.toMatchObject({
+			id: "12360",
+			axBacked: true,
+		});
+	} finally {
+		await f.close();
+	}
+});
+
+it("prefers the app's own main window over stacking order and demotes a minimized one", async () => {
+	const f = await fixture();
+	try {
+		f.state.hook = async name =>
+			name === "list_windows"
+				? reply({
+						windows: [
+							{ ...f.row, window_id: 8, title: "", z_index: 30 },
+							{ ...f.row, window_id: 9, title: "", z_index: 10 },
+						],
+						accessibility_windows: {
+							pid: 101,
+							complete: true,
+							windows: [
+								{ window_id: 8, role: "AXWindow", minimized: true },
+								{ window_id: 9, role: "AXWindow", main: true },
+							],
+						},
+					})
+				: undefined;
+		// Photos' main window carries no title, so `main` is the only evidence
+		// that separates it from the minimized window stacked above it.
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "9", main: true });
+	} finally {
+		await f.close();
+	}
+});
+
+it("marks the rows of a listed process that no accessibility window claims", async () => {
+	const f = await fixture();
+	try {
+		f.state.hook = async (name, args) =>
+			name === "list_windows"
+				? reply({
+						windows: [{ ...f.row, window_id: 52, title: "" }, f.row],
+						...(args.include_accessibility_metadata
+							? {
+									accessibility_windows: {
+										pid: 101,
+										complete: true,
+										windows: [{ window_id: 1, role: "AXWindow" }],
+									},
+								}
+							: {}),
+					})
+				: undefined;
+		expect(await f.session.windows(f.context, { app: "Fixture" })).toMatchObject([
+			{ id: "52", axBacked: false },
+			{ id: "1", axBacked: true },
+		]);
+		// A roster spanning processes is listed as it comes: the answer costs a
+		// call per pid and the listing is the cheap read.
+		f.state.hook = async name =>
+			name === "list_windows" ? reply({ windows: [f.row, { ...f.row, pid: 102, window_id: 2 }] }) : undefined;
+		const across = await f.session.windows(f.context);
+		expect(across.map(window => window.axBacked)).toEqual([undefined, undefined]);
+		expect(f.calls.filter(call => call.args.include_accessibility_metadata === true)).toHaveLength(1);
 	} finally {
 		await f.close();
 	}

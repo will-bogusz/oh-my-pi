@@ -84,6 +84,9 @@ export interface ComputerWindowIdentity {
 	 * from roster order.
 	 */
 	zIndex?: number;
+	axBacked?: boolean;
+	main?: boolean;
+	minimized?: boolean;
 	kind?: ComputerWindowKind;
 }
 export interface ComputerElementSnapshot {

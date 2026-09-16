@@ -782,6 +782,9 @@ export class CuaComputerSession implements ComputerBackend {
 				// The driver's own stacking report, higher towards the front. Null
 				// means it has none, and no order may be read out of the array.
 				...(typeof row.z_index === "number" ? { zIndex: row.z_index } : {}),
+				...(typeof row.ax_backed === "boolean" ? { axBacked: row.ax_backed } : {}),
+				...(typeof row.main === "boolean" ? { main: row.main } : {}),
+				...(typeof row.minimized === "boolean" ? { minimized: row.minimized } : {}),
 				// An owner's off-screen placeholder window is not the panel itself.
 				kind: onScreen.has(String(row.window_id))
 					? classifyWindow({ app: string(row.app_name, "app_name") })
@@ -869,19 +872,80 @@ export class CuaComputerSession implements ComputerBackend {
 			document === undefined ? "" : ` document=${document}`
 		}`;
 	}
+	#accessibilityWindows(
+		data: Wire,
+		pid: number,
+	): { complete: boolean; windows: Map<string, Pick<ComputerWindowIdentity, "main" | "minimized">> } | undefined {
+		const metadata = data.accessibility_windows;
+		if (metadata === undefined) return undefined;
+		const ax = object(metadata, "accessibility window metadata");
+		if (ax.pid !== pid) throw new ToolError("Mismatched Cua accessibility window process");
+		if (!Array.isArray(ax.windows)) throw new ToolError("Malformed Cua accessibility window roster");
+		const windows = new Map<string, Pick<ComputerWindowIdentity, "main" | "minimized">>();
+		for (const value of ax.windows) {
+			const row = object(value, "accessibility window");
+			const id = number(row.window_id, "accessibility window_id");
+			if (!Number.isInteger(id) || id <= 0 || id > 0xffff_ffff || row.role !== "AXWindow")
+				throw new ToolError("Malformed Cua accessibility window identity");
+			if (this.#leaseArtifacts.has(String(id))) continue;
+			windows.set(String(id), {
+				...(typeof row.main === "boolean" ? { main: row.main } : {}),
+				...(typeof row.minimized === "boolean" ? { minimized: row.minimized } : {}),
+			});
+		}
+		return { complete: ax.complete === true, windows };
+	}
+	#withAccessibility(
+		windows: readonly ComputerWindowIdentity[],
+		ax: { complete: boolean; windows: Map<string, Pick<ComputerWindowIdentity, "main" | "minimized">> },
+	): ComputerWindowIdentity[] {
+		return windows.map(window => {
+			const row = ax.windows.get(window.id);
+			const backed = row !== undefined ? true : ax.complete ? false : undefined;
+			if (backed === undefined && row === undefined) return window;
+			return Object.freeze({ ...window, axBacked: window.axBacked ?? backed, ...row });
+		});
+	}
+	#inputDead(
+		pid: number,
+		matches: readonly ComputerWindowIdentity[],
+		roster: readonly ComputerWindowIdentity[],
+	): ToolError {
+		const app = matches[0]?.app ?? roster[0]?.app ?? "The target process";
+		const rows = matches.length ? matches : roster;
+		const backed = roster.filter(window => window.axBacked !== false);
+		return new ToolError(
+			`${app}: pid ${pid} has ${roster.length} WindowServer row${roster.length === 1 ? "" : "s"} and ${
+				backed.length
+					? `${backed.length} accessibility window${backed.length === 1 ? "" : "s"}, none of them among the ${rows.length} this selector matched`
+					: "no accessibility window"
+			}; every input route to ${rows.length === 1 ? "it" : "them"} is refused. ${
+				backed.length
+					? `Acquire one of its accessibility windows by id instead: ${appWindows(backed)}.`
+					: "Bring it to this Space or reopen its document, then acquire again."
+			}\n${rows.map(window => this.#candidate(window)).join("\n")}`,
+		);
+	}
 	/**
-	 * Frontmost of several matches. `z_index` is the driver's own stacking
-	 * report and only comparable while every candidate carries one; the
-	 * WindowServer sample, ordered front to back, is the fallback. Neither:
-	 * stacking order is genuinely unknown and nothing may be picked. One
-	 * candidate has nothing to order and needs neither.
+	 * Frontmost of several matches. `main` is the app's own answer and settles
+	 * it, including for the untitled windows a title cannot; a minimized
+	 * window is behind every window that is not. `z_index` is the driver's
+	 * stacking report and only comparable while every candidate carries one;
+	 * the WindowServer sample, ordered front to back, is the fallback.
+	 * Neither: stacking order is genuinely unknown and nothing may be picked.
+	 * One candidate has nothing to order and needs neither.
 	 */
 	#frontmost(matches: readonly ComputerWindowIdentity[]): ComputerWindowIdentity | undefined {
 		if (matches.length === 1) return matches[0];
-		if (matches.length > 1 && matches.every(window => window.zIndex !== undefined))
-			return matches.reduce((front, window) => (window.zIndex! > front.zIndex! ? window : front));
+		const shown = matches.filter(window => window.minimized !== true);
+		const live = shown.length ? shown : matches;
+		const main = live.filter(window => window.main === true);
+		const ranked = main.length ? main : live;
+		if (ranked.length === 1) return ranked[0];
+		if (ranked.length > 1 && ranked.every(window => window.zIndex !== undefined))
+			return ranked.reduce((front, window) => (window.zIndex! > front.zIndex! ? window : front));
 		for (const row of this.#roster()?.windows ?? []) {
-			const match = matches.find(window => window.id === row.id);
+			const match = ranked.find(window => window.id === row.id);
 			if (match) return match;
 		}
 		return undefined;
@@ -913,36 +977,26 @@ export class CuaComputerSession implements ComputerBackend {
 		let matches = await this.#windows(filter);
 		const pid = matches[0]?.pid;
 		if (filter.id === undefined && matches.length > 1 && matches.every(window => window.pid === pid)) {
-			// WindowServer can include invisible app helpers. Only a complete,
-			// exact AXWindows mapping may narrow a broad selector; visibility,
-			// title, size and stacking order are not evidence of window ownership.
+			// WindowServer can include invisible app helpers, and a row no
+			// AXWindow claims takes no input at all. Only a complete, exact
+			// AXWindows mapping may narrow or refuse; visibility, title, size and
+			// stacking order are not evidence of window ownership.
 			const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
 			const sample = this.#roster();
 			const roster = this.#windowRoster(data, { pid }, sample);
 			matches = this.#windowRoster(data, filter, sample).filter(window => window.pid === pid);
-			const metadata = data.accessibility_windows;
-			if (metadata !== undefined) {
-				const ax = object(metadata, "accessibility window metadata");
-				if (ax.pid !== pid) throw new ToolError("Mismatched Cua accessibility window process");
-				if (ax.complete === true) {
-					if (!Array.isArray(ax.windows)) throw new ToolError("Malformed Cua accessibility window roster");
-					const artifacts = this.#leaseArtifacts;
-					const ids = new Set(
-						ax.windows
-							.map(value => {
-								const row = object(value, "accessibility window");
-								const id = number(row.window_id, "accessibility window_id");
-								if (!Number.isInteger(id) || id <= 0 || id > 0xffff_ffff || row.role !== "AXWindow")
-									throw new ToolError("Malformed Cua accessibility window identity");
-								return String(id);
-							})
-							.filter(id => !artifacts.has(id)),
-					);
+			const ax = this.#accessibilityWindows(data, pid);
+			if (ax) {
+				matches = this.#withAccessibility(matches, ax);
+				if (ax.complete && matches.length) {
+					const annotated = this.#withAccessibility(roster, ax);
+					if (!ax.windows.size) throw this.#inputDead(pid!, matches, annotated);
 					// AX and CG are sequential snapshots. Missing CG identities mean
 					// the mapping cannot safely disambiguate this acquisition.
-					if (ids.size && [...ids].every(id => roster.some(window => window.id === id))) {
-						const applicationWindows = matches.filter(window => ids.has(window.id));
-						if (applicationWindows.length) matches = applicationWindows;
+					if ([...ax.windows.keys()].every(id => roster.some(window => window.id === id))) {
+						const applicationWindows = matches.filter(window => window.axBacked !== false);
+						if (!applicationWindows.length) throw this.#inputDead(pid!, matches, annotated);
+						matches = applicationWindows;
 					}
 				}
 			}
@@ -963,8 +1017,19 @@ export class CuaComputerSession implements ComputerBackend {
 	#current(window: Pick<ComputerWindowIdentity, "id" | "pid">): Promise<ComputerWindowIdentity> {
 		return this.#window({ id: window.id, pid: window.pid });
 	}
+	async #listedWindows(selector: WindowSelector): Promise<ComputerWindowIdentity[]> {
+		const windows = await this.#windows(selector);
+		const pid = windows[0]?.pid;
+		if (pid === undefined || windows.some(window => window.pid !== pid || window.axBacked !== undefined))
+			return windows;
+		const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
+		const sample = this.#roster();
+		const roster = this.#windowRoster(data, selector, sample);
+		const ax = this.#accessibilityWindows(data, pid);
+		return ax ? this.#withAccessibility(roster, ax) : roster;
+	}
 	windows(context: Context, selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
-		return this.#schedule(context, "windows", false, () => this.#windows(selector));
+		return this.#schedule(context, "windows", false, () => this.#listedWindows(selector));
 	}
 	window(
 		context: Context,
