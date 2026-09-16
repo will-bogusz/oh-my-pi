@@ -2278,6 +2278,41 @@ it("surfaces both Linux refusals verbatim and restates their route in prelude vo
 	}
 });
 
+it("keeps the driver's own post-action evidence in the error a refused action throws", async () => {
+	const f = await fixture();
+	try {
+		const observation = await f.session.observe(f.context, f.window);
+		f.state.hook = async name =>
+			name === "click"
+				? {
+						text: "AX press refused: the element reports no press action.",
+						isError: true,
+						images: [],
+						errorCode: "action_refused",
+						structuredJson: JSON.stringify({
+							code: "action_refused",
+							route: "accessibility",
+							effect: "refused",
+							escalation: { reason: "delivery_failed", target: "foreground" },
+						}),
+					}
+				: undefined;
+		const refused = await f.session
+			.click(f.context, f.window, observation.elements[0]!.ref)
+			.catch((error: unknown) => error);
+		if (!(refused instanceof ToolError)) throw new Error("Expected the refusal");
+		expect(refused.message).toStartWith("action_refused: AX press refused:");
+		// One line, off the reply that already arrived: no second walk was made.
+		expect(refused.message.split("\n").at(-1)).toBe(
+			"Evidence: route=accessibility delivery=background effect=refused escalation=foreground",
+		);
+		expect(f.calls.filter(call => call.name === "click")).toHaveLength(1);
+		expect(f.lastDispatch()).toMatchObject({ name: "click" });
+	} finally {
+		await f.close();
+	}
+});
+
 it("reads a Linux capture and tree that report neither a frame flag nor an exhaustive walk", async () => {
 	const f = await fixture({ platform: "linux" });
 	try {

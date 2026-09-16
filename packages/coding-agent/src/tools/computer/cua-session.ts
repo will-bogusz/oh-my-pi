@@ -421,18 +421,43 @@ function pixelEscalation(text: string): string {
 	const doubt = ms ? `the driver saw no change within ${ms} ms` : "the driver could not confirm this landed";
 	return `${doubt} — observe() once; if the tree is unchanged, click the control's own centre off a screenshot`;
 }
-function escalationRoute(data: Wire, text: string): string | undefined {
+function escalationTarget(data: Wire): string | undefined {
 	const escalation = data.escalation;
 	if (!escalation || typeof escalation !== "object" || Array.isArray(escalation)) return undefined;
 	const row = escalation as Wire;
 	// `target` is the contract's field; `recommended` is what the untyped
 	// replies still write, and both name the same rung.
 	const target = typeof row.target === "string" ? row.target : row.recommended;
-	if (typeof target !== "string") return undefined;
+	return typeof target === "string" ? target : undefined;
+}
+function escalationRoute(data: Wire, text: string): string | undefined {
+	const target = escalationTarget(data);
+	if (target === undefined) return undefined;
 	const route = ESCALATION_ROUTES[target]?.(text);
 	if (route === undefined || text.includes(`delivery: "${target}"`)) return undefined;
-	const reason = typeof row.reason === "string" ? row.reason : undefined;
+	const escalation = data.escalation as Wire;
+	const reason = typeof escalation.reason === "string" ? escalation.reason : undefined;
 	return `⚠️ The driver escalates this action${reason ? ` (${reason})` : ""}: ${route}.`;
+}
+/**
+ * What the driver reported about an action that threw. A refusal answers with
+ * the same post-action fields a success does, and they were readable only as
+ * a JSON dump at the end of the message — the route it took, the rung it
+ * delivered on, what it believes happened, and the rung it would escalate to.
+ * Read off the reply that already arrived; nothing is walked to produce it.
+ */
+function actionEvidence(details: unknown, args: Wire): string {
+	const data = details !== null && typeof details === "object" && !Array.isArray(details) ? (details as Wire) : {};
+	const route = typeof data.route === "string" ? data.route : typeof data.path === "string" ? data.path : "cua-sdk";
+	const delivery =
+		typeof data.delivery === "string"
+			? data.delivery
+			: typeof args.delivery_mode === "string"
+				? args.delivery_mode
+				: "background";
+	const effect = typeof data.effect === "string" ? data.effect : "refused";
+	const target = escalationTarget(data);
+	return `Evidence: route=${route} delivery=${delivery} effect=${effect}${target === undefined ? "" : ` escalation=${target}`}`;
 }
 /**
  * `set_value` writes `AXValue` and then drives the app's own end-of-edit
@@ -1456,7 +1481,14 @@ export class CuaComputerSession implements ComputerBackend {
 	 * refused until the panel goes away.
 	 */
 	async #action(name: string, args: Wire): Promise<ComputerActionResult> {
-		const { result, data } = await this.#call(name, args);
+		let reply: Reply;
+		try {
+			reply = await this.#call(name, args);
+		} catch (error) {
+			if (!(error instanceof ToolError)) throw error;
+			throw new ToolError(`${error.message}\n${actionEvidence(error.context, args)}`, error.context);
+		}
+		const { result, data } = reply;
 		const interruptedBy = this.#interruption();
 		const committed = typeof data.committed === "boolean" ? data.committed : undefined;
 		// The driver writes its own advice in wire vocabulary on the success path
