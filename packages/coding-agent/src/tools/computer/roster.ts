@@ -4,6 +4,26 @@ import type { ComputerWindowIdentity } from "./types";
 const LISTED_WINDOWS = 12;
 /** Owners whose windows are plumbing: XPC hosts, panel services, agents. */
 const SERVICE_APP = /Service$/;
+/**
+ * The driver's own ScreenCaptureKit rendering lease injects a window into the
+ * target process: an `AXDialog` titled "Window", 66×20 pt, whose single child
+ * is `AXButton "WindowSharingSessionButton"`. It is on screen, on layer 0 and
+ * indistinguishable from an app window in a `list_windows` row, so it was
+ * offered as an acquisition candidate and counted against the app's own
+ * windows. Title and geometry are what a roster row carries, and the subrole
+ * the accessibility metadata adds agrees with them.
+ */
+const CAPTURE_LEASE_TITLE = "Window";
+const CAPTURE_LEASE_WIDTH = 66;
+const CAPTURE_LEASE_HEIGHT = 20;
+
+export function isCaptureLeaseArtifact(window: Pick<ComputerWindowIdentity, "title" | "bounds">): boolean {
+	return (
+		window.title === CAPTURE_LEASE_TITLE &&
+		Math.round(window.bounds.width) === CAPTURE_LEASE_WIDTH &&
+		Math.round(window.bounds.height) === CAPTURE_LEASE_HEIGHT
+	);
+}
 
 /** One listed window, standing for the run of identical ones behind it. */
 interface RosterRow {

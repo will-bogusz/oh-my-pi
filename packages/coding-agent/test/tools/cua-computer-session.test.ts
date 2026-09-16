@@ -317,6 +317,8 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 			live = false;
 		},
 		calls,
+		/** The last call that was not a roster read; every action ends with one. */
+		lastDispatch: () => calls.filter(call => call.name !== "list_windows").at(-1),
 		replies,
 		images,
 		texts,
@@ -353,6 +355,53 @@ it("acquires the sole application-declared window without hiding raw helper iden
 		f.calls.length = 0;
 		expect(await f.session.window(f.context, { id: "2", pid: 101 })).toMatchObject({ id: "2", title: "" });
 		expect(f.calls).toEqual([{ name: "list_windows", args: {} }]);
+	} finally {
+		await f.close();
+	}
+});
+
+it("keeps the driver's own capture-lease window out of every roster it offers", async () => {
+	const f = await fixture();
+	const lease = {
+		...f.row,
+		window_id: 9,
+		title: "Window",
+		bounds: { x: 0, y: 0, width: 66, height: 20 },
+		z_index: 12,
+	};
+	const named = { ...f.row, window_id: 10, title: "Window", z_index: 3 };
+	try {
+		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [f.row, lease, named] }) : undefined);
+		expect((await f.session.windows(f.context)).map(window => window.id)).toEqual(["1", "10"]);
+		// An app window that merely shares the title keeps its place, so the
+		// acquisition below is ambiguous between the two real windows only.
+		expect(await f.session.window(f.context, { app: "Fixture", title: "Editor" })).toMatchObject({ id: "1" });
+		expect(f.texts).toEqual([]);
+	} finally {
+		await f.close();
+	}
+});
+
+it("names a window the pid opened since the last observation and never rebinds the handle", async () => {
+	const f = await fixture();
+	const print = { ...f.row, window_id: 7, title: "Print", z_index: 9 };
+	const lease = { ...f.row, window_id: 9, title: "Window", bounds: { x: 0, y: 0, width: 66, height: 20 } };
+	try {
+		await f.session.observe(f.context, f.window);
+		const quiet = await f.session.press(f.context, f.window, "cmd+p", undefined, { delivery: "foreground" });
+		expect(quiet.text).not.toContain("gained window");
+		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [f.row, print, lease] }) : undefined);
+		const opened = await f.session.press(f.context, f.window, "cmd+p", undefined, { delivery: "foreground" });
+		expect(opened.text).toContain(
+			'pid 101 gained window 7 ("Print") since your last observation — acquire it with computer.window("7").',
+		);
+		expect(opened.text).not.toContain("window 9");
+		expect(f.window.id).toBe("1");
+		expect(f.lastDispatch()).toMatchObject({ name: "hotkey", args: { pid: 101, window_id: 1 } });
+		// Observing the parent adopts the new window into its own baseline.
+		await f.session.observe(f.context, f.window);
+		const settled = await f.session.press(f.context, f.window, "cmd+p", undefined, { delivery: "foreground" });
+		expect(settled.text).not.toContain("gained window");
 	} finally {
 		await f.close();
 	}
@@ -414,7 +463,7 @@ it("passes over an app's panels, off-screen windows and attached sheets to reach
 		const parent = await f.session.observe(f.context, await f.session.window(f.context, { id: "1", pid: 101 }));
 		expect(parent.relatedWindows).toEqual([{ pid: 101, id: "5", title: "Save", relation: "sheet" }]);
 		await f.session.setValue(f.context, parent.window, parent.elements[0]!.ref, "Project_File_List.txt");
-		expect(f.calls.at(-1)).toMatchObject({ name: "set_value", args: { window_id: 1, pid: 101 } });
+		expect(f.lastDispatch()).toMatchObject({ name: "set_value", args: { window_id: 1, pid: 101 } });
 		f.texts.length = 0;
 		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "1" });
 		expect(f.texts.join("\n")).toBe(
@@ -602,7 +651,7 @@ it("observes semantics without images and preserves raw empty values and false s
 		expect(f.calls.find(call => call.name === "get_window_state")?.args.include_screenshot).toBe(false);
 		expect(f.images).toHaveLength(0);
 		await f.session.setValue(f.context, f.window, observation.elements[0]!.ref, "");
-		expect(f.calls.at(-1)).toEqual({
+		expect(f.lastDispatch()).toEqual({
 			name: "set_value",
 			args: { pid: 101, window_id: 1, element_token: "s1:1", snapshot_id: "s1", value: "" },
 		});
@@ -636,17 +685,17 @@ it("speaks each backend's own key vocabulary instead of forwarding the caller's"
 			// An unknown modifier is not refused on the macOS keystroke path: it is
 			// dropped and the base key types on its own.
 			await f.session.press(f.context, f.window, "super+a", undefined, { delivery: "foreground" });
-			expect(f.calls.at(-1)).toMatchObject({ name: "hotkey", args: { keys: [mac ? "cmd" : "super", "a"] } });
+			expect(f.lastDispatch()).toMatchObject({ name: "hotkey", args: { keys: [mac ? "cmd" : "super", "a"] } });
 			await f.session.press(f.context, f.window, "Cmd+Shift+D", undefined, { delivery: "foreground" });
-			expect(f.calls.at(-1)).toMatchObject({
+			expect(f.lastDispatch()).toMatchObject({
 				name: "hotkey",
 				args: { keys: [mac ? "Cmd" : "super", "Shift", "D"] },
 			});
 			await f.session.press(f.context, f.window, ["ArrowDown"], undefined, { delivery: "foreground" });
-			expect(f.calls.at(-1)).toMatchObject({ name: "press_key", args: { key: "down" } });
+			expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { key: "down" } });
 			// Names the driver already knows are passed through untouched.
 			await f.session.press(f.context, f.window, "Return", undefined, { delivery: "foreground" });
-			expect(f.calls.at(-1)).toMatchObject({ name: "press_key", args: { key: "Return" } });
+			expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { key: "Return" } });
 		} finally {
 			await f.close();
 		}
@@ -1172,7 +1221,7 @@ for (const failedSwitch of [false, true]) {
 			if (!failedSwitch) await f.session.click(f.context, second, [1, 0]);
 			await f.session.captureWindow(f.context, f.window);
 			await f.session.click(f.context, f.window, [100, 0]);
-			expect(f.calls.at(-1)?.args).toMatchObject({ pid: 101, window_id: 1, x: 2, y: 0 });
+			expect(f.lastDispatch()?.args).toMatchObject({ pid: 101, window_id: 1, x: 2, y: 0 });
 			await expect(f.session.click(f.context, second, [1, 0])).rejects.toThrow("StaleFrame");
 		} finally {
 			await f.close();
@@ -1238,7 +1287,7 @@ it("asks for the window's point grid and takes coordinates in it", async () => {
 		// This fixture driver ignores the cap and answers 4x2 px for a 200x100
 		// pt window, so a point converts by the frame it actually delivered.
 		await f.session.click(f.context, f.window, [100, 0]);
-		expect(f.calls.at(-1)).toEqual({
+		expect(f.lastDispatch()).toEqual({
 			name: "click",
 			args: { pid: 101, window_id: 1, x: 2, y: 0, delivery_mode: "background" },
 		});
@@ -1268,7 +1317,7 @@ it("delivers a Retina capture at point size and keeps coordinates point-for-poin
 		});
 		expect(image).toMatchObject({ width: 2, height: 1, pointWidth: 2, pointHeight: 1, scale: 1 });
 		await f.session.click(f.context, window, [1, 0]);
-		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 0 });
+		expect(f.lastDispatch()?.args).toMatchObject({ x: 2, y: 0 });
 	} finally {
 		await f.close();
 	}
@@ -1290,7 +1339,7 @@ it("downscales a surface past the frame budget and reports the scale it landed o
 		expect(image).toMatchObject({ width: 2, height: 1, pointWidth: 4, pointHeight: 2, scale: 0.5 });
 		// Coordinates stay window points whatever the image cost.
 		await f.session.click(f.context, window, [2, 1]);
-		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 1 });
+		expect(f.lastDispatch()?.args).toMatchObject({ x: 2, y: 1 });
 	} finally {
 		await f.close();
 	}
@@ -1315,7 +1364,7 @@ it("invalidates pixel frames when the window moves and keeps them across AX-only
 				: undefined;
 		await f.session.verify(f.context, f.window, []);
 		await f.session.click(f.context, f.window, [100, 0]);
-		expect(f.calls.at(-1)?.args).toMatchObject({ pid: 101, window_id: 1, x: 2, y: 0 });
+		expect(f.lastDispatch()?.args).toMatchObject({ pid: 101, window_id: 1, x: 2, y: 0 });
 	} finally {
 		await f.close();
 	}
@@ -1361,7 +1410,7 @@ it("keeps visual access for windows with no AX snapshot without inventing elemen
 		});
 		expect(observation.screenshot).toBeDefined();
 		await f.session.click(f.context, f.window, [100, 0]);
-		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 0, pid: 101, window_id: 1 });
+		expect(f.lastDispatch()?.args).toMatchObject({ x: 2, y: 0, pid: 101, window_id: 1 });
 	} finally {
 		await f.close();
 	}
@@ -1375,13 +1424,13 @@ it("clicks a ref's own bounds as window points when modifiers or a count leave t
 		// The element covers the whole 200x100 pt window, so its centre is the
 		// window centre: (100, 50) pt, (2, 1) in the delivered 4x2 px frame.
 		await f.session.click(f.context, f.window, ref, { modifiers: ["shift"], delivery: "foreground" });
-		expect(f.calls.at(-1)).toEqual({
+		expect(f.lastDispatch()).toEqual({
 			name: "click",
 			args: { pid: 101, window_id: 1, x: 2, y: 1, modifier: ["shift"], delivery_mode: "foreground" },
 		});
 		await f.session.click(f.context, f.window, ref, { count: 3, button: "right" });
-		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 1, count: 3, button: "right" });
-		expect(f.calls.at(-1)?.args.element_token).toBeUndefined();
+		expect(f.lastDispatch()?.args).toMatchObject({ x: 2, y: 1, count: 3, button: "right" });
+		expect(f.lastDispatch()?.args.element_token).toBeUndefined();
 	} finally {
 		await f.close();
 	}
@@ -1429,15 +1478,15 @@ it("prefers the advertised native element double-click over the pixel fallback",
 		expect(clicks[0]!.args.y).toBeUndefined();
 		// Everything the native route does not advertise takes the bounds route.
 		await f.session.click(f.context, f.window, ref, { count: 2, button: "right" });
-		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 1, count: 2, button: "right" });
+		expect(f.lastDispatch()?.args).toMatchObject({ x: 2, y: 1, count: 2, button: "right" });
 		await f.session.click(f.context, f.window, ref, { count: 2, modifiers: ["shift"] });
-		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 1, count: 2, modifier: ["shift"] });
+		expect(f.lastDispatch()?.args).toMatchObject({ x: 2, y: 1, count: 2, modifier: ["shift"] });
 		f.state.elementDoubleClick = undefined;
 		const legacy = await f.session.observe(f.context, f.window, { screenshot: true });
 		await expect(f.session.click(f.context, f.window, ref, { count: 2 })).rejects.toThrow("StaleRef");
 		await f.session.click(f.context, f.window, legacy.elements[0]!.ref, { count: 2 });
-		expect(f.calls.at(-1)?.args).toMatchObject({ x: 2, y: 1, count: 2 });
-		expect(f.calls.at(-1)?.args.element_token).toBeUndefined();
+		expect(f.lastDispatch()?.args).toMatchObject({ x: 2, y: 1, count: 2 });
+		expect(f.lastDispatch()?.args.element_token).toBeUndefined();
 	} finally {
 		await f.close();
 	}
@@ -1573,7 +1622,7 @@ it("preserves unknown verification and invalidates the SDK traversal's old refs"
 		f.state.hook = async name => (name === "verify_state" ? reply(outcome) : undefined);
 		const expectation = [{ element: { selector: { role: "AXTextField" }, value_equals: "" } }];
 		expect(await f.session.verify(f.context, f.window, expectation, { timeoutMs: 0 })).toEqual(outcome);
-		expect(f.calls.at(-1)?.args).toEqual({
+		expect(f.lastDispatch()?.args).toEqual({
 			pid: 101,
 			window_id: 1,
 			expect: expectation,
@@ -1607,12 +1656,12 @@ it("binds resized desktop pixels to the primary UUID/native id and routes exact 
 		]);
 		await f.session.screenshot(f.context);
 		await f.session.desktopClick(f.context, 1, 0, { delivery: "foreground", count: 2, modifiers: ["shift"] });
-		expect(f.calls.at(-1)).toEqual({
+		expect(f.lastDispatch()).toEqual({
 			name: "click",
 			args: { scope: "desktop", x: 2, y: 0, count: 2, modifier: ["shift"], delivery_mode: "foreground" },
 		});
 		const moved = await f.session.desktopMove(f.context, 1, 0, { delivery: "foreground" });
-		expect(f.calls.at(-1)).toEqual({ name: "move_cursor", args: { scope: "desktop", x: 2, y: 0 } });
+		expect(f.lastDispatch()).toEqual({ name: "move_cursor", args: { scope: "desktop", x: 2, y: 0 } });
 		expect(moved.delivery).toBe("foreground");
 		await f.session.desktopDrag(
 			f.context,
@@ -1622,7 +1671,7 @@ it("binds resized desktop pixels to the primary UUID/native id and routes exact 
 			],
 			{ delivery: "foreground", button: "right" },
 		);
-		expect(f.calls.at(-1)?.args).toEqual({
+		expect(f.lastDispatch()?.args).toEqual({
 			scope: "desktop",
 			from_x: 0,
 			from_y: 0,
@@ -1632,7 +1681,7 @@ it("binds resized desktop pixels to the primary UUID/native id and routes exact 
 			delivery_mode: "foreground",
 		});
 		await f.session.desktopScroll(f.context, 1, 0, { delivery: "foreground", dy: 240 });
-		expect(f.calls.at(-1)?.args).toEqual({
+		expect(f.lastDispatch()?.args).toEqual({
 			scope: "desktop",
 			x: 2,
 			y: 0,
@@ -1642,7 +1691,7 @@ it("binds resized desktop pixels to the primary UUID/native id and routes exact 
 			delivery_mode: "foreground",
 		});
 		await f.session.desktopScroll(f.context, 1, 0, { delivery: "foreground", dx: -120 });
-		expect(f.calls.at(-1)?.args.direction).toBe("left");
+		expect(f.lastDispatch()?.args.direction).toBe("left");
 	} finally {
 		await f.close();
 	}
@@ -1776,12 +1825,12 @@ it("drags between element refs at their own observed bounds", async () => {
 		const ref = observation.elements[0]!.ref;
 		// The ref's centre: (100, 50) pt of the 200×100 pt window, (2, 1) in SDK pixels.
 		await f.session.drag(f.context, f.window, ref, [0, 0], { delivery: "foreground" });
-		expect(f.calls.at(-1)).toEqual({
+		expect(f.lastDispatch()).toEqual({
 			name: "drag",
 			args: { pid: 101, window_id: 1, from_x: 2, from_y: 1, to_x: 0, to_y: 0, delivery_mode: "foreground" },
 		});
 		await f.session.drag(f.context, f.window, ref, ref, { delivery: "foreground", steps: 10 });
-		expect(f.calls.at(-1)?.args).toMatchObject({ from_x: 2, from_y: 1, to_x: 2, to_y: 1, steps: 10 });
+		expect(f.lastDispatch()?.args).toMatchObject({ from_x: 2, from_y: 1, to_x: 2, to_y: 1, steps: 10 });
 		// No frame and no bounds are the only refusals, and neither dispatches.
 		f.calls.length = 0;
 		// A failed capture leaves the window with no frame; the tree read that
@@ -1913,7 +1962,7 @@ it("maps observed semantic actions to usable perform names without inventing cap
 		expect(element.actions).toEqual(["confirm", "open"]);
 		expect(observation.tree).toContain('actions=["confirm","open"]');
 		await f.session.perform(f.context, f.window, element.ref, element.actions![0]!);
-		expect(f.calls.at(-1)).toMatchObject({
+		expect(f.lastDispatch()).toMatchObject({
 			name: "click",
 			args: { action: "confirm", element_token: "s2:1", window_id: 1, pid: 101 },
 		});
@@ -1964,12 +2013,12 @@ it("nests an attached sheet's own tree under its parent and dispatches its refs 
 		expect(cancel.pid).toBe(101);
 		// A sheet ref reached through the parent's handle acts on the sheet.
 		await f.session.click(f.context, observation.window, cancel.ref);
-		expect(f.calls.at(-1)).toMatchObject({
+		expect(f.lastDispatch()).toMatchObject({
 			name: "click",
 			args: { window_id: 5, pid: 101, element_token: "sheet-1:2", snapshot_id: "sheet-1" },
 		});
 		await f.session.click(f.context, observation.window, parentRef);
-		expect(f.calls.at(-1)).toMatchObject({ name: "click", args: { window_id: 1, pid: 101 } });
+		expect(f.lastDispatch()).toMatchObject({ name: "click", args: { window_id: 1, pid: 101 } });
 		expect(Object.isFrozen(observation.relatedWindows)).toBe(true);
 		expect(Object.isFrozen(observation.relatedWindows![0])).toBe(true);
 		// The sheet went away: the next walk simply lacks it, and the refs it

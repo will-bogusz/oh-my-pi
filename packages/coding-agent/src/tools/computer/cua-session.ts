@@ -13,7 +13,7 @@ import {
 	sampleWindowRoster,
 	type WindowRosterSample,
 } from "./interruption";
-import { appWindows } from "./roster";
+import { appWindows, isCaptureLeaseArtifact } from "./roster";
 import { observedSemanticActions } from "./semantic-actions";
 import type {
 	ActionOptions,
@@ -500,6 +500,13 @@ export class CuaComputerSession implements ComputerBackend {
 	readonly #sheets = new Map<string, { parent: string; title: string }>();
 	readonly #staleSheetRefs = new Map<string, string>();
 	/**
+	 * Each pid's on-screen window ids as of the last observation of that pid,
+	 * and the driver's own capture-lease windows, which are nobody's.
+	 */
+	readonly #observedRoster = new Map<number, ReadonlySet<string>>();
+	#lastRoster: readonly ComputerWindowIdentity[] = [];
+	#leaseArtifacts: ReadonlySet<string> = new Set();
+	/**
 	 * What each window's writes left unproven, one sentence per write, in the
 	 * order they were made. The next read of that window reports and clears them.
 	 */
@@ -725,6 +732,7 @@ export class CuaComputerSession implements ComputerBackend {
 		if (!Array.isArray(data.windows)) throw new ToolError("Malformed Cua window roster");
 		const onScreen = new Map((sample?.windows ?? []).map(window => [window.id, window]));
 		const windows: ComputerWindowIdentity[] = [];
+		const artifacts = new Set<string>();
 		for (const value of data.windows) {
 			const row = object(value, "window");
 			// X11 reports a titled window whose owner set no `_NET_WM_PID` with
@@ -749,6 +757,10 @@ export class CuaComputerSession implements ComputerBackend {
 					? classifyWindow({ app: string(row.app_name, "app_name") })
 					: ("other" as const),
 			};
+			if (isCaptureLeaseArtifact(window)) {
+				artifacts.add(window.id);
+				continue;
+			}
 			windowArgs(window);
 			windows.push(Object.freeze(window));
 		}
@@ -773,6 +785,8 @@ export class CuaComputerSession implements ComputerBackend {
 				);
 			}
 		}
+		this.#leaseArtifacts = artifacts;
+		this.#lastRoster = windows;
 		return windows.filter(
 			window =>
 				(selector.id === undefined || window.id === selector.id) &&
@@ -882,14 +896,17 @@ export class CuaComputerSession implements ComputerBackend {
 				if (ax.pid !== pid) throw new ToolError("Mismatched Cua accessibility window process");
 				if (ax.complete === true) {
 					if (!Array.isArray(ax.windows)) throw new ToolError("Malformed Cua accessibility window roster");
+					const artifacts = this.#leaseArtifacts;
 					const ids = new Set(
-						ax.windows.map(value => {
-							const row = object(value, "accessibility window");
-							const id = number(row.window_id, "accessibility window_id");
-							if (!Number.isInteger(id) || id <= 0 || id > 0xffff_ffff || row.role !== "AXWindow")
-								throw new ToolError("Malformed Cua accessibility window identity");
-							return String(id);
-						}),
+						ax.windows
+							.map(value => {
+								const row = object(value, "accessibility window");
+								const id = number(row.window_id, "accessibility window_id");
+								if (!Number.isInteger(id) || id <= 0 || id > 0xffff_ffff || row.role !== "AXWindow")
+									throw new ToolError("Malformed Cua accessibility window identity");
+								return String(id);
+							})
+							.filter(id => !artifacts.has(id)),
 					);
 					// AX and CG are sequential snapshots. Missing CG identities mean
 					// the mapping cannot safely disambiguate this acquisition.
@@ -1068,6 +1085,12 @@ export class CuaComputerSession implements ComputerBackend {
 			// by a cell that displayed only this read.
 			const doubted = this.#doubtedWrites(current.id);
 			if (doubted.length) observation.tree = `${doubted.join("\n")}\n${observation.tree}`;
+			this.#observedRoster.set(
+				current.pid,
+				new Set(
+					this.#lastRoster.filter(row => row.pid === current.pid && row.onScreen !== false).map(row => row.id),
+				),
+			);
 			if (options.screenshot) {
 				try {
 					observation.screenshot = await this.#windowImage(context, current, reply, options.silent === true);
@@ -1396,6 +1419,36 @@ export class CuaComputerSession implements ComputerBackend {
 		return point;
 	}
 	/**
+	 * What the pid put on screen that the caller has never seen. The handle it
+	 * acted through is never rebound — a window it did not ask for is a fact
+	 * about the app, not a new target — so the id and the call that acquires
+	 * it are named and the choice stays the caller's. Sheets are excluded:
+	 * the next observation of their parent renders them in its own tree.
+	 */
+	async #openedWindows(args: Wire): Promise<string | undefined> {
+		const pid = typeof args.pid === "number" ? args.pid : undefined;
+		if (pid === undefined) return undefined;
+		const before = this.#observedRoster.get(pid);
+		if (!before) return undefined;
+		let after: readonly ComputerWindowIdentity[];
+		try {
+			after = await this.#windows({ pid });
+		} catch (error) {
+			if (!(error instanceof ToolError)) throw error;
+			return undefined;
+		}
+		const opened = after.filter(
+			window => window.onScreen !== false && !before.has(window.id) && !this.#sheets.has(window.id),
+		);
+		if (!opened.length) return undefined;
+		return opened
+			.map(
+				window =>
+					`pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation — acquire it with computer.window(${JSON.stringify(window.id)}).`,
+			)
+			.join("\n");
+	}
+	/**
 	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
 	 * window found now appeared while this action ran — a prompt the action
 	 * itself provoked, or the user's own. The action is not retracted; the
@@ -1411,11 +1464,13 @@ export class CuaComputerSession implements ComputerBackend {
 		// a next step is only executable if it is spelled the way the caller types.
 		const reported = preludeVocabulary(result.text);
 		const escalation = escalationRoute(data, reported);
+		const opened = await this.#openedWindows(args);
 		return {
 			text: [
 				reported,
 				committed === undefined ? undefined : commitNote(committed, reported),
 				escalation,
+				opened,
 				interruptedBy
 					? `⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
 					: undefined,
