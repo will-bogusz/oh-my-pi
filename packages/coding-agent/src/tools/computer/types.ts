@@ -161,7 +161,7 @@ export interface ComputerObservation {
 	elements: ComputerElementSnapshot[];
 	complete: boolean;
 	backgroundInput: unknown;
-	/** Attached surfaces have separate identities and must be acquired before input. */
+	/** Attached sheets, each walked and rendered under this window's own tree. */
 	relatedWindows?: readonly ComputerRelatedWindow[];
 	/** Document window's file (`file://` URL); absent when the app reports none. */
 	documentPath?: string;

@@ -168,8 +168,8 @@ class El {
 		this.#getContext = getContext;
 		this.#window = Object.freeze({ ...window, bounds: Object.freeze({ ...window.bounds }) });
 		this.ref = snapshot.ref;
-		this.pid = window.pid;
-		this.windowId = window.id;
+		this.pid = snapshot.pid;
+		this.windowId = snapshot.windowId;
 		this.role = snapshot.role;
 		this.label = snapshot.label;
 		this.value = snapshot.value;

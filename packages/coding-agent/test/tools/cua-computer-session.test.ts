@@ -409,9 +409,8 @@ it("passes over an app's panels, off-screen windows and attached sheets to reach
 		// AXWindows mapping either, so a sheet nobody has observed is the front
 		// titled window and is acquired as one.
 		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "5" });
-		// The parent's own walk is what names it — and it walks the sheet's
-		// controls as its own, so a ref minted there acts on the parent's
-		// window, which is how a Save panel is driven at all.
+		// The parent's own walk is what names it, and the parent's own rows keep
+		// dispatching to the parent however the sheet is rendered beside them.
 		const parent = await f.session.observe(f.context, await f.session.window(f.context, { id: "1", pid: 101 }));
 		expect(parent.relatedWindows).toEqual([{ pid: 101, id: "5", title: "Save", relation: "sheet" }]);
 		await f.session.setValue(f.context, parent.window, parent.elements[0]!.ref, "Project_File_List.txt");
@@ -1927,28 +1926,72 @@ it("maps observed semantic actions to usable perform names without inventing cap
 	}
 });
 
-it("preserves attached sheet identities without converting them into parent element references", async () => {
+it("nests an attached sheet's own tree under its parent and dispatches its refs to the sheet", async () => {
 	const f = await fixture();
+	const sheet = { ...f.row, window_id: 5, title: "Save", bounds: { x: 30, y: 40, width: 120, height: 80 } };
 	try {
 		expect((await f.session.observe(f.context, f.window)).relatedWindows).toBeUndefined();
-		f.state.relatedWindows = [
-			{ pid: 202, window_id: 42, title: "Import", relation: "sheet" },
-			{ pid: 202, window_id: 43, title: "Save", relation: "sheet" },
-		];
+		f.state.relatedWindows = [{ pid: 101, window_id: 5, title: "Save", relation: "sheet" }];
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows") return reply({ windows: [f.row, sheet] });
+			if (name !== "get_window_state" || args.window_id !== 5) return undefined;
+			return reply({
+				pid: 101,
+				window_id: 5,
+				snapshot_id: "sheet-1",
+				related_windows: [],
+				window_bounds: sheet.bounds,
+				elements: [
+					{ element_index: 1, element_token: "sheet-1:1", role: "AXSheet", label: "save", depth: 0 },
+					{ element_index: 2, element_token: "sheet-1:2", role: "AXButton", label: "Cancel", depth: 1 },
+				],
+			});
+		};
 		const observation = await f.session.observe(f.context, f.window);
-		expect(observation.relatedWindows).toEqual([
-			{ pid: 202, id: "42", title: "Import", relation: "sheet" },
-			{ pid: 202, id: "43", title: "Save", relation: "sheet" },
-		]);
-		// Each sheet names the call that acquires it, not a JSON dump.
-		expect(observation.tree).toContain(
-			'Attached sheet "Import" (id 42): a separate window that takes its own input — acquire it with computer.window("42") to drive it.',
+		expect(observation.relatedWindows).toEqual([{ pid: 101, id: "5", title: "Save", relation: "sheet" }]);
+		const parentRef = observation.elements[0]!.ref;
+		const cancel = observation.elements.find(element => element.label === "Cancel")!;
+		// The sheet is named where it attaches and its own rows hang under it.
+		expect(observation.tree).toBe(
+			[
+				`- [${parentRef}] AXTextField "Editor" value="" placeholder="Hint, not value" enabled=false selected=false`,
+				'sheet "Save" (window 5)',
+				`  - [${observation.elements[1]!.ref}] AXSheet "save"`,
+				`    - [${cancel.ref}] AXButton "Cancel"`,
+			].join("\n"),
 		);
-		expect(observation.tree).toContain('acquire it with computer.window("43") to drive it.');
-		expect(observation.elements).toHaveLength(1);
-		expect(observation.elements[0]!.label).toBe("Editor");
+		expect(cancel.windowId).toBe("5");
+		expect(cancel.pid).toBe(101);
+		// A sheet ref reached through the parent's handle acts on the sheet.
+		await f.session.click(f.context, observation.window, cancel.ref);
+		expect(f.calls.at(-1)).toMatchObject({
+			name: "click",
+			args: { window_id: 5, pid: 101, element_token: "sheet-1:2", snapshot_id: "sheet-1" },
+		});
+		await f.session.click(f.context, observation.window, parentRef);
+		expect(f.calls.at(-1)).toMatchObject({ name: "click", args: { window_id: 1, pid: 101 } });
 		expect(Object.isFrozen(observation.relatedWindows)).toBe(true);
 		expect(Object.isFrozen(observation.relatedWindows![0])).toBe(true);
+		// The sheet went away: the next walk simply lacks it, and the refs it
+		// minted say which surface took them.
+		f.state.relatedWindows = [];
+		const after = await f.session.observe(f.context, f.window);
+		expect(after.tree).not.toContain("sheet ");
+		expect(() => f.session.element(cancel.ref)).toThrow('StaleRef: sheet "Save" (window 5) is gone');
+	} finally {
+		await f.close();
+	}
+});
+
+it("reports an attached sheet it cannot walk instead of dropping it from the tree", async () => {
+	const f = await fixture();
+	try {
+		f.state.relatedWindows = [{ pid: 202, window_id: 42, title: "Import", relation: "sheet" }];
+		const observation = await f.session.observe(f.context, f.window);
+		expect(observation.relatedWindows).toEqual([{ pid: 202, id: "42", title: "Import", relation: "sheet" }]);
+		expect(observation.tree).toContain('sheet "Import" (window 42) — its own walk failed: Missing computer window');
+		expect(observation.elements).toHaveLength(1);
+		expect(observation.elements[0]!.label).toBe("Editor");
 	} finally {
 		await f.close();
 	}

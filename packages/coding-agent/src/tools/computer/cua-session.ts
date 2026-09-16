@@ -46,6 +46,18 @@ interface Binding {
 	element: ComputerElementSnapshot;
 	doubleClickAtCenter: boolean;
 }
+interface TreeRow {
+	depth: number;
+	element: ComputerElementSnapshot;
+}
+function treeRows(rows: readonly TreeRow[], indent: number): string {
+	return rows
+		.map(
+			({ depth, element }) =>
+				`${"  ".repeat(depth + indent)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.description !== undefined ? ` description=${JSON.stringify(element.description)}` : ""}${element.help !== undefined ? ` help=${JSON.stringify(element.help)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
+		)
+		.join("\n");
+}
 /**
  * One window's live capture. `image` is what the model was shown, sized to
  * the window's own point grid; `sdkWidth`/`sdkHeight` are the pixels the
@@ -485,7 +497,8 @@ export class CuaComputerSession implements ComputerBackend {
 	 * observation of the parent said, and the parent replaces its own entries
 	 * every time it is observed.
 	 */
-	readonly #sheets = new Map<string, string>();
+	readonly #sheets = new Map<string, { parent: string; title: string }>();
+	readonly #staleSheetRefs = new Map<string, string>();
 	/**
 	 * What each window's writes left unproven, one sentence per write, in the
 	 * order they were made. The next read of that window reports and clears them.
@@ -948,8 +961,13 @@ export class CuaComputerSession implements ComputerBackend {
 	}
 	#binding(ref: string, window?: ComputerWindowIdentity): Binding {
 		const binding = this.#elements.get(ref);
-		if (this.#closed || !binding) throw new ToolError("StaleRef: observe the window again");
-		if (window && (binding.window.id !== window.id || binding.window.pid !== window.pid))
+		if (this.#closed || !binding)
+			throw new ToolError(`StaleRef: ${this.#staleSheetRefs.get(ref) ?? "observe the window again"}`);
+		if (
+			window &&
+			(binding.window.pid !== window.pid ||
+				(binding.window.id !== window.id && this.#sheets.get(binding.window.id)?.parent !== window.id))
+		)
 			throw new ToolError("WrongWindow: element belongs to a different PID/window");
 		return binding;
 	}
@@ -973,73 +991,7 @@ export class CuaComputerSession implements ComputerBackend {
 				max_elements: options.maxElements,
 				query: options.query,
 			});
-			if (!Array.isArray(reply.data.elements)) throw new ToolError("Malformed Cua elements");
-			// A real window can have no matching AXWindow at all (canvas/custom UI).
-			// Preserve visual access without fabricating an actionable SDK snapshot.
-			const snapshotId = typeof reply.data.snapshot_id === "string" ? reply.data.snapshot_id : "unavailable";
-			if (snapshotId === "unavailable" && reply.data.elements.length)
-				throw new ToolError("Cua elements have no snapshot identity");
-			const rows: { depth: number; element: ComputerElementSnapshot }[] = [];
-			// The menu bar is a fifth of a macOS tree (22 kB of one 31 kB walk),
-			// every row of it advertises `press`, and every such press is refused
-			// because a menu bar item reports `AXEnabled` only while its menu is
-			// open. `menu(path)` drives it instead, so the rows stay out unless
-			// they are asked for, and a ref is never minted for one.
-			let menuBarDepth: number | undefined;
-			let menuBarRows = 0;
-			for (const value of reply.data.elements) {
-				const row = object(value, "element");
-				const depth = typeof row.depth === "number" ? Math.max(0, Math.min(50, Math.floor(row.depth))) : 0;
-				if (menuBarDepth !== undefined && depth > menuBarDepth) {
-					menuBarRows++;
-					continue;
-				}
-				menuBarDepth = undefined;
-				if (options.menubar !== true && MENU_BAR_ROLES[string(row.role, "role")] === true) {
-					menuBarDepth = depth;
-					menuBarRows++;
-					continue;
-				}
-				const token = string(row.element_token, "element_token");
-				// `#elements` is the only binding: it carries the exact window, driver
-				// snapshot and element token, and rejects a ref it does not hold. The
-				// ref itself only has to be unique for this session's lifetime.
-				const ref = `n${++this.#refSeq}`;
-				if (row.background_actions != null && !Array.isArray(row.background_actions))
-					throw new ToolError("Malformed Cua background actions");
-				const actions = row.background_actions ?? row.actions;
-				const element = Object.freeze({
-					ref,
-					pid: current.pid,
-					windowId: current.id,
-					role: string(row.role, "role"),
-					label: typeof row.label === "string" ? row.label : "",
-					...(typeof row.value === "string" ? { value: row.value } : {}),
-					...(typeof row.placeholder === "string" ? { placeholder: row.placeholder } : {}),
-					// Semantics the provider authored but role/label do not carry. An
-					// empty string is the driver's way of saying "none", and a
-					// description that merely repeats the label is pure noise.
-					...(typeof row.help === "string" && row.help ? { help: row.help } : {}),
-					...(typeof row.description === "string" &&
-					row.description &&
-					row.description !== row.label &&
-					row.description !== row.value
-						? { description: row.description }
-						: {}),
-					...(typeof row.enabled === "boolean" ? { enabled: row.enabled } : {}),
-					...(typeof row.selected === "boolean" ? { selected: row.selected } : {}),
-					...(Array.isArray(actions) ? { actions: observedSemanticActions(actions) } : {}),
-					...(row.frame ? { bounds: bounds(row.frame) } : {}),
-				});
-				this.#elements.set(ref, {
-					window: current,
-					token,
-					snapshotId,
-					element,
-					doubleClickAtCenter: reply.data.element_double_click === "left_center_v1",
-				});
-				rows.push({ depth, element });
-			}
+			const { rows, menuBarRows, snapshotId } = this.#walk(current, reply, options);
 			// Only the walker knows whether it clipped the tree. `truncated` is its
 			// explicit verdict and `elements_complete` its older positive proof.
 			// Equal returned/total counts prove nothing: both count what the walk
@@ -1062,12 +1014,7 @@ export class CuaComputerSession implements ComputerBackend {
 				complete,
 				backgroundInput: reply.data.background_input ?? null,
 				relatedWindows: relatedWindows(reply.data.related_windows),
-				tree: rows
-					.map(
-						({ depth, element }) =>
-							`${"  ".repeat(depth)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.description !== undefined ? ` description=${JSON.stringify(element.description)}` : ""}${element.help !== undefined ? ` help=${JSON.stringify(element.help)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
-					)
-					.join("\n"),
+				tree: treeRows(rows, 0),
 			};
 			if (!rows.length)
 				observation.tree =
@@ -1077,11 +1024,22 @@ export class CuaComputerSession implements ComputerBackend {
 			if (menuBarRows)
 				observation.tree += `\nMenu bar hidden (${menuBarRows} rows): its items only respond while their own menu is open, so drive it with win.menu(["<menu>", "<item>"], { delivery: "foreground" }); observe({ menubar: true }) shows them.`;
 			// This window's sheets, as of this walk: a sheet that has gone away
-			// must stop excluding an id acquisition could pick.
-			for (const [sheet, parent] of this.#sheets) if (parent === current.id) this.#sheets.delete(sheet);
-			for (const sheet of observation.relatedWindows ?? []) {
-				this.#sheets.set(sheet.id, current.id);
-				observation.tree += `\nAttached sheet ${JSON.stringify(sheet.title)} (id ${sheet.id}): a separate window that takes its own input — acquire it with computer.window("${sheet.id}") to drive it.`;
+			// must stop excluding an id acquisition could pick, and the refs it
+			// minted must say which surface took them with it.
+			const attached = observation.relatedWindows ?? [];
+			for (const [id, sheet] of this.#sheets)
+				if (sheet.parent === current.id && !attached.some(row => row.id === id)) this.#retireSheet(id, sheet.title);
+			for (const sheet of attached) {
+				this.#sheets.set(sheet.id, { parent: current.id, title: sheet.title });
+				observation.tree += `\nsheet ${JSON.stringify(sheet.title)} (window ${sheet.id})`;
+				try {
+					const nested = await this.#sheetRows(context, sheet, options);
+					observation.elements.push(...nested.map(row => row.element));
+					if (nested.length) observation.tree += `\n${treeRows(nested, 1)}`;
+				} catch (error) {
+					if (!(error instanceof ToolError)) throw error;
+					observation.tree += ` — its own walk failed: ${error.message}`;
+				}
 			}
 			if (reply.data.ax_walk_timed_out === true)
 				observation.tree +=
@@ -1120,6 +1078,107 @@ export class CuaComputerSession implements ComputerBackend {
 			}
 			return observation;
 		});
+	}
+	#walk(
+		window: ComputerWindowIdentity,
+		reply: Reply,
+		options: ObserveOptions,
+	): { rows: TreeRow[]; menuBarRows: number; snapshotId: string } {
+		if (!Array.isArray(reply.data.elements)) throw new ToolError("Malformed Cua elements");
+		// A real window can have no matching AXWindow at all (canvas/custom UI).
+		// Preserve visual access without fabricating an actionable SDK snapshot.
+		const snapshotId = typeof reply.data.snapshot_id === "string" ? reply.data.snapshot_id : "unavailable";
+		if (snapshotId === "unavailable" && reply.data.elements.length)
+			throw new ToolError("Cua elements have no snapshot identity");
+		const rows: TreeRow[] = [];
+		// The menu bar is a fifth of a macOS tree (22 kB of one 31 kB walk),
+		// every row of it advertises `press`, and every such press is refused
+		// because a menu bar item reports `AXEnabled` only while its menu is
+		// open. `menu(path)` drives it instead, so the rows stay out unless
+		// they are asked for, and a ref is never minted for one.
+		let menuBarDepth: number | undefined;
+		let menuBarRows = 0;
+		for (const value of reply.data.elements) {
+			const row = object(value, "element");
+			const depth = typeof row.depth === "number" ? Math.max(0, Math.min(50, Math.floor(row.depth))) : 0;
+			if (menuBarDepth !== undefined && depth > menuBarDepth) {
+				menuBarRows++;
+				continue;
+			}
+			menuBarDepth = undefined;
+			if (options.menubar !== true && MENU_BAR_ROLES[string(row.role, "role")] === true) {
+				menuBarDepth = depth;
+				menuBarRows++;
+				continue;
+			}
+			const token = string(row.element_token, "element_token");
+			// `#elements` is the only binding: it carries the exact window, driver
+			// snapshot and element token, and rejects a ref it does not hold. The
+			// ref itself only has to be unique for this session's lifetime.
+			const ref = `n${++this.#refSeq}`;
+			if (row.background_actions != null && !Array.isArray(row.background_actions))
+				throw new ToolError("Malformed Cua background actions");
+			const actions = row.background_actions ?? row.actions;
+			const element = Object.freeze({
+				ref,
+				pid: window.pid,
+				windowId: window.id,
+				role: string(row.role, "role"),
+				label: typeof row.label === "string" ? row.label : "",
+				...(typeof row.value === "string" ? { value: row.value } : {}),
+				...(typeof row.placeholder === "string" ? { placeholder: row.placeholder } : {}),
+				// Semantics the provider authored but role/label do not carry. An
+				// empty string is the driver's way of saying "none", and a
+				// description that merely repeats the label is pure noise.
+				...(typeof row.help === "string" && row.help ? { help: row.help } : {}),
+				...(typeof row.description === "string" &&
+				row.description &&
+				row.description !== row.label &&
+				row.description !== row.value
+					? { description: row.description }
+					: {}),
+				...(typeof row.enabled === "boolean" ? { enabled: row.enabled } : {}),
+				...(typeof row.selected === "boolean" ? { selected: row.selected } : {}),
+				...(Array.isArray(actions) ? { actions: observedSemanticActions(actions) } : {}),
+				...(row.frame ? { bounds: bounds(row.frame) } : {}),
+			});
+			this.#elements.set(ref, {
+				window,
+				token,
+				snapshotId,
+				element,
+				doubleClickAtCenter: reply.data.element_double_click === "left_center_v1",
+			});
+			rows.push({ depth, element });
+		}
+		return { rows, menuBarRows, snapshotId };
+	}
+	async #sheetRows(context: Context, sheet: ComputerRelatedWindow, options: ObserveOptions): Promise<TreeRow[]> {
+		const window = await this.#window({ id: sheet.id, pid: sheet.pid });
+		throwIfAborted(context.signal);
+		this.#invalidate(window);
+		const reply = await this.#call("get_window_state", {
+			...windowArgs(window),
+			include_accessibility_tree: true,
+			include_screenshot: false,
+			max_depth: options.maxDepth,
+			max_elements: options.maxElements,
+			query: options.query,
+		});
+		if (reply.data.pid !== window.pid || String(reply.data.window_id) !== window.id)
+			throw new ToolError("WrongWindow: Cua sheet observation identity mismatch");
+		return this.#walk(window, reply, options).rows;
+	}
+	#retireSheet(id: string, title: string): void {
+		this.#sheets.delete(id);
+		for (const [ref, binding] of this.#elements) {
+			if (binding.window.id !== id) continue;
+			this.#elements.delete(ref);
+			this.#staleSheetRefs.set(
+				ref,
+				`sheet ${JSON.stringify(title)} (window ${id}) is gone; observe the window that had it again`,
+			);
+		}
 	}
 	async #state(
 		context: Context,
@@ -1290,7 +1349,7 @@ export class CuaComputerSession implements ComputerBackend {
 	#target(window: ComputerWindowIdentity, target?: ComputerTarget): Wire {
 		if (typeof target === "string") {
 			const ref = this.#binding(target, window);
-			return { ...windowArgs(window), element_token: ref.token, snapshot_id: ref.snapshotId };
+			return { ...windowArgs(ref.window), element_token: ref.token, snapshot_id: ref.snapshotId };
 		}
 		if (!target) return windowArgs(window);
 		const frame = this.#frames.get(window.id);
