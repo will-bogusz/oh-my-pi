@@ -110,6 +110,8 @@ interface BrowserDownloads {
 		totalBytes?: number;
 	}[];
 }
+/** an option's text or value as a string, or Playwright's object form */
+type BrowserSelectOption = string | { label?: string; value?: string };
 interface BrowserTabHelpers {
 	title(): Promise<string>;
 	goto(url: string, options?: { waitUntil?: BrowserWaitUntil }): Promise<void>;
@@ -131,7 +133,7 @@ interface BrowserTabHelpers {
 	drag(from: BrowserDragTarget, to: BrowserDragTarget): Promise<void>;
 	evaluate<R, A extends unknown[]>(fn: string | ((...args: A) => R | Promise<R>), ...args: A): Promise<R>;
 	scrollIntoView(selector: string): Promise<void>;
-	select(selector: string, ...values: string[]): Promise<string[]>;
+	select(selector: string, ...values: BrowserSelectOption[]): Promise<string[]>;
 	uploadFile(selector: string, ...filePaths: string[]): Promise<void>;
 	downloads(): Promise<BrowserDownloads>;
 	waitForUrl(pattern: string | RegExp, options?: BrowserWaitOptions): Promise<string>;
@@ -143,7 +145,7 @@ interface BrowserElement {
 	press(key: string): Promise<void>;
 	hover(): Promise<void>;
 	focus(): Promise<void>;
-	select(...values: string[]): Promise<string[]>;
+	select(...values: BrowserSelectOption[]): Promise<string[]>;
 	uploadFile(...filePaths: string[]): Promise<void>;
 	scrollIntoView(): Promise<void>;
 	boundingBox(): Promise<{ x: number; y: number; width: number; height: number } | null>;

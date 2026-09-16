@@ -88,6 +88,7 @@ import {
 import { extractReadableFromHtml, type ReadableFormat } from "./readable";
 
 import { cloneSafe, RunOutput } from "./run-output";
+import type { BrowserSelectOption } from "./select-options";
 import type {
 	Observation,
 	ReadyInfo,
@@ -270,7 +271,7 @@ interface TabApi {
 	waitFor(selector: string, opts?: { timeout?: number }): Promise<TabElement>;
 	evaluate<R, TArgs extends unknown[]>(fn: string | ((...args: TArgs) => R | Promise<R>), ...args: TArgs): Promise<R>;
 	scrollIntoView(selector: string): Promise<void>;
-	select(selector: string, ...values: string[]): Promise<string[]>;
+	select(selector: string, ...values: BrowserSelectOption[]): Promise<string[]>;
 	uploadFile(selector: string, ...filePaths: string[]): Promise<void>;
 	downloads(): Promise<TabDownloads>;
 	waitForUrl(pattern: string | RegExp, opts?: { timeout?: number }): Promise<string>;
@@ -302,7 +303,7 @@ export interface TabElement {
 	press(key: string): Promise<void>;
 	hover(): Promise<void>;
 	focus(): Promise<void>;
-	select(...values: string[]): Promise<string[]>;
+	select(...values: BrowserSelectOption[]): Promise<string[]>;
 	uploadFile(...filePaths: string[]): Promise<void>;
 	scrollIntoView(): Promise<void>;
 	boundingBox(): Promise<Rect | null>;
@@ -2050,7 +2051,12 @@ export class WorkerCore {
 		await untilAborted(signal, () => page.mouse.up());
 	}
 
-	async #select(selector: string, values: string[], timeoutMs: number, signal: AbortSignal): Promise<string[]> {
+	async #select(
+		selector: string,
+		values: readonly BrowserSelectOption[],
+		timeoutMs: number,
+		signal: AbortSignal,
+	): Promise<string[]> {
 		const node = await this.#selectorNode(selector, timeoutMs, "present", signal);
 		return await selectOptions(node, values, signal);
 	}

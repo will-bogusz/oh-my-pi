@@ -507,3 +507,43 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	},
 	60_000,
 );
+
+// Models write Playwright's `selectOption({ label })` from muscle memory; the
+// object form used to miss a label printed verbatim in the offered list.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"selects by Playwright's { label } / { value } option form and keeps each key matching only what it names",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(FIELDS_PAGE, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				expect(await run<string[]>('return await tab.select("#fuel", { label: "Electric" });')).toEqual(["ele"]);
+				expect(await run<string[]>('return await tab.select("#fuel", { value: "pet" });')).toEqual(["pet"]);
+				expect(
+					await run<string[]>('return await (await tab.waitFor("#fuel")).select({ label: "Electric" });'),
+				).toEqual(["ele"]);
+				// `value` names the page-internal key only, so the label it shows is not one.
+				expect(await runError('await tab.select("#fuel", { value: "Petrol" });')).toContain(
+					'matched no option for {"value":"Petrol"}',
+				);
+				// Both keys given must land on the same option.
+				expect(await runError('await tab.select("#fuel", { label: "Electric", value: "pet" });')).toContain(
+					'matched no option for {"label":"Electric","value":"pet"}',
+				);
+				const refused = await runError('await tab.select("#fuel", { label: "Nope" });');
+				expect(refused).toContain('matched no option for {"label":"Nope"}');
+				expect(refused).toContain('"Petrol"="pet"');
+				expect(await runError('await tab.select("#fuel", {});')).toContain(
+					'select() cannot match the option {}: pass the option\'s text or value as a string, or one of { label: "…" }, { value: "…" }, { label: "…", value: "…" }.',
+				);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);

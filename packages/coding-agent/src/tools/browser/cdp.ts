@@ -3,6 +3,7 @@ import type { CDPSession, Frame, Page } from "puppeteer-core";
 import { _keyDefinitions } from "puppeteer-core/internal/common/USKeyboardLayout.js";
 import { ToolError } from "../tool-errors";
 import { type AxFrame, type AxNode, buildAxTree } from "./observation";
+import { type BrowserSelectOption, normalizeSelectOptions, SELECT_OPTIONS_SOURCE } from "./select-options";
 
 /**
  * The browser primitives the observe → ref → act loop runs on: raw CDP keyed by
@@ -469,39 +470,14 @@ export async function typeIntoNode(node: CdpNode, text: string, signal?: AbortSi
 	await typeText(node.session, text, signal);
 }
 
-/**
- * Assign the full selection first, then read back: on a single `<select>`,
- * un-selecting the current option mid-loop leaves the browser reporting it
- * selected until another option takes over, which double-counted the old value.
- */
-const SELECT_OPTIONS = `function (values) {
-	const select = this;
-	if (select.tagName !== "SELECT") throw new Error("select() requires a <select> element");
-	const options = Array.from(select.options);
-	// A caller reading the page names an option by the label it shows; the
-	// value is a page-internal key that often differs from it.
-	const names = option => [option.value, option.label, (option.textContent || "").trim()];
-	const missing = values.filter(value => !options.some(option => names(option).includes(value)));
-	if (missing.length) {
-		const shown = options.slice(0, 30).map(option =>
-			option.label === option.value
-				? JSON.stringify(option.value)
-				: JSON.stringify(option.label) + "=" + JSON.stringify(option.value));
-		throw new Error(
-			"select() matched no option for " + missing.map(value => JSON.stringify(value)).join(", ") +
-			"; this <select> offers " + (shown.join(", ") + (options.length > 30 ? ", …" : "")));
-	}
-	const wanted = new Set(values);
-	for (const option of options) option.selected = names(option).some(name => wanted.has(name));
-	const selected = [];
-	for (const option of options) if (option.selected) selected.push(option.value);
-	select.dispatchEvent(new Event("input", { bubbles: true }));
-	select.dispatchEvent(new Event("change", { bubbles: true }));
-	return selected;
-}`;
+const SELECT_OPTIONS = `function (specs) { return (${SELECT_OPTIONS_SOURCE})(this, specs); }`;
 
-export async function selectOptions(node: CdpNode, values: readonly string[], signal?: AbortSignal): Promise<string[]> {
-	const selected = await callOnNode(node, SELECT_OPTIONS, [values], signal);
+export async function selectOptions(
+	node: CdpNode,
+	values: readonly BrowserSelectOption[],
+	signal?: AbortSignal,
+): Promise<string[]> {
+	const selected = await callOnNode(node, SELECT_OPTIONS, [normalizeSelectOptions(values)], signal);
 	return Array.isArray(selected) ? selected.map(String) : [];
 }
 

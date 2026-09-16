@@ -23,6 +23,7 @@ import { type AriaSnapshotOptions, assertSelectorString, buildAriaSnapshotScript
 import { DEFAULT_VIEWPORT } from "../launch";
 import { extractReadableFromHtml, type ReadableFormat } from "../readable";
 import { cloneSafe, RunOutput } from "../run-output";
+import { type BrowserSelectOption, normalizeSelectOptions, SELECT_OPTIONS_SOURCE } from "../select-options";
 import type { Observation, ReadyInfo, RunResultOk, ScreenshotResult, SessionSnapshot } from "../tab-protocol";
 import {
 	type CmuxEvalResult,
@@ -527,8 +528,8 @@ export class CmuxTab {
 		await this.#selectorAction(selector, "scrollIntoView");
 	}
 
-	async select(selector: string, ...values: string[]): Promise<string[]> {
-		return await this.#selectorAction<string[]>(selector, "select", { values });
+	async select(selector: string, ...values: BrowserSelectOption[]): Promise<string[]> {
+		return await this.#selectorAction<string[]>(selector, "select", { specs: normalizeSelectOptions(values) });
 	}
 
 	async extract(format: ReadableFormat = "markdown"): Promise<string> {
@@ -937,18 +938,8 @@ export class CmuxTab {
 					return true;
 				case "scrollIntoView":
 					return true;
-				case "select": {
-					const values = Array.isArray(args.values) ? args.values.map(String) : [String(args.value || "")];
-					if (element.tagName !== "SELECT") throw new Error("tab.select() requires a <select> element");
-					const wanted = new Set(values);
-					const selected = [];
-					for (const option of Array.from(element.options)) {
-						option.selected = wanted.has(option.value);
-						if (option.selected) selected.push(option.value);
-					}
-					inputEvent(element);
-					return selected;
-				}
+				case "select":
+					return (${SELECT_OPTIONS_SOURCE})(element, args.specs);
 				case "uploadFile": {
 					if (element.tagName !== "INPUT" || element.type !== "file") {
 						throw new Error("tab.uploadFile() requires an <input type=file> element");
@@ -1199,6 +1190,10 @@ class CmuxElementHandle {
 
 	async boundingBox(): Promise<BoundingBox | null> {
 		return await this.#tab.elementBox(this.#selector);
+	}
+
+	async select(...values: BrowserSelectOption[]): Promise<string[]> {
+		return await this.#tab.select(this.#selector, ...values);
 	}
 
 	async uploadFile(...paths: string[]): Promise<void> {
