@@ -7,7 +7,7 @@ import type { DesktopSystemWindow } from "@oh-my-pi/pi-natives";
 import { CuaComputerSession } from "@oh-my-pi/pi-coding-agent/tools/computer/cua-session";
 import type { CuaDriver, CuaToolResult } from "@oh-my-pi/pi-coding-agent/tools/computer/driver";
 import { ToolAbortError, ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
-import type { ComputerImage, ComputerOperationContext } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
+import type { ComputerImage, ComputerOperationContext, ComputerPoint } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
 import type { WindowRosterSample } from "@oh-my-pi/pi-coding-agent/tools/computer/interruption";
 /** Upstream's generated tool contract at `e7e141ae` (`libs/cua-driver/contract/manifest.json`). */
 import contract from "../fixtures/cua-contract-manifest.json";
@@ -1293,14 +1293,27 @@ it("asks for the window's point grid and takes coordinates in it", async () => {
 			name: "click",
 			args: { pid: 101, window_id: 1, x: 2, y: 0, delivery_mode: "background" },
 		});
+		// Both idioms name the same point; the bench wrote `{x, y}` 4 runs out of 4.
+		await f.session.click(f.context, f.window, { x: 100, y: 0 });
+		expect(f.lastDispatch()).toEqual({
+			name: "click",
+			args: { pid: 101, window_id: 1, x: 2, y: 0, delivery_mode: "background" },
+		});
 		await expect(f.session.click(f.context, f.window, [200, 0])).rejects.toThrow("InvalidCoordinates");
+		await expect(f.session.click(f.context, f.window, { x: 200, y: 0 })).rejects.toThrow("InvalidCoordinates");
+		// An element's box is not a point: it would silently click a corner.
 		await expect(
-			f.session.click(f.context, f.window, { x: 10, y: 10 } as unknown as [number, number]),
-		).rejects.toThrow('InvalidCoordinates: a point is [x, y] in points read off the last screenshot, not {"x":10,"y":10}');
+			f.session.click(f.context, f.window, { x: 10, y: 10, width: 20, height: 20 } as unknown as ComputerPoint),
+		).rejects.toThrow(
+			'InvalidCoordinates: a point is [x, y] or { x, y } in points read off the last screenshot, not {"x":10,"y":10,"width":20,"height":20}',
+		);
+		await expect(
+			f.session.click(f.context, f.window, { x: "10", y: 10 } as unknown as ComputerPoint),
+		).rejects.toThrow("InvalidCoordinates: a point is [x, y] or { x, y }");
 		f.state.failCapture = true;
 		await expect(f.session.captureWindow(f.context, f.window)).rejects.toThrow("Screenshot unavailable");
 		await expect(f.session.click(f.context, f.window, [100, 0])).rejects.toThrow("StaleFrame");
-		expect(f.calls.filter(call => call.name === "click")).toHaveLength(1);
+		expect(f.calls.filter(call => call.name === "click")).toHaveLength(2);
 	} finally {
 		await f.close();
 	}
@@ -1815,6 +1828,9 @@ it("maps requested window drag timing and observed pixels to the SDK wire contra
 				},
 			},
 		]);
+		// The shape T4 reached for 4 runs out of 4, on either end of the gesture.
+		await f.session.drag(f.context, f.window, { x: 0, y: 0 }, { x: 100, y: 0 }, { delivery: "foreground" });
+		expect(f.lastDispatch()?.args).toMatchObject({ from_x: 0, from_y: 0, to_x: 2, to_y: 0 });
 	} finally {
 		await f.close();
 	}

@@ -1,10 +1,10 @@
 /**
- * `[x, y]` in points: window-local for a window's own actions, display
- * coordinates for `computer.*` ones. Captures arrive on that same grid, so a
- * point read off a screenshot is a point an action takes, and an element's
- * `bounds` (also points) convert by subtracting the window's origin.
+ * `[x, y]` or `{ x, y }` in points: window-local for a window's own actions,
+ * display coordinates for `computer.*` ones. Captures arrive on that same
+ * grid, so a point read off a screenshot is a point an action takes, and an
+ * element's `bounds` (also points) convert by subtracting the window's origin.
  */
-type ComputerPoint = [number, number];
+type ComputerPoint = [number, number] | { x: number; y: number };
 type ComputerTarget = string | ComputerPoint;
 type ComputerDirection = "up" | "down" | "left" | "right";
 /**

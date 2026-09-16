@@ -494,7 +494,7 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 		doubleClick: (x: number, y: number, options?: ActionOptions) =>
 			session.desktopClick(mutationContext(getContext), x, y, { ...options, count: 2 }),
 		move: (x: number, y: number, options?: ActionOptions) => session.desktopMove(mutationContext(getContext), x, y, options),
-		drag: (points: Array<[number, number]>, options?: ActionOptions) =>
+		drag: (points: ComputerPoint[], options?: ActionOptions) =>
 			session.desktopDrag(mutationContext(getContext), points, options),
 		scroll: (x: number, y: number, options?: ActionOptions & { dx?: number; dy?: number }) =>
 			session.desktopScroll(mutationContext(getContext), x, y, options),

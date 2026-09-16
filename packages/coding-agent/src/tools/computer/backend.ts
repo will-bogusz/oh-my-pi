@@ -146,7 +146,7 @@ export interface ComputerBackend {
 	): Promise<ComputerActionResult>;
 	desktopDrag(
 		context: ComputerOperationContext,
-		points: [number, number][],
+		points: ComputerPoint[],
 		options?: ActionOptions,
 	): Promise<ComputerActionResult>;
 	desktopScroll(

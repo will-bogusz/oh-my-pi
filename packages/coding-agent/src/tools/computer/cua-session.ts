@@ -169,8 +169,13 @@ function sameBounds(a: ComputerBounds, b: ComputerBounds): boolean {
 }
 function pointPair(point: unknown): [number, number] {
 	if (Array.isArray(point) && point.length === 2) return [Number(point[0]), Number(point[1])];
+	if (point !== null && typeof point === "object") {
+		const row = point as Wire;
+		if (Object.keys(row).length === 2 && typeof row.x === "number" && typeof row.y === "number")
+			return [row.x, row.y];
+	}
 	throw new ToolError(
-		`InvalidCoordinates: a point is [x, y] in points read off the last screenshot, not ${JSON.stringify(point)}`,
+		`InvalidCoordinates: a point is [x, y] or { x, y } in points read off the last screenshot, not ${JSON.stringify(point)}`,
 	);
 }
 /**
@@ -1653,7 +1658,10 @@ export class CuaComputerSession implements ComputerBackend {
 	/** The element a write addressed, as the observation the caller read named it. */
 	#writeTarget(target: ComputerTarget | undefined): string {
 		if (target === undefined) return "the window's focused element";
-		if (typeof target !== "string") return `(${target[0]},${target[1]})`;
+		if (typeof target !== "string") {
+			const [x, y] = pointPair(target);
+			return `(${x},${y})`;
+		}
 		const label = this.#elements.get(target)?.element.label;
 		return label ? `${target} ${JSON.stringify(label)}` : target;
 	}
@@ -1930,7 +1938,7 @@ export class CuaComputerSession implements ComputerBackend {
 	async #primaryDisplay(): Promise<PrimaryDisplay | undefined> {
 		return primaryDisplay((await this.#call("get_screen_size", {})).data);
 	}
-	async #desktopPoints(context: Context, points: [number, number][]): Promise<{ x: number; y: number }[]> {
+	async #desktopPoints(context: Context, points: ComputerPoint[]): Promise<{ x: number; y: number }[]> {
 		const frame = this.#desktopFrame;
 		if (!frame)
 			throw new ToolError(
@@ -1986,7 +1994,7 @@ export class CuaComputerSession implements ComputerBackend {
 	}
 	desktopDrag(
 		context: Context,
-		points: [number, number][],
+		points: ComputerPoint[],
 		options: ActionOptions = {},
 	): Promise<ComputerActionResult> {
 		return this.#schedule(context, "desktopDrag", true, async () => {

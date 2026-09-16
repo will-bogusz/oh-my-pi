@@ -249,4 +249,5 @@ export interface ActionOptions {
 	count?: number;
 	modifiers?: string[];
 }
-export type ComputerTarget = string | [number, number];
+export type ComputerPoint = [number, number] | { x: number; y: number };
+export type ComputerTarget = string | ComputerPoint;
