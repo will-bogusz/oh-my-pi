@@ -11,9 +11,9 @@ Model
 
 Evidence
 - A result states what it can prove: `confirmed` (state read back), `unverifiable` (delivered, unproven), `suspected_noop` (positive reason to think nothing happened), or a typed refusal (nothing dispatched; it names its route). Dispatch is not proof — read the postcondition back, and inspect a failed reply, which may still have acted.
-- Unverified is not failed: re-observe rather than repeat or escalate. A refusal that names a route is the opposite case — take the route.
+- Unverified is not failed. Re-observe freely — a read changes nothing on the screen — but never re-fire a mutation that reported delivery: the second one lands too. A refusal that names a route is the opposite case — take the route.
 - `setValue` changes the accessibility value, never disk. Save through the app, then confirm.
-- Results carry their own next step — a partial tree, passed-over windows, an attached sheet, a hidden menu bar, a refusal's route. Read them before choosing what to do.
+- Results carry their own next step — a partial tree, passed-over windows, a window an action opened, a nested sheet, a hidden menu bar, a refusal's route. Read them before choosing what to do.
 
 Boundaries
 - Never act on a dialog you did not open — password, unlock, permission, crash alert: observe it, tell the user what it asks, wait.{{#if linux}} Nothing is refused for you here and `interruptedBy` is never set.{{else}} An `auth`, `permission` or `lock` window (password/TCC prompt, lock screen, crash alert) refuses every mutation with `Interrupted:` and `interruptedBy`. One exception: a crash alert for an app you launched that exited — press "Ignore", do not relaunch, tell the user.{{/if}}
