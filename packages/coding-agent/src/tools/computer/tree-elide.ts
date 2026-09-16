@@ -21,8 +21,8 @@ import type { StructuralElisionResult } from "../../session/streaming-output";
 const ROW_PATTERN = /^((?:  )*)- \[([^\]\s]+)\] (\S+)(.*)$/;
 /** Attribute name at the start of the remaining attribute run. */
 const ATTRIBUTE_PATTERN = /^ ([a-z]+)=/;
-/** Actions every macOS node advertises; they say nothing about the node. */
-const AMBIENT_ACTIONS: Record<string, true> = { show_menu: true, cancel: true };
+/** Actions only container roles advertise; they say nothing about the node. */
+const AMBIENT_ACTIONS: Record<string, true> = { cancel: true };
 /** Roles that only ever decorate, whatever they claim to support. */
 const SEPARATOR_ROLES: Record<string, true> = { AXSeparator: true, AXSplitter: true, AXMenuItemSeparator: true };
 /** `value=` lengths tried in order; dropping the attribute is a later resort. */

@@ -153,6 +153,7 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		description: undefined as string | undefined,
 		actions: undefined as unknown,
 		backgroundActions: undefined as unknown,
+		customActions: undefined as unknown,
 		elementDoubleClick: undefined as unknown,
 		/** Absent on rows whose provider reported no frame: the ref has no point. */
 		elementFrame: { x: 10, y: 20, w: 200, h: 100 } as Wire | undefined,
@@ -233,6 +234,7 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 							description: state.description,
 							actions: state.actions ?? (linux ? ["press", "showContextMenu"] : undefined),
 							background_actions: state.backgroundActions,
+							custom_actions: state.customActions,
 							enabled: false,
 							selected: false,
 							depth: 0,
@@ -1951,25 +1953,42 @@ it("preserves SDK launch conflict identity and delivery evidence without retryin
 	}
 });
 
-it("maps observed semantic actions to usable perform names without inventing capabilities", async () => {
+it("names every action a node advertises and dispatches only the ones perform has", async () => {
 	const f = await fixture();
 	try {
 		let observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]!.actions).toBeUndefined();
-		f.state.actions = ["AXConfirm", "AXRaise", "AXOpen", "AXConfirm", null, "toString"];
+		// The T4 row whose only route to the move command is its context menu.
+		f.state.role = "AXTextField";
+		f.state.label = "Buy milk";
+		f.state.value = "Buy milk";
+		f.state.actions = ["AXShowMenu", "AXConfirm"];
 		observation = await f.session.observe(f.context, f.window);
-		const element = observation.elements[0]!;
-		expect(element.actions).toEqual(["confirm", "open"]);
-		expect(observation.tree).toContain('actions=["confirm","open"]');
-		await f.session.perform(f.context, f.window, element.ref, element.actions![0]!);
+		expect(observation.tree).toContain('AXTextField "Buy milk" value="Buy milk"');
+		expect(observation.tree).toContain('actions=["show_menu","confirm"]');
+		await f.session.perform(f.context, f.window, observation.elements[0]!.ref, "show_menu");
 		expect(f.lastDispatch()).toMatchObject({
 			name: "click",
-			args: { action: "confirm", element_token: "s2:1", window_id: 1, pid: 101 },
+			args: { action: "show_menu", element_token: "s2:1", window_id: 1, pid: 101 },
 		});
-		f.state.actions = [];
+		// A name no rung dispatches still says what the node is, so it renders
+		// verbatim; `perform` refuses it and names what it can send.
+		f.state.actions = ["AXConfirm", "AXRaise", "AXOpen", "AXConfirm", null, "toString"];
+		f.state.customActions = ["Add Reminder", "Snooze"];
 		observation = await f.session.observe(f.context, f.window);
-		expect(observation.elements[0]!.actions).toEqual([]);
+		const element = observation.elements[0]!;
+		expect(element.actions).toEqual(["confirm", "AXRaise", "open", "toString", "Add Reminder", "Snooze"]);
+		expect(observation.tree).toContain('actions=["confirm","AXRaise","open","toString","Add Reminder","Snooze"]');
+		expect(() => f.session.perform(f.context, f.window, element.ref, "AXRaise")).toThrow(
+			"perform dispatches press · show_menu · pick · confirm · cancel · open",
+		);
+		f.state.actions = [];
+		f.state.customActions = undefined;
+		observation = await f.session.observe(f.context, f.window);
+		expect(observation.elements[0]!.actions).toBeUndefined();
 		expect(observation.tree).not.toContain(" actions=");
+		f.state.customActions = "Snooze";
+		await expect(f.session.observe(f.context, f.window)).rejects.toThrow("Malformed Cua custom actions");
 	} finally {
 		await f.close();
 	}
@@ -2148,7 +2167,7 @@ it("uses reported background capabilities instead of advertising a known refused
 		expect(observation.elements[0]!.actions).toEqual(["confirm"]);
 		f.state.backgroundActions = [];
 		observation = await f.session.observe(f.context, f.window);
-		expect(observation.elements[0]!.actions).toEqual([]);
+		expect(observation.elements[0]!.actions).toBeUndefined();
 		f.state.backgroundActions = "AXConfirm";
 		await expect(f.session.observe(f.context, f.window)).rejects.toThrow("Malformed Cua background actions");
 	} finally {
@@ -2320,7 +2339,7 @@ it("reads a Linux capture and tree that report neither a frame flag nor an exhau
 		// `elements_complete` is hard-coded false on Linux; equal counts carry the answer.
 		expect(observation.complete).toBe(true);
 		expect(observation.tree).not.toContain("completeness is unknown");
-		expect(observation.elements[0]!.actions).toEqual(["press"]);
+		expect(observation.elements[0]!.actions).toEqual(["press", "showContextMenu"]);
 		// No `screenshot_frame_valid` key at all, and the pixels are still usable.
 		expect(observation.screenshotError).toBeUndefined();
 		expect(observation.screenshot?.target).toBe("6291459");

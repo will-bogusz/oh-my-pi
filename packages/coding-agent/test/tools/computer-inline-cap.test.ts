@@ -97,6 +97,10 @@ describe("computer observation inline cap", () => {
 			'- [n1] AXWindow "Export"',
 			'  - [n2] AXButton "Export" enabled=true actions=["press"]',
 			'  - [n3] AXImage "" help="Progress spinner"',
+			// The T4 shape: the context menu is this row's only route, so the row
+			// is as load-bearing as one advertising `press`.
+			'  - [n4] AXTextField "Buy milk" value="Buy milk" actions=["show_menu"]',
+			'  - [n5] AXPopover "" actions=["cancel"]',
 			...Array.from({ length: 400 }, (_, index) => `  - [d${index}] AXImage "" value=""`),
 			...Array.from({ length: 400 }, (_, index) => `  - [s${index}] AXMenuItem "" actions=["press","pick"]`),
 		];
@@ -108,6 +112,9 @@ describe("computer observation inline cap", () => {
 
 		expect(elided.text).toContain('- [n2] AXButton "Export" enabled=true actions=["press"]');
 		expect(elided.text).toContain('- [n3] AXImage "" help="Progress spinner"');
+		// Its value repeats the label, so only that redundancy goes.
+		expect(elided.text).toContain('- [n4] AXTextField "Buy milk" actions=["show_menu"]');
+		expect(elided.text).not.toContain("[n5]");
 		expect(elided.text).not.toMatch(/\[d\d+\]/);
 		expect(elided.text).not.toMatch(/\[s\d+\]/);
 	});

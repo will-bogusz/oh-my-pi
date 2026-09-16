@@ -14,7 +14,7 @@ import {
 	type WindowRosterSample,
 } from "./interruption";
 import { appWindows, isCaptureLeaseArtifact } from "./roster";
-import { observedSemanticActions } from "./semantic-actions";
+import { PERFORMABLE_ACTIONS, observedActions } from "./semantic-actions";
 import type {
 	ActionOptions,
 	ComputerActionResult,
@@ -1166,7 +1166,9 @@ export class CuaComputerSession implements ComputerBackend {
 			const ref = `n${++this.#refSeq}`;
 			if (row.background_actions != null && !Array.isArray(row.background_actions))
 				throw new ToolError("Malformed Cua background actions");
-			const actions = row.background_actions ?? row.actions;
+			if (row.custom_actions != null && !Array.isArray(row.custom_actions))
+				throw new ToolError("Malformed Cua custom actions");
+			const actions = observedActions(row.background_actions ?? row.actions, row.custom_actions);
 			const element = Object.freeze({
 				ref,
 				pid: window.pid,
@@ -1187,7 +1189,7 @@ export class CuaComputerSession implements ComputerBackend {
 					: {}),
 				...(typeof row.enabled === "boolean" ? { enabled: row.enabled } : {}),
 				...(typeof row.selected === "boolean" ? { selected: row.selected } : {}),
-				...(Array.isArray(actions) ? { actions: observedSemanticActions(actions) } : {}),
+				...(actions?.length ? { actions } : {}),
 				...(row.frame ? { bounds: bounds(row.frame) } : {}),
 			});
 			this.#elements.set(ref, {
@@ -1708,8 +1710,10 @@ export class CuaComputerSession implements ComputerBackend {
 		ref: string,
 		action: string,
 	): Promise<ComputerActionResult> {
-		if (!["press", "show_menu", "pick", "confirm", "cancel", "open"].includes(action))
-			unsupported(`AX action '${action}'`);
+		if (!PERFORMABLE_ACTIONS.includes(action))
+			unsupported(
+				`AX action '${action}'; perform dispatches ${PERFORMABLE_ACTIONS.join(" · ")}. A tree row names every action its node advertises, including ones only the app itself can run — reach those through the control's own UI`,
+			);
 		return this.#targetAction(context, "click", window, ref, { action, delivery_mode: "background" }, window.id);
 	}
 	hover(

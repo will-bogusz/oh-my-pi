@@ -106,7 +106,7 @@ export interface ComputerElementSnapshot {
 	/** Unavailable platform state stays undefined; never infer enabled or disabled. */
 	enabled?: boolean;
 	selected?: boolean;
-	/** Observed semantic actions accepted by perform; absence means unavailable. */
+	/** Every action the provider advertises, under the name `perform` takes where it has one. */
 	actions?: readonly string[];
 	/** Observed geometry in points, in display coordinates. */
 	bounds?: ComputerBounds;
