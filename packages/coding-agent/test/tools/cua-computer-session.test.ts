@@ -1088,6 +1088,66 @@ it("names the menus and the matched menu's items when a menu path is refused", a
 	}
 });
 
+/**
+ * Nothing in the vendored contract returns an open menu's items: a submenu as
+ * the final segment gets `AXPress` (`choose_action(final_segment=true)`) and
+ * the reply is one sentence, so the bench guessed leaf names blind. Both
+ * shapes of the field are consumed here — the listing a resolved submenu
+ * answers with, and the candidates a refused segment names — and neither is
+ * required: without them the rendered menu bar stays the source.
+ */
+it("reads a submenu's items instead of pressing it, from either shape the driver reports", async () => {
+	const f = await fixture();
+	const items = [
+		{ title: "Phone", enabled: true },
+		{ title: "Email", enabled: true, shortcut: "⌘E" },
+		{ title: "Related People", enabled: true, has_submenu: true },
+		{ title: "Job Title", enabled: false },
+	];
+	try {
+		f.state.hook = async name =>
+			name === "invoke_menu" ? reply({ items, resolved_path: ["Card", "Add Field"] }, []) : undefined;
+		const listed = await f.session.menu(f.context, f.window, ["Card", "Add Field"], { delivery: "foreground" });
+		expect(listed.text).toBe(
+			'Card › Add Field is a submenu; nothing was invoked. Its items: Phone · Email (⌘E) · Related People › · Job Title (disabled). Invoke one with win.menu(["Card","Add Field","Phone"], { delivery: "foreground" }); a name marked › lists its own items the same way.',
+		);
+		// A leaf segment still invokes, and its reply is the driver's own.
+		f.state.hook = undefined;
+		const invoked = await f.session.menu(f.context, f.window, ["Card", "Add Field", "Phone"], {
+			delivery: "foreground",
+		});
+		expect(invoked.text).toContain("SDK response");
+		// The refusal path prefers the driver's own listing over a tree walk.
+		f.state.hook = async name =>
+			name === "invoke_menu"
+				? {
+						text: "invoke_menu: path segment 2 was not found",
+						structuredJson: JSON.stringify({
+							status: "refused",
+							refusal: {
+								code: "menu_path_unavailable",
+								message: "invoke_menu: path segment 2 was not found",
+								failed_segment: 2,
+								items,
+							},
+						}),
+						isError: true,
+						images: [],
+					}
+				: undefined;
+		const walks = f.calls.filter(call => call.name === "get_window_state").length;
+		await expect(
+			f.session.menu(f.context, f.window, ["Card", "Add Field", "Job Ttile"], { delivery: "foreground" }),
+		).rejects.toThrow(
+			'Menu path ["Card","Add Field","Job Ttile"] has no "Job Ttile" under Card › Add Field. Card › Add Field: Phone · Email (⌘E) · Related People › · Job Title (disabled). Segment titles are matched exactly.',
+		);
+		expect(f.calls.filter(call => call.name === "get_window_state").length).toBe(walks);
+	} finally {
+		await f.close();
+	}
+});
+
+
 it("reports whether a written value survived the app's own end-of-edit", async () => {
 	const f = await fixture();
 	try {

@@ -395,6 +395,58 @@ function menuRefusalNames(markdown: string, path: readonly string[], failed: num
 		listing.items.length ? ` ${trail}: ${menuTitles(listing.items)}.` : ""
 	} Segment titles are matched exactly.`;
 }
+interface MenuItem {
+	title: string;
+	enabled?: boolean;
+	submenu?: boolean;
+	shortcut?: string;
+}
+function menuItems(value: unknown): MenuItem[] | undefined {
+	if (!Array.isArray(value)) return undefined;
+	const items: MenuItem[] = [];
+	for (const listed of value) {
+		if (listed === null || typeof listed !== "object") continue;
+		const row = listed as Wire;
+		if (typeof row.title !== "string") continue;
+		items.push({
+			title: row.title.trim(),
+			...(typeof row.enabled === "boolean" ? { enabled: row.enabled } : {}),
+			...(row.has_submenu === true ? { submenu: true } : {}),
+			...(typeof row.shortcut === "string" && row.shortcut ? { shortcut: row.shortcut } : {}),
+		});
+	}
+	return items;
+}
+function menuItemTitles(items: readonly MenuItem[]): string {
+	const listed = items
+		.slice(0, MENU_TITLE_LIMIT)
+		.map(
+			item =>
+				`${item.title || "(untitled)"}${item.shortcut ? ` (${item.shortcut})` : ""}${
+					item.enabled === false ? " (disabled)" : ""
+				}${item.submenu ? " ›" : ""}`,
+		);
+	return `${listed.join(" · ")}${items.length > listed.length ? ` · (+${items.length - listed.length} more)` : ""}`;
+}
+function menuSubmenuListing(path: readonly string[], items: readonly MenuItem[]): string {
+	const leaf = items.find(item => !item.submenu) ?? items[0]!;
+	return `${path.join(" › ")} is a submenu; nothing was invoked. Its items: ${menuItemTitles(items)}. Invoke one with win.menu(${JSON.stringify([...path, leaf.title])}, { delivery: "foreground" }); a name marked › lists its own items the same way.`;
+}
+function menuRefusalItems(
+	path: readonly string[],
+	failed: number,
+	items: readonly MenuItem[],
+	ambiguous: boolean,
+): string {
+	const trail = path.slice(0, failed);
+	return `Menu path ${JSON.stringify(path)} ${
+		ambiguous
+			? `matches more than one ${JSON.stringify(path[failed] ?? "")}`
+			: `has no ${JSON.stringify(path[failed] ?? "")}`
+	}${trail.length ? ` under ${trail.join(" › ")}` : " in the menu bar"}. ${
+		trail.length ? trail.join(" › ") : "Menus"
+	}: ${menuItemTitles(items)}. Segment titles are matched exactly.`;
+}
 /**
  * The driver's own escalation advice: the rung it believes would land, on a
  * reply whose text does not say so. A background chord always answers
@@ -1903,26 +1955,31 @@ export class CuaComputerSession implements ComputerBackend {
 		});
 	}
 	/**
-	 * The titles the refused path could have named, read from the same window
-	 * whose menu bar the driver just resolved against. No ref is minted and
-	 * none is invalidated: this walks the rendered tree only.
+	 * The titles the refused path could have named. The driver lists them
+	 * itself where it reports `items` for the level it failed at; otherwise
+	 * they are read from the rendered menu bar of the same window it just
+	 * resolved against. Neither path mints a ref or invalidates one.
 	 */
 	async #menuNames(window: ComputerWindowIdentity, menuPath: string[], error: ToolError): Promise<string | undefined> {
 		const details = error.context;
-		const refusal = details && typeof details === "object" ? (details as Wire).refusal : undefined;
-		const code = refusal && typeof refusal === "object" ? (refusal as Wire).code : undefined;
-		if (code !== "menu_path_unavailable") return undefined;
+		const data = details && typeof details === "object" ? (details as Wire) : {};
+		const refusal = data.refusal && typeof data.refusal === "object" ? (data.refusal as Wire) : {};
+		if (refusal.code !== "menu_path_unavailable") return undefined;
 		const refused = MENU_REFUSAL_SEGMENT.exec(error.message);
-		const failed = refused ? Number(refused[1]) : undefined;
+		const failed =
+			typeof refusal.failed_segment === "number" ? refusal.failed_segment : refused ? Number(refused[1]) : undefined;
 		if (failed === undefined || failed >= menuPath.length) return undefined;
-		const { data } = await this.#call("get_window_state", {
+		const ambiguous = refused?.[2] === "is ambiguous";
+		const listed = menuItems(refusal.items ?? data.items);
+		if (listed?.length) return menuRefusalItems(menuPath, failed, listed, ambiguous);
+		const { data: state } = await this.#call("get_window_state", {
 			...windowArgs(window),
 			include_accessibility_tree: true,
 			include_screenshot: false,
 			max_depth: MENU_WALK_DEPTH,
 		});
-		if (typeof data.tree_markdown !== "string") return undefined;
-		return menuRefusalNames(data.tree_markdown, menuPath, failed, refused![2] === "is ambiguous") || undefined;
+		if (typeof state.tree_markdown !== "string") return undefined;
+		return menuRefusalNames(state.tree_markdown, menuPath, failed, ambiguous) || undefined;
 	}
 	menu(
 		context: Context,
@@ -1935,7 +1992,14 @@ export class CuaComputerSession implements ComputerBackend {
 			const current = await this.#current(window);
 			throwIfAborted(context.signal);
 			try {
-				return await this.#action("invoke_menu", { ...windowArgs(current), path: menuPath });
+				const result = await this.#action("invoke_menu", { ...windowArgs(current), path: menuPath });
+				const data = result.data !== null && typeof result.data === "object" ? (result.data as Wire) : {};
+				const listed = menuItems(data.items);
+				if (!listed?.length) return result;
+				const resolved = Array.isArray(data.resolved_path)
+					? data.resolved_path.filter((segment): segment is string => typeof segment === "string")
+					: menuPath;
+				return { ...result, text: menuSubmenuListing(resolved, listed) };
 			} catch (error) {
 				// An aborted call is not a ToolError and keeps its own identity;
 				// a refusal the menu bar cannot explain stays exactly as written.
