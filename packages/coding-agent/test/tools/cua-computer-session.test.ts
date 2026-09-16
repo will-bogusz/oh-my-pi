@@ -2220,13 +2220,25 @@ it("names every action a node advertises and dispatches only the ones perform ha
 		// A name no rung dispatches still says what the node is, so it renders
 		// verbatim; `perform` refuses it and names what it can send.
 		f.state.actions = ["AXConfirm", "AXRaise", "AXOpen", "AXConfirm", null, "toString"];
-		f.state.customActions = ["Add Reminder", "Snooze"];
+		// macOS ships an app's own actions inside AXUIElementCopyActionNames as
+		// "Name:Pin List\nTarget:0x0\nSelector:(null)", so the driver reports the
+		// readable name beside the string that invokes it.
+		f.state.customActions = [
+			{ name: "Add Reminder", raw: "Name:Add Reminder\nTarget:0x0\nSelector:(null)" },
+			{ name: "Snooze", raw: "Name:Snooze\nTarget:0x0\nSelector:(null)" },
+		];
 		observation = await f.session.observe(f.context, f.window);
 		const element = observation.elements[0]!;
 		expect(element.actions).toEqual(["confirm", "AXRaise", "open", "toString", "Add Reminder", "Snooze"]);
 		expect(observation.tree).toContain('actions=["confirm","AXRaise","open","toString","Add Reminder","Snooze"]');
+		// A custom action is invoked by the raw string, never by the label.
+		await f.session.perform(f.context, f.window, element.ref, "Snooze");
+		expect(f.lastDispatch()).toMatchObject({
+			name: "click",
+			args: { action: "Name:Snooze\nTarget:0x0\nSelector:(null)" },
+		});
 		expect(() => f.session.perform(f.context, f.window, element.ref, "AXRaise")).toThrow(
-			"perform dispatches press · show_menu · pick · confirm · cancel · open",
+			"perform dispatches press · show_menu · pick · confirm · cancel · open and any custom action the element's own row advertises",
 		);
 		f.state.actions = [];
 		f.state.customActions = undefined;

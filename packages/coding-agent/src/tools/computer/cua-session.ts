@@ -44,6 +44,8 @@ interface Binding {
 	token: string;
 	snapshotId: string;
 	element: ComputerElementSnapshot;
+	/** An app's own action names, each against the wire string that invokes it. */
+	customActions: ReadonlyMap<string, string>;
 	doubleClickAtCenter: boolean;
 }
 interface TreeRow {
@@ -177,6 +179,22 @@ function pointPair(point: unknown): [number, number] {
 	throw new ToolError(
 		`InvalidCoordinates: a point is [x, y] or { x, y } in points read off the last screenshot, not ${JSON.stringify(point)}`,
 	);
+}
+function customActions(value: unknown): ReadonlyMap<string, string> {
+	const actions = new Map<string, string>();
+	if (!Array.isArray(value)) return actions;
+	for (const listed of value) {
+		if (typeof listed === "string") {
+			if (listed) actions.set(listed, listed);
+			continue;
+		}
+		if (listed === null || typeof listed !== "object") continue;
+		const row = listed as Wire;
+		const name = typeof row.name === "string" ? row.name.trim() : "";
+		if (!name) continue;
+		actions.set(name, typeof row.raw === "string" && row.raw ? row.raw : name);
+	}
+	return actions;
 }
 /**
  * Byte budget for one saved capture. Well above what a UI frame at point size
@@ -1301,7 +1319,8 @@ export class CuaComputerSession implements ComputerBackend {
 				throw new ToolError("Malformed Cua background actions");
 			if (row.custom_actions != null && !Array.isArray(row.custom_actions))
 				throw new ToolError("Malformed Cua custom actions");
-			const actions = observedActions(row.background_actions ?? row.actions, row.custom_actions);
+			const custom = customActions(row.custom_actions);
+			const actions = observedActions(row.background_actions ?? row.actions, [...custom.keys()]);
 			const element = Object.freeze({
 				ref,
 				pid: window.pid,
@@ -1330,6 +1349,7 @@ export class CuaComputerSession implements ComputerBackend {
 				token,
 				snapshotId,
 				element,
+				customActions: custom,
 				doubleClickAtCenter: reply.data.element_double_click === "left_center_v1",
 			});
 			rows.push({ depth, element });
@@ -1866,11 +1886,19 @@ export class CuaComputerSession implements ComputerBackend {
 		ref: string,
 		action: string,
 	): Promise<ComputerActionResult> {
-		if (!PERFORMABLE_ACTIONS.includes(action))
+		const custom = this.#elements.get(ref)?.customActions.get(action);
+		if (custom === undefined && !PERFORMABLE_ACTIONS.includes(action))
 			unsupported(
-				`AX action '${action}'; perform dispatches ${PERFORMABLE_ACTIONS.join(" · ")}. A tree row names every action its node advertises, including ones only the app itself can run — reach those through the control's own UI`,
+				`AX action '${action}'; perform dispatches ${PERFORMABLE_ACTIONS.join(" · ")} and any custom action the element's own row advertises`,
 			);
-		return this.#targetAction(context, "click", window, ref, { action, delivery_mode: "background" }, window.id);
+		return this.#targetAction(
+			context,
+			"click",
+			window,
+			ref,
+			{ action: custom ?? action, delivery_mode: "background" },
+			window.id,
+		);
 	}
 	hover(
 		context: Context,
