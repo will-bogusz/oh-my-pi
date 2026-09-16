@@ -537,6 +537,8 @@ function commitNote(committed: boolean, text: string): string {
  * neither its old value nor the requested one.
  */
 const INCOMPLETE_TYPING = "type_text_incomplete";
+const UNPROBED_DRAG =
+	"Delivered; the driver reported no effect evidence for this drag — observe the window to confirm it moved anything.";
 
 /**
  * Maps computer operations onto `cua-driver` tools over one supervised child.
@@ -1911,7 +1913,7 @@ export class CuaComputerSession implements ComputerBackend {
 			const start = this.#target(current, this.#dragEnd(current, from, "from"));
 			const end = this.#target(current, this.#dragEnd(current, to, "to"));
 			throwIfAborted(context.signal);
-			return this.#action("drag", {
+			const result = await this.#action("drag", {
 				...windowArgs(current),
 				from_x: start.x,
 				from_y: start.y,
@@ -1923,6 +1925,12 @@ export class CuaComputerSession implements ComputerBackend {
 				button: options.button,
 				...delivery(options),
 			});
+			if (result.evidence !== null || result.effect !== "unverifiable") return result;
+			this.#doubt(
+				current.id,
+				"a drag was delivered with no effect reported — re-read this window before building on it",
+			);
+			return { ...result, text: [result.text, UNPROBED_DRAG].filter(Boolean).join("\n") };
 		});
 	}
 	scroll(

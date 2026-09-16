@@ -1147,6 +1147,35 @@ it("reads a submenu's items instead of pressing it, from either shape the driver
 	}
 });
 
+it("says a drag was delivered without evidence and keeps the doubt on the window", async () => {
+	const f = await fixture();
+	try {
+		await f.session.captureWindow(f.context, f.window);
+		// The vendored driver's drag reply: no evidence block, no effect verdict.
+		const unprobed = await f.session.drag(f.context, f.window, [0, 0], [100, 0], { delivery: "foreground" });
+		expect(unprobed.text).toContain(
+			"Delivered; the driver reported no effect evidence for this drag — observe the window to confirm it moved anything.",
+		);
+		expect((await f.session.observe(f.context, f.window)).tree).toContain(
+			"a drag was delivered with no effect reported — re-read this window before building on it",
+		);
+		// Once the driver's probe covers drag, its own verdict is the whole answer.
+		f.state.hook = async name =>
+			name === "drag"
+				? reply({
+						effect: "no_observed_change",
+						evidence: { kind: "post_action_tree_digest", detail: "the target was watched for 2011 ms" },
+						route: "cgevent",
+						delivery: "foreground",
+					})
+				: undefined;
+		const probed = await f.session.drag(f.context, f.window, [0, 0], [100, 0], { delivery: "foreground" });
+		expect(probed.effect).toBe("no_observed_change");
+		expect(probed.text).not.toContain("no effect evidence");
+	} finally {
+		await f.close();
+	}
+});
 
 it("reports whether a written value survived the app's own end-of-edit", async () => {
 	const f = await fixture();
