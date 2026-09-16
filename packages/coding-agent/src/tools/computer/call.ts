@@ -68,6 +68,42 @@ export const ELEMENT_METHODS: MethodPolicies = {
  */
 export const COMPUTER_HANDLE_VERBS = `win: ${Object.keys(WINDOW_METHODS).join(" · ")} — el: ${Object.keys(ELEMENT_METHODS).join(" · ")} — computer.help() for signatures`;
 
+/** A member line that declares a call, not a field. */
+const SIGNATURE_MEMBER = /^[A-Za-z_$][\w$]*\(/;
+
+/**
+ * One handle's verbs with their types, read out of the declaration file
+ * `computer.help()` prints so the two can never disagree. Comments and
+ * fields are dropped and a signature spread over several lines becomes one,
+ * because this is read beside a tree, not instead of the help output.
+ */
+export function handleSignatures(declarations: string, name: string, lead: string): string {
+	const body = new RegExp(`^interface ${name}(?: extends [^{]+)?\\s*\\{\\n([\\s\\S]*?)^\\}$`, "m").exec(
+		declarations,
+	)?.[1];
+	if (body === undefined) throw new ToolError(`Computer declarations declare no ${name}`);
+	const lines: string[] = [lead];
+	let pending = "";
+	let depth = 0;
+	for (const raw of body.split("\n")) {
+		const line = raw.trim();
+		if (!line || line.startsWith("*") || line.startsWith("/*") || line.startsWith("//")) continue;
+		pending = pending ? `${pending} ${line}` : line;
+		depth += (line.match(/\(/g)?.length ?? 0) - (line.match(/\)/g)?.length ?? 0);
+		if (depth > 0) continue;
+		if (SIGNATURE_MEMBER.test(pending))
+			lines.push(
+				`  ${pending
+					.replace(/\(\s+/g, "(")
+					.replace(/,\s*\)/g, ")")
+					.replace(/;\s*\}/g, " }")}`,
+			);
+		pending = "";
+		depth = 0;
+	}
+	return lines.join("\n");
+}
+
 /** Validate the entire chain before rendering any caller-controlled method name. */
 function validateChain(chain: readonly ComputerCallStep[]): ComputerCallPolicy {
 	if (!Array.isArray(chain) || chain.length === 0) {

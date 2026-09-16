@@ -12,7 +12,14 @@ import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-age
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { computerApproval, createComputerPrelude } from "@oh-my-pi/pi-coding-agent/tools/computer";
 import type { ComputerBackend } from "@oh-my-pi/pi-coding-agent/tools/computer/backend";
-import { COMPUTER_HANDLE_VERBS, isReadOnlyComputerCall, renderComputerCall } from "@oh-my-pi/pi-coding-agent/tools/computer/call";
+import {
+	COMPUTER_HANDLE_VERBS,
+	ELEMENT_METHODS,
+	handleSignatures,
+	isReadOnlyComputerCall,
+	renderComputerCall,
+	WINDOW_METHODS,
+} from "@oh-my-pi/pi-coding-agent/tools/computer/call";
 // @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
 import computerDeclarations from "../../src/tools/computer/declarations.d.ts" with { type: "text" };
 import { ComputerSupervisor } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
@@ -1157,27 +1164,54 @@ describe("computer preludes through the session", () => {
 		expect(printed).toContain("interface ComputerElement");
 	});
 
-	it("names the handle's verbs once with the acquisition and declares every one it names", async () => {
+	it("states the handle's typed surface once a session and its verbs with every later handle", async () => {
 		const { realm, displays } = javascriptFixture();
 		try {
 			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
+			// The first acquisition of the session teaches the API it hands over.
+			expect(displays.join("\n")).toContain(
+				handleSignatures(computerDeclarations as string, "ComputerWindow", "win handle:"),
+			);
+			// Every verb the boundary accepts is declared and shown with its types.
+			for (const verb of Object.keys(WINDOW_METHODS)) {
+				expect(computerDeclarations).toContain(`\n\t${verb}(`);
+				expect(displays.join("\n")).toContain(`\n  ${verb}(`);
+			}
+			displays.length = 0;
+			await runInContext('computer.window("42", {screenshot:false})', realm);
 			const footers = displays
 				.join("\n")
 				.split("\n")
 				.filter(line => line.startsWith("win: "));
 			expect(footers).toEqual([COMPUTER_HANDLE_VERBS]);
-			const verbs = footers[0]!
-				.replace("win: ", "")
-				.replace(" — computer.help() for signatures", "")
-				.split(" — el: ")
-				.flatMap(group => group.split(" · "));
-			expect(verbs).toContain("menu");
-			for (const verb of verbs) expect(computerDeclarations).toContain(`\n\t${verb}(`);
+			expect(displays.join("\n")).not.toContain("win handle:");
 			// The surface is stated with the handle, not repeated by every read
 			// of the same window.
 			displays.length = 0;
 			await runInContext("win.observe({screenshot:false})", realm);
 			expect(displays.join("\n")).not.toContain("computer.help() for signatures");
+		} finally {
+			await runInContext("computer.close()", realm);
+		}
+	});
+
+	it("states the element handle's typed surface with the first ref of the session and never again", async () => {
+		const { realm, displays } = javascriptFixture();
+		const element = handleSignatures(computerDeclarations as string, "ComputerElement", "el handle:");
+		try {
+			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
+			await runInContext(
+				"win.observe({screenshot:false}).then(state => (globalThis.ref = state.elements[0].ref))",
+				realm,
+			);
+			expect(displays.join("\n")).not.toContain("el handle:");
+			displays.length = 0;
+			await runInContext("win.ref(ref).click()", realm);
+			expect(displays.join("\n")).toContain(element);
+			for (const verb of Object.keys(ELEMENT_METHODS)) expect(element).toContain(`\n  ${verb}(`);
+			displays.length = 0;
+			await runInContext("win.ref(ref).click()", realm);
+			expect(displays.join("\n")).not.toContain("el handle:");
 		} finally {
 			await runInContext("computer.close()", realm);
 		}

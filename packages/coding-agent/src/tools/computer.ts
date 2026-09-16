@@ -11,6 +11,7 @@ import { enforceInlineByteCap } from "../session/streaming-output";
 import {
 	COMPUTER_HANDLE_VERBS,
 	type ComputerCallStep,
+	handleSignatures,
 	isReadOnlyComputerCall,
 	renderComputerCall,
 } from "./computer/call";
@@ -52,6 +53,19 @@ function usesCoordinateSafeImageSizing(model: Model | undefined): boolean {
 			classifyModel(model.provider, model.requestModelId, { lenient: true }).class === "anthropic")
 	);
 }
+
+/**
+ * The typed surface of each handle, once per session with the first handle
+ * of its kind: a model that has the acquisition in front of it is about to
+ * call these, and the alternative was a `computer.help()` round trip for the
+ * whole declaration file. Later handles get the verb list alone.
+ */
+const windowSignatures = once(() =>
+	handleSignatures(computerCodeModeDeclarations as string, "ComputerWindow", "win handle:"),
+);
+const elementSignatures = once(() =>
+	handleSignatures(computerCodeModeDeclarations as string, "ComputerElement", "el handle:"),
+);
 
 interface ComputerRunParams {
 	action: "run";
@@ -177,6 +191,7 @@ class ComputerLifetime {
 	#releasing?: Promise<void>;
 	#closing?: Promise<void>;
 	#releaseFailure?: Error;
+	readonly #taught = new Set<string>();
 
 	constructor(session: ToolSession, createController: ComputerControllerFactory) {
 		this.#session = session;
@@ -186,6 +201,13 @@ class ComputerLifetime {
 
 	isClosed(): boolean {
 		return this.#closed;
+	}
+
+	/** True once per session, for the first handle of its kind. */
+	teach(handle: "window" | "element"): boolean {
+		if (this.#taught.has(handle)) return false;
+		this.#taught.add(handle);
+		return true;
 	}
 
 	async controller(): Promise<ComputerController> {
@@ -238,7 +260,7 @@ async function invokeComputer(
 		case "run":
 		case "call":
 			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
-			return await runComputer(session, await lifetime.controller(), params, context.signal);
+			return await runComputer(session, await lifetime.controller(), params, lifetime, context.signal);
 		case "capabilities": {
 			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
 			const capabilities = await (await lifetime.controller()).capabilities();
@@ -288,6 +310,7 @@ async function runComputer(
 	session: ToolSession,
 	controller: ComputerController,
 	params: ComputerRunParams | ComputerCallParams,
+	lifetime: ComputerLifetime,
 	signal?: AbortSignal,
 ): Promise<AgentToolResult<unknown>> {
 	const code = resolveComputerRunCode(params);
@@ -348,8 +371,13 @@ async function runComputer(
 				: undefined,
 			text,
 			// Once, with the handle itself: an observe of the same window repeats
-			// the tree, never the surface the model already holds.
-			acquired?.initialObservation ? COMPUTER_HANDLE_VERBS : undefined,
+			// the tree, never the surface the model already holds. The first
+			// handle of the session is the one that states its types.
+			acquired?.initialObservation
+				? lifetime.teach("window")
+					? windowSignatures()
+					: COMPUTER_HANDLE_VERBS
+				: undefined,
 		]
 			.filter(Boolean)
 			.join("\n");
@@ -357,6 +385,8 @@ async function runComputer(
 		// rendering; the prelude suppresses the cell's own echo of it.
 		details.rendered = true;
 	}
+	if (params.action === "call" && params.chain.some(step => step.method === "ref") && lifetime.teach("element"))
+		text = text ? `${text}\n${elementSignatures()}` : elementSignatures();
 	const cappedText = await enforceInlineByteCap(text, {
 		saveArtifact: full => saveComputerOutputArtifact(session, full),
 		elide: elideObservationTree,
