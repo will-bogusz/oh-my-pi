@@ -1061,33 +1061,42 @@ export class CuaComputerSession implements ComputerBackend {
 				complete,
 				backgroundInput: reply.data.background_input ?? null,
 				relatedWindows: relatedWindows(reply.data.related_windows),
-				tree: treeRows(rows, 0),
+				tree: "",
 			};
-			if (!rows.length)
-				observation.tree =
-					typeof reply.data.degraded_reason === "string"
-						? reply.data.degraded_reason
-						: "No accessibility elements returned; completeness is unknown.";
-			if (menuBarRows)
-				observation.tree += `\nMenu bar hidden (${menuBarRows} rows): its items only respond while their own menu is open, so drive it with win.menu(["<menu>", "<item>"], { delivery: "foreground" }); observe({ menubar: true }) shows them.`;
+			const parent = rows.length
+				? treeRows(rows, 0)
+				: typeof reply.data.degraded_reason === "string"
+					? reply.data.degraded_reason
+					: "No accessibility elements returned; completeness is unknown.";
 			// This window's sheets, as of this walk: a sheet that has gone away
 			// must stop excluding an id acquisition could pick, and the refs it
 			// minted must say which surface took them with it.
 			const attached = observation.relatedWindows ?? [];
 			for (const [id, sheet] of this.#sheets)
 				if (sheet.parent === current.id && !attached.some(row => row.id === id)) this.#retireSheet(id, sheet.title);
+			const sheets: string[] = [];
 			for (const sheet of attached) {
 				this.#sheets.set(sheet.id, { parent: current.id, title: sheet.title });
-				observation.tree += `\nsheet ${JSON.stringify(sheet.title)} (window ${sheet.id})`;
+				let block = `sheet ${JSON.stringify(sheet.title)} (window ${sheet.id}) — modal over window ${current.id}`;
 				try {
 					const nested = await this.#sheetRows(context, sheet, options);
 					observation.elements.push(...nested.map(row => row.element));
-					if (nested.length) observation.tree += `\n${treeRows(nested, 1)}`;
+					if (nested.length) block += `\n${treeRows(nested, 1)}`;
 				} catch (error) {
 					if (!(error instanceof ToolError)) throw error;
-					observation.tree += ` — its own walk failed: ${error.message}`;
+					block += ` — its own walk failed: ${error.message}`;
 				}
+				sheets.push(block);
 			}
+			observation.tree = [
+				...sheets,
+				parent,
+				menuBarRows
+					? `Menu bar hidden (${menuBarRows} rows): its items only respond while their own menu is open, so drive it with win.menu(["<menu>", "<item>"], { delivery: "foreground" }); observe({ menubar: true }) shows them.`
+					: undefined,
+			]
+				.filter(line => line !== undefined)
+				.join("\n");
 			if (reply.data.ax_walk_timed_out === true)
 				observation.tree +=
 					"\nAccessibility observation reached its time limit. The walk has finished; omitted controls and values remain unknown.";
@@ -1216,9 +1225,7 @@ export class CuaComputerSession implements ComputerBackend {
 			...windowArgs(window),
 			include_accessibility_tree: true,
 			include_screenshot: false,
-			max_depth: options.maxDepth,
 			max_elements: options.maxElements,
-			query: options.query,
 		});
 		if (reply.data.pid !== window.pid || String(reply.data.window_id) !== window.id)
 			throw new ToolError("WrongWindow: Cua sheet observation identity mismatch");
@@ -1480,6 +1487,24 @@ export class CuaComputerSession implements ComputerBackend {
 			)
 			.join("\n");
 	}
+	#focusHolder(details: unknown, args: Wire): string | undefined {
+		const data = details !== null && typeof details === "object" && !Array.isArray(details) ? (details as Wire) : {};
+		const code = typeof data.code === "string" ? data.code : undefined;
+		if (code !== "delivery_failed" && code !== "menu_path_unavailable" && data.focused_window_id === undefined)
+			return undefined;
+		const target = typeof args.window_id === "number" ? String(args.window_id) : undefined;
+		if (target === undefined) return undefined;
+		const focused =
+			typeof data.focused_window_id === "number" && String(data.focused_window_id) !== target
+				? String(data.focused_window_id)
+				: undefined;
+		const sheet = focused ?? [...this.#sheets].find(([, row]) => row.parent === target)?.[0];
+		if (sheet === undefined) return undefined;
+		const relation = this.#sheets.get(sheet);
+		return `window ${sheet}${
+			relation ? ` — a sheet attached to ${relation.parent} —` : ""
+		} holds keyboard focus, not window ${target}; drive it with computer.window(${JSON.stringify(sheet)}) and press its own buttons.`;
+	}
 	/**
 	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
 	 * window found now appeared while this action ran — a prompt the action
@@ -1493,7 +1518,11 @@ export class CuaComputerSession implements ComputerBackend {
 			reply = await this.#call(name, args);
 		} catch (error) {
 			if (!(error instanceof ToolError)) throw error;
-			throw new ToolError(`${error.message}\n${actionEvidence(error.context, args)}`, error.context);
+			const holder = this.#focusHolder(error.context, args);
+			throw new ToolError(
+				`${error.message}\n${actionEvidence(error.context, args)}${holder === undefined ? "" : `\n${holder}`}`,
+				error.context,
+			);
 		}
 		const { result, data } = reply;
 		const interruptedBy = this.#interruption();
@@ -1954,7 +1983,7 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 		throwIfAborted(context.signal);
 		const area = frame.display.bounds;
-		return points.map((point) => {
+		return points.map(point => {
 			const [x, y] = pointPair(point);
 			if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= area.width || y >= area.height)
 				throw new ToolError(
@@ -1992,11 +2021,7 @@ export class CuaComputerSession implements ComputerBackend {
 			return { ...result, delivery: "foreground" };
 		});
 	}
-	desktopDrag(
-		context: Context,
-		points: ComputerPoint[],
-		options: ActionOptions = {},
-	): Promise<ComputerActionResult> {
+	desktopDrag(context: Context, points: ComputerPoint[], options: ActionOptions = {}): Promise<ComputerActionResult> {
 		return this.#schedule(context, "desktopDrag", true, async () => {
 			foreground(options);
 			if (points.length !== 2)

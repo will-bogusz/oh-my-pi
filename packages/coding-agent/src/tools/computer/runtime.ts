@@ -424,7 +424,8 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 		},
 		apps: () => session.apps(operationContext(getContext)),
 		displays: () => session.displays(operationContext(getContext)),
-		windows: (selector: unknown = {}) => session.windows(operationContext(getContext), normalizeWindowSelector(selector)),
+		windows: (selector: unknown = {}) =>
+			session.windows(operationContext(getContext), normalizeWindowSelector(selector)),
 		window: async (selector: unknown, options: WindowResolveOptions = {}): Promise<Win> =>
 			new Win(
 				session,
@@ -493,7 +494,8 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 			session.desktopClick(mutationContext(getContext), x, y, options),
 		doubleClick: (x: number, y: number, options?: ActionOptions) =>
 			session.desktopClick(mutationContext(getContext), x, y, { ...options, count: 2 }),
-		move: (x: number, y: number, options?: ActionOptions) => session.desktopMove(mutationContext(getContext), x, y, options),
+		move: (x: number, y: number, options?: ActionOptions) =>
+			session.desktopMove(mutationContext(getContext), x, y, options),
 		drag: (points: ComputerPoint[], options?: ActionOptions) =>
 			session.desktopDrag(mutationContext(getContext), points, options),
 		scroll: (x: number, y: number, options?: ActionOptions & { dx?: number; dy?: number }) =>
@@ -556,7 +558,9 @@ export class ComputerRuntime {
 		cancelRejection.catch(() => {});
 		const onCancel = (): void => {
 			const abortError =
-				signal.reason instanceof ToolAbortError ? signal.reason : new ToolAbortError(undefined, { cause: signal.reason });
+				signal.reason instanceof ToolAbortError
+					? signal.reason
+					: new ToolAbortError(undefined, { cause: signal.reason });
 			rejectCancel(
 				timeoutSignal.aborted
 					? new ToolError(`Computer code execution timed out after ${options.timeoutMs}ms`)

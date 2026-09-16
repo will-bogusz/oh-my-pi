@@ -213,10 +213,7 @@ interface ComputerDesktop {
 	apps(): Promise<unknown>;
 	displays(): Promise<(ComputerBounds & { id: string; name: string; scale: number; isPrimary: boolean })[]>;
 	windows(filter?: ComputerWindowFilter): Promise<ComputerWindowInfo[]>;
-	window(
-		selector: string | number | ComputerWindowFilter,
-		options?: ComputerResolveOptions,
-	): Promise<ComputerWindow>;
+	window(selector: string | number | ComputerWindowFilter, options?: ComputerResolveOptions): Promise<ComputerWindow>;
 	focusedWindow(): Promise<ComputerWindow | null>;
 	screenshot(options?: { silent?: boolean }): Promise<ComputerScreenshotResult>;
 	launch(

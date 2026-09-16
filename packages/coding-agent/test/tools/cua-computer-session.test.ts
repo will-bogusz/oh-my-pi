@@ -7,7 +7,11 @@ import type { DesktopSystemWindow } from "@oh-my-pi/pi-natives";
 import { CuaComputerSession } from "@oh-my-pi/pi-coding-agent/tools/computer/cua-session";
 import type { CuaDriver, CuaToolResult } from "@oh-my-pi/pi-coding-agent/tools/computer/driver";
 import { ToolAbortError, ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
-import type { ComputerImage, ComputerOperationContext, ComputerPoint } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
+import type {
+	ComputerImage,
+	ComputerOperationContext,
+	ComputerPoint,
+} from "@oh-my-pi/pi-coding-agent/tools/computer/types";
 import type { WindowRosterSample } from "@oh-my-pi/pi-coding-agent/tools/computer/interruption";
 /** Upstream's generated tool contract at `e7e141ae` (`libs/cua-driver/contract/manifest.json`). */
 import contract from "../fixtures/cua-contract-manifest.json";
@@ -427,7 +431,12 @@ it("acquires the front document window and names the windows it passed over", as
 		};
 		f.state.hook = async name =>
 			name === "list_windows"
-				? reply({ windows: [{ ...f.row, z_index: null }, { ...second, z_index: null }] })
+				? reply({
+						windows: [
+							{ ...f.row, z_index: null },
+							{ ...second, z_index: null },
+						],
+					})
 				: undefined;
 		f.texts.length = 0;
 		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "1" });
@@ -589,7 +598,9 @@ it("does not resolve across processes or retarget after the requested window dis
 			if (args.include_accessibility_metadata) throw new Error("Must not ask one process to resolve another");
 			return reply({ windows: [f.row, { ...f.row, pid: 102, window_id: 2 }] });
 		};
-		await expect(f.session.window(f.context, { app: "Fixture" }, { ambiguous: "throw" })).rejects.toThrow("Ambiguous");
+		await expect(f.session.window(f.context, { app: "Fixture" }, { ambiguous: "throw" })).rejects.toThrow(
+			"Ambiguous",
+		);
 		f.state.hook = async (name, args) =>
 			name === "list_windows"
 				? reply({
@@ -957,7 +968,9 @@ it("reports whether a written value survived the app's own end-of-edit", async (
 		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
 		const write = async (data: Wire, text: string) => {
 			f.state.hook = async name =>
-				name === "set_value" ? { text, structuredJson: JSON.stringify(data), isError: false, images: [] } : undefined;
+				name === "set_value"
+					? { text, structuredJson: JSON.stringify(data), isError: false, images: [] }
+					: undefined;
 			return f.session.setValue(f.context, f.window, ref, "Project_File_List");
 		};
 		const lost = await write(
@@ -995,7 +1008,9 @@ it("carries a write nothing proved into the next observation of its own window",
 		// behind an `observe` in one cell, so the only reply that could have said
 		// the app discarded the name was never displayed.
 		const dropped = await observed();
-		expect((await f.session.setValue(f.context, f.window, dropped, "Project_File_List.txt")).committed).toBeUndefined();
+		expect(
+			(await f.session.setValue(f.context, f.window, dropped, "Project_File_List.txt")).committed,
+		).toBeUndefined();
 		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
 			`setValue on ${dropped} "Editor" is not proven committed — re-read the field before building on it`,
 		);
@@ -2035,13 +2050,14 @@ it("nests an attached sheet's own tree under its parent and dispatches its refs 
 		expect(observation.relatedWindows).toEqual([{ pid: 101, id: "5", title: "Save", relation: "sheet" }]);
 		const parentRef = observation.elements[0]!.ref;
 		const cancel = observation.elements.find(element => element.label === "Cancel")!;
-		// The sheet is named where it attaches and its own rows hang under it.
+		// The sheet leads the observation, named where it attaches, with its own
+		// rows hanging under it and the window it covers below.
 		expect(observation.tree).toBe(
 			[
-				`- [${parentRef}] AXTextField "Editor" value="" placeholder="Hint, not value" enabled=false selected=false`,
-				'sheet "Save" (window 5)',
+				'sheet "Save" (window 5) — modal over window 1',
 				`  - [${observation.elements[1]!.ref}] AXSheet "save"`,
 				`    - [${cancel.ref}] AXButton "Cancel"`,
+				`- [${parentRef}] AXTextField "Editor" value="" placeholder="Hint, not value" enabled=false selected=false`,
 			].join("\n"),
 		);
 		expect(cancel.windowId).toBe("5");
@@ -2067,13 +2083,102 @@ it("nests an attached sheet's own tree under its parent and dispatches its refs 
 	}
 });
 
+/**
+ * T3 `native-read-calendar/omp-2`: Calendar's "Show" sheet held the keyboard,
+ * `press_key` refused with `delivery_failed`, and the reply carried only its
+ * code and message — the window id the driver had in hand at the bail and the
+ * sheet relation OMP had already printed were both absent from the advice.
+ */
+it("names the sheet holding keyboard focus when a delivery is refused for it", async () => {
+	const f = await fixture();
+	const sheet = { ...f.row, window_id: 11151, title: "", bounds: { x: 30, y: 40, width: 120, height: 80 } };
+	try {
+		f.state.relatedWindows = [{ pid: 101, window_id: 11151, title: "", relation: "sheet" }];
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows") return reply({ windows: [f.row, sheet] });
+			if (name === "get_window_state" && args.window_id === 11151)
+				return reply({
+					pid: 101,
+					window_id: 11151,
+					snapshot_id: "sheet-1",
+					window_bounds: sheet.bounds,
+					elements: [{ element_index: 1, element_token: "sheet-1:1", role: "AXSheet", label: "_NS:25", depth: 0 }],
+				});
+			return undefined;
+		};
+		// The observation is how OMP learns the relation at all.
+		expect((await f.session.observe(f.context, f.window)).tree).toContain('sheet "" (window 11151)');
+		f.state.hook = async name =>
+			name === "press_key"
+				? {
+						text: "press_key delivery failed: exact target window did not become focused for foreground HID delivery",
+						structuredJson: JSON.stringify({
+							code: "delivery_failed",
+							message:
+								"press_key delivery failed: exact target window did not become focused for foreground HID delivery",
+						}),
+						isError: true,
+						errorCode: "delivery_failed",
+						images: [],
+					}
+				: undefined;
+		await expect(
+			f.session.press(f.context, f.window, "right", undefined, { delivery: "foreground" }),
+		).rejects.toThrow(
+			'window 11151 — a sheet attached to 1 — holds keyboard focus, not window 1; drive it with computer.window("11151") and press its own buttons.',
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("keeps an attached sheet's whole subtree when the caller narrows the parent walk", async () => {
+	const f = await fixture();
+	const sheet = { ...f.row, window_id: 5, title: "Save", bounds: { x: 30, y: 40, width: 120, height: 80 } };
+	try {
+		f.state.relatedWindows = [{ pid: 101, window_id: 5, title: "Save", relation: "sheet" }];
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows") return reply({ windows: [f.row, sheet] });
+			if (name !== "get_window_state" || args.window_id !== 5) return undefined;
+			return reply({
+				pid: 101,
+				window_id: 5,
+				snapshot_id: "sheet-1",
+				window_bounds: sheet.bounds,
+				elements: [
+					{ element_index: 1, element_token: "sheet-1:1", role: "AXSheet", label: "save", depth: 0 },
+					{ element_index: 2, element_token: "sheet-1:2", role: "AXButton", label: "Cancel", depth: 1 },
+				],
+			});
+		};
+		const observation = await f.session.observe(f.context, f.window, { maxDepth: 1, query: "Editor" });
+		expect(observation.tree).toContain('- [n3] AXButton "Cancel"');
+		// The parent walk carries the narrowing; the sheet's does not.
+		expect(f.calls.filter(call => call.name === "get_window_state").map(call => call.args)).toEqual([
+			{
+				pid: 101,
+				window_id: 1,
+				include_accessibility_tree: true,
+				include_screenshot: false,
+				max_depth: 1,
+				query: "Editor",
+			},
+			{ pid: 101, window_id: 5, include_accessibility_tree: true, include_screenshot: false },
+		]);
+	} finally {
+		await f.close();
+	}
+});
+
 it("reports an attached sheet it cannot walk instead of dropping it from the tree", async () => {
 	const f = await fixture();
 	try {
 		f.state.relatedWindows = [{ pid: 202, window_id: 42, title: "Import", relation: "sheet" }];
 		const observation = await f.session.observe(f.context, f.window);
 		expect(observation.relatedWindows).toEqual([{ pid: 202, id: "42", title: "Import", relation: "sheet" }]);
-		expect(observation.tree).toContain('sheet "Import" (window 42) — its own walk failed: Missing computer window');
+		expect(observation.tree).toContain(
+			'sheet "Import" (window 42) — modal over window 1 — its own walk failed: Missing computer window',
+		);
 		expect(observation.elements).toHaveLength(1);
 		expect(observation.elements[0]!.label).toBe("Editor");
 	} finally {

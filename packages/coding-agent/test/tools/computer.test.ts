@@ -580,9 +580,9 @@ describe("computer preludes through the session", () => {
 			expect(await runInContext("win.observe().then(state => state.screenshot === undefined)", realm)).toBe(true);
 			expect(await runInContext("win.find({}).then(found => found.length)", realm)).toBe(1);
 			expect(captured).toHaveBeenCalledTimes(1);
-			expect(await runInContext("win.observe({screenshot:true}).then(state => state.screenshot.target)", realm)).toBe(
-				"42",
-			);
+			expect(
+				await runInContext("win.observe({screenshot:true}).then(state => state.screenshot.target)", realm),
+			).toBe("42");
 			expect(captured).toHaveBeenCalledTimes(2);
 		} finally {
 			captured.mockRestore();
@@ -708,9 +708,9 @@ describe("computer preludes through the session", () => {
 			displays.length = 0;
 			// A committed write is ordinary: the cell decides whether to echo it.
 			backend.committed = true;
-			expect((await runInContext('win.setValue(win.initialObservation.elements[0].ref, "kept")', realm)).committed).toBe(
-				true,
-			);
+			expect(
+				(await runInContext('win.setValue(win.initialObservation.elements[0].ref, "kept")', realm)).committed,
+			).toBe(true);
 			expect(displays).toEqual([]);
 			// An uncommitted one may have lost the edit, so the model reads it
 			// even though this cell throws the result away.
@@ -1603,7 +1603,8 @@ describe("computer prompt variants", () => {
 		const darwin = render(computerDescription, false);
 		const linux = render(computerDescription, true);
 		for (const absent of ["AT-SPI", "X11", "xdotool", "super"]) expect(darwin).not.toContain(absent);
-		for (const absent of ["AppleScript", "TCC", "screencapture", "cmd|", "committed"]) expect(linux).not.toContain(absent);
+		for (const absent of ["AppleScript", "TCC", "screencapture", "cmd|", "committed"])
+			expect(linux).not.toContain(absent);
 		expect(linux).toContain("AT-SPI tree");
 		expect(linux).toContain("foreground_unavailable");
 		expect(darwin).toContain("password/TCC prompt");
