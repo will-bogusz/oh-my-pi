@@ -1586,15 +1586,16 @@ it("names the rung a dispatched action's own escalation points at", async () => 
 		);
 		expect(dropped.text).not.toContain('{ delivery: "foreground" }');
 		expect(dropped.escalation).toBe(dropped.text.split("\n")[1]);
-		// An escalation the reply's own text already spells is not restated, and
-		// the driver's wire vocabulary never survives as advice.
+		// The driver's wire vocabulary never survives as advice, and a reply
+		// that spells the rung itself is instructing the bypass, so the
+		// remembered route corrects it rather than staying quiet.
 		const named = await pressed(
 			{ effect: "unverifiable", escalation: { recommended: "foreground" } },
 			'⚠️ Unverified. To deliver a real click, click this control\'s pixel center with delivery_mode:"foreground".',
 		);
 		expect(named.text).toContain('{ delivery: "foreground" }');
 		expect(named.text).not.toContain("delivery_mode");
-		expect(named.escalation).toBeUndefined();
+		expect(named.escalation).toContain("now take the foreground route");
 		// A rung this surface cannot type is not turned into advice.
 		const elsewhere = await pressed(
 			{ effect: "unverifiable", escalation: { target: "session", reason: "permission_required" } },
@@ -1620,6 +1621,20 @@ it("names the rung a dispatched action's own escalation points at", async () => 
 		const raised = await f.session.raise(f.context, f.window);
 		expect(raised.text).toContain('{ delivery: "foreground" }');
 		expect(raised.text).not.toContain("now take the foreground route");
+		// A rung nothing took over is still not restated when the reply spells it.
+		f.state.hook = async name =>
+			name === "bring_to_front"
+				? {
+						text: 'Raised window 1 on pid 101. Re-run with delivery_mode:"foreground" to activate it.',
+						structuredJson: JSON.stringify({
+							effect: "unverifiable",
+							escalation: { reason: "delivery_failed", target: "foreground" },
+						}),
+						isError: false,
+						images: [],
+					}
+				: undefined;
+		expect((await f.session.raise(f.context, f.window)).escalation).toBeUndefined();
 	} finally {
 		await f.close();
 	}
@@ -1765,6 +1780,35 @@ it("records the foreground rung of a keyboard escalation the driver spells in pr
 		f.state.hook = undefined;
 		expect((await f.session.press(f.context, fresh, "Return")).text.split("\n")).toContain(REMEMBERED_ROUTE);
 		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
+	} finally {
+		await f.close();
+	}
+});
+
+it("corrects the reply's own instruction to qualify the re-run once the route is remembered", async () => {
+	const f = await fixture();
+	const instructed = {
+		text: '📨 Sent (unverified) 22 char(s) via CGEvent (30ms delay). — driver could not confirm the text landed; verify via screenshot, and re-call with delivery_mode:"foreground" if it didn\'t.',
+		structuredJson: JSON.stringify({
+			effect: "unverifiable",
+			escalation: {
+				recommended: "foreground",
+				reason:
+					'background insert could not be confirmed — re-call with delivery_mode:"foreground" if a screenshot shows the text didn\'t land.',
+			},
+		}),
+		isError: false,
+		images: [],
+	};
+	try {
+		f.state.hook = async name => (name === "type_text" ? instructed : undefined);
+		const typed = await f.session.type(f.context, f.window, "hi");
+		expect(typed.text).toContain('{ delivery: "foreground" }');
+		expect(typed.text).toContain("re-run it as-is; this window's keystrokes now take the foreground route");
+		f.state.hook = undefined;
+		const next = await f.session.press(f.context, f.window, "Return");
+		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
+		expect(next.text.split("\n")).toContain(REMEMBERED_ROUTE);
 	} finally {
 		await f.close();
 	}

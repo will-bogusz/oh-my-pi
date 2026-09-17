@@ -552,7 +552,10 @@ const ESCALATION_ROUTES: Readonly<Record<string, (text: string) => string>> = {
  * What to say instead once the session has taken the rung over: naming
  * `{ delivery: "foreground" }` told the caller to qualify the re-run, and an
  * explicit rung wins over the remembered one by design, so the advice asked
- * for the one call shape that cannot consume what was just recorded.
+ * for the one call shape that cannot consume what was just recorded. This
+ * line survives a reply that already spells the rung, where a restatement
+ * would be dropped: the driver's own sentence instructs exactly the bypass,
+ * so the correction is the point rather than noise.
  */
 const ROUTE_ALREADY_TAKEN = "re-run it as-is; this window's keystrokes now take the foreground route";
 /**
@@ -586,7 +589,7 @@ function escalationRoute(data: Wire, text: string, remembered: boolean): string 
 	const target = escalationTarget(data);
 	if (target === undefined) return undefined;
 	const route = remembered ? ROUTE_ALREADY_TAKEN : ESCALATION_ROUTES[target]?.(text);
-	if (route === undefined || text.includes(`delivery: "${target}"`)) return undefined;
+	if (route === undefined || (!remembered && text.includes(`delivery: "${target}"`))) return undefined;
 	const escalation = data.escalation as Wire;
 	const reason = typeof escalation.reason === "string" ? escalation.reason : undefined;
 	return `⚠️ The driver escalates this action${reason ? ` (${reason})` : ""}: ${route}.`;
