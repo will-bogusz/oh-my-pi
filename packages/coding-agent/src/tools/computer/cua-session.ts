@@ -1250,7 +1250,9 @@ export class CuaComputerSession implements ComputerBackend {
 				? treeRows(rows, 0)
 				: typeof reply.data.degraded_reason === "string"
 					? reply.data.degraded_reason
-					: "No accessibility elements returned; completeness is unknown.";
+					: options.query !== undefined
+						? this.#queryMiss(current, reply, options, complete)
+						: "No accessibility elements returned; completeness is unknown.";
 			// This window's sheets, as of this walk: a sheet that has gone away
 			// must stop excluding an id acquisition could pick, and the refs it
 			// minted must say which surface took them with it.
@@ -1325,6 +1327,36 @@ export class CuaComputerSession implements ComputerBackend {
 			}
 			return observation;
 		});
+	}
+	/**
+	 * A query that matched nothing, answered with what was searched. The empty
+	 * answer named neither the query nor the tree it ran against, and the bench
+	 * followed 79 % of them with another guessed word — so the rows the walk
+	 * read, its own verdict on the tree and the scroll state are what this says,
+	 * because those are what decide whether to widen the query or scroll first.
+	 */
+	#queryMiss(window: ComputerWindowIdentity, reply: Reply, options: ObserveOptions, complete: boolean): string {
+		const read =
+			typeof reply.data.total_element_count === "number"
+				? reply.data.total_element_count
+				: typeof reply.data.element_count === "number"
+					? reply.data.element_count
+					: undefined;
+		const collapsed = typeof reply.data.collapsed_rows === "number" ? reply.data.collapsed_rows : 0;
+		const verdict = reply.data.truncated === true ? "truncated" : complete ? "complete" : "not proven complete";
+		const walked =
+			read === undefined
+				? "the walk reported no row count"
+				: `the walk read ${read} actionable row${read === 1 ? "" : "s"}`;
+		const next =
+			collapsed > 0
+				? `scroll the list first — ${collapsed} row(s) are out of view and were not read — or drop the query to read what is on screen`
+				: `drop the query to read the whole tree, or widen it to a substring one of those rows carries${
+						options.menubar === true ? "" : "; observe({ menubar: true }) adds the menu bar"
+					}`;
+		return `No row matched query ${JSON.stringify(options.query)} under window ${window.id} ${JSON.stringify(
+			window.title,
+		)} (${window.app})${options.menubar === true ? " and its menu bar" : ""}: ${walked} and reported the tree ${verdict}. Next: ${next}.`;
 	}
 	#walk(
 		window: ComputerWindowIdentity,

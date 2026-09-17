@@ -1826,6 +1826,52 @@ it("keeps visual access for windows with no AX snapshot without inventing elemen
 	}
 });
 
+it("says what a query searched, read and cut when nothing matched it", async () => {
+	const f = await fixture();
+	const missed = (data: Wire): CuaToolResult =>
+		reply({
+			pid: 101,
+			window_id: 1,
+			snapshot_id: "s1",
+			elements: [],
+			elements_complete: false,
+			truncated: false,
+			element_count: 148,
+			total_element_count: 148,
+			returned_element_count: 0,
+			filtered_element_count: 0,
+			collapsed_rows: 0,
+			window_bounds: f.row.bounds,
+			...data,
+		});
+	try {
+		f.state.hook = async name => (name === "get_window_state" ? missed({}) : undefined);
+		const observation = await f.session.observe(f.context, f.window, { query: "Repeat" });
+		expect(observation.tree).toBe(
+			'No row matched query "Repeat" under window 1 "Editor" (Fixture): the walk read 148 actionable rows and reported the tree complete. Next: drop the query to read the whole tree, or widen it to a substring one of those rows carries; observe({ menubar: true }) adds the menu bar.',
+		);
+		// Rows the walker never read are the cheaper thing to fix than the
+		// query, and a walk that clipped says so instead of claiming complete.
+		f.state.hook = async name =>
+			name === "get_window_state" ? missed({ collapsed_rows: 69, truncated: true }) : undefined;
+		const collapsed = await f.session.observe(f.context, f.window, { query: "Repeat", menubar: true });
+		expect(collapsed.tree.split("\n")[0]).toBe(
+			'No row matched query "Repeat" under window 1 "Editor" (Fixture) and its menu bar: the walk read 148 actionable rows and reported the tree truncated. Next: scroll the list first — 69 row(s) are out of view and were not read — or drop the query to read what is on screen.',
+		);
+		// A window with no AX tree at all is the driver's own verdict, not a
+		// query result, and keeps saying so.
+		f.state.hook = async name =>
+			name === "get_window_state" ? missed({ degraded_reason: "AX window unavailable" }) : undefined;
+		expect((await f.session.observe(f.context, f.window, { query: "Repeat" })).tree).toBe("AX window unavailable");
+		f.state.hook = async name => (name === "get_window_state" ? missed({}) : undefined);
+		expect((await f.session.observe(f.context, f.window)).tree).toBe(
+			"No accessibility elements returned; completeness is unknown.",
+		);
+	} finally {
+		await f.close();
+	}
+});
+
 it("clicks a ref's own bounds as window points when modifiers or a count leave the element route", async () => {
 	const f = await fixture();
 	try {
