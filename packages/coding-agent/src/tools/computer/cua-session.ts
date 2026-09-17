@@ -48,17 +48,43 @@ interface Binding {
 	customActions: ReadonlyMap<string, string>;
 	doubleClickAtCenter: boolean;
 }
+interface TreeNote {
+	depth: number;
+	text: string;
+}
 interface TreeRow {
 	depth: number;
 	element: ComputerElementSnapshot;
+	notes?: readonly TreeNote[];
 }
 function treeRows(rows: readonly TreeRow[], indent: number): string {
 	return rows
-		.map(
-			({ depth, element }) =>
-				`${"  ".repeat(depth + indent)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.description !== undefined ? ` description=${JSON.stringify(element.description)}` : ""}${element.help !== undefined ? ` help=${JSON.stringify(element.help)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
-		)
+		.flatMap(({ depth, element, notes }) => [
+			`${"  ".repeat(depth + indent)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.description !== undefined ? ` description=${JSON.stringify(element.description)}` : ""}${element.help !== undefined ? ` help=${JSON.stringify(element.help)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
+			...(notes ?? []).map(note => `${"  ".repeat(note.depth + indent)}- ${note.text}`),
+		])
 		.join("\n");
+}
+const COLLAPSED_TREE_ROW = /^((?: {2})*)- (\d+ of \d+ rows are scrolled out of view and were not read)$/;
+const INDEXED_TREE_ROW = /^(?: {2})*- \[(\d+)\] /;
+function collapsedRowNotes(markdown: unknown): ReadonlyMap<number, TreeNote[]> {
+	const notes = new Map<number, TreeNote[]>();
+	if (typeof markdown !== "string") return notes;
+	let anchor = -1;
+	for (const line of markdown.split("\n")) {
+		const indexed = INDEXED_TREE_ROW.exec(line);
+		if (indexed) {
+			anchor = Number(indexed[1]);
+			continue;
+		}
+		const collapsed = COLLAPSED_TREE_ROW.exec(line);
+		if (!collapsed) continue;
+		const note = { depth: collapsed[1]!.length / 2, text: collapsed[2]! };
+		const listed = notes.get(anchor);
+		if (listed) listed.push(note);
+		else notes.set(anchor, [note]);
+	}
+	return notes;
 }
 /**
  * One window's live capture. `image` is what the model was shown, sized to
@@ -1249,6 +1275,8 @@ export class CuaComputerSession implements ComputerBackend {
 			else if (reply.data.ax_walk_stop_reason != null)
 				observation.tree +=
 					"\nAccessibility observation stopped because a native request could not complete. The walk has finished; omitted controls and values remain unknown.";
+			if (typeof reply.data.collapsed_rows === "number" && reply.data.collapsed_rows > 0)
+				observation.tree += `\n${reply.data.collapsed_rows} row(s) are scrolled out of view and were not read. Scroll the list or use the window's search field to reach them.`;
 			// Document apps: the app's own dirty bit and file path (absent = the app
 			// reports neither). AX value writes never reach disk, so this is how the
 			// model tells "text changed" from "saved".
@@ -1299,6 +1327,10 @@ export class CuaComputerSession implements ComputerBackend {
 		if (snapshotId === "unavailable" && reply.data.elements.length)
 			throw new ToolError("Cua elements have no snapshot identity");
 		const rows: TreeRow[] = [];
+		const collapsed =
+			typeof reply.data.collapsed_rows === "number" && reply.data.collapsed_rows > 0
+				? collapsedRowNotes(reply.data.tree_markdown)
+				: undefined;
 		// The menu bar is a fifth of a macOS tree (22 kB of one 31 kB walk),
 		// every row of it advertises `press`, and every such press is refused
 		// because a menu bar item reports `AXEnabled` only while its menu is
@@ -1361,7 +1393,8 @@ export class CuaComputerSession implements ComputerBackend {
 				customActions: custom,
 				doubleClickAtCenter: reply.data.element_double_click === "left_center_v1",
 			});
-			rows.push({ depth, element });
+			const notes = collapsed?.get(typeof row.element_index === "number" ? row.element_index : -1);
+			rows.push(notes?.length ? { depth, element, notes } : { depth, element });
 		}
 		return { rows, menuBarRows, snapshotId };
 	}

@@ -919,6 +919,68 @@ it("never calls a budget-capped tree complete without the walker's own verdict",
 	}
 });
 
+/**
+ * The reply NotesTask's dry run got from the real driver: a Notes list of 81
+ * rows, 12 of them on screen, the rest skipped by the walker. Trimmed to the
+ * two indexed rows either side of the collapsed-row line plus one unindexed
+ * child, at the indents and depths the driver reported.
+ */
+const NOTES_COLLAPSED = {
+	markdown: [
+		'- [49] AXOutline [id=ICMNoteList actions=[showmenu]]',
+		'          - [50] AXCell [id=ICMNoteListCell actions=[showmenu]]',
+		'            - AXStaticText = "Meeting 070"',
+		"      - 69 of 81 rows are scrolled out of view and were not read",
+		"      - [51] AXButton [actions=[press]]",
+	].join("\n"),
+	elements: [
+		{
+			element_index: 50,
+			element_token: "s1:50",
+			role: "AXCell",
+			label: "ICMNoteListCell",
+			actions: ["AXShowMenu"],
+			depth: 5,
+		},
+		{ element_index: 51, element_token: "s1:51", role: "AXButton", label: "", actions: ["AXPress"], depth: 3 },
+	],
+};
+
+it("keeps the walker's collapsed-row line under its own container and states the total", async () => {
+	const f = await fixture();
+	let collapsed = 69;
+	try {
+		f.state.hook = async name =>
+			name === "get_window_state"
+				? reply({
+						pid: 101,
+						window_id: 1,
+						snapshot_id: "s1",
+						truncated: true,
+						elements: NOTES_COLLAPSED.elements,
+						tree_markdown: NOTES_COLLAPSED.markdown,
+						...(collapsed ? { collapsed_rows: collapsed } : {}),
+					})
+				: undefined;
+		const observation = await f.session.observe(f.context, f.window);
+		const lines = observation.tree.split("\n");
+		const cell = lines.findIndex(line => line.includes("AXCell"));
+		expect(lines[cell + 1]).toBe("      - 69 of 81 rows are scrolled out of view and were not read");
+		expect(lines[cell + 2]).toContain("AXButton");
+		expect(observation.tree).toContain(
+			"69 row(s) are scrolled out of view and were not read. Scroll the list or use the window's search field to reach them.",
+		);
+		// A skipped row is a clipped walk, whatever the element counts say.
+		expect(observation.complete).toBe(false);
+		// Nothing was skipped: neither surface says anything about scrolling.
+		collapsed = 0;
+		const whole = await f.session.observe(f.context, f.window);
+		expect(whole.tree).not.toContain("scrolled out of view");
+	} finally {
+		await f.close();
+	}
+});
+
 it("speaks each backend's own key vocabulary instead of forwarding the caller's", async () => {
 	for (const platform of ["darwin", "linux"] as const) {
 		const f = await fixture({ platform });
