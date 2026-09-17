@@ -549,6 +549,13 @@ const ESCALATION_ROUTES: Readonly<Record<string, (text: string) => string>> = {
 	pixel: pixelEscalation,
 };
 /**
+ * What to say instead once the session has taken the rung over: naming
+ * `{ delivery: "foreground" }` told the caller to qualify the re-run, and an
+ * explicit rung wins over the remembered one by design, so the advice asked
+ * for the one call shape that cannot consume what was just recorded.
+ */
+const ROUTE_ALREADY_TAKEN = "re-run it as-is; this window's keystrokes now take the foreground route";
+/**
  * The driver watches a dispatched action for a fixed window and calls a
  * target that did not move in time a suspected no-op. On Contacts that window
  * expired before the app opened the menu the press had already asked for, and
@@ -575,10 +582,10 @@ function escalationTarget(data: Wire): string | undefined {
 	const target = typeof row.target === "string" ? row.target : row.recommended;
 	return typeof target === "string" ? target : undefined;
 }
-function escalationRoute(data: Wire, text: string): string | undefined {
+function escalationRoute(data: Wire, text: string, remembered: boolean): string | undefined {
 	const target = escalationTarget(data);
 	if (target === undefined) return undefined;
-	const route = ESCALATION_ROUTES[target]?.(text);
+	const route = remembered ? ROUTE_ALREADY_TAKEN : ESCALATION_ROUTES[target]?.(text);
 	if (route === undefined || text.includes(`delivery: "${target}"`)) return undefined;
 	const escalation = data.escalation as Wire;
 	const reason = typeof escalation.reason === "string" ? escalation.reason : undefined;
@@ -1861,11 +1868,16 @@ export class CuaComputerSession implements ComputerBackend {
 	 * is a route. A refused foreground dispatch is not a route to keep
 	 * taking, whoever chose it.
 	 */
-	#keyboardEscalation(name: string, args: Wire, details: Wire, refused: boolean): void {
-		if (KEYBOARD_TOOLS[name] !== true || typeof args.window_id !== "number") return;
+	#keyboardEscalation(name: string, args: Wire, details: Wire, refused: boolean): boolean {
+		if (KEYBOARD_TOOLS[name] !== true || typeof args.window_id !== "number") return false;
 		const window = String(args.window_id);
-		if (refused && args.delivery_mode === "foreground") this.#escalatedKeyboard.delete(window);
-		else if (escalationTarget(details) === "foreground") this.#escalatedKeyboard.add(window);
+		if (refused && args.delivery_mode === "foreground") {
+			this.#escalatedKeyboard.delete(window);
+			return false;
+		}
+		if (escalationTarget(details) !== "foreground") return false;
+		this.#escalatedKeyboard.add(window);
+		return true;
 	}
 	/**
 	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
@@ -1897,8 +1909,7 @@ export class CuaComputerSession implements ComputerBackend {
 		// too ("click this control's pixel center with delivery_mode:foreground");
 		// a next step is only executable if it is spelled the way the caller types.
 		const reported = preludeVocabulary(result.text);
-		const escalation = escalationRoute(data, reported);
-		this.#keyboardEscalation(name, args, data, false);
+		const escalation = escalationRoute(data, reported, this.#keyboardEscalation(name, args, data, false));
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
 		return {
 			text: [

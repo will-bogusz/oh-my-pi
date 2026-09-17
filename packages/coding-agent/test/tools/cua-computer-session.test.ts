@@ -1581,7 +1581,10 @@ it("names the rung a dispatched action's own escalation points at", async () => 
 		);
 		expect(dropped.text).toContain("Pressed cmd+n on pid 101.");
 		expect(dropped.text).toContain("(delivery_failed)");
-		expect(dropped.text).toContain('{ delivery: "foreground" }');
+		expect(dropped.escalation).toBe(
+			"⚠️ The driver escalates this action (delivery_failed): re-run it as-is; this window's keystrokes now take the foreground route.",
+		);
+		expect(dropped.text).not.toContain('{ delivery: "foreground" }');
 		expect(dropped.escalation).toBe(dropped.text.split("\n")[1]);
 		// An escalation the reply's own text already spells is not restated, and
 		// the driver's wire vocabulary never survives as advice.
@@ -1600,6 +1603,23 @@ it("names the rung a dispatched action's own escalation points at", async () => 
 		expect(elsewhere.text.split("\n")[0]).toBe("Pressed cmd+n on pid 101.");
 		expect(elsewhere.text).not.toContain("escalates");
 		expect(elsewhere.escalation).toBeUndefined();
+		// A rung the session cannot take over for the caller still names itself:
+		// only a keyboard tool's route is remembered per window.
+		f.state.hook = async name =>
+			name === "bring_to_front"
+				? {
+						text: "Raised window 1 on pid 101.",
+						structuredJson: JSON.stringify({
+							effect: "unverifiable",
+							escalation: { reason: "delivery_failed", target: "foreground" },
+						}),
+						isError: false,
+						images: [],
+					}
+				: undefined;
+		const raised = await f.session.raise(f.context, f.window);
+		expect(raised.text).toContain('{ delivery: "foreground" }');
+		expect(raised.text).not.toContain("now take the foreground route");
 	} finally {
 		await f.close();
 	}
@@ -1631,7 +1651,7 @@ it("keeps the foreground route the driver escalated to for that window's keystro
 		f.state.hook = async name => (name === "hotkey" ? escalated : undefined);
 		const first = await f.session.press(f.context, f.window, "cmd+n");
 		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
-		expect(first.text).toContain('{ delivery: "foreground" }');
+		expect(first.text).toContain("re-run it as-is; this window's keystrokes now take the foreground route");
 		// The escalation attaches to the window, not to the callsite: the next
 		// keystroke takes the route the driver named without being told again.
 		f.state.hook = undefined;
