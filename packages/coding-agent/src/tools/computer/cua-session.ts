@@ -325,15 +325,26 @@ const DETECT_WINDOW_CHANGE_TOOLS: Record<string, true> = {
 	type_text: true,
 };
 /**
- * The driver advertises its own wire vocabulary in refusal text and escalation
- * advice (`delivery_mode: "foreground"`); the prelude takes
- * `{ delivery: "foreground" }`. Rewriting at the error boundary keeps a typed
- * refusal's own suggestion executable as written. Structured details stay
- * verbatim on the error's context.
+ * Two rewrites of driver-authored text, both about a route the caller has to
+ * be able to type. The driver advertises its own wire vocabulary in refusal
+ * text and escalation advice (`delivery_mode: "foreground"`) where the prelude
+ * takes `{ delivery: "foreground" }`; and it names a screenshot as the only
+ * check for an unverified pixel dispatch, which on this surface is the
+ * expensive one — an AX read answers the same question and the model followed
+ * the sentence literally, spending a capture where `observe({ query })` would
+ * have done. Rewriting at the boundary keeps both executable as written.
+ * Structured details stay verbatim on the error's context.
  */
 const DELIVERY_MODE_VOCABULARY = /delivery_mode\s*:\s*"(background|foreground)"/g;
+const SCREENSHOT_CHECK = /not driver-verified\s*[—-]\s*confirm via screenshot/g;
 function preludeVocabulary<T>(value: T): T {
-	if (typeof value === "string") return value.replace(DELIVERY_MODE_VOCABULARY, '{ delivery: "$1" }') as T;
+	if (typeof value === "string")
+		return value
+			.replace(DELIVERY_MODE_VOCABULARY, '{ delivery: "$1" }')
+			.replace(
+				SCREENSHOT_CHECK,
+				"not driver-verified — confirm with observe({ query }) or, on a pixel surface, a screenshot",
+			) as T;
 	if (Array.isArray(value)) return value.map(entry => preludeVocabulary(entry)) as T;
 	if (value && typeof value === "object")
 		return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, preludeVocabulary(entry)])) as T;

@@ -1541,6 +1541,30 @@ it("names the rung a dispatched action's own escalation points at", async () => 
 	}
 });
 
+it("names an observe before a screenshot as the check for an unverified dispatch", async () => {
+	const f = await fixture();
+	try {
+		await f.session.observe(f.context, f.window, { screenshot: true, silent: true });
+		// The sentence every background CGEvent rung ends with — click, drag
+		// and scroll all author it, and a screenshot was the only check it named.
+		f.state.hook = async name =>
+			name === "click"
+				? {
+						text: "✅ Posted left-click to pid 101 at (2,0) (background CGEvent; not driver-verified — confirm via screenshot).",
+						structuredJson: JSON.stringify({ effect: "unverifiable", route: "cgevent" }),
+						isError: false,
+						images: [],
+					}
+				: undefined;
+		const clicked = await f.session.click(f.context, f.window, [1, 0]);
+		expect(clicked.text).toBe(
+			"✅ Posted left-click to pid 101 at (2,0) (background CGEvent; not driver-verified — confirm with observe({ query }) or, on a pixel surface, a screenshot).",
+		);
+	} finally {
+		await f.close();
+	}
+});
+
 it("sends a suspected no-op back to observe before it sends it to pixels", async () => {
 	const f = await fixture();
 	const suspected = {
