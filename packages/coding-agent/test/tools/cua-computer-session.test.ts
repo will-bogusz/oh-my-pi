@@ -2552,6 +2552,99 @@ it("names the sheet holding keyboard focus when a delivery is refused for it", a
 	}
 });
 
+it("names the sheet holding keyboard focus when the refusal nests its own code", async () => {
+	const f = await fixture();
+	const sheet = { ...f.row, window_id: 11151, title: "", bounds: { x: 30, y: 40, width: 120, height: 80 } };
+	try {
+		f.state.relatedWindows = [{ pid: 101, window_id: 11151, title: "", relation: "sheet" }];
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows") return reply({ windows: [f.row, sheet] });
+			if (name === "get_window_state" && args.window_id === 11151)
+				return reply({
+					pid: 101,
+					window_id: 11151,
+					snapshot_id: "sheet-1",
+					window_bounds: sheet.bounds,
+					elements: [{ element_index: 1, element_token: "sheet-1:1", role: "AXSheet", label: "_NS:25", depth: 0 }],
+				});
+			return undefined;
+		};
+		expect((await f.session.observe(f.context, f.window)).tree).toContain('sheet "" (window 11151)');
+		f.state.hook = async name =>
+			name === "press_key"
+				? {
+						text: "press_key delivery failed: exact target window did not become focused for foreground HID delivery",
+						structuredJson: JSON.stringify({
+							status: "refused",
+							refusal: {
+								code: "delivery_failed",
+								message:
+									"press_key delivery failed: exact target window did not become focused for foreground HID delivery",
+							},
+						}),
+						isError: true,
+						errorCode: "delivery_failed",
+						images: [],
+					}
+				: undefined;
+		await expect(
+			f.session.press(f.context, f.window, "right", undefined, { delivery: "foreground" }),
+		).rejects.toThrow(
+			'window 11151 — a sheet attached to 1 — holds keyboard focus, not window 1; drive it with computer.window("11151") and press its own buttons.',
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("names the sheet a same-pid keyboard refusal is about, and stays silent when none is attached", async () => {
+	const f = await fixture();
+	const sheet = { ...f.row, window_id: 4231, title: "New Card", bounds: { x: 30, y: 40, width: 120, height: 80 } };
+	const ambiguous = {
+		text: "Background input refused (same_pid_keyboard_ambiguity): pid 101 owns 1 other eligible top-level window(s); process-scoped key events cannot be proven to reach window 1",
+		structuredJson: JSON.stringify({
+			code: "same_pid_keyboard_ambiguity",
+			effect: "refused",
+			pid: 101,
+			window_id: 1,
+			reason:
+				"pid 101 owns 1 other eligible top-level window(s); process-scoped key events cannot be proven to reach window 1",
+		}),
+		isError: true,
+		errorCode: "same_pid_keyboard_ambiguity",
+		images: [],
+	};
+	try {
+		f.state.hook = async name => (name === "press_key" ? ambiguous : undefined);
+		let bare = "";
+		await f.session.press(f.context, f.window, "escape").catch((error: Error) => {
+			bare = error.message;
+		});
+		expect(bare).toContain("same_pid_keyboard_ambiguity: Background input refused");
+		expect(bare).not.toContain("holds keyboard focus");
+		f.state.relatedWindows = [{ pid: 101, window_id: 4231, title: "New Card", relation: "sheet" }];
+		f.state.hook = async (name, args) => {
+			if (name === "press_key") return ambiguous;
+			if (name === "list_windows") return reply({ windows: [f.row, sheet] });
+			if (name === "get_window_state" && args.window_id === 4231)
+				return reply({
+					pid: 101,
+					window_id: 4231,
+					snapshot_id: "sheet-1",
+					window_bounds: sheet.bounds,
+					elements: [{ element_index: 1, element_token: "sheet-1:1", role: "AXSheet", label: "card", depth: 0 }],
+				});
+			return undefined;
+		};
+		expect((await f.session.observe(f.context, f.window)).tree).toContain('sheet "New Card" (window 4231)');
+		await expect(f.session.press(f.context, f.window, "escape")).rejects.toThrow(
+			'window 4231 — a sheet attached to 1 — holds keyboard focus, not window 1; drive it with computer.window("4231") and press its own buttons.',
+		);
+	} finally {
+		await f.close();
+	}
+});
+
 it("keeps an attached sheet's whole subtree when the caller narrows the parent walk", async () => {
 	const f = await fixture();
 	const sheet = { ...f.row, window_id: 5, title: "Save", bounds: { x: 30, y: 40, width: 120, height: 80 } };

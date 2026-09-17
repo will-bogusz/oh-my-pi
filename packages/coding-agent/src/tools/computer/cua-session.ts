@@ -569,6 +569,17 @@ function actionEvidence(details: unknown, args: Wire): string {
 	const target = escalationTarget(data);
 	return `Evidence: route=${route} delivery=${delivery} effect=${effect}${target === undefined ? "" : ` escalation=${target}`}`;
 }
+const FOCUS_HOLDING_REFUSALS: Record<string, true> = {
+	delivery_failed: true,
+	menu_path_unavailable: true,
+	same_pid_keyboard_ambiguity: true,
+};
+function refusalDetails(details: unknown): Wire {
+	const data = details !== null && typeof details === "object" && !Array.isArray(details) ? (details as Wire) : {};
+	const nested = data.refusal;
+	if (nested === null || typeof nested !== "object" || Array.isArray(nested)) return data;
+	return { ...data, ...(nested as Wire) };
+}
 /**
  * `set_value` writes `AXValue` and then drives the app's own end-of-edit
  * gesture, reporting in `committed` whether the value survived it. Only that
@@ -1669,9 +1680,9 @@ export class CuaComputerSession implements ComputerBackend {
 			.join("\n");
 	}
 	#focusHolder(details: unknown, args: Wire): string | undefined {
-		const data = details !== null && typeof details === "object" && !Array.isArray(details) ? (details as Wire) : {};
+		const data = refusalDetails(details);
 		const code = typeof data.code === "string" ? data.code : undefined;
-		if (code !== "delivery_failed" && code !== "menu_path_unavailable" && data.focused_window_id === undefined)
+		if ((code === undefined || FOCUS_HOLDING_REFUSALS[code] !== true) && data.focused_window_id === undefined)
 			return undefined;
 		const target = typeof args.window_id === "number" ? String(args.window_id) : undefined;
 		if (target === undefined) return undefined;
@@ -2042,16 +2053,14 @@ export class CuaComputerSession implements ComputerBackend {
 	 * resolved against. Neither path mints a ref or invalidates one.
 	 */
 	async #menuNames(window: ComputerWindowIdentity, menuPath: string[], error: ToolError): Promise<string | undefined> {
-		const details = error.context;
-		const data = details && typeof details === "object" ? (details as Wire) : {};
-		const refusal = data.refusal && typeof data.refusal === "object" ? (data.refusal as Wire) : {};
+		const refusal = refusalDetails(error.context);
 		if (refusal.code !== "menu_path_unavailable") return undefined;
 		const refused = MENU_REFUSAL_SEGMENT.exec(error.message);
 		const failed =
 			typeof refusal.failed_segment === "number" ? refusal.failed_segment : refused ? Number(refused[1]) : undefined;
 		if (failed === undefined || failed >= menuPath.length) return undefined;
 		const ambiguous = refused?.[2] === "is ambiguous";
-		const listed = menuItems(refusal.items ?? data.items);
+		const listed = menuItems(refusal.items);
 		if (listed?.length) return menuRefusalItems(menuPath, failed, listed, ambiguous);
 		const { data: state } = await this.#call("get_window_state", {
 			...windowArgs(window),
