@@ -356,14 +356,22 @@ async function missedWindow(
 	return new ToolError(windows === undefined ? head : `${head} ${openWindows(windows)}`, error.context);
 }
 
-/** Resolve one window, naming what is open when nothing matches it. */
+/**
+ * Resolve one window, naming what is open when nothing matches it. `acquire`
+ * is the caller starting over on the window; rehydrating the handle a prelude
+ * method already carries is not.
+ */
 async function resolveWindow(
 	session: ComputerBackend,
 	getContext: RunContextAccessor,
 	selector: WindowSelector,
 	options: WindowResolveOptions,
+	acquire = true,
 ): Promise<ComputerWindowIdentity> {
-	return await session.window(operationContext(getContext), selector, options).catch(async (error: unknown) => {
+	const context = operationContext(getContext);
+	return await (
+		acquire ? session.acquire(context, selector, options) : session.window(context, selector, options)
+	).catch(async (error: unknown) => {
 		if (!isMissedWindow(error)) throw error;
 		throw await missedWindow(session, getContext, error, error.message);
 	});
@@ -407,7 +415,7 @@ async function launchAndAcquire(
 	for (;;) {
 		const context = operationContext(getContext);
 		if ((await session.windows(context, selector)).length || Date.now() >= deadline)
-			return await session.window(context, selector, options).catch(async (error: unknown) => {
+			return await session.acquire(context, selector, options).catch(async (error: unknown) => {
 				if (!isMissedWindow(error)) throw error;
 				// A `Missing` acquisition used to tell the model to try
 				// `{ launch: true }`, which is what this call already did.
@@ -440,7 +448,7 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 			new Win(
 				session,
 				getContext,
-				await resolveWindow(session, getContext, normalizeWindowSelector(selector, true), options),
+				await resolveWindow(session, getContext, normalizeWindowSelector(selector, true), options, false),
 			),
 		acquireWindow: async (selector: unknown, options: AcquireOptions = {}): Promise<ComputerWindowAcquisition> => {
 			const { launch, ambiguous, ...observeOptions } = options;

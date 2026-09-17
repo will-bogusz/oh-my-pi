@@ -45,6 +45,11 @@ export interface ComputerBackend {
 		selector: string | WindowSelector,
 		options?: WindowResolveOptions,
 	): Promise<ComputerWindowIdentity>;
+	acquire(
+		context: ComputerOperationContext,
+		selector: string | WindowSelector,
+		options?: WindowResolveOptions,
+	): Promise<ComputerWindowIdentity>;
 	focusedWindow(context: ComputerOperationContext): Promise<ComputerWindowIdentity | null>;
 	element(ref: string, window?: ComputerWindowIdentity): ComputerElementSnapshot;
 	elementWindow(ref: string): ComputerWindowIdentity;

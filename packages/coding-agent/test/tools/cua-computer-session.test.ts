@@ -1662,10 +1662,89 @@ it("keeps the foreground route the driver escalated to for that window's keystro
 		f.state.hook = async name => (name === "hotkey" ? escalated : undefined);
 		await f.session.press(f.context, f.window, "cmd+n");
 		f.state.hook = undefined;
-		const reacquired = await f.session.window(f.context, { id: "1", pid: 101 });
+		const reacquired = await f.session.acquire(f.context, { id: "1", pid: 101 });
 		const after = await f.session.press(f.context, reacquired, "Return");
 		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
 		expect(after.text).not.toContain("remembered");
+	} finally {
+		await f.close();
+	}
+});
+
+const REMEMBERED_ROUTE = "delivery: foreground (remembered from the driver's escalation on this window)";
+
+it("keeps the escalated keyboard route across the rehydration step every prelude window method carries", async () => {
+	const f = await fixture();
+	const escalated = {
+		text: `Pressed cmd+b on pid ${f.row.pid}.`,
+		structuredJson: JSON.stringify({
+			delivery: { mode: "background" },
+			effect: "unverifiable",
+			escalation: { reason: "delivery_failed", target: "foreground" },
+			route: "synthetic_events",
+		}),
+		isError: false,
+		images: [],
+	};
+	try {
+		const handle = () => f.session.window(f.context, { id: String(f.row.window_id), pid: f.row.pid as number });
+		f.state.hook = async name => (name === "hotkey" ? escalated : undefined);
+		await f.session.press(f.context, await handle(), "cmd+b");
+		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
+		f.state.hook = undefined;
+		const second = await f.session.press(f.context, await handle(), "Return");
+		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
+		expect(second.text.split("\n")).toContain(REMEMBERED_ROUTE);
+		const typed = await f.session.type(f.context, await handle(), "hi");
+		expect(f.lastDispatch()).toMatchObject({ name: "type_text", args: { delivery_mode: "foreground" } });
+		expect(typed.text.split("\n")).toContain(REMEMBERED_ROUTE);
+	} finally {
+		await f.close();
+	}
+});
+
+it("records the foreground rung of a keyboard escalation the driver spells in prose", async () => {
+	const f = await fixture();
+	const reply = (escalation: Wire, error?: string) => ({
+		text: error ?? `Inserted 2 char(s) into AXTextArea "".`,
+		structuredJson: JSON.stringify(
+			error === undefined ? { effect: "unverifiable", escalation } : { code: "background_unavailable", escalation },
+		),
+		isError: error !== undefined,
+		...(error === undefined ? {} : { errorCode: "background_unavailable" }),
+		images: [],
+	});
+	try {
+		f.state.hook = async name =>
+			name === "type_text"
+				? reply({
+						recommended: "foreground",
+						reason:
+							'background insert could not be confirmed — re-call with delivery_mode:"foreground" if a screenshot shows the text didn\'t land.',
+					})
+				: undefined;
+		await f.session.type(f.context, f.window, "hi");
+		f.state.hook = undefined;
+		expect((await f.session.press(f.context, f.window, "Return")).text.split("\n")).toContain(REMEMBERED_ROUTE);
+		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
+
+		const fresh = await f.session.acquire(f.context, { id: String(f.row.window_id), pid: f.row.pid as number });
+		f.state.hook = async name =>
+			name === "hotkey"
+				? reply(
+						{
+							recommended: "foreground",
+							reason:
+								"Screen Sharing does not forward modifier state from background PID-routed base-key events.",
+							requires: ["window_id"],
+						},
+						"Background input refused.",
+					)
+				: undefined;
+		await expect(f.session.press(f.context, fresh, "cmd+b")).rejects.toThrow("background_unavailable");
+		f.state.hook = undefined;
+		expect((await f.session.press(f.context, fresh, "Return")).text.split("\n")).toContain(REMEMBERED_ROUTE);
+		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
 	} finally {
 		await f.close();
 	}

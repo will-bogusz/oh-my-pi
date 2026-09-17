@@ -1195,13 +1195,27 @@ export class CuaComputerSession implements ComputerBackend {
 		return this.#schedule(context, "windows", false, () => this.#listedWindows(selector));
 	}
 	/**
+	 * Re-resolution of a handle the caller already holds. Every prelude window
+	 * method carries a `window` step to rehydrate its handle, so this runs
+	 * before each of them and keeps what the session inferred about driving
+	 * the window; `acquire` is the call that starts over on it.
+	 */
+	window(
+		context: Context,
+		selector: string | WindowSelector,
+		options: WindowResolveOptions = {},
+	): Promise<ComputerWindowIdentity> {
+		return this.#schedule(context, "window", false, () =>
+			this.#window(selector, options.ambiguous === "throw" ? undefined : text => context.emitText(text)),
+		);
+	}
+	/**
 	 * Acquisition is the caller starting again on this window, so what the
 	 * session inferred about how to drive it does not outlive it: the sheet
 	 * that made background delivery fail may be gone, and the driver is the
-	 * one that gets to say so. Internal re-resolution (`#current`) is not an
-	 * acquisition and keeps it.
+	 * one that gets to say so.
 	 */
-	window(
+	acquire(
 		context: Context,
 		selector: string | WindowSelector,
 		options: WindowResolveOptions = {},
@@ -1852,6 +1866,19 @@ export class CuaComputerSession implements ComputerBackend {
 		} holds keyboard focus, not window ${target}; drive it with computer.window(${JSON.stringify(sheet)}) and press its own buttons.`;
 	}
 	/**
+	 * The rung the driver names is the whole fact: a keyboard escalation
+	 * spells its `reason` as a contract token (`delivery_failed`) or as the
+	 * prose sentence the fork's `hotkey`/`type_text` emit, so only the target
+	 * is a route. A refused foreground dispatch is not a route to keep
+	 * taking, whoever chose it.
+	 */
+	#keyboardEscalation(name: string, args: Wire, details: Wire, refused: boolean): void {
+		if (KEYBOARD_TOOLS[name] !== true || typeof args.window_id !== "number") return;
+		const window = String(args.window_id);
+		if (refused && args.delivery_mode === "foreground") this.#escalatedKeyboard.delete(window);
+		else if (escalationTarget(details) === "foreground") this.#escalatedKeyboard.add(window);
+	}
+	/**
 	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
 	 * window found now appeared while this action ran — a prompt the action
 	 * itself provoked, or the user's own. The action is not retracted; the
@@ -1867,10 +1894,7 @@ export class CuaComputerSession implements ComputerBackend {
 			);
 		} catch (error) {
 			if (!(error instanceof ToolError)) throw error;
-			// A foreground keystroke the driver refused is not a route to keep
-			// taking, whoever chose it.
-			if (KEYBOARD_TOOLS[name] === true && args.delivery_mode === "foreground" && typeof args.window_id === "number")
-				this.#escalatedKeyboard.delete(String(args.window_id));
+			this.#keyboardEscalation(name, args, refusalDetails(error.context), true);
 			const holder = this.#focusHolder(error.context, args);
 			throw new ToolError(
 				`${error.message}\n${actionEvidence(error.context, args)}${holder === undefined ? "" : `\n${holder}`}`,
@@ -1885,11 +1909,7 @@ export class CuaComputerSession implements ComputerBackend {
 		// a next step is only executable if it is spelled the way the caller types.
 		const reported = preludeVocabulary(result.text);
 		const escalation = escalationRoute(data, reported);
-		// The driver names the route per dispatch; what it reports is a fact
-		// about the window's keyboard delivery, so the window keeps it.
-		const failed = escalationTarget(data) === "foreground" ? (data.escalation as Wire).reason : undefined;
-		if (KEYBOARD_TOOLS[name] === true && failed === "delivery_failed" && typeof args.window_id === "number")
-			this.#escalatedKeyboard.add(String(args.window_id));
+		this.#keyboardEscalation(name, args, data, false);
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
 		return {
 			text: [

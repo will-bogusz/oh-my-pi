@@ -117,6 +117,9 @@ class FakeBackend implements ComputerBackend {
 		this.pins.set(window.id, window.pid);
 		return window;
 	}
+	acquire(context: ComputerOperationContext, selector: string | WindowSelector) {
+		return this.window(context, selector);
+	}
 	async displays() {
 		return [display];
 	}
