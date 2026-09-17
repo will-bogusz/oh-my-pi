@@ -266,8 +266,7 @@ class Win {
 		const label = query.label ?? query.title;
 		const matches = observation.elements.filter(
 			element =>
-				(matched(element.role, query.role, query.exact) ||
-					matched(element.subrole, query.role, query.exact)) &&
+				(matched(element.role, query.role, query.exact) || matched(element.subrole, query.role, query.exact)) &&
 				matched(element.subrole, query.subrole, query.exact) &&
 				matched(element.label, label, query.exact) &&
 				matched(element.value, query.value, query.exact),

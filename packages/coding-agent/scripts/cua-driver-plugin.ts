@@ -6,8 +6,13 @@ import * as path from "node:path";
  * replaces `src/tools/computer/vendored.ts` with a module that embeds the
  * target platform's executable (when one is vendored) as a Bun file asset.
  */
-export async function createCuaDriverPlugin(repoRoot: string, target?: Bun.Build.CompileTarget): Promise<Bun.BunPlugin> {
-	const platform = (target ?? `bun-${process.platform}-${process.arch}`).replace(/^bun-/, "").replace(/-(baseline|modern)$/, "");
+export async function createCuaDriverPlugin(
+	repoRoot: string,
+	target?: Bun.Build.CompileTarget,
+): Promise<Bun.BunPlugin> {
+	const platform = (target ?? `bun-${process.platform}-${process.arch}`)
+		.replace(/^bun-/, "")
+		.replace(/-(baseline|modern)$/, "");
 	const sourceModule = await fs.realpath(path.join(repoRoot, "packages/coding-agent/src/tools/computer/vendored.ts"));
 	const directory = path.join(repoRoot, "vendor/cua-driver", platform);
 	const manifestFile = Bun.file(path.join(directory, "manifest.json"));
@@ -18,7 +23,8 @@ export async function createCuaDriverPlugin(repoRoot: string, target?: Bun.Build
 			throw new Error(`Invalid cua-driver manifest for ${platform}`);
 		const executable = path.join(directory, "cua-driver");
 		const digest = new Bun.CryptoHasher("sha256").update(await Bun.file(executable).bytes()).digest("hex");
-		if (digest !== manifest.sha256) throw new Error(`Vendored cua-driver for ${platform} does not match its manifest`);
+		if (digest !== manifest.sha256)
+			throw new Error(`Vendored cua-driver for ${platform} does not match its manifest`);
 		contents = [
 			`import filePath from ${JSON.stringify(executable)} with { type: "file" };`,
 			`const manifest = ${JSON.stringify(manifest)};`,

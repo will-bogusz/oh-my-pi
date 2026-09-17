@@ -135,8 +135,7 @@ function validateChain(chain: readonly ComputerCallStep[]): ComputerCallPolicy {
 		if (methods === DESKTOP_METHODS && step.method === "acquireWindow") {
 			const selector = step.args[0];
 			const options = step.args[1];
-			const launch =
-				options !== null && typeof options === "object" ? Reflect.get(options, "launch") : undefined;
+			const launch = options !== null && typeof options === "object" ? Reflect.get(options, "launch") : undefined;
 			const launchable =
 				selector !== null &&
 				typeof selector === "object" &&

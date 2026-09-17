@@ -1389,9 +1389,7 @@ export class CuaComputerSession implements ComputerBackend {
 			if (doubted.length) observation.tree = `${doubted.join("\n")}\n${observation.tree}`;
 			this.#observedRoster.set(
 				current.pid,
-				new Set(
-					(this.#lastRoster.get(current.pid) ?? []).filter(row => row.onScreen !== false).map(row => row.id),
-				),
+				new Set((this.#lastRoster.get(current.pid) ?? []).filter(row => row.onScreen !== false).map(row => row.id)),
 			);
 			if (options.screenshot) {
 				try {

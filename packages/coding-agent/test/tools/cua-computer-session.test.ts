@@ -990,8 +990,8 @@ it("never calls a budget-capped tree complete without the walker's own verdict",
  */
 const NOTES_COLLAPSED = {
 	markdown: [
-		'- [49] AXOutline [id=ICMNoteList actions=[showmenu]]',
-		'          - [50] AXCell [id=ICMNoteListCell actions=[showmenu]]',
+		"- [49] AXOutline [id=ICMNoteList actions=[showmenu]]",
+		"          - [50] AXCell [id=ICMNoteListCell actions=[showmenu]]",
 		'            - AXStaticText = "Meeting 070"',
 		"      - 69 of 81 rows are scrolled out of view and were not read",
 		"      - [51] AXButton [actions=[press]]",

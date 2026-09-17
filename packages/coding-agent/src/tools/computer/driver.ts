@@ -127,7 +127,11 @@ export async function installCuaDriver(platform: string = DRIVER_PLATFORM): Prom
 	await fs.rename(staging, installed);
 	const { filePath: _filePath, ...manifest } = vendored;
 	await Bun.write(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-	logger.info("Installed vendored cua-driver", { version: vendored.version, sha256: vendored.sha256, path: installed });
+	logger.info("Installed vendored cua-driver", {
+		version: vendored.version,
+		sha256: vendored.sha256,
+		path: installed,
+	});
 	return installed;
 }
 
@@ -238,9 +242,12 @@ export class CuaDriverChild implements CuaDriver {
 		const reply = await this.#request("tools/call", { name, arguments: args }, signal);
 		if (reply.error) throw new ToolError(`cua-driver ${name}: ${reply.error.message ?? "request failed"}`);
 		const payload = McpToolResult(reply.result ?? {});
-		if (payload instanceof type.errors) throw new ToolError(`cua-driver ${name}: malformed reply (${payload.summary})`);
+		if (payload instanceof type.errors)
+			throw new ToolError(`cua-driver ${name}: malformed reply (${payload.summary})`);
 		const structured =
-			payload.structuredContent && typeof payload.structuredContent === "object" && !Array.isArray(payload.structuredContent)
+			payload.structuredContent &&
+			typeof payload.structuredContent === "object" &&
+			!Array.isArray(payload.structuredContent)
 				? (payload.structuredContent as Record<string, unknown>)
 				: undefined;
 		const code = typeof structured?.code === "string" ? structured.code : undefined;
@@ -301,7 +308,10 @@ export class CuaDriverChild implements CuaDriver {
 		try {
 			this.#write({ jsonrpc: "2.0", method, params });
 		} catch (error) {
-			logger.debug("cua-driver notify failed", { method, error: error instanceof Error ? error.message : String(error) });
+			logger.debug("cua-driver notify failed", {
+				method,
+				error: error instanceof Error ? error.message : String(error),
+			});
 		}
 	}
 
