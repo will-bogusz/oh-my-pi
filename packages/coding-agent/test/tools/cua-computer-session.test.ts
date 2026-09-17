@@ -468,6 +468,66 @@ it("names a window the pid opened since the last observation and never rebinds t
 	}
 });
 
+it("announces what a pid opened on the observe path and nests a sheet under its new parent", async () => {
+	const f = await fixture();
+	// Chrome's print dialog renders seconds after the invoke that asked for
+	// it, so it appears between two observations rather than inside an action.
+	const print = { ...f.row, window_id: 7, title: "Print", z_index: 9 };
+	const lease = { ...f.row, window_id: 9, title: "Window", bounds: { x: 0, y: 0, width: 66, height: 20 } };
+	const document = { ...f.row, window_id: 11, title: "Untitled", bounds: { x: 0, y: 0, width: 400, height: 300 } };
+	const sheet = { ...f.row, window_id: 12, title: "", bounds: { x: 100, y: 20, width: 200, height: 120 } };
+	let windows: WindowRow[] = [f.row];
+	try {
+		f.state.hook = async (name, args) =>
+			name === "list_windows"
+				? reply({
+						windows,
+						...(args.include_accessibility_metadata
+							? {
+									accessibility_windows: {
+										pid: 101,
+										complete: true,
+										windows: [
+											{ window_id: 1, role: "AXWindow" },
+											{ window_id: 7, role: "AXWindow" },
+											{ window_id: 11, role: "AXWindow" },
+										],
+									},
+								}
+							: {}),
+					})
+				: undefined;
+		await f.session.observe(f.context, f.window);
+		windows = [f.row, print, lease];
+		f.calls.length = 0;
+		const opened = await f.session.observe(f.context, f.window);
+		// The diff spends the roster this walk's own closing geometry check read:
+		// the two reads are the ones `#state` already made before and after it.
+		expect(f.calls.map(call => [call.name, call.args.pid])).toEqual([
+			["list_windows", 101],
+			["get_window_state", 101],
+			["list_windows", 101],
+		]);
+		expect(opened.tree).toContain(
+			'pid 101 gained window 7 ("Print") since your last observation — acquire it with computer.window("7").',
+		);
+		// The driver's own capture-lease window is nobody's.
+		expect(opened.tree).not.toContain("window 9");
+		// This read adopted it, so the next one does not say it again.
+		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("gained window");
+		// A sheet and the window it is attached to appear together: the parent
+		// is the line to follow, and its own tree renders the sheet.
+		windows = [f.row, print, lease, document, sheet];
+		const nested = await f.session.observe(f.context, f.window);
+		expect(nested.tree.split("\n").filter(line => line.includes("gained") || line.includes("attached"))).toEqual([
+			'pid 101 gained window 11 ("Untitled") since your last observation — acquire it with computer.window("11").',
+			'  window 12 ("") is attached to it — no accessibility window of its own — and renders inside its parent\'s tree; observe window 11, not this id.',
+		]);
+	} finally {
+		await f.close();
+	}
+});
+
 it("declines the driver's post-action window poll on the actions that offer one", async () => {
 	const f = await fixture();
 	try {

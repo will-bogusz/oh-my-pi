@@ -195,6 +195,15 @@ function bounds(value: unknown): ComputerBounds {
 function sameBounds(a: ComputerBounds, b: ComputerBounds): boolean {
 	return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
+/** Whether the second rectangle is drawn wholly inside the first, in points. */
+function encloses(outer: ComputerBounds, inner: ComputerBounds): boolean {
+	return (
+		inner.x >= outer.x &&
+		inner.y >= outer.y &&
+		inner.x + inner.width <= outer.x + outer.width &&
+		inner.y + inner.height <= outer.y + outer.height
+	);
+}
 function pointPair(point: unknown): [number, number] {
 	if (Array.isArray(point) && point.length === 2) return [Number(point[0]), Number(point[1])];
 	if (point !== null && typeof point === "object") {
@@ -1312,6 +1321,14 @@ export class CuaComputerSession implements ComputerBackend {
 			if (typeof reply.data.document_edited === "boolean") observation.documentEdited = reply.data.document_edited;
 			if (observation.documentPath !== undefined || observation.documentEdited !== undefined)
 				observation.tree += `\nDocument: ${observation.documentPath ?? "(path unknown)"}${observation.documentEdited === undefined ? "" : observation.documentEdited ? " — unsaved changes" : " — no unsaved changes flagged"}`;
+			// The pid's roster as this walk's closing geometry check read it,
+			// against what the last observation of that pid saw: the diff adds no
+			// call, and the baseline below adopts it, so it is said once.
+			const opened = await this.#openedWindows(current.pid, {
+				roster: this.#lastRoster.get(current.pid) ?? [],
+				observed: current.id,
+			});
+			if (opened !== undefined) observation.tree += `\n${opened}`;
 			// An observation is the model's picture of the environment; a system
 			// prompt over it is part of that picture even though the AX tree of
 			// the target window looks entirely normal underneath.
@@ -1696,31 +1713,83 @@ export class CuaComputerSession implements ComputerBackend {
 	 * What the pid put on screen that the caller has never seen. The handle it
 	 * acted through is never rebound — a window it did not ask for is a fact
 	 * about the app, not a new target — so the id and the call that acquires
-	 * it are named and the choice stays the caller's. Sheets are excluded:
-	 * the next observation of their parent renders them in its own tree.
+	 * it are named and the choice stays the caller's. Read on both paths: a
+	 * dialog that renders asynchronously (Chrome's print, save and open
+	 * panels, 24 episodes in the bench corpus) appears seconds after the
+	 * action that asked for it, so an action-only diff never named it and the
+	 * model hunted it by hand. The observe path spends the roster the walk's
+	 * own window resolution already read; `read.observed` is this walk's
+	 * window, which is being looked at rather than announced.
 	 */
-	async #openedWindows(args: Wire): Promise<string | undefined> {
-		const pid = typeof args.pid === "number" ? args.pid : undefined;
+	async #openedWindows(
+		pid: number | undefined,
+		read?: { roster: readonly ComputerWindowIdentity[]; observed: string },
+	): Promise<string | undefined> {
 		if (pid === undefined) return undefined;
 		const before = this.#observedRoster.get(pid);
 		if (!before) return undefined;
-		let after: readonly ComputerWindowIdentity[];
-		try {
-			after = await this.#windows({ pid });
-		} catch (error) {
-			if (!(error instanceof ToolError)) throw error;
-			return undefined;
-		}
+		let after = read?.roster;
+		if (after === undefined)
+			try {
+				after = await this.#windows({ pid });
+			} catch (error) {
+				if (!(error instanceof ToolError)) throw error;
+				return undefined;
+			}
 		const opened = after.filter(
-			window => window.onScreen !== false && !before.has(window.id) && !this.#sheets.has(window.id),
+			window =>
+				window.onScreen !== false &&
+				!before.has(window.id) &&
+				!this.#sheets.has(window.id) &&
+				window.id !== read?.observed,
 		);
 		if (!opened.length) return undefined;
+		// A relation only costs the extra mapping read when there is something
+		// to relate: one window gained alone has no parent among the new rows.
+		const attached = opened.length > 1 ? await this.#attachedTo(pid, opened) : undefined;
 		return opened
-			.map(
-				window =>
-					`pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation — acquire it with computer.window(${JSON.stringify(window.id)}).`,
-			)
+			.filter(window => attached?.get(window.id) === undefined)
+			.flatMap(window => [
+				`pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation — acquire it with computer.window(${JSON.stringify(window.id)}).`,
+				...opened
+					.filter(row => attached?.get(row.id) === window.id)
+					.map(
+						row =>
+							`  window ${row.id} (${JSON.stringify(row.title)}) is attached to it — no accessibility window of its own — and renders inside its parent's tree; observe window ${window.id}, not this id.`,
+					),
+			])
 			.join("\n");
+	}
+	/**
+	 * Which of these newly gained rows are attached surfaces, each against the
+	 * gained window it hangs on. Only an observation of the parent reports the
+	 * relation, which is exactly what has not happened for a window that
+	 * appeared this instant — and announcing a sheet beside its own parent
+	 * sent the bench into a tree rooted at `AXSheet` that cost a cell to
+	 * recover from. So the AXWindows mapping says which rows are windows at
+	 * all, and containment says whose surface this is: a sheet is drawn inside
+	 * the window it belongs to. Anything neither settles stays a window.
+	 */
+	async #attachedTo(pid: number, opened: readonly ComputerWindowIdentity[]): Promise<ReadonlyMap<string, string>> {
+		const attached = new Map<string, string>();
+		let annotated: readonly ComputerWindowIdentity[];
+		try {
+			const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
+			const ax = this.#accessibilityWindows(data, pid);
+			if (!ax) return attached;
+			annotated = this.#withAccessibility(this.#windowRoster(data, { pid }, this.#roster()), ax);
+		} catch (error) {
+			if (!(error instanceof ToolError)) throw error;
+			return attached;
+		}
+		const rows = opened.map(window => annotated.find(row => row.id === window.id) ?? window);
+		const windows = rows.filter(row => row.axBacked === true);
+		for (const row of rows) {
+			if (row.axBacked === true) continue;
+			const hosts = windows.filter(host => encloses(host.bounds, row.bounds));
+			if (hosts.length === 1) attached.set(row.id, hosts[0]!.id);
+		}
+		return attached;
 	}
 	#focusHolder(details: unknown, args: Wire): string | undefined {
 		const data = refusalDetails(details);
@@ -1770,7 +1839,7 @@ export class CuaComputerSession implements ComputerBackend {
 		// a next step is only executable if it is spelled the way the caller types.
 		const reported = preludeVocabulary(result.text);
 		const escalation = escalationRoute(data, reported);
-		const opened = await this.#openedWindows(args);
+		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
 		return {
 			text: [
 				reported,
