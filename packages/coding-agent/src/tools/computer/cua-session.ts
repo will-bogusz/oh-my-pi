@@ -611,11 +611,11 @@ export class CuaComputerSession implements ComputerBackend {
 	readonly #sheets = new Map<string, { parent: string; title: string }>();
 	readonly #staleSheetRefs = new Map<string, string>();
 	/**
-	 * Each pid's on-screen window ids as of the last observation of that pid,
-	 * and the driver's own capture-lease windows, which are nobody's.
+	 * Each pid's on-screen ids as of its last observation, its rows as of the
+	 * last roster read, and the driver's capture-lease windows, which are nobody's.
 	 */
 	readonly #observedRoster = new Map<number, ReadonlySet<string>>();
-	#lastRoster: readonly ComputerWindowIdentity[] = [];
+	readonly #lastRoster = new Map<number, readonly ComputerWindowIdentity[]>();
 	#leaseArtifacts: ReadonlySet<string> = new Set();
 	/**
 	 * What each window's writes left unproven, one sentence per write, in the
@@ -900,7 +900,7 @@ export class CuaComputerSession implements ComputerBackend {
 			}
 		}
 		this.#leaseArtifacts = artifacts;
-		this.#lastRoster = windows;
+		for (const [pid, rows] of Map.groupBy(windows, window => window.pid)) this.#lastRoster.set(pid, rows);
 		return windows.filter(
 			window =>
 				(selector.id === undefined || window.id === selector.id) &&
@@ -910,7 +910,7 @@ export class CuaComputerSession implements ComputerBackend {
 		);
 	}
 	async #windows(selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
-		const { data } = await this.#call("list_windows", {});
+		const { data } = await this.#call("list_windows", selector.pid === undefined ? {} : { pid: selector.pid });
 		return this.#windowRoster(data, selector, this.#roster());
 	}
 	/**
@@ -1273,7 +1273,7 @@ export class CuaComputerSession implements ComputerBackend {
 			this.#observedRoster.set(
 				current.pid,
 				new Set(
-					this.#lastRoster.filter(row => row.pid === current.pid && row.onScreen !== false).map(row => row.id),
+					(this.#lastRoster.get(current.pid) ?? []).filter(row => row.onScreen !== false).map(row => row.id),
 				),
 			);
 			if (options.screenshot) {

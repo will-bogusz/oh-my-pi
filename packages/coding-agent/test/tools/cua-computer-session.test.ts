@@ -360,7 +360,7 @@ it("acquires the sole application-declared window without hiding raw helper iden
 		expect((await f.session.windows(f.context, { app: "Fixture" })).map(window => window.id)).toEqual(["2", "1"]);
 		f.calls.length = 0;
 		expect(await f.session.window(f.context, { id: "2", pid: 101 })).toMatchObject({ id: "2", title: "" });
-		expect(f.calls).toEqual([{ name: "list_windows", args: {} }]);
+		expect(f.calls).toEqual([{ name: "list_windows", args: { pid: 101 } }]);
 	} finally {
 		await f.close();
 	}
@@ -383,6 +383,61 @@ it("keeps the driver's own capture-lease window out of every roster it offers", 
 		// acquisition below is ambiguous between the two real windows only.
 		expect(await f.session.window(f.context, { app: "Fixture", title: "Editor" })).toMatchObject({ id: "1" });
 		expect(f.texts).toEqual([]);
+		// The lease window is the driver's own, so an AXWindows mapping that
+		// lists it is still exact: narrowing stands and picks the claimed row
+		// over the one stacking order puts in front.
+		f.state.hook = async (name, args) =>
+			name === "list_windows"
+				? reply({
+						windows: [f.row, lease, named],
+						...(args.include_accessibility_metadata
+							? {
+									accessibility_windows: {
+										pid: 101,
+										complete: true,
+										windows: [
+											{ window_id: 1, role: "AXWindow" },
+											{ window_id: 9, role: "AXWindow" },
+										],
+									},
+								}
+							: {}),
+					})
+				: undefined;
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "1" });
+		expect(f.texts).toEqual([]);
+	} finally {
+		await f.close();
+	}
+});
+
+it("reads only the acted pid's windows once a handle names one", async () => {
+	const f = await fixture();
+	const print = { ...f.row, window_id: 7, title: "Print", z_index: 9 };
+	const lease = { ...f.row, window_id: 9, title: "Window", bounds: { x: 0, y: 0, width: 66, height: 20 } };
+	const foreign = { ...f.row, pid: 202, window_id: 20, title: "Other app" };
+	let printing = false;
+	try {
+		f.state.hook = async (name, args) => {
+			if (name !== "list_windows") return undefined;
+			const all = [f.row, lease, foreign, ...(printing ? [print] : [])];
+			return reply({ windows: all.filter(row => args.pid === undefined || row.pid === args.pid) });
+		};
+		await f.session.observe(f.context, f.window);
+		printing = true;
+		f.calls.length = 0;
+		const opened = await f.session.press(f.context, f.window, "cmd+p", undefined, { delivery: "foreground" });
+		expect(f.calls.filter(call => call.name === "list_windows").map(call => call.args)).toEqual([
+			{ pid: 101 },
+			{ pid: 101 },
+		]);
+		expect(opened.text).toContain('pid 101 gained window 7 ("Print")');
+		expect(opened.text).not.toContain("window 9");
+		// A pid-scoped read still carries that pid's own capture-lease window,
+		// so it is still recognised and never offered as a candidate.
+		await expect(f.session.window(f.context, { id: "9", pid: 101 })).rejects.toThrow("Missing computer window");
+		// The whole roster is still what a listing with no pid asks for.
+		expect((await f.session.windows(f.context)).map(window => window.id)).toEqual(["1", "20", "7"]);
 	} finally {
 		await f.close();
 	}
