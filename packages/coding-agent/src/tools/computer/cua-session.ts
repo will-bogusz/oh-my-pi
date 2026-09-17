@@ -14,7 +14,7 @@ import {
 	type WindowRosterSample,
 } from "./interruption";
 import { appWindows, isCaptureLeaseArtifact } from "./roster";
-import { PERFORMABLE_ACTIONS, observedActions } from "./semantic-actions";
+import { PERFORMABLE_ACTIONS, observedActions, semanticAction } from "./semantic-actions";
 import type {
 	ActionOptions,
 	ComputerActionResult,
@@ -1936,23 +1936,36 @@ export class CuaComputerSession implements ComputerBackend {
 			...delivery(options),
 		});
 	}
+	/**
+	 * Exactly the names this ref's own row printed, plus the six semantic ones.
+	 * Advertisement is the driver's fact and it dispatches any advertised name,
+	 * so a narrower vocabulary here refused the verbatim AX names the tree
+	 * renders — `AXShowDefaultUI` off a Chrome file row among them. The alias
+	 * table is read on the way in as well as on the way out, and the refusal
+	 * names this row's list rather than six verbs that may not be on it.
+	 */
 	perform(
 		context: Context,
 		window: ComputerWindowIdentity,
 		ref: string,
 		action: string,
 	): Promise<ComputerActionResult> {
-		const custom = this.#elements.get(ref)?.customActions.get(action);
-		if (custom === undefined && !PERFORMABLE_ACTIONS.includes(action))
+		const binding = this.#elements.get(ref);
+		const custom = binding?.customActions.get(action);
+		const semantic = semanticAction(action);
+		const advertised = binding?.element.actions ?? [];
+		if (custom === undefined && semantic === undefined && !advertised.includes(action))
 			unsupported(
-				`AX action '${action}'; perform dispatches ${PERFORMABLE_ACTIONS.join(" · ")} and any custom action the element's own row advertises`,
+				`AX action '${action}' on ${ref}; that row advertises ${
+					advertised.length ? advertised.join(" · ") : "no actions"
+				}, and perform also dispatches ${PERFORMABLE_ACTIONS.join(" · ")}`,
 			);
 		return this.#targetAction(
 			context,
 			"click",
 			window,
 			ref,
-			{ action: custom ?? action, delivery_mode: "background" },
+			{ action: custom ?? semantic ?? action, delivery_mode: "background" },
 			window.id,
 		);
 	}

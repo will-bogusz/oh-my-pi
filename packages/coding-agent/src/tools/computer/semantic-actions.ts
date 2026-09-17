@@ -15,10 +15,15 @@ const SEMANTIC_ACTION_BY_ALIAS: Record<string, string> = {
 	open: "open",
 };
 
-/** The action names `perform` dispatches; every other observed name is a label. */
+/** The action names `perform` dispatches on every row, whatever that row advertises. */
 export const PERFORMABLE_ACTIONS: readonly string[] = Object.freeze([
 	...new Set(Object.values(SEMANTIC_ACTION_BY_ALIAS)),
 ]);
+
+/** The semantic name this alias dispatches as; undefined when it names none. */
+export function semanticAction(action: string): string | undefined {
+	return Object.hasOwn(SEMANTIC_ACTION_BY_ALIAS, action) ? SEMANTIC_ACTION_BY_ALIAS[action] : undefined;
+}
 
 export function observedActions(...lists: readonly unknown[]): readonly string[] | undefined {
 	const reported = lists.filter(list => Array.isArray(list)) as readonly unknown[][];
@@ -26,7 +31,7 @@ export function observedActions(...lists: readonly unknown[]): readonly string[]
 	const actions: string[] = [];
 	for (const action of reported.flat()) {
 		if (typeof action !== "string" || !action) continue;
-		const name = Object.hasOwn(SEMANTIC_ACTION_BY_ALIAS, action) ? SEMANTIC_ACTION_BY_ALIAS[action]! : action;
+		const name = semanticAction(action) ?? action;
 		if (!actions.includes(name)) actions.push(name);
 	}
 	return Object.freeze(actions);

@@ -2392,7 +2392,7 @@ it("preserves SDK launch conflict identity and delivery evidence without retryin
 	}
 });
 
-it("names every action a node advertises and dispatches only the ones perform has", async () => {
+it("dispatches every action a node advertises and refuses only what its row never printed", async () => {
 	const f = await fixture();
 	try {
 		let observation = await f.session.observe(f.context, f.window);
@@ -2410,9 +2410,9 @@ it("names every action a node advertises and dispatches only the ones perform ha
 			name: "click",
 			args: { action: "show_menu", element_token: "s2:1", window_id: 1, pid: 101 },
 		});
-		// A name no rung dispatches still says what the node is, so it renders
-		// verbatim; `perform` refuses it and names what it can send.
-		f.state.actions = ["AXConfirm", "AXRaise", "AXOpen", "AXConfirm", null, "toString"];
+		// A verbatim AX name is what the row advertises and what the driver
+		// dispatches, so it is accepted exactly as the tree printed it.
+		f.state.actions = ["AXConfirm", "AXShowDefaultUI", "AXOpen", "AXConfirm", null, "toString"];
 		// macOS ships an app's own actions inside AXUIElementCopyActionNames as
 		// "Name:Pin List\nTarget:0x0\nSelector:(null)", so the driver reports the
 		// readable name beside the string that invokes it.
@@ -2422,16 +2422,24 @@ it("names every action a node advertises and dispatches only the ones perform ha
 		];
 		observation = await f.session.observe(f.context, f.window);
 		const element = observation.elements[0]!;
-		expect(element.actions).toEqual(["confirm", "AXRaise", "open", "toString", "Add Reminder", "Snooze"]);
-		expect(observation.tree).toContain('actions=["confirm","AXRaise","open","toString","Add Reminder","Snooze"]');
+		expect(element.actions).toEqual(["confirm", "AXShowDefaultUI", "open", "toString", "Add Reminder", "Snooze"]);
+		expect(observation.tree).toContain(
+			'actions=["confirm","AXShowDefaultUI","open","toString","Add Reminder","Snooze"]',
+		);
 		// A custom action is invoked by the raw string, never by the label.
 		await f.session.perform(f.context, f.window, element.ref, "Snooze");
 		expect(f.lastDispatch()).toMatchObject({
 			name: "click",
 			args: { action: "Name:Snooze\nTarget:0x0\nSelector:(null)" },
 		});
-		expect(() => f.session.perform(f.context, f.window, element.ref, "AXRaise")).toThrow(
-			"perform dispatches press · show_menu · pick · confirm · cancel · open and any custom action the element's own row advertises",
+		await f.session.perform(f.context, f.window, element.ref, "AXShowDefaultUI");
+		expect(f.lastDispatch()).toMatchObject({ name: "click", args: { action: "AXShowDefaultUI" } });
+		// An AX spelling of a semantic name is dispatched as that name, whether
+		// or not the row's own list carries it.
+		await f.session.perform(f.context, f.window, element.ref, "AXPress");
+		expect(f.lastDispatch()).toMatchObject({ name: "click", args: { action: "press" } });
+		expect(() => f.session.perform(f.context, f.window, element.ref, "AXScrollToVisible")).toThrow(
+			`AX action 'AXScrollToVisible' on ${element.ref}; that row advertises confirm · AXShowDefaultUI · open · toString · Add Reminder · Snooze, and perform also dispatches press · show_menu · pick · confirm · cancel · open`,
 		);
 		f.state.actions = [];
 		f.state.customActions = undefined;
