@@ -1750,6 +1750,46 @@ it("records the foreground rung of a keyboard escalation the driver spells in pr
 	}
 });
 
+it("forgets the route when the caller's own foreground press is refused, even as the refusal escalates to it", async () => {
+	const f = await fixture();
+	const refused = {
+		text: "Background input refused.",
+		structuredJson: JSON.stringify({
+			code: "background_unavailable",
+			escalation: {
+				recommended: "foreground",
+				reason: "Screen Sharing does not forward modifier state from background PID-routed base-key events.",
+				requires: ["window_id"],
+			},
+		}),
+		isError: true,
+		errorCode: "background_unavailable",
+		images: [],
+	};
+	const refuseOnce = () => {
+		f.state.hook = async name => (name === "press_key" ? refused : undefined);
+	};
+	try {
+		refuseOnce();
+		await expect(f.session.press(f.context, f.window, "Return")).rejects.toThrow("background_unavailable");
+		f.state.hook = undefined;
+		const remembered = await f.session.press(f.context, f.window, "Return");
+		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
+		expect(remembered.text.split("\n")).toContain(REMEMBERED_ROUTE);
+
+		refuseOnce();
+		await expect(
+			f.session.press(f.context, f.window, "Return", undefined, { delivery: "foreground" }),
+		).rejects.toThrow("background_unavailable");
+		f.state.hook = undefined;
+		const forgotten = await f.session.press(f.context, f.window, "Return");
+		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "background" } });
+		expect(forgotten.text).not.toContain("remembered");
+	} finally {
+		await f.close();
+	}
+});
+
 it("names an observe before a screenshot as the check for an unverified dispatch", async () => {
 	const f = await fixture();
 	try {
