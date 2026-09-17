@@ -1372,9 +1372,6 @@ export class CuaComputerSession implements ComputerBackend {
 			if (typeof reply.data.document_edited === "boolean") observation.documentEdited = reply.data.document_edited;
 			if (observation.documentPath !== undefined || observation.documentEdited !== undefined)
 				observation.tree += `\nDocument: ${observation.documentPath ?? "(path unknown)"}${observation.documentEdited === undefined ? "" : observation.documentEdited ? " — unsaved changes" : " — no unsaved changes flagged"}`;
-			// The pid's roster as this walk's closing geometry check read it,
-			// against what the last observation of that pid saw: the diff adds no
-			// call, and the baseline below adopts it, so it is said once.
 			const opened = await this.#openedWindows(current.pid, {
 				roster: this.#lastRoster.get(current.pid) ?? [],
 				observed: current.id,
@@ -1490,10 +1487,6 @@ export class CuaComputerSession implements ComputerBackend {
 				windowId: window.id,
 				role: string(row.role, "role"),
 				label: typeof row.label === "string" ? row.label : "",
-				// The role a control answers to where its own role is generic: a
-				// macOS search field is an `AXTextField` with `AXSubrole`
-				// `AXSearchField`, and Notes gives it no title, description or
-				// placeholder at all — the subrole is the only thing that names it.
 				...(typeof row.subrole === "string" && row.subrole ? { subrole: row.subrole } : {}),
 				...(typeof row.value === "string" ? { value: row.value } : {}),
 				...(typeof row.placeholder === "string" ? { placeholder: row.placeholder } : {}),
@@ -1800,8 +1793,6 @@ export class CuaComputerSession implements ComputerBackend {
 				window.id !== read?.observed,
 		);
 		if (!opened.length) return undefined;
-		// A relation only costs the extra mapping read when there is something
-		// to relate: one window gained alone has no parent among the new rows.
 		const attached = opened.length > 1 ? await this.#attachedTo(pid, opened) : undefined;
 		return opened
 			.filter(window => attached?.get(window.id) === undefined)
