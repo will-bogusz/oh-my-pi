@@ -91,6 +91,7 @@ class FakeBackend implements ComputerBackend {
 	complete = true;
 	value = "ready";
 	placeholder?: string;
+	subrole?: string;
 	actions?: readonly string[];
 	readonly bindings = new Map<string, { window: ComputerWindowIdentity; element: ComputerElementSnapshot }>();
 	async windows(_context: ComputerOperationContext, selector: WindowSelector = {}) {
@@ -168,6 +169,7 @@ class FakeBackend implements ComputerBackend {
 			role: "button",
 			label: "Increment",
 			value: this.value,
+			...(this.subrole !== undefined ? { subrole: this.subrole } : {}),
 			...(this.placeholder !== undefined ? { placeholder: this.placeholder } : {}),
 			...(this.actions !== undefined ? { actions: this.actions } : {}),
 			enabled: true,
@@ -609,6 +611,18 @@ describe("computer preludes through the session", () => {
 			// A field the row does not carry never matches.
 			backend.value = undefined as unknown as string;
 			expect(await hits('{value:"555"}')).toEqual([]);
+			// The specific role a control answers to: macOS reports the search
+			// field as an `AXTextField` and names it only in `AXSubrole`, so the
+			// role a model read in the tree matches either one.
+			backend.subrole = "AXSearchField";
+			expect(await hits('{role:"AXSearchField"}')).toEqual(["Increment"]);
+			expect(await hits('{subrole:"searchfield"}')).toEqual(["Increment"]);
+			expect(await hits('{role:"button"}')).toEqual(["Increment"]);
+			expect(await hits('{role:"AXSearchField", exact:true}')).toEqual(["Increment"]);
+			expect(await hits('{subrole:"AXTextField"}')).toEqual([]);
+			backend.subrole = undefined;
+			expect(await hits('{subrole:"AXSearchField"}')).toEqual([]);
+			expect(await hits('{role:"AXSearchField"}')).toEqual([]);
 		} finally {
 			await runInContext("computer.close()", realm);
 		}

@@ -70,6 +70,7 @@
 	const elementFields = [
 		"ref",
 		"role",
+		"subrole",
 		"label",
 		"value",
 		"placeholder",

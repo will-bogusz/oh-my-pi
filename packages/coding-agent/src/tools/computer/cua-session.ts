@@ -57,10 +57,23 @@ interface TreeRow {
 	element: ComputerElementSnapshot;
 	notes?: readonly TreeNote[];
 }
+/**
+ * A subrole that ends in its own role's stem says nothing the row has not
+ * already printed — `AXRow`/`AXTableRow`, `AXWindow`/`AXStandardWindow` — and
+ * a captured 1558-node Notes window carries 164 of those against 9 that name a
+ * different control class, 3.1 kB of a 33 kB tree under a 50 kB cap. The
+ * driver's own markdown drops them on the same predicate; the snapshot keeps
+ * the raw value either way, so `find` is unaffected.
+ */
+function renderedSubrole(element: ComputerElementSnapshot): string {
+	const subrole = element.subrole;
+	if (subrole === undefined || subrole.endsWith(element.role.slice(2))) return "";
+	return ` subrole=${subrole}`;
+}
 function treeRows(rows: readonly TreeRow[], indent: number): string {
 	return rows
 		.flatMap(({ depth, element, notes }) => [
-			`${"  ".repeat(depth + indent)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.description !== undefined ? ` description=${JSON.stringify(element.description)}` : ""}${element.help !== undefined ? ` help=${JSON.stringify(element.help)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
+			`${"  ".repeat(depth + indent)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${renderedSubrole(element)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.description !== undefined ? ` description=${JSON.stringify(element.description)}` : ""}${element.help !== undefined ? ` help=${JSON.stringify(element.help)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
 			...(notes ?? []).map(note => `${"  ".repeat(note.depth + indent)}- ${note.text}`),
 		])
 		.join("\n");
@@ -1463,6 +1476,11 @@ export class CuaComputerSession implements ComputerBackend {
 				windowId: window.id,
 				role: string(row.role, "role"),
 				label: typeof row.label === "string" ? row.label : "",
+				// The role a control answers to where its own role is generic: a
+				// macOS search field is an `AXTextField` with `AXSubrole`
+				// `AXSearchField`, and Notes gives it no title, description or
+				// placeholder at all — the subrole is the only thing that names it.
+				...(typeof row.subrole === "string" && row.subrole ? { subrole: row.subrole } : {}),
 				...(typeof row.value === "string" ? { value: row.value } : {}),
 				...(typeof row.placeholder === "string" ? { placeholder: row.placeholder } : {}),
 				// Semantics the provider authored but role/label do not carry. An

@@ -95,6 +95,11 @@ export interface ComputerElementSnapshot {
 	windowId: string;
 	role: string;
 	label: string;
+	/**
+	 * The specific role behind a generic one (`AXSearchField` on an
+	 * `AXTextField`). Present only where the provider reports one.
+	 */
+	subrole?: string;
 	value?: string;
 	/** A field hint reported by the provider, separate from its raw value. */
 	placeholder?: string;

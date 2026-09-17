@@ -135,6 +135,8 @@ interface ComputerAction {
 interface ComputerElement {
 	ref: string;
 	role: string;
+	/** The specific role behind a generic one: `AXSearchField` on an `AXTextField`. */
+	subrole?: string;
 	label: string;
 	value?: string;
 	placeholder?: string;
@@ -179,11 +181,15 @@ interface ComputerWindow extends ComputerWindowInfo {
 	 * Elements of the window's current tree. `role`, `label` and `value` match
 	 * case-insensitive substrings of what the tree shows — `{ value: "555" }`
 	 * finds a phone field — unless `{ exact: true }` asks for whole-string
-	 * equality. `title` is accepted as a name for `label`. Costs one AX read
-	 * and mints fresh refs, exactly like `observe()`.
+	 * equality. `role` also matches a row's `subrole`, so `{ role:
+	 * "AXSearchField" }` finds the search field macOS reports as an
+	 * `AXTextField`; `{ subrole }` asks for the specific role alone. `title`
+	 * is accepted as a name for `label`. Costs one AX read and mints fresh
+	 * refs, exactly like `observe()`.
 	 */
 	find(query: {
 		role?: string;
+		subrole?: string;
 		label?: string;
 		title?: string;
 		value?: string;

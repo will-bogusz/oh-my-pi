@@ -149,6 +149,8 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		sequence: 0,
 		/** Overrides the row's platform-default role/label (menu bar rows, etc.). */
 		role: undefined as string | undefined,
+		/** `AXSubrole`: the specific role, where the provider reports one. */
+		subrole: undefined as string | undefined,
 		label: undefined as string | undefined,
 		value: "" as string | undefined,
 		placeholder: "Hint, not value" as string | undefined,
@@ -231,6 +233,7 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 							element_index: 1,
 							element_token: `s${state.sequence}:1`,
 							role: state.role ?? (linux ? "push button" : "AXTextField"),
+							subrole: state.subrole,
 							label: state.label ?? (linux ? "B3" : "Editor"),
 							value: state.value,
 							placeholder: state.placeholder,
@@ -2442,6 +2445,39 @@ it("maps requested window drag timing and observed pixels to the SDK wire contra
 		// The shape T4 reached for 4 runs out of 4, on either end of the gesture.
 		await f.session.drag(f.context, f.window, { x: 0, y: 0 }, { x: 100, y: 0 }, { delivery: "foreground" });
 		expect(f.lastDispatch()?.args).toMatchObject({ from_x: 0, from_y: 0, to_x: 2, to_y: 0 });
+	} finally {
+		await f.close();
+	}
+});
+
+it("renders the specific role a control answers to beside its generic one", async () => {
+	const f = await fixture();
+	try {
+		// Notes' search field, as the driver reports it: an `AXTextField` with
+		// no title, description or placeholder of its own, named only by its
+		// `AXSubrole`. Without it the row reads `AXTextField ""`.
+		f.state.role = "AXTextField";
+		f.state.label = "";
+		f.state.subrole = "AXSearchField";
+		f.state.placeholder = undefined;
+		const observation = await f.session.observe(f.context, f.window);
+		expect(observation.elements[0]).toMatchObject({ role: "AXTextField", subrole: "AXSearchField", label: "" });
+		expect(observation.tree.split("\n")[0]).toBe(
+			`- [${observation.elements[0]!.ref}] AXTextField "" subrole=AXSearchField value="" enabled=false selected=false`,
+		);
+		// A subrole that only restates its role is 164 of the 173 a Notes window
+		// carries, so the row does not print it twice — but the snapshot keeps
+		// it, which is what `find` reads.
+		f.state.role = "AXRow";
+		f.state.subrole = "AXTableRow";
+		const listed = await f.session.observe(f.context, f.window);
+		expect(listed.elements[0]!.subrole).toBe("AXTableRow");
+		expect(listed.tree).not.toContain("subrole=");
+		// A provider that reports no subrole says nothing about one.
+		f.state.subrole = undefined;
+		const plain = await f.session.observe(f.context, f.window);
+		expect(plain.elements[0]!.subrole).toBeUndefined();
+		expect(plain.tree).not.toContain("subrole=");
 	} finally {
 		await f.close();
 	}

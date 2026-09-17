@@ -60,7 +60,7 @@ def _make_computer():
         return {"method": method, "args": _arguments(args, kwargs)}
 
     class _Element:
-        __slots__ = ("ref", "role", "label", "value", "placeholder", "help", "description", "enabled", "selected", "actions", "bounds", "pid", "windowId", "_owner")
+        __slots__ = ("ref", "role", "subrole", "label", "value", "placeholder", "help", "description", "enabled", "selected", "actions", "bounds", "pid", "windowId", "_owner")
 
         def __init__(self, snapshot, identity=None):
             for field in _Element.__slots__:

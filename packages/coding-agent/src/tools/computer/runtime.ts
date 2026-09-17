@@ -39,6 +39,12 @@ type ScrollOptions = TextOptions & { amount?: number; by?: "line" | "page" };
 type Direction = "up" | "down" | "left" | "right";
 type ElementQuery = {
 	role?: string;
+	/**
+	 * Matched against `role` as well: a control's specific role is where its
+	 * generic one is `AXTextField`, and the query names whichever the tree
+	 * showed. `subrole` asks for the specific one alone.
+	 */
+	subrole?: string;
 	label?: string;
 	/** Accepted for `label`: an element's own name is its label, not a title. */
 	title?: string;
@@ -145,6 +151,7 @@ class El {
 	readonly pid: number;
 	readonly windowId: string;
 	readonly role: string;
+	readonly subrole?: string;
 	readonly label: string;
 	readonly value?: string;
 	readonly placeholder?: string;
@@ -171,6 +178,7 @@ class El {
 		this.pid = snapshot.pid;
 		this.windowId = snapshot.windowId;
 		this.role = snapshot.role;
+		this.subrole = snapshot.subrole;
 		this.label = snapshot.label;
 		this.value = snapshot.value;
 		this.placeholder = snapshot.placeholder;
@@ -258,7 +266,9 @@ class Win {
 		const label = query.label ?? query.title;
 		const matches = observation.elements.filter(
 			element =>
-				matched(element.role, query.role, query.exact) &&
+				(matched(element.role, query.role, query.exact) ||
+					matched(element.subrole, query.role, query.exact)) &&
+				matched(element.subrole, query.subrole, query.exact) &&
 				matched(element.label, label, query.exact) &&
 				matched(element.value, query.value, query.exact),
 		);
