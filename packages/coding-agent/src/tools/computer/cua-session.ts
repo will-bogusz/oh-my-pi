@@ -324,6 +324,8 @@ function delivery(options: ActionOptions): Wire {
 function foreground(options: { delivery?: "background" | "foreground" }): void {
 	if (options.delivery !== "foreground") throw new ToolError("This desktop operation requires delivery: 'foreground'");
 }
+/** The tools that deliver keystrokes: one delivery route per window, not per call. */
+const KEYBOARD_TOOLS: Record<string, true> = { hotkey: true, press_key: true, type_text: true };
 const DETECT_WINDOW_CHANGE_TOOLS: Record<string, true> = {
 	click: true,
 	drag: true,
@@ -679,6 +681,16 @@ export class CuaComputerSession implements ComputerBackend {
 	 * order they were made. The next read of that window reports and clears them.
 	 */
 	readonly #writes = new Map<string, Set<string>>();
+	/**
+	 * Windows whose keyboard delivery the driver escalated to foreground. The
+	 * escalation is a fact about the window — a surface whose background route
+	 * dropped the last chord drops the next one too — but the driver attaches
+	 * it per dispatch, so every callsite was told again: five escalations in
+	 * one bench task, obeyed 5/5, three of them repeating what the same run
+	 * had already been told. Cleared when the window is acquired again, or
+	 * when a foreground dispatch on it is refused.
+	 */
+	readonly #escalatedKeyboard = new Set<string>();
 	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
 	#driver: CuaDriver;
 	/**
@@ -1169,14 +1181,26 @@ export class CuaComputerSession implements ComputerBackend {
 	windows(context: Context, selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
 		return this.#schedule(context, "windows", false, () => this.#listedWindows(selector));
 	}
+	/**
+	 * Acquisition is the caller starting again on this window, so what the
+	 * session inferred about how to drive it does not outlive it: the sheet
+	 * that made background delivery fail may be gone, and the driver is the
+	 * one that gets to say so. Internal re-resolution (`#current`) is not an
+	 * acquisition and keeps it.
+	 */
 	window(
 		context: Context,
 		selector: string | WindowSelector,
 		options: WindowResolveOptions = {},
 	): Promise<ComputerWindowIdentity> {
-		return this.#schedule(context, "window", false, () =>
-			this.#window(selector, options.ambiguous === "throw" ? undefined : text => context.emitText(text)),
-		);
+		return this.#schedule(context, "window", false, async () => {
+			const window = await this.#window(
+				selector,
+				options.ambiguous === "throw" ? undefined : text => context.emitText(text),
+			);
+			this.#escalatedKeyboard.delete(window.id);
+			return window;
+		});
 	}
 	apps(context: Context): Promise<unknown> {
 		return this.#schedule(context, "apps", false, async () => (await this.#call("list_apps", {})).data);
@@ -1825,6 +1849,10 @@ export class CuaComputerSession implements ComputerBackend {
 			);
 		} catch (error) {
 			if (!(error instanceof ToolError)) throw error;
+			// A foreground keystroke the driver refused is not a route to keep
+			// taking, whoever chose it.
+			if (KEYBOARD_TOOLS[name] === true && args.delivery_mode === "foreground" && typeof args.window_id === "number")
+				this.#escalatedKeyboard.delete(String(args.window_id));
 			const holder = this.#focusHolder(error.context, args);
 			throw new ToolError(
 				`${error.message}\n${actionEvidence(error.context, args)}${holder === undefined ? "" : `\n${holder}`}`,
@@ -1839,6 +1867,11 @@ export class CuaComputerSession implements ComputerBackend {
 		// a next step is only executable if it is spelled the way the caller types.
 		const reported = preludeVocabulary(result.text);
 		const escalation = escalationRoute(data, reported);
+		// The driver names the route per dispatch; what it reports is a fact
+		// about the window's keyboard delivery, so the window keeps it.
+		const failed = escalationTarget(data) === "foreground" ? (data.escalation as Wire).reason : undefined;
+		if (KEYBOARD_TOOLS[name] === true && failed === "delivery_failed" && typeof args.window_id === "number")
+			this.#escalatedKeyboard.add(String(args.window_id));
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
 		return {
 			text: [
@@ -2013,6 +2046,26 @@ export class CuaComputerSession implements ComputerBackend {
 		this.#writes.delete(windowId);
 		return [...doubts];
 	}
+	/**
+	 * The keyboard route for this window: what the caller asked for, or the
+	 * foreground rung the driver escalated to on this window and this session
+	 * kept. The route is stated with the result — a background action that
+	 * silently activates an app would otherwise be a surprise — and an
+	 * explicit `{ delivery }` always wins, since the caller may be testing the
+	 * rung the escalation gave up on.
+	 */
+	#keyboardRoute(window: ComputerWindowIdentity, options: ActionOptions): { wire: Wire; note?: string } {
+		if (options.delivery !== undefined || !this.#escalatedKeyboard.has(window.id)) return { wire: delivery(options) };
+		return {
+			wire: { delivery_mode: "foreground" },
+			note: "delivery: foreground (remembered from the driver's escalation on this window)",
+		};
+	}
+	async #routed(dispatched: Promise<ComputerActionResult>, note: string | undefined): Promise<ComputerActionResult> {
+		const result = await dispatched;
+		if (note === undefined) return result;
+		return { ...result, text: result.text ? `${result.text}\n${note}` : note };
+	}
 	type(
 		context: Context,
 		window: ComputerWindowIdentity,
@@ -2020,11 +2073,12 @@ export class CuaComputerSession implements ComputerBackend {
 		target?: ComputerTarget,
 		options: ActionOptions = {},
 	): Promise<ComputerActionResult> {
+		const route = this.#keyboardRoute(window, options);
 		return this.#write(
 			window,
 			"type",
 			target,
-			this.#targetAction(context, "type_text", window, target, { text, ...delivery(options) }),
+			this.#routed(this.#targetAction(context, "type_text", window, target, { text, ...route.wire }), route.note),
 		);
 	}
 	setValue(
@@ -2043,10 +2097,14 @@ export class CuaComputerSession implements ComputerBackend {
 		options: ActionOptions = {},
 	): Promise<ComputerActionResult> {
 		const keys = chordKeys(chord, this.#platform);
-		return this.#targetAction(context, keys.length === 1 ? "press_key" : "hotkey", window, target, {
-			...(keys.length === 1 ? { key: keys[0] } : { keys }),
-			...delivery(options),
-		});
+		const route = this.#keyboardRoute(window, options);
+		return this.#routed(
+			this.#targetAction(context, keys.length === 1 ? "press_key" : "hotkey", window, target, {
+				...(keys.length === 1 ? { key: keys[0] } : { keys }),
+				...route.wire,
+			}),
+			route.note,
+		);
 	}
 	/**
 	 * Exactly the names this ref's own row printed, plus the six semantic ones.

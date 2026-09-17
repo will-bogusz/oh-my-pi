@@ -1594,8 +1594,75 @@ it("names the rung a dispatched action's own escalation points at", async () => 
 			{ effect: "unverifiable", escalation: { target: "session", reason: "permission_required" } },
 			"Pressed cmd+n on pid 101.",
 		);
-		expect(elsewhere.text).toBe("Pressed cmd+n on pid 101.");
+		expect(elsewhere.text.split("\n")[0]).toBe("Pressed cmd+n on pid 101.");
+		expect(elsewhere.text).not.toContain("escalates");
 		expect(elsewhere.escalation).toBeUndefined();
+	} finally {
+		await f.close();
+	}
+});
+
+it("keeps the foreground route the driver escalated to for that window's keystrokes", async () => {
+	const f = await fixture();
+	// Recorded shape from the T11 leg: the chord reads as delivered and only
+	// the structured payload says the background route dropped it.
+	const escalated = {
+		text: "Pressed cmd+n on pid 101.",
+		structuredJson: JSON.stringify({
+			delivery: { mode: "background" },
+			effect: "unverifiable",
+			escalation: { reason: "delivery_failed", target: "foreground" },
+			route: "synthetic_events",
+		}),
+		isError: false,
+		images: [],
+	};
+	const refused = {
+		text: "foreground_unavailable: the target cannot be activated.",
+		structuredJson: JSON.stringify({ code: "foreground_unavailable" }),
+		isError: true,
+		errorCode: "foreground_unavailable",
+		images: [],
+	};
+	try {
+		f.state.hook = async name => (name === "hotkey" ? escalated : undefined);
+		const first = await f.session.press(f.context, f.window, "cmd+n");
+		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
+		expect(first.text).toContain('{ delivery: "foreground" }');
+		// The escalation attaches to the window, not to the callsite: the next
+		// keystroke takes the route the driver named without being told again.
+		f.state.hook = undefined;
+		const second = await f.session.press(f.context, f.window, "Return");
+		expect(f.lastDispatch()).toMatchObject({
+			name: "press_key",
+			args: { key: "Return", delivery_mode: "foreground" },
+		});
+		expect(second.text.split("\n")).toContain(
+			"delivery: foreground (remembered from the driver's escalation on this window)",
+		);
+		expect(second.delivery).toBe("foreground");
+		// Typing is the same route on the same window.
+		await f.session.type(f.context, f.window, "hi");
+		expect(f.lastDispatch()).toMatchObject({ name: "type_text", args: { delivery_mode: "foreground" } });
+		// An explicit rung still wins — the caller may be testing the one the
+		// escalation gave up on.
+		const asked = await f.session.press(f.context, f.window, "Return", undefined, { delivery: "background" });
+		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
+		expect(asked.text).not.toContain("remembered");
+		// A foreground keystroke the driver refuses ends the memory.
+		f.state.hook = async name => (name === "press_key" ? refused : undefined);
+		await expect(f.session.press(f.context, f.window, "Return")).rejects.toThrow("foreground_unavailable");
+		f.state.hook = undefined;
+		expect((await f.session.press(f.context, f.window, "Return")).text).not.toContain("remembered");
+		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
+		// Acquiring the window again is the caller starting over on it.
+		f.state.hook = async name => (name === "hotkey" ? escalated : undefined);
+		await f.session.press(f.context, f.window, "cmd+n");
+		f.state.hook = undefined;
+		const reacquired = await f.session.window(f.context, { id: "1", pid: 101 });
+		const after = await f.session.press(f.context, reacquired, "Return");
+		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
+		expect(after.text).not.toContain("remembered");
 	} finally {
 		await f.close();
 	}
