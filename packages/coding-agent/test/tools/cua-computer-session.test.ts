@@ -413,6 +413,47 @@ it("names a window the pid opened since the last observation and never rebinds t
 	}
 });
 
+it("declines the driver's post-action window poll on the actions that offer one", async () => {
+	const f = await fixture();
+	try {
+		const ref = (await f.session.observe(f.context, f.window, { screenshot: true, silent: true })).elements[0]!.ref;
+		f.calls.length = 0;
+		await f.session.click(f.context, f.window, [1, 0]);
+		await f.session.click(f.context, f.window, ref, { count: 2 });
+		await f.session.perform(f.context, f.window, ref, "press");
+		await f.session.type(f.context, f.window, "hi");
+		await f.session.setValue(f.context, f.window, ref, "typed");
+		await f.session.press(f.context, f.window, "Return");
+		await f.session.press(f.context, f.window, "cmd+p");
+		await f.session.scroll(f.context, f.window, "down");
+		await f.session.drag(f.context, f.window, [0, 0], [1, 0], { delivery: "foreground" });
+		await f.session.menu(f.context, f.window, ["File"], { delivery: "foreground" });
+		await f.session.setFrame(f.context, f.window, { x: 0, y: 0, width: 200, height: 100 });
+		await f.session.raise(f.context, f.window);
+		await f.session.clipboardWrite(f.context, "copied");
+		const declined: Record<string, true> = {
+			click: true,
+			drag: true,
+			hotkey: true,
+			press_key: true,
+			scroll: true,
+			set_value: true,
+			type_text: true,
+		};
+		const dispatched = f.calls.filter(call => call.name !== "list_windows" && call.name !== "get_window_state");
+		expect([...new Set(dispatched.map(call => call.name))].sort()).toEqual(
+			[...Object.keys(declined), "invoke_menu", "set_window_frame", "bring_to_front", "clipboard_write"].sort(),
+		);
+		for (const call of dispatched)
+			expect([call.name, call.args.detect_window_change]).toEqual([
+				call.name,
+				declined[call.name] === true ? false : undefined,
+			]);
+	} finally {
+		await f.close();
+	}
+});
+
 it("acquires the front document window and names the windows it passed over", async () => {
 	const f = await fixture();
 	try {
@@ -792,7 +833,14 @@ it("observes semantics without images and preserves raw empty values and false s
 		await f.session.setValue(f.context, f.window, observation.elements[0]!.ref, "");
 		expect(f.lastDispatch()).toEqual({
 			name: "set_value",
-			args: { pid: 101, window_id: 1, element_token: "s1:1", snapshot_id: "s1", value: "" },
+			args: {
+				pid: 101,
+				window_id: 1,
+				element_token: "s1:1",
+				snapshot_id: "s1",
+				value: "",
+				detect_window_change: false,
+			},
 		});
 	} finally {
 		await f.close();
@@ -1521,13 +1569,13 @@ it("asks for the window's point grid and takes coordinates in it", async () => {
 		await f.session.click(f.context, f.window, [100, 0]);
 		expect(f.lastDispatch()).toEqual({
 			name: "click",
-			args: { pid: 101, window_id: 1, x: 2, y: 0, delivery_mode: "background" },
+			args: { pid: 101, window_id: 1, x: 2, y: 0, delivery_mode: "background", detect_window_change: false },
 		});
 		// Both idioms name the same point; the bench wrote `{x, y}` 4 runs out of 4.
 		await f.session.click(f.context, f.window, { x: 100, y: 0 });
 		expect(f.lastDispatch()).toEqual({
 			name: "click",
-			args: { pid: 101, window_id: 1, x: 2, y: 0, delivery_mode: "background" },
+			args: { pid: 101, window_id: 1, x: 2, y: 0, delivery_mode: "background", detect_window_change: false },
 		});
 		await expect(f.session.click(f.context, f.window, [200, 0])).rejects.toThrow("InvalidCoordinates");
 		await expect(f.session.click(f.context, f.window, { x: 200, y: 0 })).rejects.toThrow("InvalidCoordinates");
@@ -1671,7 +1719,15 @@ it("clicks a ref's own bounds as window points when modifiers or a count leave t
 		await f.session.click(f.context, f.window, ref, { modifiers: ["shift"], delivery: "foreground" });
 		expect(f.lastDispatch()).toEqual({
 			name: "click",
-			args: { pid: 101, window_id: 1, x: 2, y: 1, modifier: ["shift"], delivery_mode: "foreground" },
+			args: {
+				pid: 101,
+				window_id: 1,
+				x: 2,
+				y: 1,
+				modifier: ["shift"],
+				delivery_mode: "foreground",
+				detect_window_change: false,
+			},
 		});
 		await f.session.click(f.context, f.window, ref, { count: 3, button: "right" });
 		expect(f.lastDispatch()?.args).toMatchObject({ x: 2, y: 1, count: 3, button: "right" });
@@ -1903,7 +1959,15 @@ it("binds resized desktop pixels to the primary UUID/native id and routes exact 
 		await f.session.desktopClick(f.context, 1, 0, { delivery: "foreground", count: 2, modifiers: ["shift"] });
 		expect(f.lastDispatch()).toEqual({
 			name: "click",
-			args: { scope: "desktop", x: 2, y: 0, count: 2, modifier: ["shift"], delivery_mode: "foreground" },
+			args: {
+				scope: "desktop",
+				x: 2,
+				y: 0,
+				count: 2,
+				modifier: ["shift"],
+				delivery_mode: "foreground",
+				detect_window_change: false,
+			},
 		});
 		const moved = await f.session.desktopMove(f.context, 1, 0, { delivery: "foreground" });
 		expect(f.lastDispatch()).toEqual({ name: "move_cursor", args: { scope: "desktop", x: 2, y: 0 } });
@@ -1924,6 +1988,7 @@ it("binds resized desktop pixels to the primary UUID/native id and routes exact 
 			to_y: 0,
 			button: "right",
 			delivery_mode: "foreground",
+			detect_window_change: false,
 		});
 		await f.session.desktopScroll(f.context, 1, 0, { delivery: "foreground", dy: 240 });
 		expect(f.lastDispatch()?.args).toEqual({
@@ -1934,6 +1999,7 @@ it("binds resized desktop pixels to the primary UUID/native id and routes exact 
 			amount: 2,
 			by: "line",
 			delivery_mode: "foreground",
+			detect_window_change: false,
 		});
 		await f.session.desktopScroll(f.context, 1, 0, { delivery: "foreground", dx: -120 });
 		expect(f.lastDispatch()?.args.direction).toBe("left");
@@ -2055,6 +2121,7 @@ it("maps requested window drag timing and observed pixels to the SDK wire contra
 					button: "right",
 					modifier: ["shift"],
 					delivery_mode: "foreground",
+					detect_window_change: false,
 				},
 			},
 		]);
@@ -2075,7 +2142,16 @@ it("drags between element refs at their own observed bounds", async () => {
 		await f.session.drag(f.context, f.window, ref, [0, 0], { delivery: "foreground" });
 		expect(f.lastDispatch()).toEqual({
 			name: "drag",
-			args: { pid: 101, window_id: 1, from_x: 2, from_y: 1, to_x: 0, to_y: 0, delivery_mode: "foreground" },
+			args: {
+				pid: 101,
+				window_id: 1,
+				from_x: 2,
+				from_y: 1,
+				to_x: 0,
+				to_y: 0,
+				delivery_mode: "foreground",
+				detect_window_change: false,
+			},
 		});
 		await f.session.drag(f.context, f.window, ref, ref, { delivery: "foreground", steps: 10 });
 		expect(f.lastDispatch()?.args).toMatchObject({ from_x: 2, from_y: 1, to_x: 2, to_y: 1, steps: 10 });

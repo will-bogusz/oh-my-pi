@@ -289,6 +289,15 @@ function delivery(options: ActionOptions): Wire {
 function foreground(options: { delivery?: "background" | "foreground" }): void {
 	if (options.delivery !== "foreground") throw new ToolError("This desktop operation requires delivery: 'foreground'");
 }
+const DETECT_WINDOW_CHANGE_TOOLS: Record<string, true> = {
+	click: true,
+	drag: true,
+	hotkey: true,
+	press_key: true,
+	scroll: true,
+	set_value: true,
+	type_text: true,
+};
 /**
  * The driver advertises its own wire vocabulary in refusal text and escalation
  * advice (`delivery_mode: "foreground"`); the prelude takes
@@ -1654,7 +1663,10 @@ export class CuaComputerSession implements ComputerBackend {
 	async #action(name: string, args: Wire): Promise<ComputerActionResult> {
 		let reply: Reply;
 		try {
-			reply = await this.#call(name, args);
+			reply = await this.#call(
+				name,
+				DETECT_WINDOW_CHANGE_TOOLS[name] === true ? { ...args, detect_window_change: false } : args,
+			);
 		} catch (error) {
 			if (!(error instanceof ToolError)) throw error;
 			const holder = this.#focusHolder(error.context, args);
