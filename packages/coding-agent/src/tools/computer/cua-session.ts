@@ -2386,12 +2386,14 @@ export class CuaComputerSession implements ComputerBackend {
 	 *
 	 * Only where a re-read can answer, which the reply says: `element_
 	 * outside_target_window` also covers a row that is alive in another
-	 * window (`advice: "acquire_window"` — this window's tree provably cannot
-	 * hold it) and a proven menu-bar row, whose ancestry is process-scoped by
-	 * construction (`advice: "element"` — the row is there and a semantic
-	 * action on it is exactly addressed). A driver that reports no advice gets
-	 * the recovery, which is the released shape all four measurements came
-	 * from.
+	 * window (`acquire_window` — this window's tree provably cannot hold it)
+	 * and a proven menu-bar row, whose ancestry is process-scoped by
+	 * construction (`element` — the row is there and a semantic action on it
+	 * is exactly addressed). The route is read from whichever field carries
+	 * it: `advice` on a background refusal, the escalation target on the
+	 * ungated AX route, which is a tool error payload with no `advice` at
+	 * all. A reply naming no route gets the recovery, which is the released
+	 * shape all four measurements came from.
 	 */
 	async #deadElement(
 		name: string,
@@ -2403,7 +2405,8 @@ export class CuaComputerSession implements ComputerBackend {
 		const data = refusalDetails(error.context);
 		const code = typeof data.code === "string" ? data.code : undefined;
 		if (code === undefined || DEAD_ELEMENT_REFUSALS[code] !== true) return undefined;
-		if (typeof data.advice === "string" && data.advice !== "snapshot") return undefined;
+		const route = typeof data.advice === "string" ? data.advice : escalationTarget(data);
+		if (route !== undefined && route !== "snapshot") return undefined;
 		if (recover === undefined || typeof target !== "string" || typeof args.element_token !== "string")
 			return undefined;
 		const binding = this.#elements.get(target);

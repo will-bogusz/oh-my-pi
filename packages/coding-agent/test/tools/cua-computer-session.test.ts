@@ -2522,6 +2522,56 @@ it("reads the window again only for the refusal a re-read can answer", async () 
 		f.state.label = "Editor (renamed)";
 		expect((await f.session.click(f.context, f.window, ref)).effect).toBe("not_dispatched");
 		expect(reads()).toBe(before + 1);
+		// That recovery retired the ref it answered for, so the next two states
+		// address the row its own walk minted.
+		f.state.hook = undefined;
+		const live = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const mark = reads();
+		// The ungated AX route is a tool error payload, not a background
+		// refusal: it has no `advice` at all and names the re-read through its
+		// escalation target. Verbatim from the -25202 branch.
+		f.state.hook = async name =>
+			name === "click"
+				? {
+						text: "The addressed element no longer exists (its accessibility reference is invalid): AXUIElementPerformAction(AXPress) returned -25202 (kAXErrorInvalidUIElement). Nothing was dispatched. Re-observe the window and re-address the element.",
+						structuredJson: JSON.stringify({
+							code: "element_no_longer_exists",
+							effect: "not_dispatched",
+							route: "ax",
+							action: "AXPress",
+							ax_error: -25202,
+							ax_error_name: "kAXErrorInvalidUIElement",
+							dispatch: "not_dispatched",
+							escalation: { target: "snapshot", reason: "route_unavailable" },
+						}),
+						isError: true,
+						errorCode: "element_no_longer_exists",
+						images: [],
+					}
+				: undefined;
+		f.state.label = "Editor (renamed again)";
+		expect((await f.session.click(f.context, f.window, live, { delivery: "foreground" })).effect).toBe(
+			"not_dispatched",
+		);
+		expect(reads()).toBe(mark + 1);
+		// A reply that names a route through that same field and it is not a
+		// re-read: the tree cannot answer it either.
+		f.state.hook = async name =>
+			name === "click"
+				? {
+						text: "The addressed element belongs to pid 42's own menu bar.",
+						structuredJson: JSON.stringify({
+							code: "element_outside_target_window",
+							effect: "refused",
+							escalation: { target: "element", reason: "route_unavailable" },
+						}),
+						isError: true,
+						errorCode: "element_outside_target_window",
+						images: [],
+					}
+				: undefined;
+		await expect(f.session.click(f.context, f.window, "n4")).rejects.toThrow("own menu bar");
+		expect(reads()).toBe(mark + 1);
 	} finally {
 		await f.close();
 	}
