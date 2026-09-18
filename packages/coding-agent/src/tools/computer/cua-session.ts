@@ -66,10 +66,13 @@ interface TreeRow {
  * driver's own markdown drops them on the same predicate; the snapshot keeps
  * the raw value either way, so `find` is unaffected.
  */
-function renderedSubrole(element: ComputerElementSnapshot): string {
+function specificRole(element: ComputerElementSnapshot): string {
 	const subrole = element.subrole;
-	if (subrole === undefined || subrole.endsWith(element.role.slice(2))) return "";
-	return ` subrole=${subrole}`;
+	return subrole === undefined || subrole.endsWith(element.role.slice(2)) ? element.role : subrole;
+}
+function renderedSubrole(element: ComputerElementSnapshot): string {
+	const specific = specificRole(element);
+	return specific === element.role ? "" : ` subrole=${specific}`;
 }
 function treeRows(rows: readonly TreeRow[], indent: number): string {
 	return rows
@@ -380,6 +383,8 @@ function unsupported(operation: string): never {
 }
 /** macOS rows whose `AXPress` needs the menu already open; see `#menuBarRoute`. */
 const MENU_BAR_ROLES: Record<string, true> = { AXMenuBar: true, AXMenuBarItem: true };
+/** macOS reports a search field as this subrole on a plain `AXTextField`. */
+const SEARCH_FIELD = "AXSearchField";
 /**
  * `invoke_menu` refuses with the failing segment's index and nothing else:
  * `path segment 1 was not found`. The titles it could not match are exactly
@@ -647,18 +652,90 @@ function commitVerdict(value: unknown): ComputerCommitVerdict | undefined {
 	return undefined;
 }
 const NOT_COMMITTED_REASON = /not committed:\s*([^.]+)/i;
-function commitNote(committed: ComputerCommitVerdict, text: string): string | undefined {
-	if (committed === "unproven") return undefined;
-	if (committed === "committed") return "committed=true";
-	const reason = NOT_COMMITTED_REASON.exec(text)?.[1]?.trim();
-	return `committed=false — ${reason ?? "the driver reported no reason"}. The app may still hold its own value; read it back before relying on it.`;
+/** Whether the reply carries the driver's read-back of the value it wrote. */
+function valueReadBack(evidence: unknown): boolean {
+	const rows = Array.isArray(evidence) ? (evidence as unknown[]) : [evidence];
+	return rows.some(row => row !== null && typeof row === "object" && (row as Wire).kind === "value_readback");
+}
+/** Everything a write reply decided, as the write path read it off the wire. */
+interface WriteReport {
+	/** The operation and the field it addressed: `setValue on n7 AXTextField "Street"`. */
+	field: string;
+	operation: "setValue" | "type";
+	committed?: ComputerCommitVerdict;
+	effect: string;
+	/** The driver read the value back after writing it. */
+	readBack: boolean;
+	/** The driver doubts this rung landed and names another. */
+	escalated: boolean;
+	/** The app's own reason for discarding the value, in the driver's words. */
+	reason?: string;
+	/** What can still see a value this field does not publish. */
+	witness: string;
+	/** A search field's value is a query: the app answers it in its own output. */
+	query: boolean;
 }
 /**
- * A partial `type_text` is the one refusal that still wrote: the driver names
- * how many characters it delivered and the suffix to retry, so the field holds
- * neither its old value nor the requested one.
+ * One sentence for what a write is now known to be, or none. Five materially
+ * different outcomes used to render byte-identically — a value the app took,
+ * one it echoed without taking, one it discarded outright, one nothing could
+ * read, and one that arrived half-typed — so 22 proven writes and the single
+ * real loss were indistinguishable in the model's context, and every one of
+ * them was told to re-read the field.
+ *
+ * A proven write says nothing: the verdict, a confirmed effect, the driver's
+ * own read-back and no escalation are the whole proof, and a caveat on top of
+ * it costs a cell. Every other rung names what is known and what to do about
+ * it, and only the rungs where a re-read can still learn something ask for one
+ * — re-reading an echoed value returns the echo, and re-reading a field that
+ * publishes no value returns nothing.
+ */
+function commitNote(write: WriteReport): string | undefined {
+	if (write.committed === "not_committed")
+		return `${write.field}: not committed — ${
+			write.reason ?? "the driver reported no reason"
+		}. The app kept its own value; write it another way.`;
+	if (write.effect === "unverifiable")
+		return `${write.field}: the field publishes no readable value, so nothing read this write back — ${write.witness}.`;
+	if (write.committed === "unproven" && write.readBack)
+		return write.query
+			? `${write.field}: the value reads back as written, but a read-back is echoed by the control whether or not the app took it — check the app's own output: the rows this query filtered, not the field.`
+			: write.operation === "type"
+				? `${write.field}: the value reads back as written, but this field's app takes its value at end-of-edit, which typing does not deliver — press Tab or Return, or write it with setValue.`
+				: `${write.field}: the value reads back as written, but nothing observed the app take it, and this field's app takes its value at end-of-edit — press Tab or Return on it.`;
+	if (write.committed === "committed" && write.effect === "confirmed" && write.readBack && !write.escalated)
+		return undefined;
+	if (write.committed === undefined)
+		return `${write.field}: nothing in the reply says whether the app kept this value — read the field back before building on it.`;
+	if (write.committed === "unproven")
+		return `${write.field}: the driver could not tell whether the app kept this value — read the field back before building on it.`;
+	return `${write.field}: the driver judged the value committed ${
+		write.readBack
+			? write.escalated
+				? "but doubts this route landed and names another"
+				: `but reported the effect as ${write.effect}`
+			: "but nothing in the reply read it back"
+	} — read the field back before building on it.`;
+}
+/**
+ * A partial `type_text` is the one refusal that still wrote: the field holds
+ * neither its old value nor the requested one, and the driver names how many
+ * characters it delivered. The remainder is what the caller has to send, and
+ * slicing it by codepoint is the work the reply left undone — a model asked to
+ * "retry only the remaining suffix" retyped the whole string instead.
  */
 const INCOMPLETE_TYPING = "type_text_incomplete";
+const INCOMPLETE_DELIVERY = /delivered (\d+) of (\d+) character/;
+function incompleteNote(field: string, value: string, message: string): string {
+	const counts = INCOMPLETE_DELIVERY.exec(message);
+	const characters = [...value];
+	const delivered = counts ? Number(counts[1]) : undefined;
+	if (delivered === undefined || Number(counts?.[2]) !== characters.length)
+		return `${field}: the typing stopped part-way, so the field holds neither its old value nor the one asked for — read it back and type what is missing.`;
+	return `${field}: ${delivered} of ${characters.length} characters landed, so the field holds neither its old value nor the one asked for — type only the remainder: ${JSON.stringify(
+		characters.slice(delivered).join(""),
+	)}.`;
+}
 const UNPROBED_DRAG =
 	"Delivered; the driver reported no effect evidence for this drag — observe the window to confirm it moved anything.";
 
@@ -1930,7 +2007,6 @@ export class CuaComputerSession implements ComputerBackend {
 		return {
 			text: [
 				reported,
-				committed === undefined ? undefined : commitNote(committed, reported),
 				escalation,
 				opened,
 				interruptedBy
@@ -2050,43 +2126,83 @@ export class CuaComputerSession implements ComputerBackend {
 		);
 	}
 	/**
-	 * A write nothing proved, held against the window it was made on. Both
-	 * write routes answer `effect: "confirmed"` with a value readback for a
-	 * value the app's editing pipeline took and for one it discarded, and the
-	 * reply carrying that doubt is the cell's to drop: the bench wrote a
-	 * Save-panel filename, chained an `observe` behind it in the same cell, and
-	 * the only signal it had was never displayed. So the doubt outlives its own
-	 * call and is spent on the next read of that window — the observation or
-	 * capture whose conclusions would rest on the written value. Proof is the
-	 * driver's own commit verdict on a reply that read the state back and names
-	 * no better route; anything short of that is carried.
+	 * What a write is now known to be, said once and held against the window it
+	 * was made on. The reply carrying the doubt is the cell's to drop: the bench
+	 * wrote a Save-panel filename, chained an `observe` behind it in the same
+	 * cell, and the only signal it had was never displayed. So the sentence
+	 * rides with the reply and also outlives its own call, spent on the next
+	 * read of that window — the observation or capture whose conclusions would
+	 * rest on the written value.
 	 */
 	async #write(
 		window: ComputerWindowIdentity,
 		operation: "setValue" | "type",
 		target: ComputerTarget | undefined,
+		value: string,
 		dispatched: Promise<ComputerActionResult>,
 	): Promise<ComputerActionResult> {
-		const doubt = `${operation} on ${this.#writeTarget(target)} is not proven committed — re-read the field before building on it`;
+		const field = `${operation} on ${this.#writeTarget(target)}`;
 		try {
 			const result = await dispatched;
-			if (result.committed !== "committed" || result.effect !== "confirmed" || result.escalation !== undefined)
-				this.#doubt(window.id, doubt);
-			return result;
+			const data = object(result.data ?? {}, "action result");
+			const note = commitNote({
+				field,
+				operation,
+				committed: result.committed,
+				effect: result.effect,
+				readBack: valueReadBack(result.evidence),
+				escalated: result.escalation !== undefined,
+				reason: NOT_COMMITTED_REASON.exec(result.text)?.[1]?.trim(),
+				witness: this.#writeWitness(window, data),
+				query: this.#writesAQuery(target),
+			});
+			if (note === undefined) return result;
+			this.#doubt(window.id, note);
+			return { ...result, text: result.text ? `${result.text}\n${note}` : note };
 		} catch (error) {
-			if (error instanceof ToolError && error.message.startsWith(INCOMPLETE_TYPING)) this.#doubt(window.id, doubt);
-			throw error;
+			if (!(error instanceof ToolError) || !error.message.startsWith(INCOMPLETE_TYPING)) throw error;
+			const note = incompleteNote(field, value, error.message);
+			this.#doubt(window.id, note);
+			throw new ToolError(`${error.message}\n${note}`, error.context);
 		}
 	}
-	/** The element a write addressed, as the observation the caller read named it. */
+	/**
+	 * Where a value this field cannot publish can still be read. The driver
+	 * names the kind of surface it would escalate to; which route this session
+	 * can offer for it is the session's own fact, so a target it has no route
+	 * for names no route at all rather than a tool the caller cannot reach.
+	 */
+	#writeWitness(window: ComputerWindowIdentity, data: Wire): string {
+		const target = escalationTarget(data);
+		if (target === "snapshot")
+			return "observe() the window and read the control the app updates instead; this field will publish nothing either way";
+		if (target === "pixel" || target === "page" || this.#frames.has(window.id))
+			return "capture the window and read the value off its own pixels";
+		return "the app's own output is the only witness";
+	}
+	/** A search field holds a query, and the app answers it in its own output. */
+	#writesAQuery(target: ComputerTarget | undefined): boolean {
+		if (typeof target !== "string") return false;
+		const element = this.#elements.get(target)?.element;
+		return element?.role === SEARCH_FIELD || element?.subrole === SEARCH_FIELD;
+	}
+	/**
+	 * The element a write addressed, by the role and name the observation
+	 * printed for it. Never its value: a contact card's phone row carries the
+	 * number it holds as its own `AXLabel`, so labelling the field with it made
+	 * the sentence name the value being replaced instead of the field.
+	 */
 	#writeTarget(target: ComputerTarget | undefined): string {
 		if (target === undefined) return "the window's focused element";
 		if (typeof target !== "string") {
 			const [x, y] = pointPair(target);
 			return `(${x},${y})`;
 		}
-		const label = this.#elements.get(target)?.element.label;
-		return label ? `${target} ${JSON.stringify(label)}` : target;
+		const element = this.#elements.get(target)?.element;
+		if (!element) return target;
+		const name = element.label && element.label !== element.value ? element.label : element.placeholder;
+		const role = specificRole(element);
+		return name ? `${target} ${role} ${JSON.stringify(name)}` : `${target} ${role}`;
 	}
 	/** One sentence per unproven write, and never the same one twice. */
 	#doubt(windowId: string, sentence: string): void {
@@ -2132,6 +2248,7 @@ export class CuaComputerSession implements ComputerBackend {
 			window,
 			"type",
 			target,
+			text,
 			this.#routed(this.#targetAction(context, "type_text", window, target, { text, ...route.wire }), route.note),
 		);
 	}
@@ -2141,7 +2258,13 @@ export class CuaComputerSession implements ComputerBackend {
 		ref: string,
 		value: string,
 	): Promise<ComputerActionResult> {
-		return this.#write(window, "setValue", ref, this.#targetAction(context, "set_value", window, ref, { value }));
+		return this.#write(
+			window,
+			"setValue",
+			ref,
+			value,
+			this.#targetAction(context, "set_value", window, ref, { value }),
+		);
 	}
 	press(
 		context: Context,

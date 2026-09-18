@@ -128,12 +128,16 @@ async function reported(
 	action: Promise<ComputerActionResult>,
 ): Promise<ComputerActionResult> {
 	const result = await action;
-	// `not_committed` is the same shape by another route: the write was accepted
-	// and echoed back while the app kept its own value. So is a reply that
-	// carries the driver's own escalation: it doubts this rung landed and names
-	// the one that would, and the bench dropped exactly that value.
+	// A write verdict short of `committed` is the same shape by another route:
+	// the driver decided something about the written value that the caller
+	// cannot see from a return value the cell is free to drop. So is a reply
+	// carrying the driver's own escalation. Keyed on the verdict, not on a
+	// `committed === false` the contract stopped sending, which dropped every
+	// write sentence there was.
 	if (
-		(UNDELIVERED_EFFECTS[result.effect] || result.committed === "not_committed" || result.escalation !== undefined) &&
+		(UNDELIVERED_EFFECTS[result.effect] ||
+			(result.committed !== undefined && result.committed !== "committed") ||
+			result.escalation !== undefined) &&
 		result.text
 	)
 		context.emitText(result.text);

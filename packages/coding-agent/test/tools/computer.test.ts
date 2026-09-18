@@ -76,6 +76,13 @@ const windowFixture: ComputerWindowIdentity = {
 	onScreen: true,
 };
 
+/** What the session composes for a write it could not call proven, per verdict. */
+const WRITE_NOTES: Record<string, string> = {
+	not_committed:
+		'setValue on e2 AXTextField "Filename": not committed — the app has no end-of-edit gesture here. The app kept its own value; write it another way.',
+	unproven:
+		'setValue on e2 AXTextField "Filename": the value reads back as written, but this field\'s app takes its value at end-of-edit — press Tab or Return on it.',
+};
 /** Stateful fixture; unsupported operations fail rather than silently succeeding. */
 class FakeBackend implements ComputerBackend {
 	async drain(): Promise<void> {}
@@ -232,9 +239,9 @@ class FakeBackend implements ComputerBackend {
 		this.value = value;
 		return {
 			text:
-				this.committed === "not_committed"
-					? "📨 Sent (unverified) AXValue on [1] AXTextField.\ncommitted=false — the app may still hold its own value."
-					: "",
+				this.committed === undefined || this.committed === "committed"
+					? ""
+					: `📨 Sent (unverified) AXValue on [1] AXTextField.\n${WRITE_NOTES[this.committed]}`,
 			effect: "verified",
 			evidence: { value },
 			delivery: "background",
@@ -733,7 +740,13 @@ describe("computer preludes through the session", () => {
 			// even though this cell throws the result away.
 			backend.committed = "not_committed";
 			await runInContext('win.setValue(win.initialObservation.elements[0].ref, "lost")', realm);
-			expect(displays.join("\n")).toContain("committed=false");
+			expect(displays.join("\n")).toContain("not committed —");
+			// The verdict the dead `committed === false` gate dropped outright: the
+			// value was echoed back and nothing observed the app take it.
+			displays.length = 0;
+			backend.committed = "unproven";
+			await runInContext('win.setValue(win.initialObservation.elements[0].ref, "echoed")', realm);
+			expect(displays.join("\n")).toContain("press Tab or Return on it");
 			// Same shape by a third route: the driver dispatched, doubts the rung
 			// landed, and names the one that would. A cell that drops the result
 			// still reads it.
@@ -1620,7 +1633,7 @@ describe("computer prompt variants", () => {
 		const darwin = render(computerDescription, false);
 		const linux = render(computerDescription, true);
 		for (const absent of ["AT-SPI", "X11", "xdotool", "super"]) expect(darwin).not.toContain(absent);
-		for (const absent of ["AppleScript", "TCC", "screencapture", "cmd|", "committed"])
+		for (const absent of ["AppleScript", "TCC", "screencapture", "cmd|", "A write that is not proven"])
 			expect(linux).not.toContain(absent);
 		expect(linux).toContain("AT-SPI tree");
 		expect(linux).toContain("foreground_unavailable");

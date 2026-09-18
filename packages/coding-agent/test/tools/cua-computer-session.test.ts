@@ -1405,36 +1405,121 @@ it("says a drag was delivered without evidence and keeps the doubt on the window
 	}
 });
 
-it("reports whether a written value survived the app's own end-of-edit", async () => {
+it("composes one sentence for each thing a write turns out to be", async () => {
 	const f = await fixture();
 	try {
-		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		let ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
 		const write = async (data: Wire, text: string) => {
 			f.state.hook = async name =>
-				name === "set_value"
+				name === "set_value" || name === "type_text"
 					? { text, structuredJson: JSON.stringify(data), isError: false, images: [] }
 					: undefined;
 			return f.session.setValue(f.context, f.window, ref, "Project_File_List");
 		};
+		const typed = async (data: Wire, text: string) => {
+			f.state.hook = async name =>
+				name === "type_text"
+					? { text, structuredJson: JSON.stringify(data), isError: false, images: [] }
+					: undefined;
+			return f.session.type(f.context, f.window, "Project_File_List", ref);
+		};
+		const reread = async () => {
+			const observation = await f.session.observe(f.context, f.window);
+			ref = observation.elements[0]!.ref;
+			return observation.tree;
+		};
+		const readBack = [{ kind: "value_readback" }];
+		// Proven: the verdict, a confirmed effect, the driver's own read-back and
+		// no better route. Nothing is left to say and nothing is carried.
+		const proven = await write(
+			{ committed: "committed", effect: "confirmed", evidence: readBack },
+			"✅ Set AXValue on [1] AXTextField. Committed via tab.",
+		);
+		expect(proven.text).toBe("✅ Set AXValue on [1] AXTextField. Committed via tab.");
+		expect(await reread()).not.toContain("setValue on");
+		// Discarded: the app's own reason, and the one rung where re-reading the
+		// field is the wrong instruction.
 		const lost = await write(
-			{ committed: false },
+			{ committed: "not_committed", effect: "confirmed" },
 			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write.",
 		);
-		expect(lost.committed).toBe("not_committed");
-		expect(lost.text).toContain(
-			"committed=false — a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write",
+		expect(lost.text.split("\n").at(-1)).toBe(
+			`setValue on ${ref} AXTextField "Editor": not committed — a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write. The app kept its own value; write it another way.`,
 		);
-		expect(lost.text).toContain("read it back before relying on it");
-		const kept = await write({ committed: true }, "✅ Set AXValue on [1] AXTextField. Committed via tab.");
-		expect(kept.committed).toBe("committed");
-		expect(kept.text).toContain("committed=true");
-		// The flag stands on its own when the driver states no reason.
-		const bare = await write({ committed: false }, "📨 Sent (unverified) AXValue on [1] AXTextField.");
-		expect(bare.text).toContain("committed=false — the driver reported no reason");
-		// Contract-optional: a driver that reports no flag renders none.
-		const silent = await write({ effect: "unverifiable" }, "✅ Set AXValue on [1] AXSlider.");
-		expect(silent.committed).toBeUndefined();
-		expect(silent.text).toBe("✅ Set AXValue on [1] AXSlider.");
+		await reread();
+		const bare = await write(
+			{ committed: "not_committed", effect: "confirmed" },
+			"📨 Sent (unverified) AXValue on [1] AXTextField.",
+		);
+		expect(bare.text).toContain("not committed — the driver reported no reason.");
+		await reread();
+		// Echoed but unproven on a binding field: the gesture that would commit
+		// it, never a re-read — re-reading returns the same echo.
+		const echoed = await write(
+			{ committed: "unproven", effect: "confirmed", evidence: readBack },
+			"✅ Set AXValue on [1] AXTextField. Commit unproven: the value survived AXConfirm, but the app's own model was not observed.",
+		);
+		expect(echoed.text.split("\n").at(-1)).toBe(
+			`setValue on ${ref} AXTextField "Editor": the value reads back as written, but nothing observed the app take it, and this field's app takes its value at end-of-edit — press Tab or Return on it.`,
+		);
+		expect(echoed.text).not.toContain("re-read");
+		await reread();
+		const half = await typed(
+			{ committed: "unproven", effect: "confirmed", evidence: readBack },
+			"✅ Inserted 17 char(s) via CGEvent.",
+		);
+		expect(half.text.split("\n").at(-1)).toBe(
+			`type on ${ref} AXTextField "Editor": the value reads back as written, but this field's app takes its value at end-of-edit, which typing does not deliver — press Tab or Return, or write it with setValue.`,
+		);
+		// Same verdict on a search field: its value is a query, so the app's own
+		// output is what moved, and the field itself proves nothing either way.
+		f.state.subrole = "AXSearchField";
+		await reread();
+		const query = await typed(
+			{ committed: "unproven", effect: "confirmed", evidence: readBack },
+			"✅ Inserted 17 char(s) via CGEvent.",
+		);
+		expect(query.text.split("\n").at(-1)).toBe(
+			`type on ${ref} AXSearchField "Editor": the value reads back as written, but a read-back is echoed by the control whether or not the app took it — check the app's own output: the rows this query filtered, not the field.`,
+		);
+		f.state.subrole = undefined;
+		await reread();
+		// Nothing could read the value: name a witness that can, and never the
+		// field, whose re-read is guaranteed to return nothing.
+		const unreadable = await write({ effect: "unverifiable", evidence: null }, "✅ Set AXValue on [1] AXSlider.");
+		expect(unreadable.text.split("\n").at(-1)).toBe(
+			`setValue on ${ref} AXTextField "Editor": the field publishes no readable value, so nothing read this write back — the app's own output is the only witness.`,
+		);
+		expect(unreadable.text).not.toContain("read the field back");
+		await reread();
+		const pixels = await write(
+			{ effect: "unverifiable", evidence: null, escalation: { reason: "effect_unconfirmed", target: "pixel" } },
+			"✅ Set AXValue on [1] AXSlider.",
+		);
+		expect(pixels.text).toContain("— capture the window and read the value off its own pixels.");
+		await reread();
+		const snapshot = await write(
+			{ effect: "unverifiable", evidence: null, escalation: { reason: "effect_unconfirmed", target: "snapshot" } },
+			"✅ Set AXValue on [1] AXSlider.",
+		);
+		expect(snapshot.text).toContain(
+			"— observe() the window and read the control the app updates instead; this field will publish nothing either way.",
+		);
+		await reread();
+		// A verdict with no read-back behind it, and a driver that judges nothing
+		// at all: the field can still be read, so reading it is the instruction.
+		const unbacked = await write(
+			{ committed: "committed", effect: "confirmed" },
+			"✅ Set AXValue on [1] AXTextField.",
+		);
+		expect(unbacked.text.split("\n").at(-1)).toBe(
+			`setValue on ${ref} AXTextField "Editor": the driver judged the value committed but nothing in the reply read it back — read the field back before building on it.`,
+		);
+		await reread();
+		const unjudged = await typed({ effect: "confirmed", evidence: readBack }, "✅ Inserted 17 char(s) via CGEvent.");
+		expect(unjudged.text.split("\n").at(-1)).toBe(
+			`type on ${ref} AXTextField "Editor": nothing in the reply says whether the app kept this value — read the field back before building on it.`,
+		);
 	} finally {
 		await f.close();
 	}
@@ -1465,19 +1550,19 @@ it("reads the commit verdict the driver publishes as a string", async () => {
 			"✅ Set AXValue on [1] AXTextField. Committed via tab.",
 		);
 		expect(kept.committed).toBe("committed");
-		expect(await reread()).not.toContain("not proven committed");
+		expect(await reread()).not.toContain("setValue on");
 		const lost = await write(
 			{ committed: "not_committed", effect: "confirmed" },
 			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture.",
 		);
 		expect(lost.committed).toBe("not_committed");
-		expect(await reread()).toContain("is not proven committed");
+		expect(await reread()).toContain("The app kept its own value");
 		const unproven = await write(
 			{ committed: "unproven", effect: "confirmed", evidence: [{ kind: "value_readback" }] },
 			"✅ Set AXValue on [1] AXTextField. Commit unproven: the value survived AXConfirm, but the app's own model was not observed.",
 		);
 		expect(unproven.committed).toBe("unproven");
-		expect(await reread()).toContain("is not proven committed");
+		expect(await reread()).toContain("takes its value at end-of-edit");
 		// The stock 0.28.0 binary judges the same thing with a boolean, whose two
 		// states are the two decided verdicts.
 		expect((await write({ committed: true }, "✅ Set AXValue on [1] AXTextField.")).committed).toBe("committed");
@@ -1508,24 +1593,31 @@ it("carries a write nothing proved into the next observation of its own window",
 			(await f.session.setValue(f.context, f.window, dropped, "Project_File_List.txt")).committed,
 		).toBeUndefined();
 		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
-			`setValue on ${dropped} "Editor" is not proven committed — re-read the field before building on it`,
+			`setValue on ${dropped} AXTextField "Editor": the field publishes no readable value, so nothing read this write back — the app's own output is the only witness.`,
 		);
-		// Spent by that read: it is the re-read the sentence asked for.
-		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("not proven committed");
+		// Spent by that read: the write it judged is the one this tree shows.
+		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("setValue on");
 		// Proof is the driver's own verdict on a reply that read the value back
 		// and names no better route.
 		written({ committed: true, effect: "confirmed", evidence: [{ kind: "value_readback" }] });
 		expect((await f.session.setValue(f.context, f.window, await observed(), "Project_File_List.txt")).committed).toBe(
 			"committed",
 		);
-		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("not proven committed");
+		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("setValue on");
+		// Proof is exactly the verdict, the effect, the read-back and no better
+		// route: a driver that read the value back, called it committed and still
+		// names another route has not proven this one.
 		written({
 			committed: true,
 			effect: "confirmed",
+			evidence: [{ kind: "value_readback" }],
 			escalation: { reason: "delivery_failed", target: "foreground" },
 		});
-		await f.session.setValue(f.context, f.window, await observed(), "Project_File_List.txt");
-		expect((await f.session.observe(f.context, f.window)).tree).toContain("setValue on n");
+		const escalated = await observed();
+		await f.session.setValue(f.context, f.window, escalated, "Project_File_List.txt");
+		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
+			`setValue on ${escalated} AXTextField "Editor": the driver judged the value committed but doubts this route landed and names another — read the field back before building on it.`,
+		);
 		// `type` reports no commit flag at all, and answered `confirmed` for the
 		// one write Automator took and for the three it ignored.
 		f.state.hook = undefined;
@@ -1534,7 +1626,7 @@ it("carries a write nothing proved into the next observation of its own window",
 		await f.session.type(f.context, f.window, "Project_File_List.txt", typed);
 		const carried = await f.session.observe(f.context, f.window);
 		expect(carried.tree.split("\n")[0]).toBe(
-			`type on ${typed} "Editor" is not proven committed — re-read the field before building on it`,
+			`type on ${typed} AXTextField "Editor": the field publishes no readable value, so nothing read this write back — the app's own output is the only witness.`,
 		);
 		// One sentence per write, however often the same write is repeated.
 		expect(carried.tree.split("\n")[1]).toContain("- [n");
@@ -1553,8 +1645,11 @@ it("carries a write nothing proved into the next observation of its own window",
 			"type_text_incomplete",
 		);
 		f.state.hook = undefined;
+		// The remainder spelled out: the reply's own "retry only the remaining
+		// suffix" left the caller to slice by codepoint, and the model retyped
+		// the whole string instead.
 		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
-			`type on ${partial} "Editor" is not proven committed — re-read the field before building on it`,
+			`type on ${partial} AXTextField "Editor": 0 of 21 characters landed, so the field holds neither its old value nor the one asked for — type only the remainder: "Project_File_List.txt".`,
 		);
 	} finally {
 		await f.close();
@@ -1595,18 +1690,27 @@ it("holds an unproven write against its own window and shows it beside that wind
 		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
 		await f.session.setValue(f.context, f.window, ref, "Project_File_List.txt");
 		// Another window's read answers for its own state and carries nothing.
-		expect((await f.session.observe(f.context, other)).tree).not.toContain("not proven committed");
+		expect((await f.session.observe(f.context, other)).tree).not.toContain("setValue on");
 		f.texts.length = 0;
 		await f.session.captureWindow(f.context, other);
 		expect(f.texts).toEqual([]);
 		// A capture has no text of its own, so the doubt is pushed into the cell.
 		await f.session.captureWindow(f.context, f.window);
 		expect(f.texts).toEqual([
-			`setValue on ${ref} "Save as:" is not proven committed — re-read the field before building on it`,
+			`setValue on ${ref} AXTextField "Save as:": the field publishes no readable value, so nothing read this write back — the app's own output is the only witness.`,
 		]);
 		f.texts.length = 0;
 		await f.session.captureWindow(f.context, f.window);
 		expect(f.texts).toEqual([]);
+		// With this window's pixels in hand, they are the witness the sentence
+		// names — the route is read off the session's state, not off a table.
+		const captured = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		await f.session.setValue(f.context, f.window, captured, "Project_File_List.txt");
+		f.texts.length = 0;
+		await f.session.captureWindow(f.context, f.window);
+		expect(f.texts).toEqual([
+			`setValue on ${captured} AXTextField "Save as:": the field publishes no readable value, so nothing read this write back — capture the window and read the value off its own pixels.`,
+		]);
 	} finally {
 		await f.close();
 	}
