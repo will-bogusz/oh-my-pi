@@ -2470,6 +2470,63 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 	}
 });
 
+it("reads the window again only for the refusal a re-read can answer", async () => {
+	const f = await fixture();
+	// The same code covers three states, and the driver's own `advice` is what
+	// separates them. Both payloads below are alive rows in the wrong scope: a
+	// tree of this window cannot produce either, so the refusal stands.
+	const elsewhere = (advice: string, reason: string) => ({
+		text: `Background input refused (element_outside_target_window): ${reason}`,
+		structuredJson: JSON.stringify({
+			code: "element_outside_target_window",
+			effect: "refused",
+			advice,
+			pid: 101,
+			reason,
+			window_id: 1,
+			...(advice === "acquire_window" ? {} : { escalation: { target: advice, reason: "route_unavailable" } }),
+		}),
+		isError: true,
+		errorCode: "element_outside_target_window",
+		images: [],
+	});
+	const menuRow =
+		"this element belongs to pid 42's own menu bar, which is process-scoped and has no window ancestry by construction; a window-stamped pointer event or a process-scoped keystroke would land somewhere other than the menu row that was addressed. A semantic action on the row itself is exactly addressed";
+	try {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const reads = () => f.calls.filter(call => call.name === "get_window_state").length;
+		// A proven menu row: the row is there and the route is an action on it.
+		f.state.hook = async name => (name === "click" ? elsewhere("element", menuRow) : undefined);
+		const before = reads();
+		const proven = await f.session.click(f.context, f.window, ref).catch((error: unknown) => error);
+		if (!(proven instanceof ToolError)) throw new Error("Expected the scope refusal");
+		expect(proven.message).toContain("A semantic action on the row itself is exactly addressed");
+		expect(proven.message).not.toContain("no longer exists");
+		expect(reads()).toBe(before);
+		// Another window's row: the caller has to address that window, and the
+		// reason names it. No escalation target exists for that.
+		f.state.hook = async name =>
+			name === "click"
+				? elsewhere("acquire_window", "the addressed element belongs to window 4231 of pid 101, not window 1")
+				: undefined;
+		const other = await f.session.click(f.context, f.window, ref).catch((error: unknown) => error);
+		if (!(other instanceof ToolError)) throw new Error("Expected the scope refusal");
+		expect(other.message).toContain("belongs to window 4231");
+		expect(other.message).not.toContain("address the row you mean from it");
+		expect(reads()).toBe(before);
+		// Unproven ancestry: a fresh walk is exactly what settles it.
+		f.state.hook = async name =>
+			name === "click"
+				? elsewhere("snapshot", "the addressed element could not be proven to belong to window 1")
+				: undefined;
+		f.state.label = "Editor (renamed)";
+		expect((await f.session.click(f.context, f.window, ref)).effect).toBe("not_dispatched");
+		expect(reads()).toBe(before + 1);
+	} finally {
+		await f.close();
+	}
+});
+
 it("re-addresses a vanished ref only when one row of the new tree is the same row", async () => {
 	const f = await fixture();
 	const dead = {
