@@ -2037,7 +2037,11 @@ it("corrects the reply's own instruction to qualify the re-run once the route is
 		f.state.hook = async name => (name === "type_text" ? instructed : undefined);
 		const typed = await f.session.type(f.context, f.window, "hi");
 		expect(typed.text).toContain('{ delivery: "foreground" }');
-		expect(typed.text).toContain("re-run it as-is; this window's keystrokes now take the foreground route");
+		// The reply's own doubt is that it could not confirm the insert, so the
+		// correction keeps the read in front of the re-run it un-qualifies.
+		expect(typed.text).toContain(
+			"the keystrokes may have landed: observe the window first (win.observe()) and only if it shows nothing re-run the action — this window's keystrokes now take the foreground route",
+		);
 		f.state.hook = undefined;
 		const next = await f.session.press(f.context, f.window, "Return");
 		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
@@ -2269,6 +2273,45 @@ it("never re-offers the foreground rung a keystroke already took", async () => {
 	} finally {
 		await f.close();
 	}
+});
+
+it("tells a keystroke that may have landed to observe first, and only a failed one to re-run", async () => {
+	// T7 `native-act-notes`: contract 0.9.0 defaults an unprobed post to
+	// `effect_unconfirmed` instead of `delivery_failed`, so the remembered-route
+	// sentence started telling a keystroke that may have landed to re-run
+	// itself. The caller's own rule forbids exactly that, and the model read the
+	// pair as a contradiction and refused the retry: "the active computer-use
+	// constraint prohibits following unverified delivery with foreground input".
+	const escalatedFor = async (reason: string) => {
+		const f = await fixture();
+		try {
+			f.state.hook = async name =>
+				name === "hotkey"
+					? {
+							text: "Pressed cmd+option+f on pid 101.",
+							structuredJson: JSON.stringify({
+								delivery: { mode: "background" },
+								effect: "unverifiable",
+								escalation: { reason, target: "foreground" },
+								route: "key_events_fg",
+							}),
+							isError: false,
+							images: [],
+						}
+					: undefined;
+			return (await f.session.press(f.context, f.window, "cmd+option+f")).escalation;
+		} finally {
+			await f.close();
+		}
+	};
+	// Nothing went out, so re-running it is the whole advice.
+	expect(await escalatedFor("delivery_failed")).toBe(
+		"⚠️ The driver escalates this action (delivery_failed): re-run it as-is; this window's keystrokes now take the foreground route.",
+	);
+	// Delivery is unknown, so the read comes first and the re-run is conditional.
+	expect(await escalatedFor("effect_unconfirmed")).toBe(
+		"⚠️ The driver escalates this action (effect_unconfirmed): the keystrokes may have landed: observe the window first (win.observe()) and only if it shows nothing re-run the action — this window's keystrokes now take the foreground route.",
+	);
 });
 
 it("names the menu a keyboard no-op can be driven from, and nothing when none was observed", async () => {
