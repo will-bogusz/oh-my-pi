@@ -720,7 +720,11 @@ function actionEvidence(details: unknown, args: Wire): string | undefined {
  * Refusals about one row rather than about the window: the platform could not
  * prove the addressed element belongs to the target window, or found its
  * reference dead. `element_outside_target_window` is reported for both on
- * drivers before 0.9.0.
+ * drivers before 0.9.0. A code belongs here only if a reply of it that names
+ * no route means a re-read answers: `#deadElement` reads the window on a
+ * silent reply by design, and `element_disabled` — whose disabled-by-app-state
+ * arms name no route in either field — would then be answered with a tree the
+ * control reads identically in.
  */
 const DEAD_ELEMENT_REFUSALS: Record<string, true> = {
 	element_no_longer_exists: true,
