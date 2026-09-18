@@ -2473,7 +2473,7 @@ export class CuaComputerSession implements ComputerBackend {
 			const [ref, row] = matches[0]!;
 			const note = `${named}${under ? `, under ${under},` : ""} no longer exists in window ${
 				recover.window.id
-			}; ${ref} is the one row of that tree with the same role, label, value and position, so the action was dispatched there instead.`;
+			} and nothing was dispatched at it — ${ref} is the one row of the fresh tree with the same role, label, value and position, so the action was dispatched there instead. That walk re-minted this window's refs: ${target} is retired, and this row is ${ref} from here on.`;
 			recover.context.emitText(note);
 			try {
 				const result = await this.#action(name, {
@@ -2496,11 +2496,18 @@ export class CuaComputerSession implements ComputerBackend {
 			identity === undefined
 				? "no identity for it was recorded"
 				: sameName === 0
-					? "no row of that tree carries its role and label"
-					: `that tree has ${sameName} row(s) with its role and label, ${
+					? "no row of the fresh tree carries its role and label"
+					: `the fresh tree has ${sameName} row(s) with its role and label, ${
 							matches.length ? `${matches.length} of them` : "none"
 						} in the same position${under ? ` under ${under}` : ""}`;
-		const text = `${code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. That window as it is now — address the row you mean from it.\n${
+		// The walk retired this window's refs to mint the tree below, so the
+		// sentence that closes a dead ref has to hand the new ones back: the
+		// bench read "That window as it is now — address the row you mean from
+		// it." as a fragment and retried the dead ref, which throws `StaleRef`.
+		const readdress = rows.length
+			? `${target} is retired and the tree below carries this window's new refs — address the row you mean by its new ref.`
+			: `${target} is retired and this walk minted no refs to address — observe the window again (win.observe()) once it has rows.`;
+		const text = `${code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${
 			rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown."
 		}`;
 		recover.context.emitText(text);
