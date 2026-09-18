@@ -76,6 +76,13 @@ const windowFixture: ComputerWindowIdentity = {
 	onScreen: true,
 };
 
+/** What the session composes for a write it could not call proven, per verdict. */
+const WRITE_NOTES: Record<string, string> = {
+	not_committed:
+		'setValue on e2 AXTextField "Filename": not committed — the app has no end-of-edit gesture here. The app kept its own value; write it another way.',
+	unproven:
+		'setValue on e2 AXTextField "Filename": the value reads back as written, but this field\'s app takes its value at end-of-edit — press Tab or Return on it.',
+};
 /** Stateful fixture; unsupported operations fail rather than silently succeeding. */
 class FakeBackend implements ComputerBackend {
 	async drain(): Promise<void> {}
@@ -202,6 +209,8 @@ class FakeBackend implements ComputerBackend {
 	}
 	/** The rung the driver named when it doubted this one landed; absent when it named none. */
 	escalation?: string;
+	/** The driver dispatched an app action and cannot say what it did. */
+	unverifiable = false;
 	async click(
 		context: ComputerOperationContext,
 		window: ComputerWindowIdentity,
@@ -211,16 +220,22 @@ class FakeBackend implements ComputerBackend {
 		if (typeof target === "string") this.element(target, window);
 		this.clickCount++;
 		this.value = String(this.clickCount);
+		const dispatched = this.unverifiable
+			? '✅ Performed AXPress on [40] AXCell "Incomplete, Buy milk".'
+			: "✅ Posted click to pid 123.";
 		return {
-			text: this.escalation === undefined ? "" : `✅ Posted click to pid 123.\n${this.escalation}`,
-			effect: "verified",
+			text:
+				this.unverifiable || this.escalation !== undefined
+					? [dispatched, this.escalation].filter(line => line !== undefined).join("\n")
+					: "",
+			effect: this.unverifiable ? "unverifiable" : "verified",
 			evidence: { count: this.clickCount },
 			delivery: "background",
 			...(this.escalation === undefined ? {} : { escalation: this.escalation }),
 		};
 	}
-	/** What the driver judged about the app's end-of-edit, when it judged anything. */
-	committed?: boolean;
+	/** The driver's commit verdict for the write, when it judged one. */
+	committed?: ComputerActionResult["committed"];
 	async setValue(
 		context: ComputerOperationContext,
 		window: ComputerWindowIdentity,
@@ -232,9 +247,9 @@ class FakeBackend implements ComputerBackend {
 		this.value = value;
 		return {
 			text:
-				this.committed === false
-					? "📨 Sent (unverified) AXValue on [1] AXTextField.\ncommitted=false — the app may still hold its own value."
-					: "",
+				this.committed === undefined || this.committed === "committed"
+					? ""
+					: `📨 Sent (unverified) AXValue on [1] AXTextField.\n${WRITE_NOTES[this.committed]}`,
 			effect: "verified",
 			evidence: { value },
 			delivery: "background",
@@ -724,16 +739,22 @@ describe("computer preludes through the session", () => {
 			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
 			displays.length = 0;
 			// A committed write is ordinary: the cell decides whether to echo it.
-			backend.committed = true;
+			backend.committed = "committed";
 			expect(
 				(await runInContext('win.setValue(win.initialObservation.elements[0].ref, "kept")', realm)).committed,
-			).toBe(true);
+			).toBe("committed");
 			expect(displays).toEqual([]);
 			// An uncommitted one may have lost the edit, so the model reads it
 			// even though this cell throws the result away.
-			backend.committed = false;
+			backend.committed = "not_committed";
 			await runInContext('win.setValue(win.initialObservation.elements[0].ref, "lost")', realm);
-			expect(displays.join("\n")).toContain("committed=false");
+			expect(displays.join("\n")).toContain("not committed —");
+			// The verdict the dead `committed === false` gate dropped outright: the
+			// value was echoed back and nothing observed the app take it.
+			displays.length = 0;
+			backend.committed = "unproven";
+			await runInContext('win.setValue(win.initialObservation.elements[0].ref, "echoed")', realm);
+			expect(displays.join("\n")).toContain("press Tab or Return on it");
 			// Same shape by a third route: the driver dispatched, doubts the rung
 			// landed, and names the one that would. A cell that drops the result
 			// still reads it.
@@ -745,6 +766,15 @@ describe("computer preludes through the session", () => {
 				'⚠️ The driver escalates this action (delivery_failed): the route it names is { delivery: "foreground" }.';
 			await runInContext("win.click(win.initialObservation.elements[0].ref)", realm);
 			expect(displays.join("\n")).toContain('{ delivery: "foreground" }');
+			// A dispatched app action the driver cannot judge is the same shape
+			// again: `AXPress`/`Performed` appeared 0 times in a whole bench
+			// transcript because the reply said `unverifiable` and the cell
+			// dropped the only sentence naming what was sent.
+			backend.escalation = undefined;
+			backend.unverifiable = true;
+			displays.length = 0;
+			await runInContext("win.click(win.initialObservation.elements[0].ref)", realm);
+			expect(displays.join("\n")).toContain('Performed AXPress on [40] AXCell "Incomplete, Buy milk".');
 		} finally {
 			await runInContext("computer.close()", realm);
 		}
@@ -1620,7 +1650,7 @@ describe("computer prompt variants", () => {
 		const darwin = render(computerDescription, false);
 		const linux = render(computerDescription, true);
 		for (const absent of ["AT-SPI", "X11", "xdotool", "super"]) expect(darwin).not.toContain(absent);
-		for (const absent of ["AppleScript", "TCC", "screencapture", "cmd|", "committed"])
+		for (const absent of ["AppleScript", "TCC", "screencapture", "cmd|", "A write that is not proven"])
 			expect(linux).not.toContain(absent);
 		expect(linux).toContain("AT-SPI tree");
 		expect(linux).toContain("foreground_unavailable");

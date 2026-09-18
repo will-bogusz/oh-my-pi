@@ -126,8 +126,12 @@ interface ComputerAction {
 	data?: unknown;
 	route?: string;
 	delivery: unknown;
-	/** `setValue`: whether the app's editing pipeline kept the written value. */
-	committed?: boolean;
+	/**
+	 * A write's verdict: `committed` once the app's own editing pipeline was
+	 * observed keeping the value, `not_committed` once it was observed
+	 * discarding it, `unproven` when the read-back cannot tell those apart.
+	 */
+	committed?: "committed" | "not_committed" | "unproven";
 	/** The route the driver says would land when it doubts this one did. */
 	escalation?: string;
 	interruptedBy?: ComputerInterruption;
