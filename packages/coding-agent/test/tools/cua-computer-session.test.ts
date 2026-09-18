@@ -1588,7 +1588,10 @@ it("names the rung a dispatched action's own escalation points at", async () => 
 		expect(dropped.escalation).toBe(dropped.text.split("\n")[1]);
 		// The driver's wire vocabulary never survives as advice, and a reply
 		// that spells the rung itself is instructing the bypass, so the
-		// remembered route corrects it rather than staying quiet.
+		// remembered route corrects it rather than staying quiet. Acquiring the
+		// window again is the caller starting over on it, so the rung is the
+		// background one this case is about.
+		await f.session.acquire(f.context, { id: "1", pid: 101 });
 		const named = await pressed(
 			{ effect: "unverifiable", escalation: { recommended: "foreground" } },
 			'⚠️ Unverified. To deliver a real click, click this control\'s pixel center with delivery_mode:"foreground".',
@@ -1597,6 +1600,7 @@ it("names the rung a dispatched action's own escalation points at", async () => 
 		expect(named.text).not.toContain("delivery_mode");
 		expect(named.escalation).toContain("now take the foreground route");
 		// A rung this surface cannot type is not turned into advice.
+		await f.session.acquire(f.context, { id: "1", pid: 101 });
 		const elsewhere = await pressed(
 			{ effect: "unverifiable", escalation: { target: "session", reason: "permission_required" } },
 			"Pressed cmd+n on pid 101.",
@@ -1873,6 +1877,24 @@ it("names an observe before a screenshot as the check for an unverified dispatch
 		expect(clicked.text).toBe(
 			"✅ Posted left-click to pid 101 at (2,0) (background CGEvent; not driver-verified — confirm with observe({ query }) or, on a pixel surface, a screenshot).",
 		);
+		// The keystroke paths name a screenshot for a field whose AXValue they
+		// could not read at all. There a capture really is the only witness, so
+		// the check stands and only gains the spelling of the call that takes
+		// one — an AX read is exactly what cannot answer it.
+		f.state.hook = async name =>
+			name === "type_text"
+				? {
+						text: '📨 Sent (unverified) 2 char(s) via CGEvent (30ms delay). — driver could not confirm the text landed; verify via screenshot, and re-call with delivery_mode:"foreground" if it didn\'t.',
+						structuredJson: JSON.stringify({ effect: "unverifiable", route: "cgevent_type" }),
+						isError: false,
+						images: [],
+					}
+				: undefined;
+		const typed = await f.session.type(f.context, f.window, "hi");
+		expect(typed.text.split("\n")[0]).toBe(
+			'📨 Sent (unverified) 2 char(s) via CGEvent (30ms delay). — driver could not confirm the text landed; confirm with observe({ screenshot: true }), and re-call with { delivery: "foreground" } if it didn\'t.',
+		);
+		expect(typed.text).not.toContain("observe({ query })");
 	} finally {
 		await f.close();
 	}
@@ -1901,9 +1923,12 @@ it("sends a suspected no-op back to observe before it sends it to pixels", async
 			'✅ Performed AXPress on [15] AXMenuButton "".\n⚠️ Unverified: no change observed within 505 ms (element state, app focus, window contents, new windows).',
 		);
 		expect(watched.text).toContain("(suspected_noop)");
-		expect(watched.text).toContain("the driver saw no change within 505 ms — observe() once");
-		expect(watched.text).toContain("if the tree is unchanged, click the control's own centre off a screenshot");
-		expect(watched.text.indexOf("observe() once")).toBeLessThan(watched.text.indexOf("off a screenshot"));
+		// No capture of this window is live, and a pixel action refuses before
+		// dispatch without one, so the capture is part of the route.
+		expect(watched.text).toContain(
+			"the driver saw no change within 505 ms — observe() once; if the tree is unchanged, capture the window (observe({ screenshot: true })) and click the control's own centre",
+		);
+		expect(watched.text.indexOf("observe() once")).toBeLessThan(watched.text.indexOf("capture the window"));
 		// A driver that says how long it watched is quoted the same way.
 		const settled = await dispatched(
 			"⚠️ Unverified: the target was watched for 2000 ms after the dispatch and nothing changed.",
@@ -1913,6 +1938,180 @@ it("sends a suspected no-op back to observe before it sends it to pixels", async
 		const bare = await dispatched('✅ Performed AXPress on [15] AXMenuButton "".');
 		expect(bare.text).toContain("the driver could not confirm this landed — observe() once");
 		expect(bare.text).not.toContain(" ms");
+		// Once the window has a frame, the click is the whole route: the
+		// coordinate it names is already in hand.
+		await f.session.observe(f.context, f.window, { screenshot: true, silent: true });
+		const captured = await dispatched('✅ Performed AXPress on [15] AXMenuButton "".');
+		expect(captured.text).toContain(
+			"observe() once; if the tree is unchanged, click the control's own centre in the capture this window already has",
+		);
+		expect(captured.text).not.toContain("observe({ screenshot: true })");
+	} finally {
+		await f.close();
+	}
+});
+
+/** The shape DriverText's type path publishes when no focused text element resolved. */
+const BLIND_TYPE = {
+	text: "📨 Sent (unverified) 2 char(s) via CGEvent (30ms delay). — no focused text element could be resolved in window 1, so the keystrokes were posted blind and no field can be read back. Address the field itself: pass element_index (or element_token) for it on this call, or use set_value.",
+	structuredJson: JSON.stringify({
+		delivery: { mode: "background" },
+		effect: "unverifiable",
+		escalation: { reason: "effect_unconfirmed", target: "element" },
+		route: "cgevent_type",
+	}),
+	isError: false,
+	images: [],
+};
+
+it("names the field a blind keystroke can be written to, from the observation it holds", async () => {
+	const f = await fixture();
+	try {
+		f.state.hook = async name => (name === "type_text" ? BLIND_TYPE : undefined);
+		// No observation of this window yet: the route is real, the ref is not.
+		const blind = await f.session.type(f.context, f.window, "hi");
+		expect(blind.escalation).toBe(
+			"⚠️ The driver escalates this action (effect_unconfirmed): address the field itself — this session holds no text row for window 1, so observe it first and write the row that walk mints.",
+		);
+		// One text row in hand: the route is a call the caller can type.
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const known = await f.session.type(f.context, f.window, "hi");
+		expect(known.escalation).toBe(
+			`⚠️ The driver escalates this action (effect_unconfirmed): address the field itself: win.ref("${ref}").type("<text>") or win.ref("${ref}").setValue("<value>").`,
+		);
+		// The call already addressed a row, so the route is to write it, not to
+		// hunt for it again.
+		const addressed = await f.session.type(f.context, f.window, "hi", ref);
+		expect(addressed.escalation).toBe(
+			`⚠️ The driver escalates this action (effect_unconfirmed): write the field instead of posting keystrokes at it: win.ref("${ref}").setValue("<value>").`,
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("never re-offers the foreground rung a keystroke already took", async () => {
+	const f = await fixture();
+	// The payload measured on Notes' Find chord: the second press runs on the
+	// rung the first one's escalation named, and answers with that same
+	// escalation. A table keyed on the target alone replied "re-run it as-is".
+	const escalated = {
+		text: "Pressed cmd+option+f on pid 101.",
+		structuredJson: JSON.stringify({
+			delivery: { mode: "background" },
+			effect: "unverifiable",
+			escalation: { reason: "delivery_failed", target: "foreground" },
+			route: "key_events_fg",
+		}),
+		isError: false,
+		images: [],
+	};
+	const menuBar = [
+		{ element_index: 1, element_token: "m:1", role: "AXMenuBar", label: "", depth: 0 },
+		{ element_index: 2, element_token: "m:2", role: "AXMenuBarItem", label: "Edit", depth: 1, enabled: true },
+		{ element_index: 3, element_token: "m:3", role: "AXMenuBarItem", label: "Format", depth: 1, enabled: true },
+	];
+	try {
+		f.state.hook = async name => (name === "hotkey" ? escalated : undefined);
+		const first = await f.session.press(f.context, f.window, "cmd+option+f");
+		expect(first.escalation).toBe(
+			"⚠️ The driver escalates this action (delivery_failed): re-run it as-is; this window's keystrokes now take the foreground route.",
+		);
+		// Same reply, now on the foreground rung this session took over.
+		const second = await f.session.press(f.context, f.window, "cmd+option+f");
+		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "foreground" });
+		expect(second.escalation).toBe(
+			'⚠️ The driver escalates this action (delivery_failed): the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — observe the window (win.observe()) to read what the keystrokes did — a read changes nothing — or observe({ menubar: true }) and drive the command with win.menu([...], { delivery: "foreground" }).',
+		);
+		expect(second.escalation).not.toContain("re-run");
+		// With this window's own menu bar in hand, the route is the one measured
+		// to drive a menu command when its chord does not.
+		f.state.hook = async (name, args) => {
+			if (name === "hotkey") return escalated;
+			return name === "get_window_state" && args.window_id === 1
+				? reply({ pid: 101, window_id: 1, snapshot_id: "m", truncated: false, elements: menuBar })
+				: undefined;
+		};
+		await f.session.observe(f.context, f.window, { menubar: true });
+		const menu = await f.session.press(f.context, f.window, "cmd+option+f");
+		expect(menu.escalation).toBe(
+			'⚠️ The driver escalates this action (delivery_failed): the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — drive the command from the menu this window\'s observation carries (Edit · Format): win.menu(["<menu>", "<item>"], { delivery: "foreground" }).',
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("names the menu a keyboard no-op can be driven from, and nothing when none was observed", async () => {
+	const f = await fixture();
+	// ChordProbe rank 1: the probe reports the chord moved nothing, and the
+	// reply names no rung at all — there is none left for a chord.
+	const inert = {
+		text: "Pressed cmd+option+f on pid 101 (delivery_mode:foreground).",
+		structuredJson: JSON.stringify({
+			delivery: { mode: "foreground" },
+			effect: "suspected_noop",
+			route: "key_events_fg",
+		}),
+		isError: false,
+		images: [],
+	};
+	const menuBar = [
+		{ element_index: 1, element_token: "m:1", role: "AXMenuBar", label: "", depth: 0 },
+		{ element_index: 2, element_token: "m:2", role: "AXMenuBarItem", label: "Edit", depth: 1, enabled: true },
+	];
+	try {
+		f.state.hook = async name => (name === "hotkey" ? inert : undefined);
+		const unobserved = await f.session.press(f.context, f.window, "cmd+option+f", undefined, {
+			delivery: "foreground",
+		});
+		// Nothing in hand but a read, which is the recovery the bench took.
+		expect(unobserved.escalation).toBe(
+			'⚠️ The driver reports no observed change: the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — observe the window (win.observe()) to read what the keystrokes did — a read changes nothing — or observe({ menubar: true }) and drive the command with win.menu([...], { delivery: "foreground" }).',
+		);
+		f.state.hook = async (name, args) => {
+			if (name === "hotkey") return inert;
+			return name === "get_window_state" && args.window_id === 1
+				? reply({ pid: 101, window_id: 1, snapshot_id: "m", truncated: false, elements: menuBar })
+				: undefined;
+		};
+		await f.session.observe(f.context, f.window, { menubar: true });
+		const observed = await f.session.press(f.context, f.window, "cmd+option+f", undefined, {
+			delivery: "foreground",
+		});
+		expect(observed.escalation).toBe(
+			'⚠️ The driver reports no observed change: the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — drive the command from the menu this window\'s observation carries (Edit): win.menu(["<menu>", "<item>"], { delivery: "foreground" }).',
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("stops naming the foreground rung to an action that already ran on it", async () => {
+	const f = await fixture();
+	// AdviceMatrix: the AXEnabled refusal and its escalation are byte-identical
+	// on both rungs, so the advice names the rung that just answered.
+	const unverified = {
+		text: "✅ Performed AXPress on [1] AXButton.",
+		structuredJson: JSON.stringify({
+			effect: "unverifiable",
+			escalation: { reason: "effect_unconfirmed", target: "foreground" },
+			route: "accessibility",
+		}),
+		isError: false,
+		images: [],
+	};
+	try {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		f.state.hook = async name => (name === "click" ? unverified : undefined);
+		const background = await f.session.click(f.context, f.window, ref);
+		expect(background.escalation).toBe(
+			'⚠️ The driver escalates this action (effect_unconfirmed): the route it names is { delivery: "foreground" } — re-run the action that way.',
+		);
+		const foreground = await f.session.click(f.context, f.window, ref, { delivery: "foreground" });
+		expect(foreground.escalation).toBe(
+			`⚠️ The driver escalates this action (effect_unconfirmed): this action already ran with { delivery: "foreground" }, so the rung it names is the one that just answered — write the field instead of posting keystrokes at it: win.ref("${ref}").setValue("<value>").`,
+		);
 	} finally {
 		await f.close();
 	}

@@ -349,18 +349,21 @@ const DETECT_WINDOW_CHANGE_TOOLS: Record<string, true> = {
 	type_text: true,
 };
 /**
- * Two rewrites of driver-authored text, both about a route the caller has to
+ * Three rewrites of driver-authored text, all about a call the caller has to
  * be able to type. The driver advertises its own wire vocabulary in refusal
  * text and escalation advice (`delivery_mode: "foreground"`) where the prelude
- * takes `{ delivery: "foreground" }`; and it names a screenshot as the only
- * check for an unverified pixel dispatch, which on this surface is the
- * expensive one — an AX read answers the same question and the model followed
- * the sentence literally, spending a capture where `observe({ query })` would
- * have done. Rewriting at the boundary keeps both executable as written.
- * Structured details stay verbatim on the error's context.
+ * takes `{ delivery: "foreground" }`. It names a screenshot as the only check
+ * for an unverified pixel dispatch, which on this surface is the expensive
+ * one — an AX read answers the same question and the model followed the
+ * sentence literally, spending a capture where `observe({ query })` would have
+ * done. And the keystroke paths name a screenshot for a field whose `AXValue`
+ * they could not read at all: there a capture really is the only witness, so
+ * that one keeps the screenshot and only gains the spelling of the call that
+ * takes one. Structured details stay verbatim on the error's context.
  */
 const DELIVERY_MODE_VOCABULARY = /delivery_mode\s*:\s*"(background|foreground)"/g;
 const SCREENSHOT_CHECK = /not driver-verified\s*[—-]\s*confirm via screenshot/g;
+const SCREENSHOT_WITNESS = /verify via screenshot/g;
 function preludeVocabulary<T>(value: T): T {
 	if (typeof value === "string")
 		return value
@@ -368,7 +371,8 @@ function preludeVocabulary<T>(value: T): T {
 			.replace(
 				SCREENSHOT_CHECK,
 				"not driver-verified — confirm with observe({ query }) or, on a pixel surface, a screenshot",
-			) as T;
+			)
+			.replace(SCREENSHOT_WITNESS, "confirm with observe({ screenshot: true })") as T;
 	if (Array.isArray(value)) return value.map(entry => preludeVocabulary(entry)) as T;
 	if (value && typeof value === "object")
 		return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, preludeVocabulary(entry)])) as T;
@@ -536,18 +540,29 @@ function menuRefusalItems(
 	}: ${menuItemTitles(items)}. Segment titles are matched exactly.`;
 }
 /**
- * The driver's own escalation advice: the rung it believes would land, on a
- * reply whose text does not say so. A background chord always answers
- * `Pressed cmd+n on pid 92857.` with `escalation: { target: "foreground",
- * reason: "delivery_failed" }` in the structured payload alone — the bench
- * read the sentence, watched nothing happen, and never learned the route.
- * Only targets this surface can type are named; anything else stays in
- * `data` rather than becoming advice the caller cannot follow.
+ * The escalation targets this surface renders a call for. A target with no
+ * renderer stays in `data`: the advice the caller cannot follow is worse than
+ * none. The sentence itself is composed by `#escalationRoute`, which knows
+ * the rung this call already took, the rows the current observation holds and
+ * whether a frame is live — a table keyed on the target alone told a chord
+ * that had already run foreground to run foreground.
  */
-const ESCALATION_ROUTES: Readonly<Record<string, (text: string) => string>> = {
-	foreground: () => 'the route it names is { delivery: "foreground" } — re-run the action that way',
-	pixel: pixelEscalation,
-	snapshot: () => "observe the window again (win.observe()) and address the row that walk mints for this control",
+const RENDERED_TARGETS: Record<string, true> = { element: true, foreground: true, pixel: true, snapshot: true };
+const FOREGROUND_ROUTE = 'the route it names is { delivery: "foreground" } — re-run the action that way';
+const OBSERVE_ROUTE = "observe the window again (win.observe()) and address the row that walk mints for this control";
+const KEYBOARD_READ_ROUTE =
+	'observe the window (win.observe()) to read what the keystrokes did — a read changes nothing — or observe({ menubar: true }) and drive the command with win.menu([...], { delivery: "foreground" })';
+/** Effects a driver reports when it dispatched and doubts the target reacted. */
+const UNDELIVERED_EFFECTS: Record<string, true> = { no_observed_change: true, suspected_noop: true };
+/** Roles that take typed text, in both providers' vocabularies. */
+const TEXT_INPUT_ROLES: Record<string, true> = {
+	AXComboBox: true,
+	AXSearchField: true,
+	AXTextArea: true,
+	AXTextField: true,
+	entry: true,
+	"password text": true,
+	text: true,
 };
 /** The untyped `recommended` spelling of a contract target, keyed on what the driver still writes. */
 const ESCALATION_TARGET_ALIASES: Readonly<Record<string, string>> = { get_window_state: "snapshot" };
@@ -573,11 +588,15 @@ const ROUTE_ALREADY_TAKEN = "re-run it as-is; this window's keystrokes now take 
  * change observed within N ms", ours says how long it watched.
  */
 const NO_CHANGE_WINDOW = /watched for (\d+) ms after the dispatch|no change observed within (\d+) ms/;
-function pixelEscalation(text: string): string {
+function pixelEscalation(text: string, captured: boolean): string {
 	const window = NO_CHANGE_WINDOW.exec(text);
 	const ms = window?.[1] ?? window?.[2];
 	const doubt = ms ? `the driver saw no change within ${ms} ms` : "the driver could not confirm this landed";
-	return `${doubt} — observe() once; if the tree is unchanged, click the control's own centre off a screenshot`;
+	return `${doubt} — observe() once; if the tree is unchanged, ${
+		captured
+			? "click the control's own centre in the capture this window already has"
+			: "capture the window (observe({ screenshot: true })) and click the control's own centre"
+	}`;
 }
 function escalationTarget(data: Wire): string | undefined {
 	const escalation = data.escalation;
@@ -588,15 +607,6 @@ function escalationTarget(data: Wire): string | undefined {
 	const target = typeof row.target === "string" ? row.target : row.recommended;
 	if (typeof target !== "string") return undefined;
 	return ESCALATION_TARGET_ALIASES[target] ?? target;
-}
-function escalationRoute(data: Wire, text: string, remembered: boolean): string | undefined {
-	const target = escalationTarget(data);
-	if (target === undefined) return undefined;
-	const route = remembered ? ROUTE_ALREADY_TAKEN : ESCALATION_ROUTES[target]?.(text);
-	if (route === undefined || (!remembered && text.includes(`delivery: "${target}"`))) return undefined;
-	const escalation = data.escalation as Wire;
-	const reason = typeof escalation.reason === "string" ? escalation.reason : undefined;
-	return `⚠️ The driver escalates this action${reason ? ` (${reason})` : ""}: ${route}.`;
 }
 /** The rung a reply names, in either shape the drivers report it: a bare string or `{ mode }`. */
 function evidenceDelivery(value: unknown): string | undefined {
@@ -629,7 +639,7 @@ function actionEvidence(details: unknown, args: Wire): string | undefined {
 				: `requested=${requested}`
 			: `delivery=${delivered}`,
 		typeof data.effect === "string" ? `effect=${data.effect}` : undefined,
-		target !== undefined && ESCALATION_ROUTES[target] !== undefined ? `escalation=${target}` : undefined,
+		target !== undefined && RENDERED_TARGETS[target] === true ? `escalation=${target}` : undefined,
 	].filter(field => field !== undefined);
 	return fields.length ? `Evidence: ${fields.join(" ")}` : undefined;
 }
@@ -1901,6 +1911,140 @@ export class CuaComputerSession implements ComputerBackend {
 		this.#escalatedKeyboard.add(window);
 		return true;
 	}
+	/** The text rows this window's current observation holds. */
+	#textRows(windowId: string): string[] {
+		const refs: string[] = [];
+		for (const [ref, binding] of this.#elements) {
+			if (binding.window.id !== windowId) continue;
+			const subrole = binding.element.subrole;
+			if (
+				TEXT_INPUT_ROLES[binding.element.role] === true ||
+				(subrole !== undefined && TEXT_INPUT_ROLES[subrole] === true)
+			)
+				refs.push(ref);
+		}
+		return refs;
+	}
+	/** The menus this window's current observation holds; empty unless it was walked with the menu bar. */
+	#menuTitles(windowId: string): string[] {
+		const titles: string[] = [];
+		for (const binding of this.#elements.values())
+			if (
+				binding.window.id === windowId &&
+				binding.element.role === "AXMenuBarItem" &&
+				binding.element.label &&
+				!titles.includes(binding.element.label)
+			)
+				titles.push(binding.element.label);
+		return titles;
+	}
+	#refForToken(token: unknown): string | undefined {
+		if (typeof token !== "string") return undefined;
+		for (const [ref, binding] of this.#elements) if (binding.token === token) return ref;
+		return undefined;
+	}
+	/**
+	 * Where the text of this call can be written instead of posted at a
+	 * window: the addressed row when the call carried one, else the text rows
+	 * this window's own observation holds. A window-scoped keystroke that
+	 * cannot be read back is the case the driver has no answer for — its
+	 * `element` target means exactly "address the field", which only this side
+	 * can spell, because only this side minted the ref.
+	 */
+	#fieldRoute(windowId: string, addressed: string | undefined): string | undefined {
+		if (addressed !== undefined)
+			return `write the field instead of posting keystrokes at it: win.ref(${JSON.stringify(addressed)}).setValue("<value>")`;
+		const refs = this.#textRows(windowId);
+		if (!refs.length) return undefined;
+		if (refs.length === 1) {
+			const ref = JSON.stringify(refs[0]);
+			return `address the field itself: win.ref(${ref}).type("<text>") or win.ref(${ref}).setValue("<value>")`;
+		}
+		return `address the field itself — this window's observation holds ${refs.length} text rows (${refs
+			.slice(0, 4)
+			.join(", ")}): win.ref("<ref>").type("<text>") or win.ref("<ref>").setValue("<value>")`;
+	}
+	/** The menu route, named only when this window's own observation carries its menu bar. */
+	#menuRoute(windowId: string): string | undefined {
+		const titles = this.#menuTitles(windowId);
+		if (!titles.length) return undefined;
+		return `drive the command from the menu this window's observation carries (${titles
+			.slice(0, 8)
+			.join(" · ")}): win.menu(["<menu>", "<item>"], { delivery: "foreground" })`;
+	}
+	/**
+	 * The route this reply's own state leaves open, composed here because this
+	 * is where the state is: the rung this call already took, whether it was
+	 * scoped to an element, the rows the window's current observation holds
+	 * and whether its frame is live. Measured against a table keyed on the
+	 * escalation target alone: a chord that had already been escalated to
+	 * foreground and came back unverified was told to re-run as-is (6/6 inert
+	 * on Notes' Find chord), and a coordinate rung was named for a window with
+	 * no capture, where a pixel action refuses before dispatch.
+	 */
+	#escalationRoute(
+		name: string,
+		args: Wire,
+		text: string,
+		target: string | undefined,
+		state: { remembered: boolean; unproven: boolean; noop: boolean },
+	): string | undefined {
+		const windowId = typeof args.window_id === "number" ? String(args.window_id) : undefined;
+		const keyboard = KEYBOARD_TOOLS[name] === true;
+		const foregroundTaken = args.delivery_mode === "foreground";
+		const field =
+			windowId === undefined ? undefined : this.#fieldRoute(windowId, this.#refForToken(args.element_token));
+		const menu = windowId === undefined ? undefined : this.#menuRoute(windowId);
+		const read = keyboard ? KEYBOARD_READ_ROUTE : OBSERVE_ROUTE;
+		if (keyboard && foregroundTaken && state.unproven && (target !== undefined || state.noop))
+			return `the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — ${
+				(name === "type_text" ? (field ?? menu) : (menu ?? field)) ?? read
+			}`;
+		switch (target) {
+			case "foreground":
+				if (keyboard && state.remembered) return ROUTE_ALREADY_TAKEN;
+				if (foregroundTaken)
+					return `this action already ran with { delivery: "foreground" }, so the rung it names is the one that just answered — ${
+						menu ?? field ?? read
+					}`;
+				return text.includes('delivery: "foreground"') ? undefined : FOREGROUND_ROUTE;
+			case "element":
+				return (
+					field ??
+					`address the field itself — this session holds no text row for window ${windowId ?? "(unknown)"}, so observe it first and write the row that walk mints`
+				);
+			case "pixel":
+				return pixelEscalation(text, windowId !== undefined && this.#frames.has(windowId));
+			case "snapshot":
+				return OBSERVE_ROUTE;
+			default:
+				return keyboard && state.noop ? (menu ?? field ?? read) : undefined;
+		}
+	}
+	/**
+	 * One decision per reply: it records the rung this window's keystrokes now
+	 * take and composes the sentence for it. A reply that carries a write
+	 * verdict and points at the field says nothing here — the write path
+	 * answers that one, with the field and the value in hand.
+	 */
+	#escalation(name: string, args: Wire, data: Wire, text: string): string | undefined {
+		const remembered = this.#keyboardEscalation(name, args, data, false);
+		const effect = typeof data.effect === "string" ? data.effect : undefined;
+		const noop = effect !== undefined && UNDELIVERED_EFFECTS[effect] === true;
+		const target = escalationTarget(data);
+		if (target !== undefined && RENDERED_TARGETS[target] !== true) return undefined;
+		if (target === "element" && data.committed !== undefined) return undefined;
+		const route = this.#escalationRoute(name, args, text, target, {
+			remembered,
+			unproven: effect !== "confirmed",
+			noop,
+		});
+		if (route === undefined) return undefined;
+		if (target === undefined) return `⚠️ The driver reports no observed change: ${route}.`;
+		const escalation = data.escalation as Wire;
+		const reason = typeof escalation.reason === "string" ? escalation.reason : undefined;
+		return `⚠️ The driver escalates this action${reason ? ` (${reason})` : ""}: ${route}.`;
+	}
 	/**
 	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
 	 * window found now appeared while this action ran — a prompt the action
@@ -1928,7 +2072,7 @@ export class CuaComputerSession implements ComputerBackend {
 		// too ("click this control's pixel center with delivery_mode:foreground");
 		// a next step is only executable if it is spelled the way the caller types.
 		const reported = preludeVocabulary(result.text);
-		const escalation = escalationRoute(data, reported, this.#keyboardEscalation(name, args, data, false));
+		const escalation = this.#escalation(name, args, data, reported);
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
 		return {
 			text: [
