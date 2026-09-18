@@ -115,13 +115,19 @@ function operationContext(getContext: RunContextAccessor): ComputerOperationCont
 }
 
 /**
- * Effects that mean the driver dispatched but doubts the target reacted:
- * `no_observed_change` (nothing about the target changed after delivery) and
- * `suspected_noop` (the element never advertised the action). Both are the
- * silent-no-op shape, so their text is pushed into the cell output instead of
- * living only in a return value the cell is free to drop.
+ * Effects that mean the driver dispatched without proving the target reacted:
+ * `no_observed_change` (nothing about the target changed after delivery),
+ * `suspected_noop` (the element never advertised the action) and
+ * `unverifiable` (it dispatched an app action and cannot say what it did).
+ * None of the three is a result the caller can read off the state, so their
+ * text is pushed into the cell output instead of living only in a return
+ * value the cell is free to drop.
  */
-const UNDELIVERED_EFFECTS: Record<string, true> = { no_observed_change: true, suspected_noop: true };
+const UNDELIVERED_EFFECTS: Record<string, true> = {
+	no_observed_change: true,
+	suspected_noop: true,
+	unverifiable: true,
+};
 
 async function reported(
 	context: ComputerOperationContext,

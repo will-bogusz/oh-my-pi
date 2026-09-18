@@ -209,6 +209,8 @@ class FakeBackend implements ComputerBackend {
 	}
 	/** The rung the driver named when it doubted this one landed; absent when it named none. */
 	escalation?: string;
+	/** The driver dispatched an app action and cannot say what it did. */
+	unverifiable = false;
 	async click(
 		context: ComputerOperationContext,
 		window: ComputerWindowIdentity,
@@ -218,9 +220,15 @@ class FakeBackend implements ComputerBackend {
 		if (typeof target === "string") this.element(target, window);
 		this.clickCount++;
 		this.value = String(this.clickCount);
+		const dispatched = this.unverifiable
+			? '✅ Performed AXPress on [40] AXCell "Incomplete, Buy milk".'
+			: "✅ Posted click to pid 123.";
 		return {
-			text: this.escalation === undefined ? "" : `✅ Posted click to pid 123.\n${this.escalation}`,
-			effect: "verified",
+			text:
+				this.unverifiable || this.escalation !== undefined
+					? [dispatched, this.escalation].filter(line => line !== undefined).join("\n")
+					: "",
+			effect: this.unverifiable ? "unverifiable" : "verified",
 			evidence: { count: this.clickCount },
 			delivery: "background",
 			...(this.escalation === undefined ? {} : { escalation: this.escalation }),
@@ -758,6 +766,15 @@ describe("computer preludes through the session", () => {
 				'⚠️ The driver escalates this action (delivery_failed): the route it names is { delivery: "foreground" }.';
 			await runInContext("win.click(win.initialObservation.elements[0].ref)", realm);
 			expect(displays.join("\n")).toContain('{ delivery: "foreground" }');
+			// A dispatched app action the driver cannot judge is the same shape
+			// again: `AXPress`/`Performed` appeared 0 times in a whole bench
+			// transcript because the reply said `unverifiable` and the cell
+			// dropped the only sentence naming what was sent.
+			backend.escalation = undefined;
+			backend.unverifiable = true;
+			displays.length = 0;
+			await runInContext("win.click(win.initialObservation.elements[0].ref)", realm);
+			expect(displays.join("\n")).toContain('Performed AXPress on [40] AXCell "Incomplete, Buy milk".');
 		} finally {
 			await runInContext("computer.close()", realm);
 		}
