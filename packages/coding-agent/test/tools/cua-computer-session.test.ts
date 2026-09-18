@@ -2397,10 +2397,71 @@ it("rejects expired public refs, wrong-window refs, and recycled window owners",
 		const first = await f.session.observe(f.context, f.window);
 		expect(() => f.session.element(first.elements[0]!.ref, { ...f.window, pid: 102 })).toThrow("WrongWindow");
 		await f.session.observe(f.context, f.window);
-		await expect(f.session.click(f.context, f.window, first.elements[0]!.ref)).rejects.toThrow("StaleRef");
+		// Every refusal this session composes carries the payload a guarded
+		// dispatch needs: a caught StaleRef used to keep only its message.
+		const caught = await f.session
+			.click(f.context, f.window, first.elements[0]!.ref)
+			.catch((error: unknown) => error);
+		if (!(caught instanceof ToolError)) throw new Error("Expected the stale ref");
+		expect(caught.message).toStartWith("StaleRef:");
+		expect(caught.context).toMatchObject({
+			code: "stale_element_ref",
+			effect: "not_dispatched",
+			ref: first.elements[0]!.ref,
+			window_id: "1",
+			pid: 101,
+		});
 		f.row.pid = 102;
 		await expect(f.session.type(f.context, f.window, "no")).rejects.toThrow("Missing");
 		expect(f.calls.some(call => call.name === "click" || call.name === "type_text")).toBe(false);
+	} finally {
+		await f.close();
+	}
+});
+
+it("answers a dead ref with the window's own tree instead of throwing it away", async () => {
+	const f = await fixture();
+	// T4 `native-act-reminders/omp-2` step 4, verbatim. The cell was
+	// `await win.ref('n174').click(); await win.observe();` — the throw
+	// discarded the tree and the trailing observe never ran, so the next cell
+	// spent itself recovering what this reply already knew.
+	const dead = {
+		text: "Background input refused (element_outside_target_window): the addressed element could not be proven to belong to window 14229; take a fresh get_window_state snapshot and re-address it",
+		structuredJson: JSON.stringify({
+			code: "element_outside_target_window",
+			effect: "refused",
+			escalation: {
+				reason:
+					"the addressed element could not be proven to belong to window 14229; take a fresh get_window_state snapshot and re-address it",
+				recommended: "get_window_state",
+			},
+			pid: 82791,
+			reason:
+				"the addressed element could not be proven to belong to window 14229; take a fresh get_window_state snapshot and re-address it",
+			window_id: 14229,
+		}),
+		isError: true,
+		errorCode: "element_outside_target_window",
+		images: [],
+	};
+	try {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		f.state.hook = async name => (name === "click" ? dead : undefined);
+		const answered = await f.session.click(f.context, f.window, ref);
+		expect(answered.effect).toBe("not_dispatched");
+		expect(answered.text.split("\n")[0]).toBe(
+			`element_outside_target_window: ${ref} (AXTextField "Editor") no longer exists in window 1 and nothing was dispatched. That window as it is now — address the row you mean from it.`,
+		);
+		// The tree is in the reply and in the cell, not only in a return value
+		// the cell is free to drop.
+		expect(answered.text).toContain("- [n2] AXTextField");
+		expect(f.texts.at(-1)).toBe(answered.text);
+		// One read, and the refusal's own payload survives on the result.
+		expect(f.calls.filter(call => call.name === "get_window_state")).toHaveLength(2);
+		expect(answered.data).toMatchObject({ code: "element_outside_target_window", window_id: 14229 });
+		// The row the walk just minted is addressable without another observe.
+		f.state.hook = undefined;
+		expect((await f.session.click(f.context, f.window, "n2")).effect).toBe("unverifiable");
 	} finally {
 		await f.close();
 	}
@@ -4115,11 +4176,12 @@ it("prints only the evidence fields a refusal carries", async () => {
 		expect(menu.message).not.toContain("delivery=background");
 		expect(menu.message).not.toContain("effect=refused");
 
-		const observation = await f.session.observe(f.context, f.window);
+		// The payload is what is under test here; a ref-scoped call on this code
+		// is answered with the window's own tree instead of a throw, which its
+		// own test covers.
+		await f.session.observe(f.context, f.window, { screenshot: true, silent: true });
 		f.state.hook = async name => (name === "click" ? dead : undefined);
-		const click = await f.session
-			.click(f.context, f.window, observation.elements[0]!.ref)
-			.catch((error: unknown) => error);
+		const click = await f.session.click(f.context, f.window, [1, 0]).catch((error: unknown) => error);
 		if (!(click instanceof ToolError)) throw new Error("Expected the click refusal");
 		// `effect` is the reply's own; the route is absent, so none is invented.
 		// `get_window_state` is a tool this surface does not expose: the line

@@ -675,6 +675,16 @@ function actionEvidence(details: unknown, args: Wire): string | undefined {
 	].filter(field => field !== undefined);
 	return fields.length ? `Evidence: ${fields.join(" ")}` : undefined;
 }
+/**
+ * Refusals about one row rather than about the window: the platform could not
+ * prove the addressed element belongs to the target window, or found its
+ * reference dead. `element_outside_target_window` is reported for both on
+ * drivers before 0.9.0.
+ */
+const DEAD_ELEMENT_REFUSALS: Record<string, true> = {
+	element_no_longer_exists: true,
+	element_outside_target_window: true,
+};
 const FOCUS_HOLDING_REFUSALS: Record<string, true> = {
 	delivery_failed: true,
 	menu_path_unavailable: true,
@@ -1415,16 +1425,35 @@ export class CuaComputerSession implements ComputerBackend {
 		for (const [ref, binding] of this.#elements)
 			if (binding.window.id === window.id && binding.window.pid === window.pid) this.#elements.delete(ref);
 	}
+	/**
+	 * Every refusal this session composes itself carries the same structured
+	 * payload a driver refusal does: a guarded dispatch that catches one had
+	 * only the message string, and a caught `StaleRef` read as an addressing
+	 * problem rather than a row that is gone.
+	 */
 	#binding(ref: string, window?: ComputerWindowIdentity): Binding {
 		const binding = this.#elements.get(ref);
 		if (this.#closed || !binding)
-			throw new ToolError(`StaleRef: ${this.#staleSheetRefs.get(ref) ?? "observe the window again"}`);
+			throw new ToolError(`StaleRef: ${this.#staleSheetRefs.get(ref) ?? "observe the window again"}`, {
+				code: "stale_element_ref",
+				effect: "not_dispatched",
+				ref,
+				...(window === undefined ? {} : { window_id: window.id, pid: window.pid }),
+			});
 		if (
 			window &&
 			(binding.window.pid !== window.pid ||
 				(binding.window.id !== window.id && this.#sheets.get(binding.window.id)?.parent !== window.id))
 		)
-			throw new ToolError("WrongWindow: element belongs to a different PID/window");
+			throw new ToolError("WrongWindow: element belongs to a different PID/window", {
+				code: "wrong_window",
+				effect: "not_dispatched",
+				ref,
+				element_window_id: binding.window.id,
+				element_pid: binding.window.pid,
+				window_id: window.id,
+				pid: window.pid,
+			});
 		return binding;
 	}
 	element(ref: string, window?: ComputerWindowIdentity): ComputerElementSnapshot {
@@ -2301,13 +2330,72 @@ export class CuaComputerSession implements ComputerBackend {
 			element.label ? JSON.stringify(element.label) : '"<menu>"'
 		}, "<item>"], { delivery: "foreground" }).`;
 	}
-	/** Dispatch that can name the route a refused menu bar action actually needs. */
-	async #dispatch(name: string, args: Wire, target: ComputerTarget | undefined): Promise<ComputerActionResult> {
+	/**
+	 * A ref whose element the platform can no longer reach. The refusal is
+	 * about one row and says nothing about the window, yet throwing it
+	 * discarded the whole tree: all four bench refusals of this shape were
+	 * followed by a bare `observe()` whose only job was to recover what the
+	 * throw dropped, and one run lost a half-built contact card for 15 cells
+	 * because the refusal carried no state. So the window is read once — the
+	 * caller has to re-read it either way — and the reply is the ordinary
+	 * non-throwing shape the surface already uses for "we do not believe this
+	 * landed", with nothing dispatched and the current tree in hand.
+	 */
+	async #deadElement(
+		error: ToolError,
+		args: Wire,
+		target: ComputerTarget | undefined,
+		recover: { context: Context; window: ComputerWindowIdentity } | undefined,
+	): Promise<ComputerActionResult | undefined> {
+		const data = refusalDetails(error.context);
+		const code = typeof data.code === "string" ? data.code : undefined;
+		if (code === undefined || DEAD_ELEMENT_REFUSALS[code] !== true) return undefined;
+		if (recover === undefined || typeof target !== "string" || typeof args.element_token !== "string")
+			return undefined;
+		const identity = this.#elements.get(target)?.element;
+		let rows: readonly TreeRow[];
+		try {
+			const { reply, current } = await this.#state(recover.context, recover.window, {
+				include_accessibility_tree: true,
+				include_screenshot: false,
+			});
+			throwIfAborted(recover.context.signal);
+			rows = this.#walk(current, reply, {}).rows;
+		} catch (failed) {
+			if (!(failed instanceof ToolError)) throw failed;
+			return undefined;
+		}
+		const named =
+			identity === undefined
+				? target
+				: `${target} (${identity.role}${identity.label ? ` ${JSON.stringify(identity.label)}` : ""})`;
+		const text = `${code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched. That window as it is now — address the row you mean from it.\n${
+			rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown."
+		}`;
+		recover.context.emitText(text);
+		return {
+			text,
+			effect: "not_dispatched",
+			evidence: null,
+			delivery: args.delivery_mode ?? null,
+			...(typeof data.route === "string" ? { route: data.route } : {}),
+			data,
+		};
+	}
+	/** Dispatch that can answer a refusal the reply's own row explains. */
+	async #dispatch(
+		name: string,
+		args: Wire,
+		target: ComputerTarget | undefined,
+		recover?: { context: Context; window: ComputerWindowIdentity },
+	): Promise<ComputerActionResult> {
 		try {
 			return await this.#action(name, args);
 		} catch (error) {
 			// An aborted call is not a ToolError and keeps its own identity.
 			if (!(error instanceof ToolError)) throw error;
+			const gone = await this.#deadElement(error, args, target, recover);
+			if (gone !== undefined) return gone;
 			const route = this.#menuBarRoute(target);
 			if (route === undefined) throw error;
 			throw new ToolError(`${error.message}${route}`, error.context);
@@ -2328,7 +2416,10 @@ export class CuaComputerSession implements ComputerBackend {
 			async () => {
 				const current = await this.#current(window);
 				throwIfAborted(context.signal);
-				return this.#dispatch(name, { ...this.#target(current, target), ...args }, target);
+				return this.#dispatch(name, { ...this.#target(current, target), ...args }, target, {
+					context,
+					window: current,
+				});
 			},
 			crashAlertTarget,
 		);
@@ -2370,6 +2461,7 @@ export class CuaComputerSession implements ComputerBackend {
 						modifier: options.modifiers,
 					},
 					target,
+					{ context, window: current },
 				);
 			},
 			// A background click on an element ref is the AX press route, so it
