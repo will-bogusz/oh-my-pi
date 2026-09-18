@@ -622,8 +622,21 @@ const ESCALATION_TARGET_ALIASES: Readonly<Record<string, string>> = { get_window
  * line survives a reply that already spells the rung, where a restatement
  * would be dropped: the driver's own sentence instructs exactly the bypass,
  * so the correction is the point rather than noise.
+ *
+ * Which of the two depends on what the escalation doubts, because the
+ * caller's own rule is that a mutation which may have landed is never
+ * re-fired. `delivery_failed` says the post never went out, so re-running it
+ * is the whole advice. Contract 0.9.0 defaults an unprobed post to
+ * `effect_unconfirmed` instead, which says nothing about delivery — measured
+ * against the bare re-run, the model read the pair as a contradiction and
+ * refused the retry ("the active computer-use constraint prohibits following
+ * unverified delivery with foreground input"), so that reason gets the read
+ * first, which changes nothing, and the re-run only if the window shows the
+ * keystrokes never arrived.
  */
 const ROUTE_ALREADY_TAKEN = "re-run it as-is; this window's keystrokes now take the foreground route";
+const ROUTE_ALREADY_TAKEN_UNPROVEN =
+	"the keystrokes may have landed: observe the window first (win.observe()) and only if it shows nothing re-run the action — this window's keystrokes now take the foreground route";
 /**
  * The driver watches a dispatched action for a fixed window and calls a
  * target that did not move in time a suspected no-op. On Contacts that window
@@ -655,6 +668,18 @@ function escalationTarget(data: Wire): string | undefined {
 	const target = typeof row.target === "string" ? row.target : row.recommended;
 	if (typeof target !== "string") return undefined;
 	return ESCALATION_TARGET_ALIASES[target] ?? target;
+}
+/**
+ * What the escalation doubts: a contract token (`delivery_failed`,
+ * `effect_unconfirmed`) on a typed reply, the fork's own prose on an untyped
+ * one. It is rendered in front of the route and it decides one of them, so
+ * both readings come from the same field.
+ */
+function escalationReason(data: Wire): string | undefined {
+	const escalation = data.escalation;
+	if (!escalation || typeof escalation !== "object" || Array.isArray(escalation)) return undefined;
+	const reason = (escalation as Wire).reason;
+	return typeof reason === "string" ? reason : undefined;
 }
 /** The rung a reply names, in either shape the drivers report it: a bare string or `{ mode }`. */
 function evidenceDelivery(value: unknown): string | undefined {
@@ -2230,20 +2255,21 @@ export class CuaComputerSession implements ComputerBackend {
 	}
 	/**
 	 * The route this reply's own state leaves open, composed here because this
-	 * is where the state is: the rung this call already took, whether it was
-	 * scoped to an element, the rows the window's current observation holds
-	 * and whether its frame is live. Measured against a table keyed on the
-	 * escalation target alone: a chord that had already been escalated to
-	 * foreground and came back unverified was told to re-run as-is (6/6 inert
-	 * on Notes' Find chord), and a coordinate rung was named for a window with
-	 * no capture, where a pixel action refuses before dispatch.
+	 * is where the state is: the rung this call already took, what the
+	 * escalation doubts, whether the call was scoped to an element, the rows
+	 * the window's current observation holds and whether its frame is live.
+	 * Measured against a table keyed on the escalation target alone: a chord
+	 * that had already been escalated to foreground and came back unverified
+	 * was told to re-run as-is (6/6 inert on Notes' Find chord), and a
+	 * coordinate rung was named for a window with no capture, where a pixel
+	 * action refuses before dispatch.
 	 */
 	#escalationRoute(
 		name: string,
 		args: Wire,
 		text: string,
 		target: string | undefined,
-		state: { remembered: boolean; unproven: boolean; noop: boolean },
+		state: { remembered: boolean; unproven: boolean; noop: boolean; reason: string | undefined },
 	): string | undefined {
 		const windowId = typeof args.window_id === "number" ? String(args.window_id) : undefined;
 		const keyboard = KEYBOARD_TOOLS[name] === true;
@@ -2258,7 +2284,8 @@ export class CuaComputerSession implements ComputerBackend {
 			}`;
 		switch (target) {
 			case "foreground":
-				if (keyboard && state.remembered) return ROUTE_ALREADY_TAKEN;
+				if (keyboard && state.remembered)
+					return state.reason === "delivery_failed" ? ROUTE_ALREADY_TAKEN : ROUTE_ALREADY_TAKEN_UNPROVEN;
 				if (foregroundTaken)
 					return `this action already ran with { delivery: "foreground" }, so the rung it names is the one that just answered — ${
 						menu ?? field ?? read
@@ -2290,15 +2317,15 @@ export class CuaComputerSession implements ComputerBackend {
 		const target = escalationTarget(data);
 		if (target !== undefined && RENDERED_TARGETS[target] !== true) return undefined;
 		if (target === "element" && data.committed !== undefined) return undefined;
+		const reason = escalationReason(data);
 		const route = this.#escalationRoute(name, args, text, target, {
 			remembered,
 			unproven: effect !== "confirmed",
 			noop,
+			reason,
 		});
 		if (route === undefined) return undefined;
 		if (target === undefined) return `⚠️ The driver reports no observed change: ${route}.`;
-		const escalation = data.escalation as Wire;
-		const reason = typeof escalation.reason === "string" ? escalation.reason : undefined;
 		return `⚠️ The driver escalates this action${reason ? ` (${reason})` : ""}: ${route}.`;
 	}
 	/**
@@ -2446,7 +2473,7 @@ export class CuaComputerSession implements ComputerBackend {
 			const [ref, row] = matches[0]!;
 			const note = `${named}${under ? `, under ${under},` : ""} no longer exists in window ${
 				recover.window.id
-			}; ${ref} is the one row of that tree with the same role, label, value and position, so the action was dispatched there instead.`;
+			} and nothing was dispatched at it — ${ref} is the one row of the fresh tree with the same role, label, value and position, so the action was dispatched there instead. That walk re-minted this window's refs: ${target} is retired, and this row is ${ref} from here on.`;
 			recover.context.emitText(note);
 			try {
 				const result = await this.#action(name, {
@@ -2469,11 +2496,18 @@ export class CuaComputerSession implements ComputerBackend {
 			identity === undefined
 				? "no identity for it was recorded"
 				: sameName === 0
-					? "no row of that tree carries its role and label"
-					: `that tree has ${sameName} row(s) with its role and label, ${
+					? "no row of the fresh tree carries its role and label"
+					: `the fresh tree has ${sameName} row(s) with its role and label, ${
 							matches.length ? `${matches.length} of them` : "none"
 						} in the same position${under ? ` under ${under}` : ""}`;
-		const text = `${code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. That window as it is now — address the row you mean from it.\n${
+		// The walk retired this window's refs to mint the tree below, so the
+		// sentence that closes a dead ref has to hand the new ones back: the
+		// bench read "That window as it is now — address the row you mean from
+		// it." as a fragment and retried the dead ref, which throws `StaleRef`.
+		const readdress = rows.length
+			? `${target} is retired and the tree below carries this window's new refs — address the row you mean by its new ref.`
+			: `${target} is retired and this walk minted no refs to address — observe the window again (win.observe()) once it has rows.`;
+		const text = `${code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${
 			rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown."
 		}`;
 		recover.context.emitText(text);

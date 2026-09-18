@@ -2037,7 +2037,11 @@ it("corrects the reply's own instruction to qualify the re-run once the route is
 		f.state.hook = async name => (name === "type_text" ? instructed : undefined);
 		const typed = await f.session.type(f.context, f.window, "hi");
 		expect(typed.text).toContain('{ delivery: "foreground" }');
-		expect(typed.text).toContain("re-run it as-is; this window's keystrokes now take the foreground route");
+		// The reply's own doubt is that it could not confirm the insert, so the
+		// correction keeps the read in front of the re-run it un-qualifies.
+		expect(typed.text).toContain(
+			"the keystrokes may have landed: observe the window first (win.observe()) and only if it shows nothing re-run the action — this window's keystrokes now take the foreground route",
+		);
 		f.state.hook = undefined;
 		const next = await f.session.press(f.context, f.window, "Return");
 		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
@@ -2271,6 +2275,45 @@ it("never re-offers the foreground rung a keystroke already took", async () => {
 	}
 });
 
+it("tells a keystroke that may have landed to observe first, and only a failed one to re-run", async () => {
+	// T7 `native-act-notes`: contract 0.9.0 defaults an unprobed post to
+	// `effect_unconfirmed` instead of `delivery_failed`, so the remembered-route
+	// sentence started telling a keystroke that may have landed to re-run
+	// itself. The caller's own rule forbids exactly that, and the model read the
+	// pair as a contradiction and refused the retry: "the active computer-use
+	// constraint prohibits following unverified delivery with foreground input".
+	const escalatedFor = async (reason: string) => {
+		const f = await fixture();
+		try {
+			f.state.hook = async name =>
+				name === "hotkey"
+					? {
+							text: "Pressed cmd+option+f on pid 101.",
+							structuredJson: JSON.stringify({
+								delivery: { mode: "background" },
+								effect: "unverifiable",
+								escalation: { reason, target: "foreground" },
+								route: "key_events_fg",
+							}),
+							isError: false,
+							images: [],
+						}
+					: undefined;
+			return (await f.session.press(f.context, f.window, "cmd+option+f")).escalation;
+		} finally {
+			await f.close();
+		}
+	};
+	// Nothing went out, so re-running it is the whole advice.
+	expect(await escalatedFor("delivery_failed")).toBe(
+		"⚠️ The driver escalates this action (delivery_failed): re-run it as-is; this window's keystrokes now take the foreground route.",
+	);
+	// Delivery is unknown, so the read comes first and the re-run is conditional.
+	expect(await escalatedFor("effect_unconfirmed")).toBe(
+		"⚠️ The driver escalates this action (effect_unconfirmed): the keystrokes may have landed: observe the window first (win.observe()) and only if it shows nothing re-run the action — this window's keystrokes now take the foreground route.",
+	);
+});
+
 it("names the menu a keyboard no-op can be driven from, and nothing when none was observed", async () => {
 	const f = await fixture();
 	// ChordProbe rank 1: the probe reports the chord moved nothing, and the
@@ -2453,7 +2496,7 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 		const answered = await f.session.click(f.context, f.window, ref);
 		expect(answered.effect).toBe("not_dispatched");
 		expect(answered.text.split("\n")[0]).toBe(
-			`element_outside_target_window: ${ref} (AXTextField "Editor") no longer exists in window 1 and nothing was dispatched — no row of that tree carries its role and label. That window as it is now — address the row you mean from it.`,
+			`element_outside_target_window: ${ref} (AXTextField "Editor") no longer exists in window 1 and nothing was dispatched — no row of the fresh tree carries its role and label. ${ref} is retired and the tree below carries this window's new refs — address the row you mean by its new ref.`,
 		);
 		// The tree is in the reply and in the cell, not only in a return value
 		// the cell is free to drop.
@@ -2465,6 +2508,21 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 		// The row the walk just minted is addressable without another observe.
 		f.state.hook = undefined;
 		expect((await f.session.click(f.context, f.window, "n2")).effect).toBe("unverifiable");
+		// A recovery walk that returns no rows has no new ref to hand back, and
+		// says so rather than pointing at a tree that is not there.
+		const empty = await f.session.acquire(f.context, { id: "1", pid: 101 });
+		const gone = (await f.session.observe(f.context, empty)).elements[0]!.ref;
+		f.state.hook = async name =>
+			name === "click"
+				? dead
+				: name === "get_window_state"
+					? reply({ pid: 101, window_id: 1, snapshot_id: "s9", truncated: false, elements: [] })
+					: undefined;
+		const nothing = await f.session.click(f.context, empty, gone);
+		expect(nothing.text.split("\n")[0]).toBe(
+			`element_outside_target_window: ${gone} (AXTextField "Editor (renamed)") no longer exists in window 1 and nothing was dispatched — no row of the fresh tree carries its role and label. ${gone} is retired and this walk minted no refs to address — observe the window again (win.observe()) once it has rows.`,
+		);
+		expect(nothing.text).toContain("No accessibility elements returned");
 	} finally {
 		await f.close();
 	}
@@ -2512,7 +2570,7 @@ it("reads the window again only for the refusal a re-read can answer", async () 
 		const other = await f.session.click(f.context, f.window, ref).catch((error: unknown) => error);
 		if (!(other instanceof ToolError)) throw new Error("Expected the scope refusal");
 		expect(other.message).toContain("belongs to window 4231");
-		expect(other.message).not.toContain("address the row you mean from it");
+		expect(other.message).not.toContain("no longer exists");
 		expect(reads()).toBe(before);
 		// Unproven ancestry: a fresh walk is exactly what settles it.
 		f.state.hook = async name =>
@@ -2641,7 +2699,7 @@ it("re-addresses a vanished ref only when one row of the new tree is the same ro
 		const remapped = await f.session.click(f.context, f.window, ref);
 		expect(remapped.effect).toBe("unverifiable");
 		expect(remapped.text.split("\n")[0]).toBe(
-			`${ref} (AXCheckBox "Mark as completed"), under AXRow "Incomplete, Loaf of bread", no longer exists in window 1; n8 is the one row of that tree with the same role, label, value and position, so the action was dispatched there instead.`,
+			`${ref} (AXCheckBox "Mark as completed"), under AXRow "Incomplete, Loaf of bread", no longer exists in window 1 and nothing was dispatched at it — n8 is the one row of the fresh tree with the same role, label, value and position, so the action was dispatched there instead. That walk re-minted this window's refs: ${ref} is retired, and this row is n8 from here on.`,
 		);
 		expect(f.calls.filter(call => call.name === "click")).toHaveLength(2);
 		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "t:3", snapshot_id: "w9" });
@@ -2655,7 +2713,7 @@ it("re-addresses a vanished ref only when one row of the new tree is the same ro
 		const refused = await f.session.click(f.context, fresh, ambiguous);
 		expect(refused.effect).toBe("not_dispatched");
 		expect(refused.text.split("\n")[0]).toBe(
-			`element_no_longer_exists: ${ambiguous} (AXCheckBox "Mark as completed") no longer exists in window 1 and nothing was dispatched — that tree has 2 row(s) with its role and label, 2 of them in the same position under AXRow "". That window as it is now — address the row you mean from it.`,
+			`element_no_longer_exists: ${ambiguous} (AXCheckBox "Mark as completed") no longer exists in window 1 and nothing was dispatched — the fresh tree has 2 row(s) with its role and label, 2 of them in the same position under AXRow "". ${ambiguous} is retired and the tree below carries this window's new refs — address the row you mean by its new ref.`,
 		);
 		expect(f.calls.filter(call => call.name === "click")).toHaveLength(before + 1);
 	} finally {
