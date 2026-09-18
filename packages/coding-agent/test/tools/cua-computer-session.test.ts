@@ -1030,8 +1030,9 @@ it("keeps the walker's collapsed-row line under its own container and states the
 		const cell = lines.findIndex(line => line.includes("AXCell"));
 		expect(lines[cell + 1]).toBe("      - 69 of 81 rows are scrolled out of view and were not read");
 		expect(lines[cell + 2]).toContain("AXButton");
+		// No search field in this tree, so the footer names the one route it has.
 		expect(observation.tree).toContain(
-			"69 row(s) are scrolled out of view and were not read. Scroll the list or use the window's search field to reach them.",
+			"69 row(s) are scrolled out of view and were not read. Scroll the list to reach them.",
 		);
 		// A skipped row is a clipped walk, whatever the element counts say.
 		expect(observation.complete).toBe(false);
@@ -1039,6 +1040,44 @@ it("keeps the walker's collapsed-row line under its own container and states the
 		collapsed = 0;
 		const whole = await f.session.observe(f.context, f.window);
 		expect(whole.tree).not.toContain("scrolled out of view");
+		// A search field in the same tree is the cheaper route, and this
+		// observation is the only thing that can name the ref it minted for it.
+		collapsed = 69;
+		let enabled = true;
+		f.state.hook = async name =>
+			name === "get_window_state"
+				? reply({
+						pid: 101,
+						window_id: 1,
+						snapshot_id: "s2",
+						truncated: true,
+						elements: [
+							...NOTES_COLLAPSED.elements,
+							{
+								element_index: 52,
+								element_token: "s2:52",
+								role: "AXTextField",
+								subrole: "AXSearchField",
+								label: "Search",
+								enabled,
+								depth: 2,
+							},
+						],
+						tree_markdown: NOTES_COLLAPSED.markdown,
+						collapsed_rows: collapsed,
+					})
+				: undefined;
+		const searchable = await f.session.observe(f.context, f.window);
+		const field = searchable.elements.at(-1)!.ref;
+		expect(searchable.tree).toContain(
+			`69 row(s) are scrolled out of view and were not read. Scroll the list, or narrow it with this window's own search field: win.ref("${field}").type("<query>").`,
+		);
+		// The same control on a window that is not key reads back disabled, and
+		// the write it would take is refused — so it is not a route either.
+		enabled = false;
+		expect((await f.session.observe(f.context, f.window)).tree).toContain(
+			"69 row(s) are scrolled out of view and were not read. Scroll the list to reach them.",
+		);
 	} finally {
 		await f.close();
 	}

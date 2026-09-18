@@ -104,6 +104,23 @@ function collapsedRowNotes(markdown: unknown): ReadonlyMap<number, TreeNote[]> {
 	return notes;
 }
 /**
+ * How to reach the rows a walk did not read. Scrolling always works; the
+ * window's own search field is the cheaper route, and this observation is the
+ * only thing that knows whether there is one — the footer named it on every
+ * clipped list, so a caller went hunting for a control the tree never printed
+ * and paid 2 cells a run for the hunt. A field the walk reports disabled is
+ * not a route either: a window that is not key publishes its search control
+ * as `enabled=false` and refuses the write.
+ */
+function searchRoute(rows: readonly TreeRow[]): string {
+	const field = rows.find(row => specificRole(row.element) === SEARCH_FIELD && row.element.enabled !== false)?.element;
+	return field === undefined
+		? "Scroll the list to reach them."
+		: `Scroll the list, or narrow it with this window's own search field: win.ref(${JSON.stringify(
+				field.ref,
+			)}).type("<query>").`;
+}
+/**
  * One window's live capture. `image` is what the model was shown, sized to
  * the window's own point grid; `sdkWidth`/`sdkHeight` are the pixels the
  * driver delivered, which is the space its pixel rungs read coordinates in.
@@ -1460,7 +1477,9 @@ export class CuaComputerSession implements ComputerBackend {
 				observation.tree +=
 					"\nAccessibility observation stopped because a native request could not complete. The walk has finished; omitted controls and values remain unknown.";
 			if (typeof reply.data.collapsed_rows === "number" && reply.data.collapsed_rows > 0)
-				observation.tree += `\n${reply.data.collapsed_rows} row(s) are scrolled out of view and were not read. Scroll the list or use the window's search field to reach them.`;
+				observation.tree += `\n${reply.data.collapsed_rows} row(s) are scrolled out of view and were not read. ${searchRoute(
+					rows,
+				)}`;
 			// Document apps: the app's own dirty bit and file path (absent = the app
 			// reports neither). AX value writes never reach disk, so this is how the
 			// model tells "text changed" from "saved".
