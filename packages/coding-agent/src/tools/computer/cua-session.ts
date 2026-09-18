@@ -19,6 +19,7 @@ import type {
 	ActionOptions,
 	ComputerActionResult,
 	ComputerBounds,
+	ComputerCommitVerdict,
 	ComputerElementSnapshot,
 	ComputerImage,
 	ComputerInterruption,
@@ -626,17 +627,29 @@ function refusalDetails(details: unknown): Wire {
 	return { ...data, ...(nested as Wire) };
 }
 /**
- * `set_value` writes `AXValue` and then drives the app's own end-of-edit
- * gesture, reporting in `committed` whether the value survived it. Only that
- * flag separates a written field from a lost one: a value the app's editing
- * pipeline never accepted still reads back correctly through the AX tree, and
- * a Save-panel filename written that way was discarded. The flag is
- * contract-optional — a driver that reports none renders nothing — and the
- * driver's own reason sentence rides along with it when there is one.
+ * `set_value` and `type_text` write a value and then judge whether the app's
+ * own editing pipeline kept it, reporting that judgement in `committed`. Only
+ * that verdict separates a written field from a lost one: a value the pipeline
+ * never accepted still reads back correctly through the AX tree, and a
+ * Save-panel filename written that way was discarded. The contract publishes
+ * it as one of three words; the stock 0.28.0 binary published a boolean, whose
+ * two states are the two decided verdicts. A driver that judges none reports
+ * nothing.
  */
+const COMMIT_VERDICTS: Readonly<Record<string, ComputerCommitVerdict>> = {
+	committed: "committed",
+	not_committed: "not_committed",
+	unproven: "unproven",
+};
+function commitVerdict(value: unknown): ComputerCommitVerdict | undefined {
+	if (typeof value === "string") return COMMIT_VERDICTS[value];
+	if (typeof value === "boolean") return value ? "committed" : "not_committed";
+	return undefined;
+}
 const NOT_COMMITTED_REASON = /not committed:\s*([^.]+)/i;
-function commitNote(committed: boolean, text: string): string {
-	if (committed) return "committed=true";
+function commitNote(committed: ComputerCommitVerdict, text: string): string | undefined {
+	if (committed === "unproven") return undefined;
+	if (committed === "committed") return "committed=true";
 	const reason = NOT_COMMITTED_REASON.exec(text)?.[1]?.trim();
 	return `committed=false — ${reason ?? "the driver reported no reason"}. The app may still hold its own value; read it back before relying on it.`;
 }
@@ -1907,7 +1920,7 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 		const { result, data } = reply;
 		const interruptedBy = this.#interruption();
-		const committed = typeof data.committed === "boolean" ? data.committed : undefined;
+		const committed = commitVerdict(data.committed);
 		// The driver writes its own advice in wire vocabulary on the success path
 		// too ("click this control's pixel center with delivery_mode:foreground");
 		// a next step is only executable if it is spelled the way the caller types.
@@ -2057,7 +2070,7 @@ export class CuaComputerSession implements ComputerBackend {
 		const doubt = `${operation} on ${this.#writeTarget(target)} is not proven committed — re-read the field before building on it`;
 		try {
 			const result = await dispatched;
-			if (result.committed !== true || result.effect !== "confirmed" || result.escalation !== undefined)
+			if (result.committed !== "committed" || result.effect !== "confirmed" || result.escalation !== undefined)
 				this.#doubt(window.id, doubt);
 			return result;
 		} catch (error) {

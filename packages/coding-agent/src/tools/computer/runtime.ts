@@ -128,12 +128,12 @@ async function reported(
 	action: Promise<ComputerActionResult>,
 ): Promise<ComputerActionResult> {
 	const result = await action;
-	// `committed: false` is the same shape by another route: the write was
-	// accepted and echoed back while the app kept its own value. So is a reply
-	// that carries the driver's own escalation: it doubts this rung landed and
-	// names the one that would, and the bench dropped exactly that value.
+	// `not_committed` is the same shape by another route: the write was accepted
+	// and echoed back while the app kept its own value. So is a reply that
+	// carries the driver's own escalation: it doubts this rung landed and names
+	// the one that would, and the bench dropped exactly that value.
 	if (
-		(UNDELIVERED_EFFECTS[result.effect] || result.committed === false || result.escalation !== undefined) &&
+		(UNDELIVERED_EFFECTS[result.effect] || result.committed === "not_committed" || result.escalation !== undefined) &&
 		result.text
 	)
 		context.emitText(result.text);

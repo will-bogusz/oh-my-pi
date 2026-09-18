@@ -219,8 +219,8 @@ class FakeBackend implements ComputerBackend {
 			...(this.escalation === undefined ? {} : { escalation: this.escalation }),
 		};
 	}
-	/** What the driver judged about the app's end-of-edit, when it judged anything. */
-	committed?: boolean;
+	/** The driver's commit verdict for the write, when it judged one. */
+	committed?: ComputerActionResult["committed"];
 	async setValue(
 		context: ComputerOperationContext,
 		window: ComputerWindowIdentity,
@@ -232,7 +232,7 @@ class FakeBackend implements ComputerBackend {
 		this.value = value;
 		return {
 			text:
-				this.committed === false
+				this.committed === "not_committed"
 					? "📨 Sent (unverified) AXValue on [1] AXTextField.\ncommitted=false — the app may still hold its own value."
 					: "",
 			effect: "verified",
@@ -724,14 +724,14 @@ describe("computer preludes through the session", () => {
 			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
 			displays.length = 0;
 			// A committed write is ordinary: the cell decides whether to echo it.
-			backend.committed = true;
+			backend.committed = "committed";
 			expect(
 				(await runInContext('win.setValue(win.initialObservation.elements[0].ref, "kept")', realm)).committed,
-			).toBe(true);
+			).toBe("committed");
 			expect(displays).toEqual([]);
 			// An uncommitted one may have lost the edit, so the model reads it
 			// even though this cell throws the result away.
-			backend.committed = false;
+			backend.committed = "not_committed";
 			await runInContext('win.setValue(win.initialObservation.elements[0].ref, "lost")', realm);
 			expect(displays.join("\n")).toContain("committed=false");
 			// Same shape by a third route: the driver dispatched, doubts the rung

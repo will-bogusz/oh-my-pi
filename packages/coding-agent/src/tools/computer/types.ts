@@ -186,18 +186,21 @@ export interface ComputerWindowAcquisition extends ComputerWindowIdentity {
 	initialScreenshot?: ComputerImage;
 	screenshotError?: string;
 }
+/**
+ * The driver's verdict on a written value: `committed` once it observed the
+ * app's own editing pipeline keep it, `not_committed` once it observed the app
+ * discard it, `unproven` when the read-back it has cannot tell the two apart.
+ * A driver that judges none reports nothing.
+ */
+export type ComputerCommitVerdict = "committed" | "not_committed" | "unproven";
 export interface ComputerActionResult {
 	text: string;
 	effect: string;
 	evidence: unknown;
 	route?: string;
 	delivery: unknown;
-	/**
-	 * Whether the app's own editing pipeline kept a written value. Reported by
-	 * `setValue` when the driver could judge the end-of-edit gesture; absent
-	 * when it has none to drive or does not report the flag at all.
-	 */
-	committed?: boolean;
+	/** The driver's commit verdict for a written value; absent when it judged none. */
+	committed?: ComputerCommitVerdict;
 	/**
 	 * The driver's escalation advice for this reply, in the vocabulary the
 	 * caller types. Present only when the reply carried one its own text did

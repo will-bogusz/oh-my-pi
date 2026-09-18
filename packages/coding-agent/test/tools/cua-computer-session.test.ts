@@ -1420,13 +1420,13 @@ it("reports whether a written value survived the app's own end-of-edit", async (
 			{ committed: false },
 			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write.",
 		);
-		expect(lost.committed).toBe(false);
+		expect(lost.committed).toBe("not_committed");
 		expect(lost.text).toContain(
 			"committed=false — a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write",
 		);
 		expect(lost.text).toContain("read it back before relying on it");
 		const kept = await write({ committed: true }, "✅ Set AXValue on [1] AXTextField. Committed via tab.");
-		expect(kept.committed).toBe(true);
+		expect(kept.committed).toBe("committed");
 		expect(kept.text).toContain("committed=true");
 		// The flag stands on its own when the driver states no reason.
 		const bare = await write({ committed: false }, "📨 Sent (unverified) AXValue on [1] AXTextField.");
@@ -1435,6 +1435,59 @@ it("reports whether a written value survived the app's own end-of-edit", async (
 		const silent = await write({ effect: "unverifiable" }, "✅ Set AXValue on [1] AXSlider.");
 		expect(silent.committed).toBeUndefined();
 		expect(silent.text).toBe("✅ Set AXValue on [1] AXSlider.");
+	} finally {
+		await f.close();
+	}
+});
+
+it("reads the commit verdict the driver publishes as a string", async () => {
+	const f = await fixture();
+	try {
+		let ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const write = async (data: Wire, text: string) => {
+			f.state.hook = async name =>
+				name === "set_value"
+					? { text, structuredJson: JSON.stringify(data), isError: false, images: [] }
+					: undefined;
+			return f.session.setValue(f.context, f.window, ref, "Project_File_List");
+		};
+		/** Re-reads the window: mints the next ref and spends any carried doubt. */
+		const reread = async () => {
+			const observation = await f.session.observe(f.context, f.window);
+			ref = observation.elements[0]!.ref;
+			return observation.tree;
+		};
+		// The projected `ActionResult` the shipping driver publishes: the verdict
+		// is one of three words. Read as a boolean it is always `undefined`, so
+		// the doubt fires on every write whatever the driver judged.
+		const kept = await write(
+			{ committed: "committed", effect: "confirmed", evidence: [{ kind: "value_readback" }] },
+			"✅ Set AXValue on [1] AXTextField. Committed via tab.",
+		);
+		expect(kept.committed).toBe("committed");
+		expect(await reread()).not.toContain("not proven committed");
+		const lost = await write(
+			{ committed: "not_committed", effect: "confirmed" },
+			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture.",
+		);
+		expect(lost.committed).toBe("not_committed");
+		expect(await reread()).toContain("is not proven committed");
+		const unproven = await write(
+			{ committed: "unproven", effect: "confirmed", evidence: [{ kind: "value_readback" }] },
+			"✅ Set AXValue on [1] AXTextField. Commit unproven: the value survived AXConfirm, but the app's own model was not observed.",
+		);
+		expect(unproven.committed).toBe("unproven");
+		expect(await reread()).toContain("is not proven committed");
+		// The stock 0.28.0 binary judges the same thing with a boolean, whose two
+		// states are the two decided verdicts.
+		expect((await write({ committed: true }, "✅ Set AXValue on [1] AXTextField.")).committed).toBe("committed");
+		await reread();
+		expect((await write({ committed: false }, "📨 Sent (unverified) AXValue on [1] AXTextField.")).committed).toBe(
+			"not_committed",
+		);
+		// A word the contract does not spell is no verdict at all.
+		await reread();
+		expect((await write({ committed: "maybe" }, "✅ Set AXValue on [1] AXTextField.")).committed).toBeUndefined();
 	} finally {
 		await f.close();
 	}
@@ -1463,7 +1516,7 @@ it("carries a write nothing proved into the next observation of its own window",
 		// and names no better route.
 		written({ committed: true, effect: "confirmed", evidence: [{ kind: "value_readback" }] });
 		expect((await f.session.setValue(f.context, f.window, await observed(), "Project_File_List.txt")).committed).toBe(
-			true,
+			"committed",
 		);
 		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("not proven committed");
 		written({
