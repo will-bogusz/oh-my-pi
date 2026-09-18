@@ -3380,11 +3380,81 @@ it("keeps the driver's own post-action evidence in the error a refused action th
 		if (!(refused instanceof ToolError)) throw new Error("Expected the refusal");
 		expect(refused.message).toStartWith("action_refused: AX press refused:");
 		// One line, off the reply that already arrived: no second walk was made.
+		// The reply named no rung of its own, so the line reports the one the
+		// call asked for as a fact about the call.
 		expect(refused.message.split("\n").at(-1)).toBe(
-			"Evidence: route=accessibility delivery=background effect=refused escalation=foreground",
+			"Evidence: route=accessibility requested=background effect=refused escalation=foreground",
 		);
 		expect(f.calls.filter(call => call.name === "click")).toHaveLength(1);
 		expect(f.lastDispatch()).toMatchObject({ name: "click" });
+	} finally {
+		await f.close();
+	}
+});
+
+it("prints only the evidence fields a refusal carries", async () => {
+	const f = await fixture();
+	// T5 `native-act-contacts/omp-2` step 7, verbatim: a submenu listing that
+	// reached the projection check. No route, no rung — `invoke_menu` has no
+	// delivery input at all — and no effect, yet the line claimed all three.
+	const mismatch = {
+		text: "internal action outcome mismatch for invoke_menu: successful action omitted its internal execution record; the tool may have executed. Verify state before retrying.",
+		structuredJson: JSON.stringify({
+			code: "action_outcome_mismatch",
+			detail: "successful action omitted its internal execution record",
+			execution_state: "unknown",
+			tool: "invoke_menu",
+		}),
+		isError: true,
+		errorCode: "action_outcome_mismatch",
+		images: [],
+	};
+	// T4 `native-act-reminders/omp-2` step 4, verbatim.
+	const dead = {
+		text: "Background input refused (element_outside_target_window): the addressed element could not be proven to belong to window 14229; take a fresh get_window_state snapshot and re-address it",
+		structuredJson: JSON.stringify({
+			code: "element_outside_target_window",
+			effect: "refused",
+			escalation: {
+				reason:
+					"the addressed element could not be proven to belong to window 14229; take a fresh get_window_state snapshot and re-address it",
+				recommended: "get_window_state",
+			},
+			pid: 82791,
+			reason:
+				"the addressed element could not be proven to belong to window 14229; take a fresh get_window_state snapshot and re-address it",
+			window_id: 14229,
+		}),
+		isError: true,
+		errorCode: "element_outside_target_window",
+		images: [],
+	};
+	try {
+		f.state.hook = async name => (name === "invoke_menu" ? mismatch : undefined);
+		const menu = await f.session
+			.menu(f.context, f.window, ["Card", "Add Field"], { delivery: "foreground" })
+			.catch((error: unknown) => error);
+		if (!(menu instanceof ToolError)) throw new Error("Expected the menu refusal");
+		expect(menu.message).toStartWith("action_outcome_mismatch: internal action outcome mismatch");
+		expect(menu.message).not.toContain("Evidence:");
+		expect(menu.message).not.toContain("cua-sdk");
+		expect(menu.message).not.toContain("delivery=background");
+		expect(menu.message).not.toContain("effect=refused");
+
+		const observation = await f.session.observe(f.context, f.window);
+		f.state.hook = async name => (name === "click" ? dead : undefined);
+		const click = await f.session
+			.click(f.context, f.window, observation.elements[0]!.ref)
+			.catch((error: unknown) => error);
+		if (!(click instanceof ToolError)) throw new Error("Expected the click refusal");
+		// `effect` is the reply's own; the route is absent, so none is invented.
+		// `get_window_state` is a tool this surface does not expose: the line
+		// carries the contract target that names a call the caller can type.
+		expect(click.message.split("\n").at(-1)).toBe(
+			"Evidence: requested=background effect=refused escalation=snapshot",
+		);
+		expect(click.message).not.toContain("escalation=get_window_state");
+		expect(click.message).not.toContain("route=");
 	} finally {
 		await f.close();
 	}

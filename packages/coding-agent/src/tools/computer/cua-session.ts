@@ -547,7 +547,10 @@ function menuRefusalItems(
 const ESCALATION_ROUTES: Readonly<Record<string, (text: string) => string>> = {
 	foreground: () => 'the route it names is { delivery: "foreground" } — re-run the action that way',
 	pixel: pixelEscalation,
+	snapshot: () => "observe the window again (win.observe()) and address the row that walk mints for this control",
 };
+/** The untyped `recommended` spelling of a contract target, keyed on what the driver still writes. */
+const ESCALATION_TARGET_ALIASES: Readonly<Record<string, string>> = { get_window_state: "snapshot" };
 /**
  * What to say instead once the session has taken the rung over: naming
  * `{ delivery: "foreground" }` told the caller to qualify the re-run, and an
@@ -583,7 +586,8 @@ function escalationTarget(data: Wire): string | undefined {
 	// `target` is the contract's field; `recommended` is what the untyped
 	// replies still write, and both name the same rung.
 	const target = typeof row.target === "string" ? row.target : row.recommended;
-	return typeof target === "string" ? target : undefined;
+	if (typeof target !== "string") return undefined;
+	return ESCALATION_TARGET_ALIASES[target] ?? target;
 }
 function escalationRoute(data: Wire, text: string, remembered: boolean): string | undefined {
 	const target = escalationTarget(data);
@@ -594,25 +598,40 @@ function escalationRoute(data: Wire, text: string, remembered: boolean): string 
 	const reason = typeof escalation.reason === "string" ? escalation.reason : undefined;
 	return `⚠️ The driver escalates this action${reason ? ` (${reason})` : ""}: ${route}.`;
 }
+/** The rung a reply names, in either shape the drivers report it: a bare string or `{ mode }`. */
+function evidenceDelivery(value: unknown): string | undefined {
+	if (typeof value === "string") return value;
+	if (value === null || typeof value !== "object" || Array.isArray(value)) return undefined;
+	const mode = (value as Wire).mode;
+	return typeof mode === "string" ? mode : undefined;
+}
 /**
- * What the driver reported about an action that threw. A refusal answers with
- * the same post-action fields a success does, and they were readable only as
- * a JSON dump at the end of the message — the route it took, the rung it
- * delivered on, what it believes happened, and the rung it would escalate to.
- * Read off the reply that already arrived; nothing is walked to produce it.
+ * What the driver reported about an action that threw, and only that: the
+ * route it took, the rung it delivered on, what it believes happened, and the
+ * rung it would escalate to. Each field is printed when the reply carries it.
+ * A defaulted line said `route=cua-sdk delivery=background effect=refused` of
+ * a `win.menu` refusal that named no route, was dispatched by a tool with no
+ * rung field at all, and reported no effect — three observations the reply
+ * never made. The rung the call asked for is a fact about the call, not about
+ * the delivery, and says so. Nothing is walked to produce this.
  */
-function actionEvidence(details: unknown, args: Wire): string {
+function actionEvidence(details: unknown, args: Wire): string | undefined {
 	const data = details !== null && typeof details === "object" && !Array.isArray(details) ? (details as Wire) : {};
-	const route = typeof data.route === "string" ? data.route : typeof data.path === "string" ? data.path : "cua-sdk";
-	const delivery =
-		typeof data.delivery === "string"
-			? data.delivery
-			: typeof args.delivery_mode === "string"
-				? args.delivery_mode
-				: "background";
-	const effect = typeof data.effect === "string" ? data.effect : "refused";
+	const route = typeof data.route === "string" ? data.route : typeof data.path === "string" ? data.path : undefined;
+	const delivered = evidenceDelivery(data.delivery);
+	const requested = typeof args.delivery_mode === "string" ? args.delivery_mode : undefined;
 	const target = escalationTarget(data);
-	return `Evidence: route=${route} delivery=${delivery} effect=${effect}${target === undefined ? "" : ` escalation=${target}`}`;
+	const fields = [
+		route === undefined ? undefined : `route=${route}`,
+		delivered === undefined
+			? requested === undefined
+				? undefined
+				: `requested=${requested}`
+			: `delivery=${delivered}`,
+		typeof data.effect === "string" ? `effect=${data.effect}` : undefined,
+		target !== undefined && ESCALATION_ROUTES[target] !== undefined ? `escalation=${target}` : undefined,
+	].filter(field => field !== undefined);
+	return fields.length ? `Evidence: ${fields.join(" ")}` : undefined;
 }
 const FOCUS_HOLDING_REFUSALS: Record<string, true> = {
 	delivery_failed: true,
@@ -1899,11 +1918,8 @@ export class CuaComputerSession implements ComputerBackend {
 		} catch (error) {
 			if (!(error instanceof ToolError)) throw error;
 			this.#keyboardEscalation(name, args, refusalDetails(error.context), true);
-			const holder = this.#focusHolder(error.context, args);
-			throw new ToolError(
-				`${error.message}\n${actionEvidence(error.context, args)}${holder === undefined ? "" : `\n${holder}`}`,
-				error.context,
-			);
+			const lines = [error.message, actionEvidence(error.context, args), this.#focusHolder(error.context, args)];
+			throw new ToolError(lines.filter(line => line !== undefined).join("\n"), error.context);
 		}
 		const { result, data } = reply;
 		const interruptedBy = this.#interruption();
