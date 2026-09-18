@@ -1578,12 +1578,13 @@ export class CuaComputerSession implements ComputerBackend {
 			if (row.custom_actions != null && !Array.isArray(row.custom_actions))
 				throw new ToolError("Malformed Cua custom actions");
 			const custom = customActions(row.custom_actions);
-			const actions = observedActions(row.background_actions ?? row.actions, [...custom.keys()]);
+			const role = string(row.role, "role");
+			const actions = observedActions(role, row.background_actions ?? row.actions, [...custom.keys()]);
 			const element = Object.freeze({
 				ref,
 				pid: window.pid,
 				windowId: window.id,
-				role: string(row.role, "role"),
+				role,
 				label: typeof row.label === "string" ? row.label : "",
 				...(typeof row.subrole === "string" && row.subrole ? { subrole: row.subrole } : {}),
 				...(typeof row.value === "string" ? { value: row.value } : {}),
