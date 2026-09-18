@@ -13,7 +13,7 @@ import type {
 	ComputerPoint,
 } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
 import type { WindowRosterSample } from "@oh-my-pi/pi-coding-agent/tools/computer/interruption";
-/** Upstream's generated tool contract at `e7e141ae` (`libs/cua-driver/contract/manifest.json`). */
+/** The fork's generated tool contract at 6ee6d76324 (`libs/cua-driver/contract/manifest.json`). */
 import contract from "../fixtures/cua-contract-manifest.json";
 
 type Wire = Record<string, unknown>;
@@ -28,6 +28,22 @@ type WindowRow = Wire & {
 const PNG = "iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAAEklEQVR4nGP4z8DwHxkzoAsAAA8hD/EEN8afAAAAAElFTkSuQmCC";
 function reply(data: Wire, images: CuaToolResult["images"] = []): CuaToolResult {
 	return { text: "SDK response", structuredJson: JSON.stringify(data), isError: false, images };
+}
+/** The closed `ActionResult` every input tool answers with, per the manifest. */
+const ACTION_RESULT = fromJsonSchema(
+	(contract.tools as { name: string; success_output_schema?: unknown }[]).find(tool => tool.name === "type_text")!
+		.success_output_schema,
+);
+/**
+ * A structured payload the shipping driver can actually emit. The drift this
+ * guards against survived a release: the write tests fed `committed: true`,
+ * which no build has published since the verdict became a string, so every
+ * test of the write path passed against a shape that does not exist.
+ */
+function wireResult(data: Wire): Wire {
+	const validated = ACTION_RESULT({ route: "accessibility", ...data });
+	if (validated instanceof type.errors) throw new Error(`payload no driver emits: ${validated.summary}`);
+	return data;
 }
 
 /**
@@ -1431,7 +1447,7 @@ it("says a drag was delivered without evidence and keeps the doubt on the window
 			name === "drag"
 				? reply({
 						effect: "no_observed_change",
-						evidence: { kind: "post_action_tree_digest", detail: "the target was watched for 2011 ms" },
+						evidence: [{ kind: "observed_change", signal: "window_tree" }],
 						route: "cgevent",
 						delivery: "foreground",
 					})
@@ -1449,17 +1465,15 @@ it("composes one sentence for each thing a write turns out to be", async () => {
 	try {
 		let ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
 		const write = async (data: Wire, text: string) => {
+			const structuredJson = JSON.stringify(wireResult(data));
 			f.state.hook = async name =>
-				name === "set_value" || name === "type_text"
-					? { text, structuredJson: JSON.stringify(data), isError: false, images: [] }
-					: undefined;
+				name === "set_value" ? { text, structuredJson, isError: false, images: [] } : undefined;
 			return f.session.setValue(f.context, f.window, ref, "Project_File_List");
 		};
 		const typed = async (data: Wire, text: string) => {
+			const structuredJson = JSON.stringify(wireResult(data));
 			f.state.hook = async name =>
-				name === "type_text"
-					? { text, structuredJson: JSON.stringify(data), isError: false, images: [] }
-					: undefined;
+				name === "type_text" ? { text, structuredJson, isError: false, images: [] } : undefined;
 			return f.session.type(f.context, f.window, "Project_File_List", ref);
 		};
 		const reread = async () => {
@@ -1559,6 +1573,22 @@ it("composes one sentence for each thing a write turns out to be", async () => {
 		expect(unjudged.text.split("\n").at(-1)).toBe(
 			`type on ${ref} AXTextField "Editor": nothing in the reply says whether the app kept this value — read the field back before building on it.`,
 		);
+		// `observed_change` is not a read-back of the value, and its `signal` is
+		// carried for the model without a word of prose keyed on it.
+		await reread();
+		const signalled = await write(
+			{
+				committed: "committed",
+				effect: "confirmed",
+				evidence: [{ kind: "observed_change", signal: "element_state" }],
+			},
+			"✅ Set AXValue on [1] AXTextField.",
+		);
+		expect(signalled.evidence).toEqual([{ kind: "observed_change", signal: "element_state" }]);
+		expect(signalled.text.split("\n").at(-1)).toBe(
+			`setValue on ${ref} AXTextField "Editor": the driver judged the value committed but nothing in the reply read it back — read the field back before building on it.`,
+		);
+		expect(signalled.text).not.toContain("element_state");
 	} finally {
 		await f.close();
 	}
@@ -1585,25 +1615,27 @@ it("reads the commit verdict the driver publishes as a string", async () => {
 		// is one of three words. Read as a boolean it is always `undefined`, so
 		// the doubt fires on every write whatever the driver judged.
 		const kept = await write(
-			{ committed: "committed", effect: "confirmed", evidence: [{ kind: "value_readback" }] },
+			wireResult({ committed: "committed", effect: "confirmed", evidence: [{ kind: "value_readback" }] }),
 			"✅ Set AXValue on [1] AXTextField. Committed via tab.",
 		);
 		expect(kept.committed).toBe("committed");
 		expect(await reread()).not.toContain("setValue on");
 		const lost = await write(
-			{ committed: "not_committed", effect: "confirmed" },
+			wireResult({ committed: "not_committed", effect: "confirmed" }),
 			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture.",
 		);
 		expect(lost.committed).toBe("not_committed");
 		expect(await reread()).toContain("The app kept its own value");
 		const unproven = await write(
-			{ committed: "unproven", effect: "confirmed", evidence: [{ kind: "value_readback" }] },
+			wireResult({ committed: "unproven", effect: "confirmed", evidence: [{ kind: "value_readback" }] }),
 			"✅ Set AXValue on [1] AXTextField. Commit unproven: the value survived AXConfirm, but the app's own model was not observed.",
 		);
 		expect(unproven.committed).toBe("unproven");
 		expect(await reread()).toContain("takes its value at end-of-edit");
-		// The stock 0.28.0 binary judges the same thing with a boolean, whose two
-		// states are the two decided verdicts.
+		// Deliberately off the 0.9.0 contract, which publishes neither: the stock
+		// 0.28.0 binary judged the same thing with a boolean, whose two states
+		// are the two decided verdicts, and a word no contract spells is no
+		// verdict at all.
 		expect((await write({ committed: true }, "✅ Set AXValue on [1] AXTextField.")).committed).toBe("committed");
 		await reread();
 		expect((await write({ committed: false }, "📨 Sent (unverified) AXValue on [1] AXTextField.")).committed).toBe(
@@ -1621,7 +1653,8 @@ it("carries a write nothing proved into the next observation of its own window",
 	const f = await fixture();
 	const observed = async () => (await f.session.observe(f.context, f.window)).elements[0]!.ref;
 	const written = (data: Wire) => {
-		f.state.hook = async name => (name === "set_value" ? reply(data) : undefined);
+		const payload = wireResult(data);
+		f.state.hook = async name => (name === "set_value" ? reply(payload) : undefined);
 	};
 	try {
 		// The graded loss: `setValue` on a Save panel's filename field, chained
@@ -1638,7 +1671,7 @@ it("carries a write nothing proved into the next observation of its own window",
 		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("setValue on");
 		// Proof is the driver's own verdict on a reply that read the value back
 		// and names no better route.
-		written({ committed: true, effect: "confirmed", evidence: [{ kind: "value_readback" }] });
+		written({ committed: "committed", effect: "confirmed", evidence: [{ kind: "value_readback" }] });
 		expect((await f.session.setValue(f.context, f.window, await observed(), "Project_File_List.txt")).committed).toBe(
 			"committed",
 		);
@@ -1647,7 +1680,7 @@ it("carries a write nothing proved into the next observation of its own window",
 		// route: a driver that read the value back, called it committed and still
 		// names another route has not proven this one.
 		written({
-			committed: true,
+			committed: "committed",
 			effect: "confirmed",
 			evidence: [{ kind: "value_readback" }],
 			escalation: { reason: "delivery_failed", target: "foreground" },
