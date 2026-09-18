@@ -40,11 +40,27 @@ interface Reply {
 	result: CuaToolResult;
 	data: Wire;
 }
+/**
+ * What a row is, independently of the reference that reached it: its own
+ * role, label and value, the path of roles and labels above it, and its
+ * position among the siblings that share its role. Role and label alone are
+ * not an identity — measured, `AXCheckBox "Mark as completed"` matched three
+ * rows of one Reminders list, and the single match at this layer was a
+ * different reminder.
+ */
+interface ElementIdentity {
+	role: string;
+	label: string;
+	value?: string;
+	path: readonly string[];
+	ordinal: number;
+}
 interface Binding {
 	window: ComputerWindowIdentity;
 	token: string;
 	snapshotId: string;
 	element: ComputerElementSnapshot;
+	identity: ElementIdentity;
 	/** An app's own action names, each against the wire string that invokes it. */
 	customActions: ReadonlyMap<string, string>;
 	doubleClickAtCenter: boolean;
@@ -848,6 +864,13 @@ export class CuaComputerSession implements ComputerBackend {
 	readonly #sheets = new Map<string, { parent: string; title: string }>();
 	readonly #staleSheetRefs = new Map<string, string>();
 	/**
+	 * The identities the last invalidation of each window dropped, so a ref
+	 * whose element has died can be looked for in the rows the next walk
+	 * mints. One generation per window: a ref older than that cannot reach the
+	 * driver at all, because `#invalidate` retires it first.
+	 */
+	readonly #retired = new Map<string, ReadonlyMap<string, ElementIdentity>>();
+	/**
 	 * Each pid's on-screen ids as of its last observation, its rows as of the
 	 * last roster read, and the driver's capture-lease windows, which are nobody's.
 	 */
@@ -1422,8 +1445,13 @@ export class CuaComputerSession implements ComputerBackend {
 		);
 	}
 	#invalidate(window: Pick<ComputerWindowIdentity, "id" | "pid">): void {
+		const retired = new Map<string, ElementIdentity>();
 		for (const [ref, binding] of this.#elements)
-			if (binding.window.id === window.id && binding.window.pid === window.pid) this.#elements.delete(ref);
+			if (binding.window.id === window.id && binding.window.pid === window.pid) {
+				retired.set(ref, binding.identity);
+				this.#elements.delete(ref);
+			}
+		this.#retired.set(window.id, retired);
 	}
 	/**
 	 * Every refusal this session composes itself carries the same structured
@@ -1630,6 +1658,8 @@ export class CuaComputerSession implements ComputerBackend {
 		if (snapshotId === "unavailable" && reply.data.elements.length)
 			throw new ToolError("Cua elements have no snapshot identity");
 		const rows: TreeRow[] = [];
+		const roots = new Map<string, number>();
+		const ancestry: { depth: number; key: string; siblings: Map<string, number> }[] = [];
 		const collapsed =
 			typeof reply.data.collapsed_rows === "number" && reply.data.collapsed_rows > 0
 				? collapsedRowNotes(reply.data.tree_markdown)
@@ -1690,11 +1720,24 @@ export class CuaComputerSession implements ComputerBackend {
 				...(actions?.length ? { actions } : {}),
 				...(row.frame ? { bounds: bounds(row.frame) } : {}),
 			});
+			while (ancestry.length && ancestry[ancestry.length - 1]!.depth >= depth) ancestry.pop();
+			const siblings = ancestry[ancestry.length - 1]?.siblings ?? roots;
+			const ordinal = siblings.get(role) ?? 0;
+			siblings.set(role, ordinal + 1);
+			const identity: ElementIdentity = {
+				role,
+				label: element.label,
+				...(element.value === undefined ? {} : { value: element.value }),
+				path: ancestry.map(entry => entry.key),
+				ordinal,
+			};
+			ancestry.push({ depth, key: `${role} ${JSON.stringify(element.label)}`, siblings: new Map() });
 			this.#elements.set(ref, {
 				window,
 				token,
 				snapshotId,
 				element,
+				identity,
 				customActions: custom,
 				doubleClickAtCenter: reply.data.element_double_click === "left_center_v1",
 			});
@@ -2342,6 +2385,7 @@ export class CuaComputerSession implements ComputerBackend {
 	 * landed", with nothing dispatched and the current tree in hand.
 	 */
 	async #deadElement(
+		name: string,
 		error: ToolError,
 		args: Wire,
 		target: ComputerTarget | undefined,
@@ -2352,7 +2396,8 @@ export class CuaComputerSession implements ComputerBackend {
 		if (code === undefined || DEAD_ELEMENT_REFUSALS[code] !== true) return undefined;
 		if (recover === undefined || typeof target !== "string" || typeof args.element_token !== "string")
 			return undefined;
-		const identity = this.#elements.get(target)?.element;
+		const binding = this.#elements.get(target);
+		const snapshot = binding?.element;
 		let rows: readonly TreeRow[];
 		try {
 			const { reply, current } = await this.#state(recover.context, recover.window, {
@@ -2366,10 +2411,56 @@ export class CuaComputerSession implements ComputerBackend {
 			return undefined;
 		}
 		const named =
-			identity === undefined
+			snapshot === undefined
 				? target
-				: `${target} (${identity.role}${identity.label ? ` ${JSON.stringify(identity.label)}` : ""})`;
-		const text = `${code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched. That window as it is now — address the row you mean from it.\n${
+				: `${target} (${snapshot.role}${snapshot.label ? ` ${JSON.stringify(snapshot.label)}` : ""})`;
+		const identity = binding?.identity ?? this.#retired.get(recover.window.id)?.get(target);
+		const fresh = [...this.#elements].filter(([, row]) => row.window.id === recover.window.id);
+		const matches =
+			identity === undefined
+				? []
+				: fresh.filter(
+						([, row]) =>
+							row.identity.role === identity.role &&
+							row.identity.label === identity.label &&
+							row.identity.value === identity.value &&
+							row.identity.ordinal === identity.ordinal &&
+							row.identity.path.length === identity.path.length &&
+							row.identity.path.every((step, index) => step === identity.path[index]),
+					);
+		const under = identity?.path.at(-1);
+		if (matches.length === 1) {
+			const [ref, row] = matches[0]!;
+			const note = `${named}${under ? `, under ${under},` : ""} no longer exists in window ${
+				recover.window.id
+			}; ${ref} is the one row of that tree with the same role, label, value and position, so the action was dispatched there instead.`;
+			recover.context.emitText(note);
+			try {
+				const result = await this.#action(name, {
+					...args,
+					element_token: row.token,
+					snapshot_id: row.snapshotId,
+				});
+				return { ...result, text: result.text ? `${note}\n${result.text}` : note };
+			} catch (again) {
+				if (!(again instanceof ToolError)) throw again;
+				throw new ToolError(`${note}\n${again.message}`, again.context);
+			}
+		}
+		const sameName =
+			identity === undefined
+				? 0
+				: fresh.filter(([, row]) => row.identity.role === identity.role && row.identity.label === identity.label)
+						.length;
+		const census =
+			identity === undefined
+				? "no identity for it was recorded"
+				: sameName === 0
+					? "no row of that tree carries its role and label"
+					: `that tree has ${sameName} row(s) with its role and label, ${
+							matches.length ? `${matches.length} of them` : "none"
+						} in the same position${under ? ` under ${under}` : ""}`;
+		const text = `${code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. That window as it is now — address the row you mean from it.\n${
 			rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown."
 		}`;
 		recover.context.emitText(text);
@@ -2394,7 +2485,7 @@ export class CuaComputerSession implements ComputerBackend {
 		} catch (error) {
 			// An aborted call is not a ToolError and keeps its own identity.
 			if (!(error instanceof ToolError)) throw error;
-			const gone = await this.#deadElement(error, args, target, recover);
+			const gone = await this.#deadElement(name, error, args, target, recover);
 			if (gone !== undefined) return gone;
 			const route = this.#menuBarRoute(target);
 			if (route === undefined) throw error;

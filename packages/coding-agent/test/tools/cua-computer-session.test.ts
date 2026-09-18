@@ -2447,10 +2447,13 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 	try {
 		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
 		f.state.hook = async name => (name === "click" ? dead : undefined);
+		// The row the ref named is not in the window any more under any
+		// reference: the app renamed it between the two reads.
+		f.state.label = "Editor (renamed)";
 		const answered = await f.session.click(f.context, f.window, ref);
 		expect(answered.effect).toBe("not_dispatched");
 		expect(answered.text.split("\n")[0]).toBe(
-			`element_outside_target_window: ${ref} (AXTextField "Editor") no longer exists in window 1 and nothing was dispatched. That window as it is now — address the row you mean from it.`,
+			`element_outside_target_window: ${ref} (AXTextField "Editor") no longer exists in window 1 and nothing was dispatched — no row of that tree carries its role and label. That window as it is now — address the row you mean from it.`,
 		);
 		// The tree is in the reply and in the cell, not only in a return value
 		// the cell is free to drop.
@@ -2462,6 +2465,92 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 		// The row the walk just minted is addressable without another observe.
 		f.state.hook = undefined;
 		expect((await f.session.click(f.context, f.window, "n2")).effect).toBe("unverifiable");
+	} finally {
+		await f.close();
+	}
+});
+
+it("re-addresses a vanished ref only when one row of the new tree is the same row", async () => {
+	const f = await fixture();
+	const dead = {
+		text: "Background input refused (element_no_longer_exists): the addressed element no longer exists (its accessibility reference is invalid)",
+		structuredJson: JSON.stringify({
+			code: "element_no_longer_exists",
+			effect: "not_dispatched",
+			route: "ax",
+			reason: "the addressed element no longer exists (its accessibility reference is invalid)",
+			window_id: 1,
+			pid: 101,
+		}),
+		isError: true,
+		errorCode: "element_no_longer_exists",
+		images: [],
+	};
+	/** Reminders' own shape: one checkbox per row, all with the same role and label. */
+	const list = (rows: string[]): Wire[] => [
+		{ element_index: 1, element_token: "t:1", role: "AXOutline", label: "", depth: 0 },
+		...rows.flatMap((label, index) => [
+			{ element_index: 2 + index * 2, element_token: `t:${2 + index * 2}`, role: "AXRow", label, depth: 1 },
+			{
+				element_index: 3 + index * 2,
+				element_token: `t:${3 + index * 2}`,
+				role: "AXCheckBox",
+				label: "Mark as completed",
+				value: "0",
+				depth: 2,
+			},
+		]),
+	];
+	const walks = (rows: string[]) => {
+		let snapshot = 0;
+		f.state.hook = async (name, args) => {
+			if (name === "click" && args.element_token?.toString().startsWith("t:")) return dead;
+			return name === "get_window_state"
+				? reply({ pid: 101, window_id: 1, snapshot_id: `w${++snapshot}`, truncated: false, elements: list(rows) })
+				: undefined;
+		};
+	};
+	try {
+		// Distinct rows: role, label, value, ancestor path and sibling ordinal
+		// name exactly one row of the fresh tree, so the action goes there and
+		// the substitution is stated.
+		walks(["Incomplete, Loaf of bread", "Incomplete, Fresh lettuce"]);
+		const observed = await f.session.observe(f.context, f.window);
+		const ref = observed.elements[2]!.ref;
+		expect(observed.elements[2]!.label).toBe("Mark as completed");
+		let dispatched = 0;
+		f.state.hook = async name => {
+			if (name === "click") return ++dispatched === 1 ? dead : undefined;
+			return name === "get_window_state"
+				? reply({
+						pid: 101,
+						window_id: 1,
+						snapshot_id: "w9",
+						truncated: false,
+						elements: list(["Incomplete, Loaf of bread", "Incomplete, Fresh lettuce"]),
+					})
+				: undefined;
+		};
+		const remapped = await f.session.click(f.context, f.window, ref);
+		expect(remapped.effect).toBe("unverifiable");
+		expect(remapped.text.split("\n")[0]).toBe(
+			`${ref} (AXCheckBox "Mark as completed"), under AXRow "Incomplete, Loaf of bread", no longer exists in window 1; n8 is the one row of that tree with the same role, label, value and position, so the action was dispatched there instead.`,
+		);
+		expect(f.calls.filter(call => call.name === "click")).toHaveLength(2);
+		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "t:3", snapshot_id: "w9" });
+
+		// Rows an app leaves untitled: role and label match three ways and the
+		// position matches two, so no row is that row. Nothing is dispatched.
+		const fresh = await f.session.acquire(f.context, { id: "1", pid: 101 });
+		walks(["", ""]);
+		const ambiguous = (await f.session.observe(f.context, fresh)).elements[2]!.ref;
+		const before = f.calls.filter(call => call.name === "click").length;
+		const refused = await f.session.click(f.context, fresh, ambiguous);
+		expect(refused.effect).toBe("not_dispatched");
+		expect(refused.text.split("\n")[0]).toBe(
+			`element_no_longer_exists: ${ambiguous} (AXCheckBox "Mark as completed") no longer exists in window 1 and nothing was dispatched — that tree has 2 row(s) with its role and label, 2 of them in the same position under AXRow "". That window as it is now — address the row you mean from it.`,
+		);
+		expect(f.calls.filter(call => call.name === "click")).toHaveLength(before + 1);
 	} finally {
 		await f.close();
 	}
