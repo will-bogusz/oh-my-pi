@@ -613,7 +613,7 @@ const TEXT_INPUT_ROLES: Record<string, true> = {
 	text: true,
 };
 /** The untyped `recommended` spelling of a contract target, keyed on what the driver still writes. */
-const ESCALATION_TARGET_ALIASES: Readonly<Record<string, string>> = { get_window_state: "snapshot" };
+const ESCALATION_TARGET_ALIASES: Readonly<Record<string, string>> = { get_window_state: "snapshot", px: "pixel" };
 /**
  * What to say instead once the session has taken the rung over: naming
  * `{ delivery: "foreground" }` told the caller to qualify the re-run, and an

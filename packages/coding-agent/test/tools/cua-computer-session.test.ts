@@ -4280,6 +4280,21 @@ it("prints only the evidence fields a refusal carries", async () => {
 		);
 		expect(click.message).not.toContain("escalation=get_window_state");
 		expect(click.message).not.toContain("route=");
+
+		// `px` is the driver's older spelling of the pixel target; the line
+		// carries the contract name so the route renderer recognises it.
+		const px = {
+			...dead,
+			structuredJson: JSON.stringify({
+				code: "element_outside_target_window",
+				effect: "refused",
+				escalation: { reason: "no accessibility route", recommended: "px" },
+			}),
+		};
+		f.state.hook = async name => (name === "click" ? px : undefined);
+		const pixel = await f.session.click(f.context, f.window, [1, 0]).catch((error: unknown) => error);
+		if (!(pixel instanceof ToolError)) throw new Error("Expected the click refusal");
+		expect(pixel.message.split("\n").at(-1)).toBe("Evidence: requested=background effect=refused escalation=pixel");
 	} finally {
 		await f.close();
 	}
