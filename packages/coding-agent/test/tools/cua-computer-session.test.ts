@@ -3268,6 +3268,221 @@ it("names the sheet a same-pid keyboard refusal is about, and stays silent when 
 	}
 });
 
+it("says what a disabled control's refusal actually leaves open", async () => {
+	const f = await fixture();
+	/** The pre-0.9.0 string, byte-identical on both rungs and in all four measured states. */
+	const untyped = {
+		text: 'AX action failed: refusing AXPress: the target reports AXEnabled=false. Retry this action with delivery_mode:"foreground" or call bring_to_front first',
+		structuredJson: JSON.stringify({ code: "tool_invocation_failed" }),
+		isError: true,
+		errorCode: "tool_invocation_failed",
+		images: [],
+	};
+	/** The typed refusal, verbatim from the driver lane's commit. */
+	const disabled = (text: string, extra: Wire) => ({
+		text,
+		structuredJson: JSON.stringify({
+			code: "element_disabled",
+			effect: "not_dispatched",
+			route: "ax",
+			action: "AXPress",
+			role: "AXButton",
+			label: "Back",
+			window_id: 1,
+			pid: 101,
+			foreground: false,
+			...extra,
+		}),
+		isError: true,
+		errorCode: "element_disabled",
+		images: [],
+	});
+	try {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		// The untypeable half of the old advice never reaches the model, whatever
+		// else the reply says: there is no bring_to_front on this surface.
+		f.state.hook = async name => (name === "click" ? untyped : undefined);
+		const legacy = await f.session
+			.click(f.context, f.window, ref, { delivery: "foreground" })
+			.catch((error: unknown) => error);
+		if (!(legacy instanceof ToolError)) throw new Error("Expected the legacy refusal");
+		expect(legacy.message).not.toContain("bring_to_front");
+		expect(legacy.message).toContain('Retry this action with { delivery: "foreground" }');
+		// That reply states no state at all, so the rung the call took is the
+		// only fact there is to answer it with.
+		expect(legacy.message.split("\n").at(-1)).toBe(
+			'That control reports AXEnabled=false with { delivery: "foreground" } already in force, so the rung is not what refused and no activation changes it: satisfy its precondition or choose another control.',
+		);
+
+		// The typed refusal states the app's own applicability itself, and no
+		// route exists: OMP adds nothing rather than saying it twice.
+		f.state.hook = async name =>
+			name === "click"
+				? disabled(
+						'AXPress was not dispatched: AXButton "Back" of window 1 reports AXEnabled=false. Window 1 is already pid 101\'s front window — the application disabled this control, and neither delivery mode nor activation changes that. Satisfy its precondition or choose another control.',
+						{ front_in_process: true },
+					)
+				: undefined;
+		const inForce = await f.session.click(f.context, f.window, ref).catch((error: unknown) => error);
+		if (!(inForce instanceof ToolError)) throw new Error("Expected the disabled refusal");
+		expect(inForce.message.split("\n").at(-1)).toBe("Evidence: route=ax requested=background effect=not_dispatched");
+
+		// The app's own panel in front: the reply names the window, so only the
+		// calls for it are added — the one thing a driver cannot spell.
+		f.state.hook = async name =>
+			name === "click"
+				? disabled(
+						'AXPress was not dispatched: AXButton "Back" of window 1 reports AXEnabled=false, and window 17018 — pid 101\'s own front window, titleless, AXWindow/AXUnknown — is drawn in front of it. Dismiss that window, or address window 17018 and act on it there.',
+						{
+							front_in_process: false,
+							obscured_by: {
+								window_id: 17018,
+								title: "",
+								layer: 0,
+								ax_backed: true,
+								role: "AXWindow",
+								subrole: "AXUnknown",
+							},
+						},
+					)
+				: undefined;
+		const covered = await f.session.click(f.context, f.window, ref).catch((error: unknown) => error);
+		if (!(covered instanceof ToolError)) throw new Error("Expected the disabled refusal");
+		expect(covered.message.split("\n").at(-1)).toBe(
+			'Acquire it with computer.window("17018") and act there, or dismiss it with press("Escape").',
+		);
+
+		// A panel with no accessibility surface of its own cannot be acquired,
+		// so the call the other arm names is exactly what not to reach for.
+		f.state.hook = async name =>
+			name === "click"
+				? disabled(
+						'AXPress was not dispatched: AXButton "Back" of window 1 reports AXEnabled=false, and window 17013 — pid 101\'s own front window, titleless, no AX surface — is drawn in front of it. It publishes no AXWindow, so it cannot become the focused window: dismiss it, or act on it by pixel.',
+						{
+							front_in_process: false,
+							obscured_by: { window_id: 17013, title: "", layer: 0, ax_backed: false },
+						},
+					)
+				: undefined;
+		const blind = await f.session.click(f.context, f.window, ref).catch((error: unknown) => error);
+		if (!(blind instanceof ToolError)) throw new Error("Expected the disabled refusal");
+		expect(blind.message.split("\n").at(-1)).toBe(
+			'Dismiss it with press("Escape"); computer.window("17013") cannot acquire a window that publishes no accessibility window of its own.',
+		);
+
+		// A menu row on the untyped shape: the ref's own role is the whole
+		// decision, and no rung and no window is the answer at all.
+		f.state.role = "AXMenuItem";
+		f.state.label = "_popUpItemAction:";
+		const menuRef = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		f.state.hook = async name => (name === "click" ? untyped : undefined);
+		const menu = await f.session.click(f.context, f.window, menuRef).catch((error: unknown) => error);
+		if (!(menu instanceof ToolError)) throw new Error("Expected the disabled refusal");
+		expect(menu.message.split("\n").at(-1)).toBe(
+			"That AXMenuItem is disabled by the app's own current state: a menu row's AXEnabled tracks the command's applicability, not focus or delivery. Satisfy the command's precondition (a selection, a document, a mode) or pick another item.",
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("names the app's own panel that reveal() cannot get past", async () => {
+	const f = await fixture();
+	// AdviceMatrix, both apps: process activated, target focused, and the
+	// app's own panel in front — reported where `#focusHolder` never looked.
+	const behind = (extra: Wire, error?: boolean) => ({
+		text: "bring_to_front: exact window 1 for pid 101 was not verified as the frontmost process's focused, front window (request_accepted=true, process_activated=true, focused=true, front_in_process=false).",
+		structuredJson: JSON.stringify({
+			code: error
+				? "bring_to_front_exact_window_unverified"
+				: "bring_to_front_exact_window_verified_behind_owned_panel",
+			activated: true,
+			status: "partial",
+			observed: { focused_window_id: 1, process_frontmost_ordinary_window_id: 17013, frontmost_pid: 101 },
+			...extra,
+		}),
+		isError: error === true,
+		...(error === true ? { errorCode: "bring_to_front_exact_window_unverified" } : {}),
+		images: [],
+	});
+	try {
+		// The id alone is enough to name the window and the call for it.
+		f.state.hook = async name => (name === "bring_to_front" ? behind({}, true) : undefined);
+		const refused = await f.session.raise(f.context, f.window).catch((error: unknown) => error);
+		if (!(refused instanceof ToolError)) throw new Error("Expected the raise refusal");
+		expect(refused.message.split("\n").at(-1)).toBe(
+			'window 17013 (untitled) is pid 101\'s own window, drawn in front of window 1: acquire it with computer.window("17013") and act there, or dismiss it with press("Escape"). Pixel targets on window 1 stay covered until it goes away.',
+		);
+		// A panel with no accessibility window of its own can never be focused,
+		// so activating anything is not the route.
+		f.state.hook = async name =>
+			name === "bring_to_front"
+				? behind({
+						obscured_by: {
+							window_id: 17016,
+							title: "",
+							layer: 0,
+							ax_backed: false,
+							role: "",
+							subrole: "",
+						},
+					})
+				: undefined;
+		const verified = await f.session.raise(f.context, f.window);
+		expect(verified.text.split("\n").at(-1)).toBe(
+			'window 17016 (untitled) is pid 101\'s own front window and publishes no accessibility window, so it can never become the focused one and reveal() cannot move it: dismiss it with press("Escape") or act on its pixels.',
+		);
+		// Once the reply's own prose names that window — which the 0.9.0
+		// behind-owned-panel result does — only the calls for it are added.
+		f.state.hook = async name =>
+			name === "bring_to_front"
+				? {
+						text: "Brought exact window 1 for pid 101 to the foreground; pid 101's own window 17018 (titleless, AXWindow/AXUnknown) is drawn in front of it. Act on window 17018, or dismiss it — pixel targets on window 1 are covered until then.",
+						structuredJson: JSON.stringify({
+							code: "bring_to_front_exact_window_verified_behind_owned_panel",
+							activated: true,
+							status: "activated_behind_owned_panel",
+							exact_window_effect: { front_in_process: false },
+							observed: { focused_window_id: 1, process_frontmost_ordinary_window_id: 17018 },
+							obscured_by: {
+								window_id: 17018,
+								title: "",
+								layer: 0,
+								ax_backed: true,
+								role: "AXWindow",
+								subrole: "AXUnknown",
+							},
+						}),
+						isError: false,
+						images: [],
+					}
+				: undefined;
+		const named = await f.session.raise(f.context, f.window);
+		expect(named.text.split("\n").at(-1)).toBe(
+			'Acquire it with computer.window("17018") and act there, or dismiss it with press("Escape").',
+		);
+		// Nothing in front: nothing said.
+		f.state.hook = async name =>
+			name === "bring_to_front"
+				? {
+						text: "Brought exact window 1 for pid 101 to the foreground.",
+						structuredJson: JSON.stringify({
+							code: "bring_to_front_exact_window_verified",
+							activated: true,
+							observed: { focused_window_id: 1, process_frontmost_ordinary_window_id: 1 },
+						}),
+						isError: false,
+						images: [],
+					}
+				: undefined;
+		expect((await f.session.raise(f.context, f.window)).text).toBe(
+			"Brought exact window 1 for pid 101 to the foreground.",
+		);
+	} finally {
+		await f.close();
+	}
+});
+
 it("keeps an attached sheet's whole subtree when the caller narrows the parent walk", async () => {
 	const f = await fixture();
 	const sheet = { ...f.row, window_id: 5, title: "Save", bounds: { x: 30, y: 40, width: 120, height: 80 } };

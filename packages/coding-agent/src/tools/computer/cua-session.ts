@@ -359,11 +359,17 @@ const DETECT_WINDOW_CHANGE_TOOLS: Record<string, true> = {
  * done. And the keystroke paths name a screenshot for a field whose `AXValue`
  * they could not read at all: there a capture really is the only witness, so
  * that one keeps the screenshot and only gains the spelling of the call that
- * takes one. Structured details stay verbatim on the error's context.
+ * takes one. The last one deletes rather than restates: `bring_to_front` is
+ * not a call this surface has, and the disabled-control refusal offered it as
+ * half of a two-route sentence whose other half this file rewrites — so the
+ * translation made exactly the followable half of untrue advice easier to
+ * follow. What is true of that refusal is composed from its own state by
+ * `#disabledControl`. Structured details stay verbatim on the error's context.
  */
 const DELIVERY_MODE_VOCABULARY = /delivery_mode\s*:\s*"(background|foreground)"/g;
 const SCREENSHOT_CHECK = /not driver-verified\s*[—-]\s*confirm via screenshot/g;
 const SCREENSHOT_WITNESS = /verify via screenshot/g;
+const BRING_TO_FRONT_ADVICE = /,?\s*(?:or|and)\s+call bring_to_front first/g;
 function preludeVocabulary<T>(value: T): T {
 	if (typeof value === "string")
 		return value
@@ -372,7 +378,8 @@ function preludeVocabulary<T>(value: T): T {
 				SCREENSHOT_CHECK,
 				"not driver-verified — confirm with observe({ query }) or, on a pixel surface, a screenshot",
 			)
-			.replace(SCREENSHOT_WITNESS, "confirm with observe({ screenshot: true })") as T;
+			.replace(SCREENSHOT_WITNESS, "confirm with observe({ screenshot: true })")
+			.replace(BRING_TO_FRONT_ADVICE, "") as T;
 	if (Array.isArray(value)) return value.map(entry => preludeVocabulary(entry)) as T;
 	if (value && typeof value === "object")
 		return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, preludeVocabulary(entry)])) as T;
@@ -383,6 +390,8 @@ function unsupported(operation: string): never {
 }
 /** macOS rows whose `AXPress` needs the menu already open; see `#menuBarRoute`. */
 const MENU_BAR_ROLES: Record<string, true> = { AXMenuBar: true, AXMenuBarItem: true };
+/** Rows whose `AXEnabled` tracks the command's applicability; see `#disabledControl`. */
+const MENU_ROLES: Record<string, true> = { AXMenu: true, AXMenuBar: true, AXMenuBarItem: true, AXMenuItem: true };
 /**
  * `invoke_menu` refuses with the failing segment's index and nothing else:
  * `path segment 1 was not found`. The titles it could not match are exactly
@@ -1875,13 +1884,78 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 		return attached;
 	}
-	#focusHolder(details: unknown, args: Wire): string | undefined {
+	/**
+	 * The app's own window drawn in front of the one this call addressed, as
+	 * the calls that reach it. Before 0.9.0 `bring_to_front` reported the
+	 * blocker's id in `observed.process_frontmost_ordinary_window_id` alone —
+	 * never as the top-level `focused_window_id` the sheet arm below reads,
+	 * which is why neither measured lane's `reveal()` said anything about the
+	 * panel covering its target. A reply that names that window in its own
+	 * prose gets only the calls added; one that does not gets the identity
+	 * too. `obscured_by` is contract vocabulary rather than a generated type,
+	 * so every field is read defensively, and a window with no accessibility
+	 * surface of its own cannot be acquired at all.
+	 */
+	#obscuringPanel(data: Wire, target: string, pid: number | undefined, message: string): string | undefined {
+		const observed = data.observed !== null && typeof data.observed === "object" ? (data.observed as Wire) : {};
+		const row = data.obscured_by !== null && typeof data.obscured_by === "object" ? (data.obscured_by as Wire) : {};
+		const id =
+			typeof row.window_id === "number"
+				? String(row.window_id)
+				: typeof observed.process_frontmost_ordinary_window_id === "number"
+					? String(observed.process_frontmost_ordinary_window_id)
+					: undefined;
+		if (id === undefined || id === target) return undefined;
+		const call = `computer.window(${JSON.stringify(id)})`;
+		const blind = row.ax_backed === false;
+		if (message.includes(`window ${id}`))
+			return blind
+				? `Dismiss it with press("Escape"); ${call} cannot acquire a window that publishes no accessibility window of its own.`
+				: `Acquire it with ${call} and act there, or dismiss it with press("Escape").`;
+		const title = typeof row.title === "string" && row.title ? JSON.stringify(row.title) : "untitled";
+		const role = typeof row.role === "string" && row.role ? row.role : undefined;
+		const subrole = typeof row.subrole === "string" && row.subrole ? `/${row.subrole}` : "";
+		const owner = pid === undefined ? "the app's" : `pid ${pid}'s`;
+		const named = `window ${id} (${role === undefined ? title : `${role}${subrole}, ${title}`})`;
+		if (blind)
+			return `${named} is ${owner} own front window and publishes no accessibility window, so it can never become the focused one and reveal() cannot move it: dismiss it with press("Escape") or act on its pixels.`;
+		return `${named} is ${owner} own window, drawn in front of window ${target}: acquire it with ${call} and act there, or dismiss it with press("Escape"). Pixel targets on window ${target} stay covered until it goes away.`;
+	}
+	/**
+	 * `AXEnabled` is the app's own applicability, and the pre-0.9.0 refusal
+	 * named two rungs regardless — byte-identical on background and
+	 * foreground, on a frontmost window and behind a panel, in all four
+	 * measured states. The typed refusal composes that sentence itself, so
+	 * the only thing left to render is the one thing a driver cannot name:
+	 * the call for the window it found in front. The other two arms are
+	 * composed here only for the untyped shape, where nothing is.
+	 */
+	#disabledControl(details: unknown, args: Wire, message: string): string | undefined {
 		const data = refusalDetails(details);
+		const typed = data.code === "element_disabled";
+		if (!typed && !message.includes("AXEnabled=false")) return undefined;
+		const target = typeof args.window_id === "number" ? String(args.window_id) : undefined;
+		const pid = typeof args.pid === "number" ? args.pid : undefined;
+		const panel = target === undefined ? undefined : this.#obscuringPanel(data, target, pid, message);
+		if (panel !== undefined) return panel;
+		if (typed) return undefined;
+		const element = this.#elements.get(this.#refForToken(args.element_token) ?? "")?.element;
+		const role = element?.role ?? (typeof data.role === "string" ? data.role : undefined);
+		if (role !== undefined && MENU_ROLES[role] === true)
+			return `That ${role} is disabled by the app's own current state: a menu row's AXEnabled tracks the command's applicability, not focus or delivery. Satisfy the command's precondition (a selection, a document, a mode) or pick another item.`;
+		if (args.delivery_mode === "foreground" || data.front_in_process === true)
+			return `That control reports AXEnabled=false with { delivery: "foreground" } already in force, so the rung is not what refused and no activation changes it: satisfy its precondition or choose another control.`;
+		return undefined;
+	}
+	#focusHolder(details: unknown, args: Wire, message: string): string | undefined {
+		const data = refusalDetails(details);
+		const target = typeof args.window_id === "number" ? String(args.window_id) : undefined;
+		if (target === undefined) return undefined;
+		const panel = this.#obscuringPanel(data, target, typeof args.pid === "number" ? args.pid : undefined, message);
+		if (panel !== undefined) return panel;
 		const code = typeof data.code === "string" ? data.code : undefined;
 		if ((code === undefined || FOCUS_HOLDING_REFUSALS[code] !== true) && data.focused_window_id === undefined)
 			return undefined;
-		const target = typeof args.window_id === "number" ? String(args.window_id) : undefined;
-		if (target === undefined) return undefined;
 		const focused =
 			typeof data.focused_window_id === "number" && String(data.focused_window_id) !== target
 				? String(data.focused_window_id)
@@ -2062,7 +2136,12 @@ export class CuaComputerSession implements ComputerBackend {
 		} catch (error) {
 			if (!(error instanceof ToolError)) throw error;
 			this.#keyboardEscalation(name, args, refusalDetails(error.context), true);
-			const lines = [error.message, actionEvidence(error.context, args), this.#focusHolder(error.context, args)];
+			const lines = [
+				error.message,
+				actionEvidence(error.context, args),
+				this.#disabledControl(error.context, args, error.message) ??
+					this.#focusHolder(error.context, args, error.message),
+			];
 			throw new ToolError(lines.filter(line => line !== undefined).join("\n"), error.context);
 		}
 		const { result, data } = reply;
@@ -2529,7 +2608,10 @@ export class CuaComputerSession implements ComputerBackend {
 		return this.#schedule(context, "raise", true, async () => {
 			const current = await this.#current(window);
 			throwIfAborted(context.signal);
-			return this.#action("bring_to_front", windowArgs(current));
+			const raised = await this.#action("bring_to_front", windowArgs(current));
+			const holder = this.#focusHolder(raised.data, windowArgs(current), raised.text);
+			if (holder === undefined) return raised;
+			return { ...raised, text: raised.text ? `${raised.text}\n${holder}` : holder };
 		});
 	}
 	screenshot(context: Context, options: { silent?: boolean } = {}): Promise<ComputerImage> {
