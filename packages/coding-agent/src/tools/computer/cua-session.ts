@@ -2095,6 +2095,11 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 		return attached;
 	}
+	/** Whether this session's own roster holds the window that id names. */
+	#holdsWindow(id: string): boolean {
+		for (const rows of this.#lastRoster.values()) if (rows.some(row => row.id === id)) return true;
+		return false;
+	}
 	/**
 	 * The app's own window drawn in front of the one this call addressed, as
 	 * the calls that reach it. Before 0.9.0 `bring_to_front` reported the
@@ -2104,8 +2109,10 @@ export class CuaComputerSession implements ComputerBackend {
 	 * panel covering its target. A reply that names that window in its own
 	 * prose gets only the calls added; one that does not gets the identity
 	 * too. `obscured_by` is contract vocabulary rather than a generated type,
-	 * so every field is read defensively, and a window with no accessibility
-	 * surface of its own cannot be acquired at all.
+	 * so every field is read defensively, and the acquisition is named only
+	 * for a window this session's roster holds: T11 was told to acquire
+	 * window 19083, the capture lease's own indicator, which the roster hides
+	 * and `computer.window` answers with `Missing computer window`.
 	 */
 	#obscuringPanel(data: Wire, target: string, pid: number | undefined, message: string): string | undefined {
 		const observed = data.observed !== null && typeof data.observed === "object" ? (data.observed as Wire) : {};
@@ -2119,26 +2126,37 @@ export class CuaComputerSession implements ComputerBackend {
 		if (id === undefined || id === target) return undefined;
 		const call = `computer.window(${JSON.stringify(id)})`;
 		const blind = row.ax_backed === false;
-		if (message.includes(`window ${id}`))
-			return blind
-				? `Dismiss it with press("Escape"); ${call} cannot acquire a window that publishes no accessibility window of its own.`
-				: `Acquire it with ${call} and act there, or dismiss it with press("Escape").`;
+		const unheld = `this session's roster holds no window ${id} to acquire`;
+		const held = this.#holdsWindow(id);
+		if (message.includes(`window ${id}`)) {
+			if (blind)
+				return `Dismiss it with press("Escape"); ${call} cannot acquire a window that publishes no accessibility window of its own.`;
+			return held
+				? `Acquire it with ${call} and act there, or dismiss it with press("Escape").`
+				: `Dismiss it with press("Escape") — ${unheld}.`;
+		}
 		const title = typeof row.title === "string" && row.title ? JSON.stringify(row.title) : "untitled";
 		const role = typeof row.role === "string" && row.role ? row.role : undefined;
 		const subrole = typeof row.subrole === "string" && row.subrole ? `/${row.subrole}` : "";
 		const owner = pid === undefined ? "the app's" : `pid ${pid}'s`;
 		const named = `window ${id} (${role === undefined ? title : `${role}${subrole}, ${title}`})`;
+		const covered = `Pixel targets on window ${target} stay covered until it goes away.`;
 		if (blind)
 			return `${named} is ${owner} own front window and publishes no accessibility window, so it can never become the focused one and reveal() cannot move it: dismiss it with press("Escape") or act on its pixels.`;
-		return `${named} is ${owner} own window, drawn in front of window ${target}: acquire it with ${call} and act there, or dismiss it with press("Escape"). Pixel targets on window ${target} stay covered until it goes away.`;
+		return held
+			? `${named} is ${owner} own window, drawn in front of window ${target}: acquire it with ${call} and act there, or dismiss it with press("Escape"). ${covered}`
+			: `${named} is ${owner} own window, drawn in front of window ${target}: dismiss it with press("Escape") — ${unheld}. ${covered}`;
 	}
 	/**
 	 * `AXEnabled` is the app's own applicability, and the pre-0.9.0 refusal
 	 * named two rungs regardless — byte-identical on background and
 	 * foreground, on a frontmost window and behind a panel, in all four
 	 * measured states. The typed refusal composes that sentence itself, so
-	 * the only thing left to render is the one thing a driver cannot name:
-	 * the call for the window it found in front. The other two arms are
+	 * what is left to render is what a driver cannot name: the call for the
+	 * window it found in front, and the rung for a control whose window is
+	 * not the app's key one — a not-key Notes window publishes its own
+	 * toolbar search field as `AXEnabled=false` and accepts the same click
+	 * once a foreground dispatch makes it key. The other two arms are
 	 * composed here only for the untyped shape, where nothing is.
 	 */
 	#disabledControl(details: unknown, args: Wire, message: string): string | undefined {
@@ -2149,6 +2167,8 @@ export class CuaComputerSession implements ComputerBackend {
 		const pid = typeof args.pid === "number" ? args.pid : undefined;
 		const panel = target === undefined ? undefined : this.#obscuringPanel(data, target, pid, message);
 		if (panel !== undefined) return panel;
+		if (escalationTarget(data) === "foreground" && args.delivery_mode !== "foreground")
+			return 'retry with { delivery: "foreground" } — the window is not the app\'s key window and a foreground dispatch makes it key first.';
 		if (typed) return undefined;
 		const element = this.#elements.get(this.#refForToken(args.element_token) ?? "")?.element;
 		const role = element?.role ?? (typeof data.role === "string" ? data.role : undefined);

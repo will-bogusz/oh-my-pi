@@ -3872,6 +3872,9 @@ it("says what a disabled control's refusal actually leaves open", async () => {
 		errorCode: "element_disabled",
 		images: [],
 	});
+	/** The app's own panel, as `list_windows` reports it while it is up. */
+	const listing = (...ids: number[]) =>
+		reply({ windows: [f.row, ...ids.map(id => ({ ...f.row, window_id: id, title: "" }))] });
 	try {
 		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
 		// The untypeable half of the old advice never reaches the model, whatever
@@ -3920,7 +3923,10 @@ it("says what a disabled control's refusal actually leaves open", async () => {
 							},
 						},
 					)
-				: undefined;
+				: name === "list_windows"
+					? listing(17018)
+					: undefined;
+		await f.session.windows(f.context);
 		const covered = await f.session.click(f.context, f.window, ref).catch((error: unknown) => error);
 		if (!(covered instanceof ToolError)) throw new Error("Expected the disabled refusal");
 		expect(covered.message.split("\n").at(-1)).toBe(
@@ -3961,6 +3967,98 @@ it("says what a disabled control's refusal actually leaves open", async () => {
 	}
 });
 
+it("offers a disabled control the window it can acquire, and the rung a not-key window needs", async () => {
+	const f = await fixture();
+	// T11 `native-act-notes/omp-2`: the panel named in front of the search
+	// field was the capture lease's own 66×20 "Window" indicator, which this
+	// roster hides — `computer.window("19083")` answered `Missing computer
+	// window {"id":"19083"}`.
+	const lease = { ...f.row, window_id: 19083, title: "Window", bounds: { x: 30, y: 40, width: 66, height: 20 } };
+	const notKeyText =
+		'AXPress was not dispatched: AXTextField "" of window 1 reports AXEnabled=false. Window 1 is not the application\'s key window. A foreground dispatch makes it key first.';
+	const disabled = (
+		extra: Wire,
+		text = 'AXPress was not dispatched: AXTextField "" of window 1 reports AXEnabled=false, and window 19083 — pid 101\'s own front window, titled "Window", AXWindow/AXDialog — is drawn in front of it. Dismiss that window, or address window 19083 and act on it there.',
+	) => ({
+		text,
+		structuredJson: JSON.stringify({
+			code: "element_disabled",
+			effect: "not_dispatched",
+			route: "ax",
+			action: "AXPress",
+			role: "AXTextField",
+			label: "",
+			window_id: 1,
+			pid: 101,
+			foreground: false,
+			front_in_process: false,
+			key_window: { is_key: false, app_frontmost: true, focused_window_id: 2 },
+			...extra,
+		}),
+		isError: true,
+		errorCode: "element_disabled",
+		images: [],
+	});
+	const obscured = {
+		obscured_by: {
+			window_id: 19083,
+			title: "Window",
+			layer: 0,
+			ax_backed: true,
+			role: "AXWindow",
+			subrole: "AXDialog",
+		},
+	};
+	const refused = async (extra: Wire, listed: Wire[], options?: { delivery: "foreground" }, text?: string) => {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		f.state.hook = async name =>
+			name === "click"
+				? disabled(extra, text)
+				: name === "list_windows"
+					? reply({ windows: [f.row, ...listed] })
+					: undefined;
+		await f.session.windows(f.context);
+		const error = await f.session.click(f.context, f.window, ref, options).catch((thrown: unknown) => thrown);
+		if (!(error instanceof ToolError)) throw new Error("Expected the disabled refusal");
+		return error.message;
+	};
+	try {
+		const hidden = await refused(obscured, [lease]);
+		expect(hidden).not.toContain("computer.window");
+		expect(hidden.split("\n").at(-1)).toBe(
+			'Dismiss it with press("Escape") — this session\'s roster holds no window 19083 to acquire.',
+		);
+		// The same reply about a window the roster does hold keeps the call.
+		const held = await refused(obscured, [{ ...f.row, window_id: 19083, title: "Window" }]);
+		expect(held.split("\n").at(-1)).toBe(
+			'Acquire it with computer.window("19083") and act there, or dismiss it with press("Escape").',
+		);
+		// The 0.9.0 arm for the state that was really refusing: no panel of the
+		// app's own, the window is not key, and the rung is what makes it key.
+		const notKey = await refused(
+			{ escalation: { target: "foreground", reason: "route_unavailable" } },
+			[lease],
+			undefined,
+			notKeyText,
+		);
+		expect(notKey.split("\n").at(-1)).toBe(
+			'retry with { delivery: "foreground" } — the window is not the app\'s key window and a foreground dispatch makes it key first.',
+		);
+		// Already on that rung: it is not a route to offer twice.
+		const spent = await refused(
+			{ escalation: { target: "foreground", reason: "route_unavailable" } },
+			[lease],
+			{ delivery: "foreground" },
+			notKeyText,
+		);
+		expect(spent).not.toContain('delivery: "foreground" } —');
+		expect(spent.split("\n").at(-1)).toBe(
+			"Evidence: route=ax requested=foreground effect=not_dispatched escalation=foreground",
+		);
+	} finally {
+		await f.close();
+	}
+});
 it("names the app's own panel that reveal() cannot get past", async () => {
 	const f = await fixture();
 	// AdviceMatrix, both apps: process activated, target focused, and the
@@ -3980,9 +4078,16 @@ it("names the app's own panel that reveal() cannot get past", async () => {
 		...(error === true ? { errorCode: "bring_to_front_exact_window_unverified" } : {}),
 		images: [],
 	});
+	/** Both owned panels are rows of the app's own listing while they are up. */
+	const panels = async (name: string) =>
+		name === "list_windows"
+			? reply({ windows: [f.row, ...[17013, 17018].map(id => ({ ...f.row, window_id: id, title: "" }))] })
+			: undefined;
 	try {
+		f.state.hook = panels;
+		await f.session.windows(f.context);
 		// The id alone is enough to name the window and the call for it.
-		f.state.hook = async name => (name === "bring_to_front" ? behind({}, true) : undefined);
+		f.state.hook = async name => (name === "bring_to_front" ? behind({}, true) : panels(name));
 		const refused = await f.session.raise(f.context, f.window).catch((error: unknown) => error);
 		if (!(refused instanceof ToolError)) throw new Error("Expected the raise refusal");
 		expect(refused.message.split("\n").at(-1)).toBe(
@@ -4002,7 +4107,7 @@ it("names the app's own panel that reveal() cannot get past", async () => {
 							subrole: "",
 						},
 					})
-				: undefined;
+				: panels(name);
 		const verified = await f.session.raise(f.context, f.window);
 		expect(verified.text.split("\n").at(-1)).toBe(
 			'window 17016 (untitled) is pid 101\'s own front window and publishes no accessibility window, so it can never become the focused one and reveal() cannot move it: dismiss it with press("Escape") or act on its pixels.',
@@ -4031,7 +4136,7 @@ it("names the app's own panel that reveal() cannot get past", async () => {
 						isError: false,
 						images: [],
 					}
-				: undefined;
+				: panels(name);
 		const named = await f.session.raise(f.context, f.window);
 		expect(named.text.split("\n").at(-1)).toBe(
 			'Acquire it with computer.window("17018") and act there, or dismiss it with press("Escape").',
@@ -4049,7 +4154,7 @@ it("names the app's own panel that reveal() cannot get past", async () => {
 						isError: false,
 						images: [],
 					}
-				: undefined;
+				: panels(name);
 		expect((await f.session.raise(f.context, f.window)).text).toBe(
 			"Brought exact window 1 for pid 101 to the foreground.",
 		);
