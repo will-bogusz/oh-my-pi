@@ -2216,11 +2216,17 @@ export class CuaComputerSession implements ComputerBackend {
 		this.#escalatedKeyboard.add(window);
 		return true;
 	}
-	/** The text rows this window's current observation holds. */
+	/**
+	 * The text rows this window's current observation holds that a write can
+	 * land on. A row the app publishes `AXEnabled=false` refuses the write —
+	 * T11 was sent at `AXTextField "" subrole=AXSearchField enabled=false`
+	 * and answered `type_text_incomplete: delivered 0 of 22` — so a disabled
+	 * row is no candidate, whatever its role.
+	 */
 	#textRows(windowId: string): string[] {
 		const refs: string[] = [];
 		for (const [ref, binding] of this.#elements) {
-			if (binding.window.id !== windowId) continue;
+			if (binding.window.id !== windowId || binding.element.enabled === false) continue;
 			const subrole = binding.element.subrole;
 			if (
 				TEXT_INPUT_ROLES[binding.element.role] === true ||
@@ -2286,7 +2292,10 @@ export class CuaComputerSession implements ComputerBackend {
 	 * that had already been escalated to foreground and came back unverified
 	 * was told to re-run as-is (6/6 inert on Notes' Find chord), and a
 	 * coordinate rung was named for a window with no capture, where a pixel
-	 * action refuses before dispatch.
+	 * action refuses before dispatch. A background chord that moved nothing
+	 * still has the rung that lands — a foreground dispatch makes the window
+	 * key, which is what a not-key window's controls were waiting for — so it
+	 * goes ahead of the menu, the field and a read.
 	 */
 	#escalationRoute(
 		name: string,
@@ -2302,6 +2311,10 @@ export class CuaComputerSession implements ComputerBackend {
 			windowId === undefined ? undefined : this.#fieldRoute(windowId, this.#refForToken(args.element_token));
 		const menu = windowId === undefined ? undefined : this.#menuRoute(windowId);
 		const read = keyboard ? KEYBOARD_READ_ROUTE : OBSERVE_ROUTE;
+		const rung =
+			keyboard && state.noop && !foregroundTaken
+				? 'these keystrokes went out in the background, which leaves this window not the app\'s key window — re-run with { delivery: "foreground" }, which makes it key first'
+				: undefined;
 		if (keyboard && foregroundTaken && state.unproven && (target !== undefined || state.noop))
 			return `the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — ${
 				(name === "type_text" ? (field ?? menu) : (menu ?? field)) ?? read
@@ -2317,6 +2330,7 @@ export class CuaComputerSession implements ComputerBackend {
 				return text.includes('delivery: "foreground"') ? undefined : FOREGROUND_ROUTE;
 			case "element":
 				return (
+					rung ??
 					field ??
 					`address the field itself — this session holds no text row for window ${windowId ?? "(unknown)"}, so observe it first and write the row that walk mints`
 				);
@@ -2325,7 +2339,7 @@ export class CuaComputerSession implements ComputerBackend {
 			case "snapshot":
 				return OBSERVE_ROUTE;
 			default:
-				return keyboard && state.noop ? (menu ?? field ?? read) : undefined;
+				return keyboard && state.noop ? (rung ?? menu ?? field ?? read) : undefined;
 		}
 	}
 	/**

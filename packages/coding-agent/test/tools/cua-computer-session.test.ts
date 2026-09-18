@@ -177,6 +177,8 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		backgroundActions: undefined as unknown,
 		customActions: undefined as unknown,
 		elementDoubleClick: undefined as unknown,
+		/** `AXEnabled` of the walked row; false, as a not-key window publishes its controls. */
+		enabled: false as boolean,
 		/** Absent on rows whose provider reported no frame: the ref has no point. */
 		elementFrame: { x: 10, y: 20, w: 200, h: 100 } as Wire | undefined,
 		relatedWindows: undefined as unknown,
@@ -258,7 +260,7 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 							actions: state.actions ?? (linux ? ["press", "showContextMenu"] : undefined),
 							background_actions: state.backgroundActions,
 							custom_actions: state.customActions,
-							enabled: false,
+							enabled: state.enabled,
 							selected: false,
 							depth: 0,
 							frame: state.elementFrame,
@@ -2206,7 +2208,8 @@ it("names the field a blind keystroke can be written to, from the observation it
 		expect(blind.escalation).toBe(
 			"⚠️ The driver escalates this action (effect_unconfirmed): address the field itself — this session holds no text row for window 1, so observe it first and write the row that walk mints.",
 		);
-		// One text row in hand: the route is a call the caller can type.
+		// One enabled text row in hand: the route is a call the caller can type.
+		f.state.enabled = true;
 		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
 		const known = await f.session.type(f.context, f.window, "hi");
 		expect(known.escalation).toBe(
@@ -2359,6 +2362,54 @@ it("names the menu a keyboard no-op can be driven from, and nothing when none wa
 	}
 });
 
+it("never points a keyboard no-op at a disabled row, and offers the rung that lands first", async () => {
+	const f = await fixture();
+	// T11 `native-act-notes/omp-2`: a background cmd+f moved nothing and the
+	// route named this window's own `AXTextField "" subrole=AXSearchField
+	// enabled=false`, which answered `type_text_incomplete: delivered 0 of 22`.
+	const inert = (mode: "background" | "foreground") => ({
+		text: `Pressed cmd+f on pid 101${mode === "foreground" ? " (delivery_mode:foreground)" : ""}.`,
+		structuredJson: JSON.stringify({
+			delivery: { mode },
+			effect: "suspected_noop",
+			route: mode === "foreground" ? "key_events_fg" : "key_events",
+		}),
+		isError: false,
+		images: [],
+	});
+	try {
+		f.state.label = "";
+		f.state.subrole = "AXSearchField";
+		f.state.placeholder = undefined;
+		const observation = await f.session.observe(f.context, f.window);
+		expect(observation.tree.split("\n")[0]).toBe(
+			`- [${observation.elements[0]!.ref}] AXTextField "" subrole=AXSearchField value="" enabled=false selected=false`,
+		);
+		f.state.hook = async name => (name === "hotkey" ? inert("background") : undefined);
+		const background = await f.session.press(f.context, f.window, "cmd+f");
+		expect(background.escalation).toBe(
+			'⚠️ The driver reports no observed change: these keystrokes went out in the background, which leaves this window not the app\'s key window — re-run with { delivery: "foreground" }, which makes it key first.',
+		);
+		expect(background.escalation).not.toContain("win.ref");
+		// On the rung it named, the disabled row is still no route: a read is.
+		f.state.hook = async name => (name === "hotkey" ? inert("foreground") : undefined);
+		const spent = await f.session.press(f.context, f.window, "cmd+f", undefined, { delivery: "foreground" });
+		expect(spent.escalation).toBe(
+			'⚠️ The driver reports no observed change: the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — observe the window (win.observe()) to read what the keystrokes did — a read changes nothing — or observe({ menubar: true }) and drive the command with win.menu([...], { delivery: "foreground" }).',
+		);
+		expect(spent.escalation).not.toContain("win.ref");
+		// An enabled row of the same window is the route it always was.
+		f.state.enabled = true;
+		const enabled = await f.session.observe(f.context, f.window);
+		f.state.hook = async name => (name === "hotkey" ? inert("foreground") : undefined);
+		const known = await f.session.press(f.context, f.window, "cmd+f", undefined, { delivery: "foreground" });
+		expect(known.escalation).toContain(
+			`address the field itself: win.ref("${enabled.elements[0]!.ref}").type("<text>")`,
+		);
+	} finally {
+		await f.close();
+	}
+});
 it("stops naming the foreground rung to an action that already ran on it", async () => {
 	const f = await fixture();
 	// AdviceMatrix: the AXEnabled refusal and its escalation are byte-identical
