@@ -1,7 +1,7 @@
 {
 	"platform": "darwin-arm64",
 	"version": "0.28.0",
-	"sha256": "b01b8617012c5c39ebf6d0e444be8e1cd7c48bd8a51c3e8c708a6d50584aac4c",
-	"source": "github.com/will-bogusz/cua branch will/bench-fixes commit d004e4c59 (cargo build --locked --release -p cua-driver; codesign OMP Computer Use)",
-	"bytes": 32713104
+	"sha256": "2deaea532eac349435f3cd1a03299f94d0071f4bd78f4f7acbca198b440c25e9",
+	"source": "github.com/will-bogusz/cua branch will/bench-fixes commit 5a2dbf1d5 (cargo build --locked --release -p cua-driver; codesign OMP Computer Use)",
+	"bytes": 32701936
 }
