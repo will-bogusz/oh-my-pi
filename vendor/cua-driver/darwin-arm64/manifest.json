@@ -1,7 +1,9 @@
 {
 	"platform": "darwin-arm64",
-	"version": "0.28.0",
+	"version": "0.28.2",
+	"commit": "cf52d17ea",
 	"sha256": "dce063d93438e9756887832046a16cd3a00e01ef7da36152fa7846563b69fc66",
-	"source": "github.com/will-bogusz/cua branch will/w6-chord-menu commit cf52d17ea (cargo build --locked --release -p cua-driver; codesign OMP Computer Use)",
-	"bytes": 32817536
+	"size": 32817536,
+	"url": "https://github.com/will-bogusz/cua/releases/download/cua-driver-0.28.2-cf52d17ea/cua-driver-darwin-arm64",
+	"source": "github.com/will-bogusz/cua commit cf52d17ea (cargo build --locked --release -p cua-driver; codesign OMP Computer Use)"
 }

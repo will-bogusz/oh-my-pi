@@ -1,7 +1,9 @@
 {
 	"platform": "linux-x64",
 	"version": "0.28.0",
+	"commit": "c85afd10a",
 	"sha256": "69b404bb98517f85315135a604cc8d3f855d99a9fa386ecb4b822dc12cf54d15",
-	"source": "github.com/will-bogusz/cua branch will/bench-fixes commit c85afd10a (goliath Ubuntu 24.04 glibc 2.39, cargo build --locked --release -p cua-driver --features cua-driver/portal-input)",
-	"bytes": 50540536
+	"size": 50540536,
+	"url": "https://github.com/will-bogusz/cua/releases/download/cua-driver-0.28.0-c85afd10a/cua-driver-linux-x64",
+	"source": "github.com/will-bogusz/cua commit c85afd10a (goliath Ubuntu 24.04 glibc 2.39, cargo build --locked --release -p cua-driver --features cua-driver/portal-input)"
 }

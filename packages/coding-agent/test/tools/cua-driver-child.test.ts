@@ -1,7 +1,10 @@
 import { describe, expect, it } from "bun:test";
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
 import * as path from "node:path";
 import { CuaDriverChild, CuaDriverExitedError } from "@oh-my-pi/pi-coding-agent/tools/computer/driver";
 import { CuaComputerSession } from "@oh-my-pi/pi-coding-agent/tools/computer/cua-session";
+import { cachedCuaDriver, sha256Hex } from "@oh-my-pi/pi-coding-agent/tools/computer/driver-cache";
 import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import { parseDriverManifest, vendoredDriver } from "@oh-my-pi/pi-coding-agent/tools/computer/vendored";
 
@@ -127,21 +130,18 @@ describe("cua session over a driver child", () => {
 });
 
 describe("vendored driver manifests", () => {
-	// Shape the goliath build writes beside `vendor/cua-driver/linux-x64/cua-driver`.
+	// Shape `scripts/vendor-cua-driver.ts` writes for the goliath build.
 	const linux = {
 		platform: "linux-x64",
 		version: "0.28.0",
+		commit: "c85afd10a",
 		sha256: "05a7b58e15c5e2b2db07e48bdc8cdbb653ebaea3424221ee3720bb8c3c25488f",
-		source: "fork e7e141ae + portal-input, glibc 2.39",
-		bytes: 50459264,
+		size: 50459264,
+		url: "https://github.com/will-bogusz/cua/releases/download/cua-driver-0.28.0-c85afd10a/cua-driver-linux-x64",
+		source: "fork c85afd10a + portal-input, glibc 2.39",
 	};
 	it("accepts a linux-x64 manifest and keeps the platform key authoritative", () => {
-		expect(parseDriverManifest(linux, "linux-x64")).toEqual({
-			platform: "linux-x64",
-			version: "0.28.0",
-			sha256: linux.sha256,
-			source: linux.source,
-		});
+		expect(parseDriverManifest(linux, "linux-x64")).toEqual(linux);
 		// A driver built for another host never stands in for this one.
 		expect(() => parseDriverManifest(linux, "darwin-arm64")).toThrow(
 			"Malformed cua-driver manifest for darwin-arm64",
@@ -149,8 +149,54 @@ describe("vendored driver manifests", () => {
 		expect(() => parseDriverManifest({ ...linux, sha256: "deadbeef" }, "linux-x64")).toThrow(
 			"Malformed cua-driver manifest",
 		);
+		expect(() => parseDriverManifest({ ...linux, url: "http://example.invalid/cua-driver" }, "linux-x64")).toThrow(
+			"Malformed cua-driver manifest",
+		);
 	});
 	it("reports no driver for a platform that is not vendored", async () => {
 		expect(await vendoredDriver("linux-riscv64")).toBeUndefined();
+	});
+});
+
+describe("cua driver download cache", () => {
+	it("refuses a release asset whose bytes do not hash to the manifest and caches one that does", async () => {
+		const genuine = new TextEncoder().encode("#!/bin/sh\necho cua-driver\n");
+		const requests: string[] = [];
+		const server = Bun.serve({
+			port: 0,
+			fetch(request) {
+				const route = new URL(request.url).pathname;
+				requests.push(route);
+				return new Response(route === "/genuine" ? genuine : "#!/bin/sh\necho tampered\n");
+			},
+		});
+		const cacheDir = await fs.mkdtemp(path.join(os.tmpdir(), "cua-driver-cache-"));
+		try {
+			const manifest = {
+				platform: "test-host",
+				version: "0.0.0",
+				commit: "0000000",
+				sha256: sha256Hex(genuine),
+				size: genuine.byteLength,
+				url: `${server.url.origin}/tampered`,
+			};
+			await expect(cachedCuaDriver(manifest, { cacheDir })).rejects.toThrow(
+				`downloaded from ${manifest.url} does not match its manifest: expected sha256 ${manifest.sha256}`,
+			);
+			expect(await fs.readdir(cacheDir)).toEqual([]);
+
+			const executable = await cachedCuaDriver({ ...manifest, url: `${server.url.origin}/genuine` }, { cacheDir });
+			expect(executable).toBe(path.join(cacheDir, manifest.sha256, "cua-driver"));
+			expect(await Bun.file(executable).text()).toBe("#!/bin/sh\necho cua-driver\n");
+			expect((await fs.stat(executable)).mode & 0o111).toBe(0o111);
+			// A cached executable is served without another download.
+			expect(await cachedCuaDriver({ ...manifest, url: `${server.url.origin}/genuine` }, { cacheDir })).toBe(
+				executable,
+			);
+			expect(requests).toEqual(["/tampered", "/genuine"]);
+		} finally {
+			server.stop(true);
+			await fs.rm(cacheDir, { recursive: true, force: true });
+		}
 	});
 });

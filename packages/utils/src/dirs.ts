@@ -813,6 +813,11 @@ export function getNativesDir(): string {
 	return dirs.rootSubdir("natives", "cache");
 }
 
+/** Get the content-addressed cua-driver download cache (~/.omp/cache/cua-driver/<sha256>/cua-driver). */
+export function getCuaDriverCacheDir(): string {
+	return dirs.rootSubdir(path.join("cache", "cua-driver"), "cache");
+}
+
 /** Get the stats database path (~/.omp/stats.db). */
 export function getStatsDbPath(): string {
 	return dirs.rootSubdir("stats.db", "data");

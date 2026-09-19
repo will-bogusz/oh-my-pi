@@ -5,6 +5,7 @@ import { getNativesDir, isEnoent } from "@oh-my-pi/pi-utils";
 import * as logger from "@oh-my-pi/pi-utils/logger";
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import { cachedCuaDriver, sha256Hex } from "./driver-cache";
 import { vendoredDriver } from "./vendored";
 
 /** MCP tool reply from the driver, flattened to what the session consumes. */
@@ -85,17 +86,14 @@ export class CuaDriverExitedError extends ToolError {
 	}
 }
 
-function hash(bytes: Uint8Array): string {
-	return new Bun.CryptoHasher("sha256").update(bytes).digest("hex");
-}
-
 /**
- * The installed executable for this host, copied from the vendored file into
- * the natives cache the first time (or after a driver update). The path is
- * fixed rather than content-addressed for macOS: TCC keys an unbundled
- * binary's grants by path, so replacing the file in place keeps the grant
- * record stable. Other hosts share the layout; it costs them nothing.
- * `manifest.json` beside it names the installed sha256. No network.
+ * The installed executable for this host, copied into the natives cache the
+ * first time (or after a driver update) from the embedded copy in a compiled
+ * binary, else from the download cache, which fetches the manifest's release
+ * asset when it has nothing. The path is fixed rather than content-addressed
+ * for macOS: TCC keys an unbundled binary's grants by path, so replacing the
+ * file in place keeps the grant record stable. Other hosts share the layout;
+ * it costs them nothing. `manifest.json` beside it names the installed sha256.
  */
 export async function installCuaDriver(platform: string = DRIVER_PLATFORM): Promise<string> {
 	const vendored = await vendoredDriver(platform);
@@ -115,11 +113,12 @@ export async function installCuaDriver(platform: string = DRIVER_PLATFORM): Prom
 	} catch (error) {
 		if (!isEnoent(error) && !(error instanceof SyntaxError)) throw error;
 	}
-	const bytes = await Bun.file(vendored.filePath).bytes();
-	const digest = hash(bytes);
+	const executable = vendored.filePath ?? (await cachedCuaDriver(vendored));
+	const bytes = await Bun.file(executable).bytes();
+	const digest = sha256Hex(bytes);
 	if (digest !== vendored.sha256)
 		throw new ToolError(
-			`Vendored cua-driver ${vendored.version} does not match its manifest (sha256 ${digest}); refusing to install it.`,
+			`cua-driver ${vendored.version} at ${executable} does not match its manifest (sha256 ${digest}); refusing to install it.`,
 		);
 	await fs.mkdir(directory, { recursive: true });
 	const staging = `${installed}.${process.pid}.${crypto.randomUUID()}`;
@@ -128,7 +127,7 @@ export async function installCuaDriver(platform: string = DRIVER_PLATFORM): Prom
 	await fs.rename(staging, installed);
 	const { filePath: _filePath, ...manifest } = vendored;
 	await Bun.write(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-	logger.info("Installed vendored cua-driver", {
+	logger.info("Installed cua-driver", {
 		version: vendored.version,
 		sha256: vendored.sha256,
 		path: installed,

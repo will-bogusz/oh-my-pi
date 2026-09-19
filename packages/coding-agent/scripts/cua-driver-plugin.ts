@@ -1,10 +1,14 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
+import { cachedCuaDriver } from "../src/tools/computer/driver-cache";
+import { vendoredDriver } from "../src/tools/computer/vendored";
 
 /**
- * Standalone builds cannot read `vendor/cua-driver` from disk, so this plugin
- * replaces `src/tools/computer/vendored.ts` with a module that embeds the
- * target platform's executable (when one is vendored) as a Bun file asset.
+ * Standalone builds cannot download at run time from inside `$bunfs`, so this
+ * plugin replaces `src/tools/computer/vendored.ts` with a module that embeds
+ * the target platform's executable (when one is vendored) as a Bun file asset.
+ * The executable comes from the same download cache the runtime installer
+ * uses, fetched and sha256-verified against the manifest when absent.
  */
 export async function createCuaDriverPlugin(
 	repoRoot: string,
@@ -14,17 +18,10 @@ export async function createCuaDriverPlugin(
 		.replace(/^bun-/, "")
 		.replace(/-(baseline|modern)$/, "");
 	const sourceModule = await fs.realpath(path.join(repoRoot, "packages/coding-agent/src/tools/computer/vendored.ts"));
-	const directory = path.join(repoRoot, "vendor/cua-driver", platform);
-	const manifestFile = Bun.file(path.join(directory, "manifest.json"));
+	const manifest = await vendoredDriver(platform);
 	let contents = "export async function vendoredDriver() { return undefined; }";
-	if (await manifestFile.exists()) {
-		const manifest: unknown = await manifestFile.json();
-		if (!manifest || typeof manifest !== "object" || !("sha256" in manifest) || typeof manifest.sha256 !== "string")
-			throw new Error(`Invalid cua-driver manifest for ${platform}`);
-		const executable = path.join(directory, "cua-driver");
-		const digest = new Bun.CryptoHasher("sha256").update(await Bun.file(executable).bytes()).digest("hex");
-		if (digest !== manifest.sha256)
-			throw new Error(`Vendored cua-driver for ${platform} does not match its manifest`);
+	if (manifest) {
+		const executable = await cachedCuaDriver(manifest);
 		contents = [
 			`import filePath from ${JSON.stringify(executable)} with { type: "file" };`,
 			`const manifest = ${JSON.stringify(manifest)};`,
