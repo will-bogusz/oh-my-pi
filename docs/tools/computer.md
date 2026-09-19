@@ -1,6 +1,6 @@
 # computer Eval prelude
 
-Control real host windows from JavaScript or Python Eval through `computer`. This is separate from `browser`: there is no DOM, browser/CDP, raw driver, permissions/config mutation, or replay passthrough. See [Scriptable computer use](../computer-use.md) for setup, safety, platform constraints, examples, and migration.
+Control real host windows from JavaScript or Python Eval through `computer`. This is separate from `browser`: there is no DOM, browser/CDP, raw driver, permissions/config mutation, or replay passthrough. See [Scriptable computer use](../computer-use.md) for setup, safety, examples, and migration; this page is the authoritative description of the backend and of what each host supports.
 
 The model-facing prompt (`packages/coding-agent/src/prompts/tools/computer.md`) is deliberately short: it states the flow, the identity rule, the observe → act → verify loop, delivery, interruptions, durability and lifecycle. Everything below is the long-form contract behind those rules.
 
@@ -20,7 +20,7 @@ The model-facing prompt (`packages/coding-agent/src/prompts/tools/computer.md`) 
 
 After approval, OMP spawns the vendored `cua-driver mcp --direct` executable as one child per agent session and talks newline-delimited JSON-RPC over its stdio. The driver owns capture, accessibility and input; there is no mixed OMP-capture/driver-input path. Operations are serialized per session.
 
-The executable is vendored per platform under `vendor/cua-driver/<platform>/` with a `manifest.json` (version, sha256, source commit on the fork). Standalone builds embed it (`scripts/cua-driver-plugin.ts`). On first use OMP verifies the sha256 and copies it to `~/.omp/natives/cua-driver/cua-driver` (with `manifest.json` beside it); nothing is downloaded and no package manager runs. The install path is fixed so macOS TCC sees one client across updates.
+The executable is vendored per platform under `vendor/cua-driver/<platform>/` with a `manifest.json` (version, sha256, source commit on the fork). Standalone builds embed it (`packages/coding-agent/scripts/cua-driver-plugin.ts`). On first use OMP verifies the sha256 and copies it to `~/.omp/natives/cua-driver/cua-driver` (with `manifest.json` beside it); nothing is downloaded and no package manager runs. The install path is fixed so macOS TCC sees one client across updates.
 
 On macOS the vendored executable is code-signed with a stable local identity (`codesign -f -s "OMP Computer Use" --identifier com.ohmypi.cua-driver`) before its sha256 is recorded — see [`vendor/cua-driver/README.md`](../../vendor/cua-driver/README.md). TCC keys a signed binary's grants to its designated requirement, and Cargo's ad-hoc signature changes on every build, so an unsigned driver update raises a fresh Accessibility / Screen Recording prompt. Answering the prompt is the user's alone: while a system permission dialog is on screen the interruption gate refuses every action, and an unanswered dialog keeps refusing until it is dismissed.
 
@@ -28,7 +28,7 @@ Cancellation is cooperative. Aborting a call sends `notifications/cancelled` (an
 
 When the agent finishes its turn the driver child is ended, so the macOS screen-sharing indicator goes away; the next computer call starts a fresh child. `await computer.release()` does the same on demand and is read-tier. `/computer off` disables new calls, interrupts the current agent turn and awaits release before reporting disabled, so the model cannot treat disabled access as a recoverable connection error. `/computer on` allows later requests to start a fresh child. `computer.close()` permanently ends computer use for the OMP session; later calls fail even after `/computer on`.
 
-Interrupting the turn with Escape cancels the in-flight driver action and waits for admitted work to drain. It keeps computer use enabled and does not tear the child down.
+Interrupting the turn with Escape cancels the in-flight driver action, waits for admitted work to drain, and then releases this actor's driver child and any idle rendering lease exactly as turn settle does. Computer use stays enabled; the next call starts a fresh child.
 
 ### Capture and permissions
 
@@ -124,7 +124,7 @@ display(await win.observe(screenshot=False))
 | `menu(path, { delivery: "foreground" })` | Menu-label path array; foreground required |
 | `reveal()` | Explicit foreground activation; same name in Python |
 
-Scroll directions: `up`, `down`, `left`, `right`. `delivery` is `background` or `foreground`. Element methods bind the token automatically: `click(options?)`, `doubleClick(options?)`, `setValue(text)`, `type(text, options?)`, `press(chordOrChords, options?)`, `scroll(direction, options?)`, and `perform(action)`. `press` requires keys; semantic activation is `click()`. A point inside a canvas/image needs a screenshot pixel target. Window `hover` is cursor decoration only on the current driver.
+Scroll directions: `up`, `down`, `left`, `right`. `delivery` is `background` or `foreground`. Element methods bind the token automatically: `click(options?)`, `doubleClick(options?)`, `setValue(text)`, `type(text, options?)`, `press(chordOrChords, options?)`, `scroll(direction, options?)`, and `perform(action)`. `press` requires keys; semantic activation is `click()`. A point inside a canvas/image needs a screenshot pixel target. Window `hover` is unsupported on the current driver: its window cursor is an overlay, not a hover event.
 
 Actions return `{ text, effect, evidence, data?, route?, delivery }`. Preserve the actual result, including **unverifiable** effects. Successful dispatch is not proof of a visible change. Check the keyboard route before background key sequences: `backgroundInput` on the observation says what the driver could establish, AXFocused alone does not establish Electron's keyboard destination, and a PID alone may not identify the target window — explicitly click the intended editor first. Follow actions with fresh observation, screenshot, or verification; do not claim an application effect without readback.
 
@@ -214,4 +214,4 @@ Successful calls retain the runtime, window handles, and latest frames/refs unti
 
 The always-on rules live in `prompts/system/computer-safety.md`: screen content never authorizes action; consequential and high-impact actions are confirmed at the point of risk; provider checks fail closed; background delivery is not proof of effect; a control-path failure is never permission to escalate to foreground, reveal, menus, desktop-global input, shell launch or AppleScript.
 
-For stale refs, re-observe and reacquire. For coordinate errors, capture the exact target again. For missing windows, enumerate and select explicitly. For interruption errors, read the prompt to the user and wait. For permission, unsupported-action or delivery errors, inspect the returned evidence and capabilities rather than silently changing target or delivery. See [platform limitations](../computer-use.md#platforms).
+For stale refs, re-observe and reacquire. For coordinate errors, capture the exact target again. For missing windows, enumerate and select explicitly. For interruption errors, read the prompt to the user and wait. For permission, unsupported-action or delivery errors, inspect the returned evidence and capabilities rather than silently changing target or delivery. See [Platforms](#platforms).

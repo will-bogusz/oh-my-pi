@@ -75,7 +75,7 @@ This pattern policy controls approval for the `bash` tool; it is not process or 
 
 The disabled-by-default Eval [`computer` API](./computer-use.md) chooses its tier per call:
 
-- direct helpers (`computer.windows()`, `win.observe()`, `win.screenshot()`, `win.find()`, `win.verify()`, `computer.clipboard.read()`, …) use `read` when the invoked method is inspection-only and `exec` for input, launch, frame/menu/raise operations, element mutation, and `clipboard.write`; read calls also run under the worker's read-only guard before backend dispatch. Element `value` and `bounds` are immutable snapshot fields, not inspection methods;
+- direct helpers (`computer.windows()`, `win.observe()`, `win.screenshot()`, `win.find()`, `win.verify()`, `computer.clipboard.read()`, …) use `read` when the invoked method is inspection-only and `exec` for input, launch, frame/menu/raise operations, element mutation, and `clipboard.write`; read calls also run under the current-run read-only guard before backend dispatch. Element `value` and `bounds` are immutable snapshot fields, not inspection methods;
 - `computer.run(fnOrCode, options)` uses `read` only for `read_only: true` (JavaScript trailing option or Python keyword); `read_only: false`, a missing field, malformed arguments, or any other value uses `exec`.
 
 The approval prompt shows `read-only` when applicable, followed by the resolved JavaScript (truncated to 2,000 characters by the standard formatter). For `computer.run`, `read_only` is a trust declaration enforced by the approval tier, not static analysis of the script.
