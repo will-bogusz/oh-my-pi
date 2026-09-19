@@ -31,5 +31,6 @@ macOS
 - A `pointerdown`-driven control (common in Chromium and Electron) ignores a background press and reports `suspected_noop`: screenshot, then click its pixel centre with `delivery: "foreground"`. Check `backgroundInput` before sending keys; in Electron, click the editor first.
 - A write that is not proven names what to do about it; a proven one says nothing. Do what the sentence says — it is composed from what the driver read back, and it is named again by the next observation or capture of that window.
 - Chords: `"cmd+shift+p"` with `cmd|shift|option|ctrl|fn`; an unknown modifier name is not a key and may type its base key alone.
+- A chord at a window that is not key, when it is the key equivalent of a menu item the app keeps disabled until then, is delivered as that menu command instead: the reply leads with `Delivered as menu command <path> (app fronted: yes/no)` — the window was made key for it and the prior frontmost restored. A change that did not survive that restore is named with the control to address instead; the foreground rung has nothing more to offer there.
 {{/if}}
 </instruction>

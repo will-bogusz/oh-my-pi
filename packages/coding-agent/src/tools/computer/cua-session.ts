@@ -690,6 +690,40 @@ function evidenceDelivery(value: unknown): string | undefined {
 	return typeof mode === "string" ? mode : undefined;
 }
 /**
+ * The menu titles a `menu_command` reply says it dispatched, top level first.
+ * Contract 0.10.0 publishes them as `menu_path` beside the route; the route
+ * alone says the keystrokes became the app's own menu command, the path says
+ * which.
+ */
+function menuCommandPath(data: Wire): readonly string[] | undefined {
+	if (data.route !== "menu_command" || !Array.isArray(data.menu_path)) return undefined;
+	const path = data.menu_path.filter((segment): segment is string => typeof segment === "string");
+	return path.length ? path : undefined;
+}
+/**
+ * The driver's own activation sentence on the menu-command route names one
+ * of two things: the application was fronted, or only its window was made
+ * key (the app was already frontmost). The closed contract carries only
+ * `delivery.mode: foreground` for both, so the distinction is read off the
+ * sentence the driver composed from what it did.
+ */
+const APP_FRONTED = /was not the frontmost application, so it was fronted/;
+const WINDOW_MADE_KEY = /so it was made key for the dispatch|was already key/;
+/**
+ * The reply line for keystrokes the driver dispatched as the app's menu
+ * command: measured on Notes, the model reading `Pressed cmd+option+f` never
+ * learned that the chord had become `Edit > Find > Note List Search…` with
+ * the window made key, nor whether an app it was driving in the background
+ * had been brought to the front for it.
+ */
+function menuCommandLine(data: Wire, text: string): string | undefined {
+	const path = menuCommandPath(data);
+	if (path === undefined) return undefined;
+	const verb = data.effect === "suspected_noop" ? "Dispatched" : "Delivered";
+	const fronted = APP_FRONTED.test(text) ? "yes" : WINDOW_MADE_KEY.test(text) ? "no" : undefined;
+	return `${verb} as menu command ${path.join(" > ")}${fronted === undefined ? "" : ` (app fronted: ${fronted})`}`;
+}
+/**
  * What the driver reported about an action that threw, and only that: the
  * route it took, the rung it delivered on, what it believes happened, and the
  * rung it would escalate to. Each field is printed when the reply carries it.
@@ -2303,7 +2337,13 @@ export class CuaComputerSession implements ComputerBackend {
 		args: Wire,
 		text: string,
 		target: string | undefined,
-		state: { remembered: boolean; unproven: boolean; noop: boolean; reason: string | undefined },
+		state: {
+			remembered: boolean;
+			unproven: boolean;
+			noop: boolean;
+			reason: string | undefined;
+			menuCommand: readonly string[] | undefined;
+		},
 	): string | undefined {
 		const windowId = typeof args.window_id === "number" ? String(args.window_id) : undefined;
 		const keyboard = KEYBOARD_TOOLS[name] === true;
@@ -2312,6 +2352,24 @@ export class CuaComputerSession implements ComputerBackend {
 			windowId === undefined ? undefined : this.#fieldRoute(windowId, this.#refForToken(args.element_token));
 		const menu = windowId === undefined ? undefined : this.#menuRoute(windowId);
 		const read = keyboard ? KEYBOARD_READ_ROUTE : OBSERVE_ROUTE;
+		// A chord the driver dispatched as the app's own menu command had the
+		// window made key for it; the foreground rung has nothing more to make
+		// key, so it is never the route here (measured: Notes' Find chord,
+		// where the foreground chord was as inert as the background one).
+		if (keyboard && state.menuCommand !== undefined) {
+			if (target === "element")
+				return `${
+					field ??
+					`address the control the command targets — this session holds no text row for window ${windowId ?? "(unknown)"}, so observe it first and write the row that walk mints`
+				}, or raise the window (win.raise()) and keep it key before re-running`;
+			if (state.noop)
+				return `the driver dispatched these keystrokes as the menu command ${state.menuCommand.join(
+					" > ",
+				)} with the window key and still saw no reaction, so re-sending them on any rung lands nothing new — ${
+					field ?? read
+				}`;
+			return undefined;
+		}
 		const rung =
 			keyboard && state.noop && !foregroundTaken
 				? 'these keystrokes went out in the background, which leaves this window not the app\'s key window — re-run with { delivery: "foreground" }, which makes it key first'
@@ -2362,6 +2420,7 @@ export class CuaComputerSession implements ComputerBackend {
 			unproven: effect !== "confirmed",
 			noop,
 			reason,
+			menuCommand: menuCommandPath(data),
 		});
 		if (route === undefined) return undefined;
 		if (target === undefined) return `⚠️ The driver reports no observed change: ${route}.`;
@@ -2401,8 +2460,13 @@ export class CuaComputerSession implements ComputerBackend {
 		const reported = preludeVocabulary(result.text);
 		const escalation = this.#escalation(name, args, data, reported);
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
+		// Keystrokes the driver turned into the app's own menu command lead
+		// with that fact: the driver's sentence starts with the chord.
+		const menuCommand = KEYBOARD_TOOLS[name] === true ? menuCommandLine(data, reported) : undefined;
+		const menuPath = menuCommand === undefined ? undefined : menuCommandPath(data);
 		return {
 			text: [
+				menuCommand,
 				reported,
 				escalation,
 				opened,
@@ -2418,6 +2482,7 @@ export class CuaComputerSession implements ComputerBackend {
 			delivery: data.delivery ?? args.delivery_mode ?? "background",
 			...(committed === undefined ? {} : { committed }),
 			...(escalation === undefined ? {} : { escalation }),
+			...(menuPath === undefined ? {} : { menuPath }),
 			interruptedBy,
 			data,
 		};

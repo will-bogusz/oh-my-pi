@@ -14,7 +14,7 @@ import type {
 	ComputerPoint,
 } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
 import type { WindowRosterSample } from "@oh-my-pi/pi-coding-agent/tools/computer/interruption";
-/** The fork's generated tool contract at 6ee6d76324 (`libs/cua-driver/contract/manifest.json`). */
+/** The fork's generated tool contract at 0d897a672 (`libs/cua-driver/contract/manifest.json`, 0.10.0). */
 import contract from "../fixtures/cua-contract-manifest.json";
 
 type Wire = Record<string, unknown>;
@@ -4684,5 +4684,77 @@ it("answers every contracted tool with a payload upstream's success schema accep
 		} finally {
 			await f.close();
 		}
+	}
+});
+
+it("leads with the menu command a chord was dispatched as and never names the foreground rung for it", async () => {
+	const f = await fixture();
+	const pressed = async (data: Wire, text: string) => {
+		f.state.hook = async name =>
+			name === "hotkey"
+				? { text, structuredJson: JSON.stringify(wireResult(data)), isError: false, images: [] }
+				: undefined;
+		return f.session.press(f.context, f.window, "cmd+option+f");
+	};
+	// Recorded from the fork build on Notes (2026-09-19): the app was fronted,
+	// the search field took focus while the window was key and released it
+	// when the prior frontmost came back.
+	const fronted =
+		"Dispatched cmd+option+f to pid 101 as its menu command Edit > Find > Note List Search…: the application keeps that item disabled until window 1 is key, so the chord itself could not land there. pid 101 was not the frontmost application, so it was fronted and window 1 made key for the dispatch, then the prior frontmost was restored.\n🔎 Delivered: app_focus changed after the dispatch, so the app reacted. That is delivery, not the intended result — check the postcondition you wanted. ⚠️ That change (app_focus) did not survive restoring the prior frontmost: the command's effect holds only while window 1 is key. Re-sending the chord on any delivery mode lands nothing new — address the control the command targets directly, or raise the window first and keep it key.";
+	const menu = {
+		delivery: { mode: "foreground" },
+		effect: "unverifiable",
+		evidence: [{ kind: "observed_change", signal: "app_focus" }],
+		menu_path: ["Edit", "Find", "Note List Search…"],
+		route: "menu_command",
+	};
+	try {
+		f.state.role = "AXTextField";
+		f.state.subrole = "AXSearchField";
+		f.state.enabled = true;
+		const observed = await f.session.observe(f.context, f.window);
+		const field = observed.elements[0]!.ref;
+		const reverted = await pressed(
+			{ ...menu, escalation: { reason: "route_unavailable", target: "element" } },
+			fronted,
+		);
+		expect(reverted.text.split("\n")[0]).toBe(
+			"Delivered as menu command Edit > Find > Note List Search… (app fronted: yes)",
+		);
+		expect(reverted.menuPath).toEqual(["Edit", "Find", "Note List Search…"]);
+		expect(reverted.route).toBe("menu_command");
+		expect(reverted.escalation).toBe(
+			`⚠️ The driver escalates this action (route_unavailable): address the field itself: win.ref(${JSON.stringify(field)}).type("<text>") or win.ref(${JSON.stringify(field)}).setValue("<value>"), or raise the window (win.raise()) and keep it key before re-running.`,
+		);
+		expect(reverted.text).not.toContain('{ delivery: "foreground" }');
+		// The same-app case: only the window was made key, and the change held.
+		const held = await pressed(
+			menu,
+			"Dispatched cmd+option+l to pid 101 as its menu command Window > Arrange > Left: the application keeps that item disabled until window 1 is key, so the chord itself could not land there. window 1 was not pid 101's key window, so it was made key for the dispatch, then the prior frontmost was restored.\n🔎 Delivered: window_tree changed after the dispatch, so the app reacted. That is delivery, not the intended result — check the postcondition you wanted. That change is still in place after the restore.",
+		);
+		expect(held.text.split("\n")[0]).toBe(
+			"Delivered as menu command Edit > Find > Note List Search… (app fronted: no)",
+		);
+		expect(held.escalation).toBeUndefined();
+		// No reaction at all: the rung that would make the window key is the one
+		// that just ran, so the advice is the field or a read, never foreground.
+		const inert = await pressed(
+			{ ...menu, effect: "suspected_noop", evidence: null },
+			"Dispatched cmd+option+f to pid 101 as its menu command Edit > Find > Note List Search…: the application keeps that item disabled until window 1 is key, so the chord itself could not land there. window 1 was already key.\n⚠️ Unverified: the target was watched for 500 ms after the dispatch and nothing changed (focused element, app focus, window contents) — re-observe before repeating. The dispatch may still have landed, so a second call could act twice.",
+		);
+		expect(inert.text.split("\n")[0]).toBe(
+			"Dispatched as menu command Edit > Find > Note List Search… (app fronted: no)",
+		);
+		expect(inert.escalation).toContain("as the menu command Edit > Find > Note List Search… with the window key");
+		expect(inert.escalation).not.toContain("foreground");
+		// The remembered-rung machinery is untouched: a menu-command reply names
+		// no foreground escalation, so the next chord stays background.
+		await pressed(
+			{ delivery: { mode: "background" }, effect: "unverifiable", route: "synthetic_events" },
+			"Pressed cmd+option+f on pid 101.",
+		);
+		expect(f.calls.at(-1)?.args.delivery_mode).toBeUndefined();
+	} finally {
+		await f.close();
 	}
 });

@@ -209,6 +209,13 @@ export interface ComputerActionResult {
 	 */
 	escalation?: string;
 	/**
+	 * Keystrokes the driver dispatched as the application's own menu command
+	 * (`route: "menu_command"`): the menu titles it pressed, top level first.
+	 * The window was made key for it and the prior frontmost restored; that is
+	 * never a background delivery.
+	 */
+	menuPath?: readonly string[];
+	/**
 	 * System UI that appeared while this action ran. The action itself was
 	 * dispatched, so its evidence still describes the target; the environment
 	 * changed under it and the next action will be refused.
