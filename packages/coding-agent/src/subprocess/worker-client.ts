@@ -1,17 +1,20 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { Process } from "@oh-my-pi/pi-natives";
 import {
 	$env,
+	$which,
 	isBunTestRuntime,
 	isCompiledBinary,
+	isExecutable,
+	isFullyQualifiedPath,
 	logger,
 	postmortem,
 	stripWindowsExtendedLengthPathPrefix,
-	withTimeout,
+	WhichCachePolicy,
 	workerHostEntry,
 } from "@oh-my-pi/pi-utils";
+import { stripGitRepoLocationEnv } from "@oh-my-pi/pi-utils/env";
 import type { Subprocess } from "bun";
 
 /**
@@ -87,8 +90,6 @@ export interface SpawnedSubprocess<Outbound> {
 	 * wall-clock timers.
 	 */
 	stderrDrained: Promise<void>;
-	/** Computer-only owned tree barrier; inference workers retain root-only teardown. */
-	terminateTree?: () => Promise<void>;
 }
 
 /**
@@ -111,6 +112,33 @@ export interface WorkerSpawnCommand {
 export const SMOKE_TEST_TIMEOUT_MS = 30_000;
 
 /**
+ * Resolve the current executable path, falling back to finding the binary on
+ * PATH if the original physical path was unlinked on disk (e.g. Homebrew or a
+ * package manager pruned the prior version directory during an in-flight
+ * upgrade, leaving `process.execPath` pointing at a missing path).
+ */
+export function resolveExecutablePath(): string {
+	const executable = stripWindowsExtendedLengthPathPrefix(process.execPath);
+	if (isCompiledBinary() && !isExecutable(executable)) {
+		const argv0 = stripWindowsExtendedLengthPathPrefix(process.argv0);
+		const isPath = argv0.includes("/") || argv0.includes("\\") || argv0.includes(":");
+		const candidates = [
+			// Prefer the original launcher when invoked with an absolute path
+			isFullyQualifiedPath(argv0) ? argv0 : null,
+			!isPath ? $which(argv0, { requireAbsolutePaths: true, cache: WhichCachePolicy.Bypass }) : null,
+			// Generic fallback to finding "omp" on PATH
+			$which("omp", { requireAbsolutePaths: true, cache: WhichCachePolicy.Bypass }),
+		];
+		for (const candidate of candidates) {
+			if (candidate && isExecutable(candidate)) {
+				return candidate;
+			}
+		}
+	}
+	return executable;
+}
+
+/**
  * Resolve the command that re-enters this CLI's entrypoint: the compiled
  * binary itself, or the runtime plus the declared worker-host entry. Used by
  * the TUI `/restart` relaunch; workers go through {@link resolveWorkerSpawnCmd},
@@ -119,7 +147,7 @@ export const SMOKE_TEST_TIMEOUT_MS = 30_000;
  * absolute path of `src/cli.ts` so the relaunch keeps the caller's cwd.
  */
 export function resolveCliEntryCmd(): string[] {
-	const executable = stripWindowsExtendedLengthPathPrefix(process.execPath);
+	const executable = resolveExecutablePath();
 	if (isCompiledBinary()) return [executable];
 	const hostEntry = workerHostEntry();
 	if (hostEntry) return [executable, hostEntry];
@@ -138,7 +166,7 @@ export function resolveCliEntryCmd(): string[] {
  * IPC handles more reliably under `bun test`.
  */
 export function resolveWorkerSpawnCmd(workerArg: string): WorkerSpawnCommand {
-	const executable = stripWindowsExtendedLengthPathPrefix(process.execPath);
+	const executable = resolveExecutablePath();
 	if (isCompiledBinary()) return { cmd: [executable, workerArg] };
 	const hostEntry = workerHostEntry();
 	if (hostEntry) {
@@ -160,6 +188,9 @@ export function workerEnvFromParent(overlay?: Record<string, string>): Record<st
 		const value = base[key];
 		if (typeof value === "string") merged[key] = value;
 	}
+	// Inherited repo-location overrides must not reach a worker or the PTY
+	// daemons it hosts (issue #11082); an explicit overlay still wins below.
+	stripGitRepoLocationEnv(merged);
 	if (overlay) {
 		for (const key in overlay) merged[key] = overlay[key];
 	}
@@ -198,35 +229,6 @@ export function inferenceWorkerEnv(overlay?: Record<string, string>): Record<str
 	return workerEnvFromParent({ ...nativeLibraryPathOverlay($env, process.platform), ...overlay });
 }
 
-// The outer process remains the owned group leader even if an installer or the
-// actual worker exits first. Keep this bootstrap native-free: inner CLI startup
-// and --no-addons readiness must not initialize a desktop backend.
-const OWNED_WORKER_BOOTSTRAP = `
-const env = { ...process.env };
-const command = JSON.parse(env.OMP_OWNED_WORKER_COMMAND);
-const originalBunMode = env.OMP_OWNED_WORKER_BUN_MODE;
-delete env.OMP_OWNED_WORKER_COMMAND;
-delete env.OMP_OWNED_WORKER_BUN_MODE;
-if (originalBunMode) env.BUN_BE_BUN = originalBunMode;
-else delete env.BUN_BE_BUN;
-const child = Bun.spawn({
-	cmd: command, env, stdin: "ignore", stdout: "ignore", stderr: "inherit",
-	serialization: "advanced", windowsHide: true,
-	ipc(message) { process.send?.({ kind: "message", message }); },
-	onExit(_proc, exitCode, signalCode) {
-		process.send?.({ kind: "exit", exitCode, signalCode });
-	},
-});
-process.on("message", message => { if (child.exitCode === null) child.send(message); });
-// Retain child (including its Windows process handle) and keep the boundary
-// alive after its exit. The parent owns the hard-kill/exit barrier.
-setInterval(() => { void child.exitCode; }, 2147483647);
-process.on("disconnect", () => {
-	if (process.platform !== "win32") process.kill(-process.pid, "SIGKILL");
-	else { child.kill("SIGKILL"); process.exit(1); }
-});
-`;
-
 /**
  * Spawn an inference worker subprocess and wire its IPC fan-out. Stdio is
  * captured (stderr redirected to a temp file, stdout ignored) so native
@@ -246,8 +248,6 @@ export function createWorkerSubprocess<Outbound>(options: {
 	exitLabel: string;
 	/** Start the child as a new process-group/session leader where Bun supports it. */
 	detached?: boolean;
-	/** Keep a computer-only relay alive as the owned worker/installer group leader. */
-	ownedProcessTree?: boolean;
 	/** Treat exit code 0 as unexpected; eval cells can call process.exit(0). */
 	reportCleanExit?: boolean;
 	/** Whether an idle worker should stop keeping the parent event loop alive. */
@@ -262,7 +262,6 @@ export function createWorkerSubprocess<Outbound>(options: {
 	let stderrDrainStarted = false;
 	// Reassigned once the worker IPC fault handler is registered (after spawn);
 	// invoked from onExit to drop the registration.
-	let innerExited = false;
 	let unregisterFault: () => void = () => {};
 	const startStderrDrain = (): void => {
 		if (stderrDrainStarted) return;
@@ -270,42 +269,17 @@ export function createWorkerSubprocess<Outbound>(options: {
 		void drainStderrCapture(stderrCapture, options.exitLabel, stderrTail).finally(() => stderrDrained.resolve());
 	};
 	const proc = Bun.spawn({
-		cmd: options.ownedProcessTree ? [process.execPath, "-e", OWNED_WORKER_BOOTSTRAP] : options.spawnCommand.cmd,
+		cmd: options.spawnCommand.cmd,
 		cwd: options.spawnCommand.cwd,
-		detached: options.ownedProcessTree || options.detached,
-		env: options.ownedProcessTree
-			? {
-					...options.env,
-					BUN_BE_BUN: "1",
-					OMP_OWNED_WORKER_COMMAND: JSON.stringify(options.spawnCommand.cmd),
-					OMP_OWNED_WORKER_BUN_MODE: options.env.BUN_BE_BUN ?? "",
-				}
-			: options.env,
+		detached: options.detached,
+		env: options.env,
 		stdin: "ignore",
 		stdout: "ignore",
 		stderr: stderrCapture.target,
 		serialization: "advanced",
 		windowsHide: true,
 		ipc(message) {
-			if (options.ownedProcessTree) {
-				const envelope = message as
-					| { kind: "message"; message: Outbound }
-					| { kind: "exit"; exitCode: number | null; signalCode: string | null };
-				if (envelope.kind === "exit") {
-					innerExited = true;
-					if (!intentionalExit.value) {
-						const reason =
-							envelope.exitCode !== null
-								? `code ${envelope.exitCode}`
-								: `signal ${envelope.signalCode ?? "unknown"}`;
-						for (const handler of errors) handler(new Error(`${options.exitLabel} exited with ${reason}`));
-					}
-					return;
-				}
-				for (const handler of inbound) handler(envelope.message);
-			} else {
-				for (const handler of inbound) handler(message as Outbound);
-			}
+			for (const handler of inbound) handler(message as Outbound);
 		},
 		onExit(_proc, exitCode, signalCode) {
 			unregisterFault();
@@ -327,65 +301,6 @@ export function createWorkerSubprocess<Outbound>(options: {
 			});
 		},
 	});
-	let terminatingTree: Promise<void> | undefined;
-	const terminateTree = options.ownedProcessTree
-		? () =>
-				(terminatingTree ??= (async () => {
-					intentionalExit.value = true;
-					// Static import would load the addon during --no-addons worker
-					// readiness. Teardown alone needs maintained ptree's native primitive.
-					const { Process } = await import("@oh-my-pi/pi-natives");
-					const root = Process.fromPid(proc.pid);
-					if (proc.exitCode !== null) throw new Error(`${options.exitLabel}: owned boundary exited unexpectedly`);
-					if (!root) throw new Error(`${options.exitLabel}: process identity could not be retained`);
-					const descendants: Process[] = [];
-					const collect = (parent: Process): void => {
-						for (const child of parent.children()) {
-							descendants.push(child);
-							collect(child);
-						}
-					};
-					collect(root);
-					if (process.platform === "win32") {
-						root.killTree(9);
-						if (innerExited) {
-							throw new Error(`${options.exitLabel}: Windows orphan tree exit cannot be confirmed`);
-						}
-					} else {
-						if (root.groupId() !== proc.pid) {
-							throw new Error(`${options.exitLabel}: owned process group was not confirmed`);
-						}
-						root.killTree(9);
-						// Probe only after the hard wave. Never send another signal using a
-						// possibly stale PGID. A timeout is unconfirmed cleanup, not success.
-						const deadline = Date.now() + 5_000;
-						for (;;) {
-							try {
-								process.kill(-proc.pid, 0);
-							} catch (error) {
-								const code = (error as NodeJS.ErrnoException).code;
-								if (code === "ESRCH") break;
-								// Darwin can report EPERM while a killed group is exiting.
-								// It still means unconfirmed, never absent: keep probing until
-								// ESRCH or the deadline, including for persistent denial.
-								if (code !== "EPERM") throw error;
-							}
-							if (Date.now() >= deadline) throw new Error(`${options.exitLabel}: process group did not exit`);
-							await Bun.sleep(10);
-						}
-					}
-					const exited = await Promise.all(
-						[root, ...descendants].map(child => child.waitForExit({ timeoutMs: 5_000 })),
-					);
-					if (exited.some(value => !value))
-						throw new Error(`${options.exitLabel}: descendant exit was not confirmed`);
-					await withTimeout(
-						Promise.all([proc.exited, stderrDrained.promise]),
-						5_000,
-						`${options.exitLabel}: boundary exit and stderr drain timed out`,
-					);
-				})())
-		: undefined;
 	// Bun raises a malformed advanced-serialization frame as a process-global
 	// uncaughtException with no channel attribution (oven-sh/bun#37287). Register
 	// a fault handler so that failure rejects this worker's in-flight requests and
@@ -401,11 +316,7 @@ export function createWorkerSubprocess<Outbound>(options: {
 		// the SIGKILL's onExit does not surface a duplicate error.
 		intentionalExit.value = true;
 		try {
-			if (terminateTree)
-				void terminateTree().catch(error => {
-					for (const handler of errors) handler(error);
-				});
-			else proc.kill("SIGKILL");
+			proc.kill("SIGKILL");
 		} catch {
 			// Already gone.
 		}
@@ -414,7 +325,7 @@ export function createWorkerSubprocess<Outbound>(options: {
 	// path calls `terminate()` explicitly. Bun's test runner starves IPC for
 	// unref'd subprocesses, so keep it referenced only under tests.
 	if (!isBunTestRuntime() && options.unref !== false) proc.unref();
-	return { proc, inbound, errors, intentionalExit, stderrDrained: stderrDrained.promise, terminateTree };
+	return { proc, inbound, errors, intentionalExit, stderrDrained: stderrDrained.promise };
 }
 
 /**
@@ -554,7 +465,6 @@ export function createWorkerHandle<Inbound, Outbound>(
 			return () => errors.delete(handler);
 		},
 		async terminate() {
-			if (spawned.terminateTree) return spawned.terminateTree();
 			intentionalExit.value = true;
 			try {
 				proc.kill("SIGKILL");

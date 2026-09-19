@@ -6,7 +6,7 @@ import { disposeVmContextsByOwner, invokeJsTool } from "../../src/eval/js/contex
 import { executeJs } from "../../src/eval/js/executor";
 import { disposeKernelSessionsByOwner } from "../../src/eval/py/executor";
 import type { EvalPreludeDefinition } from "../../src/eval/preludes";
-import type { EvalStatusEvent, EvalToolDetails } from "../../src/eval/types";
+import type { EvalStatusEvent, EvalToolDetails } from "@oh-my-pi/pi-tui/tools/eval";
 import type { ToolSession } from "../../src/tools";
 import { createComputerPrelude } from "../../src/tools/computer";
 import type { ComputerBackend } from "../../src/tools/computer/backend";

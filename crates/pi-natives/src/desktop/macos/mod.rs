@@ -51,10 +51,6 @@ impl MacosBackend {
 }
 
 impl Backend for MacosBackend {
-	fn pin_window(&mut self, id: &str, pid: u32) -> CoreResult<()> {
-		self.capture.pin_window(id, pid)
-	}
-
 	fn capabilities(&mut self) -> DesktopCapabilities {
 		let capture_permission = capture::capture_permission();
 		let input_permission = ax::is_trusted();
@@ -145,39 +141,6 @@ impl Backend for MacosBackend {
 			)));
 		}
 		Ok(())
-	}
-
-	fn set_window_frame(
-		&mut self,
-		window: &DesktopWindow,
-		x: f64,
-		y: f64,
-		width: f64,
-		height: f64,
-	) -> CoreResult<()> {
-		ax::set_window_frame(window, x, y, width, height)
-	}
-
-	fn invoke_menu(&mut self, window: &DesktopWindow, path: &[String]) -> CoreResult<()> {
-		Self::require_input_permission()?;
-		let current = self.capture.window(&window.id)?;
-		if current.pid != window.pid {
-			return Err(DesktopError::invalid_target("menu target owner changed"));
-		}
-		let pid = window
-			.pid
-			.and_then(|pid| i32::try_from(pid).ok())
-			.ok_or_else(|| {
-				DesktopError::invalid_target("menu target has no valid process identity")
-			})?;
-		let wid = window
-			.id
-			.parse::<u32>()
-			.map_err(|_| DesktopError::invalid_target("invalid menu window id"))?;
-		skylight::with_foreground(pid, wid, || {
-			ax::prepare_foreground_input(window)?;
-			self.ax.invoke_menu(window, path)
-		})
 	}
 
 	fn ax(&mut self) -> Option<&mut dyn AxBackend> {

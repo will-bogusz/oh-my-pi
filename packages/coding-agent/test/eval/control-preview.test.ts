@@ -15,12 +15,8 @@ import {
 	ensurePyToolBridge,
 	registerPyToolBridge,
 } from "@oh-my-pi/pi-coding-agent/eval/py/tool-bridge";
-import type {
-	ControlImageReference,
-	EvalDisplayOutput,
-	EvalStatusEvent,
-	EvalToolDetails,
-} from "@oh-my-pi/pi-coding-agent/eval/types";
+import type { ControlImageReference, EvalStatusEvent, EvalToolDetails } from "@oh-my-pi/pi-tui/tools/eval";
+import type { EvalDisplayOutput } from "@oh-my-pi/pi-coding-agent/eval/types";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { EvalTool } from "@oh-my-pi/pi-coding-agent/tools/eval";
 import { $which } from "@oh-my-pi/pi-utils";

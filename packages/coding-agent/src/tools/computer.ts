@@ -3,11 +3,10 @@ import type { AgentToolResult, ToolApprovalDecision } from "@oh-my-pi/pi-agent-c
 import type { Model } from "@oh-my-pi/pi-ai";
 import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
 import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
-import { once, prompt } from "@oh-my-pi/pi-utils";
+import { once } from "@oh-my-pi/pi-utils";
 import { callSessionTool } from "../eval/js/tool-bridge";
 import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
-import computerDescription from "../prompts/tools/computer.md" with { type: "text" };
-import { enforceInlineByteCap } from "../session/streaming-output";
+import { enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import {
 	COMPUTER_HANDLE_VERBS,
 	type ComputerCallStep,
@@ -15,11 +14,6 @@ import {
 	isReadOnlyComputerCall,
 	renderComputerCall,
 } from "./computer/call";
-// @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
-import computerCodeModeDeclarations from "./computer/declarations.d.ts" with { type: "text" };
-// @ts-expect-error Bun imports this JavaScript source as text instead of evaluating its module shape.
-import computerJavascript from "./computer/prelude.js" with { type: "text" };
-import computerPython from "./computer/prelude.py" with { type: "text" };
 import { type ComputerController, ComputerSupervisor, registerComputerController } from "./computer/supervisor";
 import { elideObservationTree } from "./computer/tree-elide";
 import type {
@@ -29,8 +23,9 @@ import type {
 	ComputerWindowAcquisition,
 } from "./computer/types";
 import type { ToolSession } from "./index";
-import { renderFunctionRun } from "./run-code";
-import { ToolError, throwIfAborted } from "./tool-errors";
+import { renderCallChain, renderFunctionRun } from "./run-code";
+import { throwIfAborted } from "./tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { clampTimeout } from "./tool-timeouts";
 
 // Image transports that re-resize a frame past their own vision budget report
@@ -55,16 +50,25 @@ function usesCoordinateSafeImageSizing(model: Model | undefined): boolean {
 }
 
 /**
+ * Text assets the computer host reads at call time. Eval-first-use boundary:
+ * source/declaration assets stay unloaded until a JavaScript or Python kernel
+ * actually asks for its enabled preludes.
+ */
+function computerAssets(): typeof import("./computer/prelude-definition").computerPreludeAssets {
+	return require("./computer/prelude-definition").computerPreludeAssets;
+}
+
+/**
  * The typed surface of both handles, once per session with the first
  * acquisition: a model that has the acquisition in front of it is about to
  * call these, and the alternative was a `computer.help()` round trip for the
  * whole declaration file. Later handles get the verb list alone.
  */
 const windowSignatures = once(() =>
-	handleSignatures(computerCodeModeDeclarations as string, "ComputerWindow", "win handle:"),
+	handleSignatures(computerAssets().codeModeDeclarations, "ComputerWindow", "win handle:"),
 );
 const elementSignatures = once(() =>
-	handleSignatures(computerCodeModeDeclarations as string, "ComputerElement", "el handle:"),
+	handleSignatures(computerAssets().codeModeDeclarations, "ComputerElement", "el handle:"),
 );
 function handleSurface(lifetime: ComputerLifetime): string {
 	if (!lifetime.teach("window")) return COMPUTER_HANDLE_VERBS;
@@ -161,17 +165,15 @@ export function createComputerPrelude(
 		new ComputerSupervisor(currentSession, undefined, callSessionTool),
 ): EvalPreludeDefinition {
 	const lifetime = new ComputerLifetime(session, createController);
+	const assets = computerAssets();
 
 	return {
 		name: "computer",
-		// The prelude contract is the same everywhere; the backend's delivery
-		// routes, tree source and interruption model are not. The driver child
-		// is local, so the host platform selects the variant.
-		documentation: prompt.render(computerDescription, { linux: process.platform === "linux" }),
-		javascript: computerJavascript,
-		python: computerPython,
+		documentation: assets.documentation,
+		javascript: assets.javascript,
+		python: assets.python,
 		exports: ["computer"],
-		codeModeDeclarations: computerCodeModeDeclarations,
+		codeModeDeclarations: assets.codeModeDeclarations,
 		approval: computerApproval,
 		enabled: () => session.settings.get("computer.enabled") === true,
 		invoke: async (parameters, context) => {
@@ -183,7 +185,22 @@ export function createComputerPrelude(
 			// child stays up for the next call. Turn settle releases it.
 			return await invokeComputer(session, parsed, context, lifetime);
 		},
+		status: describeComputerCall,
 	};
+}
+
+/** Status-tree line for a settled computer call: `desktop.window(3).focus()`, `run(fn)`, `release`. */
+function describeComputerCall(parameters: unknown): string | undefined {
+	const parsed = getComputerParamsSchema()(parameters);
+	if (parsed instanceof type.errors) return undefined;
+	switch (parsed.action) {
+		case "call":
+			return `desktop.${renderCallChain(parsed.chain)}`;
+		case "run":
+			return `run(${parsed.fn !== undefined ? "fn" : (parsed.code?.trim().split("\n", 1)[0] ?? "")})`;
+		default:
+			return parsed.action;
+	}
 }
 
 class ComputerLifetime {
@@ -276,7 +293,7 @@ async function invokeComputer(
 		}
 		// Documentation, not desktop state: no driver child, alive or closed.
 		case "help": {
-			const text = await enforceInlineByteCap(computerCodeModeDeclarations, {
+			const text = await enforceInlineByteCap(computerAssets().codeModeDeclarations, {
 				saveArtifact: full => saveComputerOutputArtifact(session, full),
 			});
 			return { content: [{ type: "text", text }], details: { screenshots: [] } };

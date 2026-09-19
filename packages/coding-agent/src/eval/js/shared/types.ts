@@ -1,4 +1,4 @@
-import type { ControlImageMetadata } from "../../types";
+import type { ControlImageMetadata } from "@oh-my-pi/pi-tui/tools/eval";
 
 /**
  * Structured status payload emitted by helpers (`read`, `write`, `env`, etc.) and the

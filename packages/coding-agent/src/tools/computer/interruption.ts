@@ -1,6 +1,6 @@
 import type { DesktopSystemWindow } from "@oh-my-pi/pi-natives";
 import { desktopWindowRoster } from "@oh-my-pi/pi-natives/desktop";
-import { ToolError } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ComputerInterruption, ComputerWindowKind } from "./types";
 
 /**

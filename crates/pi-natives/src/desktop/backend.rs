@@ -80,10 +80,6 @@ pub enum PointerEvent {
 }
 
 pub trait Backend: Send {
-	/// Install an immutable owner binding at the platform resolution boundary.
-	fn pin_window(&mut self, id: &str, pid: u32) -> CoreResult<()> {
-		super::types::PLATFORM_WINDOW_PINS.with(|pins| pins.borrow_mut().pin(id, pid))
-	}
 	fn capabilities(&mut self) -> DesktopCapabilities;
 	fn displays(&mut self) -> CoreResult<Vec<DesktopDisplay>>;
 	fn windows(&mut self) -> CoreResult<Vec<DesktopWindow>>;
@@ -103,40 +99,16 @@ pub trait Backend: Send {
 	fn key_chord(&mut self, target: &Target, keys: &[KeyName], mode: DeliveryMode)
 	-> CoreResult<()>;
 	fn raise_window(&mut self, id: &str) -> CoreResult<()>;
-	fn set_window_frame(
-		&mut self,
-		_window: &DesktopWindow,
-		_x: f64,
-		_y: f64,
-		_width: f64,
-		_height: f64,
-	) -> CoreResult<()> {
-		Err(DesktopError::ax_failed("setting window geometry is unsupported on this backend"))
-	}
-	/// Application-menu actions have a separate scope from ordinary window AX
-	/// refs.
-	fn invoke_menu(&mut self, _window: &DesktopWindow, _path: &[String]) -> CoreResult<()> {
-		Err(DesktopError::ax_failed("application menu invocation is unsupported on this backend"))
-	}
 	fn ax(&mut self) -> Option<&mut dyn AxBackend>;
 }
 
 pub trait AxBackend {
 	fn window_root(&mut self, win: &DesktopWindow) -> CoreResult<AxHandle>;
-	/// Validate a retained element against its exact native window and owner.
-	fn validate_owner(&mut self, _handle: &AxHandle, _window: &DesktopWindow) -> CoreResult<()> {
-		Err(DesktopError::ax_failed(
-			"this accessibility backend cannot prove exact element ownership",
-		))
-	}
 	fn props(&mut self, h: &AxHandle) -> CoreResult<AxProps>;
 	fn children(&mut self, h: &AxHandle) -> CoreResult<Vec<AxHandle>>;
 	fn parent(&mut self, h: &AxHandle) -> CoreResult<Option<AxHandle>>;
 	fn perform(&mut self, h: &AxHandle, action: &str) -> CoreResult<()>;
 	fn set_value(&mut self, h: &AxHandle, value: &str) -> CoreResult<()>;
-	fn insert_text(&mut self, _h: &AxHandle, _text: &str) -> CoreResult<()> {
-		Err(DesktopError::ax_failed("semantic text insertion is unsupported on this backend"))
-	}
 	fn focus(&mut self, h: &AxHandle) -> CoreResult<()>;
 	fn element_at(&mut self, x: f64, y: f64) -> CoreResult<Option<AxHandle>>;
 	fn focused_element(&mut self) -> CoreResult<Option<AxHandle>>;

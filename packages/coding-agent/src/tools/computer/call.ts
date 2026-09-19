@@ -1,4 +1,4 @@
-import { ToolError } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 
 /** One allowlisted method invocation in a computer call chain. */
 export interface ComputerCallStep {

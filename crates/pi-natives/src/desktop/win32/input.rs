@@ -213,16 +213,6 @@ mod background {
 				"target window '{id}' is no longer present"
 			)));
 		}
-		let mut pid = 0;
-		// SAFETY: The validated HWND is queried without mutation; output is writable.
-		unsafe {
-			windows_sys::Win32::UI::WindowsAndMessaging::GetWindowThreadProcessId(hwnd, &mut pid)
-		};
-		crate::desktop::types::PLATFORM_WINDOW_PINS.with(|pins| {
-			pins
-				.borrow()
-				.validate_identity(id, (pid != 0).then_some(pid))
-		})?;
 		Ok(hwnd)
 	}
 
@@ -603,7 +593,8 @@ mod foreground {
 	impl ForegroundGuard {
 		fn activate(id: &str) -> CoreResult<Self> {
 			let target = background::hwnd(id)?;
-			// SAFETY: GetForegroundWindow accesses process-global foreground state.
+			// SAFETY: GetForegroundWindow accesses process-global foreground
+			// state.
 			let previous = unsafe { GetForegroundWindow() };
 			// SAFETY: SetForegroundWindow is called with a validated target HWND.
 			if previous != target && unsafe { SetForegroundWindow(target) } == 0 {
@@ -618,16 +609,16 @@ mod foreground {
 	impl Drop for ForegroundGuard {
 		fn drop(&mut self) {
 			if !self.previous.is_null() && self.previous != self.target {
-				// SAFETY: restoring the previously observed HWND is best-effort; Win32
-				// validates it.
+				// SAFETY: restoring the previously observed HWND is best-effort;
+				// Win32 validates it.
 				unsafe { SetForegroundWindow(self.previous) };
 			}
 		}
 	}
 
 	fn send(event: INPUT) -> CoreResult<()> {
-		// SAFETY: event points to one fully initialized INPUT copied synchronously by
-		// Win32.
+		// SAFETY: event points to one fully initialized INPUT copied
+		// synchronously by Win32.
 		let sent = unsafe { SendInput(1, &event, size_of::<INPUT>() as i32) };
 		if sent == 1 {
 			Ok(())

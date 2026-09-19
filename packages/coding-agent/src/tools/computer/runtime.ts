@@ -10,7 +10,8 @@ import {
 	type WaitPredicateOptions,
 	waitForRun,
 } from "../run-scope";
-import { ToolAbortError, ToolError, throwIfAborted } from "../tool-errors";
+import { ToolAbortError, throwIfAborted } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ComputerBackend } from "./backend";
 import { openWindows } from "./roster";
 import { normalizeLaunchOptions, normalizeWindowSelector } from "./selectors";

@@ -183,13 +183,22 @@ pub(super) fn windows() -> CoreResult<Vec<DesktopWindow>> {
 		else {
 			continue;
 		};
-		let (x, y, width, height) = logical_window_frame(
-			&monitor_layout,
-			physical_x,
-			physical_y,
-			physical_width,
-			physical_height,
-		);
+		let scale = monitor_layout
+			.iter()
+			.find(|display| {
+				let left = f64::from(display.x) * display.scale;
+				let top = f64::from(display.y) * display.scale;
+				f64::from(physical_x) >= left
+					&& f64::from(physical_x) < left + f64::from(display.width) * display.scale
+					&& f64::from(physical_y) >= top
+					&& f64::from(physical_y) < top + f64::from(display.height) * display.scale
+			})
+			.map_or(1.0, |display| display.scale)
+			.max(f64::EPSILON);
+		let x = (f64::from(physical_x) / scale).round() as i32;
+		let y = (f64::from(physical_y) / scale).round() as i32;
+		let width = (f64::from(physical_width) / scale).round().max(1.0) as u32;
+		let height = (f64::from(physical_height) / scale).round().max(1.0) as u32;
 		if width < MIN_WINDOW_EDGE || height < MIN_WINDOW_EDGE {
 			continue;
 		}
@@ -272,8 +281,6 @@ fn capture_window(id: &str) -> CoreResult<(RgbaImage, FrameGeometry)> {
 			"target window '{id}' was not found; refresh windows()"
 		))
 	})?;
-	crate::desktop::types::PLATFORM_WINDOW_PINS
-		.with(|pins| pins.borrow().validate_identity(id, process_id(numeric_id)))?;
 	let image = window.capture_image().map_err(|error| {
 		DesktopError::capture_failed(format!("capture of window '{id}' failed: {error}"))
 	})?;
@@ -286,7 +293,6 @@ fn capture_window(id: &str) -> CoreResult<(RgbaImage, FrameGeometry)> {
 		.into_iter()
 		.find(|item| item.id == id)
 		.ok_or_else(|| DesktopError::window_not_found(format!("target window '{id}' disappeared")))?;
-	crate::desktop::types::PLATFORM_WINDOW_PINS.with(|pins| pins.borrow().validate(&descriptor))?;
 	let geometry = FrameGeometry::for_window(&descriptor, image.width(), image.height());
 	Ok((image, geometry))
 }
@@ -320,214 +326,4 @@ pub(super) fn logical_to_physical(x: f64, y: f64) -> CoreResult<(i32, i32)> {
 	let px = x * display.scale;
 	let py = y * display.scale;
 	Ok((px.round() as i32, py.round() as i32))
-}
-
-// Window descriptors use absolute physical coordinates divided by the scale of
-// the display containing the top-left corner (not display-relative offsets).
-fn window_scale(displays: &[DesktopDisplay], x: i32, y: i32) -> f64 {
-	displays
-		.iter()
-		.find(|display| {
-			let left = f64::from(display.x) * display.scale;
-			let top = f64::from(display.y) * display.scale;
-			f64::from(x) >= left
-				&& f64::from(x) < left + f64::from(display.width) * display.scale
-				&& f64::from(y) >= top
-				&& f64::from(y) < top + f64::from(display.height) * display.scale
-		})
-		.map_or(1.0, |display| display.scale)
-		.max(f64::EPSILON)
-}
-
-pub(super) fn logical_window_frame(
-	displays: &[DesktopDisplay],
-	x: i32,
-	y: i32,
-	width: u32,
-	height: u32,
-) -> (i32, i32, u32, u32) {
-	let scale = window_scale(displays, x, y);
-	(
-		(f64::from(x) / scale).round() as i32,
-		(f64::from(y) / scale).round() as i32,
-		(f64::from(width) / scale).round().max(1.0) as u32,
-		(f64::from(height) / scale).round().max(1.0) as u32,
-	)
-}
-
-pub(super) fn physical_window_frame(id: u32) -> CoreResult<[i32; 4]> {
-	let native = Window::all().map_err(|error| metadata_error("window enumeration", error))?;
-	let window = native
-		.into_iter()
-		.find(|window| window.id().ok() == Some(id))
-		.ok_or_else(|| DesktopError::window_not_found("exact Win32 window disappeared"))?;
-	let width = window
-		.width()
-		.map_err(|error| metadata_error("window width", error))?;
-	let height = window
-		.height()
-		.map_err(|error| metadata_error("window height", error))?;
-	Ok([
-		window
-			.x()
-			.map_err(|error| metadata_error("window x", error))?,
-		window
-			.y()
-			.map_err(|error| metadata_error("window y", error))?,
-		i32::try_from(width)
-			.map_err(|_| DesktopError::input_failed("window width exceeds Win32 range"))?,
-		i32::try_from(height)
-			.map_err(|_| DesktopError::input_failed("window height exceeds Win32 range"))?,
-	])
-}
-
-pub(super) fn physical_frame_request(
-	displays: &[DesktopDisplay],
-	requested: [f64; 4],
-) -> CoreResult<[i32; 4]> {
-	if requested.iter().any(|value| {
-		!value.is_finite()
-			|| value.fract() != 0.0
-			|| *value < f64::from(i32::MIN)
-			|| *value > f64::from(i32::MAX)
-	}) || requested[2] <= 0.0
-		|| requested[3] <= 0.0
-	{
-		return Err(DesktopError::input_failed(
-			"Win32 geometry requires integer logical coordinates and positive dimensions in signed \
-			 32-bit range",
-		));
-	}
-	let expected =
-		(requested[0] as i32, requested[1] as i32, requested[2] as u32, requested[3] as u32);
-	let mut result = None;
-	for display in displays {
-		if requested[0] < f64::from(display.x)
-			|| requested[0] >= f64::from(display.x) + f64::from(display.width)
-			|| requested[1] < f64::from(display.y)
-			|| requested[1] >= f64::from(display.y) + f64::from(display.height)
-		{
-			continue;
-		}
-		let scaled = requested.map(|value| (value * display.scale).round());
-		if scaled.iter().any(|value| {
-			!value.is_finite() || *value < f64::from(i32::MIN) || *value > f64::from(i32::MAX)
-		}) || scaled[2] <= 0.0
-			|| scaled[3] <= 0.0
-		{
-			return Err(DesktopError::input_failed("requested physical geometry exceeds Win32 range"));
-		}
-		let frame = scaled.map(|value| value as i32);
-		if logical_window_frame(displays, frame[0], frame[1], frame[2] as u32, frame[3] as u32)
-			!= expected
-		{
-			return Err(DesktopError::input_failed(
-				"requested geometry cannot round-trip through the logical display layout",
-			));
-		}
-		if result.is_some_and(|previous| previous != frame) {
-			return Err(DesktopError::input_failed(
-				"requested logical origin is ambiguous across mixed-DPI displays",
-			));
-		}
-		result = Some(frame);
-	}
-	result.ok_or_else(|| {
-		DesktopError::input_failed("requested origin is outside the supported display layout")
-	})
-}
-
-// Straddling/offscreen frames and DPI transitions can change non-client insets.
-// Reject them before SetWindowPos rather than guessing the resulting visible
-// bounds.
-pub(super) fn contained_frame_scale(
-	displays: &[DesktopDisplay],
-	frame: [i32; 4],
-) -> CoreResult<f64> {
-	let scale = window_scale(displays, frame[0], frame[1]);
-	let contained = displays.iter().any(|display| {
-		let left = f64::from(display.x) * display.scale;
-		let top = f64::from(display.y) * display.scale;
-		display.scale == scale
-			&& f64::from(frame[0]) >= left
-			&& f64::from(frame[1]) >= top
-			&& f64::from(frame[0]) + f64::from(frame[2]) <= left + f64::from(display.width) * scale
-			&& f64::from(frame[1]) + f64::from(frame[3]) <= top + f64::from(display.height) * scale
-	});
-	if contained {
-		Ok(scale)
-	} else {
-		Err(DesktopError::input_failed(
-			"exact window geometry does not support offscreen or display-straddling frames",
-		))
-	}
-}
-
-#[cfg(test)]
-mod geometry_tests {
-	use super::*;
-
-	fn display(x: i32, scale: f64) -> DesktopDisplay {
-		DesktopDisplay {
-			id: x.to_string(),
-			name: String::new(),
-			x,
-			y: 0,
-			width: 1920,
-			height: 1080,
-			scale,
-			pixel_x: 0,
-			pixel_y: 0,
-			pixel_width: 0,
-			pixel_height: 0,
-			is_primary: x == 0,
-		}
-	}
-
-	#[test]
-	fn logical_geometry_scales_and_round_trips() {
-		for (scale, expected) in
-			[(1.0, [101, 101, 801, 601]), (1.5, [152, 152, 1202, 902]), (2.0, [202, 202, 1602, 1202])]
-		{
-			let displays = [display(0, scale)];
-			let physical = physical_frame_request(&displays, [101.0, 101.0, 801.0, 601.0]).unwrap();
-			assert_eq!(physical, expected);
-			assert_eq!(
-				logical_window_frame(
-					&displays,
-					physical[0],
-					physical[1],
-					physical[2] as u32,
-					physical[3] as u32
-				),
-				(101, 101, 801, 601)
-			);
-		}
-	}
-
-	#[test]
-	fn negative_origin_uses_absolute_scale_and_signed_rounding() {
-		let displays = [display(-1920, 1.5), display(0, 2.0)];
-		let frame = physical_frame_request(&displays, [-1001.0, 101.0, 801.0, 601.0]).unwrap();
-		assert_eq!(frame, [-1502, 152, 1202, 902]);
-		assert_eq!(
-			logical_window_frame(&displays, frame[0], frame[1], frame[2] as u32, frame[3] as u32),
-			(-1001, 101, 801, 601)
-		);
-		assert_eq!(contained_frame_scale(&displays, frame).unwrap(), 1.5);
-	}
-
-	#[test]
-	fn ambiguous_and_unrepresentable_requests_fail_closed() {
-		let displays = [display(0, 1.0), display(960, 2.0)];
-		assert!(physical_frame_request(&displays, [1000.0, 100.0, 100.0, 100.0]).is_err());
-		assert!(
-			physical_frame_request(&[display(0, 2.0)], [100.0, 100.0, f64::from(i32::MAX), 100.0])
-				.is_err()
-		);
-		assert!(physical_frame_request(&displays, [-1.0, 100.0, 100.0, 100.0]).is_err());
-		assert!(physical_frame_request(&displays, [1.5, 100.0, 100.0, 100.0]).is_err());
-		assert!(physical_frame_request(&displays, [1.0, 100.0, 0.0, 100.0]).is_err());
-		assert!(contained_frame_scale(&[display(0, 1.0)], [1900, 0, 100, 100]).is_err());
-	}
 }

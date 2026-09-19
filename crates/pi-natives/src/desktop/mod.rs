@@ -49,11 +49,6 @@ enum Response {
 type Reply = flume::Sender<CoreResult<Response>>;
 
 enum Request {
-	PinWindow {
-		id:    String,
-		pid:   u32,
-		reply: Reply,
-	},
 	Capabilities {
 		reply: Reply,
 	},
@@ -113,20 +108,6 @@ enum Request {
 		id:    String,
 		reply: Reply,
 	},
-	SetWindowFrame {
-		id:     String,
-		x:      f64,
-		y:      f64,
-		width:  f64,
-		height: f64,
-		reply:  Reply,
-	},
-	InvokeMenu {
-		id:    String,
-		path:  Vec<String>,
-		mode:  DeliveryMode,
-		reply: Reply,
-	},
 	AxSnapshot {
 		target:  Target,
 		options: AxSnapshotOptions,
@@ -172,11 +153,6 @@ enum Request {
 		value:     String,
 		reply:     Reply,
 	},
-	AxInsertText {
-		reference: String,
-		text:      String,
-		reply:     Reply,
-	},
 	AxFocus {
 		reference: String,
 		reply:     Reply,
@@ -195,7 +171,6 @@ impl Request {
 	fn reply(self, result: CoreResult<Response>) {
 		let reply = match self {
 			Self::Capabilities { reply }
-			| Self::PinWindow { reply, .. }
 			| Self::ListDisplays { reply }
 			| Self::ListWindows { reply }
 			| Self::Capture { reply, .. }
@@ -206,8 +181,6 @@ impl Request {
 			| Self::TypeText { reply, .. }
 			| Self::KeyChord { reply, .. }
 			| Self::RaiseWindow { reply, .. }
-			| Self::SetWindowFrame { reply, .. }
-			| Self::InvokeMenu { reply, .. }
 			| Self::AxSnapshot { reply, .. }
 			| Self::AxQuery { reply, .. }
 			| Self::AxElementAt { reply, .. }
@@ -218,7 +191,6 @@ impl Request {
 			| Self::AxParent { reply, .. }
 			| Self::AxPerform { reply, .. }
 			| Self::AxSetValue { reply, .. }
-			| Self::AxInsertText { reply, .. }
 			| Self::AxFocus { reply, .. }
 			| Self::AxClick { reply, .. }
 			| Self::Close { reply } => reply,
@@ -255,19 +227,12 @@ struct Worker {
 	registry:     AxRegistry,
 	frames:       HashMap<String, FrameGeometry>,
 	capabilities: Arc<Mutex<DesktopCapabilities>>,
-	pins:         WindowPins,
 }
 
 impl Worker {
 	fn new(selector: DisplaySelector, capabilities: Arc<Mutex<DesktopCapabilities>>) -> Self {
 		let backend = create_backend(selector);
-		Self {
-			backend,
-			registry: AxRegistry::default(),
-			frames: HashMap::new(),
-			capabilities,
-			pins: WindowPins::default(),
-		}
+		Self { backend, registry: AxRegistry::default(), frames: HashMap::new(), capabilities }
 	}
 
 	fn backend(&mut self) -> CoreResult<&mut Box<dyn Backend>> {
@@ -276,7 +241,7 @@ impl Worker {
 
 	fn window(&mut self, target: &Target) -> CoreResult<DesktopWindow> {
 		let windows = self.backend()?.windows()?;
-		let window = match target {
+		match target {
 			Target::Window(id) => windows
 				.into_iter()
 				.find(|window| window.id == *id)
@@ -285,9 +250,7 @@ impl Worker {
 				.into_iter()
 				.find(|window| window.focused)
 				.ok_or_else(|| DesktopError::window_not_found("no focused window was found")),
-		}?;
-		self.pins.validate(&window)?;
-		Ok(window)
+		}
 	}
 
 	fn frame(&self, target: &Target) -> CoreResult<FrameGeometry> {
@@ -323,40 +286,8 @@ impl Worker {
 			.ok_or_else(DesktopError::ax_unsupported)
 	}
 
-	fn resolve_ref(&mut self, reference: &str) -> CoreResult<ax::AxHandle> {
-		let handle = self.registry.resolve(reference)?;
-		let target = Target::parse(&self.registry.target(reference)?);
-		if self.pins.contains(target.key()) {
-			let window = self.window(&target)?;
-			self.ax()?.validate_owner(&handle, &window)?;
-		}
-		Ok(handle)
-	}
-
 	fn process(&mut self, request: &Request) -> CoreResult<Response> {
 		match request {
-			Request::PinWindow { id, pid, .. } => {
-				let window = self.window(&Target::Window(id.clone()))?;
-				if window.pid != Some(*pid) {
-					return Err(DesktopError::window_not_found(
-						"window no longer belongs to the requested process",
-					));
-				}
-				self.backend()?.pin_window(id, *pid)?;
-				self.pins.pin(id, *pid)?;
-				Ok(Response::Unit)
-			},
-			Request::InvokeMenu { id, path, mode, .. } => {
-				if *mode != DeliveryMode::Foreground {
-					return Err(DesktopError::background_unavailable(
-						"menu invocation requires explicit foreground delivery",
-					));
-				}
-				let window = self.window(&Target::Window(id.clone()))?;
-				self.backend()?.invoke_menu(&window, path)?;
-				self.frames.clear();
-				Ok(Response::Unit)
-			},
 			Request::Capabilities { .. } => {
 				let caps = match self.backend.as_mut() {
 					Ok(backend) => backend.capabilities(),
@@ -479,26 +410,6 @@ impl Worker {
 				self.backend()?.raise_window(id)?;
 				Ok(Response::Unit)
 			},
-			Request::SetWindowFrame { id, x, y, width, height, .. } => {
-				if !x.is_finite()
-					|| !y.is_finite()
-					|| !width.is_finite()
-					|| !height.is_finite()
-					|| *width <= 0.0
-					|| *height <= 0.0
-				{
-					return Err(DesktopError::ax_failed(
-						"window geometry must be finite with positive dimensions",
-					));
-				}
-				let window = self.window(&Target::Window(id.clone()))?;
-				// A partial platform failure may already have changed geometry.
-				self.frames.clear();
-				self
-					.backend()?
-					.set_window_frame(&window, *x, *y, *width, *height)?;
-				Ok(Response::Unit)
-			},
 			Request::AxSnapshot { target, options, .. } => {
 				let window = self.window(target)?;
 				let (backend, registry) = (&mut self.backend, &mut self.registry);
@@ -520,20 +431,13 @@ impl Worker {
 				Ok(Response::Nodes(ax::query(ax, registry, &window, query)?))
 			},
 			Request::AxElementAt { target, x, y, .. } => {
-				if let Target::Window(_) = target {
-					self.window(target)?;
-				}
 				let (backend, registry) = (&mut self.backend, &mut self.registry);
 				let backend = backend
 					.as_mut()
 					.map_err(|error| error.clone())?
 					.ax()
 					.ok_or_else(DesktopError::ax_unsupported)?;
-				let node = ax::element_at_node(backend, registry, target.key(), *x, *y)?;
-				if let Some(node) = &node {
-					self.resolve_ref(&node.ref_)?;
-				}
-				Ok(Response::Node(node))
+				Ok(Response::Node(ax::element_at_node(backend, registry, target.key(), *x, *y)?))
 			},
 			Request::AxFocused { .. } => {
 				let handle = self.ax()?.focused_element()?;
@@ -552,17 +456,26 @@ impl Worker {
 				Ok(Response::Node(node))
 			},
 			Request::AxNode { reference, .. } => {
-				let h = self.resolve_ref(reference)?;
+				let h = self.registry.resolve(reference)?;
 				let props = self.ax()?.props(&h)?;
 				Ok(Response::Node(Some(axnode(reference.clone(), props))))
 			},
 			Request::AxAttributes { reference, .. } => {
-				let h = self.resolve_ref(reference)?;
-				let attributes = self.ax()?.attributes(&h)?;
+				let h = self.registry.resolve(reference)?;
+				let mut attributes = self.ax()?.attributes(&h)?;
+				for (_, value) in &mut attributes {
+					if value.chars().count() > 200 {
+						*value = value
+							.chars()
+							.take(199)
+							.chain(std::iter::once('…'))
+							.collect();
+					}
+				}
 				Ok(Response::Attributes(attributes))
 			},
 			Request::AxChildren { reference, .. } => {
-				let h = self.resolve_ref(reference)?;
+				let h = self.registry.resolve(reference)?;
 				let target = self.registry.target(reference)?;
 				let handles = self.ax()?.children(&h)?;
 				let mut nodes = Vec::with_capacity(handles.len());
@@ -578,18 +491,11 @@ impl Worker {
 				Ok(Response::Nodes(nodes))
 			},
 			Request::AxParent { reference, .. } => {
-				let h = self.resolve_ref(reference)?;
+				let h = self.registry.resolve(reference)?;
 				let target = self.registry.target(reference)?;
 				let parent = self.ax()?.parent(&h)?;
 				let node = match parent {
 					Some(h) => {
-						if self.pins.contains(&target) {
-							let window = self.window(&Target::parse(&target))?;
-							if self.ax()?.validate_owner(&h, &window).is_err() {
-								// Parent navigation stops at the exact window boundary.
-								return Ok(Response::Node(None));
-							}
-						}
 						let (backend, registry) = (&mut self.backend, &mut self.registry);
 						let ax = backend
 							.as_mut()
@@ -603,7 +509,7 @@ impl Worker {
 				Ok(Response::Node(node))
 			},
 			Request::AxPerform { reference, action, .. } => {
-				let h = self.resolve_ref(reference)?;
+				let h = self.registry.resolve(reference)?;
 				if action.eq_ignore_ascii_case("press") {
 					ax::ax_press(self.ax()?, &h)?;
 				} else {
@@ -612,48 +518,35 @@ impl Worker {
 				Ok(Response::Unit)
 			},
 			Request::AxSetValue { reference, value, .. } => {
-				let h = self.resolve_ref(reference)?;
+				let h = self.registry.resolve(reference)?;
 				self.ax()?.set_value(&h, value)?;
 				Ok(Response::Unit)
 			},
-			Request::AxInsertText { reference, text, .. } => {
-				let h = self.resolve_ref(reference)?;
-				self.frames.clear();
-				self.ax()?.insert_text(&h, text)?;
-				Ok(Response::Unit)
-			},
 			Request::AxFocus { reference, .. } => {
-				let h = self.resolve_ref(reference)?;
+				let h = self.registry.resolve(reference)?;
 				self.ax()?.focus(&h)?;
 				Ok(Response::Unit)
 			},
 			Request::AxClick { reference, options, .. } => {
-				let h = self.resolve_ref(reference)?;
+				let h = self.registry.resolve(reference)?;
 				let bounds = self.ax()?.props(&h)?.bounds.ok_or_else(|| {
 					DesktopError::ax_failed(format!("{reference} has no clickable bounds"))
 				})?;
 				let x = bounds.x + bounds.width / 2.0;
 				let y = bounds.y + bounds.height / 2.0;
-				let target = Target::parse(&self.registry.target(reference)?);
-				if matches!(target, Target::Desktop) {
-					return Err(DesktopError::invalid_target(
-						"pointer actions require a window-scoped AX reference; observe the exact window",
-					));
-				}
-				// An occluding window may contain the same point. The retained
-				// reference's owner, never screen overlap, determines delivery.
-				let window = self.window(&target)?;
-				if !x.is_finite()
-					|| !y.is_finite()
-					|| x < f64::from(window.x)
-					|| x >= f64::from(window.x) + f64::from(window.width)
-					|| y < f64::from(window.y)
-					|| y >= f64::from(window.y) + f64::from(window.height)
-				{
-					return Err(DesktopError::invalid_target(format!(
-						"{reference} lies outside its owning window; refresh the observation"
-					)));
-				}
+				let windows = self.backend()?.windows()?;
+				let window = windows
+					.into_iter()
+					.find(|w| {
+						x >= f64::from(w.x)
+							&& x < f64::from(w.x + w.width as i32)
+							&& y >= f64::from(w.y)
+							&& y < f64::from(w.y + w.height as i32)
+					})
+					.ok_or_else(|| {
+						DesktopError::window_not_found(format!("no window contains {reference}"))
+					})?;
+				let target = Target::Window(window.id);
 				self.backend()?.pointer(
 					&target,
 					PointerEvent::Click {
@@ -837,12 +730,6 @@ pub struct DesktopSession {
 }
 #[napi]
 impl DesktopSession {
-	/// Pin this native window's owner for the lifetime of the session.
-	#[napi]
-	pub fn pin_window(&self, id: String, pid: u32) -> Result<task::Promise<()>> {
-		Ok(self.unit("desktop.pinWindow", move |reply| Request::PinWindow { id, pid, reply }))
-	}
-
 	#[napi(constructor)]
 	pub fn new(options: Option<DesktopSessionOptions>) -> Result<Self> {
 		Ok(Self { core: SessionCore::new(DisplaySelector::parse(options.and_then(|o| o.display))) })
@@ -1020,48 +907,6 @@ impl DesktopSession {
 	}
 
 	#[napi]
-	pub fn set_window_frame(
-		&self,
-		window_id: String,
-		x: f64,
-		y: f64,
-		width: f64,
-		height: f64,
-	) -> Result<task::Promise<()>> {
-		Ok(self.unit("desktop.setWindowFrame", move |reply| Request::SetWindowFrame {
-			id: window_id,
-			x,
-			y,
-			width,
-			height,
-			reply,
-		}))
-	}
-
-	#[napi]
-	pub fn invoke_menu(
-		&self,
-		window_id: String,
-		menu_path: Vec<String>,
-		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
-		if menu_path.is_empty() || menu_path.iter().any(String::is_empty) {
-			return Err(
-				DesktopError::invalid_target("menu path must contain exact nonempty labels").into(),
-			);
-		}
-		let mode = ParsedPointerOptions::parse(opts)
-			.map_err(napi::Error::from)?
-			.mode;
-		Ok(self.unit("desktop.invokeMenu", move |reply| Request::InvokeMenu {
-			id: window_id,
-			path: menu_path,
-			mode,
-			reply,
-		}))
-	}
-
-	#[napi]
 	pub fn ax_snapshot(
 		&self,
 		target: String,
@@ -1160,15 +1005,6 @@ impl DesktopSession {
 		Ok(self.unit("desktop.axSetValue", move |reply| Request::AxSetValue {
 			reference,
 			value,
-			reply,
-		}))
-	}
-
-	#[napi]
-	pub fn ax_insert_text(&self, reference: String, text: String) -> Result<task::Promise<()>> {
-		Ok(self.unit("desktop.axInsertText", move |reply| Request::AxInsertText {
-			reference,
-			text,
 			reply,
 		}))
 	}
@@ -1366,7 +1202,6 @@ mod capture_tests {
 			registry:     AxRegistry::default(),
 			frames:       HashMap::new(),
 			capabilities: Arc::new(Mutex::new(DesktopCapabilities::unavailable())),
-			pins:         WindowPins::default(),
 		}
 	}
 

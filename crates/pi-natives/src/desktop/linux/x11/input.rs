@@ -48,12 +48,6 @@ pub struct X11Input {
 }
 
 impl X11Input {
-	fn resolve_window(&self, id: &str) -> CoreResult<Window> {
-		let window = parse_window(id)?;
-		super::validate_owner(&self.conn, window)?;
-		Ok(window)
-	}
-
 	pub(crate) fn new(conn: Arc<RustConnection>, root: Window) -> CoreResult<Self> {
 		conn
 			.xtest_get_version(2, 2)
@@ -93,11 +87,11 @@ impl X11Input {
 		match (target, mode) {
 			(Target::Desktop, _) => self.pointer_xtest(&event),
 			(Target::Window(id), DeliveryMode::Foreground) => {
-				let window = self.resolve_window(id)?;
+				let window = parse_window(id)?;
 				self.with_foreground(window, |this| this.pointer_xtest(&event))
 			},
 			(Target::Window(id), DeliveryMode::Background) => {
-				let window = self.resolve_window(id)?;
+				let window = parse_window(id)?;
 				let filtering = self.send_event_filtering_toolkit(window);
 				if filtering && self.mpx_probe && self.pointer_mpx(window, &event).is_ok() {
 					return Ok(());
@@ -124,11 +118,11 @@ impl X11Input {
 		match (target, mode) {
 			(Target::Desktop, _) => self.type_text_xtest(text),
 			(Target::Window(id), DeliveryMode::Foreground) => {
-				let window = self.resolve_window(id)?;
+				let window = parse_window(id)?;
 				self.with_foreground(window, |this| this.type_text_xtest(text))
 			},
 			(Target::Window(id), DeliveryMode::Background) => {
-				let window = self.resolve_window(id)?;
+				let window = parse_window(id)?;
 				if self.send_event_filtering_toolkit(window) {
 					return Err(background_unavailable(
 						id,
@@ -155,11 +149,11 @@ impl X11Input {
 		match (target, mode) {
 			(Target::Desktop, _) => self.chord_xtest(keys),
 			(Target::Window(id), DeliveryMode::Foreground) => {
-				let window = self.resolve_window(id)?;
+				let window = parse_window(id)?;
 				self.with_foreground(window, |this| this.chord_xtest(keys))
 			},
 			(Target::Window(id), DeliveryMode::Background) => {
-				let window = self.resolve_window(id)?;
+				let window = parse_window(id)?;
 				if self.send_event_filtering_toolkit(window) {
 					return Err(background_unavailable(
 						id,
@@ -376,7 +370,6 @@ impl X11Input {
 	}
 
 	fn activate(&self, window: Window) -> CoreResult<()> {
-		super::validate_owner(&self.conn, window)?;
 		let atom = self.intern("_NET_ACTIVE_WINDOW")?;
 		let event = ClientMessageEvent {
 			response_type: CLIENT_MESSAGE_EVENT,
@@ -455,7 +448,6 @@ impl X11Input {
 	}
 
 	fn send_key(&self, window: Window, key: KeyName, press: bool) -> CoreResult<()> {
-		super::validate_owner(&self.conn, window)?;
 		let keycode = self.keycode(key)?;
 		let event = KeyPressEvent {
 			response_type: if press {
@@ -536,7 +528,6 @@ impl X11Input {
 		event_y: i16,
 		state: KeyButMask,
 	) -> CoreResult<()> {
-		super::validate_owner(&self.conn, window)?;
 		let event = ButtonPressEvent {
 			response_type: if press {
 				BUTTON_PRESS_EVENT
@@ -582,7 +573,6 @@ impl X11Input {
 		event_y: i16,
 		state: KeyButMask,
 	) -> CoreResult<()> {
-		super::validate_owner(&self.conn, window)?;
 		let event = MotionNotifyEvent {
 			response_type: MOTION_NOTIFY_EVENT,
 			detail: Motion::NORMAL,
@@ -1161,8 +1151,8 @@ impl UInputDevice {
 
 	fn emit(&mut self, type_: u16, code: u16, value: i32) -> CoreResult<()> {
 		let event = InputEvent { time: libc::timeval { tv_sec: 0, tv_usec: 0 }, type_, code, value };
-		// SAFETY: InputEvent is a C-compatible plain-data kernel ABI struct and the
-		// slice is bounded to its exact size.
+		// SAFETY: InputEvent is a C-compatible plain-data kernel ABI struct and
+		// the slice is bounded to its exact size.
 		let bytes = unsafe {
 			std::slice::from_raw_parts(
 				(&event as *const InputEvent).cast::<u8>(),

@@ -4,18 +4,10 @@ import * as path from "node:path";
 
 import { postmortem, Snowflake, toError, untilAborted, withTimeout } from "@oh-my-pi/pi-utils";
 import type { HTMLElement } from "@oh-my-pi/pi-utils/dom";
-import type {
-	Browser,
-	CDPSession,
-	Dialog,
-	HTTPResponse,
-	Page,
-	Target,
-} from "puppeteer-core";
+import type { Browser, CDPSession, Dialog, HTTPResponse, Page, Target } from "puppeteer-core";
 import { JsRuntime, type RuntimeHooks } from "../../eval/js/shared/runtime";
-import { resizeImage } from "../../utils/image-resize";
+import { formatScreenshot, resizeImage } from "../../utils/image-resize";
 import { resolveToCwd } from "../path-utils";
-import { formatScreenshot } from "../render-utils";
 import {
 	bindRunFacade,
 	CELL_BUDGET_SLACK_MS,
@@ -29,7 +21,8 @@ import {
 	waitForRun,
 	withBrowserPromiseCombinatorTracking,
 } from "../run-scope";
-import { ToolAbortError, ToolError, throwIfAborted } from "../tool-errors";
+import { ToolAbortError, throwIfAborted } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import {
 	type AriaSnapshotOptions,
 	assertSelectorString,
@@ -106,6 +99,14 @@ declare module "puppeteer-core" {
 	interface JSHandle<T> {
 		/** Remote object id (`@internal` upstream, present at runtime); `T` is puppeteer's own parameter. */
 		readonly id: string | undefined;
+	}
+	interface Realm {
+		/** Re-home a DOM handle into this realm (`@internal` upstream, stripped from published types). */
+		adoptHandle<T extends JSHandle>(handle: T): Promise<T>;
+	}
+	interface JSHandle {
+		/** Realm that created this handle (`@internal` upstream, stripped from published types). */
+		readonly realm: Realm;
 	}
 }
 
@@ -1053,6 +1054,15 @@ export class WorkerCore {
 			} catch (error) {
 				this.#downloadObservationError = toError(error).message;
 			}
+			if ((payload.mode === "headless" || payload.emulateFocus) && !this.#managedChrome) {
+				// Background Chromium tabs stop producing frames, stalling rAF,
+				// IntersectionObserver, and input acknowledgements. Keep owned tabs
+				// interactive without raising a window; explicit settle-freeze still
+				// applies. A leased tab in the user's Chrome is different: it only
+				// emulates focus for the span of an action (`withBackgroundInput`), so
+				// the user's own focus is never displaced between actions.
+				await this.#page.emulateFocusedPage(true);
+			}
 			if (payload.url) {
 				// Default to "load" because dev servers with HMR/WS never reach networkidle.
 				await navigateMainFrame(this.#page, payload.url, {
@@ -1862,7 +1872,9 @@ export class WorkerCore {
 		return nodes.filter(node => !candidates.includes(node) || inViewport.has(node));
 	}
 
-	async #collectObservation(options: ObserveOptions & { refs?: RefStyle; signal?: AbortSignal }): Promise<Observation> {
+	async #collectObservation(
+		options: ObserveOptions & { refs?: RefStyle; signal?: AbortSignal },
+	): Promise<Observation> {
 		const page = this.#requirePage();
 		const { signal } = options;
 		const refStyle = options.refs ?? "uuid";
@@ -2217,12 +2229,18 @@ export class WorkerCore {
 					Boolean(await boundingBox(node, await sessionOffset(page, node.session, sig), sig)),
 				),
 			isHidden: () =>
-				op(`${node.label}.isHidden()`, async sig =>
-					!(await boundingBox(node, await sessionOffset(page, node.session, sig), sig)),
+				op(
+					`${node.label}.isHidden()`,
+					async sig => !(await boundingBox(node, await sessionOffset(page, node.session, sig), sig)),
 				),
 			evaluate: (fn, ...args) =>
 				op(`${node.label}.evaluate()`, sig =>
-					callOnNode(node, `function (...args) { return (${String(fn)}).apply(null, [this, ...args]); }`, args, sig),
+					callOnNode(
+						node,
+						`function (...args) { return (${String(fn)}).apply(null, [this, ...args]); }`,
+						args,
+						sig,
+					),
 				) as never,
 		};
 	}

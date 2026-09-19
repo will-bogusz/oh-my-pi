@@ -319,11 +319,6 @@ impl X11Capture {
 					.ok_or_else(|| {
 						DesktopError::window_not_found(format!("window {id} was not found"))
 					})?;
-				super::validate_owner(
-					&self.conn,
-					id.parse::<u32>()
-						.map_err(|_| DesktopError::invalid_target("invalid X11 window id"))?,
-				)?;
 				let (x, y, width, height) = clip_to_root(
 					window.x,
 					window.y,
@@ -336,11 +331,6 @@ impl X11Capture {
 					DesktopError::capture_failed(format!("window {id} has no visible root area"))
 				})?;
 				let image = self.capture_root(x, y, width, height)?;
-				super::validate_owner(
-					&self.conn,
-					id.parse::<u32>()
-						.map_err(|_| DesktopError::invalid_target("invalid X11 window id"))?,
-				)?;
 				let frame_window = DesktopWindow { x, y, width, height, ..window };
 				let frame = FrameGeometry::for_window(&frame_window, image.width(), image.height());
 				Ok((image, frame))

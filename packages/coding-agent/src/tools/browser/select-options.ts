@@ -1,4 +1,4 @@
-import { ToolError } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 
 /**
  * How model code names one `<option>`: the text it reads off the page, or

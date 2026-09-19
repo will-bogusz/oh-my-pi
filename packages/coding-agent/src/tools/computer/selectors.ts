@@ -1,4 +1,4 @@
-import { ToolError } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ComputerLaunchOptions, WindowSelector } from "./types";
 
 /** Launch accepts the same name/path shorthand as explicit launch options. */

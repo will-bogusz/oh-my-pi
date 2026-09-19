@@ -1,7 +1,7 @@
 import { untilAborted } from "@oh-my-pi/pi-utils";
 import type { CDPSession, Frame, Page } from "puppeteer-core";
 import { _keyDefinitions } from "puppeteer-core/internal/common/USKeyboardLayout.js";
-import { ToolError } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { type AxFrame, type AxNode, buildAxTree } from "./observation";
 import { type BrowserSelectOption, normalizeSelectOptions, SELECT_OPTIONS_SOURCE } from "./select-options";
 

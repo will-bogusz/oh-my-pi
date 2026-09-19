@@ -7,7 +7,7 @@ import { executeJs } from "../../src/eval/js/executor";
 import { callSessionTool } from "../../src/eval/js/tool-bridge";
 import type { EvalPreludeDefinition } from "../../src/eval/preludes";
 import { disposeKernelSessionsByOwner, executePython } from "../../src/eval/py/executor";
-import type { EvalStatusEvent } from "../../src/eval/types";
+import type { EvalStatusEvent } from "@oh-my-pi/pi-tui/tools/eval";
 import type { ToolSession } from "../../src/tools";
 import { ToolAbortError } from "../../src/tools/tool-errors";
 

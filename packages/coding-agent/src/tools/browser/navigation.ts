@@ -2,7 +2,8 @@ import { setTimeout as sleep } from "node:timers/promises";
 
 import { untilAborted, withTimeout } from "@oh-my-pi/pi-utils";
 import type { Frame, Page } from "puppeteer-core";
-import { throwIfAborted, ToolError } from "../tool-errors";
+import { throwIfAborted } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 
 /** The only page global this module reads; the worker's ambient `document` has no `readyState`. */
 declare const document: { readyState: string };

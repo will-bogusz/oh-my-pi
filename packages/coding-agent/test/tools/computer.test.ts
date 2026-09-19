@@ -23,7 +23,7 @@ import {
 // @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
 import computerDeclarations from "../../src/tools/computer/declarations.d.ts" with { type: "text" };
 import { ComputerSupervisor } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
-import { ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type {
 	ComputerActionResult,
 	ComputerElementSnapshot,

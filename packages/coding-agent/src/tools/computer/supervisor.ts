@@ -1,6 +1,7 @@
 import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import type { ToolSession } from "../index";
-import { ToolError, throwIfAborted } from "../tool-errors";
+import { throwIfAborted } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ComputerBackend, ComputerBackendFactory } from "./backend";
 import { ComputerRuntime } from "./runtime";
 import type { ComputerRunOk, ComputerSessionSnapshot } from "./types";

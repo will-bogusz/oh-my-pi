@@ -15,7 +15,7 @@
  * and over-long `value=` text, then rows that carry neither text nor an action,
  * then the deepest subtrees, keeping rows that carry a real action for last.
  */
-import type { StructuralElisionResult } from "../../session/streaming-output";
+import type { StructuralElisionResult } from "@oh-my-pi/pi-tui/tools/streaming-output";
 
 /** A rendered tree row: indent, ref, role, then the attribute run. */
 const ROW_PATTERN = /^((?:  )*)- \[([^\]\s]+)\] (\S+)(.*)$/;

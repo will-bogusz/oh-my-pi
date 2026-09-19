@@ -9,9 +9,7 @@ use std::{
 };
 
 use objc2_application_services::{AXError, AXIsProcessTrusted, AXUIElement, AXValue, AXValueType};
-use objc2_core_foundation::{
-	CFArray, CFBoolean, CFNumber, CFNumberType, CFRetained, CFString, CFType, CGPoint, CGSize,
-};
+use objc2_core_foundation::{CFArray, CFBoolean, CFRetained, CFString, CFType, CGPoint, CGSize};
 
 use super::super::{
 	ax::{AxBounds, AxHandle, AxProps, normalize_role_macos},
@@ -31,8 +29,8 @@ static GET_WINDOW_ID: LazyLock<Option<GetWindowIdFn>> = LazyLock::new(|| {
 	if symbol.is_null() {
 		None
 	} else {
-		// SAFETY: `_AXUIElementGetWindow` has the exact AXUIElementRef, CGWindowID* ->
-		// AXError ABI above.
+		// SAFETY: `_AXUIElementGetWindow` has the exact AXUIElementRef,
+		// CGWindowID* -> AXError ABI above.
 		Some(unsafe { mem::transmute::<*mut c_void, GetWindowIdFn>(symbol) })
 	}
 });
@@ -44,7 +42,6 @@ static MANUAL_ACCESSIBILITY: LazyLock<Mutex<HashSet<libc::pid_t>>> =
 #[link(name = "ApplicationServices", kind = "framework")]
 unsafe extern "C" {
 	fn AXUIElementCreateApplication(pid: libc::pid_t) -> *mut AXUIElement;
-	fn AXUIElementGetPid(element: &AXUIElement, pid: *mut libc::pid_t) -> AXError;
 }
 
 pub(super) fn is_trusted() -> bool {
@@ -65,59 +62,6 @@ impl MacAx {
 		let root = self.window_root(window)?;
 		self.perform(&root, "AXRaise")
 	}
-
-	pub(super) fn invoke_menu(&mut self, window: &DesktopWindow, path: &[String]) -> CoreResult<()> {
-		let root = self.window_root(window)?;
-		let pid = window
-			.pid
-			.and_then(|pid| i32::try_from(pid).ok())
-			.ok_or_else(|| DesktopError::ax_failed("menu target has no valid process identity"))?;
-		let app = create_application(pid)?;
-		set_timeout(&app)?;
-		let mut current = copy_element(&app, "AXMenuBar")
-			.ok_or_else(|| DesktopError::ax_failed("application does not expose AXMenuBar"))?;
-		for label in path {
-			let mut children = copy_elements(&current, "AXChildren")?;
-			if children.len() == 1 && copy_string(&children[0], "AXRole").as_deref() == Some("AXMenu")
-			{
-				children = copy_elements(&children[0], "AXChildren")?;
-			}
-			let mut matches = children.into_iter().filter(|child| {
-				nonempty(copy_string(child, "AXTitle"))
-					.or_else(|| nonempty(copy_string(child, "AXDescription")))
-					.as_ref() == Some(label)
-			});
-			current = matches.next().ok_or_else(|| {
-				DesktopError::ax_failed(format!("menu component '{label}' is missing"))
-			})?;
-			if matches.next().is_some() {
-				return Err(DesktopError::ax_failed(format!("menu component '{label}' is ambiguous")));
-			}
-			let mut owner = 0;
-			// SAFETY: The retained menu element and writable PID slot are live.
-			if unsafe { AXUIElementGetPid(&current, &mut owner) } != AXError::Success || owner != pid {
-				return Err(DesktopError::ax_failed("menu element belongs to another application"));
-			}
-		}
-		// Menu nodes are deliberately never registered as window-scoped refs.
-		// Re-prove the original window immediately before the application action.
-		self.validate_owner(&root, window)?;
-		let _ = self.window_root(window)?;
-		require_focused_window(window)?;
-		if copy_bool(&current, "AXEnabled") != Some(true) {
-			return Err(DesktopError::ax_failed(
-				"menu item is disabled or its enabled state is unavailable",
-			));
-		}
-		let actions = copy_strings_from_action_names(&current);
-		let action = ["AXPress", "AXPick"]
-			.into_iter()
-			.find(|action| actions.iter().any(|candidate| candidate == action))
-			.ok_or_else(|| {
-				DesktopError::ax_failed("menu item advertises neither AXPress nor AXPick")
-			})?;
-		self.perform(&AxHandle::Mac(current), action)
-	}
 }
 /// Make the addressed window the app's main/focused window while foreground
 /// delivery has deliberately activated the app. This is best-effort at the
@@ -135,32 +79,6 @@ pub(super) fn prepare_foreground_input(window: &DesktopWindow) -> CoreResult<()>
 	backend.perform(&root, "AXRaise")
 }
 
-/// Prove which window will receive process-routed keyboard events. The
-/// application may own auxiliary windows, including the system sharing toolbar.
-pub(super) fn require_focused_window(window: &DesktopWindow) -> CoreResult<()> {
-	ensure_trusted()?;
-	let pid = window
-		.pid
-		.and_then(|pid| i32::try_from(pid).ok())
-		.ok_or_else(|| DesktopError::background_unavailable("keyboard target has no valid owner"))?;
-	let app = create_application(pid)?;
-	set_timeout(&app)?;
-	let focused = copy_element(&app, "AXFocusedWindow").ok_or_else(|| {
-		DesktopError::background_unavailable(
-			"application does not expose its exact keyboard window; use an AX action or explicit \
-			 foreground delivery",
-		)
-	})?;
-	MacAx::new()
-		.validate_owner(&AxHandle::Mac(focused), window)
-		.map_err(|_| {
-			DesktopError::background_unavailable(
-				"the application's keyboard window is not the requested target; focus that window \
-				 explicitly before typing",
-			)
-		})
-}
-
 impl AxBackend for MacAx {
 	fn window_root(&mut self, win: &DesktopWindow) -> CoreResult<AxHandle> {
 		ensure_trusted()?;
@@ -174,41 +92,46 @@ impl AxBackend for MacAx {
 		set_timeout(&app)?;
 		enable_web_accessibility(pid, &app);
 		let windows = copy_elements(&app, "AXWindows")?;
-		for element in windows {
-			let handle = AxHandle::Mac(element);
-			if self.validate_owner(&handle, win).is_ok() {
-				set_timeout(mac_handle(&handle)?)?;
-				return Ok(handle);
+		let expected_id = win.id.parse::<u32>().ok();
+		if let (Some(get_id), Some(expected_id)) = (*GET_WINDOW_ID, expected_id) {
+			for element in &windows {
+				let mut actual_id = 0u32;
+				// SAFETY: `actual_id` is writable and this retained AX element
+				// remains alive for the call.
+				if unsafe { get_id(element, &mut actual_id) } == AXError::Success
+					&& actual_id == expected_id
+				{
+					set_timeout(element)?;
+					return Ok(AxHandle::Mac(element.clone()));
+				}
 			}
 		}
-		Err(DesktopError::ax_failed(format!(
-			"cannot prove exact accessibility root for native window {} and process {pid}",
-			win.id
-		)))
-	}
-
-	fn validate_owner(&mut self, handle: &AxHandle, window: &DesktopWindow) -> CoreResult<()> {
-		let element = mac_handle(handle)?;
-		let get_id = GET_WINDOW_ID
-			.as_ref()
-			.ok_or_else(|| DesktopError::ax_failed("exact AX window identity is unavailable"))?;
-		let expected = window
-			.id
-			.parse::<u32>()
-			.map_err(|_| DesktopError::ax_failed("invalid native window id"))?;
-		let mut actual_id = 0;
-		let mut actual_pid = 0;
-		// SAFETY: The retained element is live and both output pointers are writable.
-		let valid = unsafe {
-			get_id(element, &mut actual_id) == AXError::Success
-				&& AXUIElementGetPid(element, &mut actual_pid) == AXError::Success
-		};
-		validate_element_identity(
-			expected,
-			window.pid,
-			valid.then_some(actual_id),
-			u32::try_from(actual_pid).ok(),
-		)
+		// Older systems may hide the private window-id SPI. Match title and
+		// global frame together, then title alone only when it is unique.
+		let mut title_match = None;
+		for element in windows {
+			let title = copy_string(&element, "AXTitle").unwrap_or_default();
+			if title != win.title {
+				continue;
+			}
+			if bounds(&element).is_some_and(|bounds| bounds_matches_window(bounds, win)) {
+				set_timeout(&element)?;
+				return Ok(AxHandle::Mac(element));
+			}
+			if title_match.is_some() {
+				title_match = None;
+				break;
+			}
+			title_match = Some(element);
+		}
+		let element = title_match.ok_or_else(|| {
+			DesktopError::ax_failed(format!(
+				"accessibility window for native window {} ('{}') was not found",
+				win.id, win.title,
+			))
+		})?;
+		set_timeout(&element)?;
+		Ok(AxHandle::Mac(element))
 	}
 
 	fn props(&mut self, h: &AxHandle) -> CoreResult<AxProps> {
@@ -221,9 +144,9 @@ impl AxBackend for MacAx {
 			role: normalize_role_macos(&native_role),
 			native_role,
 			title: nonempty(copy_string(element, "AXTitle")),
-			value: copy_value_string(element, "AXValue"),
+			value: nonempty(copy_value_string(element, "AXValue")),
 			description: nonempty(copy_string(element, "AXDescription")),
-			enabled: copy_bool(element, "AXEnabled"),
+			enabled: copy_bool(element, "AXEnabled").unwrap_or(true),
 			focused: copy_bool(element, "AXFocused").unwrap_or(false),
 			bounds: bounds(element),
 			actions,
@@ -257,29 +180,17 @@ impl AxBackend for MacAx {
 		let element = mac_handle(h)?;
 		let attribute = CFString::from_str("AXValue");
 		let value = CFString::from_str(value);
-		// SAFETY: The element, attribute, and value remain retained for the synchronous
-		// setter call.
+		// SAFETY: The element, attribute, and value remain retained for the
+		// synchronous setter call.
 		let error = unsafe { element.set_attribute_value(&attribute, &value) };
 		ax_result(error, "AXValue is not settable; no typing fallback was attempted")
-	}
-
-	fn insert_text(&mut self, h: &AxHandle, text: &str) -> CoreResult<()> {
-		let element = mac_handle(h)?;
-		require_settable(element, "AXSelectedText")?;
-		let attribute = CFString::from_str("AXSelectedText");
-		let value = CFString::from_str(text);
-		// SAFETY: All arguments remain retained throughout this synchronous setter.
-		ax_result(
-			unsafe { element.set_attribute_value(&attribute, &value) },
-			"setting AXSelectedText failed; no keyboard fallback was attempted",
-		)
 	}
 
 	fn focus(&mut self, h: &AxHandle) -> CoreResult<()> {
 		let element = mac_handle(h)?;
 		let attribute = CFString::from_str("AXFocused");
-		// SAFETY: The singleton CFBoolean and retained element remain valid for the
-		// synchronous setter call.
+		// SAFETY: The singleton CFBoolean and retained element remain valid for
+		// the synchronous setter call.
 		let error = unsafe { element.set_attribute_value(&attribute, CFBoolean::new(true)) };
 		ax_result(error, "setting AXFocused=true failed")
 	}
@@ -332,7 +243,7 @@ impl AxBackend for MacAx {
 			};
 			let value = copy_attribute(element, &name)
 				.map_or_else(|| "<no value>".to_string(), |value| stringify_value(&value));
-			result.push((name, value));
+			result.push((name, truncate_chars(value, 200)));
 		}
 		Ok(result)
 	}
@@ -349,8 +260,8 @@ fn ensure_trusted() -> CoreResult<()> {
 }
 
 fn create_application(pid: libc::pid_t) -> CoreResult<CFRetained<AXUIElement>> {
-	// SAFETY: AXUIElementCreateApplication accepts any process id and returns a +1
-	// retained CF object.
+	// SAFETY: AXUIElementCreateApplication accepts any process id and returns a
+	// +1 retained CF object.
 	let raw = unsafe { AXUIElementCreateApplication(pid) };
 	let pointer = NonNull::new(raw).ok_or_else(|| {
 		DesktopError::ax_failed(format!("AXUIElementCreateApplication({pid}) returned null"))
@@ -410,8 +321,8 @@ fn copy_attribute_result(
 	let attribute = CFString::from_str(attribute);
 	let mut output: *const CFType = ptr::null();
 	let slot = NonNull::from(&mut output);
-	// SAFETY: `slot` is writable and receives a create-rule retained CF object on
-	// success.
+	// SAFETY: `slot` is writable and receives a create-rule retained CF object
+	// on success.
 	let error = unsafe { element.copy_attribute_value(&attribute, slot) };
 	if error != AXError::Success {
 		return Err(error);
@@ -498,7 +409,8 @@ fn copy_attribute_names(element: &AXUIElement) -> CoreResult<Vec<CFRetained<CFTy
 		.ok_or_else(|| DesktopError::ax_failed("AX attribute names returned null"))?;
 	// SAFETY: The successful copy call returned this array at +1 retain count.
 	let array: CFRetained<CFArray> = unsafe { CFRetained::from_raw(pointer) };
-	// SAFETY: AXUIElementCopyAttributeNames returns a CFArray of CFString CFTypes.
+	// SAFETY: AXUIElementCopyAttributeNames returns a CFArray of CFString
+	// CFTypes.
 	let array = unsafe { CFRetained::cast_unchecked::<CFArray<CFType>>(array) };
 	Ok(array.iter().collect())
 }
@@ -578,6 +490,13 @@ fn mac_handle(handle: &AxHandle) -> CoreResult<&AXUIElement> {
 	}
 }
 
+fn bounds_matches_window(bounds: AxBounds, window: &DesktopWindow) -> bool {
+	(bounds.x - f64::from(window.x)).abs() <= 2.0
+		&& (bounds.y - f64::from(window.y)).abs() <= 2.0
+		&& (bounds.width - f64::from(window.width)).abs() <= 2.0
+		&& (bounds.height - f64::from(window.height)).abs() <= 2.0
+}
+
 fn action_name(action: &str) -> String {
 	match action.trim().to_ascii_lowercase().as_str() {
 		"press" => "AXPress".to_string(),
@@ -595,21 +514,6 @@ fn stringify_value(value: &CFType) -> String {
 	if let Some(boolean) = value.downcast_ref::<CFBoolean>() {
 		return boolean.as_bool().to_string();
 	}
-	if let Some(number) = value.downcast_ref::<CFNumber>() {
-		if number.is_float_type() {
-			let mut output = 0.0f64;
-			// SAFETY: The output type matches the requested CF numeric representation.
-			if unsafe { number.value(CFNumberType::Float64Type, (&mut output as *mut f64).cast()) } {
-				return output.to_string();
-			}
-		} else {
-			let mut output = 0i64;
-			// SAFETY: The output type matches the requested CF numeric representation.
-			if unsafe { number.value(CFNumberType::SInt64Type, (&mut output as *mut i64).cast()) } {
-				return output.to_string();
-			}
-		}
-	}
 	format!("{value:?}")
 }
 
@@ -617,113 +521,19 @@ fn nonempty(value: Option<String>) -> Option<String> {
 	value.filter(|value| !value.is_empty())
 }
 
+fn truncate_chars(value: String, max: usize) -> String {
+	if value.chars().count() <= max {
+		return value;
+	}
+	let mut result: String = value.chars().take(max.saturating_sub(1)).collect();
+	result.push('…');
+	result
+}
+
 fn ax_result(error: AXError, context: impl Into<String>) -> CoreResult<()> {
 	if error == AXError::Success {
 		Ok(())
 	} else {
 		Err(DesktopError::ax_failed(format!("{} ({error:?})", context.into())))
-	}
-}
-
-fn require_settable(element: &AXUIElement, name: &str) -> CoreResult<()> {
-	let attribute = CFString::from_str(name);
-	let mut settable = 0u8;
-	ax_result(
-		// SAFETY: The retained element and writable Boolean live through the call.
-		unsafe { element.is_attribute_settable(&attribute, NonNull::from(&mut settable)) },
-		format!("querying whether {name} is settable failed"),
-	)?;
-	if settable == 0 {
-		return Err(DesktopError::ax_failed(format!("{name} is not settable")));
-	}
-	Ok(())
-}
-
-fn validate_element_identity(
-	expected_id: u32,
-	expected_pid: Option<u32>,
-	actual_id: Option<u32>,
-	actual_pid: Option<u32>,
-) -> CoreResult<()> {
-	if expected_pid.is_none() || actual_id != Some(expected_id) || actual_pid != expected_pid {
-		return Err(DesktopError::stale_ref(
-			"accessibility element does not belong to the exact window and process",
-		));
-	}
-	Ok(())
-}
-
-pub(super) fn set_window_frame(
-	window: &DesktopWindow,
-	x: f64,
-	y: f64,
-	width: f64,
-	height: f64,
-) -> CoreResult<()> {
-	let root = MacAx::new().window_root(window)?;
-	let element = mac_handle(&root)?;
-	require_settable(element, "AXPosition")?;
-	require_settable(element, "AXSize")?;
-	let mut point = CGPoint { x, y };
-	let mut size = CGSize { width, height };
-	// SAFETY: The pointers match their AXValue types and are copied by
-	// AXValueCreate.
-	let position = unsafe { AXValue::new(AXValueType::CGPoint, NonNull::from(&mut point).cast()) }
-		.ok_or_else(|| DesktopError::ax_failed("creating AXPosition failed"))?;
-	// SAFETY: The pointer is a live CGSize and AXValueCreate copies its value.
-	let dimensions = unsafe { AXValue::new(AXValueType::CGSize, NonNull::from(&mut size).cast()) }
-		.ok_or_else(|| DesktopError::ax_failed("creating AXSize failed"))?;
-	ax_result(
-		// SAFETY: Element, attribute name and typed size remain retained for the setter.
-		unsafe { element.set_attribute_value(&CFString::from_str("AXSize"), &dimensions) },
-		"setting AXSize failed",
-	)?;
-	ax_result(
-		// SAFETY: Element, attribute name and typed point remain retained for the setter.
-		unsafe { element.set_attribute_value(&CFString::from_str("AXPosition"), &position) },
-		"setting AXPosition failed after setting AXSize",
-	)?;
-	if !bounds(element).is_some_and(|actual| {
-		actual.x == x && actual.y == y && actual.width == width && actual.height == height
-	}) {
-		return Err(DesktopError::ax_failed(
-			"window did not report the requested exact geometry after AX setters",
-		));
-	}
-	Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-
-	#[test]
-	fn exact_element_identity_rejects_siblings_reused_ids_and_missing_proof() {
-		validate_element_identity(7, Some(41), Some(7), Some(41)).unwrap();
-		assert!(validate_element_identity(7, Some(41), Some(8), Some(41)).is_err());
-		assert!(validate_element_identity(7, Some(41), Some(7), Some(42)).is_err());
-		assert!(validate_element_identity(7, Some(41), None, Some(41)).is_err());
-		assert!(validate_element_identity(7, None, Some(7), None).is_err());
-	}
-
-	#[test]
-	fn raw_values_preserve_empty_whitespace_and_complete_unicode() {
-		for value in [String::new(), "\n \t".to_string(), "文😀".repeat(300)] {
-			assert_eq!(stringify_value(&CFString::from_str(&value)), value);
-		}
-		assert_eq!(stringify_value(CFBoolean::new(false)), "false");
-		assert_eq!(stringify_value(CFBoolean::new(true)), "true");
-		let integer = -123456789012345i64;
-		let fraction = 12.75f64;
-		// SAFETY: Each pointer matches the requested numeric representation.
-		let number =
-			unsafe { CFNumber::new(None, CFNumberType::SInt64Type, (&integer as *const i64).cast()) }
-				.unwrap();
-		assert_eq!(stringify_value(&number), integer.to_string());
-		let number = unsafe {
-			CFNumber::new(None, CFNumberType::Float64Type, (&fraction as *const f64).cast())
-		}
-		.unwrap();
-		assert_eq!(stringify_value(&number), fraction.to_string());
 	}
 }

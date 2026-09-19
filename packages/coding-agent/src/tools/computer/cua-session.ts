@@ -3,7 +3,8 @@ import * as path from "node:path";
 import type { DesktopCapabilities, DesktopDisplay } from "@oh-my-pi/pi-natives";
 import * as logger from "@oh-my-pi/pi-utils/logger";
 import { resizeImage } from "../../utils/image-resize";
-import { ToolError, throwIfAborted } from "../tool-errors";
+import { throwIfAborted } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ComputerBackend, ComputerBackendFactory } from "./backend";
 import { type CuaDriver, type CuaDriverFactory, type CuaToolResult, spawnVendoredCuaDriver } from "./driver";
 import {

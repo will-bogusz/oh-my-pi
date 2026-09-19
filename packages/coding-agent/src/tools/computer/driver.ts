@@ -3,7 +3,8 @@ import * as path from "node:path";
 import { type } from "@oh-my-pi/omptype";
 import { getNativesDir, isEnoent } from "@oh-my-pi/pi-utils";
 import * as logger from "@oh-my-pi/pi-utils/logger";
-import { ToolAbortError, ToolError, throwIfAborted } from "../tool-errors";
+import { ToolAbortError, throwIfAborted } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { vendoredDriver } from "./vendored";
 
 /** MCP tool reply from the driver, flattened to what the session consumes. */

@@ -8,7 +8,7 @@
  */
 import path from "node:path";
 import { describe, expect, it } from "bun:test";
-import { DEFAULT_MAX_BYTES, enforceInlineByteCap } from "@oh-my-pi/pi-coding-agent/session/streaming-output";
+import { DEFAULT_MAX_BYTES, enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { elideObservationTree } from "@oh-my-pi/pi-coding-agent/tools/computer/tree-elide";
 
 const MIDDLE_CUT_MARKER = /\[…\d+B elided…\]/;

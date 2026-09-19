@@ -1,7 +1,8 @@
 import { logger, untilAborted } from "@oh-my-pi/pi-utils";
 import type { DialogState } from "./dialogs";
 import type { ToolSession } from "../../sdk";
-import { ToolAbortError, ToolError, throwIfAborted } from "../tool-errors";
+import { ToolAbortError, throwIfAborted } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { acquireBrowser, holdBrowser, releaseBrowser } from "./registry";
 import { readRelayControlToken } from "./relay/access";
 import type { BrowserInstance, InstanceLease, InstanceTab } from "./relay/instances";

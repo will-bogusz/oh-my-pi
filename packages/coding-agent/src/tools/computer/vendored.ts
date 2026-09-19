@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import { isEnoent } from "@oh-my-pi/pi-utils";
-import { ToolError } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 
 /** One platform's vendored `cua-driver` executable, as recorded in `vendor/cua-driver/<platform>/manifest.json`. */
 export interface VendoredDriver {

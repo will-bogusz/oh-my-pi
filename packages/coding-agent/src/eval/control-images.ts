@@ -1,4 +1,4 @@
-import type { ControlImageMetadata, ControlImageReference } from "./types";
+import type { ControlImageMetadata, ControlImageReference } from "@oh-my-pi/pi-tui/tools/eval";
 
 /** Validate metadata crossing a language/IPC boundary; never derive paths from captions. */
 export function readControlImageMetadata(value: unknown): ControlImageMetadata | undefined {

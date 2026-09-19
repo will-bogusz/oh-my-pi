@@ -1,5 +1,5 @@
 import type { CDPSession, Page } from "puppeteer-core";
-import { ToolError } from "../tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 
 export interface TabDownload {
 	id: string;

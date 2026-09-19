@@ -174,7 +174,7 @@ pub struct AxNode {
 	pub title:       Option<String>,
 	pub value:       Option<String>,
 	pub description: Option<String>,
-	pub enabled:     Option<bool>,
+	pub enabled:     bool,
 	pub focused:     bool,
 	pub x:           Option<f64>,
 	pub y:           Option<f64>,
@@ -188,11 +188,8 @@ pub struct AxNode {
 #[derive(Debug, Clone)]
 pub struct AxSnapshot {
 	pub text:       String,
-	pub nodes:      Vec<AxNode>,
 	pub node_count: u32,
 	pub truncated:  bool,
-	/// Subtrees omitted because their accessibility data could not be read.
-	pub skipped:    u32,
 }
 
 #[napi(object)]
@@ -248,91 +245,4 @@ impl DisplaySelector {
 			_ => Self::All,
 		}
 	}
-}
-
-/// Session-lifetime owner bindings. Absence is the explicit raw, unpinned path.
-#[derive(Debug, Clone, Default)]
-pub(crate) struct WindowPins(std::collections::HashMap<String, u32>);
-
-impl WindowPins {
-	pub(crate) fn contains(&self, id: &str) -> bool {
-		self.0.contains_key(id)
-	}
-
-	pub(crate) fn validate_identity(
-		&self,
-		id: &str,
-		actual_pid: Option<u32>,
-	) -> super::error::CoreResult<()> {
-		if self.0.get(id).is_some_and(|pid| actual_pid != Some(*pid)) {
-			return Err(super::error::DesktopError::window_not_found(format!(
-				"window '{id}' no longer belongs to its pinned process"
-			)));
-		}
-		Ok(())
-	}
-
-	pub(crate) fn pin(&mut self, id: &str, pid: u32) -> super::error::CoreResult<()> {
-		if pid == 0 || id.eq_ignore_ascii_case("desktop") {
-			return Err(super::error::DesktopError::invalid_target(
-				"a window pin requires a window id and positive PID",
-			));
-		}
-		match self.0.entry(id.to_string()) {
-			std::collections::hash_map::Entry::Occupied(entry) if *entry.get() != pid => {
-				Err(super::error::DesktopError::invalid_target(format!(
-					"window '{id}' is already pinned to another process"
-				)))
-			},
-			std::collections::hash_map::Entry::Occupied(_) => Ok(()),
-			std::collections::hash_map::Entry::Vacant(entry) => {
-				entry.insert(pid);
-				Ok(())
-			},
-		}
-	}
-
-	pub(crate) fn validate(&self, window: &DesktopWindow) -> super::error::CoreResult<()> {
-		self.validate_identity(&window.id, window.pid)
-	}
-}
-
-#[cfg(test)]
-mod identity_tests {
-	use super::*;
-
-	#[test]
-	fn owner_pin_is_immutable_and_missing_or_reused_owner_fails_closed() {
-		let mut pins = WindowPins::default();
-		let mut window = DesktopWindow {
-			id:      "7".into(),
-			title:   String::new(),
-			app:     String::new(),
-			pid:     Some(41),
-			x:       0,
-			y:       0,
-			width:   10,
-			height:  10,
-			focused: false,
-		};
-		pins.pin("7", 41).unwrap();
-		pins.pin("7", 41).unwrap();
-		assert!(pins.pin("7", 42).is_err());
-		pins.validate(&window).unwrap();
-		window.pid = Some(42);
-		assert!(pins.validate(&window).is_err());
-		window.pid = None;
-		assert!(pins.validate(&window).is_err());
-		window.id = "raw-unpinned".into();
-		pins.validate(&window).unwrap();
-	}
-}
-
-// DesktopSession owns one dedicated OS worker thread. These bindings live on
-// that thread so static platform target resolvers can enforce the same identity
-// at dispatch, rather than trusting an earlier roster lookup. They disappear
-// with the session's worker; no bindings are shared across sessions.
-thread_local! {
-	pub(crate) static PLATFORM_WINDOW_PINS: std::cell::RefCell<WindowPins> =
-		std::cell::RefCell::new(WindowPins::default());
 }

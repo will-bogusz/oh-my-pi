@@ -145,10 +145,7 @@ impl AtSpiAx {
 				}
 			}
 		}
-		if win.pid.is_some() {
-			return Err(format!("application '{}' (pid {:?}) not found", win.app, win.pid));
-		}
-		name_match.ok_or_else(|| format!("application '{}' not found", win.app))
+		name_match.ok_or_else(|| format!("application '{}' (pid {:?}) not found", win.app, win.pid))
 	}
 
 	async fn frames(
@@ -239,69 +236,27 @@ impl AtSpiAx {
 
 impl AxBackend for AtSpiAx {
 	fn window_root(&mut self, win: &DesktopWindow) -> CoreResult<AxHandle> {
-		if !win.id.starts_with("atspi:") {
-			return Err(DesktopError::ax_failed(
-				"exact X11 window-to-AT-SPI identity is unavailable; title matching is not ownership \
-				 proof",
-			));
-		}
 		let result = self.rt.block_on(async {
 			let app = Self::app_for_window(&self.connection, win).await?;
-			for frame in Self::frames(&self.connection, &app).await? {
-				let id = format!(
-					"atspi:{}:{}",
-					frame.name().map(ToString::to_string).unwrap_or_default(),
-					frame.path()
-				);
-				if id == win.id {
+			let frames = Self::frames(&self.connection, &app).await?;
+			let mut first = None;
+			for frame in frames {
+				if first.is_none() {
+					first = Some(frame.clone());
+				}
+				let proxy = frame
+					.as_accessible_proxy(self.connection.connection())
+					.await
+					.map_err(|err| err.to_string())?;
+				if proxy.name().await.unwrap_or_default() == win.title {
 					return Ok(frame);
 				}
 			}
-			Err(format!("no exact accessibility frame for '{}'", win.id))
+			first.ok_or_else(|| format!("no frame or dialog found for '{}'", win.title))
 		});
 		result
 			.map(AxHandle::AtSpi)
 			.map_err(|err: String| DesktopError::ax_failed(format!("AT-SPI window root: {err}")))
-	}
-
-	fn validate_owner(&mut self, handle: &AxHandle, window: &DesktopWindow) -> CoreResult<()> {
-		let root = self.window_root(window)?;
-		let root = Self::object(&root).clone();
-		let object = Self::object(handle).clone();
-		self.rt.block_on(async {
-			let name = object
-				.name()
-				.ok_or_else(|| DesktopError::stale_ref("AT-SPI element has no owner"))?;
-			let dbus = atspi::zbus::fdo::DBusProxy::new(self.connection.connection())
-				.await
-				.map_err(|err| DesktopError::stale_ref(err.to_string()))?;
-			let pid = dbus
-				.get_connection_unix_process_id(name.clone().into())
-				.await
-				.ok();
-			if pid.is_none() || pid != window.pid {
-				return Err(DesktopError::stale_ref(
-					"AT-SPI element process no longer matches its owner",
-				));
-			}
-			let mut current = object;
-			for _ in 0..128 {
-				if current == root {
-					return Ok(());
-				}
-				let proxy = current
-					.as_accessible_proxy(self.connection.connection())
-					.await
-					.map_err(|err| DesktopError::stale_ref(err.to_string()))?;
-				let parent = proxy
-					.parent()
-					.await
-					.map_err(|err| DesktopError::stale_ref(err.to_string()))?;
-				drop(proxy);
-				current = parent;
-			}
-			Err(DesktopError::stale_ref("AT-SPI element is outside its owning window"))
-		})
 	}
 
 	fn props(&mut self, h: &AxHandle) -> CoreResult<AxProps> {
@@ -374,7 +329,9 @@ impl AxBackend for AtSpiAx {
 				title,
 				value,
 				description,
-				enabled: state.as_ref().map(|states| states.contains(State::Enabled)),
+				enabled: state
+					.as_ref()
+					.is_some_and(|states| states.contains(State::Enabled)),
 				focused: state
 					.as_ref()
 					.is_some_and(|states| states.contains(State::Focused)),

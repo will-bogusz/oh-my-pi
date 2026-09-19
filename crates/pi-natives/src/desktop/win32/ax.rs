@@ -159,40 +159,11 @@ impl AxBackend for Win32Ax {
 			DesktopError::ax_failed(format!("invalid Win32 window id '{}'", window.id))
 		})?;
 		let handle = Handle::from(address as isize);
-		let element = self
+		self
 			.automation()?
 			.element_from_handle(handle)
-			.map_err(ax_error)?;
-		if window
-			.pid
-			.is_some_and(|pid| element.get_process_id().ok() != Some(pid))
-		{
-			return Err(DesktopError::stale_ref(
-				"UIA root no longer belongs to the requested process",
-			));
-		}
-		Ok(AxHandle::Uia(element))
-	}
-
-	fn validate_owner(&mut self, handle: &AxHandle, window: &DesktopWindow) -> CoreResult<()> {
-		let mut element = Self::element(handle)?.clone();
-		let root = self.window_root(window)?;
-		let root = Self::element(&root)?;
-		let walker = self.walker()?;
-		for _ in 0..128 {
-			if element.get_process_id().ok() != window.pid {
-				break;
-			}
-			if self
-				.automation()?
-				.compare_elements(&element, root)
-				.map_err(ax_error)?
-			{
-				return Ok(());
-			}
-			element = walker.get_parent(&element).map_err(ax_error)?;
-		}
-		Err(DesktopError::stale_ref("UIA element does not belong to the exact window and process"))
+			.map(AxHandle::Uia)
+			.map_err(ax_error)
 	}
 
 	fn props(&mut self, handle: &AxHandle) -> CoreResult<AxProps> {
@@ -212,7 +183,7 @@ impl AxBackend for Win32Ax {
 			title: optional(element.get_name()),
 			value: value(element),
 			description: optional(element.get_help_text()),
-			enabled: element.is_enabled().ok(),
+			enabled: element.is_enabled().unwrap_or(false),
 			focused: element.has_keyboard_focus().unwrap_or(false),
 			bounds,
 			actions: actions(element),

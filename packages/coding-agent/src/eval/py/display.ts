@@ -4,7 +4,7 @@
  */
 import { htmlToBasicMarkdown } from "../../web/scrapers/types";
 import { readControlImageMetadata } from "../control-images";
-import type { ControlImageMetadata } from "../types";
+import type { ControlImageMetadata } from "@oh-my-pi/pi-tui/tools/eval";
 
 /** Status event emitted by prelude helpers for TUI rendering. */
 export interface PythonStatusEvent {

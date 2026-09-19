@@ -8,7 +8,7 @@ import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-age
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import { BROWSER_TAB_VERBS } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-call";
-import { ToolError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { chromiumAvailable } from "../tools/chromium-probe";
 
 interface FacadeResponse {
