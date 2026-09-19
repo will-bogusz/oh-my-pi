@@ -363,7 +363,7 @@ export function readReply(details: unknown): ActionReply {
 		data,
 		code: typeof data.code === "string" ? data.code : undefined,
 		effect: typeof data.effect === "string" ? data.effect : undefined,
-		route: typeof data.route === "string" ? data.route : typeof data.path === "string" ? data.path : undefined,
+		route: typeof data.route === "string" ? data.route : undefined,
 		delivery: evidenceDelivery(data.delivery),
 		committed: commitVerdict(data.committed),
 		escalation: readEscalation(data),
