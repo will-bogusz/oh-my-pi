@@ -15,41 +15,32 @@ import {
 	type WindowRosterSample,
 } from "./interruption";
 import {
+	type ActionReply,
 	actionEvidence,
-	commitNote,
-	commitVerdict,
-	DEAD_ELEMENT_REFUSALS,
-	escalationReason,
-	escalationTarget,
-	FOCUS_HOLDING_REFUSALS,
-	FOREGROUND_ROUTE,
+	deadElement,
+	escalation,
+	type Facts,
 	INCOMPLETE_TYPING,
 	incompleteNote,
-	KEYBOARD_READ_ROUTE,
+	KEYBOARD_TOOLS,
 	MENU_BAR_ROLES,
 	MENU_REFUSAL_SEGMENT,
-	MENU_ROLES,
 	MENU_WALK_DEPTH,
+	menuBarRoute,
 	menuCommandLine,
-	menuCommandPath,
-	menuItems,
 	menuRefusalItems,
 	menuRefusalNames,
 	menuSubmenuListing,
-	NOT_COMMITTED_REASON,
-	OBSERVE_ROUTE,
-	pixelEscalation,
 	preludeVocabulary,
-	refusalDetails,
-	RENDERED_TARGETS,
-	ROUTE_ALREADY_TAKEN,
-	ROUTE_ALREADY_TAKEN_UNPROVEN,
+	readReply,
+	refusalNote,
 	SEARCH_FIELD,
-	TEXT_INPUT_ROLES,
-	UNDELIVERED_EFFECTS,
+	specificRole,
 	UNPROBED_DRAG,
-	valueReadBack,
 	type Wire,
+	type WriteFacts,
+	writeField,
+	writeNote,
 } from "./render";
 import { appWindows, isCaptureLeaseArtifact } from "./roster";
 import { PERFORMABLE_ACTIONS, observedActions, semanticAction } from "./semantic-actions";
@@ -57,7 +48,6 @@ import type {
 	ActionOptions,
 	ComputerActionResult,
 	ComputerBounds,
-	ComputerCommitVerdict,
 	ComputerElementSnapshot,
 	ComputerImage,
 	ComputerInterruption,
@@ -110,18 +100,6 @@ interface TreeRow {
 	depth: number;
 	element: ComputerElementSnapshot;
 	notes?: readonly TreeNote[];
-}
-/**
- * A subrole that ends in its own role's stem says nothing the row has not
- * already printed — `AXRow`/`AXTableRow`, `AXWindow`/`AXStandardWindow` — and
- * a captured 1558-node Notes window carries 164 of those against 9 that name a
- * different control class, 3.1 kB of a 33 kB tree under a 50 kB cap. The
- * driver's own markdown drops them on the same predicate; the snapshot keeps
- * the raw value either way, so `find` is unaffected.
- */
-function specificRole(element: ComputerElementSnapshot): string {
-	const subrole = element.subrole;
-	return subrole === undefined || subrole.endsWith(element.role.slice(2)) ? element.role : subrole;
 }
 function renderedSubrole(element: ComputerElementSnapshot): string {
 	const specific = specificRole(element);
@@ -411,8 +389,6 @@ function delivery(options: ActionOptions): Wire {
 function foreground(options: { delivery?: "background" | "foreground" }): void {
 	if (options.delivery !== "foreground") throw new ToolError("This desktop operation requires delivery: 'foreground'");
 }
-/** The tools that deliver keystrokes: one delivery route per window, not per call. */
-const KEYBOARD_TOOLS: Record<string, true> = { hotkey: true, press_key: true, type_text: true };
 const DETECT_WINDOW_CHANGE_TOOLS: Record<string, true> = {
 	click: true,
 	drag: true,
@@ -1677,295 +1653,43 @@ export class CuaComputerSession implements ComputerBackend {
 		return false;
 	}
 	/**
-	 * The app's own window drawn in front of the one this call addressed, as
-	 * the calls that reach it. Before 0.9.0 `bring_to_front` reported the
-	 * blocker's id in `observed.process_frontmost_ordinary_window_id` alone —
-	 * never as the top-level `focused_window_id` the sheet arm below reads,
-	 * which is why neither measured lane's `reveal()` said anything about the
-	 * panel covering its target. A reply that names that window in its own
-	 * prose gets only the calls added; one that does not gets the identity
-	 * too. `obscured_by` is contract vocabulary rather than a generated type,
-	 * so every field is read defensively, and the acquisition is named only
-	 * for a window this session's roster holds: T11 was told to acquire
-	 * window 19083, the capture lease's own indicator, which the roster hides
-	 * and `computer.window` answers with `Missing computer window`.
-	 */
-	#obscuringPanel(data: Wire, target: string, pid: number | undefined, message: string): string | undefined {
-		const observed = data.observed !== null && typeof data.observed === "object" ? (data.observed as Wire) : {};
-		const row = data.obscured_by !== null && typeof data.obscured_by === "object" ? (data.obscured_by as Wire) : {};
-		const id =
-			typeof row.window_id === "number"
-				? String(row.window_id)
-				: typeof observed.process_frontmost_ordinary_window_id === "number"
-					? String(observed.process_frontmost_ordinary_window_id)
-					: undefined;
-		if (id === undefined || id === target) return undefined;
-		const call = `computer.window(${JSON.stringify(id)})`;
-		const blind = row.ax_backed === false;
-		const unheld = `this session's roster holds no window ${id} to acquire`;
-		const held = this.#holdsWindow(id);
-		if (message.includes(`window ${id}`)) {
-			if (blind)
-				return `Dismiss it with press("Escape"); ${call} cannot acquire a window that publishes no accessibility window of its own.`;
-			return held
-				? `Acquire it with ${call} and act there, or dismiss it with press("Escape").`
-				: `Dismiss it with press("Escape") — ${unheld}.`;
-		}
-		const title = typeof row.title === "string" && row.title ? JSON.stringify(row.title) : "untitled";
-		const role = typeof row.role === "string" && row.role ? row.role : undefined;
-		const subrole = typeof row.subrole === "string" && row.subrole ? `/${row.subrole}` : "";
-		const owner = pid === undefined ? "the app's" : `pid ${pid}'s`;
-		const named = `window ${id} (${role === undefined ? title : `${role}${subrole}, ${title}`})`;
-		const covered = `Pixel targets on window ${target} stay covered until it goes away.`;
-		if (blind)
-			return `${named} is ${owner} own front window and publishes no accessibility window, so it can never become the focused one and reveal() cannot move it: dismiss it with press("Escape") or act on its pixels.`;
-		return held
-			? `${named} is ${owner} own window, drawn in front of window ${target}: acquire it with ${call} and act there, or dismiss it with press("Escape"). ${covered}`
-			: `${named} is ${owner} own window, drawn in front of window ${target}: dismiss it with press("Escape") — ${unheld}. ${covered}`;
-	}
-	/**
-	 * `AXEnabled` is the app's own applicability, and the pre-0.9.0 refusal
-	 * named two rungs regardless — byte-identical on background and
-	 * foreground, on a frontmost window and behind a panel, in all four
-	 * measured states. The typed refusal composes that sentence itself, so
-	 * what is left to render is what a driver cannot name: the call for the
-	 * window it found in front, and the rung for a control whose window is
-	 * not the app's key one — a not-key Notes window publishes its own
-	 * toolbar search field as `AXEnabled=false` and accepts the same click
-	 * once a foreground dispatch makes it key. The other two arms are
-	 * composed here only for the untyped shape, where nothing is.
-	 */
-	#disabledControl(details: unknown, args: Wire, message: string): string | undefined {
-		const data = refusalDetails(details);
-		const typed = data.code === "element_disabled";
-		if (!typed && !message.includes("AXEnabled=false")) return undefined;
-		const target = typeof args.window_id === "number" ? String(args.window_id) : undefined;
-		const pid = typeof args.pid === "number" ? args.pid : undefined;
-		const panel = target === undefined ? undefined : this.#obscuringPanel(data, target, pid, message);
-		if (panel !== undefined) return panel;
-		if (escalationTarget(data) === "foreground" && args.delivery_mode !== "foreground")
-			return 'retry with { delivery: "foreground" } — the window is not the app\'s key window and a foreground dispatch makes it key first.';
-		if (typed) return undefined;
-		const element = this.#elements.get(this.#refForToken(args.element_token) ?? "")?.element;
-		const role = element?.role ?? (typeof data.role === "string" ? data.role : undefined);
-		if (role !== undefined && MENU_ROLES[role] === true)
-			return `That ${role} is disabled by the app's own current state: a menu row's AXEnabled tracks the command's applicability, not focus or delivery. Satisfy the command's precondition (a selection, a document, a mode) or pick another item.`;
-		if (args.delivery_mode === "foreground" || data.front_in_process === true)
-			return `That control reports AXEnabled=false with { delivery: "foreground" } already in force, so the rung is not what refused and no activation changes it: satisfy its precondition or choose another control.`;
-		return undefined;
-	}
-	#focusHolder(details: unknown, args: Wire, message: string): string | undefined {
-		const data = refusalDetails(details);
-		const target = typeof args.window_id === "number" ? String(args.window_id) : undefined;
-		if (target === undefined) return undefined;
-		const panel = this.#obscuringPanel(data, target, typeof args.pid === "number" ? args.pid : undefined, message);
-		if (panel !== undefined) return panel;
-		const code = typeof data.code === "string" ? data.code : undefined;
-		if ((code === undefined || FOCUS_HOLDING_REFUSALS[code] !== true) && data.focused_window_id === undefined)
-			return undefined;
-		const focused =
-			typeof data.focused_window_id === "number" && String(data.focused_window_id) !== target
-				? String(data.focused_window_id)
-				: undefined;
-		const sheet = focused ?? [...this.#sheets].find(([, row]) => row.parent === target)?.[0];
-		if (sheet === undefined) return undefined;
-		const relation = this.#sheets.get(sheet);
-		return `window ${sheet}${
-			relation ? ` — a sheet attached to ${relation.parent} —` : ""
-		} holds keyboard focus, not window ${target}; drive it with computer.window(${JSON.stringify(sheet)}) and press its own buttons.`;
-	}
-	/**
 	 * The rung the driver names is the whole fact: a keyboard escalation
 	 * spells its `reason` as a contract token (`delivery_failed`) or as the
 	 * prose sentence the fork's `hotkey`/`type_text` emit, so only the target
 	 * is a route. A refused foreground dispatch is not a route to keep
 	 * taking, whoever chose it.
 	 */
-	#keyboardEscalation(name: string, args: Wire, details: Wire, refused: boolean): boolean {
-		if (KEYBOARD_TOOLS[name] !== true || typeof args.window_id !== "number") return false;
+	#keyboardEscalation(name: string, args: Wire, reply: ActionReply, refused: boolean): void {
+		if (KEYBOARD_TOOLS[name] !== true || typeof args.window_id !== "number") return;
 		const window = String(args.window_id);
-		if (refused && args.delivery_mode === "foreground") {
-			this.#escalatedKeyboard.delete(window);
-			return false;
-		}
-		if (escalationTarget(details) !== "foreground") return false;
-		this.#escalatedKeyboard.add(window);
-		return true;
-	}
-	/**
-	 * The text rows this window's current observation holds that a write can
-	 * land on. A row the app publishes `AXEnabled=false` refuses the write —
-	 * T11 was sent at `AXTextField "" subrole=AXSearchField enabled=false`
-	 * and answered `type_text_incomplete: delivered 0 of 22` — so a disabled
-	 * row is no candidate, whatever its role.
-	 */
-	#textRows(windowId: string): string[] {
-		const refs: string[] = [];
-		for (const [ref, binding] of this.#elements) {
-			if (binding.window.id !== windowId || binding.element.enabled === false) continue;
-			const subrole = binding.element.subrole;
-			if (
-				TEXT_INPUT_ROLES[binding.element.role] === true ||
-				(subrole !== undefined && TEXT_INPUT_ROLES[subrole] === true)
-			)
-				refs.push(ref);
-		}
-		return refs;
-	}
-	/** The menus this window's current observation holds; empty unless it was walked with the menu bar. */
-	#menuTitles(windowId: string): string[] {
-		const titles: string[] = [];
-		for (const binding of this.#elements.values())
-			if (
-				binding.window.id === windowId &&
-				binding.element.role === "AXMenuBarItem" &&
-				binding.element.label &&
-				!titles.includes(binding.element.label)
-			)
-				titles.push(binding.element.label);
-		return titles;
+		if (refused && args.delivery_mode === "foreground") this.#escalatedKeyboard.delete(window);
+		else if (reply.escalation?.target === "foreground") this.#escalatedKeyboard.add(window);
 	}
 	#refForToken(token: unknown): string | undefined {
 		if (typeof token !== "string") return undefined;
 		for (const [ref, binding] of this.#elements) if (binding.token === token) return ref;
 		return undefined;
 	}
-	/**
-	 * Where the text of this call can be written instead of posted at a
-	 * window: the addressed row when the call carried one, else the text rows
-	 * this window's own observation holds. A window-scoped keystroke that
-	 * cannot be read back is the case the driver has no answer for — its
-	 * `element` target means exactly "address the field", which only this side
-	 * can spell, because only this side minted the ref.
-	 */
-	#fieldRoute(windowId: string, addressed: string | undefined): string | undefined {
-		if (addressed !== undefined)
-			return `write the field instead of posting keystrokes at it: win.ref(${JSON.stringify(addressed)}).setValue("<value>")`;
-		const refs = this.#textRows(windowId);
-		if (!refs.length) return undefined;
-		if (refs.length === 1) {
-			const ref = JSON.stringify(refs[0]);
-			return `address the field itself: win.ref(${ref}).type("<text>") or win.ref(${ref}).setValue("<value>")`;
-		}
-		return `address the field itself — this window's observation holds ${refs.length} text rows (${refs
-			.slice(0, 4)
-			.join(", ")}): win.ref("<ref>").type("<text>") or win.ref("<ref>").setValue("<value>")`;
-	}
-	/** The menu route, named only when this window's own observation carries its menu bar. */
-	#menuRoute(windowId: string): string | undefined {
-		const titles = this.#menuTitles(windowId);
-		if (!titles.length) return undefined;
-		return `drive the command from the menu this window's observation carries (${titles
-			.slice(0, 8)
-			.join(" · ")}): win.menu(["<menu>", "<item>"], { delivery: "foreground" })`;
-	}
-	/**
-	 * The route this reply's own state leaves open, composed here because this
-	 * is where the state is: the rung this call already took, what the
-	 * escalation doubts, whether the call was scoped to an element, the rows
-	 * the window's current observation holds and whether its frame is live.
-	 * Measured against a table keyed on the escalation target alone: a chord
-	 * that had already been escalated to foreground and came back unverified
-	 * was told to re-run as-is (6/6 inert on Notes' Find chord), and a
-	 * coordinate rung was named for a window with no capture, where a pixel
-	 * action refuses before dispatch. A background chord that moved nothing
-	 * still has the rung that lands — a foreground dispatch makes the window
-	 * key, which is what a not-key window's controls were waiting for — so it
-	 * goes ahead of the menu, the field and a read.
-	 */
-	#escalationRoute(
-		name: string,
-		args: Wire,
-		text: string,
-		target: string | undefined,
-		state: {
-			remembered: boolean;
-			unproven: boolean;
-			noop: boolean;
-			reason: string | undefined;
-			menuCommand: readonly string[] | undefined;
-		},
-	): string | undefined {
+	/** What the renderer needs of this call and of the window it addressed. */
+	#facts(tool: string, text: string, args: Wire, addressed = this.#refForToken(args.element_token)): Facts {
 		const windowId = typeof args.window_id === "number" ? String(args.window_id) : undefined;
-		const keyboard = KEYBOARD_TOOLS[name] === true;
-		const foregroundTaken = args.delivery_mode === "foreground";
-		const field =
-			windowId === undefined ? undefined : this.#fieldRoute(windowId, this.#refForToken(args.element_token));
-		const menu = windowId === undefined ? undefined : this.#menuRoute(windowId);
-		const read = keyboard ? KEYBOARD_READ_ROUTE : OBSERVE_ROUTE;
-		// A chord the driver dispatched as the app's own menu command had the
-		// window made key for it; the foreground rung has nothing more to make
-		// key, so it is never the route here (measured: Notes' Find chord,
-		// where the foreground chord was as inert as the background one).
-		if (keyboard && state.menuCommand !== undefined) {
-			if (target === "element")
-				return `${
-					field ??
-					`address the control the command targets — this session holds no text row for window ${windowId ?? "(unknown)"}, so observe it first and write the row that walk mints`
-				}, or raise the window (win.raise()) and keep it key before re-running`;
-			if (state.noop)
-				return `the driver dispatched these keystrokes as the menu command ${state.menuCommand.join(
-					" > ",
-				)} with the window key and still saw no reaction, so re-sending them on any rung lands nothing new — ${
-					field ?? read
-				}`;
-			return undefined;
-		}
-		const rung =
-			keyboard && state.noop && !foregroundTaken
-				? 'these keystrokes went out in the background, which leaves this window not the app\'s key window — re-run with { delivery: "foreground" }, which makes it key first'
-				: undefined;
-		if (keyboard && foregroundTaken && state.unproven && (target !== undefined || state.noop))
-			return `the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — ${
-				(name === "type_text" ? (field ?? menu) : (menu ?? field)) ?? read
-			}`;
-		switch (target) {
-			case "foreground":
-				if (keyboard && state.remembered)
-					return state.reason === "delivery_failed" ? ROUTE_ALREADY_TAKEN : ROUTE_ALREADY_TAKEN_UNPROVEN;
-				if (foregroundTaken)
-					return `this action already ran with { delivery: "foreground" }, so the rung it names is the one that just answered — ${
-						menu ?? field ?? read
-					}`;
-				return text.includes('delivery: "foreground"') ? undefined : FOREGROUND_ROUTE;
-			case "element":
-				return (
-					rung ??
-					field ??
-					`address the field itself — this session holds no text row for window ${windowId ?? "(unknown)"}, so observe it first and write the row that walk mints`
-				);
-			case "pixel":
-				return pixelEscalation(text, windowId !== undefined && this.#frames.has(windowId));
-			case "snapshot":
-				return OBSERVE_ROUTE;
-			default:
-				return keyboard && state.noop ? (rung ?? menu ?? field ?? read) : undefined;
-		}
-	}
-	/**
-	 * One decision per reply: it records the rung this window's keystrokes now
-	 * take and composes the sentence for it. A reply that carries a write
-	 * verdict and points at the field says nothing here — the write path
-	 * answers that one, with the field and the value in hand.
-	 */
-	#escalation(name: string, args: Wire, data: Wire, text: string): string | undefined {
-		const remembered = this.#keyboardEscalation(name, args, data, false);
-		const effect = typeof data.effect === "string" ? data.effect : undefined;
-		const noop = effect !== undefined && UNDELIVERED_EFFECTS[effect] === true;
-		const target = escalationTarget(data);
-		if (target !== undefined && RENDERED_TARGETS[target] !== true) return undefined;
-		if (target === "element" && data.committed !== undefined) return undefined;
-		const reason = escalationReason(data);
-		const route = this.#escalationRoute(name, args, text, target, {
-			remembered,
-			unproven: effect !== "confirmed",
-			noop,
-			reason,
-			menuCommand: menuCommandPath(data),
-		});
-		if (route === undefined) return undefined;
-		if (target === undefined) return `⚠️ The driver reports no observed change: ${route}.`;
-		return `⚠️ The driver escalates this action${reason ? ` (${reason})` : ""}: ${route}.`;
+		const rows: (readonly [string, ComputerElementSnapshot])[] = [];
+		if (windowId !== undefined)
+			for (const [ref, binding] of this.#elements)
+				if (binding.window.id === windowId) rows.push([ref, binding.element]);
+		return {
+			tool,
+			text,
+			foreground: args.delivery_mode === "foreground",
+			windowId,
+			pid: typeof args.pid === "number" ? args.pid : undefined,
+			addressed,
+			element: addressed === undefined ? undefined : this.#elements.get(addressed)?.element,
+			rows,
+			captured: windowId !== undefined && this.#frames.has(windowId),
+			holds: id => this.#holdsWindow(id),
+			sheets: this.#sheets,
+		};
 	}
 	/**
 	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
@@ -1975,41 +1699,41 @@ export class CuaComputerSession implements ComputerBackend {
 	 * refused until the panel goes away.
 	 */
 	async #action(name: string, args: Wire): Promise<ComputerActionResult> {
-		let reply: Reply;
+		let called: Reply;
 		try {
-			reply = await this.#call(
+			called = await this.#call(
 				name,
 				DETECT_WINDOW_CHANGE_TOOLS[name] === true ? { ...args, detect_window_change: false } : args,
 			);
 		} catch (error) {
 			if (!(error instanceof ToolError)) throw error;
-			this.#keyboardEscalation(name, args, refusalDetails(error.context), true);
+			const reply = readReply(error.context);
+			this.#keyboardEscalation(name, args, reply, true);
 			const lines = [
 				error.message,
-				actionEvidence(error.context, args),
-				this.#disabledControl(error.context, args, error.message) ??
-					this.#focusHolder(error.context, args, error.message),
+				actionEvidence(reply, typeof args.delivery_mode === "string" ? args.delivery_mode : undefined),
+				refusalNote(reply, this.#facts(name, error.message, args)),
 			];
 			throw new ToolError(lines.filter(line => line !== undefined).join("\n"), error.context);
 		}
-		const { result, data } = reply;
+		const { result, data } = called;
+		const reply = readReply(data);
 		const interruptedBy = this.#interruption();
-		const committed = commitVerdict(data.committed);
 		// The driver writes its own advice in wire vocabulary on the success path
 		// too ("click this control's pixel center with delivery_mode:foreground");
 		// a next step is only executable if it is spelled the way the caller types.
 		const reported = preludeVocabulary(result.text);
-		const escalation = this.#escalation(name, args, data, reported);
+		this.#keyboardEscalation(name, args, reply, false);
+		const escalated = escalation(reply, this.#facts(name, reported, args));
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
 		// Keystrokes the driver turned into the app's own menu command lead
 		// with that fact: the driver's sentence starts with the chord.
-		const menuCommand = KEYBOARD_TOOLS[name] === true ? menuCommandLine(data, reported) : undefined;
-		const menuPath = menuCommand === undefined ? undefined : menuCommandPath(data);
+		const menuCommand = KEYBOARD_TOOLS[name] === true ? menuCommandLine(reply, reported) : undefined;
 		return {
 			text: [
 				menuCommand,
 				reported,
-				escalation,
+				escalated,
 				opened,
 				interruptedBy
 					? `⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
@@ -2017,33 +1741,16 @@ export class CuaComputerSession implements ComputerBackend {
 			]
 				.filter(line => line !== undefined)
 				.join("\n"),
-			effect: typeof data.effect === "string" ? data.effect : "unverifiable",
+			effect: reply.effect ?? "unverifiable",
 			evidence: data.evidence ?? null,
-			route: typeof data.route === "string" ? data.route : typeof data.path === "string" ? data.path : "cua-sdk",
+			route: reply.route ?? "cua-sdk",
 			delivery: data.delivery ?? args.delivery_mode ?? "background",
-			...(committed === undefined ? {} : { committed }),
-			...(escalation === undefined ? {} : { escalation }),
-			...(menuPath === undefined ? {} : { menuPath }),
+			...(reply.committed === undefined ? {} : { committed: reply.committed }),
+			...(escalated === undefined ? {} : { escalation: escalated }),
+			...(menuCommand === undefined ? {} : { menuPath: reply.menuPath }),
 			interruptedBy,
 			data,
 		};
-	}
-	/**
-	 * A menu bar item reports `AXEnabled` only while its own menu is open, so
-	 * the driver refuses the press before dispatch — and neither escalation it
-	 * suggests (foreground delivery, `bring_to_front`) opens a menu. Every
-	 * macOS tree carries these rows advertising `press`, and the route that
-	 * does drive them is `menu(path)`, which the driver has no way to name
-	 * because it addressed one element, not a path. The ref's own role is what
-	 * identifies the case; the driver's text survives in front of it.
-	 */
-	#menuBarRoute(target: ComputerTarget | undefined): string | undefined {
-		if (typeof target !== "string") return undefined;
-		const element = this.#elements.get(target)?.element;
-		if (!element || MENU_BAR_ROLES[element.role] !== true) return undefined;
-		return `\nThat ref is a ${element.role}: an AX action on it only lands while its menu is already open, and no delivery mode opens one. Drive the menu instead: win.menu([${
-			element.label ? JSON.stringify(element.label) : '"<menu>"'
-		}, "<item>"], { delivery: "foreground" }).`;
 	}
 	/**
 	 * A ref whose element the platform can no longer reach. The refusal is
@@ -2074,11 +1781,8 @@ export class CuaComputerSession implements ComputerBackend {
 		target: ComputerTarget | undefined,
 		recover: { context: Context; window: ComputerWindowIdentity } | undefined,
 	): Promise<ComputerActionResult | undefined> {
-		const data = refusalDetails(error.context);
-		const code = typeof data.code === "string" ? data.code : undefined;
-		if (code === undefined || DEAD_ELEMENT_REFUSALS[code] !== true) return undefined;
-		const route = typeof data.advice === "string" ? data.advice : escalationTarget(data);
-		if (route !== undefined && route !== "snapshot") return undefined;
+		const reply = readReply(error.context);
+		if (!deadElement(reply)) return undefined;
 		if (recover === undefined || typeof target !== "string" || typeof args.element_token !== "string")
 			return undefined;
 		const binding = this.#elements.get(target);
@@ -2152,7 +1856,7 @@ export class CuaComputerSession implements ComputerBackend {
 		const readdress = rows.length
 			? `${target} is retired and the tree below carries this window's new refs — address the row you mean by its new ref.`
 			: `${target} is retired and this walk minted no refs to address — observe the window again (win.observe()) once it has rows.`;
-		const text = `${code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${
+		const text = `${reply.code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${
 			rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown."
 		}`;
 		recover.context.emitText(text);
@@ -2161,8 +1865,8 @@ export class CuaComputerSession implements ComputerBackend {
 			effect: "not_dispatched",
 			evidence: null,
 			delivery: args.delivery_mode ?? null,
-			...(typeof data.route === "string" ? { route: data.route } : {}),
-			data,
+			...(reply.route === undefined ? {} : { route: reply.route }),
+			data: reply.data,
 		};
 	}
 	/** Dispatch that can answer a refusal the reply's own row explains. */
@@ -2179,7 +1883,7 @@ export class CuaComputerSession implements ComputerBackend {
 			if (!(error instanceof ToolError)) throw error;
 			const gone = await this.#deadElement(name, error, args, target, recover);
 			if (gone !== undefined) return gone;
-			const route = this.#menuBarRoute(target);
+			const route = menuBarRoute(typeof target === "string" ? this.#elements.get(target)?.element : undefined);
 			if (route === undefined) throw error;
 			throw new ToolError(`${error.message}${route}`, error.context);
 		}
@@ -2275,21 +1979,25 @@ export class CuaComputerSession implements ComputerBackend {
 		value: string,
 		dispatched: Promise<ComputerActionResult>,
 	): Promise<ComputerActionResult> {
-		const field = `${operation} on ${this.#writeTarget(target)}`;
+		// The field is named as the observation printed it before the dispatch,
+		// which may re-mint this window's refs on the way.
+		const element = typeof target === "string" ? this.#elements.get(target)?.element : undefined;
+		const facts = (text: string, escalated: boolean): WriteFacts => ({
+			...this.#facts(
+				operation === "type" ? "type_text" : "set_value",
+				text,
+				{ window_id: Number(window.id), pid: window.pid },
+				typeof target === "string" ? target : undefined,
+			),
+			element,
+			operation,
+			target,
+			escalated,
+		});
+		const field = writeField(facts("", false));
 		try {
 			const result = await dispatched;
-			const data = object(result.data ?? {}, "action result");
-			const note = commitNote({
-				field,
-				operation,
-				committed: result.committed,
-				effect: result.effect,
-				readBack: valueReadBack(result.evidence),
-				escalated: result.escalation !== undefined,
-				reason: NOT_COMMITTED_REASON.exec(result.text)?.[1]?.trim(),
-				witness: this.#writeWitness(window, data),
-				query: this.#writesAQuery(target),
-			});
+			const note = writeNote(result, facts(result.text, result.escalation !== undefined));
 			if (note === undefined) return result;
 			this.#doubt(window.id, note);
 			return { ...result, text: result.text ? `${result.text}\n${note}` : note };
@@ -2299,44 +2007,6 @@ export class CuaComputerSession implements ComputerBackend {
 			this.#doubt(window.id, note);
 			throw new ToolError(`${error.message}\n${note}`, error.context);
 		}
-	}
-	/**
-	 * Where a value this field cannot publish can still be read. The driver
-	 * names the kind of surface it would escalate to; which route this session
-	 * can offer for it is the session's own fact, so a target it has no route
-	 * for names no route at all rather than a tool the caller cannot reach.
-	 */
-	#writeWitness(window: ComputerWindowIdentity, data: Wire): string {
-		const target = escalationTarget(data);
-		if (target === "snapshot")
-			return "observe() the window and read the control the app updates instead; this field will publish nothing either way";
-		if (target === "pixel" || target === "page" || this.#frames.has(window.id))
-			return "capture the window and read the value off its own pixels";
-		return "the app's own output is the only witness";
-	}
-	/** A search field holds a query, and the app answers it in its own output. */
-	#writesAQuery(target: ComputerTarget | undefined): boolean {
-		if (typeof target !== "string") return false;
-		const element = this.#elements.get(target)?.element;
-		return element?.role === SEARCH_FIELD || element?.subrole === SEARCH_FIELD;
-	}
-	/**
-	 * The element a write addressed, by the role and name the observation
-	 * printed for it. Never its value: a contact card's phone row carries the
-	 * number it holds as its own `AXLabel`, so labelling the field with it made
-	 * the sentence name the value being replaced instead of the field.
-	 */
-	#writeTarget(target: ComputerTarget | undefined): string {
-		if (target === undefined) return "the window's focused element";
-		if (typeof target !== "string") {
-			const [x, y] = pointPair(target);
-			return `(${x},${y})`;
-		}
-		const element = this.#elements.get(target)?.element;
-		if (!element) return target;
-		const name = element.label && element.label !== element.value ? element.label : element.placeholder;
-		const role = specificRole(element);
-		return name ? `${target} ${role} ${JSON.stringify(name)}` : `${target} ${role}`;
 	}
 	/** One sentence per unproven write, and never the same one twice. */
 	#doubt(windowId: string, sentence: string): void {
@@ -2547,15 +2217,13 @@ export class CuaComputerSession implements ComputerBackend {
 	 * resolved against. Neither path mints a ref or invalidates one.
 	 */
 	async #menuNames(window: ComputerWindowIdentity, menuPath: string[], error: ToolError): Promise<string | undefined> {
-		const refusal = refusalDetails(error.context);
-		if (refusal.code !== "menu_path_unavailable") return undefined;
+		const reply = readReply(error.context);
+		if (reply.code !== "menu_path_unavailable") return undefined;
 		const refused = MENU_REFUSAL_SEGMENT.exec(error.message);
-		const failed =
-			typeof refusal.failed_segment === "number" ? refusal.failed_segment : refused ? Number(refused[1]) : undefined;
+		const failed = reply.failedSegment ?? (refused ? Number(refused[1]) : undefined);
 		if (failed === undefined || failed >= menuPath.length) return undefined;
 		const ambiguous = refused?.[2] === "is ambiguous";
-		const listed = menuItems(refusal.items);
-		if (listed?.length) return menuRefusalItems(menuPath, failed, listed, ambiguous);
+		if (reply.items?.length) return menuRefusalItems(menuPath, failed, reply.items, ambiguous);
 		const { data: state } = await this.#call("get_window_state", {
 			...windowArgs(window),
 			include_accessibility_tree: true,
@@ -2577,13 +2245,9 @@ export class CuaComputerSession implements ComputerBackend {
 			throwIfAborted(context.signal);
 			try {
 				const result = await this.#action("invoke_menu", { ...windowArgs(current), path: menuPath });
-				const data = result.data !== null && typeof result.data === "object" ? (result.data as Wire) : {};
-				const listed = menuItems(data.items);
-				if (!listed?.length) return result;
-				const resolved = Array.isArray(data.resolved_path)
-					? data.resolved_path.filter((segment): segment is string => typeof segment === "string")
-					: menuPath;
-				return { ...result, text: menuSubmenuListing(resolved, listed) };
+				const reply = readReply(result.data);
+				if (!reply.items?.length) return result;
+				return { ...result, text: menuSubmenuListing(reply.resolvedPath ?? menuPath, reply.items) };
 			} catch (error) {
 				// An aborted call is not a ToolError and keeps its own identity;
 				// a refusal the menu bar cannot explain stays exactly as written.
@@ -2640,7 +2304,10 @@ export class CuaComputerSession implements ComputerBackend {
 			const current = await this.#current(window);
 			throwIfAborted(context.signal);
 			const raised = await this.#action("bring_to_front", windowArgs(current));
-			const holder = this.#focusHolder(raised.data, windowArgs(current), raised.text);
+			const holder = refusalNote(
+				readReply(raised.data),
+				this.#facts("bring_to_front", raised.text, windowArgs(current)),
+			);
 			if (holder === undefined) return raised;
 			return { ...raised, text: raised.text ? `${raised.text}\n${holder}` : holder };
 		});
