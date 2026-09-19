@@ -14,7 +14,7 @@ import type {
 	ComputerPoint,
 } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
 import type { WindowRosterSample } from "@oh-my-pi/pi-coding-agent/tools/computer/interruption";
-/** The fork's generated tool contract at 0d897a672 (`libs/cua-driver/contract/manifest.json`, 0.10.0). */
+/** The fork's generated tool contract at cd0cc54a1 (`libs/cua-driver/contract/manifest.json`, 0.10.0). */
 import contract from "../fixtures/cua-contract-manifest.json";
 
 type Wire = Record<string, unknown>;
@@ -1450,7 +1450,7 @@ it("says a drag was delivered without evidence and keeps the doubt on the window
 			name === "drag"
 				? reply({
 						effect: "no_observed_change",
-						evidence: [{ kind: "observed_change", signal: "window_tree" }],
+						evidence: [{ kind: "window_change", signal: "window_tree" }],
 						route: "cgevent",
 						delivery: "foreground",
 					})
@@ -1576,18 +1576,18 @@ it("composes one sentence for each thing a write turns out to be", async () => {
 		expect(unjudged.text.split("\n").at(-1)).toBe(
 			`type on ${ref} AXTextField "Editor": nothing in the reply says whether the app kept this value — read the field back before building on it.`,
 		);
-		// `observed_change` is not a read-back of the value, and its `signal` is
+		// `window_change` is not a read-back of the value, and its `signal` is
 		// carried for the model without a word of prose keyed on it.
 		await reread();
 		const signalled = await write(
 			{
 				committed: "committed",
 				effect: "confirmed",
-				evidence: [{ kind: "observed_change", signal: "element_state" }],
+				evidence: [{ kind: "window_change", signal: "element_state" }],
 			},
 			"✅ Set AXValue on [1] AXTextField.",
 		);
-		expect(signalled.evidence).toEqual([{ kind: "observed_change", signal: "element_state" }]);
+		expect(signalled.evidence).toEqual([{ kind: "window_change", signal: "element_state" }]);
 		expect(signalled.text.split("\n").at(-1)).toBe(
 			`setValue on ${ref} AXTextField "Editor": the driver judged the value committed but nothing in the reply read it back — read the field back before building on it.`,
 		);
@@ -4704,7 +4704,7 @@ it("leads with the menu command a chord was dispatched as and never names the fo
 	const menu = {
 		delivery: { mode: "foreground" },
 		effect: "unverifiable",
-		evidence: [{ kind: "observed_change", signal: "app_focus" }],
+		evidence: [{ kind: "window_change", signal: "app_focus" }],
 		menu_path: ["Edit", "Find", "Note List Search…"],
 		route: "menu_command",
 	};
