@@ -158,7 +158,9 @@ describe("EvalTool live stdout streaming", () => {
 				const session = makeSession(settings);
 				session.allocateOutputArtifact = async () => ({ path: dir, id: "failed-stream" });
 				const saveArtifact = vi.spyOn(sessionManager, "saveArtifact");
-				const output = "x".repeat(bytes);
+				// The first printed line is never column-capped, so a lone wide line
+				// never opens the artifact; a later wide line does.
+				const output = `answer\n${"x".repeat(bytes)}`;
 				vi.spyOn(evalIndex.jsBackend, "execute").mockImplementation(async (_code, options) => {
 					options.onChunk(output);
 					return {
@@ -167,9 +169,9 @@ describe("EvalTool live stdout streaming", () => {
 						cancelled,
 						truncated: false,
 						artifactId: undefined,
-						totalLines: 1,
+						totalLines: 2,
 						totalBytes: output.length,
-						outputLines: 1,
+						outputLines: 2,
 						outputBytes: output.length,
 						displayOutputs: [],
 					};
