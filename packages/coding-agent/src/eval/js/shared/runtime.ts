@@ -309,18 +309,6 @@ export class JsRuntime {
 		activateGlobalOwner(this.#globalOwner, this.#ownedGlobalKeys, action);
 	}
 
-	/**
-	 * Capture the current values of every owned global back into this owner's
-	 * global stack. A cell may rebind a reserved injected global (e.g.
-	 * `var fs = await import("node:fs/promises")`); without this, the next
-	 * `activateGlobalOwner` would restore the install-time value and silently
-	 * clobber the reassignment. Called after each run so bindings persist across
-	 * cells like the eval persistence contract promises.
-	 */
-	#recordGlobals(): void {
-		for (const key of this.#ownedGlobalKeys) recordGlobalValue(key, this.#globalOwner);
-	}
-
 	readonly helpers: HelperBundle;
 	#cwd: string;
 	#session: { cwd: string; sessionId: string };
@@ -502,7 +490,6 @@ export class JsRuntime {
 		try {
 			return await this.#als.run(context, callback);
 		} finally {
-			this.#recordGlobals();
 			leaveRun();
 		}
 	}
@@ -541,7 +528,6 @@ export class JsRuntime {
 				return await awaitMaybePromise(value);
 			});
 		} finally {
-			this.#recordGlobals();
 			leaveRun();
 		}
 	}
@@ -847,8 +833,9 @@ function activateGlobalOwner(owner: symbol, keys: Iterable<string>, action: stri
 		const stack = GLOBAL_STACKS.get(key);
 		const index = stack?.entries.findIndex(entry => entry.owner === owner) ?? -1;
 		if (!stack || index === -1) throw new Error(`Cannot ${action} on a disposed JS runtime`);
-		// A cell may rebind a convenience name such as fs. Re-activation must
-		// preserve that owner's value, including assignments before a thrown error.
+		// The live value belongs to the top owner until this handoff, so snapshot
+		// it here rather than at run end: a cell may rebind a convenience name
+		// such as fs before throwing, or from a callback after the cell returned.
 		const active = stack.entries.at(-1);
 		if (active) recordGlobalValue(key, active.owner);
 		const entry = stack.entries[index];

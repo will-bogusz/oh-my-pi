@@ -36,4 +36,13 @@ describe("JsRuntime reserved global reassignment", () => {
 		const value = await runtime.run("typeof fs.readFileSync;", undefined, cell2.hooks);
 		expect(value).toBe("undefined");
 	});
+
+	it("retains a rebind that lands after the cell returned", async () => {
+		const cell1 = makeHooks();
+		const rebind = (await runtime.run("() => { globalThis.fs = 'late'; }", undefined, cell1.hooks)) as () => void;
+		rebind();
+
+		const cell2 = makeHooks();
+		expect(await runtime.run("fs", undefined, cell2.hooks)).toBe("late");
+	});
 });
