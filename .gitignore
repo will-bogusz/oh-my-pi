@@ -44,6 +44,8 @@ coverage/
 packages/ai/test/.temp-images/
 
 # Project specific
+# The cua-driver executable is a release asset named by manifest.json, never a tracked blob
+vendor/cua-driver/*/cua-driver
 !.omp/
 .omp/plugins/
 .pi_config/
