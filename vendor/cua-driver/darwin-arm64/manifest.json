@@ -1,9 +1,9 @@
 {
 	"platform": "darwin-arm64",
 	"version": "0.28.2",
-	"commit": "cf52d17ea",
-	"sha256": "dce063d93438e9756887832046a16cd3a00e01ef7da36152fa7846563b69fc66",
-	"size": 32817536,
-	"url": "https://github.com/will-bogusz/cua/releases/download/cua-driver-0.28.2-cf52d17ea/cua-driver-darwin-arm64",
-	"source": "github.com/will-bogusz/cua commit cf52d17ea (cargo build --locked --release -p cua-driver; codesign OMP Computer Use)"
+	"commit": "7c8828710",
+	"sha256": "4c3d2ac4bf6543805806bc6778f010f34887fbb9e27746c25dc488250aa6eabb",
+	"size": 32679600,
+	"url": "https://github.com/will-bogusz/cua/releases/download/cua-driver-0.28.2-7c8828710/cua-driver-darwin-arm64",
+	"source": "github.com/will-bogusz/cua commit 7c8828710 (cargo build --locked --release -p cua-driver; codesign OMP Computer Use)"
 }
