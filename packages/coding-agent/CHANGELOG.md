@@ -14,6 +14,10 @@
 - Fixed live subagent messages getting stuck behind persisted-agent discovery, and roster discovery looping on dot-named transcripts.
 - Fixed llama.cpp discovery of PrismML Bonsai 2 27B GGUFs: built-in and custom-named providers now share catalog rules for chat-completions routing and the Qwen 3.8 thinking ladder (`low`/`medium`/`xhigh`), including cached models.
 
+### Changed
+
+- The native `cua-driver` executable is no longer a git blob: `vendor/cua-driver/<platform>/manifest.json` pins a sha256 release asset on `will-bogusz/cua`, and OMP takes the installed copy, then `~/.omp/cache/cua-driver/<sha256>/`, then downloads and verifies it. Standalone builds embed it from the same cache at build time. `scripts/vendor-cua-driver.ts` publishes a new build.
+
 ## [18.2.6] - 2026-09-18
 
 ### Fixed
