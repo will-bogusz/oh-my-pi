@@ -156,7 +156,6 @@ interface ModuleResolver {
 interface ResolverRegistration {
 	runtimeNodeModules: string;
 	stubs: Record<string, string>;
-	pinnedSpecifiers?: Record<string, string>;
 }
 
 const REGISTRY = Symbol.for("omp.runtimeModuleResolver.registry");
@@ -189,16 +188,12 @@ export interface RuntimeResolverOptions {
 	runtimeNodeModules: string;
 	/** Bare specifier → absolute file path overrides (e.g. `sharp` → no-op stub). */
 	stubs?: Record<string, string>;
-	/** Exact bare specifiers owned by an isolated worker; override stock resolution. */
-	pinnedSpecifiers?: Record<string, string>;
 }
 
 /**
  * Patch `node:module`'s resolver (idempotently) so bare specifiers that the
  * stock compiled-binary resolver cannot find fall back to the registered
- * runtime caches. Explicit pinned specifiers take precedence in isolated
- * workers whose native dependencies must not resolve through host ancestors.
- * Otherwise stock resolution is tried first and kept for anything
+ * runtime caches. Stock resolution is tried first and kept for anything
  * outside the registered roots (bundled imports, node builtins, host or
  * extension trees). Multiple runtime roots may register; they are consulted
  * in registration order. Returns an uninstaller that drops the registration
@@ -219,30 +214,11 @@ export interface RuntimeResolverOptions {
  * (tiny-inference, fastembed); never install it in the main agent process,
  * where legacy-pi extensions rely on `createRequire` relative requires.
  */
-export function installRuntimeModuleResolver({
-	runtimeNodeModules,
-	stubs = {},
-	pinnedSpecifiers = {},
-}: RuntimeResolverOptions): () => void {
+export function installRuntimeModuleResolver({ runtimeNodeModules, stubs = {} }: RuntimeResolverOptions): () => void {
 	const registry = resolverRegistry();
-	for (const [specifier, destination] of Object.entries(pinnedSpecifiers)) {
-		if (
-			specifier.startsWith(".") ||
-			specifier.startsWith("node:") ||
-			path.isAbsolute(specifier) ||
-			!path.isAbsolute(destination)
-		)
-			throw new Error("Runtime pins require bare specifiers and absolute destinations");
-		for (const entry of registry) {
-			const previous = entry.pinnedSpecifiers?.[specifier];
-			if (previous && previous !== destination) throw new Error(`Conflicting runtime pin for ${specifier}`);
-		}
-	}
 	const existing = registry.find(entry => entry.runtimeNodeModules === runtimeNodeModules);
-	if (existing) {
-		Object.assign(existing.stubs, stubs);
-		Object.assign((existing.pinnedSpecifiers ??= {}), pinnedSpecifiers);
-	} else registry.push({ runtimeNodeModules, stubs: { ...stubs }, pinnedSpecifiers: { ...pinnedSpecifiers } });
+	if (existing) Object.assign(existing.stubs, stubs);
+	else registry.push({ runtimeNodeModules, stubs: { ...stubs } });
 
 	const resolver = (Module as unknown as { default?: ModuleResolver } & ModuleResolver).default ?? Module;
 	const target = resolver as unknown as ModuleResolver & { [PATCHED]?: () => void };
@@ -256,12 +232,6 @@ export function installRuntimeModuleResolver({
 	const pristine = target._resolveFilename;
 	const original = pristine.bind(target);
 	target._resolveFilename = (request: string, parent: unknown, isMain: boolean, options?: unknown): string => {
-		// Bun createRequire may omit its parent even for a known bundle. Native
-		// artifacts need explicit pins rather than trusting an ancestor package.
-		for (const registration of resolverRegistry()) {
-			const pinned = registration.pinnedSpecifiers;
-			if (pinned && Object.hasOwn(pinned, request)) return pinned[request]!;
-		}
 		let stockResolved: string | null = null;
 		let stockError: unknown;
 		try {
