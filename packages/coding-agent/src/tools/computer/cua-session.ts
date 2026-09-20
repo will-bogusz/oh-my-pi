@@ -1336,18 +1336,34 @@ export class CuaComputerSession implements ComputerBackend {
 		// because a menu bar item reports `AXEnabled` only while its menu is
 		// open. `menu(path)` drives it instead, so the rows stay out unless
 		// they are asked for, and a ref is never minted for one.
+		// A menu bar's descendants are known by ancestry where the driver
+		// reports `parent_index` (the desktop surface's icons sit deeper than
+		// the menu bar without being under it), by depth where it does not.
+		const menuBarIndices = new Set<number>();
+		const ancestryReported = reply.data.elements.some(
+			value => typeof value === "object" && value !== null && typeof (value as Wire).parent_index === "number",
+		);
 		let menuBarDepth: number | undefined;
 		let menuBarRows = 0;
 		for (const value of reply.data.elements) {
 			const row = object(value, "element");
 			const depth = typeof row.depth === "number" ? Math.max(0, Math.min(50, Math.floor(row.depth))) : 0;
-			if (menuBarDepth !== undefined && depth > menuBarDepth) {
+			const index = typeof row.element_index === "number" ? row.element_index : undefined;
+			const parent = typeof row.parent_index === "number" ? row.parent_index : undefined;
+			// With ancestry reported, a row without a parent index hangs off a
+			// non-actionable node and is a root of its own, never a menu row.
+			const underMenuBar = ancestryReported
+				? parent !== undefined && menuBarIndices.has(parent)
+				: menuBarDepth !== undefined && depth > menuBarDepth;
+			if (underMenuBar) {
+				if (index !== undefined) menuBarIndices.add(index);
 				menuBarRows++;
 				continue;
 			}
 			menuBarDepth = undefined;
 			if (options.menubar !== true && MENU_BAR_ROLES[string(row.role, "role")] === true) {
 				menuBarDepth = depth;
+				if (index !== undefined) menuBarIndices.add(index);
 				menuBarRows++;
 				continue;
 			}
@@ -2085,17 +2101,19 @@ export class CuaComputerSession implements ComputerBackend {
 			const result = await dispatched;
 			const note = writeNote(result, facts(result.text, result.escalation !== undefined));
 			if (note === undefined) return result;
-			// Only a `not_committed` verdict is answered by a read-back: the driver
-			// either had no commit gesture to watch or read the field too early,
-			// and a field of that role showing the value settles both. An
-			// unverifiable or unproven write stays doubted, because there the
-			// value in the tree is the echo the doubt is about.
+			// Two doubts are answered by a read-back: a `not_committed` verdict
+			// (the driver had no commit gesture to watch, or read the field too
+			// early) and a confirmed delivery the driver did not judge at all
+			// (keystrokes, which never carry a verdict). A field of that role
+			// showing the value settles both. An unverifiable or unproven write
+			// stays doubted, because there the value in the tree is the echo the
+			// doubt is about.
+			const answerable =
+				result.committed === "not_committed" || (result.committed === undefined && result.effect === "confirmed");
 			this.#doubt(
 				window.id,
 				note,
-				result.committed === "not_committed" && element !== undefined
-					? { field, role: element.role, operation, value }
-					: undefined,
+				answerable && element !== undefined ? { field, role: element.role, operation, value } : undefined,
 			);
 			return { ...result, text: result.text ? `${result.text}\n${note}` : note };
 		} catch (error) {

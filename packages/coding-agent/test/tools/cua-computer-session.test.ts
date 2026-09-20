@@ -1305,6 +1305,32 @@ it("keeps the menu bar out of observations and names the route that drives it", 
 		]);
 		expect(shown.tree).not.toContain("Menu bar hidden");
 		expect(shown.complete).toBe(true);
+		// The desktop surface: the menu bar at depth 0 and the icons deeper than
+		// it under a non-indexed scroll area. Ancestry, not depth, says what is
+		// under the menu bar when the driver reports `parent_index`.
+		const desktop = [
+			{ element_index: 0, element_token: "s:0", role: "AXMenuBar", label: "", depth: 0 },
+			{ element_index: 1, element_token: "s:1", role: "AXMenuBarItem", label: "File", depth: 1, parent_index: 0 },
+			{ element_index: 334, element_token: "s:334", role: "AXGroup", label: "desktop", depth: 1 },
+			{
+				element_index: 335,
+				element_token: "s:335",
+				role: "AXImage",
+				label: "Report.pdf",
+				depth: 2,
+				parent_index: 334,
+			},
+		];
+		f.state.hook = async name =>
+			name === "get_window_state"
+				? reply({ pid: 101, window_id: 1, snapshot_id: "s", truncated: false, elements: desktop })
+				: undefined;
+		const icons = await f.session.observe(f.context, f.window);
+		expect(icons.elements.map(element => `${element.role} ${element.label}`)).toEqual([
+			"AXGroup desktop",
+			"AXImage Report.pdf",
+		]);
+		expect(icons.tree).toContain("Menu bar hidden (2 rows)");
 	} finally {
 		await f.close();
 	}
@@ -1636,6 +1662,11 @@ it("composes one sentence for each thing a write turns out to be", async () => {
 		expect(unjudged.text.split("\n").at(-1)).toBe(
 			`type on ${ref} AXTextField "Editor": nothing in the reply says whether the app kept this value — read the field back before building on it.`,
 		);
+		// A re-read that shows the typed text is the read-back the doubt asked
+		// for, so it is answered rather than repeated.
+		f.state.value = "Project_File_List";
+		expect(await reread()).toContain(`AXTextField "Editor": reads back as written in this tree`);
+		f.state.value = "";
 		// `window_change` is not a read-back of the value, and its `signal` is
 		// carried for the model without a word of prose keyed on it.
 		await reread();
