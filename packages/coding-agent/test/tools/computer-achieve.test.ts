@@ -591,8 +591,11 @@ describe("achieve candidate builder", () => {
 		]);
 	});
 
-	it("chains a pick the way the prelude would", () => {
+	it("offers a write only where the field does not already hold the value", () => {
 		const [candidate] = buildCandidates('write "x"', observation([{ role: "AXTextField", label: "Q", enabled: true }]));
 		expect(candidate).toMatchObject({ id: "n0_setValue", action: "setValue", value: "x", line: 'AXTextField "Q" -> setValue "x"' });
+		// Live against Jev, a field already holding the goal's value was re-written five steps running.
+		const held = buildCandidates('write "x"', observation([{ role: "AXTextField", label: "Q", value: "x", enabled: true }]));
+		expect(held.some(candidate => candidate.action === "setValue")).toBe(false);
 	});
 });

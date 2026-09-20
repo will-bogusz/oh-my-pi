@@ -274,6 +274,9 @@ export function buildCandidates(
 		};
 		if (isTextInput(element)) {
 			for (const [index, value] of values.entries()) {
+				// A value the field already holds is no progress: live against Jev,
+				// the row a goal names most was re-written five times running.
+				if (element.value === value) continue;
 				// A write the driver refused or doubted is offered as keystrokes next.
 				const wrote = `${control}|setValue|${value}`;
 				offer(memory.failed.has(wrote) ? "type" : "setValue", index, value);
