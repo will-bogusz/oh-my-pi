@@ -8,9 +8,12 @@
  * 1. **TypeSafe** (`typesafe`, or `auto` with a stored / env credential): the
  *    native System One API, keyed by `AuthStorage` so `/login typesafe` and
  *    `TYPESAFE_API_KEY` both work and 401s rotate credentials.
- * 2. **Local on-device model** when the feature's backend setting names one:
+ * 2. **Jev via OpenRouter** when no TypeSafe credential exists but an
+ *    OpenRouter one does: the same System One wire through OpenRouter's
+ *    Decisions API, billed to the OpenRouter key.
+ * 3. **Local on-device model** when the feature's backend setting names one:
  *    keyword prompts through the shared tiny-model worker.
- * 3. **Online chat bridge** (`online`): keyword prompts to the `tiny`/`smol`
+ * 4. **Online chat bridge** (`online`): keyword prompts to the `tiny`/`smol`
  *    role chain, trying each retry-fallback candidate in turn so one dead
  *    model does not sink the judgment.
  */
@@ -22,6 +25,7 @@ import {
 	type Model,
 	type JudgmentRequest,
 	type JudgmentResult,
+	OPENROUTER_JEV_ROUTE,
 	type Questions,
 	type TextBackend,
 	type TextCompletion,
@@ -76,26 +80,39 @@ export interface ResolvedJudge extends Judge {
 	readonly kind: JudgeKind;
 }
 
-/** Whether typed judgments currently go to TypeSafe rather than a chat/local model. */
-export function usesTypeSafeJudge(settings: Settings, registry: ModelRegistry): boolean {
+/**
+ * Which credential carries typed judgments to System One: TypeSafe's own key
+ * first, else Jev through OpenRouter; `typesafe` mode insists on the native
+ * route even without a credential so the failure surfaces as a fallback.
+ */
+function systemOneProvider(settings: Settings, registry: ModelRegistry): string | undefined {
 	const mode = settings.get("providers.judgmentProvider");
-	if (mode === "llm") return false;
-	return mode === "typesafe" || registry.authStorage.hasAuth(TYPESAFE_PROVIDER);
+	if (mode === "llm") return undefined;
+	if (registry.authStorage.hasAuth(TYPESAFE_PROVIDER)) return TYPESAFE_PROVIDER;
+	if (registry.authStorage.hasAuth(OPENROUTER_JEV_ROUTE.provider)) return OPENROUTER_JEV_ROUTE.provider;
+	return mode === "typesafe" ? TYPESAFE_PROVIDER : undefined;
+}
+
+/** Whether typed judgments currently go to System One (natively or via OpenRouter) rather than a chat/local model. */
+export function usesTypeSafeJudge(settings: Settings, registry: ModelRegistry): boolean {
+	return systemOneProvider(settings, registry) !== undefined;
 }
 
 /**
- * Resolve the judge for a feature. With TypeSafe in front, a failed TypeSafe
- * call (network, 5xx after retries, rejected key) falls back to the LLM judge
- * the feature would otherwise use; only caller aborts propagate.
+ * Resolve the judge for a feature. With System One in front, a failed call
+ * (network, 5xx after retries, rejected key) falls back to the LLM judge the
+ * feature would otherwise use; only caller aborts propagate.
  */
 export function resolveJudge(deps: JudgeDeps): ResolvedJudge {
 	const configuredLlm = resolveLlmJudge(deps);
-	if (!usesTypeSafeJudge(deps.settings, deps.registry)) return configuredLlm;
+	const provider = systemOneProvider(deps.settings, deps.registry);
+	if (provider === undefined) return configuredLlm;
 	// A native judgment failure always falls back to the online role chain,
 	// never a feature's optional local-model override.
 	const fallback = new OnlineChatJudge(deps);
 	const typesafe = new TypeSafeJudge({
-		apiKey: deps.registry.authStorage.resolver(TYPESAFE_PROVIDER, { sessionId: deps.sessionId }),
+		apiKey: deps.registry.authStorage.resolver(provider, { sessionId: deps.sessionId }),
+		route: provider === TYPESAFE_PROVIDER ? undefined : OPENROUTER_JEV_ROUTE,
 	});
 	return {
 		kind: "typesafe",
@@ -114,7 +131,8 @@ export function resolveJudge(deps: JudgeDeps): ResolvedJudge {
 				return result;
 			} catch (error) {
 				if (options?.signal?.aborted || AIError.is(AIError.classify(error), AIError.Flag.Abort)) throw error;
-				logger.debug("judgment: TypeSafe failed; falling back to LLM judge", {
+				logger.debug("judgment: System One failed; falling back to LLM judge", {
+					judge: typesafe.label,
 					error: error instanceof Error ? error.message : String(error),
 					fallback: fallback.label,
 				});

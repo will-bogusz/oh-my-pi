@@ -5653,9 +5653,13 @@ export const SETTINGS_SCHEMA = {
 			group: "Tiny Model",
 			label: "Judgment Provider",
 			description:
-				"Preferred backend for typed judgments (auto-thinking difficulty, Smart unexpected-stop detection, git AI staging, eval judge()). Auto uses TypeSafe when authenticated; failed TypeSafe requests fall back through tiny, smol, default, then the active session model.",
+				"Preferred backend for typed judgments (auto-thinking difficulty, Smart unexpected-stop detection, git AI staging, eval judge()). Auto uses TypeSafe when authenticated, else Jev through OpenRouter's Decisions API when an OpenRouter key exists; failed requests fall back through tiny, smol, default, then the active session model.",
 			options: [
-				{ value: "auto", label: "Auto", description: "TypeSafe when authenticated, else the LLM bridge (default)" },
+				{
+					value: "auto",
+					label: "Auto",
+					description: "TypeSafe when authenticated, else Jev via OpenRouter, else the LLM bridge (default)",
+				},
 				{
 					value: "typesafe",
 					label: "TypeSafe",
@@ -5664,7 +5668,7 @@ export const SETTINGS_SCHEMA = {
 				{
 					value: "llm",
 					label: "LLM",
-					description: "Never TypeSafe; keyword prompts to the tiny/smol or local model",
+					description: "Never System One; keyword prompts to the tiny/smol or local model",
 				},
 			],
 		},

@@ -408,7 +408,7 @@ Use `ANTHROPIC_SEARCH_BASE_URL` (optionally with `ANTHROPIC_SEARCH_API_KEY`) to 
 
 ### TypeSafe judgments
 
-Small typed decisions the agent makes about its own state (the `auto` thinking-level difficulty classifier, Smart unexpected-stop detection, git TUI AI staging) go through one judgment interface. With a TypeSafe credential they run on TypeSafe's System One model (`POST /v1/systemone`); a failed request falls back through the `tiny`, `smol`, `default`, and active-session models. Without TypeSafe, features use that chat chain or their configured local on-device model. `providers.judgmentProvider` (`auto` / `typesafe` / `llm`) pins the preferred backend.
+Small typed decisions the agent makes about its own state (the `auto` thinking-level difficulty classifier, Smart unexpected-stop detection, git TUI AI staging, the eval `judge()` helper) go through one judgment interface. With a TypeSafe credential they run on TypeSafe's System One model (`POST /v1/systemone`); with only an OpenRouter credential they run on the same model through OpenRouter's Decisions API (`POST https://openrouter.ai/api/alpha/decisions`, model `typesafe/jev-1.13`, billed to the OpenRouter key). A failed request falls back through the `tiny`, `smol`, `default`, and active-session models. Without either credential, features use that chat chain or their configured local on-device model. `providers.judgmentProvider` (`auto` / `typesafe` / `llm`) pins the preferred backend; `llm` skips both System One routes.
 
 | Variable                 | Default / behavior                                                          |
 | ------------------------ | --------------------------------------------------------------------------- |
