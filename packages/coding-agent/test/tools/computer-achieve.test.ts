@@ -1,17 +1,20 @@
 import { afterAll, describe, expect, it } from "bun:test";
 import { createContext, runInContext } from "node:vm";
-import { type Answer, type Judge, type JudgmentRequest, type JudgmentResult, type Questions, tokenUsage } from "@oh-my-pi/pi-ai";
+import {
+	type Answer,
+	type Judge,
+	type JudgmentRequest,
+	type JudgmentResult,
+	type Questions,
+	tokenUsage,
+} from "@oh-my-pi/pi-ai";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import { callSessionTool } from "@oh-my-pi/pi-coding-agent/eval/js/tool-bridge";
 import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-agent/eval/py/executor";
 import type { EvalPreludeDefinition } from "@oh-my-pi/pi-coding-agent/eval/preludes";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { createComputerPrelude } from "@oh-my-pi/pi-coding-agent/tools/computer";
-import {
-	type AchieveResult,
-	buildCandidates,
-	goalValues,
-} from "@oh-my-pi/pi-coding-agent/tools/computer/achieve";
+import { type AchieveResult, buildCandidates, goalValues } from "@oh-my-pi/pi-coding-agent/tools/computer/achieve";
 import type { ComputerBackend } from "@oh-my-pi/pi-coding-agent/tools/computer/backend";
 import { ComputerSupervisor } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
 import type {
@@ -83,18 +86,24 @@ class AchieveBackend implements ComputerBackend {
 	onDispatch?: (action: string, row: Row, value?: string) => void;
 	observations = 0;
 	generation = 0;
-	readonly bindings = new Map<string, { window: ComputerWindowIdentity; element: ComputerElementSnapshot; row: Row }>();
+	readonly bindings = new Map<
+		string,
+		{ window: ComputerWindowIdentity; element: ComputerElementSnapshot; row: Row }
+	>();
 
 	async drain(): Promise<void> {}
 	async close(): Promise<void> {}
 	async windows(_context: ComputerOperationContext, selector: WindowSelector = {}) {
 		return [windowFixture].filter(
-			w => (selector.id === undefined || w.id === selector.id) && (selector.pid === undefined || w.pid === selector.pid),
+			w =>
+				(selector.id === undefined || w.id === selector.id) &&
+				(selector.pid === undefined || w.pid === selector.pid),
 		);
 	}
 	async window(context: ComputerOperationContext, selector: string | WindowSelector) {
 		const windows = await this.windows(context, typeof selector === "string" ? { id: selector } : selector);
-		if (windows.length !== 1) throw new ToolError(`Missing computer window ${JSON.stringify(selector)}: nothing matches it.`);
+		if (windows.length !== 1)
+			throw new ToolError(`Missing computer window ${JSON.stringify(selector)}: nothing matches it.`);
 		return windows[0]!;
 	}
 	acquire(context: ComputerOperationContext, selector: string | WindowSelector) {
@@ -125,7 +134,11 @@ class AchieveBackend implements ComputerBackend {
 	async screenshot(context: ComputerOperationContext, options: { silent?: boolean } = {}) {
 		return this.image(context, options.silent);
 	}
-	async captureWindow(context: ComputerOperationContext, _window: ComputerWindowIdentity, options: { silent?: boolean } = {}) {
+	async captureWindow(
+		context: ComputerOperationContext,
+		_window: ComputerWindowIdentity,
+		options: { silent?: boolean } = {},
+	) {
 		return this.image(context, options.silent);
 	}
 	async observe(
@@ -156,7 +169,12 @@ class AchieveBackend implements ComputerBackend {
 		return {
 			snapshotId: String(this.generation),
 			window,
-			tree: elements.map(e => `- [${e.ref}] ${e.role} ${JSON.stringify(e.label)}${e.value ? ` value=${JSON.stringify(e.value)}` : ""}`).join("\n"),
+			tree: elements
+				.map(
+					e =>
+						`- [${e.ref}] ${e.role} ${JSON.stringify(e.label)}${e.value ? ` value=${JSON.stringify(e.value)}` : ""}`,
+				)
+				.join("\n"),
 			elements,
 			complete: true,
 			backgroundInput: true,
@@ -167,7 +185,8 @@ class AchieveBackend implements ComputerBackend {
 	element(ref: string, window?: ComputerWindowIdentity) {
 		const binding = this.bindings.get(ref);
 		if (!binding) throw new ToolError(`StaleRef: ${ref}`);
-		if (window && (window.id !== binding.window.id || window.pid !== binding.window.pid)) throw new Error("InvalidTarget");
+		if (window && (window.id !== binding.window.id || window.pid !== binding.window.pid))
+			throw new Error("InvalidTarget");
 		return binding.element;
 	}
 	elementWindow(ref: string) {
@@ -189,7 +208,15 @@ class AchieveBackend implements ComputerBackend {
 			evidence: null,
 			delivery: "background",
 			...(this.interruptAfter === row.label
-				? { interruptedBy: { app: "SecurityAgent", pid: 9, windowId: "900", title: "Password", kind: "auth" as const } }
+				? {
+						interruptedBy: {
+							app: "SecurityAgent",
+							pid: 9,
+							windowId: "900",
+							title: "Password",
+							kind: "auth" as const,
+						},
+					}
 				: {}),
 		};
 	}
@@ -200,11 +227,21 @@ class AchieveBackend implements ComputerBackend {
 	async setValue(_context: ComputerOperationContext, _window: ComputerWindowIdentity, ref: string, value: string) {
 		return this.#dispatch("setValue", ref, value);
 	}
-	async type(_context: ComputerOperationContext, _window: ComputerWindowIdentity, text: string, target?: ComputerTarget) {
+	async type(
+		_context: ComputerOperationContext,
+		_window: ComputerWindowIdentity,
+		text: string,
+		target?: ComputerTarget,
+	) {
 		if (typeof target !== "string") throw new Error("untargeted type in fixture");
 		return this.#dispatch("type", target, text);
 	}
-	async press(_context: ComputerOperationContext, _window: ComputerWindowIdentity, chord: string | string[], target?: ComputerTarget) {
+	async press(
+		_context: ComputerOperationContext,
+		_window: ComputerWindowIdentity,
+		chord: string | string[],
+		target?: ComputerTarget,
+	) {
 		if (typeof target !== "string") throw new Error("untargeted press in fixture");
 		return this.#dispatch("press", target, Array.isArray(chord) ? chord.join("+") : chord);
 	}
@@ -252,7 +289,9 @@ class FakeJudge implements Judge {
 						`fixture pick ${JSON.stringify(pick.line)} is not offered; offered: ${labels.map(label => question.criteria[label]).join(" | ")}`,
 					);
 				const probabilities: Record<string, number> = {};
-				for (const label of labels) probabilities[label] = label === choice ? pick.probability : (1 - pick.probability) / Math.max(1, labels.length - 1);
+				for (const label of labels)
+					probabilities[label] =
+						label === choice ? pick.probability : (1 - pick.probability) / Math.max(1, labels.length - 1);
 				answers[id] = { type: "choice", choice, probabilities, confidence: pick.probability };
 			} else if (question.type === "noul") {
 				answers[id] = { type: "noul", noul: this.verdicts.shift() ?? 0 };
@@ -272,7 +311,9 @@ class FakeJudge implements Judge {
 	offered(): string[] {
 		const last = [...this.requests].reverse().find(request => "next" in request.questions);
 		const question = last?.questions.next;
-		return question?.type === "choice" ? Object.values(question.criteria).filter((line): line is string => line !== null) : [];
+		return question?.type === "choice"
+			? Object.values(question.criteria).filter((line): line is string => line !== null)
+			: [];
 	}
 }
 
@@ -363,12 +404,20 @@ describe("win.achieve", () => {
 		// Return was offered only after the write landed on that field.
 		expect(judge.offered()).toContain('AXTextField "Name" = "Ada Lovelace" -> press "Return"');
 		const first = judge.requests[0]!;
-		expect(first.state).toMatchObject({ goal: 'Fill the Name field with "Ada Lovelace" and commit it', window: "Contacts: Contact" });
+		expect(first.state).toMatchObject({
+			goal: 'Fill the Name field with "Ada Lovelace" and commit it',
+			window: "Contacts: Contact",
+		});
 		// The postcondition sees the goal, the action, the reply and the fresh tree.
 		const verdict = judge.requests.find(request => "satisfied" in request.questions)!;
-		expect(verdict.state).toMatchObject({ action: 'AXTextField "Name" -> setValue "Ada Lovelace"', reply: { effect: "verified" } });
+		expect(verdict.state).toMatchObject({
+			action: 'AXTextField "Name" -> setValue "Ada Lovelace"',
+			reply: { effect: "verified" },
+		});
 		expect(String((verdict.state as Record<string, unknown>).observation)).toContain('value="Ada Lovelace"');
-		expect(displays.join("\n")).toContain('achieve "Fill the Name field with \\"Ada Lovelace\\" and commit it": done after 2 steps — judge fake/judge');
+		expect(displays.join("\n")).toContain(
+			'achieve "Fill the Name field with \\"Ada Lovelace\\" and commit it": done after 2 steps — judge fake/judge',
+		);
 	});
 
 	it("re-observes once under the confidence gate, then abstains without dispatching", async () => {
@@ -449,7 +498,10 @@ describe("win.achieve", () => {
 		);
 		expect(type).toBe("undefined");
 		await expect(
-			prelude.invoke({ action: "achieve", window: { id: "42", pid: 123 }, goal: "Save" }, { session, toolCallId: "fixture" }),
+			prelude.invoke(
+				{ action: "achieve", window: { id: "42", pid: 123 }, goal: "Save" },
+				{ session, toolCallId: "fixture" },
+			),
 		).rejects.toThrow("computer.achieve: true");
 
 		const on = fixture(true);
@@ -462,7 +514,10 @@ describe("win.achieve", () => {
 	it("treats a refusal as a failed step that shrinks the table, and a second one in a row as the model's call", async () => {
 		const { backend, judge, realm } = fixture();
 		backend.rows = structuredClone(contactForm);
-		backend.refusals = { Save: "Refused: AXButton \"Save\" is covered by a sheet — press Escape first.", Email: "Refused: field is read-only." };
+		backend.refusals = {
+			Save: 'Refused: AXButton "Save" is covered by a sheet — press Escape first.',
+			Email: "Refused: field is read-only.",
+		};
 		judge.picks = [
 			{ line: 'AXButton "Save" -> click', probability: 0.9 },
 			{ line: 'AXTextField "Email" -> setValue "ada@example.org"', probability: 0.9 },
@@ -470,7 +525,9 @@ describe("win.achieve", () => {
 		const result = await achieveInRealm(realm, 'Save the contact with email "ada@example.org"');
 		expect(backend.dispatched).toEqual([]);
 		expect(result).toMatchObject({ done: false, reason: "refused", abstained: false });
-		expect(result.steps[0]!.reply).toEqual({ refusal: 'Refused: AXButton "Save" is covered by a sheet — press Escape first.' });
+		expect(result.steps[0]!.reply).toEqual({
+			refusal: 'Refused: AXButton "Save" is covered by a sheet — press Escape first.',
+		});
 		// The refused row left the second table; the field was still offered.
 		const second = judge.requests.filter(request => "next" in request.questions)[1]!;
 		const lines = Object.values((second.questions.next as { criteria: Record<string, string | null> }).criteria);
@@ -567,7 +624,12 @@ describe("achieve candidate builder", () => {
 			{ role: "AXButton", label: "Offscreen", enabled: true, bounds: { x: 900, y: 900, width: 10, height: 10 } },
 			{ role: "AXSecureTextField", label: "Password", enabled: true, bounds: inWindow },
 			{ role: "AXGroup", label: "Pressable group", enabled: true, actions: ["press"], bounds: inWindow },
-			...Array.from({ length: 70 }, (_, index) => ({ role: "AXRow", label: `Row ${index}`, enabled: true, bounds: inWindow })),
+			...Array.from({ length: 70 }, (_, index) => ({
+				role: "AXRow",
+				label: `Row ${index}`,
+				enabled: true,
+				bounds: inWindow,
+			})),
 		];
 		const candidates = buildCandidates('send the message with password "hunter2"', observation(rows));
 		expect(candidates).toHaveLength(60);
@@ -592,10 +654,21 @@ describe("achieve candidate builder", () => {
 	});
 
 	it("offers a write only where the field does not already hold the value", () => {
-		const [candidate] = buildCandidates('write "x"', observation([{ role: "AXTextField", label: "Q", enabled: true }]));
-		expect(candidate).toMatchObject({ id: "n0_setValue", action: "setValue", value: "x", line: 'AXTextField "Q" -> setValue "x"' });
+		const [candidate] = buildCandidates(
+			'write "x"',
+			observation([{ role: "AXTextField", label: "Q", enabled: true }]),
+		);
+		expect(candidate).toMatchObject({
+			id: "n0_setValue",
+			action: "setValue",
+			value: "x",
+			line: 'AXTextField "Q" -> setValue "x"',
+		});
 		// Live against Jev, a field already holding the goal's value was re-written five steps running.
-		const held = buildCandidates('write "x"', observation([{ role: "AXTextField", label: "Q", value: "x", enabled: true }]));
+		const held = buildCandidates(
+			'write "x"',
+			observation([{ role: "AXTextField", label: "Q", value: "x", enabled: true }]),
+		);
 		expect(held.some(candidate => candidate.action === "setValue")).toBe(false);
 	});
 });

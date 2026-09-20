@@ -130,35 +130,39 @@ const DESTRUCTIVE = /\b(delete|remove|discard|trash|quit)\b/gi;
 /** Values the goal supplies: straight, curly or backtick quoted spans. Anything unquoted is never written. */
 const QUOTED = /"([^"]+)"|“([^”]+)”|`([^`]+)`/g;
 const TOKEN = /[\p{L}\p{N}]{2,}/gu;
-const STOPWORDS: Record<string, true> = {
-	the: true,
-	and: true,
-	for: true,
-	with: true,
-	into: true,
-	from: true,
-	that: true,
-	this: true,
-	then: true,
-	an: true,
-	to: true,
-	in: true,
-	on: true,
-	of: true,
-	or: true,
-	it: true,
-	is: true,
-	at: true,
-	by: true,
-};
+const STOPWORDS = new Set([
+	"the",
+	"and",
+	"for",
+	"with",
+	"into",
+	"from",
+	"that",
+	"this",
+	"then",
+	"an",
+	"to",
+	"in",
+	"on",
+	"of",
+	"or",
+	"it",
+	"is",
+	"at",
+	"by",
+]);
 /** The session's own sentence for a window the action put on screen (`cua-session` `#openedWindows`). */
 const WINDOW_GAINED = /gained window .* since your last observation/;
 
-const normalizeRole = (role: string): string => role.replace(/^AX/, "").replace(/[\s_-]+/g, "").toLowerCase();
+const normalizeRole = (role: string): string =>
+	role
+		.replace(/^AX/, "")
+		.replace(/[\s_-]+/g, "")
+		.toLowerCase();
 
 function tokens(text: string): Set<string> {
 	const found = new Set<string>();
-	for (const match of text.toLowerCase().matchAll(TOKEN)) if (STOPWORDS[match[0]] !== true) found.add(match[0]);
+	for (const match of text.toLowerCase().matchAll(TOKEN)) if (!STOPWORDS.has(match[0])) found.add(match[0]);
 	return found;
 }
 
@@ -290,10 +294,7 @@ export function buildCandidates(
 }
 
 /** The chain a prelude method sends for this pick: `desktop.window({ id, pid }).ref(r).<action>(...)`. */
-export function candidateChain(
-	window: { id: string; pid: number },
-	candidate: AchieveCandidate,
-): ComputerCallStep[] {
+export function candidateChain(window: { id: string; pid: number }, candidate: AchieveCandidate): ComputerCallStep[] {
 	const args = candidate.value === undefined ? [] : [candidate.value];
 	return [
 		// The handle carries exact identity and nothing else; a selector with more fields is refused.
