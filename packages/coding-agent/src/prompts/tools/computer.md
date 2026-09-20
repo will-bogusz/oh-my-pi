@@ -6,6 +6,7 @@ Entry points: `await computer.window(selector)` acquires ONE window — `selecto
 Model
 - A window is acquired, never focused. An `{ app }` that is not running is launched and acquired in the same call; several matches yield its front document window and name the rest.
 - An observation is the accessibility tree at one instant. Its refs (`n7`) belong to that observation and that window; the next `observe` or `find` retires them. `StaleRef` means re-observe, never guess.
+- One observation pays for every action it already justifies: batch them in one cell — `win.ref(a).click(); win.ref(b).setValue("x"); await win.observe()` — and spend a new cell only when the next action depends on what the tree will show. A cell that dispatches once and reads once is the slow shape.
 - A screenshot is one window's frame. Pixels mean something only in the latest frame of that same window; AX `bounds` are desktop-global. Coordinates, modified or counted clicks and drag ends are pixel actions and need a current frame — `observe()` is tree-only unless you ask for one.
 - Delivery is background by default: accessibility routes that touch nothing on screen. Foreground briefly makes the window key and exists for what only real input can do — drag, menus, pixel targets, keys at a window that is not key. The runtime never escalates for you.
 

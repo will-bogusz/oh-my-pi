@@ -1500,14 +1500,31 @@ it("composes one sentence for each thing a write turns out to be", async () => {
 			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write.",
 		);
 		expect(lost.text.split("\n").at(-1)).toBe(
-			`setValue on ${ref} AXTextField "Editor": not committed — a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write. The app kept its own value; write it another way.`,
+			`setValue on ${ref} AXTextField "Editor": unproven — a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write. Read it back (win.observe()): if the field shows the value, build on it and do not rewrite it.`,
 		);
-		await reread();
+		// The doubt is carried until a field of that role shows the value: a
+		// re-read that does not show it repeats the doubt, one that does
+		// answers it, and the answer is spent like the doubt was.
+		expect(await reread()).toContain("unproven — a multi-line AXTextArea");
+		await write(
+			{ committed: "not_committed", effect: "confirmed" },
+			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture.",
+		);
+		f.state.value = "Project_File_List";
+		const shown = await reread();
+		expect(shown).toContain(
+			`AXTextField "Editor": reads back as written in this tree — the write stands; build on it, do not rewrite it.`,
+		);
+		expect(shown).not.toContain("unproven — a multi-line");
+		expect(await reread()).not.toContain("setValue on");
+		f.state.value = "";
 		const bare = await write(
 			{ committed: "not_committed", effect: "confirmed" },
 			"📨 Sent (unverified) AXValue on [1] AXTextField.",
 		);
-		expect(bare.text).toContain("not committed — the driver reported no reason.");
+		expect(bare.text).toContain(
+			"not committed — the driver reported no reason. Read it back (win.observe()): if the field shows the value the driver read too early and it stands; if not, write it another way.",
+		);
 		await reread();
 		// Echoed but unproven on a binding field: the gesture that would commit
 		// it, never a re-read — re-reading returns the same echo.
@@ -1628,7 +1645,7 @@ it("reads the commit verdict the driver publishes as a string", async () => {
 			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture.",
 		);
 		expect(lost.committed).toBe("not_committed");
-		expect(await reread()).toContain("The app kept its own value");
+		expect(await reread()).toContain("unproven — a multi-line AXTextArea has no end-of-edit gesture");
 		const unproven = await write(
 			wireResult({ committed: "unproven", effect: "confirmed", evidence: [{ kind: "value_readback" }] }),
 			"✅ Set AXValue on [1] AXTextField. Commit unproven: the value survived AXConfirm, but the app's own model was not observed.",
@@ -2958,6 +2975,69 @@ it("keeps visual access for windows with no AX snapshot without inventing elemen
 	}
 });
 
+it("projects a query over the walked tree: alternatives, case, ancestors and the hidden count", async () => {
+	const f = await fixture();
+	const row = (index: number, role: string, label: string, depth: number, extra: Wire = {}): Wire => ({
+		element_index: index,
+		element_token: `s1:${index}`,
+		role,
+		label,
+		depth,
+		enabled: true,
+		...extra,
+	});
+	try {
+		f.state.hook = async name =>
+			name === "get_window_state"
+				? reply({
+						pid: 101,
+						window_id: 1,
+						snapshot_id: "s1",
+						truncated: false,
+						window_bounds: f.row.bounds,
+						elements: [
+							row(1, "AXWindow", "Card", 0),
+							row(2, "AXGroup", "Phones", 1),
+							row(3, "AXTextField", "home", 2, { value: "(555) 123-4567" }),
+							row(4, "AXButton", "Remove Phone", 2),
+							row(5, "AXGroup", "Actions", 1),
+							row(6, "AXButton", "Done", 2),
+							row(7, "AXButton", "Cancel", 2),
+						],
+					})
+				: undefined;
+		// Two alternatives, neither in the row's own case, keep their rows and the
+		// groups that place them; the rest is hidden and counted.
+		const observation = await f.session.observe(f.context, f.window, { query: "remove phone|DONE" });
+		expect(observation.tree.split("\n")).toEqual([
+			'- [n1] AXWindow "Card" enabled=true',
+			'  - [n2] AXGroup "Phones" enabled=true',
+			'    - [n4] AXButton "Remove Phone" enabled=true',
+			'  - [n5] AXGroup "Actions" enabled=true',
+			'    - [n6] AXButton "Done" enabled=true',
+			'Query "remove phone|DONE" matched 2 of 7 rows (ancestors kept); 2 hidden — drop the query to read them.',
+		]);
+		expect(observation.elements.map(element => element.label)).toEqual([
+			"Card",
+			"Phones",
+			"Remove Phone",
+			"Actions",
+			"Done",
+		]);
+		// A value is searchable too, and a query that keeps everything says nothing.
+		expect((await f.session.observe(f.context, f.window, { query: "123-4567" })).tree).toContain(
+			'AXTextField "home"',
+		);
+		expect((await f.session.observe(f.context, f.window, { query: "ax" })).tree).not.toContain("hidden");
+		// The driver never sees the query.
+		expect(
+			f.calls.filter(call => call.name === "get_window_state").every(call => call.args.query === undefined),
+		).toBe(true);
+	} finally {
+		await f.close();
+	}
+});
+
 it("says what a query searched, read and cut when nothing matched it", async () => {
 	const f = await fixture();
 	const missed = (data: Wire): CuaToolResult =>
@@ -2980,7 +3060,7 @@ it("says what a query searched, read and cut when nothing matched it", async () 
 		f.state.hook = async name => (name === "get_window_state" ? missed({}) : undefined);
 		const observation = await f.session.observe(f.context, f.window, { query: "Repeat" });
 		expect(observation.tree).toBe(
-			'No row matched query "Repeat" under window 1 "Editor" (Fixture): the walk read 148 actionable rows and reported the tree complete. Next: drop the query to read the whole tree, or widen it to a substring one of those rows carries; observe({ menubar: true }) adds the menu bar.',
+			'No row matched query "Repeat" under window 1 "Editor" (Fixture): the walk read 148 actionable rows and reported the tree complete. Next: drop the query to read the whole tree, or widen it — a query is a case-insensitive substring, and `|` separates alternatives; observe({ menubar: true }) adds the menu bar.',
 		);
 		// Rows the walker never read are the cheaper thing to fix than the
 		// query, and a walk that clipped says so instead of claiming complete.
@@ -4236,7 +4316,8 @@ it("keeps an attached sheet's whole subtree when the caller narrows the parent w
 		};
 		const observation = await f.session.observe(f.context, f.window, { maxDepth: 1, query: "Editor" });
 		expect(observation.tree).toContain('- [n3] AXButton "Cancel"');
-		// The parent walk carries the narrowing; the sheet's does not.
+		// The parent walk carries the depth budget; the query is projected here,
+		// never sent, and the sheet's walk carries neither.
 		expect(f.calls.filter(call => call.name === "get_window_state").map(call => call.args)).toEqual([
 			{
 				pid: 101,
@@ -4244,7 +4325,6 @@ it("keeps an attached sheet's whole subtree when the caller narrows the parent w
 				include_accessibility_tree: true,
 				include_screenshot: false,
 				max_depth: 1,
-				query: "Editor",
 			},
 			{ pid: 101, window_id: 5, include_accessibility_tree: true, include_screenshot: false },
 		]);

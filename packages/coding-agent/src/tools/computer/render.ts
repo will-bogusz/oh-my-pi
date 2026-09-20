@@ -720,6 +720,8 @@ function writeWitness(reply: ActionReply, facts: Facts): string {
 	return "the app's own output is the only witness";
 }
 const NOT_COMMITTED_REASON = /not committed:\s*([^.]+)/i;
+/** The driver had no commit gesture to watch (multi-line areas), as opposed to a read-back that disagreed. */
+const NO_END_OF_EDIT = /no end-of-edit|may never register/i;
 const field = (facts: Facts): string => writeField(facts as WriteFacts);
 /**
  * The table. One row per thing a reply can turn out to be, keyed on the
@@ -847,10 +849,17 @@ const TABLE: readonly Row[] = [
 	{
 		slot: "write",
 		when: { verdict: "not_committed" },
-		say: (_reply, facts) =>
-			`${field(facts)}: not committed — ${
-				NOT_COMMITTED_REASON.exec(facts.text)?.[1]?.trim() ?? "the driver reported no reason"
-			}. The app kept its own value; write it another way.`,
+		say: (_reply, facts) => {
+			const reason = NOT_COMMITTED_REASON.exec(facts.text)?.[1]?.trim() ?? "the driver reported no reason";
+			// Two different findings share the verdict. "No end-of-edit gesture"
+			// means the driver had nothing to watch, not that the app refused;
+			// the bench's every persistence excursion started on the old
+			// sentence claiming the app kept its own value while the tree in
+			// the same reply showed the write. A read-back settles both.
+			return NO_END_OF_EDIT.test(reason)
+				? `${field(facts)}: unproven — ${reason}. Read it back (win.observe()): if the field shows the value, build on it and do not rewrite it.`
+				: `${field(facts)}: not committed — ${reason}. Read it back (win.observe()): if the field shows the value the driver read too early and it stands; if not, write it another way.`;
+		},
 	},
 	{
 		slot: "write",

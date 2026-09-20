@@ -50,6 +50,12 @@ interface ComputerObserveOptions {
 	silent?: boolean;
 	maxDepth?: number;
 	maxElements?: number;
+	/**
+	 * Show only the rows a case-insensitive substring matches, plus the
+	 * ancestors that place them; `|` separates alternatives ("Save|Done").
+	 * Refs are minted for the whole tree, but hidden rows are not printed —
+	 * the observation says how many it hid. A miss says what was searched.
+	 */
 	query?: string;
 	/**
 	 * Include the menu bar. Excluded by default: its rows only respond while

@@ -101,9 +101,62 @@ interface TreeRow {
 	element: ComputerElementSnapshot;
 	notes?: readonly TreeNote[];
 }
+/** An unproven write and the observation that would prove it. */
+interface WriteDoubt {
+	readonly sentence: string;
+	readonly readBack?: {
+		readonly field: string;
+		readonly role: string;
+		readonly operation: "setValue" | "type";
+		readonly value: string;
+	};
+}
 function renderedSubrole(element: ComputerElementSnapshot): string {
 	const specific = specificRole(element);
 	return specific === element.role ? "" : ` subrole=${specific}`;
+}
+/**
+ * The rows a query keeps: every row one of its `|`-separated alternatives
+ * matches (case-insensitive substring over what the row prints), plus the
+ * ancestors that place it. The driver's own projection took one literal
+ * substring, which the bench's queries were not: every alternative-carrying
+ * query missed and cost a re-observe. Projecting here keeps one semantics
+ * for both platforms and lets the observation say what it hid.
+ */
+function projectRows(rows: readonly TreeRow[], query: string): { rows: TreeRow[]; matched: number } {
+	const alternatives = query
+		.split("|")
+		.map(alternative => alternative.trim().toLowerCase())
+		.filter(alternative => alternative.length > 0);
+	if (!alternatives.length) return { rows: [...rows], matched: rows.length };
+	const hits = (element: ComputerElementSnapshot): boolean => {
+		const haystack = [
+			element.role,
+			element.subrole,
+			element.label,
+			element.value,
+			element.placeholder,
+			element.description,
+			element.help,
+		]
+			.filter((text): text is string => typeof text === "string" && text.length > 0)
+			.join("\n")
+			.toLowerCase();
+		return alternatives.some(alternative => haystack.includes(alternative));
+	};
+	const kept = new Set<number>();
+	const ancestors: number[] = [];
+	let matched = 0;
+	rows.forEach((row, index) => {
+		while (ancestors.length && rows[ancestors[ancestors.length - 1]!]!.depth >= row.depth) ancestors.pop();
+		if (hits(row.element)) {
+			matched++;
+			kept.add(index);
+			for (const ancestor of ancestors) kept.add(ancestor);
+		}
+		ancestors.push(index);
+	});
+	return { rows: rows.filter((_, index) => kept.has(index)), matched };
 }
 function treeRows(rows: readonly TreeRow[], indent: number): string {
 	return rows
@@ -462,7 +515,12 @@ export class CuaComputerSession implements ComputerBackend {
 	 * What each window's writes left unproven, one sentence per write, in the
 	 * order they were made. The next read of that window reports and clears them.
 	 */
-	readonly #writes = new Map<string, Set<string>>();
+	/**
+	 * Unproven writes by window, each with what would prove it: the next
+	 * observation of that window that shows the value in a field of the
+	 * written role turns the doubt into a read-back.
+	 */
+	readonly #writes = new Map<string, Map<string, WriteDoubt>>();
 	/**
 	 * Windows whose keyboard delivery the driver escalated to foreground. The
 	 * escalation is a fact about the window — a surface whose background route
@@ -1083,9 +1141,11 @@ export class CuaComputerSession implements ComputerBackend {
 				include_screenshot: options.screenshot === true,
 				max_depth: options.maxDepth,
 				max_elements: options.maxElements,
-				query: options.query,
 			});
-			const { rows, menuBarRows, snapshotId } = this.#walk(current, reply, options);
+			const walked = this.#walk(current, reply, options);
+			const { menuBarRows, snapshotId } = walked;
+			const projected = options.query === undefined ? undefined : projectRows(walked.rows, options.query);
+			const rows = projected?.rows ?? walked.rows;
 			// Only the walker knows whether it clipped the tree. `truncated` is its
 			// explicit verdict and `elements_complete` its older positive proof.
 			// Equal returned/total counts prove nothing: both count what the walk
@@ -1115,8 +1175,14 @@ export class CuaComputerSession implements ComputerBackend {
 				: typeof reply.data.degraded_reason === "string"
 					? reply.data.degraded_reason
 					: options.query !== undefined
-						? this.#queryMiss(current, reply, options, complete)
+						? this.#queryMiss(current, reply, options, complete, walked.rows.length)
 						: "No accessibility elements returned; completeness is unknown.";
+			// A projection hides controls the next step may need (the bench lost
+			// a Save button and an add menu to one); the count says so.
+			const hidden =
+				projected !== undefined && projected.matched > 0 && walked.rows.length > rows.length
+					? `Query ${JSON.stringify(options.query)} matched ${projected.matched} of ${walked.rows.length} rows (ancestors kept); ${walked.rows.length - rows.length} hidden — drop the query to read them.`
+					: undefined;
 			// This window's sheets, as of this walk: a sheet that has gone away
 			// must stop excluding an id acquisition could pick, and the refs it
 			// minted must say which surface took them with it.
@@ -1140,6 +1206,7 @@ export class CuaComputerSession implements ComputerBackend {
 			observation.tree = [
 				...sheets,
 				parent,
+				hidden,
 				menuBarRows
 					? `Menu bar hidden (${menuBarRows} rows): its items only respond while their own menu is open, so drive it with win.menu(["<menu>", "<item>"], { delivery: "foreground" }); observe({ menubar: true }) shows them.`
 					: undefined,
@@ -1180,7 +1247,10 @@ export class CuaComputerSession implements ComputerBackend {
 				observation.tree += `\n⚠️ Interrupted: ${describeInterruption(observation.interruptedBy)}. Actions on any window are refused until it is answered; tell the user what is asking.`;
 			// The write that decided what this tree means may have been dispatched
 			// by a cell that displayed only this read.
-			const doubted = this.#doubtedWrites(current.id);
+			const doubted = this.#doubtedWrites(
+				current.id,
+				observation.elements.map(element => ({ depth: 0, element })),
+			);
 			if (doubted.length) observation.tree = `${doubted.join("\n")}\n${observation.tree}`;
 			this.#observedRoster.set(
 				current.pid,
@@ -1204,13 +1274,19 @@ export class CuaComputerSession implements ComputerBackend {
 	 * read, its own verdict on the tree and the scroll state are what this says,
 	 * because those are what decide whether to widen the query or scroll first.
 	 */
-	#queryMiss(window: ComputerWindowIdentity, reply: Reply, options: ObserveOptions, complete: boolean): string {
+	#queryMiss(
+		window: ComputerWindowIdentity,
+		reply: Reply,
+		options: ObserveOptions,
+		complete: boolean,
+		rowsRead: number,
+	): string {
 		const read =
 			typeof reply.data.total_element_count === "number"
 				? reply.data.total_element_count
 				: typeof reply.data.element_count === "number"
 					? reply.data.element_count
-					: undefined;
+					: rowsRead || undefined;
 		const collapsed = typeof reply.data.collapsed_rows === "number" ? reply.data.collapsed_rows : 0;
 		const verdict = reply.data.truncated === true ? "truncated" : complete ? "complete" : "not proven complete";
 		const walked =
@@ -1220,7 +1296,7 @@ export class CuaComputerSession implements ComputerBackend {
 		const next =
 			collapsed > 0
 				? `scroll the list first — ${collapsed} row(s) are out of view and were not read — or drop the query to read what is on screen`
-				: `drop the query to read the whole tree, or widen it to a substring one of those rows carries${
+				: `drop the query to read the whole tree, or widen it — a query is a case-insensitive substring, and \`|\` separates alternatives${
 						options.menubar === true ? "" : "; observe({ menubar: true }) adds the menu bar"
 					}`;
 		return `No row matched query ${JSON.stringify(options.query)} under window ${window.id} ${JSON.stringify(
@@ -1506,7 +1582,7 @@ export class CuaComputerSession implements ComputerBackend {
 			});
 			// An image carries no text of its own, so an unproven write goes in
 			// front of the pixels it is true of.
-			for (const doubt of this.#doubtedWrites(current.id)) context.emitText(doubt);
+			for (const doubt of this.#doubtedWrites(current.id, [])) context.emitText(doubt);
 			return this.#windowImage(context, current, reply, options.silent === true);
 		});
 	}
@@ -1999,7 +2075,18 @@ export class CuaComputerSession implements ComputerBackend {
 			const result = await dispatched;
 			const note = writeNote(result, facts(result.text, result.escalation !== undefined));
 			if (note === undefined) return result;
-			this.#doubt(window.id, note);
+			// Only a `not_committed` verdict is answered by a read-back: the driver
+			// either had no commit gesture to watch or read the field too early,
+			// and a field of that role showing the value settles both. An
+			// unverifiable or unproven write stays doubted, because there the
+			// value in the tree is the echo the doubt is about.
+			this.#doubt(
+				window.id,
+				note,
+				result.committed === "not_committed" && element !== undefined
+					? { field, role: element.role, operation, value }
+					: undefined,
+			);
 			return { ...result, text: result.text ? `${result.text}\n${note}` : note };
 		} catch (error) {
 			if (!(error instanceof ToolError) || !error.message.startsWith(INCOMPLETE_TYPING)) throw error;
@@ -2009,16 +2096,36 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 	}
 	/** One sentence per unproven write, and never the same one twice. */
-	#doubt(windowId: string, sentence: string): void {
+	#doubt(windowId: string, sentence: string, readBack?: WriteDoubt["readBack"]): void {
 		const doubts = this.#writes.get(windowId);
-		if (doubts) doubts.add(sentence);
-		else this.#writes.set(windowId, new Set([sentence]));
+		if (doubts) doubts.set(sentence, { sentence, readBack });
+		else this.#writes.set(windowId, new Map([[sentence, { sentence, readBack }]]));
 	}
-	#doubtedWrites(windowId: string): readonly string[] {
+	/**
+	 * The doubts this observation answers or carries. A field of the written
+	 * role that now shows the value is the read-back the doubt asked for; the
+	 * bench's persistence excursions all began on a carried doubt whose
+	 * answer was printed in the same tree.
+	 */
+	#doubtedWrites(windowId: string, rows: readonly TreeRow[]): readonly string[] {
 		const doubts = this.#writes.get(windowId);
 		if (!doubts) return [];
 		this.#writes.delete(windowId);
-		return [...doubts];
+		return [...doubts.values()].map(doubt => {
+			const readBack = doubt.readBack;
+			if (readBack === undefined) return doubt.sentence;
+			const shown = rows.some(
+				row =>
+					row.element.role === readBack.role &&
+					row.element.value !== undefined &&
+					(readBack.operation === "setValue"
+						? row.element.value === readBack.value
+						: row.element.value.includes(readBack.value)),
+			);
+			return shown
+				? `${readBack.field}: reads back as written in this tree — the write stands; build on it, do not rewrite it.`
+				: doubt.sentence;
+		});
 	}
 	/**
 	 * The keyboard route for this window: what the caller asked for, or the

@@ -96,7 +96,7 @@ The `computer` eval prelude is enabled.
 {{else}}
 - For host-desktop requests, NEVER substitute Browser, Bash, AppleScript, accessibility commands, or `screencapture` unless user requests that mechanism or it errors.
 {{/if}}
-- After UI change, gather fresh accessibility or screenshot evidence before acting.
+- Act on refs from the observation that justified them, batching those actions in one cell; after the UI changes, gather fresh accessibility or screenshot evidence before acting on what changed.
 {{/if}}
 
 {{#if xdevTools.length}}

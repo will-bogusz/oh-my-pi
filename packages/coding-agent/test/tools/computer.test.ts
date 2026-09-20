@@ -79,7 +79,7 @@ const windowFixture: ComputerWindowIdentity = {
 /** What the session composes for a write it could not call proven, per verdict. */
 const WRITE_NOTES: Record<string, string> = {
 	not_committed:
-		'setValue on e2 AXTextField "Filename": not committed — the app has no end-of-edit gesture here. The app kept its own value; write it another way.',
+		'setValue on e2 AXTextField "Filename": unproven — the app has no end-of-edit gesture here. Read it back (win.observe()): if the field shows the value, build on it and do not rewrite it.',
 	unproven:
 		'setValue on e2 AXTextField "Filename": the value reads back as written, but this field\'s app takes its value at end-of-edit — press Tab or Return on it.',
 };
@@ -748,7 +748,7 @@ describe("computer preludes through the session", () => {
 			// even though this cell throws the result away.
 			backend.committed = "not_committed";
 			await runInContext('win.setValue(win.initialObservation.elements[0].ref, "lost")', realm);
-			expect(displays.join("\n")).toContain("not committed —");
+			expect(displays.join("\n")).toContain("unproven — the app has no end-of-edit gesture here");
 			// The verdict the dead `committed === false` gate dropped outright: the
 			// value was echoed back and nothing observed the app take it.
 			displays.length = 0;
