@@ -78,6 +78,8 @@ class AchieveBackend implements ComputerBackend {
 	refusals: Record<string, string> = {};
 	/** Labels whose dispatch reports `suspected_noop`. */
 	noops: Record<string, true> = {};
+	/** Labels whose write the app keeps its own value against (`committed: not_committed`). */
+	uncommitted: Record<string, true> = {};
 	/** Label whose dispatch reports a panel that appeared while it ran. */
 	interruptAfter?: string;
 	/** Panel present at the next observation. */
@@ -202,9 +204,11 @@ class AchieveBackend implements ComputerBackend {
 		this.dispatched.push(`${action} ${row.label}${value === undefined ? "" : `=${value}`}`);
 		this.onDispatch?.(action, row, value);
 		const noop = this.noops[row.label] === true;
+		const uncommitted = action === "setValue" && this.uncommitted[row.label] === true;
 		return {
 			text: noop ? `⚠️ ${action} on ${row.label} delivered but nothing changed (suspected_noop).` : "",
 			effect: noop ? "suspected_noop" : "verified",
+			...(uncommitted ? { committed: "not_committed" as const } : {}),
 			evidence: null,
 			delivery: "background",
 			...(this.interruptAfter === row.label
@@ -543,7 +547,7 @@ describe("win.achieve", () => {
 		backend.interruptAfter = "Save";
 		judge.picks = [
 			{ line: 'AXTextField "Name" -> setValue "Ada"', probability: 0.9 },
-			{ line: 'AXTextField "Name" -> type "Ada"', probability: 0.9 },
+			{ line: 'AXTextField "Name" (write not taken) -> type "Ada"', probability: 0.9 },
 			{ line: 'AXButton "Save" -> click', probability: 0.9 },
 		];
 		judge.verdicts = [0.2];
@@ -553,6 +557,31 @@ describe("win.achieve", () => {
 		expect(result.detail).toContain("auth window 900");
 		expect(result.steps[0]!.postcondition).toBeUndefined();
 		expect(result.steps[2]!.reply).toMatchObject({ interruptedBy: { kind: "auth" } });
+	});
+
+	it("takes a not_committed write as failed and lands the value by keystrokes instead", async () => {
+		// Live against Jev on TextEdit: setValue on the text view was confirmed but not committed
+		// ("the app kept its own value"), and the loop kept re-observing until max_steps.
+		const { backend, judge, realm } = fixture();
+		backend.rows = structuredClone(contactForm);
+		backend.uncommitted = { Name: true };
+		// The AX write shows in the tree even though the app did not take it, as on TextEdit.
+		backend.onDispatch = (action, row, value) => {
+			if (action === "setValue") row.value = value;
+		};
+		judge.picks = [
+			{ line: 'AXTextField "Name" -> setValue "Ada"', probability: 0.9 },
+			{ line: 'AXTextField "Name" (write not taken) -> type "Ada"', probability: 0.9 },
+		];
+		judge.verdicts = [0.9];
+		const result = await achieveInRealm(realm, 'Fill Name with "Ada"');
+		// The field still showed "Ada" after the uncommitted AX write, so it was written back to empty first.
+		expect(backend.dispatched).toEqual(["setValue Name=Ada", "setValue Name=", "type Name=Ada"]);
+		expect(result).toMatchObject({ reason: "done", done: true });
+		expect(result.steps[0]!.postcondition).toBeUndefined();
+		expect(result.steps[0]!.reply).toMatchObject({ committed: "not_committed" });
+		expect(result.steps[1]!.restored).toMatchObject({ effect: "verified" });
+		expect(result.steps[1]!.postcondition).toBe(0.9);
 	});
 
 	it("returns control when the window itself reports an interruption before any pick", async () => {
@@ -611,10 +640,11 @@ describe("achieve candidate builder", () => {
 		backgroundInput: true,
 	});
 
-	it("reads only quoted values out of the goal", () => {
+	it("reads only quoted values out of the goal, once per occurrence", () => {
 		expect(goalValues('set Name to "Ada Lovelace" and Email to “ada@x.org”')).toEqual(["Ada Lovelace", "ada@x.org"]);
 		expect(goalValues("type Ada into the name field")).toEqual([]);
 		expect(goalValues("don't touch `x`")).toEqual(["x"]);
+		expect(goalValues('first "Smith", last "Smith"')).toEqual(["Smith", "Smith"]);
 	});
 
 	it("ranks goal overlap first, drops off-screen and secret rows, and caps the table with unique ids", () => {
@@ -670,5 +700,43 @@ describe("achieve candidate builder", () => {
 			observation([{ role: "AXTextField", label: "Q", value: "x", enabled: true }]),
 		);
 		expect(held.some(candidate => candidate.action === "setValue")).toBe(false);
+	});
+
+	it("offers a landed value to no other field unless the goal quotes it again", () => {
+		// Live against Jev, "hello" confirmed in the text view was then written into the font-size box.
+		const rows: Row[] = [
+			{ role: "AXTextArea", label: "Text", value: "hello", enabled: true, bounds: inWindow },
+			{ role: "AXComboBox", label: "font size", value: "12", enabled: true, bounds: inWindow },
+		];
+		const memory = { failed: new Set<string>(), written: new Set<string>(), landed: ["hello"], before: new Map() };
+		const spent = buildCandidates('type "hello" into the document', observation(rows), memory);
+		expect(spent.some(candidate => candidate.action === "setValue")).toBe(false);
+		// A second quoted occurrence is a second write; the combo box is still a click, never a page.
+		const twice = buildCandidates('type "hello" and then "hello" again', observation(rows), memory);
+		expect(twice.map(candidate => candidate.line)).toEqual(['AXComboBox "font size" = "12" -> click']);
+	});
+
+	it("offers keystrokes for a doubted write even where the value already reads back", () => {
+		// Live against Jev on TextEdit: the uncommitted AX write showed the text the app had not taken,
+		// so the no-op rule hid the keystroke route and the only write left was the font-size box.
+		const rows: Row[] = [{ role: "AXTextArea", label: "Text", value: "hello", enabled: true, bounds: inWindow }];
+		const doubted = {
+			failed: new Set(["AXTextArea||#0|setValue|hello"]),
+			written: new Set<string>(),
+			landed: [],
+			before: new Map([["AXTextArea||#0", ""]]),
+		};
+		// Keystrokes would append to the text the view still shows, so the write is undone first.
+		expect(buildCandidates('type "hello"', observation(rows), doubted)).toMatchObject([
+			{ line: 'AXTextArea "Text" (write not taken) -> type "hello"', action: "type", restore: "" },
+		]);
+		// The same field renamed by its own text (label mirrors value) is still the doubted one.
+		const renamed: Row[] = [{ role: "AXTextArea", label: "hello", value: "hello", enabled: true, bounds: inWindow }];
+		expect(buildCandidates('type "hello"', observation(renamed), doubted).map(candidate => candidate.action)).toEqual(
+			["type"],
+		);
+		// A field the app emptied again needs no write-back.
+		const emptied: Row[] = [{ role: "AXTextArea", label: "Text", value: "", enabled: true, bounds: inWindow }];
+		expect(buildCandidates('type "hello"', observation(emptied), doubted)[0]!.restore).toBeUndefined();
 	});
 });
