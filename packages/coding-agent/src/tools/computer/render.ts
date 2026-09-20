@@ -429,7 +429,7 @@ const FOCUS_HOLDING_REFUSALS: Record<string, true> = {
 	same_pid_keyboard_ambiguity: true,
 };
 /** Roles that take typed text, in both providers' vocabularies. */
-const TEXT_INPUT_ROLES: Record<string, true> = {
+export const TEXT_INPUT_ROLES: Record<string, true> = {
 	AXComboBox: true,
 	AXSearchField: true,
 	AXTextArea: true,

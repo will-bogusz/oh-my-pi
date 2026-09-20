@@ -158,6 +158,21 @@
 			(await callValue(via(step("find", [query])))).map(item => makeElement(item, identity)),
 		);
 		defineMethod(win, "ref", ref => lazyElement(via(step("ref", [ref])), ref, identity));
+		// @achieve
+		// The chooser sub-loop runs on the host, where the judge and the typed
+		// observation live; the handle only names the goal and the bounds.
+		defineMethod(win, "achieve", async (goal, options) => {
+			if (typeof goal !== "string" || goal.length === 0) {
+				throw new TypeError("win.achieve() expects a non-empty goal string");
+			}
+			const opts = validateOptions("win.achieve", options);
+			const parameters = { window: identity, goal };
+			if (opts.maxSteps !== undefined) parameters.maxSteps = opts.maxSteps;
+			if (opts.confidence !== undefined) parameters.confidence = opts.confidence;
+			const details = await invoke("achieve", parameters);
+			return details.value;
+		});
+		// @end achieve
 		return Object.freeze(win);
 	};
 	const resolveWindow = async chain => {

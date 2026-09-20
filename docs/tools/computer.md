@@ -123,6 +123,7 @@ display(await win.observe(screenshot=False))
 | `setFrame({ x, y, width, height })` | Change window geometry |
 | `menu(path, { delivery: "foreground" })` | Menu-label path array; foreground required |
 | `reveal()` | Explicit foreground activation; same name in Python |
+| `achieve(goal, { maxSteps?, confidence? })` | Experimental, present only with `computer.achieve: true` (Python: `max_steps`, `confidence`). A bounded sub-loop: per step the host observes, builds a candidate table (enabled on-screen rows × their allowed actions; values only as the goal quotes them; destructive rows only when the goal names them), a typed judge picks a row or `reobserve`/`abstain`, the pick runs as `win.ref(r).<action>()` would, and a postcondition judgment over the fresh tree decides. Returns `{ done, steps, reason, abstained, detail? }` with the driver's replies verbatim; `reason` is `done`, `abstain`, `max_steps`, `interrupted` or `refused` |
 
 Scroll directions: `up`, `down`, `left`, `right`. `delivery` is `background` or `foreground`. Element methods bind the token automatically: `click(options?)`, `doubleClick(options?)`, `setValue(text)`, `type(text, options?)`, `press(chordOrChords, options?)`, `scroll(direction, options?)`, and `perform(action)`. `press` requires keys; semantic activation is `click()`. A point inside a canvas/image needs a screenshot pixel target. Window `hover` is unsupported on the current driver: its window cursor is an overlay, not a hover event.
 

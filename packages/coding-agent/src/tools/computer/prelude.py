@@ -198,6 +198,18 @@ def _make_computer():
 
             return _LazyElement({"ref": ref}, identity, resolve)
 
+        # @achieve
+        async def achieve(self, goal, *, max_steps=None, confidence=None):
+            """Bounded chooser sub-loop toward `goal` on this window, run on the host; may abstain."""
+            if not isinstance(goal, str) or not goal:
+                raise TypeError("win.achieve() expects a non-empty goal string")
+            details = await _invoke(
+                "achieve",
+                {"window": {"id": self.id, "pid": self.pid}, "goal": goal, "maxSteps": max_steps, "confidence": confidence},
+            )
+            return details.get("value")
+        # @end achieve
+
     class _Clipboard:
         __slots__ = ()
 

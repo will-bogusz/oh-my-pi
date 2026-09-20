@@ -217,6 +217,18 @@ interface ComputerWindow extends ComputerWindowInfo {
 		options?: { timeoutMs?: number; stableSamples?: number },
 	): Promise<unknown>;
 	reveal(): Promise<ComputerAction>;
+	// @achieve
+	/**
+	 * Experimental (`computer.achieve`): a bounded sub-loop toward one
+	 * verifiable goal on this window — fill, select, navigate-to. Each step a
+	 * typed judge picks one row of a code-built candidate table (or re-reads,
+	 * or abstains), the pick runs as `win.ref(r).<action>()` would, and a
+	 * postcondition judgment over the fresh tree decides. Values written are
+	 * only ones the goal quotes (`"..."`). May abstain; the trace is the
+	 * driver's own replies.
+	 */
+	achieve(goal: string, options?: ComputerAchieveOptions): Promise<ComputerAchieveResult>;
+	// @end achieve
 }
 interface ComputerDesktop {
 	capabilities(): Promise<ComputerCapabilities>;
@@ -278,6 +290,33 @@ interface ComputerAcquireOptions extends ComputerObserveOptions, ComputerResolve
 	 */
 	launch?: boolean;
 }
+// @achieve
+interface ComputerAchieveOptions {
+	/** Steps before the loop stops with `max_steps`; default 8. */
+	maxSteps?: number;
+	/** The pick's probability must reach this (default 0.6); below it the loop re-reads once, then abstains. */
+	confidence?: number;
+}
+interface ComputerAchieveStep {
+	/** The candidate line (`role "label" -> action`), or `reobserve` / `abstain`. */
+	candidate: string;
+	probability: number;
+	/** The row the judge leaned to when its probability fell under the gate. */
+	favored?: string;
+	/** The driver's typed reply for an executed pick, or `{ refusal }` with the message the call would have thrown. */
+	reply?: ComputerAction | { refusal: string; interruptedBy?: ComputerInterruption };
+	/** P(goal satisfied) after the pick; absent when it was not executed or reported `suspected_noop`. */
+	postcondition?: number;
+}
+interface ComputerAchieveResult {
+	done: boolean;
+	steps: ComputerAchieveStep[];
+	reason: "done" | "abstain" | "max_steps" | "interrupted" | "refused";
+	abstained: boolean;
+	/** The verbatim interruption, refusal or gate that ended the loop, when one did. */
+	detail?: string;
+}
+// @end achieve
 declare const computer: Omit<ComputerDesktop, "window"> & {
 	window(selector: string | number | ComputerWindowFilter, options?: ComputerAcquireOptions): Promise<ComputerWindow>;
 	run<R>(

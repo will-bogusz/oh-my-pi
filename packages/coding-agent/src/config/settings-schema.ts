@@ -4392,6 +4392,17 @@ export const SETTINGS_SCHEMA = {
 		},
 	},
 
+	"computer.achieve": {
+		type: "boolean",
+		default: false,
+		ui: {
+			tab: "tools",
+			group: "Computer",
+			label: "Computer Achieve",
+			description: "Enables the experimental bounded chooser sub-loop `win.achieve()`",
+		},
+	},
+
 	"images.questionTimeoutMs": {
 		type: "number",
 		default: 300_000,

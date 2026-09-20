@@ -1,12 +1,15 @@
 import { type Type, type } from "@oh-my-pi/omptype";
 import type { AgentToolResult, ToolApprovalDecision } from "@oh-my-pi/pi-agent-core";
-import type { Model } from "@oh-my-pi/pi-ai";
+import type { Judge, Model } from "@oh-my-pi/pi-ai";
 import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
 import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import { once } from "@oh-my-pi/pi-utils";
 import { callSessionTool } from "../eval/js/tool-bridge";
 import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
+import { resolveJudge } from "../judgment";
+import { ONLINE_MEMORY_MODEL_KEY } from "../tiny/models";
 import { enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
+import { ACHIEVE_DEFAULTS, achieve, renderAchieve } from "./computer/achieve";
 import {
 	COMPUTER_HANDLE_VERBS,
 	type ComputerCallStep,
@@ -14,10 +17,13 @@ import {
 	isReadOnlyComputerCall,
 	renderComputerCall,
 } from "./computer/call";
+import type * as PreludeDefinition from "./computer/prelude-definition";
 import { type ComputerController, ComputerSupervisor, registerComputerController } from "./computer/supervisor";
 import { elideObservationTree } from "./computer/tree-elide";
 import type {
+	ComputerActionResult,
 	ComputerObservation,
+	ComputerRunOk,
 	ComputerScreenshot,
 	ComputerSessionSnapshot,
 	ComputerWindowAcquisition,
@@ -52,10 +58,12 @@ function usesCoordinateSafeImageSizing(model: Model | undefined): boolean {
 /**
  * Text assets the computer host reads at call time. Eval-first-use boundary:
  * source/declaration assets stay unloaded until a JavaScript or Python kernel
- * actually asks for its enabled preludes.
+ * actually asks for its enabled preludes. The `achieve` surface ships only
+ * with `computer.achieve` on, read once per session.
  */
-function computerAssets(): typeof import("./computer/prelude-definition").computerPreludeAssets {
-	return require("./computer/prelude-definition").computerPreludeAssets;
+function computerAssets(achieve: boolean): PreludeDefinition.ComputerPreludeAssets {
+	const definition = require("./computer/prelude-definition") as typeof PreludeDefinition;
+	return definition.computerPreludeAssets(achieve);
 }
 
 /**
@@ -64,15 +72,13 @@ function computerAssets(): typeof import("./computer/prelude-definition").comput
  * call these, and the alternative was a `computer.help()` round trip for the
  * whole declaration file. Later handles get the verb list alone.
  */
-const windowSignatures = once(() =>
-	handleSignatures(computerAssets().codeModeDeclarations, "ComputerWindow", "win handle:"),
-);
-const elementSignatures = once(() =>
-	handleSignatures(computerAssets().codeModeDeclarations, "ComputerElement", "el handle:"),
-);
 function handleSurface(lifetime: ComputerLifetime): string {
 	if (!lifetime.teach("window")) return COMPUTER_HANDLE_VERBS;
-	return lifetime.teach("element") ? `${windowSignatures()}\n${elementSignatures()}` : windowSignatures();
+	const window = handleSignatures(lifetime.assets.codeModeDeclarations, "ComputerWindow", "win handle:");
+	return lifetime.teach("element") ? `${window}\n${elementSignatures(lifetime)}` : window;
+}
+function elementSignatures(lifetime: ComputerLifetime): string {
+	return handleSignatures(lifetime.assets.codeModeDeclarations, "ComputerElement", "el handle:");
 }
 
 interface ComputerRunParams {
@@ -90,9 +96,19 @@ interface ComputerCallParams {
 	timeout?: number;
 }
 
+interface ComputerAchieveParams {
+	action: "achieve";
+	window: { id: string; pid: number };
+	goal: string;
+	maxSteps?: number;
+	confidence?: number;
+	timeout?: number;
+}
+
 type ComputerParams =
 	| ComputerRunParams
 	| ComputerCallParams
+	| ComputerAchieveParams
 	| { action: "capabilities" }
 	| { action: "help" }
 	| { action: "release" }
@@ -121,6 +137,15 @@ const getComputerParamsSchema: () => ComputerParamsSchema = once(() =>
 			"timeout?": type("number").describe("run budget in seconds"),
 			"+": "reject",
 		})
+		.or({
+			action: "'achieve'",
+			window: { id: "string", pid: "number" },
+			goal: type("string").describe("one bounded, verifiable sub-goal on the window; values to write are quoted"),
+			"maxSteps?": type("number").describe("steps before the loop stops with max_steps; default 8"),
+			"confidence?": type("number").describe("probability a pick must reach; default 0.6"),
+			"timeout?": type("number").describe("per-step run budget in seconds"),
+			"+": "reject",
+		})
 		.or({ action: "'capabilities'", "+": "reject" })
 		.or({ action: "'help'", "+": "reject" })
 		.or({ action: "'release'", "+": "reject" })
@@ -142,6 +167,19 @@ interface ComputerPreludeDetails {
 
 /** Creates the session-scoped controller used by the computer prelude. */
 export type ComputerControllerFactory = (session: ToolSession) => ComputerController;
+/** Resolves the judge `win.achieve()` asks; the eval `judge()` helper's own resolution by default. */
+export type ComputerJudgeFactory = (session: ToolSession) => Judge;
+
+const sessionJudge: ComputerJudgeFactory = session => {
+	const registry = session.modelRegistry;
+	if (!registry) throw new ToolError("win.achieve() has no model registry.");
+	return resolveJudge({
+		settings: session.settings,
+		registry,
+		backend: ONLINE_MEMORY_MODEL_KEY,
+		sessionId: session.getSessionId?.() ?? undefined,
+	});
+};
 
 /** Documentation, capability inspection, explicitly read-only runs, and inspection-only direct calls use read approval. */
 export function computerApproval(args: unknown): ToolApprovalDecision {
@@ -163,9 +201,10 @@ export function createComputerPrelude(
 	session: ToolSession,
 	createController: ComputerControllerFactory = currentSession =>
 		new ComputerSupervisor(currentSession, undefined, callSessionTool),
+	createJudge: ComputerJudgeFactory = sessionJudge,
 ): EvalPreludeDefinition {
-	const lifetime = new ComputerLifetime(session, createController);
-	const assets = computerAssets();
+	const lifetime = new ComputerLifetime(session, createController, createJudge);
+	const { assets } = lifetime;
 
 	return {
 		name: "computer",
@@ -198,6 +237,8 @@ function describeComputerCall(parameters: unknown): string | undefined {
 			return `desktop.${renderCallChain(parsed.chain)}`;
 		case "run":
 			return `run(${parsed.fn !== undefined ? "fn" : (parsed.code?.trim().split("\n", 1)[0] ?? "")})`;
+		case "achieve":
+			return `achieve(${JSON.stringify(parsed.goal)})`;
 		default:
 			return parsed.action;
 	}
@@ -206,7 +247,11 @@ function describeComputerCall(parameters: unknown): string | undefined {
 class ComputerLifetime {
 	readonly #session: ToolSession;
 	readonly #createController: ComputerControllerFactory;
+	readonly #createJudge: ComputerJudgeFactory;
 	readonly #unregisterOwner: () => void;
+	/** Whether `win.achieve()` ships this session; the setting is read once, with the prelude's own text. */
+	readonly achieve: boolean;
+	readonly assets: PreludeDefinition.ComputerPreludeAssets;
 	#controller?: ComputerController;
 	#closed = false;
 	#releasing?: Promise<void>;
@@ -214,10 +259,17 @@ class ComputerLifetime {
 	#releaseFailure?: Error;
 	readonly #taught = new Set<string>();
 
-	constructor(session: ToolSession, createController: ComputerControllerFactory) {
+	constructor(session: ToolSession, createController: ComputerControllerFactory, createJudge: ComputerJudgeFactory) {
 		this.#session = session;
 		this.#createController = createController;
+		this.#createJudge = createJudge;
+		this.achieve = session.settings.get("computer.achieve") === true;
+		this.assets = computerAssets(this.achieve);
 		this.#unregisterOwner = registerComputerController(session.getEvalKernelOwnerId?.() ?? undefined, this);
+	}
+
+	judge(): Judge {
+		return this.#createJudge(this.#session);
 	}
 
 	isClosed(): boolean {
@@ -282,6 +334,13 @@ async function invokeComputer(
 		case "call":
 			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
 			return await runComputer(session, await lifetime.controller(), params, lifetime, context.signal);
+		case "achieve":
+			if (!lifetime.achieve)
+				throw new ToolError(
+					"win.achieve() is off: the experimental chooser sub-loop ships only with `computer.achieve: true`, read at session start.",
+				);
+			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
+			return await achieveComputer(session, await lifetime.controller(), params, lifetime, context.signal);
 		case "capabilities": {
 			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
 			const capabilities = await (await lifetime.controller()).capabilities();
@@ -293,7 +352,7 @@ async function invokeComputer(
 		}
 		// Documentation, not desktop state: no driver child, alive or closed.
 		case "help": {
-			const text = await enforceInlineByteCap(computerAssets().codeModeDeclarations, {
+			const text = await enforceInlineByteCap(lifetime.assets.codeModeDeclarations, {
 				saveArtifact: full => saveComputerOutputArtifact(session, full),
 			});
 			return { content: [{ type: "text", text }], details: { screenshots: [] } };
@@ -327,13 +386,13 @@ function resolveComputerRunCode(params: ComputerRunParams | ComputerCallParams):
 	throw new ToolError("Action 'run' requires exactly one of 'code' or 'fn'.");
 }
 
-async function runComputer(
+/** One run on the session's realm with the host's frozen capture settings: every call and every achieve step takes this path. */
+async function executeComputer(
 	session: ToolSession,
 	controller: ComputerController,
 	params: ComputerRunParams | ComputerCallParams,
-	lifetime: ComputerLifetime,
 	signal?: AbortSignal,
-): Promise<AgentToolResult<unknown>> {
+): Promise<{ code: string; snapshot: ComputerSessionSnapshot; run: ComputerRunOk }> {
 	const code = resolveComputerRunCode(params);
 	// Direct inspection calls run read-only so the desktop guard backs the read approval tier.
 	const readOnly = params.action === "call" ? isReadOnlyComputerCall(params.chain) : (params.read_only ?? false);
@@ -356,6 +415,60 @@ async function runComputer(
 	};
 	const run = await controller.run(code, timeoutSeconds * 1000, snapshot, signal);
 	throwIfAborted(signal);
+	return { code, snapshot, run };
+}
+
+/**
+ * The chooser sub-loop. Each observation and each pick is one `call` run on
+ * the same realm the prelude's own methods use, so refusals, typed replies
+ * and evidence are exactly what `win.observe()` and `win.ref(r).click()`
+ * would have returned; the loop itself lives in `./computer/achieve`.
+ */
+async function achieveComputer(
+	session: ToolSession,
+	controller: ComputerController,
+	params: ComputerAchieveParams,
+	lifetime: ComputerLifetime,
+	signal?: AbortSignal,
+): Promise<AgentToolResult<unknown>> {
+	if (params.goal.trim().length === 0) throw new ToolError("win.achieve() requires a non-empty goal.");
+	const call = async (chain: ComputerCallStep[]): Promise<unknown> =>
+		(await executeComputer(session, controller, { action: "call", chain, timeout: params.timeout }, signal)).run
+			.returnValue;
+	const judge = lifetime.judge();
+	const result = await achieve(
+		{
+			observe: async () =>
+				(await call([
+					{ method: "window", args: [params.window] },
+					{ method: "observe", args: [] },
+				])) as ComputerObservation,
+			act: async chain => (await call(chain)) as ComputerActionResult,
+		},
+		judge,
+		{
+			goal: params.goal,
+			maxSteps: Math.max(1, Math.floor(params.maxSteps ?? ACHIEVE_DEFAULTS.maxSteps)),
+			confidence: params.confidence ?? ACHIEVE_DEFAULTS.confidence,
+			signal,
+		},
+	);
+	const text = await enforceInlineByteCap(renderAchieve(params.goal, result, judge.label), {
+		saveArtifact: full => saveComputerOutputArtifact(session, full),
+	});
+	// The trace is this value's rendering; the prelude suppresses the cell's own echo of it.
+	const details: ComputerPreludeDetails = { screenshots: [], value: result, rendered: true };
+	return { content: [{ type: "text", text }], details };
+}
+
+async function runComputer(
+	session: ToolSession,
+	controller: ComputerController,
+	params: ComputerRunParams | ComputerCallParams,
+	lifetime: ComputerLifetime,
+	signal?: AbortSignal,
+): Promise<AgentToolResult<unknown>> {
+	const { code, snapshot, run } = await executeComputer(session, controller, params, signal);
 
 	const details: ComputerPreludeDetails = {
 		code,
@@ -403,7 +516,7 @@ async function runComputer(
 		details.rendered = true;
 	}
 	if (params.action === "call" && params.chain.some(step => step.method === "ref") && lifetime.teach("element"))
-		text = text ? `${text}\n${elementSignatures()}` : elementSignatures();
+		text = text ? `${text}\n${elementSignatures(lifetime)}` : elementSignatures(lifetime);
 	const cappedText = await enforceInlineByteCap(text, {
 		saveArtifact: full => saveComputerOutputArtifact(session, full),
 		elide: elideObservationTree,

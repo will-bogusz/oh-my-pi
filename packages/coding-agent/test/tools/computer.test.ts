@@ -20,8 +20,6 @@ import {
 	renderComputerCall,
 	WINDOW_METHODS,
 } from "@oh-my-pi/pi-coding-agent/tools/computer/call";
-// @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
-import computerDeclarations from "../../src/tools/computer/declarations.d.ts" with { type: "text" };
 import { ComputerSupervisor } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type {
@@ -378,7 +376,7 @@ function javascriptFixture(createBackend?: () => FakeBackend) {
 		},
 	});
 	runInContext(prelude.javascript, realm);
-	return { backend, realm, displays, presented };
+	return { backend, prelude, realm, displays, presented };
 }
 
 describe("computer preludes through the session", () => {
@@ -1212,21 +1210,23 @@ describe("computer preludes through the session", () => {
 	});
 
 	it("states both handle surfaces once a session and their verbs with every later handle", async () => {
-		const { realm, displays } = javascriptFixture();
-		const element = handleSignatures(computerDeclarations as string, "ComputerElement", "el handle:");
+		const { prelude, realm, displays } = javascriptFixture();
+		// The surface shown is this session's declarations: the file's `achieve`
+		// region ships only with `computer.achieve` on.
+		const declarations = prelude.codeModeDeclarations ?? "";
+		expect(declarations).not.toContain("achieve(");
+		const element = handleSignatures(declarations, "ComputerElement", "el handle:");
 		try {
 			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
 			// The first acquisition of the session teaches the API it hands over.
-			expect(displays.join("\n")).toContain(
-				handleSignatures(computerDeclarations as string, "ComputerWindow", "win handle:"),
-			);
+			expect(displays.join("\n")).toContain(handleSignatures(declarations, "ComputerWindow", "win handle:"));
 			// The element surface is the route several controls advertise in the
 			// tree beside it; a run that never writes `.ref(` still needs it.
 			expect(displays.join("\n")).toContain(element);
 			expect(displays.join("\n")).toContain("perform(action: string)");
 			// Every verb the boundary accepts is declared and shown with its types.
 			for (const verb of Object.keys(WINDOW_METHODS)) {
-				expect(computerDeclarations).toContain(`\n\t${verb}(`);
+				expect(declarations).toContain(`\n\t${verb}(`);
 				expect(displays.join("\n")).toContain(`\n  ${verb}(`);
 			}
 			for (const verb of Object.keys(ELEMENT_METHODS)) expect(element).toContain(`\n  ${verb}(`);
