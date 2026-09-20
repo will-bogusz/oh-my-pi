@@ -18,7 +18,7 @@ Evidence
 
 {{#if achieve}}
 Achieve (experimental)
-- `win.achieve(goal, { maxSteps = 8, confidence = 0.6 })` runs one bounded, verifiable sub-goal on a window you already hold — fill a field, pick a row, reach a pane — through a chooser: each step the host observes, builds a candidate table from the tree, a typed judge picks one row (or re-reads, or abstains), the pick runs exactly as `win.ref(r).<action>()` would, and a postcondition judgment over the fresh tree decides. Quote every value it should write (`"Ada"`); unquoted text is never typed. It returns `{ done, steps, reason, abstained }` with each step's driver reply verbatim; `reason` is `done`, `abstain`, `max_steps`, `interrupted` or `refused`, and anything but `done` hands the window back to you — read the trace, then act.
+- `win.achieve(goal, { maxSteps = 8, confidence = 0.6 })` runs one bounded, verifiable sub-goal on a window you already hold — fill a field, pick a row, reach a pane — through a chooser: each step the host observes, builds a candidate table from the tree, a typed judge picks one row (or re-reads, or abstains), the pick runs exactly as `win.ref(r).<action>()` would, and a postcondition judgment over the fresh tree decides. Quote every value it should write (`"Ada"`); unquoted text is never typed, and it never deletes, removes or discards anything — those are yours. It returns `{ done, steps, reason, abstained }` with each step's driver reply verbatim; `reason` is `done`, `abstain`, `max_steps`, `interrupted` or `refused`, and anything but `done` hands the window back to you — read the trace, then act.
 
 {{/if}}
 Boundaries

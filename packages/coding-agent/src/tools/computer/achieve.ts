@@ -129,8 +129,13 @@ const CLICK_ROLES: Record<string, true> = {
 const SECRET_ROLES: Record<string, true> = { "password text": true, AXSecureTextField: true };
 /** Actions a provider advertises that a click performs. */
 const PRESS_ACTIONS: Record<string, true> = { press: true, AXPress: true, click: true, activate: true };
-/** Advertised actions the goal must name before a row carrying one is offered. */
-const DESTRUCTIVE = /\b(delete|remove|discard|trash|quit)\b/gi;
+/**
+ * Rows the chooser never offers, whatever the goal says. Live, a chain whose
+ * first sub-goal was judged done on the wrong card went on to click "Remove
+ * Phone" six times on it; a deletion is the model's own call, on a card it
+ * has read.
+ */
+const DESTRUCTIVE = /\b(delete|remove|discard|trash|quit)\b/i;
 /** Values the goal supplies: straight, curly or backtick quoted spans. Anything unquoted is never written. */
 const QUOTED = /"([^"]+)"|“([^”]+)”|`([^`]+)`/g;
 const TOKEN = /[\p{L}\p{N}]{2,}/gu;
@@ -170,11 +175,8 @@ function tokens(text: string): Set<string> {
 	return found;
 }
 
-function destructiveWords(text: string): Set<string> {
-	const words = new Set<string>();
-	for (const match of text.matchAll(DESTRUCTIVE)) words.add(match[1]!.toLowerCase());
-	return words;
-}
+const isDestructive = (element: ComputerElementSnapshot): boolean =>
+	DESTRUCTIVE.test(`${element.label} ${element.description ?? ""}`);
 
 /** Each quoted occurrence in the goal is one write: a value quoted twice may land twice. */
 export function goalValues(goal: string): string[] {
@@ -266,7 +268,6 @@ export function buildCandidates(
 	memory = emptyMemory(),
 ): AchieveCandidate[] {
 	const goalTokens = tokens(goal);
-	const named = destructiveWords(goal);
 	// Live against Jev, the value a goal quoted once was written into the text
 	// view and then, still on offer, into the font-size box: a landed value is spent.
 	const values: string[] = [];
@@ -285,10 +286,7 @@ export function buildCandidates(
 		if (element.enabled === false) continue;
 		const visible = onScreen(element, observation);
 		if (visible === false) continue;
-		let destructive = false;
-		for (const word of destructiveWords(`${element.label} ${element.description ?? ""}`))
-			if (!named.has(word)) destructive = true;
-		if (destructive) continue;
+		if (isDestructive(element)) continue;
 		const control = controlKey(element, ordinal);
 		const line = elementLine(element);
 		const tier = element.enabled === true && visible === true ? 0 : 1;

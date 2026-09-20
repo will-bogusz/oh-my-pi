@@ -470,7 +470,7 @@ describe("win.achieve", () => {
 		expect(judge.picks).toHaveLength(2);
 	});
 
-	it("offers a destructive row only when the goal names it", async () => {
+	it("never offers a destructive row, even when the goal names it", async () => {
 		const { backend, judge, realm } = fixture();
 		backend.rows = structuredClone(contactForm);
 		judge.picks = [{ line: "abstain", probability: 1 }];
@@ -483,11 +483,12 @@ describe("win.achieve", () => {
 		expect(offered.some(line => line.includes("Details"))).toBe(false);
 		expect(offered.some(line => line.startsWith("AXTextField"))).toBe(false);
 
-		judge.picks = [{ line: 'AXButton "Delete Contact" -> click', probability: 0.95 }];
-		judge.verdicts = [0.9];
+		// Live, a chain judged done on the wrong card clicked "Remove Phone" six times: deletions are the model's own call.
+		judge.picks = [{ line: "abstain", probability: 1 }];
 		const result = await achieveInRealm(realm, "Delete this contact");
-		expect(result.reason).toBe("done");
-		expect(backend.dispatched).toEqual(["click Delete Contact"]);
+		expect(judge.offered()).not.toContain('AXButton "Delete Contact" -> click');
+		expect(result.reason).toBe("abstain");
+		expect(backend.dispatched).toEqual([]);
 	});
 
 	it("keeps the method off the prelude and refuses the host action while the setting is off", async () => {
