@@ -645,6 +645,31 @@ it("acquires the front document window and names the windows it passed over", as
 	}
 });
 
+it("names the desktop surface by kind and never picks it as an app's front window", async () => {
+	const f = await fixture();
+	try {
+		// Finder: one document window and the display's desktop icon window,
+		// which the driver files as kind "desktop" - untitled, behind everything,
+		// stacked above the document in z_index because WindowServer orders it so.
+		const desktop = { ...f.row, window_id: 9814, title: "", z_index: 114, kind: "desktop" };
+		const document = { ...f.row, window_id: 2, title: "Documents", z_index: 3 };
+		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [desktop, document] }) : undefined);
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "2", title: "Documents" });
+		expect(f.texts.join("\n")).toContain('also open: [9814] "" kind=desktop');
+		f.texts.length = 0;
+		expect(await f.session.window(f.context, { app: "Fixture", kind: "desktop" })).toMatchObject({
+			id: "9814",
+			kind: "desktop",
+		});
+		expect(f.texts).toEqual([]);
+		// Alone, the desktop is what the app has.
+		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [desktop] }) : undefined);
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "9814" });
+	} finally {
+		await f.close();
+	}
+});
+
 it("passes over an app's panels, off-screen windows and attached sheets to reach its document", async () => {
 	const f = await fixture();
 	// Automator's own doing: the document the user is working in, a second

@@ -30,6 +30,8 @@ interface RosterRow {
 	id: string;
 	app: string;
 	title: string;
+	/** The desktop surface: untitled by nature, so its kind is its name. */
+	desktop: boolean;
 	count: number;
 }
 
@@ -49,11 +51,16 @@ function rankedRows(windows: readonly ComputerWindowIdentity[]): RosterRow[] {
 	const titled = new Map<string, RosterRow>();
 	const untitled = new Map<string, RosterRow>();
 	for (const window of ranked) {
+		const desktop = window.kind === "desktop";
 		const rows = window.title ? titled : untitled;
-		const key = window.title ? `${window.app}\u0000${window.title}` : window.app;
+		const key = window.title
+			? `${window.app}\u0000${window.title}`
+			: desktop
+				? `${window.app}\u0000<desktop>`
+				: window.app;
 		const row = rows.get(key);
 		if (row) row.count += 1;
-		else rows.set(key, { id: window.id, app: window.app, title: window.title, count: 1 });
+		else rows.set(key, { id: window.id, app: window.app, title: window.title, desktop, count: 1 });
 	}
 	return [...titled.values(), ...untitled.values()];
 }
@@ -91,5 +98,6 @@ export function openWindows(windows: readonly ComputerWindowIdentity[]): string 
  * including the off-screen and untitled ones acquisition did not choose.
  */
 export function appWindows(windows: readonly ComputerWindowIdentity[]): string {
-	return listed(rankedRows(windows), row => JSON.stringify(row.title));
+	// An untitled row is unrecognisable; the desktop surface is one such row and its kind is its name.
+	return listed(rankedRows(windows), row => `${JSON.stringify(row.title)}${row.desktop ? " kind=desktop" : ""}`);
 }

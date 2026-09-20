@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Computer: `computer.window({ kind: "desktop" })` acquires a display's desktop surface (the driver's `kind: "desktop"` row); it is named in passed-over lists and never chosen as an app's front window.
 - Computer: `type(text, { caret })` places the caret by content (`"start"`, `"end"`, `{ after }`, `{ before }`) before typing, the route for appending to a text area (needs a driver that honours `caret`).
 - Computer: `observe({ query })` is projected by the session — case-insensitive substring, `|` between alternatives, ancestors kept, hidden rows counted; a `not_committed` write verdict now asks for a read-back instead of a rewrite, and the next observation that shows the value answers the doubt; the prompts ask for batched actions per observation.
 

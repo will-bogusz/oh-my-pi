@@ -60,7 +60,7 @@ export interface ComputerLaunchOptions {
  * `lock` the login window or screen saver, `app-modal` a panel one process
  * hosts for another (open/save/share). Everything else is `other`.
  */
-export type ComputerWindowKind = "auth" | "permission" | "lock" | "app-modal" | "other";
+export type ComputerWindowKind = "auth" | "permission" | "lock" | "app-modal" | "desktop" | "other";
 /** System UI that took the screen; carried by refusals, actions and observations. */
 export interface ComputerInterruption {
 	app: string;
@@ -260,6 +260,8 @@ export interface WindowSelector {
 	pid?: number;
 	app?: string;
 	title?: string;
+	/** `desktop` names a display's desktop surface (the icons on the Desktop), which no title can. */
+	kind?: "desktop";
 }
 export interface ActionOptions {
 	delivery?: "background" | "foreground";

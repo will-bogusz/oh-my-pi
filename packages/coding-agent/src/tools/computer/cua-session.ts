@@ -776,10 +776,16 @@ export class CuaComputerSession implements ComputerBackend {
 				...(typeof row.ax_backed === "boolean" ? { axBacked: row.ax_backed } : {}),
 				...(typeof row.main === "boolean" ? { main: row.main } : {}),
 				...(typeof row.minimized === "boolean" ? { minimized: row.minimized } : {}),
-				// An owner's off-screen placeholder window is not the panel itself.
-				kind: onScreen.has(String(row.window_id))
-					? classifyWindow({ app: string(row.app_name, "app_name") })
-					: ("other" as const),
+				// The driver names a display's desktop surface (Finder's icons,
+				// filed at the desktop icon level, no AXWindow of its own); every
+				// other kind is classified here from the owner. An owner's
+				// off-screen placeholder window is not the panel itself.
+				kind:
+					row.kind === "desktop"
+						? ("desktop" as const)
+						: onScreen.has(String(row.window_id))
+							? classifyWindow({ app: string(row.app_name, "app_name") })
+							: ("other" as const),
 			};
 			if (isCaptureLeaseArtifact(window)) {
 				artifacts.add(window.id);
@@ -816,7 +822,8 @@ export class CuaComputerSession implements ComputerBackend {
 				(selector.id === undefined || window.id === selector.id) &&
 				(selector.pid === undefined || window.pid === selector.pid) &&
 				(selector.app === undefined || window.app.toLowerCase().includes(selector.app.toLowerCase())) &&
-				(selector.title === undefined || window.title.toLowerCase().includes(selector.title.toLowerCase())),
+				(selector.title === undefined || window.title.toLowerCase().includes(selector.title.toLowerCase())) &&
+				(selector.kind === undefined || window.kind === selector.kind),
 		);
 	}
 	async #windows(selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
@@ -928,7 +935,9 @@ export class CuaComputerSession implements ComputerBackend {
 	 */
 	#frontmost(matches: readonly ComputerWindowIdentity[]): ComputerWindowIdentity | undefined {
 		if (matches.length === 1) return matches[0];
-		const shown = matches.filter(window => window.minimized !== true);
+		// The desktop is behind every window by construction and is acquired
+		// by name (`{ kind: "desktop" }`), never as an app's front window.
+		const shown = matches.filter(window => window.minimized !== true && window.kind !== "desktop");
 		const live = shown.length ? shown : matches;
 		const main = live.filter(window => window.main === true);
 		const ranked = main.length ? main : live;

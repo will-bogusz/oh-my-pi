@@ -84,6 +84,13 @@ interface ComputerWindowFilter {
 	pid?: number;
 	app?: string;
 	title?: string;
+	/**
+	 * `"desktop"` acquires a display's desktop surface — the icons on the
+	 * Desktop, as Finder exposes them — which has no title and is never an
+	 * app's front window. `computer.window({ kind: "desktop" })` then
+	 * `observe()` lists what is on the Desktop; icons are read-only there.
+	 */
+	kind?: "desktop";
 }
 /** Points, in display coordinates: window frames and element boxes alike. */
 interface ComputerBounds {

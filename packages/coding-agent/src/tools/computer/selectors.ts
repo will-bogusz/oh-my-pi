@@ -35,10 +35,11 @@ export function normalizeLaunchOptions(value: unknown): ComputerLaunchOptions {
 export function normalizeWindowSelector(value: unknown, allowId = false): WindowSelector {
 	if (allowId && (typeof value === "string" || typeof value === "number")) value = { id: value };
 	if (!value || typeof value !== "object" || Array.isArray(value))
-		throw new ToolError("Invalid window selector: use a window ID or an { id, pid, app, title } filter");
+		throw new ToolError("Invalid window selector: use a window ID or an { id, pid, app, title, kind } filter");
 	const fields = value as Record<string, unknown>;
 	for (const key of Object.keys(fields))
-		if (!["id", "pid", "app", "title"].includes(key)) throw new ToolError(`Invalid window selector field: ${key}`);
+		if (!["id", "pid", "app", "title", "kind"].includes(key))
+			throw new ToolError(`Invalid window selector field: ${key}`);
 	const selector: WindowSelector = {};
 	if (fields.id !== undefined) {
 		if (typeof fields.id === "number") {
@@ -58,6 +59,10 @@ export function normalizeWindowSelector(value: unknown, allowId = false): Window
 			if (typeof fields[key] !== "string") throw new ToolError(`Invalid window ${key}: use a string`);
 			selector[key] = fields[key];
 		}
+	}
+	if (fields.kind !== undefined) {
+		if (fields.kind !== "desktop") throw new ToolError('Invalid window kind: the only selectable kind is "desktop"');
+		selector.kind = "desktop";
 	}
 	return selector;
 }

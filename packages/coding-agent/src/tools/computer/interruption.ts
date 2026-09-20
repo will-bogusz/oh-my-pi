@@ -63,6 +63,7 @@ const BLOCKING: Record<ComputerWindowKind, boolean> = {
 	permission: true,
 	lock: true,
 	"app-modal": false,
+	desktop: false,
 	other: false,
 };
 
@@ -107,6 +108,7 @@ export function describeInterruption(interruption: ComputerInterruption): string
 		permission: "a system permission dialog",
 		lock: "the lock screen",
 		"app-modal": "an app-modal panel",
+		desktop: "the desktop",
 		other: "a system window",
 	};
 	const title = interruption.title ? ` "${interruption.title}"` : "";
