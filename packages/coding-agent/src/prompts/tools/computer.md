@@ -15,6 +15,7 @@ Evidence
 - The reply already carries its verdict and evidence: act on them. A read-back you still need goes in the same cell as the action — chain the verifying `observe()`/`find()` after it; a separate verification cell is a wasted step.
 - Unverified is not failed. Re-observe freely — a read changes nothing on the screen — but never re-fire a mutation that reported delivery: the second one lands too. A refusal that names a route is the opposite case — take that route, composed from the state the reply carries, not a blind retry of the rung that refused.
 - `setValue` changes the accessibility value, never disk. Save through the app, then confirm.
+- To add to text a control already holds, place the caret by content and type: `el.type("\nFollow-up: done", { caret: { after: "Agenda: pallet audit" } })` or `{ caret: "end" }`. A key chord such as cmd+End is not delivered to a window that is not key, and rewriting the whole value with `setValue` is the slow shape.
 - Results carry their own next step — a partial tree, passed-over windows, a window an action opened, a nested sheet, a hidden menu bar, a refusal's route. Read them before choosing what to do.
 
 Boundaries

@@ -550,6 +550,24 @@ it("announces what a pid opened on the observe path and nests a sheet under its 
 	}
 });
 
+it("forwards a caret to the driver as given, and nothing when none is asked", async () => {
+	const f = await fixture();
+	try {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		await f.session.type(f.context, f.window, "\nFollow-up: done", ref, { caret: { after: "Agenda" } });
+		expect(f.lastDispatch()).toMatchObject({
+			name: "type_text",
+			args: { text: "\nFollow-up: done", caret: { after: "Agenda" }, delivery_mode: "background" },
+		});
+		await f.session.type(f.context, f.window, "x", ref, { caret: "end" });
+		expect(f.lastDispatch()!.args.caret).toBe("end");
+		await f.session.type(f.context, f.window, "x", ref);
+		expect("caret" in f.lastDispatch()!.args).toBe(false);
+	} finally {
+		await f.close();
+	}
+});
+
 it("declines the driver's post-action window poll on the actions that offer one", async () => {
 	const f = await fixture();
 	try {

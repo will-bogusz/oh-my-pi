@@ -17,6 +17,7 @@ import { openWindows } from "./roster";
 import { normalizeLaunchOptions, normalizeWindowSelector } from "./selectors";
 import type {
 	ActionOptions,
+	TypeOptions,
 	ComputerActionResult,
 	ComputerBounds,
 	ComputerElementSnapshot,
@@ -36,6 +37,7 @@ import type {
 
 type GestureOptions = ActionOptions & { durationMs?: number; steps?: number };
 type TextOptions = ActionOptions & { target?: ComputerTarget };
+type TypeTextOptions = TypeOptions & { target?: ComputerTarget };
 type ScrollOptions = TextOptions & { amount?: number; by?: "line" | "page" };
 type Direction = "up" | "down" | "left" | "right";
 type ElementQuery = {
@@ -213,7 +215,7 @@ class El {
 		const context = mutationContext(this.#getContext);
 		return reported(context, this.#session.setValue(context, this.#window, this.ref, value));
 	}
-	type(text: string, options?: ActionOptions) {
+	type(text: string, options?: TypeOptions) {
 		const context = mutationContext(this.#getContext);
 		return reported(context, this.#session.type(context, this.#window, text, this.ref, options));
 	}
@@ -307,7 +309,7 @@ class Win {
 		const context = mutationContext(this.#getContext);
 		return reported(context, this.#session.scroll(context, this.#window, direction, options?.target, options));
 	}
-	type(text: string, options?: TextOptions) {
+	type(text: string, options?: TypeTextOptions) {
 		const context = mutationContext(this.#getContext);
 		return reported(context, this.#session.type(context, this.#window, text, options?.target, options));
 	}

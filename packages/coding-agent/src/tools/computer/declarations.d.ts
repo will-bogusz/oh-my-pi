@@ -39,6 +39,21 @@ interface ComputerScrollOptions extends ComputerDeliveryOptions {
 interface ComputerTargetOptions extends ComputerDeliveryOptions {
 	target?: ComputerTarget;
 }
+/**
+ * Where typed text goes in a text control that already holds a value:
+ * `"start"`, `"end"`, or just after/before the first occurrence of a
+ * substring of the current value. The driver places the caret through
+ * accessibility and reads it back before it types; an absent anchor is a
+ * typed refusal and nothing is typed. The route for an append — a key chord
+ * such as cmd+End is not delivered to a window that is not key.
+ */
+type ComputerCaret = "start" | "end" | { after: string } | { before: string };
+interface ComputerTypeOptions extends ComputerDeliveryOptions {
+	caret?: ComputerCaret;
+}
+interface ComputerTypeTargetOptions extends ComputerTypeOptions {
+	target?: ComputerTarget;
+}
 interface ComputerObserveOptions {
 	/**
 	 * Capture the window's pixels alongside the tree, at the window's own
@@ -161,7 +176,7 @@ interface ComputerElement {
 	click(options?: ComputerClickOptions): Promise<ComputerAction>;
 	doubleClick(options?: Omit<ComputerClickOptions, "count">): Promise<ComputerAction>;
 	setValue(value: string): Promise<ComputerAction>;
-	type(text: string, options?: ComputerDeliveryOptions): Promise<ComputerAction>;
+	type(text: string, options?: ComputerTypeOptions): Promise<ComputerAction>;
 	press(chord: ComputerChord, options?: ComputerDeliveryOptions): Promise<ComputerAction>;
 	scroll(direction: ComputerDirection, options?: Omit<ComputerScrollOptions, "target">): Promise<ComputerAction>;
 	perform(action: string): Promise<ComputerAction>;
@@ -213,7 +228,7 @@ interface ComputerWindow extends ComputerWindowInfo {
 	hover(x: number, y: number, options?: ComputerDeliveryOptions): Promise<ComputerAction>;
 	drag(from: ComputerTarget, to: ComputerTarget, options?: ComputerDragOptions): Promise<ComputerAction>;
 	scroll(direction: ComputerDirection, options?: ComputerScrollOptions): Promise<ComputerAction>;
-	type(text: string, options?: ComputerTargetOptions): Promise<ComputerAction>;
+	type(text: string, options?: ComputerTypeTargetOptions): Promise<ComputerAction>;
 	press(chord: ComputerChord, options?: ComputerTargetOptions): Promise<ComputerAction>;
 	setValue(ref: string, value: string): Promise<ComputerAction>;
 	setFrame(bounds: ComputerBounds): Promise<ComputerAction>;

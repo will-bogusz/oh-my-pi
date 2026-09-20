@@ -117,7 +117,7 @@ display(await win.observe(screenshot=False))
 | `doubleClick(target, options?)` | `button`, `modifiers`, `delivery`; an element double-click is two left clicks at its live bounding-box centre |
 | `drag(from, to, options?)` | Two points; `button`, `modifiers`, `durationMs`, `steps`, `delivery` — foreground only on the current driver |
 | `scroll(direction, options?)` | `target`, `amount`, `by: "line" \| "page"`, `delivery` |
-| `type(text, options?)` | Optional `target`, `delivery` |
+| `type(text, options?)` | Optional `target`, `delivery`, `caret` (`"start"`, `"end"`, `{ after: "<substring>" }`, `{ before: "<substring>" }` — the driver places the caret in the control's current value through accessibility and reads it back before typing; an absent anchor is a typed refusal) |
 | `press(chordOrChords, options?)` | Optional `target`, `delivery` |
 | `setValue(token, text)` | Replace the accessible value (non-durable; see above) |
 | `setFrame({ x, y, width, height })` | Change window geometry |

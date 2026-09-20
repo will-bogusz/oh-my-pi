@@ -267,5 +267,10 @@ export interface ActionOptions {
 	count?: number;
 	modifiers?: string[];
 }
+/** Where `type` puts the caret in a control's current value before it types. */
+export type ComputerCaret = "start" | "end" | { after: string } | { before: string };
+export interface TypeOptions extends ActionOptions {
+	caret?: ComputerCaret;
+}
 export type ComputerPoint = [number, number] | { x: number; y: number };
 export type ComputerTarget = string | ComputerPoint;

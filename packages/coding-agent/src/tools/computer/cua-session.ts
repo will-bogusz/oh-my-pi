@@ -46,6 +46,7 @@ import { appWindows, isCaptureLeaseArtifact } from "./roster";
 import { PERFORMABLE_ACTIONS, observedActions, semanticAction } from "./semantic-actions";
 import type {
 	ActionOptions,
+	TypeOptions,
 	ComputerActionResult,
 	ComputerBounds,
 	ComputerElementSnapshot,
@@ -2152,15 +2153,22 @@ export class CuaComputerSession implements ComputerBackend {
 		window: ComputerWindowIdentity,
 		text: string,
 		target?: ComputerTarget,
-		options: ActionOptions = {},
+		options: TypeOptions = {},
 	): Promise<ComputerActionResult> {
 		const route = this.#keyboardRoute(window, options);
+		// The caret goes to the driver as given: it places it through AX, reads
+		// it back and refuses with a typed code when it cannot, so the session
+		// has nothing to add.
+		const caret = options.caret === undefined ? {} : { caret: options.caret };
 		return this.#write(
 			window,
 			"type",
 			target,
 			text,
-			this.#routed(this.#targetAction(context, "type_text", window, target, { text, ...route.wire }), route.note),
+			this.#routed(
+				this.#targetAction(context, "type_text", window, target, { text, ...caret, ...route.wire }),
+				route.note,
+			),
 		);
 	}
 	setValue(

@@ -1,6 +1,7 @@
 import type { DesktopCapabilities, DesktopDisplay } from "@oh-my-pi/pi-natives";
 import type {
 	ActionOptions,
+	TypeOptions,
 	ComputerActionResult,
 	ComputerBounds,
 	ComputerElementSnapshot,
@@ -82,7 +83,7 @@ export interface ComputerBackend {
 		window: ComputerWindowIdentity,
 		text: string,
 		target?: ComputerTarget,
-		options?: ActionOptions,
+		options?: TypeOptions,
 	): Promise<ComputerActionResult>;
 	press(
 		context: ComputerOperationContext,
