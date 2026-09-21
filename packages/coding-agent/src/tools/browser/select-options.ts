@@ -56,6 +56,13 @@ export function normalizeSelectOptions(values: readonly BrowserSelectOption[]): 
  * read back: on a single `<select>`, un-selecting the current option mid-loop
  * leaves the browser reporting it selected until another option takes over,
  * which double-counted the old value.
+ *
+ * A bare string is matched against three properties of every option — its
+ * value, its label and its trimmed text — and a page is free to give one
+ * option the label another option carries as its value. Every match used to
+ * be assigned, and a single `<select>` keeps the last, so a caller naming the
+ * label they read off the page silently submitted a different option. Naming
+ * two options with different values is now refused instead.
  */
 export const SELECT_OPTIONS_SOURCE = `function (select, specs) {
 	if (select.tagName !== "SELECT") throw new Error("select() requires a <select> element");
@@ -69,15 +76,33 @@ export const SELECT_OPTIONS_SOURCE = `function (select, specs) {
 		if (spec.label !== undefined && option.label !== spec.label && text !== spec.label) return false;
 		return true;
 	};
-	const missing = specs.filter(spec => !options.some(option => matches(option, spec)));
-	if (missing.length) {
-		const shown = options.slice(0, 30).map(option =>
+	const offered = () =>
+		options.slice(0, 30).map(option =>
 			option.label === option.value
 				? JSON.stringify(option.value)
-				: JSON.stringify(option.label) + "=" + JSON.stringify(option.value));
+				: JSON.stringify(option.label) + "=" + JSON.stringify(option.value)).join(", ") +
+		(options.length > 30 ? ", …" : "");
+	const missing = specs.filter(spec => !options.some(option => matches(option, spec)));
+	if (missing.length) {
 		throw new Error(
 			"select() matched no option for " + missing.map(spec => JSON.stringify(spec.given)).join(", ") +
-			"; this <select> offers " + (shown.join(", ") + (options.length > 30 ? ", …" : "")));
+			"; this <select> offers " + offered());
+	}
+	// Before anything is assigned, so a refused select() leaves the page as
+	// it found it. Two options that submit the same value are still
+	// accepted: which of them is selected is unobservable.
+	for (const spec of specs) {
+		if (spec.any === undefined) continue;
+		const named = options.filter(option => matches(option, spec));
+		if (new Set(named.map(option => option.value)).size < 2) continue;
+		const where = named.map(option => option.value === spec.any
+			? "the value of <option>" + (option.textContent || "").trim() + "</option>"
+			: "the label of <option value=" + JSON.stringify(option.value) + ">");
+		throw new Error(
+			"select() cannot tell which option " + JSON.stringify(spec.any) + " names: it is " +
+			where.slice(0, -1).join(", ") + " and " + where[where.length - 1] +
+			". Name the one you mean with { label: " + JSON.stringify(spec.any) + " } or { value: " +
+			JSON.stringify(spec.any) + " }; this <select> offers " + offered() + ".");
 	}
 	for (const option of options) option.selected = specs.some(spec => matches(option, spec));
 	const selected = [];

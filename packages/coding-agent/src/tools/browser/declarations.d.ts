@@ -110,7 +110,7 @@ interface BrowserDownloads {
 		totalBytes?: number;
 	}[];
 }
-/** an option's text or value as a string, or Playwright's object form */
+/** an option's text or value as a string, which must name exactly one option, or Playwright's object form */
 type BrowserSelectOption = string | { label?: string; value?: string };
 interface BrowserTabHelpers {
 	title(): Promise<string>;
