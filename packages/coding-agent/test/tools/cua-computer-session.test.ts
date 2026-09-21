@@ -2137,6 +2137,48 @@ it("answers a write's read-back with what the control holds, never with a verdic
 	}
 });
 
+it("re-samples a window once when its header and its own tree disagree after a mutation", async () => {
+	const f = await fixture();
+	// The roster names the window the app is becoming and the AX tree still
+	// carries the one it was: the read was chained onto a write the app is
+	// still applying. The bench spent its next cell on exactly this re-read.
+	f.state.role = "AXWindow";
+	f.state.label = "Bench - 80 notes";
+	const walks = (): number => f.calls.filter(call => call.name === "get_window_state").length;
+	try {
+		// Nothing this session did touched the window, so the two titles are
+		// the app's business and not a transition to wait out.
+		const first = await f.session.observe(f.context, f.window);
+		expect(walks()).toBe(1);
+		expect(first.tree).toContain('AXWindow "Bench - 80 notes"');
+		let walked = 0;
+		f.state.hook = async name => {
+			if (name === "get_window_state") f.state.label = ++walked >= 2 ? "Editor" : "Bench - 80 notes";
+			return undefined;
+		};
+		await f.session.click(f.context, f.window, first.elements[0]!.ref);
+		f.calls.length = 0;
+		const settled = await f.session.observe(f.context, f.window);
+		expect(walks()).toBe(2);
+		expect(settled.tree).toContain('AXWindow "Editor"');
+		// Spent by that read: the next one walks once whatever the titles say.
+		f.state.hook = undefined;
+		f.state.label = "Bench - 80 notes";
+		f.calls.length = 0;
+		await f.session.observe(f.context, f.window);
+		expect(walks()).toBe(1);
+		// One retry, not a poll: a window whose two titles simply differ costs
+		// one extra walk and then renders what it has.
+		const stale = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		await f.session.click(f.context, f.window, stale);
+		f.calls.length = 0;
+		expect((await f.session.observe(f.context, f.window)).tree).toContain('AXWindow "Bench - 80 notes"');
+		expect(walks()).toBe(2);
+	} finally {
+		await f.close();
+	}
+});
+
 it("says a write was not dispatched at a control that is gone, instead of asking for a read-back", async () => {
 	const f = await fixture();
 	const dead = {

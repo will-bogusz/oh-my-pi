@@ -199,6 +199,34 @@ function projectRows(rows: readonly TreeRow[], query: string): { rows: TreeRow[]
 	});
 	return { rows: rows.filter((_, index) => kept.has(index)), matched };
 }
+/** The role a provider gives a window's own root row, in both vocabularies. */
+const WINDOW_ROW_ROLES: Record<string, true> = { AXWindow: true, frame: true, window: true };
+/**
+ * Whether one reply's two titles for the same window disagree: the roster's,
+ * which the reply's header prints, and the one the window's own tree row
+ * carries. A settled window publishes the same string twice — the roster
+ * reads the window server's name for it and the walk reads the app's — so a
+ * pair that disagrees is a window caught mid-transition, with a header
+ * describing the state the tree has not reached yet (the bench read `Notes:
+ * Search` over a tree titled `Bench – 80 notes`, the pre-search list, and
+ * spent a cell on the re-observe that returned the found row).
+ *
+ * One title containing the other is agreement, not disagreement: an app that
+ * suffixes its document name or drops an em-dash section between the two
+ * surfaces is not mid-anything, and re-sampling it every time would tax
+ * every chained read of that window.
+ */
+function titlesDisagree(title: string, rows: readonly TreeRow[]): boolean {
+	const row = rows.find(entry => WINDOW_ROW_ROLES[entry.element.role] === true)?.element.label;
+	if (row === undefined) return false;
+	const header = title.trim().toLowerCase();
+	const tree = row.trim().toLowerCase();
+	if (!header || !tree) return false;
+	return !header.includes(tree) && !tree.includes(header);
+}
+/** A window caught mid-transition is re-sampled once: the settle, and the whole budget for it. */
+const RESAMPLE_SETTLE_MS = 250;
+const RESAMPLE_BUDGET_MS = 1000;
 function treeRows(rows: readonly TreeRow[], indent: number): string {
 	return rows
 		.flatMap(({ depth, element, notes }) => [
@@ -642,6 +670,14 @@ export class CuaComputerSession implements ComputerBackend {
 	 * written role turns the doubt into a read-back.
 	 */
 	readonly #writes = new Map<string, Map<string, WriteDoubt>>();
+	/**
+	 * Windows one of this session's dispatches has changed since their last
+	 * read. A tree walked while the app is still applying that change is a
+	 * window mid-transition, which is worth one re-sample; a window nothing
+	 * touched is not, however its two titles read. Set by the dispatch, spent
+	 * by the next read of that window.
+	 */
+	readonly #mutated = new Set<string>();
 	/**
 	 * Windows whose keyboard delivery the driver escalated to foreground. The
 	 * escalation is a fact about the window — a surface whose background route
@@ -1365,13 +1401,29 @@ export class CuaComputerSession implements ComputerBackend {
 		options: ObserveOptions = {},
 	): Promise<ComputerObservation> {
 		return this.#schedule(context, "observe", false, async () => {
-			const { reply, current } = await this.#state(context, window, {
+			const read = {
 				include_accessibility_tree: true,
 				include_screenshot: options.screenshot === true,
 				max_depth: options.maxDepth,
 				max_elements: options.maxElements,
-			});
-			const walked = this.#walk(current, reply, options);
+			};
+			// A read chained onto a mutation can reach the app mid-transition,
+			// and the reply says so itself: the header's title and the tree's
+			// own window row disagree. One re-sample returns the settled tree in
+			// the same cell, which is what the model spent its next cell on.
+			const settling = this.#mutated.delete(window.id);
+			const started = Date.now();
+			let { reply, current } = await this.#state(context, window, read);
+			let walked = this.#walk(current, reply, options);
+			if (settling && titlesDisagree(current.title, walked.rows)) {
+				const settle = Math.min(RESAMPLE_SETTLE_MS, RESAMPLE_BUDGET_MS - (Date.now() - started));
+				if (settle > 0) {
+					await Bun.sleep(settle);
+					throwIfAborted(context.signal);
+					({ reply, current } = await this.#state(context, window, read));
+					walked = this.#walk(current, reply, options);
+				}
+			}
 			const { menuBarRows, snapshotId } = walked;
 			const projected = options.query === undefined ? undefined : projectRows(walked.rows, options.query);
 			const rows = projected?.rows ?? walked.rows;
@@ -2135,6 +2187,14 @@ export class CuaComputerSession implements ComputerBackend {
 		const reacted = refuted
 			? "⚠️ The driver watched this window and saw no change, but the same action put a window on screen — that is the change its probe missed; read the window named below instead of re-running the action."
 			: undefined;
+		// A window one of this session's dispatches changed is re-read once if
+		// the next walk catches it mid-transition.
+		if (
+			DETECT_WINDOW_CHANGE_TOOLS[name] === true &&
+			typeof args.window_id === "number" &&
+			reply.effect !== "not_dispatched"
+		)
+			this.#mutated.add(String(args.window_id));
 		// Keystrokes the driver turned into the app's own menu command lead
 		// with that fact: the driver's sentence starts with the chord.
 		const menuCommand = KEYBOARD_TOOLS[name] === true ? menuCommandLine(reply, reported) : undefined;
