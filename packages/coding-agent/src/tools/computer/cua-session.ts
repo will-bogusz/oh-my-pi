@@ -130,11 +130,18 @@ interface SheetCensus {
 /** An unproven write and the observation that would prove it. */
 interface WriteDoubt {
 	readonly sentence: string;
+	/**
+	 * The control the write was addressed to, as the walk that minted its
+	 * ref described it, and the text it was given. The doubt is about that
+	 * one control, so the read that answers it has to find that one control
+	 * — its window is the sheet's when the write went into a sheet, and its
+	 * identity is what survives the ref the walk then retired.
+	 */
 	readonly readBack?: {
 		readonly field: string;
-		readonly role: string;
-		readonly operation: "setValue" | "type";
 		readonly value: string;
+		readonly window: ComputerWindowIdentity;
+		readonly identity: ElementIdentity;
 	};
 }
 /**
@@ -1633,10 +1640,7 @@ export class CuaComputerSession implements ComputerBackend {
 				observation.tree += `\n⚠️ Interrupted: ${describeInterruption(observation.interruptedBy)}. Actions on any window are refused until it is answered; tell the user what is asking.`;
 			// The write that decided what this tree means may have been dispatched
 			// by a cell that displayed only this read.
-			const doubted = this.#doubtedWrites(
-				current.id,
-				observation.elements.map(element => ({ depth: 0, element })),
-			);
+			const doubted = this.#doubtedWrites(current.id);
 			if (doubted.length) observation.tree = `${doubted.join("\n")}\n${observation.tree}`;
 			this.#observedRoster.set(
 				current.pid,
@@ -2037,8 +2041,10 @@ export class CuaComputerSession implements ComputerBackend {
 				include_screenshot: true,
 			});
 			// An image carries no text of its own, so an unproven write goes in
-			// front of the pixels it is true of.
-			for (const doubt of this.#doubtedWrites(current.id, [])) context.emitText(doubt);
+			// front of the pixels it is true of. It is carried, never answered:
+			// a capture reads no tree, so the bindings this session is holding
+			// are the ones the write was dispatched against.
+			for (const doubt of this.#drainDoubts(current.id)) context.emitText(doubt.sentence);
 			return this.#windowImage(context, current, reply, options.silent === true);
 		});
 	}
@@ -2587,8 +2593,11 @@ export class CuaComputerSession implements ComputerBackend {
 		dispatched: Promise<ComputerActionResult>,
 	): Promise<ComputerActionResult> {
 		// The field is named as the observation printed it before the dispatch,
-		// which may re-mint this window's refs on the way.
-		const element = typeof target === "string" ? this.#bound(target)?.element : undefined;
+		// which may re-mint this window's refs on the way. The binding is kept
+		// whole: the ref will be retired by then, and its identity is how the
+		// next read finds the control again.
+		const control = typeof target === "string" ? this.#bound(target) : undefined;
+		const element = control?.element;
 		const facts = (text: string, escalated: boolean): WriteFacts => ({
 			...this.#facts(
 				operation === "type" ? "type_text" : "set_value",
@@ -2619,7 +2628,9 @@ export class CuaComputerSession implements ComputerBackend {
 			this.#doubt(
 				window.id,
 				note,
-				answerable && element !== undefined ? { field, role: element.role, operation, value } : undefined,
+				answerable && control !== undefined
+					? { field, value, window: control.window, identity: control.identity }
+					: undefined,
 			);
 			return { ...result, text: result.text ? `${result.text}\n${note}` : note };
 		} catch (error) {
@@ -2636,37 +2647,80 @@ export class CuaComputerSession implements ComputerBackend {
 		else this.#writes.set(windowId, new Map([[sentence, { sentence, readBack }]]));
 	}
 	/**
-	 * The doubts this observation answers or carries. A control of the written
-	 * role that now shows the value is the read-back the doubt asked for, and
-	 * it is reported as exactly that and nothing more: a control holding the
-	 * text proves the control holds the text, never that the app acted on it.
-	 * The sentence this replaces ("the write stands; build on it, do not
-	 * rewrite it") was printed over a search field whose list the app had not
-	 * filtered, and bought four cells of probes that avoided rewriting the
-	 * one thing that was wrong. Every control gets the same sentence, because
-	 * the distinction is not a property of the role: a filter field, a
-	 * spreadsheet cell and a rename box all echo what was written into them.
-	 *
-	 * Shown is trimmed containment, so a value the app padded or wrapped
-	 * still counts as the one written; a value the app rewrote does not, and
-	 * its doubt stands, which is what the driver's own verdict says of it.
+	 * Every doubt held against this window, and the ledger cleared. A doubt
+	 * is spent by the first read that could have answered it, whether or not
+	 * it did: the next read is about a tree the caller has already acted on.
 	 */
-	#doubtedWrites(windowId: string, rows: readonly TreeRow[]): readonly string[] {
+	#drainDoubts(windowId: string): readonly WriteDoubt[] {
 		const doubts = this.#writes.get(windowId);
-		if (!doubts) return [];
+		if (doubts === undefined) return [];
 		this.#writes.delete(windowId);
-		return [...doubts.values()].map(doubt => {
+		return [...doubts.values()];
+	}
+	/**
+	 * The doubts this observation answers or carries. Only the control the
+	 * write was addressed to can answer one, so it is looked up by identity
+	 * and never by "some row of that role showing the text": one role is a
+	 * whole form's worth of fields, a sheet's rows are read into the same
+	 * observation as the window beneath it, and a `{query}` hides the real
+	 * field while leaving a decoy. A `setValue("5")` answered by the next
+	 * row along that happens to contain a 5 is not a read-back.
+	 *
+	 * Its ref is always retired by the time this runs — the walk that built
+	 * the tree is what retired it — so the control is found by where it sits:
+	 * role, label, the chain above it and its position among same-role
+	 * siblings. Failing that, the same without the label, but only onto a row
+	 * that is labelled by its own value, which is the one way a label churns:
+	 * a field with no title and no description falls back to its value, so
+	 * writing into it renames it to the text that was written. A row still
+	 * carrying a name of its own is a different row at a vacated position,
+	 * not the control under another name. Failing both, the honest answer is
+	 * that this tree does not contain that control.
+	 *
+	 * What the control holds is reported as exactly that and nothing more: a
+	 * control holding the text proves the control holds the text, never that
+	 * the app acted on it. The sentence this replaces ("the write stands;
+	 * build on it, do not rewrite it") was printed over a search field whose
+	 * list the app had not filtered, and bought four cells of probes that
+	 * avoided rewriting the one thing that was wrong. Every control gets the
+	 * same sentence, because the distinction is not a property of the role: a
+	 * filter field, a spreadsheet cell and a rename box all echo what was
+	 * written into them. Shown is trimmed containment, so a value the app
+	 * padded or wrapped still counts as the one written.
+	 */
+	#doubtedWrites(windowId: string): readonly string[] {
+		return this.#drainDoubts(windowId).map(doubt => {
 			const readBack = doubt.readBack;
 			if (readBack === undefined) return doubt.sentence;
+			const identity = readBack.identity;
+			const fresh: Binding[] = [];
+			for (const binding of this.#elements.values())
+				if (binding.window.id === readBack.window.id && binding.window.pid === readBack.window.pid)
+					fresh.push(binding);
+			const place = placeKey(identity);
+			let found = fresh.filter(binding => placeKey(binding.identity) === place);
+			if (found.length !== 1) {
+				const unlabelled = JSON.stringify([identity.role, identity.ordinal, identity.path]);
+				found = fresh.filter(
+					binding =>
+						binding.identity.label === binding.identity.value &&
+						JSON.stringify([binding.identity.role, binding.identity.ordinal, binding.identity.path]) ===
+							unlabelled,
+				);
+			}
+			const control = found.length === 1 ? found[0] : undefined;
+			if (control === undefined)
+				return `${doubt.sentence} The control it was written to is not in this tree — nothing here reads it back.`;
+			const held = control.element.value;
+			// A control that publishes no value reads nothing back either
+			// way, and the doubt the driver raised over it already says so.
+			if (held === undefined) return doubt.sentence;
 			const written = readBack.value.trim();
-			const shows = (value: string | undefined): boolean =>
-				value !== undefined && (written === "" ? value.trim() === "" : value.trim().includes(written));
-			const held = rows.find(row => row.element.role === readBack.role && shows(row.element.value))?.element.value;
-			return held === undefined
-				? doubt.sentence
-				: `${readBack.field}: the control now holds ${JSON.stringify(
-						held,
-					)} — that is the field, not the app's response; judge by the app's own output (rows filtered, title changed, list updated).`;
+			if (written === "" ? held.trim() !== "" : !held.trim().includes(written))
+				return `${doubt.sentence} The control it was written to now holds ${JSON.stringify(held)}.`;
+			return `${readBack.field}: the control now holds ${JSON.stringify(
+				held,
+			)} — that is the field, not the app's response; judge by the app's own output (rows filtered, title changed, list updated).`;
 		});
 	}
 	/**

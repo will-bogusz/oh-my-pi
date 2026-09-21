@@ -2154,6 +2154,166 @@ it("answers a write's read-back with what the control holds, never with a verdic
 	}
 });
 
+/**
+ * Two fields of one form, as a contact card lays them out. `filled` says
+ * what each holds; `churn` relabels the first with what it holds, which is
+ * what the driver's label chain does to a field that has no title of its
+ * own (`get_window_state.rs:1060-1071`).
+ */
+function form(
+	generation: number,
+	filled: { company?: string; notes?: string },
+	options: { churn?: boolean; drop?: boolean } = {},
+): Wire[] {
+	const company = filled.company ?? "";
+	return [
+		{ element_index: 1, element_token: `g${generation}:1`, role: "AXGroup", label: "Contact", depth: 0 },
+		...(options.drop
+			? []
+			: [
+					{
+						element_index: 2,
+						element_token: `g${generation}:2`,
+						role: "AXTextField",
+						label: options.churn ? company : "Company",
+						value: company,
+						depth: 1,
+					},
+				]),
+		{
+			element_index: 3,
+			element_token: `g${generation}:3`,
+			role: "AXTextField",
+			label: "Notes",
+			value: filled.notes ?? "",
+			depth: 1,
+		},
+	];
+}
+
+/** A keystroke write the driver confirms but never judges: the doubt this answers. */
+const UNJUDGED_TYPING = { effect: "confirmed", evidence: [{ kind: "value_readback" }], route: "accessibility" };
+
+it("answers a doubted write from the control it was written to, not from a same-role row that shows the value", async () => {
+	const f = await fixture();
+	// `Apple Park` went into Company and came out in Notes — the app moved
+	// it, or the form re-bound under the write. Either way the field the
+	// caller wrote to is empty, and a scan for "some AXTextField holding the
+	// text" reports the write as landed.
+	let rows = form(1, {});
+	try {
+		f.state.hook = async (name, args) => {
+			if (name === "type_text") return reply(UNJUDGED_TYPING);
+			if (name !== "get_window_state") return undefined;
+			return reply({
+				pid: 101,
+				window_id: args.window_id,
+				snapshot_id: "w1",
+				truncated: false,
+				elements: rows,
+			});
+		};
+		const company = (await f.session.observe(f.context, f.window)).elements[1]!.ref;
+		await f.session.type(f.context, f.window, "Apple Park", company);
+		rows = form(2, { notes: "Apple Park" });
+		const line = (await f.session.observe(f.context, f.window)).tree.split("\n")[0]!;
+		expect(line).toContain("nothing in the reply says whether the app kept this value");
+		expect(line).toContain('The control it was written to now holds "".');
+		expect(line).not.toContain("the control now holds");
+	} finally {
+		await f.close();
+	}
+});
+
+it("reads a doubted write back through a field whose label became the value it was given", async () => {
+	const f = await fixture();
+	// An untitled field is labelled by its own value, so the write renames
+	// it: matching on the label alone would strand every such write on "not
+	// in this tree".
+	let rows = form(1, {}, { churn: true });
+	try {
+		f.state.hook = async (name, args) => {
+			if (name === "type_text") return reply(UNJUDGED_TYPING);
+			if (name !== "get_window_state") return undefined;
+			return reply({
+				pid: 101,
+				window_id: args.window_id,
+				snapshot_id: "w1",
+				truncated: false,
+				elements: rows,
+			});
+		};
+		const company = (await f.session.observe(f.context, f.window)).elements[1]!.ref;
+		await f.session.type(f.context, f.window, "Apple Park", company);
+		rows = form(2, { company: "Apple Park" }, { churn: true });
+		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
+			`type on ${company} AXTextField: the control now holds "Apple Park" — that is the field, not the app's response; judge by the app's own output (rows filtered, title changed, list updated).`,
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("says a doubted write's control is not in this tree instead of reading it back from another row", async () => {
+	const f = await fixture();
+	// The app rebuilt the card without the field that was written to, and
+	// Notes slid into its position holding the text. Position without a name
+	// is not identity: nothing here reads that write back.
+	let rows = form(1, {});
+	try {
+		f.state.hook = async (name, args) => {
+			if (name === "type_text") return reply(UNJUDGED_TYPING);
+			if (name !== "get_window_state") return undefined;
+			return reply({
+				pid: 101,
+				window_id: args.window_id,
+				snapshot_id: "w1",
+				truncated: false,
+				elements: rows,
+			});
+		};
+		const company = (await f.session.observe(f.context, f.window)).elements[1]!.ref;
+		await f.session.type(f.context, f.window, "Apple Park", company);
+		rows = form(2, { notes: "Apple Park" }, { drop: true });
+		const line = (await f.session.observe(f.context, f.window)).tree.split("\n")[0]!;
+		expect(line).toContain("nothing in the reply says whether the app kept this value");
+		expect(line).toContain("The control it was written to is not in this tree — nothing here reads it back.");
+		expect(line).not.toContain("the control now holds");
+	} finally {
+		await f.close();
+	}
+});
+
+it("does not answer a setValue read-back from a row that merely contains the text", async () => {
+	const f = await fixture();
+	// The read-back test is trimmed containment, which one-character values
+	// make almost free: a quantity of `5` is "read back" by any field on the
+	// form holding 15, 50 or 2025.
+	let rows = form(1, { notes: "15" });
+	try {
+		f.state.hook = async (name, args) => {
+			if (name === "set_value") return reply(UNJUDGED_TYPING);
+			if (name !== "get_window_state") return undefined;
+			return reply({
+				pid: 101,
+				window_id: args.window_id,
+				snapshot_id: "w1",
+				truncated: false,
+				elements: rows,
+			});
+		};
+		const company = (await f.session.observe(f.context, f.window)).elements[1]!.ref;
+		await f.session.setValue(f.context, f.window, company, "5");
+		rows = form(2, { notes: "15" });
+		const line = (await f.session.observe(f.context, f.window)).tree.split("\n")[0]!;
+		expect(line).toContain('The control it was written to now holds "".');
+		expect(line).not.toContain("the control now holds");
+		expect(line).not.toContain("15");
+	} finally {
+		await f.close();
+	}
+});
+
 it("re-samples a window once when its header and its own tree disagree after a mutation", async () => {
 	const f = await fixture();
 	// The roster names the window the app is becoming and the AX tree still
