@@ -12,6 +12,7 @@ import type {
 	ComputerImage,
 	ComputerOperationContext,
 	ComputerPoint,
+	ObserveOptions,
 } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
 import type { WindowRosterSample } from "@oh-my-pi/pi-coding-agent/tools/computer/interruption";
 /**
@@ -3732,7 +3733,7 @@ it("keeps visual access for windows with no AX snapshot without inventing elemen
 	}
 });
 
-it("projects a query over the walked tree: alternatives, case, ancestors and the hidden count", async () => {
+it("projects a query over the walked tree: a string is literal, an array is any-of", async () => {
 	const f = await fixture();
 	const row = (index: number, role: string, label: string, depth: number, extra: Wire = {}): Wire => ({
 		element_index: index,
@@ -3760,19 +3761,20 @@ it("projects a query over the walked tree: alternatives, case, ancestors and the
 							row(5, "AXGroup", "Actions", 1),
 							row(6, "AXButton", "Done", 2),
 							row(7, "AXButton", "Cancel", 2),
+							row(8, "AXButton", "Export | CSV", 2),
 						],
 					})
 				: undefined;
-		// Two alternatives, neither in the row's own case, keep their rows and the
+		// Two literals, neither in the row's own case, keep their rows and the
 		// groups that place them; the rest is hidden and counted.
-		const observation = await f.session.observe(f.context, f.window, { query: "remove phone|DONE" });
+		const observation = await f.session.observe(f.context, f.window, { query: ["remove phone", "DONE"] });
 		expect(observation.tree.split("\n")).toEqual([
 			'- [n1] AXWindow "Card" enabled=true',
 			'  - [n2] AXGroup "Phones" enabled=true',
 			'    - [n4] AXButton "Remove Phone" enabled=true',
 			'  - [n5] AXGroup "Actions" enabled=true',
 			'    - [n6] AXButton "Done" enabled=true',
-			'Query "remove phone|DONE" matched 2 of 7 rows (ancestors kept); 2 hidden — drop the query to read them.',
+			'Query ["remove phone","DONE"] matched 2 of 8 rows (ancestors kept); 3 hidden — drop the query to read them.',
 		]);
 		expect(observation.elements.map(element => element.label)).toEqual([
 			"Card",
@@ -3781,6 +3783,17 @@ it("projects a query over the walked tree: alternatives, case, ancestors and the
 			"Actions",
 			"Done",
 		]);
+		// One string is one substring: the pipe is a character the row would
+		// have to print, not a separator, so this asks for a row none of them is.
+		const literal = await f.session.observe(f.context, f.window, { query: "remove phone|DONE" });
+		expect(literal.tree.split("\n")[0]).toBe(
+			'No row matched query "remove phone|DONE" under window 1 "Editor" (Fixture): the walk read 8 actionable rows and reported the tree complete. Next: drop the query to read the whole tree, or widen it — a query is a case-insensitive substring; pass an array to search for any of several; observe({ menubar: true }) adds the menu bar.',
+		);
+		// And a row whose own label carries a pipe is reachable, which the
+		// split made impossible: every such query asked for nothing.
+		expect((await f.session.observe(f.context, f.window, { query: "Export | CSV" })).tree).toContain(
+			'AXButton "Export | CSV"',
+		);
 		// A value is searchable too, and a query that keeps everything says nothing.
 		expect((await f.session.observe(f.context, f.window, { query: "123-4567" })).tree).toContain(
 			'AXTextField "home"',
@@ -3790,6 +3803,21 @@ it("projects a query over the walked tree: alternatives, case, ancestors and the
 		expect(
 			f.calls.filter(call => call.name === "get_window_state").every(call => call.args.query === undefined),
 		).toBe(true);
+	} finally {
+		await f.close();
+	}
+});
+
+it("refuses a query that is neither a string nor a list of strings", async () => {
+	const f = await fixture();
+	// `[]` used to mean "no projection" and a number threw a raw TypeError out
+	// of `String.prototype.split`; both are a caller saying something it did
+	// not mean, and the reply now names the shape that works.
+	try {
+		for (const query of [[], ["ok", 3], 7, "", ["Save", "  "]])
+			await expect(
+				f.session.observe(f.context, f.window, { query } as unknown as ObserveOptions),
+			).rejects.toThrow("Invalid observe query: use a string or an array of strings");
 	} finally {
 		await f.close();
 	}
@@ -3817,7 +3845,7 @@ it("says what a query searched, read and cut when nothing matched it", async () 
 		f.state.hook = async name => (name === "get_window_state" ? missed({}) : undefined);
 		const observation = await f.session.observe(f.context, f.window, { query: "Repeat" });
 		expect(observation.tree).toBe(
-			'No row matched query "Repeat" under window 1 "Editor" (Fixture): the walk read 148 actionable rows and reported the tree complete. Next: drop the query to read the whole tree, or widen it — a query is a case-insensitive substring, and `|` separates alternatives; observe({ menubar: true }) adds the menu bar.',
+			'No row matched query "Repeat" under window 1 "Editor" (Fixture): the walk read 148 actionable rows and reported the tree complete. Next: drop the query to read the whole tree, or widen it — a query is a case-insensitive substring; pass an array to search for any of several; observe({ menubar: true }) adds the menu bar.',
 		);
 		// Rows the walker never read are the cheaper thing to fix than the
 		// query, and a walk that clipped says so instead of claiming complete.
@@ -3951,7 +3979,7 @@ it("answers a query about a window under a sheet from the sheet, which is what t
 		};
 		const missed = await f.session.observe(f.context, f.window, { query: "Calculator" });
 		expect(missed.tree.split("\n").filter(line => line.startsWith("No row"))).toEqual([
-			'No row matched query "Calculator" in the sheet "open-panel" (window 5) modal over window 1 "Editor" (Fixture): its walk read 2 rows. Next: drop the query to read the sheet whole, or widen it — a query is a case-insensitive substring, and `|` separates alternatives. The window behind it takes no input until the sheet is answered, so its own rows are not the place to look.',
+			'No row matched query "Calculator" in the sheet "open-panel" (window 5) modal over window 1 "Editor" (Fixture): its walk read 2 rows. Next: drop the query to read the sheet whole, or widen it — a query is a case-insensitive substring; pass an array to search for any of several. The window behind it takes no input until the sheet is answered, so its own rows are not the place to look.',
 		]);
 		expect(missed.tree).not.toContain("22 row(s) are out of view");
 	} finally {

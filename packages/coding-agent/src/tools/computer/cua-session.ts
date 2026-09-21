@@ -44,6 +44,7 @@ import {
 	writeNote,
 } from "./render";
 import { appWindows } from "./roster";
+import { normalizeQuery } from "./selectors";
 import { PERFORMABLE_ACTIONS, observedActions, semanticAction } from "./semantic-actions";
 import type {
 	ActionOptions,
@@ -150,25 +151,23 @@ function renderedSubrole(element: ComputerElementSnapshot): string {
 	const specific = specificRole(element);
 	return specific === element.role ? "" : ` subrole=${specific}`;
 }
-/** A query's `|`-separated alternatives, lower-cased, empty ones dropped. */
-function queryAlternatives(query: string): string[] {
-	return query
-		.split("|")
-		.map(alternative => alternative.trim().toLowerCase())
-		.filter(alternative => alternative.length > 0);
-}
 /**
- * The rows a query keeps: every row one of its `|`-separated alternatives
- * matches (case-insensitive substring over what the row prints, including the
+ * The rows a query keeps: every row one of its literals matches
+ * (case-insensitive substring over what the row prints, including the
  * window's own text carried beneath it), plus the ancestors that place it.
- * The driver's own projection took one literal substring, which the bench's
- * queries were not: every alternative-carrying query missed and cost a
- * re-observe. Projecting here keeps one semantics for both platforms and lets
- * the observation say what it hid.
+ * Projecting here keeps one semantics for both platforms and lets the
+ * observation say what it hid.
+ *
+ * The literals arrive already normalised, so a string is one substring and
+ * nothing about the row's own text is unsearchable: splitting the string on
+ * `|` first made a query unable to ask for a pipe — a Chrome tab titled
+ * "Order Status | Peptaura" could not be named — and made one parameter mean
+ * two things. Alternation lives in the parameter instead, as an array.
  */
-function projectRows(rows: readonly TreeRow[], query: string): { rows: TreeRow[]; matched: number } {
-	const alternatives = queryAlternatives(query);
-	if (!alternatives.length) return { rows: [...rows], matched: rows.length };
+function projectRows(
+	rows: readonly TreeRow[],
+	query: readonly string[],
+): { rows: TreeRow[]; matched: number } {
 	const hits = (row: TreeRow): boolean => {
 		const haystack = [
 			row.element.role,
@@ -183,7 +182,7 @@ function projectRows(rows: readonly TreeRow[], query: string): { rows: TreeRow[]
 			.filter((text): text is string => typeof text === "string" && text.length > 0)
 			.join("\n")
 			.toLowerCase();
-		return alternatives.some(alternative => haystack.includes(alternative));
+		return query.some(literal => haystack.includes(literal));
 	};
 	const kept = new Set<number>();
 	const ancestors: number[] = [];
@@ -271,10 +270,9 @@ const DISPLAY_TREE_ROW = /^((?: {2})*)- (?!\[)(\S.*)$/;
  * controls — that is what an actor needs, and every label in the window is
  * not — while a query is a reader asking whether this window says something.
  */
-function displayTextNotes(markdown: unknown, query: string): ReadonlyMap<number, TreeNote[]> {
+function displayTextNotes(markdown: unknown, query: readonly string[]): ReadonlyMap<number, TreeNote[]> {
 	const notes = new Map<number, TreeNote[]>();
-	const alternatives = queryAlternatives(query);
-	if (typeof markdown !== "string" || !alternatives.length) return notes;
+	if (typeof markdown !== "string") return notes;
 	let anchor = -1;
 	for (const line of markdown.split("\n")) {
 		const indexed = INDEXED_TREE_ROW.exec(line);
@@ -285,7 +283,7 @@ function displayTextNotes(markdown: unknown, query: string): ReadonlyMap<number,
 		const display = DISPLAY_TREE_ROW.exec(line);
 		if (!display || COLLAPSED_TREE_ROW.test(line)) continue;
 		const text = display[2]!;
-		if (!alternatives.some(alternative => text.toLowerCase().includes(alternative))) continue;
+		if (!query.some(literal => text.toLowerCase().includes(literal))) continue;
 		const note = { depth: display[1]!.length / 2, text, content: true as const };
 		const listed = notes.get(anchor);
 		if (listed) listed.push(note);
@@ -1401,11 +1399,14 @@ export class CuaComputerSession implements ComputerBackend {
 		return this.#binding(ref).window;
 	}
 
-	observe(
+	async observe(
 		context: Context,
 		window: ComputerWindowIdentity,
 		options: ObserveOptions = {},
 	): Promise<ComputerObservation> {
+		// One normalisation for the walk, the projection and the sheet census:
+		// the literals every matcher in this read tests against.
+		const query = options.query === undefined ? undefined : normalizeQuery(options.query);
 		return this.#schedule(context, "observe", false, async () => {
 			const read = {
 				include_accessibility_tree: true,
@@ -1420,18 +1421,18 @@ export class CuaComputerSession implements ComputerBackend {
 			const settling = this.#mutated.delete(window.id);
 			const started = Date.now();
 			let { reply, current } = await this.#state(context, window, read);
-			let walked = this.#walk(current, reply, options);
+			let walked = this.#walk(current, reply, options, query);
 			if (settling && titlesDisagree(current.title, walked.rows)) {
 				const settle = Math.min(RESAMPLE_SETTLE_MS, RESAMPLE_BUDGET_MS - (Date.now() - started));
 				if (settle > 0) {
 					await Bun.sleep(settle);
 					throwIfAborted(context.signal);
 					({ reply, current } = await this.#state(context, window, read));
-					walked = this.#walk(current, reply, options);
+					walked = this.#walk(current, reply, options, query);
 				}
 			}
 			const { menuBarRows, snapshotId } = walked;
-			const projected = options.query === undefined ? undefined : projectRows(walked.rows, options.query);
+			const projected = query === undefined ? undefined : projectRows(walked.rows, query);
 			const rows = projected?.rows ?? walked.rows;
 			// Only the walker knows whether it clipped the tree. `truncated` is its
 			// explicit verdict and `elements_complete` its older positive proof.
@@ -1474,15 +1475,15 @@ export class CuaComputerSession implements ComputerBackend {
 				this.#sheets.set(sheet.id, { parent: current.id, title: sheet.title });
 				let block = `sheet ${JSON.stringify(sheet.title)} (window ${sheet.id}) — modal over window ${current.id}`;
 				try {
-					const nested = await this.#sheetRows(context, sheet, options);
+					const nested = await this.#sheetRows(context, sheet, options, query);
 					observation.elements.push(...nested.map(row => row.element));
 					if (nested.length) block += `\n${treeRows(nested, 1)}`;
-					if (options.query !== undefined) {
+					if (query !== undefined) {
 						names.push(`${JSON.stringify(sheet.title)} (window ${sheet.id})`);
 						modal = {
 							label: `sheet${names.length === 1 ? "" : "s"} ${names.join(", ")}`,
 							rows: (modal?.rows ?? 0) + nested.length,
-							matched: (modal?.matched ?? 0) + projectRows(nested, options.query).matched,
+							matched: (modal?.matched ?? 0) + projectRows(nested, query).matched,
 						};
 					}
 				} catch (error) {
@@ -1495,7 +1496,7 @@ export class CuaComputerSession implements ComputerBackend {
 				? treeRows(rows, 0)
 				: typeof reply.data.degraded_reason === "string"
 					? reply.data.degraded_reason
-					: options.query !== undefined
+					: query !== undefined
 						? this.#queryMiss(current, reply, options, complete, walked.rows.length, modal)
 						: "No accessibility elements returned; completeness is unknown.";
 			// A projection hides controls the next step may need (the bench lost
@@ -1590,7 +1591,7 @@ export class CuaComputerSession implements ComputerBackend {
 		modal?: SheetCensus,
 	): string {
 		const query = JSON.stringify(options.query);
-		const widen = `widen it — a query is a case-insensitive substring, and \`|\` separates alternatives`;
+		const widen = `widen it — a query is a case-insensitive substring; pass an array to search for any of several`;
 		if (modal)
 			return modal.matched > 0
 				? `No row of window ${window.id} itself matched query ${query}; ${modal.matched} row(s) of the ${modal.label} modal over it match and are printed above — work in the sheet while it is up.`
@@ -1624,6 +1625,7 @@ export class CuaComputerSession implements ComputerBackend {
 		window: ComputerWindowIdentity,
 		reply: Reply,
 		options: ObserveOptions,
+		query?: readonly string[],
 	): { rows: TreeRow[]; menuBarRows: number; snapshotId: string } {
 		if (!Array.isArray(reply.data.elements)) throw new ToolError("Malformed Cua elements");
 		// A real window can have no matching AXWindow at all (canvas/custom UI).
@@ -1641,7 +1643,7 @@ export class CuaComputerSession implements ComputerBackend {
 		// What the window says, for a query only: the markdown is the one place
 		// the driver prints a node it gave no action, and a query asked of the
 		// controls alone cannot find a version string or a status line.
-		const text = options.query === undefined ? undefined : displayTextNotes(reply.data.tree_markdown, options.query);
+		const text = query === undefined ? undefined : displayTextNotes(reply.data.tree_markdown, query);
 		// The menu bar is a fifth of a macOS tree (22 kB of one 31 kB walk),
 		// every row of it advertises `press`, and every such press is refused
 		// because a menu bar item reports `AXEnabled` only while its menu is
@@ -1746,7 +1748,12 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 		return { rows, menuBarRows, snapshotId };
 	}
-	async #sheetRows(context: Context, sheet: ComputerRelatedWindow, options: ObserveOptions): Promise<TreeRow[]> {
+	async #sheetRows(
+		context: Context,
+		sheet: ComputerRelatedWindow,
+		options: ObserveOptions,
+		query?: readonly string[],
+	): Promise<TreeRow[]> {
 		const window = await this.#window({ id: sheet.id, pid: sheet.pid });
 		throwIfAborted(context.signal);
 		this.#invalidate(window);
@@ -1758,7 +1765,7 @@ export class CuaComputerSession implements ComputerBackend {
 		});
 		if (reply.data.pid !== window.pid || String(reply.data.window_id) !== window.id)
 			throw new ToolError("WrongWindow: Cua sheet observation identity mismatch");
-		return this.#walk(window, reply, options).rows;
+		return this.#walk(window, reply, options, query).rows;
 	}
 	#retireSheet(id: string, title: string): void {
 		this.#sheets.delete(id);

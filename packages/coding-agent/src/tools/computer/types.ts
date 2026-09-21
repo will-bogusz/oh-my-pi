@@ -250,7 +250,8 @@ export interface ObserveOptions {
 	silent?: boolean;
 	maxDepth?: number;
 	maxElements?: number;
-	query?: string;
+	/** One case-insensitive substring, taken literally; an array matches any of several. */
+	query?: string | readonly string[];
 	/**
 	 * Include the window's `AXMenuBar` subtrees. They are excluded by default:
 	 * a menu bar row only responds while its own menu is open, so `menu(path)`

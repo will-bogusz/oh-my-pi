@@ -66,3 +66,21 @@ export function normalizeWindowSelector(value: unknown, allowId = false): Window
 	}
 	return selector;
 }
+
+/**
+ * The literals an observe query searches for: a string is one case-insensitive
+ * substring, taken literally, and an array is any-of. Splitting the string on
+ * `|` instead made two things of one parameter — a row whose own text carries
+ * a pipe was unaskable ("Order Status | Peptaura" named a Chrome tab in the
+ * corpus), and 476 rendered rows in one leg print a literal `|` — while the
+ * alternation it bought is expressible as what it is.
+ */
+export function normalizeQuery(value: unknown): string[] {
+	const entries = typeof value === "string" ? [value] : Array.isArray(value) ? (value as unknown[]) : undefined;
+	const query = entries?.length
+		? entries.map(entry => (typeof entry === "string" ? entry.trim().toLowerCase() : ""))
+		: undefined;
+	if (query === undefined || query.some(literal => !literal.length))
+		throw new ToolError("Invalid observe query: use a string or an array of strings");
+	return query;
+}
