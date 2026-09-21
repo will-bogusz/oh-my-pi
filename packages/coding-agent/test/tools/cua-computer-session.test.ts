@@ -482,9 +482,12 @@ it("reads only the acted pid's windows once a handle names one", async () => {
 		printing = true;
 		f.calls.length = 0;
 		const opened = await f.session.press(f.context, f.window, "cmd+p", undefined, { delivery: "foreground" });
+		// The roster, then the accessibility mapping that says whether what it
+		// gained is a window at all or a surface drawn inside one.
 		expect(f.calls.filter(call => call.name === "list_windows").map(call => call.args)).toEqual([
 			{ pid: 101 },
 			{ pid: 101 },
+			{ pid: 101, include_accessibility_metadata: true },
 		]);
 		expect(opened.text).toContain('pid 101 gained window 7 ("Print")');
 		expect(opened.text).not.toContain("window 9");
@@ -556,11 +559,14 @@ it("announces what a pid opened on the observe path and nests a sheet under its 
 		windows = [f.row, print, lease];
 		f.calls.length = 0;
 		const opened = await f.session.observe(f.context, f.window);
-		// The diff spends the roster this walk's own closing geometry check read:
-		// the two reads are the ones `#state` already made before and after it.
+		// The diff spends the roster this walk's own closing geometry check read
+		// — the two reads are the ones `#state` already made before and after it
+		// — and asks once more for the accessibility mapping, which is the only
+		// thing that tells a new window from a surface drawn inside one.
 		expect(f.calls.map(call => [call.name, call.args.pid])).toEqual([
 			["list_windows", 101],
 			["get_window_state", 101],
+			["list_windows", 101],
 			["list_windows", 101],
 		]);
 		expect(opened.tree).toContain(
@@ -578,6 +584,140 @@ it("announces what a pid opened on the observe path and nests a sheet under its 
 			'pid 101 gained window 11 ("Untitled") since your last observation — acquire it with computer.window("11").',
 			'  window 12 ("") is attached to it — no accessibility window of its own — and renders inside its parent\'s tree; observe window 11, not this id.',
 		]);
+	} finally {
+		await f.close();
+	}
+});
+
+it("reports a lone window with no accessibility record as a surface of the window that encloses it", async () => {
+	const f = await fixture();
+	// An inline rename editor, a combo popup, a quick-entry popover: the app
+	// draws it as its own CGWindow inside the window it belongs to, and no
+	// AXWindow claims it. Acquiring it yields an empty tree, so the line that
+	// invites acquisition costs a cell and answers nothing.
+	const editor = { ...f.row, window_id: 30, title: "", bounds: { x: 20, y: 30, width: 50, height: 20 } };
+	let windows: WindowRow[] = [f.row];
+	try {
+		f.state.hook = async (name, args) =>
+			name === "list_windows"
+				? reply({
+						windows,
+						...(args.include_accessibility_metadata
+							? {
+									accessibility_windows: {
+										pid: 101,
+										complete: true,
+										windows: [{ window_id: 1, role: "AXWindow" }],
+									},
+								}
+							: {}),
+					})
+				: undefined;
+		await f.session.observe(f.context, f.window);
+		windows = [f.row, editor];
+		const gained = await f.session.observe(f.context, f.window);
+		expect(gained.tree.split("\n").filter(line => line.includes("window 30"))).toEqual([
+			'pid 101 gained window 30 ("") since your last observation; it is attached to window 1 — no accessibility window of its own — and renders inside that window\'s tree; observe window 1, not this id.',
+		]);
+		expect(gained.tree).not.toContain('computer.window("30")');
+	} finally {
+		await f.close();
+	}
+});
+
+it("still offers a lone gained window that has an accessibility record of its own", async () => {
+	const f = await fixture();
+	// Same shape, one difference that decides it: the new window publishes an
+	// AXWindow, so it is a window and acquiring it is the route.
+	const panel = { ...f.row, window_id: 31, title: "Export", bounds: { x: 20, y: 30, width: 50, height: 20 } };
+	let windows: WindowRow[] = [f.row];
+	try {
+		f.state.hook = async (name, args) =>
+			name === "list_windows"
+				? reply({
+						windows,
+						...(args.include_accessibility_metadata
+							? {
+									accessibility_windows: {
+										pid: 101,
+										complete: true,
+										windows: [
+											{ window_id: 1, role: "AXWindow" },
+											{ window_id: 31, role: "AXWindow" },
+										],
+									},
+								}
+							: {}),
+					})
+				: undefined;
+		await f.session.observe(f.context, f.window);
+		windows = [f.row, panel];
+		expect((await f.session.observe(f.context, f.window)).tree).toContain(
+			'pid 101 gained window 31 ("Export") since your last observation — acquire it with computer.window("31").',
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("sends the caller to a modal dialog's own rows instead of to an acquisition it does not need", async () => {
+	const f = await fixture();
+	// An application-modal alert is a real top-level window with an AXWindow of
+	// its own, so it is neither attached nor a sheet — but the walk already
+	// drew its buttons into the blocked window's tree, and the caller is
+	// holding refs for them while being told to go and acquire it.
+	// Modality is an accessibility fact, so the driver labels the row only on a
+	// roster read that asked for the mapping; the plain CGWindow row cannot
+	// carry it. `modal_windows` on the observation is the always-present half.
+	const alert = { ...f.row, window_id: 40, title: "alert" };
+	let windows: WindowRow[] = [f.row];
+	let modal = false;
+	try {
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows")
+				return reply({
+					windows: windows.map(row =>
+						args.include_accessibility_metadata && row.window_id === 40 ? { ...row, kind: "app-modal" } : row,
+					),
+					...(args.include_accessibility_metadata
+						? {
+								accessibility_windows: {
+									pid: 101,
+									complete: true,
+									windows: [
+										{ window_id: 1, role: "AXWindow" },
+										...(modal ? [{ window_id: 40, role: "AXWindow" }] : []),
+									],
+								},
+							}
+						: {}),
+				});
+			if (name !== "get_window_state" || !modal) return undefined;
+			return reply({
+				pid: 101,
+				window_id: 1,
+				snapshot_id: "s1",
+				truncated: false,
+				window_bounds: f.row.bounds,
+				modal_windows: [{ pid: 101, window_id: 40, title: "alert", relation: "app-modal" }],
+				elements: [
+					{ element_index: 1, element_token: "s1:1", role: "AXWindow", label: "Editor", depth: 0 },
+					{ element_index: 2, element_token: "s1:2", role: "AXWindow", subrole: "AXDialog", label: "alert", depth: 1 },
+					{ element_index: 3, element_token: "s1:3", role: "AXButton", label: "Only This Event", depth: 2 },
+				],
+			});
+		};
+		await f.session.observe(f.context, f.window);
+		windows = [f.row, alert];
+		modal = true;
+		const blocked = await f.session.observe(f.context, f.window);
+		expect(blocked.tree).toContain('- [n4] AXButton "Only This Event"');
+		expect(blocked.tree.split("\n").filter(line => line.includes("window 40"))).toEqual([
+			'pid 101 gained window 40 ("alert") since your last observation; the application reports it modal, so no other window of this pid takes input until it is answered. Its controls are in the tree above — act on them there, without acquiring it.',
+		]);
+		expect(blocked.tree).not.toContain('computer.window("40")');
+		// The driver's own label for that window survives the roster.
+		expect((await f.session.windows(f.context, { pid: 101 })).find(row => row.id === "40")?.kind).toBe("app-modal");
 	} finally {
 		await f.close();
 	}
@@ -2026,6 +2166,41 @@ it("says a write was not dispatched at a control that is gone, instead of asking
 			`setValue on ${ref} AXTextField "Editor": not dispatched — the control is gone; address a row in the tree below.`,
 		);
 		expect(answered.text).not.toContain("read the field back");
+	} finally {
+		await f.close();
+	}
+});
+
+it("drops the no-change doubt when the same reply names a window the app gained", async () => {
+	const f = await fixture();
+	const menu = { ...f.row, window_id: 7, title: "Add", z_index: 9 };
+	let opened = false;
+	const watched = {
+		effect: "suspected_noop",
+		evidence: null,
+		route: "accessibility",
+		escalation: { reason: "suspected_noop", recommended: "px" },
+	};
+	try {
+		f.state.hook = async name => {
+			if (name === "list_windows") return reply({ windows: opened ? [f.row, menu] : [f.row] });
+			return name === "click" ? reply(watched) : undefined;
+		};
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		// The probe watched the addressed window for its budget and saw
+		// nothing; the app had put its menu on screen instead.
+		opened = true;
+		const answered = await f.session.click(f.context, f.window, ref);
+		expect(answered.effect).toBe("suspected_noop");
+		expect(answered.text).toContain("gained window 7");
+		expect(answered.text).toContain("that is the change its probe missed");
+		expect(answered.text).not.toContain("observe() once");
+		expect(answered.escalation).toBeUndefined();
+		// With nothing gained the doubt and the route it names both stand.
+		const again = await f.session.observe(f.context, f.window);
+		const quiet = await f.session.click(f.context, f.window, again.elements[0]!.ref);
+		expect(quiet.text).toContain("observe() once");
+		expect(quiet.text).not.toContain("its probe missed");
 	} finally {
 		await f.close();
 	}

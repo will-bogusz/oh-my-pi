@@ -37,6 +37,7 @@ import {
 	SEARCH_FIELD,
 	specificRole,
 	UNPROBED_DRAG,
+	unobservedChange,
 	type Wire,
 	type WriteFacts,
 	writeField,
@@ -357,6 +358,23 @@ function relatedWindows(value: unknown): readonly ComputerRelatedWindow[] | unde
 			});
 		}),
 	);
+}
+/**
+ * The windows this walk drew into its own tree because the application
+ * reports them modal over the one that was asked for. A tolerant read: an
+ * unrecognised row costs the reply nothing, because the only thing this
+ * decides is whether a gained window is announced as somewhere to go or as
+ * something already in front of the caller.
+ */
+function modalWindows(value: unknown): ReadonlySet<string> | undefined {
+	if (!Array.isArray(value)) return undefined;
+	const ids = new Set<string>();
+	for (const row of value) {
+		if (typeof row !== "object" || row === null) continue;
+		const id = (row as Wire).window_id;
+		if (typeof id === "number" && Number.isSafeInteger(id) && id > 0) ids.add(String(id));
+	}
+	return ids.size ? ids : undefined;
 }
 function bounds(value: unknown): ComputerBounds {
 	const row = object(value, "bounds");
@@ -838,16 +856,20 @@ export class CuaComputerSession implements ComputerBackend {
 				...(typeof row.ax_backed === "boolean" ? { axBacked: row.ax_backed } : {}),
 				...(typeof row.main === "boolean" ? { main: row.main } : {}),
 				...(typeof row.minimized === "boolean" ? { minimized: row.minimized } : {}),
-				// The driver names a display's desktop surface (Finder's icons,
-				// filed at the desktop icon level, no AXWindow of its own); every
-				// other kind is classified here from the owner. An owner's
-				// off-screen placeholder window is not the panel itself.
+				// Two kinds only the driver can name: a display's desktop surface
+				// (the icons, filed at the desktop icon level with no AXWindow of
+				// its own) and a window its own application reports modal, which
+				// blocks that application and nothing else. Every other kind is
+				// classified here from the owner, and an owner's off-screen
+				// placeholder window is not the panel itself.
 				kind:
 					row.kind === "desktop"
 						? ("desktop" as const)
-						: onScreen.has(String(row.window_id))
-							? classifyWindow({ app: string(row.app_name, "app_name") })
-							: ("other" as const),
+						: row.kind === "app-modal"
+							? ("app-modal" as const)
+							: onScreen.has(String(row.window_id))
+								? classifyWindow({ app: string(row.app_name, "app_name") })
+								: ("other" as const),
 			};
 			if (isCaptureLeaseArtifact(window)) {
 				artifacts.add(window.id);
@@ -1361,6 +1383,7 @@ export class CuaComputerSession implements ComputerBackend {
 			const opened = await this.#openedWindows(current.pid, {
 				roster: this.#lastRoster.get(current.pid) ?? [],
 				observed: current.id,
+				rendered: modalWindows(reply.data.modal_windows),
 			});
 			if (opened !== undefined) observation.tree += `\n${opened}`;
 			// An observation is the model's picture of the environment; a system
@@ -1837,11 +1860,15 @@ export class CuaComputerSession implements ComputerBackend {
 	 * action that asked for it, so an action-only diff never named it and the
 	 * model hunted it by hand. The observe path spends the roster the walk's
 	 * own window resolution already read; `read.observed` is this walk's
-	 * window, which is being looked at rather than announced.
+	 * window, which is being looked at rather than announced, and
+	 * `read.rendered` names the windows that walk already drew into its own
+	 * tree — an application-modal dialog is a real top-level window, so it is
+	 * new and it is AX-backed, and telling the caller to acquire a window
+	 * whose buttons it is already holding refs for buys nothing.
 	 */
 	async #openedWindows(
 		pid: number | undefined,
-		read?: { roster: readonly ComputerWindowIdentity[]; observed: string },
+		read?: { roster: readonly ComputerWindowIdentity[]; observed: string; rendered?: ReadonlySet<string> },
 	): Promise<string | undefined> {
 		if (pid === undefined) return undefined;
 		const before = this.#observedRoster.get(pid);
@@ -1862,29 +1889,39 @@ export class CuaComputerSession implements ComputerBackend {
 				window.id !== read?.observed,
 		);
 		if (!opened.length) return undefined;
-		const attached = opened.length > 1 ? await this.#attachedTo(pid, opened) : undefined;
-		return opened
-			.filter(window => attached?.get(window.id) === undefined)
-			.flatMap(window => [
-				`pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation — acquire it with computer.window(${JSON.stringify(window.id)}).`,
-				...opened
-					.filter(row => attached?.get(row.id) === window.id)
-					.map(
-						row =>
+		const attached = await this.#attachedTo(pid, opened);
+		const lines: string[] = [];
+		for (const window of opened) {
+			const host = attached.get(window.id);
+			if (host === undefined) {
+				lines.push(
+					read?.rendered?.has(window.id) === true
+						? `pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation; the application reports it modal, so no other window of this pid takes input until it is answered. Its controls are in the tree above — act on them there, without acquiring it.`
+						: `pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation — acquire it with computer.window(${JSON.stringify(window.id)}).`,
+				);
+				for (const row of opened)
+					if (attached.get(row.id) === window.id)
+						lines.push(
 							`  window ${row.id} (${JSON.stringify(row.title)}) is attached to it — no accessibility window of its own — and renders inside its parent's tree; observe window ${window.id}, not this id.`,
-					),
-			])
-			.join("\n");
+						);
+			} else if (!opened.some(row => row.id === host))
+				lines.push(
+					`pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation; it is attached to window ${host} — no accessibility window of its own — and renders inside that window's tree; observe window ${host}, not this id.`,
+				);
+		}
+		return lines.length ? lines.join("\n") : undefined;
 	}
 	/**
 	 * Which of these newly gained rows are attached surfaces, each against the
-	 * gained window it hangs on. Only an observation of the parent reports the
+	 * window it hangs on — one gained in the same instant or one that was
+	 * already on screen. Only an observation of the parent reports the
 	 * relation, which is exactly what has not happened for a window that
 	 * appeared this instant — and announcing a sheet beside its own parent
 	 * sent the bench into a tree rooted at `AXSheet` that cost a cell to
 	 * recover from. So the AXWindows mapping says which rows are windows at
-	 * all, and containment says whose surface this is: a sheet is drawn inside
-	 * the window it belongs to. Anything neither settles stays a window.
+	 * all, and containment says whose surface this is: a sheet, popover or
+	 * inline editor is drawn inside the window it belongs to, and a window of
+	 * its own is what it has not got. Anything neither settles stays a window.
 	 */
 	async #attachedTo(pid: number, opened: readonly ComputerWindowIdentity[]): Promise<ReadonlyMap<string, string>> {
 		const attached = new Map<string, string>();
@@ -1899,7 +1936,7 @@ export class CuaComputerSession implements ComputerBackend {
 			return attached;
 		}
 		const rows = opened.map(window => annotated.find(row => row.id === window.id) ?? window);
-		const windows = rows.filter(row => row.axBacked === true);
+		const windows = annotated.filter(row => row.axBacked === true && row.onScreen !== false);
 		for (const row of rows) {
 			if (row.axBacked === true) continue;
 			const hosts = windows.filter(host => encloses(host.bounds, row.bounds));
@@ -1984,8 +2021,18 @@ export class CuaComputerSession implements ComputerBackend {
 		// a next step is only executable if it is spelled the way the caller types.
 		const reported = preludeVocabulary(result.text);
 		this.#keyboardEscalation(name, args, reply, false);
-		const escalated = escalation(reply, this.#facts(name, reported, args));
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
+		// A probe that watched one window and saw nothing move is refuted by a
+		// window the app put on screen in the same reply: the app did react,
+		// somewhere the probe was not watching. The no-change sentence sends
+		// the caller back to re-run the action or to hunt its pixels, and both
+		// are wrong over a reply that names the app's own answer — so the
+		// window is the whole signal and the doubt is not printed beside it.
+		const refuted = opened !== undefined && unobservedChange(reply.effect);
+		const escalated = refuted ? undefined : escalation(reply, this.#facts(name, reported, args));
+		const reacted = refuted
+			? "⚠️ The driver watched this window and saw no change, but the same action put a window on screen — that is the change its probe missed; read the window named below instead of re-running the action."
+			: undefined;
 		// Keystrokes the driver turned into the app's own menu command lead
 		// with that fact: the driver's sentence starts with the chord.
 		const menuCommand = KEYBOARD_TOOLS[name] === true ? menuCommandLine(reply, reported) : undefined;
@@ -1993,6 +2040,7 @@ export class CuaComputerSession implements ComputerBackend {
 			text: [
 				menuCommand,
 				reported,
+				reacted,
 				escalated,
 				opened,
 				interruptedBy

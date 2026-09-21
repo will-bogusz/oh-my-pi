@@ -429,6 +429,14 @@ export interface WriteFacts extends Facts {
 const RENDERED_TARGETS: Record<string, true> = { element: true, foreground: true, pixel: true, snapshot: true };
 /** Effects a driver reports when it dispatched and doubts the target reacted. */
 const UNDELIVERED_EFFECTS: Record<string, true> = { no_observed_change: true, suspected_noop: true };
+/**
+ * The driver dispatched and its own probe saw nothing move. A reply that
+ * names a window the app gained in the same breath has observed a change,
+ * whatever the probe watched, so the session reads this to decide which of
+ * the two signals it prints.
+ */
+export const unobservedChange = (effect: string | undefined): boolean =>
+	effect !== undefined && UNDELIVERED_EFFECTS[effect] === true;
 /** Refusals whose keyboard focus is held by another window of the same app. */
 const FOCUS_HOLDING_REFUSALS: Record<string, true> = {
 	delivery_failed: true,
@@ -507,7 +515,7 @@ function caseOf(reply: ActionReply, facts: Facts | WriteFacts): Case {
 		keyboard,
 		foreground: facts.foreground,
 		windowed: facts.windowId !== undefined,
-		noop: reply.effect !== undefined && UNDELIVERED_EFFECTS[reply.effect] === true,
+		noop: unobservedChange(reply.effect),
 		unproven: reply.effect !== "confirmed",
 		judged: reply.committed !== undefined,
 		menuCommand: keyboard && reply.menuPath !== undefined,
