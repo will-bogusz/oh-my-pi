@@ -115,13 +115,24 @@ interface ComputerScreenshotResult {
 	height: number;
 	/** Which space this capture's points are in: a window's, or the display's. */
 	surface: "window" | "display";
-	/** Point size of what was captured: the window's bounds, or the display. */
+	/**
+	 * Point size of what the pixels cover: the window's bounds, the display,
+	 * or — while a popover or menu is open over the window — the larger rect
+	 * the window server drew, window and popover together.
+	 */
 	pointWidth: number;
 	pointHeight: number;
 	/**
+	 * Where this image's top-left pixel is in the window's own points. 0 on
+	 * an ordinary capture; negative when the capture reached outside the
+	 * window, so a window point is `origin + image pixel / scale`.
+	 */
+	originX: number;
+	originY: number;
+	/**
 	 * Image pixels per point. 1 — the normal case — means a coordinate read
-	 * off this image is a coordinate an action takes; below 1 the surface
-	 * outgrew the frame budget and image pixels divide by it.
+	 * off this image is a coordinate an action takes; below 1 the captured
+	 * area outgrew the frame budget and image pixels divide by it.
 	 */
 	scale: number;
 	target: string;

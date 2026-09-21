@@ -188,6 +188,14 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		/** WindowServer sample; absent means macOS reported no roster at all. */
 		roster: undefined as WindowRosterSample | undefined,
 		failCapture: false,
+		/**
+		 * The rect a capture's pixels cover. Absent is the ordinary case —
+		 * the window's own frame — and present is the fork's report that the
+		 * window server drew a popover or menu into the same capture.
+		 */
+		captureContent: undefined as { x: number; y: number; width: number; height: number } | undefined,
+		/** Pixels the driver delivered for that rect. */
+		captureSize: { width: 4, height: 2 },
 		wrongIdentity: false,
 		kills: 0,
 		cancelled: [] as string[],
@@ -269,8 +277,11 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 					],
 					window_bounds: row.bounds,
 					...frameValid,
-					screenshot_width: 4,
-					screenshot_height: 2,
+					...(state.captureContent === undefined
+						? {}
+						: { screenshot_content_bounds: state.captureContent }),
+					screenshot_width: state.captureSize.width,
+					screenshot_height: state.captureSize.height,
 					screenshot_mime_type: "image/png",
 				},
 				args.include_screenshot && !state.failCapture ? [{ dataBase64: PNG, mimeType: "image/png" }] : [],
@@ -2973,6 +2984,42 @@ it("downscales a surface past the frame budget and reports the scale it landed o
 		// Coordinates stay window points whatever the image cost.
 		await f.session.click(f.context, window, [2, 1]);
 		expect(f.lastDispatch()?.args).toMatchObject({ x: 2, y: 1 });
+	} finally {
+		await f.close();
+	}
+});
+
+/// The window server draws the popovers and menus an application hangs over a
+/// window into that window's capture, so the pixels cover more than the
+/// window. Read against the window's own bounds, a 0.77x picture was labelled
+/// "1 px = 1 window point" and every coordinate taken off it landed somewhere
+/// else (calendar-recur omp-1 L69/L78 vs the window list at L81).
+it("takes a capture that covers more than the window on the rect it covers", async () => {
+	const f = await fixture();
+	try {
+		f.row.bounds.x = 0;
+		f.row.bounds.y = 0;
+		f.row.bounds.width = 2;
+		f.row.bounds.height = 1;
+		// A popover hanging above and to the left: 4x2 pt of content, still
+		// 4x2 px delivered, so the picture is point-for-point on its own rect
+		// and two points left of the window's origin.
+		f.state.captureContent = { x: -2, y: -1, width: 4, height: 2 };
+		const window = await f.session.window(f.context, { id: "1", pid: 101 });
+		const image = await f.session.captureWindow(f.context, window);
+		expect(image).toMatchObject({
+			width: 4,
+			height: 2,
+			pointWidth: 4,
+			pointHeight: 2,
+			originX: -2,
+			originY: -1,
+			scale: 1,
+		});
+		// A window point is still a window point to the caller; it reaches the
+		// driver in the frame the driver delivered.
+		await f.session.click(f.context, window, [1, 0]);
+		expect(f.lastDispatch()?.args).toMatchObject({ x: 3, y: 1 });
 	} finally {
 		await f.close();
 	}

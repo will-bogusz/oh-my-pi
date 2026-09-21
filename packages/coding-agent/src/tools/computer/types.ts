@@ -35,6 +35,9 @@ export interface ComputerScreenshot {
 	surface?: "window" | "display";
 	pointWidth?: number;
 	pointHeight?: number;
+	/** Window-local point of the image's top-left pixel; 0 unless the capture reached outside the window. */
+	originX?: number;
+	originY?: number;
 	/** Image pixels per point of the captured surface; 1 is point-for-point. */
 	scale?: number;
 	target: string;
@@ -127,13 +130,25 @@ export interface ComputerImage {
 	sourceHeight: number;
 	/** What the point grid belongs to, and so which space coordinates are in. */
 	surface: "window" | "display";
-	/** Point size of the captured surface: a window's bounds, a display's mode. */
+	/**
+	 * Point size of what the pixels cover. A window's own bounds while
+	 * nothing is hanging over it; the rect the window server actually drew —
+	 * window plus popover plus menu — once something is.
+	 */
 	pointWidth: number;
 	pointHeight: number;
 	/**
-	 * Image pixels per point of the captured surface. 1 is what this capture
+	 * Where the image's top-left pixel sits in the window's own points. Zero
+	 * on an ordinary capture; negative once the capture reaches above or to
+	 * the left of the window, which is how a coordinate read off the image
+	 * gets back to the window grid every action takes.
+	 */
+	originX: number;
+	originY: number;
+	/**
+	 * Image pixels per point of what the pixels cover. 1 is what this capture
 	 * path holds to: a coordinate read off the image is a coordinate an action
-	 * takes. Anything smaller means the surface itself outgrew the frame
+	 * takes. Anything smaller means the captured area outgrew the frame
 	 * budget, and the result that carries the image says so.
 	 */
 	scale: number;

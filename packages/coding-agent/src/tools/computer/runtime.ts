@@ -95,13 +95,20 @@ function operationContext(getContext: RunContextAccessor): ComputerOperationCont
 			if (!silent) {
 				// A capture is normally its surface's own point grid, so the
 				// coordinates the model reads off it are the coordinates actions
-				// take. When the surface outgrew the frame budget the image is
-				// smaller than that grid, and the only place that can be said is
-				// beside the pixels it is true of.
-				const grid =
-					image.width === Math.round(image.pointWidth) && image.height === Math.round(image.pointHeight)
+				// take. Two things break that, and the only place either can be
+				// said is beside the pixels it is true of: the surface outgrew
+				// the frame budget, so the image is smaller than its grid; or
+				// the capture covers more than the window — the window server
+				// draws the popovers and menus an application hangs over a
+				// window into that window's capture — so the image's top-left
+				// is not the window's.
+				const offset = Math.round(image.originX) !== 0 || Math.round(image.originY) !== 0;
+				const factor = image.scale.toFixed(2);
+				const grid = offset
+					? `covers ${Math.round(image.pointWidth)}×${Math.round(image.pointHeight)} points from (${Math.round(image.originX)}, ${Math.round(image.originY)}) in the ${image.surface} at ${factor}× — a ${image.surface} point is image pixels ÷ ${factor} plus that origin, so this image holds more than the ${image.surface}`
+					: image.width === Math.round(image.pointWidth) && image.height === Math.round(image.pointHeight)
 						? `1 px = 1 ${image.surface} point`
-						: `${image.surface} ${Math.round(image.pointWidth)}×${Math.round(image.pointHeight)} points at ${image.scale.toFixed(2)}× — divide image pixels by ${image.scale.toFixed(2)} for the ${image.surface} points every action takes`;
+						: `${image.surface} ${Math.round(image.pointWidth)}×${Math.round(image.pointHeight)} points at ${factor}× — divide image pixels by ${factor} for the ${image.surface} points every action takes`;
 				context.output.push({
 					type: "text",
 					text: `screenshot ${image.target} ${image.width}×${image.height} (${grid}) → ${image.path}`,

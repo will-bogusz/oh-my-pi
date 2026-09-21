@@ -1497,6 +1497,11 @@ export class CuaComputerSession implements ComputerBackend {
 	 * path, which has no cap of its own. The byte budget is deliberately
 	 * loose: a capture that loses dimensions to compression would silently
 	 * leave the point grid the coordinate contract rests on.
+	 *
+	 * `surface` is the rect the pixels cover, which is the window's own
+	 * frame only while nothing is hanging over it, and `origin` is where
+	 * that rect's top-left sits in the window's points — zero, or negative
+	 * once the capture reaches outside the window.
 	 */
 	async #saveImage(
 		context: Context,
@@ -1506,6 +1511,7 @@ export class CuaComputerSession implements ComputerBackend {
 		kind: "window" | "display",
 		surface?: Surface,
 		label?: string,
+		origin?: { x: number; y: number },
 	): Promise<ComputerImage> {
 		if (reply.result.images.length !== 1) throw new ToolError("Screenshot unavailable or ambiguous");
 		const source = reply.result.images[0]!;
@@ -1540,6 +1546,8 @@ export class CuaComputerSession implements ComputerBackend {
 			surface: kind,
 			pointWidth: points.width,
 			pointHeight: points.height,
+			originX: origin?.x ?? 0,
+			originY: origin?.y ?? 0,
 			scale: resized.width / points.width,
 			target,
 			...(label ? { label } : {}),
@@ -1579,14 +1587,24 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 		if (!sameBounds(bounds(reply.data.window_bounds), window.bounds))
 			throw new ToolError("StaleFrame: Cua did not provide a valid matching screenshot frame");
+		// What the pixels are of. The window server draws the popovers and
+		// menus an application hangs over a window into that window's
+		// capture, so the frame is wider than the window whenever one is
+		// open; reading the image against the window's own bounds is what
+		// labelled a 0.77x picture "1 px = 1 window point". Absent on the
+		// platforms that do not publish it, where the window is the frame.
+		const covered = reply.data.screenshot_content_bounds === undefined
+			? window.bounds
+			: bounds(reply.data.screenshot_content_bounds);
 		const image = await this.#saveImage(
 			context,
 			reply,
 			window.id,
 			silent,
 			"window",
-			window.bounds,
+			covered,
 			`${window.app}: ${window.title || "Untitled window"}`,
+			{ x: covered.x - window.bounds.x, y: covered.y - window.bounds.y },
 		);
 		this.#frames.set(window.id, {
 			window,
@@ -1614,11 +1632,12 @@ export class CuaComputerSession implements ComputerBackend {
 	}
 	/**
 	 * One action's target. A point is window-local, in points — the same grid
-	 * the capture is delivered on and the same grid an element's own bounds
-	 * are in, so a coordinate read off the screenshot and a coordinate derived
-	 * from the tree mean the same thing. The driver reads its pixel rungs in
-	 * the frame it delivered, so the conversion is that frame over the
-	 * window's points: identity whenever the capture is point-for-point.
+	 * an element's own bounds are in — and the driver reads its pixel rungs in
+	 * the frame it delivered. So the conversion moves the point into that
+	 * frame first (`image.originX/Y` is where the frame's top-left sits in the
+	 * window's points, zero unless the capture reached outside the window) and
+	 * then scales it by the delivered pixels over the frame's points: identity
+	 * whenever the capture is the window, point-for-point.
 	 */
 	#target(window: ComputerWindowIdentity, target?: ComputerTarget): Wire {
 		if (typeof target === "string") {
@@ -1639,8 +1658,8 @@ export class CuaComputerSession implements ComputerBackend {
 			);
 		return {
 			...windowArgs(window),
-			x: (x * frame.sdkWidth) / area.width,
-			y: (y * frame.sdkHeight) / area.height,
+			x: ((x - frame.image.originX) * frame.sdkWidth) / frame.image.pointWidth,
+			y: ((y - frame.image.originY) * frame.sdkHeight) / frame.image.pointHeight,
 		};
 	}
 	/**

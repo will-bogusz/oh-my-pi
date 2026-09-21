@@ -148,6 +148,8 @@ class FakeBackend implements ComputerBackend {
 	}
 	/** Pixels per point of the next capture; below 1 is a surface past the frame budget. */
 	captureScale = 1;
+	/** Window-local point of the capture's top-left; nonzero once it covers more than the window. */
+	captureOrigin = { x: 0, y: 0 };
 	image(context: ComputerOperationContext, target: string, silent = false) {
 		const image = {
 			path: "/fixture/capture.png",
@@ -158,6 +160,8 @@ class FakeBackend implements ComputerBackend {
 			surface: target === "desktop" ? ("display" as const) : ("window" as const),
 			pointWidth: 64,
 			pointHeight: 32,
+			originX: this.captureOrigin.x,
+			originY: this.captureOrigin.y,
 			scale: this.captureScale,
 			target,
 		};
@@ -1370,6 +1374,16 @@ describe("computer supervisor round trips", () => {
 		backend.captureScale = 0.5;
 		expect(await said()).toContain(
 			"screenshot desktop 32×16 (display 64×32 points at 0.50× — divide image pixels by 0.50 for the display points every action takes)",
+		);
+		// A capture that reached outside the window it names is not that
+		// window's point grid at all: its top-left is somewhere else, and a
+		// coordinate read off it needs the origin as well as the scale. The
+		// window server draws an open popover or menu into the window's own
+		// capture, so this is the ordinary shape, not an exotic one.
+		backend.captureScale = 1;
+		backend.captureOrigin = { x: -20, y: -8 };
+		expect(await said()).toContain(
+			"screenshot desktop 64×32 (covers 64×32 points from (-20, -8) in the display at 1.00× — a display point is image pixels ÷ 1.00 plus that origin, so this image holds more than the display)",
 		);
 	});
 
