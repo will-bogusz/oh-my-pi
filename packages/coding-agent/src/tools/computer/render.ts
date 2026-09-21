@@ -335,6 +335,12 @@ export interface ActionReply {
 	readonly evidence: unknown;
 	/** The evidence carries the driver's read-back of the value it wrote. */
 	readonly readBack: boolean;
+	/**
+	 * A typed refusal's own verdict on re-sending the same call. `false` is
+	 * the driver saying it proved the rung cannot land — the caller has to
+	 * change route, not slice the payload.
+	 */
+	readonly retryable: boolean | undefined;
 	/** The menu titles a `menu_command` reply dispatched, top level first. */
 	readonly menuPath: readonly string[] | undefined;
 	/** A background refusal's own route, where it names one. */
@@ -369,6 +375,7 @@ export function readReply(details: unknown): ActionReply {
 		escalation: readEscalation(data),
 		evidence: data.evidence,
 		readBack: valueReadBack(data.evidence),
+		retryable: typeof data.retryable === "boolean" ? data.retryable : undefined,
 		menuPath: menuPath?.length ? menuPath : undefined,
 		advice: typeof data.advice === "string" ? data.advice : undefined,
 		panel: readPanel(data),
@@ -476,6 +483,8 @@ interface Case {
 	readonly panel: boolean;
 	/** The reply says another window of the app holds keyboard focus. */
 	readonly focusHeld: boolean;
+	/** The refusal is about a row the platform can no longer reach. */
+	readonly dead: boolean;
 	/** Writes. */
 	readonly readBack: boolean;
 	readonly query: boolean;
@@ -511,6 +520,7 @@ function caseOf(reply: ActionReply, facts: Facts | WriteFacts): Case {
 		focusHeld:
 			(reply.code !== undefined && FOCUS_HOLDING_REFUSALS[reply.code] === true) ||
 			reply.focusedWindowId !== undefined,
+		dead: deadElement(reply),
 		readBack: reply.readBack,
 		query: facts.element?.role === SEARCH_FIELD || facts.element?.subrole === SEARCH_FIELD,
 		operation: writing ? facts.operation : undefined,
@@ -855,11 +865,24 @@ const TABLE: readonly Row[] = [
 			// means the driver had nothing to watch, not that the app refused;
 			// the bench's every persistence excursion started on the old
 			// sentence claiming the app kept its own value while the tree in
-			// the same reply showed the write. A read-back settles both.
+			// the same reply showed the write. A read-back separates them —
+			// and says only what it can: the text is in the control. Whether
+			// the app took it is the app's own output's to say, which is the
+			// sentence the next observation prints over the tree.
 			return NO_END_OF_EDIT.test(reason)
-				? `${field(facts)}: unproven — ${reason}. Read it back (win.observe()): if the field shows the value, build on it and do not rewrite it.`
-				: `${field(facts)}: not committed — ${reason}. Read it back (win.observe()): if the field shows the value the driver read too early and it stands; if not, write it another way.`;
+				? `${field(facts)}: unproven — ${reason}. Read it back (win.observe()): a control showing the value proves the text is in it, not that the app took it — judge that by the app's own output, and do not rewrite the control to find out.`
+				: `${field(facts)}: not committed — ${reason}. Read it back (win.observe()): if the control shows the value the driver read too early and the text is in it; if it shows the old one, write it another way.`;
 		},
+	},
+	// A judged write whose read-back the driver could not turn into proof: it
+	// read something the app rewrote, or nothing at all because the end-of-edit
+	// re-created the control. Both quote their own finding, and neither is
+	// answered by reading the same control again — the app's output is.
+	{
+		slot: "write",
+		when: { verdict: "unproven", readBack: false },
+		say: (_reply, facts) =>
+			`${field(facts)}: the driver could not prove the app kept this value — read the window back (win.observe()) and judge by the app's own output (the row, list or title it updated); rewrite only if that output still shows the old value.`,
 	},
 	{
 		slot: "write",
@@ -889,6 +912,11 @@ const TABLE: readonly Row[] = [
 		slot: "write",
 		when: { verdict: "committed", effect: "confirmed", readBack: true, escalated: false },
 		say: () => undefined,
+	},
+	{
+		slot: "write",
+		when: { verdict: undefined, effect: "not_dispatched", dead: true },
+		say: (_reply, facts) => `${field(facts)}: not dispatched — the control is gone; address a row in the tree below.`,
 	},
 	{
 		slot: "write",
@@ -1055,18 +1083,35 @@ export function actionEvidence(reply: ActionReply, requested: string | undefined
  * characters it delivered. The remainder is what the caller has to send, and
  * slicing it by codepoint is the work the reply left undone — a model asked to
  * "retry only the remaining suffix" retyped the whole string instead.
+ *
+ * A refusal the driver marks `retryable: false` is the opposite finding: it
+ * probed the target and it never took keyboard focus, so the same keystrokes
+ * land nothing again however they are sliced, and a remainder to retype is
+ * the one instruction that cannot work. The driver's own sentence carries
+ * why; this one carries the call that writes the value without keystrokes,
+ * which only this side can spell, because only this side minted the ref.
  */
 export const INCOMPLETE_TYPING = "type_text_incomplete";
 const INCOMPLETE_DELIVERY = /delivered (\d+) of (\d+) character/;
-export function incompleteNote(field: string, value: string, message: string): string {
+export function incompleteNote(facts: WriteFacts, value: string, message: string, reply: ActionReply): string {
+	const name = field(facts);
+	if (reply.retryable === false) {
+		const route =
+			facts.addressed === undefined
+				? (fieldRoute(facts) ?? "write the value into the field instead of posting keystrokes at it")
+				: `write it without keystrokes: win.ref(${JSON.stringify(facts.addressed)}).setValue(${JSON.stringify(value)})`;
+		return `${name}: nothing landed, so the field still holds its old value and re-sending these keystrokes lands nothing again — ${route}${
+			facts.foreground ? "" : ', or re-run this call with { delivery: "foreground" }'
+		}.`;
+	}
 	const counts = INCOMPLETE_DELIVERY.exec(message);
 	const characters = [...value];
 	const delivered = counts ? Number(counts[1]) : undefined;
 	if (delivered === undefined || Number(counts?.[2]) !== characters.length)
-		return `${field}: the typing stopped part-way, so the field holds neither its old value nor the one asked for — read it back and type what is missing.`;
-	return `${field}: ${delivered} of ${characters.length} characters landed, so the field holds neither its old value nor the one asked for — type only the remainder: ${JSON.stringify(
-		characters.slice(delivered).join(""),
-	)}.`;
+		return `${name}: the typing stopped part-way, so the field holds neither its old value nor the one asked for — read it back and type what is missing.`;
+	return `${name}: ${delivered} of ${characters.length} characters landed, so the field ${
+		delivered === 0 ? "still holds its old value" : "holds neither its old value nor the one asked for"
+	} — type only the remainder: ${JSON.stringify(characters.slice(delivered).join(""))}.`;
 }
 export const UNPROBED_DRAG =
 	"Delivered; the driver reported no effect evidence for this drag — observe the window to confirm it moved anything.";

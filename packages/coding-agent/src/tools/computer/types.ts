@@ -117,6 +117,13 @@ export interface ComputerElementSnapshot {
 	/** Unavailable platform state stays undefined; never infer enabled or disabled. */
 	enabled?: boolean;
 	selected?: boolean;
+	/**
+	 * The provider says a value written to this control would be accepted
+	 * (`AXUIElementIsAttributeSettable(AXValue)`). Present only where it says
+	 * so: a date area, a stepper or a slider looks like a keyboard target and
+	 * is not one, and the row that admits a write is the one to write to.
+	 */
+	settable?: true;
 	/** Every action the provider advertises, under the name `perform` takes where it has one. */
 	actions?: readonly string[];
 	/** Observed geometry in points, in display coordinates. */

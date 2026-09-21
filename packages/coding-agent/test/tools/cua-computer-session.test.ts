@@ -583,6 +583,44 @@ it("announces what a pid opened on the observe path and nests a sheet under its 
 	}
 });
 
+it("prints the provider's verdict that a control would accept a written value", async () => {
+	const f = await fixture();
+	// A date area reads like a text field and refuses typing; the row that
+	// admits a write is the one to write to, and only the provider knows.
+	try {
+		f.state.hook = async name =>
+			name === "get_window_state"
+				? reply({
+						pid: 101,
+						window_id: 1,
+						snapshot_id: "s1",
+						truncated: false,
+						window_bounds: f.row.bounds,
+						elements: [
+							{
+								element_index: 1,
+								element_token: "s1:1",
+								role: "AXDateTimeArea",
+								label: "start-datepicker",
+								depth: 0,
+								value: "2026-09-25T17:00:00-07:00",
+								value_settable: true,
+							},
+							{ element_index: 2, element_token: "s1:2", role: "AXStepper", label: "Repeat", depth: 0 },
+						],
+					})
+				: undefined;
+		const observation = await f.session.observe(f.context, f.window);
+		expect(observation.tree.split("\n")).toEqual([
+			'- [n1] AXDateTimeArea "start-datepicker" value="2026-09-25T17:00:00-07:00" settable=true',
+			'- [n2] AXStepper "Repeat"',
+		]);
+		expect(observation.elements.map(element => element.settable)).toEqual([true, undefined]);
+	} finally {
+		await f.close();
+	}
+});
+
 it("forwards a caret to the driver as given, and nothing when none is asked", async () => {
 	const f = await fixture();
 	try {
@@ -1602,11 +1640,12 @@ it("composes one sentence for each thing a write turns out to be", async () => {
 			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write.",
 		);
 		expect(lost.text.split("\n").at(-1)).toBe(
-			`setValue on ${ref} AXTextField "Editor": unproven — a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write. Read it back (win.observe()): if the field shows the value, build on it and do not rewrite it.`,
+			`setValue on ${ref} AXTextField "Editor": unproven — a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write. Read it back (win.observe()): a control showing the value proves the text is in it, not that the app took it — judge that by the app's own output, and do not rewrite the control to find out.`,
 		);
-		// The doubt is carried until a field of that role shows the value: a
+		// The doubt is carried until a control of that role shows the value: a
 		// re-read that does not show it repeats the doubt, one that does
-		// answers it, and the answer is spent like the doubt was.
+		// reports what the control holds and nothing about the app, and that
+		// answer is spent like the doubt was.
 		expect(await reread()).toContain("unproven — a multi-line AXTextArea");
 		await write(
 			{ committed: "not_committed", effect: "confirmed" },
@@ -1615,8 +1654,9 @@ it("composes one sentence for each thing a write turns out to be", async () => {
 		f.state.value = "Project_File_List";
 		const shown = await reread();
 		expect(shown).toContain(
-			`AXTextField "Editor": reads back as written in this tree — the write stands; build on it, do not rewrite it.`,
+			`AXTextField "Editor": the control now holds "Project_File_List" — that is the field, not the app's response; judge by the app's own output (rows filtered, title changed, list updated).`,
 		);
+		expect(shown).not.toContain("the write stands");
 		expect(shown).not.toContain("unproven — a multi-line");
 		expect(await reread()).not.toContain("setValue on");
 		f.state.value = "";
@@ -1625,7 +1665,7 @@ it("composes one sentence for each thing a write turns out to be", async () => {
 			"📨 Sent (unverified) AXValue on [1] AXTextField.",
 		);
 		expect(bare.text).toContain(
-			"not committed — the driver reported no reason. Read it back (win.observe()): if the field shows the value the driver read too early and it stands; if not, write it another way.",
+			"not committed — the driver reported no reason. Read it back (win.observe()): if the control shows the value the driver read too early and the text is in it; if it shows the old one, write it another way.",
 		);
 		await reread();
 		// Echoed but unproven on a binding field: the gesture that would commit
@@ -1658,6 +1698,22 @@ it("composes one sentence for each thing a write turns out to be", async () => {
 			`type on ${ref} AXSearchField "Editor": the value reads back as written, but a read-back is echoed by the control whether or not the app took it — check the app's own output: the rows this query filtered, not the field.`,
 		);
 		f.state.subrole = undefined;
+		await reread();
+		// Judged unproven with nothing read back: the app's end-of-edit rewrote
+		// the value, or re-created the control the driver held. The driver's own
+		// sentence carries which and quotes it; this side adds one line, and it
+		// is not the unreadable-field one — the control publishes a value, just
+		// not the one that was written.
+		const rewritten = await write(
+			{ committed: "unproven", effect: "unverifiable", evidence: null },
+			'📨 Sent (unverified) AXValue on [1] AXTextField. Commit unproven: the app\'s end-of-edit rewrote the value — it reads back as "(555) 789-0123", which is neither what was written nor the value the control held before.',
+		);
+		expect(rewritten.text.split("\n")).toHaveLength(2);
+		expect(rewritten.text.split("\n").at(-1)).toBe(
+			`setValue on ${ref} AXTextField "Editor": the driver could not prove the app kept this value — read the window back (win.observe()) and judge by the app's own output (the row, list or title it updated); rewrite only if that output still shows the old value.`,
+		);
+		expect(rewritten.text).not.toContain("publishes no readable value");
+		expect(rewritten.text).not.toContain("reads back as written");
 		await reread();
 		// Nothing could read the value: name a witness that can, and never the
 		// field, whose re-read is guaranteed to return nothing.
@@ -1696,9 +1752,9 @@ it("composes one sentence for each thing a write turns out to be", async () => {
 			`type on ${ref} AXTextField "Editor": nothing in the reply says whether the app kept this value — read the field back before building on it.`,
 		);
 		// A re-read that shows the typed text is the read-back the doubt asked
-		// for, so it is answered rather than repeated.
+		// for, so it reports what the control holds instead of repeating it.
 		f.state.value = "Project_File_List";
-		expect(await reread()).toContain(`AXTextField "Editor": reads back as written in this tree`);
+		expect(await reread()).toContain(`AXTextField "Editor": the control now holds "Project_File_List" —`);
 		f.state.value = "";
 		// `window_change` is not a read-back of the value, and its `signal` is
 		// carried for the model without a word of prose keyed on it.
@@ -1830,26 +1886,146 @@ it("carries a write nothing proved into the next observation of its own window",
 		// One sentence per write, however often the same write is repeated.
 		expect(carried.tree.split("\n")[1]).toContain("- [n");
 		// A partial delivery is the one refusal that still wrote.
+		const incomplete = (text: string, details?: Wire): void => {
+			f.state.hook = async name =>
+				name === "type_text"
+					? {
+							text,
+							errorCode: "type_text_incomplete",
+							...(details === undefined ? {} : { structuredJson: JSON.stringify(details) }),
+							isError: true,
+							images: [],
+						}
+					: undefined;
+		};
+		const refused = async (ref: string): Promise<string> => {
+			await expect(f.session.type(f.context, f.window, "Project_File_List.txt", ref)).rejects.toThrow(
+				"type_text_incomplete",
+			);
+			f.state.hook = undefined;
+			return (await f.session.observe(f.context, f.window)).tree.split("\n")[0]!;
+		};
 		const partial = await observed();
-		f.state.hook = async name =>
-			name === "type_text"
-				? {
-						text: "type_text incomplete: delivered 0 of 21 character(s) via CGEvent (30ms delay); retry only the remaining suffix",
-						errorCode: "type_text_incomplete",
-						isError: true,
-						images: [],
-					}
-				: undefined;
-		await expect(f.session.type(f.context, f.window, "Project_File_List.txt", partial)).rejects.toThrow(
-			"type_text_incomplete",
+		incomplete(
+			'type_text incomplete: delivered 6 of 21 character(s) via CGEvent (30ms delay); retry with text: "t_File_List.txt"',
+			{ code: "type_text_incomplete", effect: "partial", delivered_chars: 6, retryable: true },
 		);
-		f.state.hook = undefined;
-		// The remainder spelled out: the reply's own "retry only the remaining
-		// suffix" left the caller to slice by codepoint, and the model retyped
-		// the whole string instead.
-		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
-			`type on ${partial} AXTextField "Editor": 0 of 21 characters landed, so the field holds neither its old value nor the one asked for — type only the remainder: "Project_File_List.txt".`,
+		// The remainder spelled out: the reply's own "retry with text" left the
+		// caller to slice by codepoint, and the model retyped the whole string.
+		expect(await refused(partial)).toBe(
+			`type on ${partial} AXTextField "Editor": 6 of 21 characters landed, so the field holds neither its old value nor the one asked for — type only the remainder: "t_File_List.txt".`,
 		);
+		// Nothing delivered and the driver could not probe focus: the rung may
+		// still land, so the remainder is still the route — but the field holds
+		// what it held, which the old sentence denied.
+		const none = await observed();
+		incomplete("type_text incomplete: delivered 0 of 21 character(s) via CGEvent (30ms delay); retry with text: …");
+		expect(await refused(none)).toBe(
+			`type on ${none} AXTextField "Editor": 0 of 21 characters landed, so the field still holds its old value — type only the remainder: "Project_File_List.txt".`,
+		);
+		// Nothing delivered at a target the driver probed and found unfocused:
+		// the same keystrokes land nothing again however they are sliced, so
+		// the remainder is the one instruction that must not be printed.
+		const unfocused = await observed();
+		incomplete(
+			'type_text incomplete: delivered 0 of 21 character(s) via CGEvent (0ms delay); the addressed element did not take keyboard focus, so typed keystrokes cannot be proven to reach it: click the control first, write it with set_value, or retry with delivery_mode "foreground". A row that only displays text is not an editor',
+			{
+				code: "type_text_incomplete",
+				effect: "suspected_noop",
+				requested_chars: 21,
+				delivered_chars: 0,
+				retryable: false,
+				target_focused: false,
+			},
+		);
+		expect(await refused(unfocused)).toBe(
+			`type on ${unfocused} AXTextField "Editor": nothing landed, so the field still holds its old value and re-sending these keystrokes lands nothing again — write it without keystrokes: win.ref(${JSON.stringify(
+				unfocused,
+			)}).setValue("Project_File_List.txt"), or re-run this call with { delivery: "foreground" }.`,
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("answers a write's read-back with what the control holds, never with a verdict on the app", async () => {
+	const f = await fixture();
+	// A toolbar search field echoes its query whether or not the app ran it,
+	// and the list beside it is the answer. The sentence this replaces ("the
+	// write stands; build on it, do not rewrite it") was printed over a list
+	// the app had not filtered and bought four cells of probes that avoided
+	// rewriting the query.
+	let query = "";
+	try {
+		f.state.hook = async (name, args) => {
+			if (name === "type_text")
+				return reply({ effect: "confirmed", evidence: [{ kind: "value_readback" }], route: "accessibility" });
+			if (name !== "get_window_state") return undefined;
+			return reply({
+				pid: 101,
+				window_id: args.window_id,
+				snapshot_id: `q${query.length}`,
+				elements: [
+					{
+						element_index: 1,
+						element_token: `q${query.length}:1`,
+						role: "AXTextField",
+						subrole: "AXSearchField",
+						label: "Search",
+						value: query,
+						depth: 0,
+					},
+					{ element_index: 2, element_token: `q${query.length}:2`, role: "AXRow", label: "Aidan Byrne", depth: 0 },
+				],
+				window_bounds: f.row.bounds,
+			});
+		};
+		const search = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const written = await f.session.type(f.context, f.window, "Robert Green", search);
+		expect(written.text.split("\n").at(-1)).toContain("nothing in the reply says whether the app kept this value");
+		// The field took the text; the list did not move.
+		query = "Robert Green";
+		const tree = (await f.session.observe(f.context, f.window)).tree;
+		expect(tree.split("\n")[0]).toBe(
+			`type on ${search} AXSearchField "Search": the control now holds "Robert Green" — that is the field, not the app's response; judge by the app's own output (rows filtered, title changed, list updated).`,
+		);
+		expect(tree).toContain('AXRow "Aidan Byrne"');
+		expect(tree).not.toContain("the write stands");
+		expect(tree).not.toContain("build on it");
+	} finally {
+		await f.close();
+	}
+});
+
+it("says a write was not dispatched at a control that is gone, instead of asking for a read-back", async () => {
+	const f = await fixture();
+	const dead = {
+		text: "Background input refused (element_no_longer_exists): the addressed element is no longer in the accessibility tree; take a fresh get_window_state snapshot and re-address it",
+		structuredJson: JSON.stringify({
+			code: "element_no_longer_exists",
+			effect: "refused",
+			escalation: {
+				reason: "the addressed element is no longer in the accessibility tree",
+				recommended: "get_window_state",
+			},
+			pid: 101,
+			window_id: 1,
+		}),
+		isError: true,
+		errorCode: "element_no_longer_exists",
+		images: [],
+	};
+	try {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		f.state.hook = async name => (name === "set_value" ? dead : undefined);
+		// The row is not in the fresh tree under any reference.
+		f.state.label = "Editor (renamed)";
+		const answered = await f.session.setValue(f.context, f.window, ref, "Project_File_List");
+		expect(answered.effect).toBe("not_dispatched");
+		expect(answered.text.split("\n").at(-1)).toBe(
+			`setValue on ${ref} AXTextField "Editor": not dispatched — the control is gone; address a row in the tree below.`,
+		);
+		expect(answered.text).not.toContain("read the field back");
 	} finally {
 		await f.close();
 	}

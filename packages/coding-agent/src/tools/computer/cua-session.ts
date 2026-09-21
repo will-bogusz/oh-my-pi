@@ -181,7 +181,7 @@ function projectRows(rows: readonly TreeRow[], query: string): { rows: TreeRow[]
 function treeRows(rows: readonly TreeRow[], indent: number): string {
 	return rows
 		.flatMap(({ depth, element, notes }) => [
-			`${"  ".repeat(depth + indent)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${renderedSubrole(element)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.description !== undefined ? ` description=${JSON.stringify(element.description)}` : ""}${element.help !== undefined ? ` help=${JSON.stringify(element.help)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
+			`${"  ".repeat(depth + indent)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${renderedSubrole(element)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.description !== undefined ? ` description=${JSON.stringify(element.description)}` : ""}${element.help !== undefined ? ` help=${JSON.stringify(element.help)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.settable === true ? " settable=true" : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
 			...(notes ?? []).map(note => `${"  ".repeat(note.depth + indent)}- ${note.text}`),
 		])
 		.join("\n");
@@ -1533,6 +1533,11 @@ export class CuaComputerSession implements ComputerBackend {
 					: {}),
 				...(typeof row.enabled === "boolean" ? { enabled: row.enabled } : {}),
 				...(typeof row.selected === "boolean" ? { selected: row.selected } : {}),
+				// A control whose value the provider will accept. Said only where
+				// it is true, because it is the difference between a row to write
+				// to and a row to drive with keys: a date area or a stepper reads
+				// like a text field and refuses typing.
+				...(row.value_settable === true ? { settable: true as const } : {}),
 				...(actions?.length ? { actions } : {}),
 				...(row.frame ? { bounds: bounds(row.frame) } : {}),
 			});
@@ -2254,13 +2259,14 @@ export class CuaComputerSession implements ComputerBackend {
 			const result = await dispatched;
 			const note = writeNote(result, facts(result.text, result.escalation !== undefined));
 			if (note === undefined) return result;
-			// Two doubts are answered by a read-back: a `not_committed` verdict
-			// (the driver had no commit gesture to watch, or read the field too
-			// early) and a confirmed delivery the driver did not judge at all
-			// (keystrokes, which never carry a verdict). A field of that role
-			// showing the value settles both. An unverifiable or unproven write
-			// stays doubted, because there the value in the tree is the echo the
-			// doubt is about.
+			// Two doubts are worth re-reading the control for: a `not_committed`
+			// verdict (the driver had no commit gesture to watch, or read the
+			// field too early) and a confirmed delivery the driver did not judge
+			// at all (keystrokes, which never carry a verdict). What the tree
+			// then shows replaces the doubt with what the control holds — not
+			// with a verdict on the app. An unverifiable or unproven write is
+			// not re-read at all: there the driver has already said the value in
+			// the tree is the echo the doubt is about.
 			const answerable =
 				result.committed === "not_committed" || (result.committed === undefined && result.effect === "confirmed");
 			this.#doubt(
@@ -2271,7 +2277,7 @@ export class CuaComputerSession implements ComputerBackend {
 			return { ...result, text: result.text ? `${result.text}\n${note}` : note };
 		} catch (error) {
 			if (!(error instanceof ToolError) || !error.message.startsWith(INCOMPLETE_TYPING)) throw error;
-			const note = incompleteNote(field, value, error.message);
+			const note = incompleteNote(facts(error.message, false), value, error.message, readReply(error.context));
 			this.#doubt(window.id, note);
 			throw new ToolError(`${error.message}\n${note}`, error.context);
 		}
@@ -2283,10 +2289,20 @@ export class CuaComputerSession implements ComputerBackend {
 		else this.#writes.set(windowId, new Map([[sentence, { sentence, readBack }]]));
 	}
 	/**
-	 * The doubts this observation answers or carries. A field of the written
-	 * role that now shows the value is the read-back the doubt asked for; the
-	 * bench's persistence excursions all began on a carried doubt whose
-	 * answer was printed in the same tree.
+	 * The doubts this observation answers or carries. A control of the written
+	 * role that now shows the value is the read-back the doubt asked for, and
+	 * it is reported as exactly that and nothing more: a control holding the
+	 * text proves the control holds the text, never that the app acted on it.
+	 * The sentence this replaces ("the write stands; build on it, do not
+	 * rewrite it") was printed over a search field whose list the app had not
+	 * filtered, and bought four cells of probes that avoided rewriting the
+	 * one thing that was wrong. Every control gets the same sentence, because
+	 * the distinction is not a property of the role: a filter field, a
+	 * spreadsheet cell and a rename box all echo what was written into them.
+	 *
+	 * Shown is trimmed containment, so a value the app padded or wrapped
+	 * still counts as the one written; a value the app rewrote does not, and
+	 * its doubt stands, which is what the driver's own verdict says of it.
 	 */
 	#doubtedWrites(windowId: string, rows: readonly TreeRow[]): readonly string[] {
 		const doubts = this.#writes.get(windowId);
@@ -2295,17 +2311,15 @@ export class CuaComputerSession implements ComputerBackend {
 		return [...doubts.values()].map(doubt => {
 			const readBack = doubt.readBack;
 			if (readBack === undefined) return doubt.sentence;
-			const shown = rows.some(
-				row =>
-					row.element.role === readBack.role &&
-					row.element.value !== undefined &&
-					(readBack.operation === "setValue"
-						? row.element.value === readBack.value
-						: row.element.value.includes(readBack.value)),
-			);
-			return shown
-				? `${readBack.field}: reads back as written in this tree — the write stands; build on it, do not rewrite it.`
-				: doubt.sentence;
+			const written = readBack.value.trim();
+			const shows = (value: string | undefined): boolean =>
+				value !== undefined && (written === "" ? value.trim() === "" : value.trim().includes(written));
+			const held = rows.find(row => row.element.role === readBack.role && shows(row.element.value))?.element.value;
+			return held === undefined
+				? doubt.sentence
+				: `${readBack.field}: the control now holds ${JSON.stringify(
+						held,
+					)} — that is the field, not the app's response; judge by the app's own output (rows filtered, title changed, list updated).`;
 		});
 	}
 	/**
