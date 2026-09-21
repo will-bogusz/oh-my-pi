@@ -4619,32 +4619,26 @@ it("dispatches every action a node advertises and refuses only what its row neve
 	}
 });
 
-it("renders a row's press as a secondary action the tree does not offer first", async () => {
+it("lists a row's own press alongside every other action the row advertises", async () => {
 	const f = await fixture();
 	try {
-		// The measured row: a background click at its centre moved the selection
-		// and left the reminder incomplete, and the row did not advertise
-		// `AXPress` at all — its inner cell did. `press` was still the first verb
-		// the tree offered for it, and the bench pressed rows it meant to select.
-		f.state.role = "AXRow";
+		// Withholding `press` from list roles left the model told twice over:
+		// 147 cells in one leg printed `help="Perform press or select Return to
+		// open note."` beside an `actions=` list the press was cut from. Which
+		// gesture selects is the driver's per-dispatch call, not a row
+		// attribute, so every role's list is what that row offers.
 		f.state.label = "Incomplete, Buy milk";
 		f.state.value = undefined;
 		f.state.actions = ["AXPress", "AXShowMenu", "Move Down"];
-		let observation = await f.session.observe(f.context, f.window);
-		expect(observation.elements[0]!.actions).toEqual(["show_menu", "Move Down"]);
-		expect(observation.tree).toContain('actions=["show_menu","Move Down"]');
-		// Reachable by the one route that names it explicitly.
+		for (const role of ["AXRow", "AXCell", "AXListItem", "AXButton"]) {
+			f.state.role = role;
+			const observation = await f.session.observe(f.context, f.window);
+			expect(observation.elements[0]!.actions).toEqual(["press", "show_menu", "Move Down"]);
+			expect(observation.tree).toContain('actions=["press","show_menu","Move Down"]');
+		}
+		const observation = await f.session.observe(f.context, f.window);
 		await f.session.perform(f.context, f.window, observation.elements[0]!.ref, "press");
 		expect(f.lastDispatch()).toMatchObject({ name: "click", args: { action: "press" } });
-		for (const role of ["AXCell", "AXListItem"]) {
-			f.state.role = role;
-			observation = await f.session.observe(f.context, f.window);
-			expect(observation.elements[0]!.actions).toEqual(["show_menu", "Move Down"]);
-		}
-		// Every other role is pressed by a click, so its own list says so.
-		f.state.role = "AXButton";
-		observation = await f.session.observe(f.context, f.window);
-		expect(observation.elements[0]!.actions).toEqual(["press", "show_menu", "Move Down"]);
 	} finally {
 		await f.close();
 	}

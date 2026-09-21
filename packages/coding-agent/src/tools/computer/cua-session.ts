@@ -1689,7 +1689,7 @@ export class CuaComputerSession implements ComputerBackend {
 				throw new ToolError("Malformed Cua custom actions");
 			const custom = customActions(row.custom_actions);
 			const role = string(row.role, "role");
-			const actions = observedActions(role, row.background_actions ?? row.actions, [...custom.keys()]);
+			const actions = observedActions(row.background_actions ?? row.actions, [...custom.keys()]);
 			const element = Object.freeze({
 				ref,
 				pid: window.pid,
