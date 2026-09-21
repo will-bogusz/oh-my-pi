@@ -84,6 +84,16 @@ interface ElementIdentity {
 	path: readonly string[];
 	ordinal: number;
 }
+/** A ref the last walk of its window dropped, and what it pointed at. */
+interface RetiredRef {
+	identity: ElementIdentity;
+	/**
+	 * This session dispatched through the ref before the walk retired it, so
+	 * its value is expected to differ from what the tree now holds. Nothing
+	 * else may differ: the row's place is the same row or it is another row.
+	 */
+	acted: boolean;
+}
 interface Binding {
 	window: ComputerWindowIdentity;
 	token: string;
@@ -125,6 +135,16 @@ interface WriteDoubt {
 		readonly operation: "setValue" | "type";
 		readonly value: string;
 	};
+}
+/**
+ * Where a row sits, independently of what it holds: its role, its label, the
+ * chain of roles and labels above it and its position among the siblings
+ * that share its role. What the row holds is deliberately not part of it — a
+ * field this session just wrote through has a new value by construction — so
+ * the value is compared on its own by whoever needs it.
+ */
+function placeKey(identity: ElementIdentity): string {
+	return JSON.stringify([identity.role, identity.label, identity.ordinal, identity.path]);
 }
 function renderedSubrole(element: ComputerElementSnapshot): string {
 	const specific = specificRole(element);
@@ -578,7 +598,27 @@ export class CuaComputerSession implements ComputerBackend {
 	 * mints. One generation per window: a ref older than that cannot reach the
 	 * driver at all, because `#invalidate` retires it first.
 	 */
-	readonly #retired = new Map<string, ReadonlyMap<string, ElementIdentity>>();
+	readonly #retired = new Map<string, ReadonlyMap<string, RetiredRef>>();
+	/**
+	 * Retired refs a walk this session ran on its own — never one the caller
+	 * asked for — matched straight back to a row of the tree it minted, by
+	 * the ref the caller is holding. The contract the model is given is that
+	 * refs live until its next `observe`/`find` (`computer.md:8`), and a
+	 * mid-cell recovery walk used to break it silently: the bench batched
+	 * five field writes behind one observation, the second died on a
+	 * re-created control, and the walk that answered it retired the three
+	 * refs the cell had not spent yet — `StaleRef`, cell dead, the card
+	 * half-written. An alias costs nothing when the row is the same row and
+	 * is refused when it may not be; the printed tree always carries the new
+	 * refs.
+	 */
+	readonly #carried = new Map<string, Binding>();
+	/**
+	 * Refs this session dispatched through since the walk that minted them.
+	 * Their value is the one thing about them that is expected to have
+	 * changed, so they are the only refs carried across a value that moved.
+	 */
+	readonly #acted = new Set<string>();
 	/**
 	 * Each pid's on-screen ids as of its last observation, its rows as of the
 	 * last roster read, and the driver's capture-lease windows, which are nobody's.
@@ -714,6 +754,8 @@ export class CuaComputerSession implements ComputerBackend {
 		logger.warn("cua-driver child is gone; respawning", { previousPid: this.#driver.pid });
 		this.#driver = await this.#spawn();
 		this.#elements.clear();
+		this.#carried.clear();
+		this.#acted.clear();
 		this.#frames.clear();
 		this.#documents.clear();
 		this.#desktopFrame = undefined;
@@ -1216,13 +1258,68 @@ export class CuaComputerSession implements ComputerBackend {
 		);
 	}
 	#invalidate(window: Pick<ComputerWindowIdentity, "id" | "pid">): void {
-		const retired = new Map<string, ElementIdentity>();
-		for (const [ref, binding] of this.#elements)
-			if (binding.window.id === window.id && binding.window.pid === window.pid) {
-				retired.set(ref, binding.identity);
-				this.#elements.delete(ref);
-			}
+		const retired = new Map<string, RetiredRef>();
+		const park = (live: Map<string, Binding>): void => {
+			for (const [ref, binding] of live)
+				if (binding.window.id === window.id && binding.window.pid === window.pid) {
+					retired.set(ref, { identity: binding.identity, acted: this.#acted.delete(ref) });
+					live.delete(ref);
+				}
+		};
+		park(this.#elements);
+		// A carried ref is parked under the identity it was last matched on,
+		// so a second walk in the same cell can carry it again instead of
+		// stranding it one generation behind the tree it is still using.
+		park(this.#carried);
 		this.#retired.set(window.id, retired);
+	}
+	/**
+	 * What a ref resolves to: the row this window's current walk minted for
+	 * it, or the row a recovery walk matched it back to. Both are bindings of
+	 * the live tree; only the key differs.
+	 */
+	#bound(ref: string): Binding | undefined {
+		return this.#elements.get(ref) ?? this.#carried.get(ref);
+	}
+	/**
+	 * Hands the refs a walk this session ran on its own back to the rows they
+	 * named, where the fresh tree says which row that is. Only a walk the
+	 * caller did not ask for may call this: the caller's own `observe`/`find`
+	 * is what retires refs, and a walk that aliased across it would make the
+	 * contract unfalsifiable.
+	 *
+	 * A row is the same row when it sits in the same place — role, label, the
+	 * chain above it, position among same-role siblings — and holds the same
+	 * value. Place alone is not enough: a list whose rows carry no title of
+	 * their own gives every cell the same place, and a form re-bound to a
+	 * different record keeps every field's place while changing what is in
+	 * it. The one ref exempt from the value test is a ref this session
+	 * dispatched through, whose value moved because of that dispatch; it is
+	 * carried when its place is unique. Everything else stays retired and
+	 * answers `StaleRef`, exactly as before.
+	 */
+	#carry(window: ComputerWindowIdentity): ReadonlyMap<string, readonly [ref: string, binding: Binding]> {
+		const carried = new Map<string, readonly [string, Binding]>();
+		const retired = this.#retired.get(window.id);
+		if (retired === undefined || retired.size === 0) return carried;
+		const places = new Map<string, (readonly [string, Binding])[]>();
+		for (const entry of this.#elements) {
+			const [, row] = entry;
+			if (row.window.id !== window.id || row.window.pid !== window.pid) continue;
+			const key = placeKey(row.identity);
+			const sharing = places.get(key);
+			if (sharing) sharing.push(entry);
+			else places.set(key, [entry]);
+		}
+		for (const [ref, { identity, acted }] of retired) {
+			const placed = places.get(placeKey(identity)) ?? [];
+			const valued = placed.filter(([, row]) => row.identity.value === identity.value);
+			const match = valued.length === 1 ? valued[0] : acted && placed.length === 1 ? placed[0] : undefined;
+			if (match === undefined) continue;
+			this.#carried.set(ref, match[1]);
+			carried.set(ref, match);
+		}
+		return carried;
 	}
 	/**
 	 * Every refusal this session composes itself carries the same structured
@@ -1231,9 +1328,9 @@ export class CuaComputerSession implements ComputerBackend {
 	 * problem rather than a row that is gone.
 	 */
 	#binding(ref: string, window?: ComputerWindowIdentity): Binding {
-		const binding = this.#elements.get(ref);
+		const binding = this.#bound(ref);
 		if (this.#closed || !binding)
-			throw new ToolError(`StaleRef: ${this.#staleSheetRefs.get(ref) ?? "observe the window again"}`, {
+			throw new ToolError(`StaleRef: ${ref} — ${this.#staleSheetRefs.get(ref) ?? "observe the window again"}`, {
 				code: "stale_element_ref",
 				effect: "not_dispatched",
 				ref,
@@ -1607,14 +1704,19 @@ export class CuaComputerSession implements ComputerBackend {
 	}
 	#retireSheet(id: string, title: string): void {
 		this.#sheets.delete(id);
-		for (const [ref, binding] of this.#elements) {
-			if (binding.window.id !== id) continue;
-			this.#elements.delete(ref);
-			this.#staleSheetRefs.set(
-				ref,
-				`sheet ${JSON.stringify(title)} (window ${id}) is gone; observe the window that had it again`,
-			);
-		}
+		const drop = (live: Map<string, Binding>): void => {
+			for (const [ref, binding] of live) {
+				if (binding.window.id !== id) continue;
+				live.delete(ref);
+				this.#acted.delete(ref);
+				this.#staleSheetRefs.set(
+					ref,
+					`sheet ${JSON.stringify(title)} (window ${id}) is gone; observe the window that had it again`,
+				);
+			}
+		};
+		drop(this.#elements);
+		drop(this.#carried);
 	}
 	async #state(
 		context: Context,
@@ -1981,7 +2083,7 @@ export class CuaComputerSession implements ComputerBackend {
 			windowId,
 			pid: typeof args.pid === "number" ? args.pid : undefined,
 			addressed,
-			element: addressed === undefined ? undefined : this.#elements.get(addressed)?.element,
+			element: addressed === undefined ? undefined : this.#bound(addressed)?.element,
 			rows,
 			captured: windowId !== undefined && this.#frames.has(windowId),
 			holds: id => this.#holdsWindow(id),
@@ -2071,6 +2173,11 @@ export class CuaComputerSession implements ComputerBackend {
 	 * non-throwing shape the surface already uses for "we do not believe this
 	 * landed", with nothing dispatched and the current tree in hand.
 	 *
+	 * That walk is this session's, not the caller's, so it does not spend the
+	 * caller's refs either: `#carry` hands every ref it re-minted back to the
+	 * row it named wherever the fresh tree says which row that is, and the
+	 * batch behind the dead one goes on dispatching.
+	 *
 	 * Only where a re-read can answer, which the reply says: `element_
 	 * outside_target_window` also covers a row that is alive in another
 	 * window (`acquire_window` — this window's tree provably cannot hold it)
@@ -2093,8 +2200,12 @@ export class CuaComputerSession implements ComputerBackend {
 		if (!deadElement(reply)) return undefined;
 		if (recover === undefined || typeof target !== "string" || typeof args.element_token !== "string")
 			return undefined;
-		const binding = this.#elements.get(target);
+		const binding = this.#bound(target);
 		const snapshot = binding?.element;
+		// Whatever was attempted through this ref, the refusal says it did not
+		// land, so this row's own value is as untouched as any other row's and
+		// it is carried on the same terms as its siblings.
+		this.#acted.delete(target);
 		let rows: readonly TreeRow[];
 		try {
 			const { reply, current } = await this.#state(recover.context, recover.window, {
@@ -2111,39 +2222,46 @@ export class CuaComputerSession implements ComputerBackend {
 			snapshot === undefined
 				? target
 				: `${target} (${snapshot.role}${snapshot.label ? ` ${JSON.stringify(snapshot.label)}` : ""})`;
-		const identity = binding?.identity ?? this.#retired.get(recover.window.id)?.get(target);
-		const fresh = [...this.#elements].filter(([, row]) => row.window.id === recover.window.id);
-		const matches =
-			identity === undefined
-				? []
-				: fresh.filter(
-						([, row]) =>
-							row.identity.role === identity.role &&
-							row.identity.label === identity.label &&
-							row.identity.value === identity.value &&
-							row.identity.ordinal === identity.ordinal &&
-							row.identity.path.length === identity.path.length &&
-							row.identity.path.every((step, index) => step === identity.path[index]),
-					);
+		const carried = this.#carry(recover.window);
+		const identity = binding?.identity ?? this.#retired.get(recover.window.id)?.get(target)?.identity;
 		const under = identity?.path.at(-1);
-		if (matches.length === 1) {
-			const [ref, row] = matches[0]!;
-			const note = `${named}${under ? `, under ${under},` : ""} no longer exists in window ${
+		// Said wherever this reply ends up, because it is the answer to the
+		// question a dead ref raises about every other ref the caller is
+		// holding: this walk is not the caller's `observe`, and it did not
+		// end their lives.
+		const contract =
+			"That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.";
+		const retargeted = carried.get(target);
+		if (retargeted !== undefined) {
+			const [ref, row] = retargeted;
+			const lead = `${named}${under ? `, under ${under},` : ""} no longer exists in window ${
 				recover.window.id
-			} and nothing was dispatched at it — ${ref} is the one row of the fresh tree with the same role, label, value and position, so the action was dispatched there instead. That walk re-minted this window's refs: ${target} is retired, and this row is ${ref} from here on.`;
-			recover.context.emitText(note);
+			} and nothing was dispatched at it — ${ref} is the one row of the fresh tree with the same role, label, value and position`;
 			try {
 				const result = await this.#action(name, {
 					...args,
 					element_token: row.token,
 					snapshot_id: row.snapshotId,
 				});
+				const note = `${lead}, so the action was dispatched at ${ref} instead. ${contract}`;
 				return { ...result, text: result.text ? `${note}\n${result.text}` : note };
 			} catch (again) {
 				if (!(again instanceof ToolError)) throw again;
-				throw new ToolError(`${note}\n${again.message}`, again.context);
+				// Re-addressing is not a verdict. A retarget whose dispatch the
+				// driver then refused used to read as "dispatched there
+				// instead" with a refusal under it, which is two accounts of
+				// one call: the row took the action, and the row refused it.
+				throw new ToolError(
+					`${lead}, so the action was re-addressed to ${ref}, which refused it. ${contract}\n${again.message}`,
+					again.context,
+				);
 			}
 		}
+		const fresh = [...this.#elements].filter(
+			([, row]) => row.window.id === recover.window.id && row.window.pid === recover.window.pid,
+		);
+		const place = identity === undefined ? undefined : placeKey(identity);
+		const placed = place === undefined ? 0 : fresh.filter(([, row]) => placeKey(row.identity) === place).length;
 		const sameName =
 			identity === undefined
 				? 0
@@ -2155,14 +2273,14 @@ export class CuaComputerSession implements ComputerBackend {
 				: sameName === 0
 					? "no row of the fresh tree carries its role and label"
 					: `the fresh tree has ${sameName} row(s) with its role and label, ${
-							matches.length ? `${matches.length} of them` : "none"
+							placed ? `${placed} of them` : "none"
 						} in the same position${under ? ` under ${under}` : ""}`;
-		// The walk retired this window's refs to mint the tree below, so the
-		// sentence that closes a dead ref has to hand the new ones back: the
-		// bench read "That window as it is now — address the row you mean from
-		// it." as a fragment and retried the dead ref, which throws `StaleRef`.
+		// The walk retired this ref to mint the tree below, so the sentence
+		// that closes it has to hand the new one back: the bench read "That
+		// window as it is now — address the row you mean from it." as a
+		// fragment and retried the dead ref, which throws `StaleRef`.
 		const readdress = rows.length
-			? `${target} is retired and the tree below carries this window's new refs — address the row you mean by its new ref.`
+			? `${target} is retired and the tree below carries this window's new refs — address the row you mean by its new ref. ${contract}`
 			: `${target} is retired and this walk minted no refs to address — observe the window again (win.observe()) once it has rows.`;
 		const text = `${reply.code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${
 			rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown."
@@ -2184,6 +2302,10 @@ export class CuaComputerSession implements ComputerBackend {
 		target: ComputerTarget | undefined,
 		recover?: { context: Context; window: ComputerWindowIdentity },
 	): Promise<ComputerActionResult> {
+		// Whatever this dispatch does to the row, its value is the part of its
+		// identity that is expected to move: `#carry` reads this to tell a
+		// field it just wrote from a field that changed under it.
+		if (typeof target === "string") this.#acted.add(target);
 		try {
 			return await this.#action(name, args);
 		} catch (error) {
@@ -2191,7 +2313,7 @@ export class CuaComputerSession implements ComputerBackend {
 			if (!(error instanceof ToolError)) throw error;
 			const gone = await this.#deadElement(name, error, args, target, recover);
 			if (gone !== undefined) return gone;
-			const route = menuBarRoute(typeof target === "string" ? this.#elements.get(target)?.element : undefined);
+			const route = menuBarRoute(typeof target === "string" ? this.#bound(target)?.element : undefined);
 			if (route === undefined) throw error;
 			throw new ToolError(`${error.message}${route}`, error.context);
 		}
@@ -2289,7 +2411,7 @@ export class CuaComputerSession implements ComputerBackend {
 	): Promise<ComputerActionResult> {
 		// The field is named as the observation printed it before the dispatch,
 		// which may re-mint this window's refs on the way.
-		const element = typeof target === "string" ? this.#elements.get(target)?.element : undefined;
+		const element = typeof target === "string" ? this.#bound(target)?.element : undefined;
 		const facts = (text: string, escalated: boolean): WriteFacts => ({
 			...this.#facts(
 				operation === "type" ? "type_text" : "set_value",
@@ -2458,7 +2580,7 @@ export class CuaComputerSession implements ComputerBackend {
 		ref: string,
 		action: string,
 	): Promise<ComputerActionResult> {
-		const binding = this.#elements.get(ref);
+		const binding = this.#bound(ref);
 		const custom = binding?.customActions.get(action);
 		const semantic = semanticAction(action);
 		const advertised = binding?.element.actions ?? [];
@@ -2920,6 +3042,8 @@ export class CuaComputerSession implements ComputerBackend {
 				await this.#driver.kill();
 			} finally {
 				this.#elements.clear();
+				this.#carried.clear();
+				this.#acted.clear();
 				this.#frames.clear();
 				this.#documents.clear();
 				this.#desktopFrame = undefined;

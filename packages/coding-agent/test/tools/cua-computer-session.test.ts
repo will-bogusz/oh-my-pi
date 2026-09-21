@@ -3023,7 +3023,7 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 		const answered = await f.session.click(f.context, f.window, ref);
 		expect(answered.effect).toBe("not_dispatched");
 		expect(answered.text.split("\n")[0]).toBe(
-			`element_outside_target_window: ${ref} (AXTextField "Editor") no longer exists in window 1 and nothing was dispatched — no row of the fresh tree carries its role and label. ${ref} is retired and the tree below carries this window's new refs — address the row you mean by its new ref.`,
+			`element_outside_target_window: ${ref} (AXTextField "Editor") no longer exists in window 1 and nothing was dispatched — no row of the fresh tree carries its role and label. ${ref} is retired and the tree below carries this window's new refs — address the row you mean by its new ref. That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.`,
 		);
 		// The tree is in the reply and in the cell, not only in a return value
 		// the cell is free to drop.
@@ -3226,10 +3226,13 @@ it("re-addresses a vanished ref only when one row of the new tree is the same ro
 		const remapped = await f.session.click(f.context, f.window, ref);
 		expect(remapped.effect).toBe("unverifiable");
 		expect(remapped.text.split("\n")[0]).toBe(
-			`${ref} (AXCheckBox "Mark as completed"), under AXRow "Incomplete, Loaf of bread", no longer exists in window 1 and nothing was dispatched at it — n8 is the one row of the fresh tree with the same role, label, value and position, so the action was dispatched there instead. That walk re-minted this window's refs: ${ref} is retired, and this row is n8 from here on.`,
+			`${ref} (AXCheckBox "Mark as completed"), under AXRow "Incomplete, Loaf of bread", no longer exists in window 1 and nothing was dispatched at it — n8 is the one row of the fresh tree with the same role, label, value and position, so the action was dispatched at n8 instead. That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.`,
 		);
 		expect(f.calls.filter(call => call.name === "click")).toHaveLength(2);
 		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "t:3", snapshot_id: "w9" });
+		// Said once, on the reply. Pushing it into the cell as well printed it
+		// twice in every transcript that hit this path.
+		expect(f.texts.filter(text => text.includes("is the one row of the fresh tree"))).toHaveLength(0);
 
 		// Rows an app leaves untitled: role and label match three ways and the
 		// position matches two, so no row is that row. Nothing is dispatched.
@@ -3240,9 +3243,211 @@ it("re-addresses a vanished ref only when one row of the new tree is the same ro
 		const refused = await f.session.click(f.context, fresh, ambiguous);
 		expect(refused.effect).toBe("not_dispatched");
 		expect(refused.text.split("\n")[0]).toBe(
-			`element_no_longer_exists: ${ambiguous} (AXCheckBox "Mark as completed") no longer exists in window 1 and nothing was dispatched — the fresh tree has 2 row(s) with its role and label, 2 of them in the same position under AXRow "". ${ambiguous} is retired and the tree below carries this window's new refs — address the row you mean by its new ref.`,
+			`element_no_longer_exists: ${ambiguous} (AXCheckBox "Mark as completed") no longer exists in window 1 and nothing was dispatched — the fresh tree has 2 row(s) with its role and label, 2 of them in the same position under AXRow "". ${ambiguous} is retired and the tree below carries this window's new refs — address the row you mean by its new ref. That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.`,
 		);
 		expect(f.calls.filter(call => call.name === "click")).toHaveLength(before + 1);
+	} finally {
+		await f.close();
+	}
+});
+
+/**
+ * `mixed-web-contact/omp-1` cell 5, in shape: one observation, five writes
+ * batched behind it, the second dispatch landing on a control the app had
+ * just re-created. The recovery walk re-minted the window's refs and the
+ * three unspent writes died on `StaleRef` with the cell, losing a
+ * half-written contact card the run then spent 15 cells rebuilding.
+ */
+const DEAD_ROW = {
+	text: "Background input refused (element_no_longer_exists): the addressed element no longer exists (its accessibility reference is invalid)",
+	structuredJson: JSON.stringify({
+		code: "element_no_longer_exists",
+		effect: "not_dispatched",
+		route: "ax",
+		reason: "the addressed element no longer exists (its accessibility reference is invalid)",
+		window_id: 1,
+		pid: 101,
+	}),
+	isError: true,
+	errorCode: "element_no_longer_exists",
+	images: [],
+};
+/**
+ * A card of fields under one group, as an app re-lays it out: every
+ * generation mints new element tokens, and the toggle disappears from the
+ * generation that answers the refusal.
+ */
+function card(generation: number, company: string, toggle: boolean, street = ""): Wire[] {
+	const token = (index: number) => `g${generation}:${index}`;
+	return [
+		{ element_index: 1, element_token: token(1), role: "AXGroup", label: "Contact", depth: 0 },
+		{ element_index: 2, element_token: token(2), role: "AXTextField", label: "Company", value: company, depth: 1 },
+		...(toggle
+			? [{ element_index: 3, element_token: token(3), role: "AXCheckBox", label: "Company", value: "0", depth: 1 }]
+			: []),
+		{ element_index: 4, element_token: token(4), role: "AXTextField", label: "Phone", value: "", depth: 1 },
+		{ element_index: 5, element_token: token(5), role: "AXTextField", label: "Street", value: street, depth: 1 },
+	];
+}
+
+it("carries the rest of a batch's refs across the walk a dead ref provoked", async () => {
+	const f = await fixture();
+	try {
+		let generation = 0;
+		let company = "";
+		let toggle = true;
+		f.state.hook = async (name, args) => {
+			if (name === "get_window_state")
+				return reply({
+					pid: 101,
+					window_id: 1,
+					snapshot_id: `w${++generation}`,
+					truncated: false,
+					// The card comes back holding another record's street: same
+					// field, same place, contents this session did not write.
+					elements: card(generation, company, toggle, toggle ? "" : "1 Infinite Loop"),
+				});
+			// The app re-creates the card on the first write's end-of-edit, so
+			// the toggle the next dispatch addresses is gone by then.
+			if (name === "set_value" && args.element_token === "g1:2") {
+				company = String(args.value);
+				toggle = false;
+			}
+			return name === "click" && args.element_token === "g1:3" ? DEAD_ROW : undefined;
+		};
+		const observed = await f.session.observe(f.context, f.window);
+		const [, companyField, checkbox, phone, street] = observed.elements.map(element => element.ref);
+		// One cell: write a field, toggle a control that dies under it, write
+		// two more fields. Every dispatch answers with its own verdict.
+		const first = await f.session.setValue(f.context, f.window, companyField!, "Apple Park Visitor Center");
+		const dead = await f.session.click(f.context, f.window, checkbox!);
+		const third = await f.session.setValue(f.context, f.window, phone!, "408 961-1560");
+		expect([first.effect, dead.effect, third.effect]).toEqual([
+			"unverifiable",
+			"not_dispatched",
+			"unverifiable",
+		]);
+		// The third write reached the row the recovery walk minted, through
+		// the ref the cell was holding from before it.
+		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "g2:4", snapshot_id: "w2" });
+		// The dead ref is the only one retired: it has no row in the fresh
+		// tree, and that reply is the one place the tree is printed.
+		expect(dead.text.split("\n")[0]).toBe(
+			`element_no_longer_exists: ${checkbox} (AXCheckBox "Company") no longer exists in window 1 and nothing was dispatched — no row of the fresh tree carries its role and label. ${checkbox} is retired and the tree below carries this window's new refs — address the row you mean by its new ref. That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.`,
+		);
+		expect(f.texts.filter(text => text.includes("] AXTextField "))).toHaveLength(1);
+		expect(dead.text).toContain(`- [n${observed.elements.length + 2}] AXTextField "Company"`);
+		await expect(f.session.click(f.context, f.window, checkbox!)).rejects.toThrow(`StaleRef: ${checkbox} —`);
+		// A ref this session wrote through carries on its place alone: the
+		// value it no longer matches is the one this session put there.
+		await f.session.setValue(f.context, f.window, companyField!, "Apple Park");
+		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "g2:2", snapshot_id: "w2" });
+		// A sibling this session did not touch whose value moved anyway is
+		// not provably the same row — a form re-bound to another record keeps
+		// every field's place — so it stays retired.
+		await expect(f.session.setValue(f.context, f.window, street!, "no")).rejects.toThrow(`StaleRef: ${street} —`);
+		// The caller's own observation is what retires refs, and still does.
+		await f.session.observe(f.context, f.window);
+		await expect(f.session.setValue(f.context, f.window, phone!, "no")).rejects.toThrow(`StaleRef: ${phone} —`);
+	} finally {
+		await f.close();
+	}
+});
+
+it("refuses to carry a ref two rows of the fresh tree could be", async () => {
+	const f = await fixture();
+	try {
+		let generation = 0;
+		// Two rows an app leaves untitled: same role, same label, same place
+		// under their own untitled row, same value. Neither is that row.
+		const twins = (): Wire[] => [
+			{ element_index: 1, element_token: `g${generation}:1`, role: "AXOutline", label: "", depth: 0 },
+			...[0, 1].flatMap(index => [
+				{ element_index: 2 + index * 2, element_token: `g${generation}:${2 + index * 2}`, role: "AXRow", label: "", depth: 1 },
+				{
+					element_index: 3 + index * 2,
+					element_token: `g${generation}:${3 + index * 2}`,
+					role: "AXCheckBox",
+					label: "Done",
+					value: "0",
+					depth: 2,
+				},
+			]),
+		];
+		f.state.hook = async (name, args) => {
+			if (name === "get_window_state")
+				return reply({
+					pid: 101,
+					window_id: 1,
+					snapshot_id: `w${++generation}`,
+					truncated: false,
+					elements: twins(),
+				});
+			return name === "click" && args.element_token === "g1:3" ? DEAD_ROW : undefined;
+		};
+		const observed = await f.session.observe(f.context, f.window);
+		const twin = observed.elements[4]!.ref;
+		expect(observed.elements[4]!.label).toBe("Done");
+		const dispatched = await f.session.click(f.context, f.window, observed.elements[2]!.ref);
+		expect(dispatched.effect).toBe("not_dispatched");
+		// The same walk carried the one row nothing else could be — the
+		// outline itself — so the twin is refused on its ambiguity, not
+		// because the walk retired everything it touched.
+		expect(f.session.element(observed.elements[0]!.ref).role).toBe("AXOutline");
+		// The second row's ref has two candidates at its own place: no row of
+		// the fresh tree is that row, and it stays retired.
+		await expect(f.session.click(f.context, f.window, twin)).rejects.toThrow(`StaleRef: ${twin} —`);
+	} finally {
+		await f.close();
+	}
+});
+
+it("reports the refusal of a re-addressed dispatch, not a dispatch", async () => {
+	const f = await fixture();
+	// `native-act-finder-sort/omp-1` L48: the walk retargeted the dead ref to
+	// the row the editor had become and the driver refused that row too. The
+	// reply claimed both — "the action was dispatched there instead" and a
+	// refusal under it — for one call that dispatched nothing.
+	const outside = {
+		text: "Background input refused (element_outside_target_window): the addressed element could not be proven to belong to window 1; take a fresh get_window_state snapshot and re-address it",
+		structuredJson: JSON.stringify({
+			code: "element_outside_target_window",
+			effect: "refused",
+			advice: "acquire_window",
+			pid: 101,
+			reason: "the addressed element could not be proven to belong to window 1",
+			window_id: 1,
+		}),
+		isError: true,
+		errorCode: "element_outside_target_window",
+		images: [],
+	};
+	try {
+		let generation = 0;
+		f.state.hook = async (name, args) => {
+			if (name === "get_window_state")
+				return reply({
+					pid: 101,
+					window_id: 1,
+					snapshot_id: `w${++generation}`,
+					truncated: false,
+					elements: card(generation, "", true),
+				});
+			if (name !== "set_value") return undefined;
+			return args.element_token === "g1:2" ? DEAD_ROW : outside;
+		};
+		const observed = await f.session.observe(f.context, f.window);
+		const field = observed.elements[1]!.ref;
+		const caught = await f.session
+			.setValue(f.context, f.window, field, "Invoices")
+			.catch((error: unknown) => error);
+		if (!(caught instanceof ToolError)) throw new Error("Expected the retargeted row's own refusal");
+		expect(caught.message.split("\n")[0]).toBe(
+			`${field} (AXTextField "Company"), under AXGroup "Contact", no longer exists in window 1 and nothing was dispatched at it — n${observed.elements.length + 2} is the one row of the fresh tree with the same role, label, value and position, so the action was re-addressed to n${observed.elements.length + 2}, which refused it. That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.`,
+		);
+		expect(caught.message).not.toContain("dispatched at n");
+		expect(caught.message).toContain("could not be proven to belong to window 1");
+		expect(caught.context).toMatchObject({ code: "element_outside_target_window" });
 	} finally {
 		await f.close();
 	}
@@ -4439,7 +4644,9 @@ it("nests an attached sheet's own tree under its parent and dispatches its refs 
 		f.state.relatedWindows = [];
 		const after = await f.session.observe(f.context, f.window);
 		expect(after.tree).not.toContain("sheet ");
-		expect(() => f.session.element(cancel.ref)).toThrow('StaleRef: sheet "Save" (window 5) is gone');
+		expect(() => f.session.element(cancel.ref)).toThrow(
+			`StaleRef: ${cancel.ref} — sheet "Save" (window 5) is gone`,
+		);
 	} finally {
 		await f.close();
 	}
