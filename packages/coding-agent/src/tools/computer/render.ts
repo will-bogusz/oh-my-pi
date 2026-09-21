@@ -313,6 +313,18 @@ function evidenceDelivery(value: unknown): string | undefined {
 	const mode = record(value)?.mode;
 	return typeof mode === "string" ? mode : undefined;
 }
+/**
+ * The `key_window` fact a route that had to make a window key publishes:
+ * whether the application itself was brought to the front, as opposed to the
+ * window being made key inside the app that was already frontmost. Field-wise
+ * because `key_window` is also the name a disabled-element refusal gives its
+ * own, differently shaped, report; a reply that carries no boolean here is
+ * one that says nothing about fronting.
+ */
+function keyWindowFronted(value: unknown): boolean | undefined {
+	const fronted = record(value)?.app_fronted;
+	return typeof fronted === "boolean" ? fronted : undefined;
+}
 const strings = (value: unknown): readonly string[] | undefined =>
 	Array.isArray(value) ? value.filter((segment): segment is string => typeof segment === "string") : undefined;
 /**
@@ -343,6 +355,13 @@ export interface ActionReply {
 	readonly retryable: boolean | undefined;
 	/** The menu titles a `menu_command` reply dispatched, top level first. */
 	readonly menuPath: readonly string[] | undefined;
+	/**
+	 * Whether the app was fronted for a dispatch that needed a key window.
+	 * `delivery.mode` is `foreground` either way, so this is the only thing
+	 * separating "another app was fronted and then restored" from "the app was
+	 * already frontmost and only its window was made key".
+	 */
+	readonly appFronted: boolean | undefined;
 	/** A background refusal's own route, where it names one. */
 	readonly advice: string | undefined;
 	readonly panel: Panel | undefined;
@@ -377,6 +396,7 @@ export function readReply(details: unknown): ActionReply {
 		readBack: valueReadBack(data.evidence),
 		retryable: typeof data.retryable === "boolean" ? data.retryable : undefined,
 		menuPath: menuPath?.length ? menuPath : undefined,
+		appFronted: keyWindowFronted(data.key_window),
 		advice: typeof data.advice === "string" ? data.advice : undefined,
 		panel: readPanel(data),
 		focusedWindowId: typeof data.focused_window_id === "number" ? String(data.focused_window_id) : undefined,
@@ -1040,26 +1060,22 @@ export function deadElement(reply: ActionReply): boolean {
 	return route === undefined || route === "snapshot";
 }
 /**
- * The driver's own activation sentence on the menu-command route names one
- * of two things: the application was fronted, or only its window was made
- * key (the app was already frontmost). The closed contract carries only
- * `delivery.mode: foreground` for both, so the distinction is read off the
- * sentence the driver composed from what it did.
- */
-const APP_FRONTED = /was not the frontmost application, so it was fronted/;
-const WINDOW_MADE_KEY = /so it was made key for the dispatch|was already key/;
-/**
  * The reply line for keystrokes the driver dispatched as the app's menu
  * command: measured on Notes, the model reading `Pressed cmd+option+f` never
  * learned that the chord had become `Edit > Find > Note List Search…` with
  * the window made key, nor whether an app it was driving in the background
  * had been brought to the front for it.
+ *
+ * The fronting is the driver's own published fact. It was recovered by
+ * matching two sentences of the driver's English until the closed projection
+ * carried `key_window`, so any rewording there dropped the suffix silently,
+ * with no test on either side failing.
  */
-export function menuCommandLine(reply: ActionReply, text: string): string | undefined {
+export function menuCommandLine(reply: ActionReply): string | undefined {
 	if (reply.menuPath === undefined) return undefined;
 	const verb = reply.effect === "suspected_noop" ? "Dispatched" : "Delivered";
-	const fronted = APP_FRONTED.test(text) ? "yes" : WINDOW_MADE_KEY.test(text) ? "no" : undefined;
-	return `${verb} as menu command ${reply.menuPath.join(" > ")}${fronted === undefined ? "" : ` (app fronted: ${fronted})`}`;
+	const fronted = reply.appFronted;
+	return `${verb} as menu command ${reply.menuPath.join(" > ")}${fronted === undefined ? "" : ` (app fronted: ${fronted ? "yes" : "no"})`}`;
 }
 /**
  * What the driver reported about an action that threw, and only that: the

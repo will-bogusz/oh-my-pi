@@ -2203,7 +2203,7 @@ export class CuaComputerSession implements ComputerBackend {
 			this.#mutated.add(String(args.window_id));
 		// Keystrokes the driver turned into the app's own menu command lead
 		// with that fact: the driver's sentence starts with the chord.
-		const menuCommand = KEYBOARD_TOOLS[name] === true ? menuCommandLine(reply, reported) : undefined;
+		const menuCommand = KEYBOARD_TOOLS[name] === true ? menuCommandLine(reply) : undefined;
 		return {
 			text: [
 				menuCommand,
