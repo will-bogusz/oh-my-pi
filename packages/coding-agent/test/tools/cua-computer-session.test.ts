@@ -3799,6 +3799,17 @@ it("projects a query over the walked tree: a string is literal, an array is any-
 			'AXTextField "home"',
 		);
 		expect((await f.session.observe(f.context, f.window, { query: "ax" })).tree).not.toContain("hidden");
+		// A matched container answers with what it holds. The bench asked an
+		// open popover for its contents, was told `AXPopover ""` and 121 rows
+		// hidden, and spent two cells recovering from the non-answer.
+		const container = await f.session.observe(f.context, f.window, { query: "Phones" });
+		expect(container.tree.split("\n").map(line => line.replace(/\[n\d+\]/, "[ref]"))).toEqual([
+			'- [ref] AXWindow "Card" enabled=true',
+			'  - [ref] AXGroup "Phones" enabled=true',
+			'    - [ref] AXTextField "home" value="(555) 123-4567" enabled=true',
+			'    - [ref] AXButton "Remove Phone" enabled=true',
+			'Query "Phones" matched 1 of 8 rows (ancestors kept, 2 rows shown under them); 4 hidden — drop the query to read them.',
+		]);
 		// The driver never sees the query.
 		expect(
 			f.calls.filter(call => call.name === "get_window_state").every(call => call.args.query === undefined),
@@ -3818,6 +3829,91 @@ it("refuses a query that is neither a string nor a list of strings", async () =>
 			await expect(
 				f.session.observe(f.context, f.window, { query } as unknown as ObserveOptions),
 			).rejects.toThrow("Invalid observe query: use a string or an array of strings");
+	} finally {
+		await f.close();
+	}
+});
+
+it("caps how much of a matched container it prints and says what it left out", async () => {
+	const f = await fixture();
+	// The root window row is a container whose subtree is the whole tree in
+	// 119 of 129 walked trees, and any query that matches a window title or a
+	// role lands on it, so an expansion has to be bounded to be a projection.
+	const row = (index: number, role: string, label: string, depth: number): Wire => ({
+		element_index: index,
+		element_token: `s1:${index}`,
+		role,
+		label,
+		depth,
+	});
+	try {
+		f.state.hook = async name =>
+			name === "get_window_state"
+				? reply({
+						pid: 101,
+						window_id: 1,
+						snapshot_id: "s1",
+						truncated: false,
+						window_bounds: f.row.bounds,
+						elements: [
+							row(1, "AXWindow", "Card", 0),
+							row(2, "AXGroup", "Phones", 1),
+							...Array.from({ length: 20 }, (_, index) => row(index + 3, "AXTextField", `field ${index + 1}`, 2)),
+						],
+					})
+				: undefined;
+		const observation = await f.session.observe(f.context, f.window, { query: "Phones" });
+		const lines = observation.tree.split("\n");
+		expect(lines.filter(line => line.includes("AXTextField"))).toHaveLength(12);
+		expect(observation.tree).toContain('AXTextField "field 12"');
+		expect(observation.tree).not.toContain('AXTextField "field 13"');
+		expect(lines[2]).toBe("    - 8 more rows under this one were not shown — drop the query to read them.");
+		expect(lines.at(-1)).toBe(
+			'Query "Phones" matched 1 of 22 rows (ancestors kept, 12 rows shown under them); 8 hidden — drop the query to read them.',
+		);
+		// The cap prints rows, so they are handles too — the same 14 the tree
+		// shows, and not the 8 it says it left out.
+		expect(observation.elements).toHaveLength(14);
+	} finally {
+		await f.close();
+	}
+});
+
+it("does not expand a match that contains another match", async () => {
+	const f = await fixture();
+	const row = (index: number, role: string, label: string, depth: number): Wire => ({
+		element_index: index,
+		element_token: `s1:${index}`,
+		role,
+		label,
+		depth,
+	});
+	try {
+		f.state.hook = async name =>
+			name === "get_window_state"
+				? reply({
+						pid: 101,
+						window_id: 1,
+						snapshot_id: "s1",
+						truncated: false,
+						window_bounds: f.row.bounds,
+						elements: [
+							row(1, "AXWindow", "Card", 0),
+							row(2, "AXGroup", "Phones", 1),
+							row(3, "AXTextField", "home", 2),
+							row(4, "AXTextField", "mobile", 2),
+						],
+					})
+				: undefined;
+		// The deeper match is the specific answer: expanding its ancestor as
+		// well would re-print the tree around what was asked for.
+		const observation = await f.session.observe(f.context, f.window, { query: ["phones", "mobile"] });
+		expect(observation.tree.split("\n").map(line => line.replace(/\[n\d+\]/, "[ref]"))).toEqual([
+			'- [ref] AXWindow "Card"',
+			'  - [ref] AXGroup "Phones"',
+			'    - [ref] AXTextField "mobile"',
+			'Query ["phones","mobile"] matched 2 of 4 rows (ancestors kept); 1 hidden — drop the query to read them.',
+		]);
 	} finally {
 		await f.close();
 	}
@@ -3906,11 +4002,14 @@ it("answers a query from the text the window displays, not from its controls alo
 			'- [n1] AXWindow "About"',
 			'  - [n2] AXGroup "Overview"',
 			'    - AXStaticText "Version" = "macOS Tahoe Version 26.1"',
-			'Query "Tahoe" matched 1 of 3 rows (ancestors kept); 1 hidden — drop the query to read them.',
+			// The row the text hangs off is the match, so what it holds comes
+			// with it: the button beside the version string is part of the
+			// answer, and nothing is left hidden to announce.
+			'    - [n3] AXButton "More Info…"',
 		]);
 		// Display-only text is text, never a target: no ref is minted for it and
 		// the observation's element list is still the controls.
-		expect(found.elements.map(element => element.label)).toEqual(["About", "Overview"]);
+		expect(found.elements.map(element => element.label)).toEqual(["About", "Overview", "More Info…"]);
 		// The default read is unchanged — the controls, and only the controls.
 		expect((await f.session.observe(f.context, f.window)).tree.split("\n")).toEqual([
 			'- [n4] AXWindow "About"',

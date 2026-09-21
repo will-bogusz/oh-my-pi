@@ -67,10 +67,11 @@ interface ComputerObserveOptions {
 	maxElements?: number;
 	/**
 	 * Show only the rows a case-insensitive substring matches, plus the
-	 * ancestors that place them. The string is taken literally, punctuation
-	 * and all; pass an array to match any of several (`["Save", "Done"]`).
-	 * Refs are minted for the whole tree, but hidden rows are not printed —
-	 * the observation says how many it hid. A miss says what was searched.
+	 * ancestors that place them and the rows a match holds (up to 12, and it
+	 * says what it left out). The string is taken literally, punctuation and
+	 * all; pass an array to match any of several (`["Save", "Done"]`). Refs
+	 * are minted for the whole tree, but hidden rows are not printed — the
+	 * observation says how many it hid. A miss says what was searched.
 	 */
 	query?: string | readonly string[];
 	/**

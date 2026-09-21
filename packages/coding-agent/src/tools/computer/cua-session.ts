@@ -152,11 +152,25 @@ function renderedSubrole(element: ComputerElementSnapshot): string {
 	return specific === element.role ? "" : ` subrole=${specific}`;
 }
 /**
+ * Descendants printed under one matched row. A matched container answered
+ * with its own existence and nothing else: the bench asked an open popover
+ * for its contents, was told `AXPopover ""` and 121 rows hidden, and spent
+ * two cells recovering — one of them re-querying with five guessed words.
+ *
+ * 12 is the smallest bound that keeps every expansion the leg's own queries
+ * ask for whole (the widest is the 10-row popover above, replayed under the
+ * literal semantics this reads) while bounding the row a query can land on
+ * by accident: a window title or a role matches the root, whose subtree is
+ * the whole tree in 119 of 129 walks, and container subtrees reach 333 rows.
+ */
+const SUBTREE_MAX_ROWS = 12;
+/**
  * The rows a query keeps: every row one of its literals matches
  * (case-insensitive substring over what the row prints, including the
- * window's own text carried beneath it), plus the ancestors that place it.
- * Projecting here keeps one semantics for both platforms and lets the
- * observation say what it hid.
+ * window's own text carried beneath it), the ancestors that place it, and
+ * what the matched row itself holds, bounded by `SUBTREE_MAX_ROWS` and
+ * counted where the bound bit. Projecting here keeps one semantics for both
+ * platforms and lets the observation say what it hid.
  *
  * The literals arrive already normalised, so a string is one substring and
  * nothing about the row's own text is unsearchable: splitting the string on
@@ -167,7 +181,7 @@ function renderedSubrole(element: ComputerElementSnapshot): string {
 function projectRows(
 	rows: readonly TreeRow[],
 	query: readonly string[],
-): { rows: TreeRow[]; matched: number } {
+): { rows: TreeRow[]; matched: number; shown: number } {
 	const hits = (row: TreeRow): boolean => {
 		const haystack = [
 			row.element.role,
@@ -185,18 +199,56 @@ function projectRows(
 		return query.some(literal => haystack.includes(literal));
 	};
 	const kept = new Set<number>();
-	const ancestors: number[] = [];
-	let matched = 0;
+	const open: number[] = [];
+	// Where each row's own subtree ends, from the same stack that places its
+	// ancestors: a row is a container exactly when the next row is deeper.
+	const ends = new Array<number>(rows.length).fill(rows.length);
+	const matches: number[] = [];
 	rows.forEach((row, index) => {
-		while (ancestors.length && rows[ancestors[ancestors.length - 1]!]!.depth >= row.depth) ancestors.pop();
+		while (open.length && rows[open[open.length - 1]!]!.depth >= row.depth) ends[open.pop()!] = index;
 		if (hits(row)) {
-			matched++;
+			matches.push(index);
 			kept.add(index);
-			for (const ancestor of ancestors) kept.add(ancestor);
+			for (const ancestor of open) kept.add(ancestor);
 		}
-		ancestors.push(index);
+		open.push(index);
 	});
-	return { rows: rows.filter((_, index) => kept.has(index)), matched };
+	const capped = new Map<number, number>();
+	let shown = 0;
+	matches.forEach((match, order) => {
+		const end = ends[match]!;
+		// The deeper match is the specific answer: expanding a match that
+		// contains another one re-prints the tree around it.
+		if ((matches[order + 1] ?? end) < end) return;
+		const last = Math.min(end, match + 1 + SUBTREE_MAX_ROWS);
+		for (let index = match + 1; index < last; index++) kept.add(index);
+		shown += last - match - 1;
+		if (end > last) capped.set(match, end - last);
+	});
+	const projected: TreeRow[] = [];
+	rows.forEach((row, index) => {
+		if (!kept.has(index)) return;
+		const suppressed = capped.get(index);
+		if (suppressed === undefined) {
+			projected.push(row);
+			return;
+		}
+		// A note, not a row: the elider reads it as prose, so the count
+		// survives even where the rows it counts were dropped again.
+		projected.push({
+			...row,
+			notes: [
+				...(row.notes ?? []),
+				{
+					depth: row.depth + 1,
+					text: `${suppressed} more row${suppressed === 1 ? "" : "s"} under this one ${
+						suppressed === 1 ? "was" : "were"
+					} not shown — drop the query to read them.`,
+				},
+			],
+		});
+	});
+	return { rows: projected, matched: matches.length, shown };
 }
 /** The role a provider gives a window's own root row, in both vocabularies. */
 const WINDOW_ROW_ROLES: Record<string, true> = { AXWindow: true, frame: true, window: true };
@@ -1500,10 +1552,13 @@ export class CuaComputerSession implements ComputerBackend {
 						? this.#queryMiss(current, reply, options, complete, walked.rows.length, modal)
 						: "No accessibility elements returned; completeness is unknown.";
 			// A projection hides controls the next step may need (the bench lost
-			// a Save button and an add menu to one); the count says so.
+			// a Save button and an add menu to one); the count says so, and says
+			// how much of what the matched rows hold it printed under them.
 			const hidden =
 				projected !== undefined && projected.matched > 0 && walked.rows.length > rows.length
-					? `Query ${JSON.stringify(options.query)} matched ${projected.matched} of ${walked.rows.length} rows (ancestors kept); ${walked.rows.length - rows.length} hidden — drop the query to read them.`
+					? `Query ${JSON.stringify(options.query)} matched ${projected.matched} of ${walked.rows.length} rows (ancestors kept${
+							projected.shown > 0 ? `, ${projected.shown} row${projected.shown === 1 ? "" : "s"} shown under them` : ""
+						}); ${walked.rows.length - rows.length} hidden — drop the query to read them.`
 					: undefined;
 			observation.tree = [
 				...sheets,
