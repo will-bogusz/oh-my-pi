@@ -465,6 +465,60 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
+	it("waits for what a launch started by its pid, not by matching the selector's name again", async () => {
+		const { backend, realm } = javascriptFixture();
+		backend.windowAbsent = true;
+		// A bundle id is a name `launch_app` accepts and a window roster never
+		// reports: it publishes the display name ("Code") alone. Polling the
+		// selector back against the roster therefore cannot hit however long it
+		// waits, so the launch worked, the poll ran out its whole timeout, and
+		// the call ended in "it opened none". The pid the launch answers with is
+		// which process this is.
+		const launch = spyOn(backend, "launch").mockImplementation(async () => {
+			backend.windowAbsent = false;
+			return {
+				text: "launched",
+				effect: "unverifiable",
+				evidence: null,
+				delivery: "background",
+				data: { pid: 123 },
+			};
+		});
+		const asked: WindowSelector[] = [];
+		const roster = backend.windows.bind(backend);
+		backend.windows = async (context: ComputerOperationContext, selector: WindowSelector = {}) => {
+			asked.push(selector);
+			return await roster(context, selector);
+		};
+		try {
+			const acquired = await runInContext(
+				'computer.window({app:"com.vendor.Code"}, {launch:true, screenshot:false})',
+				realm,
+			);
+			expect(acquired.id).toBe("42");
+			expect(launch.mock.calls[0]![1]).toEqual({ name: "com.vendor.Code" });
+			// Before the launch the selector is the caller's; every read after it
+			// addresses the process the launch named and never the name again.
+			expect(asked[0]).toEqual({ app: "com.vendor.Code" });
+			expect(asked.slice(1)).not.toHaveLength(0);
+			expect(asked.slice(1).every(selector => selector.app === undefined && selector.pid === 123)).toBe(true);
+			// A launch that answers with no pid still has the name to fall back on.
+			backend.windowAbsent = true;
+			asked.length = 0;
+			launch.mockImplementation(async () => {
+				backend.windowAbsent = false;
+				return { text: "launched", effect: "unverifiable", evidence: null, delivery: "background" };
+			});
+			expect((await runInContext('computer.window({app:"Code"}, {launch:true, screenshot:false})', realm)).id).toBe(
+				"42",
+			);
+			expect(asked.every(selector => selector.app === "Code" || selector.id === "42")).toBe(true);
+		} finally {
+			launch.mockRestore();
+			await runInContext("computer.close()", realm);
+		}
+	});
+
 	it("reads an app selector that matches nothing as a launch request unless launching is refused", async () => {
 		const { backend, realm } = javascriptFixture();
 		backend.windowAbsent = true;

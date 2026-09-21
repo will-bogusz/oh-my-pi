@@ -444,6 +444,28 @@ it("keeps the driver's own capture-lease window out of every roster it offers", 
 	}
 });
 
+it("resolves an { app } that is a bundle id through the apps roster the window list has no room for", async () => {
+	const f = await fixture();
+	try {
+		f.state.hook = async name =>
+			name === "list_apps"
+				? reply({ apps: [{ pid: 101, name: "Fixture", bundle_id: "dev.omp.fixture", running: true, active: true }] })
+				: undefined;
+		// A window roster publishes the display name alone, so the identifier
+		// `launch_app` accepts matched nothing and read as "not running".
+		expect(await f.session.window(f.context, { app: "dev.omp.fixture" })).toMatchObject({ id: "1" });
+		expect((await f.session.windows(f.context, { app: "DEV.OMP.FIXTURE" })).map(window => window.id)).toEqual(["1"]);
+		// A display name that matches costs no apps read at all.
+		f.calls.length = 0;
+		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "1" });
+		expect(f.calls.some(call => call.name === "list_apps")).toBe(false);
+		// A bundle id no running app carries still misses, and says so.
+		await expect(f.session.window(f.context, { app: "dev.omp.absent" })).rejects.toThrow("Missing computer window");
+	} finally {
+		await f.close();
+	}
+});
+
 it("reads only the acted pid's windows once a handle names one", async () => {
 	const f = await fixture();
 	const print = { ...f.row, window_id: 7, title: "Print", z_index: 9 };

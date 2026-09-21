@@ -513,6 +513,12 @@ export class CuaComputerSession implements ComputerBackend {
 	readonly #lastRoster = new Map<number, readonly ComputerWindowIdentity[]>();
 	#leaseArtifacts: ReadonlySet<string> = new Set();
 	/**
+	 * Which live pids the apps roster gives each bundle id it was asked about,
+	 * lower-cased. Read on a miss and consulted by the roster filter, which is
+	 * synchronous and runs again inside one acquisition.
+	 */
+	readonly #bundlePids = new Map<string, ReadonlySet<number>>();
+	/**
 	 * What each window's writes left unproven, one sentence per write, in the
 	 * order they were made. The next read of that window reports and clears them.
 	 */
@@ -821,14 +827,52 @@ export class CuaComputerSession implements ComputerBackend {
 			window =>
 				(selector.id === undefined || window.id === selector.id) &&
 				(selector.pid === undefined || window.pid === selector.pid) &&
-				(selector.app === undefined || window.app.toLowerCase().includes(selector.app.toLowerCase())) &&
+				(selector.app === undefined ||
+					window.app.toLowerCase().includes(selector.app.toLowerCase()) ||
+					this.#bundlePids.get(selector.app.toLowerCase())?.has(window.pid) === true) &&
 				(selector.title === undefined || window.title.toLowerCase().includes(selector.title.toLowerCase())) &&
 				(selector.kind === undefined || window.kind === selector.kind),
 		);
 	}
+	/**
+	 * Which live processes an app bundle id names. A window roster reports the
+	 * display name and nothing else (`list_windows` `app_name`), so the
+	 * identifier `launch_app` takes and a model reaches for when a display
+	 * name is ambiguous — `{ app: "com.apple.systempreferences" }` — matched
+	 * no window however long it waited, and read as "that app is not running".
+	 * The apps roster is the one place the two are tied together. It is read
+	 * only after the name itself matched nothing, so a name that matched pays
+	 * for none of this, and the answer is remembered for the re-filters the
+	 * same acquisition runs.
+	 */
+	async #bundleIdPids(bundleId: string): Promise<ReadonlySet<number>> {
+		const pids = new Set<number>();
+		try {
+			const { data } = await this.#call("list_apps", {});
+			if (Array.isArray(data.apps))
+				for (const value of data.apps) {
+					if (typeof value !== "object" || value === null) continue;
+					const row = value as Wire;
+					if (
+						typeof row.bundle_id === "string" &&
+						row.bundle_id.toLowerCase() === bundleId.toLowerCase() &&
+						typeof row.pid === "number" &&
+						row.pid > 0
+					)
+						pids.add(row.pid);
+				}
+		} catch (error) {
+			if (!(error instanceof ToolError)) throw error;
+		}
+		this.#bundlePids.set(bundleId.toLowerCase(), pids);
+		return pids;
+	}
 	async #windows(selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
 		const { data } = await this.#call("list_windows", selector.pid === undefined ? {} : { pid: selector.pid });
-		return this.#windowRoster(data, selector, this.#roster());
+		const sample = this.#roster();
+		const matches = this.#windowRoster(data, selector, sample);
+		if (matches.length || selector.app === undefined) return matches;
+		return (await this.#bundleIdPids(selector.app)).size ? this.#windowRoster(data, selector, sample) : matches;
 	}
 	/**
 	 * Acquisition is the first call of every native run, so both failures name
@@ -990,14 +1034,14 @@ export class CuaComputerSession implements ComputerBackend {
 				matches = this.#withAccessibility(matches, ax);
 				if (ax.complete && matches.length) {
 					const annotated = this.#withAccessibility(roster, ax);
-					if (!ax.windows.size) throw this.#inputDead(pid!, matches, annotated);
+					// Readability is a per-row fact: a desktop surface is AX-backed
+					// without being an AXWindow, so `ax.windows` being empty does not
+					// mean every row is dead — only a match set with no backed row is.
+					const applicationWindows = matches.filter(window => window.axBacked !== false);
+					if (!applicationWindows.length) throw this.#inputDead(pid!, matches, annotated);
 					// AX and CG are sequential snapshots. Missing CG identities mean
 					// the mapping cannot safely disambiguate this acquisition.
-					if ([...ax.windows.keys()].every(id => roster.some(window => window.id === id))) {
-						const applicationWindows = matches.filter(window => window.axBacked !== false);
-						if (!applicationWindows.length) throw this.#inputDead(pid!, matches, annotated);
-						matches = applicationWindows;
-					}
+					if ([...ax.windows.keys()].every(id => roster.some(window => window.id === id))) matches = applicationWindows;
 				}
 			}
 		}

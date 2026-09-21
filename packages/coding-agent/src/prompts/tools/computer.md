@@ -1,7 +1,7 @@
 Control real host application windows from JavaScript or Python Eval with `computer` (no DOM — that is `browser`). Safety rules: system prompt.
 
 <instruction>
-Entry points: `await computer.window(selector)` acquires ONE window — `selector` is an id or `{ app?, title?, id?, pid? }` — and prints its tree; `computer.windows(filter)` lists without acquiring; `computer.run(fnOrCode)` runs a multi-step function with `{ desktop, wait, assert }` (no closures; full host access, not a sandbox). Everything else lives on the handle you get back and is listed with it; `computer.help()` prints the full typed API when a signature matters. Python: same names, keyword options.
+Entry points: `await computer.window(selector)` acquires ONE window — `selector` is an id or `{ app?, title?, id?, pid? }`, and `app` is either the app's display name or its bundle id (`com.vendor.App`) — and prints its tree; `computer.windows(filter)` lists without acquiring; `computer.run(fnOrCode)` runs a multi-step function with `{ desktop, wait, assert }` (no closures; full host access, not a sandbox). Everything else lives on the handle you get back and is listed with it; `computer.help()` prints the full typed API when a signature matters. Python: same names, keyword options.
 
 Model
 - A window is acquired, never focused. An `{ app }` that is not running is launched and acquired in the same call; several matches yield its front document window and name the rest. `computer.window({ kind: "desktop" })` is the Desktop itself — its icons, read-only — the way to see what is on it without a Finder window.

@@ -396,6 +396,12 @@ async function resolveWindow(
 	});
 }
 
+/** The pid `launch_app` reports for what it started, when it reports one. */
+function startedPid(result: ComputerActionResult): number | undefined {
+	const pid = (result.data as { pid?: unknown } | undefined)?.pid;
+	return typeof pid === "number" && pid > 0 ? pid : undefined;
+}
+
 /**
  * Launching collapses the three-call acquisition every native run started
  * with — `window()` throws `Missing`, `launch()`, `window()` again — into
@@ -403,6 +409,16 @@ async function resolveWindow(
  * Nothing is launched while a window already matches, and the wait is
  * bounded: an app that opens no window ends in a `Missing` error that says
  * so, and one that opens several is acquired at its frontmost window.
+ *
+ * What was launched is then waited for by its process, not by its name
+ * again. `launch_app` takes a bundle id as readily as a display name and
+ * answers with the pid it started, while a window roster reports only
+ * display names — so re-matching the selector against them can never hit
+ * for an app named by bundle id: the launch worked, the poll ran out its
+ * whole timeout, and the call ended in "it opened none". The pid is the
+ * launch reply's own answer to which process this is; a title in the
+ * selector still narrows it, and a launch that reports no pid falls back to
+ * the name it was given.
  */
 async function launchAndAcquire(
 	session: ComputerBackend,
@@ -416,25 +432,30 @@ async function launchAndAcquire(
 		);
 	if ((await session.windows(operationContext(getContext), selector)).length)
 		return await resolveWindow(session, getContext, selector, options);
-	await session.launch(mutationContext(getContext), { name: selector.app }).catch(async (error: unknown) => {
-		if (!(error instanceof ToolError)) throw error;
-		// Two facts, and until now the first one was invisible: the filter
-		// matched no open window, and the name it carries is not startable —
-		// a launch refusal alone reads as if the window question never arose.
-		throw await missedWindow(
-			session,
-			getContext,
-			error,
-			`No open window matches ${JSON.stringify(selector)} and ${
-				NOT_AN_APP.test(error.message) ? "it is not an installed app" : `launching it failed: ${error.message}`
-			}.`,
-		);
-	});
+	const launched = await session
+		.launch(mutationContext(getContext), { name: selector.app })
+		.catch(async (error: unknown) => {
+			if (!(error instanceof ToolError)) throw error;
+			// Two facts, and until now the first one was invisible: the filter
+			// matched no open window, and the name it carries is not startable —
+			// a launch refusal alone reads as if the window question never arose.
+			throw await missedWindow(
+				session,
+				getContext,
+				error,
+				`No open window matches ${JSON.stringify(selector)} and ${
+					NOT_AN_APP.test(error.message) ? "it is not an installed app" : `launching it failed: ${error.message}`
+				}.`,
+			);
+		});
+	const { app: _named, ...rest } = selector;
+	const pid = startedPid(launched);
+	const target: WindowSelector = pid === undefined ? selector : { ...rest, pid };
 	const deadline = Date.now() + LAUNCHED_WINDOW_TIMEOUT_MS;
 	for (;;) {
 		const context = operationContext(getContext);
-		if ((await session.windows(context, selector)).length || Date.now() >= deadline)
-			return await session.acquire(context, selector, options).catch(async (error: unknown) => {
+		if ((await session.windows(context, target)).length || Date.now() >= deadline)
+			return await session.acquire(context, target, options).catch(async (error: unknown) => {
 				if (!isMissedWindow(error)) throw error;
 				// A `Missing` acquisition used to tell the model to try
 				// `{ launch: true }`, which is what this call already did.
