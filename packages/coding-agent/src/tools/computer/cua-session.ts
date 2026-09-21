@@ -96,11 +96,24 @@ interface Binding {
 interface TreeNote {
 	depth: number;
 	text: string;
+	/**
+	 * Text the window itself renders, as opposed to a note this session wrote
+	 * about the row. A query reads the first and not the second: "5 of 12 rows
+	 * are scrolled out of view" is the harness talking.
+	 */
+	content?: true;
 }
 interface TreeRow {
 	depth: number;
 	element: ComputerElementSnapshot;
 	notes?: readonly TreeNote[];
+}
+/** What a query found in the sheets drawn modal over the window being read. */
+interface SheetCensus {
+	/** `sheet "Save" (window 42)`, however many the walk reported. */
+	label: string;
+	rows: number;
+	matched: number;
 }
 /** An unproven write and the observation that would prove it. */
 interface WriteDoubt {
@@ -116,29 +129,35 @@ function renderedSubrole(element: ComputerElementSnapshot): string {
 	const specific = specificRole(element);
 	return specific === element.role ? "" : ` subrole=${specific}`;
 }
-/**
- * The rows a query keeps: every row one of its `|`-separated alternatives
- * matches (case-insensitive substring over what the row prints), plus the
- * ancestors that place it. The driver's own projection took one literal
- * substring, which the bench's queries were not: every alternative-carrying
- * query missed and cost a re-observe. Projecting here keeps one semantics
- * for both platforms and lets the observation say what it hid.
- */
-function projectRows(rows: readonly TreeRow[], query: string): { rows: TreeRow[]; matched: number } {
-	const alternatives = query
+/** A query's `|`-separated alternatives, lower-cased, empty ones dropped. */
+function queryAlternatives(query: string): string[] {
+	return query
 		.split("|")
 		.map(alternative => alternative.trim().toLowerCase())
 		.filter(alternative => alternative.length > 0);
+}
+/**
+ * The rows a query keeps: every row one of its `|`-separated alternatives
+ * matches (case-insensitive substring over what the row prints, including the
+ * window's own text carried beneath it), plus the ancestors that place it.
+ * The driver's own projection took one literal substring, which the bench's
+ * queries were not: every alternative-carrying query missed and cost a
+ * re-observe. Projecting here keeps one semantics for both platforms and lets
+ * the observation say what it hid.
+ */
+function projectRows(rows: readonly TreeRow[], query: string): { rows: TreeRow[]; matched: number } {
+	const alternatives = queryAlternatives(query);
 	if (!alternatives.length) return { rows: [...rows], matched: rows.length };
-	const hits = (element: ComputerElementSnapshot): boolean => {
+	const hits = (row: TreeRow): boolean => {
 		const haystack = [
-			element.role,
-			element.subrole,
-			element.label,
-			element.value,
-			element.placeholder,
-			element.description,
-			element.help,
+			row.element.role,
+			row.element.subrole,
+			row.element.label,
+			row.element.value,
+			row.element.placeholder,
+			row.element.description,
+			row.element.help,
+			...(row.notes ?? []).filter(note => note.content === true).map(note => note.text),
 		]
 			.filter((text): text is string => typeof text === "string" && text.length > 0)
 			.join("\n")
@@ -150,7 +169,7 @@ function projectRows(rows: readonly TreeRow[], query: string): { rows: TreeRow[]
 	let matched = 0;
 	rows.forEach((row, index) => {
 		while (ancestors.length && rows[ancestors[ancestors.length - 1]!]!.depth >= row.depth) ancestors.pop();
-		if (hits(row.element)) {
+		if (hits(row)) {
 			matched++;
 			kept.add(index);
 			for (const ancestor of ancestors) kept.add(ancestor);
@@ -182,6 +201,43 @@ function collapsedRowNotes(markdown: unknown): ReadonlyMap<number, TreeNote[]> {
 		const collapsed = COLLAPSED_TREE_ROW.exec(line);
 		if (!collapsed) continue;
 		const note = { depth: collapsed[1]!.length / 2, text: collapsed[2]! };
+		const listed = notes.get(anchor);
+		if (listed) listed.push(note);
+		else notes.set(anchor, [note]);
+	}
+	return notes;
+}
+const DISPLAY_TREE_ROW = /^((?: {2})*)- (?!\[)(\S.*)$/;
+/**
+ * The text a window renders without offering any action on it — a version
+ * string, a heading, a status line, the label of a row that is not selectable
+ * — anchored to the nearest actionable row above it. The driver's structured
+ * `elements` array carries actionable nodes alone (`element_index: null` for
+ * the rest) and prints the others only in its markdown, so an `observe`
+ * projection that read `elements` answered "no row matched" about text the
+ * window was plainly showing, and the model went to the pixels for a string
+ * it had already been sent.
+ *
+ * Only the lines a query matches are kept. The default read is the window's
+ * controls — that is what an actor needs, and every label in the window is
+ * not — while a query is a reader asking whether this window says something.
+ */
+function displayTextNotes(markdown: unknown, query: string): ReadonlyMap<number, TreeNote[]> {
+	const notes = new Map<number, TreeNote[]>();
+	const alternatives = queryAlternatives(query);
+	if (typeof markdown !== "string" || !alternatives.length) return notes;
+	let anchor = -1;
+	for (const line of markdown.split("\n")) {
+		const indexed = INDEXED_TREE_ROW.exec(line);
+		if (indexed) {
+			anchor = Number(indexed[1]);
+			continue;
+		}
+		const display = DISPLAY_TREE_ROW.exec(line);
+		if (!display || COLLAPSED_TREE_ROW.test(line)) continue;
+		const text = display[2]!;
+		if (!alternatives.some(alternative => text.toLowerCase().includes(alternative))) continue;
+		const note = { depth: display[1]!.length / 2, text, content: true as const };
 		const listed = notes.get(anchor);
 		if (listed) listed.push(note);
 		else notes.set(anchor, [note]);
@@ -1224,26 +1280,19 @@ export class CuaComputerSession implements ComputerBackend {
 				relatedWindows: relatedWindows(reply.data.related_windows),
 				tree: "",
 			};
-			const parent = rows.length
-				? treeRows(rows, 0)
-				: typeof reply.data.degraded_reason === "string"
-					? reply.data.degraded_reason
-					: options.query !== undefined
-						? this.#queryMiss(current, reply, options, complete, walked.rows.length)
-						: "No accessibility elements returned; completeness is unknown.";
-			// A projection hides controls the next step may need (the bench lost
-			// a Save button and an add menu to one); the count says so.
-			const hidden =
-				projected !== undefined && projected.matched > 0 && walked.rows.length > rows.length
-					? `Query ${JSON.stringify(options.query)} matched ${projected.matched} of ${walked.rows.length} rows (ancestors kept); ${walked.rows.length - rows.length} hidden — drop the query to read them.`
-					: undefined;
 			// This window's sheets, as of this walk: a sheet that has gone away
 			// must stop excluding an id acquisition could pick, and the refs it
-			// minted must say which surface took them with it.
+			// minted must say which surface took them with it. Read before the
+			// window's own rows are judged, because while a sheet is modal it is
+			// the surface the question is about: a census of the rows it covers
+			// is not an answer, and the bench was told to scroll a sidebar that
+			// the sheet holding its match had made unreachable.
 			const attached = observation.relatedWindows ?? [];
 			for (const [id, sheet] of this.#sheets)
 				if (sheet.parent === current.id && !attached.some(row => row.id === id)) this.#retireSheet(id, sheet.title);
 			const sheets: string[] = [];
+			const names: string[] = [];
+			let modal: SheetCensus | undefined;
 			for (const sheet of attached) {
 				this.#sheets.set(sheet.id, { parent: current.id, title: sheet.title });
 				let block = `sheet ${JSON.stringify(sheet.title)} (window ${sheet.id}) — modal over window ${current.id}`;
@@ -1251,12 +1300,33 @@ export class CuaComputerSession implements ComputerBackend {
 					const nested = await this.#sheetRows(context, sheet, options);
 					observation.elements.push(...nested.map(row => row.element));
 					if (nested.length) block += `\n${treeRows(nested, 1)}`;
+					if (options.query !== undefined) {
+						names.push(`${JSON.stringify(sheet.title)} (window ${sheet.id})`);
+						modal = {
+							label: `sheet${names.length === 1 ? "" : "s"} ${names.join(", ")}`,
+							rows: (modal?.rows ?? 0) + nested.length,
+							matched: (modal?.matched ?? 0) + projectRows(nested, options.query).matched,
+						};
+					}
 				} catch (error) {
 					if (!(error instanceof ToolError)) throw error;
 					block += ` — its own walk failed: ${error.message}`;
 				}
 				sheets.push(block);
 			}
+			const parent = rows.length
+				? treeRows(rows, 0)
+				: typeof reply.data.degraded_reason === "string"
+					? reply.data.degraded_reason
+					: options.query !== undefined
+						? this.#queryMiss(current, reply, options, complete, walked.rows.length, modal)
+						: "No accessibility elements returned; completeness is unknown.";
+			// A projection hides controls the next step may need (the bench lost
+			// a Save button and an add menu to one); the count says so.
+			const hidden =
+				projected !== undefined && projected.matched > 0 && walked.rows.length > rows.length
+					? `Query ${JSON.stringify(options.query)} matched ${projected.matched} of ${walked.rows.length} rows (ancestors kept); ${walked.rows.length - rows.length} hidden — drop the query to read them.`
+					: undefined;
 			observation.tree = [
 				...sheets,
 				parent,
@@ -1327,6 +1397,11 @@ export class CuaComputerSession implements ComputerBackend {
 	 * followed 79 % of them with another guessed word — so the rows the walk
 	 * read, its own verdict on the tree and the scroll state are what this says,
 	 * because those are what decide whether to widen the query or scroll first.
+	 *
+	 * A modal sheet moves the whole census onto itself. What it covers is not
+	 * reachable until it is answered, so the rows behind it are neither the
+	 * place to look nor the place to scroll — the bench was told to scroll 22
+	 * out-of-view rows of the window under an open panel that held its match.
 	 */
 	#queryMiss(
 		window: ComputerWindowIdentity,
@@ -1334,7 +1409,16 @@ export class CuaComputerSession implements ComputerBackend {
 		options: ObserveOptions,
 		complete: boolean,
 		rowsRead: number,
+		modal?: SheetCensus,
 	): string {
+		const query = JSON.stringify(options.query);
+		const widen = `widen it — a query is a case-insensitive substring, and \`|\` separates alternatives`;
+		if (modal)
+			return modal.matched > 0
+				? `No row of window ${window.id} itself matched query ${query}; ${modal.matched} row(s) of the ${modal.label} modal over it match and are printed above — work in the sheet while it is up.`
+				: `No row matched query ${query} in the ${modal.label} modal over window ${window.id} ${JSON.stringify(
+						window.title,
+					)} (${window.app}): its walk read ${modal.rows} row${modal.rows === 1 ? "" : "s"}. Next: drop the query to read the sheet whole, or ${widen}. The window behind it takes no input until the sheet is answered, so its own rows are not the place to look.`;
 		const read =
 			typeof reply.data.total_element_count === "number"
 				? reply.data.total_element_count
@@ -1343,17 +1427,18 @@ export class CuaComputerSession implements ComputerBackend {
 					: rowsRead || undefined;
 		const collapsed = typeof reply.data.collapsed_rows === "number" ? reply.data.collapsed_rows : 0;
 		const verdict = reply.data.truncated === true ? "truncated" : complete ? "complete" : "not proven complete";
+		const text = typeof reply.data.tree_markdown === "string" ? " and every line of text it renders" : "";
 		const walked =
 			read === undefined
-				? "the walk reported no row count"
-				: `the walk read ${read} actionable row${read === 1 ? "" : "s"}`;
+				? `the walk reported no row count${text}`
+				: `the walk read ${read} actionable row${read === 1 ? "" : "s"}${text}`;
 		const next =
 			collapsed > 0
 				? `scroll the list first — ${collapsed} row(s) are out of view and were not read — or drop the query to read what is on screen`
-				: `drop the query to read the whole tree, or widen it — a query is a case-insensitive substring, and \`|\` separates alternatives${
+				: `drop the query to read the whole tree, or ${widen}${
 						options.menubar === true ? "" : "; observe({ menubar: true }) adds the menu bar"
 					}`;
-		return `No row matched query ${JSON.stringify(options.query)} under window ${window.id} ${JSON.stringify(
+		return `No row matched query ${query} under window ${window.id} ${JSON.stringify(
 			window.title,
 		)} (${window.app})${options.menubar === true ? " and its menu bar" : ""}: ${walked} and reported the tree ${verdict}. Next: ${next}.`;
 	}
@@ -1375,6 +1460,10 @@ export class CuaComputerSession implements ComputerBackend {
 			typeof reply.data.collapsed_rows === "number" && reply.data.collapsed_rows > 0
 				? collapsedRowNotes(reply.data.tree_markdown)
 				: undefined;
+		// What the window says, for a query only: the markdown is the one place
+		// the driver prints a node it gave no action, and a query asked of the
+		// controls alone cannot find a version string or a status line.
+		const text = options.query === undefined ? undefined : displayTextNotes(reply.data.tree_markdown, options.query);
 		// The menu bar is a fifth of a macOS tree (22 kB of one 31 kB walk),
 		// every row of it advertises `press`, and every such press is refused
 		// because a menu bar item reports `AXEnabled` only while its menu is
@@ -1468,8 +1557,9 @@ export class CuaComputerSession implements ComputerBackend {
 				customActions: custom,
 				doubleClickAtCenter: reply.data.element_double_click === "left_center_v1",
 			});
-			const notes = collapsed?.get(typeof row.element_index === "number" ? row.element_index : -1);
-			rows.push(notes?.length ? { depth, element, notes } : { depth, element });
+			const anchored = index ?? -1;
+			const notes = [...(collapsed?.get(anchored) ?? []), ...(text?.get(anchored) ?? [])];
+			rows.push(notes.length ? { depth, element, notes } : { depth, element });
 		}
 		return { rows, menuBarRows, snapshotId };
 	}

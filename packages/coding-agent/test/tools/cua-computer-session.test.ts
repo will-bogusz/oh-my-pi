@@ -3227,6 +3227,124 @@ it("says what a query searched, read and cut when nothing matched it", async () 
 	}
 });
 
+it("answers a query from the text the window displays, not from its controls alone", async () => {
+	const f = await fixture();
+	// The driver's structured `elements` carry actionable nodes only; a node it
+	// gave no action — a version string, a heading, a status line — exists in
+	// the markdown and nowhere else, so a query over `elements` reported the
+	// window does not say what it is plainly showing.
+	const markdown = [
+		'- [1] AXWindow "About" [actions=[press]]',
+		'  - [2] AXGroup "Overview" [actions=[press]]',
+		'    - AXStaticText "Version" = "macOS Tahoe Version 26.1"',
+		'    - [3] AXButton "More Info…" [actions=[press]]',
+	].join("\n");
+	const row = (index: number, role: string, label: string, depth: number): Wire => ({
+		element_index: index,
+		element_token: `s1:${index}`,
+		role,
+		label,
+		depth,
+	});
+	try {
+		f.state.hook = async name =>
+			name === "get_window_state"
+				? reply({
+						pid: 101,
+						window_id: 1,
+						snapshot_id: "s1",
+						truncated: false,
+						window_bounds: f.row.bounds,
+						tree_markdown: markdown,
+						elements: [row(1, "AXWindow", "About", 0), row(2, "AXGroup", "Overview", 1), row(3, "AXButton", "More Info…", 2)],
+					})
+				: undefined;
+		const found = await f.session.observe(f.context, f.window, { query: "Tahoe" });
+		expect(found.tree.split("\n")).toEqual([
+			'- [n1] AXWindow "About"',
+			'  - [n2] AXGroup "Overview"',
+			'    - AXStaticText "Version" = "macOS Tahoe Version 26.1"',
+			'Query "Tahoe" matched 1 of 3 rows (ancestors kept); 1 hidden — drop the query to read them.',
+		]);
+		// Display-only text is text, never a target: no ref is minted for it and
+		// the observation's element list is still the controls.
+		expect(found.elements.map(element => element.label)).toEqual(["About", "Overview"]);
+		// The default read is unchanged — the controls, and only the controls.
+		expect((await f.session.observe(f.context, f.window)).tree.split("\n")).toEqual([
+			'- [n4] AXWindow "About"',
+			'  - [n5] AXGroup "Overview"',
+			'    - [n6] AXButton "More Info…"',
+		]);
+		// A miss now says the text was searched too, so widening the query is
+		// the next move rather than reaching for a screenshot.
+		expect((await f.session.observe(f.context, f.window, { query: "Sequoia" })).tree).toContain(
+			"the walk read 3 actionable rows and every line of text it renders",
+		);
+	} finally {
+		await f.close();
+	}
+});
+
+it("answers a query about a window under a sheet from the sheet, which is what the window is showing", async () => {
+	const f = await fixture();
+	const sheet = { ...f.row, window_id: 5, title: "open-panel", bounds: { x: 30, y: 40, width: 120, height: 80 } };
+	const parent = (data: Wire): CuaToolResult =>
+		reply({
+			pid: 101,
+			window_id: 1,
+			snapshot_id: "s1",
+			elements: [],
+			truncated: false,
+			element_count: 119,
+			total_element_count: 119,
+			collapsed_rows: 22,
+			window_bounds: f.row.bounds,
+			related_windows: [{ pid: 101, window_id: 5, title: "open-panel", relation: "sheet" }],
+			...data,
+		});
+	const sheetRows = (label: string): CuaToolResult =>
+		reply({
+			pid: 101,
+			window_id: 5,
+			snapshot_id: "sheet-1",
+			window_bounds: sheet.bounds,
+			elements: [
+				{ element_index: 1, element_token: "sheet-1:1", role: "AXSheet", label: "open-panel", depth: 0 },
+				{ element_index: 2, element_token: "sheet-1:2", role: "AXRow", label, depth: 1 },
+			],
+		});
+	try {
+		f.state.relatedWindows = [{ pid: 101, window_id: 5, title: "open-panel", relation: "sheet" }];
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows") return reply({ windows: [f.row, sheet] });
+			if (name !== "get_window_state") return undefined;
+			return args.window_id === 5 ? sheetRows("Calculator") : parent({});
+		};
+		// The match is in the sheet, printed above; the window behind it is not
+		// where to look and its 22 out-of-view rows are not what to scroll.
+		const hit = await f.session.observe(f.context, f.window, { query: "Calculator" });
+		expect(hit.tree).toContain('- [n2] AXRow "Calculator"');
+		expect(hit.tree.split("\n").filter(line => line.startsWith("No row"))).toEqual([
+			'No row of window 1 itself matched query "Calculator"; 1 row(s) of the sheet "open-panel" (window 5) modal over it match and are printed above — work in the sheet while it is up.',
+		]);
+		expect(hit.tree).not.toContain("scroll the list first");
+		// Nothing anywhere: the census is still the sheet's, with its own row
+		// count, and the advice is about the sheet.
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows") return reply({ windows: [f.row, sheet] });
+			if (name !== "get_window_state") return undefined;
+			return args.window_id === 5 ? sheetRows("Documents") : parent({});
+		};
+		const missed = await f.session.observe(f.context, f.window, { query: "Calculator" });
+		expect(missed.tree.split("\n").filter(line => line.startsWith("No row"))).toEqual([
+			'No row matched query "Calculator" in the sheet "open-panel" (window 5) modal over window 1 "Editor" (Fixture): its walk read 2 rows. Next: drop the query to read the sheet whole, or widen it — a query is a case-insensitive substring, and `|` separates alternatives. The window behind it takes no input until the sheet is answered, so its own rows are not the place to look.',
+		]);
+		expect(missed.tree).not.toContain("22 row(s) are out of view");
+	} finally {
+		await f.close();
+	}
+});
+
 it("clicks a ref's own bounds as window points when modifiers or a count leave the element route", async () => {
 	const f = await fixture();
 	try {
