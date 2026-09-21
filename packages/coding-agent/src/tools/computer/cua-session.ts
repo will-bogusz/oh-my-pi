@@ -147,6 +147,18 @@ interface WriteDoubt {
 function placeKey(identity: ElementIdentity): string {
 	return JSON.stringify([identity.role, identity.label, identity.ordinal, identity.path]);
 }
+/**
+ * Whether a row's value says anything about which row it is. An untouched
+ * text field is reported as `""` and a row with no `AXValue` carries no
+ * value at all, so an empty value matches every other empty row at the same
+ * place: it is the absence of evidence and never a match. Every place this
+ * session weighs a value against a row's identity asks this first, and they
+ * have to agree — a carry that trusted `"" === ""` and a reply that called
+ * the same ref value-less were two readings of one row.
+ */
+function evidential(value?: string): boolean {
+	return value !== undefined && value.trim() !== "";
+}
 function renderedSubrole(element: ComputerElementSnapshot): string {
 	const specific = specificRole(element);
 	return specific === element.role ? "" : ` subrole=${specific}`;
@@ -1387,8 +1399,16 @@ export class CuaComputerSession implements ComputerBackend {
 	 * different record keeps every field's place while changing what is in
 	 * it. The one ref exempt from the value test is a ref this session
 	 * dispatched through, whose value moved because of that dispatch; it is
-	 * carried when its place is unique. Everything else stays retired and
-	 * answers `StaleRef`, exactly as before.
+	 * carried when its place is unique.
+	 *
+	 * A value is only evidence while it says something. `""` and a row with
+	 * no value at all match every other empty row at their place, so they
+	 * are not a match but the absence of one, and such a ref is carried only
+	 * where its place holds exactly one fresh row that is equally empty.
+	 * That is the ground the five empty contact fields a dead ref used to
+	 * strand always stood on; what it withdraws is the carry onto the one
+	 * row of a shared place that happens to be blank too. Everything else
+	 * stays retired and answers `StaleRef`, exactly as before.
 	 */
 	#carry(window: ComputerWindowIdentity): ReadonlyMap<string, readonly [ref: string, binding: Binding]> {
 		const carried = new Map<string, readonly [string, Binding]>();
@@ -1405,8 +1425,16 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 		for (const [ref, { identity, acted }] of retired) {
 			const placed = places.get(placeKey(identity)) ?? [];
-			const valued = placed.filter(([, row]) => row.identity.value === identity.value);
-			const match = valued.length === 1 ? valued[0] : acted && placed.length === 1 ? placed[0] : undefined;
+			const valued = evidential(identity.value)
+				? placed.filter(([, row]) => row.identity.value === identity.value)
+				: [];
+			const only = placed.length === 1 ? placed[0] : undefined;
+			const match =
+				valued.length === 1
+					? valued[0]
+					: only && (acted || (!evidential(identity.value) && !evidential(only[1].identity.value)))
+						? only
+						: undefined;
 			if (match === undefined) continue;
 			this.#carried.set(ref, match[1]);
 			carried.set(ref, match);
@@ -2351,8 +2379,29 @@ export class CuaComputerSession implements ComputerBackend {
 				? target
 				: `${target} (${snapshot.role}${snapshot.label ? ` ${JSON.stringify(snapshot.label)}` : ""})`;
 		const carried = this.#carry(recover.window);
-		const identity = binding?.identity ?? this.#retired.get(recover.window.id)?.get(target)?.identity;
+		const parked = this.#retired.get(recover.window.id);
+		const identity = binding?.identity ?? parked?.get(target)?.identity;
 		const under = identity?.path.at(-1);
+		// Refs this walk re-bound on their place alone, because neither
+		// generation gave their value anything to say. Only the dead target's
+		// own carry is printed, so the rest of a batch comes back silently on
+		// whichever ground it found — and a form re-bound to another record
+		// keeps every field's place, which is exactly the ground these stand
+		// on. Said so the caller can weigh them before writing through them.
+		const positional = [...carried]
+			.filter(
+				([ref, [, row]]) =>
+					ref !== target &&
+					!evidential(parked?.get(ref)?.identity.value) &&
+					!evidential(row.identity.value),
+			)
+			.map(([ref]) => ref);
+		const weaker =
+			positional.length === 0
+				? ""
+				: `\n${positional.join(", ")} held no value then and hold${
+						positional.length === 1 ? "s" : ""
+					} none now — ${positional.length === 1 ? "it was" : "they were"} re-bound by position alone.`;
 		// Said wherever this reply ends up, because it is the answer to the
 		// question a dead ref raises about every other ref the caller is
 		// holding: this walk is not the caller's `observe`, and it did not
@@ -2371,7 +2420,7 @@ export class CuaComputerSession implements ComputerBackend {
 					element_token: row.token,
 					snapshot_id: row.snapshotId,
 				});
-				const note = `${lead}, so the action was dispatched at ${ref} instead. ${contract}`;
+				const note = `${lead}, so the action was dispatched at ${ref} instead. ${contract}${weaker}`;
 				return { ...result, text: result.text ? `${note}\n${result.text}` : note };
 			} catch (again) {
 				if (!(again instanceof ToolError)) throw again;
@@ -2380,7 +2429,7 @@ export class CuaComputerSession implements ComputerBackend {
 				// instead" with a refusal under it, which is two accounts of
 				// one call: the row took the action, and the row refused it.
 				throw new ToolError(
-					`${lead}, so the action was re-addressed to ${ref}, which refused it. ${contract}\n${again.message}`,
+					`${lead}, so the action was re-addressed to ${ref}, which refused it. ${contract}${weaker}\n${again.message}`,
 					again.context,
 				);
 			}
@@ -2408,7 +2457,7 @@ export class CuaComputerSession implements ComputerBackend {
 		// window as it is now — address the row you mean from it." as a
 		// fragment and retried the dead ref, which throws `StaleRef`.
 		const readdress = rows.length
-			? `${target} is retired and the tree below carries this window's new refs — address the row you mean by its new ref. ${contract}`
+			? `${target} is retired and the tree below carries this window's new refs — address the row you mean by its new ref. ${contract}${weaker}`
 			: `${target} is retired and this walk minted no refs to address — observe the window again (win.observe()) once it has rows.`;
 		const text = `${reply.code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${
 			rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown."

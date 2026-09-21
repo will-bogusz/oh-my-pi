@@ -3375,7 +3375,7 @@ it("carries the rest of a batch's refs across the walk a dead ref provoked", asy
 			return name === "click" && args.element_token === "g1:3" ? DEAD_ROW : undefined;
 		};
 		const observed = await f.session.observe(f.context, f.window);
-		const [, companyField, checkbox, phone, street] = observed.elements.map(element => element.ref);
+		const [group, companyField, checkbox, phone, street] = observed.elements.map(element => element.ref);
 		// One cell: write a field, toggle a control that dies under it, write
 		// two more fields. Every dispatch answers with its own verdict.
 		const first = await f.session.setValue(f.context, f.window, companyField!, "Apple Park Visitor Center");
@@ -3396,6 +3396,16 @@ it("carries the rest of a batch's refs across the walk a dead ref provoked", asy
 		);
 		expect(f.texts.filter(text => text.includes("] AXTextField "))).toHaveLength(1);
 		expect(dead.text).toContain(`- [n${observed.elements.length + 2}] AXTextField "Company"`);
+		// The siblings come back silently, so the reply names the ones whose
+		// only evidence is position: neither generation gave their value
+		// anything to say, and a form re-bound to another record would have
+		// kept their places too.
+		expect(dead.text.split("\n")[1]).toBe(
+			`${group}, ${phone} held no value then and hold none now — they were re-bound by position alone.`,
+		);
+		// The field this session wrote through is not among them: its value
+		// moved, and that is the stronger ground it carried on.
+		expect(dead.text).not.toContain(`${companyField} held no value`);
 		await expect(f.session.click(f.context, f.window, checkbox!)).rejects.toThrow(`StaleRef: ${checkbox} —`);
 		// A ref this session wrote through carries on its place alone: the
 		// value it no longer matches is the one this session put there.
@@ -3456,6 +3466,62 @@ it("refuses to carry a ref two rows of the fresh tree could be", async () => {
 		// The second row's ref has two candidates at its own place: no row of
 		// the fresh tree is that row, and it stays retired.
 		await expect(f.session.click(f.context, f.window, twin)).rejects.toThrow(`StaleRef: ${twin} —`);
+	} finally {
+		await f.close();
+	}
+});
+
+it("refuses to carry an empty-valued ref two rows of the fresh tree could be", async () => {
+	const f = await fixture();
+	try {
+		let generation = 0;
+		// The same ambiguity in the shape a contact card has it: two untitled
+		// rows of one outline, each holding an untitled field at the same
+		// place. Both fields are empty when the walk retires them and one of
+		// them is filled in by the time it answers, so "the empty one" names
+		// exactly one fresh row — and names it for no reason at all.
+		const form = (): Wire[] => [
+			{ element_index: 1, element_token: `g${generation}:1`, role: "AXOutline", label: "", depth: 0 },
+			...[0, 1].flatMap(index => [
+				{
+					element_index: 2 + index * 2,
+					element_token: `g${generation}:${2 + index * 2}`,
+					role: "AXRow",
+					label: "",
+					depth: 1,
+				},
+				{
+					element_index: 3 + index * 2,
+					element_token: `g${generation}:${3 + index * 2}`,
+					role: "AXTextField",
+					label: "",
+					value: generation > 1 && index === 1 ? "1 Infinite Loop" : "",
+					depth: 2,
+				},
+			]),
+		];
+		f.state.hook = async (name, args) => {
+			if (name === "get_window_state")
+				return reply({
+					pid: 101,
+					window_id: 1,
+					snapshot_id: `w${++generation}`,
+					truncated: false,
+					elements: form(),
+				});
+			return name === "click" && args.element_token === "g1:3" ? DEAD_ROW : undefined;
+		};
+		const observed = await f.session.observe(f.context, f.window);
+		const twin = observed.elements[4]!.ref;
+		expect(observed.elements[4]!.role).toBe("AXTextField");
+		expect((await f.session.click(f.context, f.window, observed.elements[2]!.ref)).effect).toBe("not_dispatched");
+		// The outline is the one row nothing else could be, so it carries:
+		// the refusal below is the ambiguity's, not a blanket retirement of
+		// every value-less ref.
+		expect(f.session.element(observed.elements[0]!.ref).role).toBe("AXOutline");
+		// An empty value matches every empty row at the place, so it picks
+		// out the still-empty twin without evidence of any kind.
+		await expect(f.session.setValue(f.context, f.window, twin, "no")).rejects.toThrow(`StaleRef: ${twin} —`);
 	} finally {
 		await f.close();
 	}
