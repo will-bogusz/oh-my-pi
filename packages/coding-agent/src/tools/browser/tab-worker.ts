@@ -23,6 +23,7 @@ import {
 } from "../run-scope";
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import {
 	type AriaSnapshotOptions,
 	assertSelectorString,
@@ -832,6 +833,21 @@ export function formatSelectorMatchHint(count: number): string {
 		? "; selector currently matches no elements — run tab.observe() or tab.ariaSnapshot() to inspect the page"
 		: `; selector currently matches ${count} element(s) but the action never became possible — the element may be hidden or covered (try tab.scrollIntoView() or a more specific selector)`;
 }
+/**
+ * A tree too big for the cell to print whole. The eval sink caps a cell's
+ * inline output at {@link DEFAULT_MAX_BYTES} and cuts the middle out of
+ * anything larger, which on a long page is exactly the table or list the read
+ * was for — measured: an 83 KB Wikipedia tree printed as 30.7 KB of head plus
+ * 12.8 KB of tail, with the wanted row inside the 39.8 KB that went. The whole
+ * tree is still in the cell, as the `.tree` of the value this call returns, and
+ * code can search it for no tokens at all; nothing said so, so the model
+ * re-derived the page from the DOM instead. The cut keeps the tail, so a line
+ * at the end is one the model still reads.
+ */
+export function printableTree(tree: string): string {
+	if (Buffer.byteLength(tree, "utf-8") <= DEFAULT_MAX_BYTES) return tree;
+	return `${tree}\n[This tree is larger than the cell's ${Math.round(DEFAULT_MAX_BYTES / 1024)} KB inline output budget, so the printed copy above has its middle cut out. The whole tree is in this cell: the \`.tree\` of the value this call returned — \`tab.initialObservation.tree\` for a tab's first observation — so search it in code (\`tree.split("\\n").filter(line => line.includes("…"))\`) instead of printing it again.]`;
+}
 
 export interface InflightOp {
 	label: string;
@@ -1590,7 +1606,7 @@ export class WorkerCore {
 			observe: opts =>
 				op("tab.observe()", quickOpMs, async sig => {
 					const observation = await this.#collectObservation({ ...opts, refs: session.refs, signal: sig });
-					if (opts?.display !== false) output.push({ type: "text", text: observation.tree });
+					if (opts?.display !== false) output.push({ type: "text", text: printableTree(observation.tree) });
 					active.presented = observation;
 					return observation;
 				}),

@@ -15,7 +15,7 @@ import {
 	renderTree,
 	renderTreeDiff,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/observation";
-import { WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
+import { printableTree, WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import puppeteer from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
@@ -331,3 +331,16 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	},
 	60_000,
 );
+
+it("names the cell's own copy of a tree the printed output cannot hold whole", () => {
+	// Under the eval sink's inline budget nothing is added; over it the print
+	// is middle-cut, which on a long page takes exactly the rows the read was
+	// for, and the only cheap way back to them is the value in the cell.
+	const small = "- heading \"Overview\"\n- link \"Home\"";
+	expect(printableTree(small)).toBe(small);
+	const long = Array.from({ length: 4000 }, (_, index) => `- row "${index}" ${"x".repeat(20)}`).join("\n");
+	const printed = printableTree(long);
+	expect(printed.startsWith(long)).toBe(true);
+	expect(printed.slice(long.length)).toContain("tab.initialObservation.tree");
+	expect(printed.slice(long.length)).toContain("search it in code");
+});
