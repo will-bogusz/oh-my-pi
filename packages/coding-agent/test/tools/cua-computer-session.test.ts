@@ -401,13 +401,7 @@ it("acquires the sole application-declared window without hiding raw helper iden
 
 it("keeps the driver's own capture-lease window out of every roster it offers", async () => {
 	const f = await fixture();
-	const lease = {
-		...f.row,
-		window_id: 9,
-		title: "Window",
-		bounds: { x: 0, y: 0, width: 66, height: 20 },
-		z_index: 12,
-	};
+	const lease = { ...f.row, window_id: 9, title: "Window", kind: "system_overlay", z_index: 12 };
 	const named = { ...f.row, window_id: 10, title: "Window", z_index: 3 };
 	try {
 		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [f.row, lease, named] }) : undefined);
@@ -444,6 +438,22 @@ it("keeps the driver's own capture-lease window out of every roster it offers", 
 	}
 });
 
+it("offers an app window the driver classified as nobody's only when it says so", async () => {
+	const f = await fixture();
+	// The pattern this replaced was the indicator's own title and geometry, so
+	// an app window that happened to be a 66×20 "Window" was hidden from every
+	// roster and could not be acquired at all. Which window a capture lease
+	// caused is the driver's to know, and an unclassified row is the app's.
+	const lookalike = { ...f.row, window_id: 9, title: "Window", bounds: { x: 0, y: 0, width: 66, height: 20 } };
+	try {
+		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [f.row, lookalike] }) : undefined);
+		expect((await f.session.windows(f.context)).map(window => window.id)).toEqual(["1", "9"]);
+		expect(await f.session.window(f.context, { id: "9", pid: 101 })).toMatchObject({ id: "9", title: "Window" });
+	} finally {
+		await f.close();
+	}
+});
+
 it("resolves an { app } that is a bundle id through the apps roster the window list has no room for", async () => {
 	const f = await fixture();
 	try {
@@ -469,7 +479,7 @@ it("resolves an { app } that is a bundle id through the apps roster the window l
 it("reads only the acted pid's windows once a handle names one", async () => {
 	const f = await fixture();
 	const print = { ...f.row, window_id: 7, title: "Print", z_index: 9 };
-	const lease = { ...f.row, window_id: 9, title: "Window", bounds: { x: 0, y: 0, width: 66, height: 20 } };
+	const lease = { ...f.row, window_id: 9, title: "Window", kind: "system_overlay" };
 	const foreign = { ...f.row, pid: 202, window_id: 20, title: "Other app" };
 	let printing = false;
 	try {
@@ -504,7 +514,7 @@ it("reads only the acted pid's windows once a handle names one", async () => {
 it("names a window the pid opened since the last observation and never rebinds the handle", async () => {
 	const f = await fixture();
 	const print = { ...f.row, window_id: 7, title: "Print", z_index: 9 };
-	const lease = { ...f.row, window_id: 9, title: "Window", bounds: { x: 0, y: 0, width: 66, height: 20 } };
+	const lease = { ...f.row, window_id: 9, title: "Window", kind: "system_overlay" };
 	try {
 		await f.session.observe(f.context, f.window);
 		const quiet = await f.session.press(f.context, f.window, "cmd+p", undefined, { delivery: "foreground" });
@@ -531,7 +541,7 @@ it("announces what a pid opened on the observe path and nests a sheet under its 
 	// Chrome's print dialog renders seconds after the invoke that asked for
 	// it, so it appears between two observations rather than inside an action.
 	const print = { ...f.row, window_id: 7, title: "Print", z_index: 9 };
-	const lease = { ...f.row, window_id: 9, title: "Window", bounds: { x: 0, y: 0, width: 66, height: 20 } };
+	const lease = { ...f.row, window_id: 9, title: "Window", kind: "system_overlay" };
 	const document = { ...f.row, window_id: 11, title: "Untitled", bounds: { x: 0, y: 0, width: 400, height: 300 } };
 	const sheet = { ...f.row, window_id: 12, title: "", bounds: { x: 100, y: 20, width: 200, height: 120 } };
 	let windows: WindowRow[] = [f.row];
@@ -4963,10 +4973,10 @@ it("says what a disabled control's refusal actually leaves open", async () => {
 it("offers a disabled control the window it can acquire, and the rung a not-key window needs", async () => {
 	const f = await fixture();
 	// T11 `native-act-notes/omp-2`: the panel named in front of the search
-	// field was the capture lease's own 66×20 "Window" indicator, which this
-	// roster hides — `computer.window("19083")` answered `Missing computer
-	// window {"id":"19083"}`.
-	const lease = { ...f.row, window_id: 19083, title: "Window", bounds: { x: 30, y: 40, width: 66, height: 20 } };
+	// field was the capture lease's own indicator, which the driver classifies
+	// and this roster hides — `computer.window("19083")` answered `Missing
+	// computer window {"id":"19083"}`.
+	const lease = { ...f.row, window_id: 19083, title: "Window", kind: "system_overlay" };
 	const notKeyText =
 		'AXPress was not dispatched: AXTextField "" of window 1 reports AXEnabled=false. Window 1 is not the application\'s key window. A foreground dispatch makes it key first.';
 	const disabled = (

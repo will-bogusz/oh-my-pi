@@ -43,7 +43,7 @@ import {
 	writeField,
 	writeNote,
 } from "./render";
-import { appWindows, isCaptureLeaseArtifact } from "./roster";
+import { appWindows } from "./roster";
 import { PERFORMABLE_ACTIONS, observedActions, semanticAction } from "./semantic-actions";
 import type {
 	ActionOptions,
@@ -918,6 +918,16 @@ export class CuaComputerSession implements ComputerBackend {
 			// `pid: null` (contract-legal). Every driver call is pid-addressed,
 			// so such a row names nothing this session can observe or act on.
 			if (row.pid === null) continue;
+			// The window macOS injects into a process under a screen-capture
+			// lease: on layer 0, indistinguishable from an app window in every
+			// field a roster row carries, and nobody's. Only the driver holding
+			// the lease can name it, and it does — so this reads its
+			// classification instead of re-deriving it from title and geometry,
+			// which also hid an app window that happened to share both.
+			if (row.kind === "system_overlay") {
+				artifacts.add(String(number(row.window_id, "window_id")));
+				continue;
+			}
 			const window = {
 				id: String(number(row.window_id, "window_id")),
 				pid: number(row.pid, "pid"),
@@ -949,10 +959,6 @@ export class CuaComputerSession implements ComputerBackend {
 								? classifyWindow({ app: string(row.app_name, "app_name") })
 								: ("other" as const),
 			};
-			if (isCaptureLeaseArtifact(window)) {
-				artifacts.add(window.id);
-				continue;
-			}
 			windowArgs(window);
 			windows.push(Object.freeze(window));
 		}
