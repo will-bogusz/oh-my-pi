@@ -437,14 +437,18 @@ async function invokeBrowser(
 					session,
 				});
 				throwIfAborted(signal);
+				const state = initial.returnValue as InitialBrowserState;
 				details.value = {
 					created: handle.lease.created,
 					target: handle.lease.tab,
-					...(initial.returnValue as InitialBrowserState),
+					...state,
 				};
+				// The page, not the tab-group label: every created tab carries the
+				// same label, so "Claimed Chrome tab "Oh My Pi"" named nothing.
+				const page = state.initialObservation?.title || handle.lease.tab.title || details.url;
 				initial.displays.unshift({
 					type: "text",
-					text: `${parsed.action === "claim" ? "Claimed" : "Created inactive"} Chrome tab ${JSON.stringify(handle.label)}\nTarget: ${handle.lease.tab.id}\nURL: ${details.url}`,
+					text: `${parsed.action === "claim" ? "Claimed" : "Created inactive"} Chrome tab ${JSON.stringify(page)}\nTarget: ${handle.lease.tab.id}\nURL: ${details.url}\nTab group: ${JSON.stringify(handle.label)}`,
 				});
 				// Once, with the handle itself: the verbs are what the acquisition
 				// hands over, and a later observe() of the same tab repeats the

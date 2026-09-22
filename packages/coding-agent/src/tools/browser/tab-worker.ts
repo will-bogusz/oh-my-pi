@@ -257,6 +257,8 @@ interface TabApi {
 		url: string,
 		opts?: { waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2" },
 	): Promise<void>;
+	back(): Promise<void>;
+	forward(): Promise<void>;
 	observe(opts?: ObserveOptions): Promise<Observation>;
 	ariaSnapshot(selector?: string, opts?: AriaSnapshotOptions): Promise<string>;
 	screenshot(opts?: ScreenshotOptions): Promise<string>;
@@ -1620,6 +1622,8 @@ export class WorkerCore {
 						stopLoading: () => this.#stopLoading(),
 					});
 				}),
+			back: () => op("tab.back()", INF, sig => this.#navigateHistory(page, -1, budgetBound, sig)),
+			forward: () => op("tab.forward()", INF, sig => this.#navigateHistory(page, 1, budgetBound, sig)),
 			observe: opts =>
 				op("tab.observe()", quickOpMs, async sig => {
 					const observation = await this.#collectObservation({ ...opts, refs: session.refs, signal: sig });
@@ -1839,6 +1843,27 @@ export class WorkerCore {
 			});
 			if (attempt && observationId === this.#observationId) return attempt;
 		}
+	}
+
+	/**
+	 * Step one entry through the tab's own session history. Puppeteer's
+	 * `page.goBack()` waits for a lifecycle event, which a relayed tab stops
+	 * emitting after an idle detach, so the step is issued over CDP and waited
+	 * for the same way `goto` waits: the main frame's own `readyState`.
+	 */
+	async #navigateHistory(page: Page, delta: -1 | 1, timeoutMs: number, signal?: AbortSignal): Promise<void> {
+		const session = page.mainFrame().client;
+		const history = await untilAborted(signal, () => session.send("Page.getNavigationHistory"));
+		const entry = history.entries[history.currentIndex + delta];
+		if (!entry)
+			throw new ToolError(
+				delta < 0
+					? "This tab has no previous page in its history; it is the first page of the session."
+					: "This tab has no next page in its history; nothing was navigated back from.",
+			);
+		this.#invalidateRefs();
+		await untilAborted(signal, () => session.send("Page.navigateToHistoryEntry", { entryId: entry.id }));
+		await waitForMainFrameReady(page, { timeoutMs, signal });
 	}
 
 	async #snapshotOnce(

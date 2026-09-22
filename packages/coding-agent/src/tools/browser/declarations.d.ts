@@ -115,6 +115,10 @@ type BrowserSelectOption = string | { label?: string; value?: string };
 interface BrowserTabHelpers {
 	title(): Promise<string>;
 	goto(url: string, options?: { waitUntil?: BrowserWaitUntil }): Promise<void>;
+	/** Step one entry back through this tab's own session history. */
+	back(): Promise<void>;
+	/** Step one entry forward; only meaningful after a `back()`. */
+	forward(): Promise<void>;
 	/** settles, prints the tree (diff by default), returns it */
 	observe(options?: BrowserObserveOptions): Promise<BrowserObservation>;
 	ariaSnapshot(selector?: string, options?: { depth?: number; boxes?: boolean }): Promise<string>;
