@@ -30,7 +30,6 @@ try {
 		url: fixture.url.toString(),
 		browserId,
 		owner,
-		taskId: owner,
 		label: "OMP smoke",
 	})) as InstanceLease;
 	const version = await localBrowserRequest(`${relayUrl}/managed/${lease.id}/json/version`);
@@ -53,6 +52,6 @@ try {
 	console.log("SMOKE OK");
 } finally {
 	for (const client of clients) await client.disconnect();
-	if (lease) await request({ action: "release", id: lease.id, owner });
+	if (lease) await request({ action: "releaseTab", id: lease.id, owner, close: true });
 	fixture.stop();
 }

@@ -62,7 +62,7 @@ describe("managed Chrome physical tab ownership", () => {
 		await expect(tabs.closeTab(adopted.tab.id, "other")).rejects.toThrow("another actor");
 		expect(tabs.get(adopted.id, "owner").tab.tabId).toBe(1);
 		await tabs.releaseTab(adopted.id, "owner", true);
-		const created = await tabs.create("https://example.com", "owner", "task", "Result");
+		const created = await tabs.create("https://example.com", "owner", "Result");
 		await expect(tabs.releaseTab(created.id, "other", true)).rejects.toThrow("another actor");
 		await tabs.releaseTab(created.id, "owner", true);
 		expect(released).toEqual([
@@ -137,7 +137,7 @@ describe("managed Chrome physical tab ownership", () => {
 			reveal: async () => {},
 			invalidate: () => {},
 		});
-		const lease = await tabs.create("https://example.com", "owner", "task", "Research");
+		const lease = await tabs.create("https://example.com", "owner", "Research");
 		expect(lease.tab).toMatchObject({ url: "https://example.com", title: "Ready", groupId: 42 });
 		tabs.upsert({ ...tab(1), title: "Updated", groupId: 42 });
 		const updated = tabs.get(lease.id, "owner");
@@ -204,8 +204,8 @@ describe("managed Chrome physical tab ownership", () => {
 
 	it("groups created tabs by owning actor even when labels match, and keeps the pages it is asked to keep", async () => {
 		const { tabs, released, groups } = harness();
-		const first = await tabs.create("about:blank", "actor A", "task A", "Research");
-		const second = await tabs.create("about:blank", "actor B", "task B", "Research");
+		const first = await tabs.create("about:blank", "actor A", "Research");
+		const second = await tabs.create("about:blank", "actor B", "Research");
 		await tabs.releaseTab(first.id, "actor A", false);
 		await tabs.releaseTab(second.id, "actor B", true);
 		expect(released).toEqual([
@@ -244,7 +244,7 @@ describe("managed Chrome physical tab ownership", () => {
 
 it("recovers a dead actor after the last connection closes, without closing its page", async () => {
 	const { tabs, released } = harness(10);
-	const lease = await tabs.create("https://example.com", "owner", "task", "Work");
+	const lease = await tabs.create("https://example.com", "owner", "Work");
 	tabs.connected(lease.id, 1);
 	tabs.connected(lease.id, 2);
 	tabs.disconnected(lease.id, 1);
@@ -259,13 +259,13 @@ it("recovers a dead actor after the last connection closes, without closing its 
 
 it("allows reconnection during recovery grace and handles never-connected acquisitions", async () => {
 	const { tabs, released } = harness(20);
-	const lease = await tabs.create("https://example.com", "owner", "task", "Work");
+	const lease = await tabs.create("https://example.com", "owner", "Work");
 	tabs.connected(lease.id, 1);
 	tabs.disconnected(lease.id, 1);
 	tabs.connected(lease.id, 2);
 	await Bun.sleep(35);
 	expect(tabs.tabForLease(lease.id)).toBe(lease.tab.tabId);
-	const abandoned = await tabs.create("about:blank", "other", "task", "Work");
+	const abandoned = await tabs.create("about:blank", "other", "Work");
 	await Bun.sleep(35);
 	expect(tabs.tabForLease(abandoned.id)).toBeUndefined();
 	expect(released).toEqual([[abandoned.tab.tabId, false]]);
@@ -273,7 +273,7 @@ it("allows reconnection during recovery grace and handles never-connected acquis
 
 it("keeps orphan authority unavailable while admitted work drains", async () => {
 	const { tabs, invalidated } = harness(10);
-	const lease = await tabs.create("https://example.com", "owner", "task", "Work");
+	const lease = await tabs.create("https://example.com", "owner", "Work");
 	const finish = tabs.beginOperation(lease.id);
 	await Bun.sleep(25);
 	expect(invalidated).toContain(lease.id);

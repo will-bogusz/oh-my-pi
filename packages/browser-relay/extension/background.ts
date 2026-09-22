@@ -9,7 +9,12 @@
  * worker alive while connected (Chrome 116+); a chrome.alarms tick revives it
  * and re-dials after Chrome reaps it while disconnected.
  */
-import type { ExtToRelayMessage, RelayToExtMessage, TabSnapshot } from "../../coding-agent/src/tools/browser/relay/protocol";
+import {
+	type ExtToRelayMessage,
+	isCurrentRelayHealth,
+	type RelayToExtMessage,
+	type TabSnapshot,
+} from "../../coding-agent/src/tools/browser/relay/protocol";
 import { DebuggerAttachments, ownedDebuggerTabs } from "./debugger-ownership";
 import { groupTab, releaseOwnerGroups } from "./tab-groups";
 import { CURSOR_OVERLAY_REMOVE, LEASE_BADGE_RESTORE } from "../../coding-agent/src/tools/browser/relay/lease-badge";
@@ -209,12 +214,8 @@ async function runRpc(msg: Extract<RelayToExtMessage, { t: "rpc" }>): Promise<un
 			return { tab: snap };
 		}
 		case "activateTab": {
-			// Selecting a tab is not the same as raising its window: an adopted
-			// popup only needs the user's own tab selected again.
-			if (msg.focusWindow) {
-				const tab = await chrome.tabs.get(msg.tabId);
-				await chrome.windows.update(tab.windowId, { focused: true });
-			}
+			const tab = await chrome.tabs.get(msg.tabId);
+			await chrome.windows.update(tab.windowId, { focused: true });
 			await chrome.tabs.update(msg.tabId, { active: true });
 			return {};
 		}
@@ -284,8 +285,7 @@ async function connect(): Promise<void> {
 		// Older brokers replace their singleton on socket-open. Check compatibility
 		// before dialing /ext so an upgrade cannot evict another task's connection.
 		const healthResponse = await fetch(`http://127.0.0.1:${settings.port}/health`, { signal: AbortSignal.timeout(1500), redirect: "error" });
-		const health = healthResponse.ok ? await healthResponse.json() as {service?: string; protocol?: number} : undefined;
-		if (health?.service !== "omp-browser" || health.protocol !== 2)
+		if (!healthResponse.ok || !isCurrentRelayHealth(await healthResponse.json()))
 			throw new Error("This endpoint uses an older browser service. Use another port or update it after active tasks finish.");
 		const url = `ws://127.0.0.1:${settings.port}/ext`;
 		const socket = new WebSocket(url);

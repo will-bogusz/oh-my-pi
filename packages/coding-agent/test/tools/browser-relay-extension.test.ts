@@ -115,7 +115,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				return relay.instances.list().find(browser => browser.label === label)!.id;
 			};
 			const firstId = await launchProfile("Work Chrome");
-			const parent = await relay.instances.create(fixture.url.toString(), "actor", "task", "Workshop");
+			const parent = await relay.instances.create(fixture.url.toString(), "actor", "Workshop");
 			const connect = async (leaseId: string): Promise<Browser> => {
 				const info = (await (
 					await fetch(`http://127.0.0.1:${relay.port}/managed/${leaseId}/json/version`)
@@ -194,13 +194,12 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			expect(relay.instances.get(child.id, "actor").tab).toMatchObject({ groupId: parentTab.groupId });
 			const secondId = await launchProfile("Personal Chrome");
 			expect(relay.instances.list().filter(instance => instance.connected)).toHaveLength(2);
-			await expect(relay.instances.create("about:blank", "actor", "task", "Ambiguous")).rejects.toThrow(
+			await expect(relay.instances.create("about:blank", "actor", "Ambiguous")).rejects.toThrow(
 				"Multiple browsers",
 			);
 			const second = await relay.instances.create(
 				fixture.url.toString(),
 				"actor",
-				"task",
 				"Personal task",
 				secondId,
 			);
@@ -221,7 +220,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			expect(await childPage.title()).toBe("Workshop details");
 			// A PDF is driven like any page but never badged: Chrome's viewer takes
 			// the glyph and then keeps it, so the tab would look driven forever.
-			const pdf = await relay.instances.create(`${fixture.url}doc.pdf`, "actor", "task", "Reading");
+			const pdf = await relay.instances.create(`${fixture.url}doc.pdf`, "actor", "Reading");
 			const pdfBrowser = await connect(pdf.id);
 			const pdfPage = await pdfBrowser
 				.targets()
@@ -356,7 +355,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			await setupSession.detach();
 			await setup.disconnect();
 
-			const lease = await relay.instances.create(fixture.url.toString(), "actor", "task", "Detach task");
+			const lease = await relay.instances.create(fixture.url.toString(), "actor", "Detach task");
 			const version = (await (await fetch(`http://127.0.0.1:${port}/managed/${lease.id}/json/version`)).json()) as {
 				webSocketDebuggerUrl: string;
 			};
@@ -406,7 +405,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				await reclaimedClient.disconnect();
 			}
 			// Ownership was reset with the socket; a new lease still drives fine.
-			const revived = await relay.instances.create(fixture.url.toString(), "actor", "task", "Revived");
+			const revived = await relay.instances.create(fixture.url.toString(), "actor", "Revived");
 			const revivedVersion = (await (
 				await fetch(`http://127.0.0.1:${port}/managed/${revived.id}/json/version`)
 			).json()) as { webSocketDebuggerUrl: string };
@@ -485,7 +484,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			await setupSession.detach();
 			await setup.disconnect();
 
-			const lease = await relay.instances.create(fixture.url.toString(), "actor", "task", "Idle task");
+			const lease = await relay.instances.create(fixture.url.toString(), "actor", "Idle task");
 			const version = (await (
 				await fetch(`http://127.0.0.1:${relay.port}/managed/${lease.id}/json/version`)
 			).json()) as { webSocketDebuggerUrl: string };

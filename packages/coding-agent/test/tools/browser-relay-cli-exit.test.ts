@@ -82,7 +82,7 @@ describe("finite browser setup commands", () => {
 		const serveOut = new Response(serve.stdout).text();
 		const serveErr = new Response(serve.stderr).text();
 		try {
-			expect(await waitUntil(() => probeRelayServer(scope.endpoint), 15_000)).toBeTrue();
+			expect(await waitUntil(async () => (await probeRelayServer(scope.endpoint)) !== null, 15_000)).toBeTrue();
 			const listed = await scope.command(["list"]);
 			expect(listed).toEqual({ code: 0, stdout: "[]\n", stderr: "", signal: null });
 
@@ -97,7 +97,7 @@ describe("finite browser setup commands", () => {
 			expect(paired.stdout).toContain("Pairing code:");
 			await Bun.sleep(350);
 			expect(serve.exitCode).toBeNull();
-			expect(await probeRelayServer(scope.endpoint)).toBeTrue();
+			expect(await probeRelayServer(scope.endpoint)).not.toBeNull();
 		} finally {
 			serve.kill();
 			await Promise.all([serve.exited, serveOut, serveErr]);
@@ -115,7 +115,7 @@ describe("finite browser setup commands", () => {
 			// Longer than this fixture broker's last-client grace. The finite CLI
 			// has exited; only the service's bounded setup lease can keep it alive.
 			await Bun.sleep(350);
-			expect(await probeRelayServer(scope.endpoint)).toBeTrue();
+			expect(await probeRelayServer(scope.endpoint)).not.toBeNull();
 			const listed = await scope.command(["list"]);
 			expect(listed).toEqual({ code: 0, stdout: "[]\n", stderr: "", signal: null });
 		} finally {

@@ -130,9 +130,12 @@ async function runInstall(
 
 async function runControl(args: BrowserRelayCommandArgs): Promise<void> {
 	const url = `http://127.0.0.1:${args.port}`;
-	await ensureRelayDaemon({ cdpUrl: url });
-	const health = await localBrowserRequest(`${url}/health`);
-	if (!health.ok || ((await health.json()) as { protocol?: number }).protocol !== 2)
+	const health = await ensureRelayDaemon({ cdpUrl: url });
+	if (!health)
+		throw new Error(
+			`No browser relay is listening on port ${args.port} and one could not be started. Check \`omp browser-relay --port ${args.port}\`.`,
+		);
+	if (health === "legacy")
 		throw new Error(
 			"This endpoint has an older service. Preserve active tasks and use another --port, or update when they finish.",
 		);

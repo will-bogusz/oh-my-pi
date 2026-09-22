@@ -18,6 +18,9 @@ import { describeQuietly, stopQuietly, waitReady } from "../../../launch/ensure"
 import { resolveWorkerSpawnCmd } from "../../../subprocess/worker-client";
 import { throwIfAborted } from "../../tool-errors";
 import { probeCdpStatus } from "../attach";
+import { DEFAULT_RELAY_URL } from "./kind";
+import { localBrowserRequest } from "./local-http";
+import { isCurrentRelayHealth, type RelayHealth } from "./protocol";
 
 /** Stable broker daemon name for the relay server. */
 export const RELAY_DAEMON_NAME = "omp.browser.relay";
@@ -28,6 +31,8 @@ const READY_TIMEOUT_MS = 15_000;
 const PROBE_TIMEOUT_MS = 1_500;
 /** probe→describe→start rounds; bounds cross-process races and wedged-relay replacement. */
 const ENSURE_ATTEMPTS = 3;
+/** Port of {@link DEFAULT_RELAY_URL}; the daemon record for it carries no port suffix. */
+const DEFAULT_RELAY_PORT = new URL(DEFAULT_RELAY_URL).port;
 
 /** A code-entry window leases the broker independently of the finite pairing CLI. */
 export class RelayPairingLease {
@@ -90,14 +95,23 @@ export class RelayPairingLease {
 	}
 }
 
-/** Recognize current liveness and healthy older services without replacing either endpoint. */
-export async function probeRelayServer(cdpUrl: string): Promise<boolean> {
-	const health = await probeCdpStatus(`${cdpUrl}/health`, { timeoutMs: PROBE_TIMEOUT_MS });
-	if (health !== null && health >= 200 && health < 300) return true;
-	// Preserve a healthy older endpoint. The acquisition layer reports its protocol
-	// mismatch instead of replacing another task’s service.
+/**
+ * What is answering at `cdpUrl`: the `/health` body of a relay this build can
+ * drive, `"legacy"` for a healthy older service (preserved, never replaced —
+ * the acquisition layer reports the mismatch), or `null` when nothing is
+ * listening. The body is returned rather than a flag so callers do not have to
+ * fetch `/health` a second time to learn the protocol.
+ */
+export async function probeRelayServer(cdpUrl: string): Promise<RelayHealth | "legacy" | null> {
+	const response = await localBrowserRequest(`${cdpUrl}/health`, {
+		signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+	}).catch(() => undefined);
+	if (response?.ok) {
+		const body: unknown = await response.json().catch(() => undefined);
+		if (isCurrentRelayHealth(body)) return body;
+	}
 	const status = await probeCdpStatus(`${cdpUrl}/json/version`, { timeoutMs: PROBE_TIMEOUT_MS });
-	return status === 503 || (status !== null && status >= 200 && status < 300);
+	return status === 503 || (status !== null && status >= 200 && status < 300) ? "legacy" : null;
 }
 
 /** Auto-start is only safe for endpoints this machine can own. */
@@ -112,36 +126,44 @@ export function isLoopbackRelayUrl(cdpUrl: string): boolean {
 
 /**
  * Ensure a relay server answers at `cdpUrl`, starting the broker-owned daemon
- * when nothing is serving. Returns true once the HTTP endpoint responds — the
- * extension handshake (503 → 200) is the caller's wait. False when the relay
- * could not be started (broker unavailable or start rounds exhausted).
+ * when nothing is serving. Resolves with what answered — the `/health` body of
+ * a usable relay, or `"legacy"` for an older service this build must not
+ * replace — so the caller needs no second probe; the extension handshake
+ * (503 → 200) is still the caller's wait. `null` when nothing could be
+ * reached or started (broker unavailable or start rounds exhausted).
  */
-export async function ensureRelayDaemon(opts: { cdpUrl: string; signal?: AbortSignal }): Promise<boolean> {
+export async function ensureRelayDaemon(opts: {
+	cdpUrl: string;
+	signal?: AbortSignal;
+}): Promise<RelayHealth | "legacy" | null> {
 	let port: string;
 	try {
 		port = String(new URL(opts.cdpUrl).port || 80);
 	} catch {
-		return false;
+		return null;
 	}
 	// Broker records must identify the listening endpoint. A failed custom-port
 	// probe must never be treated as proof that another port's daemon is wedged.
-	const daemonName = port === "9224" ? RELAY_DAEMON_NAME : `${RELAY_DAEMON_NAME}.${port}`;
+	const daemonName = port === DEFAULT_RELAY_PORT ? RELAY_DAEMON_NAME : `${RELAY_DAEMON_NAME}.${port}`;
 	// Open the lazy client before probing. Merely caching SocketDaemonClient
 	// would not create the broker connection (and therefore would hold no lease).
 	const client = await daemonClientForGlobal(RELAY_BROKER_SCOPE);
 	throwIfAborted(opts.signal);
 	await client.request({ op: "ping" }, opts.signal);
-	if (await probeRelayServer(opts.cdpUrl)) return true;
+	const serving = await probeRelayServer(opts.cdpUrl);
+	if (serving) return serving;
 	const spawn = resolveWorkerSpawnCmd("browser-relay");
 	for (let attempt = 0; attempt < ENSURE_ATTEMPTS; attempt++) {
 		throwIfAborted(opts.signal);
 		// A manual serve or concurrent global-broker start may have won the
 		// port since the last round; adopt it instead of fighting the bind.
-		if (await probeRelayServer(opts.cdpUrl)) return true;
+		const adopted = await probeRelayServer(opts.cdpUrl);
+		if (adopted) return adopted;
 		const existing = await describeQuietly(client, daemonName, "Browser relay", opts.signal);
 		if (existing && existing.state !== "exited" && existing.state !== "failed") {
 			if (existing.readyAt === undefined) await waitReady(client, daemonName, "Browser relay", opts.signal);
-			if (await probeRelayServer(opts.cdpUrl)) return true;
+			const ready = await probeRelayServer(opts.cdpUrl);
+			if (ready) return ready;
 			// Live record but nothing listening: replace the wedged daemon.
 			await stopQuietly(client, daemonName, "Browser relay", opts.signal);
 			continue;
@@ -166,7 +188,8 @@ export async function ensureRelayDaemon(opts: { cdpUrl: string; signal?: AbortSi
 				opts.signal,
 			);
 			if (started.op !== "start") continue;
-			if (await probeRelayServer(opts.cdpUrl)) return true;
+			const fresh = await probeRelayServer(opts.cdpUrl);
+			if (fresh) return fresh;
 			await stopQuietly(client, daemonName, "Browser relay", opts.signal);
 		} catch (error) {
 			throwIfAborted(opts.signal);
@@ -177,5 +200,5 @@ export async function ensureRelayDaemon(opts: { cdpUrl: string; signal?: AbortSi
 			});
 		}
 	}
-	return false;
+	return null;
 }

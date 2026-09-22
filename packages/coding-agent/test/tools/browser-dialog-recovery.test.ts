@@ -142,7 +142,7 @@ it("claims a dialog-blocked tab without renderer setup or a side connection, and
 			throw new Error(`Unexpected operation ${String(body.action)}`);
 		},
 	});
-	const ensure = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+	const ensure = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue({ service: "omp-browser", protocol: 2 });
 	const token = spyOn(access, "readRelayControlToken").mockReturnValue("fixture-token");
 	const session: ToolSession = {
 		cwd: import.meta.dir,
@@ -228,7 +228,7 @@ it("hands every tab back open at settle and never closes one on the model's beha
 			throw new Error(`Unexpected operation ${String(body.action)}`);
 		},
 	});
-	const ensure = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+	const ensure = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue({ service: "omp-browser", protocol: 2 });
 	const token = spyOn(access, "readRelayControlToken").mockReturnValue("fixture-token");
 	const session: ToolSession = {
 		cwd: import.meta.dir,
@@ -273,7 +273,7 @@ it("refuses managed Chrome access when the browser.relay setting is off unless t
 			return Response.json([]);
 		},
 	});
-	const ensure = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+	const ensure = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue({ service: "omp-browser", protocol: 2 });
 	const token = spyOn(access, "readRelayControlToken").mockReturnValue("fixture-token");
 	const session: ToolSession = {
 		cwd: import.meta.dir,

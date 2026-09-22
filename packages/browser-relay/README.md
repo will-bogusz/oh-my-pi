@@ -37,7 +37,7 @@ For an independent installation alongside an older loaded extension, use `omp br
 ## Development
 
 - `bun run build` — bundles the extension into `dist/extension/`, zips it for GH releases, and regenerates the embedded CLI install assets under `packages/coding-agent/src/tools/browser/relay/extension-assets/` (**commit those**).
-- `bun scripts/smoke.ts [relay-url] [browser-id]` — creates its own inactive scratch tab and checks the supervisor + tab-worker connection pattern, then releases that tab.
+- `bun scripts/smoke.ts [relay-url] [browser-id]` — creates its own inactive scratch tab and checks the supervisor + tab-worker connection pattern, then closes that tab.
 
 ## Limitations
 

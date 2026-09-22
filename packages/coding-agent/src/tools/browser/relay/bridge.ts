@@ -319,7 +319,7 @@ export class RelayBridge {
 				await this.#rpc({ op: "group", tabId, owner, label });
 			},
 			reveal: async tabId => {
-				await this.#rpc({ op: "activateTab", tabId, focusWindow: true });
+				await this.#rpc({ op: "activateTab", tabId });
 			},
 			release: (tabId, close) => this.#releaseTab(tabId, close),
 			invalidate: leaseId => {

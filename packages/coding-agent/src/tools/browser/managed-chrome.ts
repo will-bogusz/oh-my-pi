@@ -6,7 +6,7 @@ import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { acquireBrowser, holdBrowser, releaseBrowser } from "./registry";
 import { readRelayControlToken } from "./relay/access";
 import type { BrowserInstance, InstanceLease, InstanceTab } from "./relay/instances";
-import { ensureRelayDaemon, isLoopbackRelayUrl } from "./relay/daemon";
+import { ensureRelayDaemon, isLoopbackRelayUrl, probeRelayServer } from "./relay/daemon";
 import { resolveRelayKind } from "./relay/kind";
 import { localBrowserRequest } from "./relay/local-http";
 import { acquireTab, getTab, releaseTab } from "./tab-supervisor";
@@ -69,7 +69,11 @@ export interface ManagedChromeHandle {
 	initializing?: Promise<void>;
 }
 
-function actor(session: ToolSession): { owner: string; taskId: string } {
+/**
+ * The relay's ownership key for this tool session: the session and agent the
+ * lease belongs to, stable for the session's lifetime.
+ */
+export function browserActorId(session: ToolSession): string {
 	const sessionId = session.getSessionId?.();
 	const agentId = session.getAgentId?.();
 	let fallback = embeddingActors.get(session);
@@ -77,12 +81,7 @@ function actor(session: ToolSession): { owner: string; taskId: string } {
 		fallback = crypto.randomUUID();
 		embeddingActors.set(session, fallback);
 	}
-	const taskId = sessionId ?? fallback;
-	return { owner: JSON.stringify([taskId, agentId ?? fallback]), taskId };
-}
-
-export function browserActorId(session: ToolSession): string {
-	return actor(session).owner;
+	return JSON.stringify([sessionId ?? fallback, agentId ?? fallback]);
 }
 
 export async function chromeRequest<T>(url: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<T> {
@@ -129,10 +128,17 @@ async function chromeEndpoint(session: ToolSession, signal?: AbortSignal, forced
 			"Control of existing Chrome browsers is off. Enable the browser.relay setting (or pass app.relay:true), and check PI_BROWSER_RELAY is not set to 0.",
 		);
 	const url = kind.cdpUrl.replace(/\/+$/, "");
-	if (isLoopbackRelayUrl(url)) await ensureRelayDaemon({ cdpUrl: url, signal });
-	const response = await localBrowserRequest(`${url}/health`, { signal: signal ?? AbortSignal.timeout(1500) });
-	const health = response.ok ? ((await response.json()) as { service?: string; protocol?: number }) : undefined;
-	if (health?.service !== "omp-browser" || health.protocol !== 2)
+	// One probe per acquisition: starting the daemon already reads `/health`,
+	// and what it read is what decides whether this build can drive the relay.
+	const health = isLoopbackRelayUrl(url)
+		? await ensureRelayDaemon({ cdpUrl: url, signal })
+		: await probeRelayServer(url);
+	if (!health)
+		throw new ToolError(
+			`No browser relay is listening at ${url}. Start one with \`omp browser-relay\`, or point ` +
+				"browser.relayUrl at the endpoint your extension is paired to (`omp browser-relay list` shows it).",
+		);
+	if (health === "legacy")
 		throw new ToolError(
 			`The browser relay at ${url} is an older service (no protocol-2 /health), so this build cannot use it. ` +
 				"Point browser.relayUrl at the relay your extension is paired to (`omp browser-relay list` shows it), " +
@@ -162,7 +168,7 @@ export async function discoverChromeTabs(
 ): Promise<InstanceTab[]> {
 	return await chromeRequest(
 		await chromeEndpoint(session, signal, opts.relay),
-		{ action: "discover", owner: actor(session).owner, browserId: opts.browserId },
+		{ action: "discover", owner: browserActorId(session), browserId: opts.browserId },
 		signal,
 	);
 }
@@ -173,7 +179,7 @@ export async function closeChromeTab(
 	signal?: AbortSignal,
 	opts: ChromeAccessOptions = {},
 ): Promise<void> {
-	const owner = actor(session).owner;
+	const owner = browserActorId(session);
 	await chromeRequest(
 		await chromeEndpoint(session, signal, opts.relay),
 		{ action: "closeTab", id, owner, browserId: opts.browserId },
@@ -187,7 +193,7 @@ export async function closeChromeTab(
 
 export function requireChromeHandle(id: string, session: ToolSession): ManagedChromeHandle {
 	const handle = handles.get(id);
-	if (!handle || handle.released || handle.owner !== actor(session).owner) {
+	if (!handle || handle.released || handle.owner !== browserActorId(session)) {
 		throw new ToolError(
 			"Chrome tab handle is stale or belongs to another actor. Discover and claim the exact tab again.",
 		);
@@ -200,7 +206,7 @@ export function isManagedChromeHandle(id: string): boolean {
 }
 
 export async function releaseChromeTabsForActor(session: ToolSession, signal?: AbortSignal): Promise<number> {
-	const owner = actor(session).owner;
+	const owner = browserActorId(session);
 	const owned = [...handles.values()].filter(handle => handle.owner === owner && !handle.released);
 	for (const handle of owned) await chromeLifecycle(handle, "release", signal);
 	return owned.length;
@@ -256,7 +262,7 @@ export async function acquireChromeTab(
 	},
 ): Promise<ManagedChromeHandle> {
 	const url = await chromeEndpoint(session, opts.signal, opts.relay);
-	const identity = actor(session);
+	const owner = browserActorId(session);
 	const label = opts.label?.trim() || "Oh My Pi";
 	if (opts.action === "claim" && !opts.id)
 		throw new ToolError("Claim requires the exact id returned by browser.discover()");
@@ -265,7 +271,7 @@ export async function acquireChromeTab(
 		{
 			action: opts.action,
 			browserId: opts.browserId,
-			...identity,
+			owner,
 			label,
 			id: opts.id,
 			url: opts.url ?? "about:blank",
@@ -275,7 +281,7 @@ export async function acquireChromeTab(
 	const handle: ManagedChromeHandle = {
 		id: crypto.randomUUID(),
 		label,
-		owner: identity.owner,
+		owner,
 		ownerSessionId: session.getSessionId?.() ?? undefined,
 		url,
 		lease,

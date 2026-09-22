@@ -117,7 +117,7 @@ process.stdout.write(String(await probeRelayServer(url)));`,
 			]);
 			expect(stderr).toBe("");
 			expect(exitCode).toBe(0);
-			expect(stdout).toBe("true");
+			expect(stdout).toBe("legacy");
 			expect(relayHits).toBe(2);
 			expect(proxyHits).toBe(0);
 		} finally {
@@ -207,18 +207,18 @@ try {
 				const first = spawnConsumer(firstProject, "profile-a", firstMarker);
 				try {
 					await waitForConsumerReady(first, firstMarker, 15_000);
-					expect(await probeRelayServer(cdpUrl)).toBeTrue();
+					expect(await probeRelayServer(cdpUrl)).not.toBeNull();
 
 					const second = spawnConsumer(secondProject, "profile-b", secondMarker, secondCdpUrl);
 					try {
 						await waitForConsumerReady(second, secondMarker, 15_000);
-						expect(await probeRelayServer(secondCdpUrl)).toBeTrue();
-						expect(await probeRelayServer(cdpUrl)).toBeTrue();
+						expect(await probeRelayServer(secondCdpUrl)).not.toBeNull();
+						expect(await probeRelayServer(cdpUrl)).not.toBeNull();
 						await stopConsumer(first);
 						// The global broker's real idle clock must pass while the second client remains connected.
 						await Bun.sleep(500);
-						expect(await probeRelayServer(cdpUrl)).toBeTrue();
-						expect(await probeRelayServer(secondCdpUrl)).toBeTrue();
+						expect(await probeRelayServer(cdpUrl)).not.toBeNull();
+						expect(await probeRelayServer(secondCdpUrl)).not.toBeNull();
 
 						await stopConsumer(second);
 						expect(await waitUntil(async () => !(await probeRelayServer(cdpUrl)), 5_000)).toBeTrue();

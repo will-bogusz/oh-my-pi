@@ -255,10 +255,11 @@ export class BrowserInstances {
 	}
 	/**
 	 * A Chrome running some other build of the extension contradicts the relay
-	 * silently — a v0.2 worker focuses the window on an `activateTab` that asked
-	 * it not to — so the skew is refused where a tab is acquired instead of
-	 * surfacing later as Chrome doing the opposite of what the model asked.
-	 * Only checked while connected: a disconnected instance has its own errors.
+	 * silently — it answers an RPC this build no longer sends, or ignores a
+	 * field this build added — so the skew is refused where a tab is acquired
+	 * instead of surfacing later as Chrome doing the opposite of what the model
+	 * asked. Only checked while connected: a disconnected instance has its own
+	 * errors.
 	 */
 	#requireExtensionParity(instance: Instance): void {
 		if (!instance.bridge.ready || instance.extensionBuildId === EXPECTED_EXTENSION_BUILD_ID) return;
@@ -272,15 +273,15 @@ export class BrowserInstances {
 				"Once Chrome runs a build that supports it, the extension reloads itself on the next connect.",
 		);
 	}
-	async create(url: string, owner: string, taskId: string, label?: string, browserId?: string): Promise<InstanceLease> {
+	async create(url: string, owner: string, label?: string, browserId?: string): Promise<InstanceLease> {
 		const instance = this.select(browserId);
 		this.#requireExtensionParity(instance);
-		return this.#lease(instance, await instance.bridge.managed.create(url, owner, taskId, label));
+		return this.#lease(instance, await instance.bridge.managed.create(url, owner, label));
 	}
-	claim(id: string, owner: string, taskId?: string, label?: string, browserId?: string): InstanceLease {
+	claim(id: string, owner: string, label?: string, browserId?: string): InstanceLease {
 		const instance = this.#forTab(id, browserId);
 		this.#requireExtensionParity(instance);
-		return this.#lease(instance, instance.bridge.managed.claim(id, owner, taskId, label));
+		return this.#lease(instance, instance.bridge.managed.claim(id, owner, label));
 	}
 	#forTab(id: string, browserId?: string): Instance {
 		const instance = [...this.#instances.values()].find(

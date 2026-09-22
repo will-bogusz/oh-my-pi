@@ -62,7 +62,7 @@ it("keeps paired instances concurrent and isolates identical physical tab number
 		expect(tabs[0]!.id).not.toBe(tabs[1]!.id);
 		const a = instances.claim(tabs[0]!.id, "actor");
 		const b = instances.claim(tabs[1]!.id, "actor");
-		expect(() => instances.claim(tabs[0]!.id, "other", undefined, undefined, "profile_instance_b")).toThrow(
+		expect(() => instances.claim(tabs[0]!.id, "other", undefined, "profile_instance_b")).toThrow(
 			"different browser",
 		);
 		const generationB = instances.list()[1]!.generation;
@@ -266,7 +266,7 @@ it("refuses to hand out a tab from a Chrome running another extension build, and
 		const found = instances.discover()[0]!;
 		for (const acquire of [
 			() => instances.claim(found.id, "owner"),
-			() => instances.create("https://example.com/", "owner", "task"),
+			() => instances.create("https://example.com/", "owner"),
 		]) {
 			expect(acquire).toThrow(stale);
 			expect(acquire).toThrow(EXPECTED_EXTENSION_BUILD_ID);

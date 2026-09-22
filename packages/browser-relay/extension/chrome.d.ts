@@ -47,21 +47,12 @@ interface ChromeDebuggerTargetInfo {
 }
 
 declare const chrome: {
-	permissions: {
-		contains(request: { permissions: string[] }): Promise<boolean>;
-	};
-	downloads: {
-		search(query: { startedAfter: string; startedBefore: string; limit: number; orderBy: string[] }): Promise<Array<{
-			id: number; filename: string; url: string; finalUrl: string; referrer: string; startTime: string;
-			state: "in_progress" | "complete" | "interrupted"; bytesReceived: number; totalBytes: number; exists: boolean;
-		}>>;
-	};
 	tabs: {
 		query(queryInfo: { url?: string; groupId?: number }): Promise<ChromeTab[]>;
 		get(tabId: number): Promise<ChromeTab>;
-		create(createProperties: { url?: string; active?: boolean; windowId?: number; openerTabId?: number }): Promise<ChromeTab>;
+		create(createProperties: { url?: string; active?: boolean }): Promise<ChromeTab>;
 		remove(tabId: number): Promise<void>;
-		update(tabId: number, updateProperties: { active?: boolean; url?: string }): Promise<ChromeTab>;
+		update(tabId: number, updateProperties: { active?: boolean }): Promise<ChromeTab>;
 		group(options: { tabIds: number[]; groupId?: number }): Promise<number>;
 		ungroup(tabIds: number[]): Promise<void>;
 		onCreated: ChromeEvent<(tab: ChromeTab) => void>;
@@ -71,7 +62,7 @@ declare const chrome: {
 		onReplaced: ChromeEvent<(addedTabId: number, removedTabId: number) => void>;
 	};
 	tabGroups: {
-		query(queryInfo: { title?: string; windowId?: number }): Promise<Array<{ id: number; windowId: number; title?: string }>>;
+		query(queryInfo: { windowId?: number }): Promise<Array<{ id: number; windowId: number; title?: string }>>;
 		update(groupId: number, updateProperties: { title?: string; color?: string; collapsed?: boolean }): Promise<unknown>;
 	};
 	windows: {

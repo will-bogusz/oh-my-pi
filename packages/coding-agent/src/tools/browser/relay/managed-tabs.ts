@@ -16,7 +16,6 @@ export interface ChromeTabLease {
 
 interface OwnedLease extends ChromeTabLease {
 	owner: string;
-	taskId: string;
 	label: string;
 	popupOf?: string;
 	/** Auto-leased child of a leased tab; the owner has not asked for it yet. */
@@ -80,7 +79,7 @@ export class ManagedChromeTabs {
 		});
 	}
 
-	claim(id: string, owner: string, taskId = owner, label = DEFAULT_TAB_GROUP_LABEL): ChromeTabLease {
+	claim(id: string, owner: string, label = DEFAULT_TAB_GROUP_LABEL): ChromeTabLease {
 		const tab = [...this.#tabs.values()].find(candidate => candidate.id === id);
 		if (!tab) throw new Error("The discovered tab is stale. Discover Chrome tabs again.");
 		const reserved = this.#leases.get(this.#owners.get(tab.tabId) ?? "");
@@ -90,7 +89,7 @@ export class ManagedChromeTabs {
 			this.#touch(reserved);
 			return this.#public(reserved);
 		}
-		return this.#claim(tab, owner, false, taskId, label);
+		return this.#claim(tab, owner, false, label);
 	}
 
 	get(id: string, owner: string): ChromeTabLease {
@@ -99,11 +98,11 @@ export class ManagedChromeTabs {
 		return this.#public(lease);
 	}
 
-	async create(url: string, owner: string, taskId: string, label = DEFAULT_TAB_GROUP_LABEL): Promise<ChromeTabLease> {
+	async create(url: string, owner: string, label = DEFAULT_TAB_GROUP_LABEL): Promise<ChromeTabLease> {
 		const snapshot = await this.#operations.create(url);
 		this.upsert(snapshot);
 		const tab = this.#tabs.get(snapshot.tabId)!;
-		const lease = this.#claim(tab, owner, true, taskId, label);
+		const lease = this.#claim(tab, owner, true, label);
 		try {
 			await this.#operations.group(snapshot.tabId, owner, label);
 			return this.get(lease.id, owner);
@@ -125,7 +124,7 @@ export class ManagedChromeTabs {
 		this.upsert(snapshot);
 		const tab = this.#tabs.get(snapshot.tabId);
 		if (!tab || this.#owners.has(snapshot.tabId)) return;
-		const lease = this.#claim(tab, parent.owner, true, parent.taskId, parent.label);
+		const lease = this.#claim(tab, parent.owner, true, parent.label);
 		const owned = this.#leases.get(lease.id)!;
 		owned.popupOf = parent.tab.id;
 		owned.unclaimedChild = true;
@@ -144,7 +143,7 @@ export class ManagedChromeTabs {
 		return out;
 	}
 
-	#claim(tab: DiscoveredChromeTab, owner: string, created: boolean, taskId: string, label: string): ChromeTabLease {
+	#claim(tab: DiscoveredChromeTab, owner: string, created: boolean, label: string): ChromeTabLease {
 		if (this.#owners.has(tab.tabId))
 			throw new Error("This Chrome tab is already owned by an OMP actor. Release it before claiming it elsewhere.");
 		const lease: OwnedLease = {
@@ -153,7 +152,6 @@ export class ManagedChromeTabs {
 			tab: { ...tab },
 			created,
 			owner,
-			taskId,
 			label,
 			unclaimedChild: false,
 			releasing: false,
@@ -252,7 +250,7 @@ export class ManagedChromeTabs {
 		signal?.throwIfAborted();
 		const tab = [...this.#tabs.values()].find(candidate => candidate.id === id);
 		if (!tab) throw new Error("The discovered tab is stale. Discover Chrome tabs again.");
-		const leaseId = this.#owners.get(tab.tabId) ?? this.#claim(tab, owner, false, owner, DEFAULT_TAB_GROUP_LABEL).id;
+		const leaseId = this.#owners.get(tab.tabId) ?? this.#claim(tab, owner, false, DEFAULT_TAB_GROUP_LABEL).id;
 		await this.releaseTab(leaseId, owner, true, signal);
 	}
 

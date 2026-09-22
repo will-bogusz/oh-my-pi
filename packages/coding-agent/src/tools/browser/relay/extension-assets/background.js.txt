@@ -1,3 +1,13 @@
+// ../coding-agent/src/tools/browser/relay/protocol.ts
+var RELAY_SERVICE_NAME = "omp-browser";
+var RELAY_PROTOCOL_VERSION = 2;
+function isCurrentRelayHealth(value) {
+  if (!value || typeof value !== "object")
+    return false;
+  const health = value;
+  return health.service === RELAY_SERVICE_NAME && health.protocol === RELAY_PROTOCOL_VERSION;
+}
+
 // extension/debugger-ownership.ts
 async function ownedDebuggerTabs(targets, probe) {
   const owned = await Promise.all(targets.map(async (target) => {
@@ -871,7 +881,7 @@ async function setBadge(connected) {
     await chrome.action.setBadgeBackgroundColor({ color: connected ? "#1a7f37" : "#8b8b8b" });
   } catch {}
 }
-var buildId = "737664cded39dea21070a3c01b6b2497bd425e9db1599c88cb2e8714d759eec0";
+var buildId = "15f8581760992df90e0b4bc4f18c5833e292b71e96781b37cea12951e9f5dc56";
 var RELOAD_GUARD_KEY = "reloadedFor";
 async function reloadForBuildSkew(expected) {
   if (!expected)
@@ -935,10 +945,8 @@ async function runRpc(msg) {
       return { tab: snap };
     }
     case "activateTab": {
-      if (msg.focusWindow) {
-        const tab = await chrome.tabs.get(msg.tabId);
-        await chrome.windows.update(tab.windowId, { focused: true });
-      }
+      const tab = await chrome.tabs.get(msg.tabId);
+      await chrome.windows.update(tab.windowId, { focused: true });
       await chrome.tabs.update(msg.tabId, { active: true });
       return {};
     }
@@ -1005,8 +1013,7 @@ async function connect() {
   try {
     const settings = await loadSettings();
     const healthResponse = await fetch(`http://127.0.0.1:${settings.port}/health`, { signal: AbortSignal.timeout(1500), redirect: "error" });
-    const health = healthResponse.ok ? await healthResponse.json() : undefined;
-    if (health?.service !== "omp-browser" || health.protocol !== 2)
+    if (!healthResponse.ok || !isCurrentRelayHealth(await healthResponse.json()))
       throw new Error("This endpoint uses an older browser service. Use another port or update it after active tasks finish.");
     const url = `ws://127.0.0.1:${settings.port}/ext`;
     const socket = new WebSocket(url);

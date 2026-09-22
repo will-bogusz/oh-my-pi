@@ -2,6 +2,7 @@
 import { RelayAccess } from "./access";
 import type { RelayBridge } from "./bridge";
 import { BrowserInstances } from "./instances";
+import { RELAY_PROTOCOL_VERSION, RELAY_SERVICE_NAME } from "./protocol";
 
 export interface RelayServerOptions {
 	port: number;
@@ -21,7 +22,6 @@ export interface RelayServer {
 }
 type SocketData = { role: "ext" } | { role: "cdp"; bridge: RelayBridge; leaseId: string; connId?: number };
 type RelayWebSocket = Bun.ServerWebSocket<SocketData>;
-export const RELAY_PROTOCOL_VERSION = 2;
 
 function isWsAuthority(raw: string): boolean {
 	if (/[\s/\\@#?]|[\x00-\x1f]/.test(raw)) return false;
@@ -52,7 +52,7 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 			const route = url.pathname.replace(/\/+$/, "") || "/";
 			// This liveness route exposes no tab/profile metadata or control capability.
 			if (route === "/health" && req.method === "GET")
-				return Response.json({ service: "omp-browser", protocol: RELAY_PROTOCOL_VERSION });
+				return Response.json({ service: RELAY_SERVICE_NAME, protocol: RELAY_PROTOCOL_VERSION });
 			if (route === "/ext") {
 				const origin = req.headers.get("origin");
 				if (origin && !/^chrome-extension:\/\/[a-p]{32}$/.test(origin))
@@ -98,20 +98,13 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 								await instances.create(
 									string("url"),
 									string("owner"),
-									string("taskId"),
 									optional("label"),
 									optional("browserId"),
 								),
 							);
 						case "claim":
 							return Response.json(
-								instances.claim(
-									string("id"),
-									string("owner"),
-									optional("taskId"),
-									optional("label"),
-									optional("browserId"),
-								),
+								instances.claim(string("id"), string("owner"), optional("label"), optional("browserId")),
 							);
 						case "dialog":
 							return Response.json(

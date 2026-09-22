@@ -252,10 +252,10 @@ describe("RelayBridge tab groups", () => {
 		bridge.extMessage(ext, JSON.stringify({ t: "tabCreated", tab: tab({ tabId: 9 }) }));
 		expect(ext.rpcs("group")).toHaveLength(0);
 		// A claimed tab is one of the user's: adopted, never regrouped.
-		const claimed = bridge.managed.claim(discovered(bridge, 1), "owner-a", "task-a", "Research");
+		const claimed = bridge.managed.claim(discovered(bridge, 1), "owner-a", "Research");
 		expect(ext.rpcs("group")).toHaveLength(0);
 		// A tab OMP creates for the task joins the owner's group under its label.
-		const creating = bridge.managed.create("https://example.com/task", "owner-a", "task-a", "Research");
+		const creating = bridge.managed.create("https://example.com/task", "owner-a", "Research");
 		ack(bridge, ext, "createTab", { tab: tab({ tabId: 7 }) });
 		await flush();
 		ack(bridge, ext, "group");
@@ -272,7 +272,7 @@ describe("RelayBridge tab groups", () => {
 		const bridge = new RelayBridge({ group: true });
 		const ext = new FakeExtSocket();
 		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
-		const parent = bridge.managed.claim(discovered(bridge, 1), "owner-a", "task-a", "Research");
+		const parent = bridge.managed.claim(discovered(bridge, 1), "owner-a", "Research");
 		// A child of a leased tab belongs to that tab's owner, in its group.
 		bridge.extMessage(
 			ext,
@@ -300,7 +300,7 @@ describe("RelayBridge tab groups", () => {
 		const ext = new FakeExtSocket();
 		// Tab 3 is what the user is looking at; tab 1 is the leased background tab.
 		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 3, active: true })]);
-		const parent = bridge.managed.claim(discovered(bridge, 1), "owner-a", "task-a", "Research");
+		const parent = bridge.managed.claim(discovered(bridge, 1), "owner-a", "Research");
 		// The leased page reports the popup on its own debugger session…
 		bridge.extMessage(
 			ext,
@@ -339,7 +339,7 @@ describe("RelayBridge tab groups", () => {
 		const bridge = new RelayBridge({ group: true });
 		const ext = new FakeExtSocket();
 		connect(bridge, ext, []);
-		const creating = bridge.managed.create("https://example.com/downloads", "owner-a", "task-a", "Downloads");
+		const creating = bridge.managed.create("https://example.com/downloads", "owner-a", "Downloads");
 		ack(bridge, ext, "createTab", { tab: tab({ tabId: 4 }) });
 		await flush();
 		ack(bridge, ext, "group");
@@ -366,7 +366,7 @@ describe("RelayBridge tab groups", () => {
 			const bridge = new RelayBridge({ group: marking });
 			const ext = new FakeExtSocket();
 			connect(bridge, ext, []);
-			const creating = bridge.managed.create("https://example.com/", "owner", "task");
+			const creating = bridge.managed.create("https://example.com/", "owner");
 			ack(bridge, ext, "createTab", { tab: tab({ tabId: 9 }) });
 			await flush();
 			ack(bridge, ext, "group");

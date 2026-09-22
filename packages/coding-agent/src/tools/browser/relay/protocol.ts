@@ -6,6 +6,27 @@
  * pushes tab lifecycle and `chrome.debugger` events as they happen.
  */
 
+/**
+ * Identity a relay endpoint announces on `GET /health`, so a client that finds
+ * something else listening on the port — or an older service — says so instead
+ * of talking to it. Every side (server, host, CLI, extension) reads these two
+ * constants rather than repeating the literals.
+ */
+export const RELAY_SERVICE_NAME = "omp-browser";
+export const RELAY_PROTOCOL_VERSION = 2;
+
+export interface RelayHealth {
+	service: string;
+	protocol: number;
+}
+
+/** Whether a `/health` body came from a relay this build can drive. */
+export function isCurrentRelayHealth(value: unknown): value is RelayHealth {
+	if (!value || typeof value !== "object") return false;
+	const health = value as RelayHealth;
+	return health.service === RELAY_SERVICE_NAME && health.protocol === RELAY_PROTOCOL_VERSION;
+}
+
 /** Minimal view of a Chrome tab shared between extension and relay. */
 export interface TabSnapshot {
 	tabId: number;
@@ -47,13 +68,13 @@ export type RelayRpcRequest =
 	| { op: "send"; tabId: number; sessionId?: string; method: string; params?: Record<string, unknown> }
 	| { op: "createTab"; url: string }
 	/**
-	 * Select a tab. `focusWindow` raises its window too — a deliberate reveal.
-	 * Adoption never sends this: when Chrome raises and selects a page-opened
-	 * child, that child is what the user expects a new tab to look like, and
-	 * putting the displaced tab back only makes OMP look like it showed the
-	 * wrong page.
+	 * Reveal a tab: select it and raise its window. Only an explicit
+	 * `reveal()` sends this. Adoption never does: when Chrome raises and
+	 * selects a page-opened child, that child is what the user expects a new
+	 * tab to look like, and putting the displaced tab back only makes OMP look
+	 * like it showed the wrong page.
 	 */
-	| { op: "activateTab"; tabId: number; focusWindow: boolean }
+	| { op: "activateTab"; tabId: number }
 	/**
 	 * Put one tab in the owner's tab group, created on first use per window and
 	 * titled `label`; one group per owner, reused by every later claim.
