@@ -262,11 +262,15 @@ it(
 				if (!enabled) throw new Error("connection lost");
 			},
 		});
-		const failed = await withBackgroundInput(page, undefined, async () => undefined).catch((error: unknown) =>
-			String(error),
-		);
+		const scope = prepareBackgroundPage(page);
+		await scope.ready;
+		const failed = await scope.close().catch((error: unknown) => String(error));
 		expect(failed).toContain("The page navigated or is busy; observe again");
 		expect(failed).not.toContain("release this handle");
+		// The poisoned page refuses the next run outright.
+		await expect(withBackgroundInput(page, undefined, async () => undefined)).rejects.toThrow(
+			"could not be restored",
+		);
 	},
 	15_000,
 );

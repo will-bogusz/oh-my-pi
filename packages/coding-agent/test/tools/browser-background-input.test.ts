@@ -97,7 +97,7 @@ it("finishes preparation cleanup when the target closed during the run", async (
 	expect(events).toEqual([true]);
 });
 
-it("keeps input serialized when a waiting action is cancelled", async () => {
+it("keeps input serialized inside a run scope when a waiting action is cancelled", async () => {
 	const events: string[] = [];
 	const entered = Promise.withResolvers<void>();
 	const finish = Promise.withResolvers<void>();
@@ -106,6 +106,8 @@ it("keeps input serialized when a waiting action is cancelled", async () => {
 			events.push(enabled ? "enable" : "restore");
 		},
 	});
+	const scope = prepareBackgroundPage(page);
+	await scope.ready;
 	const first = withBackgroundInput(page, undefined, async () => {
 		events.push("first");
 		entered.resolve();
@@ -122,49 +124,9 @@ it("keeps input serialized when a waiting action is cancelled", async () => {
 	expect(events).toEqual(["enable", "first"]);
 	finish.resolve();
 	await Promise.all([first, third]);
-	expect(events).toEqual(["enable", "first", "restore", "enable", "third", "restore"]);
-});
-
-it("restores a late focus enable after cancellation without dispatching input", async () => {
-	const events: string[] = [];
-	const started = Promise.withResolvers<void>();
-	const enabled = Promise.withResolvers<void>();
-	const page = fakePage({
-		emulateFocusedPage: async (value: boolean) => {
-			events.push(value ? "enable" : "restore");
-			if (value) {
-				started.resolve();
-				await enabled.promise;
-			}
-		},
-	});
-	const cancelled = new AbortController();
-	const pending = withBackgroundInput(page, cancelled.signal, async () => events.push("input"));
-	const rejected = pending.catch((error: unknown) => String(error));
-	await started.promise;
-	cancelled.abort(new Error("input cancelled"));
-	await Promise.resolve();
-	expect(events).toEqual(["enable"]);
-	enabled.resolve();
-	expect(await rejected).toContain("input cancelled");
-	expect(events).toEqual(["enable", "restore"]);
-});
-
-it("refuses subsequent input if focus restoration failed", async () => {
-	const events: string[] = [];
-	const page = fakePage({
-		emulateFocusedPage: async (enabled: boolean) => {
-			events.push(enabled ? "enable" : "restore");
-			if (!enabled) throw new Error("connection lost");
-		},
-	});
-	await expect(withBackgroundInput(page, undefined, async () => events.push("input"))).rejects.toThrow(
-		"could not be restored",
-	);
-	await expect(withBackgroundInput(page, undefined, async () => events.push("retry"))).rejects.toThrow(
-		"could not be restored",
-	);
-	expect(events).toEqual(["enable", "input", "restore"]);
+	await scope.close();
+	// One enable and one restore for the whole run, whatever happens inside it.
+	expect(events).toEqual(["enable", "first", "third", "restore"]);
 });
 
 it.skipIf(!CHROMIUM_AVAILABLE)(

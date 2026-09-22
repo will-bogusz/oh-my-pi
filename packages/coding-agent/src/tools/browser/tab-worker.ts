@@ -475,7 +475,13 @@ export function prepareBackgroundPage(page: Page, signal?: AbortSignal): Backgro
 	return scope;
 }
 
-/** Serialize page input and restore browser focus emulation even after cancellation. */
+/**
+ * Serialize input on a managed page. Focus emulation belongs to the run scope
+ * ({@link prepareBackgroundPage}), which every managed run opens for its whole
+ * duration, so an input never enables or restores it on its own: this decides
+ * the order of the inputs inside the scope and refuses admission once the
+ * scope stops accepting or its restore has failed.
+ */
 export async function withBackgroundInput<T>(
 	page: Page,
 	signal: AbortSignal | undefined,
@@ -485,7 +491,6 @@ export async function withBackgroundInput<T>(
 	const finished = Promise.withResolvers<void>();
 	const queued = previous.then(() => finished.promise);
 	backgroundInputQueues.set(page, queued);
-	let entering: Promise<void> | undefined;
 	try {
 		await untilAborted(signal, () => previous);
 		throwIfAborted(signal);
@@ -497,25 +502,13 @@ export async function withBackgroundInput<T>(
 			await untilAborted(signal, () => scope.ready);
 			throwIfAborted(signal);
 			if (!scope.accepting) throw new ToolAbortError("Chrome page operation ended");
-			return await action();
 		}
-		entering = page.emulateFocusedPage(true);
-		await untilAborted(signal, () => entering!);
-		throwIfAborted(signal);
 		return await action();
 	} finally {
-		try {
-			if (entering) {
-				// Wait for a late enable before restoring, so it cannot re-enable focus
-				// after cleanup. A failed restore poisons this worker's input path.
-				await restoreBackgroundPage(page, entering);
-			}
-		} finally {
-			finished.resolve();
-			void queued.then(() => {
-				if (backgroundInputQueues.get(page) === queued) backgroundInputQueues.delete(page);
-			});
-		}
+		finished.resolve();
+		void queued.then(() => {
+			if (backgroundInputQueues.get(page) === queued) backgroundInputQueues.delete(page);
+		});
 	}
 }
 
@@ -1074,9 +1067,9 @@ export class WorkerCore {
 				// Background Chromium tabs stop producing frames, stalling rAF,
 				// IntersectionObserver, and input acknowledgements. Keep owned tabs
 				// interactive without raising a window; explicit settle-freeze still
-				// applies. A leased tab in the user's Chrome is different: it only
-				// emulates focus for the span of an action (`withBackgroundInput`), so
-				// the user's own focus is never displaced between actions.
+				// applies. A leased tab in the user's Chrome is different: it emulates
+				// focus for the span of one run (`prepareBackgroundPage`) and restores
+				// it at the end, so the user's own focus is never displaced between runs.
 				await this.#page.emulateFocusedPage(true);
 			}
 			if (payload.url) {
