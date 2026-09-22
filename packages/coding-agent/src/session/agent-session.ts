@@ -4902,10 +4902,9 @@ export class AgentSession {
 	 *
 	 * Two surfaces, both of which the user can see from across the room:
 	 * - Managed Chrome tabs of this session's actors: every lease is handed
-	 *   back — tabs OMP opened are closed, tabs claimed from the user (and
-	 *   anything the model called `tab.keep()` on) are left open. The debugger
-	 *   attachments go with them, so the "OMP is debugging this browser"
-	 *   infobar disappears rather than sitting over the user's window.
+	 *   back and every tab is left open — created and claimed alike — ungrouped,
+	 *   with its debugger attachment gone, so the "OMP is debugging this
+	 *   browser" infobar disappears rather than sitting over the user's window.
 	 * - The computer worker: `release()`, not `close()`, so the purple
 	 *   screen-sharing pill disappears while the prelude stays reusable. A
 	 *   `close()` here would poison the lifetime for the rest of the session.
