@@ -8,9 +8,9 @@
 
 ### Fixed
 
-- The extension now hands its `chrome.debugger` attachments back instead of holding them for a whole session, so Chrome's "started debugging this browser" bar no longer outlives the work that caused it. Attachments are released when the host ends a task or turn, when the relay socket stays closed for two seconds, and when Chrome unloads the extension's worker; the next command reattaches and restores the tab's root debugger state.
+- The extension now hands its `chrome.debugger` attachments back instead of holding them for a whole session, so Chrome's "started debugging this browser" bar no longer outlives the work that caused it. Attachments are released when a tab goes idle for ten seconds, when its lease ends (the host hands every tab back at turn settle), when the relay socket stays closed for two seconds, and when Chrome unloads the extension's worker; the next command reattaches and restores the tab's root debugger state.
 - When the relay is gone for good — its socket stays closed past the reconnect grace — the extension now hands the tabs it was driving back by itself: it restores their favicons over the still-live attachment and takes them out of the groups it created, so a killed or crashed relay no longer leaves tabs marked, grouped and owned by nothing.
-- Selecting a tab no longer implies raising its window: the relay can put the user's own tab back after Chrome opens a `target="_blank"` child without touching window focus.
+- Adopting a `target="_blank"` child no longer touches tab selection or window focus: whatever Chrome did with the selection stands, because putting the displaced tab back only made OMP look like it showed the wrong page.
 - Documents whose favicon Chrome will not re-read, such as PDFs in its built-in viewer, are no longer badged; a PDF tab kept after a task used to wear the cursor glyph permanently.
 
 ## [18.0.7] - 2026-08-26

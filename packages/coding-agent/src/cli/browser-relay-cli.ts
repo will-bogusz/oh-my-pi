@@ -30,7 +30,7 @@ export interface BrowserRelayCommandArgs {
 	dir?: string;
 	/** Installed extension display name; independent of paired browser identity. */
 	name?: string;
-	/** Gather tabs the agent actively drives into an 'omp' Chrome tab group (default true). */
+	/** Gather tabs the agent actively drives into the owner's Chrome tab group, titled by the acquisition label (default true). */
 	group?: boolean;
 	verbose?: boolean;
 }

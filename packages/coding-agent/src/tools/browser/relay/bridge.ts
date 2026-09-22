@@ -1065,7 +1065,7 @@ export class RelayBridge {
 		if (!sourceSessionId && method === "Page.javascriptDialogOpening") tab.dialogs.opened(params ?? {});
 		// A closed dialog is not a lifecycle end: the page may open the next one
 		// immediately, and only an attached debugger sees it. The attachment goes
-		// back when sessions end, on release, or at turn end.
+		// back when sessions end, when the tab goes idle, or on release.
 		if (!sourceSessionId && method === "Page.javascriptDialogClosed") tab.dialogs.closed();
 		// The only signal that names the page which opened a popup, and the one
 		// `chrome.tabs.onCreated` misattributes for a synthesized click.
@@ -1508,7 +1508,7 @@ export class RelayBridge {
 				this.#touchTab(tab);
 				await this.#restoreRoot(tab);
 				// Driving starts here, so this is where the tab strip learns about
-				// it — including after a turn-end detach dropped the glyph's script.
+				// it — including after an idle detach dropped the glyph's script.
 				// Awaited: the per-document install has to be registered before the
 				// first forwarded command can navigate, or the new document has no
 				// overlay until the next reattach. Best-effort inside, never throws.

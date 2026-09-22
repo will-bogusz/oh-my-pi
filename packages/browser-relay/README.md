@@ -6,7 +6,7 @@ The companion relay server lives in the omp CLI (`omp browser-relay`, see `packa
 
 ## Setup
 
-Saved download paths are an optional capability. After updating the extension and OMP service, open extension settings and choose **Enable download file lookup** to grant Chrome's downloads permission. The same button can disable it. `tab.downloads({paths:true})` then returns bounded URL/time-matched file candidates for download IDs observed on the owned page. It does not read an unfiltered history into the agent, change where Chrome saves files, or automatically request permission. Multiple candidate files remain ambiguous; verify the actual file before claiming its destination.
+The extension asks for no downloads permission and looks up no saved paths. `tab.downloads()` reports the download events the owned page produced since acquisition — ids, source URLs, states and byte counts — from the page's own debugger session. To confirm where a file landed, check the filesystem.
 
 1. `omp browser-relay install` — writes the bundled extension to `~/.omp/browser-relay/extension`, then load it via `chrome://extensions` → Developer mode → _Load unpacked_. (Or grab `omp-browser-relay-extension.zip` from GitHub releases.)
 2. Run `omp browser-relay pair`. Click the extension's toolbar button to open its options, choose a browser name such as Work Chrome, and enter the one-use code (expires after ten minutes). Repeat in each Chrome profile you want to connect. Labels come from this setup; OMP does not inspect account email or guess profile names.
@@ -44,7 +44,7 @@ For an independent installation alongside an older loaded extension, use `omp br
 - `chrome://`, DevTools, Web Store, and other-extension pages are not attachable and are hidden from the agent.
 - Chrome shows its "is debugging this browser" infobar while any tab is attached; dismissing it detaches that tab until it navigates again.
 - A tab with DevTools open can't be attached (one debugger per tab — the constraint the relay multiplexes around for its own clients).
-- The service binds loopback and rejects browser-origin control requests. Local discovery, acquisition, pairing and lifecycle operations require a private credential stored in a mode-0600 endpoint file. Extension credentials are separate, paired once, and stored hashed on the service. Worker CDP and popup creation use random exact-tab capabilities. This protects against unauthenticated local/network clients; arbitrary programs running as your OS user can read its credentials and are not sandboxed.
+- The service binds loopback and rejects browser-origin control requests. Local discovery, acquisition, pairing and lifecycle operations require a private credential stored in a mode-0600 endpoint file. Extension credentials are separate, paired once, and stored hashed on the service. Worker CDP connections use random exact-tab capabilities. This protects against unauthenticated local/network clients; arbitrary programs running as your OS user can read its credentials and are not sandboxed.
 
 Multiple paired profiles can share an endpoint. `browser.instances()` lists exact IDs, setup names and connection state; `browser.discover({browserId})` filters tabs. Pass `browserId` to `create` when more than one profile is connected. Exact discovered tab IDs already route `claim` to the right instance. Reconnecting one profile invalidates only that profile’s handles; other instances keep their sessions and ownership.
 

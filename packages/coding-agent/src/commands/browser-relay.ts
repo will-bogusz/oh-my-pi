@@ -34,7 +34,7 @@ export default class BrowserRelay extends Command {
 			description: "Extension display name (install; default Oh My Pi)",
 		}),
 		"no-group": Flags.boolean({
-			description: "Don't gather controllable tabs into an 'omp' tab group",
+			description: "Don't gather controllable tabs into the owner's tab group (also disables the cursor glyph)",
 			default: false,
 		}),
 		verbose: Flags.boolean({ char: "v", description: "Log relay traffic summaries to stderr", default: false }),
