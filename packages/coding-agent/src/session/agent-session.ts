@@ -212,7 +212,7 @@ import type { ImageAttachmentEntry } from "../tools";
 import { resolveApproval } from "../tools/approval";
 import { type AskToolDetails } from "@oh-my-pi/pi-tui/tools/ask";
 import { type AskToolInput, recoverAskQuestions } from "../tools/ask";
-import { releaseChromeTabsForOwner, releaseDeferredChromeTabsForOwner } from "../tools/browser/managed-chrome";
+import { releaseChromeTabsForOwner } from "../tools/browser/managed-chrome";
 import {
 	armIdleCloseForOwner,
 	cancelIdleCloseForOwner,
@@ -4831,7 +4831,6 @@ export class AgentSession {
 			const released = await withTimeout(
 				Promise.all([
 					releaseChromeTabsForOwner(ownerId),
-					releaseDeferredChromeTabsForOwner(ownerId),
 					releaseTabsForOwner(ownerId, { kill: true }),
 				]).then(counts => counts.reduce((sum, count) => sum + count, 0)),
 				3_000,

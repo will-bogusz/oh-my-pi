@@ -207,28 +207,6 @@ export async function releaseChromeTabsForActor(session: ToolSession, signal?: A
 }
 
 /**
- * Dispose-time sweep for handles the ordinary tab reaper cannot see: a tab
- * claimed across an open JavaScript dialog has no page worker until the
- * dialog is answered, so nothing in the tabs map names it. Teardown hands
- * the page back untouched — an interrupted task's work is the user's now.
- */
-export async function releaseDeferredChromeTabsForOwner(ownerId: string): Promise<number> {
-	const owned = [...handles.values()].filter(
-		handle => handle.ownerSessionId === ownerId && !handle.released && !getTab(handle.id),
-	);
-	const results = await Promise.allSettled(
-		owned.map(handle => releaseChromeTab(handle, false, AbortSignal.timeout(3000))),
-	);
-	const failures = results.filter(result => result.status === "rejected");
-	if (failures.length)
-		throw new AggregateError(
-			failures.map(result => result.reason),
-			"Pending Chrome cleanup failed",
-		);
-	return owned.length;
-}
-
-/**
  * Turn-settle sweep over the managed Chrome tabs of one agent session
  * (issue #8246 follow-up). At the terminal settle the model is done, so
  * every lease it still holds is dead weight the user can see: the

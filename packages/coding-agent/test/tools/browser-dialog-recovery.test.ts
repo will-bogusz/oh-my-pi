@@ -4,7 +4,6 @@ import {
 	ensureChromePage,
 	type ManagedChromeHandle,
 	releaseChromeTabsForOwner,
-	releaseDeferredChromeTabsForOwner,
 	requireChromeHandle,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
 import * as daemon from "@oh-my-pi/pi-coding-agent/tools/browser/relay/daemon";
@@ -182,7 +181,7 @@ it("claims a dialog-blocked tab without renderer setup or a side connection, and
 		expect(release).toMatchObject({ id: "pending-lease", close: false });
 		expect(requests.map(request => request.action)).toEqual(["claim", "dialog", "releaseTab"]);
 	} finally {
-		await releaseDeferredChromeTabsForOwner("dialog-dispose");
+		await releaseChromeTabsForOwner("dialog-dispose");
 		token.mockRestore();
 		ensure.mockRestore();
 		server.stop(true);
@@ -256,7 +255,7 @@ it("hands every tab back open at settle and never closes one on the model's beha
 		expect(() => requireChromeHandle(first.handle, session)).toThrow("stale");
 		expect(() => requireChromeHandle(second.handle, session)).toThrow("stale");
 	} finally {
-		await releaseDeferredChromeTabsForOwner("settle-owner");
+		await releaseChromeTabsForOwner("settle-owner");
 		token.mockRestore();
 		ensure.mockRestore();
 		server.stop(true);
