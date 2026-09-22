@@ -2,30 +2,66 @@
  * Structure-aware elision for computer observation text.
  *
  * Observations render as a pre-order accessibility tree, two spaces of indent
- * per level (`cua-session.ts`):
+ * per level, in the grammar `observed-tree.ts` gives both surfaces
+ * (`cua-session.ts`):
  *
  * ```
- * - [n12] AXButton "Save" value="" enabled=true selected=false actions=["press"]
+ * n12 button "Save" = "value" (tooltip) [disabled] actions=open
+ *   text "Saved 2 minutes ago"
+ *   (5 of 12 rows are scrolled out of view and were not read)
  * ```
  *
  * A byte-window cut over that text removes a contiguous band of lines, and the
  * band a large web page produces is exactly where the dialog controls live —
  * the bench's T7 print pane was fetched and then elided away. This module
  * instead removes the least load-bearing parts until the text fits: redundant
- * and over-long `value=` text, then rows that carry neither text nor an action,
+ * and over-long value text, then rows that carry neither text nor an action,
  * then the deepest subtrees, keeping rows that carry a real action for last.
  */
 import type { StructuralElisionResult } from "@oh-my-pi/pi-tui/tools/streaming-output";
 
-/** A rendered tree row: indent, ref, role, then the attribute run. */
-const ROW_PATTERN = /^((?:  )*)- \[([^\]\s]+)\] (\S+)(.*)$/;
-/** Attribute name at the start of the remaining attribute run. */
-const ATTRIBUTE_PATTERN = /^ ([a-z]+)=/;
-/** Actions only container roles advertise; they say nothing about the node. */
-const AMBIENT_ACTIONS: Record<string, true> = { cancel: true };
+/** A rendered tree row: indent, the ref when it has one, then its role. */
+const ROW_PATTERN = /^((?: {2})*)(?:(n\d+) )?([a-z][a-z0-9]*)(?= |$)/;
+/** An app's own actions, the only ones the grammar prints. */
+const ACTIONS_PATTERN = / actions=\S+/;
+/** A value this row will accept: a field to write to is a row to act on. */
+const SETTABLE_PATTERN = / \[[^\]]*\bsettable\b/;
+/**
+ * Roles a dispatch lands on. The old render named actions on nearly every row
+ * — `show_menu` is published by anything with a context menu — so the elider
+ * read "carries an action" off the `actions=` list. The grammar prints only
+ * the actions an app authored, so what a row offers is now its role: these
+ * are the ones a click, a keystroke or a menu pick can do something with.
+ */
+const CONTROL_ROLES: Record<string, true> = {
+	button: true,
+	popupbutton: true,
+	menubutton: true,
+	menuitem: true,
+	menubaritem: true,
+	checkbox: true,
+	radiobutton: true,
+	togglebutton: true,
+	toggle: true,
+	switch: true,
+	link: true,
+	tab: true,
+	tabbutton: true,
+	textfield: true,
+	textarea: true,
+	securetextfield: true,
+	searchfield: true,
+	combobox: true,
+	slider: true,
+	stepper: true,
+	incrementor: true,
+	disclosuretriangle: true,
+	colorwell: true,
+	datetimearea: true,
+};
 /** Roles that only ever decorate, whatever they claim to support. */
-const SEPARATOR_ROLES: Record<string, true> = { AXSeparator: true, AXSplitter: true, AXMenuItemSeparator: true };
-/** `value=` lengths tried in order; dropping the attribute is a later resort. */
+const SEPARATOR_ROLES: Record<string, true> = { separator: true, splitter: true, menuitemseparator: true };
+/** Value lengths tried in order; dropping the value is a later resort. */
 const VALUE_LIMITS = [512, 256, 96, 32];
 
 interface Row {
@@ -34,14 +70,14 @@ interface Row {
 	depth: number;
 	role: string;
 	label: string;
-	/** `[valueStart, valueEnd)` spans ` value=<json>` inside the row's line. */
+	/** `[valueStart, valueEnd)` spans ` = <json>` inside the row's line. */
 	valueStart: number;
 	valueEnd: number;
 	valueText: string;
 	hasValue: boolean;
 	/** Carries placeholder, description or help text. */
 	hasProse: boolean;
-	/** Carries an action that is not offered by every node alike. */
+	/** Something can be dispatched on this row: its role, its own actions, or a writable value. */
 	actionable: boolean;
 	separator: boolean;
 	/** Exclusive row index where this row's subtree ends. */
@@ -68,22 +104,6 @@ function scanJsonString(text: string, from: number): number {
 	return -1;
 }
 
-/** Scan the JSON array token at `from` (strings inside may hold brackets). */
-function scanJsonArray(text: string, from: number): number {
-	if (text.charCodeAt(from) !== 91) return -1;
-	for (let index = from + 1; index < text.length; index++) {
-		const code = text.charCodeAt(index);
-		if (code === 34) {
-			const end = scanJsonString(text, index);
-			if (end < 0) return -1;
-			index = end - 1;
-			continue;
-		}
-		if (code === 93) return index + 1;
-	}
-	return -1;
-}
-
 function parseJson(token: string): unknown {
 	try {
 		return JSON.parse(token);
@@ -93,15 +113,18 @@ function parseJson(token: string): unknown {
 }
 
 /**
- * Parse one rendered row, following the render's attribute order rather than
- * searching for attribute names — a label or value may contain anything.
- * Returns undefined when the line is not a row.
+ * Parse one rendered row, following the render's own order rather than
+ * searching for attribute names — a label or value may hold anything.
+ * Returns undefined when the line is not a row: a header, a footer, and a
+ * parenthesised note are all prose this module never drops.
  */
 function parseRow(line: string, index: number): Row | undefined {
 	const match = ROW_PATTERN.exec(line);
 	if (!match) return undefined;
-	const rest = match[4];
-	const restOffset = line.length - rest.length;
+	const rest = line.slice(match[0].length);
+	// A row either carries a ref or names itself. Without one of the two the
+	// line is this session's own prose, which reads as lowercase words.
+	if (match[2] === undefined && !rest.startsWith(' "')) return undefined;
 	const row: Row = {
 		line: index,
 		depth: match[1].length / 2,
@@ -121,42 +144,30 @@ function parseRow(line: string, index: number): Row | undefined {
 		valueElided: false,
 	};
 	let pos = 0;
-	if (rest.charCodeAt(0) === 32 && rest.charCodeAt(1) === 34) {
+	if (rest.startsWith(' "')) {
 		const end = scanJsonString(rest, 1);
 		if (end > 0) {
 			row.label = String(parseJson(rest.substring(1, end)) ?? "");
 			pos = end;
 		}
 	}
-	while (pos < rest.length) {
-		const attribute = ATTRIBUTE_PATTERN.exec(rest.substring(pos));
-		if (!attribute) break;
-		const name = attribute[1];
-		const valuePos = pos + attribute[0].length;
-		const code = rest.charCodeAt(valuePos);
-		let end: number;
-		if (code === 34) end = scanJsonString(rest, valuePos);
-		else if (code === 91) end = scanJsonArray(rest, valuePos);
-		else {
-			const space = rest.indexOf(" ", valuePos);
-			end = space < 0 ? rest.length : space;
-		}
-		if (end < 0) break;
-		if (name === "value" && code === 34) {
+	if (rest.startsWith(' = "', pos)) {
+		const end = scanJsonString(rest, pos + 3);
+		if (end > 0) {
 			row.hasValue = true;
-			row.valueStart = restOffset + pos;
-			row.valueEnd = restOffset + end;
-			row.valueText = String(parseJson(rest.substring(valuePos, end)) ?? "");
-		} else if (name === "actions" && code === 91) {
-			const actions = parseJson(rest.substring(valuePos, end));
-			if (Array.isArray(actions))
-				row.actionable = actions.some(action => typeof action === "string" && AMBIENT_ACTIONS[action] !== true);
-		} else if (code === 34 && end > valuePos + 2) {
-			row.hasProse = true;
+			row.valueStart = match[0].length + pos;
+			row.valueEnd = match[0].length + end;
+			row.valueText = String(parseJson(rest.substring(pos + 3, end)) ?? "");
+			pos = end;
 		}
-		pos = end;
 	}
-	row.separator = SEPARATOR_ROLES[row.role] === true || (row.role === "AXMenuItem" && row.label.trim() === "");
+	// What is left is the description, the states and the surface's extras,
+	// none of which can be confused with a label or a value now that both are
+	// consumed: a description is parenthesised, a placeholder is named.
+	const tail = rest.slice(pos);
+	row.hasProse = tail.includes(" (") || tail.includes(' placeholder="');
+	row.actionable = CONTROL_ROLES[row.role] === true || ACTIONS_PATTERN.test(tail) || SETTABLE_PATTERN.test(tail);
+	row.separator = SEPARATOR_ROLES[row.role] === true || (row.role === "menuitem" && row.label.trim() === "");
 	return row;
 }
 
@@ -253,7 +264,7 @@ export function elideObservationTree(text: string, budget: number): StructuralEl
 		for (const row of rows) {
 			if (!row.hasValue || row.valueText.length <= limit) continue;
 			row.valueText = `${row.valueText.substring(0, limit)}\u2026`;
-			rewriteValue(row, ` value=${JSON.stringify(row.valueText)}`);
+			rewriteValue(row, ` = ${JSON.stringify(row.valueText)}`);
 		}
 	}
 

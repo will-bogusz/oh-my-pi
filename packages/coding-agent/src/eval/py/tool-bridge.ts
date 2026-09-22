@@ -126,6 +126,7 @@ async function callSessionToolPromptOnAbort(
 	const call = callSessionTool(name, args, {
 		session: entry.toolSession,
 		signal: entry.signal,
+		cell: entry.signal === undefined ? undefined : { signal: entry.signal },
 		emitStatus: entry.emitStatus,
 		defaultIntent: "py prelude",
 		identity,

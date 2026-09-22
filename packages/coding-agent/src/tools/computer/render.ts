@@ -28,6 +28,17 @@ export function specificRole(element: ComputerElementSnapshot): string {
 	return subrole === undefined || subrole.endsWith(element.role.slice(2)) ? element.role : subrole;
 }
 /**
+ * The role a row prints under: the platform name without its `AX` prefix,
+ * lower-cased, and static text under the browser's word for the same node.
+ * Only the rendering changes — `ComputerElementSnapshot.role` keeps the
+ * platform spelling, so a query and every refusal still name `AXTextField`,
+ * and `find()` accepts either spelling.
+ */
+export function renderedRole(role: string): string {
+	if (role === "AXStaticText") return "text";
+	return (role.startsWith("AX") ? role.slice(2) : role).toLowerCase();
+}
+/**
  * Driver prose rewritten into a call the caller can type. Both pinned builds
  * advertise their wire vocabulary in refusal text and escalation advice
  * (`delivery_mode: "foreground"`) where the prelude takes

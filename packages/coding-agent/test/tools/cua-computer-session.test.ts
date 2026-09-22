@@ -548,50 +548,74 @@ it("names a window the pid opened since the last observation and never rebinds t
 	}
 });
 
-it("announces what a pid opened on the observe path and adopts it on the next read", async () => {
+it("renders a window the app opened under the handle that opened it, for as long as it is up", async () => {
 	const f = await fixture();
 	// Chrome's print dialog renders seconds after the invoke that asked for
-	// it, so it appears between two observations rather than inside an action.
+	// it: another window of the same pid, which the caller drives through the
+	// handle it already holds instead of spending a call to acquire it.
 	const print = { ...f.row, window_id: 7, title: "Print", z_index: 9 };
 	const lease = { ...f.row, window_id: 9, title: "Window", kind: "system_overlay" };
 	let windows: WindowRow[] = [f.row];
 	try {
-		f.state.hook = async (name, args) =>
-			name === "list_windows"
-				? reply({
-						windows,
-						...(args.include_accessibility_metadata
-							? {
-									accessibility_windows: {
-										pid: 101,
-										complete: true,
-										windows: [
-											{ window_id: 1, role: "AXWindow" },
-											{ window_id: 7, role: "AXWindow" },
-											{ window_id: 11, role: "AXWindow" },
-										],
-									},
-								}
-							: {}),
-					})
-				: undefined;
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows")
+				return reply({
+					windows,
+					...(args.include_accessibility_metadata
+						? {
+								accessibility_windows: {
+									pid: 101,
+									complete: true,
+									windows: [
+										{ window_id: 1, role: "AXWindow" },
+										{ window_id: 7, role: "AXWindow" },
+									],
+								},
+							}
+						: {}),
+				});
+			if (name !== "get_window_state" || args.window_id !== 7) return undefined;
+			return reply({
+				pid: 101,
+				window_id: 7,
+				snapshot_id: "p1",
+				truncated: false,
+				window_bounds: print.bounds,
+				elements: [{ element_index: 1, element_token: "p1:1", role: "AXButton", label: "Print", depth: 0 }],
+			});
+		};
 		await f.session.observe(f.context, f.window);
 		windows = [f.row, print, lease];
-		f.calls.length = 0;
-		const opened = await f.session.observe(f.context, f.window);
-		// The diff spends the roster this walk's own closing geometry check read
-		// — the two reads are the ones `#state` already made before and after it.
-		expect(f.calls.map(call => [call.name, call.args.pid])).toEqual([
-			["list_windows", 101],
-			["get_window_state", 101],
-			["list_windows", 101],
+		// The action that put it on screen names it, and rebinds nothing.
+		const opened = await f.session.press(f.context, f.window, "cmd+p", undefined, { delivery: "foreground" });
+		expect(opened.text).toContain('pid 101 gained window 7 ("Print") since your last observation.');
+		expect(f.window.id).toBe("1");
+		// The next read of the opener carries it: its own rows, under a line
+		// that says which handle drives them.
+		const observed = await f.session.observe(f.context, f.window);
+		const button = observed.elements.find(element => element.label === "Print")!;
+		expect(observed.tree.split("\n").slice(-2)).toEqual([
+			'window 7 "Print" — opened by this app, driven through this window\'s refs',
+			`  ${button.ref} button "Print"`,
 		]);
-		expect(opened.tree).toContain('pid 101 gained window 7 ("Print") since your last observation.');
-		expect(opened.tree).not.toContain("computer.window(");
+		expect(button.windowId).toBe("7");
 		// The driver's own capture-lease window is nobody's.
-		expect(opened.tree).not.toContain("window 9");
-		// This read adopted it, so the next one does not say it again.
-		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("gained window");
+		expect(observed.tree).not.toContain("window 9");
+		// A ref printed there acts on the window it was minted in, dispatched
+		// through the handle the caller holds.
+		await f.session.click(f.context, f.window, button.ref);
+		expect(f.lastDispatch()).toMatchObject({
+			name: "click",
+			args: { window_id: 7, pid: 101, element_token: "p1:1", snapshot_id: "p1" },
+		});
+		// Still up on the next read, so it is still printed: what keeps it
+		// there is the window being on screen, not the diff that found it.
+		expect((await f.session.observe(f.context, f.window)).tree).toContain('window 7 "Print"');
+		// Gone: the opener's tree is its own again.
+		windows = [f.row];
+		const alone = await f.session.observe(f.context, f.window);
+		expect(alone.tree).not.toContain("window 7");
+		expect(alone.elements.map(element => element.windowId)).toEqual(["1"]);
 	} finally {
 		await f.close();
 	}
@@ -647,8 +671,9 @@ it("sends the caller to a modal dialog's own rows instead of to an acquisition i
 		windows = [f.row, alert];
 		modal = true;
 		const blocked = await f.session.observe(f.context, f.window);
-		expect(blocked.tree).toContain('- [n4] AXButton "Only This Event"');
-		// The walk rendered it, so the gained-window diff says nothing about it.
+		const only = blocked.elements.find(element => element.label === "Only This Event")!;
+		expect(blocked.tree).toContain(`${only.ref} button "Only This Event"`);
+		// The walk rendered it, so nothing sends the caller off to acquire it.
 		expect(blocked.tree.split("\n").filter(line => line.includes("window 40"))).toEqual([]);
 		// The driver's own label for that window survives the roster.
 		expect((await f.session.windows(f.context, { pid: 101 })).find(row => row.id === "40")?.kind).toBe("app-modal");
@@ -686,8 +711,8 @@ it("prints the provider's verdict that a control would accept a written value", 
 				: undefined;
 		const observation = await f.session.observe(f.context, f.window);
 		expect(observation.tree.split("\n")).toEqual([
-			'- [n1] AXDateTimeArea "start-datepicker" value="2026-09-25T17:00:00-07:00" settable=true',
-			'- [n2] AXStepper "Repeat"',
+			'n1 datetimearea "start-datepicker" = "2026-09-25T17:00:00-07:00" [settable]',
+			'n2 stepper "Repeat"',
 		]);
 		expect(observation.elements.map(element => element.settable)).toEqual([true, undefined]);
 	} finally {
@@ -1070,7 +1095,9 @@ it("observes semantics without images and preserves raw empty values and false s
 			enabled: false,
 			selected: false,
 		});
-		expect(observation.tree).toContain('value="" placeholder="Hint, not value" enabled=false selected=false');
+		// The row says only what carries news: an empty value, an unselected
+		// row and an enabled one are what every row is until it says otherwise.
+		expect(observation.tree).toBe('n1 textfield "Editor" [disabled] placeholder="Hint, not value"');
 		expect(observation.elements[0]!.label).toBe("Editor");
 		expect(observation.complete).toBe(false);
 		expect(f.calls.find(call => call.name === "get_window_state")?.args.include_screenshot).toBe(false);
@@ -1155,9 +1182,12 @@ it("keeps the walker's collapsed-row line under its own container and states the
 				: undefined;
 		const observation = await f.session.observe(f.context, f.window);
 		const lines = observation.tree.split("\n");
-		const cell = lines.findIndex(line => line.includes("AXCell"));
-		expect(lines[cell + 1]).toBe("      - 69 of 81 rows are scrolled out of view and were not read");
-		expect(lines[cell + 2]).toContain("AXButton");
+		const cell = lines.findIndex(line => line.includes('"ICMNoteListCell"'));
+		// A note this session wrote about the tree is parenthesised and a row
+		// the window rendered is not, so the two never read alike.
+		expect(lines[cell + 1]).toBe("      (69 of 81 rows are scrolled out of view and were not read)");
+		expect(lines[cell + 2]).toBe('            text "Meeting 070"');
+		expect(lines[cell + 3]).toBe(`      ${observation.elements[1]!.ref} button`);
 		// No search field in this tree, so the footer names the one route it has.
 		expect(observation.tree).toContain(
 			"69 row(s) are scrolled out of view and were not read. Scroll the list to reach them.",
@@ -1243,19 +1273,21 @@ it("preserves absent and whitespace values independently from provider placehold
 		let observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]).toMatchObject({ label: "Editor", placeholder: "Hint, not value" });
 		expect(observation.elements[0]!.value).toBeUndefined();
-		expect(observation.tree).not.toContain(" value=");
+		expect(observation.tree).toBe('n1 textfield "Editor" [disabled] placeholder="Hint, not value"');
 		f.state.value = " \tΩ café\n";
 		f.state.placeholder = 'Hint "quoted" Ω';
 		observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]!.value).toBe(f.state.value);
 		expect(observation.elements[0]!.placeholder).toBe(f.state.placeholder);
-		expect(observation.tree).toContain(
-			`value=${JSON.stringify(f.state.value)} placeholder=${JSON.stringify(f.state.placeholder)}`,
+		expect(observation.tree).toBe(
+			`n2 textfield "Editor" = ${JSON.stringify(f.state.value)} [disabled] placeholder=${JSON.stringify(
+				f.state.placeholder,
+			)}`,
 		);
 		f.state.placeholder = undefined;
 		observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]!.placeholder).toBeUndefined();
-		expect(observation.tree).not.toContain(" placeholder=");
+		expect(observation.tree).toBe(`n3 textfield "Editor" = ${JSON.stringify(f.state.value)} [disabled]`);
 	} finally {
 		await f.close();
 	}
@@ -1268,22 +1300,27 @@ it("renders provider help and description when the row carries them", async () =
 		let observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]!.help).toBeUndefined();
 		expect(observation.elements[0]!.description).toBeUndefined();
-		expect(observation.tree).not.toContain(" help=");
-		expect(observation.tree).not.toContain(" description=");
+		expect(observation.tree).toBe('n1 textfield "Editor" [disabled] placeholder="Hint, not value"');
+		// A tooltip is what this row is described as when it has none of its own.
 		f.state.help = 'Send the "draft" Ω';
+		observation = await f.session.observe(f.context, f.window);
+		expect(observation.elements[0]!.help).toBe(f.state.help);
+		expect(observation.tree).toContain(`(${f.state.help})`);
+		// Its own description is the one it prints, and the tooltip behind it
+		// is not printed a second time.
 		f.state.description = "Compose button";
 		observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]).toMatchObject({ help: f.state.help, description: f.state.description });
-		expect(observation.tree).toContain(
-			`description=${JSON.stringify(f.state.description)} help=${JSON.stringify(f.state.help)}`,
-		);
-		// A description that only repeats the label is still the provider's own
-		// word for the row and is kept.
+		expect(observation.tree).toContain("(Compose button)");
+		expect(observation.tree).not.toContain("draft");
+		// A description that only repeats the label is the label twice: the
+		// snapshot keeps the provider's word, the row drops it.
 		f.state.help = undefined;
 		f.state.description = "Editor";
 		observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]!.description).toBe("Editor");
 		expect(observation.elements[0]!.help).toBeUndefined();
+		expect(observation.tree).not.toContain("(Editor)");
 		// A provider that says "none" with an empty string, and a description
 		// that only restates the row's own value, add nothing to the line.
 		f.state.help = "";
@@ -1292,8 +1329,7 @@ it("renders provider help and description when the row carries them", async () =
 		observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]!.help).toBeUndefined();
 		expect(observation.elements[0]!.description).toBeUndefined();
-		expect(observation.tree).not.toContain(" help=");
-		expect(observation.tree).not.toContain(" description=");
+		expect(observation.tree).not.toContain("(Draft)");
 	} finally {
 		await f.close();
 	}
@@ -1692,7 +1728,7 @@ it("re-samples a window once when its header and its own tree disagree after a m
 		// the app's business and not a transition to wait out.
 		const first = await f.session.observe(f.context, f.window);
 		expect(walks()).toBe(1);
-		expect(first.tree).toContain('AXWindow "Bench - 80 notes"');
+		expect(first.tree).toContain('window "Bench - 80 notes"');
 		let walked = 0;
 		f.state.hook = async name => {
 			if (name === "get_window_state") f.state.label = ++walked >= 2 ? "Editor" : "Bench - 80 notes";
@@ -1702,7 +1738,7 @@ it("re-samples a window once when its header and its own tree disagree after a m
 		f.calls.length = 0;
 		const settled = await f.session.observe(f.context, f.window);
 		expect(walks()).toBe(2);
-		expect(settled.tree).toContain('AXWindow "Editor"');
+		expect(settled.tree).toContain('window "Editor"');
 		// Spent by that read: the next one walks once whatever the titles say.
 		f.state.hook = undefined;
 		f.state.label = "Bench - 80 notes";
@@ -1714,7 +1750,7 @@ it("re-samples a window once when its header and its own tree disagree after a m
 		const stale = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
 		await f.session.click(f.context, f.window, stale);
 		f.calls.length = 0;
-		expect((await f.session.observe(f.context, f.window)).tree).toContain('AXWindow "Bench - 80 notes"');
+		expect((await f.session.observe(f.context, f.window)).tree).toContain('window "Bench - 80 notes"');
 		expect(walks()).toBe(2);
 	} finally {
 		await f.close();
@@ -2069,7 +2105,7 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 		expect(answered.text).toContain(`${ref} is retired`);
 		// The tree is in the reply, and the reply is marked for the cell — not
 		// left in a return value the cell is free to drop.
-		expect(answered.text).toContain("- [n2] AXTextField");
+		expect(answered.text).toContain('n2 textfield "Editor (renamed)"');
 		expect(answered.mustShow).toBe(true);
 		// One read, and the refusal's own payload survives on the result.
 		expect(f.calls.filter(call => call.name === "get_window_state")).toHaveLength(2);
@@ -2285,7 +2321,7 @@ it("leaves the rest of a batch's refs bound to their own elements across a dead 
 		// the fresh tree is printed.
 		expect(dead.text).toContain(`${checkbox} is retired`);
 		expect(dead.text).toContain("Your other refs keep the exact elements they were minted for");
-		expect(dead.text).toContain(`- [n${observed.elements.length + 2}] AXTextField "Company"`);
+		expect(dead.text).toContain(`n${observed.elements.length + 2} textfield "Company"`);
 		await expect(f.session.click(f.context, f.window, checkbox!)).rejects.toThrow(`StaleRef: ${checkbox} —`);
 		// Every other ref still reaches its own element, whatever the fresh
 		// tree did with that row's place or value.
@@ -2307,7 +2343,7 @@ it("numbers element refs compactly and never reissues one a later observation in
 	try {
 		const first = await f.session.observe(f.context, f.window);
 		expect(first.elements.map(element => element.ref)).toEqual(["n1"]);
-		expect(first.tree).toStartWith("- [n1] AXTextField");
+		expect(first.tree).toStartWith('n1 textfield "Editor"');
 		const second = await f.session.observe(f.context, f.window);
 		expect(second.elements.map(element => element.ref)).toEqual(["n2"]);
 		// The dead ref must not resolve to the live element that replaced it.
@@ -2559,11 +2595,11 @@ it("projects a query over the walked tree: a string is literal, an array is any-
 		// groups that place them; the rest is hidden and counted.
 		const observation = await f.session.observe(f.context, f.window, { query: ["remove phone", "DONE"] });
 		expect(observation.tree.split("\n")).toEqual([
-			'- [n1] AXWindow "Card" enabled=true',
-			'  - [n2] AXGroup "Phones" enabled=true',
-			'    - [n4] AXButton "Remove Phone" enabled=true',
-			'  - [n5] AXGroup "Actions" enabled=true',
-			'    - [n6] AXButton "Done" enabled=true',
+			'n1 window "Card"',
+			'  n2 group "Phones"',
+			'    n4 button "Remove Phone"',
+			'  n5 group "Actions"',
+			'    n6 button "Done"',
 			'Query ["remove phone","DONE"] matched 2 of 8 rows (ancestors kept); 3 hidden — drop the query to read them.',
 		]);
 		expect(observation.elements.map(element => element.label)).toEqual([
@@ -2582,22 +2618,22 @@ it("projects a query over the walked tree: a string is literal, an array is any-
 		// And a row whose own label carries a pipe is reachable, which the
 		// split made impossible: every such query asked for nothing.
 		expect((await f.session.observe(f.context, f.window, { query: "Export | CSV" })).tree).toContain(
-			'AXButton "Export | CSV"',
+			'button "Export | CSV"',
 		);
 		// A value is searchable too, and a query that keeps everything says nothing.
 		expect((await f.session.observe(f.context, f.window, { query: "123-4567" })).tree).toContain(
-			'AXTextField "home"',
+			'textfield "home"',
 		);
 		expect((await f.session.observe(f.context, f.window, { query: "ax" })).tree).not.toContain("hidden");
 		// A matched container answers with what it holds. The bench asked an
 		// open popover for its contents, was told `AXPopover ""` and 121 rows
 		// hidden, and spent two cells recovering from the non-answer.
 		const container = await f.session.observe(f.context, f.window, { query: "Phones" });
-		expect(container.tree.split("\n").map(line => line.replace(/\[n\d+\]/, "[ref]"))).toEqual([
-			'- [ref] AXWindow "Card" enabled=true',
-			'  - [ref] AXGroup "Phones" enabled=true',
-			'    - [ref] AXTextField "home" value="(555) 123-4567" enabled=true',
-			'    - [ref] AXButton "Remove Phone" enabled=true',
+		expect(container.tree.split("\n").map(line => line.replace(/^(\s*)n\d+/, "$1[ref]"))).toEqual([
+			'[ref] window "Card"',
+			'  [ref] group "Phones"',
+			'    [ref] textfield "home" = "(555) 123-4567"',
+			'    [ref] button "Remove Phone"',
 			'Query "Phones" matched 1 of 8 rows (ancestors kept, 2 rows shown under them); 4 hidden — drop the query to read them.',
 		]);
 		// The driver never sees the query.
@@ -2654,10 +2690,10 @@ it("caps how much of a matched container it prints and says what it left out", a
 				: undefined;
 		const observation = await f.session.observe(f.context, f.window, { query: "Phones" });
 		const lines = observation.tree.split("\n");
-		expect(lines.filter(line => line.includes("AXTextField"))).toHaveLength(12);
-		expect(observation.tree).toContain('AXTextField "field 12"');
-		expect(observation.tree).not.toContain('AXTextField "field 13"');
-		expect(lines[2]).toBe("    - 8 more rows under this one were not shown — drop the query to read them.");
+		expect(lines.filter(line => line.includes("textfield"))).toHaveLength(12);
+		expect(observation.tree).toContain('textfield "field 12"');
+		expect(observation.tree).not.toContain('textfield "field 13"');
+		expect(lines[2]).toBe("    (8 more rows under this one were not shown — drop the query to read them.)");
 		expect(lines.at(-1)).toBe(
 			'Query "Phones" matched 1 of 22 rows (ancestors kept, 12 rows shown under them); 8 hidden — drop the query to read them.',
 		);
@@ -2698,10 +2734,10 @@ it("does not expand a match that contains another match", async () => {
 		// The deeper match is the specific answer: expanding its ancestor as
 		// well would re-print the tree around what was asked for.
 		const observation = await f.session.observe(f.context, f.window, { query: ["phones", "mobile"] });
-		expect(observation.tree.split("\n").map(line => line.replace(/\[n\d+\]/, "[ref]"))).toEqual([
-			'- [ref] AXWindow "Card"',
-			'  - [ref] AXGroup "Phones"',
-			'    - [ref] AXTextField "mobile"',
+		expect(observation.tree.split("\n")).toEqual([
+			'n1 window "Card"',
+			'  n2 group "Phones"',
+			'    n4 textfield "mobile"',
 			'Query ["phones","mobile"] matched 2 of 4 rows (ancestors kept); 1 hidden — drop the query to read them.',
 		]);
 	} finally {
@@ -2789,22 +2825,24 @@ it("answers a query from the text the window displays, not from its controls alo
 				: undefined;
 		const found = await f.session.observe(f.context, f.window, { query: "Tahoe" });
 		expect(found.tree.split("\n")).toEqual([
-			'- [n1] AXWindow "About"',
-			'  - [n2] AXGroup "Overview"',
-			'    - AXStaticText "Version" = "macOS Tahoe Version 26.1"',
+			'n1 window "About"',
+			'  n2 group "Overview"',
+			'    text "Version" = "macOS Tahoe Version 26.1"',
 			// The row the text hangs off is the match, so what it holds comes
 			// with it: the button beside the version string is part of the
 			// answer, and nothing is left hidden to announce.
-			'    - [n3] AXButton "More Info…"',
+			'    n3 button "More Info…"',
 		]);
 		// Display-only text is text, never a target: no ref is minted for it and
 		// the observation's element list is still the controls.
 		expect(found.elements.map(element => element.label)).toEqual(["About", "Overview", "More Info…"]);
-		// The default read is unchanged — the controls, and only the controls.
+		// Every read says what the window shows, not only the one that asked
+		// for it: the version string is in no walk's `elements` at all.
 		expect((await f.session.observe(f.context, f.window)).tree.split("\n")).toEqual([
-			'- [n4] AXWindow "About"',
-			'  - [n5] AXGroup "Overview"',
-			'    - [n6] AXButton "More Info…"',
+			'n4 window "About"',
+			'  n5 group "Overview"',
+			'    text "Version" = "macOS Tahoe Version 26.1"',
+			'    n6 button "More Info…"',
 		]);
 		// A miss now says the text was searched too, so widening the query is
 		// the next move rather than reaching for a screenshot.
@@ -2854,7 +2892,9 @@ it("answers a query about a window under a sheet from the sheet, which is what t
 		// The match is in the sheet, printed above; the window behind it is not
 		// where to look and its 22 out-of-view rows are not what to scroll.
 		const hit = await f.session.observe(f.context, f.window, { query: "Calculator" });
-		expect(hit.tree).toContain('- [n2] AXRow "Calculator"');
+		const matched = hit.elements.find(element => element.label === "Calculator")!;
+		expect(hit.tree).toContain(`  ${matched.ref} row "Calculator"`);
+		expect(matched.windowId).toBe("5");
 		expect(hit.tree.split("\n").filter(line => line.startsWith("No row"))).toEqual([
 			'No row of window 1 itself matched query "Calculator"; 1 row(s) of the sheet "open-panel" (window 5) modal over it match and are printed above — work in the sheet while it is up.',
 		]);
@@ -3311,9 +3351,8 @@ it("renders the specific role a control answers to beside its generic one", asyn
 		f.state.placeholder = undefined;
 		const observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]).toMatchObject({ role: "AXTextField", subrole: "AXSearchField", label: "" });
-		expect(observation.tree.split("\n")[0]).toBe(
-			`- [${observation.elements[0]!.ref}] AXTextField "" subrole=AXSearchField value="" enabled=false selected=false`,
-		);
+		// Without the subrole the row reads `textfield` and names nothing.
+		expect(observation.tree.split("\n")[0]).toBe(`${observation.elements[0]!.ref} searchfield [disabled]`);
 		// A subrole that only restates its role is 164 of the 173 a Notes window
 		// carries, so the row does not print it twice — but the snapshot keeps
 		// it, which is what `find` reads.
@@ -3321,12 +3360,12 @@ it("renders the specific role a control answers to beside its generic one", asyn
 		f.state.subrole = "AXTableRow";
 		const listed = await f.session.observe(f.context, f.window);
 		expect(listed.elements[0]!.subrole).toBe("AXTableRow");
-		expect(listed.tree).not.toContain("subrole=");
+		expect(listed.tree.split("\n")[0]).toBe(`${listed.elements[0]!.ref} row [disabled]`);
 		// A provider that reports no subrole says nothing about one.
 		f.state.subrole = undefined;
 		const plain = await f.session.observe(f.context, f.window);
 		expect(plain.elements[0]!.subrole).toBeUndefined();
-		expect(plain.tree).not.toContain("subrole=");
+		expect(plain.tree.split("\n")[0]).toBe(`${plain.elements[0]!.ref} row [disabled]`);
 	} finally {
 		await f.close();
 	}
@@ -3529,8 +3568,12 @@ it("dispatches every action a node advertises and refuses only what its row neve
 		f.state.value = "Buy milk";
 		f.state.actions = ["AXShowMenu", "AXConfirm"];
 		observation = await f.session.observe(f.context, f.window);
-		expect(observation.tree).toContain('AXTextField "Buy milk" value="Buy milk"');
-		expect(observation.tree).toContain('actions=["show_menu","confirm"]');
+		expect(observation.tree).toContain('textfield "Buy milk"');
+		// The value repeats the label; the row does not print it twice.
+		expect(observation.tree).not.toContain('= "Buy milk"');
+		// Both of these are advertised by every row of some family: printing
+		// them names nothing a reader could not have assumed.
+		expect(observation.tree).not.toContain("actions=");
 		await f.session.perform(f.context, f.window, observation.elements[0]!.ref, "show_menu");
 		expect(f.lastDispatch()).toMatchObject({
 			name: "click",
@@ -3549,9 +3592,9 @@ it("dispatches every action a node advertises and refuses only what its row neve
 		observation = await f.session.observe(f.context, f.window);
 		const element = observation.elements[0]!;
 		expect(element.actions).toEqual(["confirm", "AXShowDefaultUI", "open", "toString", "Add Reminder", "Snooze"]);
-		expect(observation.tree).toContain(
-			'actions=["confirm","AXShowDefaultUI","open","toString","Add Reminder","Snooze"]',
-		);
+		// What is left is what this app authored, beside the two AX verbs no
+		// family publishes for free.
+		expect(observation.tree).toContain("actions=open,toString,Add Reminder,Snooze");
 		// A custom action is invoked by the raw string, never by the label.
 		await f.session.perform(f.context, f.window, element.ref, "Snooze");
 		expect(f.lastDispatch()).toMatchObject({
@@ -3594,7 +3637,8 @@ it("lists a row's own press alongside every other action the row advertises", as
 			f.state.role = role;
 			const observation = await f.session.observe(f.context, f.window);
 			expect(observation.elements[0]!.actions).toEqual(["press", "show_menu", "Move Down"]);
-			expect(observation.tree).toContain('actions=["press","show_menu","Move Down"]');
+			// `press` is assumed of every row that has one; the app's own verb is not.
+			expect(observation.tree).toContain("actions=Move Down");
 		}
 		const observation = await f.session.observe(f.context, f.window);
 		await f.session.perform(f.context, f.window, observation.elements[0]!.ref, "press");
@@ -3634,9 +3678,9 @@ it("nests an attached sheet's own tree under its parent and dispatches its refs 
 		expect(observation.tree).toBe(
 			[
 				'sheet "Save" (window 5) — modal over window 1',
-				`  - [${observation.elements[1]!.ref}] AXSheet "save"`,
-				`    - [${cancel.ref}] AXButton "Cancel"`,
-				`- [${parentRef}] AXTextField "Editor" value="" placeholder="Hint, not value" enabled=false selected=false`,
+				`  ${observation.elements[1]!.ref} sheet "save"`,
+				`    ${cancel.ref} button "Cancel"`,
+				`${parentRef} textfield "Editor" [disabled] placeholder="Hint, not value"`,
 			].join("\n"),
 		);
 		expect(cancel.windowId).toBe("5");
@@ -4148,7 +4192,9 @@ it("keeps an attached sheet's whole subtree when the caller narrows the parent w
 			});
 		};
 		const observation = await f.session.observe(f.context, f.window, { maxDepth: 1, query: "Editor" });
-		expect(observation.tree).toContain('- [n3] AXButton "Cancel"');
+		expect(observation.tree).toContain(
+			`${observation.elements.find(element => element.label === "Cancel")!.ref} button "Cancel"`,
+		);
 		// The parent walk carries the depth budget; the query is projected here,
 		// never sent, and the sheet's walk carries neither.
 		expect(f.calls.filter(call => call.name === "get_window_state").map(call => call.args)).toEqual([

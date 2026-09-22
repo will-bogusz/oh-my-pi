@@ -22,6 +22,8 @@ export interface ComputerRunOk {
 	returnValue: unknown;
 	screenshots: ComputerScreenshot[];
 	capabilities?: DesktopCapabilities;
+	/** The last window a window step of the run resolved; absent when none did. */
+	window?: ComputerWindowIdentity;
 }
 /** Full-resolution screenshot emitted during one computer run. */
 export interface ComputerScreenshot {
@@ -191,6 +193,11 @@ export interface ComputerObservation {
 	elements: ComputerElementSnapshot[];
 	complete: boolean;
 	backgroundInput: unknown;
+	/**
+	 * The driver's own cause for an incomplete walk, where it reports one;
+	 * absent when the tree is complete or the cause is unknown.
+	 */
+	truncation?: string;
 	/** Attached sheets, each walked and rendered under this window's own tree. */
 	relatedWindows?: readonly ComputerRelatedWindow[];
 	/** Document window's file (`file://` URL); absent when the app reports none. */

@@ -7,14 +7,13 @@ import type {
 	WorkerInbound,
 	WorkerOutbound,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
+import { flattenSnapshot, hasBusyIndicator, renderHeader } from "@oh-my-pi/pi-coding-agent/tools/browser/observation";
 import {
 	buildTreeLines,
-	flattenSnapshot,
 	formatRefRanges,
-	hasBusyIndicator,
 	renderTree,
 	renderTreeDiff,
-} from "@oh-my-pi/pi-coding-agent/tools/browser/observation";
+} from "@oh-my-pi/pi-coding-agent/tools/observed-tree";
 import { printableTree, WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import puppeteer from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
@@ -48,6 +47,8 @@ const GUSTO_LIKE = ax("RootWebArea", "401(k) contributions", { url: "https://app
 ]);
 
 const HEADER = { url: "https://app.gusto.com/401k", title: "401(k) contributions", scroll: { y: 0, scrollHeight: 2140 } };
+/** What the tab worker passes the shared renderer: browser refs read `eN`. */
+const BROWSER_TREE = { prefix: "e", fullHint: "observe({ diff: false }) for the full tree" };
 
 // The tree carries text, structure and embedded documents; refs only where an
 // action can land, on both sides of the iframe boundary.
@@ -55,8 +56,8 @@ it("renders text, structure and cross-origin iframe content inline with refs on 
 	const nodes = flattenSnapshot(GUSTO_LIKE, { includeAll: false });
 	let counter = 0;
 	const refs = nodes.map(node => (node.actionable ? ++counter : undefined));
-	const lines = buildTreeLines(nodes, refs);
-	expect(renderTree({ ...HEADER, focused: "e3" }, lines)).toBe(
+	const lines = buildTreeLines(nodes, refs, "e");
+	expect(renderTree(renderHeader({ ...HEADER, focused: "e3" }), lines)).toBe(
 		[
 			"url: https://app.gusto.com/401k | title: 401(k) contributions | scroll: 0/2140 | focused: e3",
 			"navigation",
@@ -78,7 +79,7 @@ it("diffs only the changed subtree and summarizes removals as ref ranges", () =>
 	const nodes = flattenSnapshot(GUSTO_LIKE, { includeAll: false });
 	let counter = 0;
 	const refs = nodes.map(node => (node.actionable ? ++counter : undefined));
-	const before = buildTreeLines(nodes, refs);
+	const before = buildTreeLines(nodes, refs, "e");
 	// The iframe re-rendered: one textbox changed value, the pay-period text was
 	// replaced, and a new button appeared; the navigation lost both links.
 	const afterNodes = flattenSnapshot(
@@ -104,8 +105,9 @@ it("diffs only the changed subtree and summarizes removals as ref ranges", () =>
 	const after = buildTreeLines(
 		afterNodes,
 		afterNodes.map(node => (node.actionable ? afterRefs[node.name] : undefined)),
+		"e",
 	);
-	expect(renderTreeDiff(HEADER, before, after)).toBe(
+	expect(renderTreeDiff(renderHeader(HEADER), before, after, BROWSER_TREE)).toBe(
 		[
 			"url: https://app.gusto.com/401k | title: 401(k) contributions | scroll: 0/2140",
 			"diff vs previous observation (+ added, ~ changed; observe({ diff: false }) for the full tree)",
@@ -118,10 +120,10 @@ it("diffs only the changed subtree and summarizes removals as ref ranges", () =>
 			"unchanged: 7 nodes",
 		].join("\n"),
 	);
-	expect(renderTreeDiff(HEADER, before, before)).toBe(
-		`${renderTree(HEADER, []).split("\n")[0]}\nno change since the previous observation (11 nodes)`,
+	expect(renderTreeDiff(renderHeader(HEADER), before, before, BROWSER_TREE)).toBe(
+		`${renderHeader(HEADER)}\nno change since the previous observation (11 nodes)`,
 	);
-	expect(formatRefRanges([47, 12, 40, 41, 42, 43, 44, 45, 46, 50, 51])).toBe("e12, e40-e47, e50, e51");
+	expect(formatRefRanges([47, 12, 40, 41, 42, 43, 44, 45, 46, 50, 51], "e")).toBe("e12, e40-e47, e50, e51");
 });
 
 it("treats spinners as unsettled but valued progressbars and headings as content", () => {

@@ -7,7 +7,7 @@ import { committedTodoPhases } from "../../tools/todo";
 import { ToolAbortError } from "../../tools/tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { schemaDeclaresIntentField } from "../../utils/tool-schema";
-import { type EvalPreludeStatus, findEnabledEvalPrelude, invokeEvalPrelude } from "../preludes";
+import { type EvalPreludeCell, type EvalPreludeStatus, findEnabledEvalPrelude, invokeEvalPrelude } from "../preludes";
 import type { ControlActivityEvent, ControlImageMetadata } from "@oh-my-pi/pi-tui/tools/eval";
 import { EVAL_AGENT_BRIDGE_NAME, type EvalAgentHandleResult, runEvalAgent } from "../agent-bridge";
 import { EVAL_BUDGET_BRIDGE_NAME, type EvalBudgetResult, runEvalBudget } from "../budget-bridge";
@@ -38,6 +38,8 @@ export interface ToolBridgeOptions {
 	defaultIntent?: string;
 	identity?: RuntimeCallIdentity;
 	shadowCell?: EvalShadowCellSession;
+	/** The eval cell this call runs in (see `EvalPreludeContext.cell`). */
+	cell?: EvalPreludeCell;
 }
 
 type ToolValue =
@@ -301,6 +303,7 @@ export async function callSessionTool(name: string, args: unknown, options: Tool
 					session: options.session,
 					toolCallId,
 					signal: options.signal,
+					cell: options.cell,
 					context: options.session.getToolContext?.(),
 				});
 				// A control activity settles on one coalesced event: the prelude's own

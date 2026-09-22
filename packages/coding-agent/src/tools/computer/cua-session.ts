@@ -3,6 +3,7 @@ import * as path from "node:path";
 import type { DesktopCapabilities, DesktopDisplay } from "@oh-my-pi/pi-natives";
 import * as logger from "@oh-my-pi/pi-utils/logger";
 import { resizeImage } from "../../utils/image-resize";
+import { renderNode, type TreeNode } from "../observed-tree";
 import { throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ComputerBackend, ComputerBackendFactory } from "./backend";
@@ -29,6 +30,7 @@ import {
 	preludeVocabulary,
 	readReply,
 	refusalNote,
+	renderedRole,
 	SEARCH_FIELD,
 	specificRole,
 	UNPROBED_DRAG,
@@ -120,10 +122,6 @@ interface SheetCensus {
 function placeKey(identity: ElementIdentity): string {
 	return JSON.stringify([identity.role, identity.label, identity.ordinal, identity.path]);
 }
-function renderedSubrole(element: ComputerElementSnapshot): string {
-	const specific = specificRole(element);
-	return specific === element.role ? "" : ` subrole=${specific}`;
-}
 /**
  * Descendants printed under one matched row. A matched container answered
  * with its own existence and nothing else: the bench asked an open popover
@@ -137,6 +135,11 @@ function renderedSubrole(element: ComputerElementSnapshot): string {
  * the whole tree in 119 of 129 walks, and container subtrees reach 333 rows.
  */
 const SUBTREE_MAX_ROWS = 12;
+/**
+ * Rows a window the app opened is printed with under its opener. A save or
+ * open panel runs to hundreds of rows; its buttons and fields come first.
+ */
+const INLINE_WINDOW_ROWS = 40;
 /**
  * The rows a query keeps: every row one of its literals matches
  * (case-insensitive substring over what the row prints, including the
@@ -251,11 +254,75 @@ function titlesDisagree(title: string, rows: readonly TreeRow[]): boolean {
 /** A window caught mid-transition is re-sampled once: the settle, and the whole budget for it. */
 const RESAMPLE_SETTLE_MS = 250;
 const RESAMPLE_BUDGET_MS = 1000;
+/**
+ * Actions every row of some family advertises, whatever it does: `press` on
+ * a menu item, `show_menu` on any node with a context menu, the scroll and
+ * UI-visibility verbs AppKit publishes on everything. Printing them cost one
+ * print-pane walk 46 kB of `actions=["press","show_menu"]` without naming
+ * anything a reader could not have assumed, and `perform` dispatches them on
+ * rows that never advertised them anyway. What is left is what this app
+ * authored: `open`, an app's own verb.
+ */
+const IMPLICIT_ACTIONS: Record<string, true> = {
+	press: true,
+	show_menu: true,
+	confirm: true,
+	cancel: true,
+	pick: true,
+	AXShowDefaultUI: true,
+	AXShowAlternateUI: true,
+	AXRaise: true,
+	AXScrollToVisible: true,
+	AXScrollLeftByPage: true,
+	AXScrollRightByPage: true,
+	AXScrollUpByPage: true,
+	AXScrollDownByPage: true,
+};
+/** One walked row in the grammar both observation surfaces print. */
+function rowNode(depth: number, element: ComputerElementSnapshot): TreeNode {
+	const states: string[] = [];
+	// Said only where they carry news: a row is enabled and unselected until
+	// it says otherwise, and the old render spent two words per row on that.
+	if (element.enabled === false) states.push("disabled");
+	if (element.selected === true) states.push("selected");
+	if (element.settable === true) states.push("settable");
+	const extras: string[] = [];
+	if (element.placeholder !== undefined) extras.push(`placeholder=${JSON.stringify(element.placeholder)}`);
+	const actions = element.actions?.filter(action => IMPLICIT_ACTIONS[action] !== true) ?? [];
+	if (actions.length) extras.push(`actions=${actions.join(",")}`);
+	// The tooltip is this row's description when it has none of its own; one
+	// that repeats the label is the label twice, and the renderer drops it.
+	const description = element.description ?? element.help;
+	const value = element.value === "" || element.value === element.label ? undefined : element.value;
+	return {
+		depth,
+		role: renderedRole(specificRole(element)),
+		name: element.label,
+		...(value === undefined ? {} : { value }),
+		...(description === undefined ? {} : { description }),
+		states,
+		...(extras.length ? { extras } : {}),
+	};
+}
+/**
+ * The length one line of a window's own text prints to. A window renders
+ * prose nobody asked it for — one print pane carried an 8.5 kB article
+ * paragraph — and a text row exists to say what the window says, not to
+ * deliver the document: `read` and the page itself are the routes to that.
+ */
+const TEXT_ROW_MAX = 160;
+function capText(text: string): string {
+	return text.length > TEXT_ROW_MAX ? `${text.slice(0, TEXT_ROW_MAX)}\u2026` : text;
+}
 function treeRows(rows: readonly TreeRow[], indent: number): string {
 	return rows
 		.flatMap(({ depth, element, notes }) => [
-			`${"  ".repeat(depth + indent)}- [${element.ref}] ${element.role} ${JSON.stringify(element.label)}${renderedSubrole(element)}${element.value !== undefined ? ` value=${JSON.stringify(element.value)}` : ""}${element.placeholder !== undefined ? ` placeholder=${JSON.stringify(element.placeholder)}` : ""}${element.description !== undefined ? ` description=${JSON.stringify(element.description)}` : ""}${element.help !== undefined ? ` help=${JSON.stringify(element.help)}` : ""}${element.enabled !== undefined ? ` enabled=${element.enabled}` : ""}${element.selected !== undefined ? ` selected=${element.selected}` : ""}${element.settable === true ? " settable=true" : ""}${element.actions?.length ? ` actions=${JSON.stringify(element.actions)}` : ""}`,
-			...(notes ?? []).map(note => `${"  ".repeat(note.depth + indent)}- ${note.text}`),
+			`${"  ".repeat(depth + indent)}${renderNode(rowNode(depth, element), element.ref)}`,
+			// A row the window rendered prints as one; a note this session wrote
+			// about the tree is parenthesised, so the two never read alike.
+			...(notes ?? []).map(
+				note => `${"  ".repeat(note.depth + indent)}${note.content === true ? note.text : `(${note.text})`}`,
+			),
 		])
 		.join("\n");
 }
@@ -281,21 +348,54 @@ function collapsedRowNotes(markdown: unknown): ReadonlyMap<number, TreeNote[]> {
 	return notes;
 }
 const DISPLAY_TREE_ROW = /^((?: {2})*)- (?!\[)(\S.*)$/;
+/** The driver's own grammar for a node it gave no action: role, optional label, optional value. */
+const DISPLAY_NODE = /^(AX\w+)(?: "((?:[^"\\]|\\.)*)")?(?: = "((?:[^"\\]|\\.)*)")?/;
+function jsonBody(body: string | undefined): string {
+	if (!body) return "";
+	try {
+		return String(JSON.parse(`"${body}"`));
+	} catch {
+		return body;
+	}
+}
+/** One display-only markdown line, in the grammar the rows around it print. */
+function displayRow(line: string): string | undefined {
+	const parsed = DISPLAY_NODE.exec(line);
+	// A line the driver wrote in some other shape is still text the window
+	// showed: print it whole rather than lose it to a grammar mismatch.
+	if (!parsed) return `text ${JSON.stringify(capText(line))}`;
+	const label = jsonBody(parsed[2]);
+	const value = jsonBody(parsed[3]);
+	// Static text carries its string as a value and usually has no label at
+	// all, so the value is the name unless the node named itself first.
+	const name = label || value;
+	if (!name) return undefined;
+	return renderNode(
+		{
+			depth: 0,
+			role: renderedRole(parsed[1]!),
+			name: capText(name),
+			...(value && value !== name ? { value: capText(value) } : {}),
+			states: [],
+		},
+		undefined,
+	);
+}
 /**
  * The text a window renders without offering any action on it — a version
  * string, a heading, a status line, the label of a row that is not selectable
  * — anchored to the nearest actionable row above it. The driver's structured
  * `elements` array carries actionable nodes alone (`element_index: null` for
- * the rest) and prints the others only in its markdown, so an `observe`
- * projection that read `elements` answered "no row matched" about text the
- * window was plainly showing, and the model went to the pixels for a string
- * it had already been sent.
+ * the rest) and prints the others only in its markdown, so a tree built from
+ * `elements` said nothing about text the window was plainly showing, and the
+ * model went to the pixels for a string it had already been sent.
  *
- * Only the lines a query matches are kept. The default read is the window's
- * controls — that is what an actor needs, and every label in the window is
- * not — while a query is a reader asking whether this window says something.
+ * Every such line is printed, because what a window says is half of what it
+ * is and a reader that has to screenshot for it pays far more than the rows
+ * cost. A query filters them: then the question is whether this window says
+ * one particular thing, not what it says.
  */
-function displayTextNotes(markdown: unknown, query: readonly string[]): ReadonlyMap<number, TreeNote[]> {
+function displayTextNotes(markdown: unknown, query: readonly string[] | undefined): ReadonlyMap<number, TreeNote[]> {
 	const notes = new Map<number, TreeNote[]>();
 	if (typeof markdown !== "string") return notes;
 	let anchor = -1;
@@ -307,8 +407,9 @@ function displayTextNotes(markdown: unknown, query: readonly string[]): Readonly
 		}
 		const display = DISPLAY_TREE_ROW.exec(line);
 		if (!display || COLLAPSED_TREE_ROW.test(line)) continue;
-		const text = display[2]!;
-		if (!query.some(literal => text.toLowerCase().includes(literal))) continue;
+		const text = displayRow(display[2]!);
+		if (text === undefined) continue;
+		if (query !== undefined && !query.some(literal => text.toLowerCase().includes(literal))) continue;
 		const note = { depth: display[1]!.length / 2, text, content: true as const };
 		const listed = notes.get(anchor);
 		if (listed) listed.push(note);
@@ -650,6 +751,12 @@ export class CuaComputerSession implements ComputerBackend {
 	readonly #mutated = new Set<string>();
 	/** Windows whose hidden-menu-bar hint an observation has already printed. */
 	readonly #menuBarHinted = new Set<string>();
+	/**
+	 * Windows an app opened while one of its windows was being worked in, by
+	 * id, each against that opener: they render under it on every read while
+	 * they stay on screen, and its handle drives their refs.
+	 */
+	readonly #inline = new Map<string, string>();
 	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
 	#driver: CuaDriver;
 	/**
@@ -1234,7 +1341,9 @@ export class CuaComputerSession implements ComputerBackend {
 		if (
 			window &&
 			(binding.window.pid !== window.pid ||
-				(binding.window.id !== window.id && this.#sheets.get(binding.window.id)?.parent !== window.id))
+				(binding.window.id !== window.id &&
+					this.#sheets.get(binding.window.id)?.parent !== window.id &&
+					this.#inline.get(binding.window.id) !== window.id))
 		)
 			throw new ToolError("WrongWindow: element belongs to a different PID/window", {
 				code: "wrong_window",
@@ -1304,6 +1413,18 @@ export class CuaComputerSession implements ComputerBackend {
 				window: current,
 				elements: rows.map(row => row.element),
 				complete,
+				// Why the walk stopped short, where the reply says so: the Linux
+				// driver names it; a budget the caller set is proven hit when the
+				// walk returned that many rows. Timeouts, stop reasons and
+				// scrolled-out rows print their own lines below.
+				...(reply.data.truncated === true && typeof reply.data.truncation_reason === "string"
+					? { truncation: reply.data.truncation_reason }
+					: reply.data.truncated === true &&
+							options.maxElements !== undefined &&
+							typeof reply.data.returned_element_count === "number" &&
+							reply.data.returned_element_count >= options.maxElements
+						? { truncation: "element budget reached" }
+						: {}),
 				backgroundInput: reply.data.background_input ?? null,
 				relatedWindows: relatedWindows(reply.data.related_windows),
 				tree: "",
@@ -1390,12 +1511,31 @@ export class CuaComputerSession implements ComputerBackend {
 			if (typeof reply.data.document_edited === "boolean") observation.documentEdited = reply.data.document_edited;
 			if (observation.documentPath !== undefined || observation.documentEdited === true)
 				observation.tree += `\nDocument: ${observation.documentPath ?? "(path unknown)"}${observation.documentEdited === true ? " — unsaved changes" : ""}`;
-			const opened = await this.#openedWindows(current.pid, {
-				roster: this.#lastRoster.get(current.pid) ?? [],
-				observed: current.id,
-				rendered: modalWindows(reply.data.modal_windows),
-			});
-			if (opened !== undefined) observation.tree += `\n${opened}`;
+			// Windows this app opened while this one was being worked in render
+			// under it, like its sheets, for as long as they stay on screen: the
+			// caller drives them through this handle's refs instead of spending
+			// a call to acquire each one.
+			const roster = this.#lastRoster.get(current.pid) ?? [];
+			for (const window of this.#gained(current.pid, roster, current.id, modalWindows(reply.data.modal_windows)))
+				this.#inline.set(window.id, current.id);
+			const inline = roster.filter(window => this.#inline.get(window.id) === current.id && window.onScreen !== false);
+			for (const [id, opener] of this.#inline)
+				if (opener === current.id && !inline.some(window => window.id === id)) this.#inline.delete(id);
+			for (const window of inline) {
+				let block = `window ${window.id} ${JSON.stringify(window.title)} — opened by this app, driven through this window's refs`;
+				try {
+					const nested = await this.#sheetRows(context, window, options, query);
+					const shown = nested.slice(0, INLINE_WINDOW_ROWS);
+					observation.elements.push(...shown.map(row => row.element));
+					if (shown.length) block += `\n${treeRows(shown, 1)}`;
+					if (nested.length > shown.length)
+						block += `\n  (${nested.length - shown.length} more rows; computer.window(${JSON.stringify(window.id)}) reads it whole)`;
+				} catch (error) {
+					if (!(error instanceof ToolError)) throw error;
+					block += ` — its own walk failed: ${error.message}`;
+				}
+				observation.tree += `\n${block}`;
+			}
 			// An observation is the model's picture of the environment; a system
 			// prompt over it is part of that picture even though the AX tree of
 			// the target window looks entirely normal underneath.
@@ -1487,10 +1627,10 @@ export class CuaComputerSession implements ComputerBackend {
 			typeof reply.data.collapsed_rows === "number" && reply.data.collapsed_rows > 0
 				? collapsedRowNotes(reply.data.tree_markdown)
 				: undefined;
-		// What the window says, for a query only: the markdown is the one place
-		// the driver prints a node it gave no action, and a query asked of the
-		// controls alone cannot find a version string or a status line.
-		const text = query === undefined ? undefined : displayTextNotes(reply.data.tree_markdown, query);
+		// What the window says: the markdown is the one place the driver prints
+		// a node it gave no action, and a tree of the controls alone leaves out
+		// the version string, the status line and every label beside them.
+		const text = displayTextNotes(reply.data.tree_markdown, query);
 		// The menu bar is a fifth of a macOS tree (22 kB of one 31 kB walk),
 		// every row of it advertises `press`, and every such press is refused
 		// because a menu bar item reports `AXEnabled` only while its menu is
@@ -1595,7 +1735,7 @@ export class CuaComputerSession implements ComputerBackend {
 	}
 	async #sheetRows(
 		context: Context,
-		sheet: ComputerRelatedWindow,
+		sheet: Pick<ComputerWindowIdentity, "id" | "pid">,
 		options: ObserveOptions,
 		query?: readonly string[],
 	): Promise<TreeRow[]> {
@@ -1854,41 +1994,45 @@ export class CuaComputerSession implements ComputerBackend {
 		return point;
 	}
 	/**
-	 * What the pid put on screen that the caller has never seen, as a fact
-	 * about the app: which window, and nothing about what to do with it. The
-	 * handle it acted through is never rebound. Read on both paths: a dialog
-	 * that renders asynchronously (Chrome's print, save and open panels)
-	 * appears seconds after the action that asked for it. The observe path
-	 * spends the roster the walk's own window resolution already read;
-	 * `read.observed` is this walk's window, which is being looked at rather
-	 * than announced, and `read.rendered` names the windows that walk already
-	 * drew into its own tree. A display's desktop surface is no window an app
-	 * opened.
+	 * What the pid put on screen that the caller has never seen: its
+	 * on-screen windows that its last observation did not have. `observed` is
+	 * the window being read, which is looked at rather than announced, and
+	 * `rendered` the windows that walk already drew into its own tree. A
+	 * display's desktop surface is no window an app opened.
 	 */
-	async #openedWindows(
-		pid: number | undefined,
-		read?: { roster: readonly ComputerWindowIdentity[]; observed: string; rendered?: ReadonlySet<string> },
-	): Promise<string | undefined> {
-		if (pid === undefined) return undefined;
+	#gained(
+		pid: number,
+		roster: readonly ComputerWindowIdentity[],
+		observed?: string,
+		rendered?: ReadonlySet<string>,
+	): ComputerWindowIdentity[] {
 		const before = this.#observedRoster.get(pid);
-		if (!before) return undefined;
-		let after = read?.roster;
-		if (after === undefined)
-			try {
-				after = await this.#windows({ pid });
-			} catch (error) {
-				if (!(error instanceof ToolError)) throw error;
-				return undefined;
-			}
-		const opened = after.filter(
+		if (!before) return [];
+		return roster.filter(
 			window =>
 				window.onScreen !== false &&
 				window.kind !== "desktop" &&
 				!before.has(window.id) &&
 				!this.#sheets.has(window.id) &&
-				window.id !== read?.observed &&
-				read?.rendered?.has(window.id) !== true,
+				window.id !== observed &&
+				rendered?.has(window.id) !== true,
 		);
+	}
+	/**
+	 * An action's windows the pid gained, as a fact about the app: which
+	 * window, and nothing about what to do with it. The handle it acted
+	 * through is never rebound; the next read of the opener renders them.
+	 */
+	async #openedWindows(pid: number | undefined): Promise<string | undefined> {
+		if (pid === undefined || !this.#observedRoster.has(pid)) return undefined;
+		let roster: ComputerWindowIdentity[];
+		try {
+			roster = await this.#windows({ pid });
+		} catch (error) {
+			if (!(error instanceof ToolError)) throw error;
+			return undefined;
+		}
+		const opened = this.#gained(pid, roster);
 		if (!opened.length) return undefined;
 		return opened
 			.map(

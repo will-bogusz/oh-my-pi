@@ -95,7 +95,14 @@ class FakeBackend implements ComputerBackend {
 	closeCount = 0;
 	generation = 0;
 	complete = true;
+	/** The walker's own cause for stopping short; absent when it read the tree whole. */
+	truncation?: string;
+	/** How many rows the walk answers with. */
+	rows = 1;
+	/** What the driver reports about background input for this window's process. */
+	backgroundInput: unknown = true;
 	value = "ready";
+	role = "button";
 	placeholder?: string;
 	subrole?: string;
 	actions?: readonly string[];
@@ -166,28 +173,32 @@ class FakeBackend implements ComputerBackend {
 	): Promise<ComputerObservation> {
 		await this.window(context, { id: window.id, pid: window.pid });
 		this.bindings.clear();
-		const ref = `e${++this.generation}`;
-		const element = {
-			ref,
-			pid: window.pid,
-			windowId: window.id,
-			role: "button",
-			label: "Increment",
-			value: this.value,
-			...(this.subrole !== undefined ? { subrole: this.subrole } : {}),
-			...(this.placeholder !== undefined ? { placeholder: this.placeholder } : {}),
-			...(this.actions !== undefined ? { actions: this.actions } : {}),
-			enabled: true,
-			bounds: { x: 7, y: 8, width: 9, height: 10 },
-		};
-		this.bindings.set(ref, { window: structuredClone(window), element });
+		const elements = Array.from({ length: this.rows }, () => {
+			const ref = `e${++this.generation}`;
+			const element = {
+				ref,
+				pid: window.pid,
+				windowId: window.id,
+				role: this.role,
+				label: "Increment",
+				value: this.value,
+				...(this.subrole !== undefined ? { subrole: this.subrole } : {}),
+				...(this.placeholder !== undefined ? { placeholder: this.placeholder } : {}),
+				...(this.actions !== undefined ? { actions: this.actions } : {}),
+				enabled: true,
+				bounds: { x: 7, y: 8, width: 9, height: 10 },
+			};
+			this.bindings.set(ref, { window: structuredClone(window), element });
+			return element;
+		});
 		return {
 			snapshotId: String(this.generation),
 			window,
-			tree: `- button [ref=${ref}]`,
-			elements: [element],
+			tree: elements.map(element => `- button [ref=${element.ref}]`).join("\n"),
+			elements,
 			complete: this.complete,
-			backgroundInput: true,
+			backgroundInput: this.backgroundInput,
+			...(this.truncation === undefined ? {} : { truncation: this.truncation }),
 			...(options.screenshot === true ? { screenshot: this.image(context, window.id, options.silent) } : {}),
 		};
 	}
@@ -693,6 +704,12 @@ describe("computer preludes through the session", () => {
 			backend.subrole = undefined;
 			expect(await hits('{subrole:"AXSearchField"}')).toEqual([]);
 			expect(await hits('{role:"AXSearchField"}')).toEqual([]);
+			// A row's platform spelling and the one the tree prints are the same
+			// role, so a model that read either can ask for it.
+			backend.role = "AXButton";
+			expect(await hits('{role:"button", exact:true}')).toEqual(["Increment"]);
+			expect(await hits('{role:"AXButton", exact:true}')).toEqual(["Increment"]);
+			expect(await hits('{role:"textfield", exact:true}')).toEqual([]);
 		} finally {
 			await runInContext("computer.close()", realm);
 		}
@@ -752,7 +769,6 @@ describe("computer preludes through the session", () => {
 			const observed = await runInContext("win.observe({screenshot:false})", realm);
 			expect(observed.elements[0].value).toBe("1");
 			expect(displays.join("\n")).toContain("button [ref=e2]");
-			expect(displays.join("\n")).toContain("omitted controls remain unknown — narrow the next observe");
 			expect(observed.complete).toBe(false);
 			expect(displays.join("\n")).not.toContain("button [ref=e1]");
 			await expect(runInContext("win.click(win.initialObservation.elements[0].ref)", realm)).rejects.toThrow(
@@ -766,7 +782,58 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
-	it("marks the observation it rendered so the cell never serializes the same tree again", async () => {
+	it("names the keyboard route only where the driver refused background keys", async () => {
+		const { backend, realm, displays } = javascriptFixture();
+		try {
+			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
+			// A route that works is the header saying nothing: every call takes
+			// its default delivery.
+			backend.backgroundInput = { routes: [{ route: "pid_keyboard", status: "available" }] };
+			displays.length = 0;
+			await runInContext("win.observe({screenshot:false})", realm);
+			expect(displays.join("\n")).not.toContain("keys:");
+			// Refused is the one case a later call has to carry a delivery for.
+			backend.backgroundInput = {
+				routes: [{ route: "pid_keyboard", status: "refused", reason: "secure input is active" }],
+			};
+			displays.length = 0;
+			await runInContext("win.observe({screenshot:false})", realm);
+			expect(displays.join("\n")).toContain(
+				"(window 42, PID 123) · keys: foreground only (secure input is active)",
+			);
+		} finally {
+			await runInContext("computer.close()", realm);
+		}
+	});
+
+	it("calls a tree partial only when the walk named a cause and the tree is worth the words", async () => {
+		const { backend, realm, displays } = javascriptFixture();
+		try {
+			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
+			backend.rows = 24;
+			backend.truncation = "element budget reached";
+			displays.length = 0;
+			await runInContext("win.observe({screenshot:false})", realm);
+			expect(displays.join("\n")).toContain(
+				"Partial tree (element budget reached): omitted controls remain unknown.",
+			);
+			// A walk that reached everything leaves nothing unknown to say.
+			backend.truncation = undefined;
+			displays.length = 0;
+			await runInContext("win.observe({screenshot:false})", realm);
+			expect(displays.join("\n")).not.toContain("Partial tree");
+			// A handful of rows is not a window with controls hiding in it.
+			backend.truncation = "element budget reached";
+			backend.rows = 3;
+			displays.length = 0;
+			await runInContext("win.observe({screenshot:false})", realm);
+			expect(displays.join("\n")).not.toContain("Partial tree");
+		} finally {
+			await runInContext("computer.close()", realm);
+		}
+	});
+
+	it("marks what it already rendered so the cell never serializes the same value again", async () => {
 		const { realm, displays, presented } = javascriptFixture();
 		try {
 			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
@@ -776,10 +843,14 @@ describe("computer preludes through the session", () => {
 			);
 			expect(displays.join("\n")).toContain("button [ref=e2]");
 			expect(presented.at(-1)).toBe(observed);
-			// An action renders no tree of its own, so its result is still the
-			// cell's to echo.
-			await runInContext("win.click(observed.elements[0].ref)", realm);
-			expect(presented.at(-1)).toBe(observed);
+			// An action says what it did in its own line — and in the cell's
+			// summary where the cell is composed — so the JSON behind it is
+			// already rendered too.
+			const clicked = await runInContext("win.click(observed.elements[0].ref)", realm);
+			expect(presented.at(-1)).toBe(clicked);
+			// A read this surface renders nothing for stays the cell's to print.
+			const found = await runInContext("win.find({})", realm);
+			expect(presented).not.toContain(found);
 		} finally {
 			await runInContext("computer.close()", realm);
 		}

@@ -896,6 +896,11 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 				pushUpdate();
 
 				const startTime = Date.now();
+				// A prelude that composes its reply once per cell (computer) sees
+				// every call this cell makes under the cell's own signal.
+				const preludes = getEnabledEvalPreludes(session.getEvalPreludes?.() ?? []);
+				const preludeCell = { signal: combinedSignal };
+				for (const prelude of preludes) prelude.beginCell?.(preludeCell);
 				let result: ExecutorBackendResult;
 				try {
 					result = await backend.execute(cell.code, {
@@ -934,6 +939,11 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 					activeLiveCell = undefined;
 				}
 				const durationMs = Date.now() - startTime;
+				const failed = result.cancelled === true || (result.exitCode !== undefined && result.exitCode !== 0);
+				const preludeReply = preludes
+					.map(prelude => prelude.settleCell?.(preludeCell, { failed }))
+					.filter(text => text !== undefined && text !== "")
+					.join("\n");
 
 				const cellStatusEvents: EvalStatusEvent[] = [];
 				const cellDisplayTexts: string[] = [];
@@ -997,10 +1007,9 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 				const displayText = cellDisplayTexts.join("\n\n");
 				const visibleDisplayText =
 					displayText && imageText ? `${displayText}\n\n${imageText}` : displayText || imageText;
-				const cellOutput =
-					stdoutTrimmed && visibleDisplayText
-						? `${stdoutTrimmed}\n\n${visibleDisplayText}`
-						: stdoutTrimmed || visibleDisplayText;
+				const cellOutput = [preludeReply, stdoutTrimmed, visibleDisplayText]
+					.filter(text => text !== undefined && text !== "")
+					.join("\n\n");
 				cellResult.output = cellOutput;
 				cellResult.exitCode = result.exitCode;
 				cellResult.durationMs = durationMs;

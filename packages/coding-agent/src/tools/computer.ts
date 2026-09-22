@@ -17,13 +17,16 @@ import {
 	isReadOnlyComputerCall,
 	renderComputerCall,
 } from "./computer/call";
+import { actionMark, CellReply, callLabel, chainWindow, isActionResult } from "./computer/cell-reply";
 import { type ComputerController, ComputerSupervisor, registerComputerController } from "./computer/supervisor";
 import { elideObservationTree } from "./computer/tree-elide";
 import type {
+	ComputerActionResult,
 	ComputerObservation,
 	ComputerScreenshot,
 	ComputerSessionSnapshot,
 	ComputerWindowAcquisition,
+	ComputerWindowIdentity,
 } from "./computer/types";
 import type { ToolSession } from "./index";
 import { renderCallChain, renderFunctionRun, summarizeCallChain } from "./run-code";
@@ -141,6 +144,19 @@ interface ComputerPreludeDetails {
 	capturePermission?: string;
 	inputPermission?: string;
 	axPermission?: string;
+	/**
+	 * The window this call displayed (acquisition, observe) or, for an action
+	 * chain, the window it addressed as the session last knew it. Absent when
+	 * the call addressed no single window.
+	 */
+	window?: { app: string; title: string; id: string; pid: number };
+	/**
+	 * What the call did that the user could see: an app brought to the front
+	 * that was not frontmost (`key_window.app_fronted`), or the real pointer
+	 * moved (global-input rungs and drags). Absent when no reply of this call
+	 * reported either — which is not a claim that nothing happened.
+	 */
+	userVisible?: Array<{ effect: "fronted"; app: string; pid: number } | { effect: "pointer" }>;
 }
 
 /** Creates the session-scoped controller used by the computer prelude. */
@@ -188,6 +204,8 @@ export function createComputerPrelude(
 			// child stays up for the next call. Turn settle releases it.
 			return await invokeComputer(session, parsed, context, lifetime);
 		},
+		beginCell: cell => lifetime.beginCell(cell.signal),
+		settleCell: (cell, outcome) => lifetime.settleCell(cell.signal, outcome.failed),
 		status: describeComputerCall,
 	};
 }
@@ -279,6 +297,8 @@ class ComputerLifetime {
 	readonly #taught = new Set<string>();
 	/** Capture files this session's runs wrote; closing the session removes these and nothing else. */
 	readonly #captures = new Set<string>();
+	/** The reply of each eval cell running now, by the signal its calls carry. */
+	readonly #cells = new WeakMap<AbortSignal, CellReply>();
 
 	constructor(session: ToolSession, createController: ComputerControllerFactory) {
 		this.#session = session;
@@ -309,6 +329,20 @@ class ComputerLifetime {
 				this.#captures.add(file);
 	}
 
+	beginCell(signal: AbortSignal): void {
+		this.#cells.set(signal, new CellReply());
+	}
+
+	/** The reply a call made under this signal belongs to; absent outside a composed cell. */
+	cell(signal: AbortSignal | undefined): CellReply | undefined {
+		return signal === undefined ? undefined : this.#cells.get(signal);
+	}
+
+	settleCell(signal: AbortSignal, failed: boolean): string | undefined {
+		const cell = this.#cells.get(signal);
+		this.#cells.delete(signal);
+		return cell?.compose(failed);
+	}
 	async controller(): Promise<ComputerController> {
 		if (this.#releasing) await this.#releasing;
 		if (this.#releaseFailure) throw this.#releaseFailure;
@@ -363,9 +397,45 @@ async function invokeComputer(
 
 	switch (params.action) {
 		case "run":
-		case "call":
+		case "call": {
 			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
-			return await runComputer(session, await lifetime.controller(), params, lifetime, context.signal);
+			const cell = lifetime.cell(context.cell?.signal);
+			const controller = await lifetime.controller();
+			if (cell === undefined) return await runComputer(session, controller, params, lifetime, context.signal);
+			// Inside a composed cell the text waits for the cell to settle;
+			// images still go out now.
+			const label = params.action === "call" ? callLabel(params.chain) : "run";
+			const action = params.action === "call" ? !isReadOnlyComputerCall(params.chain) : params.read_only !== true;
+			let result: AgentToolResult<ComputerPreludeDetails>;
+			try {
+				result = await runComputer(session, controller, params, lifetime, context.signal);
+			} catch (error) {
+				const failure = error instanceof ToolError ? error.context : undefined;
+				const code =
+					failure !== null && typeof failure === "object" && "code" in failure && typeof failure.code === "string"
+						? failure.code
+						: "failed";
+				cell.add({ label, action, mark: "✗", text: "", failure: code });
+				throw error;
+			}
+			const chain = params.action === "call" ? params.chain : [];
+			const last = chain.at(-1)?.method;
+			const observed =
+				last === "observe" || last === "acquireWindow" || last === "screenshot"
+					? (result.details?.window ?? chainWindow(chain))
+					: undefined;
+			const target = action ? chainWindow(chain) : undefined;
+			const value = result.details?.value;
+			cell.add({
+				label,
+				action,
+				mark: action && isActionResult(value) ? actionMark(value) : "✓",
+				text: result.content.flatMap(block => (block.type === "text" ? [block.text] : [])).join("\n"),
+				...(observed === undefined ? {} : { observed: { id: observed.id, pid: observed.pid } }),
+				...(target === undefined ? {} : { target }),
+			});
+			return { ...result, content: result.content.filter(block => block.type !== "text") };
+		}
 		case "capabilities": {
 			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
 			const capabilities = await (await lifetime.controller()).capabilities();
@@ -417,7 +487,7 @@ async function runComputer(
 	params: ComputerRunParams | ComputerCallParams,
 	lifetime: ComputerLifetime,
 	signal?: AbortSignal,
-): Promise<AgentToolResult<unknown>> {
+): Promise<AgentToolResult<ComputerPreludeDetails>> {
 	const code = resolveComputerRunCode(params);
 	// Direct inspection calls run read-only so the desktop guard backs the read approval tier.
 	const readOnly = params.action === "call" ? isReadOnlyComputerCall(params.chain) : (params.read_only ?? false);
@@ -464,12 +534,19 @@ async function runComputer(
 			? (run.returnValue as ComputerObservation)
 			: undefined);
 	const observedWindow = acquired ?? observation?.window;
+	const window = observedWindow ?? run.window;
+	if (window) details.window = { app: window.app, title: window.title, id: window.id, pid: window.pid };
+	const visible = userVisible(run.returnValue, window, params.action === "call" ? params.chain.at(-1)?.method : undefined);
+	if (visible.length) details.userVisible = visible;
 	if (observedWindow) {
+		const keys = keyRoute(observation?.backgroundInput);
 		text = [
-			`${observedWindow.app}: ${observedWindow.title || "Untitled window"} (window ${observedWindow.id}, PID ${observedWindow.pid})`,
+			`${observedWindow.app}: ${observedWindow.title || "Untitled window"} (window ${observedWindow.id}, PID ${observedWindow.pid})${
+				keys === undefined ? "" : ` · ${keys}`
+			}`,
 			observation?.tree,
-			observation && !observation.complete
-				? 'Partial accessibility tree; omitted controls remain unknown — narrow the next observe ({ maxDepth } or { query: "<text>" }) or read the screenshot before concluding a control is absent.'
+			observation?.truncation !== undefined && observation.elements.length >= TRIVIAL_TREE_ROWS
+				? `Partial tree (${observation.truncation}): omitted controls remain unknown.`
 				: undefined,
 			acquired?.inspectionError ? `Initial inspection unavailable: ${acquired.inspectionError}` : undefined,
 			(observation?.screenshotError ?? acquired?.screenshotError)
@@ -486,6 +563,14 @@ async function runComputer(
 		// The window header, tree and screenshot notes above are this value's
 		// rendering; the prelude suppresses the cell's own echo of it.
 		details.rendered = true;
+	} else if (
+		params.action === "call" &&
+		(!isReadOnlyComputerCall(params.chain) || params.chain.at(-1)?.method === "screenshot")
+	) {
+		// An action's value is said by its own line (and by the cell's summary
+		// where the cell is composed), a capture's by its pixels; the JSON echo
+		// only repeats them.
+		details.rendered = true;
 	}
 	if (params.action === "call" && params.chain.some(step => step.method === "ref") && lifetime.teach("element"))
 		text = text ? `${text}\n${elementSignatures()}` : elementSignatures();
@@ -499,6 +584,49 @@ async function runComputer(
 		if (image.type === "image") content.push({ ...image, detail: "original" });
 	}
 	return { content, details };
+}
+
+/** A tree under this many rows is not worth a "Partial" line whatever the walk says. */
+const TRIVIAL_TREE_ROWS = 20;
+
+/**
+ * The keyboard route an observation's `background_input` reports for the
+ * window's process, said only when background keys are refused — the case
+ * where a call has to carry `{ delivery: "foreground" }`. Informational: the
+ * caller chooses the route.
+ */
+function keyRoute(backgroundInput: unknown): string | undefined {
+	if (backgroundInput === null || typeof backgroundInput !== "object" || !("routes" in backgroundInput)) return undefined;
+	const routes = backgroundInput.routes;
+	if (!Array.isArray(routes)) return undefined;
+	for (const route of routes) {
+		if (route === null || typeof route !== "object" || !("route" in route) || route.route !== "pid_keyboard") continue;
+		if (!("status" in route) || route.status !== "refused") return undefined;
+		return `keys: foreground only${"reason" in route && typeof route.reason === "string" ? ` (${route.reason})` : ""}`;
+	}
+	return undefined;
+}
+
+/** What one call's reply says the user could see; see `ComputerPreludeDetails.userVisible`. */
+function userVisible(
+	value: unknown,
+	window: ComputerWindowIdentity | undefined,
+	method: string | undefined,
+): NonNullable<ComputerPreludeDetails["userVisible"]> {
+	if (!isActionResult(value)) return [];
+	const visible: NonNullable<ComputerPreludeDetails["userVisible"]> = [];
+	const data = value.data;
+	const keyWindow = data !== null && typeof data === "object" && "key_window" in data ? data.key_window : undefined;
+	if (
+		window !== undefined &&
+		keyWindow !== null &&
+		typeof keyWindow === "object" &&
+		"app_fronted" in keyWindow &&
+		keyWindow.app_fronted === true
+	)
+		visible.push({ effect: "fronted", app: window.app, pid: window.pid });
+	if (value.route === "global_input" || method === "drag") visible.push({ effect: "pointer" });
+	return visible;
 }
 
 function stringifyReturnValue(value: unknown): string {

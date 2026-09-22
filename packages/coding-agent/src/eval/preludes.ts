@@ -15,6 +15,12 @@ export interface EvalPreludeContext {
 	context?: AgentToolContext;
 	/** Progress receiver shared with the active eval call. */
 	onUpdate?: AgentToolUpdateCallback<unknown>;
+	/**
+	 * The eval cell this call runs in, keyed by the signal the eval tool
+	 * announced to `beginCell`; absent outside an eval cell. `signal` above is
+	 * the call's own and may be derived per call.
+	 */
+	cell?: EvalPreludeCell;
 }
 
 /**
@@ -48,6 +54,18 @@ export interface EvalPreludeDefinition {
 	 * worth showing. Failures are recorded by the bridge regardless.
 	 */
 	status?(parameters: unknown, result: AgentToolResult<unknown>): EvalPreludeStatus | undefined;
+	/**
+	 * A cell is about to run. Host calls this prelude receives with
+	 * `cell.signal` as their `EvalPreludeContext.signal` belong to it until
+	 * `settleCell`; a prelude may hold their text back and say it once there.
+	 */
+	beginCell?(cell: EvalPreludeCell): void;
+	/**
+	 * The cell has finished. What this prelude's calls in it compose,
+	 * printed ahead of the cell's own output; `failed` when the cell ended
+	 * in an error. Called once per `beginCell`.
+	 */
+	settleCell?(cell: EvalPreludeCell, outcome: { failed: boolean }): string | undefined;
 }
 
 /** What a settled host call shows the user, built from the call and its result details. */
@@ -66,6 +84,12 @@ export interface EvalPreludeStatus {
 	 * is not proof that none happened.
 	 */
 	notices?: string[];
+}
+
+/** One eval cell, as the prelude calls made inside it identify it. */
+export interface EvalPreludeCell {
+	/** The cell's own abort signal: the one its prelude calls carry. */
+	signal: AbortSignal;
 }
 
 /**

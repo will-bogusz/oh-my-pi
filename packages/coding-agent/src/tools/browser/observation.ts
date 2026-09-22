@@ -1,4 +1,5 @@
 import type { CDPSession } from "puppeteer-core";
+import type { TreeNode } from "../observed-tree";
 
 /**
  * Observation model shared by the tab worker: serializing Chrome's raw
@@ -297,18 +298,9 @@ const LAYOUT_ROLES: Record<string, true> = { Ignored: true, InlineTextBox: true,
 /** Structural roles that add nothing to the tree when unnamed: children are hoisted. */
 const TRANSPARENT_ROLES: Record<string, true> = { generic: true, none: true, presentation: true, GenericContainer: true };
 
-export interface ObservedNode {
-	depth: number;
-	role: string;
-	name: string;
-	value?: string | number;
-	description?: string;
-	keyshortcuts?: string;
-	url?: string;
+export interface ObservedNode extends TreeNode {
 	states: string[];
 	actionable: boolean;
-	/** Set on the boundary line of an embedded document: the iframe's host. */
-	iframe?: string;
 	/** The snapshot node behind an actionable line; absent on iframe boundaries. */
 	ax?: AxNode;
 }
@@ -473,53 +465,7 @@ export function matchRefs(
 	return refs.map(ref => ref ?? mint());
 }
 
-export interface TreeLine {
-	/** Diff identity: the ref for actionable nodes, else the ancestor path plus role/name/position. */
-	key: string;
-	depth: number;
-	text: string;
-	ref?: number;
-}
-
-/** One node as the model reads it: `e26 tab "Contributions" = "value" (description) [selected]`. */
-export function renderNode(node: ObservedNode, ref: number | undefined): string {
-	if (node.iframe !== undefined) return `[iframe ${node.iframe}]`;
-	const parts: string[] = [];
-	if (ref !== undefined) parts.push(`e${ref}`);
-	parts.push(node.role);
-	if (node.name) parts.push(JSON.stringify(node.name));
-	if (node.value !== undefined && node.value !== "") parts.push(`= ${JSON.stringify(String(node.value))}`);
-	if (node.url) parts.push(`-> ${node.url}`);
-	if (node.description && node.description !== node.name) parts.push(`(${node.description})`);
-	if (node.keyshortcuts) parts.push(`(key: ${node.keyshortcuts})`);
-	if (node.states.length) parts.push(`[${node.states.join(", ")}]`);
-	return parts.join(" ");
-}
-
-/** Render lines with diff keys; `refs[i]` is the ref of node i when it is actionable. */
-export function buildTreeLines(nodes: readonly ObservedNode[], refs: readonly (number | undefined)[]): TreeLine[] {
-	const lines: TreeLine[] = [];
-	const ancestors: string[] = [];
-	const siblings = new Map<string, number>();
-	nodes.forEach((node, index) => {
-		ancestors.length = node.depth;
-		const parent = ancestors[node.depth - 1] ?? "";
-		const ref = refs[index];
-		let key: string;
-		if (ref !== undefined) {
-			key = `e${ref}`;
-		} else {
-			const base = `${parent}/${node.iframe !== undefined ? `iframe:${node.iframe}` : `${node.role}:${node.name}`}`;
-			const position = siblings.get(base) ?? 0;
-			siblings.set(base, position + 1);
-			key = `${base}#${position}`;
-		}
-		ancestors[node.depth] = key;
-		lines.push({ key, depth: node.depth, text: renderNode(node, ref), ref });
-	});
-	return lines;
-}
-
+/** The header line of a browser observation: where the tab is, and what it is looking at. */
 export interface TreeHeader {
 	url: string;
 	title?: string;
@@ -533,80 +479,6 @@ export function renderHeader(header: TreeHeader): string {
 	parts.push(`scroll: ${header.scroll.y}/${header.scroll.scrollHeight}`);
 	if (header.focused) parts.push(`focused: ${header.focused}`);
 	return parts.join(" | ");
-}
-
-export function renderTree(header: TreeHeader, lines: readonly TreeLine[]): string {
-	const out = [renderHeader(header)];
-	for (const line of lines) out.push(`${"  ".repeat(line.depth)}${line.text}`);
-	return out.join("\n");
-}
-
-/** `e12, e40-e47` for a set of ref numbers. */
-export function formatRefRanges(refs: readonly number[]): string {
-	const sorted = [...refs].sort((a, b) => a - b);
-	const ranges: string[] = [];
-	for (let i = 0; i < sorted.length; ) {
-		let j = i;
-		while (j + 1 < sorted.length && sorted[j + 1] === sorted[j] + 1) j++;
-		ranges.push(j > i + 1 ? `e${sorted[i]}-e${sorted[j]}` : sorted.slice(i, j + 1).map(n => `e${n}`).join(", "));
-		i = j + 1;
-	}
-	return ranges.join(", ");
-}
-
-/**
- * Only what changed since the previous observation: added (`+`) and changed
- * (`~`) lines under their unchanged ancestors, then the removed refs and the
- * unchanged count. Text nodes have no ref, so a text change reads as one
- * added line and one more removed node.
- */
-export function renderTreeDiff(header: TreeHeader, previous: readonly TreeLine[], current: readonly TreeLine[]): string {
-	const before = new Map(previous.map(line => [line.key, line]));
-	const after = new Map(current.map(line => [line.key, line]));
-	const out = [renderHeader(header)];
-	const body: string[] = [];
-	const emitted = new Set<string>();
-	const ancestors: TreeLine[] = [];
-	let unchanged = 0;
-	for (const line of current) {
-		ancestors.length = line.depth;
-		ancestors[line.depth] = line;
-		const old = before.get(line.key);
-		const marker = old === undefined ? "+" : old.text !== line.text ? "~" : undefined;
-		if (marker === undefined) {
-			unchanged++;
-			continue;
-		}
-		for (let depth = 0; depth < line.depth; depth++) {
-			const ancestor = ancestors[depth];
-			if (!ancestor || emitted.has(ancestor.key)) continue;
-			emitted.add(ancestor.key);
-			body.push(`  ${"  ".repeat(ancestor.depth)}${ancestor.text}`);
-		}
-		emitted.add(line.key);
-		body.push(`${marker} ${"  ".repeat(line.depth)}${line.text}`);
-	}
-	const removedRefs: number[] = [];
-	let removedOther = 0;
-	for (const line of previous) {
-		if (after.has(line.key)) continue;
-		if (line.ref !== undefined) removedRefs.push(line.ref);
-		else removedOther++;
-	}
-	if (body.length === 0 && removedRefs.length === 0 && removedOther === 0) {
-		out.push(`no change since the previous observation (${unchanged} nodes)`);
-		return out.join("\n");
-	}
-	out.push("diff vs previous observation (+ added, ~ changed; observe({ diff: false }) for the full tree)");
-	out.push(...body);
-	if (removedRefs.length || removedOther) {
-		const parts: string[] = [];
-		if (removedRefs.length) parts.push(formatRefRanges(removedRefs));
-		if (removedOther) parts.push(`${removedOther} unreferenced node${removedOther === 1 ? "" : "s"}`);
-		out.push(`removed: ${parts.join(", ")}`);
-	}
-	out.push(`unchanged: ${unchanged} node${unchanged === 1 ? "" : "s"}`);
-	return out.join("\n");
 }
 
 /** Same document when only the fragment differs. */

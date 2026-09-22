@@ -7,6 +7,7 @@ import type { HTMLElement } from "@oh-my-pi/pi-utils/dom";
 import type { Browser, CDPSession, Dialog, HTTPResponse, Page, Target } from "puppeteer-core";
 import { JsRuntime, type RuntimeHooks } from "../../eval/js/shared/runtime";
 import { formatScreenshot, resizeImage } from "../../utils/image-resize";
+import { buildTreeLines, renderTree, renderTreeDiff, type TreeLine } from "../observed-tree";
 import { resolveToCwd } from "../path-utils";
 import {
 	bindRunFacade,
@@ -66,18 +67,15 @@ import { navigateMainFrame, waitForMainFrameReady, watchMainFrameNavigation } fr
 import {
 	type AxNode,
 	axNodeKey,
-	buildTreeLines,
 	flattenSnapshot,
 	hasBusyIndicator,
 	matchRefs,
 	type ObservedNode,
 	type RefRecord,
-	renderTree,
-	renderTreeDiff,
+	renderHeader,
 	roleNamePositions,
 	sameDocument,
 	type TreeHeader,
-	type TreeLine,
 } from "./observation";
 import { extractReadableFromHtml, type ReadableFormat } from "./readable";
 
@@ -1989,6 +1987,7 @@ export class WorkerCore {
 		const lines = buildTreeLines(
 			nodes,
 			nodes.map(node => refByNode.get(node)),
+			"e",
 		);
 
 		const viewport = { ...layout.viewport, deviceScaleFactor: page.viewport()?.deviceScaleFactor };
@@ -2015,7 +2014,12 @@ export class WorkerCore {
 			previous.filter.viewportOnly === viewportOnly
 				? previous
 				: undefined;
-		const tree = baseline ? renderTreeDiff(header, baseline.lines, lines) : renderTree(header, lines);
+		const tree = baseline
+			? renderTreeDiff(renderHeader(header), baseline.lines, lines, {
+					prefix: "e",
+					fullHint: "observe({ diff: false }) for the full tree",
+				})
+			: renderTree(renderHeader(header), lines);
 		// A diff is only readable against a tree the reader has seen. An
 		// observation taken with `display:false` was never printed, so it cannot
 		// become the baseline the next printed diff is measured from.

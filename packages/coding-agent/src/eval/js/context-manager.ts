@@ -793,6 +793,7 @@ async function handleToolCall(session: JsSession, msg: Extract<WorkerOutbound, {
 			signal: ctrl.signal,
 			identity: msg.identity,
 			shadowCell: pending.shadowCell,
+			cell: pending.runState.signal === undefined ? undefined : { signal: pending.runState.signal },
 			emitStatus: (event: JsStatusEvent) => {
 				trackDeferPhase(pending, event);
 				pending.runState.onDisplay?.({ type: "status", event });

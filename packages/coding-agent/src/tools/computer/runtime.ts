@@ -13,6 +13,7 @@ import {
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ComputerBackend } from "./backend";
+import { renderedRole } from "./render";
 import { openWindows } from "./roster";
 import { normalizeLaunchOptions, normalizeWindowSelector } from "./selectors";
 import type {
@@ -69,12 +70,21 @@ function matched(observed: string | undefined, wanted: string | undefined, exact
 	return exact === true ? observed === wanted : observed.toLowerCase().includes(wanted.toLowerCase());
 }
 
+/** A role field matches in the platform's spelling (`AXTextField`) or the one the tree prints (`textfield`). */
+function roleMatched(observed: string | undefined, wanted: string | undefined, exact: boolean | undefined): boolean {
+	return (
+		observed !== undefined && (matched(observed, wanted, exact) || matched(renderedRole(observed), wanted, exact))
+	);
+}
+
 interface ComputerRunContext {
 	signal: AbortSignal;
 	readOnly: boolean;
 	snapshot: ComputerSessionSnapshot;
 	output: RunOutput;
 	screenshots: ComputerScreenshot[];
+	/** The last window a window step of this run resolved. */
+	window?: ComputerWindowIdentity;
 }
 
 type RunContextAccessor = () => ComputerRunContext;
@@ -266,8 +276,9 @@ class Win {
 		const label = query.label ?? query.title;
 		const matches = observation.elements.filter(
 			element =>
-				(matched(element.role, query.role, query.exact) || matched(element.subrole, query.role, query.exact)) &&
-				matched(element.subrole, query.subrole, query.exact) &&
+				(query.role === undefined ||
+					[element.role, element.subrole].some(role => roleMatched(role, query.role, query.exact))) &&
+				(query.subrole === undefined || roleMatched(element.subrole, query.subrole, query.exact)) &&
 				matched(element.label, label, query.exact) &&
 				matched(element.value, query.value, query.exact),
 		);
@@ -453,12 +464,11 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 		displays: () => session.displays(operationContext(getContext)),
 		windows: (selector: unknown = {}) =>
 			session.windows(operationContext(getContext), normalizeWindowSelector(selector)),
-		window: async (selector: unknown, options: WindowResolveOptions = {}): Promise<Win> =>
-			new Win(
-				session,
-				getContext,
-				await resolveWindow(session, getContext, normalizeWindowSelector(selector, true), options),
-			),
+		window: async (selector: unknown, options: WindowResolveOptions = {}): Promise<Win> => {
+			const window = await resolveWindow(session, getContext, normalizeWindowSelector(selector, true), options);
+			getContext().window = window;
+			return new Win(session, getContext, window);
+		},
 		acquireWindow: async (selector: unknown, options: AcquireOptions = {}): Promise<ComputerWindowAcquisition> => {
 			const { launch, ambiguous, ...observeOptions } = options;
 			const target = normalizeWindowSelector(selector, true);
@@ -470,6 +480,7 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 				(launch === undefined && target.app !== undefined && target.id === undefined && target.pid === undefined)
 					? await launchAndAcquire(session, getContext, target, { ambiguous })
 					: await resolveWindow(session, getContext, target, { ambiguous });
+			getContext().window = window;
 			const context = operationContext(getContext);
 			try {
 				const initialObservation = await session.observe(context, window, { screenshot: true, ...observeOptions });
@@ -659,6 +670,7 @@ export class ComputerRuntime {
 			returnValue: cloneSafe(returnValue),
 			screenshots,
 			capabilities: session.capabilities,
+			...(runContext.window === undefined ? {} : { window: runContext.window }),
 		};
 	}
 
