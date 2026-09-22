@@ -1,10 +1,15 @@
 /**
  * What a driver reply is said to mean: the readers that take a reply off the
- * wire and the sentences composed from what they read. Nothing here touches
- * the driver or the session; `cua-session.ts` supplies the call and the
- * session facts and prints what comes back.
+ * wire and the few sentences composed from what they read. Nothing here
+ * touches the driver or the session; `cua-session.ts` supplies the call and
+ * the session facts and prints what comes back.
+ *
+ * Three renderers, each keyed on contract fields: `escalation` on the rung a
+ * dispatched action's reply names, `refusalNote` on a refusal's code, and
+ * `writeNote` on a write's commit verdict and effect. Each says one line or
+ * nothing; the driver's own sentence stays the reply's account of itself.
  */
-import type { ComputerActionResult, ComputerCommitVerdict, ComputerElementSnapshot, ComputerTarget } from "./types";
+import type { ComputerCommitVerdict, ComputerElementSnapshot, ComputerTarget } from "./types";
 
 export type Wire = Record<string, unknown>;
 function record(value: unknown): Wire | undefined {
@@ -23,28 +28,19 @@ export function specificRole(element: ComputerElementSnapshot): string {
 	return subrole === undefined || subrole.endsWith(element.role.slice(2)) ? element.role : subrole;
 }
 /**
- * Three rewrites of driver-authored text, all about a call the caller has to
- * be able to type. The driver advertises its own wire vocabulary in refusal
- * text and escalation advice (`delivery_mode: "foreground"`) where the prelude
- * takes `{ delivery: "foreground" }`. It names a screenshot as the only check
- * for an unverified pixel dispatch, which on this surface is the expensive
- * one — an AX read answers the same question and the model followed the
- * sentence literally, spending a capture where `observe({ query })` would have
- * done. And the keystroke paths name a screenshot for a field whose `AXValue`
- * they could not read at all: there a capture really is the only witness, so
- * that one keeps the screenshot and only gains the spelling of the call that
- * takes one. The last one deletes rather than restates: `bring_to_front` is
- * not a call this surface has, and the disabled-control refusal offered it as
- * half of a two-route sentence whose other half this file rewrites — so the
- * translation made exactly the followable half of untrue advice easier to
- * follow. What is true of that refusal is composed from its own state by
- * the refusal rows of the table. Structured details stay verbatim on the
- * error's context.
+ * Driver prose rewritten into a call the caller can type. Both pinned builds
+ * advertise their wire vocabulary in refusal text and escalation advice
+ * (`delivery_mode: "foreground"`) where the prelude takes
+ * `{ delivery: "foreground" }`. The macOS build also names a screenshot as
+ * the check for an unverified pixel dispatch, which on this surface is the
+ * expensive one — an AX read answers the same question — and names one for
+ * a keystroke field whose `AXValue` it could not read, where a capture really
+ * is the only witness and only the spelling of the call is added.
+ * Structured details stay verbatim on the error's context.
  */
 const DELIVERY_MODE_VOCABULARY = /delivery_mode\s*:\s*"(background|foreground)"/g;
 const SCREENSHOT_CHECK = /not driver-verified\s*[—-]\s*confirm via screenshot/g;
 const SCREENSHOT_WITNESS = /verify via screenshot/g;
-const BRING_TO_FRONT_ADVICE = /,?\s*(?:or|and)\s+call bring_to_front first/g;
 export function preludeVocabulary<T>(value: T): T {
 	if (typeof value === "string")
 		return value
@@ -53,8 +49,7 @@ export function preludeVocabulary<T>(value: T): T {
 				SCREENSHOT_CHECK,
 				"not driver-verified — confirm with observe({ query }) or, on a pixel surface, a screenshot",
 			)
-			.replace(SCREENSHOT_WITNESS, "confirm with observe({ screenshot: true })")
-			.replace(BRING_TO_FRONT_ADVICE, "") as T;
+			.replace(SCREENSHOT_WITNESS, "confirm with observe({ screenshot: true })") as T;
 	if (Array.isArray(value)) return value.map(entry => preludeVocabulary(entry)) as T;
 	if (value && typeof value === "object")
 		return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, preludeVocabulary(entry)])) as T;
@@ -62,7 +57,7 @@ export function preludeVocabulary<T>(value: T): T {
 }
 /** macOS rows whose `AXPress` needs the menu already open; see `menuBarRoute`. */
 export const MENU_BAR_ROLES: Record<string, true> = { AXMenuBar: true, AXMenuBarItem: true };
-/** Rows whose `AXEnabled` tracks the command's applicability; see the disabled refusal rows. */
+/** Rows whose `AXEnabled` tracks the command's applicability, not focus or delivery. */
 const MENU_ROLES: Record<string, true> = {
 	AXMenu: true,
 	AXMenuBar: true,
@@ -71,115 +66,10 @@ const MENU_ROLES: Record<string, true> = {
 };
 /** macOS reports a search field as this subrole on a plain `AXTextField`. */
 export const SEARCH_FIELD = "AXSearchField";
-/**
- * `invoke_menu` refuses with the failing segment's index and nothing else:
- * `path segment 1 was not found`. The titles it could not match are exactly
- * the ones an observation cannot show either — a closed menu reports its
- * items `AXEnabled=false`, so the driver withholds their element index and
- * `elements[]` carries only the few that are enabled while the menu is shut
- * (Contacts' File menu arrives as "Close All · Import… · Export", without the
- * "New Card" the caller was reaching for). Every row, display-only ones
- * included, is in `tree_markdown` of the same reply, so the menu bar is read
- * from there and the refusal names what the menus actually offer.
- */
+/** `invoke_menu` names the path segment it stopped resolving at in its message. */
 export const MENU_REFUSAL_SEGMENT = /path segment (\d+) (was not found|is ambiguous)/;
-const MENU_ROW = /^(\s*)- (?:\[\d+\] )?(AXMenuBarItem|AXMenuBar|AXMenuItem|AXMenu)(?: "((?:[^"\\]|\\.)*)")?(?: |$)/;
-/** Titles a refusal lists before it counts the rest. */
+/** Titles a listing names before it counts the rest. */
 const MENU_TITLE_LIMIT = 40;
-interface MenuNode {
-	title: string;
-	items: MenuNode[];
-}
-/**
- * The menu bar of one rendered driver tree. An untitled `AXMenu` container
- * between an item and its own items is transparent, exactly as the driver's
- * own path resolution treats it (`semantic_children`), so a node's `items`
- * are the titles a path segment can name under it.
- */
-function menuBarTree(markdown: string): MenuNode[] {
-	const roots: MenuNode[] = [];
-	let base: number | undefined;
-	const stack: { indent: number; node: MenuNode }[] = [];
-	for (const line of markdown.split("\n")) {
-		const row = MENU_ROW.exec(line);
-		const indent = row ? row[1]!.length : 0;
-		if (base === undefined) {
-			if (row?.[2] !== "AXMenuBar") continue;
-			base = indent;
-			stack.push({ indent, node: { title: "", items: roots } });
-			continue;
-		}
-		// The menu bar is one sibling of the window's own subtree; the first row
-		// at or above its indent ends it, matched or not.
-		if (!row || indent <= base) break;
-		while (stack.length > 1 && stack[stack.length - 1]!.indent >= indent) stack.pop();
-		const parent = stack[stack.length - 1]!.node;
-		if (row[2] === "AXMenu" || row[2] === "AXMenuBar") {
-			stack.push({ indent, node: parent });
-			continue;
-		}
-		const node: MenuNode = { title: (row[3] ?? "").trim(), items: [] };
-		parent.items.push(node);
-		stack.push({ indent, node });
-	}
-	return roots;
-}
-/** The items under one exactly-resolved path, or undefined when it does not resolve. */
-function menuItemsAt(roots: readonly MenuNode[], path: readonly string[]): readonly MenuNode[] | undefined {
-	let items: readonly MenuNode[] = roots;
-	for (const segment of path) {
-		const matches = items.filter(node => node.title === segment.trim());
-		if (matches.length !== 1) return undefined;
-		items = matches[0]!.items;
-	}
-	return items;
-}
-function menuTitles(items: readonly MenuNode[]): string {
-	const listed = items.slice(0, MENU_TITLE_LIMIT).map(node => node.title || "(untitled)");
-	return `${listed.join(" · ")}${items.length > listed.length ? ` · (+${items.length - listed.length} more)` : ""}`;
-}
-/**
- * The deepest level of the refused path the rendered tree actually carries,
- * and its items. The menu bar is the last sibling the walker reaches, so a
- * deeper walk does not buy submenu items — it spends the budget inside the
- * window and loses the bar entirely (Contacts: `max_depth: 3` renders the
- * whole bar in ~0.4 s, `max_depth: 5` gives up after 10 s without ever
- * reaching it). One level of items is what a refusal can reliably name.
- */
-export const MENU_WALK_DEPTH = 3;
-function menuListing(
-	roots: readonly MenuNode[],
-	prefix: readonly string[],
-): { trail: readonly string[]; items: readonly MenuNode[] } {
-	for (let depth = prefix.length; depth > 0; depth--) {
-		const items = menuItemsAt(roots, prefix.slice(0, depth));
-		if (items?.length) return { trail: prefix.slice(0, depth), items };
-	}
-	return { trail: [], items: [] };
-}
-/**
- * What the menu bar offers where the path stopped resolving: the top-level
- * titles, plus the items of the deepest prefix the tree carries. Segments are
- * matched exactly, so the listing is the whole answer — ellipsis characters,
- * capitals and all.
- */
-export function menuRefusalNames(
-	markdown: string,
-	path: readonly string[],
-	failed: number,
-	ambiguous: boolean,
-): string {
-	const roots = menuBarTree(markdown);
-	if (!roots.length) return "";
-	const segment = path[failed] ?? "";
-	const listing = menuListing(roots, path.slice(0, failed));
-	const trail = listing.trail.join(" › ");
-	return `Menu path ${JSON.stringify(path)} ${
-		ambiguous ? `matches more than one ${JSON.stringify(segment)}` : `has no ${JSON.stringify(segment)}`
-	}${failed ? ` under ${path.slice(0, failed).join(" › ")}` : " in the menu bar"}. Menus: ${menuTitles(roots)}.${
-		listing.items.length ? ` ${trail}: ${menuTitles(listing.items)}.` : ""
-	} Segment titles are matched exactly.`;
-}
 interface MenuItem {
 	title: string;
 	enabled?: boolean;
@@ -217,6 +107,11 @@ export function menuSubmenuListing(path: readonly string[], items: readonly Menu
 	const leaf = items.find(item => !item.submenu) ?? items[0]!;
 	return `${path.join(" › ")} is a submenu; nothing was invoked. Its items: ${menuItemTitles(items)}. Invoke one with win.menu(${JSON.stringify([...path, leaf.title])}, { delivery: "foreground" }); a name marked › lists its own items the same way.`;
 }
+/**
+ * `invoke_menu` refuses a path it cannot resolve with the items of the level
+ * it stopped at, which is exactly what an observation cannot show: a closed
+ * menu reports its items `AXEnabled=false`, so they never reach the tree.
+ */
 export function menuRefusalItems(
 	path: readonly string[],
 	failed: number,
@@ -233,34 +128,24 @@ export function menuRefusalItems(
 	}: ${menuItemTitles(items)}. Segment titles are matched exactly.`;
 }
 /**
- * The escalation a reply names. `target` is the contract's field; `recommended`
- * is what the untyped replies still write, in the driver's older spellings
- * (`get_window_state`, `px`), and both name the same rung. `reason` is a
- * contract token (`delivery_failed`, `effect_unconfirmed`) on a typed reply and
- * the fork's own prose on an untyped one; it is rendered in front of the route
- * and it decides one of them.
+ * The escalation a reply names. `target` is the rung the driver would take
+ * instead — typed replies spell it `target`, and the refusal payloads of both
+ * pinned builds still spell it `recommended`; `reason` is a contract token
+ * (`delivery_failed`, `effect_unconfirmed`) on a typed reply and the driver's
+ * own prose otherwise.
  */
 export interface Escalation {
 	readonly target: string;
 	readonly reason: string | undefined;
 }
-const ESCALATION_TARGET_ALIASES: Readonly<Record<string, string>> = { get_window_state: "snapshot", px: "pixel" };
 function readEscalation(data: Wire): Escalation | undefined {
 	const row = record(data.escalation);
 	if (row === undefined) return undefined;
 	const target = typeof row.target === "string" ? row.target : row.recommended;
 	if (typeof target !== "string") return undefined;
-	return {
-		target: ESCALATION_TARGET_ALIASES[target] ?? target,
-		reason: typeof row.reason === "string" ? row.reason : undefined,
-	};
+	return { target, reason: typeof row.reason === "string" ? row.reason : undefined };
 }
-/**
- * The app's own window drawn in front of the one a call addressed. Before
- * 0.9.0 `bring_to_front` reported it in `observed.process_frontmost_ordinary_
- * window_id` alone; `obscured_by` is contract vocabulary rather than a
- * generated type, so every field is read defensively.
- */
+/** The app's own window drawn in front of the one a call addressed (`obscured_by`). */
 export interface Panel {
 	readonly id: string;
 	/** It publishes no accessibility window of its own. */
@@ -289,44 +174,15 @@ function readPanel(data: Wire): Panel | undefined {
 }
 /**
  * `set_value` and `type_text` write a value and then judge whether the app's
- * own editing pipeline kept it, reporting that judgement in `committed`. Only
- * that verdict separates a written field from a lost one: a value the pipeline
- * never accepted still reads back correctly through the AX tree, and a
- * Save-panel filename written that way was discarded. The contract publishes
- * it as one of three words; the stock 0.28.0 binary published a boolean, whose
- * two states are the two decided verdicts. A driver that judges none reports
- * nothing.
+ * own editing pipeline kept it. Only that verdict separates a written field
+ * from a lost one: a value the pipeline never accepted still reads back
+ * correctly through the AX tree. A driver that judges none reports nothing.
  */
 const COMMIT_VERDICTS: Readonly<Record<string, ComputerCommitVerdict>> = {
 	committed: "committed",
 	not_committed: "not_committed",
 	unproven: "unproven",
 };
-function commitVerdict(value: unknown): ComputerCommitVerdict | undefined {
-	if (typeof value === "string") return COMMIT_VERDICTS[value];
-	if (typeof value === "boolean") return value ? "committed" : "not_committed";
-	return undefined;
-}
-/** The rung a reply names, in either shape the drivers report it: a bare string or `{ mode }`. */
-function evidenceDelivery(value: unknown): string | undefined {
-	if (typeof value === "string") return value;
-	const mode = record(value)?.mode;
-	return typeof mode === "string" ? mode : undefined;
-}
-/**
- * The `key_window` fact a route that had to make a window key publishes:
- * whether the application itself was brought to the front, as opposed to the
- * window being made key inside the app that was already frontmost. Field-wise
- * because `key_window` is also the name a disabled-element refusal gives its
- * own, differently shaped, report; a reply that carries no boolean here is
- * one that says nothing about fronting.
- */
-function keyWindowFronted(value: unknown): boolean | undefined {
-	const fronted = record(value)?.app_fronted;
-	return typeof fronted === "boolean" ? fronted : undefined;
-}
-const strings = (value: unknown): readonly string[] | undefined =>
-	Array.isArray(value) ? value.filter((segment): segment is string => typeof segment === "string") : undefined;
 /**
  * One action reply as the contract types it, read off the wire once. A
  * refusal nests its own row under `refusal`; it is folded over the envelope,
@@ -353,19 +209,11 @@ export interface ActionReply {
 	 * change route, not slice the payload.
 	 */
 	readonly retryable: boolean | undefined;
-	/** The menu titles a `menu_command` reply dispatched, top level first. */
-	readonly menuPath: readonly string[] | undefined;
-	/**
-	 * Whether the app was fronted for a dispatch that needed a key window.
-	 * `delivery.mode` is `foreground` either way, so this is the only thing
-	 * separating "another app was fronted and then restored" from "the app was
-	 * already frontmost and only its window was made key".
-	 */
-	readonly appFronted: boolean | undefined;
 	/** A background refusal's own route, where it names one. */
 	readonly advice: string | undefined;
 	readonly panel: Panel | undefined;
 	readonly focusedWindowId: string | undefined;
+	/** The foreground rung was already in force for the refused dispatch. */
 	readonly frontInProcess: boolean;
 	/** The addressed row's role, where the refusal names it. */
 	readonly role: string | undefined;
@@ -379,24 +227,26 @@ function valueReadBack(evidence: unknown): boolean {
 	const rows = Array.isArray(evidence) ? (evidence as unknown[]) : [evidence];
 	return rows.some(row => record(row)?.kind === "value_readback");
 }
+const strings = (value: unknown): readonly string[] | undefined =>
+	Array.isArray(value) ? value.filter((segment): segment is string => typeof segment === "string") : undefined;
 export function readReply(details: unknown): ActionReply {
 	const envelope = record(details) ?? {};
 	const nested = record(envelope.refusal);
 	const data = nested === undefined ? envelope : { ...envelope, ...nested };
-	const menuPath = data.route === "menu_command" ? strings(data.menu_path) : undefined;
+	// Both pinned builds send the rung as `{ mode }` and the verdict as one of
+	// three words.
+	const mode = record(data.delivery)?.mode;
 	return {
 		data,
 		code: typeof data.code === "string" ? data.code : undefined,
 		effect: typeof data.effect === "string" ? data.effect : undefined,
 		route: typeof data.route === "string" ? data.route : undefined,
-		delivery: evidenceDelivery(data.delivery),
-		committed: commitVerdict(data.committed),
+		delivery: typeof mode === "string" ? mode : undefined,
+		committed: typeof data.committed === "string" ? COMMIT_VERDICTS[data.committed] : undefined,
 		escalation: readEscalation(data),
 		evidence: data.evidence,
 		readBack: valueReadBack(data.evidence),
 		retryable: typeof data.retryable === "boolean" ? data.retryable : undefined,
-		menuPath: menuPath?.length ? menuPath : undefined,
-		appFronted: keyWindowFronted(data.key_window),
 		advice: typeof data.advice === "string" ? data.advice : undefined,
 		panel: readPanel(data),
 		focusedWindowId: typeof data.focused_window_id === "number" ? String(data.focused_window_id) : undefined,
@@ -407,8 +257,27 @@ export function readReply(details: unknown): ActionReply {
 		resolvedPath: strings(data.resolved_path),
 	};
 }
-/** The tools that deliver keystrokes: one delivery route per window, not per call. */
-export const KEYBOARD_TOOLS: Record<string, true> = { hotkey: true, press_key: true, type_text: true };
+/** The tools that deliver keystrokes. */
+const KEYBOARD_TOOLS: Record<string, true> = { hotkey: true, press_key: true, type_text: true };
+/**
+ * Effects that mean the driver dispatched without proving the target
+ * reacted: the element never advertised the action, or only part of the
+ * payload went out.
+ */
+const UNDELIVERED_EFFECTS: Record<string, true> = { partial: true, suspected_noop: true };
+/**
+ * Whether a reply leaves its own delivery unproven: an undelivered effect,
+ * an app action whose outcome the driver cannot read, or a written value the
+ * app is not known to have kept. Such a reply's text has to reach the cell
+ * even where the cell drops the returned value.
+ */
+export function unproven(reply: ActionReply): boolean {
+	return (
+		(reply.effect !== undefined && (UNDELIVERED_EFFECTS[reply.effect] === true || reply.effect === "unverifiable")) ||
+		(reply.committed !== undefined && reply.committed !== "committed") ||
+		reply.escalation !== undefined
+	);
+}
 /**
  * What the session knows that a sentence needs: the call it made and what it
  * holds for the window the call addressed. Nothing here is read off the reply.
@@ -416,7 +285,7 @@ export const KEYBOARD_TOOLS: Record<string, true> = { hotkey: true, press_key: t
 export interface Facts {
 	/** The driver tool the call went to. */
 	readonly tool: string;
-	/** The driver's own sentence in prelude vocabulary; for a refusal, the message thrown. */
+	/** The driver's own sentence; for a refusal, the message thrown. */
 	readonly text: string;
 	/** The call asked for the foreground rung. */
 	readonly foreground: boolean;
@@ -434,12 +303,10 @@ export interface Facts {
 	/** Attached sheets by window id, each against the window that reported it. */
 	readonly sheets: ReadonlyMap<string, { readonly parent: string }>;
 }
-/** A write's facts: the operation, what it addressed, and whether its reply rendered an escalation. */
+/** A write's facts: the operation and what it addressed. */
 export interface WriteFacts extends Facts {
 	readonly operation: "setValue" | "type";
 	readonly target: ComputerTarget | undefined;
-	/** The driver doubts this rung landed and names another. */
-	readonly escalated: boolean;
 }
 /**
  * The escalation targets this surface renders a call for. A target with no
@@ -447,16 +314,6 @@ export interface WriteFacts extends Facts {
  * none.
  */
 const RENDERED_TARGETS: Record<string, true> = { element: true, foreground: true, pixel: true, snapshot: true };
-/** Effects a driver reports when it dispatched and doubts the target reacted. */
-const UNDELIVERED_EFFECTS: Record<string, true> = { no_observed_change: true, suspected_noop: true };
-/**
- * The driver dispatched and its own probe saw nothing move. A reply that
- * names a window the app gained in the same breath has observed a change,
- * whatever the probe watched, so the session reads this to decide which of
- * the two signals it prints.
- */
-export const unobservedChange = (effect: string | undefined): boolean =>
-	effect !== undefined && UNDELIVERED_EFFECTS[effect] === true;
 /** Refusals whose keyboard focus is held by another window of the same app. */
 const FOCUS_HOLDING_REFUSALS: Record<string, true> = {
 	delivery_failed: true,
@@ -474,149 +331,9 @@ const TEXT_INPUT_ROLES: Record<string, true> = {
 	text: true,
 };
 /**
- * The columns a reply is keyed on: the contract's own values first (refusal
- * code, escalation target and reason, route, verdict, effect), then what the
- * call was and what the reply says of it. A row of the table names the values
- * it answers; the first row whose every named column matches says its piece.
- */
-interface Case {
-	readonly target: string | undefined;
-	readonly reason: string | undefined;
-	readonly verdict: ComputerCommitVerdict | undefined;
-	readonly effect: string | undefined;
-	/** The reply names a rung, and one this surface renders a call for (or none). */
-	readonly escalates: boolean;
-	readonly rendered: boolean;
-	/** The call. */
-	readonly keyboard: boolean;
-	readonly foreground: boolean;
-	readonly windowed: boolean;
-	/** What the reply says of it. */
-	readonly noop: boolean;
-	readonly unproven: boolean;
-	/** The reply carries a write verdict, which the write path answers. */
-	readonly judged: boolean;
-	/** Keystrokes the driver dispatched as the app's own menu command. */
-	readonly menuCommand: boolean;
-	/** The driver's own sentence already spells the foreground rung. */
-	readonly spelled: boolean;
-	/** `element_disabled`, typed or in the pre-0.9.0 prose. */
-	readonly disabled: boolean;
-	readonly typed: boolean;
-	/** The disabled row is a menu row, whose `AXEnabled` tracks the command's applicability. */
-	readonly menuRow: boolean;
-	/** The foreground rung was already in force. */
-	readonly fronted: boolean;
-	/** An app window of its own is drawn in front of the addressed one. */
-	readonly panel: boolean;
-	/** The reply says another window of the app holds keyboard focus. */
-	readonly focusHeld: boolean;
-	/** The refusal is about a row the platform can no longer reach. */
-	readonly dead: boolean;
-	/** Writes. */
-	readonly readBack: boolean;
-	readonly query: boolean;
-	readonly operation: "setValue" | "type" | undefined;
-	readonly escalated: boolean;
-}
-function caseOf(reply: ActionReply, facts: Facts | WriteFacts): Case {
-	const target = reply.escalation?.target;
-	const keyboard = KEYBOARD_TOOLS[facts.tool] === true;
-	const disabled = reply.code === "element_disabled" || facts.text.includes("AXEnabled=false");
-	const role = facts.element?.role ?? reply.role;
-	const writing = "operation" in facts;
-	return {
-		target,
-		reason: reply.escalation?.reason,
-		verdict: reply.committed,
-		effect: reply.effect,
-		escalates: target !== undefined,
-		rendered: target === undefined || RENDERED_TARGETS[target] === true,
-		keyboard,
-		foreground: facts.foreground,
-		windowed: facts.windowId !== undefined,
-		noop: unobservedChange(reply.effect),
-		unproven: reply.effect !== "confirmed",
-		judged: reply.committed !== undefined,
-		menuCommand: keyboard && reply.menuPath !== undefined,
-		spelled: facts.text.includes('delivery: "foreground"'),
-		disabled,
-		typed: reply.code === "element_disabled",
-		menuRow: disabled && role !== undefined && MENU_ROLES[role] === true,
-		fronted: facts.foreground || reply.frontInProcess,
-		panel: facts.windowId !== undefined && reply.panel !== undefined && reply.panel.id !== facts.windowId,
-		focusHeld:
-			(reply.code !== undefined && FOCUS_HOLDING_REFUSALS[reply.code] === true) ||
-			reply.focusedWindowId !== undefined,
-		dead: deadElement(reply),
-		readBack: reply.readBack,
-		query: facts.element?.role === SEARCH_FIELD || facts.element?.subrole === SEARCH_FIELD,
-		operation: writing ? facts.operation : undefined,
-		escalated: writing && facts.escalated,
-	};
-}
-/** The sentences a reply gets, by what it is for: the rung it escalates to, the note a refusal needs, what a write is now known to be. */
-type Slot = "escalation" | "refusal" | "write";
-interface Row {
-	readonly slot: Slot;
-	readonly when: Partial<Case>;
-	readonly say: (reply: ActionReply, facts: Facts) => string | undefined;
-}
-const FOREGROUND_ROUTE = 'the route it names is { delivery: "foreground" } — re-run the action that way';
-const OBSERVE_ROUTE = "observe the window again (win.observe()) and address the row that walk mints for this control";
-const KEYBOARD_READ_ROUTE =
-	'observe the window (win.observe()) to read what the keystrokes did — a read changes nothing — or observe({ menubar: true }) and drive the command with win.menu([...], { delivery: "foreground" })';
-/**
- * What to say instead once the session has taken the rung over: naming
- * `{ delivery: "foreground" }` told the caller to qualify the re-run, and an
- * explicit rung wins over the remembered one by design, so the advice asked
- * for the one call shape that cannot consume what was just recorded. This
- * line survives a reply that already spells the rung, where a restatement
- * would be dropped: the driver's own sentence instructs exactly the bypass,
- * so the correction is the point rather than noise.
- *
- * Which of the two depends on what the escalation doubts, because the
- * caller's own rule is that a mutation which may have landed is never
- * re-fired. `delivery_failed` says the post never went out, so re-running it
- * is the whole advice. Contract 0.9.0 defaults an unprobed post to
- * `effect_unconfirmed` instead, which says nothing about delivery — measured
- * against the bare re-run, the model read the pair as a contradiction and
- * refused the retry ("the active computer-use constraint prohibits following
- * unverified delivery with foreground input"), so that reason gets the read
- * first, which changes nothing, and the re-run only if the window shows the
- * keystrokes never arrived.
- */
-const ROUTE_ALREADY_TAKEN = "re-run it as-is; this window's keystrokes now take the foreground route";
-const ROUTE_ALREADY_TAKEN_UNPROVEN =
-	"the keystrokes may have landed: observe the window first (win.observe()) and only if it shows nothing re-run the action — this window's keystrokes now take the foreground route";
-/**
- * The driver watches a dispatched action for a fixed window and calls a
- * target that did not move in time a suspected no-op. On Contacts that window
- * expired before the app opened the menu the press had already asked for, and
- * the coordinate rung the escalation names is the one that app swallows — the
- * run that recovered simply observed again. So the advice leads with the
- * cheap route that worked and keeps pixels as the fallback, and it quotes the
- * window the driver actually watched, since that is the whole basis of the
- * doubt. Both spellings appear in the wild: the released driver says "no
- * change observed within N ms", ours says how long it watched.
- */
-const NO_CHANGE_WINDOW = /watched for (\d+) ms after the dispatch|no change observed within (\d+) ms/;
-function pixelRoute(facts: Facts): string {
-	const window = NO_CHANGE_WINDOW.exec(facts.text);
-	const ms = window?.[1] ?? window?.[2];
-	const doubt = ms ? `the driver saw no change within ${ms} ms` : "the driver could not confirm this landed";
-	return `${doubt} — observe() once; if the tree is unchanged, ${
-		facts.captured
-			? "click the control's own centre in the capture this window already has"
-			: "capture the window (observe({ screenshot: true })) and click the control's own centre"
-	}`;
-}
-/**
  * The text rows this window's current observation holds that a write can
- * land on. A row the app publishes `AXEnabled=false` refuses the write —
- * T11 was sent at `AXTextField "" subrole=AXSearchField enabled=false`
- * and answered `type_text_incomplete: delivered 0 of 22` — so a disabled
- * row is no candidate, whatever its role.
+ * land on. A row the app publishes `AXEnabled=false` refuses the write, so a
+ * disabled row is no candidate, whatever its role.
  */
 function textRefs(facts: Facts): string[] {
 	const refs: string[] = [];
@@ -633,10 +350,9 @@ function textRefs(facts: Facts): string[] {
 /**
  * Where the text of this call can be written instead of posted at a
  * window: the addressed row when the call carried one, else the text rows
- * this window's own observation holds. A window-scoped keystroke that
- * cannot be read back is the case the driver has no answer for — its
- * `element` target means exactly "address the field", which only this side
- * can spell, because only this side minted the ref.
+ * this window's own observation holds. The driver's `element` target means
+ * exactly "address the field", which only this side can spell, because only
+ * this side minted the ref.
  */
 function fieldRoute(facts: Facts): string | undefined {
 	if (facts.addressed !== undefined)
@@ -651,41 +367,57 @@ function fieldRoute(facts: Facts): string | undefined {
 		.slice(0, 4)
 		.join(", ")}): win.ref("<ref>").type("<text>") or win.ref("<ref>").setValue("<value>")`;
 }
-/** The menu route, named only when this window's own observation carries its menu bar. */
-function menuRoute(facts: Facts): string | undefined {
-	const titles: string[] = [];
-	for (const [, element] of facts.rows)
-		if (element.role === "AXMenuBarItem" && element.label && !titles.includes(element.label))
-			titles.push(element.label);
-	if (!titles.length) return undefined;
-	return `drive the command from the menu this window's observation carries (${titles
-		.slice(0, 8)
-		.join(" · ")}): win.menu(["<menu>", "<item>"], { delivery: "foreground" })`;
-}
-/** The read that changes nothing: a keystroke's is spelled with the menu bar beside it. */
-const readRoute = (facts: Facts): string => (KEYBOARD_TOOLS[facts.tool] === true ? KEYBOARD_READ_ROUTE : OBSERVE_ROUTE);
 /**
- * The foreground rung already carried these keystrokes and the driver still
- * could not verify them: re-sending them lands nothing new, so the route is
- * the field, the menu or a read. Typing names the field first, a chord the
- * menu.
+ * The call a named rung is taken with. `snapshot` has none: a read is the
+ * whole of that advice, and the read comes first on every rung anyway.
  */
-const carried = (_reply: ActionReply, facts: Facts): string =>
-	`the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — ${
-		(facts.tool === "type_text"
-			? (fieldRoute(facts) ?? menuRoute(facts))
-			: (menuRoute(facts) ?? fieldRoute(facts))) ?? readRoute(facts)
-	}`;
-const BACKGROUND_RUNG =
-	'these keystrokes went out in the background, which leaves this window not the app\'s key window — re-run with { delivery: "foreground" }, which makes it key first';
+function escalationRoute(target: string, facts: Facts): string | undefined {
+	switch (target) {
+		case "element":
+			return (
+				fieldRoute(facts) ??
+				`address the field itself — observe window ${facts.windowId ?? "(unknown)"} and write the row it mints`
+			);
+		case "pixel":
+			return `click the control's own centre in ${
+				facts.captured ? "the capture this window already has" : "a fresh capture (observe({ screenshot: true }))"
+			}`;
+		case "foreground":
+			return facts.foreground ? undefined : 're-run it with { delivery: "foreground" }';
+		default:
+			return undefined;
+	}
+}
+/**
+ * The route a dispatched action's reply names, as the call that takes it —
+ * keyed on the escalation's `target`. `delivery_failed` says the post never
+ * went out, so the named rung is the whole advice. Any other doubt is about a
+ * dispatch that may have landed: the read comes first, and the named rung
+ * only if the window shows nothing happened, because re-sending an action
+ * that landed does it twice. Background keystrokes the driver saw move
+ * nothing name no rung of their own; they reach only the app's key window,
+ * which is what the foreground rung makes this one. A write's element
+ * escalation is answered by its verdict (`writeNote`).
+ */
+export function escalation(reply: ActionReply, facts: Facts): string | undefined {
+	const target = reply.escalation?.target;
+	if (target === "element" && reply.committed !== undefined) return undefined;
+	const keyboard = KEYBOARD_TOOLS[facts.tool] === true;
+	const route =
+		target !== undefined
+			? escalationRoute(target, facts)
+			: keyboard && !facts.foreground && reply.effect !== undefined && UNDELIVERED_EFFECTS[reply.effect] === true
+				? 're-run them with { delivery: "foreground" }, which makes this window key first — background keystrokes reach only the app\'s key window'
+				: undefined;
+	if (route === undefined) return undefined;
+	if (reply.escalation?.reason === "delivery_failed") return `Not delivered: ${route}.`;
+	return `Delivery unproven: observe first — it may have landed; only if the window shows no change, ${route}.`;
+}
 /**
  * The app's own window drawn in front of the one this call addressed, as
- * the calls that reach it. A reply that names that window in its own prose
- * gets only the calls added; one that does not gets the identity too. The
- * acquisition is named only for a window this session's roster holds: T11
- * was told to acquire window 19083, the capture lease's own indicator, which
- * the roster hides and `computer.window` answers with `Missing computer
- * window`.
+ * the calls that reach it. The acquisition is named only for a window this
+ * session's roster holds: the capture lease's own indicator is hidden from
+ * the roster, and `computer.window` answers it with `Missing computer window`.
  */
 function obscuringPanel(reply: ActionReply, facts: Facts): string {
 	const panel = reply.panel!;
@@ -724,6 +456,33 @@ function focusHolder(reply: ActionReply, facts: Facts): string | undefined {
 	} holds keyboard focus, not window ${target}; drive it with computer.window(${JSON.stringify(sheet)}) and press its own buttons.`;
 }
 /**
+ * A disabled control, keyed on what refused: the key-window precondition,
+ * which the foreground rung satisfies, or the app's own state, which no rung
+ * changes — a menu row's `AXEnabled` tracks the command's applicability.
+ */
+function disabledNote(reply: ActionReply, facts: Facts): string | undefined {
+	if (reply.escalation?.target === "foreground" && !facts.foreground)
+		return 'retry with { delivery: "foreground" } — the window is not the app\'s key window and a foreground dispatch makes it key first.';
+	const role = facts.element?.role ?? reply.role;
+	if (role !== undefined && MENU_ROLES[role] === true)
+		return `That ${role} is disabled by the app's own current state: a menu row's AXEnabled tracks the command's applicability, not focus or delivery. Satisfy the command's precondition (a selection, a document, a mode) or pick another item.`;
+	return undefined;
+}
+/**
+ * The note a refusal needs beside the driver's own sentence, keyed on its
+ * code: the app window drawn in front, the disabled control, or the window
+ * holding keyboard focus. Nothing was dispatched, so each names the route
+ * that can land.
+ */
+export function refusalNote(reply: ActionReply, facts: Facts): string | undefined {
+	if (facts.windowId !== undefined && reply.panel !== undefined && reply.panel.id !== facts.windowId)
+		return obscuringPanel(reply, facts);
+	if (reply.code === "element_disabled") return disabledNote(reply, facts);
+	if (facts.windowId !== undefined && reply.code !== undefined && FOCUS_HOLDING_REFUSALS[reply.code] === true)
+		return focusHolder(reply, facts);
+	return undefined;
+}
+/**
  * The element a write addressed, by the role and name the observation
  * printed for it. Never its value: a contact card's phone row carries the
  * number it holds as its own `AXLabel`, so labelling the field with it made
@@ -744,293 +503,41 @@ export function writeField(facts: WriteFacts): string {
 	return `${facts.operation} on ${where}`;
 }
 /**
- * Where a value this field cannot publish can still be read. The driver
- * names the kind of surface it would escalate to; which route this session
- * can offer for it is the session's own fact, so a target it has no route
- * for names no route at all rather than a tool the caller cannot reach.
+ * What a write is now known to be, keyed on the driver's commit verdict and
+ * effect — one line, or nothing for a write the driver read back committed.
+ * A control showing the written text proves the text is in the control,
+ * never that the app took it, so no line here calls a write landed; and
+ * every line ends at a read, because rewriting a value to find out whether
+ * it stuck is the one probe that can double it.
  */
-function writeWitness(reply: ActionReply, facts: Facts): string {
-	const target = reply.escalation?.target;
-	if (target === "snapshot")
-		return "observe() the window and read the control the app updates instead; this field will publish nothing either way";
-	if (target === "pixel" || target === "page" || facts.captured)
-		return "capture the window and read the value off its own pixels";
-	return "the app's own output is the only witness";
-}
-const NOT_COMMITTED_REASON = /not committed:\s*([^.]+)/i;
-/** The driver had no commit gesture to watch (multi-line areas), as opposed to a read-back that disagreed. */
-const NO_END_OF_EDIT = /no end-of-edit|may never register/i;
-const field = (facts: Facts): string => writeField(facts as WriteFacts);
-/**
- * The table. One row per thing a reply can turn out to be, keyed on the
- * contract's own values and on the call; the first row whose every named
- * column matches says its piece, and a row that says nothing ends the walk.
- *
- * Escalation rows compose the route this reply's own state leaves open: the
- * rung this call already took, what the escalation doubts, whether the call
- * was scoped to an element, the rows the window's current observation holds
- * and whether its frame is live. Measured against a table keyed on the target
- * alone: a chord that had already been escalated to foreground and came back
- * unverified was told to re-run as-is (6/6 inert on Notes' Find chord), and a
- * coordinate rung was named for a window with no capture, where a pixel action
- * refuses before dispatch. A background chord that moved nothing still has the
- * rung that lands — a foreground dispatch makes the window key, which is what a
- * not-key window's controls were waiting for — so it goes ahead of the menu,
- * the field and a read. A chord the driver dispatched as the app's own menu
- * command had the window made key for it; the foreground rung has nothing more
- * to make key, so it is never the route there.
- *
- * Refusal rows say what a driver cannot: the call for the window it found in
- * front, the rung for a control whose window is not the app's key one, and
- * the sheet holding focus. `AXEnabled` is the app's own applicability, and the
- * pre-0.9.0 refusal named two rungs regardless — byte-identical on background
- * and foreground, on a frontmost window and behind a panel, in all four
- * measured states; the typed refusal composes that sentence itself, so the
- * precondition arms are composed here only for the untyped shape.
- *
- * Write rows: five materially different outcomes used to render
- * byte-identically — a value the app took, one it echoed without taking, one
- * it discarded outright, one nothing could read, and one that arrived
- * half-typed — so 22 proven writes and the single real loss were
- * indistinguishable in the model's context. A proven write says nothing: the
- * verdict, a confirmed effect, the driver's own read-back and no escalation are
- * the whole proof. Every other rung names what is known and what to do about
- * it, and only the rungs where a re-read can still learn something ask for one.
- */
-const TABLE: readonly Row[] = [
-	// A target this surface has no call for stays in `data`.
-	{ slot: "escalation", when: { rendered: false }, say: () => undefined },
-	// A reply that carries a write verdict and points at the field: the write path answers it.
-	{ slot: "escalation", when: { target: "element", judged: true }, say: () => undefined },
-	{
-		slot: "escalation",
-		when: { menuCommand: true, target: "element" },
-		say: (_reply, facts) =>
-			`${fieldRoute(facts) ?? `address the control the command targets — this session holds no text row for window ${facts.windowId ?? "(unknown)"}, so observe it first and write the row that walk mints`}, or raise the window (win.raise()) and keep it key before re-running`,
-	},
-	{
-		slot: "escalation",
-		when: { menuCommand: true, noop: true },
-		say: (reply, facts) =>
-			`the driver dispatched these keystrokes as the menu command ${reply.menuPath!.join(
-				" > ",
-			)} with the window key and still saw no reaction, so re-sending them on any rung lands nothing new — ${
-				fieldRoute(facts) ?? readRoute(facts)
-			}`,
-	},
-	{ slot: "escalation", when: { menuCommand: true }, say: () => undefined },
-	// The foreground rung already carried these keystrokes: whatever rung the reply names, or none where nothing moved.
-	{ slot: "escalation", when: { keyboard: true, foreground: true, unproven: true, escalates: true }, say: carried },
-	{ slot: "escalation", when: { keyboard: true, foreground: true, unproven: true, noop: true }, say: carried },
-	// This window's keystrokes now take the foreground rung; the session records it.
-	{
-		slot: "escalation",
-		when: { target: "foreground", keyboard: true, windowed: true, reason: "delivery_failed" },
-		say: () => ROUTE_ALREADY_TAKEN,
-	},
-	{
-		slot: "escalation",
-		when: { target: "foreground", keyboard: true, windowed: true },
-		say: () => ROUTE_ALREADY_TAKEN_UNPROVEN,
-	},
-	{
-		slot: "escalation",
-		when: { target: "foreground", foreground: true },
-		say: (_reply, facts) =>
-			`this action already ran with { delivery: "foreground" }, so the rung it names is the one that just answered — ${
-				menuRoute(facts) ?? fieldRoute(facts) ?? readRoute(facts)
-			}`,
-	},
-	{ slot: "escalation", when: { target: "foreground", spelled: true }, say: () => undefined },
-	{ slot: "escalation", when: { target: "foreground" }, say: () => FOREGROUND_ROUTE },
-	{
-		slot: "escalation",
-		when: { target: "element", keyboard: true, noop: true, foreground: false },
-		say: () => BACKGROUND_RUNG,
-	},
-	{
-		slot: "escalation",
-		when: { target: "element" },
-		say: (_reply, facts) =>
-			fieldRoute(facts) ??
-			`address the field itself — this session holds no text row for window ${facts.windowId ?? "(unknown)"}, so observe it first and write the row that walk mints`,
-	},
-	{ slot: "escalation", when: { target: "pixel" }, say: (_reply, facts) => pixelRoute(facts) },
-	{ slot: "escalation", when: { target: "snapshot" }, say: () => OBSERVE_ROUTE },
-	{
-		slot: "escalation",
-		when: { target: undefined, keyboard: true, noop: true, foreground: false },
-		say: () => BACKGROUND_RUNG,
-	},
-
-	{ slot: "refusal", when: { panel: true }, say: obscuringPanel },
-	{
-		slot: "refusal",
-		when: { disabled: true, target: "foreground", foreground: false },
-		say: () =>
-			'retry with { delivery: "foreground" } — the window is not the app\'s key window and a foreground dispatch makes it key first.',
-	},
-	{
-		slot: "refusal",
-		when: { disabled: true, typed: false, menuRow: true },
-		say: (reply, facts) =>
-			`That ${facts.element?.role ?? reply.role} is disabled by the app's own current state: a menu row's AXEnabled tracks the command's applicability, not focus or delivery. Satisfy the command's precondition (a selection, a document, a mode) or pick another item.`,
-	},
-	{
-		slot: "refusal",
-		when: { disabled: true, typed: false, fronted: true },
-		say: () =>
-			`That control reports AXEnabled=false with { delivery: "foreground" } already in force, so the rung is not what refused and no activation changes it: satisfy its precondition or choose another control.`,
-	},
-	{ slot: "refusal", when: { windowed: true, focusHeld: true }, say: focusHolder },
-
-	{
-		slot: "write",
-		when: { verdict: "not_committed" },
-		say: (_reply, facts) => {
-			const reason = NOT_COMMITTED_REASON.exec(facts.text)?.[1]?.trim() ?? "the driver reported no reason";
-			// Two different findings share the verdict. "No end-of-edit gesture"
-			// means the driver had nothing to watch, not that the app refused;
-			// the bench's every persistence excursion started on the old
-			// sentence claiming the app kept its own value while the tree in
-			// the same reply showed the write. A read-back separates them —
-			// and says only what it can: the text is in the control. Whether
-			// the app took it is the app's own output's to say, which is the
-			// sentence the next observation prints over the tree.
-			return NO_END_OF_EDIT.test(reason)
-				? `${field(facts)}: unproven — ${reason}. Read it back (win.observe()): a control showing the value proves the text is in it, not that the app took it — judge that by the app's own output, and do not rewrite the control to find out.`
-				: `${field(facts)}: not committed — ${reason}. Read it back (win.observe()): if the control shows the value the driver read too early and the text is in it; if it shows the old one, write it another way.`;
-		},
-	},
-	// A judged write whose read-back the driver could not turn into proof: it
-	// read something the app rewrote, or nothing at all because the end-of-edit
-	// re-created the control. Both quote their own finding, and neither is
-	// answered by reading the same control again — the app's output is.
-	{
-		slot: "write",
-		when: { verdict: "unproven", readBack: false },
-		say: (_reply, facts) =>
-			`${field(facts)}: the driver could not prove the app kept this value — read the window back (win.observe()) and judge by the app's own output (the row, list or title it updated); rewrite only if that output still shows the old value.`,
-	},
-	{
-		slot: "write",
-		when: { effect: "unverifiable" },
-		say: (reply, facts) =>
-			`${field(facts)}: the field publishes no readable value, so nothing read this write back — ${writeWitness(reply, facts)}.`,
-	},
-	{
-		slot: "write",
-		when: { verdict: "unproven", readBack: true, query: true },
-		say: (_reply, facts) =>
-			`${field(facts)}: the value reads back as written, but a read-back is echoed by the control whether or not the app took it — check the app's own output: the rows this query filtered, not the field.`,
-	},
-	{
-		slot: "write",
-		when: { verdict: "unproven", readBack: true, operation: "type" },
-		say: (_reply, facts) =>
-			`${field(facts)}: the value reads back as written, but this field's app takes its value at end-of-edit, which typing does not deliver — press Tab or Return, or write it with setValue.`,
-	},
-	{
-		slot: "write",
-		when: { verdict: "unproven", readBack: true },
-		say: (_reply, facts) =>
-			`${field(facts)}: the value reads back as written, but nothing observed the app take it, and this field's app takes its value at end-of-edit — press Tab or Return on it.`,
-	},
-	{
-		slot: "write",
-		when: { verdict: "committed", effect: "confirmed", readBack: true, escalated: false },
-		say: () => undefined,
-	},
-	{
-		slot: "write",
-		when: { verdict: undefined, effect: "not_dispatched", dead: true },
-		say: (_reply, facts) => `${field(facts)}: not dispatched — the control is gone; address a row in the tree below.`,
-	},
-	{
-		slot: "write",
-		when: { verdict: undefined },
-		say: (_reply, facts) =>
-			`${field(facts)}: nothing in the reply says whether the app kept this value — read the field back before building on it.`,
-	},
-	{
-		slot: "write",
-		when: { verdict: "unproven" },
-		say: (_reply, facts) =>
-			`${field(facts)}: the driver could not tell whether the app kept this value — read the field back before building on it.`,
-	},
-	{
-		slot: "write",
-		when: { verdict: "committed", readBack: true, escalated: true },
-		say: (_reply, facts) =>
-			`${field(facts)}: the driver judged the value committed but doubts this route landed and names another — read the field back before building on it.`,
-	},
-	{
-		slot: "write",
-		when: { verdict: "committed", readBack: true },
-		say: (reply, facts) =>
-			`${field(facts)}: the driver judged the value committed but reported the effect as ${reply.effect} — read the field back before building on it.`,
-	},
-	{
-		slot: "write",
-		when: { verdict: "committed" },
-		say: (_reply, facts) =>
-			`${field(facts)}: the driver judged the value committed but nothing in the reply read it back — read the field back before building on it.`,
-	},
-];
-function say(slot: Slot, reply: ActionReply, facts: Facts): string | undefined {
-	const kase = caseOf(reply, facts);
-	for (const row of TABLE) {
-		if (row.slot !== slot) continue;
-		let matches = true;
-		for (const column of Object.keys(row.when) as (keyof Case)[])
-			if (row.when[column] !== kase[column]) {
-				matches = false;
-				break;
-			}
-		if (matches) return row.say(reply, facts);
+export function writeNote(result: { effect: string; committed?: ComputerCommitVerdict; evidence: unknown }, facts: WriteFacts): string | undefined {
+	const field = writeField(facts);
+	const readBack = valueReadBack(result.evidence);
+	switch (result.committed) {
+		case "committed":
+			return result.effect === "confirmed" && readBack
+				? undefined
+				: `${field}: the driver judged the value committed but ${
+						readBack ? `reported the effect as ${result.effect}` : "nothing in the reply read it back"
+					} — read the field back before building on it.`;
+		case "not_committed":
+			return `${field}: not committed — read it back (win.observe()); if the control still shows the old value, write it another way.`;
+		case "unproven":
+			return readBack
+				? `${field}: the value reads back as written, which proves the text is in the control, not that the app took it — judge by the app's own output.`
+				: `${field}: the driver could not prove the app kept this value — read the window back and judge by the app's own output.`;
+		default:
+			if (result.effect === "unverifiable")
+				return `${field}: the field publishes no readable value, so nothing read this write back — the app's own output is the only witness.`;
+			if (result.effect === "not_dispatched") return undefined;
+			return `${field}: nothing in the reply says whether the app kept this value — read the field back before building on it.`;
 	}
-	return undefined;
-}
-/**
- * One decision per reply: the rung this window's keystrokes now take and the
- * sentence for it. A reply that carries a write verdict and points at the
- * field says nothing here — the write path answers that one, with the field
- * and the value in hand.
- */
-export function escalation(reply: ActionReply, facts: Facts): string | undefined {
-	const route = say("escalation", reply, facts);
-	if (route === undefined) return undefined;
-	if (reply.escalation === undefined) return `⚠️ The driver reports no observed change: ${route}.`;
-	const reason = reply.escalation.reason;
-	return `⚠️ The driver escalates this action${reason ? ` (${reason})` : ""}: ${route}.`;
-}
-/** The note a refusal needs beside the driver's own sentence, or none. */
-export function refusalNote(reply: ActionReply, facts: Facts): string | undefined {
-	return say("refusal", reply, facts);
-}
-/**
- * One sentence for what a write is now known to be, or none. The verdict,
- * effect and evidence are the result's own, which the action already
- * defaulted; a dead ref's recovery answers with `not_dispatched` over the
- * refusal it recovered from.
- */
-export function writeNote(result: ComputerActionResult, facts: WriteFacts): string | undefined {
-	const reply = {
-		...readReply(result.data),
-		effect: result.effect,
-		committed: result.committed,
-		readBack: valueReadBack(result.evidence),
-	};
-	return say("write", reply, facts);
 }
 /**
  * A menu bar item reports `AXEnabled` only while its own menu is open, so
- * the driver refuses the press before dispatch — and neither escalation it
- * suggests (foreground delivery, `bring_to_front`) opens a menu. Every
- * macOS tree carries these rows advertising `press`, and the route that
- * does drive them is `menu(path)`, which the driver has no way to name
- * because it addressed one element, not a path. The ref's own role is what
- * identifies the case; the driver's text survives in front of it.
+ * the driver refuses the press before dispatch — and no delivery mode opens
+ * a menu. The route that does drive these rows is `menu(path)`, which the
+ * driver has no way to name because it addressed one element, not a path.
  */
 export function menuBarRoute(element: ComputerElementSnapshot | undefined): string | undefined {
 	if (!element || MENU_BAR_ROLES[element.role] !== true) return undefined;
@@ -1041,12 +548,8 @@ export function menuBarRoute(element: ComputerElementSnapshot | undefined): stri
 /**
  * Refusals about one row rather than about the window: the platform could not
  * prove the addressed element belongs to the target window, or found its
- * reference dead. `element_outside_target_window` is reported for both on
- * drivers before 0.9.0. A code belongs here only if a reply of it that names
- * no route means a re-read answers: the session reads the window on a silent
- * reply by design, and `element_disabled` — whose disabled-by-app-state arms
- * name no route in either field — would then be answered with a tree the
- * control reads identically in. The route is read from whichever field
+ * reference dead. A code belongs here only if a reply of it that names no
+ * route means a re-read answers. The route is read from whichever field
  * carries it: `advice` on a background refusal, the escalation target on the
  * ungated AX route, which is a tool error payload with no `advice` at all.
  */
@@ -1060,32 +563,11 @@ export function deadElement(reply: ActionReply): boolean {
 	return route === undefined || route === "snapshot";
 }
 /**
- * The reply line for keystrokes the driver dispatched as the app's menu
- * command: measured on Notes, the model reading `Pressed cmd+option+f` never
- * learned that the chord had become `Edit > Find > Note List Search…` with
- * the window made key, nor whether an app it was driving in the background
- * had been brought to the front for it.
- *
- * The fronting is the driver's own published fact. It was recovered by
- * matching two sentences of the driver's English until the closed projection
- * carried `key_window`, so any rewording there dropped the suffix silently,
- * with no test on either side failing.
- */
-export function menuCommandLine(reply: ActionReply): string | undefined {
-	if (reply.menuPath === undefined) return undefined;
-	const verb = reply.effect === "suspected_noop" ? "Dispatched" : "Delivered";
-	const fronted = reply.appFronted;
-	return `${verb} as menu command ${reply.menuPath.join(" > ")}${fronted === undefined ? "" : ` (app fronted: ${fronted ? "yes" : "no"})`}`;
-}
-/**
  * What the driver reported about an action that threw, and only that: the
  * route it took, the rung it delivered on, what it believes happened, and the
- * rung it would escalate to. Each field is printed when the reply carries it.
- * A defaulted line said `route=cua-sdk delivery=background effect=refused` of
- * a `win.menu` refusal that named no route, was dispatched by a tool with no
- * rung field at all, and reported no effect — three observations the reply
- * never made. The rung the call asked for is a fact about the call, not about
- * the delivery, and says so. Nothing is walked to produce this.
+ * rung it would escalate to. Each field is printed when the reply carries it;
+ * the rung the call asked for is a fact about the call, not about the
+ * delivery, and says so.
  */
 export function actionEvidence(reply: ActionReply, requested: string | undefined): string | undefined {
 	const target = reply.escalation?.target;
@@ -1105,20 +587,17 @@ export function actionEvidence(reply: ActionReply, requested: string | undefined
  * A partial `type_text` is the one refusal that still wrote: the field holds
  * neither its old value nor the requested one, and the driver names how many
  * characters it delivered. The remainder is what the caller has to send, and
- * slicing it by codepoint is the work the reply left undone — a model asked to
- * "retry only the remaining suffix" retyped the whole string instead.
+ * slicing it by codepoint is the work the reply left undone.
  *
  * A refusal the driver marks `retryable: false` is the opposite finding: it
  * probed the target and it never took keyboard focus, so the same keystrokes
- * land nothing again however they are sliced, and a remainder to retype is
- * the one instruction that cannot work. The driver's own sentence carries
- * why; this one carries the call that writes the value without keystrokes,
- * which only this side can spell, because only this side minted the ref.
+ * land nothing again however they are sliced. This one carries the call that
+ * writes the value without keystrokes, which only this side can spell.
  */
 export const INCOMPLETE_TYPING = "type_text_incomplete";
 const INCOMPLETE_DELIVERY = /delivered (\d+) of (\d+) character/;
 export function incompleteNote(facts: WriteFacts, value: string, message: string, reply: ActionReply): string {
-	const name = field(facts);
+	const name = writeField(facts);
 	if (reply.retryable === false) {
 		const route =
 			facts.addressed === undefined

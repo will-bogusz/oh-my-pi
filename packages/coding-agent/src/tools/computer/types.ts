@@ -225,18 +225,18 @@ export interface ComputerActionResult {
 	committed?: ComputerCommitVerdict;
 	/**
 	 * The driver's escalation advice for this reply, in the vocabulary the
-	 * caller types. Present only when the reply carried one its own text did
-	 * not already name, and then the cell output carries the result too: a
-	 * route that lives solely in a returned value is a route the cell can drop.
+	 * caller types; present only when the reply named a rung this surface
+	 * renders a call for.
 	 */
 	escalation?: string;
 	/**
-	 * Keystrokes the driver dispatched as the application's own menu command
-	 * (`route: "menu_command"`): the menu titles it pressed, top level first.
-	 * The window was made key for it and the prior frontmost restored; that is
-	 * never a background delivery.
+	 * The text has to reach the cell even where the code drops the returned
+	 * value: the reply left its delivery or its written value unproven, or
+	 * the session composed a line about it (a renderer's note, a window the
+	 * app gained, system UI that appeared). Absent means the driver's own
+	 * sentence is all there is and the action proved itself.
 	 */
-	menuPath?: readonly string[];
+	mustShow?: boolean;
 	/**
 	 * System UI that appeared while this action ran. The action itself was
 	 * dispatched, so its evidence still describes the target; the environment

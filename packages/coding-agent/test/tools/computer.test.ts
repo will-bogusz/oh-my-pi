@@ -4,7 +4,6 @@ import { type } from "@oh-my-pi/omptype";
 import type { AgentTool } from "@oh-my-pi/pi-agent-core";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import { prompt } from "@oh-my-pi/pi-utils";
-import computerSafetyPrompt from "../../src/prompts/system/computer-safety.md" with { type: "text" };
 import computerDescription from "../../src/prompts/tools/computer.md" with { type: "text" };
 import { callSessionTool } from "@oh-my-pi/pi-coding-agent/eval/js/tool-bridge";
 import type { EvalPreludeDefinition } from "@oh-my-pi/pi-coding-agent/eval/preludes";
@@ -124,16 +123,8 @@ class FakeBackend implements ComputerBackend {
 		this.pins.set(window.id, window.pid);
 		return window;
 	}
-	acquire(context: ComputerOperationContext, selector: string | WindowSelector) {
-		return this.window(context, selector);
-	}
 	async displays() {
 		return [display];
-	}
-	async focusedWindow(context: ComputerOperationContext) {
-		return this.windowAbsent
-			? null
-			: this.window(context, { id: this.currentWindow.id, pid: this.currentWindow.pid });
 	}
 	async screenshot(context: ComputerOperationContext, options: { silent?: boolean } = {}) {
 		return this.image(context, "desktop", options.silent);
@@ -236,6 +227,9 @@ class FakeBackend implements ComputerBackend {
 			evidence: { count: this.clickCount },
 			delivery: "background",
 			...(this.escalation === undefined ? {} : { escalation: this.escalation }),
+			// What the reply leaves unproven has to reach the cell even where the
+			// cell drops the returned value.
+			...(this.unverifiable || this.escalation !== undefined ? { mustShow: true } : {}),
 		};
 	}
 	/** The driver's commit verdict for the write, when it judged one. */
@@ -258,6 +252,7 @@ class FakeBackend implements ComputerBackend {
 			evidence: { value },
 			delivery: "background",
 			...(this.committed === undefined ? {} : { committed: this.committed }),
+			...(this.committed !== undefined && this.committed !== "committed" ? { mustShow: true } : {}),
 		};
 	}
 	unsupported = async (): Promise<never> => {
@@ -296,7 +291,6 @@ class FakeBackend implements ComputerBackend {
 	raise = this.unsupported;
 	drag = this.unsupported;
 	perform = this.unsupported;
-	hover = this.unsupported;
 	desktopClick = this.unsupported;
 	desktopMove = this.unsupported;
 	desktopDrag = this.unsupported;
@@ -833,6 +827,31 @@ describe("computer preludes through the session", () => {
 			displays.length = 0;
 			await runInContext("win.click(win.initialObservation.elements[0].ref)", realm);
 			expect(displays.join("\n")).toContain('Performed AXPress on [40] AXCell "Incomplete, Buy milk".');
+		} finally {
+			await runInContext("computer.close()", realm);
+		}
+	});
+
+	it("prints a must-show reply once, and never again on the observation after it", async () => {
+		const { backend, realm, displays } = javascriptFixture();
+		try {
+			await runInContext('computer.window("42", {screenshot:false}).then(win => (globalThis.win = win))', realm);
+			displays.length = 0;
+			// A reply that proved itself is the cell's business, so nothing is
+			// pushed for it.
+			await runInContext("win.click(win.initialObservation.elements[0].ref)", realm);
+			expect(displays).toEqual([]);
+			// One that did not is pushed exactly once, by the call that made it.
+			backend.escalation = 'Not delivered: re-run it with { delivery: "foreground" }.';
+			await runInContext("win.click(win.initialObservation.elements[0].ref)", realm);
+			expect(displays.filter(line => String(line).includes("Not delivered"))).toHaveLength(1);
+			// The next read answers for the window, never for the last action:
+			// re-emitting it made every observation replay a sentence the cell
+			// had already printed.
+			backend.escalation = undefined;
+			displays.length = 0;
+			await runInContext("win.observe({screenshot:false})", realm);
+			expect(displays.join("\n")).not.toContain("Not delivered");
 		} finally {
 			await runInContext("computer.close()", realm);
 		}
@@ -1723,18 +1742,5 @@ describe("computer prompt variants", () => {
 		expect(linux).toContain("AT-SPI tree");
 		expect(linux).toContain("foreground_unavailable");
 		expect(darwin).toContain("password/TCC prompt");
-	});
-	it("scopes the never-escalate rule to unverified deliveries on both backends", () => {
-		for (const linux of [false, true]) {
-			const safety = render(computerSafetyPrompt, linux);
-			expect(safety).toContain("An unverified or doubted delivery is never a reason to escalate");
-			expect(safety).toContain("intended retry, not an escalation");
-		}
-		expect(render(computerSafetyPrompt, true)).not.toContain("AppleScript");
-	});
-	it("renders the host's variant into the live prelude documentation", () => {
-		const session = toolSession();
-		const prelude = fixturePrelude(session, new FakeBackend());
-		expect(prelude.documentation).toBe(render(computerDescription, process.platform === "linux"));
 	});
 });

@@ -56,7 +56,6 @@
 		"screenshot",
 		"click",
 		"doubleClick",
-		"hover",
 		"drag",
 		"scroll",
 		"type",
@@ -169,7 +168,6 @@
 	defineValueMethods(computer, desktopValueMethods, next => [next]);
 	computer.window = (selector, options) =>
 		resolveWindow([step("acquireWindow", [selector, validateOptions("computer.window", options)])]);
-	computer.focusedWindow = () => resolveWindow([step("focusedWindow", [])]);
 	computer.ref = ref => lazyElement([step("ref", [ref])], ref);
 	computer.clipboard = Object.freeze({
 		read: () => callValue([step("clipboard.read", [])]),

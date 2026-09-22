@@ -15,21 +15,16 @@ import {
 	type WindowRosterSample,
 } from "./interruption";
 import {
-	type ActionReply,
 	actionEvidence,
 	deadElement,
 	escalation,
 	type Facts,
 	INCOMPLETE_TYPING,
 	incompleteNote,
-	KEYBOARD_TOOLS,
 	MENU_BAR_ROLES,
 	MENU_REFUSAL_SEGMENT,
-	MENU_WALK_DEPTH,
 	menuBarRoute,
-	menuCommandLine,
 	menuRefusalItems,
-	menuRefusalNames,
 	menuSubmenuListing,
 	preludeVocabulary,
 	readReply,
@@ -37,10 +32,9 @@ import {
 	SEARCH_FIELD,
 	specificRole,
 	UNPROBED_DRAG,
-	unobservedChange,
+	unproven,
 	type Wire,
 	type WriteFacts,
-	writeField,
 	writeNote,
 } from "./render";
 import { appWindows } from "./roster";
@@ -85,16 +79,6 @@ interface ElementIdentity {
 	path: readonly string[];
 	ordinal: number;
 }
-/** A ref the last walk of its window dropped, and what it pointed at. */
-interface RetiredRef {
-	identity: ElementIdentity;
-	/**
-	 * This session dispatched through the ref before the walk retired it, so
-	 * its value is expected to differ from what the tree now holds. Nothing
-	 * else may differ: the row's place is the same row or it is another row.
-	 */
-	acted: boolean;
-}
 interface Binding {
 	window: ComputerWindowIdentity;
 	token: string;
@@ -127,44 +111,14 @@ interface SheetCensus {
 	rows: number;
 	matched: number;
 }
-/** An unproven write and the observation that would prove it. */
-interface WriteDoubt {
-	readonly sentence: string;
-	/**
-	 * The control the write was addressed to, as the walk that minted its
-	 * ref described it, and the text it was given. The doubt is about that
-	 * one control, so the read that answers it has to find that one control
-	 * — its window is the sheet's when the write went into a sheet, and its
-	 * identity is what survives the ref the walk then retired.
-	 */
-	readonly readBack?: {
-		readonly field: string;
-		readonly value: string;
-		readonly window: ComputerWindowIdentity;
-		readonly identity: ElementIdentity;
-	};
-}
 /**
  * Where a row sits, independently of what it holds: its role, its label, the
  * chain of roles and labels above it and its position among the siblings
- * that share its role. What the row holds is deliberately not part of it — a
- * field this session just wrote through has a new value by construction — so
- * the value is compared on its own by whoever needs it.
+ * that share its role. A dead ref's census counts the rows of a fresh tree
+ * that sit where it did; nothing is ever re-addressed by it.
  */
 function placeKey(identity: ElementIdentity): string {
 	return JSON.stringify([identity.role, identity.label, identity.ordinal, identity.path]);
-}
-/**
- * Whether a row's value says anything about which row it is. An untouched
- * text field is reported as `""` and a row with no `AXValue` carries no
- * value at all, so an empty value matches every other empty row at the same
- * place: it is the absence of evidence and never a match. Every place this
- * session weighs a value against a row's identity asks this first, and they
- * have to agree — a carry that trusted `"" === ""` and a reply that called
- * the same ref value-less were two readings of one row.
- */
-function evidential(value?: string): boolean {
-	return value !== undefined && value.trim() !== "";
 }
 function renderedSubrole(element: ComputerElementSnapshot): string {
 	const specific = specificRole(element);
@@ -505,15 +459,6 @@ function bounds(value: unknown): ComputerBounds {
 function sameBounds(a: ComputerBounds, b: ComputerBounds): boolean {
 	return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
-/** Whether the second rectangle is drawn wholly inside the first, in points. */
-function encloses(outer: ComputerBounds, inner: ComputerBounds): boolean {
-	return (
-		inner.x >= outer.x &&
-		inner.y >= outer.y &&
-		inner.x + inner.width <= outer.x + outer.width &&
-		inner.y + inner.height <= outer.y + outer.height
-	);
-}
 function pointPair(point: unknown): [number, number] {
 	if (Array.isArray(point) && point.length === 2) return [Number(point[0]), Number(point[1])];
 	if (point !== null && typeof point === "object") {
@@ -661,8 +606,7 @@ function unsupported(operation: string): never {
  * reported in. The driver's own rungs read the frame it delivered, so each
  * dispatch converts points into that frame.
  *
- * Driver window hover is only cursor decoration and focused-window identity is
- * unavailable. Display enumeration/capture/input cover the primary display only.
+ * Display enumeration/capture/input cover the primary display only.
  * Desktop pixels require the driver's display identity/origin extension; stock
  * observations remain usable as images but never authorize coordinate dispatch.
  * Desktop drags are straight two-point gestures. Desktop scroll accepts only
@@ -675,12 +619,6 @@ export class CuaComputerSession implements ComputerBackend {
 	readonly #elements = new Map<string, Binding>();
 	readonly #frames = new Map<string, Frame>();
 	/**
-	 * The file each observed window said it was showing, by window id. Only
-	 * `get_window_state` reads `AXDocument`, so this is what acquisition knows
-	 * about a candidate without walking it again.
-	 */
-	readonly #documents = new Map<string, string>();
-	/**
 	 * Attached sheets by window id, each against the window that reported it.
 	 * Only `get_window_state` sees the relation — a sheet is an ordinary
 	 * CGWindow row of its app — so acquisition reads it out of what the last
@@ -689,33 +627,6 @@ export class CuaComputerSession implements ComputerBackend {
 	 */
 	readonly #sheets = new Map<string, { parent: string; title: string }>();
 	readonly #staleSheetRefs = new Map<string, string>();
-	/**
-	 * The identities the last invalidation of each window dropped, so a ref
-	 * whose element has died can be looked for in the rows the next walk
-	 * mints. One generation per window: a ref older than that cannot reach the
-	 * driver at all, because `#invalidate` retires it first.
-	 */
-	readonly #retired = new Map<string, ReadonlyMap<string, RetiredRef>>();
-	/**
-	 * Retired refs a walk this session ran on its own — never one the caller
-	 * asked for — matched straight back to a row of the tree it minted, by
-	 * the ref the caller is holding. The contract the model is given is that
-	 * refs live until its next `observe`/`find` (`computer.md:8`), and a
-	 * mid-cell recovery walk used to break it silently: the bench batched
-	 * five field writes behind one observation, the second died on a
-	 * re-created control, and the walk that answered it retired the three
-	 * refs the cell had not spent yet — `StaleRef`, cell dead, the card
-	 * half-written. An alias costs nothing when the row is the same row and
-	 * is refused when it may not be; the printed tree always carries the new
-	 * refs.
-	 */
-	readonly #carried = new Map<string, Binding>();
-	/**
-	 * Refs this session dispatched through since the walk that minted them.
-	 * Their value is the one thing about them that is expected to have
-	 * changed, so they are the only refs carried across a value that moved.
-	 */
-	readonly #acted = new Set<string>();
 	/**
 	 * Each pid's on-screen ids as of its last observation, its rows as of the
 	 * last roster read, and the driver's capture-lease windows, which are nobody's.
@@ -730,16 +641,6 @@ export class CuaComputerSession implements ComputerBackend {
 	 */
 	readonly #bundlePids = new Map<string, ReadonlySet<number>>();
 	/**
-	 * What each window's writes left unproven, one sentence per write, in the
-	 * order they were made. The next read of that window reports and clears them.
-	 */
-	/**
-	 * Unproven writes by window, each with what would prove it: the next
-	 * observation of that window that shows the value in a field of the
-	 * written role turns the doubt into a read-back.
-	 */
-	readonly #writes = new Map<string, Map<string, WriteDoubt>>();
-	/**
 	 * Windows one of this session's dispatches has changed since their last
 	 * read. A tree walked while the app is still applying that change is a
 	 * window mid-transition, which is worth one re-sample; a window nothing
@@ -747,16 +648,8 @@ export class CuaComputerSession implements ComputerBackend {
 	 * by the next read of that window.
 	 */
 	readonly #mutated = new Set<string>();
-	/**
-	 * Windows whose keyboard delivery the driver escalated to foreground. The
-	 * escalation is a fact about the window — a surface whose background route
-	 * dropped the last chord drops the next one too — but the driver attaches
-	 * it per dispatch, so every callsite was told again: five escalations in
-	 * one bench task, obeyed 5/5, three of them repeating what the same run
-	 * had already been told. Cleared when the window is acquired again, or
-	 * when a foreground dispatch on it is refused.
-	 */
-	readonly #escalatedKeyboard = new Set<string>();
+	/** Windows whose hidden-menu-bar hint an observation has already printed. */
+	readonly #menuBarHinted = new Set<string>();
 	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
 	#driver: CuaDriver;
 	/**
@@ -811,25 +704,9 @@ export class CuaComputerSession implements ComputerBackend {
 			permissions: Object.freeze({ ...permissions }),
 			driver: Object.freeze({ version: driver.version, transport: "mcp --direct" }),
 			displayCountKnown: false,
-			displayEnumeration: "primary only; other display count is unknown",
-			captureScope: "exact window or primary display",
-			coordinates:
-				"window actions take window-local points, desktop actions display points; captures are delivered on that same grid, so a coordinate read off a screenshot needs no arithmetic",
-			desktopCoordinates: linux
-				? "unavailable; the Linux driver reports no display identity, so desktop-root input is refused"
-				: "primary display only; requires current UUID, native id, origin, size and scale metadata",
-			desktopDrag: "exactly two points; the driver interpolates one straight drag",
-			windowDrag:
-				"foreground only; each end is an element ref (needs its own observed bounds and a current window screenshot) or a window point; durationMs integer 0–10000 (default 500), steps integer 1–200 (default 20); background drag is unavailable",
-			desktopScroll: "one axis per action; pixel deltas must be multiples of 120, up to 6000",
-			backgroundInput: linux
-				? 'toolkit-dependent; a typed background_unavailable refusal means nothing was dispatched — retry with { delivery: "foreground" }'
-				: "best effort; use observation backgroundInput and fresh evidence, never assume delivery",
-			elementRefLifetime:
-				"Exact driver snapshot, PID and window; re-observe after StaleRef. AX traversals can evict driver snapshots.",
 			unsupported: linux
-				? ["window hover", "focusedWindow", "displays", "desktop-root input", "interruption detection"]
-				: ["window hover", "focusedWindow", "secondary display enumeration/capture/input"],
+				? ["displays", "desktop-root input", "interruption detection"]
+				: ["secondary display enumeration/capture/input"],
 		});
 	}
 
@@ -859,10 +736,7 @@ export class CuaComputerSession implements ComputerBackend {
 		logger.warn("cua-driver child is gone; respawning", { previousPid: this.#driver.pid });
 		this.#driver = await this.#spawn();
 		this.#elements.clear();
-		this.#carried.clear();
-		this.#acted.clear();
 		this.#frames.clear();
-		this.#documents.clear();
 		this.#desktopFrame = undefined;
 		return this.#driver;
 	}
@@ -1011,8 +885,6 @@ export class CuaComputerSession implements ComputerBackend {
 				// means it has none, and no order may be read out of the array.
 				...(typeof row.z_index === "number" ? { zIndex: row.z_index } : {}),
 				...(typeof row.ax_backed === "boolean" ? { axBacked: row.ax_backed } : {}),
-				...(typeof row.main === "boolean" ? { main: row.main } : {}),
-				...(typeof row.minimized === "boolean" ? { minimized: row.minimized } : {}),
 				// Two kinds only the driver can name: a display's desktop surface
 				// (the icons, filed at the desktop icon level with no AXWindow of
 				// its own) and a window its own application reports modal, which
@@ -1058,9 +930,12 @@ export class CuaComputerSession implements ComputerBackend {
 			window =>
 				(selector.id === undefined || window.id === selector.id) &&
 				(selector.pid === undefined || window.pid === selector.pid) &&
+				// A display's desktop surface is filed under Finder and is never the
+				// Finder window `{ app: "Finder" }` means; it is acquired by kind.
 				(selector.app === undefined ||
-					window.app.toLowerCase().includes(selector.app.toLowerCase()) ||
-					this.#bundlePids.get(selector.app.toLowerCase())?.has(window.pid) === true) &&
+					((window.kind !== "desktop" || selector.kind === "desktop") &&
+						(window.app.toLowerCase().includes(selector.app.toLowerCase()) ||
+							this.#bundlePids.get(selector.app.toLowerCase())?.has(window.pid) === true))) &&
 				(selector.title === undefined || window.title.toLowerCase().includes(selector.title.toLowerCase())) &&
 				(selector.kind === undefined || window.kind === selector.kind),
 		);
@@ -1113,10 +988,7 @@ export class CuaComputerSession implements ComputerBackend {
 	 * roster to every miss it reports, because only it knows whether a launch
 	 * was refused, impossible, or opened nothing. Several matched: one line per
 	 * candidate with the exact id to acquire, so picking one costs no
-	 * `windows()` round trip. Document windows are the ambiguous case that a
-	 * title cannot settle (two restored Automator workflows, one of them
-	 * "Untitled"), so the file an earlier observation of that window reported
-	 * is printed beside it.
+	 * `windows()` round trip.
 	 */
 	#unresolved(selector: string | WindowSelector, matches: ComputerWindowIdentity[]): ToolError {
 		const named = JSON.stringify(selector);
@@ -1136,14 +1008,11 @@ export class CuaComputerSession implements ComputerBackend {
 		);
 	}
 	#candidate(window: ComputerWindowIdentity): string {
-		const document = this.#documents.get(window.id);
 		return `- id ${JSON.stringify(window.id)} pid ${window.pid} ${window.app} ${JSON.stringify(window.title)} ${
 			window.bounds.width
 		}×${window.bounds.height} at (${window.bounds.x},${window.bounds.y})${
 			window.onScreen === false ? " offscreen" : ""
-		}${window.kind !== undefined && window.kind !== "other" ? ` kind=${window.kind}` : ""}${
-			document === undefined ? "" : ` document=${document}`
-		}`;
+		}${window.kind !== undefined && window.kind !== "other" ? ` kind=${window.kind}` : ""}`;
 	}
 	#accessibilityWindows(
 		data: Wire,
@@ -1307,10 +1176,9 @@ export class CuaComputerSession implements ComputerBackend {
 		return this.#schedule(context, "windows", false, () => this.#listedWindows(selector));
 	}
 	/**
-	 * Re-resolution of a handle the caller already holds. Every prelude window
-	 * method carries a `window` step to rehydrate its handle, so this runs
-	 * before each of them and keeps what the session inferred about driving
-	 * the window; `acquire` is the call that starts over on it.
+	 * One window by selector: an exact `{ id, pid }` re-resolves a handle the
+	 * caller already holds (every prelude window method carries one), anything
+	 * else acquires a window.
 	 */
 	window(
 		context: Context,
@@ -1320,26 +1188,6 @@ export class CuaComputerSession implements ComputerBackend {
 		return this.#schedule(context, "window", false, () =>
 			this.#window(selector, options.ambiguous === "throw" ? undefined : text => context.emitText(text)),
 		);
-	}
-	/**
-	 * Acquisition is the caller starting again on this window, so what the
-	 * session inferred about how to drive it does not outlive it: the sheet
-	 * that made background delivery fail may be gone, and the driver is the
-	 * one that gets to say so.
-	 */
-	acquire(
-		context: Context,
-		selector: string | WindowSelector,
-		options: WindowResolveOptions = {},
-	): Promise<ComputerWindowIdentity> {
-		return this.#schedule(context, "window", false, async () => {
-			const window = await this.#window(
-				selector,
-				options.ambiguous === "throw" ? undefined : text => context.emitText(text),
-			);
-			this.#escalatedKeyboard.delete(window.id);
-			return window;
-		});
 	}
 	apps(context: Context): Promise<unknown> {
 		return this.#schedule(context, "apps", false, async () => (await this.#call("list_apps", {})).data);
@@ -1363,90 +1211,10 @@ export class CuaComputerSession implements ComputerBackend {
 			];
 		});
 	}
-	focusedWindow(context: Context): Promise<ComputerWindowIdentity | null> {
-		return this.#schedule(context, "focusedWindow", false, async () =>
-			unsupported("focusedWindow; stacking order does not prove keyboard focus"),
-		);
-	}
+	/** Retires every ref of this window: each read the caller asks for starts a new generation. */
 	#invalidate(window: Pick<ComputerWindowIdentity, "id" | "pid">): void {
-		const retired = new Map<string, RetiredRef>();
-		const park = (live: Map<string, Binding>): void => {
-			for (const [ref, binding] of live)
-				if (binding.window.id === window.id && binding.window.pid === window.pid) {
-					retired.set(ref, { identity: binding.identity, acted: this.#acted.delete(ref) });
-					live.delete(ref);
-				}
-		};
-		park(this.#elements);
-		// A carried ref is parked under the identity it was last matched on,
-		// so a second walk in the same cell can carry it again instead of
-		// stranding it one generation behind the tree it is still using.
-		park(this.#carried);
-		this.#retired.set(window.id, retired);
-	}
-	/**
-	 * What a ref resolves to: the row this window's current walk minted for
-	 * it, or the row a recovery walk matched it back to. Both are bindings of
-	 * the live tree; only the key differs.
-	 */
-	#bound(ref: string): Binding | undefined {
-		return this.#elements.get(ref) ?? this.#carried.get(ref);
-	}
-	/**
-	 * Hands the refs a walk this session ran on its own back to the rows they
-	 * named, where the fresh tree says which row that is. Only a walk the
-	 * caller did not ask for may call this: the caller's own `observe`/`find`
-	 * is what retires refs, and a walk that aliased across it would make the
-	 * contract unfalsifiable.
-	 *
-	 * A row is the same row when it sits in the same place — role, label, the
-	 * chain above it, position among same-role siblings — and holds the same
-	 * value. Place alone is not enough: a list whose rows carry no title of
-	 * their own gives every cell the same place, and a form re-bound to a
-	 * different record keeps every field's place while changing what is in
-	 * it. The one ref exempt from the value test is a ref this session
-	 * dispatched through, whose value moved because of that dispatch; it is
-	 * carried when its place is unique.
-	 *
-	 * A value is only evidence while it says something. `""` and a row with
-	 * no value at all match every other empty row at their place, so they
-	 * are not a match but the absence of one, and such a ref is carried only
-	 * where its place holds exactly one fresh row that is equally empty.
-	 * That is the ground the five empty contact fields a dead ref used to
-	 * strand always stood on; what it withdraws is the carry onto the one
-	 * row of a shared place that happens to be blank too. Everything else
-	 * stays retired and answers `StaleRef`, exactly as before.
-	 */
-	#carry(window: ComputerWindowIdentity): ReadonlyMap<string, readonly [ref: string, binding: Binding]> {
-		const carried = new Map<string, readonly [string, Binding]>();
-		const retired = this.#retired.get(window.id);
-		if (retired === undefined || retired.size === 0) return carried;
-		const places = new Map<string, (readonly [string, Binding])[]>();
-		for (const entry of this.#elements) {
-			const [, row] = entry;
-			if (row.window.id !== window.id || row.window.pid !== window.pid) continue;
-			const key = placeKey(row.identity);
-			const sharing = places.get(key);
-			if (sharing) sharing.push(entry);
-			else places.set(key, [entry]);
-		}
-		for (const [ref, { identity, acted }] of retired) {
-			const placed = places.get(placeKey(identity)) ?? [];
-			const valued = evidential(identity.value)
-				? placed.filter(([, row]) => row.identity.value === identity.value)
-				: [];
-			const only = placed.length === 1 ? placed[0] : undefined;
-			const match =
-				valued.length === 1
-					? valued[0]
-					: only && (acted || (!evidential(identity.value) && !evidential(only[1].identity.value)))
-						? only
-						: undefined;
-			if (match === undefined) continue;
-			this.#carried.set(ref, match[1]);
-			carried.set(ref, match);
-		}
-		return carried;
+		for (const [ref, binding] of this.#elements)
+			if (binding.window.id === window.id && binding.window.pid === window.pid) this.#elements.delete(ref);
 	}
 	/**
 	 * Every refusal this session composes itself carries the same structured
@@ -1455,7 +1223,7 @@ export class CuaComputerSession implements ComputerBackend {
 	 * problem rather than a row that is gone.
 	 */
 	#binding(ref: string, window?: ComputerWindowIdentity): Binding {
-		const binding = this.#bound(ref);
+		const binding = this.#elements.get(ref);
 		if (this.#closed || !binding)
 			throw new ToolError(`StaleRef: ${ref} — ${this.#staleSheetRefs.get(ref) ?? "observe the window again"}`, {
 				code: "stale_element_ref",
@@ -1507,6 +1275,7 @@ export class CuaComputerSession implements ComputerBackend {
 			// the same cell, which is what the model spent its next cell on.
 			const settling = this.#mutated.delete(window.id);
 			const started = Date.now();
+			this.#invalidate(window);
 			let { reply, current } = await this.#state(context, window, read);
 			let walked = this.#walk(current, reply, options, query);
 			if (settling && titlesDisagree(current.title, walked.rows)) {
@@ -1514,6 +1283,7 @@ export class CuaComputerSession implements ComputerBackend {
 				if (settle > 0) {
 					await Bun.sleep(settle);
 					throwIfAborted(context.signal);
+					this.#invalidate(window);
 					({ reply, current } = await this.#state(context, window, read));
 					walked = this.#walk(current, reply, options, query);
 				}
@@ -1521,21 +1291,14 @@ export class CuaComputerSession implements ComputerBackend {
 			const { menuBarRows, snapshotId } = walked;
 			const projected = query === undefined ? undefined : projectRows(walked.rows, query);
 			const rows = projected?.rows ?? walked.rows;
-			// Only the walker knows whether it clipped the tree. `truncated` is its
-			// explicit verdict and `elements_complete` its older positive proof.
-			// Equal returned/total counts prove nothing: both count what the walk
-			// reached, so every budget-capped walk called itself complete. Without
-			// a verdict a requested `maxElements` is a budget the walk may have
-			// hit, and no count can argue that away.
-			const walkFinished = reply.data.ax_walk_timed_out !== true && reply.data.ax_walk_stop_reason == null;
-			const countedWhole =
-				typeof reply.data.returned_element_count === "number" &&
-				reply.data.returned_element_count === reply.data.total_element_count;
+			// Only the walker knows whether it clipped the tree, and both pinned
+			// builds say so in `truncated` whenever a walk ran. Equal
+			// returned/total counts prove nothing: both count what the walk
+			// reached, so every budget-capped walk would call itself complete.
 			const complete =
-				walkFinished &&
-				(typeof reply.data.truncated === "boolean"
-					? !reply.data.truncated
-					: reply.data.elements_complete === true || (options.maxElements === undefined && countedWhole));
+				reply.data.ax_walk_timed_out !== true &&
+				reply.data.ax_walk_stop_reason == null &&
+				reply.data.truncated === false;
 			const observation: ComputerObservation = {
 				snapshotId,
 				window: current,
@@ -1595,11 +1358,15 @@ export class CuaComputerSession implements ComputerBackend {
 							projected.shown > 0 ? `, ${projected.shown} row${projected.shown === 1 ? "" : "s"} shown under them` : ""
 						}); ${walked.rows.length - rows.length} hidden — drop the query to read them.`
 					: undefined;
+			// Said once per window: the route is the prompt's to teach, and the
+			// same sentence on every read was the largest line of boilerplate.
+			const menuBarHint = menuBarRows > 0 && !this.#menuBarHinted.has(current.id);
+			if (menuBarHint) this.#menuBarHinted.add(current.id);
 			observation.tree = [
 				...sheets,
 				parent,
 				hidden,
-				menuBarRows
+				menuBarHint
 					? `Menu bar hidden (${menuBarRows} rows): its items only respond while their own menu is open, so drive it with win.menu(["<menu>", "<item>"], { delivery: "foreground" }); observe({ menubar: true }) shows them.`
 					: undefined,
 			]
@@ -1617,15 +1384,12 @@ export class CuaComputerSession implements ComputerBackend {
 				)}`;
 			// Document apps: the app's own dirty bit and file path (absent = the app
 			// reports neither). AX value writes never reach disk, so this is how the
-			// model tells "text changed" from "saved".
+			// model tells "text changed" from "saved". A line is printed only for
+			// a fact: a path, or unsaved changes.
 			if (typeof reply.data.document_path === "string") observation.documentPath = reply.data.document_path;
-			// Kept for the next ambiguous acquisition of this app: a document
-			// window's file identifies it where its title does not.
-			if (observation.documentPath === undefined) this.#documents.delete(current.id);
-			else this.#documents.set(current.id, observation.documentPath);
 			if (typeof reply.data.document_edited === "boolean") observation.documentEdited = reply.data.document_edited;
-			if (observation.documentPath !== undefined || observation.documentEdited !== undefined)
-				observation.tree += `\nDocument: ${observation.documentPath ?? "(path unknown)"}${observation.documentEdited === undefined ? "" : observation.documentEdited ? " — unsaved changes" : " — no unsaved changes flagged"}`;
+			if (observation.documentPath !== undefined || observation.documentEdited === true)
+				observation.tree += `\nDocument: ${observation.documentPath ?? "(path unknown)"}${observation.documentEdited === true ? " — unsaved changes" : ""}`;
 			const opened = await this.#openedWindows(current.pid, {
 				roster: this.#lastRoster.get(current.pid) ?? [],
 				observed: current.id,
@@ -1638,10 +1402,6 @@ export class CuaComputerSession implements ComputerBackend {
 			observation.interruptedBy = this.#interruption();
 			if (observation.interruptedBy)
 				observation.tree += `\n⚠️ Interrupted: ${describeInterruption(observation.interruptedBy)}. Actions on any window are refused until it is answered; tell the user what is asking.`;
-			// The write that decided what this tree means may have been dispatched
-			// by a cell that displayed only this read.
-			const doubted = this.#doubtedWrites(current.id);
-			if (doubted.length) observation.tree = `${doubted.join("\n")}\n${observation.tree}`;
 			this.#observedRoster.set(
 				current.pid,
 				new Set((this.#lastRoster.get(current.pid) ?? []).filter(row => row.onScreen !== false).map(row => row.id)),
@@ -1789,13 +1549,11 @@ export class CuaComputerSession implements ComputerBackend {
 				...(typeof row.value === "string" ? { value: row.value } : {}),
 				...(typeof row.placeholder === "string" ? { placeholder: row.placeholder } : {}),
 				// Semantics the provider authored but role/label do not carry. An
-				// empty string is the driver's way of saying "none", and a
-				// description that merely repeats the label is pure noise.
+				// empty string is the driver's way of saying "none"; the driver
+				// already drops a description that repeats the label, and one
+				// that repeats the value is as much noise.
 				...(typeof row.help === "string" && row.help ? { help: row.help } : {}),
-				...(typeof row.description === "string" &&
-				row.description &&
-				row.description !== row.label &&
-				row.description !== row.value
+				...(typeof row.description === "string" && row.description && row.description !== row.value
 					? { description: row.description }
 					: {}),
 				...(typeof row.enabled === "boolean" ? { enabled: row.enabled } : {}),
@@ -1856,19 +1614,14 @@ export class CuaComputerSession implements ComputerBackend {
 	}
 	#retireSheet(id: string, title: string): void {
 		this.#sheets.delete(id);
-		const drop = (live: Map<string, Binding>): void => {
-			for (const [ref, binding] of live) {
-				if (binding.window.id !== id) continue;
-				live.delete(ref);
-				this.#acted.delete(ref);
-				this.#staleSheetRefs.set(
-					ref,
-					`sheet ${JSON.stringify(title)} (window ${id}) is gone; observe the window that had it again`,
-				);
-			}
-		};
-		drop(this.#elements);
-		drop(this.#carried);
+		for (const [ref, binding] of this.#elements) {
+			if (binding.window.id !== id) continue;
+			this.#elements.delete(ref);
+			this.#staleSheetRefs.set(
+				ref,
+				`sheet ${JSON.stringify(title)} (window ${id}) is gone; observe the window that had it again`,
+			);
+		}
 	}
 	async #state(
 		context: Context,
@@ -1881,7 +1634,6 @@ export class CuaComputerSession implements ComputerBackend {
 		// nothing: pixels stay valid until the window's own geometry moves,
 		// which `#target` checks against the live bounds on every use.
 		if (args.include_screenshot === true) this.#frames.clear();
-		if (args.include_accessibility_tree !== false) this.#invalidate(window);
 		const current = await this.#current(window);
 		throwIfAborted(context.signal);
 		// The driver caps the capture's long edge for us, so the window's own
@@ -2040,11 +1792,6 @@ export class CuaComputerSession implements ComputerBackend {
 				include_accessibility_tree: false,
 				include_screenshot: true,
 			});
-			// An image carries no text of its own, so an unproven write goes in
-			// front of the pixels it is true of. It is carried, never answered:
-			// a capture reads no tree, so the bindings this session is holding
-			// are the ones the write was dispatched against.
-			for (const doubt of this.#drainDoubts(current.id)) context.emitText(doubt.sentence);
 			return this.#windowImage(context, current, reply, options.silent === true);
 		});
 	}
@@ -2107,20 +1854,16 @@ export class CuaComputerSession implements ComputerBackend {
 		return point;
 	}
 	/**
-	 * What the pid put on screen that the caller has never seen. The handle it
-	 * acted through is never rebound — a window it did not ask for is a fact
-	 * about the app, not a new target — so the id and the call that acquires
-	 * it are named and the choice stays the caller's. Read on both paths: a
-	 * dialog that renders asynchronously (Chrome's print, save and open
-	 * panels, 24 episodes in the bench corpus) appears seconds after the
-	 * action that asked for it, so an action-only diff never named it and the
-	 * model hunted it by hand. The observe path spends the roster the walk's
-	 * own window resolution already read; `read.observed` is this walk's
-	 * window, which is being looked at rather than announced, and
-	 * `read.rendered` names the windows that walk already drew into its own
-	 * tree — an application-modal dialog is a real top-level window, so it is
-	 * new and it is AX-backed, and telling the caller to acquire a window
-	 * whose buttons it is already holding refs for buys nothing.
+	 * What the pid put on screen that the caller has never seen, as a fact
+	 * about the app: which window, and nothing about what to do with it. The
+	 * handle it acted through is never rebound. Read on both paths: a dialog
+	 * that renders asynchronously (Chrome's print, save and open panels)
+	 * appears seconds after the action that asked for it. The observe path
+	 * spends the roster the walk's own window resolution already read;
+	 * `read.observed` is this walk's window, which is being looked at rather
+	 * than announced, and `read.rendered` names the windows that walk already
+	 * drew into its own tree. A display's desktop surface is no window an app
+	 * opened.
 	 */
 	async #openedWindows(
 		pid: number | undefined,
@@ -2140,83 +1883,23 @@ export class CuaComputerSession implements ComputerBackend {
 		const opened = after.filter(
 			window =>
 				window.onScreen !== false &&
+				window.kind !== "desktop" &&
 				!before.has(window.id) &&
 				!this.#sheets.has(window.id) &&
-				window.id !== read?.observed,
+				window.id !== read?.observed &&
+				read?.rendered?.has(window.id) !== true,
 		);
 		if (!opened.length) return undefined;
-		const attached = await this.#attachedTo(pid, opened);
-		const lines: string[] = [];
-		for (const window of opened) {
-			const host = attached.get(window.id);
-			if (host === undefined) {
-				lines.push(
-					read?.rendered?.has(window.id) === true
-						? `pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation; the application reports it modal, so no other window of this pid takes input until it is answered. Its controls are in the tree above — act on them there, without acquiring it.`
-						: `pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation — acquire it with computer.window(${JSON.stringify(window.id)}).`,
-				);
-				for (const row of opened)
-					if (attached.get(row.id) === window.id)
-						lines.push(
-							`  window ${row.id} (${JSON.stringify(row.title)}) is attached to it — no accessibility window of its own — and renders inside its parent's tree; observe window ${window.id}, not this id.`,
-						);
-			} else if (!opened.some(row => row.id === host))
-				lines.push(
-					`pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation; it is attached to window ${host} — no accessibility window of its own — and renders inside that window's tree; observe window ${host}, not this id.`,
-				);
-		}
-		return lines.length ? lines.join("\n") : undefined;
-	}
-	/**
-	 * Which of these newly gained rows are attached surfaces, each against the
-	 * window it hangs on — one gained in the same instant or one that was
-	 * already on screen. Only an observation of the parent reports the
-	 * relation, which is exactly what has not happened for a window that
-	 * appeared this instant — and announcing a sheet beside its own parent
-	 * sent the bench into a tree rooted at `AXSheet` that cost a cell to
-	 * recover from. So the AXWindows mapping says which rows are windows at
-	 * all, and containment says whose surface this is: a sheet, popover or
-	 * inline editor is drawn inside the window it belongs to, and a window of
-	 * its own is what it has not got. Anything neither settles stays a window.
-	 */
-	async #attachedTo(pid: number, opened: readonly ComputerWindowIdentity[]): Promise<ReadonlyMap<string, string>> {
-		const attached = new Map<string, string>();
-		let annotated: readonly ComputerWindowIdentity[];
-		try {
-			const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
-			const ax = this.#accessibilityWindows(data, pid);
-			if (!ax) return attached;
-			annotated = this.#withAccessibility(this.#windowRoster(data, { pid }, this.#roster()), ax);
-		} catch (error) {
-			if (!(error instanceof ToolError)) throw error;
-			return attached;
-		}
-		const rows = opened.map(window => annotated.find(row => row.id === window.id) ?? window);
-		const windows = annotated.filter(row => row.axBacked === true && row.onScreen !== false);
-		for (const row of rows) {
-			if (row.axBacked === true) continue;
-			const hosts = windows.filter(host => encloses(host.bounds, row.bounds));
-			if (hosts.length === 1) attached.set(row.id, hosts[0]!.id);
-		}
-		return attached;
+		return opened
+			.map(
+				window => `pid ${pid} gained window ${window.id} (${JSON.stringify(window.title)}) since your last observation.`,
+			)
+			.join("\n");
 	}
 	/** Whether this session's own roster holds the window that id names. */
 	#holdsWindow(id: string): boolean {
 		for (const rows of this.#lastRoster.values()) if (rows.some(row => row.id === id)) return true;
 		return false;
-	}
-	/**
-	 * The rung the driver names is the whole fact: a keyboard escalation
-	 * spells its `reason` as a contract token (`delivery_failed`) or as the
-	 * prose sentence the fork's `hotkey`/`type_text` emit, so only the target
-	 * is a route. A refused foreground dispatch is not a route to keep
-	 * taking, whoever chose it.
-	 */
-	#keyboardEscalation(name: string, args: Wire, reply: ActionReply, refused: boolean): void {
-		if (KEYBOARD_TOOLS[name] !== true || typeof args.window_id !== "number") return;
-		const window = String(args.window_id);
-		if (refused && args.delivery_mode === "foreground") this.#escalatedKeyboard.delete(window);
-		else if (reply.escalation?.target === "foreground") this.#escalatedKeyboard.add(window);
 	}
 	#refForToken(token: unknown): string | undefined {
 		if (typeof token !== "string") return undefined;
@@ -2237,7 +1920,7 @@ export class CuaComputerSession implements ComputerBackend {
 			windowId,
 			pid: typeof args.pid === "number" ? args.pid : undefined,
 			addressed,
-			element: addressed === undefined ? undefined : this.#bound(addressed)?.element,
+			element: addressed === undefined ? undefined : this.#elements.get(addressed)?.element,
 			rows,
 			captured: windowId !== undefined && this.#frames.has(windowId),
 			holds: id => this.#holdsWindow(id),
@@ -2245,11 +1928,14 @@ export class CuaComputerSession implements ComputerBackend {
 		};
 	}
 	/**
-	 * The pre-dispatch gate cleared the screen a moment ago, so any blocking
-	 * window found now appeared while this action ran — a prompt the action
-	 * itself provoked, or the user's own. The action is not retracted; the
-	 * result says the environment changed under it, and the next mutation is
-	 * refused until the panel goes away.
+	 * One dispatch and its reply, said once: the driver's own sentence, then
+	 * the line each renderer has to add, a window the app gained meanwhile,
+	 * and system UI that appeared while it ran. The pre-dispatch gate cleared
+	 * the screen a moment ago, so a blocking window found now appeared while
+	 * this action ran; the action is not retracted, and the next mutation is
+	 * refused until it goes away. Whatever the reply leaves unproven, and any
+	 * line composed here, rides the must-show flag, so the cell prints it even
+	 * where the code drops the returned value.
 	 */
 	async #action(name: string, args: Wire): Promise<ComputerActionResult> {
 		let called: Reply;
@@ -2261,7 +1947,6 @@ export class CuaComputerSession implements ComputerBackend {
 		} catch (error) {
 			if (!(error instanceof ToolError)) throw error;
 			const reply = readReply(error.context);
-			this.#keyboardEscalation(name, args, reply, true);
 			const lines = [
 				error.message,
 				actionEvidence(reply, typeof args.delivery_mode === "string" ? args.delivery_mode : undefined),
@@ -2276,19 +1961,8 @@ export class CuaComputerSession implements ComputerBackend {
 		// too ("click this control's pixel center with delivery_mode:foreground");
 		// a next step is only executable if it is spelled the way the caller types.
 		const reported = preludeVocabulary(result.text);
-		this.#keyboardEscalation(name, args, reply, false);
+		const escalated = escalation(reply, this.#facts(name, reported, args));
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
-		// A probe that watched one window and saw nothing move is refuted by a
-		// window the app put on screen in the same reply: the app did react,
-		// somewhere the probe was not watching. The no-change sentence sends
-		// the caller back to re-run the action or to hunt its pixels, and both
-		// are wrong over a reply that names the app's own answer — so the
-		// window is the whole signal and the doubt is not printed beside it.
-		const refuted = opened !== undefined && unobservedChange(reply.effect);
-		const escalated = refuted ? undefined : escalation(reply, this.#facts(name, reported, args));
-		const reacted = refuted
-			? "⚠️ The driver watched this window and saw no change, but the same action put a window on screen — that is the change its probe missed; read the window named below instead of re-running the action."
-			: undefined;
 		// A window one of this session's dispatches changed is re-read once if
 		// the next walk catches it mid-transition.
 		if (
@@ -2297,29 +1971,22 @@ export class CuaComputerSession implements ComputerBackend {
 			reply.effect !== "not_dispatched"
 		)
 			this.#mutated.add(String(args.window_id));
-		// Keystrokes the driver turned into the app's own menu command lead
-		// with that fact: the driver's sentence starts with the chord.
-		const menuCommand = KEYBOARD_TOOLS[name] === true ? menuCommandLine(reply) : undefined;
+		const notes = [
+			escalated,
+			opened,
+			interruptedBy
+				? `⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
+				: undefined,
+		].filter(line => line !== undefined);
 		return {
-			text: [
-				menuCommand,
-				reported,
-				reacted,
-				escalated,
-				opened,
-				interruptedBy
-					? `⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
-					: undefined,
-			]
-				.filter(line => line !== undefined)
-				.join("\n"),
+			text: [reported, ...notes].filter(Boolean).join("\n"),
 			effect: reply.effect ?? "unverifiable",
 			evidence: data.evidence ?? null,
 			route: reply.route ?? "cua-sdk",
 			delivery: data.delivery ?? args.delivery_mode ?? "background",
 			...(reply.committed === undefined ? {} : { committed: reply.committed }),
 			...(escalated === undefined ? {} : { escalation: escalated }),
-			...(menuCommand === undefined ? {} : { menuPath: reply.menuPath }),
+			...(notes.length > 0 || reply.effect === undefined || unproven(reply) ? { mustShow: true } : {}),
 			interruptedBy,
 			data,
 		};
@@ -2327,32 +1994,22 @@ export class CuaComputerSession implements ComputerBackend {
 	/**
 	 * A ref whose element the platform can no longer reach. The refusal is
 	 * about one row and says nothing about the window, yet throwing it
-	 * discarded the whole tree: all four bench refusals of this shape were
+	 * discarded the whole tree: every bench refusal of this shape was
 	 * followed by a bare `observe()` whose only job was to recover what the
-	 * throw dropped, and one run lost a half-built contact card for 15 cells
-	 * because the refusal carried no state. So the window is read once — the
-	 * caller has to re-read it either way — and the reply is the ordinary
-	 * non-throwing shape the surface already uses for "we do not believe this
-	 * landed", with nothing dispatched and the current tree in hand.
+	 * throw dropped. So the window is read once — the caller has to re-read
+	 * it either way — and the reply is the ordinary non-throwing shape for
+	 * "this did not land": nothing dispatched, the current tree in hand, and a
+	 * census of what the fresh tree holds where the dead row sat. Nothing is
+	 * re-addressed: the caller names the row it means.
 	 *
-	 * That walk is this session's, not the caller's, so it does not spend the
-	 * caller's refs either: `#carry` hands every ref it re-minted back to the
-	 * row it named wherever the fresh tree says which row that is, and the
-	 * batch behind the dead one goes on dispatching.
+	 * That walk is this session's, not the caller's, so it retires only the
+	 * dead ref. Every other ref stays bound to the exact element its
+	 * observation minted it for: one whose element died too refuses the same
+	 * way, and one whose element lives still reaches exactly that element.
 	 *
-	 * Only where a re-read can answer, which the reply says: `element_
-	 * outside_target_window` also covers a row that is alive in another
-	 * window (`acquire_window` — this window's tree provably cannot hold it)
-	 * and a proven menu-bar row, whose ancestry is process-scoped by
-	 * construction (`element` — the row is there and a semantic action on it
-	 * is exactly addressed). The route is read from whichever field carries
-	 * it: `advice` on a background refusal, the escalation target on the
-	 * ungated AX route, which is a tool error payload with no `advice` at
-	 * all. A reply naming no route gets the recovery, which is the released
-	 * shape all four measurements came from.
+	 * Only where a re-read can answer, which the reply says (`deadElement`).
 	 */
 	async #deadElement(
-		name: string,
 		error: ToolError,
 		args: Wire,
 		target: ComputerTarget | undefined,
@@ -2362,94 +2019,37 @@ export class CuaComputerSession implements ComputerBackend {
 		if (!deadElement(reply)) return undefined;
 		if (recover === undefined || typeof target !== "string" || typeof args.element_token !== "string")
 			return undefined;
-		const binding = this.#bound(target);
-		const snapshot = binding?.element;
-		// Whatever was attempted through this ref, the refusal says it did not
-		// land, so this row's own value is as untouched as any other row's and
-		// it is carried on the same terms as its siblings.
-		this.#acted.delete(target);
+		const binding = this.#elements.get(target);
+		this.#elements.delete(target);
 		let rows: readonly TreeRow[];
 		try {
-			const { reply, current } = await this.#state(recover.context, recover.window, {
+			const { reply: state, current } = await this.#state(recover.context, recover.window, {
 				include_accessibility_tree: true,
 				include_screenshot: false,
 			});
 			throwIfAborted(recover.context.signal);
-			rows = this.#walk(current, reply, {}).rows;
+			rows = this.#walk(current, state, {}).rows;
 		} catch (failed) {
 			if (!(failed instanceof ToolError)) throw failed;
 			return undefined;
 		}
+		const snapshot = binding?.element;
 		const named =
 			snapshot === undefined
 				? target
 				: `${target} (${snapshot.role}${snapshot.label ? ` ${JSON.stringify(snapshot.label)}` : ""})`;
-		const carried = this.#carry(recover.window);
-		const parked = this.#retired.get(recover.window.id);
-		const identity = binding?.identity ?? parked?.get(target)?.identity;
+		const identity = binding?.identity;
 		const under = identity?.path.at(-1);
-		// Refs this walk re-bound on their place alone, because neither
-		// generation gave their value anything to say. Only the dead target's
-		// own carry is printed, so the rest of a batch comes back silently on
-		// whichever ground it found — and a form re-bound to another record
-		// keeps every field's place, which is exactly the ground these stand
-		// on. Said so the caller can weigh them before writing through them.
-		const positional = [...carried]
-			.filter(
-				([ref, [, row]]) =>
-					ref !== target &&
-					!evidential(parked?.get(ref)?.identity.value) &&
-					!evidential(row.identity.value),
-			)
-			.map(([ref]) => ref);
-		const weaker =
-			positional.length === 0
-				? ""
-				: `\n${positional.join(", ")} held no value then and hold${
-						positional.length === 1 ? "s" : ""
-					} none now — ${positional.length === 1 ? "it was" : "they were"} re-bound by position alone.`;
-		// Said wherever this reply ends up, because it is the answer to the
-		// question a dead ref raises about every other ref the caller is
-		// holding: this walk is not the caller's `observe`, and it did not
-		// end their lives.
-		const contract =
-			"That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.";
-		const retargeted = carried.get(target);
-		if (retargeted !== undefined) {
-			const [ref, row] = retargeted;
-			const lead = `${named}${under ? `, under ${under},` : ""} no longer exists in window ${
-				recover.window.id
-			} and nothing was dispatched at it — ${ref} is the one row of the fresh tree with the same role, label, value and position`;
-			try {
-				const result = await this.#action(name, {
-					...args,
-					element_token: row.token,
-					snapshot_id: row.snapshotId,
-				});
-				const note = `${lead}, so the action was dispatched at ${ref} instead. ${contract}${weaker}`;
-				return { ...result, text: result.text ? `${note}\n${result.text}` : note };
-			} catch (again) {
-				if (!(again instanceof ToolError)) throw again;
-				// Re-addressing is not a verdict. A retarget whose dispatch the
-				// driver then refused used to read as "dispatched there
-				// instead" with a refusal under it, which is two accounts of
-				// one call: the row took the action, and the row refused it.
-				throw new ToolError(
-					`${lead}, so the action was re-addressed to ${ref}, which refused it. ${contract}${weaker}\n${again.message}`,
-					again.context,
-				);
-			}
-		}
-		const fresh = [...this.#elements].filter(
-			([, row]) => row.window.id === recover.window.id && row.window.pid === recover.window.pid,
-		);
+		const fresh = rows.flatMap(row => {
+			const minted = this.#elements.get(row.element.ref)?.identity;
+			return minted === undefined ? [] : [minted];
+		});
 		const place = identity === undefined ? undefined : placeKey(identity);
-		const placed = place === undefined ? 0 : fresh.filter(([, row]) => placeKey(row.identity) === place).length;
+		const placed = place === undefined ? 0 : fresh.filter(row => placeKey(row) === place).length;
 		const sameName =
 			identity === undefined
 				? 0
-				: fresh.filter(([, row]) => row.identity.role === identity.role && row.identity.label === identity.label)
-						.length;
+				: fresh.filter(row => row.role === identity.role && row.label === identity.label).length;
 		const census =
 			identity === undefined
 				? "no identity for it was recorded"
@@ -2458,23 +2058,19 @@ export class CuaComputerSession implements ComputerBackend {
 					: `the fresh tree has ${sameName} row(s) with its role and label, ${
 							placed ? `${placed} of them` : "none"
 						} in the same position${under ? ` under ${under}` : ""}`;
-		// The walk retired this ref to mint the tree below, so the sentence
-		// that closes it has to hand the new one back: the bench read "That
-		// window as it is now — address the row you mean from it." as a
-		// fragment and retried the dead ref, which throws `StaleRef`.
 		const readdress = rows.length
-			? `${target} is retired and the tree below carries this window's new refs — address the row you mean by its new ref. ${contract}${weaker}`
+			? `${target} is retired; the tree below carries new refs for this window — address the row you mean by its new ref. Your other refs keep the exact elements they were minted for until your next observe.`
 			: `${target} is retired and this walk minted no refs to address — observe the window again (win.observe()) once it has rows.`;
 		const text = `${reply.code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${
 			rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown."
 		}`;
-		recover.context.emitText(text);
 		return {
 			text,
 			effect: "not_dispatched",
 			evidence: null,
 			delivery: args.delivery_mode ?? null,
 			...(reply.route === undefined ? {} : { route: reply.route }),
+			mustShow: true,
 			data: reply.data,
 		};
 	}
@@ -2485,18 +2081,17 @@ export class CuaComputerSession implements ComputerBackend {
 		target: ComputerTarget | undefined,
 		recover?: { context: Context; window: ComputerWindowIdentity },
 	): Promise<ComputerActionResult> {
-		// Whatever this dispatch does to the row, its value is the part of its
-		// identity that is expected to move: `#carry` reads this to tell a
-		// field it just wrote from a field that changed under it.
-		if (typeof target === "string") this.#acted.add(target);
+		// The addressed row as its observation printed it, read before a
+		// dead-element recovery retires its binding.
+		const element = typeof target === "string" ? this.#elements.get(target)?.element : undefined;
 		try {
 			return await this.#action(name, args);
 		} catch (error) {
 			// An aborted call is not a ToolError and keeps its own identity.
 			if (!(error instanceof ToolError)) throw error;
-			const gone = await this.#deadElement(name, error, args, target, recover);
+			const gone = await this.#deadElement(error, args, target, recover);
 			if (gone !== undefined) return gone;
-			const route = menuBarRoute(typeof target === "string" ? this.#bound(target)?.element : undefined);
+			const route = menuBarRoute(element);
 			if (route === undefined) throw error;
 			throw new ToolError(`${error.message}${route}`, error.context);
 		}
@@ -2577,13 +2172,10 @@ export class CuaComputerSession implements ComputerBackend {
 		);
 	}
 	/**
-	 * What a write is now known to be, said once and held against the window it
-	 * was made on. The reply carrying the doubt is the cell's to drop: the bench
-	 * wrote a Save-panel filename, chained an `observe` behind it in the same
-	 * cell, and the only signal it had was never displayed. So the sentence
-	 * rides with the reply and also outlives its own call, spent on the next
-	 * read of that window — the observation or capture whose conclusions would
-	 * rest on the written value.
+	 * What a write is now known to be, said once with its own reply: the
+	 * driver's sentence and the write renderer's one line, which rides the
+	 * must-show flag so a cell that drops the returned value still prints it.
+	 * The field is named as the observation printed it before the dispatch.
 	 */
 	async #write(
 		window: ComputerWindowIdentity,
@@ -2592,13 +2184,8 @@ export class CuaComputerSession implements ComputerBackend {
 		value: string,
 		dispatched: Promise<ComputerActionResult>,
 	): Promise<ComputerActionResult> {
-		// The field is named as the observation printed it before the dispatch,
-		// which may re-mint this window's refs on the way. The binding is kept
-		// whole: the ref will be retired by then, and its identity is how the
-		// next read finds the control again.
-		const control = typeof target === "string" ? this.#bound(target) : undefined;
-		const element = control?.element;
-		const facts = (text: string, escalated: boolean): WriteFacts => ({
+		const element = typeof target === "string" ? this.#elements.get(target)?.element : undefined;
+		const facts = (text: string): WriteFacts => ({
 			...this.#facts(
 				operation === "type" ? "type_text" : "set_value",
 				text,
@@ -2608,140 +2195,17 @@ export class CuaComputerSession implements ComputerBackend {
 			element,
 			operation,
 			target,
-			escalated,
 		});
-		const field = writeField(facts("", false));
 		try {
 			const result = await dispatched;
-			const note = writeNote(result, facts(result.text, result.escalation !== undefined));
+			const note = writeNote(result, facts(result.text));
 			if (note === undefined) return result;
-			// Two doubts are worth re-reading the control for: a `not_committed`
-			// verdict (the driver had no commit gesture to watch, or read the
-			// field too early) and a confirmed delivery the driver did not judge
-			// at all (keystrokes, which never carry a verdict). What the tree
-			// then shows replaces the doubt with what the control holds — not
-			// with a verdict on the app. An unverifiable or unproven write is
-			// not re-read at all: there the driver has already said the value in
-			// the tree is the echo the doubt is about.
-			const answerable =
-				result.committed === "not_committed" || (result.committed === undefined && result.effect === "confirmed");
-			this.#doubt(
-				window.id,
-				note,
-				answerable && control !== undefined
-					? { field, value, window: control.window, identity: control.identity }
-					: undefined,
-			);
-			return { ...result, text: result.text ? `${result.text}\n${note}` : note };
+			return { ...result, text: result.text ? `${result.text}\n${note}` : note, mustShow: true };
 		} catch (error) {
 			if (!(error instanceof ToolError) || !error.message.startsWith(INCOMPLETE_TYPING)) throw error;
-			const note = incompleteNote(facts(error.message, false), value, error.message, readReply(error.context));
-			this.#doubt(window.id, note);
+			const note = incompleteNote(facts(error.message), value, error.message, readReply(error.context));
 			throw new ToolError(`${error.message}\n${note}`, error.context);
 		}
-	}
-	/** One sentence per unproven write, and never the same one twice. */
-	#doubt(windowId: string, sentence: string, readBack?: WriteDoubt["readBack"]): void {
-		const doubts = this.#writes.get(windowId);
-		if (doubts) doubts.set(sentence, { sentence, readBack });
-		else this.#writes.set(windowId, new Map([[sentence, { sentence, readBack }]]));
-	}
-	/**
-	 * Every doubt held against this window, and the ledger cleared. A doubt
-	 * is spent by the first read that could have answered it, whether or not
-	 * it did: the next read is about a tree the caller has already acted on.
-	 */
-	#drainDoubts(windowId: string): readonly WriteDoubt[] {
-		const doubts = this.#writes.get(windowId);
-		if (doubts === undefined) return [];
-		this.#writes.delete(windowId);
-		return [...doubts.values()];
-	}
-	/**
-	 * The doubts this observation answers or carries. Only the control the
-	 * write was addressed to can answer one, so it is looked up by identity
-	 * and never by "some row of that role showing the text": one role is a
-	 * whole form's worth of fields, a sheet's rows are read into the same
-	 * observation as the window beneath it, and a `{query}` hides the real
-	 * field while leaving a decoy. A `setValue("5")` answered by the next
-	 * row along that happens to contain a 5 is not a read-back.
-	 *
-	 * Its ref is always retired by the time this runs — the walk that built
-	 * the tree is what retired it — so the control is found by where it sits:
-	 * role, label, the chain above it and its position among same-role
-	 * siblings. Failing that, the same without the label, but only onto a row
-	 * that is labelled by its own value, which is the one way a label churns:
-	 * a field with no title and no description falls back to its value, so
-	 * writing into it renames it to the text that was written. A row still
-	 * carrying a name of its own is a different row at a vacated position,
-	 * not the control under another name. Failing both, the honest answer is
-	 * that this tree does not contain that control.
-	 *
-	 * What the control holds is reported as exactly that and nothing more: a
-	 * control holding the text proves the control holds the text, never that
-	 * the app acted on it. The sentence this replaces ("the write stands;
-	 * build on it, do not rewrite it") was printed over a search field whose
-	 * list the app had not filtered, and bought four cells of probes that
-	 * avoided rewriting the one thing that was wrong. Every control gets the
-	 * same sentence, because the distinction is not a property of the role: a
-	 * filter field, a spreadsheet cell and a rename box all echo what was
-	 * written into them. Shown is trimmed containment, so a value the app
-	 * padded or wrapped still counts as the one written.
-	 */
-	#doubtedWrites(windowId: string): readonly string[] {
-		return this.#drainDoubts(windowId).map(doubt => {
-			const readBack = doubt.readBack;
-			if (readBack === undefined) return doubt.sentence;
-			const identity = readBack.identity;
-			const fresh: Binding[] = [];
-			for (const binding of this.#elements.values())
-				if (binding.window.id === readBack.window.id && binding.window.pid === readBack.window.pid)
-					fresh.push(binding);
-			const place = placeKey(identity);
-			let found = fresh.filter(binding => placeKey(binding.identity) === place);
-			if (found.length !== 1) {
-				const unlabelled = JSON.stringify([identity.role, identity.ordinal, identity.path]);
-				found = fresh.filter(
-					binding =>
-						binding.identity.label === binding.identity.value &&
-						JSON.stringify([binding.identity.role, binding.identity.ordinal, binding.identity.path]) ===
-							unlabelled,
-				);
-			}
-			const control = found.length === 1 ? found[0] : undefined;
-			if (control === undefined)
-				return `${doubt.sentence} The control it was written to is not in this tree — nothing here reads it back.`;
-			const held = control.element.value;
-			// A control that publishes no value reads nothing back either
-			// way, and the doubt the driver raised over it already says so.
-			if (held === undefined) return doubt.sentence;
-			const written = readBack.value.trim();
-			if (written === "" ? held.trim() !== "" : !held.trim().includes(written))
-				return `${doubt.sentence} The control it was written to now holds ${JSON.stringify(held)}.`;
-			return `${readBack.field}: the control now holds ${JSON.stringify(
-				held,
-			)} — that is the field, not the app's response; judge by the app's own output (rows filtered, title changed, list updated).`;
-		});
-	}
-	/**
-	 * The keyboard route for this window: what the caller asked for, or the
-	 * foreground rung the driver escalated to on this window and this session
-	 * kept. The route is stated with the result — a background action that
-	 * silently activates an app would otherwise be a surprise — and an
-	 * explicit `{ delivery }` always wins, since the caller may be testing the
-	 * rung the escalation gave up on.
-	 */
-	#keyboardRoute(window: ComputerWindowIdentity, options: ActionOptions): { wire: Wire; note?: string } {
-		if (options.delivery !== undefined || !this.#escalatedKeyboard.has(window.id)) return { wire: delivery(options) };
-		return {
-			wire: { delivery_mode: "foreground" },
-			note: "delivery: foreground (remembered from the driver's escalation on this window)",
-		};
-	}
-	async #routed(dispatched: Promise<ComputerActionResult>, note: string | undefined): Promise<ComputerActionResult> {
-		const result = await dispatched;
-		if (note === undefined) return result;
-		return { ...result, text: result.text ? `${result.text}\n${note}` : note };
 	}
 	type(
 		context: Context,
@@ -2750,7 +2214,6 @@ export class CuaComputerSession implements ComputerBackend {
 		target?: ComputerTarget,
 		options: TypeOptions = {},
 	): Promise<ComputerActionResult> {
-		const route = this.#keyboardRoute(window, options);
 		// The caret goes to the driver as given: it places it through AX, reads
 		// it back and refuses with a typed code when it cannot, so the session
 		// has nothing to add.
@@ -2760,10 +2223,7 @@ export class CuaComputerSession implements ComputerBackend {
 			"type",
 			target,
 			text,
-			this.#routed(
-				this.#targetAction(context, "type_text", window, target, { text, ...caret, ...route.wire }),
-				route.note,
-			),
+			this.#targetAction(context, "type_text", window, target, { text, ...caret, ...delivery(options) }),
 		);
 	}
 	setValue(
@@ -2788,14 +2248,10 @@ export class CuaComputerSession implements ComputerBackend {
 		options: ActionOptions = {},
 	): Promise<ComputerActionResult> {
 		const keys = chordKeys(chord, this.#platform);
-		const route = this.#keyboardRoute(window, options);
-		return this.#routed(
-			this.#targetAction(context, keys.length === 1 ? "press_key" : "hotkey", window, target, {
-				...(keys.length === 1 ? { key: keys[0] } : { keys }),
-				...route.wire,
-			}),
-			route.note,
-		);
+		return this.#targetAction(context, keys.length === 1 ? "press_key" : "hotkey", window, target, {
+			...(keys.length === 1 ? { key: keys[0] } : { keys }),
+			...delivery(options),
+		});
 	}
 	/**
 	 * Exactly the names this ref's own row printed, plus the six semantic ones.
@@ -2811,7 +2267,7 @@ export class CuaComputerSession implements ComputerBackend {
 		ref: string,
 		action: string,
 	): Promise<ComputerActionResult> {
-		const binding = this.#bound(ref);
+		const binding = this.#elements.get(ref);
 		const custom = binding?.customActions.get(action);
 		const semantic = semanticAction(action);
 		const advertised = binding?.element.actions ?? [];
@@ -2828,17 +2284,6 @@ export class CuaComputerSession implements ComputerBackend {
 			ref,
 			{ action: custom ?? semantic ?? action, delivery_mode: "background" },
 			window.id,
-		);
-	}
-	hover(
-		context: Context,
-		_window: ComputerWindowIdentity,
-		_x: number,
-		_y: number,
-		_options: ActionOptions = {},
-	): Promise<ComputerActionResult> {
-		return this.#schedule(context, "hover", true, async () =>
-			unsupported("window hover; move_cursor only moves an overlay in window scope"),
 		);
 	}
 	/**
@@ -2884,11 +2329,7 @@ export class CuaComputerSession implements ComputerBackend {
 				...delivery(options),
 			});
 			if (result.evidence !== null || result.effect !== "unverifiable") return result;
-			this.#doubt(
-				current.id,
-				"a drag was delivered with no effect reported — re-read this window before building on it",
-			);
-			return { ...result, text: [result.text, UNPROBED_DRAG].filter(Boolean).join("\n") };
+			return { ...result, text: [result.text, UNPROBED_DRAG].filter(Boolean).join("\n"), mustShow: true };
 		});
 	}
 	scroll(
@@ -2921,27 +2362,16 @@ export class CuaComputerSession implements ComputerBackend {
 		});
 	}
 	/**
-	 * The titles the refused path could have named. The driver lists them
-	 * itself where it reports `items` for the level it failed at; otherwise
-	 * they are read from the rendered menu bar of the same window it just
-	 * resolved against. Neither path mints a ref or invalidates one.
+	 * The titles the refused path could have named, as the driver lists them
+	 * for the level it stopped resolving at. Nothing is walked for them.
 	 */
-	async #menuNames(window: ComputerWindowIdentity, menuPath: string[], error: ToolError): Promise<string | undefined> {
+	#menuNames(menuPath: string[], error: ToolError): string | undefined {
 		const reply = readReply(error.context);
-		if (reply.code !== "menu_path_unavailable") return undefined;
+		if (reply.code !== "menu_path_unavailable" || !reply.items?.length) return undefined;
 		const refused = MENU_REFUSAL_SEGMENT.exec(error.message);
 		const failed = reply.failedSegment ?? (refused ? Number(refused[1]) : undefined);
 		if (failed === undefined || failed >= menuPath.length) return undefined;
-		const ambiguous = refused?.[2] === "is ambiguous";
-		if (reply.items?.length) return menuRefusalItems(menuPath, failed, reply.items, ambiguous);
-		const { data: state } = await this.#call("get_window_state", {
-			...windowArgs(window),
-			include_accessibility_tree: true,
-			include_screenshot: false,
-			max_depth: MENU_WALK_DEPTH,
-		});
-		if (typeof state.tree_markdown !== "string") return undefined;
-		return menuRefusalNames(state.tree_markdown, menuPath, failed, ambiguous) || undefined;
+		return menuRefusalItems(menuPath, failed, reply.items, refused?.[2] === "is ambiguous");
 	}
 	menu(
 		context: Context,
@@ -2957,13 +2387,16 @@ export class CuaComputerSession implements ComputerBackend {
 				const result = await this.#action("invoke_menu", { ...windowArgs(current), path: menuPath });
 				const reply = readReply(result.data);
 				if (!reply.items?.length) return result;
-				return { ...result, text: menuSubmenuListing(reply.resolvedPath ?? menuPath, reply.items) };
+				return {
+					...result,
+					text: menuSubmenuListing(reply.resolvedPath ?? menuPath, reply.items),
+					mustShow: true,
+				};
 			} catch (error) {
 				// An aborted call is not a ToolError and keeps its own identity;
-				// a refusal the menu bar cannot explain stays exactly as written.
+				// a refusal the driver lists no items for stays exactly as written.
 				if (!(error instanceof ToolError)) throw error;
-				const names = await this.#menuNames(current, menuPath, error).catch(() => undefined);
-				throwIfAborted(context.signal);
+				const names = this.#menuNames(menuPath, error);
 				if (names === undefined) throw error;
 				throw new ToolError(`${error.message}\n${names}`, error.context);
 			}
@@ -3221,17 +2654,16 @@ export class CuaComputerSession implements ComputerBackend {
 			}
 			const data = result.data as { pid?: unknown } | undefined;
 			const pid = typeof data?.pid === "number" ? data.pid : undefined;
-			// An app that traps at startup queues a CrashReporter alert (UserNotificationCenter)
-			// a moment after launch_app returns. Watch briefly so the crash surfaces as an
-			// interruption naming the alert instead of a "launched" result that invites a retry.
-			// macOS-only: no other platform draws that alert, and polling an
-			// always-empty roster would only cost the launch two seconds.
-			for (let waited = 0; this.#platform === "darwin" && !result.interruptedBy && waited < 2_000; waited += 250) {
-				await Bun.sleep(250);
-				throwIfAborted(context.signal);
-				result.interruptedBy = this.#interruption();
-			}
+			// An app that traps at startup queues a CrashReporter alert
+			// (UserNotificationCenter) a moment after launch_app returns, so the
+			// crash surfaces as an interruption naming the alert instead of a
+			// "launched" result that invites a retry. Only a launched process that
+			// is already gone can have raised it, so only then is it waited for
+			// (macOS-only; see #watchCrashAlert) — a live launch pays nothing.
+			if (!result.interruptedBy && pid !== undefined && !processAlive(pid))
+				result.interruptedBy = await this.#watchCrashAlert(context, pid);
 			if (result.interruptedBy) {
+				result.mustShow = true;
 				result.text +=
 					pid !== undefined && this.#recordCrashAlert(pid, result.interruptedBy)
 						? `\n⚠️ ${crashAlertGuidance(pid, result.interruptedBy)}`
@@ -3273,10 +2705,7 @@ export class CuaComputerSession implements ComputerBackend {
 				await this.#driver.kill();
 			} finally {
 				this.#elements.clear();
-				this.#carried.clear();
-				this.#acted.clear();
 				this.#frames.clear();
-				this.#documents.clear();
 				this.#desktopFrame = undefined;
 			}
 		})();

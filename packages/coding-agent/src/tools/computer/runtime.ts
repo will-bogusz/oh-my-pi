@@ -125,38 +125,18 @@ function operationContext(getContext: RunContextAccessor): ComputerOperationCont
 }
 
 /**
- * Effects that mean the driver dispatched without proving the target reacted:
- * `no_observed_change` (nothing about the target changed after delivery),
- * `suspected_noop` (the element never advertised the action) and
- * `unverifiable` (it dispatched an app action and cannot say what it did).
- * None of the three is a result the caller can read off the state, so their
- * text is pushed into the cell output instead of living only in a return
- * value the cell is free to drop.
+ * An action's text reaches the cell output only where the session marked it
+ * must-show: a reply that left its delivery or written value unproven, or
+ * one the session added a line to. That text cannot live only in a return
+ * value the cell is free to drop, or a silent no-op reads as success; a
+ * proven action says nothing.
  */
-const UNDELIVERED_EFFECTS: Record<string, true> = {
-	no_observed_change: true,
-	suspected_noop: true,
-	unverifiable: true,
-};
-
 async function reported(
 	context: ComputerOperationContext,
 	action: Promise<ComputerActionResult>,
 ): Promise<ComputerActionResult> {
 	const result = await action;
-	// A write verdict short of `committed` is the same shape by another route:
-	// the driver decided something about the written value that the caller
-	// cannot see from a return value the cell is free to drop. So is a reply
-	// carrying the driver's own escalation. Keyed on the verdict, not on a
-	// `committed === false` the contract stopped sending, which dropped every
-	// write sentence there was.
-	if (
-		(UNDELIVERED_EFFECTS[result.effect] ||
-			(result.committed !== undefined && result.committed !== "committed") ||
-			result.escalation !== undefined) &&
-		result.text
-	)
-		context.emitText(result.text);
+	if (result.mustShow && result.text) context.emitText(result.text);
 	return result;
 }
 
@@ -305,9 +285,6 @@ class Win {
 	doubleClick(target: ComputerTarget, options?: ActionOptions) {
 		return this.click(target, { ...options, count: 2 });
 	}
-	hover(x: number, y: number, options?: ActionOptions) {
-		return this.#session.hover(mutationContext(this.#getContext), this.#window, x, y, options);
-	}
 	drag(from: ComputerTarget, to: ComputerTarget, options?: GestureOptions) {
 		const context = mutationContext(this.#getContext);
 		return reported(context, this.#session.drag(context, this.#window, from, to, options));
@@ -375,22 +352,14 @@ async function missedWindow(
 	return new ToolError(windows === undefined ? head : `${head} ${openWindows(windows)}`, error.context);
 }
 
-/**
- * Resolve one window, naming what is open when nothing matches it. `acquire`
- * is the caller starting over on the window; rehydrating the handle a prelude
- * method already carries is not.
- */
+/** Resolve one window, naming what is open when nothing matches it. */
 async function resolveWindow(
 	session: ComputerBackend,
 	getContext: RunContextAccessor,
 	selector: WindowSelector,
 	options: WindowResolveOptions,
-	acquire = true,
 ): Promise<ComputerWindowIdentity> {
-	const context = operationContext(getContext);
-	return await (
-		acquire ? session.acquire(context, selector, options) : session.window(context, selector, options)
-	).catch(async (error: unknown) => {
+	return await session.window(operationContext(getContext), selector, options).catch(async (error: unknown) => {
 		if (!isMissedWindow(error)) throw error;
 		throw await missedWindow(session, getContext, error, error.message);
 	});
@@ -455,7 +424,7 @@ async function launchAndAcquire(
 	for (;;) {
 		const context = operationContext(getContext);
 		if ((await session.windows(context, target)).length || Date.now() >= deadline)
-			return await session.acquire(context, target, options).catch(async (error: unknown) => {
+			return await session.window(context, target, options).catch(async (error: unknown) => {
 				if (!isMissedWindow(error)) throw error;
 				// A `Missing` acquisition used to tell the model to try
 				// `{ launch: true }`, which is what this call already did.
@@ -488,7 +457,7 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 			new Win(
 				session,
 				getContext,
-				await resolveWindow(session, getContext, normalizeWindowSelector(selector, true), options, false),
+				await resolveWindow(session, getContext, normalizeWindowSelector(selector, true), options),
 			),
 		acquireWindow: async (selector: unknown, options: AcquireOptions = {}): Promise<ComputerWindowAcquisition> => {
 			const { launch, ambiguous, ...observeOptions } = options;
@@ -538,10 +507,6 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 			expect: Record<string, unknown>[],
 			options?: { timeoutMs?: number; stableSamples?: number },
 		) => session.verify(operationContext(getContext), identity, expect, options),
-		focusedWindow: async (): Promise<Win | null> => {
-			const window = await session.focusedWindow(operationContext(getContext));
-			return window ? new Win(session, getContext, window) : null;
-		},
 		screenshot: (options?: { silent?: boolean }) => session.screenshot(operationContext(getContext), options),
 		launch: (options: unknown) => session.launch(mutationContext(getContext), normalizeLaunchOptions(options)),
 		ref: (ref: string): El => {

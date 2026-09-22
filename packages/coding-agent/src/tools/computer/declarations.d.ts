@@ -245,7 +245,6 @@ interface ComputerWindow extends ComputerWindowInfo {
 	ref(token: string): ComputerElement & PromiseLike<ComputerElement | null>;
 	click(target: ComputerTarget, options?: ComputerClickOptions): Promise<ComputerAction>;
 	doubleClick(target: ComputerTarget, options?: Omit<ComputerClickOptions, "count">): Promise<ComputerAction>;
-	hover(x: number, y: number, options?: ComputerDeliveryOptions): Promise<ComputerAction>;
 	drag(from: ComputerTarget, to: ComputerTarget, options?: ComputerDragOptions): Promise<ComputerAction>;
 	scroll(direction: ComputerDirection, options?: ComputerScrollOptions): Promise<ComputerAction>;
 	type(text: string, options?: ComputerTypeTargetOptions): Promise<ComputerAction>;
@@ -265,7 +264,6 @@ interface ComputerDesktop {
 	displays(): Promise<(ComputerBounds & { id: string; name: string; scale: number; isPrimary: boolean })[]>;
 	windows(filter?: ComputerWindowFilter): Promise<ComputerWindowInfo[]>;
 	window(selector: string | number | ComputerWindowFilter, options?: ComputerResolveOptions): Promise<ComputerWindow>;
-	focusedWindow(): Promise<ComputerWindow | null>;
 	screenshot(options?: { silent?: boolean }): Promise<ComputerScreenshotResult>;
 	launch(
 		options: string | { bundleId?: string; name?: string; urls?: string[]; newInstance?: boolean },

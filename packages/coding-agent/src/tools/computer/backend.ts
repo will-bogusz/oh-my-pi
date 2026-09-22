@@ -46,12 +46,6 @@ export interface ComputerBackend {
 		selector: string | WindowSelector,
 		options?: WindowResolveOptions,
 	): Promise<ComputerWindowIdentity>;
-	acquire(
-		context: ComputerOperationContext,
-		selector: string | WindowSelector,
-		options?: WindowResolveOptions,
-	): Promise<ComputerWindowIdentity>;
-	focusedWindow(context: ComputerOperationContext): Promise<ComputerWindowIdentity | null>;
 	element(ref: string, window?: ComputerWindowIdentity): ComputerElementSnapshot;
 	elementWindow(ref: string): ComputerWindowIdentity;
 	observe(
@@ -103,13 +97,6 @@ export interface ComputerBackend {
 		window: ComputerWindowIdentity,
 		ref: string,
 		action: string,
-	): Promise<ComputerActionResult>;
-	hover(
-		context: ComputerOperationContext,
-		window: ComputerWindowIdentity,
-		x: number,
-		y: number,
-		options?: ActionOptions,
 	): Promise<ComputerActionResult>;
 	drag(
 		context: ComputerOperationContext,

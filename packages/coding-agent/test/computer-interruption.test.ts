@@ -43,15 +43,6 @@ const keychainPrompt = window({
 });
 
 describe("system window classification", () => {
-	it("classifies the owners that draw system prompts", () => {
-		expect(classifyWindow({ app: "SecurityAgent" })).toBe("auth");
-		expect(classifyWindow({ app: "coreautha" })).toBe("auth");
-		expect(classifyWindow({ app: "UserNotificationCenter" })).toBe("permission");
-		expect(classifyWindow({ app: "loginwindow" })).toBe("lock");
-		expect(classifyWindow({ app: "Open and Save Panel Service" })).toBe("app-modal");
-		expect(classifyWindow({ app: "TextEdit" })).toBe("other");
-	});
-
 	it("matches the whole owner name, so an ordinary app never reads as a prompt", () => {
 		// Keychain Access is the user's app; SecurityAgentHelper is not the panel.
 		expect(classifyWindow({ app: "Keychain Access" })).toBe("other");

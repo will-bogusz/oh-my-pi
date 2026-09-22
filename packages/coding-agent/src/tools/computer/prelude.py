@@ -152,9 +152,6 @@ def _make_computer():
         async def doubleClick(self, *args, **kwargs):
             return await self._method("doubleClick", args, kwargs)
 
-        async def hover(self, *args, **kwargs):
-            return await self._method("hover", args, kwargs)
-
         async def drag(self, *args, **kwargs):
             return await self._method("drag", args, kwargs)
 
@@ -262,10 +259,6 @@ def _make_computer():
                 raise TypeError("computer.window expects one selector or filter keywords")
             options = {key: value for key, value in {"launch": launch, "ambiguous": ambiguous, "screenshot": screenshot, "silent": silent, "maxDepth": maxDepth, "maxElements": maxElements, "query": query}.items() if value is not None}
             snapshot = await self._method("acquireWindow", (selectors[0], options), {})
-            return _Window(snapshot) if isinstance(snapshot, dict) else None
-
-        async def focusedWindow(self):
-            snapshot = await self._method("focusedWindow", (), {})
             return _Window(snapshot) if isinstance(snapshot, dict) else None
 
         def ref(self, ref):

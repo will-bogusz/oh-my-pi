@@ -132,11 +132,11 @@ const LINUX = {
 } as const;
 
 /** A WindowServer roster row; the sample is ordered front to back. */
-function systemWindow(row: { id: string; title: string; zIndex?: number }): DesktopSystemWindow {
+function systemWindow(row: { id: string; title: string; zIndex?: number; app?: string; pid?: number }): DesktopSystemWindow {
 	return {
 		id: row.id,
-		pid: 101,
-		app: "Fixture",
+		pid: row.pid ?? 101,
+		app: row.app ?? "Fixture",
 		title: row.title,
 		x: 10,
 		y: 20,
@@ -192,8 +192,10 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 		relatedWindows: undefined as unknown,
 		/** The fork's walker verdict; absent on 0.28.0 and earlier. */
 		truncated: undefined as boolean | undefined,
-		/** WindowServer sample; absent means macOS reported no roster at all. */
-		roster: undefined as WindowRosterSample | undefined,
+		/** WindowServer sample, or the sample each read answers with; absent means macOS reported no roster at all. */
+		roster: undefined as WindowRosterSample | (() => WindowRosterSample | undefined) | undefined,
+		/** How often the session asked the platform for that sample. */
+		rosterReads: 0,
 		failCapture: false,
 		/**
 		 * The rect a capture's pixels cover. Absent is the ordinary case —
@@ -337,7 +339,11 @@ async function fixture(options: { platform?: NodeJS.Platform } = {}) {
 			live = true;
 			return driver;
 		},
-		sampleRoster: () => state.roster ?? { windows: [], elapsedMs: 0 },
+		sampleRoster: () => {
+			state.rosterReads++;
+			const sample = typeof state.roster === "function" ? state.roster() : state.roster;
+			return sample ?? { windows: [], elapsedMs: 0 };
+		},
 	});
 	const context: ComputerOperationContext = {
 		signal: new AbortController().signal,
@@ -499,12 +505,11 @@ it("reads only the acted pid's windows once a handle names one", async () => {
 		printing = true;
 		f.calls.length = 0;
 		const opened = await f.session.press(f.context, f.window, "cmd+p", undefined, { delivery: "foreground" });
-		// The roster, then the accessibility mapping that says whether what it
-		// gained is a window at all or a surface drawn inside one.
+		// The roster, and nothing else: the announcement is a fact about the
+		// app, so no accessibility mapping is read to dress it up.
 		expect(f.calls.filter(call => call.name === "list_windows").map(call => call.args)).toEqual([
 			{ pid: 101 },
 			{ pid: 101 },
-			{ pid: 101, include_accessibility_metadata: true },
 		]);
 		expect(opened.text).toContain('pid 101 gained window 7 ("Print")');
 		expect(opened.text).not.toContain("window 9");
@@ -528,9 +533,9 @@ it("names a window the pid opened since the last observation and never rebinds t
 		expect(quiet.text).not.toContain("gained window");
 		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [f.row, print, lease] }) : undefined);
 		const opened = await f.session.press(f.context, f.window, "cmd+p", undefined, { delivery: "foreground" });
-		expect(opened.text).toContain(
-			'pid 101 gained window 7 ("Print") since your last observation — acquire it with computer.window("7").',
-		);
+		expect(opened.text).toContain('pid 101 gained window 7 ("Print") since your last observation.');
+		// The line names the window and stops: no route, no acquisition.
+		expect(opened.text).not.toContain("computer.window(");
 		expect(opened.text).not.toContain("window 9");
 		expect(f.window.id).toBe("1");
 		expect(f.lastDispatch()).toMatchObject({ name: "hotkey", args: { pid: 101, window_id: 1 } });
@@ -543,14 +548,12 @@ it("names a window the pid opened since the last observation and never rebinds t
 	}
 });
 
-it("announces what a pid opened on the observe path and nests a sheet under its new parent", async () => {
+it("announces what a pid opened on the observe path and adopts it on the next read", async () => {
 	const f = await fixture();
 	// Chrome's print dialog renders seconds after the invoke that asked for
 	// it, so it appears between two observations rather than inside an action.
 	const print = { ...f.row, window_id: 7, title: "Print", z_index: 9 };
 	const lease = { ...f.row, window_id: 9, title: "Window", kind: "system_overlay" };
-	const document = { ...f.row, window_id: 11, title: "Untitled", bounds: { x: 0, y: 0, width: 400, height: 300 } };
-	const sheet = { ...f.row, window_id: 12, title: "", bounds: { x: 100, y: 20, width: 200, height: 120 } };
 	let windows: WindowRow[] = [f.row];
 	try {
 		f.state.hook = async (name, args) =>
@@ -577,101 +580,18 @@ it("announces what a pid opened on the observe path and nests a sheet under its 
 		f.calls.length = 0;
 		const opened = await f.session.observe(f.context, f.window);
 		// The diff spends the roster this walk's own closing geometry check read
-		// — the two reads are the ones `#state` already made before and after it
-		// — and asks once more for the accessibility mapping, which is the only
-		// thing that tells a new window from a surface drawn inside one.
+		// — the two reads are the ones `#state` already made before and after it.
 		expect(f.calls.map(call => [call.name, call.args.pid])).toEqual([
 			["list_windows", 101],
 			["get_window_state", 101],
 			["list_windows", 101],
-			["list_windows", 101],
 		]);
-		expect(opened.tree).toContain(
-			'pid 101 gained window 7 ("Print") since your last observation — acquire it with computer.window("7").',
-		);
+		expect(opened.tree).toContain('pid 101 gained window 7 ("Print") since your last observation.');
+		expect(opened.tree).not.toContain("computer.window(");
 		// The driver's own capture-lease window is nobody's.
 		expect(opened.tree).not.toContain("window 9");
 		// This read adopted it, so the next one does not say it again.
 		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("gained window");
-		// A sheet and the window it is attached to appear together: the parent
-		// is the line to follow, and its own tree renders the sheet.
-		windows = [f.row, print, lease, document, sheet];
-		const nested = await f.session.observe(f.context, f.window);
-		expect(nested.tree.split("\n").filter(line => line.includes("gained") || line.includes("attached"))).toEqual([
-			'pid 101 gained window 11 ("Untitled") since your last observation — acquire it with computer.window("11").',
-			'  window 12 ("") is attached to it — no accessibility window of its own — and renders inside its parent\'s tree; observe window 11, not this id.',
-		]);
-	} finally {
-		await f.close();
-	}
-});
-
-it("reports a lone window with no accessibility record as a surface of the window that encloses it", async () => {
-	const f = await fixture();
-	// An inline rename editor, a combo popup, a quick-entry popover: the app
-	// draws it as its own CGWindow inside the window it belongs to, and no
-	// AXWindow claims it. Acquiring it yields an empty tree, so the line that
-	// invites acquisition costs a cell and answers nothing.
-	const editor = { ...f.row, window_id: 30, title: "", bounds: { x: 20, y: 30, width: 50, height: 20 } };
-	let windows: WindowRow[] = [f.row];
-	try {
-		f.state.hook = async (name, args) =>
-			name === "list_windows"
-				? reply({
-						windows,
-						...(args.include_accessibility_metadata
-							? {
-									accessibility_windows: {
-										pid: 101,
-										complete: true,
-										windows: [{ window_id: 1, role: "AXWindow" }],
-									},
-								}
-							: {}),
-					})
-				: undefined;
-		await f.session.observe(f.context, f.window);
-		windows = [f.row, editor];
-		const gained = await f.session.observe(f.context, f.window);
-		expect(gained.tree.split("\n").filter(line => line.includes("window 30"))).toEqual([
-			'pid 101 gained window 30 ("") since your last observation; it is attached to window 1 — no accessibility window of its own — and renders inside that window\'s tree; observe window 1, not this id.',
-		]);
-		expect(gained.tree).not.toContain('computer.window("30")');
-	} finally {
-		await f.close();
-	}
-});
-
-it("still offers a lone gained window that has an accessibility record of its own", async () => {
-	const f = await fixture();
-	// Same shape, one difference that decides it: the new window publishes an
-	// AXWindow, so it is a window and acquiring it is the route.
-	const panel = { ...f.row, window_id: 31, title: "Export", bounds: { x: 20, y: 30, width: 50, height: 20 } };
-	let windows: WindowRow[] = [f.row];
-	try {
-		f.state.hook = async (name, args) =>
-			name === "list_windows"
-				? reply({
-						windows,
-						...(args.include_accessibility_metadata
-							? {
-									accessibility_windows: {
-										pid: 101,
-										complete: true,
-										windows: [
-											{ window_id: 1, role: "AXWindow" },
-											{ window_id: 31, role: "AXWindow" },
-										],
-									},
-								}
-							: {}),
-					})
-				: undefined;
-		await f.session.observe(f.context, f.window);
-		windows = [f.row, panel];
-		expect((await f.session.observe(f.context, f.window)).tree).toContain(
-			'pid 101 gained window 31 ("Export") since your last observation — acquire it with computer.window("31").',
-		);
 	} finally {
 		await f.close();
 	}
@@ -679,13 +599,12 @@ it("still offers a lone gained window that has an accessibility record of its ow
 
 it("sends the caller to a modal dialog's own rows instead of to an acquisition it does not need", async () => {
 	const f = await fixture();
-	// An application-modal alert is a real top-level window with an AXWindow of
-	// its own, so it is neither attached nor a sheet — but the walk already
-	// drew its buttons into the blocked window's tree, and the caller is
-	// holding refs for them while being told to go and acquire it.
-	// Modality is an accessibility fact, so the driver labels the row only on a
-	// roster read that asked for the mapping; the plain CGWindow row cannot
-	// carry it. `modal_windows` on the observation is the always-present half.
+	// An application-modal alert is a real top-level window with an AXWindow
+	// of its own, and the walk already drew its buttons into the blocked
+	// window's tree: announcing it again would send the caller away from the
+	// refs it is already holding. Modality is an accessibility fact, so the
+	// driver labels the row only on a roster read that asked for the
+	// mapping; `modal_windows` on the observation is the always-present half.
 	const alert = { ...f.row, window_id: 40, title: "alert" };
 	let windows: WindowRow[] = [f.row];
 	let modal = false;
@@ -729,10 +648,8 @@ it("sends the caller to a modal dialog's own rows instead of to an acquisition i
 		modal = true;
 		const blocked = await f.session.observe(f.context, f.window);
 		expect(blocked.tree).toContain('- [n4] AXButton "Only This Event"');
-		expect(blocked.tree.split("\n").filter(line => line.includes("window 40"))).toEqual([
-			'pid 101 gained window 40 ("alert") since your last observation; the application reports it modal, so no other window of this pid takes input until it is answered. Its controls are in the tree above — act on them there, without acquiring it.',
-		]);
-		expect(blocked.tree).not.toContain('computer.window("40")');
+		// The walk rendered it, so the gained-window diff says nothing about it.
+		expect(blocked.tree.split("\n").filter(line => line.includes("window 40"))).toEqual([]);
 		// The driver's own label for that window survives the roster.
 		expect((await f.session.windows(f.context, { pid: 101 })).find(row => row.id === "40")?.kind).toBe("app-modal");
 	} finally {
@@ -778,65 +695,6 @@ it("prints the provider's verdict that a control would accept a written value", 
 	}
 });
 
-it("forwards a caret to the driver as given, and nothing when none is asked", async () => {
-	const f = await fixture();
-	try {
-		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		await f.session.type(f.context, f.window, "\nFollow-up: done", ref, { caret: { after: "Agenda" } });
-		expect(f.lastDispatch()).toMatchObject({
-			name: "type_text",
-			args: { text: "\nFollow-up: done", caret: { after: "Agenda" }, delivery_mode: "background" },
-		});
-		await f.session.type(f.context, f.window, "x", ref, { caret: "end" });
-		expect(f.lastDispatch()!.args.caret).toBe("end");
-		await f.session.type(f.context, f.window, "x", ref);
-		expect("caret" in f.lastDispatch()!.args).toBe(false);
-	} finally {
-		await f.close();
-	}
-});
-
-it("declines the driver's post-action window poll on the actions that offer one", async () => {
-	const f = await fixture();
-	try {
-		const ref = (await f.session.observe(f.context, f.window, { screenshot: true, silent: true })).elements[0]!.ref;
-		f.calls.length = 0;
-		await f.session.click(f.context, f.window, [1, 0]);
-		await f.session.click(f.context, f.window, ref, { count: 2 });
-		await f.session.perform(f.context, f.window, ref, "press");
-		await f.session.type(f.context, f.window, "hi");
-		await f.session.setValue(f.context, f.window, ref, "typed");
-		await f.session.press(f.context, f.window, "Return");
-		await f.session.press(f.context, f.window, "cmd+p");
-		await f.session.scroll(f.context, f.window, "down");
-		await f.session.drag(f.context, f.window, [0, 0], [1, 0], { delivery: "foreground" });
-		await f.session.menu(f.context, f.window, ["File"], { delivery: "foreground" });
-		await f.session.setFrame(f.context, f.window, { x: 0, y: 0, width: 200, height: 100 });
-		await f.session.raise(f.context, f.window);
-		await f.session.clipboardWrite(f.context, "copied");
-		const declined: Record<string, true> = {
-			click: true,
-			drag: true,
-			hotkey: true,
-			press_key: true,
-			scroll: true,
-			set_value: true,
-			type_text: true,
-		};
-		const dispatched = f.calls.filter(call => call.name !== "list_windows" && call.name !== "get_window_state");
-		expect([...new Set(dispatched.map(call => call.name))].sort()).toEqual(
-			[...Object.keys(declined), "invoke_menu", "set_window_frame", "bring_to_front", "clipboard_write"].sort(),
-		);
-		for (const call of dispatched)
-			expect([call.name, call.args.detect_window_change]).toEqual([
-				call.name,
-				declined[call.name] === true ? false : undefined,
-			]);
-	} finally {
-		await f.close();
-	}
-});
-
 it("acquires the front document window and names the windows it passed over", async () => {
 	const f = await fixture();
 	try {
@@ -873,7 +731,7 @@ it("acquires the front document window and names the windows it passed over", as
 	}
 });
 
-it("names the desktop surface by kind and never picks it as an app's front window", async () => {
+it("keeps the desktop surface out of an app's front-window choice and reaches it by kind", async () => {
 	const f = await fixture();
 	try {
 		// Finder: one document window and the display's desktop icon window,
@@ -882,17 +740,19 @@ it("names the desktop surface by kind and never picks it as an app's front windo
 		const desktop = { ...f.row, window_id: 9814, title: "", z_index: 114, kind: "desktop" };
 		const document = { ...f.row, window_id: 2, title: "Documents", z_index: 3 };
 		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [desktop, document] }) : undefined);
+		// The desktop is no app's front window, and a plain {app} selector does
+		// not even name it as an alternative.
 		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "2", title: "Documents" });
-		expect(f.texts.join("\n")).toContain('also open: [9814] "" kind=desktop');
-		f.texts.length = 0;
+		expect(f.texts).toEqual([]);
 		expect(await f.session.window(f.context, { app: "Fixture", kind: "desktop" })).toMatchObject({
 			id: "9814",
 			kind: "desktop",
 		});
 		expect(f.texts).toEqual([]);
-		// Alone, the desktop is what the app has.
+		// Alone, it is still reachable only by kind.
 		f.state.hook = async name => (name === "list_windows" ? reply({ windows: [desktop] }) : undefined);
-		expect(await f.session.window(f.context, { app: "Fixture" })).toMatchObject({ id: "9814" });
+		await expect(f.session.window(f.context, { app: "Fixture" })).rejects.toThrow("Missing computer window");
+		expect(await f.session.window(f.context, { app: "Fixture", kind: "desktop" })).toMatchObject({ id: "9814" });
 	} finally {
 		await f.close();
 	}
@@ -1106,7 +966,7 @@ it("marks the rows of a listed process that no accessibility window claims", asy
 	}
 });
 
-it("names the launch option and each candidate's document when acquisition resolves no window", async () => {
+it("names the launch option only for a selector that can be launched", async () => {
 	const f = await fixture();
 	try {
 		// Nothing matched: an app selector can be launched in the same call, an
@@ -1118,29 +978,6 @@ it("names the launch option and each candidate's document when acquisition resol
 		const exact = await f.session.window(f.context, { id: "7", pid: 101 }).catch((error: unknown) => error);
 		if (!(exact instanceof Error)) throw new Error("Expected an exact-identity miss to fail");
 		expect(exact.message).toBe('Missing computer window {"id":"7","pid":101}: nothing matches it.');
-		// Two restored documents of one app share its name, so the file each
-		// window reported when it was last observed is what tells them apart. A
-		// window never observed carries no path, and nothing is invented for it.
-		f.state.hook = async (name, args) => {
-			if (name === "list_windows") return reply({ windows: [f.row, { ...f.row, window_id: 2 }] });
-			if (name !== "get_window_state") return undefined;
-			return reply({
-				pid: f.row.pid,
-				window_id: args.window_id,
-				snapshot_id: "s-doc",
-				elements: [],
-				document_path: "file:///Users/will/Desktop/Project%20File%20List.workflow",
-			});
-		};
-		await f.session.observe(f.context, f.window, { screenshot: false });
-		const failure = await f.session
-			.window(f.context, { app: "Fixture" }, { ambiguous: "throw" })
-			.catch((error: unknown) => error);
-		const message = (failure as Error).message;
-		expect(message).toContain(
-			'- id "1" pid 101 Fixture "Editor" 200×100 at (10,20) document=file:///Users/will/Desktop/Project%20File%20List.workflow',
-		);
-		expect(message.endsWith('- id "2" pid 101 Fixture "Editor" 200×100 at (10,20)')).toBe(true);
 	} finally {
 		await f.close();
 	}
@@ -1255,14 +1092,15 @@ it("observes semantics without images and preserves raw empty values and false s
 	}
 });
 
-it("never calls a budget-capped tree complete without the walker's own verdict", async () => {
+it("takes completeness only from the walker's own verdict, never from a count", async () => {
 	const f = await fixture({ platform: "linux" });
 	try {
-		// What a capped walk reports: returned === total, because both count the
-		// nodes it reached. The request itself is the reason it cannot be proof.
+		// A capped walk reports returned === total, because both count the nodes
+		// it reached, so no count can stand in for the verdict. Neither can its
+		// absence: a walker that says nothing has proved nothing.
 		expect((await f.session.observe(f.context, f.window, { maxElements: 1 })).complete).toBe(false);
-		expect((await f.session.observe(f.context, f.window)).complete).toBe(true);
-		// A walker that states its verdict is believed either way.
+		expect((await f.session.observe(f.context, f.window)).complete).toBe(false);
+		// A walker that states its verdict is believed either way, cap or none.
 		f.state.truncated = false;
 		expect((await f.session.observe(f.context, f.window, { maxElements: 1 })).complete).toBe(true);
 		f.state.truncated = true;
@@ -1439,10 +1277,18 @@ it("renders provider help and description when the row carries them", async () =
 		expect(observation.tree).toContain(
 			`description=${JSON.stringify(f.state.description)} help=${JSON.stringify(f.state.help)}`,
 		);
-		// A provider that says "none" with an empty string, and a description
-		// that only repeats the label, add nothing to the line.
-		f.state.help = "";
+		// A description that only repeats the label is still the provider's own
+		// word for the row and is kept.
+		f.state.help = undefined;
 		f.state.description = "Editor";
+		observation = await f.session.observe(f.context, f.window);
+		expect(observation.elements[0]!.description).toBe("Editor");
+		expect(observation.elements[0]!.help).toBeUndefined();
+		// A provider that says "none" with an empty string, and a description
+		// that only restates the row's own value, add nothing to the line.
+		f.state.help = "";
+		f.state.value = "Draft";
+		f.state.description = "Draft";
 		observation = await f.session.observe(f.context, f.window);
 		expect(observation.elements[0]!.help).toBeUndefined();
 		expect(observation.elements[0]!.description).toBeUndefined();
@@ -1558,114 +1404,43 @@ it("keeps the menu bar out of observations and names the route that drives it", 
 			"AXGroup desktop",
 			"AXImage Report.pdf",
 		]);
-		expect(icons.tree).toContain("Menu bar hidden (2 rows)");
+		// The hint was already spent on this window's first observation.
+		expect(icons.tree).not.toContain("Menu bar hidden");
 	} finally {
 		await f.close();
 	}
 });
 
-/**
- * Contacts' own menu bar as cua-driver 0.28.0 renders it (trimmed), recorded
- * from `get_window_state` on pid 95531. The rows without an element index are
- * the ones a closed menu reports disabled: `New Card` — the item the bench
- * was reaching for — is one of them, so it is in this markdown and in no
- * `elements[]` array.
- */
-const CONTACTS_MENU_BAR = `- [1] AXWindow "Contacts"
-  - [2] AXButton "Edit" [actions=[press]]
-- [703] AXMenuBar [id=_NS:722 actions=[cancel]]
-  - [704] AXMenuBarItem "Apple" [actions=[cancel,press,pick]]
-    - [705] AXMenu [actions=[cancel]]
-      - [706] AXMenuItem "About This Mac" [id=_aboutThisMacRequested: actions=[cancel,press,pick]]
-  - [707] AXMenuBarItem "Contacts" [id=_NS:726 actions=[cancel,press,pick]]
-    - [708] AXMenu [id=_NS:730 actions=[cancel]]
-      - AXMenuItem "Show All"
-      - [709] AXMenuItem "Quit Contacts" [id=_NS:249 actions=[cancel,press,pick]]
-  - [710] AXMenuBarItem "File" [id=_NS:760 actions=[cancel,press,pick]]
-    - [711] AXMenu [id=_NS:764 actions=[cancel]]
-      - AXMenuItem "New Card"
-      - AXMenuItem "New List"
-      - AXMenuItem "Close"
-      - [712] AXMenuItem "Close All" [id=closeAll: actions=[cancel,press,pick]]
-      - [713] AXMenuItem "Import…" [id=_NS:333 actions=[cancel,press,pick]]
-      - [714] AXMenuItem "Export" [id=_NS:770 actions=[cancel,press,pick]]
-        - [715] AXMenu [id=_NS:774 actions=[cancel]]
-      - AXMenuItem "Print…"
-  - [716] AXMenuBarItem "Window" [id=_NS:835 actions=[cancel,press,pick]]
-    - [717] AXMenu [id=_NS:839 actions=[cancel]]
-      - AXMenuItem "Minimize"
-
-AX tree reached its element/depth limit (2000 nodes, depth 3). This is partial state; omitted controls and values remain unknown.`;
-
-it("names the menus and the matched menu's items when a menu path is refused", async () => {
+it("says the menu bar is hidden once per window, and once for every window", async () => {
 	const f = await fixture();
-	/** The driver's own refusal envelope, and the rendered tree it refused against. */
-	const refuses = (message: string, markdown = CONTACTS_MENU_BAR): void => {
-		f.state.hook = async name =>
-			name === "invoke_menu"
-				? {
-						text: message,
-						structuredJson: JSON.stringify({
-							status: "refused",
-							refusal: { code: "menu_path_unavailable", message },
-						}),
-						isError: true,
-						images: [],
-					}
-				: name === "get_window_state"
-					? reply({ pid: 101, window_id: 1, snapshot_id: "s", elements: [], tree_markdown: markdown })
-					: undefined;
-	};
-	const refused = async (path: string[]): Promise<string> => {
-		try {
-			await f.session.menu(f.context, f.window, path, { delivery: "foreground" });
-		} catch (error) {
-			return error instanceof Error ? error.message : String(error);
-		}
-		throw new Error("Expected the menu refusal to surface");
-	};
+	// The hint is a fact about the surface, not about the observation: a model
+	// that has read it once does not need it on every walk of the same window,
+	// and a window it has never been told about is a window it has to be told
+	// about. Repeating it cost a line of every observation on the bench.
+	const rows = [
+		{ element_index: 1, element_token: "s:1", role: "AXWindow", label: "Editor", depth: 0 },
+		{ element_index: 2, element_token: "s:2", role: "AXMenuBar", label: "", depth: 1 },
+		{ element_index: 3, element_token: "s:3", role: "AXMenuBarItem", label: "File", depth: 2 },
+	];
 	try {
-		// A ref held across the refusal stays live: naming the menus reads the
-		// rendered tree and mints nothing.
-		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		refuses("invoke_menu: path segment 1 was not found");
-		const missing = await refused(["File", "New Contact"]);
-		// The driver's own refusal survives in front of what it could not name.
-		expect(missing).toContain("invoke_menu: path segment 1 was not found");
-		expect(missing).toContain('Menu path ["File","New Contact"] has no "New Contact" under File.');
-		expect(missing).toContain("Menus: Apple · Contacts · File · Window.");
-		expect(missing).toContain("File: New Card · New List · Close · Close All · Import… · Export · Print….");
-		expect(missing).toContain("matched exactly");
-		expect(f.session.element(ref).ref).toBe(ref);
-		// Pixels are never captured for a listing, and the walk stays shallow:
-		// the menu bar is the walker's last sibling, so a deeper request spends
-		// the budget inside the window and loses the bar itself.
-		expect(f.calls.filter(call => call.name === "get_window_state").at(-1)!.args).toMatchObject({
-			include_accessibility_tree: true,
-			include_screenshot: false,
-			max_depth: 3,
-		});
-		// A top-level miss has only the menu bar to report.
-		refuses("invoke_menu: path segment 0 was not found");
-		const unknownMenu = await refused(["Contact", "New Card"]);
-		expect(unknownMenu).toContain('Menu path ["Contact","New Card"] has no "Contact" in the menu bar.');
-		expect(unknownMenu).not.toContain("New Card ·");
-		// Two items of one menu share a title: the listing shows both.
-		refuses(
-			"invoke_menu: path segment 1 is ambiguous",
-			CONTACTS_MENU_BAR.replace('AXMenuItem "New List"', 'AXMenuItem "New Card"'),
-		);
-		expect(await refused(["File", "New Card"])).toContain(
-			'Menu path ["File","New Card"] matches more than one "New Card" under File.',
-		);
-		// A refusal whose reason is not a path segment is left exactly as
-		// written, and costs no walk.
-		const walks = f.calls.filter(call => call.name === "get_window_state").length;
-		refuses("invoke_menu: target exposes no AXMenuBar");
-		const noBar = await refused(["File", "New Card"]);
-		expect(noBar).toContain("invoke_menu: target exposes no AXMenuBar");
-		expect(noBar).not.toContain("Menus:");
-		expect(f.calls.filter(call => call.name === "get_window_state").length).toBe(walks);
+		const second = { ...f.row, window_id: 2, title: "Second" };
+		f.state.hook = async (name, args) =>
+			name === "list_windows"
+				? reply({ windows: [f.row, second] })
+				: name === "get_window_state"
+					? reply({
+							pid: 101,
+							window_id: args.window_id,
+							snapshot_id: `s${String(args.window_id)}`,
+							truncated: false,
+							elements: rows,
+						})
+					: undefined;
+		expect((await f.session.observe(f.context, f.window)).tree).toContain("Menu bar hidden (2 rows)");
+		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("Menu bar hidden");
+		const other = await f.session.window(f.context, { id: "2", pid: 101 });
+		expect((await f.session.observe(f.context, other)).tree).toContain("Menu bar hidden (2 rows)");
+		expect((await f.session.observe(f.context, other)).tree).not.toContain("Menu bar hidden");
 	} finally {
 		await f.close();
 	}
@@ -1730,7 +1505,7 @@ it("reads a submenu's items instead of pressing it, from either shape the driver
 	}
 });
 
-it("says a drag was delivered without evidence and keeps the doubt on the window", async () => {
+it("says a drag was delivered without evidence and pushes that into the cell", async () => {
 	const f = await fixture();
 	try {
 		await f.session.captureWindow(f.context, f.window);
@@ -1739,9 +1514,7 @@ it("says a drag was delivered without evidence and keeps the doubt on the window
 		expect(unprobed.text).toContain(
 			"Delivered; the driver reported no effect evidence for this drag — observe the window to confirm it moved anything.",
 		);
-		expect((await f.session.observe(f.context, f.window)).tree).toContain(
-			"a drag was delivered with no effect reported — re-read this window before building on it",
-		);
+		expect(unprobed.mustShow).toBe(true);
 		// Once the driver's probe covers drag, its own verdict is the whole answer.
 		f.state.hook = async name =>
 			name === "drag"
@@ -1760,330 +1533,131 @@ it("says a drag was delivered without evidence and keeps the doubt on the window
 	}
 });
 
-it("composes one sentence for each thing a write turns out to be", async () => {
+it("says what a write turned out to be, keyed on the driver's verdict and effect", async () => {
 	const f = await fixture();
 	try {
 		let ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		const write = async (data: Wire, text: string) => {
+		const said = "✅ Set AXValue on [1] AXTextField.";
+		/**
+		 * One write, answered with a payload the shipping driver can publish,
+		 * then a fresh observation: every write is judged on its own reply and
+		 * nothing it left unproven reaches the next one.
+		 */
+		const write = async (data: Wire, operation: "setValue" | "type" = "setValue") => {
 			const structuredJson = JSON.stringify(wireResult(data));
+			const tool = operation === "type" ? "type_text" : "set_value";
 			f.state.hook = async name =>
-				name === "set_value" ? { text, structuredJson, isError: false, images: [] } : undefined;
-			return f.session.setValue(f.context, f.window, ref, "Project_File_List");
-		};
-		const typed = async (data: Wire, text: string) => {
-			const structuredJson = JSON.stringify(wireResult(data));
-			f.state.hook = async name =>
-				name === "type_text" ? { text, structuredJson, isError: false, images: [] } : undefined;
-			return f.session.type(f.context, f.window, "Project_File_List", ref);
-		};
-		const reread = async () => {
-			const observation = await f.session.observe(f.context, f.window);
-			ref = observation.elements[0]!.ref;
-			return observation.tree;
+				name === tool ? { text: said, structuredJson, isError: false, images: [] } : undefined;
+			const used = ref;
+			const result =
+				operation === "type"
+					? await f.session.type(f.context, f.window, "Project_File_List", used)
+					: await f.session.setValue(f.context, f.window, used, "Project_File_List");
+			ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+			return { result, lines: result.text.split("\n"), note: result.text.split("\n").at(-1)!, used };
 		};
 		const readBack = [{ kind: "value_readback" }];
-		// Proven: the verdict, a confirmed effect, the driver's own read-back and
-		// no better route. Nothing is left to say and nothing is carried.
-		const proven = await write(
-			{ committed: "committed", effect: "confirmed", evidence: readBack },
-			"✅ Set AXValue on [1] AXTextField. Committed via tab.",
-		);
-		expect(proven.text).toBe("✅ Set AXValue on [1] AXTextField. Committed via tab.");
-		expect(await reread()).not.toContain("setValue on");
-		// Discarded: the app's own reason, and the one rung where re-reading the
-		// field is the wrong instruction.
-		const lost = await write(
-			{ committed: "not_committed", effect: "confirmed" },
-			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write.",
-		);
-		expect(lost.text.split("\n").at(-1)).toBe(
-			`setValue on ${ref} AXTextField "Editor": unproven — a multi-line AXTextArea has no end-of-edit gesture, so the app may never register the write. Read it back (win.observe()): a control showing the value proves the text is in it, not that the app took it — judge that by the app's own output, and do not rewrite the control to find out.`,
-		);
-		// The doubt is carried until a control of that role shows the value: a
-		// re-read that does not show it repeats the doubt, one that does
-		// reports what the control holds and nothing about the app, and that
-		// answer is spent like the doubt was.
-		expect(await reread()).toContain("unproven — a multi-line AXTextArea");
-		await write(
-			{ committed: "not_committed", effect: "confirmed" },
-			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture.",
-		);
-		f.state.value = "Project_File_List";
-		const shown = await reread();
-		expect(shown).toContain(
-			`AXTextField "Editor": the control now holds "Project_File_List" — that is the field, not the app's response; judge by the app's own output (rows filtered, title changed, list updated).`,
-		);
-		expect(shown).not.toContain("the write stands");
-		expect(shown).not.toContain("unproven — a multi-line");
-		expect(await reread()).not.toContain("setValue on");
-		f.state.value = "";
-		const bare = await write(
-			{ committed: "not_committed", effect: "confirmed" },
-			"📨 Sent (unverified) AXValue on [1] AXTextField.",
-		);
-		expect(bare.text).toContain(
-			"not committed — the driver reported no reason. Read it back (win.observe()): if the control shows the value the driver read too early and the text is in it; if it shows the old one, write it another way.",
-		);
-		await reread();
-		// Echoed but unproven on a binding field: the gesture that would commit
-		// it, never a re-read — re-reading returns the same echo.
-		const echoed = await write(
-			{ committed: "unproven", effect: "confirmed", evidence: readBack },
-			"✅ Set AXValue on [1] AXTextField. Commit unproven: the value survived AXConfirm, but the app's own model was not observed.",
-		);
-		expect(echoed.text.split("\n").at(-1)).toBe(
-			`setValue on ${ref} AXTextField "Editor": the value reads back as written, but nothing observed the app take it, and this field's app takes its value at end-of-edit — press Tab or Return on it.`,
-		);
-		expect(echoed.text).not.toContain("re-read");
-		await reread();
-		const half = await typed(
-			{ committed: "unproven", effect: "confirmed", evidence: readBack },
-			"✅ Inserted 17 char(s) via CGEvent.",
-		);
-		expect(half.text.split("\n").at(-1)).toBe(
-			`type on ${ref} AXTextField "Editor": the value reads back as written, but this field's app takes its value at end-of-edit, which typing does not deliver — press Tab or Return, or write it with setValue.`,
-		);
-		// Same verdict on a search field: its value is a query, so the app's own
-		// output is what moved, and the field itself proves nothing either way.
-		f.state.subrole = "AXSearchField";
-		await reread();
-		const query = await typed(
-			{ committed: "unproven", effect: "confirmed", evidence: readBack },
-			"✅ Inserted 17 char(s) via CGEvent.",
-		);
-		expect(query.text.split("\n").at(-1)).toBe(
-			`type on ${ref} AXSearchField "Editor": the value reads back as written, but a read-back is echoed by the control whether or not the app took it — check the app's own output: the rows this query filtered, not the field.`,
-		);
-		f.state.subrole = undefined;
-		await reread();
-		// Judged unproven with nothing read back: the app's end-of-edit rewrote
-		// the value, or re-created the control the driver held. The driver's own
-		// sentence carries which and quotes it; this side adds one line, and it
-		// is not the unreadable-field one — the control publishes a value, just
-		// not the one that was written.
-		const rewritten = await write(
-			{ committed: "unproven", effect: "unverifiable", evidence: null },
-			'📨 Sent (unverified) AXValue on [1] AXTextField. Commit unproven: the app\'s end-of-edit rewrote the value — it reads back as "(555) 789-0123", which is neither what was written nor the value the control held before.',
-		);
-		expect(rewritten.text.split("\n")).toHaveLength(2);
-		expect(rewritten.text.split("\n").at(-1)).toBe(
-			`setValue on ${ref} AXTextField "Editor": the driver could not prove the app kept this value — read the window back (win.observe()) and judge by the app's own output (the row, list or title it updated); rewrite only if that output still shows the old value.`,
-		);
-		expect(rewritten.text).not.toContain("publishes no readable value");
-		expect(rewritten.text).not.toContain("reads back as written");
-		await reread();
-		// Nothing could read the value: name a witness that can, and never the
-		// field, whose re-read is guaranteed to return nothing.
-		const unreadable = await write({ effect: "unverifiable", evidence: null }, "✅ Set AXValue on [1] AXSlider.");
-		expect(unreadable.text.split("\n").at(-1)).toBe(
-			`setValue on ${ref} AXTextField "Editor": the field publishes no readable value, so nothing read this write back — the app's own output is the only witness.`,
-		);
-		expect(unreadable.text).not.toContain("read the field back");
-		await reread();
-		const pixels = await write(
-			{ effect: "unverifiable", evidence: null, escalation: { reason: "effect_unconfirmed", target: "pixel" } },
-			"✅ Set AXValue on [1] AXSlider.",
-		);
-		expect(pixels.text).toContain("— capture the window and read the value off its own pixels.");
-		await reread();
-		const snapshot = await write(
-			{ effect: "unverifiable", evidence: null, escalation: { reason: "effect_unconfirmed", target: "snapshot" } },
-			"✅ Set AXValue on [1] AXSlider.",
-		);
-		expect(snapshot.text).toContain(
-			"— observe() the window and read the control the app updates instead; this field will publish nothing either way.",
-		);
-		await reread();
-		// A verdict with no read-back behind it, and a driver that judges nothing
-		// at all: the field can still be read, so reading it is the instruction.
-		const unbacked = await write(
-			{ committed: "committed", effect: "confirmed" },
-			"✅ Set AXValue on [1] AXTextField.",
-		);
-		expect(unbacked.text.split("\n").at(-1)).toBe(
-			`setValue on ${ref} AXTextField "Editor": the driver judged the value committed but nothing in the reply read it back — read the field back before building on it.`,
-		);
-		await reread();
-		const unjudged = await typed({ effect: "confirmed", evidence: readBack }, "✅ Inserted 17 char(s) via CGEvent.");
-		expect(unjudged.text.split("\n").at(-1)).toBe(
-			`type on ${ref} AXTextField "Editor": nothing in the reply says whether the app kept this value — read the field back before building on it.`,
-		);
-		// A re-read that shows the typed text is the read-back the doubt asked
-		// for, so it reports what the control holds instead of repeating it.
-		f.state.value = "Project_File_List";
-		expect(await reread()).toContain(`AXTextField "Editor": the control now holds "Project_File_List" —`);
-		f.state.value = "";
-		// `window_change` is not a read-back of the value, and its `signal` is
-		// carried for the model without a word of prose keyed on it.
-		await reread();
-		const signalled = await write(
-			{
-				committed: "committed",
-				effect: "confirmed",
-				evidence: [{ kind: "window_change", signal: "element_state" }],
-			},
-			"✅ Set AXValue on [1] AXTextField.",
-		);
-		expect(signalled.evidence).toEqual([{ kind: "window_change", signal: "element_state" }]);
-		expect(signalled.text.split("\n").at(-1)).toBe(
-			`setValue on ${ref} AXTextField "Editor": the driver judged the value committed but nothing in the reply read it back — read the field back before building on it.`,
-		);
-		expect(signalled.text).not.toContain("element_state");
+		// Proven: the verdict, a confirmed effect and the driver's own read-back.
+		// Nothing is left to say, so no line is added and the cell is not made
+		// to print anything.
+		const proven = await write({ committed: "committed", effect: "confirmed", evidence: readBack });
+		expect(proven.result.text).toBe(said);
+		expect(proven.result.committed).toBe("committed");
+		expect(proven.result.mustShow).toBeUndefined();
+		// Every other outcome adds exactly one line, which names the row the
+		// observation printed — its role and label, never the value it holds —
+		// and rides the must-show flag.
+		const odd = await write({ committed: "committed", effect: "unverifiable", evidence: readBack });
+		expect(odd.note.startsWith(`setValue on ${odd.used} AXTextField "Editor": `)).toBe(true);
+		expect(odd.note).toContain("judged the value committed but reported the effect as unverifiable");
+		expect(odd.lines).toHaveLength(2);
+		expect(odd.result.mustShow).toBe(true);
+		const unread = await write({ committed: "committed", effect: "confirmed" });
+		expect(unread.note).toContain("judged the value committed but nothing in the reply read it back");
+		const lost = await write({ committed: "not_committed", effect: "confirmed" });
+		expect(lost.result.committed).toBe("not_committed");
+		expect(lost.note).toContain("not committed");
+		const echoed = await write({ committed: "unproven", effect: "confirmed", evidence: readBack });
+		expect(echoed.result.committed).toBe("unproven");
+		expect(echoed.note).toContain("the value reads back as written");
+		const blind = await write({ committed: "unproven", effect: "confirmed" });
+		expect(blind.note).toContain("could not prove the app kept this value");
+		// No verdict at all: what the effect says, and nothing where the driver
+		// reports it never went out.
+		const unreadable = await write({ effect: "unverifiable", evidence: null });
+		expect(unreadable.result.committed).toBeUndefined();
+		expect(unreadable.note).toContain("publishes no readable value");
+		const unjudged = await write({ effect: "confirmed", evidence: readBack }, "type");
+		expect(unjudged.note.startsWith(`type on ${unjudged.used} AXTextField "Editor": `)).toBe(true);
+		expect(unjudged.note).toContain("nothing in the reply says whether the app kept this value");
+		// A write's `element` escalation is answered by its own verdict: the
+		// rung would only say "address the field" to a call that just did.
+		const addressed = await write({
+			committed: "unproven",
+			effect: "confirmed",
+			evidence: readBack,
+			escalation: { reason: "effect_unconfirmed", target: "element" },
+		});
+		expect(addressed.lines).toHaveLength(2);
+		expect(addressed.result.text).not.toContain("address the field");
+		// A field with no title of its own is labelled by its own value, so the
+		// line names what it was written with instead of which row it is; the
+		// placeholder is the name that survives the write.
+		f.state.label = "Apple Park";
+		f.state.value = "Apple Park";
+		ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const churned = await write({ committed: "unproven", effect: "confirmed" });
+		expect(churned.note.startsWith(`setValue on ${churned.used} AXTextField "Hint, not value": `)).toBe(true);
 	} finally {
 		await f.close();
 	}
 });
 
-it("reads the commit verdict the driver publishes as a string", async () => {
+it("spells out what a partial type left in the field and how to finish it", async () => {
 	const f = await fixture();
-	try {
-		let ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		const write = async (data: Wire, text: string) => {
-			f.state.hook = async name =>
-				name === "set_value"
-					? { text, structuredJson: JSON.stringify(data), isError: false, images: [] }
-					: undefined;
-			return f.session.setValue(f.context, f.window, ref, "Project_File_List");
-		};
-		/** Re-reads the window: mints the next ref and spends any carried doubt. */
-		const reread = async () => {
-			const observation = await f.session.observe(f.context, f.window);
-			ref = observation.elements[0]!.ref;
-			return observation.tree;
-		};
-		// The projected `ActionResult` the shipping driver publishes: the verdict
-		// is one of three words. Read as a boolean it is always `undefined`, so
-		// the doubt fires on every write whatever the driver judged.
-		const kept = await write(
-			wireResult({ committed: "committed", effect: "confirmed", evidence: [{ kind: "value_readback" }] }),
-			"✅ Set AXValue on [1] AXTextField. Committed via tab.",
-		);
-		expect(kept.committed).toBe("committed");
-		expect(await reread()).not.toContain("setValue on");
-		const lost = await write(
-			wireResult({ committed: "not_committed", effect: "confirmed" }),
-			"📨 Sent (unverified) AXValue on [1] AXTextArea. Not committed: a multi-line AXTextArea has no end-of-edit gesture.",
-		);
-		expect(lost.committed).toBe("not_committed");
-		expect(await reread()).toContain("unproven — a multi-line AXTextArea has no end-of-edit gesture");
-		const unproven = await write(
-			wireResult({ committed: "unproven", effect: "confirmed", evidence: [{ kind: "value_readback" }] }),
-			"✅ Set AXValue on [1] AXTextField. Commit unproven: the value survived AXConfirm, but the app's own model was not observed.",
-		);
-		expect(unproven.committed).toBe("unproven");
-		expect(await reread()).toContain("takes its value at end-of-edit");
-		// Deliberately off the 0.9.0 contract, which publishes neither: the stock
-		// 0.28.0 binary judged the same thing with a boolean, whose two states
-		// are the two decided verdicts, and a word no contract spells is no
-		// verdict at all.
-		expect((await write({ committed: true }, "✅ Set AXValue on [1] AXTextField.")).committed).toBe("committed");
-		await reread();
-		expect((await write({ committed: false }, "📨 Sent (unverified) AXValue on [1] AXTextField.")).committed).toBe(
-			"not_committed",
-		);
-		// A word the contract does not spell is no verdict at all.
-		await reread();
-		expect((await write({ committed: "maybe" }, "✅ Set AXValue on [1] AXTextField.")).committed).toBeUndefined();
-	} finally {
-		await f.close();
-	}
-});
-
-it("carries a write nothing proved into the next observation of its own window", async () => {
-	const f = await fixture();
-	const observed = async () => (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-	const written = (data: Wire) => {
-		const payload = wireResult(data);
-		f.state.hook = async name => (name === "set_value" ? reply(payload) : undefined);
+	// A partial delivery is the one refusal that still wrote: the remainder is
+	// what the caller has to send, and only this side can slice it by codepoint.
+	const incomplete = (text: string, details?: Wire): void => {
+		f.state.hook = async name =>
+			name === "type_text"
+				? {
+						text,
+						errorCode: "type_text_incomplete",
+						...(details === undefined ? {} : { structuredJson: JSON.stringify(details) }),
+						isError: true,
+						images: [],
+					}
+				: undefined;
+	};
+	const refused = async (ref: string): Promise<string> => {
+		const failure = await f.session
+			.type(f.context, f.window, "Project_File_List.txt", ref)
+			.catch((error: unknown) => error);
+		f.state.hook = undefined;
+		if (!(failure instanceof Error)) throw new Error("Expected the incomplete type to refuse");
+		return failure.message.split("\n").at(-1)!;
 	};
 	try {
-		// The graded loss: `setValue` on a Save panel's filename field, chained
-		// behind an `observe` in one cell, so the only reply that could have said
-		// the app discarded the name was never displayed.
-		const dropped = await observed();
-		expect(
-			(await f.session.setValue(f.context, f.window, dropped, "Project_File_List.txt")).committed,
-		).toBeUndefined();
-		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
-			`setValue on ${dropped} AXTextField "Editor": the field publishes no readable value, so nothing read this write back — the app's own output is the only witness.`,
-		);
-		// Spent by that read: the write it judged is the one this tree shows.
-		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("setValue on");
-		// Proof is the driver's own verdict on a reply that read the value back
-		// and names no better route.
-		written({ committed: "committed", effect: "confirmed", evidence: [{ kind: "value_readback" }] });
-		expect((await f.session.setValue(f.context, f.window, await observed(), "Project_File_List.txt")).committed).toBe(
-			"committed",
-		);
-		expect((await f.session.observe(f.context, f.window)).tree).not.toContain("setValue on");
-		// Proof is exactly the verdict, the effect, the read-back and no better
-		// route: a driver that read the value back, called it committed and still
-		// names another route has not proven this one.
-		written({
-			committed: "committed",
-			effect: "confirmed",
-			evidence: [{ kind: "value_readback" }],
-			escalation: { reason: "delivery_failed", target: "foreground" },
-		});
-		const escalated = await observed();
-		await f.session.setValue(f.context, f.window, escalated, "Project_File_List.txt");
-		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
-			`setValue on ${escalated} AXTextField "Editor": the driver judged the value committed but doubts this route landed and names another — read the field back before building on it.`,
-		);
-		// `type` reports no commit flag at all, and answered `confirmed` for the
-		// one write Automator took and for the three it ignored.
-		f.state.hook = undefined;
-		const typed = await observed();
-		await f.session.type(f.context, f.window, "Project_File_List.txt", typed);
-		await f.session.type(f.context, f.window, "Project_File_List.txt", typed);
-		const carried = await f.session.observe(f.context, f.window);
-		expect(carried.tree.split("\n")[0]).toBe(
-			`type on ${typed} AXTextField "Editor": the field publishes no readable value, so nothing read this write back — the app's own output is the only witness.`,
-		);
-		// One sentence per write, however often the same write is repeated.
-		expect(carried.tree.split("\n")[1]).toContain("- [n");
-		// A partial delivery is the one refusal that still wrote.
-		const incomplete = (text: string, details?: Wire): void => {
-			f.state.hook = async name =>
-				name === "type_text"
-					? {
-							text,
-							errorCode: "type_text_incomplete",
-							...(details === undefined ? {} : { structuredJson: JSON.stringify(details) }),
-							isError: true,
-							images: [],
-						}
-					: undefined;
-		};
-		const refused = async (ref: string): Promise<string> => {
-			await expect(f.session.type(f.context, f.window, "Project_File_List.txt", ref)).rejects.toThrow(
-				"type_text_incomplete",
-			);
-			f.state.hook = undefined;
-			return (await f.session.observe(f.context, f.window)).tree.split("\n")[0]!;
-		};
-		const partial = await observed();
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
 		incomplete(
 			'type_text incomplete: delivered 6 of 21 character(s) via CGEvent (30ms delay); retry with text: "t_File_List.txt"',
 			{ code: "type_text_incomplete", effect: "partial", delivered_chars: 6, retryable: true },
 		);
 		// The remainder spelled out: the reply's own "retry with text" left the
 		// caller to slice by codepoint, and the model retyped the whole string.
-		expect(await refused(partial)).toBe(
-			`type on ${partial} AXTextField "Editor": 6 of 21 characters landed, so the field holds neither its old value nor the one asked for — type only the remainder: "t_File_List.txt".`,
+		expect(await refused(ref)).toBe(
+			`type on ${ref} AXTextField "Editor": 6 of 21 characters landed, so the field holds neither its old value nor the one asked for — type only the remainder: "t_File_List.txt".`,
 		);
 		// Nothing delivered and the driver could not probe focus: the rung may
 		// still land, so the remainder is still the route — but the field holds
 		// what it held, which the old sentence denied.
-		const none = await observed();
 		incomplete("type_text incomplete: delivered 0 of 21 character(s) via CGEvent (30ms delay); retry with text: …");
-		expect(await refused(none)).toBe(
-			`type on ${none} AXTextField "Editor": 0 of 21 characters landed, so the field still holds its old value — type only the remainder: "Project_File_List.txt".`,
+		expect(await refused(ref)).toBe(
+			`type on ${ref} AXTextField "Editor": 0 of 21 characters landed, so the field still holds its old value — type only the remainder: "Project_File_List.txt".`,
 		);
 		// Nothing delivered at a target the driver probed and found unfocused:
 		// the same keystrokes land nothing again however they are sliced, so
 		// the remainder is the one instruction that must not be printed.
-		const unfocused = await observed();
 		incomplete(
 			'type_text incomplete: delivered 0 of 21 character(s) via CGEvent (0ms delay); the addressed element did not take keyboard focus, so typed keystrokes cannot be proven to reach it: click the control first, write it with set_value, or retry with delivery_mode "foreground". A row that only displays text is not an editor',
 			{
@@ -2095,220 +1669,11 @@ it("carries a write nothing proved into the next observation of its own window",
 				target_focused: false,
 			},
 		);
-		expect(await refused(unfocused)).toBe(
-			`type on ${unfocused} AXTextField "Editor": nothing landed, so the field still holds its old value and re-sending these keystrokes lands nothing again — write it without keystrokes: win.ref(${JSON.stringify(
-				unfocused,
+		expect(await refused(ref)).toBe(
+			`type on ${ref} AXTextField "Editor": nothing landed, so the field still holds its old value and re-sending these keystrokes lands nothing again — write it without keystrokes: win.ref(${JSON.stringify(
+				ref,
 			)}).setValue("Project_File_List.txt"), or re-run this call with { delivery: "foreground" }.`,
 		);
-	} finally {
-		await f.close();
-	}
-});
-
-it("answers a write's read-back with what the control holds, never with a verdict on the app", async () => {
-	const f = await fixture();
-	// A toolbar search field echoes its query whether or not the app ran it,
-	// and the list beside it is the answer. The sentence this replaces ("the
-	// write stands; build on it, do not rewrite it") was printed over a list
-	// the app had not filtered and bought four cells of probes that avoided
-	// rewriting the query.
-	let query = "";
-	try {
-		f.state.hook = async (name, args) => {
-			if (name === "type_text")
-				return reply({ effect: "confirmed", evidence: [{ kind: "value_readback" }], route: "accessibility" });
-			if (name !== "get_window_state") return undefined;
-			return reply({
-				pid: 101,
-				window_id: args.window_id,
-				snapshot_id: `q${query.length}`,
-				elements: [
-					{
-						element_index: 1,
-						element_token: `q${query.length}:1`,
-						role: "AXTextField",
-						subrole: "AXSearchField",
-						label: "Search",
-						value: query,
-						depth: 0,
-					},
-					{ element_index: 2, element_token: `q${query.length}:2`, role: "AXRow", label: "Aidan Byrne", depth: 0 },
-				],
-				window_bounds: f.row.bounds,
-			});
-		};
-		const search = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		const written = await f.session.type(f.context, f.window, "Robert Green", search);
-		expect(written.text.split("\n").at(-1)).toContain("nothing in the reply says whether the app kept this value");
-		// The field took the text; the list did not move.
-		query = "Robert Green";
-		const tree = (await f.session.observe(f.context, f.window)).tree;
-		expect(tree.split("\n")[0]).toBe(
-			`type on ${search} AXSearchField "Search": the control now holds "Robert Green" — that is the field, not the app's response; judge by the app's own output (rows filtered, title changed, list updated).`,
-		);
-		expect(tree).toContain('AXRow "Aidan Byrne"');
-		expect(tree).not.toContain("the write stands");
-		expect(tree).not.toContain("build on it");
-	} finally {
-		await f.close();
-	}
-});
-
-/**
- * Two fields of one form, as a contact card lays them out. `filled` says
- * what each holds; `churn` relabels the first with what it holds, which is
- * what the driver's label chain does to a field that has no title of its
- * own (`get_window_state.rs:1060-1071`).
- */
-function form(
-	generation: number,
-	filled: { company?: string; notes?: string },
-	options: { churn?: boolean; drop?: boolean } = {},
-): Wire[] {
-	const company = filled.company ?? "";
-	return [
-		{ element_index: 1, element_token: `g${generation}:1`, role: "AXGroup", label: "Contact", depth: 0 },
-		...(options.drop
-			? []
-			: [
-					{
-						element_index: 2,
-						element_token: `g${generation}:2`,
-						role: "AXTextField",
-						label: options.churn ? company : "Company",
-						value: company,
-						depth: 1,
-					},
-				]),
-		{
-			element_index: 3,
-			element_token: `g${generation}:3`,
-			role: "AXTextField",
-			label: "Notes",
-			value: filled.notes ?? "",
-			depth: 1,
-		},
-	];
-}
-
-/** A keystroke write the driver confirms but never judges: the doubt this answers. */
-const UNJUDGED_TYPING = { effect: "confirmed", evidence: [{ kind: "value_readback" }], route: "accessibility" };
-
-it("answers a doubted write from the control it was written to, not from a same-role row that shows the value", async () => {
-	const f = await fixture();
-	// `Apple Park` went into Company and came out in Notes — the app moved
-	// it, or the form re-bound under the write. Either way the field the
-	// caller wrote to is empty, and a scan for "some AXTextField holding the
-	// text" reports the write as landed.
-	let rows = form(1, {});
-	try {
-		f.state.hook = async (name, args) => {
-			if (name === "type_text") return reply(UNJUDGED_TYPING);
-			if (name !== "get_window_state") return undefined;
-			return reply({
-				pid: 101,
-				window_id: args.window_id,
-				snapshot_id: "w1",
-				truncated: false,
-				elements: rows,
-			});
-		};
-		const company = (await f.session.observe(f.context, f.window)).elements[1]!.ref;
-		await f.session.type(f.context, f.window, "Apple Park", company);
-		rows = form(2, { notes: "Apple Park" });
-		const line = (await f.session.observe(f.context, f.window)).tree.split("\n")[0]!;
-		expect(line).toContain("nothing in the reply says whether the app kept this value");
-		expect(line).toContain('The control it was written to now holds "".');
-		expect(line).not.toContain("the control now holds");
-	} finally {
-		await f.close();
-	}
-});
-
-it("reads a doubted write back through a field whose label became the value it was given", async () => {
-	const f = await fixture();
-	// An untitled field is labelled by its own value, so the write renames
-	// it: matching on the label alone would strand every such write on "not
-	// in this tree".
-	let rows = form(1, {}, { churn: true });
-	try {
-		f.state.hook = async (name, args) => {
-			if (name === "type_text") return reply(UNJUDGED_TYPING);
-			if (name !== "get_window_state") return undefined;
-			return reply({
-				pid: 101,
-				window_id: args.window_id,
-				snapshot_id: "w1",
-				truncated: false,
-				elements: rows,
-			});
-		};
-		const company = (await f.session.observe(f.context, f.window)).elements[1]!.ref;
-		await f.session.type(f.context, f.window, "Apple Park", company);
-		rows = form(2, { company: "Apple Park" }, { churn: true });
-		expect((await f.session.observe(f.context, f.window)).tree.split("\n")[0]).toBe(
-			`type on ${company} AXTextField: the control now holds "Apple Park" — that is the field, not the app's response; judge by the app's own output (rows filtered, title changed, list updated).`,
-		);
-	} finally {
-		await f.close();
-	}
-});
-
-it("says a doubted write's control is not in this tree instead of reading it back from another row", async () => {
-	const f = await fixture();
-	// The app rebuilt the card without the field that was written to, and
-	// Notes slid into its position holding the text. Position without a name
-	// is not identity: nothing here reads that write back.
-	let rows = form(1, {});
-	try {
-		f.state.hook = async (name, args) => {
-			if (name === "type_text") return reply(UNJUDGED_TYPING);
-			if (name !== "get_window_state") return undefined;
-			return reply({
-				pid: 101,
-				window_id: args.window_id,
-				snapshot_id: "w1",
-				truncated: false,
-				elements: rows,
-			});
-		};
-		const company = (await f.session.observe(f.context, f.window)).elements[1]!.ref;
-		await f.session.type(f.context, f.window, "Apple Park", company);
-		rows = form(2, { notes: "Apple Park" }, { drop: true });
-		const line = (await f.session.observe(f.context, f.window)).tree.split("\n")[0]!;
-		expect(line).toContain("nothing in the reply says whether the app kept this value");
-		expect(line).toContain("The control it was written to is not in this tree — nothing here reads it back.");
-		expect(line).not.toContain("the control now holds");
-	} finally {
-		await f.close();
-	}
-});
-
-it("does not answer a setValue read-back from a row that merely contains the text", async () => {
-	const f = await fixture();
-	// The read-back test is trimmed containment, which one-character values
-	// make almost free: a quantity of `5` is "read back" by any field on the
-	// form holding 15, 50 or 2025.
-	let rows = form(1, { notes: "15" });
-	try {
-		f.state.hook = async (name, args) => {
-			if (name === "set_value") return reply(UNJUDGED_TYPING);
-			if (name !== "get_window_state") return undefined;
-			return reply({
-				pid: 101,
-				window_id: args.window_id,
-				snapshot_id: "w1",
-				truncated: false,
-				elements: rows,
-			});
-		};
-		const company = (await f.session.observe(f.context, f.window)).elements[1]!.ref;
-		await f.session.setValue(f.context, f.window, company, "5");
-		rows = form(2, { notes: "15" });
-		const line = (await f.session.observe(f.context, f.window)).tree.split("\n")[0]!;
-		expect(line).toContain('The control it was written to now holds "".');
-		expect(line).not.toContain("the control now holds");
-		expect(line).not.toContain("15");
 	} finally {
 		await f.close();
 	}
@@ -2356,7 +1721,7 @@ it("re-samples a window once when its header and its own tree disagree after a m
 	}
 });
 
-it("says a write was not dispatched at a control that is gone, instead of asking for a read-back", async () => {
+it("answers a write at a control that is gone without asking for a read-back", async () => {
 	const f = await fixture();
 	const dead = {
 		text: "Background input refused (element_no_longer_exists): the addressed element is no longer in the accessibility tree; take a fresh get_window_state snapshot and re-address it",
@@ -2365,7 +1730,7 @@ it("says a write was not dispatched at a control that is gone, instead of asking
 			effect: "refused",
 			escalation: {
 				reason: "the addressed element is no longer in the accessibility tree",
-				recommended: "get_window_state",
+				recommended: "snapshot",
 			},
 			pid: 101,
 			window_id: 1,
@@ -2381,105 +1746,12 @@ it("says a write was not dispatched at a control that is gone, instead of asking
 		f.state.label = "Editor (renamed)";
 		const answered = await f.session.setValue(f.context, f.window, ref, "Project_File_List");
 		expect(answered.effect).toBe("not_dispatched");
-		expect(answered.text.split("\n").at(-1)).toBe(
-			`setValue on ${ref} AXTextField "Editor": not dispatched — the control is gone; address a row in the tree below.`,
-		);
+		expect(answered.mustShow).toBe(true);
+		// The dead-ref recovery is the whole answer: a write that never went out
+		// has no value to read back.
+		expect(answered.text).toContain(`${ref} (AXTextField "Editor") no longer exists in window 1`);
+		expect(answered.text).not.toContain("setValue on");
 		expect(answered.text).not.toContain("read the field back");
-	} finally {
-		await f.close();
-	}
-});
-
-it("drops the no-change doubt when the same reply names a window the app gained", async () => {
-	const f = await fixture();
-	const menu = { ...f.row, window_id: 7, title: "Add", z_index: 9 };
-	let opened = false;
-	const watched = {
-		effect: "suspected_noop",
-		evidence: null,
-		route: "accessibility",
-		escalation: { reason: "suspected_noop", recommended: "px" },
-	};
-	try {
-		f.state.hook = async name => {
-			if (name === "list_windows") return reply({ windows: opened ? [f.row, menu] : [f.row] });
-			return name === "click" ? reply(watched) : undefined;
-		};
-		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		// The probe watched the addressed window for its budget and saw
-		// nothing; the app had put its menu on screen instead.
-		opened = true;
-		const answered = await f.session.click(f.context, f.window, ref);
-		expect(answered.effect).toBe("suspected_noop");
-		expect(answered.text).toContain("gained window 7");
-		expect(answered.text).toContain("that is the change its probe missed");
-		expect(answered.text).not.toContain("observe() once");
-		expect(answered.escalation).toBeUndefined();
-		// With nothing gained the doubt and the route it names both stand.
-		const again = await f.session.observe(f.context, f.window);
-		const quiet = await f.session.click(f.context, f.window, again.elements[0]!.ref);
-		expect(quiet.text).toContain("observe() once");
-		expect(quiet.text).not.toContain("its probe missed");
-	} finally {
-		await f.close();
-	}
-});
-
-it("holds an unproven write against its own window and shows it beside that window's pixels", async () => {
-	const f = await fixture();
-	const second = { ...f.row, window_id: 2, title: "Second" };
-	try {
-		f.state.hook = async (name, args) => {
-			if (name === "list_windows") return reply({ windows: [f.row, second] });
-			if (name !== "get_window_state") return undefined;
-			return reply(
-				{
-					pid: 101,
-					window_id: args.window_id,
-					snapshot_id: `w${String(args.window_id)}`,
-					elements: [
-						{
-							element_index: 1,
-							element_token: `w${String(args.window_id)}:1`,
-							role: "AXTextField",
-							label: "Save as:",
-							depth: 0,
-						},
-					],
-					window_bounds: f.row.bounds,
-					screenshot_frame_valid: true,
-					screenshot_width: 4,
-					screenshot_height: 2,
-					screenshot_mime_type: "image/png",
-				},
-				args.include_screenshot ? [{ dataBase64: PNG, mimeType: "image/png" }] : [],
-			);
-		};
-		const other = await f.session.window(f.context, { id: "2", pid: 101 });
-		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		await f.session.setValue(f.context, f.window, ref, "Project_File_List.txt");
-		// Another window's read answers for its own state and carries nothing.
-		expect((await f.session.observe(f.context, other)).tree).not.toContain("setValue on");
-		f.texts.length = 0;
-		await f.session.captureWindow(f.context, other);
-		expect(f.texts).toEqual([]);
-		// A capture has no text of its own, so the doubt is pushed into the cell.
-		await f.session.captureWindow(f.context, f.window);
-		expect(f.texts).toEqual([
-			`setValue on ${ref} AXTextField "Save as:": the field publishes no readable value, so nothing read this write back — the app's own output is the only witness.`,
-		]);
-		f.texts.length = 0;
-		await f.session.captureWindow(f.context, f.window);
-		expect(f.texts).toEqual([]);
-		// With this window's pixels in hand, they are the witness the sentence
-		// names — the route is read off the session's state, not off a table.
-		const captured = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		await f.session.setValue(f.context, f.window, captured, "Project_File_List.txt");
-		f.texts.length = 0;
-		await f.session.captureWindow(f.context, f.window);
-		expect(f.texts).toEqual([
-			`setValue on ${captured} AXTextField "Save as:": the field publishes no readable value, so nothing read this write back — capture the window and read the value off its own pixels.`,
-		]);
 	} finally {
 		await f.close();
 	}
@@ -2505,326 +1777,31 @@ it("names the rung a dispatched action's own escalation points at", async () => 
 			},
 			"Pressed cmd+n on pid 101.",
 		);
-		expect(dropped.text).toContain("Pressed cmd+n on pid 101.");
-		expect(dropped.text).toContain("(delivery_failed)");
-		expect(dropped.escalation).toBe(
-			"⚠️ The driver escalates this action (delivery_failed): re-run it as-is; this window's keystrokes now take the foreground route.",
-		);
-		expect(dropped.text).not.toContain('{ delivery: "foreground" }');
+		expect(dropped.text.split("\n")[0]).toBe("Pressed cmd+n on pid 101.");
+		// The post never went out, so the named rung is the whole advice.
+		expect(dropped.escalation).toBe('Not delivered: re-run it with { delivery: "foreground" }.');
 		expect(dropped.escalation).toBe(dropped.text.split("\n")[1]);
-		// The driver's wire vocabulary never survives as advice, and a reply
-		// that spells the rung itself is instructing the bypass, so the
-		// remembered route corrects it rather than staying quiet. Acquiring the
-		// window again is the caller starting over on it, so the rung is the
-		// background one this case is about.
-		await f.session.acquire(f.context, { id: "1", pid: 101 });
-		const named = await pressed(
+		expect(dropped.mustShow).toBe(true);
+		// Any other doubt is about a dispatch that may have landed: the read
+		// comes first, because re-sending an action that landed does it twice.
+		// The refusal payloads of both pinned builds still spell the rung
+		// `recommended`, and the driver's own wire vocabulary never survives.
+		const unproven = await pressed(
 			{ effect: "unverifiable", escalation: { recommended: "foreground" } },
 			'⚠️ Unverified. To deliver a real click, click this control\'s pixel center with delivery_mode:"foreground".',
 		);
-		expect(named.text).toContain('{ delivery: "foreground" }');
-		expect(named.text).not.toContain("delivery_mode");
-		expect(named.escalation).toContain("now take the foreground route");
+		expect(unproven.escalation).toBe(
+			'Delivery unproven: observe first — it may have landed; only if the window shows no change, re-run it with { delivery: "foreground" }.',
+		);
+		expect(unproven.text).toContain('{ delivery: "foreground" }');
+		expect(unproven.text).not.toContain("delivery_mode");
 		// A rung this surface cannot type is not turned into advice.
-		await f.session.acquire(f.context, { id: "1", pid: 101 });
 		const elsewhere = await pressed(
 			{ effect: "unverifiable", escalation: { target: "session", reason: "permission_required" } },
 			"Pressed cmd+n on pid 101.",
 		);
-		expect(elsewhere.text.split("\n")[0]).toBe("Pressed cmd+n on pid 101.");
-		expect(elsewhere.text).not.toContain("escalates");
+		expect(elsewhere.text).toBe("Pressed cmd+n on pid 101.");
 		expect(elsewhere.escalation).toBeUndefined();
-		// A rung the session cannot take over for the caller still names itself:
-		// only a keyboard tool's route is remembered per window.
-		f.state.hook = async name =>
-			name === "bring_to_front"
-				? {
-						text: "Raised window 1 on pid 101.",
-						structuredJson: JSON.stringify({
-							effect: "unverifiable",
-							escalation: { reason: "delivery_failed", target: "foreground" },
-						}),
-						isError: false,
-						images: [],
-					}
-				: undefined;
-		const raised = await f.session.raise(f.context, f.window);
-		expect(raised.text).toContain('{ delivery: "foreground" }');
-		expect(raised.text).not.toContain("now take the foreground route");
-		// A rung nothing took over is still not restated when the reply spells it.
-		f.state.hook = async name =>
-			name === "bring_to_front"
-				? {
-						text: 'Raised window 1 on pid 101. Re-run with delivery_mode:"foreground" to activate it.',
-						structuredJson: JSON.stringify({
-							effect: "unverifiable",
-							escalation: { reason: "delivery_failed", target: "foreground" },
-						}),
-						isError: false,
-						images: [],
-					}
-				: undefined;
-		expect((await f.session.raise(f.context, f.window)).escalation).toBeUndefined();
-	} finally {
-		await f.close();
-	}
-});
-
-it("keeps the foreground route the driver escalated to for that window's keystrokes", async () => {
-	const f = await fixture();
-	// Recorded shape from the T11 leg: the chord reads as delivered and only
-	// the structured payload says the background route dropped it.
-	const escalated = {
-		text: "Pressed cmd+n on pid 101.",
-		structuredJson: JSON.stringify({
-			delivery: { mode: "background" },
-			effect: "unverifiable",
-			escalation: { reason: "delivery_failed", target: "foreground" },
-			route: "synthetic_events",
-		}),
-		isError: false,
-		images: [],
-	};
-	const refused = {
-		text: "foreground_unavailable: the target cannot be activated.",
-		structuredJson: JSON.stringify({ code: "foreground_unavailable" }),
-		isError: true,
-		errorCode: "foreground_unavailable",
-		images: [],
-	};
-	try {
-		f.state.hook = async name => (name === "hotkey" ? escalated : undefined);
-		const first = await f.session.press(f.context, f.window, "cmd+n");
-		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
-		expect(first.text).toContain("re-run it as-is; this window's keystrokes now take the foreground route");
-		// The escalation attaches to the window, not to the callsite: the next
-		// keystroke takes the route the driver named without being told again.
-		f.state.hook = undefined;
-		const second = await f.session.press(f.context, f.window, "Return");
-		expect(f.lastDispatch()).toMatchObject({
-			name: "press_key",
-			args: { key: "Return", delivery_mode: "foreground" },
-		});
-		expect(second.text.split("\n")).toContain(
-			"delivery: foreground (remembered from the driver's escalation on this window)",
-		);
-		expect(second.delivery).toBe("foreground");
-		// Typing is the same route on the same window.
-		await f.session.type(f.context, f.window, "hi");
-		expect(f.lastDispatch()).toMatchObject({ name: "type_text", args: { delivery_mode: "foreground" } });
-		// An explicit rung still wins — the caller may be testing the one the
-		// escalation gave up on.
-		const asked = await f.session.press(f.context, f.window, "Return", undefined, { delivery: "background" });
-		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
-		expect(asked.text).not.toContain("remembered");
-		// A foreground keystroke the driver refuses ends the memory.
-		f.state.hook = async name => (name === "press_key" ? refused : undefined);
-		await expect(f.session.press(f.context, f.window, "Return")).rejects.toThrow("foreground_unavailable");
-		f.state.hook = undefined;
-		expect((await f.session.press(f.context, f.window, "Return")).text).not.toContain("remembered");
-		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
-		// Acquiring the window again is the caller starting over on it.
-		f.state.hook = async name => (name === "hotkey" ? escalated : undefined);
-		await f.session.press(f.context, f.window, "cmd+n");
-		f.state.hook = undefined;
-		const reacquired = await f.session.acquire(f.context, { id: "1", pid: 101 });
-		const after = await f.session.press(f.context, reacquired, "Return");
-		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
-		expect(after.text).not.toContain("remembered");
-	} finally {
-		await f.close();
-	}
-});
-
-const REMEMBERED_ROUTE = "delivery: foreground (remembered from the driver's escalation on this window)";
-
-it("keeps the escalated keyboard route across the rehydration step every prelude window method carries", async () => {
-	const f = await fixture();
-	const escalated = {
-		text: `Pressed cmd+b on pid ${f.row.pid}.`,
-		structuredJson: JSON.stringify({
-			delivery: { mode: "background" },
-			effect: "unverifiable",
-			escalation: { reason: "delivery_failed", target: "foreground" },
-			route: "synthetic_events",
-		}),
-		isError: false,
-		images: [],
-	};
-	try {
-		const handle = () => f.session.window(f.context, { id: String(f.row.window_id), pid: f.row.pid as number });
-		f.state.hook = async name => (name === "hotkey" ? escalated : undefined);
-		await f.session.press(f.context, await handle(), "cmd+b");
-		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "background" });
-		f.state.hook = undefined;
-		const second = await f.session.press(f.context, await handle(), "Return");
-		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
-		expect(second.text.split("\n")).toContain(REMEMBERED_ROUTE);
-		const typed = await f.session.type(f.context, await handle(), "hi");
-		expect(f.lastDispatch()).toMatchObject({ name: "type_text", args: { delivery_mode: "foreground" } });
-		expect(typed.text.split("\n")).toContain(REMEMBERED_ROUTE);
-	} finally {
-		await f.close();
-	}
-});
-
-it("records the foreground rung of a keyboard escalation the driver spells in prose", async () => {
-	const f = await fixture();
-	const reply = (escalation: Wire, error?: string) => ({
-		text: error ?? `Inserted 2 char(s) into AXTextArea "".`,
-		structuredJson: JSON.stringify(
-			error === undefined ? { effect: "unverifiable", escalation } : { code: "background_unavailable", escalation },
-		),
-		isError: error !== undefined,
-		...(error === undefined ? {} : { errorCode: "background_unavailable" }),
-		images: [],
-	});
-	try {
-		f.state.hook = async name =>
-			name === "type_text"
-				? reply({
-						recommended: "foreground",
-						reason:
-							'background insert could not be confirmed — re-call with delivery_mode:"foreground" if a screenshot shows the text didn\'t land.',
-					})
-				: undefined;
-		await f.session.type(f.context, f.window, "hi");
-		f.state.hook = undefined;
-		expect((await f.session.press(f.context, f.window, "Return")).text.split("\n")).toContain(REMEMBERED_ROUTE);
-		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
-
-		const fresh = await f.session.acquire(f.context, { id: String(f.row.window_id), pid: f.row.pid as number });
-		f.state.hook = async name =>
-			name === "hotkey"
-				? reply(
-						{
-							recommended: "foreground",
-							reason:
-								"Screen Sharing does not forward modifier state from background PID-routed base-key events.",
-							requires: ["window_id"],
-						},
-						"Background input refused.",
-					)
-				: undefined;
-		await expect(f.session.press(f.context, fresh, "cmd+b")).rejects.toThrow("background_unavailable");
-		f.state.hook = undefined;
-		expect((await f.session.press(f.context, fresh, "Return")).text.split("\n")).toContain(REMEMBERED_ROUTE);
-		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
-	} finally {
-		await f.close();
-	}
-});
-
-it("corrects the reply's own instruction to qualify the re-run once the route is remembered", async () => {
-	const f = await fixture();
-	const instructed = {
-		text: '📨 Sent (unverified) 22 char(s) via CGEvent (30ms delay). — driver could not confirm the text landed; verify via screenshot, and re-call with delivery_mode:"foreground" if it didn\'t.',
-		structuredJson: JSON.stringify({
-			effect: "unverifiable",
-			escalation: {
-				recommended: "foreground",
-				reason:
-					'background insert could not be confirmed — re-call with delivery_mode:"foreground" if a screenshot shows the text didn\'t land.',
-			},
-		}),
-		isError: false,
-		images: [],
-	};
-	try {
-		f.state.hook = async name => (name === "type_text" ? instructed : undefined);
-		const typed = await f.session.type(f.context, f.window, "hi");
-		expect(typed.text).toContain('{ delivery: "foreground" }');
-		// The reply's own doubt is that it could not confirm the insert, so the
-		// correction keeps the read in front of the re-run it un-qualifies.
-		expect(typed.text).toContain(
-			"the keystrokes may have landed: observe the window first (win.observe()) and only if it shows nothing re-run the action — this window's keystrokes now take the foreground route",
-		);
-		f.state.hook = undefined;
-		const next = await f.session.press(f.context, f.window, "Return");
-		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
-		expect(next.text.split("\n")).toContain(REMEMBERED_ROUTE);
-	} finally {
-		await f.close();
-	}
-});
-
-it("forgets the route when the caller's own foreground press is refused, even as the refusal escalates to it", async () => {
-	const f = await fixture();
-	const refused = {
-		text: "Background input refused.",
-		structuredJson: JSON.stringify({
-			code: "background_unavailable",
-			escalation: {
-				recommended: "foreground",
-				reason: "Screen Sharing does not forward modifier state from background PID-routed base-key events.",
-				requires: ["window_id"],
-			},
-		}),
-		isError: true,
-		errorCode: "background_unavailable",
-		images: [],
-	};
-	const refuseOnce = () => {
-		f.state.hook = async name => (name === "press_key" ? refused : undefined);
-	};
-	try {
-		refuseOnce();
-		await expect(f.session.press(f.context, f.window, "Return")).rejects.toThrow("background_unavailable");
-		f.state.hook = undefined;
-		const remembered = await f.session.press(f.context, f.window, "Return");
-		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "foreground" } });
-		expect(remembered.text.split("\n")).toContain(REMEMBERED_ROUTE);
-
-		refuseOnce();
-		await expect(
-			f.session.press(f.context, f.window, "Return", undefined, { delivery: "foreground" }),
-		).rejects.toThrow("background_unavailable");
-		f.state.hook = undefined;
-		const forgotten = await f.session.press(f.context, f.window, "Return");
-		expect(f.lastDispatch()).toMatchObject({ name: "press_key", args: { delivery_mode: "background" } });
-		expect(forgotten.text).not.toContain("remembered");
-	} finally {
-		await f.close();
-	}
-});
-
-it("names an observe before a screenshot as the check for an unverified dispatch", async () => {
-	const f = await fixture();
-	try {
-		await f.session.observe(f.context, f.window, { screenshot: true, silent: true });
-		// The sentence every background CGEvent rung ends with — click, drag
-		// and scroll all author it, and a screenshot was the only check it named.
-		f.state.hook = async name =>
-			name === "click"
-				? {
-						text: "✅ Posted left-click to pid 101 at (2,0) (background CGEvent; not driver-verified — confirm via screenshot).",
-						structuredJson: JSON.stringify({ effect: "unverifiable", route: "cgevent" }),
-						isError: false,
-						images: [],
-					}
-				: undefined;
-		const clicked = await f.session.click(f.context, f.window, [1, 0]);
-		expect(clicked.text).toBe(
-			"✅ Posted left-click to pid 101 at (2,0) (background CGEvent; not driver-verified — confirm with observe({ query }) or, on a pixel surface, a screenshot).",
-		);
-		// The keystroke paths name a screenshot for a field whose AXValue they
-		// could not read at all. There a capture really is the only witness, so
-		// the check stands and only gains the spelling of the call that takes
-		// one — an AX read is exactly what cannot answer it.
-		f.state.hook = async name =>
-			name === "type_text"
-				? {
-						text: '📨 Sent (unverified) 2 char(s) via CGEvent (30ms delay). — driver could not confirm the text landed; verify via screenshot, and re-call with delivery_mode:"foreground" if it didn\'t.',
-						structuredJson: JSON.stringify({ effect: "unverifiable", route: "cgevent_type" }),
-						isError: false,
-						images: [],
-					}
-				: undefined;
-		const typed = await f.session.type(f.context, f.window, "hi");
-		expect(typed.text.split("\n")[0]).toBe(
-			'📨 Sent (unverified) 2 char(s) via CGEvent (30ms delay). — driver could not confirm the text landed; confirm with observe({ screenshot: true }), and re-call with { delivery: "foreground" } if it didn\'t.',
-		);
-		expect(typed.text).not.toContain("observe({ query })");
 	} finally {
 		await f.close();
 	}
@@ -2848,33 +1825,24 @@ it("sends a suspected no-op back to observe before it sends it to pixels", async
 	try {
 		// Recorded from the 09-14 Contacts leg: the press had landed and the
 		// menu opened a moment after the driver stopped watching, and the
-		// coordinate rung the escalation named is the one Contacts swallows.
+		// coordinate rung the escalation named is the one Contacts swallows —
+		// so the read comes first, and the rung only if nothing moved.
 		const watched = await dispatched(
 			'✅ Performed AXPress on [15] AXMenuButton "".\n⚠️ Unverified: no change observed within 505 ms (element state, app focus, window contents, new windows).',
 		);
-		expect(watched.text).toContain("(suspected_noop)");
 		// No capture of this window is live, and a pixel action refuses before
 		// dispatch without one, so the capture is part of the route.
-		expect(watched.text).toContain(
-			"the driver saw no change within 505 ms — observe() once; if the tree is unchanged, capture the window (observe({ screenshot: true })) and click the control's own centre",
+		expect(watched.escalation).toBe(
+			"Delivery unproven: observe first — it may have landed; only if the window shows no change, click the control's own centre in a fresh capture (observe({ screenshot: true })).",
 		);
-		expect(watched.text.indexOf("observe() once")).toBeLessThan(watched.text.indexOf("capture the window"));
-		// A driver that says how long it watched is quoted the same way.
-		const settled = await dispatched(
-			"⚠️ Unverified: the target was watched for 2000 ms after the dispatch and nothing changed.",
+		expect(watched.text.indexOf("observe first")).toBeLessThan(
+			watched.text.indexOf("click the control's own centre"),
 		);
-		expect(settled.text).toContain("the driver saw no change within 2000 ms — observe() once");
-		// No window in the reply: the doubt is still named, without a number.
-		const bare = await dispatched('✅ Performed AXPress on [15] AXMenuButton "".');
-		expect(bare.text).toContain("the driver could not confirm this landed — observe() once");
-		expect(bare.text).not.toContain(" ms");
-		// Once the window has a frame, the click is the whole route: the
-		// coordinate it names is already in hand.
+		expect(watched.mustShow).toBe(true);
+		// Once the window has a frame, the coordinate it names is already in hand.
 		await f.session.observe(f.context, f.window, { screenshot: true, silent: true });
 		const captured = await dispatched('✅ Performed AXPress on [15] AXMenuButton "".');
-		expect(captured.text).toContain(
-			"observe() once; if the tree is unchanged, click the control's own centre in the capture this window already has",
-		);
+		expect(captured.escalation).toContain("click the control's own centre in the capture this window already has");
 		expect(captured.text).not.toContain("observe({ screenshot: true })");
 	} finally {
 		await f.close();
@@ -2901,167 +1869,35 @@ it("names the field a blind keystroke can be written to, from the observation it
 		// No observation of this window yet: the route is real, the ref is not.
 		const blind = await f.session.type(f.context, f.window, "hi");
 		expect(blind.escalation).toBe(
-			"⚠️ The driver escalates this action (effect_unconfirmed): address the field itself — this session holds no text row for window 1, so observe it first and write the row that walk mints.",
+			"Delivery unproven: observe first — it may have landed; only if the window shows no change, address the field itself — observe window 1 and write the row it mints.",
+		);
+		// A row the app publishes disabled refuses the write, so it is no
+		// candidate however text-shaped its role is.
+		await f.session.observe(f.context, f.window);
+		expect((await f.session.type(f.context, f.window, "hi")).escalation).toContain(
+			"observe window 1 and write the row it mints",
 		);
 		// One enabled text row in hand: the route is a call the caller can type.
 		f.state.enabled = true;
 		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		const known = await f.session.type(f.context, f.window, "hi");
-		expect(known.escalation).toBe(
-			`⚠️ The driver escalates this action (effect_unconfirmed): address the field itself: win.ref("${ref}").type("<text>") or win.ref("${ref}").setValue("<value>").`,
+		expect((await f.session.type(f.context, f.window, "hi")).escalation).toContain(
+			`address the field itself: win.ref("${ref}").type("<text>") or win.ref("${ref}").setValue("<value>")`,
 		);
 		// The call already addressed a row, so the route is to write it, not to
 		// hunt for it again.
-		const addressed = await f.session.type(f.context, f.window, "hi", ref);
-		expect(addressed.escalation).toBe(
-			`⚠️ The driver escalates this action (effect_unconfirmed): write the field instead of posting keystrokes at it: win.ref("${ref}").setValue("<value>").`,
+		expect((await f.session.type(f.context, f.window, "hi", ref)).escalation).toContain(
+			`write the field instead of posting keystrokes at it: win.ref("${ref}").setValue("<value>")`,
 		);
 	} finally {
 		await f.close();
 	}
 });
 
-it("never re-offers the foreground rung a keystroke already took", async () => {
+it("names the foreground rung to a background keystroke the driver saw move nothing", async () => {
 	const f = await fixture();
-	// The payload measured on Notes' Find chord: the second press runs on the
-	// rung the first one's escalation named, and answers with that same
-	// escalation. A table keyed on the target alone replied "re-run it as-is".
-	const escalated = {
-		text: "Pressed cmd+option+f on pid 101.",
-		structuredJson: JSON.stringify({
-			delivery: { mode: "background" },
-			effect: "unverifiable",
-			escalation: { reason: "delivery_failed", target: "foreground" },
-			route: "key_events_fg",
-		}),
-		isError: false,
-		images: [],
-	};
-	const menuBar = [
-		{ element_index: 1, element_token: "m:1", role: "AXMenuBar", label: "", depth: 0 },
-		{ element_index: 2, element_token: "m:2", role: "AXMenuBarItem", label: "Edit", depth: 1, enabled: true },
-		{ element_index: 3, element_token: "m:3", role: "AXMenuBarItem", label: "Format", depth: 1, enabled: true },
-	];
-	try {
-		f.state.hook = async name => (name === "hotkey" ? escalated : undefined);
-		const first = await f.session.press(f.context, f.window, "cmd+option+f");
-		expect(first.escalation).toBe(
-			"⚠️ The driver escalates this action (delivery_failed): re-run it as-is; this window's keystrokes now take the foreground route.",
-		);
-		// Same reply, now on the foreground rung this session took over.
-		const second = await f.session.press(f.context, f.window, "cmd+option+f");
-		expect(f.lastDispatch()?.args).toMatchObject({ delivery_mode: "foreground" });
-		expect(second.escalation).toBe(
-			'⚠️ The driver escalates this action (delivery_failed): the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — observe the window (win.observe()) to read what the keystrokes did — a read changes nothing — or observe({ menubar: true }) and drive the command with win.menu([...], { delivery: "foreground" }).',
-		);
-		expect(second.escalation).not.toContain("re-run");
-		// With this window's own menu bar in hand, the route is the one measured
-		// to drive a menu command when its chord does not.
-		f.state.hook = async (name, args) => {
-			if (name === "hotkey") return escalated;
-			return name === "get_window_state" && args.window_id === 1
-				? reply({ pid: 101, window_id: 1, snapshot_id: "m", truncated: false, elements: menuBar })
-				: undefined;
-		};
-		await f.session.observe(f.context, f.window, { menubar: true });
-		const menu = await f.session.press(f.context, f.window, "cmd+option+f");
-		expect(menu.escalation).toBe(
-			'⚠️ The driver escalates this action (delivery_failed): the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — drive the command from the menu this window\'s observation carries (Edit · Format): win.menu(["<menu>", "<item>"], { delivery: "foreground" }).',
-		);
-	} finally {
-		await f.close();
-	}
-});
-
-it("tells a keystroke that may have landed to observe first, and only a failed one to re-run", async () => {
-	// T7 `native-act-notes`: contract 0.9.0 defaults an unprobed post to
-	// `effect_unconfirmed` instead of `delivery_failed`, so the remembered-route
-	// sentence started telling a keystroke that may have landed to re-run
-	// itself. The caller's own rule forbids exactly that, and the model read the
-	// pair as a contradiction and refused the retry: "the active computer-use
-	// constraint prohibits following unverified delivery with foreground input".
-	const escalatedFor = async (reason: string) => {
-		const f = await fixture();
-		try {
-			f.state.hook = async name =>
-				name === "hotkey"
-					? {
-							text: "Pressed cmd+option+f on pid 101.",
-							structuredJson: JSON.stringify({
-								delivery: { mode: "background" },
-								effect: "unverifiable",
-								escalation: { reason, target: "foreground" },
-								route: "key_events_fg",
-							}),
-							isError: false,
-							images: [],
-						}
-					: undefined;
-			return (await f.session.press(f.context, f.window, "cmd+option+f")).escalation;
-		} finally {
-			await f.close();
-		}
-	};
-	// Nothing went out, so re-running it is the whole advice.
-	expect(await escalatedFor("delivery_failed")).toBe(
-		"⚠️ The driver escalates this action (delivery_failed): re-run it as-is; this window's keystrokes now take the foreground route.",
-	);
-	// Delivery is unknown, so the read comes first and the re-run is conditional.
-	expect(await escalatedFor("effect_unconfirmed")).toBe(
-		"⚠️ The driver escalates this action (effect_unconfirmed): the keystrokes may have landed: observe the window first (win.observe()) and only if it shows nothing re-run the action — this window's keystrokes now take the foreground route.",
-	);
-});
-
-it("names the menu a keyboard no-op can be driven from, and nothing when none was observed", async () => {
-	const f = await fixture();
-	// ChordProbe rank 1: the probe reports the chord moved nothing, and the
-	// reply names no rung at all — there is none left for a chord.
-	const inert = {
-		text: "Pressed cmd+option+f on pid 101 (delivery_mode:foreground).",
-		structuredJson: JSON.stringify({
-			delivery: { mode: "foreground" },
-			effect: "suspected_noop",
-			route: "key_events_fg",
-		}),
-		isError: false,
-		images: [],
-	};
-	const menuBar = [
-		{ element_index: 1, element_token: "m:1", role: "AXMenuBar", label: "", depth: 0 },
-		{ element_index: 2, element_token: "m:2", role: "AXMenuBarItem", label: "Edit", depth: 1, enabled: true },
-	];
-	try {
-		f.state.hook = async name => (name === "hotkey" ? inert : undefined);
-		const unobserved = await f.session.press(f.context, f.window, "cmd+option+f", undefined, {
-			delivery: "foreground",
-		});
-		// Nothing in hand but a read, which is the recovery the bench took.
-		expect(unobserved.escalation).toBe(
-			'⚠️ The driver reports no observed change: the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — observe the window (win.observe()) to read what the keystrokes did — a read changes nothing — or observe({ menubar: true }) and drive the command with win.menu([...], { delivery: "foreground" }).',
-		);
-		f.state.hook = async (name, args) => {
-			if (name === "hotkey") return inert;
-			return name === "get_window_state" && args.window_id === 1
-				? reply({ pid: 101, window_id: 1, snapshot_id: "m", truncated: false, elements: menuBar })
-				: undefined;
-		};
-		await f.session.observe(f.context, f.window, { menubar: true });
-		const observed = await f.session.press(f.context, f.window, "cmd+option+f", undefined, {
-			delivery: "foreground",
-		});
-		expect(observed.escalation).toBe(
-			'⚠️ The driver reports no observed change: the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — drive the command from the menu this window\'s observation carries (Edit): win.menu(["<menu>", "<item>"], { delivery: "foreground" }).',
-		);
-	} finally {
-		await f.close();
-	}
-});
-
-it("never points a keyboard no-op at a disabled row, and offers the rung that lands first", async () => {
-	const f = await fixture();
-	// T11 `native-act-notes/omp-2`: a background cmd+f moved nothing and the
-	// route named this window's own `AXTextField "" subrole=AXSearchField
-	// enabled=false`, which answered `type_text_incomplete: delivered 0 of 22`.
+	// T11 `native-act-notes/omp-2`: a background cmd+f moved nothing, and the
+	// reply names no rung of its own — background keystrokes reach only the
+	// app's key window, which is what the foreground rung makes this one.
 	const inert = (mode: "background" | "foreground") => ({
 		text: `Pressed cmd+f on pid 101${mode === "foreground" ? " (delivery_mode:foreground)" : ""}.`,
 		structuredJson: JSON.stringify({
@@ -3073,42 +1909,26 @@ it("never points a keyboard no-op at a disabled row, and offers the rung that la
 		images: [],
 	});
 	try {
-		f.state.label = "";
-		f.state.subrole = "AXSearchField";
-		f.state.placeholder = undefined;
-		const observation = await f.session.observe(f.context, f.window);
-		expect(observation.tree.split("\n")[0]).toBe(
-			`- [${observation.elements[0]!.ref}] AXTextField "" subrole=AXSearchField value="" enabled=false selected=false`,
-		);
 		f.state.hook = async name => (name === "hotkey" ? inert("background") : undefined);
 		const background = await f.session.press(f.context, f.window, "cmd+f");
 		expect(background.escalation).toBe(
-			'⚠️ The driver reports no observed change: these keystrokes went out in the background, which leaves this window not the app\'s key window — re-run with { delivery: "foreground" }, which makes it key first.',
+			'Delivery unproven: observe first — it may have landed; only if the window shows no change, re-run them with { delivery: "foreground" }, which makes this window key first — background keystrokes reach only the app\'s key window.',
 		);
-		expect(background.escalation).not.toContain("win.ref");
-		// On the rung it named, the disabled row is still no route: a read is.
+		// On the rung it named there is nothing left to offer, and the reply is
+		// still unproven, so the cell still prints it.
 		f.state.hook = async name => (name === "hotkey" ? inert("foreground") : undefined);
 		const spent = await f.session.press(f.context, f.window, "cmd+f", undefined, { delivery: "foreground" });
-		expect(spent.escalation).toBe(
-			'⚠️ The driver reports no observed change: the foreground rung already carried these keystrokes and the driver still could not verify them, so re-sending them lands nothing new — observe the window (win.observe()) to read what the keystrokes did — a read changes nothing — or observe({ menubar: true }) and drive the command with win.menu([...], { delivery: "foreground" }).',
-		);
-		expect(spent.escalation).not.toContain("win.ref");
-		// An enabled row of the same window is the route it always was.
-		f.state.enabled = true;
-		const enabled = await f.session.observe(f.context, f.window);
-		f.state.hook = async name => (name === "hotkey" ? inert("foreground") : undefined);
-		const known = await f.session.press(f.context, f.window, "cmd+f", undefined, { delivery: "foreground" });
-		expect(known.escalation).toContain(
-			`address the field itself: win.ref("${enabled.elements[0]!.ref}").type("<text>")`,
-		);
+		expect(spent.escalation).toBeUndefined();
+		expect(spent.mustShow).toBe(true);
 	} finally {
 		await f.close();
 	}
 });
+
 it("stops naming the foreground rung to an action that already ran on it", async () => {
 	const f = await fixture();
 	// AdviceMatrix: the AXEnabled refusal and its escalation are byte-identical
-	// on both rungs, so the advice names the rung that just answered.
+	// on both rungs, so the rung it names is the one that just answered.
 	const unverified = {
 		text: "✅ Performed AXPress on [1] AXButton.",
 		structuredJson: JSON.stringify({
@@ -3124,12 +1944,11 @@ it("stops naming the foreground rung to an action that already ran on it", async
 		f.state.hook = async name => (name === "click" ? unverified : undefined);
 		const background = await f.session.click(f.context, f.window, ref);
 		expect(background.escalation).toBe(
-			'⚠️ The driver escalates this action (effect_unconfirmed): the route it names is { delivery: "foreground" } — re-run the action that way.',
+			'Delivery unproven: observe first — it may have landed; only if the window shows no change, re-run it with { delivery: "foreground" }.',
 		);
 		const foreground = await f.session.click(f.context, f.window, ref, { delivery: "foreground" });
-		expect(foreground.escalation).toBe(
-			`⚠️ The driver escalates this action (effect_unconfirmed): this action already ran with { delivery: "foreground" }, so the rung it names is the one that just answered — write the field instead of posting keystrokes at it: win.ref("${ref}").setValue("<value>").`,
-		);
+		expect(foreground.escalation).toBeUndefined();
+		expect(foreground.text).toBe("✅ Performed AXPress on [1] AXButton.");
 	} finally {
 		await f.close();
 	}
@@ -3222,7 +2041,7 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 			escalation: {
 				reason:
 					"the addressed element could not be proven to belong to window 14229; take a fresh get_window_state snapshot and re-address it",
-				recommended: "get_window_state",
+				recommended: "snapshot",
 			},
 			pid: 82791,
 			reason:
@@ -3241,13 +2060,17 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 		f.state.label = "Editor (renamed)";
 		const answered = await f.session.click(f.context, f.window, ref);
 		expect(answered.effect).toBe("not_dispatched");
-		expect(answered.text.split("\n")[0]).toBe(
-			`element_outside_target_window: ${ref} (AXTextField "Editor") no longer exists in window 1 and nothing was dispatched — no row of the fresh tree carries its role and label. ${ref} is retired and the tree below carries this window's new refs — address the row you mean by its new ref. That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.`,
+		// The reply names the code, the retired ref with the row it stood for,
+		// the window it was addressed in, and a census of the fresh tree.
+		expect(answered.text.split("\n")[0]).toContain(
+			`element_outside_target_window: ${ref} (AXTextField "Editor") no longer exists in window 1 and nothing was dispatched`,
 		);
-		// The tree is in the reply and in the cell, not only in a return value
-		// the cell is free to drop.
+		expect(answered.text).toContain("no row of the fresh tree carries its role and label");
+		expect(answered.text).toContain(`${ref} is retired`);
+		// The tree is in the reply, and the reply is marked for the cell — not
+		// left in a return value the cell is free to drop.
 		expect(answered.text).toContain("- [n2] AXTextField");
-		expect(f.texts.at(-1)).toBe(answered.text);
+		expect(answered.mustShow).toBe(true);
 		// One read, and the refusal's own payload survives on the result.
 		expect(f.calls.filter(call => call.name === "get_window_state")).toHaveLength(2);
 		expect(answered.data).toMatchObject({ code: "element_outside_target_window", window_id: 14229 });
@@ -3256,7 +2079,7 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 		expect((await f.session.click(f.context, f.window, "n2")).effect).toBe("unverifiable");
 		// A recovery walk that returns no rows has no new ref to hand back, and
 		// says so rather than pointing at a tree that is not there.
-		const empty = await f.session.acquire(f.context, { id: "1", pid: 101 });
+		const empty = await f.session.window(f.context, { id: "1", pid: 101 });
 		const gone = (await f.session.observe(f.context, empty)).elements[0]!.ref;
 		f.state.hook = async name =>
 			name === "click"
@@ -3265,9 +2088,7 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 					? reply({ pid: 101, window_id: 1, snapshot_id: "s9", truncated: false, elements: [] })
 					: undefined;
 		const nothing = await f.session.click(f.context, empty, gone);
-		expect(nothing.text.split("\n")[0]).toBe(
-			`element_outside_target_window: ${gone} (AXTextField "Editor (renamed)") no longer exists in window 1 and nothing was dispatched — no row of the fresh tree carries its role and label. ${gone} is retired and this walk minted no refs to address — observe the window again (win.observe()) once it has rows.`,
-		);
+		expect(nothing.text).toContain(`${gone} is retired and this walk minted no refs to address`);
 		expect(nothing.text).toContain("No accessibility elements returned");
 	} finally {
 		await f.close();
@@ -3381,95 +2202,6 @@ it("reads the window again only for the refusal a re-read can answer", async () 
 	}
 });
 
-it("re-addresses a vanished ref only when one row of the new tree is the same row", async () => {
-	const f = await fixture();
-	const dead = {
-		text: "Background input refused (element_no_longer_exists): the addressed element no longer exists (its accessibility reference is invalid)",
-		structuredJson: JSON.stringify({
-			code: "element_no_longer_exists",
-			effect: "not_dispatched",
-			route: "ax",
-			reason: "the addressed element no longer exists (its accessibility reference is invalid)",
-			window_id: 1,
-			pid: 101,
-		}),
-		isError: true,
-		errorCode: "element_no_longer_exists",
-		images: [],
-	};
-	/** Reminders' own shape: one checkbox per row, all with the same role and label. */
-	const list = (rows: string[]): Wire[] => [
-		{ element_index: 1, element_token: "t:1", role: "AXOutline", label: "", depth: 0 },
-		...rows.flatMap((label, index) => [
-			{ element_index: 2 + index * 2, element_token: `t:${2 + index * 2}`, role: "AXRow", label, depth: 1 },
-			{
-				element_index: 3 + index * 2,
-				element_token: `t:${3 + index * 2}`,
-				role: "AXCheckBox",
-				label: "Mark as completed",
-				value: "0",
-				depth: 2,
-			},
-		]),
-	];
-	const walks = (rows: string[]) => {
-		let snapshot = 0;
-		f.state.hook = async (name, args) => {
-			if (name === "click" && args.element_token?.toString().startsWith("t:")) return dead;
-			return name === "get_window_state"
-				? reply({ pid: 101, window_id: 1, snapshot_id: `w${++snapshot}`, truncated: false, elements: list(rows) })
-				: undefined;
-		};
-	};
-	try {
-		// Distinct rows: role, label, value, ancestor path and sibling ordinal
-		// name exactly one row of the fresh tree, so the action goes there and
-		// the substitution is stated.
-		walks(["Incomplete, Loaf of bread", "Incomplete, Fresh lettuce"]);
-		const observed = await f.session.observe(f.context, f.window);
-		const ref = observed.elements[2]!.ref;
-		expect(observed.elements[2]!.label).toBe("Mark as completed");
-		let dispatched = 0;
-		f.state.hook = async name => {
-			if (name === "click") return ++dispatched === 1 ? dead : undefined;
-			return name === "get_window_state"
-				? reply({
-						pid: 101,
-						window_id: 1,
-						snapshot_id: "w9",
-						truncated: false,
-						elements: list(["Incomplete, Loaf of bread", "Incomplete, Fresh lettuce"]),
-					})
-				: undefined;
-		};
-		const remapped = await f.session.click(f.context, f.window, ref);
-		expect(remapped.effect).toBe("unverifiable");
-		expect(remapped.text.split("\n")[0]).toBe(
-			`${ref} (AXCheckBox "Mark as completed"), under AXRow "Incomplete, Loaf of bread", no longer exists in window 1 and nothing was dispatched at it — n8 is the one row of the fresh tree with the same role, label, value and position, so the action was dispatched at n8 instead. That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.`,
-		);
-		expect(f.calls.filter(call => call.name === "click")).toHaveLength(2);
-		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "t:3", snapshot_id: "w9" });
-		// Said once, on the reply. Pushing it into the cell as well printed it
-		// twice in every transcript that hit this path.
-		expect(f.texts.filter(text => text.includes("is the one row of the fresh tree"))).toHaveLength(0);
-
-		// Rows an app leaves untitled: role and label match three ways and the
-		// position matches two, so no row is that row. Nothing is dispatched.
-		const fresh = await f.session.acquire(f.context, { id: "1", pid: 101 });
-		walks(["", ""]);
-		const ambiguous = (await f.session.observe(f.context, fresh)).elements[2]!.ref;
-		const before = f.calls.filter(call => call.name === "click").length;
-		const refused = await f.session.click(f.context, fresh, ambiguous);
-		expect(refused.effect).toBe("not_dispatched");
-		expect(refused.text.split("\n")[0]).toBe(
-			`element_no_longer_exists: ${ambiguous} (AXCheckBox "Mark as completed") no longer exists in window 1 and nothing was dispatched — the fresh tree has 2 row(s) with its role and label, 2 of them in the same position under AXRow "". ${ambiguous} is retired and the tree below carries this window's new refs — address the row you mean by its new ref. That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.`,
-		);
-		expect(f.calls.filter(call => call.name === "click")).toHaveLength(before + 1);
-	} finally {
-		await f.close();
-	}
-});
-
 /**
  * `mixed-web-contact/omp-1` cell 5, in shape: one observation, five writes
  * batched behind it, the second dispatch landing on a control the app had
@@ -3509,7 +2241,7 @@ function card(generation: number, company: string, toggle: boolean, street = "")
 	];
 }
 
-it("carries the rest of a batch's refs across the walk a dead ref provoked", async () => {
+it("leaves the rest of a batch's refs bound to their own elements across a dead ref's walk", async () => {
 	const f = await fixture();
 	try {
 		let generation = 0;
@@ -3541,198 +2273,30 @@ it("carries the rest of a batch's refs across the walk a dead ref provoked", asy
 		const first = await f.session.setValue(f.context, f.window, companyField!, "Apple Park Visitor Center");
 		const dead = await f.session.click(f.context, f.window, checkbox!);
 		const third = await f.session.setValue(f.context, f.window, phone!, "408 961-1560");
-		expect([first.effect, dead.effect, third.effect]).toEqual([
-			"unverifiable",
-			"not_dispatched",
-			"unverifiable",
-		]);
-		// The third write reached the row the recovery walk minted, through
-		// the ref the cell was holding from before it.
-		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "g2:4", snapshot_id: "w2" });
-		// The dead ref is the only one retired: it has no row in the fresh
-		// tree, and that reply is the one place the tree is printed.
-		expect(dead.text.split("\n")[0]).toBe(
-			`element_no_longer_exists: ${checkbox} (AXCheckBox "Company") no longer exists in window 1 and nothing was dispatched — no row of the fresh tree carries its role and label. ${checkbox} is retired and the tree below carries this window's new refs — address the row you mean by its new ref. That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.`,
-		);
-		expect(f.texts.filter(text => text.includes("] AXTextField "))).toHaveLength(1);
+		expect([first.effect, dead.effect, third.effect]).toEqual(["unverifiable", "not_dispatched", "unverifiable"]);
+		// Nothing was dispatched at the dead row, and nothing was dispatched at
+		// another row in its place: one click went out, and it was refused.
+		expect(f.calls.filter(call => call.name === "click")).toHaveLength(1);
+		// The third write reached the exact element its own observation minted
+		// it for: this session's recovery walk is not the caller's observe, so
+		// it re-binds nothing.
+		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "g1:4", snapshot_id: "w1" });
+		// The dead ref is the only one retired, and that reply is the one place
+		// the fresh tree is printed.
+		expect(dead.text).toContain(`${checkbox} is retired`);
+		expect(dead.text).toContain("Your other refs keep the exact elements they were minted for");
 		expect(dead.text).toContain(`- [n${observed.elements.length + 2}] AXTextField "Company"`);
-		// The siblings come back silently, so the reply names the ones whose
-		// only evidence is position: neither generation gave their value
-		// anything to say, and a form re-bound to another record would have
-		// kept their places too.
-		expect(dead.text.split("\n")[1]).toBe(
-			`${group}, ${phone} held no value then and hold none now — they were re-bound by position alone.`,
-		);
-		// The field this session wrote through is not among them: its value
-		// moved, and that is the stronger ground it carried on.
-		expect(dead.text).not.toContain(`${companyField} held no value`);
 		await expect(f.session.click(f.context, f.window, checkbox!)).rejects.toThrow(`StaleRef: ${checkbox} —`);
-		// A ref this session wrote through carries on its place alone: the
-		// value it no longer matches is the one this session put there.
+		// Every other ref still reaches its own element, whatever the fresh
+		// tree did with that row's place or value.
 		await f.session.setValue(f.context, f.window, companyField!, "Apple Park");
-		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "g2:2", snapshot_id: "w2" });
-		// A sibling this session did not touch whose value moved anyway is
-		// not provably the same row — a form re-bound to another record keeps
-		// every field's place — so it stays retired.
-		await expect(f.session.setValue(f.context, f.window, street!, "no")).rejects.toThrow(`StaleRef: ${street} —`);
+		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "g1:2", snapshot_id: "w1" });
+		await f.session.setValue(f.context, f.window, street!, "no");
+		expect(f.lastDispatch()?.args).toMatchObject({ element_token: "g1:5", snapshot_id: "w1" });
+		expect(f.session.element(group!).role).toBe("AXGroup");
 		// The caller's own observation is what retires refs, and still does.
 		await f.session.observe(f.context, f.window);
 		await expect(f.session.setValue(f.context, f.window, phone!, "no")).rejects.toThrow(`StaleRef: ${phone} —`);
-	} finally {
-		await f.close();
-	}
-});
-
-it("refuses to carry a ref two rows of the fresh tree could be", async () => {
-	const f = await fixture();
-	try {
-		let generation = 0;
-		// Two rows an app leaves untitled: same role, same label, same place
-		// under their own untitled row, same value. Neither is that row.
-		const twins = (): Wire[] => [
-			{ element_index: 1, element_token: `g${generation}:1`, role: "AXOutline", label: "", depth: 0 },
-			...[0, 1].flatMap(index => [
-				{ element_index: 2 + index * 2, element_token: `g${generation}:${2 + index * 2}`, role: "AXRow", label: "", depth: 1 },
-				{
-					element_index: 3 + index * 2,
-					element_token: `g${generation}:${3 + index * 2}`,
-					role: "AXCheckBox",
-					label: "Done",
-					value: "0",
-					depth: 2,
-				},
-			]),
-		];
-		f.state.hook = async (name, args) => {
-			if (name === "get_window_state")
-				return reply({
-					pid: 101,
-					window_id: 1,
-					snapshot_id: `w${++generation}`,
-					truncated: false,
-					elements: twins(),
-				});
-			return name === "click" && args.element_token === "g1:3" ? DEAD_ROW : undefined;
-		};
-		const observed = await f.session.observe(f.context, f.window);
-		const twin = observed.elements[4]!.ref;
-		expect(observed.elements[4]!.label).toBe("Done");
-		const dispatched = await f.session.click(f.context, f.window, observed.elements[2]!.ref);
-		expect(dispatched.effect).toBe("not_dispatched");
-		// The same walk carried the one row nothing else could be — the
-		// outline itself — so the twin is refused on its ambiguity, not
-		// because the walk retired everything it touched.
-		expect(f.session.element(observed.elements[0]!.ref).role).toBe("AXOutline");
-		// The second row's ref has two candidates at its own place: no row of
-		// the fresh tree is that row, and it stays retired.
-		await expect(f.session.click(f.context, f.window, twin)).rejects.toThrow(`StaleRef: ${twin} —`);
-	} finally {
-		await f.close();
-	}
-});
-
-it("refuses to carry an empty-valued ref two rows of the fresh tree could be", async () => {
-	const f = await fixture();
-	try {
-		let generation = 0;
-		// The same ambiguity in the shape a contact card has it: two untitled
-		// rows of one outline, each holding an untitled field at the same
-		// place. Both fields are empty when the walk retires them and one of
-		// them is filled in by the time it answers, so "the empty one" names
-		// exactly one fresh row — and names it for no reason at all.
-		const form = (): Wire[] => [
-			{ element_index: 1, element_token: `g${generation}:1`, role: "AXOutline", label: "", depth: 0 },
-			...[0, 1].flatMap(index => [
-				{
-					element_index: 2 + index * 2,
-					element_token: `g${generation}:${2 + index * 2}`,
-					role: "AXRow",
-					label: "",
-					depth: 1,
-				},
-				{
-					element_index: 3 + index * 2,
-					element_token: `g${generation}:${3 + index * 2}`,
-					role: "AXTextField",
-					label: "",
-					value: generation > 1 && index === 1 ? "1 Infinite Loop" : "",
-					depth: 2,
-				},
-			]),
-		];
-		f.state.hook = async (name, args) => {
-			if (name === "get_window_state")
-				return reply({
-					pid: 101,
-					window_id: 1,
-					snapshot_id: `w${++generation}`,
-					truncated: false,
-					elements: form(),
-				});
-			return name === "click" && args.element_token === "g1:3" ? DEAD_ROW : undefined;
-		};
-		const observed = await f.session.observe(f.context, f.window);
-		const twin = observed.elements[4]!.ref;
-		expect(observed.elements[4]!.role).toBe("AXTextField");
-		expect((await f.session.click(f.context, f.window, observed.elements[2]!.ref)).effect).toBe("not_dispatched");
-		// The outline is the one row nothing else could be, so it carries:
-		// the refusal below is the ambiguity's, not a blanket retirement of
-		// every value-less ref.
-		expect(f.session.element(observed.elements[0]!.ref).role).toBe("AXOutline");
-		// An empty value matches every empty row at the place, so it picks
-		// out the still-empty twin without evidence of any kind.
-		await expect(f.session.setValue(f.context, f.window, twin, "no")).rejects.toThrow(`StaleRef: ${twin} —`);
-	} finally {
-		await f.close();
-	}
-});
-
-it("reports the refusal of a re-addressed dispatch, not a dispatch", async () => {
-	const f = await fixture();
-	// `native-act-finder-sort/omp-1` L48: the walk retargeted the dead ref to
-	// the row the editor had become and the driver refused that row too. The
-	// reply claimed both — "the action was dispatched there instead" and a
-	// refusal under it — for one call that dispatched nothing.
-	const outside = {
-		text: "Background input refused (element_outside_target_window): the addressed element could not be proven to belong to window 1; take a fresh get_window_state snapshot and re-address it",
-		structuredJson: JSON.stringify({
-			code: "element_outside_target_window",
-			effect: "refused",
-			advice: "acquire_window",
-			pid: 101,
-			reason: "the addressed element could not be proven to belong to window 1",
-			window_id: 1,
-		}),
-		isError: true,
-		errorCode: "element_outside_target_window",
-		images: [],
-	};
-	try {
-		let generation = 0;
-		f.state.hook = async (name, args) => {
-			if (name === "get_window_state")
-				return reply({
-					pid: 101,
-					window_id: 1,
-					snapshot_id: `w${++generation}`,
-					truncated: false,
-					elements: card(generation, "", true),
-				});
-			if (name !== "set_value") return undefined;
-			return args.element_token === "g1:2" ? DEAD_ROW : outside;
-		};
-		const observed = await f.session.observe(f.context, f.window);
-		const field = observed.elements[1]!.ref;
-		const caught = await f.session
-			.setValue(f.context, f.window, field, "Invoices")
-			.catch((error: unknown) => error);
-		if (!(caught instanceof ToolError)) throw new Error("Expected the retargeted row's own refusal");
-		expect(caught.message.split("\n")[0]).toBe(
-			`${field} (AXTextField "Company"), under AXGroup "Contact", no longer exists in window 1 and nothing was dispatched at it — n${observed.elements.length + 2} is the one row of the fresh tree with the same role, label, value and position, so the action was re-addressed to n${observed.elements.length + 2}, which refused it. That walk re-minted this window's refs; refs from your last observe that still resolve keep working until your next observe.`,
-		);
-		expect(caught.message).not.toContain("dispatched at n");
-		expect(caught.message).toContain("could not be proven to belong to window 1");
-		expect(caught.context).toMatchObject({ code: "element_outside_target_window" });
 	} finally {
 		await f.close();
 	}
@@ -4502,7 +3066,6 @@ it("never replays an SDK error and guards unsupported or read-only mutations", a
 		expect(f.calls.filter(call => call.name === "type_text")).toHaveLength(1);
 		const count = f.calls.length;
 		await expect(f.session.click({ ...f.context, readOnly: true }, f.window, [0, 0])).rejects.toThrow("read-only");
-		await expect(f.session.hover(f.context, f.window, 0, 0)).rejects.toThrow("overlay");
 		await expect(f.session.desktopType(f.context, "no")).rejects.toThrow("foreground");
 		expect(f.calls).toHaveLength(count);
 	} finally {
@@ -4911,6 +3474,50 @@ it("preserves SDK launch conflict identity and delivery evidence without retryin
 	}
 });
 
+it("waits for a launched app's crash alert only when that process is already gone", async () => {
+	const f = await fixture();
+	const alert = {
+		windows: [
+			systemWindow({
+				id: "777",
+				title: "Fixture quit unexpectedly.",
+				app: "UserNotificationCenter",
+				pid: 55,
+			}),
+		],
+		elapsedMs: 0,
+	};
+	const launched = async (pid: number) => {
+		f.state.hook = async name => (name === "launch_app" ? reply({ pid }) : undefined);
+		const before = f.state.rosterReads;
+		const result = await f.session.launch(f.context, { name: "Fixture" });
+		return { result, samples: f.state.rosterReads - before };
+	};
+	try {
+		// Every launch reads the roster twice on its own — the pre-dispatch gate
+		// and the reply's own interruption check — and the crash report lands
+		// after both, so only a watch that polls for it can ever see it.
+		let armed = 0;
+		f.state.roster = () => (f.state.rosterReads > armed + 2 ? alert : undefined);
+		// A live launch pays nothing: only a process that is already gone can
+		// have raised the alert this would be waiting for.
+		armed = f.state.rosterReads;
+		const alive = await launched(process.pid);
+		expect(alive.samples).toBe(2);
+		expect(alive.result.interruptedBy).toBeUndefined();
+		expect(alive.result.text).not.toContain("Do not relaunch");
+		// One that died during the launch is polled for it, and what it raised
+		// is named as a crash report rather than as a launch to retry.
+		armed = f.state.rosterReads;
+		const dead = await launched(2 ** 22);
+		expect(dead.samples).toBe(3);
+		expect(dead.result.interruptedBy?.windowId).toBe("777");
+		expect(dead.result.text).toContain("Do not relaunch");
+	} finally {
+		await f.close();
+	}
+});
+
 it("dispatches every action a node advertises and refuses only what its row never printed", async () => {
 	const f = await fixture();
 	try {
@@ -5233,20 +3840,17 @@ it("says what a disabled control's refusal actually leaves open", async () => {
 		reply({ windows: [f.row, ...ids.map(id => ({ ...f.row, window_id: id, title: "" }))] });
 	try {
 		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		// The untypeable half of the old advice never reaches the model, whatever
-		// else the reply says: there is no bring_to_front on this surface.
+		// The driver's own advice is its own; what this side owes the caller is
+		// the rung spelled the way they type it.
 		f.state.hook = async name => (name === "click" ? untyped : undefined);
 		const legacy = await f.session
 			.click(f.context, f.window, ref, { delivery: "foreground" })
 			.catch((error: unknown) => error);
 		if (!(legacy instanceof ToolError)) throw new Error("Expected the legacy refusal");
-		expect(legacy.message).not.toContain("bring_to_front");
 		expect(legacy.message).toContain('Retry this action with { delivery: "foreground" }');
-		// That reply states no state at all, so the rung the call took is the
-		// only fact there is to answer it with.
-		expect(legacy.message.split("\n").at(-1)).toBe(
-			'That control reports AXEnabled=false with { delivery: "foreground" } already in force, so the rung is not what refused and no activation changes it: satisfy its precondition or choose another control.',
-		);
+		expect(legacy.message).not.toContain("delivery_mode");
+		// An untyped code is no `element_disabled`, so nothing is added to it.
+		expect(legacy.message.split("\n").at(-1)).toBe("Evidence: requested=foreground");
 
 		// The typed refusal states the app's own applicability itself, and no
 		// route exists: OMP adds nothing rather than saying it twice.
@@ -5306,13 +3910,18 @@ it("says what a disabled control's refusal actually leaves open", async () => {
 		expect(blind.message.split("\n").at(-1)).toBe(
 			'Dismiss it with press("Escape"); computer.window("17013") cannot acquire a window that publishes no accessibility window of its own.',
 		);
-
-		// A menu row on the untyped shape: the ref's own role is the whole
-		// decision, and no rung and no window is the answer at all.
+		// A menu row: the row's own role is the whole decision, and no rung and
+		// no window is the answer at all.
 		f.state.role = "AXMenuItem";
 		f.state.label = "_popUpItemAction:";
 		const menuRef = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
-		f.state.hook = async name => (name === "click" ? untyped : undefined);
+		f.state.hook = async name =>
+			name === "click"
+				? disabled(
+						'AXPress was not dispatched: AXMenuItem "_popUpItemAction:" of window 1 reports AXEnabled=false.',
+						{ front_in_process: true, role: "AXMenuItem" },
+					)
+				: undefined;
 		const menu = await f.session.click(f.context, f.window, menuRef).catch((error: unknown) => error);
 		if (!(menu instanceof ToolError)) throw new Error("Expected the disabled refusal");
 		expect(menu.message.split("\n").at(-1)).toBe(
@@ -5868,7 +4477,7 @@ it("prints only the evidence fields a refusal carries", async () => {
 			escalation: {
 				reason:
 					"the addressed element could not be proven to belong to window 14229; take a fresh get_window_state snapshot and re-address it",
-				recommended: "get_window_state",
+				recommended: "snapshot",
 			},
 			pid: 82791,
 			reason:
@@ -5899,59 +4508,43 @@ it("prints only the evidence fields a refusal carries", async () => {
 		const click = await f.session.click(f.context, f.window, [1, 0]).catch((error: unknown) => error);
 		if (!(click instanceof ToolError)) throw new Error("Expected the click refusal");
 		// `effect` is the reply's own; the route is absent, so none is invented.
-		// `get_window_state` is a tool this surface does not expose: the line
-		// carries the contract target that names a call the caller can type.
 		expect(click.message.split("\n").at(-1)).toBe(
 			"Evidence: requested=background effect=refused escalation=snapshot",
 		);
-		expect(click.message).not.toContain("escalation=get_window_state");
 		expect(click.message).not.toContain("route=");
 
-		// `px` is the driver's older spelling of the pixel target; the line
-		// carries the contract name so the route renderer recognises it.
-		const px = {
+		// A rung this surface renders no call for stays out of the line as
+		// well: advice the caller cannot follow is worse than none.
+		const elsewhere = {
 			...dead,
 			structuredJson: JSON.stringify({
 				code: "element_outside_target_window",
 				effect: "refused",
-				escalation: { reason: "no accessibility route", recommended: "px" },
+				escalation: { reason: "permission_required", target: "session" },
 			}),
 		};
-		f.state.hook = async name => (name === "click" ? px : undefined);
-		const pixel = await f.session.click(f.context, f.window, [1, 0]).catch((error: unknown) => error);
-		if (!(pixel instanceof ToolError)) throw new Error("Expected the click refusal");
-		expect(pixel.message.split("\n").at(-1)).toBe("Evidence: requested=background effect=refused escalation=pixel");
+		f.state.hook = async name => (name === "click" ? elsewhere : undefined);
+		const unrendered = await f.session.click(f.context, f.window, [1, 0]).catch((error: unknown) => error);
+		if (!(unrendered instanceof ToolError)) throw new Error("Expected the click refusal");
+		expect(unrendered.message.split("\n").at(-1)).toBe("Evidence: requested=background effect=refused");
 	} finally {
 		await f.close();
 	}
 });
 
-it("reads a Linux capture and tree that report neither a frame flag nor an exhaustive walk", async () => {
+it("reads a Linux capture that reports no frame flag and a walk that states its verdict", async () => {
 	const f = await fixture({ platform: "linux" });
 	try {
+		// `elements_complete` is hard-coded false on Linux, so the fork's own
+		// `truncated` verdict is the whole of the answer.
+		f.state.truncated = false;
 		const observation = await f.session.observe(f.context, f.window, { screenshot: true });
-		// `elements_complete` is hard-coded false on Linux; equal counts carry the answer.
 		expect(observation.complete).toBe(true);
 		expect(observation.tree).not.toContain("completeness is unknown");
 		expect(observation.elements[0]!.actions).toEqual(["press", "showContextMenu"]);
 		// No `screenshot_frame_valid` key at all, and the pixels are still usable.
 		expect(observation.screenshotError).toBeUndefined();
 		expect(observation.screenshot?.target).toBe("6291459");
-		f.state.hook = async name =>
-			name === "get_window_state"
-				? reply({
-						pid: 1167788,
-						window_id: 6291459,
-						snapshot_id: "s00000002",
-						elements_complete: false,
-						returned_element_count: 1,
-						total_element_count: 182,
-						elements: [{ element_index: 0, element_token: "s00000002:0", role: "frame", label: "B3", depth: 0 }],
-						window_bounds: LINUX.chrome.bounds,
-					})
-				: undefined;
-		const clipped = await f.session.observe(f.context, f.window);
-		expect(clipped.complete).toBe(false);
 		f.state.hook = undefined;
 		f.state.failCapture = true;
 		const failed = await f.session.observe(f.context, f.window, { screenshot: true });
@@ -5988,93 +4581,5 @@ it("answers every contracted tool with a payload upstream's success schema accep
 		} finally {
 			await f.close();
 		}
-	}
-});
-
-it("leads with the menu command a chord was dispatched as and never names the foreground rung for it", async () => {
-	const f = await fixture();
-	const pressed = async (data: Wire, text: string) => {
-		f.state.hook = async name =>
-			name === "hotkey"
-				? { text, structuredJson: JSON.stringify(wireResult(data)), isError: false, images: [] }
-				: undefined;
-		return f.session.press(f.context, f.window, "cmd+option+f");
-	};
-	// Recorded from the fork build on Notes (2026-09-19): the app was fronted,
-	// the search field took focus while the window was key and released it
-	// when the prior frontmost came back. What the reply prints about the
-	// fronting is the driver's own `key_window` fact, not a match on the
-	// English below, so each arm carries the fact its sentence describes.
-	const fronted =
-		"Dispatched cmd+option+f to pid 101 as its menu command Edit > Find > Note List Search…: the application keeps that item disabled until window 1 is key, so the chord itself could not land there. pid 101 was not the frontmost application, so it was fronted and window 1 made key for the dispatch, then the prior frontmost was restored.\n🔎 Delivered: app_focus changed after the dispatch, so the app reacted. That is delivery, not the intended result — check the postcondition you wanted. ⚠️ That change (app_focus) did not survive restoring the prior frontmost: the command's effect holds only while window 1 is key. Re-sending the chord on any delivery mode lands nothing new — address the control the command targets directly, or raise the window first and keep it key before re-running.";
-	const menu = {
-		delivery: { mode: "foreground" },
-		effect: "unverifiable",
-		evidence: [{ kind: "window_change", signal: "app_focus" }],
-		menu_path: ["Edit", "Find", "Note List Search…"],
-		route: "menu_command",
-	};
-	try {
-		f.state.role = "AXTextField";
-		f.state.subrole = "AXSearchField";
-		f.state.enabled = true;
-		const observed = await f.session.observe(f.context, f.window);
-		const field = observed.elements[0]!.ref;
-		const reverted = await pressed(
-			{
-				...menu,
-				key_window: { made_key: true, app_fronted: true, restored: true },
-				escalation: { reason: "route_unavailable", target: "element" },
-			},
-			fronted,
-		);
-		expect(reverted.text.split("\n")[0]).toBe(
-			"Delivered as menu command Edit > Find > Note List Search… (app fronted: yes)",
-		);
-		expect(reverted.menuPath).toEqual(["Edit", "Find", "Note List Search…"]);
-		expect(reverted.route).toBe("menu_command");
-		expect(reverted.escalation).toBe(
-			`⚠️ The driver escalates this action (route_unavailable): address the field itself: win.ref(${JSON.stringify(field)}).type("<text>") or win.ref(${JSON.stringify(field)}).setValue("<value>"), or raise the window (win.raise()) and keep it key before re-running.`,
-		);
-		expect(reverted.text).not.toContain('{ delivery: "foreground" }');
-		// The same-app case: only the window was made key, and the change held.
-		const held = await pressed(
-			{ ...menu, key_window: { made_key: true, app_fronted: false, restored: true } },
-			"Dispatched cmd+option+l to pid 101 as its menu command Window > Arrange > Left: the application keeps that item disabled until window 1 is key, so the chord itself could not land there. window 1 was not pid 101's key window, so it was made key for the dispatch, then the prior frontmost was restored.\n🔎 Delivered: window_tree changed after the dispatch, so the app reacted. That is delivery, not the intended result — check the postcondition you wanted. That change is still in place after the restore.",
-		);
-		expect(held.text.split("\n")[0]).toBe(
-			"Delivered as menu command Edit > Find > Note List Search… (app fronted: no)",
-		);
-		expect(held.escalation).toBeUndefined();
-		// No reaction at all: the rung that would make the window key is the one
-		// that just ran, so the advice is the field or a read, never foreground.
-		const inert = await pressed(
-			{
-				...menu,
-				effect: "suspected_noop",
-				evidence: null,
-				key_window: { made_key: false, app_fronted: false, restored: false },
-			},
-			"Dispatched cmd+option+f to pid 101 as its menu command Edit > Find > Note List Search…: the application keeps that item disabled until window 1 is key, so the chord itself could not land there. window 1 was already key.\n⚠️ Unverified: the target was watched for 500 ms after the dispatch and nothing changed (focused element, app focus, window contents) — re-observe before repeating. The dispatch may still have landed, so a second call could act twice.",
-		);
-		expect(inert.text.split("\n")[0]).toBe(
-			"Dispatched as menu command Edit > Find > Note List Search… (app fronted: no)",
-		);
-		expect(inert.escalation).toContain("as the menu command Edit > Find > Note List Search… with the window key");
-		expect(inert.escalation).not.toContain("foreground");
-		// A reply that publishes no `key_window` says nothing about the
-		// fronting: the route is still named, and the suffix that would have
-		// been guessed from the driver's wording is simply absent.
-		const unsaid = await pressed(menu, fronted);
-		expect(unsaid.text.split("\n")[0]).toBe("Delivered as menu command Edit > Find > Note List Search…");
-		// The remembered-rung machinery is untouched: a menu-command reply names
-		// no foreground escalation, so the next chord stays background.
-		await pressed(
-			{ delivery: { mode: "background" }, effect: "unverifiable", route: "synthetic_events" },
-			"Pressed cmd+option+f on pid 101.",
-		);
-		expect(f.calls.at(-1)?.args.delivery_mode).toBeUndefined();
-	} finally {
-		await f.close();
 	}
 });
