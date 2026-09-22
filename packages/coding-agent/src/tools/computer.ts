@@ -5,7 +5,7 @@ import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
 import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import { once } from "@oh-my-pi/pi-utils";
 import { callSessionTool } from "../eval/js/tool-bridge";
-import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
+import type { EvalPreludeContext, EvalPreludeDefinition, EvalPreludeStatus } from "../eval/preludes";
 import { enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import {
 	COMPUTER_HANDLE_VERBS,
@@ -23,7 +23,7 @@ import type {
 	ComputerWindowAcquisition,
 } from "./computer/types";
 import type { ToolSession } from "./index";
-import { renderCallChain, renderFunctionRun } from "./run-code";
+import { renderCallChain, renderFunctionRun, summarizeCallChain } from "./run-code";
 import { throwIfAborted } from "./tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { clampTimeout } from "./tool-timeouts";
@@ -189,17 +189,78 @@ export function createComputerPrelude(
 	};
 }
 
-/** Status-tree line for a settled computer call: `desktop.window(3).focus()`, `run(fn)`, `release`. */
-function describeComputerCall(parameters: unknown): string | undefined {
+/** The window a computer call displayed or addressed, as its result details carry it. */
+interface DescribedWindow {
+	app: string;
+	title: string;
+	id: string;
+	pid: number;
+}
+
+/** A user-visible side effect one driver reply in the call reported. */
+type UserVisibleEffect = { effect: "fronted"; app: string; pid: number } | { effect: "pointer" };
+
+function describedWindow(details: Record<string, unknown>): DescribedWindow | undefined {
+	const window = details.window;
+	if (window === null || typeof window !== "object") return undefined;
+	const { app, title, id, pid } = window as Record<string, unknown>;
+	if (typeof app !== "string" || typeof id !== "string" || typeof pid !== "number") return undefined;
+	return { app, title: typeof title === "string" ? title : "", id, pid };
+}
+
+function userVisibleNotices(details: Record<string, unknown>): string[] {
+	if (!Array.isArray(details.userVisible)) return [];
+	return (details.userVisible as UserVisibleEffect[]).flatMap(entry =>
+		entry?.effect === "fronted" && typeof entry.app === "string"
+			? [`brought ${entry.app} to the front`]
+			: entry?.effect === "pointer"
+				? ["moved the pointer"]
+				: [],
+	);
+}
+
+/**
+ * What a settled computer call shows: `detail` is the call as written
+ * (`desktop.window(3).focus()`, `run(fn)`, `release`); `summary` says it verb
+ * first against the window's title (`click n12 · Notes: All iCloud`); a call
+ * that displayed a window heads it; each fronting or pointer move the replies
+ * reported gets its own notice.
+ */
+function describeComputerCall(parameters: unknown, result: AgentToolResult<unknown>): EvalPreludeStatus | undefined {
 	const parsed = getComputerParamsSchema()(parameters);
 	if (parsed instanceof type.errors) return undefined;
+	const details =
+		result.details !== null && typeof result.details === "object" ? (result.details as Record<string, unknown>) : {};
+	const window = describedWindow(details);
+	const name = window && `${window.app}: ${window.title || "Untitled window"}`;
+	const notices = userVisibleNotices(details);
+	const status = (detail: string, summary: string | undefined): EvalPreludeStatus => ({
+		detail,
+		...(summary ? { summary } : {}),
+		...(window && details.rendered === true
+			? { header: `${name} (window ${window.id}, PID ${window.pid})` }
+			: {}),
+		...(name ? { label: name } : {}),
+		...(notices.length > 0 ? { notices } : {}),
+	});
 	switch (parsed.action) {
-		case "call":
-			return `desktop.${renderCallChain(parsed.chain)}`;
-		case "run":
-			return `run(${parsed.fn !== undefined ? "fn" : (parsed.code?.trim().split("\n", 1)[0] ?? "")})`;
+		case "call": {
+			const selector = parsed.chain[0]?.method === "window" ? parsed.chain[0].args[0] : undefined;
+			const selectorId =
+				selector !== null && typeof selector === "object" ? (selector as Record<string, unknown>).id : selector;
+			const where =
+				name ??
+				(typeof selectorId === "string" || typeof selectorId === "number" ? `window ${selectorId}` : undefined);
+			// A bare `window(…)` hop resolves a handle and does nothing else.
+			const verb = summarizeCallChain(parsed.chain.filter(step => step.method !== "window")) ?? "window";
+			return status(`desktop.${renderCallChain(parsed.chain)}`, where ? `${verb} · ${where}` : verb);
+		}
+		case "run": {
+			const source = parsed.fn !== undefined ? "fn" : (parsed.code?.trim().split("\n", 1)[0] ?? "");
+			return status(`run(${source})`, name ? `run ${source} · ${name}` : `run ${source}`);
+		}
 		default:
-			return parsed.action;
+			return status(parsed.action, undefined);
 	}
 }
 

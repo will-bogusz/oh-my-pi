@@ -7,6 +7,7 @@
 - Computer: `computer.window({ kind: "desktop" })` acquires a display's desktop surface (the driver's `kind: "desktop"` row); it is named in passed-over lists and never chosen as an app's front window.
 - Computer: `type(text, { caret })` places the caret by content (`"start"`, `"end"`, `{ after }`, `{ before }`) before typing, the route for appending to a text area (needs a driver that honours `caret`).
 - Computer: `observe({ query })` is projected by the session — case-insensitive substring, `|` between alternatives, ancestors kept, hidden rows counted; a `not_committed` write verdict now asks for a read-back instead of a rewrite, and the next observation that shows the value answers the doubt; the prompts ask for batched actions per observation.
+- Eval control cells: a settled computer/browser cell collapses to the header of each window or tab it displayed plus one verb-first line per call (`click n12 · Notes: All iCloud`, `create tab · Mount Elbrus - Wikipedia`); the raw output is on ctrl+o. Created tabs' screenshots are captioned by page title, and a result reporting a fronted app or a moved pointer gets its own line under the call.
 
 ### Breaking Changes
 

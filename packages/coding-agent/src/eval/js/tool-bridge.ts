@@ -7,7 +7,7 @@ import { committedTodoPhases } from "../../tools/todo";
 import { ToolAbortError } from "../../tools/tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { schemaDeclaresIntentField } from "../../utils/tool-schema";
-import { findEnabledEvalPrelude, invokeEvalPrelude } from "../preludes";
+import { type EvalPreludeStatus, findEnabledEvalPrelude, invokeEvalPrelude } from "../preludes";
 import type { ControlActivityEvent, ControlImageMetadata } from "@oh-my-pi/pi-tui/tools/eval";
 import { EVAL_AGENT_BRIDGE_NAME, type EvalAgentHandleResult, runEvalAgent } from "../agent-bridge";
 import { EVAL_BUDGET_BRIDGE_NAME, type EvalBudgetResult, runEvalBudget } from "../budget-bridge";
@@ -120,6 +120,7 @@ function controlImageMap(
 	result: AgentToolResult,
 	imageCount: number,
 	activity: ControlActivityEvent | undefined,
+	caption: string | undefined,
 ): Map<number, ControlImageMetadata> {
 	const images = new Map<number, ControlImageMetadata>();
 	const seen = new Set<number>();
@@ -137,12 +138,12 @@ function controlImageMap(
 		const metadata: ControlImageMetadata = { kind: activity.kind };
 		const savedPath = activity.kind === "browser" ? screenshot.dest : screenshot.path;
 		if (typeof savedPath === "string" && savedPath.length > 0) metadata.path = savedPath;
+		// A screenshot's own label names what it shows; the call's caption (the
+		// window or page title) comes next, then whatever handle it went through.
 		const label =
-			activity.kind === "computer"
-				? typeof screenshot.label === "string" && screenshot.label.length > 0
-					? screenshot.label
-					: screenshot.target
-				: result.details.name;
+			typeof screenshot.label === "string" && screenshot.label.length > 0
+				? screenshot.label
+				: (caption ?? (activity.kind === "computer" ? screenshot.target : result.details.name));
 		if (typeof label === "string" && label.length > 0) metadata.label = label;
 		images.set(index, metadata);
 	}
@@ -207,8 +208,8 @@ const summarizeToolResult: StatusSummarizer = (name, args, result, text, hasErro
 function summarizePreludeResult(session: ToolSession): StatusSummarizer {
 	return (name, args, result, text, hasError) => {
 		if (hasError) return { op: name, error: text.slice(0, 500) };
-		const detail = findEnabledEvalPrelude(session, name)?.status?.(args, result);
-		return detail === undefined ? undefined : { op: name, detail };
+		const status = findEnabledEvalPrelude(session, name)?.status?.(args, result);
+		return status === undefined ? undefined : { op: name, detail: status.summary ?? status.detail };
 	};
 }
 
@@ -219,6 +220,7 @@ export function bridgeValueFromToolResult(
 	emitStatus?: (event: JsStatusEvent) => void,
 	summarize: StatusSummarizer = summarizeToolResult,
 	activity?: ControlActivityEvent,
+	caption?: string,
 ): ToolValue {
 	const textBlocks = result.content.filter(
 		(content): content is { type: "text"; text: string } =>
@@ -237,7 +239,7 @@ export function bridgeValueFromToolResult(
 	if (result.details === undefined && imageBlocks.length === 0 && !hasError) return text;
 	const value: Exclude<ToolValue, string> = { text, details: result.details };
 	if (imageBlocks.length > 0) {
-		const controls = controlImageMap(result, imageBlocks.length, activity);
+		const controls = controlImageMap(result, imageBlocks.length, activity, caption);
 		value.images = imageBlocks.map((block, index) => ({
 			mimeType: block.mimeType,
 			data: block.data,
@@ -275,9 +277,16 @@ export async function callSessionTool(name: string, args: unknown, options: Tool
 		const request = parsePreludeRequest(args);
 		const toolCallId = `prelude-${request.name}-${crypto.randomUUID()}`;
 		const activity = controlActivity(request.name, request.parameters, toolCallId, options);
-		const emitPhase = (phase: ControlActivityEvent["phase"], detail?: string) => {
-			if (activity)
-				options.emitStatus?.(detail === undefined ? { ...activity, phase } : { ...activity, phase, detail });
+		const emitPhase = (phase: ControlActivityEvent["phase"], status?: EvalPreludeStatus) => {
+			if (!activity) return;
+			const event: ControlActivityEvent = { ...activity, phase };
+			if (status) {
+				event.detail = status.detail;
+				if (status.summary) event.summary = status.summary;
+				if (status.header) event.header = status.header;
+				if (status.notices?.length) event.notices = status.notices;
+			}
+			options.emitStatus?.(event);
 		};
 		const releasing = activity?.action === "release" || activity?.action === "close";
 		const onAbort = () => emitPhase("stopping");
@@ -286,15 +295,6 @@ export async function callSessionTool(name: string, args: unknown, options: Tool
 			if (releasing || options.signal?.aborted) emitPhase("stopping");
 			options.signal?.addEventListener("abort", onAbort, { once: true });
 		}
-		// A control activity settles on one coalesced event: the prelude's own
-		// description rides on its terminal phase instead of a second status line.
-		const summarize: StatusSummarizer = activity
-			? (name, args, result, _text, hasError) => {
-					const detail = findEnabledEvalPrelude(options.session, name)?.status?.(args, result);
-					emitPhase(hasError || options.signal?.aborted ? "failed" : releasing ? "released" : "completed", detail);
-					return undefined;
-				}
-			: summarizePreludeResult(options.session);
 		const invoke = async (): Promise<ToolValue> => {
 			try {
 				const result = await invokeEvalPrelude(request.name, request.parameters, {
@@ -303,6 +303,20 @@ export async function callSessionTool(name: string, args: unknown, options: Tool
 					signal: options.signal,
 					context: options.session.getToolContext?.(),
 				});
+				// A control activity settles on one coalesced event: the prelude's own
+				// description rides on its terminal phase instead of a second status line.
+				const status = activity
+					? findEnabledEvalPrelude(options.session, request.name)?.status?.(request.parameters, result)
+					: undefined;
+				const summarize: StatusSummarizer = activity
+					? (_name, _args, _result, _text, hasError) => {
+							emitPhase(
+								hasError || options.signal?.aborted ? "failed" : releasing ? "released" : "completed",
+								status,
+							);
+							return undefined;
+						}
+					: summarizePreludeResult(options.session);
 				return bridgeValueFromToolResult(
 					request.name,
 					request.parameters,
@@ -310,6 +324,7 @@ export async function callSessionTool(name: string, args: unknown, options: Tool
 					options.emitStatus,
 					summarize,
 					activity,
+					status?.label,
 				);
 			} catch (error) {
 				if (activity) emitPhase(error instanceof ToolAbortError ? "stopped" : "failed");

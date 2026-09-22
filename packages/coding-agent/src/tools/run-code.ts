@@ -60,6 +60,43 @@ export function renderCallChain(chain: readonly { method: string; args: readonly
 	return chain.map(step => `${step.method}(${step.args.map(renderRunArg).join(", ")})`).join(".");
 }
 
+/** Steps that hop to an element handle; their argument names what the verb acted on. */
+const ELEMENT_HOPS: Record<string, true> = { ref: true, id: true };
+/** Verbs whose first argument is text the user would recognise quoted. */
+const QUOTED_ARGUMENT: Record<string, true> = { type: true, fill: true, setValue: true };
+/** Object-argument fields that name what a lookup selected (`acquireWindow({ app: "Notes" })`). */
+const NAMING_FIELDS = ["app", "title", "query", "url", "name"] as const;
+const SUMMARY_ARGUMENT_MAX = 48;
+
+function summaryArgument(verb: string, value: unknown): string | undefined {
+	let text: string | undefined;
+	if (typeof value === "string") text = QUOTED_ARGUMENT[verb] ? JSON.stringify(value) : value;
+	else if (typeof value === "number") text = String(value);
+	else if (Array.isArray(value) && value.every(item => typeof item === "string")) text = value.join(" › ");
+	else if (value !== null && typeof value === "object") {
+		const record = value as Record<string, unknown>;
+		const field = NAMING_FIELDS.find(key => typeof record[key] === "string" && record[key] !== "");
+		text = field === undefined ? undefined : (record[field] as string);
+	}
+	if (text === undefined || text.length === 0) return undefined;
+	return text.length > SUMMARY_ARGUMENT_MAX ? `${text.slice(0, SUMMARY_ARGUMENT_MAX - 1)}…` : text;
+}
+
+/**
+ * A helper call chain said verb first, for a person scanning a transcript:
+ * `[window(3), ref("n12"), click()]` → `click n12`; `type("hi")` on `ref("n5")`
+ * → `type "hi" in n5`. Window hops are left to the caller, which knows the
+ * window's title; `undefined` for an empty chain.
+ */
+export function summarizeCallChain(chain: readonly { method: string; args: readonly unknown[] }[]): string | undefined {
+	const last = chain.at(-1);
+	if (!last) return undefined;
+	const hop = chain.slice(0, -1).findLast(step => ELEMENT_HOPS[step.method]);
+	const subject = hop && typeof hop.args[0] !== "object" ? String(hop.args[0]) : undefined;
+	const argument = summaryArgument(last.method, last.args[0]);
+	return [last.method, argument, subject && (argument ? `in ${subject}` : subject)].filter(Boolean).join(" ");
+}
+
 /** Renders a function invocation with the requested run scope and positional arguments. */
 export function renderFunctionRun(fnSource: string, scopeNames: readonly string[], args: readonly unknown[]): string {
 	const scope = scopeNames.join(", ");

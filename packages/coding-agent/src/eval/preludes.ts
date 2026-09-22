@@ -43,12 +43,29 @@ export interface EvalPreludeDefinition {
 	/** Execute a host call outside the language VM. */
 	invoke(parameters: unknown, context: EvalPreludeContext): Promise<AgentToolResult<unknown>>;
 	/**
-	 * One-line description of a successful host call for the eval status tree
-	 * (`main.goto("https://…")`). `undefined` records nothing; omit the hook
-	 * when the call has nothing worth showing. Failures are recorded by the
-	 * bridge regardless.
+	 * Description of a successful host call for the eval status tree.
+	 * `undefined` records nothing; omit the hook when the call has nothing
+	 * worth showing. Failures are recorded by the bridge regardless.
 	 */
-	status?(parameters: unknown, result: AgentToolResult<unknown>): string | undefined;
+	status?(parameters: unknown, result: AgentToolResult<unknown>): EvalPreludeStatus | undefined;
+}
+
+/** What a settled host call shows the user, built from the call and its result details. */
+export interface EvalPreludeStatus {
+	/** The call as written (`main.goto("https://…")`). */
+	detail: string;
+	/** Verb first, then what it acted on and where: `click n12 · Notes: All iCloud`. Absent → `detail`. */
+	summary?: string;
+	/** Header of the window or tab this call displayed. Absent: the call displayed none. */
+	header?: string;
+	/** Caption for the images this call captured (window or page title). Absent: the image's own label. */
+	label?: string;
+	/**
+	 * One line per user-visible side effect the result reported (an app brought
+	 * to the front, the real pointer moved). Absent: none was reported, which
+	 * is not proof that none happened.
+	 */
+	notices?: string[];
 }
 
 /**

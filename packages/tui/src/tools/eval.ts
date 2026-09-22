@@ -27,7 +27,6 @@ import {
 	PREVIEW_LIMITS,
 	replaceTabs,
 	shortenPath,
-	TRUNCATE_LENGTHS,
 	truncateToWidth,
 	wrapBrackets,
 } from "../render/render-utils";
@@ -67,6 +66,12 @@ export interface ControlActivityEvent extends EvalStatusEvent {
 	target?: string;
 	/** The prelude's own one-line description of the call, present once it settles. */
 	detail?: string;
+	/** Verb-first line for the settled call (`click n12 · Notes: All iCloud`); absent → `detail`. */
+	summary?: string;
+	/** Header of the window or tab the settled call displayed; absent when it displayed none. */
+	header?: string;
+	/** User-visible side effects the call's result reported (app fronted, pointer moved); absent → none reported. */
+	notices?: string[];
 	/** Stopped ends this operation; only released confirms an explicit cleanup succeeded. */
 	phase: "running" | "stopping" | "completed" | "released" | "stopped" | "failed";
 }
@@ -185,7 +190,31 @@ export function upsertStatusEvent(events: EvalStatusEvent[], event: EvalStatusEv
 	events.push(event);
 }
 
-/** Control activity stays visible beside previews, independently of code/output expansion. */
+/** One printable line: tabs, newlines and control sequences out. */
+function cleanLine(value: string): string {
+	return replaceTabs(sanitizeText(value)).replace(/[\r\n]+/g, " ");
+}
+
+/**
+ * What a control line says after its state: the settled call's verb-first
+ * summary; else its operation name ahead of the prelude's description, so a
+ * width cut never takes the verb; else, while running, target and operation.
+ */
+function controlEventText(event: EvalStatusEvent): string | undefined {
+	const summary = eventString(event.summary);
+	if (summary) return summary;
+	const action = eventString(event.action);
+	const detail = eventString(event.detail);
+	if (detail) return action && !detail.startsWith(action) ? `${action} · ${detail}` : detail;
+	return [action, eventString(event.target)].filter(Boolean).join(" · ") || undefined;
+}
+
+/**
+ * Control activity stays visible beside previews, independently of code/output
+ * expansion: one verb-first line per call, plus one line per user-visible side
+ * effect (an app fronted, the pointer moved) its result reported. Calls with
+ * such effects are never windowed out.
+ */
 function renderControlProgressEvents(
 	events: EvalStatusEvent[],
 	theme: Theme,
@@ -195,13 +224,16 @@ function renderControlProgressEvents(
 	spinnerFrame?: number,
 ): string[] {
 	const active = (event: EvalStatusEvent) => event.phase === "running" || event.phase === "stopping";
+	const notices = (event: EvalStatusEvent) =>
+		Array.isArray(event.notices) ? event.notices.filter((n): n is string => typeof n === "string" && n.length > 0) : [];
 	const recent = new Set(events.slice(-(expanded ? PREVIEW_LIMITS.EXPANDED_LINES : PREVIEW_LIMITS.COLLAPSED_LINES)));
-	const visible = events.filter(event => active(event) || recent.has(event));
-	return visible.map(event => {
+	const visible = events.filter(event => active(event) || recent.has(event) || notices(event).length > 0);
+	return visible.flatMap(event => {
 		const kind = event.kind === "browser" ? "Browser" : "Computer";
 		// A lost worker may never emit a terminal control event. A settled cell
 		// cannot prove release, but must not keep presenting its last spinner.
 		const phase = !canStillRun && active(event) ? "unknown" : eventString(event.phase);
+		// A completed call is said by its own verb; every other phase names itself.
 		const state =
 			phase === "unknown"
 				? "Outcome unconfirmed; inspect before retrying"
@@ -214,7 +246,7 @@ function renderControlProgressEvents(
 							: phase === "failed"
 								? "Failed; inspect before retrying"
 								: phase === "completed"
-									? "Operation complete"
+									? undefined
 									: "Working";
 		const icon = formatStatusIcon(
 			phase === "failed" || phase === "unknown"
@@ -233,20 +265,20 @@ function renderControlProgressEvents(
 				: phase === "stopping" || phase === "stopped"
 					? "warning"
 					: "muted";
-		const target = eventString(event.target);
-		const action = eventString(event.action);
-		const clean = (value: string) =>
-			truncateToWidth(replaceTabs(sanitizeText(value)).replace(/[\r\n]/g, " "), TRUNCATE_LENGTHS.TITLE);
-		// A settled call carries the prelude's own description (`main.id(5).click()`);
-		// until then only the target and operation name are known.
-		const described = eventString(event.detail);
-		const detail = described
-			? clean(described)
-			: [target && clean(target), action && clean(action)].filter(Boolean).join(" · ");
-		return truncateToWidth(
-			`${icon} ${theme.fg("accent", kind)} ${theme.fg(color, state)}${detail ? theme.sep.dot + theme.fg("dim", detail) : ""}`,
-			width,
-		);
+		const text = controlEventText(event);
+		const parts = [
+			state && theme.fg(color, state),
+			text && theme.fg(state ? "dim" : "toolOutput", cleanLine(text)),
+		].filter(Boolean);
+		const lines = [truncateToWidth(`${icon} ${theme.fg("accent", kind)} ${parts.join(theme.sep.dot)}`, width)];
+		const detail = eventString(event.detail);
+		if (expanded && detail && eventString(event.summary))
+			lines.push(truncateToWidth(`  ${theme.fg("dim", cleanLine(detail))}`, width));
+		for (const notice of notices(event))
+			lines.push(
+				truncateToWidth(`  ${theme.fg("dim", theme.tree.last)} ${theme.fg("warning", cleanLine(notice))}`, width),
+			);
+		return lines;
 	});
 }
 
@@ -573,13 +605,41 @@ function renderStatusEvents(events: EvalStatusEvent[], theme: Theme, expanded: b
 	return lines;
 }
 
+/**
+ * Collapsed view of a settled control cell: the header of each window or tab
+ * it displayed, in order, once each. Its tail is whatever the last call
+ * printed last (handle signatures, a tree's last rows, a page footer), so the
+ * raw output waits for ctrl+o; the per-call lines render below the box.
+ * `undefined` when the cell is not one: still running, failed, or no call
+ * described itself (a transcript recorded before summaries existed).
+ */
+function controlCellSummary(
+	cell: EvalCellResult,
+	controlEvents: readonly EvalStatusEvent[],
+	theme: Theme,
+	width: number,
+): { lines: readonly string[]; hiddenCount: number } | undefined {
+	if (cell.status !== "complete" || controlEvents.length === 0) return undefined;
+	if (controlEvents.some(event => event.phase === "running" || event.phase === "stopping")) return undefined;
+	if (!controlEvents.some(event => eventString(event.summary) || eventString(event.header))) return undefined;
+	const innerWidth = outputBlockContentWidth(width);
+	const headers = [...new Set(controlEvents.flatMap(event => eventString(event.header) ?? []))];
+	return {
+		lines: headers.map(header => truncateToWidth(theme.fg("toolOutput", cleanLine(header)), innerWidth)),
+		hiddenCount: cell.output ? cell.output.split("\n").length : 0,
+	};
+}
+
 function formatCellOutputLines(
 	cell: EvalCellResult,
 	expanded: boolean,
 	previewLines: number,
 	theme: Theme,
 	width: number,
+	controlEvents: readonly EvalStatusEvent[],
 ): { lines: readonly string[]; hiddenCount: number } {
+	const summary = expanded ? undefined : controlCellSummary(cell, controlEvents, theme, width);
+	if (summary) return summary;
 	if (!cell.output) {
 		return { lines: [], hiddenCount: 0 };
 	}
@@ -753,7 +813,14 @@ export const evalToolRenderer = {
 						const controlEvents = allEvents.filter(e => e.op === "control");
 						const otherEvents = allEvents.filter(e => e.op !== "agent" && e.op !== "control");
 						const statusLines = renderStatusEvents(otherEvents, uiTheme, expanded);
-						const outputContent = formatCellOutputLines(cell, expanded, previewLines, uiTheme, width);
+						const outputContent = formatCellOutputLines(
+							cell,
+							expanded,
+							previewLines,
+							uiTheme,
+							width,
+							controlEvents,
+						);
 						const outputLines = [...outputContent.lines];
 						if (!expanded && outputContent.hiddenCount > 0) {
 							outputLines.push(

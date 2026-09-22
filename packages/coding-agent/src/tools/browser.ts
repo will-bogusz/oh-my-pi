@@ -1,7 +1,7 @@
 import { type } from "@oh-my-pi/omptype";
 import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
 import { isRecord, logger, untilAborted } from "@oh-my-pi/pi-utils";
-import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
+import type { EvalPreludeContext, EvalPreludeDefinition, EvalPreludeStatus } from "../eval/preludes";
 import type { ToolSession } from "../sdk";
 import { enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { resolveCmuxKind } from "./browser/cmux/rpc";
@@ -51,7 +51,7 @@ import {
 } from "./browser/tab-supervisor";
 import { BROWSER_TAB_VERBS, renderTabCall } from "./browser/tab-call";
 import { resolveToCwd } from "./path-utils";
-import { renderCallChain, renderFunctionRun } from "./run-code";
+import { renderCallChain, renderFunctionRun, summarizeCallChain } from "./run-code";
 import { ToolAbortError, throwIfAborted } from "./tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { toolResult } from "./tool-result";
@@ -207,32 +207,74 @@ function browserAssets(): typeof import("./browser/prelude-definition").browserP
 	return require("./browser/prelude-definition").browserPreludeAssets;
 }
 
-/** Status-tree line for a settled browser call: `open main https://…`, `main.id(5).click()`, `close all`. */
-function describeBrowserCall(parameters: unknown, result: AgentToolResult<unknown>): string | undefined {
+/**
+ * The page a browser call left in view, from what its result already holds:
+ * the initial observation of an acquired tab, or an observation it printed.
+ * Any other returned value is the page's data, not the page.
+ */
+function describedPage(details: Record<string, unknown>): { url?: string; title?: string } {
+	const value = isRecord(details.value) ? details.value : {};
+	const observed = isRecord(value.initialObservation)
+		? value.initialObservation
+		: details.rendered === true
+			? value
+			: {};
+	const text = (field: unknown) => (typeof field === "string" && field.length > 0 ? field : undefined);
+	return {
+		url: text(observed.url) ?? text(details.url),
+		title: text(observed.title) ?? (isRecord(value.target) ? text(value.target.title) : undefined),
+	};
+}
+
+/**
+ * What a settled browser call shows: `detail` is the call as written (`open
+ * main https://…`, `main.id(5).click()`, `close all`); `summary` says it verb
+ * first against the page title (`click 5 · Cars.com`); a call that displayed
+ * a page (acquisition, observe) heads it with title and URL, and captions its
+ * screenshots with the title rather than the tab's handle label.
+ */
+function describeBrowserCall(parameters: unknown, result: AgentToolResult<unknown>): EvalPreludeStatus | undefined {
 	const parsed = browserSchema(parameters);
 	if (parsed instanceof type.errors) return undefined;
 	const details = isRecord(result.details) ? result.details : {};
 	// A Chrome handle call reports the tab's label, not the handle id it was addressed by.
 	const name = typeof details.name === "string" ? details.name : (parsed.name ?? DEFAULT_TAB_NAME);
+	const page = describedPage(details);
+	let host: string | undefined;
+	if (page.url) host = URL.parse(page.url)?.host || undefined;
+	const where = page.title ?? host;
+	const acquired = parsed.action === "open" || parsed.action === "create" || parsed.action === "claim";
+	const status = (detail: string, summary: string): EvalPreludeStatus => ({
+		detail,
+		summary,
+		...(page.url && (acquired || details.rendered === true)
+			? { header: page.title ? `${page.title} — ${page.url}` : page.url }
+			: {}),
+		...(page.title ? { label: page.title } : {}),
+	});
 	switch (parsed.action) {
 		case "open":
 		case "create":
-		case "claim":
-			return typeof details.url === "string" && details.url.length > 0
-				? `${parsed.action} ${name} ${details.url}`
-				: `${parsed.action} ${name}`;
+		case "claim": {
+			const detail = page.url ? `${parsed.action} ${name} ${page.url}` : `${parsed.action} ${name}`;
+			return status(detail, `${parsed.action} tab · ${where ?? name}`);
+		}
 		case "close":
-			return parsed.all ? "close all" : `close ${name}`;
-		case "run":
-			return `${name}.run(${parsed.fn !== undefined ? "fn" : (parsed.code?.trim().split("\n", 1)[0] ?? "")})`;
-		case "call":
-			return `${name}.${renderCallChain(parsed.chain ?? [])}`;
+			return parsed.all ? status("close all", "close all tabs") : status(`close ${name}`, `close ${name}`);
+		case "run": {
+			const source = parsed.fn !== undefined ? "fn" : (parsed.code?.trim().split("\n", 1)[0] ?? "");
+			return status(`${name}.run(${source})`, `run ${source} · ${where ?? name}`);
+		}
+		case "call": {
+			const chain = parsed.chain ?? [];
+			return status(`${name}.${renderCallChain(chain)}`, `${summarizeCallChain(chain) ?? "call"} · ${where ?? name}`);
+		}
 		case "instances":
 		case "discover":
 		case "help":
-			return parsed.action;
+			return status(parsed.action, parsed.action);
 		default:
-			return `${parsed.action} ${name}`;
+			return status(`${parsed.action} ${name}`, `${parsed.action} ${name}`);
 	}
 }
 
