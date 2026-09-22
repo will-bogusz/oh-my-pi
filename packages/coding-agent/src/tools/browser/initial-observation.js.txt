@@ -13,7 +13,10 @@ async ({ tab }, options) => {
 	} catch (error) {
 		partial("inspectionError", error);
 	}
-	if (options.screenshot !== false) {
+	// Only once the tree came back. An observation that failed means the page is
+	// still moving or unreachable, and the screenshot would spend its own full
+	// deadline finding that out a second time.
+	if (options.screenshot !== false && !state.inspectionError) {
 		try {
 			state.initialScreenshot = await tab.screenshot();
 		} catch (error) {

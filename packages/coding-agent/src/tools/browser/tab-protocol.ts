@@ -86,6 +86,13 @@ export type WorkerInitPayload =
 			targetId: string;
 			dialogs?: "accept" | "dismiss";
 			url?: string;
+			/**
+			 * URL Chrome already reported for this tab. Unlike `url` this never
+			 * navigates: it only tells the worker that a navigation is still
+			 * pending while the main frame holds its initial empty document, so
+			 * the first observation is not taken of a page nobody asked for.
+			 */
+			expectUrl?: string;
 			waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
 			timeoutMs: number;
 			/**

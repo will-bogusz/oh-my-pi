@@ -439,6 +439,9 @@ async function initializeChromePage(
 	try {
 		const { tab } = await acquireTab(handle.id, browser, {
 			targetId: handle.lease.targetId,
+			// Chrome answers for the tab's initial empty document until the URL it
+			// was created with commits; the worker holds `ready` until then.
+			expectUrl: handle.lease.tab.url,
 			timeoutMs: opts.timeoutMs,
 			signal: opts.signal,
 			ownerSessionId: session.getSessionId?.() ?? undefined,

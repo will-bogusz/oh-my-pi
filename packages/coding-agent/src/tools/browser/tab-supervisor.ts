@@ -124,6 +124,8 @@ export interface AcquireTabOptions {
 	ownerActorId?: string;
 	/** Exact provider target, bypassing title, URL and visibility heuristics. */
 	targetId?: string;
+	/** Where an already-created tab is headed; the worker waits for it to commit, never navigates to it. */
+	expectUrl?: string;
 	onRelease?: () => Promise<void>;
 	url?: string;
 	waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
@@ -1254,6 +1256,7 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 			browserWSEndpoint,
 			safeDir,
 			targetId: opts.targetId,
+			expectUrl: opts.expectUrl,
 			timeoutMs: opts.timeoutMs,
 			activateForScreenshot: false,
 		};
