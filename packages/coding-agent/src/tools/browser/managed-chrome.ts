@@ -405,6 +405,14 @@ export async function explainRevokedChromeControl(
 	}
 	const revoked = lease.debugger?.revoked;
 	if (!revoked) return undefined;
+	// The user pressing Cancel on Chrome's bar is a decision about this session,
+	// not an obstacle in the page: re-claiming it is exactly what they refused.
+	if (lease.debugger?.canceledByUser)
+		return new ToolError(
+			`The user stopped OMP's control of ${JSON.stringify(handle.label)} at ${lease.tab.url} from Chrome's ` +
+				"infobar. Do not re-claim this tab, reconnect, or work around it. Stop here and report what was " +
+				"done and what remains, so the user can decide how to continue.",
+		);
 	return new ToolError(
 		`OMP lost control of ${JSON.stringify(handle.label)} at ${lease.tab.url}: ${revoked}. ` +
 			"The tab is still open in the user's Chrome and OMP cannot attach while that is the case. " +

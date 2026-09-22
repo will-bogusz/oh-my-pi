@@ -16,6 +16,7 @@ Ownership
 
 Interruptions
 - "OMP lost control … Chrome revoked": another extension (typically a password manager) took over the page. Never close that tab; tell the user what step to finish, then claim it again.
+- "The user stopped OMP's control … from Chrome's infobar": they ended browser control deliberately. Do not re-claim, reopen or route around it; stop and report what is done and what is left.
 - A pending JavaScript dialog is reported on the action (a claim returns `initialDialog`); `tab.dialog()` inspects it, `tab.dialog({ action: "accept" | "dismiss", promptText? })` answers it.
 - Child tabs your page opens are auto-leased: `tab.popups()` (or `discover()`'s `popupOf`) lists them; claim the child id to drive it. Chrome decides whether it selects the child; OMP never re-selects the tab it displaced.
 - `tab.downloads()` lists this page's downloads; `suggestedFilename` is not a saved path.

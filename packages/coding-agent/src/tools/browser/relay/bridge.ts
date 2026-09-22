@@ -124,6 +124,12 @@ export interface DebuggerState {
 	attached: boolean;
 	/** Present while Chrome will not let OMP drive the tab even though it is open. */
 	revoked?: string;
+	/**
+	 * The user pressed Cancel on Chrome's debugging infobar. Unlike every other
+	 * revocation this is a decision, not an obstacle: the work stops there
+	 * instead of being retried or handed to the user to finish.
+	 */
+	canceledByUser?: boolean;
 }
 
 /**
@@ -165,6 +171,7 @@ class TabState {
 	banned = false;
 	/** Why the debugger cannot be (re)attached while `banned`, in the model's terms. */
 	banReason: string | undefined;
+	canceledByUser = false;
 	/** Whether targets for this tab were announced to discovering connections. */
 	announced = false;
 	attaching: Promise<boolean> | null = null;
@@ -1161,6 +1168,7 @@ export class RelayBridge {
 		this.#resetRuntime(tab);
 		tab.banned = true;
 		tab.banReason = describeDetach(reason);
+		tab.canceledByUser = reason === "canceled_by_user";
 		this.#retractTab(tab);
 	}
 
@@ -1188,6 +1196,7 @@ export class RelayBridge {
 			if (tab.url !== snap.url) {
 				tab.banned = false;
 				tab.banReason = undefined;
+				tab.canceledByUser = false;
 			}
 			tab.update(snap);
 		}
@@ -1407,7 +1416,11 @@ export class RelayBridge {
 		if (!tab) return { attached: false, revoked: "the tab is gone from Chrome" };
 		if (tab.attached) return { attached: true };
 		return tab.banned
-			? { attached: false, revoked: tab.banReason ?? describeDetach("target_closed") }
+			? {
+					attached: false,
+					revoked: tab.banReason ?? describeDetach("target_closed"),
+					canceledByUser: tab.canceledByUser,
+				}
 			: { attached: false };
 	}
 
