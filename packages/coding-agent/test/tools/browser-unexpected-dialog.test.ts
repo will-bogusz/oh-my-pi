@@ -1,13 +1,7 @@
 import { expect, it } from "bun:test";
-import type {
-	ReadyInfo,
-	Transport,
-	WorkerInbound,
-	WorkerOutbound,
-} from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
-import { WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import puppeteer, { type Dialog } from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
+import { startWorker } from "./browser-worker-harness";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
@@ -37,49 +31,23 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 				);
 			},
 		});
-		const ready = Promise.withResolvers<ReadyInfo>();
-		let result = Promise.withResolvers<Extract<WorkerOutbound, { type: "result" }>>();
-		const closed = Promise.withResolvers<void>();
-		let receive: (message: WorkerInbound | WorkerOutbound) => void = () => {};
-		const transport: Transport = {
-			send(message) {
-				if (message.type === "ready") ready.resolve(message.info);
-				if (message.type === "init-failed") ready.reject(new Error(message.error.message));
-				if (message.type === "result") result.resolve(message);
-				if (message.type === "closed") closed.resolve();
-			},
-			onMessage(handler) {
-				receive = handler;
-				return () => {};
-			},
-			close() {},
-		};
-		new WorkerCore(transport, false);
+		const worker = startWorker();
 		try {
-			receive({
-				type: "init",
-				payload: {
-					mode: "headless",
-					// Enable the managed page policy against our disposable Chromium.
-					// No popup is created, so no broker HTTP operation is needed.
-					browserWSEndpoint: `${browser.wsEndpoint()}?lease=preparation-fixture`,
-					safeDir: process.cwd(),
-					timeoutMs: 5000,
-				},
+			const target = await worker.init({
+				mode: "headless",
+				// Enable the managed page policy against our disposable Chromium.
+				// No popup is created, so no broker HTTP operation is needed.
+				browserWSEndpoint: `${browser.wsEndpoint()}?lease=preparation-fixture`,
+				safeDir: process.cwd(),
+				timeoutMs: 5000,
 			});
-			const target = await ready.promise;
 			const pages = await browser.pages();
 			const page = pages.find(
 				candidate => (candidate.target() as { _targetId?: string })._targetId === target.targetId,
 			);
 			if (!page) throw new Error("Missing prepared page");
 			await page.goto(fixture.url.toString());
-			const run = async (id: string, code: string) => {
-				result = Promise.withResolvers<Extract<WorkerOutbound, { type: "result" }>>();
-				receive({ type: "run", id, name: "dialog page", code, timeoutMs: 3000, session: { cwd: process.cwd() } });
-				const response = await result.promise;
-				return response;
-			};
+			const run = (id: string, code: string) => worker.run({ id, name: "dialog page", code, timeoutMs: 3000 });
 			let current: Dialog | undefined;
 			page.on("dialog", dialog => {
 				current = dialog;
@@ -110,8 +78,7 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			expect(await page.$eval("p", element => element.textContent)).toBe("Resolved café Ω");
 			expect(saves).toEqual(["Resolved café Ω"]);
 		} finally {
-			receive({ type: "close" });
-			await closed.promise;
+			await worker.close();
 			await browser.close();
 			fixture.stop(true);
 		}

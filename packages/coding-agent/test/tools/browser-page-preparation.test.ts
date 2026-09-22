@@ -1,14 +1,8 @@
 import { expect, it } from "bun:test";
-import type {
-	Observation,
-	ReadyInfo,
-	Transport,
-	WorkerInbound,
-	WorkerOutbound,
-} from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
-import { WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
+import type { Observation } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
 import puppeteer from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
+import { startWorker } from "./browser-worker-harness";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
@@ -22,37 +16,16 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			headless: true,
 			protocolTimeout: 5000,
 		});
-		const ready = Promise.withResolvers<ReadyInfo>();
-		let result = Promise.withResolvers<Extract<WorkerOutbound, { type: "result" }>>();
-		const closed = Promise.withResolvers<void>();
-		let receive: (message: WorkerInbound | WorkerOutbound) => void = () => {};
-		const transport: Transport = {
-			send(message) {
-				if (message.type === "ready") ready.resolve(message.info);
-				if (message.type === "init-failed") ready.reject(new Error(message.error.message));
-				if (message.type === "result") result.resolve(message);
-				if (message.type === "closed") closed.resolve();
-			},
-			onMessage(handler) {
-				receive = handler;
-				return () => {};
-			},
-			close() {},
-		};
-		new WorkerCore(transport, false);
+		const worker = startWorker();
 		try {
-			receive({
-				type: "init",
-				payload: {
-					mode: "headless",
-					// Enable the managed page policy against our disposable Chromium.
-					// No popup is created, so no broker HTTP operation is needed.
-					browserWSEndpoint: `${browser.wsEndpoint()}?lease=preparation-fixture`,
-					safeDir: process.cwd(),
-					timeoutMs: 5000,
-				},
+			const target = await worker.init({
+				mode: "headless",
+				// Enable the managed page policy against our disposable Chromium.
+				// No popup is created, so no broker HTTP operation is needed.
+				browserWSEndpoint: `${browser.wsEndpoint()}?lease=preparation-fixture`,
+				safeDir: process.cwd(),
+				timeoutMs: 5000,
 			});
-			const target = await ready.promise;
 			const pages = await browser.pages();
 			const page = pages.find(
 				candidate => (candidate.target() as { _targetId?: string })._targetId === target.targetId,
@@ -62,11 +35,7 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			const foreground = await browser.newPage();
 			await foreground.bringToFront();
 			expect(await page.evaluate(() => document.hasFocus())).toBe(false);
-			const run = async (id: string, code: string) => {
-				result = Promise.withResolvers<Extract<WorkerOutbound, { type: "result" }>>();
-				receive({ type: "run", id, name: "prepared page", code, timeoutMs: 3000, session: { cwd: process.cwd() } });
-				return await result.promise;
-			};
+			const run = (id: string, code: string) => worker.run({ id, name: "prepared page", code, timeoutMs: 3000 });
 			const read = await run("read", 'await page.waitForSelector("aria/Save");');
 			expect(read.ok).toBe(true);
 			expect([
@@ -87,8 +56,7 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			expect(await page.$eval("button", el => el.getAttribute("data-saved"))).toBe("true");
 			expect(await foreground.evaluate(() => document.hasFocus())).toBe(true);
 		} finally {
-			receive({ type: "close" });
-			await closed.promise;
+			await worker.close();
 			await browser.close();
 		}
 	},
@@ -108,47 +76,22 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			headless: true,
 			protocolTimeout: 5000,
 		});
-		const ready = Promise.withResolvers<ReadyInfo>();
-		let result = Promise.withResolvers<Extract<WorkerOutbound, { type: "result" }>>();
-		const closed = Promise.withResolvers<void>();
-		let receive: (message: WorkerInbound | WorkerOutbound) => void = () => {};
-		const transport: Transport = {
-			send(message) {
-				if (message.type === "ready") ready.resolve(message.info);
-				if (message.type === "init-failed") ready.reject(new Error(message.error.message));
-				if (message.type === "result") result.resolve(message);
-				if (message.type === "closed") closed.resolve();
-			},
-			onMessage(handler) {
-				receive = handler;
-				return () => {};
-			},
-			close() {},
-		};
-		new WorkerCore(transport, false);
+		const worker = startWorker();
 		try {
-			receive({
-				type: "init",
-				payload: {
-					mode: "headless",
-					browserWSEndpoint: browser.wsEndpoint(),
-					safeDir: process.cwd(),
-					viewport: { width: 800, height: 600 },
-					timeoutMs: 5000,
-				},
+			const target = await worker.init({
+				mode: "headless",
+				browserWSEndpoint: browser.wsEndpoint(),
+				safeDir: process.cwd(),
+				viewport: { width: 800, height: 600 },
+				timeoutMs: 5000,
 			});
-			const target = await ready.promise;
 			const pages = await browser.pages();
 			const page = pages.find(
 				candidate => (candidate.target() as { _targetId?: string })._targetId === target.targetId,
 			);
 			if (!page) throw new Error("Missing prepared page");
 			await page.setContent('<body style="margin:0"><div style="height:6000px"></div></body>');
-			const run = async (id: string, code: string) => {
-				result = Promise.withResolvers<Extract<WorkerOutbound, { type: "result" }>>();
-				receive({ type: "run", id, name: "scrolled page", code, timeoutMs: 3000, session: { cwd: process.cwd() } });
-				return await result.promise;
-			};
+			const run = (id: string, code: string) => worker.run({ id, name: "scrolled page", code, timeoutMs: 3000 });
 			// A wheel event scrolls asynchronously, so wait for the position to
 			// stop moving rather than reading whatever it is one round trip later.
 			// The return type is `tab.observe()`'s own; the worker sends it over a
@@ -181,8 +124,7 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			if (bad.ok) throw new Error("An unknown direction unexpectedly scrolled");
 			expect(bad.error.message).toContain("up, down, left, right");
 		} finally {
-			receive({ type: "close" });
-			await closed.promise;
+			await worker.close();
 			await browser.close();
 		}
 	},
