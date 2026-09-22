@@ -18,7 +18,7 @@ async ({ tab }, options) => {
 	// deadline finding that out a second time.
 	if (options.screenshot !== false && !state.inspectionError) {
 		try {
-			state.initialScreenshot = await tab.screenshot();
+			state.initialScreenshot = await tab.screenshot({ preview: true });
 		} catch (error) {
 			partial("screenshotError", error);
 		}

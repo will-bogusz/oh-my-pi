@@ -1,3 +1,6 @@
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
 import { type Type, type } from "@oh-my-pi/omptype";
 import type { AgentToolResult, ToolApprovalDecision } from "@oh-my-pi/pi-agent-core";
 import type { Model } from "@oh-my-pi/pi-ai";
@@ -274,6 +277,8 @@ class ComputerLifetime {
 	#closing?: Promise<void>;
 	#releaseFailure?: Error;
 	readonly #taught = new Set<string>();
+	/** Capture files this session's runs wrote; closing the session removes these and nothing else. */
+	readonly #captures = new Set<string>();
 
 	constructor(session: ToolSession, createController: ComputerControllerFactory) {
 		this.#session = session;
@@ -290,6 +295,18 @@ class ComputerLifetime {
 		if (this.#taught.has(handle)) return false;
 		this.#taught.add(handle);
 		return true;
+	}
+
+	/**
+	 * Take ownership of capture files a run wrote. Only the driver session's
+	 * own naming (`$TMPDIR/omp-computer-*`) is accepted, so a path from
+	 * anywhere else can never be scheduled for removal.
+	 */
+	own(paths: Iterable<string>): void {
+		const directory = os.tmpdir();
+		for (const file of paths)
+			if (path.dirname(file) === directory && path.basename(file).startsWith("omp-computer-"))
+				this.#captures.add(file);
 	}
 
 	async controller(): Promise<ComputerController> {
@@ -326,7 +343,13 @@ class ComputerLifetime {
 	close(): Promise<void> {
 		this.#closed = true;
 		this.#unregisterOwner();
-		return (this.#closing ??= this.release());
+		// Turn settle only releases the driver: a later turn may still read a
+		// capture by path. Session close is the end of that.
+		return (this.#closing ??= this.release().finally(async () => {
+			const files = [...this.#captures];
+			this.#captures.clear();
+			await Promise.allSettled(files.map(file => fs.rm(file, { force: true })));
+		}));
 	}
 }
 
@@ -416,6 +439,7 @@ async function runComputer(
 		readOnly,
 	};
 	const run = await controller.run(code, timeoutSeconds * 1000, snapshot, signal);
+	lifetime.own(run.screenshots.map(shot => shot.path));
 	throwIfAborted(signal);
 
 	const details: ComputerPreludeDetails = {

@@ -245,6 +245,12 @@ interface ScreenshotOptions {
 	selector?: string;
 	fullPage?: boolean;
 	silent?: boolean;
+	/**
+	 * Acquisition preview: saved at the size the model sees even when a
+	 * full-resolution screenshot directory is configured. Only an explicit
+	 * screenshot is worth the full-resolution file.
+	 */
+	preview?: boolean;
 }
 
 interface TabApi {
@@ -2070,7 +2076,7 @@ export class WorkerCore {
 			{ type: "image", data: buffer.toBase64(), mimeType: captureMime },
 			{ maxWidth: 1024, maxHeight: 1024, maxBytes: 150 * 1024, jpegQuality: 70, excludeWebP: session.excludeWebP },
 		);
-		const saveFullRes = !!session.browserScreenshotDir;
+		const saveFullRes = !!session.browserScreenshotDir && !opts.preview;
 		const savedBuffer = saveFullRes ? buffer : resized.buffer;
 		const savedMimeType = saveFullRes ? captureMime : resized.mimeType;
 		const ext = savedMimeType === "image/webp" ? "webp" : savedMimeType === "image/jpeg" ? "jpg" : "png";
