@@ -76,12 +76,12 @@ export class DebuggerAttachments {
 	}
 
 	/**
-	 * Detach the named tabs (default: every owned one) and return those Chrome
+	 * Detach every tab this worker still owns and return those Chrome
 	 * confirmed. Forgetting the tab before the call keeps a failed detach from
 	 * pinning a stale attachment forever; the next hello re-seeds the truth.
 	 */
-	async detachAll(tabIds?: readonly number[]): Promise<number[]> {
-		const targets = (tabIds ?? this.tabs()).filter(tabId => this.#tabs.has(tabId));
+	async detachAll(): Promise<number[]> {
+		const targets = this.tabs();
 		const detached = await Promise.all(
 			targets.map(async tabId => {
 				this.#tabs.delete(tabId);

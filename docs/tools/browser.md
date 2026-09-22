@@ -264,7 +264,7 @@ Because Chrome's own popup path runs, `window.open` returns a real `WindowProxy`
 
 Each acquired tab permits one active run. A timeout or abort can recycle its worker and invalidate handles; unplanned teardown preserves task pages, including partially created pages, for rediscovery, and the error identifies the exact tab. Ownership is a lease on the relay: a live scoped connection suspends its timer, and otherwise one five-minute idle grace applies, re-armed by every touch of that lease (claim, get, dialog, `popups`, any begun operation) and on disconnect. If the OMP process disappears, the relay releases the orphaned lease after that grace has elapsed; pages and groups survive for exact rediscovery and claim.
 
-Settle is automatic: when the turn ends, `agent-session.ts` runs `releaseChromeTabsForOwner` (each owned handle → `releaseTab { close: false }`) followed by `detachChromeDebuggersForOwner`, both bounded at five seconds. A claim on a renderer blocked by a JavaScript dialog succeeds without attaching a page worker; the worker attaches on the first page call after the dialog is answered.
+Settle is automatic: when the turn ends, `agent-session.ts` runs `releaseChromeTabsForOwner`, handing every owned handle back with `releaseTab { close: false }` — which detaches the debugger with the lease — bounded at five seconds. A claim on a renderer blocked by a JavaScript dialog succeeds without attaching a page worker; the worker attaches on the first page call after the dialog is answered.
 
 Reconnecting a paired profile invalidates that profile's old handles without replacing other profiles' sessions. Discover the current exact ID and claim again. Never use a stale label, URL match, or new `open` call as proof that the old task was recovered.
 

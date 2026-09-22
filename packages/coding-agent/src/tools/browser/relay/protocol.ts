@@ -44,8 +44,6 @@ export type RelayRpcRequest =
 	| { op: "queryTabs" }
 	| { op: "attach"; tabId: number }
 	| { op: "detach"; tabId: number }
-	/** Release the extension's debugger attachments (default: all it owns) and report which. */
-	| { op: "detachAll"; tabIds?: number[] }
 	| { op: "send"; tabId: number; sessionId?: string; method: string; params?: Record<string, unknown> }
 	| { op: "createTab"; url: string }
 	/**

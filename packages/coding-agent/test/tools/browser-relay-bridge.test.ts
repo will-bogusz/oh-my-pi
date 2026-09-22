@@ -395,8 +395,20 @@ describe("RelayBridge debugger lifetime", () => {
 		const cdp = new FakeCdpSocket();
 		const conn = connectCdp(bridge, cdp, 1);
 		const session = await attachPage(bridge, ext, cdp, conn, 1);
-		bridge.cdpMessage(conn, JSON.stringify({ id: 1, sessionId: session, method: "Page.enable" }));
-		ack(bridge, ext, "send");
+		// Set the tab up the way a page worker does: auto-attach, a root domain
+		// enable, and Runtime (which the bridge owns and never re-receives).
+		for (const [method, params] of [
+			["Target.setAutoAttach", { autoAttach: true, waitForDebuggerOnStart: false, flatten: true }],
+			["Page.enable", undefined],
+			["Runtime.enable", undefined],
+		] as const) {
+			bridge.cdpMessage(conn, JSON.stringify({ id: ++msgSeq, sessionId: session, method, params }));
+			await flush();
+			ack(bridge, ext, "send", {});
+			await flush();
+		}
+		// The bridge's Runtime cycle is sequential; drain its second half.
+		ack(bridge, ext, "send", {});
 		await flush();
 		await until(() => detachedTabs(ext).includes(1), "the idle detach");
 		ack(bridge, ext, "detach");
@@ -410,25 +422,31 @@ describe("RelayBridge debugger lifetime", () => {
 				message => message.method === "Runtime.executionContextsCleared" && message.sessionId === session,
 			),
 		).toHaveLength(1);
-		const before = ext.rpcs("send").length;
+		const evaluateId = ++msgSeq;
 		bridge.cdpMessage(
 			conn,
-			JSON.stringify({ id: 2, sessionId: session, method: "Runtime.evaluate", params: { expression: "1" } }),
+			JSON.stringify({ id: evaluateId, sessionId: session, method: "Runtime.evaluate", params: { expression: "1" } }),
 		);
-		for (let round = 0; round < 4; round++) {
-			await flush();
-			ack(bridge, ext, "attach");
-			ack(bridge, ext, "send", { result: { value: 1 } });
-		}
 		await flush();
-		// The reattach puts the driver's domains back before its command runs.
+		// The command waits behind one attach instead of failing on a detached tab.
+		expect(ext.pending("attach").map(request => request.tabId)).toEqual([1]);
+		expect(ext.pending("send")).toEqual([]);
+		ack(bridge, ext, "attach");
+		await flush();
+		// The reattach puts every root-session switch back in one parallel batch,
+		// before the queued command runs.
 		expect(
 			ext
-				.rpcs("send")
-				.slice(before)
-				.map(rpc => rpc.method),
-		).toEqual(["Page.enable", "Runtime.evaluate"]);
-		expect(cdp.messages.find(message => message.id === 2)).not.toHaveProperty("error");
+				.pending("send")
+				.map(request => request.method)
+				.sort(),
+		).toEqual(["Page.enable", "Runtime.enable", "Target.setAutoAttach"]);
+		ack(bridge, ext, "send", {});
+		await flush();
+		expect(ext.pending("send").map(request => request.method)).toEqual(["Runtime.evaluate"]);
+		ack(bridge, ext, "send", { result: { value: 1 } });
+		await flush();
+		expect(cdp.messages.find(message => message.id === evaluateId)).not.toHaveProperty("error");
 	});
 
 	it("keeps the debugger while a command is in flight and while a dialog is open", async () => {
@@ -1381,137 +1399,12 @@ it("keeps a recovered dialog decision channel across consecutive prompts and det
 	}
 });
 
-describe("turn-end debugger release", () => {
-	it("releases only the named actor's attachments and leaves a sibling actor driving", async () => {
-		const bridge = new RelayBridge();
-		const ext = new FakeExtSocket();
-		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
-		const discovered = bridge.managed.discover();
-		const mine = bridge.managed.claim(discovered.find(entry => entry.tabId === 1)!.id, "actor-a");
-		const theirs = bridge.managed.claim(discovered.find(entry => entry.tabId === 2)!.id, "actor-b");
-		const myCdp = new FakeCdpSocket();
-		const theirCdp = new FakeCdpSocket();
-		const myConn = bridge.cdpConnected(myCdp, mine.id);
-		const theirConn = bridge.cdpConnected(theirCdp, theirs.id);
-		await attachPage(bridge, ext, myCdp, myConn, 1);
-		await attachPage(bridge, ext, theirCdp, theirConn, 2);
-		const released = bridge.detachDebuggers({ owner: "actor-a" });
-		await flush();
-		expect(ext.pending("detachAll").map(request => request.tabIds)).toEqual([[1]]);
-		ack(bridge, ext, "detachAll", { detached: [1] });
-		expect(await released).toEqual([1]);
-		// The sibling actor never lost its debugger, so no reattach is needed.
-		expect(ext.rpcs("attach").map(request => request.tabId)).toEqual([1, 2]);
-		bridge.cdpClosed(myConn);
-		bridge.cdpClosed(theirConn);
-	});
-
-	it("keeps the debugger on a tab whose JavaScript dialog is still open", async () => {
-		const bridge = new RelayBridge();
-		const ext = new FakeExtSocket();
-		connect(bridge, ext, [tab({ tabId: 1 })]);
-		const lease = bridge.managed.claim(bridge.managed.discover()[0]!.id, "owner");
-		const cdp = new FakeCdpSocket();
-		const connection = bridge.cdpConnected(cdp, lease.id);
-		await attachPage(bridge, ext, cdp, connection, 1);
-		bridge.extMessage(
-			ext,
-			JSON.stringify({
-				t: "cdpEvent",
-				tabId: 1,
-				method: "Page.javascriptDialogOpening",
-				params: { type: "confirm", message: "Leave?" },
-			}),
-		);
-		expect(await bridge.detachDebuggers({ owner: "owner" })).toEqual([]);
-		expect(ext.rpcs("detachAll")).toEqual([]);
-		bridge.cdpClosed(connection);
-	});
-
-	it("reattaches lazily on the next command and restores the tab's root debugger state", async () => {
-		const bridge = new RelayBridge();
-		const ext = new FakeExtSocket();
-		connect(bridge, ext, [tab({ tabId: 1 })]);
-		const lease = bridge.managed.claim(bridge.managed.discover()[0]!.id, "owner");
-		const cdp = new FakeCdpSocket();
-		const connection = bridge.cdpConnected(cdp, lease.id);
-		const sessionId = await attachPage(bridge, ext, cdp, connection, 1);
-		// Set the tab up the way a page worker does: auto-attach, a root domain
-		// enable, and Runtime (which the bridge owns and never re-receives).
-		for (const [method, params] of [
-			["Target.setAutoAttach", { autoAttach: true, waitForDebuggerOnStart: false, flatten: true }],
-			["Page.enable", undefined],
-			["Runtime.enable", undefined],
-		] as const) {
-			bridge.cdpMessage(connection, JSON.stringify({ id: ++msgSeq, sessionId, method, params }));
-			await flush();
-			ack(bridge, ext, "send", {});
-			await flush();
-		}
-		// The bridge's Runtime cycle is sequential; drain its second half.
-		ack(bridge, ext, "send", {});
-		await flush();
-		expect(ext.rpcs("send").map(request => request.method)).toEqual([
-			"Target.setAutoAttach",
-			"Page.enable",
-			"Runtime.disable",
-			"Runtime.enable",
-		]);
-		const detached = bridge.detachDebuggers({ owner: "owner" });
-		await flush();
-		ack(bridge, ext, "detachAll", { detached: [1] });
-		expect(await detached).toEqual([1]);
-		const shot = ++msgSeq;
-		bridge.cdpMessage(connection, JSON.stringify({ id: shot, sessionId, method: "Page.captureScreenshot" }));
-		await flush();
-		// The command waits behind one attach instead of failing on a detached tab.
-		expect(ext.pending("attach").map(request => request.tabId)).toEqual([1]);
-		expect(ext.pending("send")).toEqual([]);
-		ack(bridge, ext, "attach", {});
-		await flush();
-		// Root state is restored in one parallel batch before the queued command.
-		expect(
-			ext
-				.pending("send")
-				.map(request => request.method)
-				.sort(),
-		).toEqual(["Page.enable", "Runtime.enable", "Target.setAutoAttach"]);
-		ack(bridge, ext, "send", {});
-		await flush();
-		expect(ext.pending("send").map(request => request.method)).toEqual(["Page.captureScreenshot"]);
-		ack(bridge, ext, "send", { data: "pixels" });
-		await flush();
-		expect(cdp.messages.find(message => message.id === shot)).toHaveProperty("result.data", "pixels");
-		bridge.cdpClosed(connection);
-	});
-
-	it("releases every attachment when no actor is named", async () => {
-		const bridge = new RelayBridge();
-		const ext = new FakeExtSocket();
-		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
-		// Two actors, one tab each: every connection is scoped to its own lease.
-		const first = new FakeCdpSocket();
-		const second = new FakeCdpSocket();
-		const firstConn = connectCdp(bridge, first, 1, "owner-a");
-		const secondConn = connectCdp(bridge, second, 2, "owner-b");
-		await attachPage(bridge, ext, first, firstConn, 1);
-		await attachPage(bridge, ext, second, secondConn, 2);
-		const released = bridge.detachDebuggers();
-		await flush();
-		expect(ext.pending("detachAll").map(request => request.tabIds)).toEqual([[1, 2]]);
-		ack(bridge, ext, "detachAll", { detached: [1, 2] });
-		expect(await released).toEqual([1, 2]);
-		bridge.cdpClosed(firstConn);
-		bridge.cdpClosed(secondConn);
-	});
-});
-
 /**
- * The built worker, driven directly: a host `detachAll` and a worker unload
+ * The built worker, driven directly: an explicit detach and a worker unload
  * must both reach `chrome.debugger.detach`, or Chrome's debugging infobar
  * outlives the task that caused it.
  */
-it("gives Chrome its debugger back on host request and on worker unload, in the built extension", async () => {
+it("gives Chrome its debugger back on explicit detach and on worker unload, in the built extension", async () => {
 	const detached: number[] = [];
 	const attachedTabs: number[] = [];
 	let suspend: () => void = () => {};
@@ -1604,7 +1497,7 @@ it("gives Chrome its debugger back on host request and on worker unload, in the 
 	};
 	await call(1, { op: "attach", tabId: 1 });
 	await call(2, { op: "attach", tabId: 2 });
-	expect(await call(3, { op: "detachAll", tabIds: [1] })).toMatchObject({ ok: true, result: { detached: [1] } });
+	expect(await call(3, { op: "detach", tabId: 1 })).toMatchObject({ ok: true });
 	expect(detached).toEqual([1]);
 	// The remaining attachment is still tracked, so unloading releases it.
 	suspend();

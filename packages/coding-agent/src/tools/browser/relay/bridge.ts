@@ -457,53 +457,6 @@ export class RelayBridge {
 		for (const tabId of this.#tabs.keys()) if (!seen.has(tabId)) this.#onTabRemoved(tabId);
 	}
 
-	/**
-	 * Hand back the `chrome.debugger` attachments this bridge holds so Chrome
-	 * takes its "started debugging this browser" infobar down. Tab ownership,
-	 * page state and downstream sessions survive; the next command sent to one
-	 * of these tabs reattaches lazily.
-	 *
-	 * `owner` restricts the release to one actor's leased tabs: a turn ending
-	 * must not rip the debugger off a tab another actor is still driving. A tab
-	 * with an open JavaScript dialog keeps its debugger — nothing else can
-	 * answer that dialog.
-	 *
-	 * Returns the tabs Chrome confirmed detached.
-	 */
-	async detachDebuggers(opts: { owner?: string } = {}): Promise<number[]> {
-		const scope = opts.owner === undefined ? undefined : new Set(this.managed.tabsForOwner(opts.owner));
-		const tabs = [...this.#tabs.values()].filter(
-			tab =>
-				tab.attached && (scope === undefined || scope.has(tab.tabId)) && tab.dialogs.snapshot().status !== "open",
-		);
-		if (!tabs.length) return [];
-		for (const tab of tabs) {
-			tab.attached = false;
-			this.#touchTab(tab);
-			this.#resetRuntime(tab);
-			tab.reattachedAfterDetach = false;
-		}
-		const tabIds = tabs.map(tab => tab.tabId);
-		const request = this.#rpc({ op: "detachAll", tabIds });
-		// Reattachment serializes behind the release, exactly as for one tab.
-		const settled = request.then(
-			() => {},
-			() => {},
-		);
-		for (const tab of tabs) tab.detaching = settled;
-		try {
-			const result = await request;
-			const detached =
-				result && typeof result === "object" && "detached" in result && Array.isArray(result.detached)
-					? result.detached.filter((tabId): tabId is number => Number.isInteger(tabId))
-					: [];
-			this.#log("released debugger attachments", { requested: tabIds.length, detached: detached.length });
-			return detached;
-		} finally {
-			for (const tab of tabs) if (tab.detaching === settled) tab.detaching = null;
-		}
-	}
-
 	#onTabActivated(tabId: number, windowId: number): void {
 		// Even an ineligible/unknown selected tab deactivates every known peer.
 		for (const tab of this.#tabs.values()) {
@@ -770,9 +723,9 @@ export class RelayBridge {
 
 	/**
 	 * Remember root-session state Chrome throws away when it detaches a
-	 * debugger, so {@link RelayBridge.detachDebuggers} stays invisible to the
-	 * connections that set it up. `Runtime.enable` never reaches here — the
-	 * bridge owns root Runtime itself.
+	 * debugger, so the idle detach — and the reattach that follows it — stay
+	 * invisible to the connections that set it up. `Runtime.enable` never
+	 * reaches here: the bridge owns root Runtime itself.
 	 */
 	#recordRootState(tab: TabState, msg: CdpCommand): void {
 		if (msg.method === "Target.setAutoAttach") {

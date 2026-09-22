@@ -328,8 +328,8 @@ interface LeasedPage {
 }
 
 /** A claimed tab with an attached debugger and one downstream page session. */
-async function leasedPage(): Promise<LeasedPage> {
-	const bridge = new RelayBridge();
+async function leasedPage(opts: { debuggerIdleMs?: number } = {}): Promise<LeasedPage> {
+	const bridge = new RelayBridge(opts);
 	const ext = new FakeExtSocket();
 	bridge.extConnected(ext);
 	bridge.extMessage(
@@ -380,17 +380,19 @@ async function leasedPage(): Promise<LeasedPage> {
  * tab again and return the commands the bridge replayed on reattach.
  */
 async function replayedAfterDetach(commands: SentCommand[]): Promise<SentCommand[]> {
-	const { bridge, ext, connection, sessionId, nextId } = await leasedPage();
+	const { bridge, ext, connection, sessionId, nextId } = await leasedPage({ debuggerIdleMs: 1 });
 	for (const command of commands) {
 		bridge.cdpMessage(connection, JSON.stringify({ id: nextId(), sessionId, ...command }));
 		await flush();
 		ext.ack(bridge, "send");
 		await flush();
 	}
-	const detached = bridge.detachDebuggers({ owner: "owner" });
+	// The bridge's idle detach is a real `setTimeout` with no injectable clock, so
+	// this awaits the detach RPC it produces rather than a guessed duration.
+	for (let i = 0; i < 2000 && !ext.pending("detach").length; i++) await Bun.sleep(1);
+	if (!ext.pending("detach").length) throw new Error("timed out waiting for the idle detach");
+	ext.ack(bridge, "detach");
 	await flush();
-	ext.ack(bridge, "detachAll", { detached: [1] });
-	await detached;
 	bridge.cdpMessage(connection, JSON.stringify({ id: nextId(), sessionId, method: "Page.captureScreenshot" }));
 	await flush();
 	ext.ack(bridge, "attach");

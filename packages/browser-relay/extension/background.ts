@@ -196,10 +196,6 @@ async function runRpc(msg: Extract<RelayToExtMessage, { t: "rpc" }>): Promise<un
 			// before the RPC result so the relay can safely serialize reattachment.
 			post({ t: "detached", tabId: msg.tabId, reason: "target_closed", relayInitiated: true });
 			return {};
-		case "detachAll":
-			// The host ended a task or turn. Give the tabs back so Chrome takes
-			// its debugging infobar down; the relay reattaches lazily on next use.
-			return { detached: await attachments.detachAll(msg.tabIds) };
 		case "send":
 			return await chrome.debugger.sendCommand(
 				msg.sessionId ? { tabId: msg.tabId, sessionId: msg.sessionId } : { tabId: msg.tabId },

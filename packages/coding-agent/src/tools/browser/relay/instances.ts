@@ -240,19 +240,6 @@ export class BrowserInstances {
 		return this.discover(owner, browserId);
 	}
 
-	/**
-	 * Release debugger attachments across connected browsers. `owner` scopes it
-	 * to one actor's tabs; omitting it releases every attachment the relay holds
-	 * (process or daemon shutdown).
-	 */
-	async detachDebuggers(owner?: string, browserId?: string): Promise<number[]> {
-		const instances = browserId
-			? [this.select(browserId)]
-			: [...this.#instances.values()].filter(instance => instance.bridge.ready);
-		const detached = await Promise.all(instances.map(instance => instance.bridge.detachDebuggers({ owner })));
-		return detached.flat();
-	}
-
 	#tab(instance: Instance, tab: DiscoveredChromeTab): InstanceTab {
 		return { ...tab, browserId: instance.id, browserLabel: instance.label };
 	}

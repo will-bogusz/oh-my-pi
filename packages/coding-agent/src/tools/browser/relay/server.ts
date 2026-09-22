@@ -93,12 +93,6 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 							break;
 						case "discover":
 							return Response.json(await instances.refresh(optional("owner"), optional("browserId")));
-						// Turn/task end: drop the debugger attachments (and Chrome's
-						// infobar) without giving up tab ownership or page state.
-						case "detachDebuggers":
-							return Response.json({
-								detached: await instances.detachDebuggers(optional("owner"), optional("browserId")),
-							});
 						case "create":
 							return Response.json(
 								await instances.create(

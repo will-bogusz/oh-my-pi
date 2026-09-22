@@ -234,15 +234,6 @@ export class ManagedChromeTabs {
 		return this.#owners.get(tabId);
 	}
 
-	/** Physical tabs one actor currently owns; a releasing lease no longer counts. */
-	tabsForOwner(owner: string): number[] {
-		const out: number[] = [];
-		for (const lease of this.#leases.values()) {
-			if (lease.owner === owner && !lease.releasing) out.push(lease.tab.tabId);
-		}
-		return out;
-	}
-
 	async reveal(id: string, owner: string): Promise<void> {
 		await this.#operations.reveal(this.#require(id, owner).tab.tabId);
 	}

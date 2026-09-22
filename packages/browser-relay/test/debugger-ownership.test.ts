@@ -100,13 +100,13 @@ it("still releases the attachments when handing the tabs back fails", async () =
 	expect(chrome.detached).toEqual([6]);
 });
 
-it("detaches only the requested tabs and reports what Chrome confirmed", async () => {
+it("forgets a tab Chrome refused to detach, so a stale attachment cannot pin forever", async () => {
 	const chrome = chromeDebugger([2]);
-	const attachments = new DebuggerAttachments({ ...chrome });
-	for (const tabId of [1, 2, 3]) attachments.attached(tabId);
-	expect(await attachments.detachAll([1, 2, 9])).toEqual([1]);
-	// A refused detach is forgotten too: the next hello re-seeds the truth.
-	expect(attachments.tabs()).toEqual([3]);
+	const attachments = new DebuggerAttachments({ ...chrome, graceMs: 0 });
+	for (const tabId of [1, 2]) attachments.attached(tabId);
+	expect(await attachments.scheduleRelease()).toEqual([1]);
+	// The refused tab is forgotten too: the next hello re-seeds the truth.
+	expect(attachments.tabs()).toEqual([]);
 });
 
 it("forgets attachments Chrome tore down itself, so a later release cannot double-detach", async () => {
