@@ -15,7 +15,7 @@ import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import { expect, it } from "bun:test";
 import { RelayBridge, type RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
 import type { RelayRpcRequest, RelayToExtMessage } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
-import { navigateMainFrame } from "@oh-my-pi/pi-coding-agent/tools/browser/navigation";
+import { navigateMainFrame, waitForMainFrameReady } from "@oh-my-pi/pi-coding-agent/tools/browser/navigation";
 import { acquireBrowser, type BrowserHandle, releaseBrowser } from "@oh-my-pi/pi-coding-agent/tools/browser/registry";
 import { acquireTab, releaseTab, runInTab } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import { prepareBackgroundPage, withBackgroundInput } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
@@ -271,6 +271,52 @@ it(
 	},
 	15_000,
 );
+
+/**
+ * A tab acquired straight after `chrome.tabs.create({url})` still answers for
+ * its initial empty document. Observing it there is what produced the blank
+ * trees and 20 s stalls in w11, so the worker holds `ready` until the page it
+ * was created for is actually there.
+ */
+function readyStatePage(script: Array<{ url: string; readyState: string }>): { page: Page; reads: () => number } {
+	let step = 0;
+	let reads = 0;
+	// Every observation — of the URL or of the readyState — moves the script on,
+	// so a scripted step is what a poll of the real page would have seen.
+	const advance = (): { url: string; readyState: string } => script[Math.min(step++, script.length - 1)]!;
+	const page = {
+		url: () => advance().url,
+		mainFrame: () => ({
+			evaluate: async () => {
+				reads++;
+				return advance().readyState;
+			},
+		}),
+	} as unknown as Page;
+	return { page, reads: () => reads };
+}
+
+it("waits for the document a created tab is navigating to, then for it to leave loading", async () => {
+	const fake = readyStatePage([
+		{ url: "about:blank", readyState: "complete" },
+		{ url: "https://example.com/", readyState: "loading" },
+		{ url: "https://example.com/", readyState: "loading" },
+		{ url: "https://example.com/", readyState: "interactive" },
+	]);
+	expect(await waitForMainFrameReady(fake.page, { timeoutMs: 2000, expectUrl: "https://example.com/" })).toBe(
+		"interactive",
+	);
+	// The uncommitted document is never probed: its readyState is "complete"
+	// and would have looked ready. Only the two committed ones are read.
+	expect(fake.reads()).toBe(2);
+});
+
+it("does not wait on a tab that really is blank, and gives up rather than failing a slow one", async () => {
+	const blank = readyStatePage([{ url: "about:blank", readyState: "complete" }]);
+	expect(await waitForMainFrameReady(blank.page, { timeoutMs: 2000 })).toBe("complete");
+	const stuck = readyStatePage([{ url: "https://example.com/", readyState: "loading" }]);
+	expect(await waitForMainFrameReady(stuck.page, { timeoutMs: 120 })).toBeUndefined();
+});
 
 type ExtRpc<Op extends RelayRpcRequest["op"]> = { t: "rpc"; id: number } & Extract<RelayRpcRequest, { op: Op }>;
 

@@ -119,6 +119,7 @@ import {
 	pushState,
 	reloadPage,
 	traverseHistory,
+	waitForMainFrameReady,
 	watchMainFrameNavigation,
 } from "./navigation";
 import {
@@ -1076,6 +1077,23 @@ async function createTrackedHeadlessPage(browser: Browser, reportTarget: (target
 
 /** Upper bound on the wait for a page to settle before an observation snapshots it. */
 const SETTLE_BUDGET_MS = 3_000;
+/**
+ * Upper bound on the wait, before a worker reports ready, for the navigation an
+ * already-created tab was acquired mid-flight to commit and leave `loading`.
+ * Generous because it is spent once per acquisition and replaces time the first
+ * observation would otherwise spend hanging on a document Chrome is replacing.
+ */
+const INITIAL_READY_BUDGET_MS = 10_000;
+/**
+ * Floor for the CDP reads that collect a snapshot once the settle budget is
+ * spent. They are otherwise bounded by the settle deadline — a read that hangs
+ * because the document went away costs the settle budget and retries as "page
+ * changed", not the whole 20s op ceiling — but a page that never goes quiet
+ * must still get its tree collected rather than fail.
+ */
+const SNAPSHOT_READ_FLOOR_MS = 1_500;
+/** A snapshot read that outlived the settle deadline; the caller retries it as a page change. */
+class SnapshotReadTimeout extends Error {}
 /** DOM-mutation quiet window that counts as settled. */
 const SETTLE_DOM_QUIET_MS = 300;
 /** Network idle window that counts as settled. */
@@ -1445,6 +1463,13 @@ export class WorkerCore {
 					stopLoading: () => this.#stopLoading(),
 				});
 			}
+			// Nothing observes this tab until `ready`, so the wait for a pending
+			// navigation to commit costs the acquisition nothing it would not have
+			// spent hanging inside the first observation instead.
+			await waitForMainFrameReady(this.#page, {
+				timeoutMs: Math.min(payload.timeoutMs, INITIAL_READY_BUDGET_MS),
+				expectUrl: payload.mode === "attach" ? payload.expectUrl : undefined,
+			});
 			this.#transport.send({ type: "ready", info: await this.#currentReadyInfo() });
 		} catch (error) {
 			// A failed headless init leaves the worker's page orphaned in the shared
@@ -2522,6 +2547,9 @@ export class WorkerCore {
 					// while the main frame moved on, is the navigation itself: the
 					// next attempt reads the new document. A tab that no longer
 					// answers is lost, and its own error says why.
+					// A read that outlived the settle deadline is Chrome replacing
+					// the document under it; retry it as a page change.
+					if (error instanceof SnapshotReadTimeout) return null;
 					const moved = await leftDocument(page, before, signal).catch(() => undefined);
 					if (moved !== undefined && (moved || isDocumentGoneError(error))) return null;
 					throw error;
@@ -2547,14 +2575,26 @@ export class WorkerCore {
 	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string }> {
 		const session = page.mainFrame().client;
 		await settlePage(page, signal, budgetMs);
-		let snapshot = await snapshotAccessibility(page, { includeAll }, signal);
+		// A read that never answers is Chrome replacing the document under it, so
+		// it costs what is left of the settle budget and is retried as a page
+		// change — not the op ceiling, which used to be the whole 20 s.
+		const bounded = <T>(what: string, read: Promise<T>): Promise<T> =>
+			withTimeout(
+				read,
+				Math.max(deadline - Date.now(), SNAPSHOT_READ_FLOOR_MS),
+				new SnapshotReadTimeout(`${what} did not answer before the page settled`),
+			);
+		let snapshot = await bounded("accessibility tree", snapshotAccessibility(page, { includeAll }, signal));
 		while (hasBusyIndicator(snapshot)) {
 			const remaining = deadline - Date.now();
 			if (remaining <= 0) break;
 			await untilAborted(signal, () => Bun.sleep(Math.min(SETTLE_BUSY_POLL_MS, remaining)));
-			snapshot = await snapshotAccessibility(page, { includeAll }, signal);
+			snapshot = await bounded("accessibility tree", snapshotAccessibility(page, { includeAll }, signal));
 		}
-		const [layout, entry] = await Promise.all([pageLayout(session, signal), currentEntry(session, signal)]);
+		const [layout, entry] = await Promise.all([
+			bounded("page layout", pageLayout(session, signal)),
+			bounded("navigation entry", currentEntry(session, signal)),
+		]);
 		return { snapshot, layout, url: entry.url, title: entry.title };
 	}
 

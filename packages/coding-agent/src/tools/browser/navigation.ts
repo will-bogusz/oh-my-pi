@@ -162,6 +162,50 @@ export function watchMainFrameNavigation(page: Page): MainFrameNavigationWatch {
 	};
 }
 
+/** Documents a tab holds before Chrome commits the navigation it was created for. */
+const INITIAL_EMPTY_DOCUMENT = /^(about:blank)?$/;
+
+export interface MainFrameReadyOptions {
+	/** Upper bound on the whole wait; expiring is not an error. */
+	timeoutMs: number;
+	/**
+	 * URL Chrome reported for this tab when the host acquired it. A tab created
+	 * with a URL answers for its initial empty document until the navigation
+	 * commits, so while the main frame still holds that document a navigation
+	 * to `expectUrl` counts as pending.
+	 */
+	expectUrl?: string;
+	signal?: AbortSignal;
+}
+
+/**
+ * Wait until the main frame holds a committed document that is past `loading`.
+ *
+ * A tab acquired straight after `chrome.tabs.create({url})` has not committed
+ * anything yet: `Page.getNavigationHistory` reports an empty URL and the
+ * accessibility tree is empty, so an observation taken now describes a page
+ * nobody asked for — and the CDP reads that collect it are the ones that hang
+ * while Chrome swaps documents under them.
+ *
+ * Best effort by design: a slow page still gets observed, just later. Returns
+ * the readyState it settled on, or `undefined` when the budget expired first.
+ */
+export async function waitForMainFrameReady(
+	page: Page,
+	opts: MainFrameReadyOptions,
+): Promise<string | undefined> {
+	const deadline = Date.now() + opts.timeoutMs;
+	const expectsNavigation = opts.expectUrl !== undefined && !INITIAL_EMPTY_DOCUMENT.test(opts.expectUrl);
+	for (;;) {
+		throwIfAborted(opts.signal);
+		const pending = expectsNavigation && INITIAL_EMPTY_DOCUMENT.test(page.url());
+		const state = pending ? undefined : await readReadyState(page);
+		if (state !== undefined && state !== "loading") return state;
+		if (Date.now() >= deadline) return undefined;
+		await untilAborted(opts.signal, () => sleep(Math.min(READY_POLL_MS, Math.max(deadline - Date.now(), 1))));
+	}
+}
+
 async function waitForMainFramePhase(
 	page: Page,
 	phase: "load" | "domcontentloaded",

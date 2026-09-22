@@ -12,7 +12,7 @@ import { chromiumAvailable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
-it("reports missing inspection channels and displays only the errors, never the state blob", async () => {
+it("skips the acquisition capture when the tree failed, and displays only the errors", async () => {
 	const calls: string[] = [];
 	const displays: unknown[] = [];
 	const context = createContext({
@@ -32,20 +32,32 @@ it("reports missing inspection channels and displays only the errors, never the 
 	expect(result.initialObservation).toBeUndefined();
 	expect(result.initialScreenshot).toBeUndefined();
 	expect(result.inspectionError).toContain("AX unavailable");
-	expect(result.screenshotError).toContain("Capture unavailable");
-	expect(calls).toEqual(["controls", "capture"]);
-	expect(displays).toEqual([{ inspectionError: result.inspectionError, screenshotError: result.screenshotError }]);
+	// A page the tree could not be read from is not worth photographing: the
+	// capture would spend its own full deadline discovering the same thing.
+	expect(calls).toEqual(["controls"]);
+	expect(result.screenshotError).toBeUndefined();
+	expect(displays).toEqual([{ inspectionError: result.inspectionError }]);
 	calls.length = 0;
 	displays.length = 0;
 	const textOnly = await runInContext(`(${initialObservationCode})({tab}, {screenshot: false})`, context);
 	expect(calls).toEqual(["controls"]);
 	expect(textOnly.screenshotError).toBeUndefined();
+	// A readable tree is photographed, and a capture failure is still reported.
+	context.tab.observe = async () => {
+		calls.push("controls");
+		return { tree: 'url: x\ne1 button "Go"', elements: [] };
+	};
+	calls.length = 0;
+	displays.length = 0;
+	const shotFailed = await runInContext(`(${initialObservationCode})({tab}, {})`, context);
+	expect(calls).toEqual(["controls", "capture"]);
+	expect(shotFailed.screenshotError).toContain("Capture unavailable");
 	// A clean acquisition adds nothing: observe() printed the tree already.
-	context.tab.observe = async () => ({ tree: "url: x\ne1 button \"Go\"", elements: [] });
 	context.tab.screenshot = async () => "/tmp/shot.webp";
 	displays.length = 0;
 	const clean = await runInContext(`(${initialObservationCode})({tab}, {})`, context);
 	expect(clean.initialObservation.tree).toContain('e1 button "Go"');
+	expect(clean.initialScreenshot).toBe("/tmp/shot.webp");
 	expect(displays).toEqual([]);
 });
 
