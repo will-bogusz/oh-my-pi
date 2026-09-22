@@ -12,6 +12,7 @@ import type { InteractiveModeContext } from "../modes/types";
 import type { AgentSession } from "../session/agent-session";
 import { USER_INTERRUPT_LABEL } from "../session/messages";
 import { commandConsumed, errorMessage, usage } from "./helpers/parse";
+import { computerUseStatus } from "./helpers/computer-status";
 import { handleSecurityCommand } from "./helpers/security";
 import type { ParsedSlashCommand, SlashCommandSpec, TuiSlashCommandRuntime } from "./types";
 
@@ -100,22 +101,6 @@ function applyExtendedContextCommand(settings: Settings, args: string): string |
 	return undefined;
 }
 
-/** Detailed, session-effective `/computer status` diagnostics. */
-function formatComputerUseStatus(session: AgentSession): string {
-	const enabled = session.settings.get("computer.enabled");
-	const active = session.getEvalPreludes().some(definition => definition.name === "computer");
-	const configured = {
-		display: session.settings.get("computer.display"),
-		maxWidth: session.settings.get("computer.maxWidth"),
-		maxHeight: session.settings.get("computer.maxHeight"),
-	};
-	return [
-		`Computer use: ${enabled ? "enabled" : "disabled"}`,
-		`prelude: ${active ? "active" : "inactive"}`,
-		`configured: display=${configured.display}, maxWidth=${configured.maxWidth}, maxHeight=${configured.maxHeight}`,
-	].join(" · ");
-}
-
 /**
  * Apply a session-scoped computer-use toggle and rebuild the current prompt.
  * The override is never persisted to settings.json.
@@ -139,8 +124,9 @@ async function applyComputerUseToggle(session: AgentSession, enable: boolean): P
 		if (enable) session.settings.override("computer.enabled", previous);
 		throw error;
 	}
+	// Enabling is when a missing grant matters: say so now, not at the first failed call.
 	return enable
-		? `Computer use enabled for this session. ${formatComputerUseStatus(session)}`
+		? `Computer use enabled for this session.\n${await computerUseStatus(session)}`
 		: "Computer use disabled for this session.";
 }
 
@@ -591,7 +577,7 @@ export const BUILTIN_MODE_SLASH_COMMANDS: ReadonlyArray<SlashCommandSpec> = [
 		handle: async (command, runtime) => {
 			const arg = command.args.trim().toLowerCase();
 			if (arg === "status") {
-				await runtime.output(formatComputerUseStatus(runtime.session));
+				await runtime.output(await computerUseStatus(runtime.session));
 				return commandConsumed();
 			}
 			if (!arg || arg === "toggle" || arg === "on" || arg === "off") {
@@ -604,8 +590,9 @@ export const BUILTIN_MODE_SLASH_COMMANDS: ReadonlyArray<SlashCommandSpec> = [
 		handleTui: async (command, runtime) => {
 			const arg = command.args.trim().toLowerCase();
 			if (arg === "status") {
-				runtime.ctx.showStatus(formatComputerUseStatus(runtime.ctx.session));
 				runtime.ctx.editor.setText("");
+				runtime.ctx.showStatus("Checking computer use…");
+				runtime.ctx.showStatus(await computerUseStatus(runtime.ctx.session));
 				return;
 			}
 			if (!arg || arg === "toggle" || arg === "on" || arg === "off") {

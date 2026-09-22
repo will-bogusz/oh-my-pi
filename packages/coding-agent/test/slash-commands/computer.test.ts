@@ -42,15 +42,13 @@ function acpRuntime(options?: { enabled?: boolean; available?: boolean }) {
 			getEvalKernelOwnerId: () => ownerId,
 			settings: { get, override, set },
 			getEvalPreludes,
+			getEvalToolSession: () => undefined,
 			refreshBaseSystemPrompt,
 		},
 		output,
 	};
 	return { ownerId, getEvalPreludes, override, output, refreshBaseSystemPrompt, runtime, set, store, abort };
 }
-
-const enabledStatus =
-	"Computer use: enabled · prelude: active · configured: display=all, maxWidth=1920, maxHeight=1200";
 
 describe("/computer slash command", () => {
 	it("off disables admission immediately but reports success only after resource release", async () => {
@@ -111,7 +109,10 @@ describe("/computer slash command", () => {
 		expect(h.refreshBaseSystemPrompt).toHaveBeenCalledTimes(1);
 		expect(h.set).not.toHaveBeenCalled();
 		expect(h.abort).not.toHaveBeenCalled();
-		expect(h.output).toHaveBeenCalledWith(`Computer use enabled for this session. ${enabledStatus}`);
+		const [reported] = h.output.mock.calls[0] as [string];
+		expect(reported.startsWith("Computer use enabled for this session.")).toBe(true);
+		expect(reported).toContain("Computer use: enabled");
+		expect(reported).toContain("Permissions:");
 	});
 
 	it("toggles an enabled session off", async () => {
@@ -137,7 +138,9 @@ describe("/computer slash command", () => {
 		await Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer status", h.runtime]);
 		expect(h.override).not.toHaveBeenCalled();
 		expect(h.refreshBaseSystemPrompt).not.toHaveBeenCalled();
-		expect(h.output).toHaveBeenCalledWith(enabledStatus);
+		const [reported] = h.output.mock.calls[0] as [string];
+		expect(reported).toContain("Computer use: enabled");
+		expect(reported).toContain("prelude: active");
 	});
 
 	it("reports configured values", async () => {
@@ -146,9 +149,10 @@ describe("/computer slash command", () => {
 		h.store["computer.maxWidth"] = 1600;
 		h.store["computer.maxHeight"] = 900;
 		await Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer status", h.runtime]);
-		expect(h.output).toHaveBeenCalledWith(
-			"Computer use: enabled · prelude: active · configured: display=display-2, maxWidth=1600, maxHeight=900",
-		);
+		const [reported] = h.output.mock.calls[0] as [string];
+		expect(reported).toContain("display=display-2");
+		expect(reported).toContain("maxWidth=1600");
+		expect(reported).toContain("maxHeight=900");
 	});
 
 	it("rolls back when the session has no computer prelude", async () => {

@@ -208,7 +208,7 @@ import {
 } from "@oh-my-pi/pi-tui/thinking";
 import { isLowSignalTitleInput } from "../tiny/text";
 import { shutdownTinyTitleClient } from "../tiny/title-client";
-import type { ImageAttachmentEntry } from "../tools";
+import type { ImageAttachmentEntry, ToolSession } from "../tools";
 import { resolveApproval } from "../tools/approval";
 import { type AskToolDetails } from "@oh-my-pi/pi-tui/tools/ask";
 import { type AskToolInput, recoverAskQuestions } from "../tools/ask";
@@ -755,6 +755,7 @@ export class AgentSession {
 	// Extension system
 	#extensionRunner: ExtensionRunner | undefined = undefined;
 	#getEvalPreludes: (() => readonly EvalPreludeDefinition[]) | undefined;
+	#evalToolSession: ToolSession | undefined;
 	#reconcileBrowserMcpFilter: AgentSessionConfig["reconcileBrowserMcpFilter"];
 	/**
 	 * Backs `ctx.setInterval`/`setTimeout`/`clearTimer` for the runner-less
@@ -1456,6 +1457,7 @@ export class AgentSession {
 		this.#slashCommands = config.slashCommands ?? [];
 		this.#extensionRunner = config.extensionRunner;
 		this.#getEvalPreludes = config.getEvalPreludes;
+		this.#evalToolSession = config.evalToolSession;
 		this.#reconcileBrowserMcpFilter = config.reconcileBrowserMcpFilter;
 		this.#customCommands = config.customCommands ?? [];
 		const recoveryHost: TurnRecoveryHost = {
@@ -5730,6 +5732,11 @@ export class AgentSession {
 	/** Current enabled eval prelude definitions. */
 	getEvalPreludes(): readonly EvalPreludeDefinition[] {
 		return this.#getEvalPreludes?.() ?? [];
+	}
+
+	/** Tool session eval preludes run against; user commands invoke a prelude with it. */
+	getEvalToolSession(): ToolSession | undefined {
+		return this.#evalToolSession;
 	}
 
 	/** Applies the external-thinking setting to the private scratchpad tool immediately. */

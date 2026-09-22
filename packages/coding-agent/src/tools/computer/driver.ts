@@ -86,6 +86,52 @@ export class CuaDriverExitedError extends ToolError {
 	}
 }
 
+/** Where the host's driver executable and its `manifest.json` live once installed. */
+function installLocation(): { directory: string; executable: string; manifest: string } {
+	const directory = path.join(getNativesDir(), "cua-driver");
+	return {
+		directory,
+		executable: path.join(directory, "cua-driver"),
+		manifest: path.join(directory, "manifest.json"),
+	};
+}
+
+/** The driver installed for this host, as the manifest beside it names it; fields it lacks are unknown. */
+export interface InstalledCuaDriver {
+	path: string;
+	version?: string;
+	commit?: string;
+	sha256?: string;
+}
+
+/**
+ * The driver installed for this host, without installing or downloading
+ * anything; `undefined` when none is installed yet.
+ */
+export async function installedCuaDriver(): Promise<InstalledCuaDriver | undefined> {
+	const location = installLocation();
+	try {
+		await fs.access(location.executable, fs.constants.X_OK);
+	} catch (error) {
+		if (isEnoent(error)) return undefined;
+		throw error;
+	}
+	let manifest: Record<string, unknown> = {};
+	try {
+		const parsed: unknown = await Bun.file(location.manifest).json();
+		if (parsed && typeof parsed === "object") manifest = parsed as Record<string, unknown>;
+	} catch (error) {
+		if (!isEnoent(error) && !(error instanceof SyntaxError)) throw error;
+	}
+	const text = (value: unknown) => (typeof value === "string" ? value : undefined);
+	return {
+		path: location.executable,
+		version: text(manifest.version),
+		commit: text(manifest.commit),
+		sha256: text(manifest.sha256),
+	};
+}
+
 /**
  * The installed executable for this host, copied into the natives cache the
  * first time (or after a driver update) from the embedded copy in a compiled
@@ -101,9 +147,7 @@ export async function installCuaDriver(platform: string = DRIVER_PLATFORM): Prom
 		throw new ToolError(
 			`Native computer control is unavailable on ${platform}: no cua-driver is vendored for this platform.`,
 		);
-	const directory = path.join(getNativesDir(), "cua-driver");
-	const installed = path.join(directory, "cua-driver");
-	const manifestPath = path.join(directory, "manifest.json");
+	const { directory, executable: installed, manifest: manifestPath } = installLocation();
 	try {
 		const current: unknown = await Bun.file(manifestPath).json();
 		if (current && typeof current === "object" && "sha256" in current && current.sha256 === vendored.sha256) {
