@@ -1,40 +1,40 @@
 Control real host application windows from JavaScript or Python Eval with `computer` (no DOM — that is `browser`). Safety rules: system prompt.
 
 <instruction>
-Entry points: `await computer.window(selector)` acquires ONE window — `selector` is an id or `{ app?, title?, id?, pid? }`, and `app` is either the app's display name or its bundle id (`com.vendor.App`) — and prints its tree; `computer.windows(filter)` lists without acquiring; `computer.run(fnOrCode)` runs a multi-step function with `{ desktop, wait, assert }` (no closures; full host access, not a sandbox). Everything else lives on the handle you get back and is listed with it; `computer.help()` prints the full typed API when a signature matters. Python: same names, keyword options.
+Entry: `await computer.window(selector)` acquires ONE window and prints its tree. `selector` is an id or `{ app?, title?, id?, pid? }`; `app` is a display name or a bundle id (`com.vendor.App`), and an app that is not running is launched. `computer.windows(filter)` lists windows without acquiring; `computer.help()` prints the typed API. The handle's verbs print with your first acquisition.
 
-Model
-- A window is acquired, never focused. An `{ app }` that is not running is launched and acquired in the same call; several matches yield its front document window and name the rest. `computer.window({ kind: "desktop" })` is the Desktop itself — its icons, read-only — for acting on what the user keeps there, not for checking whether a file was written.
-- An observation is the accessibility tree at one instant. Its refs (`n7`) belong to that observation and that window; only your next `observe` or `find` retires them — and `verify` and `setFrame`, which read no new tree to carry them into. When a refusal re-reads the window to answer itself, the tree it prints carries new refs and yours keep working wherever that tree still holds the row they named; the rest throw `StaleRef`, which names the ref — re-observe it, never guess. The tree is the window's controls: text the app draws with no action on it — a version string, a status line, a heading — is not a row at all, so ask for it with `observe({ query })`, which searches that text as well as the controls, or read it off a screenshot. A query is a case-insensitive substring taken literally; pass an array to match any of several.
-- One observation pays for every action it already justifies: batch them in one cell — `win.ref(a).click(); win.ref(b).setValue("x"); await win.observe()` — rather than spending a cell per dispatch. A cell of its own is right when the next action depends on something no reply has shown yet: a list the app fills asynchronously, a pane that redraws after the write, rows a server still owes.
-- A screenshot is one window's frame. Pixels mean something only in the latest frame of that same window; AX `bounds` are desktop-global. Coordinates, modified or counted clicks and drag ends are pixel actions and need a current frame — `observe()` is tree-only unless you ask for one.
-- Delivery is background by default: accessibility routes that touch nothing on screen. Foreground briefly makes the window key and exists for what only real input can do — drag, menus, pixel targets, keys at a window that is not key. The runtime escalates only where the reply says so: once the driver escalates a window's keystrokes, later keystrokes on that window take the foreground route until you pass `delivery` yourself.
+Observation
+- Rows read `n5 button "Add" = "value" (description) [disabled, selected] actions=open`, indented by depth; `text "…"` rows are text the window shows with no action on it. Any row takes `click()`; `actions=` names only what a row offers beyond press, show_menu, confirm, cancel and pick, which `el.perform(name)` reaches too.
+- Refs belong to the observation that printed them: your next `observe()` of that window retires them all and prints fresh ones. Never guess a ref.
+- `observe()` prints the whole window; `observe({ query })` keeps the rows matching a case-insensitive substring (an array matches any of several) with their ancestors; `{ screenshot: true }` adds a frame; `{ menubar: true }` adds the menu bar.
+- The header names the window, and says `keys: foreground only` when background keystrokes cannot reach it. Sheets, and windows the app opens while you work, print under their opener and take its refs.
+
+Acting
+- Batch what one observation justifies in one cell, then read back in the same cell: `await win.ref("n5").click(); await win.ref("n7").setValue("x"); await win.observe();`
+- `click` presses a control and selects a list row (a row's default action is `perform("press")`); `setValue` replaces a field's value; `type(text, { caret: { after: "…" } })` or `{ caret: "end" }` adds to what a field holds; `press("cmd+s")` sends a chord; `win.menu(["File", "Save…"], { delivery: "foreground" })` drives the menu bar.
+- Coordinates are window points of that window's latest screenshot; pixel targets, modified or counted clicks and drag ends need a current frame.
+- Delivery is background by default. Pass `{ delivery: "foreground" }` where the header or a reply names it, and for pixels, menus and drags; it briefly makes the window key.
 
 Evidence
-- A result states what it can prove: `confirmed` (state read back), `unverifiable` (delivered, unproven), `suspected_noop` (positive reason to think nothing happened), or a typed refusal (nothing dispatched; it names its route). Dispatch is not proof — read the postcondition back, and inspect a failed reply, which may still have acted.
-- The reply already carries its verdict and evidence: act on them. A read-back you already know you need goes in the same cell as the action — chain the verifying `observe()`/`find()` after it. A separate read is worth its cell when the state you need appears only after the reply was composed; it is not worth one to re-confirm what the reply proved.
-- Unverified is not failed. Re-observe freely — a read changes nothing on the screen — but never re-fire a mutation that reported delivery: the second one lands too. A refusal that names a route is the opposite case — take that route, composed from the state the reply carries, not a blind retry of the rung that refused.
-- `setValue` changes the accessibility value, never disk. Save through the app, then confirm the file itself with `read` — its path for the contents, its directory to see that it arrived — never by hunting for it in a window.
-- To add to text a control already holds, place the caret by content and type: `el.type("\n<addition>", { caret: { after: "<text the field already shows>" } })` or `{ caret: "end" }`. A key chord such as cmd+End is not delivered to a window that is not key, and rewriting the whole value with `setValue` is the slow shape.
-- A click on a list row selects it rather than pressing it; the row's own default action is `el.perform("press")`.
-- Results carry their own next step — a partial tree, passed-over windows, a window an action opened, a nested sheet, a hidden menu bar, a refusal's route. Read them before choosing what to do.
+- A cell's reply leads with one mark per call — `✓` proven or read, `?` delivered but unproven, `✗` nothing landed — and each outcome has its own answer:
+  - `✗` refused or not dispatched: nothing happened; take the route it names, or another allowed one.
+  - `?` dispatched, effect unproven: observe before anything else and never send it again — a second send lands too. Act again only if what you read shows it took no effect.
+  - `✓` a read-back proves only what it read: a field showing your text is not the app acting on it.
+- `setValue` never reaches disk: save through the app, then check the file itself with `read`.
 
 Boundaries
-- Never act on a dialog you did not open — password, unlock, permission, crash alert: observe it, tell the user what it asks, wait.{{#if linux}} Nothing is refused for you here and `interruptedBy` is never set.{{else}} An `auth`, `permission` or `lock` window (password/TCC prompt, lock screen, crash alert) refuses every mutation with `Interrupted:` and `interruptedBy`. One exception: a crash alert for an app you launched that exited — press "Ignore", do not relaunch, tell the user.{{/if}}
-- Never mix coordinate spaces, never guess a ref, never reach for foreground or `reveal()` to observe, and never re-run a refused rung unchanged. When a reply names a window the app drew in front of yours, it also says what that window is: acquire the id where it tells you to acquire it, and where the new surface has no accessibility window of its own — a popover, an inline editor, a panel drawn inside another window — observe the parent it names instead, never that id.
-- `computer.release()` (automatic at turn settle) ends the driver child: later calls reacquire; a cancelled call reports what landed as `partial`. `computer.close()` ends computer use for the session.
+- Never act on a dialog you did not open — password, unlock, permission, crash alert: observe it, tell the user what it asks, wait.{{#if linux}} Nothing is refused for you here and `interruptedBy` is never set.{{else}} An `auth`, `permission` or `lock` window (password/TCC prompt, lock screen, crash alert) refuses every mutation with `Interrupted:`. One exception: a crash alert for an app you launched that exited — press "Ignore", do not relaunch, tell the user.{{/if}}
+- Never mix coordinate spaces.
 
 {{#if linux}}
 Linux
 - The tree is the app's AT-SPI tree: GTK and Qt publish it, Chromium and Electron need `--force-renderer-accessibility`, an app publishing none yields one frame element — work from the screenshot.
-- Background is the AT-SPI route and reaches GTK, Qt and Chromium without touching focus; synthetic keys and pixels need foreground, which raises the target and wants a running window manager (`foreground_unavailable` otherwise). Foreground is first-class here, not a last resort: a `background_unavailable` refusal means nothing was dispatched — retry with `{ delivery: "foreground" }`.
-- `effect: "unverifiable"` is the ordinary shape of success, never a reason to repeat. `computer.displays()` and desktop-root input are unsupported. The driver child owns the selection it wrote: paste before releasing.
+- Background is the AT-SPI route and reaches GTK, Qt and Chromium without touching focus; synthetic keys and pixels need foreground, which raises the target and wants a running window manager (`foreground_unavailable` otherwise). A `background_unavailable` refusal sent nothing — retry with `{ delivery: "foreground" }`.
+- `?` is the ordinary shape of success here, never a reason to repeat. `computer.displays()` and desktop-root input are unsupported. The driver child owns the selection it wrote: paste before releasing.
 - Chords: `"ctrl+shift+p"` with `shift|ctrl|alt|super|meta`; an unknown modifier name is not a key and may type its base key alone.
 {{else}}
 macOS
-- A control that acts on a real pointer event rather than on the accessibility press ignores a background press and reports `suspected_noop`; this is what a native window hosting web content usually does. Screenshot, then click its pixel centre with `delivery: "foreground"`. Check `backgroundInput` before sending keys, and on such a surface click the editor first: it takes keystrokes only once a pointer has put the caret in it.
-- A write that is not proven names what to do about it; a proven one says nothing. Do what the sentence says — it is composed from what the driver read back, and it is named again by the next observation or capture of that window.
+- A control that acts on a real pointer event ignores a background press and reports `suspected_noop`: observe first; if nothing changed, screenshot and click its pixel centre with `{ delivery: "foreground" }`. On such a surface click the editor before typing: it takes keys only once a pointer has put the caret in it.
 - Chords: `"cmd+shift+p"` with `cmd|shift|option|ctrl|fn`; an unknown modifier name is not a key and may type its base key alone.
-- A chord at a window that is not key, when it is the key equivalent of a menu item the app keeps disabled until then, is delivered as that menu command instead: the reply leads with `Delivered as menu command <path> (app fronted: yes/no)` — the window was made key for it and the prior frontmost restored. A change that did not survive that restore is named with the control to address instead; the foreground rung has nothing more to offer there.
 {{/if}}
 </instruction>

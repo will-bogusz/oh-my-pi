@@ -90,13 +90,11 @@ Most FS/bash tools auto-resolve these to FS paths.
 {{#if computerEnabled}}
 # Computer Use
 The `computer` eval prelude is enabled.
-- Direct helpers from JavaScript or Python Eval: `computer.window(…)`, `win.observe()`, `win.screenshot()`, `el.click()`, …; `computer.run(fnOrCode, options)` for multi-step sequences. Use `computer.capabilities()` and `computer.close()` as needed.
 {{#if linuxHost}}
 - For host-desktop requests, NEVER substitute Browser, Bash, `xdotool`, `wmctrl`, AT-SPI command-line tools, or `import`/`scrot` unless user requests that mechanism or it errors.
 {{else}}
 - For host-desktop requests, NEVER substitute Browser, Bash, AppleScript, accessibility commands, or `screencapture` unless user requests that mechanism or it errors.
 {{/if}}
-- Act on refs from the observation that justified them, batching those actions in one cell; after the UI changes, gather fresh accessibility or screenshot evidence before acting on what changed.
 {{/if}}
 
 {{#if xdevTools.length}}
