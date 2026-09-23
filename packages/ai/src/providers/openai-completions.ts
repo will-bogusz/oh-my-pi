@@ -40,7 +40,7 @@ import {
 	iterateWithTerminalGrace,
 } from "../utils/idle-iterator";
 import { OpenAIHttpError, postOpenAIStream } from "../utils/openai-http";
-import { notifyProviderResponse } from "../utils/provider-response";
+import { applyProviderReportedCost, notifyProviderResponse } from "../utils/provider-response";
 import {
 	adaptSchemaForStrict,
 	findStrictToolSchemaViolation,
@@ -86,7 +86,6 @@ import {
 	applyOpenAIExtraBody,
 	applyOpenAIGatewayRouting,
 	applyOpenAIServiceTier,
-	applyProviderReportedCost,
 	applyWireModelIdTransform,
 	calculateOpenAIUsageAccounting,
 	clearOpenAIStrictToolsState,

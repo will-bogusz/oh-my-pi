@@ -26,7 +26,7 @@ const JEV_PREVIEW = {
 const LOCAL = getBundledModel("local", "qwen2.5-1.5b");
 const ONLINE = getBundledModel("anthropic", "claude-sonnet-4-6");
 const JEV = getBundledModel("typesafe", "jev-latest");
-const JEV_VIA_OPENROUTER = getBundledModel("openrouter", "typesafe/jev-1.13");
+const JEV_VIA_OPENROUTER = getBundledModel("openrouter", "~typesafe/jev-latest");
 if (!LOCAL || !ONLINE || !JEV || !JEV_VIA_OPENROUTER) throw new Error("Expected bundled judge models");
 
 const ONLINE_BACKUP = { ...ONLINE, id: "claude-sonnet-judge-backup", name: "Judge Backup" } as Model<Api>;
@@ -192,7 +192,7 @@ describe("ChainJudge", () => {
 		expect(typesafeCalls).toHaveBeenCalledTimes(1);
 	});
 
-	it("reaches Jev through OpenRouter's Decisions API when only an OpenRouter key is stored", async () => {
+	it("reaches Jev through OpenRouter's System One API when only an OpenRouter key is stored", async () => {
 		// No judge role configured: the built-in chain is TypeSafe, then Jev via
 		// OpenRouter, then the chat roles. Without a TypeSafe key the native
 		// candidate is skipped, not attempted.
@@ -207,9 +207,9 @@ describe("ChainJudge", () => {
 				urls.push(String(url));
 				expect(new Headers(init?.headers).get("authorization")).toBe("Bearer or-key");
 				const body = JSON.parse(String(init?.body)) as { model: string };
-				expect(body.model).toBe("typesafe/jev-1.13");
+				expect(body.model).toBe("~typesafe/jev-latest");
 				return Response.json({
-					model: "typesafe/jev-1.13",
+					model: "typesafe/jev-1.13-20260917",
 					answers: {
 						level: { type: "choice", choice: "low", probabilities: { low: 0.9, high: 0.1 }, confidence: 0.8 },
 					},
@@ -227,10 +227,10 @@ describe("ChainJudge", () => {
 
 		expect(result.answers.level.choice).toBe("low");
 		expect(result.provider).toBe("openrouter");
-		expect(urls).toEqual(["https://openrouter.ai/api/alpha/decisions"]);
+		expect(urls).toEqual(["https://openrouter.ai/api/v1/systemone"]);
 		expect(online).not.toHaveBeenCalled();
 		expect(onUsage).toHaveBeenCalledWith(
-			expect.objectContaining({ role: "typesafe", provider: "openrouter", model: "typesafe/jev-1.13" }),
+			expect.objectContaining({ role: "typesafe", provider: "openrouter", model: "~typesafe/jev-latest" }),
 		);
 	});
 
@@ -259,6 +259,7 @@ describe("ChainJudge", () => {
 		expect(result.provider).toBe("typesafe");
 		expect(urls).toEqual(["https://api.typesafe.ai/v1/systemone"]);
 	});
+
 	it("propagates caller abort without attempting a fallback", async () => {
 		const settings = Settings.isolated({
 			modelRoles: { judge: `${ONLINE.provider}/${ONLINE.id}` },

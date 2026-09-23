@@ -90,6 +90,7 @@ import {
 } from "../utils/harmony-leak";
 import type { CapturedHttpErrorResponse } from "../utils/http-inspector";
 import { getOpenRouterHeaders } from "../utils/openrouter-headers";
+import { applyProviderReportedCost } from "../utils/provider-response";
 import { isForcedToolChoice } from "../utils/tool-choice";
 import {
 	buildCopilotDynamicHeaders,
@@ -400,34 +401,6 @@ export function applyOpenAIResponsesServiceTierCost(
 	usage.cost.cacheRead *= multiplier;
 	usage.cost.cacheWrite *= multiplier;
 	usage.cost.total = usage.cost.input + usage.cost.output + usage.cost.cacheRead + usage.cost.cacheWrite;
-}
-
-/** Reconcile token-price estimates with a gateway's authoritative account charge. */
-export function applyProviderReportedCost(model: Pick<Model, "provider">, usage: Usage, rawUsage: unknown): void {
-	if (
-		(model.provider !== "openrouter" && model.provider !== "cline-pass") ||
-		typeof rawUsage !== "object" ||
-		rawUsage === null
-	)
-		return;
-	const reportedCost = Reflect.get(rawUsage, "cost");
-	if (typeof reportedCost !== "number" || !Number.isFinite(reportedCost) || reportedCost < 0) return;
-
-	const estimatedCost = usage.cost.total;
-	if (Number.isFinite(estimatedCost) && estimatedCost > 0) {
-		const scale = reportedCost / estimatedCost;
-		usage.cost.input *= scale;
-		usage.cost.output *= scale;
-		usage.cost.cacheRead *= scale;
-		usage.cost.cacheWrite *= scale;
-	} else {
-		// Keep legacy component-only aggregators additive when catalog pricing is unavailable.
-		usage.cost.input = reportedCost;
-		usage.cost.output = 0;
-		usage.cost.cacheRead = 0;
-		usage.cost.cacheWrite = 0;
-	}
-	usage.cost.total = reportedCost;
 }
 
 export interface OpenAIUsageAccountingInput {

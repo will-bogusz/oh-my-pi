@@ -9,10 +9,11 @@ provider "openrouter" {
 	}
 	web-search "openrouter"
 
-	// TypeSafe's System One wire re-exposed by OpenRouter's Decisions API, so an
-	// OpenRouter key alone reaches Jev for the judge role.
-	seed api="openrouter-decisions" base-url="https://openrouter.ai/api" bundle="always" {
-		model "typesafe/jev-1.13" name="TypeSafe jev via OpenRouter" {
+	// TypeSafe's System One wire, served by OpenRouter at the same `/v1/systemone`
+	// path, so an OpenRouter key alone reaches Jev for the judge role.
+	// `~typesafe/jev-latest` is OpenRouter's alias for the newest Jev release.
+	seed api="typesafe" base-url="https://openrouter.ai/api" bundle="always" {
+		model "~typesafe/jev-latest" name="TypeSafe jev via OpenRouter" {
 			reasoning #false
 			input "text"
 			cost input=0 output=0 cache-read=0 cache-write=0
@@ -80,7 +81,7 @@ provider "openrouter" {
 	models "google/gemini-3-pro-image" {
 		kind "image"
 	}
-	models "typesafe/jev-1.13" {
+	models "~typesafe/jev-latest" {
 		kind "judge"
 	}
 	// residue: taxonomy ranks and exact globs do not isolate these models.

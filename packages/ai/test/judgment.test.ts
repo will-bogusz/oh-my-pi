@@ -2,7 +2,6 @@ import { describe, expect, it } from "bun:test";
 import {
 	type ApiKeyResolveContext,
 	JudgmentParseError,
-	OPENROUTER_DECISIONS_API,
 	parseChoiceReply,
 	parseNoulReply,
 	parseScoreReply,
@@ -228,37 +227,23 @@ describe("TypeSafeJudge", () => {
 		expect(result.usage.totalTokens).toBe(6);
 	});
 
-	it("posts the same wire to OpenRouter's Decisions API and reports that route", async () => {
-		const calls: { url: string; init: RequestInit | undefined }[] = [];
+	it("reconciles usage to the cost OpenRouter reports billing the key", async () => {
 		const judge = new TypeSafeJudge({
 			apiKey: "or-key",
-			api: OPENROUTER_DECISIONS_API,
+			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api",
-			model: "typesafe/jev-1.13",
-			fetch: async (url, init) => {
-				calls.push({ url: String(url), init });
-				return Response.json({
-					model: "typesafe/jev-1.13",
+			model: "~typesafe/jev-latest",
+			fetch: async () =>
+				Response.json({
+					model: "typesafe/jev-1.13-20260917",
 					answers: { urgent: { type: "noul", noul: 0.88 } },
 					usage: { input_tokens: 7, output_tokens: 2, cost: 0.000014 },
-				});
-			},
+				}),
 		});
 
 		const result = await judge.judge(request);
 
-		expect(judge.label).toBe("openrouter/typesafe/jev-1.13");
-		expect(calls).toHaveLength(1);
-		expect(calls[0].url).toBe("https://openrouter.ai/api/alpha/decisions");
-		expect(new Headers(calls[0].init?.headers).get("authorization")).toBe("Bearer or-key");
-		expect(JSON.parse(String(calls[0].init?.body))).toEqual({
-			state: request.state,
-			model: "typesafe/jev-1.13",
-			questions: request.questions,
-		});
-		expect(result.api).toBe(OPENROUTER_DECISIONS_API);
 		expect(result.provider).toBe("openrouter");
-		expect(result.answers.urgent.noul).toBe(0.88);
 		expect(result.usage.input).toBe(7);
 		expect(result.usage.cost.total).toBe(0.000014);
 	});
