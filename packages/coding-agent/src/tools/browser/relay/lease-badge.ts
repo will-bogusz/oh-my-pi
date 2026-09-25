@@ -5,11 +5,10 @@
  * infobar they cannot see these are the only signals the user gets.
  *
  * Injected over the tab's existing `chrome.debugger` attachment rather than
- * through a content script: `chrome.scripting`/`content_scripts` would need
- * `<all_urls>` host permission (a "read and change all your data on all
- * websites" install prompt) for cosmetics, while the debugger attachment is
- * already there for the whole lease. Pages that refuse injection (chrome://,
- * Web Store, CSP'd data: icons) simply keep their icon.
+ * through a content script: the attachment is already there for the whole
+ * lease, and scoping the badge to it needs no per-tab bookkeeping in the
+ * extension. Pages that refuse injection (chrome://, Web Store, CSP'd data:
+ * icons) simply keep their icon.
  */
 
 const GLYPH_SVG =

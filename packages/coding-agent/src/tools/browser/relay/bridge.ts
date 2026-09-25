@@ -38,6 +38,7 @@ import {
 	type TabSnapshot,
 } from "./protocol";
 import { type ChromeTabGoneError, ManagedChromeTabs, shortUrl, unknownChromeTab } from "./managed-tabs";
+import { AUTOFILL_OPT_OUT_INSTALL, AUTOFILL_OPT_OUT_REMOVE } from "./autofill-opt-out";
 import { CURSOR_OVERLAY_INSTALL, CURSOR_OVERLAY_REMOVE, LEASE_BADGE_INSTALL, LEASE_BADGE_RESTORE } from "./lease-badge";
 
 /** Transport-agnostic websocket surface the bridge writes to. */
@@ -234,6 +235,8 @@ class TabState {
 	cursorScriptId: string | undefined;
 	/** A cursor paint already failed on this tab; the next ones stay silent. */
 	cursorPaintFailed = false;
+	/** The current attachment put the autofill opt-out on the page; a relay detach takes it back off. */
+	autofillOptedOut = false;
 	/** Tail of this tab's forwarded mouse events; keeps them in the order the driver sent them. */
 	mouseTail: Promise<void> = Promise.resolve();
 	/** A successful attach completed after the most recently requested relay detach. */
@@ -312,7 +315,9 @@ const CDP_ERROR_SERVER = -32000;
  * the frame that fails a reattach ({@link RelayBridge.#ensureAttached}) would
  * have force-detached a kept attachment the moment it appeared
  * ({@link RelayBridge.#onTabDetached}). Kept attached, every transient frame
- * bans the tab; detached, only one still present at the next attach does.
+ * bans the tab; detached, only one the extension cannot empty at the next
+ * attach does. The idle detach also lifts the autofill opt-out, so a user
+ * who takes the tab over gets their password manager back.
  */
 const DEBUGGER_IDLE_MS = 10_000;
 /** How stale a `Page.windowOpen` may be and still explain a new tab. */
@@ -356,6 +361,8 @@ export class RelayBridge {
 	#markTabs: boolean;
 	/** Idle window after which an attached tab's debugger goes back; 0 keeps it for the whole lease. */
 	#idleMs: number;
+	/** Keep password managers' inline menus out of leased tabs while attached (the relay server always does). */
+	#autofillOptOut: boolean;
 
 	constructor(
 		opts: {
@@ -364,11 +371,14 @@ export class RelayBridge {
 			group?: boolean;
 			/** Hand a tab's debugger back after this long without CDP traffic; 0 keeps it for the lease. */
 			debuggerIdleMs?: number;
+			/** Put the vendors' autofill opt-outs on leased tabs while the debugger is attached. */
+			autofillOptOut?: boolean;
 		} = {},
 	) {
 		this.#log = opts.log ?? (() => {});
 		this.#markTabs = opts.group ?? false;
 		this.#idleMs = opts.debuggerIdleMs ?? DEBUGGER_IDLE_MS;
+		this.#autofillOptOut = opts.autofillOptOut ?? false;
 	}
 
 	#createInstance(instanceId: string): ExtInstance {
@@ -660,7 +670,10 @@ export class RelayBridge {
 			tab.reattachedAfterDetach = false;
 		}
 		const tabIds = tabs.map(tab => tab.tabId);
-		const request = this.#rpc({ op: "detachAll", tabIds }, inst);
+		// Restores ride inside the release so a reattach waits for both.
+		const request = Promise.all(tabs.map(tab => this.#restoreAutofill(tab))).then(() =>
+			this.#rpc({ op: "detachAll", tabIds }, inst),
+		);
 		// Reattachment serializes behind the release, exactly as for one tab.
 		const settled = request.then(
 			() => {},
@@ -1422,6 +1435,8 @@ export class RelayBridge {
 		tab.banned = true;
 		tab.banReason = describeDetach(reason);
 		tab.canceledByUser = reason === "canceled_by_user";
+		// Nothing can reach the page to take the opt-out back; its next document starts clean.
+		tab.autofillOptedOut = false;
 		this.#retractTab(tab);
 	}
 
@@ -1535,6 +1550,52 @@ export class RelayBridge {
 	}
 
 	/**
+	 * Close a leased tab's documents to inline autofill menus for as long as
+	 * the debugger is attached (see {@link AUTOFILL_OPT_OUT_INSTALL}). The
+	 * per-document script dies with the session, so every attach adds it again.
+	 * Best-effort: a page that refuses injection only loses the prevention.
+	 */
+	async #optOutAutofill(tab: TabState, inst: ExtInstance): Promise<void> {
+		if (!this.#autofillOptOut || inst.managed.leaseForTab(tab.tabId) === undefined) return;
+		tab.autofillOptedOut = true;
+		try {
+			await this.#sendToTab(tab, "Page.addScriptToEvaluateOnNewDocument", { source: AUTOFILL_OPT_OUT_INSTALL });
+			await this.#sendToTab(tab, "Runtime.evaluate", { expression: AUTOFILL_OPT_OUT_INSTALL });
+		} catch (err) {
+			this.#log("autofill opt-out skipped", {
+				tabKey: tab.tabKey,
+				error: err instanceof Error ? err.message : String(err),
+			});
+		}
+	}
+
+	/**
+	 * Before the relay hands the debugger back: whoever uses the tab next gets
+	 * autofill again. Sent on the attachment still held, after `attached` is
+	 * already false, so a new command waits for the detach instead of racing it.
+	 */
+	async #restoreAutofill(tab: TabState): Promise<void> {
+		if (!tab.autofillOptedOut) return;
+		tab.autofillOptedOut = false;
+		try {
+			await this.#rpc(
+				{
+					op: "send",
+					tabId: tab.tabId,
+					method: "Runtime.evaluate",
+					params: { expression: AUTOFILL_OPT_OUT_REMOVE },
+				},
+				this.#instanceFor(tab),
+			);
+		} catch (err) {
+			this.#log("autofill restore skipped", {
+				tabKey: tab.tabKey,
+				error: err instanceof Error ? err.message : String(err),
+			});
+		}
+	}
+
+	/**
 	 * Hand a tab back to the user: its own favicon, no debugger, out of the
 	 * owner's group, closed only when asked. Restoring and detaching before
 	 * the extension touches the group — and ungrouping before any close —
@@ -1562,10 +1623,12 @@ export class RelayBridge {
 		this.#touchTab(tab);
 		this.#resetRuntime(tab);
 		tab.reattachedAfterDetach = false;
-		const done = this.#rpc({ op: "detach", tabId: tab.tabId }, this.#instanceFor(tab)).then(
-			() => {},
-			() => {},
-		);
+		const done = this.#restoreAutofill(tab)
+			.then(() => this.#rpc({ op: "detach", tabId: tab.tabId }, this.#instanceFor(tab)))
+			.then(
+				() => {},
+				() => {},
+			);
 		tab.detaching = done;
 		await done;
 		if (tab.detaching === done) tab.detaching = null;
@@ -1786,6 +1849,9 @@ export class RelayBridge {
 				// An attach nobody follows up on still has to expire.
 				this.#touchTab(tab);
 				await this.#restoreRoot(tab);
+				// Before any forwarded command can focus a field: the per-document
+				// install is what an autofocused field on the next page meets.
+				await this.#optOutAutofill(tab, inst);
 				// Driving starts here, so this is where the tab strip learns about
 				// it — including after a turn-end detach dropped the glyph's script.
 				// Awaited: the per-document install has to be registered before the

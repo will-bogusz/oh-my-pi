@@ -108,7 +108,7 @@ export class BrowserInstances {
 		} = {},
 	) {
 		this.access = access;
-		this.bridge = new RelayBridge(options);
+		this.bridge = new RelayBridge({ ...options, autofillOptOut: true });
 		for (const browser of access.browsers())
 			this.#instances.set(browser.id, { id: browser.id, label: browser.label });
 	}

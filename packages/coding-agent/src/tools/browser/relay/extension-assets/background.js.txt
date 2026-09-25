@@ -88,6 +88,59 @@ class DebuggerAttachments {
   }
 }
 
+// extension/foreign-frames.ts
+var FOREIGN_FRAME_REFUSAL = /chrome-extension:\/\/ URL of different extension/i;
+var RETRY_DELAYS_MS = [50, 100, 200, 400];
+async function attachPastForeignFrames(tabId, attach) {
+  for (let attempt = 0;; attempt++) {
+    try {
+      return await attach();
+    } catch (error) {
+      if (attempt === RETRY_DELAYS_MS.length || !FOREIGN_FRAME_REFUSAL.test(String(error)) || await neutralizeForeignFrames(tabId) === 0)
+        throw error;
+    }
+    const { promise, resolve } = Promise.withResolvers();
+    setTimeout(resolve, RETRY_DELAYS_MS[attempt]);
+    await promise;
+  }
+}
+async function neutralizeForeignFrames(tabId) {
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId, allFrames: true },
+      injectImmediately: true,
+      args: [chrome.runtime.id],
+      func: (self) => {
+        let changed = 0;
+        const visit = (root) => {
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+          for (let node = walker.nextNode();node; node = walker.nextNode()) {
+            const element = node;
+            if (element instanceof HTMLIFrameElement || element.tagName === "FRAME") {
+              const src = element.getAttribute("src") ?? "";
+              if (src.startsWith("chrome-extension://") && !src.startsWith(`chrome-extension://${self}/`)) {
+                if (element instanceof HTMLIFrameElement)
+                  element.setAttribute("srcdoc", "");
+                else
+                  element.setAttribute("src", "about:blank");
+                changed++;
+              }
+            }
+            const shadow = chrome.dom.openOrClosedShadowRoot(element);
+            if (shadow)
+              visit(shadow);
+          }
+        };
+        visit(document);
+        return changed;
+      }
+    });
+    return results.reduce((total, frame) => total + (frame.result ?? 0), 0);
+  } catch {
+    return 0;
+  }
+}
+
 // extension/tab-groups.ts
 async function groupTab(tabId, owner, label) {
   let tab;
@@ -881,7 +934,7 @@ async function setBadge(connected) {
     await chrome.action.setBadgeBackgroundColor({ color: connected ? "#1a7f37" : "#8b8b8b" });
   } catch {}
 }
-var buildId = "dd77efe0575c3112e4b536468305bfabf0f972faaffe2bf96b86255789a92fa7";
+var buildId = "e360bac0dacc2cb6b9c3435f1da8ae9d4e379c209f703509b25517d5fcf8b06d";
 var RELOAD_GUARD_KEY = "reloadedFor";
 async function reloadForBuildSkew(expected) {
   if (!expected)
@@ -928,7 +981,7 @@ async function runRpc(msg) {
     case "queryTabs":
       return { tabs: (await chrome.tabs.query({})).map(snapshot).filter((tab) => tab !== null) };
     case "attach":
-      await chrome.debugger.attach({ tabId: msg.tabId }, "1.3");
+      await attachPastForeignFrames(msg.tabId, () => chrome.debugger.attach({ tabId: msg.tabId }, "1.3"));
       attachments.attached(msg.tabId);
       return {};
     case "detach":

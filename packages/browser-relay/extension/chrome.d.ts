@@ -56,9 +56,25 @@ interface ChromeDownloadItem {
 	totalBytes: number;
 }
 
+interface ChromeInjectionResult<T> {
+	frameId: number;
+	result?: T;
+}
 declare const chrome: {
 	permissions: {
 		contains(request: { permissions: string[] }): Promise<boolean>;
+	};
+	scripting: {
+		executeScript<Args extends unknown[], Result>(injection: {
+			target: { tabId: number; allFrames?: boolean };
+			func: (...args: Args) => Result;
+			args?: Args;
+			injectImmediately?: boolean;
+		}): Promise<Array<ChromeInjectionResult<Awaited<Result>>>>;
+	};
+	/** Content-script only: reaches shadow roots another extension created closed. */
+	dom: {
+		openOrClosedShadowRoot(element: HTMLElement): ShadowRoot | null;
 	};
 	downloads: {
 		search(query: { id?: number }): Promise<ChromeDownloadItem[]>;
@@ -121,6 +137,7 @@ declare const chrome: {
 		onClicked: ChromeEvent<(tab: ChromeTab) => void>;
 	};
 	runtime: {
+		readonly id: string;
 		getURL(path: string): string;
 		/** Restarts the extension; every context, this worker included, is torn down. */
 		reload(): void;
