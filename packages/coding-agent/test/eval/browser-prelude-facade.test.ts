@@ -230,6 +230,12 @@ describe("browser JavaScript facade", () => {
 		expect(() => runInContext("tab.evaluate(Math.max)", context)).toThrow(
 			"tab helper argument cannot serialize a native or bound function; pass an arrow or function expression",
 		);
+		// A lookup that found nothing fails at the ref, naming the call, before any host round trip.
+		expect(() => runInContext("tab.ref(undefined)", context)).toThrow(
+			'tab.ref() needs a ref string such as "e12" from an observation, got undefined.',
+		);
+		expect(() => runInContext('tab.ref("  ")', context)).toThrow('got ""');
+		expect(() => runInContext('tab.ref({ ref: "e3" })', context)).toThrow("got an object (pass its .ref)");
 
 		expect(calls).toEqual([
 			{ action: "open", name: "docs", url: "https://example.test" },

@@ -2,7 +2,7 @@ import { untilAborted } from "@oh-my-pi/pi-utils";
 import type { CDPSession, Frame, Page } from "puppeteer-core";
 import { _keyDefinitions } from "puppeteer-core/internal/common/USKeyboardLayout.js";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
-import { type AxFrame, type AxNode, buildAxTree } from "./observation";
+import { type AxFrame, type AxNode, buildAxTree, hasTableParts } from "./observation";
 import { type BrowserSelectOption, normalizeSelectOptions, SELECT_OPTIONS_SOURCE } from "./select-options";
 
 /**
@@ -1027,10 +1027,43 @@ async function loaderIds(session: CDPSession, signal?: AbortSignal): Promise<Map
 }
 
 /**
+ * Backend ids of every node a session's documents mark as a click target: one
+ * with a click/mousedown/mouseup listener of its own (Chrome's `isClickable`,
+ * which also covers React's `onClick`), or a pointer cursor it does not
+ * inherit from its parent. One `DOMSnapshot` read answers every frame the
+ * session serves.
+ */
+async function clickTargets(session: CDPSession, signal?: AbortSignal): Promise<Set<number>> {
+	const { documents, strings } = await untilAborted(signal, () =>
+		session.send("DOMSnapshot.captureSnapshot", { computedStyles: ["cursor"] }),
+	);
+	const targets = new Set<number>();
+	for (const { nodes, layout } of documents) {
+		const backendIds = nodes.backendNodeId ?? [];
+		for (const index of nodes.isClickable?.index ?? []) targets.add(backendIds[index]!);
+		const cursors = new Map<number, string>();
+		layout.nodeIndex.forEach((nodeIndex, i) => {
+			const cursor = layout.styles[i]?.[0];
+			if (cursor !== undefined) cursors.set(nodeIndex, strings[cursor]!);
+		});
+		const parents = nodes.parentIndex ?? [];
+		for (const [nodeIndex, cursor] of cursors) {
+			if (cursor !== "pointer") continue;
+			// The nearest ancestor with a box: a `display: contents` parent has no style of its own.
+			let parent = parents[nodeIndex] ?? -1;
+			while (parent >= 0 && !cursors.has(parent)) parent = parents[parent] ?? -1;
+			if (parent < 0 || cursors.get(parent) !== "pointer") targets.add(backendIds[nodeIndex]!);
+		}
+	}
+	return targets;
+}
+
+/**
  * The page's accessibility tree, one `Accessibility.getFullAXTree` per frame,
  * with every embedded document spliced under the iframe element that owns it.
  * Frames are read on the session that serves them: an out-of-process iframe is
  * invisible to the page session, and its nodes must be actioned on its own.
+ * Table and grid parts the DOM marks as click targets become actionable too.
  */
 export async function snapshotAccessibility(
 	page: Page,
@@ -1060,6 +1093,16 @@ export async function snapshotAccessibility(
 			owners.set(parent.client, bySession);
 		}),
 	);
+	// One click probe per session, and only for a frame with table parts to judge.
+	const probes = new Map<CDPSession, Promise<Set<number>>>();
+	const clickable = (session: CDPSession): Promise<Set<number>> => {
+		let probe = probes.get(session);
+		if (!probe) {
+			probe = clickTargets(session, signal);
+			probes.set(session, probe);
+		}
+		return probe;
+	};
 
 	const build = async (frame: Frame): Promise<AxNode | null> => {
 		const { nodes } = await untilAborted(signal, () =>
@@ -1090,7 +1133,8 @@ export async function snapshotAccessibility(
 			frameId: frame._id,
 			loaderId: loaders.get(frame.client)?.get(frame._id) ?? "",
 		};
-		return buildAxTree(nodes, axFrame, { includeAll: options.includeAll, embedded });
+		const clickableIds = !options.includeAll && hasTableParts(nodes) ? await clickable(frame.client) : undefined;
+		return buildAxTree(nodes, axFrame, { includeAll: options.includeAll, embedded, clickable: clickableIds });
 	};
 
 	const tree = await build(page.mainFrame());

@@ -644,6 +644,14 @@ export function parseRefToken(token: string, observationId: string): number | nu
 	return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
+/** A ref must be a token string; `tab.ref(undefined)` usually means an `elements.find()` that matched nothing. */
+export function requireRefToken(id: unknown): asserts id is string {
+	if (typeof id === "string" && id.trim()) return;
+	const got =
+		typeof id === "string" ? '""' : typeof id === "object" && id !== null ? "an object (pass its .ref)" : String(id);
+	throw new ToolError(`tab.ref() needs a ref string such as "e12" from an observation, got ${got}.`);
+}
+
 const backgroundInputQueues = new WeakMap<Page, Promise<void>>();
 const backgroundInputFailures = new WeakMap<Page, Error>();
 const backgroundPageScopes = new WeakMap<Page, BackgroundPageScope>();
@@ -2338,6 +2346,7 @@ export class WorkerCore {
 				return element(this.#refNode(id));
 			},
 			ref: async id => {
+				requireRefToken(id);
 				const elementId = parseRefToken(id, this.#observationId);
 				if (elementId !== null) return element(this.#refNode(elementId));
 				if (id.includes(":"))
