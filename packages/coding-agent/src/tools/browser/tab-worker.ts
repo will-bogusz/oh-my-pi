@@ -45,6 +45,7 @@ import {
 	evaluateExpression,
 	fillNode,
 	focusNode,
+	hasSkeletonScreen,
 	highlightNode,
 	holdKey,
 	hoverNode,
@@ -1126,6 +1127,15 @@ async function settlePage(page: Page, signal: AbortSignal | undefined, budgetMs:
 		network.abort();
 		signal?.removeEventListener("abort", onAbort);
 	}
+}
+
+/** One settled read of the main document; `loading` when a loading indicator outlasted the settle budget. */
+interface SnapshotRead {
+	snapshot: AxNode;
+	layout: PageLayout;
+	url: string;
+	title: string;
+	loading: boolean;
 }
 
 /** The document the main frame shows: the session serving it and the loader that committed it. */
@@ -2529,15 +2539,16 @@ export class WorkerCore {
 	 * attempt shares the one settle budget, which never grows. When it runs out
 	 * on a page that keeps replacing its document, the last complete read comes
 	 * back marked as still navigating; only a page that never held a document
-	 * through one read fails.
+	 * through one read fails. A read taken while a loading indicator outlasted
+	 * the budget comes back marked as still loading.
 	 */
 	async #settledSnapshot(
 		page: Page,
 		includeAll: boolean,
 		deadline: number,
 		signal?: AbortSignal,
-	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string; navigating: boolean }> {
-		let latest: { snapshot: AxNode; layout: PageLayout; url: string; title: string } | undefined;
+	): Promise<SnapshotRead & { navigating: boolean }> {
+		let latest: SnapshotRead | undefined;
 		let navigated = false;
 		while (Date.now() < deadline) {
 			const before = await mainDocument(page, signal);
@@ -2572,7 +2583,7 @@ export class WorkerCore {
 		budgetMs: number,
 		deadline: number,
 		signal?: AbortSignal,
-	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string }> {
+	): Promise<SnapshotRead> {
 		const session = page.mainFrame().client;
 		await settlePage(page, signal, budgetMs);
 		// A read that never answers is Chrome replacing the document under it, so
@@ -2585,17 +2596,23 @@ export class WorkerCore {
 				new SnapshotReadTimeout(`${what} did not answer before the page settled`),
 			);
 		let snapshot = await bounded("accessibility tree", snapshotAccessibility(page, { includeAll }, signal));
-		while (hasBusyIndicator(snapshot)) {
+		// Loading means the tree still shows an indicator, or the page a skeleton
+		// where its content will be; either is waited out within the budget.
+		let loading =
+			hasBusyIndicator(snapshot) || (await bounded("skeleton probe", hasSkeletonScreen(session, signal)));
+		while (loading) {
 			const remaining = deadline - Date.now();
 			if (remaining <= 0) break;
 			await untilAborted(signal, () => Bun.sleep(Math.min(SETTLE_BUSY_POLL_MS, remaining)));
 			snapshot = await bounded("accessibility tree", snapshotAccessibility(page, { includeAll }, signal));
+			loading =
+				hasBusyIndicator(snapshot) || (await bounded("skeleton probe", hasSkeletonScreen(session, signal)));
 		}
 		const [layout, entry] = await Promise.all([
 			bounded("page layout", pageLayout(session, signal)),
 			bounded("navigation entry", currentEntry(session, signal)),
 		]);
-		return { snapshot, layout, url: entry.url, title: entry.title };
+		return { snapshot, layout, url: entry.url, title: entry.title, loading };
 	}
 
 	/**
@@ -2683,7 +2700,7 @@ export class WorkerCore {
 			: undefined;
 		this.#invalidateRefs();
 		const deadline = Date.now() + SETTLE_BUDGET_MS;
-		const { snapshot, layout, url, title, navigating } = await this.#settledSnapshot(
+		const { snapshot, layout, url, title, navigating, loading } = await this.#settledSnapshot(
 			page,
 			includeAll,
 			deadline,
@@ -2747,6 +2764,7 @@ export class WorkerCore {
 			scroll: { y: scroll.y, scrollHeight: scroll.scrollHeight },
 			focused,
 			navigating,
+			loading,
 		};
 		const previous = this.#lastTree;
 		const filter = JSON.stringify({ includeAll, viewportOnly, compact, selector: selector ?? null });
