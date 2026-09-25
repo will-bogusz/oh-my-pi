@@ -285,7 +285,7 @@ def _make_browser():
             return self._name
 
         def __repr__(self):
-            target = f" target={self._target['id']!r}" if self._target else ""
+            target = f" target['id']={self._target['id']!r}" if self._target else ""
             return f"<browser.Tab name={self._name!r}{target}>"
 
         async def _method(self, method, args, kwargs):
@@ -688,7 +688,9 @@ def _make_browser():
 
         async def closeTab(self, tab_id, **options):
             if not isinstance(tab_id, str) or not tab_id:
-                raise TypeError("browser.closeTab expects an exact discovered tab id")
+                raise TypeError(
+                    "browser.closeTab expects an exact discovered tab id (a tab's own is tab.target['id']; tab.id(n) is an element)"
+                )
             await _invoke("closeTab", {**options, "id": tab_id})
 
         async def create(self, **options):
@@ -696,6 +698,10 @@ def _make_browser():
             return _Tab(details.get("name"), details.get("handle"), details.get("value"))
 
         async def claim(self, tab_id, **options):
+            if not isinstance(tab_id, str) or not tab_id:
+                raise TypeError(
+                    "browser.claim expects an exact discovered tab id (a tab's own is tab.target['id']; tab.id(n) is an element)"
+                )
             details = await _invoke("claim", {**options, "id": tab_id})
             return _Tab(details.get("name"), details.get("handle"), details.get("value"))
 

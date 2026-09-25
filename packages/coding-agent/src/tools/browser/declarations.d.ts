@@ -611,6 +611,7 @@ interface BrowserRunScope {
 interface BrowserTab extends BrowserTabHelpers {
 	name: string;
 	handle?: string;
+	/** stable identity: `target.id` is what discover lists and claim takes */
 	target?: { id: string; browserId: string; tabId: number };
 	initialObservation?: BrowserObservation;
 	/** saved path */

@@ -253,7 +253,7 @@
 			if (initial[field] !== undefined) Object.defineProperty(tab, field, { value: initial[field] });
 		}
 		Object.defineProperty(tab, "name", { value: name, enumerable: true });
-		tab.toString = () => `<tab ${name}${tab.target ? ` target=${tab.target.id}` : ""}>`;
+		tab.toString = () => `<tab ${name}${tab.target ? ` target.id=${JSON.stringify(tab.target.id)}` : ""}>`;
 		for (const method of directMethods) {
 			tab[method] = async (...args) => {
 				const value = await callValue(name, [{ method, args: encodeArgs("tab helper argument", args) }], handle);
@@ -334,7 +334,9 @@
 		},
 		async closeTab(id, options) {
 			if (typeof id !== "string" || !id.length)
-				throw new TypeError("browser.closeTab expects an exact discovered tab id");
+				throw new TypeError(
+					"browser.closeTab expects an exact discovered tab id (a tab's own is tab.target.id; tab.id(n) is an element)",
+				);
 			await invoke("closeTab", { ...validateOptions("browser.closeTab", options), id });
 		},
 		async create(options) {
@@ -343,7 +345,9 @@
 		},
 		async claim(id, options) {
 			if (typeof id !== "string" || !id.length)
-				throw new TypeError("browser.claim expects an exact discovered tab id");
+				throw new TypeError(
+					"browser.claim expects an exact discovered tab id (a tab's own is tab.target.id; tab.id(n) is an element)",
+				);
 			const details = await invoke("claim", { ...validateOptions("browser.claim", options), id });
 			return makeTab(details.name, details.handle, details.value);
 		},

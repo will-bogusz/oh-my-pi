@@ -20,6 +20,7 @@ import { clickNode } from "@oh-my-pi/pi-coding-agent/tools/browser/cdp";
 import { withBackgroundInput } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import type { ElementHandle, Page } from "puppeteer-core";
 import puppeteer, { type Browser } from "puppeteer-core";
+import type { InitialBrowserState } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
 
 // Keep stock timer/occlusion scheduling and popup blocking in real-extension qualification.
 const stockBackgroundPolicy = [
@@ -730,6 +731,114 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			expect(requireChromeHandle(handle, session).lease.id).toBe(leaseId);
 		} finally {
 			await releaseChromeTabsForOwner("password-manager").catch(() => 0);
+			setup?.process()?.kill("SIGTERM");
+			token.mockRestore();
+			daemonReady.mockRestore();
+			relay.stop();
+			fixture.stop();
+			await rm(root, { recursive: true, force: true });
+		}
+	},
+	90_000,
+);
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"observes a created tab's committed page and names it by title and target id from creation through close",
+	async () => {
+		const fixture = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: async () => {
+				// A slow first byte keeps the navigation uncommitted when the tab is
+				// acquired — the window in which the first observation used to see
+				// Chrome's initial empty document. A real server delay is the thing
+				// under test, so this cannot be a fake timer.
+				await Bun.sleep(800);
+				return new Response("<title>Slow fixture</title><h1>Committed</h1>", {
+					headers: { "content-type": "text/html" },
+				});
+			},
+		});
+		const root = await mkdtemp(path.join(tmpdir(), "omp-create-naming-"));
+		const relay = startRelayServer({ port: 0 });
+		const token = spyOn(relayAccess, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
+		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+		const session: ToolSession = {
+			cwd: root,
+			hasUI: false,
+			getSessionFile: () => null,
+			getSessionSpawns: () => null,
+			getSessionId: () => "create-naming",
+			getAgentId: () => "agent",
+			settings: Settings.isolated({
+				"browser.enabled": true,
+				"browser.relay": true,
+				"browser.relayUrl": `http://127.0.0.1:${relay.port}`,
+			}),
+		};
+		let setup: Browser | undefined;
+		try {
+			const extension = path.join(root, "extension");
+			await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
+			setup = await puppeteer.launch({
+				executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+				headless: true,
+				pipe: true,
+				enableExtensions: true,
+				ignoreDefaultArgs: stockBackgroundPolicy,
+				userDataDir: path.join(root, "profile"),
+				defaultViewport: null,
+			});
+			const extensionId = await setup.installExtension(extension);
+			const options = await setup.newPage();
+			await options.goto(`chrome-extension://${extensionId}/options.html`);
+			await options.type("#label", "Naming fixture");
+			await options.type("#code", relay.access.issueCode().code);
+			await options.click("#save");
+			for (let i = 0; i < 400 && !relay.instances.list().some(browser => browser.connected); i++)
+				await Bun.sleep(25);
+			await options.close();
+			const setupSession = await setup.target().createCDPSession();
+			await setupSession
+				.connection()
+				?.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
+			await setupSession.detach();
+			await setup.disconnect();
+
+			const prelude = createBrowserPrelude(session);
+			const context = { session, toolCallId: "create-naming" };
+			const text = (result: AgentToolResult<unknown>) =>
+				result.content.map(part => (part.type === "text" ? part.text : "")).join("\n");
+			const created = await prelude.invoke({ action: "create", url: fixture.url.toString(), timeout: 20 }, context);
+			const details = created.details as { handle: string; value: InitialBrowserState };
+			const { lease } = requireChromeHandle(details.handle, session);
+			// The first observation is of the page asked for, never the empty
+			// document Chrome holds until the navigation commits.
+			expect(details.value.inspectionError).toBeUndefined();
+			expect(details.value.initialObservation?.url).toBe(fixture.url.toString());
+			expect(details.value.initialObservation?.title).toBe("Slow fixture");
+			// Named by the page, not the tab group's "Oh My Pi", with the identity
+			// discover lists and claim takes.
+			expect(text(created)).toContain(
+				`Created inactive Chrome tab "Slow fixture"\ntab.target.id: ${JSON.stringify(lease.tab.id)}\nURL: ${fixture.url}`,
+			);
+
+			await prelude.invoke(
+				{
+					action: "run",
+					handle: details.handle,
+					code: 'await page.evaluate(() => { document.title = "Renamed"; });',
+				},
+				context,
+			);
+			// The extension reports the title change on its own schedule.
+			const owner = browserActorId(session);
+			for (let i = 0; i < 400 && relay.instances.get(lease.id, owner).tab.title !== "Renamed"; i++)
+				await Bun.sleep(25);
+			const closed = await prelude.invoke({ action: "close", handle: details.handle }, context);
+			expect(text(closed)).toBe(`close: "Renamed" (tab.target.id ${JSON.stringify(lease.tab.id)})`);
+		} finally {
+			await releaseChromeTabsForOwner("create-naming").catch(() => 0);
 			setup?.process()?.kill("SIGTERM");
 			token.mockRestore();
 			daemonReady.mockRestore();

@@ -202,4 +202,30 @@ describe("browser prelude", () => {
 			run.mockRestore();
 		}
 	}, 15_000);
+
+	// Models reached for `tab.id` — the element helper — and passed it to claim.
+	it("shows a Chrome tab's identity as tab.target.id and points a wrong id at it", async () => {
+		const target = { id: "tab-7", browserId: "work", tabId: 7 };
+		const session = makeSession();
+		const prelude = createBrowserPrelude(session);
+		const context = createContext({
+			__omp_display__: () => {},
+			__omp_prelude__: async () => ({ text: "", details: { name: "Oh My Pi", handle: "h-1", value: { target } } }),
+		});
+		runInContext(prelude.javascript, context);
+		const result = await runInContext(
+			`(async () => {
+				const tab = await browser.create({ url: "https://example.test/" });
+				const refused = await browser.claim(tab.id).then(() => "claimed", error => error.message);
+				return { text: String(tab), id: tab.target.id, element: String(tab.id(3)), refused };
+			})()`,
+			context,
+		);
+		expect(result).toEqual({
+			text: '<tab Oh My Pi target.id="tab-7">',
+			id: "tab-7",
+			element: "<element tab.id(3) on Oh My Pi>",
+			refused: expect.stringContaining("tab.target.id"),
+		});
+	});
 });
