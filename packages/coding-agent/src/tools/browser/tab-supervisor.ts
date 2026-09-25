@@ -188,6 +188,8 @@ export interface ReleaseTabOptions {
 	kill?: boolean;
 	/** Maximum time for each asynchronous cleanup resource before close fails with diagnostics. */
 	timeoutMs?: number;
+	/** Leave `onRelease` uncalled: the owner is replacing this worker and keeps what the hook would give up. */
+	skipOnRelease?: boolean;
 }
 
 const tabs = new Map<string, TabSession>();
@@ -924,10 +926,12 @@ async function releaseTabInner(tab: TabSession, name: string, opts: ReleaseTabOp
 		}
 	}
 	await tab.worker.terminate().catch(() => undefined);
-	try {
-		await tab.onRelease?.();
-	} catch (error) {
-		cleanupError = error;
+	if (!opts.skipOnRelease) {
+		try {
+			await tab.onRelease?.();
+		} catch (error) {
+			cleanupError = error;
+		}
 	}
 	if (forced && tab.kindTag === "headless") {
 		try {

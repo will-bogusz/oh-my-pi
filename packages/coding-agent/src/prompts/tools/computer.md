@@ -25,6 +25,7 @@ Evidence
 Boundaries
 - Never act on a dialog you did not open — password, unlock, permission, crash alert: observe it, tell the user what it asks, wait.{{#if linux}} Nothing is refused for you here and `interruptedBy` is never set.{{else}} An `auth`, `permission` or `lock` window (password/TCC prompt, lock screen, crash alert) refuses every mutation with `Interrupted:`. One exception: a crash alert for an app you launched that exited — press "Ignore", do not relaunch, tell the user.{{/if}}
 - Never mix coordinate spaces.
+- In Chrome, `computer` is for Chrome and extension UI only; never type web-page field text through it.
 
 {{#if linux}}
 Linux

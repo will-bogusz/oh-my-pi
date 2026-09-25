@@ -219,6 +219,7 @@ class TabState {
 	banned = false;
 	/** Why the debugger cannot be (re)attached while `banned`, in the model's terms. */
 	banReason: string | undefined;
+	/** The ban is the user cancelling OMP's debugger from Chrome's infobar; set only while `banned`. */
 	canceledByUser = false;
 	/** Whether targets for this tab were announced to discovering connections. */
 	announced = false;
