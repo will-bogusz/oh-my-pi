@@ -153,9 +153,12 @@ const PAGE_CHURN = `<!doctype html><title>Churn</title><h1>Churn</h1>
 <script>setTimeout(() => location.href = "/churn?" + Date.now(), 150)</script>`;
 
 // The restart is bounded by the one settle budget: a page that never stops
-// navigating exhausts it and observe() says exactly that, instead of looping.
+// navigating exhausts it once and is never presented as settled. Whether any
+// read outlived one of its 150 ms documents is timing, so either answer is
+// right: the last complete tree marked as still navigating, or, with none,
+// the observe-again error.
 it.skipIf(!CHROMIUM_AVAILABLE)(
-	"gives up with the observe-again error when the page never stops navigating",
+	"never presents a page that never stops navigating as settled",
 	async () => {
 		const server = Bun.serve({
 			hostname: "127.0.0.1",
@@ -163,13 +166,109 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			fetch: () => new Response(PAGE_CHURN, { headers: { "content-type": "text/html" } }),
 		});
 		try {
-			await withWorker([], async ({ runError, goto }) => {
+			await withWorker([], async ({ run, goto }) => {
 				await goto(`http://127.0.0.1:${server.port}/churn`);
 				const started = Date.now();
-				const message = await runError(`await tab.observe();`);
-				expect(message).toContain("The page changed while observing it. Observe again.");
+				const outcome = await run<string>(
+					`try { return (await tab.observe({ diff: false })).tree.split("\\n")[0]; } catch (error) { return error.message; }`,
+				);
+				expect(outcome).toMatch(
+					/^(url: http:\/\/127\.0\.0\.1:\d+\/churn\?\d+ \|.*\| still navigating|The page changed while observing it)/,
+				);
 				// The budget is spent once, not once per navigation.
 				expect(Date.now() - started).toBeLessThan(10_000);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
+const SPA_ROUTER = `<!doctype html><title>Router</title><h1>Router</h1><p id="route">Route 0</p>
+<script>let n = 0; setInterval(() => { history.pushState(null, "", "/spa/" + ++n); document.getElementById("route").textContent = "Route " + n; }, 100)</script>`;
+
+// A client-side router moves the URL without replacing the document, so a read
+// a pushState lands in is still a read of the page the caller is on. Only a new
+// document sends observe() back to collect again.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"observes a page whose client-side router keeps pushing history entries",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(SPA_ROUTER, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/spa`);
+				const tree = await run<string>(`return (await tab.observe({ diff: false })).tree;`);
+				const [header] = tree.split("\n");
+				expect(header).toMatch(/^url: http:\/\/127\.0\.0\.1:\d+\/spa\/\d+ \| title: Router /);
+				expect(header).not.toContain("still navigating");
+				expect(tree).toContain("Router");
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
+const INTERSTITIAL = `<!doctype html><title>Signing in</title><p>Loading your account</p>
+<script>setTimeout(() => location.replace("/hop/" + Date.now()), 700)</script>`;
+
+// A chain of loading pages never holds one document for the whole settle
+// budget, yet every read of it completes. The last complete tree comes back
+// marked as still navigating, instead of an error that observing again repeats.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"returns the last complete tree, marked as still navigating, when the page keeps replacing its document",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(INTERSTITIAL, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/hop/0`);
+				const tree = await run<string>(`return (await tab.observe({ diff: false })).tree;`);
+				expect(tree).toMatch(/^url: http:\/\/127\.0\.0\.1:\d+\/hop\/\d+ \|.*\| still navigating/m);
+				expect(tree).toContain("Loading your account");
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
+const LOST_TAB = `<!doctype html><title>Lost</title><p>Loading forever</p>`;
+
+// A session that closes with nothing taking its place is a lost tab, not a
+// navigation: observe() fails with that, instead of spending the settle budget
+// and sending the model to observe a tab that is gone.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"fails with the lost tab, not a page change, when the tab closes mid-observation",
+	async () => {
+		const closing = Promise.withResolvers<void>();
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: request => {
+				if (new URL(request.url).pathname === "/close-me") closing.resolve();
+				return new Response(LOST_TAB, { headers: { "content-type": "text/html" } });
+			},
+		});
+		try {
+			await withWorker([], async ({ browser, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/lost`);
+				// The page stays busy, so observe() is still collecting when the tab closes.
+				const failed = runError(`await tab.evaluate(() => { fetch("/close-me"); }); await tab.observe();`);
+				await closing.promise;
+				const page = (await browser.pages()).find(candidate => candidate.url().endsWith("/lost"));
+				await page!.close();
+				expect(await failed).not.toContain("The page changed while observing it");
 			});
 		} finally {
 			server.stop(true);
