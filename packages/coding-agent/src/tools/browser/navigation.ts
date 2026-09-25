@@ -162,8 +162,15 @@ export function watchMainFrameNavigation(page: Page): MainFrameNavigationWatch {
 	};
 }
 
-/** Documents a tab holds before Chrome commits the navigation it was created for. */
-const INITIAL_EMPTY_DOCUMENT = /^(about:blank)?$/;
+/**
+ * Whether a URL is the document a tab holds before Chrome commits the
+ * navigation it was created for: empty, `about:blank`, or not a URL at all —
+ * puppeteer reads `:` for the main frame of a tab adopted through the relay
+ * before its first commit.
+ */
+function isInitialEmptyDocument(url: string): boolean {
+	return url === "about:blank" || !URL.canParse(url);
+}
 
 export interface MainFrameReadyOptions {
 	/** Upper bound on the whole wait; expiring is not an error. */
@@ -190,15 +197,12 @@ export interface MainFrameReadyOptions {
  * Best effort by design: a slow page still gets observed, just later. Returns
  * the readyState it settled on, or `undefined` when the budget expired first.
  */
-export async function waitForMainFrameReady(
-	page: Page,
-	opts: MainFrameReadyOptions,
-): Promise<string | undefined> {
+export async function waitForMainFrameReady(page: Page, opts: MainFrameReadyOptions): Promise<string | undefined> {
 	const deadline = Date.now() + opts.timeoutMs;
-	const expectsNavigation = opts.expectUrl !== undefined && !INITIAL_EMPTY_DOCUMENT.test(opts.expectUrl);
+	const expectsNavigation = opts.expectUrl !== undefined && !isInitialEmptyDocument(opts.expectUrl);
 	for (;;) {
 		throwIfAborted(opts.signal);
-		const pending = expectsNavigation && INITIAL_EMPTY_DOCUMENT.test(page.url());
+		const pending = expectsNavigation && isInitialEmptyDocument(page.url());
 		const state = pending ? undefined : await readReadyState(page);
 		if (state !== undefined && state !== "loading") return state;
 		if (Date.now() >= deadline) return undefined;
