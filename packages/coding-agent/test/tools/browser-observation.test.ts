@@ -133,6 +133,28 @@ it("treats spinners as unsettled but valued progressbars and headings as content
 	expect(hasBusyIndicator(ax("RootWebArea", "", {}, [ax("StaticText", "Reloading is unnecessary")]))).toBe(false);
 });
 
+it("counts loader text only where it stands in for the content", () => {
+	const page = (...children: AxNode[]) => hasBusyIndicator(ax("RootWebArea", "Page", {}, children));
+	const prose = ax("paragraph", undefined, {}, [
+		ax("StaticText", "Revenue grew in every region this quarter. ".repeat(8)),
+	]);
+	const links = ax("navigation", undefined, {}, [ax("link", "Inbox ".repeat(80))]);
+	// Loading wording anywhere in a short spinner-role name.
+	expect(page(ax("alert", "Content loading"))).toBe(true);
+	expect(page(ax("status", undefined, {}, [ax("StaticText", "Please wait…")]))).toBe(true);
+	expect(
+		page(ax("StaticText", "Loading is slow when the page has to fetch every attachment from the archive first")),
+	).toBe(false);
+	// A loader beside the page's content is a footer or a sentinel, not the page.
+	expect(page(prose, ax("StaticText", "Loading…"))).toBe(false);
+	expect(page(ax("contentinfo", undefined, {}, [ax("StaticText", "Loading…")]))).toBe(false);
+	// Only the loader's own `main` counts, and the landmarks around it never do.
+	expect(page(links, ax("main", undefined, {}, [ax("heading", "Inbox"), ax("StaticText", "Loading…")]))).toBe(true);
+	expect(page(links, ax("main", undefined, {}, [prose, ax("StaticText", "Loading…")]))).toBe(false);
+	// The page's own busy state holds wherever it is.
+	expect(page(prose, ax("navigation", undefined, { busy: true }))).toBe(true);
+});
+
 const MAIN_PAGE = (widgetUrl: string) => `<!doctype html><title>401(k) contributions</title>
 <nav><a href="/">Home</a><a href="/pay">Pay</a></nav>
 <main>

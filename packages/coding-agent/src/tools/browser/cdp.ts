@@ -760,6 +760,37 @@ export async function waitForDomQuiet(
 }
 
 /**
+ * Skeleton screen: several empty placeholder blocks in the viewport, named
+ * skeleton or shimmer by class, or an animated "placeholder" (a static one is
+ * as often a layout spacer). A block with text, media, a control, or an image
+ * background is content.
+ */
+const SKELETON_PROBE = `(() => {
+	try {
+		const content = "img,svg,video,canvas,picture,iframe,object,embed,input,textarea,select,button";
+		const animated = (element, pseudo) => !!element && getComputedStyle(element, pseudo).animationName !== "none";
+		let blocks = 0;
+		for (const element of document.querySelectorAll('[class*="skeleton" i],[class*="shimmer" i],[class*="placeholder" i]')) {
+			if (element.textContent.trim() || element.matches(content) || element.querySelector(content)) continue;
+			const box = element.getBoundingClientRect();
+			if (box.width < 8 || box.height < 4 || box.bottom <= 0 || box.right <= 0 || box.top >= innerHeight || box.left >= innerWidth) continue;
+			const style = getComputedStyle(element);
+			if (style.visibility === "hidden" || style.opacity === "0" || style.backgroundImage.includes("url(")) continue;
+			if (!/skeleton|shimmer/i.test(element.getAttribute("class")) && !(animated(element) || animated(element, "::after") || animated(element.parentElement))) continue;
+			if (++blocks >= 3) return true;
+		}
+		return false;
+	} catch {
+		return false;
+	}
+})()`;
+
+/** Whether the session's document shows a skeleton screen where its content will be. */
+export async function hasSkeletonScreen(session: CDPSession, signal?: AbortSignal): Promise<boolean> {
+	return (await evaluateExpression(session, SKELETON_PROBE, signal)) === true;
+}
+
+/**
  * Every selector the tool accepts, resolved to backend node ids on the page
  * session, fresh on every call. Nothing is remembered between calls: a
  * selector is a question about the document that is there now.
