@@ -238,7 +238,7 @@ it("holds a fresh relay's first request until the paired extension reconnects, a
 	const unpaired = new BrowserInstances(new RelayAccess());
 	try {
 		const started = performance.now();
-		await unpaired.settled(2000);
+		await unpaired.settled({ graceMs: 2000 });
 		expect(performance.now() - started).toBeLessThan(200);
 	} finally {
 		unpaired.close();
@@ -251,7 +251,7 @@ it("holds a fresh relay's first request until the paired extension reconnects, a
 		const paired = pair(instances, "profile_instance_a", "Work Chrome");
 		instances.extClosed(paired.socket);
 		expect(instances.ready).toBe(false);
-		const waited = instances.settled(2000).then(() => performance.now());
+		const waited = instances.settled({ graceMs: 2000 }).then(() => performance.now());
 		const started = performance.now();
 		const replacement = new Socket();
 		instances.extConnected(replacement);
@@ -267,13 +267,44 @@ it("holds a fresh relay's first request until the paired extension reconnects, a
 		expect(instances.ready).toBe(true);
 		// Once connected, settled never blocks.
 		const again = performance.now();
-		await instances.settled(2000);
+		await instances.settled({ graceMs: 2000 });
 		expect(performance.now() - again).toBeLessThan(50);
 		instances.extClosed(replacement);
-		// Still disconnected after the grace: give up rather than hang the request.
+		// Still disconnected after the grace: give up rather than hang the
+		// request, and say that the refusal came after waiting.
 		const grace = performance.now();
-		await instances.settled(150);
+		await instances.settled({ graceMs: 150 });
 		expect(performance.now() - grace).toBeGreaterThanOrEqual(140);
+		expect(() => instances.select()).toThrow(
+			'No paired browser is connected after waiting 0.2 s for its extension to reconnect to this relay: "Work Chrome" is paired.',
+		);
+		expect(() => instances.select("profile_instance_a")).toThrow(
+			'Browser "Work Chrome" is disconnected after waiting 0.2 s for its extension to reconnect',
+		);
+	} finally {
+		instances.close();
+	}
+});
+
+it("waits for the exact browser a request names, not whichever paired browser reconnects first", async () => {
+	const instances = new BrowserInstances(new RelayAccess());
+	try {
+		const work = pair(instances, "profile_instance_a", "Work Chrome");
+		const personal = pair(instances, "profile_instance_b", "Personal Chrome");
+		instances.extClosed(work.socket);
+		instances.extClosed(personal.socket);
+		const waiting = instances.settled({ browserId: "profile_instance_b", graceMs: 2000 });
+		const reconnect = (id: string, label: string, credential: string) => {
+			const socket = new Socket();
+			instances.extConnected(socket);
+			instances.extMessage(socket, JSON.stringify({ t: "authenticate", auth: { id, label, credential } }));
+			instances.extMessage(socket, JSON.stringify(hello));
+		};
+		reconnect("profile_instance_a", "Work Chrome", work.credential);
+		expect(Bun.peek.status(waiting)).toBe("pending");
+		reconnect("profile_instance_b", "Personal Chrome", personal.credential);
+		await waiting;
+		expect(instances.select("profile_instance_b").label).toBe("Personal Chrome");
 	} finally {
 		instances.close();
 	}

@@ -9,7 +9,13 @@
  * worker alive while connected (Chrome 116+); a chrome.alarms tick revives it
  * and re-dials after Chrome reaps it while disconnected.
  */
-import type { ExtToRelayMessage, RelayToExtMessage, TabSnapshot } from "../../coding-agent/src/tools/browser/relay/protocol";
+import {
+	EXTENSION_RECONNECT_MAX_MS,
+	EXTENSION_RECONNECT_MIN_MS,
+	type ExtToRelayMessage,
+	type RelayToExtMessage,
+	type TabSnapshot,
+} from "../../coding-agent/src/tools/browser/relay/protocol";
 import { DebuggerAttachments, ownedDebuggerTabs } from "./debugger-ownership";
 import { groupTab, releaseOwnerGroups } from "./tab-groups";
 import { CURSOR_OVERLAY_REMOVE, LEASE_BADGE_RESTORE } from "../../coding-agent/src/tools/browser/relay/lease-badge";
@@ -19,8 +25,6 @@ import { CURSOR_OVERLAY_REMOVE, LEASE_BADGE_RESTORE } from "../../coding-agent/s
 declare const __OMP_EXTENSION_BUILD_ID__: string;
 
 const PING_INTERVAL_MS = 20_000;
-const RECONNECT_MIN_MS = 1_000;
-const RECONNECT_MAX_MS = 10_000;
 /** Reconnect window a dropped relay socket gets before its attachments are released. */
 const DETACH_GRACE_MS = 2_000;
 
@@ -28,7 +32,7 @@ let ws: WebSocket | null = null;
 let connecting = false;
 let relayReady = false;
 let pendingEvents: ExtToRelayMessage[] = [];
-let reconnectDelay = RECONNECT_MIN_MS;
+let reconnectDelay = EXTENSION_RECONNECT_MIN_MS;
 let pingTimer: NodeJS.Timeout | null = null;
 /**
  * Chrome holds a `chrome.debugger` attachment (and shows its debugging
@@ -295,7 +299,7 @@ async function handleRelayMessage(socket: WebSocket, raw: string): Promise<void>
 
 function scheduleReconnect(): void {
 	const delay = reconnectDelay;
-	reconnectDelay = Math.min(reconnectDelay * 2, RECONNECT_MAX_MS);
+	reconnectDelay = Math.min(reconnectDelay * 2, EXTENSION_RECONNECT_MAX_MS);
 	setTimeout(() => void connect(), delay);
 }
 
@@ -316,7 +320,7 @@ async function connect(): Promise<void> {
 		relayReady = false;
 		pendingEvents = [];
 		socket.onopen = () => {
-			reconnectDelay = RECONNECT_MIN_MS;
+			reconnectDelay = EXTENSION_RECONNECT_MIN_MS;
 			socket.send(JSON.stringify({ t: "authenticate", auth: { id: settings.instanceId, label: settings.browserLabel, credential: settings.credential || undefined, pairingCode: settings.pairingCode || undefined } }));
 			clearInterval(pingTimer ?? undefined);
 			pingTimer = setInterval(() => post({ t: "ping" }), PING_INTERVAL_MS);

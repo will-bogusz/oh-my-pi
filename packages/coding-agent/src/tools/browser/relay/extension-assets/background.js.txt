@@ -1,3 +1,7 @@
+// ../coding-agent/src/tools/browser/relay/protocol.ts
+var EXTENSION_RECONNECT_MIN_MS = 1000;
+var EXTENSION_RECONNECT_MAX_MS = 1e4;
+
 // extension/debugger-ownership.ts
 async function ownedDebuggerTabs(targets, probe) {
   const owned = await Promise.all(targets.map(async (target) => {
@@ -791,14 +795,12 @@ var CURSOR_OVERLAY_REMOVE = `window.__ompCursor?.remove()`;
 
 // extension/background.ts
 var PING_INTERVAL_MS = 20000;
-var RECONNECT_MIN_MS = 1000;
-var RECONNECT_MAX_MS = 1e4;
 var DETACH_GRACE_MS = 2000;
 var ws = null;
 var connecting = false;
 var relayReady = false;
 var pendingEvents = [];
-var reconnectDelay = RECONNECT_MIN_MS;
+var reconnectDelay = EXTENSION_RECONNECT_MIN_MS;
 var pingTimer = null;
 var attachments = new DebuggerAttachments({
   detach: (tabId) => chrome.debugger.detach({ tabId }),
@@ -879,7 +881,7 @@ async function setBadge(connected) {
     await chrome.action.setBadgeBackgroundColor({ color: connected ? "#1a7f37" : "#8b8b8b" });
   } catch {}
 }
-var buildId = "1520c6d837177ca8087bfc63d85640145c7270e490d53f062077663205383af9";
+var buildId = "2dd4ca1e8f23d10e7df5fd5c5dd889806c493e3f041c03a09f01475864765843";
 var RELOAD_GUARD_KEY = "reloadedFor";
 async function reloadForBuildSkew(expected) {
   if (!expected)
@@ -1006,7 +1008,7 @@ async function handleRelayMessage(socket, raw) {
 }
 function scheduleReconnect() {
   const delay = reconnectDelay;
-  reconnectDelay = Math.min(reconnectDelay * 2, RECONNECT_MAX_MS);
+  reconnectDelay = Math.min(reconnectDelay * 2, EXTENSION_RECONNECT_MAX_MS);
   setTimeout(() => void connect(), delay);
 }
 async function connect() {
@@ -1025,7 +1027,7 @@ async function connect() {
     relayReady = false;
     pendingEvents = [];
     socket.onopen = () => {
-      reconnectDelay = RECONNECT_MIN_MS;
+      reconnectDelay = EXTENSION_RECONNECT_MIN_MS;
       socket.send(JSON.stringify({ t: "authenticate", auth: { id: settings.instanceId, label: settings.browserLabel, credential: settings.credential || undefined, pairingCode: settings.pairingCode || undefined } }));
       clearInterval(pingTimer ?? undefined);
       pingTimer = setInterval(() => post({ t: "ping" }), PING_INTERVAL_MS);

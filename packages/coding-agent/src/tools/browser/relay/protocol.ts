@@ -6,6 +6,14 @@
  * pushes tab lifecycle and `chrome.debugger` events as they happen.
  */
 
+/**
+ * The extension's redial backoff after it loses the relay: it doubles from the
+ * minimum to the maximum and stays there. The relay derives from the maximum
+ * how long a freshly started daemon waits for a paired browser to come back.
+ */
+export const EXTENSION_RECONNECT_MIN_MS = 1_000;
+export const EXTENSION_RECONNECT_MAX_MS = 10_000;
+
 /** Minimal view of a Chrome tab shared between extension and relay. */
 export interface TabSnapshot {
 	tabId: number;
