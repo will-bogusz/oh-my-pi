@@ -28,6 +28,8 @@ type Shape = ReadonlyMap<string, Shape | undefined>;
 interface DeclaredMethod {
 	/** Positional parameters: the declared name and, for an object type, its keys. */
 	parameters: { name: string; shape?: Shape }[];
+	/** A rest parameter takes every argument past the named ones. */
+	rest: boolean;
 	/** The declared API the method resolves to (`tab.ref()` → `BrowserElement`). */
 	returns?: DeclaredApi;
 }
@@ -157,10 +159,12 @@ function declaredApis(): ReadonlyMap<DeclaredApi, ReadonlyMap<string, DeclaredMe
 			if (member.type !== "TSMethodSignature" || name === undefined) continue;
 			const method = methods.get(name) ?? {
 				parameters: [],
+				rest: false,
 				returns: returnedApi(member.typeAnnotation?.typeAnnotation),
 			};
 			member.parameters.forEach((parameter, index) => {
 				// A rest parameter takes values, not an options bag.
+				if (parameter.type === "RestElement") method.rest = true;
 				if (parameter.type !== "Identifier") return;
 				const annotation = parameter.typeAnnotation;
 				const shape = annotation?.type === "TSTypeAnnotation" ? shapeOf(annotation.typeAnnotation) : undefined;
@@ -203,15 +207,24 @@ function checkShape(where: string, shape: Shape, value: unknown): void {
 	const unknown = Object.keys(value).filter(key => !shape.has(key));
 	if (unknown.length > 0) {
 		throw new ToolError(
-			`Unknown option${unknown.length === 1 ? "" : "s"} ${unknown.map(key => JSON.stringify(key)).join(", ")} for ${where}): it takes ${[...shape.keys()].join(", ")}.`,
+			`Unknown option${unknown.length === 1 ? "" : "s"} ${unknown.map(key => JSON.stringify(key)).join(", ")} for ${where}): it takes ${shape.size > 0 ? [...shape.keys()].join(", ") : "none"}.`,
 		);
 	}
 	for (const [key, nested] of shape) if (nested) checkShape(`${where}.${key}`, nested, value[key]);
 }
 
+/** What an argument past every declared parameter may carry: no options at all. */
+const NO_OPTIONS: Shape = new Map();
+
 function checkMethod(api: DeclaredApi, method: string, declared: DeclaredMethod, args: readonly unknown[]): void {
-	declared.parameters.forEach(({ name, shape }, index) => {
-		if (shape) checkShape(`${API_LABELS[api]}.${method}(${name}`, shape, args[index]);
+	const call = `${API_LABELS[api]}.${method}(`;
+	args.forEach((arg, index) => {
+		const parameter = declared.parameters[index];
+		if (parameter?.shape) checkShape(`${call}${parameter.name}`, parameter.shape, arg);
+		// An object past the declared parameters reaches nothing: `tab.back({ waitUntil })`
+		// once back() stopped taking options.
+		else if (index >= declared.parameters.length && !declared.rest)
+			checkShape(`${call}${[...declared.parameters.map(({ name }) => name), "…"].join(", ")}`, NO_OPTIONS, arg);
 	});
 }
 

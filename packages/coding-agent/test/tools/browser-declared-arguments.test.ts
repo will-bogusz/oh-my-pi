@@ -67,6 +67,7 @@ describe("undeclared browser options", () => {
 						return {
 							observe: await outcome(() => tab.observe({ print: false })),
 							element: await outcome(async () => (await tab.ref(go.ref)).click({ force: true })),
+							title: await outcome(() => tab.title({ waitUntil: "load" })),
 							declared: await outcome(() => tab.observe({ display: false, compact: true })),
 						};
 					`,
@@ -76,6 +77,8 @@ describe("undeclared browser options", () => {
 				const outcomes = result.returnValue as Record<string, string>;
 				expect(outcomes.observe).toMatch(/"print"[^]*\bdisplay\b/);
 				expect(outcomes.element).toMatch(/"force"[^]*\bcount\b/);
+				// title() takes no options: an object past its parameters is refused, not ignored.
+				expect(outcomes.title).toMatch(/"waitUntil"[^]*\bnone\b/);
 				expect(outcomes.declared).toBe("accepted");
 				// The refused observe never ran, so it printed no tree.
 				expect(result.displays).toEqual([]);
