@@ -80,7 +80,6 @@ it("hands a cancelled acquisition back, closing only a page it opened, and repor
 		label: "Fixture",
 		owner: "actor",
 		url: "http://fixture",
-		released: false,
 		lease: {
 			id: "lease",
 			targetId: "PAGE7",

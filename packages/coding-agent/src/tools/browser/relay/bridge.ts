@@ -36,7 +36,7 @@ import {
 	type RelayToExtMessage,
 	type TabSnapshot,
 } from "./protocol";
-import { ManagedChromeTabs } from "./managed-tabs";
+import { type ChromeTabGoneError, ManagedChromeTabs, shortUrl, unknownChromeTab } from "./managed-tabs";
 import { CURSOR_OVERLAY_INSTALL, CURSOR_OVERLAY_REMOVE, LEASE_BADGE_INSTALL, LEASE_BADGE_RESTORE } from "./lease-badge";
 
 /** Transport-agnostic websocket surface the bridge writes to. */
@@ -180,10 +180,10 @@ export interface DebuggerState {
  * sign-in forms. The tab stays open; only OMP's control ends.
  */
 function describeDetach(reason: string): string {
-	if (reason === "canceled_by_user") return "the user cancelled OMP's debugging of this tab from Chrome's infobar";
+	if (reason === "canceled_by_user") return "the user cancelled debugging from Chrome's infobar";
 	return (
-		"Chrome revoked OMP's debugger on this tab while the tab stayed open, usually because another " +
-		"extension (a password manager, for example) embedded its own UI in the page"
+		"Chrome dropped OMP's debugger with the tab still open, usually because another " +
+		"extension (a password manager, for example) put its own frame in the page"
 	);
 }
 
@@ -286,6 +286,8 @@ class TabState {
 
 /** URLs `chrome.debugger` cannot attach to; hidden from downstream discovery entirely. */
 const INELIGIBLE_URL = /^(chrome|devtools|edge|view-source|chrome-extension|chrome-untrusted|chrome-search):/i;
+/** Completes "Chrome tab X …" for a page on one of those URLs. */
+const UNDEBUGGABLE = "is on a page Chrome lets no extension debug";
 
 const RPC_TIMEOUT_MS = 20_000;
 const CDP_ERROR_METHOD_NOT_FOUND = -32601;
@@ -399,6 +401,15 @@ export class RelayBridge {
 			if (inst.managed.tabForLease(leaseId) !== undefined) return inst.instanceId;
 		}
 		return undefined;
+	}
+
+	/** Why a lease or discovered tab id no longer resolves: the browser that remembers it says why. */
+	stale(id: string): ChromeTabGoneError {
+		for (const inst of this.#instances.values()) {
+			const ended = inst.managed.unavailable(id);
+			if (ended) return ended;
+		}
+		return unknownChromeTab(id);
 	}
 
 	/** True once the instance has completed its hello on its current socket. */
@@ -738,7 +749,7 @@ export class RelayBridge {
 	/** Register a downstream CDP websocket for one lease; returns the connection id. */
 	cdpConnected(socket: RelaySocket, leaseId: string): number {
 		const instanceId = this.instanceForLease(leaseId);
-		if (instanceId === undefined) throw new Error("Chrome tab ownership is no longer valid");
+		if (instanceId === undefined) throw this.stale(leaseId);
 		const inst = this.#instance(instanceId);
 		const tabId = inst.managed.tabForLease(leaseId);
 		const conn = new CdpConnection(
@@ -781,7 +792,7 @@ export class RelayBridge {
 		if (typeof msg.id !== "number" || typeof msg.method !== "string") return;
 		void (async () => {
 			const managed = this.#instances.get(conn.instanceId)?.managed;
-			if (!managed) throw new Error("Chrome tab ownership is no longer valid");
+			if (!managed) throw this.stale(conn.leaseId);
 			const finish = managed.beginOperation(conn.leaseId);
 			try {
 				await this.#handleCdpCommand(conn, msg);
@@ -796,9 +807,6 @@ export class RelayBridge {
 	// ---- command routing -------------------------------------------------------
 
 	async #handleCdpCommand(conn: CdpConnection, msg: CdpCommand): Promise<void> {
-		if (this.#instances.get(conn.instanceId)?.managed.tabForLease(conn.leaseId) === undefined) {
-			throw new Error("Chrome tab ownership is no longer valid");
-		}
 		if (msg.method === "Browser.setDownloadBehavior" || msg.method === "Page.setDownloadBehavior") {
 			throw new Error(
 				"Changing download behavior is not supported in existing Chrome. Downloads use this profile's settings; a requested download path has not been applied.",
@@ -993,7 +1001,7 @@ export class RelayBridge {
 	/**
 	 * Every CDP command bound for a tab's root session goes through here so a
 	 * released debugger costs one attach on next use instead of a failed
-	 * command. `banned` (the user dismissed the infobar) still refuses.
+	 * command. `banned` (Chrome refused or revoked the debugger) still refuses.
 	 */
 	async #sendToTab(
 		tab: TabState,
@@ -1001,10 +1009,7 @@ export class RelayBridge {
 		params?: Record<string, unknown>,
 		sessionId?: string,
 	): Promise<unknown> {
-		if (!tab.attached && !(await this.#ensureAttached(tab)))
-			throw new Error(
-				`Chrome debugger could not attach to tab ${tab.tabId} (${tab.url})${tab.banReason ? `: ${tab.banReason}` : ""}`,
-			);
+		if (!tab.attached && !(await this.#ensureAttached(tab))) throw new Error(this.#refused(tab));
 		tab.inflight++;
 		this.#touchTab(tab);
 		try {
@@ -1217,11 +1222,7 @@ export class RelayBridge {
 					return;
 				}
 				if (!(await this.#ensureAttached(tab))) {
-					this.#replyError(
-						conn,
-						msg,
-						`Cannot attach to tab ${tab.tabId} (${tab.url})${tab.banReason ? `: ${tab.banReason}` : ""}`,
-					);
+					this.#replyError(conn, msg, this.#refused(tab));
 					return;
 				}
 				const sessionId = this.#mintSession(conn, parsed.kind, tab);
@@ -1401,7 +1402,7 @@ export class RelayBridge {
 		// attach to drop out of discovery, keeping them unclaimable.
 		if (!INELIGIBLE_URL.test(snap.url) || inst.managed.leaseForTab(snap.tabId) !== undefined)
 			inst.managed.upsert(snap);
-		else inst.managed.remove(snap.tabId);
+		else inst.managed.remove(snap.tabId, UNDEBUGGABLE);
 		if (!tab) {
 			tab = new TabState(inst.instanceId, inst.code, snap.tabId, snap);
 			this.#tabs.set(key, tab);
@@ -1506,7 +1507,7 @@ export class RelayBridge {
 		await this.#rpc({ op: "releaseTab", tabId, close }, inst);
 		// Tracked only because it was leased: with the lease gone a page no
 		// debugger can attach to leaves discovery, so nobody can claim it.
-		if (tab && INELIGIBLE_URL.test(tab.url)) inst.managed.remove(tabId);
+		if (tab && INELIGIBLE_URL.test(tab.url)) inst.managed.remove(tabId, UNDEBUGGABLE);
 	}
 
 	/**
@@ -1630,6 +1631,7 @@ export class RelayBridge {
 		const tab = inst && this.#tabs.get(tabKeyOf(inst.code, tabId));
 		if (!tab) return { attached: false, revoked: "the tab is gone from Chrome" };
 		if (tab.attached) return { attached: true };
+		if (INELIGIBLE_URL.test(tab.url)) return { attached: false, revoked: `the tab ${UNDEBUGGABLE}` };
 		return tab.banned
 			? { attached: false, revoked: tab.banReason ?? describeDetach("target_closed") }
 			: { attached: false };
@@ -1644,11 +1646,13 @@ export class RelayBridge {
 
 	async dialog(leaseId: string, owner: string, options: unknown, signal?: AbortSignal): Promise<DialogJournalState> {
 		const instanceId = this.instanceForLease(leaseId);
-		if (instanceId === undefined) throw new Error("Chrome tab ownership is stale or belongs to another actor.");
+		if (instanceId === undefined) throw this.stale(leaseId);
 		const inst = this.#instance(instanceId);
 		const lease = inst.managed.get(leaseId, owner);
 		const tab = this.#tabs.get(tabKeyOf(inst.code, lease.tab.tabId));
-		if (!tab?.attached) throw new Error("Dialog observation is unavailable: exact tab debugger is not attached");
+		if (!tab) throw this.stale(leaseId);
+		// Like any command, a look at a tab whose debugger went idle reattaches it.
+		if (!tab.attached && !(await this.#ensureAttached(tab))) throw new Error(this.#refused(tab));
 		const request = parseDialogRequest(options);
 		if (!("id" in request)) return tab.dialogs.snapshot();
 		const finish = inst.managed.beginOperation(leaseId);
@@ -1761,6 +1765,16 @@ export class RelayBridge {
 			});
 		tab.attaching = attempt;
 		return await attempt;
+	}
+
+	/** What a call on a tab the debugger cannot reach answers: why first, then where. */
+	#refused(tab: TabState): string {
+		const reason =
+			this.debuggerState(tab.instanceId, tab.tabId).revoked ??
+			(this.#instances.get(tab.instanceId)?.socket
+				? "the attach was interrupted; try again"
+				: "the OMP extension in Chrome is disconnected");
+		return `Chrome refused OMP's debugger on this tab: ${reason} (${shortUrl(tab.url)})`;
 	}
 
 	#eligible(tab: TabState): boolean {

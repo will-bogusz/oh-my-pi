@@ -1,6 +1,24 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, spyOn } from "bun:test";
+import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
+import {
+	acquireChromeTab,
+	browserActorId,
+	explainRevokedChromeControl,
+	type ManagedChromeHandle,
+	releaseDeferredChromeTabsForOwner,
+	requireChromeHandle,
+} from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
+import * as access from "@oh-my-pi/pi-coding-agent/tools/browser/relay/access";
+import type { RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
+import * as daemon from "@oh-my-pi/pi-coding-agent/tools/browser/relay/daemon";
+import {
+	EXPECTED_EXTENSION_BUILD_ID,
+	type InstanceLease,
+} from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 import { ManagedChromeTabs } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/managed-tabs";
-import type { TabSnapshot } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
+import type { RelayToExtMessage, TabSnapshot } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
+import { startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
 
 const tab = (tabId: number): TabSnapshot => ({
 	tabId,
@@ -53,7 +71,7 @@ describe("managed Chrome physical tab ownership", () => {
 		expect(tabs.discover()).toEqual([sibling!]);
 		expect(groups).toEqual([]);
 		expect(revealed).toEqual([]);
-		await expect(tabs.closeTab(first!.id, "owner")).rejects.toThrow("stale");
+		await expect(tabs.closeTab(first!.id, "owner")).rejects.toThrow("was closed by its owner. Discover tabs again.");
 	});
 
 	it("closes adopted and created tabs on request while rejecting another actor's authority", async () => {
@@ -80,7 +98,7 @@ describe("managed Chrome physical tab ownership", () => {
 		const finish = tabs.beginOperation(lease.id);
 		const closing = tabs.closeTab(lease.tab.id, "owner");
 		expect(released).toEqual([]);
-		expect(() => tabs.beginOperation(lease.id)).toThrow("no longer valid");
+		expect(() => tabs.beginOperation(lease.id)).toThrow("being released");
 		expect(() => tabs.claim(lease.tab.id, "other")).toThrow("already owned");
 		finish();
 		await closing;
@@ -172,7 +190,7 @@ describe("managed Chrome physical tab ownership", () => {
 		await Promise.resolve();
 		expect(done).toBe(false);
 		expect(() => tabs.claim(found.id, "another actor")).toThrow("already owned");
-		expect(() => tabs.beginOperation(lease.id)).toThrow("no longer valid");
+		expect(() => tabs.beginOperation(lease.id)).toThrow("being released");
 		finish();
 		await releasing;
 		expect(released).toEqual([[1, false]]);
@@ -221,22 +239,43 @@ describe("managed Chrome physical tab ownership", () => {
 		expect(tabs.discover().map(row => row.tabId)).toEqual([10]);
 	});
 
-	it("invalidates discovery and ownership across removal and transport generations", async () => {
+	it("names why a lease or discovered tab went away, and how to get it back", async () => {
 		const { tabs, invalidated, released } = harness();
 		tabs.upsert(tab(1));
 		const original = tabs.discover()[0]!;
 		const lease = tabs.claim(original.id, "owner");
 		tabs.remove(1);
 		tabs.upsert(tab(1));
-		expect(() => tabs.claim(original.id, "owner")).toThrow("stale");
-		await expect(tabs.reveal(lease.id, "owner")).rejects.toThrow("stale");
+		expect(() => tabs.claim(original.id, "owner")).toThrow(
+			'Chrome tab "Same title" was closed in Chrome. Discover tabs again.',
+		);
+		await expect(tabs.reveal(lease.id, "owner")).rejects.toThrow("was closed in Chrome. Discover tabs again.");
 		const rediscovered = tabs.discover()[0]!;
+		const kept = tabs.claim(rediscovered.id, "owner");
+		await tabs.releaseTab(kept.id, "owner", false);
+		// The page outlived the lease, so the answer is the way back to it.
+		expect(() => tabs.get(kept.id, "owner")).toThrow(
+			`was released by its owner. Claim ${JSON.stringify(rediscovered.id)} again to drive it.`,
+		);
 		const replacement = tabs.claim(rediscovered.id, "owner");
 		tabs.reset();
 		tabs.upsert(tab(1));
-		expect(() => tabs.claim(rediscovered.id, "owner")).toThrow("stale");
-		expect(invalidated).toEqual([lease.id, replacement.id]);
-		expect(released).toEqual([]);
+		expect(() => tabs.claim(rediscovered.id, "owner")).toThrow(
+			"was dropped when the OMP extension in Chrome disconnected. Discover tabs again.",
+		);
+		expect(() => tabs.get(replacement.id, "owner")).toThrow("was dropped when the OMP extension");
+		expect(() => tabs.claim("never-issued", "owner")).toThrow("unknown to this relay");
+		expect(invalidated).toEqual([lease.id, kept.id, replacement.id]);
+		expect(released).toEqual([[1, false]]);
+	});
+
+	it("gives the owner its own lease back on a repeat claim", () => {
+		const { tabs } = harness();
+		tabs.upsert(tab(1));
+		const found = tabs.discover()[0]!;
+		const lease = tabs.claim(found.id, "owner");
+		expect(tabs.claim(found.id, "owner")).toEqual(lease);
+		expect(() => tabs.claim(found.id, "other")).toThrow("already owned");
 	});
 });
 
@@ -255,6 +294,9 @@ it("recovers a dead actor after the last connection closes, without closing its 
 	tabs.disconnected(lease.id, 2);
 	await Bun.sleep(25);
 	expect(tabs.tabForLease(lease.id)).toBeUndefined();
+	expect(() => tabs.get(lease.id, "owner")).toThrow(
+		`with no OMP connection. Claim ${JSON.stringify(lease.tab.id)} again to drive it.`,
+	);
 	expect(tabs.claim(lease.tab.id, "new actor").created).toBe(false);
 	expect(released).toEqual([[lease.tab.tabId, false]]);
 });
@@ -283,4 +325,161 @@ it("keeps orphan authority unavailable while admitted work drains", async () => 
 	finish();
 	await Bun.sleep(0);
 	expect(tabs.claim(lease.tab.id, "other").created).toBe(false);
+});
+
+function toolSession(sessionId: string, settings = Settings.isolated({})): ToolSession {
+	return {
+		cwd: import.meta.dir,
+		hasUI: false,
+		getSessionFile: () => null,
+		getSessionSpawns: () => null,
+		getSessionId: () => sessionId,
+		getAgentId: () => "agent",
+		settings,
+	};
+}
+
+it("explains a raw TargetCloseError with Chrome's reason, and a closed tab with why it went away", async () => {
+	const relay = startRelayServer({ port: 0 });
+	const credential = spyOn(access, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
+	const signIn: TabSnapshot = {
+		tabId: 1,
+		windowId: 1,
+		title: "Sign in",
+		url: "https://accounts.example.com/signin?continue=https%3A%2F%2Fmail.example.com%2F&flowName=GlifWebSignIn",
+		active: false,
+		groupId: -1,
+		pinned: false,
+	};
+	const extension: RelaySocket = {
+		send(raw) {
+			const message = JSON.parse(raw) as RelayToExtMessage;
+			if (message.t !== "rpc") return;
+			queueMicrotask(() =>
+				relay.instances.extMessage(
+					extension,
+					JSON.stringify({ t: "rpcResult", id: message.id, ok: true, result: {} }),
+				),
+			);
+		},
+		close() {},
+	};
+	try {
+		relay.instances.extConnected(extension);
+		relay.instances.extMessage(
+			extension,
+			JSON.stringify({
+				t: "authenticate",
+				auth: { id: "work-profile-fixture", label: "Work", pairingCode: relay.access.issueCode().code },
+			}),
+		);
+		relay.instances.extMessage(
+			extension,
+			JSON.stringify({
+				t: "hello",
+				userAgent: "fixture",
+				browserVersion: "Chrome/150",
+				extensionBuildId: EXPECTED_EXTENSION_BUILD_ID,
+				attachedTabIds: [],
+				tabs: [signIn],
+			}),
+		);
+		const session = toolSession("explain-fixture");
+		const owner = browserActorId(session);
+		const found = relay.instances.discover(owner)[0]!;
+		const handle: ManagedChromeHandle = {
+			id: "explain-handle",
+			label: "Oh My Pi",
+			owner,
+			url: `http://127.0.0.1:${relay.port}`,
+			lease: relay.instances.claim(found.id, owner),
+		};
+		// What puppeteer throws once Chrome drops the debugger under a call.
+		const sessionClosed = Object.assign(
+			new Error("Protocol error (Runtime.callFunctionOn): Session closed. Most likely the page has been closed."),
+			{ name: "TargetCloseError" },
+		);
+		relay.instances.extMessage(extension, JSON.stringify({ t: "detached", tabId: 1, reason: "target_closed" }));
+		const revoked = (await explainRevokedChromeControl(handle, sessionClosed))!.message;
+		// Chrome's reason comes before the address, which keeps only origin and path.
+		expect(revoked).toStartWith(`Chrome revoked OMP's control of "Sign in": `);
+		expect(revoked.indexOf("password manager")).toBeLessThan(revoked.indexOf("https://accounts.example.com/signin"));
+		expect(revoked).not.toContain("continue=");
+		expect(revoked).toContain(`claim ${JSON.stringify(found.id)} again`);
+		// What headless Chrome for Testing produced when a real extension frame landed:
+		// the call in flight, then the next call on the page.
+		for (const inFlight of [
+			Object.assign(new Error("Protocol error (Runtime.evaluate): Detached while handling command."), {
+				name: "ProtocolError",
+			}),
+			new Error("Attempted to use detached Frame '6F2802E97123F398ECC824571324075B'."),
+		])
+			expect((await explainRevokedChromeControl(handle, inFlight))?.message).toBe(revoked);
+		// The user closes the tab: the same failure now says the lease is over, and why.
+		relay.instances.extMessage(extension, JSON.stringify({ t: "tabRemoved", tabId: 1 }));
+		const gone = 'Chrome tab "Sign in" was closed in Chrome. Discover tabs again.';
+		expect((await explainRevokedChromeControl(handle, sessionClosed))?.message).toBe(gone);
+		expect(() => requireChromeHandle(handle.id, session)).toThrow(gone);
+	} finally {
+		credential.mockRestore();
+		relay.stop();
+	}
+});
+
+it("replaces the handle of a tab its actor claims again instead of refusing the claim", async () => {
+	// A tab claimed across an open dialog needs no page worker, which keeps this to the relay wire.
+	const lease: InstanceLease = {
+		id: "held-lease",
+		targetId: "PAGE7",
+		created: false,
+		browserId: "profile",
+		browserLabel: "Work",
+		dialog: {
+			status: "open",
+			dialog: { id: "pending", type: "alert", message: "Wait", url: "https://fixture.test", defaultPrompt: "" },
+		},
+		tab: {
+			...tab(7),
+			title: "Review",
+			id: "page-7",
+			browserId: "profile",
+			browserLabel: "Work",
+			ownership: "this_actor",
+		},
+	};
+	const server = Bun.serve({
+		hostname: "127.0.0.1",
+		port: 0,
+		async fetch(request) {
+			if (new URL(request.url).pathname === "/health") return Response.json({ service: "omp-browser", protocol: 2 });
+			const body = (await request.json()) as { action?: string };
+			// The relay answers a repeat claim by the same actor with the lease it already holds.
+			if (body.action === "claim") return Response.json(lease);
+			return Response.json({});
+		},
+	});
+	const ensure = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+	const token = spyOn(access, "readRelayControlToken").mockReturnValue("fixture-token");
+	const session = toolSession(
+		"reclaim-fixture",
+		Settings.isolated({
+			"browser.enabled": true,
+			"browser.relay": true,
+			"browser.relayUrl": `http://127.0.0.1:${server.port}`,
+		}),
+	);
+	try {
+		const first = await acquireChromeTab(session, { action: "claim", id: "page-7", timeoutMs: 1000 });
+		const second = await acquireChromeTab(session, { action: "claim", id: "page-7", timeoutMs: 1000 });
+		expect(second.lease.id).toBe(first.lease.id);
+		expect(requireChromeHandle(second.id, session)).toBe(second);
+		expect(() => requireChromeHandle(first.id, session)).toThrow(
+			'Chrome tab "Review" was claimed again, which replaced this handle. Claim "page-7" again to drive it.',
+		);
+	} finally {
+		await releaseDeferredChromeTabsForOwner("reclaim-fixture");
+		token.mockRestore();
+		ensure.mockRestore();
+		server.stop(true);
+	}
 });
