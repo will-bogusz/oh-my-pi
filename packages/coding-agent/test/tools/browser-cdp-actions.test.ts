@@ -6,8 +6,10 @@ import type {
 	WorkerInbound,
 	WorkerOutbound,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
+import { pressChord } from "@oh-my-pi/pi-coding-agent/tools/browser/cdp";
+import { BrowserEmulationController } from "@oh-my-pi/pi-coding-agent/tools/browser/emulation";
 import { WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
-import puppeteer, { type Browser } from "puppeteer-core";
+import puppeteer, { type Browser, type CDPSession, type Page } from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
@@ -153,9 +155,12 @@ const PAGE_CHURN = `<!doctype html><title>Churn</title><h1>Churn</h1>
 <script>setTimeout(() => location.href = "/churn?" + Date.now(), 150)</script>`;
 
 // The restart is bounded by the one settle budget: a page that never stops
-// navigating exhausts it and observe() says exactly that, instead of looping.
+// navigating exhausts it once and is never presented as settled. Whether any
+// read outlived one of its 150 ms documents is timing, so either answer is
+// right: the last complete tree marked as still navigating, or, with none,
+// the observe-again error.
 it.skipIf(!CHROMIUM_AVAILABLE)(
-	"gives up with the observe-again error when the page never stops navigating",
+	"never presents a page that never stops navigating as settled",
 	async () => {
 		const server = Bun.serve({
 			hostname: "127.0.0.1",
@@ -163,13 +168,109 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			fetch: () => new Response(PAGE_CHURN, { headers: { "content-type": "text/html" } }),
 		});
 		try {
-			await withWorker([], async ({ runError, goto }) => {
+			await withWorker([], async ({ run, goto }) => {
 				await goto(`http://127.0.0.1:${server.port}/churn`);
 				const started = Date.now();
-				const message = await runError(`await tab.observe();`);
-				expect(message).toContain("The page changed while observing it. Observe again.");
+				const outcome = await run<string>(
+					`try { return (await tab.observe({ diff: false })).tree.split("\\n")[0]; } catch (error) { return error.message; }`,
+				);
+				expect(outcome).toMatch(
+					/^(url: http:\/\/127\.0\.0\.1:\d+\/churn\?\d+ \|.*\| still navigating|The page changed while observing it)/,
+				);
 				// The budget is spent once, not once per navigation.
 				expect(Date.now() - started).toBeLessThan(10_000);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
+const SPA_ROUTER = `<!doctype html><title>Router</title><h1>Router</h1><p id="route">Route 0</p>
+<script>let n = 0; setInterval(() => { history.pushState(null, "", "/spa/" + ++n); document.getElementById("route").textContent = "Route " + n; }, 100)</script>`;
+
+// A client-side router moves the URL without replacing the document, so a read
+// a pushState lands in is still a read of the page the caller is on. Only a new
+// document sends observe() back to collect again.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"observes a page whose client-side router keeps pushing history entries",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(SPA_ROUTER, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/spa`);
+				const tree = await run<string>(`return (await tab.observe({ diff: false })).tree;`);
+				const [header] = tree.split("\n");
+				expect(header).toMatch(/^url: http:\/\/127\.0\.0\.1:\d+\/spa\/\d+ \| title: Router /);
+				expect(header).not.toContain("still navigating");
+				expect(tree).toContain("Router");
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
+const INTERSTITIAL = `<!doctype html><title>Signing in</title><p>Loading your account</p>
+<script>setTimeout(() => location.replace("/hop/" + Date.now()), 700)</script>`;
+
+// A chain of loading pages never holds one document for the whole settle
+// budget, yet every read of it completes. The last complete tree comes back
+// marked as still navigating, instead of an error that observing again repeats.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"returns the last complete tree, marked as still navigating, when the page keeps replacing its document",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(INTERSTITIAL, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/hop/0`);
+				const tree = await run<string>(`return (await tab.observe({ diff: false })).tree;`);
+				expect(tree).toMatch(/^url: http:\/\/127\.0\.0\.1:\d+\/hop\/\d+ \|.*\| still navigating/m);
+				expect(tree).toContain("Loading your account");
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
+const LOST_TAB = `<!doctype html><title>Lost</title><p>Loading forever</p>`;
+
+// A session that closes with nothing taking its place is a lost tab, not a
+// navigation: observe() fails with that, instead of spending the settle budget
+// and sending the model to observe a tab that is gone.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"fails with the lost tab, not a page change, when the tab closes mid-observation",
+	async () => {
+		const closing = Promise.withResolvers<void>();
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: request => {
+				if (new URL(request.url).pathname === "/close-me") closing.resolve();
+				return new Response(LOST_TAB, { headers: { "content-type": "text/html" } });
+			},
+		});
+		try {
+			await withWorker([], async ({ browser, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/lost`);
+				// The page stays busy, so observe() is still collecting when the tab closes.
+				const failed = runError(`await tab.evaluate(() => { fetch("/close-me"); }); await tab.observe();`);
+				await closing.promise;
+				const page = (await browser.pages()).find(candidate => candidate.url().endsWith("/lost"));
+				await page!.close();
+				expect(await failed).not.toContain("The page changed while observing it");
 			});
 		} finally {
 			server.stop(true);
@@ -325,6 +426,66 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	60_000,
 );
 
+const SHORTCUT = process.platform === "darwin" ? "Meta" : "Control";
+
+// On macOS select-all, undo and redo are app-menu commands a CDP key event
+// never reaches, so the chord used to report success and leave the text alone.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"selects all, undoes and redoes with the platform's editing chords",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () =>
+				new Response(`<!doctype html><title>Edit</title><input aria-label="Field">`, {
+					headers: { "content-type": "text/html" },
+				}),
+		});
+		try {
+			await withWorker([], async ({ run, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				const values = await run<string[]>(
+					`const { elements } = await tab.observe();
+					 const field = await tab.ref(elements.find(e => e.role === "textbox").ref);
+					 const value = () => tab.evaluate(() => document.querySelector("input").value);
+					 await field.type("abc");
+					 await field.press("${SHORTCUT}+a");
+					 await field.type("x");
+					 const replaced = await value();
+					 await field.press("${SHORTCUT}+z");
+					 const undone = await value();
+					 await field.press("Shift+${SHORTCUT}+z");
+					 return [replaced, undone, await value()];`,
+				);
+				expect(values).toEqual(["x", "abc", "x"]);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
+// The clipboard chords cannot be run against the real pasteboard here, so the
+// macOS contract is checked where it is made: the key-down names the command.
+it("names the editor command on macOS editing chords, including the clipboard helpers", async () => {
+	const commands: unknown[] = [];
+	const session = {
+		send: async (method: string, params: { type: string; commands?: string[] }) => {
+			if (method === "Input.dispatchKeyEvent" && params.commands) commands.push(...params.commands);
+			return {};
+		},
+	} as unknown as CDPSession;
+	const page = { on() {}, url: () => "about:blank", mainFrame: () => ({ client: session }) } as unknown as Page;
+	const emulation = new BrowserEmulationController(page, {}, {}, "");
+	await emulation.clipboardCopy();
+	await emulation.clipboardPaste();
+	for (const chord of ["Meta+x", "Meta+a", "Meta+z", "Shift+Meta+z", "Meta+b", "Control+c", "Alt+Meta+z"]) {
+		await pressChord(session, chord);
+	}
+	expect(commands).toEqual(process.platform === "darwin" ? ["copy", "paste", "cut", "selectAll", "undo", "redo"] : []);
+});
+
 const TALL_PAGE = `<!doctype html><title>Tall</title>
 <button id="top">Visible button</button>
 <div style="height:4000px"></div>
@@ -388,6 +549,70 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 				expect(hits).toHaveLength(5);
 				expect(new Set(hits).size).toBe(1);
 				expect(hits[0]).toBe("120,55");
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
+const PRESS_PAGE = `<!doctype html><title>Press</title>
+<style>body{margin:20px;font:20px/24px monospace}</style>
+<body data-hits="">
+<p><a href="#" style="font-size:0;padding:12px;background:red">Settings</a></p>
+<p><span style="display:inline-block;transform:rotate(45deg)"><a href="#" style="font-size:0;padding:10px;background:red">Rotated</a></span></p>
+<p style="width:12ch">xxxxxxxx <a href="#">ab cd</a> yyyyyyyyy</p>
+<button id="gone">Gone</button>
+<div id="menu"><button>Inside</button></div>
+<button id="invisible">Invisible</button>
+<button id="flat">Flat</button>
+<script>document.addEventListener("click", event => {
+  event.preventDefault();
+  document.body.dataset.hits += (event.target.textContent || event.target.tagName) + ",";
+})</script>`;
+
+// A press targets the element's first fragment with area. An icon link has
+// only padding (its content box is 0x0), a rotated one only a transformed
+// quad, and a link wrapped across lines has a bounding-box centre that lands
+// on the paragraph. When nothing can be pressed, the refusal says why.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"clicks padded, transformed and wrapped links on the link, and names why a hidden one cannot be clicked",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(PRESS_PAGE, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				const hits = await run<string>(
+					`const { elements } = await tab.observe();
+					 for (const name of ["Settings", "Rotated", "ab cd"]) await (await tab.ref(elements.find(e => e.name === name).ref)).click();
+					 return await tab.evaluate(() => document.body.dataset.hits);`,
+				);
+				expect(hits).toBe("Settings,Rotated,ab cd,");
+				const refs = await run<Record<string, string>>(
+					`const { elements } = await tab.observe({ diff: false });
+					 await tab.evaluate(() => {
+						 document.getElementById("gone").style.display = "none";
+						 document.getElementById("menu").style.display = "none";
+						 document.getElementById("invisible").style.visibility = "hidden";
+						 Object.assign(document.getElementById("flat").style, { width: "0", height: "0", padding: "0", border: "0", overflow: "hidden" });
+					 });
+					 return Object.fromEntries(elements.map(e => [e.name, e.ref]));`,
+				);
+				const click = (name: string) => runError(`await (await tab.ref(${JSON.stringify(refs[name])})).click();`);
+				expect(await click("Gone")).toContain("has no box to act on: it has display:none");
+				expect(await click("Inside")).toContain(
+					"has no box to act on: it is inside <div#menu>, which has display:none",
+				);
+				expect(await click("Invisible")).toContain("blocked: it has visibility:hidden");
+				expect(await click("Flat")).toContain("has no box to act on: it is zero-sized");
+				expect(await run<string>("return await tab.evaluate(() => document.body.dataset.hits);")).toBe(
+					"Settings,Rotated,ab cd,",
+				);
 			});
 		} finally {
 			server.stop(true);

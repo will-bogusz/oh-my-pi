@@ -123,7 +123,7 @@ it("closes discovered tabs through JS and Python without page attachment, across
 		expect([...personal.tabs.keys()]).toEqual([1, 2]);
 		expect(work.requests.map(request => request.op)).toEqual(["queryTabs", "releaseTab"]);
 		expect(personal.requests).toEqual([]);
-		await expect(vm.runInContext("browser.closeTab(target.id)", context)).rejects.toThrow("stale");
+		await expect(vm.runInContext("browser.closeTab(target.id)", context)).rejects.toThrow("was closed by its owner");
 
 		const python = await executePython(
 			`tabs = await browser.discover(browserId="personal-profile-fixture")

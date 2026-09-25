@@ -1,5 +1,6 @@
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { Device, Frame, NetworkConditions, Page, Permission } from "puppeteer-core";
+import { pressChord } from "./cdp";
 import { applyViewport } from "./launch";
 
 /** Viewport dimensions accepted by runtime emulation. */
@@ -103,6 +104,9 @@ function pageOrigin(page: Page): string | null {
 		return null;
 	}
 }
+
+/** The modifier of the platform's editing chords; `pressChord` makes them edit on macOS too. */
+const SHORTCUT_MODIFIER = process.platform === "darwin" ? "Meta" : "Control";
 
 /** Apply a page-scoped user-agent override that remains active across navigations. */
 export async function applyUserAgentOverride(page: Page, userAgent: string): Promise<void> {
@@ -240,26 +244,14 @@ export class BrowserEmulationController {
 	async clipboardCopy(): Promise<ClipboardActionResult> {
 		this.#clipboardShim = undefined;
 		await this.#grantPermissions(["clipboard-read", "clipboard-write"]);
-		const modifier = process.platform === "darwin" ? "Meta" : "Control";
-		await this.#page.keyboard.down(modifier);
-		try {
-			await this.#page.keyboard.press("c");
-		} finally {
-			await this.#page.keyboard.up(modifier);
-		}
+		await pressChord(this.#page.mainFrame().client, `${SHORTCUT_MODIFIER}+c`);
 		return { source: "page" };
 	}
 
 	/** Paste the page clipboard into the focused control using the platform keyboard shortcut. */
 	async clipboardPaste(): Promise<ClipboardActionResult> {
 		await this.#grantPermissions(["clipboard-read", "clipboard-write"]);
-		const modifier = process.platform === "darwin" ? "Meta" : "Control";
-		await this.#page.keyboard.down(modifier);
-		try {
-			await this.#page.keyboard.press("v");
-		} finally {
-			await this.#page.keyboard.up(modifier);
-		}
+		await pressChord(this.#page.mainFrame().client, `${SHORTCUT_MODIFIER}+v`);
 		return { source: "page" };
 	}
 

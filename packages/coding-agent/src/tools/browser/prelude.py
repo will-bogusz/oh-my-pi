@@ -228,6 +228,14 @@ def _make_browser():
             return await self._method("screenshot", args, kwargs)
 
 
+    class _Observation(dict):
+        """An observation reads as its tree: `str(obs)`, `f"{obs}"`, `print(obs)`."""
+
+        __slots__ = ()
+
+        def __str__(self):
+            return self["tree"]
+
     class _Tab:
         __slots__ = ("_name", "_handle", "_snapshot", "_initial", "_target")
 
@@ -235,6 +243,8 @@ def _make_browser():
             self._name = _require_name(name, "tab name")
             self._handle = handle
             self._initial = initial or {}
+            if isinstance(self._initial.get("initialObservation"), dict):
+                self._initial["initialObservation"] = _Observation(self._initial["initialObservation"])
             self._snapshot = (self._initial.get("initialObservation") or {}).get("snapshot")
             target = self._initial.get("target")
             if target:
@@ -285,6 +295,7 @@ def _make_browser():
                 self._handle,
             )
             if method == "observe" and isinstance(value, dict):
+                value = _Observation(value)
                 self._snapshot = value.get("snapshot")
             if method == "goto":
                 self._snapshot = None
@@ -626,24 +637,18 @@ def _make_browser():
                 raise TypeError("tab.frame() expects a non-empty selector, name, or URL")
             return _Frame(self._name, selector_or_name_or_url, self._handle)
 
-        async def run(self, code, *, timeout=None):
+        async def run(self, code, **options):
             """Run a JavaScript code string in this tab and return its value."""
             if not isinstance(code, str) or not code.strip():
                 raise TypeError("tab.run() expects a JavaScript code string")
-            details = await _invoke(
-                "run",
-                {"name": self._name, "code": code, "timeout": timeout, "handle": self._handle},
-            )
+            details = await _invoke("run", {**options, "name": self._name, "code": code, "handle": self._handle})
             return details.get("value")
 
-        async def close(self, *, kill=None, timeout=None):
+        async def close(self, **options):
             """Close this tab handle's host-side tab."""
             if (_identities_by_name.get(self._name) or (None,))[0] == self._handle:
                 _identities_by_name.pop(self._name, None)
-            await _invoke(
-                "close",
-                {"name": self._name, "kill": kill, "timeout": timeout, "handle": self._handle},
-            )
+            await _invoke("close", {**options, "name": self._name, "handle": self._handle})
 
         async def reveal(self):
             await _invoke("reveal", {"handle": self._handle})
@@ -653,56 +658,19 @@ def _make_browser():
                 _identities_by_name.pop(self._name, None)
             await _invoke("release", {"handle": self._handle})
 
+    # Verb options (and tab.run/tab.close's) pass through whole: the host checks
+    # them against the declared API and names the keys a verb takes.
     class _Browser:
         __slots__ = ()
 
         def __repr__(self):
             return "<browser>"
 
-        async def open(
-            self,
-            *,
-            name=None,
-            url=None,
-            app=None,
-            viewport=None,
-            wait_until=None,
-            dialogs=None,
-            allowed_domains=None,
-            init_scripts=None,
-            downloads=None,
-            user_agent=None,
-            ignore_https_errors=None,
-            allow_file_access=None,
-            headed=None,
-            timeout=None,
-            persist=None,
-            observation=None,
-        ):
+        async def open(self, **options):
             """Open or attach to a browser tab and return its handle."""
-            if name is not None:
-                _require_name(name, "browser.open()")
-            details = await _invoke(
-                "open",
-                {
-                    "name": name,
-                    "url": url,
-                    "app": app,
-                    "viewport": viewport,
-                    "wait_until": wait_until,
-                    "dialogs": dialogs,
-                    "allowed_domains": allowed_domains,
-                    "init_scripts": init_scripts,
-                    "downloads": downloads,
-                    "user_agent": user_agent,
-                    "ignore_https_errors": ignore_https_errors,
-                    "allow_file_access": allow_file_access,
-                    "headed": headed,
-                    "timeout": timeout,
-                    "persist": persist,
-                    "observation": observation,
-                },
-            )
+            if options.get("name") is not None:
+                _require_name(options["name"], "browser.open()")
+            details = await _invoke("open", options)
             opened_name = details.get("name")
             if not isinstance(opened_name, str) or not opened_name:
                 raise RuntimeError("browser.open() returned an invalid tab name")
@@ -715,30 +683,30 @@ def _make_browser():
             """Print the typed browser API: every interface and signature the handles expose."""
             await _invoke("help", {})
 
-        async def discover(self, *, browserId=None, full=None):
-            return (await _invoke("discover", {"browserId": browserId, "full": full})).get("value")
+        async def discover(self, **options):
+            return (await _invoke("discover", options)).get("value")
 
-        async def closeTab(self, tab_id, *, browserId=None, timeout=None):
+        async def closeTab(self, tab_id, **options):
             if not isinstance(tab_id, str) or not tab_id:
                 raise TypeError("browser.closeTab expects an exact discovered tab id")
-            await _invoke("closeTab", {"id": tab_id, "browserId": browserId, "timeout": timeout})
+            await _invoke("closeTab", {**options, "id": tab_id})
 
-        async def create(self, *, url=None, label=None, timeout=None, browserId=None, observation=None):
-            details = await _invoke("create", {"url": url, "label": label, "timeout": timeout, "browserId": browserId, "observation": observation})
+        async def create(self, **options):
+            details = await _invoke("create", options)
             return _Tab(details.get("name"), details.get("handle"), details.get("value"))
 
-        async def claim(self, tab_id, *, label=None, timeout=None, browserId=None, observation=None):
-            details = await _invoke("claim", {"id": tab_id, "label": label, "timeout": timeout, "browserId": browserId, "observation": observation})
+        async def claim(self, tab_id, **options):
+            details = await _invoke("claim", {**options, "id": tab_id})
             return _Tab(details.get("name"), details.get("handle"), details.get("value"))
 
-        async def getTab(self, selector, *, label=None, timeout=None, observation=None):
+        async def getTab(self, selector, **options):
             if isinstance(selector, str):
                 target = {"id": selector}
             elif isinstance(selector, dict):
                 target = {"selector": selector}
             else:
                 raise TypeError("browser.getTab expects an exact discovery id or a selector dictionary")
-            details = await _invoke("claim", {**target, "label": label, "timeout": timeout, "observation": observation})
+            details = await _invoke("claim", {**options, **target})
             return _Tab(details.get("name"), details.get("handle"), details.get("value"))
 
         def tab(self, name="main"):
@@ -754,14 +722,11 @@ def _make_browser():
             value = details.get("value")
             return value if isinstance(value, list) else []
 
-        async def close(self, *, name=None, all=None, kill=None, timeout=None):
+        async def close(self, **options):
             """Close one or all managed browser tabs."""
-            if name is not None:
-                _require_name(name, "browser.close()")
-            await _invoke(
-                "close",
-                {"name": name, "all": all, "kill": kill, "timeout": timeout},
-            )
+            if options.get("name") is not None:
+                _require_name(options["name"], "browser.close()")
+            await _invoke("close", options)
 
     return _Browser()
 

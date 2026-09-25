@@ -1,6 +1,7 @@
 /** Authenticated local browser broker: paired browsers share one multi-instance CDP bridge. */
 import { RelayAccess } from "./access";
 import { BrowserInstances } from "./instances";
+import { ChromeTabGoneError } from "./managed-tabs";
 import { RELAY_PROTOCOL_VERSION, RELAY_SERVICE_NAME } from "./protocol";
 
 export interface RelayServerOptions {
@@ -131,14 +132,21 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 					}
 					return Response.json({});
 				} catch (error) {
-					return Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 409 });
+					// `gone` tells the client this lease or tab id is over, so it can retire its handle.
+					return Response.json(
+						{
+							error: error instanceof Error ? error.message : String(error),
+							gone: error instanceof ChromeTabGoneError || undefined,
+						},
+						{ status: 409 },
+					);
 				}
 			}
 			const managedVersion = /^\/managed\/([^/]+)\/json\/version$/.exec(route);
 			if (managedVersion) {
 				const leaseId = managedVersion[1]!;
 				const instance = instances.forLease(leaseId);
-				if (!instance) return new Response("Stale tab ownership", { status: 410 });
+				if (!instance) return new Response(instances.bridge.stale(leaseId).message, { status: 410 });
 				return Response.json(
 					instances.bridge.versionInfo(instance.id, `ws://${host}/cdp?lease=${encodeURIComponent(leaseId)}`),
 				);
@@ -146,7 +154,8 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 			if (route === "/cdp") {
 				const leaseId = url.searchParams.get("lease");
 				if (!leaseId) return new Response("Acquire an exact tab before connecting", { status: 403 });
-				if (!instances.forLease(leaseId)) return new Response("Stale tab ownership", { status: 410 });
+				if (!instances.forLease(leaseId))
+					return new Response(instances.bridge.stale(leaseId).message, { status: 410 });
 				if (srv.upgrade(req, { data: { role: "cdp", leaseId } })) return undefined;
 				return new Response("WebSocket upgrade required", { status: 426 });
 			}

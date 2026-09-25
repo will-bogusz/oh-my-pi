@@ -224,6 +224,7 @@ import {
 	setPageStorage,
 	type StorageKind,
 } from "./storage-state";
+import { withDeclaredArguments } from "./declared-arguments";
 import { assertTabPressArgs } from "./tab-arguments";
 import {
 	type BrowserMetrics,
@@ -1083,6 +1084,19 @@ const INITIAL_READY_BUDGET_MS = 10_000;
 const SNAPSHOT_READ_FLOOR_MS = 1_500;
 /** A snapshot read that outlived the settle deadline; the caller retries it as a page change. */
 class SnapshotReadTimeout extends Error {}
+/**
+ * A snapshot read bounded by the settle deadline. One that never answers is
+ * Chrome replacing the document under it, so it costs what is left of the
+ * settle budget, not the op ceiling; the floor gives a read issued at the
+ * deadline its chance.
+ */
+function settleRead<T>(what: string, read: Promise<T>, deadline: number): Promise<T> {
+	return withTimeout(
+		read,
+		Math.max(deadline - Date.now(), SNAPSHOT_READ_FLOOR_MS),
+		new SnapshotReadTimeout(`${what} did not answer before the page settled`),
+	);
+}
 /** DOM-mutation quiet window that counts as settled. */
 const SETTLE_DOM_QUIET_MS = 300;
 /** Network idle window that counts as settled. */
@@ -1115,6 +1129,33 @@ async function settlePage(page: Page, signal: AbortSignal | undefined, budgetMs:
 		network.abort();
 		signal?.removeEventListener("abort", onAbort);
 	}
+}
+
+/** The document the main frame shows: the session serving it and the loader that committed it. */
+interface MainDocument {
+	session: CDPSession;
+	loaderId: string;
+}
+
+/**
+ * Asked of Chrome, not inferred from events: puppeteer reports a
+ * same-document navigation (pushState, a fragment) as `framenavigated` too,
+ * but only a new document gets a new loader.
+ */
+async function mainDocument(page: Page, signal?: AbortSignal): Promise<MainDocument> {
+	const session = page.mainFrame().client;
+	const { frameTree } = await untilAborted(signal, () => session.send("Page.getFrameTree"));
+	return { session, loaderId: frameTree.frame.loaderId };
+}
+
+/**
+ * Whether the main frame moved on from `before`: a new document, or a new
+ * session serving it. Read through the session serving it now, so a tab that
+ * no longer answers rejects instead of reading as a navigation.
+ */
+async function leftDocument(page: Page, before: MainDocument, signal?: AbortSignal): Promise<boolean> {
+	const now = await mainDocument(page, signal);
+	return now.session !== before.session || now.loaderId !== before.loaderId;
 }
 
 /**
@@ -1619,7 +1660,13 @@ export class WorkerCore {
 			runtime.setRunScope({
 				page: bindRunFacade(runPage.page, signal, active.rejectionOwner, onFloatingRejection),
 				browser: bindRunFacade(browser, signal, active.rejectionOwner, onFloatingRejection),
-				tab: bindRunFacade(tabApi, signal, active.rejectionOwner, onFloatingRejection),
+				// Unknown option keys refuse instead of being ignored: the tab is its declared type.
+				tab: bindRunFacade(
+					withDeclaredArguments("BrowserTabRealm", tabApi),
+					signal,
+					active.rejectionOwner,
+					onFloatingRejection,
+				),
 				assert: (cond: unknown, text?: string): void => {
 					if (!cond) throw new ToolError(text ?? "Assertion failed");
 				},
@@ -2035,6 +2082,8 @@ export class WorkerCore {
 			observe: opts =>
 				op("tab.observe()", quickOpMs, async sig => {
 					const observation = await this.#collectObservation({ ...opts, refs: session.refs, signal: sig });
+					// `String(observation)` is the tree; non-enumerable, so it never crosses the run boundary.
+					Object.defineProperty(observation, "toString", { value: () => observation.tree });
 					if (opts?.display !== false) output.push({ type: "text", text: printableTree(observation.tree) });
 					active.presented = observation;
 					return observation;
@@ -2477,32 +2526,64 @@ export class WorkerCore {
 	}
 
 	/**
-	 * Settle the page, then snapshot it — restarting whenever the main frame
-	 * navigates mid-collection. `observe()` promises the settled tree of the
-	 * document the caller ends up on, and "click, then observe" in one cell is
-	 * the ordinary way to use it, so a navigation is a reason to look again, not
-	 * a failure. Every attempt shares the one settle budget; only exhausting it
-	 * fails, and it never grows.
+	 * Settle the page, then snapshot it — collecting again whenever the main
+	 * frame moves to a new document mid-collection. `observe()` promises the
+	 * settled tree of the document the caller ends up on, and "click, then
+	 * observe" in one cell is the ordinary way to use it, so a navigation is a
+	 * reason to look again, not a failure. A read that does not answer before
+	 * the deadline counts as one too: Chrome is swapping the document under it.
+	 * A same-document navigation (pushState, a fragment) is not one: the tree
+	 * read across it is still the page's. Every attempt shares the one settle
+	 * budget, which never grows. When it runs out on a page that keeps
+	 * replacing its document, the last complete read comes back marked as
+	 * still navigating; only a page that never held a document through one
+	 * read fails.
 	 */
 	async #settledSnapshot(
 		page: Page,
 		includeAll: boolean,
 		deadline: number,
 		signal?: AbortSignal,
-	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string }> {
-		for (;;) {
-			const observationId = this.#observationId;
-			const remaining = deadline - Date.now();
-			if (remaining <= 0) throw new ToolError("The page changed while observing it. Observe again.");
-			const attempt = await this.#snapshotOnce(page, includeAll, remaining, deadline, signal).catch(error => {
-				// The document answering our calls went away: the only cause is a
-				// navigation, which the next attempt collects instead.
-				if (error instanceof SnapshotReadTimeout || isDocumentGoneError(error) || observationId !== this.#observationId)
-					return null;
+	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string; navigating: boolean }> {
+		let latest: { snapshot: AxNode; layout: PageLayout; url: string; title: string } | undefined;
+		let navigated = false;
+		// The frame tree is a renderer read like the snapshot's own: one that does
+		// not answer before the deadline is a commit in flight, so it counts as a move.
+		const left = (before: MainDocument): Promise<boolean> =>
+			settleRead("frame tree", leftDocument(page, before, signal), deadline).catch(error => {
+				if (error instanceof SnapshotReadTimeout) return true;
 				throw error;
 			});
-			if (attempt && observationId === this.#observationId) return attempt;
+		while (Date.now() < deadline) {
+			const before = await settleRead("frame tree", mainDocument(page, signal), deadline).catch(error => {
+				if (error instanceof SnapshotReadTimeout) return undefined;
+				throw error;
+			});
+			if (!before) {
+				navigated = true;
+				continue;
+			}
+			const read = await this.#snapshotOnce(page, includeAll, deadline - Date.now(), deadline, signal).catch(
+				async error => {
+					// A read that did not answer in time, a call the old document
+					// could no longer answer, or any failure while the main frame
+					// moved on, is the navigation itself: the next attempt reads the
+					// new document. A tab that no longer answers is lost, and its own
+					// error says why.
+					if (error instanceof SnapshotReadTimeout) return null;
+					const moved = await left(before).catch(() => undefined);
+					if (moved !== undefined && (moved || isDocumentGoneError(error))) return null;
+					throw error;
+				},
+			);
+			// A read of the document the page still shows. It is provisional only
+			// when the budget ran out before this document had its settle.
+			if (read && !(await left(before))) return { ...read, navigating: navigated && Date.now() >= deadline };
+			navigated = true;
+			latest = read ?? latest;
 		}
+		if (latest) return { ...latest, navigating: true };
+		throw new ToolError("The page changed while observing it. Observe again.");
 	}
 
 	/**
@@ -2535,25 +2616,32 @@ export class WorkerCore {
 	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string }> {
 		const session = page.mainFrame().client;
 		await settlePage(page, signal, budgetMs);
-		// A read that never answers is Chrome replacing the document under it, so
-		// it costs what is left of the settle budget and is retried as a page
-		// change — not the op ceiling, which used to be the whole 20 s.
-		const bounded = <T>(what: string, read: Promise<T>): Promise<T> =>
-			withTimeout(
-				read,
-				Math.max(deadline - Date.now(), SNAPSHOT_READ_FLOOR_MS),
-				new SnapshotReadTimeout(`${what} did not answer before the page settled`),
-			);
-		let snapshot = await bounded("accessibility tree", snapshotAccessibility(page, { includeAll }, signal));
+		let snapshot = await settleRead(
+			"accessibility tree",
+			snapshotAccessibility(page, { includeAll }, signal),
+			deadline,
+		);
 		while (hasBusyIndicator(snapshot)) {
 			const remaining = deadline - Date.now();
 			if (remaining <= 0) break;
 			await untilAborted(signal, () => Bun.sleep(Math.min(SETTLE_BUSY_POLL_MS, remaining)));
-			snapshot = await bounded("accessibility tree", snapshotAccessibility(page, { includeAll }, signal));
+			// A re-read that does not answer ends the wait: the complete tree
+			// already read stands, and the caller's document check decides
+			// whether it is still the page's.
+			const next = await settleRead(
+				"accessibility tree",
+				snapshotAccessibility(page, { includeAll }, signal),
+				deadline,
+			).catch(error => {
+				if (error instanceof SnapshotReadTimeout) return undefined;
+				throw error;
+			});
+			if (!next) break;
+			snapshot = next;
 		}
 		const [layout, entry] = await Promise.all([
-			bounded("page layout", pageLayout(session, signal)),
-			bounded("navigation entry", currentEntry(session, signal)),
+			settleRead("page layout", pageLayout(session, signal), deadline),
+			settleRead("navigation entry", currentEntry(session, signal), deadline),
 		]);
 		return { snapshot, layout, url: entry.url, title: entry.title };
 	}
@@ -2643,7 +2731,12 @@ export class WorkerCore {
 			: undefined;
 		this.#invalidateRefs();
 		const deadline = Date.now() + SETTLE_BUDGET_MS;
-		const { snapshot, layout, url, title } = await this.#settledSnapshot(page, includeAll, deadline, signal);
+		const { snapshot, layout, url, title, navigating } = await this.#settledSnapshot(
+			page,
+			includeAll,
+			deadline,
+			signal,
+		);
 		const observationId = this.#observationId;
 
 		let nodes = flattenSnapshot(snapshot, { includeAll });
@@ -2697,7 +2790,13 @@ export class WorkerCore {
 		};
 		const focusedNode = actionable.find(node => node.ax!.focused === true);
 		const focused = focusedNode ? `e${refByNode.get(focusedNode)}` : undefined;
-		const header: TreeHeader = { url, title, scroll: { y: scroll.y, scrollHeight: scroll.scrollHeight }, focused };
+		const header: TreeHeader = {
+			url,
+			title,
+			scroll: { y: scroll.y, scrollHeight: scroll.scrollHeight },
+			focused,
+			navigating,
+		};
 		const previous = this.#lastTree;
 		const filter = JSON.stringify({ includeAll, viewportOnly, compact, selector: selector ?? null });
 		// Diff only against the same document observed with the same filter;

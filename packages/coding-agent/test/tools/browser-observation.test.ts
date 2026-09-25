@@ -223,12 +223,14 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			// Only an out-of-process iframe shows up as its own target; a same-process frame has none.
 			expect(browser.targets().some(candidate => candidate.url() === widgetUrl)).toBe(true);
 
-			const first = await run<{ tree: string; refs: Record<string, string>; focused?: string }>(
+			const first = await run<{ tree: string; text: string; refs: Record<string, string>; focused?: string }>(
 				"first",
 				`const observation = await tab.observe();
-				 return { tree: observation.tree, refs: Object.fromEntries(observation.elements.map(e => [e.name, e.ref])), focused: observation.focused };`,
+				 return { tree: observation.tree, text: String(observation), refs: Object.fromEntries(observation.elements.map(e => [e.name, e.ref])), focused: observation.focused };`,
 			);
 			const tree = first.returnValue.tree;
+			// Run-scope code reads the value as its tree too.
+			expect(first.returnValue.text).toBe(tree);
 			expect(tree).toContain('heading "401(k)"');
 			expect(tree).toContain('text "Account ID: 23I1202C-F8V93"');
 			expect(tree).toContain(`[iframe localhost:${widget.port}]`);
