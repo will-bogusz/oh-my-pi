@@ -18,7 +18,7 @@ Ownership
 - Several profiles (`browser.instances()`) → pass `browserId`.
 
 Interruptions
-- "Chrome revoked OMP's control …": another extension (typically a password manager) took over the page. Never close that tab; tell the user what step to finish, then claim it again.
+- "Chrome revoked OMP's control …" comes after OMP's retry: ask the user to dismiss the extension frame it names; never close that tab.
 - A pending JavaScript dialog is reported on the action (a claim returns `initialDialog`); `tab.dialog()` reads it and `tab.handleDialog({ accept, text? })` answers it. In the user's Chrome pass its `id` as well, and nothing is answered for you; elsewhere alerts and beforeunload are accepted automatically and `tab.setDialogs("accept" | "dismiss")` answers the rest.
 - Child tabs your page opens are auto-leased: `tab.popups()` (or `discover()`'s `popupOf`) lists them; claim the child id to drive it. Chrome decides whether it selects the child; OMP never re-selects the tab it displaced.
 - `tab.downloads()` lists completed downloads and `tab.waitForDownload()` waits for the next; in the user's Chrome they land in its own download folder and carry no `path`.

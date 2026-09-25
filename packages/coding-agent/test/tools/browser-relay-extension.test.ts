@@ -1,8 +1,15 @@
-import { expect, it } from "bun:test";
-import { mkdtemp, rm } from "node:fs/promises";
+import { expect, it, spyOn } from "bun:test";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
 import { runBrowserRelayCommand } from "@oh-my-pi/pi-coding-agent/cli/browser-relay-cli";
+import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
+import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
+import { releaseChromeTabsForOwner, requireChromeHandle } from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
+import * as relayAccess from "@oh-my-pi/pi-coding-agent/tools/browser/relay/access";
+import * as daemon from "@oh-my-pi/pi-coding-agent/tools/browser/relay/daemon";
 import type { InstanceTab } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 import { startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
 import { clickNode } from "@oh-my-pi/pi-coding-agent/tools/browser/cdp";
@@ -536,6 +543,170 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 		} finally {
 			await client?.disconnect().catch(() => {});
 			setup?.process()?.kill("SIGTERM");
+			relay.stop();
+			fixture.stop();
+			await rm(root, { recursive: true, force: true });
+		}
+	},
+	90_000,
+);
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"keeps a handle through a password manager's frame: one reattach per call, then a refusal that names the frame",
+	async () => {
+		let menu = "open";
+		const dismissed = Promise.withResolvers<void>();
+		const fixture = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: request => {
+				const route = new URL(request.url).pathname;
+				if (route === "/menu") return new Response(menu);
+				if (route === "/menu-removed") dismissed.resolve();
+				return new Response('<title>Sign in</title><form><input type="password"></form>', {
+					headers: { "content-type": "text/html" },
+				});
+			},
+		});
+		const root = await mkdtemp(path.join(tmpdir(), "omp-password-manager-"));
+		const events: string[] = [];
+		const relay = startRelayServer({ port: 0, log: message => events.push(message) });
+		const token = spyOn(relayAccess, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
+		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+		const session: ToolSession = {
+			cwd: root,
+			hasUI: false,
+			getSessionFile: () => null,
+			getSessionSpawns: () => null,
+			getSessionId: () => "password-manager",
+			getAgentId: () => "agent",
+			settings: Settings.isolated({
+				"browser.enabled": true,
+				"browser.relay": true,
+				"browser.relayUrl": `http://127.0.0.1:${relay.port}`,
+			}),
+		};
+		let setup: Browser | undefined;
+		try {
+			const extension = path.join(root, "extension");
+			await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
+			// An inline autofill menu is another extension's page in an iframe, and
+			// Chrome detaches every other extension's debugger when one commits.
+			// A flash is gone once it has loaded; a pinned menu stays until dismissed.
+			const passwordManager = path.join(root, "password-manager");
+			await mkdir(passwordManager);
+			await writeFile(
+				path.join(passwordManager, "manifest.json"),
+				JSON.stringify({
+					manifest_version: 3,
+					name: "Fake password manager",
+					version: "1.0",
+					content_scripts: [{ matches: ["http://127.0.0.1/*"], js: ["content.js"], run_at: "document_idle" }],
+					web_accessible_resources: [{ resources: ["menu.html"], matches: ["http://127.0.0.1/*"] }],
+				}),
+			);
+			await writeFile(path.join(passwordManager, "menu.html"), "<p>Fill password</p>");
+			await writeFile(
+				path.join(passwordManager, "content.js"),
+				`const show = pinned => {
+					const frame = document.createElement("iframe");
+					frame.src = chrome.runtime.getURL("menu.html");
+					document.body.append(frame);
+					if (!pinned) return frame.addEventListener("load", () => frame.remove(), { once: true });
+					const poll = setInterval(async () => {
+						if ((await (await fetch("/menu")).text()) !== "closed") return;
+						clearInterval(poll);
+						frame.remove();
+						await fetch("/menu-removed");
+					}, 50);
+				};
+				document.addEventListener("pm-flash", () => show(false));
+				document.addEventListener("pm-pin", () => show(true));`,
+			);
+			setup = await puppeteer.launch({
+				executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+				headless: true,
+				pipe: true,
+				enableExtensions: true,
+				ignoreDefaultArgs: stockBackgroundPolicy,
+				userDataDir: path.join(root, "profile"),
+				defaultViewport: null,
+			});
+			const extensionId = await setup.installExtension(extension);
+			await setup.installExtension(passwordManager);
+			const options = await setup.newPage();
+			await options.goto(`chrome-extension://${extensionId}/options.html`);
+			await options.type("#label", "Password manager fixture");
+			await options.type("#code", relay.access.issueCode().code);
+			await options.click("#save");
+			for (let i = 0; i < 400 && !relay.instances.list().some(browser => browser.connected); i++)
+				await Bun.sleep(25);
+			await options.close();
+			// The launch pipe is not a driver: disarm its auto-attach.
+			const setupSession = await setup.target().createCDPSession();
+			await setupSession
+				.connection()
+				?.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
+			await setupSession.detach();
+			await setup.disconnect();
+
+			const prelude = createBrowserPrelude(session);
+			const context = { session, toolCallId: "password-manager" };
+			const detail = (result: AgentToolResult<unknown>, key: string): unknown =>
+				result.details && typeof result.details === "object" && key in result.details
+					? Reflect.get(result.details, key)
+					: undefined;
+			const text = (result: AgentToolResult<unknown>) =>
+				result.content.map(part => (part.type === "text" ? part.text : "")).join("\n");
+			const handle = detail(
+				await prelude.invoke({ action: "create", url: fixture.url.toString(), timeout: 20 }, context),
+				"handle",
+			);
+			if (typeof handle !== "string") throw new Error("create returned no handle");
+			const leaseId = requireChromeHandle(handle, session).lease.id;
+			const run = (code: string) => prelude.invoke({ action: "run", handle, code, timeout: 20 }, context);
+			// The step in flight when the menu appears: half a second in the page keeps
+			// the command open when Chrome detaches. It shows the menu once per page,
+			// so running it again shows nothing and returns the title.
+			const showMenu = (event: string) =>
+				`return await page.evaluate(() => {
+					if (!window["${event}"]) {
+						window["${event}"] = true;
+						document.dispatchEvent(new Event("${event}"));
+					}
+					return new Promise(resolve => setTimeout(() => resolve(document.title), 500));
+				});`;
+			const count = (message: string) => events.filter(event => event === message).length;
+
+			// Gone before OMP is back: the call attaches once more, runs again, and says so.
+			const flashed = await run(showMenu("pm-flash"));
+			expect(detail(flashed, "value")).toBe("Sign in");
+			expect(text(flashed)).toContain("OMP reattached and ran it again");
+			expect(count("tab detached")).toBe(1);
+
+			// Still there: exactly one fresh attach, then Chrome's refusal naming the frame.
+			const failedAttaches = count("attach failed");
+			const refusal = await run(showMenu("pm-pin")).then(
+				() => "no refusal",
+				(error: unknown) => (error instanceof Error ? error.message : String(error)),
+			);
+			expect(refusal).toStartWith(`Chrome revoked OMP's control of "Sign in": another extension`);
+			expect(refusal).toContain("has embedded its UI in this page");
+			expect(refusal).toContain("the next call on this tab tries again");
+			expect(count("attach failed") - failedAttaches).toBe(1);
+
+			// The user dismisses the menu; the next call drives the same handle and lease.
+			menu = "closed";
+			await dismissed.promise;
+			const resumed = await run("return await page.title()");
+			expect(detail(resumed, "value")).toBe("Sign in");
+			expect(text(resumed)).not.toContain("ran it again");
+			expect(requireChromeHandle(handle, session).lease.id).toBe(leaseId);
+		} finally {
+			await releaseChromeTabsForOwner("password-manager").catch(() => 0);
+			setup?.process()?.kill("SIGTERM");
+			token.mockRestore();
+			daemonReady.mockRestore();
 			relay.stop();
 			fixture.stop();
 			await rm(root, { recursive: true, force: true });
