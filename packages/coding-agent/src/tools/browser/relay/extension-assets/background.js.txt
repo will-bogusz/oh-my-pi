@@ -879,7 +879,7 @@ async function setBadge(connected) {
     await chrome.action.setBadgeBackgroundColor({ color: connected ? "#1a7f37" : "#8b8b8b" });
   } catch {}
 }
-var buildId = "1520c6d837177ca8087bfc63d85640145c7270e490d53f062077663205383af9";
+var buildId = "28522a410b16fa4c7ee8b8be336a4de6103abad86d386754b566c2bd1fd09313";
 var RELOAD_GUARD_KEY = "reloadedFor";
 async function reloadForBuildSkew(expected) {
   if (!expected)
@@ -1098,6 +1098,19 @@ chrome.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
     const snap = snapshot(tab);
     if (snap)
       post({ t: "tabCreated", tab: snap });
+  }).catch(() => {
+    return;
+  });
+});
+function postDownload(item) {
+  const { id, url, finalUrl, filename, state, bytesReceived, totalBytes } = item;
+  post({ t: "download", download: { id, url, finalUrl, filename, state, bytesReceived, totalBytes } });
+}
+chrome.downloads.onCreated.addListener(postDownload);
+chrome.downloads.onChanged.addListener((delta) => {
+  chrome.downloads.search({ id: delta.id }).then(([item]) => {
+    if (item)
+      postDownload(item);
   }).catch(() => {
     return;
   });

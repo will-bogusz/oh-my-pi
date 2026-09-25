@@ -4,12 +4,13 @@ import * as path from "node:path";
 import type { Browser, CDPSession, Page } from "puppeteer-core";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 
-/** Completed download metadata returned by tab download helpers. */
+/** One download a tab started, as tab download helpers report it. */
 export interface BrowserDownload {
-	/** Absolute path of the saved file; absent in the user's Chrome, which saves into its own download folder. */
+	/** Absolute path of the saved file, once `completed`. */
 	path?: string;
 	suggestedFilename: string;
 	url: string;
+	state: "inProgress" | "completed" | "canceled";
 	bytes: number;
 }
 
@@ -17,26 +18,26 @@ export interface BrowserDownload {
 export interface TabDownloadSource {
 	/** Wait for the next unclaimed completed download. */
 	wait(signal?: AbortSignal): Promise<BrowserDownload>;
-	/** Return every completed download for this tab. */
+	/** Return every download this tab started, in start order. */
 	list(): BrowserDownload[];
 	/** Detach event listeners and reject outstanding waits. */
 	close(): Promise<void>;
 }
 
+/** `Browser.downloadWillBegin`. */
 interface DownloadStarted {
 	guid: string;
 	url: string;
 	suggestedFilename: string;
+	frameId?: string;
 }
 
+/** `Browser.downloadProgress`. */
 interface DownloadProgress {
 	guid: string;
 	state: "inProgress" | "completed" | "canceled";
 	receivedBytes: number;
-}
-
-interface PendingDownload extends DownloadStarted {
-	receivedBytes: number;
+	filePath?: string;
 }
 
 interface DownloadWaiter {
@@ -47,51 +48,69 @@ interface DownloadWaiter {
 }
 
 /**
- * Completion bookkeeping both sources share: completed downloads in arrival
- * order, the ones no wait has claimed yet, and the waits in line for the next.
+ * Bookkeeping both sources share: every download in start order, the
+ * completed ones no wait has claimed yet, and the waits in line for the next.
  */
 class DownloadQueue {
-	readonly #completed: BrowserDownload[] = [];
+	readonly #downloads = new Map<string, BrowserDownload>();
 	readonly #unclaimed: BrowserDownload[] = [];
 	readonly #waiters: DownloadWaiter[] = [];
 
 	list(): BrowserDownload[] {
-		return this.#completed.map(download => ({ ...download }));
+		return [...this.#downloads.values()].map(download => ({ ...download }));
 	}
 
 	async next(signal?: AbortSignal): Promise<BrowserDownload> {
 		const ready = this.#unclaimed.shift();
 		if (ready) return { ...ready };
 		if (signal?.aborted) throw signal.reason;
-		return await new Promise<BrowserDownload>((resolve, reject) => {
-			const waiter: DownloadWaiter = { resolve, reject, signal };
-			if (signal) {
-				waiter.onAbort = () => {
-					this.#removeWaiter(waiter);
-					reject(signal.reason);
-				};
-				signal.addEventListener("abort", waiter.onAbort, { once: true });
-			}
-			this.#waiters.push(waiter);
+		const { promise, resolve, reject } = Promise.withResolvers<BrowserDownload>();
+		const waiter: DownloadWaiter = { resolve, reject, signal };
+		if (signal) {
+			waiter.onAbort = () => {
+				this.#removeWaiter(waiter);
+				reject(signal.reason);
+			};
+			signal.addEventListener("abort", waiter.onAbort, { once: true });
+		}
+		this.#waiters.push(waiter);
+		return await promise;
+	}
+
+	began(event: DownloadStarted): void {
+		if (this.#downloads.has(event.guid)) return;
+		this.#downloads.set(event.guid, {
+			suggestedFilename: event.suggestedFilename,
+			url: event.url,
+			state: "inProgress",
+			bytes: 0,
 		});
 	}
 
-	complete(download: BrowserDownload): void {
-		this.#completed.push(download);
+	/** The download still in progress under `guid`, if this tab started one. */
+	pending(guid: string): BrowserDownload | undefined {
+		const download = this.#downloads.get(guid);
+		return download?.state === "inProgress" ? download : undefined;
+	}
+
+	complete(download: BrowserDownload, savedPath: string | undefined): void {
+		download.state = "completed";
+		if (savedPath) download.path = savedPath;
 		const waiter = this.#waiters.shift();
 		if (!waiter) {
-			this.#unclaimed.push(download);
+			this.#unclaimed.push({ ...download });
 			return;
 		}
 		if (waiter.signal && waiter.onAbort) waiter.signal.removeEventListener("abort", waiter.onAbort);
 		waiter.resolve({ ...download });
 	}
 
-	rejectNext(error: ToolError): void {
+	cancel(download: BrowserDownload): void {
+		download.state = "canceled";
 		const waiter = this.#waiters.shift();
 		if (!waiter) return;
 		if (waiter.signal && waiter.onAbort) waiter.signal.removeEventListener("abort", waiter.onAbort);
-		waiter.reject(error);
+		waiter.reject(new ToolError(`Download canceled: ${download.url}`));
 	}
 
 	rejectAll(error: ToolError): void {
@@ -115,9 +134,8 @@ export class DownloadManager implements TabDownloadSource {
 	#directory?: string;
 	#session?: CDPSession;
 	#frameId?: string;
-	readonly #pending = new Map<string, PendingDownload>();
 	readonly #queue = new DownloadQueue();
-	#willBegin?: (event: DownloadStarted & { frameId?: string }) => void;
+	#willBegin?: (event: DownloadStarted) => void;
 	#progress?: (event: DownloadProgress) => void;
 
 	constructor(browser: Browser, page: Page, tabId: string) {
@@ -171,28 +189,27 @@ export class DownloadManager implements TabDownloadSource {
 		const session = await this.#browser.target().createCDPSession();
 		this.#willBegin = event => {
 			if (this.#frameId && event.frameId && event.frameId !== this.#frameId) return;
-			this.#pending.set(event.guid, { ...event, receivedBytes: 0 });
+			this.#queue.began(event);
 		};
 		this.#progress = event => {
-			const pending = this.#pending.get(event.guid);
-			if (!pending) return;
-			pending.receivedBytes = event.receivedBytes;
+			const download = this.#queue.pending(event.guid);
+			if (!download) return;
+			download.bytes = event.receivedBytes;
 			if (event.state === "inProgress") return;
-			this.#pending.delete(event.guid);
 			if (event.state === "canceled") {
-				this.#queue.rejectNext(new ToolError(`Download canceled: ${pending.url}`));
+				this.#queue.cancel(download);
 				return;
 			}
-			void this.#complete(pending);
+			void this.#complete(download);
 		};
 		session.on("Browser.downloadWillBegin", this.#willBegin);
 		session.on("Browser.downloadProgress", this.#progress);
 		this.#session = session;
 	}
 
-	async #complete(pending: PendingDownload): Promise<void> {
+	async #complete(download: BrowserDownload): Promise<void> {
 		const directory = this.#directory ?? this.#defaultDirectory;
-		const downloadPath = path.join(directory, pending.suggestedFilename);
+		const downloadPath = path.join(directory, download.suggestedFilename);
 		for (let attempt = 0; attempt < 100; attempt++) {
 			try {
 				await fs.stat(downloadPath);
@@ -201,22 +218,17 @@ export class DownloadManager implements TabDownloadSource {
 				await Bun.sleep(10);
 			}
 		}
-		this.#queue.complete({
-			path: downloadPath,
-			suggestedFilename: pending.suggestedFilename,
-			url: pending.url,
-			bytes: pending.receivedBytes,
-		});
+		this.#queue.complete(download, downloadPath);
 	}
 }
 
 /**
- * Downloads of a tab in the user's own Chrome, read from page-scoped events.
- * Passive: it never changes the browser's download settings, so files land
- * wherever the user's Chrome puts them and no path is reported.
+ * Downloads of a tab in the user's own Chrome. Passive: it never changes the
+ * browser's download settings, so files land wherever the user's Chrome puts
+ * them. The relay reports the tab's downloads on its page sessions as
+ * `Browser.download*` events, with the saved `filePath` from `chrome.downloads`.
  */
 export class TabDownloadMonitor implements TabDownloadSource {
-	readonly #pending = new Map<string, PendingDownload>();
 	readonly #queue = new DownloadQueue();
 	#disconnected = false;
 
@@ -224,6 +236,7 @@ export class TabDownloadMonitor implements TabDownloadSource {
 		const session = await page.createCDPSession();
 		const monitor = new TabDownloadMonitor(session);
 		try {
+			// The relay learns which tab started a download from the Page domain.
 			await session.send("Page.enable");
 			return monitor;
 		} catch (error) {
@@ -233,30 +246,13 @@ export class TabDownloadMonitor implements TabDownloadSource {
 	}
 
 	constructor(readonly session: CDPSession) {
-		session.on("Page.downloadWillBegin", event => {
-			if (this.#pending.has(event.guid)) return;
-			this.#pending.set(event.guid, {
-				guid: event.guid,
-				url: event.url,
-				suggestedFilename: event.suggestedFilename,
-				receivedBytes: 0,
-			});
-		});
-		session.on("Page.downloadProgress", event => {
-			const pending = this.#pending.get(event.guid);
-			if (!pending) return;
-			pending.receivedBytes = event.receivedBytes;
-			if (event.state === "inProgress") return;
-			this.#pending.delete(event.guid);
-			if (event.state === "canceled") {
-				this.#queue.rejectNext(new ToolError(`Download canceled: ${pending.url}`));
-				return;
-			}
-			this.#queue.complete({
-				suggestedFilename: pending.suggestedFilename,
-				url: pending.url,
-				bytes: pending.receivedBytes,
-			});
+		session.on("Browser.downloadWillBegin", event => this.#queue.began(event));
+		session.on("Browser.downloadProgress", (event: DownloadProgress) => {
+			const download = this.#queue.pending(event.guid);
+			if (!download) return;
+			download.bytes = event.receivedBytes;
+			if (event.state === "completed") this.#queue.complete(download, event.filePath);
+			else if (event.state === "canceled") this.#queue.cancel(download);
 		});
 	}
 

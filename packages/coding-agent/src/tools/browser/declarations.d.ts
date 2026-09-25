@@ -128,11 +128,12 @@ interface BrowserDialogState {
 	/** user's Chrome: false while OMP was not attached to see a dialog */
 	observed?: false;
 }
-/** one completed download; `path` is absent in the user's Chrome, which saves to its own folder */
+/** one download the tab started; `path` is the saved file once completed */
 interface BrowserDownload {
 	path?: string;
 	suggestedFilename: string;
 	url: string;
+	state: "inProgress" | "completed" | "canceled";
 	bytes: number;
 }
 /** an option's text or value as a string, which must name exactly one option, or Playwright's object form */

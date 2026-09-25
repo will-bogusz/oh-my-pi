@@ -6,6 +6,10 @@
 
 - Renamed the extension's display name to **Oh My Pi**. Existing installations keep their current name unless `omp browser-relay install --name "Oh My Pi"` is passed, so a refresh never silently changes the debugger warning a loaded copy shows.
 
+### Added
+
+- The extension asks for the `downloads` permission and streams `chrome.downloads` items to the relay, which attaches the saved file path and final state to the leased tab that started each download. Downloads no leased tab started are dropped by the relay.
+
 ### Fixed
 
 - The extension now hands its `chrome.debugger` attachments back instead of holding them for a whole session, so Chrome's "started debugging this browser" bar no longer outlives the work that caused it. Attachments are released when the host ends a task or turn, when the relay socket stays closed for two seconds, and when Chrome unloads the extension's worker; the next command reattaches and restores the tab's root debugger state.

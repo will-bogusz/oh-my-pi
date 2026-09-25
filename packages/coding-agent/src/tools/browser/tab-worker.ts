@@ -1415,8 +1415,8 @@ export class WorkerCore {
 			this.#initScripts = new InitScriptManager(this.#page);
 			for (const source of payload.initScripts ?? []) await this.#initScripts.add(source);
 			if (this.#managedChrome) {
-				// Passive and page-scoped: the user's Chrome keeps its own download
-				// settings, so a download there lands where the user's Chrome puts it.
+				// Passive: the user's Chrome keeps its own download settings. The relay
+				// reports where each download of this tab landed.
 				try {
 					const monitor = await TabDownloadMonitor.connect(this.#page);
 					this.#downloads = monitor;
