@@ -403,6 +403,24 @@ chrome.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
 	}).catch(() => undefined);
 });
 
+// Chrome's debugger names the tab a download came from but never the file it
+// saved; `chrome.downloads` names the file but not the tab. The relay pairs them.
+function postDownload(item: ChromeDownloadItem): void {
+	const { id, url, finalUrl, filename, state, bytesReceived, totalBytes } = item;
+	post({ t: "download", download: { id, url, finalUrl, filename, state, bytesReceived, totalBytes } });
+}
+
+chrome.downloads.onCreated.addListener(postDownload);
+
+chrome.downloads.onChanged.addListener(delta => {
+	void chrome.downloads
+		.search({ id: delta.id })
+		.then(([item]) => {
+			if (item) postDownload(item);
+		})
+		.catch(() => undefined);
+});
+
 // ---- lifecycle ----------------------------------------------------------------
 
 chrome.action.onClicked.addListener(() => { void chrome.runtime.openOptionsPage(); });

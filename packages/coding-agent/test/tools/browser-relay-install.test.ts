@@ -76,6 +76,7 @@ async function runBackground(directory: string, initial: ExtensionStorage = {}) 
 			},
 			alarms: { create: () => {}, onAlarm: event() },
 			debugger: { onEvent: event(), onDetach: event() },
+			downloads: { onCreated: event(), onChanged: event() },
 			tabs: {
 				onCreated: event(),
 				onUpdated: event(),
