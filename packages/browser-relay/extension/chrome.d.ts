@@ -46,7 +46,23 @@ interface ChromeDebuggerTargetInfo {
 	url?: string;
 }
 
+interface ChromeDownloadItem {
+	id: number;
+	url: string;
+	finalUrl: string;
+	filename: string;
+	state: "in_progress" | "complete" | "interrupted";
+	bytesReceived: number;
+	totalBytes: number;
+}
+
 declare const chrome: {
+	downloads: {
+		search(query: { id?: number }): Promise<ChromeDownloadItem[]>;
+		onCreated: ChromeEvent<(item: ChromeDownloadItem) => void>;
+		/** Carries only the changed fields; `search` reads the rest. */
+		onChanged: ChromeEvent<(delta: { id: number }) => void>;
+	};
 	tabs: {
 		query(queryInfo: { url?: string; groupId?: number }): Promise<ChromeTab[]>;
 		get(tabId: number): Promise<ChromeTab>;

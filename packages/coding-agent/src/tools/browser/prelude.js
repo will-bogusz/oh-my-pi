@@ -253,7 +253,7 @@
 			if (initial[field] !== undefined) Object.defineProperty(tab, field, { value: initial[field] });
 		}
 		Object.defineProperty(tab, "name", { value: name, enumerable: true });
-		tab.toString = () => `<tab ${name}${tab.target ? ` target=${tab.target.id}` : ""}>`;
+		tab.toString = () => `<tab ${name}${tab.target ? ` target.id=${JSON.stringify(tab.target.id)}` : ""}>`;
 		for (const method of directMethods) {
 			tab[method] = async (...args) => {
 				const value = await callValue(name, [{ method, args: encodeArgs("tab helper argument", args) }], handle);
@@ -272,7 +272,15 @@
 				encodeArgs("tab helper argument", [snapshot ? `${snapshot}:${id}` : id]),
 				handle,
 			);
-		tab.ref = id => makeElement(name, "ref", encodeArgs("tab helper argument", [id]), handle);
+		tab.ref = id => {
+			// Usually an `elements.find()` that matched nothing; fail here, not at the first action.
+			if (typeof id !== "string" || !id.trim()) {
+				const got =
+					typeof id === "string" ? '""' : typeof id === "object" && id !== null ? "an object (pass its .ref)" : String(id);
+				throw new TypeError(`tab.ref() needs a ref string such as "e12" from an observation, got ${got}.`);
+			}
+			return makeElement(name, "ref", encodeArgs("tab helper argument", [id]), handle);
+		};
 		tab.frame = selector => makeFrame(name, selector, handle);
 		tab.popups = async () => {
 			if (!handle) throw new Error("Popup discovery requires an existing managed Chrome handle");
@@ -334,7 +342,9 @@
 		},
 		async closeTab(id, options) {
 			if (typeof id !== "string" || !id.length)
-				throw new TypeError("browser.closeTab expects an exact discovered tab id");
+				throw new TypeError(
+					"browser.closeTab expects an exact discovered tab id (a tab's own is tab.target.id; tab.id(n) is an element)",
+				);
 			await invoke("closeTab", { ...validateOptions("browser.closeTab", options), id });
 		},
 		async create(options) {
@@ -343,7 +353,9 @@
 		},
 		async claim(id, options) {
 			if (typeof id !== "string" || !id.length)
-				throw new TypeError("browser.claim expects an exact discovered tab id");
+				throw new TypeError(
+					"browser.claim expects an exact discovered tab id (a tab's own is tab.target.id; tab.id(n) is an element)",
+				);
 			const details = await invoke("claim", { ...validateOptions("browser.claim", options), id });
 			return makeTab(details.name, details.handle, details.value);
 		},

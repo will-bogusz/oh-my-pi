@@ -40,6 +40,7 @@ import { resolveRelayKind } from "./browser/relay/kind";
 import type { AriaSnapshotOptions } from "./browser/aria/aria-snapshot";
 import { type ChromeDialogState, chromeDialogState } from "./browser/dialog-journal";
 import type { InstanceTab } from "./browser/relay/instances";
+import { chromeTabName } from "./browser/relay/managed-tabs";
 import type { InitialBrowserState, RunResultOk, ScreenshotResult } from "./browser/tab-protocol";
 import type { OutputMeta } from "@oh-my-pi/pi-tui/tools/output-meta";
 import {
@@ -453,20 +454,20 @@ async function invokeBrowser(
 				if (children.length === 0) return toolResult(details).done();
 				return toolResult(details)
 					.text(
-						`${children.length} child tab${children.length === 1 ? "" : "s"} opened from ${JSON.stringify(handle.label)}; browser.claim(id) to drive one.`,
+						`${children.length} child tab${children.length === 1 ? "" : "s"} opened from ${chromeTabName(handle.lease.tab)}; browser.claim(id) to drive one.`,
 					)
 					.done();
 			}
 			if (["close", "release", "reveal"].includes(parsed.action)) {
 				const action = parsed.action as "close" | "release" | "reveal";
 				const deadline = AbortSignal.timeout(timeoutMs);
-				await chromeLifecycle(
+				const tab = await chromeLifecycle(
 					handle,
 					action,
 					context.signal ? AbortSignal.any([context.signal, deadline]) : deadline,
 				);
 				return toolResult(details)
-					.text(`${action}: ${JSON.stringify(handle.label)}`)
+					.text(`${action}: ${chromeTabName(tab)} (tab.target.id ${JSON.stringify(tab.id)})`)
 					.done();
 			}
 			if (parsed.action !== "run" && parsed.action !== "call")
@@ -567,7 +568,7 @@ async function invokeBrowser(
 						displays: [
 							{
 								type: "text",
-								text: `Claimed Chrome tab ${JSON.stringify(handle.label)} with an open dialog. Answer it with tab.handleDialog({ accept, id: tab.initialDialog.id, text? }) before page interaction.\n${JSON.stringify(chromeDialogState(handle.lease.dialog))}\n${BROWSER_TAB_VERBS}`,
+								text: `Claimed Chrome tab ${chromeTabName(handle.lease.tab)} with an open dialog. Answer it with tab.handleDialog({ accept, id: tab.initialDialog.id, text? }) before page interaction.\ntab.target.id: ${JSON.stringify(handle.lease.tab.id)}\n${JSON.stringify(chromeDialogState(handle.lease.dialog))}\n${BROWSER_TAB_VERBS}`,
 							},
 						],
 						returnValue: details.value,
@@ -589,12 +590,16 @@ async function invokeBrowser(
 					target: handle.lease.tab,
 					...state,
 				};
-				// The page, not the tab-group label: every created tab carries the
-				// same label, so "Claimed Chrome tab "Oh My Pi"" named nothing.
-				const page = state.initialObservation?.title || handle.lease.tab.title || details.url;
+				// The page as its first observation saw it; the lease only knows what
+				// Chrome reported when the tab was acquired.
+				const page = {
+					title: state.initialObservation?.title || handle.lease.tab.title,
+					url: state.initialObservation?.url || handle.lease.tab.url,
+				};
+				details.url = page.url;
 				initial.displays.unshift({
 					type: "text",
-					text: `${parsed.action === "claim" ? "Claimed" : "Created inactive"} Chrome tab ${JSON.stringify(page)}\nTarget: ${handle.lease.tab.id}\nURL: ${details.url}\nTab group: ${JSON.stringify(handle.label)}`,
+					text: `${parsed.action === "claim" ? "Claimed" : "Created inactive"} Chrome tab ${chromeTabName(page)}\ntab.target.id: ${JSON.stringify(handle.lease.tab.id)}\nURL: ${page.url}\nTab group: ${JSON.stringify(handle.label)}`,
 				});
 				// Once, with the handle itself: the verbs are what the acquisition
 				// hands over, and a later observe() of the same tab repeats the

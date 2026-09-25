@@ -1,17 +1,21 @@
-Drive real Chromium tabs from JavaScript or Python Eval with the global `browser`; use `read` for static content. Default to headless (`browser.open`); use the user's Chrome only when they name it or the task needs their session — sites attribute those actions to the user.
+`browser` drives real Chromium tabs from Eval; `read` suits static pages. Work headless (`browser.open({ url? })`{{#if relay}} with `app: { relay: false }`; a bare `open` makes a user-Chrome tab{{/if}}) unless the user names their Chrome or the task needs their session; sites attribute those actions to the user.
 
 <instruction>
-Entry points: `browser.getTab({ title?, url? })` claims ONE open tab by substring (ambiguity lists exact ids); `browser.discover({ title?, url? })` lists tabs without attaching and `browser.claim(id)` adopts one unchanged; `browser.create({ url? })` opens an inactive task tab; `browser.open({ url?, app? })` starts or attaches a headless/CDP browser. Each returns a `tab` whose first tree prints as `initialObservation` (`observation:` takes `observe()`'s options); `tab.ref("e26")` is an element handle; `tab.run(fnOrCode)` runs a multi-step function with `{ tab, page, browser, wait, assert }` (no closures; not a sandbox). `page` is a raw Puppeteer `Page` (and `frame` a Puppeteer `Frame`): read data with `page.$$eval(sel, nodes => …)`, `page.$eval`, `page.evaluate`; Puppeteer's `page.locator()` is an action handle (`.click`, `.fill`, `.filter(fn)`, `.map`, `.wait`) and Playwright's reading API is not there at all — no `{ hasText }` option, no `.allTextContents()`, no `.evaluateAll()`. Everything else lives on those handles and is listed with them; `browser.help()` prints the full typed API when a signature matters. Prelude methods take positional arguments; Python: same names, JavaScript strings for `run`.
+Entry points
+- `browser.getTab({ title?, url? })` claims ONE open tab by substring (ambiguity lists exact ids); `discover({ title?, url? })` lists tabs without attaching and `claim(id)` adopts one; `create({ url? })` opens an inactive task tab; `open` starts or attaches a headless/CDP browser.
+- Each returns a `tab` whose first tree prints and stays as `initialObservation` (`observation:` takes `observe()`'s options). `tab.ref("e26")` is an element handle; `tab.run(fn)` runs a multi-step function with `{ tab, page, browser, wait, assert }` (no closures; not a sandbox).
+- `page`/`frame` are raw Puppeteer (`$$eval`, `$eval`, `evaluate`; `locator()` only acts); Playwright's API (`hasText`, `allTextContents`, `evaluateAll`) is absent. `browser.help()` prints the typed API. Arguments are positional; Python has the same names, its `run` takes JavaScript.
 
 Model
-- A tab is claimed, never selected: input never focuses Chrome or switches tabs; only `reveal()` does. Chrome web content: `browser` only, never `computer`.
-- An observation is the page's accessibility tree: header `url | title | scroll | focused`, one node per line, indent = depth, `eN` refs only on controls, text inline, iframes inline. After an action, `await tab.observe()` in the same cell settles the page and prints only what changed (`+` added, `~` changed, `removed:`); `{ diff: false }` prints everything, `{ display: false }` nothing.
-- Refs are stable: an element keeps its number across observations and re-renders; new elements get new numbers; a ref whose node was replaced fails and says to observe again.{{#if compactRefs}} `observation.elements` carries the same refs for `find(el => …)`.{{else}} `elements[i].ref` is `<snapshot>:<n>` — use that token, not `eN`, and re-observe after a re-render.{{/if}}
-- Read the tree first: every observation keeps its whole tree as `.tree` (and `String(obs)`); search that in code when the printed copy loses its middle. `extract("text" | "markdown")` is Readability: it keeps the highest-scoring article and drops tables, nav and sidebars, so it silently loses structured data. For a table or any structured block read the tree, `tab.ariaSnapshot("<selector>")`, or `page.$$eval`; `evaluate` for data no tree carries.
+- A tab is claimed, never selected: only `reveal()` focuses Chrome or switches tabs. Chrome web content: `browser` only, never `computer`.
+- An observation is the accessibility tree: header `url | title | scroll | focused`, one node per line, indent = depth, text and iframes inline. `eN` refs mark controls, stateful nodes and clickable table rows or cells (`includeAll: true`: every node). After acting, `await tab.observe()` in the same cell waits for the page to settle and prints only changes (`+` added, `~` changed, `removed:`); `diff: false` prints all, `display: false` nothing.
+- Refs survive observations and re-renders; a ref whose node was replaced fails and says to observe again.{{#if compactRefs}} `observation.elements` carries the same refs for `find(el => …)`.{{else}} `elements[i].ref` is `<snapshot>:<n>` — use that token, not `eN`, and re-observe after a re-render.{{/if}}
+- Set checkboxes, radios and switches with `check()`/`uncheck()`; `click()` throws when one stays unchanged. `uploadFile(...paths)` on a ref, or `tab.uploadFile(selector, ...paths)`, feeds a file input, chooser button or drop zone.
+- Read the tree first; `.tree` (and `String(obs)`) keeps it whole when the print is cut. `extract()` is Readability: one article, no tables or nav, so prose only. Read tables from the tree, `tab.ariaSnapshot("<selector>")` or `page.$$eval`.
 
 Ownership
-- If the task names a site and a tab for it is open, claim it and stay on the user's account there; `create` only when no matching tab exists or you will navigate elsewhere. Never switch company or account inside the user's tab.
-- Tabs are handed back open at turn end; next turn, claim the exact id again. Close a tab you opened, never one you did not open unless asked; `tab.release()` hands back early. Never `reveal()` to observe or recover.
+- A task names a site with an open tab: claim it and stay on the user's account; `create` only when none matches or you will navigate elsewhere. Never switch company or account inside the user's tab.
+- Tabs are handed back open at turn end; next turn, claim the exact id again. Close tabs you opened, never others unless asked; `tab.release()` hands back early. Never `reveal()` to observe or recover.
 - Several profiles (`browser.instances()`) → pass `browserId`.
 
 Interruptions
@@ -19,7 +23,7 @@ Interruptions
 - "The user stopped OMP's control … from Chrome's infobar": they ended browser control on purpose. Do not re-claim or work around it; stop and report what is done and what is left.
 - A pending JavaScript dialog is reported on the action (a claim returns `initialDialog`); `tab.dialog()` reads it, `tab.handleDialog({ accept, id, text? })` answers it.
 - Child tabs your page opens are auto-leased: `tab.popups()` (or `discover()`'s `popupOf`) lists them; claim the child id to drive it.
-- `tab.downloads()` and `waitForDownload()` report finished downloads; the user's Chrome gives no `path`.
+- `tab.downloads()` lists this tab's downloads with `state` and, once completed, the saved `path`; `tab.waitForDownload()` awaits the next completion.
 </instruction>
 
 <examples>

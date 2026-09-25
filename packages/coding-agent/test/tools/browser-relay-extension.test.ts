@@ -20,6 +20,7 @@ import { clickNode } from "@oh-my-pi/pi-coding-agent/tools/browser/cdp";
 import { withBackgroundInput } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import type { ElementHandle, Page } from "puppeteer-core";
 import puppeteer, { type Browser } from "puppeteer-core";
+import type { InitialBrowserState } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
 
 // Keep stock timer/occlusion scheduling and popup blocking in real-extension qualification.
 const stockBackgroundPolicy = [
@@ -729,4 +730,298 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 		}
 	},
 	90_000,
+);
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"observes a created tab's committed page and names it by title and target id from creation through close",
+	async () => {
+		const fixture = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: async () => {
+				// A slow first byte keeps the navigation uncommitted when the tab is
+				// acquired — the window in which the first observation used to see
+				// Chrome's initial empty document. A real server delay is the thing
+				// under test, so this cannot be a fake timer.
+				await Bun.sleep(800);
+				return new Response("<title>Slow fixture</title><h1>Committed</h1>", {
+					headers: { "content-type": "text/html" },
+				});
+			},
+		});
+		const root = await mkdtemp(path.join(tmpdir(), "omp-create-naming-"));
+		const relay = startRelayServer({ port: 0 });
+		const token = spyOn(relayAccess, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
+		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+		const session: ToolSession = {
+			cwd: root,
+			hasUI: false,
+			getSessionFile: () => null,
+			getSessionSpawns: () => null,
+			getSessionId: () => "create-naming",
+			getAgentId: () => "agent",
+			settings: Settings.isolated({
+				"browser.enabled": true,
+				"browser.relay": true,
+				"browser.relayUrl": `http://127.0.0.1:${relay.port}`,
+			}),
+		};
+		let setup: Browser | undefined;
+		try {
+			const extension = path.join(root, "extension");
+			await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
+			setup = await puppeteer.launch({
+				executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+				headless: true,
+				pipe: true,
+				enableExtensions: true,
+				ignoreDefaultArgs: stockBackgroundPolicy,
+				userDataDir: path.join(root, "profile"),
+				defaultViewport: null,
+			});
+			const extensionId = await setup.installExtension(extension);
+			const options = await setup.newPage();
+			await options.goto(`chrome-extension://${extensionId}/options.html`);
+			await options.type("#label", "Naming fixture");
+			await options.type("#code", relay.access.issueCode().code);
+			await options.click("#save");
+			for (let i = 0; i < 400 && !relay.instances.list().some(browser => browser.connected); i++)
+				await Bun.sleep(25);
+			await options.close();
+			const setupSession = await setup.target().createCDPSession();
+			await setupSession
+				.connection()
+				?.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
+			await setupSession.detach();
+			await setup.disconnect();
+
+			const prelude = createBrowserPrelude(session);
+			const context = { session, toolCallId: "create-naming" };
+			const text = (result: AgentToolResult<unknown>) =>
+				result.content.map(part => (part.type === "text" ? part.text : "")).join("\n");
+			const created = await prelude.invoke({ action: "create", url: fixture.url.toString(), timeout: 20 }, context);
+			const details = created.details as { handle: string; value: InitialBrowserState };
+			const { lease } = requireChromeHandle(details.handle, session);
+			// The first observation is of the page asked for, never the empty
+			// document Chrome holds until the navigation commits.
+			expect(details.value.inspectionError).toBeUndefined();
+			expect(details.value.initialObservation?.url).toBe(fixture.url.toString());
+			expect(details.value.initialObservation?.title).toBe("Slow fixture");
+			// Named by the page, not the tab group's "Oh My Pi", with the identity
+			// discover lists and claim takes.
+			expect(text(created)).toContain(
+				`Created inactive Chrome tab "Slow fixture"\ntab.target.id: ${JSON.stringify(lease.tab.id)}\nURL: ${fixture.url}`,
+			);
+
+			await prelude.invoke(
+				{
+					action: "run",
+					handle: details.handle,
+					code: 'await page.evaluate(() => { document.title = "Renamed"; });',
+				},
+				context,
+			);
+			// The extension reports the title change on its own schedule.
+			const owner = browserActorId(session);
+			for (let i = 0; i < 400 && relay.instances.get(lease.id, owner).tab.title !== "Renamed"; i++)
+				await Bun.sleep(25);
+			const closed = await prelude.invoke({ action: "close", handle: details.handle }, context);
+			expect(text(closed)).toBe(`close: "Renamed" (tab.target.id ${JSON.stringify(lease.tab.id)})`);
+		} finally {
+			await releaseChromeTabsForOwner("create-naming").catch(() => 0);
+			setup?.process()?.kill("SIGTERM");
+			token.mockRestore();
+			daemonReady.mockRestore();
+			relay.stop();
+			fixture.stop();
+			await rm(root, { recursive: true, force: true });
+		}
+	},
+	90_000,
+);
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"reports a leased tab's downloads with state and saved path, only its own, through an idle detach",
+	async () => {
+		const csv = "client_id,secret\n42,s3cr3t\n";
+		const slowStarted = Promise.withResolvers<void>();
+		const finishSlow = Promise.withResolvers<void>();
+		const fixture = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: request => {
+				const route = new URL(request.url).pathname;
+				const attachment = (name: string, type: string) => ({
+					"content-type": type,
+					"content-disposition": `attachment; filename="${name}"`,
+				});
+				if (route === "/config.csv") return new Response(csv, { headers: attachment("config.csv", "text/csv") });
+				if (route === "/other.txt")
+					return new Response("other", { headers: attachment("other.txt", "text/plain") });
+				if (route === "/slow.bin") {
+					// Half now, half once the test has handed the debugger back.
+					const body = new ReadableStream<Uint8Array>({
+						async start(controller) {
+							controller.enqueue(new Uint8Array(4096).fill(1));
+							slowStarted.resolve();
+							await finishSlow.promise;
+							controller.enqueue(new Uint8Array(4096).fill(2));
+							controller.close();
+						},
+					});
+					return new Response(body, {
+						headers: { ...attachment("slow.bin", "application/octet-stream"), "content-length": "8192" },
+					});
+				}
+				return new Response(
+					`<title>Console</title>
+					<a id="csv" href="/config.csv">Download config</a>
+					<a id="other" href="/other.txt">Other</a>
+					<a id="slow" href="/slow.bin">Slow</a>
+					<button id="blob">Download JSON</button>
+					<script>
+						document.getElementById("blob").onclick = () => {
+							const link = document.createElement("a");
+							link.href = URL.createObjectURL(new Blob(['{"client_id":42}'], { type: "application/json" }));
+							link.download = "client.json";
+							link.click();
+						};
+					</script>`,
+					{ headers: { "content-type": "text/html" } },
+				);
+			},
+		});
+		const root = await mkdtemp(path.join(tmpdir(), "omp-relay-downloads-"));
+		const relay = startRelayServer({ port: 0 });
+		const token = spyOn(relayAccess, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
+		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+		const session: ToolSession = {
+			cwd: root,
+			hasUI: false,
+			getSessionFile: () => null,
+			getSessionSpawns: () => null,
+			getSessionId: () => "relay-downloads",
+			getAgentId: () => "agent",
+			settings: Settings.isolated({
+				"browser.enabled": true,
+				"browser.relay": true,
+				"browser.relayUrl": `http://127.0.0.1:${relay.port}`,
+			}),
+		};
+		let setup: Browser | undefined;
+		try {
+			const extension = path.join(root, "extension");
+			await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
+			// The profile's own download folder, as a user sets it; OMP never changes it.
+			const saved = path.join(root, "Downloads");
+			await mkdir(path.join(root, "profile", "Default"), { recursive: true });
+			await mkdir(saved);
+			await writeFile(
+				path.join(root, "profile", "Default", "Preferences"),
+				JSON.stringify({ download: { default_directory: saved, prompt_for_download: false } }),
+			);
+			setup = await puppeteer.launch({
+				executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+				headless: true,
+				pipe: true,
+				enableExtensions: true,
+				ignoreDefaultArgs: stockBackgroundPolicy,
+				userDataDir: path.join(root, "profile"),
+				defaultViewport: null,
+			});
+			const extensionId = await setup.installExtension(extension);
+			const options = await setup.newPage();
+			await options.goto(`chrome-extension://${extensionId}/options.html`);
+			await options.type("#label", "Downloads fixture");
+			await options.type("#code", relay.access.issueCode().code);
+			await options.click("#save");
+			for (let i = 0; i < 400 && !relay.instances.list().some(browser => browser.connected); i++)
+				await Bun.sleep(25);
+			await options.close();
+			// The launch pipe is not a driver: disarm its auto-attach.
+			const setupSession = await setup.target().createCDPSession();
+			await setupSession
+				.connection()
+				?.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
+			await setupSession.detach();
+			await setup.disconnect();
+
+			const prelude = createBrowserPrelude(session);
+			const context = { session, toolCallId: "relay-downloads" };
+			const value = (result: AgentToolResult<unknown>): unknown =>
+				result.details && typeof result.details === "object" ? Reflect.get(result.details, "value") : undefined;
+			const open = async (): Promise<string> => {
+				const created = await prelude.invoke(
+					{ action: "create", url: fixture.url.toString(), timeout: 20 },
+					context,
+				);
+				const handle =
+					created.details && typeof created.details === "object" && Reflect.get(created.details, "handle");
+				if (typeof handle !== "string") throw new Error("create returned no handle");
+				return handle;
+			};
+			const run = async (handle: string, code: string) =>
+				value(await prelude.invoke({ action: "run", handle, code, timeout: 20 }, context));
+			const main = await open();
+			const other = await open();
+
+			// A link download and a script-built blob download, each with the file Chrome saved.
+			expect(await run(main, "await page.click('#csv'); return await tab.waitForDownload();")).toEqual({
+				suggestedFilename: "config.csv",
+				url: `${fixture.url}config.csv`,
+				state: "completed",
+				bytes: csv.length,
+				path: path.join(saved, "config.csv"),
+			});
+			expect(await Bun.file(path.join(saved, "config.csv")).text()).toBe(csv);
+			expect(await run(main, "await page.click('#blob'); return await tab.waitForDownload();")).toMatchObject({
+				suggestedFilename: "client.json",
+				state: "completed",
+				path: path.join(saved, "client.json"),
+			});
+
+			// Another leased tab's download is its own.
+			expect(await run(other, "await page.click('#other'); return (await tab.waitForDownload()).path;")).toBe(
+				path.join(saved, "other.txt"),
+			);
+			expect(
+				((await run(main, "return await tab.downloads();")) as { suggestedFilename: string }[]).map(
+					download => download.suggestedFilename,
+				),
+			).toEqual(["config.csv", "client.json"]);
+
+			// Still in progress when OMP hands the debugger back; it finishes unobserved
+			// by the debugger, and the tab still learns where it landed.
+			expect(
+				await run(
+					main,
+					`await page.click('#slow');
+					for (;;) {
+						const slow = (await tab.downloads()).find(download => download.suggestedFilename === "slow.bin");
+						if (slow) return slow.state;
+						await new Promise(resolve => setTimeout(resolve, 25));
+					}`,
+				),
+			).toBe("inProgress");
+			await slowStarted.promise;
+			expect(await relay.instances.detachDebuggers()).toHaveLength(2);
+			finishSlow.resolve();
+			expect(await run(main, "return await tab.waitForDownload();")).toEqual({
+				suggestedFilename: "slow.bin",
+				url: `${fixture.url}slow.bin`,
+				state: "completed",
+				bytes: 8192,
+				path: path.join(saved, "slow.bin"),
+			});
+		} finally {
+			await releaseChromeTabsForOwner("relay-downloads").catch(() => 0);
+			setup?.process()?.kill("SIGTERM");
+			token.mockRestore();
+			daemonReady.mockRestore();
+			relay.stop();
+			fixture.stop();
+			await rm(root, { recursive: true, force: true });
+		}
+	},
+	60_000,
 );

@@ -46,6 +46,7 @@ import {
 	evaluateExpression,
 	fillNode,
 	focusNode,
+	hasSkeletonScreen,
 	highlightNode,
 	holdKey,
 	hoverNode,
@@ -642,6 +643,14 @@ export function parseRefToken(token: string, observationId: string): number | nu
 	return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
+/** A ref must be a token string; `tab.ref(undefined)` usually means an `elements.find()` that matched nothing. */
+export function requireRefToken(id: unknown): asserts id is string {
+	if (typeof id === "string" && id.trim()) return;
+	const got =
+		typeof id === "string" ? '""' : typeof id === "object" && id !== null ? "an object (pass its .ref)" : String(id);
+	throw new ToolError(`tab.ref() needs a ref string such as "e12" from an observation, got ${got}.`);
+}
+
 const backgroundInputQueues = new WeakMap<Page, Promise<void>>();
 const backgroundInputFailures = new WeakMap<Page, Error>();
 const backgroundPageScopes = new WeakMap<Page, BackgroundPageScope>();
@@ -1131,6 +1140,15 @@ async function settlePage(page: Page, signal: AbortSignal | undefined, budgetMs:
 	}
 }
 
+/** One settled read of the main document; `loading` when a loading indicator outlasted the settle budget. */
+interface SnapshotRead {
+	snapshot: AxNode;
+	layout: PageLayout;
+	url: string;
+	title: string;
+	loading: boolean;
+}
+
 /** The document the main frame shows: the session serving it and the loader that committed it. */
 interface MainDocument {
 	session: CDPSession;
@@ -1436,8 +1454,8 @@ export class WorkerCore {
 			this.#initScripts = new InitScriptManager(this.#page);
 			for (const source of payload.initScripts ?? []) await this.#initScripts.add(source);
 			if (this.#managedChrome) {
-				// Passive and page-scoped: the user's Chrome keeps its own download
-				// settings, so a download there lands where the user's Chrome puts it.
+				// Passive: the user's Chrome keeps its own download settings. The relay
+				// reports where each download of this tab landed.
 				try {
 					const monitor = await TabDownloadMonitor.connect(this.#page);
 					this.#downloads = monitor;
@@ -2369,6 +2387,7 @@ export class WorkerCore {
 				return element(this.#refNode(id));
 			},
 			ref: async id => {
+				requireRefToken(id);
 				const elementId = parseRefToken(id, this.#observationId);
 				if (elementId !== null) return element(this.#refNode(elementId));
 				if (id.includes(":"))
@@ -2537,15 +2556,16 @@ export class WorkerCore {
 	 * budget, which never grows. When it runs out on a page that keeps
 	 * replacing its document, the last complete read comes back marked as
 	 * still navigating; only a page that never held a document through one
-	 * read fails.
+	 * read fails. A read taken while a loading indicator outlasted the budget
+	 * comes back marked as still loading.
 	 */
 	async #settledSnapshot(
 		page: Page,
 		includeAll: boolean,
 		deadline: number,
 		signal?: AbortSignal,
-	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string; navigating: boolean }> {
-		let latest: { snapshot: AxNode; layout: PageLayout; url: string; title: string } | undefined;
+	): Promise<SnapshotRead & { navigating: boolean }> {
+		let latest: SnapshotRead | undefined;
 		let navigated = false;
 		// The frame tree is a renderer read like the snapshot's own: one that does
 		// not answer before the deadline is a commit in flight, so it counts as a move.
@@ -2613,7 +2633,7 @@ export class WorkerCore {
 		budgetMs: number,
 		deadline: number,
 		signal?: AbortSignal,
-	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string }> {
+	): Promise<SnapshotRead> {
 		const session = page.mainFrame().client;
 		await settlePage(page, signal, budgetMs);
 		let snapshot = await settleRead(
@@ -2621,29 +2641,37 @@ export class WorkerCore {
 			snapshotAccessibility(page, { includeAll }, signal),
 			deadline,
 		);
-		while (hasBusyIndicator(snapshot)) {
+		// Loading means the tree still shows an indicator, or the page a skeleton
+		// where its content will be; either is waited out within the budget.
+		const stillLoading = async (tree: AxNode): Promise<boolean> =>
+			hasBusyIndicator(tree) || (await settleRead("skeleton probe", hasSkeletonScreen(session, signal), deadline));
+		let loading = await stillLoading(snapshot);
+		while (loading) {
 			const remaining = deadline - Date.now();
 			if (remaining <= 0) break;
 			await untilAborted(signal, () => Bun.sleep(Math.min(SETTLE_BUSY_POLL_MS, remaining)));
 			// A re-read that does not answer ends the wait: the complete tree
-			// already read stands, and the caller's document check decides
-			// whether it is still the page's.
+			// already read stands, still marked loading, and the caller's
+			// document check decides whether it is still the page's.
 			const next = await settleRead(
 				"accessibility tree",
 				snapshotAccessibility(page, { includeAll }, signal),
 				deadline,
-			).catch(error => {
-				if (error instanceof SnapshotReadTimeout) return undefined;
-				throw error;
-			});
+			)
+				.then(async tree => ({ tree, loading: await stillLoading(tree) }))
+				.catch(error => {
+					if (error instanceof SnapshotReadTimeout) return undefined;
+					throw error;
+				});
 			if (!next) break;
-			snapshot = next;
+			snapshot = next.tree;
+			loading = next.loading;
 		}
 		const [layout, entry] = await Promise.all([
 			settleRead("page layout", pageLayout(session, signal), deadline),
 			settleRead("navigation entry", currentEntry(session, signal), deadline),
 		]);
-		return { snapshot, layout, url: entry.url, title: entry.title };
+		return { snapshot, layout, url: entry.url, title: entry.title, loading };
 	}
 
 	/**
@@ -2731,7 +2759,7 @@ export class WorkerCore {
 			: undefined;
 		this.#invalidateRefs();
 		const deadline = Date.now() + SETTLE_BUDGET_MS;
-		const { snapshot, layout, url, title, navigating } = await this.#settledSnapshot(
+		const { snapshot, layout, url, title, navigating, loading } = await this.#settledSnapshot(
 			page,
 			includeAll,
 			deadline,
@@ -2796,6 +2824,7 @@ export class WorkerCore {
 			scroll: { y: scroll.y, scrollHeight: scroll.scrollHeight },
 			focused,
 			navigating,
+			loading,
 		};
 		const previous = this.#lastTree;
 		const filter = JSON.stringify({ includeAll, viewportOnly, compact, selector: selector ?? null });

@@ -1,10 +1,14 @@
-import { expect, it } from "bun:test";
+import { expect, it, vi } from "bun:test";
 import { mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { RelayAccess } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/access";
 import type { RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
-import { BrowserInstances, EXPECTED_EXTENSION_BUILD_ID } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
+import {
+	BrowserInstances,
+	EXPECTED_EXTENSION_BUILD_ID,
+	RELAY_RECONNECT_GRACE_MS,
+} from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 
 const hello = {
 	t: "hello",
@@ -234,46 +238,80 @@ it("revokes pending reconnects before allowing the same browser to pair afresh",
 	}
 });
 
-it("holds a fresh relay's first request until the paired extension reconnects, and never waits when nothing is paired", async () => {
+function reconnect(instances: BrowserInstances, id: string, label: string, credential: string): Socket {
+	const socket = new Socket();
+	instances.extConnected(socket);
+	instances.extMessage(socket, JSON.stringify({ t: "authenticate", auth: { id, label, credential } }));
+	instances.extMessage(socket, JSON.stringify(hello));
+	return socket;
+}
+
+it("holds a fresh relay's first request until the paired extension reconnects, and never waits when nothing is paired", () => {
+	vi.useFakeTimers();
 	const unpaired = new BrowserInstances(new RelayAccess());
-	try {
-		const started = performance.now();
-		await unpaired.settled(2000);
-		expect(performance.now() - started).toBeLessThan(200);
-	} finally {
-		unpaired.close();
-	}
 	const access = new RelayAccess();
+	const before = new BrowserInstances(access);
+	const { credential } = pair(before, "profile_instance_a", "Work Chrome");
+	before.close();
+	// A daemon restart: the pairing is saved, the extension is still redialing.
 	const instances = new BrowserInstances(access);
 	try {
-		// Pair, then drop the socket: the relay knows a browser exists but it is
-		// not connected, which is exactly the state right after a daemon start.
+		expect(Bun.peek.status(unpaired.settled())).toBe("fulfilled");
+		const waiting = instances.settled();
+		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS - 1);
+		expect(Bun.peek.status(waiting)).toBe("pending");
+		reconnect(instances, "profile_instance_a", "Work Chrome", credential);
+		expect(Bun.peek.status(waiting)).toBe("fulfilled");
+		// Once connected, settled never blocks.
+		expect(Bun.peek.status(instances.settled())).toBe("fulfilled");
+	} finally {
+		unpaired.close();
+		instances.close();
+		vi.useRealTimers();
+	}
+});
+
+it("waits for a browser that just dropped, then refuses at once once it has been gone a redial interval", () => {
+	vi.useFakeTimers();
+	const instances = new BrowserInstances(new RelayAccess());
+	try {
+		// Long past the relay's own start, so only the drop makes a reconnect plausible.
+		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS * 2);
 		const paired = pair(instances, "profile_instance_a", "Work Chrome");
 		instances.extClosed(paired.socket);
-		expect(instances.ready).toBe(false);
-		const waited = instances.settled(2000).then(() => performance.now());
-		const started = performance.now();
-		const replacement = new Socket();
-		instances.extConnected(replacement);
-		instances.extMessage(
-			replacement,
-			JSON.stringify({
-				t: "authenticate",
-				auth: { id: "profile_instance_a", label: "Work Chrome", credential: paired.credential },
-			}),
+		const waiting = instances.settled();
+		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS - 1);
+		expect(Bun.peek.status(waiting)).toBe("pending");
+		vi.advanceTimersByTime(1);
+		expect(Bun.peek.status(waiting)).toBe("fulfilled");
+		expect(() => instances.select()).toThrow(
+			`No paired browser is connected after waiting ${RELAY_RECONNECT_GRACE_MS / 1000} s for its extension to reconnect to this relay: "Work Chrome" is paired.`,
 		);
-		instances.extMessage(replacement, JSON.stringify(hello));
-		expect((await waited) - started).toBeLessThan(200);
-		expect(instances.ready).toBe(true);
-		// Once connected, settled never blocks.
-		const again = performance.now();
-		await instances.settled(2000);
-		expect(performance.now() - again).toBeLessThan(50);
-		instances.extClosed(replacement);
-		// Still disconnected after the grace: give up rather than hang the request.
-		const grace = performance.now();
-		await instances.settled(150);
-		expect(performance.now() - grace).toBeGreaterThanOrEqual(140);
+		// Chrome is closed: the next request pays nothing and says it did not wait.
+		expect(Bun.peek.status(instances.settled())).toBe("fulfilled");
+		expect(() => instances.select()).toThrow('No paired browser is connected: "Work Chrome" is paired.');
+		expect(() => instances.select("profile_instance_a")).toThrow(
+			'Browser "Work Chrome" is disconnected. Check that Chrome is running',
+		);
+	} finally {
+		instances.close();
+		vi.useRealTimers();
+	}
+});
+
+it("waits for the exact browser a request names, not whichever paired browser reconnects first", () => {
+	const instances = new BrowserInstances(new RelayAccess());
+	try {
+		const work = pair(instances, "profile_instance_a", "Work Chrome");
+		const personal = pair(instances, "profile_instance_b", "Personal Chrome");
+		instances.extClosed(work.socket);
+		instances.extClosed(personal.socket);
+		const waiting = instances.settled({ browserId: "profile_instance_b" });
+		reconnect(instances, "profile_instance_a", "Work Chrome", work.credential);
+		expect(Bun.peek.status(waiting)).toBe("pending");
+		reconnect(instances, "profile_instance_b", "Personal Chrome", personal.credential);
+		expect(Bun.peek.status(waiting)).toBe("fulfilled");
+		expect(instances.select("profile_instance_b").label).toBe("Personal Chrome");
 	} finally {
 		instances.close();
 	}

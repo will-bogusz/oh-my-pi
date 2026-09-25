@@ -774,6 +774,7 @@ describe("RelayBridge attachment release", () => {
 							},
 						},
 					},
+					downloads: { onCreated: event(), onChanged: event() },
 					tabs: {
 						query: async () => [{ id: 1, ...tab({ tabId: 1 }) }],
 						onCreated: event(),
@@ -1544,6 +1545,7 @@ it("gives Chrome its debugger back on explicit detach and on worker unload, in t
 				onEvent: event(),
 				onDetach: event(),
 			},
+			downloads: { onCreated: event(), onChanged: event() },
 			tabs: {
 				query: async () => [
 					{ id: 1, ...tab({ tabId: 1 }) },
@@ -1646,6 +1648,7 @@ it("reloads the built extension worker once for an expected build it is not runn
 				action: { setBadgeText: async () => {}, setBadgeBackgroundColor: async () => {}, onClicked: event() },
 				alarms: { create: () => {}, onAlarm: event() },
 				debugger: { getTargets: async () => [], onEvent: event(), onDetach: event() },
+				downloads: { onCreated: event(), onChanged: event() },
 				tabs: {
 					query: async () => [{ id: 1, ...tab({ tabId: 1 }) }],
 					onCreated: event(),

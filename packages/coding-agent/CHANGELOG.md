@@ -10,6 +10,9 @@
 - Eval control cells: a settled computer/browser cell collapses to the header of each window or tab it displayed plus one verb-first line per call (`click n12 · Notes: All iCloud`, `create tab · Mount Elbrus - Wikipedia`); the raw output is on ctrl+o. Created tabs' screenshots are captioned by page title, and a result reporting a fronted app or a moved pointer gets its own line under the call.
 - `/computer status` (and `/computer on`) reports the installed cua-driver (version, commit, sha256, path) and the driver's own permission check: Accessibility and Screen Recording each granted or not, the app macOS attributes them to (the terminal omp runs in, found from the process ancestry), and one sentence naming that app when a grant is missing.
 - Screenshots: a managed tab's acquisition preview is saved at the size the model sees even when `browser.screenshotDir` is set (full resolution stays for an explicit `tab.screenshot()`); computer captures (`$TMPDIR/omp-computer-*`) are removed when the agent session that wrote them closes — only files that session's runs reported, never anything else.
+- Browser: table and grid rows and cells the page makes clickable (own click listener, an uninherited pointer cursor, or a `tabindex`) get refs, so webmail and admin lists can be opened by ref; plain data tables stay ref-free. Layout-table parts print as `row`/`cell`.
+- Browser: `tab.ref()` refuses a missing, empty or non-string ref at the call, naming it, instead of a `token.trim` TypeError at the first action.
+- Browser: the prompt fits its 650-word budget and now covers `includeAll`, `display: false`, `check()`/`uncheck()`, `uploadFile`, and what a bare `open()` does while the relay is on.
 
 ### Breaking Changes
 ### Added
@@ -64,6 +67,7 @@
 
 ### Fixed
 
+- Browser: `tab.downloads()` / `tab.waitForDownload()` on a tab in the user's Chrome now report each download the tab started with its `state` (`inProgress`, `completed`, `canceled`) and, once completed, the saved `path`, including a download that finishes after OMP hands the debugger back. The relay pairs the debugger's per-tab download start with the extension's `chrome.downloads` item by URL. Every `BrowserDownload` gained `state`, and `downloads()` also lists downloads still in progress or canceled.
 - Fixed `vault://` paths resolving to a different spelling for bash than for reads on Windows when `TEMP` or the profile directory uses an 8.3 short name like `ADMINI~1` ([#7911](https://github.com/can1357/oh-my-pi/issues/7911), [#7938](https://github.com/can1357/oh-my-pi/pull/7938) by [@CoderTCY](https://github.com/CoderTCY))
 - Fixed the bash tool on Windows keeping 8.3 short-name spellings like `ADMINI~1` in its working directory; `pwd` and `$PWD` now report the long path ([#7938](https://github.com/can1357/oh-my-pi/pull/7938) by [@CoderTCY](https://github.com/CoderTCY))
 - Fixed RPC `abort_and_prompt` scheduling failures being reported only as a late error response; the prompt now also completes with a `prompt_result`.

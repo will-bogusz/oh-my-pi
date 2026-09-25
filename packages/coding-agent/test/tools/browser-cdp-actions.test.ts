@@ -245,6 +245,69 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	60_000,
 );
 
+const ARTICLE = `<h1>Quarterly report</h1><p>${"Revenue grew in every region this quarter, led by strong subscription renewals. ".repeat(6)}</p>`;
+
+const LOADER_PAGES: Record<string, string> = {
+	// A text loader that is not the first word of a status node, replaced well after the DOM-quiet window.
+	"/text": `<!doctype html><title>Report</title><main id="root"><div role="status">Please wait…</div></main>
+<script>setTimeout(() => { document.getElementById("root").innerHTML = ${JSON.stringify(ARTICLE)}; }, 1500)</script>`,
+	// A skeleton screen: empty shimmering blocks, no text and no busy state, until the content arrives.
+	"/skeleton": `<!doctype html><title>Report</title>
+<style>.skeleton-line { height: 14px; margin: 8px; background: linear-gradient(90deg, #eee, #ddd, #eee); animation: shimmer 1s infinite; }
+@keyframes shimmer { to { background-position: 200px 0; } }</style>
+<main id="root"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></main>
+<script>setTimeout(() => { document.getElementById("root").innerHTML = ${JSON.stringify(ARTICLE)}; }, 1500)</script>`,
+	"/forever": `<!doctype html><title>Report</title><main><p>Loading…</p></main>`,
+	// A permanent loader under content that is already there, outside any footer landmark.
+	"/footer": `<!doctype html><title>Report</title>${ARTICLE}<div>Loading…</div>`,
+};
+
+// A loader or skeleton that the page replaces within the settle budget is
+// waited out; one that outlasts it comes back marked instead of as settled;
+// and a loader beside content the page already shows never holds the read.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"waits out text loaders and skeletons, and marks a loader that outlasts the settle budget",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: request =>
+				new Response(LOADER_PAGES[new URL(request.url).pathname], {
+					headers: { "content-type": "text/html; charset=utf-8" },
+				}),
+		});
+		const observe = async (run: Harness["run"], goto: Harness["goto"], path: string) => {
+			await goto(`http://127.0.0.1:${server.port}${path}`);
+			const started = Date.now();
+			const tree = await run<string>(`return (await tab.observe({ diff: false })).tree;`);
+			return { tree, elapsed: Date.now() - started };
+		};
+		try {
+			await withWorker([], async ({ run, goto }) => {
+				for (const path of ["/text", "/skeleton"]) {
+					const { tree } = await observe(run, goto, path);
+					expect(tree).toContain("Revenue grew in every region");
+					expect(tree).not.toContain("Please wait");
+					expect(tree).not.toContain("may still be loading");
+				}
+
+				const forever = await observe(run, goto, "/forever");
+				expect(forever.tree).toMatch(/^url: .*\| may still be loading/m);
+				expect(forever.tree).toContain('text "Loading…"');
+				expect(forever.elapsed).toBeLessThan(6_000);
+
+				const footer = await observe(run, goto, "/footer");
+				expect(footer.tree).toContain("Revenue grew in every region");
+				expect(footer.tree).not.toContain("may still be loading");
+				expect(footer.elapsed).toBeLessThan(2_000);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
 const LOST_TAB = `<!doctype html><title>Lost</title><p>Loading forever</p>`;
 
 // A session that closes with nothing taking its place is a lost tab, not a
@@ -612,6 +675,84 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 				expect(await click("Flat")).toContain("has no box to act on: it is zero-sized");
 				expect(await run<string>("return await tab.evaluate(() => document.body.dataset.hits);")).toBe(
 					"Settings,Rotated,ab cd,",
+				);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
+const CHECK_PAGE = `<!doctype html><title>Checks</title>
+<style>body{margin:20px;font:16px sans-serif}
+.styled{position:relative;display:inline-block;padding-left:28px}
+.styled input{position:absolute;left:0;top:0;margin:0;width:20px;height:20px}
+.dot{position:absolute;left:0;top:0;width:20px;height:20px;background:#39f}</style>
+<p><label><input type="radio" name="plain" id="plain"> Plain</label></p>
+<p><label><input type="radio" name="prevented" id="prevented"> Prevented</label></p>
+<p><label class="styled"><input type="radio" name="styled" id="styled" aria-label="Styled"><span class="dot"></span>Styled</label></p>
+<p><label class="styled" id="trap"><input type="radio" name="trapped" id="trapped" aria-label="Trapped"><span class="dot"></span>Trapped</label></p>
+<div id="group"><input type="checkbox" id="inert" aria-label="Inert" style="pointer-events:none"></div>
+<p><label><input type="checkbox" id="twice"> Twice</label></p>
+<p><span role="switch" aria-checked="false" id="wifi" tabindex="0">Wifi</span>
+<span role="checkbox" aria-checked="false" id="dead" tabindex="0">Dead</span>
+<span role="checkbox" aria-checked="false" id="later" tabindex="0">Later</span></p>
+<script>
+document.getElementById("prevented").addEventListener("click", event => event.preventDefault());
+document.getElementById("trap").addEventListener("click", event => event.preventDefault());
+const wifi = document.getElementById("wifi");
+wifi.addEventListener("click", () => wifi.setAttribute("aria-checked", String(wifi.getAttribute("aria-checked") !== "true")));
+const later = document.getElementById("later");
+later.addEventListener("click", () => setTimeout(() => later.setAttribute("aria-checked", "true"), 50));
+</script>`;
+
+// A click on a checkable control is expected to change it. One that still
+// reads the same after the release is reported, with where the press landed
+// when that was not the control; an ARIA control the page updates a moment
+// later is not (the fixture's page timer is the behaviour under test, so it
+// cannot be faked). A styled control drawn over by its own label is pressed
+// through that label instead of refused as covered.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"reports a checkbox, radio or switch click that left it unchanged, and clicks one through its own label",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(CHECK_PAGE, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				const refs = await run<Record<string, string>>(
+					`const { elements } = await tab.observe();
+					 return Object.fromEntries(elements.map(e => [e.name, e.ref]));`,
+				);
+				const ref = (name: string) => `(await tab.ref(${JSON.stringify(refs[name])}))`;
+				const states = () =>
+					run<string>(
+						`return await tab.evaluate(() => [...document.querySelectorAll("input")].map(i => i.id + "=" + i.checked).join(" ") + " wifi=" + document.getElementById("wifi").getAttribute("aria-checked") + " later=" + document.getElementById("later").getAttribute("aria-checked"));`,
+					);
+				await run(`await ${ref("Plain")}.click(); await ${ref("Styled")}.click(); await ${ref("Wifi")}.click(); await ${ref("Later")}.click();
+					 await ${ref("Twice")}.dblclick(); await ${ref("Plain")}.click();`);
+				expect(await states()).toBe(
+					"plain=true prevented=false styled=true trapped=false inert=false twice=false wifi=true later=true",
+				);
+				expect(await runError(`await ${ref("Prevented")}.click();`)).toContain(
+					`${refs.Prevented}.click() did not change the radio: it is still unchecked. Use check() to set it.`,
+				);
+				expect(await runError(`await ${ref("Trapped")}.click();`)).toContain(
+					".click() did not change the radio: it is still unchecked. The press landed on <span.dot> in its label. Use check() to set it.",
+				);
+				expect(await runError(`await ${ref("Inert")}.click();`)).toContain(
+					".click() did not change the checkbox: it is still unchecked. The press landed on <div#group>, which contains it. Use check() to set it.",
+				);
+				expect(await runError(`await ${ref("Dead")}.click();`)).toContain(
+					".click() did not change the checkbox: it is still unchecked. Use check() to set it.",
+				);
+				await run(`await ${ref("Prevented")}.check(); await ${ref("Trapped")}.check();`);
+				expect(await states()).toBe(
+					"plain=true prevented=true styled=true trapped=true inert=false twice=false wifi=true later=true",
 				);
 			});
 		} finally {

@@ -7,6 +7,8 @@ function isCurrentRelayHealth(value) {
   const health = value;
   return health.service === RELAY_SERVICE_NAME && health.protocol === RELAY_PROTOCOL_VERSION;
 }
+var EXTENSION_RECONNECT_MIN_MS = 1000;
+var EXTENSION_RECONNECT_MAX_MS = 1e4;
 
 // extension/debugger-ownership.ts
 async function ownedDebuggerTabs(targets, probe) {
@@ -801,14 +803,12 @@ var CURSOR_OVERLAY_REMOVE = `window.__ompCursor?.remove()`;
 
 // extension/background.ts
 var PING_INTERVAL_MS = 20000;
-var RECONNECT_MIN_MS = 1000;
-var RECONNECT_MAX_MS = 1e4;
 var DETACH_GRACE_MS = 2000;
 var ws = null;
 var connecting = false;
 var relayReady = false;
 var pendingEvents = [];
-var reconnectDelay = RECONNECT_MIN_MS;
+var reconnectDelay = EXTENSION_RECONNECT_MIN_MS;
 var pingTimer = null;
 var attachments = new DebuggerAttachments({
   detach: (tabId) => chrome.debugger.detach({ tabId }),
@@ -889,7 +889,7 @@ async function setBadge(connected) {
     await chrome.action.setBadgeBackgroundColor({ color: connected ? "#1a7f37" : "#8b8b8b" });
   } catch {}
 }
-var buildId = "50482d1c3665fe3e31adf22c8e5c67360703a97437aa1fc443196dda42161f1d";
+var buildId = "ee2cbd27e4d879427a49c159693f602daaf493a50cbe25adc8d6d25be61a847e";
 var RELOAD_GUARD_KEY = "reloadedFor";
 async function reloadForBuildSkew(expected) {
   if (!expected)
@@ -1012,7 +1012,7 @@ async function handleRelayMessage(socket, raw) {
 }
 function scheduleReconnect() {
   const delay = reconnectDelay;
-  reconnectDelay = Math.min(reconnectDelay * 2, RECONNECT_MAX_MS);
+  reconnectDelay = Math.min(reconnectDelay * 2, EXTENSION_RECONNECT_MAX_MS);
   setTimeout(() => void connect(), delay);
 }
 async function connect() {
@@ -1030,7 +1030,7 @@ async function connect() {
     relayReady = false;
     pendingEvents = [];
     socket.onopen = () => {
-      reconnectDelay = RECONNECT_MIN_MS;
+      reconnectDelay = EXTENSION_RECONNECT_MIN_MS;
       socket.send(JSON.stringify({ t: "authenticate", auth: { id: settings.instanceId, label: settings.browserLabel, credential: settings.credential || undefined, pairingCode: settings.pairingCode || undefined } }));
       clearInterval(pingTimer ?? undefined);
       pingTimer = setInterval(() => post({ t: "ping" }), PING_INTERVAL_MS);
@@ -1103,6 +1103,19 @@ chrome.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
     const snap = snapshot(tab);
     if (snap)
       post({ t: "tabCreated", tab: snap });
+  }).catch(() => {
+    return;
+  });
+});
+function postDownload(item) {
+  const { id, url, finalUrl, filename, state, bytesReceived, totalBytes } = item;
+  post({ t: "download", download: { id, url, finalUrl, filename, state, bytesReceived, totalBytes } });
+}
+chrome.downloads.onCreated.addListener(postDownload);
+chrome.downloads.onChanged.addListener((delta) => {
+  chrome.downloads.search({ id: delta.id }).then(([item]) => {
+    if (item)
+      postDownload(item);
   }).catch(() => {
     return;
   });

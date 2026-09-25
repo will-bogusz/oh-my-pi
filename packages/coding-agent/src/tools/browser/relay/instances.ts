@@ -5,10 +5,16 @@ import { RelayAccess, type BrowserAuthentication } from "./access";
 import { type DebuggerState, RelayBridge, type RelaySocket } from "./bridge";
 import buildInfo from "./extension-assets/build-info.json.txt" with { type: "text" };
 import type { ChromeTabLease, DiscoveredChromeTab } from "./managed-tabs";
-import { isTabSnapshot, type ExtToRelayMessage, type RelayToExtMessage } from "./protocol";
+import { EXTENSION_RECONNECT_MAX_MS, isTabSnapshot, type ExtToRelayMessage, type RelayToExtMessage } from "./protocol";
 
 /** Identity of the extension build shipped with this relay; the parity gate's yardstick. */
 export const EXPECTED_EXTENSION_BUILD_ID: string = JSON.parse(buildInfo).buildId;
+/**
+ * How long a request waits for a paired but disconnected browser before it is
+ * refused: one full redial interval of the extension's backoff (which grew
+ * while the relay was down) plus its authenticate/hello round trip.
+ */
+export const RELAY_RECONNECT_GRACE_MS = EXTENSION_RECONNECT_MAX_MS + 2_000;
 
 export interface ExtensionBuildStatus {
 	/** Only present while connected; never inferred from exported files. */
@@ -42,6 +48,8 @@ interface Instance {
 	label: string;
 	generation?: string;
 	extensionBuildId?: string;
+	/** When its last socket closed; a reconnect is plausible only for a redial interval after this. */
+	disconnectedAt?: number;
 }
 interface Pending {
 	authenticated?: { id: string; label: string };
@@ -81,6 +89,13 @@ export class BrowserInstances {
 	#sockets = new Map<RelaySocket, string>();
 	#awaitingHello = new Set<() => void>();
 	/**
+	 * How long the last {@link settled} wait lasted without its browser coming
+	 * back; cleared by any hello and by a request that did not wait.
+	 */
+	#unansweredWaitMs: number | undefined;
+	/** When this relay started: its paired browsers may still be redialing a relay that was down. */
+	readonly #startedAt = Date.now();
+	/**
 	 * Bound port of the relay serving these instances, set once it is listening.
 	 * Only used to spell out the reinstall command a build-skewed extension needs.
 	 */
@@ -102,21 +117,41 @@ export class BrowserInstances {
 	}
 	/**
 	 * A freshly started relay answers HTTP before the paired extension has
-	 * reconnected (its retry lands within ~1 s), so the first request of a
-	 * session would otherwise see zero browsers. When a browser is paired but
-	 * none is connected, wait up to `graceMs` for the first hello; unpaired or
-	 * already-connected relays return at once.
+	 * reconnected: the extension redials on a backoff that grew while the relay
+	 * was down, up to {@link EXTENSION_RECONNECT_MAX_MS} apart. When the browser
+	 * asked for (else any paired browser) is known but not connected, wait for
+	 * its hello — but only within `graceMs` of this relay starting or of that
+	 * browser dropping, the only windows in which a redial is on its way. A
+	 * browser gone for longer (Chrome closed) is refused at once, so a caller
+	 * that does not know pays nothing per call. A wait that expires is
+	 * remembered, so the refusal says it waited.
 	 */
-	settled(graceMs = 3000): Promise<void> {
-		if (this.ready || this.#instances.size === 0) return Promise.resolve();
+	settled(opts: { browserId?: string; graceMs?: number } = {}): Promise<void> {
+		const { browserId, graceMs = RELAY_RECONNECT_GRACE_MS } = opts;
+		const named = browserId ? this.#instances.get(browserId) : undefined;
+		const connected = () => (named ? this.bridge.connected(named.id) : this.ready);
+		if (this.#instances.size === 0 || connected()) return Promise.resolve();
+		const awaited = named ? [named] : [...this.#instances.values()];
+		const lastSeen = Math.max(this.#startedAt, ...awaited.map(instance => instance.disconnectedAt ?? 0));
+		const remaining = lastSeen + graceMs - Date.now();
+		if (remaining <= 0) {
+			this.#unansweredWaitMs = undefined;
+			return Promise.resolve();
+		}
 		const { promise, resolve } = Promise.withResolvers<void>();
 		const done = () => {
 			clearTimeout(timer);
-			this.#awaitingHello.delete(done);
+			this.#awaitingHello.delete(wake);
 			resolve();
 		};
-		const timer = setTimeout(done, graceMs);
-		this.#awaitingHello.add(done);
+		const wake = () => {
+			if (connected()) done();
+		};
+		const timer = setTimeout(() => {
+			this.#unansweredWaitMs = remaining;
+			done();
+		}, remaining);
+		this.#awaitingHello.add(wake);
 		return promise;
 	}
 	list(): BrowserInstance[] {
@@ -196,6 +231,7 @@ export class BrowserInstances {
 			this.#sockets.set(socket, identity.id);
 			this.bridge.extConnected(socket, identity.id);
 			this.bridge.extMessage(socket, raw);
+			this.#unansweredWaitMs = undefined;
 			for (const wake of this.#awaitingHello) wake();
 		} catch (error) {
 			clearTimeout(pending.timer);
@@ -210,25 +246,40 @@ export class BrowserInstances {
 		const pending = this.#pending.get(socket);
 		if (pending) clearTimeout(pending.timer);
 		this.#pending.delete(socket);
-		if (this.#sockets.delete(socket)) this.bridge.extClosed(socket);
+		const id = this.#sockets.get(socket);
+		if (!this.#sockets.delete(socket)) return;
+		this.bridge.extClosed(socket);
+		const instance = id === undefined ? undefined : this.#instances.get(id);
+		if (instance && !this.bridge.connected(instance.id)) instance.disconnectedAt = Date.now();
 	}
 
 	select(id?: string): Instance {
+		// Every request has already been through `settled`; a refusal after a wait says so.
+		const waited =
+			this.#unansweredWaitMs === undefined
+				? ""
+				: ` after waiting ${Math.ceil(this.#unansweredWaitMs / 1000)} s for its extension to reconnect to this relay`;
 		if (id) {
 			const instance = this.#instances.get(id);
 			if (!instance) throw new Error("Unknown browser instance. List paired browsers again");
 			if (!this.bridge.connected(id))
-				throw new Error(`Browser ${JSON.stringify(instance.label)} is disconnected. Reconnect its extension`);
+				throw new Error(
+					`Browser ${JSON.stringify(instance.label)} is disconnected${waited}. Check that Chrome is running with the OMP extension enabled`,
+				);
 			return instance;
 		}
 		const connected = this.#connected();
-		if (connected.length !== 1)
+		if (connected.length === 1) return connected[0]!;
+		if (connected.length > 1)
+			throw new Error("Multiple browsers are connected. Select an exact browserId from browser.instances()");
+		if (this.#instances.size === 0)
 			throw new Error(
-				connected.length
-					? "Multiple browsers are connected. Select an exact browserId from browser.instances()"
-					: "No paired browser is connected. Run omp browser-relay pair and finish setup in the extension",
+				"No paired browser is connected. Run omp browser-relay pair and finish setup in the extension",
 			);
-		return connected[0]!;
+		const paired = [...this.#instances.values()].map(instance => JSON.stringify(instance.label)).join(", ");
+		throw new Error(
+			`No paired browser is connected${waited}: ${paired} ${this.#instances.size === 1 ? "is" : "are"} paired. Check that Chrome is running with the OMP extension enabled; it redials the relay at most ${EXTENSION_RECONNECT_MAX_MS / 1000} s apart`,
+		);
 	}
 	/** The exact browser asked for, else every connected one. */
 	#scope(browserId?: string): Instance[] {

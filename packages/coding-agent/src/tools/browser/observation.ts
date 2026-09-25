@@ -53,6 +53,8 @@ export interface AxNode {
 	checked?: boolean | "mixed";
 	pressed?: boolean | "mixed";
 	level?: number;
+	/** A table or grid part the page makes clickable although no widget role says so (see `TABLE_PART_ROLES`). */
+	clickTarget?: boolean;
 	children?: AxNode[];
 	/** The DOM node behind this accessibility node, in its own frame's id space. */
 	backendNodeId?: number;
@@ -110,6 +112,33 @@ const LANDMARK_ROLES: Record<string, true> = {
 	search: true,
 };
 
+/**
+ * Table and grid parts (Chrome reports a table without headers as a layout
+ * table). Webmail and admin lists open an item only by clicking its row or
+ * cell, so a part the page made focusable or clickable is a click target; a
+ * plain data table's parts are not.
+ */
+const TABLE_PART_ROLES: Record<string, true> = {
+	row: true,
+	gridcell: true,
+	cell: true,
+	rowheader: true,
+	columnheader: true,
+	LayoutTableRow: true,
+	LayoutTableCell: true,
+};
+
+/** Whether a frame has table parts whose click targets only the DOM can name. */
+export function hasTableParts(payloads: readonly AxPayload[]): boolean {
+	return payloads.some(
+		payload =>
+			!payload.ignored &&
+			payload.backendDOMNodeId !== undefined &&
+			typeof payload.role?.value === "string" &&
+			TABLE_PART_ROLES[payload.role.value] === true,
+	);
+}
+
 /** A payload plus the derived state the interesting-node filter needs. */
 interface AxTreeNode {
 	payload: AxPayload;
@@ -121,21 +150,28 @@ interface AxTreeNode {
 	/** Document of the iframe this node owns, already serialized. */
 	embedded?: AxNode;
 	focusableChild?: boolean;
+	clickTarget: boolean;
 }
 
-function treeNode(payload: AxPayload): AxTreeNode {
+function treeNode(payload: AxPayload, clickable: ReadonlySet<number> | undefined): AxTreeNode {
 	const properties = new Map<string, unknown>();
 	for (const property of payload.properties ?? []) properties.set(property.name.toLowerCase(), property.value.value);
 	if (payload.name) properties.set("name", payload.name.value);
 	if (payload.value) properties.set("value", payload.value.value);
 	if (payload.description) properties.set("description", payload.description.value);
+	const role = typeof payload.role?.value === "string" ? payload.role.value : "Unknown";
+	const backendNodeId = payload.backendDOMNodeId;
 	return {
 		payload,
 		properties,
-		role: typeof payload.role?.value === "string" ? payload.role.value : "Unknown",
+		role,
 		name: typeof payload.name?.value === "string" ? payload.name.value : "",
 		description: typeof payload.description?.value === "string" ? payload.description.value : "",
 		children: [],
+		clickTarget:
+			TABLE_PART_ROLES[role] === true &&
+			(properties.get("focusable") === true ||
+				(backendNodeId !== undefined && clickable?.has(backendNodeId) === true)),
 	};
 }
 
@@ -175,7 +211,7 @@ function isInteresting(node: AxTreeNode, insideControl: boolean): boolean {
 		node.properties.has("roledescription")
 	)
 		return true;
-	if (CONTROL_ROLES[node.role]) return true;
+	if (CONTROL_ROLES[node.role] || node.clickTarget) return true;
 	if (insideControl) return false;
 	return isLeafNode(node) && Boolean(node.name || node.description);
 }
@@ -219,6 +255,7 @@ function serialize(node: AxTreeNode, frame: AxFrame): AxNode {
 	}
 	const level = node.properties.get("level");
 	if (level !== undefined) serialized.level = Number(level);
+	if (node.clickTarget) serialized.clickTarget = true;
 	return serialized;
 }
 
@@ -236,15 +273,17 @@ function serializeTree(node: AxTreeNode, frame: AxFrame, interesting: Set<AxTree
  * Serialize one frame's `Accessibility.getFullAXTree` payloads into a node tree,
  * splicing each embedded document under the iframe element that owns it.
  * `includeAll` keeps every node; otherwise only the ones a screen reader would
- * announce survive, which is what makes the default tree readable.
+ * announce survive, which is what makes the default tree readable. `clickable`
+ * holds the backend ids the DOM marks as click targets (a click listener or a
+ * pointer cursor of its own).
  */
 export function buildAxTree(
 	payloads: readonly AxPayload[],
 	frame: AxFrame,
-	options: { includeAll: boolean; embedded?: ReadonlyMap<number, AxNode> },
+	options: { includeAll: boolean; embedded?: ReadonlyMap<number, AxNode>; clickable?: ReadonlySet<number> },
 ): AxNode | null {
 	const byId = new Map<string, AxTreeNode>();
-	for (const payload of payloads) byId.set(payload.nodeId, treeNode(payload));
+	for (const payload of payloads) byId.set(payload.nodeId, treeNode(payload, options.clickable));
 	for (const node of byId.values()) {
 		for (const childId of node.payload.childIds ?? []) {
 			const child = byId.get(childId);
@@ -281,9 +320,9 @@ const INTERACTIVE_AX_ROLES: Record<string, true> = {
 	treeitem: true,
 };
 
-/** Nodes the model can act on: control roles or anything carrying a state. */
+/** Nodes the model can act on: control roles, clickable table parts, or anything carrying a state. */
 export function isInteractiveNode(node: AxNode): boolean {
-	if (INTERACTIVE_AX_ROLES[node.role]) return true;
+	if (INTERACTIVE_AX_ROLES[node.role] || node.clickTarget) return true;
 	return (
 		node.checked !== undefined ||
 		node.pressed !== undefined ||
@@ -297,6 +336,8 @@ export function isInteractiveNode(node: AxNode): boolean {
 const LAYOUT_ROLES: Record<string, true> = { Ignored: true, InlineTextBox: true, LineBreak: true };
 /** Structural roles that add nothing to the tree when unnamed: children are hoisted. */
 const TRANSPARENT_ROLES: Record<string, true> = { generic: true, none: true, presentation: true, GenericContainer: true };
+/** Chromium-internal role names the model reads by their plain equivalent. */
+const DISPLAY_ROLES: Record<string, string> = { StaticText: "text", LayoutTableRow: "row", LayoutTableCell: "cell" };
 
 export interface ObservedNode extends TreeNode {
 	states: string[];
@@ -364,7 +405,7 @@ export function flattenSnapshot(root: AxNode, options: { includeAll: boolean }):
 			for (const child of children) visit(child, depth, parentName);
 			return;
 		}
-		const role = node.role === "StaticText" ? "text" : node.role;
+		const role = DISPLAY_ROLES[node.role] ?? node.role;
 		const name = (node.name ?? "").trim();
 		// A link's or heading's text child only repeats the name it was computed from.
 		if (role === "text" && (name === "" || name === parentName)) return;
@@ -421,19 +462,60 @@ export function compactNodes(nodes: readonly ObservedNode[]): ObservedNode[] {
 	return nodes.filter((_, index) => kept.has(index));
 }
 
-/** Roles a "Loading…" label marks as a spinner; a heading or link that starts with the word is content. */
+/** Roles a loading label marks as a spinner; a heading or link that says "loading" is content. */
 const SPINNER_ROLES: Record<string, true> = { StaticText: true, text: true, img: true, image: true, status: true, alert: true, generic: true, paragraph: true };
+/** Wording a loader shows, anywhere in a short name: "Loading…", "Content loading", "Please wait". */
+const LOADER_TEXT = /\b(?:loading|please wait|one moment|just a moment)\b/i;
+/** A loader label is a few words; a longer name is a sentence about loading. */
+const LOADER_NAME_MAX_CHARS = 64;
+/** Landmarks around the page's content: a loader there never stands for the content itself. */
+const PERIPHERAL_ROLES: Record<string, true> = {
+	banner: true,
+	contentinfo: true,
+	navigation: true,
+	complementary: true,
+};
+/**
+ * Text a loader's page may carry besides it and still be "only a loader". A
+ * page with more has its content, so a permanent "Loading…" footer or a
+ * "Loading more…" sentinel under an article never holds the observation.
+ */
+const LOADER_CONTENT_MAX_CHARS = 300;
 
-/** Whether the page still shows a loading indicator the observation should wait out. */
+/** Characters of leaf text under `node`, skipping loaders and the landmarks around the content. */
+function contentChars(node: AxNode, loaders: ReadonlySet<AxNode>): number {
+	if (loaders.has(node) || PERIPHERAL_ROLES[node.role]) return 0;
+	if (!node.children?.length) return (node.name ?? "").trim().length;
+	let total = 0;
+	for (const child of node.children) total += contentChars(child, loaders);
+	return total;
+}
+
+/**
+ * Whether the page still shows a loading indicator the observation should wait out.
+ *
+ * `aria-busy` and an indeterminate progressbar are the page saying so. Loader
+ * text is weaker: it counts only outside the landmarks around the content, and
+ * only while the content it sits in — its `main`, else the whole page — has
+ * little text besides loaders.
+ */
 export function hasBusyIndicator(root: AxNode): boolean {
-	const busy = (node: AxNode): boolean => {
+	const loaders = new Set<AxNode>();
+	const scopes = new Set<AxNode>();
+	const busy = (node: AxNode, scope: AxNode | undefined): boolean => {
 		if (node.busy === true) return true;
 		// A progressbar with a value is a meter; only an indeterminate one is "still loading".
 		if (node.role === "progressbar" && node.value === undefined && node.valuetext === undefined) return true;
-		if (SPINNER_ROLES[node.role] && /^loading\b/i.test((node.name ?? "").trim())) return true;
-		return (node.children ?? []).some(busy);
+		const inner = PERIPHERAL_ROLES[node.role] ? undefined : node.role === "main" ? node : scope;
+		const name = (node.name ?? "").trim();
+		if (inner && SPINNER_ROLES[node.role] && name.length <= LOADER_NAME_MAX_CHARS && LOADER_TEXT.test(name)) {
+			loaders.add(node);
+			scopes.add(inner);
+		}
+		return (node.children ?? []).some(child => busy(child, inner));
 	};
-	return busy(root);
+	if (busy(root, root)) return true;
+	return [...scopes].some(scope => contentChars(scope, loaders) <= LOADER_CONTENT_MAX_CHARS);
 }
 
 /** Identity of the DOM node behind a snapshot node, unique across frames for one document lifetime. */
@@ -507,6 +589,8 @@ export interface TreeHeader {
 	focused?: string;
 	/** The settle budget ran out while the page kept replacing its document: the tree may already be gone. */
 	navigating?: boolean;
+	/** The settle budget ran out while the page still showed a loading indicator: content may still arrive. */
+	loading?: boolean;
 }
 
 export function renderHeader(header: TreeHeader): string {
@@ -515,6 +599,8 @@ export function renderHeader(header: TreeHeader): string {
 	parts.push(`scroll: ${header.scroll.y}/${header.scroll.scrollHeight}`);
 	if (header.focused) parts.push(`focused: ${header.focused}`);
 	if (header.navigating) parts.push("still navigating (the page kept replacing its document; observe again)");
+	if (header.loading)
+		parts.push("may still be loading (a loading indicator outlasted the settle wait; observe again)");
 	return parts.join(" | ");
 }
 

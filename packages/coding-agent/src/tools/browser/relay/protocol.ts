@@ -27,6 +27,14 @@ export function isCurrentRelayHealth(value: unknown): value is RelayHealth {
 	return health.service === RELAY_SERVICE_NAME && health.protocol === RELAY_PROTOCOL_VERSION;
 }
 
+/**
+ * The extension's redial backoff after it loses the relay: it doubles from the
+ * minimum to the maximum and stays there. The relay derives from the maximum
+ * how long a freshly started daemon waits for a paired browser to come back.
+ */
+export const EXTENSION_RECONNECT_MIN_MS = 1_000;
+export const EXTENSION_RECONNECT_MAX_MS = 10_000;
+
 /** Minimal view of a Chrome tab shared between extension and relay. */
 export interface TabSnapshot {
 	tabId: number;
@@ -38,6 +46,19 @@ export interface TabSnapshot {
 	pinned: boolean;
 	/** Chrome tab group id; -1 when ungrouped. */
 	groupId: number;
+}
+
+/** A `chrome.downloads` item as the extension reports it on creation and on every change. */
+export interface DownloadSnapshot {
+	id: number;
+	/** Where the download started, before redirects. */
+	url: string;
+	finalUrl: string;
+	/** Absolute path Chrome saves to; final once `state` is `complete`. */
+	filename: string;
+	state: "in_progress" | "complete" | "interrupted";
+	bytesReceived: number;
+	totalBytes: number;
 }
 
 /** Validate complete tab snapshots returned by the paired extension. */
@@ -134,5 +155,11 @@ export type ExtToRelayMessage =
 	| { t: "tabUpdated"; tab: TabSnapshot }
 	| { t: "tabRemoved"; tabId: number }
 	| { t: "tabActivated"; tabId: number; windowId: number }
+	/**
+	 * A download anywhere in this browser, from `chrome.downloads`. It names the
+	 * saved file but not the tab; the relay pairs it with the tab whose
+	 * `Page.downloadWillBegin` carried the same URL and drops the rest.
+	 */
+	| { t: "download"; download: DownloadSnapshot }
 	| { t: "rpcResult"; id: number; ok: boolean; result?: unknown; error?: string }
 	| { t: "ping" };

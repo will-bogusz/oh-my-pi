@@ -28,6 +28,7 @@
  */
 import { createHash } from "node:crypto";
 import { DialogJournal, type DialogJournalState, parseDialogRequest } from "../dialog-journal";
+import { DownloadAttribution } from "./downloads";
 import {
 	type ExtToRelayMessage,
 	isTabSnapshot,
@@ -139,6 +140,8 @@ interface ExtInstance {
 	info: { userAgent: string; browserVersion: string } | null;
 	/** Task-owned leases over this browser's tabs. */
 	readonly managed: ManagedChromeTabs;
+	/** Pairs this browser's `chrome.downloads` items with the leased tabs that started them. */
+	readonly downloads: DownloadAttribution;
 }
 
 /** Deterministic per-instance code for target ids: stable across relay restarts. */
@@ -405,6 +408,12 @@ export class RelayBridge {
 					tab.canceledByUser = false;
 				},
 			}),
+			downloads: new DownloadAttribution((tabKey, method, params) => {
+				for (const conn of this.#conns.values()) {
+					for (const pageSession of conn.sessionsForTab(tabKey, "page"))
+						conn.socket.send(JSON.stringify({ sessionId: pageSession, method, params }));
+				}
+			}),
 		};
 		return inst;
 	}
@@ -578,6 +587,9 @@ export class RelayBridge {
 				return;
 			case "tabActivated":
 				this.#onTabActivated(inst, msg.tabId, msg.windowId);
+				return;
+			case "download":
+				inst.downloads.item(msg.download);
 				return;
 			case "tabRemoved":
 				this.#onTabRemoved(tabKeyOf(inst.code, msg.tabId));
@@ -1251,6 +1263,9 @@ export class RelayBridge {
 		// The only signal that names the page which opened a popup, and the one
 		// `chrome.tabs.onCreated` misattributes for a synthesized click.
 		if (!sourceSessionId && method === "Page.windowOpen") tab.windowOpenedAt = Date.now();
+		// Whichever session saw it, a download belongs to this tab.
+		if (method === "Page.downloadWillBegin") this.#instances.get(tab.instanceId)?.downloads.began(tabKey, params);
+		else if (method === "Page.downloadProgress") this.#instances.get(tab.instanceId)?.downloads.progressed(params);
 		// Track real child sessions so downstream commands can route back.
 		if (method === "Target.attachedToTarget") {
 			const child = params?.sessionId;
@@ -1354,6 +1369,7 @@ export class RelayBridge {
 		const tab = this.#tabs.get(tabKey);
 		if (!tab) return;
 		this.#instances.get(tab.instanceId)?.managed.remove(tab.tabId);
+		this.#instances.get(tab.instanceId)?.downloads.forgetTab(tabKey);
 		this.#retractTab(tab);
 		this.#tabs.delete(tabKey);
 	}

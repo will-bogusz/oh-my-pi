@@ -135,6 +135,28 @@ it("treats spinners as unsettled but valued progressbars and headings as content
 	expect(hasBusyIndicator(ax("RootWebArea", "", {}, [ax("StaticText", "Reloading is unnecessary")]))).toBe(false);
 });
 
+it("counts loader text only where it stands in for the content", () => {
+	const page = (...children: AxNode[]) => hasBusyIndicator(ax("RootWebArea", "Page", {}, children));
+	const prose = ax("paragraph", undefined, {}, [
+		ax("StaticText", "Revenue grew in every region this quarter. ".repeat(8)),
+	]);
+	const links = ax("navigation", undefined, {}, [ax("link", "Inbox ".repeat(80))]);
+	// Loading wording anywhere in a short spinner-role name.
+	expect(page(ax("alert", "Content loading"))).toBe(true);
+	expect(page(ax("status", undefined, {}, [ax("StaticText", "Please wait…")]))).toBe(true);
+	expect(
+		page(ax("StaticText", "Loading is slow when the page has to fetch every attachment from the archive first")),
+	).toBe(false);
+	// A loader beside the page's content is a footer or a sentinel, not the page.
+	expect(page(prose, ax("StaticText", "Loading…"))).toBe(false);
+	expect(page(ax("contentinfo", undefined, {}, [ax("StaticText", "Loading…")]))).toBe(false);
+	// Only the loader's own `main` counts, and the landmarks around it never do.
+	expect(page(links, ax("main", undefined, {}, [ax("heading", "Inbox"), ax("StaticText", "Loading…")]))).toBe(true);
+	expect(page(links, ax("main", undefined, {}, [prose, ax("StaticText", "Loading…")]))).toBe(false);
+	// The page's own busy state holds wherever it is.
+	expect(page(prose, ax("navigation", undefined, { busy: true }))).toBe(true);
+});
+
 const MAIN_PAGE = (widgetUrl: string) => `<!doctype html><title>401(k) contributions</title>
 <nav><a href="/">Home</a><a href="/pay">Pay</a></nav>
 <main>
@@ -348,3 +370,122 @@ it("names the cell's own copy of a tree the printed output cannot hold whole", (
 	expect(printed.slice(long.length)).toContain("tab.initialObservation.tree");
 	expect(printed.slice(long.length)).toContain("search it in code");
 });
+
+const RECORDS_PAGE = `<!doctype html><title>Records</title><style>.open { cursor: pointer }</style>
+<table><tr><th>Name</th><th>Size</th></tr><tr><td>alpha.txt</td><td>1 KB</td></tr></table>
+<table>
+	<tr onclick="document.title = 'opened invoice 7'"><td>Invoice 7</td><td>$5</td></tr>
+	<tr class="open"><td>Invoice 8</td><td>$6</td></tr>
+</table>
+<div role="grid">
+	<div role="row" tabindex="-1"><div role="gridcell">Mail from Bob</div></div>
+	<div role="row"><div role="gridcell" class="open">Mail from Al</div><div role="gridcell">Sep 3</div></div>
+</div>`;
+
+// Webmail and admin lists open an item only through its row or cell; the page
+// says so with a listener, a pointer cursor or a tabindex. A plain data table
+// says none of that and stays ref-free.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"gives refs to clickable table rows and cells but not to a plain data table",
+	async () => {
+		const browser = await puppeteer.launch({
+			executablePath: await chromiumExecutable(),
+			headless: true,
+			protocolTimeout: 10_000,
+		});
+		const ready = Promise.withResolvers<ReadyInfo>();
+		let result = Promise.withResolvers<Extract<WorkerOutbound, { type: "result" }>>();
+		const closed = Promise.withResolvers<void>();
+		let receive: (message: WorkerInbound | WorkerOutbound) => void = () => {};
+		new WorkerCore(
+			{
+				send(message) {
+					if (message.type === "ready") ready.resolve(message.info);
+					if (message.type === "init-failed") ready.reject(new Error(message.error.message));
+					if (message.type === "result") result.resolve(message);
+					if (message.type === "closed") closed.resolve();
+				},
+				onMessage(handler) {
+					receive = handler;
+					return () => {};
+				},
+				close() {},
+			},
+			false,
+		);
+		const run = async (id: string, code: string) => {
+			result = Promise.withResolvers<Extract<WorkerOutbound, { type: "result" }>>();
+			receive({
+				type: "run",
+				id,
+				name: "records fixture",
+				code,
+				timeoutMs: 15_000,
+				session: { cwd: process.cwd(), refs: "compact" },
+			});
+			return await result.promise;
+		};
+		try {
+			receive({
+				type: "init",
+				payload: {
+					mode: "headless",
+					browserWSEndpoint: browser.wsEndpoint(),
+					safeDir: process.cwd(),
+					timeoutMs: 10_000,
+				},
+			});
+			const target = await ready.promise;
+			const page = (await browser.pages()).find(candidate => {
+				const raw = candidate.target();
+				return "_targetId" in raw && raw._targetId === target.targetId;
+			});
+			if (!page) throw new Error("Missing worker page");
+			await page.setContent(RECORDS_PAGE);
+
+			const observed = await run(
+				"observe",
+				`const observation = await tab.observe({ display: false });
+				 return { tree: observation.tree, elements: observation.elements.map(e => [e.ref, e.role, e.name ?? ""]) };`,
+			);
+			if (!observed.ok) throw new Error(observed.error.message);
+			const { tree, elements } = observed.payload.returnValue as {
+				tree: string;
+				elements: [string, string, string][];
+			};
+			// The listener row, the pointer row (its cells only inherit the cursor),
+			// the focusable grid row and the pointer gridcell; nothing in the plain
+			// table, and not the grid's static cell.
+			expect(elements).toEqual([
+				["e1", "row", ""],
+				["e2", "row", ""],
+				["e3", "row", "Mail from Bob"],
+				["e4", "gridcell", "Mail from Al"],
+			]);
+			expect(tree).toContain('text "alpha.txt"');
+			expect(tree).toMatch(/^e1 row\n {2}text "Invoice 7"$/m);
+
+			// The row's ref lands the click on the row.
+			const opened = await run(
+				"click-row",
+				`await (await tab.ref("e1")).click();
+				 return await tab.evaluate(() => document.title);`,
+			);
+			if (!opened.ok) throw new Error(opened.error.message);
+			expect(opened.payload.returnValue).toBe("opened invoice 7");
+
+			// A lookup that matched nothing names the call instead of failing inside the parser.
+			const missing = await run("ref-undefined", `await tab.ref(undefined);`);
+			expect(missing.ok).toBe(false);
+			if (missing.ok) throw new Error("tab.ref(undefined) resolved");
+			expect(missing.error.message).toContain(
+				'tab.ref() needs a ref string such as "e12" from an observation, got undefined',
+			);
+		} finally {
+			receive({ type: "close" });
+			await closed.promise;
+			await browser.close();
+		}
+	},
+	60_000,
+);

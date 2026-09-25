@@ -397,14 +397,20 @@ export async function releaseChromeTab(
 	if (leaseError) throw leaseError;
 }
 
+/**
+ * Reveal, hand back or close a handle's tab. Returns the tab as it was just
+ * before, so the caller can name the page the user sees rather than the
+ * snapshot taken when the handle was acquired.
+ */
 export async function chromeLifecycle(
 	handle: ManagedChromeHandle,
 	action: "reveal" | "release" | "close",
 	signal?: AbortSignal,
-): Promise<void> {
+): Promise<InstanceTab> {
+	const tab = await currentChromeTab(handle, signal);
 	if (action === "reveal") {
 		await leaseRequest(handle, { action }, signal);
-		return;
+		return tab;
 	}
 	await releaseChromeTab(
 		handle,
@@ -412,6 +418,27 @@ export async function chromeLifecycle(
 		signal ?? AbortSignal.timeout(3000),
 		action === "close" ? "was closed by tab.close()" : "was handed back by tab.release()",
 	);
+	return tab;
+}
+
+/**
+ * The relay's current view of a handle's tab — title and URL follow the page
+ * as it navigates — else what the handle last recorded. Naming only: a relay
+ * that cannot answer here leaves the action itself to report why.
+ */
+async function currentChromeTab(handle: ManagedChromeHandle, signal?: AbortSignal): Promise<InstanceTab> {
+	if (handle.ended) return handle.lease.tab;
+	const bound = AbortSignal.timeout(1500);
+	try {
+		const lease = await chromeRequest<InstanceLease>(
+			handle.url,
+			{ action: "get", id: handle.lease.id, owner: handle.owner },
+			signal ? AbortSignal.any([signal, bound]) : bound,
+		);
+		return lease.tab;
+	} catch {
+		return handle.lease.tab;
+	}
 }
 
 /** The one place a handle stops working; `ended` is what every later call on it answers. */
