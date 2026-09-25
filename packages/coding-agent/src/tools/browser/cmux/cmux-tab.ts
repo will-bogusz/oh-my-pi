@@ -27,6 +27,7 @@ import {
 	type BrowserErrorOptions,
 	CMUX_CONSOLE_CAPTURE_SCRIPT,
 } from "../console-capture";
+import type * as DeclaredArguments from "../declared-arguments";
 import {
 	type BrowserA11yOptions,
 	type BrowserA11yResult,
@@ -929,6 +930,8 @@ export class CmuxTab {
 		this.#lastUrl = observation.url;
 		this.#lastTitle = observation.title;
 		this.#rememberObservedElements(observation);
+		// `String(observation)` is the tree, as on every backend.
+		Object.defineProperty(observation, "toString", { value: () => observation.tree });
 		return observation;
 	}
 
@@ -2584,7 +2587,14 @@ export async function runCmuxCode(tab: CmuxTab, opts: RunCmuxCodeOptions): Promi
 		// Keep both inside try so a concurrent in-process eval/browser run surfaces as
 		// a rejected promise the supervisor can report, never an unhandled rejection.
 		runtime.setCwd(opts.snapshot.cwd);
-		const runTab = bindRunFacade(tab, signal, rejectionOwner, recordFloatingFailure);
+		// Lazy: tab-supervisor loads this module at tool registration; the declarations load with the first run.
+		const { withDeclaredArguments } = require("../declared-arguments") as typeof DeclaredArguments;
+		const runTab = bindRunFacade(
+			withDeclaredArguments("BrowserTabRealm", tab),
+			signal,
+			rejectionOwner,
+			recordFloatingFailure,
+		);
 		runtime.setRunScope({
 			page: bindRunFacade(tab.page, signal, rejectionOwner, recordFloatingFailure),
 			browser: bindRunFacade(tab.browser, signal, rejectionOwner, recordFloatingFailure),

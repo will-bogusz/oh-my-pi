@@ -226,6 +226,7 @@ import {
 	setPageStorage,
 	type StorageKind,
 } from "./storage-state";
+import { withDeclaredArguments } from "./declared-arguments";
 import { assertTabPressArgs } from "./tab-arguments";
 import {
 	type BrowserMetrics,
@@ -1631,7 +1632,13 @@ export class WorkerCore {
 			runtime.setRunScope({
 				page: bindRunFacade(runPage.page, signal, active.rejectionOwner, onFloatingRejection),
 				browser: bindRunFacade(browser, signal, active.rejectionOwner, onFloatingRejection),
-				tab: bindRunFacade(tabApi, signal, active.rejectionOwner, onFloatingRejection),
+				// Unknown option keys refuse instead of being ignored: the tab is its declared type.
+				tab: bindRunFacade(
+					withDeclaredArguments("BrowserTabRealm", tabApi),
+					signal,
+					active.rejectionOwner,
+					onFloatingRejection,
+				),
 				assert: (cond: unknown, text?: string): void => {
 					if (!cond) throw new ToolError(text ?? "Assertion failed");
 				},
@@ -2044,6 +2051,8 @@ export class WorkerCore {
 			observe: opts =>
 				op("tab.observe()", quickOpMs, async sig => {
 					const observation = await this.#collectObservation({ ...opts, refs: session.refs, signal: sig });
+					// `String(observation)` is the tree; non-enumerable, so it never crosses the run boundary.
+					Object.defineProperty(observation, "toString", { value: () => observation.tree });
 					if (opts?.display !== false) output.push({ type: "text", text: printableTree(observation.tree) });
 					active.presented = observation;
 					return observation;

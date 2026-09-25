@@ -5,6 +5,7 @@ import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes
 import type { ToolSession } from "../sdk";
 import { enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { resolveCmuxKind } from "./browser/cmux/rpc";
+import type * as DeclaredArguments from "./browser/declared-arguments";
 import { resolveSpawnArgs } from "./browser/attach";
 import {
 	acquireChromeTab,
@@ -17,6 +18,7 @@ import {
 	closeChromeTab,
 	discoverChromeTabs,
 	listChromeInstances,
+	matchesChromeTab,
 	isManagedChromeHandle,
 	type ManagedChromeHandle,
 	releaseChromeTab,
@@ -135,13 +137,11 @@ const browserSchema = type({
 		"browserId?": "string",
 		"windowId?": "number",
 	},
-	"observation?": {
-		"includeAll?": "boolean",
-		"viewportOnly?": "boolean",
-		"screenshot?": "boolean",
-	},
+	// Its keys are observe()'s plus `screenshot`, checked against the declarations like any option.
+	"observation?": type("object").describe("the first tree's observe() options plus screenshot"),
 	"name?": type("string").describe("tab id (default 'main')"),
-	"url?": type("string").describe("url to open"),
+	"url?": type("string").describe("url to open; discover's url substring"),
+	"title?": type("string").describe("discover's title substring"),
 	"app?": appSchema,
 	"viewport?": {
 		width: "number",
@@ -311,6 +311,49 @@ function sweepIdleOwnedTabs(session: ToolSession): Promise<number> {
 	});
 }
 
+/**
+ * Check the caller's options on a host action against the prelude verb it
+ * carries in `declarations.d.ts`, rebuilt from the fields the preludes add
+ * beside those options. Tab helpers are checked where they run: the tab's
+ * run scope.
+ */
+function checkPreludeOptions(params: BrowserParams): void {
+	const { action, ...rest } = params;
+	let call: Parameters<typeof DeclaredArguments.checkDeclaredArguments>;
+	switch (action) {
+		case "open":
+		case "discover":
+		case "create":
+			call = ["browser", action, [rest]];
+			break;
+		case "close": {
+			const { handle, name: _name, ...options } = rest;
+			call = handle ? ["BrowserTab", "close", [options]] : ["browser", "close", [rest]];
+			break;
+		}
+		case "closeTab": {
+			const { id, ...options } = rest;
+			call = ["browser", "closeTab", [id, options]];
+			break;
+		}
+		case "claim": {
+			const { id, selector, ...options } = rest;
+			call = selector ? ["browser", "getTab", [selector, options]] : ["browser", "claim", [id, options]];
+			break;
+		}
+		case "run": {
+			const { name: _name, handle: _handle, fn, code, ...options } = rest;
+			call = ["BrowserTab", "run", [fn ?? code, options]];
+			break;
+		}
+		default:
+			// call, popups, reveal, release, instances, tabs and help carry no caller options.
+			return;
+	}
+	// First-use boundary: the declarations and their parser load with the first checked call.
+	(require("./browser/declared-arguments") as typeof DeclaredArguments).checkDeclaredArguments(...call);
+}
+
 async function invokeBrowser(
 	session: ToolSession,
 	parameters: unknown,
@@ -321,6 +364,7 @@ async function invokeBrowser(
 	if (parsed instanceof type.errors) {
 		throw new ToolError(`browser received invalid arguments: ${parsed.summary}`);
 	}
+	checkPreludeOptions(parsed);
 
 	try {
 		throwIfAborted(context.signal);
@@ -414,10 +458,13 @@ async function invokeBrowser(
 		if (parsed.action === "discover") {
 			const deadline = AbortSignal.timeout(timeoutMs);
 			const signal = context.signal ? AbortSignal.any([context.signal, deadline]) : deadline;
-			const tabs = await discoverChromeTabs(session, signal, {
-				browserId: parsed.browserId,
-				relay: parsed.app?.relay,
-			});
+			// Filtered with getTab's own matcher, so a filter lists exactly what getTab would choose among.
+			const tabs = (
+				await discoverChromeTabs(session, signal, {
+					browserId: parsed.browserId,
+					relay: parsed.app?.relay,
+				})
+			).filter(tab => matchesChromeTab(tab, { title: parsed.title, url: parsed.url }));
 			details.value = parsed.full ? tabs : compactDiscoveredTabs(tabs);
 			// Let callers select which inventory fields enter the transcript.
 			return toolResult(details).done();

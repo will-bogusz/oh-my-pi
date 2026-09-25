@@ -26,10 +26,13 @@ interface BrowserObserveOptions {
 interface BrowserInitialObservationOptions extends BrowserObserveOptions {
 	screenshot?: boolean;
 }
-interface BrowserAcquireOptions {
+interface BrowserChromeOptions {
 	browserId?: string;
-	label?: string;
 	timeout?: number;
+	app?: { relay?: boolean };
+}
+interface BrowserAcquireOptions extends BrowserChromeOptions {
+	label?: string;
 	observation?: BrowserInitialObservationOptions;
 }
 interface BrowserOpenOptions {
@@ -633,11 +636,12 @@ declare const browser: {
 		selector: string | { title?: string; url?: string; browserId?: string; windowId?: number },
 		options?: Omit<BrowserAcquireOptions, "browserId">,
 	): Promise<BrowserTab>;
-	discover(options?: { browserId?: string; full?: false }): Promise<BrowserDiscoveredTab[]>;
-	discover(options: { browserId?: string; full: true }): Promise<BrowserDiscoveredTabFull[]>;
+	/** title/url filter by substring, as getTab matches */
+	discover(options?: BrowserChromeOptions & { title?: string; url?: string; full?: false }): Promise<BrowserDiscoveredTab[]>;
+	discover(options: BrowserChromeOptions & { title?: string; url?: string; full: true }): Promise<BrowserDiscoveredTabFull[]>;
 	claim(id: string, options?: BrowserAcquireOptions): Promise<BrowserTab>;
 	create(options?: BrowserAcquireOptions & { url?: string }): Promise<BrowserTab>;
-	closeTab(id: string, options?: { browserId?: string; timeout?: number }): Promise<void>;
+	closeTab(id: string, options?: BrowserChromeOptions): Promise<void>;
 	instances(): Promise<{ id: string; label: string; connected: boolean }[]>;
 	open(options?: BrowserOpenOptions): Promise<BrowserTab>;
 	tab(name?: string): BrowserTab;

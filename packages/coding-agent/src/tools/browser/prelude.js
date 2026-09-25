@@ -224,10 +224,16 @@
 		}
 		return Object.freeze(frame);
 	};
+	/** An observation reads as its tree: `String(observation)`, `${observation}`, `String(obs).match(…)`. */
+	const readsAsTree = observation => {
+		if (typeof observation?.tree === "string")
+			Object.defineProperty(observation, "toString", { value: () => observation.tree });
+	};
 	/** Name -> { handle, target } of a managed Chrome tab, so `browser.tab(name)` keeps its identity. */
 	const identitiesByName = new Map();
 	const makeTab = (name, handle, initial = {}) => {
 		const tab = {};
+		readsAsTree(initial.initialObservation);
 		let snapshot = initial.initialObservation?.snapshot;
 		const target = initial.target
 			? Object.freeze({ id: initial.target.id, browserId: initial.target.browserId, tabId: initial.target.tabId })
@@ -251,7 +257,10 @@
 		for (const method of directMethods) {
 			tab[method] = async (...args) => {
 				const value = await callValue(name, [{ method, args: encodeArgs("tab helper argument", args) }], handle);
-				if (method === "observe") snapshot = value?.snapshot;
+				if (method === "observe") {
+					readsAsTree(value);
+					snapshot = value?.snapshot;
+				}
 				if (method === "goto") snapshot = undefined;
 				return value;
 			};
@@ -273,12 +282,13 @@
 			if (typeof fnOrCode !== "function" && typeof fnOrCode !== "string") {
 				throw new TypeError("tab.run() expects a function or code string");
 			}
-			const opts = validateOptions("tab.run", options);
-			const parameters = { name, ...(handle ? { handle } : {}) };
-			if (opts.timeout !== undefined) parameters.timeout = opts.timeout;
+			const { args, timeout, ...rest } = validateOptions("tab.run", options);
+			// Any other key travels on, so the host refuses what tab.run() does not take.
+			const parameters = { ...rest, name, ...(handle ? { handle } : {}) };
+			if (timeout !== undefined) parameters.timeout = timeout;
 			if (typeof fnOrCode === "function") {
 				parameters.fn = serializeFunction("tab.run()", fnOrCode);
-				parameters.args = encodeArgs("tab helper argument", Array.isArray(opts.args) ? opts.args : []);
+				parameters.args = encodeArgs("tab helper argument", Array.isArray(args) ? args : []);
 			} else {
 				parameters.code = fnOrCode;
 			}

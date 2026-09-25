@@ -5,8 +5,12 @@ import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import initialObservationCode from "../../src/tools/browser/initial-observation.js.txt" with { type: "text" };
 import * as managed from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
+import { acquireBrowser, releaseBrowser } from "@oh-my-pi/pi-coding-agent/tools/browser/registry";
 import * as supervisor from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
+import { chromiumAvailable } from "./chromium-probe";
+
+const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
 it("reports missing inspection channels and displays only the errors, never the state blob", async () => {
 	const calls: string[] = [];
@@ -133,6 +137,85 @@ it("hands a cancelled acquisition back, closing only a page it opened, and repor
 		acquire.mockRestore();
 	}
 });
+
+// A claim's first tree printed whole whatever the caller asked: it could not be
+// scoped, compacted or silenced. Its `observation` takes observe()'s options.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"narrows and silences an acquired tab's first tree with observe()'s options",
+	async () => {
+		const session: ToolSession = {
+			cwd: import.meta.dir,
+			hasUI: false,
+			getSessionFile: () => null,
+			getSessionSpawns: () => null,
+			settings: Settings.isolated({ "browser.enabled": true }),
+		};
+		const browser = await acquireBrowser({ kind: "headless", headless: true }, { cwd: process.cwd() });
+		if (!("browser" in browser)) throw new Error("Expected a Puppeteer browser");
+		// A real tab stands in for the user's Chrome tab the relay would have leased.
+		const name = `acquired-${process.pid}-${crypto.randomUUID()}`;
+		const html =
+			'<nav><a href="#top">Outside link</a></nav><main><h1>Inside heading</h1><button>Inside button</button></main>';
+		const tab = {
+			id: "discovery-9",
+			tabId: 9,
+			browserId: "profile",
+			browserLabel: "Fixture profile",
+			windowId: 3,
+			title: "Fixture",
+			url: "about:blank",
+			active: false,
+			pinned: false,
+			groupId: -1,
+			ownership: "this_actor" as const,
+		};
+		const acquire = spyOn(managed, "acquireChromeTab").mockResolvedValue({
+			id: name,
+			label: "Fixture",
+			owner: "actor",
+			url: tab.url,
+			released: false,
+			lease: {
+				id: "lease",
+				targetId: "PAGE9",
+				created: true,
+				browserId: "profile",
+				browserLabel: "Fixture profile",
+				tab,
+			},
+		});
+		try {
+			await supervisor.acquireTab(name, browser, {
+				url: `data:text/html,${encodeURIComponent(html)}`,
+				timeoutMs: 30_000,
+			});
+			const result = await createBrowserPrelude(session).invoke(
+				{
+					action: "create",
+					observation: { selector: "main", compact: true, display: false, screenshot: false },
+				},
+				{ session, toolCallId: "narrowed" },
+			);
+			const { value } = result.details as {
+				value: { initialObservation: { tree: string }; initialScreenshot?: string };
+			};
+			const tree = value.initialObservation.tree;
+			expect(tree).toContain('button "Inside button"');
+			// selector: nothing outside <main>; compact: no non-control content.
+			expect(tree).not.toContain("Outside link");
+			expect(tree).not.toContain("Inside heading");
+			expect(value.initialScreenshot).toBeUndefined();
+			// display: false keeps the tree out of the acquisition's output.
+			const printed = result.content.map(part => (part.type === "text" ? part.text : "")).join("\n");
+			expect(printed).not.toContain("Inside button");
+		} finally {
+			acquire.mockRestore();
+			await supervisor.releaseTab(name, { kill: true });
+			if (browser.browser.connected) await releaseBrowser(browser, { kill: true });
+		}
+	},
+	45_000,
+);
 
 it("matches title/URL substrings case-insensitively and refuses an ambiguous selector", () => {
 	const base = {
