@@ -8,8 +8,8 @@ import initialObservationCode from "./initial-observation.js.txt" with { type: "
 // @ts-expect-error Bun imports this JavaScript source as text instead of evaluating its module shape.
 import browserJavascript from "./prelude.js" with { type: "text" };
 import browserPython from "./prelude.py" with { type: "text" };
-
-import { cfgBrowserEnabled, cfgBrowserRefs } from "./settings";
+import { resolveRelayKind } from "./relay/kind";
+import { cfgBrowserEnabled, cfgBrowserRefs, cfgBrowserRelay } from "./settings";
 
 /** Static browser assets loaded only when a kernel first requests browser preludes. */
 export const browserPreludeAssets = {
@@ -25,10 +25,12 @@ export function createBrowserPreludeDefinition(
 ): EvalPreludeDefinition {
 	return {
 		name: "browser",
-		// The static prompt states only what both `browser.refs` styles share;
-		// the active style's own contract is rendered in.
+		// The static prompt states only what every configuration shares; the
+		// active ref style's contract, and what a bare `open` does while the
+		// relay is on, are rendered in.
 		documentation: prompt.render(browserDescription, {
 			compactRefs: cfgBrowserRefs.get(session.settings) === "compact",
+			relay: resolveRelayKind({ settingEnabled: cfgBrowserRelay.get(session.settings) }) !== null,
 		}),
 		javascript: browserJavascript,
 		python: browserPython,

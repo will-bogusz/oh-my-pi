@@ -272,7 +272,15 @@
 				encodeArgs("tab helper argument", [snapshot ? `${snapshot}:${id}` : id]),
 				handle,
 			);
-		tab.ref = id => makeElement(name, "ref", encodeArgs("tab helper argument", [id]), handle);
+		tab.ref = id => {
+			// Usually an `elements.find()` that matched nothing; fail here, not at the first action.
+			if (typeof id !== "string" || !id.trim()) {
+				const got =
+					typeof id === "string" ? '""' : typeof id === "object" && id !== null ? "an object (pass its .ref)" : String(id);
+				throw new TypeError(`tab.ref() needs a ref string such as "e12" from an observation, got ${got}.`);
+			}
+			return makeElement(name, "ref", encodeArgs("tab helper argument", [id]), handle);
+		};
 		tab.frame = selector => makeFrame(name, selector, handle);
 		tab.popups = async () => {
 			if (!handle) throw new Error("Popup discovery requires an existing managed Chrome handle");
