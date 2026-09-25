@@ -42,7 +42,7 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 				await page.evaluate(() => document.hasFocus()),
 				await foreground.evaluate(() => document.hasFocus()),
 			]).toEqual([false, true]);
-			const failed = await run("failure", 'await tab.click("aria/Missing", { timeout: 50 });');
+			const failed = await run("failure", 'await tab.click("aria/Missing");');
 			expect(failed.ok).toBe(false);
 			if (failed.ok) throw new Error("Missing selector unexpectedly succeeded");
 			expect(failed.error.message).toContain("Missing");
