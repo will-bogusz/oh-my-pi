@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { DialogJournal, parseDialogRequest } from "@oh-my-pi/pi-coding-agent/tools/browser/dialogs";
+import { DialogJournal, parseDialogRequest } from "@oh-my-pi/pi-coding-agent/tools/browser/dialog-journal";
 
 test("dialog generations prevent stale responses and a late acknowledgement cannot clear the next dialog", async () => {
 	const journal = new DialogJournal();

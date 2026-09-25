@@ -1,6 +1,5 @@
-/** Authenticated local browser broker. Each paired browser has its own CDP bridge. */
+/** Authenticated local browser broker: paired browsers share one multi-instance CDP bridge. */
 import { RelayAccess } from "./access";
-import type { RelayBridge } from "./bridge";
 import { BrowserInstances } from "./instances";
 import { RELAY_PROTOCOL_VERSION, RELAY_SERVICE_NAME } from "./protocol";
 
@@ -20,7 +19,7 @@ export interface RelayServer {
 	port: number;
 	stop(): void;
 }
-type SocketData = { role: "ext" } | { role: "cdp"; bridge: RelayBridge; leaseId: string; connId?: number };
+type SocketData = { role: "ext" } | { role: "cdp"; leaseId: string; connId?: number };
 type RelayWebSocket = Bun.ServerWebSocket<SocketData>;
 
 function isWsAuthority(raw: string): boolean {
@@ -108,9 +107,7 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 							);
 						case "dialog":
 							return Response.json(
-								await instances
-									.requireLease(string("id"))
-									.bridge.dialog(string("id"), string("owner"), args.dialog, req.signal),
+								await instances.bridge.dialog(string("id"), string("owner"), args.dialog, req.signal),
 							);
 						case "get":
 							return Response.json(instances.get(string("id"), string("owner")));
@@ -118,7 +115,7 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 							await instances.closeTab(string("id"), string("owner"), optional("browserId"), req.signal);
 							break;
 						case "reveal":
-							await instances.requireLease(string("id")).bridge.managed.reveal(string("id"), string("owner"));
+							await instances.reveal(string("id"), string("owner"));
 							break;
 						// Hand a tab back to the user. `close: false` keeps the page:
 						// ungrouped, debugger detached, no longer owned.
@@ -142,14 +139,15 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 				const leaseId = managedVersion[1]!;
 				const instance = instances.forLease(leaseId);
 				if (!instance) return new Response("Stale tab ownership", { status: 410 });
-				return Response.json(instance.bridge.versionInfo(`ws://${host}/cdp?lease=${encodeURIComponent(leaseId)}`));
+				return Response.json(
+					instances.bridge.versionInfo(instance.id, `ws://${host}/cdp?lease=${encodeURIComponent(leaseId)}`),
+				);
 			}
 			if (route === "/cdp") {
 				const leaseId = url.searchParams.get("lease");
 				if (!leaseId) return new Response("Acquire an exact tab before connecting", { status: 403 });
-				const instance = instances.forLease(leaseId);
-				if (!instance) return new Response("Stale tab ownership", { status: 410 });
-				if (srv.upgrade(req, { data: { role: "cdp", leaseId, bridge: instance.bridge } })) return undefined;
+				if (!instances.forLease(leaseId)) return new Response("Stale tab ownership", { status: 410 });
+				if (srv.upgrade(req, { data: { role: "cdp", leaseId } })) return undefined;
 				return new Response("WebSocket upgrade required", { status: 426 });
 			}
 			if (route === "/json/version" || route === "/json" || route === "/json/list")
@@ -162,17 +160,17 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 			open(ws: RelayWebSocket): void {
 				sockets.add(ws);
 				if (ws.data.role === "ext") instances.extConnected(ws);
-				else ws.data.connId = ws.data.bridge.cdpConnected(ws, ws.data.leaseId);
+				else ws.data.connId = instances.bridge.cdpConnected(ws, ws.data.leaseId);
 			},
 			message(ws: RelayWebSocket, message: string | Buffer): void {
 				const text = typeof message === "string" ? message : new TextDecoder().decode(message);
 				if (ws.data.role === "ext") instances.extMessage(ws, text);
-				else if (ws.data.connId !== undefined) ws.data.bridge.cdpMessage(ws.data.connId, text);
+				else if (ws.data.connId !== undefined) instances.bridge.cdpMessage(ws.data.connId, text);
 			},
 			close(ws: RelayWebSocket): void {
 				sockets.delete(ws);
 				if (ws.data.role === "ext") instances.extClosed(ws);
-				else if (ws.data.connId !== undefined) ws.data.bridge.cdpClosed(ws.data.connId);
+				else if (ws.data.connId !== undefined) instances.bridge.cdpClosed(ws.data.connId);
 			},
 		},
 	});

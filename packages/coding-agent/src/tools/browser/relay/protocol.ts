@@ -110,6 +110,17 @@ export type ExtToRelayMessage =
 			tabs: TabSnapshot[];
 			/** Tabs that already have a `chrome.debugger` attachment (relay reconciles after a service-worker restart). */
 			attachedTabIds: number[];
+			/**
+			 * Stable per-install browser identity (persisted in `chrome.storage.local`).
+			 * The one identity of a browser across the relay: the id it pairs and
+			 * authenticates with, the `browserId` models select by, and (through a
+			 * short derived code) the namespace of its tab registry and target ids.
+			 * The relay binds a socket to the id it authenticated; a hello naming a
+			 * different instance is refused. Builds that predate the field omit it and
+			 * stay bound to their authenticated id, so the build-parity gate can still
+			 * tell the user to refresh them.
+			 */
+			instanceId?: string;
 	  }
 	| { t: "cdpEvent"; tabId: number; sessionId?: string; method: string; params?: Record<string, unknown> }
 	| { t: "detached"; tabId: number; reason: string; relayInitiated?: boolean }

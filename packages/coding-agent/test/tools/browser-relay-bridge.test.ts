@@ -1,4 +1,5 @@
 import { describe, expect, it, jest } from "bun:test";
+import { createHash } from "node:crypto";
 import { createContext, runInContext } from "node:vm";
 import { CURSOR_OVERLAY_INSTALL } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/lease-badge";
 import { RelayBridge, type RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
@@ -9,16 +10,28 @@ import type {
 	TabSnapshot,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
 
+/** Same derivation as the bridge: target ids embed this per-instance code. */
+function instanceCode(instanceId: string): string {
+	return createHash("sha256").update(instanceId).digest("base64url").slice(0, 8);
+}
+
+/** Instance id of the single browser most tests drive. */
+const BROWSER = "chrome-profile";
+const CODE = instanceCode(BROWSER);
+
 /** A relay→extension RPC narrowed to one op, tabIds/title/etc. included. */
 type ExtRpc<Op extends RelayRpcRequest["op"]> = { t: "rpc"; id: number } & Extract<RelayRpcRequest, { op: Op }>;
 
 class FakeExtSocket implements RelaySocket {
 	readonly messages: RelayToExtMessage[] = [];
 	readonly #acked = new Set<number>();
+	closed = false;
 	send(text: string): void {
 		this.messages.push(JSON.parse(text) as RelayToExtMessage);
 	}
-	close(): void {}
+	close(): void {
+		this.closed = true;
+	}
 	rpcs<Op extends RelayRpcRequest["op"]>(op: Op): Array<ExtRpc<Op>> {
 		return this.messages.filter((msg): msg is ExtRpc<Op> => msg.t === "rpc" && msg.op === op);
 	}
@@ -69,14 +82,21 @@ function tab(overrides: Partial<TabSnapshot> & { tabId: number }): TabSnapshot {
 	};
 }
 
-function connect(bridge: RelayBridge, socket: FakeExtSocket, tabs: TabSnapshot[], attachedTabIds: number[] = []): void {
-	bridge.extConnected(socket);
+function connect(
+	bridge: RelayBridge,
+	socket: FakeExtSocket,
+	tabs: TabSnapshot[],
+	attachedTabIds: number[] = [],
+	instanceId = BROWSER,
+): void {
+	bridge.extConnected(socket, instanceId);
 	bridge.extMessage(
 		socket,
 		JSON.stringify({
 			t: "hello",
+			instanceId,
 			userAgent: "test",
-			browserVersion: "Chrome/151.0.0.0",
+			browserVersion: instanceId === "edge" ? "Edg/151.0.0.0" : "Chrome/151.0.0.0",
 			tabs,
 			attachedTabIds,
 		}),
@@ -88,7 +108,7 @@ it("preserves page identity through tab updates with unavailable URL metadata", 
 	const extension = new FakeExtSocket();
 	connect(bridge, extension, [tab({ tabId: 1 })]);
 	bridge.extMessage(extension, JSON.stringify({ t: "tabUpdated", tab: tab({ tabId: 1, url: "", title: "Updated" }) }));
-	expect(bridge.managed.discover()).toMatchObject([{ tabId: 1, title: "Updated", url: "https://example.com/" }]);
+	expect(bridge.managed(BROWSER).discover()).toMatchObject([{ tabId: 1, title: "Updated", url: "https://example.com/" }]);
 });
 
 /** Answer every unanswered extension RPC of `op` with `ok: true` and `result`. */
@@ -145,7 +165,7 @@ describe("managed Chrome CDP scope", () => {
 		const bridge = new RelayBridge();
 		const ext = new FakeExtSocket();
 		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
-		const lease = bridge.managed.claim(bridge.managed.discover()[0]!.id, "owner");
+		const lease = bridge.managed(BROWSER).claim(bridge.managed(BROWSER).discover()[0]!.id, "owner");
 		const cdp = new FakeCdpSocket();
 		const connection = bridge.cdpConnected(cdp, lease.id);
 		bridge.cdpMessage(connection, JSON.stringify({ id: 1, method: "Target.setDiscoverTargets" }));
@@ -153,13 +173,13 @@ describe("managed Chrome CDP scope", () => {
 		const created = cdp.messages.filter(message => message.method === "Target.targetCreated");
 		expect(
 			created.map(message => (message.params as { targetInfo: { targetId: string } }).targetInfo.targetId),
-		).toEqual(["TAB1", "PAGE1"]);
+		).toEqual([`TAB${CODE}.1`, `PAGE${CODE}.1`]);
 		expect(ext.rpcs("attach")).toHaveLength(0);
 		const sessionId = await attachPage(bridge, ext, cdp, connection, 1);
 		for (const [id, method, params] of [
-			[2, "Target.attachToTarget", { targetId: "PAGE2" }],
-			[3, "Target.activateTarget", { targetId: "PAGE1" }],
-			[4, "Target.closeTarget", { targetId: "PAGE1" }],
+			[2, "Target.attachToTarget", { targetId: `PAGE${CODE}.2` }],
+			[3, "Target.activateTarget", { targetId: `PAGE${CODE}.1` }],
+			[4, "Target.closeTarget", { targetId: `PAGE${CODE}.1` }],
 			[5, "Target.createTarget", { url: "about:blank" }],
 		] as const)
 			bridge.cdpMessage(connection, JSON.stringify({ id, method, params }));
@@ -193,6 +213,7 @@ async function attachPage(
 	cdp: FakeCdpSocket,
 	connId: number,
 	tabId: number,
+	instanceId = BROWSER,
 ): Promise<string> {
 	const attachId = ++msgSeq;
 	bridge.cdpMessage(
@@ -200,7 +221,7 @@ async function attachPage(
 		JSON.stringify({
 			id: attachId,
 			method: "Target.attachToTarget",
-			params: { targetId: `PAGE${tabId}`, flatten: true },
+			params: { targetId: `PAGE${instanceCode(instanceId)}.${tabId}`, flatten: true },
 		}),
 	);
 	ack(bridge, ext, "attach");
@@ -211,8 +232,11 @@ async function attachPage(
 }
 
 /** Discovery id of a physical tab. */
-function discovered(bridge: RelayBridge, tabId: number): string {
-	const found = bridge.managed.discover().find(candidate => candidate.tabId === tabId);
+function discovered(bridge: RelayBridge, tabId: number, instanceId = BROWSER): string {
+	const found = bridge
+		.managed(instanceId)
+		.discover()
+		.find(candidate => candidate.tabId === tabId);
 	if (!found) throw new Error(`tab ${tabId} is not discoverable`);
 	return found.id;
 }
@@ -221,8 +245,15 @@ function discovered(bridge: RelayBridge, tabId: number): string {
  * Connect a downstream client scoped to `tabId`. Every /cdp connection carries
  * a lease, so a client exists only for a tab its owner already claimed.
  */
-function connectCdp(bridge: RelayBridge, cdp: FakeCdpSocket, tabId: number, owner = "owner"): number {
-	const leaseId = bridge.managed.leaseForTab(tabId) ?? bridge.managed.claim(discovered(bridge, tabId), owner).id;
+function connectCdp(
+	bridge: RelayBridge,
+	cdp: FakeCdpSocket,
+	tabId: number,
+	owner = "owner",
+	instanceId = BROWSER,
+): number {
+	const managed = bridge.managed(instanceId);
+	const leaseId = managed.leaseForTab(tabId) ?? managed.claim(discovered(bridge, tabId, instanceId), owner).id;
 	return bridge.cdpConnected(cdp, leaseId);
 }
 
@@ -234,7 +265,7 @@ async function release(
 	owner: string,
 	close = false,
 ): Promise<void> {
-	const done = bridge.managed.releaseTab(leaseId, owner, close);
+	const done = bridge.managed(BROWSER).releaseTab(leaseId, owner, close);
 	// Enough rounds for the serialized hand-back: badge restore, cursor removal,
 	// detach, then the extension's own releaseTab.
 	for (let round = 0; round < 8; round++) {
@@ -252,10 +283,10 @@ describe("RelayBridge tab groups", () => {
 		bridge.extMessage(ext, JSON.stringify({ t: "tabCreated", tab: tab({ tabId: 9 }) }));
 		expect(ext.rpcs("group")).toHaveLength(0);
 		// A claimed tab is one of the user's: adopted, never regrouped.
-		const claimed = bridge.managed.claim(discovered(bridge, 1), "owner-a", "Research");
+		const claimed = bridge.managed(BROWSER).claim(discovered(bridge, 1), "owner-a", "Research");
 		expect(ext.rpcs("group")).toHaveLength(0);
 		// A tab OMP creates for the task joins the owner's group under its label.
-		const creating = bridge.managed.create("https://example.com/task", "owner-a", "Research");
+		const creating = bridge.managed(BROWSER).create("https://example.com/task", "owner-a", "Research");
 		ack(bridge, ext, "createTab", { tab: tab({ tabId: 7 }) });
 		await flush();
 		ack(bridge, ext, "group");
@@ -264,15 +295,15 @@ describe("RelayBridge tab groups", () => {
 		// Keeping a tab takes it back out of the group without closing it.
 		await release(bridge, ext, created.id, "owner-a");
 		expect(ext.rpcs("releaseTab")).toEqual([expect.objectContaining({ tabId: 7, close: false })]);
-		expect(bridge.managed.discover("owner-a").find(candidate => candidate.tabId === 7)?.ownership).toBe("available");
-		expect(bridge.managed.get(claimed.id, "owner-a").tab.tabId).toBe(1);
+		expect(bridge.managed(BROWSER).discover("owner-a").find(candidate => candidate.tabId === 7)?.ownership).toBe("available");
+		expect(bridge.managed(BROWSER).get(claimed.id, "owner-a").tab.tabId).toBe(1);
 	});
 
 	it("leases a tab the browser opened from a leased tab to the opener's owner and serves it to that owner", async () => {
 		const bridge = new RelayBridge({ group: true });
 		const ext = new FakeExtSocket();
 		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
-		const parent = bridge.managed.claim(discovered(bridge, 1), "owner-a", "Research");
+		const parent = bridge.managed(BROWSER).claim(discovered(bridge, 1), "owner-a", "Research");
 		// A child of a leased tab belongs to that tab's owner, in its group.
 		bridge.extMessage(
 			ext,
@@ -280,19 +311,19 @@ describe("RelayBridge tab groups", () => {
 		);
 		await flush();
 		expect(ext.rpcs("group").map(rpc => [rpc.tabId, rpc.owner, rpc.label])).toEqual([[5, "owner-a", "Research"]]);
-		expect(bridge.managed.childTabs(parent.id, "owner-a")).toMatchObject([
+		expect(bridge.managed(BROWSER).childTabs(parent.id, "owner-a")).toMatchObject([
 			{ tabId: 5, url: "https://example.com/child", ownership: "this_actor", popupOf: parent.tab.id },
 		]);
 		// Claiming the child adopts the auto-lease instead of failing as taken.
-		const child = bridge.managed.claim(bridge.managed.childTabs(parent.id, "owner-a")[0]!.id, "owner-a");
-		expect(bridge.managed.tabForLease(child.id)).toBe(5);
+		const child = bridge.managed(BROWSER).claim(bridge.managed(BROWSER).childTabs(parent.id, "owner-a")[0]!.id, "owner-a");
+		expect(bridge.managed(BROWSER).tabForLease(child.id)).toBe(5);
 		// A child of a tab nobody leases stays the user's.
 		bridge.extMessage(ext, JSON.stringify({ t: "tabOpened", tab: tab({ tabId: 6 }), openerTabId: 2 }));
 		await flush();
-		expect(bridge.managed.discover("owner-a").find(candidate => candidate.tabId === 6)?.ownership).toBe("available");
+		expect(bridge.managed(BROWSER).discover("owner-a").find(candidate => candidate.tabId === 6)?.ownership).toBe("available");
 		// Releasing the parent hands back its unclaimed children too.
 		await release(bridge, ext, parent.id, "owner-a");
-		expect(bridge.managed.discover("owner-a").find(candidate => candidate.tabId === 1)?.ownership).toBe("available");
+		expect(bridge.managed(BROWSER).discover("owner-a").find(candidate => candidate.tabId === 1)?.ownership).toBe("available");
 	});
 
 	it("adopts a popup Chrome blames on the visible tab, and leaves Chrome's selection alone", async () => {
@@ -300,7 +331,7 @@ describe("RelayBridge tab groups", () => {
 		const ext = new FakeExtSocket();
 		// Tab 3 is what the user is looking at; tab 1 is the leased background tab.
 		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 3, active: true })]);
-		const parent = bridge.managed.claim(discovered(bridge, 1), "owner-a", "Research");
+		const parent = bridge.managed(BROWSER).claim(discovered(bridge, 1), "owner-a", "Research");
 		// The leased page reports the popup on its own debugger session…
 		bridge.extMessage(
 			ext,
@@ -321,7 +352,7 @@ describe("RelayBridge tab groups", () => {
 			}),
 		);
 		await flush();
-		expect(bridge.managed.childTabs(parent.id, "owner-a")).toMatchObject([
+		expect(bridge.managed(BROWSER).childTabs(parent.id, "owner-a")).toMatchObject([
 			{ tabId: 5, ownership: "this_actor", popupOf: parent.tab.id },
 		]);
 		expect(ext.rpcs("group").map(rpc => rpc.tabId)).toEqual([5]);
@@ -331,7 +362,7 @@ describe("RelayBridge tab groups", () => {
 		// One witness explains one popup: the next unexplained tab stays the user's.
 		bridge.extMessage(ext, JSON.stringify({ t: "tabOpened", tab: tab({ tabId: 6, active: true }), openerTabId: 3 }));
 		await flush();
-		expect(bridge.managed.discover("owner-a").find(candidate => candidate.tabId === 6)?.ownership).toBe("available");
+		expect(bridge.managed(BROWSER).discover("owner-a").find(candidate => candidate.tabId === 6)?.ownership).toBe("available");
 		expect(ext.rpcs("activateTab")).toEqual([]);
 	});
 
@@ -339,7 +370,7 @@ describe("RelayBridge tab groups", () => {
 		const bridge = new RelayBridge({ group: true });
 		const ext = new FakeExtSocket();
 		connect(bridge, ext, []);
-		const creating = bridge.managed.create("https://example.com/downloads", "owner-a", "Downloads");
+		const creating = bridge.managed(BROWSER).create("https://example.com/downloads", "owner-a", "Downloads");
 		ack(bridge, ext, "createTab", { tab: tab({ tabId: 4 }) });
 		await flush();
 		ack(bridge, ext, "group");
@@ -349,13 +380,13 @@ describe("RelayBridge tab groups", () => {
 		bridge.extMessage(ext, JSON.stringify({ t: "detached", tabId: 4, reason: "target_closed" }));
 		await flush();
 		// Ownership survives, so the tab is still discoverable and closable…
-		expect(bridge.managed.get(lease.id, "owner-a").tab).toMatchObject({ tabId: 4, url: "chrome://downloads/" });
-		expect(bridge.managed.discover("owner-a").map(candidate => candidate.tabId)).toEqual([4]);
+		expect(bridge.managed(BROWSER).get(lease.id, "owner-a").tab).toMatchObject({ tabId: 4, url: "chrome://downloads/" });
+		expect(bridge.managed(BROWSER).discover("owner-a").map(candidate => candidate.tabId)).toEqual([4]);
 		await release(bridge, ext, lease.id, "owner-a", true);
 		// …and the release still takes it out of the group before closing it.
 		expect(ext.rpcs("releaseTab")).toEqual([expect.objectContaining({ tabId: 4, close: true })]);
 		// With the lease gone the page leaves discovery: nobody may claim it.
-		expect(bridge.managed.discover()).toEqual([]);
+		expect(bridge.managed(BROWSER).discover()).toEqual([]);
 	});
 
 	it("titles the group 'Oh My Pi' unless the client names it, and groups nothing when marking is off", async () => {
@@ -366,7 +397,7 @@ describe("RelayBridge tab groups", () => {
 			const bridge = new RelayBridge({ group: marking });
 			const ext = new FakeExtSocket();
 			connect(bridge, ext, []);
-			const creating = bridge.managed.create("https://example.com/", "owner");
+			const creating = bridge.managed(BROWSER).create("https://example.com/", "owner");
 			ack(bridge, ext, "createTab", { tab: tab({ tabId: 9 }) });
 			await flush();
 			ack(bridge, ext, "group");
@@ -414,7 +445,7 @@ describe("RelayBridge debugger lifetime", () => {
 		ack(bridge, ext, "detach");
 		await flush();
 		// The lease and the downstream session both survive the detach…
-		expect(bridge.managed.tabForLease(bridge.managed.leaseForTab(1)!)).toBe(1);
+		expect(bridge.managed(BROWSER).tabForLease(bridge.managed(BROWSER).leaseForTab(1)!)).toBe(1);
 		expect(cdp.messages.filter(message => message.method === "Target.detachedFromTarget")).toHaveLength(0);
 		// …but the driver is told its object mirrors died with the attachment.
 		expect(
@@ -483,7 +514,7 @@ describe("RelayBridge debugger lifetime", () => {
 		await until(() => detachedTabs(ext).includes(2), "the unheld tab's idle detach");
 		expect(detachedTabs(ext)).not.toContain(1);
 		expect(detachedTabs(ext)).not.toContain(3);
-		expect(bridge.dialogState(3).status).toBe("open");
+		expect(bridge.dialogState(BROWSER, 3).status).toBe("open");
 		// Both holds end: the command answers, the dialog closes.
 		ack(bridge, ext, "send", {});
 		bridge.extMessage(ext, JSON.stringify({ t: "cdpEvent", tabId: 3, method: "Page.javascriptDialogClosed" }));
@@ -622,7 +653,7 @@ describe("RelayBridge Runtime sessions", () => {
 
 		bridge.extClosed(firstExt);
 		const nextExt = new FakeExtSocket();
-		bridge.extConnected(nextExt);
+		bridge.extConnected(nextExt, BROWSER);
 		bridge.extMessage(
 			nextExt,
 			JSON.stringify({
@@ -696,7 +727,7 @@ describe("RelayBridge attachment release", () => {
 				constructor() {
 					socket = this;
 					queueMicrotask(() => {
-						bridge.extConnected(ext);
+						bridge.extConnected(ext, BROWSER);
 						this.onmessage?.({ data: JSON.stringify({ t: "authenticated" }) });
 					});
 				}
@@ -760,7 +791,7 @@ describe("RelayBridge attachment release", () => {
 				context,
 			);
 			await ready.promise;
-			const lease = bridge.managed.claim(bridge.managed.discover()[0]!.id, "owner");
+			const lease = bridge.managed(BROWSER).claim(bridge.managed(BROWSER).discover()[0]!.id, "owner");
 			const cdp = new FakeCdpSocket();
 			const replies = new Map<number, () => void>();
 			const capture = cdp.send.bind(cdp);
@@ -774,7 +805,7 @@ describe("RelayBridge attachment release", () => {
 				replies.set(id, replied.resolve);
 				bridge.cdpMessage(
 					connId,
-					JSON.stringify({ id, method: "Target.attachToTarget", params: { targetId: "PAGE1" } }),
+					JSON.stringify({ id, method: "Target.attachToTarget", params: { targetId: `PAGE${CODE}.1` } }),
 				);
 				await replied.promise;
 				expect(cdp.sessionFor(id)).toBeDefined();
@@ -789,7 +820,7 @@ describe("RelayBridge attachment release", () => {
 				const reacquired = attach(3);
 				detach.resolve();
 				await reacquired;
-				expect(bridge.managed.get(lease.id, "owner").id).toBe(lease.id);
+				expect(bridge.managed(BROWSER).get(lease.id, "owner").id).toBe(lease.id);
 			}
 			attached = false;
 			nativeDetach({ tabId: 1 }, "canceled_by_user");
@@ -797,10 +828,10 @@ describe("RelayBridge attachment release", () => {
 			await flush();
 			// The cancellation costs the tab, not the ownership: the lease lives on
 			// so its owner can still take the tab out of the group and close it.
-			expect(bridge.managed.get(lease.id, "owner").id).toBe(lease.id);
+			expect(bridge.managed(BROWSER).get(lease.id, "owner").id).toBe(lease.id);
 			bridge.cdpMessage(
 				connId,
-				JSON.stringify({ id: 4, method: "Target.attachToTarget", params: { targetId: "PAGE1" } }),
+				JSON.stringify({ id: 4, method: "Target.attachToTarget", params: { targetId: `PAGE${CODE}.1` } }),
 			);
 			await flush();
 			expect(cdp.messages.find(message => message.id === 4)).toHaveProperty("error");
@@ -833,7 +864,7 @@ describe("RelayBridge attachment release", () => {
 		const reattachId = ++msgSeq;
 		bridge.cdpMessage(
 			connId,
-			JSON.stringify({ id: reattachId, method: "Target.attachToTarget", params: { targetId: "PAGE1" } }),
+			JSON.stringify({ id: reattachId, method: "Target.attachToTarget", params: { targetId: `PAGE${CODE}.1` } }),
 		);
 		ack(bridge, ext, "attach");
 		await flush();
@@ -857,7 +888,7 @@ describe("RelayBridge attachment release", () => {
 		const reattachId = ++msgSeq;
 		bridge.cdpMessage(
 			connId,
-			JSON.stringify({ id: reattachId, method: "Target.attachToTarget", params: { targetId: "PAGE1" } }),
+			JSON.stringify({ id: reattachId, method: "Target.attachToTarget", params: { targetId: `PAGE${CODE}.1` } }),
 		);
 		await flush();
 		// Only the initial attach has reached the extension while detach is pending.
@@ -974,7 +1005,7 @@ describe("RelayBridge attachment release", () => {
 		const reattachId = ++msgSeq;
 		bridge.cdpMessage(
 			reclaimed,
-			JSON.stringify({ id: reattachId, method: "Target.attachToTarget", params: { targetId: "PAGE1" } }),
+			JSON.stringify({ id: reattachId, method: "Target.attachToTarget", params: { targetId: `PAGE${CODE}.1` } }),
 		);
 		await flush();
 		expect(replacement.pending("attach")).toHaveLength(1);
@@ -991,7 +1022,7 @@ describe("RelayBridge attachment release", () => {
 		const connId = connectCdp(bridge, cdp, 1);
 		bridge.cdpMessage(
 			connId,
-			JSON.stringify({ id: ++msgSeq, method: "Target.attachToTarget", params: { targetId: "PAGE1" } }),
+			JSON.stringify({ id: ++msgSeq, method: "Target.attachToTarget", params: { targetId: `PAGE${CODE}.1` } }),
 		);
 		expect(ext.pending("attach")).toHaveLength(1);
 
@@ -1005,7 +1036,7 @@ describe("RelayBridge attachment release", () => {
 		const retryId = ++msgSeq;
 		bridge.cdpMessage(
 			reclaimed,
-			JSON.stringify({ id: retryId, method: "Target.attachToTarget", params: { targetId: "PAGE1" } }),
+			JSON.stringify({ id: retryId, method: "Target.attachToTarget", params: { targetId: `PAGE${CODE}.1` } }),
 		);
 		await flush();
 		expect(replacement.pending("attach")).toHaveLength(1);
@@ -1036,7 +1067,7 @@ describe("RelayBridge attachment release", () => {
 		const reattachId = ++msgSeq;
 		bridge.cdpMessage(
 			reclaimed,
-			JSON.stringify({ id: reattachId, method: "Target.attachToTarget", params: { targetId: "PAGE1" } }),
+			JSON.stringify({ id: reattachId, method: "Target.attachToTarget", params: { targetId: `PAGE${CODE}.1` } }),
 		);
 		await flush();
 
@@ -1275,13 +1306,13 @@ it("tracks selected tabs per window even when selection moves outside the known 
 		tab({ tabId: 3, windowId: 2, active: true }),
 	]);
 	bridge.extMessage(extension, JSON.stringify({ t: "tabActivated", tabId: 2, windowId: 1 }));
-	expect(bridge.managed.discover().map(tab => [tab.tabId, tab.active])).toEqual([
+	expect(bridge.managed(BROWSER).discover().map(tab => [tab.tabId, tab.active])).toEqual([
 		[1, false],
 		[2, true],
 		[3, true],
 	]);
 	bridge.extMessage(extension, JSON.stringify({ t: "tabActivated", tabId: 99, windowId: 1 }));
-	expect(bridge.managed.discover().map(tab => [tab.tabId, tab.active])).toEqual([
+	expect(bridge.managed(BROWSER).discover().map(tab => [tab.tabId, tab.active])).toEqual([
 		[1, false],
 		[2, false],
 		[3, true],
@@ -1293,17 +1324,17 @@ it("refreshes inventory from a read-only Chrome query without attaching and pres
 	const bridge = new RelayBridge();
 	const extension = new FakeExtSocket();
 	connect(bridge, extension, [tab({ tabId: 1, active: false }), tab({ tabId: 2, active: true })]);
-	const id = bridge.managed.discover()[0]!.id;
-	const refreshing = bridge.refreshTabs();
+	const id = bridge.managed(BROWSER).discover()[0]!.id;
+	const refreshing = bridge.refreshTabs(BROWSER);
 	ack(bridge, extension, "queryTabs", {
 		tabs: [tab({ tabId: 1, active: true }), tab({ tabId: 9, windowId: 2, active: true })],
 	});
 	await refreshing;
-	expect(bridge.managed.discover().map(tab => [tab.tabId, tab.active])).toEqual([
+	expect(bridge.managed(BROWSER).discover().map(tab => [tab.tabId, tab.active])).toEqual([
 		[1, true],
 		[9, true],
 	]);
-	expect(bridge.managed.discover()[0]!.id).toBe(id);
+	expect(bridge.managed(BROWSER).discover()[0]!.id).toBe(id);
 	expect(extension.messages.map(message => (message.t === "rpc" ? message.op : message.t))).toEqual(["queryTabs"]);
 });
 
@@ -1311,7 +1342,7 @@ it("answers only the observed dialog on an owned tab through its original debugg
 	const bridge = new RelayBridge();
 	const ext = new FakeExtSocket();
 	connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })], [1, 2]);
-	const lease = bridge.managed.claim(bridge.managed.discover().find(row => row.tabId === 1)!.id, "owner");
+	const lease = bridge.managed(BROWSER).claim(bridge.managed(BROWSER).discover().find(row => row.tabId === 1)!.id, "owner");
 	const opened = (tabId: number) =>
 		bridge.extMessage(
 			ext,
@@ -1366,7 +1397,7 @@ it("keeps a recovered dialog decision channel across consecutive prompts and det
 			JSON.stringify({ t: "cdpEvent", tabId: 1, method: "Page.javascriptDialogClosed", params: { result: true } }),
 		);
 	opening();
-	const lease = bridge.managed.claim(bridge.managed.discover()[0]!.id, "owner");
+	const lease = bridge.managed(BROWSER).claim(bridge.managed(BROWSER).discover()[0]!.id, "owner");
 	const connection = bridge.cdpConnected(new FakeCdpSocket(), lease.id);
 	try {
 		const first = await bridge.dialog(lease.id, "owner", {});
@@ -1392,7 +1423,7 @@ it("keeps a recovered dialog decision channel across consecutive prompts and det
 		await flush();
 		expect(ext.rpcs("detach").map(request => request.tabId)).toEqual([1]);
 		ack(bridge, ext, "detach", {});
-		expect(bridge.managed.discover()[0]!.ownership).toBe("available");
+		expect(bridge.managed(BROWSER).discover()[0]!.ownership).toBe("available");
 	} finally {
 		bridge.cdpClosed(connection);
 		bridge.extClosed(ext);
@@ -1622,7 +1653,7 @@ describe("RelayBridge lease presentation", () => {
 		const bridge = new RelayBridge({ group: true, log: options.log });
 		const ext = new FakeExtSocket();
 		connect(bridge, ext, [tab({ tabId: 1, active: options.active })]);
-		const lease = bridge.managed.claim(discovered(bridge, 1), "owner");
+		const lease = bridge.managed(BROWSER).claim(discovered(bridge, 1), "owner");
 		const cdp = new FakeCdpSocket();
 		const connection = bridge.cdpConnected(cdp, lease.id);
 		const attachId = ++msgSeq;
@@ -1631,7 +1662,7 @@ describe("RelayBridge lease presentation", () => {
 			JSON.stringify({
 				id: attachId,
 				method: "Target.attachToTarget",
-				params: { targetId: "PAGE1", flatten: true },
+				params: { targetId: `PAGE${CODE}.1`, flatten: true },
 			}),
 		);
 		ack(bridge, ext, "attach");
@@ -1952,5 +1983,110 @@ describe("cursor overlay page script", () => {
 		expect(overlay.style().opacity).toBe("0");
 		overlay.api.remove();
 		expect(overlay.hosts.every(host => !host.isConnected)).toBe(true);
+	});
+});
+
+describe("RelayBridge target discovery", () => {
+	it("enumerates the leased page without attaching to it or reaching other tabs", async () => {
+		const bridge = new RelayBridge();
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 }), tab({ tabId: 3, url: "chrome://extensions/" })]);
+		const cdp = new FakeCdpSocket();
+		const connId = connectCdp(bridge, cdp, 1);
+		bridge.cdpMessage(connId, JSON.stringify({ id: 1, method: "Target.getTargets" }));
+		await flush();
+		const result = cdp.messages.find(message => message.id === 1)?.result as
+			| { targetInfos: Array<{ targetId: string; type: string }> }
+			| undefined;
+		expect(result?.targetInfos.map(info => [info.targetId, info.type])).toEqual([[`PAGE${CODE}.1`, "page"]]);
+		expect(ext.messages.filter(message => message.t === "rpc")).toEqual([]);
+	});
+});
+
+describe("RelayBridge multiple browser instances", () => {
+	it("keeps equal tab numbers of two browsers apart in discovery, lease target ids and version", () => {
+		const bridge = new RelayBridge();
+		connect(bridge, new FakeExtSocket(), [tab({ tabId: 1, title: "Chrome tab" })], [], "chrome");
+		connect(bridge, new FakeExtSocket(), [tab({ tabId: 1, title: "Edge tab" })], [], "edge");
+		expect(bridge.managed("chrome").discover().map(found => found.title)).toEqual(["Chrome tab"]);
+		expect(bridge.managed("edge").discover().map(found => found.title)).toEqual(["Edge tab"]);
+		const chromeLease = bridge.managed("chrome").claim(discovered(bridge, 1, "chrome"), "owner");
+		const edgeLease = bridge.managed("edge").claim(discovered(bridge, 1, "edge"), "owner");
+		expect([chromeLease.targetId, edgeLease.targetId]).toEqual([
+			`PAGE${instanceCode("chrome")}.1`,
+			`PAGE${instanceCode("edge")}.1`,
+		]);
+		expect(bridge.instanceForLease(edgeLease.id)).toBe("edge");
+		expect(bridge.versionInfo("edge", "ws://relay").Browser).toBe("Edg/151.0.0.0");
+	});
+
+	it("scopes the hello GC to the reconnecting instance", () => {
+		const bridge = new RelayBridge();
+		connect(bridge, new FakeExtSocket(), [tab({ tabId: 1, title: "Chrome tab" })], [], "chrome");
+		const edge = new FakeExtSocket();
+		connect(bridge, edge, [tab({ tabId: 1, title: "Edge tab" })], [], "edge");
+		bridge.extClosed(edge);
+		// Edge comes back without its tab: only Edge's registry loses it.
+		connect(bridge, new FakeExtSocket(), [], [], "edge");
+		expect(bridge.managed("chrome").discover().map(found => found.title)).toEqual(["Chrome tab"]);
+		expect(bridge.managed("edge").discover()).toEqual([]);
+	});
+
+	it("retires only the reconnecting instance's socket and leases", () => {
+		const bridge = new RelayBridge();
+		const chrome = new FakeExtSocket();
+		connect(bridge, chrome, [tab({ tabId: 1 })], [], "chrome");
+		const edge = new FakeExtSocket();
+		connect(bridge, edge, [tab({ tabId: 1 })], [], "edge");
+		const chromeLease = bridge.managed("chrome").claim(discovered(bridge, 1, "chrome"), "owner");
+		const edgeLease = bridge.managed("edge").claim(discovered(bridge, 1, "edge"), "owner");
+		// Service-worker restart: a new socket hellos for the same instance.
+		connect(bridge, new FakeExtSocket(), [tab({ tabId: 1 })], [], "chrome");
+		expect(chrome.closed).toBe(true);
+		expect(edge.closed).toBe(false);
+		expect(bridge.instanceForLease(chromeLease.id)).toBeUndefined();
+		expect(bridge.instanceForLease(edgeLease.id)).toBe("edge");
+		// One registry entry per physical tab, not one per socket.
+		expect(bridge.managed("chrome").discover()).toHaveLength(1);
+	});
+
+	it("routes each browser's RPCs to its own socket and ignores results another browser sends", async () => {
+		const bridge = new RelayBridge();
+		const chrome = new FakeExtSocket();
+		connect(bridge, chrome, [tab({ tabId: 1 })], [], "chrome");
+		const edge = new FakeExtSocket();
+		connect(bridge, edge, [tab({ tabId: 1 })], [], "edge");
+		const chromeCdp = new FakeCdpSocket();
+		const chromeConn = connectCdp(bridge, chromeCdp, 1, "owner", "chrome");
+		const edgeCdp = new FakeCdpSocket();
+		const edgeConn = connectCdp(bridge, edgeCdp, 1, "owner", "edge");
+		const chromeSession = await attachPage(bridge, chrome, chromeCdp, chromeConn, 1, "chrome");
+		await attachPage(bridge, edge, edgeCdp, edgeConn, 1, "edge");
+		const commandId = ++msgSeq;
+		bridge.cdpMessage(chromeConn, JSON.stringify({ id: commandId, sessionId: chromeSession, method: "Page.reload" }));
+		await flush();
+		const [sent] = chrome.pending("send");
+		expect(sent).toMatchObject({ tabId: 1, method: "Page.reload" });
+		expect(edge.rpcs("send")).toEqual([]);
+		bridge.extMessage(edge, JSON.stringify({ t: "rpcResult", id: sent!.id, ok: true, result: { from: "edge" } }));
+		await flush();
+		expect(chromeCdp.messages.find(message => message.id === commandId)).toBeUndefined();
+		ack(bridge, chrome, "send", { from: "chrome" });
+		await flush();
+		expect(chromeCdp.messages.find(message => message.id === commandId)).toMatchObject({ result: { from: "chrome" } });
+	});
+
+	it("hides an offline browser until it reconnects and leaves the other browser drivable", () => {
+		const bridge = new RelayBridge();
+		connect(bridge, new FakeExtSocket(), [tab({ tabId: 1, title: "Chrome tab" })], [], "chrome");
+		const edge = new FakeExtSocket();
+		connect(bridge, edge, [tab({ tabId: 1, title: "Edge tab" })], [], "edge");
+		bridge.extClosed(edge);
+		expect(bridge.connected("edge")).toBe(false);
+		expect(bridge.managed("edge").discover()).toEqual([]);
+		expect(bridge.connected("chrome")).toBe(true);
+		expect(bridge.managed("chrome").discover().map(found => found.title)).toEqual(["Chrome tab"]);
+		connect(bridge, new FakeExtSocket(), [tab({ tabId: 1, title: "Edge tab" })], [], "edge");
+		expect(bridge.managed("edge").discover().map(found => found.title)).toEqual(["Edge tab"]);
 	});
 });

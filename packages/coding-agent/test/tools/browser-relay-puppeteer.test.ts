@@ -78,7 +78,7 @@ it("publishes the leased page to both real Puppeteer connections", async () => {
 					id: (target as unknown as { _targetId: string })._targetId,
 					type: String(target.type()),
 				})),
-			).toContainEqual({ id: "PAGE31", type: "page" });
+			).toContainEqual({ id: lease.targetId, type: "page" });
 		}
 	} finally {
 		for (const browser of browsers) browser.disconnect();

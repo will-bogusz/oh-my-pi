@@ -2,6 +2,7 @@ import * as os from "node:os";
 import type { AgentSession } from "../../session/agent-session";
 import { DRIVER_PLATFORM, type InstalledCuaDriver, installedCuaDriver } from "../../tools/computer/driver";
 import { releaseComputerResourcesForOwner } from "../../tools/computer/supervisor";
+import { cfgComputerDisplay, cfgComputerEnabled, cfgComputerMaxHeight, cfgComputerMaxWidth } from "../../tools/settings";
 import { type VendoredDriver, vendoredDriver } from "../../tools/computer/vendored";
 
 /** One row of the host process table: enough to walk a process's ancestry. */
@@ -138,13 +139,13 @@ export async function computerUseStatus(
 	},
 	deps: ComputerStatusDeps = defaultDeps,
 ): Promise<string> {
-	const enabled = session.settings.get("computer.enabled");
+	const enabled = cfgComputerEnabled.get(session.settings);
 	const definition = session.getEvalPreludes().find(candidate => candidate.name === "computer");
 	const lines = [
 		[
 			`Computer use: ${enabled ? "enabled" : "disabled"}`,
 			`prelude: ${definition ? "active" : "inactive"}`,
-			`configured: display=${session.settings.get("computer.display")}, maxWidth=${session.settings.get("computer.maxWidth")}, maxHeight=${session.settings.get("computer.maxHeight")}`,
+			`configured: display=${cfgComputerDisplay.get(session.settings)}, maxWidth=${cfgComputerMaxWidth.get(session.settings)}, maxHeight=${cfgComputerMaxHeight.get(session.settings)}`,
 		].join(" · "),
 	];
 	const toolSession = session.getEvalToolSession();

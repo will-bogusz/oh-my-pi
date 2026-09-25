@@ -11,6 +11,7 @@
  *   navigation waits for lifecycle events Chrome no longer emits.
  */
 
+import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import { expect, it } from "bun:test";
 import { RelayBridge, type RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
 import type { RelayRpcRequest, RelayToExtMessage } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
@@ -28,7 +29,7 @@ function makeSession(): ToolSession {
 	return {
 		cwd: process.cwd(),
 		hasUI: false,
-		settings: { get: () => undefined },
+		settings: Settings.isolated(),
 		getSessionFile: () => null,
 	} as unknown as ToolSession;
 }
@@ -381,7 +382,7 @@ interface LeasedPage {
 async function leasedPage(opts: { debuggerIdleMs?: number } = {}): Promise<LeasedPage> {
 	const bridge = new RelayBridge(opts);
 	const ext = new FakeExtSocket();
-	bridge.extConnected(ext);
+	bridge.extConnected(ext, "browser");
 	bridge.extMessage(
 		ext,
 		JSON.stringify({
@@ -402,7 +403,8 @@ async function leasedPage(opts: { debuggerIdleMs?: number } = {}): Promise<Lease
 			],
 		}),
 	);
-	const lease = bridge.managed.claim(bridge.managed.discover()[0]!.id, "owner");
+	const managed = bridge.managed("browser");
+	const lease = managed.claim(managed.discover()[0]!.id, "owner");
 	const cdp = new FakeCdpSocket();
 	const connection = bridge.cdpConnected(cdp, lease.id);
 	let seq = 100;
@@ -413,7 +415,7 @@ async function leasedPage(opts: { debuggerIdleMs?: number } = {}): Promise<Lease
 			JSON.stringify({
 				id: attachId,
 				method: "Target.attachToTarget",
-				params: { targetId: "PAGE1", flatten: true },
+				params: { targetId: lease.targetId, flatten: true },
 			}),
 		);
 		ext.ack(bridge, "attach");

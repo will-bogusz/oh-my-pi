@@ -4,7 +4,7 @@ import * as path from "node:path";
 
 import { postmortem, Snowflake, toError, untilAborted, withTimeout } from "@oh-my-pi/pi-utils";
 import type { HTMLElement } from "@oh-my-pi/pi-utils/dom";
-import type { Browser, CDPSession, Dialog, HTTPResponse, Page, Target } from "puppeteer-core";
+import type { Browser, CDPSession, Dialog, HTTPResponse, KeyInput, Page, Target } from "puppeteer-core";
 import { JsRuntime, type RuntimeHooks } from "../../eval/js/shared/runtime";
 import { formatScreenshot, resizeImage } from "../../utils/image-resize";
 import { buildTreeLines, renderTree, renderTreeDiff, type TreeLine } from "../observed-tree";
@@ -25,12 +25,14 @@ import {
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-tui/tools/streaming-output";
+import { type BrowserA11yOptions, type BrowserA11yResult, formatA11ySummary, runA11yAudit } from "./a11y/audit";
 import {
 	type AriaSnapshotOptions,
+	type AriaSnapshotPayload,
 	assertSelectorString,
 	buildAriaRefScript,
 	buildAriaSnapshotFunction,
-	buildAriaSnapshotScript,
+	buildAriaSnapshotPayloadScript,
 	parseAriaRefSelector,
 } from "./aria/aria-snapshot";
 import {
@@ -44,6 +46,8 @@ import {
 	evaluateExpression,
 	fillNode,
 	focusNode,
+	highlightNode,
+	holdKey,
 	hoverNode,
 	isDocumentGoneError,
 	nodeFromExpression,
@@ -52,21 +56,86 @@ import {
 	type Point,
 	pressChord,
 	type Rect,
+	releaseKey,
+	resolveSelector,
 	scrollIntoView,
 	selectOptions,
-	resolveSelector,
 	sessionOffset,
 	setFileInput,
+	setNodeChecked,
 	snapshotAccessibility,
 	typeIntoNode,
 	waitForDomQuiet,
 } from "./cdp";
-import { applyStealthPatches, applyViewport, BROWSER_PROTOCOL_TIMEOUT_MS, loadPuppeteerInWorker } from "./launch";
-import { TabDownloadMonitor, type TabDownloads } from "./downloads";
-import { navigateMainFrame, waitForMainFrameReady, watchMainFrameNavigation } from "./navigation";
+import {
+	type BrowserCaptureResult,
+	type BrowserConsoleEntry,
+	type BrowserConsoleOptions,
+	type BrowserErrorEntry,
+	type BrowserErrorOptions,
+	PageConsoleCapture,
+} from "./console-capture";
+import { type DialogPolicy, type DialogState, RuntimeDialogController } from "./dialogs";
+import { type BrowserDownload, DownloadManager, TabDownloadMonitor, type TabDownloadSource } from "./downloads";
+import {
+	applyUserAgentOverride,
+	BrowserEmulationController,
+	type BrowserEmulateOptions,
+	type ClipboardActionResult,
+	type ClipboardReadResult,
+} from "./emulation";
+import {
+	type BrowserFrameApi,
+	type BrowserFrameInfo,
+	captureFrameScreenshot,
+	createFrameApi,
+	listFrames,
+	resolveFrame,
+} from "./frames";
+import { type InitScriptInfo, InitScriptManager } from "./init-scripts";
+import {
+	type ClickAtOptions,
+	clickAt,
+	type HighlightOptions,
+	type MouseButtonOptions,
+	type MouseMoveOptions,
+	mouseDown,
+	mouseMove,
+	mouseUp,
+	type ScrollOptions,
+	wheel,
+} from "./interactions";
+import {
+	applyStealthPatches,
+	applyViewport,
+	BROWSER_PROTOCOL_TIMEOUT_MS,
+	DEFAULT_VIEWPORT,
+	loadedKnownDevices,
+	loadedNetworkConditions,
+	loadPuppeteerInWorker,
+} from "./launch";
+import {
+	navigateMainFrame,
+	type NavigationWaitUntil,
+	pushState,
+	reloadPage,
+	waitForMainFrameReady,
+	watchMainFrameNavigation,
+} from "./navigation";
+import {
+	BrowserNetworkManager,
+	type HarContentPolicy,
+	type NetworkPattern,
+	type NetworkRequestDetail,
+	type NetworkRequestRecord,
+	type NetworkRequestsOptions,
+	type NetworkRouteDescription,
+	type NetworkRouteOptions,
+} from "./network";
 import {
 	type AxNode,
 	axNodeKey,
+	compactNodes,
 	flattenSnapshot,
 	hasBusyIndicator,
 	matchRefs,
@@ -75,9 +144,104 @@ import {
 	renderHeader,
 	roleNamePositions,
 	sameDocument,
+	scopeNodes,
 	type TreeHeader,
 } from "./observation";
-import { extractReadableFromHtml, type ReadableFormat } from "./readable";
+import { applyIgnoreHttpsErrors } from "./open-options";
+import {
+	DEFAULT_STYLE_PROPERTIES,
+	ELEMENT_READS,
+	type ElementQueryHelpers,
+	queryAttribute,
+	type QueryBox,
+	queryBox,
+	queryChecked,
+	queryCount,
+	queryEnabled,
+	queryHtml,
+	queryStyles,
+	queryText,
+	queryValue,
+	queryVisible,
+	waitForPageText,
+} from "./queries";
+import { registerSemanticQueryHandlers } from "./query-handlers";
+import { enableReact, type ReactEnableResult } from "./react/devtools-hook";
+import { collectReactRenders, type ReactRendersAction, type ReactRendersResult } from "./react/renders";
+import { type ReactSuspenseBoundary, type ReactSuspenseOptions, readReactSuspense } from "./react/suspense";
+import {
+	inspectReactFiber,
+	type ReactInspectResult,
+	type ReactTreeNode,
+	type ReactTreeOptions,
+	readReactTree,
+} from "./react/tree";
+import { collectVitals, installVitalsObservers, type VitalsOptions, type VitalsResult } from "./react/vitals";
+import { extractReadableFromHtml, type ReadableExtractOptions, type ReadableFormat } from "./readable";
+import {
+	RecordingController,
+	type RecordingOptions,
+	type RecordingStartResult,
+	type RecordingStatus,
+	type RecordingStopResult,
+} from "./recording";
+import {
+	captureScreenshotBuffer,
+	createPngDiff,
+	type DiffScreenshotOptions,
+	type DiffScreenshotResult,
+	formatScreenshotLegend,
+	installScreenshotAnnotations,
+	type PdfOptions,
+	pngPixelChangeRatio,
+	type ScreenshotAnnotationTarget,
+	type ScreenshotChangeResult,
+	type ScreenshotHistory,
+	type ScreenshotOptions,
+	screenshotQuality,
+	screenshotScope,
+	screenshotThreshold,
+} from "./screenshot";
+import {
+	type AriaSnapshotBaseline,
+	type AriaSnapshotDiffResult,
+	ariaSnapshotBaselineKey,
+	diffAriaSnapshot,
+	postProcessAriaSnapshot,
+} from "./snapshot-plus";
+import {
+	type BrowserCookie,
+	type ClearCookiesOptions,
+	clearPageCookies,
+	clearPageStorage,
+	type CookieQueryOptions,
+	type LoadStateResult,
+	loadStorageState,
+	readCookies,
+	readStorage,
+	saveStorageState,
+	setPageCookies,
+	setPageStorage,
+	type StorageKind,
+} from "./storage-state";
+import { assertTabPressArgs } from "./tab-arguments";
+import {
+	type BrowserMetrics,
+	type BrowserProfileStopOptions,
+	type BrowserTraceStartOptions,
+	type BrowserTraceStopOptions,
+	BrowserTracingController,
+} from "./tracing";
+import {
+	installWebMcp,
+	type WebMcpController,
+	type WebMcpEventsOptions,
+	type WebMcpEventsResult,
+	type WebMcpInvokeOptions,
+	type WebMcpInvokeResult,
+	type WebMcpListOptions,
+	type WebMcpListResult,
+} from "./webmcp";
 
 import { cloneSafe, RunOutput } from "./run-output";
 import type { BrowserSelectOption } from "./select-options";
@@ -127,6 +291,12 @@ const SELECTOR_HANDLER_PREFIXES = [
 	"text/",
 	"xpath/",
 	"pierce/",
+	"label/",
+	"placeholder/",
+	"testid/",
+	"alt/",
+	"title/",
+	"role/",
 	"aria-ref=",
 	"aria-ref/",
 	"ariaref/",
@@ -142,7 +312,6 @@ const SELECTOR_HANDLER_PREFIXES = [
 const PLAYWRIGHT_ONLY_SELECTOR_RE =
 	/:has-text\(|:text\(|:text-is\(|:text-matches\(|:visible\b|:hidden\b|:nth-match\(|:near\(|:above\(|:below\(|:right-of\(|:left-of\(/;
 
-type DialogPolicy = "accept" | "dismiss";
 type DragTarget = string | { readonly x: number; readonly y: number };
 /** Last JS dialog seen on the page; kept for timeout attribution until handled or navigation. */
 interface OpenDialogInfo {
@@ -239,41 +408,53 @@ export function resolveWaitTimeout(cellTimeoutMs: number, explicit?: number): nu
 	return actionOpMs;
 }
 
-interface ScreenshotOptions {
-	selector?: string;
-	fullPage?: boolean;
-	silent?: boolean;
-	/**
-	 * Acquisition preview: saved at the size the model sees even when a
-	 * full-resolution screenshot directory is configured. Only an explicit
-	 * screenshot is worth the full-resolution file.
-	 */
-	preview?: boolean;
-}
-
 interface TabApi {
 	readonly name: string;
 	readonly page: Page;
 	readonly signal?: AbortSignal;
 	url(): string;
 	title(): Promise<string>;
-	goto(
-		url: string,
-		opts?: { waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2" },
-	): Promise<void>;
-	back(): Promise<void>;
-	forward(): Promise<void>;
+	goto(url: string, opts?: { waitUntil?: NavigationWaitUntil }): Promise<void>;
+	back(): Promise<string>;
+	forward(): Promise<string>;
+	reload(opts?: { waitUntil?: NavigationWaitUntil }): Promise<string>;
+	pushState(url: string): Promise<string>;
+	frames(): Promise<BrowserFrameInfo[]>;
+	frame(selectorOrNameOrUrl: string): Promise<BrowserFrameApi>;
+	dialog(): Promise<DialogState>;
+	handleDialog(opts: { accept: boolean; text?: string }): Promise<void>;
+	setDialogs(policy: DialogPolicy | null): Promise<void>;
 	observe(opts?: ObserveOptions): Promise<Observation>;
-	ariaSnapshot(selector?: string, opts?: AriaSnapshotOptions): Promise<string>;
-	screenshot(opts?: ScreenshotOptions): Promise<string>;
-	extract(format?: ReadableFormat): Promise<string>;
+	ariaSnapshot(selector?: string, opts?: AriaSnapshotOptions): Promise<string | AriaSnapshotDiffResult>;
+	a11y(opts?: BrowserA11yOptions): Promise<BrowserA11yResult>;
+	webmcpList(opts?: WebMcpListOptions): Promise<WebMcpListResult>;
+	webmcpInvoke(name: string, params: Record<string, unknown>, opts?: WebMcpInvokeOptions): Promise<WebMcpInvokeResult>;
+	webmcpEvents(opts?: WebMcpEventsOptions): Promise<WebMcpEventsResult>;
+	screenshot(opts?: ScreenshotOptions): Promise<string | ScreenshotChangeResult>;
+	diffScreenshot(baselinePath: string, opts?: DiffScreenshotOptions): Promise<DiffScreenshotResult>;
+	pdf(opts?: PdfOptions): Promise<string>;
+	extract(format?: ReadableFormat, opts?: ReadableExtractOptions): Promise<string>;
 	click(selector: string): Promise<void>;
+	dblclick(selector: string): Promise<void>;
+	hover(selector: string): Promise<void>;
+	focus(selector: string): Promise<void>;
+	check(selector: string): Promise<void>;
+	uncheck(selector: string): Promise<void>;
+	keyDown(key: KeyInput): Promise<void>;
+	keyUp(key: KeyInput): Promise<void>;
+	mouseMove(x: number, y: number, opts?: MouseMoveOptions): Promise<void>;
+	mouseDown(opts?: MouseButtonOptions): Promise<void>;
+	mouseUp(opts?: MouseButtonOptions): Promise<void>;
+	clickAt(x: number, y: number, opts?: ClickAtOptions): Promise<void>;
+	wheel(deltaX: number, deltaY: number): Promise<void>;
+	highlight(selector: string, opts?: HighlightOptions): Promise<void>;
 	type(selector: string, text: string): Promise<void>;
 	fill(selector: string, value: string): Promise<void>;
 	press(key: string, opts?: { selector?: string }): Promise<void>;
 	scroll(
 		deltaXOrDirection: number | ScrollDirection,
-		deltaYOrOptions?: number | { by?: number | "page" },
+		deltaYOrOptions?: number | TabScrollOptions,
+		opts?: ScrollOptions,
 	): Promise<void>;
 	drag(from: DragTarget, to: DragTarget): Promise<void>;
 	waitFor(selector: string, opts?: { timeout?: number }): Promise<TabElement>;
@@ -281,8 +462,18 @@ interface TabApi {
 	scrollIntoView(selector: string): Promise<void>;
 	select(selector: string, ...values: BrowserSelectOption[]): Promise<string[]>;
 	uploadFile(selector: string, ...filePaths: string[]): Promise<void>;
-	downloads(): Promise<TabDownloads>;
 	waitForUrl(pattern: string | RegExp, opts?: { timeout?: number }): Promise<string>;
+	text(selector: string): Promise<string | null>;
+	html(selector: string): Promise<string | null>;
+	value(selector: string): Promise<string | null>;
+	attr(selector: string, name: string): Promise<string | null>;
+	count(selector: string): Promise<number>;
+	box(selector: string): Promise<QueryBox | null>;
+	styles(selector: string, props?: string[]): Promise<Record<string, string> | null>;
+	isVisible(selector: string): Promise<boolean>;
+	isEnabled(selector: string): Promise<boolean>;
+	isChecked(selector: string): Promise<boolean>;
+	waitForText(text: string, opts?: { timeout?: number; selector?: string; exact?: boolean }): Promise<void>;
 	waitForResponse(
 		pattern: string | RegExp | ((response: HTTPResponse) => boolean | Promise<boolean>),
 		opts?: { timeout?: number },
@@ -291,12 +482,55 @@ interface TabApi {
 		selector: string,
 		opts?: { timeout?: number; visible?: boolean; hidden?: boolean },
 	): Promise<TabElement | null>;
-	waitForNavigation(opts?: {
-		waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
-		timeout?: number;
-	}): Promise<HTTPResponse | null>;
+	waitForNavigation(opts?: { waitUntil?: NavigationWaitUntil; timeout?: number }): Promise<HTTPResponse | null>;
 	id(n: number): Promise<TabElement>;
 	ref(id: string): Promise<TabElement>;
+	emulate(opts?: BrowserEmulateOptions): Promise<BrowserEmulateOptions>;
+	devices(): Promise<string[]>;
+	clipboardRead(): Promise<ClipboardReadResult>;
+	clipboardWrite(text: string): Promise<ClipboardActionResult>;
+	clipboardCopy(): Promise<ClipboardActionResult>;
+	clipboardPaste(): Promise<ClipboardActionResult>;
+	cookies(opts?: CookieQueryOptions): Promise<BrowserCookie[]>;
+	setCookies(...cookies: unknown[]): Promise<void>;
+	clearCookies(opts?: ClearCookiesOptions): Promise<void>;
+	storage(kind: StorageKind, opts?: { key?: string }): Promise<Record<string, string> | string | null>;
+	setStorage(kind: StorageKind, keyOrEntries: string | Record<string, unknown>, value?: unknown): Promise<void>;
+	clearStorage(kind: StorageKind): Promise<void>;
+	saveState(filePath?: string): Promise<string>;
+	loadState(filePath: string): Promise<LoadStateResult>;
+	addInitScript(source: string): Promise<{ id: string }>;
+	removeInitScript(id: string): Promise<void>;
+	initScripts(): Promise<InitScriptInfo[]>;
+	waitForDownload(opts?: { timeout?: number }): Promise<BrowserDownload>;
+	downloads(): Promise<BrowserDownload[]>;
+	console(opts?: BrowserConsoleOptions): Promise<BrowserCaptureResult<BrowserConsoleEntry>>;
+	errors(opts?: BrowserErrorOptions): Promise<BrowserCaptureResult<BrowserErrorEntry>>;
+	clearConsole(): Promise<void>;
+	traceStart(opts?: BrowserTraceStartOptions): Promise<void>;
+	traceStop(opts?: BrowserTraceStopOptions): Promise<string>;
+	profileStart(): Promise<void>;
+	profileStop(opts?: BrowserProfileStopOptions): Promise<string>;
+	metrics(): Promise<BrowserMetrics>;
+	route(pattern: NetworkPattern, opts?: NetworkRouteOptions): Promise<void>;
+	unroute(pattern?: NetworkPattern): Promise<void>;
+	routes(): Promise<NetworkRouteDescription[]>;
+	requests(opts?: NetworkRequestsOptions): Promise<NetworkRequestRecord[]>;
+	request(id: string | number): Promise<NetworkRequestDetail>;
+	clearRequests(): Promise<void>;
+	harStart(opts?: { content?: HarContentPolicy }): Promise<void>;
+	harStop(opts?: { path?: string }): Promise<string>;
+	allowedDomains(): Promise<string[]>;
+	vitals(opts?: VitalsOptions): Promise<VitalsResult>;
+	reactEnable(): Promise<ReactEnableResult>;
+	reactTree(opts?: ReactTreeOptions): Promise<ReactTreeNode[]>;
+	reactInspect(id: number): Promise<ReactInspectResult>;
+	reactRenders(opts: { action: ReactRendersAction }): Promise<ReactRendersResult>;
+	reactSuspense(opts?: ReactSuspenseOptions): Promise<ReactSuspenseBoundary[]>;
+	recordStart(path: string, opts?: RecordingOptions): Promise<RecordingStartResult>;
+	recordStop(): Promise<RecordingStopResult>;
+	recordRestart(path: string, opts?: RecordingOptions): Promise<RecordingStartResult>;
+	recording(): Promise<RecordingStatus>;
 }
 
 /**
@@ -304,8 +538,12 @@ interface TabApi {
  * `BrowserElement` in the code-mode declarations: same names, same positional
  * arguments, nothing puppeteer-shaped leaking through.
  */
-export interface TabElement {
+export interface TabElement extends ElementQueryHelpers {
 	click(options?: { count?: number }): Promise<void>;
+	dblclick(): Promise<void>;
+	check(): Promise<void>;
+	uncheck(): Promise<void>;
+	highlight(options?: HighlightOptions): Promise<void>;
 	type(text: string): Promise<void>;
 	fill(value: string): Promise<void>;
 	press(key: string): Promise<void>;
@@ -359,6 +597,10 @@ export function normalizeSelector(selector: string): string {
 interface ObserveOptions {
 	includeAll?: boolean;
 	viewportOnly?: boolean;
+	/** Observe only the subtree of the first element this selector matches. */
+	selector?: string;
+	/** Keep only controls and the nodes that contain them. */
+	compact?: boolean;
 	/** Render only what changed since the previous observation of this document (default when one exists). */
 	diff?: boolean;
 	/** Print the tree into the run output (default true). */
@@ -520,6 +762,11 @@ export async function withBackgroundInput<T>(
 
 export type ScrollDirection = "up" | "down" | "left" | "right";
 
+/** `scroll()`'s option bag: how far a direction steps, and an element to scroll instead of the page. */
+interface TabScrollOptions extends ScrollOptions {
+	by?: number | "page";
+}
+
 const SCROLL_DIRECTIONS: Readonly<Record<ScrollDirection, { x: number; y: number }>> = {
 	up: { x: 0, y: -1 },
 	down: { x: 0, y: 1 },
@@ -531,20 +778,20 @@ const SCROLL_DIRECTIONS: Readonly<Record<ScrollDirection, { x: number; y: number
  * Accept both scroll forms. `scroll(0, 600)` is pixel deltas; `scroll("down")`
  * and `scroll("down", { by: "page" })` are one viewport step, which is what
  * models reach for and used to reach CDP as `deltaX: "down"` — a protocol
- * error rather than a scroll. A page step is 90% of the viewport so the
- * boundary content stays visible.
+ * error rather than a scroll. A page step is 90% of the scrolled area (the
+ * viewport, or the element named by `selector`) so the boundary content stays
+ * visible.
  */
 async function resolveScrollDeltas(
-	page: Page,
 	deltaXOrDirection: number | ScrollDirection,
-	deltaYOrOptions: number | { by?: number | "page" } | undefined,
-	signal: AbortSignal | undefined,
+	deltaYOrOptions: number | TabScrollOptions | undefined,
+	area: () => Promise<{ width: number; height: number }>,
 ): Promise<{ deltaX: number; deltaY: number }> {
 	if (typeof deltaXOrDirection === "number") {
 		const deltaY = deltaYOrOptions ?? 0;
 		if (typeof deltaY !== "number" || !Number.isFinite(deltaXOrDirection) || !Number.isFinite(deltaY))
 			throw new ToolError(
-				'tab.scroll() takes pixel deltas (tab.scroll(0, 600)) or a direction (tab.scroll("down", { by: "page" }))',
+				'tab.scroll() takes pixel deltas (tab.scroll(0, 600, { selector? })) or a direction (tab.scroll("down", { by: "page", selector? }))',
 			);
 		return { deltaX: deltaXOrDirection, deltaY };
 	}
@@ -559,10 +806,30 @@ async function resolveScrollDeltas(
 		return { deltaX: unit.x * by, deltaY: unit.y * by };
 	}
 	if (by !== "page") throw new ToolError('tab.scroll() `by` must be a pixel count or "page"');
-	const { viewport } = await readPageMetrics(page, signal);
-	const step = Math.max(1, Math.round((unit.x === 0 ? viewport.height : viewport.width) * 0.9));
+	const size = await area();
+	const step = Math.max(1, Math.round((unit.x === 0 ? size.height : size.width) * 0.9));
 	return { deltaX: unit.x * step, deltaY: unit.y * step };
 }
+
+/** `fn(element, ...args)` as a `Runtime.callFunctionOn` declaration whose `this` is the element. */
+function onElement(fn: string | ((...args: never[]) => unknown)): string {
+	return `function (...args) { return (${String(fn)}).apply(null, [this, ...args]); }`;
+}
+
+/** Scroll one element by pixel deltas; its client size is the "page" a direction steps by. */
+const SCROLL_ELEMENT = "function (dx, dy) { this.scrollBy({ left: dx, top: dy, behavior: 'instant' }); }";
+const ELEMENT_CLIENT_SIZE = "function () { return { width: this.clientWidth, height: this.clientHeight }; }";
+const IS_FILE_INPUT = "function () { return this.tagName === 'INPUT' && String(this.type).toLowerCase() === 'file'; }";
+/** A drop of `payloads` (name, type, base64 data) on the element, as a drop zone expects it. */
+const DROP_FILES = `function (payloads) {
+	const transfer = new DataTransfer();
+	for (const payload of payloads) {
+		const bytes = Uint8Array.from(atob(payload.data), character => character.charCodeAt(0));
+		transfer.items.add(new File([bytes], payload.name, { type: payload.type }));
+	}
+	for (const type of ["dragenter", "dragover", "drop"])
+		this.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: transfer }));
+}`;
 
 /** Viewport and document geometry as an observation reports them. */
 function metricsFromLayout(page: Page, layout: PageLayout): Pick<Observation, "viewport" | "scroll"> {
@@ -612,18 +879,29 @@ interface RunPageScope {
 	cleanup(resume?: Promise<void>): Promise<void>;
 }
 
-/** Run-owned event handlers cannot survive a failed cell or remove controller observers. */
-export function createRunPageScope(page: Page): RunPageScope {
+/**
+ * Run-owned event handlers cannot survive a failed cell or remove controller
+ * observers (tab-level routes, request logging, dialogs, console capture keep
+ * theirs). A run that switched raw request interception hands the final state
+ * it left to `restoreInterception`, which puts back the tab's persistent
+ * route/allowlist state; the default turns interception off again.
+ */
+export function createRunPageScope(
+	page: Page,
+	restoreInterception: (leftEnabled: boolean) => Promise<void> = async leftEnabled => {
+		if (leftEnabled) await page.setRequestInterception(false);
+	},
+): RunPageScope {
 	const handlers: { type: unknown; original: unknown; registered: unknown }[] = [];
 	const on = page.on;
 	const off = page.off;
 	const setRequestInterception = page.setRequestInterception;
-	// Only a run that turned interception on needs it turned off. Puppeteer's
+	// Only a run that touched interception needs it restored. Puppeteer's
 	// `NetworkManager` starts with no recorded protocol state, so a bare
 	// `setRequestInterception(false)` is not a no-op: it fans out
 	// `Network.setCacheDisabled` + `Fetch.disable` and can outlive the cleanup
 	// budget on a page that never intercepted anything.
-	let intercepting = false;
+	let intercepting: boolean | undefined;
 	const descriptors = Object.fromEntries(
 		["on", "off", "once", "removeAllListeners", "setRequestInterception"].map(name => [
 			name,
@@ -693,16 +971,16 @@ export function createRunPageScope(page: Page): RunPageScope {
 				else Reflect.deleteProperty(page, name);
 			}
 			await resume;
-			if (!intercepting) return;
+			if (intercepting === undefined) return;
 			try {
 				await withTimeout(
-					page.setRequestInterception(false),
+					restoreInterception(intercepting),
 					REQUEST_INTERCEPTION_CLEANUP_TIMEOUT_MS,
-					"Timed out clearing browser request interception",
+					"Timed out restoring browser request interception",
 				);
 			} catch (error) {
 				throw new RequestInterceptionCleanupError(
-					"Failed to clear browser request interception after browser.run",
+					"Failed to restore browser request interception after browser.run",
 					{ error: error instanceof Error ? error.message : String(error) },
 				);
 			}
@@ -928,7 +1206,7 @@ export class WorkerCore {
 	#refCounter = 0;
 	#observationId: string = crypto.randomUUID();
 	/** Previous tree of this tab, the baseline a diff observation renders against. */
-	#lastTree?: { url: string; filter: { includeAll: boolean; viewportOnly: boolean }; lines: TreeLine[] };
+	#lastTree?: { url: string; filter: string; lines: TreeLine[] };
 	#managedChrome = false;
 	#active: ActiveRun | null = null;
 	#runtime: JsRuntime | null = null;
@@ -937,13 +1215,31 @@ export class WorkerCore {
 	#uninstallRejectionGuard: () => void;
 	#mode?: WorkerInitPayload["mode"];
 	#activateForScreenshot = true;
-	#dialogPolicy?: DialogPolicy;
-	#dialogHandler?: (dialog: Dialog) => void;
+	/**
+	 * Dialogs on a worker-owned tab: upstream's runtime controller (policy,
+	 * `tab.dialog()`/`handleDialog()`). Never installed on managed Chrome, whose
+	 * dialogs belong to the relay journal and are never auto-answered.
+	 */
+	#dialogs?: RuntimeDialogController;
+	/** Managed Chrome only: the modal the relay journal will answer, kept for attribution. */
 	#openDialog?: OpenDialogInfo;
 	#pendingPageCleanup?: Promise<void>;
 	#dialogClosed = Promise.withResolvers<void>();
-	#downloads?: TabDownloadMonitor;
+	#downloads?: TabDownloadSource;
 	#downloadObservationError?: string;
+	/** Last measured viewport, reported while a dialog blocks the renderer. */
+	#viewport?: ReadyInfo["viewport"];
+	/** Modifier keys held by `tab.keyDown()`, as Chrome's bitmask; key strokes carry them. */
+	#heldModifiers = 0;
+	#network?: BrowserNetworkManager;
+	#initScripts?: InitScriptManager;
+	readonly #consoleCapture = new PageConsoleCapture();
+	#tracing?: BrowserTracingController;
+	#ariaSnapshotBaselines = new Map<string, AriaSnapshotBaseline>();
+	#emulation?: BrowserEmulationController;
+	#screenshotHistory = new Map<string, ScreenshotHistory>();
+	#webmcp?: WebMcpController;
+	readonly #recording = new RecordingController();
 
 	constructor(transport: Transport, isolated: boolean) {
 		this.#transport = transport;
@@ -1039,6 +1335,7 @@ export class WorkerCore {
 			this.#managedChrome = new URL(payload.browserWSEndpoint).searchParams.has("lease");
 			this.#activateForScreenshot = payload.mode === "headless" || payload.activateForScreenshot !== false;
 			const puppeteer = await loadPuppeteerInWorker(payload.safeDir);
+			registerSemanticQueryHandlers(puppeteer);
 			this.#browser = await puppeteer
 				.connect({
 					browserWSEndpoint: payload.browserWSEndpoint,
@@ -1077,15 +1374,6 @@ export class WorkerCore {
 				this.#observeDialogs();
 				if (payload.dialogs) this.#applyDialogPolicy(payload.dialogs);
 			}
-			try {
-				this.#downloads = await TabDownloadMonitor.connect(this.#page);
-				this.#downloads.session.on("Page.javascriptDialogClosed", () => {
-					this.#openDialog = undefined;
-					this.#dialogClosed.resolve();
-				});
-			} catch (error) {
-				this.#downloadObservationError = toError(error).message;
-			}
 			if ((payload.mode === "headless" || payload.emulateFocus) && !this.#managedChrome) {
 				// Background Chromium tabs stop producing frames, stalling rAF,
 				// IntersectionObserver, and input acknowledgements. Keep owned tabs
@@ -1095,6 +1383,39 @@ export class WorkerCore {
 				// it at the end, so the user's own focus is never displaced between runs.
 				await this.#page.emulateFocusedPage(true);
 			}
+			// Page hooks install at document start on tabs OMP owns. The user's own
+			// Chrome gets none until the model asks for the capability behind them.
+			if (!this.#managedChrome) {
+				this.#webmcp = await installWebMcp(this.#page);
+				await installVitalsObservers(this.#page);
+			}
+			if (payload.userAgent !== undefined) await applyUserAgentOverride(this.#page, payload.userAgent);
+			if (payload.ignoreHttpsErrors) await applyIgnoreHttpsErrors(this.#page);
+			this.#targetId = await targetIdForPage(this.#page);
+			this.#initScripts = new InitScriptManager(this.#page);
+			for (const source of payload.initScripts ?? []) await this.#initScripts.add(source);
+			if (this.#managedChrome) {
+				// Passive and page-scoped: the user's Chrome keeps its own download
+				// settings, so a download there lands where the user's Chrome puts it.
+				try {
+					const monitor = await TabDownloadMonitor.connect(this.#page);
+					this.#downloads = monitor;
+					monitor.session.on("Page.javascriptDialogClosed", () => {
+						this.#openDialog = undefined;
+						this.#dialogClosed.resolve();
+					});
+				} catch (error) {
+					this.#downloadObservationError = toError(error).message;
+				}
+			} else {
+				const downloads = new DownloadManager(this.#browser, this.#page, this.#targetId);
+				this.#downloads = downloads;
+				if (payload.downloadsPath) await downloads.enable(payload.downloadsPath);
+			}
+			await this.#consoleCapture.install(this.#page);
+			this.#tracing = new BrowserTracingController(this.#page);
+			this.#network = new BrowserNetworkManager(this.#page, payload.allowedDomains);
+			await this.#network.start();
 			if (payload.url) {
 				// Default to "load" because dev servers with HMR/WS never reach networkidle.
 				await navigateMainFrame(this.#page, payload.url, {
@@ -1111,13 +1432,14 @@ export class WorkerCore {
 				timeoutMs: Math.min(payload.timeoutMs, INITIAL_READY_BUDGET_MS),
 				expectUrl: payload.mode === "attach" ? payload.expectUrl : undefined,
 			});
-			this.#targetId = await targetIdForPage(this.#page);
 			this.#transport.send({ type: "ready", info: await this.#currentReadyInfo() });
 		} catch (error) {
 			// A failed headless init leaves the worker's page orphaned in the shared
 			// browser (the supervisor retries with a fresh worker), so close it before
 			// reporting. Attach mode adopts an existing target — never close it.
 			const page = this.#page;
+			await this.#webmcp?.dispose().catch(() => undefined);
+			this.#webmcp = undefined;
 			if (payload.mode === "headless" && page && !page.isClosed()) {
 				await page.close().catch(() => undefined);
 			}
@@ -1154,36 +1476,40 @@ export class WorkerCore {
 	}
 
 	/**
-	 * Record JS dialogs for timeout attribution without handling them (semantics of an
-	 * unset `dialogs` policy are unchanged — the page stays blocked until user code or
-	 * the policy handler acts). Cleared when the policy handler settles the dialog or a
-	 * main-frame navigation proves the modal is gone.
+	 * A main-frame navigation voids every ref and proves a modal gone. On a
+	 * worker-owned tab the runtime controller observes, auto-answers per policy
+	 * and exposes `tab.dialog()`/`handleDialog()`. In managed Chrome the modal is
+	 * only recorded for attribution: the relay journal answers it, never this
+	 * worker, and an auto-accepted beforeunload would discard the user's work.
 	 */
 	#observeDialogs(): void {
 		const page = this.#requirePage();
+		page.on("framenavigated", frame => {
+			if (frame !== page.mainFrame()) return;
+			this.#openDialog = undefined;
+			this.#invalidateRefs();
+		});
+		if (!this.#managedChrome) {
+			this.#dialogs?.dispose();
+			this.#dialogs = new RuntimeDialogController(page, (message, details) => this.#log("debug", message, details));
+			this.#dialogs.observe();
+			return;
+		}
 		page.on("dialog", dialog => {
 			const opened = { type: dialog.type(), message: dialog.message() };
 			this.#openDialog = opened;
 			this.#dialogClosed = Promise.withResolvers<void>();
-			if (this.#managedChrome) {
-				const timer = setTimeout(() => {
-					if (this.#openDialog === opened) this.#active?.floatingFailure.reject(this.#dialogPendingError());
-				}, 250);
-				timer.unref();
-			}
-		});
-		page.on("framenavigated", frame => {
-			if (frame === page.mainFrame()) {
-				this.#openDialog = undefined;
-				this.#invalidateRefs();
-			}
+			const timer = setTimeout(() => {
+				if (this.#openDialog === opened) this.#active?.floatingFailure.reject(this.#dialogPendingError());
+			}, 250);
+			timer.unref();
 		});
 	}
 
 	#dialogPendingError(): ToolError {
 		const dialog = this.#openDialog;
 		return new ToolError(
-			`A JavaScript ${dialog?.type ?? "dialog"} awaits a decision: ${JSON.stringify((dialog?.message ?? "").slice(0, 2000))}. The triggering action may have taken effect and its page handler can continue after the dialog is answered. Use await tab.dialog() to inspect the exact current dialog, then tab.dialog({action:"accept"|"dismiss",id,...}) to answer it. Inspect page state before repeating the triggering action. Input cleanup may remain pending until the dialog is resolved.`,
+			`A JavaScript ${dialog?.type ?? "dialog"} awaits a decision: ${JSON.stringify((dialog?.message ?? "").slice(0, 2000))}. The triggering action may have taken effect and its page handler can continue after the dialog is answered. Use await tab.dialog() to read the exact current dialog and its id, then await tab.handleDialog({ accept, id, text? }) to answer it. Inspect page state before repeating the triggering action. Input cleanup may remain pending until the dialog is resolved.`,
 		);
 	}
 
@@ -1191,34 +1517,33 @@ export class WorkerCore {
 		const page = this.#requirePage();
 		const targetId = this.#targetId ?? (await targetIdForPage(page));
 		this.#targetId = targetId;
+		// A page blocked by a modal answers nothing that needs its renderer — the
+		// title read or the layout metrics — so a dialog reports what was last seen.
+		const blocked = this.#dialogOpen();
+		if (!blocked) this.#viewport = (await readPageMetrics(page)).viewport;
 		return {
 			url: redactUrlCredentials(page.url()),
-			title: await page.title().catch(() => undefined),
-			viewport: (await readPageMetrics(page)).viewport,
+			title: blocked ? undefined : await page.title().catch(() => undefined),
+			viewport: this.#viewport ?? page.viewport() ?? DEFAULT_VIEWPORT,
 			targetId,
 		};
 	}
 
+	/** Whether a JavaScript dialog is blocking the page right now. */
+	#dialogOpen(): boolean {
+		return this.#managedChrome ? this.#openDialog !== undefined : (this.#dialogs?.state().open ?? false);
+	}
+
+	/** Apply an automatic dialog policy selected while opening the tab. */
 	#applyDialogPolicy(policy: DialogPolicy): void {
-		const page = this.#requirePage();
-		if (this.#dialogPolicy === policy && this.#dialogHandler) return;
-		if (this.#dialogHandler) page.off("dialog", this.#dialogHandler);
-		const handler = (dialog: Dialog): void => {
-			const action = policy === "accept" ? dialog.accept() : dialog.dismiss();
-			void action.then(
-				() => {
-					this.#openDialog = undefined;
-				},
-				err =>
-					this.#log("debug", "Dialog auto-handler failed", {
-						policy,
-						error: err instanceof Error ? err.message : String(err),
-					}),
+		void this.#requireDialogs()
+			.setPolicy(policy)
+			.catch(error =>
+				this.#log("debug", "Dialog auto-handler failed", {
+					policy,
+					error: error instanceof Error ? error.message : String(error),
+				}),
 			);
-		};
-		page.on("dialog", handler);
-		this.#dialogPolicy = policy;
-		this.#dialogHandler = handler;
 	}
 
 	async #postReadyInfo(): Promise<void> {
@@ -1247,6 +1572,7 @@ export class WorkerCore {
 		const signal = AbortSignal.any([timeoutSignal, ac.signal, runAc.signal]);
 		const output = new RunOutput();
 		const screenshots: ScreenshotResult[] = [];
+		const runErrorStartSeq = this.#consoleCapture.nextSequence;
 		/** A completed run whose tab state could not be restored; the result still stands. */
 		let recoverTab: unknown;
 		const floatingFailure = Promise.withResolvers<never>();
@@ -1280,7 +1606,11 @@ export class WorkerCore {
 				backgroundPage = prepareBackgroundPage(this.#requirePage(), signal);
 				await backgroundPage.ready;
 			}
-			runPage = createRunPageScope(this.#requirePage());
+			await untilAborted(signal, () => this.#emulation?.reapply() ?? Promise.resolve());
+			const network = this.#requireNetwork();
+			runPage = createRunPageScope(this.#requirePage(), async leftEnabled => {
+				if (leftEnabled !== network.hasPersistentInterception()) await network.restoreInterception();
+			});
 			const browser = this.#requireBrowser();
 			const tabApi = this.#createTabApi(msg.name, msg.timeoutMs, signal, msg.session, output, screenshots, active);
 			const runtime = this.#ensureRuntime(msg.session);
@@ -1318,13 +1648,16 @@ export class WorkerCore {
 						: new ToolAbortError(undefined, { cause: signal.reason });
 				if (timeoutSignal.aborted) {
 					const stalled = describeInflight(active.inflight);
-					const dialog = this.#openDialog;
-					const dialogNote = dialog
-						? `; a ${dialog.type}(${JSON.stringify(dialog.message.slice(0, 80))}) dialog opened during this run and may still block the page — reopen the tab with dialogs:"accept"|"dismiss" or handle page.on('dialog')`
+					const dialog = this.#managedChrome ? this.#openDialog : this.#dialogs?.state();
+					const dialogNote = dialog?.type
+						? `; a ${dialog.type}(${JSON.stringify((dialog.message ?? "").slice(0, 80))}) dialog opened during this run and may still block the page — ${this.#managedChrome ? "read it with tab.dialog() and answer it with tab.handleDialog({ accept, id })" : 'use tab.handleDialog() or tab.setDialogs("accept"|"dismiss")'}`
 						: "";
+					const pageErrorCount = this.#consoleCapture.errorCountSince(runErrorStartSeq);
+					const pageErrorNote =
+						pageErrorCount > 0 ? `; ${pageErrorCount} page error(s) since run start — see tab.errors()` : "";
 					rejectCancel(
 						new ToolError(
-							`Browser code execution timed out after ${msg.timeoutMs}ms${stalled ? ` (stalled on ${stalled})` : ""}${dialogNote}`,
+							`Browser code execution timed out after ${msg.timeoutMs}ms${stalled ? ` (stalled on ${stalled})` : ""}${dialogNote}${pageErrorNote}`,
 						),
 					);
 				} else {
@@ -1596,15 +1929,30 @@ export class WorkerCore {
 			fn: (sig: AbortSignal) => Promise<T>,
 			selectorOpts?: { selector?: string; zeroMatchAfterMs?: number },
 		): Promise<T> => markHandled(this.#runOp(active, label, signal, perOpMs, fn, selectorOpts));
-		// Element methods run through the same fail-fast per-op wrapper as the
-		// selector helpers, so `(await tab.ref("e12")).click()` can't outrun the
-		// cell budget (issue #9535).
-		const element = (node: CdpNode): TabElement =>
-			this.#createElement(node, session.cwd, (label, fn) => op(label, actionOpMs, fn));
 		// Managed Chrome drives a tab the user is not looking at: pointer and
 		// keyboard input need page focus emulation held around the dispatch.
 		const input = <T>(sig: AbortSignal, action: () => Promise<T>): Promise<T> =>
 			this.#managedChrome ? withBackgroundInput(page, sig, action) : action();
+		// Element methods run through the same fail-fast per-op wrapper as the
+		// selector helpers, so `(await tab.ref("e12")).click()` can't outrun the
+		// cell budget (issue #9535).
+		const element = (node: CdpNode): TabElement =>
+			this.#createElement(node, session.cwd, (label, fn) => op(label, actionOpMs, fn), input);
+		/** A selector action on the node the selector names now: one op, zero-match fail-fast. */
+		const onSelector = (
+			verb: string,
+			selector: string,
+			state: "present" | "visible",
+			act: (node: CdpNode, sig: AbortSignal, label: string) => Promise<void>,
+		): Promise<void> => {
+			const label = `tab.${verb}(${JSON.stringify(selector)})`;
+			return op(
+				label,
+				actionOpMs,
+				async sig => act(await this.#selectorNode(selector, actionOpMs, state, sig), sig, label),
+				{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+			);
+		};
 		return {
 			name,
 			page,
@@ -1626,8 +1974,64 @@ export class WorkerCore {
 						stopLoading: () => this.#stopLoading(),
 					});
 				}),
-			back: () => op("tab.back()", INF, sig => this.#navigateHistory(page, -1, budgetBound, sig)),
-			forward: () => op("tab.forward()", INF, sig => this.#navigateHistory(page, 1, budgetBound, sig)),
+			// Main-frame history, not puppeteer's goBack: it waits on every child
+			// frame's lifecycle, which a never-finishing iframe or a relay session
+			// without lifecycle events never delivers.
+			back: () =>
+				op("tab.back()", INF, async sig => {
+					await this.#navigateHistory(page, -1, budgetBound, sig);
+					return page.url();
+				}),
+			forward: () =>
+				op("tab.forward()", INF, async sig => {
+					await this.#navigateHistory(page, 1, budgetBound, sig);
+					return page.url();
+				}),
+			reload: opts =>
+				op("tab.reload()", INF, async sig => {
+					this.#invalidateRefs();
+					return await reloadPage(page, opts?.waitUntil ?? "load", budgetBound, sig);
+				}),
+			pushState: url =>
+				op(`tab.pushState(${JSON.stringify(url)})`, actionOpMs, async sig => {
+					this.#invalidateRefs();
+					return await pushState(page, url, sig);
+				}),
+			frames: () => op("tab.frames()", quickOpMs, sig => listFrames(page, sig)),
+			frame: selectorOrNameOrUrl =>
+				op(`tab.frame(${JSON.stringify(selectorOrNameOrUrl)})`, quickOpMs, async sig => {
+					const frame = await resolveFrame(page, selectorOrNameOrUrl, normalizeSelector, sig);
+					return createFrameApi(frame, {
+						quickOpMs,
+						actionOpMs,
+						zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS,
+						normalizeSelector,
+						waitMs,
+						op: (label, perOpMs, fn, selectorOpts) =>
+							op(label, perOpMs, frameSignal => input(frameSignal, () => fn(frameSignal)), selectorOpts),
+						captureScreenshot: (target, selector, screenshotSignal) =>
+							captureFrameScreenshot(
+								target,
+								selector,
+								screenshotSignal,
+								normalizeSelector,
+								session,
+								output,
+								screenshots,
+							),
+					});
+				}),
+			dialog: () =>
+				op("tab.dialog()", quickOpMs, async sig => {
+					throwIfAborted(sig);
+					return this.#requireDialogs().state();
+				}),
+			handleDialog: opts =>
+				op("tab.handleDialog()", actionOpMs, sig => untilAborted(sig, () => this.#requireDialogs().handle(opts))),
+			setDialogs: policy =>
+				op("tab.setDialogs()", actionOpMs, sig =>
+					untilAborted(sig, () => this.#requireDialogs().setPolicy(policy)),
+				),
 			observe: opts =>
 				op("tab.observe()", quickOpMs, async sig => {
 					const observation = await this.#collectObservation({ ...opts, refs: session.refs, signal: sig });
@@ -1640,30 +2044,69 @@ export class WorkerCore {
 					selector ? `tab.ariaSnapshot(${JSON.stringify(selector)})` : "tab.ariaSnapshot()",
 					quickOpMs,
 					async sig => {
-						const snapshot = selector
-							? await callOnNode(
-									await this.#selectorNode(selector, quickOpMs, "present", sig),
-									buildAriaSnapshotFunction(opts),
-									[],
-									sig,
-								)
-							: await evaluateExpression(page.mainFrame().client, buildAriaSnapshotScript(undefined, opts), sig);
-						const text = String(snapshot);
-						return this.#managedChrome ? text.replace(/ \[ref=e\d+\]/g, "") : text;
+						const payload = (
+							selector
+								? await callOnNode(
+										await this.#selectorNode(selector, quickOpMs, "present", sig),
+										buildAriaSnapshotFunction(opts),
+										[],
+										sig,
+									)
+								: await evaluateExpression(
+										page.mainFrame().client,
+										buildAriaSnapshotPayloadScript(undefined, opts),
+										sig,
+									)
+						) as AriaSnapshotPayload;
+						const processed = postProcessAriaSnapshot(payload.snapshot, opts, payload.hrefs);
+						// Refs act through the page's own snapshot markers, which managed Chrome
+						// never lets an action resolve: act through tab.observe() refs there.
+						const snapshot = this.#managedChrome ? processed.replace(/ \[ref=e\d+\]/g, "") : processed;
+						if (!opts?.diff) return snapshot;
+						const key = ariaSnapshotBaselineKey(selector, opts);
+						return diffAriaSnapshot(this.#ariaSnapshotBaselines, key, page.url(), snapshot);
 					},
 				),
+			a11y: opts =>
+				op("tab.a11y()", budgetBound, async sig => {
+					const result = await untilAborted(sig, () => runA11yAudit(page, opts));
+					output.push({ type: "text", text: formatA11ySummary(result) });
+					return result;
+				}),
+			webmcpList: opts =>
+				op("tab.webmcpList()", quickOpMs, async sig => {
+					const webmcp = await untilAborted(sig, () => this.#requireWebMcp());
+					return await untilAborted(sig, () => webmcp.list(opts));
+				}),
+			webmcpInvoke: (toolName, params, opts) => {
+				const w = waitMs(opts?.timeout);
+				return op(`tab.webmcpInvoke(${JSON.stringify(toolName)})`, w, async sig => {
+					const webmcp = await untilAborted(sig, () => this.#requireWebMcp());
+					return await untilAborted(sig, () => webmcp.invoke(toolName, params, opts));
+				});
+			},
+			webmcpEvents: opts =>
+				op("tab.webmcpEvents()", quickOpMs, async sig => {
+					const webmcp = await untilAborted(sig, () => this.#requireWebMcp());
+					return await untilAborted(sig, () => webmcp.events(opts));
+				}),
 			screenshot: opts =>
 				op(describeScreenshot(opts), quickOpMs, sig =>
 					this.#captureScreenshot(session, output, screenshots, sig, opts),
 				),
-			extract: (format = "text") =>
+			diffScreenshot: (baselinePath, opts) =>
+				op("tab.diffScreenshot()", quickOpMs, sig =>
+					this.#diffScreenshot(session, output, screenshots, sig, baselinePath, opts),
+				),
+			pdf: opts => op("tab.pdf()", quickOpMs, sig => this.#pdf(session, sig, opts)),
+			extract: (format = "text", opts) =>
 				op(`tab.extract(${JSON.stringify(format)})`, quickOpMs, async sig => {
 					if (format !== "text" && format !== "markdown")
 						throw new ToolError(
-							`tab.extract(format) takes "text" or "markdown" (positional string, default "text"); received ${JSON.stringify(format)}`,
+							`tab.extract(format, options?) takes "text" or "markdown" (positional string, default "text"); received ${JSON.stringify(format)}`,
 						);
 					const html = (await untilAborted(sig, () => page.content())) as string;
-					const result = await extractReadableFromHtml(html, page.url(), format);
+					const result = await extractReadableFromHtml(html, page.url(), format, opts);
 					if (!result) {
 						throw new ToolError(
 							`tab.extract(${JSON.stringify(format)}) found no readable content on ${page.url()}`,
@@ -1678,51 +2121,82 @@ export class WorkerCore {
 					return content;
 				}),
 			click: selector =>
-				op(
-					`tab.click(${JSON.stringify(selector)})`,
-					actionOpMs,
-					async sig => {
-						const node = await this.#selectorNode(selector, actionOpMs, "visible", sig);
-						await input(sig, () => clickNode(node, 1, sig));
-					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+				onSelector("click", selector, "visible", (node, sig, label) =>
+					input(sig, () => clickNode(node, 1, sig, label)),
 				),
+			dblclick: selector =>
+				onSelector("dblclick", selector, "visible", (node, sig, label) =>
+					input(sig, () => clickNode(node, 2, sig, label)),
+				),
+			hover: selector => onSelector("hover", selector, "visible", (node, sig) => input(sig, () => hoverNode(node, sig))),
+			focus: selector => onSelector("focus", selector, "present", (node, sig) => focusNode(node, sig)),
+			check: selector =>
+				onSelector("check", selector, "present", (node, sig, label) =>
+					input(sig, () => setNodeChecked(node, true, label, sig)),
+				),
+			uncheck: selector =>
+				onSelector("uncheck", selector, "present", (node, sig, label) =>
+					input(sig, () => setNodeChecked(node, false, label, sig)),
+				),
+			highlight: (selector, opts) =>
+				onSelector("highlight", selector, "present", (node, sig) => highlightNode(node, opts, sig)),
+			keyDown: key =>
+				op(`tab.keyDown(${JSON.stringify(key)})`, actionOpMs, sig =>
+					input(sig, async () => {
+						this.#heldModifiers = await holdKey(page.mainFrame().client, key, this.#heldModifiers, sig);
+					}),
+				),
+			keyUp: key =>
+				op(`tab.keyUp(${JSON.stringify(key)})`, actionOpMs, sig =>
+					input(sig, async () => {
+						this.#heldModifiers = await releaseKey(page.mainFrame().client, key, this.#heldModifiers, sig);
+					}),
+				),
+			mouseMove: (x, y, opts) =>
+				op("tab.mouseMove()", actionOpMs, sig => input(sig, () => mouseMove(page, x, y, opts, sig))),
+			mouseDown: opts => op("tab.mouseDown()", actionOpMs, sig => input(sig, () => mouseDown(page, opts, sig))),
+			mouseUp: opts => op("tab.mouseUp()", actionOpMs, sig => input(sig, () => mouseUp(page, opts, sig))),
+			clickAt: (x, y, opts) =>
+				op("tab.clickAt()", actionOpMs, sig => input(sig, () => clickAt(page, x, y, opts, sig))),
+			wheel: (deltaX, deltaY) =>
+				op("tab.wheel()", actionOpMs, sig => input(sig, () => wheel(page, deltaX, deltaY, sig))),
 			type: (selector, text) =>
-				op(
-					`tab.type(${JSON.stringify(selector)})`,
-					actionOpMs,
-					async sig => {
-						const node = await this.#selectorNode(selector, actionOpMs, "present", sig);
-						await input(sig, () => typeIntoNode(node, text, sig));
-					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+				onSelector("type", selector, "present", (node, sig) =>
+					input(sig, () => typeIntoNode(node, text, sig, this.#heldModifiers)),
 				),
 			fill: (selector, value) =>
-				op(
-					`tab.fill(${JSON.stringify(selector)})`,
-					actionOpMs,
-					async sig => {
-						const node = await this.#selectorNode(selector, actionOpMs, "present", sig);
-						await input(sig, () => fillNode(node, value, sig));
-					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
-				),
-			press: (key, opts) =>
-				op(`tab.press(${JSON.stringify(key)})`, actionOpMs, async sig => {
+				onSelector("fill", selector, "present", (node, sig) => input(sig, () => fillNode(node, value, sig))),
+			press: (key, opts) => {
+				assertTabPressArgs(key, opts);
+				return op(`tab.press(${JSON.stringify(key)})`, actionOpMs, async sig => {
 					const selector = opts?.selector;
 					const node = selector ? await this.#selectorNode(selector, actionOpMs, "present", sig) : undefined;
 					await input(sig, async () => {
 						if (node) await focusNode(node, sig);
 						throwIfAborted(sig);
-						await pressChord(page.mainFrame().client, key, sig);
+						await pressChord(page.mainFrame().client, key, sig, this.#heldModifiers);
 					});
-				}),
-			scroll: (deltaXOrDirection, deltaYOrOptions) =>
+				});
+			},
+			scroll: (deltaXOrDirection, deltaYOrOptions, opts) =>
 				op("tab.scroll()", actionOpMs, async sig => {
-					const deltas = await resolveScrollDeltas(page, deltaXOrDirection, deltaYOrOptions, sig);
-					await untilAborted(sig, () => dispatchScroll(() => page.mouse.wheel(deltas)));
+					const selector = (typeof deltaYOrOptions === "object" ? deltaYOrOptions : opts)?.selector;
+					if (selector === undefined) {
+						const deltas = await resolveScrollDeltas(deltaXOrDirection, deltaYOrOptions, async () =>
+							(await readPageMetrics(page, sig)).viewport,
+						);
+						await untilAborted(sig, () => dispatchScroll(() => page.mouse.wheel(deltas)));
+						return;
+					}
+					const node = await this.#selectorNode(selector, actionOpMs, "present", sig);
+					const deltas = await resolveScrollDeltas(
+						deltaXOrDirection,
+						deltaYOrOptions,
+						async () => (await callOnNode(node, ELEMENT_CLIENT_SIZE, [], sig)) as { width: number; height: number },
+					);
+					await callOnNode(node, SCROLL_ELEMENT, [deltas.deltaX, deltas.deltaY], sig);
 				}),
-			drag: (from, to) => op("tab.drag()", actionOpMs, sig => this.#drag(from, to, sig)),
+			drag: (from, to) => op("tab.drag()", actionOpMs, sig => input(sig, () => this.#drag(from, to, sig))),
 			waitFor: (selector, opts) => {
 				const w = waitMs(opts?.timeout);
 				return op(
@@ -1767,12 +2241,7 @@ export class WorkerCore {
 					),
 				) as never,
 			scrollIntoView: selector =>
-				op(
-					`tab.scrollIntoView(${JSON.stringify(selector)})`,
-					actionOpMs,
-					async sig => await scrollIntoView(await this.#selectorNode(selector, actionOpMs, "present", sig), sig),
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
-				),
+				onSelector("scrollIntoView", selector, "present", (node, sig) => scrollIntoView(node, sig)),
 			select: (selector, ...values) =>
 				op(
 					`tab.select(${JSON.stringify(selector)})`,
@@ -1781,24 +2250,64 @@ export class WorkerCore {
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			uploadFile: (selector, ...filePaths) =>
-				op(
-					`tab.uploadFile(${JSON.stringify(selector)})`,
-					actionOpMs,
-					sig => this.#uploadFile(selector, filePaths, actionOpMs, sig, session),
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+				onSelector("uploadFile", selector, "present", (node, sig, label) =>
+					input(sig, () => this.#uploadFile(node, filePaths, label, sig, session.cwd)),
 				),
 			waitForUrl: (pattern, opts) => {
 				const w = waitMs(opts?.timeout);
 				return op("tab.waitForUrl()", w, sig => this.#waitForUrl(pattern, w, sig));
 			},
-			downloads: () =>
-				op("tab.downloads()", quickOpMs, () => {
-					if (!this.#downloads)
-						throw new ToolError(
-							`Download observation unavailable: ${this.#downloadObservationError ?? "not initialized"}`,
-						);
-					return Promise.resolve(this.#downloads.snapshot());
-				}),
+			text: selector =>
+				op(`tab.text(${JSON.stringify(selector)})`, quickOpMs, sig =>
+					queryText(page, normalizeSelector(selector), sig),
+				),
+			html: selector =>
+				op(`tab.html(${JSON.stringify(selector)})`, quickOpMs, sig =>
+					queryHtml(page, normalizeSelector(selector), sig),
+				),
+			value: selector =>
+				op(`tab.value(${JSON.stringify(selector)})`, quickOpMs, sig =>
+					queryValue(page, normalizeSelector(selector), sig),
+				),
+			attr: (selector, attribute) =>
+				op(`tab.attr(${JSON.stringify(selector)}, ${JSON.stringify(attribute)})`, quickOpMs, sig =>
+					queryAttribute(page, normalizeSelector(selector), attribute, sig),
+				),
+			count: selector =>
+				op(`tab.count(${JSON.stringify(selector)})`, quickOpMs, sig =>
+					queryCount(page, normalizeSelector(selector), sig),
+				),
+			box: selector =>
+				op(`tab.box(${JSON.stringify(selector)})`, quickOpMs, sig =>
+					queryBox(page, normalizeSelector(selector), sig),
+				),
+			styles: (selector, props) =>
+				op(`tab.styles(${JSON.stringify(selector)})`, quickOpMs, sig =>
+					queryStyles(page, normalizeSelector(selector), props, sig),
+				),
+			isVisible: selector =>
+				op(`tab.isVisible(${JSON.stringify(selector)})`, quickOpMs, sig =>
+					queryVisible(page, normalizeSelector(selector), sig),
+				),
+			isEnabled: selector =>
+				op(`tab.isEnabled(${JSON.stringify(selector)})`, quickOpMs, sig =>
+					queryEnabled(page, normalizeSelector(selector), sig),
+				),
+			isChecked: selector =>
+				op(`tab.isChecked(${JSON.stringify(selector)})`, quickOpMs, sig =>
+					queryChecked(page, normalizeSelector(selector), sig),
+				),
+			waitForText: (text, opts) => {
+				const w = waitMs(opts?.timeout);
+				return op(`tab.waitForText(${JSON.stringify(text)})`, w, sig =>
+					waitForPageText(page, text, {
+						timeout: w,
+						selector: opts?.selector ? normalizeSelector(opts.selector) : undefined,
+						exact: opts?.exact,
+						signal: sig,
+					}),
+				);
+			},
 			waitForResponse: (pattern, opts) => {
 				const w = waitMs(opts?.timeout);
 				return op("tab.waitForResponse()", w, sig => this.#waitForResponse(pattern, w, sig));
@@ -1817,6 +2326,153 @@ export class WorkerCore {
 					throw new ToolError("The element reference belongs to an old observation. Observe the tab again.");
 				return element(await this.#ariaRefNode(id));
 			},
+			emulate: opts =>
+				op("tab.emulate()", actionOpMs, sig => untilAborted(sig, async () => (await this.#requireEmulation()).emulate(opts))),
+			devices: () =>
+				op("tab.devices()", quickOpMs, async sig => (await untilAborted(sig, () => this.#requireEmulation())).devices()),
+			clipboardRead: () =>
+				op("tab.clipboardRead()", actionOpMs, sig =>
+					untilAborted(sig, async () => (await this.#requireEmulation()).clipboardRead()),
+				),
+			clipboardWrite: text =>
+				op("tab.clipboardWrite()", actionOpMs, sig =>
+					untilAborted(sig, async () => (await this.#requireEmulation()).clipboardWrite(text)),
+				),
+			clipboardCopy: () =>
+				op("tab.clipboardCopy()", actionOpMs, sig =>
+					untilAborted(sig, async () => (await this.#requireEmulation()).clipboardCopy()),
+				),
+			clipboardPaste: () =>
+				op("tab.clipboardPaste()", actionOpMs, sig =>
+					untilAborted(sig, async () => (await this.#requireEmulation()).clipboardPaste()),
+				),
+			cookies: opts => op("tab.cookies()", quickOpMs, sig => readCookies(page, opts, sig)),
+			setCookies: (...cookies) => op("tab.setCookies()", actionOpMs, sig => setPageCookies(page, cookies, sig)),
+			clearCookies: opts => op("tab.clearCookies()", actionOpMs, sig => clearPageCookies(page, opts, sig)),
+			storage: (kind, opts) => op("tab.storage()", quickOpMs, sig => readStorage(page, kind, opts, sig)),
+			setStorage: (kind, keyOrEntries, value) =>
+				op("tab.setStorage()", actionOpMs, sig => setPageStorage(page, kind, keyOrEntries, value, sig)),
+			clearStorage: kind => op("tab.clearStorage()", actionOpMs, sig => clearPageStorage(page, kind, sig)),
+			saveState: filePath =>
+				op("tab.saveState()", actionOpMs, sig => saveStorageState(page, name, filePath, session.cwd, sig)),
+			loadState: filePath =>
+				op("tab.loadState()", actionOpMs, sig =>
+					loadStorageState(page, filePath, session.cwd, {
+						allowOtherOrigins: this.#mode === "headless",
+						navigationTimeoutMs: actionOpMs,
+						signal: sig,
+					}),
+				),
+			addInitScript: source =>
+				op("tab.addInitScript()", actionOpMs, sig =>
+					untilAborted(sig, () => this.#requireInitScripts().add(source)),
+				),
+			removeInitScript: id =>
+				op("tab.removeInitScript()", actionOpMs, sig =>
+					untilAborted(sig, () => this.#requireInitScripts().remove(id)),
+				),
+			initScripts: () =>
+				op("tab.initScripts()", quickOpMs, async sig => {
+					throwIfAborted(sig);
+					return this.#requireInitScripts().list();
+				}),
+			waitForDownload: opts => {
+				const w = waitMs(opts?.timeout);
+				return op("tab.waitForDownload()", w, sig => this.#requireDownloads().wait(sig));
+			},
+			downloads: () =>
+				op("tab.downloads()", quickOpMs, async sig => {
+					throwIfAborted(sig);
+					return this.#requireDownloads().list();
+				}),
+			console: opts =>
+				op("tab.console()", quickOpMs, sig => untilAborted(sig, () => this.#consoleCapture.console(opts))),
+			errors: opts =>
+				op("tab.errors()", quickOpMs, sig => untilAborted(sig, () => this.#consoleCapture.errors(opts))),
+			clearConsole: () =>
+				op("tab.clearConsole()", quickOpMs, async sig => {
+					throwIfAborted(sig);
+					this.#consoleCapture.clear();
+				}),
+			traceStart: opts =>
+				op("tab.traceStart()", actionOpMs, sig => untilAborted(sig, () => this.#requireTracing().traceStart(opts))),
+			traceStop: opts =>
+				op("tab.traceStop()", actionOpMs, sig =>
+					untilAborted(sig, () => this.#requireTracing().traceStop(session.cwd, opts)),
+				),
+			profileStart: () =>
+				op("tab.profileStart()", actionOpMs, sig => untilAborted(sig, () => this.#requireTracing().profileStart())),
+			profileStop: opts =>
+				op("tab.profileStop()", actionOpMs, sig =>
+					untilAborted(sig, () => this.#requireTracing().profileStop(session.cwd, opts)),
+				),
+			metrics: () =>
+				op("tab.metrics()", quickOpMs, sig => untilAborted(sig, () => this.#requireTracing().metrics())),
+			route: (pattern, opts) =>
+				op("tab.route()", actionOpMs, sig =>
+					untilAborted(sig, () => this.#requireNetwork().route(pattern, opts, sig)),
+				),
+			unroute: pattern =>
+				op("tab.unroute()", actionOpMs, sig =>
+					untilAborted(sig, () => this.#requireNetwork().unroute(pattern, sig)),
+				),
+			routes: () =>
+				op("tab.routes()", quickOpMs, async sig => {
+					throwIfAborted(sig);
+					return this.#requireNetwork().routes();
+				}),
+			requests: opts =>
+				op("tab.requests()", quickOpMs, async sig => {
+					throwIfAborted(sig);
+					return this.#requireNetwork().requests(opts);
+				}),
+			request: id =>
+				op("tab.request()", quickOpMs, sig => untilAborted(sig, () => this.#requireNetwork().request(id, sig))),
+			clearRequests: () =>
+				op("tab.clearRequests()", quickOpMs, async sig => {
+					throwIfAborted(sig);
+					this.#requireNetwork().clearRequests();
+				}),
+			harStart: opts =>
+				op("tab.harStart()", quickOpMs, async sig => {
+					throwIfAborted(sig);
+					this.#requireNetwork().harStart(opts?.content);
+				}),
+			harStop: opts =>
+				op("tab.harStop()", INF, sig => {
+					const destination = opts?.path
+						? resolveToCwd(opts.path, session.cwd)
+						: path.join(session.cwd, `browser-${name.replace(/[^a-z0-9_-]+/gi, "-")}-${Snowflake.next()}.har`);
+					return untilAborted(sig, () => this.#requireNetwork().harStop(destination, sig));
+				}),
+			allowedDomains: () =>
+				op("tab.allowedDomains()", quickOpMs, async sig => {
+					throwIfAborted(sig);
+					return this.#requireNetwork().allowedDomains();
+				}),
+			vitals: opts => op("tab.vitals()", INF, sig => collectVitals(page, opts, sig)),
+			reactEnable: () => op("tab.reactEnable()", INF, sig => enableReact(page, sig)),
+			reactTree: opts => op("tab.reactTree()", quickOpMs, sig => readReactTree(page, opts, sig)),
+			reactInspect: id => op(`tab.reactInspect(${id})`, quickOpMs, sig => inspectReactFiber(page, id, sig)),
+			reactRenders: opts => op("tab.reactRenders()", quickOpMs, sig => collectReactRenders(page, opts, sig)),
+			reactSuspense: opts => op("tab.reactSuspense()", quickOpMs, sig => readReactSuspense(page, opts, sig)),
+			recordStart: (destination, opts) =>
+				op(`tab.recordStart(${JSON.stringify(destination)})`, quickOpMs, sig =>
+					this.#recording.start(page, destination, session.cwd, opts, sig),
+				),
+			recordStop: () =>
+				op("tab.recordStop()", budgetBound, sig =>
+					this.#recording.stop({ signal: sig, output, excludeWebP: session.excludeWebP }),
+				),
+			recordRestart: (destination, opts) =>
+				op(`tab.recordRestart(${JSON.stringify(destination)})`, budgetBound, sig =>
+					this.#recording.restart(page, destination, session.cwd, opts, {
+						signal: sig,
+						output,
+						excludeWebP: session.excludeWebP,
+					}),
+				),
+			recording: () => op("tab.recording()", quickOpMs, () => Promise.resolve(this.#recording.status())),
 		};
 	}
 
@@ -1947,6 +2603,29 @@ export class WorkerCore {
 		return nodes.filter(node => !candidates.includes(node) || inViewport.has(node));
 	}
 
+	/** Every DOM node under `node`, shadow roots and same-process frames included, on its own session. */
+	async #descendantsOf(
+		node: CdpNode,
+		signal?: AbortSignal,
+	): Promise<{ session: CDPSession; backendNodeIds: Set<number> }> {
+		const described = await untilAborted(signal, () =>
+			node.session.send("DOM.describeNode", { backendNodeId: node.backendNodeId, depth: -1, pierce: true }),
+		);
+		const backendNodeIds = new Set<number>();
+		const visit = (current: {
+			backendNodeId: number;
+			children?: unknown[];
+			shadowRoots?: unknown[];
+			contentDocument?: unknown;
+		}): void => {
+			backendNodeIds.add(current.backendNodeId);
+			for (const child of [...(current.children ?? []), ...(current.shadowRoots ?? [])]) visit(child as typeof current);
+			if (current.contentDocument) visit(current.contentDocument as typeof current);
+		};
+		visit(described.node);
+		return { session: node.session, backendNodeIds };
+	}
+
 	async #collectObservation(
 		options: ObserveOptions & { refs?: RefStyle; signal?: AbortSignal },
 	): Promise<Observation> {
@@ -1955,12 +2634,29 @@ export class WorkerCore {
 		const refStyle = options.refs ?? "uuid";
 		const includeAll = options.includeAll ?? false;
 		const viewportOnly = options.viewportOnly ?? false;
+		const compact = options.compact ?? false;
+		const selector = options.selector;
+		// Resolved before settling: a selector that names nothing is the caller's
+		// mistake, and it must not cost the settle budget to say so.
+		const scope = selector
+			? await this.#descendantsOf(await this.#selectorNode(selector, QUICK_OP_TIMEOUT_MS, "present", signal), signal)
+			: undefined;
 		this.#invalidateRefs();
 		const deadline = Date.now() + SETTLE_BUDGET_MS;
 		const { snapshot, layout, url, title } = await this.#settledSnapshot(page, includeAll, deadline, signal);
 		const observationId = this.#observationId;
 
 		let nodes = flattenSnapshot(snapshot, { includeAll });
+		if (scope) {
+			nodes = scopeNodes(
+				nodes,
+				node =>
+					node.ax?.frame?.session === scope.session &&
+					node.ax.backendNodeId !== undefined &&
+					scope.backendNodeIds.has(node.ax.backendNodeId),
+			);
+		}
+		if (compact) nodes = compactNodes(nodes);
 		if (viewportOnly) nodes = await this.#filterToViewport(page, nodes, layout, signal);
 
 		const actionable = nodes.filter(node => node.actionable && node.ax?.frame);
@@ -2003,15 +2699,11 @@ export class WorkerCore {
 		const focused = focusedNode ? `e${refByNode.get(focusedNode)}` : undefined;
 		const header: TreeHeader = { url, title, scroll: { y: scroll.y, scrollHeight: scroll.scrollHeight }, focused };
 		const previous = this.#lastTree;
-		const filter = { includeAll, viewportOnly };
+		const filter = JSON.stringify({ includeAll, viewportOnly, compact, selector: selector ?? null });
 		// Diff only against the same document observed with the same filter;
 		// anything else needs the full tree to be readable.
 		const baseline =
-			options.diff !== false &&
-			previous &&
-			sameDocument(previous.url, url) &&
-			previous.filter.includeAll === includeAll &&
-			previous.filter.viewportOnly === viewportOnly
+			options.diff !== false && previous && sameDocument(previous.url, url) && previous.filter === filter
 				? previous
 				: undefined;
 		const tree = baseline
@@ -2051,36 +2743,60 @@ export class WorkerCore {
 		screenshots: ScreenshotResult[],
 		signal: AbortSignal | undefined,
 		opts: ScreenshotOptions = {},
-	): Promise<string> {
+	): Promise<string | ScreenshotChangeResult> {
 		const page = this.#requirePage();
 		// Managed Chrome clears activation even for an explicitly selected inactive tab.
 		await preparePageForScreenshot(page, signal, this.#activateForScreenshot);
-		const fullPage = opts.selector ? false : (opts.fullPage ?? false);
-		const captureType = "png";
-		const captureMime = "image/png" as const;
-		let buffer: Buffer;
+		screenshotQuality(opts);
+		const threshold = screenshotThreshold(opts.threshold);
+		const changeDetection = opts.ifChanged === true || opts.threshold !== undefined;
+		const captureFormat = opts.format ?? "png";
+		const captureMime = captureFormat === "jpeg" ? ("image/jpeg" as const) : ("image/png" as const);
+		let clip: Rect | undefined;
 		if (opts.selector) {
 			const node = await this.#selectorNode(opts.selector, QUICK_OP_TIMEOUT_MS, "present", signal);
 			// Best-effort: a clipped capture of an off-screen element still renders.
 			await scrollIntoView(node, signal).catch(() => undefined);
 			const box = await boundingBox(node, await sessionOffset(page, node.session, signal), signal);
 			if (!box) throw new ToolError(`Screenshot selector ${JSON.stringify(opts.selector)} has no visible box`);
-			const shot = await untilAborted(signal, () =>
-				page.mainFrame().client.send("Page.captureScreenshot", {
-					format: captureType,
-					clip: { x: box.x, y: box.y, width: box.width, height: box.height, scale: 1 },
-					captureBeyondViewport: true,
-				}),
-			);
-			buffer = Buffer.from(shot.data, "base64");
-		} else {
-			buffer = (await untilAborted(signal, () => page.screenshot({ type: captureType, fullPage }))) as Buffer;
+			clip = box;
+		}
+		const annotationTargets = opts.annotate ? await this.#annotationTargets(signal) : [];
+		const cleanupAnnotations = opts.annotate
+			? await installScreenshotAnnotations(page, annotationTargets, signal)
+			: async (): Promise<void> => {};
+		// A background tab in the user's Chrome produces no frames to wait for.
+		const waitForFrame = !this.#managedChrome;
+		let comparisonBuffer: Uint8Array;
+		let buffer: Uint8Array;
+		try {
+			comparisonBuffer = await captureScreenshotBuffer(page, opts, signal, clip, "png", waitForFrame);
+			buffer =
+				captureFormat === "png"
+					? comparisonBuffer
+					: await captureScreenshotBuffer(page, opts, signal, clip, captureFormat, waitForFrame);
+		} finally {
+			await cleanupAnnotations();
+		}
+		let changeResult: ScreenshotChangeResult | undefined;
+		if (changeDetection) {
+			const scope = screenshotScope(opts);
+			const previous = this.#screenshotHistory.get(scope);
+			const pixelChangeRatio = previous ? pngPixelChangeRatio(previous.png, comparisonBuffer) : 1;
+			const changed = !previous || pixelChangeRatio > threshold;
+			const revision = previous ? previous.revision + (changed ? 1 : 0) : 1;
+			this.#screenshotHistory.set(scope, { png: comparisonBuffer, revision });
+			changeResult = { changed, revision, pixelChangeRatio };
+			if (!changed) return changeResult;
 		}
 		const resized = await resizeImage(
 			{ type: "image", data: buffer.toBase64(), mimeType: captureMime },
 			{ maxWidth: 1024, maxHeight: 1024, maxBytes: 150 * 1024, jpegQuality: 70, excludeWebP: session.excludeWebP },
 		);
-		const saveFullRes = !!session.browserScreenshotDir && !opts.preview;
+		// An explicit format keeps the capture as taken; an acquisition preview is
+		// saved at the size the model sees even with a screenshot directory set.
+		const preserveFormat = opts.format !== undefined;
+		const saveFullRes = (!!session.browserScreenshotDir && !opts.preview) || preserveFormat;
 		const savedBuffer = saveFullRes ? buffer : resized.buffer;
 		const savedMimeType = saveFullRes ? captureMime : resized.mimeType;
 		const ext = savedMimeType === "image/webp" ? "webp" : savedMimeType === "image/jpeg" ? "jpg" : "png";
@@ -2108,10 +2824,87 @@ export class WorkerCore {
 				dest,
 				resized,
 			});
+			if (opts.annotate) lines.push(formatScreenshotLegend(annotationTargets));
 			output.push({ type: "text", text: lines.join("\n") });
 			info.imageIndex = output.imageCount;
 			output.push({ type: "image", data: resized.data, mimeType: resized.mimeType });
 		}
+		if (changeResult) return { ...changeResult, path: dest };
+		return dest;
+	}
+
+	/** Boxes of the controls one observation numbers, labelled by their stable ref ids. */
+	async #annotationTargets(signal: AbortSignal | undefined): Promise<ScreenshotAnnotationTarget[]> {
+		const page = this.#requirePage();
+		const observation = await this.#collectObservation({ display: false, signal });
+		const targets: ScreenshotAnnotationTarget[] = [];
+		for (const entry of observation.elements) {
+			const node = this.#refNode(entry.id);
+			const box = await boundingBox(node, await sessionOffset(page, node.session, signal), signal).catch(() => null);
+			if (!box || box.width <= 0 || box.height <= 0) continue;
+			targets.push({ id: entry.id, role: entry.role, name: entry.name, ...box });
+		}
+		return targets;
+	}
+
+	async #diffScreenshot(
+		session: SessionSnapshot,
+		output: RunOutput,
+		screenshots: ScreenshotResult[],
+		signal: AbortSignal | undefined,
+		baselinePath: string,
+		opts: DiffScreenshotOptions = {},
+	): Promise<DiffScreenshotResult> {
+		const page = this.#requirePage();
+		await preparePageForScreenshot(page, signal, this.#activateForScreenshot);
+		const absoluteBaseline = resolveToCwd(baselinePath, session.cwd);
+		const baseline = await untilAborted(signal, () => fs.promises.readFile(absoluteBaseline));
+		const current = await captureScreenshotBuffer(page, {}, signal, undefined, "png", !this.#managedChrome);
+		const diff = createPngDiff(baseline, current);
+		const threshold = screenshotThreshold(opts.threshold);
+		const changed = diff.pixelChangeRatio > threshold;
+		const diffPath = opts.output
+			? resolveToCwd(opts.output, session.cwd)
+			: path.join(os.tmpdir(), `omp-screenshot-diff-${Snowflake.next()}.png`);
+		await fs.promises.mkdir(path.dirname(diffPath), { recursive: true });
+		await Bun.write(diffPath, diff.png);
+		const resized = await resizeImage(
+			{ type: "image", data: diff.png.toBase64(), mimeType: "image/png" },
+			{ maxWidth: 1024, maxHeight: 1024, maxBytes: 150 * 1024, jpegQuality: 70, excludeWebP: session.excludeWebP },
+		);
+		const info: ScreenshotResult = {
+			dest: diffPath,
+			mimeType: "image/png",
+			bytes: diff.png.length,
+			width: resized.width,
+			height: resized.height,
+		};
+		screenshots.push(info);
+		output.push({
+			type: "text",
+			text: `Screenshot diff: ${diff.pixelChangeRatio.toFixed(6)} changed-pixel ratio (${changed ? "changed" : "unchanged"}); saved to ${diffPath}`,
+		});
+		info.imageIndex = output.imageCount;
+		output.push({ type: "image", data: resized.data, mimeType: resized.mimeType });
+		return { pixelChangeRatio: diff.pixelChangeRatio, changed, diffPath };
+	}
+
+	async #pdf(session: SessionSnapshot, signal: AbortSignal | undefined, opts: PdfOptions = {}): Promise<string> {
+		const dest = opts.path
+			? resolveToCwd(opts.path, session.cwd)
+			: path.join(os.tmpdir(), `omp-browser-${Snowflake.next()}.pdf`);
+		await fs.promises.mkdir(path.dirname(dest), { recursive: true });
+		await untilAborted(signal, () =>
+			this.#requirePage().pdf({
+				path: dest,
+				format: opts.format,
+				landscape: opts.landscape,
+				scale: opts.scale,
+				printBackground: opts.printBackground,
+				margin: opts.margin,
+				pageRanges: opts.pageRanges,
+			}),
+		);
 		return dest;
 	}
 
@@ -2154,20 +2947,43 @@ export class WorkerCore {
 		return await selectOptions(node, values, signal);
 	}
 
+	/**
+	 * Hand files to whatever the node is: a file input takes them directly;
+	 * anything else is clicked in case it opens a file chooser, and a drop zone
+	 * that opens none receives them as a synthetic drop.
+	 */
 	async #uploadFile(
-		selector: string,
+		node: CdpNode,
 		filePaths: string[],
-		timeoutMs: number,
+		label: string,
 		signal: AbortSignal,
-		session: SessionSnapshot,
+		cwd: string,
 	): Promise<void> {
-		if (!filePaths.length) throw new ToolError("tab.uploadFile() requires at least one file path");
-		const node = await this.#selectorNode(selector, timeoutMs, "present", signal);
-		await setFileInput(
-			node,
-			filePaths.map(filePath => resolveToCwd(filePath, session.cwd)),
-			signal,
-		);
+		if (!filePaths.length) throw new ToolError(`${label} requires at least one file path`);
+		const absolute = filePaths.map(filePath => resolveToCwd(filePath, cwd));
+		if ((await callOnNode(node, IS_FILE_INPUT, [], signal)) === true) {
+			await setFileInput(node, absolute, signal);
+			return;
+		}
+		const page = this.#requirePage();
+		const chooserPromise = page.waitForFileChooser({ timeout: 400 }).catch(() => null);
+		await clickNode(node, 1, signal, label);
+		const chooser = await untilAborted(signal, () => chooserPromise);
+		if (chooser) {
+			await untilAborted(signal, () => chooser.accept(absolute));
+			return;
+		}
+		const files: { name: string; type: string; data: string }[] = [];
+		for (const filePath of absolute) {
+			throwIfAborted(signal);
+			const file = Bun.file(filePath);
+			files.push({
+				name: path.basename(filePath),
+				type: file.type || "application/octet-stream",
+				data: Buffer.from(await file.arrayBuffer()).toString("base64"),
+			});
+		}
+		await callOnNode(node, DROP_FILES, [files], signal);
 	}
 
 	/**
@@ -2269,60 +3085,60 @@ export class WorkerCore {
 	 * The element surface model code drives. Every method addresses the node by
 	 * backend id on the session that owns its frame, at call time, so no
 	 * navigation between two statements can leave it holding a dead object.
+	 * `input` holds page focus emulation around pointer and keyboard dispatch in
+	 * managed Chrome, whose tab the user is not looking at.
 	 */
-	#createElement(node: CdpNode, cwd: string, op: ElementOp): TabElement {
+	#createElement(
+		node: CdpNode,
+		cwd: string,
+		op: ElementOp,
+		input: <T>(signal: AbortSignal, action: () => Promise<T>) => Promise<T>,
+	): TabElement {
 		const page = this.#requirePage();
-		// Managed Chrome drives a tab the user is not looking at: pointer and
-		// keyboard input need page focus emulation held around the dispatch.
-		const input = <T>(signal: AbortSignal, action: () => Promise<T>): Promise<T> =>
-			this.#managedChrome ? withBackgroundInput(page, signal, action) : action();
+		const label = (method: string): string => `${node.label}.${method}()`;
+		const read = <R>(method: keyof typeof ELEMENT_READS, ...args: unknown[]): Promise<R> =>
+			op(label(method), sig => callOnNode(node, onElement(ELEMENT_READS[method]), args, sig)) as Promise<R>;
 		return {
 			click: options =>
-				op(`${node.label}.click()`, sig => input(sig, () => clickNode(node, options?.count ?? 1, sig))),
-			hover: () => op(`${node.label}.hover()`, sig => input(sig, () => hoverNode(node, sig))),
-			type: text => op(`${node.label}.type()`, sig => input(sig, () => typeIntoNode(node, text, sig))),
-			fill: value => op(`${node.label}.fill()`, sig => input(sig, () => fillNode(node, value, sig))),
+				op(label("click"), sig => input(sig, () => clickNode(node, options?.count ?? 1, sig, label("click")))),
+			dblclick: () => op(label("dblclick"), sig => input(sig, () => clickNode(node, 2, sig, label("dblclick")))),
+			check: () => op(label("check"), sig => input(sig, () => setNodeChecked(node, true, label("check"), sig))),
+			uncheck: () =>
+				op(label("uncheck"), sig => input(sig, () => setNodeChecked(node, false, label("uncheck"), sig))),
+			highlight: options => op(label("highlight"), sig => highlightNode(node, options, sig)),
+			hover: () => op(label("hover"), sig => input(sig, () => hoverNode(node, sig))),
+			type: text =>
+				op(label("type"), sig => input(sig, () => typeIntoNode(node, text, sig, this.#heldModifiers))),
+			fill: value => op(label("fill"), sig => input(sig, () => fillNode(node, value, sig))),
 			press: key =>
-				op(`${node.label}.press()`, sig =>
+				op(label("press"), sig =>
 					input(sig, async () => {
 						await focusNode(node, sig);
-						await pressChord(node.session, key, sig);
+						await pressChord(node.session, key, sig, this.#heldModifiers);
 					}),
 				),
-			focus: () => op(`${node.label}.focus()`, sig => focusNode(node, sig)),
-			scrollIntoView: () => op(`${node.label}.scrollIntoView()`, sig => scrollIntoView(node, sig)),
-			select: (...values) => op(`${node.label}.select()`, sig => selectOptions(node, values, sig)),
+			focus: () => op(label("focus"), sig => focusNode(node, sig)),
+			scrollIntoView: () => op(label("scrollIntoView"), sig => scrollIntoView(node, sig)),
+			select: (...values) => op(label("select"), sig => selectOptions(node, values, sig)),
 			uploadFile: (...filePaths) =>
-				op(`${node.label}.uploadFile()`, sig => {
-					if (!filePaths.length) throw new ToolError("uploadFile() requires at least one file path");
-					return setFileInput(
-						node,
-						filePaths.map(filePath => resolveToCwd(filePath, cwd)),
-						sig,
-					);
-				}),
+				op(label("uploadFile"), sig => input(sig, () => this.#uploadFile(node, filePaths, label("uploadFile"), sig, cwd))),
 			boundingBox: () =>
-				op(`${node.label}.boundingBox()`, async sig =>
-					boundingBox(node, await sessionOffset(page, node.session, sig), sig),
-				),
+				op(label("boundingBox"), async sig => boundingBox(node, await sessionOffset(page, node.session, sig), sig)),
 			isVisible: () =>
-				op(`${node.label}.isVisible()`, async sig =>
+				op(label("isVisible"), async sig =>
 					Boolean(await boundingBox(node, await sessionOffset(page, node.session, sig), sig)),
 				),
 			isHidden: () =>
-				op(
-					`${node.label}.isHidden()`,
-					async sig => !(await boundingBox(node, await sessionOffset(page, node.session, sig), sig)),
-				),
+				op(label("isHidden"), async sig => !(await boundingBox(node, await sessionOffset(page, node.session, sig), sig))),
+			text: () => read("text"),
+			html: () => read("html"),
+			value: () => read("value"),
+			attr: name => read("attr", name),
+			styles: props => read("styles", props ?? [...DEFAULT_STYLE_PROPERTIES]),
+			isEnabled: () => read("isEnabled"),
+			isChecked: () => read("isChecked"),
 			evaluate: (fn, ...args) =>
-				op(`${node.label}.evaluate()`, sig =>
-					callOnNode(
-						node,
-						`function (...args) { return (${String(fn)}).apply(null, [this, ...args]); }`,
-						args,
-						sig,
-					),
-				) as never,
+				op(label("evaluate"), sig => callOnNode(node, onElement(fn), args, sig)) as never,
 		};
 	}
 
@@ -2355,8 +3171,19 @@ export class WorkerCore {
 		this.#unsub();
 		this.#uninstallRejectionGuard();
 		const page = this.#page;
-		await this.#downloads?.dispose().catch(() => undefined);
-		if (this.#dialogHandler && page && !page.isClosed()) page.off("dialog", this.#dialogHandler);
+		await this.#recording.close().catch(error => {
+			this.#log("warn", "Failed to finalize active browser recording during tab close", {
+				error: error instanceof Error ? error.message : String(error),
+			});
+		});
+		await this.#webmcp?.dispose().catch(() => undefined);
+		this.#webmcp = undefined;
+		this.#dialogs?.dispose();
+		await this.#network?.close();
+		await this.#downloads?.close().catch(() => undefined);
+		await this.#tracing?.dispose();
+		await this.#consoleCapture.detach();
+		this.#emulation?.dispose();
 		if (this.#mode === "headless" && page && !page.isClosed()) await page.close().catch(() => undefined);
 		if (this.#browser?.connected) this.#browser.disconnect();
 		this.#transport.send({ type: "closed" });
@@ -2366,6 +3193,56 @@ export class WorkerCore {
 	#requirePage(): Page {
 		if (!this.#page) throw new ToolError("Tab worker is not initialized");
 		return this.#page;
+	}
+
+	#requireDialogs(): RuntimeDialogController {
+		if (this.#managedChrome)
+			throw new ToolError(
+				"In the user's Chrome a dialog is answered from Eval, outside tab.run: await tab.dialog() returns it with its id, then await tab.handleDialog({ accept, id, text? }). Dialogs there are never answered automatically, so setDialogs() does not apply.",
+			);
+		if (!this.#dialogs) throw new ToolError("Tab worker dialog handling is not initialized");
+		return this.#dialogs;
+	}
+
+	#requireNetwork(): BrowserNetworkManager {
+		if (!this.#network) throw new ToolError("Tab worker network manager is not initialized");
+		return this.#network;
+	}
+
+	#requireTracing(): BrowserTracingController {
+		if (!this.#tracing) throw new ToolError("Tab worker tracing is not initialized");
+		return this.#tracing;
+	}
+
+	#requireInitScripts(): InitScriptManager {
+		if (!this.#initScripts) throw new ToolError("Tab worker init scripts are not initialized");
+		return this.#initScripts;
+	}
+
+	#requireDownloads(): TabDownloadSource {
+		if (!this.#downloads)
+			throw new ToolError(`Download observation unavailable: ${this.#downloadObservationError ?? "not initialized"}`);
+		return this.#downloads;
+	}
+
+	/** Emulation starts from the page's own user agent, read the first time an override is asked for. */
+	async #requireEmulation(): Promise<BrowserEmulationController> {
+		if (this.#emulation) return this.#emulation;
+		const page = this.#requirePage();
+		const baseUserAgent = (await page.evaluate(() => navigator.userAgent)) as string;
+		this.#emulation ??= new BrowserEmulationController(
+			page,
+			loadedKnownDevices(),
+			loadedNetworkConditions(),
+			baseUserAgent,
+		);
+		return this.#emulation;
+	}
+
+	/** Worker-owned tabs install the WebMCP hook at start; the user's Chrome gets it on first use. */
+	async #requireWebMcp(): Promise<WebMcpController> {
+		this.#webmcp ??= await installWebMcp(this.#requirePage());
+		return this.#webmcp;
 	}
 
 	#requireBrowser(): Browser {

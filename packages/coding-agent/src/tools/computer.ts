@@ -34,6 +34,14 @@ import { throwIfAborted } from "./tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { clampTimeout } from "./tool-timeouts";
 
+import {
+	cfgComputerDisplay,
+	cfgComputerEnabled,
+	cfgComputerMaxHeight,
+	cfgComputerMaxWidth,
+	cfgToolsMaxTimeout,
+} from "./settings";
+
 // Image transports that re-resize a frame past their own vision budget report
 // nothing back, so the model reads coordinates off pixels OMP never measured.
 // Anthropic's budget is 1568 px on the long edge and ~1.15 M pixels of area
@@ -194,7 +202,7 @@ export function createComputerPrelude(
 		exports: ["computer"],
 		codeModeDeclarations: assets.codeModeDeclarations,
 		approval: computerApproval,
-		enabled: () => session.settings.get("computer.enabled") === true,
+		enabled: () => cfgComputerEnabled.get(session.settings) === true,
 		invoke: async (parameters, context) => {
 			const parsed = getComputerParamsSchema()(parameters);
 			if (parsed instanceof type.errors) {
@@ -347,7 +355,7 @@ class ComputerLifetime {
 		if (this.#releasing) await this.#releasing;
 		if (this.#releaseFailure) throw this.#releaseFailure;
 		if (this.#closed) throw new ToolError("Computer session is closed");
-		if (!this.#session.settings.get("computer.enabled")) throw new ToolError("Computer use is disabled");
+		if (!cfgComputerEnabled.get(this.#session.settings)) throw new ToolError("Computer use is disabled");
 		return (this.#controller ??= this.#createController(this.#session));
 	}
 
@@ -491,10 +499,10 @@ async function runComputer(
 	const code = resolveComputerRunCode(params);
 	// Direct inspection calls run read-only so the desktop guard backs the read approval tier.
 	const readOnly = params.action === "call" ? isReadOnlyComputerCall(params.chain) : (params.read_only ?? false);
-	const timeoutSeconds = clampTimeout("computer", params.timeout, session.settings.get("tools.maxTimeout"));
+	const timeoutSeconds = clampTimeout("computer", params.timeout, cfgToolsMaxTimeout.get(session.settings));
 	const coordinateSafe = usesCoordinateSafeImageSizing(session.getActiveModel?.());
-	const configuredMaxWidth = session.settings.get("computer.maxWidth");
-	const configuredMaxHeight = session.settings.get("computer.maxHeight");
+	const configuredMaxWidth = cfgComputerMaxWidth.get(session.settings);
+	const configuredMaxHeight = cfgComputerMaxHeight.get(session.settings);
 	const snapshot: ComputerSessionSnapshot = {
 		cwd: session.cwd,
 		sessionId: session.getEvalSessionId?.() ?? session.getSessionId?.() ?? "computer",
@@ -505,7 +513,7 @@ async function runComputer(
 			? Math.min(configuredMaxHeight, COORDINATE_SAFE_MAX_CAPTURE_EDGE)
 			: configuredMaxHeight,
 		captureMaxPixels: coordinateSafe ? COORDINATE_SAFE_MAX_CAPTURE_PIXELS : 0,
-		display: session.settings.get("computer.display") ?? "all",
+		display: cfgComputerDisplay.get(session.settings),
 		readOnly,
 	};
 	const run = await controller.run(code, timeoutSeconds * 1000, snapshot, signal);

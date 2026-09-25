@@ -10,7 +10,7 @@ import * as daemon from "@oh-my-pi/pi-coding-agent/tools/browser/relay/daemon";
 import type { InstanceLease } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
-import type { DialogState } from "@oh-my-pi/pi-coding-agent/tools/browser/dialogs";
+import type { ChromeDialogState, DialogJournalState } from "@oh-my-pi/pi-coding-agent/tools/browser/dialog-journal";
 import * as registry from "@oh-my-pi/pi-coding-agent/tools/browser/registry";
 import * as access from "@oh-my-pi/pi-coding-agent/tools/browser/relay/access";
 
@@ -29,7 +29,7 @@ const tabSnapshot = {
 };
 
 it("does not duplicate page initialization after a waiting caller aborts, and refuses unknown dialog outcomes", async () => {
-	let state: DialogState = { status: "closed", dialog: null };
+	let state: DialogJournalState = { status: "closed", dialog: null };
 	const requests: unknown[] = [];
 	const server = Bun.serve({
 		hostname: "127.0.0.1",
@@ -162,9 +162,9 @@ it("claims a dialog-blocked tab without renderer setup or a side connection, and
 		const result = await prelude.invoke({ action: "claim", id: "page-7", timeout: 1 }, context);
 		const details = result.details as {
 			handle: string;
-			value: { initialDialog: DialogState; initialObservation?: unknown };
+			value: { initialDialog: ChromeDialogState; initialObservation?: unknown };
 		};
-		expect(details.value.initialDialog.dialog?.id).toBe("pending-id");
+		expect(details.value.initialDialog.id).toBe("pending-id");
 		expect(details.value.initialObservation).toBeUndefined();
 		requireChromeHandle(details.handle, session);
 		expect(() => requireChromeHandle(details.handle, { ...session, getSessionId: () => "another-task" })).toThrow(

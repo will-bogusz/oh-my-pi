@@ -112,7 +112,7 @@ describe("browser JavaScript facade", () => {
 							value: {
 								target: { id: `discovery-${nextHandle}`, browserId: `profile-${nextHandle}`, tabId: 1 },
 								initialObservation: { snapshot: `initial-${nextHandle}`, elements: [{ id: 1 }] },
-								initialDialog: { status: "open", dialog: { id: "dialog-first" } },
+								initialDialog: { open: true, id: "dialog-first" },
 							},
 						},
 					};
@@ -170,13 +170,13 @@ describe("browser JavaScript facade", () => {
 		expect(() => runInContext('"use strict"; first.target.id = "discovery-2"', context)).toThrow();
 		expect(runInContext("first.initialObservation.snapshot", context)).toBe("initial-1");
 		await runInContext(
-			'first.dialog({action:"accept",id:first.initialDialog.dialog.id,promptText:"café Ω"})',
+			'first.handleDialog({accept:true,id:first.initialDialog.id,text:"café Ω"})',
 			context,
 		);
-		expect(calls.at(-1)).toEqual({
-			action: "dialog",
+		expect(calls.at(-1)).toMatchObject({
+			action: "call",
 			handle: "handle-1",
-			dialog: { action: "accept", id: "dialog-first", promptText: "café Ω" },
+			chain: [{ method: "handleDialog", args: [{ accept: true, id: "dialog-first", text: "café Ω" }] }],
 		});
 	});
 
@@ -512,7 +512,7 @@ describe("browser facade in real Eval runtimes", () => {
 								value: {
 									target: { id: "py-discovery", browserId: "py-profile", tabId: 7 },
 									initialObservation: { snapshot: "initial-py", elements: [{ id: 2, role: "button" }] },
-									initialDialog: { status: "open", dialog: { id: "dialog-py" } },
+									initialDialog: { open: true, id: "dialog-py" },
 								},
 							},
 						};
@@ -523,8 +523,8 @@ describe("browser facade in real Eval runtimes", () => {
 		const result = await executePython(
 			`tab = await browser.getTab({"title": "Same label"}, observation={"screenshot": False})
 element = tab.id(tab.initialObservation["elements"][0]["id"])
-await tab.dialog(action="accept", id=tab.initialDialog["dialog"]["id"], promptText="café Ω")
-await tab.dialog({"action":"inspect"})
+await tab.handleDialog(accept=True, id=tab.initialDialog["id"], text="café Ω")
+await tab.dialog()
 await tab.observe()
 await element.click()
 await tab.reveal()
@@ -546,12 +546,16 @@ print(tab.initialObservation["snapshot"])
 		);
 		expect(result.exitCode).toBe(0);
 		expect(result.output.trim().split("\n")).toEqual(["immutable", "py-discovery", "initial-py"]);
-		expect(calls).toContainEqual({
-			action: "dialog",
-			handle: "py-held-tab",
-			dialog: { action: "accept", id: "dialog-py", promptText: "café Ω" },
-		});
-		expect(calls).toContainEqual({ action: "dialog", handle: "py-held-tab", dialog: { action: "inspect" } });
+		expect(calls).toContainEqual(
+			expect.objectContaining({
+				action: "call",
+				handle: "py-held-tab",
+				chain: [{ method: "handleDialog", args: [{ accept: true, id: "dialog-py", text: "café Ω" }] }],
+			}),
+		);
+		expect(calls).toContainEqual(
+			expect.objectContaining({ action: "call", handle: "py-held-tab", chain: [{ method: "dialog", args: [] }] }),
+		);
 		expect(calls).toContainEqual({ action: "reveal", handle: "py-held-tab" });
 		expect(calls).toContainEqual({ action: "popups", handle: "py-held-tab" });
 		// A name lookup carries the handle: managed Chrome tabs are only

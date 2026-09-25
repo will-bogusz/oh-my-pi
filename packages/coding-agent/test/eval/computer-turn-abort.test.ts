@@ -12,6 +12,7 @@ import { createComputerPrelude } from "../../src/tools/computer";
 import type { ComputerBackend } from "../../src/tools/computer/backend";
 import { ComputerSupervisor } from "../../src/tools/computer/supervisor";
 import { EvalTool } from "../../src/tools/eval";
+import { cfgComputerEnabled } from "../../src/tools/settings";
 
 const capabilities: DesktopCapabilities = {
 	backend: "fake",
@@ -115,7 +116,7 @@ describe("computer turn cancellation", () => {
 			expect(resumed).toMatchObject({ ok: true, value: 42 });
 			expect(backends).toHaveLength(1);
 			expect(backends[0].closeCount).toBe(0);
-			expect(session.settings.get("computer.enabled")).toBe(true);
+			expect(cfgComputerEnabled.get(session.settings)).toBe(true);
 			await definition.invoke({ action: "release" }, { session, toolCallId: "release" });
 			expect(backends[0].closeCount).toBe(1);
 		} finally {
@@ -191,7 +192,7 @@ describe("computer turn cancellation", () => {
 				expect(finalEvents.filter(event => event.op === "control").at(-1)?.phase).toBe("stopped");
 				expect(finalEvents.some(event => event.phase === "released")).toBe(false);
 				expect(backends[0].closeCount).toBe(0);
-				expect(session.settings.get("computer.enabled")).toBe(true);
+				expect(cfgComputerEnabled.get(session.settings)).toBe(true);
 				// The cancelled cell's kernel is interrupted asynchronously, so a late
 				// SIGINT can still land on it; drop it before the follow-up cell. The
 				// computer session under test belongs to the ToolSession, not the kernel.

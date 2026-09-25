@@ -9,6 +9,8 @@ import initialObservationCode from "./initial-observation.js.txt" with { type: "
 import browserJavascript from "./prelude.js" with { type: "text" };
 import browserPython from "./prelude.py" with { type: "text" };
 
+import { cfgBrowserEnabled, cfgBrowserRefs } from "./settings";
+
 /** Static browser assets loaded only when a kernel first requests browser preludes. */
 export const browserPreludeAssets = {
 	codeModeDeclarations: browserDeclarations as string,
@@ -26,7 +28,7 @@ export function createBrowserPreludeDefinition(
 		// The static prompt states only what both `browser.refs` styles share;
 		// the active style's own contract is rendered in.
 		documentation: prompt.render(browserDescription, {
-			compactRefs: session.settings.get("browser.refs") === "compact",
+			compactRefs: cfgBrowserRefs.get(session.settings) === "compact",
 		}),
 		javascript: browserJavascript,
 		python: browserPython,
@@ -35,7 +37,7 @@ export function createBrowserPreludeDefinition(
 		// Documentation is the one browser action that touches no tab.
 		approval: args =>
 			args !== null && typeof args === "object" && "action" in args && args.action === "help" ? "read" : "exec",
-		enabled: () => session.settings.get("browser.enabled"),
+		enabled: () => cfgBrowserEnabled.get(session.settings),
 		invoke: host.invoke,
 		status: host.status,
 	};

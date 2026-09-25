@@ -144,7 +144,7 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			await setupSession.detach();
 			await chrome.disconnect();
 
-			const lease = await relay.instances.create(fixture.start, "actor", "task", "Context recovery");
+			const lease = await relay.instances.create(fixture.start, "actor", "Context recovery");
 			const version = (await (
 				await fetch(`http://127.0.0.1:${relay.port}/managed/${lease.id}/json/version`)
 			).json()) as { webSocketDebuggerUrl: string };

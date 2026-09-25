@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "bun:test";
+import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import type { EvalPreludeDefinition } from "@oh-my-pi/pi-coding-agent/eval/preludes";
 import {
 	type ComputerStatusDeps,
@@ -8,6 +9,7 @@ import {
 } from "@oh-my-pi/pi-coding-agent/slash-commands/helpers/computer-status";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { registerComputerController } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
+import { cfgComputerEnabled } from "@oh-my-pi/pi-coding-agent/tools/settings";
 
 const ITERM: ProcessRow[] = [
 	{ pid: 300, ppid: 200, command: "/Users/me/.bun/bin/omp" },
@@ -36,18 +38,18 @@ function session(options: { enabled?: boolean; permissions?: Record<string, unkn
 		details: { driver: { version: "0.28.2" }, permissions: options.permissions ?? {} },
 	}));
 	const definition = { name: "computer", invoke } as unknown as EvalPreludeDefinition;
-	const store: Record<string, unknown> = {
+	const settings = Settings.isolated({
 		"computer.enabled": options.enabled ?? true,
 		"computer.display": "all",
 		"computer.maxWidth": 1920,
 		"computer.maxHeight": 1200,
-	};
+	});
 	return {
 		invoke,
 		ownerId,
 		value: {
-			settings: { get: (key: string) => store[key] },
-			getEvalPreludes: () => (store["computer.enabled"] ? [definition] : []),
+			settings,
+			getEvalPreludes: () => (cfgComputerEnabled.get(settings) ? [definition] : []),
 			getEvalToolSession: () => ({}) as ToolSession,
 			getEvalKernelOwnerId: () => ownerId,
 			isStreaming: options.streaming ?? false,

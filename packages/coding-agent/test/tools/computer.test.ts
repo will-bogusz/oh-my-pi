@@ -22,6 +22,7 @@ import {
 // @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
 import computerDeclarations from "../../src/tools/computer/declarations.d.ts" with { type: "text" };
 import { ComputerSupervisor } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
+import { cfgComputerEnabled } from "@oh-my-pi/pi-coding-agent/tools/settings";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type {
 	ComputerActionResult,
@@ -1126,7 +1127,7 @@ describe("computer preludes through the session", () => {
 		const session = toolSession();
 		const prelude = fixturePrelude(session, new FakeBackend());
 		expect(prelude.enabled?.()).toBe(true);
-		session.settings.override("computer.enabled", false);
+		cfgComputerEnabled.override(session.settings, false);
 		expect(prelude.enabled?.()).toBe(false);
 	});
 
