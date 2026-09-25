@@ -76,6 +76,12 @@ export interface ManagedChromeHandle {
 	/** Why the handle stopped working — what every later call on it answers. Set once. */
 	ended?: string;
 	initializing?: Promise<void>;
+	/**
+	 * Chrome dropped this handle's page along with OMP's debugger. Until a worker
+	 * attaches again, an unobserved dialog journal is that detach's reset, not a
+	 * dialog answer of unknown outcome.
+	 */
+	pageLost?: boolean;
 }
 
 function actor(session: ToolSession): { owner: string; taskId: string } {
@@ -582,16 +588,14 @@ async function initializeChromePage(
  * acquisition and this returns immediately, while a claim taken across an open
  * JavaScript dialog attaches on the first call after the dialog is answered
  * (Chrome never resolves `target.page()` while a modal blocks the renderer).
- * `reclaimed`: the tab was just claimed again, which starts over like any
- * claim — Chrome's detach reset the dialog journal to unobserved, and only a
- * dialog seen open still holds the page back.
+ * A page Chrome dropped with the debugger starts over like any claim: only a
+ * dialog seen open still holds it back.
  */
 export async function ensureChromePage(
 	handle: ManagedChromeHandle,
 	session: ToolSession,
 	timeoutMs: number,
 	signal?: AbortSignal,
-	reclaimed = false,
 ): Promise<void> {
 	if (getTab(handle.id)) return;
 	if (!handle.initializing) {
@@ -601,11 +605,12 @@ export async function ensureChromePage(
 				throw new ToolError(
 					"This tab still has an open dialog. Inspect tab.dialog() and answer its current id before using the page",
 				);
-			if (state.status !== "closed" && !reclaimed)
+			if (state.status !== "closed" && !handle.pageLost)
 				throw new ToolError(
 					`The pending dialog's outcome is unknown. Page control cannot resume until closure is observed; inspect tab.dialog() before continuing, or claim ${JSON.stringify(handle.lease.tab.id)} again to start over`,
 				);
 			await initializeChromePage(handle, session, { timeoutMs, signal });
+			handle.pageLost = false;
 		})();
 		const initializing = handle.initializing;
 		const settled = () => {
@@ -647,6 +652,7 @@ export async function runOnChromePage<T>(
 		const lost = await lostChromeControl(handle, error);
 		if (!lost) throw error;
 		if (lost instanceof ChromeTabGoneError || lost.debugger?.canceledByUser) throw describeLostControl(lost, next);
+		handle.pageLost = true;
 	}
 	await chromeRequest(
 		handle.url,
@@ -656,7 +662,7 @@ export async function runOnChromePage<T>(
 	// Chrome's session under that worker is gone; the lease is not, so nothing is handed back.
 	if (worker && getTab(handle.id) === worker) await releaseTab(handle.id, { skipOnRelease: true });
 	try {
-		await ensureChromePage(handle, session, timeoutMs, signal, true);
+		await ensureChromePage(handle, session, timeoutMs, signal);
 		return await operation(worker !== undefined);
 	} catch (error) {
 		const lost = await lostChromeControl(handle, error);

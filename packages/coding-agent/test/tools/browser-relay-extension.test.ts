@@ -7,7 +7,11 @@ import { runBrowserRelayCommand } from "@oh-my-pi/pi-coding-agent/cli/browser-re
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
-import { releaseChromeTabsForOwner, requireChromeHandle } from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
+import {
+	browserActorId,
+	releaseChromeTabsForOwner,
+	requireChromeHandle,
+} from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
 import * as relayAccess from "@oh-my-pi/pi-coding-agent/tools/browser/relay/access";
 import * as daemon from "@oh-my-pi/pi-coding-agent/tools/browser/relay/daemon";
 import type { InstanceTab } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
@@ -552,7 +556,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 );
 
 it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
-	"keeps a handle through a password manager's frame: one reattach per call, then a refusal that names the frame",
+	"keeps a handle through a password manager's frame: one reattach per call, a refusal that names the frame, then resumes",
 	async () => {
 		let menu = "open";
 		const dismissed = Promise.withResolvers<void>();
@@ -563,6 +567,8 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				const route = new URL(request.url).pathname;
 				if (route === "/menu") return new Response(menu);
 				if (route === "/menu-removed") dismissed.resolve();
+				if (route === "/signed-in")
+					return new Response("<title>Signed in</title><p>done</p>", { headers: { "content-type": "text/html" } });
 				return new Response('<title>Sign in</title><form><input type="password"></form>', {
 					headers: { "content-type": "text/html" },
 				});
@@ -592,7 +598,8 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
 			// An inline autofill menu is another extension's page in an iframe, and
 			// Chrome detaches every other extension's debugger when one commits.
-			// A flash is gone once it has loaded; a pinned menu stays until dismissed.
+			// A flash is gone once it has loaded; a pinned menu stays until the user
+			// dismisses it or signs in, which navigates the page.
 			const passwordManager = path.join(root, "password-manager");
 			await mkdir(passwordManager);
 			await writeFile(
@@ -614,8 +621,10 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 					document.body.append(frame);
 					if (!pinned) return frame.addEventListener("load", () => frame.remove(), { once: true });
 					const poll = setInterval(async () => {
-						if ((await (await fetch("/menu")).text()) !== "closed") return;
+						const state = await (await fetch("/menu")).text();
+						if (state === "open") return;
 						clearInterval(poll);
+						if (state === "signed-in") return location.assign("/signed-in");
 						frame.remove();
 						await fetch("/menu-removed");
 					}, 50);
@@ -666,12 +675,12 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			const leaseId = requireChromeHandle(handle, session).lease.id;
 			const run = (code: string) => prelude.invoke({ action: "run", handle, code, timeout: 20 }, context);
 			// The step in flight when the menu appears: half a second in the page keeps
-			// the command open when Chrome detaches. It shows the menu once per page,
+			// the command open when Chrome detaches. It shows the menu once per `key`,
 			// so running it again shows nothing and returns the title.
-			const showMenu = (event: string) =>
+			const showMenu = (event: string, key = event) =>
 				`return await page.evaluate(() => {
-					if (!window["${event}"]) {
-						window["${event}"] = true;
+					if (!window["${key}"]) {
+						window["${key}"] = true;
 						document.dispatchEvent(new Event("${event}"));
 					}
 					return new Promise(resolve => setTimeout(() => resolve(document.title), 500));
@@ -701,6 +710,23 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			const resumed = await run("return await page.title()");
 			expect(detail(resumed, "value")).toBe("Sign in");
 			expect(text(resumed)).not.toContain("ran it again");
+			expect(requireChromeHandle(handle, session).lease.id).toBe(leaseId);
+
+			// Or the user signs in, which navigates the page and lifts the relay's ban
+			// on its own. The page's dialog journal is still the detach's blank one;
+			// the next call attaches anyway, with no claim from the model.
+			menu = "open";
+			expect(await run(showMenu("pm-pin", "pinned again")).then(() => "no refusal", String)).toContain(
+				"the next call on this tab tries again",
+			);
+			menu = "signed-in";
+			const owner = browserActorId(session);
+			// The extension reports the navigation on its own schedule; wait for the relay to hear it.
+			for (let i = 0; i < 400 && !relay.instances.get(leaseId, owner).tab.url.endsWith("/signed-in"); i++)
+				await Bun.sleep(25);
+			expect(relay.instances.get(leaseId, owner).debugger?.revoked).toBeUndefined();
+			const signedIn = await run("return await page.title()");
+			expect(detail(signedIn, "value")).toBe("Signed in");
 			expect(requireChromeHandle(handle, session).lease.id).toBe(leaseId);
 		} finally {
 			await releaseChromeTabsForOwner("password-manager").catch(() => 0);
