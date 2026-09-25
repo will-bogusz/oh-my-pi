@@ -54,7 +54,6 @@ it("does not duplicate page initialization after a waiting caller aborts, and re
 		label: "Pending review",
 		owner: "actor",
 		url: `http://127.0.0.1:${server.port}`,
-		released: false,
 		lease: {
 			id: "exact-lease",
 			targetId: "PAGE7",
@@ -176,7 +175,7 @@ it("claims a dialog-blocked tab without renderer setup or a side connection, and
 		).rejects.toThrow("open dialog");
 		// The turn-settle sweep finds it even though no page worker names it.
 		expect(await releaseChromeTabsForOwner("dialog-dispose")).toBe(1);
-		expect(() => requireChromeHandle(details.handle, session)).toThrow("stale");
+		expect(() => requireChromeHandle(details.handle, session)).toThrow("when the previous turn ended");
 		const release = requests.find(request => request.action === "releaseTab");
 		// A tab claimed from the user is handed back, never closed.
 		expect(release).toMatchObject({ id: "pending-lease", close: false });
@@ -253,8 +252,11 @@ it("hands every tab back open at settle and never closes one on the model's beha
 		expect(await releaseChromeTabsForOwner("settle-owner")).toBe(2);
 		const releases = requests.filter(request => request.action === "releaseTab");
 		expect(releases.map(request => request.close)).toEqual([false, false]);
-		expect(() => requireChromeHandle(first.handle, session)).toThrow("stale");
-		expect(() => requireChromeHandle(second.handle, session)).toThrow("stale");
+		// Next turn, a call on either handle says why it stopped and how to get the tab back.
+		expect(() => requireChromeHandle(first.handle, session)).toThrow(
+			'was handed back to the user when the previous turn ended. Claim "page-1" again to drive it.',
+		);
+		expect(() => requireChromeHandle(second.handle, session)).toThrow('Claim "page-2" again');
 	} finally {
 		await releaseDeferredChromeTabsForOwner("settle-owner");
 		token.mockRestore();

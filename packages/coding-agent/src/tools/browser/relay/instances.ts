@@ -311,8 +311,11 @@ export class BrowserInstances {
 				.discover()
 				.some(tab => tab.id === id),
 		);
-		if (!instance || (browserId && browserId !== instance.id))
-			throw new Error("Discovered tab is stale or belongs to a different browser instance");
+		if (!instance) throw this.bridge.stale(id);
+		if (browserId && browserId !== instance.id)
+			throw new Error(
+				`Chrome tab ${JSON.stringify(id)} is in a different browser: ${JSON.stringify(instance.label)}, not ${JSON.stringify(browserId)}`,
+			);
 		return instance;
 	}
 	async closeTab(id: string, owner: string, browserId?: string, signal?: AbortSignal): Promise<void> {
@@ -324,7 +327,7 @@ export class BrowserInstances {
 	}
 	requireLease(id: string): Instance {
 		const instance = this.forLease(id);
-		if (!instance) throw new Error("Browser tab ownership is stale");
+		if (!instance) throw this.bridge.stale(id);
 		return instance;
 	}
 	get(id: string, owner: string): InstanceLease {

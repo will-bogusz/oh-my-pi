@@ -1277,6 +1277,50 @@ describe("RelayBridge attachment release", () => {
 			),
 		).toEqual([]);
 	});
+
+	it("tries a banned tab once more on an explicit claim and re-bans it with Chrome's fresh reason", async () => {
+		const bridge = new RelayBridge();
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1, url: "https://accounts.example.com/signin?continue=%2Finbox" })]);
+		const cdp = new FakeCdpSocket();
+		const connId = connectCdp(bridge, cdp, 1);
+		await attachPage(bridge, ext, cdp, connId, 1);
+		const leaseId = bridge.managed(BROWSER).leaseForTab(1)!;
+		const attachToTarget = (): number => {
+			const id = ++msgSeq;
+			bridge.cdpMessage(
+				connId,
+				JSON.stringify({ id, method: "Target.attachToTarget", params: { targetId: `PAGE${CODE}.1` } }),
+			);
+			return id;
+		};
+		// A password manager's frame lands in the page: Chrome drops the debugger.
+		bridge.extMessage(ext, JSON.stringify({ t: "detached", tabId: 1, reason: "target_closed" }));
+		await flush();
+		expect(bridge.debuggerState(BROWSER, 1).revoked).toContain("password manager");
+		// Nothing the relay does on its own reattaches a banned tab.
+		const attaches = ext.rpcs("attach").length;
+		attachToTarget();
+		await flush();
+		expect(ext.rpcs("attach")).toHaveLength(attaches);
+		// The owner claiming it again gets its own lease back and one more try…
+		expect(bridge.managed(BROWSER).claim(discovered(bridge, 1), "owner").id).toBe(leaseId);
+		const retry = attachToTarget();
+		await flush();
+		expect(ext.pending("attach")).toHaveLength(1);
+		nack(bridge, ext, "attach", "Cannot access a chrome-extension:// URL of different extension");
+		await flush();
+		// …and Chrome's new refusal is the ban's reason, said before where the tab is.
+		const refusal = cdp.messages.find(message => message.id === retry) as { error?: { message: string } };
+		expect(refusal.error?.message).toMatch(
+			/^Chrome refused OMP's debugger on this tab: another extension .* has embedded its UI .*\(https:\/\/accounts\.example\.com\/signin\)$/,
+		);
+		expect(bridge.debuggerState(BROWSER, 1).revoked).toContain("has embedded its UI");
+		// One try per claim.
+		attachToTarget();
+		await flush();
+		expect(ext.rpcs("attach")).toHaveLength(attaches + 1);
+	});
 });
 
 it("tracks selected tabs per window even when selection moves outside the known eligible set", () => {
