@@ -8,6 +8,7 @@ import {
 	type ManagedChromeHandle,
 	releaseDeferredChromeTabsForOwner,
 	requireChromeHandle,
+	runOnChromePage,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
 import * as access from "@oh-my-pi/pi-coding-agent/tools/browser/relay/access";
 import type { RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
@@ -375,7 +376,7 @@ function toolSession(sessionId: string, settings = Settings.isolated({})): ToolS
 	};
 }
 
-it("explains a raw TargetCloseError with Chrome's reason, and a closed tab with why it went away", async () => {
+it("explains a raw TargetCloseError with Chrome's reason, never retries past the user's cancel, and says why a closed tab went away", async () => {
 	const relay = startRelayServer({ port: 0 });
 	const credential = spyOn(access, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
 	const signIn: TabSnapshot = {
@@ -451,6 +452,17 @@ it("explains a raw TargetCloseError with Chrome's reason, and a closed tab with 
 			new Error("Attempted to use detached Frame '6F2802E97123F398ECC824571324075B'."),
 		])
 			expect((await explainRevokedChromeControl(handle, inFlight))?.message).toBe(revoked);
+		// The user pressing Cancel on Chrome's infobar is a decision: no call claims its way past it.
+		relay.instances.extMessage(extension, JSON.stringify({ t: "detached", tabId: 1, reason: "canceled_by_user" }));
+		let ran = false;
+		const operation = async () => {
+			ran = true;
+		};
+		await expect(runOnChromePage(handle, session, 1000, undefined, operation)).rejects.toThrow(
+			`The user stopped OMP's control of "Sign in" from Chrome's infobar. Do not claim it again`,
+		);
+		expect(ran).toBe(false);
+		expect(relay.instances.get(handle.lease.id, owner).debugger?.canceledByUser).toBe(true);
 		// The user closes the tab: the same failure now says the lease is over, and why.
 		relay.instances.extMessage(extension, JSON.stringify({ t: "tabRemoved", tabId: 1 }));
 		const gone = 'Chrome tab "Sign in" was closed in Chrome. Discover tabs again.';

@@ -13,8 +13,6 @@ import {
 	chromeChildTabs,
 	chromeLifecycle,
 	chromeDialog,
-	ensureChromePage,
-	explainRevokedChromeControl,
 	closeChromeTab,
 	discoverChromeTabs,
 	listChromeInstances,
@@ -24,6 +22,7 @@ import {
 	releaseChromeTab,
 	releaseChromeTabsForActor,
 	requireChromeHandle,
+	runOnChromePage,
 	selectChromeTab,
 } from "./browser/managed-chrome";
 import {
@@ -430,12 +429,13 @@ async function invokeBrowser(
 			}
 			if (parsed.action !== "run" && parsed.action !== "call")
 				throw new ToolError("Invalid operation for an existing Chrome handle");
-			try {
-				await ensureChromePage(handle, session, timeoutMs, context.signal);
-				return await runBrowser(session, handle.id, parsed, details, timeoutMs, context.signal);
-			} catch (error) {
-				throw (await explainRevokedChromeControl(handle, error)) ?? error;
-			}
+			return await runOnChromePage(handle, session, timeoutMs, context.signal, async rerun => {
+				const result = await runBrowser(session, handle.id, parsed, details, timeoutMs, context.signal);
+				if (!rerun) return result;
+				const note =
+					"Chrome dropped OMP's debugger during this call (usually another extension's frame, such as a password manager's menu); OMP reattached and ran it again, so a step before the drop may have run twice.";
+				return { ...result, content: [{ type: "text", text: note }, ...result.content] };
+			});
 		}
 		if (parsed.action === "closeTab") {
 			if (!parsed.id) throw new ToolError("closeTab requires the exact id returned by browser.discover()");

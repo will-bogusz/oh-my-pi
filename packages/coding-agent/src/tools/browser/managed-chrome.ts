@@ -11,7 +11,7 @@ import { chromeTabName, describeGoneTab, shortUrl } from "./relay/managed-tabs";
 import { resolveRelayKind } from "./relay/kind";
 import { localBrowserRequest } from "./relay/local-http";
 import { cfgBrowserRelay, cfgBrowserRelayUrl } from "./settings";
-import { acquireTab, getTab, releaseTab } from "./tab-supervisor";
+import { acquireTab, getTab, releaseTab, type TabSession } from "./tab-supervisor";
 
 const embeddingActors = new WeakMap<ToolSession, string>();
 const handles = new Map<string, ManagedChromeHandle>();
@@ -76,6 +76,12 @@ export interface ManagedChromeHandle {
 	/** Why the handle stopped working — what every later call on it answers. Set once. */
 	ended?: string;
 	initializing?: Promise<void>;
+	/**
+	 * Chrome dropped this handle's page along with OMP's debugger. Until a worker
+	 * attaches again, an unobserved dialog journal is that detach's reset, not a
+	 * dialog answer of unknown outcome.
+	 */
+	pageLost?: boolean;
 }
 
 function actor(session: ToolSession): { owner: string; taskId: string } {
@@ -469,32 +475,56 @@ const LOST_CONTROL =
 	/Target closed|Session closed|Connection closed|Detached while handling command|detached Frame|no longer available|refused OMP's debugger|could not attach|Cannot attach|Dialog observation is unavailable|focus state could not be restored/;
 
 /**
- * A page call that died because OMP's hold on the tab ended reads as
- * "Target closed" or "Session closed", which the model takes for a closed
- * tab. Ask the relay what happened and say that instead: the lease is over
- * (the relay's account of why), or the tab is open but Chrome will not let
- * OMP drive it (Chrome's reason, then where). Anything else is left alone.
+ * Where a page call that died with its connection leaves the lease: over (the
+ * relay's account of why), or standing on an open tab Chrome will not let OMP
+ * drive (`debugger.revoked` says why). Undefined for any other failure.
  */
-export async function explainRevokedChromeControl(
+async function lostChromeControl(
 	handle: ManagedChromeHandle,
 	error: unknown,
-): Promise<ToolError | undefined> {
+): Promise<InstanceLease | ChromeTabGoneError | undefined> {
 	if (
 		!(error instanceof Error) ||
 		!(error.name === "TargetCloseError" || error.name === "ConnectionClosedError" || LOST_CONTROL.test(error.message))
 	)
 		return undefined;
-	let lease: InstanceLease;
 	try {
-		lease = await leaseRequest<InstanceLease>(handle, { action: "get" }, AbortSignal.timeout(1500));
+		const lease = await leaseRequest<InstanceLease>(handle, { action: "get" }, AbortSignal.timeout(1500));
+		return lease.debugger?.revoked ? lease : undefined;
 	} catch (refusal) {
 		return refusal instanceof ChromeTabGoneError ? refusal : undefined;
 	}
-	const revoked = lease.debugger?.revoked;
-	if (!revoked) return undefined;
+}
+
+/**
+ * A lost page call in the model's terms, since a raw "Target closed" reads as
+ * a closed tab: why the lease is over, or Chrome's reason, where the tab stays
+ * open, and `next`. The user pressing Cancel on Chrome's infobar is a decision
+ * about this session, so that answer offers no way around it.
+ */
+function describeLostControl(lost: InstanceLease | ChromeTabGoneError, next: string): ToolError {
+	if (lost instanceof ChromeTabGoneError) return lost;
+	if (lost.debugger?.canceledByUser)
+		return new ToolError(
+			`The user stopped OMP's control of ${chromeTabName(lost.tab)} from Chrome's infobar. Do not claim it again or work around it; tell the user what remains.`,
+		);
 	return new ToolError(
-		`Chrome revoked OMP's control of ${chromeTabName(lease.tab)}: ${revoked}. The tab stays open at ${shortUrl(lease.tab.url)}. ` +
-			`Do not close it; ask the user to finish that step in Chrome, then claim ${JSON.stringify(lease.tab.id)} again.`,
+		`Chrome revoked OMP's control of ${chromeTabName(lost.tab)}: ${lost.debugger?.revoked}. The tab stays open at ${shortUrl(lost.tab.url)}. ${next}`,
+	);
+}
+
+/** An acquisition that lost its page leaves no handle behind, so the way back is claiming the tab again. */
+export async function explainRevokedChromeControl(
+	handle: ManagedChromeHandle,
+	error: unknown,
+): Promise<ToolError | undefined> {
+	const lost = await lostChromeControl(handle, error);
+	return (
+		lost &&
+		describeLostControl(
+			lost,
+			`Do not close it; ask the user to finish that step in Chrome, then claim ${JSON.stringify(handle.lease.tab.id)} again.`,
+		)
 	);
 }
 
@@ -558,6 +588,8 @@ async function initializeChromePage(
  * acquisition and this returns immediately, while a claim taken across an open
  * JavaScript dialog attaches on the first call after the dialog is answered
  * (Chrome never resolves `target.page()` while a modal blocks the renderer).
+ * A page Chrome dropped with the debugger starts over like any claim: only a
+ * dialog seen open still holds it back.
  */
 export async function ensureChromePage(
 	handle: ManagedChromeHandle,
@@ -573,11 +605,12 @@ export async function ensureChromePage(
 				throw new ToolError(
 					"This tab still has an open dialog. Inspect tab.dialog() and answer its current id before using the page",
 				);
-			if (state.status !== "closed")
+			if (state.status !== "closed" && !handle.pageLost)
 				throw new ToolError(
 					`The pending dialog's outcome is unknown. Page control cannot resume until closure is observed; inspect tab.dialog() before continuing, or claim ${JSON.stringify(handle.lease.tab.id)} again to start over`,
 				);
 			await initializeChromePage(handle, session, { timeoutMs, signal });
+			handle.pageLost = false;
 		})();
 		const initializing = handle.initializing;
 		const settled = () => {
@@ -589,6 +622,52 @@ export async function ensureChromePage(
 	}
 	const initializing = handle.initializing;
 	await untilAborted(signal, () => initializing);
+}
+
+/**
+ * Run a page operation on a leased tab through Chrome dropping OMP's debugger
+ * under it. A frame Chrome lets no other extension debug — most often a
+ * password manager's inline menu — detaches OMP and gets the tab banned at the
+ * relay, but the lease stands, so the handle does too: claim the tab again (the
+ * same lease, whose ban lifts for exactly one fresh attach), drop the worker
+ * whose page died with Chrome's old session, and run once more. `operation`
+ * hears whether its first run had already reached the page. A second loss is
+ * reported with Chrome's current reason; the next call takes the same retry.
+ */
+export async function runOnChromePage<T>(
+	handle: ManagedChromeHandle,
+	session: ToolSession,
+	timeoutMs: number,
+	signal: AbortSignal | undefined,
+	operation: (rerun: boolean) => Promise<T>,
+): Promise<T> {
+	const next =
+		"OMP already retried once. Do not close or claim it again: ask the user to finish that step in Chrome; the next call on this tab tries again.";
+	let worker: TabSession | undefined;
+	try {
+		await ensureChromePage(handle, session, timeoutMs, signal);
+		worker = getTab(handle.id);
+		return await operation(false);
+	} catch (error) {
+		const lost = await lostChromeControl(handle, error);
+		if (!lost) throw error;
+		if (lost instanceof ChromeTabGoneError || lost.debugger?.canceledByUser) throw describeLostControl(lost, next);
+		handle.pageLost = true;
+	}
+	await chromeRequest(
+		handle.url,
+		{ action: "claim", id: handle.lease.tab.id, browserId: handle.lease.browserId, owner: handle.owner },
+		signal,
+	);
+	// Chrome's session under that worker is gone; the lease is not, so nothing is handed back.
+	if (worker && getTab(handle.id) === worker) await releaseTab(handle.id, { skipOnRelease: true });
+	try {
+		await ensureChromePage(handle, session, timeoutMs, signal);
+		return await operation(worker !== undefined);
+	} catch (error) {
+		const lost = await lostChromeControl(handle, error);
+		throw lost ? describeLostControl(lost, next) : error;
+	}
 }
 
 /**

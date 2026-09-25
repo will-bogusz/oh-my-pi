@@ -22,6 +22,7 @@ Evidence
 Boundaries
 - Never act on a dialog you did not open — password, unlock, permission, crash alert: observe it, tell the user what it asks, wait.{{#if linux}} Nothing is refused for you here and `interruptedBy` is never set.{{else}} An `auth`, `permission` or `lock` window (password/TCC prompt, lock screen, crash alert) refuses every mutation with `Interrupted:` and `interruptedBy`. One exception: a crash alert for an app you launched that exited — press "Ignore", do not relaunch, tell the user.{{/if}}
 - Never mix coordinate spaces, never guess a ref, never reach for foreground or `reveal()` to observe, and never re-run a refused rung unchanged. When a reply names a window the app drew in front of yours, it also says what that window is: acquire the id where it tells you to acquire it, and where the new surface has no accessibility window of its own — a popover, an inline editor, a panel drawn inside another window — observe the parent it names instead, never that id.
+- In Chrome, `computer` is for Chrome and extension UI only; never type web-page field text through it.
 - `computer.release()` (automatic at turn settle) ends the driver child: later calls reacquire; a cancelled call reports what landed as `partial`. `computer.close()` ends computer use for the session.
 
 {{#if linux}}
