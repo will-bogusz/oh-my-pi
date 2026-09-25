@@ -219,6 +219,17 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			// display: false keeps the tree out of the acquisition's output.
 			const printed = result.content.map(part => (part.type === "text" ? part.text : "")).join("\n");
 			expect(printed).not.toContain("Inside button");
+			// The capture an acquisition takes by default is a model-size preview,
+			// an option the run scope's declared-argument check has to accept.
+			const photographed = await createBrowserPrelude(session).invoke(
+				{ action: "create", observation: { display: false } },
+				{ session, toolCallId: "photographed" },
+			);
+			const { value: shot } = photographed.details as {
+				value: { initialScreenshot?: string; screenshotError?: string };
+			};
+			expect(shot.screenshotError).toBeUndefined();
+			expect(shot.initialScreenshot).toBeString();
 		} finally {
 			acquire.mockRestore();
 			await supervisor.releaseTab(name, { kill: true });

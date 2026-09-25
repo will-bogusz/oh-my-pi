@@ -150,6 +150,8 @@ interface BrowserScreenshotOptions {
 	ifChanged?: boolean;
 	/** changed-pixel ratio (0-1) that still counts as unchanged */
 	threshold?: number;
+	/** save the model-size image even when browser.screenshotDir keeps full resolution */
+	preview?: boolean;
 }
 interface BrowserScreenshotChangeResult {
 	path?: string;
