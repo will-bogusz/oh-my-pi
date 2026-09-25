@@ -273,12 +273,13 @@
 			if (typeof fnOrCode !== "function" && typeof fnOrCode !== "string") {
 				throw new TypeError("tab.run() expects a function or code string");
 			}
-			const opts = validateOptions("tab.run", options);
-			const parameters = { name, ...(handle ? { handle } : {}) };
-			if (opts.timeout !== undefined) parameters.timeout = opts.timeout;
+			const { args, timeout, ...rest } = validateOptions("tab.run", options);
+			// Any other key travels on, so the host refuses what tab.run() does not take.
+			const parameters = { ...rest, name, ...(handle ? { handle } : {}) };
+			if (timeout !== undefined) parameters.timeout = timeout;
 			if (typeof fnOrCode === "function") {
 				parameters.fn = serializeFunction("tab.run()", fnOrCode);
-				parameters.args = encodeArgs("tab helper argument", Array.isArray(opts.args) ? opts.args : []);
+				parameters.args = encodeArgs("tab helper argument", Array.isArray(args) ? args : []);
 			} else {
 				parameters.code = fnOrCode;
 			}
