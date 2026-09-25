@@ -559,6 +559,8 @@ export interface TreeHeader {
 	title?: string;
 	scroll: { y: number; scrollHeight: number };
 	focused?: string;
+	/** The settle budget ran out while the page kept replacing its document: the tree may already be gone. */
+	navigating?: boolean;
 }
 
 export function renderHeader(header: TreeHeader): string {
@@ -566,6 +568,7 @@ export function renderHeader(header: TreeHeader): string {
 	if (header.title) parts.push(`title: ${header.title}`);
 	parts.push(`scroll: ${header.scroll.y}/${header.scroll.scrollHeight}`);
 	if (header.focused) parts.push(`focused: ${header.focused}`);
+	if (header.navigating) parts.push("still navigating (the page kept replacing its document; observe again)");
 	return parts.join(" | ");
 }
 

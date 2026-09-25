@@ -1109,6 +1109,33 @@ async function settlePage(page: Page, signal: AbortSignal | undefined, budgetMs:
 	}
 }
 
+/** The document the main frame shows: the session serving it and the loader that committed it. */
+interface MainDocument {
+	session: CDPSession;
+	loaderId: string;
+}
+
+/**
+ * Asked of Chrome, not inferred from events: puppeteer reports a
+ * same-document navigation (pushState, a fragment) as `framenavigated` too,
+ * but only a new document gets a new loader.
+ */
+async function mainDocument(page: Page, signal?: AbortSignal): Promise<MainDocument> {
+	const session = page.mainFrame().client;
+	const { frameTree } = await untilAborted(signal, () => session.send("Page.getFrameTree"));
+	return { session, loaderId: frameTree.frame.loaderId };
+}
+
+/**
+ * Whether the main frame moved on from `before`: a new document, or a new
+ * session serving it. Read through the session serving it now, so a tab that
+ * no longer answers rejects instead of reading as a navigation.
+ */
+async function leftDocument(page: Page, before: MainDocument, signal?: AbortSignal): Promise<boolean> {
+	const now = await mainDocument(page, signal);
+	return now.session !== before.session || now.loaderId !== before.loaderId;
+}
+
 /**
  * Hint appended to a selector op's fail-fast timeout, given the selector's current
  * match count: a missing element (consent wall, wrong page) reads differently from
@@ -2459,31 +2486,47 @@ export class WorkerCore {
 	}
 
 	/**
-	 * Settle the page, then snapshot it — restarting whenever the main frame
-	 * navigates mid-collection. `observe()` promises the settled tree of the
-	 * document the caller ends up on, and "click, then observe" in one cell is
-	 * the ordinary way to use it, so a navigation is a reason to look again, not
-	 * a failure. Every attempt shares the one settle budget; only exhausting it
-	 * fails, and it never grows.
+	 * Settle the page, then snapshot it — collecting again whenever the main
+	 * frame moves to a new document mid-collection. `observe()` promises the
+	 * settled tree of the document the caller ends up on, and "click, then
+	 * observe" in one cell is the ordinary way to use it, so a navigation is a
+	 * reason to look again, not a failure. A same-document navigation (pushState,
+	 * a fragment) is not one: the tree read across it is still the page's. Every
+	 * attempt shares the one settle budget, which never grows. When it runs out
+	 * on a page that keeps replacing its document, the last complete read comes
+	 * back marked as still navigating; only a page that never held a document
+	 * through one read fails.
 	 */
 	async #settledSnapshot(
 		page: Page,
 		includeAll: boolean,
 		deadline: number,
 		signal?: AbortSignal,
-	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string }> {
-		for (;;) {
-			const observationId = this.#observationId;
-			const remaining = deadline - Date.now();
-			if (remaining <= 0) throw new ToolError("The page changed while observing it. Observe again.");
-			const attempt = await this.#snapshotOnce(page, includeAll, remaining, deadline, signal).catch(error => {
-				// The document answering our calls went away: the only cause is a
-				// navigation, which the next attempt collects instead.
-				if (isDocumentGoneError(error) || observationId !== this.#observationId) return null;
-				throw error;
-			});
-			if (attempt && observationId === this.#observationId) return attempt;
+	): Promise<{ snapshot: AxNode; layout: PageLayout; url: string; title: string; navigating: boolean }> {
+		let latest: { snapshot: AxNode; layout: PageLayout; url: string; title: string } | undefined;
+		let navigated = false;
+		while (Date.now() < deadline) {
+			const before = await mainDocument(page, signal);
+			const read = await this.#snapshotOnce(page, includeAll, deadline - Date.now(), deadline, signal).catch(
+				async error => {
+					// A call the old document could no longer answer, or any failure
+					// while the main frame moved on, is the navigation itself: the
+					// next attempt reads the new document. A tab that no longer
+					// answers is lost, and its own error says why.
+					const moved = await leftDocument(page, before, signal).catch(() => undefined);
+					if (moved !== undefined && (moved || isDocumentGoneError(error))) return null;
+					throw error;
+				},
+			);
+			// A read of the document the page still shows. It is provisional only
+			// when the budget ran out before this document had its settle.
+			if (read && !(await leftDocument(page, before, signal)))
+				return { ...read, navigating: navigated && Date.now() >= deadline };
+			navigated = true;
+			latest = read ?? latest;
 		}
+		if (latest) return { ...latest, navigating: true };
+		throw new ToolError("The page changed while observing it. Observe again.");
 	}
 
 	async #snapshotOnce(
@@ -2591,7 +2634,12 @@ export class WorkerCore {
 			: undefined;
 		this.#invalidateRefs();
 		const deadline = Date.now() + SETTLE_BUDGET_MS;
-		const { snapshot, layout, url, title } = await this.#settledSnapshot(page, includeAll, deadline, signal);
+		const { snapshot, layout, url, title, navigating } = await this.#settledSnapshot(
+			page,
+			includeAll,
+			deadline,
+			signal,
+		);
 		const observationId = this.#observationId;
 
 		let nodes = flattenSnapshot(snapshot, { includeAll });
@@ -2644,7 +2692,13 @@ export class WorkerCore {
 		};
 		const focusedNode = actionable.find(node => node.ax!.focused === true);
 		const focused = focusedNode ? `e${refByNode.get(focusedNode)}` : undefined;
-		const header: TreeHeader = { url, title, scroll: { y: scroll.y, scrollHeight: scroll.scrollHeight }, focused };
+		const header: TreeHeader = {
+			url,
+			title,
+			scroll: { y: scroll.y, scrollHeight: scroll.scrollHeight },
+			focused,
+			navigating,
+		};
 		const previous = this.#lastTree;
 		const filter = JSON.stringify({ includeAll, viewportOnly, compact, selector: selector ?? null });
 		// Diff only against the same document observed with the same filter;
