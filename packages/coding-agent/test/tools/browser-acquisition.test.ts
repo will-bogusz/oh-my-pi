@@ -174,7 +174,6 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			label: "Fixture",
 			owner: "actor",
 			url: tab.url,
-			released: false,
 			lease: {
 				id: "lease",
 				targetId: "PAGE9",
