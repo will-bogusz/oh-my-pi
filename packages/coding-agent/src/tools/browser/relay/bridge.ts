@@ -209,7 +209,7 @@ class TabState {
 	groupId: number;
 	/** Whether `chrome.debugger` is currently attached to this tab. */
 	attached = false;
-	/** Set when attach failed or the user cancelled the debugger; cleared on navigation. */
+	/** Set when Chrome refused or revoked the debugger; cleared on navigation and by an explicit claim. */
 	banned = false;
 	/** Why the debugger cannot be (re)attached while `banned`, in the model's terms. */
 	banReason: string | undefined;
@@ -296,6 +296,13 @@ const CDP_ERROR_SERVER = -32000;
  * How long an attached tab may sit without CDP traffic before its
  * `chrome.debugger` attachment — and with it Chrome's "being debugged" infobar
  * — goes back. The bar then tracks the work (last step + ~10 s), not the turn.
+ *
+ * Detaching does not widen what a password manager can take: Chrome refuses
+ * an extension's debugger on any page holding another extension's frame, so
+ * the frame that fails a reattach ({@link RelayBridge.#ensureAttached}) would
+ * have force-detached a kept attachment the moment it appeared
+ * ({@link RelayBridge.#onTabDetached}). Kept attached, every transient frame
+ * bans the tab; detached, only one still present at the next attach does.
  */
 const DEBUGGER_IDLE_MS = 10_000;
 /** How stale a `Page.windowOpen` may be and still explain a new tab. */
@@ -378,6 +385,15 @@ export class RelayBridge {
 				release: (tabId, close) => this.#releaseTab(inst, tabId, close),
 				invalidate: leaseId => {
 					for (const conn of this.#conns.values()) if (conn.leaseId === leaseId) conn.socket.close();
+				},
+				// A ban protects the user from an attach loop the relay starts on its
+				// own; a claim is someone asking again. One try, re-banned with
+				// Chrome's fresh reason when it fails.
+				allowAttach: tabId => {
+					const tab = this.#tabs.get(tabKeyOf(code, tabId));
+					if (!tab) return;
+					tab.banned = false;
+					tab.banReason = undefined;
 				},
 			}),
 		};

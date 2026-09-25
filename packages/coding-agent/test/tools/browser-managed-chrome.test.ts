@@ -36,6 +36,8 @@ function harness(orphanGraceMs?: number, onRelease?: (tabId: number, close: bool
 	const revealed: number[] = [];
 	const invalidated: string[] = [];
 	const groups: Array<[number, string, string]> = [];
+	/** Tabs an explicit claim cleared to try the debugger again. */
+	const attachAllowed: number[] = [];
 	let nextTab = 10;
 	const tabs = new ManagedChromeTabs(
 		{
@@ -54,10 +56,13 @@ function harness(orphanGraceMs?: number, onRelease?: (tabId: number, close: bool
 			invalidate: lease => {
 				invalidated.push(lease);
 			},
+			allowAttach: tabId => {
+				attachAllowed.push(tabId);
+			},
 		},
 		{ orphanGraceMs },
 	);
-	return { tabs, released, revealed, invalidated, groups };
+	return { tabs, released, revealed, invalidated, groups, attachAllowed };
 }
 
 describe("managed Chrome physical tab ownership", () => {
@@ -156,6 +161,7 @@ describe("managed Chrome physical tab ownership", () => {
 			release: async () => {},
 			reveal: async () => {},
 			invalidate: () => {},
+			allowAttach: () => {},
 		});
 		const lease = await tabs.create("https://example.com", "owner", "task", "Research");
 		expect(lease.tab).toMatchObject({ url: "https://example.com", title: "Ready", groupId: 42 });
@@ -269,13 +275,14 @@ describe("managed Chrome physical tab ownership", () => {
 		expect(released).toEqual([[1, false]]);
 	});
 
-	it("gives the owner its own lease back on a repeat claim", () => {
-		const { tabs } = harness();
+	it("gives the owner its own lease back on a repeat claim, and lets each claim try the debugger again", () => {
+		const { tabs, attachAllowed } = harness();
 		tabs.upsert(tab(1));
 		const found = tabs.discover()[0]!;
 		const lease = tabs.claim(found.id, "owner");
 		expect(tabs.claim(found.id, "owner")).toEqual(lease);
 		expect(() => tabs.claim(found.id, "other")).toThrow("already owned");
+		expect(attachAllowed).toEqual([1, 1]);
 	});
 });
 

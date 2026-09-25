@@ -93,6 +93,8 @@ export interface ManagedChromeOperations {
 	/** Hand the tab back: restore the favicon, detach the debugger, leave the group, close when asked. */
 	release(tabId: number, close: boolean): Promise<void>;
 	invalidate(leaseId: string): void;
+	/** An explicit claim is the go-ahead to try the debugger once more, even where Chrome refused it before. */
+	allowAttach(tabId: number): void;
 }
 
 /** Physical-tab authority is independent of CDP connections and display names. */
@@ -165,14 +167,18 @@ export class ManagedChromeTabs {
 		const tab = this.#discovered(id);
 		if (!tab) throw this.#gone(id);
 		const held = this.#leases.get(this.#owners.get(tab.tabId) ?? "");
+		let lease: ChromeTabLease;
 		// The owner's own lease — a popup auto-leased to it, or a tab whose
 		// handle it lost — comes back as it is instead of reading as taken.
 		if (held?.owner === owner && !held.releasing) {
 			held.unclaimedChild = false;
 			this.#touch(held);
-			return this.#public(held);
+			lease = this.#public(held);
+		} else {
+			lease = this.#claim(tab, owner, false, taskId, label);
 		}
-		return this.#claim(tab, owner, false, taskId, label);
+		this.#operations.allowAttach(tab.tabId);
+		return lease;
 	}
 
 	get(id: string, owner: string): ChromeTabLease {
