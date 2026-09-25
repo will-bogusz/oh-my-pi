@@ -472,6 +472,25 @@ export function parseChord(chord: string): { modifiers: string[]; key: string } 
 	return { modifiers, key: parts[parts.length - 1] };
 }
 
+/**
+ * macOS runs its editing chords as app-menu commands, which a CDP key event
+ * never reaches: the page sees Meta+V and nothing is pasted. There the key-down
+ * names the editor command itself, which Chrome runs as the key's default
+ * action, so a page that cancels the key still cancels the edit. Keyed by
+ * modifier mask and physical key.
+ */
+const EDITING_COMMANDS: Record<string, string> =
+	process.platform === "darwin"
+		? {
+				[`${MODIFIER_BITS.Meta}:KeyA`]: "selectAll",
+				[`${MODIFIER_BITS.Meta}:KeyC`]: "copy",
+				[`${MODIFIER_BITS.Meta}:KeyV`]: "paste",
+				[`${MODIFIER_BITS.Meta}:KeyX`]: "cut",
+				[`${MODIFIER_BITS.Meta}:KeyZ`]: "undo",
+				[`${MODIFIER_BITS.Meta | MODIFIER_BITS.Shift}:KeyZ`]: "redo",
+			}
+		: {};
+
 async function dispatchKey(
 	session: CDPSession,
 	type: "keyDown" | "rawKeyDown" | "keyUp",
@@ -479,6 +498,7 @@ async function dispatchKey(
 	modifiers: number,
 	signal?: AbortSignal,
 ): Promise<void> {
+	const command = type === "keyUp" ? undefined : EDITING_COMMANDS[`${modifiers}:${stroke.code}`];
 	await untilAborted(signal, () =>
 		session.send("Input.dispatchKeyEvent", {
 			type,
@@ -490,6 +510,7 @@ async function dispatchKey(
 			unmodifiedText: type === "keyUp" ? undefined : stroke.text,
 			location: stroke.location,
 			isKeypad: stroke.location === 3,
+			commands: command ? [command] : undefined,
 		}),
 	);
 }

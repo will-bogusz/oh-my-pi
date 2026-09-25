@@ -6,8 +6,10 @@ import type {
 	WorkerInbound,
 	WorkerOutbound,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
+import { pressChord } from "@oh-my-pi/pi-coding-agent/tools/browser/cdp";
+import { BrowserEmulationController } from "@oh-my-pi/pi-coding-agent/tools/browser/emulation";
 import { WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
-import puppeteer, { type Browser } from "puppeteer-core";
+import puppeteer, { type Browser, type CDPSession, type Page } from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
@@ -324,6 +326,66 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	},
 	60_000,
 );
+
+const SHORTCUT = process.platform === "darwin" ? "Meta" : "Control";
+
+// On macOS select-all, undo and redo are app-menu commands a CDP key event
+// never reaches, so the chord used to report success and leave the text alone.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"selects all, undoes and redoes with the platform's editing chords",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () =>
+				new Response(`<!doctype html><title>Edit</title><input aria-label="Field">`, {
+					headers: { "content-type": "text/html" },
+				}),
+		});
+		try {
+			await withWorker([], async ({ run, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				const values = await run<string[]>(
+					`const { elements } = await tab.observe();
+					 const field = await tab.ref(elements.find(e => e.role === "textbox").ref);
+					 const value = () => tab.evaluate(() => document.querySelector("input").value);
+					 await field.type("abc");
+					 await field.press("${SHORTCUT}+a");
+					 await field.type("x");
+					 const replaced = await value();
+					 await field.press("${SHORTCUT}+z");
+					 const undone = await value();
+					 await field.press("Shift+${SHORTCUT}+z");
+					 return [replaced, undone, await value()];`,
+				);
+				expect(values).toEqual(["x", "abc", "x"]);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
+// The clipboard chords cannot be run against the real pasteboard here, so the
+// macOS contract is checked where it is made: the key-down names the command.
+it("names the editor command on macOS editing chords, including the clipboard helpers", async () => {
+	const commands: unknown[] = [];
+	const session = {
+		send: async (method: string, params: { type: string; commands?: string[] }) => {
+			if (method === "Input.dispatchKeyEvent" && params.commands) commands.push(...params.commands);
+			return {};
+		},
+	} as unknown as CDPSession;
+	const page = { on() {}, url: () => "about:blank", mainFrame: () => ({ client: session }) } as unknown as Page;
+	const emulation = new BrowserEmulationController(page, {}, {}, "");
+	await emulation.clipboardCopy();
+	await emulation.clipboardPaste();
+	for (const chord of ["Meta+x", "Meta+a", "Meta+z", "Shift+Meta+z", "Meta+b", "Control+c", "Alt+Meta+z"]) {
+		await pressChord(session, chord);
+	}
+	expect(commands).toEqual(process.platform === "darwin" ? ["copy", "paste", "cut", "selectAll", "undo", "redo"] : []);
+});
 
 const TALL_PAGE = `<!doctype html><title>Tall</title>
 <button id="top">Visible button</button>
