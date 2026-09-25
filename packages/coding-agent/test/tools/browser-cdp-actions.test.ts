@@ -633,18 +633,23 @@ const CHECK_PAGE = `<!doctype html><title>Checks</title>
 <div id="group"><input type="checkbox" id="inert" aria-label="Inert" style="pointer-events:none"></div>
 <p><label><input type="checkbox" id="twice"> Twice</label></p>
 <p><span role="switch" aria-checked="false" id="wifi" tabindex="0">Wifi</span>
-<span role="checkbox" aria-checked="false" id="dead" tabindex="0">Dead</span></p>
+<span role="checkbox" aria-checked="false" id="dead" tabindex="0">Dead</span>
+<span role="checkbox" aria-checked="false" id="later" tabindex="0">Later</span></p>
 <script>
 document.getElementById("prevented").addEventListener("click", event => event.preventDefault());
 document.getElementById("trap").addEventListener("click", event => event.preventDefault());
 const wifi = document.getElementById("wifi");
 wifi.addEventListener("click", () => wifi.setAttribute("aria-checked", String(wifi.getAttribute("aria-checked") !== "true")));
+const later = document.getElementById("later");
+later.addEventListener("click", () => setTimeout(() => later.setAttribute("aria-checked", "true"), 50));
 </script>`;
 
-// A click on a checkable control is expected to change it. One that reads the
-// same right after the release is reported, with where the press landed when
-// that was not the control; a styled control drawn over by its own label is
-// pressed through that label instead of refused as covered.
+// A click on a checkable control is expected to change it. One that still
+// reads the same after the release is reported, with where the press landed
+// when that was not the control; an ARIA control the page updates a moment
+// later is not (the fixture's page timer is the behaviour under test, so it
+// cannot be faked). A styled control drawn over by its own label is pressed
+// through that label instead of refused as covered.
 it.skipIf(!CHROMIUM_AVAILABLE)(
 	"reports a checkbox, radio or switch click that left it unchanged, and clicks one through its own label",
 	async () => {
@@ -663,12 +668,12 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 				const ref = (name: string) => `(await tab.ref(${JSON.stringify(refs[name])}))`;
 				const states = () =>
 					run<string>(
-						`return await tab.evaluate(() => [...document.querySelectorAll("input")].map(i => i.id + "=" + i.checked).join(" ") + " wifi=" + document.getElementById("wifi").getAttribute("aria-checked"));`,
+						`return await tab.evaluate(() => [...document.querySelectorAll("input")].map(i => i.id + "=" + i.checked).join(" ") + " wifi=" + document.getElementById("wifi").getAttribute("aria-checked") + " later=" + document.getElementById("later").getAttribute("aria-checked"));`,
 					);
-				await run(`await ${ref("Plain")}.click(); await ${ref("Styled")}.click(); await ${ref("Wifi")}.click();
+				await run(`await ${ref("Plain")}.click(); await ${ref("Styled")}.click(); await ${ref("Wifi")}.click(); await ${ref("Later")}.click();
 					 await ${ref("Twice")}.dblclick(); await ${ref("Plain")}.click();`);
 				expect(await states()).toBe(
-					"plain=true prevented=false styled=true trapped=false inert=false twice=false wifi=true",
+					"plain=true prevented=false styled=true trapped=false inert=false twice=false wifi=true later=true",
 				);
 				expect(await runError(`await ${ref("Prevented")}.click();`)).toContain(
 					`${refs.Prevented}.click() did not change the radio: it is still unchecked. Use check() to set it.`,
@@ -684,7 +689,7 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 				);
 				await run(`await ${ref("Prevented")}.check(); await ${ref("Trapped")}.check();`);
 				expect(await states()).toBe(
-					"plain=true prevented=true styled=true trapped=true inert=false twice=false wifi=true",
+					"plain=true prevented=true styled=true trapped=true inert=false twice=false wifi=true later=true",
 				);
 			});
 		} finally {

@@ -441,9 +441,35 @@ async function pressNode(
 }
 
 /**
+ * The control's state after a click, or null once it left the document. A
+ * native input has settled by the time the release is acknowledged; an ARIA
+ * control is the page's to update, possibly a little later, so one still
+ * reading `before` gets until it changes (or leaves) or 150 ms, whichever is
+ * first. Only a click that did not take pays that wait.
+ */
+const CHECKED_AFTER = `function (before) {
+	const read = () => (this.isConnected ? (${CHECKED_OF})(this) : null);
+	const now = read();
+	if (!now || now.state !== before || !now.kind.startsWith("aria-")) return now;
+	const { promise, resolve } = Promise.withResolvers();
+	const observer = new MutationObserver(() => {
+		const state = read();
+		if (!state || state.state !== before) finish();
+	});
+	const timer = setTimeout(() => finish(), 150);
+	const finish = () => {
+		observer.disconnect();
+		clearTimeout(timer);
+		resolve(read());
+	};
+	observer.observe(this.ownerDocument, { subtree: true, childList: true, attributes: true, attributeFilter: ["aria-checked"] });
+	return promise;
+}`;
+
+/**
  * Click the node. On a checkbox, radio or switch the click is also expected to
- * change it (toggle it, or select an unselected radio); when its state reads
- * the same right after the release, the click is reported as not taken, with
+ * change it (toggle it, or select an unselected radio); when its state still
+ * reads the same after the release, the click is reported as not taken, with
  * what the press landed on when that was not the control itself.
  */
 export async function clickNode(
@@ -457,8 +483,8 @@ export async function clickNode(
 	const radio = before.kind.endsWith("radio");
 	if (radio ? before.state === "checked" : clickCount % 2 === 0) return;
 	// A control the click replaced or navigated away is not evidence either way.
-	const after = await callOnNode(node, CHECKED_STATE, [], signal).then(
-		state => state as CheckedState,
+	const after = await callOnNode(node, CHECKED_AFTER, [before.state], signal).then(
+		state => state as CheckedState | null,
 		error => {
 			rethrowIfAborted(signal, error);
 			return null;
