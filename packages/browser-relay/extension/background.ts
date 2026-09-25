@@ -11,6 +11,7 @@
  */
 import type { ExtToRelayMessage, RelayToExtMessage, TabSnapshot } from "../../coding-agent/src/tools/browser/relay/protocol";
 import { DebuggerAttachments, ownedDebuggerTabs } from "./debugger-ownership";
+import { attachPastForeignFrames } from "./foreign-frames";
 import { groupTab, releaseOwnerGroups } from "./tab-groups";
 import { CURSOR_OVERLAY_REMOVE, LEASE_BADGE_RESTORE } from "../../coding-agent/src/tools/browser/relay/lease-badge";
 
@@ -205,7 +206,7 @@ async function runRpc(msg: Extract<RelayToExtMessage, { t: "rpc" }>): Promise<un
 		case "queryTabs":
 			return { tabs: (await chrome.tabs.query({})).map(snapshot).filter(tab => tab !== null) };
 		case "attach":
-			await chrome.debugger.attach({ tabId: msg.tabId }, "1.3");
+			await attachPastForeignFrames(msg.tabId, () => chrome.debugger.attach({ tabId: msg.tabId }, "1.3"));
 			attachments.attached(msg.tabId);
 			return {};
 		case "detach":

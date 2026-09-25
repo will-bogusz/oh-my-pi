@@ -4,10 +4,12 @@
 
 ### Changed
 
+- The extension now requests `scripting` and access to all sites, shown by Chrome as "Read and change all your data on all websites". It uses them only to empty other extensions' frames in a tab it is attaching to (see Fixed).
 - Renamed the extension's display name to **Oh My Pi**. Existing installations keep their current name unless `omp browser-relay install --name "Oh My Pi"` is passed, so a refresh never silently changes the debugger warning a loaded copy shows.
 
 ### Fixed
 
+- A password manager's inline autofill menu no longer takes a tab away from OMP. While the debugger is attached, a leased tab's documents carry the page opt-outs the vendors honour: `data-1p-ignore` on `<body>` (1Password), Dashlane's `dashlane/analysis` meta, and `data-bwignore` / `data-protonpass-ignore` on fields. The menu then stays closed for the agent, while the user's own tabs, and a leased tab once its debugger goes back, keep autofill. A vendor without an opt-out still makes Chrome drop the debugger once, but the reattach now succeeds: when Chrome refuses an attach over another extension's frame, the extension points every such frame at an empty document and retries.
 - The extension now hands its `chrome.debugger` attachments back instead of holding them for a whole session, so Chrome's "started debugging this browser" bar no longer outlives the work that caused it. Attachments are released when the host ends a task or turn, when the relay socket stays closed for two seconds, and when Chrome unloads the extension's worker; the next command reattaches and restores the tab's root debugger state.
 - When the relay is gone for good — its socket stays closed past the reconnect grace — the extension now hands the tabs it was driving back by itself: it restores their favicons over the still-live attachment and takes them out of the groups it created, so a killed or crashed relay no longer leaves tabs marked, grouped and owned by nothing.
 - Selecting a tab no longer implies raising its window: the relay can put the user's own tab back after Chrome opens a `target="_blank"` child without touching window focus.
