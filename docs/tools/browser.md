@@ -34,7 +34,7 @@ Chrome shows that warning once per debugger attach and removes it about five sec
 
 Existing installations keep the display name they were installed with. Pass `--name "Oh My Pi"` to adopt the current default on an already installed copy.
 
-`browser.instances()` returns paired profiles, including disconnected ones, as `{ id, label, connected, generation? }`. Labels are chosen during setup; they are not inferred account or profile identities. Use the exact `id` as `browserId`. With multiple connected profiles, `create` requires an explicit selection.
+`browser.instances()` returns paired profiles, including disconnected ones, as `{ id, label, connected, generation? }`. Labels are chosen during setup; they are not inferred account or profile identities. Use the exact `id` as `browserId`. With multiple connected profiles, `create` requires an explicit selection. A freshly started relay holds each request up to 12 s (the extension's longest redial interval plus its handshake) for a paired browser to reconnect, waiting for the named `browserId` when given; a refusal after that says it waited.
 
 `browser.discover({ browserId?, full? })` returns fresh tab inventory without attaching to pages, navigating, or activating Chrome. The default projection is what a tab choice needs, sized to fit a cell even for dozens of tabs:
 
@@ -123,7 +123,7 @@ Direct `waitFor` and `waitForSelector` return booleans. Their timeouts are in mi
 
 ### Observation
 
-`observe()` is the page reader. It waits for the page to settle — no DOM mutations for 300 ms or no network traffic for 1 s, whichever comes first, then re-checks while the tree still shows a loading indicator (`aria-busy`, an indeterminate progressbar, a "Loading…" node), bounded at about 3 s and never failing on the bound — snapshots the accessibility tree with every iframe's document included (cross-origin ones through their own CDP session), prints the tree into the cell, and returns `{ snapshot, url, title, viewport, scroll, focused?, tree, elements }`. `elements` lists the actionable nodes only, each with a `ref`; the tree carries the text.
+`observe()` is the page reader. It waits for the page to settle — no DOM mutations for 300 ms or no network traffic for 1 s, whichever comes first, then re-checks while the page still shows a loading indicator (`aria-busy`, an indeterminate progressbar, loading or please-wait text standing in for the page's content, or a skeleton screen of empty placeholder blocks), bounded at about 3 s and never failing on the bound: a tree read while an indicator outlasted it says `may still be loading` in its header — snapshots the accessibility tree with every iframe's document included (cross-origin ones through their own CDP session), prints the tree into the cell, and returns `{ snapshot, url, title, viewport, scroll, focused?, tree, elements }`. `elements` lists the actionable nodes only, each with a `ref`; the tree carries the text.
 
 `observe()` returns the settled tree of the document the cell ends up on. A click that navigates while the observation is already collecting is the ordinary case, not a failure: collection restarts against the new document inside the same settle budget. Only a page that never stops navigating exhausts that budget, and then the call fails with "The page changed while observing it. Observe again."
 
@@ -142,6 +142,8 @@ main
     e40 textbox "Amount in percent" = "14.5"
 ```
 
+Actionable means a control role, a node carrying state (checked, pressed, selected, expanded, focused), or a table or grid part — row, cell, gridcell, row or column header — that the page makes clickable: its own click listener (React `onClick` included), a pointer cursor it does not inherit from its parent, or a `tabindex`. Webmail and admin lists often open an item only through such a row. A plain data table has none of these and stays ref-free; `includeAll` gives every node a ref.
+
 When the same tab was observed before on the same document with the same filter, the default output is the diff: the header, then only added (`+`) and changed (`~`) lines under their unchanged ancestors, `removed: e12, e40-e47` (plus a count of removed unreferenced nodes), and `unchanged: N nodes`; a page with nothing changed prints one line saying so. `{ diff: false }` prints the full tree, a different document always does, and `{ display: false }` returns the observation without printing. Acquisition runs the same observation, so `claim`/`create`/`getTab` print the first tree.
 
 Act, then observe in the same cell; the settle wait replaces sleeps and the diff shows what the action did:
@@ -154,7 +156,7 @@ await tab.ref(search.ref).fill("background browser control");
 await tab.observe();
 ```
 
-`tab.ref(ref)` and `tab.id(number)` return synchronous `BrowserElement` proxies. On the direct facade, `tab.id` binds the number to the most recent observation. Handles support `click` (`{ count: 2 }` double-clicks), `type`, `fill`, `press`, `hover`, `focus`, `select`, `uploadFile`, `scrollIntoView`, `boundingBox`, `isVisible`, `isHidden`, and `evaluate`. A string passed to element `evaluate` is a function expression invoked with the element as its first argument. `press` takes one key or a chord — `"Enter"`, `"Control+a"`, `"Shift+Tab"` — with US-layout key names. `boundingBox` reports the border box in root-viewport CSS pixels (an element inside an out-of-process iframe is converted through its frame chain) and returns `null` when the element has no box; `isVisible`/`isHidden` answer the same question.
+`tab.ref(ref)` and `tab.id(number)` return synchronous `BrowserElement` proxies. `tab.ref()` refuses anything but a non-empty ref string on the spot (`undefined` usually means an `elements.find()` matched nothing), naming the call rather than failing at the first action. On the direct facade, `tab.id` binds the number to the most recent observation. Handles support `click` (`{ count: 2 }` double-clicks), `check`, `uncheck`, `type`, `fill`, `press`, `hover`, `focus`, `select`, `uploadFile`, `scrollIntoView`, `boundingBox`, `isVisible`, `isHidden`, and `evaluate`. A string passed to element `evaluate` is a function expression invoked with the element as its first argument. `press` takes one key or a chord — `"Enter"`, `"Control+a"`, `"Shift+Tab"` — with US-layout key names. `boundingBox` reports the border box in root-viewport CSS pixels (an element inside an out-of-process iframe is converted through its frame chain) and returns `null` when the element has no box; `isVisible`/`isHidden` answer the same question.
 
 Managed Chrome `ariaSnapshot()` is a read-only structural view. Its `[ref=eN]` slots are not action references; use `observe()` references for actions. Numeric IDs inside `tab.run` are also rejected on managed Chrome because they lack snapshot identity. Other Puppeteer modes retain their legacy numeric observation IDs and ARIA references.
 
