@@ -590,7 +590,8 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			// An inline autofill menu is another extension's page in an iframe, and
 			// Chrome detaches every other extension's debugger when one commits.
 			// A flash is gone once it has loaded; a pinned menu stays until the user
-			// dismisses it or signs in, which navigates the page.
+			// dismisses it or signs in, which navigates the page, and replaces its
+			// frame whenever OMP's extension empties it, so the refusal stays reachable.
 			const passwordManager = path.join(root, "password-manager");
 			await mkdir(passwordManager);
 			await writeFile(
@@ -607,14 +608,26 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			await writeFile(
 				path.join(passwordManager, "content.js"),
 				`const show = pinned => {
-					const frame = document.createElement("iframe");
-					frame.src = chrome.runtime.getURL("menu.html");
-					document.body.append(frame);
+					const open = () => {
+						const next = document.createElement("iframe");
+						next.src = chrome.runtime.getURL("menu.html");
+						document.body.append(next);
+						return next;
+					};
+					let frame = open();
 					if (!pinned) return frame.addEventListener("load", () => frame.remove(), { once: true });
+					const replace = new MutationObserver(() => {
+						if (!frame.hasAttribute("srcdoc")) return;
+						frame.remove();
+						frame = open();
+						replace.observe(frame, { attributeFilter: ["srcdoc"] });
+					});
+					replace.observe(frame, { attributeFilter: ["srcdoc"] });
 					const poll = setInterval(async () => {
 						const state = await (await fetch("/menu")).text();
 						if (state === "open") return;
 						clearInterval(poll);
+						replace.disconnect();
 						if (state === "signed-in") return location.assign("/signed-in");
 						frame.remove();
 						await fetch("/menu-removed");
@@ -684,7 +697,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			expect(text(flashed)).toContain("OMP reattached and ran it again");
 			expect(count("tab detached")).toBe(1);
 
-			// Still there: exactly one fresh attach, then Chrome's refusal naming the frame.
+			// Still there, and back as soon as it is emptied: exactly one fresh attach, then Chrome's refusal naming the frame.
 			const failedAttaches = count("attach failed");
 			const refusal = await run(showMenu("pm-pin")).then(
 				() => "no refusal",
@@ -1030,4 +1043,219 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 		}
 	},
 	60_000,
+);
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"keeps control of a driven tab through password-manager menus, and leaves the menus to the user's tabs",
+	async () => {
+		// Every inline menu that loads reports here, tagged with the page that opened it.
+		const menus: string[] = [];
+		const menuWaiters = new Map<string, () => void>();
+		// Resolves when a menu opened by `who` has loaded; the test timeout bounds it.
+		const menuFor = (who: string): Promise<void> => {
+			if (menus.includes(who)) return Promise.resolve();
+			const { promise, resolve } = Promise.withResolvers<void>();
+			menuWaiters.set(who, resolve);
+			return promise;
+		};
+		const fixture = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: request => {
+				const url = new URL(request.url);
+				if (url.pathname === "/menu-loaded") {
+					const who = url.searchParams.get("who") ?? "";
+					menus.push(who);
+					menuWaiters.get(who)?.();
+					return new Response(null, { status: 204 });
+				}
+				const autofocus = url.searchParams.has("autofocus") ? " autofocus" : "";
+				return new Response(
+					`<title>Sign in</title><form><input id="user"${autofocus}><input type="password" id="pw"></form>`,
+					{ headers: { "content-type": "text/html" } },
+				);
+			},
+		});
+		const root = await mkdtemp(path.join(tmpdir(), "omp-autofill-menus-"));
+		const events: string[] = [];
+		const relay = startRelayServer({ port: 0, log: message => events.push(message) });
+		const token = spyOn(relayAccess, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
+		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+		const session: ToolSession = {
+			cwd: root,
+			hasUI: false,
+			getSessionFile: () => null,
+			getSessionSpawns: () => null,
+			getSessionId: () => "autofill-menus",
+			getAgentId: () => "agent",
+			settings: Settings.isolated({
+				"browser.enabled": true,
+				"browser.relay": true,
+				"browser.relayUrl": `http://127.0.0.1:${relay.port}`,
+			}),
+		};
+		let setup: Browser | undefined;
+		try {
+			const extension = path.join(root, "extension");
+			await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
+			// Built like 1Password's inline menu: one closed-shadow host per document
+			// whose frame is pointed at the menu on every field focus and hidden on
+			// blur. `?pm=honors` pages get a vendor that honours 1Password's
+			// `data-1p-ignore`; `?pm=ignores` pages one that honours nothing.
+			const passwordManager = path.join(root, "password-manager");
+			await mkdir(passwordManager);
+			await writeFile(
+				path.join(passwordManager, "manifest.json"),
+				JSON.stringify({
+					manifest_version: 3,
+					name: "Fake password manager",
+					version: "1.0",
+					content_scripts: [{ matches: ["http://127.0.0.1/*"], js: ["content.js"], run_at: "document_start" }],
+					web_accessible_resources: [{ resources: ["menu.html", "menu.js"], matches: ["http://127.0.0.1/*"] }],
+				}),
+			);
+			await writeFile(
+				path.join(passwordManager, "menu.html"),
+				'<script src="menu.js"></script><p>Fill password</p>',
+			);
+			await writeFile(
+				path.join(passwordManager, "menu.js"),
+				'fetch(new URLSearchParams(location.search).get("report"), { mode: "no-cors" });',
+			);
+			await writeFile(
+				path.join(passwordManager, "content.js"),
+				`const params = new URL(location.href).searchParams;
+				const ignored = field => params.get("pm") === "honors" && [field, document.body].some(el => "1pIgnore" in el.dataset);
+				let host, frame;
+				window.addEventListener("focusin", event => {
+					if (!(event.target instanceof HTMLInputElement) || ignored(event.target)) return;
+					if (!host) {
+						host = document.createElement("com-fake-menu");
+						frame = document.createElement("iframe");
+						host.attachShadow({ mode: "closed" }).append(frame);
+					}
+					const report = location.origin + "/menu-loaded?who=" + params.get("who");
+					frame.src = chrome.runtime.getURL("menu.html") + "?report=" + encodeURIComponent(report) + "&at=" + performance.now();
+					document.body.append(host);
+				}, true);
+				window.addEventListener("focusout", () => host?.remove(), true);`,
+			);
+			setup = await puppeteer.launch({
+				executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+				headless: true,
+				pipe: true,
+				enableExtensions: true,
+				ignoreDefaultArgs: stockBackgroundPolicy,
+				userDataDir: path.join(root, "profile"),
+				defaultViewport: null,
+			});
+			const extensionId = await setup.installExtension(extension);
+			await setup.installExtension(passwordManager);
+			const options = await setup.newPage();
+			await options.goto(`chrome-extension://${extensionId}/options.html`);
+			await options.type("#label", "Autofill fixture");
+			await options.type("#code", relay.access.issueCode().code);
+			await options.click("#save");
+			for (let i = 0; i < 400 && !relay.instances.list().some(browser => browser.connected); i++)
+				await Bun.sleep(25);
+			await options.close();
+			// The launch pipe stays as the user's hands: it is not an extension, so
+			// Chrome's rule never applies to it. Disarm its auto-attach.
+			const setupSession = await setup.target().createCDPSession();
+			const user = setupSession.connection()!;
+			await user.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
+			const userSession = async (who: string) => {
+				const { targetInfos } = await user.send("Target.getTargets");
+				const target = targetInfos.find(info => info.type === "page" && info.url.includes(`who=${who}`));
+				if (!target) throw new Error(`no page for ${who}`);
+				const { sessionId } = await user.send("Target.attachToTarget", {
+					targetId: target.targetId,
+					flatten: true,
+				});
+				const page = user.session(sessionId)!;
+				await page.send("Emulation.setFocusEmulationEnabled", { enabled: true });
+				return async (expression: string) =>
+					(await page.send("Runtime.evaluate", { expression, returnByValue: true })).result.value as unknown;
+			};
+			const prelude = createBrowserPrelude(session);
+			const context = { session, toolCallId: "autofill-menus" };
+			const detail = (result: AgentToolResult<unknown>, key: string): unknown =>
+				result.details && typeof result.details === "object" && key in result.details
+					? Reflect.get(result.details, key)
+					: undefined;
+			const text = (result: AgentToolResult<unknown>) =>
+				result.content.map(part => (part.type === "text" ? part.text : "")).join("\n");
+			const count = (message: string) => events.filter(event => event === message).length;
+			const create = async (query: string) => {
+				const handle = detail(
+					await prelude.invoke({ action: "create", url: `${fixture.url}login?${query}`, timeout: 20 }, context),
+					"handle",
+				);
+				if (typeof handle !== "string") throw new Error("create returned no handle");
+				return handle;
+			};
+
+			// A vendor with a page opt-out: the menu never opens for the agent.
+			const honoring = await create("pm=honors&who=agent");
+			const run = (handle: string, code: string) =>
+				prelude.invoke({ action: "run", handle, code, timeout: 20 }, context);
+			const filled = await run(
+				honoring,
+				`await page.click("#user"); await page.keyboard.type("will");
+				await page.click("#pw"); await page.keyboard.type("secret");
+				return await page.evaluate(() => document.querySelector("#user").value + "/" + document.querySelector("#pw").value);`,
+			);
+			expect(detail(filled, "value")).toBe("will/secret");
+			// The next page focuses its field itself, before any command reaches it.
+			const next = await run(
+				honoring,
+				`await page.goto(new URL("/login?pm=honors&who=agent-next&autofocus", page.url()).href);
+				await page.keyboard.type("will");
+				return await page.$eval("#user", field => field.value);`,
+			);
+			expect(detail(next, "value")).toBe("will");
+			expect(count("tab detached")).toBe(0);
+			expect(menus).toEqual([]);
+			// The user's own tab, opened while the agent drives: its menu opens as usual.
+			await user.send("Target.createTarget", { url: `${fixture.url}login?pm=honors&who=user&autofocus` });
+			await menuFor("user");
+			// Handed back, the driven tab is the user's again, menu included.
+			await prelude.invoke({ action: "release", handle: honoring }, context);
+			const handedBack = await userSession("agent-next");
+			expect(await handedBack(`document.body.hasAttribute("data-1p-ignore")`)).toBe(false);
+			await handedBack(`document.querySelector("#pw").focus()`);
+			await menuFor("agent-next");
+			expect(menus).toEqual(["user", "agent-next"]);
+
+			// A vendor that honours nothing: Chrome drops the debugger once, the
+			// extension empties the menu's frame, and the call goes through on the
+			// same handle; focusing again re-shows a frame that now loads nothing.
+			const ignoring = await create("pm=ignores&who=agent-ignored");
+			const refusals = count("attach failed");
+			const first = await run(
+				ignoring,
+				`await page.click("#user"); await page.keyboard.type("will"); return await page.$eval("#user", field => field.value);`,
+			);
+			expect(detail(first, "value")).toBe("will");
+			expect(text(first)).toContain("OMP reattached and ran it again");
+			expect(count("tab detached")).toBe(1);
+			const second = await run(
+				ignoring,
+				`await page.click("#pw"); await page.keyboard.type("secret"); return await page.$eval("#pw", field => field.value);`,
+			);
+			expect(detail(second, "value")).toBe("secret");
+			expect(text(second)).not.toContain("ran it again");
+			expect(count("tab detached")).toBe(1);
+			expect(count("attach failed")).toBe(refusals);
+		} finally {
+			await releaseChromeTabsForOwner("autofill-menus").catch(() => 0);
+			setup?.process()?.kill("SIGTERM");
+			token.mockRestore();
+			daemonReady.mockRestore();
+			relay.stop();
+			fixture.stop();
+			await rm(root, { recursive: true, force: true });
+		}
+	},
+	90_000,
 );
