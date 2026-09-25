@@ -268,22 +268,66 @@ async function pressPoint(node: CdpNode, signal?: AbortSignal): Promise<Point | 
 	return { x: (quad[0] + quad[2] + quad[4] + quad[6]) / 4, y: (quad[1] + quad[3] + quad[5] + quad[7]) / 4 };
 }
 
+/** `<tag#id.class>`: how a refusal names an element. */
+const DESCRIBE_ELEMENT = `target => {
+	const id = target.id ? "#" + target.id : "";
+	const classes = Array.from(target.classList).slice(0, 2).map(name => "." + name).join("");
+	return "<" + target.tagName.toLowerCase() + id + classes + ">";
+}`;
+
+/** Whether `descendant` is `ancestor` or inside it, across shadow roots. */
+const CONTAINS = `(ancestor, descendant) => {
+	for (let current = descendant, depth = 0; current && depth < 64; depth++) {
+		if (current === ancestor) return true;
+		current = current.parentElement || current.getRootNode().host || null;
+	}
+	return false;
+}`;
+
+/** A native checkbox/radio or ARIA checkbox/radio/switch, and its state now; `kind` is empty for anything else. */
+const CHECKED_OF = `element => {
+	const tag = element.tagName.toLowerCase();
+	const type = tag === "input" ? String(element.type).toLowerCase() : "";
+	const role = (element.getAttribute("role") || "").toLowerCase();
+	if (tag === "input" && (type === "checkbox" || type === "radio")) {
+		const state = element.indeterminate && type === "checkbox" ? "mixed" : element.checked ? "checked" : "unchecked";
+		return { kind: type, checked: element.checked, state };
+	}
+	if (role === "switch" || role === "checkbox" || role === "radio") {
+		const aria = element.getAttribute("aria-checked");
+		const state = aria === "true" ? "checked" : aria === "mixed" ? "mixed" : "unchecked";
+		return { kind: "aria-" + role, checked: aria === "true", state };
+	}
+	return { kind: "", checked: false, state: "unchecked" };
+}`;
+const CHECKED_STATE = `function () { return (${CHECKED_OF})(this); }`;
+
+interface CheckedState {
+	kind: string;
+	checked: boolean;
+	state: "checked" | "unchecked" | "mixed";
+}
+
 /**
  * Why a press on the node would not reach it, or null when it would. Asked of
  * the node where it lives, so an iframe needs no offsets, and in the order a
  * user would find out: the page dropped it (Chrome keeps answering for detached
  * nodes), `display:none` on it or an ancestor, no area, `visibility` that
  * hit-testing skips, or another element over the centre of its first fragment
- * (the fragment the press targets). An ancestor at that point is not a cover.
+ * (the fragment the press targets). An ancestor at that point is not a cover,
+ * and neither is one of the control's own labels, which forwards the click.
+ * A checkable control that can be pressed also reports its state, so a click
+ * can tell whether it took without a read of its own before the press.
  */
 const PRESS_BLOCKER = `function () {
 	const element = this;
 	if (!element.isConnected) return { stale: "it is detached from the document" };
 	const view = element.ownerDocument.defaultView;
-	const describe = target => {
-		const id = target.id ? "#" + target.id : "";
-		const classes = Array.from(target.classList).slice(0, 2).map(name => "." + name).join("");
-		return "<" + target.tagName.toLowerCase() + id + classes + ">";
+	const describe = ${DESCRIBE_ELEMENT};
+	const contains = ${CONTAINS};
+	const clear = () => {
+		const state = (${CHECKED_OF})(element);
+		return state.kind ? { state } : null;
 	};
 	const parentOf = current => current.assignedSlot || current.parentElement || current.getRootNode().host || null;
 	if (!element.checkVisibility()) {
@@ -303,7 +347,7 @@ const PRESS_BLOCKER = `function () {
 	const right = Math.max(0, Math.min(view.innerWidth, rect.right));
 	const top = Math.max(0, Math.min(view.innerHeight, rect.top));
 	const bottom = Math.max(0, Math.min(view.innerHeight, rect.bottom));
-	if (right - left < 1 || bottom - top < 1) return null;
+	if (right - left < 1 || bottom - top < 1) return clear();
 	const x = Math.floor((left + right) / 2);
 	const y = Math.floor((top + bottom) / 2);
 	let hit = element.ownerDocument.elementFromPoint(x, y);
@@ -312,32 +356,20 @@ const PRESS_BLOCKER = `function () {
 		if (!nested || nested === hit) break;
 		hit = nested;
 	}
-	if (!hit) return null;
-	const contains = (ancestor, descendant) => {
-		for (let current = descendant, depth = 0; current && depth < 64; depth++) {
-			if (current === ancestor) return true;
-			current = current.parentElement || current.getRootNode().host || null;
-		}
-		return false;
-	};
-	if (contains(element, hit) || contains(hit, element)) return null;
+	if (!hit || contains(element, hit) || contains(hit, element)) return clear();
+	if (Array.from(element.labels || []).some(label => contains(label, hit))) return clear();
 	return { blocked: "covered by " + describe(hit) };
 }`;
 
-async function pressBlocker(node: CdpNode, label: string, signal?: AbortSignal): Promise<ToolError | null> {
-	const blocker = (await callOnNode(node, PRESS_BLOCKER, [], signal)) as {
-		stale?: string;
-		noBox?: string;
-		blocked?: string;
-	} | null;
-	if (!blocker) return null;
-	if (blocker.stale) return staleNode(node, new Error(blocker.stale));
-	if (blocker.noBox) {
-		return new ToolError(
-			`${label} has no box to act on: ${blocker.noBox}. Run tab.observe() to see the current page.`,
-		);
+type PressProbe = { stale?: string; noBox?: string; blocked?: string; state?: CheckedState } | null;
+
+function pressRefusal(node: CdpNode, label: string, probe: PressProbe): ToolError | null {
+	if (probe?.stale) return staleNode(node, new Error(probe.stale));
+	if (probe?.noBox) {
+		return new ToolError(`${label} has no box to act on: ${probe.noBox}. Run tab.observe() to see the current page.`);
 	}
-	return new ToolError(`${label} blocked: ${blocker.blocked}`);
+	if (probe?.blocked) return new ToolError(`${label} blocked: ${probe.blocked}`);
+	return null;
 }
 
 /** Scroll the node into view and find where a press lands, or refuse with the reason there is nowhere. */
@@ -354,7 +386,7 @@ async function actionPoint(node: CdpNode, label: string, signal?: AbortSignal): 
 	const point = scrolled ? await pressPoint(node, signal) : null;
 	if (point) return point;
 	throw (
-		(await pressBlocker(node, label, signal)) ??
+		pressRefusal(node, label, (await callOnNode(node, PRESS_BLOCKER, [], signal)) as PressProbe) ??
 		new ToolError(`${label} has no box to act on. Run tab.observe() to see the current page.`)
 	);
 }
@@ -386,6 +418,59 @@ async function dispatchMouse(
 /**
  * Press and release where the node's first fragment is. A press that would not
  * reach it is refused instead of landing elsewhere: `${label} blocked: covered by <div#overlay>`.
+ * Returns where it pressed and, for a checkable control, its state before.
+ */
+async function pressNode(
+	node: CdpNode,
+	clickCount: number,
+	label: string,
+	signal?: AbortSignal,
+): Promise<{ point: Point; before?: CheckedState }> {
+	const point = await actionPoint(node, label, signal);
+	const probe = (await callOnNode(node, PRESS_BLOCKER, [], signal)) as PressProbe;
+	const refusal = pressRefusal(node, label, probe);
+	if (refusal) throw refusal;
+	// The move both primes hover state and drives the in-page cursor overlay the
+	// relay paints from Input.dispatchMouseEvent.
+	await dispatchMouse(node.session, "mouseMoved", point, { button: "none", buttons: 0, clickCount: 0 }, signal);
+	for (let count = 1; count <= clickCount; count++) {
+		await dispatchMouse(node.session, "mousePressed", point, { button: "left", buttons: 1, clickCount: count }, signal);
+		await dispatchMouse(node.session, "mouseReleased", point, { button: "left", buttons: 0, clickCount: count }, signal);
+	}
+	return { point, before: probe?.state };
+}
+
+/**
+ * The control's state after a click, or null once it left the document. A
+ * native input has settled by the time the release is acknowledged; an ARIA
+ * control is the page's to update, possibly a little later, so one still
+ * reading `before` gets until it changes (or leaves) or 150 ms, whichever is
+ * first. Only a click that did not take pays that wait.
+ */
+const CHECKED_AFTER = `function (before) {
+	const read = () => (this.isConnected ? (${CHECKED_OF})(this) : null);
+	const now = read();
+	if (!now || now.state !== before || !now.kind.startsWith("aria-")) return now;
+	const { promise, resolve } = Promise.withResolvers();
+	const observer = new MutationObserver(() => {
+		const state = read();
+		if (!state || state.state !== before) finish();
+	});
+	const timer = setTimeout(() => finish(), 150);
+	const finish = () => {
+		observer.disconnect();
+		clearTimeout(timer);
+		resolve(read());
+	};
+	observer.observe(this.ownerDocument, { subtree: true, childList: true, attributes: true, attributeFilter: ["aria-checked"] });
+	return promise;
+}`;
+
+/**
+ * Click the node. On a checkbox, radio or switch the click is also expected to
+ * change it (toggle it, or select an unselected radio); when its state still
+ * reads the same after the release, the click is reported as not taken, with
+ * what the press landed on when that was not the control itself.
  */
 export async function clickNode(
 	node: CdpNode,
@@ -393,15 +478,69 @@ export async function clickNode(
 	signal?: AbortSignal,
 	label: string = node.label,
 ): Promise<void> {
-	const point = await actionPoint(node, label, signal);
-	const blocker = await pressBlocker(node, label, signal);
-	if (blocker) throw blocker;
-	// The move both primes hover state and drives the in-page cursor overlay the
-	// relay paints from Input.dispatchMouseEvent.
-	await dispatchMouse(node.session, "mouseMoved", point, { button: "none", buttons: 0, clickCount: 0 }, signal);
-	for (let count = 1; count <= clickCount; count++) {
-		await dispatchMouse(node.session, "mousePressed", point, { button: "left", buttons: 1, clickCount: count }, signal);
-		await dispatchMouse(node.session, "mouseReleased", point, { button: "left", buttons: 0, clickCount: count }, signal);
+	const { point, before } = await pressNode(node, clickCount, label, signal);
+	if (!before) return;
+	const radio = before.kind.endsWith("radio");
+	if (radio ? before.state === "checked" : clickCount % 2 === 0) return;
+	// A control the click replaced or navigated away is not evidence either way.
+	const after = await callOnNode(node, CHECKED_AFTER, [before.state], signal).then(
+		state => state as CheckedState | null,
+		error => {
+			rethrowIfAborted(signal, error);
+			return null;
+		},
+	);
+	if (!after || after.state !== before.state) return;
+	const control = before.kind.replace("aria-", "");
+	const setter =
+		radio || before.state === "unchecked"
+			? "check()"
+			: before.state === "checked"
+				? "uncheck()"
+				: "check() or uncheck()";
+	throw new ToolError(
+		`${label} did not change the ${control}: it is still ${after.state}.${await landing(node, point, signal)} Use ${setter} to set it.`,
+	);
+}
+
+/** What a press at `point` hit, when that is not the node or inside it: ` The press landed on <div#group>, which contains it.` */
+const LANDING = `function (target) {
+	const describe = ${DESCRIBE_ELEMENT};
+	const contains = ${CONTAINS};
+	if (contains(target, this)) return "";
+	const where = " The press landed on " + describe(this);
+	if (Array.from(target.labels || []).some(label => contains(label, this))) return where + " in its label.";
+	return where + (contains(this, target) ? ", which contains it." : ".");
+}`;
+
+/** Only asked once a click failed, so its extra calls never cost a click that worked. Empty when unknowable. */
+async function landing(node: CdpNode, point: Point, signal?: AbortSignal): Promise<string> {
+	const send = node.session.send.bind(node.session);
+	const objects: string[] = [];
+	try {
+		const hit = await untilAborted(signal, () =>
+			send("DOM.getNodeForLocation", { x: Math.round(point.x), y: Math.round(point.y) }),
+		);
+		if (hit.backendNodeId === node.backendNodeId) return "";
+		for (const backendNodeId of [hit.backendNodeId, node.backendNodeId]) {
+			const { object } = await untilAborted(signal, () => send("DOM.resolveNode", { backendNodeId }));
+			if (!object.objectId) return "";
+			objects.push(object.objectId);
+		}
+		const result = await untilAborted(signal, () =>
+			send("Runtime.callFunctionOn", {
+				objectId: objects[0],
+				functionDeclaration: LANDING,
+				arguments: [{ objectId: objects[1] }],
+				returnByValue: true,
+			}),
+		);
+		return typeof result.result.value === "string" ? result.result.value : "";
+	} catch (error) {
+		rethrowIfAborted(signal, error);
+		return "";
+	} finally {
+		for (const objectId of objects) await send("Runtime.releaseObject", { objectId }).catch(() => undefined);
 	}
 }
 
@@ -645,16 +784,6 @@ export async function setFileInput(node: CdpNode, files: readonly string[], sign
 	);
 }
 
-/** A native checkbox/radio or ARIA checkbox/radio/switch, and whether it is checked now. */
-const CHECKED_STATE = `function () {
-	const tag = this.tagName.toLowerCase();
-	const type = tag === "input" ? String(this.type).toLowerCase() : "";
-	const role = (this.getAttribute("role") || "").toLowerCase();
-	if (tag === "input" && (type === "checkbox" || type === "radio")) return { kind: type, checked: this.checked };
-	if (role === "switch" || role === "checkbox" || role === "radio")
-		return { kind: "aria-" + role, checked: this.getAttribute("aria-checked") === "true" };
-	return { kind: "", checked: false };
-}`;
 /** Force the state a click did not reach, with the events a user's change would fire. */
 const SET_CHECKED = `function (desired) {
 	const role = (this.getAttribute("role") || "").toLowerCase();
@@ -678,10 +807,10 @@ export async function setNodeChecked(
 	label: string,
 	signal?: AbortSignal,
 ): Promise<void> {
-	const state = (await callOnNode(node, CHECKED_STATE, [], signal)) as { kind: string; checked: boolean };
+	const state = (await callOnNode(node, CHECKED_STATE, [], signal)) as CheckedState;
 	if (!state.kind) throw new ToolError(`${label} requires a checkbox, radio, or ARIA switch`);
 	if (state.checked === checked) return;
-	if (state.kind !== "radio" || checked) await clickNode(node, 1, signal, label);
+	if (state.kind !== "radio" || checked) await pressNode(node, 1, label, signal);
 	await callOnNode(node, SET_CHECKED, [checked], signal);
 }
 

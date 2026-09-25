@@ -621,6 +621,84 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	60_000,
 );
 
+const CHECK_PAGE = `<!doctype html><title>Checks</title>
+<style>body{margin:20px;font:16px sans-serif}
+.styled{position:relative;display:inline-block;padding-left:28px}
+.styled input{position:absolute;left:0;top:0;margin:0;width:20px;height:20px}
+.dot{position:absolute;left:0;top:0;width:20px;height:20px;background:#39f}</style>
+<p><label><input type="radio" name="plain" id="plain"> Plain</label></p>
+<p><label><input type="radio" name="prevented" id="prevented"> Prevented</label></p>
+<p><label class="styled"><input type="radio" name="styled" id="styled" aria-label="Styled"><span class="dot"></span>Styled</label></p>
+<p><label class="styled" id="trap"><input type="radio" name="trapped" id="trapped" aria-label="Trapped"><span class="dot"></span>Trapped</label></p>
+<div id="group"><input type="checkbox" id="inert" aria-label="Inert" style="pointer-events:none"></div>
+<p><label><input type="checkbox" id="twice"> Twice</label></p>
+<p><span role="switch" aria-checked="false" id="wifi" tabindex="0">Wifi</span>
+<span role="checkbox" aria-checked="false" id="dead" tabindex="0">Dead</span>
+<span role="checkbox" aria-checked="false" id="later" tabindex="0">Later</span></p>
+<script>
+document.getElementById("prevented").addEventListener("click", event => event.preventDefault());
+document.getElementById("trap").addEventListener("click", event => event.preventDefault());
+const wifi = document.getElementById("wifi");
+wifi.addEventListener("click", () => wifi.setAttribute("aria-checked", String(wifi.getAttribute("aria-checked") !== "true")));
+const later = document.getElementById("later");
+later.addEventListener("click", () => setTimeout(() => later.setAttribute("aria-checked", "true"), 50));
+</script>`;
+
+// A click on a checkable control is expected to change it. One that still
+// reads the same after the release is reported, with where the press landed
+// when that was not the control; an ARIA control the page updates a moment
+// later is not (the fixture's page timer is the behaviour under test, so it
+// cannot be faked). A styled control drawn over by its own label is pressed
+// through that label instead of refused as covered.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"reports a checkbox, radio or switch click that left it unchanged, and clicks one through its own label",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(CHECK_PAGE, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				const refs = await run<Record<string, string>>(
+					`const { elements } = await tab.observe();
+					 return Object.fromEntries(elements.map(e => [e.name, e.ref]));`,
+				);
+				const ref = (name: string) => `(await tab.ref(${JSON.stringify(refs[name])}))`;
+				const states = () =>
+					run<string>(
+						`return await tab.evaluate(() => [...document.querySelectorAll("input")].map(i => i.id + "=" + i.checked).join(" ") + " wifi=" + document.getElementById("wifi").getAttribute("aria-checked") + " later=" + document.getElementById("later").getAttribute("aria-checked"));`,
+					);
+				await run(`await ${ref("Plain")}.click(); await ${ref("Styled")}.click(); await ${ref("Wifi")}.click(); await ${ref("Later")}.click();
+					 await ${ref("Twice")}.dblclick(); await ${ref("Plain")}.click();`);
+				expect(await states()).toBe(
+					"plain=true prevented=false styled=true trapped=false inert=false twice=false wifi=true later=true",
+				);
+				expect(await runError(`await ${ref("Prevented")}.click();`)).toContain(
+					`${refs.Prevented}.click() did not change the radio: it is still unchecked. Use check() to set it.`,
+				);
+				expect(await runError(`await ${ref("Trapped")}.click();`)).toContain(
+					".click() did not change the radio: it is still unchecked. The press landed on <span.dot> in its label. Use check() to set it.",
+				);
+				expect(await runError(`await ${ref("Inert")}.click();`)).toContain(
+					".click() did not change the checkbox: it is still unchecked. The press landed on <div#group>, which contains it. Use check() to set it.",
+				);
+				expect(await runError(`await ${ref("Dead")}.click();`)).toContain(
+					".click() did not change the checkbox: it is still unchecked. Use check() to set it.",
+				);
+				await run(`await ${ref("Prevented")}.check(); await ${ref("Trapped")}.check();`);
+				expect(await states()).toBe(
+					"plain=true prevented=true styled=true trapped=true inert=false twice=false wifi=true later=true",
+				);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
 const HOP_START = `<!doctype html><title>Start</title><h1>Start</h1>
 <button id="go" onclick="location.href='/hop'">Go</button>`;
 
