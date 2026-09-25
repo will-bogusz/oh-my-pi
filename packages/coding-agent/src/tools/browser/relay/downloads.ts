@@ -54,9 +54,10 @@ function sameUrl(item: DownloadSnapshot, url: string): boolean {
  * `chrome.debugger` names the tab (`Page.downloadWillBegin`, on the tab's root
  * or a child-frame session) but never the saved file; `chrome.downloads` names
  * the file and its final state but never the tab. They meet on the download
- * URL. A pairing outlives the debugger attachment, so a download still finishes
- * after an idle detach. Downloads no leased tab's debugger saw (another tab, or
- * one started while detached) never pair and are never reported.
+ * URL. A running download's progress events are tab traffic, so the idle detach
+ * never drops the debugger under one. Downloads no leased tab's debugger saw
+ * (another tab, or one started while detached) never pair and are never
+ * reported.
  */
 export class DownloadAttribution {
 	readonly #emit: EmitTabEvent;

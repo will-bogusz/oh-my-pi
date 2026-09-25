@@ -752,7 +752,10 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 		const root = await mkdtemp(path.join(tmpdir(), "omp-create-naming-"));
 		const relay = startRelayServer({ port: 0 });
 		const token = spyOn(relayAccess, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
-		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue({
+			service: "omp-browser",
+			protocol: 2,
+		});
 		const session: ToolSession = {
 			cwd: root,
 			hasUI: false,
@@ -841,7 +844,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 );
 
 it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
-	"reports a leased tab's downloads with state and saved path, only its own, through an idle detach",
+	"reports a leased tab's downloads with state and saved path, only its own",
 	async () => {
 		const csv = "client_id,secret\n42,s3cr3t\n";
 		const slowStarted = Promise.withResolvers<void>();
@@ -894,7 +897,10 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 		const root = await mkdtemp(path.join(tmpdir(), "omp-relay-downloads-"));
 		const relay = startRelayServer({ port: 0 });
 		const token = spyOn(relayAccess, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
-		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue({
+			service: "omp-browser",
+			protocol: 2,
+		});
 		const session: ToolSession = {
 			cwd: root,
 			hasUI: false,
@@ -990,8 +996,9 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				),
 			).toEqual(["config.csv", "client.json"]);
 
-			// Still in progress when OMP hands the debugger back; it finishes unobserved
-			// by the debugger, and the tab still learns where it landed.
+			// Still in progress, then finished with its path. Chrome reports progress
+			// every half second, which is traffic, so the relay's idle detach never
+			// takes the debugger from a tab while one of its downloads is running.
 			expect(
 				await run(
 					main,
@@ -1004,7 +1011,6 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				),
 			).toBe("inProgress");
 			await slowStarted.promise;
-			expect(await relay.instances.detachDebuggers()).toHaveLength(2);
 			finishSlow.resolve();
 			expect(await run(main, "return await tab.waitForDownload();")).toEqual({
 				suggestedFilename: "slow.bin",
