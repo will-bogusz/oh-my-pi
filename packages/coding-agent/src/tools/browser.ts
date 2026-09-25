@@ -136,11 +136,8 @@ const browserSchema = type({
 		"browserId?": "string",
 		"windowId?": "number",
 	},
-	"observation?": {
-		"includeAll?": "boolean",
-		"viewportOnly?": "boolean",
-		"screenshot?": "boolean",
-	},
+	// Its keys are observe()'s plus `screenshot`, checked against the declarations like any option.
+	"observation?": type("object").describe("the first tree's observe() options plus screenshot"),
 	"name?": type("string").describe("tab id (default 'main')"),
 	"url?": type("string").describe("url to open"),
 	"app?": appSchema,

@@ -1,4 +1,6 @@
 async ({ tab }, options) => {
+	// `screenshot` is the acquisition's own option; every other key is observe()'s.
+	const { screenshot, ...observe } = options;
 	const state = {};
 	const partial = (field, error) => {
 		if (tab.signal?.aborted) throw error;
@@ -6,14 +8,11 @@ async ({ tab }, options) => {
 	};
 	try {
 		// observe() prints the tree itself; the state only carries what code needs.
-		state.initialObservation = await tab.observe({
-			includeAll: options.includeAll,
-			viewportOnly: options.viewportOnly,
-		});
+		state.initialObservation = await tab.observe(observe);
 	} catch (error) {
 		partial("inspectionError", error);
 	}
-	if (options.screenshot !== false) {
+	if (screenshot !== false) {
 		try {
 			state.initialScreenshot = await tab.screenshot();
 		} catch (error) {
