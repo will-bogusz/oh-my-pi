@@ -228,6 +228,14 @@ def _make_browser():
             return await self._method("screenshot", args, kwargs)
 
 
+    class _Observation(dict):
+        """An observation reads as its tree: `str(obs)`, `f"{obs}"`, `print(obs)`."""
+
+        __slots__ = ()
+
+        def __str__(self):
+            return self["tree"]
+
     class _Tab:
         __slots__ = ("_name", "_handle", "_snapshot", "_initial", "_target")
 
@@ -235,6 +243,8 @@ def _make_browser():
             self._name = _require_name(name, "tab name")
             self._handle = handle
             self._initial = initial or {}
+            if isinstance(self._initial.get("initialObservation"), dict):
+                self._initial["initialObservation"] = _Observation(self._initial["initialObservation"])
             self._snapshot = (self._initial.get("initialObservation") or {}).get("snapshot")
             target = self._initial.get("target")
             if target:
@@ -285,6 +295,7 @@ def _make_browser():
                 self._handle,
             )
             if method == "observe" and isinstance(value, dict):
+                value = _Observation(value)
                 self._snapshot = value.get("snapshot")
             if method == "goto":
                 self._snapshot = None

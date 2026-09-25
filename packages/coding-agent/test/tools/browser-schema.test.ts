@@ -1,9 +1,11 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, spyOn } from "bun:test";
 import { createContext, runInContext } from "node:vm";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { executePython } from "@oh-my-pi/pi-coding-agent/eval/py/executor";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import { browserActorId } from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
+import * as supervisor from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 
 import { cfgBrowserEnabled } from "@oh-my-pi/pi-coding-agent/tools/browser/settings";
 
@@ -144,4 +146,60 @@ describe("browser prelude", () => {
 			},
 		]);
 	});
+
+	// `String(observation).match(…)` searched "[object Object]" and always missed.
+	it("reads an observation value as its tree in both preludes", async () => {
+		const tree = 'url: https://example.test/ | title: Example\ne1 button "Go"';
+		const observation = { snapshot: "s1", url: "https://example.test/", tree, elements: [] };
+		const session = makeSession();
+		const prelude = createBrowserPrelude(session);
+		const context = createContext({
+			__omp_display__: () => {},
+			__omp_prelude__: async (_name: string, parameters: unknown) => {
+				const created = Reflect.get(Object(parameters), "action") === "create";
+				return {
+					text: "",
+					details: created
+						? { name: "Fixture", handle: "fixture-handle", value: { initialObservation: { ...observation } } }
+						: { value: { ...observation }, rendered: true },
+				};
+			},
+		});
+		runInContext(prelude.javascript, context);
+		const javascript = await runInContext(
+			`(async () => {
+				const tab = await browser.create();
+				const observation = await tab.observe();
+				return { initial: String(tab.initialObservation), observed: \`\${observation}\`, json: JSON.stringify(observation) };
+			})()`,
+			context,
+		);
+		expect(javascript.initial).toBe(tree);
+		expect(javascript.observed).toBe(tree);
+		// The tree string is how it reads, not another field it carries.
+		expect(JSON.parse(javascript.json)).toEqual(observation);
+
+		const run = spyOn(supervisor, "runInTab").mockResolvedValue({
+			displays: [],
+			returnValue: { ...observation },
+			screenshots: [],
+			rendered: true,
+		});
+		try {
+			session.getEvalPreludes = () => [prelude];
+			const python = await executePython(
+				`obs = await browser.tab("fixture").observe()\nprint(str(obs) == obs["tree"], f"{obs}" == obs["tree"])`,
+				{
+					cwd: import.meta.dir,
+					sessionId: `observation-string-${crypto.randomUUID()}`,
+					toolSession: session,
+					kernelMode: "per-call",
+				},
+			);
+			expect(python.exitCode).toBe(0);
+			expect(python.output.trim().split("\n").at(-1)).toBe("True True");
+		} finally {
+			run.mockRestore();
+		}
+	}, 15_000);
 });

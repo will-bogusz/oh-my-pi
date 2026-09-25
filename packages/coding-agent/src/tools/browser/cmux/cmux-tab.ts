@@ -930,6 +930,8 @@ export class CmuxTab {
 		this.#lastUrl = observation.url;
 		this.#lastTitle = observation.title;
 		this.#rememberObservedElements(observation);
+		// `String(observation)` is the tree, as on every backend.
+		Object.defineProperty(observation, "toString", { value: () => observation.tree });
 		return observation;
 	}
 

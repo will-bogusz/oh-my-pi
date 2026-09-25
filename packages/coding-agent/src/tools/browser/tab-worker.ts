@@ -2024,6 +2024,8 @@ export class WorkerCore {
 			observe: opts =>
 				op("tab.observe()", quickOpMs, async sig => {
 					const observation = await this.#collectObservation({ ...opts, refs: session.refs, signal: sig });
+					// `String(observation)` is the tree; non-enumerable, so it never crosses the run boundary.
+					Object.defineProperty(observation, "toString", { value: () => observation.tree });
 					if (opts?.display !== false) output.push({ type: "text", text: printableTree(observation.tree) });
 					active.presented = observation;
 					return observation;
