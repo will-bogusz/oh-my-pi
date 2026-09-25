@@ -1093,12 +1093,16 @@ export async function snapshotAccessibility(
 			owners.set(parent.client, bySession);
 		}),
 	);
-	// One click probe per session, and only for a frame with table parts to judge.
-	const probes = new Map<CDPSession, Promise<Set<number>>>();
-	const clickable = (session: CDPSession): Promise<Set<number>> => {
+	// One click probe per session, and only for a frame with table parts to judge. Row refs are an
+	// addition: a failed probe costs them, never the observation.
+	const probes = new Map<CDPSession, Promise<Set<number> | undefined>>();
+	const clickable = (session: CDPSession): Promise<Set<number> | undefined> => {
 		let probe = probes.get(session);
 		if (!probe) {
-			probe = clickTargets(session, signal);
+			probe = clickTargets(session, signal).catch(error => {
+				if (signal?.aborted) throw error;
+				return undefined;
+			});
 			probes.set(session, probe);
 		}
 		return probe;
