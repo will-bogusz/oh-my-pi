@@ -1080,7 +1080,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 		const events: string[] = [];
 		const relay = startRelayServer({ port: 0, log: message => events.push(message) });
 		const token = spyOn(relayAccess, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
-		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue(true);
+		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue({ service: "omp-browser", protocol: 2 });
 		const session: ToolSession = {
 			cwd: root,
 			hasUI: false,
