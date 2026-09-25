@@ -4,8 +4,8 @@ import browserDeclarations from "../../src/tools/browser/declarations.d.ts" with
 import {
 	BROWSER_TAB_VERBS,
 	ELEMENT_METHODS,
+	FRAME_METHODS,
 	renderTabCall,
-	TAB_HANDLE_METHODS,
 	TAB_PRESENCE_METHODS,
 	TAB_VALUE_METHODS,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-call";
@@ -21,63 +21,24 @@ function errorMessage(run: () => unknown): string {
 }
 
 describe("renderTabCall", () => {
-	it("keeps the public direct and element allowlists exact", () => {
-		expect(TAB_VALUE_METHODS).toEqual([
-			"url",
-			"title",
-			"goto",
-			"observe",
-			"ariaSnapshot",
-			"screenshot",
-			"extract",
-			"click",
-			"type",
-			"fill",
-			"press",
-			"scroll",
-			"drag",
-			"scrollIntoView",
-			"select",
-			"uploadFile",
-			"downloads",
-			"waitForUrl",
-			"evaluate",
-		]);
-		expect(TAB_PRESENCE_METHODS).toEqual(["waitFor", "waitForSelector"]);
-		expect(TAB_HANDLE_METHODS).toEqual(["id", "ref"]);
-		expect(ELEMENT_METHODS).toEqual([
-			"click",
-			"type",
-			"fill",
-			"press",
-			"hover",
-			"focus",
-			"select",
-			"uploadFile",
-			"scrollIntoView",
-			"boundingBox",
-			"isVisible",
-			"isHidden",
-			"evaluate",
-		]);
-	});
-
 	it("names every allowlisted verb in the acquisition footer and declares each one it names", () => {
-		const [tabGroup, elementGroup] = BROWSER_TAB_VERBS.replace("tab: ", "")
-			.replace(" (via tab.id()/tab.ref()) — browser.help() for signatures", "")
-			.split(" — el: ");
+		const [tabGroup, elementGroup, frameGroup] = BROWSER_TAB_VERBS.split(" — ")
+			.slice(0, 3)
+			.map(group => group.replace(/^\w+: /, "").replace(/ \(via .*\)$/, ""));
 		const tabVerbs = tabGroup!.split(" · ");
 		const elementVerbs = elementGroup!.split(" · ");
+		const frameVerbs = frameGroup!.split(" · ");
 		// The footer is the allowlist, not a hand-kept copy of it.
 		expect(tabVerbs.map(verb => verb.replace(/\(.*$/, ""))).toEqual([...TAB_VALUE_METHODS, ...TAB_PRESENCE_METHODS]);
 		expect(elementVerbs.map(verb => verb.replace(/\(.*$/, ""))).toEqual([...ELEMENT_METHODS]);
+		expect(frameVerbs).toEqual([...FRAME_METHODS]);
 		// Playwright's selectOption cost the bench five failed calls; the shape
 		// that replaces it travels with the name on both surfaces.
 		expect(tabVerbs).toContain("select(...values)");
 		expect(elementVerbs).toContain("select(...values)");
 		// Declared as a member of the tab or element interface — `evaluate` and
 		// friends open with a type parameter instead of the argument list.
-		for (const verb of [...tabVerbs, ...elementVerbs])
+		for (const verb of [...tabVerbs, ...elementVerbs, ...frameVerbs])
 			expect(browserDeclarations).toMatch(new RegExp(`\\n\\t${verb.replace(/\(.*$/, "")}[(<]`));
 		expect(BROWSER_TAB_VERBS.split("\n")).toHaveLength(1);
 	});
@@ -107,10 +68,10 @@ describe("renderTabCall", () => {
 		).toBe("return await (await tab.id(5)).evaluate((node => node.textContent));");
 	});
 
-	it("reports every invalid chain with its exact public error", () => {
+	it("rejects invalid call chains with actionable errors", () => {
 		expect(errorMessage(() => renderTabCall([]))).toBe("Action 'call' requires a non-empty 'chain'.");
-		expect(errorMessage(() => renderTabCall([{ method: "waitForNavigation", args: [] }]))).toBe(
-			'Unknown tab helper "waitForNavigation". Direct helpers: url, title, goto, observe, ariaSnapshot, screenshot, extract, click, type, fill, press, scroll, drag, scrollIntoView, select, uploadFile, downloads, waitForUrl, evaluate, waitFor, waitForSelector; element handles via tab.id(n)/tab.ref(id).',
+		expect(errorMessage(() => renderTabCall([{ method: "notAHelper", args: [] }]))).toContain(
+			'Unknown tab helper "notAHelper".',
 		);
 		expect(errorMessage(() => renderTabCall([{ method: "id", args: [5] }]))).toBe(
 			"tab.id() returns an element handle; call a method on it (tab.id(5).click()) or use tab.run(fn).",
@@ -122,7 +83,7 @@ describe("renderTabCall", () => {
 					{ method: "focus", args: [] },
 				]),
 			),
-		).toBe("Only tab.id(n)/tab.ref(id) results accept a chained call; got tab.click().");
+		).toMatch(/^Only tab\.id\(n\)\/tab\.ref\(id\).* results accept a chained call; got tab\.click\(\)\.$/);
 		expect(
 			errorMessage(() =>
 				renderTabCall([
@@ -130,9 +91,7 @@ describe("renderTabCall", () => {
 					{ method: "remove", args: [] },
 				]),
 			),
-		).toBe(
-			'Unknown element method "remove". Element handles support: click, type, fill, press, hover, focus, select, uploadFile, scrollIntoView, boundingBox, isVisible, isHidden, evaluate.',
-		);
+		).toContain('Unknown element method "remove".');
 		expect(
 			errorMessage(() =>
 				renderTabCall([

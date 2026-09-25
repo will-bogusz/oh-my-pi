@@ -1,5 +1,5 @@
-import type { Page } from "puppeteer-core";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import type { SnapshotPostProcessOptions } from "../snapshot-plus";
 import ariaBundle from "./aria-snapshot.bundle.txt" with { type: "text" };
 // `aria-snapshot.bundle.txt` is a generated, committed artifact: Playwright's
 // injected ARIA-snapshot sources (pinned, Apache-2.0) bundled to a CJS module.
@@ -7,11 +7,19 @@ import ariaBundle from "./aria-snapshot.bundle.txt" with { type: "text" };
 //   bun scripts/generate-aria-snapshot.ts
 // (fetches the pinned tag, bundles in a temp dir, rewrites the .txt artifact.)
 
-export interface AriaSnapshotOptions {
+export interface AriaSnapshotOptions extends SnapshotPostProcessOptions {
 	/** Maximum tree depth to render. */
 	depth?: number;
 	/** Append `[box=x,y,w,h]` bounding boxes to each node. */
 	boxes?: boolean;
+	/** Return a revisioned full, unchanged, or delta result. */
+	diff?: boolean;
+}
+
+/** Raw snapshot text and resolved link destinations produced in a browser realm. */
+export interface AriaSnapshotPayload {
+	snapshot: string;
+	hrefs: Record<string, string>;
 }
 
 /**
@@ -24,13 +32,14 @@ export interface AriaSnapshotOptions {
  * renumbered from e1 on each snapshot and remain valid until the next one.
  */
 /**
- * The bundle as a `Runtime.callFunctionOn` declaration that snapshots `this`.
+ * The bundle as a `Runtime.callFunctionOn` declaration that snapshots `this`
+ * and, for `urls`, resolves each link ref's destination in the same call.
  * Lets the worker scope a snapshot to an element it addressed by backend node
- * id, without ever holding a puppeteer handle.
+ * id, without ever holding a puppeteer handle. Returns an `AriaSnapshotPayload`.
  */
 export function buildAriaSnapshotFunction(options: AriaSnapshotOptions = {}): string {
 	const request = { depth: options.depth, boxes: options.boxes };
-	return `function(){var module={exports:{}};\n${ariaBundle}\nreturn module.exports.ariaSnapshot(this,${JSON.stringify(request)});}`;
+	return `function(){var module={exports:{}};\n${ariaBundle}\nvar snapshot=module.exports.ariaSnapshot(this,${JSON.stringify(request)});var hrefs={};if(${options.urls === true}){for(var match of snapshot.matchAll(/\\[ref=(e\\d+)\\]/g)){var ref=match[1],el=module.exports.resolveAriaRef(ref);if(el&&el.tagName==="A"&&el.href)hrefs[ref]=el.href;}}return {snapshot:snapshot,hrefs:hrefs};}`;
 }
 
 /**
@@ -103,4 +112,14 @@ export function buildAriaSnapshotScript(selector: string | undefined, options: A
 	const request = { depth: options.depth, boxes: options.boxes };
 	const sel = selector ? JSON.stringify(selector) : "null";
 	return `(function(){var module={exports:{}};\n${ariaBundle}\nvar __sel=${sel};var __root=__sel?document.querySelector(__sel):null;if(__sel&&!__root)throw new Error("tab.ariaSnapshot: selector "+__sel+" matched no element");return module.exports.ariaSnapshot(__root,${JSON.stringify(request)});})()`;
+}
+
+/** Build the cmux page-world expression returning snapshot text plus link destinations. */
+export function buildAriaSnapshotPayloadScript(
+	selector: string | undefined,
+	options: AriaSnapshotOptions = {},
+): string {
+	const request = { depth: options.depth, boxes: options.boxes };
+	const sel = selector ? JSON.stringify(selector) : "null";
+	return `(function(){var module={exports:{}};\n${ariaBundle}\nvar __sel=${sel};var __root=__sel?document.querySelector(__sel):null;if(__sel&&!__root)throw new Error("tab.ariaSnapshot: selector "+__sel+" matched no element");var snapshot=module.exports.ariaSnapshot(__root,${JSON.stringify(request)});var hrefs={};if(${options.urls === true}){for(var match of snapshot.matchAll(/\\[ref=(e\\d+)\\]/g)){var ref=match[1],el=module.exports.resolveAriaRef(ref);if(el&&el.tagName==="A"&&el.href)hrefs[ref]=el.href;}}return {snapshot:snapshot,hrefs:hrefs};})()`;
 }

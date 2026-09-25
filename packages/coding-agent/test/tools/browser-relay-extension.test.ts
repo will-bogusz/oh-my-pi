@@ -373,12 +373,11 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			await page.waitForSelector("p");
 			expect(await page.title()).toBe("Detach fixture");
 
-			const bridge = relay.instances.select(browserId).bridge;
-			expect(await bridge.detachDebuggers({ owner: "actor" })).toEqual([lease.tab.tabId]);
+			expect(await relay.instances.detachDebuggers("actor", browserId)).toEqual([lease.tab.tabId]);
 			// Chrome allows one debugger per tab, so the reattach this command
 			// forces would fail outright if the extension had not really detached.
 			expect(await page.evaluate("document.querySelector('p').textContent")).toBe("page");
-			expect(await bridge.detachDebuggers({ owner: "actor" })).toEqual([lease.tab.tabId]);
+			expect(await relay.instances.detachDebuggers("actor", browserId)).toEqual([lease.tab.tabId]);
 
 			// Losing the relay must cost the attachment too: a fresh server's
 			// handshake reports what the extension still holds, probed in Chrome.
@@ -389,7 +388,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			// the strip the dead relay left, not a mark this one just added.
 			relay = startRelayServer({ port, access, group: false });
 			const reconnected = await connected(relay);
-			expect(await relay.instances.select(reconnected).bridge.detachDebuggers()).toEqual([]);
+			expect(await relay.instances.detachDebuggers(undefined, reconnected)).toEqual([]);
 			// The dead relay's leases can never be released, so the extension gave
 			// the tabs back itself: out of the group, with their own favicon.
 			const orphan = (await relay.instances.refresh()).find(candidate => candidate.tabId === lease.tab.tabId);
@@ -518,7 +517,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			expect(detach!.at - lastStep).toBeGreaterThan(8_000);
 			expect(detach!.at - lastStep).toBeLessThan(14_000);
 			// Chrome confirms it holds nothing: a second release finds no attachment.
-			expect(await relay.instances.select(browserId).bridge.detachDebuggers({ owner: "actor" })).toEqual([]);
+			expect(await relay.instances.detachDebuggers("actor", browserId)).toEqual([]);
 			expect(relay.instances.get(lease.id, "actor").tab.tabId).toBe(lease.tab.tabId);
 			// The next step reattaches under the driver, which never saw a target go
 			// away. The evaluate goes first: its reply cannot overtake the

@@ -1,5 +1,6 @@
 import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import type { ToolSession } from "../index";
+import { cfgComputerDisplay } from "../settings";
 import { throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ComputerBackend, ComputerBackendFactory } from "./backend";
@@ -69,7 +70,7 @@ export class ComputerSupervisor implements ComputerController {
 	}
 
 	async capabilities(): Promise<DesktopCapabilities> {
-		return (await this.#ensureBackend(this.#session.settings.get("computer.display") ?? "all")).capabilities;
+		return (await this.#ensureBackend(cfgComputerDisplay.get(this.#session.settings))).capabilities;
 	}
 
 	async run(

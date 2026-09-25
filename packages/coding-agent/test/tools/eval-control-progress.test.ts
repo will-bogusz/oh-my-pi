@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import type { EvalCellResult, EvalStatusEvent, EvalToolDetails } from "@oh-my-pi/pi-tui/tools/eval";
-import { getThemeByName, setThemeInstance, type Theme } from "@oh-my-pi/pi-coding-agent/modes/theme/theme";
-import { evalToolRenderer, upsertStatusEvent } from "@oh-my-pi/pi-coding-agent/tools/eval-render";
+import { getThemeByName, setThemeInstance, type Theme } from "@oh-my-pi/pi-tui/theme";
+import { evalToolRenderer, upsertStatusEvent } from "@oh-my-pi/pi-tui/tools/eval";
 
 describe("eval control activity", () => {
 	let theme: Theme;

@@ -292,8 +292,56 @@ async function dispatchMouse(
 	);
 }
 
-export async function clickNode(node: CdpNode, clickCount: number, signal?: AbortSignal): Promise<void> {
+/**
+ * What the element's visible centre hits in its own document, when that is
+ * neither the element nor inside it: `<div#overlay>`. Null when the click
+ * would land. Evaluated where the element lives, so an iframe needs no offsets.
+ */
+const COVERING_ELEMENT = `function () {
+	const element = this;
+	const doc = element.ownerDocument;
+	const view = doc.defaultView;
+	const rect = element.getBoundingClientRect();
+	const left = Math.max(0, Math.min(view.innerWidth, rect.left));
+	const right = Math.max(0, Math.min(view.innerWidth, rect.right));
+	const top = Math.max(0, Math.min(view.innerHeight, rect.top));
+	const bottom = Math.max(0, Math.min(view.innerHeight, rect.bottom));
+	if (right - left < 1 || bottom - top < 1) return null;
+	const x = Math.floor((left + right) / 2);
+	const y = Math.floor((top + bottom) / 2);
+	let hit = doc.elementFromPoint(x, y);
+	for (let depth = 0; hit && hit.shadowRoot && depth < 16; depth++) {
+		const nested = hit.shadowRoot.elementFromPoint(x, y);
+		if (!nested || nested === hit) break;
+		hit = nested;
+	}
+	if (!hit) return null;
+	const contains = (ancestor, descendant) => {
+		for (let current = descendant, depth = 0; current && depth < 64; depth++) {
+			if (current === ancestor) return true;
+			current = current.parentElement || current.getRootNode().host || null;
+		}
+		return false;
+	};
+	if (contains(element, hit) || contains(hit, element)) return null;
+	const id = hit.id ? "#" + hit.id : "";
+	const classes = Array.from(hit.classList).slice(0, 2).map(name => "." + name).join("");
+	return "<" + hit.tagName.toLowerCase() + id + classes + ">";
+}`;
+
+/**
+ * Press and release at the node's centre. A click whose point another element
+ * covers is refused instead of landing on the cover: `${label} blocked: covered by <div#overlay>`.
+ */
+export async function clickNode(
+	node: CdpNode,
+	clickCount: number,
+	signal?: AbortSignal,
+	label: string = node.label,
+): Promise<void> {
 	const point = await actionPoint(node, signal);
+	const cover = await callOnNode(node, COVERING_ELEMENT, [], signal);
+	if (typeof cover === "string") throw new ToolError(`${label} blocked: covered by ${cover}`);
 	// The move both primes hover state and drives the in-page cursor overlay the
 	// relay paints from Input.dispatchMouseEvent.
 	await dispatchMouse(node.session, "mouseMoved", point, { button: "none", buttons: 0, clickCount: 0 }, signal);
@@ -392,10 +440,18 @@ async function dispatchKey(
 	);
 }
 
-/** One key or chord: modifiers down, key down/up, modifiers up — with the bitmask Chrome expects. */
-export async function pressChord(session: CDPSession, chord: string, signal?: AbortSignal): Promise<void> {
+/**
+ * One key or chord: modifiers down, key down/up, modifiers up — with the bitmask Chrome expects.
+ * `heldModifiers` is the mask a `holdKey()` already has down; those stay down.
+ */
+export async function pressChord(
+	session: CDPSession,
+	chord: string,
+	signal?: AbortSignal,
+	heldModifiers = 0,
+): Promise<void> {
 	const { modifiers, key } = parseChord(chord);
-	let mask = 0;
+	let mask = heldModifiers;
 	const held: KeyStroke[] = [];
 	for (const modifier of modifiers) {
 		const stroke = keyStroke(modifier, mask);
@@ -415,13 +471,33 @@ export async function pressChord(session: CDPSession, chord: string, signal?: Ab
 	}
 }
 
+/**
+ * Press a key without releasing it. A modifier joins the returned mask, which
+ * later strokes carry until `releaseKey()` takes it out again.
+ */
+export async function holdKey(session: CDPSession, key: string, held: number, signal?: AbortSignal): Promise<number> {
+	const modifier = MODIFIER_ALIASES[key.toLowerCase()];
+	const mask = modifier ? held | MODIFIER_BITS[modifier] : held;
+	const stroke = keyStroke(modifier ?? key, mask);
+	await dispatchKey(session, stroke.text ? "keyDown" : "rawKeyDown", stroke, mask, signal);
+	return mask;
+}
+
+/** Release a key `holdKey()` pressed; returns the held-modifier mask without it. */
+export async function releaseKey(session: CDPSession, key: string, held: number, signal?: AbortSignal): Promise<number> {
+	const modifier = MODIFIER_ALIASES[key.toLowerCase()];
+	const mask = modifier ? held & ~MODIFIER_BITS[modifier] : held;
+	await dispatchKey(session, "keyUp", keyStroke(modifier ?? key, mask), mask, signal);
+	return mask;
+}
+
 /** Type text as a user would: a key event per layout character, IME insertion for the rest. */
-export async function typeText(session: CDPSession, text: string, signal?: AbortSignal): Promise<void> {
+export async function typeText(session: CDPSession, text: string, signal?: AbortSignal, held = 0): Promise<void> {
 	for (const character of text) {
 		if (character in _keyDefinitions) {
-			const stroke = keyStroke(character, 0);
-			await dispatchKey(session, "keyDown", stroke, 0, signal);
-			await dispatchKey(session, "keyUp", stroke, 0, signal);
+			const stroke = keyStroke(character, held);
+			await dispatchKey(session, "keyDown", stroke, held, signal);
+			await dispatchKey(session, "keyUp", stroke, held, signal);
 		} else {
 			await untilAborted(signal, () => session.send("Input.insertText", { text: character }));
 		}
@@ -465,9 +541,9 @@ export async function fillNode(node: CdpNode, value: string, signal?: AbortSigna
 	else if (typeof selected === "number" && selected > 0) await pressChord(node.session, "Backspace", signal);
 }
 
-export async function typeIntoNode(node: CdpNode, text: string, signal?: AbortSignal): Promise<void> {
+export async function typeIntoNode(node: CdpNode, text: string, signal?: AbortSignal, held = 0): Promise<void> {
 	await focusNode(node, signal);
-	await typeText(node.session, text, signal);
+	await typeText(node.session, text, signal, held);
 }
 
 const SELECT_OPTIONS = `function (specs) { return (${SELECT_OPTIONS_SOURCE})(this, specs); }`;
@@ -492,6 +568,93 @@ export async function setFileInput(node: CdpNode, files: readonly string[], sign
 	await untilAborted(signal, () =>
 		node.session.send("DOM.setFileInputFiles", { files: [...files], backendNodeId: node.backendNodeId }),
 	);
+}
+
+/** A native checkbox/radio or ARIA checkbox/radio/switch, and whether it is checked now. */
+const CHECKED_STATE = `function () {
+	const tag = this.tagName.toLowerCase();
+	const type = tag === "input" ? String(this.type).toLowerCase() : "";
+	const role = (this.getAttribute("role") || "").toLowerCase();
+	if (tag === "input" && (type === "checkbox" || type === "radio")) return { kind: type, checked: this.checked };
+	if (role === "switch" || role === "checkbox" || role === "radio")
+		return { kind: "aria-" + role, checked: this.getAttribute("aria-checked") === "true" };
+	return { kind: "", checked: false };
+}`;
+/** Force the state a click did not reach, with the events a user's change would fire. */
+const SET_CHECKED = `function (desired) {
+	const role = (this.getAttribute("role") || "").toLowerCase();
+	const aria = role === "switch" || role === "checkbox" || role === "radio";
+	const current = aria ? this.getAttribute("aria-checked") === "true" : this.checked;
+	if (current === desired) return;
+	if (aria) this.setAttribute("aria-checked", String(desired));
+	else this.checked = desired;
+	this.dispatchEvent(new Event("input", { bubbles: true }));
+	this.dispatchEvent(new Event("change", { bubbles: true }));
+}`;
+
+/**
+ * Set a checkable control to `checked`, idempotently: already there is a no-op,
+ * otherwise a click toggles it, and a control the click did not flip is set
+ * directly. A checked radio is unchecked directly, since no click unchecks one.
+ */
+export async function setNodeChecked(
+	node: CdpNode,
+	checked: boolean,
+	label: string,
+	signal?: AbortSignal,
+): Promise<void> {
+	const state = (await callOnNode(node, CHECKED_STATE, [], signal)) as { kind: string; checked: boolean };
+	if (!state.kind) throw new ToolError(`${label} requires a checkbox, radio, or ARIA switch`);
+	if (state.checked === checked) return;
+	if (state.kind !== "radio" || checked) await clickNode(node, 1, signal, label);
+	await callOnNode(node, SET_CHECKED, [checked], signal);
+}
+
+const DRAW_HIGHLIGHT = `function (overlayId) {
+	const rect = this.getBoundingClientRect();
+	const overlay = this.ownerDocument.createElement("div");
+	overlay.id = overlayId;
+	overlay.dataset.ompHighlightOverlay = "";
+	overlay.setAttribute("aria-hidden", "true");
+	overlay.setAttribute("role", "presentation");
+	overlay.inert = true;
+	Object.assign(overlay.style, {
+		position: "fixed",
+		left: rect.left - 3 + "px",
+		top: rect.top - 3 + "px",
+		width: rect.width + 6 + "px",
+		height: rect.height + 6 + "px",
+		border: "3px solid #ff3366",
+		borderRadius: "4px",
+		boxSizing: "border-box",
+		pointerEvents: "none",
+		zIndex: "2147483647",
+	});
+	this.ownerDocument.documentElement.append(overlay);
+}`;
+
+/** Outline the node for `duration` ms (default 2000) with an inert overlay in its own document. */
+export async function highlightNode(
+	node: CdpNode,
+	options: { duration?: number } = {},
+	signal?: AbortSignal,
+): Promise<void> {
+	const duration = options.duration ?? 2_000;
+	if (!Number.isFinite(duration) || duration < 0)
+		throw new ToolError("highlight duration must be a non-negative number");
+	const id = `omp-highlight-${crypto.randomUUID()}`;
+	await callOnNode(node, DRAW_HIGHLIGHT, [id], signal);
+	try {
+		await untilAborted(signal, () => Bun.sleep(duration));
+	} finally {
+		// The overlay lives in the node's document, which may since have dropped
+		// the node; removal goes through the document, and a navigation took it anyway.
+		await callOnNode(node, "function (overlayId) { this.ownerDocument.getElementById(overlayId)?.remove(); }", [id])
+			.catch(() =>
+				evaluateExpression(node.session, `document.getElementById(${JSON.stringify(id)})?.remove()`),
+			)
+			.catch(() => undefined);
+	}
 }
 
 /**
@@ -533,6 +696,9 @@ export async function waitForDomQuiet(
  * - `pierce/` repeats the CSS query inside every shadow root of the document.
  * - `aria/` matches the accessibility tree by name (and optional role), the
  *   same payload `observe()` reads, so both agree on what a control is called.
+ * - `label/`, `placeholder/`, `testid/`, `alt/`, `title/` and `role/` are the
+ *   semantic query handlers the worker registers on puppeteer; their matches
+ *   come back as handles, each pinned to its backend node id and released here.
  */
 export async function resolveSelector(
 	page: Page,
@@ -541,29 +707,70 @@ export async function resolveSelector(
 ): Promise<{ session: CDPSession; backendNodeId: number }[]> {
 	const session = page.mainFrame().client;
 	if (selector.startsWith("aria/")) return await resolveAriaSelector(page, selector.slice("aria/".length), signal);
-	const document = await untilAborted(signal, () =>
-		session.send("DOM.getDocument", { depth: selector.startsWith("pierce/") ? -1 : 0, pierce: true }),
-	);
-	const nodeIds = selector.startsWith("xpath/")
-		? await search(session, selector.slice("xpath/".length), signal)
-		: selector.startsWith("text/")
-			? await search(session, selector.slice("text/".length), signal)
-			: await queryAll(session, document.root, selector.replace(/^pierce\//, ""), signal);
-	const nodes: { session: CDPSession; backendNodeId: number }[] = [];
-	for (const nodeId of nodeIds) {
-		const described = await untilAborted(signal, () => session.send("DOM.describeNode", { nodeId })).catch(
-			() => null,
+	if (SEMANTIC_QUERY_PREFIXES.some(prefix => selector.startsWith(prefix)))
+		return await resolveSemanticQuery(page, selector, signal);
+	// DOM.getDocument voids every node id handed out before it, so two selector
+	// queries on one session must not interleave or each keeps voiding the other's.
+	return await oneDocumentQuery(session, async () => {
+		const document = await untilAborted(signal, () =>
+			session.send("DOM.getDocument", { depth: selector.startsWith("pierce/") ? -1 : 0, pierce: true }),
 		);
-		if (!described) continue;
-		// A text search matches the text node; the model means its element.
-		const backendNodeId =
-			described.node.nodeType === 3
-				? await elementOf(session, nodeId, signal)
-				: described.node.backendNodeId;
-		if (backendNodeId !== undefined && !nodes.some(node => node.backendNodeId === backendNodeId))
-			nodes.push({ session, backendNodeId });
+		const nodeIds = selector.startsWith("xpath/")
+			? await search(session, selector.slice("xpath/".length), signal)
+			: selector.startsWith("text/")
+				? await search(session, selector.slice("text/".length), signal)
+				: await queryAll(session, document.root, selector.replace(/^pierce\//, ""), signal);
+		const nodes: { session: CDPSession; backendNodeId: number }[] = [];
+		for (const nodeId of nodeIds) {
+			const described = await untilAborted(signal, () => session.send("DOM.describeNode", { nodeId })).catch(
+				() => null,
+			);
+			if (!described) continue;
+			// A text search matches the text node; the model means its element.
+			const backendNodeId =
+				described.node.nodeType === 3
+					? await elementOf(session, nodeId, signal)
+					: described.node.backendNodeId;
+			if (backendNodeId !== undefined && !nodes.some(node => node.backendNodeId === backendNodeId))
+				nodes.push({ session, backendNodeId });
+		}
+		return nodes;
+	});
+}
+
+const documentQueries = new WeakMap<CDPSession, Promise<unknown>>();
+
+async function oneDocumentQuery<T>(session: CDPSession, query: () => Promise<T>): Promise<T> {
+	const run = (documentQueries.get(session) ?? Promise.resolve()).then(query, query);
+	documentQueries.set(session, run.catch(() => undefined));
+	return await run;
+}
+
+const SEMANTIC_QUERY_PREFIXES = ["label/", "placeholder/", "testid/", "alt/", "title/", "role/"];
+
+async function resolveSemanticQuery(
+	page: Page,
+	selector: string,
+	signal?: AbortSignal,
+): Promise<{ session: CDPSession; backendNodeId: number }[]> {
+	const session = page.mainFrame().client;
+	const handles = await untilAborted(signal, () => page.$$(selector));
+	try {
+		const nodes: { session: CDPSession; backendNodeId: number }[] = [];
+		for (const handle of handles) {
+			const objectId = handle.remoteObject().objectId;
+			if (!objectId) continue;
+			const described = await untilAborted(signal, () => session.send("DOM.describeNode", { objectId })).catch(
+				() => null,
+			);
+			const backendNodeId = described?.node.backendNodeId;
+			if (backendNodeId !== undefined && !nodes.some(node => node.backendNodeId === backendNodeId))
+				nodes.push({ session, backendNodeId });
+		}
+		return nodes;
+	} finally {
+		await Promise.all(handles.map(handle => handle.dispose().catch(() => undefined)));
 	}
-	return nodes;
 }
 
 /**

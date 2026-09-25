@@ -46,7 +46,7 @@ function pair(
 		JSON.stringify({ t: "authenticate", auth: { id, label, pairingCode: instances.access.issueCode().code } }),
 	);
 	const credential = socket.messages[0]!.credential as string;
-	instances.extMessage(socket, JSON.stringify({ ...hello, extensionBuildId }));
+	instances.extMessage(socket, JSON.stringify({ ...hello, instanceId: id, extensionBuildId }));
 	return { socket, credential };
 }
 
@@ -105,6 +105,33 @@ it("cannot evict or relabel a healthy instance with invalid credentials or malfo
 			expect(healthy.socket.closed).toBe(false);
 			expect(instances.list()[0]!.label).toBe("Work Chrome");
 		}
+	} finally {
+		instances.close();
+	}
+});
+
+it("refuses a hello naming another browser's instance, leaving that browser's socket and tabs alone", () => {
+	const instances = new BrowserInstances(new RelayAccess());
+	try {
+		const victim = pair(instances, "profile_instance_a", "Work Chrome", EXPECTED_EXTENSION_BUILD_ID);
+		const lease = instances.claim(instances.discover("actor")[0]!.id, "actor");
+		const intruder = new Socket();
+		instances.extConnected(intruder);
+		instances.extMessage(
+			intruder,
+			JSON.stringify({
+				t: "authenticate",
+				auth: { id: "profile_instance_b", label: "Personal Chrome", pairingCode: instances.access.issueCode().code },
+			}),
+		);
+		instances.extMessage(
+			intruder,
+			JSON.stringify({ ...hello, instanceId: "profile_instance_a", extensionBuildId: EXPECTED_EXTENSION_BUILD_ID }),
+		);
+		expect(intruder.closed).toBe(true);
+		expect(victim.socket.closed).toBe(false);
+		expect(instances.get(lease.id, "actor").browserId).toBe("profile_instance_a");
+		expect(instances.list().find(browser => browser.id === "profile_instance_b")?.connected).toBe(false);
 	} finally {
 		instances.close();
 	}

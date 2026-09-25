@@ -13,6 +13,10 @@
 - Selecting a tab no longer implies raising its window: the relay can put the user's own tab back after Chrome opens a `target="_blank"` child without touching window focus.
 - Documents whose favicon Chrome will not re-read, such as PDFs in its built-in viewer, are no longer badged; a PDF tab kept after a task used to wear the cursor glyph permanently.
 
+### Fixed
+
+- Fixed browser relay support for multiple browser instances, such as Chrome and Edge, connected simultaneously. Each browser's stable instance id (the id it pairs with, sent in every hello) namespaces its tabs, target ids and relay requests, so equal tab numbers in two browsers never collide. Existing pairings keep working; a build that predates the field stays bound to the browser it authenticated as.
+
 ## [18.0.7] - 2026-08-26
 
 ### Changed

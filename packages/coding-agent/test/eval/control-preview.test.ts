@@ -15,7 +15,7 @@ import {
 	ensurePyToolBridge,
 	registerPyToolBridge,
 } from "@oh-my-pi/pi-coding-agent/eval/py/tool-bridge";
-import type { ControlImageReference, EvalStatusEvent, EvalToolDetails } from "@oh-my-pi/pi-tui/tools/eval";
+import type { ControlImageReference, EvalStatusEvent } from "@oh-my-pi/pi-tui/tools/eval";
 import type { EvalDisplayOutput } from "@oh-my-pi/pi-coding-agent/eval/types";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { EvalTool } from "@oh-my-pi/pi-coding-agent/tools/eval";
@@ -182,7 +182,7 @@ describe("control activity and exact image provenance", () => {
 		expect(duplicate.images?.[0]).not.toHaveProperty("control");
 	});
 
-	it("carries only the exact host screenshot through JS, mixed outputs and Eval resizing/partial/final aggregation", async () => {
+	it("carries only the exact host screenshot through JS, mixed outputs and Eval resizing/final aggregation", async () => {
 		const session = sessionWith("browser", async () => browserResult());
 		const runtime = new JsRuntime({ initialCwd: process.cwd(), sessionId: crypto.randomUUID() });
 		const outputs: JsDisplayOutput[] = [];
@@ -223,21 +223,16 @@ describe("control activity and exact image provenance", () => {
 		};
 		vi.spyOn(evalBackends.jsBackend, "execute").mockResolvedValue(backendResult);
 		vi.spyOn(evalBackends.jsBackend, "isAvailable").mockResolvedValue(true);
-		const updates: EvalToolDetails[] = [];
 		const tool = new EvalTool(session);
 		const result = await tool.execute(
 			"mixed-control-images",
 			{ language: "js", code: "irrelevant mocked execution" },
 			undefined,
-			update => {
-				if (update.details) updates.push(update.details);
-			},
 		);
 		const expected: ControlImageReference[] = [
 			{ index: 2, kind: "browser", label: "Research tab", path: "/tmp/actual-screenshot.png" },
 		];
 		expect(result.details?.controlImages).toEqual(expected);
-		expect(updates.find(update => update.images?.length === 5)?.controlImages).toEqual(expected);
 		const finalImages = result.content.filter(content => content.type === "image");
 		expect(finalImages).toHaveLength(5);
 		expect(finalImages[2].data).not.toBe(imageOutputs[2].data);

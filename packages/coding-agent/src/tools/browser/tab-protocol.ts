@@ -1,4 +1,4 @@
-import type { DialogState } from "./dialogs";
+import type { ChromeDialogState } from "./dialog-journal";
 import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
 
 export type Transferable = Bun.Transferable;
@@ -50,7 +50,7 @@ export interface ScreenshotResult {
 
 /** Independent inspection channels collected while acquiring a managed Chrome tab. */
 export interface InitialBrowserState {
-	initialDialog?: DialogState;
+	initialDialog?: ChromeDialogState;
 	initialObservation?: Observation;
 	initialScreenshot?: string;
 	inspectionError?: string;
@@ -75,6 +75,16 @@ export type WorkerInitPayload =
 			emulateViewport?: boolean;
 			viewport?: { width: number; height: number; deviceScaleFactor?: number };
 			dialogs?: "accept" | "dismiss";
+			/** Hostname patterns allowed for every page request. */
+			allowedDomains?: string[];
+			/** Document-start JavaScript sources registered before navigation. */
+			initScripts?: string[];
+			/** Absolute directory enabled for completed downloads. */
+			downloadsPath?: string;
+			/** Explicit tab user agent applied during worker initialization. */
+			userAgent?: string;
+			/** Ignore invalid HTTPS certificates for this page. */
+			ignoreHttpsErrors?: boolean;
 			url?: string;
 			waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
 			timeoutMs: number;
@@ -85,6 +95,16 @@ export type WorkerInitPayload =
 			safeDir: string;
 			targetId: string;
 			dialogs?: "accept" | "dismiss";
+			/** Hostname patterns allowed for every page request. */
+			allowedDomains?: string[];
+			/** Document-start JavaScript sources registered before navigation. */
+			initScripts?: string[];
+			/** Absolute directory enabled for completed downloads. */
+			downloadsPath?: string;
+			/** Explicit tab user agent applied during worker initialization. */
+			userAgent?: string;
+			/** Ignore invalid HTTPS certificates for this page. */
+			ignoreHttpsErrors?: boolean;
 			url?: string;
 			waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
 			timeoutMs: number;

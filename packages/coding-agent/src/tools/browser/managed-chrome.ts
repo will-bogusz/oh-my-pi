@@ -1,5 +1,5 @@
 import { logger, untilAborted } from "@oh-my-pi/pi-utils";
-import type { DialogState } from "./dialogs";
+import type { DialogJournalState } from "./dialog-journal";
 import type { ToolSession } from "../../sdk";
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
@@ -9,6 +9,7 @@ import type { BrowserInstance, InstanceLease, InstanceTab } from "./relay/instan
 import { ensureRelayDaemon, isLoopbackRelayUrl } from "./relay/daemon";
 import { resolveRelayKind } from "./relay/kind";
 import { localBrowserRequest } from "./relay/local-http";
+import { cfgBrowserRelay, cfgBrowserRelayUrl } from "./settings";
 import { acquireTab, getTab, releaseTab } from "./tab-supervisor";
 
 const embeddingActors = new WeakMap<ToolSession, string>();
@@ -121,8 +122,8 @@ export async function chromeRequest<T>(url: string, args: Record<string, unknown
  */
 async function chromeEndpoint(session: ToolSession, signal?: AbortSignal, forced?: boolean): Promise<string> {
 	const kind = resolveRelayKind({
-		settingEnabled: forced === true || session.settings.get("browser.relay"),
-		url: session.settings.get("browser.relayUrl"),
+		settingEnabled: forced === true || cfgBrowserRelay.get(session.settings),
+		url: cfgBrowserRelayUrl.get(session.settings),
 	});
 	if (!kind)
 		throw new ToolError(
@@ -434,8 +435,8 @@ export async function chromeDialog(
 	handle: ManagedChromeHandle,
 	options: unknown,
 	signal?: AbortSignal,
-): Promise<DialogState> {
-	return await chromeRequest<DialogState>(
+): Promise<DialogJournalState> {
+	return await chromeRequest<DialogJournalState>(
 		handle.url,
 		{ action: "dialog", id: handle.lease.id, owner: handle.owner, dialog: options },
 		signal,

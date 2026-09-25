@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import { getBrowserRelayDir } from "@oh-my-pi/pi-utils";
-import type { DialogState } from "../dialogs";
+import type { DialogJournalState } from "../dialog-journal";
 import { RelayAccess, type BrowserAuthentication } from "./access";
 import { type DebuggerState, RelayBridge, type RelaySocket } from "./bridge";
 import buildInfo from "./extension-assets/build-info.json.txt" with { type: "text" };
@@ -29,17 +29,17 @@ export interface InstanceTab extends DiscoveredChromeTab {
 	browserLabel: string;
 }
 export interface InstanceLease extends ChromeTabLease {
-	dialog?: DialogState;
+	dialog?: DialogJournalState;
 	/** Whether OMP can drive the tab right now; `revoked` says why not when the tab is open but undebuggable. */
 	debugger?: DebuggerState;
 	browserId: string;
 	browserLabel: string;
 	tab: InstanceTab;
 }
+/** A paired browser. Its id is the extension's stable instance id, the one identity everywhere. */
 interface Instance {
 	id: string;
 	label: string;
-	bridge: RelayBridge;
 	generation?: string;
 	extensionBuildId?: string;
 }
@@ -56,6 +56,7 @@ function validHello(value: unknown): value is Hello {
 		hello.t === "hello" &&
 		typeof hello.userAgent === "string" &&
 		typeof hello.browserVersion === "string" &&
+		(hello.instanceId === undefined || typeof hello.instanceId === "string") &&
 		(hello.extensionBuildId === undefined ||
 			(typeof hello.extensionBuildId === "string" && /^[a-f0-9]{64}$/.test(hello.extensionBuildId))) &&
 		Array.isArray(hello.tabs) &&
@@ -66,22 +67,24 @@ function validHello(value: unknown): value is Hello {
 	);
 }
 
-/** One mature CDP bridge per authenticated browser; pending handshakes cannot evict healthy peers. */
+/**
+ * Paired browsers in front of one multi-instance CDP bridge. A socket reaches
+ * the bridge only after it authenticated as a paired browser and sent a valid
+ * hello, so a pending handshake can never evict a healthy peer.
+ */
 export class BrowserInstances {
 	readonly access: RelayAccess;
+	readonly bridge: RelayBridge;
 	#instances = new Map<string, Instance>();
 	#pending = new Map<RelaySocket, Pending>();
-	#sockets = new Map<RelaySocket, Instance>();
+	/** Sockets that completed authentication and hello, with the instance they speak for. */
+	#sockets = new Map<RelaySocket, string>();
 	#awaitingHello = new Set<() => void>();
 	/**
 	 * Bound port of the relay serving these instances, set once it is listening.
 	 * Only used to spell out the reinstall command a build-skewed extension needs.
 	 */
 	port: number | undefined;
-	#options: {
-		log?: (message: string, data?: Record<string, unknown>) => void;
-		group?: boolean;
-	};
 	constructor(
 		access: RelayAccess,
 		options: {
@@ -90,12 +93,12 @@ export class BrowserInstances {
 		} = {},
 	) {
 		this.access = access;
-		this.#options = options;
+		this.bridge = new RelayBridge(options);
 		for (const browser of access.browsers())
-			this.#instances.set(browser.id, { id: browser.id, label: browser.label, bridge: new RelayBridge(options) });
+			this.#instances.set(browser.id, { id: browser.id, label: browser.label });
 	}
 	get ready(): boolean {
-		return [...this.#instances.values()].some(instance => instance.bridge.ready);
+		return [...this.#instances.keys()].some(id => this.bridge.connected(id));
 	}
 	/**
 	 * A freshly started relay answers HTTP before the paired extension has
@@ -106,33 +109,36 @@ export class BrowserInstances {
 	 */
 	settled(graceMs = 3000): Promise<void> {
 		if (this.ready || this.#instances.size === 0) return Promise.resolve();
-		return new Promise(resolve => {
-			const done = () => {
-				clearTimeout(timer);
-				this.#awaitingHello.delete(done);
-				resolve();
-			};
-			const timer = setTimeout(done, graceMs);
-			this.#awaitingHello.add(done);
-		});
+		const { promise, resolve } = Promise.withResolvers<void>();
+		const done = () => {
+			clearTimeout(timer);
+			this.#awaitingHello.delete(done);
+			resolve();
+		};
+		const timer = setTimeout(done, graceMs);
+		this.#awaitingHello.add(done);
+		return promise;
 	}
 	list(): BrowserInstance[] {
-		return [...this.#instances.values()].map(instance => ({
-			id: instance.id,
-			label: instance.label,
-			connected: instance.bridge.ready,
-			generation: instance.generation,
-			extension: {
-				loadedBuildId: instance.bridge.ready ? instance.extensionBuildId : undefined,
-				expectedBuildId: EXPECTED_EXTENSION_BUILD_ID,
-				status:
-					!instance.bridge.ready || !instance.extensionBuildId
-						? "unknown"
-						: instance.extensionBuildId === EXPECTED_EXTENSION_BUILD_ID
-							? "matching"
-							: "different",
-			},
-		}));
+		return [...this.#instances.values()].map(instance => {
+			const connected = this.bridge.connected(instance.id);
+			return {
+				id: instance.id,
+				label: instance.label,
+				connected,
+				generation: instance.generation,
+				extension: {
+					loadedBuildId: connected ? instance.extensionBuildId : undefined,
+					expectedBuildId: EXPECTED_EXTENSION_BUILD_ID,
+					status:
+						!connected || !instance.extensionBuildId
+							? "unknown"
+							: instance.extensionBuildId === EXPECTED_EXTENSION_BUILD_ID
+								? "matching"
+								: "different",
+				},
+			};
+		});
 	}
 
 	extConnected(socket: RelaySocket): void {
@@ -146,7 +152,7 @@ export class BrowserInstances {
 	extMessage(socket: RelaySocket, raw: string): void {
 		const pending = this.#pending.get(socket);
 		if (!pending) {
-			this.#sockets.get(socket)?.bridge.extMessage(socket, raw);
+			if (this.#sockets.has(socket)) this.bridge.extMessage(socket, raw);
 			return;
 		}
 		try {
@@ -157,10 +163,7 @@ export class BrowserInstances {
 				const result = this.access.authenticate(message.auth);
 				pending.authenticated = { id: result.browser.id, label: result.browser.label };
 				if (!this.#instances.has(result.browser.id))
-					this.#instances.set(result.browser.id, {
-						...pending.authenticated,
-						bridge: new RelayBridge(this.#options),
-					});
+					this.#instances.set(result.browser.id, { ...pending.authenticated });
 				// The build this relay expects travels with the handshake so a
 				// skewed extension can reload itself instead of waiting for the
 				// user to notice; extensions that predate the field ignore it.
@@ -175,9 +178,13 @@ export class BrowserInstances {
 			}
 			if (!validHello(message)) throw new Error("Invalid browser hello; healthy connection preserved");
 			const identity = pending.authenticated;
+			// The paired identity is the instance identity: a hello naming another
+			// instance would hand this browser's socket another browser's tabs.
+			if (message.instanceId !== undefined && message.instanceId !== identity.id)
+				throw new Error("Browser hello names a different instance than it authenticated as; healthy connection preserved");
 			let instance = this.#instances.get(identity.id);
 			if (!instance) {
-				instance = { ...identity, bridge: new RelayBridge(this.#options) };
+				instance = { ...identity };
 				this.#instances.set(identity.id, instance);
 			}
 			this.access.setLabel(identity.id, identity.label);
@@ -186,9 +193,9 @@ export class BrowserInstances {
 			instance.extensionBuildId = message.extensionBuildId;
 			clearTimeout(pending.timer);
 			this.#pending.delete(socket);
-			this.#sockets.set(socket, instance);
-			instance.bridge.extConnected(socket);
-			instance.bridge.extMessage(socket, raw);
+			this.#sockets.set(socket, identity.id);
+			this.bridge.extConnected(socket, identity.id);
+			this.bridge.extMessage(socket, raw);
 			for (const wake of this.#awaitingHello) wake();
 		} catch (error) {
 			clearTimeout(pending.timer);
@@ -203,19 +210,18 @@ export class BrowserInstances {
 		const pending = this.#pending.get(socket);
 		if (pending) clearTimeout(pending.timer);
 		this.#pending.delete(socket);
-		this.#sockets.get(socket)?.bridge.extClosed(socket);
-		this.#sockets.delete(socket);
+		if (this.#sockets.delete(socket)) this.bridge.extClosed(socket);
 	}
 
 	select(id?: string): Instance {
 		if (id) {
 			const instance = this.#instances.get(id);
 			if (!instance) throw new Error("Unknown browser instance. List paired browsers again");
-			if (!instance.bridge.ready)
+			if (!this.bridge.connected(id))
 				throw new Error(`Browser ${JSON.stringify(instance.label)} is disconnected. Reconnect its extension`);
 			return instance;
 		}
-		const connected = [...this.#instances.values()].filter(instance => instance.bridge.ready);
+		const connected = this.#connected();
 		if (connected.length !== 1)
 			throw new Error(
 				connected.length
@@ -224,19 +230,23 @@ export class BrowserInstances {
 			);
 		return connected[0]!;
 	}
+	/** The exact browser asked for, else every connected one. */
+	#scope(browserId?: string): Instance[] {
+		return browserId ? [this.select(browserId)] : this.#connected();
+	}
+	#connected(): Instance[] {
+		return [...this.#instances.values()].filter(instance => this.bridge.connected(instance.id));
+	}
 	discover(owner?: string, browserId?: string): InstanceTab[] {
-		const instances = browserId
-			? [this.select(browserId)]
-			: [...this.#instances.values()].filter(instance => instance.bridge.ready);
-		return instances.flatMap(instance =>
-			instance.bridge.managed.discover(owner).map(tab => this.#tab(instance, tab)),
+		return this.#scope(browserId).flatMap(instance =>
+			this.bridge
+				.managed(instance.id)
+				.discover(owner)
+				.map(tab => this.#tab(instance, tab)),
 		);
 	}
 	async refresh(owner?: string, browserId?: string): Promise<InstanceTab[]> {
-		const instances = browserId
-			? [this.select(browserId)]
-			: [...this.#instances.values()].filter(instance => instance.bridge.ready);
-		await Promise.all(instances.map(instance => instance.bridge.refreshTabs()));
+		await Promise.all(this.#scope(browserId).map(instance => this.bridge.refreshTabs(instance.id)));
 		return this.discover(owner, browserId);
 	}
 
@@ -246,10 +256,9 @@ export class BrowserInstances {
 	 * (process or daemon shutdown).
 	 */
 	async detachDebuggers(owner?: string, browserId?: string): Promise<number[]> {
-		const instances = browserId
-			? [this.select(browserId)]
-			: [...this.#instances.values()].filter(instance => instance.bridge.ready);
-		const detached = await Promise.all(instances.map(instance => instance.bridge.detachDebuggers({ owner })));
+		const detached = await Promise.all(
+			this.#scope(browserId).map(instance => this.bridge.detachDebuggers({ owner, instanceId: instance.id })),
+		);
 		return detached.flat();
 	}
 
@@ -259,8 +268,8 @@ export class BrowserInstances {
 	#lease(instance: Instance, lease: ChromeTabLease): InstanceLease {
 		return {
 			...lease,
-			dialog: instance.bridge.dialogState(lease.tab.tabId),
-			debugger: instance.bridge.debuggerState(lease.tab.tabId),
+			dialog: this.bridge.dialogState(instance.id, lease.tab.tabId),
+			debugger: this.bridge.debuggerState(instance.id, lease.tab.tabId),
 			browserId: instance.id,
 			browserLabel: instance.label,
 			tab: this.#tab(instance, lease.tab),
@@ -274,7 +283,7 @@ export class BrowserInstances {
 	 * Only checked while connected: a disconnected instance has its own errors.
 	 */
 	#requireExtensionParity(instance: Instance): void {
-		if (!instance.bridge.ready || instance.extensionBuildId === EXPECTED_EXTENSION_BUILD_ID) return;
+		if (!this.bridge.connected(instance.id) || instance.extensionBuildId === EXPECTED_EXTENSION_BUILD_ID) return;
 		const dir = path.join(getBrowserRelayDir(), "extension");
 		const port = this.port === undefined ? "" : ` --port ${this.port}`;
 		throw new Error(
@@ -288,26 +297,30 @@ export class BrowserInstances {
 	async create(url: string, owner: string, taskId: string, label?: string, browserId?: string): Promise<InstanceLease> {
 		const instance = this.select(browserId);
 		this.#requireExtensionParity(instance);
-		return this.#lease(instance, await instance.bridge.managed.create(url, owner, taskId, label));
+		return this.#lease(instance, await this.bridge.managed(instance.id).create(url, owner, taskId, label));
 	}
 	claim(id: string, owner: string, taskId?: string, label?: string, browserId?: string): InstanceLease {
 		const instance = this.#forTab(id, browserId);
 		this.#requireExtensionParity(instance);
-		return this.#lease(instance, instance.bridge.managed.claim(id, owner, taskId, label));
+		return this.#lease(instance, this.bridge.managed(instance.id).claim(id, owner, taskId, label));
 	}
 	#forTab(id: string, browserId?: string): Instance {
-		const instance = [...this.#instances.values()].find(
-			candidate => candidate.bridge.ready && candidate.bridge.managed.discover().some(tab => tab.id === id),
+		const instance = this.#connected().find(candidate =>
+			this.bridge
+				.managed(candidate.id)
+				.discover()
+				.some(tab => tab.id === id),
 		);
 		if (!instance || (browserId && browserId !== instance.id))
 			throw new Error("Discovered tab is stale or belongs to a different browser instance");
 		return instance;
 	}
 	async closeTab(id: string, owner: string, browserId?: string, signal?: AbortSignal): Promise<void> {
-		await this.#forTab(id, browserId).bridge.managed.closeTab(id, owner, signal);
+		await this.bridge.managed(this.#forTab(id, browserId).id).closeTab(id, owner, signal);
 	}
 	forLease(id: string): Instance | undefined {
-		return [...this.#instances.values()].find(instance => instance.bridge.managed.tabForLease(id) !== undefined);
+		const instanceId = this.bridge.instanceForLease(id);
+		return instanceId === undefined ? undefined : this.#instances.get(instanceId);
 	}
 	requireLease(id: string): Instance {
 		const instance = this.forLease(id);
@@ -317,14 +330,20 @@ export class BrowserInstances {
 	get(id: string, owner: string): InstanceLease {
 		const instance = this.requireLease(id);
 		this.#requireExtensionParity(instance);
-		return this.#lease(instance, instance.bridge.managed.get(id, owner));
+		return this.#lease(instance, this.bridge.managed(instance.id).get(id, owner));
+	}
+	async reveal(id: string, owner: string): Promise<void> {
+		await this.bridge.managed(this.requireLease(id).id).reveal(id, owner);
 	}
 	async releaseTab(id: string, owner: string, close: boolean, signal?: AbortSignal): Promise<void> {
-		await this.requireLease(id).bridge.managed.releaseTab(id, owner, close, signal);
+		await this.bridge.managed(this.requireLease(id).id).releaseTab(id, owner, close, signal);
 	}
 	childTabs(id: string, owner: string): InstanceTab[] {
 		const instance = this.requireLease(id);
-		return instance.bridge.managed.childTabs(id, owner).map(tab => this.#tab(instance, tab));
+		return this.bridge
+			.managed(instance.id)
+			.childTabs(id, owner)
+			.map(tab => this.#tab(instance, tab));
 	}
 	unpair(id: string): void {
 		this.access.unpair(id);
@@ -333,11 +352,12 @@ export class BrowserInstances {
 				this.extClosed(socket);
 				socket.close();
 			}
-		for (const [socket, instance] of this.#sockets)
-			if (instance.id === id) {
+		for (const [socket, instanceId] of this.#sockets)
+			if (instanceId === id) {
 				this.extClosed(socket);
 				socket.close();
 			}
+		this.bridge.forget(id);
 		this.#instances.delete(id);
 	}
 	close(): void {

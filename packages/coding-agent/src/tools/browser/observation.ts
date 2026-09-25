@@ -395,6 +395,40 @@ export function flattenSnapshot(root: AxNode, options: { includeAll: boolean }):
 	return nodes;
 }
 
+/**
+ * The display subtrees rooted at the nodes `inScope` accepts, each re-rooted at
+ * depth 0. A root's descendants in display order come along whether or not
+ * `inScope` knows them, which is how an iframe's document follows its element.
+ */
+export function scopeNodes(nodes: readonly ObservedNode[], inScope: (node: ObservedNode) => boolean): ObservedNode[] {
+	const scoped: ObservedNode[] = [];
+	let rootDepth: number | undefined;
+	for (const node of nodes) {
+		if (rootDepth !== undefined && node.depth > rootDepth) {
+			scoped.push({ ...node, depth: node.depth - rootDepth });
+			continue;
+		}
+		rootDepth = inScope(node) ? node.depth : undefined;
+		if (rootDepth !== undefined) scoped.push({ ...node, depth: 0 });
+	}
+	return scoped;
+}
+
+/** Controls, and the nodes on the path down to one; everything else is dropped. */
+export function compactNodes(nodes: readonly ObservedNode[]): ObservedNode[] {
+	const kept = new Set<number>();
+	const open: number[] = [];
+	nodes.forEach((node, index) => {
+		while (open.length > 0 && nodes[open[open.length - 1]!]!.depth >= node.depth) open.pop();
+		if (node.actionable) {
+			for (const ancestor of open) kept.add(ancestor);
+			kept.add(index);
+		}
+		open.push(index);
+	});
+	return nodes.filter((_, index) => kept.has(index));
+}
+
 /** Roles a "Loading…" label marks as a spinner; a heading or link that starts with the word is content. */
 const SPINNER_ROLES: Record<string, true> = { StaticText: true, text: true, img: true, image: true, status: true, alert: true, generic: true, paragraph: true };
 

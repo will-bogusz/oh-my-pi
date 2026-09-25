@@ -31,6 +31,8 @@ interface OwnedLease extends ChromeTabLease {
 export const DEFAULT_TAB_GROUP_LABEL = "Oh My Pi";
 
 export interface ManagedChromeOperations {
+	/** Target id a downstream connection addresses this browser's tab by. */
+	targetId(tabId: number): string;
 	create(url: string): Promise<TabSnapshot>;
 	/** Put the tab in the owner's group, titled `label`. */
 	group(tabId: number, owner: string, label: string): Promise<void>;
@@ -149,7 +151,7 @@ export class ManagedChromeTabs {
 			throw new Error("This Chrome tab is already owned by an OMP actor. Release it before claiming it elsewhere.");
 		const lease: OwnedLease = {
 			id: crypto.randomUUID(),
-			targetId: `PAGE${tab.tabId}`,
+			targetId: this.#operations.targetId(tab.tabId),
 			tab: { ...tab },
 			created,
 			owner,

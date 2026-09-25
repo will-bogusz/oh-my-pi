@@ -21,6 +21,7 @@ function harness(orphanGraceMs?: number, onRelease?: (tabId: number, close: bool
 	let nextTab = 10;
 	const tabs = new ManagedChromeTabs(
 		{
+			targetId: tabId => `PAGE${tabId}`,
 			create: async () => tab(nextTab++),
 			group: async (tabId, owner, label) => {
 				groups.push([tabId, owner, label]);
@@ -131,6 +132,7 @@ describe("managed Chrome physical tab ownership", () => {
 
 	it("returns metadata observed during creation and refreshes it without changing lease identity", async () => {
 		const tabs = new ManagedChromeTabs({
+			targetId: tabId => `PAGE${tabId}`,
 			create: async () => ({ ...tab(1), url: "", title: "" }),
 			group: async () => tabs.upsert({ ...tab(1), title: "Ready", groupId: 42 }),
 			release: async () => {},

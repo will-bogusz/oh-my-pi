@@ -18,6 +18,7 @@ import {
 	discoverChromeTabs,
 	listChromeInstances,
 	isManagedChromeHandle,
+	type ManagedChromeHandle,
 	releaseChromeTab,
 	releaseChromeTabsForActor,
 	requireChromeHandle,
@@ -33,8 +34,10 @@ import {
 	releaseBrowser,
 } from "./browser/registry";
 import { ensureChromiumExecutable } from "./browser/launch";
+import { resolveInitScriptSources } from "./browser/open-options";
 import { resolveRelayKind } from "./browser/relay/kind";
 import type { AriaSnapshotOptions } from "./browser/aria/aria-snapshot";
+import { type ChromeDialogState, chromeDialogState } from "./browser/dialog-journal";
 import type { InstanceTab } from "./browser/relay/instances";
 import type { InitialBrowserState, RunResultOk, ScreenshotResult } from "./browser/tab-protocol";
 import type { OutputMeta } from "@oh-my-pi/pi-tui/tools/output-meta";
@@ -44,6 +47,7 @@ import {
 	cancelIdleCloseForOwner,
 	dropHeadlessTabs,
 	getTab,
+	listTabs,
 	releaseIdleTabsForOwner,
 	releaseTabsForActor,
 	releaseTab,
@@ -56,6 +60,16 @@ import { ToolAbortError, throwIfAborted } from "./tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { toolResult } from "./tool-result";
 import { clampTimeout } from "./tool-timeouts";
+
+import {
+	cfgBrowserCdpUrl,
+	cfgBrowserCmux,
+	cfgBrowserHeadless,
+	cfgBrowserIdleCloseSec,
+	cfgBrowserRelay,
+	cfgBrowserRelayUrl,
+} from "./browser/settings";
+import { cfgToolsMaxTimeout } from "./settings";
 
 export type { AriaSnapshotOptions } from "./browser/aria/aria-snapshot";
 
@@ -71,7 +85,23 @@ export function parseAriaRefSelector(selector: string): string | null {
 
 export { cmuxSnapshotToObservation, mapWaitUntil, resolveCmuxKind, serializeEval } from "./browser/cmux/rpc";
 export { CmuxSocketClient } from "./browser/cmux/socket-client";
-export { extractReadableFromHtml, type ReadableFormat, type ReadableResult } from "./browser/readable";
+export {
+	extractMarkdownOutline,
+	extractReadableFromHtml,
+	filterMarkdownSections,
+	type ReadableExtractOptions,
+	type ReadableFormat,
+	type ReadableResult,
+} from "./browser/readable";
+export {
+	ariaSnapshotBaselineKey,
+	collectAriaSnapshotRefs,
+	diffAriaSnapshot,
+	postProcessAriaSnapshot,
+	type AriaSnapshotBaseline,
+	type AriaSnapshotDiffResult,
+	type SnapshotPostProcessOptions,
+} from "./browser/snapshot-plus";
 export { DEFAULT_RELAY_URL, type RelayKind, resolveRelayKind } from "./browser/relay/kind";
 export type { Observation, ObservationEntry } from "./browser/tab-protocol";
 
@@ -93,9 +123,8 @@ const tabCallStepSchema = type({
 
 const browserSchema = type({
 	action: type(
-		"'open' | 'close' | 'closeTab' | 'dialog' | 'popups' | 'run' | 'call' | 'instances' | 'discover' | 'create' | 'claim' | 'reveal' | 'release' | 'help'",
+		"'open' | 'close' | 'closeTab' | 'popups' | 'run' | 'call' | 'tabs' | 'instances' | 'discover' | 'create' | 'claim' | 'reveal' | 'release' | 'help'",
 	).describe("operation"),
-	"dialog?": "unknown",
 	"handle?": "string",
 	"id?": "string",
 	"browserId?": "string",
@@ -123,6 +152,13 @@ const browserSchema = type({
 		"navigation wait condition",
 	),
 	"dialogs?": type("'accept' | 'dismiss'").describe("auto-handle dialogs"),
+	"allowed_domains?": type("string[]").describe("allowed request hostnames"),
+	"init_scripts?": type("string[]").describe("document-start JavaScript sources or cwd-relative file paths"),
+	"downloads?": type("string").describe("cwd-relative download directory"),
+	"user_agent?": type("string").describe("tab user agent override"),
+	"ignore_https_errors?": type("boolean").describe("ignore invalid HTTPS certificates"),
+	"allow_file_access?": type("boolean").describe("allow file URLs to read local files"),
+	"headed?": type("boolean").describe("override the configured browser display mode"),
 	"code?": type("string").describe("js body to run in tab"),
 	"fn?": type("string").describe("serialized JavaScript function to run in tab"),
 	"args?": type("unknown[]").describe("arguments passed to a serialized function"),
@@ -157,9 +193,16 @@ function resolveBrowserKind(params: BrowserParams, session: ToolSession): Browse
 	}
 	if (app?.path) {
 		const exe = resolveToCwd(app.path, session.cwd);
-		return { kind: "spawned", path: exe, args: resolveSpawnArgs(exe, app.args, session.cwd) };
+		const args = resolveSpawnArgs(exe, app.args, session.cwd);
+		if (params.ignore_https_errors && !args.includes("--ignore-certificate-errors")) {
+			args.push("--ignore-certificate-errors");
+		}
+		if (params.allow_file_access && !args.includes("--allow-file-access-from-files")) {
+			args.push("--allow-file-access-from-files");
+		}
+		return { kind: "spawned", path: exe, args };
 	}
-	const relayUrl = session.settings.get("browser.relayUrl");
+	const relayUrl = cfgBrowserRelayUrl.get(session.settings);
 	// Explicit app.relay wins over every setting; PI_BROWSER_RELAY stays the
 	// final kill switch (a relay that is down would otherwise brick the tool).
 	if (app?.relay) {
@@ -172,23 +215,28 @@ function resolveBrowserKind(params: BrowserParams, session: ToolSession): Browse
 	// app options win.
 	if (app?.relay !== false) {
 		const relayKind = resolveRelayKind({
-			settingEnabled: session.settings.get("browser.relay"),
+			settingEnabled: cfgBrowserRelay.get(session.settings),
 			url: relayUrl,
 		});
 		if (relayKind) return relayKind;
 	}
-	const configuredCdpUrl = session.settings.get("browser.cdpUrl")?.trim();
+	const configuredCdpUrl = cfgBrowserCdpUrl.get(session.settings)?.trim();
 	if (configuredCdpUrl) {
 		return { kind: "connected", cdpUrl: configuredCdpUrl.replace(/\/+$/, "") };
 	}
 	const cmuxKind = resolveCmuxKind({
-		settingEnabled: session.settings.get("browser.cmux"),
+		settingEnabled: cfgBrowserCmux.get(session.settings),
 	});
 	if (cmuxKind) {
 		return cmuxKind;
 	}
-	const headless = session.settings.get("browser.headless");
-	return { kind: "headless", headless };
+	const headless = params.headed === undefined ? cfgBrowserHeadless.get(session.settings) : !params.headed;
+	return {
+		kind: "headless",
+		headless,
+		ignoreHttpsErrors: params.ignore_https_errors,
+		allowFileAccess: params.allow_file_access,
+	};
 }
 
 /** Create the enabled-only browser host prelude for one tool session. */
@@ -229,6 +277,7 @@ function describeBrowserCall(parameters: unknown, result: AgentToolResult<unknow
 			return `${name}.${renderCallChain(parsed.chain ?? [])}`;
 		case "instances":
 		case "discover":
+		case "tabs":
 		case "help":
 			return parsed.action;
 		default:
@@ -249,7 +298,7 @@ export async function restartBrowserForModeChange(): Promise<void> {
 function sweepIdleOwnedTabs(session: ToolSession): Promise<number> {
 	const ownerId = session.getSessionId?.() ?? undefined;
 	if (!ownerId) return Promise.resolve(0);
-	const idleSec = session.settings.get("browser.idleCloseSec");
+	const idleSec = cfgBrowserIdleCloseSec.get(session.settings);
 	if (!(idleSec > 0)) {
 		cancelIdleCloseForOwner(ownerId);
 		return Promise.resolve(0);
@@ -275,7 +324,7 @@ async function invokeBrowser(
 
 	try {
 		throwIfAborted(context.signal);
-		const timeoutSeconds = clampTimeout("browser", parsed.timeout, session.settings.get("tools.maxTimeout"));
+		const timeoutSeconds = clampTimeout("browser", parsed.timeout, cfgToolsMaxTimeout.get(session.settings));
 		const timeoutMs = timeoutSeconds * 1000;
 		const name = parsed.name ?? DEFAULT_TAB_NAME;
 		const details: BrowserPreludeDetails = { action: parsed.action, name };
@@ -297,11 +346,14 @@ async function invokeBrowser(
 			const handle = requireChromeHandle(parsed.handle, session);
 			details.name = handle.label;
 			details.handle = handle.id;
-			if (parsed.action === "dialog") {
+			// The relay journal answers dialogs in the user's Chrome: a modal-blocked
+			// renderer cannot host the tab worker, and the worker never auto-answers there.
+			const dialogStep = parsed.action === "call" && parsed.chain?.length === 1 ? parsed.chain[0] : undefined;
+			if (dialogStep && MANAGED_DIALOG_METHODS.includes(dialogStep.method)) {
 				const deadline = AbortSignal.timeout(timeoutMs);
-				details.value = await chromeDialog(
+				details.value = await managedDialogCall(
 					handle,
-					parsed.dialog,
+					dialogStep,
 					context.signal ? AbortSignal.any([context.signal, deadline]) : deadline,
 				);
 				return toolResult(details).done();
@@ -379,6 +431,11 @@ async function invokeBrowser(
 				);
 			if (parsed.action === "claim" && parsed.url)
 				throw new ToolError("Claim never navigates a user tab. Call goto explicitly after claiming it.");
+			const ownedOnly = OWNED_BROWSER_OPEN_OPTIONS.filter(option => parsed[option] !== undefined);
+			if (ownedOnly.length > 0)
+				throw new ToolError(
+					`${ownedOnly.join(", ")} configure a browser OMP launches or attaches; a tab in the user's Chrome keeps that browser's own settings.`,
+				);
 			if (parsed.selector && (parsed.action !== "claim" || parsed.id || parsed.browserId))
 				throw new ToolError(
 					"getTab selectors cannot be combined with an id, creation, or a second browser selection",
@@ -415,13 +472,13 @@ async function invokeBrowser(
 					details.value = {
 						created: handle.lease.created,
 						target: handle.lease.tab,
-						initialDialog: handle.lease.dialog,
+						initialDialog: chromeDialogState(handle.lease.dialog),
 					};
 					return await browserRunResult(session, details, {
 						displays: [
 							{
 								type: "text",
-								text: `Claimed Chrome tab ${JSON.stringify(handle.label)} with an open dialog. Inspect initialDialog or tab.dialog(); answer its exact id before page interaction.\n${JSON.stringify(handle.lease.dialog)}\n${BROWSER_TAB_VERBS}`,
+								text: `Claimed Chrome tab ${JSON.stringify(handle.label)} with an open dialog. Answer it with tab.handleDialog({ accept, id: tab.initialDialog.id, text? }) before page interaction.\n${JSON.stringify(chromeDialogState(handle.lease.dialog))}\n${BROWSER_TAB_VERBS}`,
 							},
 						],
 						returnValue: details.value,
@@ -470,6 +527,9 @@ async function invokeBrowser(
 				return await openBrowser(session, name, parsed, details, timeoutMs, context.signal);
 			case "close":
 				return await closeBrowser(session, name, parsed, details, timeoutMs, context.signal);
+			case "tabs":
+				details.value = listTabs();
+				return toolResult(details).done();
 			case "run":
 			case "call":
 				return await runBrowser(session, name, parsed, details, timeoutMs, context.signal);
@@ -485,6 +545,51 @@ async function invokeBrowser(
 	}
 }
 
+const MANAGED_DIALOG_METHODS: readonly string[] = ["dialog", "handleDialog", "setDialogs"];
+
+/** `tab.dialog()`, `tab.handleDialog()` and `tab.setDialogs()` on a Chrome handle, against the relay journal. */
+async function managedDialogCall(
+	handle: ManagedChromeHandle,
+	step: { method: string; args: unknown[] },
+	signal: AbortSignal,
+): Promise<ChromeDialogState | undefined> {
+	if (step.method === "dialog") return chromeDialogState(await chromeDialog(handle, undefined, signal));
+	if (step.method === "setDialogs")
+		throw new ToolError(
+			"The user's Chrome never answers dialogs automatically: read each one with tab.dialog() and answer it with tab.handleDialog({ accept, id }).",
+		);
+	const [options] = step.args;
+	if (!isRecord(options) || typeof options.accept !== "boolean")
+		throw new ToolError("tab.handleDialog() expects { accept: boolean, id: string, text?: string }");
+	if (typeof options.id !== "string" || options.id.length === 0)
+		throw new ToolError(
+			"In the user's Chrome, tab.handleDialog() needs the id of the dialog it answers: read it with await tab.dialog(), then pass { accept, id, text? }.",
+		);
+	if (options.text !== undefined && typeof options.text !== "string")
+		throw new ToolError("tab.handleDialog() text must be a string");
+	await chromeDialog(
+		handle,
+		{
+			action: options.accept ? "accept" : "dismiss",
+			id: options.id,
+			...(options.text === undefined ? {} : { promptText: options.text }),
+		},
+		signal,
+	);
+	return undefined;
+}
+
+/** Options that configure a browser OMP launches or attaches; the user's Chrome keeps its own. */
+const OWNED_BROWSER_OPEN_OPTIONS = [
+	"allowed_domains",
+	"init_scripts",
+	"downloads",
+	"user_agent",
+	"ignore_https_errors",
+	"allow_file_access",
+	"headed",
+] as const;
+
 async function openBrowser(
 	session: ToolSession,
 	name: string,
@@ -494,6 +599,7 @@ async function openBrowser(
 	signal?: AbortSignal,
 ): Promise<AgentToolResult<unknown>> {
 	const kind = resolveBrowserKind(params, session);
+	const downloadsPath = params.downloads === undefined ? undefined : resolveToCwd(params.downloads, session.cwd);
 	details.browser = kind.kind;
 
 	// If a tab with this name already exists on a different browser kind, fail fast — caller must close first.
@@ -549,6 +655,20 @@ async function openBrowser(
 		holdBrowser(browser);
 		let result: AcquireTabResult;
 		try {
+			const initScripts = await untilAborted(openSignal, () =>
+				resolveInitScriptSources(params.init_scripts, session.cwd),
+			);
+			// Worker-init options cannot be applied to a live tab: recycle it so the
+			// reopened tab starts with them.
+			if (
+				existing &&
+				(initScripts.length > 0 ||
+					params.downloads !== undefined ||
+					params.user_agent !== undefined ||
+					params.ignore_https_errors === true)
+			) {
+				await untilAborted(openSignal, () => releaseTab(name, { kill: false, timeoutMs }));
+			}
 			result = await untilAborted(openSignal, () =>
 				acquireTab(name, browser, {
 					url: params.url,
@@ -564,6 +684,11 @@ async function openBrowser(
 					timeoutMs,
 					deadlineStartMs: deadlineStart,
 					dialogs: params.dialogs,
+					allowedDomains: params.allowed_domains,
+					initScripts,
+					downloadsPath,
+					userAgent: params.user_agent,
+					ignoreHttpsErrors: params.ignore_https_errors,
 					signal: openSignal,
 					ownerSessionId: session.getSessionId?.() ?? undefined,
 					// Omitted stays undefined: creation defaults it to false

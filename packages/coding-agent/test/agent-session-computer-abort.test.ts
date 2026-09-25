@@ -9,6 +9,7 @@ import { AgentSession } from "../src/session/agent-session";
 import { SessionManager } from "../src/session/session-manager";
 import { registerComputerController } from "../src/tools/computer/supervisor";
 import { executeAcpBuiltinSlashCommand } from "../src/slash-commands/acp-builtins";
+import { cfgComputerEnabled } from "../src/tools/settings";
 import { createInMemoryAuthStorage } from "./helpers/agent-session-setup";
 
 describe("AgentSession computer interruption cleanup", () => {
@@ -60,7 +61,7 @@ describe("AgentSession computer interruption cleanup", () => {
 				const outcome = await aborting;
 				if (fail) expect(outcome).toBeInstanceOf(AggregateError);
 				else expect(outcome).toBeUndefined();
-				expect(settings.get("computer.enabled")).toBe(true);
+				expect(cfgComputerEnabled.get(settings)).toBe(true);
 				expect(otherReleased).toBe(false);
 			} finally {
 				release.resolve();
@@ -138,7 +139,7 @@ it("computer off stops the agent before a failed computer call can lead to anoth
 			{ session, output: async () => {} },
 		]);
 		await running;
-		expect(session.settings.get("computer.enabled")).toBe(false);
+		expect(cfgComputerEnabled.get(session.settings)).toBe(false);
 		expect(agent.state.isStreaming).toBe(false);
 		expect(fallbackEffects).toBe(0);
 		// The agent loop may drain an already-aborted provider stream, but must

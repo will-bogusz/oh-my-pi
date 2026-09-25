@@ -46,11 +46,38 @@
 		"url",
 		"title",
 		"goto",
+		"back",
+		"forward",
+		"reload",
+		"pushState",
+		"frames",
+		"dialog",
+		"handleDialog",
+		"setDialogs",
 		"observe",
 		"ariaSnapshot",
+		"a11y",
+		"webmcpList",
+		"webmcpInvoke",
+		"webmcpEvents",
 		"screenshot",
+		"diffScreenshot",
+		"pdf",
 		"extract",
 		"click",
+		"dblclick",
+		"hover",
+		"focus",
+		"check",
+		"uncheck",
+		"keyDown",
+		"keyUp",
+		"mouseMove",
+		"mouseDown",
+		"mouseUp",
+		"clickAt",
+		"wheel",
+		"highlight",
 		"type",
 		"fill",
 		"press",
@@ -61,12 +88,72 @@
 		"uploadFile",
 		"downloads",
 		"waitForUrl",
+		"text",
+		"html",
+		"value",
+		"attr",
+		"count",
+		"box",
+		"styles",
+		"isVisible",
+		"isEnabled",
+		"isChecked",
+		"waitForText",
 		"evaluate",
 		"waitFor",
 		"waitForSelector",
+		"emulate",
+		"devices",
+		"clipboardRead",
+		"clipboardWrite",
+		"clipboardCopy",
+		"clipboardPaste",
+		"cookies",
+		"setCookies",
+		"clearCookies",
+		"storage",
+		"setStorage",
+		"clearStorage",
+		"saveState",
+		"loadState",
+		"addInitScript",
+		"removeInitScript",
+		"initScripts",
+		"waitForDownload",
+		"console",
+		"errors",
+		"clearConsole",
+		"traceStart",
+		"traceStop",
+		"profileStart",
+		"profileStop",
+		"metrics",
+		"route",
+		"unroute",
+		"routes",
+		"requests",
+		"request",
+		"clearRequests",
+		"harStart",
+		"harStop",
+		"allowedDomains",
+		"vitals",
+		"reactEnable",
+		"reactTree",
+		"reactInspect",
+		"reactRenders",
+		"reactSuspense",
+		"recordStart",
+		"recordStop",
+		"recordRestart",
+		"recording",
 	];
 	const elementMethods = [
 		"click",
+		"dblclick",
+		"check",
+		"uncheck",
+		"highlight",
 		"type",
 		"fill",
 		"press",
@@ -78,7 +165,31 @@
 		"boundingBox",
 		"isVisible",
 		"isHidden",
+		"text",
+		"html",
+		"value",
+		"attr",
+		"styles",
+		"isEnabled",
+		"isChecked",
 		"evaluate",
+	];
+	const frameMethods = [
+		"click",
+		"fill",
+		"type",
+		"press",
+		"text",
+		"html",
+		"value",
+		"attr",
+		"count",
+		"isVisible",
+		"ariaSnapshot",
+		"evaluate",
+		"waitFor",
+		"waitForSelector",
+		"screenshot",
 	];
 	const makeElement = (name, handleMethod, handleArgs, handle) => {
 		const element = {};
@@ -96,6 +207,22 @@
 				);
 		}
 		return Object.freeze(element);
+	};
+	const makeFrame = (name, selector, handle) => {
+		const frame = {};
+		frame.toString = () => `<frame tab.frame(${JSON.stringify(selector)}) on ${name}>`;
+		for (const method of frameMethods) {
+			frame[method] = (...args) =>
+				callValue(
+					name,
+					[
+						{ method: "frame", args: encodeArgs("tab helper argument", [selector]) },
+						{ method, args: encodeArgs("frame helper argument", args) },
+					],
+					handle,
+				);
+		}
+		return Object.freeze(frame);
 	};
 	/** Name -> { handle, target } of a managed Chrome tab, so `browser.tab(name)` keeps its identity. */
 	const identitiesByName = new Map();
@@ -137,10 +264,7 @@
 				handle,
 			);
 		tab.ref = id => makeElement(name, "ref", encodeArgs("tab helper argument", [id]), handle);
-		tab.dialog = async options => {
-			if (!handle) throw new Error("Dialog inspection requires an existing managed Chrome handle");
-			return (await invoke("dialog", { handle, dialog: validateOptions("tab.dialog", options) })).value;
-		};
+		tab.frame = selector => makeFrame(name, selector, handle);
 		tab.popups = async () => {
 			if (!handle) throw new Error("Popup discovery requires an existing managed Chrome handle");
 			return (await invoke("popups", { handle })).value;
@@ -226,6 +350,10 @@
 			// Managed Chrome tabs are addressed by their immutable handle, never by
 			// the display label, so a name lookup has to carry the handle across.
 			return makeTab(name, identitiesByName.get(name)?.handle);
+		},
+		async tabs() {
+			const details = await invoke("tabs", {});
+			return Array.isArray(details.value) ? details.value : [];
 		},
 		async close(options) {
 			await invoke("close", validateOptions("browser.close", options));

@@ -2,24 +2,14 @@ import { expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { TabDownloadMonitor, type TabDownload } from "@oh-my-pi/pi-coding-agent/tools/browser/downloads";
+import { TabDownloadMonitor } from "@oh-my-pi/pi-coding-agent/tools/browser/downloads";
 import puppeteer from "puppeteer-core";
 import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
-async function waitForDownload(monitor: TabDownloadMonitor, state: TabDownload["state"]): Promise<TabDownload> {
-	const deadline = Date.now() + 5000;
-	while (Date.now() < deadline) {
-		const entry = monitor.snapshot().entries.find(entry => entry.state === state);
-		if (entry) return entry;
-		await Bun.sleep(20);
-	}
-	throw new Error(`No ${state} download: ${JSON.stringify(monitor.snapshot())}`);
-}
-
 it.skipIf(!CHROMIUM_AVAILABLE)(
-	"observes page-scoped completion and cancellation by GUID, and refuses stale state after detach",
+	"observes page-scoped completion and cancellation without changing download settings, and refuses stale state after detach",
 	async () => {
 		const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-download-test-"));
 		const server = Bun.serve({
@@ -57,7 +47,11 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 		});
 		try {
 			const control = await browser.target().createCDPSession();
-			await control.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: directory });
+			await control.send("Browser.setDownloadBehavior", {
+				behavior: "allow",
+				downloadPath: directory,
+				eventsEnabled: true,
+			});
 			const page = await browser.newPage();
 			const other = await browser.newPage();
 			await page.goto(`http://127.0.0.1:${server.port}/`);
@@ -67,31 +61,38 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 			try {
 				await other.emulateFocusedPage(true);
 				await other.click("a");
-				await waitForDownload(otherMonitor, "completed");
+				await otherMonitor.wait(AbortSignal.timeout(5000));
 				await other.emulateFocusedPage(false);
-				expect(monitor.snapshot().entries).toEqual([]);
+				expect(monitor.list()).toEqual([]);
 				await page.emulateFocusedPage(true);
 				await page.click("a");
-				const completed = await waitForDownload(monitor, "completed");
-				expect(completed.id).not.toBe(otherMonitor.snapshot().entries[0]!.id);
-				expect(completed.suggestedFilename).toBe("receipt.txt");
-				expect(completed.receivedBytes).toBe(new TextEncoder().encode("download verified — café Ω").length);
+				const completed = await monitor.wait(AbortSignal.timeout(5000));
+				expect(completed).toEqual({
+					suggestedFilename: "receipt.txt",
+					url: `http://127.0.0.1:${server.port}/file`,
+					bytes: new TextEncoder().encode("download verified — café Ω").length,
+				});
 				expect(await Bun.file(path.join(directory, "receipt.txt")).text()).toBe("download verified — café Ω");
-				completed.state = "canceled";
-				expect(monitor.snapshot().entries[0]!.state).toBe("completed");
+				completed.bytes = 0;
+				expect(monitor.list()[0]!.bytes).toBeGreaterThan(0);
 				await page.$eval("a", element => element.setAttribute("href", "/slow"));
+				const began = new Promise<string>(resolve =>
+					control.once("Browser.downloadWillBegin", event => resolve(event.guid)),
+				);
+				const canceled = monitor.wait(AbortSignal.timeout(5000)).then(
+					() => "completed",
+					(error: Error) => error.message,
+				);
 				await page.click("a");
-				const pending = await waitForDownload(monitor, "inProgress");
-				await control.send("Browser.cancelDownload", { guid: pending.id });
-				const canceled = await waitForDownload(monitor, "canceled");
-				expect(canceled.id).toBe(pending.id);
+				await control.send("Browser.cancelDownload", { guid: await began });
+				expect(await canceled).toContain("Download canceled");
 				expect(await Bun.file(path.join(directory, "pending.txt")).exists()).toBe(false);
-				expect(monitor.snapshot().entries[0]!.state).toBe("completed");
+				expect(monitor.list()).toHaveLength(1);
 				await monitor.session.detach();
-				expect(() => monitor.snapshot()).toThrow("disconnected");
+				expect(() => monitor.list()).toThrow("disconnected");
 			} finally {
-				await monitor.dispose();
-				await otherMonitor.dispose();
+				await monitor.close();
+				await otherMonitor.close();
 			}
 		} finally {
 			await browser.close();

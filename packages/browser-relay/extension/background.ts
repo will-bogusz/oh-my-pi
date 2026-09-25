@@ -51,9 +51,29 @@ const attachments = new DebuggerAttachments({
 	},
 });
 
+/**
+ * Stable per-install browser identity, persisted in `chrome.storage.local`:
+ * the id this browser pairs and authenticates with, and the instance id sent
+ * in every hello. The relay namespaces tab registries per instance, so several
+ * browsers can share one relay and a service-worker restart keeps the
+ * browser's tab registry instead of replacing another browser's connection.
+ * Stored under the key pairing has always used, so paired browsers keep their
+ * credentials across the update.
+ */
+let instanceId: string | null = null;
+async function ensureInstanceId(): Promise<string> {
+	if (instanceId) return instanceId;
+	const key = "browserId";
+	const stored = await chrome.storage.local.get({ [key]: "" });
+	const existing = stored[key];
+	instanceId = typeof existing === "string" && existing.length > 0 ? existing : crypto.randomUUID();
+	await chrome.storage.local.set({ [key]: instanceId } as Record<string, string>);
+	return instanceId;
+}
+
 interface RelaySettings {
 	port: number;
-	browserId: string;
+	instanceId: string;
 	browserLabel: string;
 	credential: string;
 	pairingCode: string;
@@ -67,13 +87,11 @@ async function loadSettings(): Promise<RelaySettings> {
 	const defaultPort = defaults && typeof defaults === "object" && "port" in defaults ? defaults.port : undefined;
 	if (!response.ok || typeof defaultPort !== "number" || !Number.isInteger(defaultPort) || defaultPort < 1 || defaultPort > 65535)
 		throw new Error("Invalid extension connection configuration; reinstall the extension.");
-	const stored = await chrome.storage.local.get({ port: defaultPort, browserId: "", browserLabel: "", credential: "", pairingCode: "" });
+	const stored = await chrome.storage.local.get({ port: defaultPort, browserLabel: "", credential: "", pairingCode: "" });
 	const port = Number(stored.port);
-	const browserId = typeof stored.browserId === "string" && stored.browserId ? stored.browserId : crypto.randomUUID();
-	if (browserId !== stored.browserId) await chrome.storage.local.set({ browserId });
 	return {
 		port: Number.isInteger(port) && port > 0 && port <= 65535 ? port : defaultPort,
-		browserId,
+		instanceId: await ensureInstanceId(),
 		browserLabel: typeof stored.browserLabel === "string" ? stored.browserLabel : "",
 		credential: typeof stored.credential === "string" ? stored.credential : "",
 		pairingCode: typeof stored.pairingCode === "string" ? stored.pairingCode : "",
@@ -173,6 +191,7 @@ async function buildHello(): Promise<ExtToRelayMessage> {
 	const versionMatch = /Chrome\/[\d.]+/.exec(navigator.userAgent);
 	return {
 		t: "hello",
+		instanceId: await ensureInstanceId(),
 		userAgent: navigator.userAgent,
 		browserVersion: versionMatch?.[0] ?? "Chrome/unknown",
 		extensionBuildId: buildId,
@@ -298,7 +317,7 @@ async function connect(): Promise<void> {
 		pendingEvents = [];
 		socket.onopen = () => {
 			reconnectDelay = RECONNECT_MIN_MS;
-			socket.send(JSON.stringify({ t: "authenticate", auth: { id: settings.browserId, label: settings.browserLabel, credential: settings.credential || undefined, pairingCode: settings.pairingCode || undefined } }));
+			socket.send(JSON.stringify({ t: "authenticate", auth: { id: settings.instanceId, label: settings.browserLabel, credential: settings.credential || undefined, pairingCode: settings.pairingCode || undefined } }));
 			clearInterval(pingTimer ?? undefined);
 			pingTimer = setInterval(() => post({ t: "ping" }), PING_INTERVAL_MS);
 		};
