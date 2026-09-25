@@ -396,6 +396,70 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	60_000,
 );
 
+const PRESS_PAGE = `<!doctype html><title>Press</title>
+<style>body{margin:20px;font:20px/24px monospace}</style>
+<body data-hits="">
+<p><a href="#" style="font-size:0;padding:12px;background:red">Settings</a></p>
+<p><span style="display:inline-block;transform:rotate(45deg)"><a href="#" style="font-size:0;padding:10px;background:red">Rotated</a></span></p>
+<p style="width:12ch">xxxxxxxx <a href="#">ab cd</a> yyyyyyyyy</p>
+<button id="gone">Gone</button>
+<div id="menu"><button>Inside</button></div>
+<button id="invisible">Invisible</button>
+<button id="flat">Flat</button>
+<script>document.addEventListener("click", event => {
+  event.preventDefault();
+  document.body.dataset.hits += (event.target.textContent || event.target.tagName) + ",";
+})</script>`;
+
+// A press targets the element's first fragment with area. An icon link has
+// only padding (its content box is 0x0), a rotated one only a transformed
+// quad, and a link wrapped across lines has a bounding-box centre that lands
+// on the paragraph. When nothing can be pressed, the refusal says why.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"clicks padded, transformed and wrapped links on the link, and names why a hidden one cannot be clicked",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(PRESS_PAGE, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				const hits = await run<string>(
+					`const { elements } = await tab.observe();
+					 for (const name of ["Settings", "Rotated", "ab cd"]) await (await tab.ref(elements.find(e => e.name === name).ref)).click();
+					 return await tab.evaluate(() => document.body.dataset.hits);`,
+				);
+				expect(hits).toBe("Settings,Rotated,ab cd,");
+				const refs = await run<Record<string, string>>(
+					`const { elements } = await tab.observe({ diff: false });
+					 await tab.evaluate(() => {
+						 document.getElementById("gone").style.display = "none";
+						 document.getElementById("menu").style.display = "none";
+						 document.getElementById("invisible").style.visibility = "hidden";
+						 Object.assign(document.getElementById("flat").style, { width: "0", height: "0", padding: "0", border: "0", overflow: "hidden" });
+					 });
+					 return Object.fromEntries(elements.map(e => [e.name, e.ref]));`,
+				);
+				const click = (name: string) => runError(`await (await tab.ref(${JSON.stringify(refs[name])})).click();`);
+				expect(await click("Gone")).toContain("has no box to act on: it has display:none");
+				expect(await click("Inside")).toContain(
+					"has no box to act on: it is inside <div#menu>, which has display:none",
+				);
+				expect(await click("Invisible")).toContain("blocked: it has visibility:hidden");
+				expect(await click("Flat")).toContain("has no box to act on: it is zero-sized");
+				expect(await run<string>("return await tab.evaluate(() => document.body.dataset.hits);")).toBe(
+					"Settings,Rotated,ab cd,",
+				);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
 const HOP_START = `<!doctype html><title>Start</title><h1>Start</h1>
 <button id="go" onclick="location.href='/hop'">Go</button>`;
 

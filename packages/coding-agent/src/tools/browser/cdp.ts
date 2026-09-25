@@ -171,16 +171,15 @@ function rethrowIfAborted(signal: AbortSignal | undefined, error: unknown): void
 	if (signal?.aborted) throw error;
 }
 
-/** Border box of the node in its own frame's coordinates, or null when it has no box. */
-async function nodeBox(node: CdpNode, signal?: AbortSignal): Promise<{ border: Rect; content: Rect } | null> {
+/** Border quad of the node in its own frame's coordinates, or null when it has no box. */
+async function borderQuad(node: CdpNode, signal?: AbortSignal): Promise<number[] | null> {
 	const box = await untilAborted(signal, () =>
 		node.session.send("DOM.getBoxModel", { backendNodeId: node.backendNodeId }),
 	).catch(error => {
 		rethrowIfAborted(signal, error);
 		return null;
 	});
-	if (!box) return null;
-	return { border: quadRect(box.model.border), content: quadRect(box.model.content) };
+	return box ? box.model.border : null;
 }
 
 function quadRect(quad: readonly number[]): Rect {
@@ -189,6 +188,16 @@ function quadRect(quad: readonly number[]): Rect {
 	const x = Math.min(...xs);
 	const y = Math.min(...ys);
 	return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+}
+
+/** A quad something can land on: at least one CSS pixel of area, however it is rotated. */
+function hasArea(quad: readonly number[] | null): quad is readonly number[] {
+	if (!quad) return false;
+	let twiceArea = 0;
+	for (let index = 0; index < 8; index += 2) {
+		twiceArea += quad[index] * quad[(index + 3) % 8] - quad[(index + 2) % 8] * quad[index + 1];
+	}
+	return Math.abs(twiceArea) / 2 >= 1;
 }
 
 /**
@@ -213,9 +222,10 @@ export async function sessionOffset(page: Page, session: CDPSession, signal?: Ab
 
 /** The node's border box in root-viewport coordinates, or null when it has no box. */
 export async function boundingBox(node: CdpNode, offset: Point, signal?: AbortSignal): Promise<Rect | null> {
-	const box = await nodeBox(node, signal);
-	if (!box || box.border.width === 0 || box.border.height === 0) return null;
-	return { x: box.border.x + offset.x, y: box.border.y + offset.y, width: box.border.width, height: box.border.height };
+	const quad = await borderQuad(node, signal);
+	const box = quad && quadRect(quad);
+	if (!box || box.width === 0 || box.height === 0) return null;
+	return { x: box.x + offset.x, y: box.y + offset.y, width: box.width, height: box.height };
 }
 
 export async function scrollIntoView(node: CdpNode, signal?: AbortSignal): Promise<void> {
@@ -237,25 +247,103 @@ export async function focusNode(node: CdpNode, signal?: AbortSignal): Promise<vo
 }
 
 /**
- * Why the node has no box: the page dropped it — Chrome keeps answering for
- * detached nodes, so only the node itself can say — or it is still in the
- * document but not rendered. Costs a resolve, and only on the failure path.
+ * Where a press on the node lands, in its own frame's coordinates: the centre of
+ * its first fragment with area. `DOM.getContentQuads` gives each line of a
+ * wrapped inline and follows transforms, but measures an inline by its text
+ * alone, so an icon link drawn by padding and a background falls back to its
+ * border box. Null when neither has area.
  */
-async function noBoxError(node: CdpNode, signal?: AbortSignal): Promise<ToolError> {
-	const connected = await callOnNode(node, "function () { return this.isConnected === true; }", [], signal).then(
-		value => value === true,
-		() => false,
+async function pressPoint(node: CdpNode, signal?: AbortSignal): Promise<Point | null> {
+	const quads = await untilAborted(signal, () =>
+		node.session.send("DOM.getContentQuads", { backendNodeId: node.backendNodeId }),
+	).then(
+		result => result.quads,
+		error => {
+			rethrowIfAborted(signal, error);
+			return [];
+		},
 	);
-	if (!connected) return staleNode(node, new Error("it is detached from the document"));
-	return new ToolError(
-		`${node.label} has no box to act on: it is hidden or zero-sized. Run tab.observe() to see the current page.`,
-	);
+	const quad = quads.find(hasArea) ?? (await borderQuad(node, signal));
+	if (!hasArea(quad)) return null;
+	return { x: (quad[0] + quad[2] + quad[4] + quad[6]) / 4, y: (quad[1] + quad[3] + quad[5] + quad[7]) / 4 };
 }
 
-/** Centre of the node's content box in its own frame's coordinates — where a click lands. */
-async function actionPoint(node: CdpNode, signal?: AbortSignal): Promise<Point> {
-	// A scroll that cannot happen is never the error worth reporting: the box
-	// check below says precisely whether the node is gone or merely unrendered.
+/**
+ * Why a press on the node would not reach it, or null when it would. Asked of
+ * the node where it lives, so an iframe needs no offsets, and in the order a
+ * user would find out: the page dropped it (Chrome keeps answering for detached
+ * nodes), `display:none` on it or an ancestor, no area, `visibility` that
+ * hit-testing skips, or another element over the centre of its first fragment
+ * (the fragment the press targets). An ancestor at that point is not a cover.
+ */
+const PRESS_BLOCKER = `function () {
+	const element = this;
+	if (!element.isConnected) return { stale: "it is detached from the document" };
+	const view = element.ownerDocument.defaultView;
+	const describe = target => {
+		const id = target.id ? "#" + target.id : "";
+		const classes = Array.from(target.classList).slice(0, 2).map(name => "." + name).join("");
+		return "<" + target.tagName.toLowerCase() + id + classes + ">";
+	};
+	const parentOf = current => current.assignedSlot || current.parentElement || current.getRootNode().host || null;
+	if (!element.checkVisibility()) {
+		for (let current = element; current; current = parentOf(current)) {
+			const display = view.getComputedStyle(current).display;
+			if (current === element && display === "contents") return { noBox: "it has display:contents, so no box of its own" };
+			if (display !== "none") continue;
+			return { noBox: current === element ? "it has display:none" : "it is inside " + describe(current) + ", which has display:none" };
+		}
+		return { noBox: "it is not rendered" };
+	}
+	const rect = Array.from(element.getClientRects()).find(fragment => fragment.width * fragment.height >= 1);
+	if (!rect) return { noBox: "it is zero-sized" };
+	const visibility = view.getComputedStyle(element).visibility;
+	if (visibility !== "visible") return { blocked: "it has visibility:" + visibility + ", which clicks pass through" };
+	const left = Math.max(0, Math.min(view.innerWidth, rect.left));
+	const right = Math.max(0, Math.min(view.innerWidth, rect.right));
+	const top = Math.max(0, Math.min(view.innerHeight, rect.top));
+	const bottom = Math.max(0, Math.min(view.innerHeight, rect.bottom));
+	if (right - left < 1 || bottom - top < 1) return null;
+	const x = Math.floor((left + right) / 2);
+	const y = Math.floor((top + bottom) / 2);
+	let hit = element.ownerDocument.elementFromPoint(x, y);
+	for (let depth = 0; hit && hit.shadowRoot && depth < 16; depth++) {
+		const nested = hit.shadowRoot.elementFromPoint(x, y);
+		if (!nested || nested === hit) break;
+		hit = nested;
+	}
+	if (!hit) return null;
+	const contains = (ancestor, descendant) => {
+		for (let current = descendant, depth = 0; current && depth < 64; depth++) {
+			if (current === ancestor) return true;
+			current = current.parentElement || current.getRootNode().host || null;
+		}
+		return false;
+	};
+	if (contains(element, hit) || contains(hit, element)) return null;
+	return { blocked: "covered by " + describe(hit) };
+}`;
+
+async function pressBlocker(node: CdpNode, label: string, signal?: AbortSignal): Promise<ToolError | null> {
+	const blocker = (await callOnNode(node, PRESS_BLOCKER, [], signal)) as {
+		stale?: string;
+		noBox?: string;
+		blocked?: string;
+	} | null;
+	if (!blocker) return null;
+	if (blocker.stale) return staleNode(node, new Error(blocker.stale));
+	if (blocker.noBox) {
+		return new ToolError(
+			`${label} has no box to act on: ${blocker.noBox}. Run tab.observe() to see the current page.`,
+		);
+	}
+	return new ToolError(`${label} blocked: ${blocker.blocked}`);
+}
+
+/** Scroll the node into view and find where a press lands, or refuse with the reason there is nowhere. */
+async function actionPoint(node: CdpNode, label: string, signal?: AbortSignal): Promise<Point> {
+	// A scroll that cannot happen is never the error worth reporting: the probe
+	// below says precisely whether the node is gone or merely unrendered.
 	const scrolled = await scrollIntoView(node, signal).then(
 		() => true,
 		error => {
@@ -263,9 +351,12 @@ async function actionPoint(node: CdpNode, signal?: AbortSignal): Promise<Point> 
 			return false;
 		},
 	);
-	const box = scrolled ? await nodeBox(node, signal) : null;
-	if (!box || box.content.width === 0 || box.content.height === 0) throw await noBoxError(node, signal);
-	return { x: box.content.x + box.content.width / 2, y: box.content.y + box.content.height / 2 };
+	const point = scrolled ? await pressPoint(node, signal) : null;
+	if (point) return point;
+	throw (
+		(await pressBlocker(node, label, signal)) ??
+		new ToolError(`${label} has no box to act on. Run tab.observe() to see the current page.`)
+	);
 }
 
 /**
@@ -293,45 +384,8 @@ async function dispatchMouse(
 }
 
 /**
- * What the element's visible centre hits in its own document, when that is
- * neither the element nor inside it: `<div#overlay>`. Null when the click
- * would land. Evaluated where the element lives, so an iframe needs no offsets.
- */
-const COVERING_ELEMENT = `function () {
-	const element = this;
-	const doc = element.ownerDocument;
-	const view = doc.defaultView;
-	const rect = element.getBoundingClientRect();
-	const left = Math.max(0, Math.min(view.innerWidth, rect.left));
-	const right = Math.max(0, Math.min(view.innerWidth, rect.right));
-	const top = Math.max(0, Math.min(view.innerHeight, rect.top));
-	const bottom = Math.max(0, Math.min(view.innerHeight, rect.bottom));
-	if (right - left < 1 || bottom - top < 1) return null;
-	const x = Math.floor((left + right) / 2);
-	const y = Math.floor((top + bottom) / 2);
-	let hit = doc.elementFromPoint(x, y);
-	for (let depth = 0; hit && hit.shadowRoot && depth < 16; depth++) {
-		const nested = hit.shadowRoot.elementFromPoint(x, y);
-		if (!nested || nested === hit) break;
-		hit = nested;
-	}
-	if (!hit) return null;
-	const contains = (ancestor, descendant) => {
-		for (let current = descendant, depth = 0; current && depth < 64; depth++) {
-			if (current === ancestor) return true;
-			current = current.parentElement || current.getRootNode().host || null;
-		}
-		return false;
-	};
-	if (contains(element, hit) || contains(hit, element)) return null;
-	const id = hit.id ? "#" + hit.id : "";
-	const classes = Array.from(hit.classList).slice(0, 2).map(name => "." + name).join("");
-	return "<" + hit.tagName.toLowerCase() + id + classes + ">";
-}`;
-
-/**
- * Press and release at the node's centre. A click whose point another element
- * covers is refused instead of landing on the cover: `${label} blocked: covered by <div#overlay>`.
+ * Press and release where the node's first fragment is. A press that would not
+ * reach it is refused instead of landing elsewhere: `${label} blocked: covered by <div#overlay>`.
  */
 export async function clickNode(
 	node: CdpNode,
@@ -339,9 +393,9 @@ export async function clickNode(
 	signal?: AbortSignal,
 	label: string = node.label,
 ): Promise<void> {
-	const point = await actionPoint(node, signal);
-	const cover = await callOnNode(node, COVERING_ELEMENT, [], signal);
-	if (typeof cover === "string") throw new ToolError(`${label} blocked: covered by ${cover}`);
+	const point = await actionPoint(node, label, signal);
+	const blocker = await pressBlocker(node, label, signal);
+	if (blocker) throw blocker;
 	// The move both primes hover state and drives the in-page cursor overlay the
 	// relay paints from Input.dispatchMouseEvent.
 	await dispatchMouse(node.session, "mouseMoved", point, { button: "none", buttons: 0, clickCount: 0 }, signal);
@@ -352,7 +406,7 @@ export async function clickNode(
 }
 
 export async function hoverNode(node: CdpNode, signal?: AbortSignal): Promise<void> {
-	const point = await actionPoint(node, signal);
+	const point = await actionPoint(node, node.label, signal);
 	await dispatchMouse(node.session, "mouseMoved", point, { button: "none", buttons: 0, clickCount: 0 }, signal);
 }
 
@@ -825,11 +879,6 @@ async function elementOf(session: CDPSession, nodeId: number, signal?: AbortSign
 /** Cadence for every selector wait: one resolution per tick, nothing kept between ticks. */
 const SELECTOR_POLL_MS = 100;
 
-async function hasBox(node: CdpNode, signal?: AbortSignal): Promise<boolean> {
-	const box = await nodeBox(node, signal);
-	return box !== null && box.border.width > 0 && box.border.height > 0;
-}
-
 /**
  * Poll a selector until it names something the caller can use. `state` picks
  * what counts: `present` any match, `visible` a match with a box, `hidden` the
@@ -851,7 +900,9 @@ export async function awaitSelector(
 		if (options.state !== "present") {
 			let visible: CdpNode | null = null;
 			for (const node of nodes) {
-				if (await hasBox(node, signal)) {
+				// The border box bounds every fragment `pressPoint` can pick, so
+				// what passes here is what a click can land on.
+				if (hasArea(await borderQuad(node, signal))) {
 					visible = node;
 					break;
 				}

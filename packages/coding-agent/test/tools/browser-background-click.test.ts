@@ -6,7 +6,7 @@ import { chromiumAvailable, chromiumExecutable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
-const BOX = { content: [0, 0, 40, 0, 40, 20, 0, 20], border: [0, 0, 40, 0, 40, 20, 0, 20] };
+const QUAD = [0, 0, 40, 0, 40, 20, 0, 20];
 
 // An action that outran its deadline must be over: a scroll that only finishes
 // afterwards may not go on to dispatch the click the caller already gave up on.
@@ -24,7 +24,7 @@ it("does not dispatch a timed-out click when scrolling later completes", async (
 				finished.resolve();
 				return {};
 			}
-			if (method === "DOM.getBoxModel") return { model: BOX };
+			if (method === "DOM.getContentQuads") return { quads: [QUAD] };
 			return {};
 		},
 	} as unknown as CDPSession;
@@ -44,9 +44,10 @@ it("does not dispatch a timed-out click when scrolling later completes", async (
 it("refuses to click a node with no box and names the ref", async () => {
 	const session = {
 		send: async (method: string) => {
+			if (method === "DOM.getContentQuads") throw new Error("Could not compute content quads.");
 			if (method === "DOM.getBoxModel") throw new Error("Could not compute box model.");
 			if (method === "DOM.resolveNode") return { object: { objectId: "1" } };
-			if (method === "Runtime.callFunctionOn") return { result: { value: true } };
+			if (method === "Runtime.callFunctionOn") return { result: { value: { noBox: "it has display:none" } } };
 			return {};
 		},
 	} as unknown as CDPSession;
@@ -63,9 +64,9 @@ it("checks cancellation again after geometry and before trusted pointer input", 
 	const session = {
 		send: async (method: string) => {
 			sent.push(method);
-			if (method === "DOM.getBoxModel") {
+			if (method === "DOM.getContentQuads") {
 				deadline.abort(new Error("lease released"));
-				return { model: BOX };
+				return { quads: [QUAD] };
 			}
 			return {};
 		},
@@ -73,7 +74,7 @@ it("checks cancellation again after geometry and before trusted pointer input", 
 	await expect(clickNode({ session, backendNodeId: 7, label: "e1" }, 1, deadline.signal)).rejects.toThrow(
 		"lease released",
 	);
-	expect(sent).toEqual(["DOM.scrollIntoViewIfNeeded", "DOM.getBoxModel"]);
+	expect(sent).toEqual(["DOM.scrollIntoViewIfNeeded", "DOM.getContentQuads"]);
 });
 
 // Opt-in real Chromium regression, without a visible browser or user profile.
