@@ -3,7 +3,7 @@ import { mergeTabSnapshot, type TabSnapshot } from "./protocol";
 export interface DiscoveredChromeTab extends TabSnapshot {
 	id: string;
 	ownership?: "available" | "this_actor" | "other_actor";
-	/** Discovery id of the tab that opened this one, while its lease lasts. */
+	/** Discovery id of the nearest still-leased tab this one was opened from. */
 	popupOf?: string;
 }
 
@@ -410,8 +410,18 @@ export class ManagedChromeTabs {
 		const page = this.#tabs.get(lease.tab.tabId);
 		this.#end(id, page?.id === lease.tab.id ? page : lease.tab, reason);
 		if (!lease.releasing) this.#operations.invalidate(id);
+		// A popup outlives the page between it and the tab being driven (a
+		// sign-in window that opens the consent page, then closes): children
+		// move up to this lease's own opener, and only unclaimed ones with no
+		// opener left are handed back with it.
+		const heir =
+			lease.popupOf !== undefined && [...this.#leases.values()].some(other => other.tab.id === lease.popupOf)
+				? lease.popupOf
+				: undefined;
 		for (const child of this.#leases.values()) {
-			if (child.unclaimedChild && child.popupOf === lease.tab.id)
+			if (child.popupOf !== lease.tab.id) continue;
+			child.popupOf = heir;
+			if (heir === undefined && child.unclaimedChild)
 				void this.#release(child, false, `was released when the tab that opened it ${reason}`);
 		}
 	}

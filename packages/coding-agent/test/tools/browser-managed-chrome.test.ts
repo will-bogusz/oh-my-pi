@@ -284,6 +284,35 @@ describe("managed Chrome physical tab ownership", () => {
 		expect(() => tabs.claim(found.id, "other")).toThrow("already owned");
 		expect(attachAllowed).toEqual([1, 1]);
 	});
+
+	it("moves a popup up to the driving tab when the window that opened it closes", async () => {
+		const consentReleased = Promise.withResolvers<void>();
+		const { tabs, released } = harness(undefined, async tabId => {
+			if (tabId === 3) consentReleased.resolve();
+		});
+		tabs.upsert(tab(1));
+		const driving = tabs.claim(tabs.discover()[0]!.id, "owner");
+		// The driving tab opens a sign-in window, which opens the consent page, then closes.
+		await tabs.adoptChild(tab(2), 1);
+		await tabs.adoptChild(tab(3), 2);
+		expect(tabs.discover().find(row => row.tabId === 3)!.popupOf).toBe(
+			tabs.discover().find(row => row.tabId === 2)!.id,
+		);
+		tabs.remove(2);
+		expect(tabs.childTabs(driving.id, "owner")).toMatchObject([{ tabId: 3, popupOf: driving.tab.id }]);
+		expect(tabs.discover("owner").find(row => row.tabId === 3)).toMatchObject({
+			ownership: "this_actor",
+			popupOf: driving.tab.id,
+		});
+		expect(released).toEqual([]);
+		// With no opener left above it, an unclaimed popup goes back with the driving tab.
+		await tabs.releaseTab(driving.id, "owner", false);
+		await consentReleased.promise;
+		expect(released).toEqual([
+			[1, false],
+			[3, false],
+		]);
+	});
 });
 
 // The idle-reclaim path is a real `setTimeout` inside the authority: the tests below
