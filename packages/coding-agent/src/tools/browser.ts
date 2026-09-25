@@ -18,6 +18,7 @@ import {
 	closeChromeTab,
 	discoverChromeTabs,
 	listChromeInstances,
+	matchesChromeTab,
 	isManagedChromeHandle,
 	type ManagedChromeHandle,
 	releaseChromeTab,
@@ -139,7 +140,8 @@ const browserSchema = type({
 	// Its keys are observe()'s plus `screenshot`, checked against the declarations like any option.
 	"observation?": type("object").describe("the first tree's observe() options plus screenshot"),
 	"name?": type("string").describe("tab id (default 'main')"),
-	"url?": type("string").describe("url to open"),
+	"url?": type("string").describe("url to open; discover's url substring"),
+	"title?": type("string").describe("discover's title substring"),
 	"app?": appSchema,
 	"viewport?": {
 		width: "number",
@@ -456,10 +458,13 @@ async function invokeBrowser(
 		if (parsed.action === "discover") {
 			const deadline = AbortSignal.timeout(timeoutMs);
 			const signal = context.signal ? AbortSignal.any([context.signal, deadline]) : deadline;
-			const tabs = await discoverChromeTabs(session, signal, {
-				browserId: parsed.browserId,
-				relay: parsed.app?.relay,
-			});
+			// Filtered with getTab's own matcher, so a filter lists exactly what getTab would choose among.
+			const tabs = (
+				await discoverChromeTabs(session, signal, {
+					browserId: parsed.browserId,
+					relay: parsed.app?.relay,
+				})
+			).filter(tab => matchesChromeTab(tab, { title: parsed.title, url: parsed.url }));
 			details.value = parsed.full ? tabs : compactDiscoveredTabs(tabs);
 			// Let callers select which inventory fields enter the transcript.
 			return toolResult(details).done();

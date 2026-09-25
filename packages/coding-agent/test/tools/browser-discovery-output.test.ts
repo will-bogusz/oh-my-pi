@@ -125,6 +125,11 @@ it("projects discovery to the fields a tab choice needs unless full is requested
 		});
 		expect(Object.keys(compact[0] as object)).toEqual(["id", "title", "url", "active", "ownership"]);
 		expect(JSON.stringify(compact, null, 2).length).toBeLessThan(6_000);
+		// title/url narrow the inventory with getTab's substring match instead of listing every tab.
+		const filtered: { id: string }[] = await vm.runInContext("browser.discover({ title: \"NUMBER 12 ·\" })", context);
+		expect(filtered.map(tab => tab.id)).toEqual(["discovered-12"]);
+		const byUrl: { id: string }[] = await vm.runInContext("browser.discover({ url: \"/path/7?\" })", context);
+		expect(byUrl.map(tab => tab.id)).toEqual(["discovered-7"]);
 		const full: unknown[] = await vm.runInContext("browser.discover({ full: true })", context);
 		expect(full[3]).toEqual(tabs[3]);
 	} finally {
