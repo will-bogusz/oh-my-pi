@@ -5,8 +5,6 @@
 ### Changed
 
 - Computer: the first successful `computer.window()` reply of a conversation carries the computer guide once, ahead of its tree and inside the reply's byte budget, and the eval description says so, making a separate initial read of `xd://eval/computer` unnecessary.
-- Browser: with `compact` refs (the default), an element op refused because its ref's node is gone ("… is stale: the page no longer has that element") carries the page as read right after the refusal — the ordinary observation diff, whose refs act — instead of asking for `tab.observe()`. It is still a refusal, and a failed or oversized read leaves the old request to observe.
-- Computer: the session's first acquired window carries the computer guide once, ahead of its tree, and the eval description says it does, so a native task no longer spends its first call reading `xd://eval/computer`.
 - Computer: `computer.window({ kind: "desktop" })` acquires a display's desktop surface (the driver's `kind: "desktop"` row); it is named in passed-over lists and never chosen as an app's front window.
 - Computer: `type(text, { caret })` places the caret by content (`"start"`, `"end"`, `{ after }`, `{ before }`) before typing, the route for appending to a text area (needs a driver that honours `caret`).
 - Computer: `observe({ query })` is projected by the session — case-insensitive substring, `|` between alternatives, ancestors kept, hidden rows counted; a `not_committed` write verdict now asks for a read-back instead of a rewrite, and the next observation that shows the value answers the doubt; the prompts ask for batched actions per observation.
