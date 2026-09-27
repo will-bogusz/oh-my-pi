@@ -350,6 +350,8 @@ export interface ObservedNode extends TreeNode {
 	actionable: boolean;
 	/** The snapshot node behind an actionable line; absent on iframe boundaries. */
 	ax?: AxNode;
+	/** An iframe boundary whose document did not answer this read: its content is missing, not empty. */
+	unanswered?: boolean;
 }
 
 function nodeStates(node: AxNode): string[] {
@@ -401,6 +403,7 @@ export function flattenSnapshot(root: AxNode, options: { includeAll: boolean }):
 					name: (node.name ?? "").trim(),
 					states: [],
 					actionable: false,
+					...(embedded.unanswered ? { unanswered: true } : {}),
 					iframe: embedded.unanswered
 						? `${frameHost(embedded)} (did not answer in time; its content is left out of this read)`
 						: frameHost(embedded),
@@ -455,13 +458,17 @@ export function scopeNodes(nodes: readonly ObservedNode[], inScope: (node: Obser
 	return scoped;
 }
 
-/** Controls, and the nodes on the path down to one; everything else is dropped. */
+/**
+ * Controls, and the nodes on the path down to one; everything else is dropped.
+ * A frame that did not answer is kept like a control: without it a compact
+ * read cannot tell content left out from content that is not there.
+ */
 export function compactNodes(nodes: readonly ObservedNode[]): ObservedNode[] {
 	const kept = new Set<number>();
 	const open: number[] = [];
 	nodes.forEach((node, index) => {
 		while (open.length > 0 && nodes[open[open.length - 1]!]!.depth >= node.depth) open.pop();
-		if (node.actionable) {
+		if (node.actionable || node.unanswered) {
 			for (const ancestor of open) kept.add(ancestor);
 			kept.add(index);
 		}
