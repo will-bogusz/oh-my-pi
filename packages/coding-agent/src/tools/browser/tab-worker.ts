@@ -340,6 +340,8 @@ interface OpenDialogInfo {
  * code legitimately use the full cell budget.
  */
 const QUICK_OP_TIMEOUT_MS = 20_000;
+/** Bound on the page read a stale-ref refusal carries; it runs after the cell has already stopped. */
+const STALE_REFUSAL_READ_MS = 5_000;
 const ACTION_OP_TIMEOUT_MS = 8_000;
 /** Maximum wait for a renderer acknowledgement after a wheel event is queued. */
 const SCROLL_ACK_TIMEOUT_MS = 2_000;
@@ -1794,7 +1796,8 @@ export class WorkerCore {
 			if (this.#active?.id === msg.id) this.#active = null;
 		}
 		if (failure) {
-			this.#transport.send({ type: "result", id: msg.id, ok: false, error: errorPayload(failure.error) });
+			const error = await this.#refusalWithPageNow(failure.error, msg.session.refs);
+			this.#transport.send({ type: "result", id: msg.id, ok: false, error: errorPayload(error) });
 			return;
 		}
 		if (completed) {
@@ -2003,25 +2006,7 @@ export class WorkerCore {
 		// selector helpers, so `(await tab.ref("e12")).click()` can't outrun the
 		// cell budget (issue #9535).
 		const element = (node: CdpNode): TabElement =>
-			this.#createElement(
-				node,
-				session.cwd,
-				(label, fn) =>
-					markHandled(
-						op(label, actionOpMs, fn).catch(error =>
-							this.#refusalWithPageNow(
-								error,
-								session.refs,
-								() =>
-									op("tab.observe()", quickOpMs, sig =>
-										this.#collectObservation({ refs: session.refs, signal: sig, display: false }),
-									),
-								active.rejectionOwner,
-							),
-						),
-					),
-				input,
-			);
+			this.#createElement(node, session.cwd, (label, fn) => op(label, actionOpMs, fn), input);
 		/** A selector action on the node the selector names now: one op, zero-match fail-fast. */
 		const onSelector = (
 			verb: string,
@@ -3170,34 +3155,30 @@ export class WorkerCore {
 	}
 
 	/**
-	 * An element op refused because the page no longer has its node: the refusal
-	 * stays a refusal, but it carries the page as read right after it, so the
-	 * model's next cell does not have to be a bare `tab.observe()` (every such
-	 * refusal in the transcripts was followed by exactly that cell). The read is
-	 * the ordinary observation: a diff against the tree last printed, refs
-	 * current under the tab's usual numbering, nothing mapped from the stale ref
-	 * to another element. It is not the diff baseline (`display: false`), since
-	 * only a caller that reads the error sees it. Only `compact` refs: a `uuid`
-	 * observation would void every ref the caller holds and hand back no value
-	 * to act from. A read that fails, or a tree over the inline budget, leaves
-	 * the plain refusal.
+	 * A cell that ended on a stale-ref refusal: the refusal stays the cell's
+	 * error, but it carries the whole page as read after the cell stopped, so
+	 * the model's next cell does not have to be a bare `tab.observe()` (every
+	 * such refusal in the transcripts was followed by exactly that cell). Only
+	 * here, once nothing else in the cell can run: an operation's rejection
+	 * that code catches gets no read, so no ref is re-attached behind a caller
+	 * that never sees the page. The read is the ordinary observation, printed
+	 * whole (a diff could lean on a tree the failed cell never delivered), and
+	 * it is not made the diff baseline. Only `compact` refs: a `uuid`
+	 * observation would void every ref the caller holds. A read that fails, or
+	 * a dialog holding the page, leaves the plain refusal.
 	 */
-	async #refusalWithPageNow(
-		error: unknown,
-		refs: RefStyle | undefined,
-		observe: () => Promise<Observation>,
-		rejectionOwner: object,
-	): Promise<never> {
-		if (!(error instanceof StaleNodeError) || refs !== "compact") throw error;
-		const tree = await observe().then(
+	async #refusalWithPageNow(error: unknown, refs: RefStyle | undefined): Promise<unknown> {
+		if (!(error instanceof StaleNodeError) || refs !== "compact" || this.#openDialog) return error;
+		const tree = await this.#collectObservation({
+			refs,
+			diff: false,
+			display: false,
+			signal: AbortSignal.timeout(STALE_REFUSAL_READ_MS),
+		}).then(
 			observation => observation.tree,
 			() => undefined,
 		);
-		if (tree === undefined || Buffer.byteLength(tree, "utf-8") > DEFAULT_MAX_BYTES) throw error;
-		throw markBrowserRunRejection(
-			new ToolError(`${error.fact} The page as read right after this refusal:\n${tree}`),
-			rejectionOwner,
-		);
+		return tree === undefined ? error : new ToolError(`${error.fact} The page as read after this refusal:\n${tree}`);
 	}
 
 	/**

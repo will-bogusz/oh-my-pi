@@ -987,6 +987,7 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 
 const RERENDER_PAGE = `<!doctype html><title>Rows</title><ul id="rows"></ul>
 <button onclick="names = names.map(name => name + ' v2'); render()">Rename all</button>
+<button onclick="render()">Redraw</button>
 <script>
 let names = ["alpha", "beta"];
 function render() {
@@ -1032,6 +1033,17 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 				expect(await run<string>(`await (await tab.ref("${fresh}")).click(); return await tab.title();`)).toBe(
 					"edited alpha v2",
 				);
+				// A refusal the cell catches carries no read: nothing is re-attached behind
+				// code that never saw the page, so a retry of the same ref is refused again
+				// even though a same-named button replaced it.
+				const beta = /\b(e\d+) button "Edit beta v2"/.exec(refused)![1]!;
+				const retried = await runError(
+					`await (await tab.ref(${JSON.stringify(refs.Redraw)})).click();
+					 await (await tab.ref("${beta}")).click().catch(() => undefined);
+					 await (await tab.ref("${beta}")).click();`,
+				);
+				expect(retried).toContain(`${beta} is stale`);
+				expect(await run<string>("return await tab.title();")).toBe("edited alpha v2");
 			});
 		} finally {
 			server.stop(true);
