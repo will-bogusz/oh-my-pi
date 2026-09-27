@@ -334,6 +334,8 @@ class Win {
 /** A launched app gets this long to put its window on the WindowServer. */
 const LAUNCHED_WINDOW_TIMEOUT_MS = 15_000;
 const LAUNCHED_WINDOW_POLL_MS = 250;
+/** How long a launched app's first window gets to stop moving before it is acquired anyway. */
+const LAUNCHED_WINDOW_SETTLE_MS = 2_000;
 /** Either driver's refusal when a name is not an installed app at all. */
 const NOT_AN_APP = /is not an executable on PATH|No installed macOS app found/i;
 
@@ -399,6 +401,13 @@ function startedPid(result: ComputerActionResult): number | undefined {
  * launch reply's own answer to which process this is; a title in the
  * selector still narrows it, and a launch that reports no pid falls back to
  * the name it was given.
+ *
+ * A window that has only just appeared is often still animating to its
+ * frame, and an observation that spans a geometry change is refused as a
+ * stale frame, so a window acquired the moment the roster lists it comes
+ * back with no tree. The launched app's windows are acquired once two polls
+ * report the same frames, or once the settle bound runs out, whichever
+ * comes first.
  */
 async function launchAndAcquire(
 	session: ComputerBackend,
@@ -432,9 +441,15 @@ async function launchAndAcquire(
 	const pid = startedPid(launched);
 	const target: WindowSelector = pid === undefined ? selector : { ...rest, pid };
 	const deadline = Date.now() + LAUNCHED_WINDOW_TIMEOUT_MS;
+	let settleBy: number | undefined;
+	let previous: string | undefined;
 	for (;;) {
 		const context = operationContext(getContext);
-		if ((await session.windows(context, target)).length || Date.now() >= deadline)
+		const windows = await session.windows(context, target);
+		const frames = windows.length ? JSON.stringify(windows.map(window => [window.id, window.bounds])) : undefined;
+		if (frames !== undefined) settleBy ??= Date.now() + LAUNCHED_WINDOW_SETTLE_MS;
+		const settled = frames !== undefined && (frames === previous || Date.now() >= settleBy!);
+		if (settled || Date.now() >= deadline)
 			return await session.window(context, target, options).catch(async (error: unknown) => {
 				if (!isMissedWindow(error)) throw error;
 				// A `Missing` acquisition used to tell the model to try
@@ -450,6 +465,7 @@ async function launchAndAcquire(
 					} s, or the one it opened is already gone.`,
 				);
 			});
+		previous = frames;
 		await Bun.sleep(LAUNCHED_WINDOW_POLL_MS);
 	}
 }
