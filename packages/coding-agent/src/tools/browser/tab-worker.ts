@@ -1794,9 +1794,7 @@ export class WorkerCore {
 			// load where it was), and `browser.tabs()` reads what `ready` last said.
 			// Bounded well inside the supervisor's post-run grace; an abort or the
 			// cell's own timeout leaves it to the next run.
-			const failedAtDeadline =
-				failure.error instanceof ToolError && failure.error.message.startsWith("Browser code execution timed out");
-			if (!(failure.error instanceof ToolAbortError) && !failedAtDeadline)
+			if (!timeoutSignal.aborted && !ac.signal.aborted)
 				await Promise.race([this.#postReadyInfo(), Bun.sleep(FAILED_RUN_INFO_MS)]);
 			this.#transport.send({ type: "result", id: msg.id, ok: false, error: errorPayload(failure.error) });
 			return;

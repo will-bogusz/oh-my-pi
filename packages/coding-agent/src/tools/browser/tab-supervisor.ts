@@ -12,6 +12,7 @@ import { callSessionTool } from "../../eval/js/tool-bridge";
 import { webpExclusionForModel } from "@oh-my-pi/pi-tui/chat/image-loading";
 import type { ToolSession } from "../index";
 import { expandPath } from "../path-utils";
+import { CELL_BUDGET_SLACK_MS } from "../run-scope";
 import { ToolAbortError } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { gracefulKillTreeOnce, pickElectronTarget, shouldPreserveConnectedBrowserFocus } from "./attach";
@@ -211,6 +212,8 @@ const acquireChains = new Map<string, Promise<void>>();
 const GRACE_MS = 750;
 /** Kept back from an open's navigation budget for the reply once the navigation returns. */
 const OPEN_REPLY_MARGIN_MS = 250;
+/** Upper bound on goto's timeout report: its readyState read and its stop, 250 ms each (navigation.ts). */
+const NAVIGATION_REPORT_MS = 500;
 // Cold-start guard for the worker's `setup` handshake (realm usable: puppeteer
 // loaded, browser connected, page acquired). On hosts where the worker's cold
 // import stalls (observed: Bun worker inside a full RPC process), an
@@ -553,8 +556,13 @@ async function navigatePublishedTab(
 	opts: AcquireTabOptions,
 	startedAt: number,
 ): Promise<string | undefined> {
-	const budgetMs = Math.floor(opts.timeoutMs - (performance.now() - startedAt) - OPEN_REPLY_MARGIN_MS);
-	if (budgetMs <= 0) throw new ToolError(`Browser open timed out after ${opts.timeoutMs}ms`);
+	const leftMs = Math.floor(opts.timeoutMs - (performance.now() - startedAt) - OPEN_REPLY_MARGIN_MS);
+	if (leftMs <= 0) throw new ToolError(`Browser open timed out after ${opts.timeoutMs}ms`);
+	// goto gets what is left less its timeout report's own bound; a short open
+	// still gives it half. The cell adds back the slack every run keeps from its
+	// ops, so that slack does not come out of the navigation a second time.
+	const navigateMs = Math.max(leftMs - NAVIGATION_REPORT_MS, Math.floor(leftMs / 2));
+	const budgetMs = navigateMs + CELL_BUDGET_SLACK_MS;
 	try {
 		await runInTabWithSnapshot(
 			name,

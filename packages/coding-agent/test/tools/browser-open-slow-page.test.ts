@@ -114,6 +114,10 @@ describe("browser.open on a page that outlasts its timeout", () => {
 				const observed = await invoke({ action: "call", name: fresh, chain: [{ method: "observe", args: [] }] });
 				expect(JSON.stringify(observed.content)).toContain("Access check in progress");
 
+				// With the browser up, the shortest open a caller can ask for still
+				// loads a page that answers.
+				await invoke({ action: "open", name: `quick-${fresh}`, url: `${origin}/ready`, timeout: 1 });
+
 				// A fresh open on a server that never answers: the tab is kept all the same.
 				const noAnswer = await refusal(invoke({ action: "open", name: blank, url: `${origin}/no-answer`, timeout: 4 }));
 				expect(noAnswer).toContain(`browser.tab(${JSON.stringify(blank)})`);

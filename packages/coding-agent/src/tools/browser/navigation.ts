@@ -110,7 +110,8 @@ export async function navigateMainFrame(page: Page, url: string, opts: MainFrame
 		if (timedOut) await reportNavigationTimeout(page, opts);
 		throw error;
 	} finally {
-		await session.detach().catch(() => undefined);
+		// Not awaited: a slow detach must not hold the answer past its deadline.
+		void session.detach().catch(() => undefined);
 	}
 }
 
@@ -230,7 +231,9 @@ async function waitForMainFramePhase(
 	let interactiveSince: number | undefined;
 	for (;;) {
 		throwIfAborted(signal);
-		const state = await readReadyState(page);
+		// Each probe fits what is left of the deadline, so a page that stops
+		// answering cannot carry the wait past it.
+		const state = await readReadyState(page, Math.max(1, Math.min(READY_PROBE_TIMEOUT_MS, deadline - Date.now())));
 		if (state === "complete") return;
 		if (state === "interactive") {
 			if (phase === "domcontentloaded") return;
@@ -268,10 +271,17 @@ async function reportNavigationTimeout(page: Page, opts: MainFrameNavigateOption
 	// leaves the probe unanswered, and a report that outran the cell turned into
 	// a cell timeout that killed the tab.
 	const url = page.url();
-	const readyState = (await readReadyState(page, REPORT_STEP_TIMEOUT_MS)) ?? "unreachable";
-	const stopped = opts.stopLoading ? "; pending navigation stopped" : "";
-	if (opts.stopLoading)
-		await withTimeout(opts.stopLoading(), REPORT_STEP_TIMEOUT_MS, "stopLoading timed out").catch(() => undefined);
+	const readyState =
+		(await readReadyState(page, REPORT_STEP_TIMEOUT_MS)) ?? `unknown (no answer within ${REPORT_STEP_TIMEOUT_MS}ms)`;
+	let stopped = "";
+	if (opts.stopLoading) {
+		const confirmed = await withTimeout(
+			opts.stopLoading().then(() => true),
+			REPORT_STEP_TIMEOUT_MS,
+			"stopLoading timed out",
+		).catch(() => false);
+		stopped = confirmed ? "; pending navigation stopped" : "; stopping the pending navigation was not confirmed";
+	}
 	throw new NavigationTimeoutError(
 		`${opts.label} timed out after ${opts.timeoutMs}ms${stopped} — current URL: ${url}, readyState: ${readyState}`,
 	);
