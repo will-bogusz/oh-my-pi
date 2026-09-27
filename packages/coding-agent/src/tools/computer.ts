@@ -159,12 +159,11 @@ interface ComputerPreludeDetails {
 	 */
 	window?: { app: string; title: string; id: string; pid: number };
 	/**
-	 * What the call did that the user could see: an app brought to the front
-	 * that was not frontmost (`key_window.app_fronted`), or the real pointer
-	 * moved (global-input rungs and drags). Absent when no reply of this call
-	 * reported either — which is not a claim that nothing happened.
+	 * What the call did that the user could see: the real pointer moved
+	 * (global-input rungs and drags). Absent when no reply of this call
+	 * reported it — which is not a claim that nothing happened.
 	 */
-	userVisible?: Array<{ effect: "fronted"; app: string; pid: number } | { effect: "pointer" }>;
+	userVisible?: Array<{ effect: "pointer" }>;
 }
 
 /** Creates the session-scoped controller used by the computer prelude. */
@@ -227,7 +226,7 @@ interface DescribedWindow {
 }
 
 /** A user-visible side effect one driver reply in the call reported. */
-type UserVisibleEffect = { effect: "fronted"; app: string; pid: number } | { effect: "pointer" };
+type UserVisibleEffect = { effect: "pointer" };
 
 function describedWindow(details: Record<string, unknown>): DescribedWindow | undefined {
 	const window = details.window;
@@ -240,11 +239,7 @@ function describedWindow(details: Record<string, unknown>): DescribedWindow | un
 function userVisibleNotices(details: Record<string, unknown>): string[] {
 	if (!Array.isArray(details.userVisible)) return [];
 	return (details.userVisible as UserVisibleEffect[]).flatMap(entry =>
-		entry?.effect === "fronted" && typeof entry.app === "string"
-			? [`brought ${entry.app} to the front`]
-			: entry?.effect === "pointer"
-				? ["moved the pointer"]
-				: [],
+		entry?.effect === "pointer" ? ["moved the pointer"] : [],
 	);
 }
 
@@ -252,8 +247,8 @@ function userVisibleNotices(details: Record<string, unknown>): string[] {
  * What a settled computer call shows: `detail` is the call as written
  * (`desktop.window(3).focus()`, `run(fn)`, `release`); `summary` says it verb
  * first against the window's title (`click n12 · Notes: All iCloud`); a call
- * that displayed a window heads it; each fronting or pointer move the replies
- * reported gets its own notice.
+ * that displayed a window heads it; each pointer move the replies reported
+ * gets its own notice.
  */
 function describeComputerCall(parameters: unknown, result: AgentToolResult<unknown>): EvalPreludeStatus | undefined {
 	const parsed = getComputerParamsSchema()(parameters);
@@ -544,7 +539,7 @@ async function runComputer(
 	const observedWindow = acquired ?? observation?.window;
 	const window = observedWindow ?? run.window;
 	if (window) details.window = { app: window.app, title: window.title, id: window.id, pid: window.pid };
-	const visible = userVisible(run.returnValue, window, params.action === "call" ? params.chain.at(-1)?.method : undefined);
+	const visible = userVisible(run.returnValue, params.action === "call" ? params.chain.at(-1)?.method : undefined);
 	if (visible.length) details.userVisible = visible;
 	if (observedWindow) {
 		const keys = keyRoute(observation?.backgroundInput);
@@ -616,25 +611,9 @@ function keyRoute(backgroundInput: unknown): string | undefined {
 }
 
 /** What one call's reply says the user could see; see `ComputerPreludeDetails.userVisible`. */
-function userVisible(
-	value: unknown,
-	window: ComputerWindowIdentity | undefined,
-	method: string | undefined,
-): NonNullable<ComputerPreludeDetails["userVisible"]> {
+function userVisible(value: unknown, method: string | undefined): NonNullable<ComputerPreludeDetails["userVisible"]> {
 	if (!isActionResult(value)) return [];
-	const visible: NonNullable<ComputerPreludeDetails["userVisible"]> = [];
-	const data = value.data;
-	const keyWindow = data !== null && typeof data === "object" && "key_window" in data ? data.key_window : undefined;
-	if (
-		window !== undefined &&
-		keyWindow !== null &&
-		typeof keyWindow === "object" &&
-		"app_fronted" in keyWindow &&
-		keyWindow.app_fronted === true
-	)
-		visible.push({ effect: "fronted", app: window.app, pid: window.pid });
-	if (value.route === "global_input" || method === "drag") visible.push({ effect: "pointer" });
-	return visible;
+	return value.route === "global_input" || method === "drag" ? [{ effect: "pointer" }] : [];
 }
 
 function stringifyReturnValue(value: unknown): string {
