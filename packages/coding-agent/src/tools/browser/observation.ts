@@ -402,7 +402,7 @@ export function flattenSnapshot(root: AxNode, options: { includeAll: boolean }):
 					states: [],
 					actionable: false,
 					iframe: embedded.unanswered
-						? `${frameHost(embedded)} (not answering; its content is left out of this read)`
+						? `${frameHost(embedded)} (did not answer in time; its content is left out of this read)`
 						: frameHost(embedded),
 				});
 				for (const child of embedded.children ?? []) visit(child, depth + 1, "");

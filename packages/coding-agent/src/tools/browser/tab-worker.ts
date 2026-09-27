@@ -1089,6 +1089,8 @@ const INITIAL_READY_BUDGET_MS = 10_000;
  * request-interception cleanup's 500ms.
  */
 const FAILED_RUN_INFO_MS = 200;
+/** Kept back from a snapshot's budget for the page's own reads when another frame is slow to answer. */
+const FRAME_READ_RESERVE_MS = 500;
 /**
  * Floor for the CDP reads that collect a snapshot once the settle budget is
  * spent. They are otherwise bounded by the settle deadline — a read that hangs
@@ -2570,7 +2572,7 @@ export class WorkerCore {
 	): Promise<SnapshotRead & { navigating: boolean }> {
 		let latest: SnapshotRead | undefined;
 		let navigated = false;
-		/** A main-frame document change was actually seen, not just inferred from a read that did not answer. */
+		/** A document change was reported (a new main loader, or a document-gone error), not just inferred from a read that did not answer. */
 		let moveSeen = false;
 		// The frame tree is a renderer read like the snapshot's own: one that does
 		// not answer before the deadline is a commit in flight, so it counts as a move.
@@ -2622,7 +2624,7 @@ export class WorkerCore {
 		// that never happened.
 		if (!moveSeen)
 			throw new ToolError(
-				"The page did not answer while observing it: its accessibility tree was not read within the settle budget, and its document did not change. Observe again; tab.screenshot() does not need the tree.",
+				"The page did not answer while observing it: its accessibility tree was not read within the settle budget, and no change of its document was seen. Observe again; tab.screenshot() does not need the tree.",
 			);
 		throw new ToolError("The page changed while observing it. Observe again.");
 	}
@@ -2659,7 +2661,9 @@ export class WorkerCore {
 		await settlePage(page, signal, budgetMs);
 		let snapshot = await settleRead(
 			"accessibility tree",
-			snapshotAccessibility(page, { includeAll }, signal),
+			// A slow frame may use what the settle budget can spare beyond the
+			// page's own reads; one that never answers still leaves them room.
+			snapshotAccessibility(page, { includeAll, frameReadMs: deadline - Date.now() - FRAME_READ_RESERVE_MS }, signal),
 			deadline,
 		);
 		// Loading means the tree still shows an indicator, or the page a skeleton

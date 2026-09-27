@@ -87,7 +87,7 @@ describe("observing a page with an out-of-process frame that does not answer", (
 				const busy = await observe();
 				expect(busy).toContain('heading "Account"');
 				// Its URL may not have reached the page yet; the mark is what matters.
-				expect(busy).toMatch(/\[iframe .*not answering/);
+				expect(busy).toMatch(/\[iframe .*did not answer in time/);
 				expect(busy).not.toContain("Widget content");
 				await invoke({
 					action: "run",
@@ -96,14 +96,14 @@ describe("observing a page with an out-of-process frame that does not answer", (
 				});
 				const free = await observe();
 				expect(free).toContain("Widget content");
-				expect(free).not.toContain("not answering");
+				expect(free).not.toContain("did not answer in time");
 				// A frame stuck for good: the page's own tree and refs still come back. Last,
 				// because the stuck renderer also serves any later frame of its site.
 				await invoke({ action: "open", name, url: `${origin}/stuck-parent` });
 				const stuck = await observe();
 				expect(stuck).toContain('heading "Sign in"');
 				expect(stuck).toMatch(/e\d+ button "Continue"/);
-				expect(stuck).toMatch(/\[iframe localhost.*not answering/);
+				expect(stuck).toMatch(/\[iframe localhost.*did not answer in time/);
 
 			} finally {
 				await invoke({ action: "close", name }).catch(() => undefined);

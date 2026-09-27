@@ -1254,24 +1254,26 @@ class FrameNotAnswering extends Error {}
  * with every embedded document spliced under the iframe element that owns it.
  * Frames are read on the session that serves them: an out-of-process iframe is
  * invisible to the page session, and its nodes must be actioned on its own.
- * A frame on another session that does not answer within {@link FRAME_READ_MS}
- * is left out of this read, marked `unanswered`; the next read asks it again.
+ * A frame on another session that does not answer within `frameReadMs` (at
+ * least {@link FRAME_READ_MS}; the caller passes what its settle budget can
+ * spare) is left out of this read, marked `unanswered`; the next read asks it again.
  * Table and grid parts the DOM marks as click targets become actionable too.
  */
 export async function snapshotAccessibility(
 	page: Page,
-	options: { includeAll: boolean },
+	options: { includeAll: boolean; frameReadMs?: number },
 	signal?: AbortSignal,
 ): Promise<AxNode> {
 	const frames = page.frames();
 	const pageSession = page.mainFrame().client;
+	const frameReadMs = Math.max(FRAME_READ_MS, options.frameReadMs ?? 0);
 	/** Sessions that let a read time out during this snapshot; their frames are not asked again in it. */
 	const silent = new Set<CDPSession>();
-	const frameRead = <T>(session: CDPSession, read: () => Promise<T>): Promise<T> => {
+	const frameRead = <T>(session: CDPSession, read: () => Promise<T>, markSilent = true): Promise<T> => {
 		if (session === pageSession) return untilAborted(signal, read);
 		if (silent.has(session)) return Promise.reject(new FrameNotAnswering());
-		return withTimeout(untilAborted(signal, read), FRAME_READ_MS, new FrameNotAnswering()).catch(error => {
-			if (error instanceof FrameNotAnswering) silent.add(session);
+		return withTimeout(untilAborted(signal, read), frameReadMs, new FrameNotAnswering()).catch(error => {
+			if (markSilent && error instanceof FrameNotAnswering) silent.add(session);
 			throw error;
 		});
 	};
@@ -1292,8 +1294,11 @@ export async function snapshotAccessibility(
 		frames.map(async frame => {
 			const parent = frame.parentFrame();
 			if (!parent) return;
-			const owner = await frameRead(parent.client, () =>
-				parent.client.send("DOM.getFrameOwner", { frameId: frame._id }),
+			// A slow owner lookup costs that one frame, never its parent's session.
+			const owner = await frameRead(
+				parent.client,
+				() => parent.client.send("DOM.getFrameOwner", { frameId: frame._id }),
+				false,
 			).catch(() => null);
 			if (!owner) return;
 			const bySession = owners.get(parent.client) ?? new Map<number, Frame>();
@@ -1308,7 +1313,7 @@ export async function snapshotAccessibility(
 		let probe = probes.get(session);
 		if (!probe) {
 			const read = untilAborted(signal, () => clickTargets(session, signal));
-			probe = (session === pageSession ? read : withTimeout(read, FRAME_READ_MS, new FrameNotAnswering())).catch(
+			probe = (session === pageSession ? read : withTimeout(read, frameReadMs, new FrameNotAnswering())).catch(
 				error => {
 					if (signal?.aborted) throw error;
 					return undefined;
