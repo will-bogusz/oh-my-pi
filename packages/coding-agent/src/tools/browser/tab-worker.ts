@@ -1277,6 +1277,8 @@ export class WorkerCore {
 	#lastTree?: { url: string; filter: string; lines: TreeLine[] };
 	#managedChrome = false;
 	#active: ActiveRun | null = null;
+	/** A run that has stopped but still reads the page for its stale-ref refusal; an abort cuts that read. */
+	#finishing: { id: string; ac: AbortController } | null = null;
 	#runtime: JsRuntime | null = null;
 	#unsub: () => void;
 	#isolated: boolean;
@@ -1380,14 +1382,17 @@ export class WorkerCore {
 			case "run":
 				await this.#run(msg);
 				return;
-			case "abort":
-				if (this.#active?.id === msg.id) {
+			case "abort": {
+				const run =
+					this.#active?.id === msg.id ? this.#active : this.#finishing?.id === msg.id ? this.#finishing : null;
+				if (run) {
 					const reason = msg.expectedCleanup
 						? postmortem.markExpectedCleanupError(new ToolAbortError())
 						: new ToolAbortError();
-					this.#active.ac.abort(reason);
+					run.ac.abort(reason);
 				}
 				return;
+			}
 			case "tool-reply":
 				this.#deliverToolReply(msg.id, msg.reply);
 				return;
@@ -1803,7 +1808,13 @@ export class WorkerCore {
 			if (this.#active?.id === msg.id) this.#active = null;
 		}
 		if (failure) {
-			const error = await this.#refusalWithPageNow(failure.error, msg.session.refs, deadline, ac.signal);
+			this.#finishing = { id: msg.id, ac };
+			let error: unknown;
+			try {
+				error = await this.#refusalWithPageNow(failure.error, msg.session.refs, deadline, ac.signal);
+			} finally {
+				this.#finishing = null;
+			}
 			this.#transport.send({ type: "result", id: msg.id, ok: false, error: errorPayload(error) });
 			return;
 		}
@@ -3176,10 +3187,10 @@ export class WorkerCore {
 	 * shown), is not made the diff baseline, and goes through the inline output
 	 * cap an observation's printed tree gets. It must end by the run's
 	 * deadline, so the supervisor's grace after it stays for delivering the
-	 * result, and it is skipped with too little of the run left. Only `compact`
-	 * refs: a `uuid` observation would void every ref the caller holds. A
-	 * skipped or failed read, or a dialog holding the page, leaves the plain
-	 * refusal.
+	 * result, and it is skipped with too little of the run left; cancelling
+	 * the call cuts it. Only `compact` refs: a `uuid` observation would void
+	 * every ref the caller holds. A skipped, cut or failed read, or a dialog
+	 * holding the page, leaves the plain refusal.
 	 */
 	async #refusalWithPageNow(
 		error: unknown,
@@ -3187,7 +3198,9 @@ export class WorkerCore {
 		deadline: number,
 		cancel: AbortSignal,
 	): Promise<unknown> {
-		if (!(error instanceof StaleNodeError) || refs !== "compact" || this.#openDialog || cancel.aborted) return error;
+		if (!(error instanceof StaleNodeError) || refs !== "compact" || this.#dialogOpen() || cancel.aborted) {
+			return error;
+		}
 		const budgetMs = Math.min(STALE_REFUSAL_READ_MAX_MS, deadline - Date.now());
 		if (budgetMs < STALE_REFUSAL_READ_MIN_MS) return error;
 		const signal = AbortSignal.any([AbortSignal.timeout(budgetMs), cancel]);

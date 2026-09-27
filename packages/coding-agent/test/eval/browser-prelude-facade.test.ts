@@ -673,24 +673,36 @@ describe("browser facade Chromium helper E2E", () => {
 /**
  * A real tab behind the shipped JavaScript prelude and the real supervisor.
  * `cell` runs model code as the body of an async function, with the tab
- * bound to `tab`.
+ * bound to `tab`; `signal` cancels the cell's host calls, as Eval does.
  */
 async function withFacadeTab(
 	html: string,
-	body: (cell: <T>(code: string) => Promise<T>) => Promise<void>,
+	body: (cell: <T>(code: string, signal?: AbortSignal) => Promise<T>) => Promise<void>,
 ): Promise<void> {
 	const name = `facade-stale-${crypto.randomUUID()}`;
 	const session = makeSession();
 	const prelude = createBrowserPrelude(session);
+	let cellSignal: AbortSignal | undefined;
 	const context = createContext({
 		__omp_display__: () => {},
 		__omp_prelude__: async (_prelude: string, parameters: unknown) => {
-			const result = await prelude.invoke(parameters, { session, toolCallId: `stale-${crypto.randomUUID()}` });
+			const result = await prelude.invoke(parameters, {
+				session,
+				toolCallId: `stale-${crypto.randomUUID()}`,
+				signal: cellSignal,
+			});
 			return { text: "", details: result.details };
 		},
 	});
 	runInContext(prelude.javascript, context);
-	const cell = <T>(code: string): Promise<T> => runInContext(`(async () => { ${code} })()`, context);
+	const cell = async <T>(code: string, signal?: AbortSignal): Promise<T> => {
+		cellSignal = signal;
+		try {
+			return await runInContext(`(async () => { ${code} })()`, context);
+		} finally {
+			cellSignal = undefined;
+		}
+	};
 	try {
 		const url = `data:text/html,${encodeURIComponent(html)}`;
 		await cell(`globalThis.tab = await browser.open({ name: ${JSON.stringify(name)}, url: ${JSON.stringify(url)} });`);
@@ -761,9 +773,9 @@ describe("browser stale-ref refusal through the facade", () => {
 	// The read happens after the cell stopped, on the run's time: a refusal near
 	// the run's deadline, on a page whose loading indicator never clears, must
 	// come back as the plain refusal and leave the tab alive, whether the read is
-	// skipped or cut off.
+	// skipped or cut off; so must one whose call is cancelled during the read.
 	it.skipIf(!CHROMIUM_AVAILABLE)(
-		"keeps a refusal near the run's deadline inside it and the tab alive",
+		"keeps a refusal near the run's deadline or cancelled inside its bounds and the tab alive",
 		async () => {
 			const loading = `const status = document.createElement('div'); status.setAttribute('role', 'status'); status.textContent = 'Loading...'; document.body.append(status);`;
 			await withFacadeTab(redrawPage(1, loading), async cell => {
@@ -781,6 +793,18 @@ describe("browser stale-ref refusal through the facade", () => {
 					expect(refusal).toEndWith("Run tab.observe() again.");
 					expect(await cell<string>("return await tab.title();")).toBe("Start");
 				}
+				// A cancel 300 ms in lands during the read, which the loading page
+				// would otherwise hold for its 3 s settle budget.
+				const cancel = new AbortController();
+				setTimeout(() => cancel.abort(), 300);
+				const started = Date.now();
+				const cancelled = await cell<string>(
+					`try { await tab.ref(${JSON.stringify(refs.Edit)}).click(); } catch (error) { return error.message; }`,
+					cancel.signal,
+				);
+				expect(Date.now() - started).toBeLessThan(1_500);
+				expect(cancelled).not.toContain("The page as read after this refusal");
+				expect(await cell<string>("return await tab.title();")).toBe("Start");
 			});
 		},
 		60_000,
