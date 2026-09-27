@@ -110,6 +110,21 @@ export type { Observation, ObservationEntry } from "./browser/tab-protocol";
 const DEFAULT_TAB_NAME = "main";
 const BROWSER_RUN_SCOPE: readonly string[] = ["tab", "page", "browser", "wait", "assert"];
 
+/** Conversations, by relay actor (session and agent), whose transcript already holds the tab verbs. */
+const verbsTaught = new Set<string>();
+
+/**
+ * The verb list for a conversation's first acquisition, then nothing: each
+ * later open or claim would repeat the same ~1.8 KB into a transcript that
+ * already holds it. The actor key changes with `/new` and session switches.
+ */
+function tabVerbsOnce(session: ToolSession): string | undefined {
+	const actor = browserActorId(session);
+	if (verbsTaught.has(actor)) return undefined;
+	verbsTaught.add(actor);
+	return BROWSER_TAB_VERBS;
+}
+
 const appSchema = type({
 	"path?": type("string").describe("binary path to spawn"),
 	"cdp_url?": type("string").describe("existing cdp endpoint"),
@@ -568,7 +583,14 @@ async function invokeBrowser(
 						displays: [
 							{
 								type: "text",
-								text: `Claimed Chrome tab ${chromeTabName(handle.lease.tab)} with an open dialog. Answer it with tab.handleDialog({ accept, id: tab.initialDialog.id, text? }) before page interaction.\ntab.target.id: ${JSON.stringify(handle.lease.tab.id)}\n${JSON.stringify(chromeDialogState(handle.lease.dialog))}\n${BROWSER_TAB_VERBS}`,
+								text: [
+									`Claimed Chrome tab ${chromeTabName(handle.lease.tab)} with an open dialog. Answer it with tab.handleDialog({ accept, id: tab.initialDialog.id, text? }) before page interaction.`,
+									`tab.target.id: ${JSON.stringify(handle.lease.tab.id)}`,
+									JSON.stringify(chromeDialogState(handle.lease.dialog)),
+									tabVerbsOnce(session),
+								]
+									.filter(line => line !== undefined)
+									.join("\n"),
 							},
 						],
 						returnValue: details.value,
@@ -601,10 +623,11 @@ async function invokeBrowser(
 					type: "text",
 					text: `${parsed.action === "claim" ? "Claimed" : "Created inactive"} Chrome tab ${chromeTabName(page)}\ntab.target.id: ${JSON.stringify(handle.lease.tab.id)}\nURL: ${page.url}\nTab group: ${JSON.stringify(handle.label)}`,
 				});
-				// Once, with the handle itself: the verbs are what the acquisition
-				// hands over, and a later observe() of the same tab repeats the
-				// tree without repeating them.
-				initial.displays.push({ type: "text", text: BROWSER_TAB_VERBS });
+				// Once per conversation, with its first handle: the verbs are what
+				// the acquisition hands over, and a later observe() of the same tab
+				// repeats the tree without repeating them.
+				const verbs = tabVerbsOnce(session);
+				if (verbs) initial.displays.push({ type: "text", text: verbs });
 				return await browserRunResult(session, details, initial);
 			} catch (error) {
 				// A cancelled/failed observation cannot return its handle to the
@@ -820,9 +843,8 @@ async function openBrowser(
 			`${verb} tab ${JSON.stringify(name)} on ${describeBrowser(browser)}`,
 			`URL: ${url}`,
 			title ? `Title: ${title}` : null,
-			// Stated with the handle this call hands over, exactly once: no
-			// helper on it prints them again.
-			BROWSER_TAB_VERBS,
+			// Once per conversation: a reuse or a second tab would repeat them.
+			tabVerbsOnce(session),
 		].filter((line): line is string => typeof line === "string");
 		return toolResult(details).text(lines.join("\n")).done();
 	} catch (error) {

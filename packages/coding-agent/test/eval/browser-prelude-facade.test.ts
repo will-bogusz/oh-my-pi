@@ -8,6 +8,7 @@ import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-age
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import { BROWSER_TAB_VERBS } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-call";
+import { cfgToolsOutputMaxColumns } from "@oh-my-pi/pi-coding-agent/tools/settings";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { chromiumAvailable } from "../tools/chromium-probe";
 
@@ -624,11 +625,20 @@ describe("browser facade Chromium helper E2E", () => {
 					"(async () => { globalThis.__e2eTab = await browser.open({ name: __name__, url: __url__ }); })()",
 					context,
 				);
-				// The verbs ride the acquisition, once. Their absence is what the
-				// 20260914 bench leg paid for in `selectOption` TypeErrors and
-				// 8 KB `browser.help()` recoveries.
+				// The verbs ride the conversation's first acquisition, once. Their
+				// absence is what the 20260914 bench leg paid for in `selectOption`
+				// TypeErrors and 8 KB `browser.help()` recoveries.
 				expect(displayed.filter(text => String(text).includes(BROWSER_TAB_VERBS))).toHaveLength(1);
-				expect(String(displayed.at(-1)).split("\n").at(-1)).toBe(BROWSER_TAB_VERBS);
+				expect(String(displayed.at(-1)).endsWith(`\n${BROWSER_TAB_VERBS}`)).toBe(true);
+				// Eval cuts each output line at tools.outputMaxColumns; nothing the
+				// acquisition prints may lose its tail to that cut.
+				const columnCap = cfgToolsOutputMaxColumns.get(session.settings);
+				for (const line of String(displayed.at(-1)).split("\n"))
+					expect(Buffer.byteLength(line, "utf-8")).toBeLessThanOrEqual(columnCap);
+				// Reopening the same tab in the same conversation reuses it without the verbs.
+				await runInContext("browser.open({ name: __name__ })", context);
+				expect(String(displayed.at(-1))).toStartWith(`Reused tab ${JSON.stringify(name)}`);
+				expect(displayed.filter(text => String(text).includes("browser.help() for signatures"))).toHaveLength(1);
 				await runInContext('__e2eTab.click("text/Go")', context);
 				const title = await runInContext("__e2eTab.title()", context);
 				expect(typeof title).toBe("string");
