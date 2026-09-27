@@ -2542,30 +2542,9 @@ export class CuaComputerSession implements ComputerBackend {
 				const result = await this.#action("invoke_menu", { ...windowArgs(current), path: menuPath });
 				const reply = readReply(result.data);
 				if (!reply.items?.length) return result;
-				let path = reply.resolvedPath ?? menuPath;
-				let items = reply.items;
-				// A level whose only entry opens a submenu offers no choice, so
-				// the listing continues through it to the first level that does
-				// instead of costing the caller a call per level. A submenu
-				// segment is never pressed, so reading deeper invokes nothing.
-				for (let sole = items[0]!; items.length === 1 && sole.submenu && sole.enabled !== false && sole.title; ) {
-					const next = [...path, sole.title];
-					// A refused deeper read leaves the level already read as the answer.
-					const deeper = await this.#action("invoke_menu", { ...windowArgs(current), path: next }).then(
-						listed => readReply(listed.data),
-						(error: unknown) => {
-							if (!(error instanceof ToolError)) throw error;
-							return undefined;
-						},
-					);
-					if (!deeper?.items?.length) break;
-					path = deeper.resolvedPath ?? next;
-					items = deeper.items;
-					sole = items[0]!;
-				}
 				return {
 					...result,
-					text: menuSubmenuListing(path, items),
+					text: menuSubmenuListing(reply.resolvedPath ?? menuPath, reply.items),
 					mustShow: true,
 				};
 			} catch (error) {

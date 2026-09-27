@@ -1541,41 +1541,6 @@ it("reads a submenu's items instead of pressing it, from either shape the driver
 	}
 });
 
-it("lists through a submenu level whose only entry is itself a submenu", async () => {
-	const f = await fixture();
-	const levels: Record<string, Record<string, unknown>[]> = {
-		"Edit/Move": [{ title: "Account", enabled: true, has_submenu: true }],
-		"Edit/Move/Account": [
-			{ title: "Inbox", enabled: true },
-			{ title: "Archive", enabled: true },
-		],
-		"View/Sort": [{ title: "Disabled Group", enabled: false, has_submenu: true }],
-	};
-	const asked: string[] = [];
-	try {
-		f.state.hook = async (name, args) => {
-			if (name !== "invoke_menu") return undefined;
-			const key = (args.path as string[]).join("/");
-			asked.push(key);
-			return reply({ items: levels[key], resolved_path: args.path }, []);
-		};
-		const listed = await f.session.menu(f.context, f.window, ["Edit", "Move"], { delivery: "foreground" });
-		expect(listed.text).toBe(
-			'Edit › Move › Account is a submenu; nothing was invoked. Its items: Inbox · Archive. Invoke one with win.menu(["Edit","Move","Account","Inbox"], { delivery: "foreground" }); a name marked › lists its own items the same way.',
-		);
-		expect(asked).toEqual(["Edit/Move", "Edit/Move/Account"]);
-		// A sole entry the app disabled is listed as it is, not opened.
-		asked.length = 0;
-		const disabled = await f.session.menu(f.context, f.window, ["View", "Sort"], { delivery: "foreground" });
-		expect(disabled.text).toContain(
-			"View › Sort is a submenu; nothing was invoked. Its items: Disabled Group (disabled) ›.",
-		);
-		expect(asked).toEqual(["View/Sort"]);
-	} finally {
-		await f.close();
-	}
-});
-
 it("says a drag was delivered without evidence and pushes that into the cell", async () => {
 	const f = await fixture();
 	try {
