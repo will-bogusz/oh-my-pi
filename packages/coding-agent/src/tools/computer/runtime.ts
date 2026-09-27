@@ -464,10 +464,10 @@ async function launchAndAcquire(
 								app,
 							)} is already running and has no window of its own to acquire, and launching it again reuses that process and opens none. Reopen its document: ${reopenRoute(app)}; then acquire again.`
 						: `Missing computer window ${JSON.stringify(selector)}: launched ${JSON.stringify(
-								selector.app,
+								app,
 							)} and no window of it could be acquired — it opened none within ${
 								LAUNCHED_WINDOW_TIMEOUT_MS / 1000
-							} s, or the one it opened is already gone.`,
+							} s, or the one it opened is already gone. An app that opens no window by itself still opens a document: ${reopenRoute(app)}; then acquire again.`,
 				);
 			});
 		await Bun.sleep(LAUNCHED_WINDOW_POLL_MS);

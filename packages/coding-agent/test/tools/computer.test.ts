@@ -465,6 +465,8 @@ describe("computer preludes through the session", () => {
 			expect(launch).toHaveBeenCalledTimes(2);
 			expect(failure.message).toContain('launched "Code" and no window of it could be acquired');
 			expect(failure.message).not.toContain("launch: true");
+			// What does open a window of an app that opens none by itself is named.
+			expect(failure.message).toContain('computer.launch({ name: "Code", urls: [');
 		} finally {
 			launch.mockRestore();
 			await runInContext("computer.close()", realm);
