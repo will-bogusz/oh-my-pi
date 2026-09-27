@@ -1469,11 +1469,6 @@ export class CuaComputerSession implements ComputerBackend {
 			let modal: SheetCensus | undefined;
 			for (const sheet of attached) {
 				this.#sheets.set(sheet.id, { parent: current.id, title: sheet.title });
-				// A sheet the roster listed before it reported attaching (the
-				// read right after the command that opened it) was taken for a
-				// window this app opened; it prints once, as the sheet, or the
-				// second walk's refs would retire the ones printed here.
-				this.#inline.delete(sheet.id);
 				let block = `sheet ${JSON.stringify(sheet.title)} (window ${sheet.id}) — modal over window ${current.id}`;
 				try {
 					const nested = await this.#sheetRows(context, sheet, options, query);
@@ -1552,6 +1547,12 @@ export class CuaComputerSession implements ComputerBackend {
 			for (const [id, opener] of this.#inline)
 				if (opener === current.id && !inline.some(window => window.id === id)) this.#inline.delete(id);
 			for (const window of inline) {
+				// A sheet the roster listed before its parent reported it attached
+				// (the read chained on the command that opened it) was taken for a
+				// window this app opened. While attached it prints once, as the
+				// sheet: a second walk would retire the refs printed there. It stays
+				// in the opened set, so it prints here again if it detaches.
+				if (this.#sheets.get(window.id)?.parent === current.id) continue;
 				let block = `window ${window.id} ${JSON.stringify(window.title)} — opened by this app, driven through this window's refs`;
 				try {
 					const nested = await this.#sheetRows(context, window, options, query);

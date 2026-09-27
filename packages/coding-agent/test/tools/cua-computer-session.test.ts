@@ -3765,7 +3765,7 @@ it("prints a sheet once when the roster listed it before it reported attaching",
 		f.state.relatedWindows = [{ pid: 101, window_id: 5, title: "Export", relation: "sheet" }];
 		const observation = await f.session.observe(f.context, f.window);
 		expect(observation.tree).toContain('sheet "Export" (window 5) — modal over window 1');
-		expect(observation.tree).not.toContain("opened by this app");
+		expect(observation.tree.match(/window 5/g)).toHaveLength(1);
 		expect(observation.tree.match(/button "Save"/g)).toHaveLength(1);
 		const save = observation.elements.find(element => element.label === "Save")!;
 		await f.session.click(f.context, observation.window, save.ref);
@@ -3773,6 +3773,10 @@ it("prints a sheet once when the roster listed it before it reported attaching",
 			name: "click",
 			args: { window_id: 5, pid: 101, element_token: "sheet-1:2", snapshot_id: "sheet-1" },
 		});
+		// Its parent stops reporting it while it is still on screen: it is the
+		// window this app opened again, not gone from the opener's reads.
+		f.state.relatedWindows = [];
+		expect((await f.session.observe(f.context, f.window)).tree.match(/button "Save"/g)).toHaveLength(1);
 	} finally {
 		await f.close();
 	}
