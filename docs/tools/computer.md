@@ -94,7 +94,7 @@ A window without accessible controls can still have a usable screenshot. An unav
 
 ### Observation previews
 
-A settled computer or browser cell collapses to the header of each window or tab it displayed (`Notes: All iCloud (window 41043, PID 55206)`, `Mount Elbrus - Wikipedia — https://…`) and one verb-first line per call (`click n12 · Notes: All iCloud`); a call whose reply reported an app brought to the front or the pointer moved gets its own line under it. The raw output, and the exact call as written, are on expansion. Browser and computer observation images appear as compact snapshots in collapsed tool output, captioned by window or page title. Use the existing tool expansion control (Ctrl+O by default) to show them at the configured inline-image size. Collapsed snapshots fit within 48 columns and 8 rows; tighter image settings and the shared image budget still apply. Expansion only changes the displayed snapshot; it does not take a new screenshot, activate an app, or reveal a window.
+A settled computer or browser cell collapses to the header of each window or tab it displayed (`Notes: All iCloud (window 41043, PID 55206)`, `Mount Elbrus - Wikipedia — https://…`) and one verb-first line per call (`click n12 · Notes: All iCloud`); a call whose reply reported the pointer moved gets its own line under it. The raw output, and the exact call as written, are on expansion. Browser and computer observation images appear as compact snapshots in collapsed tool output, captioned by window or page title. Use the existing tool expansion control (Ctrl+O by default) to show them at the configured inline-image size. Collapsed snapshots fit within 48 columns and 8 rows; tighter image settings and the shared image budget still apply. Expansion only changes the displayed snapshot; it does not take a new screenshot, activate an app, or reveal a window.
 
 Python uses keyword options and lists for points; returned observation objects use dictionary keys, while window/element handle fields use attributes:
 
@@ -111,7 +111,7 @@ display(await win.observe(screenshot=False))
 
 ## Window and element actions
 
-`target` is a current token string or `[x, y]` in the latest image of this window. Window delivery defaults to background; OMP never escalates it. The pinned driver itself dispatches a keyboard chord that names a menu command as that command, fronting the app for the dispatch and restoring the previous front app; the reply's `key_window.app_fronted` says whether that happened and the cell shows it under the call.
+`target` is a current token string or `[x, y]` in the latest image of this window. Window delivery defaults to background; OMP never escalates it.
 
 | Window method | Options / meaning |
 | --- | --- |

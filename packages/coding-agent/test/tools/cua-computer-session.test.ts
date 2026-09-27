@@ -17,10 +17,8 @@ import type {
 import type { WindowRosterSample } from "@oh-my-pi/pi-coding-agent/tools/computer/interruption";
 /**
  * The fork's generated tool contract (`libs/cua-driver/contract/manifest.json`,
- * 0.10.0), copied verbatim from `cargo run -p cua-driver-contract --bin
- * cua-contract-gen -- manifest`. This regeneration carries
- * `ActionResult.key_window` and the `menu_opened` evidence signal that a
- * wave-10 driver change added without regenerating the manifest.
+ * 0.11.0), copied verbatim from `cargo run -p cua-driver-contract --bin
+ * cua-contract-gen -- manifest`.
  */
 import contract from "../fixtures/cua-contract-manifest.json";
 

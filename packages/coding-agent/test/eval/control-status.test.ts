@@ -51,15 +51,13 @@ describe("computer call status", () => {
 			result({
 				screenshots: [],
 				window: notes,
-				userVisible: [{ effect: "fronted", app: "Notes", pid: 55206 }, { effect: "pointer" }],
+				userVisible: [{ effect: "pointer" }],
 			}),
 		)!;
 		expect(status.summary?.startsWith("click n12")).toBe(true);
 		expect(status.summary).toContain("Notes: All iCloud");
 		expect(status.header).toBeUndefined();
-		expect(status.notices).toHaveLength(2);
-		expect(status.notices?.[0]).toContain("Notes");
-		expect(status.notices?.[1]).toContain("pointer");
+		expect(status.notices).toEqual(["moved the pointer"]);
 	});
 
 	it("falls back to the window id without a title and claims no side effect nobody reported", () => {
