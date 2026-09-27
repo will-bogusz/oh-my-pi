@@ -9,6 +9,7 @@ import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import { BROWSER_TAB_VERBS } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-call";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { chromiumAvailable } from "../tools/chromium-probe";
 
 interface FacadeResponse {
@@ -666,5 +667,143 @@ describe("browser facade Chromium helper E2E", () => {
 			}
 		},
 		30_000,
+	);
+});
+
+/**
+ * A real tab behind the shipped JavaScript prelude and the real supervisor.
+ * `cell` runs model code as the body of an async function, with the tab
+ * bound to `tab`.
+ */
+async function withFacadeTab(
+	html: string,
+	body: (cell: <T>(code: string) => Promise<T>) => Promise<void>,
+): Promise<void> {
+	const name = `facade-stale-${crypto.randomUUID()}`;
+	const session = makeSession();
+	const prelude = createBrowserPrelude(session);
+	const context = createContext({
+		__omp_display__: () => {},
+		__omp_prelude__: async (_prelude: string, parameters: unknown) => {
+			const result = await prelude.invoke(parameters, { session, toolCallId: `stale-${crypto.randomUUID()}` });
+			return { text: "", details: result.details };
+		},
+	});
+	runInContext(prelude.javascript, context);
+	const cell = <T>(code: string): Promise<T> => runInContext(`(async () => { ${code} })()`, context);
+	try {
+		const url = `data:text/html,${encodeURIComponent(html)}`;
+		await cell(`globalThis.tab = await browser.open({ name: ${JSON.stringify(name)}, url: ${JSON.stringify(url)} });`);
+		await body(cell);
+	} finally {
+		await prelude
+			.invoke({ action: "close", name }, { session, toolCallId: `stale-cleanup-${crypto.randomUUID()}` })
+			.catch(() => undefined);
+	}
+}
+
+/** `Redraw` replaces every `Edit` button with a same-named one whose click names its generation. */
+const redrawPage = (rows: number, onRedraw = "") => `<!doctype html><title>Start</title><ul id="rows"></ul>
+<button onclick="redraw(); ${onRedraw}">Redraw</button>
+<script>
+let generation = 0;
+function redraw() {
+	const mine = ++generation;
+	document.getElementById("rows").replaceChildren(...Array.from({ length: ${rows} }, (_, i) => {
+		const row = document.createElement("li");
+		const edit = document.createElement("button");
+		edit.textContent = ${rows === 1 ? '"Edit"' : '"Edit a fairly long descriptive row label number " + i'};
+		edit.onclick = () => { document.title = "clicked generation " + mine; };
+		row.append(edit);
+		return row;
+	}));
+}
+redraw();
+</script>`;
+
+/** Refs by accessible name, from a fresh observation. */
+const refsByName = `return Object.fromEntries((await tab.observe()).elements.map(element => [element.name, element.ref]));`;
+
+describe("browser stale-ref refusal through the facade", () => {
+	// A direct helper call is a run of its own, and the model's code can catch
+	// its refusal without reading it. The page the refusal carries must then
+	// have re-attached nothing: the retry is refused again instead of clicking
+	// the same-named node that replaced the refused one.
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"carries the page after a refusal, and a caught refusal's retry is refused again",
+		async () => {
+			await withFacadeTab(redrawPage(1), async cell => {
+				const refs = await cell<Record<string, string>>(refsByName);
+				const outcome = await cell<{ refusal?: string; retry?: string; title: string }>(
+					`await tab.ref(${JSON.stringify(refs.Redraw)}).click();
+					 const outcome = {};
+					 try { await tab.ref(${JSON.stringify(refs.Edit)}).click(); } catch (error) { outcome.refusal = error.message; }
+					 try { await tab.ref(${JSON.stringify(refs.Edit)}).click(); } catch (error) { outcome.retry = error.message; }
+					 outcome.title = await tab.title();
+					 return outcome;`,
+				);
+				expect(outcome.title).toBe("Start");
+				expect(outcome.retry).toContain(`${refs.Edit} is stale`);
+				expect(outcome.refusal).toContain(`${refs.Edit} is stale`);
+				expect(outcome.refusal).toContain("The page as read after this refusal:");
+				// The replacement is on the page under a ref of its own, and that ref acts.
+				const fresh = /\b(e\d+) button "Edit"/.exec(outcome.refusal!)?.[1];
+				expect(fresh).toBeDefined();
+				expect(fresh).not.toBe(refs.Edit);
+				expect(await cell<string>(`await tab.ref(${JSON.stringify(fresh)}).click(); return await tab.title();`)).toBe(
+					"clicked generation 2",
+				);
+			});
+		},
+		60_000,
+	);
+
+	// The read happens after the cell stopped, on the run's time: a refusal near
+	// the run's deadline, on a page whose loading indicator never clears, must
+	// come back as the plain refusal and leave the tab alive, whether the read is
+	// skipped or cut off.
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"keeps a refusal near the run's deadline inside it and the tab alive",
+		async () => {
+			const loading = `const status = document.createElement('div'); status.setAttribute('role', 'status'); status.textContent = 'Loading...'; document.body.append(status);`;
+			await withFacadeTab(redrawPage(1, loading), async cell => {
+				const refs = await cell<Record<string, string>>(refsByName);
+				await cell(`await tab.ref(${JSON.stringify(refs.Redraw)}).click();`);
+				// Too little of the 2 s run left to read at all; then enough to start
+				// a read that the unfinished load holds past the deadline.
+				for (const waitMs of [1_600, 700]) {
+					const refusal = await cell<string>(
+						`try {
+							 await tab.run(${JSON.stringify(`await wait(${waitMs}); await (await tab.ref(${JSON.stringify(refs.Edit)})).click();`)}, { timeout: 2 });
+						 } catch (error) { return error.message; }`,
+					);
+					expect(refusal).toStartWith(`${refs.Edit} is stale: the page no longer has that element`);
+					expect(refusal).toEndWith("Run tab.observe() again.");
+					expect(await cell<string>("return await tab.title();")).toBe("Start");
+				}
+			});
+		},
+		60_000,
+	);
+
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"cuts the page a refusal carries to the inline output budget",
+		async () => {
+			await withFacadeTab(redrawPage(1_500), async cell => {
+				const refs = await cell<Record<string, string>>(refsByName);
+				const first = refs["Edit a fairly long descriptive row label number 0"]!;
+				const refusal = await cell<string>(
+					`await tab.ref(${JSON.stringify(refs.Redraw)}).click();
+					 try { await tab.ref(${JSON.stringify(first)}).click(); } catch (error) { return error.message; }`,
+				);
+				expect(Buffer.byteLength(refusal, "utf-8")).toBeLessThanOrEqual(DEFAULT_MAX_BYTES);
+				expect(refusal).toStartWith(`${first} is stale: the page no longer has that element`);
+				// Head and tail survive the cut, and the refusal says where the rest is.
+				expect(refusal).toMatch(/\be\d+ button "Edit a fairly long descriptive row label number 0"/);
+				expect(refusal).toMatch(/\be\d+ button "Redraw"/);
+				expect(refusal).toContain("tab.observe({ diff: false }) returns it whole");
+			});
+		},
+		60_000,
 	);
 });

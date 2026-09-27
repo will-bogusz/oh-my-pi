@@ -24,7 +24,7 @@ import {
 } from "../run-scope";
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
-import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-tui/tools/streaming-output";
+import { DEFAULT_MAX_BYTES, enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { type BrowserA11yOptions, type BrowserA11yResult, formatA11ySummary, runA11yAudit } from "./a11y/audit";
 import {
 	type AriaSnapshotOptions,
@@ -65,6 +65,7 @@ import {
 	setFileInput,
 	setNodeChecked,
 	snapshotAccessibility,
+	StaleNodeError,
 	typeIntoNode,
 	waitForDomQuiet,
 } from "./cdp";
@@ -340,6 +341,14 @@ interface OpenDialogInfo {
  */
 const QUICK_OP_TIMEOUT_MS = 20_000;
 const ACTION_OP_TIMEOUT_MS = 8_000;
+/**
+ * Bounds on the page read a stale-ref refusal carries. It runs after the cell
+ * has stopped and must end by the run's own deadline, which leaves the
+ * supervisor's grace after it for delivering the result; with less than the
+ * floor left the refusal goes out without it.
+ */
+const STALE_REFUSAL_READ_MAX_MS = 5_000;
+const STALE_REFUSAL_READ_MIN_MS = 1_000;
 /** Maximum wait for a renderer acknowledgement after a wheel event is queued. */
 const SCROLL_ACK_TIMEOUT_MS = 2_000;
 /** Headroom subtracted from the cell budget so a per-op deadline fires before it. */
@@ -1625,6 +1634,7 @@ export class WorkerCore {
 			});
 			return;
 		}
+		const deadline = Date.now() + msg.timeoutMs;
 		const timeoutSignal = AbortSignal.timeout(msg.timeoutMs);
 		const ac = new AbortController();
 		const runAc = new AbortController();
@@ -1793,7 +1803,8 @@ export class WorkerCore {
 			if (this.#active?.id === msg.id) this.#active = null;
 		}
 		if (failure) {
-			this.#transport.send({ type: "result", id: msg.id, ok: false, error: errorPayload(failure.error) });
+			const error = await this.#refusalWithPageNow(failure.error, msg.session.refs, deadline, ac.signal);
+			this.#transport.send({ type: "result", id: msg.id, ok: false, error: errorPayload(error) });
 			return;
 		}
 		if (completed) {
@@ -2743,7 +2754,7 @@ export class WorkerCore {
 	}
 
 	async #collectObservation(
-		options: ObserveOptions & { refs?: RefStyle; signal?: AbortSignal },
+		options: ObserveOptions & { refs?: RefStyle; signal?: AbortSignal; reattach?: boolean },
 	): Promise<Observation> {
 		const page = this.#requirePage();
 		const { signal } = options;
@@ -2785,6 +2796,7 @@ export class WorkerCore {
 			actionable.map(node => ({ role: node.role, name: node.name, nodeKey: axNodeKey(node.ax!) })),
 			this.#refs,
 			() => ++this.#refCounter,
+			{ reattach: options.reattach },
 		);
 		const positions = roleNamePositions(actionable);
 		const refByNode = new Map<ObservedNode, number>();
@@ -3148,6 +3160,50 @@ export class WorkerCore {
 					? response => pattern.test(response.url())
 					: response => response.url().includes(pattern);
 		return (await untilAborted(signal, () => page.waitForResponse(predicate, { timeout, signal }))) as HTTPResponse;
+	}
+
+	/**
+	 * A run that ended on a stale-ref refusal: the refusal stays the run's
+	 * error, but it carries the whole page as read after the run stopped, so
+	 * the model's next cell does not have to be a bare `tab.observe()` (every
+	 * such refusal in the transcripts was followed by exactly that cell).
+	 *
+	 * A direct helper call is a run of its own, so code outside it may catch
+	 * this error and carry on without reading it. The read therefore re-attaches
+	 * nothing: only a DOM node an earlier observation numbered keeps its ref,
+	 * a node that replaced one gets a fresh ref, and the refused ref stays
+	 * refused. It prints the whole tree (a diff could lean on a tree no one was
+	 * shown), is not made the diff baseline, and goes through the inline output
+	 * cap an observation's printed tree gets. It must end by the run's
+	 * deadline, so the supervisor's grace after it stays for delivering the
+	 * result, and it is skipped with too little of the run left. Only `compact`
+	 * refs: a `uuid` observation would void every ref the caller holds. A
+	 * skipped or failed read, or a dialog holding the page, leaves the plain
+	 * refusal.
+	 */
+	async #refusalWithPageNow(
+		error: unknown,
+		refs: RefStyle | undefined,
+		deadline: number,
+		cancel: AbortSignal,
+	): Promise<unknown> {
+		if (!(error instanceof StaleNodeError) || refs !== "compact" || this.#openDialog || cancel.aborted) return error;
+		const budgetMs = Math.min(STALE_REFUSAL_READ_MAX_MS, deadline - Date.now());
+		if (budgetMs < STALE_REFUSAL_READ_MIN_MS) return error;
+		const signal = AbortSignal.any([AbortSignal.timeout(budgetMs), cancel]);
+		const tree = await untilAborted(signal, () =>
+			this.#collectObservation({ refs, diff: false, display: false, reattach: false, signal }),
+		).then(
+			observation => observation.tree,
+			() => undefined,
+		);
+		if (tree === undefined) return error;
+		const intro = `${error.fact} The page as read after this refusal:\n`;
+		const cut = `\n[The middle of this page is cut to fit the ${Math.round(DEFAULT_MAX_BYTES / 1024)} KB inline output budget; tab.observe({ diff: false }) returns it whole as \`.tree\`.]`;
+		const shown = await enforceInlineByteCap(tree, {
+			maxBytes: DEFAULT_MAX_BYTES - Buffer.byteLength(intro, "utf-8") - Buffer.byteLength(cut, "utf-8"),
+		});
+		return new ToolError(`${intro}${shown}${shown === tree ? "" : cut}`);
 	}
 
 	/**

@@ -547,12 +547,15 @@ export function roleNamePositions(entries: readonly { role: string; name: string
  * Give each actionable node its ref: the number a previous observation minted
  * for the same DOM node, else for the same role+name+position (a re-render
  * that replaced the node), else a fresh one. Numbers are never reused, so a
- * ref means the same element for the whole tab lifetime.
+ * ref means the same element for the whole tab lifetime. With `reattach:
+ * false` only the same DOM node keeps its number: a replacement gets a fresh
+ * one, and a number whose node is gone is left unattached.
  */
 export function matchRefs(
 	nodes: readonly { role: string; name: string; nodeKey?: string }[],
 	previous: ReadonlyMap<number, RefRecord>,
 	mint: () => number,
+	{ reattach = true }: { reattach?: boolean } = {},
 ): number[] {
 	const byNode = new Map<string, number>();
 	const byKey = new Map<string, number>();
@@ -571,7 +574,7 @@ export function matchRefs(
 		}
 	});
 	nodes.forEach((node, index) => {
-		if (refs[index] !== undefined) return;
+		if (!reattach || refs[index] !== undefined) return;
 		const ref = byKey.get(`${node.role}\u0000${node.name}\u0000${positions[index]}`);
 		if (ref !== undefined && !claimed.has(ref)) {
 			refs[index] = ref;

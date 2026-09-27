@@ -160,9 +160,20 @@ export async function callOnNode(
 	}
 }
 
-function staleNode(node: CdpNode, cause: unknown): ToolError {
-	return new ToolError(
-		`${node.label} is stale: the page no longer has that element (${cause instanceof Error ? cause.message : String(cause)}). Run tab.observe() again.`,
+/**
+ * The page no longer has the element a ref or selector resolved to. `fact` is
+ * the refusal without its advice, so a caller that has already re-read the
+ * page can say so instead of asking for the read.
+ */
+export class StaleNodeError extends ToolError {
+	constructor(readonly fact: string) {
+		super(`${fact} Run tab.observe() again.`);
+	}
+}
+
+function staleNode(node: CdpNode, cause: unknown): StaleNodeError {
+	return new StaleNodeError(
+		`${node.label} is stale: the page no longer has that element (${cause instanceof Error ? cause.message : String(cause)}).`,
 	);
 }
 
