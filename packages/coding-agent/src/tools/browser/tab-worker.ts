@@ -1084,6 +1084,12 @@ const SETTLE_BUDGET_MS = 3_000;
  */
 const INITIAL_READY_BUDGET_MS = 10_000;
 /**
+ * How long a failed run may spend re-reading the tab's URL and title before its
+ * error is sent: inside the supervisor's 750ms post-run grace, beside the
+ * request-interception cleanup's 500ms.
+ */
+const FAILED_RUN_INFO_MS = 200;
+/**
  * Floor for the CDP reads that collect a snapshot once the settle budget is
  * spent. They are otherwise bounded by the settle deadline — a read that hangs
  * because the document went away costs the settle budget and retries as "page
@@ -1407,8 +1413,8 @@ export class WorkerCore {
 
 			// Realm setup is done: puppeteer loaded and browser connected. Sent before
 			// page acquisition so the supervisor's cold-start budget bounds only the
-			// realm setup; page creation and the first navigation run under the ready
-			// wait.
+			// realm setup; page creation runs under the ready wait. The supervisor
+			// navigates once the tab is published, so a slow page never costs the tab.
 			this.#transport.send({ type: "setup" });
 			if (payload.mode === "headless") {
 				// Create the target directly so its id is reportable before
@@ -1475,15 +1481,6 @@ export class WorkerCore {
 			this.#tracing = new BrowserTracingController(this.#page);
 			this.#network = new BrowserNetworkManager(this.#page, payload.allowedDomains);
 			await this.#network.start();
-			if (payload.url) {
-				// Default to "load" because dev servers with HMR/WS never reach networkidle.
-				await navigateMainFrame(this.#page, payload.url, {
-					label: `navigate to ${JSON.stringify(payload.url)}`,
-					timeoutMs: payload.timeoutMs,
-					waitUntil: payload.waitUntil,
-					stopLoading: () => this.#stopLoading(),
-				});
-			}
 			// Nothing observes this tab until `ready`, so the wait for a pending
 			// navigation to commit costs the acquisition nothing it would not have
 			// spent hanging inside the first observation instead.
@@ -1793,6 +1790,14 @@ export class WorkerCore {
 			if (this.#active?.id === msg.id) this.#active = null;
 		}
 		if (failure) {
+			// A failed run can still have moved the page (a timed-out goto stops the
+			// load where it was), and `browser.tabs()` reads what `ready` last said.
+			// Bounded well inside the supervisor's post-run grace; an abort or the
+			// cell's own timeout leaves it to the next run.
+			const failedAtDeadline =
+				failure.error instanceof ToolError && failure.error.message.startsWith("Browser code execution timed out");
+			if (!(failure.error instanceof ToolAbortError) && !failedAtDeadline)
+				await Promise.race([this.#postReadyInfo(), Bun.sleep(FAILED_RUN_INFO_MS)]);
 			this.#transport.send({ type: "result", id: msg.id, ok: false, error: errorPayload(failure.error) });
 			return;
 		}

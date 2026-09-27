@@ -85,8 +85,6 @@ export type WorkerInitPayload =
 			userAgent?: string;
 			/** Ignore invalid HTTPS certificates for this page. */
 			ignoreHttpsErrors?: boolean;
-			url?: string;
-			waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
 			timeoutMs: number;
 	  }
 	| {
@@ -105,15 +103,13 @@ export type WorkerInitPayload =
 			userAgent?: string;
 			/** Ignore invalid HTTPS certificates for this page. */
 			ignoreHttpsErrors?: boolean;
-			url?: string;
 			/**
-			 * URL Chrome already reported for this tab. Unlike `url` this never
-			 * navigates: it only tells the worker that a navigation is still
+			 * URL Chrome already reported for this tab. This never navigates: it
+			 * only tells the worker that a navigation is still
 			 * pending while the main frame holds its initial empty document, so
 			 * the first observation is not taken of a page nobody asked for.
 			 */
 			expectUrl?: string;
-			waitUntil?: "load" | "domcontentloaded" | "networkidle0" | "networkidle2";
 			timeoutMs: number;
 			/**
 			 * Post-timeout recycle: clear abandoned request interception before adopting

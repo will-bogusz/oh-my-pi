@@ -798,6 +798,7 @@ async function openBrowser(
 	const deadlineStart = performance.now();
 	const timeoutSignal = AbortSignal.timeout(timeoutMs);
 	const openSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
+	let stillLoading: ToolError | undefined;
 	try {
 		const browser = await untilAborted(openSignal, () =>
 			acquireBrowser(kind, {
@@ -887,14 +888,22 @@ async function openBrowser(
 		details.url = url;
 		details.viewport = tab.info.viewport;
 		const verb = result.created ? "Opened" : "Reused";
-		const lines = [
-			`${verb} tab ${JSON.stringify(name)} on ${describeBrowser(browser)}`,
-			`URL: ${url}`,
-			title ? `Title: ${title}` : null,
-			// Once per conversation: a reuse or a second tab would repeat them.
-			tabVerbsOnce(taught, session),
-		].filter((line): line is string => typeof line === "string");
-		return toolResult(details).text(lines.join("\n")).done();
+		const header = `${verb} tab ${JSON.stringify(name)} on ${describeBrowser(browser)}`;
+		if (!result.navigationTimeout) {
+			const lines = [
+				header,
+				`URL: ${url}`,
+				title ? `Title: ${title}` : null,
+				// Once per conversation: a reuse or a second tab would repeat them.
+				tabVerbsOnce(taught, session),
+			].filter((line): line is string => typeof line === "string");
+			return toolResult(details).text(lines.join("\n")).done();
+		}
+		// The page outlasted the budget: goto stopped the load and said where.
+		// Thrown like goto's own timeout, but the tab and what arrived stay.
+		stillLoading = new ToolError(
+			`${header}, but its page did not finish loading: ${result.navigationTimeout}. The tab stays open on what loaded${title ? ` (title ${JSON.stringify(title)})` : ""}: browser.tab(${JSON.stringify(name)}) drives it.`,
+		);
 	} catch (error) {
 		// Caller cancellation stays a ToolAbortError; the requested timeout
 		// becomes a timeout ToolError; anything else passes through unchanged.
@@ -902,6 +911,7 @@ async function openBrowser(
 		if (timeoutSignal.aborted) throw new ToolError(`Browser open timed out after ${timeoutMs}ms`);
 		throw error;
 	}
+	throw stillLoading;
 }
 
 async function closeBrowser(

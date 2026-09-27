@@ -175,6 +175,12 @@ export interface AcquireTabOptions {
 export interface AcquireTabResult {
 	tab: TabSession;
 	created: boolean;
+	/**
+	 * The navigation to `url` outlasted the caller's budget and was stopped
+	 * where it was: the `tab.goto` error, naming the URL and readyState it
+	 * stopped at. The tab stays published on what loaded.
+	 */
+	navigationTimeout?: string;
 }
 
 export interface RunInTabOptions {
@@ -203,6 +209,8 @@ const workerPageTargets = new WeakMap<WorkerHandle, string>();
 // awaits) cannot interleave and leak a worker + browser refCount.
 const acquireChains = new Map<string, Promise<void>>();
 const GRACE_MS = 750;
+/** Kept back from an open's navigation budget for the reply once the navigation returns. */
+const OPEN_REPLY_MARGIN_MS = 250;
 // Cold-start guard for the worker's `setup` handshake (realm usable: puppeteer
 // loaded, browser connected, page acquired). On hosts where the worker's cold
 // import stalls (observed: Bun worker inside a full RPC process), an
@@ -385,23 +393,11 @@ async function acquireTabImpl(
 						`await page.setViewport({ width: ${opts.viewport.width}, height: ${opts.viewport.height}, deviceScaleFactor: ${dsf === undefined ? "undefined" : String(dsf)} });`,
 					);
 				}
-				if (opts.url) {
-					reuseSteps.push(
-						`await tab.goto(${JSON.stringify(opts.url)}, { waitUntil: ${JSON.stringify(opts.waitUntil ?? "load")} });`,
-					);
-				}
-				if (reuseSteps.length) {
-					await runInTabWithSnapshot(
-						name,
-						{
-							code: reuseSteps.join("\n"),
-							timeoutMs: opts.timeoutMs,
-							signal: opts.signal,
-						},
-						{ cwd: getProjectDir() },
-					);
-				}
-				return { tab: tabs.get(name)!, created: false };
+				if (opts.url) reuseSteps.push(gotoStep(opts.url, opts));
+				const navigationTimeout = reuseSteps.length
+					? await navigatePublishedTab(name, reuseSteps, opts, startedAt)
+					: undefined;
+				return { tab: tabs.get(name)!, created: false, navigationTimeout };
 			}
 		} else {
 			if (existing.browser === browser) {
@@ -523,7 +519,53 @@ async function acquireTabImpl(
 	// this process dies abnormally before its own teardown closes the tab.
 	const scope = sharedScopeOf(browser);
 	if (scope) void recordSharedTarget(scope, info.targetId);
-	return { tab, created: true };
+	if (!opts.url) return { tab, created: true };
+	// Navigated only now that the tab is published, through the same goto a
+	// reuse runs: a page that outlasts the budget leaves the tab on what loaded.
+	try {
+		return {
+			tab,
+			created: true,
+			navigationTimeout: await navigatePublishedTab(name, [gotoStep(opts.url, opts)], opts, startedAt),
+		};
+	} catch (error) {
+		// A navigation that failed outright (DNS, refused, a blocked domain), or
+		// the caller's abort, leaves nothing worth keeping from this open.
+		await releaseTab(name, { kill: false }).catch(() => undefined);
+		throw error;
+	}
+}
+
+function gotoStep(url: string, opts: AcquireTabOptions): string {
+	return `await tab.goto(${JSON.stringify(url)}, { waitUntil: ${JSON.stringify(opts.waitUntil ?? "load")} });`;
+}
+
+/**
+ * Run an open's steps on its published tab with what is left of the caller's
+ * budget, less the reply's margin, so goto's own timeout (which stops the load
+ * and names where it stopped) fires before the caller's deadline does. Returns
+ * that timeout's message when the page outlasted the budget; any other
+ * failure throws.
+ */
+async function navigatePublishedTab(
+	name: string,
+	steps: readonly string[],
+	opts: AcquireTabOptions,
+	startedAt: number,
+): Promise<string | undefined> {
+	const budgetMs = Math.floor(opts.timeoutMs - (performance.now() - startedAt) - OPEN_REPLY_MARGIN_MS);
+	if (budgetMs <= 0) throw new ToolError(`Browser open timed out after ${opts.timeoutMs}ms`);
+	try {
+		await runInTabWithSnapshot(
+			name,
+			{ code: steps.join("\n"), timeoutMs: budgetMs, signal: opts.signal },
+			{ cwd: getProjectDir() },
+		);
+		return undefined;
+	} catch (error) {
+		if (error instanceof Error && error.name === "NavigationTimeoutError") return error.message;
+		throw error;
+	}
 }
 
 async function acquireCmuxTab(
@@ -1340,8 +1382,6 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 			downloadsPath: opts.downloadsPath,
 			userAgent: opts.userAgent,
 			ignoreHttpsErrors: opts.ignoreHttpsErrors,
-			url: opts.url,
-			waitUntil: opts.waitUntil,
 			timeoutMs: opts.timeoutMs,
 		};
 	}
@@ -1366,8 +1406,6 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 		downloadsPath: opts.downloadsPath,
 		userAgent: opts.userAgent,
 		ignoreHttpsErrors: opts.ignoreHttpsErrors,
-		url: opts.url,
-		waitUntil: opts.waitUntil,
 		timeoutMs: opts.timeoutMs,
 		activateForScreenshot,
 	};

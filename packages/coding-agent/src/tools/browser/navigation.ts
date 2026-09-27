@@ -13,6 +13,8 @@ export type NavigationWaitUntil = "load" | "domcontentloaded" | "networkidle0" |
 
 const READY_POLL_MS = 50;
 const READY_PROBE_TIMEOUT_MS = 1_000;
+/** Bound on each step of a navigation-timeout report: the readyState read, then the stop. */
+const REPORT_STEP_TIMEOUT_MS = 250;
 /** Round trip allowed for puppeteer to record a same-document URL change. */
 const SAME_DOCUMENT_URL_MS = 500;
 /**
@@ -30,6 +32,15 @@ const NAVIGATION_SHAPED_ERROR_RE =
 	/execution context (was )?destroyed|inspected target navigated|target crashed|target closed|session closed|frame (was )?detached|because of a navigation/i;
 
 class PhaseTimeout extends Error {}
+
+/**
+ * A navigation that outlasted its budget and was stopped where it was. The
+ * page, and the tab holding it, are still there; the name survives the worker
+ * boundary, so the host can tell this from a navigation that failed.
+ */
+export class NavigationTimeoutError extends ToolError {
+	override name = "NavigationTimeoutError";
+}
 
 export interface MainFrameNavigateOptions {
 	/** Op label used in the timeout message, e.g. `tab.goto("/x")`. */
@@ -237,11 +248,11 @@ async function waitForMainFramePhase(
 }
 
 /** Main-frame `document.readyState`, or `undefined` while the context is unreachable. */
-async function readReadyState(page: Page): Promise<string | undefined> {
+async function readReadyState(page: Page, timeoutMs = READY_PROBE_TIMEOUT_MS): Promise<string | undefined> {
 	try {
 		const state = await withTimeout(
 			page.mainFrame().evaluate(() => document.readyState),
-			READY_PROBE_TIMEOUT_MS,
+			timeoutMs,
 			"readyState probe timed out",
 		);
 		return typeof state === "string" ? state : undefined;
@@ -252,11 +263,16 @@ async function readReadyState(page: Page): Promise<string | undefined> {
 
 async function reportNavigationTimeout(page: Page, opts: MainFrameNavigateOptions): Promise<never> {
 	// Read the state before stopping: `Page.stopLoading` changes what we would report.
+	// Each step is bounded so the report lands inside the one second a cell keeps
+	// back from its ops (CELL_BUDGET_SLACK_MS): a navigation that never committed
+	// leaves the probe unanswered, and a report that outran the cell turned into
+	// a cell timeout that killed the tab.
 	const url = page.url();
-	const readyState = (await readReadyState(page)) ?? "unreachable";
+	const readyState = (await readReadyState(page, REPORT_STEP_TIMEOUT_MS)) ?? "unreachable";
 	const stopped = opts.stopLoading ? "; pending navigation stopped" : "";
-	await opts.stopLoading?.().catch(() => undefined);
-	throw new ToolError(
+	if (opts.stopLoading)
+		await withTimeout(opts.stopLoading(), REPORT_STEP_TIMEOUT_MS, "stopLoading timed out").catch(() => undefined);
+	throw new NavigationTimeoutError(
 		`${opts.label} timed out after ${opts.timeoutMs}ms${stopped} — current URL: ${url}, readyState: ${readyState}`,
 	);
 }
