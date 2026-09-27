@@ -67,7 +67,10 @@ export function openWindows(windows: readonly ComputerWindowIdentity[]): string 
 		return `No app window is on screen; computer.windows() lists ${windows.length} service or off-screen row${
 			windows.length === 1 ? "" : "s"
 		}.`;
-	return `Open windows: ${listed(rows, row => `${row.app}${row.title ? ` — ${JSON.stringify(row.title)}` : ""}`)}.`;
+	return `Open windows: ${listed(
+		rows,
+		row => `${row.app}${row.title ? ` — ${JSON.stringify(row.title)}` : ""}${row.desktop ? " kind=desktop" : ""}`,
+	)}.`;
 }
 
 /**

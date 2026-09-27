@@ -958,7 +958,9 @@ it("never hands an app selector the desktop surface when the app has no window o
 		for (const selector of [{ app: "Fixture" }, { pid: 101 }]) {
 			const failure = await f.session.window(f.context, selector).catch((error: unknown) => error);
 			if (!(failure instanceof Error)) throw new Error(`Expected ${JSON.stringify(selector)} to be refused`);
-			expect(failure.message).toContain("2 WindowServer rows and no accessibility window");
+			expect(failure.message).toContain(
+				"2 WindowServer rows besides the display's desktop surface and no accessibility window",
+			);
 			expect(failure.message).toContain('computer.launch({ name: "Fixture", urls: [');
 			expect(failure.message).not.toContain("9814");
 		}

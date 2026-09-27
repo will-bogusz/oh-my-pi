@@ -527,35 +527,6 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
-	it("does not wait for a window from a launch that reused the running app", async () => {
-		const { backend, realm } = javascriptFixture();
-		backend.windowAbsent = true;
-		// `launch_app` answers an app that is already running with that process
-		// and reopens nothing, so no window is on its way: waiting out the
-		// launch timeout for one only delays the miss.
-		const launch = spyOn(backend, "launch").mockResolvedValue({
-			text: "Using running Code (pid 123); visibility unchanged.",
-			effect: "unverifiable",
-			evidence: null,
-			delivery: "background",
-			data: { pid: 123, launch_state: { requested: false, process_running: true, window_ready: false } },
-		});
-		try {
-			const started = Date.now();
-			const failure = await runInContext('computer.window({app:"Code"}, {screenshot:false})', realm).catch(
-				(error: unknown) => error as Error,
-			);
-			expect(Date.now() - started).toBeLessThan(2_000);
-			expect(launch).toHaveBeenCalledTimes(1);
-			expect(failure.message).toContain('"Code" is already running and has no window of its own');
-			expect(failure.message).toContain('computer.launch({ name: "Code", urls: [');
-			expect(failure.message).not.toContain("opened none within");
-		} finally {
-			launch.mockRestore();
-			await runInContext("computer.close()", realm);
-		}
-	});
-
 	it("reads an app selector that matches nothing as a launch request unless launching is refused", async () => {
 		const { backend, realm } = javascriptFixture();
 		backend.windowAbsent = true;
@@ -655,6 +626,13 @@ describe("computer preludes through the session", () => {
 			expect(crowded.message).toContain('Open windows: [100] Terminal — "shell 0", [101] Terminal — "shell 1", ');
 			expect(crowded.message).toContain('[111] Terminal — "shell 11", and 4 more.');
 			expect(crowded.message).not.toContain("shell 12");
+			// The display's desktop surface is untitled, so its kind is what names
+			// it: listed as a bare app it reads like one of that app's windows.
+			backend.extraWindows = [{ ...windowFixture, id: "9814", app: "Finder", title: "", kind: "desktop" }];
+			const surface = await runInContext('computer.window({app:"Absent"}, {screenshot:false})', realm).catch(
+				(error: unknown) => error as Error,
+			);
+			expect(surface.message).toContain("[9814] Finder kind=desktop");
 			// Nothing a person would name, and the roster still says so.
 			backend.extraWindows = [];
 			backend.currentWindow = { ...windowFixture, app: "Creative Cloud Core Service", title: "" };

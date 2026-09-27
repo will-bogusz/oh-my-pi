@@ -383,15 +383,6 @@ function startedPid(result: ComputerActionResult): number | undefined {
 }
 
 /**
- * Whether `launch_app` answered with a process that was already running:
- * it reuses that process without a reopen, so no window is on its way.
- */
-function reusedRunningApp(result: ComputerActionResult): boolean {
-	const state = (result.data as { launch_state?: { requested?: unknown } } | undefined)?.launch_state;
-	return state?.requested === false;
-}
-
-/**
  * Launching collapses the three-call acquisition every native run started
  * with — `window()` throws `Missing`, `launch()`, `window()` again — into
  * one call, and it is what an `{ app }` selector matching nothing means.
@@ -408,11 +399,6 @@ function reusedRunningApp(result: ComputerActionResult): boolean {
  * launch reply's own answer to which process this is; a title in the
  * selector still narrows it, and a launch that reports no pid falls back to
  * the name it was given.
- *
- * A launch that answers with a process that was already running reused it
- * without a reopen, so nothing is waited for: the window it has is acquired
- * at once, and having none is said as such, with the route that does make a
- * running app open one.
  */
 async function launchAndAcquire(
 	session: ComputerBackend,
@@ -447,10 +433,9 @@ async function launchAndAcquire(
 	const pid = startedPid(launched);
 	const target: WindowSelector = pid === undefined ? selector : { ...rest, pid };
 	const deadline = Date.now() + LAUNCHED_WINDOW_TIMEOUT_MS;
-	const reused = reusedRunningApp(launched);
 	for (;;) {
 		const context = operationContext(getContext);
-		if (reused || (await session.windows(context, target)).length || Date.now() >= deadline)
+		if ((await session.windows(context, target)).length || Date.now() >= deadline)
 			return await session.window(context, target, options).catch(async (error: unknown) => {
 				if (!isMissedWindow(error)) throw error;
 				// A `Missing` acquisition used to tell the model to try
@@ -459,15 +444,11 @@ async function launchAndAcquire(
 					session,
 					getContext,
 					error,
-					reused
-						? `Missing computer window ${JSON.stringify(selector)}: ${JSON.stringify(
-								app,
-							)} is already running and has no window of its own to acquire, and launching it again reuses that process and opens none. Reopen its document: ${reopenRoute(app)}; then acquire again.`
-						: `Missing computer window ${JSON.stringify(selector)}: launched ${JSON.stringify(
-								app,
-							)} and no window of it could be acquired — it opened none within ${
-								LAUNCHED_WINDOW_TIMEOUT_MS / 1000
-							} s, or the one it opened is already gone. An app that opens no window by itself still opens a document: ${reopenRoute(app)}; then acquire again.`,
+					`Missing computer window ${JSON.stringify(selector)}: launched ${JSON.stringify(
+						app,
+					)} and no window of it could be acquired — it opened none within ${
+						LAUNCHED_WINDOW_TIMEOUT_MS / 1000
+					} s, or the one it opened is already gone. If it opens windows only for a document or folder, ${reopenRoute(app)}; then acquire again.`,
 				);
 			});
 		await Bun.sleep(LAUNCHED_WINDOW_POLL_MS);

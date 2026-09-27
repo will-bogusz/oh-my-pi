@@ -1165,19 +1165,22 @@ export class CuaComputerSession implements ComputerBackend {
 		pid: number,
 		matches: readonly ComputerWindowIdentity[],
 		roster: readonly ComputerWindowIdentity[],
+		desktop: boolean,
 	): ToolError {
 		const app = matches[0]?.app ?? roster[0]?.app ?? "The target process";
 		const rows = matches.length ? matches : roster;
 		const backed = roster.filter(window => window.axBacked !== false);
 		return new ToolError(
-			`${app}: pid ${pid} has ${roster.length} WindowServer row${roster.length === 1 ? "" : "s"} and ${
+			`${app}: pid ${pid} has ${roster.length} WindowServer row${roster.length === 1 ? "" : "s"}${
+				desktop ? " besides the display's desktop surface" : ""
+			} and ${
 				backed.length
 					? `${backed.length} accessibility window${backed.length === 1 ? "" : "s"}, none of them among the ${rows.length} this selector matched`
 					: "no accessibility window"
 			}; every input route to ${rows.length === 1 ? "it" : "them"} is refused. ${
 				backed.length
 					? `Acquire one of its accessibility windows by id instead: ${appWindows(backed)}.`
-					: `Bring it to this Space, or reopen its document: ${reopenRoute(app)}; then acquire again.`
+					: `Bring it to this Space, or, if it opens windows for a document or folder, ${reopenRoute(app)}; then acquire again.`
 			}\n${rows.map(window => this.#candidate(window)).join("\n")}`,
 		);
 	}
@@ -1251,7 +1254,13 @@ export class CuaComputerSession implements ComputerBackend {
 					// without being an AXWindow, so `ax.windows` being empty does not
 					// mean every row is dead — only a match set with no backed row is.
 					const applicationWindows = matches.filter(window => window.axBacked !== false);
-					if (!applicationWindows.length) throw this.#inputDead(pid!, matches, annotated);
+					if (!applicationWindows.length)
+						throw this.#inputDead(
+							pid!,
+							matches,
+							annotated,
+							this.#windowRoster(data, { pid, kind: "desktop" }, sample).length > 0,
+						);
 					// AX and CG are sequential snapshots. Missing CG identities mean
 					// the mapping cannot safely disambiguate this acquisition.
 					if ([...ax.windows.keys()].every(id => roster.some(window => window.id === id))) matches = applicationWindows;
