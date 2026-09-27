@@ -682,6 +682,83 @@ it("sends the caller to a modal dialog's own rows instead of to an acquisition i
 	}
 });
 
+it("resolves by exact id an app-modal window only the accessibility roster lists", async () => {
+	const f = await fixture();
+	// Recorded shape (driver 5b3a6cf96): while an application-modal prompt
+	// is up, the app's window sits on CGWindow layer 8, and only the
+	// `include_accessibility_metadata` view of `list_windows` carries it; the
+	// plain views (with or without `pid`) are layer 0 and omit it.
+	const modal = {
+		...f.row,
+		window_id: 58,
+		title: "prompt",
+		bounds: { height: 598, width: 935, x: 200, y: 386 },
+		layer: 8,
+		kind: "app-modal",
+		ax_backed: true,
+		z_index: 43,
+	};
+	const helper = { ...f.row, window_id: 56, title: "", is_on_screen: false, ax_backed: false };
+	try {
+		f.state.hook = async (name, args) => {
+			if (name === "get_window_state" && args.window_id === 58)
+				return reply({
+					pid: 101,
+					window_id: 58,
+					snapshot_id: "s58",
+					truncated: false,
+					window_bounds: modal.bounds,
+					elements: [
+						{ element_index: 1, element_token: "s58:1", role: "AXWindow", subrole: "AXDialog", depth: 0 },
+						{ element_index: 2, element_token: "s58:2", role: "AXButton", label: "Delete", depth: 1 },
+					],
+				});
+			if (name !== "list_windows") return undefined;
+			if (!args.include_accessibility_metadata)
+				return reply({ windows: [f.row, { ...helper, ax_backed: undefined }] });
+			return reply({
+				windows: [modal, f.row, helper],
+				accessibility_windows: {
+					pid: 101,
+					complete: true,
+					windows: [
+						{ window_id: 58, role: "AXWindow", subrole: "AXDialog", main: true, minimized: false, modal: true },
+					],
+				},
+			});
+		};
+		f.state.roster = {
+			windows: [
+				{ ...systemWindow({ id: "58", title: "prompt" }), layer: 8 },
+				{ ...systemWindow({ id: "77", title: "" }), layer: 3 },
+			],
+			elapsedMs: 0,
+		};
+		const listed = (await f.session.windows(f.context, { pid: 101 })).find(window => window.id === "58");
+		expect(listed).toMatchObject({ kind: "app-modal", axBacked: true, main: true });
+		// The id the roster printed resolves, with or without its pid, to the same row.
+		const reads = () => f.calls.filter(call => call.name === "list_windows").length;
+		for (const selector of [{ id: "58", pid: 101 }, { id: "58" }, "58"]) {
+			const resolved = await f.session.window(f.context, selector);
+			expect(resolved).toMatchObject({ id: "58", pid: 101, kind: "app-modal", layer: 8, main: true });
+		}
+		// A held handle's re-resolution (`#current`) reaches it too.
+		const handle = await f.session.window(f.context, { id: "58", pid: 101 });
+		const observed = await f.session.observe(f.context, handle);
+		expect(observed.window.id).toBe("58");
+		// A layer-0 id is answered by the plain view alone.
+		const before = reads();
+		await f.session.window(f.context, { id: "1", pid: 101 });
+		expect(reads() - before).toBe(1);
+		// The WindowServer only names the pid to ask: an id the driver lists
+		// in neither view is still missing.
+		for (const selector of [{ id: "77", pid: 101 }, { id: "77" }])
+			await expect(f.session.window(f.context, selector)).rejects.toThrow(/Missing computer window/);
+	} finally {
+		await f.close();
+	}
+});
+
 it("prints the provider's verdict that a control would accept a written value", async () => {
 	const f = await fixture();
 	// A date area reads like a text field and refuses typing; the row that

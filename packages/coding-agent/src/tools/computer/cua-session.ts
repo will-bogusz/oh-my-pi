@@ -1235,6 +1235,7 @@ export class CuaComputerSession implements ComputerBackend {
 	async #window(selector: string | WindowSelector, note?: (text: string) => void): Promise<ComputerWindowIdentity> {
 		const filter = typeof selector === "string" ? { id: selector } : selector;
 		let matches = await this.#windows(filter);
+		if (filter.id !== undefined && !matches.length) matches = await this.#offLayerWindow(filter);
 		const pid = matches[0]?.pid;
 		if (filter.id === undefined && matches.length > 1 && matches.every(window => window.pid === pid)) {
 			// WindowServer can include invisible app helpers, and a row no
@@ -1283,16 +1284,34 @@ export class CuaComputerSession implements ComputerBackend {
 	#current(window: Pick<ComputerWindowIdentity, "id" | "pid">): Promise<ComputerWindowIdentity> {
 		return this.#window({ id: window.id, pid: window.pid });
 	}
+	/**
+	 * The driver's plain macOS roster is CGWindow layer 0. A window its app
+	 * declares modal (`AXModal`) sits above that layer (the modal-panel
+	 * level) while it is modal, and the driver reports it, on screen, only in
+	 * the view that carries the accessibility mapping — the roster `windows()`
+	 * prints for one app or pid. So an exact id the plain view lacks is
+	 * looked up there before it is called missing: under the pid the caller
+	 * named, else the pid the WindowServer files that window under. The
+	 * driver's row stays the only evidence the window exists. No other
+	 * platform has that second view.
+	 */
+	async #offLayerWindow(filter: WindowSelector): Promise<ComputerWindowIdentity[]> {
+		if (this.#platform !== "darwin") return [];
+		const pid = filter.pid ?? this.#roster()?.windows.find(window => window.id === filter.id)?.pid;
+		return pid === undefined ? [] : this.#annotatedWindows(pid, filter);
+	}
+	async #annotatedWindows(pid: number, selector: WindowSelector): Promise<ComputerWindowIdentity[]> {
+		const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
+		const roster = this.#windowRoster(data, selector, this.#roster());
+		const ax = this.#accessibilityWindows(data, pid);
+		return ax ? this.#withAccessibility(roster, ax) : roster;
+	}
 	async #listedWindows(selector: WindowSelector): Promise<ComputerWindowIdentity[]> {
 		const windows = await this.#windows(selector);
 		const pid = windows[0]?.pid;
 		if (pid === undefined || windows.some(window => window.pid !== pid || window.axBacked !== undefined))
 			return windows;
-		const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
-		const sample = this.#roster();
-		const roster = this.#windowRoster(data, selector, sample);
-		const ax = this.#accessibilityWindows(data, pid);
-		return ax ? this.#withAccessibility(roster, ax) : roster;
+		return this.#annotatedWindows(pid, selector);
 	}
 	windows(context: Context, selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
 		return this.#schedule(context, "windows", false, () => this.#listedWindows(selector));
