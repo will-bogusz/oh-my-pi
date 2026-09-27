@@ -1,6 +1,15 @@
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ComputerLaunchOptions, WindowSelector } from "./types";
 
+/**
+ * The route by which a running app opens a window it does not have: a
+ * launch that reuses the running process opens nothing by itself, while one
+ * that carries `urls` hands the app those documents or folders to open.
+ */
+export function reopenRoute(app: string): string {
+	return `computer.launch({ name: ${JSON.stringify(app)}, urls: ["<document or folder path>"] }) hands the running app a document or folder to open`;
+}
+
 /** Launch accepts the same name/path shorthand as explicit launch options. */
 export function normalizeLaunchOptions(value: unknown): ComputerLaunchOptions {
 	if (typeof value === "string") value = { name: value };

@@ -525,6 +525,35 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
+	it("does not wait for a window from a launch that reused the running app", async () => {
+		const { backend, realm } = javascriptFixture();
+		backend.windowAbsent = true;
+		// `launch_app` answers an app that is already running with that process
+		// and reopens nothing, so no window is on its way: waiting out the
+		// launch timeout for one only delays the miss.
+		const launch = spyOn(backend, "launch").mockResolvedValue({
+			text: "Using running Code (pid 123); visibility unchanged.",
+			effect: "unverifiable",
+			evidence: null,
+			delivery: "background",
+			data: { pid: 123, launch_state: { requested: false, process_running: true, window_ready: false } },
+		});
+		try {
+			const started = Date.now();
+			const failure = await runInContext('computer.window({app:"Code"}, {screenshot:false})', realm).catch(
+				(error: unknown) => error as Error,
+			);
+			expect(Date.now() - started).toBeLessThan(2_000);
+			expect(launch).toHaveBeenCalledTimes(1);
+			expect(failure.message).toContain('"Code" is already running and has no window of its own');
+			expect(failure.message).toContain('computer.launch({ name: "Code", urls: [');
+			expect(failure.message).not.toContain("opened none within");
+		} finally {
+			launch.mockRestore();
+			await runInContext("computer.close()", realm);
+		}
+	});
+
 	it("reads an app selector that matches nothing as a launch request unless launching is refused", async () => {
 		const { backend, realm } = javascriptFixture();
 		backend.windowAbsent = true;

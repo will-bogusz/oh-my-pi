@@ -40,7 +40,7 @@ import {
 	writeNote,
 } from "./render";
 import { appWindows } from "./roster";
-import { normalizeQuery } from "./selectors";
+import { normalizeQuery, reopenRoute } from "./selectors";
 import { PERFORMABLE_ACTIONS, observedActions, semanticAction } from "./semantic-actions";
 import type {
 	ActionOptions,
@@ -1039,12 +1039,16 @@ export class CuaComputerSession implements ComputerBackend {
 			window =>
 				(selector.id === undefined || window.id === selector.id) &&
 				(selector.pid === undefined || window.pid === selector.pid) &&
-				// A display's desktop surface is filed under Finder and is never the
-				// Finder window `{ app: "Finder" }` means; it is acquired by kind.
+				// A display's desktop surface is filed under Finder and is never a
+				// window of the app a selector names — by name or by the pid a
+				// launch answered with; it is acquired by kind or by its exact id.
+				(window.kind !== "desktop" ||
+					selector.kind === "desktop" ||
+					selector.id !== undefined ||
+					(selector.app === undefined && selector.pid === undefined)) &&
 				(selector.app === undefined ||
-					((window.kind !== "desktop" || selector.kind === "desktop") &&
-						(window.app.toLowerCase().includes(selector.app.toLowerCase()) ||
-							this.#bundlePids.get(selector.app.toLowerCase())?.has(window.pid) === true))) &&
+					window.app.toLowerCase().includes(selector.app.toLowerCase()) ||
+					this.#bundlePids.get(selector.app.toLowerCase())?.has(window.pid) === true) &&
 				(selector.title === undefined || window.title.toLowerCase().includes(selector.title.toLowerCase())) &&
 				(selector.kind === undefined || window.kind === selector.kind),
 		);
@@ -1173,7 +1177,7 @@ export class CuaComputerSession implements ComputerBackend {
 			}; every input route to ${rows.length === 1 ? "it" : "them"} is refused. ${
 				backed.length
 					? `Acquire one of its accessibility windows by id instead: ${appWindows(backed)}.`
-					: "Bring it to this Space or reopen its document, then acquire again."
+					: `Bring it to this Space, or reopen its document: ${reopenRoute(app)}; then acquire again.`
 			}\n${rows.map(window => this.#candidate(window)).join("\n")}`,
 		);
 	}

@@ -894,8 +894,10 @@ it("refuses an acquisition whose every candidate row takes no input", async () =
 		const failure = await f.session.window(f.context, { app: "Fixture" }).catch((error: unknown) => error);
 		if (!(failure instanceof Error)) throw new Error("Expected the input-dead acquisition to be refused");
 		expect(failure.message).toContain(
-			"Fixture: pid 101 has 3 WindowServer rows and no accessibility window; every input route to them is refused. Bring it to this Space or reopen its document, then acquire again.",
+			"Fixture: pid 101 has 3 WindowServer rows and no accessibility window; every input route to them is refused.",
 		);
+		// What makes a running app open a window is named with the call that does it.
+		expect(failure.message).toContain('computer.launch({ name: "Fixture", urls: [');
 		expect(failure.message).toContain('- id "52" pid 101 Fixture "" 1728×33 at (0,0) offscreen');
 		// Nothing was observed or dispatched on a window that cannot answer.
 		expect(f.calls.every(call => call.name === "list_windows")).toBe(true);
@@ -924,6 +926,45 @@ it("refuses an acquisition whose every candidate row takes no input", async () =
 			id: "12360",
 			axBacked: true,
 		});
+	} finally {
+		await f.close();
+	}
+});
+
+it("never hands an app selector the desktop surface when the app has no window of its own", async () => {
+	const f = await fixture();
+	// A running app with no window open: WindowServer rows no AXWindow claims,
+	// and the display's desktop surface, which the driver files under the same
+	// pid and reads through AX without it being an AXWindow.
+	const ghost = (id: number) => ({
+		...f.row,
+		window_id: id,
+		title: "",
+		is_on_screen: false,
+		bounds: { x: 0, y: 0, width: 1920, height: 30 },
+	});
+	const desktop = { ...f.row, window_id: 9814, title: "", z_index: 114, kind: "desktop", ax_backed: true };
+	try {
+		f.state.hook = async name =>
+			name === "list_windows"
+				? reply({
+						windows: [ghost(52), desktop, ghost(51)],
+						accessibility_windows: { pid: 101, complete: true, windows: [] },
+					})
+				: undefined;
+		// Named by app or by pid — the pid is how a launch that reused the
+		// running process addresses it — the app has no window that takes input,
+		// and the refusal neither acquires the desktop nor offers it as one.
+		for (const selector of [{ app: "Fixture" }, { pid: 101 }]) {
+			const failure = await f.session.window(f.context, selector).catch((error: unknown) => error);
+			if (!(failure instanceof Error)) throw new Error(`Expected ${JSON.stringify(selector)} to be refused`);
+			expect(failure.message).toContain("2 WindowServer rows and no accessibility window");
+			expect(failure.message).toContain('computer.launch({ name: "Fixture", urls: [');
+			expect(failure.message).not.toContain("9814");
+		}
+		// The desktop itself stays reachable by kind and by its exact id.
+		expect(await f.session.window(f.context, { kind: "desktop" })).toMatchObject({ id: "9814", kind: "desktop" });
+		expect(await f.session.window(f.context, { id: "9814", pid: 101 })).toMatchObject({ id: "9814" });
 	} finally {
 		await f.close();
 	}
