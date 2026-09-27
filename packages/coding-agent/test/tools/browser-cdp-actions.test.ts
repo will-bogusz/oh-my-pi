@@ -624,6 +624,7 @@ const CONTEXT_MENU_PAGE = `<!doctype html><title>Files</title>
 <body data-events="">
 <div role="button" tabindex="0" id="item">report.pdf</div>
 <label><input type="checkbox" id="keep"> Keep a copy</label>
+<p><label id="wrap"><input type="checkbox" aria-label="Wrapped" style="pointer-events:none"> Wrapped</label></p>
 <p><label style="position:relative;display:inline-block;padding-left:28px"><input type="checkbox" aria-label="Styled" style="position:absolute;left:0;top:0;margin:0;width:20px;height:20px"><span class="dot" style="position:absolute;left:0;top:0;width:20px;height:20px;background:#39f"></span>Styled</label></p>
 <script>
 const log = e => document.body.dataset.events += e.type + ":" + e.button + ":" + e.buttons + ":" + e.isTrusted + ",";
@@ -676,6 +677,12 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 						 await (await tab.ref(observation.elements.find(e => e.name === "Styled").ref)).click({ button: "right" });`,
 					),
 				).toContain("blocked: covered by <span.dot> in its label, which passes only a left click on to it");
+				expect(
+					await runError(
+						`const observation = await tab.observe({ display: false });
+						 await (await tab.ref(observation.elements.find(e => e.name === "Wrapped").ref)).click({ button: "right" });`,
+					),
+				).toContain("blocked: under its label <label#wrap>, which passes only a left click on to it");
 			});
 		} finally {
 			server.stop(true);

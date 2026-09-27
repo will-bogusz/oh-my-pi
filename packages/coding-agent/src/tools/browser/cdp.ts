@@ -314,9 +314,10 @@ interface CheckedState {
  * user would find out: the page dropped it (Chrome keeps answering for detached
  * nodes), `display:none` on it or an ancestor, no area, `visibility` that
  * hit-testing skips, or another element over the centre of its first fragment
- * (the fragment the press targets). An ancestor at that point is not a cover,
- * and for a left press (`primary`) neither is one of the control's own labels,
- * which forwards that click; a label forwards no other button, so it covers.
+ * (the fragment the press targets). An ancestor at that point is not a cover.
+ * The control's own label, or anything in it, is not a cover for a left press
+ * (`primary`), which the label forwards, and is one for any other button, which
+ * it does not forward, even when the label wraps the control.
  * A checkable control that can be pressed also reports its state, so a click
  * can tell whether it took without a read of its own before the press.
  */
@@ -357,11 +358,15 @@ const PRESS_BLOCKER = `function (primary) {
 		if (!nested || nested === hit) break;
 		hit = nested;
 	}
-	if (!hit || contains(element, hit) || contains(hit, element)) return clear();
-	if (Array.from(element.labels || []).some(label => contains(label, hit))) {
+	if (!hit || contains(element, hit)) return clear();
+	// Before the ancestor rule: a label that wraps the control is also its ancestor.
+	const label = Array.from(element.labels || []).find(label => contains(label, hit));
+	if (label) {
 		if (primary !== false) return clear();
-		return { blocked: "covered by " + describe(hit) + " in its label, which passes only a left click on to it" };
+		const where = hit === label ? "under its label " + describe(label) : "covered by " + describe(hit) + " in its label";
+		return { blocked: where + ", which passes only a left click on to it" };
 	}
+	if (contains(hit, element)) return clear();
 	return { blocked: "covered by " + describe(hit) };
 }`;
 
