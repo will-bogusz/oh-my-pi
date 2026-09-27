@@ -538,7 +538,7 @@ interface BrowserTabHelpers {
 	recording(): Promise<{ active: boolean; path?: string; fps?: number; durationMs?: number; frames?: number }>;
 }
 interface BrowserElement {
-	click(options?: { count?: number }): Promise<void>;
+	click(options?: { count?: number; button?: BrowserMouseButton }): Promise<void>;
 	dblclick(): Promise<void>;
 	check(): Promise<void>;
 	uncheck(): Promise<void>;

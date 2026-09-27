@@ -1,5 +1,5 @@
 import { untilAborted } from "@oh-my-pi/pi-utils";
-import type { CDPSession, Frame, Page } from "puppeteer-core";
+import type { CDPSession, Frame, MouseButton, Page } from "puppeteer-core";
 import { _keyDefinitions } from "puppeteer-core/internal/common/USKeyboardLayout.js";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { type AxFrame, type AxNode, buildAxTree, hasTableParts } from "./observation";
@@ -400,7 +400,7 @@ async function dispatchMouse(
 	session: CDPSession,
 	type: "mouseMoved" | "mousePressed" | "mouseReleased",
 	point: Point,
-	options: { button: "none" | "left"; buttons: number; clickCount: number },
+	options: { button: "none" | MouseButton; buttons: number; clickCount: number },
 	signal?: AbortSignal,
 ): Promise<void> {
 	await untilAborted(signal, () =>
@@ -415,8 +415,11 @@ async function dispatchMouse(
 	);
 }
 
+/** The `buttons` bit each button sets while it is held (CDP `Input.dispatchMouseEvent`). */
+const BUTTON_BITS: Record<MouseButton, number> = { left: 1, right: 2, middle: 4, back: 8, forward: 16 };
+
 /**
- * Press and release where the node's first fragment is. A press that would not
+ * Press and release `button` where the node's first fragment is. A press that would not
  * reach it is refused instead of landing elsewhere: `${label} blocked: covered by <div#overlay>`.
  * Returns where it pressed and, for a checkable control, its state before.
  */
@@ -425,6 +428,7 @@ async function pressNode(
 	clickCount: number,
 	label: string,
 	signal?: AbortSignal,
+	button: MouseButton = "left",
 ): Promise<{ point: Point; before?: CheckedState }> {
 	const point = await actionPoint(node, label, signal);
 	const probe = (await callOnNode(node, PRESS_BLOCKER, [], signal)) as PressProbe;
@@ -434,8 +438,8 @@ async function pressNode(
 	// relay paints from Input.dispatchMouseEvent.
 	await dispatchMouse(node.session, "mouseMoved", point, { button: "none", buttons: 0, clickCount: 0 }, signal);
 	for (let count = 1; count <= clickCount; count++) {
-		await dispatchMouse(node.session, "mousePressed", point, { button: "left", buttons: 1, clickCount: count }, signal);
-		await dispatchMouse(node.session, "mouseReleased", point, { button: "left", buttons: 0, clickCount: count }, signal);
+		await dispatchMouse(node.session, "mousePressed", point, { button, buttons: BUTTON_BITS[button], clickCount: count }, signal);
+		await dispatchMouse(node.session, "mouseReleased", point, { button, buttons: 0, clickCount: count }, signal);
 	}
 	return { point, before: probe?.state };
 }
@@ -467,8 +471,9 @@ const CHECKED_AFTER = `function (before) {
 }`;
 
 /**
- * Click the node. On a checkbox, radio or switch the click is also expected to
- * change it (toggle it, or select an unselected radio); when its state still
+ * Click the node with `button` (left by default; `right` opens the page's
+ * context menu). A left click on a checkbox, radio or switch is also expected
+ * to change it (toggle it, or select an unselected radio); when its state still
  * reads the same after the release, the click is reported as not taken, with
  * what the press landed on when that was not the control itself.
  */
@@ -477,9 +482,14 @@ export async function clickNode(
 	clickCount: number,
 	signal?: AbortSignal,
 	label: string = node.label,
+	button: MouseButton = "left",
 ): Promise<void> {
-	const { point, before } = await pressNode(node, clickCount, label, signal);
-	if (!before) return;
+	if (!Object.hasOwn(BUTTON_BITS, button))
+		throw new ToolError(
+			`${label}: unknown button ${JSON.stringify(button)}; use one of ${Object.keys(BUTTON_BITS).join(", ")}.`,
+		);
+	const { point, before } = await pressNode(node, clickCount, label, signal, button);
+	if (!before || button !== "left") return;
 	const radio = before.kind.endsWith("radio");
 	if (radio ? before.state === "checked" : clickCount % 2 === 0) return;
 	// A control the click replaced or navigated away is not evidence either way.

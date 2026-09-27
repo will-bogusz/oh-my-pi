@@ -4,7 +4,7 @@ import * as path from "node:path";
 
 import { postmortem, Snowflake, toError, untilAborted, withTimeout } from "@oh-my-pi/pi-utils";
 import type { HTMLElement } from "@oh-my-pi/pi-utils/dom";
-import type { Browser, CDPSession, Dialog, HTTPResponse, KeyInput, Page, Target } from "puppeteer-core";
+import type { Browser, CDPSession, Dialog, HTTPResponse, KeyInput, MouseButton, Page, Target } from "puppeteer-core";
 import { JsRuntime, type RuntimeHooks } from "../../eval/js/shared/runtime";
 import { formatScreenshot, resizeImage } from "../../utils/image-resize";
 import { buildTreeLines, renderTree, renderTreeDiff, type TreeLine } from "../observed-tree";
@@ -541,7 +541,7 @@ interface TabApi {
  * arguments, nothing puppeteer-shaped leaking through.
  */
 export interface TabElement extends ElementQueryHelpers {
-	click(options?: { count?: number }): Promise<void>;
+	click(options?: { count?: number; button?: MouseButton }): Promise<void>;
 	dblclick(): Promise<void>;
 	check(): Promise<void>;
 	uncheck(): Promise<void>;
@@ -3228,7 +3228,9 @@ export class WorkerCore {
 			op(label(method), sig => callOnNode(node, onElement(ELEMENT_READS[method]), args, sig)) as Promise<R>;
 		return {
 			click: options =>
-				op(label("click"), sig => input(sig, () => clickNode(node, options?.count ?? 1, sig, label("click")))),
+				op(label("click"), sig =>
+					input(sig, () => clickNode(node, options?.count ?? 1, sig, label("click"), options?.button ?? "left")),
+				),
 			dblclick: () => op(label("dblclick"), sig => input(sig, () => clickNode(node, 2, sig, label("dblclick")))),
 			check: () => op(label("check"), sig => input(sig, () => setNodeChecked(node, true, label("check"), sig))),
 			uncheck: () =>

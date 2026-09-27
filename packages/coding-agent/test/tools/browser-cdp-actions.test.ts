@@ -620,6 +620,61 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	60_000,
 );
 
+const CONTEXT_MENU_PAGE = `<!doctype html><title>Volumes</title>
+<body data-events="">
+<div role="button" tabindex="0" id="vol">pgdata-2</div>
+<label><input type="checkbox" id="keep"> Keep data</label>
+<script>
+const log = e => document.body.dataset.events += e.type + ":" + e.button + ":" + e.isTrusted + ",";
+for (const type of ["mousedown", "click", "contextmenu"]) document.getElementById("vol").addEventListener(type, log);
+document.getElementById("vol").addEventListener("contextmenu", e => {
+  e.preventDefault();
+  const menu = document.createElement("div");
+  menu.setAttribute("role", "menu");
+  menu.innerHTML = '<div role="menuitem" tabindex="-1">Move to</div>';
+  document.body.append(menu);
+});
+</script>`;
+
+// A context menu is opened by right-clicking the element that owns it, so the
+// ref's own click must press the right button with trusted input: the page sees
+// a right mousedown and a contextmenu, never a left click. A right click toggles
+// nothing, so on a checkbox it is not reported as a click that did not take.
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"right-clicks a ref to open the page's context menu without a left click",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(CONTEXT_MENU_PAGE, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				const outcome = await run<{ events: string; menu: boolean; keep: boolean }>(
+					`const observation = await tab.observe();
+					 const ref = name => observation.elements.find(e => e.name === name).ref;
+					 await (await tab.ref(ref("pgdata-2"))).click({ button: "right" });
+					 await (await tab.ref(ref("Keep data"))).click({ button: "right" });
+					 const menu = (await tab.observe({ diff: false, display: false })).tree.includes("Move to");
+					 return { events: await tab.evaluate(() => document.body.dataset.events), menu, keep: await tab.evaluate(() => document.getElementById("keep").checked) };`,
+				);
+				expect(outcome.events).toBe("mousedown:2:true,contextmenu:2:true,");
+				expect(outcome.menu).toBe(true);
+				expect(outcome.keep).toBe(false);
+				const refused = await runError(
+					`const observation = await tab.observe({ display: false });
+					 await (await tab.ref(observation.elements.find(e => e.name === "pgdata-2").ref)).click({ button: "side" });`,
+				);
+				expect(refused).toContain('unknown button "side"; use one of left, right, middle, back, forward');
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
+
 const PRESS_PAGE = `<!doctype html><title>Press</title>
 <style>body{margin:20px;font:20px/24px monospace}</style>
 <body data-hits="">
