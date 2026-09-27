@@ -618,9 +618,10 @@ async function invokeBrowser(
 						? openedTabRoutes(session, tab => tab.name === claimId)
 						: [];
 				if (routes.length === 0) throw error;
-				// Chrome does not know the id, and it is the name of a tab this session
-				// opened: that answer, not "the relay may have restarted", is the one to give.
-				if (error instanceof ChromeTabGoneError)
+				// Chrome never knew the id (not one it remembers ending), and it is the name
+				// of a tab this session opened: that answer, not "the relay may have
+				// restarted", is the one to give. A known ending keeps its reason.
+				if (error instanceof ChromeTabGoneError && error.message.includes("is unknown to this relay"))
 					throw new ToolError(
 						`${JSON.stringify(claimId)} is the name of a tab this session opened with browser.open(), not a Chrome tab id: ${routes.join(" or ")} returns it. ${OPENED_TABS_NOTE}`,
 					);
