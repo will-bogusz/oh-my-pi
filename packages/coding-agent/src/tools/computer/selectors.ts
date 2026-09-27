@@ -90,6 +90,8 @@ export function normalizeQuery(value: unknown): string[] {
 		? entries.map(entry => (typeof entry === "string" ? entry.trim().toLowerCase() : ""))
 		: undefined;
 	if (query === undefined || query.some(literal => !literal.length))
-		throw new ToolError("Invalid observe query: use a string or an array of strings");
+		throw new ToolError(
+			'Invalid observe query: use a non-empty string or an array of non-empty strings. An empty query ("", [] or a blank entry) has nothing to filter by — omit query to read the whole window.',
+		);
 	return query;
 }
