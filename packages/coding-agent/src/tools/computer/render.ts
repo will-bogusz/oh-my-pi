@@ -480,15 +480,30 @@ function disabledNote(reply: ActionReply, facts: Facts): string | undefined {
 	return undefined;
 }
 /**
+ * A write to an element with no writable value: the driver names the
+ * element's own press, which this API spells `click()` — `press()` sends
+ * keys. A collapsed search control's press reveals the field that takes the
+ * value, under a ref the next observation prints.
+ */
+function unsettableNote(reply: ActionReply, facts: Facts): string | undefined {
+	if (strings(reply.data.advertised_actions)?.includes("AXPress") !== true) return undefined;
+	const call =
+		facts.addressed === undefined ? "click() on that ref" : `win.ref(${JSON.stringify(facts.addressed)}).click()`;
+	return reply.data.subrole === "AXSearchField"
+		? `Press it with ${call} (press() sends keys), then win.observe() and setValue on the search field it reveals.`
+		: `Its press is ${call}; press() sends keys.`;
+}
+/**
  * The note a refusal needs beside the driver's own sentence, keyed on its
- * code: the app window drawn in front, the disabled control, or the window
- * holding keyboard focus. Nothing was dispatched, so each names the route
- * that can land.
+ * code: the app window drawn in front, the disabled control, the element with
+ * no writable value, or the window holding keyboard focus. Nothing was
+ * dispatched, so each names the route that can land.
  */
 export function refusalNote(reply: ActionReply, facts: Facts): string | undefined {
 	if (facts.windowId !== undefined && reply.panel !== undefined && reply.panel.id !== facts.windowId)
 		return obscuringPanel(reply, facts);
 	if (reply.code === "element_disabled") return disabledNote(reply, facts);
+	if (reply.code === "value_not_settable") return unsettableNote(reply, facts);
 	if (facts.windowId !== undefined && reply.code !== undefined && FOCUS_HOLDING_REFUSALS[reply.code] === true)
 		return focusHolder(reply, facts);
 	return undefined;

@@ -4108,6 +4108,52 @@ it("says what a disabled control's refusal actually leaves open", async () => {
 	}
 });
 
+it("spells the press a value_not_settable refusal names as a click", async () => {
+	const f = await fixture();
+	/** The driver's refusal for a control with no value to write (fork 77b8264f0). */
+	const unsettable = (subrole: string | undefined, actions: string[]) => ({
+		text: `set_value was not dispatched: AXButton${subrole ? `/${subrole}` : ""} "Search" of window 1 publishes no AXValue, so it has no value to write.`,
+		structuredJson: JSON.stringify({
+			code: "value_not_settable",
+			effect: "not_dispatched",
+			route: "ax",
+			action: "set_value",
+			role: "AXButton",
+			...(subrole ? { subrole } : {}),
+			label: "Search",
+			window_id: 1,
+			pid: 101,
+			value_attribute: "absent",
+			advertised_actions: actions,
+		}),
+		isError: true,
+		errorCode: "value_not_settable",
+		images: [],
+	});
+	try {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const refused = async (subrole: string | undefined, actions: string[]) => {
+			f.state.hook = async name => (name === "set_value" ? unsettable(subrole, actions) : undefined);
+			const error = await f.session.setValue(f.context, f.window, ref, "Dock").catch((caught: unknown) => caught);
+			if (!(error instanceof ToolError)) throw new Error("Expected the value_not_settable refusal");
+			return error.message;
+		};
+		// Activity Monitor's collapsed toolbar search: `press()` would send keys.
+		expect((await refused("AXSearchField", ["AXPress"])).split("\n").at(-1)).toBe(
+			`Press it with win.ref(${JSON.stringify(ref)}).click() (press() sends keys), then win.observe() and setValue on the search field it reveals.`,
+		);
+		expect((await refused(undefined, ["AXPress"])).split("\n").at(-1)).toBe(
+			`Its press is win.ref(${JSON.stringify(ref)}).click(); press() sends keys.`,
+		);
+		// No press to spell: the driver's sentence is the whole answer.
+		const inert = await refused(undefined, []);
+		expect(inert).not.toContain(".click()");
+		expect(inert).toContain("set_value was not dispatched");
+	} finally {
+		await f.close();
+	}
+});
+
 it("offers a disabled control the window it can acquire, and the rung a not-key window needs", async () => {
 	const f = await fixture();
 	// T11 `native-act-notes/omp-2`: the panel named in front of the search
