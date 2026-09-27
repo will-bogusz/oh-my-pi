@@ -221,7 +221,7 @@ export interface EvalToolDescriptionOptions {
 	/** Point blocked callers at the `wait` tool; false when the session lacks it (subagents). Default: true. */
 	waitTool?: boolean;
 	/** Enabled preludes; each becomes an `xd://eval/<name>` doc topic. */
-	preludes?: readonly Pick<EvalPreludeDefinition, "name" | "documentation">[];
+	preludes?: readonly Pick<EvalPreludeDefinition, "name" | "documentation" | "documentationDelivery">[];
 	/**
 	 * Inline every doc topic instead of linking `xd://eval/<topic>`. Required
 	 * when the session cannot `read` (the only transport for topic docs).
@@ -268,10 +268,11 @@ export function getEvalDocTopics(options: EvalToolDescriptionOptions = {}): Reco
 
 /** Model-facing eval description: core kernel surface plus one pointer per doc topic. */
 export function getEvalToolDescription(options: EvalToolDescriptionOptions = {}): string {
-	const preludes: { name: string; summary: string }[] = [];
+	const preludes: { name: string; summary: string; delivery?: string }[] = [];
 	for (const prelude of options.preludes ?? []) {
 		const doc = prelude.documentation.trim();
-		if (doc) preludes.push({ name: prelude.name, summary: doc.split("\n", 1)[0]! });
+		if (doc)
+			preludes.push({ name: prelude.name, summary: doc.split("\n", 1)[0]!, delivery: prelude.documentationDelivery });
 	}
 	return prompt.render(evalDescription, {
 		...evalTemplateContext(options),

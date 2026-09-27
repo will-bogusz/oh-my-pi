@@ -367,9 +367,8 @@ function fixturePrelude(session: ToolSession, backend: FakeBackend | (() => Fake
 	);
 }
 
-function javascriptFixture(createBackend?: () => FakeBackend) {
+function javascriptFixture(createBackend?: () => FakeBackend, session: ToolSession = toolSession()) {
 	const backend = new FakeBackend();
-	const session = toolSession();
 	const prelude = fixturePrelude(session, createBackend ?? backend);
 	const displays: unknown[] = [];
 	const presented: unknown[] = [];
@@ -1409,6 +1408,35 @@ describe("computer preludes through the session", () => {
 			expect(displays.join("\n")).not.toContain("el handle:");
 		} finally {
 			await runInContext("computer.close()", realm);
+		}
+	});
+
+	it("delivers the guide with the session's first acquired window, once", async () => {
+		const guide = prompt.render(computerDescription as string, { linux: process.platform === "linux" });
+		const copies = (text: string) => text.split(guide).length - 1;
+		const { realm, displays } = javascriptFixture();
+		try {
+			// Neither a listing nor an acquisition that resolves no window hands over a handle.
+			await runInContext("computer.windows()", realm);
+			await expect(runInContext('computer.window("7", {screenshot:false})', realm)).rejects.toThrow();
+			expect(copies(displays.join("\n"))).toBe(0);
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			const first = displays.join("\n");
+			expect(copies(first)).toBe(1);
+			expect(first.indexOf(guide)).toBeLessThan(first.indexOf("Code: Editor (window 42"));
+			displays.length = 0;
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			expect(copies(displays.join("\n"))).toBe(0);
+		} finally {
+			await runInContext("computer.close()", realm);
+		}
+		// A session without `read` carries every topic inline in the eval description already.
+		const inline = javascriptFixture(undefined, { ...toolSession(), isToolActive: name => name !== "read" });
+		try {
+			await runInContext('computer.window("42", {screenshot:false})', inline.realm);
+			expect(copies(inline.displays.join("\n"))).toBe(0);
+		} finally {
+			await runInContext("computer.close()", inline.realm);
 		}
 	});
 

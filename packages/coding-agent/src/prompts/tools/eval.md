@@ -25,7 +25,7 @@ More globals; `read` the linked docs before first use:
 - `agent`, `workpool`: background subagents, DAG waves → `xd://eval/agents`
 {{/if}}
 {{#each preludes}}
-- `{{name}}`: {{summary}} → `xd://eval/{{name}}`
+- `{{name}}`: {{summary}} → `xd://eval/{{name}}`{{#if delivery}}; {{delivery}}{{/if}}
 {{/each}}
 </namespaces>
 {{/if}}

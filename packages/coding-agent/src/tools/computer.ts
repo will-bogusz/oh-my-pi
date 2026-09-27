@@ -197,6 +197,7 @@ export function createComputerPrelude(
 	return {
 		name: "computer",
 		documentation: assets.documentation,
+		documentationDelivery: "the same guide prints once, ahead of your first `computer.window()` reply: no read needed",
 		javascript: assets.javascript,
 		python: assets.python,
 		exports: ["computer"],
@@ -318,8 +319,8 @@ class ComputerLifetime {
 		return this.#closed;
 	}
 
-	/** True once per session, for the first handle of its kind. */
-	teach(handle: "window" | "element"): boolean {
+	/** True once per session, for the first handle of its kind or the first delivery of the guide. */
+	teach(handle: "window" | "element" | "guide"): boolean {
 		if (this.#taught.has(handle)) return false;
 		this.#taught.add(handle);
 		return true;
@@ -587,7 +588,16 @@ async function runComputer(
 		elide: elideObservationTree,
 	});
 	const content: AgentToolResult<ComputerPreludeDetails>["content"] = [];
-	if (cappedText) content.push({ type: "text", text: cappedText });
+	// The guide rides the session's first acquisition, the call every native
+	// task starts with, instead of costing a `read` step before it; it sits
+	// outside the byte cap so it never elides the tree. A session that cannot
+	// `read` already has it inline in the eval description.
+	const guide =
+		acquired !== undefined && session.isToolActive?.("read") !== false && lifetime.teach("guide")
+			? `Computer guide (once per session; also at xd://eval/computer):\n${computerAssets().documentation}`
+			: undefined;
+	const replyText = guide === undefined ? cappedText : cappedText ? `${guide}\n\n${cappedText}` : guide;
+	if (replyText) content.push({ type: "text", text: replyText });
 	for (const image of run.displays) {
 		if (image.type === "image") content.push({ ...image, detail: "original" });
 	}
