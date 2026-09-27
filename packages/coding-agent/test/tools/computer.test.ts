@@ -1436,6 +1436,12 @@ describe("computer preludes through the session", () => {
 			conversation = "second";
 			await runInContext('computer.window("42", {screenshot:false})', realm);
 			expect(copies(displays.join("\n"))).toBe(1);
+			// Switching back finds a transcript that already holds it, and the handle surface.
+			displays.length = 0;
+			conversation = "first";
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			expect(copies(displays.join("\n"))).toBe(0);
+			expect(displays.join("\n")).not.toContain("win handle:");
 		} finally {
 			await runInContext("computer.close()", realm);
 		}
@@ -1461,7 +1467,7 @@ describe("computer preludes through the session", () => {
 			const composed = prelude.settleCell!(cell, { failed: false }) ?? "";
 			expect(copies(composed)).toBe(1);
 			expect(composed.indexOf(guide)).toBeLessThan(composed.indexOf("Code: Editor (window 42"));
-			expect(Buffer.byteLength(composed, "utf-8")).toBeLessThanOrEqual(DEFAULT_MAX_BYTES + 256);
+			expect(Buffer.byteLength(composed, "utf-8")).toBeLessThanOrEqual(DEFAULT_MAX_BYTES);
 		} finally {
 			await prelude.invoke({ action: "close" }, { session, toolCallId: "close" });
 		}

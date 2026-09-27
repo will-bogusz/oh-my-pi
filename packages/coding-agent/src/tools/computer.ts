@@ -304,9 +304,8 @@ class ComputerLifetime {
 	#releasing?: Promise<void>;
 	#closing?: Promise<void>;
 	#releaseFailure?: Error;
-	readonly #taught = new Set<string>();
-	/** The conversation `#taught` was taught in; the prelude outlives `/new` and session switches. */
-	#taughtIn: string | null | undefined;
+	/** What each conversation was taught, by session id; the prelude outlives `/new` and session switches. */
+	readonly #taught = new Map<string | null, Set<string>>();
 	/** Capture files this session's runs wrote; closing the session removes these and nothing else. */
 	readonly #captures = new Set<string>();
 	/** The reply of each eval cell running now, by the signal its calls carry. */
@@ -325,17 +324,15 @@ class ComputerLifetime {
 	/**
 	 * True once per conversation, for the first handle of its kind or the first
 	 * delivery of the guide. The prelude (and this lifetime) is kept across
-	 * `/new` and session switches, whose transcript never saw what an earlier
-	 * conversation was taught.
+	 * `/new` and session switches: a new conversation's transcript never saw
+	 * what another was taught, and one switched back to still holds it.
 	 */
 	teach(handle: "window" | "element" | "guide"): boolean {
 		const conversation = this.#session.getSessionId?.() ?? null;
-		if (conversation !== this.#taughtIn) {
-			this.#taught.clear();
-			this.#taughtIn = conversation;
-		}
-		if (this.#taught.has(handle)) return false;
-		this.#taught.add(handle);
+		let taught = this.#taught.get(conversation);
+		if (!taught) this.#taught.set(conversation, (taught = new Set()));
+		if (taught.has(handle)) return false;
+		taught.add(handle);
 		return true;
 	}
 
