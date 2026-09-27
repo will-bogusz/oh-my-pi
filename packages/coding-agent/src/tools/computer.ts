@@ -9,7 +9,7 @@ import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import { once } from "@oh-my-pi/pi-utils";
 import { callSessionTool } from "../eval/js/tool-bridge";
 import type { EvalPreludeContext, EvalPreludeDefinition, EvalPreludeStatus } from "../eval/preludes";
-import { enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
+import { DEFAULT_MAX_BYTES, enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import {
 	COMPUTER_HANDLE_VERBS,
 	type ComputerCallStep,
@@ -197,7 +197,8 @@ export function createComputerPrelude(
 	return {
 		name: "computer",
 		documentation: assets.documentation,
-		documentationDelivery: "the same guide prints once, ahead of your first `computer.window()` reply: no read needed",
+		documentationDelivery:
+			"arrives unasked, once, ahead of this conversation's first successful `computer.window(selector)` reply; read it only if that reply has left your context",
 		javascript: assets.javascript,
 		python: assets.python,
 		exports: ["computer"],
@@ -304,6 +305,8 @@ class ComputerLifetime {
 	#closing?: Promise<void>;
 	#releaseFailure?: Error;
 	readonly #taught = new Set<string>();
+	/** The conversation `#taught` was taught in; the prelude outlives `/new` and session switches. */
+	#taughtIn: string | null | undefined;
 	/** Capture files this session's runs wrote; closing the session removes these and nothing else. */
 	readonly #captures = new Set<string>();
 	/** The reply of each eval cell running now, by the signal its calls carry. */
@@ -319,8 +322,18 @@ class ComputerLifetime {
 		return this.#closed;
 	}
 
-	/** True once per session, for the first handle of its kind or the first delivery of the guide. */
+	/**
+	 * True once per conversation, for the first handle of its kind or the first
+	 * delivery of the guide. The prelude (and this lifetime) is kept across
+	 * `/new` and session switches, whose transcript never saw what an earlier
+	 * conversation was taught.
+	 */
 	teach(handle: "window" | "element" | "guide"): boolean {
+		const conversation = this.#session.getSessionId?.() ?? null;
+		if (conversation !== this.#taughtIn) {
+			this.#taught.clear();
+			this.#taughtIn = conversation;
+		}
 		if (this.#taught.has(handle)) return false;
 		this.#taught.add(handle);
 		return true;
@@ -583,20 +596,22 @@ async function runComputer(
 	}
 	if (params.action === "call" && params.chain.some(step => step.method === "ref") && lifetime.teach("element"))
 		text = text ? `${text}\n${elementSignatures()}` : elementSignatures();
+	// The guide rides the conversation's first acquisition, the call every
+	// native task starts with, instead of costing a `read` step before it. It
+	// shares the reply's byte budget, so the tree is elided structurally to
+	// fit beside it rather than cut blindly by the output spill. A session
+	// that cannot `read` already has it inline in the eval description.
+	const guide =
+		acquired !== undefined && session.isToolActive?.("read") !== false && lifetime.teach("guide")
+			? `Computer guide (once per conversation; also at xd://eval/computer):\n${computerAssets().documentation}\n\n`
+			: "";
 	const cappedText = await enforceInlineByteCap(text, {
+		maxBytes: DEFAULT_MAX_BYTES - Buffer.byteLength(guide, "utf-8"),
 		saveArtifact: full => saveComputerOutputArtifact(session, full),
 		elide: elideObservationTree,
 	});
 	const content: AgentToolResult<ComputerPreludeDetails>["content"] = [];
-	// The guide rides the session's first acquisition, the call every native
-	// task starts with, instead of costing a `read` step before it; it sits
-	// outside the byte cap so it never elides the tree. A session that cannot
-	// `read` already has it inline in the eval description.
-	const guide =
-		acquired !== undefined && session.isToolActive?.("read") !== false && lifetime.teach("guide")
-			? `Computer guide (once per session; also at xd://eval/computer):\n${computerAssets().documentation}`
-			: undefined;
-	const replyText = guide === undefined ? cappedText : cappedText ? `${guide}\n\n${cappedText}` : guide;
+	const replyText = cappedText ? `${guide}${cappedText}` : guide.trimEnd();
 	if (replyText) content.push({ type: "text", text: replyText });
 	for (const image of run.displays) {
 		if (image.type === "image") content.push({ ...image, detail: "original" });

@@ -277,6 +277,7 @@ export function getEvalToolDescription(options: EvalToolDescriptionOptions = {})
 	return prompt.render(evalDescription, {
 		...evalTemplateContext(options),
 		preludes,
+		deliveredDocs: preludes.some(prelude => prelude.delivery !== undefined),
 		inlineTopics: options.inlineTopics ? Object.values(getEvalDocTopics(options)).join("\n\n") : undefined,
 	});
 }

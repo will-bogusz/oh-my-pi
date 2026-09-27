@@ -23,6 +23,7 @@ import {
 import computerDeclarations from "../../src/tools/computer/declarations.d.ts" with { type: "text" };
 import { ComputerSupervisor } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
 import { cfgComputerEnabled } from "@oh-my-pi/pi-coding-agent/tools/settings";
+import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type {
 	ComputerActionResult,
@@ -1411,10 +1412,11 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
-	it("delivers the guide with the session's first acquired window, once", async () => {
+	it("delivers the guide with each conversation's first acquired window, once", async () => {
 		const guide = prompt.render(computerDescription as string, { linux: process.platform === "linux" });
 		const copies = (text: string) => text.split(guide).length - 1;
-		const { realm, displays } = javascriptFixture();
+		let conversation = "first";
+		const { realm, displays } = javascriptFixture(undefined, { ...toolSession(), getSessionId: () => conversation });
 		try {
 			// Neither a listing nor an acquisition that resolves no window hands over a handle.
 			await runInContext("computer.windows()", realm);
@@ -1426,7 +1428,14 @@ describe("computer preludes through the session", () => {
 			expect(first.indexOf(guide)).toBeLessThan(first.indexOf("Code: Editor (window 42"));
 			displays.length = 0;
 			await runInContext('computer.window("42", {screenshot:false})', realm);
+			// Releasing the driver ends no conversation.
+			await runInContext("computer.release()", realm);
+			await runInContext('computer.window("42", {screenshot:false})', realm);
 			expect(copies(displays.join("\n"))).toBe(0);
+			// `/new` or a session switch keeps the prelude; the new transcript never saw the guide.
+			conversation = "second";
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			expect(copies(displays.join("\n"))).toBe(1);
 		} finally {
 			await runInContext("computer.close()", realm);
 		}
@@ -1437,6 +1446,24 @@ describe("computer preludes through the session", () => {
 			expect(copies(inline.displays.join("\n"))).toBe(0);
 		} finally {
 			await runInContext("computer.close()", inline.realm);
+		}
+		// Every real eval cell is composed: the guide leads the cell's reply, and
+		// a tree near the output budget is elided to fit beside it, never cut past it.
+		const session = toolSession();
+		const backend = new FakeBackend();
+		backend.rows = 2300;
+		const prelude = fixturePrelude(session, backend);
+		const acquire = { action: "call", chain: [{ method: "acquireWindow", args: ["42", { screenshot: false }] }] };
+		try {
+			const cell = { signal: new AbortController().signal };
+			prelude.beginCell!(cell);
+			await prelude.invoke(acquire, { session, toolCallId: "composed", signal: cell.signal, cell });
+			const composed = prelude.settleCell!(cell, { failed: false }) ?? "";
+			expect(copies(composed)).toBe(1);
+			expect(composed.indexOf(guide)).toBeLessThan(composed.indexOf("Code: Editor (window 42"));
+			expect(Buffer.byteLength(composed, "utf-8")).toBeLessThanOrEqual(DEFAULT_MAX_BYTES + 256);
+		} finally {
+			await prelude.invoke({ action: "close" }, { session, toolCallId: "close" });
 		}
 	});
 
