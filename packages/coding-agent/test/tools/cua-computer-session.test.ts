@@ -2729,17 +2729,19 @@ it("projects a query over the walked tree: a string is literal, an array is any-
 	}
 });
 
-it("refuses a query that is neither a string nor a list of strings", async () => {
+it("refuses an empty, blank or non-string query", async () => {
 	const f = await fixture();
 	// `[]` used to mean "no projection" and a number threw a raw TypeError out
 	// of `String.prototype.split`; both are a caller saying something it did
-	// not mean. The reply names the shape that works and, since `""` is a
-	// string, names the empty query itself and the way to read everything.
+	// not mean. `""` is a string, so the reply for it names it and the way to
+	// read the whole window.
 	try {
-		for (const query of [[], ["ok", 3], 7, "", ["Save", "  "]])
+		for (const query of [[], ["ok", 3], 7, ["Save", "  "]])
 			await expect(
 				f.session.observe(f.context, f.window, { query } as unknown as ObserveOptions),
-			).rejects.toThrow(/^Invalid observe query: .*non-empty string.*"".*omit query/);
+			).rejects.toThrow("Invalid observe query");
+		const empty = f.session.observe(f.context, f.window, { query: "" });
+		await expect(empty).rejects.toThrow('omit query (not "")');
 	} finally {
 		await f.close();
 	}
