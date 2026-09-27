@@ -984,3 +984,58 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	},
 	60_000,
 );
+
+const RERENDER_PAGE = `<!doctype html><title>Rows</title><ul id="rows"></ul>
+<button onclick="names = names.map(name => name + ' v2'); render()">Rename all</button>
+<script>
+let names = ["alpha", "beta"];
+function render() {
+	document.getElementById("rows").replaceChildren(...names.map(name => {
+		const row = document.createElement("li");
+		const edit = document.createElement("button");
+		edit.textContent = "Edit " + name;
+		edit.onclick = () => { document.title = "edited " + name; };
+		row.append(edit);
+		return row;
+	}));
+}
+render();
+</script>`;
+
+// A click that re-renders a list leaves every ref inside it pointing at a node
+// the page dropped. The refusal stays a refusal, and it carries the page as it
+// is now, so the next cell can act without first spending one on observe().
+it.skipIf(!CHROMIUM_AVAILABLE)(
+	"refuses a stale ref with the page as read after the refusal, whose refs act",
+	async () => {
+		const server = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () => new Response(RERENDER_PAGE, { headers: { "content-type": "text/html" } }),
+		});
+		try {
+			await withWorker([], async ({ run, runError, goto }) => {
+				await goto(`http://127.0.0.1:${server.port}/`);
+				const refs = await run<Record<string, string>>(
+					`const observation = await tab.observe();
+					 return Object.fromEntries(observation.elements.map(e => [e.name, e.ref]));`,
+				);
+				const refused = await runError(
+					`await (await tab.ref(${JSON.stringify(refs["Rename all"])})).click();
+					 await (await tab.ref(${JSON.stringify(refs["Edit alpha"])})).click();`,
+				);
+				expect(refused).toContain(`${refs["Edit alpha"]} is stale`);
+				expect(await run<string>("return await tab.title();")).toBe("Rows");
+				const fresh = /\b(e\d+) button "Edit alpha v2"/.exec(refused)?.[1];
+				expect(fresh).toBeDefined();
+				expect(fresh).not.toBe(refs["Edit alpha"]);
+				expect(await run<string>(`await (await tab.ref("${fresh}")).click(); return await tab.title();`)).toBe(
+					"edited alpha v2",
+				);
+			});
+		} finally {
+			server.stop(true);
+		}
+	},
+	60_000,
+);
