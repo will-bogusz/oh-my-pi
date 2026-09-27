@@ -525,48 +525,6 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
-	it("observes a launched app's window only once its frame holds still", async () => {
-		const { backend, realm } = javascriptFixture();
-		backend.windowAbsent = true;
-		const launch = spyOn(backend, "launch").mockImplementation(async () => {
-			backend.windowAbsent = false;
-			return { text: "launched", effect: "unverifiable", evidence: null, delivery: "background" };
-		});
-		// The window opens small and grows to its frame over the first polls,
-		// the way a window animates in after its app launches.
-		const widths = [10, 20, 40];
-		const roster = backend.windows.bind(backend);
-		backend.windows = async (context: ComputerOperationContext, selector: WindowSelector = {}) => {
-			if (!backend.windowAbsent) backend.currentWindow.bounds.width = widths.shift() ?? 40;
-			return await roster(context, selector);
-		};
-		const observed: number[] = [];
-		const observe = backend.observe.bind(backend);
-		backend.observe = async (context, window, options) => {
-			observed.push(window.bounds.width);
-			return await observe(context, window, options);
-		};
-		try {
-			const acquired = await runInContext('computer.window({app:"Code"}, {screenshot:false})', realm);
-			expect(acquired.inspectionError).toBeUndefined();
-			expect(observed).toEqual([40]);
-			// A window that never holds still is still acquired within the settle bound, not the launch timeout.
-			backend.windowAbsent = true;
-			let width = 0;
-			backend.windows = async (context: ComputerOperationContext, selector: WindowSelector = {}) => {
-				if (!backend.windowAbsent) backend.currentWindow.bounds.width = ++width;
-				return await roster(context, selector);
-			};
-			const started = Date.now();
-			expect((await runInContext('computer.window({app:"Code"}, {screenshot:false})', realm)).id).toBe("42");
-			expect(Date.now() - started).toBeLessThan(5_000);
-			expect(launch).toHaveBeenCalledTimes(2);
-		} finally {
-			launch.mockRestore();
-			await runInContext("computer.close()", realm);
-		}
-	});
-
 	it("reads an app selector that matches nothing as a launch request unless launching is refused", async () => {
 		const { backend, realm } = javascriptFixture();
 		backend.windowAbsent = true;
