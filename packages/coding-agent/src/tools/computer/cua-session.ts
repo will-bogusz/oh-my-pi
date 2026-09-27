@@ -682,6 +682,17 @@ function delivery(options: ActionOptions): Wire {
 function foreground(options: { delivery?: "background" | "foreground" }): void {
 	if (options.delivery !== "foreground") throw new ToolError("This desktop operation requires delivery: 'foreground'");
 }
+/**
+ * The calls whose `{ delivery: "foreground" }` form the driver does not hold
+ * to its background element-ancestry check, by the verb the caller types.
+ */
+const FOREGROUND_UNGATED: Record<string, string> = {
+	click: "click",
+	type_text: "type",
+	press_key: "press",
+	hotkey: "press",
+	scroll: "scroll",
+};
 const DETECT_WINDOW_CHANGE_TOOLS: Record<string, true> = {
 	click: true,
 	drag: true,
@@ -2186,24 +2197,40 @@ export class CuaComputerSession implements ComputerBackend {
 		};
 	}
 	/**
-	 * A ref whose element the platform can no longer reach. The refusal is
-	 * about one row and says nothing about the window, yet throwing it
+	 * A ref the platform refused as dead or as unprovably placed. The refusal
+	 * is about one row and says nothing about the window, yet throwing it
 	 * discarded the whole tree: every bench refusal of this shape was
 	 * followed by a bare `observe()` whose only job was to recover what the
 	 * throw dropped. So the window is read once — the caller has to re-read
 	 * it either way — and the reply is the ordinary non-throwing shape for
 	 * "this did not land": nothing dispatched, the current tree in hand, and a
-	 * census of what the fresh tree holds where the dead row sat. Nothing is
-	 * re-addressed: the caller names the row it means.
+	 * census of what the fresh tree holds where the refused row sat. Nothing
+	 * is re-addressed or retried: the caller names the row and the route.
+	 *
+	 * The two codes are different facts. `element_no_longer_exists` is a dead
+	 * reference. `element_outside_target_window` with a re-read as its advice
+	 * is the driver failing to prove, for this dispatch, that the element
+	 * descends from the window: it says nothing about the element being gone,
+	 * and a fresh ref re-checks it. That check can keep failing for a row
+	 * that is still there (the VM probe refused a desktop icon 5 of 5 times,
+	 * re-read at 0-3 s, while foreground delivery dispatched), so whenever
+	 * the fresh tree has rows the reply names, for a repeat of the same
+	 * refusal, what the check does not gate: the same call with
+	 * `{ delivery: "foreground" }` where the driver gates that call only in
+	 * the background, and, for a click or an AX action, the document or
+	 * folder hand-off if opening one was the aim. A row of the same role and
+	 * label in the same place is named as the row in that position now, never
+	 * as the refused element itself.
 	 *
 	 * That walk is this session's, not the caller's, so it retires only the
-	 * dead ref. Every other ref stays bound to the exact element its
+	 * refused ref. Every other ref stays bound to the exact element its
 	 * observation minted it for: one whose element died too refuses the same
 	 * way, and one whose element lives still reaches exactly that element.
 	 *
 	 * Only where a re-read can answer, which the reply says (`deadElement`).
 	 */
 	async #deadElement(
+		name: string,
 		error: ToolError,
 		args: Wire,
 		target: ComputerTarget | undefined,
@@ -2236,28 +2263,60 @@ export class CuaComputerSession implements ComputerBackend {
 		const under = identity?.path.at(-1);
 		const fresh = rows.flatMap(row => {
 			const minted = this.#elements.get(row.element.ref)?.identity;
-			return minted === undefined ? [] : [minted];
+			return minted === undefined ? [] : [{ ref: row.element.ref, identity: minted }];
 		});
 		const place = identity === undefined ? undefined : placeKey(identity);
-		const placed = place === undefined ? 0 : fresh.filter(row => placeKey(row) === place).length;
+		const placed = place === undefined ? [] : fresh.filter(row => placeKey(row.identity) === place);
 		const sameName =
 			identity === undefined
 				? 0
-				: fresh.filter(row => row.role === identity.role && row.label === identity.label).length;
+				: fresh.filter(row => row.identity.role === identity.role && row.identity.label === identity.label).length;
 		const census =
 			identity === undefined
 				? "no identity for it was recorded"
 				: sameName === 0
 					? "no row of the fresh tree carries its role and label"
 					: `the fresh tree has ${sameName} row(s) with its role and label, ${
-							placed ? `${placed} of them` : "none"
+							placed.length ? `${placed.length} of them` : "none"
 						} in the same position${under ? ` under ${under}` : ""}`;
+		const tree = rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown.";
 		const readdress = rows.length
 			? `${target} is retired; the tree below carries new refs for this window — address the row you mean by its new ref. Your other refs keep the exact elements they were minted for until your next observe.`
 			: `${target} is retired and this walk minted no refs to address — observe the window again (win.observe()) once it has rows.`;
-		const text = `${reply.code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${
-			rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown."
-		}`;
+		let text: string;
+		if (reply.code !== "element_outside_target_window") {
+			text = `${reply.code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${tree}`;
+		} else {
+			let routes = "";
+			if (rows.length) {
+				// The driver holds only these calls' background form to the check
+				// (cua-driver 5b3a6cf96: click.rs element path, type_text.rs,
+				// press_key.rs, hotkey.rs). Its element double-click is held in
+				// both modes, a middle click never fronts the window, and perform
+				// and setValue take no delivery option here.
+				const verb =
+					args.delivery_mode === "foreground" ||
+					(name === "click" && (args.action !== undefined || (args.count ?? 1) !== 1 || args.button === "middle"))
+						? undefined
+						: FOREGROUND_UNGATED[name];
+				const offered = [
+					verb === undefined
+						? undefined
+						: `the same ${verb} with { delivery: "foreground" } is not held to this check (it requests foreground delivery and may take focus)`,
+					name === "click"
+						? `if opening a document or folder that row stands for is the aim, ${reopenRoute(recover.window.app)}`
+						: undefined,
+				]
+					.filter(route => route !== undefined)
+					.join("; ");
+				routes = ` A background action on ${
+					placed.length === 1 ? `${placed[0]!.ref}, the row in that position now,` : "the row you choose"
+				} runs the check again. If you already re-addressed it and got this refusal again, do not repeat that alone: ${
+					offered || "this call has no route past the check here; report the limitation"
+				}.`;
+			}
+			text = `${reply.code}: the driver could not prove ${named} belongs to window ${recover.window.id}, and nothing was dispatched; that is not a report that the element is gone — ${census}. ${readdress}${routes}\n${tree}`;
+		}
 		return {
 			text,
 			effect: "not_dispatched",
@@ -2283,7 +2342,7 @@ export class CuaComputerSession implements ComputerBackend {
 		} catch (error) {
 			// An aborted call is not a ToolError and keeps its own identity.
 			if (!(error instanceof ToolError)) throw error;
-			const gone = await this.#deadElement(error, args, target, recover);
+			const gone = await this.#deadElement(name, error, args, target, recover);
 			if (gone !== undefined) return gone;
 			const route = menuBarRoute(element);
 			if (route === undefined) throw error;
