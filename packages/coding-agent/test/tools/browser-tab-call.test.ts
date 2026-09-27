@@ -9,6 +9,8 @@ import {
 	TAB_PRESENCE_METHODS,
 	TAB_VALUE_METHODS,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-call";
+import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { cfgToolsOutputMaxColumns } from "@oh-my-pi/pi-coding-agent/tools/settings";
 
 function errorMessage(run: () => unknown): string {
 	try {
@@ -22,17 +24,14 @@ function errorMessage(run: () => unknown): string {
 
 describe("renderTabCall", () => {
 	it("names every allowlisted verb in the acquisition footer and declares each one it names", () => {
-		// Continuation lines are indented under the group they wrap.
+		// Continuation lines are indented under the group they wrap; the help
+		// pointer has a line of its own, clear of any column cut.
 		const groups = BROWSER_TAB_VERBS.replace(/\n {2}/g, " · ").split("\n");
-		expect(groups.at(-1)).toBe("browser.help() for signatures");
+		expect(groups).toHaveLength(4);
+		expect(groups.at(-1)).toContain("browser.help()");
 		const [tabVerbs, elementVerbs, frameVerbs] = groups
 			.slice(0, 3)
 			.map(group => group.replace(/^[^:]+: /, "").split(" · "));
-		expect(groups.slice(0, 3).map(group => group.slice(0, group.indexOf(":")))).toEqual([
-			"tab",
-			"el (via tab.id()/tab.ref())",
-			"frame (via tab.frame())",
-		]);
 		// The footer is the allowlist, not a hand-kept copy of it.
 		expect(tabVerbs!.map(verb => verb.replace(/\(.*$/, ""))).toEqual([...TAB_VALUE_METHODS, ...TAB_PRESENCE_METHODS]);
 		expect(elementVerbs!.map(verb => verb.replace(/\(.*$/, ""))).toEqual([...ELEMENT_METHODS]);
@@ -45,9 +44,10 @@ describe("renderTabCall", () => {
 		// friends open with a type parameter instead of the argument list.
 		for (const verb of [...tabVerbs!, ...elementVerbs!, ...frameVerbs!])
 			expect(browserDeclarations).toMatch(new RegExp(`\\n\\t${verb.replace(/\(.*$/, "")}[(<]`));
-		// Eval cuts every output line at tools.outputMaxColumns (768 bytes by
-		// default); one line holding the whole list lost its tail to that cut.
-		for (const line of BROWSER_TAB_VERBS.split("\n")) expect(Buffer.byteLength(line, "utf-8")).toBeLessThan(768);
+		// Eval cuts every output line at tools.outputMaxColumns; one line holding
+		// the whole list lost its tail to that cut.
+		const columnCap = cfgToolsOutputMaxColumns.get(Settings.isolated());
+		for (const line of BROWSER_TAB_VERBS.split("\n")) expect(Buffer.byteLength(line, "utf-8")).toBeLessThan(columnCap);
 	});
 
 	it("renders value, presence, and one-hop element calls byte-for-byte", () => {

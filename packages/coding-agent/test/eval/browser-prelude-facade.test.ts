@@ -585,6 +585,47 @@ print(tab.initialObservation["snapshot"])
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
+describe("browser tab verbs per conversation", () => {
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"prints them with a conversation's first acquisition, and again after a compaction or in another conversation",
+		async () => {
+			let sessionId = "conversation-a";
+			const branch: Array<{ type: string; id: string }> = [];
+			const session: ToolSession = {
+				...makeSession(),
+				getSessionId: () => sessionId,
+				sessionManager: { getBranch: () => branch } as unknown as ToolSession["sessionManager"],
+			};
+			const prelude = createBrowserPrelude(session);
+			const names = [`verbs-a-${crypto.randomUUID()}`, `verbs-b-${crypto.randomUUID()}`];
+			const taught = async (name: string) => {
+				const result = await prelude.invoke(
+					{ action: "open", name, url: "data:text/html,<title>Verbs</title>" },
+					{ session, toolCallId: `verbs-${crypto.randomUUID()}` },
+				);
+				return result.content.some(part => part.type === "text" && part.text.includes(BROWSER_TAB_VERBS));
+			};
+			try {
+				expect(await taught(names[0]!)).toBe(true);
+				expect(await taught(names[0]!)).toBe(false);
+				// A compaction replaced the context that carried them.
+				branch.push({ type: "compaction", id: "compaction-1" });
+				expect(await taught(names[0]!)).toBe(true);
+				expect(await taught(names[0]!)).toBe(false);
+				// `/new` or a session switch starts another conversation.
+				sessionId = "conversation-b";
+				expect(await taught(names[1]!)).toBe(true);
+				expect(await taught(names[1]!)).toBe(false);
+			} finally {
+				await prelude
+					.invoke({ action: "close", all: true }, { session, toolCallId: `verbs-close-${crypto.randomUUID()}` })
+					.catch(() => undefined);
+			}
+		},
+		30_000,
+	);
+});
+
 describe("browser facade Chromium helper E2E", () => {
 	it.skipIf(!CHROMIUM_AVAILABLE)(
 		"drives a real page through direct helpers, handles, waits, and function and code runs",

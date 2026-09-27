@@ -111,18 +111,19 @@ export type { Observation, ObservationEntry } from "./browser/tab-protocol";
 const DEFAULT_TAB_NAME = "main";
 const BROWSER_RUN_SCOPE: readonly string[] = ["tab", "page", "browser", "wait", "assert"];
 
-/** Conversations, by relay actor (session and agent), whose transcript already holds the tab verbs. */
-const verbsTaught = new Set<string>();
-
 /**
  * The verb list for a conversation's first acquisition, then nothing: each
- * later open or claim would repeat the same ~1.8 KB into a transcript that
- * already holds it. The actor key changes with `/new` and session switches.
+ * later open or claim would repeat the same ~1.8 KB into a context that
+ * already holds it. `taught` lives with the prelude; the key is the relay
+ * actor (session and agent, which `/new`, a session switch and a subagent
+ * change) and the latest compaction on the branch, since a compaction
+ * replaces the context that carried the list.
  */
-function tabVerbsOnce(session: ToolSession): string | undefined {
-	const actor = browserActorId(session);
-	if (verbsTaught.has(actor)) return undefined;
-	verbsTaught.add(actor);
+function tabVerbsOnce(taught: Set<string>, session: ToolSession): string | undefined {
+	const compaction = session.sessionManager?.getBranch().findLast(entry => entry.type === "compaction")?.id;
+	const key = JSON.stringify([browserActorId(session), compaction ?? null]);
+	if (taught.has(key)) return undefined;
+	taught.add(key);
 	return BROWSER_TAB_VERBS;
 }
 
@@ -278,8 +279,9 @@ export function createBrowserPrelude(session: ToolSession): EvalPreludeDefinitio
 	// Eval-first-use boundary: source/declaration assets stay unloaded until a
 	// JavaScript or Python kernel actually asks for its enabled preludes.
 	const { createBrowserPreludeDefinition } = require("./browser/prelude-definition");
+	const taught = new Set<string>();
 	return createBrowserPreludeDefinition(session, {
-		invoke: (parameters: unknown, context: EvalPreludeContext) => invokeBrowser(session, parameters, context),
+		invoke: (parameters: unknown, context: EvalPreludeContext) => invokeBrowser(parameters, context, taught),
 		status: describeBrowserCall,
 	});
 }
@@ -431,11 +433,12 @@ function checkPreludeOptions(params: BrowserParams): void {
 }
 
 async function invokeBrowser(
-	session: ToolSession,
 	parameters: unknown,
 	context: EvalPreludeContext,
+	/** Conversations whose context holds the tab verbs; see {@link tabVerbsOnce}. */
+	taught: Set<string>,
 ): Promise<AgentToolResult<unknown>> {
-	session = context.session;
+	const session = context.session;
 	const parsed = browserSchema(parameters);
 	if (parsed instanceof type.errors) {
 		throw new ToolError(`browser received invalid arguments: ${parsed.summary}`);
@@ -631,7 +634,7 @@ async function invokeBrowser(
 									`Claimed Chrome tab ${chromeTabName(handle.lease.tab)} with an open dialog. Answer it with tab.handleDialog({ accept, id: tab.initialDialog.id, text? }) before page interaction.`,
 									`tab.target.id: ${JSON.stringify(handle.lease.tab.id)}`,
 									JSON.stringify(chromeDialogState(handle.lease.dialog)),
-									tabVerbsOnce(session),
+									tabVerbsOnce(taught, session),
 								]
 									.filter(line => line !== undefined)
 									.join("\n"),
@@ -670,7 +673,7 @@ async function invokeBrowser(
 				// Once per conversation, with its first handle: the verbs are what
 				// the acquisition hands over, and a later observe() of the same tab
 				// repeats the tree without repeating them.
-				const verbs = tabVerbsOnce(session);
+				const verbs = tabVerbsOnce(taught, session);
 				if (verbs) initial.displays.push({ type: "text", text: verbs });
 				return await browserRunResult(session, details, initial);
 			} catch (error) {
@@ -689,7 +692,7 @@ async function invokeBrowser(
 
 		switch (parsed.action) {
 			case "open":
-				return await openBrowser(session, name, parsed, details, timeoutMs, context.signal);
+				return await openBrowser(session, name, parsed, details, timeoutMs, taught, context.signal);
 			case "close":
 				return await closeBrowser(session, name, parsed, details, timeoutMs, context.signal);
 			case "tabs":
@@ -761,6 +764,7 @@ async function openBrowser(
 	params: BrowserParams,
 	details: BrowserPreludeDetails,
 	timeoutMs: number,
+	taught: Set<string>,
 	signal?: AbortSignal,
 ): Promise<AgentToolResult<unknown>> {
 	const kind = resolveBrowserKind(params, session);
@@ -888,7 +892,7 @@ async function openBrowser(
 			`URL: ${url}`,
 			title ? `Title: ${title}` : null,
 			// Once per conversation: a reuse or a second tab would repeat them.
-			tabVerbsOnce(session),
+			tabVerbsOnce(taught, session),
 		].filter((line): line is string => typeof line === "string");
 		return toolResult(details).text(lines.join("\n")).done();
 	} catch (error) {
