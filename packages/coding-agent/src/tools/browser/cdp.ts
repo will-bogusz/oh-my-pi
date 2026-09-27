@@ -1254,9 +1254,9 @@ class FrameNotAnswering extends Error {}
  * with every embedded document spliced under the iframe element that owns it.
  * Frames are read on the session that serves them: an out-of-process iframe is
  * invisible to the page session, and its nodes must be actioned on its own.
- * A frame on another session that does not answer within `frameReadMs` (at
- * least {@link FRAME_READ_MS}; the caller passes what its settle budget can
- * spare) is left out of this read, marked `unanswered`; the next read asks it again.
+ * Reads of frames on other sessions share one deadline, `frameReadMs` from now
+ * (at least {@link FRAME_READ_MS}; the caller passes what its settle budget can
+ * spare); a frame not read by then is left out of this read, marked `unanswered`; the next read asks it again.
  * Table and grid parts the DOM marks as click targets become actionable too.
  */
 export async function snapshotAccessibility(
@@ -1266,13 +1266,17 @@ export async function snapshotAccessibility(
 ): Promise<AxNode> {
 	const frames = page.frames();
 	const pageSession = page.mainFrame().client;
-	const frameReadMs = Math.max(FRAME_READ_MS, options.frameReadMs ?? 0);
+	// One deadline for every read of other sessions in this snapshot, so reads
+	// that each fit cannot add up past what the page's own tree can wait for.
+	const framesDeadline = Date.now() + Math.max(FRAME_READ_MS, options.frameReadMs ?? 0);
 	/** Sessions that let a read time out during this snapshot; their frames are not asked again in it. */
 	const silent = new Set<CDPSession>();
 	const frameRead = <T>(session: CDPSession, read: () => Promise<T>, markSilent = true): Promise<T> => {
 		if (session === pageSession) return untilAborted(signal, read);
 		if (silent.has(session)) return Promise.reject(new FrameNotAnswering());
-		return withTimeout(untilAborted(signal, read), frameReadMs, new FrameNotAnswering()).catch(error => {
+		const left = framesDeadline - Date.now();
+		if (left <= 0) return Promise.reject(new FrameNotAnswering());
+		return withTimeout(untilAborted(signal, read), left, new FrameNotAnswering()).catch(error => {
 			if (markSilent && error instanceof FrameNotAnswering) silent.add(session);
 			throw error;
 		});
@@ -1313,7 +1317,7 @@ export async function snapshotAccessibility(
 		let probe = probes.get(session);
 		if (!probe) {
 			const read = untilAborted(signal, () => clickTargets(session, signal));
-			probe = (session === pageSession ? read : withTimeout(read, frameReadMs, new FrameNotAnswering())).catch(
+			probe = (session === pageSession ? read : withTimeout(read, Math.max(1, framesDeadline - Date.now()), new FrameNotAnswering())).catch(
 				error => {
 					if (signal?.aborted) throw error;
 					return undefined;

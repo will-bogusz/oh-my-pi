@@ -139,6 +139,7 @@ import {
 	compactNodes,
 	flattenSnapshot,
 	hasBusyIndicator,
+	hasUnansweredFrame,
 	matchRefs,
 	type ObservedNode,
 	type RefRecord,
@@ -2680,7 +2681,11 @@ export class WorkerCore {
 			// document check decides whether it is still the page's.
 			const next = await settleRead(
 				"accessibility tree",
-				snapshotAccessibility(page, { includeAll }, signal),
+				snapshotAccessibility(
+					page,
+					{ includeAll, frameReadMs: deadline - Date.now() - FRAME_READ_RESERVE_MS },
+					signal,
+				),
 				deadline,
 			)
 				.then(async tree => ({ tree, loading: await stillLoading(tree) }))
@@ -2689,6 +2694,9 @@ export class WorkerCore {
 					throw error;
 				});
 			if (!next) break;
+			// A re-read that lost a frame the kept read has is not a better read:
+			// keep the complete one, still marked loading.
+			if (hasUnansweredFrame(next.tree) && !hasUnansweredFrame(snapshot)) break;
 			snapshot = next.tree;
 			loading = next.loading;
 		}
