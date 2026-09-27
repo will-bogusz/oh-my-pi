@@ -20,7 +20,7 @@ const endedHandles = new Map<string, ManagedChromeHandle>();
 const ENDED_HANDLES_KEPT = 128;
 
 /** The relay's answer that a lease or tab id is over; the message says why. */
-class ChromeTabGoneError extends ToolError {}
+export class ChromeTabGoneError extends ToolError {}
 
 export interface ChromeTabSelector {
 	title?: string;

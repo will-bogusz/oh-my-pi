@@ -131,8 +131,11 @@ describe("getTab and claim on a tab this session opened", () => {
 				expect(chromeMiss).not.toContain("browser.tab(");
 				const inWindow = await refusal(invoke({ action: "claim", selector: { title: "order status", windowId: 1 } }));
 				expect(inWindow).not.toContain("browser.tab(");
-				// The tab's name is not a Chrome id and is left for Chrome to refuse.
-				expect(await refusal(invoke({ action: "claim", id: name }))).not.toContain("browser.tab(");
+				// The tab's name is asked of Chrome first; once Chrome refuses it, the
+				// refusal names the route instead of a relay restart.
+				const byName = await refusal(invoke({ action: "claim", id: name }));
+				expect(byName).toContain(route);
+				expect(byName).not.toContain("restarted");
 
 				// With existing-Chrome control off, the refusal still names the route.
 				const unpaired = makeSession({ "browser.relay": false });
@@ -165,6 +168,7 @@ describe("getTab and claim on a tab this session opened", () => {
 				const route = `browser.tab(${JSON.stringify(name)})`;
 				expect(await refusal(invoke({ action: "claim", selector: { url: "data:text/html" } }))).toContain(route);
 				expect(await refusal(invoke({ action: "claim", id: targetId }))).toContain(route);
+				expect(await refusal(invoke({ action: "claim", id: name }))).toContain(route);
 			} finally {
 				await invoke({ action: "close", name }).catch(() => undefined);
 			}

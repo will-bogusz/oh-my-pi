@@ -10,6 +10,7 @@ import { resolveSpawnArgs } from "./browser/attach";
 import {
 	acquireChromeTab,
 	browserActorId,
+	ChromeTabGoneError,
 	chromeChildTabs,
 	chromeLifecycle,
 	chromeDialog,
@@ -129,17 +130,16 @@ function tabVerbsOnce(taught: Set<string>, session: ToolSession): string | undef
 
 /**
  * `browser.tab("<name>")` for each tab this actor opened with `open` that
- * `matches` picks out, or undefined. getTab and claim take only tabs in the
+ * `matches` picks out. getTab and claim take only tabs in the
  * user's Chrome, and the relay's answer for an id it never issued (a target id
  * from `browser.tabs()`, say) suggests a restart that never happened. Only
  * tabs recorded as this actor's own are named, and never their URLs.
  */
-function openedTabRoutes(session: ToolSession, matches: (tab: ManagedTabInfo) => boolean): string | undefined {
+function openedTabRoutes(session: ToolSession, matches: (tab: ManagedTabInfo) => boolean): string[] {
 	const actor = browserActorId(session);
-	const routes = listTabs()
+	return listTabs()
 		.filter(tab => !isManagedChromeHandle(tab.name) && getTab(tab.name)?.ownerActorId === actor && matches(tab))
 		.map(tab => `browser.tab(${JSON.stringify(tab.name)})`);
-	return routes.length > 0 ? routes.join(" or ") : undefined;
 }
 
 const OPENED_TABS_NOTE =
@@ -568,12 +568,13 @@ async function invokeBrowser(
 					"getTab selectors cannot be combined with an id, creation, or a second browser selection",
 				);
 			const claimId = parsed.action === "claim" ? parsed.id : undefined;
-			// Target ids and Chrome discovery ids never share a shape, so this
-			// cannot shadow a Chrome tab; a tab name could, and is left to Chrome.
-			const openedById = claimId && openedTabRoutes(session, tab => tab.targetId === claimId);
-			if (openedById)
+			// A CDP target id is Chrome's own opaque token for an opened tab, never a
+			// relay discovery id; a tab name is the caller's choice and could equal
+			// one, so a name is looked up only once Chrome has refused the id.
+			const openedById = claimId ? openedTabRoutes(session, tab => tab.targetId === claimId) : [];
+			if (openedById.length > 0)
 				throw new ToolError(
-					`${JSON.stringify(claimId)} is the target id of a tab this session opened with browser.open(), not a Chrome tab id: ${openedById} returns it. ${OPENED_TABS_NOTE}`,
+					`${JSON.stringify(claimId)} is the target id of a tab this session opened with browser.open(), not a Chrome tab id: ${openedById.join(" or ")} returns it. ${OPENED_TABS_NOTE}`,
 				);
 			let selected: InstanceTab | undefined;
 			if (parsed.selector) {
@@ -584,9 +585,9 @@ async function invokeBrowser(
 					selector.browserId === undefined &&
 					selector.windowId === undefined
 						? openedTabRoutes(session, tab => matchesChromeTab(tab, { title: selector.title, url: selector.url }))
-						: undefined;
-				const alsoOpened = (routes: string) =>
-					`A tab this session opened with browser.open() matches this selector; if that is the one you meant, ${routes} returns it. ${OPENED_TABS_NOTE}`;
+						: [];
+				const alsoOpened = (routes: readonly string[]) =>
+					`${routes.length > 1 ? "Tabs this session opened with browser.open() match" : "A tab this session opened with browser.open() matches"} this selector; if that is what you meant, ${routes.join(" or ")} returns it. ${OPENED_TABS_NOTE}`;
 				let discovered: InstanceTab[];
 				try {
 					discovered = await discoverChromeTabs(session, signal, {
@@ -594,11 +595,11 @@ async function invokeBrowser(
 						relay: parsed.app?.relay,
 					});
 				} catch (error) {
-					const routes = !signal.aborted && error instanceof Error ? openedBySelector() : undefined;
-					throw routes ? new ToolError(`${(error as Error).message} ${alsoOpened(routes)}`) : error;
+					const routes = !signal.aborted && error instanceof Error ? openedBySelector() : [];
+					throw routes.length > 0 ? new ToolError(`${(error as Error).message} ${alsoOpened(routes)}`) : error;
 				}
-				const routes = discovered.some(tab => matchesChromeTab(tab, selector)) ? undefined : openedBySelector();
-				if (routes) throw new ToolError(`No Chrome tab matches this selector. ${alsoOpened(routes)}`);
+				const routes = discovered.some(tab => matchesChromeTab(tab, selector)) ? [] : openedBySelector();
+				if (routes.length > 0) throw new ToolError(`No Chrome tab matches this selector. ${alsoOpened(routes)}`);
 				selected = selectChromeTab(discovered, selector);
 			}
 			const handle = await acquireChromeTab(session, {
@@ -611,6 +612,21 @@ async function invokeBrowser(
 				timeoutMs,
 				signal,
 				relay: parsed.app?.relay,
+			}).catch(error => {
+				const routes =
+					claimId && !signal.aborted && error instanceof ToolError
+						? openedTabRoutes(session, tab => tab.name === claimId)
+						: [];
+				if (routes.length === 0) throw error;
+				// Chrome does not know the id, and it is the name of a tab this session
+				// opened: that answer, not "the relay may have restarted", is the one to give.
+				if (error instanceof ChromeTabGoneError)
+					throw new ToolError(
+						`${JSON.stringify(claimId)} is the name of a tab this session opened with browser.open(), not a Chrome tab id: ${routes.join(" or ")} returns it. ${OPENED_TABS_NOTE}`,
+					);
+				throw new ToolError(
+					`${error.message} ${JSON.stringify(claimId)} is also the name of a tab this session opened with browser.open(); if that is what you meant, ${routes.join(" or ")} returns it. ${OPENED_TABS_NOTE}`,
+				);
 			});
 			details.handle = handle.id;
 			details.name = handle.label;
