@@ -3987,6 +3987,211 @@ it("nests an attached sheet's own tree under its parent and dispatches its refs 
 	}
 });
 
+it("prints a sheet attached to a sheet under its opener, bounded and without looping", async () => {
+	const f = await fixture();
+	// Recorded shape (driver 5b3a6cf96, VM probe hc4): the document's walk
+	// names only its own sheet (an export panel); the panel's walk names the
+	// sheet attached to it (its go-to-folder sheet), which the document's
+	// walk never reports.
+	const bounds = { x: 30, y: 40, width: 120, height: 80 };
+	let related: Record<number, { window_id: number; title: string }[]> = {
+		83: [{ window_id: 89, title: "" }],
+		89: [],
+	};
+	const label: Record<number, string> = { 83: "export", 89: "GoToWindow", 90: "third", 91: "fourth" };
+	const partial = new Set<number>();
+	try {
+		f.state.relatedWindows = [{ pid: 101, window_id: 83, title: "export", relation: "sheet" }];
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows")
+				return reply({
+					windows: [
+						f.row,
+						...[83, 89, 90, 91, 92, 93, 94, 95, 96].map(id => ({ ...f.row, window_id: id, title: "", bounds })),
+					],
+				});
+			if (name !== "get_window_state" || args.window_id === 1) return undefined;
+			const id = args.window_id as number;
+			return reply({
+				pid: 101,
+				window_id: id,
+				snapshot_id: `sheet-${id}`,
+				related_windows: (related[id] ?? []).map(row => ({ pid: 101, relation: "sheet", ...row })),
+				...(partial.has(id) ? { truncated: true } : {}),
+				window_bounds: bounds,
+				elements: [
+					{ element_index: 0, element_token: `sheet-${id}:0`, role: "AXSheet", label: label[id], depth: 0 },
+					{ element_index: 1, element_token: `sheet-${id}:1`, role: "AXButton", label: "Cancel", depth: 1 },
+				],
+			});
+		};
+		// A query is answered from the sheet taking input: the panel's match
+		// sits under the inner sheet, so it is not offered as the place to work.
+		const queried = await f.session.observe(f.context, f.window, { query: "export" });
+		expect(queried.tree).toContain('No row matched query "export" in the sheet "" (window 89) modal over window 1');
+		const observation = await f.session.observe(f.context, f.window);
+		const ref = (id: string, role: string) =>
+			observation.elements.find(element => element.windowId === id && element.role === role)!.ref;
+		expect(observation.tree).toBe(
+			[
+				'sheet "export" (window 83) — modal over window 1',
+				`  ${ref("83", "AXSheet")} sheet "export"`,
+				`    ${ref("83", "AXButton")} button "Cancel"`,
+				'  sheet "" (window 89) — modal over sheet 83',
+				`    ${ref("89", "AXSheet")} sheet "GoToWindow"`,
+				`      ${ref("89", "AXButton")} button "Cancel"`,
+				`${observation.elements[0]!.ref} textfield "Editor" [disabled] placeholder="Hint, not value"`,
+			].join("\n"),
+		);
+		// The inner sheet's ref, reached through the document's handle, acts on the inner sheet.
+		const inner = ref("89", "AXButton");
+		await f.session.click(f.context, observation.window, inner);
+		expect(f.lastDispatch()).toMatchObject({ name: "click", args: { window_id: 89, element_token: "sheet-89:1" } });
+		// A keyboard refusal on the document names the innermost sheet, the one
+		// that holds the keyboard over the panel it opened from.
+		const hook = f.state.hook;
+		f.state.hook = async (name, args) =>
+			name === "press_key"
+				? {
+						text: "press_key delivery failed: exact target window did not become focused for foreground HID delivery",
+						structuredJson: JSON.stringify({ code: "delivery_failed" }),
+						isError: true,
+						errorCode: "delivery_failed",
+						images: [],
+					}
+				: hook!(name, args);
+		await expect(
+			f.session.press(f.context, observation.window, "right", undefined, { delivery: "foreground" }),
+		).rejects.toThrow("window 89 — a sheet attached to 83 — holds keyboard focus, not window 1");
+		f.state.hook = hook;
+
+		// The inner sheet was answered: its refs say so; the panel's stay.
+		related = { 83: [] };
+		const answered = await f.session.observe(f.context, f.window);
+		expect(answered.tree).not.toContain("window 89");
+		expect(() => f.session.element(inner)).toThrow(`StaleRef: ${inner} — sheet "" (window 89) is gone`);
+
+		// A relation that loops back ends at the window already printed, and a
+		// chain past the depth bound is named with the call that reads it.
+		related = {
+			83: [{ window_id: 89, title: "" }],
+			89: [
+				{ window_id: 83, title: "export" },
+				{ window_id: 90, title: "third" },
+			],
+			90: [{ window_id: 91, title: "fourth" }],
+			91: [{ window_id: 83, title: "export" }],
+		};
+		const reads = f.calls.filter(call => call.name === "get_window_state").length;
+		const deep = await f.session.observe(f.context, f.window);
+		expect(deep.tree.match(/\(window 83\)/g)).toHaveLength(1);
+		expect(deep.tree).toContain('    sheet "third" (window 90) — modal over sheet 89');
+		expect(deep.tree).toContain(
+			'      sheet "fourth" (window 91) — modal over sheet 90; not read here — computer.window({"id":"91","pid":101}) reads it',
+		);
+		// The document, then 83, 89 and 90: the fourth level is not walked.
+		expect(f.calls.filter(call => call.name === "get_window_state").length - reads).toBe(4);
+
+		// A panel whose own read failed says nothing about what is attached to
+		// it: its inner sheets' refs stop being admitted, as unread, not gone.
+		const third = deep.elements.find(element => element.windowId === "90")!.ref;
+		f.state.hook = async (name, args) =>
+			name === "get_window_state" && args.window_id === 83
+				? { text: "walk failed", isError: true, errorCode: "CuaError", images: [] }
+				: hook!(name, args);
+		const failed = await f.session.observe(f.context, f.window);
+		expect(failed.tree).toContain('sheet "export" (window 83) — modal over window 1 — its own walk failed');
+		expect(() => f.session.element(third)).toThrow(
+			`StaleRef: ${third} — sheet "third" (window 90) was not read in the last observation`,
+		);
+
+		// A walk the driver cut short proves nothing about a sheet it did not
+		// report: the inner sheet's refs stop being admitted, as unread.
+		f.state.hook = hook;
+		related = { 83: [{ window_id: 89, title: "" }], 89: [] };
+		const before = (await f.session.observe(f.context, f.window)).elements.find(element => element.windowId === "89")!.ref;
+		related = { 83: [] };
+		partial.add(83);
+		await f.session.observe(f.context, f.window);
+		expect(() => f.session.element(before)).toThrow(`StaleRef: ${before} — sheet "" (window 89) was not read in the last observation`);
+		partial.clear();
+
+		// Past six walked sheets in one read, the rest are named, not read.
+		f.state.hook = hook;
+		related = {};
+		f.state.relatedWindows = [83, 91, 92, 93, 94, 95, 96].map(id => ({ pid: 101, window_id: id, title: "", relation: "sheet" }));
+		const wide = await f.session.observe(f.context, f.window);
+		expect(wide.tree.match(/; not read here/g)).toHaveLength(1);
+		expect(wide.tree).toContain('sheet "" (window 96) — modal over window 1; not read here — computer.window({"id":"96","pid":101}) reads it');
+	} finally {
+		await f.close();
+	}
+});
+
+it("keeps a read's own sheets when remembered relations reverse, and names a sheet it could not read", async () => {
+	const f = await fixture();
+	const bounds = { x: 30, y: 40, width: 120, height: 80 };
+	let related: Record<number, number[]> = {};
+	const failed = new Set<number>();
+	const labels: Record<number, string> = {};
+	f.state.hook = async (name, args) => {
+		if (name === "list_windows")
+			return reply({ windows: [f.row, ...[2, 3, 4].map(id => ({ ...f.row, window_id: id, title: `W${id}`, bounds }))] });
+		if (name !== "get_window_state") return undefined;
+		const id = args.window_id as number;
+		if (failed.has(id)) return { text: "walk failed", isError: true, errorCode: "CuaError", images: [] };
+		return reply({
+			pid: 101,
+			window_id: id,
+			snapshot_id: `w${id}-${f.calls.length}`,
+			related_windows: (related[id] ?? []).map(sheet => ({ pid: 101, window_id: sheet, title: `W${sheet}`, relation: "sheet" })),
+			window_bounds: id === 1 ? f.row.bounds : bounds,
+			elements: [
+				{ element_index: 0, element_token: `w${id}:0:${f.calls.length}`, role: "AXSheet", label: `S${id}`, depth: 0 },
+				{ element_index: 1, element_token: `w${id}:1:${f.calls.length}`, role: "AXButton", label: labels[id] ?? "Cancel", depth: 1 },
+			],
+		});
+	};
+	const live = (observation: { elements: readonly { ref: string }[] }) =>
+		observation.elements.filter(element => {
+			try {
+				f.session.element(element.ref);
+				return false;
+			} catch {
+				return true;
+			}
+		});
+	try {
+		// Remembered 1 → 2 → 3 → 4; then the app reports 4 → 2 and nothing else.
+		related = { 1: [2], 2: [3], 3: [4] };
+		const remembered = await f.session.observe(f.context, f.window);
+		const three = remembered.elements.find(element => element.windowId === "3")!.ref;
+		related = { 4: [2] };
+		const four = await f.session.observe(f.context, await f.session.window(f.context, { id: "4", pid: 101 }));
+		expect(four.tree).toContain('sheet "W2" (window 2) — modal over window 4');
+		// Every ref this reply printed is live.
+		expect(live(four).map(element => element.ref)).toEqual([]);
+		// The window whose remembered edge closed the cycle was not read here:
+		// its refs stop being admitted instead of lingering unreachable.
+		expect(() => f.session.element(three)).toThrow(`StaleRef: ${three} — sheet "W3" (window 3) was not read in the last observation`);
+
+		// A sheet taking input that could not be read is named as unread, with
+		// the call that reads it — not as a sheet read with no rows, and not by
+		// sending the caller to the sheet it covers.
+		related = { 1: [2], 2: [3] };
+		labels[2] = "Match here";
+		failed.add(3);
+		const queried = await f.session.observe(f.context, f.window, { query: "Match" });
+		expect(queried.tree).toContain(
+			'the query did not search the sheet "W3" (window 3) modal over it: that sheet was not read here, so neither its rows nor what is attached to it are known. Read it with computer.window({"id":"3","pid":101}) and observe that handle.',
+		);
+		expect(queried.tree).not.toContain("work in the sheet while it is up");
+		expect(queried.tree).not.toContain("drop the query");
+	} finally {
+		await f.close();
+	}
+});
+
 /**
  * T3 `native-read-calendar/omp-2`: Calendar's "Show" sheet held the keyboard,
  * `press_key` refused with `delivery_failed`, and the reply carried only its
