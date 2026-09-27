@@ -667,13 +667,14 @@ interface BackgroundPageScope {
 	close(): Promise<void>;
 }
 
-async function restoreBackgroundPage(page: Page, pending: Promise<unknown>): Promise<void> {
+async function restoreBackgroundPage(page: Page, pending: Promise<unknown>, enabled: () => boolean): Promise<void> {
 	const navigation = watchMainFrameNavigation(page);
 	await withTimeout(
 		pending
 			.catch(() => undefined)
 			.then(async () => {
-				if (!page.isClosed()) await page.emulateFocusedPage(false);
+				// A run refused before it asked for focus emulation has nothing to undo.
+				if (!page.isClosed() && enabled()) await page.emulateFocusedPage(false);
 			}),
 		INPUT_RESTORE_TIMEOUT_MS,
 		"Timed out restoring Chrome page focus state",
@@ -702,15 +703,44 @@ async function restoreBackgroundPage(page: Page, pending: Promise<unknown>): Pro
 		.finally(() => navigation.stop());
 }
 
+/**
+ * A restore that failed, typically timing out on a renderer busy with a heavy
+ * document, is retried under the same bound before the next run enables focus
+ * emulation, so the refusal lasts only as long as the restore keeps failing.
+ * The renderer applies `Emulation.setFocusEmulationEnabled` synchronously on
+ * its main-thread command path, so on the page's session an answered retry
+ * comes after the timed-out disable it follows, and the run's enable is sent
+ * only after that answer. Cancellation stops the wait, not the command, and
+ * leaves the failure recorded for the next call.
+ */
+async function retryFailedRestore(page: Page, signal: AbortSignal | undefined): Promise<void> {
+	if (!backgroundInputFailures.has(page)) return;
+	try {
+		await withTimeout(
+			page.emulateFocusedPage(false),
+			INPUT_RESTORE_TIMEOUT_MS,
+			"Timed out restoring Chrome page focus state",
+			signal,
+		);
+	} catch (error) {
+		throwIfAborted(signal);
+		throw new ToolError(
+			`Chrome page focus state could not be restored: retrying it before this call failed too (${String(error)}). ` +
+				"No input was sent. Every call retries the restore first; if the page is busy, observe again once it has settled.",
+		);
+	}
+	backgroundInputFailures.delete(page);
+}
+
 /** Prepare a complete managed run, including accessibility queries, without selecting its tab. */
 export function prepareBackgroundPage(page: Page, signal?: AbortSignal): BackgroundPageScope {
 	throwIfAborted(signal);
-	const failure = backgroundInputFailures.get(page);
-	if (failure) throw failure;
 	if (backgroundPageScopes.has(page) || backgroundInputQueues.has(page))
 		throw new ToolError("Chrome page still has an active operation");
-	const entering = Promise.resolve().then(() => {
+	let enabled = false;
+	const entering = retryFailedRestore(page, signal).then(() => {
 		throwIfAborted(signal);
+		enabled = true;
 		return page.emulateFocusedPage(true);
 	});
 	let closing: Promise<void> | undefined;
@@ -723,7 +753,7 @@ export function prepareBackgroundPage(page: Page, signal?: AbortSignal): Backgro
 			// Run cancellation stops new admission before this drain. Already-started
 			// input keeps its serialization slot until it settles, even after abort.
 			const drained = backgroundInputQueues.get(page) ?? Promise.resolve();
-			closing = restoreBackgroundPage(page, Promise.allSettled([entering, drained])).finally(() => {
+			closing = restoreBackgroundPage(page, Promise.allSettled([entering, drained]), () => enabled).finally(() => {
 				if (backgroundPageScopes.get(page) === scope) backgroundPageScopes.delete(page);
 			});
 			return closing;
