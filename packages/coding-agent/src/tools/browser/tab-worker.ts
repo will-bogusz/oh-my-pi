@@ -3314,19 +3314,24 @@ export class WorkerCore {
 		this.#observationId = crypto.randomUUID();
 	}
 
-	/** Best-effort `Page.stopLoading` so an abandoned navigation cannot stall later ops. */
-	async #stopLoading(): Promise<void> {
+	/**
+	 * Best-effort `Page.stopLoading` so an abandoned navigation cannot stall later
+	 * ops. True only when Chrome acknowledged the stop.
+	 */
+	async #stopLoading(): Promise<boolean> {
 		try {
 			const session = await this.#requirePage().createCDPSession();
 			try {
 				await session.send("Page.stopLoading");
+				return true;
 			} finally {
-				await session.detach().catch(() => undefined);
+				void session.detach().catch(() => undefined);
 			}
 		} catch (error) {
 			this.#log("debug", "Page.stopLoading failed", {
 				error: error instanceof Error ? error.message : String(error),
 			});
+			return false;
 		}
 	}
 

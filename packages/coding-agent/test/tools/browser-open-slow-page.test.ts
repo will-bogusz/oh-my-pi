@@ -20,6 +20,8 @@ beforeAll(() => {
 		fetch(request) {
 			const html = { "content-type": "text/html; charset=utf-8" };
 			switch (new URL(request.url).pathname) {
+				case "/spin":
+					return new Response("<!doctype html><title>Spinning</title><script>for (;;) {}</script>", { headers: html });
 				case "/ready":
 					return new Response("<!doctype html><title>Ready page</title><h1>Ready</h1>", { headers: html });
 				case "/no-answer":
@@ -140,6 +142,14 @@ describe("browser.open on a page that outlasts its timeout", () => {
 				// aborted open left: nothing to reuse.
 				const next = await invoke({ action: "open", name: aborted, url: `${origin}/ready` });
 				expect(JSON.stringify(next.content)).toContain(`Opened tab ${JSON.stringify(aborted).replaceAll('"', '\\"')}`);
+
+				// A short open whose page stops answering altogether: the deadline beats
+				// goto's own report, and the error still names the tab it kept. Last,
+				// because the spinning renderer serves every later page of this site.
+				const spinning = `slow-${crypto.randomUUID().slice(0, 8)}`;
+				const spun = await refusal(invoke({ action: "open", name: spinning, url: `${origin}/spin`, timeout: 1 }));
+				expect(spun).toContain(`browser.tab(${JSON.stringify(spinning)})`);
+				expect((await listed()).map(tab => tab.name)).toContain(spinning);
 			} finally {
 				await invoke({ action: "close", all: true }).catch(() => undefined);
 			}

@@ -880,6 +880,7 @@ async function openBrowser(
 					userAgent: params.user_agent,
 					ignoreHttpsErrors: params.ignore_https_errors,
 					signal: openSignal,
+					cancelSignal: signal,
 					ownerSessionId: session.getSessionId?.() ?? undefined,
 					// Omitted stays undefined: creation defaults it to false
 					// while reuse by the owner leaves a set value alone.
@@ -928,7 +929,16 @@ async function openBrowser(
 		// Caller cancellation stays a ToolAbortError; the requested timeout
 		// becomes a timeout ToolError; anything else passes through unchanged.
 		if (signal?.aborted) throw error instanceof ToolAbortError ? error : new ToolAbortError();
-		if (timeoutSignal.aborted) throw new ToolError(`Browser open timed out after ${timeoutMs}ms`);
+		if (timeoutSignal.aborted) {
+			// The deadline won the race against goto's own report: say what is
+			// still there when the tab was published.
+			const kept = getTab(name);
+			if (kept?.state === "alive" && kept.ownerActorId === browserActorId(session))
+				throw new ToolError(
+					`Browser open timed out after ${timeoutMs}ms; tab ${JSON.stringify(name)} stays open on ${kept.info.url}: browser.tab(${JSON.stringify(name)}) drives it.`,
+				);
+			throw new ToolError(`Browser open timed out after ${timeoutMs}ms`);
+		}
 		throw error;
 	}
 	throw stillLoading;

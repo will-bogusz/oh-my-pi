@@ -48,8 +48,8 @@ export interface MainFrameNavigateOptions {
 	timeoutMs: number;
 	waitUntil?: NavigationWaitUntil;
 	signal?: AbortSignal;
-	/** Best-effort `Page.stopLoading`, run before a timeout is reported. */
-	stopLoading?: () => Promise<void>;
+	/** Best-effort `Page.stopLoading`, run before a timeout is reported; true when Chrome acknowledged it. */
+	stopLoading?: () => Promise<boolean>;
 }
 
 /**
@@ -276,7 +276,7 @@ async function reportNavigationTimeout(page: Page, opts: MainFrameNavigateOption
 	let stopped = "";
 	if (opts.stopLoading) {
 		const confirmed = await withTimeout(
-			opts.stopLoading().then(() => true),
+			opts.stopLoading(),
 			REPORT_STEP_TIMEOUT_MS,
 			"stopLoading timed out",
 		).catch(() => false);
