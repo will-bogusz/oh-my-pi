@@ -55,6 +55,12 @@ export interface AxNode {
 	level?: number;
 	/** A table or grid part the page makes clickable although no widget role says so (see `TABLE_PART_ROLES`). */
 	clickTarget?: boolean;
+	/**
+	 * An embedded document whose frame did not answer this read in time: it
+	 * carries only the frame's `url`, and its content is left out until a later
+	 * read gets an answer.
+	 */
+	unanswered?: boolean;
 	children?: AxNode[];
 	/** The DOM node behind this accessibility node, in its own frame's id space. */
 	backendNodeId?: number;
@@ -395,7 +401,9 @@ export function flattenSnapshot(root: AxNode, options: { includeAll: boolean }):
 					name: (node.name ?? "").trim(),
 					states: [],
 					actionable: false,
-					iframe: frameHost(embedded),
+					iframe: embedded.unanswered
+						? `${frameHost(embedded)} (not answering; its content is left out of this read)`
+						: frameHost(embedded),
 				});
 				for (const child of embedded.children ?? []) visit(child, depth + 1, "");
 				return;

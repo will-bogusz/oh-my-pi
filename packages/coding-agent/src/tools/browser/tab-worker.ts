@@ -2572,13 +2572,21 @@ export class WorkerCore {
 	): Promise<SnapshotRead & { navigating: boolean }> {
 		let latest: SnapshotRead | undefined;
 		let navigated = false;
+		/** A main-frame document change was actually seen, not just inferred from a read that did not answer. */
+		let moveSeen = false;
 		// The frame tree is a renderer read like the snapshot's own: one that does
 		// not answer before the deadline is a commit in flight, so it counts as a move.
 		const left = (before: MainDocument): Promise<boolean> =>
-			settleRead("frame tree", leftDocument(page, before, signal), deadline).catch(error => {
-				if (error instanceof SnapshotReadTimeout) return true;
-				throw error;
-			});
+			settleRead("frame tree", leftDocument(page, before, signal), deadline).then(
+				moved => {
+					if (moved) moveSeen = true;
+					return moved;
+				},
+				error => {
+					if (error instanceof SnapshotReadTimeout) return true;
+					throw error;
+				},
+			);
 		while (Date.now() < deadline) {
 			const before = await settleRead("frame tree", mainDocument(page, signal), deadline).catch(error => {
 				if (error instanceof SnapshotReadTimeout) return undefined;
@@ -2597,7 +2605,10 @@ export class WorkerCore {
 					// error says why.
 					if (error instanceof SnapshotReadTimeout) return null;
 					const moved = await left(before).catch(() => undefined);
-					if (moved !== undefined && (moved || isDocumentGoneError(error))) return null;
+					if (moved !== undefined && (moved || isDocumentGoneError(error))) {
+						if (isDocumentGoneError(error)) moveSeen = true;
+						return null;
+					}
 					throw error;
 				},
 			);
@@ -2608,6 +2619,13 @@ export class WorkerCore {
 			latest = read ?? latest;
 		}
 		if (latest) return { ...latest, navigating: true };
+		// No complete read, and no new document seen: the page's own reads never
+		// answered in the budget. Saying it changed sent callers after a navigation
+		// that never happened.
+		if (!moveSeen)
+			throw new ToolError(
+				"The page did not answer while observing it: its accessibility tree was not read within the settle budget, and its document did not change. Observe again; tab.screenshot() does not need the tree.",
+			);
 		throw new ToolError("The page changed while observing it. Observe again.");
 	}
 

@@ -1,4 +1,4 @@
-import { untilAborted } from "@oh-my-pi/pi-utils";
+import { untilAborted, withTimeout } from "@oh-my-pi/pi-utils";
 import type { CDPSession, Frame, MouseButton, Page } from "puppeteer-core";
 import { _keyDefinitions } from "puppeteer-core/internal/common/USKeyboardLayout.js";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
@@ -1239,10 +1239,23 @@ async function clickTargets(session: CDPSession, signal?: AbortSignal): Promise<
 }
 
 /**
+ * How long a frame served by a session other than the page's own gets for
+ * each read of an observation. An out-of-process frame whose renderer is stuck
+ * in script answers none of them, and one such frame (a challenge widget, say)
+ * must not cost the whole page its tree.
+ */
+const FRAME_READ_MS = 1_000;
+
+/** A frame's session did not answer an observation read in time. */
+class FrameNotAnswering extends Error {}
+
+/**
  * The page's accessibility tree, one `Accessibility.getFullAXTree` per frame,
  * with every embedded document spliced under the iframe element that owns it.
  * Frames are read on the session that serves them: an out-of-process iframe is
  * invisible to the page session, and its nodes must be actioned on its own.
+ * A frame on another session that does not answer within {@link FRAME_READ_MS}
+ * is left out of this read, marked `unanswered`; the next read asks it again.
  * Table and grid parts the DOM marks as click targets become actionable too.
  */
 export async function snapshotAccessibility(
@@ -1251,11 +1264,26 @@ export async function snapshotAccessibility(
 	signal?: AbortSignal,
 ): Promise<AxNode> {
 	const frames = page.frames();
+	const pageSession = page.mainFrame().client;
+	/** Sessions that let a read time out during this snapshot; their frames are not asked again in it. */
+	const silent = new Set<CDPSession>();
+	const frameRead = <T>(session: CDPSession, read: () => Promise<T>): Promise<T> => {
+		if (session === pageSession) return untilAborted(signal, read);
+		if (silent.has(session)) return Promise.reject(new FrameNotAnswering());
+		return withTimeout(untilAborted(signal, read), FRAME_READ_MS, new FrameNotAnswering()).catch(error => {
+			if (error instanceof FrameNotAnswering) silent.add(session);
+			throw error;
+		});
+	};
 	const sessions = new Set(frames.map(frame => frame.client));
 	const loaders = new Map<CDPSession, Map<string, string>>();
 	await Promise.all(
 		[...sessions].map(async session => {
-			loaders.set(session, await loaderIds(session, signal));
+			const ids = await frameRead(session, () => loaderIds(session, signal)).catch(error => {
+				if (error instanceof FrameNotAnswering) return new Map<string, string>();
+				throw error;
+			});
+			loaders.set(session, ids);
 		}),
 	);
 	// Which backend node owns which child frame, per session that can see it.
@@ -1264,7 +1292,7 @@ export async function snapshotAccessibility(
 		frames.map(async frame => {
 			const parent = frame.parentFrame();
 			if (!parent) return;
-			const owner = await untilAborted(signal, () =>
+			const owner = await frameRead(parent.client, () =>
 				parent.client.send("DOM.getFrameOwner", { frameId: frame._id }),
 			).catch(() => null);
 			if (!owner) return;
@@ -1274,22 +1302,25 @@ export async function snapshotAccessibility(
 		}),
 	);
 	// One click probe per session, and only for a frame with table parts to judge. Row refs are an
-	// addition: a failed probe costs them, never the observation.
+	// addition: a failed or unanswered probe costs them, never the observation (nor the frame).
 	const probes = new Map<CDPSession, Promise<Set<number> | undefined>>();
 	const clickable = (session: CDPSession): Promise<Set<number> | undefined> => {
 		let probe = probes.get(session);
 		if (!probe) {
-			probe = clickTargets(session, signal).catch(error => {
-				if (signal?.aborted) throw error;
-				return undefined;
-			});
+			const read = untilAborted(signal, () => clickTargets(session, signal));
+			probe = (session === pageSession ? read : withTimeout(read, FRAME_READ_MS, new FrameNotAnswering())).catch(
+				error => {
+					if (signal?.aborted) throw error;
+					return undefined;
+				},
+			);
 			probes.set(session, probe);
 		}
 		return probe;
 	};
 
 	const build = async (frame: Frame): Promise<AxNode | null> => {
-		const { nodes } = await untilAborted(signal, () =>
+		const { nodes } = await frameRead(frame.client, () =>
 			frame.client.send("Accessibility.getFullAXTree", { frameId: frame._id }),
 		);
 		const known = owners.get(frame.client);
@@ -1303,8 +1334,10 @@ export async function snapshotAccessibility(
 					const child = known.get(id);
 					if (!child) return;
 					// A frame that detaches mid-collection simply has no content to
-					// splice; anything else is a real failure and must surface.
+					// splice, and one that does not answer is marked in its place;
+					// anything else is a real failure and must surface.
 					const tree = await build(child).catch(error => {
+						if (error instanceof FrameNotAnswering) return { role: "RootWebArea", url: child.url(), unanswered: true };
 						if (child.detached || !page.frames().includes(child)) return null;
 						throw error;
 					});
