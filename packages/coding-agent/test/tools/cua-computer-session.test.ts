@@ -2217,12 +2217,17 @@ it("answers a dead ref with the window's own tree instead of throwing it away", 
 		const answered = await f.session.click(f.context, f.window, ref);
 		expect(answered.effect).toBe("not_dispatched");
 		// The reply names the code, the retired ref with the row it stood for,
-		// the window it was addressed in, and a census of the fresh tree.
-		expect(answered.text.split("\n")[0]).toContain(
-			`element_outside_target_window: ${ref} (AXTextField "Editor") no longer exists in window 1 and nothing was dispatched`,
-		);
+		// the window it was addressed in, and a census of the fresh tree. The
+		// code is an ancestry refusal, so it never claims the element died.
+		const header = answered.text.split("\n")[0]!;
+		expect(header).toStartWith("element_outside_target_window:");
+		expect(header).toContain(`${ref} (AXTextField "Editor")`);
+		expect(header).toContain("window 1");
+		expect(header).not.toContain("no longer exists");
 		expect(answered.text).toContain("no row of the fresh tree carries its role and label");
 		expect(answered.text).toContain(`${ref} is retired`);
+		// The route past the check does not depend on the row staying in place.
+		expect(answered.text).toContain('the same click with { delivery: "foreground" } is not held to this check');
 		// The tree is in the reply, and the reply is marked for the cell — not
 		// left in a return value the cell is free to drop.
 		expect(answered.text).toContain('n2 textfield "Editor (renamed)"');
@@ -2353,6 +2358,69 @@ it("reads the window again only for the refusal a re-read can answer", async () 
 				: undefined;
 		await expect(f.session.click(f.context, f.window, "n4")).rejects.toThrow("own menu bar");
 		expect(reads()).toBe(mark + 1);
+	} finally {
+		await f.close();
+	}
+});
+
+it("renders an unproven-ancestry refusal as that, and names what the check does not gate", async () => {
+	const f = await fixture();
+	// Driver 5b3a6cf96, verbatim but for the window id and pid (VM probe q7): a
+	// desktop icon refused this way on every background re-address, at 0, 1
+	// and 3 s, while the same action with delivery_mode "foreground"
+	// dispatched. The row is alive and in place; only its ancestry is unproven.
+	const reason =
+		"the addressed element could not be proven to belong to window 1; re-observe the window and re-address the element from that observation";
+	const unproven = {
+		text: `Background input refused (element_outside_target_window): ${reason}`,
+		structuredJson: JSON.stringify({
+			advice: "snapshot",
+			code: "element_outside_target_window",
+			effect: "refused",
+			escalation: { reason: "route_unavailable", target: "snapshot" },
+			pid: 101,
+			reason,
+			window_id: 1,
+		}),
+		isError: true,
+		errorCode: "element_outside_target_window",
+		images: [],
+	};
+	f.state.role = "AXImage";
+	f.state.label = "Icon";
+	f.state.actions = ["AXOpen", "AXShowMenu"];
+	const dispatches = () =>
+		f.calls.filter(call => call.name === "click" || call.name === "type_text").map(call => call.args.delivery_mode);
+	try {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		f.state.hook = async (name, args) =>
+			(name === "click" || name === "type_text") && args.delivery_mode !== "foreground" ? unproven : undefined;
+		const refused = await f.session.click(f.context, f.window, ref);
+		expect(refused.effect).toBe("not_dispatched");
+		expect(refused.mustShow).toBe(true);
+		expect(refused.text).not.toContain("no longer exists");
+		const fresh = refused.text.match(/on (n\d+), the row in that position now/)?.[1];
+		expect(fresh).toBeDefined();
+		// What the check does not gate, should the same refusal come back.
+		expect(refused.text).toContain('the same click with { delivery: "foreground" } is not held to this check');
+		expect(refused.text).toContain('computer.launch({ name: "Fixture", urls: ["<document or folder path>"] })');
+		// A refusal, not a retry: one background dispatch, nothing in the foreground.
+		expect(dispatches()).toEqual(["background"]);
+		// Both re-addresses stay callable as written: the background one re-checks, the foreground one is not held.
+		expect((await f.session.click(f.context, f.window, fresh!)).effect).toBe("not_dispatched");
+		const row = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		expect((await f.session.click(f.context, f.window, row, { delivery: "foreground" })).effect).toBe("unverifiable");
+		// A keystroke call has its own foreground form and no document hand-off.
+		const field = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const typed = await f.session.type(f.context, f.window, "x", field);
+		expect(typed.text).toContain('the same type with { delivery: "foreground" } is not held to this check');
+		expect(typed.text).not.toContain("computer.launch");
+		// `perform` takes no delivery option here, so only the hand-off is named.
+		const icon = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		const performed = await f.session.perform(f.context, f.window, icon, "AXOpen");
+		expect(performed.effect).toBe("not_dispatched");
+		expect(performed.text).not.toContain('delivery: "foreground"');
+		expect(performed.text).toContain("if opening a document or folder that row stands for is the aim");
 	} finally {
 		await f.close();
 	}
