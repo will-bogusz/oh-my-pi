@@ -297,9 +297,11 @@ it("waits for a browser that just dropped, then refuses at once once it has been
 	vi.useFakeTimers();
 	const instances = new BrowserInstances(new RelayAccess());
 	try {
-		// Long past the relay's own start, so only the drop makes a reconnect plausible.
-		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS * 2);
 		const paired = pair(instances, "profile_instance_a", "Work Chrome");
+		// The relay's first request, served at once while the browser is connected.
+		expect(Bun.peek.status(instances.settled())).toBe("fulfilled");
+		// Long past that request, so only the drop makes a reconnect plausible.
+		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS * 2);
 		instances.extClosed(paired.socket);
 		const waiting = instances.settled();
 		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS - 1);
