@@ -3732,6 +3732,52 @@ it("lists a row's own press alongside every other action the row advertises", as
 	}
 });
 
+it("prints a sheet once when the roster listed it before it reported attaching", async () => {
+	const f = await fixture();
+	// Right after the command that opens it, a sheet is already a window of
+	// the pid while its parent does not yet report it attached, so that read
+	// prints it as a window the app opened. Once it is attached it is the
+	// sheet: printed once, and its refs the ones that act.
+	const sheet = { ...f.row, window_id: 5, title: "Export", bounds: { x: 30, y: 40, width: 120, height: 80 } };
+	let windows: WindowRow[] = [f.row];
+	try {
+		f.state.hook = async (name, args) => {
+			if (name === "list_windows") return reply({ windows });
+			if (name !== "get_window_state" || args.window_id !== 5) return undefined;
+			return reply({
+				pid: 101,
+				window_id: 5,
+				snapshot_id: "sheet-1",
+				related_windows: [],
+				window_bounds: sheet.bounds,
+				elements: [
+					{ element_index: 1, element_token: "sheet-1:1", role: "AXSheet", label: "export", depth: 0 },
+					{ element_index: 2, element_token: "sheet-1:2", role: "AXButton", label: "Save", depth: 1 },
+				],
+			});
+		};
+		await f.session.observe(f.context, f.window);
+		windows = [f.row, sheet];
+		await f.session.press(f.context, f.window, "cmd+e", undefined, { delivery: "foreground" });
+		expect((await f.session.observe(f.context, f.window)).tree).toContain(
+			'window 5 "Export" — opened by this app, driven through this window\'s refs',
+		);
+		f.state.relatedWindows = [{ pid: 101, window_id: 5, title: "Export", relation: "sheet" }];
+		const observation = await f.session.observe(f.context, f.window);
+		expect(observation.tree).toContain('sheet "Export" (window 5) — modal over window 1');
+		expect(observation.tree).not.toContain("opened by this app");
+		expect(observation.tree.match(/button "Save"/g)).toHaveLength(1);
+		const save = observation.elements.find(element => element.label === "Save")!;
+		await f.session.click(f.context, observation.window, save.ref);
+		expect(f.lastDispatch()).toMatchObject({
+			name: "click",
+			args: { window_id: 5, pid: 101, element_token: "sheet-1:2", snapshot_id: "sheet-1" },
+		});
+	} finally {
+		await f.close();
+	}
+});
+
 it("nests an attached sheet's own tree under its parent and dispatches its refs to the sheet", async () => {
 	const f = await fixture();
 	const sheet = { ...f.row, window_id: 5, title: "Save", bounds: { x: 30, y: 40, width: 120, height: 80 } };

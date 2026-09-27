@@ -1469,6 +1469,11 @@ export class CuaComputerSession implements ComputerBackend {
 			let modal: SheetCensus | undefined;
 			for (const sheet of attached) {
 				this.#sheets.set(sheet.id, { parent: current.id, title: sheet.title });
+				// A sheet the roster listed before it reported attaching (the
+				// read right after the command that opened it) was taken for a
+				// window this app opened; it prints once, as the sheet, or the
+				// second walk's refs would retire the ones printed here.
+				this.#inline.delete(sheet.id);
 				let block = `sheet ${JSON.stringify(sheet.title)} (window ${sheet.id}) — modal over window ${current.id}`;
 				try {
 					const nested = await this.#sheetRows(context, sheet, options, query);
