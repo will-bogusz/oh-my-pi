@@ -617,9 +617,16 @@ describe("browser tab verbs per conversation", () => {
 				expect(await taught(names[1]!)).toBe(true);
 				expect(await taught(names[1]!)).toBe(false);
 			} finally {
-				await prelude
-					.invoke({ action: "close", all: true }, { session, toolCallId: `verbs-close-${crypto.randomUUID()}` })
-					.catch(() => undefined);
+				// Each tab belongs to the conversation that opened it.
+				for (const [conversation, name] of [
+					["conversation-a", names[0]!],
+					["conversation-b", names[1]!],
+				] as const) {
+					sessionId = conversation;
+					await prelude
+						.invoke({ action: "close", name }, { session, toolCallId: `verbs-close-${crypto.randomUUID()}` })
+						.catch(() => undefined);
+				}
 			}
 		},
 		30_000,
