@@ -2517,8 +2517,7 @@ it("reads a window once more when its frame moved during the read, and refuses a
 	const f = await fixture();
 	let moves = 1;
 	try {
-		// The frame moves while the driver walks the window, the way a window
-		// still opening to its frame does.
+		// The frame moves while the driver walks the window.
 		f.state.hook = async name => {
 			if (name === "get_window_state" && moves > 0) {
 				moves--;
@@ -2535,6 +2534,21 @@ it("reads a window once more when its frame moved during the read, and refuses a
 			"StaleFrame: window geometry changed during observation",
 		);
 		expect(f.calls.filter(call => call.name === "get_window_state")).toHaveLength(4);
+		// Any other refusal of the read is not retried.
+		f.state.wrongIdentity = true;
+		await expect(f.session.observe(f.context, f.window)).rejects.toThrow("WrongWindow");
+		expect(f.calls.filter(call => call.name === "get_window_state")).toHaveLength(5);
+		// After a mutation the geometry re-read is the observation's one
+		// re-sample: titles that still disagree do not buy a third read.
+		f.state.wrongIdentity = false;
+		f.state.role = "AXWindow";
+		f.state.label = "Previous document";
+		const target = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		await f.session.click(f.context, f.window, target);
+		f.calls.length = 0;
+		moves = 1;
+		await f.session.observe(f.context, f.window);
+		expect(f.calls.filter(call => call.name === "get_window_state")).toHaveLength(2);
 	} finally {
 		await f.close();
 	}

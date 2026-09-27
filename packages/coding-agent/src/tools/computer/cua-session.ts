@@ -1384,17 +1384,18 @@ export class CuaComputerSession implements ComputerBackend {
 			// and the reply says so itself: the header's title and the tree's
 			// own window row disagree. One re-sample returns the settled tree in
 			// the same cell, which is what the model spent its next cell on.
-			const settling = this.#mutated.delete(window.id);
+			let settling = this.#mutated.delete(window.id);
 			const started = Date.now();
 			this.#invalidate(window);
-			// A window still moving to its frame (one that has only just
-			// opened, say) refuses the read that spanned the move. The same
-			// window is read once more after the settle; a second move stands.
+			// A read the window's frame moved under (seen right after a launch)
+			// is refused by the geometry check. It minted nothing, so the same
+			// window is simply read once more after the settle; a second move
+			// stands. That re-read is the observation's one re-sample.
 			let { reply, current } = await this.#state(context, window, read).catch(async (error: unknown) => {
 				if (!(error instanceof GeometryChangedError)) throw error;
+				settling = false;
 				await Bun.sleep(RESAMPLE_SETTLE_MS);
 				throwIfAborted(context.signal);
-				this.#invalidate(window);
 				return await this.#state(context, window, read);
 			});
 			let walked = this.#walk(current, reply, options, query);
