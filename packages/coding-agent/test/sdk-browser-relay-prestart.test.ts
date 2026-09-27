@@ -9,10 +9,11 @@ import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import * as brokerClients from "@oh-my-pi/pi-coding-agent/launch/client";
 import type { DaemonBrokerClient } from "@oh-my-pi/pi-coding-agent/launch/client";
 import type { DaemonOperation, DaemonRpcResult } from "@oh-my-pi/pi-coding-agent/launch/protocol";
-import { createAgentSession } from "@oh-my-pi/pi-coding-agent/sdk";
+import { createAgentSession, type ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import type { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
 import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
 import { findFreeCdpPort } from "@oh-my-pi/pi-coding-agent/tools/browser/attach";
+import { listChromeInstances } from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
 import * as relayDaemon from "@oh-my-pi/pi-coding-agent/tools/browser/relay/daemon";
 import { RELAY_PROTOCOL_VERSION, RELAY_SERVICE_NAME } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
 import { removeSyncWithRetries, Snowflake } from "@oh-my-pi/pi-utils";
@@ -63,8 +64,11 @@ describe("browser relay prestart at session start", () => {
 	let modelRegistry: ModelRegistry;
 	const sessions: AgentSession[] = [];
 	const brokers: FakeRelayBroker[] = [];
+	const ambientRelayFlag = process.env.PI_BROWSER_RELAY;
 
 	beforeAll(async () => {
+		// PI_BROWSER_RELAY overrides the setting both ways; the cases below set relay mode through settings only.
+		delete process.env.PI_BROWSER_RELAY;
 		registryDir = path.join(os.tmpdir(), `pi-relay-prestart-${Snowflake.next()}`);
 		fs.mkdirSync(registryDir, { recursive: true });
 		authStorage = await AuthStorage.create(path.join(registryDir, "auth.db"));
@@ -78,12 +82,13 @@ describe("browser relay prestart at session start", () => {
 	});
 
 	afterAll(async () => {
+		if (ambientRelayFlag !== undefined) process.env.PI_BROWSER_RELAY = ambientRelayFlag;
 		for (const session of sessions) await session.dispose().catch(() => {});
 		authStorage.close();
 		if (fs.existsSync(registryDir)) removeSyncWithRetries(registryDir);
 	});
 
-	const openSession = async (overrides: Record<string, unknown>) => {
+	const fakeBroker = () => {
 		const broker = new FakeRelayBroker();
 		brokers.push(broker);
 		vi.spyOn(brokerClients, "daemonClientForGlobal").mockResolvedValue(broker);
@@ -91,6 +96,10 @@ describe("browser relay prestart at session start", () => {
 		const ensure = vi.spyOn(relayDaemon, "ensureRelayDaemon");
 		const pingHeld = Promise.withResolvers<void>();
 		broker.pingGate = pingHeld.promise;
+		return { broker, ensure, releasePing: pingHeld.resolve };
+	};
+
+	const createSession = async (overrides: Record<string, unknown>) => {
 		const { session } = await createAgentSession({
 			cwd: registryDir,
 			agentDir: registryDir,
@@ -108,26 +117,33 @@ describe("browser relay prestart at session start", () => {
 			skipPythonPreflight: true,
 		});
 		sessions.push(session);
-		return { session, broker, ensure, releasePing: pingHeld.resolve };
+		return session;
 	};
 
-	it("starts the loopback relay once, without holding up session creation", async () => {
+	it("starts the loopback relay once, without holding up session creation or racing the first acquisition", async () => {
+		const { broker, ensure, releasePing } = fakeBroker();
 		const relayUrl = `http://127.0.0.1:${await findFreeCdpPort()}`;
-		const { session, broker, ensure, releasePing } = await openSession({
-			"browser.enabled": true,
-			"browser.relay": true,
-			"browser.relayUrl": relayUrl,
-		});
+		const relayOn = { "browser.enabled": true, "browser.relay": true, "browser.relayUrl": relayUrl };
+		const session = await createSession(relayOn);
 		// The session exists while the broker has not answered the prestart's ping.
 		expect(ensure).toHaveBeenCalledTimes(1);
 		expect(ensure.mock.calls[0]?.[0]).toEqual({ cdpUrl: relayUrl });
 		expect(broker.operations.map(operation => operation.op)).toEqual(["ping"]);
+
+		// A second session (a subagent) and the first acquisition arrive while that start is in flight:
+		// the session adds no ensure, and the acquisition waits for the prestart before its own.
+		await createSession(relayOn);
+		const toolSession = { settings: session.settings } as unknown as ToolSession;
+		const acquisition = listChromeInstances(toolSession).catch(() => undefined);
+		expect(ensure).toHaveBeenCalledTimes(1);
 
 		releasePing();
 		expect(await ensure.mock.results[0]?.value).toEqual({
 			service: RELAY_SERVICE_NAME,
 			protocol: RELAY_PROTOCOL_VERSION,
 		});
+		await acquisition;
+		expect(ensure).toHaveBeenCalledTimes(2);
 		const starts = broker.operations.filter(operation => operation.op === "start");
 		expect(starts).toHaveLength(1);
 		expect(starts[0]?.spec.args.slice(-2)).toEqual(["--port", new URL(relayUrl).port]);
@@ -135,7 +151,7 @@ describe("browser relay prestart at session start", () => {
 		// Later prelude reads and prompt rebuilds within the session do not ensure again.
 		session.getEvalPreludes();
 		await session.runToolRegistryMutation(async () => undefined);
-		expect(ensure).toHaveBeenCalledTimes(1);
+		expect(ensure).toHaveBeenCalledTimes(2);
 	}, 30_000);
 
 	for (const [label, overrides] of [
@@ -147,7 +163,8 @@ describe("browser relay prestart at session start", () => {
 		],
 	] as const) {
 		it(`starts nothing when ${label}`, async () => {
-			const { session, broker, ensure } = await openSession(overrides);
+			const { broker, ensure } = fakeBroker();
+			const session = await createSession(overrides);
 			session.getEvalPreludes();
 			await session.runToolRegistryMutation(async () => undefined);
 			expect(ensure).not.toHaveBeenCalled();
