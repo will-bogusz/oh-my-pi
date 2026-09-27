@@ -93,8 +93,13 @@ export class BrowserInstances {
 	 * back; cleared by any hello and by a request that did not wait.
 	 */
 	#unansweredWaitMs: number | undefined;
-	/** When this relay started: its paired browsers may still be redialing a relay that was down. */
-	readonly #startedAt = Date.now();
+	/**
+	 * When this relay was first asked to act. Until then its paired browsers may
+	 * still be redialing (a relay that was down) or not yet running (a relay
+	 * started ahead of use), so the first request gets the grace a relay started
+	 * for it would have had, however long the relay has been idle.
+	 */
+	#firstRequestAt: number | undefined;
 	/**
 	 * Bound port of the relay serving these instances, set once it is listening.
 	 * Only used to spell out the reinstall command a build-skewed extension needs.
@@ -116,23 +121,24 @@ export class BrowserInstances {
 		return [...this.#instances.keys()].some(id => this.bridge.connected(id));
 	}
 	/**
-	 * A freshly started relay answers HTTP before the paired extension has
-	 * reconnected: the extension redials on a backoff that grew while the relay
-	 * was down, up to {@link EXTENSION_RECONNECT_MAX_MS} apart. When the browser
-	 * asked for (else any paired browser) is known but not connected, wait for
-	 * its hello — but only within `graceMs` of this relay starting or of that
-	 * browser dropping, the only windows in which a redial is on its way. A
-	 * browser gone for longer (Chrome closed) is refused at once, so a caller
-	 * that does not know pays nothing per call. A wait that expires is
-	 * remembered, so the refusal says it waited.
+	 * A relay can answer HTTP before the paired extension has (re)connected:
+	 * the extension redials on a backoff that grew while no relay was up, up to
+	 * {@link EXTENSION_RECONNECT_MAX_MS} apart. When the browser asked for (else
+	 * any paired browser) is known but not connected, wait for its hello — but
+	 * only within `graceMs` of this relay's first request or of that browser
+	 * dropping, the only windows in which a redial is on its way. A browser gone
+	 * for longer (Chrome closed) is refused at once, so a caller that does not
+	 * know pays nothing per call. A wait that expires is remembered, so the
+	 * refusal says it waited.
 	 */
 	settled(opts: { browserId?: string; graceMs?: number } = {}): Promise<void> {
 		const { browserId, graceMs = RELAY_RECONNECT_GRACE_MS } = opts;
+		this.#firstRequestAt ??= Date.now();
 		const named = browserId ? this.#instances.get(browserId) : undefined;
 		const connected = () => (named ? this.bridge.connected(named.id) : this.ready);
 		if (this.#instances.size === 0 || connected()) return Promise.resolve();
 		const awaited = named ? [named] : [...this.#instances.values()];
-		const lastSeen = Math.max(this.#startedAt, ...awaited.map(instance => instance.disconnectedAt ?? 0));
+		const lastSeen = Math.max(this.#firstRequestAt, ...awaited.map(instance => instance.disconnectedAt ?? 0));
 		const remaining = lastSeen + graceMs - Date.now();
 		if (remaining <= 0) {
 			this.#unansweredWaitMs = undefined;

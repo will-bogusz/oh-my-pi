@@ -124,6 +124,9 @@ export async function chromeRequest<T>(url: string, args: Record<string, unknown
 	return value as T;
 }
 
+/** Session-start relay ensures still in flight, by endpoint; one per process at a time. */
+const relayPrestarts = new Map<string, Promise<void>>();
+
 /**
  * `browser.relay` is the switch for existing-Chrome control, not just for
  * `browser.open`: with it off, discovery and claiming are off too, so nothing
@@ -141,6 +144,11 @@ async function chromeEndpoint(session: ToolSession, signal?: AbortSignal, forced
 			"Control of existing Chrome browsers is off. Enable the browser.relay setting (or pass app.relay:true), and check PI_BROWSER_RELAY is not set to 0.",
 		);
 	const url = kind.cdpUrl.replace(/\/+$/, "");
+	// A session-start ensure still in flight owns the cold start. Racing it from
+	// this process can use up this call's start rounds while that start is still
+	// being published, and fail an acquisition the relay was about to serve.
+	const prestart = relayPrestarts.get(url);
+	if (prestart) await untilAborted(signal, prestart);
 	// One probe per acquisition: starting the daemon already reads `/health`,
 	// and what it read is what decides whether this build can drive the relay.
 	const health = isLoopbackRelayUrl(url)
@@ -158,6 +166,39 @@ async function chromeEndpoint(session: ToolSession, signal?: AbortSignal, forced
 				"or stop the stale relay on that port; do not retry against this endpoint.",
 		);
 	return url;
+}
+
+/**
+ * Start the loopback relay while the session starts instead of inside its
+ * first acquisition. A relay started on demand makes that acquisition wait
+ * for the extension's next redial (backoff up to `EXTENSION_RECONNECT_MAX_MS`);
+ * started now, the redial usually lands before the model's first browser call.
+ * Fire-and-forget and silent: failures are debug-logged, and the acquisition
+ * still ensures the relay itself. The started relay is broker-owned, so it
+ * outlives this session while any omp process holds the global broker.
+ */
+export function prestartChromeRelay(session: ToolSession): void {
+	const kind = resolveRelayKind({
+		settingEnabled: cfgBrowserRelay.get(session.settings),
+		url: cfgBrowserRelayUrl.get(session.settings),
+	});
+	if (!kind || !isLoopbackRelayUrl(kind.cdpUrl)) return;
+	const cdpUrl = kind.cdpUrl;
+	if (relayPrestarts.has(cdpUrl)) return;
+	const pending = ensureRelayDaemon({ cdpUrl })
+		.then(
+			health => {
+				if (!health) logger.debug("Browser relay prestart found no relay", { cdpUrl });
+			},
+			(error: unknown) => {
+				logger.debug("Browser relay prestart failed", {
+					cdpUrl,
+					error: error instanceof Error ? error.message : String(error),
+				});
+			},
+		)
+		.finally(() => relayPrestarts.delete(cdpUrl));
+	relayPrestarts.set(cdpUrl, pending);
 }
 
 /** Per-call escape hatch for an explicit `app.relay: true` against a disabled setting. */

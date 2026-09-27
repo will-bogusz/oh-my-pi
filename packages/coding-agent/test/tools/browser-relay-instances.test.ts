@@ -271,13 +271,37 @@ it("holds a fresh relay's first request until the paired extension reconnects, a
 	}
 });
 
+it("gives the first request the grace of a fresh relay however long the relay idled before it", () => {
+	vi.useFakeTimers();
+	const access = new RelayAccess();
+	const before = new BrowserInstances(access);
+	const { credential } = pair(before, "profile_instance_a", "Work Chrome");
+	before.close();
+	// Started ahead of use (at session start) while Chrome was closed; Chrome opens much later.
+	const instances = new BrowserInstances(access);
+	try {
+		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS * 3);
+		const first = instances.settled();
+		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS - 1);
+		expect(Bun.peek.status(first)).toBe("pending");
+		reconnect(instances, "profile_instance_a", "Work Chrome", credential);
+		expect(Bun.peek.status(first)).toBe("fulfilled");
+		expect(instances.select().id).toBe("profile_instance_a");
+	} finally {
+		instances.close();
+		vi.useRealTimers();
+	}
+});
+
 it("waits for a browser that just dropped, then refuses at once once it has been gone a redial interval", () => {
 	vi.useFakeTimers();
 	const instances = new BrowserInstances(new RelayAccess());
 	try {
-		// Long past the relay's own start, so only the drop makes a reconnect plausible.
-		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS * 2);
 		const paired = pair(instances, "profile_instance_a", "Work Chrome");
+		// The relay's first request, served at once while the browser is connected.
+		expect(Bun.peek.status(instances.settled())).toBe("fulfilled");
+		// Long past that request, so only the drop makes a reconnect plausible.
+		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS * 2);
 		instances.extClosed(paired.socket);
 		const waiting = instances.settled();
 		vi.advanceTimersByTime(RELAY_RECONNECT_GRACE_MS - 1);
