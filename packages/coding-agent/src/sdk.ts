@@ -260,6 +260,7 @@ import {
 	xdevEntries,
 } from "./tools";
 import { createBrowserPrelude } from "./tools/browser";
+import { prestartChromeRelay } from "./tools/browser/managed-chrome";
 import { isMCPToolName, normalizeToolNames } from "./tools/builtin-names";
 import { createComputerPrelude } from "./tools/computer";
 import { ToolContextStore } from "./tools/context";
@@ -2185,7 +2186,12 @@ async function createAgentSessionScoped(options: CreateAgentSessionOptions): Pro
 			if (restrictToolNames || !toolRegistry.has("eval") || !activeToolNames.has("eval")) return [];
 			const builtins: EvalPreludeDefinition[] = [];
 			if (cfgBrowserEnabled.get(settings)) {
-				browserPrelude ??= createBrowserPrelude(toolSession);
+				if (!browserPrelude) {
+					browserPrelude = createBrowserPrelude(toolSession);
+					// Once per session, when the prelude is first built: the relay's cold
+					// start then overlaps session start instead of the first claim.
+					prestartChromeRelay(toolSession);
+				}
 				builtins.push(browserPrelude);
 			}
 			if (cfgComputerEnabled.get(settings)) {

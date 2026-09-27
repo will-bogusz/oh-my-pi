@@ -160,6 +160,35 @@ async function chromeEndpoint(session: ToolSession, signal?: AbortSignal, forced
 	return url;
 }
 
+/**
+ * Start the loopback relay while the session starts instead of inside its
+ * first acquisition. A relay started on demand makes that acquisition wait
+ * for the extension's next redial (backoff up to `EXTENSION_RECONNECT_MAX_MS`);
+ * started now, the redial usually lands before the model's first browser call.
+ * Fire-and-forget and silent: failures are debug-logged, and the acquisition
+ * still ensures the relay itself. The started relay is broker-owned, so it
+ * outlives this session while any omp process holds the global broker.
+ */
+export function prestartChromeRelay(session: ToolSession): void {
+	const kind = resolveRelayKind({
+		settingEnabled: cfgBrowserRelay.get(session.settings),
+		url: cfgBrowserRelayUrl.get(session.settings),
+	});
+	if (!kind || !isLoopbackRelayUrl(kind.cdpUrl)) return;
+	const cdpUrl = kind.cdpUrl;
+	void ensureRelayDaemon({ cdpUrl }).then(
+		health => {
+			if (!health) logger.debug("Browser relay prestart found no relay", { cdpUrl });
+		},
+		(error: unknown) => {
+			logger.debug("Browser relay prestart failed", {
+				cdpUrl,
+				error: error instanceof Error ? error.message : String(error),
+			});
+		},
+	);
+}
+
 /** Per-call escape hatch for an explicit `app.relay: true` against a disabled setting. */
 export interface ChromeAccessOptions {
 	browserId?: string;

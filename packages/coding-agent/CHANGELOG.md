@@ -13,6 +13,7 @@
 - Browser: table and grid rows and cells the page makes clickable (own click listener, an uninherited pointer cursor, or a `tabindex`) get refs, so webmail and admin lists can be opened by ref; plain data tables stay ref-free. Layout-table parts print as `row`/`cell`.
 - Browser: `tab.ref()` refuses a missing, empty or non-string ref at the call, naming it, instead of a `token.trim` TypeError at the first action.
 - Browser: the prompt fits its 650-word budget and now covers `includeAll`, `display: false`, `check()`/`uncheck()`, `uploadFile`, and what a bare `open()` does while the relay is on.
+- Browser: with `browser.relay` on and a loopback `browser.relayUrl` (the default is), the relay daemon starts in the background as a session with the browser prelude starts, rather than on the first browser call, so the extension's reconnect backoff (up to 10 s) usually elapses before that call instead of inside it. Silent and non-blocking: a failure is logged at debug level and the first call still starts the relay. The relay stays up while any omp process holds the global relay broker, as before.
 
 ### Breaking Changes
 ### Added

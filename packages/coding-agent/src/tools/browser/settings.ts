@@ -38,7 +38,7 @@ export const cfgBrowserRelay = register({
 		group: "Grep & Browser",
 		label: "Existing Chrome browsers",
 		description:
-			"Work in paired Chrome profiles using task tabs. Install the extension with `omp browser-relay install`, then use `omp browser-relay pair` and enter its code and a profile name in extension options. The local service starts when needed. Takes precedence over Browser CDP URL; PI_BROWSER_RELAY overrides this setting.",
+			"Work in paired Chrome profiles using task tabs. Install the extension with `omp browser-relay install`, then use `omp browser-relay pair` and enter its code and a profile name in extension options. The local service starts with each session (and when a call needs it). Takes precedence over Browser CDP URL; PI_BROWSER_RELAY overrides this setting.",
 	},
 });
 
