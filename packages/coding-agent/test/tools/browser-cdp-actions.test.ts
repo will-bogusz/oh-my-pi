@@ -620,18 +620,19 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	60_000,
 );
 
-const CONTEXT_MENU_PAGE = `<!doctype html><title>Volumes</title>
+const CONTEXT_MENU_PAGE = `<!doctype html><title>Files</title>
 <body data-events="">
-<div role="button" tabindex="0" id="vol">pgdata-2</div>
-<label><input type="checkbox" id="keep"> Keep data</label>
+<div role="button" tabindex="0" id="item">report.pdf</div>
+<label><input type="checkbox" id="keep"> Keep a copy</label>
+<p><label style="position:relative;display:inline-block;padding-left:28px"><input type="checkbox" aria-label="Styled" style="position:absolute;left:0;top:0;margin:0;width:20px;height:20px"><span class="dot" style="position:absolute;left:0;top:0;width:20px;height:20px;background:#39f"></span>Styled</label></p>
 <script>
-const log = e => document.body.dataset.events += e.type + ":" + e.button + ":" + e.isTrusted + ",";
-for (const type of ["mousedown", "click", "contextmenu"]) document.getElementById("vol").addEventListener(type, log);
-document.getElementById("vol").addEventListener("contextmenu", e => {
+const log = e => document.body.dataset.events += e.type + ":" + e.button + ":" + e.buttons + ":" + e.isTrusted + ",";
+for (const type of ["mousedown", "click", "contextmenu"]) document.getElementById("item").addEventListener(type, log);
+document.getElementById("item").addEventListener("contextmenu", e => {
   e.preventDefault();
   const menu = document.createElement("div");
   menu.setAttribute("role", "menu");
-  menu.innerHTML = '<div role="menuitem" tabindex="-1">Move to</div>';
+  menu.innerHTML = '<div role="menuitem" tabindex="-1">Open with</div>';
   document.body.append(menu);
 });
 </script>`;
@@ -654,19 +655,27 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 				const outcome = await run<{ events: string; menu: boolean; keep: boolean }>(
 					`const observation = await tab.observe();
 					 const ref = name => observation.elements.find(e => e.name === name).ref;
-					 await (await tab.ref(ref("pgdata-2"))).click({ button: "right" });
-					 await (await tab.ref(ref("Keep data"))).click({ button: "right" });
-					 const menu = (await tab.observe({ diff: false, display: false })).tree.includes("Move to");
+					 await (await tab.ref(ref("report.pdf"))).click({ button: "right" });
+					 await (await tab.ref(ref("Keep a copy"))).click({ button: "right" });
+					 const menu = (await tab.observe({ diff: false, display: false })).tree.includes("Open with");
 					 return { events: await tab.evaluate(() => document.body.dataset.events), menu, keep: await tab.evaluate(() => document.getElementById("keep").checked) };`,
 				);
-				expect(outcome.events).toBe("mousedown:2:true,contextmenu:2:true,");
+				expect(outcome.events).toBe("mousedown:2:2:true,contextmenu:2:2:true,");
 				expect(outcome.menu).toBe(true);
 				expect(outcome.keep).toBe(false);
 				const refused = await runError(
 					`const observation = await tab.observe({ display: false });
-					 await (await tab.ref(observation.elements.find(e => e.name === "pgdata-2").ref)).click({ button: "side" });`,
+					 await (await tab.ref(observation.elements.find(e => e.name === "report.pdf").ref)).click({ button: "side" });`,
 				);
-				expect(refused).toContain('unknown button "side"; use one of left, right, middle, back, forward');
+				expect(refused).toContain('unknown button "side"');
+				// A label passes only a left click on to its control, so a right press on
+				// a control its own label draws over would reach the label, not the control.
+				expect(
+					await runError(
+						`const observation = await tab.observe({ display: false });
+						 await (await tab.ref(observation.elements.find(e => e.name === "Styled").ref)).click({ button: "right" });`,
+					),
+				).toContain("blocked: covered by <span.dot> in its label, which passes only a left click on to it");
 			});
 		} finally {
 			server.stop(true);

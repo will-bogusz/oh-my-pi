@@ -2279,8 +2279,8 @@ class CmuxElementHandle {
 		this.#selector = selector;
 	}
 
-	async click(opts?: { count?: number; button?: string }): Promise<void> {
-		// cmux clicks elements through its own left-click RPC; a right click would land as a left one.
+	async click(opts?: { button?: string }): Promise<void> {
+		// Both cmux element-click paths (its click RPC and the synthetic-event fallback) press the left button.
 		if (opts?.button !== undefined && opts.button !== "left")
 			throw new ToolError(
 				`element.click({ button: ${JSON.stringify(opts.button)} }) is not supported in a cmux browser, which only left-clicks elements.`,

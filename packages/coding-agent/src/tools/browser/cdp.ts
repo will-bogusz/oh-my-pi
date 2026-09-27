@@ -315,11 +315,12 @@ interface CheckedState {
  * nodes), `display:none` on it or an ancestor, no area, `visibility` that
  * hit-testing skips, or another element over the centre of its first fragment
  * (the fragment the press targets). An ancestor at that point is not a cover,
- * and neither is one of the control's own labels, which forwards the click.
+ * and for a left press (`primary`) neither is one of the control's own labels,
+ * which forwards that click; a label forwards no other button, so it covers.
  * A checkable control that can be pressed also reports its state, so a click
  * can tell whether it took without a read of its own before the press.
  */
-const PRESS_BLOCKER = `function () {
+const PRESS_BLOCKER = `function (primary) {
 	const element = this;
 	if (!element.isConnected) return { stale: "it is detached from the document" };
 	const view = element.ownerDocument.defaultView;
@@ -357,7 +358,10 @@ const PRESS_BLOCKER = `function () {
 		hit = nested;
 	}
 	if (!hit || contains(element, hit) || contains(hit, element)) return clear();
-	if (Array.from(element.labels || []).some(label => contains(label, hit))) return clear();
+	if (Array.from(element.labels || []).some(label => contains(label, hit))) {
+		if (primary !== false) return clear();
+		return { blocked: "covered by " + describe(hit) + " in its label, which passes only a left click on to it" };
+	}
 	return { blocked: "covered by " + describe(hit) };
 }`;
 
@@ -431,7 +435,7 @@ async function pressNode(
 	button: MouseButton = "left",
 ): Promise<{ point: Point; before?: CheckedState }> {
 	const point = await actionPoint(node, label, signal);
-	const probe = (await callOnNode(node, PRESS_BLOCKER, [], signal)) as PressProbe;
+	const probe = (await callOnNode(node, PRESS_BLOCKER, [button === "left"], signal)) as PressProbe;
 	const refusal = pressRefusal(node, label, probe);
 	if (refusal) throw refusal;
 	// The move both primes hover state and drives the in-page cursor overlay the
@@ -471,8 +475,9 @@ const CHECKED_AFTER = `function (before) {
 }`;
 
 /**
- * Click the node with `button` (left by default; `right` opens the page's
- * context menu). A left click on a checkbox, radio or switch is also expected
+ * Click the node with `button` (left by default; `right` is a trusted
+ * right-click, which opens the page's own context menu when it has one). A
+ * left click on a checkbox, radio or switch is also expected
  * to change it (toggle it, or select an unselected radio); when its state still
  * reads the same after the release, the click is reported as not taken, with
  * what the press landed on when that was not the control itself.
