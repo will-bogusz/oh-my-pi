@@ -40,7 +40,7 @@ import { resolveRelayKind } from "./browser/relay/kind";
 import type { AriaSnapshotOptions } from "./browser/aria/aria-snapshot";
 import { type ChromeDialogState, chromeDialogState } from "./browser/dialog-journal";
 import type { InstanceTab } from "./browser/relay/instances";
-import { chromeTabName } from "./browser/relay/managed-tabs";
+import { chromeTabName, shortUrl } from "./browser/relay/managed-tabs";
 import type { InitialBrowserState, RunResultOk, ScreenshotResult } from "./browser/tab-protocol";
 import type { OutputMeta } from "@oh-my-pi/pi-tui/tools/output-meta";
 import {
@@ -50,6 +50,7 @@ import {
 	dropHeadlessTabs,
 	getTab,
 	listTabs,
+	type ManagedTabInfo,
 	releaseIdleTabsForOwner,
 	releaseTabsForActor,
 	releaseTab,
@@ -123,6 +124,26 @@ function tabVerbsOnce(session: ToolSession): string | undefined {
 	if (verbsTaught.has(actor)) return undefined;
 	verbsTaught.add(actor);
 	return BROWSER_TAB_VERBS;
+}
+
+/**
+ * Names the tabs this actor opened with `open` that `matches` picks out, and
+ * their route, for a `getTab`/`claim` that named one: those take only tabs in
+ * the user's Chrome, and the relay's answer for an id it never issued (a CDP
+ * target id from `browser.tabs()`, say) suggests a restart that never happened.
+ */
+function openedTabRoute(session: ToolSession, matches: (tab: ManagedTabInfo) => boolean): string | undefined {
+	const actor = browserActorId(session);
+	const opened = listTabs().filter(
+		tab =>
+			!isManagedChromeHandle(tab.name) &&
+			(getTab(tab.name)?.ownerActorId ?? actor) === actor &&
+			matches(tab),
+	);
+	if (opened.length === 0) return undefined;
+	const routes = opened.map(tab => `browser.tab(${JSON.stringify(tab.name)}) (${shortUrl(tab.url)})`).join(", ");
+	const one = opened.length === 1;
+	return `${one ? "a tab" : "tabs"} this session opened with browser.open(); ${one ? "it stays" : "they stay"} open across cells: ${routes}. getTab and claim take only tabs in the user's Chrome.`;
 }
 
 const appSchema = type({
@@ -545,15 +566,31 @@ async function invokeBrowser(
 				throw new ToolError(
 					"getTab selectors cannot be combined with an id, creation, or a second browser selection",
 				);
-			const selected = parsed.selector
-				? selectChromeTab(
-						await discoverChromeTabs(session, signal, {
-							browserId: parsed.selector.browserId,
-							relay: parsed.app?.relay,
-						}),
-						parsed.selector,
-					)
-				: undefined;
+			const claimId = parsed.action === "claim" ? parsed.id : undefined;
+			const openedById = claimId && openedTabRoute(session, tab => tab.targetId === claimId || tab.name === claimId);
+			if (openedById) throw new ToolError(`${JSON.stringify(claimId)} is not a Chrome tab id: it names ${openedById}`);
+			let selected: InstanceTab | undefined;
+			if (parsed.selector) {
+				const selector = parsed.selector;
+				// Only a title or URL can name an opened tab; windowId and browserId are Chrome's.
+				const openedBySelector = () =>
+					selector.title?.trim() || selector.url?.trim()
+						? openedTabRoute(session, tab => matchesChromeTab(tab, { title: selector.title, url: selector.url }))
+						: undefined;
+				let discovered: InstanceTab[];
+				try {
+					discovered = await discoverChromeTabs(session, signal, {
+						browserId: selector.browserId,
+						relay: parsed.app?.relay,
+					});
+				} catch (error) {
+					const route = !signal.aborted && error instanceof ToolError ? openedBySelector() : undefined;
+					throw route ? new ToolError(`${(error as ToolError).message} This selector matches ${route}`) : error;
+				}
+				const route = discovered.some(tab => matchesChromeTab(tab, selector)) ? undefined : openedBySelector();
+				if (route) throw new ToolError(`No Chrome tab matches this selector; it matches ${route}`);
+				selected = selectChromeTab(discovered, selector);
+			}
 			const handle = await acquireChromeTab(session, {
 				action: parsed.action === "claim" ? "claim" : "create",
 				id: selected?.id ?? parsed.id,

@@ -35,7 +35,10 @@ export interface ChromeTabSelector {
  * the whole string made `getTab({title})` unusable for the names a model can
  * actually see. Ambiguity is still an error, never a silent first-match.
  */
-export function matchesChromeTab(tab: InstanceTab, selector: ChromeTabSelector): boolean {
+export function matchesChromeTab(
+	tab: Pick<InstanceTab, "title" | "url"> & Partial<Pick<InstanceTab, "browserId" | "windowId">>,
+	selector: ChromeTabSelector,
+): boolean {
 	return (
 		(selector.title === undefined ||
 			(tab.title ?? "").toLowerCase().includes(selector.title.trim().toLowerCase())) &&
