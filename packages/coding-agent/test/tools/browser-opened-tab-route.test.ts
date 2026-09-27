@@ -55,7 +55,10 @@ function startUserChrome(tab: { title: string; url: string }) {
 	relay.instances.extConnected(socket);
 	relay.instances.extMessage(
 		socket,
-		JSON.stringify({ t: "authenticate", auth: { id: "user", label: "User", pairingCode: relay.access.issueCode().code } }),
+		JSON.stringify({
+			t: "authenticate",
+			auth: { id: "user-profile-fixture", label: "User", pairingCode: relay.access.issueCode().code },
+		}),
 	);
 	relay.instances.extMessage(
 		socket,
@@ -114,10 +117,22 @@ describe("getTab and claim on a tab this session opened", () => {
 				const byId = await refusal(invoke({ action: "claim", id: targetId }));
 				expect(byId).toContain(route);
 				expect(byId).not.toContain("restarted");
+				// The route is the name; the page's URL is not repeated into the error.
+				expect(byId).not.toContain("data:text/html");
 
-				// A selector naming only the user's Chrome tab is still Chrome's to answer.
+				// Chrome answers whenever its own tabs are in question: a selector that
+				// matches the user's tab (and the opened one), a miss, a Chrome window.
+				expect(
+					((await invoke({ action: "discover" })).details as { value: unknown[] }).value,
+				).toHaveLength(1);
+				const both = await refusal(invoke({ action: "claim", selector: { title: "o" } }));
+				expect(both).not.toContain("browser.tab(");
 				const chromeMiss = await refusal(invoke({ action: "claim", selector: { title: "no such page" } }));
 				expect(chromeMiss).not.toContain("browser.tab(");
+				const inWindow = await refusal(invoke({ action: "claim", selector: { title: "order status", windowId: 1 } }));
+				expect(inWindow).not.toContain("browser.tab(");
+				// The tab's name is not a Chrome id and is left for Chrome to refuse.
+				expect(await refusal(invoke({ action: "claim", id: name }))).not.toContain("browser.tab(");
 
 				// With existing-Chrome control off, the refusal still names the route.
 				const unpaired = makeSession({ "browser.relay": false });
