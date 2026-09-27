@@ -65,7 +65,6 @@ import {
 	setFileInput,
 	setNodeChecked,
 	snapshotAccessibility,
-	StaleNodeError,
 	typeIntoNode,
 	waitForDomQuiet,
 } from "./cdp";
@@ -2003,25 +2002,7 @@ export class WorkerCore {
 		// selector helpers, so `(await tab.ref("e12")).click()` can't outrun the
 		// cell budget (issue #9535).
 		const element = (node: CdpNode): TabElement =>
-			this.#createElement(
-				node,
-				session.cwd,
-				(label, fn) =>
-					markHandled(
-						op(label, actionOpMs, fn).catch(error =>
-							this.#refusalWithPageNow(
-								error,
-								session.refs,
-								() =>
-									op("tab.observe()", quickOpMs, sig =>
-										this.#collectObservation({ refs: session.refs, signal: sig, display: false }),
-									),
-								active.rejectionOwner,
-							),
-						),
-					),
-				input,
-			);
+			this.#createElement(node, session.cwd, (label, fn) => op(label, actionOpMs, fn), input);
 		/** A selector action on the node the selector names now: one op, zero-match fail-fast. */
 		const onSelector = (
 			verb: string,
@@ -3167,37 +3148,6 @@ export class WorkerCore {
 					? response => pattern.test(response.url())
 					: response => response.url().includes(pattern);
 		return (await untilAborted(signal, () => page.waitForResponse(predicate, { timeout, signal }))) as HTTPResponse;
-	}
-
-	/**
-	 * An element op refused because the page no longer has its node: the refusal
-	 * stays a refusal, but it carries the page as read right after it, so the
-	 * model's next cell does not have to be a bare `tab.observe()` (every such
-	 * refusal in the transcripts was followed by exactly that cell). The read is
-	 * the ordinary observation: a diff against the tree last printed, refs
-	 * current under the tab's usual numbering, nothing mapped from the stale ref
-	 * to another element. It is not the diff baseline (`display: false`), since
-	 * only a caller that reads the error sees it. Only `compact` refs: a `uuid`
-	 * observation would void every ref the caller holds and hand back no value
-	 * to act from. A read that fails, or a tree over the inline budget, leaves
-	 * the plain refusal.
-	 */
-	async #refusalWithPageNow(
-		error: unknown,
-		refs: RefStyle | undefined,
-		observe: () => Promise<Observation>,
-		rejectionOwner: object,
-	): Promise<never> {
-		if (!(error instanceof StaleNodeError) || refs !== "compact") throw error;
-		const tree = await observe().then(
-			observation => observation.tree,
-			() => undefined,
-		);
-		if (tree === undefined || Buffer.byteLength(tree, "utf-8") > DEFAULT_MAX_BYTES) throw error;
-		throw markBrowserRunRejection(
-			new ToolError(`${error.fact} The page as read right after this refusal:\n${tree}`),
-			rejectionOwner,
-		);
 	}
 
 	/**
