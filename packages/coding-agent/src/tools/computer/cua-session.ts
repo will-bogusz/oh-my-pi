@@ -141,6 +141,15 @@ const SUBTREE_MAX_ROWS = 12;
  */
 const INLINE_WINDOW_ROWS = 40;
 /**
+ * How far an observation follows sheets attached to sheets: a panel's own
+ * sheet (a save panel's Go-to-Folder sheet) is reported only by the panel's
+ * walk, never by the document's. AppKit shows one sheet on a window at a
+ * time, so a chain is the usual shape; three levels is past any observed
+ * one, and each walked sheet costs one roster read and one `get_window_state`.
+ */
+const SHEET_DEPTH = 3;
+const SHEET_COUNT = 6;
+/**
  * The rows a query keeps: every row one of its literals matches
  * (case-insensitive substring over what the row prints, including the
  * window's own text carried beneath it), the ancestors that place it, and
@@ -682,6 +691,17 @@ function delivery(options: ActionOptions): Wire {
 function foreground(options: { delivery?: "background" | "foreground" }): void {
 	if (options.delivery !== "foreground") throw new ToolError("This desktop operation requires delivery: 'foreground'");
 }
+/**
+ * The calls whose `{ delivery: "foreground" }` form the driver does not hold
+ * to its background element-ancestry check, by the verb the caller types.
+ */
+const FOREGROUND_UNGATED: Record<string, string> = {
+	click: "click",
+	type_text: "type",
+	press_key: "press",
+	hotkey: "press",
+	scroll: "scroll",
+};
 const DETECT_WINDOW_CHANGE_TOOLS: Record<string, true> = {
 	click: true,
 	drag: true,
@@ -1235,6 +1255,7 @@ export class CuaComputerSession implements ComputerBackend {
 	async #window(selector: string | WindowSelector, note?: (text: string) => void): Promise<ComputerWindowIdentity> {
 		const filter = typeof selector === "string" ? { id: selector } : selector;
 		let matches = await this.#windows(filter);
+		if (filter.id !== undefined && !matches.length) matches = await this.#offLayerWindow(filter);
 		const pid = matches[0]?.pid;
 		if (filter.id === undefined && matches.length > 1 && matches.every(window => window.pid === pid)) {
 			// WindowServer can include invisible app helpers, and a row no
@@ -1283,16 +1304,34 @@ export class CuaComputerSession implements ComputerBackend {
 	#current(window: Pick<ComputerWindowIdentity, "id" | "pid">): Promise<ComputerWindowIdentity> {
 		return this.#window({ id: window.id, pid: window.pid });
 	}
+	/**
+	 * The driver's plain macOS roster is CGWindow layer 0. A window its app
+	 * declares modal (`AXModal`) sits above that layer (the modal-panel
+	 * level) while it is modal, and the driver reports it, on screen, only in
+	 * the view that carries the accessibility mapping — the roster `windows()`
+	 * prints for one app or pid. So an exact id the plain view lacks is
+	 * looked up there before it is called missing: under the pid the caller
+	 * named, else the pid the WindowServer files that window under. The
+	 * driver's row stays the only evidence the window exists. No other
+	 * platform has that second view.
+	 */
+	async #offLayerWindow(filter: WindowSelector): Promise<ComputerWindowIdentity[]> {
+		if (this.#platform !== "darwin") return [];
+		const pid = filter.pid ?? this.#roster()?.windows.find(window => window.id === filter.id)?.pid;
+		return pid === undefined ? [] : this.#annotatedWindows(pid, filter);
+	}
+	async #annotatedWindows(pid: number, selector: WindowSelector): Promise<ComputerWindowIdentity[]> {
+		const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
+		const roster = this.#windowRoster(data, selector, this.#roster());
+		const ax = this.#accessibilityWindows(data, pid);
+		return ax ? this.#withAccessibility(roster, ax) : roster;
+	}
 	async #listedWindows(selector: WindowSelector): Promise<ComputerWindowIdentity[]> {
 		const windows = await this.#windows(selector);
 		const pid = windows[0]?.pid;
 		if (pid === undefined || windows.some(window => window.pid !== pid || window.axBacked !== undefined))
 			return windows;
-		const { data } = await this.#call("list_windows", { pid, include_accessibility_metadata: true });
-		const sample = this.#roster();
-		const roster = this.#windowRoster(data, selector, sample);
-		const ax = this.#accessibilityWindows(data, pid);
-		return ax ? this.#withAccessibility(roster, ax) : roster;
+		return this.#annotatedWindows(pid, selector);
 	}
 	windows(context: Context, selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
 		return this.#schedule(context, "windows", false, () => this.#listedWindows(selector));
@@ -1357,7 +1396,7 @@ export class CuaComputerSession implements ComputerBackend {
 			window &&
 			(binding.window.pid !== window.pid ||
 				(binding.window.id !== window.id &&
-					this.#sheets.get(binding.window.id)?.parent !== window.id &&
+					!this.#sheetOf(binding.window.id, window.id) &&
 					this.#inline.get(binding.window.id) !== window.id))
 		)
 			throw new ToolError("WrongWindow: element belongs to a different PID/window", {
@@ -1464,30 +1503,85 @@ export class CuaComputerSession implements ComputerBackend {
 			const attached = observation.relatedWindows ?? [];
 			for (const [id, sheet] of this.#sheets)
 				if (sheet.parent === current.id && !attached.some(row => row.id === id)) this.#retireSheet(id, sheet.title);
-			const sheets: string[] = [];
-			const names: string[] = [];
-			let modal: SheetCensus | undefined;
-			for (const sheet of attached) {
-				this.#sheets.set(sheet.id, { parent: current.id, title: sheet.title });
-				let block = `sheet ${JSON.stringify(sheet.title)} (window ${sheet.id}) — modal over window ${current.id}`;
-				try {
-					const nested = await this.#sheetRows(context, sheet, options, query);
-					observation.elements.push(...nested.map(row => row.element));
-					if (nested.length) block += `\n${treeRows(nested, 1)}`;
-					if (query !== undefined) {
-						names.push(`${JSON.stringify(sheet.title)} (window ${sheet.id})`);
-						modal = {
-							label: `sheet${names.length === 1 ? "" : "s"} ${names.join(", ")}`,
-							rows: (modal?.rows ?? 0) + nested.length,
-							matched: (modal?.matched ?? 0) + projectRows(nested, query).matched,
-						};
+			// Every sheet this read printed, at any depth, walked or not.
+			const printed = new Set<string>([current.id]);
+			let walkedSheets = 0;
+			// A query's census belongs to the sheets taking input: one with a
+			// sheet of its own attached is covered by it, so it counts only when
+			// no uncovered sheet was read.
+			const census: { name: string; rows: number; matched: number; covered: boolean }[] = [];
+			// What was attached to a sheet that is not read now is unknown, not
+			// gone: those sheets stop admitting refs until a read reports them.
+			const unread = (sheet: string) => {
+				for (const [id, stale] of this.#sheets)
+					if (stale.parent === sheet) this.#retireSheet(id, stale.title, "was not read in the last observation");
+			};
+			// A sheet's own walk reports the sheets attached to it, and only it
+			// does: each is printed under its opener, as deep as SHEET_DEPTH and
+			// as many as SHEET_COUNT, and a window already printed is not walked
+			// again, so a relation that loops back ends there.
+			const sheetBlocks = async (
+				opener: string,
+				related: readonly ComputerRelatedWindow[],
+				depth: number,
+			): Promise<string[]> => {
+				const blocks: string[] = [];
+				for (const sheet of related) {
+					if (printed.has(sheet.id)) continue;
+					printed.add(sheet.id);
+					// A fresh relation displaces a remembered one that points the
+					// other way (the opener recorded as this sheet's own sheet).
+					if (this.#sheets.get(opener)?.parent === sheet.id) this.#sheets.delete(opener);
+					this.#sheets.set(sheet.id, { parent: opener, title: sheet.title });
+					let block = `${"  ".repeat(depth)}sheet ${JSON.stringify(sheet.title)} (window ${sheet.id}) — modal over ${
+						depth === 0 ? "window" : "sheet"
+					} ${opener}`;
+					if (depth >= SHEET_DEPTH || walkedSheets >= SHEET_COUNT) {
+						unread(sheet.id);
+						if (query !== undefined)
+							census.push({ name: `${JSON.stringify(sheet.title)} (window ${sheet.id})`, rows: 0, matched: 0, covered: false });
+						blocks.push(`${block}; not read here — computer.window(${JSON.stringify(sheet.id)}) reads it`);
+						continue;
 					}
-				} catch (error) {
-					if (!(error instanceof ToolError)) throw error;
-					block += ` — its own walk failed: ${error.message}`;
+					walkedSheets++;
+					let inner: readonly ComputerRelatedWindow[] = [];
+					try {
+						const walked = await this.#sheetRows(context, sheet, options, query);
+						inner = walked.sheets;
+						// A walk the driver cut short proves nothing about a sheet it
+						// did not report: that one is unread, not gone.
+						for (const [id, stale] of this.#sheets)
+							if (stale.parent === sheet.id && !inner.some(row => row.id === id))
+								this.#retireSheet(id, stale.title, walked.partial ? "was not read in the last observation" : "is gone");
+						observation.elements.push(...walked.rows.map(row => row.element));
+						if (walked.rows.length) block += `\n${treeRows(walked.rows, depth + 1)}`;
+						if (query !== undefined)
+							census.push({
+								name: `${JSON.stringify(sheet.title)} (window ${sheet.id})`,
+								rows: walked.rows.length,
+								matched: projectRows(walked.rows, query).matched,
+								covered: inner.length > 0,
+							});
+					} catch (error) {
+						if (!(error instanceof ToolError)) throw error;
+						unread(sheet.id);
+						if (query !== undefined)
+							census.push({ name: `${JSON.stringify(sheet.title)} (window ${sheet.id})`, rows: 0, matched: 0, covered: false });
+						block += ` — its own walk failed: ${error.message}`;
+					}
+					blocks.push(block, ...(await sheetBlocks(sheet.id, inner, depth + 1)));
 				}
-				sheets.push(block);
-			}
+				return blocks;
+			};
+			const sheets = await sheetBlocks(current.id, attached, 0);
+			const counted = census.some(entry => !entry.covered) ? census.filter(entry => !entry.covered) : census;
+			const modal: SheetCensus | undefined = counted.length
+				? {
+						label: `sheet${counted.length === 1 ? "" : "s"} ${counted.map(entry => entry.name).join(", ")}`,
+						rows: counted.reduce((sum, entry) => sum + entry.rows, 0),
+						matched: counted.reduce((sum, entry) => sum + entry.matched, 0),
+					}
+				: undefined;
 			const parent = rows.length
 				? treeRows(rows, 0)
 				: typeof reply.data.degraded_reason === "string"
@@ -1549,13 +1643,14 @@ export class CuaComputerSession implements ComputerBackend {
 			for (const window of inline) {
 				// A sheet the roster listed before its parent reported it attached
 				// (the read chained on the command that opened it) was taken for a
-				// window this app opened. While attached it prints once, as the
-				// sheet: a second walk would retire the refs printed there. It stays
-				// in the opened set, so it prints here again if it detaches.
-				if (this.#sheets.get(window.id)?.parent === current.id) continue;
+				// window this app opened. While attached — to this window or to one
+				// of its sheets — it prints once, as the sheet: a second walk would
+				// retire the refs printed there. It stays in the opened set, so it
+				// prints here again if it detaches.
+				if (printed.has(window.id)) continue;
 				let block = `window ${window.id} ${JSON.stringify(window.title)} — opened by this app, driven through this window's refs`;
 				try {
-					const nested = await this.#sheetRows(context, window, options, query);
+					const nested = (await this.#sheetRows(context, window, options, query)).rows;
 					const shown = nested.slice(0, INLINE_WINDOW_ROWS);
 					observation.elements.push(...shown.map(row => row.element));
 					if (shown.length) block += `\n${treeRows(shown, 1)}`;
@@ -1769,7 +1864,7 @@ export class CuaComputerSession implements ComputerBackend {
 		sheet: Pick<ComputerWindowIdentity, "id" | "pid">,
 		options: ObserveOptions,
 		query?: readonly string[],
-	): Promise<TreeRow[]> {
+	): Promise<{ rows: TreeRow[]; sheets: readonly ComputerRelatedWindow[]; partial: boolean }> {
 		const window = await this.#window({ id: sheet.id, pid: sheet.pid });
 		throwIfAborted(context.signal);
 		this.#invalidate(window);
@@ -1781,18 +1876,36 @@ export class CuaComputerSession implements ComputerBackend {
 		});
 		if (reply.data.pid !== window.pid || String(reply.data.window_id) !== window.id)
 			throw new ToolError("WrongWindow: Cua sheet observation identity mismatch");
-		return this.#walk(window, reply, options, query).rows;
+		return {
+			rows: this.#walk(window, reply, options, query).rows,
+			sheets: relatedWindows(reply.data.related_windows) ?? [],
+			partial: reply.data.truncated === true,
+		};
 	}
-	#retireSheet(id: string, title: string): void {
+	/**
+	 * A sheet that has gone, or whose opener's read no longer reached it,
+	 * takes the sheets attached to it along: none of their refs is admitted
+	 * until a read reports them again.
+	 */
+	#retireSheet(id: string, title: string, why = "is gone"): void {
 		this.#sheets.delete(id);
 		for (const [ref, binding] of this.#elements) {
 			if (binding.window.id !== id) continue;
 			this.#elements.delete(ref);
-			this.#staleSheetRefs.set(
-				ref,
-				`sheet ${JSON.stringify(title)} (window ${id}) is gone; observe the window that had it again`,
-			);
+			this.#staleSheetRefs.set(ref, `sheet ${JSON.stringify(title)} (window ${id}) ${why}; observe the window that had it again`);
 		}
+		for (const [child, sheet] of this.#sheets) if (sheet.parent === id) this.#retireSheet(child, sheet.title, why);
+	}
+	/** Whether the window `id` names is a sheet attached to `opener`, directly or through its sheets. */
+	#sheetOf(id: string, opener: string): boolean {
+		const seen = new Set<string>();
+		for (let parent = this.#sheets.get(id)?.parent; parent !== undefined && !seen.has(parent); parent = this.#sheets.get(parent)?.parent) {
+			if (parent === opener) return true;
+			// A link through a window the roster no longer holds is not current.
+			if (!this.#holdsWindow(parent)) return false;
+			seen.add(parent);
+		}
+		return false;
 	}
 	async #state(
 		context: Context,
@@ -2167,24 +2280,38 @@ export class CuaComputerSession implements ComputerBackend {
 		};
 	}
 	/**
-	 * A ref whose element the platform can no longer reach. The refusal is
-	 * about one row and says nothing about the window, yet throwing it
+	 * A ref the platform refused as dead or as unprovably placed. The refusal
+	 * is about one row and says nothing about the window, yet throwing it
 	 * discarded the whole tree: every bench refusal of this shape was
 	 * followed by a bare `observe()` whose only job was to recover what the
 	 * throw dropped. So the window is read once — the caller has to re-read
 	 * it either way — and the reply is the ordinary non-throwing shape for
 	 * "this did not land": nothing dispatched, the current tree in hand, and a
-	 * census of what the fresh tree holds where the dead row sat. Nothing is
-	 * re-addressed: the caller names the row it means.
+	 * census of what the fresh tree holds where the refused row sat. Nothing
+	 * is re-addressed or retried: the caller names the row and the route.
+	 *
+	 * The two codes are different facts. `element_no_longer_exists` is a dead
+	 * reference. `element_outside_target_window` with a re-read as its advice
+	 * is the driver failing to prove, for this dispatch, that the element
+	 * descends from the window: it says nothing about the element being gone,
+	 * and a fresh ref re-checks it. That check can keep failing for a row
+	 * that is still there (the VM probe refused a desktop icon 5 of 5 times,
+	 * re-read at 0-3 s, while foreground delivery dispatched), so where the
+	 * fresh tree still holds a row of that role and label in the same place
+	 * the reply names, for a repeat of the same refusal, what the check does
+	 * not gate: the same call with `{ delivery: "foreground" }` where the
+	 * driver gates that call only in the background, and, for a click or an
+	 * AX action, the document or folder hand-off if opening one was the aim.
 	 *
 	 * That walk is this session's, not the caller's, so it retires only the
-	 * dead ref. Every other ref stays bound to the exact element its
+	 * refused ref. Every other ref stays bound to the exact element its
 	 * observation minted it for: one whose element died too refuses the same
 	 * way, and one whose element lives still reaches exactly that element.
 	 *
 	 * Only where a re-read can answer, which the reply says (`deadElement`).
 	 */
 	async #deadElement(
+		name: string,
 		error: ToolError,
 		args: Wire,
 		target: ComputerTarget | undefined,
@@ -2217,28 +2344,60 @@ export class CuaComputerSession implements ComputerBackend {
 		const under = identity?.path.at(-1);
 		const fresh = rows.flatMap(row => {
 			const minted = this.#elements.get(row.element.ref)?.identity;
-			return minted === undefined ? [] : [minted];
+			return minted === undefined ? [] : [{ ref: row.element.ref, identity: minted }];
 		});
 		const place = identity === undefined ? undefined : placeKey(identity);
-		const placed = place === undefined ? 0 : fresh.filter(row => placeKey(row) === place).length;
+		const placed = place === undefined ? [] : fresh.filter(row => placeKey(row.identity) === place);
 		const sameName =
 			identity === undefined
 				? 0
-				: fresh.filter(row => row.role === identity.role && row.label === identity.label).length;
+				: fresh.filter(row => row.identity.role === identity.role && row.identity.label === identity.label).length;
 		const census =
 			identity === undefined
 				? "no identity for it was recorded"
 				: sameName === 0
 					? "no row of the fresh tree carries its role and label"
 					: `the fresh tree has ${sameName} row(s) with its role and label, ${
-							placed ? `${placed} of them` : "none"
+							placed.length ? `${placed.length} of them` : "none"
 						} in the same position${under ? ` under ${under}` : ""}`;
+		const tree = rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown.";
 		const readdress = rows.length
 			? `${target} is retired; the tree below carries new refs for this window — address the row you mean by its new ref. Your other refs keep the exact elements they were minted for until your next observe.`
 			: `${target} is retired and this walk minted no refs to address — observe the window again (win.observe()) once it has rows.`;
-		const text = `${reply.code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${
-			rows.length ? treeRows(rows, 0) : "No accessibility elements returned; completeness is unknown."
-		}`;
+		let text: string;
+		if (reply.code !== "element_outside_target_window") {
+			text = `${reply.code}: ${named} no longer exists in window ${recover.window.id} and nothing was dispatched — ${census}. ${readdress}\n${tree}`;
+		} else {
+			let routes = "";
+			if (rows.length) {
+				// The driver holds only these calls' background form to the check
+				// (cua-driver 5b3a6cf96: click.rs element path, type_text.rs,
+				// press_key.rs, hotkey.rs). Its element double-click is held in
+				// both modes, a middle click never fronts the window, and perform
+				// and setValue take no delivery option here.
+				const verb =
+					args.delivery_mode === "foreground" ||
+					(name === "click" && (args.action !== undefined || (args.count ?? 1) !== 1 || args.button === "middle"))
+						? undefined
+						: FOREGROUND_UNGATED[name];
+				const offered = [
+					verb === undefined
+						? undefined
+						: `the same ${verb} with { delivery: "foreground" } is not held to this check (it requests foreground delivery and may take focus)`,
+					name === "click"
+						? `if opening a document or folder that row stands for is the aim, ${reopenRoute(recover.window.app)}`
+						: undefined,
+				]
+					.filter(route => route !== undefined)
+					.join("; ");
+				routes = ` A background action on ${
+					placed.length === 1 ? `${placed[0]!.ref}, the row in that position now,` : "the row you choose"
+				} runs the check again. If you already re-addressed it and got this refusal again, do not repeat that alone: ${
+					offered || "this call has no route past the check here; report the limitation"
+				}.`;
+			}
+			text = `${reply.code}: the driver could not prove ${named} belongs to window ${recover.window.id}, and nothing was dispatched; that is not a report that the element is gone — ${census}. ${readdress}${routes}\n${tree}`;
+		}
 		return {
 			text,
 			effect: "not_dispatched",
@@ -2264,7 +2423,7 @@ export class CuaComputerSession implements ComputerBackend {
 		} catch (error) {
 			// An aborted call is not a ToolError and keeps its own identity.
 			if (!(error instanceof ToolError)) throw error;
-			const gone = await this.#deadElement(error, args, target, recover);
+			const gone = await this.#deadElement(name, error, args, target, recover);
 			if (gone !== undefined) return gone;
 			const route = menuBarRoute(element);
 			if (route === undefined) throw error;

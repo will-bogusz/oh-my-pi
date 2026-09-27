@@ -454,12 +454,28 @@ function obscuringPanel(reply: ActionReply, facts: Facts): string {
 		? `${named} is ${owner} own window, drawn in front of window ${target}: acquire it with ${call} and act there, or dismiss it with press("Escape"). ${covered}`
 		: `${named} is ${owner} own window, drawn in front of window ${target}: dismiss it with press("Escape") — ${unheld}. ${covered}`;
 }
-/** The sheet holding keyboard focus instead of the addressed window: the one the reply names, else the one attached to it. */
+/**
+ * The sheet holding keyboard focus instead of the addressed window: the one
+ * the reply names, else the sheet attached to it. Where the reply names no
+ * focused window at all, a sheet on that sheet — one this session's roster
+ * still holds — is the one holding the keyboard over the sheet it opened from.
+ */
 function focusHolder(reply: ActionReply, facts: Facts): string | undefined {
 	const target = facts.windowId!;
-	const focused =
-		reply.focusedWindowId !== undefined && reply.focusedWindowId !== target ? reply.focusedWindowId : undefined;
-	const sheet = focused ?? [...facts.sheets].find(([, row]) => row.parent === target)?.[0];
+	let sheet =
+		reply.focusedWindowId !== undefined && reply.focusedWindowId !== target
+			? reply.focusedWindowId
+			: [...facts.sheets].find(([, row]) => row.parent === target)?.[0];
+	if (sheet !== undefined && reply.focusedWindowId === undefined && facts.holds(sheet)) {
+		const seen = new Set<string>([target, sheet]);
+		for (;;) {
+			const opener: string = sheet;
+			const next: string | undefined = [...facts.sheets].find(([, row]) => row.parent === opener)?.[0];
+			if (next === undefined || seen.has(next) || !facts.holds(next)) break;
+			seen.add(next);
+			sheet = next;
+		}
+	}
 	if (sheet === undefined) return undefined;
 	const relation = facts.sheets.get(sheet);
 	return `window ${sheet}${
