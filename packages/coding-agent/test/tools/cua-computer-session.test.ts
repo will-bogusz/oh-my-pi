@@ -2548,6 +2548,33 @@ it("invalidates pixel frames when the window moves and keeps them across AX-only
 	}
 });
 
+it("reads a window once more when its frame moved during the read, and refuses a second move", async () => {
+	const f = await fixture();
+	let moves = 1;
+	try {
+		// The frame moves while the driver walks the window, the way a window
+		// still opening to its frame does.
+		f.state.hook = async name => {
+			if (name === "get_window_state" && moves > 0) {
+				moves--;
+				f.row.bounds.width++;
+			}
+			return undefined;
+		};
+		const observation = await f.session.observe(f.context, f.window, { screenshot: true });
+		expect(observation.window.bounds).toEqual(f.row.bounds);
+		expect(f.calls.filter(call => call.name === "get_window_state")).toHaveLength(2);
+		// A frame that moves again under the second read is still refused.
+		moves = 2;
+		await expect(f.session.observe(f.context, f.window)).rejects.toThrow(
+			"StaleFrame: window geometry changed during observation",
+		);
+		expect(f.calls.filter(call => call.name === "get_window_state")).toHaveLength(4);
+	} finally {
+		await f.close();
+	}
+});
+
 it("refuses mismatched observation identities before publishing elements or images", async () => {
 	const f = await fixture();
 	try {

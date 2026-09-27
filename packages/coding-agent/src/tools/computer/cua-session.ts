@@ -254,6 +254,8 @@ function titlesDisagree(title: string, rows: readonly TreeRow[]): boolean {
 /** A window caught mid-transition is re-sampled once: the settle, and the whole budget for it. */
 const RESAMPLE_SETTLE_MS = 250;
 const RESAMPLE_BUDGET_MS = 1000;
+/** The window's frame moved while it was being read, so the read describes no one frame. */
+class GeometryChangedError extends ToolError {}
 /**
  * Actions every row of some family advertises, whatever it does: `press` on
  * a menu item, `show_menu` on any node with a context menu, the scroll and
@@ -1385,7 +1387,16 @@ export class CuaComputerSession implements ComputerBackend {
 			const settling = this.#mutated.delete(window.id);
 			const started = Date.now();
 			this.#invalidate(window);
-			let { reply, current } = await this.#state(context, window, read);
+			// A window still moving to its frame (one that has only just
+			// opened, say) refuses the read that spanned the move. The same
+			// window is read once more after the settle; a second move stands.
+			let { reply, current } = await this.#state(context, window, read).catch(async (error: unknown) => {
+				if (!(error instanceof GeometryChangedError)) throw error;
+				await Bun.sleep(RESAMPLE_SETTLE_MS);
+				throwIfAborted(context.signal);
+				this.#invalidate(window);
+				return await this.#state(context, window, read);
+			});
 			let walked = this.#walk(current, reply, options, query);
 			if (settling && titlesDisagree(current.title, walked.rows)) {
 				const settle = Math.min(RESAMPLE_SETTLE_MS, RESAMPLE_BUDGET_MS - (Date.now() - started));
@@ -1795,7 +1806,7 @@ export class CuaComputerSession implements ComputerBackend {
 			throw new ToolError("WrongWindow: Cua observation identity mismatch");
 		const after = await this.#current(current);
 		if (!sameBounds(current.bounds, after.bounds))
-			throw new ToolError("StaleFrame: window geometry changed during observation");
+			throw new GeometryChangedError("StaleFrame: window geometry changed during observation");
 		return { reply, current: after };
 	}
 	/**
