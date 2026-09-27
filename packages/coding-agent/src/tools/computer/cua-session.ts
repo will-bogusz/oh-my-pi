@@ -141,6 +141,15 @@ const SUBTREE_MAX_ROWS = 12;
  */
 const INLINE_WINDOW_ROWS = 40;
 /**
+ * How far an observation follows sheets attached to sheets: a panel's own
+ * sheet (a save panel's Go-to-Folder sheet) is reported only by the panel's
+ * walk, never by the document's. AppKit shows one sheet on a window at a
+ * time, so a chain is the usual shape; three levels is past any observed
+ * one, and each walked sheet costs one roster read and one `get_window_state`.
+ */
+const SHEET_DEPTH = 3;
+const SHEET_COUNT = 6;
+/**
  * The rows a query keeps: every row one of its literals matches
  * (case-insensitive substring over what the row prints, including the
  * window's own text carried beneath it), the ancestors that place it, and
@@ -1387,7 +1396,7 @@ export class CuaComputerSession implements ComputerBackend {
 			window &&
 			(binding.window.pid !== window.pid ||
 				(binding.window.id !== window.id &&
-					this.#sheets.get(binding.window.id)?.parent !== window.id &&
+					!this.#sheetOf(binding.window.id, window.id) &&
 					this.#inline.get(binding.window.id) !== window.id))
 		)
 			throw new ToolError("WrongWindow: element belongs to a different PID/window", {
@@ -1494,30 +1503,85 @@ export class CuaComputerSession implements ComputerBackend {
 			const attached = observation.relatedWindows ?? [];
 			for (const [id, sheet] of this.#sheets)
 				if (sheet.parent === current.id && !attached.some(row => row.id === id)) this.#retireSheet(id, sheet.title);
-			const sheets: string[] = [];
-			const names: string[] = [];
-			let modal: SheetCensus | undefined;
-			for (const sheet of attached) {
-				this.#sheets.set(sheet.id, { parent: current.id, title: sheet.title });
-				let block = `sheet ${JSON.stringify(sheet.title)} (window ${sheet.id}) — modal over window ${current.id}`;
-				try {
-					const nested = await this.#sheetRows(context, sheet, options, query);
-					observation.elements.push(...nested.map(row => row.element));
-					if (nested.length) block += `\n${treeRows(nested, 1)}`;
-					if (query !== undefined) {
-						names.push(`${JSON.stringify(sheet.title)} (window ${sheet.id})`);
-						modal = {
-							label: `sheet${names.length === 1 ? "" : "s"} ${names.join(", ")}`,
-							rows: (modal?.rows ?? 0) + nested.length,
-							matched: (modal?.matched ?? 0) + projectRows(nested, query).matched,
-						};
+			// Every sheet this read printed, at any depth, walked or not.
+			const printed = new Set<string>([current.id]);
+			let walkedSheets = 0;
+			// A query's census belongs to the sheets taking input: one with a
+			// sheet of its own attached is covered by it, so it counts only when
+			// no uncovered sheet was read.
+			const census: { name: string; rows: number; matched: number; covered: boolean }[] = [];
+			// What was attached to a sheet that is not read now is unknown, not
+			// gone: those sheets stop admitting refs until a read reports them.
+			const unread = (sheet: string) => {
+				for (const [id, stale] of this.#sheets)
+					if (stale.parent === sheet) this.#retireSheet(id, stale.title, "was not read in the last observation");
+			};
+			// A sheet's own walk reports the sheets attached to it, and only it
+			// does: each is printed under its opener, as deep as SHEET_DEPTH and
+			// as many as SHEET_COUNT, and a window already printed is not walked
+			// again, so a relation that loops back ends there.
+			const sheetBlocks = async (
+				opener: string,
+				related: readonly ComputerRelatedWindow[],
+				depth: number,
+			): Promise<string[]> => {
+				const blocks: string[] = [];
+				for (const sheet of related) {
+					if (printed.has(sheet.id)) continue;
+					printed.add(sheet.id);
+					// A fresh relation displaces a remembered one that points the
+					// other way (the opener recorded as this sheet's own sheet).
+					if (this.#sheets.get(opener)?.parent === sheet.id) this.#sheets.delete(opener);
+					this.#sheets.set(sheet.id, { parent: opener, title: sheet.title });
+					let block = `${"  ".repeat(depth)}sheet ${JSON.stringify(sheet.title)} (window ${sheet.id}) — modal over ${
+						depth === 0 ? "window" : "sheet"
+					} ${opener}`;
+					if (depth >= SHEET_DEPTH || walkedSheets >= SHEET_COUNT) {
+						unread(sheet.id);
+						if (query !== undefined)
+							census.push({ name: `${JSON.stringify(sheet.title)} (window ${sheet.id})`, rows: 0, matched: 0, covered: false });
+						blocks.push(`${block}; not read here — computer.window(${JSON.stringify(sheet.id)}) reads it`);
+						continue;
 					}
-				} catch (error) {
-					if (!(error instanceof ToolError)) throw error;
-					block += ` — its own walk failed: ${error.message}`;
+					walkedSheets++;
+					let inner: readonly ComputerRelatedWindow[] = [];
+					try {
+						const walked = await this.#sheetRows(context, sheet, options, query);
+						inner = walked.sheets;
+						// A walk the driver cut short proves nothing about a sheet it
+						// did not report: that one is unread, not gone.
+						for (const [id, stale] of this.#sheets)
+							if (stale.parent === sheet.id && !inner.some(row => row.id === id))
+								this.#retireSheet(id, stale.title, walked.partial ? "was not read in the last observation" : "is gone");
+						observation.elements.push(...walked.rows.map(row => row.element));
+						if (walked.rows.length) block += `\n${treeRows(walked.rows, depth + 1)}`;
+						if (query !== undefined)
+							census.push({
+								name: `${JSON.stringify(sheet.title)} (window ${sheet.id})`,
+								rows: walked.rows.length,
+								matched: projectRows(walked.rows, query).matched,
+								covered: inner.length > 0,
+							});
+					} catch (error) {
+						if (!(error instanceof ToolError)) throw error;
+						unread(sheet.id);
+						if (query !== undefined)
+							census.push({ name: `${JSON.stringify(sheet.title)} (window ${sheet.id})`, rows: 0, matched: 0, covered: false });
+						block += ` — its own walk failed: ${error.message}`;
+					}
+					blocks.push(block, ...(await sheetBlocks(sheet.id, inner, depth + 1)));
 				}
-				sheets.push(block);
-			}
+				return blocks;
+			};
+			const sheets = await sheetBlocks(current.id, attached, 0);
+			const counted = census.some(entry => !entry.covered) ? census.filter(entry => !entry.covered) : census;
+			const modal: SheetCensus | undefined = counted.length
+				? {
+						label: `sheet${counted.length === 1 ? "" : "s"} ${counted.map(entry => entry.name).join(", ")}`,
+						rows: counted.reduce((sum, entry) => sum + entry.rows, 0),
+						matched: counted.reduce((sum, entry) => sum + entry.matched, 0),
+					}
+				: undefined;
 			const parent = rows.length
 				? treeRows(rows, 0)
 				: typeof reply.data.degraded_reason === "string"
@@ -1579,13 +1643,14 @@ export class CuaComputerSession implements ComputerBackend {
 			for (const window of inline) {
 				// A sheet the roster listed before its parent reported it attached
 				// (the read chained on the command that opened it) was taken for a
-				// window this app opened. While attached it prints once, as the
-				// sheet: a second walk would retire the refs printed there. It stays
-				// in the opened set, so it prints here again if it detaches.
-				if (this.#sheets.get(window.id)?.parent === current.id) continue;
+				// window this app opened. While attached — to this window or to one
+				// of its sheets — it prints once, as the sheet: a second walk would
+				// retire the refs printed there. It stays in the opened set, so it
+				// prints here again if it detaches.
+				if (printed.has(window.id)) continue;
 				let block = `window ${window.id} ${JSON.stringify(window.title)} — opened by this app, driven through this window's refs`;
 				try {
-					const nested = await this.#sheetRows(context, window, options, query);
+					const nested = (await this.#sheetRows(context, window, options, query)).rows;
 					const shown = nested.slice(0, INLINE_WINDOW_ROWS);
 					observation.elements.push(...shown.map(row => row.element));
 					if (shown.length) block += `\n${treeRows(shown, 1)}`;
@@ -1799,7 +1864,7 @@ export class CuaComputerSession implements ComputerBackend {
 		sheet: Pick<ComputerWindowIdentity, "id" | "pid">,
 		options: ObserveOptions,
 		query?: readonly string[],
-	): Promise<TreeRow[]> {
+	): Promise<{ rows: TreeRow[]; sheets: readonly ComputerRelatedWindow[]; partial: boolean }> {
 		const window = await this.#window({ id: sheet.id, pid: sheet.pid });
 		throwIfAborted(context.signal);
 		this.#invalidate(window);
@@ -1811,18 +1876,36 @@ export class CuaComputerSession implements ComputerBackend {
 		});
 		if (reply.data.pid !== window.pid || String(reply.data.window_id) !== window.id)
 			throw new ToolError("WrongWindow: Cua sheet observation identity mismatch");
-		return this.#walk(window, reply, options, query).rows;
+		return {
+			rows: this.#walk(window, reply, options, query).rows,
+			sheets: relatedWindows(reply.data.related_windows) ?? [],
+			partial: reply.data.truncated === true,
+		};
 	}
-	#retireSheet(id: string, title: string): void {
+	/**
+	 * A sheet that has gone, or whose opener's read no longer reached it,
+	 * takes the sheets attached to it along: none of their refs is admitted
+	 * until a read reports them again.
+	 */
+	#retireSheet(id: string, title: string, why = "is gone"): void {
 		this.#sheets.delete(id);
 		for (const [ref, binding] of this.#elements) {
 			if (binding.window.id !== id) continue;
 			this.#elements.delete(ref);
-			this.#staleSheetRefs.set(
-				ref,
-				`sheet ${JSON.stringify(title)} (window ${id}) is gone; observe the window that had it again`,
-			);
+			this.#staleSheetRefs.set(ref, `sheet ${JSON.stringify(title)} (window ${id}) ${why}; observe the window that had it again`);
 		}
+		for (const [child, sheet] of this.#sheets) if (sheet.parent === id) this.#retireSheet(child, sheet.title, why);
+	}
+	/** Whether the window `id` names is a sheet attached to `opener`, directly or through its sheets. */
+	#sheetOf(id: string, opener: string): boolean {
+		const seen = new Set<string>();
+		for (let parent = this.#sheets.get(id)?.parent; parent !== undefined && !seen.has(parent); parent = this.#sheets.get(parent)?.parent) {
+			if (parent === opener) return true;
+			// A link through a window the roster no longer holds is not current.
+			if (!this.#holdsWindow(parent)) return false;
+			seen.add(parent);
+		}
+		return false;
 	}
 	async #state(
 		context: Context,
