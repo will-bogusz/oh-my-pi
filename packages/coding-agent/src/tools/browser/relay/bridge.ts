@@ -348,6 +348,12 @@ const WINDOW_OPEN_MATCH_MS = 3_000;
  * the glyph is still in the air.
  */
 const CURSOR_ARRIVAL_TIMEOUT_MS = 1_500;
+/**
+ * How long a page clean-up before a detach may take. `Runtime.evaluate`
+ * waits out an open JS dialog, and a claim waits for the detach, so a
+ * best-effort clean-up must not hold both for the whole {@link RPC_TIMEOUT_MS}.
+ */
+const PAGE_CLEANUP_TIMEOUT_MS = 2_000;
 
 /**
  * Multiplexing CDP bridge between downstream puppeteer connections and the
@@ -1620,6 +1626,7 @@ export class RelayBridge {
 					params: { expression: AUTOFILL_OPT_OUT_REMOVE },
 				},
 				this.#instanceFor(tab),
+				PAGE_CLEANUP_TIMEOUT_MS,
 			);
 		} catch (err) {
 			this.#log("autofill restore skipped", {
@@ -1643,7 +1650,11 @@ export class RelayBridge {
 		const inst = this.#instanceFor(tab);
 		const removals = await Promise.allSettled(
 			[LEASE_BADGE_RESTORE, CURSOR_OVERLAY_REMOVE, AUTOFILL_OPT_OUT_REMOVE].map(expression =>
-				this.#rpc({ op: "send", tabId: tab.tabId, method: "Runtime.evaluate", params: { expression } }, inst),
+				this.#rpc(
+					{ op: "send", tabId: tab.tabId, method: "Runtime.evaluate", params: { expression } },
+					inst,
+					PAGE_CLEANUP_TIMEOUT_MS,
+				),
 			),
 		);
 		for (const removal of removals)
