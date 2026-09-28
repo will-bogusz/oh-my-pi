@@ -738,6 +738,59 @@ describe("computer prelude", () => {
 		expect(calls).toEqual([{ action: "capabilities" }]);
 	});
 
+	it("delivers the guide once per conversation with the first acquired window", async () => {
+		let conversation = "session-a";
+		let readActive = true;
+		const session: ToolSession = {
+			...toolSession(),
+			getSessionId: () => conversation,
+			isToolActive: (name: string) => name !== "read" || readActive,
+		};
+		const window = {
+			id: "42",
+			app: "Code",
+			title: "main.ts",
+			pid: 7,
+			bounds: { x: 0, y: 0, width: 1, height: 1 },
+			focused: true,
+		};
+		let value: unknown = window;
+		const prelude = createComputerPrelude(session, () => ({
+			async run() {
+				return { displays: [], returnValue: value, screenshots: [] };
+			},
+			async capabilities() {
+				return undefined;
+			},
+			async close() {},
+		}));
+		const reply = async (method: string): Promise<string> => {
+			const result = await prelude.invoke(
+				{ action: "call", chain: [{ method, args: method === "window" ? [{ app: "Code" }] : [] }] },
+				{ session, toolCallId: method },
+			);
+			return result.content.map(block => (block.type === "text" ? block.text : "")).join("");
+		};
+		const guideHeader = "Computer guide (sent once per conversation; also at xd://eval/computer):";
+
+		value = null;
+		expect(await reply("focusedWindow")).toBe("");
+		expect(await reply("windows")).toBe("");
+		value = window;
+		const first = await reply("window");
+		expect(first.startsWith(guideHeader)).toBe(true);
+		expect(first).toContain(prelude.documentation);
+		expect(await reply("window")).toBe("");
+		conversation = "session-b";
+		expect((await reply("focusedWindow")).startsWith(guideHeader)).toBe(true);
+		conversation = "session-a";
+		expect(await reply("window")).toBe("");
+		conversation = "session-c";
+		readActive = false;
+		expect(await reply("window")).toBe("");
+		expect(prelude.documentationDelivery).toContain("computer.window");
+	});
+
 	it("reflects the live enabled setting", () => {
 		const session = toolSession();
 		const prelude = createComputerPrelude(session, () => ({

@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added `documentationDelivery` to eval prelude definitions; the `computer` prelude uses it to send its guide once per conversation with the first successful `computer.window(…)`/`computer.focusedWindow()` reply, and the eval description tells the model it need not `read xd://eval/computer` first
 - Added a post-input report to `computer` Eval cells: a cell that sends desktop input ends with each touched window re-read and printed as its current tree, rows marked against the tree the model last saw (`~` changed, `+` added, `removed:`), plus windows the input opened, closed or focused; a call that fails on a ref gets its window's current tree the same way, so acting no longer needs a separate `ax()` call to see the result
 - Added an optional `settleCell` hook to eval prelude definitions: host calls a cell makes carry that cell in their context (`EvalPreludeContext.cell`), and once the cell finishes the text the hook returns is appended after the cell's own output, so a prelude can report what a whole cell left behind once instead of once per call
 - Added a `telemetry.otlpExportEnabled` setting (`/settings` → Providers → Privacy) that stops OMP from exporting OTLP traces, logs, and metrics even when `OTEL_*` endpoints are set in its environment; export stays enabled by default ([#13444](https://github.com/can1357/oh-my-pi/pull/13444) by [@krizh-p](https://github.com/krizh-p))
