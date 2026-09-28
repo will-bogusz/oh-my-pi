@@ -138,9 +138,11 @@ export interface AcquireTabOptions {
 	target?: string;
 	signal?: AbortSignal;
 	/**
-	 * The caller's own cancellation, when `signal` also carries its deadline: a
-	 * navigation cut off by the deadline alone leaves the published tab open.
+	 * The caller's deadline, when `signal` carries it beside the caller's own
+	 * cancellation (`cancelSignal`, if the caller has one): a navigation cut off
+	 * by the deadline alone leaves the published tab open.
 	 */
+	deadlineSignal?: AbortSignal;
 	cancelSignal?: AbortSignal;
 	timeoutMs: number;
 	/**
@@ -540,7 +542,7 @@ async function acquireTabImpl(
 		// A navigation that failed outright (DNS, refused, a blocked domain), or
 		// the caller's abort, leaves nothing worth keeping from this open. One the
 		// caller's deadline cut off keeps the tab on what loaded.
-		const deadlineOnly = opts.cancelSignal !== undefined && !opts.cancelSignal.aborted && opts.signal?.aborted;
+		const deadlineOnly = opts.deadlineSignal?.aborted === true && opts.cancelSignal?.aborted !== true;
 		if (!deadlineOnly) await releaseTab(name, { kill: false }).catch(() => undefined);
 		throw error;
 	}

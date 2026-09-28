@@ -143,14 +143,74 @@ describe("browser.open on a page that outlasts its timeout", () => {
 				const next = await invoke({ action: "open", name: aborted, url: `${origin}/ready` });
 				expect(JSON.stringify(next.content)).toContain(`Opened tab ${JSON.stringify(aborted).replaceAll('"', '\\"')}`);
 
-				// A short open whose page stops answering altogether: the deadline beats
-				// goto's own report, and the error still names the tab it kept. Last,
-				// because the spinning renderer serves every later page of this site.
+				// A short open whose page stops answering altogether, from a caller with
+				// no signal of its own: the deadline beats goto's own report, and the
+				// error still names the tab it kept. Last, because the spinning renderer
+				// serves every later page of this site.
 				const spinning = `slow-${crypto.randomUUID().slice(0, 8)}`;
 				const spun = await refusal(invoke({ action: "open", name: spinning, url: `${origin}/spin`, timeout: 1 }));
 				expect(spun).toContain(`browser.tab(${JSON.stringify(spinning)})`);
-				expect((await listed()).map(tab => tab.name)).toContain(spinning);
+				// An open of the same name queues behind that open's own cleanup, so it
+				// sees whether the tab outlived it.
+				const after = await invoke({ action: "open", name: spinning });
+				expect(JSON.stringify(after.content)).toContain(`Reused tab ${JSON.stringify(spinning).replaceAll('"', '\\"')}`);
 			} finally {
+				await invoke({ action: "close", all: true }).catch(() => undefined);
+			}
+		},
+		60_000,
+	);
+
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"keeps the tab when the deadline beats goto's report, with or without a caller signal, and stops its load",
+		async () => {
+			// Another site than the first case's spinning renderer.
+			const origin = `http://localhost:${server!.port}`;
+			const session = makeSession();
+			const prelude = createBrowserPrelude(session);
+			const invoke = (parameters: Record<string, unknown>, signal?: AbortSignal) =>
+				prelude.invoke(parameters, { session, toolCallId: `late-${crypto.randomUUID()}`, signal });
+			// With the browser up, the open's deadline is spent on its navigation.
+			await invoke({ action: "open", name: `warm-${crypto.randomUUID().slice(0, 8)}`, url: "about:blank" });
+			// The worker thread gets the open's navigation late, and every message
+			// after it in order, as a busy thread would: the deadline fires before
+			// goto can report, and the abort reaches goto mid-navigation. A real
+			// delay: the open's deadline is a wall-clock timeout.
+			const post = Worker.prototype.postMessage;
+			const inboxes = new Map<Worker, Promise<void>>();
+			Worker.prototype.postMessage = function (this: Worker, message: unknown, ...rest: unknown[]) {
+				const gotoRun =
+					message !== null &&
+					typeof message === "object" &&
+					"type" in message &&
+					message.type === "run" &&
+					"code" in message &&
+					typeof message.code === "string" &&
+					message.code.includes("tab.goto(");
+				const inbox = inboxes.get(this);
+				if (!gotoRun && !inbox) return Reflect.apply(post, this, [message, ...rest]);
+				const delivered = (inbox ?? Promise.resolve())
+					.then(() => (gotoRun ? Bun.sleep(600) : undefined))
+					.then(() => Reflect.apply(post, this, [message, ...rest]))
+					.catch(() => undefined);
+				inboxes.set(this, delivered);
+			};
+			try {
+				for (const signal of [undefined, new AbortController().signal]) {
+					const name = `late-${crypto.randomUUID().slice(0, 8)}`;
+					const refused = await refusal(
+						invoke({ action: "open", name, url: `${origin}/no-answer`, timeout: 1 }, signal),
+					);
+					expect(refused).toContain(`browser.tab(${JSON.stringify(name)})`);
+					// Queued behind that open's own cleanup: it sees whether the tab outlived it.
+					const after = await invoke({ action: "open", name });
+					expect(JSON.stringify(after.content)).toContain(`Reused tab ${JSON.stringify(name).replaceAll('"', '\\"')}`);
+				}
+				// The kept tabs' abandoned loads were stopped: a new tab still opens in
+				// well under a second, where a load left pending made each attach wait 5 s.
+				await invoke({ action: "open", name: `after-${crypto.randomUUID().slice(0, 8)}`, timeout: 3 });
+			} finally {
+				Worker.prototype.postMessage = post;
 				await invoke({ action: "close", all: true }).catch(() => undefined);
 			}
 		},

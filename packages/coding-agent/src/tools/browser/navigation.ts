@@ -108,6 +108,10 @@ export async function navigateMainFrame(page: Page, url: string, opts: MainFrame
 	} catch (error) {
 		const timedOut = error instanceof PhaseTimeout || (error instanceof Error && error.name === "TimeoutError");
 		if (timedOut) await reportNavigationTimeout(page, opts);
+		// An abandoned load keeps going in Chrome: it stalls later ops on this
+		// page, and every new tab's attach to the browser waits on it. Stopped
+		// without waiting, as the abort must answer now.
+		if (opts.signal?.aborted) void opts.stopLoading?.().catch(() => undefined);
 		throw error;
 	} finally {
 		// Not awaited: a slow detach must not hold the answer past its deadline.
@@ -272,7 +276,8 @@ async function reportNavigationTimeout(page: Page, opts: MainFrameNavigateOption
 	// a cell timeout that killed the tab.
 	const url = page.url();
 	const readyState =
-		(await readReadyState(page, REPORT_STEP_TIMEOUT_MS)) ?? `unknown (no answer within ${REPORT_STEP_TIMEOUT_MS}ms)`;
+		(await readReadyState(page, REPORT_STEP_TIMEOUT_MS)) ??
+		`unknown (not readable within ${REPORT_STEP_TIMEOUT_MS}ms)`;
 	let stopped = "";
 	if (opts.stopLoading) {
 		const confirmed = await withTimeout(
