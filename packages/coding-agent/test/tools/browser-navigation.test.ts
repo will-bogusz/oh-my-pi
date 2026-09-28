@@ -268,7 +268,7 @@ it(
 		const failed = await scope.close().catch((error: unknown) => String(error));
 		expect(failed).toContain("The page navigated or is busy; observe again");
 		expect(failed).not.toContain("release this handle");
-		// The poisoned page refuses the next run outright.
+		// Input is refused until the next run's retry of the restore goes through.
 		await expect(withBackgroundInput(page, undefined, async () => undefined)).rejects.toThrow(
 			"could not be restored",
 		);
