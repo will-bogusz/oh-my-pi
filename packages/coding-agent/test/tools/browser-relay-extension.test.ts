@@ -1401,7 +1401,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 );
 
 it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
-	"shows a driver that reclaims a tab after the extension's socket dropped the tab's cross-site frame",
+	"hands a tab back unmarked when the extension's socket drops, and shows the driver that reclaims it the cross-site frame",
 	async () => {
 		const fixture = Bun.serve({
 			hostname: "127.0.0.1",
@@ -1419,6 +1419,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 		const root = await mkdtemp(path.join(tmpdir(), "omp-frame-reconnect-"));
 		const relay = startRelayServer({ port: 0, log: () => {} });
 		const extensionSockets = spyOn(relay.instances, "extConnected");
+		const extensionMessages = spyOn(relay.instances, "extMessage");
 		const clients: Browser[] = [];
 		let setup: Browser | undefined;
 		try {
@@ -1427,7 +1428,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			setup = await puppeteer.launch({
 				executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
 				headless: true,
-				pipe: true,
+				pipe: false,
 				args: ["--use-mock-keychain", "--password-store=basic"],
 				enableExtensions: true,
 				ignoreDefaultArgs: stockBackgroundPolicy,
@@ -1452,7 +1453,25 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				.connection()
 				?.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
 			await setupSession.detach();
+			const nativeEndpoint = setup.wsEndpoint();
 			await setup.disconnect();
+			// OMP's badge, cursor and autofill opt-out on the tab's current document, read over Chrome's own endpoint.
+			const marks = async (): Promise<unknown> => {
+				const native = await puppeteer.connect({ browserWSEndpoint: nativeEndpoint, defaultViewport: null });
+				try {
+					const page = (await native.pages()).find(candidate => candidate.url() === fixture.url.toString());
+					if (!page) throw new Error("the fixture tab is gone");
+					// A raw evaluation: the page's own world, whichever context puppeteer settled on.
+					const session = await page.createCDPSession();
+					const { result } = await session.send("Runtime.evaluate", {
+						expression: "[!!window.__ompLeaseBadge, !!window.__ompCursor, !!window.__ompAutofillOptOut]",
+						returnByValue: true,
+					});
+					return result.value;
+				} finally {
+					await native.disconnect();
+				}
+			};
 
 			// Claim the tab, connect a driver to it, and read its cross-site frame.
 			const drive = async (): Promise<unknown> => {
@@ -1476,6 +1495,7 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				return await frame.evaluate("document.title");
 			};
 			expect(await drive()).toBe("Child");
+			expect(await marks()).toEqual([true, true, true]);
 
 			// The extension's socket drops, and its worker reconnects within the grace
 			// in which Chrome keeps the debugger attached, frame session included.
@@ -1490,11 +1510,26 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			)
 				await Bun.sleep(25);
 			expect(extensionSockets.mock.calls.length).toBeGreaterThan(1);
+			// Within the grace: the reconnect's hello still lists the tab as attached.
+			const hellos = extensionMessages.mock.calls
+				.map(([, text]) => JSON.parse(String(text)) as { t: string; attachedTabIds?: number[] })
+				.filter(message => message.t === "hello");
+			const tabId = relay.instances.discover().find(candidate => candidate.title === "Reconnect")?.tabId;
+			expect(hellos).toHaveLength(2);
+			expect(hellos[1]!.attachedTabIds).toContain(tabId);
+			// No lease survived the socket: the relay hands the attachment back, marks off first.
+			let left = await marks();
+			for (let i = 0; i < 200 && JSON.stringify(left) !== "[false,false,false]"; i++) {
+				await Bun.sleep(25);
+				left = await marks();
+			}
+			expect(left).toEqual([false, false, false]);
 			expect(await drive()).toBe("Child");
 		} finally {
 			for (const client of clients) await client.disconnect().catch(() => undefined);
 			setup?.process()?.kill("SIGTERM");
 			extensionSockets.mockRestore();
+			extensionMessages.mockRestore();
 			relay.stop();
 			fixture.stop();
 			await rm(root, { recursive: true, force: true });

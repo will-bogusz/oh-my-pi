@@ -333,9 +333,10 @@ async function connect(): Promise<void> {
 				pingTimer = null;
 			}
 			void setBadge(false);
-			// The relay is gone. A reconnect within the grace keeps the debugger
-			// attachments (and the tabs' state); otherwise they go back to Chrome so
-			// its debugging infobar disappears instead of outliving the task.
+			// The relay is gone. A reconnect within the grace leaves the debugger
+			// attachments to the returning relay, which takes its marks off the
+			// pages and hands back those no lease outlived; otherwise they go back
+			// to Chrome here so its debugging infobar does not outlive the task.
 			void attachments.scheduleRelease();
 			scheduleReconnect();
 		};

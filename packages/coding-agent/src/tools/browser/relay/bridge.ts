@@ -734,10 +734,11 @@ export class RelayBridge {
 			tab.attaching = null;
 			// Every lease ended with the last socket, and what Chrome reported while
 			// none was open never arrived: an attachment Chrome kept is handed back,
-			// so the next claim starts a fresh one whose child frames Chrome reports
-			// anew, instead of a driver arming over children nobody recorded.
+			// OMP's marks taken off its page first, so the next claim starts a fresh
+			// one whose child frames Chrome reports anew, instead of a driver arming
+			// over children nobody recorded.
 			tab.attached = attachedNow.has(tab.tabId);
-			if (tab.attached) void this.#detachTab(tab);
+			if (tab.attached) void this.#detachTab(tab, true);
 			else this.#forgetChildren(tab);
 		}
 		this.#log("extension connected", {
@@ -1629,6 +1630,28 @@ export class RelayBridge {
 	}
 
 	/**
+	 * Take every OMP mark off a tab's current document over the attachment
+	 * still held — badge, cursor, autofill opt-out — whoever put them there:
+	 * after a lost socket no lease is left to take them off, and a restarted
+	 * relay never knew their script ids. The per-document scripts end with the
+	 * detach itself.
+	 */
+	async #clearPageMarks(tab: TabState): Promise<void> {
+		tab.autofillOptedOut = false;
+		tab.badgeScriptId = undefined;
+		tab.cursorScriptId = undefined;
+		const inst = this.#instanceFor(tab);
+		const removals = await Promise.allSettled(
+			[LEASE_BADGE_RESTORE, CURSOR_OVERLAY_REMOVE, AUTOFILL_OPT_OUT_REMOVE].map(expression =>
+				this.#rpc({ op: "send", tabId: tab.tabId, method: "Runtime.evaluate", params: { expression } }, inst),
+			),
+		);
+		for (const removal of removals)
+			if (removal.status === "rejected")
+				this.#log("page mark removal skipped", { tabKey: tab.tabKey, error: String(removal.reason) });
+	}
+
+	/**
 	 * Hand a tab back to the user: its own favicon, no debugger, out of the
 	 * owner's group, closed only when asked. Restoring and detaching before
 	 * the extension touches the group — and ungrouping before any close —
@@ -1648,9 +1671,11 @@ export class RelayBridge {
 
 	/**
 	 * Detach one tab's `chrome.debugger` without touching downstream sessions:
-	 * the lease ending, and the tab going idle mid-lease, both land here.
+	 * the lease ending, and the tab going idle mid-lease, both land here. An
+	 * `orphaned` attachment outlived the lease that marked its page, so every
+	 * OMP mark comes off the current document first.
 	 */
-	async #detachTab(tab: TabState): Promise<void> {
+	async #detachTab(tab: TabState, orphaned = false): Promise<void> {
 		if (!tab.attached) return;
 		tab.attached = false;
 		this.#touchTab(tab);
@@ -1658,8 +1683,12 @@ export class RelayBridge {
 		// Chrome drops the child sessions with the attachment; a reattach reports fresh ones.
 		this.#forgetChildren(tab);
 		tab.reattachedAfterDetach = false;
-		const done = this.#restoreAutofill(tab)
-			.then(() => this.#rpc({ op: "detach", tabId: tab.tabId }, this.#instanceFor(tab)))
+		const inst = this.#instances.get(tab.instanceId);
+		const socket = inst?.socket;
+		const done = (orphaned ? this.#clearPageMarks(tab) : this.#restoreAutofill(tab))
+			// Bound to the socket it started on: after a swap the next hello decides
+			// about whatever attachment Chrome kept, and hands it back itself.
+			.then(() => (inst && inst.socket === socket ? this.#rpc({ op: "detach", tabId: tab.tabId }, inst) : undefined))
 			.then(
 				() => {},
 				() => {},

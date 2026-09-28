@@ -666,7 +666,9 @@ describe("RelayBridge Runtime sessions", () => {
 				attachedTabIds: [1],
 			}),
 		);
-		// Chrome kept the attachment; the relay hands it back before anyone drives the tab again.
+		// Chrome kept the attachment; the relay takes OMP's marks off the page and hands it back.
+		await flush();
+		ack(bridge, nextExt, "send");
 		await flush();
 		ack(bridge, nextExt, "detach");
 		await flush();
@@ -975,6 +977,8 @@ describe("RelayBridge attachment release", () => {
 
 		const replacement = new FakeExtSocket();
 		connect(bridge, replacement, [tab({ tabId: 1 })], [1]);
+		await flush();
+		ack(bridge, replacement, "send");
 		await flush();
 		// The hello still lists the tab: the relay hands that attachment back itself.
 		expect(replacement.pending("detach").map(rpc => rpc.tabId)).toEqual([1]);
@@ -1480,6 +1484,8 @@ describe("RelayBridge attachment release", () => {
 		const next = new FakeExtSocket();
 		connect(bridge, next, [tab({ tabId: 1 })], [1]);
 		await flush();
+		ack(bridge, next, "send");
+		await flush();
 		expect(next.pending("detach").map(request => request.tabId)).toEqual([1]);
 		bridge.extMessage(
 			next,
@@ -1517,6 +1523,42 @@ describe("RelayBridge attachment release", () => {
 		ack(bridge, next, "send");
 		await flush();
 		expect(second.attachedSessions().filter(session => session.startsWith("FRAME-"))).toEqual(["FRAME-AFTER"]);
+	});
+
+	it("sends one detach for a hand-back whose socket is replaced before Chrome answers it", async () => {
+		const bridge = new RelayBridge({ autofillOptOut: true });
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const cdp = new FakeCdpSocket();
+		const conn = connectCdp(bridge, cdp, 1);
+		const attachId = ++msgSeq;
+		bridge.cdpMessage(
+			conn,
+			JSON.stringify({ id: attachId, method: "Target.attachToTarget", params: { targetId: `PAGE${CODE}.1` } }),
+		);
+		ack(bridge, ext, "attach");
+		for (let round = 0; round < 4; round++) {
+			await flush();
+			ack(bridge, ext, "send");
+		}
+		await flush();
+		expect(cdp.sessionFor(attachId)).toBeDefined();
+		bridge.extClosed(ext);
+		bridge.cdpClosed(conn);
+		// The worker reconnects over the attachment Chrome kept; its hand-back waits on Chrome to clean the page.
+		const next = new FakeExtSocket();
+		connect(bridge, next, [tab({ tabId: 1 })], [1]);
+		await flush();
+		expect(next.pending("send")).not.toHaveLength(0);
+		// Replaced again before Chrome answers: that hand-back ends with its socket, and the next hello's takes over.
+		const last = new FakeExtSocket();
+		connect(bridge, last, [tab({ tabId: 1 })], [1]);
+		for (let round = 0; round < 4; round++) {
+			await flush();
+			ack(bridge, last, "send");
+		}
+		await flush();
+		expect([...next.rpcs("detach"), ...last.rpcs("detach")].map(request => request.tabId)).toEqual([1]);
 	});
 
 	it("lets no arm Chrome answers after a reattach announce the new attachment's frames", async () => {
