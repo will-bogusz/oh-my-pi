@@ -1425,6 +1425,16 @@ describe("RelayBridge attachment release", () => {
 		expect(late.messages.filter(message => message.sessionId === frame.sessionId && message.method === "Page.lifecycleEvent")).toHaveLength(1);
 		expect(first.messages.filter(message => message.sessionId === frame.sessionId && message.method === "Page.lifecycleEvent")).toHaveLength(0);
 
+		// Letting go twice is refused: a connection that no longer holds the frame cannot end it.
+		const again = ++msgSeq;
+		bridge.cdpMessage(
+			firstConn,
+			JSON.stringify({ id: again, sessionId: firstPage, method: "Target.detachFromTarget", params: { sessionId: frame.sessionId } }),
+		);
+		await flush();
+		expect(ext.rpcs("send")).toHaveLength(sends);
+		expect(first.messages.find(message => message.id === again)).toHaveProperty("error");
+
 		// The last holder letting go ends the frame's session in Chrome.
 		bridge.cdpMessage(
 			lateConn,

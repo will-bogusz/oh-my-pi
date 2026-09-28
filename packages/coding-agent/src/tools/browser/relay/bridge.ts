@@ -1043,11 +1043,15 @@ export class RelayBridge {
 		}
 		if (!realSessionId) this.#recordRootState(tab, msg);
 		// One Chrome session serves every connection told of a child, so a
-		// connection letting go of it must not end it for another that holds it.
+		// connection letting go of it must not end it for another that holds it,
+		// and one that no longer holds it (a repeated detach) cannot end it at all.
 		const release = msg.method === "Target.detachFromTarget" ? msg.params?.sessionId : undefined;
 		const shared = typeof release === "string" ? tab.realSessions.get(release) : undefined;
-		if (typeof release === "string" && shared && conn.announced.has(release)) {
-			conn.announced.delete(release);
+		if (typeof release === "string" && shared) {
+			if (!conn.announced.delete(release)) {
+				this.#replyError(conn, msg, `No session with given id: ${release}`);
+				return;
+			}
 			if ([...this.#conns.values()].some(other => other.announced.has(release))) {
 				this.#emit(conn, "Target.detachedFromTarget", { sessionId: release, targetId: shared.targetId }, msg.sessionId);
 				this.#reply(conn, msg, {});
