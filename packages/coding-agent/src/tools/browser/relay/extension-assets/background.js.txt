@@ -99,10 +99,10 @@ class DebuggerAttachments {
 // extension/foreign-frames.ts
 var FOREIGN_FRAME_REFUSAL = /chrome-extension:\/\/ URL of different extension/i;
 var RETRY_DELAYS_MS = [50, 100, 200, 400];
-async function attachPastForeignFrames(tabId, attach) {
+async function pastForeignFrames(tabId, call) {
   for (let attempt = 0;; attempt++) {
     try {
-      return await attach();
+      return await call();
     } catch (error) {
       if (attempt === RETRY_DELAYS_MS.length || !FOREIGN_FRAME_REFUSAL.test(String(error)) || await neutralizeForeignFrames(tabId) === 0)
         throw error;
@@ -864,7 +864,7 @@ var pendingEvents = [];
 var reconnectDelay = EXTENSION_RECONNECT_MIN_MS;
 var pingTimer = null;
 var attachments = new DebuggerAttachments({
-  detach: (tabId) => chrome.debugger.detach({ tabId }),
+  detach: (tabId) => pastForeignFrames(tabId, () => chrome.debugger.detach({ tabId })),
   graceMs: DETACH_GRACE_MS,
   surrender: async (held) => {
     for (const tabId of held) {
@@ -942,7 +942,7 @@ async function setBadge(connected) {
     await chrome.action.setBadgeBackgroundColor({ color: connected ? "#1a7f37" : "#8b8b8b" });
   } catch {}
 }
-var buildId = "8a62a2c8e4fe963e5df4b891ec53472738737b644b074da83a9db5a109d06e7b";
+var buildId = "beddfe1c0c9b3052fe87da6a76db36872249fc1ec07188b886e42dc406967e79";
 var RELOAD_GUARD_KEY = "reloadedFor";
 async function reloadForBuildSkew(expected) {
   if (!expected)
@@ -989,16 +989,16 @@ async function runRpc(msg) {
     case "queryTabs":
       return { tabs: (await chrome.tabs.query({})).map(snapshot).filter((tab) => tab !== null) };
     case "attach":
-      await attachPastForeignFrames(msg.tabId, () => chrome.debugger.attach({ tabId: msg.tabId }, "1.3"));
+      await pastForeignFrames(msg.tabId, () => chrome.debugger.attach({ tabId: msg.tabId }, "1.3"));
       attachments.attached(msg.tabId);
       return {};
     case "detach":
       attachments.detached(msg.tabId);
-      await chrome.debugger.detach({ tabId: msg.tabId });
+      await pastForeignFrames(msg.tabId, () => chrome.debugger.detach({ tabId: msg.tabId }));
       post({ t: "detached", tabId: msg.tabId, reason: "target_closed", relayInitiated: true });
       return {};
     case "send":
-      return await chrome.debugger.sendCommand(msg.sessionId ? { tabId: msg.tabId, sessionId: msg.sessionId } : { tabId: msg.tabId }, msg.method, msg.params);
+      return await pastForeignFrames(msg.tabId, () => chrome.debugger.sendCommand(msg.sessionId ? { tabId: msg.tabId, sessionId: msg.sessionId } : { tabId: msg.tabId }, msg.method, msg.params));
     case "createTab": {
       const tab = await chrome.tabs.create({ url: msg.url, active: false });
       const snap = snapshot(tab);
