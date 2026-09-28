@@ -520,9 +520,6 @@ export class RelayBridge {
 			this.#log("replacing extension socket", { instanceId });
 			const previous = inst.socket;
 			this.#retire(inst, new ExtensionReplacedError());
-			// Debugger-derived state dies with the old attachment; the hello's
-			// attachedTabIds reconciliation runs right after.
-			for (const tab of this.#tabs.values()) if (tab.instanceId === instanceId) this.#resetRuntime(tab);
 			previous.close();
 		}
 		inst.socket = socket;
@@ -534,18 +531,22 @@ export class RelayBridge {
 		const inst = instanceId === undefined ? undefined : this.#instances.get(instanceId);
 		if (!inst || inst.socket !== socket) return;
 		this.#retire(inst, new Error("relay extension disconnected"));
-		// Keep the instance's tabs registered (the browser may reconnect), but drop
-		// debugger state: the attachment died with the service worker.
+	}
+
+	/**
+	 * Detach an instance from its socket: its leases end and its in-flight RPCs
+	 * fail. Its tabs stay registered (the browser may reconnect), but the bridge
+	 * holds no debugger over them until the next hello says what Chrome kept —
+	 * marked first, so connections closing with their leases send no detach
+	 * down a socket that is gone.
+	 */
+	#retire(inst: ExtInstance, error: Error): void {
 		for (const tab of this.#tabs.values()) {
 			if (tab.instanceId !== inst.instanceId) continue;
 			tab.attached = false;
 			tab.attaching = null;
 			this.#resetRuntime(tab);
 		}
-	}
-
-	/** Detach an instance from its socket: its leases end and its in-flight RPCs fail. */
-	#retire(inst: ExtInstance, error: Error): void {
 		if (inst.socket) this.#socketInstance.delete(inst.socket);
 		inst.socket = null;
 		inst.info = null;
@@ -723,18 +724,14 @@ export class RelayBridge {
 		}
 		for (const tab of this.#tabs.values()) {
 			if (tab.instanceId !== inst.instanceId) continue;
-			const wasAttached = tab.attached;
-			tab.attached = attachedNow.has(tab.tabId);
-			// Children outlive a socket swap only on an attachment Chrome still holds.
-			if (!tab.attached) this.#forgetChildren(tab);
 			tab.attaching = null;
-			// A service-worker restart can drop attachments while downstream
-			// connections still hold sessions: restore them best-effort.
-			if (wasAttached && !tab.attached && this.#sessionHolders(tab.tabKey).length > 0) {
-				void this.#ensureAttached(tab).then(ok => {
-					if (!ok) this.#onTabDetached(tab.tabKey, "reattach_failed", false);
-				});
-			}
+			// Every lease ended with the last socket, and what Chrome reported while
+			// none was open never arrived: an attachment Chrome kept is handed back,
+			// so the next claim starts a fresh one whose child frames Chrome reports
+			// anew, instead of a driver arming over children nobody recorded.
+			tab.attached = attachedNow.has(tab.tabId);
+			if (tab.attached) void this.#detachTab(tab);
+			else this.#forgetChildren(tab);
 		}
 		this.#log("extension connected", {
 			instanceId: inst.instanceId,

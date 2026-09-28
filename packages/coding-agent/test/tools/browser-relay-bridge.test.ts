@@ -651,7 +651,9 @@ describe("RelayBridge Runtime sessions", () => {
 		ack(bridge, firstExt, "send");
 		await flush();
 
+		// The socket drops: the server closes the connections whose leases ended with it.
 		bridge.extClosed(firstExt);
+		bridge.cdpClosed(firstConn);
 		const nextExt = new FakeExtSocket();
 		bridge.extConnected(nextExt, BROWSER);
 		bridge.extMessage(
@@ -664,6 +666,10 @@ describe("RelayBridge Runtime sessions", () => {
 				attachedTabIds: [1],
 			}),
 		);
+		// Chrome kept the attachment; the relay hands it back before anyone drives the tab again.
+		await flush();
+		ack(bridge, nextExt, "detach");
+		await flush();
 
 		const second = new FakeCdpSocket();
 		const secondConn = connectCdp(bridge, second, 1);
@@ -954,31 +960,6 @@ describe("RelayBridge attachment release", () => {
 		expect(ext.rpcs("detach").map(rpc => rpc.tabId)).toEqual([1]);
 	});
 
-	it("retracts held sessions when reconnect reattachment fails", async () => {
-		const bridge = new RelayBridge();
-		const ext = new FakeExtSocket();
-		connect(bridge, ext, [tab({ tabId: 1 })]);
-		const cdp = new FakeCdpSocket();
-		const connId = connectCdp(bridge, cdp, 1);
-		const sessionId = await attachPage(bridge, ext, cdp, connId, 1);
-
-		const replacement = new FakeExtSocket();
-		connect(bridge, replacement, [tab({ tabId: 1 })]);
-		expect(replacement.pending("attach")).toHaveLength(1);
-		nack(bridge, replacement, "attach", "debugger unavailable");
-		await flush();
-
-		const detached = cdp.messages.find(
-			message =>
-				message.method === "Target.detachedFromTarget" &&
-				message.params !== null &&
-				typeof message.params === "object" &&
-				"sessionId" in message.params &&
-				message.params.sessionId === sessionId,
-		);
-		expect(detached).toBeDefined();
-	});
-
 	it("reconciles a delayed detach after replacement hello still reports the old attachment", async () => {
 		const bridge = new RelayBridge();
 		const ext = new FakeExtSocket();
@@ -994,10 +975,14 @@ describe("RelayBridge attachment release", () => {
 
 		const replacement = new FakeExtSocket();
 		connect(bridge, replacement, [tab({ tabId: 1 })], [1]);
+		await flush();
+		// The hello still lists the tab: the relay hands that attachment back itself.
+		expect(replacement.pending("detach").map(rpc => rpc.tabId)).toEqual([1]);
 		bridge.extMessage(
 			replacement,
 			JSON.stringify({ t: "detached", tabId: 1, reason: "target_closed", relayInitiated: true }),
 		);
+		ack(bridge, replacement, "detach");
 		await flush();
 
 		// A replacement worker drops tab ownership, so the client re-claims the
@@ -1451,36 +1436,87 @@ describe("RelayBridge attachment release", () => {
 		expect(ext.rpcs("send").at(-1)).toMatchObject({ method: "Target.detachFromTarget", params: { sessionId: frame.sessionId } });
 	});
 
-	it("keeps a child frame's reports flowing when the extension's socket is replaced over a live attachment", async () => {
+	it("hands back an attachment Chrome kept across a lost extension socket, so a reclaiming driver hears its frames afresh", async () => {
 		const bridge = new RelayBridge({});
 		const ext = new FakeExtSocket();
 		connect(bridge, ext, [tab({ tabId: 1 })]);
-		const cdp = new FakeCdpSocket();
-		const conn = connectCdp(bridge, cdp, 1);
-		const page = await attachPage(bridge, ext, cdp, conn, 1);
-		bridge.cdpMessage(
-			conn,
-			JSON.stringify({
-				id: ++msgSeq,
-				sessionId: page,
-				method: "Target.setAutoAttach",
-				params: { autoAttach: true, waitForDebuggerOnStart: true, flatten: true },
-			}),
-		);
+		const arm = (conn: number, sessionId: string) =>
+			bridge.cdpMessage(
+				conn,
+				JSON.stringify({
+					id: ++msgSeq,
+					sessionId,
+					method: "Target.setAutoAttach",
+					params: { autoAttach: true, waitForDebuggerOnStart: true, flatten: true },
+				}),
+			);
+		const report = (socket: FakeExtSocket, sessionId: string) =>
+			bridge.extMessage(
+				socket,
+				JSON.stringify({
+					t: "cdpEvent",
+					tabId: 1,
+					method: "Target.attachedToTarget",
+					params: {
+						sessionId,
+						targetInfo: { targetId: "OOPIF", type: "iframe", url: "" },
+						waitingForDebugger: false,
+					},
+				}),
+			);
+		const first = new FakeCdpSocket();
+		const firstConn = connectCdp(bridge, first, 1);
+		const firstPage = await attachPage(bridge, ext, first, firstConn, 1);
+		arm(firstConn, firstPage);
 		ack(bridge, ext, "send");
 		await flush();
-		const frame = { sessionId: "REAL-FRAME", targetInfo: { targetId: "OOPIF", type: "iframe", url: "" }, waitingForDebugger: false };
-		bridge.extMessage(ext, JSON.stringify({ t: "cdpEvent", tabId: 1, method: "Target.attachedToTarget", params: frame }));
-		// The worker restarts; Chrome kept the attachment, and with it the frame's session.
+		report(ext, "FRAME-BEFORE");
+
+		// The socket drops: every lease ends with it, and the server closes their connections.
 		bridge.extClosed(ext);
+		bridge.cdpClosed(firstConn);
+		// The worker reconnects within the grace. Chrome kept the attachment, but what it
+		// reported in between never arrived, so the relay hands the attachment back.
 		const next = new FakeExtSocket();
 		connect(bridge, next, [tab({ tabId: 1 })], [1]);
 		await flush();
+		expect(next.pending("detach").map(request => request.tabId)).toEqual([1]);
 		bridge.extMessage(
 			next,
-			JSON.stringify({ t: "cdpEvent", tabId: 1, sessionId: frame.sessionId, method: "Page.frameNavigated", params: { frame: { id: "F" } } }),
+			JSON.stringify({ t: "detached", tabId: 1, reason: "target_closed", relayInitiated: true }),
 		);
-		expect(cdp.messages.filter(message => message.sessionId === frame.sessionId && message.method === "Page.frameNavigated")).toHaveLength(1);
+		ack(bridge, next, "detach");
+		await flush();
+
+		// A driver reclaiming the tab gets a fresh attachment; its auto-attach is armed
+		// again there, and Chrome reports the frame to it under a new session.
+		const second = new FakeCdpSocket();
+		const secondConn = connectCdp(bridge, second, 1);
+		const reattach = ++msgSeq;
+		bridge.cdpMessage(
+			secondConn,
+			JSON.stringify({
+				id: reattach,
+				method: "Target.attachToTarget",
+				params: { targetId: `PAGE${CODE}.1`, flatten: true },
+			}),
+		);
+		await flush();
+		expect(next.pending("attach")).toHaveLength(1);
+		ack(bridge, next, "attach");
+		await flush();
+		expect(next.pending("send").map(request => request.method)).toContain("Target.setAutoAttach");
+		report(next, "FRAME-AFTER");
+		while (next.pending("send").length > 0) {
+			ack(bridge, next, "send");
+			await flush();
+		}
+		const secondPage = second.sessionFor(reattach);
+		if (!secondPage) throw new Error("the reattach minted no page session");
+		arm(secondConn, secondPage);
+		ack(bridge, next, "send");
+		await flush();
+		expect(second.attachedSessions().filter(session => session.startsWith("FRAME-"))).toEqual(["FRAME-AFTER"]);
 	});
 
 	it("holds a pipelined duplicate Runtime.enable until the in-flight enable settles", async () => {
@@ -1656,8 +1692,14 @@ it("refreshes inventory from a read-only Chrome query without attaching and pres
 it("answers only the observed dialog on an owned tab through its original debugger session", async () => {
 	const bridge = new RelayBridge();
 	const ext = new FakeExtSocket();
-	connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })], [1, 2]);
-	const lease = bridge.managed(BROWSER).claim(bridge.managed(BROWSER).discover().find(row => row.tabId === 1)!.id, "owner");
+	connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
+	const lease = bridge.managed(BROWSER).claim(
+		bridge
+			.managed(BROWSER)
+			.discover()
+			.find(row => row.tabId === 1)!.id,
+		"owner",
+	);
 	const opened = (tabId: number) =>
 		bridge.extMessage(
 			ext,
@@ -1668,6 +1710,11 @@ it("answers only the observed dialog on an owned tab through its original debugg
 				params: { type: "prompt", message: "Name", defaultPrompt: "Original" },
 			}),
 		);
+	// Looking at the owned tab attaches OMP's debugger to it.
+	const looking = bridge.dialog(lease.id, "owner", {});
+	await flush();
+	ack(bridge, ext, "attach");
+	expect((await looking).status).toBe("unobserved");
 	opened(2);
 	expect((await bridge.dialog(lease.id, "owner", {})).status).toBe("unobserved");
 	opened(1);
@@ -1692,10 +1739,10 @@ it("answers only the observed dialog on an owned tab through its original debugg
 	bridge.extClosed(ext);
 });
 
-it("keeps a recovered dialog decision channel across consecutive prompts and detaches after ownership ends", async () => {
+it("keeps a dialog decision channel across consecutive prompts and detaches after ownership ends", async () => {
 	const bridge = new RelayBridge();
 	const ext = new FakeExtSocket();
-	connect(bridge, ext, [tab({ tabId: 1 })], [1]);
+	connect(bridge, ext, [tab({ tabId: 1 })]);
 	const opening = () =>
 		bridge.extMessage(
 			ext,
@@ -1711,10 +1758,14 @@ it("keeps a recovered dialog decision channel across consecutive prompts and det
 			ext,
 			JSON.stringify({ t: "cdpEvent", tabId: 1, method: "Page.javascriptDialogClosed", params: { result: true } }),
 		);
-	opening();
 	const lease = bridge.managed(BROWSER).claim(bridge.managed(BROWSER).discover()[0]!.id, "owner");
 	const connection = bridge.cdpConnected(new FakeCdpSocket(), lease.id);
 	try {
+		const looking = bridge.dialog(lease.id, "owner", {});
+		await flush();
+		ack(bridge, ext, "attach");
+		await looking;
+		opening();
 		const first = await bridge.dialog(lease.id, "owner", {});
 		const reply = bridge.dialog(lease.id, "owner", { action: "accept", id: first.dialog!.id, promptText: "Saved" });
 		await flush();

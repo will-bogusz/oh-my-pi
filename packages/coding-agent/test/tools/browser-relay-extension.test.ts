@@ -1399,3 +1399,106 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 	},
 	90_000,
 );
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"shows a driver that reclaims a tab after the extension's socket dropped the tab's cross-site frame",
+	async () => {
+		const fixture = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: request => {
+				const url = new URL(request.url);
+				// The frame is served to another site (`localhost`), so it runs in its own process.
+				const body =
+					url.pathname === "/frame"
+						? "<title>Child</title><p>Frame</p>"
+						: `<title>Reconnect</title><iframe src="http://localhost:${url.port}/frame"></iframe>`;
+				return new Response(body, { headers: { "content-type": "text/html" } });
+			},
+		});
+		const root = await mkdtemp(path.join(tmpdir(), "omp-frame-reconnect-"));
+		const relay = startRelayServer({ port: 0, log: () => {} });
+		const extensionSockets = spyOn(relay.instances, "extConnected");
+		const clients: Browser[] = [];
+		let setup: Browser | undefined;
+		try {
+			const extension = path.join(root, "extension");
+			await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
+			setup = await puppeteer.launch({
+				executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+				headless: true,
+				pipe: true,
+				args: ["--use-mock-keychain", "--password-store=basic"],
+				enableExtensions: true,
+				ignoreDefaultArgs: stockBackgroundPolicy,
+				userDataDir: path.join(root, "profile"),
+				defaultViewport: null,
+			});
+			const extensionId = await setup.installExtension(extension);
+			const options = await setup.newPage();
+			await options.goto(`chrome-extension://${extensionId}/options.html`);
+			await options.type("#label", "Reconnect fixture");
+			await options.type("#code", relay.access.issueCode().code);
+			await options.click("#save");
+			for (let i = 0; i < 400 && !relay.instances.list().some(browser => browser.connected); i++)
+				await Bun.sleep(25);
+			await options.close();
+			const userTab = await setup.newPage();
+			await userTab.goto(fixture.url.toString());
+			await userTab.waitForFrame(frame => frame.url().startsWith("http://localhost:"));
+			// The launch pipe is not a driver: disarm its auto-attach.
+			const setupSession = await setup.target().createCDPSession();
+			await setupSession
+				.connection()
+				?.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
+			await setupSession.detach();
+			await setup.disconnect();
+
+			// Claim the tab, connect a driver to it, and read its cross-site frame.
+			const drive = async (): Promise<unknown> => {
+				const found = relay.instances.discover().find(candidate => candidate.title === "Reconnect");
+				if (!found) throw new Error("the fixture tab is not discoverable");
+				const lease = relay.instances.claim(found.id, "frame-reconnect");
+				const version = (await (
+					await fetch(`http://127.0.0.1:${relay.port}/managed/${lease.id}/json/version`)
+				).json()) as { webSocketDebuggerUrl: string };
+				const client = await puppeteer.connect({
+					browserWSEndpoint: version.webSocketDebuggerUrl,
+					defaultViewport: null,
+					protocolTimeout: 10_000,
+				});
+				clients.push(client);
+				const [page] = await client.pages();
+				if (!page) throw new Error("the lease exposes no page");
+				const frame = await page.waitForFrame(candidate => candidate.url().startsWith("http://localhost:"), {
+					timeout: 5_000,
+				});
+				return await frame.evaluate("document.title");
+			};
+			expect(await drive()).toBe("Child");
+
+			// The extension's socket drops, and its worker reconnects within the grace
+			// in which Chrome keeps the debugger attached, frame session included.
+			const dropped = extensionSockets.mock.calls.at(-1)?.[0];
+			if (!dropped) throw new Error("the extension never connected");
+			dropped.close();
+			for (
+				let i = 0;
+				i < 400 &&
+				!(extensionSockets.mock.calls.length > 1 && relay.instances.list().some(browser => browser.connected));
+				i++
+			)
+				await Bun.sleep(25);
+			expect(extensionSockets.mock.calls.length).toBeGreaterThan(1);
+			expect(await drive()).toBe("Child");
+		} finally {
+			for (const client of clients) await client.disconnect().catch(() => undefined);
+			setup?.process()?.kill("SIGTERM");
+			extensionSockets.mockRestore();
+			relay.stop();
+			fixture.stop();
+			await rm(root, { recursive: true, force: true });
+		}
+	},
+	90_000,
+);
