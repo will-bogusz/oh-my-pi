@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { AgentToolContext, AgentToolResult, AgentToolUpdateCallback, ToolApproval } from "@oh-my-pi/pi-agent-core";
+import type { ImageContent } from "@oh-my-pi/pi-ai";
 import { untilAborted } from "@oh-my-pi/pi-utils";
 import type { ToolSession } from "../tools";
 import { denyError, formatApprovalPrompt, resolveApproval, resolveApprovalFromContext } from "../tools/approval";
@@ -28,6 +29,12 @@ export interface EvalPreludeContext {
 export interface EvalPreludeCell {
 	/** The cell's abort signal; aborted when the eval call is cancelled or times out. */
 	readonly signal: AbortSignal;
+}
+
+/** What a prelude adds to a cell once it has settled. */
+export interface EvalPreludeSettleReply {
+	text?: string;
+	images?: ImageContent[];
 }
 
 const activePreludeCell = new AsyncLocalStorage<EvalPreludeCell>();
@@ -91,9 +98,10 @@ export interface EvalPreludeDefinition {
 	 * cell's output, after everything the cell printed, so a prelude can report
 	 * what the cell's calls left behind once, instead of once per call. Called
 	 * for every enabled prelude after each cell that was not cancelled; `failed`
-	 * when the cell ended with an error. Must not throw.
+	 * when the cell ended with an error. Images join the cell's displayed
+	 * images. Must not throw.
 	 */
-	settleCell?(cell: EvalPreludeCell, outcome: { failed: boolean }): Promise<string | undefined>;
+	settleCell?(cell: EvalPreludeCell, outcome: { failed: boolean }): Promise<EvalPreludeSettleReply | undefined>;
 }
 
 /**

@@ -359,8 +359,11 @@ class Win {
 		this.focused = window.focused;
 	}
 
-	screenshot(options?: ScreenshotOptions): Promise<{ path: string; width: number; height: number }> {
-		return captureScreenshot(this.#session, this.#getContext, this.id, options);
+	async screenshot(options?: ScreenshotOptions): Promise<{ path: string; width: number; height: number }> {
+		const frame = await captureScreenshot(this.#session, this.#getContext, this.id, options);
+		if (this.id !== DESKTOP_TARGET && !options?.silent)
+			this.#observer.ledger.recordCapture({ id: this.id, pid: this.pid });
+		return frame;
 	}
 
 	/** An input on this window (or, for the desktop root, the focused one), recorded for the cell's read-back. */
@@ -761,6 +764,12 @@ export class ComputerWorkerCore {
 				}
 				observer.ledger.recordShown({ id: touched.id, pid: window?.pid }, readBack.text, touched.options);
 				sections.push(renderReadBack(readBack));
+				if (touched.screenshot) {
+					// The frame also becomes the target's coordinate frame, so the
+					// next pixel input maps against the image the model now sees.
+					await captureScreenshot(session, this.#currentRunContext, touched.id);
+					observer.ledger.recordCapture({ id: touched.id, pid: window?.pid });
+				}
 			} catch (error) {
 				if (signal.aborted) throw error;
 				sections.push(

@@ -4,6 +4,7 @@
 
 ### Added
 
+- The `computer` post-input report now includes a fresh screenshot of each touched window the model last looked at through a displayed screenshot, and eval prelude `settleCell` replies can carry images
 - Added structural elision to the `computer` post-input report: a window tree over 16 KB drops whole subtrees (empty wrappers, then the deepest rows without controls, changed rows last) and leaves a `… N rows elided` line where each run went, instead of being cut as a byte band
 - Added `documentationDelivery` to eval prelude definitions; the `computer` prelude uses it to send its guide once per conversation with the first successful `computer.window(…)`/`computer.focusedWindow()` reply, and the eval description tells the model it need not `read xd://eval/computer` first
 - Added a post-input report to `computer` Eval cells: a cell that sends desktop input ends with each touched window re-read and printed as its current tree, rows marked against the tree the model last saw (`~` changed, `+` added, `removed:`), plus windows the input opened, closed or focused; a call that fails on a ref gets its window's current tree the same way, so acting no longer needs a separate `ax()` call to see the result

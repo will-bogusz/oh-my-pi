@@ -1,3 +1,4 @@
+import type { ImageContent } from "@oh-my-pi/pi-ai";
 import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import { withTimeout } from "@oh-my-pi/pi-utils/async";
 import * as logger from "@oh-my-pi/pi-utils/logger";
@@ -27,6 +28,12 @@ const RESTART_MESSAGE = "computer worker restarted; captures and ax refs were re
 // up to two tree reads per touched window.
 const SETTLE_TIMEOUT_MS = 15_000;
 
+/** What a settled cell's input left behind: the report text, and screenshots of windows the model works on by pixels. */
+export interface ComputerSettleReport {
+	text?: string;
+	images: ImageContent[];
+}
+
 /** Runs desktop scripts and owns their persistent worker session. */
 export interface ComputerController {
 	run(
@@ -42,7 +49,7 @@ export interface ComputerController {
 	 * and windows it opened, closed or focused. Undefined when there is nothing
 	 * to report. Controllers without it report nothing.
 	 */
-	settle?(snapshot: ComputerSessionSnapshot, signal?: AbortSignal): Promise<string | undefined>;
+	settle?(snapshot: ComputerSessionSnapshot, signal?: AbortSignal): Promise<ComputerSettleReport | undefined>;
 	close(): Promise<void>;
 }
 
@@ -215,7 +222,7 @@ export class ComputerSupervisor implements ComputerController {
 		return this.#request(id => ({ type: "run", id, code, timeoutMs, session: snapshot }), timeoutMs, signal);
 	}
 
-	async settle(snapshot: ComputerSessionSnapshot, signal?: AbortSignal): Promise<string | undefined> {
+	async settle(snapshot: ComputerSessionSnapshot, signal?: AbortSignal): Promise<ComputerSettleReport | undefined> {
 		// A worker that never started has seen no input.
 		if (!this.#worker) return undefined;
 		const result = await this.#request(
@@ -223,7 +230,9 @@ export class ComputerSupervisor implements ComputerController {
 			SETTLE_TIMEOUT_MS,
 			signal,
 		);
-		return typeof result.returnValue === "string" ? result.returnValue : undefined;
+		const images = result.displays.filter(block => block.type === "image");
+		if (typeof result.returnValue !== "string" && images.length === 0) return undefined;
+		return { text: typeof result.returnValue === "string" ? result.returnValue : undefined, images };
 	}
 
 	async #request(

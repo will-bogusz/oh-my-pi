@@ -38,6 +38,8 @@ export interface TouchedWindow {
 	baseline?: string;
 	/** Options of that read. */
 	options: AxReadOptions;
+	/** The model's latest look at the window was a displayed screenshot: it works from pixels, so the report repeats one. */
+	screenshot: boolean;
 }
 
 /** Everything one cell's input left for the settle to report. */
@@ -57,6 +59,8 @@ interface WindowRecord {
 	/** Unelided tree text the model last received. */
 	shown?: string;
 	options: AxReadOptions;
+	/** How the model last looked at the window. */
+	observedBy?: "ax" | "screenshot";
 }
 
 /**
@@ -251,7 +255,16 @@ export class ObservationLedger {
 		if (window.pid !== undefined) record.pid = window.pid;
 		record.shown = text;
 		record.options = { ...options };
+		record.observedBy = "ax";
 		this.recordRefs(window.id, treeRefs(text));
+		this.#touched.delete(window.id);
+	}
+
+	/** The model was shown a screenshot of the window: its post-input state is known, and it works from pixels. */
+	recordCapture(window: InputWindow): void {
+		const record = this.#record(window.id);
+		if (window.pid !== undefined) record.pid = window.pid;
+		record.observedBy = "screenshot";
 		this.#touched.delete(window.id);
 	}
 
@@ -296,7 +309,13 @@ export class ObservationLedger {
 		if (this.#inputs === 0 && this.#touched.size === 0) return undefined;
 		const touched: TouchedWindow[] = [...this.#touched].map(([id, entry]) => {
 			const record = this.#windows.get(id);
-			return { id, ...entry, baseline: record?.shown, options: { ...(record?.options ?? {}) } };
+			return {
+				id,
+				...entry,
+				baseline: record?.shown,
+				options: { ...(record?.options ?? {}) },
+				screenshot: record?.observedBy === "screenshot",
+			};
 		});
 		const pending: PendingSettle = {
 			touched,
@@ -366,6 +385,7 @@ export function renderReadBack(readBack: ReadBack): string {
 	const tree = change?.text ?? readBack.text;
 	const elided = elideAxTree(tree, REPORT_TREE_BUDGET_BYTES);
 	if (elided) summary += `; ${elided.elidedRows} rows elided to fit, changed rows kept — \`win.ax()\` prints all`;
+	if (touched.screenshot) summary += "; screenshot below";
 	const lines = [`${name} after ${describeCause(touched)} — ${summary}:`, elided?.text ?? tree];
 	if (change && change.removed.length > 0) {
 		const shown = change.removed.slice(0, 8).join("; ");

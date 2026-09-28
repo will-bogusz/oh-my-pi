@@ -6,7 +6,10 @@ import { disposeAllKernelSessions } from "@oh-my-pi/pi-coding-agent/eval/py/exec
 import { EvalTool } from "@oh-my-pi/pi-coding-agent/tools/eval";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
 
-/** A prelude that counts its calls per cell and reports the count once the cell settles. */
+const PIXEL_PNG =
+	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+
+/** A prelude that counts its calls per cell and reports the count once the cell settles, with an image after three. */
 function countingPrelude(settled: Array<{ calls: number; failed: boolean }>): EvalPreludeDefinition {
 	const calls = new Map<EvalPreludeCell, number>();
 	return {
@@ -25,7 +28,10 @@ function countingPrelude(settled: Array<{ calls: number; failed: boolean }>): Ev
 			if (count === undefined) return undefined;
 			calls.delete(cell);
 			settled.push({ calls: count, failed: outcome.failed });
-			return `counter: ${count} call(s) this cell`;
+			return {
+				text: `counter: ${count} call(s) this cell`,
+				images: count === 3 ? [{ type: "image", data: PIXEL_PNG, mimeType: "image/png" }] : undefined,
+			};
 		},
 	};
 }
@@ -83,7 +89,9 @@ describe("eval prelude cell settlement", () => {
 			language: "py",
 			code: "await counter.hit()\nawait counter.hit()\nawait counter.hit()\nprint('cell body')",
 		});
-		expect(text(result)).toBe("cell body\n\ncounter: 3 call(s) this cell");
+		expect(text(result)).toStartWith("cell body\n\n");
+		expect(text(result)).toEndWith("counter: 3 call(s) this cell");
+		expect(result.content.filter(block => block.type === "image")).toHaveLength(1);
 		expect(settled).toEqual([{ calls: 3, failed: false }]);
 	});
 });

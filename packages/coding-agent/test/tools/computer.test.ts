@@ -1298,11 +1298,15 @@ class EditableWindowSession extends FakeNativeSession {
 	}
 }
 
-async function settleWorker(transport: MemoryTransport, id: string): Promise<unknown> {
+async function settleRun(transport: MemoryTransport, id: string) {
 	transport.inbound({ type: "settle", id, timeoutMs: 5_000, session: snapshot(true) });
 	const message = await transport.waitFor(candidate => candidate.type === "result" && candidate.id === id);
 	if (message.type !== "result" || !message.ok) throw new Error(`settle ${id} failed`);
-	return message.payload.returnValue;
+	return message.payload;
+}
+
+async function settleWorker(transport: MemoryTransport, id: string): Promise<unknown> {
+	return (await settleRun(transport, id)).returnValue;
 }
 
 describe("computer cell settlement", () => {
@@ -1411,6 +1415,33 @@ describe("computer cell settlement", () => {
 		expect(tree).toContainEqual(expect.stringMatching(/^ {4}… \d+ rows elided$/));
 	});
 
+	it("repeats a screenshot for a window the model last looked at in pixels", async () => {
+		const transport = new MemoryTransport();
+		const native = new EditableWindowSession();
+		new ComputerWorkerCore(transport, () => native);
+
+		await runWorker(
+			transport,
+			"read",
+			'const win = await desktop.window("42"); await win.ax(); await win.screenshot()',
+		);
+		await runWorker(transport, "press", 'await (await desktop.ref("e3")).press()');
+		const pixels = await settleRun(transport, "settle-pixels");
+		expect(String(pixels.returnValue).split("\n")[0]).toEndWith("; screenshot below:");
+		expect(pixels.displays.filter(block => block.type === "image")).toHaveLength(1);
+		expect(pixels.screenshots).toEqual([expect.objectContaining({ target: "42" })]);
+
+		// A screenshot taken after the input already answers it: no read-back at all.
+		await runWorker(
+			transport,
+			"press-look",
+			'const win = await desktop.window("42"); await (await desktop.ref("e7")).press(); await win.screenshot()',
+		);
+		const looked = await settleRun(transport, "settle-looked");
+		expect(looked.returnValue).toBeUndefined();
+		expect(looked.displays).toEqual([]);
+	});
+
 	it("names windows the cell's input opened and focused", async () => {
 		const transport = new MemoryTransport();
 		const native = new EditableWindowSession();
@@ -1437,7 +1468,7 @@ describe("computer cell settlement", () => {
 			},
 			async settle(snapshot) {
 				settled.push(snapshot.readOnly);
-				return "window 42 after press e3 — current tree:";
+				return { text: "window 42 after press e3 — current tree:", images: [] };
 			},
 			async close() {},
 		}));
@@ -1454,7 +1485,10 @@ describe("computer cell settlement", () => {
 			{ session: toolSession(), toolCallId: "press", cell: acting },
 		);
 		expect(await prelude.settleCell?.(idle, { failed: false })).toBeUndefined();
-		expect(await prelude.settleCell?.(acting, { failed: false })).toBe("window 42 after press e3 — current tree:");
+		expect(await prelude.settleCell?.(acting, { failed: false })).toEqual({
+			text: "window 42 after press e3 — current tree:",
+			images: [],
+		});
 		expect(await prelude.settleCell?.(acting, { failed: false })).toBeUndefined();
 		expect(settled).toEqual([true]);
 	});
