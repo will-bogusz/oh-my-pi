@@ -13,6 +13,7 @@
  * `- role "label" [ref=eN] …`.
  */
 import type { DesktopWindow, DiffRun } from "@oh-my-pi/pi-natives";
+import { elideAxTree } from "./tree-elide";
 
 /** Options of the `ax()` read a window's baseline came from; re-reads reuse them so trees compare. */
 export interface AxReadOptions {
@@ -57,6 +58,13 @@ interface WindowRecord {
 	shown?: string;
 	options: AxReadOptions;
 }
+
+/**
+ * Bytes one window's tree may take in a cell's report. Larger trees are
+ * elided structurally, dropping unmarked subtrees without controls first, so
+ * the rows the input changed survive.
+ */
+export const REPORT_TREE_BUDGET_BYTES = 16 * 1024;
 
 /** Most refs remembered for mapping an element back to its window. */
 const MAX_REFS = 20_000;
@@ -355,7 +363,10 @@ export function renderReadBack(readBack: ReadBack): string {
 		summary = `no accessibility change ${(readBack.sinceInputMs / 1000).toFixed(1)} s after the input; refs renewed`;
 	else
 		summary = `${change.changed} changed, ${change.added} added, ${change.removed.length} removed (rows marked ~ changed, + added)`;
-	const lines = [`${name} after ${describeCause(touched)} — ${summary}:`, change?.text ?? readBack.text];
+	const tree = change?.text ?? readBack.text;
+	const elided = elideAxTree(tree, REPORT_TREE_BUDGET_BYTES);
+	if (elided) summary += `; ${elided.elidedRows} rows elided to fit, changed rows kept — \`win.ax()\` prints all`;
+	const lines = [`${name} after ${describeCause(touched)} — ${summary}:`, elided?.text ?? tree];
 	if (change && change.removed.length > 0) {
 		const shown = change.removed.slice(0, 8).join("; ");
 		const more = change.removed.length > 8 ? `; +${change.removed.length - 8} more` : "";

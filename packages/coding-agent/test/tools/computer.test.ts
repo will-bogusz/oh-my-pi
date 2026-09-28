@@ -1219,6 +1219,8 @@ describe("computer supervisor recovery", () => {
 class EditableWindowSession extends FakeNativeSession {
 	editing = false;
 	snapshots = 0;
+	/** Extra read-only text rows, to grow the tree past the report's byte budget. */
+	filler = 0;
 	windows: DesktopWindow[] = [windowFixture];
 	#nextRef = 1;
 	#live = new Set<string>();
@@ -1240,6 +1242,11 @@ class EditableWindowSession extends FakeNativeSession {
 			`    - button "${this.editing ? "Done" : "Edit"}" [ref=${ref()}]`,
 			...(this.editing ? [`    - textfield "Phone" [ref=${ref()}]: "555"`] : []),
 			`    - button "Share" [ref=${ref()}]`,
+			...(this.filler > 0 ? [`  - list [ref=${ref()}]`] : []),
+			...Array.from(
+				{ length: this.filler },
+				(_, index) => `    - statictext "Row ${index} of the transcript pane" [ref=${ref()}]`,
+			),
 		];
 		return { text: rows.join("\n") };
 	}
@@ -1347,6 +1354,23 @@ describe("computer cell settlement", () => {
 		expect(report).toMatch(
 			/^window 42 Code "Editor" after click 3,4 — no accessibility change 0\.\d s after the input; refs renewed:\n- window "Editor" \[ref=e\d+\]/,
 		);
+	});
+
+	it("elides a large report tree to its budget and keeps the rows the input changed", async () => {
+		const transport = new MemoryTransport();
+		const native = new EditableWindowSession();
+		native.filler = 2_000;
+		new ComputerWorkerCore(transport, () => native);
+
+		await runWorker(transport, "read", 'return await (await desktop.window("42")).ax()');
+		await runWorker(transport, "press", 'await (await desktop.ref("e3")).press()');
+		const report = String(await settleWorker(transport, "settle-large"));
+		const [header, ...tree] = report.split("\n");
+		expect(header).toMatch(/ rows elided to fit, changed rows kept — `win.ax\(\)` prints all:$/);
+		expect(Buffer.byteLength(tree.join("\n"), "utf-8")).toBeLessThanOrEqual(16 * 1024);
+		expect(tree).toContainEqual(expect.stringMatching(/^ {4}~ button "Done" \[ref=e\d+\] \(was: button "Edit"\)$/));
+		expect(tree).toContainEqual(expect.stringMatching(/^ {4}\+ textfield "Phone" \[ref=e\d+\]: "555"$/));
+		expect(tree).toContainEqual(expect.stringMatching(/^ {4}… \d+ rows elided$/));
 	});
 
 	it("names windows the cell's input opened and focused", async () => {
