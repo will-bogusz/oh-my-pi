@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import type { AgentToolContext, AgentToolResult, AgentToolUpdateCallback, ToolApproval } from "@oh-my-pi/pi-agent-core";
 import { untilAborted } from "@oh-my-pi/pi-utils";
 import type { ToolSession } from "../tools";
@@ -15,6 +16,30 @@ export interface EvalPreludeContext {
 	context?: AgentToolContext;
 	/** Progress receiver shared with the active eval call. */
 	onUpdate?: AgentToolUpdateCallback<unknown>;
+	/** The eval cell this call runs in; absent for calls made outside a cell. */
+	cell?: EvalPreludeCell;
+}
+
+/**
+ * One eval cell as its prelude calls see it. The object identifies the cell:
+ * every host call the cell's code makes carries this same object in
+ * `EvalPreludeContext.cell`, and `settleCell` receives it once the cell ends.
+ */
+export interface EvalPreludeCell {
+	/** The cell's abort signal; aborted when the eval call is cancelled or times out. */
+	readonly signal: AbortSignal;
+}
+
+const activePreludeCell = new AsyncLocalStorage<EvalPreludeCell>();
+
+/** Run a cell's execution with `cell` as the cell its prelude calls belong to. */
+export function runWithEvalPreludeCell<T>(cell: EvalPreludeCell, action: () => T): T {
+	return activePreludeCell.run(cell, action);
+}
+
+/** The cell whose execution is running in the current host async context, if any. */
+export function getActiveEvalPreludeCell(): EvalPreludeCell | undefined {
+	return activePreludeCell.getStore();
 }
 
 /**
@@ -55,6 +80,14 @@ export interface EvalPreludeDefinition {
 	 * bridge regardless.
 	 */
 	status?(parameters: unknown, result: AgentToolResult<unknown>): string | undefined;
+	/**
+	 * The cell has finished running. Text returned here is appended to the
+	 * cell's output, after everything the cell printed, so a prelude can report
+	 * what the cell's calls left behind once, instead of once per call. Called
+	 * for every enabled prelude after each cell that was not cancelled; `failed`
+	 * when the cell ended with an error. Must not throw.
+	 */
+	settleCell?(cell: EvalPreludeCell, outcome: { failed: boolean }): Promise<string | undefined>;
 }
 
 /**

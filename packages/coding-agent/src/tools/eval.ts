@@ -15,7 +15,12 @@ import { jsBackend, pythonBackend } from "../eval";
 import type { ExecutorBackend, ExecutorBackendResult } from "../eval/backend";
 import { EVAL_TIMEOUT_PAUSE_OP, EVAL_TIMEOUT_RESUME_OP } from "../eval/bridge-timeout";
 import { IdleTimeout } from "../eval/idle-timeout";
-import { type EvalPreludeDefinition, evalPreludeSummary, getEnabledEvalPreludes } from "../eval/preludes";
+import {
+	type EvalPreludeDefinition,
+	evalPreludeSummary,
+	getEnabledEvalPreludes,
+	runWithEvalPreludeCell,
+} from "../eval/preludes";
 import { prepareEvalSource } from "../eval/input";
 import type { BackendProbeOptions } from "../eval/probe";
 import { defaultEvalSessionId } from "../eval/session-id";
@@ -916,42 +921,47 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 				pushUpdate();
 
 				const startTime = Date.now();
+				// Prelude calls this cell makes carry `preludeCell`; each prelude may
+				// append what the cell left behind once it has settled.
+				const preludeCell = { signal: combinedSignal };
 				let result: ExecutorBackendResult;
 				try {
-					result = await backend.execute(cell.code, {
-						cwd: session.cwd,
-						sessionId,
-						sessionFile: sessionFile ?? undefined,
-						kernelOwnerId,
-						signal: combinedSignal,
-						session,
-						idleTimeoutMs,
-						reset: cell.reset,
-						filename: cell.filename,
-						packages: cell.packages,
-						environment: cell.environment,
-						onChunk: chunk => {
-							outputSink!.push(chunk);
-						},
-						onStatus: event => {
-							if (event.op === EVAL_TIMEOUT_PAUSE_OP) {
-								idle?.pause();
-								return;
-							}
-							if (event.op === EVAL_TIMEOUT_RESUME_OP) {
-								idle?.resume();
-								return;
-							}
-							cellResult.statusEvents ??= [];
-							upsertStatusEvent(cellResult.statusEvents, {
-								...event,
-								resolvedThinkingLevel: parseConfiguredThinkingLevel(
-									typeof event.resolvedThinkingLevel === "string" ? event.resolvedThinkingLevel : undefined,
-								),
-							});
-							pushUpdate();
-						},
-					});
+					result = await runWithEvalPreludeCell(preludeCell, () =>
+						backend.execute(cell.code, {
+							cwd: session.cwd,
+							sessionId,
+							sessionFile: sessionFile ?? undefined,
+							kernelOwnerId,
+							signal: combinedSignal,
+							session,
+							idleTimeoutMs,
+							reset: cell.reset,
+							filename: cell.filename,
+							packages: cell.packages,
+							environment: cell.environment,
+							onChunk: chunk => {
+								outputSink!.push(chunk);
+							},
+							onStatus: event => {
+								if (event.op === EVAL_TIMEOUT_PAUSE_OP) {
+									idle?.pause();
+									return;
+								}
+								if (event.op === EVAL_TIMEOUT_RESUME_OP) {
+									idle?.resume();
+									return;
+								}
+								cellResult.statusEvents ??= [];
+								upsertStatusEvent(cellResult.statusEvents, {
+									...event,
+									resolvedThinkingLevel: parseConfiguredThinkingLevel(
+										typeof event.resolvedThinkingLevel === "string" ? event.resolvedThinkingLevel : undefined,
+									),
+								});
+								pushUpdate();
+							},
+						}),
+					);
 				} finally {
 					idle?.dispose();
 					// Publish the cell's last live state before its final output replaces it.
@@ -959,6 +969,14 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 					activeLiveCell = undefined;
 				}
 				const durationMs = Date.now() - startTime;
+				const preludeReplies: string[] = [];
+				if (!result.cancelled) {
+					const failed = result.exitCode !== undefined && result.exitCode !== 0;
+					for (const prelude of getEnabledEvalPreludes(session.getEvalPreludes?.() ?? [])) {
+						const reply = await prelude.settleCell?.(preludeCell, { failed });
+						if (reply) preludeReplies.push(reply);
+					}
+				}
 
 				const cellStatusEvents: EvalStatusEvent[] = [];
 				const cellDisplayTexts: string[] = [];
@@ -1024,10 +1042,9 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 				const displayText = cellDisplayTexts.join("\n\n");
 				const visibleDisplayText =
 					displayText && imageText ? `${displayText}\n\n${imageText}` : displayText || imageText;
-				const cellOutput =
-					stdoutTrimmed && visibleDisplayText
-						? `${stdoutTrimmed}\n\n${visibleDisplayText}`
-						: stdoutTrimmed || visibleDisplayText;
+				const cellOutput = [stdoutTrimmed, visibleDisplayText, ...preludeReplies]
+					.filter(text => text !== "")
+					.join("\n\n");
 				cellResult.output = cellOutput;
 				cellResult.exitCode = result.exitCode;
 				cellResult.durationMs = durationMs;
