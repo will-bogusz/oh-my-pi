@@ -79,16 +79,24 @@ export async function navigateMainFrame(page: Page, url: string, opts: MainFrame
 	const waitUntil = opts.waitUntil ?? "load";
 	const sameDocument = sameDocumentTarget(page.url(), url);
 	const session = await untilAborted(opts.signal, () => page.createCDPSession());
-	let sent = false;
+	// A load its caller gave up keeps going in Chrome: it stalls later ops on
+	// this page, and every new tab's attach to the browser waits on it. It is
+	// stopped the moment the caller gives up, on this navigation's own session:
+	// the stop is on the wire before the worker can take its next message, so
+	// it cannot land on a navigation sent after it.
+	const abandon = opts.abandonSignal;
+	const stop = (): void => void session.send("Page.stopLoading").catch(() => undefined);
 	try {
 		const navigated = await withTimeout(
 			untilAborted(opts.signal, () => {
-				sent = true;
+				abandon?.addEventListener("abort", stop, { once: true });
 				return session.send("Page.navigate", { url });
 			}),
 			Math.max(deadline - Date.now(), 1),
 			new PhaseTimeout(`navigation to ${url} never committed`),
 		);
+		// Only a new document has a load to stop.
+		if (!navigated.loaderId) abandon?.removeEventListener("abort", stop);
 		// `net::ERR_ABORTED` is Chrome reporting a download or a navigation the page
 		// itself replaced; puppeteer treats it as a success and so do we.
 		if (navigated.errorText && navigated.errorText !== "net::ERR_ABORTED")
@@ -118,15 +126,9 @@ export async function navigateMainFrame(page: Page, url: string, opts: MainFrame
 	} catch (error) {
 		const timedOut = error instanceof PhaseTimeout || (error instanceof Error && error.name === "TimeoutError");
 		if (timedOut) await reportNavigationTimeout(page, opts);
-		// An abandoned load keeps going in Chrome: it stalls later ops on this
-		// page, and every new tab's attach to the browser waits on it. The stop
-		// goes out now, on this navigation's own session, so it reaches Chrome
-		// ahead of any navigation this worker sends next; not awaited, as the
-		// abort must answer now.
-		if (sent && sameDocument === undefined && opts.abandonSignal?.aborted)
-			void session.send("Page.stopLoading").catch(() => undefined);
 		throw error;
 	} finally {
+		abandon?.removeEventListener("abort", stop);
 		// Not awaited: a slow detach must not hold the answer past its deadline.
 		void session.detach().catch(() => undefined);
 	}

@@ -1630,6 +1630,12 @@ export class WorkerCore {
 		const ac = new AbortController();
 		const runAc = new AbortController();
 		const signal = AbortSignal.any([timeoutSignal, ac.signal, runAc.signal]);
+		// Settled when the run ends: a run timeout that fires after the run
+		// already ended does not abandon what the run left in flight.
+		const abandonAc = new AbortController();
+		const abandon = (): void => abandonAc.abort();
+		timeoutSignal.addEventListener("abort", abandon, { once: true });
+		ac.signal.addEventListener("abort", abandon, { once: true });
 		const output = new RunOutput();
 		const screenshots: ScreenshotResult[] = [];
 		const runErrorStartSeq = this.#consoleCapture.nextSequence;
@@ -1640,7 +1646,7 @@ export class WorkerCore {
 			id: msg.id,
 			ac,
 			signal,
-			abandoned: AbortSignal.any([timeoutSignal, ac.signal]),
+			abandoned: abandonAc.signal,
 			output,
 			screenshots,
 			pendingTools: new Map(),
@@ -1764,6 +1770,8 @@ export class WorkerCore {
 		} catch (error) {
 			failure = { error };
 		} finally {
+			timeoutSignal.removeEventListener("abort", abandon);
+			ac.signal.removeEventListener("abort", abandon);
 			runAc.abort(postmortem.markExpectedCleanupError(new ToolAbortError("Browser run ended")));
 			await Bun.sleep(0);
 			const blockedByDialog = this.#managedChrome && !!this.#openDialog;
