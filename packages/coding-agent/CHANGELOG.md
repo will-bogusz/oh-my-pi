@@ -35,6 +35,10 @@
 - Fixed the agent's `goal` calls asking for approval under `--approval-mode write`, which paused goal-mode loops at `complete`; `always-ask` still prompts for goal changes but not `get` ([#14368](https://github.com/can1357/oh-my-pi/issues/14368))
 - Fixed MCP server connection progress popping up a toast for every server that connects or fails in native terminals such as Tern; it now shows only in the classic terminal transcript
 
+### Added
+
+- Added a post-input report to `computer` Eval cells: a cell that sends desktop input ends with each touched window's current tree, rows marked against the tree the model last saw, plus windows the input opened, closed or focused; eval preludes gain a `settleCell` hook that appends text after a cell's output ([#14343](https://github.com/can1357/oh-my-pi/pull/14343) by [@will-bogusz](https://github.com/will-bogusz))
+
 ## [18.6.1] - 2026-10-04
 
 ### Fixed
