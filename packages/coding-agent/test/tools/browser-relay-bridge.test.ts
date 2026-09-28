@@ -1347,6 +1347,93 @@ describe("RelayBridge attachment release", () => {
 		expect(announced(third).slice(thirdBefore)).toEqual([]);
 	});
 
+	it("routes a shared child's reports only to connections that know it, and lets each let go of it alone", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const arm = (conn: number, sessionId: string) =>
+			bridge.cdpMessage(
+				conn,
+				JSON.stringify({
+					id: ++msgSeq,
+					sessionId,
+					method: "Target.setAutoAttach",
+					params: { autoAttach: true, waitForDebuggerOnStart: true, flatten: true },
+				}),
+			);
+		const report = (params: Record<string, unknown>, sessionId?: string) =>
+			bridge.extMessage(ext, JSON.stringify({ t: "cdpEvent", tabId: 1, sessionId, method: "Target.attachedToTarget", params }));
+		const heard = (socket: FakeCdpSocket, method: string) =>
+			socket.messages
+				.filter(message => message.method === method)
+				.map(message => ({
+					on: message.sessionId,
+					child:
+						typeof message.params === "object" && message.params !== null && "sessionId" in message.params
+							? message.params.sessionId
+							: undefined,
+				}));
+		const frame = { sessionId: "REAL-FRAME", targetInfo: { targetId: "OOPIF", type: "iframe", url: "" }, waitingForDebugger: false };
+		const nested = { sessionId: "REAL-NESTED", targetInfo: { targetId: "NESTED", type: "iframe", url: "" }, waitingForDebugger: false };
+
+		const first = new FakeCdpSocket();
+		const firstConn = connectCdp(bridge, first, 1);
+		const firstPage = await attachPage(bridge, ext, first, firstConn, 1);
+		arm(firstConn, firstPage);
+		ack(bridge, ext, "send");
+		await flush();
+		report(frame);
+
+		// A late connection's arm is in flight when the frame reports a frame of its own:
+		// the late connection cannot place a report from a frame it has not heard of yet.
+		const late = new FakeCdpSocket();
+		const lateConn = connectCdp(bridge, late, 1);
+		const latePage = await attachPage(bridge, ext, late, lateConn, 1);
+		arm(lateConn, latePage);
+		await flush();
+		report(nested, frame.sessionId);
+		ack(bridge, ext, "send");
+		await flush();
+		arm(lateConn, frame.sessionId);
+		ack(bridge, ext, "send");
+		await flush();
+		expect(heard(late, "Target.attachedToTarget").filter(entry => entry.on !== undefined)).toEqual([
+			{ on: latePage, child: frame.sessionId },
+			{ on: frame.sessionId, child: nested.sessionId },
+		]);
+		expect(heard(first, "Target.attachedToTarget").filter(entry => entry.on !== undefined)).toEqual([
+			{ on: firstPage, child: frame.sessionId },
+			{ on: frame.sessionId, child: nested.sessionId },
+		]);
+
+		// The first connection lets go of the frame: it hears the detach, Chrome is not asked,
+		// and the late connection keeps hearing the frame.
+		const sends = ext.rpcs("send").length;
+		const detachId = ++msgSeq;
+		bridge.cdpMessage(
+			firstConn,
+			JSON.stringify({ id: detachId, sessionId: firstPage, method: "Target.detachFromTarget", params: { sessionId: frame.sessionId } }),
+		);
+		await flush();
+		expect(ext.rpcs("send")).toHaveLength(sends);
+		expect(first.messages.find(message => message.id === detachId)).toHaveProperty("result");
+		expect(heard(first, "Target.detachedFromTarget")).toEqual([{ on: firstPage, child: frame.sessionId }]);
+		bridge.extMessage(
+			ext,
+			JSON.stringify({ t: "cdpEvent", tabId: 1, sessionId: frame.sessionId, method: "Page.lifecycleEvent", params: { name: "load" } }),
+		);
+		expect(late.messages.filter(message => message.sessionId === frame.sessionId && message.method === "Page.lifecycleEvent")).toHaveLength(1);
+		expect(first.messages.filter(message => message.sessionId === frame.sessionId && message.method === "Page.lifecycleEvent")).toHaveLength(0);
+
+		// The last holder letting go ends the frame's session in Chrome.
+		bridge.cdpMessage(
+			lateConn,
+			JSON.stringify({ id: ++msgSeq, sessionId: latePage, method: "Target.detachFromTarget", params: { sessionId: frame.sessionId } }),
+		);
+		await flush();
+		expect(ext.rpcs("send").at(-1)).toMatchObject({ method: "Target.detachFromTarget", params: { sessionId: frame.sessionId } });
+	});
+
 	it("holds a pipelined duplicate Runtime.enable until the in-flight enable settles", async () => {
 		const bridge = new RelayBridge({});
 		const ext = new FakeExtSocket();

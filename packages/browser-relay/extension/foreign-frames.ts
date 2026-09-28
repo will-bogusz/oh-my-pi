@@ -20,8 +20,12 @@
  * re-shows the same frame loads nothing) and the call is retried while Chrome
  * tears the old document down; the refusal came before dispatch, so a retry
  * never runs a command twice. Codex's extension neutralizes frames the same
- * way; the relay only calls on a tab OMP is driving, so the user's own tabs
- * keep their menus.
+ * way. Only tabs this extension holds an attachment on are touched, the user's
+ * own tabs never, but that includes a leased tab being handed back: a detach
+ * refused over a menu empties it, since a failed detach would keep the tab
+ * attached (and Chrome's infobar up) until it closes. The cost falls on that
+ * document only: a vendor that draws a fresh frame for its next menu shows it,
+ * one that re-points the emptied frame shows nothing there until a reload.
  */
 
 const FOREIGN_FRAME_REFUSAL = /chrome-extension:\/\/ URL of different extension/i;

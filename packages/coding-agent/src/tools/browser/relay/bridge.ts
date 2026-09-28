@@ -1042,6 +1042,18 @@ export class RelayBridge {
 			throw new Error("Use the explicit tab reveal/release lifecycle operation");
 		}
 		if (!realSessionId) this.#recordRootState(tab, msg);
+		// One Chrome session serves every connection told of a child, so a
+		// connection letting go of it must not end it for another that holds it.
+		const release = msg.method === "Target.detachFromTarget" ? msg.params?.sessionId : undefined;
+		const shared = typeof release === "string" ? tab.realSessions.get(release) : undefined;
+		if (typeof release === "string" && shared && conn.announced.has(release)) {
+			conn.announced.delete(release);
+			if ([...this.#conns.values()].some(other => other.announced.has(release))) {
+				this.#emit(conn, "Target.detachedFromTarget", { sessionId: release, targetId: shared.targetId }, msg.sessionId);
+				this.#reply(conn, msg, {});
+				return;
+			}
+		}
 		const send = async (): Promise<void> => {
 			// Only a click on a visible tab has anything to wait for; everything
 			// else must reach Chrome in the same turn it was forwarded.
@@ -1315,6 +1327,8 @@ export class RelayBridge {
 		const info = params?.targetInfo;
 		const targetId = info && typeof info === "object" && "targetId" in info ? info.targetId : undefined;
 		const attached = method === "Target.attachedToTarget" ? child : undefined;
+		// A child reported while a detach is in flight dies with that attachment: nobody is told of it.
+		if (attached !== undefined && !tab.attached) return;
 		if (attached !== undefined && params) {
 			tab.realSessions.set(attached, { parent: sourceSessionId, targetId, event: params });
 			this.#realSessionTabs.set(attached, tabKey);
@@ -1328,10 +1342,12 @@ export class RelayBridge {
 		}
 		if (sourceSessionId) {
 			// Event from a real child session: pass through verbatim to every
-			// connection that was told about the child.
+			// connection that was told about the child. A connection that has not
+			// heard of it could not place the event; a child it reports is kept
+			// for that connection's arm on it instead (#announceChildren).
 			const payload = JSON.stringify({ sessionId: sourceSessionId, method, params });
 			for (const conn of this.#conns.values()) {
-				if (conn.autoAttachSessionsForTab(tabKey).length === 0) continue;
+				if (!conn.announced.has(sourceSessionId)) continue;
 				if (attached !== undefined) {
 					if (conn.announced.has(attached)) continue;
 					conn.announced.add(attached);
