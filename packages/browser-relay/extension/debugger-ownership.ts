@@ -99,7 +99,8 @@ export class DebuggerAttachments {
 
 	/**
 	 * The relay is unreachable. Give a reconnect the grace window — a relay
-	 * restart mid-task must not cost a re-attach — then release everything.
+	 * that comes back decides about the attachments itself, over the ones
+	 * still held — then release everything.
 	 * Resolves with the tabs released, or an empty list when {@link hold} or
 	 * {@link releaseNow} settles the window first.
 	 */

@@ -100,6 +100,8 @@ class CdpConnection {
 	autoAttach = false;
 	/** Minted pseudo-sessions owned by this connection. */
 	readonly sessions = new Map<string, SessionRef>();
+	/** Real child sessions (OOPIF, worker) this connection has been told about: each is announced once. */
+	readonly announced = new Set<string>();
 
 	constructor(
 		readonly id: number,
@@ -263,8 +265,24 @@ class TabState {
 	 * dialog/download/lifecycle events stop silently.
 	 */
 	readonly rootEnabled = new Map<string, Record<string, unknown> | undefined>();
-	/** Real Chrome session ids (OOPIF/worker children) living under this tab's root session. */
-	readonly realSessions = new Set<string>();
+	/**
+	 * Real Chrome child sessions (OOPIF/worker) under this tab's attachment,
+	 * keyed by session id: the session that reported each (none = the root),
+	 * and its `Target.attachedToTarget` params with the latest target info.
+	 * Chrome reports a child once, to the first auto-attach armed over it; a
+	 * second driver arming later gets it from here. `releasing` marks a child
+	 * its last holder asked Chrome to detach: it is never replayed again.
+	 */
+	readonly realSessions = new Map<
+		string,
+		{ parent: string | undefined; targetId: unknown; event: Record<string, unknown>; releasing?: boolean }
+	>();
+	/**
+	 * Bumped whenever the recorded children are dropped: an auto-attach arm
+	 * issued before that replays nothing, since the children it would name
+	 * belong to a later report its connection hears of live.
+	 */
+	childEpoch = 0;
 	/** Live execution contexts from the shared root debugger session. */
 	readonly runtimeContexts = new Map<number, Record<string, unknown>>();
 	/** Whether the shared root Runtime domain has been enabled by the bridge. */
@@ -330,6 +348,12 @@ const WINDOW_OPEN_MATCH_MS = 3_000;
  * the glyph is still in the air.
  */
 const CURSOR_ARRIVAL_TIMEOUT_MS = 1_500;
+/**
+ * How long a page clean-up before a detach may take. `Runtime.evaluate`
+ * waits out an open JS dialog, and a claim waits for the detach, so a
+ * best-effort clean-up must not hold both for the whole {@link RPC_TIMEOUT_MS}.
+ */
+const PAGE_CLEANUP_TIMEOUT_MS = 2_000;
 
 /**
  * Multiplexing CDP bridge between downstream puppeteer connections and the
@@ -509,9 +533,6 @@ export class RelayBridge {
 			this.#log("replacing extension socket", { instanceId });
 			const previous = inst.socket;
 			this.#retire(inst, new ExtensionReplacedError());
-			// Debugger-derived state dies with the old attachment; the hello's
-			// attachedTabIds reconciliation runs right after.
-			for (const tab of this.#tabs.values()) if (tab.instanceId === instanceId) this.#resetRuntime(tab);
 			previous.close();
 		}
 		inst.socket = socket;
@@ -523,18 +544,22 @@ export class RelayBridge {
 		const inst = instanceId === undefined ? undefined : this.#instances.get(instanceId);
 		if (!inst || inst.socket !== socket) return;
 		this.#retire(inst, new Error("relay extension disconnected"));
-		// Keep the instance's tabs registered (the browser may reconnect), but drop
-		// debugger state: the attachment died with the service worker.
+	}
+
+	/**
+	 * Detach an instance from its socket: its leases end and its in-flight RPCs
+	 * fail. Its tabs stay registered (the browser may reconnect), but the bridge
+	 * holds no debugger over them until the next hello says what Chrome kept —
+	 * marked first, so connections closing with their leases send no detach
+	 * down a socket that is gone.
+	 */
+	#retire(inst: ExtInstance, error: Error): void {
 		for (const tab of this.#tabs.values()) {
 			if (tab.instanceId !== inst.instanceId) continue;
 			tab.attached = false;
 			tab.attaching = null;
 			this.#resetRuntime(tab);
 		}
-	}
-
-	/** Detach an instance from its socket: its leases end and its in-flight RPCs fail. */
-	#retire(inst: ExtInstance, error: Error): void {
 		if (inst.socket) this.#socketInstance.delete(inst.socket);
 		inst.socket = null;
 		inst.info = null;
@@ -712,16 +737,15 @@ export class RelayBridge {
 		}
 		for (const tab of this.#tabs.values()) {
 			if (tab.instanceId !== inst.instanceId) continue;
-			const wasAttached = tab.attached;
-			tab.attached = attachedNow.has(tab.tabId);
 			tab.attaching = null;
-			// A service-worker restart can drop attachments while downstream
-			// connections still hold sessions: restore them best-effort.
-			if (wasAttached && !tab.attached && this.#sessionHolders(tab.tabKey).length > 0) {
-				void this.#ensureAttached(tab).then(ok => {
-					if (!ok) this.#onTabDetached(tab.tabKey, "reattach_failed", false);
-				});
-			}
+			// Every lease ended with the last socket, and what Chrome reported while
+			// none was open never arrived: an attachment Chrome kept is handed back,
+			// OMP's marks taken off its page first, so the next claim starts a fresh
+			// one whose child frames Chrome reports anew, instead of a driver arming
+			// over children nobody recorded.
+			tab.attached = attachedNow.has(tab.tabId);
+			if (tab.attached) void this.#detachTab(tab, true);
+			else this.#forgetChildren(tab);
 		}
 		this.#log("extension connected", {
 			instanceId: inst.instanceId,
@@ -1031,15 +1055,61 @@ export class RelayBridge {
 			throw new Error("Use the explicit tab reveal/release lifecycle operation");
 		}
 		if (!realSessionId) this.#recordRootState(tab, msg);
+		// One Chrome session serves every connection told of a child, so a
+		// connection letting go of it must not end it for another that holds it,
+		// and one that no longer holds it (a repeated detach) cannot end it at all.
+		const release = msg.method === "Target.detachFromTarget" ? msg.params?.sessionId : undefined;
+		const shared = typeof release === "string" ? tab.realSessions.get(release) : undefined;
+		let released: string[] | undefined;
+		if (typeof release === "string" && shared) {
+			if (!conn.announced.delete(release)) {
+				this.#replyError(conn, msg, `No session with given id: ${release}`);
+				return;
+			}
+			// The frames nested in it go with it for this connection.
+			released = [release];
+			for (let i = 0; i < released.length; i++)
+				for (const [child, known] of tab.realSessions)
+					if (known.parent === released[i] && conn.announced.delete(child)) released.push(child);
+			if ([...this.#conns.values()].some(other => other.announced.has(release))) {
+				this.#emit(
+					conn,
+					"Target.detachedFromTarget",
+					{ sessionId: release, targetId: shared.targetId },
+					msg.sessionId,
+				);
+				this.#reply(conn, msg, {});
+				return;
+			}
+			// Its last holder: Chrome ends it, and no late arm is told of it meanwhile.
+			shared.releasing = true;
+		}
+		const arm = msg.method === "Target.setAutoAttach" && msg.params?.autoAttach === true ? msg.sessionId : undefined;
 		const send = async (): Promise<void> => {
 			// Only a click on a visible tab has anything to wait for; everything
 			// else must reach Chrome in the same turn it was forwarded.
 			const arrival = this.#paintCursor(tab, msg);
 			if (arrival) await arrival;
+			const epoch = tab.childEpoch;
 			try {
 				const result = await this.#sendToTab(tab, msg.method, msg.params, realSessionId);
+				// Before the reply, as Chrome does: puppeteer counts the children
+				// attached before its setAutoAttach resolves. Only while the arming
+				// session and the children it was armed over are both still current.
+				if (
+					arm !== undefined &&
+					epoch === tab.childEpoch &&
+					this.#conns.get(conn.id) === conn &&
+					(realSessionId === undefined ? conn.sessions.has(arm) : conn.announced.has(realSessionId))
+				)
+					this.#announceChildren(conn, tab, realSessionId, arm);
 				this.#reply(conn, msg, (result as Record<string, unknown> | undefined) ?? {});
 			} catch (err) {
+				// Chrome kept the child: this connection still holds what it let go of.
+				if (shared && released && tab.realSessions.get(released[0]!) === shared) {
+					shared.releasing = false;
+					for (const child of released) if (tab.realSessions.has(child)) conn.announced.add(child);
+				}
 				this.#replyError(conn, msg, err instanceof Error ? err.message : String(err));
 			}
 		};
@@ -1054,6 +1124,24 @@ export class RelayBridge {
 		const queued = tab.mouseTail.then(send, send);
 		tab.mouseTail = queued;
 		await queued;
+	}
+
+	/**
+	 * Chrome reports a child target once, to the first auto-attach armed over
+	 * it: on this relay that is often another connection, or the bridge's own
+	 * replay after a reattach before any driver is back, and arming again
+	 * reports nothing. So a connection arming auto-attach on `parent` (the
+	 * root when undefined) is told here of every child already reported
+	 * under it that it has not heard of — the cross-site frames of a tab
+	 * claimed after they loaded, or of a tab reattached after Chrome dropped
+	 * the debugger.
+	 */
+	#announceChildren(conn: CdpConnection, tab: TabState, parent: string | undefined, sessionId: string): void {
+		for (const [child, known] of tab.realSessions) {
+			if (known.parent !== parent || known.releasing || conn.announced.has(child)) continue;
+			conn.announced.add(child);
+			conn.socket.send(JSON.stringify({ sessionId, method: "Target.attachedToTarget", params: known.event }));
+		}
 	}
 
 	/**
@@ -1276,26 +1364,38 @@ export class RelayBridge {
 		// Whichever session saw it, a download belongs to this tab.
 		if (method === "Page.downloadWillBegin") this.#instances.get(tab.instanceId)?.downloads.began(tabKey, params);
 		else if (method === "Page.downloadProgress") this.#instances.get(tab.instanceId)?.downloads.progressed(params);
-		// Track real child sessions so downstream commands can route back.
-		if (method === "Target.attachedToTarget") {
-			const child = params?.sessionId;
-			if (typeof child === "string") {
-				tab.realSessions.add(child);
-				this.#realSessionTabs.set(child, tabKey);
-			}
-		} else if (method === "Target.detachedFromTarget") {
-			const child = params?.sessionId;
-			if (typeof child === "string") {
-				tab.realSessions.delete(child);
-				this.#realSessionTabs.delete(child);
-			}
+		// Track real child sessions so downstream commands can route back, and
+		// so a driver arming auto-attach later still hears of them (#announceChildren).
+		const child = typeof params?.sessionId === "string" ? params.sessionId : undefined;
+		const info = params?.targetInfo;
+		const targetId = info && typeof info === "object" && "targetId" in info ? info.targetId : undefined;
+		const attached = method === "Target.attachedToTarget" ? child : undefined;
+		// A child reported while a detach is in flight dies with that attachment: nobody is told of it.
+		if (attached !== undefined && !tab.attached) return;
+		if (attached !== undefined && params) {
+			tab.realSessions.set(attached, { parent: sourceSessionId, targetId, event: params });
+			this.#realSessionTabs.set(attached, tabKey);
+		} else if (method === "Target.detachedFromTarget" && child !== undefined) {
+			tab.realSessions.delete(child);
+			this.#realSessionTabs.delete(child);
+			for (const conn of this.#conns.values()) conn.announced.delete(child);
+		} else if (method === "Target.targetInfoChanged" && targetId !== undefined) {
+			for (const known of tab.realSessions.values())
+				if (known.targetId === targetId) known.event = { ...known.event, targetInfo: info };
 		}
 		if (sourceSessionId) {
 			// Event from a real child session: pass through verbatim to every
-			// connection that was told about the child.
+			// connection that was told about the child. A connection that has not
+			// heard of it could not place the event; a child it reports is kept
+			// for that connection's arm on it instead (#announceChildren).
 			const payload = JSON.stringify({ sessionId: sourceSessionId, method, params });
 			for (const conn of this.#conns.values()) {
-				if (conn.autoAttachSessionsForTab(tabKey).length > 0) conn.socket.send(payload);
+				if (!conn.announced.has(sourceSessionId)) continue;
+				if (attached !== undefined) {
+					if (conn.announced.has(attached)) continue;
+					conn.announced.add(attached);
+				}
+				conn.socket.send(payload);
 			}
 			return;
 		}
@@ -1337,11 +1437,13 @@ export class RelayBridge {
 		// child attach/detach goes only to sessions that armed auto-attach.
 		const childEvent = method === "Target.attachedToTarget" || method === "Target.detachedFromTarget";
 		for (const conn of this.#conns.values()) {
-			for (const pageSession of childEvent
-				? conn.autoAttachSessionsForTab(tabKey)
-				: conn.sessionsForTab(tabKey, "page")) {
-				conn.socket.send(JSON.stringify({ sessionId: pageSession, method, params }));
+			const sessions = childEvent ? conn.autoAttachSessionsForTab(tabKey) : conn.sessionsForTab(tabKey, "page");
+			if (attached !== undefined && sessions.length > 0) {
+				if (conn.announced.has(attached)) continue;
+				conn.announced.add(attached);
 			}
+			for (const pageSession of sessions)
+				conn.socket.send(JSON.stringify({ sessionId: pageSession, method, params }));
 		}
 	}
 
@@ -1369,6 +1471,7 @@ export class RelayBridge {
 		tab.attached = false;
 		tab.attaching = null;
 		this.#resetRuntime(tab);
+		this.#forgetChildren(tab);
 		tab.banned = true;
 		tab.banReason = describeDetach(reason);
 		tab.canceledByUser = reason === "canceled_by_user";
@@ -1523,6 +1626,7 @@ export class RelayBridge {
 					params: { expression: AUTOFILL_OPT_OUT_REMOVE },
 				},
 				this.#instanceFor(tab),
+				PAGE_CLEANUP_TIMEOUT_MS,
 			);
 		} catch (err) {
 			this.#log("autofill restore skipped", {
@@ -1530,6 +1634,32 @@ export class RelayBridge {
 				error: err instanceof Error ? err.message : String(err),
 			});
 		}
+	}
+
+	/**
+	 * Take every OMP mark off a tab's current document over the attachment
+	 * still held — badge, cursor, autofill opt-out — whoever put them there:
+	 * after a lost socket no lease is left to take them off, and a restarted
+	 * relay never knew their script ids. The per-document scripts end with the
+	 * detach itself.
+	 */
+	async #clearPageMarks(tab: TabState): Promise<void> {
+		tab.autofillOptedOut = false;
+		tab.badgeScriptId = undefined;
+		tab.cursorScriptId = undefined;
+		const inst = this.#instanceFor(tab);
+		const removals = await Promise.allSettled(
+			[LEASE_BADGE_RESTORE, CURSOR_OVERLAY_REMOVE, AUTOFILL_OPT_OUT_REMOVE].map(expression =>
+				this.#rpc(
+					{ op: "send", tabId: tab.tabId, method: "Runtime.evaluate", params: { expression } },
+					inst,
+					PAGE_CLEANUP_TIMEOUT_MS,
+				),
+			),
+		);
+		for (const removal of removals)
+			if (removal.status === "rejected")
+				this.#log("page mark removal skipped", { tabKey: tab.tabKey, error: String(removal.reason) });
 	}
 
 	/**
@@ -1552,16 +1682,24 @@ export class RelayBridge {
 
 	/**
 	 * Detach one tab's `chrome.debugger` without touching downstream sessions:
-	 * the lease ending, and the tab going idle mid-lease, both land here.
+	 * the lease ending, and the tab going idle mid-lease, both land here. An
+	 * `orphaned` attachment outlived the lease that marked its page, so every
+	 * OMP mark comes off the current document first.
 	 */
-	async #detachTab(tab: TabState): Promise<void> {
+	async #detachTab(tab: TabState, orphaned = false): Promise<void> {
 		if (!tab.attached) return;
 		tab.attached = false;
 		this.#touchTab(tab);
 		this.#resetRuntime(tab);
+		// Chrome drops the child sessions with the attachment; a reattach reports fresh ones.
+		this.#forgetChildren(tab);
 		tab.reattachedAfterDetach = false;
-		const done = this.#restoreAutofill(tab)
-			.then(() => this.#rpc({ op: "detach", tabId: tab.tabId }, this.#instanceFor(tab)))
+		const inst = this.#instances.get(tab.instanceId);
+		const socket = inst?.socket;
+		const done = (orphaned ? this.#clearPageMarks(tab) : this.#restoreAutofill(tab))
+			// Bound to the socket it started on: after a swap the next hello decides
+			// about whatever attachment Chrome kept, and hands it back itself.
+			.then(() => (inst && inst.socket === socket ? this.#rpc({ op: "detach", tabId: tab.tabId }, inst) : undefined))
 			.then(
 				() => {},
 				() => {},
@@ -1610,8 +1748,9 @@ export class RelayBridge {
 
 	/** Tear a tab out of every downstream connection (closed, detached, or now ineligible). */
 	#retractTab(tab: TabState): void {
-		for (const realSession of tab.realSessions) this.#realSessionTabs.delete(realSession);
-		tab.realSessions.clear();
+		for (const [realSession, tabKey] of this.#realSessionTabs)
+			if (tabKey === tab.tabKey) this.#realSessionTabs.delete(realSession);
+		this.#forgetChildren(tab);
 		for (const conn of this.#conns.values()) {
 			const tabSessions = conn.sessionsForTab(tab.tabKey, "tab");
 			for (const pageSession of conn.sessionsForTab(tab.tabKey, "page")) {
@@ -1636,6 +1775,17 @@ export class RelayBridge {
 			}
 		}
 		tab.announced = false;
+	}
+
+	/**
+	 * No child of this tab is replayed any more, not even to an arm already in
+	 * flight, and a fresh report of one is announced again.
+	 */
+	#forgetChildren(tab: TabState): void {
+		for (const conn of this.#conns.values())
+			for (const child of tab.realSessions.keys()) conn.announced.delete(child);
+		tab.childEpoch++;
+		tab.realSessions.clear();
 	}
 
 	// ---- session + attach bookkeeping --------------------------------------------
@@ -1778,6 +1928,8 @@ export class RelayBridge {
 		const attempt = this.#rpc({ op: "attach", tabId: tab.tabId }, inst)
 			.then(async () => {
 				tab.attached = true;
+				// A fresh attachment: any child still on record belonged to a dead one.
+				this.#forgetChildren(tab);
 				tab.reattachedAfterDetach = true;
 				this.#log("debugger attached", {
 					tabKey: tab.tabKey,

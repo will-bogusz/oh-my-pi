@@ -1259,3 +1259,281 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 	},
 	90_000,
 );
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"drives a sign-in frame from another site through a password manager's menu inside it",
+	async () => {
+		const fixture = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: request => {
+				const url = new URL(request.url);
+				// The sign-in form is served to another site (`localhost`), so it runs in its own process.
+				const body =
+					url.pathname === "/frame"
+						? '<form><label>Password <input type="password" id="pw"></label><button type="button">Next</button></form>'
+						: `<title>Sign in</title><h1>Sign in</h1><iframe title="Credentials" src="http://localhost:${url.port}/frame"></iframe>`;
+				return new Response(body, { headers: { "content-type": "text/html" } });
+			},
+		});
+		const root = await mkdtemp(path.join(tmpdir(), "omp-frame-signin-"));
+		const relay = startRelayServer({ port: 0, log: () => {} });
+		const token = spyOn(relayAccess, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
+		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue({ service: "omp-browser", protocol: 2 });
+		const session: ToolSession = {
+			cwd: root,
+			hasUI: false,
+			getSessionFile: () => null,
+			getSessionSpawns: () => null,
+			getSessionId: () => "frame-signin",
+			getAgentId: () => "agent",
+			settings: Settings.isolated({
+				"browser.enabled": true,
+				"browser.relay": true,
+				"browser.relayUrl": `http://127.0.0.1:${relay.port}`,
+			}),
+		};
+		let setup: Browser | undefined;
+		try {
+			const extension = path.join(root, "extension");
+			await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
+			// An inline menu in every frame, as password managers draw it: another
+			// extension's page in an iframe beside the focused field, honouring no opt-out.
+			const passwordManager = path.join(root, "password-manager");
+			await mkdir(passwordManager);
+			await writeFile(
+				path.join(passwordManager, "manifest.json"),
+				JSON.stringify({
+					manifest_version: 3,
+					name: "Fake password manager",
+					version: "1.0",
+					content_scripts: [
+						{ matches: ["http://localhost/*"], js: ["content.js"], all_frames: true, run_at: "document_idle" },
+					],
+					web_accessible_resources: [{ resources: ["menu.html"], matches: ["http://localhost/*"] }],
+				}),
+			);
+			await writeFile(path.join(passwordManager, "menu.html"), "<p>Fill password</p>");
+			await writeFile(
+				path.join(passwordManager, "content.js"),
+				`document.addEventListener("focusin", event => {
+					if (!event.target.matches?.("input[type=password]")) return;
+					const menu = document.createElement("iframe");
+					menu.src = chrome.runtime.getURL("menu.html");
+					document.body.append(menu);
+				}, true);`,
+			);
+			setup = await puppeteer.launch({
+				executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+				headless: true,
+				pipe: true,
+				enableExtensions: true,
+				ignoreDefaultArgs: stockBackgroundPolicy,
+				userDataDir: path.join(root, "profile"),
+				defaultViewport: null,
+			});
+			const extensionId = await setup.installExtension(extension);
+			await setup.installExtension(passwordManager);
+			const options = await setup.newPage();
+			await options.goto(`chrome-extension://${extensionId}/options.html`);
+			await options.type("#label", "Password manager fixture");
+			await options.type("#code", relay.access.issueCode().code);
+			await options.click("#save");
+			for (let i = 0; i < 400 && !relay.instances.list().some(browser => browser.connected); i++)
+				await Bun.sleep(25);
+			await options.close();
+			// The user's own tab, its sign-in frame loaded before OMP is asked to drive it.
+			const userTab = await setup.newPage();
+			await userTab.goto(fixture.url.toString());
+			await userTab.waitForFrame(frame => frame.url().startsWith("http://localhost:"));
+			// The launch pipe is not a driver: disarm its auto-attach.
+			const setupSession = await setup.target().createCDPSession();
+			await setupSession
+				.connection()
+				?.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
+			await setupSession.detach();
+			await setup.disconnect();
+
+			const prelude = createBrowserPrelude(session);
+			const context = { session, toolCallId: "frame-signin" };
+			const text = (result: AgentToolResult<unknown>) =>
+				result.content.map(part => (part.type === "text" ? part.text : "")).join("\n");
+			const value = (result: AgentToolResult<unknown>): unknown =>
+				result.details && typeof result.details === "object" && "value" in result.details
+					? result.details.value
+					: undefined;
+			const claimed = await prelude.invoke(
+				{ action: "claim", selector: { title: "Sign in" }, timeout: 20 },
+				context,
+			);
+			const handle =
+				claimed.details && typeof claimed.details === "object" && "handle" in claimed.details
+					? claimed.details.handle
+					: undefined;
+			if (typeof handle !== "string") throw new Error("claim returned no handle");
+			const run = (code: string) => prelude.invoke({ action: "run", handle, code, timeout: 20 }, context);
+			const passwordRef = (tree: unknown) => /\b(e\d+) textbox "Password"/.exec(String(tree))?.[1];
+
+			// A frame that loaded before the claim is read like one that loads after it.
+			const first = String(value(await run("return String(await tab.observe({ diff: false }))")));
+			const ref = passwordRef(first);
+			expect(ref).toBeDefined();
+
+			// Focusing the field opens the menu inside the frame: Chrome drops OMP's
+			// debugger, and whatever that call reports, the tab is still OMP's.
+			await run(`await (await tab.ref(${JSON.stringify(ref)})).fill("Tern-Harbor-4471"); return 1`).catch(
+				() => undefined,
+			);
+			const after = await run("return String(await tab.observe({ diff: false }))");
+			expect(text(after)).not.toContain("revoked");
+			expect(passwordRef(value(after))).toBeDefined();
+		} finally {
+			await releaseChromeTabsForOwner("frame-signin").catch(() => 0);
+			setup?.process()?.kill("SIGTERM");
+			token.mockRestore();
+			daemonReady.mockRestore();
+			relay.stop();
+			fixture.stop();
+			await rm(root, { recursive: true, force: true });
+		}
+	},
+	90_000,
+);
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"hands a tab back unmarked when the extension's socket drops, and shows the driver that reclaims it the cross-site frame",
+	async () => {
+		const fixture = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: request => {
+				const url = new URL(request.url);
+				// The frame is served to another site (`localhost`), so it runs in its own process.
+				const body =
+					url.pathname === "/frame"
+						? "<title>Child</title><p>Frame</p>"
+						: `<title>Reconnect</title><iframe src="http://localhost:${url.port}/frame"></iframe>`;
+				return new Response(body, { headers: { "content-type": "text/html" } });
+			},
+		});
+		const root = await mkdtemp(path.join(tmpdir(), "omp-frame-reconnect-"));
+		const relay = startRelayServer({ port: 0, log: () => {} });
+		const extensionSockets = spyOn(relay.instances, "extConnected");
+		const extensionMessages = spyOn(relay.instances, "extMessage");
+		const clients: Browser[] = [];
+		let setup: Browser | undefined;
+		try {
+			const extension = path.join(root, "extension");
+			await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
+			setup = await puppeteer.launch({
+				executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+				headless: true,
+				pipe: false,
+				args: ["--use-mock-keychain", "--password-store=basic"],
+				enableExtensions: true,
+				ignoreDefaultArgs: stockBackgroundPolicy,
+				userDataDir: path.join(root, "profile"),
+				defaultViewport: null,
+			});
+			const extensionId = await setup.installExtension(extension);
+			const options = await setup.newPage();
+			await options.goto(`chrome-extension://${extensionId}/options.html`);
+			await options.type("#label", "Reconnect fixture");
+			await options.type("#code", relay.access.issueCode().code);
+			await options.click("#save");
+			for (let i = 0; i < 400 && !relay.instances.list().some(browser => browser.connected); i++)
+				await Bun.sleep(25);
+			await options.close();
+			const userTab = await setup.newPage();
+			await userTab.goto(fixture.url.toString());
+			await userTab.waitForFrame(frame => frame.url().startsWith("http://localhost:"));
+			// The launch pipe is not a driver: disarm its auto-attach.
+			const setupSession = await setup.target().createCDPSession();
+			await setupSession
+				.connection()
+				?.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
+			await setupSession.detach();
+			const nativeEndpoint = setup.wsEndpoint();
+			await setup.disconnect();
+			// OMP's badge, cursor and autofill opt-out on the tab's current document, read over Chrome's own endpoint.
+			const marks = async (): Promise<unknown> => {
+				const native = await puppeteer.connect({ browserWSEndpoint: nativeEndpoint, defaultViewport: null });
+				try {
+					const page = (await native.pages()).find(candidate => candidate.url() === fixture.url.toString());
+					if (!page) throw new Error("the fixture tab is gone");
+					// A raw evaluation: the page's own world, whichever context puppeteer settled on.
+					const session = await page.createCDPSession();
+					const { result } = await session.send("Runtime.evaluate", {
+						expression: "[!!window.__ompLeaseBadge, !!window.__ompCursor, !!window.__ompAutofillOptOut]",
+						returnByValue: true,
+					});
+					return result.value;
+				} finally {
+					await native.disconnect();
+				}
+			};
+
+			// Claim the tab, connect a driver to it, and read its cross-site frame.
+			const drive = async (): Promise<unknown> => {
+				const found = relay.instances.discover().find(candidate => candidate.title === "Reconnect");
+				if (!found) throw new Error("the fixture tab is not discoverable");
+				const lease = relay.instances.claim(found.id, "frame-reconnect");
+				const version = (await (
+					await fetch(`http://127.0.0.1:${relay.port}/managed/${lease.id}/json/version`)
+				).json()) as { webSocketDebuggerUrl: string };
+				const client = await puppeteer.connect({
+					browserWSEndpoint: version.webSocketDebuggerUrl,
+					defaultViewport: null,
+					protocolTimeout: 10_000,
+				});
+				clients.push(client);
+				const [page] = await client.pages();
+				if (!page) throw new Error("the lease exposes no page");
+				const frame = await page.waitForFrame(candidate => candidate.url().startsWith("http://localhost:"), {
+					timeout: 5_000,
+				});
+				return await frame.evaluate("document.title");
+			};
+			expect(await drive()).toBe("Child");
+			expect(await marks()).toEqual([true, true, true]);
+
+			// The extension's socket drops, and its worker reconnects within the grace
+			// in which Chrome keeps the debugger attached, frame session included.
+			const dropped = extensionSockets.mock.calls.at(-1)?.[0];
+			if (!dropped) throw new Error("the extension never connected");
+			dropped.close();
+			for (
+				let i = 0;
+				i < 400 &&
+				!(extensionSockets.mock.calls.length > 1 && relay.instances.list().some(browser => browser.connected));
+				i++
+			)
+				await Bun.sleep(25);
+			expect(extensionSockets.mock.calls.length).toBeGreaterThan(1);
+			// Within the grace: the reconnect's hello still lists the tab as attached.
+			const hellos = extensionMessages.mock.calls
+				.map(([, text]) => JSON.parse(String(text)) as { t: string; attachedTabIds?: number[] })
+				.filter(message => message.t === "hello");
+			const tabId = relay.instances.discover().find(candidate => candidate.title === "Reconnect")?.tabId;
+			expect(hellos).toHaveLength(2);
+			expect(hellos[1]!.attachedTabIds).toContain(tabId);
+			// No lease survived the socket: the relay hands the attachment back, marks off first.
+			let left = await marks();
+			for (let i = 0; i < 200 && JSON.stringify(left) !== "[false,false,false]"; i++) {
+				await Bun.sleep(25);
+				left = await marks();
+			}
+			expect(left).toEqual([false, false, false]);
+			expect(await drive()).toBe("Child");
+		} finally {
+			for (const client of clients) await client.disconnect().catch(() => undefined);
+			setup?.process()?.kill("SIGTERM");
+			extensionSockets.mockRestore();
+			extensionMessages.mockRestore();
+			relay.stop();
+			fixture.stop();
+			await rm(root, { recursive: true, force: true });
+		}
+	},
+	90_000,
+);

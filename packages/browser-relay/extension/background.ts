@@ -18,7 +18,7 @@ import {
 	type TabSnapshot,
 } from "../../coding-agent/src/tools/browser/relay/protocol";
 import { DebuggerAttachments, ownedDebuggerTabs } from "./debugger-ownership";
-import { attachPastForeignFrames } from "./foreign-frames";
+import { pastForeignFrames } from "./foreign-frames";
 import { groupTab, releaseOwnerGroups } from "./tab-groups";
 import { CURSOR_OVERLAY_REMOVE, LEASE_BADGE_RESTORE } from "../../coding-agent/src/tools/browser/relay/lease-badge";
 
@@ -42,7 +42,7 @@ let pingTimer: NodeJS.Timeout | null = null;
  * authority has to give the attachments back explicitly.
  */
 const attachments = new DebuggerAttachments({
-	detach: tabId => chrome.debugger.detach({ tabId }),
+	detach: tabId => pastForeignFrames(tabId, () => chrome.debugger.detach({ tabId })),
 	graceMs: DETACH_GRACE_MS,
 	surrender: async held => {
 		// Relay authority is gone for good: nothing else will ever release
@@ -211,21 +211,23 @@ async function runRpc(msg: Extract<RelayToExtMessage, { t: "rpc" }>): Promise<un
 		case "queryTabs":
 			return { tabs: (await chrome.tabs.query({})).map(snapshot).filter(tab => tab !== null) };
 		case "attach":
-			await attachPastForeignFrames(msg.tabId, () => chrome.debugger.attach({ tabId: msg.tabId }, "1.3"));
+			await pastForeignFrames(msg.tabId, () => chrome.debugger.attach({ tabId: msg.tabId }, "1.3"));
 			attachments.attached(msg.tabId);
 			return {};
 		case "detach":
 			attachments.detached(msg.tabId);
-			await chrome.debugger.detach({ tabId: msg.tabId });
+			await pastForeignFrames(msg.tabId, () => chrome.debugger.detach({ tabId: msg.tabId }));
 			// Chrome's explicit detach does not emit onDetach. Acknowledge it
 			// before the RPC result so the relay can safely serialize reattachment.
 			post({ t: "detached", tabId: msg.tabId, reason: "target_closed", relayInitiated: true });
 			return {};
 		case "send":
-			return await chrome.debugger.sendCommand(
-				msg.sessionId ? { tabId: msg.tabId, sessionId: msg.sessionId } : { tabId: msg.tabId },
-				msg.method,
-				msg.params,
+			return await pastForeignFrames(msg.tabId, () =>
+				chrome.debugger.sendCommand(
+					msg.sessionId ? { tabId: msg.tabId, sessionId: msg.sessionId } : { tabId: msg.tabId },
+					msg.method,
+					msg.params,
+				),
 			);
 		case "createTab": {
 			const tab = await chrome.tabs.create({ url: msg.url, active: false });
@@ -331,9 +333,10 @@ async function connect(): Promise<void> {
 				pingTimer = null;
 			}
 			void setBadge(false);
-			// The relay is gone. A reconnect within the grace keeps the debugger
-			// attachments (and the tabs' state); otherwise they go back to Chrome so
-			// its debugging infobar disappears instead of outliving the task.
+			// The relay is gone. A reconnect within the grace leaves the debugger
+			// attachments to the returning relay, which takes its marks off the
+			// pages and hands back those no lease outlived; otherwise they go back
+			// to Chrome here so its debugging infobar does not outlive the task.
 			void attachments.scheduleRelease();
 			scheduleReconnect();
 		};
