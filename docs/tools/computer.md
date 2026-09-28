@@ -113,6 +113,10 @@ Screenshots are PNGs written under the OS temp directory. Unless `silent: true`,
 
 AX actions need no screenshot. AX bounds and `desktop.elementAt()` use global logical desktop coordinates, not screenshot pixels. A window AX snapshot advances its ref generation; current and immediately previous refs remain valid, while older refs throw `StaleRef`.
 
+### What a cell's input left behind
+
+Mutating helpers return nothing; the Eval cell that called them reports their effect once, after its own output. The prelude's `settleCell` hook asks the worker to settle: every window the cell sent input to (window input, element actions on refs the session read from that window) and every window where a ref-addressed call failed is re-read no sooner than 250 ms after the cell's last input, using the options of the model's last `ax()` of that window, and printed as `window <id> <app> "<title>" after <inputs> — <summary>:` followed by its current tree. Rows are marked against the tree the model last received for the window (its last `ax()` or report): `~` changed (with `(was: …)`), `+` added, and a `removed:` line names rows that disappeared. A re-read identical to that tree is read once more 500 ms later before the report says `no accessibility change`. The trees renew refs, so a failed or refused call's report is the tree to retry from. A window the model read with `ax()` after its last input is not re-read. Windows the input opened (of the processes it addressed, or newly focused), closed, or focused follow as one line each. Cells whose code never reached the desktop, and cancelled cells, report nothing. Desktop-root input (`computer.click`, `computer.press`, …) reports only window-list changes.
+
 ### Clipboard
 
 - `desktop.clipboard.read() -> string`
@@ -133,8 +137,9 @@ Result details contain the resolved `code`, `readOnly`, `screenshots`, optional 
 5. Each run installs a run-scoped `desktop` facade plus `wait`/`assert`. AsyncLocalStorage prevents leaked asynchronous work from borrowing a later run's signal or read-only policy.
 6. Native operations execute in the worker. Runtime `tool.*` calls cross back through the supervisor into the owning session tool bridge and inherit cancellation.
 7. At run end, pending work is aborted, clone-safe displays/return value and capabilities return to the host, and the worker remains alive.
-8. A run timeout is followed by a 750 ms supervisor grace period. If the worker does not finish, it is terminated with `computer worker restarted; captures and ax refs were reset`; a later call starts a fresh worker.
-9. Session cleanup sends `close`, waits up to 1.5 seconds, then force-terminates as a bounded fallback. Owner-scoped cleanup closes every registered computer controller.
+8. When an Eval cell that made computer calls ends, the host sends one `settle` request (15-second budget, same abort and restart handling as a run); the worker re-reads what the cell's input touched and returns the report appended to the cell's output.
+9. A run timeout is followed by a 750 ms supervisor grace period. If the worker does not finish, it is terminated with `computer worker restarted; captures and ax refs were reset`; a later call starts a fresh worker.
+10. Session cleanup sends `close`, waits up to 1.5 seconds, then force-terminates as a bounded fallback. Owner-scoped cleanup closes every registered computer controller.
 
 ## Side effects
 
@@ -155,7 +160,7 @@ Native errors are surfaced as `ToolError` text prefixed by the stable code name:
 
 Prelude/worker errors include `Computer session is closed`, `Computer worker is busy`, `Timed out starting computer worker`, `Computer code execution timed out after <ms>ms`, read-only mutation errors, and the worker-restart message above.
 
-Recover by refreshing the exact target screenshot after coordinate-frame errors, taking a new AX snapshot after `StaleRef`, using AX or a delivery mode listed by `desktop.capabilities()` after `BackgroundUnavailable`, and inspecting those capabilities for platform/permission failures.
+Recover by refreshing the exact target screenshot after coordinate-frame errors, using the tree the cell's report prints (or a new AX snapshot) after `StaleRef`, using AX or a delivery mode listed by `desktop.capabilities()` after `BackgroundUnavailable`, and inspecting those capabilities for platform/permission failures.
 
 ## Platform constraints
 

@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import { scheduler } from "node:timers/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 
@@ -26,6 +27,17 @@ import {
 } from "../run-scope";
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import {
+	type AxReadOptions,
+	describeRosterChanges,
+	diffTree,
+	type InputWindow,
+	isUnchanged,
+	ObservationLedger,
+	type ReadBack,
+	renderGone,
+	renderReadBack,
+} from "./observation";
 import type {
 	ComputerScreenshot,
 	ComputerSessionSnapshot,
@@ -79,6 +91,13 @@ export type NativeDesktopSessionFactory = (
 ) => NativeDesktopSession | Promise<NativeDesktopSession>;
 
 type WindowFilter = { id?: string; app?: string; title?: string };
+
+/** Target id of desktop-root input: the focused window at dispatch. */
+const DESKTOP_TARGET = "desktop";
+/** A settling cell reads windows back no sooner than this after its last input, so the app can react. */
+const SETTLE_DELAY_MS = 250;
+/** A read-back identical to the model's last tree is read once more after this, before saying nothing changed. */
+const RECHECK_DELAY_MS = 500;
 type InputOptions = { takeover?: boolean };
 type ScreenshotOptions = { silent?: boolean };
 type ClickOptions = InputOptions & { button?: string; count?: number; modifiers?: string[] };
@@ -232,10 +251,12 @@ class El {
 	readonly childCount: number;
 	readonly #session: NativeDesktopSession;
 	readonly #getContext: RunContextAccessor;
+	readonly #observer: InputObserver;
 
-	constructor(session: NativeDesktopSession, getContext: RunContextAccessor, node: AxNode) {
+	constructor(session: NativeDesktopSession, getContext: RunContextAccessor, observer: InputObserver, node: AxNode) {
 		this.#session = session;
 		this.#getContext = getContext;
+		this.#observer = observer;
 		this.ref = node.ref;
 		this.role = node.role;
 		this.nativeRole = node.nativeRole;
@@ -246,69 +267,65 @@ class El {
 		this.childCount = node.childCount;
 	}
 
-	async value(): Promise<string | undefined> {
-		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axNode(this.ref))).value;
+	/** A read of this element; a failure (an expired ref) has the settle renew the window's tree. */
+	#read<T>(method: string, call: () => Promise<T>): Promise<T> {
+		return this.#observer.read(this.#getContext().signal, this.ref, `${method} ${this.ref}`, call);
 	}
 
-	async setValue(value: string): Promise<void> {
+	/** An input on this element, recorded for the cell's post-input read-back. */
+	async #input(method: string, label: string, dispatch: () => Promise<void>): Promise<void> {
 		const context = this.#getContext();
-		guardRun(context, "setValue");
-		await nativeCall(context.signal, () => this.#session.axSetValue(this.ref, value));
+		guardRun(context, method);
+		await this.#observer.input(context.signal, this.#observer.windowOf(this.ref), label, dispatch);
+	}
+
+	async value(): Promise<string | undefined> {
+		return (await this.#read("value", () => this.#session.axNode(this.ref))).value;
+	}
+
+	setValue(value: string): Promise<void> {
+		return this.#input("setValue", `setValue ${this.ref}`, () => this.#session.axSetValue(this.ref, value));
 	}
 
 	async bounds(): Promise<{ x: number; y: number; width: number; height: number } | null> {
-		const { signal } = this.#getContext();
-		const node = await nativeCall(signal, () => this.#session.axNode(this.ref));
+		const node = await this.#read("bounds", () => this.#session.axNode(this.ref));
 		if (node.x === undefined || node.y === undefined || node.width === undefined || node.height === undefined)
 			return null;
 		return { x: node.x, y: node.y, width: node.width, height: node.height };
 	}
 
 	async attributes(): Promise<Record<string, string>> {
-		const { signal } = this.#getContext();
-		return Object.fromEntries(await nativeCall(signal, () => this.#session.axAttributes(this.ref)));
+		return Object.fromEntries(await this.#read("attributes", () => this.#session.axAttributes(this.ref)));
 	}
 
 	async actions(): Promise<string[]> {
-		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axNode(this.ref))).actions ?? [];
+		return (await this.#read("actions", () => this.#session.axNode(this.ref))).actions ?? [];
 	}
 
-	async perform(action: string): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "perform");
-		await nativeCall(context.signal, () => this.#session.axPerform(this.ref, action));
+	perform(action: string): Promise<void> {
+		return this.#input("perform", `perform ${this.ref} ${action}`, () => this.#session.axPerform(this.ref, action));
 	}
 
-	async press(): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "press");
-		await nativeCall(context.signal, () => this.#session.axPerform(this.ref, "press"));
+	press(): Promise<void> {
+		return this.#input("press", `press ${this.ref}`, () => this.#session.axPerform(this.ref, "press"));
 	}
 
-	async click(options?: InputOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "click");
-		await nativeCall(context.signal, () => this.#session.axClick(this.ref, pointerOptions(options)));
+	click(options?: InputOptions): Promise<void> {
+		return this.#input("click", `click ${this.ref}`, () => this.#session.axClick(this.ref, pointerOptions(options)));
 	}
 
-	async focus(): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "focus");
-		await nativeCall(context.signal, () => this.#session.axFocus(this.ref));
+	focus(): Promise<void> {
+		return this.#input("focus", `focus ${this.ref}`, () => this.#session.axFocus(this.ref));
 	}
 
 	async parent(): Promise<El | null> {
-		const { signal } = this.#getContext();
-		const node = await nativeCall(signal, () => this.#session.axParent(this.ref));
-		return node ? new El(this.#session, this.#getContext, node) : null;
+		const node = await this.#read("parent", () => this.#session.axParent(this.ref));
+		return node ? this.#observer.element(this.#getContext, node, this.#observer.windowOf(this.ref)) : null;
 	}
 
 	async children(): Promise<El[]> {
-		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axChildren(this.ref))).map(
-			node => new El(this.#session, this.#getContext, node),
+		return (await this.#read("children", () => this.#session.axChildren(this.ref))).map(node =>
+			this.#observer.element(this.#getContext, node, this.#observer.windowOf(this.ref)),
 		);
 	}
 }
@@ -322,10 +339,17 @@ class Win {
 	readonly focused: boolean;
 	readonly #session: NativeDesktopSession;
 	readonly #getContext: RunContextAccessor;
+	readonly #observer: InputObserver;
 
-	constructor(session: NativeDesktopSession, getContext: RunContextAccessor, window: DesktopWindow) {
+	constructor(
+		session: NativeDesktopSession,
+		getContext: RunContextAccessor,
+		observer: InputObserver,
+		window: DesktopWindow,
+	) {
 		this.#session = session;
 		this.#getContext = getContext;
+		this.#observer = observer;
 		this.id = window.id;
 		this.app = window.app;
 		this.title = window.title;
@@ -338,30 +362,30 @@ class Win {
 		return captureScreenshot(this.#session, this.#getContext, this.id, options);
 	}
 
-	async click(x: number, y: number, options?: ClickOptions): Promise<void> {
+	/** An input on this window (or, for the desktop root, the focused one), recorded for the cell's read-back. */
+	async #input(method: string, label: string, dispatch: () => Promise<void>): Promise<void> {
 		const context = this.#getContext();
-		guardRun(context, "click");
-		await nativeCall(context.signal, () => this.#session.click(this.id, x, y, pointerOptions(options)));
+		guardRun(context, method);
+		const window = this.id === DESKTOP_TARGET ? undefined : { id: this.id, pid: this.pid };
+		await this.#observer.input(context.signal, window, label, dispatch);
 	}
 
-	async doubleClick(x: number, y: number, options?: Omit<ClickOptions, "count">): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "doubleClick");
-		await nativeCall(context.signal, () =>
+	click(x: number, y: number, options?: ClickOptions): Promise<void> {
+		return this.#input("click", `click ${x},${y}`, () => this.#session.click(this.id, x, y, pointerOptions(options)));
+	}
+
+	doubleClick(x: number, y: number, options?: Omit<ClickOptions, "count">): Promise<void> {
+		return this.#input("doubleClick", `doubleClick ${x},${y}`, () =>
 			this.#session.click(this.id, x, y, pointerOptions({ ...options, count: 2 })),
 		);
 	}
 
-	async move(x: number, y: number): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "move");
-		await nativeCall(context.signal, () => this.#session.moveMouse(this.id, x, y));
+	move(x: number, y: number): Promise<void> {
+		return this.#input("move", `move ${x},${y}`, () => this.#session.moveMouse(this.id, x, y));
 	}
 
-	async drag(points: Array<[number, number]>, options?: DragOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "drag");
-		await nativeCall(context.signal, () =>
+	drag(points: Array<[number, number]>, options?: DragOptions): Promise<void> {
+		return this.#input("drag", "drag", () =>
 			this.#session.drag(
 				this.id,
 				points.map(([x, y]) => ({ x, y })),
@@ -370,49 +394,113 @@ class Win {
 		);
 	}
 
-	async scroll(x: number, y: number, options: ScrollOptions = {}): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "scroll");
-		await nativeCall(context.signal, () =>
+	scroll(x: number, y: number, options: ScrollOptions = {}): Promise<void> {
+		return this.#input("scroll", `scroll ${x},${y}`, () =>
 			this.#session.scroll(this.id, x, y, options.dx ?? 0, options.dy ?? 0, pointerOptions(options)),
 		);
 	}
 
-	async type(text: string, options?: InputOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "type");
-		await nativeCall(context.signal, () => this.#session.typeText(this.id, text, pointerOptions(options)));
-	}
-
-	async press(chord: string | string[], options?: InputOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "press");
-		await nativeCall(context.signal, () =>
-			this.#session.keyChord(this.id, chordKeys(chord), pointerOptions(options)),
+	type(text: string, options?: InputOptions): Promise<void> {
+		const shown = text.length > 24 ? `${text.slice(0, 23)}…` : text;
+		return this.#input("type", `type ${JSON.stringify(shown)}`, () =>
+			this.#session.typeText(this.id, text, pointerOptions(options)),
 		);
 	}
 
-	async raise(): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "raise");
-		await nativeCall(context.signal, () => this.#session.raiseWindow(this.id));
+	press(chord: string | string[], options?: InputOptions): Promise<void> {
+		const keys = chordKeys(chord);
+		return this.#input("press", `press ${keys.join("+")}`, () =>
+			this.#session.keyChord(this.id, keys, pointerOptions(options)),
+		);
+	}
+
+	raise(): Promise<void> {
+		return this.#input("raise", "raise", () => this.#session.raiseWindow(this.id));
 	}
 
 	async ax(options?: AxOptions): Promise<string> {
 		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axSnapshot(this.id, options))).text;
+		const text = (await nativeCall(signal, () => this.#session.axSnapshot(this.id, options))).text;
+		this.#observer.ledger.recordShown({ id: this.id, pid: this.pid }, text, axReadOptions(options));
+		return text;
 	}
 
 	async find(query: AxQuery): Promise<El[]> {
 		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axQuery(this.id, query))).map(
-			node => new El(this.#session, this.#getContext, node),
+		const window = { id: this.id, pid: this.pid };
+		return (await nativeCall(signal, () => this.#session.axQuery(this.id, query))).map(node =>
+			this.#observer.element(this.#getContext, node, window),
 		);
 	}
 
 	async ref(ref: string): Promise<El> {
-		const { signal } = this.#getContext();
-		return new El(this.#session, this.#getContext, await nativeCall(signal, () => this.#session.axNode(ref)));
+		const node = await this.#observer.read(this.#getContext().signal, ref, `ref ${ref}`, () =>
+			this.#session.axNode(ref),
+		);
+		return this.#observer.element(this.#getContext, node, this.#observer.windowOf(ref));
+	}
+}
+
+/** The comparable part of `ax()` options: what a read-back must repeat to match the model's tree. */
+function axReadOptions(options: AxOptions | undefined): AxReadOptions {
+	return { all: options?.all, maxDepth: options?.maxDepth };
+}
+
+/** Routes one native session's inputs and element reads through its observation ledger. */
+class InputObserver {
+	readonly ledger = new ObservationLedger();
+	readonly #session: NativeDesktopSession;
+
+	constructor(session: NativeDesktopSession) {
+		this.#session = session;
+	}
+
+	windowOf(ref: string): InputWindow | undefined {
+		return this.ledger.windowOf(ref);
+	}
+
+	/** Wrap a resolved node, remembering the window it was read from. */
+	element(getContext: RunContextAccessor, node: AxNode, window: InputWindow | undefined): El {
+		if (window) this.ledger.recordRefs(window.id, [node.ref]);
+		return new El(this.#session, getContext, this, node);
+	}
+
+	/** A read addressed by ref. When it fails, the settle prints the ref's window afresh. */
+	async read<T>(signal: AbortSignal, ref: string, label: string, call: () => Promise<T>): Promise<T> {
+		try {
+			return await nativeCall(signal, call);
+		} catch (error) {
+			const window = this.ledger.windowOf(ref);
+			if (window && !(error instanceof ToolAbortError))
+				this.ledger.noteFailure(window, label, error instanceof Error ? error.message : String(error));
+			throw error;
+		}
+	}
+
+	/** Dispatch one input, capturing the roster first when it opens the cell's input. */
+	async input(
+		signal: AbortSignal,
+		window: InputWindow | undefined,
+		label: string,
+		dispatch: () => Promise<void>,
+	): Promise<void> {
+		if (this.ledger.wantsRoster) {
+			try {
+				this.ledger.setRosterBefore(await nativeCall(signal, () => this.#session.listWindows()));
+			} catch (error) {
+				if (error instanceof ToolAbortError) throw error;
+			}
+		}
+		this.ledger.noteInput(window, label);
+		try {
+			await nativeCall(signal, dispatch);
+		} catch (error) {
+			if (window && !(error instanceof ToolAbortError))
+				this.ledger.noteFailure(window, label, error instanceof Error ? error.message : String(error));
+			throw error;
+		} finally {
+			this.ledger.noteInputEnded();
+		}
 	}
 }
 
@@ -424,6 +512,8 @@ export class ComputerWorkerCore {
 	#session?: NativeDesktopSession;
 	/** In-flight lazy session creation, shared so concurrent run/capabilities requests never double-create. */
 	#sessionInit?: Promise<NativeDesktopSession>;
+	/** What the model saw of each window and what input touched since; lives and dies with `#session`. */
+	#observer?: InputObserver;
 	#runtime?: JsRuntime;
 	#active: ActiveRun | null = null;
 	/**
@@ -448,6 +538,7 @@ export class ComputerWorkerCore {
 				this.#transport.send({ type: "pong", id: message.id });
 				return;
 			case "run":
+			case "settle":
 				void this.#run(message);
 				return;
 			case "capabilities":
@@ -496,7 +587,8 @@ export class ComputerWorkerCore {
 		return this.#runtime;
 	}
 
-	async #run(message: Extract<ComputerWorkerInbound, { type: "run" }>): Promise<void> {
+	/** Runs desktop code, or settles the cell that just ended (`settle`), as one abortable run. */
+	async #run(message: Extract<ComputerWorkerInbound, { type: "run" | "settle" }>): Promise<void> {
 		if (this.#closed) {
 			this.#transport.send({
 				type: "result",
@@ -536,25 +628,37 @@ export class ComputerWorkerCore {
 		try {
 			throwIfAborted(signal);
 			const session = await this.#ensureSession(message.session);
-			const runtime = this.#ensureRuntime(message.session);
-			runtime.setCwd(message.session.cwd);
-			const desktop = this.#createDesktopScope(session);
-			runtime.setRunScope({
-				desktop: bindRunFacade(desktop, signal),
-				assert: (condition: unknown, text?: string): void => {
-					if (!condition) throw new ToolError(text ?? "Assertion failed");
-				},
-				wait: (msOrPredicate: number | (() => unknown), options?: WaitPredicateOptions): Promise<unknown> => {
-					const resolved =
-						typeof msOrPredicate === "number"
-							? undefined
-							: {
-									timeout: resolvePredicateTimeout(message.timeoutMs, options?.timeout),
-									interval: options?.interval,
-								};
-					return markHandled(waitForRun(msOrPredicate, signal, resolved));
-				},
-			});
+			const observer = (this.#observer ??= new InputObserver(session));
+			let body: () => Promise<unknown>;
+			if (message.type === "settle") {
+				body = () => this.#settle(session, observer, signal);
+			} else {
+				const code = message.code;
+				const runtime = this.#ensureRuntime(message.session);
+				runtime.setCwd(message.session.cwd);
+				const desktop = this.#createDesktopScope(session, observer);
+				runtime.setRunScope({
+					desktop: bindRunFacade(desktop, signal),
+					assert: (condition: unknown, text?: string): void => {
+						if (!condition) throw new ToolError(text ?? "Assertion failed");
+					},
+					wait: (msOrPredicate: number | (() => unknown), options?: WaitPredicateOptions): Promise<unknown> => {
+						const resolved =
+							typeof msOrPredicate === "number"
+								? undefined
+								: {
+										timeout: resolvePredicateTimeout(message.timeoutMs, options?.timeout),
+										interval: options?.interval,
+									};
+						return markHandled(waitForRun(msOrPredicate, signal, resolved));
+					},
+				});
+				body = () =>
+					runtime.run(code, `computer-run-${message.id}.js`, this.#runtimeHooks(active, output), {
+						runId: message.id,
+						cwd: message.session.cwd,
+					});
+			}
 			const { promise: cancelRejection, reject: rejectCancel } = Promise.withResolvers<never>();
 			const onCancel = (): void => {
 				const abortError =
@@ -575,15 +679,7 @@ export class ComputerWorkerCore {
 			if (signal.aborted) onCancel();
 			else signal.addEventListener("abort", onCancel, { once: true });
 			try {
-				returnValue = await Promise.race([
-					this.#runContexts.run(runContext, () =>
-						runtime.run(message.code, `computer-run-${message.id}.js`, this.#runtimeHooks(active, output), {
-							runId: message.id,
-							cwd: message.session.cwd,
-						}),
-					),
-					cancelRejection,
-				]);
+				returnValue = await Promise.race([this.#runContexts.run(runContext, body), cancelRejection]);
 				completed = true;
 			} finally {
 				signal.removeEventListener("abort", onCancel);
@@ -618,6 +714,65 @@ export class ComputerWorkerCore {
 				payload: { displays: output.finish(), returnValue: cloneSafe(returnValue), screenshots, capabilities },
 			});
 		}
+	}
+
+	/**
+	 * Re-reads every window the cell's input touched and says, once, what it
+	 * left behind: each window's current tree marked against the last tree the
+	 * model received, then windows the input opened, closed or focused. The
+	 * trees renew refs, so a refused or failed call carries the tree to retry
+	 * from. Nothing when the cell sent no input and no ref failed.
+	 */
+	async #settle(
+		session: NativeDesktopSession,
+		observer: InputObserver,
+		signal: AbortSignal,
+	): Promise<string | undefined> {
+		const pending = observer.ledger.take();
+		if (!pending) return undefined;
+		const settleIn = pending.lastInputAt + SETTLE_DELAY_MS - Date.now();
+		if (settleIn > 0) await scheduler.wait(settleIn, { signal });
+		const { diffLineRuns } = await import("@oh-my-pi/pi-natives");
+		let roster: DesktopWindow[] | undefined;
+		try {
+			roster = await nativeCall(signal, () => session.listWindows());
+		} catch (error) {
+			if (signal.aborted) throw error;
+		}
+		const sections: string[] = [];
+		for (const touched of pending.touched) {
+			const window = roster?.find(candidate => candidate.id === touched.id);
+			if (roster && !window) {
+				sections.push(renderGone(touched));
+				continue;
+			}
+			const read = async (): Promise<ReadBack> => {
+				const text = (await nativeCall(signal, () => session.axSnapshot(touched.id, touched.options))).text;
+				const change = touched.baseline === undefined ? undefined : diffTree(touched.baseline, text, diffLineRuns);
+				return { touched, window, text, change, sinceInputMs: Date.now() - pending.lastInputAt };
+			};
+			try {
+				let readBack = await read();
+				// An app can take a moment to show what an input did; one quiet read is not yet "no change".
+				if (isUnchanged(readBack.change) && touched.failure === undefined) {
+					await scheduler.wait(RECHECK_DELAY_MS, { signal });
+					readBack = await read();
+				}
+				observer.ledger.recordShown({ id: touched.id, pid: window?.pid }, readBack.text, touched.options);
+				sections.push(renderReadBack(readBack));
+			} catch (error) {
+				if (signal.aborted) throw error;
+				sections.push(
+					`window ${touched.id} could not be read back: ${error instanceof Error ? error.message : String(error)}`,
+				);
+			}
+		}
+		if (roster && pending.rosterBefore) {
+			const reported = new Set(pending.touched.map(touched => touched.id));
+			const changes = describeRosterChanges(pending.rosterBefore, roster, pending.pids, reported);
+			if (changes.length > 0) sections.push(changes.join("\n"));
+		}
+		return sections.length > 0 ? sections.join("\n\n") : undefined;
 	}
 
 	/**
@@ -687,12 +842,12 @@ export class ComputerWorkerCore {
 		return context;
 	};
 
-	#createDesktopScope(session: NativeDesktopSession): object {
+	#createDesktopScope(session: NativeDesktopSession, observer: InputObserver): object {
 		const getContext = this.#currentRunContext;
-		const makeWin = (window: DesktopWindow): Win => new Win(session, getContext, window);
-		const el = (node: AxNode): El => new El(session, getContext, node);
-		const desktopTarget = new Win(session, getContext, {
-			id: "desktop",
+		const makeWin = (window: DesktopWindow): Win => new Win(session, getContext, observer, window);
+		const el = (node: AxNode): El => observer.element(getContext, node, undefined);
+		const desktopTarget = new Win(session, getContext, observer, {
+			id: DESKTOP_TARGET,
 			app: "desktop",
 			title: "desktop",
 			x: 0,
@@ -761,8 +916,8 @@ export class ComputerWorkerCore {
 				return node ? el(node) : null;
 			},
 			ref: async (ref: string): Promise<El> => {
-				const { signal } = getContext();
-				return el(await nativeCall(signal, () => session.axNode(ref)));
+				const node = await observer.read(getContext().signal, ref, `ref ${ref}`, () => session.axNode(ref));
+				return observer.element(getContext, node, observer.windowOf(ref));
 			},
 			clipboard: {
 				read: async (): Promise<string> => {
@@ -798,6 +953,7 @@ export class ComputerWorkerCore {
 			// Closing is best-effort; the worker is exiting and has no request to report this against.
 		} finally {
 			this.#session = undefined;
+			this.#observer = undefined;
 			this.#sessionInit = undefined;
 			this.#unsubscribe();
 			this.#transport.send({ type: "closed" });
