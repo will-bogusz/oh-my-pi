@@ -1244,7 +1244,7 @@ async function clickTargets(session: CDPSession, signal?: AbortSignal): Promise<
  * in script answers none of them, and one such frame (a challenge widget, say)
  * must not cost the whole page its tree.
  */
-const FRAME_READ_MS = 1_000;
+export const FRAME_READ_MS = 1_000;
 
 /** A frame's session did not answer an observation read in time. */
 class FrameNotAnswering extends Error {}
@@ -1281,35 +1281,38 @@ export async function snapshotAccessibility(
 			throw error;
 		});
 	};
-	const sessions = new Set(frames.map(frame => frame.client));
-	const loaders = new Map<CDPSession, Map<string, string>>();
-	await Promise.all(
-		[...sessions].map(async session => {
-			const ids = await frameRead(session, () => loaderIds(session, signal)).catch(error => {
-				if (error instanceof FrameNotAnswering) return new Map<string, string>();
-				throw error;
-			});
-			loaders.set(session, ids);
-		}),
-	);
+	// Every session's reads start at once, and a frame waits only on its own
+	// session's: one that does not answer costs its own content, never a
+	// sibling's the shared deadline would otherwise run out on.
+	const loaders = new Map<CDPSession, Promise<Map<string, string>>>();
+	for (const session of new Set(frames.map(frame => frame.client))) {
+		const ids = frameRead(session, () => loaderIds(session, signal)).catch(error => {
+			if (error instanceof FrameNotAnswering) return new Map<string, string>();
+			throw error;
+		});
+		// A session no spliced frame reaches is never awaited; its failure is not the observation's.
+		ids.catch(() => undefined);
+		loaders.set(session, ids);
+	}
 	// Which backend node owns which child frame, per session that can see it.
-	const owners = new Map<CDPSession, Map<number, Frame>>();
-	await Promise.all(
-		frames.map(async frame => {
-			const parent = frame.parentFrame();
-			if (!parent) return;
-			// A slow owner lookup costs that one frame, never its parent's session.
+	// A slow owner lookup costs that one frame, never its parent's session.
+	const owners = new Map<CDPSession, Promise<Map<number, Frame>>>();
+	for (const session of loaders.keys()) {
+		const children = frames.filter(frame => frame.parentFrame()?.client === session);
+		if (!children.length) continue;
+		const lookups = children.map(async frame => {
 			const owner = await frameRead(
-				parent.client,
-				() => parent.client.send("DOM.getFrameOwner", { frameId: frame._id }),
+				session,
+				() => session.send("DOM.getFrameOwner", { frameId: frame._id }),
 				false,
 			).catch(() => null);
-			if (!owner) return;
-			const bySession = owners.get(parent.client) ?? new Map<number, Frame>();
-			bySession.set(owner.backendNodeId, frame);
-			owners.set(parent.client, bySession);
-		}),
-	);
+			return owner ? ([owner.backendNodeId, frame] as const) : undefined;
+		});
+		owners.set(
+			session,
+			Promise.all(lookups).then(entries => new Map(entries.filter(entry => entry !== undefined))),
+		);
+	}
 	// One click probe per session, and only for a frame with table parts to judge. Row refs are an
 	// addition: a failed or unanswered probe costs them, never the observation (nor the frame).
 	const probes = new Map<CDPSession, Promise<Set<number> | undefined>>();
@@ -1329,10 +1332,13 @@ export async function snapshotAccessibility(
 	};
 
 	const build = async (frame: Frame): Promise<AxNode | null> => {
+		// The session's loader ids are read before its tree, so they never name
+		// a document newer than the nodes they stamp.
+		const frameLoaders = (await loaders.get(frame.client)) ?? new Map<string, string>();
 		const { nodes } = await frameRead(frame.client, () =>
 			frame.client.send("Accessibility.getFullAXTree", { frameId: frame._id }),
 		);
-		const known = owners.get(frame.client);
+		const known = await owners.get(frame.client);
 		const embedded = new Map<number, AxNode>();
 		if (known?.size) {
 			const children = nodes
@@ -1357,7 +1363,7 @@ export async function snapshotAccessibility(
 		const axFrame: AxFrame = {
 			session: frame.client,
 			frameId: frame._id,
-			loaderId: loaders.get(frame.client)?.get(frame._id) ?? "",
+			loaderId: frameLoaders.get(frame._id) ?? "",
 		};
 		const clickableIds = !options.includeAll && hasTableParts(nodes) ? await clickable(frame.client) : undefined;
 		return buildAxTree(nodes, axFrame, { includeAll: options.includeAll, embedded, clickable: clickableIds });

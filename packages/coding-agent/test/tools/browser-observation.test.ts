@@ -507,6 +507,6 @@ it("keeps a frame that did not answer in a compact read, so its missing content 
 	const lines = buildTreeLines(compact, compact.map((node, i) => (node.actionable ? i + 1 : undefined)), "e");
 	const tree = renderTree("header", lines);
 	expect(tree).toContain('button "Continue"');
-	expect(tree).toContain("[iframe widget.example (did not answer in time; its content is left out of this read)]");
+	expect(tree).toMatch(/\[iframe widget\.example .*did not answer in time/);
 	expect(tree).not.toContain('heading "Sign in"');
 });

@@ -514,11 +514,6 @@ function contentChars(node: AxNode, loaders: ReadonlySet<AxNode>): number {
  * only while the content it sits in — its `main`, else the whole page — has
  * little text besides loaders.
  */
-/** Whether a snapshot left out an embedded document that did not answer. */
-export function hasUnansweredFrame(node: AxNode): boolean {
-	return node.unanswered === true || (node.children ?? []).some(hasUnansweredFrame);
-}
-
 export function hasBusyIndicator(root: AxNode): boolean {
 	const loaders = new Set<AxNode>();
 	const scopes = new Set<AxNode>();

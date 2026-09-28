@@ -37,6 +37,14 @@ beforeAll(() => {
 					return html(
 						`<!doctype html><p>Widget content</p><script>setTimeout(() => { const until = Date.now() + 8000; while (Date.now() < until) {} parent.postMessage("widget free", "*"); });</script>`,
 					);
+				case "/sibling-parent":
+					// Two more sites, each a subdomain of localhost, so each frame gets
+					// its own renderer, apart from the stuck one of the case above.
+					return html(
+						`<!doctype html><title>Siblings</title><h1>Checkout</h1><iframe title="challenge" src="http://hung.localhost:${server!.port}/stuck"></iframe><iframe title="payment" src="http://fine.localhost:${server!.port}/fine"></iframe>`,
+					);
+				case "/fine":
+					return html(`<!doctype html><button>Pay now</button>`);
 				default:
 					return new Response("not found", { status: 404 });
 			}
@@ -104,7 +112,13 @@ describe("observing a page with an out-of-process frame that does not answer", (
 				expect(stuck).toContain('heading "Sign in"');
 				expect(stuck).toMatch(/e\d+ button "Continue"/);
 				expect(stuck).toMatch(/\[iframe localhost.*did not answer in time/);
-
+				// A stuck frame beside a healthy one of another site costs only its own content.
+				await invoke({ action: "open", name, url: `${origin}/sibling-parent` });
+				const siblings = await observe();
+				expect(siblings).toContain('heading "Checkout"');
+				expect(siblings).toMatch(/e\d+ button "Pay now"/);
+				expect(siblings).toMatch(/\[iframe hung\.localhost.*did not answer in time/);
+				expect(siblings).not.toMatch(/\[iframe fine\.localhost.*did not answer in time/);
 			} finally {
 				await invoke({ action: "close", name }).catch(() => undefined);
 			}
