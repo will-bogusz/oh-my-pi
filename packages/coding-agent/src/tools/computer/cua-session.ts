@@ -112,6 +112,8 @@ interface SheetCensus {
 	label: string;
 	rows: number;
 	matched: number;
+	/** Innermost sheets this observation reached but did not read (walk failed or past a bound). */
+	unread: readonly { name: string; id: string; pid: number }[];
 }
 /**
  * Where a row sits, independently of what it holds: its role, its label, the
@@ -1501,20 +1503,43 @@ export class CuaComputerSession implements ComputerBackend {
 			// is not an answer, and the bench was told to scroll a sidebar that
 			// the sheet holding its match had made unreachable.
 			const attached = observation.relatedWindows ?? [];
-			for (const [id, sheet] of this.#sheets)
-				if (sheet.parent === current.id && !attached.some(row => row.id === id)) this.#retireSheet(id, sheet.title);
-			// Every sheet this read printed, at any depth, walked or not.
+			// Every sheet this read printed, at any depth, walked or not. None of
+			// them is retired by this read, whatever a remembered relation says:
+			// its refs are the ones this reply hands out.
 			const printed = new Set<string>([current.id]);
+			for (const [id, sheet] of this.#sheets)
+				if (sheet.parent === current.id && !attached.some(row => row.id === id))
+					this.#retireSheet(id, sheet.title, "is gone", printed);
 			let walkedSheets = 0;
 			// A query's census belongs to the sheets taking input: one with a
 			// sheet of its own attached is covered by it, so it counts only when
-			// no uncovered sheet was read.
-			const census: { name: string; rows: number; matched: number; covered: boolean }[] = [];
+			// no uncovered sheet was reached. One reached but not read is named
+			// as unread, never as read and empty.
+			const census: {
+				name: string;
+				id: string;
+				pid: number;
+				rows: number;
+				matched: number;
+				covered: boolean;
+				read: boolean;
+			}[] = [];
 			// What was attached to a sheet that is not read now is unknown, not
 			// gone: those sheets stop admitting refs until a read reports them.
-			const unread = (sheet: string) => {
+			const unread = (sheet: ComputerRelatedWindow) => {
 				for (const [id, stale] of this.#sheets)
-					if (stale.parent === sheet) this.#retireSheet(id, stale.title, "was not read in the last observation");
+					if (stale.parent === sheet.id)
+						this.#retireSheet(id, stale.title, "was not read in the last observation", printed);
+				if (query !== undefined)
+					census.push({
+						name: `${JSON.stringify(sheet.title)} (window ${sheet.id})`,
+						id: sheet.id,
+						pid: sheet.pid,
+						rows: 0,
+						matched: 0,
+						covered: false,
+						read: false,
+					});
 			};
 			// A sheet's own walk reports the sheets attached to it, and only it
 			// does: each is printed under its opener, as deep as SHEET_DEPTH and
@@ -1529,18 +1554,32 @@ export class CuaComputerSession implements ComputerBackend {
 				for (const sheet of related) {
 					if (printed.has(sheet.id)) continue;
 					printed.add(sheet.id);
-					// A fresh relation displaces a remembered one that points the
-					// other way (the opener recorded as this sheet's own sheet).
-					if (this.#sheets.get(opener)?.parent === sheet.id) this.#sheets.delete(opener);
+					// A fresh relation contradicts any remembered one that leads from
+					// the opener back to this sheet: kept, it would close a cycle a
+					// later retirement follows into windows this read printed. The
+					// window whose remembered edge closes it was not read here, so it
+					// and what hangs off it are retired as unread; only a window this
+					// read printed keeps its refs and just loses the edge.
+					const seen = new Set<string>();
+					for (let node: string | undefined = opener; node !== undefined && !seen.has(node); ) {
+						seen.add(node);
+						const remembered = this.#sheets.get(node);
+						if (remembered?.parent === sheet.id) {
+							if (printed.has(node)) this.#sheets.delete(node);
+							else this.#retireSheet(node, remembered.title, "was not read in the last observation", printed);
+							break;
+						}
+						node = remembered?.parent;
+					}
 					this.#sheets.set(sheet.id, { parent: opener, title: sheet.title });
 					let block = `${"  ".repeat(depth)}sheet ${JSON.stringify(sheet.title)} (window ${sheet.id}) — modal over ${
 						depth === 0 ? "window" : "sheet"
 					} ${opener}`;
 					if (depth >= SHEET_DEPTH || walkedSheets >= SHEET_COUNT) {
-						unread(sheet.id);
-						if (query !== undefined)
-							census.push({ name: `${JSON.stringify(sheet.title)} (window ${sheet.id})`, rows: 0, matched: 0, covered: false });
-						blocks.push(`${block}; not read here — computer.window(${JSON.stringify(sheet.id)}) reads it`);
+						unread(sheet);
+						blocks.push(
+							`${block}; not read here — computer.window(${JSON.stringify({ id: sheet.id, pid: sheet.pid })}) reads it`,
+						);
 						continue;
 					}
 					walkedSheets++;
@@ -1552,21 +1591,27 @@ export class CuaComputerSession implements ComputerBackend {
 						// did not report: that one is unread, not gone.
 						for (const [id, stale] of this.#sheets)
 							if (stale.parent === sheet.id && !inner.some(row => row.id === id))
-								this.#retireSheet(id, stale.title, walked.partial ? "was not read in the last observation" : "is gone");
+								this.#retireSheet(
+									id,
+									stale.title,
+									walked.partial ? "was not read in the last observation" : "is gone",
+									printed,
+								);
 						observation.elements.push(...walked.rows.map(row => row.element));
 						if (walked.rows.length) block += `\n${treeRows(walked.rows, depth + 1)}`;
 						if (query !== undefined)
 							census.push({
 								name: `${JSON.stringify(sheet.title)} (window ${sheet.id})`,
+								id: sheet.id,
+								pid: sheet.pid,
 								rows: walked.rows.length,
 								matched: projectRows(walked.rows, query).matched,
 								covered: inner.length > 0,
+								read: true,
 							});
 					} catch (error) {
 						if (!(error instanceof ToolError)) throw error;
-						unread(sheet.id);
-						if (query !== undefined)
-							census.push({ name: `${JSON.stringify(sheet.title)} (window ${sheet.id})`, rows: 0, matched: 0, covered: false });
+						unread(sheet);
 						block += ` — its own walk failed: ${error.message}`;
 					}
 					blocks.push(block, ...(await sheetBlocks(sheet.id, inner, depth + 1)));
@@ -1580,6 +1625,7 @@ export class CuaComputerSession implements ComputerBackend {
 						label: `sheet${counted.length === 1 ? "" : "s"} ${counted.map(entry => entry.name).join(", ")}`,
 						rows: counted.reduce((sum, entry) => sum + entry.rows, 0),
 						matched: counted.reduce((sum, entry) => sum + entry.matched, 0),
+						unread: counted.filter(entry => !entry.read),
 					}
 				: undefined;
 			const parent = rows.length
@@ -1705,6 +1751,19 @@ export class CuaComputerSession implements ComputerBackend {
 	): string {
 		const query = JSON.stringify(options.query);
 		const widen = `widen it — a query is a case-insensitive substring; pass an array to search for any of several`;
+		if (modal?.unread.length) {
+			const names = modal.unread.map(sheet => `sheet ${sheet.name}`).join(", ");
+			const reads = modal.unread
+				.map(sheet => `computer.window(${JSON.stringify({ id: sheet.id, pid: sheet.pid })})`)
+				.join(" or ");
+			return `No row of window ${window.id} itself matched query ${query}, and the query did not search the ${names} modal over it: ${
+				modal.unread.length === 1 ? "that sheet was" : "those sheets were"
+			} not read here, so neither ${modal.unread.length === 1 ? "its rows nor what is attached to it are" : "their rows nor what is attached to them are"} known. Read ${
+				modal.unread.length === 1 ? "it" : "each"
+			} with ${reads} and observe that handle.${
+				modal.matched > 0 ? ` ${modal.matched} row(s) of the other sheets read here match and are printed above.` : ""
+			} The window behind takes no input until its sheets are answered, so its own rows are not the place to look.`;
+		}
 		if (modal)
 			return modal.matched > 0
 				? `No row of window ${window.id} itself matched query ${query}; ${modal.matched} row(s) of the ${modal.label} modal over it match and are printed above — work in the sheet while it is up.`
@@ -1885,16 +1944,19 @@ export class CuaComputerSession implements ComputerBackend {
 	/**
 	 * A sheet that has gone, or whose opener's read no longer reached it,
 	 * takes the sheets attached to it along: none of their refs is admitted
-	 * until a read reports them again.
+	 * until a read reports them again. `keep` names the windows the current
+	 * observation printed; a remembered relation never retires one of them.
 	 */
-	#retireSheet(id: string, title: string, why = "is gone"): void {
+	#retireSheet(id: string, title: string, why = "is gone", keep?: ReadonlySet<string>): void {
+		if (keep?.has(id)) return;
 		this.#sheets.delete(id);
 		for (const [ref, binding] of this.#elements) {
 			if (binding.window.id !== id) continue;
 			this.#elements.delete(ref);
 			this.#staleSheetRefs.set(ref, `sheet ${JSON.stringify(title)} (window ${id}) ${why}; observe the window that had it again`);
 		}
-		for (const [child, sheet] of this.#sheets) if (sheet.parent === id) this.#retireSheet(child, sheet.title, why);
+		for (const [child, sheet] of this.#sheets)
+			if (sheet.parent === id) this.#retireSheet(child, sheet.title, why, keep);
 	}
 	/** Whether the window `id` names is a sheet attached to `opener`, directly or through its sheets. */
 	#sheetOf(id: string, opener: string): boolean {
@@ -2296,12 +2358,14 @@ export class CuaComputerSession implements ComputerBackend {
 	 * descends from the window: it says nothing about the element being gone,
 	 * and a fresh ref re-checks it. That check can keep failing for a row
 	 * that is still there (the VM probe refused a desktop icon 5 of 5 times,
-	 * re-read at 0-3 s, while foreground delivery dispatched), so where the
-	 * fresh tree still holds a row of that role and label in the same place
-	 * the reply names, for a repeat of the same refusal, what the check does
-	 * not gate: the same call with `{ delivery: "foreground" }` where the
-	 * driver gates that call only in the background, and, for a click or an
-	 * AX action, the document or folder hand-off if opening one was the aim.
+	 * re-read at 0-3 s, while foreground delivery dispatched), so whenever
+	 * the fresh tree has rows the reply names, for a repeat of the same
+	 * refusal, what the check does not gate: the same call with
+	 * `{ delivery: "foreground" }` where the driver gates that call only in
+	 * the background, and, for a click or an AX action, the document or
+	 * folder hand-off if opening one was the aim. A row of the same role and
+	 * label in the same place is named as the row in that position now, never
+	 * as the refused element itself.
 	 *
 	 * That walk is this session's, not the caller's, so it retires only the
 	 * refused ref. Every other ref stays bound to the exact element its

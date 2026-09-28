@@ -4088,7 +4088,7 @@ it("prints a sheet attached to a sheet under its opener, bounded and without loo
 		expect(deep.tree.match(/\(window 83\)/g)).toHaveLength(1);
 		expect(deep.tree).toContain('    sheet "third" (window 90) — modal over sheet 89');
 		expect(deep.tree).toContain(
-			'      sheet "fourth" (window 91) — modal over sheet 90; not read here — computer.window("91") reads it',
+			'      sheet "fourth" (window 91) — modal over sheet 90; not read here — computer.window({"id":"91","pid":101}) reads it',
 		);
 		// The document, then 83, 89 and 90: the fourth level is not walked.
 		expect(f.calls.filter(call => call.name === "get_window_state").length - reads).toBe(4);
@@ -4123,7 +4123,71 @@ it("prints a sheet attached to a sheet under its opener, bounded and without loo
 		f.state.relatedWindows = [83, 91, 92, 93, 94, 95, 96].map(id => ({ pid: 101, window_id: id, title: "", relation: "sheet" }));
 		const wide = await f.session.observe(f.context, f.window);
 		expect(wide.tree.match(/; not read here/g)).toHaveLength(1);
-		expect(wide.tree).toContain('sheet "" (window 96) — modal over window 1; not read here — computer.window("96") reads it');
+		expect(wide.tree).toContain('sheet "" (window 96) — modal over window 1; not read here — computer.window({"id":"96","pid":101}) reads it');
+	} finally {
+		await f.close();
+	}
+});
+
+it("keeps a read's own sheets when remembered relations reverse, and names a sheet it could not read", async () => {
+	const f = await fixture();
+	const bounds = { x: 30, y: 40, width: 120, height: 80 };
+	let related: Record<number, number[]> = {};
+	const failed = new Set<number>();
+	const labels: Record<number, string> = {};
+	f.state.hook = async (name, args) => {
+		if (name === "list_windows")
+			return reply({ windows: [f.row, ...[2, 3, 4].map(id => ({ ...f.row, window_id: id, title: `W${id}`, bounds }))] });
+		if (name !== "get_window_state") return undefined;
+		const id = args.window_id as number;
+		if (failed.has(id)) return { text: "walk failed", isError: true, errorCode: "CuaError", images: [] };
+		return reply({
+			pid: 101,
+			window_id: id,
+			snapshot_id: `w${id}-${f.calls.length}`,
+			related_windows: (related[id] ?? []).map(sheet => ({ pid: 101, window_id: sheet, title: `W${sheet}`, relation: "sheet" })),
+			window_bounds: id === 1 ? f.row.bounds : bounds,
+			elements: [
+				{ element_index: 0, element_token: `w${id}:0:${f.calls.length}`, role: "AXSheet", label: `S${id}`, depth: 0 },
+				{ element_index: 1, element_token: `w${id}:1:${f.calls.length}`, role: "AXButton", label: labels[id] ?? "Cancel", depth: 1 },
+			],
+		});
+	};
+	const live = (observation: { elements: readonly { ref: string }[] }) =>
+		observation.elements.filter(element => {
+			try {
+				f.session.element(element.ref);
+				return false;
+			} catch {
+				return true;
+			}
+		});
+	try {
+		// Remembered 1 → 2 → 3 → 4; then the app reports 4 → 2 and nothing else.
+		related = { 1: [2], 2: [3], 3: [4] };
+		const remembered = await f.session.observe(f.context, f.window);
+		const three = remembered.elements.find(element => element.windowId === "3")!.ref;
+		related = { 4: [2] };
+		const four = await f.session.observe(f.context, await f.session.window(f.context, { id: "4", pid: 101 }));
+		expect(four.tree).toContain('sheet "W2" (window 2) — modal over window 4');
+		// Every ref this reply printed is live.
+		expect(live(four).map(element => element.ref)).toEqual([]);
+		// The window whose remembered edge closed the cycle was not read here:
+		// its refs stop being admitted instead of lingering unreachable.
+		expect(() => f.session.element(three)).toThrow(`StaleRef: ${three} — sheet "W3" (window 3) was not read in the last observation`);
+
+		// A sheet taking input that could not be read is named as unread, with
+		// the call that reads it — not as a sheet read with no rows, and not by
+		// sending the caller to the sheet it covers.
+		related = { 1: [2], 2: [3] };
+		labels[2] = "Match here";
+		failed.add(3);
+		const queried = await f.session.observe(f.context, f.window, { query: "Match" });
+		expect(queried.tree).toContain(
+			'the query did not search the sheet "W3" (window 3) modal over it: that sheet was not read here, so neither its rows nor what is attached to it are known. Read it with computer.window({"id":"3","pid":101}) and observe that handle.',
+		);
+		expect(queried.tree).not.toContain("work in the sheet while it is up");
+		expect(queried.tree).not.toContain("drop the query");
 	} finally {
 		await f.close();
 	}
