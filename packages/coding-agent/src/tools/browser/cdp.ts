@@ -1244,7 +1244,7 @@ async function clickTargets(session: CDPSession, signal?: AbortSignal): Promise<
  * in script answers none of them, and one such frame (a challenge widget, say)
  * must not cost the whole page its tree.
  */
-export const FRAME_READ_MS = 1_000;
+const FRAME_READ_MS = 1_000;
 
 /** A frame's session did not answer an observation read in time. */
 class FrameNotAnswering extends Error {}

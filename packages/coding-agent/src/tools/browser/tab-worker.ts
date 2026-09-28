@@ -44,7 +44,6 @@ import {
 	clickNode,
 	currentEntry,
 	evaluateExpression,
-	FRAME_READ_MS,
 	fillNode,
 	focusNode,
 	hasSkeletonScreen,
@@ -2661,16 +2660,13 @@ export class WorkerCore {
 		const session = page.mainFrame().client;
 		await settlePage(page, signal, budgetMs);
 		// A slow frame may use what the settle budget can spare beyond the page's
-		// own reads (never under FRAME_READ_MS); one that never answers still
-		// leaves them room.
+		// own reads; one that never answers still leaves them room.
 		const frameReadMs = (): number => deadline - Date.now() - FRAME_READ_RESERVE_MS;
-		let startedAt = Date.now();
 		let snapshot = await settleRead(
 			"accessibility tree",
 			snapshotAccessibility(page, { includeAll, frameReadMs: frameReadMs() }, signal),
 			deadline,
 		);
-		let lastReadMs = Date.now() - startedAt;
 		// Loading means the tree still shows an indicator, or the page a skeleton
 		// where its content will be; either is waited out within the budget.
 		const stillLoading = async (tree: AxNode): Promise<boolean> =>
@@ -2680,10 +2676,6 @@ export class WorkerCore {
 			const remaining = deadline - Date.now();
 			if (remaining <= 0) break;
 			await untilAborted(signal, () => Bun.sleep(Math.min(SETTLE_BUSY_POLL_MS, remaining)));
-			// A re-read the last one says cannot finish in what a read started now
-			// may take would only lose what that one read: it stands, still marked loading.
-			if (lastReadMs > Math.min(deadline - Date.now(), Math.max(FRAME_READ_MS, frameReadMs()))) break;
-			startedAt = Date.now();
 			// A re-read that does not answer ends the wait: the complete tree
 			// already read stands, still marked loading, and the caller's
 			// document check decides whether it is still the page's.
@@ -2692,7 +2684,7 @@ export class WorkerCore {
 				snapshotAccessibility(page, { includeAll, frameReadMs: frameReadMs() }, signal),
 				deadline,
 			)
-				.then(async tree => ({ tree, readMs: Date.now() - startedAt, loading: await stillLoading(tree) }))
+				.then(async tree => ({ tree, loading: await stillLoading(tree) }))
 				.catch(error => {
 					if (error instanceof SnapshotReadTimeout) return undefined;
 					throw error;
@@ -2700,10 +2692,9 @@ export class WorkerCore {
 			if (!next) break;
 			// The newer read is the page's current state, even with a frame it
 			// could not read in time: that frame is marked in it, never filled
-			// from an older read of a page that has moved on.
+			// from an older read of a page that may have moved on.
 			snapshot = next.tree;
 			loading = next.loading;
-			lastReadMs = next.readMs;
 		}
 		const [layout, entry] = await Promise.all([
 			settleRead("page layout", pageLayout(session, signal), deadline),

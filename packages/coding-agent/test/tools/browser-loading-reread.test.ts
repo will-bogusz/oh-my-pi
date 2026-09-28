@@ -119,16 +119,23 @@ describe("re-reading a page that still shows a loading indicator", () => {
 	);
 
 	it.skipIf(!CHROMIUM_AVAILABLE)(
-		"keeps a complete read rather than start a re-read too short for a slow frame",
+		"re-reads the page after a slow read, so what finished meanwhile is not left out",
 		async () => {
-			const text = await observeWith(async ({ method, frameId, child, send }) => {
+			let childReads = 0;
+			const text = await observeWith(async ({ method, frameId, page, child, send }) => {
 				const answer = await send();
-				// Every read of the frame answers, but only after 1.25 s.
-				if (method === "Accessibility.getFullAXTree" && frameId === child._id) await Bun.sleep(1_250);
+				// Only the first read of the frame is slow; the page finishes its work meanwhile.
+				if (method === "Accessibility.getFullAXTree" && frameId === child._id && ++childReads === 1) {
+					await Bun.sleep(1_250);
+					await page.evaluate(
+						`document.querySelector("main").innerHTML = "<h1>Transfer completed</h1><button>Download receipt</button>"`,
+					);
+				}
 				return answer;
 			});
+			expect(text).toContain('heading "Transfer completed"');
+			expect(text).not.toContain("Approve transfer");
 			expect(text).toContain('button "Frame control"');
-			expect(text).not.toContain("did not answer in time");
 		},
 		30_000,
 	);
