@@ -270,12 +270,19 @@ class TabState {
 	 * keyed by session id: the session that reported each (none = the root),
 	 * and its `Target.attachedToTarget` params with the latest target info.
 	 * Chrome reports a child once, to the first auto-attach armed over it; a
-	 * second driver arming later gets it from here.
+	 * second driver arming later gets it from here. `releasing` marks a child
+	 * its last holder asked Chrome to detach: it is never replayed again.
 	 */
 	readonly realSessions = new Map<
 		string,
-		{ parent: string | undefined; targetId: unknown; event: Record<string, unknown> }
+		{ parent: string | undefined; targetId: unknown; event: Record<string, unknown>; releasing?: boolean }
 	>();
+	/**
+	 * Bumped whenever the recorded children are dropped: an auto-attach arm
+	 * issued before that replays nothing, since the children it would name
+	 * belong to a later report its connection hears of live.
+	 */
+	childEpoch = 0;
 	/** Live execution contexts from the shared root debugger session. */
 	readonly runtimeContexts = new Map<number, Record<string, unknown>>();
 	/** Whether the shared root Runtime domain has been enabled by the bridge. */
@@ -1046,35 +1053,56 @@ export class RelayBridge {
 		// and one that no longer holds it (a repeated detach) cannot end it at all.
 		const release = msg.method === "Target.detachFromTarget" ? msg.params?.sessionId : undefined;
 		const shared = typeof release === "string" ? tab.realSessions.get(release) : undefined;
+		let released: string[] | undefined;
 		if (typeof release === "string" && shared) {
 			if (!conn.announced.delete(release)) {
 				this.#replyError(conn, msg, `No session with given id: ${release}`);
 				return;
 			}
 			// The frames nested in it go with it for this connection.
-			const nested = [release];
-			for (let parent = nested.pop(); parent !== undefined; parent = nested.pop())
+			released = [release];
+			for (let i = 0; i < released.length; i++)
 				for (const [child, known] of tab.realSessions)
-					if (known.parent === parent && conn.announced.delete(child)) nested.push(child);
+					if (known.parent === released[i] && conn.announced.delete(child)) released.push(child);
 			if ([...this.#conns.values()].some(other => other.announced.has(release))) {
-				this.#emit(conn, "Target.detachedFromTarget", { sessionId: release, targetId: shared.targetId }, msg.sessionId);
+				this.#emit(
+					conn,
+					"Target.detachedFromTarget",
+					{ sessionId: release, targetId: shared.targetId },
+					msg.sessionId,
+				);
 				this.#reply(conn, msg, {});
 				return;
 			}
+			// Its last holder: Chrome ends it, and no late arm is told of it meanwhile.
+			shared.releasing = true;
 		}
+		const arm = msg.method === "Target.setAutoAttach" && msg.params?.autoAttach === true ? msg.sessionId : undefined;
 		const send = async (): Promise<void> => {
 			// Only a click on a visible tab has anything to wait for; everything
 			// else must reach Chrome in the same turn it was forwarded.
 			const arrival = this.#paintCursor(tab, msg);
 			if (arrival) await arrival;
+			const epoch = tab.childEpoch;
 			try {
 				const result = await this.#sendToTab(tab, msg.method, msg.params, realSessionId);
 				// Before the reply, as Chrome does: puppeteer counts the children
-				// attached before its setAutoAttach resolves.
-				if (msg.method === "Target.setAutoAttach" && msg.params?.autoAttach === true && msg.sessionId)
-					this.#announceChildren(conn, tab, realSessionId, msg.sessionId);
+				// attached before its setAutoAttach resolves. Only while the arming
+				// session and the children it was armed over are both still current.
+				if (
+					arm !== undefined &&
+					epoch === tab.childEpoch &&
+					this.#conns.get(conn.id) === conn &&
+					(realSessionId === undefined ? conn.sessions.has(arm) : conn.announced.has(realSessionId))
+				)
+					this.#announceChildren(conn, tab, realSessionId, arm);
 				this.#reply(conn, msg, (result as Record<string, unknown> | undefined) ?? {});
 			} catch (err) {
+				// Chrome kept the child: this connection still holds what it let go of.
+				if (shared && released && tab.realSessions.get(released[0]!) === shared) {
+					shared.releasing = false;
+					for (const child of released) if (tab.realSessions.has(child)) conn.announced.add(child);
+				}
 				this.#replyError(conn, msg, err instanceof Error ? err.message : String(err));
 			}
 		};
@@ -1103,7 +1131,7 @@ export class RelayBridge {
 	 */
 	#announceChildren(conn: CdpConnection, tab: TabState, parent: string | undefined, sessionId: string): void {
 		for (const [child, known] of tab.realSessions) {
-			if (known.parent !== parent || conn.announced.has(child)) continue;
+			if (known.parent !== parent || known.releasing || conn.announced.has(child)) continue;
 			conn.announced.add(child);
 			conn.socket.send(JSON.stringify({ sessionId, method: "Target.attachedToTarget", params: known.event }));
 		}
@@ -1709,10 +1737,14 @@ export class RelayBridge {
 		tab.announced = false;
 	}
 
-	/** No child of this tab is replayed any more, and a fresh report of one is announced again. */
+	/**
+	 * No child of this tab is replayed any more, not even to an arm already in
+	 * flight, and a fresh report of one is announced again.
+	 */
 	#forgetChildren(tab: TabState): void {
 		for (const conn of this.#conns.values())
 			for (const child of tab.realSessions.keys()) conn.announced.delete(child);
+		tab.childEpoch++;
 		tab.realSessions.clear();
 	}
 
