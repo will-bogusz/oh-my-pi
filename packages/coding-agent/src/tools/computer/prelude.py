@@ -116,7 +116,8 @@ def _make_computer():
             return f"<computer.Window id={self.id!r} app={self.app!r}>"
 
         async def _method(self, method, args, kwargs):
-            return await _call([_step("window", (self.id,), {}), _step(method, args, kwargs)])
+            # By exact id: a closed window fails here instead of resolving by name to another.
+            return await _call([_step("window", ({"id": self.id},), {}), _step(method, args, kwargs)])
 
         async def screenshot(self, *args, **kwargs):
             return await self._method("screenshot", args, kwargs)
@@ -208,7 +209,7 @@ def _make_computer():
             return await self._method("press", args, kwargs)
 
         async def window(self, *args, **kwargs):
-            """Resolve one window by opaque id or by `app`/`title` filter keywords."""
+            """Resolve one window by id ("74" or 74) or by `app`/`title` filter keywords."""
             snapshot = await self._method("window", args, kwargs)
             return _Window(snapshot) if isinstance(snapshot, dict) else None
 

@@ -15,10 +15,12 @@
 ### Changed
 
 - `computer.window(…)` that matches no window now throws with the open windows grouped by app (ids and titles, candidates for the requested app first), so the model need not list windows before retrying or launching the app
+- A `computer.window(…)` string that is no window id now resolves to the one open window whose app or title equals it (case-insensitive, and the reply says so) or throws naming `window({ app })`/`window({ title })`; window ids in reports, listings and candidates print JSON-quoted (`window "74" Reminders "Todo"`), the form `window()` takes verbatim; window handle methods re-resolve by exact id (`window({ id })`), so a closed window fails at the call
 - The `eval` tool description now notes that the kernel may be shared with the parent session and concurrent `task` subagents ([#13521](https://github.com/can1357/oh-my-pi/pull/13521) by [@radkawar](https://github.com/radkawar))
 
 ### Fixed
 
+- Fixed `computer.window(74)` (a number) matching every window as an empty filter, and `window({ id: 74 })`/`windows({ id: 74 })` matching none; a number is now window id `"74"`
 - Fixed Windows sessions started from an 8.3 short path (such as `C:\Users\ADMINI~1\project`) using the short spelling as the project directory, and home-directory paths written with 8.3 aliases not being shortened to `~` in the status line, tool labels, and errors ([#13394](https://github.com/can1357/oh-my-pi/pull/13394) by [@CoderTCY](https://github.com/CoderTCY))
 - Fixed `edit` `PUT >N` moving a shallower insert (Go `case`, `} else {`) past a closing brace when that breaks the file's syntax ([#13520](https://github.com/can1357/oh-my-pi/pull/13520) by [@radkawar](https://github.com/radkawar))
 - Fixed `omp update` and other one-shot commands on Windows printing "ended before completing" and exiting 1 after they had actually completed ([#13470](https://github.com/can1357/oh-my-pi/issues/13470))

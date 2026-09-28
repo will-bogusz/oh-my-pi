@@ -13,6 +13,7 @@
  * `- role "label" [ref=eN] …`.
  */
 import type { DesktopWindow, DiffRun } from "@oh-my-pi/pi-natives";
+import { windowLabel } from "./roster";
 import { elideAxTree } from "./tree-elide";
 
 /** Options of the `ax()` read a window's baseline came from; re-reads reuse them so trees compare. */
@@ -420,9 +421,9 @@ export class ObservationLedger {
 	}
 }
 
-/** `window 42 Code "main.ts"`. */
-function windowName(window: DesktopWindow): string {
-	return `window ${window.id} ${window.app} ${JSON.stringify(window.title)}`;
+/** `window "42" Code "main.ts"`, or `window "42"` when the roster did not list it: the id as `window()` takes it. */
+function windowName(window: DesktopWindow | undefined, id: string): string {
+	return `window ${window ? windowLabel(window) : JSON.stringify(id)}`;
 }
 
 /** `press e5, type "abc"` — the inputs a read-back answers, then the failure that renewed it. */
@@ -456,7 +457,7 @@ function isUnchanged(change: TreeChange | undefined): boolean {
 /** The post-input section for one window: a header saying what changed, then its current tree. */
 export function renderReadBack(readBack: ReadBack): string {
 	const { touched, change } = readBack;
-	const name = readBack.window ? windowName(readBack.window) : `window ${touched.id}`;
+	const name = windowName(readBack.window, touched.id);
 	let summary: string;
 	// Without an input (a call failed on a stale ref) there is no input to have changed nothing.
 	if (change === undefined || (isUnchanged(change) && touched.labels.length === 0)) summary = "current tree";
@@ -483,14 +484,14 @@ export function renderReadBack(readBack: ReadBack): string {
 
 /** A touched window whose tree could not be read back. */
 export function renderUnreadable(touched: TouchedWindow, window: DesktopWindow | undefined, message: string): string {
-	const name = window ? windowName(window) : `window ${touched.id}`;
+	const name = windowName(window, touched.id);
 	const screenshot = touched.screenshot ? "; screenshot below" : "";
 	return `${name} after ${describeCause(touched)} — could not be read back through AX: ${message}${screenshot}`;
 }
 
 /** A touched window the roster no longer lists. */
 export function renderGone(touched: TouchedWindow): string {
-	return `window ${touched.id} after ${describeCause(touched)} — gone from the window list (closed, minimized or off screen)`;
+	return `${windowName(undefined, touched.id)} after ${describeCause(touched)} — gone from the window list (closed, minimized or off screen)`;
 }
 
 /**
@@ -511,16 +512,16 @@ export function describeRosterChanges(
 	for (const window of after) {
 		if (beforeIds.has(window.id) || reported.has(window.id) || !(acted(window) || window.focused)) continue;
 		lines.push(
-			`new ${windowName(window)} ${Math.round(window.width)}×${Math.round(window.height)}${window.focused ? " (focused)" : ""}`,
+			`new window ${windowLabel(window)} ${Math.round(window.width)}×${Math.round(window.height)}${window.focused ? " (focused)" : ""}`,
 		);
 	}
 	for (const window of before) {
 		if (afterIds.has(window.id) || reported.has(window.id) || !acted(window)) continue;
-		lines.push(`${windowName(window)} closed`);
+		lines.push(`window ${windowLabel(window)} closed`);
 	}
 	const focusedBefore = before.find(window => window.focused);
 	const focusedAfter = after.find(window => window.focused);
 	if (focusedAfter && focusedAfter.id !== focusedBefore?.id && beforeIds.has(focusedAfter.id))
-		lines.push(`focus moved to ${windowName(focusedAfter)}`);
+		lines.push(`focus moved to window ${windowLabel(focusedAfter)}`);
 	return lines;
 }

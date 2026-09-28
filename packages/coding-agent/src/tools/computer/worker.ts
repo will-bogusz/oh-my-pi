@@ -39,7 +39,7 @@ import {
 	renderReadBack,
 	renderUnreadable,
 } from "./observation";
-import { describeWindowMiss } from "./roster";
+import { describeWindowMiss, resolveWindowId, windowLabel } from "./roster";
 import type {
 	ComputerScreenshot,
 	ComputerSessionSnapshot,
@@ -92,7 +92,7 @@ export type NativeDesktopSessionFactory = (
 	options: DesktopSessionOptions,
 ) => NativeDesktopSession | Promise<NativeDesktopSession>;
 
-type WindowFilter = { id?: string; app?: string; title?: string };
+type WindowFilter = { id?: string | number; app?: string; title?: string };
 
 /** Target id of desktop-root input: the focused window at dispatch. */
 const DESKTOP_TARGET = DESKTOP_WINDOW_ID;
@@ -197,7 +197,7 @@ function matchesFilter(window: DesktopWindow, filter?: WindowFilter): boolean {
 	const app = filter.app?.toLocaleLowerCase();
 	const title = filter.title?.toLocaleLowerCase();
 	return (
-		(filter.id === undefined || window.id === filter.id) &&
+		(filter.id === undefined || window.id === String(filter.id)) &&
 		(!app || window.app.toLocaleLowerCase().includes(app)) &&
 		(!title || window.title.toLocaleLowerCase().includes(title))
 	);
@@ -780,7 +780,7 @@ export class ComputerWorkerCore {
 			}
 			if (Date.now() > deadline) {
 				sections.push(
-					`window ${touched.id} was not read back: the report's time budget is spent; read it yourself`,
+					`window ${JSON.stringify(touched.id)} was not read back: the report's time budget is spent; read it yourself`,
 				);
 				continue;
 			}
@@ -801,7 +801,7 @@ export class ComputerWorkerCore {
 				try {
 					await captureScreenshot(session, this.#currentRunContext, touched.id);
 				} catch (error) {
-					sections.push(`window ${touched.id}: screenshot failed: ${failure(error)}`);
+					sections.push(`window ${JSON.stringify(touched.id)}: screenshot failed: ${failure(error)}`);
 				}
 			}
 		}
@@ -922,24 +922,23 @@ export class ComputerWorkerCore {
 					matchesFilter(window, filter),
 				);
 			},
-			window: async (selector: string | WindowFilter): Promise<Win> => {
-				const { signal } = getContext();
+			window: async (selector: string | number | WindowFilter): Promise<Win> => {
+				const { signal, output } = getContext();
 				const windows = await nativeCall(signal, () => session.listWindows());
-				const matches =
-					typeof selector === "string"
-						? windows.filter(window => window.id === selector)
-						: windows.filter(window => matchesFilter(window, selector));
+				// An id may arrive as a number (`window(74)`); only an object is a filter.
+				if (typeof selector === "string" || typeof selector === "number") {
+					return makeWin(resolveWindowId(windows, selector, text => output.push({ type: "text", text })));
+				}
+				const matches = windows.filter(window => matchesFilter(window, selector));
 				if (matches.length === 0) {
-					const app = typeof selector === "string" ? undefined : selector.app;
 					throw new ToolError(
-						`no window matches ${JSON.stringify(selector)}\n${describeWindowMiss(windows, app)}`,
+						`no window matches ${JSON.stringify(selector)}\n${describeWindowMiss(windows, selector.app)}`,
 					);
 				}
 				if (matches.length > 1) {
-					const candidates = matches
-						.map(window => `${window.id} ${window.app} ${JSON.stringify(window.title)}`)
-						.join("\n");
-					throw new ToolError(`multiple windows match ${JSON.stringify(selector)}:\n${candidates}`);
+					throw new ToolError(
+						`multiple windows match ${JSON.stringify(selector)}:\n${matches.map(windowLabel).join("\n")}`,
+					);
 				}
 				return makeWin(matches[0]!);
 			},

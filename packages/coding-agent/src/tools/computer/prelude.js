@@ -106,8 +106,9 @@
 	const makeWindow = snapshot => {
 		const win = {};
 		copyFields(win, windowFields, snapshot);
-		defineMethod(win, "toString", () => `<window ${snapshot.id} ${snapshot.app}>`);
-		const via = next => [step("window", [snapshot.id]), next];
+		defineMethod(win, "toString", () => `<window ${JSON.stringify(snapshot.id)} ${snapshot.app}>`);
+		// By exact id: a closed window fails here instead of resolving by name to another.
+		const via = next => [step("window", [{ id: snapshot.id }]), next];
 		defineValueMethods(win, windowValueMethods, via);
 		defineMethod(win, "find", async query => (await callValue(via(step("find", [query])))).map(makeElement));
 		defineMethod(win, "ref", ref => resolveElement([step("ref", [ref])]));

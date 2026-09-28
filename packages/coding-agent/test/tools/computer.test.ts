@@ -1,6 +1,8 @@
 import { afterAll, describe, expect, it } from "bun:test";
 import { createContext, runInContext } from "node:vm";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { disposeAllVmContexts } from "@oh-my-pi/pi-coding-agent/eval/js/context-manager";
+import { executeJs } from "@oh-my-pi/pi-coding-agent/eval/js/executor";
 import type { EvalPreludeDefinition } from "@oh-my-pi/pi-coding-agent/eval/preludes";
 import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-agent/eval/py/executor";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
@@ -30,6 +32,7 @@ import type {
 } from "@oh-my-pi/pi-natives";
 
 import { cfgComputerEnabled } from "@oh-my-pi/pi-coding-agent/tools/settings";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 
 /** Method name of the last step in a facade call chain, or "" when the chain is malformed. */
 function terminalMethod(chain: unknown): string {
@@ -230,6 +233,26 @@ async function runWorker(
 	return message;
 }
 
+/** A controller that runs each call through a real worker core over `native`, failing as the supervisor does. */
+function workerController(native: NativeDesktopSession): ComputerController {
+	const transport = new MemoryTransport();
+	new ComputerWorkerCore(transport, () => native);
+	let runs = 0;
+	return {
+		async run(code) {
+			const result = await runWorker(transport, `kernel-${++runs}`, code);
+			if (result.ok) return result.payload;
+			const error = result.error.isToolError ? new ToolError(result.error.message) : new Error(result.error.message);
+			error.name = result.error.name;
+			throw error;
+		},
+		async capabilities() {
+			return undefined;
+		},
+		async close() {},
+	};
+}
+
 function toolSession(): ToolSession {
 	return {
 		cwd: import.meta.dir,
@@ -242,6 +265,7 @@ function toolSession(): ToolSession {
 
 afterAll(async () => {
 	await disposeAllKernelSessions();
+	await disposeAllVmContexts();
 });
 
 describe("computer prelude", () => {
@@ -524,14 +548,14 @@ describe("computer prelude", () => {
 			{
 				action: "call",
 				chain: [
-					{ method: "window", args: ["42"] },
+					{ method: "window", args: [{ id: "42" }] },
 					{ method: "ax", args: [{ maxDepth: 3 }] },
 				],
 			},
 			{
 				action: "call",
 				chain: [
-					{ method: "window", args: ["42"] },
+					{ method: "window", args: [{ id: "42" }] },
 					{ method: "press", args: ["cmd+s"] },
 				],
 			},
@@ -560,7 +584,7 @@ describe("computer prelude", () => {
 			{
 				action: "call",
 				chain: [
-					{ method: "window", args: ["42"] },
+					{ method: "window", args: [{ id: "42" }] },
 					{ method: "find", args: [{ role: "button" }] },
 				],
 			},
@@ -671,7 +695,7 @@ describe("computer prelude", () => {
 			{
 				action: "call",
 				chain: [
-					{ method: "window", args: ["42"] },
+					{ method: "window", args: [{ id: "42" }] },
 					{ method: "ax", args: [{ maxDepth: 3 }] },
 				],
 			},
@@ -686,14 +710,14 @@ describe("computer prelude", () => {
 			{
 				action: "call",
 				chain: [
-					{ method: "window", args: ["42"] },
+					{ method: "window", args: [{ id: "42" }] },
 					{ method: "raise", args: [] },
 				],
 			},
 			{
 				action: "call",
 				chain: [
-					{ method: "window", args: ["42"] },
+					{ method: "window", args: [{ id: "42" }] },
 					{ method: "click", args: [10, 20, { button: "right" }] },
 				],
 			},
@@ -788,6 +812,66 @@ describe("computer prelude", () => {
 		conversation = "session-c";
 		readActive = false;
 		expect(await reply("window")).toBe("");
+	});
+
+	it("resolves a numeric id, and a closed window's handle never retargets, in real JavaScript and Python kernels", async () => {
+		const reminders: DesktopWindow = {
+			...windowFixture,
+			id: "67",
+			app: "Reminders",
+			title: "Reminders",
+			pid: 11,
+			focused: false,
+		};
+		// Raising Reminders "closes" it and opens a window titled with its old id.
+		const run = async (language: "js" | "py", code: string[]) => {
+			const native = new FakeNativeSession();
+			let windows: DesktopWindow[] = [windowFixture, reminders];
+			let typed = 0;
+			native.listWindows = async () => windows;
+			native.raiseWindow = async () => {
+				windows = [windowFixture, { ...windowFixture, id: "99", app: "TextEdit", title: "67", focused: false }];
+			};
+			native.typeText = async () => {
+				typed += 1;
+			};
+			let definitions: readonly EvalPreludeDefinition[] = [];
+			const session: ToolSession = { ...toolSession(), getEvalPreludes: () => definitions };
+			definitions = [createComputerPrelude(session, () => workerController(native))];
+			const sessionId = `computer-ids-${language}-${crypto.randomUUID()}`;
+			const result =
+				language === "js"
+					? await executeJs(code.join("\n"), { cwd: process.cwd(), sessionId, session })
+					: await executePython(code.join("\n"), {
+							cwd: process.cwd(),
+							sessionId,
+							toolSession: session,
+							kernelMode: "per-call",
+						});
+			// Its last two lines: the title, then the refused call.
+			return { exitCode: result.exitCode, lines: result.output.trim().split("\n").slice(-2), typed };
+		};
+		const expected = { exitCode: 0, lines: ["Reminders", 'no window matches {"id":"67"}'], typed: 0 };
+
+		expect(
+			await run("js", [
+				"const win = await computer.window(67);",
+				"print(win.title);",
+				"await win.raise();",
+				'try { await win.type("x"); } catch (error) { print(error.message.split("\\n")[0]); }',
+			]),
+		).toEqual(expected);
+		expect(
+			await run("py", [
+				"win = await computer.window(67)",
+				"print(win.title)",
+				"await win.raise_()",
+				"try:",
+				'    await win.type("x")',
+				"except Exception as error:",
+				'    print(str(error).split("\\n")[0])',
+			]),
+		).toEqual(expected);
 	});
 
 	it("reflects the live enabled setting", () => {
@@ -962,10 +1046,10 @@ describe("computer worker round trips", () => {
 			[
 				'no window matches {"app":"Contacts"}',
 				'No open window belongs to an app matching "Contacts".',
-				'Open windows by app (id "title"; `computer.windows({ app })` lists all):',
-				'- Code: 42 "Editor" (focused), 1 more',
-				'- Finder: 7 "Downloads"',
-				'- TextEdit: 8 "notes.txt"',
+				'Open windows by app ("id" "title"; `computer.windows({ app })` lists all):',
+				'- Code: "42" "Editor" (focused), 1 more',
+				'- Finder: "7" "Downloads"',
+				'- TextEdit: "8" "notes.txt"',
 			].join("\n"),
 		);
 		const missingTitle = await runWorker(
@@ -976,8 +1060,70 @@ describe("computer worker round trips", () => {
 		expect(missingTitle.ok).toBe(false);
 		if (missingTitle.ok) return;
 		expect(missingTitle.error.message.split("\n").slice(1, 3)).toEqual([
-			'Open windows by app (id "title"; `computer.windows({ app })` lists all):',
-			'- TextEdit: 8 "notes.txt"',
+			'Open windows by app ("id" "title"; `computer.windows({ app })` lists all):',
+			'- TextEdit: "8" "notes.txt"',
+		]);
+	});
+
+	it("resolves a number only as that window id, and a string that is no id only to the one window it names", async () => {
+		const transport = new MemoryTransport();
+		const native = new FakeNativeSession();
+		const windows: DesktopWindow[] = [
+			windowFixture,
+			{ ...windowFixture, id: "43", title: "", focused: false },
+			{ ...windowFixture, id: "67", app: "Reminders", title: "Reminders", pid: 11, focused: false },
+			{ ...windowFixture, id: "8", app: "TextEdit", title: "notes.txt", pid: 10, focused: false },
+			{ ...windowFixture, id: "5", app: "Terminal", title: "99", pid: 12, focused: false },
+		];
+		native.listWindows = async () => windows;
+		new ComputerWorkerCore(transport, () => native);
+		const resolved = async (id: string, selector: string) => {
+			const result = await runWorker(transport, id, `return (await desktop.window(${selector})).id`);
+			if (!result.ok) throw new Error(result.error.message);
+			return { id: result.payload.returnValue, displays: result.payload.displays };
+		};
+		const refused = async (id: string, selector: string): Promise<string> => {
+			const result = await runWorker(transport, id, `await desktop.window(${selector})`);
+			if (result.ok) throw new Error(`${selector} resolved`);
+			return result.error.message;
+		};
+
+		expect(await resolved("number", "67")).toEqual({ id: "67", displays: [] });
+		expect(await resolved("id", '"8"')).toEqual({ id: "8", displays: [] });
+		expect(await resolved("id-filter", "{ id: 67 }")).toEqual({ id: "67", displays: [] });
+		// App and title of one window count once.
+		expect(await resolved("app", '"reminders"')).toEqual({
+			id: "67",
+			displays: [
+				{
+					type: "text",
+					text: '"reminders" is not a window id; it is the app of exactly one open window, so resolved to window "67" Reminders "Reminders". Pass ids as window("67"); filter with window({ app }) / window({ title }).',
+				},
+			],
+		});
+		expect((await resolved("title", '"notes.txt"')).id).toBe("8");
+		expect(await refused("ambiguous", '"Code"')).toBe(
+			[
+				'"Code" is not a window id, and 2 open windows have that app or title; pass one\'s id, or narrow with window({ app, title }):',
+				'"42" Code "Editor"',
+				'"43" Code ""',
+			].join("\n"),
+		);
+		// A number is never a name: window "5" is titled "99" and is not picked.
+		expect((await refused("unknown-number", "99")).split("\n").slice(0, 2)).toEqual([
+			'no window has id "99"; pass an id listed below, or filter with window({ app }) / window({ title }).',
+			'Open windows by app ("id" "title"; `computer.windows({ app })` lists all):',
+		]);
+		expect((await resolved("numeric-title", '"99"')).id).toBe("5");
+		expect((await refused("unknown-string", '"Contacts"')).split("\n").slice(0, 3)).toEqual([
+			'no window has id "Contacts", and no open window\'s app or title is "Contacts"; filter with window({ app }) / window({ title }), or pass an id listed below.',
+			'No open window belongs to an app matching "Contacts".',
+			'Open windows by app ("id" "title"; `computer.windows({ app })` lists all):',
+		]);
+		// A partial name ranks its app first but is never picked.
+		expect((await refused("partial", '"Remind"')).split("\n").slice(1, 3)).toEqual([
+			'Open windows by app ("id" "title"; `computer.windows({ app })` lists all):',
+			'- Reminders: "67" "Reminders"',
 		]);
 	});
 
@@ -1333,7 +1479,7 @@ describe("computer cell settlement", () => {
 		const report = await settleWorker(transport, "settle-press");
 		expect(report).toBe(
 			[
-				'window 42 Code "Editor" after press e3 — 1 changed, 1 added, 0 removed (rows marked ~ changed, + added):',
+				'window "42" Code "Editor" after press e3 — 1 changed, 1 added, 0 removed (rows marked ~ changed, + added):',
 				'- window "Editor" [ref=e6] app=Code (focused)',
 				"  - toolbar [ref=e7]",
 				'    ~ button "Done" [ref=e8] (was: button "Edit")',
@@ -1414,7 +1560,7 @@ describe("computer cell settlement", () => {
 		const report = await settleWorker(transport, "settle-stale");
 		expect(report).toBe(
 			[
-				'window 42 Code "Editor" after ref e3 failed: StaleRef: e3 expired; re-run ax()/find() — current tree:',
+				'window "42" Code "Editor" after ref e3 failed: StaleRef: e3 expired; re-run ax()/find() — current tree:',
 				'- window "Editor" [ref=e16] app=Code (focused)',
 				"  - toolbar [ref=e17]",
 				'    - button "Edit" [ref=e18]',
@@ -1436,7 +1582,7 @@ describe("computer cell settlement", () => {
 		await runWorker(transport, "root", 'await desktop.press("cmd+e")');
 		const report = String(await settleWorker(transport, "settle-root"));
 		expect(report.split("\n")[0]).toBe(
-			'window 42 Code "Editor" after desktop press cmd+e (sent without a window; shown on the focused window) — 1 changed, 1 added, 0 removed (rows marked ~ changed, + added):',
+			'window "42" Code "Editor" after desktop press cmd+e (sent without a window; shown on the focused window) — 1 changed, 1 added, 0 removed (rows marked ~ changed, + added):',
 		);
 	});
 
@@ -1515,7 +1661,7 @@ describe("computer cell settlement", () => {
 		};
 		await runWorker(transport, "open", 'await (await desktop.ref("e2")).press()');
 		const report = await settleWorker(transport, "settle-open");
-		expect(report).toMatch(/\n\nnew window 43 Code "Save" 30×12 \(focused\)$/);
+		expect(report).toMatch(/\n\nnew window "43" Code "Save" 30×12 \(focused\)$/);
 	});
 
 	it("settles only cells whose code reached the desktop, and says when a settle fails", async () => {
@@ -1529,7 +1675,7 @@ describe("computer cell settlement", () => {
 			},
 			async settle() {
 				if (fail) throw new Error("computer worker restarted; captures and ax refs were reset");
-				return { text: "window 42 after press e3 — current tree:", images: [] };
+				return { text: 'window "42" after press e3 — current tree:', images: [] };
 			},
 			async close() {},
 		}));
@@ -1545,7 +1691,7 @@ describe("computer cell settlement", () => {
 		await prelude.invoke(press, { session: toolSession(), toolCallId: "press", cell: acting });
 		expect(await prelude.settleCell?.(idle, { failed: false })).toBeUndefined();
 		expect(await prelude.settleCell?.(acting, { failed: false })).toEqual({
-			text: "window 42 after press e3 — current tree:",
+			text: 'window "42" after press e3 — current tree:',
 			images: [],
 		});
 		expect(await prelude.settleCell?.(acting, { failed: false })).toBeUndefined();
