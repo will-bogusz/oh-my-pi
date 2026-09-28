@@ -31,6 +31,7 @@ import type {
 	PointerOptions,
 } from "@oh-my-pi/pi-natives";
 
+import { EvalTool } from "@oh-my-pi/pi-coding-agent/tools/eval";
 import { cfgComputerEnabled } from "@oh-my-pi/pi-coding-agent/tools/settings";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 
@@ -762,7 +763,7 @@ describe("computer prelude", () => {
 		expect(calls).toEqual([{ action: "capabilities" }]);
 	});
 
-	it("delivers the guide once per conversation with the first acquired window", async () => {
+	it("appends the guide once per conversation to the cell of its first window lookup, hit or miss", async () => {
 		let conversation = "session-a";
 		let readActive = true;
 		const session: ToolSession = {
@@ -770,48 +771,60 @@ describe("computer prelude", () => {
 			getSessionId: () => conversation,
 			isToolActive: (name: string) => name !== "read" || readActive,
 		};
-		const window = {
-			id: "42",
-			app: "Code",
-			title: "main.ts",
-			pid: 7,
-			bounds: { x: 0, y: 0, width: 1, height: 1 },
-			focused: true,
-		};
-		let value: unknown = window;
+		let value: unknown = { id: "42", app: "Code", title: "main.ts", focused: true };
+		let failure: Error | undefined;
+		// The turn a cell belongs to, aborted while that cell's report settles.
+		let abortedWhileSettling: AbortController | undefined;
 		const prelude = createComputerPrelude(session, () => ({
 			async run() {
+				if (failure) throw failure;
 				return { displays: [], returnValue: value, screenshots: [] };
+			},
+			async settle() {
+				abortedWhileSettling?.abort();
+				return undefined;
 			},
 			async capabilities() {
 				return undefined;
 			},
 			async close() {},
 		}));
-		const reply = async (method: string): Promise<string> => {
-			const result = await prelude.invoke(
-				{ action: "call", chain: [{ method, args: method === "window" ? [{ app: "Code" }] : [] }] },
-				{ session, toolCallId: method },
-			);
-			return result.content.map(block => (block.type === "text" ? block.text : "")).join("");
+		/** Run one cell of direct calls (each `[method, …]` a chain), then settle it unless cancelled. */
+		const cell = async (chains: string[][], end: "settle" | "cancel" | "abort" = "settle") => {
+			const turn = new AbortController();
+			const current = { signal: turn.signal };
+			for (const methods of chains) {
+				const chain = methods.map(method => ({ method, args: method === "window" ? ["Reminders"] : [] }));
+				await prelude
+					.invoke({ action: "call", chain }, { session, toolCallId: methods[0]!, cell: current })
+					.catch(() => undefined);
+			}
+			if (end === "cancel") return undefined;
+			abortedWhileSettling = end === "abort" ? turn : undefined;
+			return (await prelude.settleCell?.(current, { failed: failure !== undefined }))?.text;
 		};
-		const guideHeader = "Computer guide (sent once per conversation; also at xd://eval/computer):";
+		const guide = `Computer guide (sent once per conversation; also at xd://eval/computer):\n${prelude.documentation}`;
 
-		value = null;
-		expect(await reply("focusedWindow")).toBe("");
-		expect(await reply("windows")).toBe("");
-		value = window;
-		const first = await reply("window");
-		expect(first.startsWith(guideHeader)).toBe(true);
-		expect(first).toContain(prelude.documentation);
-		expect(await reply("window")).toBe("");
+		// Other calls, and window methods on a handle, never bring it.
+		expect(await cell([["windows"], ["window", "ax"]])).toBeUndefined();
+		// A miss brings it, caught or not; later lookups do not.
+		failure = new ToolError('no window has id "Reminders"');
+		expect(await cell([["window"]])).toBe(guide);
+		expect(await cell([["window"]])).toBeUndefined();
+		failure = undefined;
+		expect(await cell([["focusedWindow"]])).toBeUndefined();
+		// A cancelled cell is never settled, and a turn aborted while settling is not answered, so the next
+		// lookup still brings it; so does a null focusedWindow().
 		conversation = "session-b";
-		expect((await reply("focusedWindow")).startsWith(guideHeader)).toBe(true);
+		value = null;
+		expect(await cell([["focusedWindow"]], "cancel")).toBeUndefined();
+		expect(await cell([["focusedWindow"]], "abort")).toBeUndefined();
+		expect(await cell([["focusedWindow"]])).toBe(guide);
 		conversation = "session-a";
-		expect(await reply("window")).toBe("");
+		expect(await cell([["window"]])).toBeUndefined();
 		conversation = "session-c";
 		readActive = false;
-		expect(await reply("window")).toBe("");
+		expect(await cell([["window"]])).toBeUndefined();
 	});
 
 	it("resolves a numeric id, and a closed window's handle never retargets, in real JavaScript and Python kernels", async () => {
@@ -872,6 +885,42 @@ describe("computer prelude", () => {
 				'    print(str(error).split("\\n")[0])',
 			]),
 		).toEqual(expected);
+	});
+
+	it("appends the guide after the first lookup's cell through the eval tool in JavaScript and Python", async () => {
+		const native = new FakeNativeSession();
+		native.listWindows = async () => [
+			windowFixture,
+			{ ...windowFixture, id: "67", app: "Reminders", title: "Reminders", pid: 11, focused: false },
+		];
+		let conversation = "js";
+		let definitions: readonly EvalPreludeDefinition[] = [];
+		const session: ToolSession = {
+			...toolSession(),
+			settings: Settings.isolated({ "computer.enabled": true, "async.enabled": false }),
+			getSessionId: () => conversation,
+			getEvalSessionId: () => `computer-guide-${conversation}`,
+			getEvalPreludes: () => definitions,
+		};
+		const prelude = createComputerPrelude(session, () => workerController(native));
+		definitions = [prelude];
+		const tool = new EvalTool(session);
+		const output = async (language: "js" | "py", code: string): Promise<string> =>
+			(await tool.execute(`guide-${language}-${crypto.randomUUID()}`, { language, code })).content
+				.map(block => (block.type === "text" ? block.text : ""))
+				.join("");
+		const guide = `Computer guide (sent once per conversation; also at xd://eval/computer):\n${prelude.documentation}`;
+
+		// A miss the cell swallows still brings it, after the cell's own output.
+		const swallowed = await output("js", 'try { await computer.window("Contacts"); } catch {} print("after");');
+		expect(swallowed).toBe(`after\n\n${guide}`);
+		expect(await output("js", "print((await computer.window(67)).title);")).toBe("Reminders");
+
+		conversation = "py";
+		const failed = await output("py", 'await computer.window("Contacts")');
+		expect(failed).toContain('no window has id "Contacts"');
+		expect(failed).toContain(guide);
+		expect(await output("py", "print((await computer.window(67)).title)")).toBe("Reminders");
 	});
 
 	it("reflects the live enabled setting", () => {

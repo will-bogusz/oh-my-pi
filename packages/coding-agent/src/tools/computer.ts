@@ -5,9 +5,14 @@ import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
 import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import { logger, once } from "@oh-my-pi/pi-utils";
 import { callSessionTool } from "../eval/js/tool-bridge";
-import type { EvalPreludeCell, EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
+import type {
+	EvalPreludeCell,
+	EvalPreludeContext,
+	EvalPreludeDefinition,
+	EvalPreludeSettleReply,
+} from "../eval/preludes";
 import computerUsePrompt from "../prompts/system/computer-use.md" with { type: "text" };
-import { DEFAULT_MAX_BYTES, enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
+import { enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { type ComputerCallStep, isReadOnlyComputerCall, renderComputerCall } from "./computer/call";
 import type { ComputerScreenshot, ComputerSessionSnapshot } from "./computer/protocol";
 import { type ComputerController, ComputerSupervisor, registerComputerController } from "./computer/supervisor";
@@ -33,7 +38,7 @@ import {
 const COORDINATE_SAFE_MAX_CAPTURE_WIDTH = 1280;
 /** How the eval description tells the model the guide reaches it without a `read`. */
 const GUIDE_DELIVERY =
-	"arrives unasked, once, with this conversation's first successful `computer.window(…)`/`computer.focusedWindow()` reply; read it only if that reply has left your context";
+	"arrives unasked, once, after the output of the Eval cell that makes this conversation's first direct `computer.window(…)`/`computer.focusedWindow()` call, hit or miss; read it only if that output has left your context";
 const COORDINATE_SAFE_MAX_CAPTURE_HEIGHT = 896;
 
 function usesCoordinateSafeImageSizing(model: Model | undefined): boolean {
@@ -143,8 +148,28 @@ export function createComputerPrelude(
 		taught.add(conversation);
 		return `Computer guide (sent once per conversation; also at xd://eval/computer):\n${computerPreludeAssets.documentation}`;
 	};
+	/** The post-input report of a cell that reached the desktop. */
+	const settleReport = async (cell: EvalPreludeCell): Promise<EvalPreludeSettleReply | undefined> => {
+		if (closed || !controller.settle) return undefined;
+		try {
+			return await controller.settle(buildComputerSnapshot(session, true), cell.signal);
+		} catch (error) {
+			// Cancellation of the turn needs no report; anything else leaves the
+			// model without its post-input observation, so it is told to look.
+			if (cell.signal.aborted) return undefined;
+			const message = error instanceof Error ? error.message : String(error);
+			logger.debug("Computer cell settle failed", { error: message });
+			return {
+				text: `No post-input report for this cell (${message}); read the windows it touched before continuing.`,
+			};
+		}
+	};
 	// Cells whose code reached the desktop; only these are settled.
 	const cells = new WeakSet<EvalPreludeCell>();
+	// Cells that looked a window up directly: the conversation's first to settle
+	// carries the guide after its output, whether the lookup hit, missed or was
+	// caught, so the next call is not a guess.
+	const lookups = new WeakSet<EvalPreludeCell>();
 	const lifetime: ComputerLifetime = {
 		isClosed: () => closed,
 		close: async () => {
@@ -171,25 +196,24 @@ export function createComputerPrelude(
 			if (parsed instanceof type.errors) {
 				throw new ToolError(`computer received invalid arguments: ${parsed.summary}`);
 			}
-			if (context.cell && (parsed.action === "run" || parsed.action === "call")) cells.add(context.cell);
-			return await invokeComputer(session, controller, parsed, context, lifetime, teachGuide);
+			if (context.cell && (parsed.action === "run" || parsed.action === "call")) {
+				cells.add(context.cell);
+				const [first, ...rest] = parsed.action === "call" ? parsed.chain : [];
+				if (rest.length === 0 && (first?.method === "window" || first?.method === "focusedWindow")) {
+					lookups.add(context.cell);
+				}
+			}
+			return await invokeComputer(session, controller, parsed, context, lifetime);
 		},
 		status: describeComputerCall,
 		settleCell: async cell => {
-			if (!cells.has(cell) || closed || !controller.settle) return undefined;
+			if (!cells.has(cell)) return undefined;
 			cells.delete(cell);
-			try {
-				return await controller.settle(buildComputerSnapshot(session, true), cell.signal);
-			} catch (error) {
-				// Cancellation of the turn needs no report; anything else leaves the
-				// model without its post-input observation, so it is told to look.
-				if (cell.signal.aborted) return undefined;
-				const message = error instanceof Error ? error.message : String(error);
-				logger.debug("Computer cell settle failed", { error: message });
-				return {
-					text: `No post-input report for this cell (${message}); read the windows it touched before continuing.`,
-				};
-			}
+			const report = await settleReport(cell);
+			// Taught only once the turn will carry it.
+			const guide = lookups.has(cell) && !cell.signal.aborted ? teachGuide() : undefined;
+			if (guide === undefined) return report;
+			return { text: report?.text ? `${guide}\n\n${report.text}` : guide, images: report?.images };
 		},
 	};
 }
@@ -220,7 +244,6 @@ async function invokeComputer(
 	params: ComputerParams,
 	context: EvalPreludeContext,
 	lifetime: ComputerLifetime,
-	teachGuide: () => string | undefined,
 ): Promise<AgentToolResult<unknown>> {
 	throwIfAborted(context.signal);
 
@@ -228,7 +251,7 @@ async function invokeComputer(
 		case "run":
 		case "call":
 			if (lifetime.isClosed()) throw new ToolError("Computer session is closed");
-			return await runComputer(session, controller, params, teachGuide, context.signal);
+			return await runComputer(session, controller, params, context.signal);
 		case "capabilities": {
 			const capabilities = lifetime.isClosed()
 				? undefined
@@ -292,7 +315,6 @@ async function runComputer(
 	session: ToolSession,
 	controller: ComputerController,
 	params: ComputerRunParams | ComputerCallParams,
-	teachGuide: () => string | undefined,
 	signal?: AbortSignal,
 ): Promise<AgentToolResult<unknown>> {
 	const code = resolveComputerRunCode(params);
@@ -315,26 +337,11 @@ async function runComputer(
 		.filter((content): content is { type: "text"; text: string } => content.type === "text")
 		.map(content => content.text)
 		.join("\n");
-	// The guide rides the conversation's first window acquisition, the call a
-	// desktop task starts with, instead of costing a `read` call before it.
-	const acquired =
-		params.action === "call" &&
-		params.chain.length === 1 &&
-		(params.chain[0]!.method === "window" || params.chain[0]!.method === "focusedWindow") &&
-		run.returnValue !== null &&
-		run.returnValue !== undefined;
-	const guide = acquired ? teachGuide() : undefined;
 	const cappedText = await enforceInlineByteCap(text, {
-		// The guide shares the reply's cap; the rest keeps at least a quarter of it.
-		maxBytes: Math.max(
-			DEFAULT_MAX_BYTES / 4,
-			DEFAULT_MAX_BYTES - (guide === undefined ? 0 : Buffer.byteLength(guide, "utf-8")),
-		),
 		saveArtifact: full => saveComputerOutputArtifact(session, full),
 	});
-	const replyText = [guide, cappedText].filter(Boolean).join("\n\n");
 	const content: AgentToolResult<ComputerPreludeDetails>["content"] = [];
-	if (replyText) content.push({ type: "text", text: replyText });
+	if (cappedText) content.push({ type: "text", text: cappedText });
 	for (const image of run.displays) {
 		if (image.type === "image") content.push({ ...image, detail: "original" });
 	}
