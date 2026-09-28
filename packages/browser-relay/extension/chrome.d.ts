@@ -116,11 +116,11 @@ declare const chrome: {
 		local: {
 			get(keys: Record<string, unknown>): Promise<Record<string, unknown>>;
 			set(items: Record<string, unknown>): Promise<void>;
+			remove(keys: string | string[]): Promise<void>;
 		};
 		session: {
 			get(keys: Record<string, unknown>): Promise<Record<string, unknown>>;
 			set(items: Record<string, unknown>): Promise<void>;
-			remove(keys: string | string[]): Promise<void>;
 		};
 		onChanged: ChromeEvent<(changes: Record<string, unknown>, areaName: string) => void>;
 	};

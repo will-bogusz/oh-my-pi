@@ -2123,101 +2123,138 @@ it("gives Chrome its debugger back on explicit detach and on worker unload, in t
 });
 
 /**
- * Build skew is the relay's to announce and the extension's to fix: a worker
- * whose RPC contract no longer matches the relay is worse than no worker, and
- * the files on disk are usually already the new ones.
+ * Build skew is the relay's to announce and the extension's to fix when a
+ * reload can fix it. Chrome semantics the loop guard has to survive: a reload
+ * boots the installed files afresh and clears session storage; local storage
+ * persists; Chrome kills an unpacked extension after about 30 fast reloads.
  */
-it("reloads the built extension worker once for an expected build it is not running", async () => {
-	const session: Record<string, unknown> = {};
+describe("built extension reload on build skew", () => {
+	const committedWorker = Bun.file(
+		new URL("../../src/tools/browser/relay/extension-assets/background.js.txt", import.meta.url),
+	).text();
+	const worker = async (build: string): Promise<string> =>
+		(await committedWorker).replaceAll(EXPECTED_EXTENSION_BUILD_ID, build);
 	const event = () => ({ addListener: () => {} });
-	const boot = async (expectedBuildId: string): Promise<{ sent: string[]; reloads: number }> => {
-		const sent: string[] = [];
+
+	/**
+	 * Boots `running`, then the installed files after every reload, against a
+	 * relay that answers each handshake with `expectedBuildId`, until a worker
+	 * says hello or Chrome would have terminated the extension.
+	 */
+	async function runChrome(options: {
+		running: string;
+		installed: { worker: string; buildId: string };
+		expectedBuildId: string;
+	}): Promise<{ reloads: number; hello?: string }> {
+		const local: Record<string, unknown> = {};
 		let reloads = 0;
-		class ExtensionSocket {
-			static OPEN = 1;
-			static CONNECTING = 0;
-			readyState = 1;
-			onmessage?: (event: { data: string }) => void;
-			onopen?: () => void;
-			send(text: string): void {
-				const message = JSON.parse(text) as { t: string };
-				sent.push(message.t);
-				if (message.t === "authenticate")
-					this.onmessage?.({ data: JSON.stringify({ t: "authenticated", expectedBuildId }) });
+		for (let boot = 0; boot <= 30; boot++) {
+			const session: Record<string, unknown> = {};
+			let reloaded = false;
+			let hello: string | undefined;
+			class ExtensionSocket {
+				static OPEN = 1;
+				static CONNECTING = 0;
+				readyState = 1;
+				onmessage?: (event: { data: string }) => void;
+				onopen?: () => void;
+				send(text: string): void {
+					// The worker under test is the only sender; its messages are the protocol's.
+					const message: { t: string; extensionBuildId?: string } = JSON.parse(text);
+					if (message.t === "hello") hello = message.extensionBuildId;
+					if (message.t === "authenticate")
+						this.onmessage?.({ data: JSON.stringify({ t: "authenticated", expectedBuildId: options.expectedBuildId }) });
+				}
+				close(): void {}
+				constructor() {
+					queueMicrotask(() => this.onopen?.());
+				}
 			}
-			close(): void {}
-			constructor() {
-				queueMicrotask(() => this.onopen?.());
-			}
+			const storageArea = (store: Record<string, unknown>) => ({
+				get: async (defaults: Record<string, unknown>) => ({ ...defaults, ...store }),
+				set: async (values: Record<string, unknown>) => {
+					Object.assign(store, values);
+				},
+				remove: async (key: string) => {
+					delete store[key];
+				},
+			});
+			const context = createContext({
+				AbortSignal,
+				Response,
+				crypto,
+				navigator: { userAgent: "Chrome/151.0.0.0" },
+				WebSocket: ExtensionSocket,
+				setTimeout: () => 0,
+				clearTimeout: () => {},
+				setInterval: () => 0,
+				clearInterval: () => {},
+				fetch: async (url: string) =>
+					Response.json(
+						url.endsWith("connection.json")
+							? { port: 19443 }
+							: url.endsWith("build-info.json")
+								? { buildId: options.installed.buildId }
+								: { service: "omp-browser", protocol: 2 },
+					),
+				chrome: {
+					runtime: {
+						getURL: (name: string) => `chrome-extension://fixture/${name}`,
+						reload: () => {
+							reloaded = true;
+						},
+						onInstalled: event(),
+						onStartup: event(),
+						onMessage: event(),
+						onSuspend: event(),
+					},
+					storage: { local: storageArea(local), session: storageArea(session) },
+					action: { setBadgeText: async () => {}, setBadgeBackgroundColor: async () => {}, onClicked: event() },
+					alarms: { create: () => {}, onAlarm: event() },
+					debugger: { getTargets: async () => [], onEvent: event(), onDetach: event() },
+					downloads: { onCreated: event(), onChanged: event() },
+					tabs: {
+						query: async () => [{ id: 1, ...tab({ tabId: 1 }) }],
+						onCreated: event(),
+						onUpdated: event(),
+						onRemoved: event(),
+						onReplaced: event(),
+						onActivated: event(),
+					},
+				},
+			});
+			runInContext(boot === 0 ? options.running : options.installed.worker, context);
+			for (let tick = 0; tick < 200 && !reloaded && hello === undefined; tick++) await Promise.resolve();
+			if (!reloaded) return { reloads, hello };
+			reloads++;
 		}
-		const context = createContext({
-			AbortSignal,
-			Response,
-			crypto,
-			navigator: { userAgent: "Chrome/151.0.0.0" },
-			WebSocket: ExtensionSocket,
-			setTimeout: () => 0,
-			clearTimeout: () => {},
-			setInterval: () => 0,
-			clearInterval: () => {},
-			fetch: async (url: string) =>
-				Response.json(url.endsWith("connection.json") ? { port: 19443 } : { service: "omp-browser", protocol: 2 }),
-			chrome: {
-				runtime: {
-					getURL: (name: string) => `chrome-extension://fixture/${name}`,
-					reload: () => {
-						reloads++;
-					},
-					onInstalled: event(),
-					onStartup: event(),
-					onMessage: event(),
-					onSuspend: event(),
-				},
-				storage: {
-					local: { get: async (defaults: object) => defaults, set: async () => {} },
-					session: {
-						get: async (defaults: Record<string, unknown>) => ({ ...defaults, ...session }),
-						set: async (values: Record<string, unknown>) => {
-							Object.assign(session, values);
-						},
-						remove: async (key: string) => {
-							delete session[key];
-						},
-					},
-				},
-				action: { setBadgeText: async () => {}, setBadgeBackgroundColor: async () => {}, onClicked: event() },
-				alarms: { create: () => {}, onAlarm: event() },
-				debugger: { getTargets: async () => [], onEvent: event(), onDetach: event() },
-				downloads: { onCreated: event(), onChanged: event() },
-				tabs: {
-					query: async () => [{ id: 1, ...tab({ tabId: 1 }) }],
-					onCreated: event(),
-					onUpdated: event(),
-					onRemoved: event(),
-					onReplaced: event(),
-					onActivated: event(),
-				},
-			},
+		return { reloads };
+	}
+
+	const foreign = "0".repeat(64);
+
+	it("stays connected, without reloading, to a relay expecting a build the installed files are not", async () => {
+		const installed = { worker: await worker(EXPECTED_EXTENSION_BUILD_ID), buildId: EXPECTED_EXTENSION_BUILD_ID };
+		expect(await runChrome({ running: installed.worker, installed, expectedBuildId: foreign })).toEqual({
+			reloads: 0,
+			hello: EXPECTED_EXTENSION_BUILD_ID,
 		});
-		runInContext(
-			await Bun.file(
-				new URL("../../src/tools/browser/relay/extension-assets/background.js.txt", import.meta.url),
-			).text(),
-			context,
-		);
-		for (let tick = 0; tick < 200 && reloads === 0 && !sent.includes("hello"); tick++) await Promise.resolve();
-		return { sent, reloads };
-	};
-	const stale = "0".repeat(64);
-	const skewed = await boot(stale);
-	// Nothing is reported to a relay this worker cannot serve correctly.
-	expect(skewed).toEqual({ reloads: 1, sent: ["authenticate"] });
-	expect(session).toEqual({ reloadedFor: stale });
-	// A stale install directory reloads to the same build; reloading again loops.
-	expect(await boot(stale)).toMatchObject({ reloads: 0, sent: ["authenticate", "hello"] });
-	// The committed worker is the build the relay ships, so parity clears the guard.
-	expect(await boot(EXPECTED_EXTENSION_BUILD_ID)).toMatchObject({ reloads: 0 });
-	expect(session).toEqual({});
+	});
+
+	it("reloads a stale worker once onto installed files that are the expected build", async () => {
+		const installed = { worker: await worker(EXPECTED_EXTENSION_BUILD_ID), buildId: EXPECTED_EXTENSION_BUILD_ID };
+		expect(
+			await runChrome({ running: await worker(foreign), installed, expectedBuildId: EXPECTED_EXTENSION_BUILD_ID }),
+		).toEqual({ reloads: 1, hello: EXPECTED_EXTENSION_BUILD_ID });
+	});
+
+	it("reloads at most once for an expected build even when the reload does not reach it", async () => {
+		// Files that claim the expected build while the worker they load is another.
+		const installed = { worker: await worker(foreign), buildId: EXPECTED_EXTENSION_BUILD_ID };
+		expect(
+			await runChrome({ running: installed.worker, installed, expectedBuildId: EXPECTED_EXTENSION_BUILD_ID }),
+		).toEqual({ reloads: 1, hello: foreign });
+	});
 });
 
 describe("RelayBridge lease presentation", () => {

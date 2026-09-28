@@ -151,30 +151,43 @@ async function setBadge(connected: boolean): Promise<void> {
 
 /** Identity of the executing worker; absent only in an unbuilt (source-loaded) extension. */
 const buildId: string | undefined = typeof __OMP_EXTENSION_BUILD_ID__ === "string" ? __OMP_EXTENSION_BUILD_ID__ : undefined;
-/** Session-scoped guard: which expected build this worker already reloaded for. */
-const RELOAD_GUARD_KEY = "reloadedFor";
+/**
+ * Which expected build this extension already reloaded for. Local storage,
+ * because the reload it guards clears session storage.
+ */
+const RELOAD_GUARD_KEY = "reloadedForBuild";
+
+/** Build of the files a reload would load, as opposed to the executing worker's. */
+async function installedBuildId(): Promise<string | undefined> {
+	const response = await fetch(chrome.runtime.getURL("build-info.json"), { cache: "no-store" });
+	const info = (await response.json()) as { buildId?: unknown };
+	return typeof info.buildId === "string" ? info.buildId : undefined;
+}
 
 /**
  * A relay built against another extension build cannot drive this worker
- * correctly — the RPC contract moved under it — and the files on disk are
- * usually already the new ones, so reloading picks them up without the user
- * visiting chrome://extensions. Once per expected build: a stale install
- * directory reloads to the same old id, and repeating that is a loop.
- * Returns true when a reload was started; the caller must then stop.
+ * correctly — the RPC contract moved under it. When the installed files are
+ * already that build, only the executing worker is stale, and reloading picks
+ * them up without the user visiting chrome://extensions. Any other skew
+ * (another tree's relay on the port, files not yet reinstalled) reloads back
+ * to the same worker, so it stays connected and the relay reports the skew.
+ * At most once per expected build even so, in case Chrome keeps loading
+ * something else. Returns true when a reload was started; the caller must then stop.
  */
 async function reloadForBuildSkew(expected: string | undefined): Promise<boolean> {
 	if (!expected) return false;
 	try {
 		if (expected === buildId) {
 			// Parity restored: a later skew to this id deserves its own reload.
-			await chrome.storage.session.remove(RELOAD_GUARD_KEY);
+			await chrome.storage.local.remove(RELOAD_GUARD_KEY);
 			return false;
 		}
-		const stored = await chrome.storage.session.get({ [RELOAD_GUARD_KEY]: "" });
+		if ((await installedBuildId()) !== expected) return false;
+		const stored = await chrome.storage.local.get({ [RELOAD_GUARD_KEY]: "" });
 		if (stored[RELOAD_GUARD_KEY] === expected) return false;
-		await chrome.storage.session.set({ [RELOAD_GUARD_KEY]: expected });
+		await chrome.storage.local.set({ [RELOAD_GUARD_KEY]: expected });
 	} catch {
-		// Session storage is the only loop guard there is; without it, never reload.
+		// Without the installed build or the guard, a reload could loop; stay put.
 		return false;
 	}
 	chrome.runtime.reload();

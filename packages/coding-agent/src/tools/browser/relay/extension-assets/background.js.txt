@@ -942,20 +942,27 @@ async function setBadge(connected) {
     await chrome.action.setBadgeBackgroundColor({ color: connected ? "#1a7f37" : "#8b8b8b" });
   } catch {}
 }
-var buildId = "beddfe1c0c9b3052fe87da6a76db36872249fc1ec07188b886e42dc406967e79";
-var RELOAD_GUARD_KEY = "reloadedFor";
+var buildId = "f1a08162f4e7a7d97a93ca10e183b4ee8f261e4ac9f6dcddb667d0ccf0e4f28d";
+var RELOAD_GUARD_KEY = "reloadedForBuild";
+async function installedBuildId() {
+  const response = await fetch(chrome.runtime.getURL("build-info.json"), { cache: "no-store" });
+  const info = await response.json();
+  return typeof info.buildId === "string" ? info.buildId : undefined;
+}
 async function reloadForBuildSkew(expected) {
   if (!expected)
     return false;
   try {
     if (expected === buildId) {
-      await chrome.storage.session.remove(RELOAD_GUARD_KEY);
+      await chrome.storage.local.remove(RELOAD_GUARD_KEY);
       return false;
     }
-    const stored = await chrome.storage.session.get({ [RELOAD_GUARD_KEY]: "" });
+    if (await installedBuildId() !== expected)
+      return false;
+    const stored = await chrome.storage.local.get({ [RELOAD_GUARD_KEY]: "" });
     if (stored[RELOAD_GUARD_KEY] === expected)
       return false;
-    await chrome.storage.session.set({ [RELOAD_GUARD_KEY]: expected });
+    await chrome.storage.local.set({ [RELOAD_GUARD_KEY]: expected });
   } catch {
     return false;
   }

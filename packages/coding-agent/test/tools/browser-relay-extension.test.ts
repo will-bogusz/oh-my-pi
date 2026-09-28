@@ -1,4 +1,5 @@
 import { expect, it, spyOn } from "bun:test";
+import { readFileSync, writeFileSync } from "node:fs";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -15,6 +16,7 @@ import {
 import * as relayAccess from "@oh-my-pi/pi-coding-agent/tools/browser/relay/access";
 import * as daemon from "@oh-my-pi/pi-coding-agent/tools/browser/relay/daemon";
 import type { InstanceTab } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
+import { RELAY_PROTOCOL_VERSION, RELAY_SERVICE_NAME } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
 import { startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
 import { clickNode } from "@oh-my-pi/pi-coding-agent/tools/browser/cdp";
 import { withBackgroundInput } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
@@ -1536,4 +1538,124 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 		}
 	},
 	90_000,
+);
+
+interface BuildSkewMessage {
+	t: string;
+	extensionBuildId?: string;
+}
+
+/**
+ * Runs the installed extension against a relay that answers every handshake
+ * with `expected`. `onFirstAuthenticate` runs before the first answer, after
+ * the worker has started from the installed files. Returns how many workers
+ * dialed and the builds of those that sent a hello.
+ */
+async function runBuildSkew(
+	expected: string,
+	onFirstAuthenticate: (extension: string, installedBuild: string) => void,
+): Promise<{ installedBuild: string; authenticates: number; hellos: string[] }> {
+	let authenticates = 0;
+	const hellos: string[] = [];
+	const root = await mkdtemp(path.join(tmpdir(), "omp-extension-skew-"));
+	const extension = path.join(root, "extension");
+	let installedBuild = "";
+	const relay = Bun.serve({
+		hostname: "127.0.0.1",
+		port: 0,
+		fetch: (request, server) => {
+			const route = new URL(request.url).pathname;
+			if (route === "/health") return Response.json({ service: RELAY_SERVICE_NAME, protocol: RELAY_PROTOCOL_VERSION });
+			if (route === "/ext" && server.upgrade(request, { data: undefined })) return undefined;
+			return new Response("Not found", { status: 404 });
+		},
+		websocket: {
+			message: (socket, raw) => {
+				// The extension under test is the only peer; its messages are the protocol's.
+				const message: BuildSkewMessage = JSON.parse(String(raw));
+				if (message.t === "authenticate") {
+					if (authenticates++ === 0) onFirstAuthenticate(extension, installedBuild);
+					socket.send(JSON.stringify({ t: "authenticated", expectedBuildId: expected }));
+				} else if (message.t === "hello") hellos.push(message.extensionBuildId ?? "");
+			},
+		},
+	});
+	let browser: Browser | undefined;
+	try {
+		if (!relay.port) throw new Error("Relay did not bind a port");
+		await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
+		const buildInfo: { buildId: string } = await Bun.file(path.join(extension, "build-info.json")).json();
+		installedBuild = buildInfo.buildId;
+		browser = await puppeteer.launch({
+			executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+			headless: true,
+			pipe: true,
+			enableExtensions: true,
+			args: ["--use-mock-keychain", "--password-store=basic"],
+			userDataDir: path.join(root, "profile"),
+		});
+		// An unpacked extension that reloads outside Developer mode comes back disabled.
+		const extensionsPage = await browser.newPage();
+		await extensionsPage.goto("chrome://extensions");
+		const developerMode = await extensionsPage.waitForSelector("pierce/#devMode");
+		await developerMode?.click();
+		await extensionsPage.waitForFunction(toggle => toggle.hasAttribute("checked"), {}, developerMode);
+		await extensionsPage.close();
+		await browser.installExtension(extension);
+		for (let i = 0; i < 400 && hellos.length === 0; i++) await Bun.sleep(25);
+		// Real Chrome decides when a reloaded worker dials again (about 100 ms
+		// into a loop); only a real-time window can show that no loop follows.
+		await Bun.sleep(3_000);
+		return { installedBuild, authenticates, hellos };
+	} finally {
+		await browser?.close();
+		relay.stop(true);
+		await rm(root, { recursive: true, force: true });
+	}
+}
+
+const expectedBuild = "0".repeat(64);
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"stays connected, without reloading, to a relay that expects a build its installed files are not",
+	async () => {
+		const run = await runBuildSkew(expectedBuild, () => {});
+		expect({ authenticates: run.authenticates, hellos: run.hellos }).toEqual({
+			authenticates: 1,
+			hellos: [run.installedBuild],
+		});
+	},
+	30_000,
+);
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"reloads a stale worker once onto installed files that are the expected build",
+	async () => {
+		const run = await runBuildSkew(expectedBuild, (extension, installedBuild) => {
+			// A reinstall under the running worker: new code, stamped with the build the relay expects.
+			const background = path.join(extension, "background.js");
+			writeFileSync(background, readFileSync(background, "utf8").replaceAll(installedBuild, expectedBuild));
+			writeFileSync(path.join(extension, "build-info.json"), `${JSON.stringify({ buildId: expectedBuild })}\n`);
+		});
+		expect({ authenticates: run.authenticates, hellos: run.hellos }).toEqual({
+			authenticates: 2,
+			hellos: [expectedBuild],
+		});
+	},
+	30_000,
+);
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"reloads at most once for an expected build even when the reload does not reach it",
+	async () => {
+		const run = await runBuildSkew(expectedBuild, extension => {
+			// Files that claim the expected build while the worker they load is still the installed one.
+			writeFileSync(path.join(extension, "build-info.json"), `${JSON.stringify({ buildId: expectedBuild })}\n`);
+		});
+		expect({ authenticates: run.authenticates, hellos: run.hellos }).toEqual({
+			authenticates: 2,
+			hellos: [run.installedBuild],
+		});
+	},
+	30_000,
 );
