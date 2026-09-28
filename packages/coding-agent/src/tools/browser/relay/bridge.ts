@@ -100,6 +100,8 @@ class CdpConnection {
 	autoAttach = false;
 	/** Minted pseudo-sessions owned by this connection. */
 	readonly sessions = new Map<string, SessionRef>();
+	/** Real child sessions (OOPIF, worker) this connection has been told about: each is announced once. */
+	readonly announced = new Set<string>();
 
 	constructor(
 		readonly id: number,
@@ -263,8 +265,17 @@ class TabState {
 	 * dialog/download/lifecycle events stop silently.
 	 */
 	readonly rootEnabled = new Map<string, Record<string, unknown> | undefined>();
-	/** Real Chrome session ids (OOPIF/worker children) living under this tab's root session. */
-	readonly realSessions = new Set<string>();
+	/**
+	 * Real Chrome child sessions (OOPIF/worker) under this tab's attachment,
+	 * keyed by session id: the session that reported each (none = the root),
+	 * and its `Target.attachedToTarget` params with the latest target info.
+	 * Chrome reports a child once, to the first auto-attach armed over it; a
+	 * second driver arming later gets it from here.
+	 */
+	readonly realSessions = new Map<
+		string,
+		{ parent: string | undefined; targetId: unknown; event: Record<string, unknown> }
+	>();
 	/** Live execution contexts from the shared root debugger session. */
 	readonly runtimeContexts = new Map<number, Record<string, unknown>>();
 	/** Whether the shared root Runtime domain has been enabled by the bridge. */
@@ -1038,6 +1049,10 @@ export class RelayBridge {
 			if (arrival) await arrival;
 			try {
 				const result = await this.#sendToTab(tab, msg.method, msg.params, realSessionId);
+				// Before the reply, as Chrome does: puppeteer counts the children
+				// attached before its setAutoAttach resolves.
+				if (msg.method === "Target.setAutoAttach" && msg.params?.autoAttach === true && msg.sessionId)
+					this.#announceChildren(conn, tab, realSessionId, msg.sessionId);
 				this.#reply(conn, msg, (result as Record<string, unknown> | undefined) ?? {});
 			} catch (err) {
 				this.#replyError(conn, msg, err instanceof Error ? err.message : String(err));
@@ -1054,6 +1069,24 @@ export class RelayBridge {
 		const queued = tab.mouseTail.then(send, send);
 		tab.mouseTail = queued;
 		await queued;
+	}
+
+	/**
+	 * Chrome reports a child target once, to the first auto-attach armed over
+	 * it: on this relay that is often another connection, or the bridge's own
+	 * replay after a reattach before any driver is back, and arming again
+	 * reports nothing. So a connection arming auto-attach on `parent` (the
+	 * root when undefined) is told here of every child already reported
+	 * under it that it has not heard of — the cross-site frames of a tab
+	 * claimed after they loaded, or of a tab reattached after Chrome dropped
+	 * the debugger.
+	 */
+	#announceChildren(conn: CdpConnection, tab: TabState, parent: string | undefined, sessionId: string): void {
+		for (const [child, known] of tab.realSessions) {
+			if (known.parent !== parent || conn.announced.has(child)) continue;
+			conn.announced.add(child);
+			conn.socket.send(JSON.stringify({ sessionId, method: "Target.attachedToTarget", params: known.event }));
+		}
 	}
 
 	/**
@@ -1276,26 +1309,34 @@ export class RelayBridge {
 		// Whichever session saw it, a download belongs to this tab.
 		if (method === "Page.downloadWillBegin") this.#instances.get(tab.instanceId)?.downloads.began(tabKey, params);
 		else if (method === "Page.downloadProgress") this.#instances.get(tab.instanceId)?.downloads.progressed(params);
-		// Track real child sessions so downstream commands can route back.
-		if (method === "Target.attachedToTarget") {
-			const child = params?.sessionId;
-			if (typeof child === "string") {
-				tab.realSessions.add(child);
-				this.#realSessionTabs.set(child, tabKey);
-			}
-		} else if (method === "Target.detachedFromTarget") {
-			const child = params?.sessionId;
-			if (typeof child === "string") {
-				tab.realSessions.delete(child);
-				this.#realSessionTabs.delete(child);
-			}
+		// Track real child sessions so downstream commands can route back, and
+		// so a driver arming auto-attach later still hears of them (#announceChildren).
+		const child = typeof params?.sessionId === "string" ? params.sessionId : undefined;
+		const info = params?.targetInfo;
+		const targetId = info && typeof info === "object" && "targetId" in info ? info.targetId : undefined;
+		const attached = method === "Target.attachedToTarget" ? child : undefined;
+		if (attached !== undefined && params) {
+			tab.realSessions.set(attached, { parent: sourceSessionId, targetId, event: params });
+			this.#realSessionTabs.set(attached, tabKey);
+		} else if (method === "Target.detachedFromTarget" && child !== undefined) {
+			tab.realSessions.delete(child);
+			this.#realSessionTabs.delete(child);
+			for (const conn of this.#conns.values()) conn.announced.delete(child);
+		} else if (method === "Target.targetInfoChanged" && targetId !== undefined) {
+			for (const known of tab.realSessions.values())
+				if (known.targetId === targetId) known.event = { ...known.event, targetInfo: info };
 		}
 		if (sourceSessionId) {
 			// Event from a real child session: pass through verbatim to every
 			// connection that was told about the child.
 			const payload = JSON.stringify({ sessionId: sourceSessionId, method, params });
 			for (const conn of this.#conns.values()) {
-				if (conn.autoAttachSessionsForTab(tabKey).length > 0) conn.socket.send(payload);
+				if (conn.autoAttachSessionsForTab(tabKey).length === 0) continue;
+				if (attached !== undefined) {
+					if (conn.announced.has(attached)) continue;
+					conn.announced.add(attached);
+				}
+				conn.socket.send(payload);
 			}
 			return;
 		}
@@ -1337,11 +1378,13 @@ export class RelayBridge {
 		// child attach/detach goes only to sessions that armed auto-attach.
 		const childEvent = method === "Target.attachedToTarget" || method === "Target.detachedFromTarget";
 		for (const conn of this.#conns.values()) {
-			for (const pageSession of childEvent
-				? conn.autoAttachSessionsForTab(tabKey)
-				: conn.sessionsForTab(tabKey, "page")) {
-				conn.socket.send(JSON.stringify({ sessionId: pageSession, method, params }));
+			const sessions = childEvent ? conn.autoAttachSessionsForTab(tabKey) : conn.sessionsForTab(tabKey, "page");
+			if (attached !== undefined && sessions.length > 0) {
+				if (conn.announced.has(attached)) continue;
+				conn.announced.add(attached);
 			}
+			for (const pageSession of sessions)
+				conn.socket.send(JSON.stringify({ sessionId: pageSession, method, params }));
 		}
 	}
 
@@ -1610,8 +1653,9 @@ export class RelayBridge {
 
 	/** Tear a tab out of every downstream connection (closed, detached, or now ineligible). */
 	#retractTab(tab: TabState): void {
-		for (const realSession of tab.realSessions) this.#realSessionTabs.delete(realSession);
-		tab.realSessions.clear();
+		for (const [realSession, tabKey] of this.#realSessionTabs)
+			if (tabKey === tab.tabKey) this.#realSessionTabs.delete(realSession);
+		this.#forgetChildren(tab);
 		for (const conn of this.#conns.values()) {
 			const tabSessions = conn.sessionsForTab(tab.tabKey, "tab");
 			for (const pageSession of conn.sessionsForTab(tab.tabKey, "page")) {
@@ -1636,6 +1680,13 @@ export class RelayBridge {
 			}
 		}
 		tab.announced = false;
+	}
+
+	/** No child of this tab is replayed any more, and a fresh report of one is announced again. */
+	#forgetChildren(tab: TabState): void {
+		for (const conn of this.#conns.values())
+			for (const child of tab.realSessions.keys()) conn.announced.delete(child);
+		tab.realSessions.clear();
 	}
 
 	// ---- session + attach bookkeeping --------------------------------------------
@@ -1737,6 +1788,8 @@ export class RelayBridge {
 		tab.rootRuntimeEnabled = false;
 		tab.rootRuntimeEnabling = null;
 		tab.runtimeGeneration++;
+		// Chrome drops the child sessions with the attachment; a reattach reports fresh ones.
+		this.#forgetChildren(tab);
 		for (const conn of this.#conns.values()) {
 			for (const [pageSession, ref] of conn.sessions) {
 				if (ref.kind !== "page" || ref.tabKey !== tab.tabKey) continue;
