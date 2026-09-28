@@ -725,6 +725,8 @@ export class RelayBridge {
 			if (tab.instanceId !== inst.instanceId) continue;
 			const wasAttached = tab.attached;
 			tab.attached = attachedNow.has(tab.tabId);
+			// Children outlive a socket swap only on an attachment Chrome still holds.
+			if (!tab.attached) this.#forgetChildren(tab);
 			tab.attaching = null;
 			// A service-worker restart can drop attachments while downstream
 			// connections still hold sessions: restore them best-effort.
@@ -1052,6 +1054,11 @@ export class RelayBridge {
 				this.#replyError(conn, msg, `No session with given id: ${release}`);
 				return;
 			}
+			// The frames nested in it go with it for this connection.
+			const nested = [release];
+			for (let parent = nested.pop(); parent !== undefined; parent = nested.pop())
+				for (const [child, known] of tab.realSessions)
+					if (known.parent === parent && conn.announced.delete(child)) nested.push(child);
 			if ([...this.#conns.values()].some(other => other.announced.has(release))) {
 				this.#emit(conn, "Target.detachedFromTarget", { sessionId: release, targetId: shared.targetId }, msg.sessionId);
 				this.#reply(conn, msg, {});
@@ -1432,6 +1439,7 @@ export class RelayBridge {
 		tab.attached = false;
 		tab.attaching = null;
 		this.#resetRuntime(tab);
+		this.#forgetChildren(tab);
 		tab.banned = true;
 		tab.banReason = describeDetach(reason);
 		tab.canceledByUser = reason === "canceled_by_user";
@@ -1622,6 +1630,8 @@ export class RelayBridge {
 		tab.attached = false;
 		this.#touchTab(tab);
 		this.#resetRuntime(tab);
+		// Chrome drops the child sessions with the attachment; a reattach reports fresh ones.
+		this.#forgetChildren(tab);
 		tab.reattachedAfterDetach = false;
 		const done = this.#restoreAutofill(tab)
 			.then(() => this.#rpc({ op: "detach", tabId: tab.tabId }, this.#instanceFor(tab)))
@@ -1808,8 +1818,6 @@ export class RelayBridge {
 		tab.rootRuntimeEnabled = false;
 		tab.rootRuntimeEnabling = null;
 		tab.runtimeGeneration++;
-		// Chrome drops the child sessions with the attachment; a reattach reports fresh ones.
-		this.#forgetChildren(tab);
 		for (const conn of this.#conns.values()) {
 			for (const [pageSession, ref] of conn.sessions) {
 				if (ref.kind !== "page" || ref.tabKey !== tab.tabKey) continue;
@@ -1851,6 +1859,8 @@ export class RelayBridge {
 		const attempt = this.#rpc({ op: "attach", tabId: tab.tabId }, inst)
 			.then(async () => {
 				tab.attached = true;
+				// A fresh attachment: any child still on record belonged to a dead one.
+				this.#forgetChildren(tab);
 				tab.reattachedAfterDetach = true;
 				this.#log("debugger attached", {
 					tabKey: tab.tabKey,

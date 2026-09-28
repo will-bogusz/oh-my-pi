@@ -1424,6 +1424,13 @@ describe("RelayBridge attachment release", () => {
 		);
 		expect(late.messages.filter(message => message.sessionId === frame.sessionId && message.method === "Page.lifecycleEvent")).toHaveLength(1);
 		expect(first.messages.filter(message => message.sessionId === frame.sessionId && message.method === "Page.lifecycleEvent")).toHaveLength(0);
+		// …and the frame nested in it went with it for the first connection only.
+		bridge.extMessage(
+			ext,
+			JSON.stringify({ t: "cdpEvent", tabId: 1, sessionId: nested.sessionId, method: "Page.lifecycleEvent", params: { name: "load" } }),
+		);
+		expect(late.messages.filter(message => message.sessionId === nested.sessionId && message.method === "Page.lifecycleEvent")).toHaveLength(1);
+		expect(first.messages.filter(message => message.sessionId === nested.sessionId && message.method === "Page.lifecycleEvent")).toHaveLength(0);
 
 		// Letting go twice is refused: a connection that no longer holds the frame cannot end it.
 		const again = ++msgSeq;
@@ -1442,6 +1449,38 @@ describe("RelayBridge attachment release", () => {
 		);
 		await flush();
 		expect(ext.rpcs("send").at(-1)).toMatchObject({ method: "Target.detachFromTarget", params: { sessionId: frame.sessionId } });
+	});
+
+	it("keeps a child frame's reports flowing when the extension's socket is replaced over a live attachment", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const cdp = new FakeCdpSocket();
+		const conn = connectCdp(bridge, cdp, 1);
+		const page = await attachPage(bridge, ext, cdp, conn, 1);
+		bridge.cdpMessage(
+			conn,
+			JSON.stringify({
+				id: ++msgSeq,
+				sessionId: page,
+				method: "Target.setAutoAttach",
+				params: { autoAttach: true, waitForDebuggerOnStart: true, flatten: true },
+			}),
+		);
+		ack(bridge, ext, "send");
+		await flush();
+		const frame = { sessionId: "REAL-FRAME", targetInfo: { targetId: "OOPIF", type: "iframe", url: "" }, waitingForDebugger: false };
+		bridge.extMessage(ext, JSON.stringify({ t: "cdpEvent", tabId: 1, method: "Target.attachedToTarget", params: frame }));
+		// The worker restarts; Chrome kept the attachment, and with it the frame's session.
+		bridge.extClosed(ext);
+		const next = new FakeExtSocket();
+		connect(bridge, next, [tab({ tabId: 1 })], [1]);
+		await flush();
+		bridge.extMessage(
+			next,
+			JSON.stringify({ t: "cdpEvent", tabId: 1, sessionId: frame.sessionId, method: "Page.frameNavigated", params: { frame: { id: "F" } } }),
+		);
+		expect(cdp.messages.filter(message => message.sessionId === frame.sessionId && message.method === "Page.frameNavigated")).toHaveLength(1);
 	});
 
 	it("holds a pipelined duplicate Runtime.enable until the in-flight enable settles", async () => {
