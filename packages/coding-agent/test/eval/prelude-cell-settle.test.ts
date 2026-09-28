@@ -6,8 +6,7 @@ import { disposeAllKernelSessions } from "@oh-my-pi/pi-coding-agent/eval/py/exec
 import { EvalTool } from "@oh-my-pi/pi-coding-agent/tools/eval";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
 
-const PIXEL_PNG =
-	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+const PIXEL_PNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
 
 /** A prelude that counts its calls per cell and reports the count once the cell settles, with an image after three. */
 function countingPrelude(settled: Array<{ calls: number; failed: boolean }>): EvalPreludeDefinition {

@@ -374,7 +374,7 @@ export class ObservationLedger {
 				id,
 				...entry,
 				baseline: record?.shown,
-				options: { ...(record?.options ?? {}) },
+				options: { ...record?.options },
 				screenshot: record?.pixels === true,
 			};
 		});
@@ -415,7 +415,7 @@ export class ObservationLedger {
 			id: window.id,
 			labels,
 			baseline: record?.shown,
-			options: { ...(record?.options ?? {}) },
+			options: { ...record?.options },
 			screenshot: record?.pixels === true,
 		});
 	}

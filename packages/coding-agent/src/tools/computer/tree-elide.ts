@@ -179,7 +179,7 @@ export function elideAxTree(text: string, budget: number): AxTreeElision | undef
 	// Pre-order: a row's subtree runs until the next row at or above its own
 	// depth, and the nearest open row shallower than it is its parent.
 	const open: number[] = [];
-	const lastChild: number[] = new Array(rows.length).fill(-1);
+	const lastChild: number[] = Array.from({ length: rows.length }, () => -1);
 	let lastRoot = -1;
 	for (const [index, row] of rows.entries()) {
 		while (open.length && rows[open[open.length - 1]].depth >= row.depth) rows[open.pop()!].subtreeEnd = index;
