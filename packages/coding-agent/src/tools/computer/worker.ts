@@ -38,6 +38,7 @@ import {
 	renderGone,
 	renderReadBack,
 } from "./observation";
+import { describeWindowMiss } from "./roster";
 import type {
 	ComputerScreenshot,
 	ComputerSessionSnapshot,
@@ -883,7 +884,12 @@ export class ComputerWorkerCore {
 					typeof selector === "string"
 						? windows.filter(window => window.id === selector)
 						: windows.filter(window => matchesFilter(window, selector));
-				if (matches.length === 0) throw new ToolError(`no window matches ${JSON.stringify(selector)}`);
+				if (matches.length === 0) {
+					const app = typeof selector === "string" ? undefined : selector.app;
+					throw new ToolError(
+						`no window matches ${JSON.stringify(selector)}\n${describeWindowMiss(windows, app)}`,
+					);
+				}
 				if (matches.length > 1) {
 					const candidates = matches
 						.map(window => `${window.id} ${window.app} ${JSON.stringify(window.title)}`)

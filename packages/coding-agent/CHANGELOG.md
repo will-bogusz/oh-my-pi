@@ -13,6 +13,7 @@
 
 ### Changed
 
+- `computer.window(…)` that matches no window now throws with the open windows grouped by app (ids and titles, candidates for the requested app first), so the model need not list windows before retrying or launching the app
 - The `eval` tool description now notes that the kernel may be shared with the parent session and concurrent `task` subagents ([#13521](https://github.com/can1357/oh-my-pi/pull/13521) by [@radkawar](https://github.com/radkawar))
 
 ### Fixed

@@ -76,7 +76,7 @@ The same surface is reachable as `computer.*` directly and as `desktop.*` inside
 ### Discovery
 
 - `desktop.windows({ app?, title? })` returns matching `DesktopWindow[]`; app/title matching is case-insensitive substring matching.
-- `desktop.window(id | { app?, title? })` returns one persistent window facade. Zero matches throw; multiple matches throw with the candidates.
+- `desktop.window(id | { app?, title? })` returns one persistent window facade. Zero matches throw with the open windows grouped by app (`id "title"`, the selector's `app` matches first and up to 10 windows, others up to 3, untitled ones counted, and a line when no app matches); multiple matches throw with the candidates.
 - `desktop.focusedWindow()` returns a window facade or `null`.
 - `desktop.displays()` returns `DesktopDisplay[]`.
 - `desktop.capabilities()` returns capture/input/AX availability, permission states, delivery modes, display server, backend, and display count.

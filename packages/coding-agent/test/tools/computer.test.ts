@@ -944,6 +944,44 @@ describe("computer worker round trips", () => {
 		});
 	});
 
+	it("names the open windows by app when a window selector matches nothing", async () => {
+		const transport = new MemoryTransport();
+		const native = new FakeNativeSession();
+		const windows: DesktopWindow[] = [
+			windowFixture,
+			{ ...windowFixture, id: "43", title: "", focused: false },
+			{ ...windowFixture, id: "7", app: "Finder", title: "Downloads", pid: 9, focused: false },
+			{ ...windowFixture, id: "8", app: "TextEdit", title: "notes.txt", pid: 10, focused: false },
+		];
+		native.listWindows = async () => windows;
+		new ComputerWorkerCore(transport, () => native);
+
+		const missingApp = await runWorker(transport, "miss-app", 'await desktop.window({ app: "Contacts" })');
+		expect(missingApp.ok).toBe(false);
+		if (missingApp.ok) return;
+		expect(missingApp.error.message).toBe(
+			[
+				'no window matches {"app":"Contacts"}',
+				'No open window belongs to an app matching "Contacts".',
+				'Open windows by app (id "title"):',
+				'- Code: 42 "Editor" (focused), 1 more',
+				'- Finder: 7 "Downloads"',
+				'- TextEdit: 8 "notes.txt"',
+			].join("\n"),
+		);
+		const missingTitle = await runWorker(
+			transport,
+			"miss-title",
+			'await desktop.window({ app: "textedit", title: "report" })',
+		);
+		expect(missingTitle.ok).toBe(false);
+		if (missingTitle.ok) return;
+		expect(missingTitle.error.message.split("\n").slice(1, 3)).toEqual([
+			'Open windows by app (id "title"):',
+			'- TextEdit: 8 "notes.txt"',
+		]);
+	});
+
 	it("resolves ref() to a populated live element and find() to every match", async () => {
 		const transport = new MemoryTransport();
 		new ComputerWorkerCore(transport, () => new FakeNativeSession());
