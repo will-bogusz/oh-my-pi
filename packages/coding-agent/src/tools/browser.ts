@@ -10,6 +10,7 @@ import { resolveSpawnArgs } from "./browser/attach";
 import {
 	acquireChromeTab,
 	browserActorId,
+	ChromeTabGoneError,
 	chromeChildTabs,
 	chromeLifecycle,
 	chromeDialog,
@@ -50,6 +51,7 @@ import {
 	dropHeadlessTabs,
 	getTab,
 	listTabs,
+	type ManagedTabInfo,
 	releaseIdleTabsForOwner,
 	releaseTabsForActor,
 	releaseTab,
@@ -109,6 +111,39 @@ export type { Observation, ObservationEntry } from "./browser/tab-protocol";
 
 const DEFAULT_TAB_NAME = "main";
 const BROWSER_RUN_SCOPE: readonly string[] = ["tab", "page", "browser", "wait", "assert"];
+
+/**
+ * The verb list for a conversation's first acquisition, then nothing: each
+ * later open or claim would repeat the same ~1.8 KB into a context that
+ * already holds it. `taught` lives with the prelude; the key is the relay
+ * actor (session and agent, which `/new`, a session switch and a subagent
+ * change) and the latest compaction on the branch, since a compaction
+ * replaces the context that carried the list.
+ */
+function tabVerbsOnce(taught: Set<string>, session: ToolSession): string | undefined {
+	const compaction = session.sessionManager?.getBranch().findLast(entry => entry.type === "compaction")?.id;
+	const key = JSON.stringify([browserActorId(session), compaction ?? null]);
+	if (taught.has(key)) return undefined;
+	taught.add(key);
+	return BROWSER_TAB_VERBS;
+}
+
+/**
+ * `browser.tab("<name>")` for each tab this actor opened with `open` that
+ * `matches` picks out. getTab and claim take only tabs in the
+ * user's Chrome, and the relay's answer for an id it never issued (a target id
+ * from `browser.tabs()`, say) suggests a restart that never happened. Only
+ * tabs recorded as this actor's own are named, and never their URLs.
+ */
+function openedTabRoutes(session: ToolSession, matches: (tab: ManagedTabInfo) => boolean): string[] {
+	const actor = browserActorId(session);
+	return listTabs()
+		.filter(tab => !isManagedChromeHandle(tab.name) && getTab(tab.name)?.ownerActorId === actor && matches(tab))
+		.map(tab => `browser.tab(${JSON.stringify(tab.name)})`);
+}
+
+const OPENED_TABS_NOTE =
+	"Tabs from browser.open() stay open across cells; getTab and claim take only tabs in the user's Chrome.";
 
 const appSchema = type({
 	"path?": type("string").describe("binary path to spawn"),
@@ -244,8 +279,9 @@ export function createBrowserPrelude(session: ToolSession): EvalPreludeDefinitio
 	// Eval-first-use boundary: source/declaration assets stay unloaded until a
 	// JavaScript or Python kernel actually asks for its enabled preludes.
 	const { createBrowserPreludeDefinition } = require("./browser/prelude-definition");
+	const taught = new Set<string>();
 	return createBrowserPreludeDefinition(session, {
-		invoke: (parameters: unknown, context: EvalPreludeContext) => invokeBrowser(session, parameters, context),
+		invoke: (parameters: unknown, context: EvalPreludeContext) => invokeBrowser(parameters, context, taught),
 		status: describeBrowserCall,
 	});
 }
@@ -397,11 +433,12 @@ function checkPreludeOptions(params: BrowserParams): void {
 }
 
 async function invokeBrowser(
-	session: ToolSession,
 	parameters: unknown,
 	context: EvalPreludeContext,
+	/** Conversations whose context holds the tab verbs; see {@link tabVerbsOnce}. */
+	taught: Set<string>,
 ): Promise<AgentToolResult<unknown>> {
-	session = context.session;
+	const session = context.session;
 	const parsed = browserSchema(parameters);
 	if (parsed instanceof type.errors) {
 		throw new ToolError(`browser received invalid arguments: ${parsed.summary}`);
@@ -530,15 +567,41 @@ async function invokeBrowser(
 				throw new ToolError(
 					"getTab selectors cannot be combined with an id, creation, or a second browser selection",
 				);
-			const selected = parsed.selector
-				? selectChromeTab(
-						await discoverChromeTabs(session, signal, {
-							browserId: parsed.selector.browserId,
-							relay: parsed.app?.relay,
-						}),
-						parsed.selector,
-					)
-				: undefined;
+			const claimId = parsed.action === "claim" ? parsed.id : undefined;
+			// A CDP target id is Chrome's own opaque token for an opened tab, never a
+			// relay discovery id; a tab name is the caller's choice and could equal
+			// one, so a name is looked up only once Chrome has refused the id.
+			const openedById = claimId ? openedTabRoutes(session, tab => tab.targetId === claimId) : [];
+			if (openedById.length > 0)
+				throw new ToolError(
+					`${JSON.stringify(claimId)} is the target id of a tab this session opened with browser.open(), not a Chrome tab id: ${openedById.join(" or ")} returns it. ${OPENED_TABS_NOTE}`,
+				);
+			let selected: InstanceTab | undefined;
+			if (parsed.selector) {
+				const selector = parsed.selector;
+				// Only a bare title or URL can mean an opened tab; a profile or window is Chrome's.
+				const openedBySelector = () =>
+					(selector.title?.trim() || selector.url?.trim()) &&
+					selector.browserId === undefined &&
+					selector.windowId === undefined
+						? openedTabRoutes(session, tab => matchesChromeTab(tab, { title: selector.title, url: selector.url }))
+						: [];
+				const alsoOpened = (routes: readonly string[]) =>
+					`${routes.length > 1 ? "Tabs this session opened with browser.open() match" : "A tab this session opened with browser.open() matches"} this selector; if that is what you meant, ${routes.join(" or ")} returns it. ${OPENED_TABS_NOTE}`;
+				let discovered: InstanceTab[];
+				try {
+					discovered = await discoverChromeTabs(session, signal, {
+						browserId: selector.browserId,
+						relay: parsed.app?.relay,
+					});
+				} catch (error) {
+					const routes = !signal.aborted && error instanceof Error ? openedBySelector() : [];
+					throw routes.length > 0 ? new ToolError(`${(error as Error).message} ${alsoOpened(routes)}`) : error;
+				}
+				const routes = discovered.some(tab => matchesChromeTab(tab, selector)) ? [] : openedBySelector();
+				if (routes.length > 0) throw new ToolError(`No Chrome tab matches this selector. ${alsoOpened(routes)}`);
+				selected = selectChromeTab(discovered, selector);
+			}
 			const handle = await acquireChromeTab(session, {
 				action: parsed.action === "claim" ? "claim" : "create",
 				id: selected?.id ?? parsed.id,
@@ -549,6 +612,25 @@ async function invokeBrowser(
 				timeoutMs,
 				signal,
 				relay: parsed.app?.relay,
+			}).catch(error => {
+				const routes =
+					claimId && !signal.aborted && error instanceof ToolError
+						? openedTabRoutes(session, tab => tab.name === claimId)
+						: [];
+				if (routes.length === 0) throw error;
+				// Chrome never knew the id (not one it remembers ending), and it is the name
+				// of a tab this session opened: that answer, not "the relay may have
+				// restarted", is the one to give. A known ending keeps its reason.
+				if (
+					error instanceof ChromeTabGoneError &&
+					error.message.startsWith(`Chrome tab id ${JSON.stringify(claimId)} is unknown to this relay`)
+				)
+					throw new ToolError(
+						`${JSON.stringify(claimId)} is the name of a tab this session opened with browser.open(), not a Chrome tab id: ${routes.join(" or ")} returns it. ${OPENED_TABS_NOTE}`,
+					);
+				throw new ToolError(
+					`${error.message} ${JSON.stringify(claimId)} is also the name of a tab this session opened with browser.open(); if that is what you meant, ${routes.join(" or ")} returns it. ${OPENED_TABS_NOTE}`,
+				);
 			});
 			details.handle = handle.id;
 			details.name = handle.label;
@@ -568,7 +650,14 @@ async function invokeBrowser(
 						displays: [
 							{
 								type: "text",
-								text: `Claimed Chrome tab ${chromeTabName(handle.lease.tab)} with an open dialog. Answer it with tab.handleDialog({ accept, id: tab.initialDialog.id, text? }) before page interaction.\ntab.target.id: ${JSON.stringify(handle.lease.tab.id)}\n${JSON.stringify(chromeDialogState(handle.lease.dialog))}\n${BROWSER_TAB_VERBS}`,
+								text: [
+									`Claimed Chrome tab ${chromeTabName(handle.lease.tab)} with an open dialog. Answer it with tab.handleDialog({ accept, id: tab.initialDialog.id, text? }) before page interaction.`,
+									`tab.target.id: ${JSON.stringify(handle.lease.tab.id)}`,
+									JSON.stringify(chromeDialogState(handle.lease.dialog)),
+									tabVerbsOnce(taught, session),
+								]
+									.filter(line => line !== undefined)
+									.join("\n"),
 							},
 						],
 						returnValue: details.value,
@@ -601,10 +690,11 @@ async function invokeBrowser(
 					type: "text",
 					text: `${parsed.action === "claim" ? "Claimed" : "Created inactive"} Chrome tab ${chromeTabName(page)}\ntab.target.id: ${JSON.stringify(handle.lease.tab.id)}\nURL: ${page.url}\nTab group: ${JSON.stringify(handle.label)}`,
 				});
-				// Once, with the handle itself: the verbs are what the acquisition
-				// hands over, and a later observe() of the same tab repeats the
-				// tree without repeating them.
-				initial.displays.push({ type: "text", text: BROWSER_TAB_VERBS });
+				// Once per conversation, with its first handle: the verbs are what
+				// the acquisition hands over, and a later observe() of the same tab
+				// repeats the tree without repeating them.
+				const verbs = tabVerbsOnce(taught, session);
+				if (verbs) initial.displays.push({ type: "text", text: verbs });
 				return await browserRunResult(session, details, initial);
 			} catch (error) {
 				// A cancelled/failed observation cannot return its handle to the
@@ -622,7 +712,7 @@ async function invokeBrowser(
 
 		switch (parsed.action) {
 			case "open":
-				return await openBrowser(session, name, parsed, details, timeoutMs, context.signal);
+				return await openBrowser(session, name, parsed, details, timeoutMs, taught, context.signal);
 			case "close":
 				return await closeBrowser(session, name, parsed, details, timeoutMs, context.signal);
 			case "tabs":
@@ -694,6 +784,7 @@ async function openBrowser(
 	params: BrowserParams,
 	details: BrowserPreludeDetails,
 	timeoutMs: number,
+	taught: Set<string>,
 	signal?: AbortSignal,
 ): Promise<AgentToolResult<unknown>> {
 	const kind = resolveBrowserKind(params, session);
@@ -727,6 +818,7 @@ async function openBrowser(
 	const deadlineStart = performance.now();
 	const timeoutSignal = AbortSignal.timeout(timeoutMs);
 	const openSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
+	let stillLoading: ToolError | undefined;
 	try {
 		const browser = await untilAborted(openSignal, () =>
 			acquireBrowser(kind, {
@@ -788,6 +880,8 @@ async function openBrowser(
 					userAgent: params.user_agent,
 					ignoreHttpsErrors: params.ignore_https_errors,
 					signal: openSignal,
+					deadlineSignal: timeoutSignal,
+					cancelSignal: signal,
 					ownerSessionId: session.getSessionId?.() ?? undefined,
 					// Omitted stays undefined: creation defaults it to false
 					// while reuse by the owner leaves a set value alone.
@@ -816,22 +910,40 @@ async function openBrowser(
 		details.url = url;
 		details.viewport = tab.info.viewport;
 		const verb = result.created ? "Opened" : "Reused";
-		const lines = [
-			`${verb} tab ${JSON.stringify(name)} on ${describeBrowser(browser)}`,
-			`URL: ${url}`,
-			title ? `Title: ${title}` : null,
-			// Stated with the handle this call hands over, exactly once: no
-			// helper on it prints them again.
-			BROWSER_TAB_VERBS,
-		].filter((line): line is string => typeof line === "string");
-		return toolResult(details).text(lines.join("\n")).done();
+		const header = `${verb} tab ${JSON.stringify(name)} on ${describeBrowser(browser)}`;
+		if (!result.navigationTimeout) {
+			const lines = [
+				header,
+				`URL: ${url}`,
+				title ? `Title: ${title}` : null,
+				// Once per conversation: a reuse or a second tab would repeat them.
+				tabVerbsOnce(taught, session),
+			].filter((line): line is string => typeof line === "string");
+			return toolResult(details).text(lines.join("\n")).done();
+		}
+		// The page outlasted the budget: goto stopped the load and said where.
+		// Thrown like goto's own timeout, but the tab and what arrived stay.
+		stillLoading = new ToolError(
+			`${header}, but its page did not finish loading: ${result.navigationTimeout}. The tab stays open on what loaded${title ? ` (title ${JSON.stringify(title)})` : ""}: browser.tab(${JSON.stringify(name)}) drives it.`,
+		);
 	} catch (error) {
 		// Caller cancellation stays a ToolAbortError; the requested timeout
 		// becomes a timeout ToolError; anything else passes through unchanged.
 		if (signal?.aborted) throw error instanceof ToolAbortError ? error : new ToolAbortError();
-		if (timeoutSignal.aborted) throw new ToolError(`Browser open timed out after ${timeoutMs}ms`);
+		if (timeoutSignal.aborted) {
+			// The deadline won the race against goto's own report: name the tab
+			// when it was published and kept. Its cached URL may predate what
+			// the page committed since, so the tab is named, not its page.
+			const kept = getTab(name);
+			if (kept?.state === "alive" && kept.ownerActorId === browserActorId(session))
+				throw new ToolError(
+					`Browser open timed out after ${timeoutMs}ms; tab ${JSON.stringify(name)} stays open with what loaded: browser.tab(${JSON.stringify(name)}) drives it.`,
+				);
+			throw new ToolError(`Browser open timed out after ${timeoutMs}ms`);
+		}
 		throw error;
 	}
+	throw stillLoading;
 }
 
 async function closeBrowser(

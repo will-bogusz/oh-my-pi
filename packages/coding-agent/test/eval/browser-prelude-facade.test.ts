@@ -8,6 +8,7 @@ import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-age
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import { BROWSER_TAB_VERBS } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-call";
+import { cfgToolsOutputMaxColumns } from "@oh-my-pi/pi-coding-agent/tools/settings";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { chromiumAvailable } from "../tools/chromium-probe";
@@ -585,6 +586,54 @@ print(tab.initialObservation["snapshot"])
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 
+describe("browser tab verbs per conversation", () => {
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"prints them with a conversation's first acquisition, and again after a compaction or in another conversation",
+		async () => {
+			let sessionId = "conversation-a";
+			const branch: Array<{ type: string; id: string }> = [];
+			const session: ToolSession = {
+				...makeSession(),
+				getSessionId: () => sessionId,
+				sessionManager: { getBranch: () => branch } as unknown as ToolSession["sessionManager"],
+			};
+			const prelude = createBrowserPrelude(session);
+			const names = [`verbs-a-${crypto.randomUUID()}`, `verbs-b-${crypto.randomUUID()}`];
+			const taught = async (name: string) => {
+				const result = await prelude.invoke(
+					{ action: "open", name, url: "data:text/html,<title>Verbs</title>" },
+					{ session, toolCallId: `verbs-${crypto.randomUUID()}` },
+				);
+				return result.content.some(part => part.type === "text" && part.text.includes(BROWSER_TAB_VERBS));
+			};
+			try {
+				expect(await taught(names[0]!)).toBe(true);
+				expect(await taught(names[0]!)).toBe(false);
+				// A compaction replaced the context that carried them.
+				branch.push({ type: "compaction", id: "compaction-1" });
+				expect(await taught(names[0]!)).toBe(true);
+				expect(await taught(names[0]!)).toBe(false);
+				// `/new` or a session switch starts another conversation.
+				sessionId = "conversation-b";
+				expect(await taught(names[1]!)).toBe(true);
+				expect(await taught(names[1]!)).toBe(false);
+			} finally {
+				// Each tab belongs to the conversation that opened it.
+				for (const [conversation, name] of [
+					["conversation-a", names[0]!],
+					["conversation-b", names[1]!],
+				] as const) {
+					sessionId = conversation;
+					await prelude
+						.invoke({ action: "close", name }, { session, toolCallId: `verbs-close-${crypto.randomUUID()}` })
+						.catch(() => undefined);
+				}
+			}
+		},
+		30_000,
+	);
+});
+
 describe("browser facade Chromium helper E2E", () => {
 	it.skipIf(!CHROMIUM_AVAILABLE)(
 		"drives a real page through direct helpers, handles, waits, and function and code runs",
@@ -625,11 +674,20 @@ describe("browser facade Chromium helper E2E", () => {
 					"(async () => { globalThis.__e2eTab = await browser.open({ name: __name__, url: __url__ }); })()",
 					context,
 				);
-				// The verbs ride the acquisition, once. Their absence is what the
-				// 20260914 bench leg paid for in `selectOption` TypeErrors and
-				// 8 KB `browser.help()` recoveries.
+				// The verbs ride the conversation's first acquisition, once. Their
+				// absence is what the 20260914 bench leg paid for in `selectOption`
+				// TypeErrors and 8 KB `browser.help()` recoveries.
 				expect(displayed.filter(text => String(text).includes(BROWSER_TAB_VERBS))).toHaveLength(1);
-				expect(String(displayed.at(-1)).split("\n").at(-1)).toBe(BROWSER_TAB_VERBS);
+				expect(String(displayed.at(-1)).endsWith(`\n${BROWSER_TAB_VERBS}`)).toBe(true);
+				// Eval cuts each output line at tools.outputMaxColumns; nothing the
+				// acquisition prints may lose its tail to that cut.
+				const columnCap = cfgToolsOutputMaxColumns.get(session.settings);
+				for (const line of String(displayed.at(-1)).split("\n"))
+					expect(Buffer.byteLength(line, "utf-8")).toBeLessThanOrEqual(columnCap);
+				// Reopening the same tab in the same conversation reuses it without the verbs.
+				await runInContext("browser.open({ name: __name__ })", context);
+				expect(String(displayed.at(-1))).toStartWith(`Reused tab ${JSON.stringify(name)}`);
+				expect(displayed.filter(text => String(text).includes("browser.help() for signatures"))).toHaveLength(1);
 				await runInContext('__e2eTab.click("text/Go")', context);
 				const title = await runInContext("__e2eTab.title()", context);
 				expect(typeof title).toBe("string");

@@ -105,7 +105,7 @@ export async function renderPdfPageScreenshot(
 		browser = acquiredBrowser;
 		holdBrowser(acquiredBrowser);
 		browserLease = true;
-		await untilAborted(renderSignal, () =>
+		const acquired = await untilAborted(renderSignal, () =>
 			acquireTab(tabName, acquiredBrowser, {
 				url: url.href,
 				waitUntil: "load",
@@ -116,6 +116,8 @@ export async function renderPdfPageScreenshot(
 			}),
 		);
 		tabOpened = true;
+		// A page still loading at the deadline would render half of itself.
+		if (acquired.navigationTimeout) throw new ToolError(`Timed out loading the PDF: ${acquired.navigationTimeout}`);
 		await releaseBrowser(acquiredBrowser, { kill: false });
 		browserLease = false;
 

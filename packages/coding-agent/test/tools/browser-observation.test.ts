@@ -7,7 +7,12 @@ import type {
 	WorkerInbound,
 	WorkerOutbound,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
-import { flattenSnapshot, hasBusyIndicator, renderHeader } from "@oh-my-pi/pi-coding-agent/tools/browser/observation";
+import {
+	compactNodes,
+	flattenSnapshot,
+	hasBusyIndicator,
+	renderHeader,
+} from "@oh-my-pi/pi-coding-agent/tools/browser/observation";
 import {
 	buildTreeLines,
 	formatRefRanges,
@@ -489,3 +494,19 @@ it.skipIf(!CHROMIUM_AVAILABLE)(
 	},
 	60_000,
 );
+
+it("keeps a frame that did not answer in a compact read, so its missing content is not mistaken for none", () => {
+	const page = ax("RootWebArea", "Sign in", { url: "https://shop.example/login" }, [
+		ax("heading", "Sign in", { level: 1 }),
+		ax("button", "Continue", { backendNodeId: 1 }),
+		ax("Iframe", "challenge", { backendNodeId: 2 }, [
+			ax("RootWebArea", undefined, { url: "https://widget.example/frame", unanswered: true }),
+		]),
+	]);
+	const compact = compactNodes(flattenSnapshot(page, { includeAll: false }));
+	const lines = buildTreeLines(compact, compact.map((node, i) => (node.actionable ? i + 1 : undefined)), "e");
+	const tree = renderTree("header", lines);
+	expect(tree).toContain('button "Continue"');
+	expect(tree).toMatch(/\[iframe widget\.example .*did not answer in time/);
+	expect(tree).not.toContain('heading "Sign in"');
+});

@@ -238,7 +238,7 @@ Use `await browser.discover(browserId=...)` and `await browser.claim(tab_id, lab
 
 ## Compatibility `open` and other browser modes
 
-`browser.open(options?)` supports `name`, `url`, `app`, `viewport`, `wait_until`, `dialogs`, and `timeout`. Explicit selection takes precedence in this order: `app.cdp_url`, `app.path`, then `app.relay`. Without explicit selection, OMP considers relay settings, configured CDP, cmux, then project-shared headless Chromium. `PI_BROWSER_RELAY` can override relay enablement.
+`browser.open(options?)` supports `name`, `url`, `app`, `viewport`, `wait_until`, `dialogs`, and `timeout`. Explicit selection takes precedence in this order: `app.cdp_url`, `app.path`, then `app.relay`. Without explicit selection, OMP considers relay settings, configured CDP, cmux, then project-shared headless Chromium. `PI_BROWSER_RELAY` can override relay enablement. The tab is published before it navigates to `url`, with `goto`'s semantics and what is left of `timeout`: a page that is still loading when that runs out has its load stopped and the open throws `goto`'s timeout (the URL and `readyState` reached) while the tab stays open on what arrived, reachable as `browser.tab(name)`. A navigation that fails outright, or the caller's abort, closes a tab the open created.
 
 | Mode                                                 | Acquisition and explicit close behavior                                                                                                                               |
 | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

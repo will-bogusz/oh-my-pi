@@ -174,13 +174,41 @@ export const FRAME_METHODS: readonly string[] = [
 const VERB_SHAPES: Readonly<Record<string, string>> = { select: "select(...values)" };
 
 /**
- * The verbs a tab and its element handles answer to, for the footer of an
- * acquisition result. Derived from the tables that gate every call, so the
- * list a model reads cannot drift from the list the boundary accepts.
+ * Widest line of the verb list. Eval output cuts every line at
+ * `tools.outputMaxColumns` (768 bytes by default), and one line holding the
+ * whole list lost its element and frame verbs and the help pointer to that cut.
  */
-export const BROWSER_TAB_VERBS = `tab: ${[...TAB_VALUE_METHODS, ...TAB_PRESENCE_METHODS]
-	.map(method => VERB_SHAPES[method] ?? method)
-	.join(" · ")} — el: ${ELEMENT_METHODS.map(method => VERB_SHAPES[method] ?? method).join(" · ")} (via tab.id()/tab.ref()) — frame: ${FRAME_METHODS.join(" · ")} (via tab.frame()) — browser.help() for signatures`;
+const VERB_LINE_BYTES = 256;
+
+/** `label: a · b · …`, wrapped onto indented lines of at most {@link VERB_LINE_BYTES}. */
+function verbLines(label: string, verbs: readonly string[]): string[] {
+	const lines: string[] = [];
+	let line = `${label}:`;
+	let first = true;
+	for (const verb of verbs.map(method => VERB_SHAPES[method] ?? method)) {
+		const next = `${line}${first ? " " : " · "}${verb}`;
+		if (!first && Buffer.byteLength(next, "utf-8") > VERB_LINE_BYTES) {
+			lines.push(line);
+			line = `  ${verb}`;
+		} else line = next;
+		first = false;
+	}
+	lines.push(line);
+	return lines;
+}
+
+/**
+ * The verbs a tab and its element handles answer to, for the footer of a
+ * conversation's first acquisition. Derived from the tables that gate every
+ * call, so the list a model reads cannot drift from the list the boundary
+ * accepts. The help pointer has its own line.
+ */
+export const BROWSER_TAB_VERBS = [
+	...verbLines("tab", [...TAB_VALUE_METHODS, ...TAB_PRESENCE_METHODS]),
+	...verbLines("el (via tab.id()/tab.ref())", ELEMENT_METHODS),
+	...verbLines("frame (via tab.frame())", FRAME_METHODS),
+	"browser.help() for signatures",
+].join("\n");
 
 const DIRECT_METHODS_DESCRIPTION = [...TAB_VALUE_METHODS, ...TAB_PRESENCE_METHODS].join(", ");
 const ELEMENT_METHODS_DESCRIPTION = ELEMENT_METHODS.join(", ");

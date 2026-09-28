@@ -13,6 +13,8 @@ export type NavigationWaitUntil = "load" | "domcontentloaded" | "networkidle0" |
 
 const READY_POLL_MS = 50;
 const READY_PROBE_TIMEOUT_MS = 1_000;
+/** Bound on each step of a navigation-timeout report: the readyState read, then the stop. */
+const REPORT_STEP_TIMEOUT_MS = 250;
 /** Round trip allowed for puppeteer to record a same-document URL change. */
 const SAME_DOCUMENT_URL_MS = 500;
 /**
@@ -31,14 +33,29 @@ const NAVIGATION_SHAPED_ERROR_RE =
 
 class PhaseTimeout extends Error {}
 
+/**
+ * A navigation that outlasted its budget and was stopped where it was. The
+ * page, and the tab holding it, are still there; the name survives the worker
+ * boundary, so the host can tell this from a navigation that failed.
+ */
+export class NavigationTimeoutError extends ToolError {
+	override name = "NavigationTimeoutError";
+}
+
 export interface MainFrameNavigateOptions {
 	/** Op label used in the timeout message, e.g. `tab.goto("/x")`. */
 	label: string;
 	timeoutMs: number;
 	waitUntil?: NavigationWaitUntil;
 	signal?: AbortSignal;
-	/** Best-effort `Page.stopLoading`, run before a timeout is reported. */
-	stopLoading?: () => Promise<void>;
+	/** Best-effort `Page.stopLoading`, run before a timeout is reported; true when Chrome acknowledged it. */
+	stopLoading?: () => Promise<boolean>;
+	/**
+	 * Aborted when the caller gave the navigation up (cancelled, or out of
+	 * time), so its load is stopped. `signal` alone also aborts when a run ends
+	 * normally with a navigation still in flight, whose load must go on.
+	 */
+	abandonSignal?: AbortSignal;
 }
 
 /**
@@ -62,12 +79,24 @@ export async function navigateMainFrame(page: Page, url: string, opts: MainFrame
 	const waitUntil = opts.waitUntil ?? "load";
 	const sameDocument = sameDocumentTarget(page.url(), url);
 	const session = await untilAborted(opts.signal, () => page.createCDPSession());
+	// A load its caller gave up keeps going in Chrome: it stalls later ops on
+	// this page, and every new tab's attach to the browser waits on it. It is
+	// stopped the moment the caller gives up, on this navigation's own session:
+	// the stop is on the wire before the worker can take its next message, so
+	// it cannot land on a navigation sent after it.
+	const abandon = opts.abandonSignal;
+	const stop = (): void => void session.send("Page.stopLoading").catch(() => undefined);
 	try {
 		const navigated = await withTimeout(
-			untilAborted(opts.signal, () => session.send("Page.navigate", { url })),
+			untilAborted(opts.signal, () => {
+				abandon?.addEventListener("abort", stop, { once: true });
+				return session.send("Page.navigate", { url });
+			}),
 			Math.max(deadline - Date.now(), 1),
 			new PhaseTimeout(`navigation to ${url} never committed`),
 		);
+		// Only a new document has a load to stop.
+		if (!navigated.loaderId) abandon?.removeEventListener("abort", stop);
 		// `net::ERR_ABORTED` is Chrome reporting a download or a navigation the page
 		// itself replaced; puppeteer treats it as a success and so do we.
 		if (navigated.errorText && navigated.errorText !== "net::ERR_ABORTED")
@@ -99,7 +128,9 @@ export async function navigateMainFrame(page: Page, url: string, opts: MainFrame
 		if (timedOut) await reportNavigationTimeout(page, opts);
 		throw error;
 	} finally {
-		await session.detach().catch(() => undefined);
+		abandon?.removeEventListener("abort", stop);
+		// Not awaited: a slow detach must not hold the answer past its deadline.
+		void session.detach().catch(() => undefined);
 	}
 }
 
@@ -219,7 +250,9 @@ async function waitForMainFramePhase(
 	let interactiveSince: number | undefined;
 	for (;;) {
 		throwIfAborted(signal);
-		const state = await readReadyState(page);
+		// Each probe fits what is left of the deadline, so a page that stops
+		// answering cannot carry the wait past it.
+		const state = await readReadyState(page, Math.max(1, Math.min(READY_PROBE_TIMEOUT_MS, deadline - Date.now())));
 		if (state === "complete") return;
 		if (state === "interactive") {
 			if (phase === "domcontentloaded") return;
@@ -237,11 +270,11 @@ async function waitForMainFramePhase(
 }
 
 /** Main-frame `document.readyState`, or `undefined` while the context is unreachable. */
-async function readReadyState(page: Page): Promise<string | undefined> {
+async function readReadyState(page: Page, timeoutMs = READY_PROBE_TIMEOUT_MS): Promise<string | undefined> {
 	try {
 		const state = await withTimeout(
 			page.mainFrame().evaluate(() => document.readyState),
-			READY_PROBE_TIMEOUT_MS,
+			timeoutMs,
 			"readyState probe timed out",
 		);
 		return typeof state === "string" ? state : undefined;
@@ -252,11 +285,24 @@ async function readReadyState(page: Page): Promise<string | undefined> {
 
 async function reportNavigationTimeout(page: Page, opts: MainFrameNavigateOptions): Promise<never> {
 	// Read the state before stopping: `Page.stopLoading` changes what we would report.
+	// Each step is bounded so the report lands inside the one second a cell keeps
+	// back from its ops (CELL_BUDGET_SLACK_MS): a navigation that never committed
+	// leaves the probe unanswered, and a report that outran the cell turned into
+	// a cell timeout that killed the tab.
 	const url = page.url();
-	const readyState = (await readReadyState(page)) ?? "unreachable";
-	const stopped = opts.stopLoading ? "; pending navigation stopped" : "";
-	await opts.stopLoading?.().catch(() => undefined);
-	throw new ToolError(
+	const readyState =
+		(await readReadyState(page, REPORT_STEP_TIMEOUT_MS)) ??
+		`unknown (not readable within ${REPORT_STEP_TIMEOUT_MS}ms)`;
+	let stopped = "";
+	if (opts.stopLoading) {
+		const confirmed = await withTimeout(
+			opts.stopLoading(),
+			REPORT_STEP_TIMEOUT_MS,
+			"stopLoading timed out",
+		).catch(() => false);
+		stopped = confirmed ? "; pending navigation stopped" : "; stopping the pending navigation was not confirmed";
+	}
+	throw new NavigationTimeoutError(
 		`${opts.label} timed out after ${opts.timeoutMs}ms${stopped} — current URL: ${url}, readyState: ${readyState}`,
 	);
 }

@@ -4,6 +4,7 @@
 Entry points
 - `browser.getTab({ title?, url? })` claims ONE open tab by substring (ambiguity lists exact ids); `discover({ title?, url? })` lists tabs without attaching and `claim(id)` adopts one; `create({ url? })` opens an inactive task tab; `open` starts or attaches a headless/CDP browser.
 - Each returns a `tab` whose first tree prints and stays as `initialObservation` (`observation:` takes `observe()`'s options). `tab.ref("e26")` is an element handle; `tab.run(fn)` runs a multi-step function with `{ tab, page, browser, wait, assert }` (no closures; not a sandbox).
+- Headless/CDP tabs from `open` persist across cells: `browser.tab(name)` (default `"main"`) returns one. `getTab`/`claim` address only user-Chrome tabs.
 - `page`/`frame` are raw Puppeteer (`$$eval`, `$eval`, `evaluate`; `locator()` only acts); Playwright's API (`hasText`, `allTextContents`, `evaluateAll`) is absent. `browser.help()` prints the typed API. Arguments are positional; Python has the same names, its `run` takes JavaScript.
 
 Model
@@ -15,7 +16,7 @@ Model
 
 Ownership
 - A task names a site with an open tab: claim it and stay on the user's account; `create` only when none matches or you will navigate elsewhere. Never switch company or account inside the user's tab.
-- Tabs are handed back open at turn end; next turn, claim the exact id again. Close tabs you opened, never others unless asked; `tab.release()` hands back early. Never `reveal()` to observe or recover.
+- User-Chrome tabs are handed back open at turn end; next turn, claim their exact id again. Close tabs you opened, never others unless asked; `tab.release()` hands back early. Never `reveal()` to observe or recover.
 - Several profiles (`browser.instances()`) → pass `browserId`.
 
 Interruptions

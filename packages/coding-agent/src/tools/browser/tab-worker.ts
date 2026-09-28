@@ -1123,6 +1123,14 @@ const SETTLE_BUDGET_MS = 3_000;
  */
 const INITIAL_READY_BUDGET_MS = 10_000;
 /**
+ * How long a failed run may spend re-reading the tab's URL and title before its
+ * error is sent: inside the supervisor's 750ms post-run grace, beside the
+ * request-interception cleanup's 500ms.
+ */
+const FAILED_RUN_INFO_MS = 200;
+/** Kept back from a snapshot's budget for the page's own reads when another frame is slow to answer. */
+const FRAME_READ_RESERVE_MS = 500;
+/**
  * Floor for the CDP reads that collect a snapshot once the settle budget is
  * spent. They are otherwise bounded by the settle deadline — a read that hangs
  * because the document went away costs the settle budget and retries as "page
@@ -1250,6 +1258,8 @@ interface ActiveRun {
 	id: string;
 	ac: AbortController;
 	signal: AbortSignal;
+	/** The run was cancelled or ran out of time: unlike its normal end, work it left unfinished was abandoned. */
+	abandoned: AbortSignal;
 	output: RunOutput;
 	screenshots: ScreenshotResult[];
 	pendingTools: Map<string, { resolve(value: unknown): void; reject(error: Error): void }>;
@@ -1451,8 +1461,8 @@ export class WorkerCore {
 
 			// Realm setup is done: puppeteer loaded and browser connected. Sent before
 			// page acquisition so the supervisor's cold-start budget bounds only the
-			// realm setup; page creation and the first navigation run under the ready
-			// wait.
+			// realm setup; page creation runs under the ready wait. The supervisor
+			// navigates once the tab is published, so a slow page never costs the tab.
 			this.#transport.send({ type: "setup" });
 			if (payload.mode === "headless") {
 				// Create the target directly so its id is reportable before
@@ -1519,15 +1529,6 @@ export class WorkerCore {
 			this.#tracing = new BrowserTracingController(this.#page);
 			this.#network = new BrowserNetworkManager(this.#page, payload.allowedDomains);
 			await this.#network.start();
-			if (payload.url) {
-				// Default to "load" because dev servers with HMR/WS never reach networkidle.
-				await navigateMainFrame(this.#page, payload.url, {
-					label: `navigate to ${JSON.stringify(payload.url)}`,
-					timeoutMs: payload.timeoutMs,
-					waitUntil: payload.waitUntil,
-					stopLoading: () => this.#stopLoading(),
-				});
-			}
 			// Nothing observes this tab until `ready`, so the wait for a pending
 			// navigation to commit costs the acquisition nothing it would not have
 			// spent hanging inside the first observation instead.
@@ -1674,6 +1675,12 @@ export class WorkerCore {
 		const ac = new AbortController();
 		const runAc = new AbortController();
 		const signal = AbortSignal.any([timeoutSignal, ac.signal, runAc.signal]);
+		// Settled when the run ends: a run timeout that fires after the run
+		// already ended does not abandon what the run left in flight.
+		const abandonAc = new AbortController();
+		const abandon = (): void => abandonAc.abort();
+		timeoutSignal.addEventListener("abort", abandon, { once: true });
+		ac.signal.addEventListener("abort", abandon, { once: true });
 		const output = new RunOutput();
 		const screenshots: ScreenshotResult[] = [];
 		const runErrorStartSeq = this.#consoleCapture.nextSequence;
@@ -1684,6 +1691,7 @@ export class WorkerCore {
 			id: msg.id,
 			ac,
 			signal,
+			abandoned: abandonAc.signal,
 			output,
 			screenshots,
 			pendingTools: new Map(),
@@ -1807,6 +1815,8 @@ export class WorkerCore {
 		} catch (error) {
 			failure = { error };
 		} finally {
+			timeoutSignal.removeEventListener("abort", abandon);
+			ac.signal.removeEventListener("abort", abandon);
 			runAc.abort(postmortem.markExpectedCleanupError(new ToolAbortError("Browser run ended")));
 			await Bun.sleep(0);
 			const blockedByDialog = this.#managedChrome && !!this.#openDialog;
@@ -1838,6 +1848,12 @@ export class WorkerCore {
 			if (this.#active?.id === msg.id) this.#active = null;
 		}
 		if (failure) {
+			// A failed run can still have moved the page (a timed-out goto stops the
+			// load where it was), and `browser.tabs()` reads what `ready` last said.
+			// Bounded well inside the supervisor's post-run grace; an abort or the
+			// cell's own timeout leaves it to the next run.
+			if (!timeoutSignal.aborted && !ac.signal.aborted)
+				await Promise.race([this.#postReadyInfo(), Bun.sleep(FAILED_RUN_INFO_MS)]);
 			this.#finishing = { id: msg.id, ac };
 			let error: unknown;
 			try {
@@ -2089,6 +2105,7 @@ export class WorkerCore {
 						waitUntil: opts?.waitUntil,
 						signal: sig,
 						stopLoading: () => this.#stopLoading(),
+						abandonSignal: active.abandoned,
 					});
 				}),
 			// Main-frame history, not puppeteer's goBack: it waits on every child
@@ -2619,13 +2636,21 @@ export class WorkerCore {
 	): Promise<SnapshotRead & { navigating: boolean }> {
 		let latest: SnapshotRead | undefined;
 		let navigated = false;
+		/** A document change was reported (a new main loader, or a document-gone error), not just inferred from a read that did not answer. */
+		let moveSeen = false;
 		// The frame tree is a renderer read like the snapshot's own: one that does
 		// not answer before the deadline is a commit in flight, so it counts as a move.
 		const left = (before: MainDocument): Promise<boolean> =>
-			settleRead("frame tree", leftDocument(page, before, signal), deadline).catch(error => {
-				if (error instanceof SnapshotReadTimeout) return true;
-				throw error;
-			});
+			settleRead("frame tree", leftDocument(page, before, signal), deadline).then(
+				moved => {
+					if (moved) moveSeen = true;
+					return moved;
+				},
+				error => {
+					if (error instanceof SnapshotReadTimeout) return true;
+					throw error;
+				},
+			);
 		while (Date.now() < deadline) {
 			const before = await settleRead("frame tree", mainDocument(page, signal), deadline).catch(error => {
 				if (error instanceof SnapshotReadTimeout) return undefined;
@@ -2644,7 +2669,10 @@ export class WorkerCore {
 					// error says why.
 					if (error instanceof SnapshotReadTimeout) return null;
 					const moved = await left(before).catch(() => undefined);
-					if (moved !== undefined && (moved || isDocumentGoneError(error))) return null;
+					if (moved !== undefined && (moved || isDocumentGoneError(error))) {
+						if (isDocumentGoneError(error)) moveSeen = true;
+						return null;
+					}
 					throw error;
 				},
 			);
@@ -2655,6 +2683,13 @@ export class WorkerCore {
 			latest = read ?? latest;
 		}
 		if (latest) return { ...latest, navigating: true };
+		// No complete read, and no new document seen: the page's own reads never
+		// answered in the budget. Saying it changed sent callers after a navigation
+		// that never happened.
+		if (!moveSeen)
+			throw new ToolError(
+				"The page did not answer while observing it: its accessibility tree was not read within the settle budget, and no change of its document was seen. Observe again; tab.screenshot() does not need the tree.",
+			);
 		throw new ToolError("The page changed while observing it. Observe again.");
 	}
 
@@ -2688,9 +2723,12 @@ export class WorkerCore {
 	): Promise<SnapshotRead> {
 		const session = page.mainFrame().client;
 		await settlePage(page, signal, budgetMs);
+		// A slow frame may use what the settle budget can spare beyond the page's
+		// own reads; one that never answers still leaves them room.
+		const frameReadMs = (): number => deadline - Date.now() - FRAME_READ_RESERVE_MS;
 		let snapshot = await settleRead(
 			"accessibility tree",
-			snapshotAccessibility(page, { includeAll }, signal),
+			snapshotAccessibility(page, { includeAll, frameReadMs: frameReadMs() }, signal),
 			deadline,
 		);
 		// Loading means the tree still shows an indicator, or the page a skeleton
@@ -2707,7 +2745,7 @@ export class WorkerCore {
 			// document check decides whether it is still the page's.
 			const next = await settleRead(
 				"accessibility tree",
-				snapshotAccessibility(page, { includeAll }, signal),
+				snapshotAccessibility(page, { includeAll, frameReadMs: frameReadMs() }, signal),
 				deadline,
 			)
 				.then(async tree => ({ tree, loading: await stillLoading(tree) }))
@@ -2716,6 +2754,9 @@ export class WorkerCore {
 					throw error;
 				});
 			if (!next) break;
+			// The newer read is the page's current state, even with a frame it
+			// could not read in time: that frame is marked in it, never filled
+			// from an older read of a page that may have moved on.
 			snapshot = next.tree;
 			loading = next.loading;
 		}
@@ -3380,19 +3421,24 @@ export class WorkerCore {
 		this.#observationId = crypto.randomUUID();
 	}
 
-	/** Best-effort `Page.stopLoading` so an abandoned navigation cannot stall later ops. */
-	async #stopLoading(): Promise<void> {
+	/**
+	 * Best-effort `Page.stopLoading` so an abandoned navigation cannot stall later
+	 * ops. True only when Chrome acknowledged the stop.
+	 */
+	async #stopLoading(): Promise<boolean> {
 		try {
 			const session = await this.#requirePage().createCDPSession();
 			try {
 				await session.send("Page.stopLoading");
+				return true;
 			} finally {
-				await session.detach().catch(() => undefined);
+				void session.detach().catch(() => undefined);
 			}
 		} catch (error) {
 			this.#log("debug", "Page.stopLoading failed", {
 				error: error instanceof Error ? error.message : String(error),
 			});
+			return false;
 		}
 	}
 
