@@ -28,11 +28,17 @@ export function describeWindowMiss(windows: readonly DesktopWindow[], app: strin
 	});
 	const lines = apps.map(name => {
 		const group = byApp.get(name)!;
-		const titled = group.filter(window => window.title.trim() !== "");
+		// A candidate app's untitled windows are named too: one may be the target.
+		const shown = matched(name)
+			? [...group].sort((left, right) => Number(left.title.trim() === "") - Number(right.title.trim() === ""))
+			: group.filter(window => window.title.trim() !== "");
 		const limit = matched(name) ? WINDOWS_PER_MATCHED_APP : WINDOWS_PER_APP;
-		const named = titled
+		const named = shown
 			.slice(0, limit)
-			.map(window => `${window.id} ${JSON.stringify(window.title)}${window.focused ? " (focused)" : ""}`);
+			.map(
+				window =>
+					`${window.id} ${window.title.trim() === "" ? "(untitled)" : JSON.stringify(window.title)}${window.focused ? " (focused)" : ""}`,
+			);
 		const rest = group.length - named.length;
 		if (rest > 0) named.push(`${rest} ${named.length > 0 ? "more" : "untitled"}`);
 		return `- ${name}: ${named.join(", ")}`;
@@ -41,5 +47,5 @@ export function describeWindowMiss(windows: readonly DesktopWindow[], app: strin
 		needle !== undefined && !apps.some(matched)
 			? `No open window belongs to an app matching ${JSON.stringify(app)}.\n`
 			: "";
-	return `${note}Open windows by app (id "title"):\n${lines.join("\n")}`;
+	return `${note}Open windows by app (id "title"; \`computer.windows({ app })\` lists all):\n${lines.join("\n")}`;
 }

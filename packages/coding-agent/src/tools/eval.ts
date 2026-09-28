@@ -9,7 +9,7 @@ import type {
 import type { ImageContent, ToolExample } from "@oh-my-pi/pi-ai";
 import { formatBackgroundNotice } from "@oh-my-pi/pi-tui/tools/bash";
 import { parseConfiguredThinkingLevel } from "@oh-my-pi/pi-tui/thinking";
-import { isRecord, prompt } from "@oh-my-pi/pi-utils";
+import { isRecord, logger, prompt } from "@oh-my-pi/pi-utils";
 import { raceJobSettlement, resolveAutoBackgroundWaitMs } from "../async";
 import { jsBackend, pythonBackend } from "../eval";
 import type { ExecutorBackend, ExecutorBackendResult } from "../eval/backend";
@@ -17,6 +17,7 @@ import { EVAL_TIMEOUT_PAUSE_OP, EVAL_TIMEOUT_RESUME_OP } from "../eval/bridge-ti
 import { IdleTimeout } from "../eval/idle-timeout";
 import {
 	type EvalPreludeDefinition,
+	type EvalPreludeSettleReply,
 	evalPreludeSummary,
 	getEnabledEvalPreludes,
 	runWithEvalPreludeCell,
@@ -969,20 +970,29 @@ export class EvalTool implements AgentTool<typeof evalSchema> {
 					flushUpdate();
 					activeLiveCell = undefined;
 				}
-				const durationMs = Date.now() - startTime;
 				const preludeReplies: string[] = [];
 				// Settle images join the cell's own displays, so they are resized and noted alike.
 				const displayOutputs = [...result.displayOutputs];
 				if (!result.cancelled) {
 					const failed = result.exitCode !== undefined && result.exitCode !== 0;
 					for (const prelude of getEnabledEvalPreludes(session.getEvalPreludes?.() ?? [])) {
-						const reply = await prelude.settleCell?.(preludeCell, { failed });
+						let reply: EvalPreludeSettleReply | undefined;
+						try {
+							reply = await prelude.settleCell?.(preludeCell, { failed });
+						} catch (error) {
+							// One prelude's settle must not cost the cell its output.
+							logger.warn("Eval prelude settle failed", {
+								prelude: prelude.name,
+								error: error instanceof Error ? error.message : String(error),
+							});
+						}
 						if (reply?.text) preludeReplies.push(reply.text);
 						for (const image of reply?.images ?? [])
 							displayOutputs.push({ type: "image", data: image.data, mimeType: image.mimeType });
 					}
 				}
-
+				// Settling is part of the cell as the model sees it.
+				const durationMs = Date.now() - startTime;
 				const cellStatusEvents: EvalStatusEvent[] = [];
 				const cellDisplayTexts: string[] = [];
 				const cellImageNotes: string[] = [];

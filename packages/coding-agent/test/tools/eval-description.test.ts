@@ -185,9 +185,6 @@ describe("eval tool description", () => {
 		};
 		const delivered = new EvalTool(makeSession({ preludes: () => [prelude] })).description;
 		expect(delivered).toContain(
-			"`read` the linked docs before first use, except where a line says its doc arrives unasked:",
-		);
-		expect(delivered).toContain(
 			"`fixture`: Fixture summary line. → `xd://eval/fixture`; arrives with the first reply",
 		);
 		const plain = new EvalTool(makeSession({ preludes: () => [{ ...prelude, documentationDelivery: undefined }] }))

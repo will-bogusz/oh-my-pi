@@ -181,10 +181,14 @@ export function createComputerPrelude(
 			try {
 				return await controller.settle(buildComputerSnapshot(session, true), cell.signal);
 			} catch (error) {
-				logger.debug("Computer cell settle failed", {
-					error: error instanceof Error ? error.message : String(error),
-				});
-				return undefined;
+				// Cancellation of the turn needs no report; anything else leaves the
+				// model without its post-input observation, so it is told to look.
+				if (cell.signal.aborted) return undefined;
+				const message = error instanceof Error ? error.message : String(error);
+				logger.debug("Computer cell settle failed", { error: message });
+				return {
+					text: `No post-input report for this cell (${message}); read the windows it touched before continuing.`,
+				};
 			}
 		},
 	};
@@ -321,7 +325,11 @@ async function runComputer(
 		run.returnValue !== undefined;
 	const guide = acquired ? teachGuide() : undefined;
 	const cappedText = await enforceInlineByteCap(text, {
-		maxBytes: DEFAULT_MAX_BYTES - (guide === undefined ? 0 : Buffer.byteLength(guide, "utf-8")),
+		// The guide shares the reply's cap; the rest keeps at least a quarter of it.
+		maxBytes: Math.max(
+			DEFAULT_MAX_BYTES / 4,
+			DEFAULT_MAX_BYTES - (guide === undefined ? 0 : Buffer.byteLength(guide, "utf-8")),
+		),
 		saveArtifact: full => saveComputerOutputArtifact(session, full),
 	});
 	const replyText = [guide, cappedText].filter(Boolean).join("\n\n");
