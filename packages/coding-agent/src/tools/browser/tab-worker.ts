@@ -1219,6 +1219,8 @@ interface ActiveRun {
 	id: string;
 	ac: AbortController;
 	signal: AbortSignal;
+	/** The run was cancelled or ran out of time: unlike its normal end, work it left unfinished was abandoned. */
+	abandoned: AbortSignal;
 	output: RunOutput;
 	screenshots: ScreenshotResult[];
 	pendingTools: Map<string, { resolve(value: unknown): void; reject(error: Error): void }>;
@@ -1638,6 +1640,7 @@ export class WorkerCore {
 			id: msg.id,
 			ac,
 			signal,
+			abandoned: AbortSignal.any([timeoutSignal, ac.signal]),
 			output,
 			screenshots,
 			pendingTools: new Map(),
@@ -2042,6 +2045,7 @@ export class WorkerCore {
 						waitUntil: opts?.waitUntil,
 						signal: sig,
 						stopLoading: () => this.#stopLoading(),
+						abandonSignal: active.abandoned,
 					});
 				}),
 			// Main-frame history, not puppeteer's goBack: it waits on every child

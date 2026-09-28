@@ -50,6 +50,12 @@ export interface MainFrameNavigateOptions {
 	signal?: AbortSignal;
 	/** Best-effort `Page.stopLoading`, run before a timeout is reported; true when Chrome acknowledged it. */
 	stopLoading?: () => Promise<boolean>;
+	/**
+	 * Aborted when the caller gave the navigation up (cancelled, or out of
+	 * time), so its load is stopped. `signal` alone also aborts when a run ends
+	 * normally with a navigation still in flight, whose load must go on.
+	 */
+	abandonSignal?: AbortSignal;
 }
 
 /**
@@ -73,9 +79,13 @@ export async function navigateMainFrame(page: Page, url: string, opts: MainFrame
 	const waitUntil = opts.waitUntil ?? "load";
 	const sameDocument = sameDocumentTarget(page.url(), url);
 	const session = await untilAborted(opts.signal, () => page.createCDPSession());
+	let sent = false;
 	try {
 		const navigated = await withTimeout(
-			untilAborted(opts.signal, () => session.send("Page.navigate", { url })),
+			untilAborted(opts.signal, () => {
+				sent = true;
+				return session.send("Page.navigate", { url });
+			}),
 			Math.max(deadline - Date.now(), 1),
 			new PhaseTimeout(`navigation to ${url} never committed`),
 		);
@@ -109,9 +119,12 @@ export async function navigateMainFrame(page: Page, url: string, opts: MainFrame
 		const timedOut = error instanceof PhaseTimeout || (error instanceof Error && error.name === "TimeoutError");
 		if (timedOut) await reportNavigationTimeout(page, opts);
 		// An abandoned load keeps going in Chrome: it stalls later ops on this
-		// page, and every new tab's attach to the browser waits on it. Stopped
-		// without waiting, as the abort must answer now.
-		if (opts.signal?.aborted) void opts.stopLoading?.().catch(() => undefined);
+		// page, and every new tab's attach to the browser waits on it. The stop
+		// goes out now, on this navigation's own session, so it reaches Chrome
+		// ahead of any navigation this worker sends next; not awaited, as the
+		// abort must answer now.
+		if (sent && sameDocument === undefined && opts.abandonSignal?.aborted)
+			void session.send("Page.stopLoading").catch(() => undefined);
 		throw error;
 	} finally {
 		// Not awaited: a slow detach must not hold the answer past its deadline.
