@@ -5637,6 +5637,43 @@ it("says a covered scroll target in the caller's point and sends nothing", async
 	}
 });
 
+it("says a scroll the driver could not send, at the caller's point, and who has the pointer", async () => {
+	const f = await fixture();
+	/** The driver's `not_sent_refusal`: its point in screenshot pixels and its reason. */
+	const notSent = (reason: string): CuaToolResult => ({
+		text: `scroll not sent at (2, 1): ${reason}; no wheel event was posted`,
+		structuredJson: JSON.stringify({ code: "scroll_not_sent", window_id: 1, point: { x: 2, y: 1 }, reason }),
+		isError: true,
+		errorCode: "scroll_not_sent",
+		images: [],
+	});
+	const scroll = (target?: [number, number]) =>
+		f.session.scroll(f.context, f.window, "down", target, { delivery: "foreground" }).then(
+			() => undefined,
+			(thrown: unknown) => (thrown instanceof ToolError ? thrown.message : thrown),
+		);
+	try {
+		await f.session.captureWindow(f.context, f.window, { silent: true });
+		f.state.hook = async name =>
+			name === "scroll" ? notSent("the pointer moved to (10, 10) during the scroll; the user has it") : undefined;
+		expect(await scroll([150, 60])).toBe(
+			"scroll_not_sent: nothing was sent — at (150, 60), the pointer moved to (10, 10) during the scroll; the user has it. The user has the pointer or the front app now: do not retry this scroll; wait until they are done, or ask.",
+		);
+		// Untargeted: the driver's pixel point, mapped back into window points.
+		f.state.hook = async name =>
+			name === "scroll" ? notSent("another application came to the front during the scroll") : undefined;
+		expect(await scroll()).toBe(
+			"scroll_not_sent: nothing was sent — at (100, 50), another application came to the front during the scroll. The user has the pointer or the front app now: do not retry this scroll; wait until they are done, or ask.",
+		);
+		f.state.hook = async name => (name === "scroll" ? notSent("input stopped: event tap refused") : undefined);
+		expect(await scroll([150, 60])).toBe(
+			"scroll_not_sent: nothing was sent — at (150, 60), input stopped: event tap refused. Observe before scrolling again.",
+		);
+	} finally {
+		await f.close();
+	}
+});
+
 it("prints an app's note once per conversation, with the first window of the bundle it is keyed on", async () => {
 	const mirror = await fixture({ bundles: { 101: "com.apple.ScreenContinuity" } });
 	const notes = () => mirror.texts.filter(text => text === appNote("com.apple.ScreenContinuity"));

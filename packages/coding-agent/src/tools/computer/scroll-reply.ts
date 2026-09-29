@@ -99,6 +99,16 @@ const STOPPED_EARLY = /(?:^|;\s*)stopped early:\s*(.+?)\.?$/i;
 const USER_TOOK_OVER = /the user has it|another application came to the front/i;
 
 /**
+ * The next step after a scroll the driver stopped or never sent, by why: a
+ * user who took the pointer or the front app is not to be fought.
+ */
+export function stoppedScrollAdvice(why: string): string {
+	return USER_TOOK_OVER.test(why)
+		? "The user has the pointer or the front app now: do not retry this scroll; wait until they are done, or ask."
+		: "Observe before scrolling again.";
+}
+
+/**
  * The verdict line. `where` is the point in the caller's coordinates, a ref,
  * or the window centre, already worded (`(163, 400)`, `n5`). `confirmed` is
  * the driver's own postcondition (`effect: "confirmed"`): only then does a
@@ -112,11 +122,7 @@ export function scrollVerdict(scroll: ComputerScrollOutcome, where: string, conf
 	const stop = stopped?.[1];
 	const verdict = measuredVerdict(scroll, where, confirmed, stop === undefined, scroll.reason?.slice(0, stopped?.index));
 	if (stop === undefined) return verdict;
-	return `${verdict}. Stopped early: ${stop}. ${
-		USER_TOOK_OVER.test(stop)
-			? "The user has the pointer or the front app now: do not retry this scroll; wait until they are done, or ask."
-			: "Observe before scrolling again."
-	}`;
+	return `${verdict}. Stopped early: ${stop}. ${stoppedScrollAdvice(stop)}`;
 }
 
 function measuredVerdict(

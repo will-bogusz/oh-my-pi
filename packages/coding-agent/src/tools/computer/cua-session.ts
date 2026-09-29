@@ -42,7 +42,7 @@ import {
 } from "./render";
 import { appWindows } from "./roster";
 import { normalizeQuery, reopenRoute } from "./selectors";
-import { readDriverScroll, scrollVerdict } from "./scroll-reply";
+import { readDriverScroll, scrollVerdict, stoppedScrollAdvice } from "./scroll-reply";
 import { PERFORMABLE_ACTIONS, observedActions, semanticAction } from "./semantic-actions";
 import type {
 	ActionOptions,
@@ -2875,38 +2875,35 @@ export class CuaComputerSession implements ComputerBackend {
 					: typeof target === "string"
 						? target
 						: "the window centre";
-			const measure: Measure = data => {
-				const driven = readDriverScroll(data);
-				if (driven === undefined) return undefined;
-				// The driver's point is local to the window the wire addressed,
-				// which for a sheet's ref is the sheet: only this window's own
-				// frame maps it back.
+			// The driver's point is local to the window the wire addressed,
+			// which for a sheet's ref is the sheet: only this window's own
+			// frame maps it back, and only an untargeted scroll needs it.
+			const mapBack = (point: { x: number; y: number } | undefined): readonly [number, number] | undefined => {
 				const frame = this.#frames.get(current.id);
-				const mapped =
-					given === undefined &&
-					driven.point !== undefined &&
+				return given === undefined &&
+					point !== undefined &&
 					addressed.window_id === Number(current.id) &&
 					frame !== undefined &&
 					frame.window.pid === current.pid &&
 					sameBounds(frame.window.bounds, current.bounds)
-						? ([
-								(driven.point.x * frame.image.pointWidth) / frame.sdkWidth + frame.image.originX,
-								(driven.point.y * frame.image.pointHeight) / frame.sdkHeight + frame.image.originY,
-							] as const)
-						: undefined;
-				const point = given ?? mapped;
+					? [
+							(point.x * frame.image.pointWidth) / frame.sdkWidth + frame.image.originX,
+							(point.y * frame.image.pointHeight) / frame.sdkHeight + frame.image.originY,
+						]
+					: undefined;
+			};
+			/** Where a reply says the wheel went: the caller's target, else the driver's point mapped back. */
+			const whereAt = (point: readonly [number, number] | undefined): string =>
+				!target && point !== undefined ? `(${Math.round(point[0])}, ${Math.round(point[1])})` : described;
+			const measure: Measure = data => {
+				const driven = readDriverScroll(data);
+				if (driven === undefined) return undefined;
+				const point = given ?? mapBack(driven.point);
 				const scroll = {
 					...driven.outcome,
 					...(point === undefined ? {} : { point: { x: Math.round(point[0]), y: Math.round(point[1]) } }),
 				};
-				return {
-					text: scrollVerdict(
-						scroll,
-						!target && scroll.point !== undefined ? `(${scroll.point.x}, ${scroll.point.y})` : described,
-						data.effect === "confirmed",
-					),
-					scroll,
-				};
+				return { text: scrollVerdict(scroll, whereAt(point), data.effect === "confirmed"), scroll };
 			};
 			try {
 				return await this.#dispatch(
@@ -2917,7 +2914,32 @@ export class CuaComputerSession implements ComputerBackend {
 					measure,
 				);
 			} catch (error) {
-				if (!(error instanceof ToolError) || readReply(error.context).code !== "target_covered") throw error;
+				if (!(error instanceof ToolError)) throw error;
+				const refused = readReply(error.context);
+				const raw = refused.data.point;
+				const where = whereAt(
+					mapBack(
+						raw !== null &&
+							typeof raw === "object" &&
+							"x" in raw &&
+							typeof raw.x === "number" &&
+							"y" in raw &&
+							typeof raw.y === "number"
+							? { x: raw.x, y: raw.y }
+							: undefined,
+					),
+				);
+				// The driver raised the app and then found the gesture could not
+				// go out (the user took the pointer or the front app, or input
+				// failed) before a single wheel event was posted.
+				if (refused.code === "scroll_not_sent") {
+					const why = typeof refused.data.reason === "string" ? refused.data.reason : "the driver gave no reason";
+					throw new ToolError(
+						`scroll_not_sent: nothing was sent — at ${where}, ${why}. ${stoppedScrollAdvice(why)}`,
+						error.context,
+					);
+				}
+				if (refused.code !== "target_covered") throw error;
 				// Nothing was posted: after the app was raised, the topmost
 				// window at the point was another app's (`covered_by`), or none
 				// of this window was on screen there (`covered_by: null`). The
@@ -2929,8 +2951,8 @@ export class CuaComputerSession implements ComputerBackend {
 						: undefined;
 				throw new ToolError(
 					owner === undefined
-						? `target_covered: nothing was sent — at ${described}, window ${current.id} is not on screen under that point even after its app was raised. Scroll at a point inside the part of window ${current.id} that is visible.`
-						: `target_covered: nothing was sent — at ${described}, window ${current.id} stays covered by ${owner} even after its app was raised. Scroll at a point where window ${current.id} is on top, or ask the user to move the covering window.`,
+						? `target_covered: nothing was sent — at ${where}, window ${current.id} is not on screen under that point even after its app was raised. Scroll at a point inside the part of window ${current.id} that is visible.`
+						: `target_covered: nothing was sent — at ${where}, window ${current.id} stays covered by ${owner} even after its app was raised. Scroll at a point where window ${current.id} is on top, or ask the user to move the covering window.`,
 					error.context,
 				);
 			}
