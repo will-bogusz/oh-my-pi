@@ -20,6 +20,7 @@ import {
 import { ManagedChromeTabs } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/managed-tabs";
 import type { RelayToExtMessage, TabSnapshot } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
 import { startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
+import { UserStoppedError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 
 const tab = (tabId: number): TabSnapshot => ({
 	tabId,
@@ -452,13 +453,16 @@ it("explains a raw TargetCloseError with Chrome's reason, never retries past the
 			new Error("Attempted to use detached Frame '6F2802E97123F398ECC824571324075B'."),
 		])
 			expect((await explainRevokedChromeControl(handle, inFlight))?.message).toBe(revoked);
-		// The user pressing Cancel on Chrome's infobar is a decision: no call claims its way past it.
+		// The user pressing Cancel on Chrome's infobar is a decision, not a failure:
+		// a user stop, and no call claims its way past it.
 		relay.instances.extMessage(extension, JSON.stringify({ t: "detached", tabId: 1, reason: "canceled_by_user" }));
 		let ran = false;
 		const operation = async () => {
 			ran = true;
 		};
-		await expect(runOnChromePage(handle, session, 1000, undefined, operation)).rejects.toThrow(
+		const stopped = runOnChromePage(handle, session, 1000, undefined, operation);
+		await expect(stopped).rejects.toBeInstanceOf(UserStoppedError);
+		await expect(stopped).rejects.toThrow(
 			`The user stopped OMP's control of "Sign in" from Chrome's infobar. Do not claim it again`,
 		);
 		expect(ran).toBe(false);

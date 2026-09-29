@@ -1,7 +1,7 @@
 import { logger, untilAborted } from "@oh-my-pi/pi-utils";
 import type { DialogJournalState } from "./dialog-journal";
 import type { ToolSession } from "../../sdk";
-import { ToolAbortError, throwIfAborted } from "../tool-errors";
+import { ToolAbortError, throwIfAborted, UserStoppedError } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { acquireBrowser, holdBrowser, releaseBrowser } from "./registry";
 import { readRelayControlToken } from "./relay/access";
@@ -556,12 +556,13 @@ async function lostChromeControl(
  * A lost page call in the model's terms, since a raw "Target closed" reads as
  * a closed tab: why the lease is over, or Chrome's reason, where the tab stays
  * open, and `next`. The user pressing Cancel on Chrome's infobar is a decision
- * about this session, so that answer offers no way around it.
+ * about this session, not a failure: a {@link UserStoppedError} whose answer
+ * offers no way around it.
  */
 function describeLostControl(lost: InstanceLease | ChromeTabGoneError, next: string): ToolError {
 	if (lost instanceof ChromeTabGoneError) return lost;
 	if (lost.debugger?.canceledByUser)
-		return new ToolError(
+		return new UserStoppedError(
 			`The user stopped OMP's control of ${chromeTabName(lost.tab)} from Chrome's infobar. Do not claim it again, ` +
 				"reconnect, or work around it; stop here and report what was done and what remains.",
 		);
