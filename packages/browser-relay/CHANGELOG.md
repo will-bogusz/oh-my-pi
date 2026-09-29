@@ -22,9 +22,11 @@
 - Adopting a `target="_blank"` child no longer touches tab selection or window focus: whatever Chrome did with the selection stands, because putting the displaced tab back only made OMP look like it showed the wrong page.
 - Documents whose favicon Chrome will not re-read, such as PDFs in its built-in viewer, are no longer badged; a PDF tab kept after a task used to wear the cursor glyph permanently.
 
+## [18.3.1] - 2026-09-25
+
 ### Fixed
 
-- Fixed browser relay support for multiple browser instances, such as Chrome and Edge, connected simultaneously. Each browser's stable instance id (the id it pairs with, sent in every hello) namespaces its tabs, target ids and relay requests, so equal tab numbers in two browsers never collide. Existing pairings keep working; a build that predates the field stays bound to the browser it authenticated as.
+- Fixed browser relay support when multiple browser instances, such as Chrome and Edge, are connected simultaneously, ensuring tabs and relay requests remain associated with the correct browser while preserving single-browser compatibility for extensions without an instance identifier.
 
 ## [18.0.7] - 2026-08-26
 

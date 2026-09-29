@@ -23,6 +23,7 @@ function makeSession(settings: Record<string, unknown>): ToolSession {
 			"browser.enabled": true,
 			"browser.headless": true,
 			"browser.cmux": false,
+			"browser.tern": false,
 			...settings,
 		}),
 	};

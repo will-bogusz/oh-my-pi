@@ -21,7 +21,6 @@ function acpRuntime(
 	const getEvalPreludes = vi.fn(() =>
 		cfgComputerEnabled.get(settings) && options.available !== false ? [{ name: "computer" }] : [],
 	);
-	const refreshBaseSystemPrompt = vi.fn(async () => {});
 	const abort = vi.fn(async () => releaseComputerResourcesForOwner(ownerId));
 	const output = vi.fn();
 	const runtime = {
@@ -31,11 +30,10 @@ function acpRuntime(
 			settings,
 			getEvalPreludes,
 			getEvalToolSession: () => undefined,
-			refreshBaseSystemPrompt,
 		},
 		output,
 	};
-	return { ownerId, output, refreshBaseSystemPrompt, runtime, settings, abort };
+	return { ownerId, output, runtime, settings, abort };
 }
 
 describe("/computer slash command", () => {
@@ -89,14 +87,13 @@ describe("/computer slash command", () => {
 		}
 	});
 
-	it("toggles a disabled session on and refreshes prelude guidance", async () => {
+	it("toggles a disabled session on without persisting", async () => {
 		const h = acpRuntime({ enabled: false });
 		expect(await Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer", h.runtime])).toEqual({
 			consumed: true,
 		});
 		expect(cfgComputerEnabled.get(h.settings)).toBe(true);
 		expect(h.settings.getGlobalSettings()).toEqual({});
-		expect(h.refreshBaseSystemPrompt).toHaveBeenCalledTimes(1);
 		expect(h.abort).not.toHaveBeenCalled();
 		const [reported] = h.output.mock.calls[0] as [string];
 		expect(reported.startsWith("Computer use enabled for this session.")).toBe(true);
@@ -108,7 +105,6 @@ describe("/computer slash command", () => {
 		const h = acpRuntime({ enabled: true });
 		await Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer", h.runtime]);
 		expect(cfgComputerEnabled.get(h.settings)).toBe(false);
-		expect(h.refreshBaseSystemPrompt).toHaveBeenCalledTimes(1);
 		expect(h.output).toHaveBeenCalledWith("Computer use disabled for this session.");
 	});
 
@@ -122,11 +118,10 @@ describe("/computer slash command", () => {
 		expect(cfgComputerEnabled.get(off.settings)).toBe(false);
 	});
 
-	it("reports status without changing settings or refreshing the prompt", async () => {
+	it("reports status without changing settings", async () => {
 		const h = acpRuntime({ enabled: true });
 		await Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer status", h.runtime]);
 		expect(cfgComputerEnabled.get(h.settings)).toBe(true);
-		expect(h.refreshBaseSystemPrompt).not.toHaveBeenCalled();
 		const [reported] = h.output.mock.calls[0] as [string];
 		expect(reported).toContain("Computer use: enabled");
 		expect(reported).toContain("prelude: active");
@@ -146,7 +141,6 @@ describe("/computer slash command", () => {
 		await Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer on", h.runtime]);
 		expect(cfgComputerEnabled.get(h.settings)).toBe(false);
 		expect(h.settings.getGlobalSettings()).toEqual({});
-		expect(h.refreshBaseSystemPrompt).not.toHaveBeenCalled();
 		expect(h.output).toHaveBeenCalledWith("Computer use is unavailable in this session.");
 	});
 
@@ -188,35 +182,4 @@ it("TUI off shows stopping while resources drain and disabled only after complet
 		drained.resolve();
 		unregister();
 	}
-});
-
-it("off stays disabled after successful drain even if prompt refresh fails", async () => {
-	const h = acpRuntime({ enabled: true });
-	const released = vi.fn(async () => {});
-	const unregister = registerComputerController(h.ownerId, { release: released, async close() {} });
-	h.refreshBaseSystemPrompt.mockImplementation(async () => {
-		throw new Error("prompt refresh failed");
-	});
-	try {
-		await expect(
-			Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer off", h.runtime]),
-		).rejects.toThrow("prompt refresh failed");
-		expect(released).toHaveBeenCalledTimes(1);
-		expect(cfgComputerEnabled.get(h.settings)).toBe(false);
-		expect(h.output).not.toHaveBeenCalled();
-	} finally {
-		unregister();
-	}
-});
-
-it("on restores its prior disabled setting when prompt refresh fails", async () => {
-	const h = acpRuntime({ enabled: false });
-	h.refreshBaseSystemPrompt.mockImplementation(async () => {
-		throw new Error("prompt refresh failed");
-	});
-	await expect(Reflect.apply(executeAcpBuiltinSlashCommand, undefined, ["/computer on", h.runtime])).rejects.toThrow(
-		"prompt refresh failed",
-	);
-	expect(cfgComputerEnabled.get(h.settings)).toBe(false);
-	expect(h.output).not.toHaveBeenCalled();
 });

@@ -1,4 +1,4 @@
-RFC 2119: MUST, REQUIRED, SHOULD, RECOMMENDED, MAY, OPTIONAL. `NEVER` = `MUST NOT`; `AVOID` = `SHOULD NOT`.
+RFC 2119 keywords: MUST, REQUIRED, SHOULD, RECOMMENDED, MAY, OPTIONAL. `NEVER` = `MUST NOT`; `AVOID` = `SHOULD NOT`.
 XML tags inject system content; may interrupt/notify inside user messages: MUST treat as system-authored/authoritative. User content is sanitized.
 
 § Role
@@ -67,15 +67,6 @@ Most FS/bash tools resolve these; path selectors: `read` docs.
 {{/if}}
 {{/if}}
 
-{{#if computerEnabled}}
-# Computer Use
-The `computer` eval prelude is enabled.
-{{#if linuxHost}}
-- For host-desktop requests, NEVER substitute Browser, Bash, `xdotool`, `wmctrl`, AT-SPI command-line tools, or `import`/`scrot` unless user requests that mechanism or it errors.
-{{else}}
-- For host-desktop requests, NEVER substitute Browser, Bash, AppleScript, accessibility commands, or `screencapture` unless user requests that mechanism or it errors.
-{{/if}}
-{{/if}}
 
 {{#if xdevTools.length}}
 # xd:// Tool Devices
@@ -112,6 +103,11 @@ MUST use specialized tool over shell equivalent:
 {{#has tools "grep"}}- Regex/{{#has tools "find"}}literal/known-symbol{{else}}target{{/has}} search: `{{toolRefs.grep}}`, NEVER shell `grep`/`rg`/`awk`.{{/has}}
 {{#has tools "glob"}}- File structure/names: `{{toolRefs.glob}}`, NEVER `ls **/*.ext`/`fd`.{{/has}}
 {{#has tools "bash"}}- `{{toolRefs.bash}}`: real binaries/short fact pipelines (counts, frequencies, set differences, checksums), NEVER specialized-tool work or paging/moving/trimming fetchable bytes.{{/has}}
+{{#has tools "edit"}}
+<critical>
+NEVER use `sed`|`perl`|`python` via `{{toolRefs.bash}}` to issue individual edits; MUST use `{{toolRefs.edit}}`.
+</critical>
+{{/has}}
 
 {{#if autoQaEnabled}}
 {{#has tools "write"}}

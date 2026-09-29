@@ -38,7 +38,7 @@ interface BrowserAcquireOptions extends BrowserChromeOptions {
 interface BrowserOpenOptions {
 	name?: string;
 	url?: string;
-	app?: { path?: string; cdp_url?: string; relay?: boolean; args?: string[]; target?: string };
+	app?: { path?: string; cdp_url?: string; relay?: boolean; tern?: boolean; args?: string[]; target?: string };
 	viewport?: { width: number; height: number; scale?: number };
 	wait_until?: BrowserWaitUntil;
 	dialogs?: "accept" | "dismiss";
@@ -113,7 +113,7 @@ interface BrowserManagedTab {
 	url: string;
 	title: string;
 	targetId: string;
-	kind: "headless" | "spawned" | "connected" | "relay" | "cmux";
+	kind: "headless" | "spawned" | "connected" | "relay" | "cmux" | "tern";
 	persist: boolean;
 }
 /** the pending JavaScript dialog; in the user's Chrome answering needs its `id` */

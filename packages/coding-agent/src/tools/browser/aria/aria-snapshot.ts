@@ -51,6 +51,15 @@ export function buildAriaRefScript(ref: string): string {
 	return `(function(){var module={exports:{}};\n${ariaBundle}\nreturn module.exports.resolveAriaRef(${JSON.stringify(ref)});})()`;
 }
 
+/**
+ * Playwright-only selector engines/pseudos no backend can parse. Without this guard a
+ * `tab.click(":has-text(...)")` would wait the full action timeout and fail opaquely;
+ * fail fast instead with a pointer to the supported alternative. Callers skip it for
+ * explicit query-handler prefixes (`text/`, `aria/`, …) whose payload is literal text.
+ */
+export const PLAYWRIGHT_ONLY_SELECTOR_RE =
+	/:has-text\(|:text\(|:text-is\(|:text-matches\(|:visible\b|:hidden\b|:nth-match\(|:near\(|:above\(|:below\(|:right-of\(|:left-of\(/;
+
 const ARIA_REF_PREFIXES = ["aria-ref=", "aria-ref/", "ariaref/"];
 
 /**

@@ -67,6 +67,7 @@ function makeSession(): ToolSession {
 			"browser.headless": true,
 			"browser.relay": false,
 			"browser.cmux": false,
+			"browser.tern": false,
 		}),
 	};
 }

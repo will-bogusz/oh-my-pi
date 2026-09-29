@@ -203,6 +203,7 @@ export function createComputerPrelude(
 		python: assets.python,
 		exports: ["computer"],
 		codeModeDeclarations: assets.codeModeDeclarations,
+		guidance: assets.guidance,
 		approval: computerApproval,
 		enabled: () => cfgComputerEnabled.get(session.settings) === true,
 		invoke: async (parameters, context) => {

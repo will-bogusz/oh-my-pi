@@ -1,4 +1,5 @@
 import { prompt } from "@oh-my-pi/pi-utils";
+import computerUsePrompt from "../../prompts/system/computer-use.md" with { type: "text" };
 import computerDescription from "../../prompts/tools/computer.md" with { type: "text" };
 // @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
 import computerCodeModeDeclarations from "./declarations.d.ts" with { type: "text" };
@@ -15,4 +16,7 @@ export const computerPreludeAssets = {
 	javascript: computerJavascript as string,
 	python: computerPython,
 	codeModeDeclarations: computerCodeModeDeclarations as string,
+	// Appended as its own system-prompt block while the prelude is advertised,
+	// and replayed by the hidden prelude notice when enabled mid-session.
+	guidance: prompt.render(computerUsePrompt, { linux: process.platform === "linux" }),
 } as const;
