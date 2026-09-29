@@ -82,13 +82,15 @@ export const cfgBrowserCmux = register({
 export const cfgBrowserTern = register({
 	id: "browser.tern",
 	type: "boolean",
-	default: true,
+	// Off by default: Tern tabs lack the observation tree, eN refs and the
+	// select/click option checks the browser prompt teaches.
+	default: false,
 	ui: {
 		tab: "tools",
 		group: "Grep & Browser",
 		label: "Tern Browser",
 		description:
-			"Inside a Tern pane, open browser tabs as picture-in-pictures over omp's pane (native web view) instead of headless Chromium; falls back to Chromium when no Tern window can host them. Explicit app options, the relay and Browser CDP URL take precedence; headed:false or app.tern:false opts one open out. Set PI_BROWSER_TERN=0 or PI_BROWSER_TERN=1 to override.",
+			"Inside a Tern pane, open browser tabs as picture-in-pictures over omp's pane (native web view) instead of headless Chromium; falls back to Chromium when no Tern window can host them. Off by default: Tern tabs do not yet print the observation tree and refs the browser guide describes. Explicit app options, the relay and Browser CDP URL take precedence; headed:false or app.tern:false opts one open out. Set PI_BROWSER_TERN=0 or PI_BROWSER_TERN=1 to override.",
 	},
 });
 

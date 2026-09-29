@@ -12,7 +12,7 @@ function session(settings: Record<string, unknown> = {}): ToolSession {
 		hasUI: false,
 		getSessionFile: () => null,
 		getSessionSpawns: () => null,
-		settings: Settings.isolated({ "browser.relay": false, ...settings }),
+		settings: Settings.isolated({ "browser.relay": false, "browser.tern": true, ...settings }),
 	};
 }
 
