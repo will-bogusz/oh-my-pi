@@ -371,9 +371,9 @@ export async function acquireChromeTab(
 	};
 	try {
 		// Attach through the relay before any page worker does. A dialog seen
-		// open there is reported as `initialDialog`; a page that cannot answer
-		// the debugger at all is refused within seconds, where a worker would
-		// wait on it for minutes.
+		// open there is reported as `initialDialog`; a page that does not answer
+		// the debugger within the relay's probe is refused then, where a worker
+		// would wait on it for minutes.
 		if (lease.dialog?.status !== "open") handle.lease.dialog = await chromeDialog(handle, {}, opts.signal);
 		// A renderer blocked by a JavaScript dialog never resolves `target.page()`,
 		// so the page worker attaches on the first call after the dialog is

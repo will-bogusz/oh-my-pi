@@ -137,7 +137,7 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 					return Response.json({});
 				} catch (error) {
 					// `gone` tells the client this lease or tab id is over, so it can retire its handle;
-					// `unresponsive` that the tab's page did not answer the debugger, which only the user can clear.
+					// `unresponsive` that the tab's page did not answer the debugger in time (a busy page, or a dialog OMP never saw).
 					return Response.json(
 						{
 							error: error instanceof Error ? error.message : String(error),

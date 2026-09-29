@@ -1990,50 +1990,64 @@ it("answers only the observed dialog on an owned tab through its original debugg
 	bridge.extClosed(ext);
 });
 
-it("hands the debugger back within seconds from a page that cannot answer it, without banning the tab", async () => {
+it("waits out a busy page, refuses one that stays silent without banning it, and holds every caller until the probe decides", async () => {
 	const bridge = new RelayBridge();
 	const ext = new FakeExtSocket();
 	connect(bridge, ext, [tab({ tabId: 1, url: "https://example.com/form" })]);
 	const managed = bridge.managed(BROWSER);
 	const lease = managed.claim(managed.discover()[0]!.id, "owner");
+	const settled = <T>(promise: Promise<T>) => {
+		const state: { done: boolean; value?: unknown } = { done: false };
+		void promise.then(
+			value => Object.assign(state, { done: true, value }),
+			(error: unknown) => Object.assign(state, { done: true, value: error }),
+		);
+		return state;
+	};
 	// A dialog that opened before any debugger: Chrome runs nothing in the page
 	// and tells the debugger nothing about the dialog.
 	ext.pageAnswers = false;
 	jest.useFakeTimers();
 	try {
-		const looking = bridge.dialog(lease.id, "owner", {}).then(
-			() => undefined,
-			(error: unknown) => error,
-		);
+		const first = settled(bridge.dialog(lease.id, "owner", {}));
 		await flush();
 		ack(bridge, ext, "attach");
 		await flush();
 		expect(ext.pending("send")).toMatchObject([{ method: "Runtime.evaluate", params: { expression: "0" } }]);
-		jest.advanceTimersByTime(1_999);
+		// A second caller during the probe does not see the tab as usable.
+		const second = settled(bridge.dialog(lease.id, "owner", {}));
+		jest.advanceTimersByTime(9_999);
 		await flush();
-		expect(ext.pending("detach")).toHaveLength(0);
+		expect([first.done, second.done, ext.pending("detach").length]).toEqual([false, false, 0]);
 		jest.advanceTimersByTime(1);
 		await flush();
 		expect(ext.pending("detach")).toHaveLength(1);
 		ack(bridge, ext, "detach");
-		const refusal = await looking;
-		expect(refusal).toBeInstanceOf(ChromePageUnresponsiveError);
-		expect(String(refusal)).toContain("https://example.com/form");
+		await flush();
+		for (const caller of [first, second]) {
+			expect(caller.value).toBeInstanceOf(ChromePageUnresponsiveError);
+			expect(String(caller.value)).toContain("did not respond to OMP's debugger in time (https://example.com/form)");
+		}
+		// Nothing but the probe went to the page, and the tab is not banned.
+		expect(ext.rpcs("send")).toHaveLength(1);
+		nack(bridge, ext, "send", "Detached while handling command.");
+		expect(bridge.debuggerState(BROWSER, 1)).toEqual({ attached: false });
+
+		// A page busy with one long task answers once it ends: the attach goes on.
+		const busy = settled(bridge.dialog(lease.id, "owner", {}));
+		await flush();
+		ack(bridge, ext, "attach");
+		await flush();
+		jest.advanceTimersByTime(4_000);
+		await flush();
+		expect(busy.done).toBe(false);
+		ack(bridge, ext, "send");
+		await flush();
+		expect(busy.value).toMatchObject({ status: "unobserved" });
+		expect(bridge.debuggerState(BROWSER, 1)).toEqual({ attached: true });
 	} finally {
 		jest.useRealTimers();
 	}
-	// Nothing but the probe went to the page, and the tab is not banned.
-	expect(ext.rpcs("send")).toHaveLength(1);
-	nack(bridge, ext, "send", "Detached while handling command.");
-	expect(bridge.debuggerState(BROWSER, 1)).toEqual({ attached: false });
-
-	// Once the user answers the dialog, the next look attaches as usual.
-	ext.pageAnswers = true;
-	const looking = bridge.dialog(lease.id, "owner", {});
-	await flush();
-	ack(bridge, ext, "attach");
-	expect((await looking).status).toBe("unobserved");
-	expect(bridge.debuggerState(BROWSER, 1)).toEqual({ attached: true });
 	await release(bridge, ext, lease.id, "owner");
 	bridge.extClosed(ext);
 });

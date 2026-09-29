@@ -1553,11 +1553,13 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 );
 
 it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
-	"refuses a claim of a tab blocked by a dialog OMP never saw within seconds, leaves no lease, then claims it once the dialog is gone",
+	"refuses a claim of a tab blocked by a dialog OMP never saw, leaves no lease, claims it once the dialog is gone, and waits out a page busy with a long task",
 	async () => {
 		const go = Promise.withResolvers<void>();
 		const alerting = Promise.withResolvers<void>();
 		const answered = Promise.withResolvers<void>();
+		const busyGo = Promise.withResolvers<void>();
+		const busying = Promise.withResolvers<void>();
 		const fixture = Bun.serve({
 			hostname: "127.0.0.1",
 			port: 0,
@@ -1567,6 +1569,28 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 					await go.promise;
 					return new Response(null, { status: 204 });
 				}
+				if (route === "/busy-go") {
+					await busyGo.promise;
+					return new Response(null, { status: 204 });
+				}
+				if (route === "/busying") {
+					busying.resolve();
+					return new Response(null, { status: 204 });
+				}
+				// A healthy page whose main thread is busy for 4 s: silent, but not blocked.
+				if (route === "/busy")
+					return new Response(
+						`<title>Busy page</title><p id="state">idle</p>
+						<script>
+							fetch("/busy-go").then(() => {
+								fetch("/busying");
+								const end = Date.now() + 4000;
+								while (Date.now() < end) {}
+								document.getElementById("state").textContent = "done";
+							});
+						</script>`,
+						{ headers: { "content-type": "text/html" } },
+					);
 				if (route === "/alerting") {
 					alerting.resolve();
 					return new Response(null, { status: 204 });
@@ -1661,9 +1685,9 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				() => undefined,
 				(error: unknown) => error,
 			);
-			expect(performance.now() - started).toBeLessThan(10_000);
+			expect(performance.now() - started).toBeLessThan(15_000);
 			expect(refused).toBeInstanceOf(ChromePageUnresponsiveError);
-			expect(String(refused)).toContain("Ask the user to answer any dialog in that tab");
+			expect(String(refused)).toContain("ask the user to answer any dialog open in that tab");
 			// Nothing answered the dialog on the way in, and no lease was left behind.
 			expect((await relay.instances.refresh()).find(candidate => candidate.id === tab!.id)).toMatchObject({
 				ownership: "available",
@@ -1685,6 +1709,22 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 			expect((await relay.instances.refresh()).find(candidate => candidate.id === tab!.id)).toMatchObject({
 				ownership: "available",
 			});
+
+			// A page busy with one long task is waited out, not refused.
+			const busyTab = await relay.instances.create(`${fixture.url}busy`, "someone-else", "Setup");
+			await relay.instances.reveal(busyTab.id, "someone-else");
+			await relay.instances.releaseTab(busyTab.id, "someone-else", false);
+			busyGo.resolve();
+			await busying.promise;
+			const busyId = (await relay.instances.refresh()).find(candidate => candidate.tabId === busyTab.tab.tabId)!.id;
+			const busyClaim = await prelude.invoke({ action: "claim", id: busyId, timeout: 20 }, context);
+			const busyHandle = (busyClaim.details as { handle: string }).handle;
+			const busyText = await prelude.invoke(
+				{ action: "call", handle: busyHandle, chain: [{ method: "text", args: ["#state"] }], timeout: 20 },
+				context,
+			);
+			expect(busyText.details).toMatchObject({ value: "done" });
+			await prelude.invoke({ action: "release", handle: busyHandle }, context);
 		} finally {
 			await releaseChromeTabsForOwner("relay-preopened-dialog").catch(() => 0);
 			setup?.process()?.kill("SIGTERM");
