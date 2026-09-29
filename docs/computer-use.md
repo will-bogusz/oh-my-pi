@@ -103,11 +103,11 @@ The driver samples the window's pixels around the gesture, and the reply's first
 | `✓ Scrolled down 231 pt at (163, 400) (requested 231 pt; foreground pointer wheel, 2 chunks, 300 px)` | The content moved that far | `✓` |
 | `✓ At end: moved 58 of 231 pt at (…), then the view stopped at its end — …` | It reached its end; repeating moves nothing | `✓` |
 | `? Moved the other way: the view scrolled up 80 pt at (…) …` | It travelled against the request; observe first | `?` |
-| `✗ No motion at (…) — the view under that point did not scroll …` | Measured stillness; a background reply names `{ delivery: "foreground" }` | `✗` |
+| `✗ No motion at (…) — no displacement observed …` | Measured stillness: the view may be at its end, or nothing there takes the wheel; a background reply names `{ delivery: "foreground" }` | `✗` |
 | `? Changed in place at (…): pixels changed but nothing shifted …` | A pager, sheet or navigation; observe first | `?` |
 | `? Unmeasured: scrolled down at (…) …, but the capture was unavailable …` | No frames to judge by | `?` |
 
-`✓` needs the driver's own confirmation (`effect: "confirmed"`: travel the way asked, or an end reached without travelling back); anything else reads `?` or `✗`. The result's `scroll` field carries the outcome (`outcome`, `delivery`, `direction`, `point`, `requestedPt`, `movedPt`, `acrossPt`, `confidence`, `wheel`, `chunks`, `reason`), and a confirmed move carries the driver's `frame_motion` evidence. A driver that measures nothing keeps its own reply text.
+`✓` needs the driver's own confirmation (`effect: "confirmed"`: travel the way asked, or an end reached without travelling back); anything else reads `?` or `✗`. A gesture the driver cut short adds `Stopped early: <why>.` to the same line; when the why is the user moving the pointer or bringing another app to the front, the line says the user has it and not to retry, in place of the outcome's usual next step. The result's `scroll` field carries the outcome (`outcome`, `delivery`, `direction`, `point`, `requestedPt`, `movedPt`, `acrossPt`, `confidence`, `wheel`, `chunks`, `reason`), and a confirmed move carries the driver's `frame_motion` evidence. A driver that measures nothing keeps its own reply text.
 
 ### App notes
 

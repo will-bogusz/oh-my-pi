@@ -23,6 +23,7 @@ import { elideObservationTree } from "./computer/tree-elide";
 import type {
 	ComputerActionResult,
 	ComputerObservation,
+	ComputerRunOk,
 	ComputerScreenshot,
 	ComputerSessionSnapshot,
 	ComputerWindowAcquisition,
@@ -333,6 +334,11 @@ class ComputerLifetime {
 		return true;
 	}
 
+	/** Take back a topic a run taught but never delivered: its output was discarded with its failure. */
+	untaught(topic: `backend:${string}`): void {
+		this.#taught.get(this.#session.getSessionId?.() ?? null)?.delete(topic);
+	}
+
 	/**
 	 * Take ownership of capture files a run wrote. Only the driver session's
 	 * own naming (`$TMPDIR/omp-computer-*`) is accepted, so a path from
@@ -519,6 +525,7 @@ async function runComputer(
 	const coordinateSafe = usesCoordinateSafeImageSizing(session.getActiveModel?.());
 	const configuredMaxWidth = cfgComputerMaxWidth.get(session.settings);
 	const configuredMaxHeight = cfgComputerMaxHeight.get(session.settings);
+	const taughtHere: `backend:${string}`[] = [];
 	const snapshot: ComputerSessionSnapshot = {
 		cwd: session.cwd,
 		sessionId: session.getEvalSessionId?.() ?? session.getSessionId?.() ?? "computer",
@@ -532,11 +539,24 @@ async function runComputer(
 		display: cfgComputerDisplay.get(session.settings),
 		readOnly,
 		// Backends are rebuilt after every turn; this conversation's record
-		// of what it was told is not.
-		teach: topic => lifetime.teach(`backend:${topic}`),
+		// of what it was told is not. A failed run discards everything it
+		// printed, so what it taught is taken back below.
+		teach: topic => {
+			const key = `backend:${topic}` as const;
+			if (!lifetime.teach(key)) return false;
+			taughtHere.push(key);
+			return true;
+		},
 	};
-	const run = await controller.run(code, timeoutSeconds * 1000, snapshot, signal);
+	let run: ComputerRunOk;
+	try {
+		run = await controller.run(code, timeoutSeconds * 1000, snapshot, signal);
+	} catch (error) {
+		for (const topic of taughtHere) lifetime.untaught(topic);
+		throw error;
+	}
 	lifetime.own(run.screenshots.map(shot => shot.path));
+	if (signal?.aborted) for (const topic of taughtHere) lifetime.untaught(topic);
 	throwIfAborted(signal);
 
 	const details: ComputerPreludeDetails = {

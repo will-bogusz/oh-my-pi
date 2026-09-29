@@ -93,46 +93,76 @@ const OPPOSITE: Record<ComputerScrollOutcome["direction"], ComputerScrollOutcome
 	right: "left",
 };
 
+/** The driver's reason ends with `stopped early: <why>` when the gesture was cut short. */
+const STOPPED_EARLY = /(?:^|;\s*)stopped early:\s*(.+?)\.?$/i;
+/** Why-clauses the driver writes when the user, not the target, interrupted the gesture. */
+const USER_TOOK_OVER = /the user has it|another application came to the front/i;
+
 /**
  * The verdict line. `where` is the point in the caller's coordinates, a ref,
  * or the window centre, already worded (`(163, 400)`, `n5`). `confirmed` is
  * the driver's own postcondition (`effect: "confirmed"`): only then does a
  * move read ✓. Travel against the request is its own verdict, and a move
- * with no net travel reads as the end it is.
+ * with no net travel reads as the end it is. A gesture the driver cut short
+ * says why on the same line; one the user interrupted says the user has the
+ * pointer, and no outcome's own next step is offered in its place.
  */
 export function scrollVerdict(scroll: ComputerScrollOutcome, where: string, confirmed: boolean): string {
+	const stopped = scroll.reason === undefined ? undefined : STOPPED_EARLY.exec(scroll.reason);
+	const stop = stopped?.[1];
+	const verdict = measuredVerdict(scroll, where, confirmed, stop === undefined, scroll.reason?.slice(0, stopped?.index));
+	if (stop === undefined) return verdict;
+	return `${verdict}. Stopped early: ${stop}. ${
+		USER_TOOK_OVER.test(stop)
+			? "The user has the pointer or the front app now: do not retry this scroll; wait until they are done, or ask."
+			: "Observe before scrolling again."
+	}`;
+}
+
+function measuredVerdict(
+	scroll: ComputerScrollOutcome,
+	where: string,
+	confirmed: boolean,
+	advise: boolean,
+	reason: string | undefined,
+): string {
 	const moved = scroll.movedPt === null ? 0 : Math.round(scroll.movedPt);
 	const mark = confirmed ? "✓" : "?";
+	const next = (advice: string) => (advise ? ` — ${advice}` : "");
 	switch (scroll.outcome) {
 		case "moved":
 		case "at_end":
 			if (moved < 0)
 				return `? Moved the other way: the view scrolled ${OPPOSITE[scroll.direction]} ${-moved} pt at ${where}${detail(
 					scroll,
-				)} — observe before the next coordinate action`;
+				)}${next("observe before the next coordinate action")}`;
 			if (scroll.outcome === "moved" && moved > 0)
 				return `${mark} Scrolled ${scroll.direction} ${moved} pt at ${where}${detail(scroll)}`;
 			// Either signature — a bounce, or travel that stopped short with the
 			// frames settled — is the view's end; which one fired is not reported.
 			return `${mark} At end: moved ${moved}${
 				scroll.requestedPt === null ? "" : ` of ${Math.round(scroll.requestedPt)}`
-			} pt at ${where}, then the view stopped at its end — scrolling further ${scroll.direction} there moves nothing${detail(scroll)}`;
+			} pt at ${where}, then the view stopped at its end${next(
+				`scrolling further ${scroll.direction} there moves nothing`,
+			)}${detail(scroll)}`;
 		case "no_motion":
-			return `✗ No motion at ${where} — the view under that point did not scroll${detail(scroll)}; ${
-				scroll.delivery === "background"
-					? 'unless it is already at its end, retry with { delivery: "foreground" }: background wheels do not reach views that scroll only under the real pointer'
-					: "nothing there scrolls with the wheel (a pager or carousel pages by tapping its edge) or it is already at its end: pick a point inside the list"
+			return `✗ No motion at ${where} — no displacement observed${detail(scroll)}${
+				advise
+					? scroll.delivery === "background"
+						? '; the view may be at its end — unless it is, retry with { delivery: "foreground" }: background wheels do not reach views that scroll only under the real pointer'
+						: "; the view may be at its end, or nothing under that point scrolls with the wheel (a pager or carousel pages by tapping its edge)"
+					: ""
 			}`;
 		case "changed_in_place":
 			return `? Changed in place at ${where}: pixels changed but nothing shifted (a pager, sheet or navigation)${detail(
 				scroll,
-			)} — observe before the next coordinate action`;
+			)}${next("observe before the next coordinate action")}`;
 		case "unmeasured": {
 			// The driver words its reason `capture unavailable: <why>`.
-			const why = scroll.reason?.replace(/^capture unavailable:\s*/i, "");
+			const why = reason?.replace(/^capture unavailable:\s*/i, "");
 			return `? Unmeasured: scrolled ${scroll.direction} at ${where}${detail(scroll)}, but the capture was unavailable${
 				why ? `: ${why}` : ""
-			} — observe({ screenshot: true }) to see where it landed`;
+			}${next("observe({ screenshot: true }) to see where it landed")}`;
 		}
 	}
 }

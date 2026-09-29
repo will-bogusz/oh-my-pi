@@ -1509,6 +1509,15 @@ describe("computer preludes through the session", () => {
 		);
 		const notes = () => displays.join("\n").split("APP NOTE").length - 1;
 		try {
+			// A run that fails after the note was said discards its output with
+			// it, so the note is still owed to this conversation.
+			await expect(
+				runInContext(
+					'computer.run(async ({ desktop }) => { await desktop.window("42"); throw new Error("boom"); })',
+					realm,
+				),
+			).rejects.toThrow("boom");
+			expect(notes()).toBe(0);
 			await runInContext('computer.window("42", {screenshot:false})', realm);
 			await runInContext('computer.window("42", {screenshot:false})', realm);
 			expect(notes()).toBe(1);

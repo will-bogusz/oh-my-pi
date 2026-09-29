@@ -118,7 +118,7 @@ display(await win.observe(screenshot=False))
 | `click(target, options?)` | `button`, `count`, `modifiers`, `delivery`; token clicks require count 1 and no modifiers |
 | `doubleClick(target, options?)` | `button`, `modifiers`, `delivery`; an element double-click is two left clicks at its live bounding-box centre |
 | `drag(from, to, options?)` | Two points; `button`, `modifiers`, `durationMs`, `steps`, `delivery` — foreground only on the current driver |
-| `scroll(direction, options?)` | `target` (default: window centre), `amount`, `by: "line" \| "page" \| "points"` (notches 1–50; points 1–5000), `delivery`; the reply leads with the measured verdict (`✓ Scrolled down 231 pt at (163, 400)`, `✓ At end`, `✗ No motion`, `? Changed in place`, `? Unmeasured`) — see [Scrolling](../computer-use.md#scrolling) |
+| `scroll(direction, options?)` | `target` (default: window centre), `amount`, `by: "line" \| "page" \| "points"` (notches 1–50; points 1–5000), `delivery`; the reply leads with the measured verdict (`✓ Scrolled down 231 pt at (163, 400)`, `✓ At end`, `? Moved the other way`, `✗ No motion`, `? Changed in place`, `? Unmeasured`, plus `Stopped early: <why>` when the gesture was cut short) — see [Scrolling](../computer-use.md#scrolling) |
 | `type(text, options?)` | Optional `target`, `delivery`, `caret` (`"start"`, `"end"`, `{ after: "<substring>" }`, `{ before: "<substring>" }` — the driver places the caret in the control's current value through accessibility and reads it back before typing; an absent anchor is a typed refusal) |
 | `press(chordOrChords, options?)` | Optional `target`, `delivery` |
 | `setValue(token, text)` | Replace the accessible value (non-durable; see above) |

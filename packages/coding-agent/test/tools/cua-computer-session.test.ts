@@ -5398,7 +5398,7 @@ it("maps an untargeted scroll's driver point back into window points for its ver
 				: undefined;
 		const still = await f.session.scroll(f.context, f.window, "down", undefined, { amount: 3 });
 		expect(still.text).toBe(
-			'✗ No motion at (100, 50) — the view under that point did not scroll (background line wheel, 3 lines); unless it is already at its end, retry with { delivery: "foreground" }: background wheels do not reach views that scroll only under the real pointer',
+			'✗ No motion at (100, 50) — no displacement observed (background line wheel, 3 lines); the view may be at its end — unless it is, retry with { delivery: "foreground" }: background wheels do not reach views that scroll only under the real pointer',
 		);
 		// The route stays on the result for code that branches on it; the
 		// text does not restate it as "delivery unproven".
@@ -5494,6 +5494,72 @@ it("never marks a scroll that travelled against the request, or not at all, as d
 		const end = await scroll({ outcome: "at_end", moved_pt: 0, confidence: 0.9 });
 		expect(end.text).toStartWith("✓ At end: moved 0 of 231 pt at (150, 60)");
 		expect(actionMark(end)).toBe("✓");
+	} finally {
+		await f.close();
+	}
+});
+
+it("says on the verdict line that a scroll stopped early, and that the user has the pointer when they took it", async () => {
+	const f = await fixture();
+	try {
+		await f.session.captureWindow(f.context, f.window, { silent: true });
+		const sent = {
+			delivery: "foreground",
+			point: { x: 3, y: 1.2 },
+			requested_pt: 400,
+			wheel: { unit: "pixel", events: 5, total: 150 },
+		};
+		const scroll = async (reported: Wire, text: string) => {
+			f.state.hook = async name => (name === "scroll" ? scrollReply({ ...sent, ...reported }, text) : undefined);
+			return f.session.scroll(f.context, f.window, "down", [150, 60], {
+				amount: 400,
+				by: "points",
+				delivery: "foreground",
+			});
+		};
+		// The driver's shape: `stopped early: <why>` alone in the reason for a
+		// move, and " Stopped early: <why>." at the end of its own first line.
+		const taken = await scroll(
+			{
+				outcome: "moved",
+				moved_pt: 120,
+				confidence: 0.9,
+				reason: "stopped early: the pointer moved to (10, 10) during the scroll; the user has it",
+			},
+			"✓ Scrolled down 120 pt at (3, 1) (requested 400; foreground pointer wheel, 1 chunk, 150 px) Stopped early: the pointer moved to (10, 10) during the scroll; the user has it.",
+		);
+		expect(taken.text).toBe(
+			"✓ Scrolled down 120 pt at (150, 60) (requested 400 pt; foreground pointer wheel, 150 px). Stopped early: the pointer moved to (10, 10) during the scroll; the user has it. The user has the pointer or the front app now: do not retry this scroll; wait until they are done, or ask.",
+		);
+		// A no-motion reason carries its own clause first; the list advice
+		// does not apply to a gesture that was cut off.
+		const cut = await scroll(
+			{
+				outcome: "no_motion",
+				moved_pt: 0,
+				confidence: null,
+				reason:
+					"no displacement observed — the view may be at its end, or nothing under this point scrolls with the wheel; stopped early: another application came to the front during the scroll",
+			},
+			"✗ No motion …",
+		);
+		expect(cut.text).toBe(
+			"✗ No motion at (150, 60) — no displacement observed (requested 400 pt; foreground pointer wheel, 150 px). Stopped early: another application came to the front during the scroll. The user has the pointer or the front app now: do not retry this scroll; wait until they are done, or ask.",
+		);
+		// A stop the user did not cause names itself and asks for a read first.
+		const failed = await scroll(
+			{
+				outcome: "unmeasured",
+				moved_pt: null,
+				across_pt: null,
+				confidence: null,
+				reason: "capture unavailable: window 1 returned no image; stopped early: input stopped: event tap refused",
+			},
+			"? Unmeasured …",
+		);
+		expect(failed.text).toBe(
+			"? Unmeasured: scrolled down at (150, 60) (requested 400 pt; foreground pointer wheel, 150 px), but the capture was unavailable: window 1 returned no image. Stopped early: input stopped: event tap refused. Observe before scrolling again.",
+		);
 	} finally {
 		await f.close();
 	}

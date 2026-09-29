@@ -40,8 +40,10 @@ interface ComputerDragOptions extends Omit<ComputerClickOptions, "count"> {
  * visible height), then puts pointer and focus back: views that scroll only
  * under the real pointer need it. Background sends line ticks (a page is 5,
  * points about one per 40). The reply's first line is the measured verdict:
- * `✓ Scrolled down 231 pt at (163, 400)`, `✓ At end: …`, `✗ No motion at …`,
- * `? Changed in place …`, `? Unmeasured …`.
+ * `✓ Scrolled down 231 pt at (163, 400)`, `✓ At end: …`, `? Moved the other
+ * way: …`, `✗ No motion at …`, `? Changed in place …`, `? Unmeasured …`; a
+ * gesture cut short adds `Stopped early: <why>.` (if the user took the
+ * pointer, do not retry).
  */
 interface ComputerScrollOptions extends ComputerDeliveryOptions {
 	target?: ComputerTarget;
