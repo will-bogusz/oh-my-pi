@@ -232,6 +232,8 @@ class TabState {
 	 * debugger back; the next attach checks again.
 	 */
 	unresponsive = false;
+	/** How long the attach in flight lets the page take to answer its probe; the longest any waiting caller asked for. */
+	probePatience = 0;
 	/** Whether targets for this tab were announced to discovering connections. */
 	announced = false;
 	attaching: Promise<boolean> | null = null;
@@ -1962,15 +1964,20 @@ export class RelayBridge {
 		if (tab.attached) return true;
 		const inst = this.#instances.get(tab.instanceId);
 		if (tab.banned || !inst?.socket) return false;
-		if (tab.attaching) return await tab.attaching;
+		if (tab.attaching) {
+			// A caller joining the attempt keeps its own patience: the probe waits for the longest.
+			tab.probePatience = Math.max(tab.probePatience, probeMs);
+			return await tab.attaching;
+		}
 		// Only the attempt that probes may say the page did not answer.
 		tab.unresponsive = false;
+		tab.probePatience = probeMs;
 		const socket = inst.socket;
 		const attempt = this.#rpc({ op: "attach", tabId: tab.tabId }, inst)
 			.then(async () => {
 				// Before anything that needs the page: a renderer blocked by a dialog
 				// OMP never saw would hold every later step for its whole timeout.
-				const answered = await this.#pageAnswers(tab, inst, probeMs);
+				const answered = await this.#pageAnswers(tab, inst);
 				// Chrome dropped the debugger, or the socket was replaced, while the
 				// probe waited: that owner decides about the attachment now.
 				if (tab.banned || inst.socket !== socket || tab.attaching !== attempt) return false;
@@ -1983,7 +1990,7 @@ export class RelayBridge {
 					this.#log("page not responding; debugger handed back", {
 						tabKey: tab.tabKey,
 						url: tab.url,
-						probeMs,
+						probeMs: tab.probePatience,
 					});
 					await this.#detachTab(tab);
 					return false;
@@ -2026,13 +2033,20 @@ export class RelayBridge {
 	}
 
 	/**
-	 * Whether the page answers a no-op evaluation within `probeMs`. Any reply
-	 * counts, an error included: only a renderer that cannot run the command
-	 * at all stays silent.
+	 * Whether the page answers a no-op evaluation within the attempt's
+	 * `probePatience`, which a caller joining the attempt can raise while it
+	 * waits. Any reply counts, an error included: only a renderer that cannot
+	 * run the command at all stays silent.
 	 */
-	async #pageAnswers(tab: TabState, inst: ExtInstance, probeMs: number): Promise<boolean> {
+	async #pageAnswers(tab: TabState, inst: ExtInstance): Promise<boolean> {
 		const deadline = Promise.withResolvers<boolean>();
-		const timer = setTimeout(() => deadline.resolve(false), probeMs);
+		let waited = tab.probePatience;
+		const expire = (): void => {
+			if (tab.probePatience <= waited) return deadline.resolve(false);
+			timer = setTimeout(expire, tab.probePatience - waited);
+			waited = tab.probePatience;
+		};
+		let timer = setTimeout(expire, waited);
 		try {
 			const answer = this.#rpc(
 				{ op: "send", tabId: tab.tabId, method: "Runtime.evaluate", params: { expression: "0" } },

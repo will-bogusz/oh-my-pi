@@ -2843,3 +2843,53 @@ describe("RelayBridge multiple browser instances", () => {
 		expect(bridge.managed("edge").discover().map(found => found.title)).toEqual(["Edge tab"]);
 	});
 });
+
+it("keeps a page command's own reattach bound when it joins a reattach tab.dialog() started", async () => {
+	const bridge = new RelayBridge({ debuggerIdleMs: 1 });
+	const ext = new FakeExtSocket();
+	connect(bridge, ext, [tab({ tabId: 1 })]);
+	const cdp = new FakeCdpSocket();
+	const conn = connectCdp(bridge, cdp, 1);
+	const leaseId = bridge.managed(BROWSER).leaseForTab(1)!;
+	const session = await attachPage(bridge, ext, cdp, conn, 1);
+	for (let i = 0; i < 16; i++) {
+		await flush();
+		ack(bridge, ext, "send");
+	}
+	// The relay's idle detach is a real timer with no injectable clock; await the detach it produces.
+	for (let i = 0; i < 2000 && ext.pending("detach").length === 0; i++) await Bun.sleep(1);
+	ack(bridge, ext, "detach");
+	await flush();
+	expect(bridge.debuggerState(BROWSER, 1)).toEqual({ attached: false });
+	// The page is busy for 12 s: past a dialog look's patience, within a command's.
+	ext.pageAnswers = false;
+	jest.useFakeTimers();
+	try {
+		const looking = bridge.dialog(leaseId, "owner", {}).then(
+			value => value,
+			(error: unknown) => error,
+		);
+		await flush();
+		ack(bridge, ext, "attach");
+		await flush();
+		bridge.cdpMessage(
+			conn,
+			JSON.stringify({ id: 9001, sessionId: session, method: "Runtime.evaluate", params: { expression: "1" } }),
+		);
+		await flush();
+		jest.advanceTimersByTime(12_000);
+		await flush();
+		expect(ext.pending("detach")).toHaveLength(0);
+		ack(bridge, ext, "send");
+		for (let i = 0; i < 4; i++) {
+			await flush();
+			ack(bridge, ext, "send", { result: { type: "number", value: 1 } });
+		}
+		expect(await looking).toMatchObject({ status: "unobserved" });
+		expect(cdp.messages.find(message => message.id === 9001)).toMatchObject({
+			result: { result: { type: "number", value: 1 } },
+		});
+	} finally {
+		jest.useRealTimers();
+	}
+});
