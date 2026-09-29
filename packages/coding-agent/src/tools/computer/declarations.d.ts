@@ -31,10 +31,22 @@ interface ComputerDragOptions extends Omit<ComputerClickOptions, "count"> {
 	durationMs?: number;
 	steps?: number;
 }
+/**
+ * `target` is where the wheel goes (a ref's centre, or a window point);
+ * without one, the window's centre. `by: "line"` (default) and `"page"`
+ * count notches, 1–50; `by: "points"` needs an `amount` in window points,
+ * 1–5000. `{ delivery: "foreground" }` moves the real pointer over the
+ * target and wheels there by distance (a line is 40 pt, a page 0.8 × the
+ * visible height), then puts pointer and focus back: views that scroll only
+ * under the real pointer need it. Background sends line ticks (a page is 5,
+ * points about one per 40). The reply's first line is the measured verdict:
+ * `✓ Scrolled down 231 pt at (163, 400)`, `✓ At end: …`, `✗ No motion at …`,
+ * `? Changed in place …`, `? Unmeasured …`.
+ */
 interface ComputerScrollOptions extends ComputerDeliveryOptions {
 	target?: ComputerTarget;
 	amount?: number;
-	by?: "line" | "page";
+	by?: "line" | "page" | "points";
 }
 interface ComputerTargetOptions extends ComputerDeliveryOptions {
 	target?: ComputerTarget;
@@ -176,6 +188,20 @@ interface ComputerAction {
 	/** The route the driver says would land when it doubts this one did. */
 	escalation?: string;
 	interruptedBy?: ComputerInterruption;
+	/** A scroll's measured outcome; `point` and distances in window points. */
+	scroll?: {
+		outcome: "moved" | "at_end" | "no_motion" | "changed_in_place" | "unmeasured";
+		delivery: "foreground" | "background";
+		direction: ComputerDirection;
+		point?: { x: number; y: number };
+		requestedPt: number | null;
+		movedPt: number | null;
+		acrossPt: number | null;
+		confidence: number | null;
+		wheel?: { unit: "pixel" | "line"; events: number; total: number };
+		chunks?: number;
+		reason?: string;
+	};
 }
 interface ComputerElement {
 	ref: string;

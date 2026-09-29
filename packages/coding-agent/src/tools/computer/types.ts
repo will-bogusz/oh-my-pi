@@ -222,6 +222,33 @@ export interface ComputerWindowAcquisition extends ComputerWindowIdentity {
  * A driver that judges none reports nothing.
  */
 export type ComputerCommitVerdict = "committed" | "not_committed" | "unproven";
+/**
+ * What a window scroll measured, read off the driver's `scroll` object.
+ * `moved` and `at_end` are measured motion; `no_motion` is measured
+ * stillness; `changed_in_place` saw pixels change with no rigid shift (a
+ * pager, sheet or navigation); `unmeasured` had no capture to judge by.
+ */
+export type ComputerScrollOutcomeKind = "moved" | "at_end" | "no_motion" | "changed_in_place" | "unmeasured";
+export interface ComputerScrollOutcome {
+	outcome: ComputerScrollOutcomeKind;
+	delivery: "foreground" | "background";
+	direction: "up" | "down" | "left" | "right";
+	/** Where the wheel went, in the caller's window points; absent when no frame maps it back. */
+	point?: { x: number; y: number };
+	/** The distance asked for, in window points; null on the background route, which sends line ticks. */
+	requestedPt: number | null;
+	/** Content travel along the requested direction (+ = the way asked), window points; null when unmeasured. */
+	movedPt: number | null;
+	/** Travel across it, window points; null when unmeasured. */
+	acrossPt: number | null;
+	confidence: number | null;
+	/** The wheel events actually posted. */
+	wheel?: { unit: "pixel" | "line"; events: number; total: number };
+	chunks?: number;
+	reason?: string;
+}
+/** Scroll distance units: notches of a line or of 0.8 × the visible height, or window points. */
+export type ComputerScrollUnit = "line" | "page" | "points";
 export interface ComputerActionResult {
 	text: string;
 	effect: string;
@@ -250,6 +277,8 @@ export interface ComputerActionResult {
 	 * changed under it and the next action will be refused.
 	 */
 	interruptedBy?: ComputerInterruption;
+	/** A window scroll's measured outcome; absent from a driver that measures none. */
+	scroll?: ComputerScrollOutcome;
 	data?: unknown;
 }
 export interface ObserveOptions {
@@ -298,6 +327,11 @@ export interface ActionOptions {
 	button?: "left" | "right" | "middle";
 	count?: number;
 	modifiers?: string[];
+}
+export interface ScrollOptions extends ActionOptions {
+	/** Line and page notches: 1–50. Points: 1–5000. */
+	amount?: number;
+	by?: ComputerScrollUnit;
 }
 /** Where `type` puts the caret in a control's current value before it types. */
 export type ComputerCaret = "start" | "end" | { after: string } | { before: string };

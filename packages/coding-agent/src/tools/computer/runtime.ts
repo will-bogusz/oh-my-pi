@@ -32,6 +32,7 @@ import type {
 	ComputerWindowKind,
 	AcquireOptions,
 	ObserveOptions,
+	ScrollOptions as ScrollAmountOptions,
 	WindowResolveOptions,
 	WindowSelector,
 } from "./types";
@@ -39,7 +40,7 @@ import type {
 type GestureOptions = ActionOptions & { durationMs?: number; steps?: number };
 type TextOptions = ActionOptions & { target?: ComputerTarget };
 type TypeTextOptions = TypeOptions & { target?: ComputerTarget };
-type ScrollOptions = TextOptions & { amount?: number; by?: "line" | "page" };
+type ScrollOptions = ScrollAmountOptions & { target?: ComputerTarget };
 type Direction = "up" | "down" | "left" | "right";
 type ElementQuery = {
 	role?: string;
