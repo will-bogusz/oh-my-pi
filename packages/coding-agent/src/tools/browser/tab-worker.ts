@@ -1449,16 +1449,22 @@ export class WorkerCore {
 	/**
 	 * `tab.waitForDownload()` called on its own: it waits beside whatever run
 	 * holds the tab, so the click that starts the download can run meanwhile.
-	 * Same deadline and timeout error as the helper inside a run.
+	 * It reports once observation is armed (the supervisor holds later runs
+	 * until then), then answers with the download. Same deadline and timeout
+	 * error as the helper inside a run.
 	 */
 	async #waitForDownload(msg: Extract<WorkerInbound, { type: "download-wait" }>): Promise<void> {
 		const label = "tab.waitForDownload()";
 		const waitMs = resolveWaitTimeout(msg.timeoutMs, msg.timeout);
 		const ac = new AbortController();
 		const deadline = AbortSignal.timeout(waitMs);
+		const signal = AbortSignal.any([ac.signal, deadline]);
 		this.#downloadWaits.set(msg.id, ac);
 		try {
-			const download = await this.#requireDownloads().wait(AbortSignal.any([ac.signal, deadline]));
+			const downloads = this.#requireDownloads();
+			await untilAborted(signal, () => downloads.arm());
+			this.#transport.send({ type: "download-wait-armed", id: msg.id });
+			const download = await downloads.wait(signal);
 			this.#transport.send({ type: "download-wait-result", id: msg.id, ok: true, download });
 		} catch (error) {
 			const failure =

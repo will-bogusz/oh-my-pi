@@ -16,6 +16,9 @@
  * sessions' tabs belong to their owners.
  */
 
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
 import { afterEach, describe, expect, it, spyOn, vi } from "bun:test";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import type { CmuxKind } from "@oh-my-pi/pi-coding-agent/tools/browser/cmux/rpc";
@@ -38,6 +41,7 @@ import {
 	runInTab,
 	setTabFrozenForTest,
 	unfreezeTabSessionForTest,
+	waitForTabDownload,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import type { PendingRun, TabSession } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
@@ -919,6 +923,75 @@ describe("browser settle — lifecycle freeze via CDP", () => {
 			expect(getTabsMapForTest().has(`${base}-due`)).toBe(false);
 			expect(getTabsMapForTest().has(`${base}-fresh`)).toBe(true);
 			expect(hasIdleCloseTimerForTest("session-cancelsweep")).toBe(false);
+		}, 120_000);
+
+		it("keeps a tab whose download wait is pending out of settle-freeze and idle-close", async () => {
+			const browser = await acquireBrowser({ kind: "headless", headless: true }, { cwd: process.cwd() });
+			const name = `settle-dlwait-${process.pid}`;
+			const owner = "session-dlwait";
+			const { tab } = await acquireTab(name, browser, { timeoutMs: 30_000, ownerSessionId: owner });
+			const wait = waitForTabDownload(name, { timeoutMs: 30_000, timeout: 20_000 }).catch((error: unknown) => error);
+
+			expect(await freezeTabsForOwner(owner)).toBe(0);
+			expect(tab.frozen).toBe(false);
+			tab.lastActivityAt = Date.now() - 3_600_000;
+			expect(await releaseIdleTabsForOwner(owner, { idleMs: 60_000 })).toBe(0);
+			cancelIdleCloseForOwner(owner);
+			expect(getTabsMapForTest().has(name)).toBe(true);
+
+			await releaseTab(name, { kill: false });
+			expect(String(await wait)).toContain(`Tab ${JSON.stringify(name)} was closed`);
+		}, 120_000);
+
+		it("resumes a frozen tab to serve a download wait", async () => {
+			let go = false;
+			const server = Bun.serve({
+				port: 0,
+				fetch(request) {
+					const route = new URL(request.url).pathname;
+					if (route === "/go") return new Response(null, { status: go ? 200 : 204 });
+					if (route === "/file") {
+						return new Response("frozen download\n", {
+							headers: {
+								"content-type": "application/octet-stream",
+								"content-disposition": 'attachment; filename="frozen.bin"',
+							},
+						});
+					}
+					// The page's own timer starts the download: no run resumes the tab, only the wait.
+					return new Response(
+						`<a id="download" href="/file">download</a><script>
+						const poll = setInterval(async () => {
+							if ((await fetch("/go")).status !== 200) return;
+							clearInterval(poll);
+							document.getElementById("download").click();
+						}, 50);
+						</script>`,
+						{ headers: { "content-type": "text/html" } },
+					);
+				},
+			});
+			const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-settle-download-"));
+			try {
+				const browser = await acquireBrowser({ kind: "headless", headless: true }, { cwd: process.cwd() });
+				const name = `settle-dlfrozen-${process.pid}`;
+				const { tab } = await acquireTab(name, browser, {
+					url: server.url.href,
+					downloadsPath: directory,
+					timeoutMs: 30_000,
+					ownerSessionId: "session-dlfrozen",
+				});
+				expect(await freezeTabsForOwner("session-dlfrozen")).toBe(1);
+				go = true;
+
+				const download = await waitForTabDownload(name, { timeoutMs: 30_000, timeout: 5_000 });
+				expect(tab.frozen).toBe(false);
+				expect(download).toMatchObject({ suggestedFilename: "frozen.bin", state: "completed" });
+				expect(await Bun.file(path.join(directory, "frozen.bin")).text()).toBe("frozen download\n");
+			} finally {
+				server.stop(true);
+				await fs.rm(directory, { recursive: true, force: true });
+			}
 		}, 120_000);
 	});
 });

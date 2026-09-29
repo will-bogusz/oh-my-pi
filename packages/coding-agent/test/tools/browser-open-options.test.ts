@@ -271,6 +271,29 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("browser open options", () => {
 		}
 	});
 
+	// Without a `downloads` option the tab starts observing downloads only when
+	// a wait asks; a click issued right after the wait must not outrun that.
+	it("catches the download of a click issued right after the wait on a tab opened without a downloads option", async () => {
+		const payload = new TextEncoder().encode("default download\n");
+		const server = downloadServer(payload);
+		try {
+			const invoke = browserHost();
+			const name = `download-default-${crypto.randomUUID()}`;
+			await invoke({ action: "open", name, url: server.url.href });
+			const call = async (method: string, ...args: unknown[]) =>
+				returnedValue(await invoke({ action: "call", name, chain: [{ method, args }] }));
+			const armed = call("waitForDownload", { timeout: 5_000 }).catch((error: unknown) => error);
+			const clicked = call("click", "#download");
+			const download = (await armed) as { path: string };
+			await clicked;
+			expect(download).toMatchObject({ suggestedFilename: "fixture.bin", state: "completed" });
+			tempDirs.push(path.dirname(download.path));
+			expect(new Uint8Array(await Bun.file(download.path).arrayBuffer())).toEqual(payload);
+		} finally {
+			server.stop(true);
+		}
+	});
+
 	it("ends a pending download wait on its timeout, the caller's abort and tab close", async () => {
 		const payload = new TextEncoder().encode("ended download\n");
 		const server = downloadServer(payload);

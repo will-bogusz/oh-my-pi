@@ -196,6 +196,8 @@ export type WorkerOutbound =
 	| { type: "init-failed"; error: RunErrorPayload }
 	| { type: "result"; id: string; ok: true; payload: RunResultOk }
 	| { type: "result"; id: string; ok: false; error: RunErrorPayload }
+	/** The download wait `id` observes downloads now; a run after this cannot start one it misses. */
+	| { type: "download-wait-armed"; id: string }
 	| { type: "download-wait-result"; id: string; ok: true; download: BrowserDownload }
 	| { type: "download-wait-result"; id: string; ok: false; error: RunErrorPayload }
 	| { type: "tool-call"; id: string; runId: string; name: string; args: unknown }
