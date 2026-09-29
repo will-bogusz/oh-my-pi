@@ -33,7 +33,7 @@ Requesting an onscreen window screenshot starts or reuses a rendering lease that
 
 ## Select, observe, act, observe again
 
-Acquisition includes initial background inspection: `computer.window` displays the tree and preview and returns an exact handle with `initialObservation`. It never activates the target. If inspection fails, the handle exposes `inspectionError` and, when available, independent `initialScreenshot`; missing state remains unknown. Requesting only information does not imply revealing the app. Use `win.reveal()` only for an intended foreground handoff.
+Acquisition includes initial background inspection: `computer.window` displays the tree and a screenshot (the window's current frame) and returns an exact handle with `initialObservation`. It never activates the target. If inspection fails, the handle exposes `inspectionError` and, when available, independent `initialScreenshot`; missing state remains unknown. Requesting only information does not imply revealing the app. Use `win.reveal()` only for an intended foreground handoff.
 
 Choose an explicit application/window filter, then retain the exact window ID and PID in the returned handle. When several windows of one application match (two open documents, a document and its inspector), acquisition takes the front document window — on screen, titled, not a sheet — or the frontmost window when the app shows none, and names the others with their ids; matches across applications, and every re-resolution of an exact id/pid, fail instead of choosing. Use `computer.windows({ app: "Code" })` to inspect candidates and select with `{ id, pid }` when necessary. Positive safe integer IDs are accepted, including `computer.window(42)` and `{ id: 42, pid: 123 }`; returned IDs remain strings. Invalid selector types produce an explicit error.
 
@@ -50,9 +50,9 @@ display(result);
 display(await win.observe({ screenshot: false }));
 ```
 
-`observe()` returns a structured object with `snapshotId`, `window`, textual `tree`, `elements`, `complete`, `backgroundInput`, and optional `screenshot` or `screenshotError`. By default it also captures and displays an image, together with the tree and a partial-coverage warning, even when the result is assigned to a variable. Use `screenshot: false` for cheap AX-only observation; `silent: true` captures without displaying the image. Check `complete` rather than assuming all controls were returned: `maxElements` limits visited nodes, including containers, so a small limit can omit a visible button. Use `win.find(...)` or a wider observation when the desired control is absent from a partial result.
+`observe()` returns a structured object with `snapshotId`, `window`, textual `tree`, `elements`, `complete`, `backgroundInput`, and optional `screenshot` or `screenshotError`. It displays the tree and a partial-coverage warning even when the result is assigned to a variable, and it captures an image only with `screenshot: true`; add `silent: true` to capture without displaying it. Check `complete` rather than assuming all controls were returned: `maxElements` limits visited nodes, including containers, so a small limit can omit a visible button. Use `win.find(...)` or a wider observation when the desired control is absent from a partial result.
 
-If capture fails, valid AX results remain available with `screenshotError`. `win.screenshot({ silent? })` captures independently of AX, returning image metadata or throwing the capture error; use it when accessibility is unavailable.
+If capture fails, valid AX results remain available with `screenshotError`. `win.screenshot({ silent? })` captures independently of AX, returning image metadata or throwing the capture error. Acquisition already displays a screenshot, including for a window without accessibility, unless it was called with `screenshot: false` or `silent: true` or its capture failed; call `screenshot()` after acting or waiting, or when a pixel action is refused with `StaleFrame`, not straight after acquiring.
 
 Python uses the same method names; acquisition and observation options are keyword arguments:
 
@@ -171,7 +171,7 @@ The host platform is the backend platform: the model-facing prompt, the safety b
 
 | Removed/changed API | Supported replacement |
 | --- | --- |
-| `win.ax()` textual-only tree | `win.observe()` structured tree/elements plus image; `screenshot: false` for AX only |
+| `win.ax()` textual-only tree | `win.observe()` structured tree/elements; `screenshot: true` adds an image |
 | `find({ title })` | `find({ label })`; this refreshes observation |
 | Live `el.value()` / `el.bounds()` | Snapshot `el.value` / `el.bounds`; observe again for fresh data |
 | `el.parent()`, `el.children()` | Inspect observation tree/elements; no live traversal API |
