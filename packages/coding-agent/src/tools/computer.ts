@@ -388,16 +388,24 @@ class ComputerLifetime {
 		return this.#releasing;
 	}
 
-	close(): Promise<void> {
-		this.#closed = true;
-		this.#unregisterOwner();
-		// Turn settle only releases the driver: a later turn may still read a
-		// capture by path. Session close is the end of that.
-		return (this.#closing ??= this.release().finally(async () => {
+	/**
+	 * `computer.close()`: ends the desktop session a conversation asked to end.
+	 * The driver is released and the capture files this lifetime owns are
+	 * removed; the lifetime stays open, so a later call starts a fresh session.
+	 */
+	end(): Promise<void> {
+		return this.release().finally(async () => {
 			const files = [...this.#captures];
 			this.#captures.clear();
 			await Promise.allSettled(files.map(file => fs.rm(file, { force: true })));
-		}));
+		});
+	}
+
+	/** Owner teardown (agent session end): permanent, unlike `end()`. */
+	close(): Promise<void> {
+		this.#closed = true;
+		this.#unregisterOwner();
+		return (this.#closing ??= this.end());
 	}
 }
 
@@ -471,7 +479,7 @@ async function invokeComputer(
 			throwIfAborted(context.signal);
 			return { content: [{ type: "text", text: "Released computer resources" }], details: {} };
 		case "close":
-			await lifetime.close();
+			await lifetime.end();
 			throwIfAborted(context.signal);
 			return { content: [{ type: "text", text: "Closed computer session" }], details: {} };
 	}

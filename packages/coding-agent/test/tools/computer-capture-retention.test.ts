@@ -69,3 +69,44 @@ it("session close removes the captures its runs wrote, turn settle keeps them, a
 	expect(await exists(unrelated)).toBe(true);
 	expect(await exists(neverReported)).toBe(true);
 });
+
+it("computer.close() removes the session's captures, a later call starts a fresh session, and teardown still removes its captures", async () => {
+	const owner = `capture-close-${crypto.randomUUID()}`;
+	const capture = () => file(path.join(os.tmpdir(), `omp-computer-${crypto.randomUUID()}.png`));
+	let shot = await capture();
+	const session: ToolSession = {
+		cwd: os.tmpdir(),
+		hasUI: false,
+		getSessionFile: () => null,
+		getSessionSpawns: () => null,
+		getEvalKernelOwnerId: () => owner,
+		settings: Settings.isolated({ "computer.enabled": true }),
+	};
+	let controllers = 0;
+	const prelude = createComputerPrelude(session, () => {
+		controllers++;
+		return {
+			async run() {
+				return { displays: [], returnValue: undefined, screenshots: [{ path: shot } as ComputerScreenshot] };
+			},
+			async capabilities() {
+				throw new Error("not used");
+			},
+			async close() {},
+		};
+	});
+	const context = { session, toolCallId: "capture" };
+	try {
+		await prelude.invoke({ action: "run", code: "1" }, context);
+		const closed = shot;
+		await prelude.invoke({ action: "close" }, context);
+		expect(await exists(closed)).toBe(false);
+		shot = await capture();
+		await prelude.invoke({ action: "run", code: "1" }, context);
+		expect(controllers).toBe(2);
+		await releaseComputerSessionsForOwner(owner);
+		expect(await exists(shot)).toBe(false);
+	} finally {
+		await releaseComputerSessionsForOwner(owner);
+	}
+});
