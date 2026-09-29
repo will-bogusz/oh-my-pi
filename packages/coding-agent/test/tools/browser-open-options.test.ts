@@ -9,6 +9,8 @@ import { applyIgnoreHttpsErrors, resolveInitScriptSources } from "@oh-my-pi/pi-c
 import { buildHeadlessLaunchArgs } from "@oh-my-pi/pi-coding-agent/tools/browser/launch";
 import { releaseAllTabs } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
+import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { Page } from "puppeteer-core";
 import { chromiumAvailable } from "./chromium-probe";
 
@@ -29,8 +31,28 @@ function browserHost(cwd: string = process.cwd()) {
 		}),
 	};
 	const prelude = createBrowserPrelude(session);
-	return (parameters: unknown) =>
-		prelude.invoke(parameters, { session, toolCallId: `browser-open-options-${crypto.randomUUID()}` });
+	return (parameters: unknown, signal?: AbortSignal) =>
+		prelude.invoke(parameters, { session, toolCallId: `browser-open-options-${crypto.randomUUID()}`, signal });
+}
+
+/** A page whose `#download` link downloads `fixture.bin` with `payload`. */
+function downloadServer(payload: Uint8Array) {
+	return Bun.serve({
+		port: 0,
+		fetch(request) {
+			if (new URL(request.url).pathname === "/file") {
+				return new Response(payload, {
+					headers: {
+						"content-type": "application/octet-stream",
+						"content-disposition": 'attachment; filename="fixture.bin"',
+					},
+				});
+			}
+			return new Response('<a id="download" href="/file">download</a>', {
+				headers: { "content-type": "text/html" },
+			});
+		},
+	});
 }
 
 function returnedValue(result: { details?: unknown }): unknown {
@@ -189,22 +211,7 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("browser open options", () => {
 
 	it("waits for a completed download and records its bytes", async () => {
 		const payload = new TextEncoder().encode("download payload\n");
-		const server = Bun.serve({
-			port: 0,
-			fetch(request) {
-				if (new URL(request.url).pathname === "/file") {
-					return new Response(payload, {
-						headers: {
-							"content-type": "application/octet-stream",
-							"content-disposition": 'attachment; filename="fixture.bin"',
-						},
-					});
-				}
-				return new Response('<a id="download" href="/file">download</a>', {
-					headers: { "content-type": "text/html" },
-				});
-			},
-		});
+		const server = downloadServer(payload);
 		const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-browser-download-test-"));
 		tempDirs.push(directory);
 		try {
@@ -230,6 +237,79 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("browser open options", () => {
 			expect(
 				returnedValue(await invoke({ action: "call", name, chain: [{ method: "downloads", args: [] }] })),
 			).toEqual([download]);
+		} finally {
+			server.stop(true);
+		}
+	});
+
+	// The Playwright-style order: arm the wait as its own call, then trigger.
+	// A wait that held the tab refused the click with `Tab "…" is busy`.
+	it("lets other calls use the tab while a download wait armed before the click is pending", async () => {
+		const payload = new TextEncoder().encode("armed download\n");
+		const server = downloadServer(payload);
+		const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-browser-download-test-"));
+		tempDirs.push(directory);
+		try {
+			const invoke = browserHost();
+			const name = `download-armed-${crypto.randomUUID()}`;
+			await invoke({ action: "open", name, url: server.url.href, downloads: directory });
+			const call = async (method: string, ...args: unknown[]) =>
+				returnedValue(await invoke({ action: "call", name, chain: [{ method, args }] }));
+			const armed = call("waitForDownload", { timeout: 10_000 });
+			void armed.catch(() => undefined);
+			expect(await call("downloads")).toEqual([]);
+			await call("click", "#download");
+			expect(await armed).toEqual({
+				path: path.join(directory, "fixture.bin"),
+				suggestedFilename: "fixture.bin",
+				url: `${server.url.href}file`,
+				state: "completed",
+				bytes: payload.byteLength,
+			});
+		} finally {
+			server.stop(true);
+		}
+	});
+
+	it("ends a pending download wait on its timeout, the caller's abort and tab close", async () => {
+		const payload = new TextEncoder().encode("ended download\n");
+		const server = downloadServer(payload);
+		const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-browser-download-test-"));
+		tempDirs.push(directory);
+		try {
+			const invoke = browserHost();
+			const name = `download-ended-${crypto.randomUUID()}`;
+			await invoke({ action: "open", name, url: server.url.href, downloads: directory });
+			// Settled through `.catch`: `expect(promise).rejects` stalls delivery of the tab worker's reply.
+			const wait = (opts: { timeout: number }, signal?: AbortSignal) =>
+				invoke({ action: "call", name, chain: [{ method: "waitForDownload", args: [opts] }] }, signal).catch(
+					(error: unknown) => error,
+				);
+			// Issued after a wait, so by its answer the wait has reached the tab.
+			const settle = () => invoke({ action: "call", name, chain: [{ method: "url", args: [] }] });
+
+			const timedOut = await wait({ timeout: 200 });
+			expect(timedOut).toBeInstanceOf(ToolError);
+			expect((timedOut as Error).message).toBe("tab.waitForDownload() timed out after 200ms");
+
+			// An aborted wait is gone from the tab: the next download goes to the next wait.
+			const controller = new AbortController();
+			const aborted = wait({ timeout: 10_000 }, controller.signal);
+			await settle();
+			controller.abort();
+			expect(await aborted).toBeInstanceOf(ToolAbortError);
+			await invoke({ action: "call", name, chain: [{ method: "click", args: ["#download"] }] });
+			expect(returnedValue((await wait({ timeout: 10_000 })) as { details?: unknown })).toMatchObject({
+				suggestedFilename: "fixture.bin",
+				state: "completed",
+			});
+
+			const closing = wait({ timeout: 10_000 });
+			await settle();
+			await invoke({ action: "close", name });
+			const closed = await closing;
+			expect(closed).toBeInstanceOf(ToolError);
+			expect((closed as Error).message).toBe(`Tab ${JSON.stringify(name)} was closed`);
 		} finally {
 			server.stop(true);
 		}

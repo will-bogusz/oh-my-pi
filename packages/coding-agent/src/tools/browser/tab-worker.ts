@@ -1337,6 +1337,8 @@ export class WorkerCore {
 	#dialogClosed = Promise.withResolvers<void>();
 	#downloads?: TabDownloadSource;
 	#downloadObservationError?: string;
+	/** Download waits served outside any run, by id; `abort` cancels one. */
+	readonly #downloadWaits = new Map<string, AbortController>();
 	/** Last measured viewport, reported while a dialog blocks the renderer. */
 	#viewport?: ReadyInfo["viewport"];
 	/** Modifier keys held by `tab.keyDown()`, as Chrome's bitmask; key strokes carry them. */
@@ -1423,22 +1425,47 @@ export class WorkerCore {
 				await this.#run(msg);
 				return;
 			case "abort": {
+				const reason = msg.expectedCleanup
+					? postmortem.markExpectedCleanupError(new ToolAbortError())
+					: new ToolAbortError();
 				const run =
 					this.#active?.id === msg.id ? this.#active : this.#finishing?.id === msg.id ? this.#finishing : null;
-				if (run) {
-					const reason = msg.expectedCleanup
-						? postmortem.markExpectedCleanupError(new ToolAbortError())
-						: new ToolAbortError();
-					run.ac.abort(reason);
-				}
+				run?.ac.abort(reason);
+				this.#downloadWaits.get(msg.id)?.abort(reason);
 				return;
 			}
+			case "download-wait":
+				await this.#waitForDownload(msg);
+				return;
 			case "tool-reply":
 				this.#deliverToolReply(msg.id, msg.reply);
 				return;
 			case "close":
 				await this.#close();
 				return;
+		}
+	}
+
+	/**
+	 * `tab.waitForDownload()` called on its own: it waits beside whatever run
+	 * holds the tab, so the click that starts the download can run meanwhile.
+	 * Same deadline and timeout error as the helper inside a run.
+	 */
+	async #waitForDownload(msg: Extract<WorkerInbound, { type: "download-wait" }>): Promise<void> {
+		const label = "tab.waitForDownload()";
+		const waitMs = resolveWaitTimeout(msg.timeoutMs, msg.timeout);
+		const ac = new AbortController();
+		const deadline = AbortSignal.timeout(waitMs);
+		this.#downloadWaits.set(msg.id, ac);
+		try {
+			const download = await this.#requireDownloads().wait(AbortSignal.any([ac.signal, deadline]));
+			this.#transport.send({ type: "download-wait-result", id: msg.id, ok: true, download });
+		} catch (error) {
+			const failure =
+				deadline.aborted && !ac.signal.aborted ? new ToolError(`${label} timed out after ${waitMs}ms`) : error;
+			this.#transport.send({ type: "download-wait-result", id: msg.id, ok: false, error: errorPayload(failure) });
+		} finally {
+			this.#downloadWaits.delete(msg.id);
 		}
 	}
 

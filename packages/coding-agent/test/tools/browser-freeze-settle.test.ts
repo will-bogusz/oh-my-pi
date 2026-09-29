@@ -112,6 +112,7 @@ function makeStubTab(overrides: Record<string, unknown> = {}): { tab: TabSession
 		state: "alive",
 		info: {},
 		pending: new Map(),
+		downloadWaits: new Map(),
 		kindTag: "headless",
 		ownerSessionId: "session-stub",
 		persist: false,

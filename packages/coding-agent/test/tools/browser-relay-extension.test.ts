@@ -1013,6 +1013,16 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 				),
 			).toEqual(["config.csv", "client.json"]);
 
+			// A wait armed as its own call leaves the tab to the click that starts the download.
+			const call = async (handle: string, method: string, ...args: unknown[]) =>
+				value(await prelude.invoke({ action: "call", handle, chain: [{ method, args }], timeout: 20 }, context));
+			const armed = call(other, "waitForDownload", { timeout: 15_000 });
+			void armed.catch(() => undefined);
+			await call(other, "click", "#other");
+			const rearmed = (await armed) as { suggestedFilename: string; state: string; path: string };
+			expect(rearmed).toMatchObject({ suggestedFilename: "other.txt", state: "completed" });
+			expect(await Bun.file(rearmed.path).text()).toBe("other");
+
 			// Still in progress, then finished with its path. Chrome reports progress
 			// every half second, which is traffic, so the relay's idle detach never
 			// takes the debugger from a tab while one of its downloads is running.

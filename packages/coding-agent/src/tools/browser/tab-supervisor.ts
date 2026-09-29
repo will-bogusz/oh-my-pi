@@ -18,6 +18,7 @@ import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { gracefulKillTreeOnce, pickElectronTarget, shouldPreserveConnectedBrowserFocus } from "./attach";
 import { CmuxTab, runCmuxCode } from "./cmux/cmux-tab";
 import { mapWaitUntil } from "./cmux/rpc";
+import type { BrowserDownload } from "./downloads";
 import { DEFAULT_VIEWPORT } from "./launch";
 import { closeCdpTarget, forgetSharedTarget, recordSharedTarget, type SharedTargetScope } from "./orphan-registry";
 import {
@@ -73,6 +74,12 @@ export interface PendingRun {
 	closeAc?: AbortController;
 }
 
+/** A `tab.waitForDownload()` the worker serves beside the tab's runs. */
+interface PendingDownloadWait {
+	resolve(download: BrowserDownload): void;
+	reject(error: unknown): void;
+}
+
 interface TabSessionBase<TBrowser extends BrowserHandle = BrowserHandle> {
 	name: string;
 	browser: TBrowser;
@@ -114,6 +121,11 @@ export interface WorkerTabSession extends TabSessionBase<PuppeteerBrowserHandle>
 	backend: "worker";
 	worker: WorkerHandle;
 	activateForScreenshot: boolean;
+	/**
+	 * Download waits in flight, by id. Kept out of `pending` so a wait never
+	 * makes the tab busy; closing, killing or recycling the tab rejects them.
+	 */
+	downloadWaits: Map<string, PendingDownloadWait>;
 }
 
 export interface CmuxTabSession extends TabSessionBase<CmuxBrowserHandle> {
@@ -512,6 +524,7 @@ async function acquireTabImpl(
 		state: "alive",
 		info,
 		pending: new Map(),
+		downloadWaits: new Map(),
 		dialogPolicy: opts.dialogs,
 		allowedDomains: opts.allowedDomains ? [...opts.allowedDomains] : undefined,
 		kindTag: browser.kind.kind,
@@ -681,20 +694,73 @@ export async function runInTab(name: string, opts: RunInTabOptions): Promise<Run
 	);
 }
 
+/** The live tab named `name`; a killed or closed one refuses with how it ended. */
+function requireLiveTab(name: string): TabSession {
+	const tab = tabs.get(name);
+	if (tab && tab.state !== "dead") return tab;
+	const killed = killedTabs.get(name);
+	throw new ToolError(
+		killed
+			? `Tab ${JSON.stringify(name)} was killed: ${killed}. Reopen it.`
+			: `Tab ${JSON.stringify(name)} is not alive. Open it first with action:"open".`,
+	);
+}
+
+export interface WaitForTabDownloadOptions {
+	/** The caller's cell budget, which bounds the wait as it bounds the helper inside a run. */
+	timeoutMs: number;
+	/** The caller's `{ timeout }` option. */
+	timeout?: number;
+	signal?: AbortSignal;
+}
+
+/**
+ * `tab.waitForDownload()` called on its own. A run holds its tab exclusively,
+ * so a wait served as a run would refuse the click that starts the download;
+ * this one waits beside the tab's runs instead. It never counts as `pending`
+ * (the tab stays usable) and rejects when the caller aborts or the tab is
+ * closed, killed or recycled.
+ */
+export async function waitForTabDownload(name: string, opts: WaitForTabDownloadOptions): Promise<BrowserDownload> {
+	const tab = requireLiveTab(name);
+	if (tab.backend === "cmux") throw new ToolError("tab.waitForDownload() is not supported on the cmux backend");
+	if (opts.signal?.aborted) throw new ToolAbortError();
+	tab.lastActivityAt = Date.now();
+	const id = Snowflake.next();
+	const { promise, resolve, reject } = Promise.withResolvers<BrowserDownload>();
+	tab.downloadWaits.set(id, { resolve, reject });
+	const abort = (): void => {
+		safeSend(tab, { type: "abort", id });
+		reject(new ToolAbortError());
+	};
+	opts.signal?.addEventListener("abort", abort, { once: true });
+	try {
+		tab.worker.send({ type: "download-wait", id, timeoutMs: opts.timeoutMs, timeout: opts.timeout });
+		// The worker answers by its own deadline; this bound only covers a worker that never answers.
+		return await raceWithTimeout(
+			promise,
+			opts.timeoutMs + GRACE_MS,
+			`tab.waitForDownload() got no answer from tab ${JSON.stringify(name)}`,
+			async () => safeSend(tab, { type: "abort", id }),
+		);
+	} finally {
+		opts.signal?.removeEventListener("abort", abort);
+		tab.downloadWaits.delete(id);
+		tab.lastActivityAt = Date.now();
+	}
+}
+
+function rejectDownloadWaits(tab: WorkerTabSession, error: unknown): void {
+	for (const wait of tab.downloadWaits.values()) wait.reject(error);
+	tab.downloadWaits.clear();
+}
+
 async function runInTabWithSnapshot(
 	name: string,
 	opts: { code: string; timeoutMs: number; signal?: AbortSignal; session?: ToolSession },
 	snapshot: SessionSnapshot,
 ): Promise<RunResultOk> {
-	const tab = tabs.get(name);
-	if (!tab || tab.state === "dead") {
-		const killed = killedTabs.get(name);
-		throw new ToolError(
-			killed
-				? `Tab ${JSON.stringify(name)} was killed: ${killed}. Reopen it.`
-				: `Tab ${JSON.stringify(name)} is not alive. Open it first with action:"open".`,
-		);
-	}
+	const tab = requireLiveTab(name);
 	if (tab.pending.size > 0) throw new ToolError(`Tab ${JSON.stringify(name)} is busy`);
 	// An already-aborted call never runs: without this early exit the worker
 	// branch below would send `abort` before `run`, which the worker ignores
@@ -939,6 +1005,7 @@ async function releaseTabInner(tab: TabSession, name: string, opts: ReleaseTabOp
 		pending.reject(closeError);
 	}
 	tab.pending.clear();
+	if (tab.backend === "worker") rejectDownloadWaits(tab, closeError);
 	const timeoutMs = opts.timeoutMs ?? DEFAULT_TAB_CLOSE_TIMEOUT_MS;
 	if (tab.backend === "cmux") {
 		let closeError: unknown;
@@ -1440,6 +1507,14 @@ function handleTabMessage(tab: WorkerTabSession, msg: WorkerOutbound): void {
 		pending.reject(errorFromPayload(msg.error));
 		return;
 	}
+	if (msg.type === "download-wait-result") {
+		const wait = tab.downloadWaits.get(msg.id);
+		if (!wait) return;
+		tab.downloadWaits.delete(msg.id);
+		if (msg.ok) wait.resolve(msg.download);
+		else wait.reject(errorFromPayload(msg.error));
+		return;
+	}
 	if (msg.type === "ready") {
 		tab.info = msg.info;
 		return;
@@ -1517,6 +1592,11 @@ async function recycleTimedOutWorkerTab(tab: WorkerTabSession, timeoutMs: number
 	// must not restart the recycle's init budget.
 	const startedAt = performance.now();
 	const oldWorker = tab.worker;
+	// The old worker's download observation dies with it.
+	rejectDownloadWaits(
+		tab,
+		new ToolError(`Tab ${JSON.stringify(tab.name)} restarted its worker while waiting for a download`),
+	);
 	await oldWorker.terminate().catch(() => undefined);
 	const browserWSEndpoint = tab.browser.browser.wsEndpoint();
 	if (!browserWSEndpoint) throw new ToolError("Browser websocket endpoint is unavailable");
@@ -1574,6 +1654,7 @@ async function forceKillTab(name: string, reason: string): Promise<void> {
 	const error = postmortem.markExpectedCleanupError(new ToolError(reason));
 	for (const pending of tab.pending.values()) pending.reject(error);
 	tab.pending.clear();
+	if (tab.backend === "worker") rejectDownloadWaits(tab, error);
 	if (tab.backend === "cmux") {
 		await releaseBrowser(tab.browser, { kill: false });
 		tabs.delete(name);
