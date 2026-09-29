@@ -1,11 +1,10 @@
-import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import type { ToolSession } from "../index";
 import { cfgComputerDisplay } from "../settings";
 import { throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ComputerBackend, ComputerBackendFactory } from "./backend";
 import { ComputerRuntime } from "./runtime";
-import type { ComputerRunOk, ComputerSessionSnapshot } from "./types";
+import type { ComputerCapabilities, ComputerRunOk, ComputerSessionSnapshot } from "./types";
 
 /** Runs desktop scripts and owns their persistent session. */
 export interface ComputerController {
@@ -16,7 +15,7 @@ export interface ComputerController {
 		signal?: AbortSignal,
 	): Promise<ComputerRunOk>;
 	/** Probes the driver when needed; never a cache read that can answer undefined. */
-	capabilities(): Promise<DesktopCapabilities>;
+	capabilities(): Promise<ComputerCapabilities>;
 	close(): Promise<void>;
 }
 
@@ -69,7 +68,7 @@ export class ComputerSupervisor implements ComputerController {
 		return this.#backend;
 	}
 
-	async capabilities(): Promise<DesktopCapabilities> {
+	async capabilities(): Promise<ComputerCapabilities> {
 		return (await this.#ensureBackend(cfgComputerDisplay.get(this.#session.settings))).capabilities;
 	}
 

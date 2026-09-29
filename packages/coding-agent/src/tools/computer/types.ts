@@ -1,5 +1,23 @@
 import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
-import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
+
+/**
+ * What the driver child can do on this host, as `computer.capabilities()`
+ * returns it. The cua-driver backend's own shape: input routes are named by
+ * `deliveryModes`, not by the native desktop backend's `takeover` flag.
+ */
+export interface ComputerCapabilities {
+	backend: string;
+	displayServer?: string;
+	capture: boolean;
+	input: boolean;
+	ax: boolean;
+	backgroundWindowInput: boolean;
+	deliveryModes: string[];
+	capturePermission: string;
+	inputPermission: string;
+	axPermission: string;
+	displayCount: number;
+}
 
 /** Frozen run settings captured from the host session for one computer run. */
 export interface ComputerSessionSnapshot {
@@ -27,7 +45,7 @@ export interface ComputerRunOk {
 	displays: Array<TextContent | ImageContent>;
 	returnValue: unknown;
 	screenshots: ComputerScreenshot[];
-	capabilities?: DesktopCapabilities;
+	capabilities?: ComputerCapabilities;
 	/** The last window a window step of the run resolved; absent when none did. */
 	window?: ComputerWindowIdentity;
 }

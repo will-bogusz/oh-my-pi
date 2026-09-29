@@ -1,8 +1,9 @@
-import type { DesktopCapabilities, DesktopDisplay } from "@oh-my-pi/pi-natives";
+import type { DesktopDisplay } from "@oh-my-pi/pi-natives";
 import type {
 	ActionOptions,
 	TypeOptions,
 	ComputerActionResult,
+	ComputerCapabilities,
 	ComputerBounds,
 	ComputerElementSnapshot,
 	ComputerImage,
@@ -37,7 +38,7 @@ export interface ComputerVerificationResult {
  * unsupported capabilities reject without an alternate target or input replay.
  */
 export interface ComputerBackend {
-	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
+	readonly capabilities: ComputerCapabilities & Record<string, unknown>;
 
 	apps(context: ComputerOperationContext): Promise<unknown>;
 	displays(context: ComputerOperationContext): Promise<DesktopDisplay[]>;

@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { Settings } from "../../src/config/settings";
 import { disposeVmContextsByOwner } from "../../src/eval/js/context-manager";
@@ -9,10 +8,15 @@ import type { ToolSession } from "../../src/tools";
 import { createComputerPrelude } from "../../src/tools/computer";
 import type { ComputerBackend } from "../../src/tools/computer/backend";
 import { ComputerSupervisor } from "../../src/tools/computer/supervisor";
-import type { ComputerActionResult, ComputerObservation, ComputerWindowIdentity } from "../../src/tools/computer/types";
+import type {
+	ComputerActionResult,
+	ComputerCapabilities,
+	ComputerObservation,
+	ComputerWindowIdentity,
+} from "../../src/tools/computer/types";
 import { EvalTool } from "../../src/tools/eval";
 
-const capabilities: DesktopCapabilities = {
+const capabilities: ComputerCapabilities = {
 	backend: "fake",
 	displayServer: "memory",
 	capture: true,

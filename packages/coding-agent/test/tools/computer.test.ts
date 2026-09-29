@@ -30,6 +30,7 @@ import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type {
 	ComputerActionResult,
+	ComputerCapabilities,
 	ComputerElementSnapshot,
 	ComputerObservation,
 	ComputerOperationContext,
@@ -40,9 +41,9 @@ import type {
 	ObserveOptions,
 	WindowSelector,
 } from "@oh-my-pi/pi-coding-agent/tools/computer/types";
-import type { DesktopCapabilities, DesktopDisplay } from "@oh-my-pi/pi-natives";
+import type { DesktopDisplay } from "@oh-my-pi/pi-natives";
 
-const capabilities: DesktopCapabilities = {
+const capabilities: ComputerCapabilities = {
 	backend: "fake",
 	displayServer: "memory",
 	capture: true,

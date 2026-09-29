@@ -1,5 +1,4 @@
 import { describe, expect, it } from "bun:test";
-import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import { withTimeout } from "@oh-my-pi/pi-utils/async";
 import { Settings } from "../../src/config/settings";
 import { disposeVmContextsByOwner, invokeJsTool } from "../../src/eval/js/context-manager";
@@ -11,10 +10,11 @@ import type { ToolSession } from "../../src/tools";
 import { createComputerPrelude } from "../../src/tools/computer";
 import type { ComputerBackend } from "../../src/tools/computer/backend";
 import { ComputerSupervisor } from "../../src/tools/computer/supervisor";
+import type { ComputerCapabilities } from "../../src/tools/computer/types";
 import { EvalTool } from "../../src/tools/eval";
 import { cfgComputerEnabled } from "../../src/tools/settings";
 
-const capabilities: DesktopCapabilities = {
+const capabilities: ComputerCapabilities = {
 	backend: "fake",
 	displayServer: "memory",
 	capture: true,
@@ -94,7 +94,7 @@ describe("computer turn cancellation", () => {
 			let settled = false;
 			const pending = invokeJsTool(
 				{ op: "call", name: "nativeWork", args: { code: "await desktop.apps()" } },
-				{ sessionKey: owner, ownerId: owner, session, signal: signal.signal },
+				{ sessionKey: owner, session, signal: signal.signal },
 			).finally(() => {
 				settled = true;
 			});
@@ -111,7 +111,7 @@ describe("computer turn cancellation", () => {
 			expect(backends[0].closeCount).toBe(0);
 			const resumed = await invokeJsTool(
 				{ op: "call", name: "nativeWork", args: { code: "return 42" } },
-				{ sessionKey: owner, ownerId: owner, session },
+				{ sessionKey: owner, session },
 			);
 			expect(resumed).toMatchObject({ ok: true, value: 42 });
 			expect(backends).toHaveLength(1);

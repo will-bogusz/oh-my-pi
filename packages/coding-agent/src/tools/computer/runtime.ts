@@ -1,5 +1,4 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import * as postmortem from "@oh-my-pi/pi-utils/postmortem";
 import { JsRuntime, type RuntimeHooks } from "../../eval/js/shared/runtime";
 import { cloneSafe, RunOutput } from "../browser/run-output";
@@ -25,6 +24,7 @@ import type {
 	ComputerOperationContext,
 	ComputerRunOk,
 	ComputerScreenshot,
+	ComputerCapabilities,
 	ComputerSessionSnapshot,
 	ComputerTarget,
 	ComputerWindowAcquisition,
@@ -459,7 +459,7 @@ async function launchAndAcquire(
 
 function createDesktopScope(session: ComputerBackend, getContext: RunContextAccessor): object {
 	return {
-		capabilities: (): DesktopCapabilities => {
+		capabilities: (): ComputerCapabilities => {
 			throwIfAborted(getContext().signal);
 			return session.capabilities;
 		},

@@ -5,7 +5,6 @@ import { type Type, type } from "@oh-my-pi/omptype";
 import type { AgentToolResult, ToolApprovalDecision } from "@oh-my-pi/pi-agent-core";
 import type { Model } from "@oh-my-pi/pi-ai";
 import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
-import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
 import { once } from "@oh-my-pi/pi-utils";
 import { callSessionTool } from "../eval/js/tool-bridge";
 import type { EvalPreludeContext, EvalPreludeDefinition, EvalPreludeStatus } from "../eval/preludes";
@@ -22,6 +21,7 @@ import { type ComputerController, ComputerSupervisor, registerComputerController
 import { elideObservationTree } from "./computer/tree-elide";
 import type {
 	ComputerActionResult,
+	ComputerCapabilities,
 	ComputerObservation,
 	ComputerRunOk,
 	ComputerScreenshot,
@@ -683,7 +683,7 @@ function stringifyReturnValue(value: unknown): string {
 
 function populateCapabilityDetails(
 	details: ComputerPreludeDetails,
-	capabilities: DesktopCapabilities | undefined,
+	capabilities: ComputerCapabilities | undefined,
 ): void {
 	if (!capabilities) return;
 	details.backend = capabilities.backend;

@@ -1,6 +1,6 @@
 import * as os from "node:os";
 import * as path from "node:path";
-import type { DesktopCapabilities, DesktopDisplay } from "@oh-my-pi/pi-natives";
+import type { DesktopDisplay } from "@oh-my-pi/pi-natives";
 import * as logger from "@oh-my-pi/pi-utils/logger";
 import { resizeImage } from "../../utils/image-resize";
 import { renderNode, type TreeNode } from "../observed-tree";
@@ -52,6 +52,7 @@ import type {
 	ComputerElementSnapshot,
 	ComputerImage,
 	ComputerInterruption,
+	ComputerCapabilities,
 	ComputerLaunchOptions,
 	ComputerObservation,
 	ComputerRelatedWindow,
@@ -808,7 +809,7 @@ export class CuaComputerSession implements ComputerBackend {
 	 * they stay on screen, and its handle drives their refs.
 	 */
 	readonly #inline = new Map<string, string>();
-	readonly capabilities: DesktopCapabilities & Record<string, unknown>;
+	readonly capabilities: ComputerCapabilities & Record<string, unknown>;
 	#driver: CuaDriver;
 	/**
 	 * Monotonic source of public element refs (`n1`, `n2`, …). Never reset: a
