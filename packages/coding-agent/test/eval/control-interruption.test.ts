@@ -9,7 +9,7 @@ import type { EvalPreludeDefinition } from "../../src/eval/preludes";
 import { disposeKernelSessionsByOwner, executePython } from "../../src/eval/py/executor";
 import type { EvalStatusEvent } from "@oh-my-pi/pi-tui/tools/eval";
 import type { ToolSession } from "../../src/tools";
-import { ToolAbortError } from "../../src/tools/tool-errors";
+import { ToolAbortError, UserStoppedError } from "../../src/tools/tool-errors";
 
 function sessionWith(invoke: EvalPreludeDefinition["invoke"]): ToolSession {
 	const definition: EvalPreludeDefinition = {
@@ -119,4 +119,32 @@ describe("typed control interruption", () => {
 			}
 		}, 20_000);
 	}
+
+	it("ends a stop the user made outside OMP as stopped, not failed, and lets the cell tell it from a failure", async () => {
+		const owner = `control-user-stop-${crypto.randomUUID()}`;
+		const session = sessionWith(async () => {
+			throw new UserStoppedError("The user stopped OMP's control of this tab. Stop here and report.");
+		});
+		const events: EvalStatusEvent[] = [];
+		const execute = (code: string) =>
+			executeJs(code, { sessionId: owner, kernelOwnerId: owner, session, onStatus: event => events.push(event) });
+		try {
+			const caught = await execute(
+				"try { await __omp_prelude__('computer', {action:'run'}) } catch (error) { console.log(`${error.name}: ${error.message}`) }",
+			);
+			expect(caught.exitCode).toBe(0);
+			expect(caught.output).toContain("UserStoppedError: The user stopped OMP's control of this tab.");
+			expect(events.filter(event => event.op === "control").map(event => event.phase)).toEqual([
+				"running",
+				"stopped",
+			]);
+			events.length = 0;
+			const uncaught = await execute("await __omp_prelude__('computer', {action:'run'})");
+			expect(uncaught.exitCode).toBe(1);
+			expect(uncaught.output).toContain("UserStoppedError: The user stopped OMP's control of this tab.");
+			expect(events.filter(event => event.op === "control").at(-1)?.phase).toBe("stopped");
+		} finally {
+			await disposeVmContextsByOwner(owner);
+		}
+	}, 20_000);
 });

@@ -20,6 +20,19 @@ export class ToolAbortError extends Error {
 }
 
 /**
+ * The user ended this operation from outside OMP, such as Cancel on Chrome's
+ * debugging infobar. It is the user's decision, not a failure. The message
+ * tells the model what to do next, and `name` lets a cell's `catch` tell this
+ * apart from a failure.
+ */
+export class UserStoppedError extends ToolError {
+	constructor(message: string) {
+		super(message);
+		this.name = "UserStoppedError";
+	}
+}
+
+/**
  * Throw ToolAbortError if the signal is aborted.
  * Use this instead of signal?.throwIfAborted() to get consistent error types.
  */

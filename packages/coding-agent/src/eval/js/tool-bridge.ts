@@ -4,7 +4,7 @@ import { isRecord } from "@oh-my-pi/pi-utils";
 import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
 import type { ToolSession } from "../../tools";
 import { committedTodoPhases } from "../../tools/todo";
-import { ToolAbortError } from "../../tools/tool-errors";
+import { ToolAbortError, UserStoppedError } from "../../tools/tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { schemaDeclaresIntentField } from "../../utils/tool-schema";
 import { type EvalPreludeCell, type EvalPreludeStatus, findEnabledEvalPrelude, invokeEvalPrelude } from "../preludes";
@@ -339,7 +339,8 @@ export async function callSessionTool(name: string, args: unknown, options: Tool
 					status?.label,
 				);
 			} catch (error) {
-				if (activity) emitPhase(error instanceof ToolAbortError ? "stopped" : "failed");
+				if (activity)
+					emitPhase(error instanceof ToolAbortError || error instanceof UserStoppedError ? "stopped" : "failed");
 				else
 					options.emitStatus?.({
 						op: request.name,
