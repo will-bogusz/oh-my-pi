@@ -166,10 +166,15 @@ export class ManagedChromeTabs {
 		const tab = this.#discovered(id);
 		if (!tab) throw this.#gone(id);
 		const held = this.#leases.get(this.#owners.get(tab.tabId) ?? "");
+		// Not someone else's: this owner's own hand-back is still running.
+		if (held?.owner === owner && held.releasing)
+			throw new Error(
+				"This Chrome tab is still being handed back from this actor's previous lease. Claim it again in a moment.",
+			);
 		let lease: ChromeTabLease;
 		// The owner's own lease — a popup auto-leased to it, or a tab whose
 		// handle it lost — comes back as it is instead of reading as taken.
-		if (held?.owner === owner && !held.releasing) {
+		if (held?.owner === owner) {
 			held.unclaimedChild = false;
 			this.#touch(held);
 			lease = this.#public(held);

@@ -16,6 +16,8 @@ export interface BrowserDownload {
 
 /** What a tab's `downloads()` / `waitForDownload()` read from. */
 export interface TabDownloadSource {
+	/** Start observing downloads, if not yet: from then on every download this tab starts is recorded. */
+	arm(): Promise<void>;
 	/** Wait for the next unclaimed completed download. */
 	wait(signal?: AbortSignal): Promise<BrowserDownload>;
 	/** Return every download this tab started, in start order. */
@@ -135,6 +137,8 @@ export class DownloadManager implements TabDownloadSource {
 	#session?: CDPSession;
 	#frameId?: string;
 	readonly #queue = new DownloadQueue();
+	/** The first arm in flight, shared so concurrent waits attach one set of listeners. */
+	#arming?: Promise<void>;
 	#willBegin?: (event: DownloadStarted) => void;
 	#progress?: (event: DownloadProgress) => void;
 
@@ -159,8 +163,18 @@ export class DownloadManager implements TabDownloadSource {
 		this.#directory = resolved;
 	}
 
+	async arm(): Promise<void> {
+		// `#session` is set before the enable finishes: a second wait joins that enable, not the half-set session.
+		if (this.#arming) return await this.#arming;
+		if (this.#session) return;
+		this.#arming = this.enable().finally(() => {
+			this.#arming = undefined;
+		});
+		await this.#arming;
+	}
+
 	async wait(signal?: AbortSignal): Promise<BrowserDownload> {
-		if (!this.#session) await this.enable();
+		await this.arm();
 		return await this.#queue.next(signal);
 	}
 
@@ -254,6 +268,10 @@ export class TabDownloadMonitor implements TabDownloadSource {
 			if (event.state === "completed") this.#queue.complete(download, event.filePath);
 			else if (event.state === "canceled") this.#queue.cancel(download);
 		});
+	}
+
+	async arm(): Promise<void> {
+		this.#assertConnected();
 	}
 
 	async wait(signal?: AbortSignal): Promise<BrowserDownload> {

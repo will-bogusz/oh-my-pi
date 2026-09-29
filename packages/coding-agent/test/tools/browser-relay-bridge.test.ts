@@ -2,7 +2,11 @@ import { describe, expect, it, jest } from "bun:test";
 import { createHash } from "node:crypto";
 import { createContext, runInContext } from "node:vm";
 import { CURSOR_OVERLAY_INSTALL } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/lease-badge";
-import { RelayBridge, type RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
+import {
+	ChromePageUnresponsiveError,
+	RelayBridge,
+	type RelaySocket,
+} from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
 import { EXPECTED_EXTENSION_BUILD_ID } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/instances";
 import type {
 	RelayRpcRequest,
@@ -25,15 +29,41 @@ type ExtRpc<Op extends RelayRpcRequest["op"]> = { t: "rpc"; id: number } & Extra
 class FakeExtSocket implements RelaySocket {
 	readonly messages: RelayToExtMessage[] = [];
 	readonly #acked = new Set<number>();
+	readonly #probes = new Set<number>();
 	closed = false;
+	/**
+	 * Set by {@link connect}: the bridge this socket answers the relay's
+	 * renderer probe on (the no-op `Runtime.evaluate` every attach sends before
+	 * any page work), as a live page does, unless `pageAnswers` is cleared.
+	 * Answered probes are left out of {@link rpcs}: they are not page work.
+	 */
+	bridge: RelayBridge | undefined;
+	pageAnswers = true;
 	send(text: string): void {
-		this.messages.push(JSON.parse(text) as RelayToExtMessage);
+		const message = JSON.parse(text) as RelayToExtMessage;
+		this.messages.push(message);
+		if (
+			this.pageAnswers &&
+			message.t === "rpc" &&
+			message.op === "send" &&
+			message.method === "Runtime.evaluate" &&
+			message.params?.expression === "0"
+		) {
+			this.#acked.add(message.id);
+			this.#probes.add(message.id);
+			const bridge = this.bridge;
+			queueMicrotask(() =>
+				bridge?.extMessage(this, JSON.stringify({ t: "rpcResult", id: message.id, ok: true, result: {} })),
+			);
+		}
 	}
 	close(): void {
 		this.closed = true;
 	}
 	rpcs<Op extends RelayRpcRequest["op"]>(op: Op): Array<ExtRpc<Op>> {
-		return this.messages.filter((msg): msg is ExtRpc<Op> => msg.t === "rpc" && msg.op === op);
+		return this.messages.filter(
+			(msg): msg is ExtRpc<Op> => msg.t === "rpc" && msg.op === op && !this.#probes.has(msg.id),
+		);
 	}
 	/** RPC requests of `op` not yet answered through {@link ack}. */
 	pending<Op extends RelayRpcRequest["op"]>(op: Op): Array<ExtRpc<Op>> {
@@ -89,6 +119,7 @@ function connect(
 	attachedTabIds: number[] = [],
 	instanceId = BROWSER,
 ): void {
+	socket.bridge = bridge;
 	bridge.extConnected(socket, instanceId);
 	bridge.extMessage(
 		socket,
@@ -655,6 +686,7 @@ describe("RelayBridge Runtime sessions", () => {
 		bridge.extClosed(firstExt);
 		bridge.cdpClosed(firstConn);
 		const nextExt = new FakeExtSocket();
+		nextExt.bridge = bridge;
 		bridge.extConnected(nextExt, BROWSER);
 		bridge.extMessage(
 			nextExt,
@@ -1958,6 +1990,68 @@ it("answers only the observed dialog on an owned tab through its original debugg
 	bridge.extClosed(ext);
 });
 
+it("waits out a busy page, refuses one that stays silent without banning it, and holds every caller until the probe decides", async () => {
+	const bridge = new RelayBridge();
+	const ext = new FakeExtSocket();
+	connect(bridge, ext, [tab({ tabId: 1, url: "https://example.com/form" })]);
+	const managed = bridge.managed(BROWSER);
+	const lease = managed.claim(managed.discover()[0]!.id, "owner");
+	const settled = <T>(promise: Promise<T>) => {
+		const state: { done: boolean; value?: unknown } = { done: false };
+		void promise.then(
+			value => Object.assign(state, { done: true, value }),
+			(error: unknown) => Object.assign(state, { done: true, value: error }),
+		);
+		return state;
+	};
+	// A dialog that opened before any debugger: Chrome runs nothing in the page
+	// and tells the debugger nothing about the dialog.
+	ext.pageAnswers = false;
+	jest.useFakeTimers();
+	try {
+		const first = settled(bridge.dialog(lease.id, "owner", {}));
+		await flush();
+		ack(bridge, ext, "attach");
+		await flush();
+		expect(ext.pending("send")).toMatchObject([{ method: "Runtime.evaluate", params: { expression: "0" } }]);
+		// A second caller during the probe does not see the tab as usable.
+		const second = settled(bridge.dialog(lease.id, "owner", {}));
+		jest.advanceTimersByTime(9_999);
+		await flush();
+		expect([first.done, second.done, ext.pending("detach").length]).toEqual([false, false, 0]);
+		jest.advanceTimersByTime(1);
+		await flush();
+		expect(ext.pending("detach")).toHaveLength(1);
+		ack(bridge, ext, "detach");
+		await flush();
+		for (const caller of [first, second]) {
+			expect(caller.value).toBeInstanceOf(ChromePageUnresponsiveError);
+			expect(String(caller.value)).toContain("did not respond to OMP's debugger in time (https://example.com/form)");
+		}
+		// Nothing but the probe went to the page, and the tab is not banned.
+		expect(ext.rpcs("send")).toHaveLength(1);
+		nack(bridge, ext, "send", "Detached while handling command.");
+		expect(bridge.debuggerState(BROWSER, 1)).toEqual({ attached: false });
+
+		// A page busy with one long task answers once it ends: the attach goes on.
+		const busy = settled(bridge.dialog(lease.id, "owner", {}));
+		await flush();
+		ack(bridge, ext, "attach");
+		await flush();
+		jest.advanceTimersByTime(4_000);
+		await flush();
+		expect(busy.done).toBe(false);
+		ack(bridge, ext, "send");
+		await flush();
+		expect(busy.value).toMatchObject({ status: "unobserved" });
+		expect(bridge.debuggerState(BROWSER, 1)).toEqual({ attached: true });
+	} finally {
+		jest.useRealTimers();
+	}
+	await release(bridge, ext, lease.id, "owner");
+	bridge.extClosed(ext);
+});
+
 it("keeps a dialog decision channel across consecutive prompts and detaches after ownership ends", async () => {
 	const bridge = new RelayBridge();
 	const ext = new FakeExtSocket();
@@ -2748,4 +2842,54 @@ describe("RelayBridge multiple browser instances", () => {
 		connect(bridge, new FakeExtSocket(), [tab({ tabId: 1, title: "Edge tab" })], [], "edge");
 		expect(bridge.managed("edge").discover().map(found => found.title)).toEqual(["Edge tab"]);
 	});
+});
+
+it("keeps a page command's own reattach bound when it joins a reattach tab.dialog() started", async () => {
+	const bridge = new RelayBridge({ debuggerIdleMs: 1 });
+	const ext = new FakeExtSocket();
+	connect(bridge, ext, [tab({ tabId: 1 })]);
+	const cdp = new FakeCdpSocket();
+	const conn = connectCdp(bridge, cdp, 1);
+	const leaseId = bridge.managed(BROWSER).leaseForTab(1)!;
+	const session = await attachPage(bridge, ext, cdp, conn, 1);
+	for (let i = 0; i < 16; i++) {
+		await flush();
+		ack(bridge, ext, "send");
+	}
+	// The relay's idle detach is a real timer with no injectable clock; await the detach it produces.
+	for (let i = 0; i < 2000 && ext.pending("detach").length === 0; i++) await Bun.sleep(1);
+	ack(bridge, ext, "detach");
+	await flush();
+	expect(bridge.debuggerState(BROWSER, 1)).toEqual({ attached: false });
+	// The page is busy for 12 s: past a dialog look's patience, within a command's.
+	ext.pageAnswers = false;
+	jest.useFakeTimers();
+	try {
+		const looking = bridge.dialog(leaseId, "owner", {}).then(
+			value => value,
+			(error: unknown) => error,
+		);
+		await flush();
+		ack(bridge, ext, "attach");
+		await flush();
+		bridge.cdpMessage(
+			conn,
+			JSON.stringify({ id: 9001, sessionId: session, method: "Runtime.evaluate", params: { expression: "1" } }),
+		);
+		await flush();
+		jest.advanceTimersByTime(12_000);
+		await flush();
+		expect(ext.pending("detach")).toHaveLength(0);
+		ack(bridge, ext, "send");
+		for (let i = 0; i < 4; i++) {
+			await flush();
+			ack(bridge, ext, "send", { result: { type: "number", value: 1 } });
+		}
+		expect(await looking).toMatchObject({ status: "unobserved" });
+		expect(cdp.messages.find(message => message.id === 9001)).toMatchObject({
+			result: { result: { type: "number", value: 1 } },
+		});
+	} finally {
+		jest.useRealTimers();
+	}
 });

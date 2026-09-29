@@ -16,6 +16,9 @@
  * sessions' tabs belong to their owners.
  */
 
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
 import { afterEach, describe, expect, it, spyOn, vi } from "bun:test";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import type { CmuxKind } from "@oh-my-pi/pi-coding-agent/tools/browser/cmux/rpc";
@@ -38,6 +41,7 @@ import {
 	runInTab,
 	setTabFrozenForTest,
 	unfreezeTabSessionForTest,
+	waitForTabDownload,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import { ToolAbortError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
 import type { PendingRun, TabSession } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
@@ -112,6 +116,7 @@ function makeStubTab(overrides: Record<string, unknown> = {}): { tab: TabSession
 		state: "alive",
 		info: {},
 		pending: new Map(),
+		downloadWaits: new Map(),
 		kindTag: "headless",
 		ownerSessionId: "session-stub",
 		persist: false,
@@ -919,5 +924,140 @@ describe("browser settle — lifecycle freeze via CDP", () => {
 			expect(getTabsMapForTest().has(`${base}-fresh`)).toBe(true);
 			expect(hasIdleCloseTimerForTest("session-cancelsweep")).toBe(false);
 		}, 120_000);
+
+		it("keeps a tab whose download wait is pending out of settle-freeze and idle-close", async () => {
+			const browser = await acquireBrowser({ kind: "headless", headless: true }, { cwd: process.cwd() });
+			const name = `settle-dlwait-${process.pid}`;
+			const owner = "session-dlwait";
+			const { tab } = await acquireTab(name, browser, { timeoutMs: 30_000, ownerSessionId: owner });
+			const wait = waitForTabDownload(name, { timeoutMs: 30_000, timeout: 20_000 }).catch((error: unknown) => error);
+
+			expect(await freezeTabsForOwner(owner)).toBe(0);
+			expect(tab.frozen).toBe(false);
+			tab.lastActivityAt = Date.now() - 3_600_000;
+			expect(await releaseIdleTabsForOwner(owner, { idleMs: 60_000 })).toBe(0);
+			cancelIdleCloseForOwner(owner);
+			expect(getTabsMapForTest().has(name)).toBe(true);
+
+			await releaseTab(name, { kill: false });
+			expect(String(await wait)).toContain(`Tab ${JSON.stringify(name)} was closed`);
+		}, 120_000);
+
+		it("resumes a frozen tab to serve a download wait", async () => {
+			let go = false;
+			const server = Bun.serve({
+				port: 0,
+				fetch(request) {
+					const route = new URL(request.url).pathname;
+					if (route === "/go") return new Response(null, { status: go ? 200 : 204 });
+					if (route === "/file") {
+						return new Response("frozen download\n", {
+							headers: {
+								"content-type": "application/octet-stream",
+								"content-disposition": 'attachment; filename="frozen.bin"',
+							},
+						});
+					}
+					// The page's own timer starts the download: no run resumes the tab, only the wait.
+					return new Response(
+						`<a id="download" href="/file">download</a><script>
+						const poll = setInterval(async () => {
+							if ((await fetch("/go")).status !== 200) return;
+							clearInterval(poll);
+							document.getElementById("download").click();
+						}, 50);
+						</script>`,
+						{ headers: { "content-type": "text/html" } },
+					);
+				},
+			});
+			const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-settle-download-"));
+			try {
+				const browser = await acquireBrowser({ kind: "headless", headless: true }, { cwd: process.cwd() });
+				const name = `settle-dlfrozen-${process.pid}`;
+				const { tab } = await acquireTab(name, browser, {
+					url: server.url.href,
+					downloadsPath: directory,
+					timeoutMs: 30_000,
+					ownerSessionId: "session-dlfrozen",
+				});
+				expect(await freezeTabsForOwner("session-dlfrozen")).toBe(1);
+				go = true;
+
+				const download = await waitForTabDownload(name, { timeoutMs: 30_000, timeout: 5_000 });
+				expect(tab.frozen).toBe(false);
+				expect(download).toMatchObject({ suggestedFilename: "frozen.bin", state: "completed" });
+				expect(await Bun.file(path.join(directory, "frozen.bin")).text()).toBe("frozen download\n");
+			} finally {
+				server.stop(true);
+				await fs.rm(directory, { recursive: true, force: true });
+			}
+		}, 120_000);
+	});
+});
+
+describe("browser download wait — arming before the next run", () => {
+	/** A worker tab that records what the supervisor sends it; the test plays the worker. */
+	function recordingTab(name: string): { tab: TabSession; sent: Array<{ type: string; id?: string }> } {
+		const sent: Array<{ type: string; id?: string }> = [];
+		const tab = {
+			name,
+			backend: "worker",
+			state: "alive",
+			frozen: false,
+			pending: new Map(),
+			downloadWaits: new Map(),
+			lastActivityAt: Date.now(),
+			info: { url: "about:blank", title: "" },
+			kindTag: "headless",
+			activateForScreenshot: false,
+			worker: { mode: "thread", send: (message: { type: string; id?: string }) => sent.push(message) },
+		} as unknown as TabSession;
+		getTabsMapForTest().set(name, tab);
+		return { tab, sent };
+	}
+	const settle = async (): Promise<void> => {
+		for (let i = 0; i < 20; i++) await Promise.resolve();
+	};
+
+	it("holds a run started after a wait until the worker is watching, and lets it go when the wait ends first", async () => {
+		const { tab, sent } = recordingTab("download-arming");
+		if (tab.backend !== "worker") throw new Error("worker tab expected");
+		const session = makeSession(process.cwd());
+		try {
+			const armed = waitForTabDownload("download-arming", { timeoutMs: 5_000 }).catch((error: unknown) => error);
+			await settle();
+			expect(sent.map(message => message.type)).toEqual(["download-wait"]);
+			const run = runInTab("download-arming", { code: "1", timeoutMs: 5_000, session });
+			await settle();
+			expect(sent.some(message => message.type === "run")).toBe(false);
+			const [waitId, wait] = [...tab.downloadWaits.entries()][0]!;
+			wait.markArmed();
+			await settle();
+			const first = sent.find(message => message.type === "run")!;
+			tab.pending.get(first.id!)!.resolve({ displays: [], returnValue: undefined, screenshots: [] });
+			await run;
+			tab.downloadWaits.delete(waitId);
+			wait.resolve({ suggestedFilename: "a.bin", url: "", state: "completed", bytes: 0 });
+			await armed;
+
+			// A wait that fails before it is armed releases the run it held.
+			sent.length = 0;
+			const failing = waitForTabDownload("download-arming", { timeoutMs: 5_000 }).catch((error: unknown) => error);
+			await settle();
+			const held = runInTab("download-arming", { code: "2", timeoutMs: 5_000, session });
+			await settle();
+			expect(sent.some(message => message.type === "run")).toBe(false);
+			const [failedId, failed] = [...tab.downloadWaits.entries()][0]!;
+			tab.downloadWaits.delete(failedId);
+			failed.reject(new Error("Download observation unavailable"));
+			expect(String(await failing)).toContain("Download observation unavailable");
+			await settle();
+			const second = sent.find(message => message.type === "run")!;
+			tab.pending.get(second.id!)!.resolve({ displays: [], returnValue: undefined, screenshots: [] });
+			await held;
+		} finally {
+			getTabsMapForTest().delete("download-arming");
+		}
 	});
 });

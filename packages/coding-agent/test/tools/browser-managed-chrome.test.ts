@@ -4,6 +4,7 @@ import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import {
 	acquireChromeTab,
 	browserActorId,
+	chromeDialog,
 	explainRevokedChromeControl,
 	type ManagedChromeHandle,
 	releaseChromeTabsForOwner,
@@ -20,6 +21,8 @@ import {
 import { ManagedChromeTabs } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/managed-tabs";
 import type { RelayToExtMessage, TabSnapshot } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
 import { startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
+import { UserStoppedError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 
 const tab = (tabId: number): TabSnapshot => ({
 	tabId,
@@ -452,17 +455,28 @@ it("explains a raw TargetCloseError with Chrome's reason, never retries past the
 			new Error("Attempted to use detached Frame '6F2802E97123F398ECC824571324075B'."),
 		])
 			expect((await explainRevokedChromeControl(handle, inFlight))?.message).toBe(revoked);
-		// The user pressing Cancel on Chrome's infobar is a decision: no call claims its way past it.
+		// The dialog channel bypasses the page worker; Chrome's own revocation there stays a failure.
+		const refusedDialog = await chromeDialog(handle, {}).catch((error: unknown) => error);
+		expect(refusedDialog).toBeInstanceOf(ToolError);
+		expect(refusedDialog).not.toBeInstanceOf(UserStoppedError);
+		// The user pressing Cancel on Chrome's infobar is a decision, not a failure:
+		// a user stop, and no call claims its way past it.
 		relay.instances.extMessage(extension, JSON.stringify({ t: "detached", tabId: 1, reason: "canceled_by_user" }));
 		let ran = false;
 		const operation = async () => {
 			ran = true;
 		};
-		await expect(runOnChromePage(handle, session, 1000, undefined, operation)).rejects.toThrow(
+		const stopped = runOnChromePage(handle, session, 1000, undefined, operation);
+		await expect(stopped).rejects.toBeInstanceOf(UserStoppedError);
+		await expect(stopped).rejects.toThrow(
 			`The user stopped OMP's control of "Sign in" from Chrome's infobar. Do not claim it again`,
 		);
 		expect(ran).toBe(false);
 		expect(relay.instances.get(handle.lease.id, owner).debugger?.canceledByUser).toBe(true);
+		// The dialog channel reports the same decision the same way.
+		const stoppedDialog = await chromeDialog(handle, {}).catch((error: unknown) => error);
+		expect(stoppedDialog).toBeInstanceOf(UserStoppedError);
+		expect(String(stoppedDialog)).toContain(`The user stopped OMP's control of "Sign in" from Chrome's infobar`);
 		// The user closes the tab: the same failure now says the lease is over, and why.
 		relay.instances.extMessage(extension, JSON.stringify({ t: "tabRemoved", tabId: 1 }));
 		const gone = 'Chrome tab "Sign in" was closed in Chrome. Discover tabs again.';
@@ -529,5 +543,75 @@ it("replaces the handle of a tab its actor claims again instead of refusing the 
 		token.mockRestore();
 		ensure.mockRestore();
 		server.stop(true);
+	}
+});
+
+it("ends a claim as a user stop when the user cancels the infobar while the claim is attaching", async () => {
+	const relay = startRelayServer({ port: 0 });
+	const credential = spyOn(access, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
+	const ensure = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue({ service: "omp-browser", protocol: 2 });
+	const page: TabSnapshot = { ...tab(1), title: "Busy", url: "https://example.com/busy" };
+	const extension: RelaySocket = {
+		send(raw) {
+			const message = JSON.parse(raw) as RelayToExtMessage;
+			if (message.t !== "rpc") return;
+			// The user presses Cancel on the infobar while the attach's renderer probe waits;
+			// Chrome drops the debugger and fails the pending command.
+			const canceled = message.op === "send" && message.method === "Runtime.evaluate";
+			queueMicrotask(() => {
+				if (canceled)
+					relay.instances.extMessage(extension, JSON.stringify({ t: "detached", tabId: 1, reason: "canceled_by_user" }));
+				relay.instances.extMessage(
+					extension,
+					JSON.stringify(
+						canceled
+							? { t: "rpcResult", id: message.id, ok: false, error: "Detached while handling command." }
+							: { t: "rpcResult", id: message.id, ok: true, result: {} },
+					),
+				);
+			});
+		},
+		close() {},
+	};
+	try {
+		relay.instances.extConnected(extension);
+		relay.instances.extMessage(
+			extension,
+			JSON.stringify({
+				t: "authenticate",
+				auth: { id: "claim-cancel-fixture", label: "Work", pairingCode: relay.access.issueCode().code },
+			}),
+		);
+		relay.instances.extMessage(
+			extension,
+			JSON.stringify({
+				t: "hello",
+				userAgent: "fixture",
+				browserVersion: "Chrome/150",
+				extensionBuildId: EXPECTED_EXTENSION_BUILD_ID,
+				attachedTabIds: [],
+				tabs: [page],
+			}),
+		);
+		const session = toolSession(
+			"claim-cancel",
+			Settings.isolated({
+				"browser.enabled": true,
+				"browser.relay": true,
+				"browser.relayUrl": `http://127.0.0.1:${relay.port}`,
+			}),
+		);
+		const found = relay.instances.discover(browserActorId(session))[0]!;
+		const stopped = await acquireChromeTab(session, { action: "claim", id: found.id, timeoutMs: 2000 }).then(
+			() => undefined,
+			(error: unknown) => error,
+		);
+		expect(stopped).toBeInstanceOf(UserStoppedError);
+		expect(String(stopped)).toContain(`The user stopped OMP's control of "Busy" from Chrome's infobar`);
+		expect(relay.instances.discover()[0]).toMatchObject({ ownership: "available" });
+	} finally {
+		credential.mockRestore();
+		ensure.mockRestore();
+		relay.stop();
 	}
 });

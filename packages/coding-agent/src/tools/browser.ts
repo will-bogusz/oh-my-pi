@@ -56,6 +56,7 @@ import {
 	releaseTabsForActor,
 	releaseTab,
 	runInTab,
+	waitForTabDownload,
 } from "./browser/tab-supervisor";
 import { BROWSER_TAB_VERBS, renderTabCall } from "./browser/tab-call";
 import { resolveToCwd } from "./path-utils";
@@ -430,6 +431,23 @@ function checkPreludeOptions(params: BrowserParams): void {
 	}
 	// First-use boundary: the declarations and their parser load with the first checked call.
 	(require("./browser/declared-arguments") as typeof DeclaredArguments).checkDeclaredArguments(...call);
+}
+
+/**
+ * The options of a call that is `tab.waitForDownload(opts?)` alone, checked
+ * against its declaration; undefined for any other call.
+ */
+function downloadWaitCall(params: BrowserParams): { timeout?: number } | undefined {
+	if (params.action !== "call" || params.chain?.length !== 1) return undefined;
+	const [step] = params.chain;
+	if (step?.method !== "waitForDownload") return undefined;
+	(require("./browser/declared-arguments") as typeof DeclaredArguments).checkDeclaredArguments(
+		"BrowserTabRealm",
+		step.method,
+		step.args,
+	);
+	const [opts] = step.args;
+	return { timeout: isRecord(opts) && typeof opts.timeout === "number" ? opts.timeout : undefined };
 }
 
 async function invokeBrowser(
@@ -987,15 +1005,20 @@ async function runBrowser(
 	timeoutMs: number,
 	signal?: AbortSignal,
 ): Promise<AgentToolResult<unknown>> {
-	const code = resolveBrowserRunCode(params);
 	const tab = getTab(name);
 	if (tab) {
 		details.browser = tab.browser.kind.kind;
 		details.url = tab.info.url;
 	}
+	// A download wait never holds the tab, so the call that starts the download can run meanwhile.
+	const downloadWait = downloadWaitCall(params);
+	if (downloadWait) {
+		details.value = await waitForTabDownload(name, { timeoutMs, timeout: downloadWait.timeout, signal });
+		return toolResult(details).done();
+	}
 
 	const result = await runInTab(name, {
-		code,
+		code: resolveBrowserRunCode(params),
 		timeoutMs,
 		signal,
 		session,

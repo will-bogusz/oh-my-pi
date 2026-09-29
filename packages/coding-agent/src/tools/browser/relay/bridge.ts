@@ -227,6 +227,13 @@ class TabState {
 	banReason: string | undefined;
 	/** The ban is the user cancelling OMP's debugger from Chrome's infobar; set only while `banned`. */
 	canceledByUser = false;
+	/**
+	 * The last attach found the page not answering the debugger and handed the
+	 * debugger back; the next attach checks again.
+	 */
+	unresponsive = false;
+	/** How long the attach in flight lets the page take to answer its probe; the longest any waiting caller asked for. */
+	probePatience = 0;
 	/** Whether targets for this tab were announced to discovering connections. */
 	announced = false;
 	attaching: Promise<boolean> | null = null;
@@ -354,6 +361,28 @@ const CURSOR_ARRIVAL_TIMEOUT_MS = 1_500;
  * best-effort clean-up must not hold both for the whole {@link RPC_TIMEOUT_MS}.
  */
 const PAGE_CLEANUP_TIMEOUT_MS = 2_000;
+/**
+ * How long a freshly attached page gets, when a claim or `tab.dialog()`
+ * attaches it, to answer a no-op evaluation before the attach is given up.
+ * A JavaScript dialog that opened before OMP attached blocks the renderer,
+ * and Chrome neither reports that dialog to a debugger that attaches later
+ * nor lets it answer one (`Page.handleJavaScriptDialog`: "No dialog is
+ * showing"), so every page command of the attach would wait out
+ * {@link RPC_TIMEOUT_MS} in turn. A healthy page busy with one long task
+ * (a heavy app booting, a big parse) is silent the same way but answers once
+ * the task ends, and waiting is the only way to tell the two apart: this is
+ * a policy, well past one long task and far under the minute the old claim
+ * hung. The reattach a forwarded command causes waits
+ * {@link RPC_TIMEOUT_MS} instead, the bound that command already has.
+ */
+const RENDERER_PROBE_TIMEOUT_MS = 10_000;
+
+/**
+ * A tab whose page did not answer OMP's debugger in time (see
+ * {@link RENDERER_PROBE_TIMEOUT_MS}). The debugger was handed back and nothing
+ * in the page changed; a later attach checks again.
+ */
+export class ChromePageUnresponsiveError extends Error {}
 
 /**
  * Multiplexing CDP bridge between downstream puppeteer connections and the
@@ -1848,7 +1877,8 @@ export class RelayBridge {
 		const tab = this.#tabs.get(tabKeyOf(inst.code, lease.tab.tabId));
 		if (!tab) throw this.stale(leaseId);
 		// Like any command, a look at a tab whose debugger went idle reattaches it.
-		if (!tab.attached && !(await this.#ensureAttached(tab))) throw new Error(this.#refused(tab));
+		if (!tab.attached && !(await this.#ensureAttached(tab, RENDERER_PROBE_TIMEOUT_MS)))
+			throw tab.unresponsive ? new ChromePageUnresponsiveError(this.#refused(tab)) : new Error(this.#refused(tab));
 		const request = parseDialogRequest(options);
 		if (!("id" in request)) return tab.dialogs.snapshot();
 		const finish = inst.managed.beginOperation(leaseId);
@@ -1917,20 +1947,54 @@ export class RelayBridge {
 		});
 	}
 
-	async #ensureAttached(tab: TabState): Promise<boolean> {
+	/**
+	 * Attach the debugger and make the tab usable. `attached` is set only once
+	 * the page answered the renderer probe, so a caller arriving meanwhile
+	 * waits on the same attempt (`attaching`) instead of treating a page that
+	 * may be blocked as ready; the setup steps after the probe send through
+	 * `#sendToTab` with `attached` already set and never wait on themselves.
+	 * `probeMs` is how long the page gets to answer (see
+	 * {@link RENDERER_PROBE_TIMEOUT_MS}); a caller already waiting on an attempt
+	 * shares that attempt's patience.
+	 */
+	async #ensureAttached(tab: TabState, probeMs = RPC_TIMEOUT_MS): Promise<boolean> {
 		// The extension acknowledges successful detach before resolving the RPC.
 		// Awaiting prevents a replacement attach racing either operation.
 		while (tab.detaching) await tab.detaching;
 		if (tab.attached) return true;
 		const inst = this.#instances.get(tab.instanceId);
 		if (tab.banned || !inst?.socket) return false;
-		if (tab.attaching) return await tab.attaching;
+		if (tab.attaching) {
+			// A caller joining the attempt keeps its own patience: the probe waits for the longest.
+			tab.probePatience = Math.max(tab.probePatience, probeMs);
+			return await tab.attaching;
+		}
+		// Only the attempt that probes may say the page did not answer.
+		tab.unresponsive = false;
+		tab.probePatience = probeMs;
+		const socket = inst.socket;
 		const attempt = this.#rpc({ op: "attach", tabId: tab.tabId }, inst)
 			.then(async () => {
+				// Before anything that needs the page: a renderer blocked by a dialog
+				// OMP never saw would hold every later step for its whole timeout.
+				const answered = await this.#pageAnswers(tab, inst);
+				// Chrome dropped the debugger, or the socket was replaced, while the
+				// probe waited: that owner decides about the attachment now.
+				if (tab.banned || inst.socket !== socket || tab.attaching !== attempt) return false;
 				tab.attached = true;
 				// A fresh attachment: any child still on record belonged to a dead one.
 				this.#forgetChildren(tab);
 				tab.reattachedAfterDetach = true;
+				if (!answered) {
+					tab.unresponsive = true;
+					this.#log("page not responding; debugger handed back", {
+						tabKey: tab.tabKey,
+						url: tab.url,
+						probeMs: tab.probePatience,
+					});
+					await this.#detachTab(tab);
+					return false;
+				}
 				this.#log("debugger attached", {
 					tabKey: tab.tabKey,
 					leased: inst.managed.leaseForTab(tab.tabId) !== undefined,
@@ -1968,8 +2032,44 @@ export class RelayBridge {
 		return await attempt;
 	}
 
+	/**
+	 * Whether the page answers a no-op evaluation within the attempt's
+	 * `probePatience`, which a caller joining the attempt can raise while it
+	 * waits. Any reply counts, an error included: only a renderer that cannot
+	 * run the command at all stays silent.
+	 */
+	async #pageAnswers(tab: TabState, inst: ExtInstance): Promise<boolean> {
+		const deadline = Promise.withResolvers<boolean>();
+		let waited = tab.probePatience;
+		const expire = (): void => {
+			if (tab.probePatience <= waited) return deadline.resolve(false);
+			timer = setTimeout(expire, tab.probePatience - waited);
+			waited = tab.probePatience;
+		};
+		let timer = setTimeout(expire, waited);
+		try {
+			const answer = this.#rpc(
+				{ op: "send", tabId: tab.tabId, method: "Runtime.evaluate", params: { expression: "0" } },
+				inst,
+			).then(
+				() => true,
+				() => true,
+			);
+			return await Promise.race([answer, deadline.promise]);
+		} finally {
+			clearTimeout(timer);
+		}
+	}
+
 	/** What a call on a tab the debugger cannot reach answers: why first, then where. */
 	#refused(tab: TabState): string {
+		if (tab.unresponsive)
+			return (
+				`The page in this Chrome tab did not respond to OMP's debugger in time (${shortUrl(tab.url)}). ` +
+				"A JavaScript dialog that opened before OMP attached blocks a page this way (Chrome lets OMP neither " +
+				"see nor answer it), and so does a script that is still running. OMP detached without changing the " +
+				"page. Try again shortly; if it still does not respond, ask the user to answer any dialog open in that tab."
+			);
 		const reason =
 			this.debuggerState(tab.instanceId, tab.tabId).revoked ??
 			(this.#instances.get(tab.instanceId)?.socket

@@ -4,6 +4,7 @@ import {
 	logger,
 	postmortem,
 	Snowflake,
+	untilAborted,
 	withTimeout,
 	workerHostEntry,
 } from "@oh-my-pi/pi-utils";
@@ -18,6 +19,7 @@ import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { gracefulKillTreeOnce, pickElectronTarget, shouldPreserveConnectedBrowserFocus } from "./attach";
 import { CmuxTab, runCmuxCode } from "./cmux/cmux-tab";
 import { mapWaitUntil } from "./cmux/rpc";
+import type { BrowserDownload } from "./downloads";
 import { DEFAULT_VIEWPORT } from "./launch";
 import { closeCdpTarget, forgetSharedTarget, recordSharedTarget, type SharedTargetScope } from "./orphan-registry";
 import {
@@ -73,6 +75,15 @@ export interface PendingRun {
 	closeAc?: AbortController;
 }
 
+/** A `tab.waitForDownload()` the worker serves beside the tab's runs. */
+interface PendingDownloadWait {
+	resolve(download: BrowserDownload): void;
+	reject(error: unknown): void;
+	/** Settles once the worker observes downloads for this wait, or the wait ended first. */
+	armed: Promise<void>;
+	markArmed(): void;
+}
+
 interface TabSessionBase<TBrowser extends BrowserHandle = BrowserHandle> {
 	name: string;
 	browser: TBrowser;
@@ -114,6 +125,11 @@ export interface WorkerTabSession extends TabSessionBase<PuppeteerBrowserHandle>
 	backend: "worker";
 	worker: WorkerHandle;
 	activateForScreenshot: boolean;
+	/**
+	 * Download waits in flight, by id. Kept out of `pending` so a wait never
+	 * makes the tab busy; closing, killing or recycling the tab rejects them.
+	 */
+	downloadWaits: Map<string, PendingDownloadWait>;
 }
 
 export interface CmuxTabSession extends TabSessionBase<CmuxBrowserHandle> {
@@ -512,6 +528,7 @@ async function acquireTabImpl(
 		state: "alive",
 		info,
 		pending: new Map(),
+		downloadWaits: new Map(),
 		dialogPolicy: opts.dialogs,
 		allowedDomains: opts.allowedDomains ? [...opts.allowedDomains] : undefined,
 		kindTag: browser.kind.kind,
@@ -681,20 +698,96 @@ export async function runInTab(name: string, opts: RunInTabOptions): Promise<Run
 	);
 }
 
+/** The live tab named `name`; a killed or closed one refuses with how it ended. */
+function requireLiveTab(name: string): TabSession {
+	const tab = tabs.get(name);
+	if (tab && tab.state !== "dead") return tab;
+	const killed = killedTabs.get(name);
+	throw new ToolError(
+		killed
+			? `Tab ${JSON.stringify(name)} was killed: ${killed}. Reopen it.`
+			: `Tab ${JSON.stringify(name)} is not alive. Open it first with action:"open".`,
+	);
+}
+
+export interface WaitForTabDownloadOptions {
+	/** The caller's cell budget, which bounds the wait as it bounds the helper inside a run. */
+	timeoutMs: number;
+	/** The caller's `{ timeout }` option. */
+	timeout?: number;
+	signal?: AbortSignal;
+}
+
+/**
+ * `tab.waitForDownload()` called on its own. A run holds its tab exclusively,
+ * so a wait served as a run would refuse the click that starts the download;
+ * this one waits beside the tab's runs instead. It never counts as `pending`
+ * (the tab stays usable), but it keeps the tab from settle-freeze and
+ * idle-close, and a run started after it waits until the worker observes
+ * downloads, so that run's download is not missed. It rejects when the
+ * caller aborts or the tab is closed, killed or recycled.
+ */
+export async function waitForTabDownload(name: string, opts: WaitForTabDownloadOptions): Promise<BrowserDownload> {
+	const tab = requireLiveTab(name);
+	if (tab.backend === "cmux") throw new ToolError("tab.waitForDownload() is not supported on the cmux backend");
+	if (opts.signal?.aborted) throw new ToolAbortError();
+	tab.lastActivityAt = Date.now();
+	const id = Snowflake.next();
+	const { promise, resolve, reject } = Promise.withResolvers<BrowserDownload>();
+	const armed = Promise.withResolvers<void>();
+	// Registered before the unfreeze await below, as a run registers in
+	// `pending`: a settle-freeze stands down from here on, or undoes itself
+	// if it was already past its guard (see `setTabFrozen`).
+	tab.downloadWaits.set(id, { resolve, reject, armed: armed.promise, markArmed: armed.resolve });
+	// A close or abort during the resume below rejects before anything awaits it.
+	promise.catch(() => undefined);
+	const abort = (): void => {
+		safeSend(tab, { type: "abort", id });
+		reject(new ToolAbortError());
+	};
+	opts.signal?.addEventListener("abort", abort, { once: true });
+	try {
+		// The download may depend on the page making progress: resume a settle-frozen page first.
+		if (!(await unfreezeTabSession(tab)))
+			throw new ToolError(`Tab ${JSON.stringify(name)} is frozen and could not be resumed. Close and reopen it.`);
+		// An abort or close during the resume already settled `promise`; a wait
+		// sent now would take the next download for nobody.
+		if (tab.state === "alive" && !opts.signal?.aborted)
+			tab.worker.send({ type: "download-wait", id, timeoutMs: opts.timeoutMs, timeout: opts.timeout });
+		// The worker answers by its own deadline; this bound only covers a worker that never answers.
+		return await raceWithTimeout(
+			promise,
+			opts.timeoutMs + GRACE_MS,
+			`tab.waitForDownload() got no answer from tab ${JSON.stringify(name)}`,
+			async () => safeSend(tab, { type: "abort", id }),
+		);
+	} finally {
+		opts.signal?.removeEventListener("abort", abort);
+		tab.downloadWaits.delete(id);
+		armed.resolve();
+		tab.lastActivityAt = Date.now();
+	}
+}
+
+function rejectDownloadWaits(tab: WorkerTabSession, error: unknown): void {
+	for (const wait of tab.downloadWaits.values()) {
+		wait.reject(error);
+		wait.markArmed();
+	}
+	tab.downloadWaits.clear();
+}
+
+/** Work a settle-freeze or idle close must not cut: a run, or a download wait. */
+function hasInFlightWork(tab: TabSession): boolean {
+	return tab.pending.size > 0 || (tab.backend === "worker" && tab.downloadWaits.size > 0);
+}
+
 async function runInTabWithSnapshot(
 	name: string,
 	opts: { code: string; timeoutMs: number; signal?: AbortSignal; session?: ToolSession },
 	snapshot: SessionSnapshot,
 ): Promise<RunResultOk> {
-	const tab = tabs.get(name);
-	if (!tab || tab.state === "dead") {
-		const killed = killedTabs.get(name);
-		throw new ToolError(
-			killed
-				? `Tab ${JSON.stringify(name)} was killed: ${killed}. Reopen it.`
-				: `Tab ${JSON.stringify(name)} is not alive. Open it first with action:"open".`,
-		);
-	}
+	const tab = requireLiveTab(name);
 	if (tab.pending.size > 0) throw new ToolError(`Tab ${JSON.stringify(name)} is busy`);
 	// An already-aborted call never runs: without this early exit the worker
 	// branch below would send `abort` before `run`, which the worker ignores
@@ -740,6 +833,9 @@ async function runInTabWithSnapshot(
 	// attach their consumers, and an unobserved `pending.reject` would fire
 	// `unhandledRejection` and tear the whole session down (issue #4499).
 	promise.catch(() => undefined);
+	// Download waits called before this run, not yet observing downloads: the
+	// run may be the click that starts the one they wait for.
+	const arming = tab.backend === "worker" ? [...tab.downloadWaits.values()].map(wait => wait.armed) : [];
 	// Resume a settle-frozen page before driving it — frozen rAF/timers would
 	// otherwise hang the execution below. A refused resume fails the run
 	// here with an actionable error instead of stalling to timeout.
@@ -747,6 +843,9 @@ async function runInTabWithSnapshot(
 		tab.pending.delete(id);
 		throw new ToolError(`Tab ${JSON.stringify(name)} is frozen and could not be resumed. Close and reopen it.`);
 	}
+	// Held until they observe (each settles by its wait's end at the latest);
+	// an abort meanwhile falls through to the check below.
+	if (arming.length > 0) await untilAborted(opts.signal, Promise.all(arming)).catch(() => undefined);
 	// An abort that landed during the resume roundtrip must not dispatch:
 	// the worker ignores `abort` for a run that was never started.
 	if (opts.signal?.aborted) {
@@ -939,6 +1038,7 @@ async function releaseTabInner(tab: TabSession, name: string, opts: ReleaseTabOp
 		pending.reject(closeError);
 	}
 	tab.pending.clear();
+	if (tab.backend === "worker") rejectDownloadWaits(tab, closeError);
 	const timeoutMs = opts.timeoutMs ?? DEFAULT_TAB_CLOSE_TIMEOUT_MS;
 	if (tab.backend === "cmux") {
 		let closeError: unknown;
@@ -1100,9 +1200,9 @@ async function findTargetForTab(tab: WorkerTabSession): Promise<Target | undefin
  * retries and close paths still apply.
  *
  * Race protocol (all flag reads/writes below run atomically between awaits):
- * runs register `pending` before driving the page, so a freeze that starts
- * after a run began stands down at the guard. A freeze already past the
- * guard when a run registers rechecks `pending` after its CDP roundtrip and
+ * runs register `pending` (download waits `downloadWaits`) before driving the
+ * page, so a freeze that starts after one began stands down at the guard. A
+ * freeze already past the guard when one registers rechecks after its CDP roundtrip and
  * re-asserts `active` on the same session — a frozen frame already sent
  * cannot be unsent, so the undo guarantees the run never executes on a
  * frozen page. Unfreezing always proceeds: resuming is safe under any
@@ -1111,7 +1211,7 @@ async function findTargetForTab(tab: WorkerTabSession): Promise<Target | undefin
 async function setTabFrozen(tab: TabSession, frozen: boolean): Promise<boolean> {
 	if (!isSettleManaged(tab) || tab.backend !== "worker") return false;
 	if (tab.frozen === frozen) return false;
-	if (frozen && tab.pending.size > 0) return false;
+	if (frozen && hasInFlightWork(tab)) return false;
 	const target = await findTargetForTab(tab).catch(() => undefined);
 	if (!target) return false;
 	const session = await target.createCDPSession().catch(() => null);
@@ -1122,8 +1222,8 @@ async function setTabFrozen(tab: TabSession, frozen: boolean): Promise<boolean> 
 		if (tab.state !== "alive") return false;
 		if (frozen) {
 			if (tab.frozen) return false;
-			if (tab.pending.size > 0 || tab.persist) {
-				// A run registered, or the owner opted out with `persist`,
+			if (hasInFlightWork(tab) || tab.persist) {
+				// A run or download wait registered, or the owner opted out with `persist`,
 				// while our CDP roundtrip was in flight. Either way the
 				// frozen frame may already have landed, so re-assert
 				// `active` instead of recording frozen — a persist tab left
@@ -1213,8 +1313,8 @@ export async function freezeTabsForOwner(ownerId: string): Promise<number> {
 	return count;
 }
 /**
- * Idle-close eligibility: owned, settle-managed, no in-flight run, and idle
- * past the deadline. An executing tab is not idle even when its run outlasts
+ * Idle-close eligibility: owned, settle-managed, no in-flight run or download
+ * wait, and idle past the deadline. An executing tab is not idle even when its run outlasts
  * the timeout. Exported so the never-touch contract is unit-testable;
  * `releaseIdleTabsForOwner` walks the map with exactly this predicate.
  */
@@ -1222,7 +1322,7 @@ export function isIdleCloseCandidate(tab: TabSession, ownerId: string, nowMs: nu
 	return (
 		tab.ownerSessionId === ownerId &&
 		isSettleManaged(tab) &&
-		tab.pending.size === 0 &&
+		!hasInFlightWork(tab) &&
 		nowMs - tab.lastActivityAt >= idleMs
 	);
 }
@@ -1440,6 +1540,18 @@ function handleTabMessage(tab: WorkerTabSession, msg: WorkerOutbound): void {
 		pending.reject(errorFromPayload(msg.error));
 		return;
 	}
+	if (msg.type === "download-wait-armed") {
+		tab.downloadWaits.get(msg.id)?.markArmed();
+		return;
+	}
+	if (msg.type === "download-wait-result") {
+		const wait = tab.downloadWaits.get(msg.id);
+		if (!wait) return;
+		tab.downloadWaits.delete(msg.id);
+		if (msg.ok) wait.resolve(msg.download);
+		else wait.reject(errorFromPayload(msg.error));
+		return;
+	}
 	if (msg.type === "ready") {
 		tab.info = msg.info;
 		return;
@@ -1517,6 +1629,11 @@ async function recycleTimedOutWorkerTab(tab: WorkerTabSession, timeoutMs: number
 	// must not restart the recycle's init budget.
 	const startedAt = performance.now();
 	const oldWorker = tab.worker;
+	// The old worker's download observation dies with it.
+	rejectDownloadWaits(
+		tab,
+		new ToolError(`Tab ${JSON.stringify(tab.name)} restarted its worker while waiting for a download`),
+	);
 	await oldWorker.terminate().catch(() => undefined);
 	const browserWSEndpoint = tab.browser.browser.wsEndpoint();
 	if (!browserWSEndpoint) throw new ToolError("Browser websocket endpoint is unavailable");
@@ -1574,6 +1691,7 @@ async function forceKillTab(name: string, reason: string): Promise<void> {
 	const error = postmortem.markExpectedCleanupError(new ToolError(reason));
 	for (const pending of tab.pending.values()) pending.reject(error);
 	tab.pending.clear();
+	if (tab.backend === "worker") rejectDownloadWaits(tab, error);
 	if (tab.backend === "cmux") {
 		await releaseBrowser(tab.browser, { kill: false });
 		tabs.delete(name);
