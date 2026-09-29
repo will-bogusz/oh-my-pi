@@ -995,3 +995,69 @@ describe("browser settle — lifecycle freeze via CDP", () => {
 		}, 120_000);
 	});
 });
+
+describe("browser download wait — arming before the next run", () => {
+	/** A worker tab that records what the supervisor sends it; the test plays the worker. */
+	function recordingTab(name: string): { tab: TabSession; sent: Array<{ type: string; id?: string }> } {
+		const sent: Array<{ type: string; id?: string }> = [];
+		const tab = {
+			name,
+			backend: "worker",
+			state: "alive",
+			frozen: false,
+			pending: new Map(),
+			downloadWaits: new Map(),
+			lastActivityAt: Date.now(),
+			info: { url: "about:blank", title: "" },
+			kindTag: "headless",
+			activateForScreenshot: false,
+			worker: { mode: "thread", send: (message: { type: string; id?: string }) => sent.push(message) },
+		} as unknown as TabSession;
+		getTabsMapForTest().set(name, tab);
+		return { tab, sent };
+	}
+	const settle = async (): Promise<void> => {
+		for (let i = 0; i < 20; i++) await Promise.resolve();
+	};
+
+	it("holds a run started after a wait until the worker is watching, and lets it go when the wait ends first", async () => {
+		const { tab, sent } = recordingTab("download-arming");
+		if (tab.backend !== "worker") throw new Error("worker tab expected");
+		const session = makeSession(process.cwd());
+		try {
+			const armed = waitForTabDownload("download-arming", { timeoutMs: 5_000 }).catch((error: unknown) => error);
+			await settle();
+			expect(sent.map(message => message.type)).toEqual(["download-wait"]);
+			const run = runInTab("download-arming", { code: "1", timeoutMs: 5_000, session });
+			await settle();
+			expect(sent.some(message => message.type === "run")).toBe(false);
+			const [waitId, wait] = [...tab.downloadWaits.entries()][0]!;
+			wait.markArmed();
+			await settle();
+			const first = sent.find(message => message.type === "run")!;
+			tab.pending.get(first.id!)!.resolve({ displays: [], returnValue: undefined, screenshots: [] });
+			await run;
+			tab.downloadWaits.delete(waitId);
+			wait.resolve({ suggestedFilename: "a.bin", url: "", state: "completed", bytes: 0 });
+			await armed;
+
+			// A wait that fails before it is armed releases the run it held.
+			sent.length = 0;
+			const failing = waitForTabDownload("download-arming", { timeoutMs: 5_000 }).catch((error: unknown) => error);
+			await settle();
+			const held = runInTab("download-arming", { code: "2", timeoutMs: 5_000, session });
+			await settle();
+			expect(sent.some(message => message.type === "run")).toBe(false);
+			const [failedId, failed] = [...tab.downloadWaits.entries()][0]!;
+			tab.downloadWaits.delete(failedId);
+			failed.reject(new Error("Download observation unavailable"));
+			expect(String(await failing)).toContain("Download observation unavailable");
+			await settle();
+			const second = sent.find(message => message.type === "run")!;
+			tab.pending.get(second.id!)!.resolve({ displays: [], returnValue: undefined, screenshots: [] });
+			await held;
+		} finally {
+			getTabsMapForTest().delete("download-arming");
+		}
+	});
+});

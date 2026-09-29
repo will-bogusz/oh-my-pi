@@ -164,8 +164,10 @@ export class DownloadManager implements TabDownloadSource {
 	}
 
 	async arm(): Promise<void> {
+		// `#session` is set before the enable finishes: a second wait joins that enable, not the half-set session.
+		if (this.#arming) return await this.#arming;
 		if (this.#session) return;
-		this.#arming ??= this.enable().finally(() => {
+		this.#arming = this.enable().finally(() => {
 			this.#arming = undefined;
 		});
 		await this.#arming;
