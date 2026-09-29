@@ -1,7 +1,7 @@
 Control real host application windows from JavaScript or Python Eval with `computer` (no DOM — that is `browser`). Safety rules: system prompt.
 
 <instruction>
-Entry: `await computer.window(selector)` acquires ONE window and prints its tree. `selector` is an id or `{ app?, title?, id?, pid? }`; `app` is a display name or a bundle id (`com.vendor.App`), and an app that is not running is launched. `computer.windows(filter)` lists windows without acquiring; `computer.help()` prints the typed API. The handle's verbs print with your first acquisition.
+Entry: `await computer.window(selector)` acquires ONE window and prints its tree and a screenshot of it, which is also the frame pixel actions use; capture it again only after acting or waiting, or when a pixel action answers `StaleFrame`. `selector` is an id or `{ app?, title?, id?, pid? }`; `app` is a display name or a bundle id (`com.vendor.App`), and an app that is not running is launched. `computer.windows(filter)` lists windows without acquiring; `computer.help()` prints the typed API. The handle's verbs print with your first acquisition.
 
 Observation
 - Rows read `n5 button "Add" = "value" (description) [disabled, selected] actions=open`, indented by depth; `text "…"` rows are text the window shows with no action on it. Any row takes `click()`; `actions=` names only what a row offers beyond press, show_menu, confirm, cancel and pick, which `el.perform(name)` reaches too.
