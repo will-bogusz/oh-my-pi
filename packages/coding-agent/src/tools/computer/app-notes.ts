@@ -18,3 +18,22 @@ export function appNote(bundleId: string): string | undefined {
 	const note = APP_NOTES[bundleId.toLowerCase()];
 	return note === undefined ? undefined : `App note for ${bundleId} (printed once per session):\n${note.trim()}`;
 }
+
+/**
+ * The bundle id Launch Services files a running pid under; undefined for a
+ * process that is no app. `lsappinfo` answers in ~25 ms, where the driver's
+ * `list_apps` also scans every installed bundle and took ~0.8 s — too slow to
+ * pay on each app's first acquisition for a note most apps do not have.
+ */
+export async function launchServicesBundleId(pid: number): Promise<string | undefined> {
+	try {
+		const child = Bun.spawn(["lsappinfo", "info", "-only", "bundleid", String(pid)], {
+			stdout: "pipe",
+			stderr: "ignore",
+		});
+		const [text] = await Promise.all([new Response(child.stdout).text(), child.exited]);
+		return /"CFBundleIdentifier"="([^"]+)"/.exec(text)?.[1];
+	} catch {
+		return undefined;
+	}
+}

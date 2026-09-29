@@ -71,7 +71,7 @@ function detail(scroll: ComputerScrollOutcome): string {
 	const parts: string[] = [];
 	if (scroll.requestedPt !== null) parts.push(`requested ${Math.round(scroll.requestedPt)} pt`);
 	const wheel = scroll.wheel;
-	const route = `${scroll.delivery} ${wheel?.unit === "pixel" ? "pointer" : "line"} wheel`;
+	const route = `${scroll.delivery} ${wheel === undefined ? "" : wheel.unit === "pixel" ? "pointer " : "line "}wheel`;
 	const sent = [
 		...(scroll.chunks !== undefined && scroll.chunks > 1 ? [`${scroll.chunks} chunks`] : []),
 		...(wheel === undefined
@@ -96,13 +96,15 @@ export function scrollVerdict(scroll: ComputerScrollOutcome, where: string): str
 		case "moved":
 			return `✓ Scrolled ${scroll.direction} ${moved} pt at ${where}${detail(scroll)}`;
 		case "at_end":
+			// Either signature — a bounce, or travel that stopped short with the
+			// frames settled — is the view's end; which one fired is not reported.
 			return `✓ At end: moved ${moved}${
 				scroll.requestedPt === null ? "" : ` of ${Math.round(scroll.requestedPt)}`
-			} pt at ${where}, then the view bounced — nothing further scrolls ${scroll.direction} there${detail(scroll)}`;
+			} pt at ${where}, then the view stopped at its end — scrolling further ${scroll.direction} there moves nothing${detail(scroll)}`;
 		case "no_motion":
 			return `✗ No motion at ${where} — the view under that point did not scroll${detail(scroll)}; ${
 				scroll.delivery === "background"
-					? 'background wheels do not reach views that scroll only under the real pointer: retry with { delivery: "foreground" }'
+					? 'unless it is already at its end, retry with { delivery: "foreground" }: background wheels do not reach views that scroll only under the real pointer'
 					: "nothing there scrolls with the wheel (a pager or carousel pages by tapping its edge) or it is already at its end: pick a point inside the list"
 			}`;
 		case "changed_in_place":

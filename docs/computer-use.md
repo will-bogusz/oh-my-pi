@@ -92,16 +92,16 @@ Explicitly click the intended editor/control before background keyboard sequence
 
 ### Scrolling
 
-`scroll(direction, { target?, amount?, by?, delivery? })` wheels at the target (a token's centre or a window point), or at the window's centre without one. `by: "line"` (default) and `by: "page"` (0.8 × the visible height of the scroll area under the point) count notches, `amount` 1–50; `by: "points"` is a distance in window points, `amount` 1–5000. Anything else is refused before input.
+`scroll(direction, { target?, amount?, by?, delivery? })` wheels at the target (a token's centre or a window point), or at the window's centre without one. `by: "line"` (default) and `by: "page"` count notches, `amount` 1–50; `by: "points"` needs an `amount`, a distance in window points, 1–5000. Anything else is refused before input.
 
-Background delivery posts line wheels to the process. `{ delivery: "foreground" }` raises the app, checks that the target window is topmost at the point (else refuses with `target_covered` and sends nothing), moves the real pointer there, wheels in pixel units in measured chunks, then puts the pointer and the previously frontmost app back. Views that scroll only under the real pointer (iPhone Mirroring, some canvases) need it.
+`{ delivery: "foreground" }` scrolls by distance — a line is 40 pt, a page 0.8 × the visible height of the scroll area under the point, points as given. It raises the app, checks that the target window is topmost at the point (else refuses with `target_covered` and sends nothing), moves the real pointer there, wheels in pixel units in measured chunks, then puts the pointer and the previously frontmost app back. Views that scroll only under the real pointer (iPhone Mirroring, some canvases) need it. Background delivery posts line ticks to the process: a line is one tick, a page five, points about one per 40; the measured verdict reports how far the view really went.
 
-The driver samples the window's pixels around the gesture, and the reply's first line is what the view did, at the point in the caller's window coordinates (a driver point is mapped back through the current frame):
+The driver samples the window's pixels around the gesture, and the reply's first line is what the view did. It names the target as the caller gave it — its point or its ref — and, without one, the driver's point mapped back into window points through the current frame:
 
 | Verdict | Meaning | Cell mark |
 | --- | --- | --- |
 | `✓ Scrolled down 231 pt at (163, 400) (requested 231 pt; foreground pointer wheel, 2 chunks, 300 px)` | The content moved that far | `✓` |
-| `✓ At end: moved 58 of 231 pt at (…), then the view bounced — …` | It reached its end; repeating moves nothing | `✓` |
+| `✓ At end: moved 58 of 231 pt at (…), then the view stopped at its end — …` | It reached its end; repeating moves nothing | `✓` |
 | `✗ No motion at (…) — the view under that point did not scroll …` | Measured stillness; a background reply names `{ delivery: "foreground" }` | `✗` |
 | `? Changed in place at (…): pixels changed but nothing shifted …` | A pager, sheet or navigation; observe first | `?` |
 | `? Unmeasured: scrolled down at (…) …, but the capture was unavailable …` | No frames to judge by | `?` |
@@ -110,7 +110,7 @@ The result's `scroll` field carries the outcome (`outcome`, `delivery`, `directi
 
 ### App notes
 
-Some apps have traps their accessibility tree and pixels cannot show. A note per bundle id lives in `packages/coding-agent/src/tools/computer/app-notes/<bundle id>.md` (registered in `app-notes.ts`) and prints once per computer session beside the first window of that app acquired (macOS; the bundle comes from the driver's apps roster). The first is `com.apple.ScreenContinuity` (iPhone Mirroring): pixels only, scroll with foreground delivery at a target, drags and keys do not scroll, pagers page by taps, horizontal drags on rows open swipe actions, and ⌘1/⌘2/⌘3 for Home Screen, App Switcher and Spotlight.
+Some apps have traps their accessibility tree and pixels cannot show. A note per bundle id lives in `packages/coding-agent/src/tools/computer/app-notes/<bundle id>.md` (registered in `app-notes.ts`, imported as text so compiled binaries carry it) and prints once per computer session beside the first window of that app acquired (macOS; the pid's bundle id comes from Launch Services, `lsappinfo`, once per pid). The first is `com.apple.ScreenContinuity` (iPhone Mirroring): pixels only, scroll with foreground delivery at a target, drags and keys do not scroll, pagers page by taps, horizontal drags on rows open swipe actions, and ⌘1/⌘2/⌘3 for Home Screen, App Switcher and Spotlight.
 
 ### Pixel input
 

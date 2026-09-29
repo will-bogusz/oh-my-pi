@@ -6,7 +6,7 @@ import { resizeImage } from "../../utils/image-resize";
 import { renderNode, type TreeNode } from "../observed-tree";
 import { throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
-import { appNote } from "./app-notes";
+import { appNote, launchServicesBundleId } from "./app-notes";
 import type { ComputerBackend, ComputerBackendFactory } from "./backend";
 import { type CuaDriver, type CuaDriverFactory, type CuaToolResult, spawnVendoredCuaDriver } from "./driver";
 import {
@@ -494,6 +494,8 @@ export interface CuaSessionOptions {
 	spawn?: CuaDriverFactory;
 	/** WindowServer roster used for interruption checks; tests inject a quiet desktop. */
 	sampleRoster?: () => WindowRosterSample;
+	/** Bundle id of a running pid, for app notes; tests inject a fixed answer. */
+	bundleId?: (pid: number) => Promise<string | undefined>;
 	/**
 	 * Host the driver child runs on. The driver is a local child, so this is
 	 * `process.platform`; tests pin it to exercise the other backend.
@@ -746,6 +748,7 @@ function unsupported(operation: string): never {
 export class CuaComputerSession implements ComputerBackend {
 	readonly #spawn: CuaDriverFactory;
 	readonly #sampleRoster: () => WindowRosterSample;
+	readonly #bundleIdOf: (pid: number) => Promise<string | undefined>;
 	readonly #platform: NodeJS.Platform;
 	readonly #elements = new Map<string, Binding>();
 	readonly #frames = new Map<string, Frame>();
@@ -772,8 +775,8 @@ export class CuaComputerSession implements ComputerBackend {
 	 */
 	readonly #bundlePids = new Map<string, ReadonlySet<number>>();
 	/**
-	 * The bundle id of each pid as the last apps roster listed it; null for
-	 * a pid that roster did not list. App notes are keyed on it.
+	 * The bundle id each pid ran when this session first acquired one of its
+	 * windows; null for a process that is no app. App notes are keyed on it.
 	 */
 	readonly #pidBundles = new Map<number, string | null>();
 	/** Bundle ids whose app note this session has printed. */
@@ -813,12 +816,14 @@ export class CuaComputerSession implements ComputerBackend {
 		driver: CuaDriver,
 		spawn: CuaDriverFactory,
 		sampleRoster: () => WindowRosterSample,
+		bundleIdOf: (pid: number) => Promise<string | undefined>,
 		permissions: Wire,
 		platform: NodeJS.Platform,
 	) {
 		this.#driver = driver;
 		this.#spawn = spawn;
 		this.#sampleRoster = sampleRoster;
+		this.#bundleIdOf = bundleIdOf;
 		this.#platform = platform;
 		// The two backends answer `check_permissions` with disjoint keys:
 		// macOS reports TCC grants (`accessibility`, `screen_recording`),
@@ -867,7 +872,14 @@ export class CuaComputerSession implements ComputerBackend {
 			// Without an X11 connection the Linux driver answers every window
 			// call with an opaque X error; its own report says what is missing.
 			if (platform === "linux" && reported.x11 !== true) throw new ToolError(permissions.text);
-			return new CuaComputerSession(driver, spawn, options.sampleRoster ?? sampleWindowRoster, reported, platform);
+			return new CuaComputerSession(
+				driver,
+				spawn,
+				options.sampleRoster ?? sampleWindowRoster,
+				options.bundleId ?? launchServicesBundleId,
+				reported,
+				platform,
+			);
 		} catch (error) {
 			await driver.kill({ force: true });
 			throw error;
@@ -1101,48 +1113,39 @@ export class CuaComputerSession implements ComputerBackend {
 	 */
 	async #bundleIdPids(bundleId: string): Promise<ReadonlySet<number>> {
 		const pids = new Set<number>();
-		const wanted = bundleId.toLowerCase();
-		if (await this.#readAppBundles())
-			for (const [pid, bundle] of this.#pidBundles) if (bundle?.toLowerCase() === wanted) pids.add(pid);
-		this.#bundlePids.set(wanted, pids);
+		try {
+			const { data } = await this.#call("list_apps", {});
+			if (Array.isArray(data.apps))
+				for (const value of data.apps) {
+					if (typeof value !== "object" || value === null) continue;
+					const row = value as Wire;
+					if (
+						typeof row.bundle_id === "string" &&
+						row.bundle_id.toLowerCase() === bundleId.toLowerCase() &&
+						typeof row.pid === "number" &&
+						row.pid > 0
+					)
+						pids.add(row.pid);
+				}
+		} catch (error) {
+			if (!(error instanceof ToolError)) throw error;
+		}
+		this.#bundlePids.set(bundleId.toLowerCase(), pids);
 		return pids;
 	}
 	/**
-	 * Re-read which bundle each live pid runs. A roster read replaces the
-	 * last one whole: a pid it no longer lists has exited or been reused.
-	 * False when the driver could not list apps, and nothing is replaced.
-	 */
-	async #readAppBundles(): Promise<boolean> {
-		let apps: unknown;
-		try {
-			apps = (await this.#call("list_apps", {})).data.apps;
-		} catch (error) {
-			if (!(error instanceof ToolError)) throw error;
-			return false;
-		}
-		this.#pidBundles.clear();
-		if (Array.isArray(apps))
-			for (const value of apps) {
-				if (typeof value !== "object" || value === null) continue;
-				const row = value as Wire;
-				if (typeof row.bundle_id === "string" && typeof row.pid === "number" && row.pid > 0)
-					this.#pidBundles.set(row.pid, row.bundle_id);
-			}
-		return true;
-	}
-	/**
 	 * The note of the app a window belongs to, the first time this session
-	 * acquires one of its windows. Bundle ids are a macOS roster fact; the
-	 * apps roster is read once per pid it has not yet answered for.
+	 * acquires one of its windows. The bundle is asked once per pid (macOS
+	 * only: bundle ids are a Launch Services fact).
 	 */
 	async #appNote(context: Context, window: ComputerWindowIdentity): Promise<void> {
 		if (this.#platform !== "darwin") return;
-		if (!this.#pidBundles.has(window.pid)) {
-			if (!(await this.#readAppBundles())) return;
-			if (!this.#pidBundles.has(window.pid)) this.#pidBundles.set(window.pid, null);
+		let bundle = this.#pidBundles.get(window.pid);
+		if (bundle === undefined) {
+			bundle = (await this.#bundleIdOf(window.pid)) ?? null;
+			this.#pidBundles.set(window.pid, bundle);
 		}
-		const bundle = this.#pidBundles.get(window.pid);
-		if (!bundle || this.#notedApps.has(bundle.toLowerCase())) return;
+		if (bundle === null || this.#notedApps.has(bundle.toLowerCase())) return;
 		const note = appNote(bundle);
 		if (note === undefined) return;
 		this.#notedApps.add(bundle.toLowerCase());
@@ -2374,10 +2377,7 @@ export class CuaComputerSession implements ComputerBackend {
 							.slice(1)
 							.filter(line => !line.includes("not driver-verified")),
 					].join("\n");
-		const escalated =
-			measured !== undefined && measured.scroll.outcome !== "unmeasured"
-				? undefined
-				: escalation(reply, this.#facts(name, reported, args));
+		const escalated = escalation(reply, this.#facts(name, reported, args));
 		const motion = measured === undefined ? undefined : scrollEvidence(measured.scroll);
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
 		// A window one of this session's dispatches changed is re-read once if
@@ -2389,7 +2389,7 @@ export class CuaComputerSession implements ComputerBackend {
 		)
 			this.#mutated.add(String(args.window_id));
 		const notes = [
-			escalated,
+			measured !== undefined && measured.scroll.outcome !== "unmeasured" ? undefined : escalated,
 			opened,
 			interruptedBy
 				? `⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
@@ -2401,7 +2401,10 @@ export class CuaComputerSession implements ComputerBackend {
 			evidence:
 				motion === undefined
 					? (data.evidence ?? null)
-					: [...(Array.isArray(data.evidence) ? data.evidence : data.evidence == null ? [] : [data.evidence]), motion],
+					: [
+							...(Array.isArray(data.evidence) ? data.evidence : data.evidence == null ? [] : [data.evidence]),
+							motion,
+						],
 			route: reply.route ?? "cua-sdk",
 			delivery: data.delivery ?? args.delivery_mode ?? "background",
 			...(reply.committed === undefined ? {} : { committed: reply.committed }),
@@ -2824,6 +2827,10 @@ export class CuaComputerSession implements ComputerBackend {
 			if (by !== "line" && by !== "page" && by !== "points")
 				throw new ToolError(`Scroll by must be "line", "page" or "points", not ${JSON.stringify(options.by)}`);
 			const most = by === "points" ? 5000 : 50;
+			// A distance has no honest default: the driver's notch default read
+			// as points is a few points, which measures as no motion.
+			if (by === "points" && options.amount === undefined)
+				throw new ToolError('Scroll by: "points" needs an amount: the distance in window points, 1 to 5000');
 			if (
 				options.amount !== undefined &&
 				(!Number.isInteger(options.amount) || options.amount < 1 || options.amount > most)
@@ -2831,7 +2838,10 @@ export class CuaComputerSession implements ComputerBackend {
 				throw new ToolError(`Scroll amount must be an integer from 1 to ${most} for by: "${by}"`);
 			const current = await this.#current(window);
 			throwIfAborted(context.signal);
-			const given = typeof target === "string" || target === undefined ? undefined : pointPair(target);
+			const addressed = this.#target(current, target);
+			const given = !target || typeof target === "string" ? undefined : pointPair(target);
+			// The verdict names the target as the caller gave it: its point, its
+			// ref, or — without one — the driver's point mapped back.
 			const described =
 				given !== undefined
 					? `(${Math.round(given[0])}, ${Math.round(given[1])})`
@@ -2841,10 +2851,14 @@ export class CuaComputerSession implements ComputerBackend {
 			const measure: Measure = data => {
 				const driven = readDriverScroll(data);
 				if (driven === undefined) return undefined;
+				// The driver's point is local to the window the wire addressed,
+				// which for a sheet's ref is the sheet: only this window's own
+				// frame maps it back.
 				const frame = this.#frames.get(current.id);
 				const mapped =
 					given === undefined &&
 					driven.point !== undefined &&
+					addressed.window_id === Number(current.id) &&
 					frame !== undefined &&
 					frame.window.pid === current.pid &&
 					sameBounds(frame.window.bounds, current.bounds)
@@ -2861,7 +2875,7 @@ export class CuaComputerSession implements ComputerBackend {
 				return {
 					text: scrollVerdict(
 						scroll,
-						scroll.point === undefined ? described : `(${scroll.point.x}, ${scroll.point.y})`,
+						!target && scroll.point !== undefined ? `(${scroll.point.x}, ${scroll.point.y})` : described,
 					),
 					scroll,
 				};
@@ -2869,13 +2883,7 @@ export class CuaComputerSession implements ComputerBackend {
 			try {
 				return await this.#dispatch(
 					"scroll",
-					{
-						...this.#target(current, target),
-						direction,
-						amount: options.amount,
-						by: options.by,
-						...delivery(options),
-					},
+					{ ...addressed, direction, amount: options.amount, by: options.by, ...delivery(options) },
 					target,
 					{ context, window: current },
 					measure,
@@ -2884,11 +2892,12 @@ export class CuaComputerSession implements ComputerBackend {
 				if (!(error instanceof ToolError) || readReply(error.context).code !== "target_covered") throw error;
 				// The driver raised the app and still found another window on top
 				// at the point; its sentence names that point in its own pixels.
+				// The covering window is someone's: moving it is the user's call.
 				const cover = /stays covered by (.+?) at \(/.exec(error.message)?.[1];
 				throw new ToolError(
-					`target_covered: nothing was sent — at ${described} window ${current.id} stays covered${
+					`target_covered: nothing was sent — at ${described}, window ${current.id} stays covered${
 						cover === undefined ? "" : ` by ${cover}`
-					} even after its app was raised. Move or close the covering window, or scroll at a point where window ${current.id} is on top.`,
+					} even after its app was raised. Scroll at a point where window ${current.id} is on top, or ask the user to move the covering window.`,
 					error.context,
 				);
 			}

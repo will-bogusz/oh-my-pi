@@ -4,6 +4,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { fromJsonSchema, type } from "@oh-my-pi/omptype";
 import type { DesktopSystemWindow } from "@oh-my-pi/pi-natives";
+import { appNote } from "@oh-my-pi/pi-coding-agent/tools/computer/app-notes";
 import { actionMark } from "@oh-my-pi/pi-coding-agent/tools/computer/cell-reply";
 import { CuaComputerSession } from "@oh-my-pi/pi-coding-agent/tools/computer/cua-session";
 import type { CuaDriver, CuaToolResult } from "@oh-my-pi/pi-coding-agent/tools/computer/driver";
@@ -147,7 +148,7 @@ function systemWindow(row: { id: string; title: string; zIndex?: number; app?: s
 	};
 }
 
-async function fixture(options: { platform?: NodeJS.Platform; apps?: Wire[] } = {}) {
+async function fixture(options: { platform?: NodeJS.Platform; bundles?: Record<number, string> } = {}) {
 	const platform = options.platform ?? "darwin";
 	const linux = platform === "linux";
 	const directory = await fs.mkdtemp(path.join(os.tmpdir(), "omp-cua-session-"));
@@ -210,12 +211,14 @@ async function fixture(options: { platform?: NodeJS.Platform; apps?: Wire[] } = 
 		displayIdentity: true,
 		display: { uuid: "display-uuid", nativeId: 7, x: 0, y: 0, width: 2, height: 1, scale: 2 },
 		hook: undefined as ((name: string, args: Wire) => Promise<CuaToolResult | undefined>) | undefined,
+		/** Pids whose bundle id the session asked for. */
+		bundleReads: [] as number[],
 	};
 	const answer = (name: string, args: Wire): CuaToolResult => {
 		if (name === "check_permissions")
 			return reply(linux ? LINUX.permissions : { accessibility: true, screen_recording: true });
 		if (name === "list_windows") return reply({ windows: linux ? [LINUX.xterm, row, LINUX.pidless] : [row] });
-		if (name === "list_apps") return reply({ apps: options.apps ?? [] });
+		if (name === "list_apps") return reply({ apps: [] });
 		if (name === "get_screen_size" || name === "get_desktop_state") {
 			const display = state.display;
 			const identity = state.displayIdentity
@@ -342,6 +345,10 @@ async function fixture(options: { platform?: NodeJS.Platform; apps?: Wire[] } = 
 			state.rosterReads++;
 			const sample = typeof state.roster === "function" ? state.roster() : state.roster;
 			return sample ?? { windows: [], elapsedMs: 0 };
+		},
+		bundleId: async pid => {
+			state.bundleReads.push(pid);
+			return options.bundles?.[pid];
 		},
 	});
 	const context: ComputerOperationContext = {
@@ -5261,7 +5268,7 @@ it("maps an untargeted scroll's driver point back into window points for its ver
 			delivery: "foreground",
 		});
 		expect(end.text).toBe(
-			"✓ At end: moved 58 of 231 pt at (100, 50), then the view bounced — nothing further scrolls down there (requested 231 pt; foreground pointer wheel, 300 px)",
+			"✓ At end: moved 58 of 231 pt at (100, 50), then the view stopped at its end — scrolling further down there moves nothing (requested 231 pt; foreground pointer wheel, 300 px)",
 		);
 		expect(end.scroll?.point).toEqual({ x: 100, y: 50 });
 		expect(f.lastDispatch()?.args).not.toHaveProperty("x");
@@ -5287,9 +5294,11 @@ it("maps an untargeted scroll's driver point back into window points for its ver
 				: undefined;
 		const still = await f.session.scroll(f.context, f.window, "down", undefined, { amount: 3 });
 		expect(still.text).toBe(
-			'✗ No motion at (100, 50) — the view under that point did not scroll (background line wheel, 3 lines); background wheels do not reach views that scroll only under the real pointer: retry with { delivery: "foreground" }',
+			'✗ No motion at (100, 50) — the view under that point did not scroll (background line wheel, 3 lines); unless it is already at its end, retry with { delivery: "foreground" }: background wheels do not reach views that scroll only under the real pointer',
 		);
-		expect(still.escalation).toBeUndefined();
+		// The route stays on the result for code that branches on it; the
+		// text does not restate it as "delivery unproven".
+		expect(still.escalation).toContain('{ delivery: "foreground" }');
 		expect(still.effect).toBe("suspected_noop");
 		expect(still.mustShow).toBe(true);
 		expect(actionMark(still)).toBe("✗");
@@ -5335,6 +5344,14 @@ it("names a ref target when no frame maps the driver's point, and keeps unproven
 		);
 		expect(blind.evidence).toBeNull();
 		expect(actionMark(blind)).toBe("?");
+		// With a frame the ref's wheel point maps back onto the result, and
+		// the verdict still names the target the way the caller gave it.
+		await f.session.captureWindow(f.context, f.window, { silent: true });
+		f.state.hook = async name =>
+			name === "scroll" ? scrollReply({ ...sent, outcome: "moved", moved_pt: 40, confidence: 0.9 }) : undefined;
+		const moved = await f.session.scroll(f.context, f.window, "down", ref, { delivery: "foreground" });
+		expect(moved.text).toBe(`✓ Scrolled down 40 pt at ${ref} (requested 40 pt; foreground pointer wheel, 40 px)`);
+		expect(moved.scroll?.point).toEqual({ x: 100, y: 50 });
 	} finally {
 		await f.close();
 	}
@@ -5359,6 +5376,9 @@ it("refuses a scroll amount or unit the driver cannot honour before sending anyt
 			'Scroll amount must be an integer from 1 to 5000 for by: "points"',
 		);
 		expect(await refusal({ by: "pixels" })).toBe('Scroll by must be "line", "page" or "points", not "pixels"');
+		expect(await refusal({ by: "points" })).toBe(
+			'Scroll by: "points" needs an amount: the distance in window points, 1 to 5000',
+		);
 		expect(f.calls.some(call => call.name === "scroll")).toBe(false);
 		expect(await refusal({ amount: 5000, by: "points" })).toBe("sent");
 		expect(f.lastDispatch()?.args).toMatchObject({ amount: 5000, by: "points" });
@@ -5387,7 +5407,7 @@ it("says a covered scroll target in the caller's point and sends nothing", async
 		);
 		expect(error).toBeInstanceOf(ToolError);
 		expect((error as ToolError).message).toBe(
-			"target_covered: nothing was sent — at (150, 60) window 1 stays covered by Terminal (pid 42) even after its app was raised. Move or close the covering window, or scroll at a point where window 1 is on top.",
+			"target_covered: nothing was sent — at (150, 60), window 1 stays covered by Terminal (pid 42) even after its app was raised. Scroll at a point where window 1 is on top, or ask the user to move the covering window.",
 		);
 	} finally {
 		await f.close();
@@ -5395,27 +5415,20 @@ it("says a covered scroll target in the caller's point and sends nothing", async
 });
 
 it("prints an app's note once, with the first window of the bundle it is keyed on", async () => {
-	const mirror = await fixture({
-		apps: [{ bundle_id: "com.apple.ScreenContinuity", pid: 101, name: "iPhone Mirroring" }],
-	});
-	const notes = () => mirror.texts.filter(text => text.startsWith("App note for com.apple.ScreenContinuity"));
+	const mirror = await fixture({ bundles: { 101: "com.apple.ScreenContinuity" } });
+	const notes = () => mirror.texts.filter(text => text === appNote("com.apple.ScreenContinuity"));
 	try {
 		expect(notes()).toHaveLength(1);
-		expect(notes()[0]).toContain("### iPhone Mirroring");
-		expect(notes()[0]).toContain('win.scroll("down", { target: [x, y], delivery: "foreground" })');
 		await mirror.session.window(mirror.context, { id: "1", pid: 101 });
 		await mirror.session.window(mirror.context, { app: "Fixture" });
 		expect(notes()).toHaveLength(1);
-		expect(mirror.calls.filter(call => call.name === "list_apps")).toHaveLength(1);
+		// Asked once per pid, and never through the driver's slow app scan.
+		expect(mirror.state.bundleReads).toEqual([101]);
+		expect(mirror.calls.some(call => call.name === "list_apps")).toBe(false);
 	} finally {
 		await mirror.close();
 	}
-	const other = await fixture({
-		apps: [
-			{ bundle_id: "com.example.Fixture", pid: 101 },
-			{ bundle_id: "com.apple.ScreenContinuity", pid: 202 },
-		],
-	});
+	const other = await fixture({ bundles: { 101: "com.example.Fixture", 202: "com.apple.ScreenContinuity" } });
 	try {
 		expect(other.texts.some(text => text.startsWith("App note"))).toBe(false);
 	} finally {
