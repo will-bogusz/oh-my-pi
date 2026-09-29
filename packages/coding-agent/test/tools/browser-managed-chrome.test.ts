@@ -545,3 +545,73 @@ it("replaces the handle of a tab its actor claims again instead of refusing the 
 		server.stop(true);
 	}
 });
+
+it("ends a claim as a user stop when the user cancels the infobar while the claim is attaching", async () => {
+	const relay = startRelayServer({ port: 0 });
+	const credential = spyOn(access, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
+	const ensure = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue({ service: "omp-browser", protocol: 2 });
+	const page: TabSnapshot = { ...tab(1), title: "Busy", url: "https://example.com/busy" };
+	const extension: RelaySocket = {
+		send(raw) {
+			const message = JSON.parse(raw) as RelayToExtMessage;
+			if (message.t !== "rpc") return;
+			// The user presses Cancel on the infobar while the attach's renderer probe waits;
+			// Chrome drops the debugger and fails the pending command.
+			const canceled = message.op === "send" && message.method === "Runtime.evaluate";
+			queueMicrotask(() => {
+				if (canceled)
+					relay.instances.extMessage(extension, JSON.stringify({ t: "detached", tabId: 1, reason: "canceled_by_user" }));
+				relay.instances.extMessage(
+					extension,
+					JSON.stringify(
+						canceled
+							? { t: "rpcResult", id: message.id, ok: false, error: "Detached while handling command." }
+							: { t: "rpcResult", id: message.id, ok: true, result: {} },
+					),
+				);
+			});
+		},
+		close() {},
+	};
+	try {
+		relay.instances.extConnected(extension);
+		relay.instances.extMessage(
+			extension,
+			JSON.stringify({
+				t: "authenticate",
+				auth: { id: "claim-cancel-fixture", label: "Work", pairingCode: relay.access.issueCode().code },
+			}),
+		);
+		relay.instances.extMessage(
+			extension,
+			JSON.stringify({
+				t: "hello",
+				userAgent: "fixture",
+				browserVersion: "Chrome/150",
+				extensionBuildId: EXPECTED_EXTENSION_BUILD_ID,
+				attachedTabIds: [],
+				tabs: [page],
+			}),
+		);
+		const session = toolSession(
+			"claim-cancel",
+			Settings.isolated({
+				"browser.enabled": true,
+				"browser.relay": true,
+				"browser.relayUrl": `http://127.0.0.1:${relay.port}`,
+			}),
+		);
+		const found = relay.instances.discover(browserActorId(session))[0]!;
+		const stopped = await acquireChromeTab(session, { action: "claim", id: found.id, timeoutMs: 2000 }).then(
+			() => undefined,
+			(error: unknown) => error,
+		);
+		expect(stopped).toBeInstanceOf(UserStoppedError);
+		expect(String(stopped)).toContain(`The user stopped OMP's control of "Busy" from Chrome's infobar`);
+		expect(relay.instances.discover()[0]).toMatchObject({ ownership: "available" });
+	} finally {
+		credential.mockRestore();
+		ensure.mockRestore();
+		relay.stop();
+	}
+});

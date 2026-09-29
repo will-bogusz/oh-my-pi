@@ -389,7 +389,8 @@ export async function acquireChromeTab(
 		return handle;
 	} catch (error) {
 		// Ask before handing it back, so the answer is about what went wrong and not this release.
-		const revoked = await explainRevokedChromeControl(handle, error);
+		// A user stop the attach already reported (chromeDialog) is that answer as it stands.
+		const revoked = error instanceof UserStoppedError ? error : await explainRevokedChromeControl(handle, error);
 		try {
 			// The caller never got this handle. A blank tab OMP just created is
 			// litter; one Chrome revoked control of is the user's next step, and
