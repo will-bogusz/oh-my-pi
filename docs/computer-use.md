@@ -138,7 +138,7 @@ Use `await computer.release()` when finished with computer work. It drains admit
 
 Escape releases the interrupted actor's computer resources too, including a rendering lease left idle between calls. After confirmed cleanup it keeps computer use enabled, so subsequent work can select and observe through a fresh driver child. The activity display reports a stopped operation only after its cleanup finishes; a failed cleanup remains a failure.
 
-`await computer.close()` retains its permanent behavior: it releases resources and ends computer use for the current OMP session. `/computer on` cannot reopen a closed session; start a new OMP session afterward. Prefer `release()` for ordinary completion.
+`await computer.close()` ends the desktop session: it releases like `release()` and also deletes the capture files this OMP session's runs wrote, so a path from an earlier capture no longer reads. A later call starts a fresh session. Prefer `release()` for ordinary completion.
 
 ## Platforms
 

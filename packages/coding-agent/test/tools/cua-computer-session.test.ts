@@ -2546,6 +2546,98 @@ it("numbers element refs compactly and never reissues one a later observation in
 	}
 });
 
+/**
+ * The driver's refusal once its idle sweep (or its owner) ended the implicit
+ * session, as cua-driver 0.28.2 answered it live: every call is refused
+ * before dispatch until `start_session` revives the session.
+ */
+const SESSION_ENDED: CuaToolResult = {
+	text: "this session has ended; call start_session explicitly to reuse its label",
+	structuredJson: JSON.stringify({
+		refusal: {
+			code: "session_ended",
+			message: "this session has ended; call start_session explicitly to reuse its label",
+		},
+		status: "refused",
+	}),
+	isError: true,
+	images: [],
+};
+
+it("revives a driver session that ended, re-sends the refused call once, and keeps refs", async () => {
+	const f = await fixture();
+	try {
+		const ref = (await f.session.observe(f.context, f.window)).elements[0]!.ref;
+		let ended = true;
+		f.state.hook = async name => {
+			if (name === "start_session") {
+				ended = false;
+				return reply({ active: true, revived: true, session: "implicit" });
+			}
+			return ended ? SESSION_ENDED : undefined;
+		};
+		const before = f.calls.length;
+		await f.session.setValue(f.context, f.window, ref, "after idle");
+		const calls = f.calls.slice(before);
+		expect(calls.filter(call => call.name === "start_session")).toEqual([{ name: "start_session", args: {} }]);
+		// The refused call goes out again, unchanged, right after the revival.
+		const revival = calls.findIndex(call => call.name === "start_session");
+		expect(calls[revival + 1]).toEqual(calls[revival - 1]!);
+		expect(f.state.value).toBe("after idle");
+		expect(f.session.element(ref).role).toBe("AXTextField");
+	} finally {
+		await f.close();
+	}
+});
+
+it("re-sends an ended session's call only once, and never when the revival is refused", async () => {
+	const f = await fixture();
+	try {
+		f.state.hook = async name => (name === "start_session" ? reply({ active: true, revived: true }) : SESSION_ENDED);
+		let before = f.calls.length;
+		await expect(f.session.observe(f.context, f.window)).rejects.toThrow(
+			"session_ended: the driver refused 'list_windows' again right after reviving its session",
+		);
+		expect(f.calls.slice(before).map(call => call.name)).toEqual(["list_windows", "start_session", "list_windows"]);
+
+		// A transport that does not own the ended session cannot revive it.
+		const unavailable = { code: "session_unavailable", message: "session is not available to this transport" };
+		f.state.hook = async name =>
+			name === "start_session"
+				? { text: unavailable.message, structuredJson: JSON.stringify(unavailable), isError: true, images: [] }
+				: SESSION_ENDED;
+		before = f.calls.length;
+		const refused = await f.session.observe(f.context, f.window).catch((error: unknown) => error);
+		expect(refused).toBeInstanceOf(ToolError);
+		expect((refused as ToolError).message).toStartWith(
+			"session_ended: the driver ended this computer session and refused to start a new one",
+		);
+		expect((refused as ToolError).context).toMatchObject({ code: "session_unavailable" });
+		expect(f.calls.slice(before).map(call => call.name)).toEqual(["list_windows", "start_session"]);
+	} finally {
+		await f.close();
+	}
+});
+
+it("sends any other driver refusal once, without reviving the session", async () => {
+	const f = await fixture();
+	try {
+		const refusal = {
+			status: "refused",
+			refusal: { code: "background_unavailable", message: "no focus-free route" },
+		};
+		f.state.hook = async name =>
+			name === "list_windows"
+				? { text: "no focus-free route", structuredJson: JSON.stringify(refusal), isError: true, images: [] }
+				: undefined;
+		const before = f.calls.length;
+		await expect(f.session.observe(f.context, f.window)).rejects.toThrow("no focus-free route");
+		expect(f.calls.slice(before).map(call => call.name)).toEqual(["list_windows"]);
+	} finally {
+		await f.close();
+	}
+});
+
 it("asks for the window's point grid and takes coordinates in it", async () => {
 	const f = await fixture();
 	try {

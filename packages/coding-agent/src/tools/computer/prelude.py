@@ -293,7 +293,7 @@ def _make_computer():
             await _invoke("release", {})
 
         async def close(self):
-            """End the persistent desktop session; later calls fail."""
+            """End the desktop session: release like release() and delete its capture files; later calls start a fresh session."""
             await _invoke("close", {})
 
     return _Computer()

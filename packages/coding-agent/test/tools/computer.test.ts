@@ -21,7 +21,10 @@ import {
 } from "@oh-my-pi/pi-coding-agent/tools/computer/call";
 // @ts-expect-error Bun imports this declaration source as text instead of a TypeScript module.
 import computerDeclarations from "../../src/tools/computer/declarations.d.ts" with { type: "text" };
-import { ComputerSupervisor } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
+import {
+	ComputerSupervisor,
+	releaseComputerSessionsForOwner,
+} from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
 import { cfgComputerEnabled } from "@oh-my-pi/pi-coding-agent/tools/settings";
 import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
@@ -1048,13 +1051,17 @@ describe("computer preludes through the session", () => {
 		);
 	});
 
-	it("JavaScript release invalidates retained refs, permits fresh work, and preserves permanent close", async () => {
+	it("JavaScript release and close invalidate retained refs and a later call starts a fresh session; owner teardown is permanent", async () => {
+		const owner = `computer-close-${crypto.randomUUID()}`;
 		const backends: FakeBackend[] = [];
-		const { realm } = javascriptFixture(() => {
-			const backend = new FakeBackend();
-			backends.push(backend);
-			return backend;
-		});
+		const { realm } = javascriptFixture(
+			() => {
+				const backend = new FakeBackend();
+				backends.push(backend);
+				return backend;
+			},
+			{ ...toolSession(), getEvalKernelOwnerId: () => owner },
+		);
 		await runInContext(
 			'(async () => { const win = await computer.window("42"); const state = await win.observe(); globalThis.oldElement = await win.ref(state.elements[0].ref); })()',
 			realm,
@@ -1068,12 +1075,20 @@ describe("computer preludes through the session", () => {
 				realm,
 			),
 		).toBe("1");
+		// `computer.close()` from a cell ends this session, not the conversation's computer use.
 		expect(backends[0]?.clickCount).toBe(0);
 		expect(backends[1]?.clickCount).toBe(1);
 		await runInContext("computer.close()", realm);
-		await runInContext("computer.release()", realm);
+		expect(backends[1]?.closeCount).toBe(1);
+		expect(await runInContext("(async () => (await computer.windows()).map(window => window.id))()", realm)).toEqual([
+			"42",
+		]);
+		expect(backends).toHaveLength(3);
+		// Agent session end is final.
+		await releaseComputerSessionsForOwner(owner);
+		expect(backends[2]?.closeCount).toBe(1);
 		await expect(runInContext("computer.windows()", realm)).rejects.toThrow("closed");
-		expect(backends).toHaveLength(2);
+		expect(backends).toHaveLength(3);
 		expect(computerApproval({ action: "release" })).toBe("read");
 	});
 

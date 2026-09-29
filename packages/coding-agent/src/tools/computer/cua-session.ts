@@ -716,6 +716,15 @@ const DETECT_WINDOW_CHANGE_TOOLS: Record<string, true> = {
 function unsupported(operation: string): never {
 	throw new ToolError(`Unsupported Cua operation: ${operation}`);
 }
+/** The structured payload of a driver error reply; malformed details are dropped, never thrown. */
+function errorDetails(result: CuaToolResult, name: string): Wire | undefined {
+	try {
+		return result.structuredJson ? object(JSON.parse(result.structuredJson), `${name} error`) : undefined;
+	} catch {
+		// Malformed optional details must not replace the original SDK failure.
+		return undefined;
+	}
+}
 /**
  * Maps computer operations onto `cua-driver` tools over one supervised child.
  * All desktop work, including capture, happens in the driver process.
@@ -952,20 +961,42 @@ export class CuaComputerSession implements ComputerBackend {
 		this.#tail = pending.catch(() => undefined);
 		return pending;
 	}
+	/**
+	 * One driver call. The driver ends its implicit session after its idle
+	 * TTL (five minutes by default) and from then on refuses every call
+	 * before dispatch with `session_ended` until `start_session` revives it.
+	 * Nothing ran, so the session is revived and the call re-sent once. The
+	 * interruption gate stays per operation (`#schedule`), as it is for every
+	 * later call an operation makes. Element snapshots are keyed by the
+	 * driver process, not its session, so refs and frames stay valid across
+	 * the revival.
+	 */
 	async #call(name: string, args: Wire): Promise<Reply> {
-		const result = await (await this.#liveDriver()).callTool(name, args, this.#signal);
+		let result = await (await this.#liveDriver()).callTool(name, args, this.#signal);
+		let details = result.isError ? errorDetails(result, name) : undefined;
+		if (readReply(details).code === "session_ended") {
+			const driver = await this.#liveDriver();
+			const revived = await driver.callTool("start_session", {}, this.#signal);
+			if (revived.isError)
+				throw new ToolError(
+					`session_ended: the driver ended this computer session and refused to start a new one: ${revived.text}`,
+					errorDetails(revived, "start_session"),
+				);
+			logger.debug("cua-driver session had ended; revived it", { tool: name, pid: driver.pid });
+			result = await (await this.#liveDriver()).callTool(name, args, this.#signal);
+			details = result.isError ? errorDetails(result, name) : undefined;
+			if (readReply(details).code === "session_ended")
+				throw new ToolError(
+					`session_ended: the driver refused '${name}' again right after reviving its session: ${result.text}`,
+					details,
+				);
+		}
 		if (result.isError) {
-			let details: Wire | undefined;
-			try {
-				details = result.structuredJson ? object(JSON.parse(result.structuredJson), `${name} error`) : undefined;
-			} catch {
-				// Malformed optional details must not replace the original SDK failure.
-			}
 			const code = result.errorCode ?? (typeof details?.error === "string" ? details.error : "CuaError");
 			// A typed refusal (`background_unavailable`, `foreground_unavailable`)
 			// carries the driver's own reason and the one escalation that works.
 			// Both survive verbatim; only the route is restated in the vocabulary
-			// the caller can actually type. Nothing is retried here.
+			// the caller can actually type. Nothing else is retried here.
 			throw new ToolError(
 				`${code}: ${preludeVocabulary(result.text)}${details ? `\nDetails: ${JSON.stringify(preludeVocabulary(details))}` : ""}`,
 				details,

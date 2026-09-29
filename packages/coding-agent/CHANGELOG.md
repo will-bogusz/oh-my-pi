@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Computer: a driver session that ended after its idle TTL no longer strands the conversation: OMP answers the `session_ended` refusal by reviving the session with `start_session` and re-sending the refused call once, keeping refs and frames.
+- Computer: `computer.close()` no longer ends computer use for the whole OMP session: it releases the driver and deletes the captures this OMP session's runs wrote, and a later call starts a fresh session; only the agent session's end is final.
 - Computer: the first successful `computer.window()` reply of a conversation carries the computer guide once, ahead of its tree and inside the reply's byte budget, and the eval description says so, making a separate initial read of `xd://eval/computer` unnecessary.
 - Browser: with `compact` refs (the default), a run that ends on a stale-ref refusal ("… is stale: the page no longer has that element"), including a direct helper call, carries the whole page as read after the run stopped, cut to the inline output budget, instead of asking for `tab.observe()`. It is still the run's error. The read re-attaches no ref: a node that replaced the refused one gets a fresh ref, so a caught refusal's retry is refused again. It ends by the run's deadline, is skipped with under a second left or an open dialog, and stops when the call is cancelled; a skipped, cut or failed read leaves the plain refusal. The browser prompt tells the model to act on the carried page's refs.
 - Computer: `computer.window({ kind: "desktop" })` acquires a display's desktop surface (the driver's `kind: "desktop"` row); it is named in passed-over lists and never chosen as an app's front window.
