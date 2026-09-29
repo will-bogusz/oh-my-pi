@@ -337,7 +337,7 @@ export class BrowserInstances {
 				`loaded ${instance.extensionBuildId ?? "(a build too old to report its id)"}, expected ${EXPECTED_EXTENSION_BUILD_ID}. ` +
 				`Refresh it with: omp browser-relay install --dir ${dir}${port} --name ${JSON.stringify(instance.label)} — ` +
 				"then open chrome://extensions and click Reload on that extension. " +
-				"Once Chrome runs a build that supports it, the extension reloads itself on the next connect.",
+				"An extension build that supports it reloads itself instead on its next connect once those files are installed.",
 		);
 	}
 	async create(url: string, owner: string, label?: string, browserId?: string): Promise<InstanceLease> {
@@ -365,7 +365,10 @@ export class BrowserInstances {
 		return instance;
 	}
 	async closeTab(id: string, owner: string, browserId?: string, signal?: AbortSignal): Promise<void> {
-		await this.bridge.managed(this.#forTab(id, browserId).id).closeTab(id, owner, signal);
+		const instance = this.#forTab(id, browserId);
+		// Closing a tab nobody owns acquires it first.
+		this.#requireExtensionParity(instance);
+		await this.bridge.managed(instance.id).closeTab(id, owner, signal);
 	}
 	forLease(id: string): Instance | undefined {
 		const instanceId = this.bridge.instanceForLease(id);

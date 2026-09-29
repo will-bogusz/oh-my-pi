@@ -341,7 +341,7 @@ it("waits for the exact browser a request names, not whichever paired browser re
 	}
 });
 
-it("refuses to hand out a tab from a Chrome running another extension build, and says how to fix it", () => {
+it("refuses to hand out or close a tab from a Chrome running another extension build, and says how to fix it", async () => {
 	const instances = new BrowserInstances(new RelayAccess());
 	instances.port = 54_837;
 	try {
@@ -362,6 +362,10 @@ it("refuses to hand out a tab from a Chrome running another extension build, and
 			expect(acquire).toThrow("omp browser-relay install");
 			expect(acquire).toThrow("--port 54837");
 		}
+		// Closing a tab nobody owns acquires it first, so it is refused before any RPC reaches that Chrome.
+		const sent = socket.messages.length;
+		await expect(instances.closeTab(found.id, "owner")).rejects.toThrow(stale);
+		expect(socket.messages.length).toBe(sent);
 		// A build too old to report an id is skew too: nothing here can be trusted.
 		pair(instances, "profile_instance_b", "Personal Chrome");
 		const legacy = instances.discover().find(candidate => candidate.browserId === "profile_instance_b")!;
