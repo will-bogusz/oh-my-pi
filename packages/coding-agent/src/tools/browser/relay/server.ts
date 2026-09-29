@@ -1,5 +1,6 @@
 /** Authenticated local browser broker: paired browsers share one multi-instance CDP bridge. */
 import { RelayAccess } from "./access";
+import { ChromePageUnresponsiveError } from "./bridge";
 import { BrowserInstances } from "./instances";
 import { ChromeTabGoneError } from "./managed-tabs";
 import { RELAY_PROTOCOL_VERSION, RELAY_SERVICE_NAME } from "./protocol";
@@ -135,11 +136,13 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 					}
 					return Response.json({});
 				} catch (error) {
-					// `gone` tells the client this lease or tab id is over, so it can retire its handle.
+					// `gone` tells the client this lease or tab id is over, so it can retire its handle;
+					// `unresponsive` that the tab's page did not answer the debugger, which only the user can clear.
 					return Response.json(
 						{
 							error: error instanceof Error ? error.message : String(error),
 							gone: error instanceof ChromeTabGoneError || undefined,
+							unresponsive: error instanceof ChromePageUnresponsiveError || undefined,
 						},
 						{ status: 409 },
 					);

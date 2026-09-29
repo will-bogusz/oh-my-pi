@@ -227,6 +227,11 @@ class TabState {
 	banReason: string | undefined;
 	/** The ban is the user cancelling OMP's debugger from Chrome's infobar; set only while `banned`. */
 	canceledByUser = false;
+	/**
+	 * The last attach found the page not answering the debugger and handed the
+	 * debugger back; the next attach checks again.
+	 */
+	unresponsive = false;
 	/** Whether targets for this tab were announced to discovering connections. */
 	announced = false;
 	attaching: Promise<boolean> | null = null;
@@ -354,6 +359,23 @@ const CURSOR_ARRIVAL_TIMEOUT_MS = 1_500;
  * best-effort clean-up must not hold both for the whole {@link RPC_TIMEOUT_MS}.
  */
 const PAGE_CLEANUP_TIMEOUT_MS = 2_000;
+/**
+ * How long a freshly attached page gets to answer a no-op evaluation before
+ * the attach is given up. A JavaScript dialog that opened before OMP
+ * attached blocks the renderer, and Chrome neither reports that dialog to a
+ * debugger that attaches later nor lets it answer one
+ * (`Page.handleJavaScriptDialog`: "No dialog is showing"), so every page
+ * command of the attach would wait out {@link RPC_TIMEOUT_MS} in turn. Bounded
+ * like a page clean-up, since a claim and a release wait for it too.
+ */
+const RENDERER_PROBE_TIMEOUT_MS = 2_000;
+
+/**
+ * A tab whose page did not answer OMP's debugger (see
+ * {@link RENDERER_PROBE_TIMEOUT_MS}). The debugger was handed back and nothing
+ * in the page changed.
+ */
+export class ChromePageUnresponsiveError extends Error {}
 
 /**
  * Multiplexing CDP bridge between downstream puppeteer connections and the
@@ -1848,7 +1870,8 @@ export class RelayBridge {
 		const tab = this.#tabs.get(tabKeyOf(inst.code, lease.tab.tabId));
 		if (!tab) throw this.stale(leaseId);
 		// Like any command, a look at a tab whose debugger went idle reattaches it.
-		if (!tab.attached && !(await this.#ensureAttached(tab))) throw new Error(this.#refused(tab));
+		if (!tab.attached && !(await this.#ensureAttached(tab)))
+			throw tab.unresponsive ? new ChromePageUnresponsiveError(this.#refused(tab)) : new Error(this.#refused(tab));
 		const request = parseDialogRequest(options);
 		if (!("id" in request)) return tab.dialogs.snapshot();
 		const finish = inst.managed.beginOperation(leaseId);
@@ -1935,6 +1958,14 @@ export class RelayBridge {
 					tabKey: tab.tabKey,
 					leased: inst.managed.leaseForTab(tab.tabId) !== undefined,
 				});
+				// Before anything that needs the page: a renderer blocked by a dialog
+				// OMP never saw would hold every later step for its whole timeout.
+				tab.unresponsive = !(await this.#pageAnswers(tab, inst));
+				if (tab.unresponsive) {
+					this.#log("page not responding; debugger handed back", { tabKey: tab.tabKey, url: tab.url });
+					await this.#detachTab(tab);
+					return false;
+				}
 				// An attach nobody follows up on still has to expire.
 				this.#touchTab(tab);
 				await this.#restoreRoot(tab);
@@ -1968,8 +1999,36 @@ export class RelayBridge {
 		return await attempt;
 	}
 
+	/**
+	 * Whether the page answers a no-op evaluation within
+	 * {@link RENDERER_PROBE_TIMEOUT_MS}. Any reply counts, an error included:
+	 * only a renderer that cannot run the command at all stays silent.
+	 */
+	async #pageAnswers(tab: TabState, inst: ExtInstance): Promise<boolean> {
+		const deadline = Promise.withResolvers<boolean>();
+		const timer = setTimeout(() => deadline.resolve(false), RENDERER_PROBE_TIMEOUT_MS);
+		try {
+			const answer = this.#rpc(
+				{ op: "send", tabId: tab.tabId, method: "Runtime.evaluate", params: { expression: "0" } },
+				inst,
+			).then(
+				() => true,
+				() => true,
+			);
+			return await Promise.race([answer, deadline.promise]);
+		} finally {
+			clearTimeout(timer);
+		}
+	}
+
 	/** What a call on a tab the debugger cannot reach answers: why first, then where. */
 	#refused(tab: TabState): string {
+		if (tab.unresponsive)
+			return (
+				`The page in this Chrome tab is not responding (${shortUrl(tab.url)}): a JavaScript dialog that opened ` +
+				"before OMP attached is blocking it (OMP can neither see nor answer such a dialog), or a script is still " +
+				"running. OMP detached without changing the page. Ask the user to answer any dialog in that tab, then try again."
+			);
 		const reason =
 			this.debuggerState(tab.instanceId, tab.tabId).revoked ??
 			(this.#instances.get(tab.instanceId)?.socket

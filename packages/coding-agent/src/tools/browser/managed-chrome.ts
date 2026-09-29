@@ -21,6 +21,8 @@ const ENDED_HANDLES_KEPT = 128;
 
 /** The relay's answer that a lease or tab id is over; the message says why. */
 export class ChromeTabGoneError extends ToolError {}
+/** The relay's answer that a tab's page did not answer OMP's debugger; the message says what to do. */
+export class ChromePageUnresponsiveError extends ToolError {}
 
 export interface ChromeTabSelector {
 	title?: string;
@@ -120,9 +122,11 @@ export async function chromeRequest<T>(url: string, args: Record<string, unknown
 		);
 	const value: unknown = await response.json();
 	if (!response.ok) {
-		const body = value && typeof value === "object" ? (value as { error?: unknown; gone?: unknown }) : {};
+		const body =
+			value && typeof value === "object" ? (value as { error?: unknown; gone?: unknown; unresponsive?: unknown }) : {};
 		const message = body.error !== undefined ? String(body.error) : `Chrome request failed (${response.status})`;
-		throw body.gone === true ? new ChromeTabGoneError(message) : new ToolError(message);
+		if (body.gone === true) throw new ChromeTabGoneError(message);
+		throw body.unresponsive === true ? new ChromePageUnresponsiveError(message) : new ToolError(message);
 	}
 	return value as T;
 }
@@ -366,11 +370,16 @@ export async function acquireChromeTab(
 		lease,
 	};
 	try {
+		// Attach through the relay before any page worker does. A dialog seen
+		// open there is reported as `initialDialog`; a page that cannot answer
+		// the debugger at all is refused within seconds, where a worker would
+		// wait on it for minutes.
+		if (lease.dialog?.status !== "open") handle.lease.dialog = await chromeDialog(handle, {}, opts.signal);
 		// A renderer blocked by a JavaScript dialog never resolves `target.page()`,
 		// so the page worker attaches on the first call after the dialog is
 		// answered ({@link ensureChromePage}). The claim itself still succeeds:
 		// holding the lease is the only way to answer the dialog at all.
-		if (lease.dialog?.status === "open") {
+		if (handle.lease.dialog?.status === "open") {
 			if (opts.selector && !matchesChromeTab(lease.tab, opts.selector))
 				throw new ToolError("Chrome tab changed before acquisition; discover the exact target again");
 		} else {
@@ -393,6 +402,7 @@ export async function acquireChromeTab(
 		}
 		if (error instanceof ToolAbortError || (error instanceof Error && error.name === "AbortError")) throw error;
 		if (revoked) throw revoked;
+		if (error instanceof ChromePageUnresponsiveError) throw error;
 		throw new ToolError(
 			`Chrome acquisition failed for tab ${lease.tab.id} in browser ${lease.browserId}: ${String(error)}. Control was released without closing a page you did not open. Discover and claim this exact tab to inspect its current state before continuing.`,
 		);

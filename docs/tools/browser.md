@@ -195,7 +195,9 @@ A blocking unexpected dialog ends the current managed run with a decision-requir
 
 When reclaiming a tab with an already observed pending dialog, acquisition returns `initialDialog` instead of initial page inspection. The exact tab stays owned while the decision is pending. Resolve it through `tab.dialog()`; the first subsequent page operation initializes control on that same tab. Releasing or disposing the task preserves the page and its unresolved dialog for later recovery.
 
-This supports page-owned JavaScript alerts, prompts, confirms and beforeunload events observed on the root debugger session. Native file pickers, browser permission panels and dialogs that predate observation are not equivalent. Dialogs opened before any debugger observation, child-session events, cancellation during resolution and extension reconnect recovery still require qualification. Generic worker recycling no longer dismisses dialogs or stops navigation implicitly.
+A dialog that opened before OMP's debugger attached is not observed at all: Chrome does not report it to a debugger that attaches later, refuses to answer it through one (`Page.handleJavaScriptDialog`: "No dialog is showing"), and it blocks the page, so nothing OMP sends the page can finish. Every attach therefore first checks that the page answers a no-op evaluation within two seconds. A page that does not gets the debugger back unchanged, and the claim (or the call that reattached) fails at once with the reason: ask the user to answer the dialog in Chrome, then claim again. A refused claim leaves no lease behind, and the tab is not banned; a script that holds the page that long is refused the same way.
+
+This supports page-owned JavaScript alerts, prompts, confirms and beforeunload events observed on the root debugger session. Native file pickers and browser permission panels are not equivalent. Child-session events, cancellation during resolution and extension reconnect recovery still require qualification. Generic worker recycling no longer dismisses dialogs or stops navigation implicitly.
 
 ## `tab.run(fnOrCode, options?)`
 

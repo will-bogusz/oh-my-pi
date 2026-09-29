@@ -327,8 +327,23 @@ type ExtRpc<Op extends RelayRpcRequest["op"]> = { t: "rpc"; id: number } & Extra
 class FakeExtSocket implements RelaySocket {
 	readonly messages: RelayToExtMessage[] = [];
 	readonly #acked = new Set<number>();
+	/** Answers the relay's renderer probe (the no-op `Runtime.evaluate` after every attach) as a live page does. */
+	bridge: RelayBridge | undefined;
 	send(text: string): void {
-		this.messages.push(JSON.parse(text) as RelayToExtMessage);
+		const message = JSON.parse(text) as RelayToExtMessage;
+		this.messages.push(message);
+		if (
+			message.t === "rpc" &&
+			message.op === "send" &&
+			message.method === "Runtime.evaluate" &&
+			message.params?.expression === "0"
+		) {
+			this.#acked.add(message.id);
+			const bridge = this.bridge;
+			queueMicrotask(() =>
+				bridge?.extMessage(this, JSON.stringify({ t: "rpcResult", id: message.id, ok: true, result: {} })),
+			);
+		}
 	}
 	close(): void {}
 	pending<Op extends RelayRpcRequest["op"]>(op: Op): Array<ExtRpc<Op>> {
@@ -382,6 +397,7 @@ interface LeasedPage {
 async function leasedPage(opts: { debuggerIdleMs?: number } = {}): Promise<LeasedPage> {
 	const bridge = new RelayBridge(opts);
 	const ext = new FakeExtSocket();
+	ext.bridge = bridge;
 	bridge.extConnected(ext, "browser");
 	bridge.extMessage(
 		ext,

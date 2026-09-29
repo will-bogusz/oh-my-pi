@@ -8,8 +8,10 @@ import { runBrowserRelayCommand } from "@oh-my-pi/pi-coding-agent/cli/browser-re
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
+import type { ChromeDialogState } from "@oh-my-pi/pi-coding-agent/tools/browser/dialog-journal";
 import {
 	browserActorId,
+	ChromePageUnresponsiveError,
 	releaseChromeTabsForOwner,
 	requireChromeHandle,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/managed-chrome";
@@ -1538,6 +1540,152 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 		}
 	},
 	90_000,
+);
+
+it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
+	"refuses a claim of a tab blocked by a dialog OMP never saw within seconds, leaves no lease, then claims it once the dialog is gone",
+	async () => {
+		const go = Promise.withResolvers<void>();
+		const alerting = Promise.withResolvers<void>();
+		const answered = Promise.withResolvers<void>();
+		const fixture = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: async request => {
+				const route = new URL(request.url).pathname;
+				if (route === "/go") {
+					await go.promise;
+					return new Response(null, { status: 204 });
+				}
+				if (route === "/alerting") {
+					alerting.resolve();
+					return new Response(null, { status: 204 });
+				}
+				if (route === "/answered") {
+					answered.resolve();
+					return new Response(null, { status: 204 });
+				}
+				if (route === "/other") return new Response("<title>Other</title>", { headers: { "content-type": "text/html" } });
+				// `alert()` runs in the same task that sends /alerting, so the page is
+				// blocked on the dialog before the fixture can hear that request.
+				return new Response(
+					`<title>Preopened dialog</title><p id="state">waiting</p>
+					<script>
+						fetch("/go").then(() => {
+							fetch("/alerting");
+							alert("Opened before any debugger");
+							document.getElementById("state").textContent = "answered";
+							fetch("/answered");
+						});
+					</script>`,
+					{ headers: { "content-type": "text/html" } },
+				);
+			},
+		});
+		const root = await mkdtemp(path.join(tmpdir(), "omp-relay-preopened-dialog-"));
+		const relay = startRelayServer({ port: 0 });
+		const token = spyOn(relayAccess, "readRelayControlToken").mockReturnValue(relay.access.controlToken);
+		const daemonReady = spyOn(daemon, "ensureRelayDaemon").mockResolvedValue({
+			service: "omp-browser",
+			protocol: 2,
+		});
+		const session: ToolSession = {
+			cwd: root,
+			hasUI: false,
+			getSessionFile: () => null,
+			getSessionSpawns: () => null,
+			getSessionId: () => "relay-preopened-dialog",
+			getAgentId: () => "agent",
+			settings: Settings.isolated({
+				"browser.enabled": true,
+				"browser.relay": true,
+				"browser.relayUrl": `http://127.0.0.1:${relay.port}`,
+			}),
+		};
+		let setup: Browser | undefined;
+		try {
+			const extension = path.join(root, "extension");
+			await runBrowserRelayCommand({ action: "install", dir: extension, port: relay.port });
+			setup = await puppeteer.launch({
+				executablePath: process.env.PI_BROWSER_TEST_EXECUTABLE,
+				headless: true,
+				pipe: true,
+				enableExtensions: true,
+				ignoreDefaultArgs: stockBackgroundPolicy,
+				args: ["--use-mock-keychain", "--password-store=basic"],
+				userDataDir: path.join(root, "profile"),
+				defaultViewport: null,
+			});
+			const extensionId = await setup.installExtension(extension);
+			const options = await setup.newPage();
+			await options.goto(`chrome-extension://${extensionId}/options.html`);
+			await options.type("#label", "Preopened dialog fixture");
+			await options.type("#code", relay.access.issueCode().code);
+			await options.click("#save");
+			for (let i = 0; i < 400 && !relay.instances.list().some(browser => browser.connected); i++)
+				await Bun.sleep(25);
+			await options.close();
+			const setupSession = await setup.target().createCDPSession();
+			await setupSession
+				.connection()
+				?.send("Target.setAutoAttach", { autoAttach: false, waitForDebuggerOnStart: false, flatten: true });
+			await setupSession.detach();
+			await setup.disconnect();
+
+			// The user's own tab, in front and handed back before any driver
+			// connected: no debugger is attached when its page raises the alert.
+			// Chrome dismisses a background tab's dialog by itself, so it must be
+			// the tab the user is looking at.
+			const opened = await relay.instances.create(fixture.url.toString(), "someone-else", "Setup");
+			await relay.instances.reveal(opened.id, "someone-else");
+			await relay.instances.releaseTab(opened.id, "someone-else", false);
+			go.resolve();
+			await alerting.promise;
+			const tab = (await relay.instances.refresh()).find(candidate => candidate.tabId === opened.tab.tabId);
+			expect(tab).toMatchObject({ ownership: "available" });
+
+			const prelude = createBrowserPrelude(session);
+			const context = { session, toolCallId: "relay-preopened-dialog" };
+			const started = performance.now();
+			const refused = await prelude.invoke({ action: "claim", id: tab!.id, timeout: 60 }, context).then(
+				() => undefined,
+				(error: unknown) => error,
+			);
+			expect(performance.now() - started).toBeLessThan(10_000);
+			expect(refused).toBeInstanceOf(ChromePageUnresponsiveError);
+			expect(String(refused)).toContain("Ask the user to answer any dialog in that tab");
+			// Nothing answered the dialog on the way in, and no lease was left behind.
+			expect((await relay.instances.refresh()).find(candidate => candidate.id === tab!.id)).toMatchObject({
+				ownership: "available",
+			});
+
+			// The user leaves the tab; Chrome dismisses the dialog of a tab that goes to the background.
+			const other = await relay.instances.create(`${fixture.url}other`, "someone-else", "Setup");
+			await relay.instances.reveal(other.id, "someone-else");
+			await answered.promise;
+			const claimed = await prelude.invoke({ action: "claim", id: tab!.id, timeout: 20 }, context);
+			const details = claimed.details as { handle: string; value: { initialDialog?: ChromeDialogState } };
+			expect(details.value.initialDialog).toBeUndefined();
+			const text = await prelude.invoke(
+				{ action: "call", handle: details.handle, chain: [{ method: "text", args: ["#state"] }], timeout: 20 },
+				context,
+			);
+			expect(text.details).toMatchObject({ value: "answered" });
+			await prelude.invoke({ action: "release", handle: details.handle }, context);
+			expect((await relay.instances.refresh()).find(candidate => candidate.id === tab!.id)).toMatchObject({
+				ownership: "available",
+			});
+		} finally {
+			await releaseChromeTabsForOwner("relay-preopened-dialog").catch(() => 0);
+			setup?.process()?.kill("SIGTERM");
+			token.mockRestore();
+			daemonReady.mockRestore();
+			relay.stop();
+			fixture.stop();
+			await rm(root, { recursive: true, force: true });
+		}
+	},
+	120_000,
 );
 
 interface BuildSkewMessage {
