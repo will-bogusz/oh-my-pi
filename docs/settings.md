@@ -587,7 +587,7 @@ computer:
 
 Computer settings and the active model's image limits are read for every call; edits to settings files require a new session, while runtime setting changes apply to the next call. Select an explicit window, call `observe()` for structured AX and an image, act on current tokens, then observe or verify the effect. Pixel input requires the latest image of the same target; AX bounds are not image coordinates. Configure `tools.approvalMode` or `tools.approval.computer` and inspect host-owned permissions.
 
-Window screenshots keep a rendering lease active and macOS shows its sharing indicator. Use `await computer.release()` when finished: it drains work and releases the lease, and later calls start a fresh driver child. `/computer off` also releases resources before reporting success and keeps computer use disabled until `/computer on`. Applications and their windows stay open. `computer.close()` retains its permanent behavior and requires a new OMP session afterward. See [Scriptable computer use](computer-use.md) for lifecycle and the [API reference](tools/computer.md) for capability limits.
+Window screenshots keep a rendering lease active and macOS shows its sharing indicator. Use `await computer.release()` when finished: it drains work and releases the lease, and later calls start a fresh driver child. `/computer off` also releases resources before reporting success and keeps computer use disabled until `/computer on`. Applications and their windows stay open. `computer.close()` also deletes the captures this OMP session's runs wrote; later calls start a fresh session. See [Scriptable computer use](computer-use.md) for lifecycle and the [API reference](tools/computer.md) for capability limits.
 
 ### Shell, eval, and LSP
 

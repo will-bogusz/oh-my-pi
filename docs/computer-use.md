@@ -83,12 +83,35 @@ Prefer token-based actions when AX exposes a control:
 - `win.doubleClick(token)` is two left clicks at the element's live bounding-box center, with exact-window validation.
 - `win.setValue(token, text)` replaces an accessible value.
 - `win.type(text, { target: token })` and `win.press(chord, { target: token })` target text/key input.
-- `win.scroll("down", { target: token, amount: 3, by: "line" })` scrolls a target; directions are `up`, `down`, `left`, and `right`.
+- `win.scroll("down", { target: token, amount: 3, by: "line" })` scrolls a target; directions are `up`, `down`, `left`, and `right`. See [Scrolling](#scrolling).
 - Element handles offer `click`, `doubleClick`, `setValue`, `type`, `press`, `scroll`, and `perform(action)`. `press` requires a key chord; use `click()` for semantic activation.
 
 Action results report `text`, `effect`, `evidence`, optional `data`/`route`, and `delivery`. A dispatched event is not a verified application change. Synthetic events are often **unverifiable**. Inspect the result and obtain fresh observation, or use `win.verify(expectations, { timeoutMs?, stableSamples? })` for supported native predicates. Verification reports satisfied, unsatisfied, or unknown; incomplete/skipped AX traversal cannot prove absence, and web/document descendants are untrusted semantic evidence. See the [predicate contract](./tools/computer.md#observe-and-resolve). Do not treat dispatch success as proof.
 
 Explicitly click the intended editor/control before background keyboard sequences such as `Cmd+A` then `Backspace`. Setting AXFocused alone does not establish Electron's keyboard destination. Read back the result with fresh AX observation and/or a screenshot; no application effect is guaranteed without readback.
+
+### Scrolling
+
+`scroll(direction, { target?, amount?, by?, delivery? })` wheels at the target (a token's centre or a window point), or at the window's centre without one. `by: "line"` (default) and `by: "page"` count notches, `amount` 1–50; `by: "points"` needs an `amount`, a distance in window points, 1–5000. Anything else is refused before input.
+
+`{ delivery: "foreground" }` scrolls by distance — a line is 40 pt, a page 0.8 × the visible height of the scroll area under the point, points as given. It raises the app, checks that the target window is topmost at the point (else refuses with `target_covered`, naming the covering app or saying the window is not on screen there, and sends nothing), moves the real pointer there, wheels in pixel units in measured chunks, then puts the pointer and the previously frontmost app back. If the gesture cannot go out before its first wheel event — the user took the pointer or the front app, or input failed — it refuses with `scroll_not_sent`, the reason, and (for a user takeover) not to retry. Views that scroll only under the real pointer (iPhone Mirroring, some canvases) need it. Background delivery posts line ticks to the process: a line is one tick, a page five, points about one per 40; the measured verdict reports how far the view really went.
+
+The driver samples the window's pixels around the gesture, and the reply's first line is what the view did. It names the target as the caller gave it — its point or its ref — and, without one, the driver's point mapped back into window points through the current frame:
+
+| Verdict | Meaning | Cell mark |
+| --- | --- | --- |
+| `✓ Scrolled down 231 pt at (163, 400) (requested 231 pt; foreground pointer wheel, 2 chunks, 300 px)` | The content moved that far | `✓` |
+| `✓ At end: moved 58 of 231 pt at (…), then the view stopped at its end — …` | It reached its end; repeating moves nothing | `✓` |
+| `? Moved the other way: the view scrolled up 80 pt at (…) …` | It travelled against the request; observe first | `?` |
+| `✗ No motion at (…) — no displacement observed …` | Measured stillness: the view may be at its end, or nothing there takes the wheel; a background reply names `{ delivery: "foreground" }` | `✗` |
+| `? Changed in place at (…): pixels changed but nothing shifted …` | A pager, sheet or navigation; observe first | `?` |
+| `? Unmeasured: scrolled down at (…) …, but the capture was unavailable …` | No frames to judge by | `?` |
+
+`✓` needs the driver's own confirmation (`effect: "confirmed"`: travel the way asked, or an end reached without travelling back); anything else reads `?` or `✗`. A gesture the driver cut short adds `Stopped early: <why>.` to the same line; when the why is the user moving the pointer or bringing another app to the front, the line says the user has it and not to retry, in place of the outcome's usual next step. The result's `scroll` field carries the outcome (`outcome`, `delivery`, `direction`, `point`, `requestedPt`, `movedPt`, `acrossPt`, `confidence`, `wheel`, `chunks`, `reason`), and a confirmed move carries the driver's `frame_motion` evidence. A driver that measures nothing keeps its own reply text.
+
+### App notes
+
+Some apps have traps their accessibility tree and pixels cannot show. A note per bundle id lives in `packages/coding-agent/src/tools/computer/app-notes/<bundle id>.md` (registered in `app-notes.ts`, imported as text so compiled binaries carry it) and prints once per conversation beside the first window of that app acquired — the driver backend is rebuilt every turn, so the conversation's computer lifetime, not the backend, remembers it (macOS; the pid's bundle id comes from Launch Services, `/usr/bin/lsappinfo` with a 500 ms limit, once per pid per backend; a failed lookup is retried on the next acquisition). The first is `com.apple.ScreenContinuity` (iPhone Mirroring): pixels only, scroll with foreground delivery at a target, drags and keys do not scroll, pagers page by taps, horizontal drags on rows open swipe actions, and ⌘1/⌘2/⌘3 for Home Screen, App Switcher and Spotlight.
 
 ### Pixel input
 
@@ -138,7 +161,7 @@ Use `await computer.release()` when finished with computer work. It drains admit
 
 Escape releases the interrupted actor's computer resources too, including a rendering lease left idle between calls. After confirmed cleanup it keeps computer use enabled, so subsequent work can select and observe through a fresh driver child. The activity display reports a stopped operation only after its cleanup finishes; a failed cleanup remains a failure.
 
-`await computer.close()` retains its permanent behavior: it releases resources and ends computer use for the current OMP session. `/computer on` cannot reopen a closed session; start a new OMP session afterward. Prefer `release()` for ordinary completion.
+`await computer.close()` ends the desktop session: it releases like `release()` and also deletes the capture files this OMP session's runs wrote, so a path from an earlier capture no longer reads. A later call starts a fresh session. Prefer `release()` for ordinary completion.
 
 ## Platforms
 

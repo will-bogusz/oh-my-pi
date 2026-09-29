@@ -23,6 +23,7 @@ import { elideObservationTree } from "./computer/tree-elide";
 import type {
 	ComputerActionResult,
 	ComputerObservation,
+	ComputerRunOk,
 	ComputerScreenshot,
 	ComputerSessionSnapshot,
 	ComputerWindowAcquisition,
@@ -317,18 +318,25 @@ class ComputerLifetime {
 	}
 
 	/**
-	 * True once per conversation, for the first handle of its kind or the first
-	 * delivery of the guide. The prelude (and this lifetime) is kept across
-	 * `/new` and session switches: a new conversation's transcript never saw
-	 * what another was taught, and one switched back to still holds it.
+	 * True once per conversation, for the first handle of its kind, the first
+	 * delivery of the guide, or a backend's first word on a topic (an app's
+	 * note: `backend:app-note:<bundle id>`). The prelude (and this lifetime)
+	 * is kept across `/new`, session switches and the per-turn driver
+	 * release: a new conversation's transcript never saw what another was
+	 * taught, and one switched back to still holds it.
 	 */
-	teach(handle: "window" | "element" | "guide"): boolean {
+	teach(topic: "window" | "element" | "guide" | `backend:${string}`): boolean {
 		const conversation = this.#session.getSessionId?.() ?? null;
 		let taught = this.#taught.get(conversation);
 		if (!taught) this.#taught.set(conversation, (taught = new Set()));
-		if (taught.has(handle)) return false;
-		taught.add(handle);
+		if (taught.has(topic)) return false;
+		taught.add(topic);
 		return true;
+	}
+
+	/** Take back a topic a run taught but never delivered: its output was discarded with its failure. */
+	untaught(topic: `backend:${string}`): void {
+		this.#taught.get(this.#session.getSessionId?.() ?? null)?.delete(topic);
 	}
 
 	/**
@@ -388,16 +396,24 @@ class ComputerLifetime {
 		return this.#releasing;
 	}
 
-	close(): Promise<void> {
-		this.#closed = true;
-		this.#unregisterOwner();
-		// Turn settle only releases the driver: a later turn may still read a
-		// capture by path. Session close is the end of that.
-		return (this.#closing ??= this.release().finally(async () => {
+	/**
+	 * `computer.close()`: ends the desktop session a conversation asked to end.
+	 * The driver is released and the capture files this lifetime owns are
+	 * removed; the lifetime stays open, so a later call starts a fresh session.
+	 */
+	end(): Promise<void> {
+		return this.release().finally(async () => {
 			const files = [...this.#captures];
 			this.#captures.clear();
 			await Promise.allSettled(files.map(file => fs.rm(file, { force: true })));
-		}));
+		});
+	}
+
+	/** Owner teardown (agent session end): permanent, unlike `end()`. */
+	close(): Promise<void> {
+		this.#closed = true;
+		this.#unregisterOwner();
+		return (this.#closing ??= this.end());
 	}
 }
 
@@ -471,7 +487,7 @@ async function invokeComputer(
 			throwIfAborted(context.signal);
 			return { content: [{ type: "text", text: "Released computer resources" }], details: {} };
 		case "close":
-			await lifetime.close();
+			await lifetime.end();
 			throwIfAborted(context.signal);
 			return { content: [{ type: "text", text: "Closed computer session" }], details: {} };
 	}
@@ -509,6 +525,7 @@ async function runComputer(
 	const coordinateSafe = usesCoordinateSafeImageSizing(session.getActiveModel?.());
 	const configuredMaxWidth = cfgComputerMaxWidth.get(session.settings);
 	const configuredMaxHeight = cfgComputerMaxHeight.get(session.settings);
+	const taughtHere: `backend:${string}`[] = [];
 	const snapshot: ComputerSessionSnapshot = {
 		cwd: session.cwd,
 		sessionId: session.getEvalSessionId?.() ?? session.getSessionId?.() ?? "computer",
@@ -521,9 +538,25 @@ async function runComputer(
 		captureMaxPixels: coordinateSafe ? COORDINATE_SAFE_MAX_CAPTURE_PIXELS : 0,
 		display: cfgComputerDisplay.get(session.settings),
 		readOnly,
+		// Backends are rebuilt after every turn; this conversation's record
+		// of what it was told is not. A failed run discards everything it
+		// printed, so what it taught is taken back below.
+		teach: topic => {
+			const key = `backend:${topic}` as const;
+			if (!lifetime.teach(key)) return false;
+			taughtHere.push(key);
+			return true;
+		},
 	};
-	const run = await controller.run(code, timeoutSeconds * 1000, snapshot, signal);
+	let run: ComputerRunOk;
+	try {
+		run = await controller.run(code, timeoutSeconds * 1000, snapshot, signal);
+	} catch (error) {
+		for (const topic of taughtHere) lifetime.untaught(topic);
+		throw error;
+	}
 	lifetime.own(run.screenshots.map(shot => shot.path));
+	if (signal?.aborted) for (const topic of taughtHere) lifetime.untaught(topic);
 	throwIfAborted(signal);
 
 	const details: ComputerPreludeDetails = {

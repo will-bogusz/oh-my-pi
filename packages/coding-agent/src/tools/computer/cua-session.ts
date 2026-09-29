@@ -6,6 +6,7 @@ import { resizeImage } from "../../utils/image-resize";
 import { renderNode, type TreeNode } from "../observed-tree";
 import { throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import { appNote, launchServicesBundleId } from "./app-notes";
 import type { ComputerBackend, ComputerBackendFactory } from "./backend";
 import { type CuaDriver, type CuaDriverFactory, type CuaToolResult, spawnVendoredCuaDriver } from "./driver";
 import {
@@ -41,6 +42,7 @@ import {
 } from "./render";
 import { appWindows } from "./roster";
 import { normalizeQuery, reopenRoute } from "./selectors";
+import { readDriverScroll, scrollVerdict, stoppedScrollAdvice } from "./scroll-reply";
 import { PERFORMABLE_ACTIONS, observedActions, semanticAction } from "./semantic-actions";
 import type {
 	ActionOptions,
@@ -54,9 +56,11 @@ import type {
 	ComputerObservation,
 	ComputerRelatedWindow,
 	ComputerOperationContext,
+	ComputerScrollOutcome,
 	ComputerTarget,
 	ComputerWindowIdentity,
 	ObserveOptions,
+	ScrollOptions,
 	WindowResolveOptions,
 	WindowSelector,
 } from "./types";
@@ -66,6 +70,8 @@ interface Reply {
 	result: CuaToolResult;
 	data: Wire;
 }
+/** A measured outcome read off an action reply: its verdict line and the outcome it states. */
+type Measure = (data: Wire) => { text: string; scroll: ComputerScrollOutcome } | undefined;
 /**
  * What a row is, independently of the reference that reached it: its own
  * role, label and value, the path of roles and labels above it, and its
@@ -489,6 +495,11 @@ export interface CuaSessionOptions {
 	/** WindowServer roster used for interruption checks; tests inject a quiet desktop. */
 	sampleRoster?: () => WindowRosterSample;
 	/**
+	 * Bundle id of a running pid, for app notes: null for a process that is
+	 * no app, undefined when the lookup failed. Tests inject a fixed answer.
+	 */
+	bundleId?: (pid: number, signal: AbortSignal) => Promise<string | null | undefined>;
+	/**
 	 * Host the driver child runs on. The driver is a local child, so this is
 	 * `process.platform`; tests pin it to exercise the other backend.
 	 */
@@ -716,6 +727,15 @@ const DETECT_WINDOW_CHANGE_TOOLS: Record<string, true> = {
 function unsupported(operation: string): never {
 	throw new ToolError(`Unsupported Cua operation: ${operation}`);
 }
+/** The structured payload of a driver error reply; malformed details are dropped, never thrown. */
+function errorDetails(result: CuaToolResult, name: string): Wire | undefined {
+	try {
+		return result.structuredJson ? object(JSON.parse(result.structuredJson), `${name} error`) : undefined;
+	} catch {
+		// Malformed optional details must not replace the original SDK failure.
+		return undefined;
+	}
+}
 /**
  * Maps computer operations onto `cua-driver` tools over one supervised child.
  * All desktop work, including capture, happens in the driver process.
@@ -740,6 +760,7 @@ function unsupported(operation: string): never {
 export class CuaComputerSession implements ComputerBackend {
 	readonly #spawn: CuaDriverFactory;
 	readonly #sampleRoster: () => WindowRosterSample;
+	readonly #bundleIdOf: (pid: number, signal: AbortSignal) => Promise<string | null | undefined>;
 	readonly #platform: NodeJS.Platform;
 	readonly #elements = new Map<string, Binding>();
 	readonly #frames = new Map<string, Frame>();
@@ -765,6 +786,12 @@ export class CuaComputerSession implements ComputerBackend {
 	 * synchronous and runs again inside one acquisition.
 	 */
 	readonly #bundlePids = new Map<string, ReadonlySet<number>>();
+	/**
+	 * The bundle id each pid ran when this backend first acquired one of its
+	 * windows; null for a process that is no app. A failed lookup is not
+	 * remembered, so the next acquisition asks again.
+	 */
+	readonly #pidBundles = new Map<number, string | null>();
 	/**
 	 * Windows one of this session's dispatches has changed since their last
 	 * read. A tree walked while the app is still applying that change is a
@@ -800,12 +827,14 @@ export class CuaComputerSession implements ComputerBackend {
 		driver: CuaDriver,
 		spawn: CuaDriverFactory,
 		sampleRoster: () => WindowRosterSample,
+		bundleIdOf: (pid: number, signal: AbortSignal) => Promise<string | null | undefined>,
 		permissions: Wire,
 		platform: NodeJS.Platform,
 	) {
 		this.#driver = driver;
 		this.#spawn = spawn;
 		this.#sampleRoster = sampleRoster;
+		this.#bundleIdOf = bundleIdOf;
 		this.#platform = platform;
 		// The two backends answer `check_permissions` with disjoint keys:
 		// macOS reports TCC grants (`accessibility`, `screen_recording`),
@@ -854,7 +883,14 @@ export class CuaComputerSession implements ComputerBackend {
 			// Without an X11 connection the Linux driver answers every window
 			// call with an opaque X error; its own report says what is missing.
 			if (platform === "linux" && reported.x11 !== true) throw new ToolError(permissions.text);
-			return new CuaComputerSession(driver, spawn, options.sampleRoster ?? sampleWindowRoster, reported, platform);
+			return new CuaComputerSession(
+				driver,
+				spawn,
+				options.sampleRoster ?? sampleWindowRoster,
+				options.bundleId ?? launchServicesBundleId,
+				reported,
+				platform,
+			);
 		} catch (error) {
 			await driver.kill({ force: true });
 			throw error;
@@ -952,20 +988,42 @@ export class CuaComputerSession implements ComputerBackend {
 		this.#tail = pending.catch(() => undefined);
 		return pending;
 	}
+	/**
+	 * One driver call. The driver ends its implicit session after its idle
+	 * TTL (five minutes by default) and from then on refuses every call
+	 * before dispatch with `session_ended` until `start_session` revives it.
+	 * Nothing ran, so the session is revived and the call re-sent once. The
+	 * interruption gate stays per operation (`#schedule`), as it is for every
+	 * later call an operation makes. Element snapshots are keyed by the
+	 * driver process, not its session, so refs and frames stay valid across
+	 * the revival.
+	 */
 	async #call(name: string, args: Wire): Promise<Reply> {
-		const result = await (await this.#liveDriver()).callTool(name, args, this.#signal);
+		let result = await (await this.#liveDriver()).callTool(name, args, this.#signal);
+		let details = result.isError ? errorDetails(result, name) : undefined;
+		if (readReply(details).code === "session_ended") {
+			const driver = await this.#liveDriver();
+			const revived = await driver.callTool("start_session", {}, this.#signal);
+			if (revived.isError)
+				throw new ToolError(
+					`session_ended: the driver ended this computer session and refused to start a new one: ${revived.text}`,
+					errorDetails(revived, "start_session"),
+				);
+			logger.debug("cua-driver session had ended; revived it", { tool: name, pid: driver.pid });
+			result = await (await this.#liveDriver()).callTool(name, args, this.#signal);
+			details = result.isError ? errorDetails(result, name) : undefined;
+			if (readReply(details).code === "session_ended")
+				throw new ToolError(
+					`session_ended: the driver refused '${name}' again right after reviving its session: ${result.text}`,
+					details,
+				);
+		}
 		if (result.isError) {
-			let details: Wire | undefined;
-			try {
-				details = result.structuredJson ? object(JSON.parse(result.structuredJson), `${name} error`) : undefined;
-			} catch {
-				// Malformed optional details must not replace the original SDK failure.
-			}
 			const code = result.errorCode ?? (typeof details?.error === "string" ? details.error : "CuaError");
 			// A typed refusal (`background_unavailable`, `foreground_unavailable`)
 			// carries the driver's own reason and the one escalation that works.
 			// Both survive verbatim; only the route is restated in the vocabulary
-			// the caller can actually type. Nothing is retried here.
+			// the caller can actually type. Nothing else is retried here.
 			throw new ToolError(
 				`${code}: ${preludeVocabulary(result.text)}${details ? `\nDetails: ${JSON.stringify(preludeVocabulary(details))}` : ""}`,
 				details,
@@ -1107,6 +1165,25 @@ export class CuaComputerSession implements ComputerBackend {
 		}
 		this.#bundlePids.set(bundleId.toLowerCase(), pids);
 		return pids;
+	}
+	/**
+	 * The note of the app a window belongs to, the first time this
+	 * conversation acquires one of its windows: the backend is rebuilt every
+	 * turn, so whether it was said is the conversation's (`context.teach`).
+	 * macOS only: bundle ids are a Launch Services fact.
+	 */
+	async #appNote(context: Context, window: ComputerWindowIdentity): Promise<void> {
+		if (this.#platform !== "darwin") return;
+		let bundle = this.#pidBundles.get(window.pid);
+		if (bundle === undefined) {
+			bundle = await this.#bundleIdOf(window.pid, context.signal);
+			if (bundle === undefined) return;
+			this.#pidBundles.set(window.pid, bundle);
+		}
+		if (bundle === null) return;
+		const note = appNote(bundle);
+		if (note === undefined || !context.teach(`app-note:${bundle.toLowerCase()}`)) return;
+		context.emitText(note);
 	}
 	async #windows(selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
 		const { data } = await this.#call("list_windows", selector.pid === undefined ? {} : { pid: selector.pid });
@@ -1341,16 +1418,22 @@ export class CuaComputerSession implements ComputerBackend {
 	/**
 	 * One window by selector: an exact `{ id, pid }` re-resolves a handle the
 	 * caller already holds (every prelude window method carries one), anything
-	 * else acquires a window.
+	 * else acquires a window. Either way the first window of an app with an
+	 * app note prints that note, once per conversation.
 	 */
 	window(
 		context: Context,
 		selector: string | WindowSelector,
 		options: WindowResolveOptions = {},
 	): Promise<ComputerWindowIdentity> {
-		return this.#schedule(context, "window", false, () =>
-			this.#window(selector, options.ambiguous === "throw" ? undefined : text => context.emitText(text)),
-		);
+		return this.#schedule(context, "window", false, async () => {
+			const window = await this.#window(
+				selector,
+				options.ambiguous === "throw" ? undefined : text => context.emitText(text),
+			);
+			await this.#appNote(context, window);
+			return window;
+		});
 	}
 	apps(context: Context): Promise<unknown> {
 		return this.#schedule(context, "apps", false, async () => (await this.#call("list_apps", {})).data);
@@ -2286,8 +2369,14 @@ export class CuaComputerSession implements ComputerBackend {
 	 * refused until it goes away. Whatever the reply leaves unproven, and any
 	 * line composed here, rides the must-show flag, so the cell prints it even
 	 * where the code drops the returned value.
+	 *
+	 * `measure` reads a measured outcome out of the reply (a scroll's). Its
+	 * verdict replaces the driver's first line, which speaks the driver's
+	 * pixel space, and names its own next step, so the driver's escalation is
+	 * not restated as a doubt; the reply always prints, because what the view
+	 * did is the answer.
 	 */
-	async #action(name: string, args: Wire): Promise<ComputerActionResult> {
+	async #action(name: string, args: Wire, measure?: Measure): Promise<ComputerActionResult> {
 		let called: Reply;
 		try {
 			called = await this.#call(
@@ -2310,7 +2399,18 @@ export class CuaComputerSession implements ComputerBackend {
 		// The driver writes its own advice in wire vocabulary on the success path
 		// too ("click this control's pixel center with delivery_mode:foreground");
 		// a next step is only executable if it is spelled the way the caller types.
-		const reported = preludeVocabulary(result.text);
+		const driverText = preludeVocabulary(result.text);
+		const measured = measure?.(data);
+		const reported =
+			measured === undefined
+				? driverText
+				: [
+						measured.text,
+						...driverText
+							.split("\n")
+							.slice(1)
+							.filter(line => !line.includes("not driver-verified")),
+					].join("\n");
 		const escalated = escalation(reply, this.#facts(name, reported, args));
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
 		// A window one of this session's dispatches changed is re-read once if
@@ -2322,7 +2422,7 @@ export class CuaComputerSession implements ComputerBackend {
 		)
 			this.#mutated.add(String(args.window_id));
 		const notes = [
-			escalated,
+			measured !== undefined && measured.scroll.outcome !== "unmeasured" ? undefined : escalated,
 			opened,
 			interruptedBy
 				? `⚠️ Interrupted while acting: ${describeInterruption(interruptedBy)}. Stop and tell the user; further actions are refused until it is answered.`
@@ -2336,7 +2436,10 @@ export class CuaComputerSession implements ComputerBackend {
 			delivery: data.delivery ?? args.delivery_mode ?? "background",
 			...(reply.committed === undefined ? {} : { committed: reply.committed }),
 			...(escalated === undefined ? {} : { escalation: escalated }),
-			...(notes.length > 0 || reply.effect === undefined || unproven(reply) ? { mustShow: true } : {}),
+			...(measured !== undefined || notes.length > 0 || reply.effect === undefined || unproven(reply)
+				? { mustShow: true }
+				: {}),
+			...(measured === undefined ? {} : { scroll: measured.scroll }),
 			interruptedBy,
 			data,
 		};
@@ -2478,12 +2581,13 @@ export class CuaComputerSession implements ComputerBackend {
 		args: Wire,
 		target: ComputerTarget | undefined,
 		recover?: { context: Context; window: ComputerWindowIdentity },
+		measure?: Measure,
 	): Promise<ComputerActionResult> {
 		// The addressed row as its observation printed it, read before a
 		// dead-element recovery retires its binding.
 		const element = typeof target === "string" ? this.#elements.get(target)?.element : undefined;
 		try {
-			return await this.#action(name, args);
+			return await this.#action(name, args, measure);
 		} catch (error) {
 			// An aborted call is not a ToolError and keeps its own identity.
 			if (!(error instanceof ToolError)) throw error;
@@ -2730,18 +2834,128 @@ export class CuaComputerSession implements ComputerBackend {
 			return { ...result, text: [result.text, UNPROBED_DRAG].filter(Boolean).join("\n"), mustShow: true };
 		});
 	}
+	/**
+	 * A window scroll, answered with what the view did. The driver measures
+	 * the window's pixels around the gesture; the verdict names the point in
+	 * the caller's own window points: the point it passed, else the driver's
+	 * point (window-local screenshot pixels) mapped back through the frame
+	 * the call was checked against. `line`/`page` count notches, 1–50;
+	 * `points` is a distance, 1–5000.
+	 */
 	scroll(
 		context: Context,
 		window: ComputerWindowIdentity,
 		direction: "up" | "down" | "left" | "right",
 		target?: ComputerTarget,
-		options: ActionOptions & { amount?: number; by?: "line" | "page" } = {},
+		options: ScrollOptions = {},
 	): Promise<ComputerActionResult> {
-		return this.#targetAction(context, "scroll", window, target, {
-			direction,
-			amount: options.amount,
-			by: options.by,
-			...delivery(options),
+		return this.#schedule(context, "scroll", true, async () => {
+			const by = options.by ?? "line";
+			if (by !== "line" && by !== "page" && by !== "points")
+				throw new ToolError(`Scroll by must be "line", "page" or "points", not ${JSON.stringify(options.by)}`);
+			const most = by === "points" ? 5000 : 50;
+			// A distance has no honest default: the driver's notch default read
+			// as points is a few points, which measures as no motion.
+			if (by === "points" && options.amount === undefined)
+				throw new ToolError('Scroll by: "points" needs an amount: the distance in window points, 1 to 5000');
+			if (
+				options.amount !== undefined &&
+				(!Number.isInteger(options.amount) || options.amount < 1 || options.amount > most)
+			)
+				throw new ToolError(`Scroll amount must be an integer from 1 to ${most} for by: "${by}"`);
+			const current = await this.#current(window);
+			throwIfAborted(context.signal);
+			const addressed = this.#target(current, target);
+			const given = !target || typeof target === "string" ? undefined : pointPair(target);
+			// The verdict names the target as the caller gave it: its point, its
+			// ref, or — without one — the driver's point mapped back.
+			const described =
+				given !== undefined
+					? `(${Math.round(given[0])}, ${Math.round(given[1])})`
+					: typeof target === "string"
+						? target
+						: "the window centre";
+			// The driver's point is local to the window the wire addressed,
+			// which for a sheet's ref is the sheet: only this window's own
+			// frame maps it back, and only an untargeted scroll needs it.
+			const mapBack = (point: { x: number; y: number } | undefined): readonly [number, number] | undefined => {
+				const frame = this.#frames.get(current.id);
+				return given === undefined &&
+					point !== undefined &&
+					addressed.window_id === Number(current.id) &&
+					frame !== undefined &&
+					frame.window.pid === current.pid &&
+					sameBounds(frame.window.bounds, current.bounds)
+					? [
+							(point.x * frame.image.pointWidth) / frame.sdkWidth + frame.image.originX,
+							(point.y * frame.image.pointHeight) / frame.sdkHeight + frame.image.originY,
+						]
+					: undefined;
+			};
+			/** Where a reply says the wheel went: the caller's target, else the driver's point mapped back. */
+			const whereAt = (point: readonly [number, number] | undefined): string =>
+				!target && point !== undefined ? `(${Math.round(point[0])}, ${Math.round(point[1])})` : described;
+			const measure: Measure = data => {
+				const driven = readDriverScroll(data);
+				if (driven === undefined) return undefined;
+				const point = given ?? mapBack(driven.point);
+				const scroll = {
+					...driven.outcome,
+					...(point === undefined ? {} : { point: { x: Math.round(point[0]), y: Math.round(point[1]) } }),
+				};
+				return { text: scrollVerdict(scroll, whereAt(point), data.effect === "confirmed"), scroll };
+			};
+			try {
+				return await this.#dispatch(
+					"scroll",
+					{ ...addressed, direction, amount: options.amount, by: options.by, ...delivery(options) },
+					target,
+					{ context, window: current },
+					measure,
+				);
+			} catch (error) {
+				if (!(error instanceof ToolError)) throw error;
+				const refused = readReply(error.context);
+				const raw = refused.data.point;
+				const where = whereAt(
+					mapBack(
+						raw !== null &&
+							typeof raw === "object" &&
+							"x" in raw &&
+							typeof raw.x === "number" &&
+							"y" in raw &&
+							typeof raw.y === "number"
+							? { x: raw.x, y: raw.y }
+							: undefined,
+					),
+				);
+				// The driver raised the app and then found the gesture could not
+				// go out (the user took the pointer or the front app, or input
+				// failed) before a single wheel event was posted.
+				if (refused.code === "scroll_not_sent") {
+					const why = typeof refused.data.reason === "string" ? refused.data.reason : "the driver gave no reason";
+					throw new ToolError(
+						`scroll_not_sent: nothing was sent — at ${where}, ${why}. ${stoppedScrollAdvice(why)}`,
+						error.context,
+					);
+				}
+				if (refused.code !== "target_covered") throw error;
+				// Nothing was posted: after the app was raised, the topmost
+				// window at the point was another app's (`covered_by`), or none
+				// of this window was on screen there (`covered_by: null`). The
+				// covering window is someone's: moving it is the user's call.
+				const cover = readReply(error.context).data.covered_by;
+				const owner =
+					cover !== null && typeof cover === "object" && "app_name" in cover && typeof cover.app_name === "string"
+						? `${cover.app_name}${"pid" in cover && typeof cover.pid === "number" ? ` (pid ${cover.pid})` : ""}`
+						: undefined;
+				throw new ToolError(
+					owner === undefined
+						? `target_covered: nothing was sent — at ${where}, window ${current.id} is not on screen under that point even after its app was raised. Scroll at a point inside the part of window ${current.id} that is visible.`
+						: `target_covered: nothing was sent — at ${where}, window ${current.id} stays covered by ${owner} even after its app was raised. Scroll at a point where window ${current.id} is on top, or ask the user to move the covering window.`,
+					error.context,
+				);
+			}
 		});
 	}
 	setFrame(context: Context, window: ComputerWindowIdentity, frame: ComputerBounds): Promise<ComputerActionResult> {
