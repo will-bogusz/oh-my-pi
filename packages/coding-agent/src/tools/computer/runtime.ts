@@ -132,6 +132,7 @@ function operationContext(getContext: RunContextAccessor): ComputerOperationCont
 			throwIfAborted(context.signal);
 			context.output.push({ type: "text", text });
 		},
+		teach: topic => context.snapshot.teach(topic),
 	};
 }
 

@@ -42,7 +42,7 @@ import {
 } from "./render";
 import { appWindows } from "./roster";
 import { normalizeQuery, reopenRoute } from "./selectors";
-import { readDriverScroll, scrollEvidence, scrollVerdict } from "./scroll-reply";
+import { readDriverScroll, scrollVerdict } from "./scroll-reply";
 import { PERFORMABLE_ACTIONS, observedActions, semanticAction } from "./semantic-actions";
 import type {
 	ActionOptions,
@@ -494,8 +494,11 @@ export interface CuaSessionOptions {
 	spawn?: CuaDriverFactory;
 	/** WindowServer roster used for interruption checks; tests inject a quiet desktop. */
 	sampleRoster?: () => WindowRosterSample;
-	/** Bundle id of a running pid, for app notes; tests inject a fixed answer. */
-	bundleId?: (pid: number) => Promise<string | undefined>;
+	/**
+	 * Bundle id of a running pid, for app notes: null for a process that is
+	 * no app, undefined when the lookup failed. Tests inject a fixed answer.
+	 */
+	bundleId?: (pid: number, signal: AbortSignal) => Promise<string | null | undefined>;
 	/**
 	 * Host the driver child runs on. The driver is a local child, so this is
 	 * `process.platform`; tests pin it to exercise the other backend.
@@ -757,7 +760,7 @@ function errorDetails(result: CuaToolResult, name: string): Wire | undefined {
 export class CuaComputerSession implements ComputerBackend {
 	readonly #spawn: CuaDriverFactory;
 	readonly #sampleRoster: () => WindowRosterSample;
-	readonly #bundleIdOf: (pid: number) => Promise<string | undefined>;
+	readonly #bundleIdOf: (pid: number, signal: AbortSignal) => Promise<string | null | undefined>;
 	readonly #platform: NodeJS.Platform;
 	readonly #elements = new Map<string, Binding>();
 	readonly #frames = new Map<string, Frame>();
@@ -784,12 +787,11 @@ export class CuaComputerSession implements ComputerBackend {
 	 */
 	readonly #bundlePids = new Map<string, ReadonlySet<number>>();
 	/**
-	 * The bundle id each pid ran when this session first acquired one of its
-	 * windows; null for a process that is no app. App notes are keyed on it.
+	 * The bundle id each pid ran when this backend first acquired one of its
+	 * windows; null for a process that is no app. A failed lookup is not
+	 * remembered, so the next acquisition asks again.
 	 */
 	readonly #pidBundles = new Map<number, string | null>();
-	/** Bundle ids whose app note this session has printed. */
-	readonly #notedApps = new Set<string>();
 	/**
 	 * Windows one of this session's dispatches has changed since their last
 	 * read. A tree walked while the app is still applying that change is a
@@ -825,7 +827,7 @@ export class CuaComputerSession implements ComputerBackend {
 		driver: CuaDriver,
 		spawn: CuaDriverFactory,
 		sampleRoster: () => WindowRosterSample,
-		bundleIdOf: (pid: number) => Promise<string | undefined>,
+		bundleIdOf: (pid: number, signal: AbortSignal) => Promise<string | null | undefined>,
 		permissions: Wire,
 		platform: NodeJS.Platform,
 	) {
@@ -1165,21 +1167,22 @@ export class CuaComputerSession implements ComputerBackend {
 		return pids;
 	}
 	/**
-	 * The note of the app a window belongs to, the first time this session
-	 * acquires one of its windows. The bundle is asked once per pid (macOS
-	 * only: bundle ids are a Launch Services fact).
+	 * The note of the app a window belongs to, the first time this
+	 * conversation acquires one of its windows: the backend is rebuilt every
+	 * turn, so whether it was said is the conversation's (`context.teach`).
+	 * macOS only: bundle ids are a Launch Services fact.
 	 */
 	async #appNote(context: Context, window: ComputerWindowIdentity): Promise<void> {
 		if (this.#platform !== "darwin") return;
 		let bundle = this.#pidBundles.get(window.pid);
 		if (bundle === undefined) {
-			bundle = (await this.#bundleIdOf(window.pid)) ?? null;
+			bundle = await this.#bundleIdOf(window.pid, context.signal);
+			if (bundle === undefined) return;
 			this.#pidBundles.set(window.pid, bundle);
 		}
-		if (bundle === null || this.#notedApps.has(bundle.toLowerCase())) return;
+		if (bundle === null) return;
 		const note = appNote(bundle);
-		if (note === undefined) return;
-		this.#notedApps.add(bundle.toLowerCase());
+		if (note === undefined || !context.teach(`app-note:${bundle.toLowerCase()}`)) return;
 		context.emitText(note);
 	}
 	async #windows(selector: WindowSelector = {}): Promise<ComputerWindowIdentity[]> {
@@ -1416,7 +1419,7 @@ export class CuaComputerSession implements ComputerBackend {
 	 * One window by selector: an exact `{ id, pid }` re-resolves a handle the
 	 * caller already holds (every prelude window method carries one), anything
 	 * else acquires a window. Either way the first window of an app with an
-	 * app note prints that note, once per session.
+	 * app note prints that note, once per conversation.
 	 */
 	window(
 		context: Context,
@@ -2409,7 +2412,6 @@ export class CuaComputerSession implements ComputerBackend {
 							.filter(line => !line.includes("not driver-verified")),
 					].join("\n");
 		const escalated = escalation(reply, this.#facts(name, reported, args));
-		const motion = measured === undefined ? undefined : scrollEvidence(measured.scroll);
 		const opened = await this.#openedWindows(typeof args.pid === "number" ? args.pid : undefined);
 		// A window one of this session's dispatches changed is re-read once if
 		// the next walk catches it mid-transition.
@@ -2429,13 +2431,7 @@ export class CuaComputerSession implements ComputerBackend {
 		return {
 			text: [reported, ...notes].filter(Boolean).join("\n"),
 			effect: reply.effect ?? "unverifiable",
-			evidence:
-				motion === undefined
-					? (data.evidence ?? null)
-					: [
-							...(Array.isArray(data.evidence) ? data.evidence : data.evidence == null ? [] : [data.evidence]),
-							motion,
-						],
+			evidence: data.evidence ?? null,
 			route: reply.route ?? "cua-sdk",
 			delivery: data.delivery ?? args.delivery_mode ?? "background",
 			...(reply.committed === undefined ? {} : { committed: reply.committed }),
@@ -2907,6 +2903,7 @@ export class CuaComputerSession implements ComputerBackend {
 					text: scrollVerdict(
 						scroll,
 						!target && scroll.point !== undefined ? `(${scroll.point.x}, ${scroll.point.y})` : described,
+						data.effect === "confirmed",
 					),
 					scroll,
 				};
@@ -2921,14 +2918,19 @@ export class CuaComputerSession implements ComputerBackend {
 				);
 			} catch (error) {
 				if (!(error instanceof ToolError) || readReply(error.context).code !== "target_covered") throw error;
-				// The driver raised the app and still found another window on top
-				// at the point; its sentence names that point in its own pixels.
-				// The covering window is someone's: moving it is the user's call.
-				const cover = /stays covered by (.+?) at \(/.exec(error.message)?.[1];
+				// Nothing was posted: after the app was raised, the topmost
+				// window at the point was another app's (`covered_by`), or none
+				// of this window was on screen there (`covered_by: null`). The
+				// covering window is someone's: moving it is the user's call.
+				const cover = readReply(error.context).data.covered_by;
+				const owner =
+					cover !== null && typeof cover === "object" && "app_name" in cover && typeof cover.app_name === "string"
+						? `${cover.app_name}${"pid" in cover && typeof cover.pid === "number" ? ` (pid ${cover.pid})` : ""}`
+						: undefined;
 				throw new ToolError(
-					`target_covered: nothing was sent — at ${described}, window ${current.id} stays covered${
-						cover === undefined ? "" : ` by ${cover}`
-					} even after its app was raised. Scroll at a point where window ${current.id} is on top, or ask the user to move the covering window.`,
+					owner === undefined
+						? `target_covered: nothing was sent — at ${described}, window ${current.id} is not on screen under that point even after its app was raised. Scroll at a point inside the part of window ${current.id} that is visible.`
+						: `target_covered: nothing was sent — at ${described}, window ${current.id} stays covered by ${owner} even after its app was raised. Scroll at a point where window ${current.id} is on top, or ask the user to move the covering window.`,
 					error.context,
 				);
 			}

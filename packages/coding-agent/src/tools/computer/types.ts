@@ -15,6 +15,12 @@ export interface ComputerSessionSnapshot {
 	captureMaxPixels: number;
 	display: string;
 	readOnly: boolean;
+	/**
+	 * True the first time a conversation asks about a topic, false after.
+	 * Backends are rebuilt every turn; what the model was already told is the
+	 * conversation's, so one-time notes key on this instead of on a backend.
+	 */
+	teach(topic: string): boolean;
 }
 /** Successful computer run output. */
 export interface ComputerRunOk {
@@ -179,6 +185,8 @@ export interface ComputerOperationContext {
 	 * result — otherwise a silent no-op is indistinguishable from success.
 	 */
 	emitText(text: string): void;
+	/** True once per conversation per topic (`ComputerSessionSnapshot.teach`). */
+	teach(topic: string): boolean;
 }
 export interface ComputerRelatedWindow {
 	id: string;

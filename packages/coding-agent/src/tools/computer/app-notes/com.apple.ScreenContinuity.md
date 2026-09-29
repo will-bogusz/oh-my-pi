@@ -2,9 +2,9 @@
 
 The window shows the iPhone's pixels only: there is no accessibility tree for iOS content. Work from screenshots.
 
-- Scroll with `win.scroll("down", { target: [x, y], delivery: "foreground" })`, the target inside the list or view that should move. It takes focus for about a second and moves the real pointer, then puts both back. A background scroll does not reach this window.
+- Scroll with `win.scroll("down", { target: [x, y], delivery: "foreground" })` (Python: `await win.scroll("down", target=[x, y], delivery="foreground")`), the target inside the list or view that should move. It takes focus for about a second and moves the real pointer, then puts both back. A background scroll does not reach this window.
 - Distance: `{ by: "page" }` moves about 0.8 of the visible height; `{ amount: 300, by: "points" }` moves 300 points; each `by: "line"` notch is 40 points.
-- The reply's first line is what the view measurably did: `✓ Scrolled down 231 pt at (163, 400)` moved; `✓ At end: …` reached the end, so stop repeating; `✗ No motion at …` nothing under that point scrolls with the wheel; `? Changed in place …` a pager, sheet or navigation changed the screen.
+- The reply's first line is what the view measurably did: `✓ Scrolled down 231 pt at (163, 400)` moved; `✓ At end: …` reached the end, so stop repeating; `? Moved the other way: …` it went back, so re-screenshot; `✗ No motion at …` nothing under that point scrolls with the wheel; `? Changed in place …` a pager, sheet or navigation changed the screen.
 - After a scroll that moved the view, take a new screenshot before clicking anything: coordinates from the old frame now point at different content.
 - Do not drag to scroll: vertical drags never scroll here. Horizontal drags on list rows open the row's swipe actions.
 - Page Down, arrow keys and Space do not scroll. Shift+scroll does not scroll sideways; use `scroll("left" | "right", { target: [x, y], delivery: "foreground" })` on the row itself.

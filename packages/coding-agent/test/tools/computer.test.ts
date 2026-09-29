@@ -326,6 +326,7 @@ const snapshot = (readOnly = false): ComputerSessionSnapshot => ({
 	captureMaxPixels: 1280 * 896,
 	display: "all",
 	readOnly,
+	teach: () => true,
 });
 
 type SupervisorRun = { ok: true; payload: ComputerRunOk } | { ok: false; error: Error };
@@ -1485,6 +1486,43 @@ describe("computer preludes through the session", () => {
 			expect(Buffer.byteLength(composed, "utf-8")).toBeLessThanOrEqual(DEFAULT_MAX_BYTES);
 		} finally {
 			await prelude.invoke({ action: "close" }, { session, toolCallId: "close" });
+		}
+	});
+
+	it("keeps a backend's once-only note once per conversation across the per-turn driver release", async () => {
+		/** Says its note the way the Cua backend says an app note: only when the conversation has not heard it. */
+		class NotingBackend extends FakeBackend {
+			override async window(context: ComputerOperationContext, selector: string | WindowSelector) {
+				const window = await super.window(context, selector);
+				if (context.teach("app-note:dev.omp.code")) context.emitText("APP NOTE");
+				return window;
+			}
+		}
+		let backends = 0;
+		let conversation = "first";
+		const { realm, displays } = javascriptFixture(
+			() => {
+				backends++;
+				return new NotingBackend();
+			},
+			{ ...toolSession(), getSessionId: () => conversation },
+		);
+		const notes = () => displays.join("\n").split("APP NOTE").length - 1;
+		try {
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			expect(notes()).toBe(1);
+			// Turn settle releases the driver; the next call builds a new backend.
+			await runInContext("computer.release()", realm);
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			expect(backends).toBe(2);
+			expect(notes()).toBe(1);
+			// Another conversation's transcript never saw it.
+			conversation = "second";
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			expect(notes()).toBe(2);
+		} finally {
+			await runInContext("computer.close()", realm);
 		}
 	});
 

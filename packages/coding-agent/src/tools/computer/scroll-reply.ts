@@ -86,19 +86,35 @@ function detail(scroll: ComputerScrollOutcome): string {
 	return ` (${parts.join("; ")})`;
 }
 
+const OPPOSITE: Record<ComputerScrollOutcome["direction"], ComputerScrollOutcome["direction"]> = {
+	up: "down",
+	down: "up",
+	left: "right",
+	right: "left",
+};
+
 /**
  * The verdict line. `where` is the point in the caller's coordinates, a ref,
- * or the window centre, already worded (`(163, 400)`, `n5`).
+ * or the window centre, already worded (`(163, 400)`, `n5`). `confirmed` is
+ * the driver's own postcondition (`effect: "confirmed"`): only then does a
+ * move read ✓. Travel against the request is its own verdict, and a move
+ * with no net travel reads as the end it is.
  */
-export function scrollVerdict(scroll: ComputerScrollOutcome, where: string): string {
+export function scrollVerdict(scroll: ComputerScrollOutcome, where: string, confirmed: boolean): string {
 	const moved = scroll.movedPt === null ? 0 : Math.round(scroll.movedPt);
+	const mark = confirmed ? "✓" : "?";
 	switch (scroll.outcome) {
 		case "moved":
-			return `✓ Scrolled ${scroll.direction} ${moved} pt at ${where}${detail(scroll)}`;
 		case "at_end":
+			if (moved < 0)
+				return `? Moved the other way: the view scrolled ${OPPOSITE[scroll.direction]} ${-moved} pt at ${where}${detail(
+					scroll,
+				)} — observe before the next coordinate action`;
+			if (scroll.outcome === "moved" && moved > 0)
+				return `${mark} Scrolled ${scroll.direction} ${moved} pt at ${where}${detail(scroll)}`;
 			// Either signature — a bounce, or travel that stopped short with the
 			// frames settled — is the view's end; which one fired is not reported.
-			return `✓ At end: moved ${moved}${
+			return `${mark} At end: moved ${moved}${
 				scroll.requestedPt === null ? "" : ` of ${Math.round(scroll.requestedPt)}`
 			} pt at ${where}, then the view stopped at its end — scrolling further ${scroll.direction} there moves nothing${detail(scroll)}`;
 		case "no_motion":
@@ -111,23 +127,12 @@ export function scrollVerdict(scroll: ComputerScrollOutcome, where: string): str
 			return `? Changed in place at ${where}: pixels changed but nothing shifted (a pager, sheet or navigation)${detail(
 				scroll,
 			)} — observe before the next coordinate action`;
-		case "unmeasured":
-			return `? Unmeasured: scrolled ${scroll.direction} at ${where}${detail(scroll)}, but ${
-				scroll.reason === undefined
-					? "the capture was unavailable"
-					: `the capture was unavailable: ${scroll.reason}`
+		case "unmeasured": {
+			// The driver words its reason `capture unavailable: <why>`.
+			const why = scroll.reason?.replace(/^capture unavailable:\s*/i, "");
+			return `? Unmeasured: scrolled ${scroll.direction} at ${where}${detail(scroll)}, but the capture was unavailable${
+				why ? `: ${why}` : ""
 			} — observe({ screenshot: true }) to see where it landed`;
+		}
 	}
-}
-
-/** Measured motion, as the reply's `evidence` row. Unmeasured leaves the driver's evidence alone. */
-export function scrollEvidence(scroll: ComputerScrollOutcome): Wire | undefined {
-	if (scroll.outcome === "unmeasured") return undefined;
-	return {
-		kind: "scroll_motion",
-		outcome: scroll.outcome,
-		moved_pt: scroll.movedPt,
-		across_pt: scroll.acrossPt,
-		confidence: scroll.confidence,
-	};
 }

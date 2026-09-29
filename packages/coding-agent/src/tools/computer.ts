@@ -317,17 +317,19 @@ class ComputerLifetime {
 	}
 
 	/**
-	 * True once per conversation, for the first handle of its kind or the first
-	 * delivery of the guide. The prelude (and this lifetime) is kept across
-	 * `/new` and session switches: a new conversation's transcript never saw
-	 * what another was taught, and one switched back to still holds it.
+	 * True once per conversation, for the first handle of its kind, the first
+	 * delivery of the guide, or a backend's first word on a topic (an app's
+	 * note: `backend:app-note:<bundle id>`). The prelude (and this lifetime)
+	 * is kept across `/new`, session switches and the per-turn driver
+	 * release: a new conversation's transcript never saw what another was
+	 * taught, and one switched back to still holds it.
 	 */
-	teach(handle: "window" | "element" | "guide"): boolean {
+	teach(topic: "window" | "element" | "guide" | `backend:${string}`): boolean {
 		const conversation = this.#session.getSessionId?.() ?? null;
 		let taught = this.#taught.get(conversation);
 		if (!taught) this.#taught.set(conversation, (taught = new Set()));
-		if (taught.has(handle)) return false;
-		taught.add(handle);
+		if (taught.has(topic)) return false;
+		taught.add(topic);
 		return true;
 	}
 
@@ -529,6 +531,9 @@ async function runComputer(
 		captureMaxPixels: coordinateSafe ? COORDINATE_SAFE_MAX_CAPTURE_PIXELS : 0,
 		display: cfgComputerDisplay.get(session.settings),
 		readOnly,
+		// Backends are rebuilt after every turn; this conversation's record
+		// of what it was told is not.
+		teach: topic => lifetime.teach(`backend:${topic}`),
 	};
 	const run = await controller.run(code, timeoutSeconds * 1000, snapshot, signal);
 	lifetime.own(run.screenshots.map(shot => shot.path));
