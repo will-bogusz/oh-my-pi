@@ -143,7 +143,11 @@ function measuredVerdict(
 					scroll,
 				)}${next("observe before the next coordinate action")}`;
 			if (scroll.outcome === "moved" && moved > 0)
-				return `${mark} Scrolled ${scroll.direction} ${moved} pt at ${where}${detail(scroll)}`;
+				// An unconfirmed move names its witness (the driver's reason, e.g. the
+				// accessibility scroll position when the pixels did not show it).
+				return `${mark} Scrolled ${scroll.direction} ${moved} pt at ${where}${detail(scroll)}${
+					!confirmed && reason ? ` — ${reason}` : ""
+				}`;
 			// Either signature — a bounce, or travel that stopped short with the
 			// frames settled — is the view's end; which one fired is not reported.
 			return `${mark} At end: moved ${moved}${

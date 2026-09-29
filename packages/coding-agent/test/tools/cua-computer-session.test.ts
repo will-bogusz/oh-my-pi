@@ -5490,6 +5490,25 @@ it("never marks a scroll that travelled against the request, or not at all, as d
 		const still = await scroll({ outcome: "moved", moved_pt: 0, confidence: 0.5 });
 		expect(still.text).toStartWith("? At end: moved 0 of 231 pt at (150, 60)");
 		expect(actionMark(still)).toBe("?");
+		// Pixels showed nothing but the accessibility scroll position moved: an
+		// unconfirmed move that names its witness.
+		const witness = "measured from the accessibility scroll position: the window's pixels did not show the move";
+		f.state.hook = async name =>
+			name === "scroll"
+				? scrollReply({ ...sent, outcome: "moved", moved_pt: 72, confidence: null, reason: witness }, undefined, {
+						effect: "unverifiable",
+						evidence: null,
+					})
+				: undefined;
+		const ax = await f.session.scroll(f.context, f.window, "down", [150, 60], {
+			amount: 231,
+			by: "points",
+			delivery: "foreground",
+		});
+		expect(ax.text).toBe(
+			`? Scrolled down 72 pt at (150, 60) (requested 231 pt; foreground pointer wheel, 231 px) — ${witness}`,
+		);
+		expect(actionMark(ax)).toBe("?");
 		// An end reached with no travel is the driver's confirmed postcondition.
 		const end = await scroll({ outcome: "at_end", moved_pt: 0, confidence: 0.9 });
 		expect(end.text).toStartWith("✓ At end: moved 0 of 231 pt at (150, 60)");
