@@ -1548,15 +1548,19 @@ interface BuildSkewMessage {
 /**
  * Runs the installed extension against a relay that answers every handshake
  * with `expected`. `onFirstAuthenticate` runs before the first answer, after
- * the worker has started from the installed files. Returns how many workers
- * dialed and the builds of those that sent a hello.
+ * the worker has started from the installed files. `repair`, when given, runs
+ * once that settles, and the relay then drops the socket so the extension
+ * reconnects to the repaired files. Returns how many workers dialed and the
+ * builds of those that sent a hello.
  */
 async function runBuildSkew(
 	expected: string,
 	onFirstAuthenticate: (extension: string, installedBuild: string) => void,
+	repair?: (extension: string, installedBuild: string) => void,
 ): Promise<{ installedBuild: string; authenticates: number; hellos: string[] }> {
 	let authenticates = 0;
 	const hellos: string[] = [];
+	const sockets = new Set<{ close(): void }>();
 	const root = await mkdtemp(path.join(tmpdir(), "omp-extension-skew-"));
 	const extension = path.join(root, "extension");
 	let installedBuild = "";
@@ -1570,6 +1574,12 @@ async function runBuildSkew(
 			return new Response("Not found", { status: 404 });
 		},
 		websocket: {
+			open: socket => {
+				sockets.add(socket);
+			},
+			close: socket => {
+				sockets.delete(socket);
+			},
 			message: (socket, raw) => {
 				// The extension under test is the only peer; its messages are the protocol's.
 				const message: BuildSkewMessage = JSON.parse(String(raw));
@@ -1580,6 +1590,12 @@ async function runBuildSkew(
 			},
 		},
 	});
+	const settle = async (helloCount: number): Promise<void> => {
+		for (let i = 0; i < 400 && hellos.length < helloCount; i++) await Bun.sleep(25);
+		// Real Chrome decides when a reloaded worker dials again (about 100 ms
+		// into a loop); only a real-time window can show that no loop follows.
+		await Bun.sleep(3_000);
+	};
 	let browser: Browser | undefined;
 	try {
 		if (!relay.port) throw new Error("Relay did not bind a port");
@@ -1602,10 +1618,13 @@ async function runBuildSkew(
 		await extensionsPage.waitForFunction(toggle => toggle.hasAttribute("checked"), {}, developerMode);
 		await extensionsPage.close();
 		await browser.installExtension(extension);
-		for (let i = 0; i < 400 && hellos.length === 0; i++) await Bun.sleep(25);
-		// Real Chrome decides when a reloaded worker dials again (about 100 ms
-		// into a loop); only a real-time window can show that no loop follows.
-		await Bun.sleep(3_000);
+		await settle(1);
+		if (repair) {
+			repair(extension, installedBuild);
+			const helloCount = hellos.length + 1;
+			for (const socket of sockets) socket.close();
+			await settle(helloCount);
+		}
 		return { installedBuild, authenticates, hellos };
 	} finally {
 		await browser?.close();
@@ -1646,16 +1665,24 @@ it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
 );
 
 it.skipIf(!process.env.PI_BROWSER_TEST_EXECUTABLE)(
-	"reloads at most once for an expected build even when the reload does not reach it",
+	"reloads once for an expected build the reload does not reach, and again once the installed worker is repaired",
 	async () => {
-		const run = await runBuildSkew(expectedBuild, extension => {
-			// Files that claim the expected build while the worker they load is still the installed one.
-			writeFileSync(path.join(extension, "build-info.json"), `${JSON.stringify({ buildId: expectedBuild })}\n`);
-		});
+		const run = await runBuildSkew(
+			expectedBuild,
+			extension => {
+				// Files that claim the expected build while the worker they load is still the installed one.
+				writeFileSync(path.join(extension, "build-info.json"), `${JSON.stringify({ buildId: expectedBuild })}\n`);
+			},
+			(extension, installedBuild) => {
+				const background = path.join(extension, "background.js");
+				writeFileSync(background, readFileSync(background, "utf8").replaceAll(installedBuild, expectedBuild));
+			},
+		);
+		// Stuck: one reload, then the old worker stays. Repaired: one more reload lands.
 		expect({ authenticates: run.authenticates, hellos: run.hellos }).toEqual({
-			authenticates: 2,
-			hellos: [run.installedBuild],
+			authenticates: 4,
+			hellos: [run.installedBuild, expectedBuild],
 		});
 	},
-	30_000,
+	45_000,
 );

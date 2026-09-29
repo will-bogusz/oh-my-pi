@@ -2139,18 +2139,21 @@ describe("built extension reload on build skew", () => {
 	/**
 	 * Boots `running`, then the installed files after every reload, against a
 	 * relay that answers each handshake with `expectedBuildId`, until a worker
-	 * says hello or Chrome would have terminated the extension.
+	 * says hello or Chrome would have terminated the extension. `local` is the
+	 * profile's extension local storage, a fresh one unless given.
 	 */
 	async function runChrome(options: {
 		running: string;
 		installed: { worker: string; buildId: string };
 		expectedBuildId: string;
+		local?: Record<string, unknown>;
 	}): Promise<{ reloads: number; hello?: string }> {
-		const local: Record<string, unknown> = {};
+		const local = options.local ?? {};
 		let reloads = 0;
 		for (let boot = 0; boot <= 30; boot++) {
 			const session: Record<string, unknown> = {};
-			let reloaded = false;
+			// Each boot ends in a reload or a hello; the worker's awaits include real crypto work.
+			const outcome = Promise.withResolvers<"reload" | "hello">();
 			let hello: string | undefined;
 			class ExtensionSocket {
 				static OPEN = 1;
@@ -2161,7 +2164,10 @@ describe("built extension reload on build skew", () => {
 				send(text: string): void {
 					// The worker under test is the only sender; its messages are the protocol's.
 					const message: { t: string; extensionBuildId?: string } = JSON.parse(text);
-					if (message.t === "hello") hello = message.extensionBuildId;
+					if (message.t === "hello") {
+						hello = message.extensionBuildId;
+						outcome.resolve("hello");
+					}
 					if (message.t === "authenticate")
 						this.onmessage?.({ data: JSON.stringify({ t: "authenticated", expectedBuildId: options.expectedBuildId }) });
 				}
@@ -2189,20 +2195,20 @@ describe("built extension reload on build skew", () => {
 				clearTimeout: () => {},
 				setInterval: () => 0,
 				clearInterval: () => {},
-				fetch: async (url: string) =>
-					Response.json(
+				fetch: async (url: string) => {
+					if (url.endsWith("/background.js")) return new Response(options.installed.worker);
+					return Response.json(
 						url.endsWith("connection.json")
 							? { port: 19443 }
 							: url.endsWith("build-info.json")
 								? { buildId: options.installed.buildId }
 								: { service: "omp-browser", protocol: 2 },
-					),
+					);
+				},
 				chrome: {
 					runtime: {
 						getURL: (name: string) => `chrome-extension://fixture/${name}`,
-						reload: () => {
-							reloaded = true;
-						},
+						reload: () => outcome.resolve("reload"),
 						onInstalled: event(),
 						onStartup: event(),
 						onMessage: event(),
@@ -2224,8 +2230,7 @@ describe("built extension reload on build skew", () => {
 				},
 			});
 			runInContext(boot === 0 ? options.running : options.installed.worker, context);
-			for (let tick = 0; tick < 200 && !reloaded && hello === undefined; tick++) await Promise.resolve();
-			if (!reloaded) return { reloads, hello };
+			if ((await outcome.promise) === "hello") return { reloads, hello };
 			reloads++;
 		}
 		return { reloads };
@@ -2245,6 +2250,36 @@ describe("built extension reload on build skew", () => {
 		const installed = { worker: await worker(EXPECTED_EXTENSION_BUILD_ID), buildId: EXPECTED_EXTENSION_BUILD_ID };
 		expect(
 			await runChrome({ running: await worker(foreign), installed, expectedBuildId: EXPECTED_EXTENSION_BUILD_ID }),
+		).toEqual({ reloads: 1, hello: EXPECTED_EXTENSION_BUILD_ID });
+	});
+
+	it("reloads again for a build it reached once the running worker has left it", async () => {
+		const local: Record<string, unknown> = {};
+		const installed = { worker: await worker(EXPECTED_EXTENSION_BUILD_ID), buildId: EXPECTED_EXTENSION_BUILD_ID };
+		const skew = { installed, expectedBuildId: EXPECTED_EXTENSION_BUILD_ID, local };
+		expect(await runChrome({ ...skew, running: await worker(foreign) })).toEqual({
+			reloads: 1,
+			hello: EXPECTED_EXTENSION_BUILD_ID,
+		});
+		// Later the profile runs another worker again (a manual reload onto other files, since restored).
+		expect(await runChrome({ ...skew, running: await worker(foreign) })).toEqual({
+			reloads: 1,
+			hello: EXPECTED_EXTENSION_BUILD_ID,
+		});
+	});
+
+	it("reloads again for an expected build once the installed worker changes", async () => {
+		const local: Record<string, unknown> = {};
+		const running = await worker(foreign);
+		// Files that claim the expected build while the worker they load is another...
+		const broken = { worker: running, buildId: EXPECTED_EXTENSION_BUILD_ID };
+		expect(
+			await runChrome({ running, installed: broken, expectedBuildId: EXPECTED_EXTENSION_BUILD_ID, local }),
+		).toEqual({ reloads: 1, hello: foreign });
+		// ...then a repaired install under the same stuck worker.
+		const repaired = { worker: await worker(EXPECTED_EXTENSION_BUILD_ID), buildId: EXPECTED_EXTENSION_BUILD_ID };
+		expect(
+			await runChrome({ running, installed: repaired, expectedBuildId: EXPECTED_EXTENSION_BUILD_ID, local }),
 		).toEqual({ reloads: 1, hello: EXPECTED_EXTENSION_BUILD_ID });
 	});
 

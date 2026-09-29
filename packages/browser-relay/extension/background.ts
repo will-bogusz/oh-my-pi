@@ -152,16 +152,26 @@ async function setBadge(connected: boolean): Promise<void> {
 /** Identity of the executing worker; absent only in an unbuilt (source-loaded) extension. */
 const buildId: string | undefined = typeof __OMP_EXTENSION_BUILD_ID__ === "string" ? __OMP_EXTENSION_BUILD_ID__ : undefined;
 /**
- * Which expected build this extension already reloaded for. Local storage,
- * because the reload it guards clears session storage.
+ * The expected build and installed worker this extension last reloaded for.
+ * Local storage, because the reload it guards clears session storage.
  */
-const RELOAD_GUARD_KEY = "reloadedForBuild";
+const RELOAD_GUARD_KEY = "reloadedFor";
+
+/** An installed extension file, read as a reload would load it rather than as this worker was loaded. */
+async function installedFile(name: string): Promise<Response> {
+	return await fetch(chrome.runtime.getURL(name), { cache: "no-store" });
+}
 
 /** Build of the files a reload would load, as opposed to the executing worker's. */
 async function installedBuildId(): Promise<string | undefined> {
-	const response = await fetch(chrome.runtime.getURL("build-info.json"), { cache: "no-store" });
-	const info = (await response.json()) as { buildId?: unknown };
+	const info = (await (await installedFile("build-info.json")).json()) as { buildId?: unknown };
 	return typeof info.buildId === "string" ? info.buildId : undefined;
+}
+
+/** SHA-256 of the worker file a reload would load. */
+async function installedWorkerDigest(): Promise<string> {
+	const digest = await crypto.subtle.digest("SHA-256", await (await installedFile("background.js")).arrayBuffer());
+	return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
 }
 
 /**
@@ -171,8 +181,9 @@ async function installedBuildId(): Promise<string | undefined> {
  * them up without the user visiting chrome://extensions. Any other skew
  * (another tree's relay on the port, files not yet reinstalled) reloads back
  * to the same worker, so it stays connected and the relay reports the skew.
- * At most once per expected build even so, in case Chrome keeps loading
- * something else. Returns true when a reload was started; the caller must then stop.
+ * Even so, one reload per expected build and installed worker file, in case
+ * Chrome keeps loading something else; new files earn another. Returns true
+ * when a reload was started; the caller must then stop.
  */
 async function reloadForBuildSkew(expected: string | undefined): Promise<boolean> {
 	if (!expected) return false;
@@ -183,11 +194,12 @@ async function reloadForBuildSkew(expected: string | undefined): Promise<boolean
 			return false;
 		}
 		if ((await installedBuildId()) !== expected) return false;
+		const attempt = `${expected} ${await installedWorkerDigest()}`;
 		const stored = await chrome.storage.local.get({ [RELOAD_GUARD_KEY]: "" });
-		if (stored[RELOAD_GUARD_KEY] === expected) return false;
-		await chrome.storage.local.set({ [RELOAD_GUARD_KEY]: expected });
+		if (stored[RELOAD_GUARD_KEY] === attempt) return false;
+		await chrome.storage.local.set({ [RELOAD_GUARD_KEY]: attempt });
 	} catch {
-		// Without the installed build or the guard, a reload could loop; stay put.
+		// Without the installed files or the guard, a reload could loop; stay put.
 		return false;
 	}
 	chrome.runtime.reload();

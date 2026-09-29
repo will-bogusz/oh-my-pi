@@ -942,12 +942,18 @@ async function setBadge(connected) {
     await chrome.action.setBadgeBackgroundColor({ color: connected ? "#1a7f37" : "#8b8b8b" });
   } catch {}
 }
-var buildId = "f1a08162f4e7a7d97a93ca10e183b4ee8f261e4ac9f6dcddb667d0ccf0e4f28d";
-var RELOAD_GUARD_KEY = "reloadedForBuild";
+var buildId = "a259f4ad447297c1764170ee701ccb094e40a1dd1113022ae0e4d5e1655c140c";
+var RELOAD_GUARD_KEY = "reloadedFor";
+async function installedFile(name) {
+  return await fetch(chrome.runtime.getURL(name), { cache: "no-store" });
+}
 async function installedBuildId() {
-  const response = await fetch(chrome.runtime.getURL("build-info.json"), { cache: "no-store" });
-  const info = await response.json();
+  const info = await (await installedFile("build-info.json")).json();
   return typeof info.buildId === "string" ? info.buildId : undefined;
+}
+async function installedWorkerDigest() {
+  const digest = await crypto.subtle.digest("SHA-256", await (await installedFile("background.js")).arrayBuffer());
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 async function reloadForBuildSkew(expected) {
   if (!expected)
@@ -959,10 +965,11 @@ async function reloadForBuildSkew(expected) {
     }
     if (await installedBuildId() !== expected)
       return false;
+    const attempt = `${expected} ${await installedWorkerDigest()}`;
     const stored = await chrome.storage.local.get({ [RELOAD_GUARD_KEY]: "" });
-    if (stored[RELOAD_GUARD_KEY] === expected)
+    if (stored[RELOAD_GUARD_KEY] === attempt)
       return false;
-    await chrome.storage.local.set({ [RELOAD_GUARD_KEY]: expected });
+    await chrome.storage.local.set({ [RELOAD_GUARD_KEY]: attempt });
   } catch {
     return false;
   }
