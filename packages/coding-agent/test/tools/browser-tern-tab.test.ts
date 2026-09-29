@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it } from "bun:test";
+import { acquireBrowser } from "@oh-my-pi/pi-coding-agent/tools/browser/registry";
+import { acquireTab, releaseTabsForActor } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import { TernTab, userSourceFunction } from "@oh-my-pi/pi-coding-agent/tools/browser/tern/tern-tab";
 import { TernSocketClient } from "@oh-my-pi/pi-coding-agent/tools/browser/tern/wire";
 import { type FakeAnswer, type FakeDaemon, startFakeDaemon } from "./tern-fake-daemon";
@@ -351,5 +353,16 @@ describe("TernTab", () => {
 			/resourceType image: only the page's fetch and xhr requests can be routed/,
 		);
 		expect(fake.requests.length).toBe(before);
+	});
+});
+
+describe("Tern tabs in the tab supervisor", () => {
+	it("are released with the rest of their actor's tabs", async () => {
+		const fake = await startPage({ eventBatches: [], kit: {} });
+		const browser = await acquireBrowser({ kind: "tern", socketPath: fake.socketPath, pane: 3 }, { cwd: "/tmp" });
+		await acquireTab("tern-actor-owned", browser, { timeoutMs: 5_000, ownerActorId: "actor-a" });
+		expect(await releaseTabsForActor("actor-b")).toBe(0);
+		expect(await releaseTabsForActor("actor-a")).toBe(1);
+		expect(opsOf(fake)).toContain("close");
 	});
 });

@@ -742,6 +742,7 @@ async function acquireTernTab(
 			allowedDomains: opts.allowedDomains ? [...opts.allowedDomains] : undefined,
 			kindTag: browser.kind.kind,
 			ownerSessionId: opts.ownerSessionId,
+			ownerActorId: opts.ownerActorId,
 			persist: opts.persist ?? false,
 			lastActivityAt: Date.now(),
 			frozen: false,
