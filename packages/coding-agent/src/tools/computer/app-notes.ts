@@ -6,6 +6,7 @@
  * the header of the first window of that app it acquires. App knowledge lives
  * here, never in input code.
  */
+import { $ } from "bun";
 import screenContinuity from "./app-notes/com.apple.ScreenContinuity.md" with { type: "text" };
 
 /** Keyed by lower-cased bundle id. */
@@ -27,13 +28,10 @@ export function appNote(bundleId: string): string | undefined {
  */
 export async function launchServicesBundleId(pid: number): Promise<string | undefined> {
 	try {
-		const child = Bun.spawn(["lsappinfo", "info", "-only", "bundleid", String(pid)], {
-			stdout: "pipe",
-			stderr: "ignore",
-		});
-		const [text] = await Promise.all([new Response(child.stdout).text(), child.exited]);
+		const text = await $`lsappinfo info -only bundleid ${pid}`.quiet().nothrow().text();
 		return /"CFBundleIdentifier"="([^"]+)"/.exec(text)?.[1];
 	} catch {
+		// No lsappinfo on this host: no bundle, so no note.
 		return undefined;
 	}
 }
