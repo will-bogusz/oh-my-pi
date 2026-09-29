@@ -83,12 +83,34 @@ Prefer token-based actions when AX exposes a control:
 - `win.doubleClick(token)` is two left clicks at the element's live bounding-box center, with exact-window validation.
 - `win.setValue(token, text)` replaces an accessible value.
 - `win.type(text, { target: token })` and `win.press(chord, { target: token })` target text/key input.
-- `win.scroll("down", { target: token, amount: 3, by: "line" })` scrolls a target; directions are `up`, `down`, `left`, and `right`.
+- `win.scroll("down", { target: token, amount: 3, by: "line" })` scrolls a target; directions are `up`, `down`, `left`, and `right`. See [Scrolling](#scrolling).
 - Element handles offer `click`, `doubleClick`, `setValue`, `type`, `press`, `scroll`, and `perform(action)`. `press` requires a key chord; use `click()` for semantic activation.
 
 Action results report `text`, `effect`, `evidence`, optional `data`/`route`, and `delivery`. A dispatched event is not a verified application change. Synthetic events are often **unverifiable**. Inspect the result and obtain fresh observation, or use `win.verify(expectations, { timeoutMs?, stableSamples? })` for supported native predicates. Verification reports satisfied, unsatisfied, or unknown; incomplete/skipped AX traversal cannot prove absence, and web/document descendants are untrusted semantic evidence. See the [predicate contract](./tools/computer.md#observe-and-resolve). Do not treat dispatch success as proof.
 
 Explicitly click the intended editor/control before background keyboard sequences such as `Cmd+A` then `Backspace`. Setting AXFocused alone does not establish Electron's keyboard destination. Read back the result with fresh AX observation and/or a screenshot; no application effect is guaranteed without readback.
+
+### Scrolling
+
+`scroll(direction, { target?, amount?, by?, delivery? })` wheels at the target (a token's centre or a window point), or at the window's centre without one. `by: "line"` (default) and `by: "page"` (0.8 × the visible height of the scroll area under the point) count notches, `amount` 1–50; `by: "points"` is a distance in window points, `amount` 1–5000. Anything else is refused before input.
+
+Background delivery posts line wheels to the process. `{ delivery: "foreground" }` raises the app, checks that the target window is topmost at the point (else refuses with `target_covered` and sends nothing), moves the real pointer there, wheels in pixel units in measured chunks, then puts the pointer and the previously frontmost app back. Views that scroll only under the real pointer (iPhone Mirroring, some canvases) need it.
+
+The driver samples the window's pixels around the gesture, and the reply's first line is what the view did, at the point in the caller's window coordinates (a driver point is mapped back through the current frame):
+
+| Verdict | Meaning | Cell mark |
+| --- | --- | --- |
+| `✓ Scrolled down 231 pt at (163, 400) (requested 231 pt; foreground pointer wheel, 2 chunks, 300 px)` | The content moved that far | `✓` |
+| `✓ At end: moved 58 of 231 pt at (…), then the view bounced — …` | It reached its end; repeating moves nothing | `✓` |
+| `✗ No motion at (…) — the view under that point did not scroll …` | Measured stillness; a background reply names `{ delivery: "foreground" }` | `✗` |
+| `? Changed in place at (…): pixels changed but nothing shifted …` | A pager, sheet or navigation; observe first | `?` |
+| `? Unmeasured: scrolled down at (…) …, but the capture was unavailable …` | No frames to judge by | `?` |
+
+The result's `scroll` field carries the outcome (`outcome`, `delivery`, `direction`, `point`, `requestedPt`, `movedPt`, `acrossPt`, `confidence`, `wheel`, `chunks`, `reason`), and `evidence` gains a `scroll_motion` row for measured outcomes. A driver that measures nothing keeps its own reply text.
+
+### App notes
+
+Some apps have traps their accessibility tree and pixels cannot show. A note per bundle id lives in `packages/coding-agent/src/tools/computer/app-notes/<bundle id>.md` (registered in `app-notes.ts`) and prints once per computer session beside the first window of that app acquired (macOS; the bundle comes from the driver's apps roster). The first is `com.apple.ScreenContinuity` (iPhone Mirroring): pixels only, scroll with foreground delivery at a target, drags and keys do not scroll, pagers page by taps, horizontal drags on rows open swipe actions, and ⌘1/⌘2/⌘3 for Home Screen, App Switcher and Spotlight.
 
 ### Pixel input
 

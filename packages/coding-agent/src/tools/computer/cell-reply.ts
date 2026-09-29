@@ -109,9 +109,14 @@ export function chainWindow(chain: readonly ComputerCallStep[]): { id: string; p
 /** Effects a driver reports when it dispatched and doubts the target reacted. */
 const UNPROVEN_EFFECTS: Record<string, true> = { partial: true, suspected_noop: true, unverifiable: true };
 
-/** ✓ proven, ? dispatched but unproven, ✗ nothing landed. */
+/**
+ * ✓ proven, ? dispatched but unproven, ✗ nothing landed. A measured scroll
+ * is judged by what the view did: no motion landed nothing, whatever the
+ * driver's effect word says about the dispatch.
+ */
 export function actionMark(result: ComputerActionResult): CallMark {
-	if (result.effect === "not_dispatched") return "✗";
+	if (result.effect === "not_dispatched" || result.scroll?.outcome === "no_motion") return "✗";
+	if (result.scroll?.outcome === "moved" || result.scroll?.outcome === "at_end") return "✓";
 	if (
 		UNPROVEN_EFFECTS[result.effect] === true ||
 		(result.committed !== undefined && result.committed !== "committed") ||

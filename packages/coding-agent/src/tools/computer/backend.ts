@@ -12,6 +12,7 @@ import type {
 	ComputerTarget,
 	ComputerWindowIdentity,
 	ObserveOptions,
+	ScrollOptions,
 	WindowResolveOptions,
 	WindowSelector,
 } from "./types";
@@ -110,7 +111,7 @@ export interface ComputerBackend {
 		window: ComputerWindowIdentity,
 		direction: "up" | "down" | "left" | "right",
 		target?: ComputerTarget,
-		options?: ActionOptions & { amount?: number; by?: "line" | "page" },
+		options?: ScrollOptions,
 	): Promise<ComputerActionResult>;
 	setFrame(
 		context: ComputerOperationContext,

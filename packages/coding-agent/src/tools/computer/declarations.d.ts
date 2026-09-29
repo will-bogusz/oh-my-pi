@@ -31,10 +31,20 @@ interface ComputerDragOptions extends Omit<ComputerClickOptions, "count"> {
 	durationMs?: number;
 	steps?: number;
 }
+/**
+ * `target` is where the wheel goes (a ref's centre, or a window point);
+ * without one, the window's centre. `by: "line"` (default) and `"page"`
+ * (0.8 × the visible height) count notches, 1–50; `by: "points"` is a
+ * distance in window points, 1–5000. `{ delivery: "foreground" }` moves the
+ * real pointer over the target and wheels there, then puts pointer and focus
+ * back: views that scroll only under the real pointer need it. The reply's
+ * first line is the measured verdict: `✓ Scrolled down 231 pt at (163, 400)`,
+ * `✓ At end: …`, `✗ No motion at …`, `? Changed in place …`, `? Unmeasured …`.
+ */
 interface ComputerScrollOptions extends ComputerDeliveryOptions {
 	target?: ComputerTarget;
 	amount?: number;
-	by?: "line" | "page";
+	by?: "line" | "page" | "points";
 }
 interface ComputerTargetOptions extends ComputerDeliveryOptions {
 	target?: ComputerTarget;

@@ -7,13 +7,14 @@ Observation
 - Rows read `n5 button "Add" = "value" (description) [disabled, selected] actions=open`, indented by depth; `text "…"` rows are text the window shows with no action on it. Any row takes `click()`; `actions=` names only what a row offers beyond press, show_menu, confirm, cancel and pick, which `el.perform(name)` reaches too.
 - Refs belong to the observation that printed them: your next `observe()` of that window retires them all and prints fresh ones. Never guess a ref.
 - `observe()` prints the whole window; `observe({ query })` keeps the rows matching a case-insensitive substring (an array matches any of several) with their ancestors; `{ screenshot: true }` adds a frame; `{ menubar: true }` adds the menu bar.
-- The header names the window, and says `keys: foreground only` when background keystrokes cannot reach it. Sheets, and windows the app opens while you work, print under their opener and take its refs.
+- The header names the window, and says `keys: foreground only` when background keystrokes cannot reach it. Sheets, and windows the app opens while you work, print under their opener and take its refs. An app with traps its tree cannot show prints an app note with its first window; follow it.
 
 Acting
 - Batch what one observation justifies in one cell, then read back in the same cell: `await win.ref("n5").click(); await win.ref("n7").setValue("x"); await win.observe();`
 - `click` presses a control and selects a list row (a row's default action is `perform("press")`); `setValue` replaces a field's value; `type(text, { caret: { after: "…" } })` or `{ caret: "end" }` adds to what a field holds; `press("cmd+s")` sends a chord; `win.menu(["File", "Save…"], { delivery: "foreground" })` drives the menu bar.
 - Coordinates are window points of that window's latest screenshot; pixel targets, modified or counted clicks and drag ends need a current frame.
 - Delivery is background by default. Pass `{ delivery: "foreground" }` where the header or a reply names it, and for pixels, menus and drags; it briefly makes the window key.
+- `scroll(direction, { target, amount, by })`: `by: "line"` (default) or `"page"` counts notches (1–50), `by: "points"` is a distance (1–5000); no target means the window centre. Its reply leads with what the view did: `✓ Scrolled down 231 pt at (163, 400)`; `✓ At end` — stop repeating; `✗ No motion` — take the route it names (`{ delivery: "foreground" }` moves the real pointer there for views that scroll only under it); `? Changed in place` — observe first. After a move, capture again before any coordinate action.
 
 Evidence
 - A cell's reply leads with one mark per call — `✓` proven or read, `?` delivered but unproven, `✗` nothing landed — and each outcome has its own answer:
