@@ -596,13 +596,25 @@ export async function explainRevokedChromeControl(
 	);
 }
 
-/** Dialog control bypasses the renderer and a worker blocked by the modal. */
+/**
+ * Dialog control bypasses the renderer and a worker blocked by the modal, and
+ * so bypasses {@link runOnChromePage}: a user who cancelled OMP's debugger
+ * from Chrome's infobar is reported here the same way, as a user stop. Any
+ * other refusal keeps its own error.
+ */
 export async function chromeDialog(
 	handle: ManagedChromeHandle,
 	options: unknown,
 	signal?: AbortSignal,
 ): Promise<DialogJournalState> {
-	return await leaseRequest<DialogJournalState>(handle, { action: "dialog", dialog: options }, signal);
+	try {
+		return await leaseRequest<DialogJournalState>(handle, { action: "dialog", dialog: options }, signal);
+	} catch (error) {
+		const lost = await lostChromeControl(handle, error);
+		if (lost && !(lost instanceof ChromeTabGoneError) && lost.debugger?.canceledByUser)
+			throw describeLostControl(lost, "");
+		throw error;
+	}
 }
 
 async function initializeChromePage(

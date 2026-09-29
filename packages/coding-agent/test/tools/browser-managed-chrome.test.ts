@@ -4,6 +4,7 @@ import type { ToolSession } from "@oh-my-pi/pi-coding-agent/sdk";
 import {
 	acquireChromeTab,
 	browserActorId,
+	chromeDialog,
 	explainRevokedChromeControl,
 	type ManagedChromeHandle,
 	releaseChromeTabsForOwner,
@@ -21,6 +22,7 @@ import { ManagedChromeTabs } from "@oh-my-pi/pi-coding-agent/tools/browser/relay
 import type { RelayToExtMessage, TabSnapshot } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
 import { startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
 import { UserStoppedError } from "@oh-my-pi/pi-coding-agent/tools/tool-errors";
+import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 
 const tab = (tabId: number): TabSnapshot => ({
 	tabId,
@@ -453,6 +455,10 @@ it("explains a raw TargetCloseError with Chrome's reason, never retries past the
 			new Error("Attempted to use detached Frame '6F2802E97123F398ECC824571324075B'."),
 		])
 			expect((await explainRevokedChromeControl(handle, inFlight))?.message).toBe(revoked);
+		// The dialog channel bypasses the page worker; Chrome's own revocation there stays a failure.
+		const refusedDialog = await chromeDialog(handle, {}).catch((error: unknown) => error);
+		expect(refusedDialog).toBeInstanceOf(ToolError);
+		expect(refusedDialog).not.toBeInstanceOf(UserStoppedError);
 		// The user pressing Cancel on Chrome's infobar is a decision, not a failure:
 		// a user stop, and no call claims its way past it.
 		relay.instances.extMessage(extension, JSON.stringify({ t: "detached", tabId: 1, reason: "canceled_by_user" }));
@@ -467,6 +473,10 @@ it("explains a raw TargetCloseError with Chrome's reason, never retries past the
 		);
 		expect(ran).toBe(false);
 		expect(relay.instances.get(handle.lease.id, owner).debugger?.canceledByUser).toBe(true);
+		// The dialog channel reports the same decision the same way.
+		const stoppedDialog = await chromeDialog(handle, {}).catch((error: unknown) => error);
+		expect(stoppedDialog).toBeInstanceOf(UserStoppedError);
+		expect(String(stoppedDialog)).toContain(`The user stopped OMP's control of "Sign in" from Chrome's infobar`);
 		// The user closes the tab: the same failure now says the lease is over, and why.
 		relay.instances.extMessage(extension, JSON.stringify({ t: "tabRemoved", tabId: 1 }));
 		const gone = 'Chrome tab "Sign in" was closed in Chrome. Discover tabs again.';
