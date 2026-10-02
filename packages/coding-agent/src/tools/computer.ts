@@ -301,8 +301,11 @@ class ComputerLifetime {
 	#releasing?: Promise<void>;
 	#closing?: Promise<void>;
 	#releaseFailure?: Error;
-	/** What each conversation was taught, by session id; the prelude outlives `/new` and session switches. */
-	readonly #taught = new Map<string | null, Set<string>>();
+	/**
+	 * What each context was taught, by conversation and its latest compaction;
+	 * the prelude outlives `/new`, session switches and compactions.
+	 */
+	readonly #taught = new Map<string, Set<string>>();
 	/** Capture files this session's runs wrote; closing the session removes these and nothing else. */
 	readonly #captures = new Set<string>();
 	/** The reply of each eval cell running now, by the signal its calls carry. */
@@ -319,17 +322,18 @@ class ComputerLifetime {
 	}
 
 	/**
-	 * True once per conversation, for the first handle of its kind, the first
+	 * True once per context, for the first handle of its kind, the first
 	 * delivery of the guide, or a backend's first word on a topic (an app's
 	 * note: `backend:app-note:<bundle id>`). The prelude (and this lifetime)
-	 * is kept across `/new`, session switches and the per-turn driver
-	 * release: a new conversation's transcript never saw what another was
-	 * taught, and one switched back to still holds it.
+	 * is kept across `/new`, session switches, compactions and the per-turn
+	 * driver release: a new conversation's transcript never saw what another
+	 * was taught, a compaction replaces the context that carried it, and a
+	 * conversation switched back to still holds it.
 	 */
 	teach(topic: "window" | "element" | "guide" | `backend:${string}`): boolean {
-		const conversation = this.#session.getSessionId?.() ?? null;
-		let taught = this.#taught.get(conversation);
-		if (!taught) this.#taught.set(conversation, (taught = new Set()));
+		const context = this.#context();
+		let taught = this.#taught.get(context);
+		if (!taught) this.#taught.set(context, (taught = new Set()));
 		if (taught.has(topic)) return false;
 		taught.add(topic);
 		return true;
@@ -337,7 +341,12 @@ class ComputerLifetime {
 
 	/** Take back a topic a run taught but never delivered: its output was discarded with its failure. */
 	untaught(topic: `backend:${string}`): void {
-		this.#taught.get(this.#session.getSessionId?.() ?? null)?.delete(topic);
+		this.#taught.get(this.#context())?.delete(topic);
+	}
+
+	#context(): string {
+		const compaction = this.#session.sessionManager?.getBranch().findLast(entry => entry.type === "compaction")?.id;
+		return JSON.stringify([this.#session.getSessionId?.() ?? null, compaction ?? null]);
 	}
 
 	/**

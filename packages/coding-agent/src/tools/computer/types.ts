@@ -273,7 +273,7 @@ export interface ComputerScrollOutcome {
 	chunks?: number;
 	reason?: string;
 }
-/** Scroll distance units: notches of a line or of 0.8 × the visible height, or window points. */
+/** Scroll distance units: notches of a line or of 0.8 × the visible height (width when scrolling sideways), or window points. */
 export type ComputerScrollUnit = "line" | "page" | "points";
 export interface ComputerActionResult {
 	text: string;

@@ -797,6 +797,34 @@ describe("computer preludes through the session", () => {
 		}
 	});
 
+	it("refuses a missing ref token or a scroll without a direction with what the call needs", async () => {
+		const { backend, realm } = javascriptFixture();
+		const scroll = spyOn(backend, "scroll");
+		try {
+			await runInContext('computer.window("42", {screenshot: false}).then(win => globalThis.win = win)', realm);
+			// A failed regex hands `undefined` over; it is no stale row to observe again for.
+			for (const call of ["win.ref(undefined)", 'win.ref("")', "computer.ref(undefined)"]) {
+				const error = await (async () => await runInContext(call, realm))().catch((caught: unknown) => caught);
+				expect(String(error)).toContain('ref(token) needs a ref string such as "n24"');
+				expect(String(error)).not.toContain("StaleRef");
+			}
+			for (const [call, options] of [
+				["win.scroll({ deltaY: 300 })", "{ target?, amount?, by?, delivery? }"],
+				['win.scroll("sideways")', "{ target?, amount?, by?, delivery? }"],
+				// An element scrolls at itself: its form takes no target.
+				["win.ref(win.initialObservation.elements[0].ref).scroll({ deltaY: 300 })", "{ amount?, by?, delivery? }"],
+			]) {
+				await expect(runInContext(call, realm)).rejects.toThrow(
+					`scroll(direction: "up" | "down" | "left" | "right", ${options})`,
+				);
+			}
+			expect(scroll).not.toHaveBeenCalled();
+		} finally {
+			scroll.mockRestore();
+			await runInContext("computer.close()", realm);
+		}
+	});
+
 	it("names the keyboard route only where the driver refused background keys", async () => {
 		const { backend, realm, displays } = javascriptFixture();
 		try {
@@ -1529,6 +1557,31 @@ describe("computer preludes through the session", () => {
 			expect(notes()).toBe(1);
 			// Another conversation's transcript never saw it.
 			conversation = "second";
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			expect(notes()).toBe(2);
+		} finally {
+			await runInContext("computer.close()", realm);
+		}
+	});
+
+	it("teaches an app note again once a compaction replaced the context that held it", async () => {
+		class NotingBackend extends FakeBackend {
+			override async window(context: ComputerOperationContext, selector: string | WindowSelector) {
+				const window = await super.window(context, selector);
+				if (context.teach("app-note:dev.omp.code")) context.emitText("APP NOTE");
+				return window;
+			}
+		}
+		const branch: { type: string; id: string }[] = [{ type: "message", id: "m1" }];
+		const sessionManager = { getBranch: () => branch } as unknown as NonNullable<ToolSession["sessionManager"]>;
+		const { realm, displays } = javascriptFixture(() => new NotingBackend(), { ...toolSession(), sessionManager });
+		const notes = () => displays.join("\n").split("APP NOTE").length - 1;
+		try {
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			await runInContext('computer.window("42", {screenshot:false})', realm);
+			expect(notes()).toBe(1);
+			branch.push({ type: "compaction", id: "c1" }, { type: "message", id: "m2" });
+			await runInContext('computer.window("42", {screenshot:false})', realm);
 			await runInContext('computer.window("42", {screenshot:false})', realm);
 			expect(notes()).toBe(2);
 		} finally {

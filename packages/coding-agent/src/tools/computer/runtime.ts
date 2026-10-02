@@ -78,6 +78,25 @@ function roleMatched(observed: string | undefined, wanted: string | undefined, e
 	);
 }
 
+/** `ref(undefined)` from a failed match used to answer `StaleRef: undefined`, which reads as a row that is gone. */
+function refToken(token: unknown): string {
+	if (typeof token === "string" && token !== "") return token;
+	throw new ToolError(
+		`ref(token) needs a ref string such as "n24" from the latest observe() or find(); got ${token === "" ? '""' : String(token)}`,
+	);
+}
+
+const SCROLL_DIRECTIONS: readonly string[] = ["up", "down", "left", "right"];
+
+/** A wrong-shape call (`scroll({ deltaY: 300 })`) used to reach the driver and fail without the signature. */
+function scrollDirection(direction: unknown, element = false): Direction {
+	if (typeof direction === "string" && SCROLL_DIRECTIONS.includes(direction)) return direction as Direction;
+	const options = element ? "{ amount?, by?, delivery? }" : "{ target?, amount?, by?, delivery? }";
+	throw new ToolError(
+		`scroll(direction: "up" | "down" | "left" | "right", ${options}); got direction ${typeof direction === "object" && direction !== null ? JSON.stringify(direction) : String(direction)}`,
+	);
+}
+
 interface ComputerRunContext {
 	signal: AbortSignal;
 	readOnly: boolean;
@@ -224,7 +243,10 @@ class El {
 	}
 	scroll(direction: Direction, options?: ScrollOptions) {
 		const context = mutationContext(this.#getContext);
-		return reported(context, this.#session.scroll(context, this.#window, direction, this.ref, options));
+		return reported(
+			context,
+			this.#session.scroll(context, this.#window, scrollDirection(direction, true), this.ref, options),
+		);
 	}
 	perform(action: string) {
 		const context = mutationContext(this.#getContext);
@@ -289,7 +311,8 @@ class Win {
 			.map(element => new El(this.#session, this.#getContext, this.#window, element));
 	}
 	ref(ref: string): El {
-		return new El(this.#session, this.#getContext, this.#window, this.#session.element(ref, this.#window));
+		const token = refToken(ref);
+		return new El(this.#session, this.#getContext, this.#window, this.#session.element(token, this.#window));
 	}
 	click(target: ComputerTarget, options?: ActionOptions) {
 		const context = mutationContext(this.#getContext);
@@ -304,7 +327,10 @@ class Win {
 	}
 	scroll(direction: Direction, options?: ScrollOptions) {
 		const context = mutationContext(this.#getContext);
-		return reported(context, this.#session.scroll(context, this.#window, direction, options?.target, options));
+		return reported(
+			context,
+			this.#session.scroll(context, this.#window, scrollDirection(direction), options?.target, options),
+		);
 	}
 	type(text: string, options?: TypeTextOptions) {
 		const context = mutationContext(this.#getContext);
@@ -525,7 +551,8 @@ function createDesktopScope(session: ComputerBackend, getContext: RunContextAcce
 		launch: (options: unknown) => session.launch(mutationContext(getContext), normalizeLaunchOptions(options)),
 		ref: (ref: string): El => {
 			throwIfAborted(getContext().signal);
-			return new El(session, getContext, session.elementWindow(ref), session.element(ref));
+			const token = refToken(ref);
+			return new El(session, getContext, session.elementWindow(token), session.element(token));
 		},
 		click: (x: number, y: number, options?: ActionOptions) =>
 			session.desktopClick(mutationContext(getContext), x, y, options),
