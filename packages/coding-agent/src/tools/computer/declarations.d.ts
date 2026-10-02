@@ -37,7 +37,8 @@ interface ComputerDragOptions extends Omit<ComputerClickOptions, "count"> {
  * count notches, 1–50; `by: "points"` needs an `amount` in window points,
  * 1–5000. `{ delivery: "foreground" }` moves the real pointer over the
  * target and wheels there by distance (a line is 40 pt, a page 0.8 × the
- * visible height), then puts pointer and focus back: views that scroll only
+ * visible height, or of the width when scrolling sideways), then puts
+ * pointer and focus back: views that scroll only
  * under the real pointer need it. Background sends line ticks (a page is 5,
  * points about one per 40). The reply's first line is the measured verdict:
  * `✓ Scrolled down 231 pt at (163, 400)`, `✓ At end: …`, `? Moved the other
@@ -76,6 +77,7 @@ interface ComputerObserveOptions {
 	 * are going to click coordinates.
 	 */
 	screenshot?: boolean;
+	/** Return the capture's path without showing the image: you have not seen it. */
 	silent?: boolean;
 	maxDepth?: number;
 	maxElements?: number;
@@ -249,6 +251,7 @@ interface ComputerWindow extends ComputerWindowInfo {
 	initialScreenshot?: ComputerScreenshotResult;
 	screenshotError?: string;
 	observe(options?: ComputerObserveOptions): Promise<ComputerObservation>;
+	/** `silent` returns the capture's path without showing the image: you have not seen it. */
 	screenshot(options?: { silent?: boolean }): Promise<ComputerScreenshotResult>;
 	/**
 	 * Elements of the window's current tree. `role`, `label` and `value` match
@@ -292,6 +295,7 @@ interface ComputerDesktop {
 	displays(): Promise<(ComputerBounds & { id: string; name: string; scale: number; isPrimary: boolean })[]>;
 	windows(filter?: ComputerWindowFilter): Promise<ComputerWindowInfo[]>;
 	window(selector: string | number | ComputerWindowFilter, options?: ComputerResolveOptions): Promise<ComputerWindow>;
+	/** `silent` returns the capture's path without showing the image: you have not seen it. */
 	screenshot(options?: { silent?: boolean }): Promise<ComputerScreenshotResult>;
 	launch(
 		options: string | { bundleId?: string; name?: string; urls?: string[]; newInstance?: boolean },
