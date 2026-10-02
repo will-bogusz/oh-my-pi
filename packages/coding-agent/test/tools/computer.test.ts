@@ -808,13 +808,14 @@ describe("computer preludes through the session", () => {
 				expect(String(error)).toContain('ref(token) needs a ref string such as "n24"');
 				expect(String(error)).not.toContain("StaleRef");
 			}
-			for (const call of [
-				"win.scroll({ deltaY: 300 })",
-				'win.scroll("sideways")',
-				"win.ref(win.initialObservation.elements[0].ref).scroll({ deltaY: 300 })",
+			for (const [call, options] of [
+				["win.scroll({ deltaY: 300 })", "{ target?, amount?, by?, delivery? }"],
+				['win.scroll("sideways")', "{ target?, amount?, by?, delivery? }"],
+				// An element scrolls at itself: its form takes no target.
+				["win.ref(win.initialObservation.elements[0].ref).scroll({ deltaY: 300 })", "{ amount?, by?, delivery? }"],
 			]) {
 				await expect(runInContext(call, realm)).rejects.toThrow(
-					'scroll(direction: "up" | "down" | "left" | "right", { target?, amount?, by?, delivery? })',
+					`scroll(direction: "up" | "down" | "left" | "right", ${options})`,
 				);
 			}
 			expect(scroll).not.toHaveBeenCalled();

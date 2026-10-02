@@ -89,10 +89,11 @@ function refToken(token: unknown): string {
 const SCROLL_DIRECTIONS: readonly string[] = ["up", "down", "left", "right"];
 
 /** A wrong-shape call (`scroll({ deltaY: 300 })`) used to reach the driver and fail without the signature. */
-function scrollDirection(direction: unknown): Direction {
+function scrollDirection(direction: unknown, element = false): Direction {
 	if (typeof direction === "string" && SCROLL_DIRECTIONS.includes(direction)) return direction as Direction;
+	const options = element ? "{ amount?, by?, delivery? }" : "{ target?, amount?, by?, delivery? }";
 	throw new ToolError(
-		`scroll(direction: "up" | "down" | "left" | "right", { target?, amount?, by?, delivery? }); got direction ${typeof direction === "object" && direction !== null ? JSON.stringify(direction) : String(direction)}`,
+		`scroll(direction: "up" | "down" | "left" | "right", ${options}); got direction ${typeof direction === "object" && direction !== null ? JSON.stringify(direction) : String(direction)}`,
 	);
 }
 
@@ -244,7 +245,7 @@ class El {
 		const context = mutationContext(this.#getContext);
 		return reported(
 			context,
-			this.#session.scroll(context, this.#window, scrollDirection(direction), this.ref, options),
+			this.#session.scroll(context, this.#window, scrollDirection(direction, true), this.ref, options),
 		);
 	}
 	perform(action: string) {
