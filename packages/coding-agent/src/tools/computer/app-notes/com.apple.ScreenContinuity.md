@@ -1,14 +1,16 @@
 ### iPhone Mirroring
 
-The window shows the iPhone's pixels only: there is no accessibility tree for iOS content. Work from screenshots.
+The window shows the iPhone's pixels only: there is no accessibility tree for iOS content. Work from screenshots. Input reaches the phone only with `{ delivery: "foreground" }`: the window takes focus, and the real pointer for pointer input, then both go back.
 
-- Scroll with `win.scroll("down", { target: [x, y], delivery: "foreground" })` (Python: `await win.scroll("down", target=[x, y], delivery="foreground")`), the target inside the list or view that should move. It takes focus for about a second and moves the real pointer, then puts both back. A background scroll does not reach this window.
-- Distance: `{ by: "page" }` moves about 0.8 of the visible height; `{ amount: 300, by: "points" }` moves 300 points; each `by: "line"` notch is 40 points.
-- The reply's first line is what the view measurably did: `✓ Scrolled down 231 pt at (163, 400)` moved; `✓ At end: …` reached the end, so stop repeating; `? Moved the other way: …` it went back, so re-screenshot; `✗ No motion at …` no displacement: the view may be at its end, or nothing under that point scrolls with the wheel; `? Changed in place …` a pager, sheet or navigation changed the screen; `Stopped early: … the user has it` means the user took the pointer — do not retry.
+- The window's own state is accessibility text: "Connection Paused" (press its "Resume" button), "Connecting…", and "iPhone in Use" (the phone is unlocked; Connect works only once it locks, so tell the user instead of retrying). Reconnecting takes 10–25 seconds: wait with `observe({ query: "Resume" })` or screenshots until the state text is gone, not a fixed sleep.
+- Navigation: press the window's "Home Screen" and "App Switcher" buttons (`(await win.find({ label: "Home Screen" }))[0].click()`); the View menu has the same commands. Shortcuts: ⌘1 Home Screen, ⌘2 App Switcher, ⌘3 Spotlight (`press("cmd+3", { delivery: "foreground" })`). A horizontal `drag` swipes between Home Screen pages.
+- Type by tapping the field, then `win.type(text, { delivery: "foreground" })`. It sends physical US-layout keys, so only printable ASCII is accepted.
+- The picture lags a tap by up to a second: wait before the screenshot, or take screenshots until two in a row match.
+- Scroll with `win.scroll("down", { target: [x, y], delivery: "foreground" })` (Python: `await win.scroll("down", target=[x, y], delivery="foreground")`), the target inside the list or view that should move. A background scroll does not reach this window.
+- Distance: `{ by: "page" }` moves about 0.8 of the visible height (of the width, sideways); `{ amount: 300, by: "points" }` moves 300 points; each `by: "line"` notch is 40 points.
+- The reply's first line is what the view measurably did: `✓ Scrolled down 231 pt at (163, 400)` moved; `✓ At end: …` reached the end, so stop repeating; `? Moved the other way: …` it went back, so re-screenshot; `✗ No motion at …` no displacement: the view may be at its end, or nothing under that point scrolls with the wheel; `? Changed in place …` a pager, sheet or navigation changed the screen; `Stopped early: … the user has it` means the user took the pointer — do not retry. iOS lists that snap or collapse a header can answer `At end` after moving most of a long request: when it moved a large share, scroll once more before treating it as the end.
 - After a scroll that moved the view, take a new screenshot before clicking anything: coordinates from the old frame now point at different content.
 - Do not drag to scroll: vertical drags never scroll here. Horizontal drags on list rows open the row's swipe actions.
 - Page Down, arrow keys and Space do not scroll. Shift+scroll does not scroll sideways; use `scroll("left" | "right", { target: [x, y], delivery: "foreground" })` on the row itself.
-- Photo pagers and carousels that do not move with the wheel page by tapping their left or right edge.
-- Home Screen: ⌘1 (`press("cmd+1", { delivery: "foreground" })`). App Switcher: ⌘2. Spotlight: ⌘3. The View menu has the same commands.
+- Photo pagers and carousels that do not move with the wheel page by tapping their left or right edge; a segmented bar at the top shows the position. Walk one in a single cell (tap, wait, screenshot, until two screenshots match) and view the captures: a `silent` screenshot is a path you have not seen.
 - Tap icons at their centre, not their label.
-- If the window says the connection is paused, click its Connect button and wait about 5 seconds. Unlocking the phone ends the session.
