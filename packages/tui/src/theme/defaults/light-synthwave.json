@@ -101,8 +101,22 @@
 		"chrome": "cardBg",
 		"widget": "#ffffff",
 		"ansi": [
-			"#3b2a55", "#d00159", "#068854", "#a57305", "#3f4add", "#d001dc", "#0282a2", "lightGray",
-			"mediumGray", "#fa2564", "#02a164", "#ad8604", "#4e73f6", "#e357b4", "#0698bd", "cardBg"
+			"#3b2a55",
+			"#d00159",
+			"#068854",
+			"#a57305",
+			"#3f4add",
+			"#d001dc",
+			"#0282a2",
+			"lightGray",
+			"mediumGray",
+			"#fa2564",
+			"#02a164",
+			"#ad8604",
+			"#4e73f6",
+			"#e357b4",
+			"#0698bd",
+			"cardBg"
 		]
 	}
 }

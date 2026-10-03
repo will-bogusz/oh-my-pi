@@ -103,8 +103,22 @@
 		"chrome": "lightEarth",
 		"widget": "#ffffff",
 		"ansi": [
-			"twilightGreen", "#b94834", "fernGreen", "#a07307", "#47769d", "#8b4a70", "#418686", "lichen",
-			"earthGray", "#e16149", "#669557", "#b38000", "#598eba", "#bd719c", "#479595", "morningDew"
+			"twilightGreen",
+			"#b94834",
+			"fernGreen",
+			"#a07307",
+			"#47769d",
+			"#8b4a70",
+			"#418686",
+			"lichen",
+			"earthGray",
+			"#e16149",
+			"#669557",
+			"#b38000",
+			"#598eba",
+			"#bd719c",
+			"#479595",
+			"morningDew"
 		]
 	}
 }

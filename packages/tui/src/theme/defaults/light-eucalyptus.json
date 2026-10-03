@@ -98,8 +98,22 @@
 		"chrome": "customMsgBg",
 		"widget": "#ffffff",
 		"ansi": [
-			"gray", "red", "green", "#a17206", "#1565c0", "#8e24aa", "#00838f", "darkGray",
-			"dimGray", "#e53935", "#388e3c", "#b37f07", "#1e88e5", "#ab47bc", "#0097a7", "#eceff1"
+			"gray",
+			"red",
+			"green",
+			"#a17206",
+			"#1565c0",
+			"#8e24aa",
+			"#00838f",
+			"darkGray",
+			"dimGray",
+			"#e53935",
+			"#388e3c",
+			"#b37f07",
+			"#1e88e5",
+			"#ab47bc",
+			"#0097a7",
+			"#eceff1"
 		]
 	}
 }

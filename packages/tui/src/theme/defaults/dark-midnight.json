@@ -98,8 +98,22 @@
 		"chrome": "userMsgBg",
 		"widget": "toolPendingBg",
 		"ansi": [
-			"darkGray", "red", "green", "yellow", "blue", "#d500f9", "cyan", "gray",
-			"dimGray", "#ff5252", "#69f0ae", "#ffff00", "#448aff", "#e040fb", "#18ffff", "#eceff1"
+			"darkGray",
+			"red",
+			"green",
+			"yellow",
+			"blue",
+			"#d500f9",
+			"cyan",
+			"gray",
+			"dimGray",
+			"#ff5252",
+			"#69f0ae",
+			"#ffff00",
+			"#448aff",
+			"#e040fb",
+			"#18ffff",
+			"#eceff1"
 		]
 	}
 }

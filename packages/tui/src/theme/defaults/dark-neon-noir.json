@@ -103,8 +103,22 @@
 		"chrome": "black",
 		"widget": "panelBg",
 		"ansi": [
-			"soot", "#ff3b5c", "#39f58a", "amber", "#4d8bff", "magenta", "cyan", "ash",
-			"smoke", "#ff6b85", "#7dffb5", "#ffdd8f", "#7aa9ff", "#ff7ae6", "paleCyan", "#f4f4f8"
+			"soot",
+			"#ff3b5c",
+			"#39f58a",
+			"amber",
+			"#4d8bff",
+			"magenta",
+			"cyan",
+			"ash",
+			"smoke",
+			"#ff6b85",
+			"#7dffb5",
+			"#ffdd8f",
+			"#7aa9ff",
+			"#ff7ae6",
+			"paleCyan",
+			"#f4f4f8"
 		]
 	}
 }

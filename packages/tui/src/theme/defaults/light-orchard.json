@@ -94,8 +94,22 @@
 		"chrome": "orchardElevated",
 		"widget": "orchardSurface",
 		"ansi": [
-			"#3f3326", "errorRed", "#487e1e", "#96690f", "#4a6fa5", "#af5476", "#307c78", "orchardBorder",
-			"#90806e", "#d0604f", "#5c9436", "#af7c19", "#5f87c0", "#c6698a", "#3e938c", "orchardElevated"
+			"#3f3326",
+			"errorRed",
+			"#487e1e",
+			"#96690f",
+			"#4a6fa5",
+			"#af5476",
+			"#307c78",
+			"orchardBorder",
+			"#90806e",
+			"#d0604f",
+			"#5c9436",
+			"#af7c19",
+			"#5f87c0",
+			"#c6698a",
+			"#3e938c",
+			"orchardElevated"
 		]
 	}
 }

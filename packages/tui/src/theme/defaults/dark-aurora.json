@@ -98,8 +98,22 @@
 		"chrome": "#0a0a12",
 		"widget": "toolPendingBg",
 		"ansi": [
-			"#2a2a3e", "red", "green", "yellow", "#3a8dff", "accent", "blue", "#c0c0d0",
-			"#6c6c86", "#ff4d85", "#5effc0", "#fff566", "#75b0ff", "#d45cff", "#33dcf0", "#ffffff"
+			"#2a2a3e",
+			"red",
+			"green",
+			"yellow",
+			"#3a8dff",
+			"accent",
+			"blue",
+			"#c0c0d0",
+			"#6c6c86",
+			"#ff4d85",
+			"#5effc0",
+			"#fff566",
+			"#75b0ff",
+			"#d45cff",
+			"#33dcf0",
+			"#ffffff"
 		]
 	}
 }

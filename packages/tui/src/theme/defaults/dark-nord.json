@@ -101,8 +101,22 @@
 		"chrome": "nord0",
 		"widget": "nord0",
 		"ansi": [
-			"nord1", "nord11", "nord14", "nord13", "nord9", "nord15", "nord8", "nord5",
-			"#6f7d98", "nord11", "nord14", "nord13", "nord9", "nord15", "nord7", "nord6"
+			"nord1",
+			"nord11",
+			"nord14",
+			"nord13",
+			"nord9",
+			"nord15",
+			"nord8",
+			"nord5",
+			"#6f7d98",
+			"nord11",
+			"nord14",
+			"nord13",
+			"nord9",
+			"nord15",
+			"nord7",
+			"nord6"
 		]
 	}
 }

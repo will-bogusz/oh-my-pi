@@ -110,8 +110,22 @@
 		"chrome": "mantle",
 		"widget": "mantle",
 		"ansi": [
-			"surface1", "red", "green", "yellow", "blue", "pink", "teal", "subtext1",
-			"#656881", "red", "green", "yellow", "blue", "pink", "teal", "subtext0"
+			"surface1",
+			"red",
+			"green",
+			"yellow",
+			"blue",
+			"pink",
+			"teal",
+			"subtext1",
+			"#656881",
+			"red",
+			"green",
+			"yellow",
+			"blue",
+			"pink",
+			"teal",
+			"subtext0"
 		]
 	}
 }

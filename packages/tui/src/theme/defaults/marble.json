@@ -96,8 +96,22 @@
 		"chrome": "userMsgBg",
 		"widget": "#ffffff",
 		"ansi": [
-			"carvedBlack", "burgundy", "forestGreen", "#8d702f", "#385984", "#7f486e", "#356e71", "marbleVein",
-			"warmGray", "#bc4852", "#5d8754", "#ab8632", "#4a76ae", "#9f5989", "#42878b", "#ffffff"
+			"carvedBlack",
+			"burgundy",
+			"forestGreen",
+			"#8d702f",
+			"#385984",
+			"#7f486e",
+			"#356e71",
+			"marbleVein",
+			"warmGray",
+			"#bc4852",
+			"#5d8754",
+			"#ab8632",
+			"#4a76ae",
+			"#9f5989",
+			"#42878b",
+			"#ffffff"
 		]
 	}
 }

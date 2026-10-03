@@ -94,8 +94,22 @@
 		"chrome": "abyssBlack",
 		"widget": "trenchBlue",
 		"ansi": [
-			"slateBlue", "errorRed", "kelpGreen", "warningAmber", "crystalBlue", "#c77dff", "abyssCyan", "#a9b8c8",
-			"dimSteel", "#ff8080", "#6ee0ab", "#ffd27a", "#8cc0ff", "#dda6ff", "glowCyan", "#e6eef7"
+			"slateBlue",
+			"errorRed",
+			"kelpGreen",
+			"warningAmber",
+			"crystalBlue",
+			"#c77dff",
+			"abyssCyan",
+			"#a9b8c8",
+			"dimSteel",
+			"#ff8080",
+			"#6ee0ab",
+			"#ffd27a",
+			"#8cc0ff",
+			"#dda6ff",
+			"glowCyan",
+			"#e6eef7"
 		]
 	}
 }

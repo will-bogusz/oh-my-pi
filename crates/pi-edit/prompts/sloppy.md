@@ -23,6 +23,7 @@ const helper = () => 1;
 ```
 
 Keep skipped lines and part of a line:
+
 ```text
 *** Edit File: src/users.ts
 *** Find
@@ -34,4 +35,5 @@ function load(…){
 …
 return fresh(…);
 ```
+
 </example>

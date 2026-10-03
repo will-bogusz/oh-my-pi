@@ -29,29 +29,29 @@ Terminology follows `docs/natives-architecture.md`:
 
 ## JS API ↔ Rust export mapping
 
-| JS API                                                                          | Rust N-API symbol                                | Rust module    |
-| ------------------------------------------------------------------------------- | ------------------------------------------------ | -------------- |
-| `grep(options, onMatch?)`                                                       | `grep`                                           | `grep.rs`      |
-| `search(content, options)`                                                      | `search`                                         | `grep.rs`      |
-| `hasMatch(content, pattern, ignoreCase?, multiline?)`                           | `has_match`                                      | `grep.rs`      |
-| `fuzzyFind(options)`                                                            | `fuzzy_find`                                     | `fd.rs`        |
-| `glob(options, onMatch?)`                                                       | `glob`                                           | `glob.rs`      |
-| `invalidateFsScanCache(path?)`                                                  | `invalidate_fs_scan_cache`                       | `iofs.rs`      |
-| `astGrep(options)`                                                              | `ast_grep`                                       | `ast.rs`       |
-| `astMatch(options)`                                                             | `ast_match`                                      | `ast.rs`       |
-| `astEdit(options)`                                                              | `ast_edit`                                       | `ast.rs`       |
-| `wrapTextWithAnsi(text, width, tabWidth)`                                       | `wrap_text_with_ansi`                            | `text.rs`      |
-| `truncateToWidth(text, maxWidth, ellipsis, pad, tabWidth)`                      | `truncate_to_width`                              | `text.rs`      |
-| `sliceWithWidth(line, startCol, length, strict, tabWidth)`                      | `slice_with_width`                               | `text.rs`      |
-| `extractSegments(line, beforeEnd, afterStart, afterLen, strictAfter, tabWidth)` | `extract_segments`                               | `text.rs`      |
-| `visibleWidth(text, tabWidth)`                                                  | `visible_width`                                  | `text.rs`      |
-| `setHangulCompatJamoWidthOverride(value)`                                       | `set_hangul_compat_jamo_width_override`           | `text.rs`      |
-| `highlightCode(code, lang, colors)`                                             | `highlight_code`                                 | `highlight.rs` |
-| `new HighlightStream(lang, colors)` / `.push(chunk)`                              | `HighlightStream`                                | `highlight.rs` |
-| `warmHighlighter()`                                                               | `warm_highlighter`                               | `highlight.rs` |
-| `supportsLanguage(lang)`                                                        | `supports_language`                              | `highlight.rs` |
-| `getSupportedLanguages()`                                                       | `get_supported_languages`                        | `highlight.rs` |
-| `countTokens(input, encoding?)`                                                 | `count_tokens`                                   | `tokens.rs`    |
+| JS API                                                                          | Rust N-API symbol                       | Rust module    |
+| ------------------------------------------------------------------------------- | --------------------------------------- | -------------- |
+| `grep(options, onMatch?)`                                                       | `grep`                                  | `grep.rs`      |
+| `search(content, options)`                                                      | `search`                                | `grep.rs`      |
+| `hasMatch(content, pattern, ignoreCase?, multiline?)`                           | `has_match`                             | `grep.rs`      |
+| `fuzzyFind(options)`                                                            | `fuzzy_find`                            | `fd.rs`        |
+| `glob(options, onMatch?)`                                                       | `glob`                                  | `glob.rs`      |
+| `invalidateFsScanCache(path?)`                                                  | `invalidate_fs_scan_cache`              | `iofs.rs`      |
+| `astGrep(options)`                                                              | `ast_grep`                              | `ast.rs`       |
+| `astMatch(options)`                                                             | `ast_match`                             | `ast.rs`       |
+| `astEdit(options)`                                                              | `ast_edit`                              | `ast.rs`       |
+| `wrapTextWithAnsi(text, width, tabWidth)`                                       | `wrap_text_with_ansi`                   | `text.rs`      |
+| `truncateToWidth(text, maxWidth, ellipsis, pad, tabWidth)`                      | `truncate_to_width`                     | `text.rs`      |
+| `sliceWithWidth(line, startCol, length, strict, tabWidth)`                      | `slice_with_width`                      | `text.rs`      |
+| `extractSegments(line, beforeEnd, afterStart, afterLen, strictAfter, tabWidth)` | `extract_segments`                      | `text.rs`      |
+| `visibleWidth(text, tabWidth)`                                                  | `visible_width`                         | `text.rs`      |
+| `setHangulCompatJamoWidthOverride(value)`                                       | `set_hangul_compat_jamo_width_override` | `text.rs`      |
+| `highlightCode(code, lang, colors)`                                             | `highlight_code`                        | `highlight.rs` |
+| `new HighlightStream(lang, colors)` / `.push(chunk)`                            | `HighlightStream`                       | `highlight.rs` |
+| `warmHighlighter()`                                                             | `warm_highlighter`                      | `highlight.rs` |
+| `supportsLanguage(lang)`                                                        | `supports_language`                     | `highlight.rs` |
+| `getSupportedLanguages()`                                                       | `get_supported_languages`               | `highlight.rs` |
+| `countTokens(input, encoding?)`                                                 | `count_tokens`                          | `tokens.rs`    |
 
 ## Pipeline overview by subsystem
 
@@ -67,34 +67,34 @@ Terminology follows `docs/natives-architecture.md`:
 ### Execution branches
 
 - **In-memory branch**
-  - `search` -> `search_sync` / search helpers over provided content bytes.
-  - `hasMatch` compiles/checks pattern against provided content and returns a boolean.
-  - No filesystem scan or walker cache.
+   - `search` -> `search_sync` / search helpers over provided content bytes.
+   - `hasMatch` compiles/checks pattern against provided content and returns a boolean.
+   - No filesystem scan or walker cache.
 - **Single-file branch**
-  - `grep` resolves the path through the selected filesystem, checks metadata, and searches a file directly. Oversized files are searched over their leading 4 MiB.
+   - `grep` resolves the path through the selected filesystem, checks metadata, and searches a file directly. Oversized files are searched over their leading 4 MiB.
 - **Directory branch**
-  - Rust builds a `pi_walker::WalkRequest` with `.cache(false)` hard-coded (`build_grep_walk_request`): directory searches stream while the tree is walked and never read or populate the shared scan cache.
-  - The walk yields file candidates directly to searchers; glob filtering runs walker-side and the file-type filter is applied per candidate. Size hints use `SizeHintPolicy::WhenCheap`, avoiding provider metadata calls solely for sizes.
-  - Files larger than the size cap are deferred to a trailing prefix pass that reads only the leading window into an owned buffer.
+   - Rust builds a `pi_walker::WalkRequest` with `.cache(false)` hard-coded (`build_grep_walk_request`): directory searches stream while the tree is walked and never read or populate the shared scan cache.
+   - The walk yields file candidates directly to searchers; glob filtering runs walker-side and the file-type filter is applied per candidate. Size hints use `SizeHintPolicy::WhenCheap`, avoiding provider metadata calls solely for sizes.
+   - Files larger than the size cap are deferred to a trailing prefix pass that reads only the leading window into an owned buffer.
 
 ### Search/collection semantics
 
 - Matcher selection: the Rust regex engine is tried first, then PCRE2 for features such as lookaround/backreferences. `OMP_PCRE2_JIT=0`/`false` disables PCRE2 JIT and `1` enables it; when unset, JIT is enabled except on macOS.
 - Filesystem grep defaults to `hidden=true`, `gitignore=true`, and `recursive=true` for simple glob filters. Directory walks skip `.git` and skip `node_modules` unless the glob mentions it.
 - Context resolution:
-  - `contextBefore/contextAfter` override legacy `context`.
-  - Non-content modes do not collect context.
+   - `contextBefore/contextAfter` override legacy `context`.
+   - Non-content modes do not collect context.
 - Output modes:
-  - `content` -> one `GrepMatch` per hit.
-  - `count` emits per-file entries with `lineNumber=0`, `line=""`, and `matchCount` set.
-  - `filesWithMatches` emits one path-only entry per matched file (`lineNumber=0`, `line=""`, `matchCount` omitted).
-  - `offset` and `maxCount` are applied during aggregation across sorted file results; `maxCountPerFile` can additionally prevent one hot file consuming the content-mode budget.
-  - Directory streaming model (`run_streaming_grep`):
-    - With a content-mode match budget (`maxCount`, no `offset`), the budget terminates the walk itself: budgets up to 64 matches, or any budget with one walker worker, use a sequential early-exit walk. Larger budgets use a path-ordered windowed walk (`run_windowed_streaming_grep`), stopping once the budget is satisfied. Deterministic path-ordered first pages are preserved at every budget size.
-    - Without an early-stop budget, an unordered work-stealing parallel traversal feeds searchers directly (`run_parallel_streaming_grep`); per-file results are sorted by path afterwards.
-    - `maxCountPerFile` (content mode) caps matches collected per file so one hot file cannot exhaust the global `maxCount` budget before other files are reached.
-    - Oversized files (beyond the 4 MiB cap) are deferred behind normal-sized results and searched over their leading window only (bounded prefix read via `read_owned_prefix`; no full-file read and no mmap — the bounded owned read avoids mmap page faults).
-    - `offset` and `maxCount` are applied while aggregating per-file results. The positional `onMatch(error, match)` callback is emitted after directory aggregation; the direct-file branch returns its matches without that callback.
+   - `content` -> one `GrepMatch` per hit.
+   - `count` emits per-file entries with `lineNumber=0`, `line=""`, and `matchCount` set.
+   - `filesWithMatches` emits one path-only entry per matched file (`lineNumber=0`, `line=""`, `matchCount` omitted).
+   - `offset` and `maxCount` are applied during aggregation across sorted file results; `maxCountPerFile` can additionally prevent one hot file consuming the content-mode budget.
+   - Directory streaming model (`run_streaming_grep`):
+      - With a content-mode match budget (`maxCount`, no `offset`), the budget terminates the walk itself: budgets up to 64 matches, or any budget with one walker worker, use a sequential early-exit walk. Larger budgets use a path-ordered windowed walk (`run_windowed_streaming_grep`), stopping once the budget is satisfied. Deterministic path-ordered first pages are preserved at every budget size.
+      - Without an early-stop budget, an unordered work-stealing parallel traversal feeds searchers directly (`run_parallel_streaming_grep`); per-file results are sorted by path afterwards.
+      - `maxCountPerFile` (content mode) caps matches collected per file so one hot file cannot exhaust the global `maxCount` budget before other files are reached.
+      - Oversized files (beyond the 4 MiB cap) are deferred behind normal-sized results and searched over their leading window only (bounded prefix read via `read_owned_prefix`; no full-file read and no mmap — the bounded owned read avoids mmap page faults).
+      - `offset` and `maxCount` are applied while aggregating per-file results. The positional `onMatch(error, match)` callback is emitted after directory aggregation; the direct-file branch returns its matches without that callback.
 
 ### Batched delivery (`onMatches`)
 
@@ -217,13 +217,13 @@ These are pure, in-memory utilities.
 ### Boundaries and responsibilities
 
 - `text.rs` owns terminal-cell semantics:
-  - ANSI sequence parsing,
-  - grapheme-aware width and slicing,
-  - wrap/truncate/slice behavior,
-  - explicit tab-width parameter on width-sensitive APIs.
+   - ANSI sequence parsing,
+   - grapheme-aware width and slicing,
+   - wrap/truncate/slice behavior,
+   - explicit tab-width parameter on width-sensitive APIs.
 - `grep.rs` line truncation (`maxColumns`) is separate:
-  - simple character-boundary truncation of matched lines with `...`,
-  - not ANSI-state-preserving and not terminal-cell width aware.
+   - simple character-boundary truncation of matched lines with `...`,
+   - not ANSI-state-preserving and not terminal-cell width aware.
 
 ### Key behaviors
 
@@ -273,17 +273,17 @@ The palette requires nine core semantic colors (`comment`, `keyword`, `function`
 
 ## Pure utility vs filesystem-dependent flows
 
-| Flow                         | Filesystem access | Shared cache | Notes                                                        |
-| ---------------------------- | ----------------- | ------------ | ------------------------------------------------------------ |
-| `search` / `hasMatch`        | No                | No           | regex on provided bytes/string only                          |
-| `text` module functions      | No                | No           | ANSI/width utilities only                                    |
-| `highlight` module functions | No                | No           | syntax + ANSI coloring only                                  |
-| `countTokens`                | No                | No           | tokenization only                                            |
-| `astMatch`                   | No                | No           | in-memory syntax-aware match (no disk)                       |
+| Flow                         | Filesystem access | Shared cache | Notes                                                                  |
+| ---------------------------- | ----------------- | ------------ | ---------------------------------------------------------------------- |
+| `search` / `hasMatch`        | No                | No           | regex on provided bytes/string only                                    |
+| `text` module functions      | No                | No           | ANSI/width utilities only                                              |
+| `highlight` module functions | No                | No           | syntax + ANSI coloring only                                            |
+| `countTokens`                | No                | No           | tokenization only                                                      |
+| `astMatch`                   | No                | No           | in-memory syntax-aware match (no disk)                                 |
 | `astGrep` / `astEdit`        | Yes               | Native-only  | directory discovery requests caching; direct files/providers bypass it |
-| `glob`                       | Yes               | Optional     | directory scans + glob filtering (`cache` opt-in)            |
-| `fuzzyFind`                  | Yes               | Optional     | directory scans + fuzzy scoring (`cache` opt-in)             |
-| `grep` (file/dir path)       | Yes               | Never        | streaming uncached walk feeding searchers                    |
+| `glob`                       | Yes               | Optional     | directory scans + glob filtering (`cache` opt-in)                      |
+| `fuzzyFind`                  | Yes               | Optional     | directory scans + fuzzy scoring (`cache` opt-in)                       |
+| `grep` (file/dir path)       | Yes               | Never        | streaming uncached walk feeding searchers                              |
 
 ## End-to-end lifecycle summary
 

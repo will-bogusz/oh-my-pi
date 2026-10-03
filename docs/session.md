@@ -72,17 +72,17 @@ Session files are JSONL: one JSON object per line. Current files physically begi
 
 ```json
 {
-  "type": "session",
-  "version": 3,
-  "id": "019c625b-b900-7000-8000-000000000001",
-  "timestamp": "2026-02-16T10:20:30.000Z",
-  "cwd": "/work/pi",
-  "title": "optional session title",
-  "titleSource": "auto",
-  "additionalDirectories": ["/work/shared"],
-  "previousSessionFiles": ["/old/location/session.jsonl"],
-  "providerPromptCacheKey": "optional inherited cache identity",
-  "parentSession": "optional lineage marker"
+	"type": "session",
+	"version": 3,
+	"id": "019c625b-b900-7000-8000-000000000001",
+	"timestamp": "2026-02-16T10:20:30.000Z",
+	"cwd": "/work/pi",
+	"title": "optional session title",
+	"titleSource": "auto",
+	"additionalDirectories": ["/work/shared"],
+	"previousSessionFiles": ["/old/location/session.jsonl"],
+	"providerPromptCacheKey": "optional inherited cache identity",
+	"parentSession": "optional lineage marker"
 }
 ```
 
@@ -102,10 +102,10 @@ All non-header entries include:
 
 ```json
 {
-  "type": "...",
-  "id": "8-char-id",
-  "parentId": "previous-or-branch-parent",
-  "timestamp": "2026-02-16T10:20:30.000Z"
+	"type": "...",
+	"id": "8-char-id",
+	"parentId": "previous-or-branch-parent",
+	"timestamp": "2026-02-16T10:20:30.000Z"
 }
 ```
 
@@ -138,33 +138,33 @@ Stores an `AgentMessage` directly.
 
 ```json
 {
-  "type": "message",
-  "id": "a1b2c3d4",
-  "parentId": null,
-  "timestamp": "2026-02-16T10:21:00.000Z",
-  "message": {
-    "role": "assistant",
-    "api": "anthropic-messages",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-5",
-    "content": [{ "type": "text", "text": "Done." }],
-    "usage": {
-      "input": 100,
-      "output": 20,
-      "cacheRead": 0,
-      "cacheWrite": 0,
-      "totalTokens": 120,
-      "cost": {
-        "input": 0,
-        "output": 0,
-        "cacheRead": 0,
-        "cacheWrite": 0,
-        "total": 0
-      }
-    },
-    "stopReason": "stop",
-    "timestamp": 1760000000000
-  }
+	"type": "message",
+	"id": "a1b2c3d4",
+	"parentId": null,
+	"timestamp": "2026-02-16T10:21:00.000Z",
+	"message": {
+		"role": "assistant",
+		"api": "anthropic-messages",
+		"provider": "anthropic",
+		"model": "claude-sonnet-4-5",
+		"content": [{ "type": "text", "text": "Done." }],
+		"usage": {
+			"input": 100,
+			"output": 20,
+			"cacheRead": 0,
+			"cacheWrite": 0,
+			"totalTokens": 120,
+			"cost": {
+				"input": 0,
+				"output": 0,
+				"cacheRead": 0,
+				"cacheWrite": 0,
+				"total": 0
+			}
+		},
+		"stopReason": "stop",
+		"timestamp": 1760000000000
+	}
 }
 ```
 
@@ -217,12 +217,12 @@ initiating session/branch and rejects stale session ownership.
 
 ```json
 {
-  "type": "model_change",
-  "id": "b1c2d3e4",
-  "parentId": "a1b2c3d4",
-  "timestamp": "2026-02-16T10:21:30.000Z",
-  "model": "openai/gpt-4o",
-  "role": "default"
+	"type": "model_change",
+	"id": "b1c2d3e4",
+	"parentId": "a1b2c3d4",
+	"timestamp": "2026-02-16T10:21:30.000Z",
+	"model": "openai/gpt-4o",
+	"role": "default"
 }
 ```
 
@@ -235,11 +235,11 @@ default instead of restoring that role's temporary model.
 
 ```json
 {
-  "type": "service_tier_change",
-  "id": "c1d2e3f4",
-  "parentId": "b1c2d3e4",
-  "timestamp": "2026-02-16T10:21:45.000Z",
-  "serviceTier": { "openai": "priority", "google": "flex" }
+	"type": "service_tier_change",
+	"id": "c1d2e3f4",
+	"parentId": "b1c2d3e4",
+	"timestamp": "2026-02-16T10:21:45.000Z",
+	"serviceTier": { "openai": "priority", "google": "flex" }
 }
 ```
 
@@ -249,11 +249,11 @@ default instead of restoring that role's temporary model.
 
 ```json
 {
-  "type": "thinking_level_change",
-  "id": "c1d2e3f4",
-  "parentId": "b1c2d3e4",
-  "timestamp": "2026-02-16T10:22:00.000Z",
-  "thinkingLevel": "high"
+	"type": "thinking_level_change",
+	"id": "c1d2e3f4",
+	"parentId": "b1c2d3e4",
+	"timestamp": "2026-02-16T10:22:00.000Z",
+	"thinkingLevel": "high"
 }
 ```
 
@@ -263,17 +263,17 @@ default instead of restoring that role's temporary model.
 
 ```json
 {
-  "type": "compaction",
-  "id": "d1e2f3a4",
-  "parentId": "c1d2e3f4",
-  "timestamp": "2026-02-16T10:23:00.000Z",
-  "summary": "Conversation summary",
-  "shortSummary": "Short recap",
-  "firstKeptEntryId": "a1b2c3d4",
-  "tokensBefore": 42000,
-  "details": { "readFiles": ["src/a.ts"] },
-  "preserveData": { "hookState": true },
-  "fromExtension": false
+	"type": "compaction",
+	"id": "d1e2f3a4",
+	"parentId": "c1d2e3f4",
+	"timestamp": "2026-02-16T10:23:00.000Z",
+	"summary": "Conversation summary",
+	"shortSummary": "Short recap",
+	"firstKeptEntryId": "a1b2c3d4",
+	"tokensBefore": 42000,
+	"details": { "readFiles": ["src/a.ts"] },
+	"preserveData": { "hookState": true },
+	"fromExtension": false
 }
 ```
 
@@ -287,14 +287,14 @@ replacement history so later entries still replay normally.
 
 ```json
 {
-  "type": "branch_summary",
-  "id": "e1f2a3b4",
-  "parentId": "a1b2c3d4",
-  "timestamp": "2026-02-16T10:24:00.000Z",
-  "fromId": "a1b2c3d4",
-  "summary": "Summary of abandoned path",
-  "details": { "note": "optional" },
-  "fromExtension": true
+	"type": "branch_summary",
+	"id": "e1f2a3b4",
+	"parentId": "a1b2c3d4",
+	"timestamp": "2026-02-16T10:24:00.000Z",
+	"fromId": "a1b2c3d4",
+	"summary": "Summary of abandoned path",
+	"details": { "note": "optional" },
+	"fromExtension": true
 }
 ```
 
@@ -310,12 +310,12 @@ Opaque, non-LLM records owned by core subsystems or extensions. `buildSessionCon
 
 ```json
 {
-  "type": "custom",
-  "id": "f1a2b3c4",
-  "parentId": "e1f2a3b4",
-  "timestamp": "2026-02-16T10:25:00.000Z",
-  "customType": "com.example.my-extension.state",
-  "data": { "state": 1 }
+	"type": "custom",
+	"id": "f1a2b3c4",
+	"parentId": "e1f2a3b4",
+	"timestamp": "2026-02-16T10:25:00.000Z",
+	"customType": "com.example.my-extension.state",
+	"data": { "state": 1 }
 }
 ```
 
@@ -339,15 +339,15 @@ Extension-provided message that does participate in LLM context. `content` can b
 
 ```json
 {
-  "type": "custom_message",
-  "id": "a2b3c4d5",
-  "parentId": "f1a2b3c4",
-  "timestamp": "2026-02-16T10:26:00.000Z",
-  "customType": "my-extension",
-  "content": "Injected context",
-  "display": true,
-  "details": { "debug": false },
-  "attribution": "agent"
+	"type": "custom_message",
+	"id": "a2b3c4d5",
+	"parentId": "f1a2b3c4",
+	"timestamp": "2026-02-16T10:26:00.000Z",
+	"customType": "my-extension",
+	"content": "Injected context",
+	"display": true,
+	"details": { "debug": false },
+	"attribution": "agent"
 }
 ```
 
@@ -355,12 +355,12 @@ Extension-provided message that does participate in LLM context. `content` can b
 
 ```json
 {
-  "type": "label",
-  "id": "b2c3d4e5",
-  "parentId": "a2b3c4d5",
-  "timestamp": "2026-02-16T10:27:00.000Z",
-  "targetId": "a1b2c3d4",
-  "label": "checkpoint"
+	"type": "label",
+	"id": "b2c3d4e5",
+	"parentId": "a2b3c4d5",
+	"timestamp": "2026-02-16T10:27:00.000Z",
+	"targetId": "a1b2c3d4",
+	"label": "checkpoint"
 }
 ```
 
@@ -376,11 +376,11 @@ Append-only audit entry for a session rename. It records `title`, `source` (`aut
 
 ```json
 {
-  "type": "ttsr_injection",
-  "id": "c2d3e4f5",
-  "parentId": "b2c3d4e5",
-  "timestamp": "2026-02-16T10:28:00.000Z",
-  "injectedRules": ["ruleA", "ruleB"]
+	"type": "ttsr_injection",
+	"id": "c2d3e4f5",
+	"parentId": "b2c3d4e5",
+	"timestamp": "2026-02-16T10:28:00.000Z",
+	"injectedRules": ["ruleA", "ruleB"]
 }
 ```
 
@@ -392,18 +392,18 @@ Records the provider and a pseudonymous SHA-256 account/scope hash used to re-pi
 
 ```json
 {
-  "type": "session_init",
-  "id": "d2e3f4a5",
-  "parentId": "c2d3e4f5",
-  "timestamp": "2026-02-16T10:29:00.000Z",
-  "systemPrompt": "...",
-  "task": "...",
-  "tools": ["read", "edit"],
-  "outputSchema": { "type": "object" },
-  "outputSchemaMode": "strict",
-  "restrictToolNames": true,
-  "spawns": "*",
-  "readSummarize": false
+	"type": "session_init",
+	"id": "d2e3f4a5",
+	"parentId": "c2d3e4f5",
+	"timestamp": "2026-02-16T10:29:00.000Z",
+	"systemPrompt": "...",
+	"task": "...",
+	"tools": ["read", "edit"],
+	"outputSchema": { "type": "object" },
+	"outputSchemaMode": "strict",
+	"restrictToolNames": true,
+	"spawns": "*",
+	"readSummarize": false
 }
 ```
 
@@ -417,12 +417,12 @@ fields include `agent`, `modelRole`, `resolvedModel`, `retryFallback`, `readOnly
 
 ```json
 {
-  "type": "mode_change",
-  "id": "e2f3a4b5",
-  "parentId": "d2e3f4a5",
-  "timestamp": "2026-02-16T10:30:00.000Z",
-  "mode": "plan",
-  "data": { "planFilePath": "local://PLAN.md" }
+	"type": "mode_change",
+	"id": "e2f3a4b5",
+	"parentId": "d2e3f4a5",
+	"timestamp": "2026-02-16T10:30:00.000Z",
+	"mode": "plan",
+	"data": { "planFilePath": "local://PLAN.md" }
 }
 ```
 

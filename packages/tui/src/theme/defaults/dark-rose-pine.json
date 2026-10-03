@@ -99,8 +99,22 @@
 		"chrome": "base",
 		"widget": "surface",
 		"ansi": [
-			"overlay", "love", "pine", "gold", "foam", "iris", "rose", "text",
-			"subtle", "love", "pine", "gold", "foam", "iris", "rose", "text"
+			"overlay",
+			"love",
+			"pine",
+			"gold",
+			"foam",
+			"iris",
+			"rose",
+			"text",
+			"subtle",
+			"love",
+			"pine",
+			"gold",
+			"foam",
+			"iris",
+			"rose",
+			"text"
 		]
 	}
 }

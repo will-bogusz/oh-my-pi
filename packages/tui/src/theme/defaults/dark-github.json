@@ -108,8 +108,22 @@
 		"chrome": "#010409",
 		"widget": "bgElevated",
 		"ansi": [
-			"#484f58", "redLight", "green", "yellow", "blue", "#bc8cff", "#39c5cf", "#b1bac4",
-			"textDim", "#ffa198", "#56d364", "#e3b341", "blueLight", "purple", "#56d4dd", "#ffffff"
+			"#484f58",
+			"redLight",
+			"green",
+			"yellow",
+			"blue",
+			"#bc8cff",
+			"#39c5cf",
+			"#b1bac4",
+			"textDim",
+			"#ffa198",
+			"#56d364",
+			"#e3b341",
+			"blueLight",
+			"purple",
+			"#56d4dd",
+			"#ffffff"
 		]
 	}
 }

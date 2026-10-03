@@ -99,8 +99,22 @@
 		"chrome": "caveDeep",
 		"widget": "customMsgBg",
 		"ansi": [
-			"crystalFacet", "#d96c75", "#8eb897", "gold", "#7c9cf0", "amethyst", "#6cc4c8", "#cfc4d8",
-			"#8b7a99", "#f0909a", "#a8c9b0", "#e8cc6a", "#a4baff", "lavender", "#9adfe0", "quartz"
+			"crystalFacet",
+			"#d96c75",
+			"#8eb897",
+			"gold",
+			"#7c9cf0",
+			"amethyst",
+			"#6cc4c8",
+			"#cfc4d8",
+			"#8b7a99",
+			"#f0909a",
+			"#a8c9b0",
+			"#e8cc6a",
+			"#a4baff",
+			"lavender",
+			"#9adfe0",
+			"quartz"
 		]
 	}
 }

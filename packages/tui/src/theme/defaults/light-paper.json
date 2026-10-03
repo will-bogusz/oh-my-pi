@@ -98,8 +98,22 @@
 		"chrome": "selectedBg",
 		"widget": "toolPendingBg",
 		"ansi": [
-			"#000000", "red", "green", "#a68101", "blue", "#8959a8", "#39949a", "#bfbfbf",
-			"#848582", "red", "green", "#a68101", "blue", "#8959a8", "#39949a", "#ffffff"
+			"#000000",
+			"red",
+			"green",
+			"#a68101",
+			"blue",
+			"#8959a8",
+			"#39949a",
+			"#bfbfbf",
+			"#848582",
+			"red",
+			"green",
+			"#a68101",
+			"blue",
+			"#8959a8",
+			"#39949a",
+			"#ffffff"
 		]
 	}
 }

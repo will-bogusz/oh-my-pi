@@ -98,8 +98,22 @@
 		"chrome": "customMsgBg",
 		"widget": "#ffffff",
 		"ansi": [
-			"#3e2723", "red", "green", "#a17904", "blue", "#922492", "cyan", "darkGray",
-			"dimGray", "#e53935", "#43a047", "#af8808", "#1e88e5", "#ba3bb4", "#0097a7", "toolPendingBg"
+			"#3e2723",
+			"red",
+			"green",
+			"#a17904",
+			"blue",
+			"#922492",
+			"cyan",
+			"darkGray",
+			"dimGray",
+			"#e53935",
+			"#43a047",
+			"#af8808",
+			"#1e88e5",
+			"#ba3bb4",
+			"#0097a7",
+			"toolPendingBg"
 		]
 	}
 }

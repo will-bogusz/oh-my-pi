@@ -93,8 +93,22 @@
 		"chrome": "void",
 		"widget": "#12101c",
 		"ansi": [
-			"nebula", "error", "success", "warning", "#7f8ff0", "magenta", "teal", "#bdb2c9",
-			"dim", "#ee8590", "#84dcc3", "#f7cc8a", "#a6b0ff", "#e99be9", "#6fd0dc", "star"
+			"nebula",
+			"error",
+			"success",
+			"warning",
+			"#7f8ff0",
+			"magenta",
+			"teal",
+			"#bdb2c9",
+			"dim",
+			"#ee8590",
+			"#84dcc3",
+			"#f7cc8a",
+			"#a6b0ff",
+			"#e99be9",
+			"#6fd0dc",
+			"star"
 		]
 	}
 }

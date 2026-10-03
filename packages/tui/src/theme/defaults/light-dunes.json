@@ -94,8 +94,22 @@
 		"chrome": "dunesPanel",
 		"widget": "dunesSurface",
 		"ansi": [
-			"#3b2f25", "errorRed", "#728330", "#a07407", "#477a9f", "#9a587f", "#4e8581", "dunesBorder",
-			"dimText", "#dd6456", "successGreen", "#b28108", "#568fb9", "#bd719e", "#569490", "dunesSurface"
+			"#3b2f25",
+			"errorRed",
+			"#728330",
+			"#a07407",
+			"#477a9f",
+			"#9a587f",
+			"#4e8581",
+			"dunesBorder",
+			"dimText",
+			"#dd6456",
+			"successGreen",
+			"#b28108",
+			"#568fb9",
+			"#bd719e",
+			"#569490",
+			"dunesSurface"
 		]
 	}
 }

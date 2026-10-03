@@ -94,8 +94,22 @@
 		"chrome": "#070706",
 		"widget": "glass",
 		"ansi": [
-			"#4a4642", "crimson", "jade", "gold", "#68a5ff", "violet", "#43dbea", "#b8b4af",
-			"#6e6960", "#fe8e98", "#93f7c3", "#ffe294", "#96c0fe", "prism", "#87f2fe", "pearl"
+			"#4a4642",
+			"crimson",
+			"jade",
+			"gold",
+			"#68a5ff",
+			"violet",
+			"#43dbea",
+			"#b8b4af",
+			"#6e6960",
+			"#fe8e98",
+			"#93f7c3",
+			"#ffe294",
+			"#96c0fe",
+			"prism",
+			"#87f2fe",
+			"pearl"
 		]
 	}
 }

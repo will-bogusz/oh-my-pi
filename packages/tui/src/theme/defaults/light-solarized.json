@@ -105,8 +105,22 @@
 		"chrome": "base2",
 		"widget": "base2",
 		"ansi": [
-			"base02", "red", "#849800", "#b48800", "blue", "magenta", "#299e95", "base2",
-			"base03", "orange", "base01", "base00", "#819294", "violet", "#829292", "base3"
+			"base02",
+			"red",
+			"#849800",
+			"#b48800",
+			"blue",
+			"magenta",
+			"#299e95",
+			"base2",
+			"base03",
+			"orange",
+			"base01",
+			"base00",
+			"#819294",
+			"violet",
+			"#829292",
+			"base3"
 		]
 	}
 }

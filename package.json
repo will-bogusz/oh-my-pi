@@ -3,7 +3,10 @@
 	"private": true,
 	"homepage": "https://omp.sh",
 	"license": "MIT",
-	"author": { "name": "Stencil Labs, Inc.", "url": "https://stencil.so" },
+	"author": {
+		"name": "Stencil Labs, Inc.",
+		"url": "https://stencil.so"
+	},
 	"workspaces": {
 		"packages": [
 			"packages/*",

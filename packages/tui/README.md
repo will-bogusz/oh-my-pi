@@ -28,7 +28,7 @@ const tui = new TUI(terminal);
 tui.addChild(new Text("Welcome to my app!"));
 
 const editor = new Editor(editorTheme);
-editor.onSubmit = (text) => {
+editor.onSubmit = text => {
 	console.log("Submitted:", text);
 	tui.addChild(new Text(`You said: ${text}`));
 };
@@ -69,11 +69,11 @@ interface Component {
 }
 ```
 
-| Method               | Description                                                                                                                                                        |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Method               | Description                                                                                                                                                                                                                                                                                                                                    |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `render(width)`      | Returns an array of strings, one per line. Each line **must not exceed `width`** or the TUI will error. Use `truncateToWidth()` or manual wrapping to ensure this. The result is component-owned and immutable to callers; return the same array reference when unchanged (enables renderer memoization) and a new array when content changed. |
-| `handleInput?(data)` | Called when the component has focus and receives keyboard input. The `data` string contains raw terminal input (may include ANSI escape sequences).                |
-| `invalidate?()`      | Called to clear any cached render state. Components should re-render from scratch on the next `render()` call.                                                     |
+| `handleInput?(data)` | Called when the component has focus and receives keyboard input. The `data` string contains raw terminal input (may include ANSI escape sequences).                                                                                                                                                                                            |
+| `invalidate?()`      | Called to clear any cached render state. Components should re-render from scratch on the next `render()` call.                                                                                                                                                                                                                                 |
 
 ## Built-in Components
 
@@ -81,20 +81,20 @@ interface Component {
 
 Build screens from persistent components and update their data, selection, expansion, or size through setters. Layouts own child bounds and mouse-coordinate translation; controllers retain domain workflows and asynchronous operations. Propagate `invalidate()` after theme changes and `dispose()` when removing an owned component tree.
 
-| Family | Components | Import |
-| --- | --- | --- |
-| Layout | `Stack`, `Row`, `SplitPane` | package root |
-| Panels | `OverlayPanel`, `PanelRows`, `PanelDivider` | `/chrome` |
-| Menus | `SelectList`, `MenuSelection` | package root |
-| Forms | `Form`, `FormField`, `TextFormField`, `SelectFormField`, `SettingsFormField` | package root |
-| Wizard steps | `WizardStep` | package root |
-| Viewports | `ScrollView`, including child rendering, follow-tail, and keyed range anchoring | package root |
-| Trees | `TreeView` | package root |
-| Disclosure | `Disclosure`, with lazy summary/detail children | package root |
-| Messages | `FramedMessageComponent`, `MessageNoticeComponent`, `MessageDividerComponent` | `/chrome` |
-| Tool output | `ToolCard`, `framedToolCard`, `plainToolCard`, `OutputPane` | `/render` |
-| Transcripts | `TranscriptBrowser` | package root |
-| Data | `MetricRow`, `ProgressBar`, `Table`, `KeyValueList`, `Section` | package root |
+| Family       | Components                                                                      | Import       |
+| ------------ | ------------------------------------------------------------------------------- | ------------ |
+| Layout       | `Stack`, `Row`, `SplitPane`                                                     | package root |
+| Panels       | `OverlayPanel`, `PanelRows`, `PanelDivider`                                     | `/chrome`    |
+| Menus        | `SelectList`, `MenuSelection`                                                   | package root |
+| Forms        | `Form`, `FormField`, `TextFormField`, `SelectFormField`, `SettingsFormField`    | package root |
+| Wizard steps | `WizardStep`                                                                    | package root |
+| Viewports    | `ScrollView`, including child rendering, follow-tail, and keyed range anchoring | package root |
+| Trees        | `TreeView`                                                                      | package root |
+| Disclosure   | `Disclosure`, with lazy summary/detail children                                 | package root |
+| Messages     | `FramedMessageComponent`, `MessageNoticeComponent`, `MessageDividerComponent`   | `/chrome`    |
+| Tool output  | `ToolCard`, `framedToolCard`, `plainToolCard`, `OutputPane`                     | `/render`    |
+| Transcripts  | `TranscriptBrowser`                                                             | package root |
+| Data         | `MetricRow`, `ProgressBar`, `Table`, `KeyValueList`, `Section`                  | package root |
 
 ```typescript
 import { Disclosure, SplitPane, Text } from "@oh-my-pi/pi-tui";
@@ -138,10 +138,10 @@ Container that applies padding and background color to all children.
 const box = new Box(
 	1, // paddingX (default: 1)
 	1, // paddingY (default: 1)
-	(text) => chalk.bgGray(text), // optional background function
+	text => chalk.bgGray(text), // optional background function
 );
 box.addChild(new Text("Content"));
-box.setBgFn((text) => chalk.bgBlue(text)); // Change background dynamically
+box.setBgFn(text => chalk.bgBlue(text)); // Change background dynamically
 ```
 
 ### Text
@@ -153,10 +153,10 @@ const text = new Text(
 	"Hello World", // text content
 	1, // paddingX (default: 1)
 	1, // paddingY (default: 1)
-	(text) => chalk.bgGray(text), // optional background function
+	text => chalk.bgGray(text), // optional background function
 );
 text.setText("Updated text");
-text.setCustomBgFn((text) => chalk.bgBlue(text));
+text.setCustomBgFn(text => chalk.bgBlue(text));
 ```
 
 ### TruncatedText
@@ -177,7 +177,7 @@ Single-line text input with horizontal scrolling.
 
 ```typescript
 const input = new Input();
-input.onSubmit = (value) => console.log(value);
+input.onSubmit = value => console.log(value);
 input.setValue("initial");
 input.getValue();
 ```
@@ -247,11 +247,11 @@ interface EditorTheme {
 }
 
 const editor = new Editor(theme);
-editor.onSubmit = (text) => console.log(text);
-editor.onChange = (text) => console.log("Changed:", text);
+editor.onSubmit = text => console.log(text);
+editor.onChange = text => console.log("Changed:", text);
 editor.disableSubmit = true; // Disable submit temporarily
 editor.setAutocompleteProvider(provider);
-editor.borderColor = (s) => chalk.blue(s); // Change border dynamically
+editor.borderColor = s => chalk.blue(s); // Change border dynamically
 ```
 
 **Features:**
@@ -333,8 +333,8 @@ Animated loading spinner.
 ```typescript
 const loader = new Loader(
 	tui, // TUI instance for render updates
-	(s) => chalk.cyan(s), // spinner color function
-	(s) => chalk.gray(s), // message color function
+	s => chalk.cyan(s), // spinner color function
+	s => chalk.gray(s), // message color function
 	"Loading...", // message (default: "Loading...")
 );
 loader.start();
@@ -349,8 +349,8 @@ Extends Loader with Escape key handling and an AbortSignal for cancelling async 
 ```typescript
 const loader = new CancellableLoader(
 	tui, // TUI instance for render updates
-	(s) => chalk.cyan(s), // spinner color function
-	(s) => chalk.gray(s), // message color function
+	s => chalk.cyan(s), // spinner color function
+	s => chalk.gray(s), // message color function
 	"Working...", // message
 );
 loader.onAbort = () => done(null); // Called when user presses Escape
@@ -392,9 +392,9 @@ const list = new SelectList(
 	theme, // SelectListTheme
 );
 
-list.onSelect = (item) => console.log("Selected:", item);
+list.onSelect = item => console.log("Selected:", item);
 list.onCancel = () => console.log("Cancelled");
-list.onSelectionChange = (item) => console.log("Highlighted:", item);
+list.onSelectionChange = item => console.log("Highlighted:", item);
 list.setFilter("opt"); // Filter items
 ```
 

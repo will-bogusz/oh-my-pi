@@ -98,8 +98,22 @@
 		"chrome": "#191a21",
 		"widget": "selectedBg",
 		"ansi": [
-			"darkGray", "red", "green", "yellow", "blue", "#ff79c6", "cyan", "gray",
-			"dimGray", "#ff6e6e", "#69ff94", "#ffffa5", "#d6acff", "#ff92df", "#a4ffff", "#ffffff"
+			"darkGray",
+			"red",
+			"green",
+			"yellow",
+			"blue",
+			"#ff79c6",
+			"cyan",
+			"gray",
+			"dimGray",
+			"#ff6e6e",
+			"#69ff94",
+			"#ffffa5",
+			"#d6acff",
+			"#ff92df",
+			"#a4ffff",
+			"#ffffff"
 		]
 	}
 }

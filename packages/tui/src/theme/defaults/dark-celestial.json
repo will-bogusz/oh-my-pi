@@ -109,8 +109,22 @@
 		"chrome": "crust",
 		"widget": "mantle",
 		"ansi": [
-			"surface", "pink", "#29d398", "peach", "blue", "magenta", "#59e1e3", "text",
-			"#6c6f93", "#ec6a88", "#3fdaa4", "#fbc3a7", "#3fc4de", "#f075b5", "#6be4e6", "#ffffff"
+			"surface",
+			"pink",
+			"#29d398",
+			"peach",
+			"blue",
+			"magenta",
+			"#59e1e3",
+			"text",
+			"#6c6f93",
+			"#ec6a88",
+			"#3fdaa4",
+			"#fbc3a7",
+			"#3fc4de",
+			"#f075b5",
+			"#6be4e6",
+			"#ffffff"
 		]
 	}
 }

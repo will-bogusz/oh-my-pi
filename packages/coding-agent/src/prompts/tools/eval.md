@@ -19,15 +19,17 @@ wait(handles, timeout?=None, raise_errors?=True) — agent/completion barrier, o
 {{else}}
 <namespaces>
 More globals; `read` the linked docs before first use:
+
 - `judge`, `{{#if py}}judge_batch{{else}}judgeBatch{{/if}}`, `completion`: classification, bulk judgment, model calls → `xd://eval/judge`
 - `%load`{{#if py}}, `%pip`{{/if}}{{#if js}}, `%bun add`{{/if}}, `budget`{{#if evalTools}}, `@tool`/`tool(fn)`{{/if}}: setup, installs, utilities → `xd://eval/helpers`
-{{#if spawns}}
+  {{#if spawns}}
 - `agent`, `workpool`: background subagents, DAG waves → `xd://eval/agents`
-{{/if}}
-{{#each preludes}}
+  {{/if}}
+  {{#each preludes}}
 - `{{name}}`: {{summary}} → `xd://eval/{{name}}`
 {{/each}}
-</namespaces>
+ </namespaces>
+
 {{/if}}
 
 <critical>

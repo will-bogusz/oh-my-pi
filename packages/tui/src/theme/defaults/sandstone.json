@@ -98,8 +98,22 @@
 		"chrome": "#ebe0d0",
 		"widget": "#faf6f0",
 		"ansi": [
-			"shadow", "#ac473a", "sage", "#9d712d", "#4e6c8b", "#854e73", "#3b7477", "#a89888",
-			"mediumGray", "#c96152", "olive", "#ac803e", "#6583a3", "#9e658b", "#528b8e", "erosion"
+			"shadow",
+			"#ac473a",
+			"sage",
+			"#9d712d",
+			"#4e6c8b",
+			"#854e73",
+			"#3b7477",
+			"#a89888",
+			"mediumGray",
+			"#c96152",
+			"olive",
+			"#ac803e",
+			"#6583a3",
+			"#9e658b",
+			"#528b8e",
+			"erosion"
 		]
 	}
 }

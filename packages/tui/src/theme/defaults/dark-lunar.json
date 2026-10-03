@@ -92,8 +92,22 @@
 		"chrome": "#07080c",
 		"widget": "#11151c",
 		"ansi": [
-			"#252a35", "error", "success", "warning", "ice", "#b294d4", "#6cc0cc", "#b9c2cf",
-			"dim", "#ec8d8d", "#93d6b5", "#f6d6a3", "glow", "#ccb4e6", "#95d6df", "#f0f3f7"
+			"#252a35",
+			"error",
+			"success",
+			"warning",
+			"ice",
+			"#b294d4",
+			"#6cc0cc",
+			"#b9c2cf",
+			"dim",
+			"#ec8d8d",
+			"#93d6b5",
+			"#f6d6a3",
+			"glow",
+			"#ccb4e6",
+			"#95d6df",
+			"#f0f3f7"
 		]
 	}
 }

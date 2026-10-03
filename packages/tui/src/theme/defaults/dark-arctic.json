@@ -107,8 +107,22 @@
 		"chrome": "#1a1f2b",
 		"widget": "deepPolar",
 		"ansi": [
-			"polarNight1", "auroraRed", "auroraGreen", "auroraYellow", "frost2", "auroraPurple", "frost1", "snowStorm1",
-			"#616e88", "auroraRed", "auroraGreen", "auroraYellow", "frost2", "auroraPurple", "frost0", "snowStorm2"
+			"polarNight1",
+			"auroraRed",
+			"auroraGreen",
+			"auroraYellow",
+			"frost2",
+			"auroraPurple",
+			"frost1",
+			"snowStorm1",
+			"#616e88",
+			"auroraRed",
+			"auroraGreen",
+			"auroraYellow",
+			"frost2",
+			"auroraPurple",
+			"frost0",
+			"snowStorm2"
 		]
 	}
 }

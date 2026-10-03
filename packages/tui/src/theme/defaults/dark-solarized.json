@@ -100,8 +100,22 @@
 		"chrome": "#00212b",
 		"widget": "#00212b",
 		"ansi": [
-			"base02", "red", "green", "yellow", "blue", "magenta", "cyan", "base2",
-			"#5d747b", "orange", "#5d747b", "base00", "base0", "violet", "base1", "base3"
+			"base02",
+			"red",
+			"green",
+			"yellow",
+			"blue",
+			"magenta",
+			"cyan",
+			"base2",
+			"#5d747b",
+			"orange",
+			"#5d747b",
+			"base00",
+			"base0",
+			"violet",
+			"base1",
+			"base3"
 		]
 	}
 }

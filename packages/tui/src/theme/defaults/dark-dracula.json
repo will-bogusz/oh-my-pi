@@ -101,8 +101,22 @@
 		"chrome": "toolPendingBg",
 		"widget": "toolPendingBg",
 		"ansi": [
-			"toolPendingBg", "red", "green", "yellow", "purple", "pink", "cyan", "foreground",
-			"comment", "#ff6e6e", "#69ff94", "#ffffa5", "#d6acff", "#ff92df", "#a4ffff", "#ffffff"
+			"toolPendingBg",
+			"red",
+			"green",
+			"yellow",
+			"purple",
+			"pink",
+			"cyan",
+			"foreground",
+			"comment",
+			"#ff6e6e",
+			"#69ff94",
+			"#ffffa5",
+			"#d6acff",
+			"#ff92df",
+			"#a4ffff",
+			"#ffffff"
 		]
 	}
 }

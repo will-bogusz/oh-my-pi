@@ -740,7 +740,22 @@ jobs:
          needs.test_coding_agent_native.result == 'success' &&
          needs.test_smoke.result == 'success' && needs.check.result == 'success' &&
          needs.install_methods.result == 'success' }}
-      needs: [release_metadata, check, rust_validate, native_addons, native_addons_cross, test_workspace, test_coding_agent_singleton, test_ts_native, test_coding_agent_ui, test_coding_agent_runtime, test_coding_agent_native, test_smoke, install_methods]
+      needs:
+         [
+            release_metadata,
+            check,
+            rust_validate,
+            native_addons,
+            native_addons_cross,
+            test_workspace,
+            test_coding_agent_singleton,
+            test_ts_native,
+            test_coding_agent_ui,
+            test_coding_agent_runtime,
+            test_coding_agent_native,
+            test_smoke,
+            install_methods,
+         ]
       runs-on: ubuntu-22.04
       steps:
          - uses: actions/checkout@v4
@@ -1247,7 +1262,15 @@ jobs:
       # release_native_leaves must finish first: the core package lists the
       # leaf packages as lockstep-versioned optionalDependencies, so installs
       # resolve them the moment the core version is live.
-      needs: [release_metadata, release_binary, release_binary_hosted, release_smoke_win32_arm64, release_github_verify, release_native_leaves]
+      needs:
+         [
+            release_metadata,
+            release_binary,
+            release_binary_hosted,
+            release_smoke_win32_arm64,
+            release_github_verify,
+            release_native_leaves,
+         ]
       runs-on: ubuntu-22.04
       # `id-token: write` lets npm mint the GitHub OIDC token it exchanges for a
       # short-lived publish token (trusted publishing + provenance). When a
