@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
 import { renderDemotedThinking } from "../dialect/demotion";
 import type {
 	Api,
@@ -394,6 +395,23 @@ function targetReadsForeignThinking(model: Model, compat: Model["compat"]): bool
 	return model.reasoning && compat.thinkingFormat === "zai";
 }
 
+/**
+ * Targets that declare (KDL `replay-same-family-reasoning`) that their native
+ * reasoning slot reaches the model accept reasoning the same model family
+ * produced on another host or wire: it is the model's own reasoning, so it
+ * replays natively instead of as demoted text. Same family means equal
+ * `classifyModel` class, family and revision; class-only ids never match.
+ */
+function targetReplaysSameFamilyReasoning(model: Model, compat: Model["compat"], source: AssistantMessage): boolean {
+	if (compat === undefined || !("replaySameFamilyReasoning" in compat) || compat.replaySameFamilyReasoning !== true) {
+		return false;
+	}
+	const target = model.identity;
+	if (target.family === undefined) return false;
+	const origin = classifyModel(source.provider, source.model, { lenient: true });
+	return origin.class === target.class && origin.family === target.family && origin.revision === target.revision;
+}
+
 const ANTHROPIC_TOOL_CALL_ID_PATTERN = /^[a-zA-Z0-9_-]{1,64}$/;
 
 function isValidAnthropicToolCallId(id: string): boolean {
@@ -703,6 +721,10 @@ export function transformMessages<TApi extends Api>(
 				assistantMsg.provider === model.provider &&
 				assistantMsg.api === model.api &&
 				assistantMsg.model === model.id;
+			// Cross-host reasoning from the target's own model family that the
+			// target declares it can replay natively.
+			const replaysSameFamilyThinking =
+				!isSameModel && targetReplaysSameFamilyReasoning(model, targetCompat, assistantMsg);
 
 			const isAnthropicTarget = isAnthropicMessagesModel(model);
 			// Anthropic's all-or-none contract on prior-turn thinking blocks
@@ -893,6 +915,9 @@ export function transformMessages<TApi extends Api>(
 					if (targetReadsForeignThinking(model, targetCompat)) {
 						return sanitized.thinkingSignature ? { ...sanitized, thinkingSignature: undefined } : sanitized;
 					}
+					// Same family from another host: keep only the text. The signature
+					// and Responses item id are bound to the host that minted them.
+					if (replaysSameFamilyThinking) return { type: "thinking" as const, thinking: sanitized.thinking };
 					// Other cross-API targets (openai-responses encrypted blobs, google
 					// thought parts, anthropic-target from a non-Anthropic source, or any
 					// reasoning-disabled target) can't replay an unsigned thinking block:

@@ -315,6 +315,15 @@ export interface OpenAICompat {
 	 */
 	replayReasoningContent?: boolean;
 	/**
+	 * Replay reasoning that the same model family produced on another host or
+	 * wire in this host's native reasoning slot, instead of demoting it to
+	 * visible `<think>` text. "Same family" means the earlier turn's
+	 * `classifyModel` identity matches this model's class, family and revision.
+	 * Declare it only where a live probe showed the host feeds that slot to the
+	 * model. Default: unset (cross-host reasoning is demoted).
+	 */
+	replaySameFamilyReasoning?: boolean;
+	/**
 	 * Send `preserve_thinking: true` so the Qwen3.6+ chat template renders
 	 * `<think>...</think>` markup for EVERY assistant turn (not just turns
 	 * after the last user message). Without it, the template strips the think
@@ -944,6 +953,7 @@ export type ResolvedOpenAICompat = ResolvedOpenAISharedCompat &
 			| "streamRevision"
 			| "cacheControlFormat"
 			| "thinkingKeep"
+			| "replaySameFamilyReasoning"
 			| "strictResponsesPairing"
 			| "supportsImageDetailOriginal"
 			| "supportsConfigurationUpdate"
@@ -957,6 +967,7 @@ export type ResolvedOpenAICompat = ResolvedOpenAISharedCompat &
 		extraBody?: OpenAICompat["extraBody"];
 		cacheControlFormat?: OpenAICompat["cacheControlFormat"];
 		thinkingKeep?: OpenAICompat["thinkingKeep"];
+		replaySameFamilyReasoning?: boolean;
 		streamIdleTimeoutMs?: number;
 		toolStrictMode: ResolvedToolStrictMode;
 		/** The model sits behind Vercel AI Gateway. */
@@ -1099,11 +1110,13 @@ export interface DevinCompat {
 	supportsParallelToolCalls?: boolean;
 	/** See {@link BedrockCompat.supportsSamplingParams}. */
 	supportsSamplingParams?: boolean;
+	/** See {@link OpenAICompat.replaySameFamilyReasoning}; the carried text rides the prompt's `thinking` field. */
+	replaySameFamilyReasoning?: boolean;
 }
 
 /** Fully-resolved devin-agent compat view. */
-export type ResolvedDevinCompat = Required<Omit<DevinCompat, "supportsSamplingParams">> &
-	Pick<DevinCompat, "supportsSamplingParams">;
+export type ResolvedDevinCompat = Required<Omit<DevinCompat, "supportsSamplingParams" | "replaySameFamilyReasoning">> &
+	Pick<DevinCompat, "supportsSamplingParams" | "replaySameFamilyReasoning">;
 /**
  * Compatibility settings for the Google API family (google-generative-ai,
  * google-vertex, google-gemini-cli). Class-driven defaults come from the

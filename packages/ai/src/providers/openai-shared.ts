@@ -2392,6 +2392,11 @@ export function convertResponsesAssistantMessage<TApi extends Api>(
 	let reasoningItemEmitted = false;
 	const carriedReasoningTexts: string[] = [];
 	let synthesizedReasoningItemId: string | undefined;
+	// Hosts that declare `replay-same-family-reasoning` read plaintext reasoning
+	// items: same-family reasoning carried from another host arrives here
+	// unsigned (transformMessages keeps only its text) and replays as one.
+	const compat: object = model.compat ?? {};
+	const replaysPlaintextReasoning = "replaySameFamilyReasoning" in compat && compat.replaySameFamilyReasoning === true;
 
 	for (const block of assistantMsg.content) {
 		if (block.type === "thinking" && assistantMsg.stopReason !== "error") {
@@ -2405,6 +2410,9 @@ export function convertResponsesAssistantMessage<TApi extends Api>(
 			const reasoningItem = parseResponseReasoningReplayItem(block.thinkingSignature);
 			if (reasoningItem) {
 				outputItems.push(reasoningItem);
+				reasoningItemEmitted = true;
+			} else if (replaysPlaintextReasoning && block.thinking.trim().length > 0) {
+				outputItems.push(createSyntheticResponsesReasoningItem(block.thinking));
 				reasoningItemEmitted = true;
 			}
 			continue;

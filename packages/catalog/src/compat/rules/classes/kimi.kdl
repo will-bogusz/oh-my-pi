@@ -123,4 +123,13 @@ class "kimi" {
 			}
 		}
 	}
+	// K3 is trained to read its earlier reasoning from the reasoning slot
+	// (preserved thinking). On these hosts a recall probe (a code stated only in
+	// an earlier turn's reasoning) showed that slot reaches the model, so K3
+	// reasoning carried from another K3 host replays there, not as visible text.
+	on "devin" "factory-droid" "moonshot" "openrouter" {
+		family "k3" {
+			replay-same-family-reasoning #true
+		}
+	}
 }

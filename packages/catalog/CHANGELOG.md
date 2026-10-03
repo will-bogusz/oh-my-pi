@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added the `replay-same-family-reasoning` rule, which lets a host declare that it reads reasoning from the same model family produced on another host. Kimi K3 declares it on Moonshot, Factory Droid, OpenRouter and Devin.
+
 ### Fixed
 
 - Fixed DeepSeek V4 model IDs and the V4.1 Flash alias lacking version information in model identity and dashboards ([#14194](https://github.com/can1357/oh-my-pi/issues/14194)).

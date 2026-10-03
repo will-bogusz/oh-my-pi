@@ -289,6 +289,12 @@ export const AXES: Readonly<Record<string, AxisDef>> = {
 	 * mid-stream retirement is attempted, not whether it is safe.
 	 */
 	"stream-revision": wire("streamRevision", [...OAI, "bedrock"], "scalar", ["none", "possible"]),
+	/**
+	 * Keep reasoning from the same model family on another host native instead
+	 * of demoting it to visible text. Assign only where a live recall probe
+	 * showed the host's native reasoning slot reaches the model.
+	 */
+	"replay-same-family-reasoning": wire("replaySameFamilyReasoning", ["openai", "devin"]),
 	"stream-first-event-timeout-ms": wire("streamFirstEventTimeoutMs", [...OAI, "google"]),
 	"stream-idle-timeout-ms": wire("streamIdleTimeoutMs", [...OAI, "anthropic", "bedrock", "google"]),
 	"strip-image-input": wire("stripImageInput", [...OAI, "anthropic", "google"]),

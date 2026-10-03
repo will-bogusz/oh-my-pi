@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- When a session switches between Kimi K3 hosts (Moonshot, Factory Droid, OpenRouter, Devin), K3's earlier reasoning now reaches the new host in its reasoning field, where K3 was trained to read it, instead of as `<think>` text pasted into the earlier replies.
+
 ### Fixed
 
 - Fixed Antigravity chat and image requests sending an outdated client version when the model list came from cache, which could make newer models such as Claude Opus 5.5 unavailable.
