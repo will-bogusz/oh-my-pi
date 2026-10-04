@@ -6,9 +6,9 @@
 
 - Added `frameTokens` and `frameBillingKey`, which price a rendered frame at what the model reading it is billed ([#14291](https://github.com/can1357/oh-my-pi/pull/14291) by [@will-bogusz](https://github.com/will-bogusz))
 
-### Breaking Changes
+### Changed
 
-- `maxFramesForDataBudget()` now takes the frame shape instead of a byte budget, so the default 1568px shapes get 26 frames instead of 17 ([#14277](https://github.com/can1357/oh-my-pi/pull/14277) by [@will-bogusz](https://github.com/will-bogusz)).
+- Raised the snapcompact frame payload cap from 3 MB to 16 MB per request, so archive size follows the room under the compaction trigger instead of stopping at 17 to 26 frames
 
 ## [18.2.9] - 2026-09-22
 

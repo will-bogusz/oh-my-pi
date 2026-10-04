@@ -597,6 +597,39 @@ describe("buildSessionContext", () => {
 			expect(transcriptSummary.blocks?.filter(block => block.type === "image")).toHaveLength(17);
 		});
 
+		it("keeps legacy archives to the frame payload they were written under", () => {
+			const archiveText = `Legacy few-frame archive source\n${"archived history ".repeat(22_000)}`;
+			const compacted: CompactionEntry = {
+				...compaction("3", "2", "Legacy snapcompact summary", "1"),
+				preserveData: {
+					[snapcompact.PRESERVE_KEY]: {
+						// Four frames, 4 MB of base64: under the current payload cap, over the legacy one.
+						frames: Array.from({ length: 4 }, (_, index) => ({
+							data: "A".repeat(1_000_000),
+							mimeType: "image/png",
+							cols: 64,
+							rows: 40,
+							chars: 1000 + index,
+						})),
+						totalChars: archiveText.length,
+						truncatedChars: 1_500_000,
+						text: archiveText,
+						textHead: "legacy oldest retained text",
+						textTail: "legacy newest retained text",
+					},
+				},
+			};
+			const ctx = buildSessionContext([
+				msg("1", null, "user", "before compact"),
+				msg("2", "1", "assistant", "archived response"),
+				compacted,
+				msg("4", "3", "user", "after resume"),
+			]);
+			const summary = ctx.messages[0];
+			if (summary?.role !== "compactionSummary") throw new Error("Expected active compaction summary");
+			expect(summary.blocks?.filter(block => block.type === "image")).toHaveLength(0);
+		});
+
 		it("keeps current oversized snapcompact frame archives in active LLM context", () => {
 			const framePayload = "A".repeat(100_000);
 			const archiveText = `Current archive source\n${"archived history ".repeat(22_000)}`;

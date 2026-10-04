@@ -3557,10 +3557,10 @@ export class SessionMaintenance {
 	}
 
 	/** Frame caps that hold whatever the context budget allows: the engine default, the per-request payload, and the provider's image count. */
-	#snapcompactFrameHardCap(shape: snapcompact.Shape): number {
+	#snapcompactFrameHardCap(): number {
 		return Math.min(
 			snapcompact.MAX_FRAMES_DEFAULT,
-			snapcompact.maxFramesForDataBudget(shape),
+			snapcompact.maxFramesForDataBudget(),
 			snapcompact.providerFrameBudget(this.#model?.provider),
 		);
 	}
@@ -3608,7 +3608,7 @@ export class SessionMaintenance {
 	#computeSnapcompactMaxFrames(preparation: CompactionPreparation, settings: EngineCompactionSettings): number {
 		// Same shape the auto and manual paths pass to `snapcompact.compact`.
 		const shape = snapcompact.resolveShape(this.#model, cfgSnapcompactShape.get(this.#host.settings));
-		const hardCap = this.#snapcompactFrameHardCap(shape);
+		const hardCap = this.#snapcompactFrameHardCap();
 		const ctxWindow = this.#model?.contextWindow ?? 0;
 		if (ctxWindow <= 0) return hardCap;
 		const totalBudget = ctxWindow - effectiveReserveTokens(ctxWindow, settings);
@@ -4053,7 +4053,7 @@ export class SessionMaintenance {
 		// count above the per-request payload or provider image budget would
 		// "shrink" a huge archive to a frame count the rebuilt prompt can never
 		// attach anyway.
-		const hardCap = this.#snapcompactFrameHardCap(shape);
+		const hardCap = this.#snapcompactFrameHardCap();
 		const ctxWindow = this.#model?.contextWindow ?? 0;
 		if (ctxWindow <= 0) return hardCap;
 		const frameBudget =

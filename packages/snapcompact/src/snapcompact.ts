@@ -490,40 +490,18 @@ export const FRAME_TOKEN_ESTIMATE = 5024;
 
 /** Conservative upper bound for one persisted frame's base64 payload. The
  *  measured high-res Anthropic `8x13`/`11on16` PNG frames sit around 159 KB;
- *  170 KB leaves margin for denser glyph pages without permitting multi-MB
- *  standing request bodies at large context windows. */
+ *  170 KB leaves margin for denser glyph pages. */
 export const FRAME_DATA_BYTES_ESTIMATE = 170_000;
 
-/** Maximum snapcompact image base64 carried in every rebuilt provider request.
- *  Above this, provider backends can accept the HTTP body but fail mid-stream
- *  with opaque 5xx errors. Keep this independent from visual-token budgeting:
- *  a 1M-token model can afford 70 images on paper, but not the resulting
- *  ~11 MB JSON payload on every turn. */
-export const FRAME_DATA_BYTES_BUDGET = 3_000_000;
+/** Safety cap on snapcompact image base64 carried in every rebuilt provider
+ *  request. Archive size is set by the room under the compaction trigger;
+ *  this only bounds the request body, which stays under Anthropic's 32 MB
+ *  request limit with room for the text. */
+export const FRAME_DATA_BYTES_BUDGET = 16_000_000;
 
-/** Default edge variants whose frames shrink with pixel area. Inkier variants
- *  keep the full {@link FRAME_DATA_BYTES_ESTIMATE} at any frame size. */
-const AREA_PRICED_VARIANTS: readonly ShapeGeometry[] = [SHAPE_VARIANTS["8on22-bw"], SHAPE_VARIANTS["11on16-bw"]];
-
-/** Frame-count cap implied by {@link FRAME_DATA_BYTES_BUDGET} for frames
- *  rendered by `shape`. {@link AREA_PRICED_VARIANTS} below 1932px are charged
- *  {@link FRAME_DATA_BYTES_ESTIMATE} scaled by pixel area; every other shape
- *  pays the full estimate. */
-export function maxFramesForDataBudget(shape: ShapeGeometry): number {
-	const areaPriced = AREA_PRICED_VARIANTS.some(
-		variant =>
-			variant.font === shape.font &&
-			variant.cellWidth === shape.cellWidth &&
-			variant.cellHeight === shape.cellHeight &&
-			variant.stretch === shape.stretch &&
-			variant.variant === shape.variant &&
-			variant.stopwordDim === shape.stopwordDim &&
-			variant.columns === shape.columns &&
-			variant.lineRepeat === shape.lineRepeat,
-	);
-	const areaRatio = areaPriced ? (shape.frameSize / HIGH_RES_ANTHROPIC_VARIANT.frameSize) ** 2 : 1;
-	const frameBytes = Math.min(FRAME_DATA_BYTES_ESTIMATE, Math.ceil(FRAME_DATA_BYTES_ESTIMATE * areaRatio));
-	return Math.max(1, Math.floor(FRAME_DATA_BYTES_BUDGET / frameBytes));
+/** Frame-count cap implied by {@link FRAME_DATA_BYTES_BUDGET}. */
+export function maxFramesForDataBudget(maxFrameDataBytes: number = FRAME_DATA_BYTES_BUDGET): number {
+	return Math.max(1, Math.floor(maxFrameDataBytes / FRAME_DATA_BYTES_ESTIMATE));
 }
 
 /** Base64 byte length for persisted snapcompact frames. */

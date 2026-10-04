@@ -166,13 +166,20 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		expect(high * frame).toBeLessThanOrEqual(SHARE * 160_000);
 	});
 
+	it("lets the room under a large trigger size the archive rather than the frame payload cap", async () => {
+		const model = opus(1_000_000);
+		const frames = await requestedFrames(model, { "compaction.thresholdTokens": 400_000 });
+		expect(frames * framePrice(model)).toBeLessThanOrEqual(SHARE * 400_000);
+		expect(frames).toBeGreaterThan(30);
+	});
+
 	it("keeps a trigger far below the window from getting a window-sized archive", async () => {
 		const model = opus(1_000_000);
 		const frames = await requestedFrames(model, { "compaction.thresholdTokens": 60_000 });
 		expect(frames).toBeGreaterThan(0);
 		expect(frames * framePrice(model)).toBeLessThanOrEqual(SHARE * 60_000);
 		// The window alone would allow the full payload cap.
-		expect(frames).toBeLessThan(snapcompact.maxFramesForDataBudget(snapcompact.resolveShape(model)));
+		expect(frames).toBeLessThan(snapcompact.MAX_FRAMES_DEFAULT);
 	});
 
 	it("follows the active model's trigger after a model switch", async () => {
