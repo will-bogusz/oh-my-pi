@@ -3,6 +3,7 @@ import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import { BrowserNetworkManager } from "@oh-my-pi/pi-coding-agent/tools/browser/network";
 import { acquireBrowser, releaseBrowser } from "@oh-my-pi/pi-coding-agent/tools/browser/registry";
 import { acquireTab, releaseTab, runInTab } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
+import { TERN_KIT_SOURCE } from "@oh-my-pi/pi-coding-agent/tools/browser/tern/page-kit";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
 import { chromiumAvailable } from "./chromium-probe";
 
@@ -174,7 +175,7 @@ describe("browser observe", () => {
 				`,
 			)) as { title: string; id: number; outcome: string };
 			expect(result.title).toBe("restored");
-			expect(result.outcome).toBe(`Unknown element id ${result.id}. Run tab.observe() to refresh the element list.`);
+			expect(result.outcome).toBe(`Element id ${result.id} is stale. Run tab.observe() again.`);
 		},
 		45_000,
 	);
@@ -475,6 +476,208 @@ describe("browser reads after an action", () => {
 			]);
 			expect(typeof id).toBe("number");
 			expect(title).toBe("clicked 7");
+		},
+		45_000,
+	);
+});
+
+const ID_PAGE = `data:text/html,${encodeURIComponent(
+	'<button id="a" onclick="document.title = \'clicked\'">Alpha</button><button id="b">Beta</button>',
+)}`;
+
+/** Inserts a Gamma button before Alpha and removes Beta. */
+const RERENDER = `() => {
+	const gamma = document.createElement("button");
+	gamma.textContent = "Gamma";
+	document.body.prepend(gamma);
+	document.querySelector("#b").remove();
+}`;
+
+describe("browser observe ids", () => {
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"keep an element's id across observations and never hand a retired id to another element",
+		async () => {
+			const result = await runOnPage(
+				ID_PAGE,
+				`
+					const ids = observation => observation.elements.map(element => [element.name, element.id]);
+					const failure = async id => {
+						try {
+							await tab.id(id);
+							return "resolved";
+						} catch (error) {
+							return error.message;
+						}
+					};
+					const first = await tab.observe();
+					await tab.evaluate(${RERENDER});
+					const second = await tab.observe();
+					await (await tab.id(1)).click();
+					const title = await tab.title();
+					const removed = await failure(2);
+					await tab.goto("data:text/html,<button>Alpha</button>");
+					const navigated = await failure(1);
+					const third = await tab.observe();
+					return { first: ids(first), second: ids(second), title, removed, navigated, third: ids(third) };
+				`,
+			);
+			expect(result).toEqual({
+				first: [
+					["Alpha", 1],
+					["Beta", 2],
+				],
+				second: [
+					["Gamma", 3],
+					["Alpha", 1],
+				],
+				title: "clicked",
+				removed: "Element id 2 is stale. Run tab.observe() again.",
+				navigated: "Element id 1 is stale. Run tab.observe() again.",
+				third: [["Alpha", 4]],
+			});
+		},
+		45_000,
+	);
+
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"keep Tern page-kit ids across observations and continue numbering in a new document",
+		async () => {
+			const result = await runOnPage(
+				ID_PAGE,
+				`
+					const kit = ${JSON.stringify(TERN_KIT_SOURCE)};
+					const observe = firstId =>
+						tab.evaluate(firstId => globalThis.__ompTernKit.observe({ firstId }).elements.map(e => [e.name, e.id]), firstId);
+					await tab.evaluate(kit);
+					const first = await observe(1);
+					await tab.evaluate(${RERENDER});
+					const second = await observe(3);
+					let removed = "resolved";
+					try {
+						await tab.evaluate(() => globalThis.__ompTernKit.count({ engine: "id", id: 2 }));
+					} catch (error) {
+						removed = error.message;
+					}
+					await tab.goto("data:text/html,<button>Alpha</button>");
+					await tab.evaluate(kit);
+					const third = await observe(4);
+					return { first, second, removed, third };
+				`,
+			);
+			expect(result).toEqual({
+				first: [
+					["Alpha", 1],
+					["Beta", 2],
+				],
+				second: [
+					["Gamma", 3],
+					["Alpha", 1],
+				],
+				removed: expect.stringContaining("Element id 2 is stale"),
+				third: [["Alpha", 4]],
+			});
+		},
+		45_000,
+	);
+
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"keep an id whose cached handle another observe() released or user code disposed",
+		async () => {
+			const result = await runOnPage(
+				ID_PAGE,
+				`
+					const outcomes = new Set();
+					let listed;
+					for (let attempt = 0; attempt < 15; attempt++) {
+						await tab.observe({ viewportOnly: true });
+						await tab.id(1);
+						const [outcome, observation] = await Promise.all([
+							tab.id(1).then(() => "ok", error => error.message),
+							tab.observe(),
+						]);
+						outcomes.add(outcome);
+						listed = observation.elements.map(element => [element.name, element.id]);
+					}
+					// A handle user code disposed fails its check the same way.
+					await (await tab.id(1)).dispose();
+					outcomes.add(await tab.id(1).then(() => "ok", error => error.message));
+					return { outcomes: [...outcomes], listed };
+				`,
+			);
+			expect(result).toEqual({
+				outcomes: ["ok"],
+				listed: [
+					["Alpha", 1],
+					["Beta", 2],
+				],
+			});
+		},
+		45_000,
+	);
+
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"retire the least recently observed ids once a document has listed more than 5,000 others",
+		async () => {
+			const result = await runOnPage(
+				ID_PAGE,
+				`
+					const fill = prefix =>
+						tab.evaluate(prefix => {
+							for (const button of document.querySelectorAll("button.n")) button.remove();
+							for (let i = 0; i < 5000; i++) {
+								const button = document.createElement("button");
+								button.className = "n";
+								button.textContent = prefix + i;
+								document.body.append(button);
+							}
+						}, prefix);
+					await fill("x");
+					await tab.observe();
+					// Alpha leaves the listing while staying in the document, and 5,000 new buttons are listed.
+					await tab.evaluate(() => { document.querySelector("#a").style.display = "none"; });
+					await fill("y");
+					const second = await tab.observe();
+					const beta = second.elements.find(element => element.name === "Beta").id;
+					await tab.evaluate(() => { document.querySelector("#a").style.display = ""; });
+					let alpha = "resolved";
+					try {
+						await tab.id(1);
+					} catch (error) {
+						alpha = error.message;
+					}
+					const third = await tab.observe();
+					return { beta, alpha, relisted: third.elements.find(element => element.name === "Alpha").id };
+				`,
+				50_000,
+			);
+			expect(result).toEqual({
+				beta: 2,
+				alpha: "Element id 1 is stale. Run tab.observe() again.",
+				relisted: 10_003,
+			});
+		},
+		90_000,
+	);
+
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"give Tern page-kit includeAll text entries ids of their own",
+		async () => {
+			const result = await runOnPage(
+				`data:text/html,${encodeURIComponent('<p>Hello</p><a href="#" aria-label="Open">Read more</a>')}`,
+				`
+					await tab.evaluate(${JSON.stringify(TERN_KIT_SOURCE)});
+					const list = () =>
+						tab.evaluate(() =>
+							globalThis.__ompTernKit.observe({ includeAll: true, firstId: 1 }).elements.map(e => [e.role, e.id]),
+						);
+					return { first: await list(), second: await list() };
+				`,
+			);
+			const { first, second } = result as { first: [string, number][]; second: [string, number][] };
+			const ids = first.map(([, id]) => id);
+			expect(first.filter(([role]) => role === "StaticText").length).toBeGreaterThan(0);
+			expect(new Set(ids).size).toBe(ids.length);
+			expect(second).toEqual(first);
 		},
 		45_000,
 	);

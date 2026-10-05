@@ -17,7 +17,7 @@ export type TernSelector =
 	| { engine: TernSemanticEngine; query: string }
 	/** `eN` from the last `ariaSnapshot` in this document. */
 	| { engine: "ariaRef"; ref: string }
-	/** Numeric id from the last `observe()` in this document. */
+	/** Numeric id from an `observe()`; valid while its element stays in this document. */
 	| { engine: "id"; id: number }
 	/** Element marked by the kit's `mark()`. */
 	| { engine: "handle"; token: string };

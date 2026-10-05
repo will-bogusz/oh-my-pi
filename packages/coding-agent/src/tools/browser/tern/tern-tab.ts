@@ -360,6 +360,8 @@ export class TernTab implements InProcessRunTab {
 	#shown: boolean | undefined;
 	#viewport: ViewportOptions;
 	#cursor = 0;
+	/** Lowest id the next newly observed element may get; ids are never reused within the tab. */
+	#nextElementId = 1;
 	readonly #events: TernEvent[] = [];
 	#pulling: Promise<void> | undefined;
 	#runContext: InProcessRunContext | undefined;
@@ -1660,10 +1662,18 @@ export class TernTab implements InProcessRunTab {
 		return tokens.map(token => new TernElementHandle(this, { engine: "handle", token }, null));
 	}
 
-	/** Handle for observation id `id` (from the last `observe()`). */
+	/** Handle for observation id `id`; it stays valid while its element remains in the document. */
 	async id(id: number): Promise<TernElementHandle> {
 		const spec: TernSelector = { engine: "id", id };
-		await this.#kit("count", [spec]);
+		try {
+			await this.#kit("count", [spec]);
+		} catch (error) {
+			// A new document's kit has not seen this tab's earlier ids: one handed out before the navigation is stale.
+			if (id < this.#nextElementId && error instanceof ToolError && error.message.includes("Unknown element id")) {
+				throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
+			}
+			throw error;
+		}
 		return new TernElementHandle(this, spec, null);
 	}
 
@@ -1765,9 +1775,11 @@ export class TernTab implements InProcessRunTab {
 				includeAll: opts?.includeAll,
 				viewportOnly: opts?.viewportOnly,
 				compact: opts?.compact,
+				firstId: this.#nextElementId,
 				...(opts?.selector ? { root: this.#spec(opts.selector) } : {}),
 			},
 		]);
+		for (const element of observation.elements) this.#nextElementId = Math.max(this.#nextElementId, element.id + 1);
 		this.#url = observation.url;
 		if (observation.title !== undefined) this.#title = observation.title;
 		return observation;

@@ -7,6 +7,7 @@ import { TernElementHandle, TernTab, userSourceFunction } from "@oh-my-pi/pi-cod
 import { parseTernSelector } from "@oh-my-pi/pi-coding-agent/tools/browser/tern/selectors";
 import { TernSocketClient } from "@oh-my-pi/pi-coding-agent/tools/browser/tern/wire";
 import { encodeRawPng } from "@oh-my-pi/pi-coding-agent/utils/png-encode";
+import { rejectionOf } from "../helpers/rejection";
 import { type FakeAnswer, type FakeDaemon, startFakeDaemon } from "./tern-fake-daemon";
 
 interface FakePage {
@@ -63,7 +64,11 @@ async function startPage(page: FakePage): Promise<FakeDaemon> {
 				if (String(op.function).includes("__ompTernKit") && typeof args[0] === "string") {
 					const stub = page.kit[args[0]];
 					if (!stub) return { error: { kind: "js", message: `Error: kit method ${args[0]} not stubbed` } };
-					return { ok: { value: { value: stub(Array.isArray(args[1]) ? args[1] : []) } } };
+					try {
+						return { ok: { value: { value: stub(Array.isArray(args[1]) ? args[1] : []) } } };
+					} catch (error) {
+						return { error: { kind: "js", message: String(error) } };
+					}
 				}
 				return { ok: {} };
 			}
@@ -446,6 +451,32 @@ describe("TernTab", () => {
 			/resourceType image: only the page's fetch and xhr requests can be routed/,
 		);
 		expect(fake.requests.length).toBe(before);
+	});
+
+	it("numbers observe() ids on from the tab's highest and reports an earlier document's id as stale", async () => {
+		const firstIds: unknown[] = [];
+		const fake = await startPage({
+			eventBatches: [],
+			kit: {
+				observe: ([options]) => {
+					firstIds.push(
+						options && typeof options === "object" && "firstId" in options ? options.firstId : undefined,
+					);
+					const next = firstIds.length * 2;
+					return { url: "https://example.test/", elements: [{ id: next - 1 }, { id: next }] };
+				},
+				// The kit of a document the tab navigated to has not listed these ids.
+				count: () => {
+					throw new Error("Unknown element id 2. Run tab.observe() to refresh the element list.");
+				},
+			},
+		});
+		const tab = await openTab(fake);
+		await tab.observe();
+		await tab.observe();
+		expect(firstIds).toEqual([1, 3]);
+		expect(String(await rejectionOf(tab.id(2)))).toContain("Element id 2 is stale. Run tab.observe() again.");
+		expect(String(await rejectionOf(tab.id(9)))).toContain("Unknown element id 2");
 	});
 });
 

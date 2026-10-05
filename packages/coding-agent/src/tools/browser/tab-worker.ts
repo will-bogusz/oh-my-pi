@@ -367,6 +367,11 @@ const SETTLE_TIMEOUT_MS = 3_000;
 const SETTLE_QUIET_MS = 150;
 /** Poll cadence while requests started by an action are still in flight. */
 const SETTLE_POLL_MS = 50;
+/**
+ * Most observed ids a tab keeps beyond the latest observation's own, so a long-lived page that keeps
+ * rendering new nodes does not grow them without bound; the least recently observed go first.
+ */
+const OBSERVED_ID_LIMIT = 5_000;
 
 /** Queue a wheel event without treating a delayed renderer acknowledgement as dispatch failure. */
 export async function dispatchScroll(
@@ -1900,6 +1905,8 @@ export class WorkerCore {
 	#lastViewport?: ReadyInfo["viewport"];
 	#elementCache = new Map<number, ElementHandle>();
 	#observedElements = new Map<number, ObservedElement>();
+	/** Id of each observed element, keyed by its document's loader id and backend node id. */
+	#elementIds = new Map<string, number>();
 	#elementCounter = 0;
 	#active: ActiveRun | null = null;
 	#runtime: JsRuntime | null = null;
@@ -2078,12 +2085,27 @@ export class WorkerCore {
 		return failure;
 	}
 
-	/** Number an observed element; keeps `handle` when the observation already resolved it. */
+	/**
+	 * Id for an observed element: the one it got when first observed in this document, else a new
+	 * one. A worker never hands one id to two elements, so a stale id cannot reach another element.
+	 * Keeps `handle` when the observation already resolved it.
+	 */
 	observeElement(element: ObservedElement, handle?: ElementHandle): number {
-		this.#elementCounter += 1;
-		this.#observedElements.set(this.#elementCounter, element);
-		if (handle) this.#elementCache.set(this.#elementCounter, handle);
-		return this.#elementCounter;
+		const key = `${element.loaderId}:${element.backendNodeId}`;
+		let id = this.#elementIds.get(key);
+		let observed = element;
+		if (id === undefined) {
+			id = ++this.#elementCounter;
+			this.#elementIds.set(key, id);
+		} else {
+			// Re-insert, so the map runs from the least to the most recently observed element.
+			observed = this.#observedElements.get(id) ?? element;
+			this.#observedElements.delete(id);
+		}
+		this.#observedElements.set(id, observed);
+		if (handle && this.#elementCache.has(id)) void handle.dispose().catch(() => undefined);
+		else if (handle) this.#elementCache.set(id, handle);
+		return id;
 	}
 
 	async #handleMessage(msg: WorkerInbound): Promise<void> {
@@ -3647,7 +3669,7 @@ export class WorkerCore {
 		signal?: AbortSignal;
 	}): Promise<Observation> {
 		const page = this.#requirePage();
-		this.#clearElementCache();
+		this.#releaseElementHandles();
 		const includeAll = options.includeAll ?? false;
 		const viewportOnly = options.viewportOnly ?? false;
 		let root: ElementHandle | null = null;
@@ -3690,6 +3712,7 @@ export class WorkerCore {
 				interactiveAncestors,
 			});
 		}
+		this.#retireOldElementIds(entries.length);
 		const scroll = (await untilAborted(options.signal, () =>
 			page.evaluate(() => {
 				const win = globalThis as unknown as {
@@ -4013,40 +4036,43 @@ export class WorkerCore {
 
 	async #resolveCachedHandle(id: number): Promise<ElementHandle> {
 		const element = this.#observedElements.get(id);
-		if (!element) throw new ToolError(`Unknown element id ${id}. Run tab.observe() to refresh the element list.`);
+		if (!element) {
+			// This worker never reissues an id, so one it handed out names an element that is gone.
+			if (Number.isInteger(id) && id > 0 && id <= this.#elementCounter) {
+				throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
+			}
+			throw new ToolError(`Unknown element id ${id}. Run tab.observe() to refresh the element list.`);
+		}
 		if (isObservedDocumentGone(element)) {
-			this.#clearElementCache();
+			this.#forgetElement(id);
 			throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
 		}
-		const handle = this.#elementCache.get(id);
-		if (!handle) {
-			const resolved = await resolveObservedElement(element);
-			// An observe() during the await renumbers ids, so the id may now name another element.
-			if (!resolved || this.#observedElements.get(id) !== element) {
-				await resolved?.dispose().catch(() => undefined);
-				if (this.#observedElements.get(id) === element) this.#clearElementCache();
+		const cached = this.#elementCache.get(id);
+		if (cached) {
+			const isConnected = await rawHandleEvaluate(cached)(el => el.isConnected).catch(() => undefined);
+			if (isConnected) return cached;
+			if (isConnected === false) {
+				this.#forgetElement(id);
 				throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
 			}
-			const cached = this.#elementCache.get(id);
-			if (cached) {
-				await resolved.dispose().catch(() => undefined);
-				return cached;
-			}
-			this.#elementCache.set(id, resolved);
-			return resolved;
+			// The handle failed rather than answering: an observe() released it mid-check, or user code disposed it.
+			// The element may well be there still, so resolve it again.
+			if (this.#elementCache.get(id) === cached) this.#elementCache.delete(id);
 		}
-		try {
-			const isConnected = (await rawHandleEvaluate(handle)(el => el.isConnected)) as boolean;
-			if (!isConnected) {
-				this.#clearElementCache();
-				throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
-			}
-		} catch (err) {
-			if (err instanceof ToolError) throw err;
-			this.#clearElementCache();
+		const resolved = await resolveObservedElement(element);
+		// A navigation during the await may have retired the id.
+		if (!resolved || this.#observedElements.get(id) !== element) {
+			await resolved?.dispose().catch(() => undefined);
+			if (this.#observedElements.get(id) === element) this.#forgetElement(id);
 			throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
 		}
-		return handle;
+		const raced = this.#elementCache.get(id);
+		if (raced) {
+			await resolved.dispose().catch(() => undefined);
+			return raced;
+		}
+		this.#elementCache.set(id, resolved);
+		return resolved;
 	}
 
 	async #resolveAriaRef(id: string): Promise<ElementHandle> {
@@ -4071,16 +4097,44 @@ export class WorkerCore {
 			this.#requirePage().locator(normalizeSelector(selector)).setTimeout(timeoutMs).waitHandle({ signal: sig }),
 		)) as ElementHandle;
 	}
+	/** Retire every observed id; numbering continues, so this worker never reissues them. */
 	#clearElementCache(): void {
 		this.#observedElements.clear();
-		if (this.#elementCache.size === 0) {
-			this.#elementCounter = 0;
-			return;
+		this.#elementIds.clear();
+		this.#releaseElementHandles();
+	}
+
+	/**
+	 * Dispose resolved handles so they do not pin removed nodes in the page, and retire ids whose
+	 * document is gone. Ids of elements still in their document stay valid.
+	 */
+	#releaseElementHandles(): void {
+		for (const [id, element] of this.#observedElements) {
+			if (element.frame.detached || isObservedDocumentGone(element)) this.#forgetElement(id);
 		}
 		const handles = [...this.#elementCache.values()];
 		this.#elementCache.clear();
-		this.#elementCounter = 0;
 		for (const handle of handles) void handle.dispose().catch(() => undefined);
+	}
+
+	#forgetElement(id: number): void {
+		const element = this.#observedElements.get(id);
+		if (element) this.#elementIds.delete(`${element.loaderId}:${element.backendNodeId}`);
+		this.#observedElements.delete(id);
+		const handle = this.#elementCache.get(id);
+		this.#elementCache.delete(id);
+		void handle?.dispose().catch(() => undefined);
+	}
+
+	/**
+	 * Retire the least recently observed ids past {@link OBSERVED_ID_LIMIT}, never one of the `latest`
+	 * ids the observation that just ran listed (they are the newest entries).
+	 */
+	#retireOldElementIds(latest: number): void {
+		const excess = this.#observedElements.size - Math.max(OBSERVED_ID_LIMIT, latest);
+		if (excess <= 0) return;
+		const oldest = [...this.#observedElements.keys()].slice(0, excess);
+		for (const id of oldest) this.#forgetElement(id);
 	}
 
 	/** Best-effort `Page.stopLoading` so an abandoned navigation cannot stall later ops. */
