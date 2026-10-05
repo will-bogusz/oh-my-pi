@@ -861,17 +861,20 @@ interface RunPageScope {
  * Expose the tab page while retaining every event handler created by this run.
  * The facade removes only run-owned listeners, preserving worker-level routing,
  * request logging, dialogs, and console capture. Raw interception is restored
- * to the tab's persistent route/allowlist state after the run.
+ * to the tab's persistent route/allowlist state after a run that changed it.
  */
 function createRunPageScope(page: Page, restoreInterception: () => Promise<void>): RunPageScope {
 	const handlers = new Map<unknown, unknown[]>();
 	const on = page.on;
 	const off = page.off;
 	const once = page.once;
+	const setRequestInterception = page.setRequestInterception;
 	const onDescriptor = Object.getOwnPropertyDescriptor(page, "on");
 	const offDescriptor = Object.getOwnPropertyDescriptor(page, "off");
 	const onceDescriptor = Object.getOwnPropertyDescriptor(page, "once");
 	const removeAllDescriptor = Object.getOwnPropertyDescriptor(page, "removeAllListeners");
+	const interceptionDescriptor = Object.getOwnPropertyDescriptor(page, "setRequestInterception");
+	let interceptionChanged = false;
 
 	const remember = (type: unknown, handler: unknown): void => {
 		const owned = handlers.get(type);
@@ -936,6 +939,13 @@ function createRunPageScope(page: Page, restoreInterception: () => Promise<void>
 				return page;
 			},
 		},
+		setRequestInterception: {
+			configurable: true,
+			value: (value: boolean): Promise<void> => {
+				interceptionChanged = true;
+				return Reflect.apply(setRequestInterception, page, [value]);
+			},
+		},
 	});
 
 	return {
@@ -949,10 +959,13 @@ function createRunPageScope(page: Page, restoreInterception: () => Promise<void>
 			else Reflect.deleteProperty(page, "once");
 			if (removeAllDescriptor) Object.defineProperty(page, "removeAllListeners", removeAllDescriptor);
 			else Reflect.deleteProperty(page, "removeAllListeners");
+			if (interceptionDescriptor) Object.defineProperty(page, "setRequestInterception", interceptionDescriptor);
+			else Reflect.deleteProperty(page, "setRequestInterception");
 			for (const [type, owned] of handlers) {
 				for (const handler of owned) Reflect.apply(off, page, [type, handler]);
 			}
 			handlers.clear();
+			if (!interceptionChanged) return;
 			try {
 				await withTimeout(
 					restoreInterception(),
@@ -1538,6 +1551,7 @@ export class WorkerCore {
 		let completed = false;
 		let returnValue: unknown;
 		let failure: { error: unknown } | undefined;
+		let recoverTab = false;
 		let runPage: RunPageScope | undefined;
 		try {
 			throwIfAborted(signal);
@@ -1634,7 +1648,15 @@ export class WorkerCore {
 			try {
 				await runPage?.cleanup();
 			} catch (error) {
-				failure = { error };
+				// A finished run keeps its result; the supervisor still recycles the tab.
+				if (completed && active.floatingRejections.length === 0) {
+					recoverTab = true;
+					this.#log("warn", "Browser tab state could not be restored after a completed run", {
+						error: error instanceof Error ? error.message : String(error),
+					});
+				} else {
+					failure = { error };
+				}
 			}
 			failure = this.#foldFloatingRejections(active, failure);
 			if (this.#active?.id === msg.id) this.#active = null;
@@ -1649,7 +1671,12 @@ export class WorkerCore {
 				type: "result",
 				id: msg.id,
 				ok: true,
-				payload: { displays: output.finish(), returnValue: cloneSafe(returnValue), screenshots },
+				payload: {
+					displays: output.finish(),
+					returnValue: cloneSafe(returnValue),
+					screenshots,
+					recoverTab: recoverTab || undefined,
+				},
 			});
 		}
 	}
