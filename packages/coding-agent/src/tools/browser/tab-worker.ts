@@ -309,6 +309,12 @@ const REQUEST_INTERCEPTION_CLEANUP_TIMEOUT_MS = 500;
 const HANDLE_ACTION_INVALIDATION_TIMEOUT_MS = 500;
 /** Bound on reading every iframe in one observation; a frame whose renderer is stuck in script never answers. */
 const FRAME_SNAPSHOT_TIMEOUT_MS = 5_000;
+/** Longest a look waits for the effects of the actions before it to land. */
+const SETTLE_TIMEOUT_MS = 3_000;
+/** DOM silence that counts as settled once the action's requests have finished. */
+const SETTLE_QUIET_MS = 150;
+/** Poll cadence while requests started by an action are still in flight. */
+const SETTLE_POLL_MS = 50;
 
 /** Queue a wheel event without treating a delayed renderer acknowledgement as dispatch failure. */
 export async function dispatchScroll(
@@ -663,12 +669,14 @@ async function adoptElementArgs(
  * and disposes its handle before surfacing the named error, so catching it cannot
  * dispatch a duplicate retry through the stale handle. Puppeteer handles expose
  * `type()` but no `fill()`; the `fill()` semantics mirror the selector-based
- * `tab.fill()`: focus, clear any existing value, then type.
+ * `tab.fill()`: focus, clear any existing value, then type. `queryGuard` wraps the read helpers
+ * (`text()`, `value()`, …) and defaults to `guard`.
  */
 export function toActionableHandle(
 	handle: ElementHandle,
 	guard?: HandleOpGuard,
 	invalidate?: () => Promise<void>,
+	queryGuard: HandleOpGuard | undefined = guard,
 ): ActionableHandle {
 	const enriched = handle as HandleWithRawMethods;
 	const methods = enriched as unknown as Partial<Record<GuardedHandleMethod, RawHandleMethod>>;
@@ -824,7 +832,7 @@ export function toActionableHandle(
 				invalidate,
 			),
 		);
-	return enrichElementQueries(enriched, guard);
+	return enrichElementQueries(enriched, queryGuard ?? guard);
 }
 
 /** Focus once, then type one code point at a time so abort stops before the next key dispatch. */
@@ -1166,6 +1174,63 @@ async function resolveBackendNode(frame: Frame, backendNodeId: number): Promise<
 	}
 }
 
+/**
+ * Page-side wait, run in the isolated world: true once the document has parsed and its nodes,
+ * text and state attributes stay unchanged for `quietMs`; false when `timeoutMs` passes first.
+ * `style`/`class` churn (animations, spinners) does not count as change.
+ */
+function waitForQuietDom(quietMs: number, timeoutMs: number): Promise<boolean> {
+	const win = globalThis as unknown as {
+		document: {
+			readyState: string;
+			addEventListener(type: string, listener: () => void, options: { once: boolean }): void;
+		};
+		MutationObserver: new (callback: () => void) => {
+			observe(target: unknown, options: Record<string, unknown>): void;
+			disconnect(): void;
+		};
+		setTimeout(callback: () => void, ms: number): number;
+		clearTimeout(id: number | undefined): void;
+	};
+	const { promise, resolve } = Promise.withResolvers<boolean>();
+	let observer: { disconnect(): void } | undefined;
+	let quietTimer: number | undefined;
+	const finish = (quiet: boolean): void => {
+		observer?.disconnect();
+		win.clearTimeout(quietTimer);
+		win.clearTimeout(deadline);
+		resolve(quiet);
+	};
+	const deadline = win.setTimeout(() => finish(false), timeoutMs);
+	const restart = (): void => {
+		win.clearTimeout(quietTimer);
+		quietTimer = win.setTimeout(() => finish(true), quietMs);
+	};
+	const watch = (): void => {
+		const mutations = new win.MutationObserver(restart);
+		mutations.observe(win.document, {
+			subtree: true,
+			childList: true,
+			characterData: true,
+			attributeFilter: [
+				"hidden",
+				"disabled",
+				"open",
+				"value",
+				"checked",
+				"aria-hidden",
+				"aria-busy",
+				"aria-expanded",
+			],
+		});
+		observer = mutations;
+		restart();
+	};
+	if (win.document.readyState === "loading") win.document.addEventListener("DOMContentLoaded", watch, { once: true });
+	else watch();
+	return promise;
+}
+
 async function collectObservationEntries(
 	core: WorkerCore,
 	owner: Omit<ObservedElement, "backendNodeId">,
@@ -1314,6 +1379,8 @@ export class WorkerCore {
 	#emulation?: BrowserEmulationController;
 	#screenshotHistory = new Map<string, ScreenshotHistory>();
 	#webmcp?: WebMcpController;
+	/** Start of the earliest input action or navigation since the last look; the next look settles it. */
+	#actionStartedAt?: number;
 	readonly #recording = new RecordingController();
 
 	constructor(transport: Transport, isolated: boolean) {
@@ -1976,18 +2043,36 @@ export class WorkerCore {
 			fn: (sig: AbortSignal) => Promise<T>,
 			selectorOpts?: { selector?: string; zeroMatchAfterMs?: number },
 		): Promise<T> => markHandled(this.#runOp(active, label, signal, perOpMs, fn, selectorOpts));
+		// Input actions and navigations mark the tab so the next observe/ariaSnapshot settles them.
+		const act = <T>(
+			label: string,
+			perOpMs: number,
+			fn: (sig: AbortSignal) => Promise<T>,
+			selectorOpts?: { selector?: string; zeroMatchAfterMs?: number },
+		): Promise<T> =>
+			op(
+				label,
+				perOpMs,
+				sig => {
+					this.#actionStartedAt ??= Date.now();
+					return fn(sig);
+				},
+				selectorOpts,
+			);
 		// Hand user-facing handles the fail-fast per-op guard so their interactive
 		// methods (`.click()`, `.type()`, …) can't outrun the cell budget (issue #9535).
+		// Only the interactive methods count as actions for the next look's settle.
 		const enrich = (handle: ElementHandle): ActionableHandle =>
 			toActionableHandle(
 				handle,
-				(label, fn) => op(label, actionOpMs, fn),
+				(label, fn) => act(label, actionOpMs, fn),
 				async () => {
 					// Raw Puppeteer actions have no AbortSignal. Poison + dispose every
 					// cached handle and stop navigation before reporting a recoverable timeout.
 					this.#clearElementCache();
 					await this.#stopLoading();
 				},
+				(label, fn) => op(label, actionOpMs, fn),
 			);
 		return {
 			name,
@@ -1996,7 +2081,7 @@ export class WorkerCore {
 			url: () => page.url(),
 			title: () => op("tab.title()", INF, sig => untilAborted(sig, () => page.title())),
 			goto: (url, opts) =>
-				op(`tab.goto(${JSON.stringify(url)})`, INF, async sig => {
+				act(`tab.goto(${JSON.stringify(url)})`, INF, async sig => {
 					this.#clearElementCache();
 					try {
 						// Default to "load" because dev servers with HMR/WS never reach networkidle.
@@ -2017,12 +2102,17 @@ export class WorkerCore {
 						throw err;
 					}
 				}),
-			observe: opts => op("tab.observe()", quickOpMs, sig => this.#collectObservation({ ...opts, signal: sig })),
+			observe: opts =>
+				op("tab.observe()", quickOpMs, async sig => {
+					await this.#settleAfterAction(sig);
+					return await this.#collectObservation({ ...opts, signal: sig });
+				}),
 			ariaSnapshot: (selector, opts) =>
 				op(
 					selector ? `tab.ariaSnapshot(${JSON.stringify(selector)})` : "tab.ariaSnapshot()",
 					quickOpMs,
 					async sig => {
+						await this.#settleAfterAction(sig);
 						let root: ElementHandle | null = null;
 						if (selector) {
 							root = (await untilAborted(sig, () =>
@@ -2065,7 +2155,7 @@ export class WorkerCore {
 					return content;
 				}),
 			click: selector =>
-				op(
+				act(
 					`tab.click(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
@@ -2085,7 +2175,7 @@ export class WorkerCore {
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			type: (selector, text) =>
-				op(
+				act(
 					`tab.type(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
@@ -2100,7 +2190,7 @@ export class WorkerCore {
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			fill: (selector, value) =>
-				op(
+				act(
 					`tab.fill(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
@@ -2114,7 +2204,7 @@ export class WorkerCore {
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			press: (key, opts) =>
-				op(`tab.press(${JSON.stringify(key)})`, actionOpMs, async sig => {
+				act(`tab.press(${JSON.stringify(key)})`, actionOpMs, async sig => {
 					assertTabPressArgs(key, opts);
 					const selector = opts?.selector;
 					if (selector) {
@@ -2130,7 +2220,7 @@ export class WorkerCore {
 					await untilAborted(sig, () => pressKey(page, key));
 				}),
 			scroll: (deltaX, deltaY, opts) =>
-				op("tab.scroll()", actionOpMs, async sig => {
+				act("tab.scroll()", actionOpMs, async sig => {
 					if (!opts?.selector) {
 						await untilAborted(sig, () => dispatchScroll(() => page.mouse.wheel({ deltaX, deltaY })));
 						return;
@@ -2153,7 +2243,7 @@ export class WorkerCore {
 						await handle.dispose().catch(() => undefined);
 					}
 				}),
-			drag: (from, to) => op("tab.drag()", actionOpMs, sig => this.#drag(from, to, sig)),
+			drag: (from, to) => act("tab.drag()", actionOpMs, sig => this.#drag(from, to, sig)),
 			waitFor: (selector, opts) => {
 				const w = waitMs(opts?.timeout);
 				return op(
@@ -2212,7 +2302,7 @@ export class WorkerCore {
 					}),
 				) as never,
 			scrollIntoView: selector =>
-				op(
+				act(
 					`tab.scrollIntoView(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
@@ -2233,14 +2323,14 @@ export class WorkerCore {
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			select: (selector, ...values) =>
-				op(
+				act(
 					`tab.select(${JSON.stringify(selector)})`,
 					actionOpMs,
 					sig => this.#select(selector, values, actionOpMs, sig),
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			uploadFile: (selector, ...filePaths) =>
-				op(
+				act(
 					`tab.uploadFile(${JSON.stringify(selector)})`,
 					actionOpMs,
 					sig => this.#uploadFile(selector, filePaths, actionOpMs, sig, session),
@@ -2311,22 +2401,22 @@ export class WorkerCore {
 			reactRenders: opts => op("tab.reactRenders()", quickOpMs, sig => collectReactRenders(page, opts, sig)),
 			reactSuspense: opts => op("tab.reactSuspense()", quickOpMs, sig => readReactSuspense(page, opts, sig)),
 			back: opts =>
-				op("tab.back()", INF, async sig => {
+				act("tab.back()", INF, async sig => {
 					this.#clearElementCache();
 					return await traverseHistory(page, "back", opts?.waitUntil ?? "load", budgetBound, sig);
 				}),
 			forward: opts =>
-				op("tab.forward()", INF, async sig => {
+				act("tab.forward()", INF, async sig => {
 					this.#clearElementCache();
 					return await traverseHistory(page, "forward", opts?.waitUntil ?? "load", budgetBound, sig);
 				}),
 			reload: opts =>
-				op("tab.reload()", INF, async sig => {
+				act("tab.reload()", INF, async sig => {
 					this.#clearElementCache();
 					return await reloadPage(page, opts?.waitUntil ?? "load", budgetBound, sig);
 				}),
 			pushState: url =>
-				op(`tab.pushState(${JSON.stringify(url)})`, actionOpMs, async sig => {
+				act(`tab.pushState(${JSON.stringify(url)})`, actionOpMs, async sig => {
 					this.#clearElementCache();
 					return await pushState(page, url, sig);
 				}),
@@ -2341,6 +2431,7 @@ export class WorkerCore {
 						normalizeSelector,
 						waitMs,
 						op,
+						act,
 						captureScreenshot: (target, selector, screenshotSignal) =>
 							captureFrameScreenshot(
 								target,
@@ -2359,7 +2450,7 @@ export class WorkerCore {
 					return this.#requireDialogs().state();
 				}),
 			handleDialog: opts =>
-				op("tab.handleDialog()", actionOpMs, sig => untilAborted(sig, () => this.#requireDialogs().handle(opts))),
+				act("tab.handleDialog()", actionOpMs, sig => untilAborted(sig, () => this.#requireDialogs().handle(opts))),
 			setDialogs: policy =>
 				op("tab.setDialogs()", actionOpMs, sig =>
 					untilAborted(sig, () => this.#requireDialogs().setPolicy(policy)),
@@ -2508,7 +2599,7 @@ export class WorkerCore {
 			metrics: () =>
 				op("tab.metrics()", quickOpMs, sig => untilAborted(sig, () => this.#requireTracing().metrics())),
 			dblclick: selector =>
-				op(
+				act(
 					`tab.dblclick(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
@@ -2522,7 +2613,7 @@ export class WorkerCore {
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			hover: selector =>
-				op(
+				act(
 					`tab.hover(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
@@ -2536,7 +2627,7 @@ export class WorkerCore {
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			focus: selector =>
-				op(
+				act(
 					`tab.focus(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
@@ -2550,7 +2641,7 @@ export class WorkerCore {
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			check: selector =>
-				op(
+				act(
 					`tab.check(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
@@ -2564,7 +2655,7 @@ export class WorkerCore {
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			uncheck: selector =>
-				op(
+				act(
 					`tab.uncheck(${JSON.stringify(selector)})`,
 					actionOpMs,
 					async sig => {
@@ -2577,13 +2668,13 @@ export class WorkerCore {
 					},
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
-			keyDown: key => op(`tab.keyDown(${JSON.stringify(key)})`, actionOpMs, sig => keyDown(page, key, sig)),
-			keyUp: key => op(`tab.keyUp(${JSON.stringify(key)})`, actionOpMs, sig => keyUp(page, key, sig)),
-			mouseMove: (x, y, opts) => op("tab.mouseMove()", actionOpMs, sig => mouseMove(page, x, y, opts, sig)),
-			mouseDown: opts => op("tab.mouseDown()", actionOpMs, sig => mouseDown(page, opts, sig)),
-			mouseUp: opts => op("tab.mouseUp()", actionOpMs, sig => mouseUp(page, opts, sig)),
-			clickAt: (x, y, opts) => op("tab.clickAt()", actionOpMs, sig => clickAt(page, x, y, opts, sig)),
-			wheel: (deltaX, deltaY) => op("tab.wheel()", actionOpMs, sig => wheel(page, deltaX, deltaY, sig)),
+			keyDown: key => act(`tab.keyDown(${JSON.stringify(key)})`, actionOpMs, sig => keyDown(page, key, sig)),
+			keyUp: key => act(`tab.keyUp(${JSON.stringify(key)})`, actionOpMs, sig => keyUp(page, key, sig)),
+			mouseMove: (x, y, opts) => act("tab.mouseMove()", actionOpMs, sig => mouseMove(page, x, y, opts, sig)),
+			mouseDown: opts => act("tab.mouseDown()", actionOpMs, sig => mouseDown(page, opts, sig)),
+			mouseUp: opts => act("tab.mouseUp()", actionOpMs, sig => mouseUp(page, opts, sig)),
+			clickAt: (x, y, opts) => act("tab.clickAt()", actionOpMs, sig => clickAt(page, x, y, opts, sig)),
+			wheel: (deltaX, deltaY) => act("tab.wheel()", actionOpMs, sig => wheel(page, deltaX, deltaY, sig)),
 			highlight: (selector, opts) =>
 				op(
 					`tab.highlight(${JSON.stringify(selector)})`,
@@ -2618,10 +2709,43 @@ export class WorkerCore {
 					untilAborted(sig, () => this.#requireEmulation().clipboardCopy()),
 				),
 			clipboardPaste: () =>
-				op("tab.clipboardPaste()", actionOpMs, sig =>
+				act("tab.clipboardPaste()", actionOpMs, sig =>
 					untilAborted(sig, () => this.#requireEmulation().clipboardPaste()),
 				),
 		};
+	}
+
+	/**
+	 * Before a look, let the actions since the previous look land: a main-frame navigation they
+	 * started loads, the document, fetch and XHR requests they started finish, and the DOM then
+	 * stays quiet for {@link SETTLE_QUIET_MS}. Bounded by {@link SETTLE_TIMEOUT_MS}, after which the
+	 * page is read as it is. A look with no action before it returns at once.
+	 */
+	async #settleAfterAction(signal: AbortSignal): Promise<void> {
+		const since = this.#actionStartedAt;
+		this.#actionStartedAt = undefined;
+		if (since === undefined) return;
+		const page = this.#requirePage();
+		const network = this.#requireNetwork();
+		const deadline = Date.now() + SETTLE_TIMEOUT_MS;
+		while (Date.now() < deadline) {
+			if (network.hasPendingRequests(since)) {
+				await untilAborted(signal, () => Bun.sleep(SETTLE_POLL_MS));
+				continue;
+			}
+			const remaining = deadline - Date.now();
+			// A navigation that commits mid-wait destroys the context; the loop then waits in the new document.
+			const quiet = await withTimeout(
+				page.evaluate(waitForQuietDom, SETTLE_QUIET_MS, remaining),
+				remaining + SETTLE_POLL_MS,
+				"settle wait timed out",
+				signal,
+			).catch(error => {
+				if (signal.aborted) throw error;
+				return false;
+			});
+			if (quiet && !network.hasPendingRequests(since)) return;
+		}
 	}
 
 	async #collectObservation(options: {
