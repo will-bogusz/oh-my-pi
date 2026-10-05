@@ -26,6 +26,7 @@ import {
 } from "../run-scope";
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import { describeChanges, type TreeRows, treeRows } from "./change-summary";
 import type {
 	ComputerScreenshot,
 	ComputerSessionSnapshot,
@@ -85,6 +86,9 @@ type ClickOptions = InputOptions & { button?: string; count?: number; modifiers?
 type DragOptions = InputOptions & { modifiers?: string[] };
 type ScrollOptions = InputOptions & { dx?: number; dy?: number };
 type AxOptions = Pick<AxSnapshotOptions, "all" | "maxDepth">;
+
+/** Delay before an input's read-back, so the app can react to the input. */
+const SETTLE_DELAY_MS = 500;
 
 type PendingTool = { resolve(value: unknown): void; reject(reason?: unknown): void };
 interface ActiveRun {
@@ -221,6 +225,83 @@ async function captureScreenshot(
 	return { path: destination, width: frame.width, height: frame.height };
 }
 
+/**
+ * One native session's record of what the model last read: each window's
+ * tree and where each ref came from. An input helper diffs the tree it reads
+ * back after the input against this record and returns the difference.
+ */
+class ChangeTracker {
+	readonly #session: NativeDesktopSession;
+	/** Last default `ax()` tree of each window. */
+	readonly #trees = new Map<string, TreeRows>();
+	/** Window each ref was read from. */
+	readonly #refWindows = new Map<string, string>();
+	/** Window list as last listed. */
+	#windows?: DesktopWindow[];
+
+	constructor(session: NativeDesktopSession) {
+		this.#session = session;
+	}
+
+	/** Records a read tree; only a default read is what later inputs are diffed against. */
+	noteTree(windowId: string, text: string, options?: AxOptions): TreeRows {
+		const rows = treeRows(text);
+		for (const ref of rows.keys()) this.#refWindows.set(ref, windowId);
+		if (!options?.all && options?.maxDepth === undefined) this.#trees.set(windowId, rows);
+		return rows;
+	}
+
+	noteRefs(windowId: string | undefined, nodes: readonly AxNode[]): void {
+		if (windowId === undefined) return;
+		for (const node of nodes) this.#refWindows.set(node.ref, windowId);
+	}
+
+	noteWindows(windows: DesktopWindow[]): void {
+		this.#windows = windows;
+	}
+
+	windowOf(ref: string): string | undefined {
+		return this.#refWindows.get(ref);
+	}
+
+	/**
+	 * Sends one input and summarizes it: windows opened, closed or focused,
+	 * then the changed rows of the window it reached (a window it opened and
+	 * focused, else `target`, else the focused one). A target never read is
+	 * read first so its rows have something to be diffed against.
+	 */
+	async input(
+		signal: AbortSignal,
+		target: string | undefined,
+		label: string,
+		dispatch: () => Promise<void>,
+	): Promise<string> {
+		const windowsBefore = this.#windows ?? (await nativeCall(signal, () => this.#session.listWindows()));
+		if (target !== undefined && !this.#trees.has(target)) {
+			await this.#read(signal, target).catch(() => undefined);
+		}
+		await nativeCall(signal, dispatch);
+		await waitForRun(SETTLE_DELAY_MS, signal);
+		const windowsAfter = await nativeCall(signal, () => this.#session.listWindows());
+		this.#windows = windowsAfter;
+		const listed = new Set(windowsBefore.map(window => window.id));
+		const focused = windowsAfter.find(window => window.focused);
+		const window =
+			focused && !listed.has(focused.id)
+				? focused
+				: (windowsAfter.find(candidate => candidate.id === target) ?? focused);
+		if (!window) return describeChanges({ label, windowsBefore, windowsAfter });
+		const before = this.#trees.get(window.id);
+		const after = await this.#read(signal, window.id).catch(() => undefined);
+		return describeChanges({ label, windowsBefore, windowsAfter, target: window, before, after });
+	}
+
+	async #read(signal: AbortSignal, windowId: string): Promise<TreeRows> {
+		const { text } = await nativeCall(signal, () => this.#session.axSnapshot(windowId));
+		return this.noteTree(windowId, text);
+	}
+}
+
 class El {
 	readonly ref: string;
 	readonly role: string;
@@ -232,10 +313,12 @@ class El {
 	readonly childCount: number;
 	readonly #session: NativeDesktopSession;
 	readonly #getContext: RunContextAccessor;
+	readonly #tracker: ChangeTracker;
 
-	constructor(session: NativeDesktopSession, getContext: RunContextAccessor, node: AxNode) {
+	constructor(session: NativeDesktopSession, getContext: RunContextAccessor, tracker: ChangeTracker, node: AxNode) {
 		this.#session = session;
 		this.#getContext = getContext;
+		this.#tracker = tracker;
 		this.ref = node.ref;
 		this.role = node.role;
 		this.nativeRole = node.nativeRole;
@@ -246,15 +329,20 @@ class El {
 		this.childCount = node.childCount;
 	}
 
+	/** Sends an input to this element and returns what it changed in the element's window. */
+	#input(method: string, label: string, dispatch: () => Promise<void>): Promise<string> {
+		const context = this.#getContext();
+		guardRun(context, method);
+		return this.#tracker.input(context.signal, this.#tracker.windowOf(this.ref), label, dispatch);
+	}
+
 	async value(): Promise<string | undefined> {
 		const { signal } = this.#getContext();
 		return (await nativeCall(signal, () => this.#session.axNode(this.ref))).value;
 	}
 
-	async setValue(value: string): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "setValue");
-		await nativeCall(context.signal, () => this.#session.axSetValue(this.ref, value));
+	setValue(value: string): Promise<string> {
+		return this.#input("setValue", `setValue ${this.ref}`, () => this.#session.axSetValue(this.ref, value));
 	}
 
 	async bounds(): Promise<{ x: number; y: number; width: number; height: number } | null> {
@@ -275,22 +363,16 @@ class El {
 		return (await nativeCall(signal, () => this.#session.axNode(this.ref))).actions ?? [];
 	}
 
-	async perform(action: string): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "perform");
-		await nativeCall(context.signal, () => this.#session.axPerform(this.ref, action));
+	perform(action: string): Promise<string> {
+		return this.#input("perform", `perform ${this.ref} ${action}`, () => this.#session.axPerform(this.ref, action));
 	}
 
-	async press(): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "press");
-		await nativeCall(context.signal, () => this.#session.axPerform(this.ref, "press"));
+	press(): Promise<string> {
+		return this.#input("press", `press ${this.ref}`, () => this.#session.axPerform(this.ref, "press"));
 	}
 
-	async click(options?: InputOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "click");
-		await nativeCall(context.signal, () => this.#session.axClick(this.ref, pointerOptions(options)));
+	click(options?: InputOptions): Promise<string> {
+		return this.#input("click", `click ${this.ref}`, () => this.#session.axClick(this.ref, pointerOptions(options)));
 	}
 
 	async focus(): Promise<void> {
@@ -302,14 +384,16 @@ class El {
 	async parent(): Promise<El | null> {
 		const { signal } = this.#getContext();
 		const node = await nativeCall(signal, () => this.#session.axParent(this.ref));
-		return node ? new El(this.#session, this.#getContext, node) : null;
+		if (!node) return null;
+		this.#tracker.noteRefs(this.#tracker.windowOf(this.ref), [node]);
+		return new El(this.#session, this.#getContext, this.#tracker, node);
 	}
 
 	async children(): Promise<El[]> {
 		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axChildren(this.ref))).map(
-			node => new El(this.#session, this.#getContext, node),
-		);
+		const nodes = await nativeCall(signal, () => this.#session.axChildren(this.ref));
+		this.#tracker.noteRefs(this.#tracker.windowOf(this.ref), nodes);
+		return nodes.map(node => new El(this.#session, this.#getContext, this.#tracker, node));
 	}
 }
 
@@ -322,10 +406,17 @@ class Win {
 	readonly focused: boolean;
 	readonly #session: NativeDesktopSession;
 	readonly #getContext: RunContextAccessor;
+	readonly #tracker: ChangeTracker;
 
-	constructor(session: NativeDesktopSession, getContext: RunContextAccessor, window: DesktopWindow) {
+	constructor(
+		session: NativeDesktopSession,
+		getContext: RunContextAccessor,
+		tracker: ChangeTracker,
+		window: DesktopWindow,
+	) {
 		this.#session = session;
 		this.#getContext = getContext;
+		this.#tracker = tracker;
 		this.id = window.id;
 		this.app = window.app;
 		this.title = window.title;
@@ -334,20 +425,24 @@ class Win {
 		this.focused = window.focused;
 	}
 
+	/** Sends an input to this window (the focused one for desktop input) and returns what it changed. */
+	#input(method: string, label: string, dispatch: () => Promise<void>): Promise<string> {
+		const context = this.#getContext();
+		guardRun(context, method);
+		const target = this.id === "desktop" ? undefined : this.id;
+		return this.#tracker.input(context.signal, target, label, dispatch);
+	}
+
 	screenshot(options?: ScreenshotOptions): Promise<{ path: string; width: number; height: number }> {
 		return captureScreenshot(this.#session, this.#getContext, this.id, options);
 	}
 
-	async click(x: number, y: number, options?: ClickOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "click");
-		await nativeCall(context.signal, () => this.#session.click(this.id, x, y, pointerOptions(options)));
+	click(x: number, y: number, options?: ClickOptions): Promise<string> {
+		return this.#input("click", `click ${x},${y}`, () => this.#session.click(this.id, x, y, pointerOptions(options)));
 	}
 
-	async doubleClick(x: number, y: number, options?: Omit<ClickOptions, "count">): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "doubleClick");
-		await nativeCall(context.signal, () =>
+	doubleClick(x: number, y: number, options?: Omit<ClickOptions, "count">): Promise<string> {
+		return this.#input("doubleClick", `doubleClick ${x},${y}`, () =>
 			this.#session.click(this.id, x, y, pointerOptions({ ...options, count: 2 })),
 		);
 	}
@@ -358,10 +453,8 @@ class Win {
 		await nativeCall(context.signal, () => this.#session.moveMouse(this.id, x, y));
 	}
 
-	async drag(points: Array<[number, number]>, options?: DragOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "drag");
-		await nativeCall(context.signal, () =>
+	drag(points: Array<[number, number]>, options?: DragOptions): Promise<string> {
+		return this.#input("drag", "drag", () =>
 			this.#session.drag(
 				this.id,
 				points.map(([x, y]) => ({ x, y })),
@@ -370,25 +463,23 @@ class Win {
 		);
 	}
 
-	async scroll(x: number, y: number, options: ScrollOptions = {}): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "scroll");
-		await nativeCall(context.signal, () =>
+	scroll(x: number, y: number, options: ScrollOptions = {}): Promise<string> {
+		return this.#input("scroll", `scroll ${x},${y}`, () =>
 			this.#session.scroll(this.id, x, y, options.dx ?? 0, options.dy ?? 0, pointerOptions(options)),
 		);
 	}
 
-	async type(text: string, options?: InputOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "type");
-		await nativeCall(context.signal, () => this.#session.typeText(this.id, text, pointerOptions(options)));
+	type(text: string, options?: InputOptions): Promise<string> {
+		const shown = text.length > 24 ? `${text.slice(0, 23)}…` : text;
+		return this.#input("type", `type ${JSON.stringify(shown)}`, () =>
+			this.#session.typeText(this.id, text, pointerOptions(options)),
+		);
 	}
 
-	async press(chord: string | string[], options?: InputOptions): Promise<void> {
-		const context = this.#getContext();
-		guardRun(context, "press");
-		await nativeCall(context.signal, () =>
-			this.#session.keyChord(this.id, chordKeys(chord), pointerOptions(options)),
+	press(chord: string | string[], options?: InputOptions): Promise<string> {
+		const keys = chordKeys(chord);
+		return this.#input("press", `press ${keys.join("+")}`, () =>
+			this.#session.keyChord(this.id, keys, pointerOptions(options)),
 		);
 	}
 
@@ -400,19 +491,22 @@ class Win {
 
 	async ax(options?: AxOptions): Promise<string> {
 		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axSnapshot(this.id, options))).text;
+		const { text } = await nativeCall(signal, () => this.#session.axSnapshot(this.id, options));
+		this.#tracker.noteTree(this.id, text, options);
+		return text;
 	}
 
 	async find(query: AxQuery): Promise<El[]> {
 		const { signal } = this.#getContext();
-		return (await nativeCall(signal, () => this.#session.axQuery(this.id, query))).map(
-			node => new El(this.#session, this.#getContext, node),
-		);
+		const nodes = await nativeCall(signal, () => this.#session.axQuery(this.id, query));
+		this.#tracker.noteRefs(this.id, nodes);
+		return nodes.map(node => new El(this.#session, this.#getContext, this.#tracker, node));
 	}
 
 	async ref(ref: string): Promise<El> {
 		const { signal } = this.#getContext();
-		return new El(this.#session, this.#getContext, await nativeCall(signal, () => this.#session.axNode(ref)));
+		const node = await nativeCall(signal, () => this.#session.axNode(ref));
+		return new El(this.#session, this.#getContext, this.#tracker, node);
 	}
 }
 
@@ -422,6 +516,7 @@ export class ComputerWorkerCore {
 	readonly #createSession?: NativeDesktopSessionFactory;
 	readonly #unsubscribe: () => void;
 	#session?: NativeDesktopSession;
+	#tracker?: ChangeTracker;
 	/** In-flight lazy session creation, shared so concurrent run/capabilities requests never double-create. */
 	#sessionInit?: Promise<NativeDesktopSession>;
 	#runtime?: JsRuntime;
@@ -538,7 +633,7 @@ export class ComputerWorkerCore {
 			const session = await this.#ensureSession(message.session);
 			const runtime = this.#ensureRuntime(message.session);
 			runtime.setCwd(message.session.cwd);
-			const desktop = this.#createDesktopScope(session);
+			const desktop = this.#createDesktopScope(session, (this.#tracker ??= new ChangeTracker(session)));
 			runtime.setRunScope({
 				desktop: bindRunFacade(desktop, signal),
 				assert: (condition: unknown, text?: string): void => {
@@ -687,11 +782,11 @@ export class ComputerWorkerCore {
 		return context;
 	};
 
-	#createDesktopScope(session: NativeDesktopSession): object {
+	#createDesktopScope(session: NativeDesktopSession, tracker: ChangeTracker): object {
 		const getContext = this.#currentRunContext;
-		const makeWin = (window: DesktopWindow): Win => new Win(session, getContext, window);
-		const el = (node: AxNode): El => new El(session, getContext, node);
-		const desktopTarget = new Win(session, getContext, {
+		const makeWin = (window: DesktopWindow): Win => new Win(session, getContext, tracker, window);
+		const el = (node: AxNode): El => new El(session, getContext, tracker, node);
+		const desktopTarget = new Win(session, getContext, tracker, {
 			id: "desktop",
 			app: "desktop",
 			title: "desktop",
@@ -717,13 +812,14 @@ export class ComputerWorkerCore {
 			},
 			windows: async (filter?: WindowFilter): Promise<DesktopWindow[]> => {
 				const { signal } = getContext();
-				return (await nativeCall(signal, () => session.listWindows())).filter(window =>
-					matchesFilter(window, filter),
-				);
+				const windows = await nativeCall(signal, () => session.listWindows());
+				tracker.noteWindows(windows);
+				return windows.filter(window => matchesFilter(window, filter));
 			},
 			window: async (selector: string | number | WindowFilter): Promise<Win> => {
 				const { signal } = getContext();
 				const windows = await nativeCall(signal, () => session.listWindows());
+				tracker.noteWindows(windows);
 				const matches =
 					typeof selector === "string" || typeof selector === "number"
 						? windows.filter(window => window.id === String(selector))
@@ -739,7 +835,9 @@ export class ComputerWorkerCore {
 			},
 			focusedWindow: async (): Promise<Win | null> => {
 				const { signal } = getContext();
-				const window = (await nativeCall(signal, () => session.listWindows())).find(candidate => candidate.focused);
+				const windows = await nativeCall(signal, () => session.listWindows());
+				tracker.noteWindows(windows);
+				const window = windows.find(candidate => candidate.focused);
 				return window ? makeWin(window) : null;
 			},
 			screenshot: (options?: ScreenshotOptions) => captureScreenshot(session, getContext, "desktop", options),

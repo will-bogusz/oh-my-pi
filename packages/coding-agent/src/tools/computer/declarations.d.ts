@@ -119,32 +119,33 @@ interface ComputerElement {
 	readonly focused: boolean;
 	readonly childCount: number;
 	value(): Promise<string | undefined>;
-	setValue(value: string): Promise<void>;
+	/** Inputs return what they changed: windows opened, closed or focused, then the window's changed (`~`), added (`+`) and removed (`-`) rows with live refs. */
+	setValue(value: string): Promise<string>;
 	/** Bounds in global desktop coordinates, or null when the element has none. */
 	bounds(): Promise<ComputerBounds | null>;
 	attributes(): Promise<Record<string, string>>;
 	actions(): Promise<string[]>;
-	perform(action: string): Promise<void>;
+	perform(action: string): Promise<string>;
 	/** Perform the element's native press action; needs no screenshot. */
-	press(): Promise<void>;
+	press(): Promise<string>;
 	/** Click the element's center with native input. */
-	click(options?: ComputerInputOptions): Promise<void>;
+	click(options?: ComputerInputOptions): Promise<string>;
 	focus(): Promise<void>;
 	parent(): Promise<ComputerElement | null>;
 	children(): Promise<ComputerElement[]>;
 }
 
-/** Native input helpers shared by the desktop root and window handles; `x`/`y` are pixels in the most recent screenshot of the same target. */
+/** Native input helpers shared by the desktop root and window handles; `x`/`y` are pixels in the most recent screenshot of the same target. Inputs except `move` return what they changed, like element inputs. */
 interface ComputerInputTarget {
 	screenshot(options?: ComputerScreenshotOptions): Promise<ComputerScreenshotResult>;
-	click(x: number, y: number, options?: ComputerClickOptions): Promise<void>;
-	doubleClick(x: number, y: number, options?: Omit<ComputerClickOptions, "count">): Promise<void>;
+	click(x: number, y: number, options?: ComputerClickOptions): Promise<string>;
+	doubleClick(x: number, y: number, options?: Omit<ComputerClickOptions, "count">): Promise<string>;
 	move(x: number, y: number): Promise<void>;
-	drag(points: Array<[number, number]>, options?: ComputerDragOptions): Promise<void>;
-	scroll(x: number, y: number, options?: ComputerScrollOptions): Promise<void>;
-	type(text: string, options?: ComputerInputOptions): Promise<void>;
+	drag(points: Array<[number, number]>, options?: ComputerDragOptions): Promise<string>;
+	scroll(x: number, y: number, options?: ComputerScrollOptions): Promise<string>;
+	type(text: string, options?: ComputerInputOptions): Promise<string>;
 	/** Key chord such as `"cmd+shift+p"` or `["cmd", "shift", "p"]`. */
-	press(chord: string | string[], options?: ComputerInputOptions): Promise<void>;
+	press(chord: string | string[], options?: ComputerInputOptions): Promise<string>;
 }
 
 /** Window handle resolved by `window`/`focusedWindow`; identity fields are a snapshot taken at resolution. */

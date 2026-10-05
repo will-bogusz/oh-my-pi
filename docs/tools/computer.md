@@ -98,6 +98,8 @@ Both a selected window and `desktop` expose:
 
 A window also exposes `raise()`, `ax(...)`, `find(...)`, and `ref(...)`. Window input defaults to background delivery without deliberate activation or pointer movement. `takeover: true` briefly activates the target and posts real input; use it only after that call reports `BackgroundUnavailable` or a screenshot proves a no-op, and AX cannot perform the action. Never replay uncertain input blindly. Desktop-root pointer helpers drive the user's real pointer, so prefer window handles. Pixel coordinates belong to the most recent screenshot of the same target. Coordinate input before capture, after target/layout changes, or with another target's frame throws.
 
+Input helpers other than `move()`, `raise()` and `focus()` return what the input changed, about half a second after sending it: windows opened, closed or newly focused, then the rows of the window the input reached that changed (`~`, with the old row), appeared (`+`) or disappeared (`-`) since that window's last default `ax()` or input, each with its live ref. A window never read is read once before the input so it has a baseline; a window the input opened and focused is listed in full. Past 30 lines the rest are counted, and `ax()` shows the whole tree.
+
 Screenshots are PNGs written under the OS temp directory. Native capture is resized to the effective capture caps before both saving and displaying; the saved PNG and model-visible image share the same pixel frame. Unless `silent: true`, each capture emits a status text block and an image block. Details record captured dimensions, original source dimensions, and target.
 
 ### Accessibility

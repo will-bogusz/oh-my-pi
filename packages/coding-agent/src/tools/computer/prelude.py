@@ -51,9 +51,22 @@ def _make_computer():
         details = response.get("details")
         return details if isinstance(details, dict) else {}
 
+    _INPUTS = {"click", "doubleClick", "drag", "scroll", "type", "press", "setValue", "perform"}
+
+    class _Changes(str):
+        """What an input changed; a cell ending in the input shows it as plain text."""
+
+        __slots__ = ()
+
+        def __repr__(self):
+            return str(self)
+
     async def _call(chain):
         details = await _invoke("call", {"chain": chain})
-        return details.get("value")
+        value = details.get("value")
+        if isinstance(value, str) and chain[-1]["method"] in _INPUTS:
+            return _Changes(value)
+        return value
 
     def _step(method, args, kwargs):
         return {"method": method, "args": _arguments(args, kwargs)}

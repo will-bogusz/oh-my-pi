@@ -807,6 +807,35 @@ describe("computer worker round trips", () => {
 		});
 	});
 
+	it("returns what an element press changed in the window it was read from", async () => {
+		const transport = new MemoryTransport();
+		const native = new (class extends FakeNativeSession {
+			pressed = false;
+			override async axSnapshot(): Promise<{ text: string }> {
+				const value = this.pressed ? "1" : "0";
+				return { text: `- window "Editor" [ref=e1] app=Code\n  - checkbox "Wrap" [ref=e2]: "${value}"` };
+			}
+			override async axNode(ref: string): Promise<AxNode> {
+				return { ...axNode, ref };
+			}
+			override async axPerform(): Promise<void> {
+				this.pressed = true;
+			}
+		})();
+		new ComputerWorkerCore(transport, () => native);
+
+		const result = await runWorker(
+			transport,
+			"summary",
+			'const win = await desktop.window("42"); await win.ax(); await (await win.ref("e2")).press()',
+		);
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		expect(result.payload.returnValue).toBe(
+			'press e2 → Code "Editor" [42] (focused):\n~ checkbox "Wrap" [ref=e2]: "1" (was: checkbox "Wrap": "0")',
+		);
+	});
+
 	it("blocks read-only click after capture before invoking native input", async () => {
 		const transport = new MemoryTransport();
 		const native = new FakeNativeSession();
