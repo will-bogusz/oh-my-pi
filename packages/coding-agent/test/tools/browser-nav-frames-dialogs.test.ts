@@ -12,6 +12,16 @@ const server = Bun.serve({
 	fetch(request) {
 		const { pathname } = new URL(request.url);
 		const iframe = `<iframe id="f" name="payment" srcdoc="<!doctype html><input id='in'><div id='out'>ready</div><script>document.querySelector('#in').addEventListener('input',e=>document.querySelector('#out').textContent=e.target.value)</script>"></iframe>`;
+		const headers = { "content-type": "text/html" };
+		if (pathname === "/card") return new Response(`<input aria-label="Card"><button>Pay</button>`, { headers });
+		if (pathname === "/observe-frames") {
+			// localhost and 127.0.0.1 are different sites, so the frame runs out of process.
+			const card = `http://localhost:${new URL(request.url).port}/card`;
+			return new Response(
+				`<section id="checkout" aria-label="Checkout"><button>Main</button><iframe id="pay" src="${card}"></iframe></section><iframe srcdoc="<button>Outside</button>"></iframe>`,
+				{ headers },
+			);
+		}
 		return new Response(
 			`<!doctype html><title>${pathname}</title><body data-path="${pathname}">${iframe}<script>
 				sessionStorage.setItem('loads', String(Number(sessionStorage.getItem('loads') || 0) + 1));
@@ -242,6 +252,42 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("browser navigation, frames, dialogs, and t
 				}),
 			),
 		).toBe("direct");
+	}, 30_000);
+
+	test("observes controls inside iframes and acts on them by id", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "observe-frames", url: `${baseUrl}/observe-frames` });
+		const observe = async (options: object) => {
+			const { elements } = valueOf(
+				await invoke({ action: "call", name: "observe-frames", chain: [{ method: "observe", args: [options] }] }),
+			) as { elements: Array<{ id: number; role: string; name: string }> };
+			return { elements, names: elements.map(entry => `${entry.role}:${entry.name}`) };
+		};
+		// A selector reads only the iframes inside it.
+		expect((await observe({ selector: "#checkout" })).names).toEqual(["button:Main", "textbox:Card", "button:Pay"]);
+		const observed = await observe({});
+		expect(observed.names).toEqual(["button:Main", "textbox:Card", "button:Pay", "button:Outside"]);
+		const card = observed.elements.find(entry => entry.name === "Card")!;
+		await invoke({
+			action: "call",
+			name: "observe-frames",
+			chain: [
+				{ method: "id", args: [card.id] },
+				{ method: "fill", args: ["4242"] },
+			],
+		});
+		expect(
+			valueOf(
+				await invoke({
+					action: "call",
+					name: "observe-frames",
+					chain: [
+						{ method: "frame", args: ["#pay"] },
+						{ method: "value", args: ["input"] },
+					],
+				}),
+			),
+		).toBe("4242");
 	}, 30_000);
 
 	test("lists managed tabs with live metadata", async () => {
