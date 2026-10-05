@@ -118,3 +118,23 @@ export async function ensureRelayDaemon(opts: { cdpUrl: string; signal?: AbortSi
 	}
 	return false;
 }
+
+/**
+ * Replace the broker-owned relay at `cdpUrl` with one from this OMP version.
+ * False when the broker runs no relay there (a manually started relay is left
+ * alone) or the old relay did not stop.
+ */
+export async function restartRelayDaemon(opts: { cdpUrl: string; signal?: AbortSignal }): Promise<boolean> {
+	let name: string;
+	try {
+		name = relayDaemonName(String(new URL(opts.cdpUrl).port || 80));
+	} catch {
+		return false;
+	}
+	const client = await daemonClientForGlobal(RELAY_BROKER_SCOPE);
+	const existing = await describeQuietly(client, name, "Browser relay", opts.signal);
+	if (!existing || existing.state === "exited" || existing.state === "failed") return false;
+	const stopped = await stopQuietly(client, name, "Browser relay", opts.signal);
+	if (stopped?.state !== "exited" && stopped?.state !== "failed") return false;
+	return ensureRelayDaemon(opts);
+}
