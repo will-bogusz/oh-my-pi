@@ -223,6 +223,8 @@ declare module "puppeteer-core" {
 	interface Frame {
 		/** Puppeteer's main JavaScript realm, retained by our pinned runtime patch. */
 		mainRealm(): Realm;
+		/** Loader of the frame's current document (`@internal` upstream, stripped from published types). */
+		readonly _loaderId: string;
 	}
 	interface Realm {
 		/** Re-home a DOM handle into this realm (`@internal` upstream, stripped from published types). */
@@ -1029,9 +1031,13 @@ function collectInteractiveObservationAncestors(node: SerializedAXNode, ancestor
 	return found;
 }
 
-/** Where an observed element lives; `tab.id(n)` resolves it to a handle on first use. */
+/**
+ * Where an observed element lives; `tab.id(n)` resolves it to a handle on first use. Backend node
+ * ids are only unique per renderer, so the document's loader id scopes them.
+ */
 interface ObservedElement {
 	frame: Frame;
+	loaderId: string;
 	backendNodeId: number;
 }
 
@@ -1063,7 +1069,7 @@ async function resolveBackendNode(frame: Frame, backendNodeId: number): Promise<
 
 async function collectObservationEntries(
 	core: WorkerCore,
-	frame: Frame,
+	owner: Omit<ObservedElement, "backendNodeId">,
 	node: SerializedAXNode,
 	entries: ObservationEntry[],
 	options: {
@@ -1085,11 +1091,11 @@ async function collectObservationEntries(
 		let handle: ElementHandle | null = null;
 		let inViewport = true;
 		if (options.viewportOnly) {
-			handle = await resolveBackendNode(frame, node.backendNodeId);
+			handle = await resolveBackendNode(owner.frame, node.backendNodeId);
 			inViewport = (await handle?.isIntersectingViewport().catch(() => false)) ?? false;
 		}
 		if (inViewport) {
-			const id = core.observeElement({ frame, backendNodeId: node.backendNodeId }, handle ?? undefined);
+			const id = core.observeElement({ ...owner, backendNodeId: node.backendNodeId }, handle ?? undefined);
 			const states: string[] = [];
 			if (node.disabled) states.push("disabled");
 			if (node.checked !== undefined) states.push(`checked=${String(node.checked)}`);
@@ -1116,7 +1122,7 @@ async function collectObservationEntries(
 		}
 	}
 	for (const child of node.children ?? []) {
-		await collectObservationEntries(core, frame, child, entries, options);
+		await collectObservationEntries(core, owner, child, entries, options);
 	}
 }
 
@@ -1190,6 +1196,7 @@ export class WorkerCore {
 	#targetId?: string;
 	#elementCache = new Map<number, ElementHandle>();
 	#observedElements = new Map<number, ObservedElement>();
+	#elementIds = new Map<string, number>();
 	#elementCounter = 0;
 	#active: ActiveRun | null = null;
 	#runtime: JsRuntime | null = null;
@@ -1273,12 +1280,22 @@ export class WorkerCore {
 		return failure;
 	}
 
-	/** Number an observed element; keeps `handle` when the observation already resolved it. */
+	/**
+	 * Id for an observed element: the one it got when first observed in this document, else a new
+	 * one. Ids are never reused, so a stale id cannot reach another element. Keeps `handle` when the
+	 * observation already resolved it.
+	 */
 	observeElement(element: ObservedElement, handle?: ElementHandle): number {
-		this.#elementCounter += 1;
-		this.#observedElements.set(this.#elementCounter, element);
-		if (handle) this.#elementCache.set(this.#elementCounter, handle);
-		return this.#elementCounter;
+		const key = `${element.loaderId}:${element.backendNodeId}`;
+		let id = this.#elementIds.get(key);
+		if (id === undefined) {
+			id = ++this.#elementCounter;
+			this.#elementIds.set(key, id);
+			this.#observedElements.set(id, element);
+		}
+		if (handle && this.#elementCache.has(id)) void handle.dispose().catch(() => undefined);
+		else if (handle) this.#elementCache.set(id, handle);
+		return id;
 	}
 
 	async #handleMessage(msg: WorkerInbound): Promise<void> {
@@ -2480,7 +2497,9 @@ export class WorkerCore {
 		signal?: AbortSignal;
 	}): Promise<Observation> {
 		const page = this.#requirePage();
-		this.#clearElementCache();
+		this.#releaseElementHandles();
+		const frame = page.mainFrame();
+		const loaderId = frame._loaderId;
 		const includeAll = options.includeAll ?? false;
 		const viewportOnly = options.viewportOnly ?? false;
 		let root: ElementHandle | null = null;
@@ -2507,7 +2526,7 @@ export class WorkerCore {
 		const entries: ObservationEntry[] = [];
 		const interactiveAncestors = new Set<SerializedAXNode>();
 		if (options.compact) collectInteractiveObservationAncestors(snapshot, interactiveAncestors);
-		await collectObservationEntries(this, page.mainFrame(), snapshot, entries, {
+		await collectObservationEntries(this, { frame, loaderId }, snapshot, entries, {
 			includeAll,
 			viewportOnly,
 			compact: options.compact ?? false,
@@ -2854,29 +2873,21 @@ export class WorkerCore {
 	}
 
 	async #resolveCachedHandle(id: number): Promise<ElementHandle> {
-		const handle = this.#elementCache.get(id);
-		if (!handle) {
-			const element = this.#observedElements.get(id);
-			if (!element) throw new ToolError(`Unknown element id ${id}. Run tab.observe() to refresh the element list.`);
-			const resolved = await resolveBackendNode(element.frame, element.backendNodeId);
-			if (!resolved) {
-				this.#clearElementCache();
-				throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
-			}
-			this.#elementCache.set(id, resolved);
-			return resolved;
+		const element = this.#observedElements.get(id);
+		if (!element && !(Number.isInteger(id) && id > 0 && id <= this.#elementCounter)) {
+			throw new ToolError(`Unknown element id ${id}. Run tab.observe() to refresh the element list.`);
 		}
-		try {
-			const isConnected = (await handle.evaluate(el => el.isConnected)) as boolean;
-			if (!isConnected) {
-				this.#clearElementCache();
-				throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
-			}
-		} catch (err) {
-			if (err instanceof ToolError) throw err;
-			this.#clearElementCache();
+		const cached = this.#elementCache.get(id);
+		let handle: ElementHandle | null = null;
+		if (element && !element.frame.detached && element.frame._loaderId === element.loaderId) {
+			if (!cached) handle = await resolveBackendNode(element.frame, element.backendNodeId);
+			else if (await cached.evaluate(el => el.isConnected).catch(() => false)) handle = cached;
+		}
+		if (!handle) {
+			this.#forgetElement(id);
 			throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
 		}
+		this.#elementCache.set(id, handle);
 		return handle;
 	}
 
@@ -2902,16 +2913,33 @@ export class WorkerCore {
 			this.#requirePage().locator(normalizeSelector(selector)).setTimeout(timeoutMs).waitHandle({ signal: sig }),
 		)) as ElementHandle;
 	}
+	/** Retire every observed id; numbering continues, so retired ids are never reissued. */
 	#clearElementCache(): void {
 		this.#observedElements.clear();
-		if (this.#elementCache.size === 0) {
-			this.#elementCounter = 0;
-			return;
+		this.#elementIds.clear();
+		this.#releaseElementHandles();
+	}
+
+	/**
+	 * Dispose resolved handles so they do not pin removed nodes in the page, and retire ids whose
+	 * document is gone. The ids of elements still in their document stay valid.
+	 */
+	#releaseElementHandles(): void {
+		for (const [id, element] of this.#observedElements) {
+			if (element.frame.detached || element.frame._loaderId !== element.loaderId) this.#forgetElement(id);
 		}
 		const handles = [...this.#elementCache.values()];
 		this.#elementCache.clear();
-		this.#elementCounter = 0;
 		for (const handle of handles) void handle.dispose().catch(() => undefined);
+	}
+
+	#forgetElement(id: number): void {
+		const element = this.#observedElements.get(id);
+		if (element) this.#elementIds.delete(`${element.loaderId}:${element.backendNodeId}`);
+		this.#observedElements.delete(id);
+		const handle = this.#elementCache.get(id);
+		this.#elementCache.delete(id);
+		void handle?.dispose().catch(() => undefined);
 	}
 
 	/** Best-effort `Page.stopLoading` so an abandoned navigation cannot stall later ops. */

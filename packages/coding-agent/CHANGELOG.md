@@ -5,6 +5,7 @@
 ### Changed
 
 - Made browser `tab.observe()` much faster on element-heavy pages, especially over the relay: listed elements are resolved to handles only when `tab.id(n)` uses them
+- Kept browser `tab.observe()` ids stable on Chromium and Tern tabs: an element keeps its id across observations while it stays on the page, and a removed or navigated-away element's id now fails as stale instead of being reused for another element
 
 ## [18.6.2] - 2026-10-04
 

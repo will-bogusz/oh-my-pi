@@ -93,7 +93,7 @@ Direct `waitFor` and `waitForSelector` return booleans for the resolved handle, 
 
 Selectors accept CSS and Puppeteer `aria/…`, `text/…`, `xpath/…`, `pierce/…`, plus `label/…`, `placeholder/…`, `testid/…`, `alt/…`, `title/…`, and `role/<role>[name="…"]` query handlers. Add ` exact` inside the role name filter for exact matching. Playwright-only pseudos such as `:has-text()` and `:visible` are rejected. Use `tab.select` for `<select>` elements; `tab.fill` does not support them.
 
-`observe()` assigns numeric ids consumed by `tab.id`. `ariaSnapshot()` assigns `[ref=eN]` ids consumed by `tab.ref`; `diff: true` returns a revisioned full, unchanged, or delta object. Navigation and re-rendering invalidate handles; re-observe and act in the same Eval cell.
+`observe()` assigns numeric ids consumed by `tab.id`. On Chromium and Tern tabs an element keeps its id across observations while it stays in the document; a removed element's id, and every id after a navigation, is stale and never reassigned. `ariaSnapshot()` assigns `[ref=eN]` ids consumed by `tab.ref`, renumbered on every snapshot; `diff: true` returns a revisioned full, unchanged, or delta object. Re-observe and act in the same Eval cell.
 
 ### `tab.run(fnOrCode, options?)`
 

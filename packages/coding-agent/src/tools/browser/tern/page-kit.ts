@@ -73,6 +73,8 @@ export interface TernObserveOptions {
 	viewportOnly?: boolean;
 	root?: TernSelector;
 	compact?: boolean;
+	/** Lowest id a newly observed element may get, so ids stay unique across the tab's documents. */
+	firstId?: number;
 }
 
 /** `observe()` result; ids populate the document's `id` selector registry. */
@@ -144,7 +146,7 @@ export interface TernKitApi {
 	highlight(sel: TernSelector, id: string): void;
 	/** Remove a highlight or annotation overlay. */
 	removeOverlay(id: string): void;
-	/** List elements like the Chromium AX-tree observe; replaces the `id` registry. */
+	/** List elements like the Chromium AX-tree observe; an element keeps its `id` across observations. */
 	observe(opts: TernObserveOptions): TernObservation;
 	/** Playwright ARIA snapshot of `root` (or the document); refs resolve through `ariaRef` selectors. */
 	ariaSnapshot(
@@ -224,6 +226,8 @@ const HANDLE_ATTR = "data-omp-tern-handle";
 const OVERLAY_ATTR = "data-omp-tern-overlay";
 
 let registry = new Map();
+const elementIds = new WeakMap();
+let nextId = 1;
 // Ref resolution is stateless (it scans _ariaRef expandos), so one instance serves every lookup.
 const ariaRefs = loadAria();
 
@@ -592,8 +596,8 @@ const resolveAll = sel => {
 		}
 		case "id": {
 			const el = registry.get(sel.id);
-			if (!el) throw new Error("Unknown element id " + sel.id + ". Run tab.observe() to refresh the element list.");
-			if (!el.isConnected) throw new Error("Element id " + sel.id + " is stale. Run tab.observe() again.");
+			if (!el && !(sel.id < nextId)) throw new Error("Unknown element id " + sel.id + ". Run tab.observe() to refresh the element list.");
+			if (!el || !el.isConnected) throw new Error("Element id " + sel.id + " is stale. Run tab.observe() again.");
 			return [el];
 		}
 		case "handle":
@@ -838,11 +842,16 @@ const observe = opts => {
 		return interactive || descendantInteractive;
 	};
 	visit(root, false);
-	registry = new Map();
+	nextId = Math.max(nextId, opts.firstId || 1);
+	for (const [id, el] of registry) if (!el.isConnected) registry.delete(id);
 	const elements = [];
 	for (const entry of collected) {
 		if (entry.drop) continue;
-		const id = elements.length + 1;
+		let id = elementIds.get(entry.el);
+		if (id === undefined) {
+			id = nextId++;
+			elementIds.set(entry.el, id);
+		}
 		registry.set(id, entry.el);
 		const out = { id, role: entry.role, states: entry.states };
 		for (const key of ["name", "value", "description", "keyshortcuts"]) {

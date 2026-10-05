@@ -609,7 +609,7 @@ interface BrowserBoundingBox {
 
 /** One element in a structured browser observation. */
 interface BrowserObservationEntry {
-	/** Numeric id accepted by `tab.id`. */
+	/** Numeric id accepted by `tab.id`; kept across observations while the element stays on the page. */
 	id: number;
 	/** Accessibility role. */
 	role: string;
