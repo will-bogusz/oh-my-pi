@@ -5,6 +5,7 @@ import * as path from "node:path";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import { disposeAllVmContexts } from "@oh-my-pi/pi-coding-agent/eval/js/context-manager";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
+import { CmuxTab } from "@oh-my-pi/pi-coding-agent/tools/browser/cmux/cmux-tab";
 import { releaseAllTabs } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
 import { chromiumAvailable } from "./chromium-probe";
@@ -17,6 +18,7 @@ const COMBO_TAB_NAME = `combos-${crypto.randomUUID()}`;
 const SHORTCUT = process.platform === "darwin" ? "Meta" : "Control";
 const comboHtml = `<!doctype html><textarea id="area">hello world</textarea><input id="field"><input id="paste">
 <iframe id="inner" srcdoc='<!doctype html><textarea id="deep">nested text</textarea>'></iframe>`;
+const SELECT_TAB_NAME = `select-${crypto.randomUUID()}`;
 let tempDir = "";
 let uploadPath = "";
 
@@ -231,6 +233,81 @@ return await tab.value("#paste");`,
 		},
 		30_000,
 	);
+
+	test("selects options by value, then by visible label, from tabs and element handles", async () => {
+		const session = makeSession();
+		const prelude = createBrowserPrelude(session);
+		const context = { session, toolCallId: "browser-select" };
+		const selectHtml = `<!doctype html>
+<select id="country"><option value="">Choose…</option><option value="us">United States</option><option value="ca">Canada</option></select>
+<select id="size"><option value="m">Large</option><option value="Large">Extra large</option></select>
+<select id="extras" multiple><option value="cheese">Cheese</option><option value="ham">Ham</option><option value="olives">Olives</option></select>`;
+		await prelude.invoke(
+			{ action: "open", name: SELECT_TAB_NAME, url: `data:text/html,${encodeURIComponent(selectHtml)}` },
+			context,
+		);
+		try {
+			const result = await prelude.invoke(
+				{
+					action: "run",
+					name: SELECT_TAB_NAME,
+					code: `const byLabel = await tab.select("#country", "United States");
+const afterLabel = await tab.value("#country");
+const byValue = await tab.select("#country", "ca");
+const handle = await tab.waitFor("#country");
+const handleByLabel = await handle.select("United States");
+const afterHandle = await tab.value("#country");
+const valueWins = await tab.select("#size", "Large");
+const firstOnSingle = await tab.select("#country", "Canada", "us");
+const handleFirstOnSingle = await handle.select("us", "ca");
+const afterFirst = await tab.value("#country");
+const noMatch = await tab.select("#country", "Mexico");
+const handleNoMatch = await handle.select("Mexico");
+const multiple = await tab.select("#extras", "Cheese", "olives");
+return { byLabel, afterLabel, byValue, handleByLabel, afterHandle, valueWins, firstOnSingle, handleFirstOnSingle, afterFirst, noMatch, handleNoMatch, multiple };`,
+					timeout: 20,
+				},
+				context,
+			);
+			expect(valueFrom<Record<string, unknown>>(result)).toEqual({
+				byLabel: ["us"],
+				afterLabel: "us",
+				byValue: ["ca"],
+				handleByLabel: ["us"],
+				afterHandle: "us",
+				valueWins: ["Large"],
+				firstOnSingle: ["ca"],
+				handleFirstOnSingle: ["us"],
+				afterFirst: "us",
+				noMatch: [],
+				handleNoMatch: [],
+				multiple: ["cheese", "olives"],
+			});
+
+			// cmux tabs run the same rules in their injected page script; replay it in this page.
+			const cmux = new CmuxTab({
+				client: {
+					request: async (method: string, params: { script?: string }) => {
+						expect(method).toBe("browser.eval");
+						const evaluated = await prelude.invoke(
+							{ action: "call", name: SELECT_TAB_NAME, chain: [{ method: "evaluate", args: [params.script] }] },
+							context,
+						);
+						return { value: valueFrom<unknown>(evaluated) };
+					},
+				} as never,
+				surfaceId: "select",
+			});
+			expect({
+				byLabel: await cmux.select("#country", "United States"),
+				firstOnSingle: await cmux.select("#country", "Canada", "us"),
+				noMatch: await cmux.select("#country", "Mexico"),
+				multiple: await cmux.select("#extras", "Ham", "olives"),
+			}).toEqual({ byLabel: ["us"], firstOnSingle: ["ca"], noMatch: [], multiple: ["ham", "olives"] });
+		} finally {
+			await prelude.invoke({ action: "close", name: SELECT_TAB_NAME, kill: true }, context).catch(() => undefined);
+		}
+	}, 30_000);
 
 	// Backgrounded headless tabs deliver no animation frames, which stalls every
 	// Puppeteer `Locator` precondition (viewport/stability/enabled) forever.
