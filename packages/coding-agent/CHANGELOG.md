@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Made browser `tab.observe()` much faster on element-heavy pages, especially over the relay: listed elements are resolved to handles only when `tab.id(n)` uses them
+
 ## [18.6.2] - 2026-10-04
 
 ### Fixed
