@@ -32,7 +32,7 @@ Drive real Chromium tabs from JavaScript or Python Eval with the global `browser
 - `tab.run` executes in an isolated JavaScript tab runtime with raw Puppeteer `page`/`browser`, ordinary Eval helpers, and full Bun/Node + tool-bridge access. It is not sandboxed.
 - Direct helpers and `tab.run` return real structured values. Nonempty inner `display` text prints in the outer Eval cell; screenshots surface as Eval images.
 - Selectors accept CSS plus Puppeteer `aria/…`, `text/…`, `xpath/…`, `pierce/…`, `label/…`, `placeholder/…`, `testid/…`, `alt/…`, `title/…`, and `role/<role>[name="…"]` query handlers; append ` exact` inside the role name filter for exact matching.
-- Navigation and re-renders invalidate observed ids and refs. Re-observe, then act in the same cell. Use `pushState(url)` for SPA navigation without a document load.
+- On Chromium and Tern tabs an element keeps its `observe()` id across observations while it stays on the page; once it is removed or the page navigates, its id is stale and never reused. `ariaSnapshot()` refs renumber on every snapshot. Re-observe, then act in the same cell. Use `pushState(url)` for SPA navigation without a document load.
 - Use `tab.select` for `<select>` elements; `tab.fill` does not support them.
 - Raw `page.setRequestInterception` and `page.on("request")` inside `tab.run` coexist with persistent `tab.route` handlers and are cleaned up after that run; `tab.route` persists until `tab.unroute` or tab close.
 - `browser.open({ allowed_domains: […] })` allows exact hosts and `*.example.com` patterns (including the bare domain), aborting other navigation, subresource, fetch, and WebSocket requests.
