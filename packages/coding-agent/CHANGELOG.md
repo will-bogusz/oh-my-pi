@@ -90,6 +90,7 @@
 - Made browser `tab.observe()` much faster on element-heavy pages, especially over the relay: listed elements are resolved to handles only when `tab.id(n)` uses them
 - Kept browser `tab.observe()` ids stable on Chromium and Tern tabs: an element keeps its id across observations while it stays on the page, and a removed or navigated-away element's id now fails as stale instead of being reused for another element
 - Made browser `tab.observe()` and `tab.ariaSnapshot()` on Chromium tabs wait, up to 3 seconds, for the navigation, requests and page updates the preceding actions started, so a cell that clicks and then observes shows the result instead of an empty list or "Execution context was destroyed"
+- Changed the browser tool prompt to end an acting Eval cell with `tab.observe()` instead of re-observing before acting, so an action and its result take one call
 
 ## [18.6.2] - 2026-10-04
 
