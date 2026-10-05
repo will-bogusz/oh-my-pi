@@ -1103,7 +1103,10 @@ async function snapshotFrames(
 				return [];
 			}
 			if (!snapshot) return [];
-			return [{ frame, loaderId, snapshot }, ...(await snapshotFrames(frame.childFrames(), { ...options, root: null }))];
+			return [
+				{ frame, loaderId, snapshot },
+				...(await snapshotFrames(frame.childFrames(), { ...options, root: null })),
+			];
 		}),
 	);
 	return snapshots.flat();
@@ -2793,7 +2796,10 @@ export class WorkerCore {
 		const interactiveAncestors = new Set<SerializedAXNode>();
 		const trees = [
 			{ owner: { frame, loaderId }, tree: snapshot },
-			...frameSnapshots.map(child => ({ owner: { frame: child.frame, loaderId: child.loaderId }, tree: child.snapshot })),
+			...frameSnapshots.map(child => ({
+				owner: { frame: child.frame, loaderId: child.loaderId },
+				tree: child.snapshot,
+			})),
 		];
 		for (const { owner, tree } of trees) {
 			if (options.compact) collectInteractiveObservationAncestors(tree, interactiveAncestors);
