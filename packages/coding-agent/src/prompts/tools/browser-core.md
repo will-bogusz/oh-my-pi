@@ -30,7 +30,7 @@ Drive real Chromium tabs from JavaScript or Python Eval with the global `browser
   in a separate runtime with Puppeteer `page`; it is Node, not the page.
   Python `await tab.run(code, timeout=…)` takes a JavaScript code string only.
 - Selectors: CSS plus `aria/…`, `text/…`, `xpath/…`, `pierce/…`, `label/…`, `placeholder/…`, `role/<role>[name="…"]`. No Playwright selectors.
-- Navigation and re-renders invalidate observed ids. Act and look in one cell: end a cell that acts with `await tab.observe()`.
+- On Chromium tabs and Tern tabs without native DOM reads, observed ids stay with their element until it leaves the page; elsewhere navigation and re-renders invalidate them. Act and look in one cell: end a cell that acts with `await tab.observe()`.
 </instruction>
 
 <examples>
