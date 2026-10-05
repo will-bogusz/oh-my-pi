@@ -34,7 +34,8 @@ Drive real Chromium tabs from JavaScript or Python Eval with the global `browser
 - `tab.run` executes in an isolated JavaScript tab runtime with raw Puppeteer `page`/`browser`, ordinary Eval helpers, and full Bun/Node + tool-bridge access. It is not sandboxed.
 - Direct helpers and `tab.run` return real structured values. Nonempty text printed inside `tab.run` prints in the outer Eval cell; screenshots surface as Eval images.
 - Selectors accept CSS plus Puppeteer `aria/…`, `text/…`, `xpath/…`, `pierce/…`, `label/…`, `placeholder/…`, `testid/…`, `alt/…`, `title/…`, and `role/<role>[name="…"]` query handlers; append ` exact` inside the role name filter for exact matching.
-- Navigation and re-renders invalidate observed ids and refs. Re-observe, then act in the same cell. Use `pushState(url)` for SPA navigation without a document load.
+- Navigation and re-renders invalidate observed ids and refs. Use `pushState(url)` for SPA navigation without a document load.
+- Act and look in one cell: end a cell that acts with `await tab.observe()`. On Chromium it first waits for the navigation, requests and DOM updates the actions started, so the result shows without another call.
 - Use `tab.select` for `<select>` elements; `tab.fill` does not support them.
 - Raw `page.setRequestInterception` and `page.on("request")` inside `tab.run` coexist with persistent `tab.route` handlers and are cleaned up after that run; `tab.route` persists until `tab.unroute` or tab close.
 - `browser.open({ allowed_domains: […] })` allows exact hosts and `*.example.com` patterns (including the bare domain), aborting other navigation, subresource, fetch, and WebSocket requests.
@@ -63,6 +64,7 @@ Application modes:
 const tab = await browser.open({ name: "docs", url: "https://example.com" });
 const observed = await tab.observe();
 await tab.id(observed.elements[0].id).click();
+const after = await tab.observe(); // the page once the click has settled
 const title = await tab.run(async ({ tab }, suffix) => (await tab.title()) + suffix, { args: ["!"] });
 await tab.close();
 ```
@@ -71,6 +73,7 @@ await tab.close();
 tab = await browser.open(name="docs", url="https://example.com")
 observed = await tab.observe()
 await tab.id(observed["elements"][0]["id"]).click()
+after = await tab.observe()
 title = await tab.run("return await tab.title();", timeout=30)
 await tab.close()
 ```
@@ -80,6 +83,7 @@ await tab.close()
 - MUST open a tab before direct use; `browser.tab(name)` does not open one.
 - Default to `tab.observe()`; use screenshots for visual confirmation.
 - Report a step as done only when the page did it. NEVER alter the page with scripts to make a step look done (inserting controls, writing app state, revealing hidden elements); when a step cannot be done through the page, say so. When the user asks you to change the page with a script, do it.
+- On Chromium tabs, the next look or read after an action waits for the page to settle (navigation, requests the action started, DOM quiet), so fixed sleeps are not needed for that; on Tern and cmux, and for content the page renders later on its own timer, wait for it with `waitForText`/`waitForSelector`, never a fixed sleep.
 - `tab.run` has full Bun/Node and tool-bridge access; it is not sandboxed.
 - Relay and CDP actions operate on real user sessions.
 </critical>
