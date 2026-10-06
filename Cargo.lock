@@ -6730,6 +6730,7 @@ dependencies = [
  "rand 0.10.3",
  "rayon",
  "regex",
+ "regex-bites",
  "rlimit",
  "rustc-hash",
  "rustix 1.1.5",

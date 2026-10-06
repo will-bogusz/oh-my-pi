@@ -284,6 +284,7 @@ mod filter {
 		input::{self, Inputs, RcIter},
 	};
 	use pi_vfs::BlockingFs;
+	use regex_bites::bytes::{Match, RegexBuilder};
 
 	use super::{Error, Session, Val, output, read};
 
@@ -325,6 +326,8 @@ def IN(src; s): any(src == s; .);
 def halt_error($exit_code): halt_error_empty($exit_code), halt($exit_code);
 def halt_error: halt_error(5);
 def tonumber: tonumber_;
+def scan($re; $flags): scan_($re; "g" + $flags);
+def scan($re): scan($re; null);
 "#;
 
 	/// Natives that replace or extend jaq's. Listed first: the compiler binds a
@@ -339,8 +342,9 @@ def tonumber: tonumber_;
 	/// - `tonumber_`, behind `tonumber`: accepts exactly one number literal,
 	///   like jq; jaq's parses any JSON text, so `"1 2"` yields two numbers and
 	///   `"+1"` prints `+1`.
+	/// - `scan_`, behind `scan`: every match, with capture groups, like jq.
 	/// - `@csv`, `@tsv`: jaq 3 moved them out of its standard library.
-	fn natives() -> [native::Filter<RunPtr<Kind>>; 9] {
+	fn natives() -> [native::Filter<RunPtr<Kind>>; 10] {
 		[
 			("env", native::v(0), |cv| box_once(Ok(cv.0.data().session.env.clone()))),
 			("debug_empty", native::v(0), |cv| {
@@ -382,6 +386,14 @@ def tonumber: tonumber_;
 				box_once(Ok(Val::from(cv.0.data().session.input.lines.get())))
 			}),
 			("tonumber_", native::v(0), |cv| box_once(tonumber(cv.1).map_err(Exn::from))),
+			("scan_", native::v(2), |mut cv| {
+				let flags = cv.0.pop_var();
+				let re = cv.0.pop_var();
+				match scan(&cv.1, &re, &flags) {
+					Ok(found) => Box::new(found.into_iter().map(Ok)),
+					Err(e) => box_once(Err(Exn::from(e))),
+				}
+			}),
 			("@csv", native::v(0), |cv| box_once(table_row(&cv.1, "CSV", Row::write_csv))),
 			("@tsv", native::v(0), |cv| box_once(table_row(&cv.1, "TSV", Row::write_tsv))),
 		]
@@ -421,6 +433,56 @@ def tonumber: tonumber_;
 			_ => None,
 		};
 		num.map(Val::Num).ok_or_else(|| CoreError::typ(v, "number"))
+	}
+
+	/// jq's `scan`: every match of `re`, as the matched string or, when `re`
+	/// has capture groups, as the array of their strings, `null` for a group
+	/// that took no part. jaq's stops at the first match and drops the groups.
+	/// The regex dialect and flags stay jaq's, as in its `test` and `match`.
+	fn scan(s: &Val, re: &Val, flags: &Val) -> Result<Vec<Val>, CoreError<Val>> {
+		let mut builder = RegexBuilder::new(utf8_str(re)?);
+		let mut ignore_empty = false;
+		for flag in utf8_str(flags)?.chars() {
+			match flag {
+				// `scan` always finds every match
+				'g' => {},
+				'n' => ignore_empty = true,
+				'i' => {
+					builder.case_insensitive(true);
+				},
+				'm' => {
+					builder.multi_line(true);
+				},
+				's' => {
+					builder.dot_matches_new_line(true);
+				},
+				'p' => {
+					builder.multi_line(true).dot_matches_new_line(true);
+				},
+				'l' => {
+					builder.swap_greed(true);
+				},
+				'x' => {
+					builder.ignore_whitespace(true);
+				},
+				c => return Err(CoreError::str(format_args!("invalid regex flag: {c}"))),
+			}
+		}
+		let re = builder
+			.build()
+			.map_err(|e| CoreError::str(format_args!("invalid regex: {e}")))?;
+		let text = |m: Option<Match>| m.map_or(Val::Null, |m| s.as_sub_str(m.as_bytes()));
+		let groups = re.captures_len() > 1;
+		Ok(re
+			.captures_iter(s.try_as_utf8_bytes()?)
+			.filter(|c| !(ignore_empty && c[0].is_empty()))
+			.map(|c| if groups { c.iter().skip(1).map(text).collect() } else { text(c.get(0)) })
+			.collect())
+	}
+
+	/// The text of a string value, as jaq's regex functions take it.
+	fn utf8_str(v: &Val) -> Result<&str, CoreError<Val>> {
+		core::str::from_utf8(v.try_as_utf8_bytes()?).map_err(CoreError::str)
 	}
 
 	/// An array of scalars as one CSV or TSV row.
@@ -2060,6 +2122,17 @@ mod tests {
 		let input = "[\"1 2\",\" 1\",\"0x10\",\"\",null]";
 		let (code, out, _) = run_jq(&["-c", "map(try tonumber catch \"no\")"], input);
 		assert_eq!((code, out.as_str()), (0, "[\"no\",\"no\",\"no\",\"no\",\"no\"]\n"));
+	}
+
+	#[test]
+	fn scan_yields_every_match_like_jq() {
+		let filter = r#"[scan("[0-9]")], [scan("([a-z])([0-9])")], [scan("(x)?([0-9])")], [scan("B"; "i")], [scan("x*"; "n")]"#;
+		let (code, out, err) = run_jq(&["-c", filter], "\"a1b2\"");
+		let expected = "[\"1\",\"2\"]\n[[\"a\",\"1\"],[\"b\",\"2\"]]\n[[null,\"1\"],[null,\"2\"]]\n[\"b\"]\n[]\n";
+		assert_eq!((code, out.as_str(), err.as_str()), (0, expected, ""));
+
+		let (code, _, err) = run_jq(&["-n", r#""a" | scan("a"; "q")"#], "");
+		assert_eq!((code, err.as_str()), (5, "Error: \"invalid regex flag: q\"\n"));
 	}
 
 	#[test]

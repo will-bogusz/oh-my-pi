@@ -82,6 +82,8 @@ jaq-core = "3.1.1"
 jaq-fmts = { version = "0.1.1", default-features = false, features = ["tabular"] }
 jaq-json = "2.0.3"
 jaq-std = "3.0.3"
+# The regex engine of jaq's `test` and `match`, for `jq`'s `scan`.
+regex-bites = "0.1.6"
 jiff = { version = "0.2.18", features = ["tzdb-bundle-platform"] }
 lscolors = { version = "0.21.0", default-features = false, features = ["gnu_legacy"] }
 memchr = "2.7.4"
