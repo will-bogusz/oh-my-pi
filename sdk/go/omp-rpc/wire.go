@@ -2931,6 +2931,10 @@ type SessionCredits struct {
 	Cost          float64 `json:"cost"`
 	CommittedCost float64 `json:"committedCost"`
 	AcuCost       float64 `json:"acuCost"`
+	// Summed plan-quota share in percent; absent until a turn reports it.
+	QuotaPercent *float64 `json:"quotaPercent,omitempty"`
+	// Summed overage charge in USD; absent until a turn reports it.
+	OverageUsd *float64 `json:"overageUsd,omitempty"`
 }
 
 func (v *SessionCredits) UnmarshalJSON(data []byte) error {
@@ -2943,6 +2947,8 @@ func (v *SessionCredits) decodeFrom(raw map[string]json.RawMessage) error {
 	d.required("cost", &out.Cost)
 	d.required("committedCost", &out.CommittedCost)
 	d.required("acuCost", &out.AcuCost)
+	d.optional("quotaPercent", &out.QuotaPercent)
+	d.optional("overageUsd", &out.OverageUsd)
 	if d.err != nil {
 		return d.err
 	}

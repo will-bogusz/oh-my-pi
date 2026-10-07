@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `quotaPercent` and `overageUsd` to `Usage.credits` for providers that report each turn's plan-quota share and overage charge ([#14759](https://github.com/can1357/oh-my-pi/pull/14759) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Fixed
 
 - Enabled long prompt-cache retention (`ttl: "1h"`) for Claude models on `google-vertex` ([#15505](https://github.com/can1357/oh-my-pi/pull/15505) by [@hpost](https://github.com/hpost))

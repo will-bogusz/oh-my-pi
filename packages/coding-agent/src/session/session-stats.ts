@@ -198,6 +198,8 @@ export class SessionStatsTracker {
 		let creditCost = 0;
 		let committedCreditCost = 0;
 		let committedAcuCost = 0;
+		let quotaPercent: number | undefined;
+		let overageUsd: number | undefined;
 		let hasCredits = false;
 		const routedModels: Record<string, number> = {};
 		const addUsage = (usage: Usage): void => {
@@ -215,6 +217,8 @@ export class SessionStatsTracker {
 				creditCost += credits.cost ?? 0;
 				committedCreditCost += credits.committedCost ?? 0;
 				committedAcuCost += credits.acuCost ?? 0;
+				if (credits.quotaPercent !== undefined) quotaPercent = (quotaPercent ?? 0) + credits.quotaPercent;
+				if (credits.overageUsd !== undefined) overageUsd = (overageUsd ?? 0) + credits.overageUsd;
 			}
 		};
 		for (const message of state.messages) {
@@ -265,6 +269,8 @@ export class SessionStatsTracker {
 							cost: creditCost,
 							committedCost: committedCreditCost,
 							acuCost: committedAcuCost,
+							...(quotaPercent !== undefined ? { quotaPercent } : undefined),
+							...(overageUsd !== undefined ? { overageUsd } : undefined),
 						},
 					}
 				: undefined),
