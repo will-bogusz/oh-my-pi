@@ -24,7 +24,8 @@
  *   NON-terminal — the episode is deferred (not buried), so the credit is
  *   retried as usage grows or a window exhausts before expiry.
  * - `blocked-account` (restore; `blocked` trigger only): a live 429 blocked
- *   the turn and no sibling credential could take over, so the pool is dry.
+ *   the turn and no sibling credential could take over outside its usage
+ *   reserve, so the pool is dry or down to protected backups.
  *   Candidates are accounts with at least one genuinely exhausted normalized
  *   chat window — 5h or weekly. A banked reset clears the account's
  *   chat rate limits generally, not just the weekly window: OpenAI's own
@@ -41,7 +42,8 @@
  *   picks it up.
  *
  * TRIGGERS: `blocked` runs from the usage-limit branch of the retry pipeline
- * after sibling switch fails, on force-refreshed reports (the cached snapshot
+ * when sibling switch fails or would only land inside a sibling's usage
+ * reserve, on force-refreshed reports (the cached snapshot
  * predates the 429 that got us there). `sweep` piggybacks on every successful
  * usage-report fetch — the status line polls every 5 minutes while the TUI is
  * open — so expiring credits are caught even when nothing is blocked.

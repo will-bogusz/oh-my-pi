@@ -960,6 +960,8 @@ When a usage refresh detects an eligible banked reset expiring within the next *
 
 `salvageHorizonHours` controls earlier, usage-based salvage; setting it to `0` leaves the five-minute last-chance rule active. Set the provider's `autoRedeem` to `no` to disable all automatic spending.
 
+An account that could take over only inside its usage reserve (`auth.accountPolicies[].reservePct`, otherwise `retry.usageReservePct`) counts as a protected backup, not a takeover: auto-redeem spends the blocked account's reset first and moves the turn to the backup only if no reset is spent (none banked, `keepCredits`, a wait under `minBlockedMinutes`, or consent declined). With auto-redeem on, a `reservePct: 100` backup therefore serves only after the other accounts' resets are used or not worth spending.
+
 ### Other groups
 
 Every schema path not individually tabulated in this catalog is explicitly deferred to `omp config list`. Additional groups include:
