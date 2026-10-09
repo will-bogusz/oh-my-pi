@@ -59,6 +59,7 @@ import {
 	applyStealthPatches,
 	applyViewport,
 	BROWSER_PROTOCOL_TIMEOUT_MS,
+	browserConnection,
 	connectPuppeteer,
 	DEFAULT_VIEWPORT,
 	isPuppeteerHandle,
@@ -1189,15 +1190,16 @@ async function targetIdForPage(page: Page): Promise<string> {
 	return await targetIdForTarget(page.target());
 }
 
-async function createTrackedHeadlessPage(browser: Browser, reportTarget: (targetId: string) => void): Promise<Page> {
-	const session = await browser.target().createCDPSession();
-	let targetId: string;
-	try {
-		({ targetId } = await session.send("Target.createTarget", { url: "about:blank" }));
-		reportTarget(targetId);
-	} finally {
-		await session.detach().catch(() => undefined);
-	}
+async function createTrackedPage(
+	browser: Browser,
+	options: { background: boolean },
+	reportTarget: (targetId: string) => void,
+): Promise<Page> {
+	const { targetId } = await browserConnection(browser).send("Target.createTarget", {
+		url: "about:blank",
+		background: options.background || undefined,
+	});
+	reportTarget(targetId);
 	const existing = browser.targets().find(target => privateTargetId(target) === targetId);
 	const target =
 		existing ??
@@ -1205,7 +1207,7 @@ async function createTrackedHeadlessPage(browser: Browser, reportTarget: (target
 			timeout: BROWSER_PROTOCOL_TIMEOUT_MS,
 		}));
 	const page = await target.page();
-	if (!page) throw new ToolError(`Created headless target ${targetId} did not expose a page`);
+	if (!page) throw new ToolError(`Created target ${targetId} did not expose a page`);
 	return page;
 }
 
@@ -1476,6 +1478,7 @@ export class WorkerCore {
 	#isolated: boolean;
 	#uninstallRejectionGuard: () => void;
 	#mode?: WorkerInitPayload["mode"];
+	#ownsPage = false;
 	#activateForScreenshot = true;
 	/** The upload route this worker's browser connection takes, and the tab's staging folder. */
 	#uploads?: UploadStaging;
@@ -1622,8 +1625,10 @@ export class WorkerCore {
 	}
 
 	async #init(payload: WorkerInitPayload): Promise<void> {
+		const createsPage = payload.mode === "headless" || payload.page.kind === "create";
 		try {
 			this.#mode = payload.mode;
+			this.#ownsPage = payload.mode === "headless" || payload.page.kind !== "borrowed";
 			this.#activateForScreenshot = payload.mode === "headless" || payload.activateForScreenshot !== false;
 			this.#uploads = new UploadStaging(payload.uploadDir);
 			const puppeteer = await loadPuppeteerInWorker(payload.safeDir);
@@ -1638,25 +1643,29 @@ export class WorkerCore {
 			// page acquisition so the supervisor's cold-start budget bounds only the
 			// realm setup; page creation runs under the ready wait.
 			this.#transport.send({ type: "setup" });
-			if (payload.mode === "headless") {
+			if (payload.mode === "headless" || payload.page.kind === "create") {
 				// Create the target directly so its id is reportable before
 				// Puppeteer waits for target/page initialization. If that wait
 				// wedges, the supervisor can still close the created target.
-				this.#page = await createTrackedHeadlessPage(this.#browser, targetId => {
+				// In a browser the user drives, the tab opens without being selected.
+				this.#page = await createTrackedPage(this.#browser, { background: payload.mode === "attach" }, targetId => {
 					this.#transport.send({ type: "page-created", targetId });
 				});
 				this.#observeDialogs();
-				await applyStealthPatches(this.#browser, this.#page, { browserSession: null, override: null });
-				if (payload.emulateViewport !== false) await applyViewport(this.#page, payload.viewport);
+				if (payload.mode === "headless") {
+					await applyStealthPatches(this.#browser, this.#page, { browserSession: null, override: null });
+					if (payload.emulateViewport !== false) await applyViewport(this.#page, payload.viewport);
+				}
 				if (payload.dialogs) this.#applyDialogPolicy(payload.dialogs);
 			} else {
-				const target = await this.#findAttachedTarget(payload.targetId);
+				const target = await this.#findAttachedTarget(payload.page.targetId);
 				// Post-timeout recycle: unblock the target BEFORE adopting the page — an open
 				// modal dialog or hung navigation can stall `target.page()` / ready info, and a
 				// stalled init used to time out and force-kill the tab.
 				if (payload.recover) await this.#recoverAttachedTarget(target);
 				const page = await target.page();
-				if (!page) throw new ToolError(`Target ${payload.targetId} is no longer available on the attached browser`);
+				if (!page)
+					throw new ToolError(`Target ${payload.page.targetId} is no longer available on the attached browser`);
 				this.#page = page;
 				await this.#claimRelayTarget(page);
 				this.#observeDialogs();
@@ -1664,7 +1673,7 @@ export class WorkerCore {
 			}
 			this.#page.mainFrame().client.on("Page.frameNavigated", this.#onFrameNavigated);
 			this.#page.on("error", this.#onPageCrashed);
-			if (payload.mode === "headless" || payload.emulateFocus) {
+			if (this.#ownsPage) {
 				// Background Chromium tabs stop producing frames, stalling rAF,
 				// IntersectionObserver, and input acknowledgements. Keep owned tabs
 				// interactive without raising a window; explicit settle-freeze still applies.
@@ -1696,13 +1705,13 @@ export class WorkerCore {
 			this.#started = true;
 			this.#transport.send({ type: "ready", info });
 		} catch (error) {
-			// A failed headless init leaves the worker's page orphaned in the shared
-			// browser (the supervisor retries with a fresh worker), so close it before
-			// reporting. Attach mode adopts an existing target — never close it.
+			// A page this attempt created would be orphaned (the supervisor retries
+			// with a fresh worker), so close it before reporting. An adopted target —
+			// a borrowed page, or an owned one a recycle retries — is never closed here.
 			const page = this.#page;
 			await this.#webmcp?.dispose().catch(() => undefined);
 			this.#webmcp = undefined;
-			if (payload.mode === "headless" && page && !page.isClosed()) {
+			if (createsPage && page && !page.isClosed()) {
 				await page.close().catch(() => undefined);
 			}
 			this.#transport.send({ type: "init-failed", error: errorPayload(error) });
@@ -3379,7 +3388,7 @@ export class WorkerCore {
 		await this.#tracing?.dispose();
 		await this.#consoleCapture.detach();
 		this.#emulation?.dispose();
-		if (this.#mode === "headless" && page && !page.isClosed()) await page.close().catch(() => undefined);
+		if (this.#ownsPage && page && !page.isClosed()) await page.close().catch(() => undefined);
 		if (this.#browser?.connected) this.#browser.disconnect();
 		this.#transport.send({ type: "closed" });
 		this.#transport.close();
