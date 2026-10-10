@@ -104,6 +104,9 @@
 
 - Fixed macOS computer use reporting `AxFailed` instead of `StaleRef` for a ref whose element the app had removed ([#15156](https://github.com/can1357/oh-my-pi/pull/15156) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS `el.press()` and `el.perform()` reporting `AxFailed` when the app did not answer in time, such as a press that opens a modal dialog; they now report `AxUnconfirmed` ([#15156](https://github.com/can1357/oh-my-pi/pull/15156) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed macOS background key presses, typing, held keys, left clicks and menu actions taking keyboard focus from the user's app, which then dropped pastes and shortcuts until clicked again
+- Fixed macOS background typing into Chrome pages and background shortcuts such as ⌘A in TextEdit doing nothing
+- Fixed macOS typing into Screen Sharing and iPhone Mirroring arriving as a run of `a`, and their background shortcuts and held keys being refused: typed text now uses the keyboard layout's keys, and iPhone Mirroring taps and scrolls land where aimed
 
 ## [18.8.7] - 2026-10-09
 
