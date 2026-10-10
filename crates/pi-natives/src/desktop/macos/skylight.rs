@@ -1,4 +1,5 @@
 use std::{
+	cell::Cell,
 	ffi::c_void,
 	ptr,
 	sync::{
@@ -24,6 +25,7 @@ use super::{
 	super::{
 		control,
 		error::{CoreResult, DesktopError},
+		types::DesktopFocusReturn,
 	},
 	ax, capture,
 	key_reroute::KeyReroute,
@@ -1446,7 +1448,9 @@ pub(super) fn with_foreground<T>(
 	})?;
 	let focused = ax::focused_window_id(pid);
 	if preserves_exact_existing_focus(Some(previous.psn), target, focused, wid) {
-		return action(false).and_then(|value| control::wait(FOREGROUND_SETTLE).map(|()| value));
+		let result = action(false).and_then(|value| control::wait(FOREGROUND_SETTLE).map(|()| value));
+		report_focus_return(false, previous.pid);
+		return result;
 	}
 	let previous_pid = previous.pid.ok_or_else(|| {
 		DesktopError::input_failed(
@@ -1460,6 +1464,7 @@ pub(super) fn with_foreground<T>(
 			)
 		})?
 		.window();
+	let returned = Cell::new(false);
 	let restore = |preparation_failed: bool| {
 		// Keys the user types while takeover holds the front land in the target
 		// without them choosing it, so only a click or a shortcut of theirs, or
@@ -1504,6 +1509,7 @@ pub(super) fn with_foreground<T>(
 		}
 		// A previous app that showed no window gets only its front status back.
 		let Some(previous_key) = previous_key else {
+			returned.set(true);
 			return Ok(());
 		};
 		if !rekey_unless_user_chose(
@@ -1514,16 +1520,32 @@ pub(super) fn with_foreground<T>(
 		)? {
 			return Ok(());
 		}
-		await_window_focused(spi, previous_pid, previous_key, previous.psn)
+		await_window_focused(spi, previous_pid, previous_key, previous.psn)?;
+		returned.set(true);
+		Ok(())
 	};
 	let prepare = set_front(spi, target, wid)
 		.and_then(|()| make_exact_window_key(spi, target, wid))
 		.and_then(|()| await_window_focused(spi, pid, wid, target));
-	if let Err(error) = prepare {
-		return after_cleanup(Err(error), control::cleanup(|| restore(true)));
-	}
-	let result = action(true).and_then(|value| control::wait(FOREGROUND_SETTLE).map(|()| value));
-	after_cleanup(result, control::cleanup(|| restore(false)))
+	let result = if let Err(error) = prepare {
+		after_cleanup(Err(error), control::cleanup(|| restore(true)))
+	} else {
+		let result = action(true).and_then(|value| control::wait(FOREGROUND_SETTLE).map(|()| value));
+		after_cleanup(result, control::cleanup(|| restore(false)))
+	};
+	report_focus_return(returned.get(), previous.pid);
+	result
+}
+
+/// Records for the host where a takeover left focus, read from `WindowServer`
+/// after restoration.
+fn report_focus_return(handed_back: bool, previous: Option<pid_t>) {
+	let pid = |pid: pid_t| u32::try_from(pid).ok();
+	control::report_focus_return(DesktopFocusReturn {
+		handed_back,
+		previous_pid: previous.and_then(pid),
+		front_pid: front_pid().and_then(pid),
+	});
 }
 
 /// Makes `previous_key` key again after takeover handed the front back,
