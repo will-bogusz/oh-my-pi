@@ -196,17 +196,20 @@ async function nativeCall<T>(signal: AbortSignal, call: () => T | Promise<T>): P
 	}
 }
 
-function pointerOptions(options?: ClickOptions | DragOptions | InputOptions, fallback?: Fallback): PointerOptions {
+/**
+ * Native pointer options, each read once from the model's object, so the
+ * `refuse` check and the native call see the same `takeover`.
+ */
+function pointerOptions(options?: ClickOptions | DragOptions | InputOptions): PointerOptions {
+	const { button, count, modifiers, keys, menu, takeover }: Partial<ClickOptions & DragOptions> = options ?? {};
 	const mapped: PointerOptions = {};
-	if (options) {
-		if ("button" in options && options.button !== undefined) mapped.button = options.button;
-		if ("count" in options && options.count !== undefined) mapped.count = options.count;
-		if ("modifiers" in options && options.modifiers !== undefined) mapped.modifiers = options.modifiers;
-		if ("keys" in options && options.keys !== undefined) mapped.keys = options.keys;
-		if ("menu" in options && options.menu !== undefined) mapped.menu = menuOption(options);
-		if (options.takeover !== undefined) mapped.takeover = options.takeover;
-	}
-	return fallback ? { ...mapped, ...fallback } : mapped;
+	if (button !== undefined) mapped.button = button;
+	if (count !== undefined) mapped.count = count;
+	if (modifiers !== undefined) mapped.modifiers = modifiers;
+	if (keys !== undefined) mapped.keys = keys;
+	if (menu !== undefined) mapped.menu = menuOption({ menu });
+	if (takeover !== undefined) mapped.takeover = takeover;
+	return mapped;
 }
 
 /** The item path of a `menu` option, checked before anything is sent. */
@@ -559,8 +562,9 @@ class El {
 	async click(options?: ClickOptions): Promise<void> {
 		const context = this.#getContext();
 		guardRun(context, "click");
-		await sendInput(this.#session, context, "click", options?.takeover, fallback =>
-			this.#session.axClick(this.ref, pointerOptions(options, fallback)),
+		const native = pointerOptions(options);
+		await sendInput(this.#session, context, "click", native.takeover, fallback =>
+			this.#session.axClick(this.ref, { ...native, ...fallback }),
 		);
 	}
 
@@ -573,6 +577,16 @@ class El {
 	async focus(): Promise<void> {
 		const context = this.#getContext();
 		guardRun(context, "focus");
+		// macOS sets AXFocused inside the app without activating it; Windows
+		// (UIA SetFocus) and Linux (AT-SPI grab_focus) move keyboard focus.
+		if (this.#session.capabilities.backend !== "quartz") {
+			refuseForeground(
+				context,
+				"focus()",
+				"move the user's keyboard focus to this element",
+				"Use setValue(), press() or another AX action, which need no focus.",
+			);
+		}
 		await nativeCall(context.signal, () => this.#session.axFocus(this.ref));
 	}
 
@@ -756,24 +770,26 @@ class Win {
 
 	async click(x: number, y: number, options?: ClickOptions): Promise<void> {
 		const context = this.#guardInput("click");
+		const native = pointerOptions(options);
 		await sendInput(
 			this.#session,
 			context,
 			"click",
-			options?.takeover,
-			fallback => this.#session.click(this.id, x, y, pointerOptions(options, fallback)),
+			native.takeover,
+			fallback => this.#session.click(this.id, x, y, { ...native, ...fallback }),
 			this.pid,
 		);
 	}
 
 	async doubleClick(x: number, y: number, options?: Omit<ClickOptions, "count">): Promise<void> {
 		const context = this.#guardInput("doubleClick");
+		const native = { ...pointerOptions(options), count: 2 };
 		await sendInput(
 			this.#session,
 			context,
 			"doubleClick",
-			options?.takeover,
-			fallback => this.#session.click(this.id, x, y, pointerOptions({ ...options, count: 2 }, fallback)),
+			native.takeover,
+			fallback => this.#session.click(this.id, x, y, { ...native, ...fallback }),
 			this.pid,
 		);
 	}
@@ -785,23 +801,24 @@ class Win {
 			context,
 			"move",
 			undefined,
-			fallback => this.#session.moveMouse(this.id, x, y, pointerOptions(undefined, fallback)),
+			fallback => this.#session.moveMouse(this.id, x, y, { ...fallback }),
 			this.pid,
 		);
 	}
 
 	async drag(points: Array<[number, number]>, options?: DragOptions): Promise<void> {
 		const context = this.#guardInput("drag");
+		const native = pointerOptions(options);
 		await sendInput(
 			this.#session,
 			context,
 			"drag",
-			options?.takeover,
+			native.takeover,
 			fallback =>
 				this.#session.drag(
 					this.id,
 					points.map(([x, y]) => ({ x, y })),
-					pointerOptions(options, fallback),
+					{ ...native, ...fallback },
 				),
 			this.pid,
 		);
@@ -809,13 +826,15 @@ class Win {
 
 	async scroll(x: number, y: number, options: ScrollOptions = {}): Promise<void> {
 		const context = this.#guardInput("scroll");
+		const dx = options.dx ?? 0;
+		const dy = options.dy ?? 0;
+		const native = pointerOptions(options);
 		await sendInput(
 			this.#session,
 			context,
 			"scroll",
-			options.takeover,
-			fallback =>
-				this.#session.scroll(this.id, x, y, options.dx ?? 0, options.dy ?? 0, pointerOptions(options, fallback)),
+			native.takeover,
+			fallback => this.#session.scroll(this.id, x, y, dx, dy, { ...native, ...fallback }),
 			this.pid,
 		);
 	}
@@ -823,12 +842,13 @@ class Win {
 	async type(text: string, options?: InputOptions): Promise<void> {
 		const context = this.#guardInput("type");
 		validateString(text, "type(text)");
+		const native = pointerOptions(options);
 		await sendInput(
 			this.#session,
 			context,
 			"type",
-			options?.takeover,
-			fallback => this.#session.typeText(this.id, text, pointerOptions(options, fallback)),
+			native.takeover,
+			fallback => this.#session.typeText(this.id, text, { ...native, ...fallback }),
 			this.pid,
 		);
 	}
@@ -841,52 +861,44 @@ class Win {
 				`press(chord) requires a key chord such as "cmd+shift+p" or ["cmd", "shift", "p"], got ${describeArgument(chord)}`,
 			);
 		}
+		const native = pointerOptions(options);
 		await sendInput(
 			this.#session,
 			context,
 			"press",
-			options?.takeover,
-			fallback => this.#session.keyChord(this.id, keys, pointerOptions(options, fallback)),
+			native.takeover,
+			fallback => this.#session.keyChord(this.id, keys, { ...native, ...fallback }),
 			this.pid,
 		);
 	}
 
 	async holdKeys(keys: string[], options: HoldOptions): Promise<void> {
 		const context = this.#guardInput("holdKeys");
-		validateHold(options);
+		// One read of each option, so the `refuse` check and the native call agree.
+		const { duration, takeover } = { ...options };
+		validateHold({ duration, takeover });
 		validateKeys(keys, "keys");
 		await sendInput(
 			this.#session,
 			context,
 			"holdKeys",
-			options.takeover,
-			fallback =>
-				this.#session.holdKeys(this.id, keys, {
-					duration: options.duration,
-					takeover: options.takeover,
-					...fallback,
-				}),
+			takeover,
+			fallback => this.#session.holdKeys(this.id, keys, { duration, takeover, ...fallback }),
 			this.pid,
 		);
 	}
 
 	async holdMouse(x: number, y: number, options: HoldMouseOptions): Promise<void> {
 		const context = this.#guardInput("holdMouse");
-		validateHold(options);
-		if (options.keys !== undefined) validateKeys(options.keys, "keys");
+		const { duration, button, keys, takeover } = { ...options };
+		validateHold({ duration, takeover });
+		if (keys !== undefined) validateKeys(keys, "keys");
 		await sendInput(
 			this.#session,
 			context,
 			"holdMouse",
-			options.takeover,
-			fallback =>
-				this.#session.holdMouse(this.id, x, y, {
-					duration: options.duration,
-					button: options.button,
-					keys: options.keys,
-					takeover: options.takeover,
-					...fallback,
-				}),
+			takeover,
+			fallback => this.#session.holdMouse(this.id, x, y, { duration, button, keys, takeover, ...fallback }),
 			this.pid,
 		);
 	}
@@ -1388,7 +1400,9 @@ export class ComputerWorkerCore {
 					const context = getContext();
 					guardRun(context, "apps.open");
 					validateString(id, "apps.open(id)", { nonEmpty: true });
-					if (options?.activate === true) {
+					// One read of each option, so the `refuse` check and the native call agree.
+					const open = { ...options };
+					if (open.activate === true) {
 						refuseForeground(
 							context,
 							"apps.open with activate: true",
@@ -1396,7 +1410,7 @@ export class ComputerWorkerCore {
 							"Call apps.open without activate, which opens the application behind the user's.",
 						);
 					}
-					const opened = await nativeCall(context.signal, () => session.openApplication(id, options));
+					const opened = await nativeCall(context.signal, () => session.openApplication(id, open));
 					return { ...opened.application, window: opened.window ? makeWin(opened.window) : null };
 				},
 			},
