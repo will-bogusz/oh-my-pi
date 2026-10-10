@@ -151,8 +151,16 @@ impl MacInput {
 							}
 						})
 					},
-					DeliveryMode::Foreground => {
-						foreground_pointer(&self.source, &window, pid, wid, event, menu)
+					DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => {
+						foreground_pointer(
+							&self.source,
+							&window,
+							pid,
+							wid,
+							event,
+							returns_focus(mode),
+							menu,
+						)
 					},
 				}
 			},
@@ -239,7 +247,7 @@ impl MacInput {
 		// A takeover write goes to the window brought to the front for it.
 		let behind_user = || match mode {
 			DeliveryMode::Background => entry_front.require_behind(skylight::front_pid(), pid, wid),
-			DeliveryMode::Foreground => Ok(()),
+			DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => Ok(()),
 		};
 		let inserted = inserts_first(mode, element.is_some(), text, || {
 			if remote.is_some() || process::is_terminal(pid) {
@@ -281,30 +289,33 @@ impl MacInput {
 					})
 				})
 			},
-			DeliveryMode::Foreground => skylight::with_foreground(pid, wid, |activated| {
-				control::wait(first_key_settle(activated))?;
-				element_keys(pid, element, || {
-					if remote.is_some() {
-						// A remote screen may read modifiers from the keyboard state,
-						// which only bare key transitions at the HID tap move. They
-						// post globally, so every press first checks that the target
-						// still has focus.
-						post_bare_keys(&bare_transitions(&keys), gap, || {
-							skylight::require_front_window(pid, wid)
-						})
-					} else {
-						// Stop rather than typing into a newly user-selected app or
-						// window.
-						type_keys(
-							&self.source,
-							&keys,
-							gap,
-							|| skylight::require_front_window(pid, wid),
-							post_global,
-						)
-					}
+			DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => {
+				skylight::with_foreground(pid, wid, returns_focus(mode), |activated| {
+					control::wait(first_key_settle(activated))?;
+					element_keys(pid, element, || {
+						if remote.is_some() {
+							// A remote screen may read modifiers from the keyboard
+							// state, which only bare key
+							// transitions at the HID tap move. They
+							// post globally, so every press first checks that the
+							// target still has focus.
+							post_bare_keys(&bare_transitions(&keys), gap, || {
+								skylight::require_front_window(pid, wid)
+							})
+						} else {
+							// Stop rather than typing into a newly user-selected app
+							// or window.
+							type_keys(
+								&self.source,
+								&keys,
+								gap,
+								|| skylight::require_front_window(pid, wid),
+								post_global,
+							)
+						}
+					})
 				})
-			}),
+			},
 		}
 	}
 
@@ -359,18 +370,23 @@ impl MacInput {
 				}
 				Ok(delivery)
 			},
-			DeliveryMode::Foreground => skylight::with_foreground(pid, wid, |activated| {
-				control::wait(first_key_settle(activated))?;
-				element_keys(pid, element, || {
-					if remote.is_some() {
-						// As for typed text: a remote screen may read modifiers from
-						// the keyboard state, which only bare transitions move.
-						press_bare_chord(&chord, gap, || skylight::require_front_window(pid, wid))
-					} else {
-						press_chord(&self.source, &chord, gap, |event| post_takeover_key(pid, wid, event))
-					}
+			DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => {
+				skylight::with_foreground(pid, wid, returns_focus(mode), |activated| {
+					control::wait(first_key_settle(activated))?;
+					element_keys(pid, element, || {
+						if remote.is_some() {
+							// As for typed text: a remote screen may read modifiers
+							// from the keyboard state, which only
+							// bare transitions move.
+							press_bare_chord(&chord, gap, || skylight::require_front_window(pid, wid))
+						} else {
+							press_chord(&self.source, &chord, gap, |event| {
+								post_takeover_key(pid, wid, event)
+							})
+						}
+					})
 				})
-			}),
+			},
 		}
 	}
 }
@@ -426,21 +442,28 @@ impl MacInput {
 							},
 						)
 					},
-					DeliveryMode::Foreground => skylight::with_foreground(pid, wid, |activated| {
-						control::wait(first_key_settle(activated))?;
-						let body = || control::wait(duration);
-						if remote.is_some() {
-							hold_bare_keys(&held, gap, || skylight::require_front_window(pid, wid), body)
-						} else {
-							hold_presses(
-								&self.source,
-								&held,
-								gap,
-								|event| post_takeover_key(pid, wid, event),
-								body,
-							)
-						}
-					}),
+					DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => {
+						skylight::with_foreground(pid, wid, returns_focus(mode), |activated| {
+							control::wait(first_key_settle(activated))?;
+							let body = || control::wait(duration);
+							if remote.is_some() {
+								hold_bare_keys(
+									&held,
+									gap,
+									|| skylight::require_front_window(pid, wid),
+									body,
+								)
+							} else {
+								hold_presses(
+									&self.source,
+									&held,
+									gap,
+									|event| post_takeover_key(pid, wid, event),
+									body,
+								)
+							}
+						})
+					},
 				}
 			},
 		}
@@ -463,6 +486,12 @@ fn remote_modifier_check(
 		.then(|| physical_modifier_check(window, physical_flags))
 }
 
+/// Whether a takeover hands focus back even after user input (see
+/// [`DeliveryMode::ForegroundReturnFocus`]).
+const fn returns_focus(mode: DeliveryMode) -> bool {
+	matches!(mode, DeliveryMode::ForegroundReturnFocus)
+}
+
 fn window_identity(window: &DesktopWindow) -> CoreResult<(libc::pid_t, u32)> {
 	let pid = window.pid.ok_or_else(|| {
 		DesktopError::input_failed(format!("window {} has no owning process id", window.id))
@@ -482,7 +511,7 @@ fn window_identity(window: &DesktopWindow) -> CoreResult<(libc::pid_t, u32)> {
 fn keyboard_modifiers_refusal(window: &DesktopWindow, action: &str) -> DesktopError {
 	DesktopError::background_unavailable(format!(
 		"window {} ({}) takes Shift, Option, Control and Command from the physical keyboard, so \
-		 background input cannot hold them to {action}; nothing was sent; retry with takeover:true",
+		 background input cannot hold them to {action}; nothing was sent",
 		window.id, window.app,
 	))
 }
@@ -675,7 +704,7 @@ fn unmapped_keyboard_refusal(wid: u32) -> DesktopError {
 	DesktopError::background_unavailable(format!(
 		"window {wid} is not among its application's accessibility windows, is not its focused \
 		 window, and is not attached to one of its windows, so background keystrokes cannot be \
-		 proven to reach it; retry with takeover:true or use ax actions",
+		 proven to reach it; nothing was sent",
 	))
 }
 
@@ -969,7 +998,7 @@ fn input_owner(
 			Err(DesktopError::background_unavailable(format!(
 				"window {wid} shows content drawn by process {owner}, such as a system Open or Save \
 				 panel, and that process does not report focus in its window {window}, so background \
-				 input would be dropped; nothing was sent; retry with takeover:true or use ax actions",
+				 input would be dropped; nothing was sent",
 			)))
 		},
 	}
@@ -1077,8 +1106,7 @@ fn key_refusal(
 			);
 			DesktopError::background_unavailable(format!(
 				"window {wid} did not become its application's key window, and {focused} still is, so \
-				 background keystrokes would reach that window; nothing was sent; retry with \
-				 takeover:true or use ax actions",
+				 background keystrokes would reach that window; nothing was sent",
 			))
 		},
 		ax::KeyDestination::Target(_) | ax::KeyDestination::Unreported => {
@@ -1089,7 +1117,7 @@ fn key_refusal(
 			DesktopError::background_unavailable(format!(
 				"window {wid} shares its application with {siblings} other window(s) and did not \
 				 become its key window, so background keystrokes could reach another window; nothing \
-				 was sent; retry with takeover:true or use ax actions",
+				 was sent",
 			))
 		},
 	}
@@ -1155,7 +1183,7 @@ fn refuse_pointer(
 ) -> CoreResult<()> {
 	let refuse = |reason: &str| {
 		Err(DesktopError::background_unavailable(format!(
-			"window {} ({}) {reason}; retry with takeover:true or use ax actions",
+			"window {} ({}) {reason}; nothing was sent",
 			window.id, window.app,
 		)))
 	};
@@ -1380,8 +1408,8 @@ impl EntryFront {
 
 fn came_forward_refusal(wid: u32) -> DesktopError {
 	DesktopError::background_unavailable(format!(
-		"window {wid}'s application came to the front while background input was prepared; nothing \
-		 was sent; inspect the window, then retry with takeover:true or use ax actions",
+		"window {wid}'s application came to the front while background input was prepared, so \
+		 nothing was sent",
 	))
 }
 
@@ -1456,15 +1484,13 @@ pub(super) fn make_key_in_background(
 		FrontTarget::UserSibling => {
 			return Err(DesktopError::background_unavailable(format!(
 				"window {wid} belongs to the frontmost application but is not its key window; making \
-				 it key would move the user's typing there, so nothing was sent; retry with \
-				 takeover:true or use ax actions",
+				 it key would move the user's typing there, so nothing was sent",
 			)));
 		},
 		FrontTarget::Unknown => {
 			return Err(DesktopError::background_unavailable(format!(
 				"window {wid}: the frontmost application could not be identified, so making the \
-				 window key could move the user's typing there; nothing was sent; retry with \
-				 takeover:true or use ax actions",
+				 window key could move the user's typing there; nothing was sent",
 			)));
 		},
 	}
@@ -1562,8 +1588,7 @@ pub(super) fn recheck_background(
 	if prepared && (visited() || left_background(front(), pid)) {
 		return Err(DesktopError::background_unavailable(format!(
 			"window {wid}'s application came to the front, or the front application could not be \
-			 identified, during background input; no further input was sent; inspect the window, \
-			 then retry with takeover:true or use ax actions",
+			 identified, during background input; no further input was sent; inspect the window",
 		)));
 	}
 	Ok(())
@@ -1787,7 +1812,7 @@ fn background_pointer(
 		Some(_) => Some(capture::menu_windows(menu_pid).ok_or_else(|| {
 			DesktopError::background_unavailable(format!(
 				"cannot list the open menus of window {} ({}), so a menu this {} opens could not be \
-				 closed; nothing was sent; retry with takeover:true or use ax actions",
+				 closed; nothing was sent",
 				window.id,
 				window.app,
 				pointer_kind(&event),
@@ -1866,8 +1891,7 @@ fn menu_watch(
 			"window {} ({}) has a menu button or popup button where {gesture} presses, and its menu \
 			 would open on the first press and keep the keyboard from the user's app until {gesture} \
 			 {ends}, so {gesture} {was} not sent; to choose an item in the background, click the \
-			 control once with the item's path as the menu option, e.g. menu: [\"<item>\"], or retry \
-			 with takeover:true",
+			 control once with the item's path as the menu option, e.g. menu: [\"<item>\"]",
 			window.id, window.app,
 		)));
 	}
@@ -1917,7 +1941,7 @@ fn refuse_drag_source(
 		"the {} on window {} ({}) starts on {element}, where a press can pick up an item for drag \
 		 and drop, which macOS completes from the user's real pointer and could drop into the \
 		 user's own window; background drags and holds run only on sliders, scroll bars, splitters \
-		 and steppers; nothing was sent; retry with takeover:true",
+		 and steppers; nothing was sent",
 		pointer_kind(event),
 		window.id,
 		window.app,
@@ -3524,6 +3548,8 @@ fn char_key_code(character: char) -> CoreResult<u16> {
 /// Delivers real HID pointer input to `window` while it is the frontmost key
 /// window, then restores focus, any known covering window, and the user's
 /// pointer. Raising a single covering window is not an exact z-order snapshot.
+/// With `return_focus`, user input during the action does not cancel the
+/// restoration.
 /// With `menu`, the item path is chosen in the menu the click opens before
 /// focus goes back, which would close the menu.
 fn foreground_pointer(
@@ -3532,6 +3558,7 @@ fn foreground_pointer(
 	pid: libc::pid_t,
 	wid: u32,
 	event: PointerEvent,
+	return_focus: bool,
 	menu: Option<&[String]>,
 ) -> CoreResult<()> {
 	let kind = pointer_kind(&event);
@@ -3541,7 +3568,7 @@ fn foreground_pointer(
 		ax::open_menu::CONTROL_MENU_TIMEOUT
 	};
 	preserving_cursor(source, || {
-		skylight::with_foreground(pid, wid, |_| {
+		skylight::with_foreground(pid, wid, return_focus, |_| {
 			let choices = control::user_choices();
 			let mut occluder = None;
 			let result = uncover(window, pid, wid, &event, &mut occluder)
@@ -3575,7 +3602,8 @@ fn foreground_pointer(
 				});
 			// Capture before raising, so even a failed raise/re-hit-test retains
 			// the restoration token. Never reorder over a user-selected app.
-			let cleanup = if control::user_choices() == choices && skylight::is_front_window(pid, wid)
+			let cleanup = if (return_focus || control::user_choices() == choices)
+				&& skylight::is_front_window(pid, wid)
 			{
 				control::cleanup(|| {
 					occluder.map_or(Ok(()), |occluder: Occluder| {
@@ -6566,7 +6594,7 @@ mod tests {
 					.expect_err("refused before posting");
 				assert_eq!(error.code.as_str(), "BackgroundUnavailable", "{role:?}");
 				assert!(error.message.contains("nothing was sent"), "{}", error.message);
-				assert!(error.message.contains("retry with takeover:true"), "{}", error.message);
+				assert!(!error.message.contains("takeover"), "{}", error.message);
 			}
 			for role in DRAG_TRACKING_ROLES {
 				refuse_drag_source(&window, &event, |_, _| Some(role.to_string())).expect(role);

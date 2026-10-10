@@ -170,7 +170,7 @@ impl Backend for Win32Backend {
 				})?;
 				input::element_background(id, own, input)?;
 			},
-			DeliveryMode::Foreground => {
+			DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => {
 				self.ax.focus(element)?;
 				match input {
 					ElementInput::Text(text) => input::type_text(target, text, mode)?,
