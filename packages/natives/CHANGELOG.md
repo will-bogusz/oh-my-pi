@@ -17,6 +17,7 @@
 - macOS background clicks into apps built on macOS's own Tk 8.5 now run; Tk 8.6 and later still throw `BackgroundUnavailable` ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - macOS window input with `takeover` and the new `returnFocus` option hands focus back to the user's app even when they typed or clicked during the action; only a third app they switched to keeps focus. Plain `takeover` is unchanged
 - `BackgroundUnavailable` and partial-delivery errors no longer tell the caller to retry with `takeover:true`; they say whether any input was sent
+- Window input calls now resolve to a `DesktopFocusReturn` (`handedBack`, `previousPid`, `frontPid`) when a macOS takeover ran, read from `WindowServer` once focus was restored; otherwise they resolve to `null`
 
 ### Fixed
 
@@ -44,6 +45,7 @@
 - Fixed a macOS `menu` path or background `press()` on a popup in a system Open or Save panel, such as Automator's Save sheet Where: popup, failing with "its items could not be read" or "opened no menu", because the menu opens in `openAndSavePanelService` ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS `setValue` on a background popup button typing the user's keys into the target app: the menu it opens now ends with `AXCancel` right after the item is pressed, instead of flashing the item and fading out for about a third of a second while it holds the keyboard ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a macOS background right-click or Control-click that opened a context menu leaving the menu open, which kept the keyboard from the user's app; the menu now closes and the click throws `InputFailed` saying so, never `BackgroundUnavailable`, since a takeover rerun would close the menu again when focus returns
+- Fixed X11 background input refusing with `BackgroundUnavailable` and "no input was sent" after part of the call was already sent (a later click of a double-click, a later scroll detent, a pointer event after held keys); it now throws `InputFailed` saying input may already have landed
 
 ## [18.12.1] - 2026-10-17
 
