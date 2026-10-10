@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `el.selectText(text, { prefix?, suffix?, select? })` to the macOS `computer` tool: it selects text (or places a caret) inside a background app's text element without taking focus, moving the pointer or sending keys, so a following `type` replaces it
+
 ### Changed
 
 - Reduced CPU overhead during syntax checks and automatic edit repairs ([#15904](https://github.com/can1357/oh-my-pi/pull/15904) by [@iliaal](https://github.com/iliaal)).
