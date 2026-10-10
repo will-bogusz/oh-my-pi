@@ -156,6 +156,8 @@ enum Response {
 	OpenedApplication(OpenedApplication),
 	MenuItems(Vec<DesktopMenuItem>),
 	Unit,
+	/// A finished input call's notice, if any.
+	Notice(Option<String>),
 	Snapshot(AxSnapshot),
 	Nodes(Vec<AxNode>),
 	Node(Option<AxNode>),
@@ -944,7 +946,7 @@ impl Worker {
 					DeliveryMode::from_takeover(*takeover),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Notice(self.backend()?.take_input_notice()))
 			},
 			Request::HoldMouse { target, x, y, button, keys, duration, takeover, .. } => {
 				if !keys.is_empty() {
@@ -1083,7 +1085,7 @@ impl Worker {
 					DeliveryMode::from_takeover(*takeover),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Notice(self.backend()?.take_input_notice()))
 			},
 			Request::KeyChord { target, keys, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
@@ -1093,7 +1095,7 @@ impl Worker {
 					DeliveryMode::from_takeover(*takeover),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Notice(self.backend()?.take_input_notice()))
 			},
 			Request::RaiseWindow { id, .. } => {
 				self.backend()?.raise_window(id, token)?;
@@ -1620,13 +1622,13 @@ impl DesktopSession {
 		target: String,
 		keys: Vec<String>,
 		options: HoldOptions,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<String>>> {
 		let keys = parse_keys(&keys).map_err(napi::Error::from)?;
 		if keys.is_empty() {
 			return Err(DesktopError::invalid_key("holdKeys requires at least one key").into());
 		}
 		let duration = hold_duration(options.duration).map_err(napi::Error::from)?;
-		Ok(self.unit("desktop.holdKeys", move |reply| Request::HoldKeys {
+		Ok(self.notice("desktop.holdKeys", move |reply| Request::HoldKeys {
 			target: Target::parse(&target),
 			keys,
 			duration,
@@ -1828,11 +1830,11 @@ impl DesktopSession {
 		target: String,
 		text: String,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<String>>> {
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.typeText", move |reply| Request::TypeText {
+		Ok(self.notice("desktop.typeText", move |reply| Request::TypeText {
 			target: Target::parse(&target),
 			text,
 			takeover,
@@ -1846,12 +1848,12 @@ impl DesktopSession {
 		target: String,
 		keys: Vec<String>,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<String>>> {
 		let keys = parse_keys(&keys).map_err(napi::Error::from)?;
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.keyChord", move |reply| Request::KeyChord {
+		Ok(self.notice("desktop.keyChord", move |reply| Request::KeyChord {
 			target: Target::parse(&target),
 			keys,
 			takeover,
@@ -2043,6 +2045,23 @@ impl DesktopSession {
 			c.call(token, make)
 				.and_then(response_unit)
 				.map_err(Into::into)
+		})
+	}
+
+	/// An input call that resolves to its notice, if any.
+	fn notice(
+		&self,
+		label: &'static str,
+		make: impl FnOnce(Reply) -> Request + Send + 'static,
+	) -> task::Promise<Option<String>> {
+		let c = Arc::clone(&self.core);
+		let token = c.cancellation.token();
+		task::blocking(label, (), move |_| {
+			match c.call(token, make)? {
+				Response::Notice(notice) => Ok(notice),
+				_ => Err(DesktopError::internal("unexpected desktop worker response")),
+			}
+			.map_err(Into::into)
 		})
 	}
 
