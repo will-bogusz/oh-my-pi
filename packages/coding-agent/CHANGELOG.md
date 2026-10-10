@@ -5,7 +5,7 @@
 ### Added
 
 - Added a `menu` option to the computer tool's `win.click`, `el.click`, `el.press` and `el.perform`: on macOS the call that opens a context menu or menu button's menu chooses that item, e.g. `menu: ["Add to", "Fonts"]`, and leaves no menu open ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
-- Added `computer.backgroundFallback` (`takeover` by default, or `refuse`). When a `computer` window input call's background route is unavailable, the tool reruns that one call in takeover, hands focus back to your app (on macOS even if you kept typing), and says so in its result (`click ran in takeover because …; focus returned to …`); `refuse` fails the call without taking over, and also refuses, before anything is sent, the model's own `takeover: true`, `raise()`, activating `apps.open`, `control.acquire`, desktop-root input and, off macOS, `el.focus()`, naming the background route instead. `/computer status` shows the setting ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
+- Added `computer.backgroundFallback` (`takeover` by default, or `refuse`). When a `computer` window input call's background route is unavailable, the tool reruns that one call in takeover, hands focus back to your app (on macOS even if you kept typing), and says so in its result (`click ran in takeover because …; the input was delivered, and focus returned to …`); `refuse` fails the call without taking over, and also refuses, before anything is sent, the model's own `takeover: true`, `raise()`, activating `apps.open`, `control.acquire`, desktop-root input and, off macOS, `el.focus()`, naming the background route instead. `/computer status` shows the setting ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 
@@ -56,6 +56,7 @@
 - Fixed the transcript collapsing to one line per entry after switching between a subagent and the main session mid-turn when an earlier turn left a tool call without a result ([#12247](https://github.com/can1357/oh-my-pi/issues/12247), [#15466](https://github.com/can1357/oh-my-pi/pull/15466) by [@shgew](https://github.com/shgew))
 - Fixed a retried tool losing its transcript card when the view was rebuilt (subagent focus switch, overlay close) while the tool was still running
 - Fixed `computer.apps.open` returning before the app had a window, or never giving a hidden running app one; it now returns the app's frontmost window as `window`, waiting up to 3 s on macOS ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed the `computer` tool's takeover-rerun notice saying "nothing was sent" about a call it had just delivered; it now says the input was delivered, so the model stops repeating the call ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.11.1] - 2026-10-15
 
