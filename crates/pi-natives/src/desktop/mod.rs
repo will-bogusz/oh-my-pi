@@ -1821,6 +1821,8 @@ mod capture_tests {
 				bounds:      Some(AxBounds { x: 10.0, y: 10.0, width: 20.0, height: 20.0 }),
 				actions:     Vec::new(),
 				child_count: 0,
+				selected:    false,
+				role_name:   None,
 			})
 		}
 
