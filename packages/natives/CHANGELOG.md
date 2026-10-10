@@ -17,6 +17,15 @@
 
 - Fixed native memory growing without bound, and eventually crashing the process, when files in a downloaded (WASM) grammar language such as C# were parsed repeatedly ([#16067](https://github.com/can1357/oh-my-pi/issues/16067))
 
+### Changed
+
+- macOS background keystrokes into an app with several windows now reach the target window instead of throwing `BackgroundUnavailable`
+
+### Fixed
+
+- Fixed macOS background key presses, typing, held keys, left clicks and menu actions taking keyboard focus from the user's app, which then dropped pastes and shortcuts until clicked again
+- Fixed macOS background typing into Chrome pages and background shortcuts such as ⌘A in TextEdit doing nothing
+
 ## [18.12.0] - 2026-10-17
 
 ### Breaking Changes
