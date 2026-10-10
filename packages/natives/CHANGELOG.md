@@ -10,7 +10,7 @@
 
 - Reduced memory held by cached code-structure parses: the cache now caps estimated syntax-tree memory instead of source size, keeps only a file's current and previous parse, and reparses edited files incrementally ([#15886](https://github.com/can1357/oh-my-pi/pull/15886) by [@H4vC](https://github.com/H4vC))
 - Changed `warmBlockParse` to skip files over 2 MiB (was 4 MiB), the size above which a typical parse no longer fits the cache ([#15886](https://github.com/can1357/oh-my-pi/pull/15886) by [@H4vC](https://github.com/H4vC))
-- Computer use's physical Escape stop now watches the keyboard only during takeover input (`takeover: true` or held control); an Escape the user presses in their own app no longer cancels background input, which the host interrupt still stops (by [@will-bogusz](https://github.com/will-bogusz))
+- Computer use's physical Escape stop now watches the keyboard only during takeover input (`takeover: true`, held control, desktop-level input, raises); an Escape the user presses in their own app no longer cancels background window input, which the host interrupt still stops (by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 
