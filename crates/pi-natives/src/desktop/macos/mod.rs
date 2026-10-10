@@ -29,19 +29,17 @@ use super::{
 };
 
 pub struct MacosBackend {
-	capture:      MacCapture,
-	input:        MacInput,
-	ax:           MacAx,
-	input_notice: Option<String>,
+	capture: MacCapture,
+	input:   MacInput,
+	ax:      MacAx,
 }
 
 impl MacosBackend {
 	pub(crate) fn new(display: DisplaySelector) -> CoreResult<Self> {
 		Ok(Self {
-			capture:      MacCapture::new(display),
-			input:        MacInput::new()?,
-			ax:           MacAx::new(),
-			input_notice: None,
+			capture: MacCapture::new(display),
+			input:   MacInput::new()?,
+			ax:      MacAx::new(),
 		})
 	}
 
@@ -134,11 +132,9 @@ impl Backend for MacosBackend {
 		mode: DeliveryMode,
 		token: &OperationToken,
 	) -> CoreResult<()> {
-		self.input_notice = None;
 		token.check()?;
 		Self::require_input_permission()?;
-		self.input_notice = self.input.type_text(target, text, mode, &self.capture)?;
-		Ok(())
+		self.input.type_text(target, text, mode, &self.capture)
 	}
 
 	fn key_chord(
@@ -148,11 +144,9 @@ impl Backend for MacosBackend {
 		mode: DeliveryMode,
 		token: &OperationToken,
 	) -> CoreResult<()> {
-		self.input_notice = None;
 		token.check()?;
 		Self::require_input_permission()?;
-		self.input_notice = self.input.key_chord(target, keys, mode, &self.capture)?;
-		Ok(())
+		self.input.key_chord(target, keys, mode, &self.capture)
 	}
 
 	fn hold_keys(
@@ -163,17 +157,11 @@ impl Backend for MacosBackend {
 		mode: DeliveryMode,
 		token: &OperationToken,
 	) -> CoreResult<()> {
-		self.input_notice = None;
 		token.check()?;
 		Self::require_input_permission()?;
-		self.input_notice = self
+		self
 			.input
-			.hold_keys(target, keys, duration, mode, &self.capture)?;
-		Ok(())
-	}
-
-	fn take_input_notice(&mut self) -> Option<String> {
-		self.input_notice.take()
+			.hold_keys(target, keys, duration, mode, &self.capture)
 	}
 
 	fn menu_items(
