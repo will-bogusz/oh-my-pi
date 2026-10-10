@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added a `menu` option to the computer tool's `win.click`, `el.click`, `el.press` and `el.perform`: on macOS the call that opens a context menu or menu button's menu chooses that item, e.g. `menu: ["Add to", "Fonts"]`, and leaves no menu open ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Changed
 
 - Reduced CPU overhead during syntax checks and automatic edit repairs ([#15904](https://github.com/can1357/oh-my-pi/pull/15904) by [@iliaal](https://github.com/iliaal)).
