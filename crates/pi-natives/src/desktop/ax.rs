@@ -350,19 +350,13 @@ fn walk_raw(
 	Ok(Some(WalkNode { handle, props, settable, children }))
 }
 
-/// Roles whose value is entered rather than pressed or chosen.
+/// Roles whose value `setValue` writes: text, which it sets as a string, and
+/// dates. Sliders, steppers and color wells hold numbers or colors it cannot
+/// write.
 fn takes_value(role: &str) -> bool {
 	matches!(
 		role,
-		"textfield"
-			| "textarea"
-			| "combobox"
-			| "datetimearea"
-			| "datefield"
-			| "timefield"
-			| "slider"
-			| "incrementor"
-			| "colorwell"
+		"textfield" | "textarea" | "combobox" | "datetimearea" | "datefield" | "timefield"
 	)
 }
 
@@ -599,7 +593,7 @@ fn format_tree(
 	let focused = if depth == 0 {
 		window.focused
 	} else {
-		node.props.focused || focus == Some(&node.handle)
+		focused_in(focus, &node.handle, node.props.focused)
 	};
 	let reference = registry.register(backend, target, generation, node.handle, &node.props);
 	if !text.is_empty() {
@@ -667,7 +661,8 @@ pub fn snapshot(
 	let generation = registry.begin_snapshot(target);
 	let root = backend.window_root(window)?;
 	// Per-element focus flags also hold on every cell of a focused table, so
-	// `(focused)` marks only the application's own focused element.
+	// `(focused)` marks only the application's own focused element where the
+	// backend reports one.
 	let focus = backend.focused_within(&root);
 	let mut state = WalkState {
 		visited:     0,
@@ -751,7 +746,7 @@ pub fn query(
 			&& contains(node.props.value.as_deref(), value.as_ref())
 		{
 			let mut props = node.props;
-			props.focused = props.focused || focus.as_ref() == Some(&node.handle);
+			props.focused = focused_in(focus.as_ref(), &node.handle, props.focused);
 			let reference = registry.register(backend, target, generation, node.handle, &props);
 			result.push(node_to_napi(reference, props));
 			if result.len() >= limit {
@@ -768,10 +763,24 @@ pub fn register_node(
 	target: &str,
 	handle: AxHandle,
 ) -> CoreResult<AxNode> {
-	let props = backend.props(&handle)?;
+	let props = node_props(backend, &handle)?;
 	let generation = registry.current_generation(target);
 	let reference = registry.register(backend, target, generation, handle, &props);
 	Ok(node_to_napi(reference, props))
+}
+
+/// Whether `handle` holds focus: it is its application's focused element when
+/// the backend reports one, else its own flag says so.
+fn focused_in(focus: Option<&AxHandle>, handle: &AxHandle, own: bool) -> bool {
+	focus.map_or(own, |focus| focus == handle)
+}
+
+/// An element's props, its `focused` decided by [`focused_in`].
+pub fn node_props(backend: &mut dyn AxBackend, handle: &AxHandle) -> CoreResult<AxProps> {
+	let mut props = backend.props(handle)?;
+	let focus = backend.focused_within(handle);
+	props.focused = focused_in(focus.as_ref(), handle, props.focused);
+	Ok(props)
 }
 pub fn element_at_node(
 	backend: &mut dyn AxBackend,
@@ -1332,25 +1341,38 @@ mod tests {
 		.unwrap();
 		assert_eq!(found[0].value.as_deref(), Some(whole.as_str()));
 	}
+	/// The tree line of `reference`, without its indent.
+	fn line<'a>(text: &'a str, reference: &str) -> &'a str {
+		let tag = format!("[ref={reference}]");
+		text
+			.lines()
+			.find(|line| line.contains(&tag))
+			.unwrap_or_else(|| panic!("no {tag} in\n{text}"))
+			.trim_start()
+	}
 	#[test]
 	fn only_the_applications_focused_element_is_marked_focused() {
+		// A focused table reports every cell focused.
+		let cell = |title| {
+			let mut cell = p("cell", Some(title));
+			cell.focused = true;
+			cell
+		};
 		let mut m = Mock {
 			props: [
 				(1, p("window", Some("Title"))),
 				(2, p("outline", Some("Files"))),
-				(3, p("cell", Some("a.txt"))),
-				(4, p("cell", Some("b.txt"))),
+				(3, cell("a.txt")),
+				(4, cell("b.txt")),
 			]
 			.into(),
 			children: [(1, vec![2]), (2, vec![3, 4])].into(),
 			focus: Some(4),
 			..Default::default()
 		};
-		assert_eq!(
-			tree(&mut m),
-			"- window \"Title\" [ref=e1] app=Safari (focused)\n  - outline \"Files\" [ref=e2]\n    - \
-			 cell \"a.txt\" [ref=e3]\n    - cell \"b.txt\" [ref=e4] (focused)"
-		);
+		let text = tree(&mut m);
+		assert_eq!(line(&text, "e3"), "- cell \"a.txt\" [ref=e3]");
+		assert_eq!(line(&text, "e4"), "- cell \"b.txt\" [ref=e4] (focused)");
 		let found = query(&mut m, &mut AxRegistry::default(), &window(), &AxQuery {
 			role:  Some("cell".into()),
 			title: None,
@@ -1359,11 +1381,22 @@ mod tests {
 		})
 		.unwrap();
 		assert_eq!(found.iter().map(|node| node.focused).collect::<Vec<_>>(), [false, true]);
+		let mut registry = AxRegistry::default();
+		let (a, b) = (m.handle(3), m.handle(4));
+		let a = register_node(&mut m, &mut registry, "w", a).unwrap();
+		let b = register_node(&mut m, &mut registry, "w", b).unwrap();
+		assert_eq!((a.focused, b.focused), (false, true));
+		// Without an application focus, an element's own flag stands.
+		m.focus = None;
+		let text = tree(&mut m);
+		assert!(line(&text, "e3").ends_with("(focused)"), "{text}");
 	}
 	#[test]
 	fn values_set_value_can_write_are_marked_settable_outside_web_content() {
 		let mut due = p("datetimearea", Some("Due"));
 		due.value = Some("2026-10-16T09:00:00-04:00".into());
+		let mut volume = p("slider", Some("Volume"));
+		volume.value = Some("0.5".into());
 		let mut m = Mock {
 			props: [
 				(1, p("window", Some("Title"))),
@@ -1371,18 +1404,18 @@ mod tests {
 				(3, p("webarea", Some("Page"))),
 				(4, p("textfield", Some("Search"))),
 				(5, p("button", Some("Go"))),
+				(6, volume),
 			]
 			.into(),
-			children: [(1, vec![2, 3, 5]), (3, vec![4])].into(),
-			settable: [2, 4, 5].into(),
+			children: [(1, vec![2, 3, 5, 6]), (3, vec![4])].into(),
+			settable: [2, 4, 5, 6].into(),
 			..Default::default()
 		};
-		assert_eq!(
-			tree(&mut m),
-			"- window \"Title\" [ref=e1] app=Safari (focused)\n  - datetimearea \"Due\" [ref=e2]: \
-			 \"2026-10-16T09:00:00-04:00\" (settable)\n  - webarea \"Page\" [ref=e3]\n    - \
-			 textfield \"Search\" [ref=e4]\n  - button \"Go\" [ref=e5]"
-		);
+		let text = tree(&mut m);
+		assert!(line(&text, "e2").ends_with("(settable)"), "{text}");
+		for unsettable in ["e4", "e5", "e6"] {
+			assert!(!line(&text, unsettable).contains("(settable)"), "{text}");
+		}
 		assert_eq!(m.settable_reads, 1);
 	}
 	#[test]
@@ -1397,8 +1430,7 @@ mod tests {
 			..Default::default()
 		};
 		let text = tree(&mut m);
-		assert!(text.contains("- textfield [ref=e2]: \"invoice.pdf\" actions=open"), "{text}");
-		assert!(!text.contains("(settable)"), "{text}");
+		assert_eq!(line(&text, "e2"), "- textfield [ref=e2]: \"invoice.pdf\" actions=open");
 		assert_eq!(m.settable_reads, 0);
 	}
 	#[test]
@@ -1421,12 +1453,16 @@ mod tests {
 			children: [(1, vec![2, 5]), (2, vec![3, 4]), (5, vec![6, 7])].into(),
 			..Default::default()
 		};
-		assert_eq!(
-			tree(&mut m),
-			"- window \"Title\" [ref=e1] app=Safari (focused)\n  - outline \"Sidebar\" [ref=e2]\n    \
-			 - row \"Inbox\" [ref=e3] (selected)\n    - row \"Sent\" [ref=e4]\n  - list \"Files\" \
-			 [ref=e5]\n    - image \"a.pdf\" [ref=e6]\n    - image \"b.pdf\" [ref=e7] (selected)"
-		);
+		let text = tree(&mut m);
+		let marked: Vec<_> = text
+			.lines()
+			.filter(|line| line.ends_with(" (selected)"))
+			.map(str::trim_start)
+			.collect();
+		assert_eq!(marked, [
+			"- row \"Inbox\" [ref=e3] (selected)",
+			"- image \"b.pdf\" [ref=e7] (selected)"
+		]);
 	}
 	#[test]
 	fn lines_list_the_actions_a_role_does_not_imply() {
@@ -1450,14 +1486,19 @@ mod tests {
 			children: [(1, (2..=8).collect())].into(),
 			..Default::default()
 		};
-		assert_eq!(
-			tree(&mut m),
-			"- window \"Title\" [ref=e1] app=Safari (focused)\n  - button \"Save\" [ref=e2]\n  - \
-			 button \"Search\" [ref=e3] actions=showmenu,scrolltovisible\n  - image \"a.pdf\" \
-			 [ref=e4] actions=open\n  - statictext \"Yoga\" [ref=e5] actions=press\n  - textfield \
-			 \"Name\" [ref=e6]\n  - popover \"Details\" [ref=e7] actions=cancel\n  - button \
-			 \"Native\" [ref=e8]"
-		);
+		let text = tree(&mut m);
+		let actions = |reference| {
+			line(&text, reference)
+				.split_once(" actions=")
+				.map(|(_, actions)| actions)
+		};
+		assert_eq!(actions("e2"), None);
+		assert_eq!(actions("e3"), Some("showmenu,scrolltovisible"));
+		assert_eq!(actions("e4"), Some("open"));
+		assert_eq!(actions("e5"), Some("press"));
+		assert_eq!(actions("e6"), None);
+		assert_eq!(actions("e7"), Some("cancel"));
+		assert_eq!(actions("e8"), None);
 	}
 	#[test]
 	fn a_window_control_named_only_by_its_subrole_takes_that_name() {

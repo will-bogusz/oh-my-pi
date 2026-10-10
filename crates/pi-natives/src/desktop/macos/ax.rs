@@ -423,9 +423,7 @@ impl AxBackend for MacAx {
 		let element = mac_handle(h)?;
 		let child_count =
 			copy_elements_optional(element, "AXChildren").map_or(0, |children| children.len());
-		let mut props = element_props(element, child_count, WalkBounds::Read)?;
-		props.focused = app_focused(element).is_some_and(|focused| *focused == *element);
-		Ok(props)
+		element_props(element, child_count, WalkBounds::Read)
 	}
 
 	fn walk_node(
@@ -617,9 +615,7 @@ fn element_props(
 		value: nonempty(copy_value_string(element, "AXValue")),
 		description,
 		enabled: copy_bool(element, "AXEnabled").unwrap_or(true),
-		// A focused table reports every cell focused; callers compare against
-		// the application's focused element instead.
-		focused: false,
+		focused: copy_bool(element, "AXFocused").unwrap_or(false),
 		bounds: match read_bounds {
 			WalkBounds::Read => bounds(element),
 			WalkBounds::Skip => None,
@@ -1142,11 +1138,12 @@ fn bounds_matches_window(bounds: AxBounds, window: &DesktopWindow) -> bool {
 }
 
 fn action_name(action: &str) -> String {
-	match action.trim().to_ascii_lowercase().as_str() {
+	let action = action.trim();
+	match action.to_ascii_lowercase().as_str() {
 		"press" => "AXPress".to_string(),
 		"raise" => "AXRaise".to_string(),
 		"showmenu" | "show_menu" => "AXShowMenu".to_string(),
-		_ if action.starts_with("AX") => action.to_string(),
+		lower if lower.starts_with("ax") => format!("AX{}", &action[2..]),
 		_ => format!("AX{action}"),
 	}
 }
@@ -1320,6 +1317,9 @@ mod tests {
 		assert_eq!(native("showmenu"), Some("AXShowMenu"));
 		assert_eq!(native("AXOpen"), Some("AXOpen"));
 		assert_eq!(native("press"), None);
+		assert_eq!(native("axopen"), Some("AXOpen"));
+		assert_eq!(native("axOpen"), Some("AXOpen"));
+		assert_eq!(native(" open "), Some("AXOpen"));
 	}
 
 	#[test]

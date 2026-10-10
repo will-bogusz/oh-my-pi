@@ -847,7 +847,7 @@ impl Worker {
 			},
 			Request::AxNode { reference, .. } => {
 				let h = self.registry.resolve(reference)?;
-				let props = self.ax()?.props(&h)?;
+				let props = ax::node_props(self.ax()?, &h)?;
 				Ok(Response::Node(Some(ax::node_to_napi(reference.clone(), props))))
 			},
 			Request::AxAttributes { reference, .. } => {
