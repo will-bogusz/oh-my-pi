@@ -6,7 +6,7 @@
 
 - macOS background keystrokes into an app with several windows now reach the target window instead of throwing `BackgroundUnavailable`, and stop with `InputFailed` once another of its windows becomes key ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - macOS background keystrokes, left clicks and menu actions aimed at a non-key window of the app the user is in now throw `BackgroundUnavailable` instead of moving the user's typing to that window; pass `takeover: true` for it ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
-- Computer use's physical Escape stop now watches the keyboard only during takeover input (`takeover: true` or held control); an Escape the user presses in their own app no longer cancels background input, which the host interrupt still stops (by [@will-bogusz](https://github.com/will-bogusz))
+- Computer use's physical Escape stop now watches the keyboard only during takeover input (`takeover: true`, held control, desktop-level input, raises); an Escape the user presses in their own app no longer cancels background window input, which the host interrupt still stops (by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 
