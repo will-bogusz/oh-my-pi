@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The `computer` tool prompt now says physical Escape stops only takeover input, so background input keeps running while the user presses Escape in their own app (by [@will-bogusz](https://github.com/will-bogusz))
+
 ## [18.12.0] - 2026-10-17
 
 ### Added

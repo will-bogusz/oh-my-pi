@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Computer use's physical Escape stop now watches the keyboard only during takeover input (`takeover: true` or held control); an Escape the user presses in their own app no longer cancels background input, which the host interrupt still stops (by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Fixed
 
 - Fixed macOS computer use reporting a working physical Escape stop (`globalEscape: true`) when Input Monitoring was turned off and the stop could not see keys; `inputPermission` now reports event-posting access, and permission errors name the terminal or IDE to grant ([#15157](https://github.com/can1357/oh-my-pi/pull/15157) by [@will-bogusz](https://github.com/will-bogusz))
