@@ -79,7 +79,7 @@ export interface NativeDesktopSession {
 		caps?: { maxWidth?: number; maxHeight?: number },
 		options?: AxOptions,
 	): Promise<NativeObservation>;
-	holdKeys(target: string, keys: string[], options: NativeHoldOptions): Promise<string | null | undefined>;
+	holdKeys(target: string, keys: string[], options: NativeHoldOptions): Promise<void>;
 	holdMouse(target: string, x: number, y: number, options: NativeHoldOptions): Promise<void>;
 	acquireControl(): Promise<DesktopControlState>;
 	releaseControl(): void;
@@ -89,8 +89,8 @@ export interface NativeDesktopSession {
 	moveMouse(target: string, x: number, y: number, opts?: PointerOptions | null): Promise<void>;
 	drag(target: string, points: DesktopPoint[], opts?: PointerOptions | null): Promise<void>;
 	scroll(target: string, x: number, y: number, dx: number, dy: number, opts?: PointerOptions | null): Promise<void>;
-	typeText(target: string, text: string, opts?: PointerOptions | null): Promise<string | null | undefined>;
-	keyChord(target: string, keys: string[], opts?: PointerOptions | null): Promise<string | null | undefined>;
+	typeText(target: string, text: string, opts?: PointerOptions | null): Promise<void>;
+	keyChord(target: string, keys: string[], opts?: PointerOptions | null): Promise<void>;
 	raiseWindow(windowId: string): Promise<void>;
 	axSnapshot(target: string, opts?: AxSnapshotOptions | null): Promise<{ text: string }>;
 	axQuery(target: string, query: AxQuery): Promise<AxNode[]>;
@@ -662,10 +662,7 @@ class Win {
 		const context = this.#getContext();
 		guardRun(context, "type");
 		validateString(text, "type(text)");
-		const notice = await nativeCall(context.signal, () =>
-			this.#session.typeText(this.id, text, pointerOptions(options)),
-		);
-		if (notice) context.output.push({ type: "text", text: notice });
+		await nativeCall(context.signal, () => this.#session.typeText(this.id, text, pointerOptions(options)));
 	}
 
 	async press(chord: string | string[], options?: InputOptions): Promise<void> {
@@ -677,10 +674,7 @@ class Win {
 				`press(chord) requires a key chord such as "cmd+shift+p" or ["cmd", "shift", "p"], got ${describeArgument(chord)}`,
 			);
 		}
-		const notice = await nativeCall(context.signal, () =>
-			this.#session.keyChord(this.id, keys, pointerOptions(options)),
-		);
-		if (notice) context.output.push({ type: "text", text: notice });
+		await nativeCall(context.signal, () => this.#session.keyChord(this.id, keys, pointerOptions(options)));
 	}
 
 	async holdKeys(keys: string[], options: HoldOptions): Promise<void> {
@@ -688,8 +682,7 @@ class Win {
 		guardRun(context, "holdKeys");
 		validateHold(options);
 		validateKeys(keys, "keys");
-		const notice = await nativeCall(context.signal, () => this.#session.holdKeys(this.id, keys, options));
-		if (notice) context.output.push({ type: "text", text: notice });
+		await nativeCall(context.signal, () => this.#session.holdKeys(this.id, keys, options));
 	}
 
 	async holdMouse(x: number, y: number, options: HoldMouseOptions): Promise<void> {
