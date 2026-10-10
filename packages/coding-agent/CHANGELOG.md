@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Removed `preparePageForScreenshot` (`tools/browser/tab-worker`), `shouldPreserveConnectedBrowserFocus` (`tools/browser/attach`) and the tab worker's `activateForScreenshot` init option: Chromium screenshots no longer activate their tab
+
 ### Changed
 
 - Reduced CPU overhead during syntax checks and automatic edit repairs ([#15904](https://github.com/can1357/oh-my-pi/pull/15904) by [@iliaal](https://github.com/iliaal)).
