@@ -81,6 +81,10 @@
 - Fixed macOS computer use reporting `AxFailed` instead of `StaleRef` for a ref whose element the app had removed ([#15156](https://github.com/can1357/oh-my-pi/pull/15156) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS `el.press()` and `el.perform()` reporting `AxFailed` when the app did not answer in time, such as a press that opens a modal dialog; they now report `AxUnconfirmed` ([#15156](https://github.com/can1357/oh-my-pi/pull/15156) by [@will-bogusz](https://github.com/will-bogusz))
 
+### Added
+
+- Added `DesktopSession.axSelectText` (macOS) to select text in an accessibility element's value by UTF-16 range, refusing missing or ambiguous matches and returning the selection read back
+
 ## [18.8.7] - 2026-10-09
 
 ### Added
