@@ -395,6 +395,16 @@ fn activation_activity() -> [u32; 5] {
 	})
 }
 
+/// Hardware mouse presses (left, right, other): a click is how a user picks a
+/// window, while typing in their own window is not. Events posted to a pid do
+/// not advance these counters.
+fn pointer_presses() -> [u32; 3] {
+	[1, 3, 25].map(|event_type| {
+		// SAFETY: as in `activation_activity`; a read-only counter query.
+		unsafe { CGEventSourceCounterForEventType(1, event_type) }
+	})
+}
+
 #[derive(Debug, PartialEq, Eq)]
 enum FocusDecision {
 	Observe,
@@ -729,6 +739,26 @@ fn restorable_key(
 	}
 	(ax_lists_window() == Some(false) && shows_window() == Some(false))
 		.then_some(UserKey::Windowless)
+}
+
+/// Whether focus goes back to `previous_key`, given the previous front
+/// process's key window now. Another window there was the user's choice. The
+/// target itself is still key after the focus record within one process, so
+/// there only a hardware click marks it as the user's choice. Typing in their
+/// own window never stops the hand-back: background input watches no keys.
+const fn hands_back(
+	same_process: bool,
+	key: Option<u32>,
+	previous_key: u32,
+	wid: u32,
+	clicked: bool,
+) -> bool {
+	match key {
+		Some(key) if key == previous_key => true,
+		Some(key) if same_process && key == wid => !clicked,
+		Some(_) => false,
+		None => true,
+	}
 }
 
 /// Makes `wid` the frontmost key window, runs `action`, then restores the
@@ -1243,5 +1273,20 @@ mod tests {
 				.code,
 			ErrorCode::InputFailed
 		);
+	}
+
+	#[test]
+	fn focus_hand_back_yields_only_to_a_window_the_user_picked() {
+		let (user, target) = (7, 42);
+		// Typing in their own app moves no window: focus goes back to it.
+		assert!(hands_back(false, Some(user), user, target, false));
+		assert!(hands_back(true, Some(user), user, target, true), "a click in their own window");
+		assert!(hands_back(true, None, user, target, false));
+		// A sibling target still key after the focus record is ours to hand back,
+		// unless the user clicked it.
+		assert!(hands_back(true, Some(target), user, target, false));
+		assert!(!hands_back(true, Some(target), user, target, true));
+		assert!(!hands_back(true, Some(9), user, target, false), "another window the user picked");
+		assert!(!hands_back(false, Some(9), user, target, false));
 	}
 }
