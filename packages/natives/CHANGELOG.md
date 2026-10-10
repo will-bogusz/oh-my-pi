@@ -7,6 +7,8 @@
 - Reduced allocation overhead for uncached, result-limited file searches in large directory trees ([#16115](https://github.com/can1357/oh-my-pi/pull/16115) by [@kyle-elliott](https://github.com/kyle-elliott)).
 - macOS background keystrokes into an app with several windows now reach the target window instead of throwing `BackgroundUnavailable`, and stop with `InputFailed` once another of its windows becomes key ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - macOS background keystrokes, left clicks and menu actions aimed at a non-key window of the app the user is in now throw `BackgroundUnavailable` instead of moving the user's typing to that window; pass `takeover: true` for it ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
+- macOS background drags, mouse holds, clicks with modifiers, right-clicks and scrolls in Electron apps now run without bringing the app forward, instead of throwing `BackgroundUnavailable`
+- macOS background clicks into apps built on macOS's own Tk 8.5 now run; Tk 8.6 and later still throw `BackgroundUnavailable`
 
 ### Fixed
 
@@ -28,6 +30,7 @@
 - Fixed macOS background clicks on a control in a popover or sheet, such as Calendar's event popover or Automator's Save sheet, closing the popover or landing in the window it is attached to; they now go to the popover or sheet, without the press that made the window key ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a macOS background AX action that reports an error yet brings its app forward, such as `AXOpen` on a file in Chrome's Open panel, leaving that app in front of the user's for good; the focus guard now keeps watching after a failed action and sends the app back ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed the macOS background focus guard able to put the user's app back in front just after they clicked the agent's target app themselves, when the click came between the guard's last check and its hand-back; macOS now refuses the hand-back if any key or click came after that check ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed a macOS background right-click or Control-click that opened a context menu leaving the menu open, which kept the keyboard from the user's app; the menu now closes and the click throws `BackgroundUnavailable`
 
 ## [18.12.1] - 2026-10-17
 
