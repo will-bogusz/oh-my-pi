@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Desktop window input with `takeover` omitted is now background on every platform even while task control is held; only `takeover: true` selects foreground delivery
+
 ## [18.12.0] - 2026-10-17
 
 ### Breaking Changes

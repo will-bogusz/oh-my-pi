@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Computer-use window input with `takeover` omitted now stays in the background after `computer.control.acquire`, so an acquired grant no longer activates the target app or moves the user's pointer; pass `takeover: true` for foreground input
+
 ## [18.12.0] - 2026-10-17
 
 ### Added
