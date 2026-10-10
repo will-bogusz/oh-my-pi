@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The `computer` tool's instructions now tell the model that macOS drags, mouse holds, modified clicks, right-clicks and scrolls run in the background, so it no longer reaches for `takeover` for them
+
 ### Fixed
 
 - Fixed a Codex turn stopping on "Request failed … unsupported_native_inflight_message" when you sent a message while the response was writing text; the session now keeps the partial reply and continues with your message
