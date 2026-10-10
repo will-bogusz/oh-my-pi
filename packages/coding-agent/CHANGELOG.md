@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The computer tool tells the model that Screen Sharing and iPhone Mirroring take background input, and that text no keyboard key types throws `InvalidKey` there
+
 ### Fixed
 
 - Fixed a Codex turn stopping on "Request failed … unsupported_native_inflight_message" when you sent a message while the response was writing text; the session now keeps the partial reply and continues with your message
