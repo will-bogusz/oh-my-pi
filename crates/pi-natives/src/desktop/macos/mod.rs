@@ -11,6 +11,7 @@ mod release;
 mod release_guard;
 mod route;
 mod session;
+mod settle;
 mod skylight;
 mod spaces;
 
@@ -344,6 +345,20 @@ impl Backend for MacosBackend {
 			)));
 		}
 		Ok(())
+	}
+
+	fn wait_for_ui_quiet(
+		&mut self,
+		pids: &[u32],
+		quiet: std::time::Duration,
+		cap: std::time::Duration,
+		token: &OperationToken,
+	) -> CoreResult<super::types::UiQuiet> {
+		token.check()?;
+		if !ax::is_trusted() {
+			return Ok(super::types::UiQuiet::unwatched());
+		}
+		settle::wait_for_quiet(pids, quiet, cap, token)
 	}
 
 	fn ax(&mut self) -> Option<&mut dyn AxBackend> {
