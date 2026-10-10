@@ -4,7 +4,7 @@
 
 ### Changed
 
-- The `computer` tool prompt now says physical Escape stops only takeover input, so background input keeps running while the user presses Escape in their own app (by [@will-bogusz](https://github.com/will-bogusz))
+- The `computer` tool prompt now says physical Escape stops only takeover input, so background input keeps running while the user presses Escape in their own app ([#15176](https://github.com/can1357/oh-my-pi/pull/15176) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.12.0] - 2026-10-17
 
