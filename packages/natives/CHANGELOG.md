@@ -104,6 +104,8 @@
 
 - Fixed macOS computer use reporting `AxFailed` instead of `StaleRef` for a ref whose element the app had removed ([#15156](https://github.com/can1357/oh-my-pi/pull/15156) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS `el.press()` and `el.perform()` reporting `AxFailed` when the app did not answer in time, such as a press that opens a modal dialog; they now report `AxUnconfirmed` ([#15156](https://github.com/can1357/oh-my-pi/pull/15156) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed the user's typing landing in the macOS app a background action targets when that app brings itself to the front while they type; a click, ⌘/⌥/⌃ chord or Spotlight just before still counts as switching there on purpose
+- Fixed macOS background input sending the user back to their previous app after they opened the target app from Spotlight during the action
 
 ## [18.8.7] - 2026-10-09
 
