@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `DesktopSession.waitForUiQuiet(pids)` on macOS, which resolves once those apps have sent no accessibility notification for a quiet window, or at a cap
+
 ## [18.15.0] - 2026-11-01
 
 ### Fixed
