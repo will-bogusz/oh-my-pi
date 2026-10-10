@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `DesktopSession.waitForUiQuiet(pids)` on macOS, which resolves once those apps have sent no accessibility notification for a quiet window, or at a cap
+
 ### Fixed
 
 - Fixed a crash when parsing Markdown with very deeply nested lists or block quotes, such as a line of several hundred `- ` markers, which made editing such files kill the process ([#18707](https://github.com/can1357/oh-my-pi/issues/18707))
