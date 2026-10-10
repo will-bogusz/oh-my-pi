@@ -13,6 +13,8 @@
 - macOS background keystrokes, left clicks and menu actions aimed at a non-key window of the app the user is in now throw `BackgroundUnavailable` instead of moving the user's typing to that window; pass `takeover: true` for it ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - macOS background drags, mouse holds, clicks with modifiers, right-clicks and scrolls in Electron apps now run without bringing the app forward, instead of throwing `BackgroundUnavailable`; drags and holds with the right button or Control, repeated right-clicks or Control-clicks, and gestures with modifiers or keys into Apple Screen Sharing, still throw it ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - macOS background clicks into apps built on macOS's own Tk 8.5 now run; Tk 8.6 and later still throw `BackgroundUnavailable` ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- macOS window input with `takeover` and the new `returnFocus` option hands focus back to the user's app even when they typed or clicked during the action; only a third app they switched to keeps focus. Plain `takeover` is unchanged
+- `BackgroundUnavailable` and partial-delivery errors no longer tell the caller to retry with `takeover:true`; they say whether any input was sent
 
 ### Fixed
 
