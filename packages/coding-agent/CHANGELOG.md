@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The `computer` tool prompt now says physical Escape stops only takeover input, so background input keeps running while the user presses Escape in their own app (by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Fixed
 
 - Fixed a Codex turn stopping on "Request failed … unsupported_native_inflight_message" when you sent a message while the response was writing text; the session now keeps the partial reply and continues with your message
