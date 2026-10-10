@@ -104,6 +104,9 @@ enum Response {
 	MenuItems(Vec<DesktopMenuItem>),
 	Unit,
 	Snapshot(AxSnapshot),
+	/// An input call's takeover focus report; see
+	/// [`control::take_focus_return`].
+	Input(Option<DesktopFocusReturn>),
 	Nodes(Vec<AxNode>),
 	Node(Option<AxNode>),
 	Attributes(Vec<(String, String)>),
@@ -773,6 +776,7 @@ impl Worker {
 		let previous_frame = request
 			.frame_target()
 			.and_then(|target| self.frames.remove(target.key()));
+		control::take_focus_return();
 		let result = self.process(request, token).and_then(|response| {
 			token.check()?;
 			Ok(response)
@@ -854,7 +858,7 @@ impl Worker {
 					delivery_mode(*takeover, token),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::HoldMouse { target, x, y, button, keys, duration, takeover, .. } => {
 				if !keys.is_empty() {
@@ -874,7 +878,7 @@ impl Worker {
 					delivery_mode(*takeover, token),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::CaptureRegion { target, region, caps, .. } => {
 				let (base, _) = self.validated_frame(target)?;
@@ -938,7 +942,7 @@ impl Worker {
 					&frame,
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::MoveMouse { target, x, y, takeover, .. } => {
 				let (x, y, frame) = self.map_point(target, *x, *y)?;
@@ -949,7 +953,7 @@ impl Worker {
 					delivery_mode(*takeover, token),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::Drag { target, path, options, .. } => {
 				if !options.keys.is_empty() || options.modifiers != backend::Modifiers::default() {
@@ -972,7 +976,7 @@ impl Worker {
 					options.mode(token),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::Scroll { target, x, y, dx, dy, takeover, .. } => {
 				let (x, y, frame) = self.map_point(target, *x, *y)?;
@@ -983,21 +987,21 @@ impl Worker {
 					delivery_mode(*takeover, token),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::TypeText { target, text, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
 				self
 					.backend()?
 					.type_text(target, text, delivery_mode(*takeover, token), token)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::KeyChord { target, keys, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
 				self
 					.backend()?
 					.key_chord(target, keys, delivery_mode(*takeover, token), token)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::RaiseWindow { id, .. } => {
 				self.backend()?.raise_window(id, token)?;
@@ -1138,7 +1142,7 @@ impl Worker {
 					&FrameGeometry::identity_global(),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::Close { .. } => Ok(Response::Unit),
 		}
@@ -1503,13 +1507,13 @@ impl DesktopSession {
 		target: String,
 		keys: Vec<String>,
 		options: HoldOptions,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let keys = parse_keys(&keys).map_err(napi::Error::from)?;
 		if keys.is_empty() {
 			return Err(DesktopError::invalid_key("holdKeys requires at least one key").into());
 		}
 		let duration = hold_duration(options.duration).map_err(napi::Error::from)?;
-		Ok(self.unit("desktop.holdKeys", move |reply| Request::HoldKeys {
+		Ok(self.input("desktop.holdKeys", move |reply| Request::HoldKeys {
 			target: Target::parse(&target),
 			keys,
 			duration,
@@ -1525,12 +1529,12 @@ impl DesktopSession {
 		x: f64,
 		y: f64,
 		options: HoldOptions,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let duration = hold_duration(options.duration).map_err(napi::Error::from)?;
 		let button = MouseButton::parse(options.button.as_deref()).map_err(napi::Error::from)?;
 		let keys =
 			parse_keys(options.keys.as_deref().unwrap_or_default()).map_err(napi::Error::from)?;
-		Ok(self.unit("desktop.holdMouse", move |reply| Request::HoldMouse {
+		Ok(self.input("desktop.holdMouse", move |reply| Request::HoldMouse {
 			target: Target::parse(&target),
 			x,
 			y,
@@ -1633,9 +1637,9 @@ impl DesktopSession {
 		x: f64,
 		y: f64,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let o = ParsedPointerOptions::parse(opts).map_err(napi::Error::from)?;
-		Ok(self.unit("desktop.click", move |reply| Request::Click {
+		Ok(self.input("desktop.click", move |reply| Request::Click {
 			target: Target::parse(&target),
 			x,
 			y,
@@ -1651,11 +1655,11 @@ impl DesktopSession {
 		x: f64,
 		y: f64,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.moveMouse", move |reply| Request::MoveMouse {
+		Ok(self.input("desktop.moveMouse", move |reply| Request::MoveMouse {
 			target: Target::parse(&target),
 			x,
 			y,
@@ -1670,7 +1674,7 @@ impl DesktopSession {
 		target: String,
 		path: Vec<DesktopPoint>,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let o = ParsedPointerOptions::parse(opts).map_err(napi::Error::from)?;
 		if o.menu.is_some() {
 			return Err(
@@ -1681,7 +1685,7 @@ impl DesktopSession {
 			);
 		}
 		let path = path.into_iter().map(|p| (p.x, p.y)).collect();
-		Ok(self.unit("desktop.drag", move |reply| Request::Drag {
+		Ok(self.input("desktop.drag", move |reply| Request::Drag {
 			target: Target::parse(&target),
 			path,
 			options: o,
@@ -1698,11 +1702,11 @@ impl DesktopSession {
 		dx: f64,
 		dy: f64,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.scroll", move |reply| Request::Scroll {
+		Ok(self.input("desktop.scroll", move |reply| Request::Scroll {
 			target: Target::parse(&target),
 			x,
 			y,
@@ -1719,11 +1723,11 @@ impl DesktopSession {
 		target: String,
 		text: String,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.typeText", move |reply| Request::TypeText {
+		Ok(self.input("desktop.typeText", move |reply| Request::TypeText {
 			target: Target::parse(&target),
 			text,
 			takeover,
@@ -1737,12 +1741,12 @@ impl DesktopSession {
 		target: String,
 		keys: Vec<String>,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let keys = parse_keys(&keys).map_err(napi::Error::from)?;
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.keyChord", move |reply| Request::KeyChord {
+		Ok(self.input("desktop.keyChord", move |reply| Request::KeyChord {
 			target: Target::parse(&target),
 			keys,
 			takeover,
@@ -1883,9 +1887,9 @@ impl DesktopSession {
 		&self,
 		reference: String,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let o = ParsedPointerOptions::parse(opts).map_err(napi::Error::from)?;
-		Ok(self.unit("desktop.axClick", move |reply| Request::AxClick {
+		Ok(self.input("desktop.axClick", move |reply| Request::AxClick {
 			reference,
 			options: o,
 			reply,
@@ -1918,6 +1922,24 @@ impl DesktopSession {
 			c.call(token, make)
 				.and_then(response_unit)
 				.map_err(Into::into)
+		})
+	}
+
+	/// An input call, resolving to where its takeover left focus, if it took
+	/// over.
+	fn input(
+		&self,
+		label: &'static str,
+		make: impl FnOnce(Reply) -> Request + Send + 'static,
+	) -> task::Promise<Option<DesktopFocusReturn>> {
+		let c = Arc::clone(&self.core);
+		let token = c.cancellation.token();
+		task::blocking(label, (), move |_| {
+			match c.call(token, make)? {
+				Response::Input(report) => Ok(report),
+				_ => Err(DesktopError::internal("unexpected desktop worker response")),
+			}
+			.map_err(Into::into)
 		})
 	}
 
