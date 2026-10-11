@@ -1198,12 +1198,12 @@ const fn button_types(
 }
 
 /// Background pointer input for window `wid` of `pid`. The events go to `to`,
-/// the process and window that take the window's input ([`input_owner`]);
-/// making the window key still goes to its own application. `in_overlay`
-/// says `wid` is a sheet or popover on the application's focused window
-/// ([`takes_overlay_focus`]), so a left click sends only the activation,
-/// without the press outside its frame that would close a popover or reach
-/// the window the sheet is attached to.
+/// the process and window that take the window's input ([`input_owner`]),
+/// which also shows any menu they open; making the window key still goes to
+/// its own application. `in_overlay` says `wid` is a sheet or popover on the
+/// application's focused window ([`takes_overlay_focus`]), so a left click
+/// sends only the activation, without the press outside its frame that would
+/// close a popover or reach the window the sheet is attached to.
 fn background_pointer(
 	source: &CGEventSource,
 	pid: libc::pid_t,
@@ -1212,20 +1212,21 @@ fn background_pointer(
 	event: PointerEvent,
 	menu: Option<&[String]>,
 	entry_front: Option<libc::pid_t>,
-	(to, to_wid): (libc::pid_t, u32),
+	to: (libc::pid_t, u32),
 	in_overlay: bool,
 ) -> CoreResult<()> {
+	let menu_pid = to.0;
 	// An open menu takes the keyboard from the user's app: a context menu, or
 	// the menu of a menu button or popup button that a left click lands on.
 	let timeout = if may_open_context_menu(&event) {
 		Some(ax::open_menu::CONTEXT_MENU_TIMEOUT)
-	} else if menu.is_some() || clicks_menu_control(&event, pid) {
+	} else if menu.is_some() || clicks_menu_control(&event, pid, menu_pid) {
 		Some(ax::open_menu::CONTROL_MENU_TIMEOUT)
 	} else {
 		None
 	};
 	let before = match timeout {
-		Some(_) => Some(capture::menu_windows(pid).ok_or_else(|| {
+		Some(_) => Some(capture::menu_windows(menu_pid).ok_or_else(|| {
 			DesktopError::background_unavailable(format!(
 				"cannot list the open menus of window {} ({}), so a menu this {} opens could not be \
 				 closed; nothing was sent; retry with takeover:true or use ax actions",
@@ -1240,19 +1241,22 @@ fn background_pointer(
 		ax::open_menu::Press::Pointer { kind: pointer_kind(&event), window },
 		before.as_deref(),
 		menu,
-		|| background_gesture(source, pid, wid, window, event, entry_front, (to, to_wid), in_overlay),
-		|before, path| ax::open_menu::settle(pid, before, path, timeout.unwrap_or_default()),
+		|| background_gesture(source, pid, wid, window, event, entry_front, to, in_overlay),
+		|before, path| {
+			ax::open_menu::settle(menu_pid, pid, before, path, timeout.unwrap_or_default())
+		},
 	)
 }
 
 /// Whether `event` is a left click that lands on a menu button or popup
-/// button of `pid` while another application is frontmost; the control opens
-/// its menu on the click. Other clicks pay no accessibility hit-test.
-fn clicks_menu_control(event: &PointerEvent, pid: libc::pid_t) -> bool {
+/// button drawn by `owner` (the window's application, or the process drawing
+/// its content) while another application than `pid` is frontmost; the control
+/// opens its menu on the click. Other clicks pay no accessibility hit-test.
+fn clicks_menu_control(event: &PointerEvent, pid: libc::pid_t, owner: libc::pid_t) -> bool {
 	let PointerEvent::Click { x, y, button: MouseButton::Left, .. } = *event else {
 		return false;
 	};
-	skylight::front_pid() != Some(pid) && ax::open_menu::opens_menu_at(pid, x, y)
+	skylight::front_pid() != Some(pid) && ax::open_menu::opens_menu_at(owner, x, y)
 }
 
 fn background_gesture(
@@ -1496,8 +1500,8 @@ fn drag_pasteboard_count() -> isize {
 /// and `TextEdit` moved dragged text to the end of its document. Such a drag's
 /// outcome is unknown rather than failed: it throws `InputFailed` saying the
 /// drop could not be confirmed, so the caller reads the target before
-/// retrying, and it is not rerun in takeover, which would repeat a drop that did
-/// land. Escape posted to the source did not cancel the drop, and releasing
+/// retrying, and it is not rerun in takeover, which would repeat a drop that
+/// did land. Escape posted to the source did not cancel the drop, and releasing
 /// early would only drop the item short of the path's end. A drag inside a
 /// view (a slider, a text selection, a web page's mouse-driven drag) leaves
 /// the count alone.
@@ -1519,9 +1523,9 @@ fn drag_session_outcome(
 	}
 	Err(DesktopError::input_failed(format!(
 		"the drag reached window {} ({}), but its outcome could not be confirmed: it started a \
-		 drag-and-drop session, which macOS completes from the user's real pointer and button, so the \
-		 item may already have been dropped at the path's end, elsewhere, or not at all. Read the \
-		 target before retrying; prefer the app's menu command or ax actions, and drag with \
+		 drag-and-drop session, which macOS completes from the user's real pointer and button, so \
+		 the item may already have been dropped at the path's end, elsewhere, or not at all. Read \
+		 the target before retrying; prefer the app's menu command or ax actions, and drag with \
 		 takeover:true only if nothing was dropped",
 		window.id, window.app,
 	)))
@@ -2238,7 +2242,7 @@ fn foreground_pointer(
 							Some(&before),
 							Some(path),
 							|| global_pointer(source, event),
-							|before, path| ax::open_menu::settle(pid, before, path, timeout),
+							|before, path| ax::open_menu::settle(pid, pid, before, path, timeout),
 						)
 					},
 				});
