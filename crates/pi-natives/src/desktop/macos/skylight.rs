@@ -743,6 +743,22 @@ fn restorable_key(
 		.then_some(UserKey::Windowless)
 }
 
+/// Checks [`hands_back`] twice, the second time with the final front-process
+/// check, re-reading the key window and the press counter each time: a window
+/// the user picks or a click on the target between the two still vetoes the
+/// hand-back.
+fn hand_back_confirmed(
+	same_process: bool,
+	previous_key: u32,
+	wid: u32,
+	mut key_window: impl FnMut() -> Option<u32>,
+	mut clicked: impl FnMut() -> bool,
+	still_front: impl FnOnce() -> bool,
+) -> bool {
+	let mut hands_back_now = || hands_back(same_process, key_window(), previous_key, wid, clicked());
+	hands_back_now() && still_front() && hands_back_now()
+}
+
 /// Whether focus goes back to `previous_key`, given the previous front
 /// process's key window now. Another window there was the user's choice. The
 /// target itself is still key after the focus record within one process, so
@@ -1290,5 +1306,26 @@ mod tests {
 		assert!(!hands_back(true, Some(target), user, target, true));
 		assert!(!hands_back(true, Some(9), user, target, false), "another window the user picked");
 		assert!(!hands_back(false, Some(9), user, target, false));
+	}
+
+	#[test]
+	fn final_hand_back_check_rereads_the_key_window() {
+		let (user, target) = (7, 42);
+		let mut keys = [Some(user), Some(9)].into_iter();
+		assert!(
+			!hand_back_confirmed(false, user, target, || keys.next().unwrap(), || false, || true),
+			"a window the user picked between the two checks"
+		);
+		let mut presses = [false, true].into_iter();
+		assert!(!hand_back_confirmed(
+			true,
+			user,
+			target,
+			|| Some(target),
+			|| presses.next().unwrap(),
+			|| true
+		));
+		assert!(!hand_back_confirmed(false, user, target, || Some(user), || false, || false));
+		assert!(hand_back_confirmed(false, user, target, || Some(user), || false, || true));
 	}
 }
