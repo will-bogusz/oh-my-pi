@@ -13,9 +13,6 @@
 - Fixed macOS `openApplication` leaving a running app without a window, such as one AppleScript launched hidden, and bringing Notes or Contacts to the front; it now shows the app in the background and returns its first window ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS background key presses, typing, held keys, left clicks and menu actions taking keyboard focus from the user's app, which then dropped pastes and shortcuts until clicked again ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS background typing into Chrome pages and background shortcuts such as ⌘A in TextEdit doing nothing ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
-- Fixed the user's typing landing in the macOS app a background action targets when that app brings itself to the front while they type ([#15195](https://github.com/can1357/oh-my-pi/pull/15195) by [@will-bogusz](https://github.com/will-bogusz))
-- Fixed macOS background input sending the user back to their previous app after they opened the target app from Spotlight during the action ([#15195](https://github.com/can1357/oh-my-pi/pull/15195) by [@will-bogusz](https://github.com/will-bogusz))
-- Fixed an app that a macOS background action opens something in, such as TextEdit after a background ⌘O in Finder, staying in front of the user's app; it is sent back like the target ([#15195](https://github.com/can1357/oh-my-pi/pull/15195) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS background keystrokes into Finder throwing `BackgroundUnavailable`, because its desktop is listed among its windows without a window id ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS background shortcuts with a modifier reporting success when the app stopped answering right after; they now throw `InputFailed` saying the outcome is unknown ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed TextEdit and Script Editor freezing for good when a macOS background ⌘S followed a background edit of a just-opened document; background input now waits until the app reports the activation it was sent ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
@@ -65,6 +62,9 @@
 ### Changed
 
 - Optimized transport performance with task-local write coalescing and batch-based newline processing
+- Fixed the user's typing landing in the macOS app a background action targets when that app brings itself to the front while they type ([#15195](https://github.com/can1357/oh-my-pi/pull/15195) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed macOS background input sending the user back to their previous app after they opened the target app from Spotlight during the action ([#15195](https://github.com/can1357/oh-my-pi/pull/15195) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed an app that a macOS background action opens something in, such as TextEdit after a background ⌘O in Finder, staying in front of the user's app; it is sent back like the target ([#15195](https://github.com/can1357/oh-my-pi/pull/15195) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.9.2] - 2026-10-11
 
