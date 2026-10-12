@@ -1004,15 +1004,7 @@ impl Worker {
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::HoldMouse {
-				target,
-				x,
-				y,
-				button,
-				keys,
-				duration,
-				takeover,
-				refuse_menu,
-				..
+				target, x, y, button, keys, duration, takeover, refuse_menu, ..
 			} => {
 				if !keys.is_empty() {
 					self.validate_keyboard_target(target)?;
@@ -3445,7 +3437,8 @@ mod capture_tests {
 		}
 		assert!(clicks.lock().is_empty(), "nothing may be sent before the refusal");
 		// Without the option or in takeover the hold and drag are sent unchecked.
-		for request in [hold(false, None), hold(true, Some(true)), drag(None, None), drag(Some(true), Some(true))]
+		for request in
+			[hold(false, None), hold(true, Some(true)), drag(None, None), drag(Some(true), Some(true))]
 		{
 			worker.process(&request, &token).expect("unchecked press");
 		}
