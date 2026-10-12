@@ -464,12 +464,13 @@ impl Request {
 
 #[derive(Clone)]
 struct ParsedPointerOptions {
-	button:    MouseButton,
-	count:     u32,
-	modifiers: backend::Modifiers,
-	keys:      Vec<keys::KeyName>,
-	takeover:  Takeover,
-	menu:      Option<Vec<String>>,
+	button:      MouseButton,
+	count:       u32,
+	modifiers:   backend::Modifiers,
+	keys:        Vec<keys::KeyName>,
+	takeover:    Takeover,
+	menu:        Option<Vec<String>>,
+	refuse_menu: bool,
 }
 impl ParsedPointerOptions {
 	fn parse(options: Option<PointerOptions>) -> CoreResult<Self> {
@@ -478,12 +479,13 @@ impl ParsedPointerOptions {
 			menus::validate_path(menu, false)?;
 		}
 		Ok(Self {
-			button:    MouseButton::parse(options.button.as_deref())?,
-			count:     options.count.unwrap_or(1).max(1),
-			modifiers: parse_modifiers(options.modifiers.as_deref().unwrap_or_default())?,
-			keys:      parse_keys(options.keys.as_deref().unwrap_or_default())?,
-			takeover:  Takeover::new(options.takeover, options.return_focus),
-			menu:      options.menu,
+			button:      MouseButton::parse(options.button.as_deref())?,
+			count:       options.count.unwrap_or(1).max(1),
+			modifiers:   parse_modifiers(options.modifiers.as_deref().unwrap_or_default())?,
+			keys:        parse_keys(options.keys.as_deref().unwrap_or_default())?,
+			takeover:    Takeover::new(options.takeover, options.return_focus),
+			menu:        options.menu,
+			refuse_menu: options.refuse_menu == Some(true),
 		})
 	}
 
@@ -492,7 +494,8 @@ impl ParsedPointerOptions {
 	}
 
 	/// Sends the click `event`, choosing [`Self::menu`] in the menu it opens
-	/// when that is set.
+	/// when that is set. With [`Self::refuse_menu`], a background click that
+	/// would open a control's menu is refused first.
 	fn click(
 		&self,
 		backend: &mut dyn Backend,
@@ -501,10 +504,14 @@ impl ParsedPointerOptions {
 		frame: &FrameGeometry,
 		token: &OperationToken,
 	) -> CoreResult<()> {
-		match &self.menu {
-			Some(path) => backend.pointer_menu(target, event, path, frame, self.mode(token), token),
-			None => backend.pointer(target, event, frame, self.mode(token), token),
+		let mode = self.mode(token);
+		if let Some(path) = &self.menu {
+			return backend.pointer_menu(target, event, path, frame, mode, token);
 		}
+		if self.refuse_menu && mode == DeliveryMode::Background {
+			backend.refuse_menu_click(target, &event)?;
+		}
+		backend.pointer(target, event, frame, mode, token)
 	}
 }
 
@@ -2197,6 +2204,8 @@ mod capture_tests {
 		/// Each window listing signals the sender, then blocks until the
 		/// receiver's sender drops.
 		hang_windows:           Option<(flume::Sender<()>, flume::Receiver<()>)>,
+		/// Every click lands on a control whose menu would take the keyboard.
+		menu_control:           bool,
 	}
 
 	impl FakeWaylandBackend {
@@ -2216,6 +2225,7 @@ mod capture_tests {
 				overlap:                None,
 				window_present:         true,
 				tree:                   None,
+				menu_control:           false,
 				clicks:                 Arc::new(Mutex::new(Vec::new())),
 				layout:                 Arc::new(Mutex::new(vec![DesktopDisplay {
 					id:           "screen-1".to_string(),
@@ -2511,6 +2521,16 @@ mod capture_tests {
 				.clicks
 				.lock()
 				.push(format!("{} menu {}", target.key(), path.join(" > ")));
+			Ok(())
+		}
+
+		fn refuse_menu_click(&mut self, target: &Target, _: &PointerEvent) -> CoreResult<()> {
+			if self.menu_control {
+				return Err(DesktopError::background_unavailable(format!(
+					"the click on window {} lands on a popup button; nothing was sent",
+					target.key()
+				)));
+			}
 			Ok(())
 		}
 
@@ -3348,6 +3368,53 @@ mod capture_tests {
 		// An empty path refuses before anything is sent.
 		let empty = PointerOptions { menu: Some(Vec::new()), ..PointerOptions::default() };
 		assert!(ParsedPointerOptions::parse(Some(empty)).is_err());
+	}
+
+	#[test]
+	fn refuse_menu_checks_a_background_click_before_anything_is_sent() {
+		let mut backend = FakeWaylandBackend::new();
+		backend.menu_control = true;
+		let clicks = Arc::clone(&backend.clicks);
+		let mut worker = worker_with(backend);
+		let token = CancellationSource::default().token();
+		let target = Target::Window(WAYLAND_ID.to_string());
+		let event = PointerEvent::Click {
+			x:         1.0,
+			y:         1.0,
+			button:    MouseButton::Left,
+			count:     1,
+			modifiers: backend::Modifiers::default(),
+		};
+		let mut click =
+			|refuse_menu: Option<bool>, takeover: Option<bool>, menu: Option<Vec<String>>| {
+				ParsedPointerOptions::parse(Some(PointerOptions {
+					refuse_menu,
+					takeover,
+					menu,
+					..PointerOptions::default()
+				}))
+				.unwrap()
+				.click(
+					worker.backend().unwrap().as_mut(),
+					&target,
+					event.clone(),
+					&FrameGeometry::identity_global(),
+					&token,
+				)
+			};
+		let refused = click(Some(true), None, None).expect_err("a click on a menu control refuses");
+		assert_eq!(refused.code, ErrorCode::BackgroundUnavailable);
+		assert!(clicks.lock().is_empty(), "nothing may be sent before the refusal");
+		// Without the option, in takeover, or with a menu path the click is sent
+		// unchecked.
+		click(None, None, None).expect("plain click");
+		click(Some(true), Some(true), None).expect("takeover click");
+		click(Some(true), None, Some(vec!["Large".to_string()])).expect("menu click");
+		assert_eq!(*clicks.lock(), [
+			WAYLAND_ID.to_string(),
+			WAYLAND_ID.to_string(),
+			format!("{WAYLAND_ID} menu Large"),
+		]);
 	}
 
 	fn capture_request(target: Target) -> Request {
