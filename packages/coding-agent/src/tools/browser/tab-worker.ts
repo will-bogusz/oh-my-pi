@@ -1664,10 +1664,13 @@ export class WorkerCore {
 			}
 			this.#page.mainFrame().client.on("Page.frameNavigated", this.#onFrameNavigated);
 			this.#page.on("error", this.#onPageCrashed);
-			if (payload.mode === "headless" || payload.emulateFocus) {
+			if (payload.mode === "headless" || payload.emulateFocus || payload.userDriven) {
 				// Background Chromium tabs stop producing frames, stalling rAF,
-				// IntersectionObserver, and input acknowledgements. Keep owned tabs
-				// interactive without raising a window; explicit settle-freeze still applies.
+				// IntersectionObserver, and input acknowledgements; in a visible browser a tab
+				// that was never selected drops trusted input outright. Keep the page
+				// interactive without selecting its tab or raising a window, including a user's
+				// page in a background tab; explicit settle-freeze still applies. It ends with
+				// this connection's session (on the relay, with the bridge's last session).
 				await this.#page.emulateFocusedPage(true);
 			}
 			this.#webmcp = await installWebMcp(this.#page);

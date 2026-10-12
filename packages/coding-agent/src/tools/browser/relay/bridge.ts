@@ -50,6 +50,17 @@ interface CdpCommand {
  */
 type RuntimeState = "default" | "enabled" | "disabled";
 
+/**
+ * CDP `{ enabled }` switches Chrome keeps per debugger session. Every relay session of a tab shares one attachment,
+ * which outlives them, so the bridge keeps a switch on while any session asks for it and turns it off once none does.
+ */
+const TAB_WIDE_SWITCHES = ["Page.setInterceptFileChooserDialog", "Emulation.setFocusEmulationEnabled"] as const;
+type TabWideSwitch = (typeof TAB_WIDE_SWITCHES)[number];
+
+function isTabWideSwitch(method: string): method is TabWideSwitch {
+	return (TAB_WIDE_SWITCHES as readonly string[]).includes(method);
+}
+
 interface SessionRef {
 	kind: "tab" | "page";
 	/** Registry key of the owning tab (`<instance code>:<chrome tabId>`). */
@@ -64,8 +75,8 @@ interface SessionRef {
 	runtimeEpoch: number;
 	/** Sent `Target.setAutoAttach`; only such a session is told about real child targets. */
 	autoAttach: boolean;
-	/** Asked for `Page.setInterceptFileChooserDialog`; the tab keeps it on while any of its sessions does. */
-	interceptsFileChooser: boolean;
+	/** Tab-wide switches ({@link TAB_WIDE_SWITCHES}) this session turned on. */
+	readonly switches: Set<TabWideSwitch>;
 }
 
 interface TargetInfo {
@@ -501,6 +512,12 @@ export class RelayBridge {
 			if (wasAttached && !tab.attached && this.#sessionHolders(tab.tabKey).length > 0) {
 				void this.#ensureAttached(tab).then(ok => {
 					if (!ok) this.#onTabDetached(tab.tabKey, "reattach_failed", false);
+					// The lost attachment took its switches with it.
+					else {
+						for (const method of TAB_WIDE_SWITCHES) {
+							if (this.#switchWanted(tab.tabKey, method)) this.#sendSwitch(tab.tabKey, method, true);
+						}
+					}
 				});
 			}
 		}
@@ -527,13 +544,10 @@ export class RelayBridge {
 		if (!conn) return;
 		this.#conns.delete(connId);
 		const touched = new Set<string>();
-		const intercepting = new Set<string>();
-		for (const ref of conn.sessions.values()) {
-			touched.add(ref.tabKey);
-			if (ref.interceptsFileChooser) intercepting.add(ref.tabKey);
-		}
+		for (const ref of conn.sessions.values()) touched.add(ref.tabKey);
+		const departed = [...conn.sessions.values()];
 		conn.sessions.clear();
-		for (const tabKey of intercepting) this.#releaseFileChooserInterception(tabKey);
+		for (const ref of departed) this.#releaseSwitches(ref);
 		// Tabs this client claimed leave the omp group unless another claimant
 		// remains — session holders don't count: the long-lived registry
 		// connection holds sessions on every tab without driving any of them.
@@ -623,14 +637,17 @@ export class RelayBridge {
 				}
 				return;
 			}
-			if (msg.method === "Page.setInterceptFileChooserDialog") {
-				// Every session of a tab shares one debugger attachment, so interception is tab-wide here: one
-				// session switching it off must not cancel another session's chooser wait.
-				const previous = ref.interceptsFileChooser;
-				ref.interceptsFileChooser = msg.params?.enabled === true;
-				const params = { ...msg.params, enabled: this.#interceptsFileChooser(ref.tabKey) };
+			if (isTabWideSwitch(msg.method)) {
+				// Every session of a tab shares one debugger attachment, so the switch is tab-wide here: one session
+				// switching it off must not undo another's (a pending chooser wait, a background tab's input).
+				const method = msg.method;
+				const previous = ref.switches.has(method);
+				if (msg.params?.enabled === true) ref.switches.add(method);
+				else ref.switches.delete(method);
+				const params = { ...msg.params, enabled: this.#switchWanted(ref.tabKey, method) };
 				if (!(await this.#forwardToTab(conn, { ...msg, params }, ref.tabKey, undefined))) {
-					ref.interceptsFileChooser = previous;
+					if (previous) ref.switches.add(method);
+					else ref.switches.delete(method);
 				}
 				return;
 			}
@@ -1388,7 +1405,7 @@ export class RelayBridge {
 			runtimeEnabling: null,
 			runtimeEpoch: 0,
 			autoAttach: false,
-			interceptsFileChooser: false,
+			switches: new Set(),
 		});
 		return sessionId;
 	}
@@ -1397,7 +1414,7 @@ export class RelayBridge {
 		const ref = conn.sessions.get(sessionId);
 		if (!ref) return;
 		conn.sessions.delete(sessionId);
-		if (ref.interceptsFileChooser) this.#releaseFileChooserInterception(ref.tabKey);
+		this.#releaseSwitches(ref);
 		const targetId = ref.kind === "tab" ? tabTargetIdFromKey(ref.tabKey) : pageTargetIdFromKey(ref.tabKey);
 		this.#emit(conn, "Target.detachedFromTarget", { sessionId, targetId }, parentSessionId);
 		// An explicit release of the last session must drop the attachment too,
@@ -1460,30 +1477,32 @@ export class RelayBridge {
 		return out;
 	}
 
-	/** Whether any live session on a tab, across connections, has file chooser interception on. */
-	#interceptsFileChooser(tabKey: string): boolean {
+	/** Whether any live session on a tab, across connections, has `method` switched on. */
+	#switchWanted(tabKey: string, method: TabWideSwitch): boolean {
 		for (const conn of this.#conns.values()) {
 			for (const ref of conn.sessions.values()) {
-				if (ref.tabKey === tabKey && ref.interceptsFileChooser) return true;
+				if (ref.tabKey === tabKey && ref.switches.has(method)) return true;
 			}
 		}
 		return false;
 	}
 
 	/**
-	 * Switch interception off once no live session of the tab asks for it: a session that went away without disabling
-	 * it (a worker killed mid-upload) would otherwise leave the shared attachment swallowing every chooser.
+	 * Switch off what a departed session left on, unless another live session of the tab still wants it: a session
+	 * that went away without turning it off (a killed worker) would otherwise leave it on for as long as the attachment
+	 * lasts, swallowing every chooser or keeping a background tab visible.
 	 */
-	#releaseFileChooserInterception(tabKey: string): void {
-		if (this.#interceptsFileChooser(tabKey)) return;
+	#releaseSwitches(ref: SessionRef): void {
+		for (const method of ref.switches) {
+			if (!this.#switchWanted(ref.tabKey, method)) this.#sendSwitch(ref.tabKey, method, false);
+		}
+	}
+
+	#sendSwitch(tabKey: string, method: TabWideSwitch, enabled: boolean): void {
 		const tab = this.#tabs.get(tabKey);
 		const inst = tab?.attached ? this.#instances.get(tab.instanceId) : undefined;
 		if (!tab || !inst) return;
-		const params = { enabled: false };
-		void this.#rpc(
-			{ op: "send", tabId: tab.tabId, method: "Page.setInterceptFileChooserDialog", params },
-			inst,
-		).catch(() => {});
+		void this.#rpc({ op: "send", tabId: tab.tabId, method, params: { enabled } }, inst).catch(() => {});
 	}
 
 	#emitTabAttached(conn: CdpConnection, tab: TabState): void {

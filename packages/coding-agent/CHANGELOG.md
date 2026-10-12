@@ -50,6 +50,7 @@
 - Fixed a retried tool losing its transcript card when the view was rebuilt (subagent focus switch, overlay close) while the tool was still running
 - Fixed browser `uploadFile` on a control that opens `showOpenFilePicker()` hanging the cell until the tab was killed; it now fails at once with a named error ([#15490](https://github.com/can1357/oh-my-pi/pull/15490) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed every later file chooser on a page doing nothing, the user's own clicks in a relay tab included, after browser `uploadFile` clicked a chooser trigger or drop zone ([#15490](https://github.com/can1357/oh-my-pi/pull/15490) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed background relay and `app.cdp_url` tabs ignoring omp's clicks and keys or timing out on hover and drag; the page reads as visible while omp drives it and hidden again once released ([#15510](https://github.com/can1357/oh-my-pi/pull/15510) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.11.1] - 2026-10-15
 
