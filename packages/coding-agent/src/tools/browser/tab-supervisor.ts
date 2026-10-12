@@ -22,7 +22,7 @@ import { runInProcessTab } from "./in-process-run";
 import { browserConnection, DEFAULT_VIEWPORT } from "./launch";
 import {
 	closeCdpTarget,
-	closeTargetVia,
+	closeRelayTarget,
 	forgetSharedTarget,
 	forgetSharedTargets,
 	recordSharedTarget,
@@ -1231,6 +1231,12 @@ async function releaseTabInner(tab: TabSession, name: string, opts: ReleaseTabOp
 			} else {
 				void forgetSharedTarget(scope, tab.targetId);
 			}
+		} else if (targetCloseFailed) {
+			// Nothing here can retry it (a relay tab, e.g. while its browser's extension is offline).
+			logger.warn("Could not confirm a browser tab omp opened was closed; it may still be open", {
+				name,
+				targetId: tab.targetId,
+			});
 		}
 	}
 	if (cleanupError) throw cleanupError;
@@ -1649,8 +1655,9 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 	let activateForScreenshot: boolean;
 	if (browser.kind.kind === "relay" && !opts.target) {
 		// A relay open without a target gets its own background tab, leaving the user's
-		// selected tab alone. Focus emulation keeps it capturable without raising it.
-		page = { kind: "create" };
+		// selected tab alone, in the browser of the tab omp used last on this relay.
+		// Focus emulation keeps it capturable without raising it.
+		page = { kind: "create", nearTargetId: lastUsedTargetOn(browser) };
 		activateForScreenshot = false;
 	} else {
 		// A connected browser without a target adopts the visible tab and avoids raising
@@ -1680,6 +1687,16 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 		activateForScreenshot,
 		userDriven,
 	};
+}
+
+/** The tab most recently used on `browser`, for a new relay tab to open beside. */
+function lastUsedTargetOn(browser: PuppeteerBrowserHandle): string | undefined {
+	let last: WorkerTabSession | undefined;
+	for (const tab of tabs.values()) {
+		if (tab.backend !== "worker" || tab.browser !== browser || tab.state !== "alive") continue;
+		if (!last || tab.lastActivityAt > last.lastActivityAt) last = tab;
+	}
+	return last?.targetId;
 }
 
 function handleTabMessage(tab: WorkerTabSession, msg: WorkerOutbound): void {
@@ -1893,7 +1910,7 @@ async function forceKillTabTeardown(tab: WorkerTabSession): Promise<void> {
  * protocol timeout, retaining the cleanup hold for tens of seconds.
  */
 async function closeTargetById(browser: PuppeteerBrowserHandle, targetId: string): Promise<boolean> {
-	if (browser.kind.kind === "relay") return await closeTargetVia(browserConnection(browser.browser), targetId);
+	if (browser.kind.kind === "relay") return await closeRelayTarget(browserConnection(browser.browser), targetId);
 	return await closeCdpTarget(browser.browser, targetId);
 }
 
