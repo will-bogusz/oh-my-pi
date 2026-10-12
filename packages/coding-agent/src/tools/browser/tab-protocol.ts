@@ -45,7 +45,8 @@ export interface SessionSnapshot {
 /**
  * The page an attach worker drives. `create`: open a background tab and own it, in the browser of
  * `nearTargetId` (another tab omp drives on the relay) when given. `owned`: a tab omp created, adopted
- * again after a recycle. `borrowed`: a page the user has open; never closed, never focus-emulated.
+ * again after a recycle. `borrowed`: a page the user has open; never closed, and focus-emulated only in a
+ * browser the user drives (see `userDriven`).
  */
 export type AttachPage = { kind: "create"; nearTargetId?: string } | { kind: "owned" | "borrowed"; targetId: string };
 
@@ -102,7 +103,10 @@ export type WorkerInitPayload =
 			recover?: boolean;
 			/**
 			 * The user drives this browser (connected, relay): downloads keep its one browser-wide folder and real file
-			 * names, since the user's own downloads land there too. Unset means an OMP-launched browser.
+			 * names, since the user's own downloads land there too. The page, borrowed user tabs included, is also
+			 * focus-emulated so a background tab takes trusted input without being selected; the emulation ends with
+			 * the CDP session (on the relay, with the bridge's last session of the tab). Unset means an OMP-launched
+			 * browser.
 			 */
 			userDriven?: boolean;
 	  };
