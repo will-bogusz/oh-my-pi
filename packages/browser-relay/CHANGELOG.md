@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- CDP clients other than omp connecting to the relay must open a tab with `Target.createTarget` or claim a listed one with `OMP.claimTarget { targetId }` before attaching it; `Target.setAutoAttach` no longer attaches every tab and `Target.attachToTarget` on an unclaimed tab is refused ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Added
 
 - The extension now reports which omp version installed it, so omp can tell when an extension from before an upgrade is still loaded ([#15105](https://github.com/can1357/oh-my-pi/pull/15105) by [@will-bogusz](https://github.com/will-bogusz))

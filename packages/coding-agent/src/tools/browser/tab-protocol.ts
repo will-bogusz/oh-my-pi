@@ -106,6 +106,8 @@ export type WorkerInitPayload =
 			 * browser.
 			 */
 			userDriven?: boolean;
+			/** The browser is the omp relay: claim `owned`/`borrowed` tabs there before adopting them, or it never attaches them. */
+			relay?: boolean;
 	  };
 
 /** Result of one host tool requested by browser-run JavaScript. */
