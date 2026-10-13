@@ -146,8 +146,7 @@ import {
 	BrowserTracingController,
 } from "./tracing";
 import {
-	installWebMcp,
-	type WebMcpController,
+	WebMcpController,
 	type WebMcpEventsOptions,
 	type WebMcpEventsResult,
 	type WebMcpInvokeOptions,
@@ -1766,7 +1765,6 @@ export class WorkerCore {
 				// this connection's session (on the relay, with the bridge's last session).
 				await this.#page.emulateFocusedPage(true);
 			}
-			this.#webmcp = await installWebMcp(this.#page);
 			await installVitalsObservers(this.#page);
 			if (payload.userAgent !== undefined) await applyUserAgentOverride(this.#page, payload.userAgent);
 			if (payload.ignoreHttpsErrors) await applyIgnoreHttpsErrors(this.#page);
@@ -1797,8 +1795,6 @@ export class WorkerCore {
 			// with a fresh worker), so close it before reporting. An adopted target —
 			// a borrowed page, or an owned one a recycle retries — is never closed here.
 			const page = this.#page;
-			await this.#webmcp?.dispose().catch(() => undefined);
-			this.#webmcp = undefined;
 			await this.#printHold?.dispose().catch(() => undefined);
 			this.#printHold = undefined;
 			if (createsPage && page && !page.isClosed()) {
@@ -2322,8 +2318,8 @@ export class WorkerCore {
 		active: ActiveRun,
 	): TabApi {
 		const page = this.#requirePage();
-		const webmcp = this.#webmcp;
-		if (!webmcp) throw new ToolError("Tab worker WebMCP handling is not initialized");
+		// Created on first use and touches the page only when a webmcp* helper runs.
+		const webmcp = (this.#webmcp ??= new WebMcpController(page));
 		const { budgetBound, quickOpMs, actionOpMs } = resolveOpTimeouts(timeoutMs);
 		const waitMs = (explicit?: number): number => resolveWaitTimeout(timeoutMs, explicit);
 		const INF = Number.POSITIVE_INFINITY;
@@ -2683,7 +2679,7 @@ export class WorkerCore {
 			webmcpInvoke: (toolName, params, opts) => {
 				const w = waitMs(opts?.timeout);
 				return op(`tab.webmcpInvoke(${JSON.stringify(toolName)})`, w, sig =>
-					untilAborted(sig, () => webmcp.invoke(toolName, params, opts)),
+					untilAborted(sig, () => webmcp.invoke(toolName, params, opts, sig)),
 				);
 			},
 			webmcpEvents: opts => op("tab.webmcpEvents()", quickOpMs, sig => untilAborted(sig, () => webmcp.events(opts))),
@@ -3492,8 +3488,6 @@ export class WorkerCore {
 				error: error instanceof Error ? error.message : String(error),
 			});
 		});
-		await this.#webmcp?.dispose().catch(() => undefined);
-		this.#webmcp = undefined;
 		await this.#printHold?.dispose().catch(() => undefined);
 		this.#printHold = undefined;
 		this.#dialogs?.dispose();
