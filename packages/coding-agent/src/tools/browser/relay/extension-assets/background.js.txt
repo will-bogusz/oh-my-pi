@@ -16,6 +16,103 @@ async function ownedDebuggerTabs(targets, probe) {
   return owned.filter((tabId) => tabId !== undefined);
 }
 
+// extension/popup-placement.ts
+var NO_WINDOW = -1;
+
+class PopupPlacement {
+  #chrome;
+  #selected = new Map;
+  #generation = new Map;
+  #displacedTab = new Map;
+  #popups = new Set;
+  #focused;
+  #focusedBefore = new Map;
+  #awaitingFocus = new Map;
+  constructor(chrome2) {
+    this.#chrome = chrome2;
+  }
+  seed(windowId, tabId, focused) {
+    if (!this.#selected.has(windowId))
+      this.#selected.set(windowId, tabId);
+    if (focused && this.#focused === undefined)
+      this.#focused = windowId;
+  }
+  activated(windowId, tabId) {
+    const generation = (this.#generation.get(windowId) ?? 0) + 1;
+    this.#generation.set(windowId, generation);
+    if (this.#displacedTab.has(tabId))
+      this.#popups.delete(tabId);
+    this.#displacedTab.set(tabId, { previous: this.#selected.get(windowId), generation });
+    this.#selected.set(windowId, tabId);
+  }
+  focusChanged(windowId) {
+    const back = this.#awaitingFocus.get(windowId);
+    this.#awaitingFocus.clear();
+    if (back !== undefined)
+      this.#chrome.focusWindow(back).catch(() => {
+        return;
+      });
+    if (windowId !== NO_WINDOW)
+      this.#focusedBefore.set(windowId, this.#focused);
+    this.#focused = windowId;
+  }
+  opened(tabId) {
+    this.#popups.add(tabId);
+  }
+  removed(tabId) {
+    this.#displacedTab.delete(tabId);
+    this.#popups.delete(tabId);
+  }
+  windowRemoved(windowId) {
+    this.#selected.delete(windowId);
+    this.#generation.delete(windowId);
+    this.#focusedBefore.delete(windowId);
+    this.#awaitingFocus.delete(windowId);
+  }
+  async background(tabId) {
+    this.#popups.add(tabId);
+    const tab = await this.#chrome.getTab(tabId);
+    if (!tab)
+      return;
+    const window = await this.#chrome.getWindow(tab.windowId);
+    if (window.type === "popup") {
+      if (this.#focused === tab.windowId) {
+        if (!window.focused)
+          return;
+        const before = this.#focusedBefore.get(tab.windowId);
+        if (before === undefined) {
+          const last = await this.#chrome.lastFocusedNormalWindow();
+          if (last !== undefined && last !== tab.windowId && this.#focused === tab.windowId) {
+            await this.#chrome.focusWindow(last);
+          }
+        } else if (before !== NO_WINDOW)
+          await this.#chrome.focusWindow(before);
+      } else if (this.#focused !== undefined && this.#focused !== NO_WINDOW && !this.#focusedBefore.has(tab.windowId)) {
+        if (window.focused)
+          await this.#chrome.focusWindow(this.#focused);
+        else
+          this.#awaitingFocus.set(tab.windowId, this.#focused);
+      }
+      return;
+    }
+    const own = this.#displacedTab.get(tabId);
+    if (!tab.active || !own || this.#generation.get(tab.windowId) !== own.generation)
+      return;
+    const seen = new Set([tabId]);
+    let previous = own.previous;
+    while (previous !== undefined && this.#popups.has(previous) && !seen.has(previous)) {
+      seen.add(previous);
+      previous = this.#displacedTab.get(previous)?.previous;
+    }
+    if (previous === undefined || seen.has(previous))
+      return;
+    const target = await this.#chrome.getTab(previous);
+    if (target?.windowId !== tab.windowId || this.#generation.get(tab.windowId) !== own.generation)
+      return;
+    await this.#chrome.selectTab(previous);
+  }
+}
+
 // extension/background.ts
 var DEFAULT_PORT = 9224;
 var PING_INTERVAL_MS = 20000;
@@ -27,6 +124,16 @@ var ws = null;
 var reconnectDelay = RECONNECT_MIN_MS;
 var pingTimer = null;
 var relayInitiatedDetachTabs = new Set;
+var debuggerTabs = new Set;
+var placement = new PopupPlacement({
+  getTab: (tabId) => chrome.tabs.get(tabId).catch(() => null),
+  selectTab: (tabId) => chrome.tabs.update(tabId, { active: true }),
+  getWindow: (windowId) => chrome.windows.get(windowId),
+  focusWindow: (windowId) => chrome.windows.update(windowId, { focused: true }),
+  lastFocusedNormalWindow: () => chrome.windows.getLastFocused({ windowTypes: ["normal"] }).then((window) => window.id).catch(() => {
+    return;
+  })
+});
 var instanceId = null;
 async function ensureInstanceId() {
   if (instanceId)
@@ -159,14 +266,23 @@ async function setBadge(connected) {
   } catch {}
 }
 async function buildHello() {
-  const [tabs, targets] = await Promise.all([chrome.tabs.query({}), chrome.debugger.getTargets()]);
+  const [tabs, targets, lastFocused] = await Promise.all([
+    chrome.tabs.query({}),
+    chrome.debugger.getTargets(),
+    chrome.windows.getLastFocused().catch(() => null)
+  ]);
   const snapshots = [];
   for (const tab of tabs) {
     const snap = snapshot(tab);
     if (snap)
       snapshots.push(snap);
+    if (tab.active && tab.id !== undefined) {
+      placement.seed(tab.windowId, tab.id, lastFocused?.focused === true && lastFocused.id === tab.windowId);
+    }
   }
   const attachedTabIds = await ownedDebuggerTabs(targets, (tabId) => chrome.debugger.sendCommand({ tabId }, "Target.getTargetInfo"));
+  for (const tabId of attachedTabIds)
+    debuggerTabs.add(tabId);
   const versionMatch = /Chrome\/[\d.]+/.exec(navigator.userAgent);
   return {
     t: "hello",
@@ -185,11 +301,13 @@ async function runRpc(msg, origin) {
   switch (msg.op) {
     case "attach":
       await chrome.debugger.attach({ tabId: msg.tabId }, "1.3");
+      debuggerTabs.add(msg.tabId);
       return {};
     case "detach":
       relayInitiatedDetachTabs.add(msg.tabId);
       try {
         await chrome.debugger.detach({ tabId: msg.tabId });
+        debuggerTabs.delete(msg.tabId);
         return {};
       } catch (error) {
         relayInitiatedDetachTabs.delete(msg.tabId);
@@ -215,6 +333,9 @@ async function runRpc(msg, origin) {
       await chrome.tabs.update(msg.tabId, { active: true });
       return {};
     }
+    case "backgroundTab":
+      await placement.background(msg.tabId);
+      return {};
     case "group":
       return await enqueueGroupOp(() => groupTabs(msg.tabIds, msg.title, msg.color));
     case "ungroup":
@@ -291,6 +412,7 @@ chrome.debugger.onDetach.addListener((source, reason) => {
   if (source.tabId === undefined)
     return;
   const relayInitiated = relayInitiatedDetachTabs.delete(source.tabId);
+  debuggerTabs.delete(source.tabId);
   post({ t: "detached", tabId: source.tabId, reason, relayInitiated });
 });
 chrome.tabs.onCreated.addListener((tab) => {
@@ -303,7 +425,8 @@ chrome.tabs.onUpdated.addListener((_tabId, _changeInfo, tab) => {
   if (snap)
     post({ t: "tabUpdated", tab: snap });
 });
-chrome.tabs.onActivated.addListener(({ tabId }) => {
+chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
+  placement.activated(windowId, tabId);
   chrome.tabs.get(tabId).then((tab) => {
     const snap = snapshot(tab);
     if (snap)
@@ -311,8 +434,17 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
   }).catch(() => {});
 });
 chrome.tabs.onRemoved.addListener((tabId) => {
+  placement.removed(tabId);
+  debuggerTabs.delete(tabId);
   post({ t: "tabRemoved", tabId });
 });
+chrome.webNavigation.onCreatedNavigationTarget.addListener(({ sourceTabId, tabId }) => {
+  if (debuggerTabs.has(sourceTabId))
+    placement.opened(tabId);
+  post({ t: "popupCreated", tabId, sourceTabId });
+});
+chrome.windows.onFocusChanged.addListener((windowId) => placement.focusChanged(windowId));
+chrome.windows.onRemoved.addListener((windowId) => placement.windowRemoved(windowId));
 chrome.alarms.create("omp-relay-keepalive", { periodInMinutes: 0.5 });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "omp-relay-keepalive")

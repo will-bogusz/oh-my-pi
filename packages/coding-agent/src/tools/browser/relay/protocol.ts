@@ -30,6 +30,12 @@ export type RelayRpcRequest =
 	| { op: "createTab"; url: string; active?: boolean }
 	| { op: "removeTab"; tabId: number }
 	| { op: "activateTab"; tabId: number }
+	/**
+	 * Put a popup an omp tab opened behind the user's selection: reselect the tab its appearance displaced
+	 * (unless the user changed the selection since), or give focus back to the window a popup window took it
+	 * from. Older extensions ignore it.
+	 */
+	| { op: "backgroundTab"; tabId: number }
 	/** Add tabs to the per-window omp group (created/reused by title), remembering prior membership. */
 	| { op: "group"; tabIds: number[]; title: string; color: string }
 	/** Return tabs to their pre-omp group (or ungroup); no-op for tabs the relay never grouped. */
@@ -122,5 +128,7 @@ export type ExtToRelayMessage =
 	| { t: "tabCreated"; tab: TabSnapshot }
 	| { t: "tabUpdated"; tab: TabSnapshot }
 	| { t: "tabRemoved"; tabId: number }
+	/** A page in `sourceTabId` (any frame) opened `tabId` (`webNavigation.onCreatedNavigationTarget`). Absent in older extensions. */
+	| { t: "popupCreated"; tabId: number; sourceTabId: number }
 	| { t: "rpcResult"; id: number; ok: boolean; result?: unknown; error?: string }
 	| { t: "ping" };

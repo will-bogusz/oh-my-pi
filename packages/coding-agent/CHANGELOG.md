@@ -18,6 +18,7 @@
 ### Fixed
 
 - Fixed the browser relay attaching Chrome's debugger to every tab of the user's browser whenever omp connected; it now attaches only tabs omp opened or borrowed with `app.target`, and omp replaces a relay an older omp started (or reports one started by hand as out of date) instead of using it ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed popups and `target=_blank` tabs from a relay tab omp drives taking the user's selected tab or keyboard focus while omp could not reach them; with the reinstalled extension omp owns and drives them ([#15590](https://github.com/can1357/oh-my-pi/pull/15590) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.12.2] - 2026-10-18
 

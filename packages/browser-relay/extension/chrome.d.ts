@@ -65,7 +65,14 @@ declare const chrome: {
 		update(groupId: number, updateProperties: { title?: string; color?: string; collapsed?: boolean }): Promise<unknown>;
 	};
 	windows: {
+		get(windowId: number): Promise<{ id?: number; type?: string; state?: string; focused: boolean }>;
+		getLastFocused(queryOptions?: { windowTypes?: string[] }): Promise<{ id?: number; focused: boolean }>;
 		update(windowId: number, updateInfo: { focused?: boolean }): Promise<unknown>;
+		onFocusChanged: ChromeEvent<(windowId: number) => void>;
+		onRemoved: ChromeEvent<(windowId: number) => void>;
+	};
+	webNavigation: {
+		onCreatedNavigationTarget: ChromeEvent<(details: { sourceTabId: number; tabId: number; url: string }) => void>;
 	};
 	debugger: {
 		attach(target: ChromeDebuggerSession, requiredVersion: string): Promise<void>;

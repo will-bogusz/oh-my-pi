@@ -2152,6 +2152,159 @@ describe("RelayBridge auto-attach gating", () => {
 		expect(destroyedIds(cdp)).toContain(`PAGE${ANON}.1`);
 	});
 
+	function openerIdOf(cdp: FakeCdpSocket, bridge: RelayBridge, connId: number, targetId: string): Promise<unknown> {
+		const listId = ++msgSeq;
+		bridge.cdpMessage(connId, JSON.stringify({ id: listId, method: "Target.getTargets" }));
+		return flush().then(() => {
+			const listed = cdp.messages.find(message => message.id === listId)?.result as {
+				targetInfos: Array<{ targetId: string; openerId?: string }>;
+			};
+			return listed.targetInfos.find(info => info.targetId === targetId)?.openerId;
+		});
+	}
+
+	it.each([
+		{ order: "the tab before Chrome names its opener", tabFirst: true },
+		{ order: "Chrome naming the opener before the tab", tabFirst: false },
+	])("owns a popup an owned tab opens and puts it behind the user's selection ($order)", async ({ tabFirst }) => {
+		const bridge = new RelayBridge();
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2, active: true })]);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		await claimTab(bridge, ext, cdp, connId, 1);
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: ++msgSeq, method: "Target.setAutoAttach", params: { autoAttach: true } }),
+		);
+		ack(bridge, ext, "attach");
+		await flush();
+
+		const created = (tabId: number) =>
+			bridge.extMessage(ext, JSON.stringify({ t: "tabCreated", tab: tab({ tabId, url: "", active: true }) }));
+		const popup = (sourceTabId: number, tabId: number) =>
+			bridge.extMessage(ext, JSON.stringify({ t: "popupCreated", sourceTabId, tabId }));
+		// The user opens a blank tab of their own just before omp's popup appears.
+		created(4);
+		if (tabFirst) {
+			created(3);
+			popup(1, 3);
+		} else {
+			popup(1, 3);
+			created(3);
+		}
+		// A popup from the user's own tab stays theirs.
+		created(5);
+		popup(2, 5);
+		ack(bridge, ext, "attach");
+		await flush();
+
+		expect(ext.rpcs("attach").map(rpc => rpc.tabId)).toEqual([1, 3]);
+		expect(ext.rpcs("backgroundTab").map(rpc => rpc.tabId)).toEqual([3]);
+		const attached = attachedIds(cdp);
+		expect(attached).toContain(`TAB${ANON}.3`);
+		expect(attached).not.toContain(`TAB${ANON}.4`);
+		expect(attached).not.toContain(`TAB${ANON}.5`);
+		expect(await openerIdOf(cdp, bridge, connId, `PAGE${ANON}.3`)).toBe(`PAGE${ANON}.1`);
+		expect(await openerIdOf(cdp, bridge, connId, `PAGE${ANON}.4`)).toBeUndefined();
+	});
+
+	it("leaves a popup alone once its opener's last owner has gone", async () => {
+		const bridge = new RelayBridge();
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
+		const [gone, staying] = [new FakeCdpSocket(), new FakeCdpSocket()].map(cdp => ({
+			cdp,
+			id: bridge.cdpConnected(cdp),
+		}));
+		await claimTab(bridge, ext, gone!.cdp, gone!.id, 1);
+		await claimTab(bridge, ext, staying!.cdp, staying!.id, 2);
+		bridge.cdpMessage(
+			staying!.id,
+			JSON.stringify({ id: ++msgSeq, method: "Target.setAutoAttach", params: { autoAttach: true } }),
+		);
+		ack(bridge, ext, "attach");
+		await flush();
+		bridge.cdpClosed(gone!.id);
+		await flush();
+
+		for (const [sourceTabId, tabId] of [
+			[1, 3],
+			[2, 4],
+		]) {
+			bridge.extMessage(ext, JSON.stringify({ t: "tabCreated", tab: tab({ tabId: tabId!, url: "" }) }));
+			bridge.extMessage(ext, JSON.stringify({ t: "popupCreated", sourceTabId, tabId }));
+		}
+		ack(bridge, ext, "attach");
+		await flush();
+
+		expect(ext.rpcs("backgroundTab").map(rpc => rpc.tabId)).toEqual([4]);
+		expect(attachedIds(staying!.cdp)).toContain(`TAB${ANON}.4`);
+		expect(attachedIds(staying!.cdp)).not.toContain(`TAB${ANON}.3`);
+		expect(await openerIdOf(staying!.cdp, bridge, staying!.id, `PAGE${ANON}.3`)).toBeUndefined();
+	});
+
+	it("leaves popups unowned and asks nothing new of an older extension that does not report them", async () => {
+		const bridge = new RelayBridge();
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2, active: true })]);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		await claimTab(bridge, ext, cdp, connId, 1);
+		// Without `popupCreated`, the popup omp's page opened looks like any other new tab.
+		bridge.extMessage(ext, JSON.stringify({ t: "tabCreated", tab: tab({ tabId: 3, url: "", active: true }) }));
+		await flush();
+		expect(ext.rpcs("attach").map(rpc => rpc.tabId)).not.toContain(3);
+		expect(ext.rpcs("backgroundTab")).toEqual([]);
+		expect(await openerIdOf(cdp, bridge, connId, `PAGE${ANON}.3`)).toBeUndefined();
+	});
+
+	it.each([
+		{
+			case: "the reported tab closes before Chrome sends it",
+			forget: (bridge: RelayBridge, ext: FakeExtSocket) => {
+				bridge.extMessage(ext, JSON.stringify({ t: "tabRemoved", tabId: 3 }));
+				return ext;
+			},
+		},
+		{
+			case: "the extension reconnects without it",
+			forget: (bridge: RelayBridge, ext: FakeExtSocket) => {
+				bridge.extClosed(ext);
+				const next = new FakeExtSocket();
+				connect(bridge, next, [tab({ tabId: 1 }), tab({ tabId: 2 })], [1]);
+				return next;
+			},
+		},
+		{
+			case: "the report is older than Chrome ever takes",
+			forget: (_bridge: RelayBridge, ext: FakeExtSocket) => {
+				jest.advanceTimersByTime(10_001);
+				return ext;
+			},
+		},
+	])("forgets a reported popup when $case, so a later tab with its id stays the user's", async ({ forget }) => {
+		jest.useFakeTimers();
+		try {
+			const bridge = new RelayBridge();
+			const ext = new FakeExtSocket();
+			connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
+			const cdp = new FakeCdpSocket();
+			const connId = bridge.cdpConnected(cdp);
+			await claimTab(bridge, ext, cdp, connId, 1);
+			bridge.extMessage(ext, JSON.stringify({ t: "popupCreated", sourceTabId: 1, tabId: 3 }));
+			const live = forget(bridge, ext);
+			// A report arriving now prunes expired ones; it names a tab Chrome never sends.
+			bridge.extMessage(live, JSON.stringify({ t: "popupCreated", sourceTabId: 1, tabId: 9 }));
+			bridge.extMessage(live, JSON.stringify({ t: "tabCreated", tab: tab({ tabId: 3, url: "" }) }));
+			await flush();
+			expect(live.rpcs("attach").map(rpc => rpc.tabId)).not.toContain(3);
+			expect(await openerIdOf(cdp, bridge, connId, `PAGE${ANON}.3`)).toBeUndefined();
+		} finally {
+			jest.useRealTimers();
+		}
+	});
+
 	it("announces revived tabs and retracts discarded tabs", async () => {
 		const bridge = new RelayBridge();
 		const ext = new FakeExtSocket();

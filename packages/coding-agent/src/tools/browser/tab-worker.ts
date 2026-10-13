@@ -1594,6 +1594,15 @@ export class WorkerCore {
 		this.#transport.send({ type: "result", id: run.id, ok: false, error: errorPayload(error) });
 	};
 
+	/**
+	 * The relay keeps a popup this page opens behind the user's selection, where Chromium stops rendering it;
+	 * focus emulation keeps it rendering and taking input, as for the page itself.
+	 */
+	readonly #onRelayPopup = (popup: Page | null): void => {
+		// The popup may close before the command lands; there is nothing to keep rendering then.
+		void popup?.emulateFocusedPage(true).catch(() => undefined);
+	};
+
 	constructor(transport: Transport, isolated: boolean) {
 		this.#transport = transport;
 		this.#isolated = isolated;
@@ -1761,6 +1770,7 @@ export class WorkerCore {
 				// this connection's session (on the relay, with the bridge's last session).
 				await this.#page.emulateFocusedPage(true);
 			}
+			if (payload.mode === "attach" && payload.relay === true) this.#page.on("popup", this.#onRelayPopup);
 			this.#webmcp = await installWebMcp(this.#page);
 			// Only a browser that draws its windows on the user's screen raises native ones.
 			if (payload.showsWindows && process.platform === "darwin") {

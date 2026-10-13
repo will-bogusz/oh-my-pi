@@ -227,6 +227,8 @@ class TabState {
 	ompGroupId: number | undefined;
 	/** User pulled the tab out of the omp group — never re-group it. */
 	groupOptOut = false;
+	/** Owned tab whose page opened this one (`window.open`, `target=_blank`); clients see it as `openerId`. */
+	opener: string | undefined;
 	/**
 	 * Real Chrome sessions (OOPIF/worker children) under this tab's attachment: the child session
 	 * that reported each (none for the root) and its `Target.attachedToTarget` params.
@@ -275,6 +277,8 @@ const INELIGIBLE_URL = /^(chrome|devtools|edge|view-source|chrome-extension|chro
 const RPC_TIMEOUT_MS = 20_000;
 /** How long after its timeout a late RPC result is still undone; a wedged extension must not grow the map forever. */
 const LATE_RPC_KEEP_MS = 60_000;
+/** Chrome reports a new tab within milliseconds of naming its opener; a report older than this is dropped. */
+const POPUP_REPORT_KEEP_MS = 10_000;
 const CDP_ERROR_METHOD_NOT_FOUND = -32601;
 const CDP_ERROR_SERVER = -32000;
 /**
@@ -350,6 +354,8 @@ export class RelayBridge {
 	#groupDraining = false;
 	/** Each tab switch's last transition, by `tabKey method`; see {@link #serializeSwitches}. */
 	#switchTransitions = new Map<string, Promise<void>>();
+	/** Popups Chrome reported before the tab itself → the owned tab that opened each, and when. */
+	#popupOpeners = new Map<string, { opener: string; at: number }>();
 
 	constructor(
 		opts: {
@@ -546,6 +552,7 @@ export class RelayBridge {
 			tab.grouping = false;
 			tab.ompGroupId = undefined;
 		}
+		this.#forgetPopupReports(inst.code);
 		this.#groupQueue = this.#groupQueue.filter(tab => tab.instanceId !== instanceId);
 		if (!this.ready) this.#extensionGoneSince ??= Date.now();
 	}
@@ -599,6 +606,9 @@ export class RelayBridge {
 				return;
 			case "tabRemoved":
 				this.#onTabRemoved(tabKeyOf(inst.code, msg.tabId));
+				return;
+			case "popupCreated":
+				this.#onPopupCreated(inst, msg.sourceTabId, msg.tabId);
 				return;
 			case "ping":
 				socket.send(JSON.stringify({ t: "pong" } satisfies RelayToExtMessage));
@@ -686,6 +696,8 @@ export class RelayBridge {
 			const closed = this.#tabs.get(key);
 			if (closed?.url === url) void this.#closeTab(key, closed.tabId, inst).catch(() => undefined);
 		}
+		// A reported popup missing from the snapshot never opened, or closed while the worker was away.
+		this.#forgetPopupReports(inst.code);
 		for (const tab of this.#tabs.values()) {
 			if (tab.instanceId !== instanceId) continue;
 			const wasAttached = tab.attached;
@@ -1183,6 +1195,44 @@ export class RelayBridge {
 		return false;
 	}
 
+	/** A page in an owned tab opened a tab: it belongs to the opener's owners and goes behind the user's selection. */
+	#onPopupCreated(inst: ExtInstance, sourceTabId: number, tabId: number): void {
+		const opener = this.#tabs.get(tabKeyOf(inst.code, sourceTabId));
+		if (!opener || !this.#claimed(opener.tabKey)) return;
+		const popupKey = tabKeyOf(inst.code, tabId);
+		const popup = this.#tabs.get(popupKey);
+		if (popup) this.#adoptPopup(opener, popup);
+		else {
+			const now = Date.now();
+			for (const [key, report] of this.#popupOpeners) {
+				if (now - report.at > POPUP_REPORT_KEEP_MS) this.#popupOpeners.delete(key);
+			}
+			this.#popupOpeners.set(popupKey, { opener: opener.tabKey, at: now });
+		}
+		this.#rpc({ op: "backgroundTab", tabId }, inst).catch(err => {
+			this.#log("popup stayed in front", {
+				tabKey: popupKey,
+				error: err instanceof Error ? err.message : String(err),
+			});
+		});
+	}
+
+	/** Give a popup to every connection owning its opener now, attaching it for them once it is announced. */
+	#adoptPopup(opener: TabState, popup: TabState): void {
+		popup.opener = opener.tabKey;
+		for (const conn of this.#conns.values()) {
+			if (conn.claims.has(opener.tabKey)) this.#claimTab(conn, popup.tabKey);
+		}
+		if (popup.announced) this.#attachForOwners(popup);
+	}
+
+	/** Drop the popups an extension reported but never sent: its socket went away or its hello did not list them. */
+	#forgetPopupReports(extCode: string): void {
+		for (const key of this.#popupOpeners.keys()) {
+			if (key.startsWith(`${extCode}:`)) this.#popupOpeners.delete(key);
+		}
+	}
+
 	/** Tab pseudo-sessions only exist to satisfy puppeteer's Target hierarchy. */
 	#handleTabSessionCommand(conn: CdpConnection, msg: CdpCommand, ref: SessionRef): void {
 		switch (msg.method) {
@@ -1621,6 +1671,7 @@ export class RelayBridge {
 	}
 
 	#onTabRemoved(tabKey: string): void {
+		this.#popupOpeners.delete(tabKey);
 		const tab = this.#tabs.get(tabKey);
 		if (!tab) return;
 		this.#retractTab(tab);
@@ -1637,6 +1688,10 @@ export class RelayBridge {
 		if (!tab) {
 			tab = new TabState(instanceId, inst.code, snap.tabId, snap);
 			this.#tabs.set(key, tab);
+			const report = this.#popupOpeners.get(key);
+			this.#popupOpeners.delete(key);
+			const opener = report === undefined ? undefined : this.#tabs.get(report.opener);
+			if (opener && this.#claimed(opener.tabKey)) this.#adoptPopup(opener, tab);
 		} else {
 			if (tab.url !== snap.url) tab.banned = false;
 			// The user dragging a tab out of the omp group is an opt-out; the
@@ -2072,6 +2127,7 @@ export class RelayBridge {
 			url: tab.url || "about:blank",
 			attached,
 			canAccessOpener: false,
+			...(tab.opener ? { openerId: pageTargetIdFromKey(tab.opener) } : {}),
 		};
 	}
 
