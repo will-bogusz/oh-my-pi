@@ -23,19 +23,19 @@ All browser host operations request exec-tier approval, including inspection hel
 
 ```js
 const tab = await browser.open({
-  name: "main",
-  url: "https://example.com",
-  wait_until: "load",
+	name: "main",
+	url: "https://example.com",
+	wait_until: "load",
 });
 
 const observation = await tab.observe();
 await tab.id(observation.elements[0].id).click();
 const title = await tab.title();
 
-const length = await tab.run(
-  async ({ tab }, suffix) => (await tab.title() + suffix).length,
-  { args: ["!"], timeout: 30 },
-);
+const length = await tab.run(async ({ tab }, suffix) => ((await tab.title()) + suffix).length, {
+	args: ["!"],
+	timeout: 30,
+});
 
 await tab.close();
 ```
@@ -50,23 +50,23 @@ await tab.close();
 
 ### Open options
 
-| Option | Contract |
-|---|---|
-| `name` | Managed-tab name; default `"main"`. |
-| `url` | Navigate the opened or reused tab to this URL. On Chromium-backed tabs, a navigation that outlasts `timeout` throws an error naming the tab and keeps it on what loaded; reach it with `browser.tab(name)`. A navigation that fails outright (refused connection, blocked domain, certificate error) or an open that is cancelled closes a tab the open created; a reused tab stays open. |
-| `app` | `{ cdp_url?, path?, args?, relay?, tern?, target? }`; backend selection is described below. `target` selects an attached page by URL/title substring. |
-| `viewport` | `{ width, height, scale? }`; `scale` becomes the device scale factor. |
-| `wait_until` | `"load"`, `"domcontentloaded"`, `"networkidle0"`, or `"networkidle2"`. |
-| `dialogs` | `"accept"` or `"dismiss"` automatic policy. Without one, beforeunload prompts are accepted, and alerts too except in Chromium browsers the user drives (connected, relay); other dialogs remain pending. |
-| `allowed_domains` | Exact hostnames or `*.example.com` patterns (including the bare domain). The network manager aborts intercepted HTTP(S)/WS(S) requests to other hosts; an empty list leaves requests unrestricted. This is not a sandbox, and native-webview coverage differs below. |
-| `init_scripts` | Document-start JavaScript sources or cwd-relative source-file paths. |
-| `downloads` | Absolute or cwd-relative directory for this tab's downloads; defaults to a temporary folder per tab. Tabs in a managed or spawned Chromium keep separate folders while they share a browser, downloads their iframes start included; there a download no tab tracks keeps Chromium's GUID file name. Connected and relay browsers also receive the user's own downloads, so they keep one browser-wide folder (the last tab to set it wins) and real file names. |
-| `user_agent` | Per-tab user-agent override. |
-| `ignore_https_errors` | Ignore invalid HTTPS certificates for the tab. |
-| `allow_file_access` | Launch flag permitting local file pages to read local files; cannot change an already-running shared Chromium. |
-| `headed` | Override `browser.headless` for this open. `headed: false` also opts out of automatic Tern selection. |
-| `persist` | Default `false`; opt out of settle-freeze and idle-close management. Explicit reuse by the owning session can change it. |
-| `timeout` | Seconds; default 30, capped by positive `tools.maxTimeout`, then clamped to 1–300. First-use Chromium installation is outside the open deadline. An open that runs out names the step it stalled in: launching or connecting to the browser, closing a tab to reopen it, or opening the tab. |
+| Option                | Contract                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                | Managed-tab name; default `"main"`.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `url`                 | Navigate the opened or reused tab to this URL. On Chromium-backed tabs, a navigation that outlasts `timeout` throws an error naming the tab and keeps it on what loaded; reach it with `browser.tab(name)`. A navigation that fails outright (refused connection, blocked domain, certificate error) or an open that is cancelled closes a tab the open created; a reused tab stays open.                                                                        |
+| `app`                 | `{ cdp_url?, path?, args?, relay?, tern?, target? }`; backend selection is described below. `target` selects an attached page by URL/title substring.                                                                                                                                                                                                                                                                                                            |
+| `viewport`            | `{ width, height, scale? }`; `scale` becomes the device scale factor.                                                                                                                                                                                                                                                                                                                                                                                            |
+| `wait_until`          | `"load"`, `"domcontentloaded"`, `"networkidle0"`, or `"networkidle2"`.                                                                                                                                                                                                                                                                                                                                                                                           |
+| `dialogs`             | `"accept"` or `"dismiss"` automatic policy. Without one, beforeunload prompts are accepted, and alerts too except in Chromium browsers the user drives (connected, relay); other dialogs remain pending.                                                                                                                                                                                                                                                         |
+| `allowed_domains`     | Exact hostnames or `*.example.com` patterns (including the bare domain). The network manager aborts intercepted HTTP(S)/WS(S) requests to other hosts; an empty list leaves requests unrestricted. This is not a sandbox, and native-webview coverage differs below.                                                                                                                                                                                             |
+| `init_scripts`        | Document-start JavaScript sources or cwd-relative source-file paths.                                                                                                                                                                                                                                                                                                                                                                                             |
+| `downloads`           | Absolute or cwd-relative directory for this tab's downloads; defaults to a temporary folder per tab. Tabs in a managed or spawned Chromium keep separate folders while they share a browser, downloads their iframes start included; there a download no tab tracks keeps Chromium's GUID file name. Connected and relay browsers also receive the user's own downloads, so they keep one browser-wide folder (the last tab to set it wins) and real file names. |
+| `user_agent`          | Per-tab user-agent override.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `ignore_https_errors` | Ignore invalid HTTPS certificates for the tab.                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `allow_file_access`   | Launch flag permitting local file pages to read local files; cannot change an already-running shared Chromium.                                                                                                                                                                                                                                                                                                                                                   |
+| `headed`              | Override `browser.headless` for this open. `headed: false` also opts out of automatic Tern selection.                                                                                                                                                                                                                                                                                                                                                            |
+| `persist`             | Default `false`; opt out of settle-freeze, idle-close, and the relay's release between turns. Explicit reuse by the owning session can change it.                                                                                                                                                                                                                                                                                                                |
+| `timeout`             | Seconds; default 30, capped by positive `tools.maxTimeout`, then clamped to 1–300. First-use Chromium installation is outside the open deadline. An open that runs out names the step it stalled in: launching or connecting to the browser, closing a tab to reopen it, or opening the tab.                                                                                                                                                                     |
 
 Reopening with init scripts, a download directory, a user-agent override, or `ignore_https_errors: true` recycles an existing tab so those worker-init options can take effect.
 
@@ -105,13 +105,10 @@ A run accepts either a serialized function or a JavaScript function-body string,
 
 ```js
 const hrefs = await tab.run(async ({ page }) => {
-  return await page.$$eval("a", links => links.map(link => link.href));
+	return await page.$$eval("a", links => links.map(link => link.href));
 });
 
-const title = await tab.run(
-  "return await tab.title();",
-  { timeout: 10 },
-);
+const title = await tab.run("return await tab.title();", { timeout: 10 });
 ```
 
 Functions receive `{ tab, page, browser, wait, assert }` as their first argument. Additional `args` follow it. Plain data, functions, and `RegExp` values are serialized; the function cannot capture Eval-cell closures. Code strings use the same names as globals and allow top-level `await`.
@@ -166,6 +163,8 @@ Relay and attached modes operate on real logged-in sessions; sites attribute act
 Each named tab permits one active run; Chromium-backed tabs have one worker, while Tern/cmux use their own backend. A timed-out or aborted run can recycle the worker and invalidate handles. A call on a Chromium tab whose renderer crashed (under it, or earlier while idle) fails at once and recycles the worker before returning, which reloads the page; its error says so. A page that does not come back (it crashes again as it loads, or a relay tab, which reattaching leaves crashed) closes the tab, as does any crash on a tab whose worker runs inline in the omp process. An open that navigates or resizes such a tab reloads it first and reports it. `browser.close({ all: true })` releases all managed tabs; `kill` never closes or kills relay/CDP-attached browsers.
 
 By default, omp-owned managed Chromium tabs freeze at turn settle and unfreeze on next use (`browser.freezeOnTurnEnd = true`). Owned Chromium and Tern tabs idle for 1,800 seconds are closed (`browser.idleCloseSec`; `0` disables this). `persist: true` opts a tab out of both policies, but explicit close still releases it. Relay, connected, spawned, and cmux tabs are not auto-frozen or idle-closed.
+
+Chrome shows its debugging bar on every tab of the browser while omp has any one tab attached. When the agent hands back (its run ends, an interrupt included; not between model steps, and not when a queued steer continues the run), omp releases its relay tabs from Chrome's debugger: they stay open, owned by omp and in its tab group, and the bar leaves about 5 s later. The next call on such a tab reattaches it first, which brings the bar back. The emulated size and other `tab.emulate()` overrides are cleared before the release and put back on reattach, as are init scripts, the open's user agent, and the dialog policy; `tab.route` routes, a `harStart` or `traceStart`/`profileStart` capture (unwritten) and a screen recording (saved) end with the release, element ids and run globals start fresh, and the first result after the reattach says so. A tab stays attached while its page waits on a dialog or a held file chooser (a dialog open at the release could not be answered afterwards), when it was opened with `persist: true` or `allowed_domains` (which only the attachment enforces), or while a call runs on it; the next result says why. `app.cdp_url` tabs show no debugging bar and stay attached.
 
 ## Common recovery
 

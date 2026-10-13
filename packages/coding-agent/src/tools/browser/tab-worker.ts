@@ -1845,12 +1845,10 @@ export class WorkerCore {
 				await this.#close();
 				return;
 			case "release": {
-				const outcome = await this.#release().catch(
-					(error: unknown): ReleaseOutcome => ({
-						released: false,
-						failed: error instanceof Error ? error.message : String(error),
-					}),
-				);
+				const outcome = await this.#release().catch((error: unknown): ReleaseOutcome => ({
+					released: false,
+					failed: error instanceof Error ? error.message : String(error),
+				}));
 				this.#transport.send({ type: "released", outcome });
 				return;
 			}
