@@ -20,7 +20,13 @@ use objc2_core_foundation::{
 };
 use objc2_foundation::NSString;
 
-use super::{CoreResult, DesktopError, ax_error, copy_attribute, copy_held_attribute, copy_string};
+use super::{
+	CoreResult, DesktopError, ax_error, copy_attribute, copy_attribute_result, copy_held_attribute,
+	copy_string,
+};
+
+/// How many times a text that changes while it is read is read again.
+const READ_ATTEMPTS: usize = 3;
 
 /// The styles Markdown can show.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -42,27 +48,72 @@ pub(super) struct Span {
 
 /// `element`'s whole text as Markdown.
 pub(super) fn markdown(element: &AXUIElement) -> CoreResult<String> {
-	let subrole = copy_held_attribute(element, "AXSubrole")?
-		.and_then(|value| value.downcast::<CFString>().ok())
-		.map(|value| value.to_string());
-	ensure_readable(subrole.as_deref())?;
+	ensure_readable(copy_attribute_result(element, "AXSubrole"))?;
 	// The font lookups run on the session thread, which has no pool of its own.
 	autoreleasepool(|_| Ok(to_markdown(&spans(element)?)))
 }
 
-/// A secure text field's text is never read, masked or not.
-fn ensure_readable(subrole: Option<&str>) -> CoreResult<()> {
-	if subrole == Some("AXSecureTextField") {
+/// A secure text field's text is never read, masked or not, and neither is the
+/// text of an element whose subrole could not be read.
+fn ensure_readable(subrole: Result<Option<CFRetained<CFType>>, AXError>) -> CoreResult<()> {
+	let subrole = match subrole {
+		Ok(subrole) => subrole
+			.and_then(|value| value.downcast::<CFString>().ok())
+			.map(|value| value.to_string()),
+		Err(error) if error == AXError::NoValue || error == AXError::AttributeUnsupported => None,
+		Err(error) => {
+			return Err(ax_error(
+				error,
+				"reading the element's subrole failed, so its text is not read: it may be a secure \
+				 text field",
+			));
+		},
+	};
+	if subrole.as_deref() == Some("AXSecureTextField") {
 		return Err(DesktopError::ax_failed("a secure text field's text is never read"));
 	}
 	Ok(())
 }
 
 fn spans(element: &AXUIElement) -> CoreResult<Vec<Span>> {
-	let length = text_length(copy_held_attribute(element, "AXNumberOfCharacters")?, || {
-		copy_held_attribute(element, "AXValue")
-	})?
-	.ok_or_else(|| no_formatted_text(element))?;
+	let length = || {
+		text_length(copy_held_attribute(element, "AXNumberOfCharacters")?, || {
+			copy_held_attribute(element, "AXValue")
+		})
+	};
+	let text = read_whole(length, |length| attributed(element, length))?
+		.ok_or_else(|| no_formatted_text(element))?;
+	Ok(read_spans(&text))
+}
+
+/// Reads the text at its `length`, again when the length changed during the
+/// read or the read came back short, so an edit between the two calls never
+/// passes for the whole text. `WebKit`'s attributed text carries list markers
+/// its count leaves out, so a longer read is whole.
+fn read_whole<T>(
+	mut length: impl FnMut() -> CoreResult<Option<CFIndex>>,
+	mut read: impl FnMut(CFIndex) -> CoreResult<(T, CFIndex)>,
+) -> CoreResult<Option<T>> {
+	for _ in 0..READ_ATTEMPTS {
+		let Some(before) = length()? else {
+			return Ok(None);
+		};
+		let (text, read_length) = read(before)?;
+		if read_length >= before && length()? == Some(before) {
+			return Ok(Some(text));
+		}
+	}
+	Err(DesktopError::ax_failed(
+		"the text kept changing while it was read; read it again once it settles",
+	))
+}
+
+/// `AXAttributedStringForRange` over the first `length` characters, and the
+/// length of what came back.
+fn attributed(
+	element: &AXUIElement,
+	length: CFIndex,
+) -> CoreResult<(CFRetained<CFAttributedString>, CFIndex)> {
 	let mut range = CFRange { location: 0, length };
 	// SAFETY: `range` is a live CFRange matching the requested AXValue type.
 	let parameter = unsafe { AXValue::new(AXValueType::CFRange, NonNull::from(&mut range).cast()) }
@@ -87,7 +138,8 @@ fn spans(element: &AXUIElement) -> CoreResult<Vec<Span>> {
 		.map(|pointer| unsafe { CFRetained::<CFType>::from_raw(pointer) })
 		.and_then(|value| value.downcast::<CFAttributedString>().ok())
 		.ok_or_else(|| no_formatted_text(element))?;
-	Ok(read_spans(&text))
+	let read_length = text.length();
+	Ok((text, read_length))
 }
 
 /// The text's length in UTF-16 units: `AXNumberOfCharacters`, else the length
@@ -448,11 +500,14 @@ fn escape_into(out: &mut String, text: &str, offset: usize, block: Option<usize>
 
 #[cfg(test)]
 mod tests {
+	use objc2_application_services::AXError;
 	use objc2_core_foundation::{
-		CFBoolean, CFDictionary, CFNumber, CFRetained, CFString, CFType, Type,
+		CFBoolean, CFDictionary, CFIndex, CFNumber, CFRetained, CFString, CFType, Type,
 	};
 
-	use super::{Span, Style, ensure_readable, font_traits, style_span, text_length, to_markdown};
+	use super::{
+		Span, Style, ensure_readable, font_traits, read_whole, style_span, text_length, to_markdown,
+	};
 	use crate::desktop::error::{DesktopError, ErrorCode};
 
 	fn plain(text: &str) -> Span {
@@ -653,11 +708,51 @@ mod tests {
 	}
 
 	#[test]
-	fn secure_text_fields_are_never_read() {
-		let refusal = ensure_readable(Some("AXSecureTextField")).unwrap_err();
-		assert_eq!(refusal.code, ErrorCode::AxFailed);
-		assert!(ensure_readable(Some("AXSearchField")).is_ok());
-		assert!(ensure_readable(None).is_ok());
+	fn secure_text_fields_and_fields_of_unknown_subrole_are_never_read() {
+		let subrole = |name: &'static str| -> Result<Option<CFRetained<CFType>>, AXError> {
+			let name: &CFType = &CFString::from_static_str(name);
+			Ok(Some(name.retain()))
+		};
+		let code = |subrole| ensure_readable(subrole).map_err(|error: DesktopError| error.code);
+		assert_eq!(code(subrole("AXSecureTextField")), Err(ErrorCode::AxFailed));
+		// A subrole read that fails may have been a secure field's.
+		assert_eq!(code(Err(AXError::CannotComplete)), Err(ErrorCode::AxFailed));
+		assert_eq!(code(Err(AXError::InvalidUIElement)), Err(ErrorCode::StaleRef));
+		assert_eq!(code(subrole("AXSearchField")), Ok(()));
+		assert_eq!(code(Ok(None)), Ok(()));
+		assert_eq!(code(Err(AXError::NoValue)), Ok(()));
+		assert_eq!(code(Err(AXError::AttributeUnsupported)), Ok(()));
+	}
+
+	#[test]
+	fn text_that_changes_length_while_it_is_read_is_read_again() {
+		// `lengths` answers the count reads in turn; each read returns
+		// `extra` more characters than it asked for.
+		fn read(
+			lengths: &[CFIndex],
+			extra: CFIndex,
+		) -> (Result<Option<CFIndex>, ErrorCode>, Vec<CFIndex>) {
+			let mut counts = lengths.iter().copied();
+			let mut asked = Vec::new();
+			let result = read_whole(
+				|| Ok(counts.next()),
+				|length| {
+					asked.push(length);
+					Ok((length, length + extra))
+				},
+			);
+			(result.map_err(|error| error.code), asked)
+		}
+		assert_eq!(read(&[5, 5], 0), (Ok(Some(5)), vec![5]));
+		// `WebKit` adds list markers the count leaves out.
+		assert_eq!(read(&[5, 5], 2), (Ok(Some(5)), vec![5]));
+		// Text appended between the count and the read.
+		assert_eq!(read(&[5, 7, 7, 7], 0), (Ok(Some(7)), vec![5, 7]));
+		// A read that came back short.
+		assert_eq!(read(&[5, 5, 5, 5, 5, 5], -1), (Err(ErrorCode::AxFailed), vec![5, 5, 5]));
+		// Text that keeps growing.
+		assert_eq!(read(&[1, 2, 3, 4, 5, 6], 0), (Err(ErrorCode::AxFailed), vec![1, 3, 5]));
+		assert_eq!(read(&[], 0), (Ok(None), vec![]));
 	}
 
 	#[test]
