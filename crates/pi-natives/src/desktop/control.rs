@@ -127,10 +127,6 @@ pub(crate) struct OperationToken {
 }
 
 impl OperationToken {
-	pub(crate) fn control_active(&self) -> bool {
-		self.source.control_active()
-	}
-
 	pub(crate) fn escape_unavailable(&self) -> bool {
 		self.source.escape_unavailable()
 	}
@@ -604,14 +600,14 @@ impl Drop for KernelLease {
 }
 
 #[cfg(test)]
-mod tests {
+pub(super) mod tests {
 	use super::*;
 
-	static OWNERSHIP_TEST: Mutex<()> = Mutex::new(());
+	pub(in crate::desktop) static OWNERSHIP_TEST: Mutex<()> = Mutex::new(());
 
 	/// Real ownership without OS event monitoring: lifecycle regressions must
 	/// not depend on an interactive desktop or Accessibility permissions.
-	fn grant_for_test(source: &CancellationSource) {
+	pub(in crate::desktop) fn grant_for_test(source: &CancellationSource) {
 		let owner = ControlLease {
 			escape:  None,
 			_kernel: KernelOwner::acquire().expect("test kernel owner"),
@@ -621,7 +617,7 @@ mod tests {
 	}
 
 	/// Removes this process's private kernel lock (see `KernelLease::path`).
-	fn remove_test_lock() {
+	pub(in crate::desktop) fn remove_test_lock() {
 		#[cfg(unix)]
 		let _ = std::fs::remove_file(KernelLease::path());
 	}
