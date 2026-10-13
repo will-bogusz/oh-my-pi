@@ -837,9 +837,19 @@ pub(super) fn with_foreground<T>(
 		{
 			return Ok(());
 		}
-		if control::user_activity() != activity
-			|| !front_process(spi.get_front).is_some_and(|front| front.psn == target)
-		{
+		// The action and its settle are over, so takeover's own keys and
+		// clicks, which `WindowServer` counts like the user's, came before this
+		// timestamp; a user key or click after it refuses the hand-back, and the
+		// make-key records below are then never posted.
+		let handed_back = request_after_check(
+			event_clock_now,
+			|| {
+				control::user_activity() == activity
+					&& front_process(spi.get_front).is_some_and(|front| front.psn == target)
+			},
+			|since| set_front_unless_user_acted(spi, previous.psn, previous_key, since),
+		)?;
+		if handed_back != Some(FrontRequest::Done) {
 			return Ok(());
 		}
 		set_front(spi, previous.psn, previous_key.unwrap_or(0))?;
@@ -1327,5 +1337,45 @@ mod tests {
 		));
 		assert!(!hand_back_confirmed(false, user, target, || Some(user), || false, || false));
 		assert!(hand_back_confirmed(false, user, target, || Some(user), || false, || true));
+	}
+
+	#[test]
+	fn the_hand_back_timestamp_precedes_the_last_check() {
+		use std::cell::RefCell;
+		let steps = RefCell::new(Vec::new());
+		let handed = request_after_check(
+			|| {
+				steps.borrow_mut().push("clock");
+				7
+			},
+			|| {
+				steps.borrow_mut().push("check");
+				true
+			},
+			|since| {
+				steps.borrow_mut().push("request");
+				assert_eq!(since, 7, "the request carries the timestamp taken before the check");
+				Ok(FrontRequest::UserActed)
+			},
+		);
+		assert_eq!(handed.ok(), Some(Some(FrontRequest::UserActed)));
+		assert_eq!(*steps.borrow(), ["clock", "check", "request"]);
+
+		let unwanted =
+			request_after_check(|| 7, || false, |_| panic!("no request once the check fails"));
+		assert_eq!(unwanted.ok(), Some(None));
+	}
+
+	#[test]
+	fn a_front_request_the_user_overtook_is_their_choice_not_an_error() {
+		use crate::desktop::error::ErrorCode;
+		assert_eq!(front_request(0).ok(), Some(FrontRequest::Done));
+		assert_eq!(front_request(EXPIRED_FRONT_REQUEST).ok(), Some(FrontRequest::UserActed));
+		assert_eq!(
+			front_request(-1)
+				.expect_err("other failures stay errors")
+				.code,
+			ErrorCode::InputFailed
+		);
 	}
 }
