@@ -10,7 +10,7 @@ Reading order: `desktop/ax.rs` `walk_raw` (the `readonly` flag) → `format_tree
 
 ## Why
 
-**Builds on #15282**: this branch is #15282's head plus 3 commits; merge #15282 first, or merge this alone to land both. It reads settability through #15282's walk, which already tracks whether a node sits in web content. **Overlaps** the item-8 focus branch on `will/computer-ax-focus` (stacked on #15282) in `format_tree` and the backend trait: adjacent lines, no shared logic.
+It reads settability through #15282's walk, which already tracks whether a node sits in web content.
 
 - **Decisions.** Web content only: outside it an unsettable `AXValue` proves nothing (a terminal's text area reports it and still takes keys). The mark is the page's declaration, not a guarantee: a contenteditable with `aria-readonly` can still accept keys. A failed settability query marks nothing.
 - **Non-goals.** Combo boxes (a choice-only popup has no text to set, so the answer would mislead), number inputs (Chrome exposes them as `incrementor`; Safari adds a stepper child whose answer means something else), Linux and Windows.
