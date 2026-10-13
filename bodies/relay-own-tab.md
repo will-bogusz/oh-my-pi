@@ -16,20 +16,18 @@ Reading order: `tab-protocol.ts` (`page: create | owned | borrowed`) → `tab-su
 
 ## Why
 
-**Overlaps #15105, #15174** in `packages/browser-relay/README.md`, `relay/bridge.ts`, `tab-supervisor.ts`, `tab-worker.ts`; merge #15105 first.
-
 - **Default, not opt-in.** The tool prompt already forbade navigating the visible tab without authorization, yet the default path did. An opt-in (#12582, #11662) leaves every call that forgets the flag on the user's tab.
 - **Screenshots.** The owned tab is focus-emulated, so Chrome captures it without activation; borrowed tabs keep `main`'s activate-before-capture.
 - **Older extension.** One predating #15109 opens the tab selected (as `browser.newPage()` does on `main`) but never navigates the user's page; refusing it would break relay users until they reinstall.
 - **Which browser.** New tabs followed the last hello, which flips when a service worker restarts. Each omp tab has its own relay connection, so the supervisor names the tab it used last (`nearTargetId`, a relay-only parameter). Known limit: unlike `main`'s adoption, the fallback doesn't probe `visibilityState`, so a minimized browser listed first beats a visible second one.
-- The relay has no browser target, so create and close use Puppeteer's root connection.
+- With no relay browser target, create and close use Puppeteer's root connection.
 - Non-goals: advisory claims; freezing or idle-closing owned relay tabs; closing a crashed omp's tabs; `app.cdp_url` still adopts.
 - Builds on #14060 by nnnnoel (co-author), without its close refusal for borrowed tabs. Related: #12101, #12314, #14881, #14865. Refs #14884, #11688, #12049.
 
 ## Testing
 
 - `browser-relay-tab-isolation.test.ts` (real extension in Chromium): own tabs unselected, user tab untouched, click works, close removes the tab, borrowed tab survives, dismissed-debugger tab closed, owned recovery target survives a failed init, a second browser's default tab opens beside the tab borrowed there. 4 of 5 fail with the source reverted. Bridge tests: routing fails without `#instanceForNewTab`; `closeRelayTarget` calling an offline browser's tab closed fails with `main`'s `Target.getTargets` check.
-- The isolation test also hovers the unselected owned tab, since headless Chromium delivers clicks to hidden tabs: with the owned-tab focus emulation removed, that hover times out.
+- The isolation test also hovers the unselected owned tab (headless Chromium clicks hidden tabs); without the owned-tab focus emulation that hover times out.
 - `bun test test/tools/browser-*.test.ts`: 545 pass, 4 skipped; `bun run check:ts` passes.
 - Live, headful Chrome for Testing on an isolated relay, user tab selected, via `acquireTab`/`runInTab`/`releaseTab`:
 
