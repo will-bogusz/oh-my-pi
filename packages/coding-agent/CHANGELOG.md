@@ -111,6 +111,11 @@
 - Fixed `RpcClient.stop()` occasionally waiting forever because the agent process was never signaled.
 - Fixed blank rows opening under the input after an `ask` dialog, command report or todo list closed in a session that had filled the screen; the transcript now refills the screen ([#15405](https://github.com/can1357/oh-my-pi/pull/15405) by [@H4vC](https://github.com/H4vC))
 - Fixed blank rows appearing between the last paragraphs of a streamed answer when the turn ended ([#15405](https://github.com/can1357/oh-my-pi/pull/15405) by [@H4vC](https://github.com/H4vC))
+- Added a `menu` option to the computer tool's `win.click`, `el.click`, `el.press` and `el.perform`: on macOS the call that opens a context menu or menu button's menu chooses that item, e.g. `menu: ["Add to", "Fonts"]`, and leaves no menu open ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+
+### Changed
+
+- The `computer` tool's instructions now tell the model that macOS drags, mouse holds, modified clicks, right-clicks and scrolls run in the background, so it no longer reaches for `takeover` for them ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 

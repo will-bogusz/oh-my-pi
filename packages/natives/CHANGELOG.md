@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added a `menu` item path to `click` options and `axPerform`: a macOS click or action that opens a menu presses that item in it, submenus included, and returns with the menu closed ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Changed
 
 - Computer use's physical Escape stop now watches the keyboard only during takeover input (`takeover: true`, held control, desktop-level input, raises); an Escape the user presses in their own app no longer cancels background window input, which the host interrupt still stops ([#15176](https://github.com/can1357/oh-my-pi/pull/15176) by [@will-bogusz](https://github.com/will-bogusz))
@@ -36,6 +40,8 @@
 
 - macOS background keystrokes into an app with several windows now reach the target window instead of throwing `BackgroundUnavailable`, and stop with `InputFailed` once another of its windows becomes key ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - macOS background keystrokes, left clicks and menu actions aimed at a non-key window of the app the user is in now throw `BackgroundUnavailable` instead of moving the user's typing to that window; pass `takeover: true` for it ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
+- macOS background drags, mouse holds, clicks with modifiers, right-clicks and scrolls in Electron apps now run without bringing the app forward, instead of throwing `BackgroundUnavailable`; drags and holds with the right button or Control, repeated right-clicks or Control-clicks, and gestures with modifiers or keys into Apple Screen Sharing, still throw it ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- macOS background clicks into apps built on macOS's own Tk 8.5 now run; Tk 8.6 and later still throw `BackgroundUnavailable` ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 
@@ -53,6 +59,11 @@
 - Fixed macOS `win.menu.items` and `win.menu.select` treating commands such as Font Book's File ▸ New Collection as disabled while the app was in the background or had not yet caught up with an edit ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS background keys, typing, clicks and scrolls into a system Open or Save panel, or the Go to Folder sheet it opens, being dropped while the call reported success; they now go to `openAndSavePanelService`, which draws the panel, and throw `BackgroundUnavailable` while it does not report focus there ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS background clicks on a control in a popover or sheet, such as Calendar's event popover or Automator's Save sheet, closing the popover or landing in the window it is attached to; they now go to the popover or sheet, without the press that made the window key ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed a macOS background drag that picked up an item (a file, font tile, row or selected text) returning success while its drop landed elsewhere or nowhere; it now throws `InputFailed` saying the drop could not be confirmed ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed a macOS background right-click or Control-click that opened a context menu leaving the menu open, which kept the keyboard from the user's app; the menu now closes and the click throws `InputFailed`, since it was delivered ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed a macOS background `press()`, `perform("AXShowMenu")`, click, mouse hold or drag on a menu button or popup button leaving its menu open, which took every key from the user's app; the menu now closes and the call throws `InputFailed` listing its items ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed a macOS `menu` path or background `press()` on a popup in a system Open or Save panel, such as Automator's Save sheet Where: popup, failing with "its items could not be read" or "opened no menu", because the menu opens in `openAndSavePanelService` ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed macOS `setValue` on a background popup button typing the user's keys into the target app: the menu it opens now ends with `AXCancel` right after the item is pressed, instead of flashing the item and fading out for about a third of a second while it holds the keyboard ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a macOS background AX action that reports an error yet brings its app forward, such as `AXOpen` on a file in Chrome's Open panel, leaving that app in front of the user's for good; the focus guard now keeps watching after a failed action and sends the app back ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed the macOS background focus guard able to put the user's app back in front just after they clicked the agent's target app themselves, when the click came between the guard's last check and its hand-back; macOS now refuses the hand-back if any key or click came after that check ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 
