@@ -2753,6 +2753,42 @@ describe("RelayBridge release between turns", () => {
 		expect(ext.rpcs("attach")).toHaveLength(attaches + 1);
 	});
 
+	it("releases the popups a released tab opened with it, and attaches one again when its client claims it", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		await claimTab(bridge, ext, cdp, connId, 1);
+		autoAttach(bridge, connId);
+		ack(bridge, ext, "attach");
+		await flush();
+		// Tab 1 opens a popup, which opens one of its own; the user's tab 2 opens one that stays theirs.
+		for (const [sourceTabId, tabId] of [
+			[1, 3],
+			[3, 4],
+			[2, 5],
+		]) {
+			bridge.extMessage(ext, JSON.stringify({ t: "tabCreated", tab: tab({ tabId: tabId!, url: "" }) }));
+			bridge.extMessage(ext, JSON.stringify({ t: "popupCreated", sourceTabId, tabId }));
+		}
+		ack(bridge, ext, "attach");
+		await flush();
+		expect(ext.rpcs("attach").map(rpc => rpc.tabId)).toEqual([1, 3, 4]);
+
+		const reply = await release(bridge, ext, cdp, connId, 1);
+		expect(reply).toMatchObject({ result: { detached: true } });
+		expect(
+			ext
+				.rpcs("detach")
+				.map(rpc => rpc.tabId)
+				.sort(),
+		).toEqual([1, 3, 4]);
+
+		await claimTab(bridge, ext, cdp, connId, 3);
+		expect(ext.rpcs("attach").map(rpc => rpc.tabId)).toEqual([1, 3, 4, 3]);
+	});
+
 	it("keeps the debugger on while another client still holds a session on the released tab", async () => {
 		const bridge = new RelayBridge({});
 		const ext = new FakeExtSocket();

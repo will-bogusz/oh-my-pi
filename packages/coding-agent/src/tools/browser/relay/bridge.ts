@@ -1203,6 +1203,41 @@ export class RelayBridge {
 		}
 	}
 
+	/** Let go of `conn`'s debugger on `tab`: its sessions end, and the attachment comes off unless another client holds it. */
+	async #releaseFor(conn: CdpConnection, tab: TabState): Promise<void> {
+		conn.released.add(tab.tabKey);
+		const tabSession = conn.sessionsForTab(tab.tabKey, "tab")[0];
+		const pageSessions = conn.sessionsForTab(tab.tabKey, "page");
+		// The tab's frames announced to this connection end with its sessions, nested ones first.
+		for (const [child, parent] of [...conn.childParents].reverse()) {
+			if (!tab.realSessions.has(child)) continue;
+			conn.childParents.delete(child);
+			this.#emit(conn, "Target.detachedFromTarget", { sessionId: child }, parent);
+		}
+		for (const pageSession of pageSessions) this.#releaseSession(conn, pageSession, tabSession);
+		for (const session of conn.sessionsForTab(tab.tabKey, "tab")) this.#releaseSession(conn, session, undefined);
+		// An attach in flight lands after this reply otherwise, and the debugger comes back unasked.
+		if (tab.attaching) await tab.attaching.catch(() => false);
+		this.#detachIfUnheld(tab.tabKey);
+		await tab.detaching;
+	}
+
+	/** Tabs `conn` owns and has not released that `tab` opened, or that its popups opened in turn. */
+	#popupsOf(conn: CdpConnection, tab: TabState): TabState[] {
+		const found: TabState[] = [];
+		const openers = new Set([tab.tabKey]);
+		for (let grew = true; grew;) {
+			grew = false;
+			for (const candidate of this.#tabs.values()) {
+				if (!candidate.opener || !openers.has(candidate.opener) || openers.has(candidate.tabKey)) continue;
+				openers.add(candidate.tabKey);
+				grew = true;
+				if (conn.claims.has(candidate.tabKey) && !conn.released.has(candidate.tabKey)) found.push(candidate);
+			}
+		}
+		return found;
+	}
+
 	/** True while a connection that owns the tab still wants its debugger: it claimed the tab and did not release it. */
 	#attachWanted(tabKey: string): boolean {
 		for (const conn of this.#conns.values()) {
@@ -1357,23 +1392,11 @@ export class RelayBridge {
 					this.#replyError(conn, msg, `Target ${String(msg.params?.targetId)} is not a tab this client owns`);
 					return;
 				}
-				conn.released.add(tab.tabKey);
-				const tabSession = conn.sessionsForTab(tab.tabKey, "tab")[0];
-				const pageSessions = conn.sessionsForTab(tab.tabKey, "page");
-				// The tab's frames announced to this connection end with its sessions, nested ones first.
-				for (const [child, parent] of [...conn.childParents].reverse()) {
-					if (!tab.realSessions.has(child)) continue;
-					conn.childParents.delete(child);
-					this.#emit(conn, "Target.detachedFromTarget", { sessionId: child }, parent);
-				}
-				for (const pageSession of pageSessions) this.#releaseSession(conn, pageSession, tabSession);
-				for (const session of conn.sessionsForTab(tab.tabKey, "tab"))
-					this.#releaseSession(conn, session, undefined);
-				// An attach in flight lands after this reply otherwise, and the debugger comes back unasked.
-				if (tab.attaching) await tab.attaching.catch(() => false);
-				this.#detachIfUnheld(tab.tabKey);
-				await tab.detaching;
-				this.#reply(conn, msg, { detached: !tab.attached });
+				// Popups the tab opened went to its owners with it (#adoptPopup); left attached, they would keep
+				// Chrome's debugging bar up through the turn. A later claim of one attaches it again.
+				const released = [tab, ...this.#popupsOf(conn, tab)];
+				await Promise.all(released.map(target => this.#releaseFor(conn, target)));
+				this.#reply(conn, msg, { detached: released.every(target => !target.attached) });
 				return;
 			}
 			case "Target.attachToTarget": {
