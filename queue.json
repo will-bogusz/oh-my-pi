@@ -1071,27 +1071,19 @@
    "needs": [
     "#15105",
     "#15110",
-    "#15493",
-    "#15498",
-    "#15494",
-    "#15508",
-    "#15489",
-    "#15490",
-    "#15510",
-    "#15491",
-    "#15492",
-    "#15503"
+    "#15493"
    ],
-   "base": null,
-   "body": null,
+   "base": "b4953a029ae84b4d34eb4621db3a3f26971aba0d",
+   "body": "bodies/relay-call-deadline.md",
    "state": "open",
    "pr": 15559,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-call-deadline",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:47:19Z",
-   "note": ""
+   "updated": "2026-10-13T21:50:37Z",
+   "note": "",
+   "requeue": 15559
   },
   {
    "id": "computer-user-intervened",
