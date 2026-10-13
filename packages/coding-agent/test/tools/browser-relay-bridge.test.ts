@@ -451,11 +451,18 @@ describe("RelayBridge tab grouping", () => {
 		await flush();
 		nack(bridge, ext, "attach", "Cannot access contents of the page");
 		await flush();
-		nack(bridge, ext, "removeTab", "No tab with id: 9.");
+		nack(bridge, ext, "removeTab", "Tabs cannot be edited right now (user may be dragging a tab).");
 		await flush();
 		expect(cdp.messages.find(message => message.id === createId)).toMatchObject({
 			result: { targetId: `PAGE${ANON}.9` },
 		});
+		// The tab is still open; closing it by the returned id reaches Chrome again.
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: ++msgSeq, method: "Target.closeTarget", params: { targetId: `PAGE${ANON}.9` } }),
+		);
+		await flush();
+		expect(ext.rpcs("removeTab").map(rpc => rpc.tabId)).toEqual([9, 9]);
 	});
 
 	it("creates a Target.createTarget background tab without selecting it", () => {
