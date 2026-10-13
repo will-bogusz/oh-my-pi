@@ -1038,15 +1038,16 @@
    ],
    "base": "b16b8de60b5d4b33e5e3304d7cd6d709c08f4100",
    "body": "bodies/webmcp-native.md",
-   "state": "open",
-   "pr": 15556,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15556
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/webmcp-native",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:50:56Z",
-   "note": "",
-   "requeue": 15556
+   "updated": "2026-10-13T21:51:00Z",
+   "note": ""
   },
   {
    "id": "relay-call-deadline",
