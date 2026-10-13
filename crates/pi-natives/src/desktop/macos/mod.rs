@@ -17,10 +17,13 @@ pub(super) use ax::menus;
 pub(super) use capture::application_windows;
 use image::RgbaImage;
 use objc2_app_kit::{NSApplicationActivationOptions, NSRunningApplication};
+pub(super) use process::started as process_started;
 pub(super) use session::screen_state;
+pub(super) use skylight::front_pid;
 
 use self::{ax::MacAx, capture::MacCapture, input::MacInput, session::DisplayAwake};
 use super::{
+	ax::AxHandle,
 	backend::{AxBackend, Backend, DeliveryMode, PointerEvent},
 	control::OperationToken,
 	error::{CoreResult, DesktopError},
@@ -99,6 +102,11 @@ impl Backend for MacosBackend {
 
 	fn windows(&mut self) -> CoreResult<Vec<DesktopWindow>> {
 		self.capture.windows()
+	}
+
+	fn window_app(&mut self, id: &str) -> Option<(libc::pid_t, String)> {
+		let pid = skylight::window_owner_pid(id.parse().ok()?)?;
+		Some((pid, app_name(pid)))
 	}
 
 	fn screen_state(&mut self, display: Option<&DisplaySelector>) -> ScreenState {
@@ -271,6 +279,18 @@ const fn presses(event: &PointerEvent) -> bool {
 const fn shares_hid_route(target: &Target, mode: DeliveryMode) -> bool {
 	matches!(target, Target::Desktop | Target::Display(_))
 		|| matches!(mode, DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus)
+}
+
+/// The process owning the element `h` names, with its application's name.
+pub(super) fn element_app(h: &AxHandle) -> CoreResult<(libc::pid_t, String)> {
+	let pid = ax::handle_pid(h)?;
+	Ok((pid, app_name(pid)))
+}
+
+fn app_name(pid: libc::pid_t) -> String {
+	NSRunningApplication::runningApplicationWithProcessIdentifier(pid)
+		.and_then(|app| app.localizedName())
+		.map_or_else(|| format!("process {pid}"), |name| name.to_string())
 }
 
 fn permission_label(granted: bool) -> String {

@@ -22,6 +22,8 @@ use super::{
 	types::DesktopFocusReturn,
 };
 
+#[cfg(target_os = "macos")]
+pub(crate) mod intervention;
 #[cfg(target_os = "linux")]
 mod linux;
 #[cfg(target_os = "macos")]
@@ -40,6 +42,10 @@ struct CancellationState {
 	/// monitor; stays set until a later takeover lease starts one. Background
 	/// leases never arm the monitor and leave it unchanged.
 	escape_failed: AtomicBool,
+	/// When the current computer run ends; input waiting for the user to
+	/// pause stops shortly before it.
+	#[cfg(target_os = "macos")]
+	deadline:      Mutex<Option<Instant>>,
 	#[cfg(target_os = "linux")]
 	async_wake:    tokio::sync::Notify,
 }
@@ -50,8 +56,10 @@ pub(crate) struct CancellationSource(Arc<CancellationState>);
 impl CancellationSource {
 	pub(crate) fn token(&self) -> OperationToken {
 		OperationToken {
-			source:     self.clone(),
+			source: self.clone(),
 			generation: self.0.generation.load(Ordering::Acquire),
+			#[cfg(target_os = "macos")]
+			reply_by: None,
 		}
 	}
 
@@ -106,6 +114,13 @@ impl CancellationSource {
 		self.0.escape_failed.load(Ordering::Acquire)
 	}
 
+	/// Sets when the current computer run ends, `None` for no deadline. Each
+	/// run sets it before its first call.
+	#[cfg(target_os = "macos")]
+	pub(crate) fn set_deadline(&self, deadline: Option<Instant>) {
+		*self.0.deadline.lock() = deadline;
+	}
+
 	#[cfg(test)]
 	pub(crate) fn fail_escape_for_test(&self) {
 		self.0.escape_failed.store(true, Ordering::Release);
@@ -128,11 +143,31 @@ impl EmergencyStop {
 pub(crate) struct OperationToken {
 	source:     CancellationSource,
 	generation: u64,
+	/// When the caller stops waiting for this request's reply.
+	#[cfg(target_os = "macos")]
+	reply_by:   Option<Instant>,
 }
 
 impl OperationToken {
 	pub(crate) fn escape_unavailable(&self) -> bool {
 		self.source.escape_unavailable()
+	}
+
+	/// When this operation must have answered: the run's end or the caller's
+	/// reply timeout, whichever comes first.
+	#[cfg(target_os = "macos")]
+	pub(crate) fn deadline(&self) -> Option<Instant> {
+		let run = *self.source.0.deadline.lock();
+		match (run, self.reply_by) {
+			(Some(run), Some(reply)) => Some(run.min(reply)),
+			(run, reply) => run.or(reply),
+		}
+	}
+
+	/// This token for a request whose caller waits for its reply until `at`.
+	#[cfg(target_os = "macos")]
+	pub(crate) fn replying_by(self, at: Instant) -> Self {
+		Self { reply_by: Some(at), ..self }
 	}
 
 	pub(crate) fn enter(&self) -> OperationScope {

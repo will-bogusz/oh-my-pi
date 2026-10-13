@@ -91,6 +91,7 @@ impl MacInput {
 							ax::focused_window_content(pid, wid),
 							ax::focused_window_id,
 						)?;
+						control::intervention::input_goes_to(to.0);
 						let entry_front = skylight::front_pid();
 						skylight::with_background_guard(pid, || {
 							if process::remote_screen(pid) == Some(RemoteScreen::HidReports) {
@@ -426,6 +427,7 @@ fn with_background_keyboard<T>(
 			|| ax::focused_window_content(pid, wid),
 			ax::focused_window_id,
 		)?;
+		control::intervention::input_goes_to(to);
 		if prepared {
 			still_behind_user(pid, wid)?;
 		}
@@ -474,14 +476,17 @@ fn keys_still_reach(
 	)))
 }
 
-/// Posts `event`, first running `guard` when it presses a key or modifier;
-/// releases always go out so nothing stays held.
+/// Posts `event`. Before a key or modifier press it checks that the user has
+/// not used the target's app since the call began
+/// ([`control::intervention::check_press`]) and runs `guard`; releases always
+/// go out so nothing stays held.
 fn post_guarded(
 	event: &CGEvent,
 	guard: impl FnOnce() -> CoreResult<()>,
 	post: impl FnOnce(&CGEvent) -> CoreResult<()>,
 ) -> CoreResult<()> {
 	if is_key_press(event) {
+		control::intervention::check_press()?;
 		guard()?;
 	}
 	post(event)
@@ -3143,10 +3148,21 @@ fn post_global_mouse(
 }
 
 fn post_global(event: &CGEvent) -> CoreResult<()> {
+	post_hid(event, |event| event.post(CGEventTapLocation::HID))
+}
+
+/// Tags and posts `event` at the HID tap through `post`. A key or modifier
+/// press first checks that the user has not used the target's app since the
+/// call began ([`control::intervention::check_press`]); releases always go
+/// out.
+fn post_hid(event: &CGEvent, post: impl FnOnce(&CGEvent)) -> CoreResult<()> {
 	control::check()?;
+	if is_key_press(event) {
+		control::intervention::check_press()?;
+	}
 	event.set_integer_value_field(EventField::EVENT_SOURCE_USER_DATA, control::SYNTHETIC_EVENT_TAG);
 	release_guard::post(Route::Hid, event, || {
-		event.post(CGEventTapLocation::HID);
+		post(event);
 		Ok(())
 	})
 }
@@ -3824,6 +3840,81 @@ mod tests {
 		);
 		assert_eq!(result.unwrap_err().code, ErrorCode::InputFailed);
 		assert_eq!(held, [
+			SHIFT_SPACE_TRANSITIONS[0],
+			SHIFT_SPACE_TRANSITIONS[2],
+			SHIFT_SPACE_TRANSITIONS[3]
+		]);
+	}
+
+	#[test]
+	fn keys_stop_at_the_users_first_key_or_click_in_the_target_app() {
+		use crate::desktop::error::ErrorCode;
+		let source = source().expect("event source");
+		let listener = control::intervention::Listener::simulated();
+		listener.touch(7, Some(1), || "TextEdit".to_string());
+		let token = control::CancellationSource::default().token();
+		let mut events = Vec::new();
+		let result = {
+			let _watch = listener
+				.admit(7, &token)
+				.expect("the user has not used TextEdit");
+			key_chord(&source, &[KeyName::Ctrl, KeyName::Enter], |event| {
+				post_guarded(
+					event,
+					|| Ok(()),
+					|event| {
+						// The user types in TextEdit right after Ctrl goes down.
+						listener.record_for_test(7, Instant::now());
+						events.push((
+							event.get_type() as u32,
+							event.get_integer_value_field(EventField::KEYBOARD_EVENT_KEYCODE),
+						));
+						Ok(())
+					},
+				)
+			})
+		};
+		let error = result.unwrap_err();
+		assert_eq!(error.code, ErrorCode::UserIntervened);
+		assert!(error.message.contains("in TextEdit during this input"), "{}", error.message);
+		assert!(error.message.contains("nothing more was sent"), "{}", error.message);
+		// Enter is never pressed; its release and Ctrl's still go out.
+		assert_eq!(events, [
+			(CGEventType::FlagsChanged as u32, 59),
+			(CGEventType::KeyUp as u32, 36),
+			(CGEventType::FlagsChanged as u32, 59),
+		]);
+	}
+
+	#[test]
+	fn takeover_keys_held_around_a_pointer_gesture_stop_at_the_users_input() {
+		use crate::desktop::error::ErrorCode;
+		let source = source().expect("event source");
+		let listener = control::intervention::Listener::simulated();
+		listener.touch(7, Some(1), || "TextEdit".to_string());
+		let token = control::CancellationSource::default().token();
+		let mut events = Vec::new();
+		// A takeover drag or held mouse holds its keys through the HID tap.
+		let result = {
+			let _watch = listener
+				.admit(7, &token)
+				.expect("the user has not used TextEdit");
+			with_held_keys(
+				&source,
+				&[KeyName::Shift, KeyName::Space],
+				|event| {
+					post_hid(event, |event| {
+						// The user types in TextEdit right after Shift goes down.
+						listener.record_for_test(7, Instant::now());
+						events.push(shift_transition(event));
+					})
+				},
+				|| panic!("a refused press must not run the gesture"),
+			)
+		};
+		assert_eq!(result.unwrap_err().code, ErrorCode::UserIntervened);
+		// Space is never pressed; its release and Shift's still go out.
+		assert_eq!(events, [
 			SHIFT_SPACE_TRANSITIONS[0],
 			SHIFT_SPACE_TRANSITIONS[2],
 			SHIFT_SPACE_TRANSITIONS[3]
