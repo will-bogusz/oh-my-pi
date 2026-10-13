@@ -731,17 +731,18 @@ mod tests {
 		assert_eq!(to_markdown(&[heading("##")]), "## \\##");
 	}
 
+	fn font(entries: &[(&'static str, &CFType)]) -> CFRetained<CFDictionary<CFString, CFType>> {
+		let keys: Vec<_> = entries
+			.iter()
+			.map(|(key, _)| CFString::from_static_str(key))
+			.collect();
+		let keys: Vec<&CFString> = keys.iter().map(|key| &**key).collect();
+		let values: Vec<&CFType> = entries.iter().map(|(_, value)| *value).collect();
+		CFDictionary::from_slices(&keys, &values)
+	}
+
 	#[test]
 	fn fonts_say_bold_and_italic_with_web_flags_or_their_own_traits() {
-		fn font(entries: &[(&'static str, &CFType)]) -> CFRetained<CFDictionary<CFString, CFType>> {
-			let keys: Vec<_> = entries
-				.iter()
-				.map(|(key, _)| CFString::from_static_str(key))
-				.collect();
-			let keys: Vec<&CFString> = keys.iter().map(|key| &**key).collect();
-			let values: Vec<&CFType> = entries.iter().map(|(_, value)| *value).collect();
-			CFDictionary::from_slices(&keys, &values)
-		}
 		// As `WebKit` describes a run's font: a system font name, with flags
 		// for bold and italic.
 		fn style(entries: &[(&'static str, &CFType)]) -> Style {
@@ -772,13 +773,6 @@ mod tests {
 		assert!(slanted.italic && !slanted.bold, "{slanted:?}");
 		let regular = style(&[("AXFontName", regular_name), ("AXFontSize", size)]);
 		assert!(!regular.bold && !regular.italic, "{regular:?}");
-		// A system font without flags is not looked up: `CoreText` would log a
-		// note to stderr for it.
-		let semibold = CFString::from_static_str(".SFNS-Semibold");
-		let (traits, logged) =
-			stderr_of(|| font_traits(&font(&[("AXFontName", &*semibold), ("AXFontSize", size)])));
-		assert_eq!(traits, None);
-		assert!(!logged.contains("CoreText"), "{logged}");
 		let helvetica = CFString::from_static_str("Helvetica-Bold");
 		assert_eq!(
 			font_traits(&font(&[("AXFontName", &*helvetica), ("AXFontSize", size)])),
@@ -786,26 +780,31 @@ mod tests {
 		);
 	}
 
-	/// `f`'s result and what it wrote to fd 2.
-	fn stderr_of<T>(f: impl FnOnce() -> T) -> (T, String) {
-		use std::{io::Read as _, os::fd::FromRawFd as _};
-		let mut fds = [0; 2];
-		// SAFETY: The pipe's fds are this function's; fd 2 is restored before
-		// the read end is drained.
-		unsafe {
-			assert_eq!(libc::pipe(fds.as_mut_ptr()), 0);
-			let saved = libc::dup(2);
-			libc::dup2(fds[1], 2);
-			let value = f();
-			libc::dup2(saved, 2);
-			libc::close(saved);
-			libc::close(fds[1]);
-			let mut logged = String::new();
-			std::fs::File::from_raw_fd(fds[0])
-				.read_to_string(&mut logged)
-				.unwrap();
-			(value, logged)
+	#[test]
+	fn system_font_names_are_never_looked_up() {
+		// `CoreText` logs a note to stderr for each such lookup. The lookup runs
+		// in a child test process, whose stderr no other test shares.
+		let child = format!("{}::system_font_lookup", module_path!().split_once("::").unwrap().1);
+		let output = std::process::Command::new(std::env::current_exe().unwrap())
+			.args(["--exact", &child, "--ignored", "--nocapture", "--test-threads=1"])
+			.env("PI_NATIVES_SYSTEM_FONT_CHILD", "1")
+			.output()
+			.unwrap();
+		let (stdout, stderr) =
+			(String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
+		assert!(output.status.success() && stdout.contains("1 passed"), "{stdout}{stderr}");
+		assert!(!stderr.contains("CoreText"), "{stderr}");
+	}
+
+	#[test]
+	#[ignore = "run by system_font_names_are_never_looked_up in its own process"]
+	fn system_font_lookup() {
+		if std::env::var_os("PI_NATIVES_SYSTEM_FONT_CHILD").is_none() {
+			return;
 		}
+		let name: &CFType = &CFString::from_static_str(".SFNS-Semibold");
+		let size: &CFType = &CFNumber::new_i64(14);
+		assert_eq!(font_traits(&font(&[("AXFontName", name), ("AXFontSize", size)])), None);
 	}
 
 	#[test]
