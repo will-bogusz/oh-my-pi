@@ -12,8 +12,6 @@ Reading order: `macos/skylight.rs` (`FrontHold`, `FrontApp::keep_in_front`) → 
 
 ## Why
 
-**Builds on #15105, #15110, #15493, #15498, #15494, #15508, #15489, #15490, #15510, #15491, #15492, #15503, #15559, #15554, #15556, #15590** (merge in that order): its first 112 commits are theirs; merge those first, or merge this alone to land them all.
-
 On macOS Chrome makes itself the active app whenever it shows a tab or window a page opened, 35-55 ms after the click, even from a background tab, and keeps it. Neither the extension nor CDP can stop it (`chrome.windows.update(id, {focused: false})` never hands the app back); #15590 named this as its known limit. The relay runs on the user's Mac, so it hands the front back itself, through the WindowServer calls the computer tool already uses.
 
 - **Read at omp's input, not at the popup report.** Chrome's report reaches the relay only 2-4 ms before Chrome is in front, so the relay reads the front app as it forwards omp's input to a tab, and uses it once, for a popup from that tab within a second.
