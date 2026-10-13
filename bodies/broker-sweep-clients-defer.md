@@ -14,8 +14,6 @@ Reading order: `UsageResponse.resetSweep` and the capability gate in `auth-broke
 
 ## Why
 
-**Merge after #15134, #15131, #15133, #15129, #15143.** The diff carries those bases (#15143 at `aafb01eb87`, which brings the other four: #15133 `4f585fc170` with #15134 `3243b8d268`). This PR's own work is `cd78af2b32`, `2f5585122e`, `97d15b4457`, `c5f46e4b79`, `76a58e8cce`, plus the conflict resolutions in its merges.
-
 Without it, N sessions on one broker make N background sweeps over the same accounts, and the Claude listings among them are what trips Anthropic's usage rate limit.
 
 The decision for a maintainer: should a session on a sweeping broker defer to the broker host's settings for background salvage? I think yes, since the broker is the one process that sees every account. I rejected putting the broker's `autoRedeem` mode on the wire: with per-account overrides (#15133) the client cannot see the broker host's account policies, so it would promise an outcome it cannot check. The client only learns which providers the broker covers, and the banner says who decides rather than what happens.
