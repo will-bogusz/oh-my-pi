@@ -425,20 +425,25 @@ impl SwitchSignals {
 			.and_then(|since| now.checked_sub(since));
 		let flags = modifier_flags();
 		let last_chord = *sampled.chord.lock();
-		let key_focus = spi.get_key_focus.and_then(|get_key_focus| {
-			let mut psn = ProcessSerialNumber::default();
-			let mut status = 0u8;
-			// SAFETY: Both out-pointers are writable for the synchronous call,
-			// which writes the 8-byte PSN and one status byte.
-			(unsafe { get_key_focus(&mut psn, &mut status) } == 0).then_some(psn)
-		});
-		let signals = Self::new(buttons, last_click, flags, last_chord, key_focus);
+		let signals = Self::new(buttons, last_click, flags, last_chord, key_focus(spi));
 		let front_since = *sampled.front.lock();
 		match front_since {
 			Some((front, at)) => signals.with_front_since(front, at),
 			None => signals,
 		}
 	}
+}
+
+/// The process that has the keyboard: the front app, or a panel such as
+/// Spotlight's.
+fn key_focus(spi: &ForegroundSpi) -> Option<ProcessSerialNumber> {
+	spi.get_key_focus.and_then(|get_key_focus| {
+		let mut psn = ProcessSerialNumber::default();
+		let mut status = 0u8;
+		// SAFETY: Both out-pointers are writable for the synchronous call,
+		// which writes the 8-byte PSN and one status byte.
+		(unsafe { get_key_focus(&mut psn, &mut status) } == 0).then_some(psn)
+	})
 }
 
 fn modifier_flags() -> u64 {
@@ -1078,7 +1083,7 @@ fn restorable_key(
 /// re-activating it can clear Chromium's renderer focus. The window is made
 /// key without being raised; callers that need it unobstructed raise it.
 /// `return_focus` restores even after user input during the action; see
-/// [`hands_focus_back`].
+/// [`hands_focus_back`] and [`third_app`].
 pub(super) fn with_foreground<T>(
 	pid: pid_t,
 	wid: u32,
@@ -1117,6 +1122,27 @@ pub(super) fn with_foreground<T>(
 			)
 		})?
 		.window();
+	let start = Instant::now();
+	// The user's switches up to the takeover's first input come from the HID
+	// state, as for background input; from then on that state also moves with
+	// the takeover's own clicks and modifiers, so only the Escape monitor's
+	// physical events count.
+	let before = UserSwitchWatch::new(
+		previous.psn,
+		target,
+		// No sampler runs before the takeover; a ⌘/⌃ held now is in the flags.
+		SwitchSignals::read(spi, start, &Sampled::default()),
+		start,
+		USER_SWITCH_WINDOW,
+	);
+	let user_picked = |front: ProcessSerialNumber| {
+		!control::observes_user_input()
+			|| user_acted()
+			|| before
+				.since(start.checked_sub(USER_SWITCH_WINDOW).unwrap_or(start))
+				.is_some()
+			|| key_focus(spi).is_some_and(|focus| focus != front)
+	};
 	let handed_back = Cell::new(false);
 	let restore = || {
 		if !return_focus && user_acted() {
@@ -1128,7 +1154,7 @@ pub(super) fn with_foreground<T>(
 		let now = if front.psn == target {
 			FocusAfterTakeover::Target
 		} else {
-			FocusAfterTakeover::Elsewhere
+			third_app(front.psn == previous.psn, user_picked(front.psn))
 		};
 		if !hands_focus_back(return_focus, user_acted(), now) {
 			return Ok(());
@@ -1143,8 +1169,9 @@ pub(super) fn with_foreground<T>(
 		let still_ours = || {
 			(return_focus || !user_acted())
 				&& pointer_presses() == presses
-				// A user-selected third app must not be overwritten.
-				&& front_process(spi.get_front).is_some_and(|now| now.psn == target)
+				// A third app the user selected meanwhile must not be
+				// overwritten.
+				&& front_process(spi.get_front).is_some_and(|now| now.psn == front.psn)
 		};
 		// The action and its settle are over, so takeover's own keys and
 		// clicks, which `WindowServer` counts like the user's, came before this
@@ -1203,8 +1230,29 @@ fn report_focus_return(handed_back: bool, previous: Option<pid_t>) {
 enum FocusAfterTakeover {
 	/// The target process is front, whichever of its windows is key.
 	Target,
-	/// Another process is front: the user's own app again, or a third app.
-	Elsewhere,
+	/// The user's own app is front again.
+	UserApp,
+	/// A third app came forward that the user did not pick: the action (a
+	/// link opening in a browser, say) or the target brought it.
+	Brought,
+	/// A third app the user switched to.
+	Picked,
+}
+
+/// Classifies a front process other than the target. A third app counts as
+/// the user's pick when they switched apps (see [`UserSwitch`]): a click
+/// outside their app or a ⌘/⌃ chord just before the takeover, a physical
+/// mouse press or Command shortcut during it, or another process's panel
+/// holding the keyboard at its end. Without the Escape monitor no physical
+/// input is seen, so every third app counts as picked.
+const fn third_app(user_app: bool, user_picked: bool) -> FocusAfterTakeover {
+	if user_app {
+		FocusAfterTakeover::UserApp
+	} else if user_picked {
+		FocusAfterTakeover::Picked
+	} else {
+		FocusAfterTakeover::Brought
+	}
 }
 
 /// Whether a takeover hands focus back to the app the user was in.
@@ -1215,13 +1263,14 @@ enum FocusAfterTakeover {
 /// a document the action opened or a sheet it closed is not the user's
 /// choice. A returning takeover (the host's rerun of a refused background
 /// action) hands focus back even after user input: input the user typed while
-/// the target was front was meant for their own app. Neither overwrites a
-/// process the user switched to, which is either their own app already or a
-/// deliberately chosen third app.
+/// the target was front was meant for their own app. A third app the action
+/// brought forward is undone like the target itself. Neither overwrites a
+/// third app the user switched to, nor touches their own app once it is front
+/// again.
 const fn hands_focus_back(return_focus: bool, user_acted: bool, now: FocusAfterTakeover) -> bool {
 	match now {
-		FocusAfterTakeover::Elsewhere => false,
-		FocusAfterTakeover::Target => return_focus || !user_acted,
+		FocusAfterTakeover::UserApp | FocusAfterTakeover::Picked => false,
+		FocusAfterTakeover::Target | FocusAfterTakeover::Brought => return_focus || !user_acted,
 	}
 }
 
@@ -2182,8 +2231,8 @@ mod tests {
 	}
 
 	#[test]
-	fn a_returning_takeover_hands_focus_back_after_typing_but_not_over_a_third_app() {
-		use FocusAfterTakeover::{Elsewhere, Target};
+	fn a_returning_takeover_hands_focus_back_after_typing_but_not_over_a_picked_app() {
+		use FocusAfterTakeover::{Brought, Picked, Target, UserApp};
 		// The user typed (or clicked) while the target was front: a returning
 		// takeover still hands focus back, an explicit one yields to that input.
 		assert!(hands_focus_back(true, true, Target));
@@ -2192,9 +2241,28 @@ mod tests {
 		// windows the action left key (a document it opened, a sheet it closed).
 		assert!(hands_focus_back(true, false, Target));
 		assert!(hands_focus_back(false, false, Target));
-		// A process the user switched to keeps focus either way.
+		// A third app the user switched to, or their own app, keeps focus
+		// either way.
 		for (return_focus, user_acted) in [(true, true), (true, false), (false, false)] {
-			assert!(!hands_focus_back(return_focus, user_acted, Elsewhere));
+			assert!(!hands_focus_back(return_focus, user_acted, Picked));
+			assert!(!hands_focus_back(return_focus, user_acted, UserApp));
 		}
+		// A third app the action brought forward is undone like the target: a
+		// returning takeover hands focus back even after the user acted, an
+		// explicit one only when they did nothing.
+		assert!(hands_focus_back(true, true, Brought));
+		assert!(hands_focus_back(true, false, Brought));
+		assert!(hands_focus_back(false, false, Brought));
+		assert!(!hands_focus_back(false, true, Brought));
+	}
+
+	#[test]
+	fn a_third_app_is_the_users_pick_only_after_a_switch() {
+		use FocusAfterTakeover::{Brought, Picked, UserApp};
+		assert_eq!(third_app(false, false), Brought);
+		assert_eq!(third_app(false, true), Picked);
+		// Their own app in front again is never a third app.
+		assert_eq!(third_app(true, false), UserApp);
+		assert_eq!(third_app(true, true), UserApp);
 	}
 }
