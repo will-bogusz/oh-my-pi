@@ -1382,15 +1382,16 @@
    ],
    "base": "c393c878951242e8fabdb2ced2f01378bcd1d7a1",
    "body": "bodies/computer-rich-text.md",
-   "state": "open",
-   "pr": 15608,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15608
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-rich-text",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:52:03Z",
-   "note": "",
-   "requeue": 15608
+   "updated": "2026-10-13T21:52:07Z",
+   "note": ""
   },
   {
    "id": "relay-popup-front",
