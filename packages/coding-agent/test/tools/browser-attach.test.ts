@@ -20,6 +20,7 @@ import {
 	findReusableCdp,
 	gracefulKillTreeOnce,
 	pickElectronTarget,
+	pickRelayTarget,
 	probeCdpStatus,
 	resolveSpawnArgs,
 	waitForCdp,
@@ -872,7 +873,7 @@ describe("resolveSpawnArgs", () => {
 		expect(borrowed).toEqual([`--user-data-dir=${path.resolve("/home/me/.config/chrome")}`]);
 	});
 });
-describe("pickElectronTarget relay path", () => {
+describe("pickRelayTarget", () => {
 	let relay: Bun.Server<undefined>;
 	let relayJson: string;
 	let available = true;
@@ -892,44 +893,10 @@ describe("pickElectronTarget relay path", () => {
 	});
 	afterEach(async () => {
 		await relay.stop(true);
-		vi.restoreAllMocks();
-	});
-
-	it("adopts the active tab from /json metadata without attaching any other target", async () => {
-		const pages = new Map<string, { page: Page; calls: () => number }>();
-		const targets: Array<Target & { _targetId: string }> = [];
-		for (const entry of RELAY_ENTRIES) {
-			const made = makePage([() => {}]);
-			pages.set(entry.id, made);
-			const { target, pageSpy } = makeTarget(entry.id, made.page);
-			Object.assign(target, { page: pageSpy });
-			targets.push(target as Target & { _targetId: string });
-		}
-		const browser = makeBrowser(targets);
-
-		const picked = await pickElectronTarget(browser, { relayJson });
-
-		expect(picked).toBe(pages.get("PAGE11")!.page);
-		const attachCalls = targets.map(
-			t => (t as unknown as { page: { mock: { calls: unknown[] } } }).page.mock.calls.length,
-		);
-		expect(attachCalls).toEqual([0, 1, 0]);
 	});
 
 	it("matcher skips a discarded matching tab", async () => {
-		const made = makePage([() => {}]);
-		const { target } = makeTarget("PAGE11", made.page);
-		const made12 = makePage([() => {}]);
-		const { target: target12 } = makeTarget("PAGE12", made12.page);
-		const browser = makeBrowser([target, target12]);
-
-		const picked = await pickElectronTarget(browser, {
-			relayJson,
-			matcher: "cart",
-		});
-
-		expect(picked).toBe(made.page);
-		expect((target12 as unknown as { page: { mock: { calls: unknown[] } } }).page.mock.calls.length).toBe(0);
+		expect(await pickRelayTarget(relayJson, "cart")).toBe("PAGE11");
 	});
 
 	it("chooses the first of two live matching tabs", async () => {
@@ -951,16 +918,21 @@ describe("pickElectronTarget relay path", () => {
 				discarded: "false",
 			},
 		];
-		const firstPage = makePage([() => {}], relayEntries[0]!.url).page;
-		const secondPage = makePage([() => {}], relayEntries[1]!.url).page;
-		const first = makeTarget("PAGE_A", firstPage);
-		const second = makeTarget("PAGE_B", secondPage);
-		const picked = await pickElectronTarget(makeBrowser([first.target, second.target]), {
-			relayJson,
-			matcher: "cart",
-		});
-		expect(picked).toBe(firstPage);
-		expect(second.pageSpy).not.toHaveBeenCalled();
+		expect(await pickRelayTarget(relayJson, "cart")).toBe("PAGE_A");
+	});
+
+	it("adopts a service worker page when explicitly targeted", async () => {
+		relayEntries = [
+			{
+				id: "PAGE_A",
+				type: "page",
+				title: "Service Worker",
+				url: "https://example.com/a",
+				active: "true",
+				discarded: "false",
+			},
+		];
+		expect(await pickRelayTarget(relayJson, "Service Worker")).toBe("PAGE_A");
 	});
 
 	it("adopts an exact relay id before a URL substring on another tab", async () => {
@@ -1028,17 +1000,13 @@ describe("pickElectronTarget relay path", () => {
 		};
 		let served = 0;
 		relay.reload({ fetch: () => Response.json(++served === 1 ? RELAY_ENTRIES : [...RELAY_ENTRIES, opened]) });
-		const openedPage = makePage([() => {}], opened.url).page;
-		const target = makeTarget("PAGE_NEW", openedPage);
 
-		const picked = await pickElectronTarget(makeBrowser([target.target]), { relayJson, matcher: "omp-probe=new" });
-
-		expect(picked).toBe(openedPage);
+		expect(await pickRelayTarget(relayJson, "omp-probe=new")).toBe("PAGE_NEW");
 		expect(served).toBe(2);
 	});
 
 	it("lists relay page ids with their URLs when a target id is missing", async () => {
-		const error = await rejectionOf(pickElectronTarget(makeBrowser([]), { relayJson, matcher: "PAGE_MISSING" }));
+		const error = await rejectionOf(pickRelayTarget(relayJson, "PAGE_MISSING"));
 
 		expect(error).toBeInstanceOf(Error);
 		const message = (error as Error).message;
@@ -1047,165 +1015,21 @@ describe("pickElectronTarget relay path", () => {
 		expect(message).toContain("PAGE11  Whole Foods Market Shopping Cart  https://www.amazon.com/cart/localmarket");
 	});
 
-	it("waits for Puppeteer to see a tab that /json already lists", async () => {
-		const cartPage = makePage([() => {}], RELAY_ENTRIES[1]!.url).page;
-		const late = makeTarget("PAGE11", cartPage);
-		const targets: Array<Target & { _targetId: string }> = [];
-		const browser = Object.assign(makeBrowser(targets), {
-			waitForTarget: async (predicate: (target: Target) => boolean) => {
-				targets.push(late.target);
-				return targets.find(predicate);
-			},
-		});
-
-		expect(await pickElectronTarget(browser, { relayJson, matcher: "whole foods" })).toBe(cartPage);
+	it("fails with guidance when the only match is a discarded tab", async () => {
+		const error = await rejectionOf(pickRelayTarget(relayJson, "old cart"));
+		expect((error as Error).message).toMatch(/discarded .* Chrome/i);
 	});
 
-	it("tells the model to retry when Puppeteer never sees the selected tab, with release-build class names", async () => {
-		// A connected browser with no targets, so Puppeteer's own wait times out and builds its own error.
-		const transport: ConnectionTransport = {
-			send(message) {
-				const { id, method } = JSON.parse(message) as { id: number; method: string };
-				const result = method === "Target.getBrowserContexts" ? { browserContextIds: [] } : {};
-				queueMicrotask(() => transport.onmessage?.(JSON.stringify({ id, result })));
-			},
-			close() {
-				transport.onclose?.();
-			},
-		};
-		const puppeteerBrowser = await (await loadPuppeteer()).connect({ transport, defaultViewport: null });
-		const nameDescriptor = Object.getOwnPropertyDescriptor(TimeoutError, "name")!;
-		// Release builds minify class names, so Puppeteer names its timeout like this there.
-		Object.defineProperty(TimeoutError, "name", { ...nameDescriptor, value: "Og" });
-		try {
-			const browser = Object.assign(makeBrowser([]), {
-				waitForTarget: (predicate: (target: Target) => boolean) =>
-					puppeteerBrowser.waitForTarget(predicate, { timeout: 50 }),
-			});
-
-			const error = await rejectionOf(pickElectronTarget(browser, { relayJson, matcher: "whole foods" }));
-
-			expect((error as Error).message).toMatch(/^Selected tab did not become available.*retry, or reopen it/);
-		} finally {
-			Object.defineProperty(TimeoutError, "name", nameDescriptor);
-			await puppeteerBrowser.disconnect();
-		}
+	it("names the relay when /json is unavailable", async () => {
+		available = false;
+		const error = await rejectionOf(pickRelayTarget(relayJson, "cart"));
+		expect((error as Error).message).toContain(`omp browser relay at ${relayJson} did not list its pages`);
 	});
+});
 
-	it("falls back to target enumeration at once when /json lists no pages", async () => {
-		let served = 0;
-		relay.reload({
-			fetch: () => {
-				served++;
-				return Response.json([]);
-			},
-		});
-		const cartPage = fakePage({ url: "https://example.com/cart", title: "Cart" });
-		const cart = makeTarget("PAGE_CART", cartPage);
-
-		expect(await pickElectronTarget(makeBrowser([cart.target]), { relayJson, matcher: "cart" })).toBe(cartPage);
-		expect(served).toBe(1);
-	});
-
-	it("does not adopt another live tab when the selected tab is unreadable", async () => {
-		const other = makeTarget("PAGE10", fakePage({ url: "https://docs.example.com", title: "Docs" }));
-		const unreadable = makeTarget("PAGE11", {
-			url: () => {
-				throw new Error("Page frame unavailable");
-			},
-			title: async () => "Cart",
-		} as unknown as Page);
-
-		await expect(
-			pickElectronTarget(makeBrowser([other.target, unreadable.target]), { relayJson, preferVisible: true }),
-		).rejects.toThrow(/selected tab.*not ready/i);
-		expect(other.pageSpy).not.toHaveBeenCalled();
-	});
-
-	it("skips an active service worker page unless explicitly targeted", async () => {
-		relayEntries = [
-			{
-				id: "PAGE_A",
-				type: "page",
-				title: "Service Worker",
-				url: "https://example.com/a",
-				active: "true",
-				discarded: "false",
-			},
-			{
-				id: "PAGE_B",
-				type: "page",
-				title: "Home",
-				url: "https://example.com/b",
-				active: "false",
-				discarded: "false",
-			},
-		];
-		const skippedPage = makePage([() => {}], relayEntries[0]!.url).page;
-		const homePage = makePage([() => {}], relayEntries[1]!.url).page;
-		const skipped = makeTarget("PAGE_A", skippedPage);
-		const home = makeTarget("PAGE_B", homePage);
-		const browser = makeBrowser([skipped.target, home.target]);
-		expect(await pickElectronTarget(browser, { relayJson, preferVisible: true })).toBe(homePage);
-		expect(skipped.pageSpy).not.toHaveBeenCalled();
-		expect(await pickElectronTarget(browser, { relayJson, matcher: "Service Worker" })).toBe(skippedPage);
-	});
-
-	it("prefers the visible tab among active tabs in different windows", async () => {
-		relayEntries = [
-			{
-				id: "PAGE_A",
-				type: "page",
-				title: "Window A",
-				url: "https://example.com/a",
-				active: "true",
-				discarded: "false",
-			},
-			{
-				id: "PAGE_B",
-				type: "page",
-				title: "Window B",
-				url: "https://example.com/b",
-				active: "true",
-				discarded: "false",
-			},
-		];
-		const firstPage = {
-			url: () => relayEntries[0]!.url,
-			title: async () => "Window A",
-			evaluate: async () => false,
-		} as unknown as Page;
-		const visiblePage = {
-			url: () => relayEntries[1]!.url,
-			title: async () => "Window B",
-			evaluate: async () => true,
-		} as unknown as Page;
-		const first = makeTarget("PAGE_A", firstPage);
-		const second = makeTarget("PAGE_B", visiblePage);
-		const picked = await pickElectronTarget(makeBrowser([first.target, second.target]), {
-			relayJson,
-			preferVisible: true,
-		});
-		expect(picked).toBe(visiblePage);
-	});
-
-	it("does not choose a hidden window when another active tab is unreadable", async () => {
-		relayEntries = RELAY_ENTRIES.map(entry => (entry.id === "PAGE10" ? { ...entry, active: "true" } : entry));
-		const unreadable = makeTarget("PAGE10", {
-			url: () => {
-				throw new Error("Page frame unavailable");
-			},
-			title: async () => "Docs",
-		} as unknown as Page);
-		const hidden = makeTarget("PAGE11", {
-			url: () => relayEntries[1]!.url,
-			title: async () => "Cart",
-			evaluate: async () => false,
-		} as unknown as Page);
-
-		await expect(
-			pickElectronTarget(makeBrowser([unreadable.target, hidden.target]), { relayJson, preferVisible: true }),
-		).rejects.toThrow(/tab.*not ready/i);
+describe("pickElectronTarget unreadable pages", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
 	});
 
 	it("does not select a hidden page when another connected-browser page is unreadable", async () => {
@@ -1264,30 +1088,6 @@ describe("pickElectronTarget relay path", () => {
 		controller.abort();
 		await expect(readiness).rejects.toThrow("Operation aborted");
 	});
-
-	it("fails with guidance when the only match is a discarded tab", async () => {
-		const made = makePage([() => {}]);
-		const { target } = makeTarget("PAGE12", made.page);
-		const browser = makeBrowser([target]);
-
-		const picking = pickElectronTarget(browser, {
-			relayJson,
-			matcher: "old cart",
-		});
-
-		await expect(picking).rejects.toThrow(/discarded .* Chrome/i);
-	});
-
-	it("falls back to target enumeration when /json is unavailable", async () => {
-		available = false;
-		const made = makePage([() => {}]);
-		const { target } = makeTarget("PAGE11", made.page);
-		const browser = makeBrowser([target]);
-
-		const picked = await pickElectronTarget(browser, { relayJson });
-
-		expect(picked).toBe(made.page);
-	});
 });
 
 it("uses relay metadata through a proxy without corrupting UTF-8 titles", async () => {
@@ -1324,16 +1124,8 @@ it("uses relay metadata through a proxy without corrupting UTF-8 titles", async 
 	process.env.NO_PROXY = "";
 	process.env.no_proxy = "";
 	try {
-		const firstPage = { url: () => entries[0]!.url, title: async () => "Other" } as unknown as Page;
-		const chosenPage = { url: () => entries[1]!.url, title: async () => "Café" } as unknown as Page;
-		const first = makeTarget(entries[0]!.id, firstPage);
-		const chosen = makeTarget(entries[1]!.id, chosenPage);
-		const picked = await pickElectronTarget(makeBrowser([first.target, chosen.target]), {
-			relayJson: `http://127.0.0.1:${relay.port}`,
-			matcher: "Café",
-		});
-		expect(picked).toBe(chosenPage);
-		expect(first.pageSpy).not.toHaveBeenCalled();
+		const picked = await pickRelayTarget(`http://127.0.0.1:${relay.port}`, "Café");
+		expect(picked).toBe("PAGE_B");
 		expect(relayHits).toBe(1);
 		expect(proxyHits).toBe(0);
 	} finally {

@@ -29,7 +29,7 @@ import {
 import { WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
 import { getPuppeteerDir } from "@oh-my-pi/pi-utils";
-import puppeteer, { type Browser, type Page } from "puppeteer-core";
+import puppeteer, { type Browser, type Page, type WebWorker } from "puppeteer-core";
 import { chromiumAvailable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
@@ -287,6 +287,21 @@ async function activeChromeTabUrl(fixture: RelayFixture): Promise<unknown> {
 	);
 }
 
+/** Whether the relay extension holds a `chrome.debugger` attachment on the tab: only its own answers a command. */
+async function relayAttached(fixture: RelayFixture, tabId: number): Promise<unknown> {
+	return await fixture.extension.evaluate(
+		`chrome.debugger.sendCommand({ tabId: ${tabId} }, "Runtime.evaluate", { expression: "1" }).then(() => true, () => false)`,
+	);
+}
+
+async function chromeTabIdOf(fixture: RelayFixture, url: string): Promise<number> {
+	const tabId = await fixture.extension.evaluate(
+		`chrome.tabs.query({}).then(tabs => tabs.find(tab => tab.url === ${JSON.stringify(url)})?.id)`,
+	);
+	if (typeof tabId !== "number") throw new Error(`No Chrome tab shows ${url}`);
+	return tabId;
+}
+
 const session = {
 	cwd: process.cwd(),
 	hasUI: false,
@@ -390,6 +405,38 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
 			await releaseTab(names[2]!);
 			expect(human.isClosed()).toBeFalse();
 			expect(await human.title()).toBe("Human sentinel");
+		} finally {
+			for (const name of names) await releaseTab(name).catch(() => undefined);
+			await releaseBrowser(relay, { kill: false });
+			await fixture.close();
+		}
+	}, 60_000);
+
+	it("attaches the debugger only to tabs omp opens or adopts, never to the user's other tabs", async () => {
+		const fixture = await launchRelayFixture();
+		const human = await fixture.browser.newPage();
+		const humanUrl = `${fixture.origin}/human`;
+		await human.goto(humanUrl);
+		const relay = await acquireBrowser({ kind: "relay", cdpUrl: fixture.cdpUrl }, { cwd: process.cwd() });
+		const names = [`relay-own-only-${process.pid}`, `relay-adopt-only-${process.pid}`];
+		try {
+			const humanTabId = await chromeTabIdOf(fixture, humanUrl);
+			const owned = await acquireTab(names[0]!, relay, { url: `${fixture.origin}/first`, timeoutMs: 15_000 });
+			expect(await relayAttached(fixture, chromeTabId(owned.tab.targetId))).toBeTrue();
+			expect(await relayAttached(fixture, humanTabId)).toBeFalse();
+			const clicked = await runInTab(names[0]!, {
+				code: "await tab.click('button'); return await tab.text('button');",
+				timeoutMs: 10_000,
+				session,
+			});
+			expect(clicked.returnValue).toBe("clicked");
+			expect(await relayAttached(fixture, humanTabId)).toBeFalse();
+
+			// `app.target` adopts the user's tab, which attaches it.
+			await acquireTab(names[1]!, relay, { target: "Human sentinel", timeoutMs: 15_000 });
+			expect(await relayAttached(fixture, humanTabId)).toBeTrue();
+			const read = await runInTab(names[1]!, { code: "return await tab.title();", timeoutMs: 10_000, session });
+			expect(read.returnValue).toBe("Human sentinel");
 		} finally {
 			for (const name of names) await releaseTab(name).catch(() => undefined);
 			await releaseBrowser(relay, { kill: false });

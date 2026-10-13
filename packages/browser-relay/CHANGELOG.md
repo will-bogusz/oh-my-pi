@@ -25,6 +25,11 @@
 - Updated Bun engine requirement to ≥1.4.4
 
 ## [18.13.0] - 2026-10-26
+### Fixed
+
+- Fixed the relay attaching Chrome's debugger to every tab of your browser whenever omp connected; only tabs omp opened or borrowed are attached ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
+
+## [18.12.2] - 2026-10-18
 
 ### Added
 

@@ -1187,6 +1187,14 @@
 - Fixed generated titles that come out without an icon and code (a subagent's title, a title-model fallback, a malformed card reply) staying plain: they now get a card like `/rename` titles do
 - Fixed running the test suite adding fixture titles (`PLAN`, `renamed session`, …) to your real `~/.omp/agent/history.db`
 
+### Added
+
+- Added a report of native windows to browser results on macOS: a `<select>` menu, colour or date picker, or a print, save, sign-in, passkey or permission sheet or bubble a call raised over its tab is named with its `computer.window()` id, by the next call when it shows just after the call returned, and on failed calls too ([#15575](https://github.com/can1357/oh-my-pi/pull/15575) by [@will-bogusz](https://github.com/will-bogusz))
+
+### Fixed
+
+- Fixed the browser relay attaching Chrome's debugger to every tab of the user's browser whenever omp connected; it now attaches only tabs omp opened or borrowed with `app.target` ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
+
 ## [18.12.2] - 2026-10-18
 
 ### Added
