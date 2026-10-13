@@ -143,6 +143,7 @@ describe("relay tabs at the end of a turn", () => {
 			expect(ext.attaches).toBe(attaches + 1);
 			expect(next.value).toEqual([500, 400, "Asia/Tokyo"]);
 			expect(next.text).toContain(REATTACHED);
+			expect(next.text).toContain("emulation was put back");
 			// Said once: the next call is an ordinary one.
 			const after = await invoke({ action: "run", code: "return 1;", timeout: 10 });
 			expect(after.text).not.toContain(REATTACHED);
@@ -342,7 +343,8 @@ describe("relay tabs at the end of a turn", () => {
 			// touches the run's source, so the run guard leaves it alone.
 			await invoke({
 				action: "run",
-				code: `setTimeout(() => {
+				code: `await tab.emulate({ timezone: "Asia/Tokyo" });
+				setTimeout(() => {
 					const err = new Error("library-internal");
 					err.stack = "Error: library-internal\\n    at #onFileChooser (puppeteer/Page.js:1:1)";
 					Promise.reject(err);
@@ -379,6 +381,9 @@ describe("relay tabs at the end of a turn", () => {
 			});
 			expect(next.value).toBe(7);
 			expect(next.text).toContain(REATTACHED);
+			// The worker never answered, so the note names what may be gone instead of claiming it came back.
+			expect(next.text).toContain("which it could not read back");
+			expect(next.text).not.toContain("put back");
 			expect(ext.attaches).toBe(attaches + 1);
 		},
 		60_000,

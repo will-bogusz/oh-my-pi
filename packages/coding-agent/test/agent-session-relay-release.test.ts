@@ -60,7 +60,7 @@ describe("AgentSession relay tab release at hand-back", () => {
 	/** Resolves when the model is first asked for a response. */
 	let streaming = Promise.withResolvers<void>();
 
-	function createSession(responses: MockResponse[]): AgentSession {
+	function createSession(responses: MockResponse[], settings: Record<string, unknown> = {}): AgentSession {
 		streaming = Promise.withResolvers<void>();
 		release = spyOn(tabSupervisor, "releaseRelayTabsForOwner").mockResolvedValue(0);
 		releasesDuringSteps.length = 0;
@@ -79,7 +79,7 @@ describe("AgentSession relay tab release at hand-back", () => {
 		session = new AgentSession({
 			agent,
 			sessionManager: SessionManager.inMemory(),
-			settings: Settings.isolated({ "compaction.enabled": false }),
+			settings: Settings.isolated({ "compaction.enabled": false, ...settings }),
 			modelRegistry,
 			toolRegistry: new Map([[probeTool.name, probeTool as AgentTool]]),
 		});
@@ -132,5 +132,11 @@ describe("AgentSession relay tab release at hand-back", () => {
 		await ended.promise;
 		expect(releasesDuringSteps).toEqual([0]);
 		expect(release.mock.calls).toEqual([[target.sessionManager.getSessionId()]]);
+	});
+
+	it("keeps the tabs attached at hand-back when browser.relayReleaseOnTurnEnd is off", async () => {
+		const target = createSession([probe, { content: ["done"] }], { "browser.relayReleaseOnTurnEnd": false });
+		await target.prompt("go");
+		expect(release.mock.calls).toEqual([]);
 	});
 });

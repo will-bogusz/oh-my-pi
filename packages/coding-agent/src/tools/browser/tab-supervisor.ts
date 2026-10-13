@@ -1304,7 +1304,11 @@ async function releaseRelayTab(tab: WorkerTabSession): Promise<boolean> {
 			error: error instanceof Error ? error.message : String(error),
 		});
 		if (tab.worker === worker) await worker.terminate().catch(() => undefined);
-		outcome = { released: true, replay: { dialogs: tab.dialogPolicy }, ended: ["tab state omp could not read back"] };
+		outcome = {
+			released: true,
+			replay: { dialogs: tab.dialogPolicy },
+			ended: ["any emulation, init scripts and open options omp had set, which it could not read back"],
+		};
 	} finally {
 		unsubscribe();
 		unlistenExit();
@@ -1339,7 +1343,17 @@ async function reattachReleasedTab(tab: WorkerTabSession, timeoutMs: number): Pr
 	tab.released = undefined;
 	if (reattached) {
 		const ended = released.ended.length > 0 ? ` What ended with it: ${released.ended.join("; ")}.` : "";
-		tab.turnEndNote = `omp let go of this tab when the last turn ended, so Chrome's debugging bar could go, and reattached it for this call.${ended} Element ids, run globals and the console and request logs start fresh; emulation, init scripts, user agent and dialog policy were put back.`;
+		const replay = released.replay;
+		const back = [
+			Object.keys(replay.emulation ?? {}).length > 0 && "emulation",
+			(replay.initScripts?.length ?? 0) > 0 && "init scripts",
+			replay.userAgent && "the open's user agent",
+			replay.downloadsPath && "downloads folder",
+			replay.ignoreHttpsErrors && "ignore_https_errors",
+			replay.dialogs && "dialog policy",
+		].filter(item => typeof item === "string");
+		const putBack = back.length > 0 ? `; ${back.join(", ")} ${back.length === 1 ? "was" : "were"} put back` : "";
+		tab.turnEndNote = `omp let go of this tab when the last turn ended, so Chrome's debugging bar could go, and reattached it for this call.${ended} Element ids, run globals and the console and request logs start fresh${putBack}.`;
 	}
 	return reattached;
 }

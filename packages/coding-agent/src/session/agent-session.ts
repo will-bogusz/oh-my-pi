@@ -486,7 +486,12 @@ import { TodoTracker, type TodoTrackerHost } from "./todo-tracker";
 import { TtsrCoordinator, type TtsrCoordinatorHost } from "./ttsr-coordinator";
 
 import { cfgAdvisorEnabled, cfgAdvisorMaxNotesPerUpdate } from "../advisor/settings";
-import { cfgBrowserEnabled, cfgBrowserFreezeOnTurnEnd, cfgBrowserIdleCloseSec } from "../tools/browser/settings";
+import {
+	cfgBrowserEnabled,
+	cfgBrowserFreezeOnTurnEnd,
+	cfgBrowserIdleCloseSec,
+	cfgBrowserRelayReleaseOnTurnEnd,
+} from "../tools/browser/settings";
 import {
 	cfgClaudeResets,
 	cfgClaudeResetsAutoRedeem,
@@ -1598,7 +1603,7 @@ export class AgentSession implements SettingsScope {
 			this.#irc.hasPending();
 		const final = queuedContinuation || ircContinuation ? { ...pending, isTerminal: false } : pending;
 		this.#emit(final);
-		if (final.isTerminal !== false) void this.#releaseRelayBrowserTabs();
+		void this.#releaseRelayBrowserTabs(final);
 	}
 
 	/**
@@ -3391,7 +3396,7 @@ export class AgentSession implements SettingsScope {
 			this.#pendingAgentEndEmit = event;
 		} else {
 			this.#emit(event);
-			if (event.type === "agent_end" && event.isTerminal !== false) void this.#releaseRelayBrowserTabs();
+			if (event.type === "agent_end") void this.#releaseRelayBrowserTabs(event);
 		}
 		const extensionEmit = this.#emitExtensionEvent(event);
 		if (options.detachExtensions) {
@@ -5704,12 +5709,13 @@ export class AgentSession implements SettingsScope {
 	}
 
 	/**
-	 * The agent handed back (its run settled for good, an interrupt included; not a step within the run, and not a
-	 * settle a queued steer or follow-up continues): let go of the relay's debugger on this session's relay tabs until
-	 * their next call, so Chrome's debugging bar, shown on every tab while omp has any one attached, goes away between
-	 * turns. Never throws.
+	 * Called with each published `agent_end`. When it is the agent handing back (its run settled for good, an interrupt
+	 * included; not a settle a queued steer or follow-up continues), let go of the relay's debugger on this session's
+	 * relay tabs until their next call, so Chrome's debugging bar, shown on every tab while omp has any one attached,
+	 * goes away between turns (`browser.relayReleaseOnTurnEnd`). Never throws.
 	 */
-	async #releaseRelayBrowserTabs(): Promise<void> {
+	async #releaseRelayBrowserTabs(event: Extract<AgentSessionEvent, { type: "agent_end" }>): Promise<void> {
+		if (event.isTerminal === false || !cfgBrowserRelayReleaseOnTurnEnd.get(this.settings)) return;
 		const ownerId = this.sessionManager.getSessionId();
 		if (!ownerId) return;
 		const released = await releaseRelayTabsForOwner(ownerId);

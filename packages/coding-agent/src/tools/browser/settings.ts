@@ -105,6 +105,19 @@ export const cfgBrowserFreezeOnTurnEnd = register({
 	},
 });
 
+export const cfgBrowserRelayReleaseOnTurnEnd = register({
+	id: "browser.relayReleaseOnTurnEnd",
+	type: "boolean",
+	default: true,
+	ui: {
+		tab: "tools",
+		group: "Grep & Browser",
+		label: "Release Relay Tabs Between Turns",
+		description:
+			"When the agent hands back, let go of Chrome's debugger on omp's relay tabs so Chrome's debugging bar leaves between turns; the next call reattaches, and routes, captures and run globals end with the release. Off keeps the debugger, and the bar, until the tabs close; pass persist:true on open to opt one tab out.",
+	},
+});
+
 export const cfgBrowserIdleCloseSec = register({
 	id: "browser.idleCloseSec",
 	type: "number",
