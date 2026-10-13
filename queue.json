@@ -1010,15 +1010,16 @@
    ],
    "base": "2b7516970243b4f28bb92708315885f2187f5ef2",
    "body": "bodies/page-waiting.md",
-   "state": "open",
-   "pr": 15555,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15555
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/page-waiting",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:51:27Z",
-   "note": "",
-   "requeue": 15555
+   "updated": "2026-10-13T21:51:31Z",
+   "note": ""
   },
   {
    "id": "webmcp-native",
