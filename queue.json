@@ -790,15 +790,16 @@
    "needs": [],
    "base": "5b46169ed3877a9622f1e907a9cb392180a70d06",
    "body": "bodies/relay-detach.md",
-   "state": "open",
-   "pr": 15493,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15493
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-detach",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:49:41Z",
-   "note": "",
-   "requeue": 15493
+   "updated": "2026-10-13T21:49:45Z",
+   "note": ""
   },
   {
    "id": "relay-page-create-target",
