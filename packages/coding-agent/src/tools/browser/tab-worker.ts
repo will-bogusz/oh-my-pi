@@ -348,6 +348,8 @@ const FRAME_SNAPSHOT_TIMEOUT_MS = 5_000;
 const ATTACHED_TARGET_EXPOSE_TIMEOUT_MS = 5_000;
 /** Bound on the frames a release waits for, so a page laid out again at its own size before omp lets go of it. */
 const RELEASE_LAYOUT_WAIT_MS = 500;
+/** How long a released relay tab's page gets to answer a trivial evaluate before its reattach counts it stopped. */
+const REATTACH_STOPPED_PROBE_MS = 1_500;
 
 /** Queue a wheel event without treating a delayed renderer acknowledgement as dispatch failure. */
 export async function dispatchScroll(
@@ -1036,6 +1038,9 @@ class DebuggerDetachedError extends ToolError {
 	}
 }
 
+/** A relay tab omp released between turns stopped meanwhile (a dialog, or a script that does not yield); it stays released. */
+class PageStoppedError extends ToolError {}
+
 interface RunPageScope {
 	page: Page;
 	/** Restore the page's own listener methods and remove every handler this run registered. */
@@ -1244,6 +1249,7 @@ function errorPayload(error: unknown): RunErrorPayload {
 	const navigationTimeout = error instanceof NavigationTimeoutError || undefined;
 	const rendererCrashed = error instanceof RendererCrashedError || undefined;
 	const debuggerDetached = error instanceof DebuggerDetachedError ? error.when : undefined;
+	const pageStopped = error instanceof PageStoppedError || undefined;
 	if (error instanceof ToolAbortError) {
 		return { name: error.name, message: error.message, stack: error.stack, isToolError: false, isAbort: true };
 	}
@@ -1258,6 +1264,7 @@ function errorPayload(error: unknown): RunErrorPayload {
 			navigationTimeout,
 			rendererCrashed,
 			debuggerDetached,
+			pageStopped,
 		};
 	}
 	if (error instanceof Error) {
@@ -1910,6 +1917,7 @@ export class WorkerCore {
 				// modal dialog or hung navigation can stall `target.page()` / ready info, and a
 				// stalled init used to time out and force-kill the tab.
 				if (payload.recover) await this.#recoverAttachedTarget(target);
+				if (payload.reattach) await this.#refuseStoppedPage(target, payload.page.targetId);
 				// `page()` settles once the page's frame tree is handled, so the main frame below exists even for a
 				// relay tab that is still loading.
 				const page = await target.page();
@@ -2057,6 +2065,33 @@ export class WorkerCore {
 		} finally {
 			await session?.detach().catch(() => undefined);
 		}
+	}
+
+	/**
+	 * Refuse to adopt a relay tab omp released between turns whose page stopped meanwhile, and release the tab again.
+	 * A dialog the page opened while nobody was attached is shown to the user, and no new attachment sees it, so
+	 * adopting the page would stall until the call's timeout. A page that does not answer a trivial evaluate within
+	 * {@link REATTACH_STOPPED_PROBE_MS} counts as stopped.
+	 */
+	async #refuseStoppedPage(target: Target, targetId: string): Promise<void> {
+		const session = await target.createCDPSession();
+		let answered: boolean;
+		try {
+			answered = await Promise.race([
+				session.send("Runtime.evaluate", { expression: "0", returnByValue: true }).then(
+					() => true,
+					() => true,
+				),
+				Bun.sleep(REATTACH_STOPPED_PROBE_MS).then(() => false),
+			]);
+		} finally {
+			await session.detach().catch(() => undefined);
+		}
+		if (answered) return;
+		await releaseRelayTarget(browserConnection(this.#requireBrowser()), targetId).catch(() => false);
+		throw new PageStoppedError(
+			"omp let go of this tab when the last turn ended, and its page has stopped since: most likely it opened a dialog, which Chrome shows the user and omp cannot answer from a new attachment (or it runs a script that does not yield). This call did not run. Ask the user to answer the dialog; the next call reattaches the tab. Closing the tab also ends it.",
+		);
 	}
 
 	/**

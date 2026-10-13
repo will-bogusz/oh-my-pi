@@ -118,6 +118,11 @@ export type WorkerInitPayload =
 			showsWindows?: boolean;
 			/** `tab.emulate()` overrides to put back: the tab's previous worker released it between turns. */
 			emulation?: BrowserEmulateOptions;
+			/**
+			 * This attach reattaches a relay tab omp released between turns: a page that stopped meanwhile (a dialog
+			 * Chrome showed the user, or a long script) is not adopted, and the tab is released again.
+			 */
+			reattach?: boolean;
 	  };
 
 /** Result of one host tool requested by browser-run JavaScript. */
@@ -184,6 +189,8 @@ export interface RunErrorPayload {
 	 * its code started, or `before` it, so nothing ran; the worker runs nothing more and the tab must be re-adopted.
 	 */
 	debuggerDetached?: "during" | "before";
+	/** A released relay tab's page stopped while omp was away; the tab stays released and nothing ran. */
+	pageStopped?: boolean;
 }
 
 export type WorkerOutbound =

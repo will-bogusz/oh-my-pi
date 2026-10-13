@@ -167,6 +167,37 @@ describe("relay tabs at the end of a turn", () => {
 	);
 
 	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"fails the next call at once, and stays released, when the page opened a dialog while omp was away",
+		async () => {
+			const { ext, page } = await openRelayTab();
+			await invoke({ action: "run", code: "return 1;", timeout: 10 });
+			expect(await releaseRelayTabsForOwner(OWNER)).toBe(1);
+			expect(ext.attached).toBe(false);
+			// The user's side of the page sees the dialog; no attachment made after it opened can.
+			const shown = new Promise<{ dismiss(): Promise<void> }>(resolve => page.once("dialog", resolve));
+			await page.evaluate(() => {
+				setTimeout(() => confirm("while away?"), 0);
+			});
+			const dialog = await shown;
+
+			const started = performance.now();
+			const stopped = await invoke({ action: "run", code: "return 1;", timeout: 20 }).catch(
+				(error: unknown) => error,
+			);
+			expect(String(stopped)).toContain("its page has stopped since");
+			// Well inside the call's 20 s budget, which a stalled adoption would spend.
+			expect(performance.now() - started).toBeLessThan(8_000);
+			expect(ext.attached).toBe(false);
+
+			await dialog.dismiss();
+			const next = await invoke({ action: "run", code: "return 2;", timeout: 10 });
+			expect(next.value).toBe(2);
+			expect(next.text).toContain(REATTACHED);
+		},
+		60_000,
+	);
+
+	it.skipIf(!CHROMIUM_AVAILABLE)(
 		"keeps persist tabs and tabs held to allowed_domains attached, and leaves other owners' tabs alone",
 		async () => {
 			const { ext } = await openRelayTab({ persist: true });

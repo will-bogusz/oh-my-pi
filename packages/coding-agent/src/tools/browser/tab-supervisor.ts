@@ -298,6 +298,8 @@ class DebuggerDetachedError extends ToolError {
 		super(message);
 	}
 }
+/** A relay tab omp released between turns stopped meanwhile; its reattach was refused and it stays released. */
+class PageStoppedError extends ToolError {}
 const REPORTED_INIT_FAILURE = Symbol("reported-init-failure");
 
 type ReportedInitFailure = Error & { [REPORTED_INIT_FAILURE]?: true };
@@ -1209,6 +1211,8 @@ async function recoverWorkerTab(
 		if (tab.worker.mode === "inline") return await killTab(reason);
 		return await recycleTimedOutWorkerTab(tab, timeoutMs + GRACE_MS, { recover: opts.recover, replay: opts.replay });
 	} catch (recycleError) {
+		// The released tab's page stopped while omp was away: it stays released, the call says why.
+		if (recycleError instanceof PageStoppedError) throw recycleError;
 		logger.warn("Failed to recycle browser tab worker; killing tab", {
 			error: recycleError instanceof Error ? recycleError.message : String(recycleError),
 		});
@@ -1277,7 +1281,10 @@ async function releaseRelayTab(tab: WorkerTabSession): Promise<boolean> {
 	return true;
 }
 
-/** Reattach a tab released between turns on a new worker; resolves `false` when the tab was closed instead. */
+/**
+ * Reattach a tab released between turns on a new worker; resolves `false` when the tab was closed instead. A page
+ * that stopped while omp was away rejects with the reason and leaves the tab released for the next call.
+ */
 async function reattachReleasedTab(tab: WorkerTabSession, timeoutMs: number): Promise<boolean> {
 	const released = tab.released;
 	if (!released) return true;
@@ -2149,6 +2156,7 @@ async function recycleTimedOutWorkerTab(
 		activateForScreenshot: tab.activateForScreenshot,
 		userDriven: tab.kindTag === "connected" || tab.kindTag === "relay",
 		relay: tab.kindTag === "relay",
+		reattach: replay !== undefined,
 		showsWindows: browserShowsWindows(tab.browser.kind),
 	};
 	// A release can land while the new worker starts: it tore down the worker it saw, so a
@@ -2171,7 +2179,8 @@ async function recycleTimedOutWorkerTab(
 	} catch (error) {
 		await worker.terminate().catch(() => undefined);
 		// The page crashed again as this attach brought it back; a second attach would only revive it once more.
-		if (error instanceof RendererCrashedError) throw error;
+		// A released tab's stopped page stays stopped for a second attach too.
+		if (error instanceof RendererCrashedError || error instanceof PageStoppedError) throw error;
 		// The recycle's budget is exhausted: the run caller already timed out, so a
 		// retried init can't beat its deadline — fail fast and let the caller
 		// force-kill the tab instead of spending the phase floors' excess.
@@ -2371,6 +2380,11 @@ async function targetIdForTarget(target: Target): Promise<string> {
 function errorFromPayload(payload: RunErrorPayload): Error {
 	if (payload.debuggerDetached) {
 		const error = new DebuggerDetachedError(payload.message, payload.debuggerDetached);
+		if (payload.stack) error.stack = payload.stack;
+		return error;
+	}
+	if (payload.pageStopped) {
+		const error = new PageStoppedError(payload.message);
 		if (payload.stack) error.stack = payload.stack;
 		return error;
 	}
