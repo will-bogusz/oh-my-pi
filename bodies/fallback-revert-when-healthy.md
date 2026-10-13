@@ -23,7 +23,7 @@ The usage pin came with usage-aware fallback (`0bfb0bd1e3`, `db97103c32`): resto
 - A band, not a timer: quota only falls between resets, so leaving at the reserve and returning above reserve + 10 allows one move each way per reset.
 - Rejected: `cooldown-expiry` returning from usage pins (reverses `0bfb0bd1e3` for everyone); a margin setting; climbing the chain.
 - Cost: a cold prompt cache on return; one cached usage read per prompt past cooldown; across tokenizers, one extra count in the primary's domain only once usage allows a return (tokenizer cached).
-- Pin state keeps #14744's shape (`pinned` for usage, plus `refusalPinned`), so the two compose. #14193's per-chain validator accepts `cooldown-expiry`/`never`; whichever lands second adds `when-healthy`. #15126 reworks reserve resolution in `health.ts`; the margin adds on top.
+- Pin state keeps #14744's shape (`pinned` for usage, plus `refusalPinned`), so the two compose.
 - Related: #5018, #8633.
 
 Non-goal: cache warmth (#13106).
