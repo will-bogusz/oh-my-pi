@@ -109,6 +109,7 @@ export interface NativeDesktopSession {
 	axFocused(): Promise<AxNode | null | undefined>;
 	axNode(ref: string): Promise<AxNode>;
 	axAttributes(ref: string): Promise<Array<[string, string]>>;
+	axMarkdown(ref: string): Promise<string>;
 	axChildren(ref: string): Promise<AxNode[]>;
 	axParent(ref: string): Promise<AxNode | null | undefined>;
 	axPerform(ref: string, action: string, menu?: string[] | null): Promise<void>;
@@ -139,6 +140,7 @@ type MenuOptions = { menu?: string[] };
 type ClickOptions = InputOptions & MenuOptions & { button?: string; count?: number; modifiers?: string[] };
 type DragOptions = InputOptions & { modifiers?: string[]; keys?: string[] };
 type ScrollOptions = InputOptions & { dx?: number; dy?: number };
+type ValueOptions = { format?: "text" | "markdown" };
 type AxOptions = Pick<AxSnapshotOptions, "all" | "maxDepth">;
 type HoldOptions = Pick<NativeHoldOptions, "duration" | "takeover">;
 type HoldMouseOptions = Pick<NativeHoldOptions, "duration" | "button" | "keys" | "takeover">;
@@ -279,6 +281,16 @@ function validateString(value: unknown, call: string, options?: { nonEmpty?: boo
 	throw new ToolError(
 		`${call} requires ${options?.nonEmpty ? "a non-empty string" : "a string"}, got ${describeArgument(value)}`,
 	);
+}
+
+/** `value()`'s format: `"text"` (the default) or `"markdown"`. */
+function valueFormat(options: unknown): "text" | "markdown" {
+	if (options === undefined) return "text";
+	const format =
+		typeof options === "object" && options !== null ? ("format" in options ? options.format : undefined) : null;
+	if (format === undefined || format === "text" || format === "markdown") return format ?? "text";
+	const got = format === null ? describeArgument(options) : `format ${describeArgument(format)}`;
+	throw new ToolError(`value(options) takes { format: "text" } or { format: "markdown" }, got ${got}`);
 }
 
 /** A menu path is one title, an array of titles, or the titles as separate arguments. */
@@ -654,8 +666,10 @@ class El {
 		this.childCount = node.childCount;
 	}
 
-	async value(): Promise<string | undefined> {
+	async value(options?: ValueOptions): Promise<string | undefined> {
+		const format = valueFormat(options);
 		const { signal } = this.#getContext();
+		if (format === "markdown") return nativeCall(signal, () => this.#session.axMarkdown(this.ref));
 		return (await nativeCall(signal, () => this.#session.axNode(this.ref))).value;
 	}
 
@@ -893,8 +907,10 @@ class ElRef implements PromiseLike<El> {
 		return this.#resolve().finally(onFinally);
 	}
 
-	async value(): Promise<string | undefined> {
-		return (await this.#resolve()).value();
+	async value(options?: ValueOptions): Promise<string | undefined> {
+		// A bad format fails before the ref lookup reaches the native addon.
+		valueFormat(options);
+		return (await this.#resolve()).value(options);
 	}
 
 	async setValue(value: string): Promise<void> {

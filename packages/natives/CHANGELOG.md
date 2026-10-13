@@ -11,6 +11,7 @@
 - Added `DesktopSession.axType` and `axKeyChord`, which type into or press keys in one accessibility element; on macOS a field that does not report keyboard focus gets nothing and the error names what has focus; on Windows background input goes straight to the element's own control window and refuses a windowless element ([#15563](https://github.com/can1357/oh-my-pi/pull/15563) by [@will-bogusz](https://github.com/will-bogusz))
 - Added `DesktopSession.escapeStops` and `desktopEscapeStops(key)`, counting takeover input you stopped with physical Escape on macOS, Windows and X11, apart from host cancels ([#15564](https://github.com/can1357/oh-my-pi/pull/15564) by [@will-bogusz](https://github.com/will-bogusz))
 - Added `UserIntervened` on macOS: keys and clicks stop at your first key or click in the app they go to, and input to an app you used since it was last read waits up to 5 s for you to pause, then fails without sending (needs Input Monitoring) ([#15562](https://github.com/can1357/oh-my-pi/pull/15562) by [@will-bogusz](https://github.com/will-bogusz))
+- Added `DesktopSession.axMarkdown` (macOS), which returns a text element's whole text as Markdown with its bold, italic, struck-out text, links, lists and headings, and never reads a secure text field
 
 ### Changed
 - Reduced Mermaid XY-chart rendering overhead while preserving chart colors and layout ([#16214](https://github.com/can1357/oh-my-pi/pull/16214) by [@kyle-elliott](https://github.com/kyle-elliott)).

@@ -167,6 +167,7 @@ enum Response {
 	Node(Option<AxNode>),
 	Attributes(Vec<(String, String)>),
 	TextSelection(AxTextSelection),
+	Text(String),
 }
 
 type Reply = flume::Sender<CoreResult<Response>>;
@@ -316,6 +317,10 @@ enum Request {
 		reference: String,
 		reply:     Reply,
 	},
+	AxMarkdown {
+		reference: String,
+		reply:     Reply,
+	},
 	AxChildren {
 		reference: String,
 		reply:     Reply,
@@ -389,6 +394,7 @@ impl Request {
 			| Self::AxFocused { reply }
 			| Self::AxNode { reply, .. }
 			| Self::AxAttributes { reply, .. }
+			| Self::AxMarkdown { reply, .. }
 			| Self::AxChildren { reply, .. }
 			| Self::AxParent { reply, .. }
 			| Self::AxPerform { reply, .. }
@@ -1497,6 +1503,10 @@ impl Worker {
 				let props = self.ax()?.props(&h)?;
 				Ok(Response::Node(Some(ax::node_to_napi(reference.clone(), props))))
 			},
+			Request::AxMarkdown { reference, .. } => {
+				let h = self.registry.resolve(reference)?;
+				Ok(Response::Text(self.ax()?.markdown(&h)?))
+			},
 			Request::AxAttributes { reference, .. } => {
 				let h = self.registry.resolve(reference)?;
 				let mut attributes = self.ax()?.attributes(&h)?;
@@ -2427,6 +2437,20 @@ impl DesktopSession {
 		Ok(task::blocking("desktop.axAttributes", (), move |_| {
 			match c.call(token, |reply| Request::AxAttributes { reference, reply })? {
 				Response::Attributes(v) => Ok(v),
+				_ => Err(DesktopError::internal("unexpected response")),
+			}
+			.map_err(Into::into)
+		}))
+	}
+
+	/// The element's whole text as Markdown (macOS).
+	#[napi]
+	pub fn ax_markdown(&self, reference: String) -> Result<task::Promise<String>> {
+		let c = Arc::clone(&self.core);
+		let token = c.cancellation.token();
+		Ok(task::blocking("desktop.axMarkdown", (), move |_| {
+			match c.call(token, |reply| Request::AxMarkdown { reference, reply })? {
+				Response::Text(v) => Ok(v),
 				_ => Err(DesktopError::internal("unexpected response")),
 			}
 			.map_err(Into::into)

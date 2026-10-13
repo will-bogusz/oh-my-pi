@@ -347,6 +347,11 @@ pub trait AxBackend {
 	fn element_at(&mut self, x: f64, y: f64) -> CoreResult<Option<AxHandle>>;
 	fn focused_element(&mut self) -> CoreResult<Option<AxHandle>>;
 	fn attributes(&mut self, h: &AxHandle) -> CoreResult<Vec<(String, String)>>;
+	/// The element's whole text as Markdown, keeping its bold, italic,
+	/// struck-out text, links and list items.
+	fn markdown(&mut self, _h: &AxHandle) -> CoreResult<String> {
+		Err(DesktopError::unsupported("formatted text is read only on macOS"))
+	}
 	/// Whether the element `h` was read from still exists. Backends whose
 	/// identities a later element can take over once the first is gone check
 	/// it, so a ref is never renewed onto the newcomer.

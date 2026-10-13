@@ -265,6 +265,9 @@ class FakeNativeSession implements NativeDesktopSession {
 	async axAttributes(_ref: string): Promise<Array<[string, string]>> {
 		return [];
 	}
+	async axMarkdown(_ref: string): Promise<string> {
+		return "";
+	}
 	async axChildren(_ref: string): Promise<AxNode[]> {
 		return [];
 	}
@@ -3109,6 +3112,48 @@ describe("expanded computer APIs", () => {
 		} finally {
 			await prelude.invoke({ action: "close" }, context);
 		}
+	});
+
+	it("reads an element's text as Markdown only when value() asks for it", async () => {
+		class MarkdownSession extends FakeNativeSession {
+			readonly calls: string[] = [];
+			override async axNode(ref: string): Promise<AxNode> {
+				this.calls.push(`axNode:${ref}`);
+				return { ...axNode, value: "Make it bold" };
+			}
+			override async axMarkdown(ref: string): Promise<string> {
+				this.calls.push(`axMarkdown:${ref}`);
+				return "Make it **bold**";
+			}
+		}
+		const transport = new MemoryTransport();
+		const native = new MarkdownSession();
+		new ComputerWorkerCore(transport, () => native);
+		for (const [code, value] of [
+			['return await desktop.ref("e1").value()', "Make it bold"],
+			['return await desktop.ref("e1").value({ format: "text" })', "Make it bold"],
+			['return await desktop.ref("e1").value({ format: "markdown" })', "Make it **bold**"],
+			[
+				'const [el] = await (await desktop.window(42)).find({ role: "textarea" }); return await el.value({ format: "markdown" })',
+				"Make it **bold**",
+			],
+		]) {
+			const result = await runWorker(transport, `markdown-${code}`, code);
+			expect(result.ok ? result.payload.returnValue : result.error).toBe(value);
+		}
+		expect(native.calls.filter(call => call.startsWith("axMarkdown"))).toHaveLength(2);
+		native.calls.length = 0;
+		for (const [code, got] of [
+			['await desktop.ref("e1").value({ format: "html" })', 'format "html"'],
+			['await desktop.ref("e1").value("markdown")', '"markdown"'],
+		]) {
+			const result = await runWorker(transport, `markdown-bad-${got}`, code);
+			expect(result.ok ? undefined : result.error).toMatchObject({
+				isToolError: true,
+				message: `value(options) takes { format: "text" } or { format: "markdown" }, got ${got}`,
+			});
+		}
+		expect(native.calls).toEqual([]);
 	});
 
 	it("names the helper and argument for a missing or non-string text argument before any native call", async () => {

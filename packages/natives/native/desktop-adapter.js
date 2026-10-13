@@ -17,6 +17,7 @@ const REQUIRED_METHODS = [
 	"controlState",
 	"bringToCurrentSpace",
 	"axSelectText",
+	"axMarkdown",
 	"holdDisplayUntilReleased",
 	"releaseDisplayAwake",
 ];
