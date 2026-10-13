@@ -768,16 +768,17 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": null,
-   "body": null,
+   "base": "f1ac114d8d3438bee43010aee559bfe720ba3224",
+   "body": "bodies/browser-upload-element.md",
    "state": "open",
    "pr": 15492,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-upload-element",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:47:19Z",
-   "note": ""
+   "updated": "2026-10-13T21:49:31Z",
+   "note": "",
+   "requeue": 15492
   },
   {
    "id": "relay-detach",
