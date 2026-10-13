@@ -1,0 +1,49 @@
+## What
+
+An agent opening a relay tab without naming one kept grabbing the tab I was reading and navigating it away, so now it opens its own tab in the background and closes it when it's done.
+
+| | main | this PR |
+|---|---|---|
+| relay open, no `app.target` | adopts the selected tab; `url` navigates it away | opens a new unselected tab; the user's tab, selection and window focus are untouched |
+| click, type, screenshot on it | (the user's tab) | work in the background; screenshots never raise it |
+| `browser.close` | releases; the tab stays | closes omp's tab, also after a forced release, a force-kill, or the user dismissing its debugger bar |
+| `app.target` | borrows a tab; close leaves it | unchanged |
+| two browsers on one relay | new tabs follow the last extension hello | the browser of the tab omp used last on that relay, else the one showing the first selected tab, else the last hello |
+
+**Maintainer decision: this changes the relay default.**
+
+Reading order: `tab-protocol.ts` (`page: create | owned | borrowed`) → `tab-supervisor.ts` `buildInitPayload`, `ownsPage` (replaces `main`'s `reattached`), `closeTargetById` → `orphan-registry.ts` `closeRelayTarget` → `tab-worker.ts` `#init` → `relay/bridge.ts` `#instanceForNewTab` (`nearTargetId`).
+
+## Why
+
+**Overlaps #15105, #15174** in `packages/browser-relay/README.md`, `relay/bridge.ts`, `tab-supervisor.ts`, `tab-worker.ts`; merge #15105 first.
+
+- **Default, not opt-in.** The tool prompt already forbade navigating the visible tab without authorization, yet the default path did. An opt-in (#12582, #11662) leaves every call that forgets the flag on the user's tab.
+- **Screenshots.** The owned tab is focus-emulated, so Chrome captures it without activation; borrowed tabs keep `main`'s activate-before-capture.
+- **Older extension.** One predating #15109 opens the tab selected (as `browser.newPage()` does on `main`) but never navigates the user's page; refusing it would break relay users until they reinstall.
+- **Which browser.** New tabs followed the last hello, which flips when a service worker restarts. Each omp tab has its own relay connection, so the supervisor names the tab it used last (`nearTargetId`, a relay-only parameter). Known limit: unlike `main`'s adoption, the fallback doesn't probe `visibilityState`, so a minimized browser listed first beats a visible second one.
+- The relay has no browser target, so create and close use Puppeteer's root connection.
+- Non-goals: advisory claims; freezing or idle-closing owned relay tabs; closing a crashed omp's tabs; `app.cdp_url` still adopts.
+- Builds on #14060 by nnnnoel (co-author), without its close refusal for borrowed tabs. Related: #12101, #12314, #14881, #14865. Refs #14884, #11688, #12049.
+
+## Testing
+
+- `browser-relay-tab-isolation.test.ts` (real extension in Chromium): own tabs unselected, user tab untouched, click works, close removes the tab, borrowed tab survives, dismissed-debugger tab closed, owned recovery target survives a failed init, a second browser's default tab opens beside the tab borrowed there. 4 of 5 fail with the source reverted. Bridge tests: routing fails without `#instanceForNewTab`; `closeRelayTarget` calling an offline browser's tab closed fails with `main`'s `Target.getTargets` check.
+- The isolation test also hovers the unselected owned tab, since headless Chromium delivers clicks to hidden tabs: with the owned-tab focus emulation removed, that hover times out.
+- `bun test test/tools/browser-*.test.ts`: 545 pass, 4 skipped; `bun run check:ts` passes.
+- Live, headful Chrome for Testing on an isolated relay, user tab selected, via `acquireTab`/`runInTab`/`releaseTab`:
+
+| extension | user tab after open | owned tab | click | screenshot | close |
+|---|---|---|---|---|---|
+| this branch | selected | unselected | `clicked` | captured, nothing raised | owned gone, borrowed kept |
+| from before #15109 | deselected | selected | `clicked` | captured | owned gone, user tab reselected |
+
+Frontmost app never changed. Two browsers: the owned tab stayed in browser 0 across each extension reconnecting; after borrowing a tab in browser 1, a default open landed there (browser 0 before `nearTargetId`).
+
+---
+
+- [x] `bun check` passes
+- [x] Tested locally
+- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
+
