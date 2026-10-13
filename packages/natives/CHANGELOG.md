@@ -5,6 +5,7 @@
 ### Added
 
 - Added to macOS `ax()` lines what an element can do: `(selected)`, `(settable)` on dates `setValue` can write, `(readonly)` on web text fields the page locks, `actions=` beyond its press, and names for window buttons ([#15282](https://github.com/can1357/oh-my-pi/pull/15282) by [@will-bogusz](https://github.com/will-bogusz))
+- Added `DesktopSession.axMarkdown` (macOS), which returns a text element's whole text as Markdown with its bold, italic, struck-out text, links, lists and headings, and never reads a secure text field
 
 ### Changed
 

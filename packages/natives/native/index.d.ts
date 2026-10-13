@@ -114,6 +114,8 @@ export declare class DesktopSession {
   axFocused(): Promise<AxNode | undefined | null>
   axNode(reference: string): Promise<AxNode>
   axAttributes(reference: string): Promise<Array<[string, string]>>
+  /** The element's whole text as Markdown (macOS). */
+  axMarkdown(reference: string): Promise<string>
   axChildren(reference: string): Promise<Array<AxNode>>
   axParent(reference: string): Promise<AxNode | undefined | null>
   /**

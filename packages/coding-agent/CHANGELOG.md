@@ -5,6 +5,7 @@
 ### Added
 
 - Anthropic web search and Files API uploads follow `PI_ANTHROPIC_API_VERSION=2026-10-21`; web search omits `temperature` under that version ([#16706](https://github.com/can1357/oh-my-pi/pull/16706) by [@H4vC](https://github.com/H4vC))
+- Added `el.value({ format: "markdown" })` to the macOS `computer` tool: it returns a text view's whole text with its bold, italic, struck-out text, links, lists and headings kept as Markdown
 
 ### Changed
 

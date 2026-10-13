@@ -3,6 +3,7 @@ pub(crate) mod menus;
 pub(super) mod open_menu;
 mod popup;
 mod selection;
+mod rich_text;
 
 use std::{
 	collections::VecDeque,
@@ -1181,6 +1182,10 @@ impl AxBackend for MacAx {
 
 	fn value_settable(&mut self, h: &AxHandle) -> Option<bool> {
 		attribute_settable_answer(mac_handle(h).ok()?, "AXValue")
+	}
+
+	fn markdown(&mut self, h: &AxHandle) -> CoreResult<String> {
+		rich_text::markdown(mac_handle(h)?)
 	}
 }
 
