@@ -75,6 +75,8 @@ export type WorkerInitPayload =
 			userAgent?: string;
 			/** Ignore invalid HTTPS certificates for this page. */
 			ignoreHttpsErrors?: boolean;
+			/** The browser draws its windows on the user's screen (a visible launch), so a call can raise native ones. */
+			showsWindows?: boolean;
 	  }
 	| {
 			mode: "attach";
@@ -105,6 +107,11 @@ export type WorkerInitPayload =
 			 * names, since the user's own downloads land there too. Unset means an OMP-launched browser.
 			 */
 			userDriven?: boolean;
+			/**
+			 * The browser draws its windows on the user's screen, so a call can raise native ones. Unset for a headless
+			 * browser, whose recycled tabs attach too.
+			 */
+			showsWindows?: boolean;
 	  };
 
 /** Result of one host tool requested by browser-run JavaScript. */

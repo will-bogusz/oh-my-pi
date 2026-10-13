@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added a report of native windows to browser results on macOS: a `<select>` menu, colour or date picker, or a print, save, sign-in, passkey or permission sheet or bubble a call raised over its tab is named with its `computer.window()` id, by the next call when it shows just after the call returned, and on failed calls too ([#15575](https://github.com/can1357/oh-my-pi/pull/15575) by [@will-bogusz](https://github.com/will-bogusz))
+
 ## [18.12.2] - 2026-10-18
 
 ### Added
