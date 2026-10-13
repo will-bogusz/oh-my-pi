@@ -276,15 +276,16 @@
    ],
    "base": "aafb01eb877a52609176395c1a8a913569bb9906",
    "body": "bodies/broker-sweep-clients-defer.md",
-   "state": "open",
-   "pr": 15144,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15144
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-sweep-clients-defer",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:52:49Z",
-   "note": "",
-   "requeue": 15144
+   "updated": "2026-10-13T21:52:53Z",
+   "note": ""
   },
   {
    "id": "computer-honest-capabilities",
