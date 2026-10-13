@@ -950,15 +950,16 @@
    ],
    "base": "8a6bbe909dd33f687af42b800700d95848317c1c",
    "body": "bodies/relay-bg-input-main.md",
-   "state": "open",
-   "pr": 15510,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15510
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-bg-input-main",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:50:27Z",
-   "note": "",
-   "requeue": 15510
+   "updated": "2026-10-13T21:50:31Z",
+   "note": ""
   },
   {
    "id": "relay-own-only",
