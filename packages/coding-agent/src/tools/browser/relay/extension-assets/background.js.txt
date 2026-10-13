@@ -18,6 +18,7 @@ async function ownedDebuggerTabs(targets, probe) {
 
 // extension/popup-placement.ts
 var NO_WINDOW = -1;
+var TRANSIENT_NO_FOCUS_MS = 100;
 
 class PopupPlacement {
   #chrome;
@@ -28,8 +29,12 @@ class PopupPlacement {
   #focused;
   #focusedBefore = new Map;
   #awaitingFocus = new Map;
-  constructor(chrome2) {
+  #noneAt = Number.NEGATIVE_INFINITY;
+  #beforeNone;
+  #now;
+  constructor(chrome2, now = Date.now) {
     this.#chrome = chrome2;
+    this.#now = now;
   }
   seed(windowId, tabId, focused) {
     if (!this.#selected.has(windowId))
@@ -46,15 +51,26 @@ class PopupPlacement {
     this.#selected.set(windowId, tabId);
   }
   focusChanged(windowId) {
-    const back = this.#awaitingFocus.get(windowId);
+    if (windowId === NO_WINDOW) {
+      this.#beforeNone = this.#focused;
+      this.#noneAt = this.#now();
+      this.#focused = NO_WINDOW;
+      return;
+    }
+    const previous = this.#lastFocused();
+    const back = previous === NO_WINDOW ? undefined : this.#awaitingFocus.get(windowId);
     this.#awaitingFocus.clear();
     if (back !== undefined)
       this.#chrome.focusWindow(back).catch(() => {
         return;
       });
-    if (windowId !== NO_WINDOW)
-      this.#focusedBefore.set(windowId, this.#focused);
+    this.#focusedBefore.set(windowId, previous);
     this.#focused = windowId;
+  }
+  #lastFocused() {
+    if (this.#focused === NO_WINDOW && this.#now() - this.#noneAt < TRANSIENT_NO_FOCUS_MS)
+      return this.#beforeNone;
+    return this.#focused;
   }
   opened(tabId) {
     this.#popups.add(tabId);
@@ -68,9 +84,12 @@ class PopupPlacement {
     this.#generation.delete(windowId);
     this.#focusedBefore.delete(windowId);
     this.#awaitingFocus.delete(windowId);
+    if (this.#beforeNone === windowId)
+      this.#beforeNone = undefined;
   }
   async background(tabId) {
-    this.#popups.add(tabId);
+    if (!this.#popups.has(tabId))
+      return;
     const tab = await this.#chrome.getTab(tabId);
     if (!tab)
       return;
@@ -87,11 +106,14 @@ class PopupPlacement {
           }
         } else if (before !== NO_WINDOW)
           await this.#chrome.focusWindow(before);
-      } else if (this.#focused !== undefined && this.#focused !== NO_WINDOW && !this.#focusedBefore.has(tab.windowId)) {
+      } else {
+        const current = this.#lastFocused();
+        if (current === undefined || current === NO_WINDOW || this.#focusedBefore.has(tab.windowId))
+          return;
         if (window.focused)
-          await this.#chrome.focusWindow(this.#focused);
+          await this.#chrome.focusWindow(current);
         else
-          this.#awaitingFocus.set(tab.windowId, this.#focused);
+          this.#awaitingFocus.set(tab.windowId, current);
       }
       return;
     }
