@@ -199,9 +199,11 @@ export class FileChooserCatcher {
 
 	/**
 	 * Leave the choosers a raw Puppeteer `page.waitForFileChooser()` waits for to it: Chrome tells this session about
-	 * them too, and Puppeteer fills or cancels them without this catcher knowing. Returns `waiting`.
+	 * them too, and Puppeteer fills or cancels them without this catcher knowing. Returns `waiting`. Puppeteer turns
+	 * interception on for the page's own session and never off, so `release` turns it off once the last raw wait
+	 * settles; this catcher holds choosers on a session of its own, which that leaves alone.
 	 */
-	leaveTo<T>(waiting: Promise<T>): Promise<T> {
+	leaveTo<T>(waiting: Promise<T>, release: () => Promise<unknown>): Promise<T> {
 		this.#rawWaits++;
 		// The chooser reaches this session a moment after Puppeteer's; it is still theirs then.
 		void waiting
@@ -211,6 +213,7 @@ export class FileChooserCatcher {
 			)
 			.finally(() => {
 				this.#rawWaits--;
+				if (this.#rawWaits === 0) void release().catch(() => undefined);
 			});
 		return waiting;
 	}
