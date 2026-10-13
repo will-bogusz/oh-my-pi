@@ -20,6 +20,7 @@ import {
 import { ownedDebuggerTabs } from "./debugger-ownership";
 import { DownloadPairing } from "./download-pairing";
 import { pastForeignFrames } from "./foreign-frames";
+import { PopupPlacement } from "./popup-placement";
 
 const DEFAULT_PORT = 9224;
 const PING_INTERVAL_MS = 20_000;
@@ -39,6 +40,19 @@ let ws: WebSocket | null = null;
 let reconnectDelay = RECONNECT_MIN_MS;
 let pingTimer: NodeJS.Timeout | null = null;
 const relayInitiatedDetachTabs = new Set<number>();
+/** Tabs this extension's debugger is attached to: the ones omp drives. */
+const debuggerTabs = new Set<number>();
+const placement = new PopupPlacement({
+	getTab: tabId => chrome.tabs.get(tabId).catch(() => null),
+	selectTab: tabId => chrome.tabs.update(tabId, { active: true }),
+	getWindow: windowId => chrome.windows.get(windowId),
+	focusWindow: windowId => chrome.windows.update(windowId, { focused: true }),
+	lastFocusedNormalWindow: () =>
+		chrome.windows
+			.getLastFocused({ windowTypes: ["normal"] })
+			.then(window => window.id)
+			.catch(() => undefined),
+});
 
 /**
  * Stable per-install browser identity, persisted in `chrome.storage.local` and
@@ -205,16 +219,24 @@ async function setBadge(connected: boolean): Promise<void> {
 }
 
 async function buildHello(): Promise<ExtToRelayMessage> {
-	const [tabs, targets] = await Promise.all([chrome.tabs.query({}), chrome.debugger.getTargets()]);
+	const [tabs, targets, lastFocused] = await Promise.all([
+		chrome.tabs.query({}),
+		chrome.debugger.getTargets(),
+		chrome.windows.getLastFocused().catch(() => null),
+	]);
 	const snapshots: TabSnapshot[] = [];
 	for (const tab of tabs) {
 		const snap = snapshot(tab);
 		if (snap) snapshots.push(snap);
+		if (tab.active && tab.id !== undefined) {
+			placement.seed(tab.windowId, tab.id, lastFocused?.focused === true && lastFocused.id === tab.windowId);
+		}
 	}
 	// `attached` is true for DevTools or another extension too; only our own attachment answers a command.
 	const attachedTabIds = await ownedDebuggerTabs(targets, tabId =>
 		chrome.debugger.sendCommand({ tabId }, "Target.getTargetInfo"),
 	);
+	for (const tabId of attachedTabIds) debuggerTabs.add(tabId);
 	const versionMatch = /Chrome\/[\d.]+/.exec(navigator.userAgent);
 	return {
 		t: "hello",
@@ -237,12 +259,14 @@ async function runRpc(msg: Extract<RelayToExtMessage, { t: "rpc" }>, origin: Web
 		case "attach": {
 			const attach = () => chrome.debugger.attach({ tabId: msg.tabId }, "1.3");
 			await (msg.clearForeignFrames ? pastForeignFrames(msg.tabId, attach) : attach());
+			debuggerTabs.add(msg.tabId);
 			return {};
 		}
 		case "detach":
 			relayInitiatedDetachTabs.add(msg.tabId);
 			try {
 				await chrome.debugger.detach({ tabId: msg.tabId });
+				debuggerTabs.delete(msg.tabId);
 				return {};
 			} catch (error) {
 				relayInitiatedDetachTabs.delete(msg.tabId);
@@ -274,6 +298,9 @@ async function runRpc(msg: Extract<RelayToExtMessage, { t: "rpc" }>, origin: Web
 			await chrome.tabs.update(msg.tabId, { active: true });
 			return {};
 		}
+		case "backgroundTab":
+			await placement.background(msg.tabId);
+			return {};
 		case "group":
 			return await enqueueGroupOp(() => groupTabs(msg.tabIds, msg.title, msg.color));
 		case "ungroup":
@@ -376,6 +403,7 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
 chrome.debugger.onDetach.addListener((source, reason) => {
 	if (source.tabId === undefined) return;
 	const relayInitiated = relayInitiatedDetachTabs.delete(source.tabId);
+	debuggerTabs.delete(source.tabId);
 	post({ t: "detached", tabId: source.tabId, reason, relayInitiated });
 });
 
@@ -389,7 +417,8 @@ chrome.tabs.onUpdated.addListener((_tabId, _changeInfo, tab) => {
 	if (snap) post({ t: "tabUpdated", tab: snap });
 });
 
-chrome.tabs.onActivated.addListener(({ tabId }) => {
+chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
+	placement.activated(windowId, tabId);
 	void chrome.tabs.get(tabId).then(tab => {
 		const snap = snapshot(tab);
 		if (snap) post({ t: "tabUpdated", tab: snap });
@@ -399,8 +428,20 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
 });
 
 chrome.tabs.onRemoved.addListener(tabId => {
+	placement.removed(tabId);
+	debuggerTabs.delete(tabId);
 	post({ t: "tabRemoved", tabId });
 });
+
+// Chrome names the tab whose page (or a frame in it) opened the new one; `openerTabId` does not
+// for `noopener` links.
+chrome.webNavigation.onCreatedNavigationTarget.addListener(({ sourceTabId, tabId }) => {
+	if (debuggerTabs.has(sourceTabId)) placement.opened(tabId);
+	post({ t: "popupCreated", tabId, sourceTabId });
+});
+
+chrome.windows.onFocusChanged.addListener(windowId => placement.focusChanged(windowId));
+chrome.windows.onRemoved.addListener(windowId => placement.windowRemoved(windowId));
 
 // ---- lifecycle ----------------------------------------------------------------
 
