@@ -1,4 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import { findFreeCdpPort } from "@oh-my-pi/pi-coding-agent/tools/browser/attach";
@@ -45,9 +47,10 @@ describe("relay tabs at the end of a turn", () => {
 			hostname: "127.0.0.1",
 			port: 0,
 			fetch: () =>
-				new Response('<title>Turn</title><button id="ask" onclick="confirm(\'keep me?\')">ask</button>', {
-					headers: { "content-type": "text/html" },
-				}),
+				new Response(
+					'<title>Turn</title><button id="ask" onclick="confirm(\'keep me?\')">ask</button><input type="file" id="pick">',
+					{ headers: { "content-type": "text/html" } },
+				),
 		});
 	});
 
@@ -182,6 +185,42 @@ describe("relay tabs at the end of a turn", () => {
 			expect(next.value).toMatchObject({ open: true, type: "confirm" });
 			expect(next.text).toContain("omp kept its debugger on this tab when the last turn ended");
 			await invoke({ action: "run", code: "await tab.handleDialog({ accept: true });", timeout: 10 });
+		},
+		60_000,
+	);
+
+	it.skipIf(!CHROMIUM_AVAILABLE)(
+		"keeps a file staged before the release readable after the reattach, in the tab's one staging folder",
+		async () => {
+			const { ext } = await openRelayTab();
+			const file = path.join(tool.cwd, `turn-release-${crypto.randomUUID()}.txt`);
+			await Bun.write(file, "staged before the release");
+			try {
+				await invoke({
+					action: "run",
+					code: `await tab.uploadFile("#pick", ${JSON.stringify(file)});`,
+					timeout: 10,
+				});
+				const { uploadDir } = workerTab();
+				// The paths route: Chrome got a copy in the tab's staging folder, which it reads only when the page does.
+				const staged = await fs.readdir(uploadDir, { recursive: true });
+				expect(staged.map(entry => path.basename(entry))).toContain(path.basename(file));
+
+				expect(await releaseRelayTabsForOwner(OWNER)).toBe(1);
+				expect(ext.attached).toBe(false);
+				const next = await invoke({
+					action: "run",
+					code: 'return await page.evaluate(() => document.querySelector("#pick").files[0].text());',
+					timeout: 10,
+				});
+				expect(next.text).toContain(REATTACHED);
+				expect(next.value).toBe("staged before the release");
+				// The reattached worker took over the same folder instead of starting another.
+				expect(workerTab().uploadDir).toBe(uploadDir);
+				expect(await fs.readdir(uploadDir, { recursive: true })).toEqual(staged);
+			} finally {
+				await fs.rm(file, { force: true });
+			}
 		},
 		60_000,
 	);
