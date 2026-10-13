@@ -1372,7 +1372,8 @@ async function releaseTabInner(tab: TabSession, name: string, opts: ReleaseTabOp
 	// Close a live tab's owned page by id as well, which confirms it is gone: a worker's own
 	// close can fail and still report `closed` (its CDP socket broke), and the relay retracts a
 	// target whose debugger the user dismissed, so the worker cannot close it at all. A dead
-	// tab's page was closed by the teardown that killed it.
+	// tab's page was closed by the teardown that killed it. A relay target id cannot name another
+	// tab after Chrome restarts: Chrome persists its tab id counter, so it never reuses a tab id.
 	if (tab.ownsPage && wasAlive) {
 		try {
 			// `false` is "not confirmed closed" (the CDP session could not be

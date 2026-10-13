@@ -29,6 +29,7 @@ import {
 	EXTENSION_RELOAD_PROTOCOL_VERSION,
 	isOlderOmpVersion,
 	isOmpVersion,
+	RELAY_CDP_PROTOCOL_VERSION,
 } from "./protocol";
 import type { ExtToRelayMessage, RelayRpcRequest, RelayToExtMessage, TabSnapshot } from "./protocol";
 
@@ -476,6 +477,7 @@ export class RelayBridge {
 			webSocketDebuggerUrl: wsUrl,
 			ompRelayVersion: VERSION,
 			ompRelayDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
+			ompRelayCdpProtocol: String(RELAY_CDP_PROTOCOL_VERSION),
 			ompExtensionDiscardedTabsProtocol: String(hasCompatibleExtension ? DISCARDED_TABS_PROTOCOL_VERSION : 0),
 			ompRelayCdpClients: this.#conns.size,
 			ompExtensionVersion: oldestExtensionOmp ?? "",

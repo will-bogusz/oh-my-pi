@@ -640,7 +640,7 @@ try {
 		const standIn = path.join(home, "stand-in-relay.ts");
 		await Bun.write(
 			standIn,
-			`import { DISCARDED_TABS_PROTOCOL_VERSION } from ${source("tools/browser/relay/protocol.ts")};
+			`import { DISCARDED_TABS_PROTOCOL_VERSION, RELAY_CDP_PROTOCOL_VERSION } from ${source("tools/browser/relay/protocol.ts")};
 const port = Number(process.argv[2]);
 // A compatible relay from an older omp with no CDP client; it never accepts an extension.
 Bun.serve({
@@ -650,6 +650,7 @@ Bun.serve({
 		Response.json({
 			ompRelayVersion: "18.0.0",
 			ompRelayDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
+			ompRelayCdpProtocol: String(RELAY_CDP_PROTOCOL_VERSION),
 			ompExtensionDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
 			ompRelayCdpClients: 0,
 		}),
@@ -747,11 +748,12 @@ if (process.argv[2] === "browser-relay") {
 			`import { declareWorkerHostEntry } from "@oh-my-pi/pi-utils/worker-host";
 import { closeDaemonClients, daemonClientForGlobal } from ${JSON.stringify(path.resolve(import.meta.dir, "../../src/launch/client.ts"))};
 import { acquireBrowser } from ${JSON.stringify(path.resolve(import.meta.dir, "../../src/tools/browser/registry.ts"))};
-import { DISCARDED_TABS_PROTOCOL_VERSION } from ${JSON.stringify(path.resolve(import.meta.dir, "../../src/tools/browser/relay/protocol.ts"))};
+import { DISCARDED_TABS_PROTOCOL_VERSION, RELAY_CDP_PROTOCOL_VERSION } from ${JSON.stringify(path.resolve(import.meta.dir, "../../src/tools/browser/relay/protocol.ts"))};
 // A compatible relay from an older omp that nobody is connected to, until a newer omp with another protocol replaces it.
 let served = {
 	ompRelayVersion: "18.0.0",
 	ompRelayDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
+	ompRelayCdpProtocol: String(RELAY_CDP_PROTOCOL_VERSION),
 	ompExtensionDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
 	ompRelayCdpClients: 0,
 };
@@ -768,6 +770,7 @@ try {
 			served = {
 				ompRelayVersion: "999.0.0",
 				ompRelayDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION + 1),
+				ompRelayCdpProtocol: String(RELAY_CDP_PROTOCOL_VERSION),
 				ompExtensionDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION + 1),
 				ompRelayCdpClients: 0,
 			};

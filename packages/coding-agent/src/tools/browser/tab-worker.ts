@@ -1733,6 +1733,8 @@ export class WorkerCore {
 				// modal dialog or hung navigation can stall `target.page()` / ready info, and a
 				// stalled init used to time out and force-kill the tab.
 				if (payload.recover) await this.#recoverAttachedTarget(target);
+				// `page()` settles once the page's frame tree is handled, so the main frame below exists even for a
+				// relay tab that is still loading.
 				const page = await target.page();
 				if (!page)
 					throw new ToolError(`Target ${payload.page.targetId} is no longer available on the attached browser`);

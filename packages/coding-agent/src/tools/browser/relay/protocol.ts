@@ -80,6 +80,13 @@ export function stampRelayExtensionManifest(manifestJson: string, ompVersion: st
 	return `${JSON.stringify({ ...JSON.parse(manifestJson), version_name: ompVersion }, null, "\t")}\n`;
 }
 
+/**
+ * The relay's CDP contract this omp relies on, reported in `/json/version`; omp replaces (or refuses) a
+ * relay reporting another. 1: the relay attaches only tabs a connection created (`Target.createTarget`)
+ * or claimed with the browser-level `OMP.claimTarget`.
+ */
+export const RELAY_CDP_PROTOCOL_VERSION = 1;
+
 /** Messages sent extension → relay. */
 export type ExtToRelayMessage =
 	| {
