@@ -224,6 +224,7 @@ import {
 	RuntimeDialogController,
 } from "./dialogs";
 import { FileChooserCatcher } from "./file-choosers";
+import { NativeWindowWatch, readTabFrame } from "./native-windows";
 import {
 	type BrowserFrameApi,
 	type BrowserFrameInfo,
@@ -1669,6 +1670,8 @@ export class WorkerCore {
 	#printHold?: PrintHold;
 	/** Holds file choosers so no OS file dialog appears: for the tab's life in a browser omp launched, else around calls. */
 	#choosers?: FileChooserCatcher;
+	/** Names the native windows a call raised on screen; only for a browser that shows windows, on macOS. */
+	#nativeWindows?: NativeWindowWatch;
 	/** Nobody but omp drives this browser: holds last the tab's life and alerts close themselves. */
 	#ownBrowser = true;
 	#uncountInput: (() => void) | undefined;
@@ -1929,6 +1932,10 @@ export class WorkerCore {
 				choosers.leaveTo(waitForFileChooser(options), () =>
 					page.mainFrame().client.send("Page.setInterceptFileChooserDialog", { enabled: false }),
 				);
+			// Only a browser that draws its windows on the user's screen raises native ones.
+			if (payload.showsWindows && process.platform === "darwin") {
+				this.#nativeWindows = new NativeWindowWatch(() => readTabFrame(page));
+			}
 			await installVitalsObservers(this.#page);
 			if (payload.userAgent !== undefined) await applyUserAgentOverride(this.#page, payload.userAgent);
 			if (payload.ignoreHttpsErrors) await applyIgnoreHttpsErrors(this.#page);
@@ -2216,6 +2223,7 @@ export class WorkerCore {
 			if (signal.aborted) onCancel();
 			else signal.addEventListener("abort", onCancel, { once: true });
 			try {
+				this.#nativeWindows?.beginCall(this.#dialogs?.state().open === true);
 				// A renderer already blocked in a print nobody held never answers; the run's timeout reports that.
 				await Promise.race([this.#printHold?.beginCall(msg.timeoutMs), cancelRejection]);
 				await Promise.race([this.#choosers?.beginCall(), cancelRejection]);
@@ -2271,13 +2279,18 @@ export class WorkerCore {
 			this.#printHold?.endCall();
 			this.#choosers?.endCall(this.#ownBrowser ? undefined : USER_DRIVEN_RELEASE_MS);
 		}
+		// What the call raised on screen that no page call can reach, named on failures too: a native panel is often
+		// why the call failed.
+		const nativeNotices = (await this.#nativeWindows?.endCall(this.#dialogs?.state().open === true)) ?? [];
 		// A renderer crash or a debugger detach answers the run itself.
 		if (this.#unanswered !== active) return;
 		if (failure) {
 			// A chooser this call left waiting is named by the next call that touches the page.
 			this.#choosers?.dropNotices();
 			this.#unanswered = null;
-			this.#transport.send({ type: "result", id: msg.id, ok: false, error: errorPayload(failure.error) });
+			const error = errorPayload(failure.error);
+			if (nativeNotices.length > 0) error.message = [error.message, ...nativeNotices].join("\n");
+			this.#transport.send({ type: "result", id: msg.id, ok: false, error });
 			return;
 		}
 		if (completed) {
@@ -2288,6 +2301,7 @@ export class WorkerCore {
 			for (const notice of (await this.#choosers?.takeNotices()) ?? []) output.pushText(`${notice}\n`);
 			const printNotice = this.#printHold?.takeNotice();
 			if (printNotice) output.pushText(`${printNotice}\n`);
+			for (const notice of nativeNotices) output.pushText(`${notice}\n`);
 			// A dialog the call's last input opened ends that input as delivered; the result says what waits, once.
 			const dialog = this.#dialogs?.takeUnreported();
 			if (dialog) output.pushText(`The page is waiting on ${describeWaiting(dialog)}. ${describeAnswer(dialog)}\n`);

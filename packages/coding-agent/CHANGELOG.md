@@ -12,6 +12,7 @@
 - Added a note to relay `browser.open` results when the OMP Browser Relay extension in Chrome was installed by an older omp, naming `omp browser-relay install` and a reload; `omp browser-relay install` now records the installing omp's version in the extension ([#15105](https://github.com/can1357/oh-my-pi/pull/15105) by [@will-bogusz](https://github.com/will-bogusz))
 - The browser relay now keeps its Chrome extension current after an omp upgrade: when the extension in `~/.omp/browser-relay/extension` is older and no omp session is using the relay, it rewrites the files and the extension reloads itself ([#15105](https://github.com/can1357/oh-my-pi/pull/15105) by [@will-bogusz](https://github.com/will-bogusz))
 - Added file choosers to browser `tab.dialog()` and `tab.handleDialog()` on Chromium: a chooser a call opens is held instead of raising the OS file dialog, reported as `file-chooser`, and answered with `handleDialog({ accept: true, files })` or cancelled with `{ accept: false }` ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
+- Added a report of native windows to browser results on macOS: a `<select>` menu, colour or date picker, or a print, save, sign-in, passkey or permission sheet or bubble a call raised over its tab is named with its `computer.window()` id, by the next call when it shows just after the call returned, and on failed calls too ([#15575](https://github.com/can1357/oh-my-pi/pull/15575) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 
