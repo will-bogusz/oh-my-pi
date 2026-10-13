@@ -4014,7 +4014,7 @@ mod tests {
 			let _watch = listener
 				.admit(7, &token)
 				.expect("the user has not used TextEdit");
-			key_chord(&source, &[KeyName::Ctrl, KeyName::Enter], |event| {
+			key_chord(&source, &[KeyName::Ctrl, KeyName::Enter], KEY_GAP, |event| {
 				post_guarded(
 					event,
 					|| Ok(()),
@@ -4058,6 +4058,7 @@ mod tests {
 			with_held_keys(
 				&source,
 				&[KeyName::Shift, KeyName::Space],
+				KEY_GAP,
 				|event| {
 					post_hid(event, |event| {
 						// The user types in TextEdit right after Shift goes down.
