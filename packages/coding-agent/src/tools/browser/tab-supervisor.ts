@@ -1254,6 +1254,7 @@ async function releaseRelayTab(tab: WorkerTabSession): Promise<boolean> {
 	try {
 		tab.worker.send({ type: "release" });
 		outcome = await raceWithTimeout(promise, RELEASE_TIMEOUT_MS, "The tab worker did not answer the release");
+		if (!outcome.released && outcome.failed) throw new Error(outcome.failed);
 	} catch (error) {
 		// The worker may have let go halfway: the next call reattaches on a new worker rather than trust it.
 		logger.warn("Releasing a relay tab failed; reattaching it on its next use", {

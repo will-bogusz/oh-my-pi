@@ -346,6 +346,8 @@ const HANDLE_ACTION_INVALIDATION_TIMEOUT_MS = 500;
 const FRAME_SNAPSHOT_TIMEOUT_MS = 5_000;
 /** Bound on Puppeteer exposing a page Chromium still has; the supervisor's init budget caps the whole attach anyway. */
 const ATTACHED_TARGET_EXPOSE_TIMEOUT_MS = 5_000;
+/** Bound on the frames a release waits for, so a page laid out again at its own size before omp lets go of it. */
+const RELEASE_LAYOUT_WAIT_MS = 500;
 
 /** Queue a wheel event without treating a delayed renderer acknowledgement as dispatch failure. */
 export async function dispatchScroll(
@@ -1842,9 +1844,16 @@ export class WorkerCore {
 			case "close":
 				await this.#close();
 				return;
-			case "release":
-				this.#transport.send({ type: "released", outcome: await this.#release() });
+			case "release": {
+				const outcome = await this.#release().catch(
+					(error: unknown): ReleaseOutcome => ({
+						released: false,
+						failed: error instanceof Error ? error.message : String(error),
+					}),
+				);
+				this.#transport.send({ type: "released", outcome });
 				return;
+			}
 		}
 	}
 
@@ -3883,6 +3892,12 @@ export class WorkerCore {
 		};
 		this.#clearElementCache();
 		await this.#emulation?.clear();
+		// A background tab lays out only while focus-emulated: let it take its own size back first, or the emulated
+		// size stays on the page until it reloads.
+		await Promise.race([
+			page.evaluate("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))"),
+			Bun.sleep(RELEASE_LAYOUT_WAIT_MS),
+		]).catch(() => undefined);
 		// A tab-wide switch on the relay: switched off first, or the page goes on reporting focus until it loads again.
 		await page.emulateFocusedPage(false).catch(() => undefined);
 		await this.#disposeInstruments();

@@ -152,11 +152,12 @@ export interface ReattachReplay {
 
 /**
  * A worker's answer to `release`. Released: the worker drives the tab no more; `ended` names the tab state that
- * went with the attachment. Not released: `kept` says why the tab stays attached, absent when nothing was attached.
+ * went with the attachment. Not released: `kept` says why the tab stays attached, absent when nothing was attached;
+ * `failed` says the release broke off partway, leaving the worker's state unknown.
  */
 export type ReleaseOutcome =
 	| { released: true; replay: ReattachReplay; ended: string[] }
-	| { released: false; kept?: string };
+	| { released: false; kept?: string; failed?: string };
 
 export interface RunResultOk {
 	displays: Array<TextContent | ImageContent>;
