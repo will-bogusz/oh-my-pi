@@ -269,6 +269,58 @@ describe("PopupPlacement", () => {
 		expect(chrome.calls).toEqual([]);
 	});
 
+	it("puts back a popup's popup opened before omp attached to the first popup", async () => {
+		const { chrome, placement } = setup();
+		placement.openedFrom(1, 3, true);
+		select(chrome, placement, 3);
+		placement.openedFrom(3, 5, false);
+		select(chrome, placement, 5);
+		await placement.background(5);
+		expect(chrome.calls).toEqual(["select 2"]);
+	});
+
+	it("leaves a tab the user's own tab opened alone", async () => {
+		const { chrome, placement } = setup();
+		placement.openedFrom(2, 3, false);
+		select(chrome, placement, 3);
+		await placement.background(3);
+		expect(chrome.calls).toEqual([]);
+	});
+
+	it.each([
+		{ order: "first popup first", first: 3, second: 5 },
+		{ order: "second popup first", first: 5, second: 3 },
+	])(
+		"gives focus back to the user's window, never another popup window, when two popup windows took it ($order)",
+		async ({ first, second }) => {
+			const { chrome, placement } = setup();
+			popupWindow(chrome, placement, true);
+			placement.focusChanged(7);
+			chrome.windows.set(7, { type: "popup", focused: false });
+			chrome.tabs.set(5, { active: true, windowId: 8 });
+			chrome.windows.set(8, { type: "popup", focused: true });
+			placement.opened(5);
+			placement.focusChanged(8);
+			await placement.background(first);
+			await placement.background(second);
+			expect(chrome.calls).toEqual(["focus 1"]);
+		},
+	);
+
+	it("gives focus back to the user's window once a popup window opened over another popup window takes it", async () => {
+		const { chrome, placement } = setup();
+		popupWindow(chrome, placement, true);
+		placement.focusChanged(7);
+		chrome.tabs.set(5, { active: true, windowId: 8 });
+		chrome.windows.set(8, { type: "popup", focused: false });
+		placement.opened(5);
+		await placement.background(5);
+		expect(chrome.calls).toEqual([]);
+		placement.focusChanged(8);
+		await Promise.resolve();
+		expect(chrome.calls).toEqual(["focus 1"]);
+	});
+
 	it("forgets a closed window's selection", async () => {
 		const { chrome, placement } = setup();
 		placement.windowRemoved(1);
