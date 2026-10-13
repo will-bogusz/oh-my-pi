@@ -10,8 +10,6 @@ I made browser `uploadFile` fail when nothing on the page read the dropped file,
 | a plain `div`, or the wrong element next to the drop zone | success, no file attached | the error above |
 | the same, on a page that cancels `dragover`/`drop` document-wide (react-dropzone's default) | success, no file attached | the error above |
 
-**Overlaps #15489** in `interactions.ts` (the drop branch, `deliverToDropZone` there); merge #15489 first. Joining point: #15489 builds the files and dispatches the drop in the isolated world, so this PR's read check can't run inside that dispatch. Merged, `deliverToDropZone` first runs a main-world `watchDropRead()`: a capturing `drop` listener on `window` that redefines `files` and `items` on the event's `DataTransfer` from its own prototype's getters. If that check sees no read, the drop throws this PR's error. #15489's drop, contents and replaced-globals tests pass on that join.
-
 ## Why
 
 Before, the drop path dispatched `dragenter`, `dragover` and `drop` and returned whatever happened. Cancellation is not proof either: drop zones cancel `dragover` to accept a drop, but many pages also cancel `dragover` and `drop` on `document` only so a stray drop does not navigate away, and react-dropzone does that by default. What a drop zone always does is read `event.dataTransfer.files` or `.items` while handling `drop`, so the dispatch counts reads of those two getters during `drop`. It runs in the page's main world, because a getter defined in Puppeteer's isolated world is invisible to the page's own listeners.
