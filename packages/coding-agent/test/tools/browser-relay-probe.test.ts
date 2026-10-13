@@ -9,6 +9,7 @@ import {
 import {
 	DISCARDED_TABS_PROTOCOL_VERSION,
 	isOlderOmpVersion,
+	RELAY_CDP_PROTOCOL_VERSION,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol";
 import {
 	type RelayServer,
@@ -174,10 +175,26 @@ describe("waitForRelayExtension", () => {
 				Response.json({
 					ompRelayVersion: "18.5.1",
 					ompRelayDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
+					ompRelayCdpProtocol: String(RELAY_CDP_PROTOCOL_VERSION),
 					ompExtensionDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
 				}),
 		});
 		expect(await waitForRelayExtension(`http://127.0.0.1:${fake.port}`)).toBe("ready");
+	});
+
+	it("rejects a relay from before tab claims, even while CDP clients use it", async () => {
+		fake = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch: () =>
+				Response.json({
+					ompRelayVersion: "18.5.1",
+					ompRelayDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
+					ompExtensionDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
+					ompRelayCdpClients: 1,
+				}),
+		});
+		expect(await waitForRelayExtension(`http://127.0.0.1:${fake.port}`)).toBe("outdated-relay");
 	});
 
 	it.each([
@@ -195,6 +212,7 @@ describe("waitForRelayExtension", () => {
 					Response.json({
 						ompRelayVersion: version,
 						ompRelayDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
+						ompRelayCdpProtocol: String(RELAY_CDP_PROTOCOL_VERSION),
 						ompExtensionDiscardedTabsProtocol: String(DISCARDED_TABS_PROTOCOL_VERSION),
 						ompRelayCdpClients: clients,
 					}),
