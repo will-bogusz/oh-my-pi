@@ -72,6 +72,7 @@ import {
 } from "./launch";
 import { extractReadableFromHtml, type ReadableExtractOptions, type ReadableFormat } from "./readable";
 import { PrintHold } from "./print-hold";
+import { claimRelayTarget } from "./relay/claim";
 import { assertTabPressArgs } from "./tab-arguments";
 import {
 	type BrowserCookie,
@@ -335,9 +336,6 @@ const HANDLE_ACTION_INVALIDATION_TIMEOUT_MS = 500;
 const FRAME_SNAPSHOT_TIMEOUT_MS = 5_000;
 /** Bound on Puppeteer exposing a page Chromium still has; the supervisor's init budget caps the whole attach anyway. */
 const ATTACHED_TARGET_EXPOSE_TIMEOUT_MS = 5_000;
-
-/** How Chromium answers an unknown CDP method: a plain CDP backend's reply to the relay-private `OMP.claimTarget`. */
-const CDP_METHOD_NOT_FOUND = "wasn't found";
 
 /** Queue a wheel event without treating a delayed renderer acknowledgement as dispatch failure. */
 export async function dispatchScroll(
@@ -1728,8 +1726,9 @@ export class WorkerCore {
 				if (payload.dialogs) this.#applyDialogPolicy(payload.dialogs);
 			} else {
 				// The omp relay attaches only tabs a connection owns: claim the tab first so it attaches here.
-				const claimed = await this.#claimRelayTarget(payload.page.targetId);
-				const target = await this.#findAttachedTarget(payload.page.targetId, claimed);
+				const relay = payload.relay === true;
+				if (relay) await claimRelayTarget(browserConnection(this.#browser), payload.page.targetId);
+				const target = await this.#findAttachedTarget(payload.page.targetId, relay);
 				// Post-timeout recycle: unblock the target BEFORE adopting the page — an open
 				// modal dialog or hung navigation can stall `target.page()` / ready info, and a
 				// stalled init used to time out and force-kill the tab.
@@ -1841,33 +1840,6 @@ export class WorkerCore {
 			return false;
 		} finally {
 			await session?.detach().catch(() => undefined);
-		}
-	}
-
-	/**
-	 * Claim the target on the omp browser relay, which attaches and announces only tabs a connection
-	 * owns, and adds it to the per-window "omp" tab group. False on plain CDP backends (real Chrome,
-	 * cmux), which reject the relay-private method as unknown.
-	 */
-	async #claimRelayTarget(targetId: string): Promise<boolean> {
-		if (!this.#browser) throw new ToolError("Browser is not connected");
-		// Puppeteer's protocol map cannot express the relay-private method; the send signature is otherwise identical.
-		const connection = browserConnection(this.#browser) as unknown as {
-			send(method: string, params: { targetId: string }): Promise<unknown>;
-		};
-		try {
-			await connection.send("OMP.claimTarget", { targetId });
-			return true;
-		} catch (error) {
-			// Puppeteer keeps the CDP error's message but not its code.
-			if (
-				error instanceof Error &&
-				"originalMessage" in error &&
-				typeof error.originalMessage === "string" &&
-				error.originalMessage.endsWith(CDP_METHOD_NOT_FOUND)
-			)
-				return false;
-			throw error;
 		}
 	}
 

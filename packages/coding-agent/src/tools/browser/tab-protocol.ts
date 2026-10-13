@@ -116,6 +116,8 @@ export type WorkerInitPayload =
 			 * browser, whose recycled tabs attach too.
 			 */
 			showsWindows?: boolean;
+			/** The browser is the omp relay: claim `owned`/`borrowed` tabs there before adopting them, or it never attaches them. */
+			relay?: boolean;
 	  };
 
 /** Result of one host tool requested by browser-run JavaScript. */

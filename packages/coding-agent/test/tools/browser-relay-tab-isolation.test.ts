@@ -473,4 +473,72 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("owned tab recovery", () => {
 			await releaseBrowser(launched, { kill: true });
 		}
 	}, 30_000);
+
+	it("adopts a page on a CDP endpoint that rejects unknown methods in its own words, sending it no relay claim", async () => {
+		const launched = await acquireBrowser({ kind: "headless", headless: true }, { cwd: process.cwd() });
+		if (!("browser" in launched)) throw new Error("Expected Chromium");
+		const page = await launched.browser.newPage();
+		await page.goto("data:text/html,<title>Plain CDP sentinel</title>");
+		const target = page.target();
+		if (!("_targetId" in target) || typeof target._targetId !== "string") throw new Error("Missing target ID");
+		// A CDP shim in front of Chromium that words its unknown-method error differently.
+		const relayMethods: string[] = [];
+		const upstreams = new Map<object, { socket: WebSocket; queued: string[] }>();
+		const proxy = Bun.serve({
+			port: 0,
+			fetch(request, server) {
+				return server.upgrade(request) ? undefined : new Response("CDP shim", { status: 404 });
+			},
+			websocket: {
+				open(client) {
+					const socket = new WebSocket(launched.browser.wsEndpoint());
+					const queued: string[] = [];
+					socket.onopen = () => {
+						for (const message of queued.splice(0)) socket.send(message);
+					};
+					socket.onmessage = event => client.send(String(event.data));
+					socket.onclose = () => client.close();
+					upstreams.set(client, { socket, queued });
+				},
+				message(client, raw) {
+					const message = JSON.parse(String(raw)) as { id: number; method: string; sessionId?: string };
+					if (message.method.startsWith("OMP.")) {
+						relayMethods.push(message.method);
+						client.send(
+							JSON.stringify({
+								id: message.id,
+								sessionId: message.sessionId,
+								error: { code: -32000, message: "Unsupported command" },
+							}),
+						);
+						return;
+					}
+					const upstream = upstreams.get(client)!;
+					if (upstream.socket.readyState === WebSocket.OPEN) upstream.socket.send(String(raw));
+					else upstream.queued.push(String(raw));
+				},
+				close(client) {
+					upstreams.get(client)?.socket.close();
+					upstreams.delete(client);
+				},
+			},
+		});
+		const worker = startWorker({
+			mode: "attach",
+			browserWSEndpoint: `ws://127.0.0.1:${proxy.port}/devtools/browser`,
+			safeDir: getPuppeteerDir(),
+			uploadDir: "/tmp/omp-uploads-test",
+			page: { kind: "borrowed", targetId: target._targetId },
+		});
+		try {
+			const outcome = await worker.outcome;
+			expect(outcome.type).toBe("ready");
+			expect(relayMethods).toEqual([]);
+		} finally {
+			await worker.close();
+			proxy.stop(true);
+			await page.close().catch(() => undefined);
+			await releaseBrowser(launched, { kill: true });
+		}
+	}, 30_000);
 });

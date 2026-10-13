@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- CDP clients other than omp connecting to the relay must open a tab with `Target.createTarget` or claim a listed one with `OMP.claimTarget { targetId }` before attaching it; `Target.setAutoAttach` no longer attaches every tab and `Target.attachToTarget` on an unclaimed tab is refused ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Fixed
 
 - Fixed the relay attaching Chrome's debugger to every tab of your browser whenever omp connected; only tabs omp opened or borrowed are attached ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))

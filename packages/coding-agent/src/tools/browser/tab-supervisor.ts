@@ -1875,6 +1875,7 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 		ignoreHttpsErrors: opts.ignoreHttpsErrors,
 		userDriven,
 		showsWindows: browserShowsWindows(browser.kind),
+		relay: browser.kind.kind === "relay",
 	};
 }
 
@@ -2076,6 +2077,7 @@ async function recycleTimedOutWorkerTab(
 		recover: opts.recover ?? true,
 		userDriven: tab.kindTag === "connected" || tab.kindTag === "relay",
 		showsWindows: browserShowsWindows(tab.browser.kind),
+		relay: tab.kindTag === "relay",
 	};
 	// A release can land while the new worker starts: it tore down the worker it saw, so a
 	// replacement published after it would drive a closed tab.
