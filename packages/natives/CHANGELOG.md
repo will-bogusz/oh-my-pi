@@ -7,6 +7,10 @@
 - Added a `menu` item path to `click` options and `axPerform`: a macOS click or action that opens a menu presses that item in it, submenus included, and returns with the menu closed ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - Added a `refuseMenu` option to `click`, `drag` and `holdMouse`: a macOS background left click that lands on a menu button or popup button, or a drag or hold that starts on one, throws `BackgroundUnavailable` before anything is sent, instead of opening the control's menu, which takes the user's keyboard ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
+### Added
+
+- Added `DesktopSession.escapeStops` and `desktopEscapeStops(key)`, counting computer-use takeover input the user stopped with physical Escape on macOS, Windows and X11, apart from host cancels ([#15564](https://github.com/can1357/oh-my-pi/pull/15564) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Changed
 
 - Computer use's physical Escape stop now watches the keyboard only during takeover input (`takeover: true`, held control, desktop-level input, raises); an Escape the user presses in their own app no longer cancels background window input, which the host interrupt still stops ([#15176](https://github.com/can1357/oh-my-pi/pull/15176) by [@will-bogusz](https://github.com/will-bogusz))

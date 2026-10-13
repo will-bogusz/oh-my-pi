@@ -134,6 +134,7 @@
 
 - Fixed `computer.apps.open` returning before the app had a window, or never giving a hidden running app one; it now returns the app's frontmost window as `window`, waiting up to 3 s on macOS ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed the `computer` tool's takeover-rerun notice saying "nothing was sent" about a call it had just delivered; it now says the input was delivered, so the model stops repeating the call ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
+- Added stopping computer use for the rest of the turn when the user presses Escape during takeover input: later `computer` calls are refused before anything is sent until the user's next message ([#15564](https://github.com/can1357/oh-my-pi/pull/15564) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 
