@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added stopping computer use for the rest of the turn when the user presses Escape during takeover input: later `computer` calls are refused before anything is sent until the user's next message ([#PR](https://github.com/can1357/oh-my-pi/pull/PR) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Changed
 
 - Reduced CPU overhead during syntax checks and automatic edit repairs ([#15904](https://github.com/can1357/oh-my-pi/pull/15904) by [@iliaal](https://github.com/iliaal)).
