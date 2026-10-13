@@ -1421,15 +1421,16 @@
    ],
    "base": "8dcd296d6e1dd923df62305889ca0df01ef2c449",
    "body": "bodies/relay-popup-front.md",
-   "state": "open",
-   "pr": 15611,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15611
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:51:17Z",
-   "note": "",
-   "requeue": 15611
+   "updated": "2026-10-13T21:51:21Z",
+   "note": ""
   }
  ]
 }
