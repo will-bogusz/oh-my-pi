@@ -1194,15 +1194,16 @@
    ],
    "base": "957b8137dfd2d01b728f469103c11b2f668e5e84",
    "body": "bodies/relay-turn-end-detach.md",
-   "state": "open",
-   "pr": 15569,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15569
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-turn-end-detach",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:51:45Z",
-   "note": "",
-   "requeue": 15569
+   "updated": "2026-10-13T21:51:48Z",
+   "note": ""
   },
   {
    "id": "ax-stale-refind",
