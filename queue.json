@@ -870,16 +870,17 @@
    "needs": [
     "#15493"
    ],
-   "base": null,
-   "body": null,
+   "base": "64ece3d2634156c6d15a1a3de8f42b1c247fda32",
+   "body": "bodies/browser-worker-exit.md",
    "state": "open",
    "pr": 15498,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-worker-exit",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:47:19Z",
-   "note": ""
+   "updated": "2026-10-13T21:50:19Z",
+   "note": "",
+   "requeue": 15498
   },
   {
    "id": "aria-password-mask",
