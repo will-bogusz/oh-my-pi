@@ -766,7 +766,7 @@ fn background_guard(
 	refuse_pointer(
 		window,
 		event,
-		|| process::is_screen_sharing(pid),
+		|| process::remote_screen(pid) == Some(RemoteScreen::KeyEvents),
 		|| process::reads_hardware_pointer(pid),
 	)
 }
@@ -804,7 +804,7 @@ fn refuse_pointer(
 		);
 	}
 	if holds_keys(event) && is_screen_sharing() {
-		return Err(screen_sharing_refusal(window, "modifier flags and held keys on pointer input"));
+		return Err(keyboard_modifiers_refusal(window, &format!("modify this {kind}")));
 	}
 	// An open context menu takes the keyboard from the user's app, and a hold
 	// or a drag keeps it open until the button is released, however long the
@@ -1549,6 +1549,7 @@ fn background_drag(
 	with_held_keys(
 		source,
 		keys,
+		KEY_GAP,
 		|event| skylight::post_keyboard(pid, event),
 		|| {
 			let start = path[0];
@@ -1643,6 +1644,7 @@ fn background_hold(
 	with_held_keys(
 		source,
 		keys,
+		KEY_GAP,
 		|event| skylight::post_keyboard(pid, event),
 		|| {
 			post_hover(source, pid, wid, window, at.x, at.y, group)?;
@@ -1885,8 +1887,8 @@ fn background_scroll(
 /// (iPhone Mirroring). A tap needs no activation, only a press that outlasts
 /// a report, addressed to the window. The device moves its own pointer only
 /// for a button event and scrolls whatever is under that pointer, so a scroll
-/// first aims it with a lone release, which taps nothing. Other events take
-/// the ordinary route.
+/// first aims it with a lone release, which taps nothing. Other events,
+/// modified clicks included, take the ordinary route.
 fn report_pointer(
 	source: &CGEventSource,
 	pid: libc::pid_t,
@@ -1907,7 +1909,7 @@ fn report_pointer(
 		skylight::post_routed(pid, &event)
 	};
 	match event {
-		PointerEvent::Click { x, y, button: MouseButton::Left, count, .. } => {
+		PointerEvent::Click { x, y, count, .. } if is_report_tap(&event) => {
 			let count = i64::from(count.max(1));
 			for click_state in 1..=count {
 				let result = post(CGEventType::LeftMouseDown, x, y, click_state)
@@ -1925,8 +1927,19 @@ fn report_pointer(
 			control::wait(TAP_HOLD)?;
 			background_scroll(source, pid, wid, window, x, y, dx, dy)
 		},
-		event => background_pointer(source, pid, wid, window, event, entry_front, to, in_overlay),
+		event => background_pointer(source, pid, wid, window, event, None, entry_front, to, in_overlay),
 	}
+}
+
+/// Whether `event` is a plain left click, which [`report_pointer`] posts as a
+/// tap; the tap carries no modifiers, so a modified click takes the ordinary
+/// route that holds them.
+fn is_report_tap(event: &PointerEvent) -> bool {
+	matches!(
+		event,
+		PointerEvent::Click { button: MouseButton::Left, modifiers, .. }
+			if *modifiers == Modifiers::default()
+	)
 }
 
 /// A pointer event whose flags carry no modifiers: a `HIDSystemState` source
@@ -3593,6 +3606,19 @@ mod tests {
 		assert!(modified_text(&typed_keys("ab", us_stroke).unwrap()).is_empty());
 		// Option alone also needs a modifier the remote reads from the keyboard.
 		assert_eq!(modified_text(&typed_keys("aå", us_stroke).unwrap()), ["å"]);
+	}
+
+	#[test]
+	fn report_devices_tap_only_plain_left_clicks() {
+		let click =
+			|button, modifiers| PointerEvent::Click { x: 1.0, y: 1.0, button, count: 1, modifiers };
+		assert!(is_report_tap(&click(MouseButton::Left, Modifiers::default())));
+		// A tap carries no modifiers: a modified click takes the route that holds
+		// them, and is never posted as a plain tap.
+		let command = Modifiers { meta: true, ..Modifiers::default() };
+		assert!(!is_report_tap(&click(MouseButton::Left, command)));
+		assert!(!is_report_tap(&click(MouseButton::Right, Modifiers::default())));
+		assert!(!is_report_tap(&PointerEvent::Scroll { x: 1.0, y: 1.0, dx: 0.0, dy: 1.0 }));
 	}
 
 	#[test]
