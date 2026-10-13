@@ -14,13 +14,11 @@ Reading order: `sweepResets` and `redeemConsentedResets` in `session/auto-reset.
 
 ## Why
 
-**Merge after #15134, #15131, #15133, #15129.** The diff carries those bases (#15129 `feb93cf481`, #15131 `6ed93c39f2`, #15133 `4f585fc170` with #15134 `3243b8d268`). This PR's own work is the non-merge commits from `5427913ca0` on, plus the merge resolutions porting each base's planner and consent change into the shared module.
-
 A broker host is the one process that is always up, and it already fetches every account's usage. Without this, a reset that expires while no session is open is lost, and with several sessions open each one sweeps the same accounts.
 
 The decision for a maintainer: should the broker sweep by default when serving, with no new flag? The existing settings already say it: `autoRedeem: no` stops it per provider, and under `unset` it only rescues credits that would otherwise expire unused. I rejected a `--no-reset-sweep` flag (a second switch for the same choice), a fixed 5-minute timer (it lists accounts that have nothing due), and a separate refactor PR for the executor move (the move has no caller without the sweep).
 
-Not a goal: sessions on a sweeping broker still sweep too; the follow-up stacked on this one stops that.
+Not a goal: sessions on a sweeping broker still sweep too; a follow-up stops that.
 
 ## Testing
 
