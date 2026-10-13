@@ -563,7 +563,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": null,
+   "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
    "body": null,
    "state": "open",
    "pr": 15402,
@@ -571,8 +571,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/todo-parallel",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:47:19Z",
-   "note": ""
+   "updated": "2026-10-13T22:55:34Z",
+   "note": "",
+   "advanced": "2026-10-13T22:55:34Z"
   },
   {
    "id": "eval-run-local-roots",
