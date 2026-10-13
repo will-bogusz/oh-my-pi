@@ -4,7 +4,7 @@
 
 ### Breaking Changes
 
-- `WebMcpController` (`tools/browser/webmcp`) now takes the Puppeteer `Page` instead of a host and options; `installWebMcp`, `installWebMcpPageHook`, `uninstallWebMcpPageHook`, `webMcpSnapshotInPage`, `webMcpInvokeInPage`, `WEBMCP_BRIDGE_KEY` and the page-hook types are removed
+- `WebMcpController` (`tools/browser/webmcp`) now takes the Puppeteer `Page` instead of a host and options; `installWebMcp`, `installWebMcpPageHook`, `uninstallWebMcpPageHook`, `webMcpSnapshotInPage`, `webMcpInvokeInPage`, `WEBMCP_BRIDGE_KEY` and the page-hook types are removed ([#15556](https://github.com/can1357/oh-my-pi/pull/15556) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Added
 
@@ -20,6 +20,7 @@
 - The Shared Language Servers setting now says what it does: each connection gets its own server, and a released one is reused while another omp instance keeps the project's mux running ([#14633](https://github.com/can1357/oh-my-pi/pull/14633) by [@jorgoose](https://github.com/jorgoose))
 - Memories saved explicitly through the extension `memory.save` API are now stored as `stated` rather than `unknown`, so they rank as deliberate memories in Mnemopi recall ([#13824](https://github.com/can1357/oh-my-pi/pull/13824) by [@sjawhar](https://github.com/sjawhar))
 - A relay `browser.open` without `app.target` now opens its own background tab instead of adopting the visible one (after reinstalling the relay extension; older ones select it), and `browser.close` closes it; `app.target` still borrows an existing tab ([#15110](https://github.com/can1357/oh-my-pi/pull/15110) by [@will-bogusz](https://github.com/will-bogusz))
+- Browser `webmcp*` helpers read Chrome's native WebMCP when called instead of injecting a script and `modelContext` polyfill into every page omp drives, and say why when Chrome offers a page none; Tern tabs no longer support them ([#15556](https://github.com/can1357/oh-my-pi/pull/15556) by [@will-bogusz](https://github.com/will-bogusz))
 - Browser `webmcp*` helpers read Chrome's native WebMCP on first use instead of injecting a script and `modelContext` polyfill into every page omp drives, and say why when Chrome offers a page none; Tern tabs no longer support them
 
 ### Fixed
@@ -73,7 +74,7 @@
 - Browser (Chrome tabs): a click or drag that timed out on a page busy in its own script no longer completes on its target once the page answers, a timed-out key combo sends no further key, and a call or run cut off mid-gesture releases the mouse button or keys it held instead of leaving them down in the tab ([#15559](https://github.com/can1357/oh-my-pi/pull/15559) by [@will-bogusz](https://github.com/will-bogusz))
 - Relay mode: `tab.waitForSelector`, `tab.evaluate` and `tab.goto` no longer fail after 20 s when the page or server takes longer; like on a launched Chrome they now run to the call's own timeout, up to omp's 60 s protocol timeout, and a command Chrome never answers names itself and its tab ([#15559](https://github.com/can1357/oh-my-pi/pull/15559) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed the browser relay attaching Chrome's debugger to every tab of the user's browser whenever omp connected; it now attaches only tabs omp opened or borrowed with `app.target`, and omp replaces a relay an older omp started (or reports one started by hand as out of date) instead of using it ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
-- Fixed `webmcpInvoke` returning an empty error when a page's tool throws, and leaving a timed-out invocation running in the page
+- Fixed `webmcpInvoke` returning an empty error when a page's tool throws, and leaving a timed-out invocation running in the page ([#15556](https://github.com/can1357/oh-my-pi/pull/15556) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.11.1] - 2026-10-15
 
