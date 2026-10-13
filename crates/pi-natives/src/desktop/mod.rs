@@ -2249,7 +2249,46 @@ mod capture_tests {
 		}
 	}
 
-	fn worker_with(backend: impl Backend + 'static) -> Worker {
+	/// A worker that holds the ownership test lock for its test: input it is
+	/// sent takes the process's one input lease, which the ownership tests in
+	/// `control` assert on.
+	struct TestWorker {
+		worker:     Worker,
+		_ownership: parking_lot::MutexGuard<'static, ()>,
+	}
+
+	impl TestWorker {
+		fn serve(self, rx: &flume::Receiver<QueuedRequest>, grace: Duration) {
+			let Self { worker, _ownership } = self;
+			worker.serve(rx, grace);
+		}
+	}
+
+	impl std::ops::Deref for TestWorker {
+		type Target = Worker;
+
+		fn deref(&self) -> &Worker {
+			&self.worker
+		}
+	}
+
+	impl std::ops::DerefMut for TestWorker {
+		fn deref_mut(&mut self) -> &mut Worker {
+			&mut self.worker
+		}
+	}
+
+	fn worker_with(backend: impl Backend + 'static) -> TestWorker {
+		TestWorker {
+			_ownership: crate::desktop::control::OWNERSHIP_TEST.lock(),
+			worker:     unlocked_worker(backend),
+		}
+	}
+
+	/// A worker for requests that take no input lease. A session serving one
+	/// on its own thread must not wait for the ownership lock: a test holding
+	/// it would park the worker until the caller's timeout.
+	fn unlocked_worker(backend: impl Backend + 'static) -> Worker {
 		Worker {
 			backend:       Ok(Box::new(backend)),
 			registry:      AxRegistry::default(),
@@ -2313,7 +2352,7 @@ mod capture_tests {
 		let awake = Arc::clone(&backend.awake);
 		let (tx, rx) = flume::unbounded();
 		let grace = Duration::from_millis(500);
-		let serving = thread::spawn(move || worker_with(backend).serve(&rx, grace));
+		let serving = thread::spawn(move || unlocked_worker(backend).serve(&rx, grace));
 
 		send_and_wait(&tx, |reply| Request::Capabilities { reply });
 		assert!(awake.lock().is_empty(), "a status read must not hold the display awake");
@@ -2337,7 +2376,7 @@ mod capture_tests {
 		let awake = Arc::clone(&backend.awake);
 		let (tx, rx) = flume::unbounded();
 		let serving =
-			thread::spawn(move || worker_with(backend).serve(&rx, Duration::from_secs(3600)));
+			thread::spawn(move || unlocked_worker(backend).serve(&rx, Duration::from_secs(3600)));
 		send_and_wait(&tx, |reply| Request::ListWindows { reply });
 		drop(tx);
 		serving.join().unwrap();
@@ -2375,7 +2414,7 @@ mod capture_tests {
 		let (tx, rx) = flume::unbounded();
 		let (done_tx, done) = flume::bounded(1);
 		let join = thread::spawn(move || {
-			let mut worker = worker_with(backend);
+			let mut worker = unlocked_worker(backend);
 			worker.display_awake = display_awake;
 			worker.serve(&rx, Duration::from_secs(3600));
 			let _ = done_tx.send(());
