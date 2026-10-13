@@ -392,14 +392,18 @@ fn is_bullet(glyph: &str) -> bool {
 /// One line: `prefix`, then the runs after the first `skip` bytes, whose text
 /// is `content`. A heading's text is set in a bold font, which the `#` marker
 /// already says.
-fn render_line(
-	line: &[Span],
-	prefix: String,
-	content: &str,
-	mut skip: usize,
-	heading: bool,
-) -> String {
+fn render_line(line: &[Span], prefix: String, content: &str, skip: usize, heading: bool) -> String {
 	let mut out = prefix;
+	// Four columns of leading whitespace start an indented code block, which
+	// shows emphasis and links as typed: the first character is written as a
+	// character reference instead, which is not indentation.
+	let (content, mut skip) = match code_indent(content) {
+		Some(reference) => {
+			out.push_str(reference);
+			(&content[1..], skip + 1)
+		},
+		None => (content, skip),
+	};
 	let block = block_escape(content);
 	let mut offset = 0;
 	for span in line {
@@ -414,6 +418,28 @@ fn render_line(
 		offset += text.len();
 	}
 	out
+}
+
+/// The character reference for `content`'s first character when its leading
+/// whitespace reaches four columns before any text.
+fn code_indent(content: &str) -> Option<&'static str> {
+	let mut column = 0;
+	for c in content.chars() {
+		match c {
+			' ' => column += 1,
+			'\t' => column += 4 - column % 4,
+			_ => break,
+		}
+	}
+	let text = content.trim_start_matches([' ', '\t']);
+	if column < 4 || text.is_empty() {
+		return None;
+	}
+	Some(if content.starts_with('\t') {
+		"&#9;"
+	} else {
+		"&#32;"
+	})
 }
 
 /// Where a line's text needs a backslash so it is not read as a heading, quote,
@@ -587,8 +613,14 @@ mod tests {
 		// A heading marker split from its text by a style change.
 		assert_eq!(to_markdown(&[plain("#"), italic(" not")]), "\\# *not*");
 		assert_eq!(to_markdown(&[plain(" "), bold("#"), plain(" x")]), " **\\#** x");
-		// A tab-led line without a list marker stays text.
-		assert_eq!(to_markdown(&[plain("\tindented\tcell")]), "\tindented\tcell");
+		// Four columns of indentation would make a code block that shows the
+		// marks as typed; three would not.
+		assert_eq!(to_markdown(&[plain("\tindented\tcell")]), "&#9;indented\tcell");
+		assert_eq!(to_markdown(&[bold("    bold")]), "&#32;   **bold**");
+		assert_eq!(to_markdown(&[plain("  \t"), italic("x")]), "&#32; \t*x*");
+		assert_eq!(to_markdown(&[bold("   bold")]), "   **bold**");
+		assert_eq!(to_markdown(&[plain("\t•\t    # item")]), "- &#32;   \\# item");
+		assert_eq!(to_markdown(&[plain("    ")]), "    ");
 	}
 
 	#[test]
