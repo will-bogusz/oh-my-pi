@@ -17,9 +17,7 @@ Reading order: `tab-worker.ts` `#init` (emulate focus when `payload.userDriven`)
 
 ## Why
 
-**Builds on #15490**: its first 7 commits are #15490's; merge #15490 first, or merge this alone to land both. It widens #15490's per-tab file-chooser switch in the bridge into a table that also holds focus emulation.
-
-**Overlaps #15110** in `tab-worker.ts` `#init`; #15110 focus-emulates owned pages. Joined: `#init` emulates when `this.#ownsPage || (payload.mode === "attach" && payload.userDriven)`; both PRs' relay tests pass on the join.
+It widens #15490's per-tab file-chooser switch in the bridge into a table that also holds focus emulation.
 
 - **Cause.** `main` emulates focus only on omp's headless pages. `Emulation.setFocusEmulationEnabled` makes Chrome count a page as visible without selecting its tab or raising the window.
 - **Decision.** The `emulateFocus` doc said "never a borrowed user tab" (9b2a43514b); this reverses that for connected and relay browsers. Selecting the tab per action, as screenshots do, would take it from the user.
