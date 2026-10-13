@@ -209,16 +209,17 @@
    "area": "broker",
    "priority": "P2",
    "needs": [],
-   "base": null,
-   "body": null,
+   "base": "d489cb326c5494839dbc4dee809140cf1ff3a8da",
+   "body": "bodies/reset-account-optout.md",
    "state": "open",
    "pr": 15133,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-account-optout",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:47:19Z",
-   "note": ""
+   "updated": "2026-10-13T21:50:01Z",
+   "note": "",
+   "requeue": 15133
   },
   {
    "id": "fallback-revert-when-healthy",
