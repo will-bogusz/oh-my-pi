@@ -17,8 +17,6 @@ I made omp stop changing every page it drives just in case the model calls WebMC
 
 ## Why
 
-**Builds on #15105, #15110, #15493, #15498, #15494, #15508, #15489, #15490, #15510, #15491, #15492, #15503, #15559, #15554** (merge in that order): its first 103 commits are theirs; merge those first, or merge this alone to land them all.
-
 Every tab worker installed the hook at init (`evaluateOnNewDocument` plus a main-world eval in each frame) and polyfilled `modelContext` where it was missing, so every page omp touched saw a changed global whether or not WebMCP was used; #15118 had to stop that hook getting renderers killed.
 
 <details><summary>How omp reads Chrome's WebMCP now</summary>
