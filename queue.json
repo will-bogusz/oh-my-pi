@@ -211,15 +211,16 @@
    "needs": [],
    "base": "d489cb326c5494839dbc4dee809140cf1ff3a8da",
    "body": "bodies/reset-account-optout.md",
-   "state": "open",
-   "pr": 15133,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15133
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-account-optout",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:50:01Z",
-   "note": "",
-   "requeue": 15133
+   "updated": "2026-10-13T21:50:04Z",
+   "note": ""
   },
   {
    "id": "fallback-revert-when-healthy",
