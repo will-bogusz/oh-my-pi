@@ -79,7 +79,7 @@ export type FrameOperation = <T>(
 	label: string,
 	deadlineMs: number,
 	operation: (signal: AbortSignal) => Promise<T>,
-	selectorOptions?: { selector?: string; zeroMatchAfterMs?: number },
+	options?: { selector?: string; zeroMatchAfterMs?: number; pageWait?: "input" },
 ) => Promise<T>;
 
 /** Worker hooks needed to build a frame-scoped helper without coupling it to WorkerCore. */
@@ -267,7 +267,7 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 						signal,
 					);
 				},
-				selectorOptions(selector),
+				{ ...selectorOptions(selector), pageWait: "input" },
 			),
 		fill: (selector, value) =>
 			hooks.act(
@@ -299,11 +299,16 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 				selectorOptions(selector),
 			),
 		press: (key, options) =>
-			hooks.act(`frame.press(${JSON.stringify(key)})`, hooks.actionOpMs, async signal => {
-				if (options?.selector)
-					await untilAborted(signal, () => frame.focus(hooks.normalizeSelector(options.selector!)));
-				await pressKey(frame.page(), key, undefined, signal);
-			}),
+			hooks.act(
+				`frame.press(${JSON.stringify(key)})`,
+				hooks.actionOpMs,
+				async signal => {
+					if (options?.selector)
+						await untilAborted(signal, () => frame.focus(hooks.normalizeSelector(options.selector!)));
+					await pressKey(frame.page(), key, undefined, signal);
+				},
+				{ pageWait: "input" },
+			),
 		// Without a selector, the frame's `<body>`; any value passed, `null` included, is still checked as a selector.
 		text: (selector = "body") =>
 			hooks.op(

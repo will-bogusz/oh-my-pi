@@ -5,6 +5,7 @@ Drive real browser tabs; start with `const tab = await browser.open({ name, url 
 - Python: same names and awaits; keyword arguments become the trailing options object (`await browser.open(name=…, url=…)`).
 - `timeout`: seconds on `open`, `close`, `run` (default 30, clamped to 1–300, capped by `tools.maxTimeout` when set); milliseconds on `waitFor*`.
 - A `run` without `timeout`, and each direct helper call such as `tab.evaluate(…)`, gets the Eval cell's `timeout` when that is longer; for long page work, raise the cell's `timeout`.
+  - Dialogs: `dialog`, `handleDialog`, `setDialogs`. Without a policy, beforeunload prompts are accepted automatically, and alerts too unless the user drives the browser (connected, relay); other dialogs remain pending. In Chromium tabs a file chooser a call opens is held instead of shown, and the call says so; `dialog()` reports it as `file-chooser`: answer it with `handleDialog({ accept: true, files: [...paths] })`, or `handleDialog({ accept: false })` to cancel. While a dialog or chooser is pending there, other tab calls fail naming it.
 
 ```
 await browser.open({name, url, app, argv, target, viewport, wait_until, dialogs, allowed_domains, init_scripts, downloads, user_agent, insecure, headed, timeout, persist}) → BrowserTab
