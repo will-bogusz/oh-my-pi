@@ -12,8 +12,6 @@ A held `print()` (#15508) is reported but never pending. Tern rejects `files`; c
 
 ## Why
 
-**Builds on #15105, #15110, #15493, #15498, #15494, #15508, #15489, #15490, #15510, #15491, #15492, #15503, #15559, #15554, #15556, #15590, #15611** (merge in that order): its first 114 commits are theirs; merge those first, or merge this alone to land them all.
-
 Joining #15489: the per-tab catcher replaces `catchChooserInput`/`pagesAwaitingChooser`; its paths and contents routes and both deadlines stay; a chooser whose delivery failed stays held and answerable; `handleDialog({ files })` uses the tab's route and staging.
 
 On `main` a `confirm()` stops the page's script, so the click that opened it waits out the cell, the tab is reset from a fresh session that cannot see the dialog, and then killed. In a relay tab that is the user's Chrome, and an `alert()` there is accepted before the user sees it. A chooser click raises the macOS Open panel on the user's screen or is cancelled, and the model is told nothing.
