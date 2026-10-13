@@ -12,8 +12,9 @@
  *
  * Usage: bun scripts/smoke.ts [relay-url] [target-substring]
  */
-import type { Target } from "puppeteer-core";
+import type { Connection, Target } from "puppeteer-core";
 import puppeteer from "puppeteer-core";
+import { claimRelayTarget } from "../../coding-agent/src/tools/browser/relay/claim";
 
 const relayUrl = Bun.argv[2] ?? "http://127.0.0.1:9224";
 const matcher = Bun.argv[3] ?? "Relay Smoke Page";
@@ -53,9 +54,8 @@ const worker = await puppeteer.connect({
 });
 // The relay attaches only tabs a connection owns: claim the picked tab on the worker's connection.
 if (!("_connection" in worker)) throw new Error("puppeteer browser exposes no CDP connection");
-// Puppeteer's CDP browser keeps its connection on an internal field, and its protocol map lacks the relay method.
-const workerConnection = worker._connection as { send(method: string, params: object): Promise<unknown> };
-await workerConnection.send("OMP.claimTarget", { targetId });
+// Puppeteer's CDP browser keeps its connection on an internal field.
+await claimRelayTarget(worker._connection as Connection, targetId);
 const workerTarget = await worker.waitForTarget(target => targetIdOf(target) === targetId, { timeout: 10_000 });
 const page = await workerTarget.page();
 if (!page) throw new Error("worker could not adopt page");
