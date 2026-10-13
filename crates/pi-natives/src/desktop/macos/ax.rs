@@ -1502,14 +1502,16 @@ fn verify_text_value(element: &AXUIElement, sent: &str, expected: &str) -> CoreR
 }
 
 fn is_secure(element: &AXUIElement) -> bool {
-	secure_subrole(copy_attribute_result(element, "AXSubrole").map(|value| {
-		match value {
-			None => Subrole::Absent,
-			Some(value) => value
-				.downcast::<CFString>()
-				.map_or(Subrole::Malformed, |value| Subrole::Named(value.to_string())),
-		}
-	}))
+	secure_subrole(read_subrole(element))
+}
+
+fn read_subrole(element: &AXUIElement) -> Result<Subrole, AXError> {
+	copy_attribute_result(element, "AXSubrole").map(|value| match value {
+		None => Subrole::Absent,
+		Some(value) => value
+			.downcast::<CFString>()
+			.map_or(Subrole::Malformed, |value| Subrole::Named(value.to_string())),
+	})
 }
 
 /// What an element answered for `AXSubrole`.

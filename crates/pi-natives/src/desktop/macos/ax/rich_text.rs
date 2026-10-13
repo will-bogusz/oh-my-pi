@@ -21,7 +21,8 @@ use objc2_core_foundation::{
 use objc2_foundation::NSString;
 
 use super::{
-	CoreResult, DesktopError, ax_error, copy_attribute_result, copy_held_attribute, copy_string,
+	CoreResult, DesktopError, Subrole, ax_error, copy_attribute_result, copy_held_attribute,
+	copy_string, read_subrole, secure_subrole,
 };
 
 /// How many times a text that changes while it is read is read again.
@@ -47,31 +48,32 @@ pub(super) struct Span {
 
 /// `element`'s whole text as Markdown.
 pub(super) fn markdown(element: &AXUIElement) -> CoreResult<String> {
-	ensure_readable(copy_attribute_result(element, "AXSubrole"))?;
+	ensure_readable(read_subrole(element))?;
 	// The font lookups run on the session thread, which has no pool of its own.
 	autoreleasepool(|_| Ok(to_markdown(&spans(element)?)))
 }
 
 /// A secure text field's text is never read, masked or not, and neither is the
-/// text of an element whose subrole could not be read.
-fn ensure_readable(subrole: Result<Option<CFRetained<CFType>>, AXError>) -> CoreResult<()> {
-	let subrole = match subrole {
-		Ok(subrole) => subrole
-			.and_then(|value| value.downcast::<CFString>().ok())
-			.map(|value| value.to_string()),
-		Err(error) if error == AXError::NoValue || error == AXError::AttributeUnsupported => None,
-		Err(error) => {
-			return Err(ax_error(
-				error,
-				"reading the element's subrole failed, so its text is not read: it may be a secure \
-				 text field",
-			));
-		},
-	};
-	if subrole.as_deref() == Some("AXSecureTextField") {
-		return Err(DesktopError::ax_failed("a secure text field's text is never read"));
+/// text of an element whose subrole could not be read or is not a string. A
+/// destroyed element is a `StaleRef`, not a possibly secure field.
+fn ensure_readable(subrole: Result<Subrole, AXError>) -> CoreResult<()> {
+	let failed = subrole.as_ref().err().copied();
+	let named = matches!(subrole, Ok(Subrole::Named(_)));
+	if !secure_subrole(subrole) {
+		return Ok(());
 	}
-	Ok(())
+	Err(match failed {
+		Some(error) => ax_error(
+			error,
+			"reading the element's subrole failed, so its text is not read: it may be a secure text \
+			 field",
+		),
+		None if named => DesktopError::ax_failed("a secure text field's text is never read"),
+		None => DesktopError::ax_failed(
+			"the element's subrole is not a string, so its text is not read: it may be a secure text \
+			 field",
+		),
+	})
 }
 
 fn spans(element: &AXUIElement) -> CoreResult<Vec<Span>> {
@@ -570,8 +572,8 @@ mod tests {
 	};
 
 	use super::{
-		Span, Style, ensure_readable, font_traits, link_url, read_whole, style_span, text_length,
-		to_markdown,
+		Span, Style, Subrole, ensure_readable, font_traits, link_url, read_whole, style_span,
+		text_length, to_markdown,
 	};
 	use crate::desktop::error::{DesktopError, ErrorCode};
 
@@ -809,19 +811,18 @@ mod tests {
 
 	#[test]
 	fn secure_text_fields_and_fields_of_unknown_subrole_are_never_read() {
-		let subrole = |name: &'static str| -> Result<Option<CFRetained<CFType>>, AXError> {
-			let name: &CFType = &CFString::from_static_str(name);
-			Ok(Some(name.retain()))
-		};
+		let named = |name: &str| -> Result<Subrole, AXError> { Ok(Subrole::Named(name.into())) };
 		let code = |subrole| ensure_readable(subrole).map_err(|error: DesktopError| error.code);
-		assert_eq!(code(subrole("AXSecureTextField")), Err(ErrorCode::AxFailed));
+		assert_eq!(code(named("AXSecureTextField")), Err(ErrorCode::AxFailed));
 		// A subrole read that fails may have been a secure field's.
 		assert_eq!(code(Err(AXError::CannotComplete)), Err(ErrorCode::AxFailed));
 		assert_eq!(code(Err(AXError::InvalidUIElement)), Err(ErrorCode::StaleRef));
-		assert_eq!(code(subrole("AXSearchField")), Ok(()));
-		assert_eq!(code(Ok(None)), Ok(()));
+		assert_eq!(code(named("AXSearchField")), Ok(()));
+		assert_eq!(code(Ok(Subrole::Absent)), Ok(()));
 		assert_eq!(code(Err(AXError::NoValue)), Ok(()));
 		assert_eq!(code(Err(AXError::AttributeUnsupported)), Ok(()));
+		// A subrole that is not a string says nothing about the field.
+		assert_eq!(code(Ok(Subrole::Malformed)), Err(ErrorCode::AxFailed));
 	}
 
 	#[test]
