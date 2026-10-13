@@ -119,15 +119,16 @@
    "needs": [],
    "base": "818dd42b73ab1caad17fa06d4edcc3a97086dc57",
    "body": "bodies/relay-own-tab.md",
-   "state": "open",
-   "pr": 15110,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15110
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-own-tab",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:49:51Z",
-   "note": "",
-   "requeue": 15110
+   "updated": "2026-10-13T21:49:55Z",
+   "note": ""
   },
   {
    "id": "policy-priority-unmeasured",
