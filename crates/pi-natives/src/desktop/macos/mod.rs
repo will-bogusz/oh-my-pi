@@ -310,7 +310,7 @@ const fn presses(event: &PointerEvent) -> bool {
 /// user's own keyboard and mouse share.
 const fn shares_hid_route(target: &Target, mode: DeliveryMode) -> bool {
 	matches!(target, Target::Desktop | Target::Display(_))
-		|| matches!(mode, DeliveryMode::Foreground)
+		|| matches!(mode, DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus)
 }
 
 fn permission_label(granted: bool) -> String {
@@ -318,5 +318,21 @@ fn permission_label(granted: bool) -> String {
 		"granted".to_string()
 	} else {
 		"denied".to_string()
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn every_takeover_shares_the_hid_route() {
+		let window = Target::Window("42".to_string());
+		assert!(!shares_hid_route(&window, DeliveryMode::Background));
+		assert!(shares_hid_route(&window, DeliveryMode::Foreground));
+		// The host's rerun of a refused background call takes over too, so its
+		// release helper must observe the user's keys before its first press.
+		assert!(shares_hid_route(&window, DeliveryMode::ForegroundReturnFocus));
+		assert!(shares_hid_route(&Target::Desktop, DeliveryMode::Background));
 	}
 }
