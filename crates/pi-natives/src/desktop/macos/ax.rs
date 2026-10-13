@@ -270,6 +270,29 @@ pub(super) fn focused_window_id(pid: libc::pid_t) -> Option<u32> {
 	window_id(&window)
 }
 
+/// How an error names a window: its id, title and, for anything but a
+/// standard window, its AX subrole or role (`AXDialog`, `AXSheet`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) struct WindowLabel {
+	pub(super) id:    Option<u32>,
+	pub(super) title: Option<String>,
+	pub(super) kind:  Option<String>,
+}
+
+/// `pid`'s `AXFocusedWindow`, labelled for an error message.
+pub(super) fn focused_window_label(pid: libc::pid_t) -> Option<WindowLabel> {
+	let app = probe_application(pid)?;
+	let window = copy_element(&app, "AXFocusedWindow")?;
+	let kind = copy_string(&window, "AXSubrole")
+		.filter(|subrole| subrole != "AXStandardWindow")
+		.or_else(|| copy_string(&window, "AXRole").filter(|role| role != "AXWindow"));
+	Some(WindowLabel {
+		id: window_id(&window),
+		title: nonempty(copy_string(&window, "AXTitle")),
+		kind,
+	})
+}
+
 /// An application's `AXFocusedWindow`.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub(super) enum FocusedWindow {
@@ -1193,14 +1216,13 @@ fn text_surface(element: &AXUIElement) -> TextSurface {
 fn ensure_native_text_target(element: &AXUIElement) -> CoreResult<()> {
 	if process::is_terminal(element_pid(element)?) {
 		return Err(DesktopError::ax_failed(
-			"terminal AX text represents its rendered grid, not terminal input; use typeText or \
-			 takeover:true instead",
+			"terminal AX text represents its rendered grid, not terminal input; use typeText instead",
 		));
 	}
 	if text_surface(element) != TextSurface::Native {
 		return Err(DesktopError::ax_failed(
 			"AX text writes cannot be verified in web content or an incomplete AX ancestry; use a \
-			 pixel click followed by typeText, or takeover:true input instead",
+			 pixel click followed by typeText instead",
 		));
 	}
 	Ok(())
