@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `macOSFrontApp()`, which reads the app macOS has in front and can put it back in front for a while (`keepInFront`) without stopping for the user's typing
+
 ## [18.12.2] - 2026-10-18
 
 ### Added
