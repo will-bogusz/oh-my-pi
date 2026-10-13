@@ -3,6 +3,7 @@ mod capture;
 mod date;
 mod input;
 mod process;
+mod roster;
 mod session;
 mod skylight;
 mod spaces;
@@ -10,6 +11,7 @@ mod spaces;
 pub(super) use ax::menus;
 use image::RgbaImage;
 use objc2_app_kit::{NSApplicationActivationOptions, NSRunningApplication};
+pub(super) use roster::window_roster;
 pub(super) use session::screen_state;
 pub(super) use skylight::{FrontApp, front_app};
 
