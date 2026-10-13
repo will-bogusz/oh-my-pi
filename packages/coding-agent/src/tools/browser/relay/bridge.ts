@@ -713,11 +713,12 @@ export class RelayBridge {
 			if (wasAttached && !tab.attached && this.#sessionHolders(tab.tabKey).length > 0) {
 				void this.#ensureAttached(tab).then(ok => {
 					if (!ok) this.#onTabDetached(tab.tabKey, "reattach_failed", false);
-					// The lost attachment took its switches with it.
+					// The lost attachment took its switches with it; the last holder may have left while it came back.
 					else {
 						for (const method of TAB_WIDE_SWITCHES) {
 							if (this.#switchWanted(tab.tabKey, method)) this.#sendSwitch(tab.tabKey, method, true);
 						}
+						this.#detachIfUnheld(tab.tabKey);
 					}
 				});
 			}
@@ -1160,17 +1161,16 @@ export class RelayBridge {
 	}
 
 	/**
-	 * Attach a tab `conn` owns and announce it there as auto-attach would; false when the attach
-	 * failed or the connection gave the tab up meanwhile, in which case the attachment comes off again.
+	 * Attach a tab `conn` owns. False when the attach failed, or when the connection left or gave the
+	 * tab up meanwhile; the attachment then comes off again unless another client owns the tab (it may
+	 * be waiting on the same attach). Every client attach goes through here, so no session is minted
+	 * for a connection that is gone.
 	 */
-	async #attachOwned(conn: CdpConnection, tab: TabState): Promise<boolean> {
-		if (!(await this.#ensureAttached(tab))) return false;
-		if (this.#conns.get(conn.id) !== conn || !conn.claims.has(tab.tabKey) || tab.discarded) {
-			this.#detachIfUnheld(tab.tabKey);
-			return false;
-		}
-		this.#emitTabAttached(conn, tab);
-		return true;
+	async #attachFor(conn: CdpConnection, tab: TabState, opts?: { retryAfterDiscard?: boolean }): Promise<boolean> {
+		if (!(await this.#ensureAttached(tab, opts))) return false;
+		if (this.#conns.get(conn.id) === conn && conn.claims.has(tab.tabKey) && !tab.discarded) return true;
+		if (!this.#claimed(tab.tabKey)) this.#detachIfUnheld(tab.tabKey);
+		return false;
 	}
 
 	/** True while any downstream connection claims the tab as its drive target. */
@@ -1263,15 +1263,20 @@ export class RelayBridge {
 					const tab = this.#tabs.get(tabKey);
 					return tab && this.#eligible(tab) && !tab.discarded ? [tab] : [];
 				});
-				await Promise.all(tabs.map(tab => this.#ensureAttached(tab, { retryAfterDiscard: true })));
-				for (const tab of tabs) {
+				const attached = await Promise.all(
+					tabs.map(tab => this.#attachFor(conn, tab, { retryAfterDiscard: true })),
+				);
+				if (this.#conns.get(conn.id) !== conn) return;
+				for (const [index, tab] of tabs.entries()) {
+					if (attached[index]) {
+						this.#emitTabAttached(conn, tab);
+						continue;
+					}
 					if (!tab.attached || tab.discarded || !this.#eligible(tab)) {
 						// Failed or newly discarded tabs must not hold up connect().
 						this.#retractTab(tab);
 						this.#detachIfUnheld(tab.tabKey);
-						continue;
 					}
-					this.#emitTabAttached(conn, tab);
 				}
 				// Discarded tabs can stall debugger calls. Retract targets already
 				// announced by Target.setDiscoverTargets so Puppeteer can connect().
@@ -1299,10 +1304,13 @@ export class RelayBridge {
 					return;
 				}
 				this.#claimTab(conn, tab.tabKey);
-				if (conn.autoAttach && !(await this.#attachOwned(conn, tab))) {
-					if (conn.claims.delete(tab.tabKey)) this.#syncTabGrouping(tab);
-					this.#replyError(conn, msg, `Cannot attach to tab ${tab.tabKey} (${tab.url})`);
-					return;
+				if (conn.autoAttach) {
+					if (!(await this.#attachFor(conn, tab))) {
+						if (conn.claims.delete(tab.tabKey)) this.#syncTabGrouping(tab);
+						this.#replyError(conn, msg, `Cannot attach to tab ${tab.tabKey} (${tab.url})`);
+						return;
+					}
+					this.#emitTabAttached(conn, tab);
 				}
 				this.#reply(conn, msg, {});
 				return;
@@ -1326,7 +1334,7 @@ export class RelayBridge {
 					);
 					return;
 				}
-				if (!(await this.#ensureAttached(tab))) {
+				if (!(await this.#attachFor(conn, tab))) {
 					this.#replyError(conn, msg, `Cannot attach to tab ${tab.tabKey} (${tab.url})`);
 					return;
 				}
@@ -1380,12 +1388,28 @@ export class RelayBridge {
 				const createdKey = tabKeyOf(inst.code, result.tab.tabId);
 				this.#claimTab(conn, createdKey);
 				const created = this.#tabs.get(createdKey);
-				if (conn.autoAttach && created && !(await this.#attachOwned(conn, created))) {
-					// Nobody can drive a tab the relay cannot attach; close it rather than leave it behind.
-					await this.#rpc({ op: "removeTab", tabId: result.tab.tabId }, inst).catch(() => {});
-					if (this.#conns.get(conn.id) === conn)
-						this.#replyError(conn, msg, `Cannot attach to the tab the relay opened for ${url}`);
-					return;
+				if (conn.autoAttach && created) {
+					if (await this.#attachFor(conn, created)) {
+						this.#emitTabAttached(conn, created);
+					} else {
+						// Nobody can drive a tab the relay cannot attach: close it. When closing fails too, the
+						// reply still names the tab, so the client's own cleanup can close it later.
+						const closed = await this.#rpc({ op: "removeTab", tabId: result.tab.tabId }, inst).then(
+							() => true,
+							(error: unknown) => {
+								this.#log("closing a tab the relay could not attach failed", {
+									tabKey: createdKey,
+									error: error instanceof Error ? error.message : String(error),
+								});
+								return false;
+							},
+						);
+						if (this.#conns.get(conn.id) !== conn) return;
+						if (closed) {
+							this.#replyError(conn, msg, `Cannot attach to the tab the relay opened for ${url}`);
+							return;
+						}
+					}
 				}
 				this.#reply(conn, msg, { targetId: pageTargetIdFromKey(createdKey) });
 				return;
@@ -1769,6 +1793,8 @@ export class RelayBridge {
 							if (typeof groupId !== "number") continue;
 							tab.grouped = true;
 							tab.ompGroupId = groupId;
+							// Its claimant may have let go (or failed to attach) while the group RPC ran.
+							if (!this.#groupWorthy(tab)) this.#syncTabGrouping(tab);
 						}
 						this.#log("grouped tabs", { instanceId, tabIds, grouped });
 					} catch (err) {
@@ -1984,6 +2010,9 @@ export class RelayBridge {
 				tab.attached = true;
 				tab.reattachedAfterDetach = true;
 				if (tab.discarded) this.#detachIfUnheld(tab.tabKey);
+				// A discard cancelled the waiter, so no caller takes this attachment: keep it only for a claimant.
+				else if (generation !== tab.attachGeneration && !this.#claimed(tab.tabKey))
+					this.#detachIfUnheld(tab.tabKey);
 				return !tab.discarded;
 			})
 			.catch(err => {

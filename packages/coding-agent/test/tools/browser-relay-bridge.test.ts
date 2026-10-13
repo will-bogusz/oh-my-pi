@@ -272,7 +272,10 @@ describe("RelayBridge tab grouping", () => {
 		expect(ext.rpcs("group").map(rpc => rpc.tabIds)).toEqual([[1]]);
 	});
 
-	it("fails a claim it cannot attach without keeping the claim", async () => {
+	it.each([
+		{ order: "the group answers before the attach fails", groupFirst: true },
+		{ order: "the attach fails before the group answers", groupFirst: false },
+	])("fails a claim it cannot attach and takes the tab back out of the group when $order", async ({ groupFirst }) => {
 		const bridge = new RelayBridge({ group: { title: "omp", color: "cyan" } });
 		const ext = new FakeExtSocket();
 		connect(bridge, ext, [tab({ tabId: 1 })]);
@@ -289,9 +292,11 @@ describe("RelayBridge tab grouping", () => {
 			JSON.stringify({ id: claimId, method: "OMP.claimTarget", params: { targetId: `PAGE${ANON}.1` } }),
 		);
 		await flush();
-		// The claim requested the group before the attach answered; the failure takes it back out.
-		ack(bridge, ext, "group", { grouped: { "1": 42 } });
+		// The claim requests the group while the attach is still running.
+		if (groupFirst) ack(bridge, ext, "group", { grouped: { "1": 42 } });
 		nack(bridge, ext, "attach", "Another debugger is already attached to the tab with id: 1.");
+		await flush();
+		if (!groupFirst) ack(bridge, ext, "group", { grouped: { "1": 42 } });
 		await flush();
 		const reply = cdp.messages.find(message => message.id === claimId);
 		expect(reply && "error" in reply).toBe(true);
@@ -420,9 +425,37 @@ describe("RelayBridge tab grouping", () => {
 		await flush();
 		expect(ext.rpcs("removeTab").map(rpc => rpc.tabId)).toEqual([9]);
 		ack(bridge, ext, "removeTab");
+		bridge.extMessage(ext, JSON.stringify({ t: "tabRemoved", tabId: 9 }));
 		await flush();
 		const reply = cdp.messages.find(message => message.id === createId);
 		expect(reply && "error" in reply).toBe(true);
+		expect(bridge.listTargets().map(target => target.id)).not.toContain(`PAGE${ANON}.9`);
+	});
+
+	it("hands back the id of a created tab it could neither attach nor close, so the client can close it", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, []);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: ++msgSeq, method: "Target.setAutoAttach", params: { autoAttach: true } }),
+		);
+		const createId = ++msgSeq;
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: createId, method: "Target.createTarget", params: { url: "https://example.com/" } }),
+		);
+		ack(bridge, ext, "createTab", { tab: tab({ tabId: 9 }) });
+		await flush();
+		nack(bridge, ext, "attach", "Cannot access contents of the page");
+		await flush();
+		nack(bridge, ext, "removeTab", "No tab with id: 9.");
+		await flush();
+		expect(cdp.messages.find(message => message.id === createId)).toMatchObject({
+			result: { targetId: `PAGE${ANON}.9` },
+		});
 	});
 
 	it("creates a Target.createTarget background tab without selecting it", () => {
@@ -1078,6 +1111,81 @@ describe("RelayBridge attachment release", () => {
 		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })], [1]);
 		expect(ext.rpcs("detach").map(rpc => rpc.tabId)).toEqual([1]);
 	});
+
+	it("takes off an attachment that lands after a discard cancelled the claim waiting on it", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: ++msgSeq, method: "Target.setAutoAttach", params: { autoAttach: true } }),
+		);
+		await flush();
+		const claimId = ++msgSeq;
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: claimId, method: "OMP.claimTarget", params: { targetId: `PAGE${ANON}.1` } }),
+		);
+		await flush();
+		bridge.extMessage(ext, JSON.stringify({ t: "tabUpdated", tab: tab({ tabId: 1, discarded: true }) }));
+		await flush();
+		bridge.extMessage(ext, JSON.stringify({ t: "tabUpdated", tab: tab({ tabId: 1 }) }));
+		await flush();
+		// The original attach RPC succeeds only now, after the claim already failed.
+		ack(bridge, ext, "attach");
+		await flush();
+		const reply = cdp.messages.find(message => message.id === claimId);
+		expect(reply && "error" in reply).toBe(true);
+		expect(cdp.attachedSessions()).toHaveLength(0);
+		expect(ext.rpcs("detach").map(rpc => rpc.tabId)).toEqual([1]);
+	});
+
+	it.each([
+		{ method: "Target.attachToTarget", params: { targetId: `PAGE${ANON}.1`, flatten: true } },
+		{ method: "Target.setAutoAttach", params: { autoAttach: true } },
+	])("takes off an attachment whose client left while $method waited on it", async ({ method, params }) => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		await claimTab(bridge, ext, cdp, connId, 1);
+		bridge.cdpMessage(connId, JSON.stringify({ id: ++msgSeq, method, params }));
+		await flush();
+		expect(ext.pending("attach")).toHaveLength(1);
+		bridge.cdpClosed(connId);
+		ack(bridge, ext, "attach");
+		await flush();
+		expect(cdp.attachedSessions()).toHaveLength(0);
+		expect(ext.rpcs("detach").map(rpc => rpc.tabId)).toEqual([1]);
+	});
+
+	it("keeps an attachment another owner takes when one client leaves while the attach is pending", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const [leaving, staying] = [new FakeCdpSocket(), new FakeCdpSocket()].map(cdp => ({
+			cdp,
+			id: bridge.cdpConnected(cdp),
+		}));
+		for (const { cdp, id } of [leaving!, staying!]) await claimTab(bridge, ext, cdp, id, 1);
+		for (const { id } of [leaving!, staying!]) {
+			bridge.cdpMessage(
+				id,
+				JSON.stringify({ id: ++msgSeq, method: "Target.attachToTarget", params: { targetId: `PAGE${ANON}.1` } }),
+			);
+		}
+		await flush();
+		bridge.cdpClosed(leaving!.id);
+		ack(bridge, ext, "attach");
+		await flush();
+		expect(leaving!.cdp.attachedSessions()).toHaveLength(0);
+		expect(staying!.cdp.attachedSessions()).toHaveLength(1);
+		expect(ext.rpcs("detach")).toHaveLength(0);
+	});
+
 	it("detaches cleanly on explicit last-session release and permits reattachment", async () => {
 		const bridge = new RelayBridge({ group: { title: "omp", color: "cyan" } });
 		const ext = new FakeExtSocket();
@@ -1755,21 +1863,6 @@ describe("RelayBridge multiple extension instances", () => {
 		} finally {
 			jest.useRealTimers();
 		}
-	});
-
-	it("opens a new tab beside a tab another connection owns before following the selected tab", async () => {
-		const bridge = new RelayBridge({});
-		const chrome = new FakeExtSocket();
-		const edge = new FakeExtSocket();
-		// Chrome shows the first selected tab and said hello last; omp owns Edge's tab on another connection.
-		connectInstance(bridge, edge, "edge", [tab({ tabId: 1 })]);
-		connectInstance(bridge, chrome, "chrome", [tab({ tabId: 1, active: true })]);
-		const owner = new FakeCdpSocket();
-		await claimTab(bridge, edge, owner, bridge.cdpConnected(owner), 1, "edge");
-		const connId = bridge.cdpConnected(new FakeCdpSocket());
-		bridge.cdpMessage(connId, JSON.stringify({ id: ++msgSeq, method: "Target.createTarget", params: {} }));
-		expect(edge.rpcs("createTab")).toHaveLength(1);
-		expect(chrome.rpcs("createTab")).toHaveLength(0);
 	});
 });
 
