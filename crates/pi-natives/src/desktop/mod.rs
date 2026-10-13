@@ -29,7 +29,7 @@ use std::{
 
 pub use applications::{Application, ApplicationOpenOptions, ApplicationQuery, OpenedApplication};
 use ax::{AxRegistry, register_node};
-use backend::{Backend, DeliveryMode, MouseButton, PointerEvent};
+use backend::{Backend, DeliveryMode, MouseButton, PointerEvent, is_raise_action};
 use control::{CancellationSource, InputLease, OperationToken};
 use error::{CoreResult, DesktopError};
 use frame::{FrameGeometry, apply_capture_caps, encode_png};
@@ -304,6 +304,31 @@ impl Request {
 				| Self::HoldKeys { .. }
 				| Self::HoldMouse { .. }
 		)
+	}
+
+	/// Whether this mutation takes over the user's own input or foreground,
+	/// which arms the physical-Escape stop: takeover delivery, input to a
+	/// desktop or display target (it drives the user's real pointer and
+	/// keyboard), an explicit raise, and an activating launch.
+	fn takes_over(&self) -> bool {
+		let (target, takeover) = match self {
+			Self::HoldKeys { target, takeover, .. }
+			| Self::HoldMouse { target, takeover, .. }
+			| Self::MoveMouse { target, takeover, .. }
+			| Self::Scroll { target, takeover, .. }
+			| Self::TypeText { target, takeover, .. }
+			| Self::KeyChord { target, takeover, .. } => (Some(target), *takeover),
+			Self::Click { target, options, .. } | Self::Drag { target, options, .. } => {
+				(Some(target), options.takeover)
+			},
+			Self::AxClick { options, .. } => (None, options.takeover),
+			Self::RaiseWindow { .. } => return true,
+			Self::OpenApplication { options, .. } => return options.activate.unwrap_or(false),
+			Self::AxPerform { action, .. } => return is_raise_action(action),
+			_ => return false,
+		};
+		target.is_some_and(|target| !matches!(target, Target::Window(_)))
+			|| DeliveryMode::from_takeover(takeover) == DeliveryMode::Foreground
 	}
 
 	const fn frame_target(&self) -> Option<&Target> {
@@ -672,7 +697,7 @@ impl Worker {
 		let _scope = token.enter();
 		let _lease = request
 			.is_mutation()
-			.then(|| InputLease::acquire(token))
+			.then(|| InputLease::acquire(token, request.takes_over()))
 			.transpose()?;
 		token.check()?;
 		// A full capture replaces coordinates only if it completes in its
@@ -2158,12 +2183,44 @@ mod capture_tests {
 		}
 	}
 
-	fn worker_with(backend: impl Backend + 'static) -> Worker {
-		Worker {
-			backend:      Ok(Box::new(backend)),
-			registry:     AxRegistry::default(),
-			frames:       HashMap::new(),
-			capabilities: Arc::default(),
+	/// A worker that holds the ownership test lock for its test: input it is
+	/// sent takes the process's one input lease, which the ownership tests in
+	/// `control` assert on.
+	struct TestWorker {
+		worker:     Worker,
+		_ownership: parking_lot::MutexGuard<'static, ()>,
+	}
+
+	impl TestWorker {
+		fn serve(self, rx: &flume::Receiver<QueuedRequest>, grace: Duration) {
+			let Self { worker, _ownership } = self;
+			worker.serve(rx, grace);
+		}
+	}
+
+	impl std::ops::Deref for TestWorker {
+		type Target = Worker;
+
+		fn deref(&self) -> &Worker {
+			&self.worker
+		}
+	}
+
+	impl std::ops::DerefMut for TestWorker {
+		fn deref_mut(&mut self) -> &mut Worker {
+			&mut self.worker
+		}
+	}
+
+	fn worker_with(backend: impl Backend + 'static) -> TestWorker {
+		TestWorker {
+			_ownership: crate::desktop::control::OWNERSHIP_TEST.lock(),
+			worker:     Worker {
+				backend:      Ok(Box::new(backend)),
+				registry:     AxRegistry::default(),
+				frames:       HashMap::new(),
+				capabilities: Arc::default(),
+			},
 		}
 	}
 
@@ -2823,6 +2880,75 @@ mod capture_tests {
 			background, background, background, background, foreground, foreground, foreground,
 			foreground
 		]);
+	}
+
+	#[test]
+	fn only_takeover_requests_arm_the_physical_escape_stop() {
+		let window = Target::Window("42".to_string());
+		let reply = || flume::unbounded().0;
+		let typing = |target: &Target, takeover| Request::TypeText {
+			target: target.clone(),
+			text: "abc".to_string(),
+			takeover,
+			reply: reply(),
+		};
+		let holding = |target: &Target, takeover| Request::HoldKeys {
+			target: target.clone(),
+			keys: parse_keys(&["shift".to_string()]).unwrap(),
+			duration: Duration::ZERO,
+			takeover,
+			reply: reply(),
+		};
+		let clicking = |target: &Target, takeover| Request::Click {
+			target:  target.clone(),
+			x:       0.0,
+			y:       0.0,
+			options: ParsedPointerOptions::parse(Some(PointerOptions {
+				takeover,
+				..PointerOptions::default()
+			}))
+			.unwrap(),
+			reply:   reply(),
+		};
+		let perform = |action: &str| Request::AxPerform {
+			reference: "e1".to_string(),
+			action:    action.to_string(),
+			reply:     reply(),
+		};
+		let open = |activate| Request::OpenApplication {
+			id:      "com.apple.TextEdit".to_string(),
+			options: ApplicationOpenOptions { activate },
+			reply:   reply(),
+		};
+		let background = [
+			typing(&window, None),
+			typing(&window, Some(false)),
+			holding(&window, None),
+			clicking(&window, Some(false)),
+			perform("AXPress"),
+			perform("showMenu"),
+			open(None),
+			open(Some(false)),
+		];
+		for request in background {
+			assert!(!request.takes_over(), "background input leaves Escape to the user");
+		}
+		let display = Target::parse("display:screen-1");
+		let takeover = [
+			typing(&window, Some(true)),
+			holding(&window, Some(true)),
+			clicking(&window, Some(true)),
+			typing(&Target::Desktop, None),
+			holding(&Target::Desktop, Some(false)),
+			clicking(&display, None),
+			Request::RaiseWindow { id: "42".to_string(), reply: reply() },
+			perform("raise"),
+			perform("AXRaise"),
+			open(Some(true)),
+		];
+		for request in takeover {
+			assert!(request.takes_over(), "takeover input keeps the Escape stop");
+		}
 	}
 
 	#[test]
