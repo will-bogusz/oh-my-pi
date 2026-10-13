@@ -336,6 +336,9 @@ const FRAME_SNAPSHOT_TIMEOUT_MS = 5_000;
 /** Bound on Puppeteer exposing a page Chromium still has; the supervisor's init budget caps the whole attach anyway. */
 const ATTACHED_TARGET_EXPOSE_TIMEOUT_MS = 5_000;
 
+/** How Chromium answers an unknown CDP method: a plain CDP backend's reply to the relay-private `OMP.claimTarget`. */
+const CDP_METHOD_NOT_FOUND = "wasn't found";
+
 /** Queue a wheel event without treating a delayed renderer acknowledgement as dispatch failure. */
 export async function dispatchScroll(
 	dispatch: () => Promise<void>,
@@ -1724,7 +1727,9 @@ export class WorkerCore {
 				}
 				if (payload.dialogs) this.#applyDialogPolicy(payload.dialogs);
 			} else {
-				const target = await this.#findAttachedTarget(payload.page.targetId);
+				// The omp relay attaches only tabs a connection owns: claim the tab first so it attaches here.
+				const claimed = await this.#claimRelayTarget(payload.page.targetId);
+				const target = await this.#findAttachedTarget(payload.page.targetId, claimed);
 				// Post-timeout recycle: unblock the target BEFORE adopting the page — an open
 				// modal dialog or hung navigation can stall `target.page()` / ready info, and a
 				// stalled init used to time out and force-kill the tab.
@@ -1733,7 +1738,6 @@ export class WorkerCore {
 				if (!page)
 					throw new ToolError(`Target ${payload.page.targetId} is no longer available on the attached browser`);
 				this.#page = page;
-				await this.#claimRelayTarget(page);
 				this.#observeDialogs();
 				if (payload.dialogs) this.#applyDialogPolicy(payload.dialogs);
 			}
@@ -1807,15 +1811,16 @@ export class WorkerCore {
 		}
 	}
 
-	async #findAttachedTarget(targetId: string): Promise<Target> {
+	async #findAttachedTarget(targetId: string, claimed: boolean): Promise<Target> {
 		if (!this.#browser) throw new ToolError("Browser is not connected");
 		for (const target of this.#browser.targets()) {
 			if ((await targetIdForTarget(target).catch(() => "")) !== targetId) continue;
 			return target;
 		}
 		// Puppeteer lists a page only once its URL is non-empty, and a crashed page revived by this attach reloads
-		// with an empty URL for a moment. Wait for it while Chromium still has the target; fail at once when not.
-		if (await this.#browserHasTarget(this.#browser, targetId)) {
+		// with an empty URL for a moment; a just-claimed relay tab also announces its page a moment later. Wait for
+		// it while Chromium still has the target; fail at once when not.
+		if (claimed || (await this.#browserHasTarget(this.#browser, targetId))) {
 			const target = await this.#browser
 				.waitForTarget(async candidate => (await targetIdForTarget(candidate).catch(() => "")) === targetId, {
 					timeout: ATTACHED_TARGET_EXPOSE_TIMEOUT_MS,
@@ -1840,22 +1845,29 @@ export class WorkerCore {
 	}
 
 	/**
-	 * Tell the omp browser relay this worker drives the adopted page, so the
-	 * relay adds it to the per-window "omp" tab group. Best-effort: plain CDP
-	 * backends (real Chrome, cmux) reject the relay-private method.
+	 * Claim the target on the omp browser relay, which attaches and announces only tabs a connection
+	 * owns, and adds it to the per-window "omp" tab group. False on plain CDP backends (real Chrome,
+	 * cmux), which reject the relay-private method as unknown.
 	 */
-	async #claimRelayTarget(page: Page): Promise<void> {
-		let session: CDPSession | undefined;
+	async #claimRelayTarget(targetId: string): Promise<boolean> {
+		if (!this.#browser) throw new ToolError("Browser is not connected");
+		// Puppeteer's protocol map cannot express the relay-private method; the send signature is otherwise identical.
+		const connection = browserConnection(this.#browser) as unknown as {
+			send(method: string, params: { targetId: string }): Promise<unknown>;
+		};
 		try {
-			session = await page.createCDPSession();
-			// Puppeteer's protocol map cannot express the relay-private method; the
-			// send signature is otherwise identical.
-			const raw = session as unknown as { send(method: string): Promise<unknown> };
-			await raw.send("OMP.claimTarget");
-		} catch {
-			// Not the omp relay; nothing to claim.
-		} finally {
-			await session?.detach().catch(() => undefined);
+			await connection.send("OMP.claimTarget", { targetId });
+			return true;
+		} catch (error) {
+			// Puppeteer keeps the CDP error's message but not its code.
+			if (
+				error instanceof Error &&
+				"originalMessage" in error &&
+				typeof error.originalMessage === "string" &&
+				error.originalMessage.endsWith(CDP_METHOD_NOT_FOUND)
+			)
+				return false;
+			throw error;
 		}
 	}
 

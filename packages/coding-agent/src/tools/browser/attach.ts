@@ -435,8 +435,6 @@ export async function findReusableCdp(
 export interface PickTargetOptions {
 	matcher?: string;
 	preferVisible?: boolean;
-	/** Relay /json endpoint (e.g. http://127.0.0.1:9224); enables metadata-first target selection. */
-	relayJson?: string;
 	signal?: AbortSignal;
 }
 
@@ -598,109 +596,53 @@ function relayEntryMatches(entry: RelayJsonEntry, needle: string): boolean {
 	return entry.url.toLowerCase().includes(needle) || entry.title.toLowerCase().includes(needle);
 }
 
-function selectRelayEntry(entries: RelayJsonEntry[], options: PickTargetOptions): RelayJsonEntry | null {
-	const needle = options.matcher?.toLowerCase();
-	if (needle) {
-		const hits = entries.filter(e => relayEntryMatches(e, needle));
-		const live = hits.filter(e => e.discarded !== "true");
-		if (live.length > 0) return live[0]!;
-		if (hits.length > 0) {
-			throw new ToolError(
-				`The tab matching ${JSON.stringify(options.matcher)} was discarded by Chrome. Click it to reload, then retry.`,
-			);
-		}
-		const summary = entries.map(e => `- ${e.title || "(untitled)"}  ${e.url}`).join("\n");
+/** The relay page matching `matcher`; a discarded match or none fails with what to pass instead. */
+function selectRelayEntry(entries: RelayJsonEntry[], matcher: string): RelayJsonEntry {
+	const needle = matcher.toLowerCase();
+	const hits = entries.filter(e => relayEntryMatches(e, needle));
+	const live = hits.filter(e => e.discarded !== "true");
+	if (live.length > 0) return live[0]!;
+	if (hits.length > 0) {
 		throw new ToolError(
-			`No page target matched ${JSON.stringify(options.matcher)} after waiting ${RELAY_MATCH_SETTLE_MS / 1000}s for a newly opened tab. Pass a target from these URLs or titles (browser.targets() lists them before adopting), or omit it to use the active tab. Available pages:\n${summary}`,
+			`The tab matching ${JSON.stringify(matcher)} was discarded by Chrome. Click it to reload, then retry.`,
 		);
 	}
-	const usable = entries.filter(isAdoptableRelayEntry);
-	return usable.find(e => e.active === "true") ?? usable[0] ?? null;
+	const summary = entries.map(e => `- ${e.title || "(untitled)"}  ${e.url}`).join("\n");
+	throw new ToolError(
+		`No page target matched ${JSON.stringify(matcher)} after waiting ${RELAY_MATCH_SETTLE_MS / 1000}s for a newly opened tab. Pass a target from these URLs or titles (browser.targets() lists them before adopting), or omit it to open a new tab. Available pages:\n${summary}`,
+	);
 }
 
-/** Select relay pages from /json metadata before probing pages; enumerate targets when metadata offers no selection. */
+/**
+ * The id of the relay page `matcher` names, chosen from the relay's `/json` listing without attaching
+ * to any tab: the relay attaches a tab only once the connection driving it claims it. A tab opened a
+ * moment earlier gets a short settle to appear.
+ */
+export async function pickRelayTarget(relayJson: string, matcher: string, signal?: AbortSignal): Promise<string> {
+	throwIfAborted(signal);
+	const needle = matcher.toLowerCase();
+	const settleDeadline = Date.now() + RELAY_MATCH_SETTLE_MS;
+	let entries = await fetchRelayEntries(relayJson, signal);
+	while (
+		entries &&
+		!entries.some(e => e.type === "page" && relayEntryMatches(e, needle)) &&
+		Date.now() < settleDeadline
+	) {
+		await abortable(signal, () => Bun.sleep(Math.min(RELAY_MATCH_POLL_MS, settleDeadline - Date.now())));
+		const polled = await fetchRelayEntries(relayJson, signal, Math.max(1, settleDeadline - Date.now()));
+		throwIfAborted(signal);
+		entries = polled ?? entries;
+	}
+	if (!entries) throw new ToolError(`omp browser relay at ${relayJson} did not list its pages (GET /json failed).`);
+	return selectRelayEntry(
+		entries.filter(e => e.type === "page"),
+		matcher,
+	).id;
+}
+
+/** Pick a page of a CDP browser by URL/title match, else the visible one when asked, else the first usable one. */
 export async function pickElectronTarget(browser: Browser, options: PickTargetOptions = {}): Promise<Page> {
 	throwIfAborted(options.signal);
-	if (options.relayJson) {
-		let entries = await fetchRelayEntries(options.relayJson, options.signal);
-		const needle = options.matcher?.toLowerCase();
-		const settleDeadline = Date.now() + RELAY_MATCH_SETTLE_MS;
-		// Without page metadata, target enumeration below decides at once, as before.
-		while (
-			needle &&
-			entries?.some(e => e.type === "page") &&
-			!entries.some(e => e.type === "page" && relayEntryMatches(e, needle)) &&
-			Date.now() < settleDeadline
-		) {
-			await abortable(options.signal, () => Bun.sleep(Math.min(RELAY_MATCH_POLL_MS, settleDeadline - Date.now())));
-			const polled = await fetchRelayEntries(
-				options.relayJson,
-				options.signal,
-				Math.max(1, settleDeadline - Date.now()),
-			);
-			throwIfAborted(options.signal);
-			entries = polled ?? entries;
-		}
-		if (entries) {
-			const pageEntries = entries.filter(e => e.type === "page");
-			const selected = pageEntries.length > 0 ? selectRelayEntry(pageEntries, options) : null;
-			const targets = browser.targets();
-			if (options.preferVisible && !options.matcher) {
-				const active = pageEntries.filter(e => e.active === "true" && isAdoptableRelayEntry(e));
-				if (active.length > 1) {
-					let firstPage: Page | null = null;
-					let unreadableActive = false;
-					for (const entry of active) {
-						const target = targets.find(t => (t as Target & { _targetId?: string })._targetId === entry.id);
-						if (!target) {
-							unreadableActive = true;
-							continue;
-						}
-						const page = await attachPageWithTimeout(target, PAGE_ATTACH_TIMEOUT_MS, options.signal);
-						if (!page || !(await waitForMainFrame(page, FRAME_READY_TIMEOUT_MS, options.signal))) {
-							unreadableActive = true;
-							continue;
-						}
-						firstPage ??= page;
-						const visible = await abortable(options.signal, () =>
-							Promise.race([
-								page.evaluate(() => document.visibilityState === "visible").catch(() => false),
-								Bun.sleep(RELAY_VISIBILITY_TIMEOUT_MS).then(() => false),
-							]),
-						);
-						if (visible) return page;
-					}
-					if (unreadableActive) throw new ToolError("An active tab is not ready; retry after it loads");
-					if (firstPage) return firstPage;
-				}
-			}
-			if (selected) {
-				const isSelected = (t: Target) => (t as Target & { _targetId?: string })._targetId === selected.id;
-				const attachDeadline = Date.now() + PAGE_ATTACH_TIMEOUT_MS;
-				let target = targets.find(isSelected);
-				if (!target) {
-					// Puppeteer learns of a tab from the relay's targetCreated event, which can trail /json.
-					try {
-						target = await abortable(options.signal, () =>
-							browser.waitForTarget(isSelected, { timeout: PAGE_ATTACH_TIMEOUT_MS, signal: options.signal }),
-						);
-					} catch (error) {
-						throwIfAborted(options.signal);
-						if (error instanceof Error && error.name === "TimeoutError") {
-							throw new ToolError(
-								"Selected tab did not become available before omp could attach; retry, or reopen it if it closed",
-							);
-						}
-						throw error;
-					}
-				}
-				const page = await attachPageWithTimeout(target, attachDeadline - Date.now(), options.signal);
-				if (!page || !(await waitForMainFrame(page, FRAME_READY_TIMEOUT_MS, options.signal)))
-					throw new ToolError("Selected tab is not ready; retry after it loads");
-				return page;
-			}
-		}
-	}
 
 	let targets = browser.targets();
 	if (!targets.some(target => String(target.type()) === "page")) {

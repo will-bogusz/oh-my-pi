@@ -3,10 +3,12 @@
  * connection pattern against a live relay + extension.
  *
  * The tool opens TWO puppeteer connections per driven tab — the supervisor
- * (`puppeteer.connect({browserURL})`, picks a target) and a tab worker
- * (`puppeteer.connect({browserWSEndpoint})`, adopts that target by id) — so
- * this script does exactly that, then exercises evaluate/navigate/screenshot,
- * an extra CDP session, and the createTarget/closeTarget path.
+ * (`puppeteer.connect({browserURL})`, picks a target from the relay's `/json`
+ * listing without attaching to it) and a tab worker
+ * (`puppeteer.connect({browserWSEndpoint})`, claims that target with the
+ * relay-private `OMP.claimTarget`, which attaches it) — so this script does
+ * exactly that, then exercises evaluate/navigate/screenshot, an extra CDP
+ * session, and the createTarget/closeTarget path.
  *
  * Usage: bun scripts/smoke.ts [relay-url] [target-substring]
  */
@@ -31,27 +33,15 @@ step("supervisor: connect via browserURL");
 const supervisor = await puppeteer.connect({ browserURL: relayUrl, defaultViewport: null, protocolTimeout: 20_000 });
 console.log("version:", await supervisor.version());
 
-step("supervisor: discover targets");
-const pages = (
-	await Promise.all(
-		supervisor
-			.targets()
-			.map(async target => (String(target.type()) === "page" ? await target.page().catch(() => null) : null)),
-	)
-).filter(page => page !== null);
+step("supervisor: list pages from /json");
+const listed = (await (await fetch(`${relayUrl}/json`)).json()) as Array<{ id: string; title: string; url: string }>;
 console.log(
 	"pages:",
-	pages.map(page => page.url()),
+	listed.map(entry => entry.url),
 );
-if (pages.length === 0) throw new Error("no page targets discovered");
-
-let picked = null;
-for (const page of pages) {
-	const title = await page.title().catch(() => "");
-	if (page.url().includes(matcher) || title.includes(matcher)) picked = page;
-}
+const picked = listed.find(entry => entry.url.includes(matcher) || entry.title.includes(matcher));
 if (!picked) throw new Error(`no page matching ${JSON.stringify(matcher)}`);
-const targetId = targetIdOf(picked.target());
+const targetId = picked.id;
 const wsEndpoint = supervisor.wsEndpoint();
 console.log("picked target:", targetId, "ws:", wsEndpoint);
 
@@ -61,6 +51,11 @@ const worker = await puppeteer.connect({
 	defaultViewport: null,
 	protocolTimeout: 20_000,
 });
+// The relay attaches only tabs a connection owns: claim the picked tab on the worker's connection.
+if (!("_connection" in worker)) throw new Error("puppeteer browser exposes no CDP connection");
+// Puppeteer's CDP browser keeps its connection on an internal field, and its protocol map lacks the relay method.
+const workerConnection = worker._connection as { send(method: string, params: object): Promise<unknown> };
+await workerConnection.send("OMP.claimTarget", { targetId });
 const workerTarget = await worker.waitForTarget(target => targetIdOf(target) === targetId, { timeout: 10_000 });
 const page = await workerTarget.page();
 if (!page) throw new Error("worker could not adopt page");
