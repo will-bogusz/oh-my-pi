@@ -3404,8 +3404,9 @@ mod capture_tests {
 		let backend = FakeWaylandBackend::new();
 		let calls = Arc::clone(&backend.clicks);
 		let mut worker = worker_with(backend);
-		let ax = worker.backend.as_mut().unwrap().ax().unwrap();
-		let reference = register_node(ax, &mut worker.registry, WAYLAND_ID, AxHandle::Test(1))
+		let inner = &mut *worker;
+		let ax = inner.backend.as_mut().unwrap().ax().unwrap();
+		let reference = register_node(ax, &mut inner.registry, WAYLAND_ID, AxHandle::Test(1))
 			.unwrap()
 			.ref_;
 		let menu = Some(vec!["Add to".to_string(), "Bench Holdout".to_string()]);
@@ -3548,7 +3549,8 @@ mod capture_tests {
 			[(None, ErrorCode::BackgroundUnavailable), (Some(true), ErrorCode::InputFailed)]
 		{
 			let mut worker = worker_with(FakeWaylandBackend::new());
-			let (backend, registry) = (&mut worker.backend, &mut worker.registry);
+			let inner = &mut *worker;
+			let (backend, registry) = (&mut inner.backend, &mut inner.registry);
 			let ax = backend
 				.as_mut()
 				.ok()
