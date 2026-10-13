@@ -2,6 +2,7 @@ mod ax;
 mod capture;
 mod date;
 mod input;
+mod keymap;
 pub(super) mod permission;
 mod process;
 mod session;
