@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `DesktopSession.axType` and `axKeyChord`, which type into or press keys in one accessibility element; on macOS a field that does not report keyboard focus gets nothing and the error names what has focus ([#PR](https://github.com/can1357/oh-my-pi/pull/PR) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Changed
 
 - Reduced allocation overhead for uncached, result-limited file searches in large directory trees ([#16115](https://github.com/can1357/oh-my-pi/pull/16115) by [@kyle-elliott](https://github.com/kyle-elliott)).
