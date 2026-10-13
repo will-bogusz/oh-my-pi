@@ -1921,9 +1921,14 @@ export class WorkerCore {
 			const choosers = await FileChooserCatcher.attach(this.#page);
 			this.#choosers = choosers;
 			if (this.#ownBrowser) await choosers.arm();
-			// A cell's raw `page.waitForFileChooser()` fills or cancels its chooser itself; the catcher leaves it be.
-			const waitForFileChooser = this.#page.waitForFileChooser.bind(this.#page);
-			this.#page.waitForFileChooser = options => choosers.leaveTo(waitForFileChooser(options));
+			// A cell's raw `page.waitForFileChooser()` fills or cancels its chooser itself; the catcher leaves it be, and
+			// turns off the interception Puppeteer leaves on, which would swallow the user's later choosers.
+			const page = this.#page;
+			const waitForFileChooser = page.waitForFileChooser.bind(page);
+			page.waitForFileChooser = options =>
+				choosers.leaveTo(waitForFileChooser(options), () =>
+					page.mainFrame().client.send("Page.setInterceptFileChooserDialog", { enabled: false }),
+				);
 			await installVitalsObservers(this.#page);
 			if (payload.userAgent !== undefined) await applyUserAgentOverride(this.#page, payload.userAgent);
 			if (payload.ignoreHttpsErrors) await applyIgnoreHttpsErrors(this.#page);
