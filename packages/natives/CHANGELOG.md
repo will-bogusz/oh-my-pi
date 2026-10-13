@@ -23,6 +23,10 @@
 
 - Optimized transport performance with task-local write coalescing and batch-based newline processing
 
+### Fixed
+
+- Fixed macOS computer use reporting a working physical Escape stop (`globalEscape: true`) when it could not see keys, and refusing input when the stop failed to start; input now runs without it, `inputPermission` reports event-posting access, and permission errors name the terminal or IDE to grant ([#15157](https://github.com/can1357/oh-my-pi/pull/15157) by [@will-bogusz](https://github.com/will-bogusz))
+
 ## [18.9.2] - 2026-10-11
 
 ### Fixed
