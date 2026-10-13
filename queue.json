@@ -1141,15 +1141,16 @@
    ],
    "base": "73330e1926981d973b67411bacc9c48003c4646b",
    "body": "bodies/computer-settle-debt.md",
-   "state": "open",
-   "pr": 15565,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15565
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-settle-debt",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:52:13Z",
-   "note": "",
-   "requeue": 15565
+   "updated": "2026-10-13T21:52:16Z",
+   "note": ""
   },
   {
    "id": "computer-ax-focus",
