@@ -99,7 +99,7 @@ class CdpConnection {
 	autoAttach = false;
 	/** Minted pseudo-sessions owned by this connection. */
 	readonly sessions = new Map<string, SessionRef>();
-	/** Tabs this connection claimed as drive targets (`OMP.claimTarget` / `Target.createTarget`). */
+	/** Tabs this connection owns (`Target.createTarget` / `OMP.claimTarget`): the only tabs it may attach to. */
 	readonly claims = new Set<string>();
 	/** Real child session id → the session it was announced on; its events and detach go there. */
 	readonly childParents = new Map<string, string>();
@@ -658,6 +658,8 @@ export class RelayBridge {
 					}
 				});
 			}
+			// An attachment no client holds (one an earlier relay process left behind) comes off the tab.
+			if (tab.attached) this.#detachIfUnheld(tab.tabKey);
 		}
 		this.#syncGrouping();
 		this.#log("extension connected", {
@@ -766,8 +768,7 @@ export class RelayBridge {
 		conn.sessions.clear();
 		for (const ref of departed) this.#releaseSwitches(ref);
 		// Tabs this client claimed leave the omp group unless another claimant
-		// remains — session holders don't count: the long-lived registry
-		// connection holds sessions on every tab without driving any of them.
+		// remains; a connection that only holds a session on the tab does not count.
 		for (const tabId of conn.claims) {
 			const tab = this.#tabs.get(tabId);
 			if (tab) this.#syncTabGrouping(tab);
@@ -986,7 +987,7 @@ export class RelayBridge {
 
 	/**
 	 * Chrome reports a child target once, to the first auto-attach armed over it, so a connection
-	 * arming later (a tab worker after the registry connection) is told here of the children already
+	 * arming later (a fresh worker beside one still holding the tab) is told here of the children already
 	 * reported under `parent` (the tab's root when undefined) that it has not heard of.
 	 */
 	#announceChildren(conn: CdpConnection, tabKey: string, parent: string | undefined, sessionId: string): void {
@@ -1013,13 +1014,6 @@ export class RelayBridge {
 	): Promise<boolean> {
 		// Guard rail: a page session must never take the whole browser down.
 		if (msg.method === "Browser.close") {
-			this.#reply(conn, msg, {});
-			return true;
-		}
-		// Relay-private claim: the omp tab worker marks the page it was spawned
-		// to drive. Never forwarded — real Chrome rejects the unknown method.
-		if (msg.method === "OMP.claimTarget") {
-			this.#claimTab(conn, tabKey);
 			this.#reply(conn, msg, {});
 			return true;
 		}
@@ -1062,10 +1056,9 @@ export class RelayBridge {
 	}
 
 	/**
-	 * Record `conn` as a driver of the tab and reconcile grouping. Claims are
-	 * explicit (worker adoption or tab creation) rather than inferred from
-	 * command traffic: target discovery scans every page with the same
-	 * commands a driver sends, so inference would sweep all tabs.
+	 * Record `conn` as the owner of the tab and reconcile grouping. Ownership is
+	 * explicit (tab creation or a claim) rather than inferred from command
+	 * traffic, and it is what lets a connection attach to the tab at all.
 	 */
 	#claimTab(conn: CdpConnection, tabKey: string): void {
 		const tab = this.#tabs.get(tabKey);
@@ -1075,6 +1068,20 @@ export class RelayBridge {
 			this.#log("tab claimed", { conn: conn.id, tabKey });
 		}
 		this.#syncTabGrouping(tab);
+	}
+
+	/**
+	 * Attach a tab `conn` owns and announce it there as auto-attach would; false when the attach
+	 * failed or the connection gave the tab up meanwhile, in which case the attachment comes off again.
+	 */
+	async #attachOwned(conn: CdpConnection, tab: TabState): Promise<boolean> {
+		if (!(await this.#ensureAttached(tab))) return false;
+		if (this.#conns.get(conn.id) !== conn || !conn.claims.has(tab.tabKey) || tab.discarded) {
+			this.#detachIfUnheld(tab.tabKey);
+			return false;
+		}
+		this.#emitTabAttached(conn, tab);
+		return true;
 	}
 
 	/** True while any downstream connection claims the tab as its drive target. */
@@ -1161,9 +1168,12 @@ export class RelayBridge {
 			}
 			case "Target.setAutoAttach": {
 				conn.autoAttach = true;
-				// Discarded tabs can stall debugger calls. Retract targets already
-				// announced by Target.setDiscoverTargets so Puppeteer can connect().
-				const tabs = [...this.#tabs.values()].filter(tab => this.#eligible(tab) && !tab.discarded);
+				// Only the tabs this connection owns get the debugger: the user's other tabs stay
+				// unattached (no infobar, no debugger slowdown) until a client claims one.
+				const tabs = [...conn.claims].flatMap(tabKey => {
+					const tab = this.#tabs.get(tabKey);
+					return tab && this.#eligible(tab) && !tab.discarded ? [tab] : [];
+				});
 				await Promise.all(tabs.map(tab => this.#ensureAttached(tab, { retryAfterDiscard: true })));
 				for (const tab of tabs) {
 					if (!tab.attached || tab.discarded || !this.#eligible(tab)) {
@@ -1174,11 +1184,36 @@ export class RelayBridge {
 					}
 					this.#emitTabAttached(conn, tab);
 				}
+				// Discarded tabs can stall debugger calls. Retract targets already
+				// announced by Target.setDiscoverTargets so Puppeteer can connect().
 				for (const tab of this.#tabs.values()) {
 					if (tab.announced && tab.discarded && this.#eligible(tab)) {
 						this.#retractTab(tab);
 						this.#detachIfUnheld(tab.tabKey);
 					}
+				}
+				this.#reply(conn, msg, {});
+				return;
+			}
+			case "OMP.claimTarget": {
+				// Relay-private: the connection takes a listed tab as its own (omp adopting a page the
+				// user has open, or a fresh worker taking back its tab), which attaches it when the
+				// connection auto-attaches. Never forwarded: real Chrome rejects the unknown method.
+				const parsed = typeof msg.params?.targetId === "string" ? parseTargetId(msg.params.targetId) : null;
+				const tab = parsed ? this.#tabs.get(parsed.key) : undefined;
+				if (!parsed || !tab || !this.#eligible(tab)) {
+					this.#replyError(conn, msg, `No target with id ${String(msg.params?.targetId)}`);
+					return;
+				}
+				if (tab.discarded) {
+					this.#replyError(conn, msg, `Cannot attach to discarded tab ${tab.tabKey}`);
+					return;
+				}
+				this.#claimTab(conn, tab.tabKey);
+				if (conn.autoAttach && !(await this.#attachOwned(conn, tab))) {
+					if (conn.claims.delete(tab.tabKey)) this.#syncTabGrouping(tab);
+					this.#replyError(conn, msg, `Cannot attach to tab ${tab.tabKey} (${tab.url})`);
+					return;
 				}
 				this.#reply(conn, msg, {});
 				return;
@@ -1192,6 +1227,14 @@ export class RelayBridge {
 				}
 				if (tab.discarded) {
 					this.#replyError(conn, msg, `Cannot attach to discarded tab ${tab.tabKey}`);
+					return;
+				}
+				if (!conn.claims.has(tab.tabKey)) {
+					this.#replyError(
+						conn,
+						msg,
+						`Target ${String(msg.params?.targetId)} is a tab this client does not own: the relay attaches only tabs a client opened (Target.createTarget) or claimed (OMP.claimTarget with its targetId). In omp, adopt it with app.target.`,
+					);
 					return;
 				}
 				if (!(await this.#ensureAttached(tab))) {
@@ -1240,9 +1283,17 @@ export class RelayBridge {
 					await this.#rpc({ op: "removeTab", tabId: result.tab.tabId }, inst);
 					return;
 				}
-				// Creating a tab is an explicit act of driving it.
+				// Creating a tab is an explicit act of owning it; an auto-attaching client gets it attached.
 				const createdKey = tabKeyOf(inst.code, result.tab.tabId);
 				this.#claimTab(conn, createdKey);
+				const created = this.#tabs.get(createdKey);
+				if (conn.autoAttach && created && !(await this.#attachOwned(conn, created))) {
+					// Nobody can drive a tab the relay cannot attach; close it rather than leave it behind.
+					await this.#rpc({ op: "removeTab", tabId: result.tab.tabId }, inst).catch(() => {});
+					if (this.#conns.get(conn.id) === conn)
+						this.#replyError(conn, msg, `Cannot attach to the tab the relay opened for ${url}`);
+					return;
+				}
 				this.#reply(conn, msg, { targetId: pageTargetIdFromKey(createdKey) });
 				return;
 			}
@@ -1507,7 +1558,7 @@ export class RelayBridge {
 		}
 	}
 
-	/** Announce an unannounced tab to discovering connections and attach it for auto-attaching ones. */
+	/** Announce an unannounced tab to discovering connections and attach it for the auto-attaching connections that own it. */
 	#announceTab(tab: TabState): void {
 		tab.announced = true;
 		for (const conn of this.#conns.values()) {
@@ -1515,18 +1566,12 @@ export class RelayBridge {
 			this.#emit(conn, "Target.targetCreated", { targetInfo: this.#tabInfo(tab, tab.attached) });
 			this.#emit(conn, "Target.targetCreated", { targetInfo: this.#pageInfo(tab, tab.attached) });
 		}
-		this.#attachForAutoAttach(tab);
+		this.#attachForOwners(tab);
 	}
 
-	#attachForAutoAttach(tab: TabState): void {
-		let hasAutoAttach = false;
-		for (const conn of this.#conns.values()) {
-			if (conn.autoAttach) {
-				hasAutoAttach = true;
-				break;
-			}
-		}
-		if (!hasAutoAttach) return;
+	/** Attach a tab an auto-attaching connection owns (revived after a discard) and announce it to each such owner. */
+	#attachForOwners(tab: TabState): void {
+		if (![...this.#conns.values()].some(conn => conn.autoAttach && conn.claims.has(tab.tabKey))) return;
 		void this.#ensureAttached(tab, { retryAfterDiscard: true }).then(ok => {
 			if (!ok) return;
 			if (tab.discarded || !this.#eligible(tab) || this.#tabs.get(tab.tabKey) !== tab) {
@@ -1535,8 +1580,10 @@ export class RelayBridge {
 				return;
 			}
 			for (const conn of this.#conns.values()) {
-				if (conn.autoAttach) this.#emitTabAttached(conn, tab);
+				if (conn.autoAttach && conn.claims.has(tab.tabKey)) this.#emitTabAttached(conn, tab);
 			}
+			// Owners that left during the attach leave no holder behind.
+			this.#detachIfUnheld(tab.tabKey);
 		});
 	}
 
@@ -1697,7 +1744,7 @@ export class RelayBridge {
 
 	/**
 	 * Release the tab's chrome.debugger attachment once no downstream session
-	 * holds it. Inert while the long-lived registry connection still holds one.
+	 * holds it.
 	 */
 	#detachIfUnheld(tabKey: string): void {
 		if (this.#sessionHolders(tabKey).length > 0) return;
@@ -1833,7 +1880,7 @@ export class RelayBridge {
 				}
 				const retry = tab.retryAttachAfterDiscard;
 				tab.retryAttachAfterDiscard = false;
-				if (retry && !tab.discarded) this.#attachForAutoAttach(tab);
+				if (retry && !tab.discarded) this.#attachForOwners(tab);
 			});
 		// Stop waiting for discarded tabs without dropping the extension RPC's late result.
 		const attempt = Promise.race([request, cancelled.promise]);

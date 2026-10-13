@@ -16,7 +16,12 @@ import { expandPath } from "../path-utils";
 import { CELL_BUDGET_SLACK_MS } from "../run-scope";
 import { ToolAbortError, toWorkerErrorPayload } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
-import { gracefulKillTreeOnce, pickElectronTarget, shouldPreserveConnectedBrowserFocus } from "./attach";
+import {
+	gracefulKillTreeOnce,
+	pickElectronTarget,
+	pickRelayTarget,
+	shouldPreserveConnectedBrowserFocus,
+} from "./attach";
 import { CmuxTab } from "./cmux/cmux-tab";
 import { mapWaitUntil } from "./cmux/rpc";
 import { runInProcessTab } from "./in-process-run";
@@ -1815,13 +1820,18 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 		// it before screenshots. An explicit target may be backgrounded, so retain
 		// activation for target-correct pixels.
 		activateForScreenshot = !userDriven || !shouldPreserveConnectedBrowserFocus(opts.target);
-		const picked = await pickElectronTarget(browser.browser, {
-			matcher: opts.target,
-			preferVisible: !activateForScreenshot,
-			relayJson: browser.kind.kind === "relay" ? browser.kind.cdpUrl : undefined,
-			signal: opts.signal,
-		});
-		page = { kind: "borrowed", targetId: await targetIdForPage(picked) };
+		// A relay target is picked from the relay's listing: the worker's claim is what attaches it.
+		const targetId =
+			browser.kind.kind === "relay" && opts.target
+				? await pickRelayTarget(browser.kind.cdpUrl, opts.target, opts.signal)
+				: await targetIdForPage(
+						await pickElectronTarget(browser.browser, {
+							matcher: opts.target,
+							preferVisible: !activateForScreenshot,
+							signal: opts.signal,
+						}),
+					);
+		page = { kind: "borrowed", targetId };
 	}
 	return {
 		mode: "attach",
