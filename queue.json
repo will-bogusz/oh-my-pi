@@ -1241,15 +1241,16 @@
    ],
    "base": "0859ab5c682cf3d2a20bdd20e0a880077152e608",
    "body": "bodies/native-window-report.md",
-   "state": "open",
-   "pr": 15575,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15575
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/native-window-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:51:37Z",
-   "note": "",
-   "requeue": 15575
+   "updated": "2026-10-13T21:51:40Z",
+   "note": ""
   },
   {
    "id": "test-ownership-lock",
