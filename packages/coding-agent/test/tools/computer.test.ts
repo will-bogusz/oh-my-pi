@@ -301,7 +301,12 @@ class EscapeNativeSession extends FakeNativeSession {
 		this.operations.push(`setValue:${ref}:${value}`);
 	}
 
-	override async click(target: string, x: number, y: number, opts?: PointerOptions | null): Promise<void> {
+	override async click(
+		target: string,
+		x: number,
+		y: number,
+		opts?: PointerOptions | null,
+	): Promise<DesktopFocusReturn | null | void> {
 		if (!this.escapeOnClick) return await super.click(target, x, y, opts);
 		this.escapeOnClick = false;
 		this.escapeStops += 1;
