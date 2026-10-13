@@ -344,7 +344,7 @@ enum Request {
 	AxInput {
 		reference: String,
 		input:     ElementInput,
-		takeover:  Option<bool>,
+		takeover:  Takeover,
 		reply:     Reply,
 	},
 	Close {
@@ -435,6 +435,7 @@ impl Request {
 				(Some(target), options.takeover)
 			},
 			Self::AxClick { options, .. } => (None, options.takeover),
+			Self::AxInput { takeover, .. } => (None, *takeover),
 			Self::RaiseWindow { .. } => return true,
 			Self::OpenApplication { options, .. } => return options.activate.unwrap_or(false),
 			Self::AxPerform { action, .. } => return is_raise_action(action),
@@ -1442,7 +1443,7 @@ impl Worker {
 					.backend()?
 					.element_input(&target, &h, input, mode, token)?
 				{
-					ElementDelivery::Delivered => Ok(Response::Unit),
+					ElementDelivery::Delivered => Ok(Response::Input(control::take_focus_return())),
 					ElementDelivery::Unfocused(focus) => {
 						Err(self.element_focus_refusal(reference, focus, mode))
 					},
@@ -1500,10 +1501,10 @@ impl Worker {
 			 before retrying"
 		);
 		match mode {
-			DeliveryMode::Background => {
-				DesktopError::background_unavailable(format!("{message}, or retry with takeover:true"))
+			DeliveryMode::Background => DesktopError::background_unavailable(message),
+			DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => {
+				DesktopError::input_failed(message)
 			},
-			DeliveryMode::Foreground => DesktopError::input_failed(message),
 		}
 	}
 }
@@ -2366,11 +2367,11 @@ impl DesktopSession {
 		reference: String,
 		text: String,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.axType", move |reply| Request::AxInput {
+		Ok(self.input("desktop.axType", move |reply| Request::AxInput {
 			reference,
 			input: ElementInput::Text(text),
 			takeover,
@@ -2385,12 +2386,12 @@ impl DesktopSession {
 		reference: String,
 		keys: Vec<String>,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let keys = parse_keys(&keys).map_err(napi::Error::from)?;
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.axKeyChord", move |reply| Request::AxInput {
+		Ok(self.input("desktop.axKeyChord", move |reply| Request::AxInput {
 			reference,
 			input: ElementInput::Chord(keys),
 			takeover,
@@ -3560,7 +3561,7 @@ mod capture_tests {
 			let request = Request::AxInput {
 				reference: reference.clone(),
 				input: ElementInput::Text("4".to_owned()),
-				takeover,
+				takeover: Takeover::new(takeover, None),
 				reply,
 			};
 			let Err(error) = worker.process(&request, &CancellationSource::default().token()) else {
