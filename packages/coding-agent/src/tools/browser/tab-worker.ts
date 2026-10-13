@@ -230,6 +230,7 @@ import {
 	type BrowserFrameInfo,
 	captureFrameScreenshot,
 	createFrameApi,
+	devtoolsFrameId,
 	listFrames,
 	resolveFrame,
 } from "./frames";
@@ -250,6 +251,7 @@ import type {
 	Transport,
 	WorkerInbound,
 	WorkerInitPayload,
+	WorkerOutbound,
 } from "./tab-protocol";
 
 declare module "puppeteer-core" {
@@ -260,9 +262,10 @@ declare module "puppeteer-core" {
 		readonly accessibility: Accessibility;
 		/**
 		 * Loader of the document the frame shows (`@internal` upstream). Changes on every navigation that
-		 * loads a document; a back/forward cache restore keeps the previous document's value.
+		 * loads a document; a back/forward cache restore keeps the previous document's value. Empty for a
+		 * document already shown when this connection attached, which `readLoaderIds` fills in.
 		 */
-		readonly _loaderId: string;
+		_loaderId: string;
 		/** CDP session that drives this frame (`@internal` upstream, stripped from published types). */
 		readonly client: CDPSession;
 	}
@@ -348,6 +351,8 @@ const FRAME_SNAPSHOT_TIMEOUT_MS = 5_000;
 const ATTACHED_TARGET_EXPOSE_TIMEOUT_MS = 5_000;
 /** Bound on the frames a release waits for, so a page laid out again at its own size before omp lets go of it. */
 const RELEASE_LAYOUT_WAIT_MS = 500;
+/** Bound on reading the logged response bodies and pending console arguments from the page's session before a release. */
+const RELEASE_CAPTURE_WAIT_MS = 2_000;
 /** How long a released relay tab's page gets to answer a trivial evaluate before its reattach counts it stopped. */
 const REATTACH_STOPPED_PROBE_MS = 1_500;
 
@@ -1427,6 +1432,29 @@ function isObservedDocumentGone(element: ObservedElement): boolean {
 }
 
 /**
+ * A new attachment hears no lifecycle `init` for the documents its frames already show, so Puppeteer leaves their
+ * loader ids empty and every element observed before reads as gone: take them from each frame's session instead.
+ */
+async function readLoaderIds(page: Page): Promise<void> {
+	const loaders = new Map<string, string>();
+	const collect = (tree: Protocol.Page.FrameTree): void => {
+		loaders.set(tree.frame.id, tree.frame.loaderId);
+		for (const child of tree.childFrames ?? []) collect(child);
+	};
+	const sessions = new Set(page.frames().map(frame => frame.client));
+	await Promise.all(
+		[...sessions].map(async session => {
+			const reply = await session.send("Page.getFrameTree").catch(() => undefined);
+			if (reply) collect(reply.frameTree);
+		}),
+	);
+	for (const frame of page.frames()) {
+		const loaderId = loaders.get(devtoolsFrameId(frame));
+		if (!frame._loaderId && loaderId) frame._loaderId = loaderId;
+	}
+}
+
+/**
  * Resolve an observed element to a handle in its frame's main world, or null when the node is
  * gone, has left the document, or the frame no longer shows the document it was observed in (any
  * resolution failure counts as gone). Text nodes resolve to their parent.
@@ -1687,10 +1715,14 @@ export class WorkerCore {
 	#ownBrowser = true;
 	#uncountInput: (() => void) | undefined;
 	readonly #recording = new RecordingController();
-	/** The open options a later worker on this page puts back when it reattaches after a release. */
+	/** The open options this tab put on its page; a reattach after a release, or a later worker, puts them back. */
 	#openReplay: Pick<ReattachReplay, "userAgent" | "downloadsPath" | "ignoreHttpsErrors"> = {};
 	/** The page is focus-emulated (owned, or in a browser the user drives); a release broken off puts it back. */
 	#focusEmulated = false;
+	/** The tab is a relay tab, whose popups this worker keeps rendering and which a turn end may release. */
+	#relay = false;
+	/** Target ids of the popups this relay tab opened; a release lets go of them with it, and a reattach takes them back. */
+	readonly #popups = new Set<string>();
 	/**
 	 * A back/forward cache restore brings a document back without loading it, so the frame keeps the
 	 * loader id of the document it replaced and the ids observed there would still pass as current.
@@ -1756,6 +1788,10 @@ export class WorkerCore {
 	readonly #onRelayPopup = (popup: Page | null): void => {
 		if (!popup) return;
 		popup.on("popup", this.#onRelayPopup);
+		void targetIdForPage(popup).then(
+			targetId => this.#popups.add(targetId),
+			() => undefined,
+		);
 		// The popup may close before the command lands; there is nothing to keep rendering then.
 		void popup.emulateFocusedPage(true).catch(() => undefined);
 	};
@@ -1861,6 +1897,14 @@ export class WorkerCore {
 				this.#transport.send({ type: "released", outcome });
 				return;
 			}
+			case "reattach": {
+				const reply: WorkerOutbound = await this.#reattach().then(
+					info => ({ type: "reattached", ok: true, info }),
+					(error: unknown) => ({ type: "reattached", ok: false, error: errorPayload(error) }),
+				);
+				this.#transport.send(reply);
+				return;
+			}
 		}
 	}
 
@@ -1929,46 +1973,19 @@ export class WorkerCore {
 				this.#observeDialogs();
 				if (payload.dialogs) this.#applyDialogPolicy(payload.dialogs);
 			}
-			// Nobody else drives a browser omp launched, so its tabs hold every print(); the user's own browser only
-			// while omp acts, so the page's Print buttons still work for the user. The hold comes first: it covers the
-			// setup below, and its script must reach new documents before any init script the tab adds.
-			this.#printHold = await PrintHold.install(this.#page, this.#ownBrowser ? "tab" : "calls");
-			this.#page.mainFrame().client.on("Page.frameNavigated", this.#onFrameNavigated);
-			this.#page.mainFrame().client.on("OMP.debuggerDetached", this.#onDebuggerDetached);
-			this.#uncountInput = countPageInput(this.#page);
-			this.#page.on("error", this.#onPageCrashed);
-			if (this.#ownsPage || (payload.mode === "attach" && payload.userDriven)) {
-				// Background Chromium tabs stop producing frames, stalling rAF,
-				// IntersectionObserver, and input acknowledgements; in a visible browser a tab
-				// that was never selected drops trusted input outright. Keep the page
-				// interactive without selecting its tab or raising a window, including a user's
-				// page in a background tab; explicit settle-freeze still applies. It ends with
-				// this connection's session (on the relay, with the bridge's last session).
-				await this.#page.emulateFocusedPage(true);
-				this.#focusEmulated = true;
-			}
-			if (payload.mode === "attach" && payload.relay === true) this.#page.on("popup", this.#onRelayPopup);
+			// Background Chromium tabs stop producing frames, stalling rAF, IntersectionObserver, and input
+			// acknowledgements; in a visible browser a tab that was never selected drops trusted input outright. Keep
+			// the page interactive without selecting its tab or raising a window, including a user's page in a
+			// background tab; explicit settle-freeze still applies.
+			this.#focusEmulated = this.#ownsPage || (payload.mode === "attach" && payload.userDriven === true);
+			this.#relay = payload.mode === "attach" && payload.relay === true;
+			await this.#hookPage(this.#page);
 			this.#webmcp = await installWebMcp(this.#page);
-			// Nobody else drives a browser omp launched, so its tabs hold every file chooser; the user's own browser only
-			// while omp acts, so the page's upload buttons still work for the user.
-			const choosers = await FileChooserCatcher.attach(this.#page);
-			this.#choosers = choosers;
-			if (this.#ownBrowser) await choosers.arm();
-			// A cell's raw `page.waitForFileChooser()` fills or cancels its chooser itself; the catcher leaves it be, and
-			// turns off the interception Puppeteer leaves on, which would swallow the user's later choosers.
-			const page = this.#page;
-			const waitForFileChooser = page.waitForFileChooser.bind(page);
-			page.waitForFileChooser = options =>
-				choosers.leaveTo(waitForFileChooser(options), () =>
-					page.mainFrame().client.send("Page.setInterceptFileChooserDialog", { enabled: false }),
-				);
+
 			// Only a browser that draws its windows on the user's screen raises native ones.
 			if (payload.showsWindows && process.platform === "darwin") {
-				this.#nativeWindows = new NativeWindowWatch(() => readTabFrame(page));
+				this.#nativeWindows = new NativeWindowWatch(() => readTabFrame(this.#requirePage()));
 			}
-			await installVitalsObservers(this.#page);
-			if (payload.userAgent !== undefined) await applyUserAgentOverride(this.#page, payload.userAgent);
-			if (payload.ignoreHttpsErrors) await applyIgnoreHttpsErrors(this.#page);
 			this.#targetId = await targetIdForPage(this.#page);
 			this.#initScripts = new InitScriptManager(this.#page);
 			for (const script of payload.initScripts ?? []) {
@@ -1993,7 +2010,7 @@ export class WorkerCore {
 			await this.#network.start();
 			const info = await this.#currentReadyInfo();
 			this.#started = true;
-			this.#printHold.endCall();
+			this.#printHold?.endCall();
 			this.#transport.send({ type: "ready", info });
 		} catch (error) {
 			// A page this attempt created would be orphaned (the supervisor retries
@@ -2010,6 +2027,88 @@ export class WorkerCore {
 				await page.close().catch(() => undefined);
 			}
 			this.#transport.send({ type: "init-failed", error: errorPayload(error) });
+		}
+	}
+
+	/**
+	 * Put omp's hooks on the page this worker drives: at the start, and on the page a reattach after a release
+	 * exposes. The print hold comes first: it covers the setup after it, and its script must reach new documents
+	 * before any init script the tab adds.
+	 */
+	async #hookPage(page: Page): Promise<void> {
+		// Nobody else drives a browser omp launched, so its tabs hold every print(); the user's own browser only while
+		// omp acts, so the page's Print buttons still work for the user.
+		this.#printHold = await PrintHold.install(page, this.#ownBrowser ? "tab" : "calls");
+		page.mainFrame().client.on("Page.frameNavigated", this.#onFrameNavigated);
+		page.mainFrame().client.on("OMP.debuggerDetached", this.#onDebuggerDetached);
+		this.#uncountInput = countPageInput(page);
+		page.on("error", this.#onPageCrashed);
+		// It ends with this connection's session (on the relay, with the bridge's last session).
+		if (this.#focusEmulated) await page.emulateFocusedPage(true);
+		if (this.#relay) page.on("popup", this.#onRelayPopup);
+		// Nobody else drives a browser omp launched, so its tabs hold every file chooser; the user's own browser only
+		// while omp acts, so the page's upload buttons still work for the user.
+		const choosers = await FileChooserCatcher.attach(page);
+		this.#choosers = choosers;
+		if (this.#ownBrowser) await choosers.arm();
+		// A cell's raw `page.waitForFileChooser()` fills or cancels its chooser itself; the catcher leaves it be, and
+		// turns off the interception Puppeteer leaves on, which would swallow the user's later choosers.
+		const waitForFileChooser = page.waitForFileChooser.bind(page);
+		page.waitForFileChooser = options =>
+			choosers.leaveTo(waitForFileChooser(options), () =>
+				page.mainFrame().client.send("Page.setInterceptFileChooserDialog", { enabled: false }),
+			);
+		await installVitalsObservers(page);
+		if (this.#openReplay.userAgent !== undefined) await applyUserAgentOverride(page, this.#openReplay.userAgent);
+		if (this.#openReplay.ignoreHttpsErrors) await applyIgnoreHttpsErrors(page);
+	}
+
+	/**
+	 * Take back a relay tab `#release` let go of: claim it again and move every instrument onto the page the new
+	 * attachment exposes, with what it holds (console and request logs, init scripts with their ids, emulation, the
+	 * dialog policy, downloads, WebMCP's catalog, element ids and the popups the tab opened). A page that stopped
+	 * while omp was away is refused and stays released, with nothing moved.
+	 */
+	async #reattach(): Promise<ReadyInfo> {
+		const browser = this.#requireBrowser();
+		const targetId = this.#targetId;
+		if (this.#page || !targetId) throw new ToolError("This tab was not released");
+		await claimRelayTarget(browserConnection(browser), targetId);
+		const target = await this.#findAttachedTarget(targetId, true);
+		await this.#refuseStoppedPage(target, targetId);
+		const page = await target.page();
+		if (!page) throw new ToolError(`Target ${targetId} is no longer available on the attached browser`);
+		this.#page = page;
+		await readLoaderIds(page);
+		const policy = this.#dialogs?.policy;
+		this.#observeDialogs();
+		if (policy) this.#applyDialogPolicy(policy);
+		await this.#hookPage(page);
+		this.#webmcp?.rebind(page);
+		const scripts = this.#initScripts?.list() ?? [];
+		this.#initScripts = new InitScriptManager(page);
+		await this.#initScripts.restore(scripts);
+		this.#downloads?.rebind(page);
+		await this.#emulation?.rebind(page);
+		await this.#consoleCapture.install(page);
+		this.#tracing = new BrowserTracingController(page);
+		await this.#network?.rebind(page);
+		await Promise.all([...this.#popups].map(popup => this.#reclaimPopup(browser, popup)));
+		const info = await this.#currentReadyInfo();
+		this.#printHold?.endCall();
+		return info;
+	}
+
+	/** Attach a popup the release let go of again and keep it rendering; one closed meanwhile is forgotten. */
+	async #reclaimPopup(browser: Browser, targetId: string): Promise<void> {
+		try {
+			await claimRelayTarget(browserConnection(browser), targetId);
+			const popup = await (await this.#findAttachedTarget(targetId, true)).page();
+			if (!popup) throw new ToolError(`Popup ${targetId} is gone`);
+			popup.on("popup", this.#onRelayPopup);
+			await popup.emulateFocusedPage(true);
+		} catch {
+			this.#popups.delete(targetId);
 		}
 	}
 
@@ -3772,6 +3871,13 @@ export class WorkerCore {
 	async #resolveCachedHandle(id: number): Promise<ElementHandle> {
 		const element = this.#observedElements.get(id);
 		if (!element) throw new ToolError(`Unknown element id ${id}. Run tab.observe() to refresh the element list.`);
+		// A reattach after a release exposes the tab's frames anew: the element's frame is the one with its id now.
+		const page = this.#requirePage();
+		if (element.frame.page() !== page) {
+			const frameId = devtoolsFrameId(element.frame);
+			const current = page.frames().find(frame => devtoolsFrameId(frame) === frameId);
+			if (current) element.frame = current;
+		}
 		if (isObservedDocumentGone(element)) {
 			this.#clearElementCache();
 			throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
@@ -3794,7 +3900,11 @@ export class WorkerCore {
 			return resolved;
 		}
 		try {
-			const isConnected = (await handle.evaluate(el => el.isConnected)) as boolean;
+			// An earlier run enriched the cached handle with its own deadline, which ended with that run: check through
+			// Puppeteer's evaluate.
+			const evaluate = (handle as HandleWithRawMethods)[RAW_HANDLE_METHODS]?.reads.evaluate;
+			const connected = (el: Element) => el.isConnected;
+			const isConnected = evaluate ? await evaluate.call(handle, connected) : await handle.evaluate(connected);
 			if (!isConnected) {
 				this.#clearElementCache();
 				throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
@@ -3896,11 +4006,13 @@ export class WorkerCore {
 	}
 
 	/**
-	 * Let go of the relay's debugger on this tab between turns, so Chrome's debugging bar can go, unless the page
-	 * waits on an answer: a dialog the detach would orphan (the page stays blocked and no later attachment can
-	 * answer it) or a file chooser omp holds, including one the page opens while omp lets go. Overrides come off
-	 * first, since the page keeps an emulated size past the detach, and go back on if the page starts waiting; what
-	 * the attachment carried ends with it, and what a new worker can put back is returned.
+	 * Let go of the relay's debugger on this tab between turns, so Chrome's debugging bar can go; the worker keeps
+	 * everything the tab built and `#reattach` moves it onto the next attachment. The tab stays attached while
+	 * something lives only in the attachment (routes, a HAR, a trace or profile, a screen recording, held keys or
+	 * buttons) or the page waits on an answer: a dialog the detach would orphan (the page stays blocked and no later
+	 * attachment can answer it) or a file chooser omp holds, including one the page opens while omp lets go.
+	 * Overrides come off first, since the page keeps an emulated size past the detach, and go back on if the page
+	 * starts waiting. What a new worker would put back, should this one be lost meanwhile, is returned.
 	 */
 	async #release(): Promise<ReleaseOutcome> {
 		const page = this.#page;
@@ -3910,6 +4022,23 @@ export class WorkerCore {
 			return { released: false };
 		}
 		if (this.#unanswered) return { released: false, kept: "a call was still running" };
+		const routes = this.#network?.routes().length ?? 0;
+		const tracing = this.#tracing?.running();
+		const live = [
+			routes > 0 && (routes === 1 ? "a tab.route() route applies" : `${routes} tab.route() routes apply`),
+			this.#network?.harActive() && "the HAR from tab.harStart() records",
+			tracing?.trace && "the trace from tab.traceStart() records",
+			tracing?.profile && "the CPU profile from tab.profileStart() records",
+			this.#recording.status().active && "the screen recording records",
+			(this.#heldKeys.size > 0 || this.#heldButtons.size > 0) &&
+				"keys or buttons tab.keyDown() or tab.mouseDown() pressed stay held",
+		].filter(item => typeof item === "string");
+		if (live.length > 0) {
+			return {
+				released: false,
+				kept: `${live.join(", ")} only while omp is attached, and letting go would end ${live.length === 1 ? "it" : "them"}`,
+			};
+		}
 		const waiting = await this.#pageWaitsOn();
 		if (waiting) return { released: false, kept: `the page was waiting on ${describeWaiting(waiting)}` };
 		let arrived: DialogState | undefined;
@@ -3946,23 +4075,12 @@ export class WorkerCore {
 			// A tab-wide switch on the relay: switched off first, or the page goes on reporting focus until it loads
 			// again.
 			if (!arrived) await step(page.emulateFocusedPage(false));
-			// A screen recording is saved now; it cannot go on without the attachment either way.
-			const ended: string[] = [];
-			const recording = this.#recording.status();
-			if (recording.active && !arrived) {
-				const saved = await Promise.race([
-					this.#recording.close().then(
-						() => "saved",
-						() => "unsaved",
-					),
-					pageWaits.promise.then(() => "saving"),
-				]);
-				ended.push(
-					saved === "unsaved"
-						? "the screen recording, unsaved"
-						: `the screen recording, ${saved === "saved" ? "saved" : "still being saved"} to ${recording.path}`,
-				);
+			// Response bodies stay in the page's session and console arguments are read through it: take both in
+			// while it lasts, so the request and console logs read the same after the reattach.
+			if (!arrived && this.#network) {
+				await step(Promise.race([this.#network.keepBodies(), Bun.sleep(RELEASE_CAPTURE_WAIT_MS)]));
 			}
+			if (!arrived) await step(Promise.race([this.#consoleCapture.settled(), Bun.sleep(RELEASE_CAPTURE_WAIT_MS)]));
 			if (arrived) {
 				// Put back behind the steps still queued on the dialog, which the page runs once it is answered.
 				const emulation = this.#emulation;
@@ -3974,17 +4092,18 @@ export class WorkerCore {
 				return {
 					released: false,
 					kept: `the page started waiting on ${describeWaiting(arrived)} as omp was letting go`,
-					ended,
 				};
 			}
-			const routes = this.#network?.routes().length ?? 0;
-			if (routes > 0) ended.push(`${routes} tab.route ${routes === 1 ? "route" : "routes"}`);
-			if (this.#network?.harActive()) ended.push("the HAR recording from tab.harStart(), unwritten");
-			const tracing = this.#tracing?.running();
-			if (tracing?.trace) ended.push("the trace from tab.traceStart(), unwritten");
-			if (tracing?.profile) ended.push("the CPU profile from tab.profileStart(), unwritten");
-			this.#clearElementCache();
+			// Handles die with the page's sessions; the element ids stay and resolve again on the reattached page.
+			const handles = [...this.#elementCache.values()];
+			this.#elementCache.clear();
+			for (const handle of handles) void handle.dispose().catch(() => undefined);
 			this.#page = undefined;
+			// The page object goes with its sessions; nothing it reports from here on is about the reattached page.
+			page.mainFrame().client.off("Page.frameNavigated", this.#onFrameNavigated);
+			page.mainFrame().client.off("OMP.debuggerDetached", this.#onDebuggerDetached);
+			page.off("error", this.#onPageCrashed);
+			page.off("popup", this.#onRelayPopup);
 			// Straight after the last check: only a dialog the page opens within this one round trip goes unseen.
 			try {
 				if (!(await releaseRelayTarget(browserConnection(browser), targetId))) {
@@ -3998,10 +4117,18 @@ export class WorkerCore {
 					error: error instanceof Error ? error.message : String(error),
 				});
 			}
-			// The page's sessions ended with the attachment, which took routes, captures and interception with it;
-			// this drops what the worker kept of them.
-			await this.#disposeInstruments().catch(() => undefined);
-			return { released: true, replay, ended };
+			// The page's sessions ended with the attachment: the instruments come off the page and keep what they hold.
+			await this.#printHold?.dispose().catch(() => undefined);
+			this.#printHold = undefined;
+			await this.#choosers?.dispose().catch(() => undefined);
+			this.#choosers = undefined;
+			this.#uncountInput?.();
+			this.#uncountInput = undefined;
+			this.#dialogs?.dispose();
+			this.#emulation?.dispose();
+			await this.#network?.close().catch(() => undefined);
+			await this.#consoleCapture.suspend().catch(() => undefined);
+			return { released: true, replay };
 		} finally {
 			offPageWaits();
 		}

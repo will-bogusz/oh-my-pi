@@ -262,7 +262,7 @@ async function invokeNative(
  * reaches the page until a call, which enables the domain on every CDP session serving the tab's frames.
  */
 export class WebMcpController {
-	readonly #page: Page;
+	#page: Page;
 	/** Tools announced on watched sessions, for frames `WebMCP.enable` does not replay. */
 	readonly #announced = new Map<string, { tool: Protocol.WebMCP.Tool; session: CDPSession }>();
 	/** Watched sessions and how to stop listening to each. */
@@ -273,6 +273,18 @@ export class WebMcpController {
 	#droppedThrough = 0;
 
 	constructor(page: Page) {
+		this.#page = page;
+		this.#watch(page.mainFrame().client);
+	}
+
+	/**
+	 * Go on on `page`, the tab's page as a new attachment exposes it. The catalog and its events carry over; the
+	 * old sessions' announcements go with them, and the new sessions announce their tools again.
+	 */
+	rebind(page: Page): void {
+		for (const stop of this.#watched.values()) stop();
+		this.#watched.clear();
+		this.#announced.clear();
 		this.#page = page;
 		this.#watch(page.mainFrame().client);
 	}

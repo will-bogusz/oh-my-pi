@@ -113,7 +113,7 @@ export async function applyUserAgentOverride(page: Page, userAgent: string): Pro
 
 /** Owns persistent runtime emulation and clipboard state for one Puppeteer page. */
 export class BrowserEmulationController {
-	readonly #page: Page;
+	#page: Page;
 	readonly #devices: KnownDeviceMap;
 	readonly #networkConditions: KnownNetworkMap;
 	readonly #baseUserAgent: string;
@@ -144,6 +144,14 @@ export class BrowserEmulationController {
 		Object.assign(this.#state, copyOptions(options));
 		await this.reapply();
 		return copyOptions(this.#state);
+	}
+
+	/** Go on on `page`, the tab's page as a new attachment exposes it, with every override put back on it. */
+	async rebind(page: Page): Promise<void> {
+		this.dispose();
+		this.#page = page;
+		page.on("framenavigated", this.#navigationHandler);
+		await this.reapply();
 	}
 
 	/** Re-apply every active override after a browser lifecycle resume. */

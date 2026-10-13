@@ -234,9 +234,9 @@ export class PageConsoleCapture {
 		return this.#nextSeq;
 	}
 
-	/** Attach capture listeners to a page once. */
+	/** Attach capture listeners to a page; entries captured on an earlier page of the same tab are kept. */
 	async install(page: Page): Promise<void> {
-		await this.detach();
+		await this.suspend();
 		this.#page = page;
 		const generation = this.#generation;
 		this.#consoleHandler = message => {
@@ -396,8 +396,19 @@ export class PageConsoleCapture {
 		this.#dropped = 0;
 	}
 
+	/** Settles once every console message heard so far is recorded (their arguments are read from the page). */
+	settled(): Promise<void> {
+		return this.#pending;
+	}
+
 	/** Detach listeners and clear all captured state. */
 	async detach(): Promise<void> {
+		await this.suspend();
+		this.clear();
+	}
+
+	/** Detach listeners and keep what was captured, for a later `install` on the same tab to go on from. */
+	async suspend(): Promise<void> {
 		this.#generation += 1;
 		if (this.#page && this.#consoleHandler) this.#page.off("console", this.#consoleHandler);
 		if (this.#page && this.#pageErrorHandler) this.#page.off("pageerror", this.#pageErrorHandler);
@@ -429,7 +440,6 @@ export class PageConsoleCapture {
 		this.#protocolRequestFinishedHandler = undefined;
 		this.#protocolRequestFailedHandler = undefined;
 		this.#requests.clear();
-		this.clear();
 	}
 
 	#allocateSequence(): number {

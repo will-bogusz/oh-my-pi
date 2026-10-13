@@ -120,7 +120,7 @@ export type WorkerInitPayload =
 			 * browser, whose recycled tabs attach too.
 			 */
 			showsWindows?: boolean;
-			/** `tab.emulate()` overrides to put back: the tab's previous worker released it between turns. */
+			/** `tab.emulate()` overrides to put back: the tab's previous worker released it between turns and was lost. */
 			emulation?: BrowserEmulateOptions;
 			/**
 			 * This attach reattaches a relay tab omp released between turns: a page that stopped meanwhile (a dialog
@@ -139,7 +139,9 @@ export type WorkerInbound =
 	| { type: "tool-reply"; id: string; reply: ToolReply }
 	| { type: "close" }
 	/** Let go of the relay's debugger on this tab between turns; answered by `released`. */
-	| { type: "release" };
+	| { type: "release" }
+	/** Take back the tab a `release` let go of, with everything the worker holds for it; answered by `reattached`. */
+	| { type: "reattach" };
 
 export interface ReadyInfo {
 	url: string;
@@ -148,7 +150,10 @@ export interface ReadyInfo {
 	targetId: string;
 }
 
-/** Per-tab settings a released relay tab's next worker puts back as it reattaches; the payload fields of the same names. */
+/**
+ * Per-tab settings a new worker puts back on a released relay tab whose worker was lost before it reattached; the
+ * payload fields of the same names.
+ */
 export interface ReattachReplay {
 	emulation?: BrowserEmulateOptions;
 	initScripts?: InitScriptInfo[];
@@ -160,14 +165,14 @@ export interface ReattachReplay {
 }
 
 /**
- * A worker's answer to `release`. Released: the worker drives the tab no more; `ended` names the tab state that
- * went with the attachment. Not released: `kept` says why the tab stays attached, absent when nothing was attached,
- * and `ended` names what a release broken off partway still ended; `failed` says the release broke off partway,
- * leaving the worker's state unknown.
+ * A worker's answer to `release`. Released: the worker drives the tab no more until `reattach`, and keeps what the
+ * tab built; `replay` is what a new worker puts back should this one be lost meanwhile. Not released: `kept` says why
+ * the tab stays attached, absent when nothing was attached; `failed` says the release broke off partway, leaving the
+ * worker's state unknown.
  */
 export type ReleaseOutcome =
-	| { released: true; replay: ReattachReplay; ended: string[] }
-	| { released: false; kept?: string; ended?: string[]; failed?: string };
+	| { released: true; replay: ReattachReplay }
+	| { released: false; kept?: string; failed?: string };
 
 export interface RunResultOk {
 	displays: Array<TextContent | ImageContent>;
@@ -222,7 +227,9 @@ export type WorkerOutbound =
 	| { type: "tool-call"; id: string; runId: string; name: string; args: unknown }
 	| { type: "log"; level: "debug" | "warn" | "error"; msg: string; meta?: Record<string, unknown> }
 	| { type: "closed" }
-	| { type: "released"; outcome: ReleaseOutcome };
+	| { type: "released"; outcome: ReleaseOutcome }
+	| { type: "reattached"; ok: true; info: ReadyInfo }
+	| { type: "reattached"; ok: false; error: RunErrorPayload };
 
 export interface Transport {
 	send(msg: WorkerOutbound | WorkerInbound, transferList?: Transferable[]): void;
