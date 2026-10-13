@@ -154,6 +154,7 @@
 - Added `omp session pack`, `omp session unpack` and `omp session moved` to move a session with its artifacts to another machine and continue it there; resuming the copy left behind forks it instead of continuing it
 - Added `omp auth export` and `omp auth import` to carry model sign-ins to another machine
 - Added hiding a pending `ask` question without answering it: `Alt+H` (`app.ask.hide`) or the Hide button in Tern collapses the dialog to one line; the same key, `Enter`, or Show brings it back ([#15400](https://github.com/can1357/oh-my-pi/pull/15400) by [@H4vC](https://github.com/H4vC))
+- Added stopping computer use for the rest of the turn when the user presses Escape during takeover input: later `computer` calls are refused before anything is sent until the user's next message ([#PR](https://github.com/can1357/oh-my-pi/pull/PR) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 
