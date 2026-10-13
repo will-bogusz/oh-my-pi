@@ -19,6 +19,19 @@
 
 - Fixed the browser relay attaching Chrome's debugger to every tab of the user's browser whenever omp connected; it now attaches only tabs omp opened or borrowed with `app.target`, and omp replaces a relay an older omp started (or reports one started by hand as out of date) instead of using it ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
 
+### Added
+
+- Added file choosers to browser `tab.dialog()` and `tab.handleDialog()` on Chromium: a chooser a call opens is held instead of raising the OS file dialog, reported as `file-chooser`, and answered with `handleDialog({ accept: true, files })` or cancelled with `{ accept: false }` ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
+
+### Changed
+
+- Changed alerts in connected and relay Chromium browsers to stay open for the user instead of being accepted automatically ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
+
+### Fixed
+
+- Fixed browser calls on Chromium hanging until the cell timed out, and the tab then being killed, when the page opened a confirm or prompt; other calls now fail at once naming `tab.handleDialog()` ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed a Chromium browser tab being killed, its page still stopped in a JavaScript dialog, after a call timed out behind that dialog; omp now dismisses it and the tab recovers ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
+
 ## [18.12.2] - 2026-10-18
 
 ### Added

@@ -6,7 +6,6 @@ import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import { disposeAllVmContexts } from "@oh-my-pi/pi-coding-agent/eval/js/context-manager";
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import { findFreeCdpPort, waitForCdp } from "@oh-my-pi/pi-coding-agent/tools/browser/attach";
-import { prepareElementUpload } from "@oh-my-pi/pi-coding-agent/tools/browser/interactions";
 import { ensureChromiumExecutable } from "@oh-my-pi/pi-coding-agent/tools/browser/launch";
 import { releaseAllTabs } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import {
@@ -16,8 +15,7 @@ import {
 	UploadStaging,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/upload-files";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
-import type { ElementHandle, Page } from "puppeteer-core";
-import { rejectionOf } from "../helpers/rejection";
+import type { Page } from "puppeteer-core";
 import { chromiumAvailable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
@@ -386,6 +384,32 @@ return {
 			}
 		}, 60_000);
 
+		test("answers a held chooser by the tab's route, and keeps one whose upload failed answerable", async () => {
+			const { run, close } = await openConnectedTab(`browser-upload-held-${route}`, { proxy: routeProxy(route) });
+			try {
+				await Bun.write(path.join(tempDir, "alpha.txt"), "alpha");
+				await Bun.write(path.join(tempDir, "beta.txt"), "beta");
+				// A click's chooser is held; the answer reaches its input the way an upload would on this route.
+				const answered = await run(`await tab.click("#trigger");
+await tab.handleDialog({ accept: true, files: ["alpha.txt"] });
+return await tab.evaluate(() => [...document.querySelector("#trigger-input").files].map(file => file.name));`);
+				expect(answered).toEqual(["alpha.txt"]);
+				// Two files for a one-file input are refused, and the chooser stays held for a corrected answer.
+				const retried = await run(`let error;
+try { await tab.uploadFile("#other", "alpha.txt", "beta.txt"); } catch (e) { error = e.message; }
+const state = await tab.dialog();
+await tab.handleDialog({ accept: true, files: ["beta.txt"] });
+return { error, state, names: await tab.evaluate(() => [...document.querySelector("#other-input").files].map(file => file.name)) };`);
+				expect(retried).toMatchObject({
+					error: expect.stringContaining("The file chooser is still waiting"),
+					state: { open: true, type: "file-chooser" },
+					names: ["beta.txt"],
+				});
+			} finally {
+				await close();
+			}
+		}, 60_000);
+
 		test("builds the files out of the page's reach, untyped when the extension names no type", async () => {
 			const { run, close } = await openConnectedTab(`browser-upload-poisoned-${route}`, {
 				page: "poisoned",
@@ -585,32 +609,6 @@ test("reports the type a browser's own pick would for the contents route", async
 		Object.keys(files).map(async name => (await openUploadSource(path.join(tempDir, name))).info.type),
 	);
 	expect(types).toEqual(Object.values(files));
-});
-
-test("detaches a chooser session that attaches after the upload was cancelled", async () => {
-	const { promise: attached, resolve: attach } = Promise.withResolvers<{ detach: () => Promise<void> }>();
-	let detached = false;
-	const controller = new AbortController();
-	// Only what the chooser route touches before its session exists: the target's tag and session creation,
-	// which the cancel interrupts.
-	const page = {
-		createCDPSession: () => {
-			controller.abort();
-			return attached;
-		},
-	} as unknown as Page;
-	const handle = { evaluate: async () => ({ tag: "BUTTON", type: "" }) } as unknown as ElementHandle;
-	const file = path.join(tempDir, "late.txt");
-	await Bun.write(file, "late");
-	const staging = new UploadStaging(path.join(tempDir, "late-staging"));
-	await rejectionOf(prepareElementUpload(page, handle, [file], "upload", "contents", staging, controller.signal));
-	attach({
-		detach: async () => {
-			detached = true;
-		},
-	});
-	for (let turn = 0; turn < 5; turn++) await Promise.resolve();
-	expect(detached).toBe(true);
 });
 
 /** A page whose route check reads its token through `read`, counting the checks. */
