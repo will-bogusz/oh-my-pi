@@ -409,6 +409,39 @@ await tab.handleDialog({ accept: false });`);
 		}
 	}, 60_000);
 
+	test("in the user's own browser, lets the user's later click reach Chrome's chooser after a raw page.waitForFileChooser()", async () => {
+		const user = await launchUserBrowser();
+		try {
+			const { attempt, step, close } = await openFixture({ cdp_url: user.cdpUrl });
+			try {
+				const alpha = JSON.stringify(path.join(tempDir, "alpha.txt"));
+				await attempt(`const [chooser] = await Promise.all([page.waitForFileChooser(), tab.click("#trigger")]);
+await chooser.accept([${alpha}]);`);
+				// Real time past the 1.5 s release tail, which runs in the tab's worker where fake timers cannot reach.
+				// Puppeteer left interception on for the page's session, which swallowed this click: the chooser was
+				// intercepted with no one waiting, so the page saw neither a file nor a cancel.
+				await Bun.sleep(2_000);
+				const browser = await puppeteer.connect({ browserURL: user.cdpUrl, defaultViewport: null });
+				try {
+					const page = (await browser.pages()).find(candidate => candidate.url() === url);
+					if (!page) throw new Error("Expected the fixture page in the user's browser");
+					await page.click("#other");
+				} finally {
+					await browser.disconnect();
+				}
+				const after = await step("await Bun.sleep(300); return await tab.evaluate(() => window.log);");
+				expect(after.value).toEqual([
+					{ id: "trigger-input", event: "change", names: ["alpha.txt"] },
+					{ id: "other-input", event: "cancel", names: [] },
+				]);
+			} finally {
+				await close();
+			}
+		} finally {
+			await user.stop();
+		}
+	}, 60_000);
+
 	test("in the user's own browser, goes on while a confirm waits past the hold, and holds the chooser it leads to", async () => {
 		const user = await launchUserBrowser();
 		try {

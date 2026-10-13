@@ -1903,12 +1903,16 @@ export class WorkerCore {
 			const choosers = await FileChooserCatcher.attach(this.#page);
 			this.#choosers = choosers;
 			if (this.#ownBrowser) await choosers.arm();
-			// A cell's raw `page.waitForFileChooser()` fills or cancels its chooser itself; the catcher leaves it be.
-			const waitForFileChooser = this.#page.waitForFileChooser.bind(this.#page);
-			this.#page.waitForFileChooser = options => choosers.leaveTo(waitForFileChooser(options));
+			// A cell's raw `page.waitForFileChooser()` fills or cancels its chooser itself; the catcher leaves it be, and
+			// turns off the interception Puppeteer leaves on, which would swallow the user's later choosers.
+			const page = this.#page;
+			const waitForFileChooser = page.waitForFileChooser.bind(page);
+			page.waitForFileChooser = options =>
+				choosers.leaveTo(waitForFileChooser(options), () =>
+					page.mainFrame().client.send("Page.setInterceptFileChooserDialog", { enabled: false }),
+				);
 			// Only a browser that draws its windows on the user's screen raises native ones.
 			if (payload.showsWindows && process.platform === "darwin") {
-				const page = this.#page;
 				this.#nativeWindows = new NativeWindowWatch(() => readTabFrame(page));
 			}
 			await installVitalsObservers(this.#page);
