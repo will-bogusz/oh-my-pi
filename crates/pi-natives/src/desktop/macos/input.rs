@@ -249,7 +249,7 @@ impl MacInput {
 				}
 				with_background_keyboard(&self.source, pid, wid, window, |to, guard| {
 					element_keys(pid, element, || {
-						type_keys(&self.source, &keys, gap, guard, |event| {
+						type_keys(&self.source, &keys, gap, intervention_guard(guard), |event| {
 							skylight::post_keyboard(to, event)
 						})
 					})
@@ -626,6 +626,17 @@ fn keys_still_reach(
 		 before that may already have landed, and nothing more was sent; inspect the window before \
 		 retrying",
 	)))
+}
+
+/// `guard` behind the intervention check [`post_guarded`] runs for chords:
+/// [`type_keys`] runs it before each key or modifier press, so background
+/// typing stops before pressing a key once the user has used the target's
+/// app since the call began.
+fn intervention_guard(mut guard: impl FnMut() -> CoreResult<()>) -> impl FnMut() -> CoreResult<()> {
+	move || {
+		control::intervention::check_press()?;
+		guard()
+	}
 }
 
 /// Posts `event`. Before a key or modifier press it checks that the user has
@@ -4002,6 +4013,35 @@ mod tests {
 			SHIFT_SPACE_TRANSITIONS[2],
 			SHIFT_SPACE_TRANSITIONS[3]
 		]);
+	}
+
+	#[test]
+	fn background_typing_stops_at_the_users_first_key_or_click_in_the_target_app() {
+		use crate::desktop::error::ErrorCode;
+		let source = source().expect("event source");
+		let listener = control::intervention::Listener::simulated();
+		listener.touch(7, Some(1), || "TextEdit".to_string());
+		let token = control::CancellationSource::default().token();
+		let keys = unicode_keys("abc");
+		let mut events = Vec::new();
+		// Background typing posts each key through the same chain as
+		// `window_type`'s background route.
+		let result = {
+			let _watch = listener
+				.admit(7, &token)
+				.expect("the user has not used TextEdit");
+			type_keys(&source, &keys, Duration::ZERO, intervention_guard(|| Ok(())), |event| {
+				// The user types in TextEdit right after the first key goes out.
+				listener.record_for_test(7, Instant::now());
+				events.push(event.get_type() as u32);
+				Ok(())
+			})
+		};
+		let error = result.unwrap_err();
+		assert_eq!(error.code, ErrorCode::UserIntervened);
+		assert!(error.message.contains("in TextEdit during this input"), "{}", error.message);
+		// Only a is typed, with its release; b and c are never pressed.
+		assert_eq!(events, [CGEventType::KeyDown as u32, CGEventType::KeyUp as u32]);
 	}
 
 	#[test]
