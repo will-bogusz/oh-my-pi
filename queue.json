@@ -159,15 +159,16 @@
    ],
    "base": "50488786a1f9f054fbd9c17839d64b9776a3aea6",
    "body": "bodies/account-window-reserves.md",
-   "state": "open",
-   "pr": 15126,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    15126
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/account-window-reserves",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:52:58Z",
-   "note": "",
-   "requeue": 15126
+   "updated": "2026-10-13T21:53:02Z",
+   "note": ""
   },
   {
    "id": "reset-restore-longest-wait",
