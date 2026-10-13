@@ -21,8 +21,7 @@ use objc2_core_foundation::{
 use objc2_foundation::NSString;
 
 use super::{
-	CoreResult, DesktopError, ax_error, copy_attribute, copy_attribute_result, copy_held_attribute,
-	copy_string,
+	CoreResult, DesktopError, ax_error, copy_attribute_result, copy_held_attribute, copy_string,
 };
 
 /// How many times a text that changes while it is read is read again.
@@ -83,7 +82,7 @@ fn spans(element: &AXUIElement) -> CoreResult<Vec<Span>> {
 	};
 	let text = read_whole(length, |length| attributed(element, length))?
 		.ok_or_else(|| no_formatted_text(element))?;
-	Ok(read_spans(&text))
+	read_spans(&text)
 }
 
 /// Reads the text at its `length`, again when the length changed during the
@@ -167,9 +166,9 @@ fn no_formatted_text(element: &AXUIElement) -> DesktopError {
 	))
 }
 
-fn read_spans(text: &CFAttributedString) -> Vec<Span> {
+fn read_spans(text: &CFAttributedString) -> CoreResult<Vec<Span>> {
 	let Some(string) = text.string() else {
-		return Vec::new();
+		return Ok(Vec::new());
 	};
 	let units: Vec<u16> = string.to_string().encode_utf16().collect();
 	let length = text.length();
@@ -192,15 +191,15 @@ fn read_spans(text: &CFAttributedString) -> Vec<Span> {
 			// SAFETY: AX attributed strings key their attributes by CFString.
 			let attributes =
 				unsafe { CFRetained::cast_unchecked::<CFDictionary<CFString, CFType>>(attributes) };
-			style_span(&mut span.style, &attributes);
+			style_span(&mut span.style, &attributes)?;
 		}
 		spans.push(span);
 		location = run.location + run.length;
 	}
-	spans
+	Ok(spans)
 }
 
-fn style_span(style: &mut Style, attributes: &CFDictionary<CFString, CFType>) {
+fn style_span(style: &mut Style, attributes: &CFDictionary<CFString, CFType>) -> CoreResult<()> {
 	let get = |key: &'static str| attributes.get(&CFString::from_static_str(key));
 	if let Some((bold, italic)) = get("AXFont")
 		.and_then(|font| font.downcast::<CFDictionary>().ok())
@@ -212,20 +211,37 @@ fn style_span(style: &mut Style, attributes: &CFDictionary<CFString, CFType>) {
 		style.italic = italic;
 	}
 	style.strike = get("AXStrikethrough").is_some_and(|value| truthy(&value));
-	style.link = get("AXLink")
-		.and_then(|link| link.downcast::<AXUIElement>().ok())
-		.and_then(|link| copy_attribute(&link, "AXURL"))
-		.and_then(|url| match url.downcast::<CFURL>() {
-			Ok(url) => Some(url.string().to_string()),
-			Err(url) => url.downcast::<CFString>().ok().map(|url| url.to_string()),
-		})
-		.filter(|url| !url.is_empty());
+	style.link = match get("AXLink").and_then(|link| link.downcast::<AXUIElement>().ok()) {
+		Some(link) => link_url(copy_attribute_result(&link, "AXURL"))?,
+		None => None,
+	};
 	style.heading = get("AXHeadingLevel")
 		.and_then(|level| level.downcast::<CFNumber>().ok())
 		.and_then(|level| level.as_i64())
 		.and_then(|level| u8::try_from(level).ok())
 		.filter(|level| (1..=6).contains(level))
 		.unwrap_or(0);
+	Ok(())
+}
+
+/// A link's address from its `AXURL` read. A read that fails fails the whole
+/// read, so a link never comes back as plain text.
+fn link_url(url: Result<Option<CFRetained<CFType>>, AXError>) -> CoreResult<Option<String>> {
+	let url = match url {
+		Ok(url) => url,
+		Err(error) if error == AXError::NoValue || error == AXError::AttributeUnsupported => None,
+		Err(error) => {
+			return Err(DesktopError::ax_failed(format!(
+				"reading a link's address failed ({error:?}); read the text again"
+			)));
+		},
+	};
+	Ok(url
+		.and_then(|url| match url.downcast::<CFURL>() {
+			Ok(url) => Some(url.string().to_string()),
+			Err(url) => url.downcast::<CFString>().ok().map(|url| url.to_string()),
+		})
+		.filter(|url| !url.is_empty()))
 }
 
 /// Bold and italic of an `AXFont` dictionary. `WebKit` states them as
@@ -404,7 +420,7 @@ fn render_line(line: &[Span], prefix: String, content: &str, skip: usize, headin
 		},
 		None => (content, skip),
 	};
-	let block = block_escape(content);
+	let escapes = [block_escape(content), heading.then(|| heading_close(content)).flatten()];
 	let mut offset = 0;
 	for span in line {
 		if skip >= span.text.len() {
@@ -414,7 +430,7 @@ fn render_line(line: &[Span], prefix: String, content: &str, skip: usize, headin
 		let text = &span.text[skip..];
 		skip = 0;
 		let style = Style { bold: span.style.bold && !heading, ..span.style.clone() };
-		push_span(&mut out, &style, text, offset, block);
+		push_span(&mut out, &style, text, offset, escapes);
 		offset += text.len();
 	}
 	out
@@ -456,17 +472,32 @@ fn block_escape(content: &str) -> Option<usize> {
 		.then_some(start + digits)
 }
 
+/// Where a heading's text needs a backslash so its trailing `#`s are not read
+/// as the heading's closing sequence: before the first of them, when a space
+/// or the line's start comes before them.
+fn heading_close(content: &str) -> Option<usize> {
+	let text = content.trim_end_matches([' ', '\t']);
+	let start = text.trim_end_matches('#').len();
+	(start < text.len() && (start == 0 || text[..start].ends_with([' ', '\t']))).then_some(start)
+}
+
 /// `text` in `style`, starting `offset` bytes into its line's content.
-fn push_span(out: &mut String, style: &Style, text: &str, offset: usize, block: Option<usize>) {
+fn push_span(
+	out: &mut String,
+	style: &Style,
+	text: &str,
+	offset: usize,
+	escapes: [Option<usize>; 2],
+) {
 	let styled = style.bold || style.italic || style.strike || style.link.is_some();
 	let trimmed = text.trim_matches(char::is_whitespace);
 	if !styled || trimmed.is_empty() {
-		escape_into(out, text, offset, block);
+		escape_into(out, text, offset, escapes);
 		return;
 	}
 	let lead = text.len() - text.trim_start_matches(char::is_whitespace).len();
 	let trail = lead + trimmed.len();
-	escape_into(out, &text[..lead], offset, block);
+	escape_into(out, &text[..lead], offset, escapes);
 	let marks = match (style.bold, style.italic) {
 		(true, true) => "***",
 		(true, false) => "**",
@@ -478,9 +509,16 @@ fn push_span(out: &mut String, style: &Style, text: &str, offset: usize, block: 
 	}
 	out.push_str(marks);
 	if style.link.is_some() {
+		// A `!` right before the `[` would make the link an image.
+		if out.ends_with('!') {
+			let before = &out[..out.len() - 1];
+			if (before.len() - before.trim_end_matches('\\').len()).is_multiple_of(2) {
+				out.insert(out.len() - 1, '\\');
+			}
+		}
 		out.push('[');
 	}
-	escape_into(out, trimmed, offset + lead, block);
+	escape_into(out, trimmed, offset + lead, escapes);
 	if let Some(url) = &style.link {
 		out.push_str("](");
 		push_url(out, url);
@@ -490,7 +528,7 @@ fn push_span(out: &mut String, style: &Style, text: &str, offset: usize, block: 
 	if style.strike {
 		out.push_str("~~");
 	}
-	escape_into(out, &text[trail..], offset + trail, block);
+	escape_into(out, &text[trail..], offset + trail, escapes);
 }
 
 /// A link destination that parses back to `url`: Markdown's escapable
@@ -511,11 +549,11 @@ fn push_url(out: &mut String, url: &str) {
 	}
 }
 
-/// Escapes inline Markdown punctuation, and the block marker at `block` (an
-/// offset into the line's content), so the text reads back as itself.
-fn escape_into(out: &mut String, text: &str, offset: usize, block: Option<usize>) {
+/// Escapes inline Markdown punctuation, and the characters at `escapes`
+/// (offsets into the line's content), so the text reads back as itself.
+fn escape_into(out: &mut String, text: &str, offset: usize, escapes: [Option<usize>; 2]) {
 	for (index, c) in text.char_indices() {
-		if block == Some(offset + index)
+		if escapes.contains(&Some(offset + index))
 			|| matches!(c, '\\' | '*' | '_' | '`' | '[' | ']' | '~' | '<' | '&')
 		{
 			out.push('\\');
@@ -532,7 +570,8 @@ mod tests {
 	};
 
 	use super::{
-		Span, Style, ensure_readable, font_traits, read_whole, style_span, text_length, to_markdown,
+		Span, Style, ensure_readable, font_traits, link_url, read_whole, style_span, text_length,
+		to_markdown,
 	};
 	use crate::desktop::error::{DesktopError, ErrorCode};
 
@@ -630,6 +669,29 @@ mod tests {
 			"[doc](https://x.test/a%20b\\(1\\)\\\\_\\&copy;%0A\\<z\\>)"
 		);
 		assert_eq!(to_markdown(&[link("[x]", "https://x.test")]), "[\\[x\\]](https://x.test)");
+		// A `!` right before a link would make it an image.
+		assert_eq!(
+			to_markdown(&[plain("Wow!"), link("site", "https://x.test")]),
+			"Wow\\![site](https://x.test)"
+		);
+		assert_eq!(
+			to_markdown(&[plain("a\\!"), link("b", "https://x.test")]),
+			"a\\\\\\![b](https://x.test)"
+		);
+		assert_eq!(
+			to_markdown(&[plain("Wow! "), link("site", "https://x.test")]),
+			"Wow! [site](https://x.test)"
+		);
+	}
+
+	#[test]
+	fn a_link_whose_address_cannot_be_read_fails_the_read() {
+		let url: &CFType = &CFString::from_static_str("https://x.test");
+		assert_eq!(link_url(Ok(Some(url.retain()))).unwrap().as_deref(), Some("https://x.test"));
+		assert_eq!(link_url(Err(AXError::NoValue)).unwrap(), None);
+		assert_eq!(link_url(Ok(None)).unwrap(), None);
+		let failed = link_url(Err(AXError::CannotComplete)).unwrap_err();
+		assert_eq!(failed.code, ErrorCode::AxFailed);
 	}
 
 	#[test]
@@ -660,6 +722,13 @@ mod tests {
 		// A typed `- ` or `* ` is text, not an item, and a bullet glyph needs
 		// its space.
 		assert_eq!(to_markdown(&[plain("- dash\n•tight")]), "\\- dash\n•tight");
+		// Trailing `#`s after a space would close the heading and vanish.
+		let heading =
+			|text: &str| Span { text: text.into(), style: Style { heading: 2, ..Style::default() } };
+		assert_eq!(to_markdown(&[heading("Plan #")]), "## Plan \\#");
+		assert_eq!(to_markdown(&[heading("Plan ## ")]), "## Plan \\## ");
+		assert_eq!(to_markdown(&[heading("C#")]), "## C#");
+		assert_eq!(to_markdown(&[heading("##")]), "## \\##");
 	}
 
 	#[test]
@@ -681,7 +750,7 @@ mod tests {
 			let attributes =
 				CFDictionary::from_slices(&[&*CFString::from_static_str("AXFont")], &[font]);
 			let mut style = Style::default();
-			style_span(&mut style, &attributes);
+			style_span(&mut style, &attributes).unwrap();
 			style
 		}
 		let (bold_name, italic_name, regular_name) = (
