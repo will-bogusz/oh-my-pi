@@ -4578,7 +4578,6 @@ mod capture_tests {
 
 	#[test]
 	fn held_control_leaves_omitted_takeover_in_the_background() {
-		let _serial = control::tests::OWNERSHIP_TEST.lock();
 		let backend = FakeWaylandBackend::new();
 		let modes = Arc::clone(&backend.modes);
 		let mut worker = worker_with(backend);
