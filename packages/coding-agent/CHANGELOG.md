@@ -11,6 +11,7 @@
 - Added `omp auth-gateway serve --clients=<file>`: per-client bearer tokens, each limited to listed models and broker OAuth accounts with no fallback to other accounts or API keys, re-read while serving ([#5098](https://github.com/can1357/oh-my-pi/issues/5098), [#15900](https://github.com/can1357/oh-my-pi/pull/15900) by [@alphastorm](https://github.com/alphastorm))
 - Added a note to relay `browser.open` results when the OMP Browser Relay extension in Chrome was installed by an older omp, naming `omp browser-relay install` and a reload; `omp browser-relay install` now records the installing omp's version in the extension ([#15105](https://github.com/can1357/oh-my-pi/pull/15105) by [@will-bogusz](https://github.com/will-bogusz))
 - The browser relay now keeps its Chrome extension current after an omp upgrade: when the extension in `~/.omp/browser-relay/extension` is older and no omp session is using the relay, it rewrites the files and the extension reloads itself ([#15105](https://github.com/can1357/oh-my-pi/pull/15105) by [@will-bogusz](https://github.com/will-bogusz))
+- Added file choosers to browser `tab.dialog()` and `tab.handleDialog()` on Chromium: a chooser a call opens is held instead of raising the OS file dialog, reported as `file-chooser`, and answered with `handleDialog({ accept: true, files })` or cancelled with `{ accept: false }` ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 
@@ -21,6 +22,7 @@
 - Memories saved explicitly through the extension `memory.save` API are now stored as `stated` rather than `unknown`, so they rank as deliberate memories in Mnemopi recall ([#13824](https://github.com/can1357/oh-my-pi/pull/13824) by [@sjawhar](https://github.com/sjawhar))
 - A relay `browser.open` without `app.target` now opens its own background tab instead of adopting the visible one (after reinstalling the relay extension; older ones select it), and `browser.close` closes it; `app.target` still borrows an existing tab ([#15110](https://github.com/can1357/oh-my-pi/pull/15110) by [@will-bogusz](https://github.com/will-bogusz))
 - Browser `webmcp*` helpers read Chrome's native WebMCP when called instead of injecting a script and `modelContext` polyfill into every page omp drives, and say why when Chrome offers a page none; Tern tabs no longer support them ([#15556](https://github.com/can1357/oh-my-pi/pull/15556) by [@will-bogusz](https://github.com/will-bogusz))
+- Changed alerts in connected and relay Chromium browsers to stay open for the user instead of being accepted automatically ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 
@@ -76,6 +78,8 @@
 - Fixed `webmcpInvoke` returning an empty error when a page's tool throws, and leaving a timed-out invocation running in the page ([#15556](https://github.com/can1357/oh-my-pi/pull/15556) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed popups and `target=_blank` tabs from a relay tab omp drives taking the user's selected tab or keyboard focus while omp could not reach them; with the reinstalled extension omp owns and drives them ([#15590](https://github.com/can1357/oh-my-pi/pull/15590) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed keys typed in another app going to a popup's page on macOS when a relay tab omp drives opened that popup: Chrome made itself the active app and kept it; the relay now puts the user's app back in front within milliseconds ([#15611](https://github.com/can1357/oh-my-pi/pull/15611) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed browser calls on Chromium hanging until the cell timed out, and the tab then being killed, when the page opened a confirm or prompt; other calls now fail at once naming `tab.handleDialog()` ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed a Chromium browser tab being killed, its page still stopped in a JavaScript dialog, after a call timed out behind that dialog; omp now dismisses it and the tab recovers ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.11.1] - 2026-10-15
 

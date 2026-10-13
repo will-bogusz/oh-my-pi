@@ -78,6 +78,17 @@ const server = Bun.serve({
 			const stuck = `http://localhost:${new URL(request.url).port}/stuck`;
 			return new Response(`<button>Main</button><iframe id="stuck" src="${stuck}"></iframe>`, { headers });
 		}
+		if (pathname === "/ask" || pathname === "/ask-on-load") {
+			// `log` records what each dialog returned; a dialog nobody answers leaves the page's script stopped in it.
+			const onLoad = pathname === "/ask-on-load" ? "log.push('load:' + confirm('Leave unsaved?'));" : "";
+			return new Response(
+				`<button id="delete" onclick="log.push('confirm:' + confirm('Delete?'))">Delete</button><button id="save" onclick="alert('Saved'); log.push('alert closed')">Save</button><button id="later" style="display:none" onclick="log.push('later')">Later</button><input id="name" onfocus="confirm('Rename?')"><p id="status">ready</p><script>globalThis.log = [];${onLoad}</script>`,
+				{ headers },
+			);
+		}
+		if (pathname === "/ask-frame") {
+			return new Response(`<iframe id="inner" src="/ask"></iframe>`, { headers });
+		}
 		if (pathname === "/print" || pathname === "/print-on-load") {
 			// `log` records what the page saw: Chrome fires afterprint only once a print finished, and headless Chrome
 			// returns from an unheld print() without printing anything.
@@ -181,6 +192,41 @@ async function withUserBrowser(use: (cdpUrl: string) => Promise<void>): Promise<
 		await child.exited;
 		await fs.rm(root, { recursive: true, force: true });
 	}
+}
+
+/**
+ * Stands in for the user at the page whose URL ends with `suffix`: a DevTools client of its own, attached before
+ * the dialog opens as the browser's own dialog UI is, that can close the dialog the way the user's click would.
+ */
+async function userAtPage(cdpUrl: string, suffix: string): Promise<{ closeDialog(): Promise<void>; leave(): void }> {
+	const targets = (await (await fetch(`${cdpUrl}/json/list`)).json()) as Array<{
+		url: string;
+		webSocketDebuggerUrl: string;
+	}>;
+	const target = targets.find(candidate => candidate.url.endsWith(suffix));
+	if (!target) throw new Error(`Expected a page ending in ${suffix} in the user's browser`);
+	const socket = new WebSocket(target.webSocketDebuggerUrl);
+	const replies = new Map<number, (message: { error?: { message: string } }) => void>();
+	socket.addEventListener("message", event => {
+		const message = JSON.parse(String(event.data)) as { id?: number; error?: { message: string } };
+		if (message.id !== undefined) replies.get(message.id)?.(message);
+	});
+	const { promise: opened, resolve: open } = Promise.withResolvers<void>();
+	socket.addEventListener("open", () => open(), { once: true });
+	await opened;
+	let id = 0;
+	const send = async (method: string, params: object = {}) => {
+		const { promise, resolve } = Promise.withResolvers<{ error?: { message: string } }>();
+		replies.set(++id, resolve);
+		socket.send(JSON.stringify({ id, method, params }));
+		const reply = await promise;
+		if (reply.error) throw new Error(`${method}: ${reply.error.message}`);
+	};
+	await send("Page.enable");
+	return {
+		closeDialog: () => send("Page.handleJavaScriptDialog", { accept: true }),
+		leave: () => socket.close(),
+	};
 }
 
 async function observe(invoke: (parameters: unknown) => Promise<{ details?: unknown }>, name: string, options: object) {
@@ -456,6 +502,320 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("browser navigation, frames, dialogs, and t
 			chain: [{ method: "setDialogs", args: [null] }],
 		});
 	}, 30_000);
+
+	test("reports a confirm the page waits on though the tab's emulation is set", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "emulated-dialog", url: `${baseUrl}/dialogs` });
+		await invoke({
+			action: "run",
+			name: "emulated-dialog",
+			code: "await tab.emulate({ viewport: { width: 500, height: 400 } });",
+		});
+		await invoke({
+			action: "run",
+			name: "emulated-dialog",
+			code: 'await tab.evaluate(() => { requestAnimationFrame(() => { globalThis.confirmResult = confirm("continue?"); }); }); await wait(async () => (await tab.dialog()).open, { timeout: 2000, interval: 10 });',
+		});
+		// Each run re-applies the emulation first, which a page stopped in a dialog never answers.
+		const started = performance.now();
+		const dialog = await invoke({
+			action: "run",
+			name: "emulated-dialog",
+			code: "return await tab.dialog();",
+			timeout: 5,
+		});
+		expect(valueOf(dialog)).toEqual({ open: true, type: "confirm", message: "continue?" });
+		expect(performance.now() - started).toBeLessThan(3_000);
+		await invoke({
+			action: "call",
+			name: "emulated-dialog",
+			chain: [{ method: "handleDialog", args: [{ accept: true }] }],
+		});
+	}, 30_000);
+
+	test("lets the click that opens a confirm return and fails later page calls at once until it is answered", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "ask", url: `${baseUrl}/ask` });
+		// The click used to wait on the stopped page until the cell timed out, and the tab was then killed.
+		const clicked = await invoke({
+			action: "run",
+			name: "ask",
+			timeout: 10,
+			code: 'await tab.click("#delete"); return await tab.dialog();',
+		});
+		expect(valueOf(clicked)).toEqual({ open: true, type: "confirm", message: "Delete?" });
+		expect(textOf(clicked)).toContain('The page is waiting on a confirm("Delete?")');
+		const started = Date.now();
+		const blocked = await invoke({
+			action: "run",
+			name: "ask",
+			timeout: 10,
+			code: 'try { await tab.text("#status"); return "ran"; } catch (e) { return e.message; }',
+		});
+		const message = String(valueOf(blocked));
+		expect(message).toStartWith('tab.text("#status") cannot run');
+		expect(message).toContain('confirm("Delete?")');
+		expect(message).toContain("tab.handleDialog({ accept: true })");
+		expect(Date.now() - started).toBeLessThan(5_000);
+		// The first result named it; later ones do not repeat it.
+		expect(textOf(blocked)).not.toContain("The page is waiting on");
+		const answered = await invoke({
+			action: "run",
+			name: "ask",
+			timeout: 10,
+			code: "await tab.handleDialog({ accept: true }); return await tab.evaluate(() => globalThis.log);",
+		});
+		expect(valueOf(answered)).toEqual(["confirm:true"]);
+
+		// A call whose own work the dialog stops ends at once, naming it.
+		const evaluated = await invoke({
+			action: "run",
+			name: "ask",
+			timeout: 10,
+			code: 'try { await tab.evaluate(() => confirm("Again?")); return "returned"; } catch (e) { return e.message; }',
+		});
+		expect(valueOf(evaluated)).toContain('tab.evaluate(): the page opened a confirm("Again?")');
+		await invoke({ action: "call", name: "ask", chain: [{ method: "handleDialog", args: [{ accept: false }] }] });
+		await invoke({ action: "close", name: "ask" });
+	}, 60_000);
+
+	test("fails the calls running beside the click that opens a confirm, not just later ones", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "ask-beside", url: `${baseUrl}/ask` });
+		// The click's input used to count for every call in flight, so these returned as if they had finished.
+		const result = valueOf(
+			await invoke({
+				action: "run",
+				name: "ask-beside",
+				timeout: 10,
+				code: `const settle = promise => promise.then(value => ({ returned: value ?? null }), e => e.message);
+// The page keeps the promise reachable: Chrome fails an evaluation whose promise it collected.
+const evaluated = settle(tab.evaluate(() => { const pending = Promise.withResolvers(); window.keepPending = pending.resolve; return pending.promise; }));
+const waiting = settle(tab.click("#later"));
+await tab.click("#delete");
+const result = { evaluated: await evaluated, waiting: await waiting };
+await tab.handleDialog({ accept: false });
+return result;`,
+			}),
+		) as { evaluated: unknown; waiting: unknown };
+		expect(result.evaluated).toStartWith('tab.evaluate(): the page opened a confirm("Delete?")');
+		expect(result.waiting).toStartWith('tab.click("#later"): the page opened a confirm("Delete?")');
+		await invoke({ action: "close", name: "ask-beside" });
+	}, 60_000);
+
+	test("fails an input a timer's dialog beat to the page, without sending it", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "ask-timer", url: `${baseUrl}/ask` });
+		// It used to return as if clicked: the dialog opened while the click still waited for the hidden button.
+		const result = valueOf(
+			await invoke({
+				action: "run",
+				name: "ask-timer",
+				timeout: 10,
+				code: `await tab.evaluate(() => { setTimeout(() => confirm("Timer?"), 100); });
+let clicked = "clicked";
+try { await tab.click("#later"); } catch (e) { clicked = e.message; }
+await tab.handleDialog({ accept: false });
+return { clicked, log: await tab.evaluate(() => globalThis.log) };`,
+			}),
+		) as { clicked: string; log: string[] };
+		expect(result.clicked).toContain('tab.click("#later"): the page opened a confirm("Timer?")');
+		expect(result.log).toEqual([]);
+		await invoke({ action: "close", name: "ask-timer" });
+	}, 60_000);
+
+	test("fails id and ref lookups at once while a dialog waits", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "ask-ids", url: `${baseUrl}/ask` });
+		const result = valueOf(
+			await invoke({
+				action: "run",
+				name: "ask-ids",
+				timeout: 10,
+				code: `const { elements } = await tab.observe();
+const id = elements.find(element => element.name === "Delete").id;
+await tab.click("#delete");
+const errors = [];
+for (const lookup of [() => tab.id(id), () => tab.ref("e1")]) {
+	try { await lookup(); errors.push("resolved"); } catch (e) { errors.push(e.message); }
+}
+await tab.handleDialog({ accept: true });
+return errors;`,
+			}),
+		) as string[];
+		// They used to wait on the stopped page until the cell timed out.
+		expect(result[0]).toContain("tab.id(");
+		expect(result[1]).toContain("tab.ref(");
+		for (const error of result) expect(error).toContain('cannot run: the page is waiting on a confirm("Delete?")');
+		await invoke({ action: "close", name: "ask-ids" });
+	}, 60_000);
+
+	test("fails a kept handle's reads at once while a dialog waits", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "ask-kept", url: `${baseUrl}/ask` });
+		const result = valueOf(
+			await invoke({
+				action: "run",
+				name: "ask-kept",
+				timeout: 10,
+				code: `const status = await tab.waitFor("#status");
+const [child] = await (await tab.waitFor("body")).$$("#status");
+await tab.click("#delete");
+const errors = [];
+for (const read of [() => status.evaluate(el => el.textContent), () => status.boundingBox(), () => status.isVisible(), () => status.isHidden(), () => child.evaluate(el => el.textContent)]) {
+	try { await read(); errors.push("returned"); } catch (e) { errors.push(e.message); }
+}
+await tab.handleDialog({ accept: true });
+return { errors, text: await status.evaluate(el => el.textContent) };`,
+			}),
+		) as { errors: string[]; text: string };
+		// They used to wait on the stopped page until the cell timed out; a child the handle returned as well.
+		expect(result.errors.map(error => error.slice(0, error.indexOf(" cannot run")))).toEqual([
+			"handle.evaluate()",
+			"handle.boundingBox()",
+			"handle.isVisible()",
+			"handle.isHidden()",
+			"handle.evaluate()",
+		]);
+		for (const error of result.errors) expect(error).toContain('the page is waiting on a confirm("Delete?")');
+		expect(result.text).toBe("ready");
+		await invoke({ action: "close", name: "ask-kept" });
+	}, 60_000);
+
+	test("keeps a tab whose page asks for a confirm while it opens, and answers it", async () => {
+		const invoke = createHost();
+		// The open used to treat the dialog as a failed navigation and close the tab it was waiting in.
+		const opened = await invoke({ action: "open", name: "ask-load", url: `${baseUrl}/ask-on-load` });
+		expect(textOf(opened)).toContain('The page is waiting on a confirm("Leave unsaved?")');
+		const answered = await invoke({
+			action: "run",
+			name: "ask-load",
+			timeout: 10,
+			code: "await tab.handleDialog({ accept: true }); return await tab.evaluate(() => globalThis.log);",
+		});
+		expect(valueOf(answered)).toEqual(["load:true"]);
+		await invoke({ action: "close", name: "ask-load" });
+	}, 60_000);
+
+	test("answers a reload whose page asks for a confirm with the URL it reached", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "ask-reload", url: `${baseUrl}/ask-on-load` });
+		// tab.reload() promises the URL; it used to return undefined once the reloaded page asked.
+		const reloaded = await invoke({
+			action: "run",
+			name: "ask-reload",
+			timeout: 10,
+			code: "await tab.handleDialog({ accept: true }); const url = await tab.reload(); return { url, dialog: await tab.dialog() };",
+		});
+		expect(valueOf(reloaded)).toEqual({
+			url: `${baseUrl}/ask-on-load`,
+			dialog: { open: true, type: "confirm", message: "Leave unsaved?" },
+		});
+		await invoke({ action: "close", name: "ask-reload" });
+	}, 60_000);
+
+	test("lets a frame's click that opens a confirm return like the tab's", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "ask-frame", url: `${baseUrl}/ask-frame` });
+		const clicked = await invoke({
+			action: "run",
+			name: "ask-frame",
+			timeout: 10,
+			code: 'const frame = await tab.frame("#inner"); await frame.click("#delete"); return await tab.dialog();',
+		});
+		expect(valueOf(clicked)).toEqual({ open: true, type: "confirm", message: "Delete?" });
+		await invoke({
+			action: "call",
+			name: "ask-frame",
+			chain: [{ method: "handleDialog", args: [{ accept: true }] }],
+		});
+		await invoke({ action: "close", name: "ask-frame" });
+	}, 60_000);
+
+	test("names the dialog, not a timeout, when it cut a handle's action short", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "ask-handle", url: `${baseUrl}/ask` });
+		const result = valueOf(
+			await invoke({
+				action: "run",
+				name: "ask-handle",
+				timeout: 10,
+				code: `const { elements } = await tab.observe();
+const field = await tab.id(elements.find(element => element.role === "textbox").id);
+const errors = [];
+try { await field.fill("x"); } catch (e) { errors.push(e.message); }
+await tab.handleDialog({ accept: false });
+try { await field.fill("x"); } catch (e) { errors.push(e.message); }
+return errors;`,
+			}),
+		) as string[];
+		expect(result[0]).toContain('handle.fill(): the page opened a confirm("Rename?")');
+		expect(result[1]).toContain("the page's dialog interrupted handle.fill()");
+		expect(result[1]).not.toContain("timed out");
+		await invoke({ action: "close", name: "ask-handle" });
+	}, 60_000);
+
+	test("dismisses a dialog a timed-out call left, so the tab recovers", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "ask-raw", url: `${baseUrl}/ask` });
+		// Raw page calls do not check for dialogs; one stuck behind a confirm times the cell out. The tab used to be
+		// reset from a fresh session, which cannot see the dialog, and was then killed with the page still stopped.
+		const timedOut = await invoke({
+			action: "run",
+			name: "ask-raw",
+			timeout: 2,
+			code: 'await page.evaluate(() => confirm("Raw?"));',
+		}).catch((error: unknown) => (error instanceof Error ? error.message : String(error)));
+		expect(String(timedOut)).toContain('confirm("Raw?"), which omp dismissed');
+		const after = await invoke({
+			action: "run",
+			name: "ask-raw",
+			timeout: 10,
+			code: "return [await tab.dialog(), await tab.text('#status')];",
+		});
+		expect(valueOf(after)).toEqual([{ open: false }, "ready"]);
+		await invoke({ action: "close", name: "ask-raw" });
+	}, 60_000);
+
+	test("leaves an alert in the user's own browser for the user, and goes on once they close it", async () => {
+		await withUserBrowser(async cdpUrl => {
+			const invoke = createHost();
+			try {
+				await invoke({ action: "open", name: "user-alert", url: `${baseUrl}/ask`, app: { cdp_url: cdpUrl } });
+				const user = await userAtPage(cdpUrl, "/ask");
+				try {
+					// It used to be accepted at once, so the user never saw it.
+					const clicked = await invoke({
+						action: "run",
+						name: "user-alert",
+						timeout: 10,
+						code: 'await tab.click("#save"); return await tab.dialog();',
+					});
+					expect(valueOf(clicked)).toEqual({ open: true, type: "alert", message: "Saved" });
+					expect(textOf(clicked)).toContain('The page is waiting on an alert("Saved")');
+					const blocked = await invoke({
+						action: "run",
+						name: "user-alert",
+						timeout: 10,
+						code: 'try { await tab.text("#status"); return "ran"; } catch (e) { return e.message; }',
+					});
+					expect(valueOf(blocked)).toContain('cannot run: the page is waiting on an alert("Saved")');
+					await user.closeDialog();
+				} finally {
+					user.leave();
+				}
+				const after = await invoke({
+					action: "run",
+					name: "user-alert",
+					timeout: 10,
+					code: 'return [await tab.dialog(), await tab.text("#status"), await tab.evaluate(() => globalThis.log)];',
+				});
+				expect(valueOf(after)).toEqual([{ open: false }, "ready", ["alert closed"]]);
+			} finally {
+				await invoke({ action: "close", name: "user-alert" }).catch(() => {});
+			}
+		});
+	}, 60_000);
 
 	test("holds print() in a tab omp launched, during its calls and between them, and says so", async () => {
 		const invoke = createHost();

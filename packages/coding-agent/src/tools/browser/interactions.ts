@@ -1,8 +1,8 @@
-import type { Protocol } from "devtools-protocol";
 import { untilAborted } from "@oh-my-pi/pi-utils";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { ElementHandle, JSHandle, KeyInput, KeyPressOptions, MouseButton, Page, Realm } from "puppeteer-core";
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
+import type { CaughtFileChooser, FileChooserCatcher } from "./file-choosers";
 import { splitKeyCombo, ternKey } from "./tern/keys";
 import { devtoolsFrameId } from "./frames";
 import {
@@ -1214,61 +1214,6 @@ export async function prepareInputUpload(
 	return preparedUpload(sources, sig => deliverToInput(input, sources, route, staging, sig));
 }
 
-/** Pages with a chooser-trigger upload in flight: a second one would catch the first one's chooser. */
-const pagesAwaitingChooser = new WeakSet<Page>();
-
-/**
- * Click `handle` and return the file input of the chooser it opens, adopted into the isolated world; null when no
- * chooser opened. The chooser is caught on a CDP session of our own, which lets go of the interception as soon as the
- * input is adopted: Puppeteer's `waitForFileChooser` leaves it on, which swallows every later chooser on the page, and
- * its listener throws on a File System Access picker's event.
- */
-async function catchChooserInput(
-	page: Page,
-	handle: ElementHandle,
-	label: string,
-	signal: AbortSignal | undefined,
-): Promise<ElementHandle | null> {
-	let timer: NodeJS.Timeout | undefined;
-	const creating = page.createCDPSession();
-	const session = await untilAborted(signal, () => creating).catch(error => {
-		// An abort does not stop the attach; detach the session once it arrives.
-		void creating.then(late => late.detach()).catch(() => undefined);
-		throw error;
-	});
-	try {
-		const { promise: opened, resolve } = Promise.withResolvers<Protocol.Page.FileChooserOpenedEvent | null>();
-		session.once("Page.fileChooserOpened", resolve);
-		await untilAborted(signal, () => session.send("Page.enable"));
-		await untilAborted(signal, () => session.send("Page.setInterceptFileChooserDialog", { enabled: true }));
-		// The wait covers the click, so a target that only becomes clickable later counts as a drop zone.
-		timer = setTimeout(() => resolve(null), FILE_CHOOSER_WAIT_MS);
-		await clickElement(handle, label, signal);
-		const chooser = await untilAborted(signal, () => opened);
-		if (!chooser) return null;
-		if (chooser.backendNodeId === undefined) {
-			throw new ToolError(
-				`${label} opened a File System Access picker (showOpenFilePicker), which automation cannot fill; upload through the page's <input type=file> or drop zone instead`,
-			);
-		}
-		const { backendNodeId } = chooser;
-		const frame = page.frames().find(candidate => devtoolsFrameId(candidate) === chooser.frameId);
-		if (!frame) throw new ToolError(`${label} opened a file chooser in a frame that has since gone away`);
-		const node = await untilAborted(signal, () => frame.isolatedRealm().adoptBackendNode(backendNodeId));
-		const input = node.asElement();
-		if (!input) {
-			await node.dispose().catch(() => undefined);
-			throw new ToolError("Node is not a file input element");
-		}
-		return input;
-	} finally {
-		clearTimeout(timer);
-		// The relay serves every session of a tab from one debugger attachment, so detaching alone leaves it on.
-		await session.send("Page.setInterceptFileChooserDialog", { enabled: false }).catch(() => undefined);
-		await session.detach().catch(() => undefined);
-	}
-}
-
 /**
  * Find what takes an upload through `handle`: the file input itself, the chooser its click opens, or else the element
  * as a drop zone. `route` is how the browser gets the files; see {@link UploadStaging.route}.
@@ -1280,6 +1225,7 @@ export async function prepareElementUpload(
 	label: string,
 	route: UploadRoute,
 	staging: UploadStaging,
+	choosers: FileChooserCatcher,
 	signal?: AbortSignal,
 ): Promise<PreparedUpload> {
 	const inputType = (await untilAborted(signal, () =>
@@ -1294,30 +1240,71 @@ export async function prepareElementUpload(
 	const sources = await openUploadSources(absolutePaths, signal);
 	if (route === "contents") refuseFolders(sources);
 
-	if (pagesAwaitingChooser.has(page)) {
-		throw new ToolError(`${label} cannot run while another uploadFile on this tab waits for its file chooser`);
-	}
-	pagesAwaitingChooser.add(page);
+	// The tab's chooser catcher takes the chooser the click opens, so no OS file dialog shows and nothing else gets it.
+	const chooser = await choosers.claimDuring(
+		() => clickElement(handle, label, signal),
+		FILE_CHOOSER_WAIT_MS,
+		label,
+		signal,
+	);
+	if (!chooser) return preparedUpload(sources, sig => deliverToDropZone(handle, sources, route, staging, label, sig));
+	// A chooser the upload did not fill stays held while its input still waits, so it can be answered, not lost.
+	let settled = false;
+	const keepWaiting = async (error: unknown): Promise<unknown> => {
+		settled = true;
+		if (!(await choosers.holdIfWaiting(chooser)) || !(error instanceof ToolError)) return error;
+		return new ToolError(
+			`${error.message}. The file chooser is still waiting: answer it with tab.handleDialog({ accept: true, files: [...] }) or cancel it with tab.handleDialog({ accept: false }).`,
+		);
+	};
 	try {
-		const input = await catchChooserInput(page, handle, label, signal);
-		if (input) {
-			try {
-				const refusal = await untilAborted(signal, () => input.evaluate(fileInputRefusal, sources.length));
-				if (refusal) throw new ToolError(refusal);
-			} catch (error) {
-				await input.dispose().catch(() => undefined);
-				throw error;
-			}
-			return preparedUpload(
-				sources,
-				sig => deliverToInput(input, sources, route, staging, sig),
-				() => input.dispose().catch(() => undefined),
-			);
-		}
-	} finally {
-		pagesAwaitingChooser.delete(page);
+		await choosers.check(chooser, absolutePaths, label);
+	} catch (error) {
+		throw await keepWaiting(error);
 	}
-	return preparedUpload(sources, sig => deliverToDropZone(handle, sources, route, staging, label, sig));
+	return preparedUpload(
+		sources,
+		async sig => {
+			try {
+				await deliverToChooser(page, choosers, chooser, sources, route, staging, label, sig);
+				settled = true;
+			} catch (error) {
+				throw await keepWaiting(error);
+			}
+		},
+		async () => {
+			if (!settled) await choosers.holdIfWaiting(chooser);
+		},
+	);
+}
+
+/**
+ * Hand a caught chooser's `<input type=file>` the files by `route`: staged copies' paths, or contents streamed into
+ * the isolated world, as for an input the upload targets directly.
+ */
+export async function deliverToChooser(
+	page: Page,
+	choosers: FileChooserCatcher,
+	chooser: CaughtFileChooser,
+	sources: UploadSource[],
+	route: UploadRoute,
+	staging: UploadStaging,
+	label: string,
+	signal: AbortSignal,
+): Promise<void> {
+	const backendNodeId = chooser.backendNodeId;
+	if (backendNodeId === undefined) throw new ToolError(`${label} opened a File System Access picker`);
+	const frame = page.frames().find(candidate => devtoolsFrameId(candidate) === chooser.frameId);
+	if (!frame) throw new ToolError(`${label} opened a file chooser in a frame that has since gone away`);
+	const node = await untilAborted(signal, () => frame.isolatedRealm().adoptBackendNode(backendNodeId));
+	const input = node.asElement();
+	try {
+		if (!input) throw new ToolError("Node is not a file input element");
+		await deliverToInput(input, sources, route, staging, signal);
+	} finally {
+		await node.dispose().catch(() => undefined);
+	}
+	choosers.answered(chooser);
 }
 
 /** Press a keyboard key without releasing it; a press cut off on its way is released, not left held. */
