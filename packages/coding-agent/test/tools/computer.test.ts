@@ -3118,7 +3118,14 @@ describe("computer background fallback", () => {
 		const transport = new MemoryTransport();
 		new ComputerWorkerCore(transport, () => native);
 		const id = crypto.randomUUID();
-		transport.inbound({ type: "run", id, code, timeoutMs: 2_000, session: snapshot(false, backgroundFallback) });
+		transport.inbound({
+			type: "run",
+			id,
+			code,
+			timeoutMs: 2_000,
+			session: snapshot(false, backgroundFallback),
+			escape: escapeScope(),
+		});
 		const message = await transport.waitFor(candidate => candidate.type === "result" && candidate.id === id);
 		if (message.type !== "result") throw new Error(`Expected computer result, received ${message.type}`);
 		return message;
@@ -3769,6 +3776,7 @@ describe("computer background fallback", () => {
 				code: 'await desktop.control.acquire({ reason: "Test task" })',
 				timeoutMs: 2_000,
 				session: snapshot(false, "refuse"),
+				escape: escapeScope(),
 			});
 			const result = await transport.waitFor(candidate => candidate.type === "result" && candidate.id === id);
 			if (result.type !== "result" || result.ok) throw new Error("control.acquire was not refused");
