@@ -1284,16 +1284,17 @@
    "needs": [
     "#15282"
    ],
-   "base": null,
-   "body": null,
+   "base": "8c323e882d102e77aa5f1b88bbd451ce21184d50",
+   "body": "bodies/computer-web-readonly.md",
    "state": "open",
    "pr": 15584,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-web-readonly",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:47:19Z",
-   "note": ""
+   "updated": "2026-10-13T21:52:31Z",
+   "note": "",
+   "requeue": 15584
   },
   {
    "id": "relay-popup-owned",
