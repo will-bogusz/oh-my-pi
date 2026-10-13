@@ -432,7 +432,7 @@ function refuseMenuPress(
 	context: ComputerRunContext,
 	native: { refuseMenu?: boolean },
 ): void {
-	if (session.capabilities.backend === "quartz" && context.snapshot.backgroundFallback === "refuse") {
+	if (context.snapshot.backgroundFallback === "refuse" && session.capabilities.backend === "quartz") {
 		native.refuseMenu = true;
 	}
 }
