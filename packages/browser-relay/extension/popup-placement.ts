@@ -1,5 +1,7 @@
 /** Chrome's `windows.WINDOW_ID_NONE`: no Chrome window has focus (another app is active). */
 const NO_WINDOW = -1;
+/** How long a report of no focused window may be the moment between two of Chrome's windows. */
+const TRANSIENT_NO_FOCUS_MS = 100;
 
 /** The Chrome calls placing a popup needs; tests pass a fake. */
 export interface PlacementChrome {
@@ -38,9 +40,14 @@ export class PopupPlacement {
 	#focusedBefore = new Map<number, number | undefined>();
 	/** Popup windows asked to give focus back before Chrome focused them → the window to return it to. */
 	#awaitingFocus = new Map<number, number>();
+	/** When focus last left every Chrome window, and the window that had it. */
+	#noneAt = Number.NEGATIVE_INFINITY;
+	#beforeNone: number | undefined;
+	readonly #now: () => number;
 
-	constructor(chrome: PlacementChrome) {
+	constructor(chrome: PlacementChrome, now: () => number = Date.now) {
 		this.#chrome = chrome;
+		this.#now = now;
 	}
 
 	/** The selection and focus this worker found at its hello, before it saw any change. */
@@ -59,13 +66,30 @@ export class PopupPlacement {
 	}
 
 	focusChanged(windowId: number): void {
-		const back = this.#awaitingFocus.get(windowId);
-		// Only the very next focus change can be the popup taking it; any other means the user moved on.
+		if (windowId === NO_WINDOW) {
+			this.#beforeNone = this.#focused;
+			this.#noneAt = this.#now();
+			this.#focused = NO_WINDOW;
+			return;
+		}
+		const previous = this.#lastFocused();
+		// Only the very next focus change can be the popup taking it; any other, or leaving Chrome, means the
+		// user moved on.
+		const back = previous === NO_WINDOW ? undefined : this.#awaitingFocus.get(windowId);
 		this.#awaitingFocus.clear();
 		// The window may have closed meanwhile; there is nothing to give focus back to then.
 		if (back !== undefined) void this.#chrome.focusWindow(back).catch(() => undefined);
-		if (windowId !== NO_WINDOW) this.#focusedBefore.set(windowId, this.#focused);
+		this.#focusedBefore.set(windowId, previous);
 		this.#focused = windowId;
+	}
+
+	/**
+	 * The focused window, looking through a moment of no focus: some Linux window managers report
+	 * `WINDOW_ID_NONE` just before focus moves between two Chrome windows.
+	 */
+	#lastFocused(): number | undefined {
+		if (this.#focused === NO_WINDOW && this.#now() - this.#noneAt < TRANSIENT_NO_FOCUS_MS) return this.#beforeNone;
+		return this.#focused;
 	}
 
 	/** A tab omp drives opened `tabId`. Recorded at once, so a later popup never restores this one. */
@@ -83,6 +107,7 @@ export class PopupPlacement {
 		this.#generation.delete(windowId);
 		this.#focusedBefore.delete(windowId);
 		this.#awaitingFocus.delete(windowId);
+		if (this.#beforeNone === windowId) this.#beforeNone = undefined;
 	}
 
 	/**
@@ -91,7 +116,8 @@ export class PopupPlacement {
 	 * from. Never focuses a window that did not have focus a moment ago, so Chrome is not raised.
 	 */
 	async background(tabId: number): Promise<void> {
-		this.#popups.add(tabId);
+		// Not reported by this worker, or selected again by the user since: theirs to place.
+		if (!this.#popups.has(tabId)) return;
 		const tab = await this.#chrome.getTab(tabId);
 		if (!tab) return;
 		const window = await this.#chrome.getWindow(tab.windowId);
@@ -100,23 +126,26 @@ export class PopupPlacement {
 			// stops rendering a minimized one. It stays where Chrome put it; once the user's window has focus
 			// back it sits behind it, and omp's focus emulation keeps it rendering there.
 			// Focus goes back only to the window that had it while Chrome was the active app, and only if nothing
-			// moved it since; otherwise it was the user's doing, and focusing a window could raise Chrome.
+			// moved it since; otherwise it was the user's doing. Chrome is the active app already whenever this
+			// focuses a window (the popup has the focus), so it only picks which of Chrome's windows is in front.
 			if (this.#focused === tab.windowId) {
 				if (!window.focused) return;
 				const before = this.#focusedBefore.get(tab.windowId);
 				if (before === undefined) {
-					// Chrome had focus before this worker saw any focus change (a Chrome that just started reports
-					// none): the popup's own focus says Chrome is the active app, and the normal window focused last
-					// is the one it took focus from.
+					// Chrome had focus before this worker saw any focus change: a Chrome that just started can report
+					// neither its focus nor, at the hello, a focused window. The normal window focused last goes in
+					// front of the popup.
 					const last = await this.#chrome.lastFocusedNormalWindow();
 					if (last !== undefined && last !== tab.windowId && this.#focused === tab.windowId) {
 						await this.#chrome.focusWindow(last);
 					}
 				} else if (before !== NO_WINDOW) await this.#chrome.focusWindow(before);
-			} else if (this.#focused !== undefined && this.#focused !== NO_WINDOW && !this.#focusedBefore.has(tab.windowId)) {
+			} else {
+				const current = this.#lastFocused();
+				if (current === undefined || current === NO_WINDOW || this.#focusedBefore.has(tab.windowId)) return;
 				// Chrome has not reported the popup's focus yet: a new window takes a moment to show.
-				if (window.focused) await this.#chrome.focusWindow(this.#focused);
-				else this.#awaitingFocus.set(tab.windowId, this.#focused);
+				if (window.focused) await this.#chrome.focusWindow(current);
+				else this.#awaitingFocus.set(tab.windowId, current);
 			}
 			return;
 		}
