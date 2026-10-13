@@ -725,7 +725,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": null,
+   "base": "687892d1046ecaf18829b45f5b86928a308258f4",
    "body": null,
    "state": "open",
    "pr": 15489,
@@ -733,8 +733,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-upload-bytes",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:47:19Z",
-   "note": ""
+   "updated": "2026-10-13T22:54:02Z",
+   "note": "",
+   "advanced": "2026-10-13T22:54:02Z"
   },
   {
    "id": "browser-upload-chooser-session",
