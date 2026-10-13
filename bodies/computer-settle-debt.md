@@ -11,13 +11,17 @@ Reading order: `InputObserver.input` in `packages/coding-agent/src/tools/compute
 
 ## Why
 
-**Builds on #15280**: its first 12 commits are #15280's; merge #15280 first, or merge this alone to land both.
-
 #15280 makes every read after input wait until the apps that input reached go quiet (250 ms without an accessibility notification, 5 s at most), so nothing reads a half-drawn window. Input did not wait: the second call in `press(...); type(...)` was sent while the first one's UI was still appearing, so keys landed on whatever had focus at that instant. On macOS a sheet, popover, rename field or new window takes a few hundred milliseconds to take focus, and that is where the lost and misrouted keys come from.
 
 The wait is the one #15280 already runs, paid once before the next input instead of only before the next read. It covers every app earlier input reached, not just the one about to receive keys, because effects cross apps (a copy in one and a paste in another, a save sheet that belongs to the document's app). A wait cut short by cancelling its cell leaves that input owed, so the next call still waits for it instead of treating it as settled.
 
-Cost: chained input pays one quiet window per step, here about 0.8 s for Finder to finish the new folder: Finder starts reacting 160-355 ms after the key, and the 250 ms window has to pass after its last notification. A cell with one input and a read pays nothing new, since the read already waited. Two ways to cut it lost more than they saved, so neither is here. Counting the quiet that had already passed since the input, instead of starting the window when the wait starts, saved 0.07 s per cell (1.58 s) and named the folder wrong 2 times in 40, both on the shortest waits: with credit from the input, the window can close before Finder's first notification. Keeping each app's observer registered between waits saved 0.03 s (1.63 s, 39/40).
+Cost: chained input pays one quiet window per step, here about 0.8 s for Finder to finish the new folder: Finder starts reacting 160-355 ms after the key, and the 250 ms window has to pass after its last notification. A cell with one input and a read pays nothing new, since the read already waited. Two ways to cut it lost more than they saved, so neither is here.
+
+<details><summary>The two rejected cuts</summary>
+
+Counting the quiet that had already passed since the input, instead of starting the window when the wait starts, saved 0.07 s per cell (1.58 s) and named the folder wrong 2 times in 40, both on the shortest waits: with credit from the input, the window can close before Finder's first notification. Keeping each app's observer registered between waits saved 0.03 s (1.63 s, 39/40).
+
+</details>
 
 ## Testing
 
