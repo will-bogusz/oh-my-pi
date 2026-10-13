@@ -15,8 +15,6 @@ Reading order: `relay/bridge.ts` (`Target.setAutoAttach`, `OMP.claimTarget`, `#a
 
 ## Why
 
-**Builds on #15105, #15110, #15493, #15498, #15494, #15508, #15489, #15490, #15510, #15491, #15492, #15503, #15559** (merge in that order): its first 98 commits are theirs; merge those first, or merge this alone to land them all.
-
 > **Relay context.** The relay is a CDP façade over `chrome.debugger`. Every `puppeteer.connect` sends `Target.setAutoAttach`, omp opens one relay connection per tab worker plus the supervisor's, and the bridge answered each by attaching every tab.
 
 - **Ownership is explicit.** A connection owns tabs it created or claimed with the relay-private browser-level `OMP.claimTarget { targetId }` (replacing the worker's page-session claim after attaching). Only owned tabs are attached; the rest stay listed for `app.target`.
