@@ -7,8 +7,6 @@ I moved the file chooser handling in browser `uploadFile` onto a CDP session omp
 | a later click on an upload button (the agent's or, in a relay tab, the user's own) | nothing opens; the chooser is swallowed | the chooser opens normally |
 | a control that calls `showOpenFilePicker()` | the cell hangs about 25 s, then the tab is killed | fails at once: `… opened a File System Access picker (showOpenFilePicker), which automation cannot fill; upload through the page's <input type=file> or drop zone instead` |
 
-**Overlaps #15489** in `interactions.ts`; merge #15489 first. Joining point: #15489 catches choosers on its own CDP session only on its contents route (`catchChooserInput`) and keeps Puppeteer's chooser on the paths route (`catchChooser`); merged, this PR's `fillClickedFileChooser` becomes `catchChooserInput` for both routes, and the paths route fills the adopted input with `setFileInputPaths`.
-
 ## Why
 
 `uploadFile` on anything but a file input clicks it and waits 400 ms for a chooser through Puppeteer's `page.waitForFileChooser()`. That turns on `Page.setInterceptFileChooserDialog` and never turns it off, so every later chooser on the page goes to a listener nobody waits on; a drop zone sets it off too, since the wait starts before omp knows it is one. The same listener throws on a File System Access picker, whose event has no input node, and the cell never settles.
