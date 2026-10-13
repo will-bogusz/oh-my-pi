@@ -4200,7 +4200,7 @@ mod tests {
 			},
 			|| panic!("a focused element needs no fresh read"),
 			|| {
-				type_text(&source, "ab", |event| {
+				type_keys(&source, &unicode_keys("ab"), Duration::ZERO, || Ok(()), |event| {
 					pressed += usize::from(matches!(event.get_type(), CGEventType::KeyDown));
 					Ok(())
 				})
@@ -4230,7 +4230,7 @@ mod tests {
 			|_| panic!("the first box has focus at once"),
 			|| panic!("the first box took focus"),
 			|| {
-				type_text(&source, "123456", |event| {
+				type_keys(&source, &unicode_keys("123456"), Duration::ZERO, || Ok(()), |event| {
 					match event.get_type() {
 						CGEventType::KeyDown => boxes.push(focused_box.get()),
 						// Each box hands focus to the next once its digit lands.
