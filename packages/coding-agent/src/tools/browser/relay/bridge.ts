@@ -223,6 +223,8 @@ class TabState {
 const INELIGIBLE_URL = /^(chrome|devtools|edge|view-source|chrome-extension|chrome-untrusted|chrome-search):/i;
 
 const RPC_TIMEOUT_MS = 20_000;
+/** How long after its timeout a late RPC result is still undone; a wedged extension must not grow the map forever. */
+const LATE_RPC_KEEP_MS = 60_000;
 const CDP_ERROR_METHOD_NOT_FOUND = -32601;
 const CDP_ERROR_SERVER = -32000;
 
@@ -251,7 +253,7 @@ export class RelayBridge {
 		{ resolve: (value: unknown) => void; reject: (err: Error) => void; timer: NodeJS.Timeout }
 	>();
 	/** Timed-out RPCs whose late success still needs undoing (a tab Chrome created after omp gave up), by `instance:id`. */
-	#lateRpc = new Map<string, (result: unknown) => void>();
+	#lateRpc = new Map<string, { onResult: (result: unknown) => void; timer: NodeJS.Timeout }>();
 	/** Real child session id → owning tab key, learned from `Target.attachedToTarget` events. */
 	#realSessionTabs = new Map<string, string>();
 	#log: (message: string, data?: Record<string, unknown>) => void;
@@ -383,8 +385,10 @@ export class RelayBridge {
 			pending.reject(error);
 			this.#pendingRpc.delete(key);
 		}
-		for (const key of this.#lateRpc.keys()) {
-			if (key.startsWith(prefix)) this.#lateRpc.delete(key);
+		for (const [key, late] of this.#lateRpc) {
+			if (!key.startsWith(prefix)) continue;
+			clearTimeout(late.timer);
+			this.#lateRpc.delete(key);
 		}
 	}
 
@@ -440,8 +444,10 @@ export class RelayBridge {
 				const pending = this.#pendingRpc.get(key);
 				if (!pending) {
 					const late = this.#lateRpc.get(key);
+					if (!late) return;
 					this.#lateRpc.delete(key);
-					if (late && msg.ok) late(msg.result);
+					clearTimeout(late.timer);
+					if (msg.ok) late.onResult(msg.result);
 					return;
 				}
 				this.#pendingRpc.delete(key);
@@ -1612,7 +1618,12 @@ export class RelayBridge {
 		const { promise, resolve, reject } = Promise.withResolvers<unknown>();
 		const timer = setTimeout(() => {
 			this.#pendingRpc.delete(`${inst.instanceId}:${id}`);
-			if (onLateResult) this.#lateRpc.set(`${inst.instanceId}:${id}`, onLateResult);
+			if (onLateResult) {
+				const key = `${inst.instanceId}:${id}`;
+				const expiry = setTimeout(() => this.#lateRpc.delete(key), LATE_RPC_KEEP_MS);
+				expiry.unref?.();
+				this.#lateRpc.set(key, { onResult: onLateResult, timer: expiry });
+			}
 			reject(new Error(`extension rpc '${req.op}' timed out after ${timeoutMs}ms`));
 		}, timeoutMs);
 		this.#pendingRpc.set(`${inst.instanceId}:${id}`, { resolve, reject, timer });
