@@ -5,6 +5,13 @@ export const TAB_ID = 1;
 /** Chrome's refusal while another extension's frame is in the tab. */
 const FOREIGN_FRAME_REFUSAL = "Cannot access a chrome-extension:// URL of different extension";
 
+/** Which forwarded command a waiter takes: a predicate on its params, or text its serialized params contain. */
+export type SendMatch = string | ((params: Record<string, unknown>) => boolean);
+
+function sendMatcher(match: SendMatch): (params: Record<string, unknown>) => boolean {
+	return typeof match === "string" ? params => JSON.stringify(params).includes(match) : match;
+}
+
 /**
  * The relay extension's side of the wire, played over a real headless Chromium's CDP endpoint: `attach`,
  * `send` and `detach` drive one page target the way `chrome.debugger` drives a tab. {@link chromeDetach}
@@ -20,11 +27,16 @@ export class ChromeBackedExtension {
 	#root: string | undefined;
 	/** Chrome command id → relay RPC id of in-flight `send`s, answered with Chrome's error when the attachment ends. */
 	readonly #inFlight = new Map<number, number>();
-	/** Resolved by the next forwarded command of that method. */
-	readonly #sendWaiters = new Map<
-		string,
-		{ resolve: () => void; matches: (params: Record<string, unknown>) => boolean }
-	>();
+	/**
+	 * Resolved by the next forwarded command of that method whose params `matches` accepts; one with a `gate`
+	 * reaches Chrome only once the gate opens.
+	 */
+	readonly #sendWaiters: Array<{
+		method: string;
+		matches: (params: Record<string, unknown>) => boolean;
+		resolve: () => void;
+		gate?: Promise<void>;
+	}> = [];
 	/** Answer attaches with Chrome's refusal, as while a foreign extension frame is in the tab. */
 	refuseAttach = false;
 	/** `attach` and `detach` requests the relay made. */
@@ -147,20 +159,22 @@ export class ChromeBackedExtension {
 				return this.#reply(id, { result: {} });
 			}
 			case "send": {
+				const method = String(message.method);
+				const params = isRecord(message.params) ? message.params : {};
+				const waiter = this.#sendWaiters.find(w => w.method === method && w.matches(params));
+				if (waiter) {
+					this.#sendWaiters.splice(this.#sendWaiters.indexOf(waiter), 1);
+					waiter.resolve();
+					if (waiter.gate) await waiter.gate;
+				}
 				const root = this.#root;
 				if (!root) return this.#reply(id, { error: "Debugger is not attached to the tab with id: 1." });
-				const method = String(message.method);
 				const sent = this.#chromeSend(
 					method,
 					isRecord(message.params) ? message.params : {},
 					typeof message.sessionId === "string" ? message.sessionId : root,
 				);
 				this.#inFlight.set(sent.id, id);
-				const waiter = this.#sendWaiters.get(method);
-				if (waiter?.matches(isRecord(message.params) ? message.params : {})) {
-					this.#sendWaiters.delete(method);
-					waiter.resolve();
-				}
 				const answer = await sent.promise;
 				// Chrome already answered this RPC when the attachment ended under it.
 				if (!this.#inFlight.delete(sent.id)) return;
@@ -172,11 +186,22 @@ export class ChromeBackedExtension {
 		}
 	}
 
-	/** Resolves once the relay forwards a command of `method` whose params `matches` accepts to the tab. */
-	nextSend(method: string, matches: (params: Record<string, unknown>) => boolean = () => true): Promise<void> {
+	/** Resolves once the relay forwards a command of `method` whose params `matches` accepts, or contain it as text. */
+	nextSend(method: string, matches: SendMatch = ""): Promise<void> {
 		const { promise, resolve } = Promise.withResolvers<void>();
-		this.#sendWaiters.set(method, { resolve, matches });
+		this.#sendWaiters.push({ method, matches: sendMatcher(matches), resolve });
 		return promise;
+	}
+
+	/**
+	 * Hold the next command of `method` whose params `matches` accepts before it reaches Chrome: `arrived` resolves
+	 * once the relay forwards it, and Chrome gets it when `release` is called.
+	 */
+	holdSend(method: string, matches: SendMatch = ""): { arrived: Promise<void>; release: () => void } {
+		const arrived = Promise.withResolvers<void>();
+		const gate = Promise.withResolvers<void>();
+		this.#sendWaiters.push({ method, matches: sendMatcher(matches), resolve: arrived.resolve, gate: gate.promise });
+		return { arrived: arrived.promise, release: gate.resolve };
 	}
 
 	/** Chrome ends the attachment by itself: the command in flight fails, then `onDetach` fires. */

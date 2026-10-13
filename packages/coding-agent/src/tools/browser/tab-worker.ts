@@ -3918,6 +3918,13 @@ export class WorkerCore {
 			arrived ??= state;
 			pageWaits.resolve();
 		});
+		// A page held in a dialog runs no further page command until the dialog is answered: each step gives way to it.
+		const steps: Promise<unknown>[] = [];
+		const step = async (work: Promise<unknown>): Promise<void> => {
+			const settled = work.catch(() => undefined);
+			steps.push(settled);
+			await Promise.race([settled, pageWaits.promise]);
+		};
 		try {
 			const replay: ReattachReplay = {
 				...this.#openReplay,
@@ -3925,17 +3932,20 @@ export class WorkerCore {
 				initScripts: this.#initScripts?.list(),
 				dialogs: this.#dialogs?.policy,
 			};
-			await this.#emulation?.clear();
+			if (this.#emulation) await step(this.#emulation.clear());
 			// A background tab lays out only while focus-emulated: let it take its own size back first, or the
 			// emulated size stays on the page until it reloads.
-			await Promise.race([
-				page.evaluate("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))"),
-				Bun.sleep(RELEASE_LAYOUT_WAIT_MS),
-				pageWaits.promise,
-			]).catch(() => undefined);
+			if (!arrived) {
+				await step(
+					Promise.race([
+						page.evaluate("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))"),
+						Bun.sleep(RELEASE_LAYOUT_WAIT_MS),
+					]),
+				);
+			}
 			// A tab-wide switch on the relay: switched off first, or the page goes on reporting focus until it loads
 			// again.
-			await page.emulateFocusedPage(false).catch(() => undefined);
+			if (!arrived) await step(page.emulateFocusedPage(false));
 			// A screen recording is saved now; it cannot go on without the attachment either way.
 			const ended: string[] = [];
 			const recording = this.#recording.status();
@@ -3954,8 +3964,13 @@ export class WorkerCore {
 				);
 			}
 			if (arrived) {
-				await this.#emulation?.reapply().catch(() => undefined);
-				if (this.#focusEmulated) await page.emulateFocusedPage(true).catch(() => undefined);
+				// Put back behind the steps still queued on the dialog, which the page runs once it is answered.
+				const emulation = this.#emulation;
+				const focusEmulated = this.#focusEmulated;
+				void Promise.all(steps).then(async () => {
+					await emulation?.reapply().catch(() => undefined);
+					if (focusEmulated) await page.emulateFocusedPage(true).catch(() => undefined);
+				});
 				return {
 					released: false,
 					kept: `the page started waiting on ${describeWaiting(arrived)} as omp was letting go`,
