@@ -115,8 +115,8 @@ export interface NativeDesktopSession {
 	axSelectText(ref: string, text: string, opts?: AxSelectTextOptions | null): Promise<AxTextSelection>;
 	axFocus(ref: string): Promise<void>;
 	axClick(ref: string, opts?: PointerOptions | null): InputCall;
-	axType(ref: string, text: string, opts?: PointerOptions | null): Promise<void>;
-	axKeyChord(ref: string, keys: string[], opts?: PointerOptions | null): Promise<void>;
+	axType(ref: string, text: string, opts?: PointerOptions | null): InputCall;
+	axKeyChord(ref: string, keys: string[], opts?: PointerOptions | null): InputCall;
 	close(): Promise<void>;
 }
 
@@ -711,14 +711,20 @@ class El {
 			return;
 		}
 		const keys = chordKeys(chord);
-		await nativeCall(context.signal, () => this.#session.axKeyChord(this.ref, keys, pointerOptions(options)));
+		const native = pointerOptions(options);
+		await sendInput(this.#session, context, "press", native.takeover, fallback =>
+			this.#session.axKeyChord(this.ref, keys, { ...native, ...fallback }),
+		);
 	}
 
 	async type(text: string, options?: InputOptions): Promise<void> {
 		const context = this.#getContext();
 		guardRun(context, "type");
 		validateString(text, "type(text)");
-		await nativeCall(context.signal, () => this.#session.axType(this.ref, text, pointerOptions(options)));
+		const native = pointerOptions(options);
+		await sendInput(this.#session, context, "type", native.takeover, fallback =>
+			this.#session.axType(this.ref, text, { ...native, ...fallback }),
+		);
 	}
 
 	async click(options?: ClickOptions): Promise<void> {
