@@ -107,7 +107,8 @@ async function launchRelayFixture(
 							: route === "/frame"
 								? `<a id="frame" target="_blank" href="http://127.0.0.1:${new URL(request.url).port}/popup?k=frame">frame</a>`
 								: route === "/popup"
-									? `<title>Popup</title><button id="b" onclick="this.textContent='clicked'">b</button><input id="i">`
+									? `<title>Popup</title><button id="b" onclick="this.textContent='clicked'">b</button><input id="i">
+<button id="nest" onclick="window.open('/popup?k=nested')">nest</button>`
 									: "<title>Human sentinel</title><h1>Keep me</h1>";
 			return new Response(html, { headers: { "Content-Type": "text/html" } });
 		},
@@ -401,6 +402,44 @@ return { visible: await got.evaluate(() => document.visibilityState), shot: shot
 				).toMatchObject(expected);
 			}
 			expect(await relayAttached(fixture, blankTabId)).toBeFalse();
+		} finally {
+			await releaseTab(name).catch(() => undefined);
+			await releaseBrowser(relay, { kill: false });
+			await fixture.close();
+		}
+	}, 60_000);
+
+	it("keeps a popup's own popup rendering and taking input behind the user's selection", async () => {
+		const fixture = await launchRelayFixture();
+		const human = await fixture.browser.newPage();
+		const humanUrl = `${fixture.origin}/human`;
+		await human.goto(humanUrl);
+		await human.bringToFront();
+		const relay = await acquireBrowser({ kind: "relay", cdpUrl: fixture.cdpUrl }, { cwd: process.cwd() });
+		const name = `relay-nested-popup-${process.pid}`;
+		try {
+			await acquireTab(name, relay, { url: `${fixture.origin}/opener`, timeoutMs: 15_000 });
+			const humanTabId = await chromeTabIdOf(fixture, humanUrl);
+			const driven = await runInTab(name, {
+				code: `const child = Promise.withResolvers();
+page.once("popup", child.resolve);
+await tab.click("#open");
+const popup = await child.promise;
+await popup.waitForSelector("#nest");
+const grandchild = Promise.withResolvers();
+popup.once("popup", grandchild.resolve);
+await popup.click("#nest");
+const got = await grandchild.promise;
+await got.waitForFunction(() => location.search === "?k=nested");
+await got.click("#b");
+await got.type("#i", "typed");
+return { focus: await got.evaluate(() => document.hasFocus()), visible: await got.evaluate(() => document.visibilityState),
+	button: await got.$eval("#b", b => b.textContent), input: await got.$eval("#i", i => i.value) };`,
+				timeoutMs: 15_000,
+				session,
+			});
+			expect(driven.returnValue).toEqual({ focus: true, visible: "visible", button: "clicked", input: "typed" });
+			expect(await chromeTab(fixture, humanTabId)).toEqual({ active: true });
 		} finally {
 			await releaseTab(name).catch(() => undefined);
 			await releaseBrowser(relay, { kill: false });

@@ -1596,11 +1596,14 @@ export class WorkerCore {
 
 	/**
 	 * The relay keeps a popup this page opens behind the user's selection, where Chromium stops rendering it;
-	 * focus emulation keeps it rendering and taking input, as for the page itself.
+	 * focus emulation keeps it rendering and taking input, as for the page itself. Puppeteer reports a popup's
+	 * own popups on the popup, so each one gets this handler too.
 	 */
 	readonly #onRelayPopup = (popup: Page | null): void => {
+		if (!popup) return;
+		popup.on("popup", this.#onRelayPopup);
 		// The popup may close before the command lands; there is nothing to keep rendering then.
-		void popup?.emulateFocusedPage(true).catch(() => undefined);
+		void popup.emulateFocusedPage(true).catch(() => undefined);
 	};
 
 	constructor(transport: Transport, isolated: boolean) {

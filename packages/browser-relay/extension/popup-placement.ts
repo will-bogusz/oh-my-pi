@@ -97,6 +97,14 @@ export class PopupPlacement {
 		this.#popups.add(tabId);
 	}
 
+	/**
+	 * `sourceTabId` opened `tabId`. A popup when omp drives the source (`driven`), or when the source is itself a
+	 * popup of omp's: a popup can open its own before omp has attached to it.
+	 */
+	openedFrom(sourceTabId: number, tabId: number, driven: boolean): void {
+		if (driven || this.#popups.has(sourceTabId)) this.opened(tabId);
+	}
+
 	removed(tabId: number): void {
 		this.#displacedTab.delete(tabId);
 		this.#popups.delete(tabId);
@@ -130,7 +138,9 @@ export class PopupPlacement {
 			// focuses a window (the popup has the focus), so it only picks which of Chrome's windows is in front.
 			if (this.#focused === tab.windowId) {
 				if (!window.focused) return;
-				const before = this.#focusedBefore.get(tab.windowId);
+				const before = await this.#pastPopupWindows(this.#focusedBefore.get(tab.windowId));
+				// The user moved focus while this looked up omp's popup windows.
+				if (this.#focused !== tab.windowId) return;
 				if (before === undefined) {
 					// Chrome had focus before this worker saw any focus change: a Chrome that just started can report
 					// neither its focus nor, at the hello, a focused window. The normal window focused last goes in
@@ -143,9 +153,13 @@ export class PopupPlacement {
 			} else {
 				const current = this.#lastFocused();
 				if (current === undefined || current === NO_WINDOW || this.#focusedBefore.has(tab.windowId)) return;
+				const back = await this.#pastPopupWindows(current);
+				// The user moved focus, or Chrome reported the popup's, while this looked up omp's popup windows.
+				if (this.#lastFocused() !== current || this.#focusedBefore.has(tab.windowId)) return;
+				if (back === undefined || back === NO_WINDOW) return;
 				// Chrome has not reported the popup's focus yet: a new window takes a moment to show.
-				if (window.focused) await this.#chrome.focusWindow(current);
-				else this.#awaitingFocus.set(tab.windowId, current);
+				if (window.focused) await this.#chrome.focusWindow(back);
+				else this.#awaitingFocus.set(tab.windowId, back);
 			}
 			return;
 		}
@@ -162,5 +176,30 @@ export class PopupPlacement {
 		// The user (or another popup) changed the selection while Chrome answered.
 		if (target?.windowId !== tab.windowId || this.#generation.get(tab.windowId) !== own.generation) return;
 		await this.#chrome.selectTab(previous);
+	}
+
+	/**
+	 * `windowId`, or, when it is one of omp's popup windows, the window focused before it, followed back the same
+	 * way: several popup windows can each take focus before the first is put back. `NO_WINDOW` when the chain
+	 * loops.
+	 */
+	async #pastPopupWindows(windowId: number | undefined): Promise<number | undefined> {
+		if (windowId === undefined || windowId === NO_WINDOW) return windowId;
+		const popupWindows = new Set<number>();
+		for (const popup of this.#popups) {
+			const tab = await this.#chrome.getTab(popup);
+			if (!tab || popupWindows.has(tab.windowId)) continue;
+			// The window may have closed meanwhile.
+			const window = await this.#chrome.getWindow(tab.windowId).catch(() => undefined);
+			if (window?.type === "popup") popupWindows.add(tab.windowId);
+		}
+		const seen = new Set<number>();
+		let current: number | undefined = windowId;
+		while (current !== undefined && current !== NO_WINDOW && popupWindows.has(current)) {
+			if (seen.has(current)) return NO_WINDOW;
+			seen.add(current);
+			current = this.#focusedBefore.get(current);
+		}
+		return current;
 	}
 }

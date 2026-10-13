@@ -405,7 +405,7 @@ chrome.tabs.onRemoved.addListener(tabId => {
 // Chrome names the tab whose page (or a frame in it) opened the new one; `openerTabId` does not
 // for `noopener` links.
 chrome.webNavigation.onCreatedNavigationTarget.addListener(({ sourceTabId, tabId }) => {
-	if (debuggerTabs.has(sourceTabId)) placement.opened(tabId);
+	placement.openedFrom(sourceTabId, tabId, debuggerTabs.has(sourceTabId));
 	post({ t: "popupCreated", tabId, sourceTabId });
 });
 
