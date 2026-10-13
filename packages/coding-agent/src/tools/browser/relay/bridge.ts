@@ -1117,14 +1117,15 @@ export class RelayBridge {
 	}
 
 	/**
-	 * Attach a tab `conn` owns. False when the attach failed, or when the connection left or gave the
-	 * tab up meanwhile; the attachment then comes off again unless another client owns the tab (it may
-	 * be waiting on the same attach). Every client attach goes through here, so no session is minted
-	 * for a connection that is gone.
+	 * Attach a tab `conn` owns. False when the attach failed, or when the connection left, gave the tab
+	 * up or released it (`OMP.releaseTarget`) meanwhile; the attachment then comes off again unless
+	 * another client owns the tab (it may be waiting on the same attach). Every client attach goes
+	 * through here, so no session is minted for a connection that is gone.
 	 */
 	async #attachFor(conn: CdpConnection, tab: TabState, opts?: { retryAfterDiscard?: boolean }): Promise<boolean> {
 		if (!(await this.#ensureAttached(tab, opts))) return false;
-		if (this.#conns.get(conn.id) === conn && conn.claims.has(tab.tabKey) && !tab.discarded) return true;
+		const owned = conn.claims.has(tab.tabKey) && !conn.released.has(tab.tabKey);
+		if (this.#conns.get(conn.id) === conn && owned && !tab.discarded) return true;
 		if (!this.#attachWanted(tab.tabKey)) this.#detachIfUnheld(tab.tabKey);
 		return false;
 	}
@@ -1368,6 +1369,8 @@ export class RelayBridge {
 				for (const pageSession of pageSessions) this.#releaseSession(conn, pageSession, tabSession);
 				for (const session of conn.sessionsForTab(tab.tabKey, "tab"))
 					this.#releaseSession(conn, session, undefined);
+				// An attach in flight lands after this reply otherwise, and the debugger comes back unasked.
+				if (tab.attaching) await tab.attaching.catch(() => false);
 				this.#detachIfUnheld(tab.tabKey);
 				await tab.detaching;
 				this.#reply(conn, msg, { detached: !tab.attached });

@@ -157,6 +157,8 @@ export interface WorkerTabSession extends TabSessionBase<PuppeteerBrowserHandle>
 	released?: { replay: ReattachReplay; ended: string[] };
 	/** Told with the next call's result: what the last turn end's release ended, or why the tab stayed attached. */
 	turnEndNote?: string;
+	/** Runs dispatched to the tab so far; a hand-back that waited out a transition skips the tab if this moved. */
+	runsStarted: number;
 }
 
 export interface CmuxTabSession extends TabSessionBase<CmuxBrowserHandle> {
@@ -473,13 +475,15 @@ async function acquireTabImpl(
 					existing.persist = opts.persist;
 				}
 				const reuseSteps: string[] = [];
-				if (opts.viewport && browser.kind.kind !== "cmux" && browser.kind.kind !== "tern") {
+				// Through `tab.emulate` on the relay too: a released relay tab's next worker puts back what it holds.
+				const viaEmulation = existing.backend === "tern" || existing.kindTag === "relay";
+				if (opts.viewport && browser.kind.kind !== "cmux" && !viaEmulation) {
 					const dsf = opts.viewport.deviceScaleFactor;
 					reuseSteps.push(
 						`await page.setViewport({ width: ${opts.viewport.width}, height: ${opts.viewport.height}, deviceScaleFactor: ${dsf === undefined ? "undefined" : String(dsf)} });`,
 					);
 				}
-				if (opts.viewport && existing.backend === "tern") {
+				if (opts.viewport && viaEmulation) {
 					reuseSteps.push(
 						`await tab.emulate({ viewport: ${JSON.stringify({ width: opts.viewport.width, height: opts.viewport.height, scale: opts.viewport.deviceScaleFactor })} });`,
 					);
@@ -634,6 +638,7 @@ async function acquireTabImpl(
 		lastActivityAt: Date.now(),
 		frozen: false,
 		uploadDir: initPayload.uploadDir,
+		runsStarted: 0,
 	};
 	attachTabWorker(tab, worker);
 	tabs.set(name, tab);
@@ -917,6 +922,8 @@ async function runInTabWithSnapshot(
 	// not the one this call was meant for. A tab omp released between turns is reattached here, before this call.
 	for (let recovering = tabs.get(name); recovering?.backend === "worker";) {
 		if (!recovering.workerRecovery && recovering.released && recovering.state === "alive") {
+			// An interrupted call starts no reattach: the tab stays released, and nothing is left attached unasked.
+			if (opts.signal?.aborted) throw new ToolAbortError();
 			const reattach = reattachReleasedTab(recovering, opts.timeoutMs).finally(() => {
 				if (recovering?.backend === "worker" && recovering.workerRecovery === reattach)
 					recovering.workerRecovery = undefined;
@@ -962,6 +969,7 @@ async function runInTabWithSnapshot(
 	if (opts.signal?.aborted) throw new ToolAbortError();
 	// A run is use: refresh the idle clock for idle-close.
 	tab.lastActivityAt = Date.now();
+	if (tab.backend === "worker") tab.runsStarted++;
 	// A retry after a detach gets only what is left of this call's budget, not a fresh one.
 	const startedAt = performance.now();
 	const id = Snowflake.next();
@@ -1220,59 +1228,92 @@ async function recoverWorkerTab(
 	}
 }
 
-/** How long a hand-back waits for a tab's worker to let go of the relay's debugger. */
-const RELEASE_TIMEOUT_MS = 3_000;
+/**
+ * How long a hand-back waits for a tab's worker to answer the release before it presumes the worker wedged. The
+ * worker bounds its own steps (a page that starts waiting ends the release at once), so this is a backstop.
+ */
+const RELEASE_TIMEOUT_MS = 15_000;
+
+/** Turn releases in flight, by the promise each sets as its tab's `workerRecovery`. */
+const turnReleases = new WeakSet<Promise<boolean>>();
+
+function isTurnRelease(transition: Promise<boolean> | undefined): boolean {
+	return transition !== undefined && turnReleases.has(transition);
+}
 
 /**
  * Hand-back checkpoint for the relay (the agent's turn ended, interrupts included): let go of the relay's debugger on
  * every live tab `ownerId` opened or adopted there, so Chrome's debugging bar, which it shows on every tab of the
  * browser while omp has any one attached, goes away between turns. The tabs stay open, owned and grouped; the next
  * call reattaches each on a new worker. Kept attached: `persist` tabs, tabs whose `allowed_domains` only the
- * attachment enforces, tabs a call still drives, pages waiting on an answer, and tabs whose worker runs inline.
- * Never throws; resolves how many tabs were released.
+ * attachment enforces, tabs a call still drives, pages waiting on an answer, and tabs whose worker runs inline. A tab
+ * whose worker is being replaced (a reattach an interrupted call started goes on without it) is released once that
+ * settles, unless a call started on it meanwhile. Never throws; resolves how many tabs were released.
  */
 export async function releaseRelayTabsForOwner(ownerId: string): Promise<number> {
 	if (!ownerId) return 0;
 	const releases: Promise<boolean>[] = [];
 	for (const tab of tabs.values()) {
 		if (tab.backend !== "worker" || tab.kindTag !== "relay" || tab.ownerSessionId !== ownerId) continue;
-		if (tab.state !== "alive" || tab.released || tab.workerRecovery || tab.pending.size > 0) continue;
-		if (tab.persist || (tab.allowedDomains?.length ?? 0) > 0 || tab.worker.mode === "inline") continue;
-		// Set before the first await: a call arriving meanwhile waits for the release, then reattaches.
-		const release = releaseRelayTab(tab).finally(() => {
-			if (tab.workerRecovery === release) tab.workerRecovery = undefined;
-		});
-		tab.workerRecovery = release;
-		releases.push(release);
+		releases.push(releaseWhenSettled(tab, tab.runsStarted));
 	}
 	const released = await Promise.all(releases);
 	return released.filter(Boolean).length;
 }
 
+/** Release `tab` after the transition it is in, if it is still eligible and no call started on it since `runsStarted`. */
+async function releaseWhenSettled(tab: WorkerTabSession, runsStarted: number): Promise<boolean> {
+	for (let transition = tab.workerRecovery; transition; transition = tab.workerRecovery) {
+		if (isTurnRelease(transition)) return false;
+		await transition.catch(() => false);
+	}
+	if (tab.runsStarted !== runsStarted || tab.state !== "alive" || tab.released || tab.pending.size > 0) return false;
+	if (tab.persist || (tab.allowedDomains?.length ?? 0) > 0 || tab.worker.mode === "inline") return false;
+	// Set before any await: a call arriving meanwhile waits for the release, then reattaches.
+	const release = releaseRelayTab(tab).finally(() => {
+		if (tab.workerRecovery === release) tab.workerRecovery = undefined;
+	});
+	turnReleases.add(release);
+	tab.workerRecovery = release;
+	return await release;
+}
+
+/**
+ * Ask the tab's worker to let go of the relay's debugger and record what it answers. The release owns the tab until
+ * then: the worker exiting meanwhile ends it (its connection, and with it the attachment, is gone) instead of
+ * starting a recovery, and an answer is applied only to the worker it came from.
+ */
 async function releaseRelayTab(tab: WorkerTabSession): Promise<boolean> {
-	const { promise, resolve } = Promise.withResolvers<ReleaseOutcome>();
-	const unsubscribe = tab.worker.onMessage(msg => {
+	const worker = tab.worker;
+	const { promise, resolve } = Promise.withResolvers<ReleaseOutcome | "exited">();
+	const unsubscribe = worker.onMessage(msg => {
 		if (msg.type === "released") resolve(msg.outcome);
 	});
+	const unlistenExit = worker.onExit(() => resolve("exited"));
 	let outcome: ReleaseOutcome;
 	try {
-		tab.worker.send({ type: "release" });
-		outcome = await raceWithTimeout(promise, RELEASE_TIMEOUT_MS, "The tab worker did not answer the release");
-		if (!outcome.released && outcome.failed) throw new Error(outcome.failed);
+		worker.send({ type: "release" });
+		const answer = await raceWithTimeout(promise, RELEASE_TIMEOUT_MS, "The tab worker did not answer the release");
+		if (answer === "exited") throw new Error("The tab worker exited during the release");
+		if (!answer.released && answer.failed) throw new Error(answer.failed);
+		outcome = answer;
 	} catch (error) {
-		// The worker may have let go halfway: the next call reattaches on a new worker rather than trust it.
+		// The worker may have let go halfway, or wedged: the next call reattaches on a new worker rather than trust it.
 		logger.warn("Releasing a relay tab failed; reattaching it on its next use", {
 			name: tab.name,
 			error: error instanceof Error ? error.message : String(error),
 		});
+		if (tab.worker === worker) await worker.terminate().catch(() => undefined);
 		outcome = { released: true, replay: { dialogs: tab.dialogPolicy }, ended: ["tab state omp could not read back"] };
 	} finally {
 		unsubscribe();
+		unlistenExit();
 	}
-	if (tab.state !== "alive") return false;
+	if (tab.state !== "alive" || tab.worker !== worker) return false;
 	if (!outcome.released) {
 		if (outcome.kept) {
-			tab.turnEndNote = `omp kept its debugger on this tab when the last turn ended, because ${outcome.kept}; Chrome's debugging bar stayed up.`;
+			const ended = outcome.ended?.length ? ` What ended anyway: ${outcome.ended.join("; ")}.` : "";
+			tab.turnEndNote = `omp kept its debugger on this tab when the last turn ended, because ${outcome.kept}; Chrome's debugging bar stayed up.${ended}`;
 		}
 		return false;
 	}
@@ -2069,13 +2110,14 @@ function attachTabWorker(tab: WorkerTabSession, worker: WorkerHandle): void {
 		lastError = error;
 	});
 	worker.onExit(exitCode => {
-		// A release or recycle owns a worker it replaced or is tearing down. A released tab's worker drives nothing:
-		// the next call reattaches the tab on a new one anyway.
+		// A release or recycle owns a worker it replaced or is tearing down; a turn release, one exiting under it. A
+		// released tab's worker drives nothing: the next call reattaches the tab on a new one anyway.
 		if (
 			tabs.get(tab.name) !== tab ||
 			tab.worker !== worker ||
 			tab.state !== "alive" ||
 			releaseInflight.has(tab) ||
+			isTurnRelease(tab.workerRecovery) ||
 			tab.released
 		)
 			return;

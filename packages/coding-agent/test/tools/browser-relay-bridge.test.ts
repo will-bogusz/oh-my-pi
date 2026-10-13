@@ -2783,4 +2783,34 @@ describe("RelayBridge release between turns", () => {
 		expect(reply && "error" in reply).toBe(true);
 		expect(ext.rpcs("detach")).toHaveLength(0);
 	});
+
+	it("keeps a released tab detached when an attach for it was still in flight", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		// Claimed without auto-attach, so nothing attaches until the client asks for it.
+		await claimTab(bridge, ext, cdp, connId, 1);
+		autoAttach(bridge, connId);
+		await flush();
+		expect(ext.pending("attach")).toHaveLength(1);
+
+		const releaseId = ++msgSeq;
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: releaseId, method: "OMP.releaseTarget", params: { targetId: `PAGE${ANON}.1` } }),
+		);
+		await flush();
+		// The reply waits for the attach in flight, which would otherwise land after it.
+		expect(cdp.messages.find(message => message.id === releaseId)).toBeUndefined();
+		ack(bridge, ext, "attach");
+		await flush();
+		ack(bridge, ext, "detach");
+		await flush();
+
+		expect(cdp.messages.find(message => message.id === releaseId)).toMatchObject({ result: { detached: true } });
+		expect(cdp.attachedSessions()).toHaveLength(0);
+		expect(ext.rpcs("detach").map(rpc => rpc.tabId)).toEqual([1]);
+	});
 });

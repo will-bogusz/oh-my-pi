@@ -1689,6 +1689,8 @@ export class WorkerCore {
 	readonly #recording = new RecordingController();
 	/** The open options a later worker on this page puts back when it reattaches after a release. */
 	#openReplay: Pick<ReattachReplay, "userAgent" | "downloadsPath" | "ignoreHttpsErrors"> = {};
+	/** The page is focus-emulated (owned, or in a browser the user drives); a release broken off puts it back. */
+	#focusEmulated = false;
 	/**
 	 * A back/forward cache restore brings a document back without loading it, so the frame keeps the
 	 * loader id of the document it replaced and the ids observed there would still pass as current.
@@ -1943,6 +1945,7 @@ export class WorkerCore {
 				// page in a background tab; explicit settle-freeze still applies. It ends with
 				// this connection's session (on the relay, with the bridge's last session).
 				await this.#page.emulateFocusedPage(true);
+				this.#focusEmulated = true;
 			}
 			if (payload.mode === "attach" && payload.relay === true) this.#page.on("popup", this.#onRelayPopup);
 			this.#webmcp = await installWebMcp(this.#page);
@@ -1968,7 +1971,10 @@ export class WorkerCore {
 			if (payload.ignoreHttpsErrors) await applyIgnoreHttpsErrors(this.#page);
 			this.#targetId = await targetIdForPage(this.#page);
 			this.#initScripts = new InitScriptManager(this.#page);
-			for (const source of payload.initScripts ?? []) await this.#initScripts.add(source);
+			for (const script of payload.initScripts ?? []) {
+				if (typeof script === "string") await this.#initScripts.add(script);
+				else await this.#initScripts.restore([script]);
+			}
 			this.#downloads = new DownloadManager(this.#browser, this.#page, this.#targetId, {
 				perTab: this.#ownBrowser,
 			});
@@ -3868,29 +3874,33 @@ export class WorkerCore {
 		this.#transport.close();
 	}
 
-	/** Take omp's per-page instruments off the page and stop the ones still recording. */
+	/**
+	 * Take omp's per-page instruments off the page and stop the ones still recording. Each step stands alone: after a
+	 * release the page's sessions are gone, and a step failing on that must not keep the others' state.
+	 */
 	async #disposeInstruments(): Promise<void> {
 		await this.#webmcp?.dispose().catch(() => undefined);
 		this.#webmcp = undefined;
 		await this.#printHold?.dispose().catch(() => undefined);
 		this.#printHold = undefined;
-		await this.#choosers?.dispose();
+		await this.#choosers?.dispose().catch(() => undefined);
 		this.#choosers = undefined;
 		this.#uncountInput?.();
 		this.#uncountInput = undefined;
 		this.#dialogs?.dispose();
-		await this.#network?.close();
-		await this.#downloads?.close();
-		await this.#tracing?.dispose();
-		await this.#consoleCapture.detach();
+		await this.#network?.close().catch(() => undefined);
+		await this.#downloads?.close().catch(() => undefined);
+		await this.#tracing?.dispose().catch(() => undefined);
+		await this.#consoleCapture.detach().catch(() => undefined);
 		this.#emulation?.dispose();
 	}
 
 	/**
 	 * Let go of the relay's debugger on this tab between turns, so Chrome's debugging bar can go, unless the page
 	 * waits on an answer: a dialog the detach would orphan (the page stays blocked and no later attachment can
-	 * answer it) or a file chooser omp holds. Overrides come off first, since the page keeps an emulated size past
-	 * the detach; what the attachment carried ends with it, and what a new worker can put back is returned.
+	 * answer it) or a file chooser omp holds, including one the page opens while omp lets go. Overrides come off
+	 * first, since the page keeps an emulated size past the detach, and go back on if the page starts waiting; what
+	 * the attachment carried ends with it, and what a new worker can put back is returned.
 	 */
 	async #release(): Promise<ReleaseOutcome> {
 		const page = this.#page;
@@ -3902,50 +3912,84 @@ export class WorkerCore {
 		if (this.#unanswered) return { released: false, kept: "a call was still running" };
 		const waiting = await this.#pageWaitsOn();
 		if (waiting) return { released: false, kept: `the page was waiting on ${describeWaiting(waiting)}` };
-		const ended: string[] = [];
-		const routes = this.#network?.routes().length ?? 0;
-		if (routes > 0) ended.push(`${routes} tab.route ${routes === 1 ? "route" : "routes"}`);
-		if (this.#network?.harActive()) ended.push("the HAR recording from tab.harStart(), unwritten");
-		const recording = this.#recording.status();
-		if (recording.active) {
-			const saved = await this.#recording.close().then(
-				() => true,
-				() => false,
-			);
-			ended.push(saved ? `the screen recording, saved to ${recording.path}` : "the screen recording, unsaved");
-		}
-		const tracing = this.#tracing?.running();
-		if (tracing?.trace) ended.push("the trace from tab.traceStart(), unwritten");
-		if (tracing?.profile) ended.push("the CPU profile from tab.profileStart(), unwritten");
-		const replay: ReattachReplay = {
-			...this.#openReplay,
-			emulation: this.#emulation?.state(),
-			initScripts: this.#initScripts?.list().map(script => script.source),
-			dialogs: this.#dialogs?.policy,
-		};
-		this.#clearElementCache();
-		await this.#emulation?.clear();
-		// A background tab lays out only while focus-emulated: let it take its own size back first, or the emulated
-		// size stays on the page until it reloads.
-		await Promise.race([
-			page.evaluate("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))"),
-			Bun.sleep(RELEASE_LAYOUT_WAIT_MS),
-		]).catch(() => undefined);
-		// A tab-wide switch on the relay: switched off first, or the page goes on reporting focus until it loads again.
-		await page.emulateFocusedPage(false).catch(() => undefined);
-		await this.#disposeInstruments();
-		this.#page = undefined;
+		let arrived: DialogState | undefined;
+		const pageWaits = Promise.withResolvers<void>();
+		const offPageWaits = this.#onPageWaits(state => {
+			arrived ??= state;
+			pageWaits.resolve();
+		});
 		try {
-			if (!(await releaseRelayTarget(browserConnection(browser), targetId))) {
-				this.#log("debug", "Another relay client still holds this tab; its debugger stays attached", { targetId });
+			const replay: ReattachReplay = {
+				...this.#openReplay,
+				emulation: this.#emulation?.state(),
+				initScripts: this.#initScripts?.list(),
+				dialogs: this.#dialogs?.policy,
+			};
+			await this.#emulation?.clear();
+			// A background tab lays out only while focus-emulated: let it take its own size back first, or the
+			// emulated size stays on the page until it reloads.
+			await Promise.race([
+				page.evaluate("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))"),
+				Bun.sleep(RELEASE_LAYOUT_WAIT_MS),
+				pageWaits.promise,
+			]).catch(() => undefined);
+			// A tab-wide switch on the relay: switched off first, or the page goes on reporting focus until it loads
+			// again.
+			await page.emulateFocusedPage(false).catch(() => undefined);
+			// A screen recording is saved now; it cannot go on without the attachment either way.
+			const ended: string[] = [];
+			const recording = this.#recording.status();
+			if (recording.active && !arrived) {
+				const saved = await Promise.race([
+					this.#recording.close().then(
+						() => "saved",
+						() => "unsaved",
+					),
+					pageWaits.promise.then(() => "saving"),
+				]);
+				ended.push(
+					saved === "unsaved"
+						? "the screen recording, unsaved"
+						: `the screen recording, ${saved === "saved" ? "saved" : "still being saved"} to ${recording.path}`,
+				);
 			}
-		} catch (error) {
-			this.#log("warn", "Releasing the relay tab failed", {
-				targetId,
-				error: error instanceof Error ? error.message : String(error),
-			});
+			if (arrived) {
+				await this.#emulation?.reapply().catch(() => undefined);
+				if (this.#focusEmulated) await page.emulateFocusedPage(true).catch(() => undefined);
+				return {
+					released: false,
+					kept: `the page started waiting on ${describeWaiting(arrived)} as omp was letting go`,
+					ended,
+				};
+			}
+			const routes = this.#network?.routes().length ?? 0;
+			if (routes > 0) ended.push(`${routes} tab.route ${routes === 1 ? "route" : "routes"}`);
+			if (this.#network?.harActive()) ended.push("the HAR recording from tab.harStart(), unwritten");
+			const tracing = this.#tracing?.running();
+			if (tracing?.trace) ended.push("the trace from tab.traceStart(), unwritten");
+			if (tracing?.profile) ended.push("the CPU profile from tab.profileStart(), unwritten");
+			this.#clearElementCache();
+			this.#page = undefined;
+			// Straight after the last check: only a dialog the page opens within this one round trip goes unseen.
+			try {
+				if (!(await releaseRelayTarget(browserConnection(browser), targetId))) {
+					this.#log("debug", "Another relay client still holds this tab; its debugger stays attached", {
+						targetId,
+					});
+				}
+			} catch (error) {
+				this.#log("warn", "Releasing the relay tab failed", {
+					targetId,
+					error: error instanceof Error ? error.message : String(error),
+				});
+			}
+			// The page's sessions ended with the attachment, which took routes, captures and interception with it;
+			// this drops what the worker kept of them.
+			await this.#disposeInstruments().catch(() => undefined);
+			return { released: true, replay, ended };
+		} finally {
+			offPageWaits();
 		}
-		return { released: true, replay, ended };
 	}
 
 	#requirePage(): Page {

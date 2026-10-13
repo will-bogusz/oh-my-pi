@@ -1,5 +1,6 @@
 import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
 import type { BrowserEmulateOptions } from "./emulation";
+import type { InitScriptInfo } from "./init-scripts";
 
 export type Transferable = Bun.Transferable;
 
@@ -82,8 +83,11 @@ export type WorkerInitPayload =
 			dialogs?: "accept" | "dismiss";
 			/** Hostname patterns allowed for every page request. */
 			allowedDomains?: string[];
-			/** Document-start JavaScript sources registered before navigation. */
-			initScripts?: string[];
+			/**
+			 * Document-start JavaScript sources registered before navigation; an `{ id, source }` keeps the id the
+			 * previous worker of a released relay tab returned for it.
+			 */
+			initScripts?: Array<string | InitScriptInfo>;
 			/** Absolute directory enabled for completed downloads. */
 			downloadsPath?: string;
 			/** Explicit tab user agent applied during worker initialization. */
@@ -147,7 +151,7 @@ export interface ReadyInfo {
 /** Per-tab settings a released relay tab's next worker puts back as it reattaches; the payload fields of the same names. */
 export interface ReattachReplay {
 	emulation?: BrowserEmulateOptions;
-	initScripts?: string[];
+	initScripts?: InitScriptInfo[];
 	userAgent?: string;
 	downloadsPath?: string;
 	ignoreHttpsErrors?: boolean;
@@ -157,12 +161,13 @@ export interface ReattachReplay {
 
 /**
  * A worker's answer to `release`. Released: the worker drives the tab no more; `ended` names the tab state that
- * went with the attachment. Not released: `kept` says why the tab stays attached, absent when nothing was attached;
- * `failed` says the release broke off partway, leaving the worker's state unknown.
+ * went with the attachment. Not released: `kept` says why the tab stays attached, absent when nothing was attached,
+ * and `ended` names what a release broken off partway still ended; `failed` says the release broke off partway,
+ * leaving the worker's state unknown.
  */
 export type ReleaseOutcome =
 	| { released: true; replay: ReattachReplay; ended: string[] }
-	| { released: false; kept?: string; failed?: string };
+	| { released: false; kept?: string; ended?: string[]; failed?: string };
 
 export interface RunResultOk {
 	displays: Array<TextContent | ImageContent>;

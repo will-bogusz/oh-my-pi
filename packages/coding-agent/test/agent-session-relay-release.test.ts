@@ -120,4 +120,17 @@ describe("AgentSession relay tab release at hand-back", () => {
 		await running;
 		expect(release.mock.calls).toEqual([[target.sessionManager.getSessionId()]]);
 	});
+
+	it("releases when a run started outside prompt() hands back", async () => {
+		// No admitted prompt: the session publishes the run's end at once instead of deferring it to the prompt's unwind.
+		const target = createSession([probe, { content: ["done"] }]);
+		const ended = Promise.withResolvers<void>();
+		target.subscribe(event => {
+			if (event.type === "agent_end") ended.resolve();
+		});
+		await target.agent.prompt("direct");
+		await ended.promise;
+		expect(releasesDuringSteps).toEqual([0]);
+		expect(release.mock.calls).toEqual([[target.sessionManager.getSessionId()]]);
+	});
 });
