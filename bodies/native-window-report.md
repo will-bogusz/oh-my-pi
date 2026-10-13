@@ -15,8 +15,6 @@ On macOS, in a browser that shows its windows, a call's result now names each wi
 
 ## Why
 
-**Builds on #15105, #15110, #15493, #15498, #15494, #15508, #15489, #15490, #15510, #15491, #15492, #15503, #15559, #15554, #15556, #15590, #15611, #15555** (merge in that order): its first 115 commits are theirs; merge those first, or merge this alone to land them all. #15569 builds on this.
-
 On #15555 these windows appear while the call reports success. Read `roster.rs`, `native-windows.ts`, then `tab-worker.ts`.
 
 - `desktopWindowRoster()` (pi-natives): one window-server pass with owner pid, layer, bounds and `listed` (capture's own predicate: true exactly when `computer.window(id)` resolves).
