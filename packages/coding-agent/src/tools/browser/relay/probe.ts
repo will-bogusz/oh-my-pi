@@ -17,7 +17,7 @@ import { VERSION } from "@oh-my-pi/pi-utils/dirs";
 import { throwIfAborted } from "../../tool-errors";
 import { probeCdpResponse } from "../attach";
 import type { RelayUnavailableInfo } from "./server";
-import { DISCARDED_TABS_PROTOCOL_VERSION, isOlderOmpVersion } from "./protocol";
+import { DISCARDED_TABS_PROTOCOL_VERSION, isOlderOmpVersion, RELAY_CDP_PROTOCOL_VERSION } from "./protocol";
 
 /**
  * One extension keepalive alarm period (30s, `background.js`) plus the dial
@@ -90,7 +90,10 @@ function readyOutcome(body: string): RelayWaitOutcome {
 			typeof parsed !== "object" ||
 			parsed === null ||
 			!("ompRelayDiscardedTabsProtocol" in parsed) ||
-			parsed.ompRelayDiscardedTabsProtocol !== String(DISCARDED_TABS_PROTOCOL_VERSION)
+			parsed.ompRelayDiscardedTabsProtocol !== String(DISCARDED_TABS_PROTOCOL_VERSION) ||
+			// A relay without this omp's CDP contract would attach tabs omp never claimed, or refuse its claims.
+			!("ompRelayCdpProtocol" in parsed) ||
+			parsed.ompRelayCdpProtocol !== String(RELAY_CDP_PROTOCOL_VERSION)
 		) {
 			return "outdated-relay";
 		}
