@@ -1826,9 +1826,9 @@ mod tests {
 	use super::{
 		AttachedCandidate, AxWindowRecord, CHILDREN, DESCRIPTION, ENABLED, FocusedWindow,
 		KeyDestination, KeyFocus, NodeRead, NodeValues, ROLE, TITLE, TextSurface, VALUE,
-		WindowContent, action_name, ax_result, content_owner, create_system_wide, element_action_result,
-		is_raise_action, menu_window, replace_utf16_selection, required_string, select_attached,
-		stringify_value, takes_inserted_text, window_records_of,
+		WindowContent, action_name, ax_result, content_owner, create_system_wide,
+		element_action_result, is_raise_action, menu_window, replace_utf16_selection,
+		required_string, select_attached, stringify_value, takes_inserted_text, window_records_of,
 	};
 	use crate::desktop::error::ErrorCode;
 

@@ -745,11 +745,16 @@ pub(super) fn with_background_guard<T>(
 							let handed_back = request_after_check(
 								event_clock_now,
 								|| {
-									front_process(spi.get_front).is_some_and(|front| front.psn == brought) && {
-										let now = Instant::now();
-										lease.observe(brought, None, SwitchSignals::read(spi, now, sampled), now)
-											== FocusDecision::Restore
-									}
+									front_process(spi.get_front).is_some_and(|front| front.psn == brought)
+										&& {
+											let now = Instant::now();
+											lease.observe(
+												brought,
+												None,
+												SwitchSignals::read(spi, now, sampled),
+												now,
+											) == FocusDecision::Restore
+										}
 								},
 								|since| {
 									set_front_unless_user_acted(

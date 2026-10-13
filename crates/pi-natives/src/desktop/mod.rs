@@ -548,7 +548,6 @@ impl Takeover {
 	}
 }
 
-
 fn hold_duration(seconds: f64) -> CoreResult<Duration> {
 	if !seconds.is_finite() || !(0.0..=100.0).contains(&seconds) {
 		return Err(DesktopError::input_failed(
@@ -1047,13 +1046,9 @@ impl Worker {
 			},
 			Request::HoldKeys { target, keys, duration, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
-				self.backend()?.hold_keys(
-					target,
-					keys,
-					*duration,
-					takeover.mode(),
-					token,
-				)?;
+				self
+					.backend()?
+					.hold_keys(target, keys, *duration, takeover.mode(), token)?;
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::HoldMouse {
@@ -1136,7 +1131,6 @@ impl Worker {
 						modifiers: options.modifiers,
 					},
 					&frame,
-
 					token,
 				)?;
 				Ok(Response::Input(control::take_focus_return()))
@@ -1186,12 +1180,16 @@ impl Worker {
 			},
 			Request::TypeText { target, text, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
-				self.backend()?.type_text(target, text, takeover.mode(), token)?;
+				self
+					.backend()?
+					.type_text(target, text, takeover.mode(), token)?;
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::KeyChord { target, keys, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
-				self.backend()?.key_chord(target, keys, takeover.mode(), token)?;
+				self
+					.backend()?
+					.key_chord(target, keys, takeover.mode(), token)?;
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::RaiseWindow { id, .. } => {
@@ -1335,7 +1333,6 @@ impl Worker {
 						modifiers: options.modifiers,
 					},
 					&FrameGeometry::identity_global(),
-
 					token,
 				)?;
 				Ok(Response::Input(control::take_focus_return()))

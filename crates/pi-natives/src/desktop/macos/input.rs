@@ -101,8 +101,8 @@ impl MacInput {
 							if process::remote_screen(pid) == Some(RemoteScreen::HidReports) {
 								if menu.is_some() {
 									return Err(DesktopError::invalid_target(
-										"menu needs a local window; a menu a click opens on a remote \
-										 screen is drawn by the remote Mac",
+										"menu needs a local window; a menu a click opens on a remote screen \
+										 is drawn by the remote Mac",
 									));
 								}
 								report_pointer(
@@ -2153,7 +2153,9 @@ fn report_pointer(
 			control::wait(TAP_HOLD)?;
 			background_scroll(source, pid, wid, window, x, y, dx, dy)
 		},
-		event => background_pointer(source, pid, wid, window, event, None, entry_front, to, in_overlay),
+		event => {
+			background_pointer(source, pid, wid, window, event, None, entry_front, to, in_overlay)
+		},
 	}
 }
 
@@ -4137,10 +4139,16 @@ mod tests {
 			},
 			|| panic!("a focused element needs no fresh read"),
 			|| {
-				type_keys(&source, &unicode_keys("ab"), Duration::ZERO, || Ok(()), |event| {
-					pressed += usize::from(matches!(event.get_type(), CGEventType::KeyDown));
-					Ok(())
-				})
+				type_keys(
+					&source,
+					&unicode_keys("ab"),
+					Duration::ZERO,
+					|| Ok(()),
+					|event| {
+						pressed += usize::from(matches!(event.get_type(), CGEventType::KeyDown));
+						Ok(())
+					},
+				)
 			},
 		);
 		assert!(matches!(delivery, Ok(ElementDelivery::Delivered)));
@@ -4167,15 +4175,21 @@ mod tests {
 			|_| panic!("the first box has focus at once"),
 			|| panic!("the first box took focus"),
 			|| {
-				type_keys(&source, &unicode_keys("123456"), Duration::ZERO, || Ok(()), |event| {
-					match event.get_type() {
-						CGEventType::KeyDown => boxes.push(focused_box.get()),
-						// Each box hands focus to the next once its digit lands.
-						CGEventType::KeyUp => focused_box.set(focused_box.get() + 1),
-						_ => {},
-					}
-					Ok(())
-				})
+				type_keys(
+					&source,
+					&unicode_keys("123456"),
+					Duration::ZERO,
+					|| Ok(()),
+					|event| {
+						match event.get_type() {
+							CGEventType::KeyDown => boxes.push(focused_box.get()),
+							// Each box hands focus to the next once its digit lands.
+							CGEventType::KeyUp => focused_box.set(focused_box.get() + 1),
+							_ => {},
+						}
+						Ok(())
+					},
+				)
 			},
 		);
 		assert!(matches!(delivery, Ok(ElementDelivery::Delivered)));

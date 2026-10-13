@@ -804,7 +804,6 @@ impl Drop for KernelLease {
 pub(super) mod tests {
 	use super::*;
 
-
 	/// Real ownership without OS event monitoring: lifecycle regressions must
 	/// not depend on an interactive desktop or Accessibility permissions.
 	pub(in crate::desktop) fn grant_for_test(source: &CancellationSource) {
