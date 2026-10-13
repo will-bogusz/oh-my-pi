@@ -18,8 +18,6 @@ Keys go to the app's focused element, and the user's typing goes to whatever has
 
 The marks are gathered while the tree is written, so the cost is one attribute read for the selected text per tree, plus one element read when focus is outside the printed rows. The selected text rides on the `Focused:` line so a selection that clears changes that line instead of removing one, which keeps #15280's after-input diff honest. Linux and Windows get the `Focused:` line from their per-element focus flag and no selected text.
 
-Overlaps: `macos/ax.rs` also changes in the AX enablement and re-find work; this PR adds only `selected_text`.
-
 ## Testing
 
 - Rust: `cargo test -p pi-natives --lib desktop::ax` 24 pass on bench-mac; the trailer tests fail with the trailer emission reverted. `CI=1 bun scripts/run-rs-task.ts check:rs` clean.
