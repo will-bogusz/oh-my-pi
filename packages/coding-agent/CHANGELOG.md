@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Removed `preparePageForScreenshot` (`tools/browser/tab-worker`), `shouldPreserveConnectedBrowserFocus` (`tools/browser/attach`) and the tab worker's `activateForScreenshot` init option: Chromium screenshots no longer activate their tab ([#15174](https://github.com/can1357/oh-my-pi/pull/15174) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Added
 
 - Extensions can observe and answer the interactive plan review, including refinement feedback and save-and-quit ([#14250](https://github.com/can1357/oh-my-pi/pull/14250) by [@rlfleming93](https://github.com/rlfleming93))
@@ -132,6 +136,10 @@
 ### Changed
 
 - The `computer` tool prompt now says physical Escape stops only takeover input, so background input keeps running while the user presses Escape in their own app ([#15176](https://github.com/can1357/oh-my-pi/pull/15176) by [@will-bogusz](https://github.com/will-bogusz))
+
+### Fixed
+
+- Fixed browser `tab.screenshot()` raising Chrome over the app you were typing in and switching its visible tab; background tabs and windows behind other apps are now captured in place, as is a relay or `app.cdp_url` tab the user switched away from ([#15174](https://github.com/can1357/oh-my-pi/pull/15174) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.9.2] - 2026-10-11
 
