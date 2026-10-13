@@ -14,8 +14,6 @@ Reading order: `extension/background.ts` → `popup-placement.ts` → `relay/bri
 
 ## Why
 
-**Builds on #15105, #15110, #15493, #15498, #15494, #15508, #15489, #15490, #15510, #15491, #15492, #15503, #15559, #15554, #15556** (merge in that order): its first 109 commits are theirs; merge those first, or merge this alone to land them all.
-
 > **Relay context.** Since #15554 the relay attaches only tabs a client opened or claimed, so a popup is a new, unclaimed tab. Chrome's `webNavigation.onCreatedNavigationTarget` names the tab (any frame) that opened it, `noopener` links included.
 
 - **Provenance from Chrome, not timing.** A popup goes to its opener's owners only when Chrome names the opener; a guess from `Page.windowOpen` timing attached a tab the user opened at the same moment.
