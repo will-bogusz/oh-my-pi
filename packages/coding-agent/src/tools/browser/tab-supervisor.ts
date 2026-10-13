@@ -36,6 +36,7 @@ import {
 	type CmuxBrowserHandle,
 	holdBrowser,
 	type PuppeteerBrowserHandle,
+	type PuppeteerBrowserKind,
 	releaseBrowser,
 	type TernBrowserHandle,
 } from "./registry";
@@ -1895,6 +1896,10 @@ function sweepClosedTabUploads(): void {
 	void sweepUploadStaging(live, now).catch(() => undefined);
 }
 
+/** Whether the browser draws its windows on the user's screen; a headless one keeps that through a tab's recycle. */
+export function browserShowsWindows(kind: PuppeteerBrowserKind): boolean {
+	return kind.kind !== "headless" || !kind.headless;
+}
 async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTabOptions): Promise<WorkerInitPayload> {
 	const safeDir = getPuppeteerDir();
 	const uploadDir = newUploadStagingDir();
@@ -1908,6 +1913,7 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 			// Visible launches still need an OMP-owned page, stealth setup, and
 			// independent lifecycle; only their fixed device emulation is disabled.
 			emulateViewport: browser.kind.headless,
+			showsWindows: browserShowsWindows(browser.kind),
 			viewport: opts.viewport,
 			dialogs: opts.dialogs,
 			allowedDomains: opts.allowedDomains,
@@ -1955,6 +1961,7 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 		ignoreHttpsErrors: opts.ignoreHttpsErrors,
 		userDriven,
 		relay: browser.kind.kind === "relay",
+		showsWindows: browserShowsWindows(browser.kind),
 	};
 }
 
@@ -2170,6 +2177,7 @@ async function recycleTimedOutWorkerTab(
 		recover: opts.recover ?? true,
 		userDriven: tab.kindTag === "connected" || tab.kindTag === "relay",
 		relay: tab.kindTag === "relay",
+		showsWindows: browserShowsWindows(tab.browser.kind),
 	};
 	// A release can land while the new worker starts: it tore down the worker it saw, so a
 	// replacement published after it would drive a closed tab.

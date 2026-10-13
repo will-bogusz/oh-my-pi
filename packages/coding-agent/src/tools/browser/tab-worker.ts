@@ -216,6 +216,7 @@ import {
 	whileDrawing,
 } from "./screenshot";
 import { RuntimeDialogController, type DialogPolicy, type DialogState } from "./dialogs";
+import { NativeWindowWatch, readTabFrame } from "./native-windows";
 import {
 	type BrowserFrameApi,
 	type BrowserFrameInfo,
@@ -1564,6 +1565,8 @@ export class WorkerCore {
 	#webmcp?: WebMcpController;
 	/** Session holding `ignore_https_errors`; Chromium drops the override once it detaches. */
 	#certificateOverride?: CDPSession;
+	/** Names the native windows a call raised on screen; only for a browser that shows windows, on macOS. */
+	#nativeWindows?: NativeWindowWatch;
 	readonly #recording = new RecordingController();
 	/** Set once the core stops for good: by {@link terminate}, or by a close. */
 	#stopped = false;
@@ -1828,6 +1831,11 @@ export class WorkerCore {
 				await this.#page.emulateFocusedPage(true);
 			}
 			this.#webmcp = new WebMcpController(this.#page);
+			// Only a browser that draws its windows on the user's screen raises native ones.
+			if (payload.showsWindows && process.platform === "darwin") {
+				const page = this.#page;
+				this.#nativeWindows = new NativeWindowWatch(() => readTabFrame(page));
+			}
 			await installVitalsObservers(this.#page);
 			await installCancelledReleaseGuard(this.#page);
 			if (payload.userAgent !== undefined) await applyUserAgentOverride(this.#page, payload.userAgent);
@@ -2131,6 +2139,7 @@ export class WorkerCore {
 			if (signal.aborted) onCancel();
 			else signal.addEventListener("abort", onCancel, { once: true });
 			try {
+				this.#nativeWindows?.beginCall(this.#dialogs?.state().open === true);
 				const hooks = this.#hooksForActiveRun();
 				if (!hooks) throw new ToolError("Browser runtime started without an active run");
 				returnValue = await withBrowserPromiseCombinatorTracking(
@@ -2181,6 +2190,9 @@ export class WorkerCore {
 			failure = this.#foldFloatingRejections(active, failure);
 			if (this.#active?.id === msg.id) this.#active = null;
 		}
+		// What the call raised on screen that no page call can reach, named on failures too: a native panel is often
+		// why the call failed.
+		const nativeNotices = (await this.#nativeWindows?.endCall(this.#dialogs?.state().open === true)) ?? [];
 		// A renderer crash or a debugger detach answers the run itself.
 		if (this.#unanswered !== active) return;
 		if (failure) {
@@ -2199,10 +2211,13 @@ export class WorkerCore {
 				if (this.#unanswered !== active) return;
 			}
 			this.#unanswered = null;
-			this.#transport.send({ type: "result", id: msg.id, ok: false, error: errorPayload(failure.error) });
+			const error = errorPayload(failure.error);
+			if (nativeNotices.length > 0) error.message = [error.message, ...nativeNotices].join("\n");
+			this.#transport.send({ type: "result", id: msg.id, ok: false, error });
 			return;
 		}
 		if (completed) {
+			for (const notice of nativeNotices) output.pushText(`${notice}\n`);
 			await this.#postReadyInfo();
 			if (this.#unanswered !== active) return;
 			this.#unanswered = null;
