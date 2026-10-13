@@ -59,6 +59,10 @@ const SWITCH_MODIFIERS: u64 = 0x0010_0000 | 0x0004_0000;
 const OPTION_MODIFIER: u64 = 0x0008_0000;
 /// `kCGEventFlagsChanged`: a modifier key went down or up.
 const FLAGS_CHANGED: u32 = 12;
+/// Quicker than a person presses ⌘, ⌃ or ⌥, picks an app and lets go: a
+/// modifier change this soon after the user's app was read, with none of them
+/// held then, is typing (Shift), not an app switch.
+const SWITCH_CHORD_MIN: Duration = Duration::from_millis(50);
 /// How often [`FrontApp::keep_in_front`] checks the front app; a keystroke
 /// typed between an activation and the next check goes to the activated app.
 const HOLD_POLL: Duration = Duration::from_millis(2);
@@ -575,12 +579,19 @@ fn set_front(spi: &ForegroundSpi, psn: ProcessSerialNumber, wid: u32) -> CoreRes
 pub(in super::super) struct FrontApp {
 	psn:     ProcessSerialNumber,
 	read_at: Instant,
+	/// The modifier keys held then (`CGEventFlags`).
+	flags:   u64,
 }
 
 /// The app `WindowServer` has in front now; `None` without the focus SPI.
 pub(in super::super) fn front_app() -> Option<FrontApp> {
 	let spi = FOREGROUND.as_ref()?;
-	Some(FrontApp { psn: front_process(spi.get_front)?.psn, read_at: Instant::now() })
+	Some(FrontApp {
+		psn:     front_process(spi.get_front)?.psn,
+		read_at: Instant::now(),
+		// SAFETY: HIDSystemState is defined by CGEventSource.h; a read-only query.
+		flags:   unsafe { CGEventSourceFlagsState(HID_SYSTEM_STATE) },
+	})
 }
 
 impl FrontApp {
@@ -594,7 +605,7 @@ impl FrontApp {
 		})?;
 		let _owner = control::own_focus()?;
 		let deadline = Instant::now() + duration;
-		let mut hold = FrontHold::new(self.psn);
+		let mut hold = FrontHold::new(self.psn, self.flags);
 		let mut handed_back = 0;
 		while Instant::now() < deadline {
 			if let Some(front) = front_process(spi.get_front) {
@@ -622,21 +633,25 @@ struct HardwareInput {
 	modifier_changed: bool,
 	/// The modifier keys held now (`CGEventFlags`).
 	flags:            u64,
+	/// Since the user's app was read.
+	elapsed:          Duration,
 }
 
 impl HardwareInput {
 	fn since(at: Instant) -> Self {
-		let elapsed = at.elapsed().as_secs_f64();
+		let elapsed = at.elapsed();
 		// SAFETY: HIDSystemState and these public CGEventType values are defined
 		// by CGEventSource.h / CGEventTypes.h; these are read-only queries.
 		let changed_since = |event_type| unsafe {
-			CGEventSourceSecondsSinceLastEventType(HID_SYSTEM_STATE, event_type) < elapsed
+			CGEventSourceSecondsSinceLastEventType(HID_SYSTEM_STATE, event_type)
+				< elapsed.as_secs_f64()
 		};
 		Self {
-			clicked:          MOUSE_BUTTON_EVENTS.into_iter().any(changed_since),
+			clicked: MOUSE_BUTTON_EVENTS.into_iter().any(changed_since),
 			modifier_changed: changed_since(FLAGS_CHANGED),
 			// SAFETY: as above.
-			flags:            unsafe { CGEventSourceFlagsState(HID_SYSTEM_STATE) },
+			flags: unsafe { CGEventSourceFlagsState(HID_SYSTEM_STATE) },
+			elapsed,
 		}
 	}
 }
@@ -654,18 +669,26 @@ enum HoldStep {
 /// sent back, as Chrome takes it again to show a popup window; any other app
 /// coming forward ends the hold. That first app is not taken for the browser
 /// once ⌥ was held (a launcher may be opening), nor when it was already in
-/// front at the first reading after a modifier changed since the user's app
-/// was read (a ⌘-Tab may have finished before the hold began).
+/// front at the first reading after a modifier change that can have finished
+/// a ⌘-Tab before the hold began (see [`SWITCH_CHORD_MIN`]).
 struct FrontHold {
-	user:   ProcessSerialNumber,
-	taker:  Option<ProcessSerialNumber>,
-	option: bool,
-	first:  bool,
+	user:          ProcessSerialNumber,
+	taker:         Option<ProcessSerialNumber>,
+	option:        bool,
+	first:         bool,
+	/// ⌘, ⌃ or ⌥ was held when the user's app was read.
+	chord_at_read: bool,
 }
 
 impl FrontHold {
-	const fn new(user: ProcessSerialNumber) -> Self {
-		Self { user, taker: None, option: false, first: true }
+	const fn new(user: ProcessSerialNumber, flags_at_read: u64) -> Self {
+		Self {
+			user,
+			taker: None,
+			option: false,
+			first: true,
+			chord_at_read: flags_at_read & (SWITCH_MODIFIERS | OPTION_MODIFIER) != 0,
+		}
 	}
 
 	fn observe(&mut self, front: ProcessSerialNumber, input: &HardwareInput) -> HoldStep {
@@ -677,10 +700,13 @@ impl FrontHold {
 		if front == self.user {
 			return HoldStep::Wait;
 		}
+		let switched_before = first
+			&& input.modifier_changed
+			&& (self.chord_at_read || input.elapsed >= SWITCH_CHORD_MIN);
 		match self.taker {
 			Some(taker) if taker == front => HoldStep::HandBack,
 			Some(_) => HoldStep::Stop,
-			None if self.option || (first && input.modifier_changed) => HoldStep::Stop,
+			None if self.option || switched_before => HoldStep::Stop,
 			None => {
 				self.taker = Some(front);
 				HoldStep::HandBack
@@ -1115,8 +1141,13 @@ mod tests {
 		let user = ProcessSerialNumber { high: 0, low: 7 };
 		let browser = ProcessSerialNumber { high: 0, low: 8 };
 		let third = ProcessSerialNumber { high: 0, low: 9 };
-		let typing = |flags| HardwareInput { clicked: false, modifier_changed: true, flags };
-		let mut hold = FrontHold::new(user);
+		let typing = |flags| HardwareInput {
+			clicked: false,
+			modifier_changed: true,
+			flags,
+			elapsed: Duration::from_millis(300),
+		};
+		let mut hold = FrontHold::new(user, 0);
 		// Shift held for a capital letter.
 		assert_eq!(hold.observe(user, &typing(0x0002_0000)), HoldStep::Wait);
 		assert_eq!(hold.observe(browser, &typing(0)), HoldStep::HandBack);
@@ -1129,24 +1160,37 @@ mod tests {
 	fn a_click_a_held_command_or_control_key_or_a_launcher_ends_a_hold() {
 		let user = ProcessSerialNumber { high: 0, low: 7 };
 		let launcher = ProcessSerialNumber { high: 0, low: 9 };
-		let input = |clicked, flags| HardwareInput { clicked, modifier_changed: false, flags };
+		let input = |clicked, flags| HardwareInput {
+			clicked,
+			modifier_changed: false,
+			flags,
+			elapsed: Duration::ZERO,
+		};
 		for picking in [input(true, 0), input(false, 0x0010_0000), input(false, 0x0004_0000)] {
-			assert_eq!(FrontHold::new(user).observe(user, &picking), HoldStep::Stop);
+			assert_eq!(FrontHold::new(user, 0).observe(user, &picking), HoldStep::Stop);
 		}
-		let mut hold = FrontHold::new(user);
+		let mut hold = FrontHold::new(user, 0);
 		assert_eq!(hold.observe(user, &input(false, 0x0008_0000)), HoldStep::Wait);
 		assert_eq!(hold.observe(launcher, &input(false, 0)), HoldStep::Stop);
 	}
 
 	#[test]
-	fn an_app_in_front_before_the_hold_began_goes_back_only_without_a_modifier_change() {
+	fn an_app_in_front_before_the_hold_began_goes_back_unless_a_switch_can_have_finished() {
 		let user = ProcessSerialNumber { high: 0, low: 7 };
 		let other = ProcessSerialNumber { high: 0, low: 8 };
-		let quiet =
-			HardwareInput { clicked: false, modifier_changed: false, flags: 0 };
-		assert_eq!(FrontHold::new(user).observe(other, &quiet), HoldStep::HandBack);
-		// A ⌘-Tab released before the hold's first reading.
-		let switched = HardwareInput { modifier_changed: true, ..quiet };
-		assert_eq!(FrontHold::new(user).observe(other, &switched), HoldStep::Stop);
+		let changed = |ms| HardwareInput {
+			clicked:          false,
+			modifier_changed: true,
+			flags:            0,
+			elapsed:          Duration::from_millis(ms),
+		};
+		let quiet = HardwareInput { modifier_changed: false, ..changed(300) };
+		assert_eq!(FrontHold::new(user, 0).observe(other, &quiet), HoldStep::HandBack);
+		// Shift pressed and released before Chrome's first reading in front.
+		assert_eq!(FrontHold::new(user, 0).observe(other, &changed(20)), HoldStep::HandBack);
+		// ⌘ held at the read and let go: a ⌘-Tab finished before the hold began.
+		assert_eq!(FrontHold::new(user, 0x0010_0000).observe(other, &changed(20)), HoldStep::Stop);
+		// Time for a whole ⌘-Tab since the read.
+		assert_eq!(FrontHold::new(user, 0).observe(other, &changed(300)), HoldStep::Stop);
 	}
 }
