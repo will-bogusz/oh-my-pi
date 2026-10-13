@@ -18,12 +18,11 @@ Reading order: `macos/ax/rich_text.rs` (`markdown` → `read_spans` → `to_mark
 
 ## Why
 
-**Builds on #15574**: its first 12 commits are #15574's; merge #15574 first, or merge this alone to land both. Both change `value()`; a Markdown read re-finds a rebuilt element like a plain one.
+A Markdown read re-finds a rebuilt element like a plain one.
 
 - **Decisions.** Bold and italic come from the font's own traits (`NSFont`), or on a web page from the bold and italic flags Safari puts next to the font, not from guessing at names like `-Bold`. System font names (`.SFNS-Bold`) are never looked up: `NSFont` refuses them and logs to stderr. Markdown punctuation in the text is escaped. It is an option on `value()`, where the model already reads text. A secure field, or one whose subrole read fails, is refused first: Apple doesn't promise its attributed read is masked. Text that changes length mid-read is read again, up to 3 times.
 - **Limits.** A nested list item comes out top level: AppKit lays every level out with the same leading tab and keeps the indent in the paragraph style, which accessibility doesn't expose. A Safari ordered list reads as `1\. step` text, because its `1. ` looks exactly like typed text. An AppKit run in the system font (no flags) reads without bold or italic.
 - **Non-goals.** Writing Markdown back, tables, images, colors, Chrome pages, Linux and Windows (they throw `Unsupported`).
-- **Overlap.** Drafts #15280 and #15282 add lines next to this PR's in `worker.ts` `value()`, the `Response` enum and `MacAx`'s `AxBackend` impl: adjacent insertions, keep both; with #15280 the Markdown read goes through its `#read` too.
 - **If Apple changes it.** A text view that stops publishing runs throws the `AxFailed` above, never wrong Markdown.
 
 ## Testing
