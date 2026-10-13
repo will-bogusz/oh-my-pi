@@ -16,8 +16,6 @@ Reading order: `effectiveAutoRedeemMode`, both planners, `AgentSession.#confirmA
 
 ## Why
 
-**Overlaps #14237, #15126, #15128, #15130** in `agent-session.ts`, `discover.ts`, `policy.ts`, `usage-cli.ts`, a reset test and broker docs.
-
 Today the only switch is per provider: `no` also stops omp rescuing resets on the account you want rescued, and `yes` spends a borrowed account's (one shared through `omp auth-broker`).
 
 The decision for a maintainer: should `auth.accountPolicies` carry a per-account `autoRedeem` that wins over the provider setting in both directions? Policies already match exactly one stored account. I rejected an include/exclude list under `codexResets` (a second selector syntax) and an opt-out-only field (it can't say "only this account, without asking").
