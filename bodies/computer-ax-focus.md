@@ -32,7 +32,13 @@ The marks are gathered while the tree is written, so the cost is one attribute r
 | Tool time | 92.6 s | 93.9 s |
 | Wall time | 927 s | 997 s |
 
-  The failed run is an Automator run that saved its workflow inside the folder it was listing. Each task's median stays inside the other arm's range except Finder sort's wall time (210 s [160-280] vs 315 s [224-494]), all of it model time per step. That gap does not hold up: 6 more Finder sort runs per arm, alternating which arm ran first, came out 204 s [123-412] before and 181 s [103-230] after, and over all 10 runs per arm it is 204 s [123-412] vs 218 s [103-494]. Steps (34.5 vs 35), tool time (19.7 s vs 21.1 s) and output tokens match; model time per step spans 4.1-10.8 s before and 3.6-10.6 s after, and the slow runs track the API, not the prompt: the slowest run before (10.8 s per step) had a smaller median prompt (17.3k tokens) than the fastest after (3.6 s, 17.8k). The trailers add about 7% to tool output (53k vs 49k characters per run, inside the before arm's range).
+  The failed run is an Automator run that saved its workflow inside the folder it was listing.
+
+  <details><summary>Finder sort's wall time</summary>
+
+  Each task's median stays inside the other arm's range except Finder sort's wall time (210 s [160-280] vs 315 s [224-494]), all of it model time per step. That gap does not hold up: 6 more Finder sort runs per arm, alternating which arm ran first, came out 204 s [123-412] before and 181 s [103-230] after, and over all 10 runs per arm it is 204 s [123-412] vs 218 s [103-494]. Steps (34.5 vs 35), tool time (19.7 s vs 21.1 s) and output tokens match; model time per step spans 4.1-10.8 s before and 3.6-10.6 s after, and the slow runs track the API, not the prompt: the slowest run before (10.8 s per step) had a smaller median prompt (17.3k tokens) than the fastest after (3.6 s, 17.8k). The trailers add about 7% to tool output (53k vs 49k characters per run, inside the before arm's range).
+
+  </details>
 
   Neither arm probed for focus or selection on these tasks (no `focusedElement()` or `attributes()` call in 1,049 tool calls), so this set shows the cost is flat, not a step saving.
 
