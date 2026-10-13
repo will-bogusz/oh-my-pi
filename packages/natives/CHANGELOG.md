@@ -5,6 +5,7 @@
 ### Added
 
 - Added `parseCodeStatus` to check code syntax and its resolved language without generating a summary ([#15904](https://github.com/can1357/oh-my-pi/pull/15904) by [@iliaal](https://github.com/iliaal)).
+- Added `DesktopSession.axType` and `axKeyChord`, which type into or press keys in one accessibility element; on macOS a field that does not report keyboard focus gets nothing and the error names what has focus ([#PR](https://github.com/can1357/oh-my-pi/pull/PR) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 

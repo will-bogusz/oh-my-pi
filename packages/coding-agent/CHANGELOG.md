@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `el.type(text)` and `el.press(chord)` to the `computer` tool, which send text and keys to that element instead of wherever its window's focus is; on macOS nothing is sent if it does not take focus ([#PR](https://github.com/can1357/oh-my-pi/pull/PR) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Changed
 
 - Reduced CPU overhead during syntax checks and automatic edit repairs ([#15904](https://github.com/can1357/oh-my-pi/pull/15904) by [@iliaal](https://github.com/iliaal)).
