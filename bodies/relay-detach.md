@@ -29,7 +29,7 @@ The bridge banned a tab on any detach it had not requested, until its URL change
 
 Non-goal: staying attached while the other extension's frame is open; Chrome refuses, and reopening fails at once with `Selected tab is not ready`.
 
-**Overlaps #12314** (another author) in `relay/bridge.ts`: it also limits the ban to `canceled_by_user`, within a broader lazy-reattach change. **Overlaps #15110, #15105** in `relay/bridge.ts` and `tab-supervisor.ts`; merge those first. **Overlaps #15508** without a textual conflict: three `browser-relay-detach.test.ts` cases must wait for the call's own evaluation, not the print hold's; whichever merges second adds that. #15559 and the PRs stacked on it already carry that join (the detach cases wait for the call's own `HANG` evaluation), so merging any of them lands both resolved.
+Related: #12314 (another author) in `relay/bridge.ts`: it also limits the ban to `canceled_by_user`, within a broader lazy-reattach change.
 
 ## Testing
 
