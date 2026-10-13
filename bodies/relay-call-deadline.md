@@ -13,8 +13,6 @@ I made a browser call that gives up actually stop: a timed-out click no longer l
 
 ## Why
 
-**Builds on #15105, #15110, #15493, #15498, #15494, #15508, #15489, #15490, #15510, #15491, #15492, #15503** (merge in that order): its first 91 commits are theirs; merge those first, or merge this alone to land them all.
-
 `untilAborted` stops waiting for puppeteer's `mouse.click` / `keyboard.press`, not sending: their queued steps go out once the page answers. Clicks, drags and combos (tab, frame and handle `press`, clipboard shortcuts) now go one press at a time, an aborted call sends no further press, and every press that went out is released at once. A cut-off run also releases what `tab.mouseDown` / `tab.keyDown` hold.
 
 The relay gave every command 20 s. Commands that wait on the page (`awaitPromise` evaluations, `Runtime.awaitPromise`, `Page.navigate`) now wait 5 s past omp's own 60 s protocol timeout (`BROWSER_PROTOCOL_TIMEOUT_MS`), so the call's timeout decides, as on a launched Chrome; the rest keep 20 s, and one Chrome never answers fails naming the method and tab.
