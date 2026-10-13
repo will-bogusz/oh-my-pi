@@ -54,7 +54,7 @@ afterAll(async () => {
 	await disposeAllVmContexts();
 });
 
-function servePage(body: string): ReturnType<typeof Bun.serve> {
+function servePage(body: string): Bun.Server<undefined> {
 	return Bun.serve({
 		port: 0,
 		hostname: "localhost",
@@ -402,11 +402,39 @@ document.modelContext.registerTool({ name: "child_tool", description: "Answers f
 		expect(result).toEqual({ ok: true, result: { from: "child" }, untrusted: true });
 		await invoke(
 			call("webmcp-child", "evaluate", [
-				`new Promise(resolve => { const frame = document.querySelector("iframe"); frame.onload = resolve; frame.src = "http://localhost:${child.port}/plain"; }).then(() => null)`,
+				`(() => { const { promise, resolve } = Promise.withResolvers(); const frame = document.querySelector("iframe"); frame.onload = resolve; frame.src = "http://localhost:${child.port}/plain"; return promise.then(() => null); })()`,
 			]),
 		);
 		expect(valueFrom<WebMcpListResult>(await invoke(call("webmcp-child", "webmcpList"))).tools).toEqual([]);
 		await invoke({ action: "close", name: "webmcp-child", kill: true });
+	}, 30_000);
+
+	it("stops following a cross-origin iframe's session once the iframe is gone", async () => {
+		using child = Bun.serve({
+			port: 0,
+			hostname: "127.0.0.1",
+			fetch: () => new Response("<!doctype html><title>child</title>", { headers: { "content-type": "text/html" } }),
+		});
+		using parent = servePage(`<title>parent</title><iframe src="http://127.0.0.1:${child.port}/"></iframe>`);
+		const handle = await acquireBrowser({ kind: "headless", headless: true }, { cwd: process.cwd() });
+		if (!("browser" in handle)) throw new Error("Expected a Puppeteer browser");
+		holdBrowser(handle);
+		const page = await handle.browser.newPage();
+		try {
+			await page.goto(`http://localhost:${parent.port}/`, { waitUntil: "load" });
+			const oopif = page.frames().find(frame => frame.client !== page.mainFrame().client);
+			if (!oopif) throw new Error("Expected the cross-origin iframe in its own process");
+			const session = oopif.client;
+			const controller = new WebMcpController(page);
+			await controller.list();
+			expect(session.listenerCount("WebMCP.toolsAdded")).toBe(1);
+			await page.evaluate(`document.querySelector("iframe").remove()`);
+			await controller.list();
+			expect(session.listenerCount("WebMCP.toolsAdded")).toBe(0);
+		} finally {
+			await page.close();
+			await releaseBrowser(handle, { kill: false });
+		}
 	}, 30_000);
 
 	it("says the browser has no WebMCP when its DevTools protocol lacks the domain", async () => {
