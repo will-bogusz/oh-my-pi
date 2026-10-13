@@ -45,9 +45,28 @@ const ACTIVATION_TIMEOUT: Duration = Duration::from_millis(400);
 const ACTIVATION_POLL: Duration = Duration::from_millis(10);
 /// Keeps the target frontmost until it has consumed foreground input.
 const FOREGROUND_SETTLE: Duration = Duration::from_millis(40);
+/// `kCGEventSourceStateHIDSystemState`: input from hardware. Events posted to a
+/// pid or through a page's debugger leave it unchanged.
+const HID_SYSTEM_STATE: i32 = 1;
+/// Left, right and other mouse button down and up (`CGEventType`).
+const MOUSE_BUTTON_EVENTS: [u32; 6] = [1, 2, 3, 4, 25, 26];
+/// ⌘ and ⌃ (`kCGEventFlagMaskCommand | Control`), held to pick an app with
+/// ⌘-Tab, Spaces or a launcher hotkey.
+const SWITCH_MODIFIERS: u64 = 0x0010_0000 | 0x0004_0000;
+/// ⌥ (`kCGEventFlagMaskAlternate`). It types characters on many layouts, so it
+/// only keeps an app from being taken for the browser: launchers open on
+/// ⌥-Space.
+const OPTION_MODIFIER: u64 = 0x0008_0000;
+/// `kCGEventFlagsChanged`: a modifier key went down or up.
+const FLAGS_CHANGED: u32 = 12;
+/// How often [`FrontApp::keep_in_front`] checks the front app; a keystroke
+/// typed between an activation and the next check goes to the activated app.
+const HOLD_POLL: Duration = Duration::from_millis(2);
 
 unsafe extern "C" {
 	fn CGEventSourceCounterForEventType(state: i32, event_type: u32) -> u32;
+	fn CGEventSourceFlagsState(state: i32) -> u64;
+	fn CGEventSourceSecondsSinceLastEventType(state: i32, event_type: u32) -> f64;
 }
 
 #[repr(C)]
@@ -551,6 +570,125 @@ fn set_front(spi: &ForegroundSpi, psn: ProcessSerialNumber, wid: u32) -> CoreRes
 	Ok(())
 }
 
+/// The app the user had in front when [`front_app`] read it.
+#[derive(Clone, Copy)]
+pub(in super::super) struct FrontApp {
+	psn:     ProcessSerialNumber,
+	read_at: Instant,
+}
+
+/// The app `WindowServer` has in front now; `None` without the focus SPI.
+pub(in super::super) fn front_app() -> Option<FrontApp> {
+	let spi = FOREGROUND.as_ref()?;
+	Some(FrontApp { psn: front_process(spi.get_front)?.psn, read_at: Instant::now() })
+}
+
+impl FrontApp {
+	/// For `duration`, puts this app back in front without raising its windows
+	/// each time the app that took the front from it takes it again, as
+	/// [`FrontHold`] decides, and returns how many times it did. Typing does not
+	/// end it. Busy while another operation owns desktop input/focus control.
+	pub(in super::super) fn keep_in_front(&self, duration: Duration) -> CoreResult<u32> {
+		let spi = FOREGROUND.as_ref().ok_or_else(|| {
+			DesktopError::background_unavailable("the front-process SPI is unavailable")
+		})?;
+		let _owner = control::own_focus()?;
+		let deadline = Instant::now() + duration;
+		let mut hold = FrontHold::new(self.psn);
+		let mut handed_back = 0;
+		while Instant::now() < deadline {
+			if let Some(front) = front_process(spi.get_front) {
+				match hold.observe(front.psn, &HardwareInput::since(self.read_at)) {
+					HoldStep::Wait => {},
+					HoldStep::HandBack => {
+						set_front(spi, self.psn, 0)?;
+						handed_back += 1;
+					},
+					HoldStep::Stop => break,
+				}
+			}
+			thread::sleep(HOLD_POLL);
+		}
+		Ok(handed_back)
+	}
+}
+
+/// What the hardware did since the user's app was read, as far as picking an
+/// app goes.
+struct HardwareInput {
+	/// A mouse button went down or up.
+	clicked:          bool,
+	/// A modifier key went down or up.
+	modifier_changed: bool,
+	/// The modifier keys held now (`CGEventFlags`).
+	flags:            u64,
+}
+
+impl HardwareInput {
+	fn since(at: Instant) -> Self {
+		let elapsed = at.elapsed().as_secs_f64();
+		// SAFETY: HIDSystemState and these public CGEventType values are defined
+		// by CGEventSource.h / CGEventTypes.h; these are read-only queries.
+		let changed_since = |event_type| unsafe {
+			CGEventSourceSecondsSinceLastEventType(HID_SYSTEM_STATE, event_type) < elapsed
+		};
+		Self {
+			clicked:          MOUSE_BUTTON_EVENTS.into_iter().any(changed_since),
+			modifier_changed: changed_since(FLAGS_CHANGED),
+			// SAFETY: as above.
+			flags:            unsafe { CGEventSourceFlagsState(HID_SYSTEM_STATE) },
+		}
+	}
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum HoldStep {
+	Wait,
+	HandBack,
+	Stop,
+}
+
+/// Decides, reading by reading, whether the app that took the front from the
+/// user's app goes back behind it. A click anywhere or a held ⌘/⌃ is the user
+/// picking an app and ends the hold. Only the first app to take the front is
+/// sent back, as Chrome takes it again to show a popup window; any other app
+/// coming forward ends the hold. That first app is not taken for the browser
+/// once ⌥ was held (a launcher may be opening), nor when it was already in
+/// front at the first reading after a modifier changed since the user's app
+/// was read (a ⌘-Tab may have finished before the hold began).
+struct FrontHold {
+	user:   ProcessSerialNumber,
+	taker:  Option<ProcessSerialNumber>,
+	option: bool,
+	first:  bool,
+}
+
+impl FrontHold {
+	const fn new(user: ProcessSerialNumber) -> Self {
+		Self { user, taker: None, option: false, first: true }
+	}
+
+	fn observe(&mut self, front: ProcessSerialNumber, input: &HardwareInput) -> HoldStep {
+		let first = mem::replace(&mut self.first, false);
+		self.option |= input.flags & OPTION_MODIFIER != 0;
+		if input.clicked || input.flags & SWITCH_MODIFIERS != 0 {
+			return HoldStep::Stop;
+		}
+		if front == self.user {
+			return HoldStep::Wait;
+		}
+		match self.taker {
+			Some(taker) if taker == front => HoldStep::HandBack,
+			Some(_) => HoldStep::Stop,
+			None if self.option || (first && input.modifier_changed) => HoldStep::Stop,
+			None => {
+				self.taker = Some(front);
+				HoldStep::HandBack
+			},
+		}
+	}
+}
+
 /// Makes `wid` its process's key window without raising it or changing the
 /// front process, runs `action`, then hands keyboard focus back.
 ///
@@ -970,5 +1108,45 @@ mod tests {
 		assert!(!preserves_exact_existing_focus(Some(target), target, Some(41), 42));
 		assert!(!preserves_exact_existing_focus(Some(target), target, None, 42));
 		assert!(!preserves_exact_existing_focus(None, target, Some(42), 42));
+	}
+
+	#[test]
+	fn a_hold_sends_back_only_the_app_that_took_the_front_while_the_user_types() {
+		let user = ProcessSerialNumber { high: 0, low: 7 };
+		let browser = ProcessSerialNumber { high: 0, low: 8 };
+		let third = ProcessSerialNumber { high: 0, low: 9 };
+		let typing = |flags| HardwareInput { clicked: false, modifier_changed: true, flags };
+		let mut hold = FrontHold::new(user);
+		// Shift held for a capital letter.
+		assert_eq!(hold.observe(user, &typing(0x0002_0000)), HoldStep::Wait);
+		assert_eq!(hold.observe(browser, &typing(0)), HoldStep::HandBack);
+		assert_eq!(hold.observe(user, &typing(0)), HoldStep::Wait);
+		assert_eq!(hold.observe(browser, &typing(0)), HoldStep::HandBack);
+		assert_eq!(hold.observe(third, &typing(0)), HoldStep::Stop);
+	}
+
+	#[test]
+	fn a_click_a_held_command_or_control_key_or_a_launcher_ends_a_hold() {
+		let user = ProcessSerialNumber { high: 0, low: 7 };
+		let launcher = ProcessSerialNumber { high: 0, low: 9 };
+		let input = |clicked, flags| HardwareInput { clicked, modifier_changed: false, flags };
+		for picking in [input(true, 0), input(false, 0x0010_0000), input(false, 0x0004_0000)] {
+			assert_eq!(FrontHold::new(user).observe(user, &picking), HoldStep::Stop);
+		}
+		let mut hold = FrontHold::new(user);
+		assert_eq!(hold.observe(user, &input(false, 0x0008_0000)), HoldStep::Wait);
+		assert_eq!(hold.observe(launcher, &input(false, 0)), HoldStep::Stop);
+	}
+
+	#[test]
+	fn an_app_in_front_before_the_hold_began_goes_back_only_without_a_modifier_change() {
+		let user = ProcessSerialNumber { high: 0, low: 7 };
+		let other = ProcessSerialNumber { high: 0, low: 8 };
+		let quiet =
+			HardwareInput { clicked: false, modifier_changed: false, flags: 0 };
+		assert_eq!(FrontHold::new(user).observe(other, &quiet), HoldStep::HandBack);
+		// A ⌘-Tab released before the hold's first reading.
+		let switched = HardwareInput { modifier_changed: true, ..quiet };
+		assert_eq!(FrontHold::new(user).observe(other, &switched), HoldStep::Stop);
 	}
 }

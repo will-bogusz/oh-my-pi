@@ -1,7 +1,7 @@
 import { describe, expect, it, jest } from "bun:test";
 import { createHash } from "node:crypto";
 import { closeRelayTarget } from "@oh-my-pi/pi-coding-agent/tools/browser/orphan-registry";
-import { RelayBridge, type RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
+import { type FrontApp, RelayBridge, type RelaySocket } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/bridge";
 import type {
 	RelayRpcRequest,
 	RelayToExtMessage,
@@ -2183,6 +2183,100 @@ describe("RelayBridge auto-attach gating", () => {
 			await flush();
 			expect(live.rpcs("attach").map(rpc => rpc.tabId)).not.toContain(3);
 			expect(await openerIdOf(cdp, bridge, connId, `PAGE${ANON}.3`)).toBeUndefined();
+		} finally {
+			jest.useRealTimers();
+		}
+	});
+
+	/** A relay reading the front app as `n` (the read count), recording each app it holds in front and for how long. */
+	function frontAppRecorder(): { holds: Array<{ app: number; ms: number }>; frontApp: () => FrontApp } {
+		const holds: Array<{ app: number; ms: number }> = [];
+		let reads = 0;
+		return {
+			holds,
+			frontApp: () => {
+				const app = ++reads;
+				return {
+					keepInFront: async ms => {
+						holds.push({ app, ms });
+						return 1;
+					},
+				};
+			},
+		};
+	}
+
+	async function sendInput(bridge: RelayBridge, ext: FakeExtSocket, connId: number, sessionId: string): Promise<void> {
+		for (const type of ["mousePressed", "mouseReleased"]) {
+			bridge.cdpMessage(
+				connId,
+				JSON.stringify({
+					id: ++msgSeq,
+					sessionId,
+					method: "Input.dispatchMouseEvent",
+					params: { type, x: 5, y: 5 },
+				}),
+			);
+		}
+		ack(bridge, ext, "send");
+		await flush();
+	}
+
+	it("holds the app that was in front at omp's input to a tab in front once a popup from that tab is reported", async () => {
+		const { holds, frontApp } = frontAppRecorder();
+		const bridge = new RelayBridge({ frontApp });
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 }), tab({ tabId: 9, active: true })]);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		const first = await attachPage(bridge, ext, cdp, connId, 1);
+		const second = await attachPage(bridge, ext, cdp, connId, 2);
+		// Reading the page reads no front app; only input can make Chrome open and show a popup.
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: ++msgSeq, sessionId: first, method: "Runtime.evaluate", params: {} }),
+		);
+		ack(bridge, ext, "send");
+		// Reads 1 and 2 for tab 1, then 3 and 4 for omp's other tab.
+		await sendInput(bridge, ext, connId, first);
+		await sendInput(bridge, ext, connId, second);
+
+		// The click opens two popups; the user's own tab opens one of its own.
+		for (const [sourceTabId, tabId] of [
+			[1, 3],
+			[1, 4],
+			[9, 5],
+		]) {
+			bridge.extMessage(ext, JSON.stringify({ t: "popupCreated", sourceTabId, tabId }));
+		}
+		await flush();
+		expect(holds).toEqual([{ app: 2, ms: 500 }]);
+		// Once that hold is over, a later popup does not bring back the app read for the same input.
+		bridge.extMessage(ext, JSON.stringify({ t: "popupCreated", sourceTabId: 1, tabId: 6 }));
+		await flush();
+		expect(holds).toHaveLength(1);
+	});
+
+	it.each([
+		{ case: "no input of omp's came before it", inputTab: null, after: 0 },
+		{ case: "omp's last input to its opener was over a second before it", inputTab: 1, after: 1_001 },
+		{ case: "omp's input went to another of its tabs", inputTab: 2, after: 0 },
+	])("holds no app in front for a popup when $case", async ({ inputTab, after }) => {
+		jest.useFakeTimers();
+		try {
+			const { holds, frontApp } = frontAppRecorder();
+			const bridge = new RelayBridge({ frontApp });
+			const ext = new FakeExtSocket();
+			connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
+			const cdp = new FakeCdpSocket();
+			const connId = bridge.cdpConnected(cdp);
+			const opener = await attachPage(bridge, ext, cdp, connId, 1);
+			const other = await attachPage(bridge, ext, cdp, connId, 2);
+			if (inputTab !== null) await sendInput(bridge, ext, connId, inputTab === 1 ? opener : other);
+			jest.advanceTimersByTime(after);
+			bridge.extMessage(ext, JSON.stringify({ t: "popupCreated", sourceTabId: 1, tabId: 3 }));
+			await flush();
+			expect(holds).toEqual([]);
 		} finally {
 			jest.useRealTimers();
 		}

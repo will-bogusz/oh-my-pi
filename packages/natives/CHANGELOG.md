@@ -5,6 +5,7 @@
 ### Added
 
 - Added `parseCodeStatus` to check code syntax and its resolved language without generating a summary ([#15904](https://github.com/can1357/oh-my-pi/pull/15904) by [@iliaal](https://github.com/iliaal)).
+- Added `macOSFrontApp()`, which reads the app macOS has in front and can put it back in front for a while (`keepInFront`) without stopping for the user's typing ([#15611](https://github.com/can1357/oh-my-pi/pull/15611) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 

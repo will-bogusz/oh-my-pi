@@ -219,6 +219,8 @@ class TabState {
 	groupOptOut = false;
 	/** Owned tab whose page opened this one (`window.open`, `target=_blank`); clients see it as `openerId`. */
 	opener: string | undefined;
+	/** The app in front of the user when omp's input last reached this tab, and when; a popup the tab opens uses it once. */
+	frontAtInput: { app: FrontApp; at: number } | null = null;
 	/**
 	 * Real Chrome sessions (OOPIF/worker children) under this tab's attachment: the child session
 	 * that reported each (none for the root) and its `Target.attachedToTarget` params.
@@ -269,6 +271,10 @@ const RPC_TIMEOUT_MS = 20_000;
 const LATE_RPC_KEEP_MS = 60_000;
 /** Chrome reports a new tab within milliseconds of naming its opener; a report older than this is dropped. */
 const POPUP_REPORT_KEEP_MS = 10_000;
+/** A popup reported this long after omp's input reached a tab is still taken to be that input's doing. */
+const POPUP_AFTER_INPUT_MS = 1_000;
+/** How long the user's app is held in front after omp's input opened a popup; Chrome activates within milliseconds. */
+const KEEP_FRONT_MS = 500;
 const CDP_ERROR_METHOD_NOT_FOUND = -32601;
 const CDP_ERROR_SERVER = -32000;
 /** Chrome's answer to a command in flight when it ends the debugger attachment. */
@@ -287,6 +293,12 @@ const RPC_TIMED_OUT = /^extension rpc '\w+' timed out after \d+ms$/;
  * relay's, reaches the call.
  */
 const PAGE_BOUND_RPC_TIMEOUT_MS = BROWSER_PROTOCOL_TIMEOUT_MS + 5_000;
+
+/** The app in front of the user, as `macOSFrontApp` from `@oh-my-pi/pi-natives` reads it. */
+export interface FrontApp {
+	/** Puts the app back in front each time the app that took the front takes it again within `durationMs`, until the user picks an app; resolves how many times. */
+	keepInFront(durationMs: number): Promise<number>;
+}
 
 /**
  * Multiplexing CDP bridge between downstream puppeteer connections and the
@@ -331,6 +343,10 @@ export class RelayBridge {
 	#groupDraining = false;
 	/** Popups Chrome reported before the tab itself → the owned tab that opened each, and when. */
 	#popupOpeners = new Map<string, { opener: string; at: number }>();
+	/** Reads the app in front of the user; set only where the relay can put it back (macOS). */
+	#readFrontApp: (() => FrontApp | null) | undefined;
+	/** True while a hold on the user's app runs; a popup reported meanwhile shares it. */
+	#keepingFront = false;
 
 	constructor(
 		opts: {
@@ -339,11 +355,14 @@ export class RelayBridge {
 			group?: { title: string; color: string } | null;
 			/** Enables extension self-update; absent, the relay never rewrites or reloads an extension. */
 			updateExtension?: RelayBridgeExtensionUpdater;
+			/** Reads the app in front of the user, to put it back when omp's input opens a popup that brings the browser forward. */
+			frontApp?: () => FrontApp | null;
 		} = {},
 	) {
 		this.#log = opts.log ?? (() => {});
 		this.#group = opts.group ?? null;
 		this.#updateExtension = opts.updateExtension ?? null;
+		this.#readFrontApp = opts.frontApp;
 	}
 
 	/** True once an extension has completed its hello handshake, and the relay is not rewriting its files. */
@@ -1054,6 +1073,10 @@ export class RelayBridge {
 			await this.#handleBrowserCommand(conn, msg, tab);
 			return true;
 		}
+		if (this.#readFrontApp && msg.method.startsWith("Input.")) {
+			const app = this.#readFrontApp();
+			tab.frontAtInput = app && { app, at: Date.now() };
+		}
 		try {
 			const result = await this.#send(tab, inst, msg.method, msg.params, realSessionId);
 			beforeReply?.();
@@ -1107,10 +1130,14 @@ export class RelayBridge {
 		return false;
 	}
 
-	/** A page in an owned tab opened a tab: it belongs to the opener's owners and goes behind the user's selection. */
+	/**
+	 * A page in an owned tab opened a tab: it belongs to the opener's owners and goes behind the user's selection,
+	 * and the user's app goes back in front once Chrome makes itself the active app to show it.
+	 */
 	#onPopupCreated(inst: ExtInstance, sourceTabId: number, tabId: number): void {
 		const opener = this.#tabs.get(tabKeyOf(inst.code, sourceTabId));
 		if (!opener || !this.#claimed(opener.tabKey)) return;
+		this.#keepFrontApp(opener);
 		const popupKey = tabKeyOf(inst.code, tabId);
 		const popup = this.#tabs.get(popupKey);
 		if (popup) this.#adoptPopup(opener, popup);
@@ -1127,6 +1154,29 @@ export class RelayBridge {
 				error: err instanceof Error ? err.message : String(err),
 			});
 		});
+	}
+
+	/** Hold the app that was in front at omp's last input to `opener`, if that input can have opened the popup just reported. */
+	#keepFrontApp(opener: TabState): void {
+		const front = opener.frontAtInput;
+		if (!front || this.#keepingFront || Date.now() - front.at > POPUP_AFTER_INPUT_MS) return;
+		opener.frontAtInput = null;
+		this.#keepingFront = true;
+		front.app
+			.keepInFront(KEEP_FRONT_MS)
+			.then(
+				times => {
+					if (times > 0) this.#log("put the user's app back in front", { times });
+				},
+				err => {
+					this.#log("could not keep the user's app in front", {
+						error: err instanceof Error ? err.message : String(err),
+					});
+				},
+			)
+			.finally(() => {
+				this.#keepingFront = false;
+			});
 	}
 
 	/** Give a popup to every connection owning its opener now, attaching it for them once it is announced. */

@@ -15,6 +15,7 @@
 
 - Fixed the relay attaching Chrome's debugger to every tab of your browser whenever omp connected; only tabs omp opened or borrowed are attached ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed popups and `target=_blank` tabs from omp's tabs taking your selected tab or keyboard focus: the extension reports which tab opened one (new `webNavigation` permission; reinstall and reload it) ([#15590](https://github.com/can1357/oh-my-pi/pull/15590) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed Chrome keeping the front on macOS after omp's tab opened a popup while you typed in another app; the relay now puts your app back within milliseconds ([#15611](https://github.com/can1357/oh-my-pi/pull/15611) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.8.8] - 2026-10-10
 
