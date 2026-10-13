@@ -7,7 +7,7 @@ import { type RelayServer, startRelayServer } from "@oh-my-pi/pi-coding-agent/to
 import { releaseRelayTabsForOwner, releaseTab } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
 import { isRecord } from "@oh-my-pi/pi-utils";
-import puppeteer, { type Browser, type Page } from "puppeteer-core";
+import puppeteer, { type Browser, type Dialog, type Page } from "puppeteer-core";
 import { chromiumAvailable } from "./chromium-probe";
 import { ChromeBackedExtension } from "./relay-chrome-backed-extension";
 
@@ -174,11 +174,12 @@ describe("relay tabs at the end of a turn", () => {
 			expect(await releaseRelayTabsForOwner(OWNER)).toBe(1);
 			expect(ext.attached).toBe(false);
 			// The user's side of the page sees the dialog; no attachment made after it opened can.
-			const shown = new Promise<{ dismiss(): Promise<void> }>(resolve => page.once("dialog", resolve));
+			const shown = Promise.withResolvers<Dialog>();
+			page.once("dialog", shown.resolve);
 			await page.evaluate(() => {
 				setTimeout(() => confirm("while away?"), 0);
 			});
-			const dialog = await shown;
+			const dialog = await shown.promise;
 
 			const started = performance.now();
 			const stopped = await invoke({ action: "run", code: "return 1;", timeout: 20 }).catch(
