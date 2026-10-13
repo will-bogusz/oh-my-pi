@@ -23,7 +23,7 @@ Each field falls back to the account value, then the global setting; without `wi
 
 ## Why
 
-**Merge after #14074.** #14074 adds `taperHours` and one helper, `windowReserveFraction`, that ranking, eviction, usage health and `omp usage` all call; this branch is built on #14074's commits and resolves the per-window override inside that helper, so it collapses to its own commit once #14074 lands.
+#14074 adds `taperHours` and one helper, `windowReserveFraction`, that ranking, eviction, usage health and `omp usage` all call; this PR resolves the per-window override inside that helper.
 
 **Decision for maintainers:** should one account's reserve be settable per usage window, as `windows: { <window id>: { reservePct, taperHours } }`? If not, an account stays on one `reservePct`, with #14074's taper as the only time-based release.
 
