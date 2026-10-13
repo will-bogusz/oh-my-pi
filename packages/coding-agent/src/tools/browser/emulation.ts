@@ -201,6 +201,36 @@ export class BrowserEmulationController {
 		if (hasOwn(state, "cpuThrottling")) await this.#page.emulateCPUThrottling(state.cpuThrottling);
 	}
 
+	/** The merged overrides `emulate()` applied, for a later worker on the same page to put back. */
+	state(): BrowserEmulateOptions {
+		return copyOptions(this.#state);
+	}
+
+	/**
+	 * Take every override off the page ahead of a debugger detach, which ends them all but one: an emulated size
+	 * stays on the page (through reloads) until it is cleared, also when a run set it through `page` directly.
+	 * Best effort: a page that refuses one clear still gets the others.
+	 */
+	async clear(): Promise<void> {
+		const client = this.#page.mainFrame().client;
+		const state = this.#state;
+		const clears: Array<() => Promise<unknown>> = [
+			() => client.send("Emulation.clearDeviceMetricsOverride"),
+			() => client.send("Emulation.setTouchEmulationEnabled", { enabled: false }),
+		];
+		if (state.geolocation) clears.push(() => client.send("Emulation.clearGeolocationOverride"));
+		if (state.network) clears.push(() => this.#page.emulateNetworkConditions(null));
+		if (state.offline) clears.push(() => this.#page.setOfflineMode(false));
+		if (hasOwn(state, "colorScheme") || hasOwn(state, "reducedMotion"))
+			clears.push(() => this.#page.emulateMediaFeatures());
+		if (state.headers) clears.push(() => this.#page.setExtraHTTPHeaders({}));
+		if (state.credentials) clears.push(() => this.#page.authenticate(null));
+		if (state.timezone) clears.push(() => this.#page.emulateTimezone(undefined));
+		if (state.locale) clears.push(() => this.#page.emulateLocale(undefined));
+		if (state.cpuThrottling) clears.push(() => this.#page.emulateCPUThrottling(null));
+		for (const clear of clears) await clear().catch(() => undefined);
+	}
+
 	/** Read text through the page clipboard, falling back only to a prior shim write. */
 	async clipboardRead(): Promise<ClipboardReadResult> {
 		try {

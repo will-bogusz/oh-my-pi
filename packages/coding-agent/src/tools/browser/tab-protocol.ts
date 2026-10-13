@@ -1,4 +1,5 @@
 import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
+import type { BrowserEmulateOptions } from "./emulation";
 
 export type Transferable = Bun.Transferable;
 
@@ -115,6 +116,8 @@ export type WorkerInitPayload =
 			 * browser, whose recycled tabs attach too.
 			 */
 			showsWindows?: boolean;
+			/** `tab.emulate()` overrides to put back: the tab's previous worker released it between turns. */
+			emulation?: BrowserEmulateOptions;
 	  };
 
 /** Result of one host tool requested by browser-run JavaScript. */
@@ -125,7 +128,9 @@ export type WorkerInbound =
 	| { type: "run"; id: string; name: string; code: string; timeoutMs: number; session: SessionSnapshot }
 	| { type: "abort"; id: string; expectedCleanup?: boolean }
 	| { type: "tool-reply"; id: string; reply: ToolReply }
-	| { type: "close" };
+	| { type: "close" }
+	/** Let go of the relay's debugger on this tab between turns; answered by `released`. */
+	| { type: "release" };
 
 export interface ReadyInfo {
 	url: string;
@@ -133,6 +138,25 @@ export interface ReadyInfo {
 	viewport: { width: number; height: number; deviceScaleFactor?: number };
 	targetId: string;
 }
+
+/** Per-tab settings a released relay tab's next worker puts back as it reattaches; the payload fields of the same names. */
+export interface ReattachReplay {
+	emulation?: BrowserEmulateOptions;
+	initScripts?: string[];
+	userAgent?: string;
+	downloadsPath?: string;
+	ignoreHttpsErrors?: boolean;
+	/** The dialog policy last set, at open or by `tab.setDialogs()`. */
+	dialogs?: "accept" | "dismiss";
+}
+
+/**
+ * A worker's answer to `release`. Released: the worker drives the tab no more; `ended` names the tab state that
+ * went with the attachment. Not released: `kept` says why the tab stays attached, absent when nothing was attached.
+ */
+export type ReleaseOutcome =
+	| { released: true; replay: ReattachReplay; ended: string[] }
+	| { released: false; kept?: string };
 
 export interface RunResultOk {
 	displays: Array<TextContent | ImageContent>;
@@ -184,7 +208,8 @@ export type WorkerOutbound =
 	| { type: "result"; id: string; ok: false; error: RunErrorPayload }
 	| { type: "tool-call"; id: string; runId: string; name: string; args: unknown }
 	| { type: "log"; level: "debug" | "warn" | "error"; msg: string; meta?: Record<string, unknown> }
-	| { type: "closed" };
+	| { type: "closed" }
+	| { type: "released"; outcome: ReleaseOutcome };
 
 export interface Transport {
 	send(msg: WorkerOutbound | WorkerInbound, transferList?: Transferable[]): void;

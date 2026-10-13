@@ -354,6 +354,11 @@ export class BrowserNetworkManager {
 		this.#recordsById.clear();
 	}
 
+	/** Whether `harStart()` is collecting a HAR that `harStop()` has not written yet. */
+	harActive(): boolean {
+		return this.#harSession !== undefined;
+	}
+
 	/** Begin collecting subsequent request-log entries for a HAR file. */
 	harStart(content: HarContentPolicy = "none"): void {
 		if (content !== "none" && content !== "text" && content !== "all") {

@@ -73,7 +73,7 @@ import {
 } from "./launch";
 import { extractReadableFromHtml, type ReadableExtractOptions, type ReadableFormat } from "./readable";
 import { PrintHold, USER_DRIVEN_RELEASE_MS } from "./print-hold";
-import { claimRelayTarget } from "./relay/claim";
+import { claimRelayTarget, releaseRelayTarget } from "./relay/claim";
 import { assertTabPressArgs } from "./tab-arguments";
 import {
 	type BrowserCookie,
@@ -240,7 +240,9 @@ import { openUploadSources, refuseFolders, type UploadRoute, UploadStaging } fro
 import type {
 	Observation,
 	ObservationEntry,
+	ReattachReplay,
 	ReadyInfo,
+	ReleaseOutcome,
 	RunErrorPayload,
 	ScreenshotResult,
 	SessionSnapshot,
@@ -1676,6 +1678,8 @@ export class WorkerCore {
 	#ownBrowser = true;
 	#uncountInput: (() => void) | undefined;
 	readonly #recording = new RecordingController();
+	/** The open options a later worker on this page puts back when it reattaches after a release. */
+	#openReplay: Pick<ReattachReplay, "userAgent" | "downloadsPath" | "ignoreHttpsErrors"> = {};
 	/**
 	 * A back/forward cache restore brings a document back without loading it, so the frame keeps the
 	 * loader id of the document it replaced and the ids observed there would still pass as current.
@@ -1838,6 +1842,9 @@ export class WorkerCore {
 			case "close":
 				await this.#close();
 				return;
+			case "release":
+				this.#transport.send({ type: "released", outcome: await this.#release() });
+				return;
 		}
 	}
 
@@ -1849,6 +1856,11 @@ export class WorkerCore {
 			this.#activateForScreenshot = payload.mode === "headless" || payload.activateForScreenshot !== false;
 			this.#ownBrowser = payload.mode === "headless" || payload.userDriven !== true;
 			this.#uploads = new UploadStaging(payload.uploadDir);
+			this.#openReplay = {
+				userAgent: payload.userAgent,
+				downloadsPath: payload.downloadsPath,
+				ignoreHttpsErrors: payload.ignoreHttpsErrors,
+			};
 			const puppeteer = await loadPuppeteerInWorker(payload.safeDir);
 			registerSemanticQueryHandlers(puppeteer);
 			this.#browser = await connectPuppeteer(puppeteer, {
@@ -1953,6 +1965,7 @@ export class WorkerCore {
 				loadedNetworkConditions(),
 				baseUserAgent,
 			);
+			if (payload.mode === "attach" && payload.emulation) await this.#emulation.emulate(payload.emulation);
 			await this.#consoleCapture.install(this.#page);
 			this.#tracing = new BrowserTracingController(this.#page);
 			this.#network = new BrowserNetworkManager(this.#page, payload.allowedDomains);
@@ -3806,24 +3819,85 @@ export class WorkerCore {
 				error: error instanceof Error ? error.message : String(error),
 			});
 		});
+		await this.#disposeInstruments();
+		if (this.#ownsPage && page && !page.isClosed()) await page.close().catch(() => undefined);
+		if (this.#browser?.connected) this.#browser.disconnect();
+		this.#transport.send({ type: "closed" });
+		this.#transport.close();
+	}
+
+	/** Take omp's per-page instruments off the page and stop the ones still recording. */
+	async #disposeInstruments(): Promise<void> {
 		await this.#webmcp?.dispose().catch(() => undefined);
 		this.#webmcp = undefined;
 		await this.#printHold?.dispose().catch(() => undefined);
 		this.#printHold = undefined;
 		await this.#choosers?.dispose();
+		this.#choosers = undefined;
 		this.#uncountInput?.();
 		this.#uncountInput = undefined;
-		this.#choosers = undefined;
 		this.#dialogs?.dispose();
 		await this.#network?.close();
 		await this.#downloads?.close();
 		await this.#tracing?.dispose();
 		await this.#consoleCapture.detach();
 		this.#emulation?.dispose();
-		if (this.#ownsPage && page && !page.isClosed()) await page.close().catch(() => undefined);
-		if (this.#browser?.connected) this.#browser.disconnect();
-		this.#transport.send({ type: "closed" });
-		this.#transport.close();
+	}
+
+	/**
+	 * Let go of the relay's debugger on this tab between turns, so Chrome's debugging bar can go, unless the page
+	 * waits on an answer: a dialog the detach would orphan (the page stays blocked and no later attachment can
+	 * answer it) or a file chooser omp holds. Overrides come off first, since the page keeps an emulated size past
+	 * the detach; what the attachment carried ends with it, and what a new worker can put back is returned.
+	 */
+	async #release(): Promise<ReleaseOutcome> {
+		const page = this.#page;
+		const browser = this.#browser;
+		const targetId = this.#targetId;
+		if (!page || !browser || !targetId || this.#crashed || this.#debuggerDetached !== undefined) {
+			return { released: false };
+		}
+		if (this.#unanswered) return { released: false, kept: "a call was still running" };
+		const waiting = await this.#pageWaitsOn();
+		if (waiting) return { released: false, kept: `the page was waiting on ${describeWaiting(waiting)}` };
+		const ended: string[] = [];
+		const routes = this.#network?.routes().length ?? 0;
+		if (routes > 0) ended.push(`${routes} tab.route ${routes === 1 ? "route" : "routes"}`);
+		if (this.#network?.harActive()) ended.push("the HAR recording from tab.harStart(), unwritten");
+		const recording = this.#recording.status();
+		if (recording.active) {
+			const saved = await this.#recording.close().then(
+				() => true,
+				() => false,
+			);
+			ended.push(saved ? `the screen recording, saved to ${recording.path}` : "the screen recording, unsaved");
+		}
+		const tracing = this.#tracing?.running();
+		if (tracing?.trace) ended.push("the trace from tab.traceStart(), unwritten");
+		if (tracing?.profile) ended.push("the CPU profile from tab.profileStart(), unwritten");
+		const replay: ReattachReplay = {
+			...this.#openReplay,
+			emulation: this.#emulation?.state(),
+			initScripts: this.#initScripts?.list().map(script => script.source),
+			dialogs: this.#dialogs?.policy,
+		};
+		this.#clearElementCache();
+		await this.#emulation?.clear();
+		// A tab-wide switch on the relay: switched off first, or the page goes on reporting focus until it loads again.
+		await page.emulateFocusedPage(false).catch(() => undefined);
+		await this.#disposeInstruments();
+		this.#page = undefined;
+		try {
+			if (!(await releaseRelayTarget(browserConnection(browser), targetId))) {
+				this.#log("debug", "Another relay client still holds this tab; its debugger stays attached", { targetId });
+			}
+		} catch (error) {
+			this.#log("warn", "Releasing the relay tab failed", {
+				targetId,
+				error: error instanceof Error ? error.message : String(error),
+			});
+		}
+		return { released: true, replay, ended };
 	}
 
 	#requirePage(): Page {

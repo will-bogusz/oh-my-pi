@@ -102,6 +102,8 @@ class CdpConnection {
 	readonly sessions = new Map<string, SessionRef>();
 	/** Tabs this connection owns (`Target.createTarget` / `OMP.claimTarget`): the only tabs it may attach to. */
 	readonly claims = new Set<string>();
+	/** Owned tabs whose debugger this connection let go of (`OMP.releaseTarget`); they are never attached for it again. */
+	readonly released = new Set<string>();
 	/** Real child session id → the session it was announced on; its events and detach go there. */
 	readonly childParents = new Map<string, string>();
 
@@ -116,6 +118,11 @@ class CdpConnection {
 			if (ref.tabKey === tabKey && (!kind || ref.kind === kind)) out.push(sessionId);
 		}
 		return out;
+	}
+
+	/** Whether the relay attaches `tabKey` for this connection on its own: it auto-attaches, owns the tab, and kept its debugger. */
+	attachesTo(tabKey: string): boolean {
+		return this.autoAttach && this.claims.has(tabKey) && !this.released.has(tabKey);
 	}
 
 	/** This tab's first page session that armed auto-attach; one per connection so no child is announced twice. */
@@ -1118,7 +1125,7 @@ export class RelayBridge {
 	async #attachFor(conn: CdpConnection, tab: TabState, opts?: { retryAfterDiscard?: boolean }): Promise<boolean> {
 		if (!(await this.#ensureAttached(tab, opts))) return false;
 		if (this.#conns.get(conn.id) === conn && conn.claims.has(tab.tabKey) && !tab.discarded) return true;
-		if (!this.#claimed(tab.tabKey)) this.#detachIfUnheld(tab.tabKey);
+		if (!this.#attachWanted(tab.tabKey)) this.#detachIfUnheld(tab.tabKey);
 		return false;
 	}
 
@@ -1193,6 +1200,14 @@ export class RelayBridge {
 		for (const key of this.#popupOpeners.keys()) {
 			if (key.startsWith(`${extCode}:`)) this.#popupOpeners.delete(key);
 		}
+	}
+
+	/** True while a connection that owns the tab still wants its debugger: it claimed the tab and did not release it. */
+	#attachWanted(tabKey: string): boolean {
+		for (const conn of this.#conns.values()) {
+			if (conn.claims.has(tabKey) && !conn.released.has(tabKey)) return true;
+		}
+		return false;
 	}
 
 	/** Tab pseudo-sessions only exist to satisfy puppeteer's Target hierarchy. */
@@ -1275,7 +1290,7 @@ export class RelayBridge {
 				// unattached (no infobar, no debugger slowdown) until a client claims one.
 				const tabs = [...conn.claims].flatMap(tabKey => {
 					const tab = this.#tabs.get(tabKey);
-					return tab && this.#eligible(tab) && !tab.discarded ? [tab] : [];
+					return tab && conn.attachesTo(tabKey) && this.#eligible(tab) && !tab.discarded ? [tab] : [];
 				});
 				const attached = await Promise.all(
 					tabs.map(tab => this.#attachFor(conn, tab, { retryAfterDiscard: true })),
@@ -1318,6 +1333,7 @@ export class RelayBridge {
 					return;
 				}
 				this.#claimTab(conn, tab.tabKey);
+				conn.released.delete(tab.tabKey);
 				if (conn.autoAttach) {
 					if (!(await this.#attachFor(conn, tab))) {
 						if (conn.claims.delete(tab.tabKey)) this.#syncTabGrouping(tab);
@@ -1327,6 +1343,34 @@ export class RelayBridge {
 					this.#emitTabAttached(conn, tab);
 				}
 				this.#reply(conn, msg, {});
+				return;
+			}
+			case "OMP.releaseTarget": {
+				// Relay-private: the connection lets go of the debugger on a tab it owns and keeps the tab as its
+				// own (still grouped, never attached for it again until it claims the tab anew): omp between turns.
+				// The attachment comes off once no other connection holds a session on the tab; the reply waits
+				// for that, so `detached` tells the client whether Chrome's debugging bar can go.
+				const parsed = typeof msg.params?.targetId === "string" ? parseTargetId(msg.params.targetId) : null;
+				const tab = parsed ? this.#tabs.get(parsed.key) : undefined;
+				if (!parsed || !tab || !conn.claims.has(tab.tabKey)) {
+					this.#replyError(conn, msg, `Target ${String(msg.params?.targetId)} is not a tab this client owns`);
+					return;
+				}
+				conn.released.add(tab.tabKey);
+				const tabSession = conn.sessionsForTab(tab.tabKey, "tab")[0];
+				const pageSessions = conn.sessionsForTab(tab.tabKey, "page");
+				// The tab's frames announced to this connection end with its sessions, nested ones first.
+				for (const [child, parent] of [...conn.childParents].reverse()) {
+					if (!tab.realSessions.has(child)) continue;
+					conn.childParents.delete(child);
+					this.#emit(conn, "Target.detachedFromTarget", { sessionId: child }, parent);
+				}
+				for (const pageSession of pageSessions) this.#releaseSession(conn, pageSession, tabSession);
+				for (const session of conn.sessionsForTab(tab.tabKey, "tab"))
+					this.#releaseSession(conn, session, undefined);
+				this.#detachIfUnheld(tab.tabKey);
+				await tab.detaching;
+				this.#reply(conn, msg, { detached: !tab.attached });
 				return;
 			}
 			case "Target.attachToTarget": {
@@ -1348,6 +1392,7 @@ export class RelayBridge {
 					);
 					return;
 				}
+				conn.released.delete(tab.tabKey);
 				if (!(await this.#attachFor(conn, tab))) {
 					this.#replyError(conn, msg, `Cannot attach to tab ${tab.tabKey} (${tab.url})`);
 					return;
@@ -1631,7 +1676,10 @@ export class RelayBridge {
 		if (!tab) return;
 		this.#retractTab(tab);
 		this.#tabs.delete(tabKey);
-		for (const conn of this.#conns.values()) conn.claims.delete(tabKey);
+		for (const conn of this.#conns.values()) {
+			conn.claims.delete(tabKey);
+			conn.released.delete(tabKey);
+		}
 	}
 
 	#onTabUpsert(snap: TabSnapshot, instanceId: string, opts: { silent?: boolean } = {}): void {
@@ -1703,7 +1751,7 @@ export class RelayBridge {
 
 	/** Attach a tab an auto-attaching connection owns (revived after a discard) and announce it to each such owner. */
 	#attachForOwners(tab: TabState): void {
-		if (![...this.#conns.values()].some(conn => conn.autoAttach && conn.claims.has(tab.tabKey))) return;
+		if (![...this.#conns.values()].some(conn => conn.attachesTo(tab.tabKey))) return;
 		void this.#ensureAttached(tab, { retryAfterDiscard: true }).then(ok => {
 			if (!ok) return;
 			if (tab.discarded || !this.#eligible(tab) || this.#tabs.get(tab.tabKey) !== tab) {
@@ -1712,7 +1760,7 @@ export class RelayBridge {
 				return;
 			}
 			for (const conn of this.#conns.values()) {
-				if (conn.autoAttach && conn.claims.has(tab.tabKey)) this.#emitTabAttached(conn, tab);
+				if (conn.attachesTo(tab.tabKey)) this.#emitTabAttached(conn, tab);
 			}
 			// Owners that left during the attach leave no holder behind.
 			this.#detachIfUnheld(tab.tabKey);
@@ -1995,8 +2043,8 @@ export class RelayBridge {
 				tab.attached = true;
 				tab.reattachedAfterDetach = true;
 				if (tab.discarded) this.#detachIfUnheld(tab.tabKey);
-				// A discard cancelled the waiter, so no caller takes this attachment: keep it only for a claimant.
-				else if (generation !== tab.attachGeneration && !this.#claimed(tab.tabKey))
+				// A discard cancelled the waiter, so no caller takes this attachment: keep it only for a claimant that wants it.
+				else if (generation !== tab.attachGeneration && !this.#attachWanted(tab.tabKey))
 					this.#detachIfUnheld(tab.tabKey);
 				return !tab.discarded;
 			})
