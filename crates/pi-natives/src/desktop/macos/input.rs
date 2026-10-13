@@ -2167,7 +2167,9 @@ fn report_pointer(
 			control::wait(TAP_HOLD)?;
 			background_scroll(source, pid, wid, window, x, y, dx, dy)
 		},
-		event => background_pointer(source, pid, wid, window, event, None, entry_front, to, in_overlay),
+		event => {
+			background_pointer(source, pid, wid, window, event, None, entry_front, to, in_overlay)
+		},
 	}
 }
 
@@ -4046,7 +4048,7 @@ mod tests {
 			let _watch = listener
 				.admit(7, &token)
 				.expect("the user has not used TextEdit");
-			key_chord(&source, &[KeyName::Ctrl, KeyName::Enter], |event| {
+			key_chord(&source, &[KeyName::Ctrl, KeyName::Enter], KEY_GAP, |event| {
 				post_guarded(event, intervention_guard(|| Ok(())), |event| {
 					// The user types in TextEdit right after Ctrl goes down.
 					listener.record_for_test(7, Instant::now());
@@ -4119,6 +4121,7 @@ mod tests {
 			with_held_keys(
 				&source,
 				&[KeyName::Shift, KeyName::Space],
+				KEY_GAP,
 				|event| {
 					post_hid(event, |event| {
 						// The user types in TextEdit right after Shift goes down.
