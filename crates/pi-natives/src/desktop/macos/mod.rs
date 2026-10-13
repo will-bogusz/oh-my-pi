@@ -24,7 +24,7 @@ pub(super) use skylight::front_pid;
 use self::{ax::MacAx, capture::MacCapture, input::MacInput, session::DisplayAwake};
 use super::{
 	ax::AxHandle,
-	backend::{AxBackend, Backend, DeliveryMode, PointerEvent},
+	backend::{AxBackend, Backend, DeliveryMode, ElementDelivery, ElementInput, PointerEvent},
 	control::OperationToken,
 	error::{CoreResult, DesktopError},
 	frame::FrameGeometry,
@@ -189,6 +189,24 @@ impl Backend for MacosBackend {
 		release_guard::scope(shares_hid_route(target, mode), || {
 			self.input.key_chord(target, keys, mode, &self.capture)
 		})
+	}
+
+	fn element_input(
+		&mut self,
+		target: &Target,
+		element: &AxHandle,
+		input: &ElementInput,
+		mode: DeliveryMode,
+		token: &OperationToken,
+	) -> CoreResult<ElementDelivery> {
+		token.check()?;
+		Self::require_input_permission()?;
+		let Target::Window(id) = target else {
+			return Err(DesktopError::invalid_target("element input needs the element's window"));
+		};
+		self
+			.input
+			.element_input(id, ax::mac_handle(element)?, input, mode, &self.capture)
 	}
 
 	fn hold_keys(
