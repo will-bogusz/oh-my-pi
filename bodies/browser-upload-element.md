@@ -10,8 +10,6 @@ In Chrome, `(await tab.waitFor(sel)).uploadFile(…)`, `tab.id(n)` and `tab.ref(
 | `<label for=…>`, or a button that opens a chooser | `Protocol error (DOM.setFileInputFiles): Node is not a file input element` | fills the chooser |
 | drop zone, two files | `Multiple file uploads only work with <input type=file multiple>` | drops both |
 
-**Overlaps #15489** in `tab-worker.ts` and `interactions.ts`; merge #15489 first. Joining point: #15489's handle hook calls `prepareInputUpload` with its route and staged copies; merged, it calls `prepareElementUpload` with the same arguments, and this PR's `uploadFilesToElement` call and `setInputFiles` parameter go.
-
 ## Why
 
 Handles exposed Puppeteer's own `ElementHandle.uploadFile`, which only sets files on an input and resolves paths against `process.cwd()`. The browser prompt offers `uploadFile` on every element handle, and Tern and cmux handles route it to their `tab.uploadFile`; only Chrome handles fell short.
