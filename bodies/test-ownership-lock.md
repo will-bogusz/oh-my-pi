@@ -4,8 +4,6 @@ I run the native tests on my Mac, and on `main` a full `cargo test -p pi-natives
 
 ## Why
 
-**Builds on #15414**: its first 7 commits, up to 30b77aa936, are #15414's; merge #15414 first, or merge this alone to land both. Both change the test worker helper in `desktop/mod.rs`.
-
 The ownership tests in `desktop::control` hold `OWNERSHIP_TEST` while they take and assert on this process's one input lease (`KernelOwner`, `ProcessLease`). The worker tests in `desktop::capture_tests` send input through `Worker::execute`, which takes that same lease without the lock. Run together, one of them loses: on a macOS host it's the emergency-stop test, every time. Running just that test and `desktop::capture_tests` reproduces it; either alone passes.
 
 - `OWNERSHIP_TEST` moves out of `control::tests` to a `#[cfg(test)] pub(crate)` static beside the lease it guards.
