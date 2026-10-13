@@ -721,7 +721,7 @@
    "area": "catalog",
    "priority": "P0",
    "needs": [],
-   "base": null,
+   "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
    "body": null,
    "state": "open",
    "pr": 15445,
@@ -729,8 +729,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/antigravity-retired-gemini-flash",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:47:19Z",
-   "note": ""
+   "updated": "2026-10-13T23:11:56Z",
+   "note": "",
+   "advanced": "2026-10-13T23:11:56Z"
   },
   {
    "id": "browser-upload-bytes",
