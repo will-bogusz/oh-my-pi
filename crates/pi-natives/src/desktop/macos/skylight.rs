@@ -23,6 +23,7 @@ use super::{
 		error::{CoreResult, DesktopError},
 	},
 	ax, capture,
+	key_reroute::KeyReroute,
 };
 
 const EVENT_RECORD_LENGTH: usize = 248;
@@ -743,6 +744,9 @@ pub(super) fn with_background_guard<T>(
 		SwitchSignals::read(spi, now, &sampled),
 		now,
 	);
+	// Sends the user's keys back to their app while the target holds the
+	// keyboard uninvited, until the guard below has put their app back.
+	let _reroute = previous.pid.and_then(|user| KeyReroute::arm(user, pid));
 	let stopped = AtomicBool::new(false);
 	let start_failed = |error: std::io::Error| {
 		DesktopError::background_unavailable(format!(
