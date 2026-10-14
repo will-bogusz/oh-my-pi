@@ -1300,7 +1300,7 @@
    "needs": [
     "#15414"
    ],
-   "base": "30b77aa936cbafb8a7acdaa4b39895ca7161336a",
+   "base": "c695605fbd07f7b61a485ee0af1326145e424afc",
    "body": "bodies/test-ownership-lock.md",
    "state": "queued",
    "pr": null,
@@ -1310,8 +1310,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/test-ownership-lock",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:51:59Z",
-   "note": ""
+   "updated": "2026-10-14T18:36:18Z",
+   "note": "",
+   "advanced": "2026-10-14T18:36:18Z"
   },
   {
    "id": "computer-web-readonly",
@@ -1477,7 +1478,7 @@
    "needs": [
     "#15414"
    ],
-   "base": "30b77aa936cbafb8a7acdaa4b39895ca7161336a",
+   "base": "c695605fbd07f7b61a485ee0af1326145e424afc",
    "body": "bodies/display-turn-hold.md",
    "state": "queued",
    "pr": null,
@@ -1485,8 +1486,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/display-turn-hold",
    "host": "MacBook-Pro",
    "added": "2026-10-14T03:39:10Z",
-   "updated": "2026-10-14T03:39:10Z",
-   "note": ""
+   "updated": "2026-10-14T18:36:18Z",
+   "note": "",
+   "advanced": "2026-10-14T18:36:18Z"
   },
   {
    "id": "computer-key-reroute",
