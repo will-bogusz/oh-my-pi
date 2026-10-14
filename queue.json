@@ -1310,10 +1310,11 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/test-ownership-lock",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-14T18:53:36Z",
+   "updated": "2026-10-14T18:53:48Z",
    "note": "",
    "advanced": "2026-10-14T18:36:18Z",
-   "opened": "2026-10-14T18:53:35Z"
+   "opened": "2026-10-14T18:53:35Z",
+   "readied": "2026-10-14T18:53:48Z"
   },
   {
    "id": "computer-web-readonly",
