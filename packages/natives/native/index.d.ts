@@ -1291,6 +1291,15 @@ export interface ClipboardImage {
   mimeType: string
 }
 
+/**
+ * Invalidates this process's listen-only event taps; for a host about to
+ * exit, after which no desktop session here sees the user's input again. A
+ * macOS tap that dies with its process while the user types makes
+ * `WindowServer` deliver their key again; Bun's `process.exit` runs no native
+ * exit hook, so the host calls this from its exit handler.
+ */
+export declare function closeDesktopEventTaps(): void
+
 /** A context line (before or after a match). */
 export interface ContextLine {
   /** 1-indexed line number in the source file. */
@@ -1447,6 +1456,12 @@ export interface DesktopDisplay {
 }
 
 /**
+ * Physical-Escape stops counted under `key` by every desktop session created
+ * with it, including closed ones, until the key is forgotten.
+ */
+export declare function desktopEscapeStops(key: string): number
+
+/**
  * Where focus ended after a takeover input call, as `WindowServer` reports
  * it. Input calls resolve to it on macOS when they took over; other
  * backends and background delivery resolve to `null`.
@@ -1491,12 +1506,6 @@ export interface DesktopScreenState {
   screenLocked: boolean
   displayAsleep: boolean
 }
-
-/**
- * Physical-Escape stops counted under `key` by every desktop session created
- * with it, including closed ones, until the key is forgotten.
- */
-export declare function desktopEscapeStops(key: string): number
 
 export interface DesktopSessionOptions {
   display?: string

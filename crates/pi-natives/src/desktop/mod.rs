@@ -1590,6 +1590,16 @@ pub fn forget_desktop_escape_stops(key: String) {
 	control::forget_escape_stops(&key);
 }
 
+/// Invalidates this process's listen-only event taps; for a host about to
+/// exit, after which no desktop session here sees the user's input again. A
+/// macOS tap that dies with its process while the user types makes
+/// `WindowServer` deliver their key again; Bun's `process.exit` runs no native
+/// exit hook, so the host calls this from its exit handler.
+#[napi]
+pub fn close_desktop_event_taps() {
+	control::close_event_taps();
+}
+
 /// Persistent, serialized native desktop capture/input/accessibility session.
 #[napi]
 pub struct DesktopSession {
