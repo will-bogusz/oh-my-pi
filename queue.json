@@ -1552,9 +1552,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/latest-abandoned-turn-count",
    "host": "MacBook-Pro",
    "added": "2026-10-14T22:39:33Z",
-   "updated": "2026-10-14T22:43:07Z",
+   "updated": "2026-10-14T22:43:24Z",
    "note": "",
-   "opened": "2026-10-14T22:43:06Z"
+   "opened": "2026-10-14T22:43:06Z",
+   "readied": "2026-10-14T22:43:24Z"
   },
   {
    "id": "text-click-followups",
