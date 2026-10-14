@@ -18,7 +18,7 @@ Reading order: `agent-session.ts` (`#beginInFlight`, `#endInFlight`, `#resetInFl
 ## Why
 
 - One notion of "the agent is working": the in-flight bracket that already takes and drops the `power.sleepPrevention` assertion.
-- Work can outlive a turn (background eval jobs). Each run carries its turn number and the worker ignores a hold for a turn it has seen end, so late work gets the grace instead of pinning the display until the next turn.
+- Work can outlive a turn (background eval jobs). Each run carries the turn in flight when it starts (none between turns), and the worker ignores a hold for a turn it has seen end, so work after its turn gets the grace instead of pinning the display until the next turn; work that runs during a later turn holds until that turn ends.
 - Without an agent session nothing marks a turn, so SDK and `omp eval` keep the grace.
 - Residual, shared with the power assertion: a continuation started outside the bracket (Gemini header-runaway recovery) keeps `main`'s grace, and a prompt aborted mid-setup that finishes after the next one began ends that one's hold early. Both are bracket fixes.
 
@@ -37,3 +37,4 @@ Live in macOS VMs, each trial after powerd's post-input display hold expired: a 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
