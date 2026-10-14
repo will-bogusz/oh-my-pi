@@ -1221,13 +1221,9 @@ impl Worker {
 			},
 			Request::HoldKeys { target, keys, duration, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
-				self.backend()?.hold_keys(
-					target,
-					keys,
-					*duration,
-					DeliveryMode::from_takeover(*takeover),
-					token,
-				)?;
+				self
+					.backend()?
+					.hold_keys(target, keys, *duration, takeover.mode(), token)?;
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::HoldMouse {
@@ -1320,7 +1316,7 @@ impl Worker {
 					target,
 					PointerEvent::Move { x, y },
 					&frame,
-					DeliveryMode::from_takeover(*takeover),
+					takeover.mode(),
 					token,
 				)?;
 				Ok(Response::Input(control::take_focus_return()))
@@ -1352,7 +1348,7 @@ impl Worker {
 					target,
 					PointerEvent::Scroll { x, y, dx: *dx, dy: *dy },
 					&frame,
-					DeliveryMode::from_takeover(*takeover),
+					takeover.mode(),
 					token,
 				)?;
 				Ok(Response::Input(control::take_focus_return()))
