@@ -14,6 +14,7 @@ use core_graphics::{
 	sys::{CGEventRef, CGEventSourceRef},
 };
 use foreign_types::ForeignType;
+use objc2_app_kit::{NSPasteboard, NSPasteboardNameDrag};
 use xutf::graphemes_str;
 
 use super::{
@@ -25,7 +26,7 @@ use super::{
 		types::{DesktopWindow, Target},
 	},
 	ax,
-	capture::MacCapture,
+	capture::{self, MacCapture},
 	process, skylight,
 };
 
@@ -46,6 +47,8 @@ impl MacInput {
 		Ok(Self { source: source()? })
 	}
 
+	/// Delivers `event`; with `menu`, a click that opens a menu chooses that
+	/// item path in it.
 	#[allow(
 		clippy::needless_pass_by_ref_mut,
 		reason = "`&mut self` exclusivity backs the `Send` safety argument for the CF event source"
@@ -54,10 +57,21 @@ impl MacInput {
 		&mut self,
 		target: &Target,
 		event: PointerEvent,
+		menu: Option<&[String]>,
 		mode: DeliveryMode,
 		capture: &MacCapture,
 	) -> CoreResult<()> {
+		if menu.is_some() && !matches!(event, PointerEvent::Click { .. }) {
+			return Err(DesktopError::invalid_target(
+				"menu chooses an item of the menu a click opens; it applies to clicks only",
+			));
+		}
 		match target {
+			Target::Desktop | Target::Display(_) if menu.is_some() => {
+				Err(DesktopError::invalid_target(
+					"menu needs a window target, whose application owns the menu the click opens",
+				))
+			},
 			Target::Desktop | Target::Display(_) => global_pointer(&self.source, event),
 			Target::Window(id) => {
 				let window = capture.window(id)?;
@@ -95,6 +109,7 @@ impl MacInput {
 								wid,
 								&window,
 								event,
+								menu,
 								entry_front,
 								to,
 								in_overlay,
@@ -102,7 +117,7 @@ impl MacInput {
 						})
 					},
 					DeliveryMode::Foreground => {
-						foreground_pointer(&self.source, &window, pid, wid, event)
+						foreground_pointer(&self.source, &window, pid, wid, event, menu)
 					},
 				}
 			},
@@ -325,11 +340,7 @@ fn with_background_keyboard<T>(
 		})
 	});
 	if conflict == Some(KeyboardConflict::Unmapped) {
-		return Err(DesktopError::background_unavailable(format!(
-			"window {wid} is not among its application's accessibility windows, is not its focused \
-			 window, and is not attached to one of its windows, so background keystrokes cannot be \
-			 proven to reach it; retry with takeover:true or use ax actions",
-		)));
+		return Err(unmapped_keyboard_refusal(wid));
 	}
 	let focus = ax::key_focus(pid);
 	// The target cannot become key while a window attached to it has focus,
@@ -363,6 +374,22 @@ fn with_background_keyboard<T>(
 			}),
 		)
 	})
+}
+
+fn unmapped_keyboard_refusal(wid: u32) -> DesktopError {
+	DesktopError::background_unavailable(format!(
+		"window {wid} is not among its application's accessibility windows, is not its focused \
+		 window, and is not attached to one of its windows, so background keystrokes cannot be \
+		 proven to reach it; retry with takeover:true or use ax actions",
+	))
+}
+
+fn sibling_keyboard_refusal(wid: u32, siblings: usize) -> DesktopError {
+	DesktopError::background_unavailable(format!(
+		"window {wid} shares its application with {siblings} other window(s) and did not become its \
+		 key window, so background keystrokes could reach another window; retry with takeover:true \
+		 or use ax actions",
+	))
 }
 
 /// Before a background press: keys posted to the process now still reach
@@ -556,7 +583,7 @@ const MAX_ATTACHED_DEPTH: usize = 4;
 /// Whether `window` is attached, directly or through other attached windows,
 /// to a window `is_ancestor` accepts, as `parent_of` reports `WindowServer`'s
 /// parents.
-fn attached_under(
+pub(super) fn attached_under(
 	window: u32,
 	parent_of: impl Fn(u32) -> Option<u32>,
 	is_ancestor: impl Fn(u32) -> bool,
@@ -606,7 +633,7 @@ fn pressed_point(event: &PointerEvent) -> Option<(f64, f64)> {
 /// reported focused window, or is that window itself while attached to
 /// another. Making such a window key with a press outside its frame would
 /// close a popover, or land in the window a sheet is attached to.
-fn takes_overlay_focus(
+pub(super) fn takes_overlay_focus(
 	wid: u32,
 	focused: Option<u32>,
 	parent_of: impl Fn(u32) -> Option<u32>,
@@ -694,11 +721,28 @@ const fn pointer_kind(event: &PointerEvent) -> &'static str {
 }
 
 /// Refuses background pointer input the target is known to drop or misplace,
-/// before anything is posted.
+/// or that holds a key with no key code, before anything is posted.
 fn background_guard(
 	window: &DesktopWindow,
 	pid: libc::pid_t,
 	event: &PointerEvent,
+) -> CoreResult<()> {
+	refuse_pointer(
+		window,
+		event,
+		|| process::is_screen_sharing(pid),
+		|| process::reads_hardware_pointer(pid),
+	)
+}
+
+/// [`background_guard`]'s verdict. The target is probed by
+/// `is_screen_sharing` only for an event that holds keys, and its Tk by
+/// `reads_hardware_pointer` only for an event that presses a button.
+fn refuse_pointer(
+	window: &DesktopWindow,
+	event: &PointerEvent,
+	is_screen_sharing: impl FnOnce() -> bool,
+	reads_hardware_pointer: impl FnOnce() -> bool,
 ) -> CoreResult<()> {
 	let refuse = |reason: &str| {
 		Err(DesktopError::background_unavailable(format!(
@@ -706,31 +750,15 @@ fn background_guard(
 			window.id, window.app,
 		)))
 	};
+	// Preparing a held press can make the target's window key, so a key that
+	// cannot be pressed refuses first.
+	if let PointerEvent::Drag { keys, .. } | PointerEvent::Hold { keys, .. } = event {
+		for &key in keys {
+			key_code(key)?;
+		}
+	}
 	let kind = pointer_kind(event);
-	match event {
-		PointerEvent::Hold { .. } => {
-			return refuse("cannot establish reliable background held-button capture on macOS");
-		},
-		PointerEvent::Drag { .. } => {
-			return refuse(
-				"cannot receive a background drag: pid-routed events neither move the pointer nor \
-				 establish the pointer capture a drag needs on macOS",
-			);
-		},
-		PointerEvent::Click { modifiers, .. } if *modifiers != Modifiers::default() => {
-			return refuse(
-				"cannot receive a background modified click: pid-routed events cannot establish live \
-				 modifier-key state on macOS",
-			);
-		},
-		_ => {},
-	}
 	let app = window.app.to_ascii_lowercase();
-	if process::is_chromium(pid)
-		&& matches!(event, PointerEvent::Click { button: MouseButton::Right, .. })
-	{
-		return refuse("coerces synthetic background right-click events to left-clicks");
-	}
 	let canvas_or_game = ["blender", "unity", "godot", "unreal"]
 		.iter()
 		.any(|name| app.contains(name));
@@ -739,15 +767,61 @@ fn background_guard(
 			format!("drops background {kind} events in its canvas/game input stack").as_str(),
 		);
 	}
-	match event {
-		PointerEvent::Click { .. } if process::reads_hardware_pointer(pid) => refuse(
+	if holds_keys(event) && is_screen_sharing() {
+		return Err(screen_sharing_refusal(window, "modifier flags and held keys on pointer input"));
+	}
+	// An open context menu takes the keyboard from the user's app, and a hold
+	// or a drag keeps it open until the button is released, however long the
+	// hold or stroke runs.
+	if matches!(event, PointerEvent::Hold { .. } | PointerEvent::Drag { .. })
+		&& may_open_context_menu(event)
+	{
+		return refuse(
+			"could open a context menu on this secondary-button hold or drag, which would take the \
+			 keyboard from the user's app until the button is released",
+		);
+	}
+	// Each later click of a multi-click waits its gap before the menu the first
+	// one opened can be closed.
+	if let PointerEvent::Click { count, .. } = event
+		&& *count > 1
+		&& may_open_context_menu(event)
+	{
+		return refuse(
+			format!(
+				"could open a context menu on the first of these {count} secondary-button clicks, \
+				 which would take the keyboard from the user's app while the later clicks are sent"
+			)
+			.as_str(),
+		);
+	}
+	if presses_button(event) && reads_hardware_pointer() {
+		return refuse(
 			"uses the Tk toolkit, which places clicks at the hardware pointer rather than the event \
 			 location, so a background click would land wherever the user's pointer is",
-		),
-		PointerEvent::Scroll { .. } if process::is_electron(pid) => {
-			refuse("is an Electron app, whose renderer drops background wheel events")
+		);
+	}
+	Ok(())
+}
+
+/// Whether `event` presses a mouse button, which a toolkit that reads the
+/// hardware pointer places at the user's pointer instead of the event.
+const fn presses_button(event: &PointerEvent) -> bool {
+	matches!(
+		event,
+		PointerEvent::Click { .. } | PointerEvent::Drag { .. } | PointerEvent::Hold { .. }
+	)
+}
+
+/// Whether `event` carries modifier flags or holds keys around its presses.
+fn holds_keys(event: &PointerEvent) -> bool {
+	match event {
+		PointerEvent::Click { modifiers, .. } => *modifiers != Modifiers::default(),
+		PointerEvent::Drag { modifiers, keys, .. } => {
+			*modifiers != Modifiers::default() || !keys.is_empty()
 		},
-		_ => Ok(()),
+		PointerEvent::Hold { keys, .. } => !keys.is_empty(),
+		PointerEvent::Move { .. } | PointerEvent::Scroll { .. } => false,
 	}
 }
 
@@ -1020,7 +1094,7 @@ pub(super) fn await_key_window(pid: libc::pid_t, wid: u32) -> CoreResult<bool> {
 /// Lets `WindowServer` apply a pointer warp before HID input at the new
 /// location, and lets the target consume a click before focus or the pointer
 /// moves on.
-const POINTER_SETTLE: Duration = Duration::from_millis(40);
+pub(super) const POINTER_SETTLE: Duration = Duration::from_millis(40);
 /// Press-to-release gap: an `NSButton` press enters a tracking loop that can
 /// miss a release arriving before its first poll.
 const PRESS_GAP: Duration = Duration::from_millis(28);
@@ -1031,6 +1105,11 @@ const KEY_GAP: Duration = Duration::from_millis(8);
 const SHORTCUT_REPLY_DELAY: Duration = Duration::from_millis(100);
 /// How long that application has to reply before it counts as not answering.
 const SHORTCUT_REPLY_TIMEOUT_SECONDS: f32 = 1.5;
+/// Pacing between the dragged events of a background drag, one 60 Hz frame.
+const DRAG_STEP_GAP: Duration = Duration::from_millis(16);
+/// Wait at the end point before a background drag's release, so the target
+/// handles the last move as a move rather than coalescing it into the release.
+const DRAG_RELEASE_GAP: Duration = Duration::from_millis(50);
 /// How long raising an occluded target may take to become visible to
 /// hit-testing.
 const UNCOVER_TIMEOUT: Duration = Duration::from_millis(300);
@@ -1064,6 +1143,8 @@ unsafe extern "C" {
 	);
 	#[link_name = "CGEventCreateKeyboardEvent"]
 	fn create_keyboard_event(source: CGEventSourceRef, keycode: u16, down: bool) -> CGEventRef;
+	#[link_name = "CGEventSetTimestamp"]
+	fn set_event_timestamp(event: CGEventRef, timestamp: u64);
 	#[link_name = "CGEventSetType"]
 	fn set_event_type(event: CGEventRef, event_type: u32);
 	#[cfg(test)]
@@ -1081,6 +1162,9 @@ unsafe extern "C" {
 		length: *mut usize,
 		units: *mut u16,
 	);
+	#[cfg(test)]
+	#[link_name = "CGEventGetTimestamp"]
+	fn get_event_timestamp(event: CGEventRef) -> u64;
 }
 
 pub(super) fn source() -> CoreResult<CGEventSource> {
@@ -1154,13 +1238,79 @@ const fn button_types(
 }
 
 /// Background pointer input for window `wid` of `pid`. The events go to `to`,
-/// the process and window that take the window's input ([`input_owner`]);
-/// making the window key still goes to its own application. `in_overlay`
-/// says `wid` is a sheet or popover on the application's focused window
-/// ([`takes_overlay_focus`]), so a left click sends only the activation,
-/// without the press outside its frame that would close a popover or reach
-/// the window the sheet is attached to.
+/// the process and window that take the window's input ([`input_owner`]),
+/// which also shows any menu they open; making the window key still goes to
+/// its own application. `in_overlay` says `wid` is a sheet or popover on the
+/// application's focused window ([`takes_overlay_focus`]), so a left click
+/// sends only the activation, without the press outside its frame that would
+/// close a popover or reach the window the sheet is attached to.
 fn background_pointer(
+	source: &CGEventSource,
+	pid: libc::pid_t,
+	wid: u32,
+	window: &DesktopWindow,
+	event: PointerEvent,
+	menu: Option<&[String]>,
+	entry_front: Option<libc::pid_t>,
+	to: (libc::pid_t, u32),
+	in_overlay: bool,
+) -> CoreResult<()> {
+	let menu_pid = to.0;
+	// An open menu takes the keyboard from the user's app: a context menu, or
+	// the menu of a menu button or popup button that a left click lands on.
+	let timeout = if may_open_context_menu(&event) {
+		Some(ax::open_menu::CONTEXT_MENU_TIMEOUT)
+	} else if menu.is_some() || presses_menu_control(&event, pid, menu_pid) {
+		Some(ax::open_menu::CONTROL_MENU_TIMEOUT)
+	} else {
+		None
+	};
+	let before = match timeout {
+		Some(_) => Some(capture::menu_windows(menu_pid).ok_or_else(|| {
+			DesktopError::background_unavailable(format!(
+				"cannot list the open menus of window {} ({}), so a menu this {} opens could not be \
+				 closed; nothing was sent; retry with takeover:true or use ax actions",
+				window.id,
+				window.app,
+				pointer_kind(&event),
+			))
+		})?),
+		None => None,
+	};
+	ax::open_menu::guard(
+		ax::open_menu::Press::Pointer { kind: pointer_kind(&event), window },
+		before.as_deref(),
+		menu,
+		|| background_gesture(source, pid, wid, window, event, entry_front, to, in_overlay),
+		|before, path| {
+			ax::open_menu::settle(menu_pid, pid, before, path, timeout.unwrap_or_default())
+		},
+	)
+}
+
+/// Whether `event` presses the left button on a menu button or popup button
+/// drawn by `owner` (the window's application, or the process drawing its
+/// content) while another application than `pid` is frontmost; the control
+/// opens its menu on the press. Other gestures pay no accessibility hit-test.
+fn presses_menu_control(event: &PointerEvent, pid: libc::pid_t, owner: libc::pid_t) -> bool {
+	let Some((x, y)) = left_press(event) else {
+		return false;
+	};
+	skylight::front_pid() != Some(pid) && ax::open_menu::opens_menu_at(owner, x, y)
+}
+
+/// Where `event` presses the left button: a click's point, or the point a
+/// mouse hold or drag starts at.
+fn left_press(event: &PointerEvent) -> Option<(f64, f64)> {
+	match event {
+		PointerEvent::Click { x, y, button: MouseButton::Left, .. }
+		| PointerEvent::Hold { x, y, button: MouseButton::Left, .. } => Some((*x, *y)),
+		PointerEvent::Drag { path, button: MouseButton::Left, .. } => path.first().copied(),
+		_ => None,
+	}
+}
+
+fn background_gesture(
 	source: &CGEventSource,
 	pid: libc::pid_t,
 	wid: u32,
@@ -1171,26 +1321,297 @@ fn background_pointer(
 	in_overlay: bool,
 ) -> CoreResult<()> {
 	match event {
-		PointerEvent::Click { x, y, button: MouseButton::Left, count, .. } => {
+		PointerEvent::Click { x, y, button: MouseButton::Left, count, modifiers } => {
 			if make_key_in_background(source, pid, wid, window, entry_front, in_overlay)? {
 				still_behind_user(pid, wid)?;
 			}
-			background_left_click(source, to, to_wid, window, x, y, count)
+			background_left_click(source, to, to_wid, window, x, y, count, modifier_flags(modifiers))
 		},
-		PointerEvent::Click { x, y, button, count, .. } => {
-			background_button_click(source, to, to_wid, window, x, y, button, count)
-		},
+		PointerEvent::Click { x, y, button, count, modifiers } => background_button_click(
+			source,
+			to,
+			to_wid,
+			window,
+			x,
+			y,
+			button,
+			count,
+			modifier_flags(modifiers),
+		),
 		PointerEvent::Move { x, y } => post_hover(source, to, to_wid, window, x, y, click_group_id()),
 		PointerEvent::Scroll { x, y, dx, dy } => {
 			background_scroll(source, to, to_wid, window, x, y, dx, dy)
 		},
-		PointerEvent::Drag { .. } | PointerEvent::Hold { .. } => {
-			Err(DesktopError::background_unavailable(format!(
-				"window {wid} cannot receive a background drag on macOS; retry with takeover:true or \
-				 use ax actions",
-			)))
+		PointerEvent::Drag { path, button, modifiers, mut keys } => {
+			control::add_modifiers(&mut keys, modifiers);
+			let path = path
+				.iter()
+				.map(|&(x, y)| point(x, y))
+				.collect::<CoreResult<Vec<_>>>()?;
+			if path.len() < 2 {
+				return Err(DesktopError::input_failed("drag path must contain at least two points"));
+			}
+			prepare_press(source, pid, wid, window, button, &keys, entry_front)?;
+			background_drag(source, pid, wid, window, &path, button, &keys)
+		},
+		PointerEvent::Hold { x, y, button, keys, duration } => {
+			let at = point(x, y)?;
+			prepare_press(source, pid, wid, window, button, &keys, entry_front)?;
+			background_hold(source, pid, wid, window, at, button, &keys, duration)
 		},
 	}
+}
+
+/// Whether `event` is a secondary press, which opens a context menu in most
+/// views: a right press, or a left press with Control held.
+fn may_open_context_menu(event: &PointerEvent) -> bool {
+	let (button, control) = match event {
+		PointerEvent::Click { button, modifiers, .. } => (*button, modifiers.ctrl),
+		PointerEvent::Drag { button, modifiers, keys, .. } => {
+			(*button, modifiers.ctrl || keys.contains(&KeyName::Ctrl))
+		},
+		PointerEvent::Hold { button, keys, .. } => (*button, keys.contains(&KeyName::Ctrl)),
+		PointerEvent::Move { .. } | PointerEvent::Scroll { .. } => return false,
+	};
+	matches!(button, MouseButton::Right) || (matches!(button, MouseButton::Left) && control)
+}
+
+/// Posts Escape to `pid`, which closes the menu it has open.
+pub(super) fn post_escape(pid: libc::pid_t) -> CoreResult<()> {
+	let source = source()?;
+	let mut post = |event: &CGEvent| skylight::post_keyboard(pid, event);
+	let flags = CGEventFlags::CGEventFlagNull;
+	post_key(&source, KeyName::Escape, true, flags, &mut post)?;
+	post_key(&source, KeyName::Escape, false, flags, &mut post)
+}
+
+/// Readies a background window for a held press and the keys held around it.
+///
+/// A view that refuses first mouse, as Chromium and Electron pages do, drops a
+/// left press into a window its application does not yet consider key, which
+/// a click survives but a press that stays down does not. Held keys go to the
+/// process, which hands them to its key window, so they need the same proof
+/// that `wid` is that window as background typing does.
+fn prepare_press(
+	source: &CGEventSource,
+	pid: libc::pid_t,
+	wid: u32,
+	window: &DesktopWindow,
+	button: MouseButton,
+	keys: &[KeyName],
+	entry_front: Option<libc::pid_t>,
+) -> CoreResult<()> {
+	ready_press(
+		wid,
+		button,
+		!keys.is_empty(),
+		|| {
+			ax::window_records(pid).map_or(Some(KeyboardConflict::Unmapped), |records| {
+				keyboard_conflict(wid, &records, || {
+					ax::focused_window_id(pid) == Some(wid)
+						|| attached_under(wid, skylight::window_parent, |parent| {
+							records.iter().any(|record| record.id == Some(parent))
+						})
+				})
+			})
+		},
+		|| make_key_in_background(source, pid, wid, window, entry_front, false),
+		|| await_key_window(pid, wid),
+		|| still_behind_user(pid, wid),
+	)
+}
+
+/// [`prepare_press`] with its probes and the key-window step as closures.
+/// When `make_key` ran the activation step, `still_behind` re-checks after the
+/// wait for the key window that the user has not brought the target forward.
+fn ready_press(
+	wid: u32,
+	button: MouseButton,
+	holds_keys: bool,
+	conflict: impl FnOnce() -> Option<KeyboardConflict>,
+	make_key: impl FnOnce() -> CoreResult<bool>,
+	is_key: impl FnOnce() -> CoreResult<bool>,
+	still_behind: impl FnOnce() -> CoreResult<()>,
+) -> CoreResult<()> {
+	let siblings = if holds_keys {
+		match conflict() {
+			Some(KeyboardConflict::Unmapped) => return Err(unmapped_keyboard_refusal(wid)),
+			Some(KeyboardConflict::Siblings(siblings)) => siblings,
+			None => 0,
+		}
+	} else {
+		0
+	};
+	if !holds_keys && !matches!(button, MouseButton::Left) {
+		return Ok(());
+	}
+	let prepared = make_key()?;
+	if !is_key()? && siblings > 0 {
+		return Err(sibling_keyboard_refusal(wid, siblings));
+	}
+	if prepared {
+		still_behind()?;
+	}
+	Ok(())
+}
+
+/// One event of a background drag.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Stroke {
+	Down,
+	Dragged,
+	Up,
+}
+
+/// Posts a drag along `path` (at least two points): the press at its start,
+/// one dragged event per later point, and the release. The release is posted
+/// whatever happens before it, at the last point attempted, since a failed
+/// post may still have been delivered.
+fn stroke_path(
+	path: &[CGPoint],
+	mut post: impl FnMut(Stroke, CGPoint) -> CoreResult<()>,
+) -> CoreResult<()> {
+	let mut last = path[0];
+	let result = (|| {
+		post(Stroke::Down, last)?;
+		for &at in &path[1..] {
+			control::wait(DRAG_STEP_GAP)?;
+			last = at;
+			post(Stroke::Dragged, at)?;
+		}
+		control::wait(DRAG_RELEASE_GAP)
+	})();
+	let release = control::cleanup(|| post(Stroke::Up, last));
+	skylight::after_cleanup(result, release)
+}
+
+/// A background drag along `path` (global points, at least two): a hover at
+/// the start, then [`stroke_path`], all routed to `wid` so the user's pointer
+/// stays where it is. `keys` are held around the gesture as key transitions
+/// to the target process, and their modifiers ride on every pointer event.
+/// A drag that starts a drag-and-drop session throws with its outcome
+/// unconfirmed, as [`drag_session_outcome`] describes.
+fn background_drag(
+	source: &CGEventSource,
+	pid: libc::pid_t,
+	wid: u32,
+	window: &DesktopWindow,
+	path: &[CGPoint],
+	button: MouseButton,
+	keys: &[KeyName],
+) -> CoreResult<()> {
+	let (cg_button, down, up, dragged, number) = button_types(button);
+	let flags = held_flags(keys);
+	let group = click_group_id();
+	let sessions = drag_pasteboard_count();
+	with_held_keys(
+		source,
+		keys,
+		|event| skylight::post_keyboard(pid, event),
+		|| {
+			let start = path[0];
+			post_hover(source, pid, wid, window, start.x, start.y, group)?;
+			control::wait(Duration::from_millis(12))?;
+			stroke_path(path, |stroke, at| {
+				let event_type = match stroke {
+					Stroke::Down => down,
+					Stroke::Dragged => dragged,
+					Stroke::Up => up,
+				};
+				let event = mouse_event(source, event_type, at, cg_button)?;
+				event.set_flags(flags);
+				post_window_pointer(pid, wid, window, &event, at.x, at.y, 1, number, group)
+			})
+		},
+	)?;
+	// An accessibility round trip, which the target answers from its run loop
+	// once it has handled the events posted before it.
+	drag_session_outcome(window, sessions, drag_pasteboard_count, || {
+		ax::reports_active(pid);
+	})
+}
+
+/// Change count of the drag pasteboard, which a drag source clears and
+/// writes as it begins a drag-and-drop session.
+fn drag_pasteboard_count() -> isize {
+	// SAFETY: `NSPasteboardNameDrag` is an immutable AppKit string constant.
+	NSPasteboard::pasteboardWithName(unsafe { NSPasteboardNameDrag }).changeCount()
+}
+
+/// [`background_drag`]'s verdict after its release, from the drag
+/// pasteboard's change count as `count` reads it and as it was `before` the
+/// press.
+///
+/// A drag that picks up an item (a file, a font, a table row, selected text)
+/// makes its application begin a drag-and-drop session, which macOS completes
+/// from the user's real pointer and button as well as from the routed events,
+/// so where the item lands is not up to the drag. On macOS 26, Font Book
+/// dropped a font on the collection at the path's end in some drags and
+/// nowhere in others, depending on where the user's pointer and windows were,
+/// and `TextEdit` moved dragged text to the end of its document. Such a drag's
+/// outcome is unknown rather than failed: it throws `InputFailed` saying the
+/// drop could not be confirmed, so the caller reads the target before
+/// retrying, and it is not rerun in takeover, which would repeat a drop that
+/// did land. Escape posted to the source did not cancel the drop, and releasing
+/// early would only drop the item short of the path's end. A drag inside a
+/// view (a slider, a text selection, a web page's mouse-driven drag) leaves
+/// the count alone.
+///
+/// The source writes the pasteboard while it handles the routed events; when
+/// the count has not moved yet, `caught_up` waits until the target has handled
+/// them, and the count is read once more.
+fn drag_session_outcome(
+	window: &DesktopWindow,
+	before: isize,
+	mut count: impl FnMut() -> isize,
+	caught_up: impl FnOnce(),
+) -> CoreResult<()> {
+	if count() == before {
+		caught_up();
+		if count() == before {
+			return Ok(());
+		}
+	}
+	Err(DesktopError::input_failed(format!(
+		"the drag reached window {} ({}), but its outcome could not be confirmed: it started a \
+		 drag-and-drop session, which macOS completes from the user's real pointer and button, so \
+		 the item may already have been dropped at the path's end, elsewhere, or not at all. Read \
+		 the target before retrying; prefer the app's menu command or ax actions, and drag with \
+		 takeover:true only if nothing was dropped",
+		window.id, window.app,
+	)))
+}
+
+/// A background press held for `duration` at `at`, routed to `wid`; the
+/// release is posted even when the hold is cancelled. `keys` are held around
+/// it as in [`background_drag`].
+fn background_hold(
+	source: &CGEventSource,
+	pid: libc::pid_t,
+	wid: u32,
+	window: &DesktopWindow,
+	at: CGPoint,
+	button: MouseButton,
+	keys: &[KeyName],
+	duration: Duration,
+) -> CoreResult<()> {
+	let (cg_button, down, up, _, number) = button_types(button);
+	let flags = held_flags(keys);
+	let group = click_group_id();
+	with_held_keys(
+		source,
+		keys,
+		|event| skylight::post_keyboard(pid, event),
+		|| {
+			post_hover(source, pid, wid, window, at.x, at.y, group)?;
+			control::wait(Duration::from_millis(12))?;
+			control::bounded_hold(duration, |pressed| {
+				let event = mouse_event(source, if pressed { down } else { up }, at, cg_button)?;
+				event.set_flags(flags);
+				post_window_pointer(pid, wid, window, &event, at.x, at.y, 1, number, group)
+			})
+		},
+	)
 }
 
 /// Background left click on the Chromium-compatible route: a hover primer at
@@ -1208,6 +1629,7 @@ fn background_left_click(
 	x: f64,
 	y: f64,
 	count: u32,
+	flags: CGEventFlags,
 ) -> CoreResult<()> {
 	let group = click_group_id();
 	let target = CGPoint::new(x, y);
@@ -1217,9 +1639,11 @@ fn background_left_click(
 	            location: CGPoint,
 	            window_location: CGPoint,
 	            phase: i64,
-	            click_state: i64|
+	            click_state: i64,
+	            flags: CGEventFlags|
 	 -> CoreResult<()> {
 		let event = mouse_event(source, event_type, location, CGMouseButton::Left)?;
+		event.set_flags(flags);
 		skylight::set_fields(&event, &[
 			(FIELD_MOUSE_EVENT_NUMBER, phase),
 			(FIELD_CLICK_STATE, click_state),
@@ -1234,19 +1658,21 @@ fn background_left_click(
 		skylight::set_window_location(&event, window_location)?;
 		skylight::post_routed(pid, &event)
 	};
-	post(CGEventType::MouseMoved, target, local, 2, 0)?;
+	let unmodified = CGEventFlags::CGEventFlagNull;
+	post(CGEventType::MouseMoved, target, local, 2, 0, flags)?;
 	control::wait(Duration::from_millis(15))?;
-	post(CGEventType::LeftMouseDown, offscreen, offscreen, 1, 1)?;
+	post(CGEventType::LeftMouseDown, offscreen, offscreen, 1, 1, unmodified)?;
 	let result = control::wait(Duration::from_millis(1));
-	let release = control::cleanup(|| post(CGEventType::LeftMouseUp, offscreen, offscreen, 2, 1));
+	let release =
+		control::cleanup(|| post(CGEventType::LeftMouseUp, offscreen, offscreen, 2, 1, unmodified));
 	skylight::after_cleanup(result, release)?;
 	control::wait(Duration::from_millis(100))?;
 	let count = count.max(1);
 	for click_state in 1..=count {
-		post(CGEventType::LeftMouseDown, target, local, 3, i64::from(click_state))?;
+		post(CGEventType::LeftMouseDown, target, local, 3, i64::from(click_state), flags)?;
 		let result = control::wait(Duration::from_millis(1));
 		let release = control::cleanup(|| {
-			post(CGEventType::LeftMouseUp, target, local, 3, i64::from(click_state))
+			post(CGEventType::LeftMouseUp, target, local, 3, i64::from(click_state), flags)
 		});
 		skylight::after_cleanup(result, release)?;
 		if click_state < count {
@@ -1268,6 +1694,7 @@ fn background_button_click(
 	y: f64,
 	button: MouseButton,
 	count: u32,
+	flags: CGEventFlags,
 ) -> CoreResult<()> {
 	let group = click_group_id();
 	let (cg_button, down, up, _, number) = button_types(button);
@@ -1277,6 +1704,8 @@ fn background_button_click(
 	for click_state in 1..=count {
 		let press = mouse_event(source, down, CGPoint::new(x, y), cg_button)?;
 		let release = mouse_event(source, up, CGPoint::new(x, y), cg_button)?;
+		press.set_flags(flags);
+		release.set_flags(flags);
 		let result =
 			post_window_pointer(pid, wid, window, &press, x, y, i64::from(click_state), number, group)
 				.and_then(|()| control::wait(PRESS_GAP));
@@ -1318,9 +1747,25 @@ fn post_hover(
 }
 
 /// Stamps the window-routing fields on a background pointer event and posts it
-/// with `skylight::post_dual`. The window location is window-local, as the
-/// public route expects.
+/// with `skylight::post_dual`.
 fn post_window_pointer(
+	pid: libc::pid_t,
+	wid: u32,
+	window: &DesktopWindow,
+	event: &CGEvent,
+	x: f64,
+	y: f64,
+	click_state: i64,
+	button_number: i64,
+	group: i64,
+) -> CoreResult<()> {
+	route_window_pointer(pid, wid, window, event, x, y, click_state, button_number, group)?;
+	skylight::post_dual(pid, event)
+}
+
+/// The window-routing fields and timestamp of a background pointer event. The
+/// window location is window-local, as the public route expects.
+fn route_window_pointer(
 	pid: libc::pid_t,
 	wid: u32,
 	window: &DesktopWindow,
@@ -1342,7 +1787,25 @@ fn post_window_pointer(
 		(FIELD_WINDOW_UNDER_POINTER_THAT_CAN_HANDLE, i64::from(wid)),
 	])?;
 	skylight::set_window_location(event, window_local(window, x, y))?;
-	skylight::post_dual(pid, event)
+	// Only window-routed events carry a time; the activation press, the
+	// left-click route and wheel events keep 0, which their targets accept.
+	stamp_now(event);
+	Ok(())
+}
+
+/// Stamps `event` with the current time. A Quartz-created event carries
+/// timestamp 0, and a background target that times a gesture from its events'
+/// timestamps, as a web page's `event.timeStamp` does, would see a held press
+/// released the instant it went down.
+fn stamp_now(event: &CGEvent) {
+	// SAFETY: `clock_gettime_nsec_np` only reads the clock; `event` is a live
+	// CGEvent. Quartz event timestamps count nanoseconds of system uptime.
+	unsafe { set_event_timestamp(event.as_ptr(), clock_gettime_nsec_np(libc::CLOCK_UPTIME_RAW)) };
+}
+
+unsafe extern "C" {
+	/// `<time.h>`: the time on `clock` in nanoseconds.
+	fn clock_gettime_nsec_np(clock: libc::clockid_t) -> u64;
 }
 
 fn background_scroll(
@@ -1787,27 +2250,52 @@ fn char_key_code(character: char) -> CoreResult<u16> {
 /// Delivers real HID pointer input to `window` while it is the frontmost key
 /// window, then restores focus, any known covering window, and the user's
 /// pointer. Raising a single covering window is not an exact z-order snapshot.
+/// With `menu`, the item path is chosen in the menu the click opens before
+/// focus goes back, which would close the menu.
 fn foreground_pointer(
 	source: &CGEventSource,
 	window: &DesktopWindow,
 	pid: libc::pid_t,
 	wid: u32,
 	event: PointerEvent,
+	menu: Option<&[String]>,
 ) -> CoreResult<()> {
+	let kind = pointer_kind(&event);
+	let timeout = if may_open_context_menu(&event) {
+		ax::open_menu::CONTEXT_MENU_TIMEOUT
+	} else {
+		ax::open_menu::CONTROL_MENU_TIMEOUT
+	};
 	preserving_cursor(source, || {
 		skylight::with_foreground(pid, wid, |_| {
 			let choices = control::user_choices();
 			let mut occluder = None;
 			let result = uncover(window, pid, wid, &event, &mut occluder)
 				.and_then(|()| skylight::require_front_window(pid, wid))
-				.and_then(|()| match event {
-					PointerEvent::Scroll { x, y, dx, dy } => {
+				.and_then(|()| match (event, menu) {
+					(PointerEvent::Scroll { x, y, dx, dy }, _) => {
 						let side = primer_side(window, x);
 						global_scroll(source, x, y, dx, dy, side, || {
 							skylight::require_front_window(pid, wid)
 						})
 					},
-					event => global_pointer(source, event),
+					(event, None) => global_pointer(source, event),
+					(event, Some(path)) => {
+						let before = capture::menu_windows(pid).ok_or_else(|| {
+							DesktopError::input_failed(format!(
+								"cannot list the open menus of window {} ({}), so no menu item could be \
+								 chosen; nothing was sent",
+								window.id, window.app,
+							))
+						})?;
+						ax::open_menu::guard(
+							ax::open_menu::Press::Pointer { kind, window },
+							Some(&before),
+							Some(path),
+							|| global_pointer(source, event),
+							|before, path| ax::open_menu::settle(pid, pid, before, path, timeout),
+						)
+					},
 				});
 			// Capture before raising, so even a failed raise/re-hit-test retains
 			// the restoration token. Never reorder over a user-selected app.
@@ -3029,6 +3517,467 @@ mod tests {
 			assert!((100.0..400.0).contains(&start), "primer for {x} starts outside at {start}");
 			assert_eq!((start - x).abs(), PRIMER_OFFSETS[0]);
 		}
+	}
+
+	fn background_window(app: &str) -> DesktopWindow {
+		DesktopWindow {
+			id:      "42".to_string(),
+			title:   String::new(),
+			app:     app.to_string(),
+			pid:     Some(7),
+			x:       0,
+			y:       0,
+			width:   300,
+			height:  200,
+			focused: false,
+		}
+	}
+
+	/// The pointer gestures a background target used to be refused: drags,
+	/// holds, modified clicks and right-clicks press a button; scrolls and moves
+	/// do not.
+	fn gestures() -> (Vec<PointerEvent>, Vec<PointerEvent>) {
+		let meta = Modifiers { meta: true, ..Modifiers::default() };
+		let shift = Modifiers { shift: true, ..Modifiers::default() };
+		let click =
+			|button, modifiers| PointerEvent::Click { x: 10.0, y: 10.0, button, count: 1, modifiers };
+		let presses = vec![
+			PointerEvent::Drag {
+				path:      vec![(10.0, 10.0), (90.0, 40.0)],
+				button:    MouseButton::Left,
+				modifiers: meta,
+				keys:      vec![KeyName::Space],
+			},
+			PointerEvent::Hold {
+				x:        10.0,
+				y:        10.0,
+				button:   MouseButton::Left,
+				keys:     Vec::new(),
+				duration: Duration::from_secs(1),
+			},
+			click(MouseButton::Left, meta),
+			click(MouseButton::Left, shift),
+			click(MouseButton::Right, Modifiers::default()),
+			click(MouseButton::Left, Modifiers::default()),
+		];
+		let others = vec![
+			PointerEvent::Scroll { x: 10.0, y: 10.0, dx: 0.0, dy: -40.0 },
+			PointerEvent::Scroll { x: 10.0, y: 10.0, dx: -40.0, dy: 0.0 },
+			PointerEvent::Move { x: 10.0, y: 10.0 },
+		];
+		(presses, others)
+	}
+
+	#[test]
+	fn background_guard_refuses_only_presses_into_a_tk_that_reads_the_hardware_pointer() {
+		let window = background_window("Python");
+		let (presses, others) = gestures();
+		let refused: Vec<_> = presses
+			.iter()
+			.chain(&others)
+			.filter(|event| refuse_pointer(&window, event, || false, || false).is_err())
+			.collect();
+		assert!(refused.is_empty(), "refused outside Tk: {refused:#?}");
+		// Tk 9 places every press at the user's pointer, wherever the event says.
+		for event in &presses {
+			let refused =
+				refuse_pointer(&window, event, || false, || true).expect_err("press into Tk 9");
+			assert_eq!(refused.code.as_str(), "BackgroundUnavailable");
+		}
+		for event in &others {
+			assert!(
+				refuse_pointer(&window, event, || false, || true).is_ok(),
+				"{event:?} was refused"
+			);
+		}
+	}
+
+	#[test]
+	fn screen_sharing_refuses_pointer_gestures_that_hold_keys() {
+		// Screen Sharing relays only physical key transitions, so the keys and
+		// modifier flags of a background gesture would not reach the remote host.
+		let window = background_window("Screen Sharing");
+		let meta = Modifiers { meta: true, ..Modifiers::default() };
+		let drag = |modifiers, keys| PointerEvent::Drag {
+			path: vec![(10.0, 10.0), (90.0, 40.0)],
+			button: MouseButton::Left,
+			modifiers,
+			keys,
+		};
+		let hold = |keys| PointerEvent::Hold {
+			x: 10.0,
+			y: 10.0,
+			button: MouseButton::Left,
+			keys,
+			duration: Duration::from_secs(1),
+		};
+		let click = |modifiers| PointerEvent::Click {
+			x: 10.0,
+			y: 10.0,
+			button: MouseButton::Left,
+			count: 1,
+			modifiers,
+		};
+		for event in [
+			drag(Modifiers::default(), vec![KeyName::Space]),
+			drag(meta, Vec::new()),
+			hold(vec![KeyName::Shift]),
+			click(meta),
+		] {
+			let refused = refuse_pointer(&window, &event, || true, || false)
+				.expect_err("keys into Screen Sharing");
+			assert_eq!(refused.code.as_str(), "BackgroundUnavailable", "{event:?}");
+			assert!(refuse_pointer(&window, &event, || false, || false).is_ok(), "{event:?}");
+		}
+		for event in [
+			drag(Modifiers::default(), Vec::new()),
+			hold(Vec::new()),
+			click(Modifiers::default()),
+			PointerEvent::Scroll { x: 10.0, y: 10.0, dx: 0.0, dy: -40.0 },
+		] {
+			assert!(refuse_pointer(&window, &event, || true, || false).is_ok(), "{event:?}");
+		}
+	}
+
+	#[test]
+	fn a_hold_that_can_open_a_context_menu_is_refused_before_anything_is_sent() {
+		// The menu would hold the user's keyboard until the button is released.
+		let window = background_window("Google Chrome");
+		let hold = |button, keys| PointerEvent::Hold {
+			x: 10.0,
+			y: 10.0,
+			button,
+			keys,
+			duration: Duration::from_secs(100),
+		};
+		let verdict = |event: &PointerEvent| {
+			refuse_pointer(&window, event, || false, || false).map_err(|error| error.code.as_str())
+		};
+		assert_eq!(verdict(&hold(MouseButton::Right, Vec::new())), Err("BackgroundUnavailable"));
+		assert_eq!(
+			verdict(&hold(MouseButton::Left, vec![KeyName::Ctrl])),
+			Err("BackgroundUnavailable")
+		);
+		assert_eq!(verdict(&hold(MouseButton::Left, Vec::new())), Ok(()));
+		assert_eq!(verdict(&hold(MouseButton::Left, vec![KeyName::Shift])), Ok(()));
+		assert_eq!(verdict(&hold(MouseButton::Middle, vec![KeyName::Ctrl])), Ok(()));
+		let drag = |button, modifiers| PointerEvent::Drag {
+			path: vec![(10.0, 10.0); 500],
+			button,
+			modifiers,
+			keys: Vec::new(),
+		};
+		assert_eq!(
+			verdict(&drag(MouseButton::Right, Modifiers::default())),
+			Err("BackgroundUnavailable")
+		);
+		assert_eq!(
+			verdict(&drag(MouseButton::Left, Modifiers { ctrl: true, ..Modifiers::default() })),
+			Err("BackgroundUnavailable")
+		);
+		assert_eq!(verdict(&drag(MouseButton::Left, Modifiers::default())), Ok(()));
+		// A right-click ends at once, so its menu is closed instead.
+		let right_click = PointerEvent::Click {
+			x:         10.0,
+			y:         10.0,
+			button:    MouseButton::Right,
+			count:     1,
+			modifiers: Modifiers::default(),
+		};
+		assert_eq!(verdict(&right_click), Ok(()));
+	}
+
+	#[test]
+	fn repeated_clicks_that_can_open_a_context_menu_are_refused_before_anything_is_sent() {
+		// The menu the first click opens would hold the user's keyboard while
+		// the later clicks wait their gaps.
+		let window = background_window("Google Chrome");
+		let click = |button, count, ctrl| PointerEvent::Click {
+			x: 10.0,
+			y: 10.0,
+			button,
+			count,
+			modifiers: Modifiers { ctrl, ..Modifiers::default() },
+		};
+		let verdict = |event: &PointerEvent| {
+			refuse_pointer(&window, event, || false, || false).map_err(|error| error.code.as_str())
+		};
+		assert_eq!(verdict(&click(MouseButton::Right, 2, false)), Err("BackgroundUnavailable"));
+		assert_eq!(verdict(&click(MouseButton::Left, 50, true)), Err("BackgroundUnavailable"));
+		assert_eq!(verdict(&click(MouseButton::Right, 1, false)), Ok(()));
+		assert_eq!(verdict(&click(MouseButton::Left, 1, true)), Ok(()));
+		assert_eq!(verdict(&click(MouseButton::Left, 3, false)), Ok(()));
+		assert_eq!(verdict(&click(MouseButton::Middle, 2, true)), Ok(()));
+	}
+
+	#[test]
+	fn held_keys_without_a_key_code_refuse_before_the_target_is_prepared() {
+		// `parse_keys` accepts "é", which has no macOS key code; the press
+		// preparation would already have made the target's window key.
+		let window = background_window("Google Chrome");
+		let verdict = |event: &PointerEvent| {
+			refuse_pointer(&window, event, || false, || false).map_err(|error| error.code.as_str())
+		};
+		let drag = |keys| PointerEvent::Drag {
+			path: vec![(10.0, 10.0), (90.0, 40.0)],
+			button: MouseButton::Left,
+			modifiers: Modifiers::default(),
+			keys,
+		};
+		let hold = |keys| PointerEvent::Hold {
+			x: 10.0,
+			y: 10.0,
+			button: MouseButton::Left,
+			keys,
+			duration: Duration::from_secs(1),
+		};
+		assert_eq!(verdict(&drag(vec![KeyName::Char('é')])), Err("InvalidKey"));
+		assert_eq!(verdict(&hold(vec![KeyName::Shift, KeyName::Char('é')])), Err("InvalidKey"));
+		assert_eq!(verdict(&drag(vec![KeyName::Shift])), Ok(()));
+		assert_eq!(verdict(&hold(vec![KeyName::Char('a')])), Ok(()));
+	}
+
+	#[test]
+	fn background_pointer_events_carry_the_time_they_are_routed() {
+		// A page times a held press from its events' timestamps; Quartz leaves
+		// them at 0, which made a 1 s background hold measure 0 ms.
+		let source = source().expect("event source");
+		let window = background_window("Electron");
+		let event = mouse_event(
+			&source,
+			CGEventType::LeftMouseDown,
+			CGPoint::new(10.0, 10.0),
+			CGMouseButton::Left,
+		)
+		.expect("press");
+		// SAFETY: `clock_gettime_nsec_np` only reads the clock.
+		let before = unsafe { clock_gettime_nsec_np(libc::CLOCK_UPTIME_RAW) };
+		route_window_pointer(7, 42, &window, &event, 10.0, 10.0, 1, 0, 1).expect("route");
+		// SAFETY: `event` is a live CGEvent.
+		let stamped = unsafe { get_event_timestamp(event.as_ptr()) };
+		// SAFETY: as above.
+		let after = unsafe { clock_gettime_nsec_np(libc::CLOCK_UPTIME_RAW) };
+		assert!((before..=after).contains(&stamped), "{before} <= {stamped} <= {after}");
+	}
+
+	#[test]
+	fn secondary_presses_are_the_gestures_that_can_open_a_context_menu() {
+		let ctrl = Modifiers { ctrl: true, ..Modifiers::default() };
+		let click =
+			|button, modifiers| PointerEvent::Click { x: 1.0, y: 1.0, button, count: 1, modifiers };
+		let drag = |button, modifiers, keys| PointerEvent::Drag {
+			path: vec![(1.0, 1.0), (9.0, 9.0)],
+			button,
+			modifiers,
+			keys,
+		};
+		let hold = |button, keys| PointerEvent::Hold {
+			x: 1.0,
+			y: 1.0,
+			button,
+			keys,
+			duration: Duration::from_secs(1),
+		};
+		for event in [
+			click(MouseButton::Right, Modifiers::default()),
+			click(MouseButton::Left, ctrl),
+			drag(MouseButton::Right, Modifiers::default(), Vec::new()),
+			drag(MouseButton::Left, ctrl, Vec::new()),
+			drag(MouseButton::Left, Modifiers::default(), vec![KeyName::Ctrl]),
+			hold(MouseButton::Right, Vec::new()),
+			hold(MouseButton::Left, vec![KeyName::Ctrl]),
+		] {
+			assert!(may_open_context_menu(&event), "{event:?}");
+		}
+		for event in [
+			click(MouseButton::Left, Modifiers { meta: true, ..Modifiers::default() }),
+			click(MouseButton::Middle, ctrl),
+			drag(MouseButton::Left, Modifiers::default(), vec![KeyName::Space]),
+			hold(MouseButton::Left, Vec::new()),
+			PointerEvent::Scroll { x: 1.0, y: 1.0, dx: 0.0, dy: 5.0 },
+			PointerEvent::Move { x: 1.0, y: 1.0 },
+		] {
+			assert!(!may_open_context_menu(&event), "{event:?}");
+		}
+	}
+
+	#[test]
+	fn left_clicks_holds_and_drags_press_where_a_control_could_open_its_menu() {
+		let drag = |button| PointerEvent::Drag {
+			path: vec![(3.0, 4.0), (9.0, 9.0)],
+			button,
+			modifiers: Modifiers::default(),
+			keys: Vec::new(),
+		};
+		let hold = |button| PointerEvent::Hold {
+			x: 5.0,
+			y: 6.0,
+			button,
+			keys: Vec::new(),
+			duration: Duration::from_secs(1),
+		};
+		let click = |button| PointerEvent::Click {
+			x: 1.0,
+			y: 2.0,
+			button,
+			count: 1,
+			modifiers: Modifiers::default(),
+		};
+		assert_eq!(left_press(&click(MouseButton::Left)), Some((1.0, 2.0)));
+		// A hold or drag that starts on a popup opens its menu as a click does.
+		assert_eq!(left_press(&hold(MouseButton::Left)), Some((5.0, 6.0)));
+		assert_eq!(left_press(&drag(MouseButton::Left)), Some((3.0, 4.0)));
+		for event in [
+			click(MouseButton::Right),
+			hold(MouseButton::Middle),
+			drag(MouseButton::Right),
+			PointerEvent::Scroll { x: 1.0, y: 1.0, dx: 0.0, dy: 5.0 },
+			PointerEvent::Move { x: 1.0, y: 1.0 },
+		] {
+			assert_eq!(left_press(&event), None, "{event:?}");
+		}
+	}
+
+	#[test]
+	fn held_keys_need_the_target_as_key_window_whatever_the_button() {
+		let ready = |button, holds_keys, conflict: Option<KeyboardConflict>, keyed| {
+			let steps = std::cell::RefCell::new(Vec::new());
+			let result = ready_press(
+				42,
+				button,
+				holds_keys,
+				|| conflict,
+				|| {
+					steps.borrow_mut().push("make key");
+					Ok(true)
+				},
+				|| {
+					steps.borrow_mut().push("await key");
+					Ok(keyed)
+				},
+				|| Ok(()),
+			);
+			(result.map_err(|error| error.code.as_str()), steps.into_inner())
+		};
+		let both = vec!["make key", "await key"];
+		// A right or middle press without keys needs no key window.
+		assert_eq!(ready(MouseButton::Right, false, None, false), (Ok(()), Vec::new()));
+		// A left press is readied, and goes ahead even when the app never
+		// reports its key window: it has no other window to reach.
+		assert_eq!(ready(MouseButton::Left, false, None, false), (Ok(()), both.clone()));
+		// Held keys into an app with other windows go only once the target is
+		// key, for any button.
+		for button in [MouseButton::Left, MouseButton::Right, MouseButton::Middle] {
+			let siblings = Some(KeyboardConflict::Siblings(1));
+			assert_eq!(
+				ready(button, true, siblings, false),
+				(Err("BackgroundUnavailable"), both.clone())
+			);
+			let siblings = Some(KeyboardConflict::Siblings(1));
+			assert_eq!(ready(button, true, siblings, true), (Ok(()), both.clone()));
+			assert_eq!(
+				ready(button, true, Some(KeyboardConflict::Unmapped), true),
+				(Err("BackgroundUnavailable"), Vec::new())
+			);
+			assert_eq!(ready(button, true, None, false), (Ok(()), both.clone()));
+		}
+	}
+
+	#[test]
+	fn a_held_press_stops_when_its_app_comes_to_the_front_during_preparation() {
+		let ready = |prepared: bool| {
+			let steps = std::cell::RefCell::new(Vec::new());
+			let result = ready_press(
+				42,
+				MouseButton::Left,
+				false,
+				|| None,
+				|| Ok(prepared),
+				|| {
+					steps.borrow_mut().push("await key");
+					Ok(true)
+				},
+				|| {
+					steps.borrow_mut().push("still behind");
+					Err(DesktopError::background_unavailable("came to the front"))
+				},
+			);
+			(result.map_err(|error| error.code.as_str()), steps.into_inner())
+		};
+		// The user can bring the target forward while it becomes key; the press
+		// would then switch the key window of the app they type into.
+		assert_eq!(ready(true), (Err("BackgroundUnavailable"), vec!["await key", "still behind"]));
+		// The target already was the frontmost key window: nothing to re-check.
+		assert_eq!(ready(false), (Ok(()), vec!["await key"]));
+	}
+
+	#[test]
+	fn a_drag_is_released_at_the_last_point_attempted_after_a_failed_post() {
+		let path = [CGPoint::new(1.0, 1.0), CGPoint::new(5.0, 5.0), CGPoint::new(9.0, 9.0)];
+		let run = |fail_on: Option<(Stroke, f64)>| {
+			let mut posted = Vec::new();
+			let result = stroke_path(&path, |stroke, at| {
+				posted.push((stroke, at.x));
+				if fail_on == Some((stroke, at.x)) {
+					Err(DesktopError::input_failed("delivery may be partial"))
+				} else {
+					Ok(())
+				}
+			});
+			(result.is_ok(), posted)
+		};
+		use Stroke::{Down, Dragged, Up};
+		assert_eq!(run(None), (true, vec![(Down, 1.0), (Dragged, 5.0), (Dragged, 9.0), (Up, 9.0)]));
+		// A press that may have been delivered is still released.
+		assert_eq!(run(Some((Down, 1.0))), (false, vec![(Down, 1.0), (Up, 1.0)]));
+		// The release goes where the failed move may have taken the target.
+		assert_eq!(run(Some((Dragged, 5.0))), (false, vec![(Down, 1.0), (Dragged, 5.0), (Up, 5.0)]));
+	}
+
+	#[test]
+	fn a_drag_that_starts_a_drag_and_drop_session_reports_its_drop_as_unconfirmed() {
+		use std::cell::{Cell, RefCell};
+		let window = background_window("Font Book");
+		// `reads` are the drag pasteboard's change counts after the release, in
+		// order; the count before the press was 7.
+		let run = |reads: &[isize]| {
+			let next = Cell::new(0);
+			let log = RefCell::new(Vec::new());
+			let outcome = drag_session_outcome(
+				&window,
+				7,
+				|| {
+					let count = reads[next.get()];
+					next.set(next.get() + 1);
+					log.borrow_mut().push(format!("read {count}"));
+					count
+				},
+				|| log.borrow_mut().push("caught up".to_owned()),
+			);
+			(outcome.map_err(|error| (error.code.as_str(), error.message)), log.into_inner())
+		};
+		// Font Book wrote the drag pasteboard while it handled the routed
+		// drag: its session may drop the font at the path's end, elsewhere or
+		// nowhere, so the call throws with the drop unconfirmed instead of
+		// returning as if it had moved, and says to read the target first.
+		let (outcome, log) = run(&[8]);
+		assert_eq!(log, vec!["read 8".to_owned()]);
+		let (code, message) = outcome.unwrap_err();
+		assert_eq!(code, "InputFailed");
+		assert!(message.contains("could not be confirmed"), "{message}");
+		assert!(message.contains("may already have been dropped"), "{message}");
+		assert!(message.contains("before retrying"), "{message}");
+		// A source that begins its session only once it catches up with the
+		// events is found by the read after the round trip.
+		let (outcome, log) = run(&[7, 9]);
+		assert_eq!(log, vec!["read 7".to_owned(), "caught up".to_owned(), "read 9".to_owned()]);
+		assert_eq!(outcome.unwrap_err().0, "InputFailed");
+		// A drag inside a view (a slider, a selection) leaves the pasteboard
+		// alone.
+		assert_eq!(
+			run(&[7, 7]),
+			(Ok(()), vec!["read 7".to_owned(), "caught up".to_owned(), "read 7".to_owned()])
+		);
 	}
 
 	#[test]
