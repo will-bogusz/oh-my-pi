@@ -4079,7 +4079,7 @@ mod tests {
 		let listener = control::intervention::Listener::simulated();
 		listener.touch(7, Some(1), || "TextEdit".to_string());
 		let token = control::CancellationSource::default().token();
-		let guard = intervention_guard(|| Ok(()));
+		let keys = unicode_keys("abc");
 		let mut events = Vec::new();
 		// Typing that runs the route's guard before each press itself, without
 		// `post_guarded`, as a typed-key path does.
@@ -4087,10 +4087,7 @@ mod tests {
 			let _watch = listener
 				.admit(7, &token)
 				.expect("the user has not used TextEdit");
-			type_text(&source, "abc", |event| {
-				if is_key_press(event) {
-					guard()?;
-				}
+			type_keys(&source, &keys, Duration::ZERO, intervention_guard(|| Ok(())), |event| {
 				// The user types in TextEdit right after the first key goes out.
 				listener.record_for_test(7, Instant::now());
 				events.push(event.get_type() as u32);

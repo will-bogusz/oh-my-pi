@@ -3243,7 +3243,7 @@ describe("computer background fallback", () => {
 			}
 			override async openApplication(id: string, options?: { activate?: boolean }) {
 				this.calls.push(`open:${id}:${options?.activate ?? "-"}`);
-				return (await this.listApplications())[0]!;
+				return { application: (await this.listApplications())[0]!, window: windowFixture };
 			}
 		}
 
