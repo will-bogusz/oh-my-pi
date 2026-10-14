@@ -1508,14 +1508,15 @@
    "needs": [],
    "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
    "body": "bodies/runtime-provenance.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 15680,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/runtime-provenance",
    "host": "MacBook-Pro",
    "added": "2026-10-14T05:08:43Z",
-   "updated": "2026-10-14T05:08:43Z",
-   "note": ""
+   "updated": "2026-10-14T05:11:22Z",
+   "note": "",
+   "opened": "2026-10-14T05:11:22Z"
   }
  ],
  "opening": {
