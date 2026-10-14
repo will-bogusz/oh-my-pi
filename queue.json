@@ -1302,17 +1302,18 @@
    ],
    "base": "c695605fbd07f7b61a485ee0af1326145e424afc",
    "body": "bodies/test-ownership-lock.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 15761,
    "closed_prs": [
     15580
    ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/test-ownership-lock",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-14T18:49:59Z",
+   "updated": "2026-10-14T18:53:36Z",
    "note": "",
-   "advanced": "2026-10-14T18:36:18Z"
+   "advanced": "2026-10-14T18:36:18Z",
+   "opened": "2026-10-14T18:53:35Z"
   },
   {
    "id": "computer-web-readonly",
