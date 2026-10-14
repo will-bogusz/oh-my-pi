@@ -60,6 +60,7 @@
 ### Fixed
 
 - Fixed `pwsh` code blocks rendering without PowerShell syntax colors ([#15008](https://github.com/can1357/oh-my-pi/issues/15008)).
+- Fixed a key the user typed reaching their app twice or more on macOS when a process holding a computer-use event tap (the user-input watch or the takeover Escape monitor) exited at that moment: `closeDesktopEventTaps()` invalidates the process's taps before it exits ([#15562](https://github.com/can1357/oh-my-pi/pull/15562) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.10.2] - 2026-10-12
 
