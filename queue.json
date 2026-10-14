@@ -1533,11 +1533,5 @@
    "readied": "2026-10-14T05:11:36Z",
    "merged_by": "pr"
   }
- ],
- "opening": {
-  "id": "test-ownership-lock",
-  "token": "5639ab5c3f624a80bbfdb62206f00e84",
-  "host": "MacBook-Pro",
-  "at": "2026-10-14T18:53:45Z"
- }
+ ]
 }
