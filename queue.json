@@ -1663,5 +1663,11 @@
     "tag": "v18.11.0"
    }
   ]
+ },
+ "opening": {
+  "id": "latest-abandoned-turn-count",
+  "token": "646f49abaf114c2d9f5d382e715c9ef0",
+  "host": "MacBook-Pro",
+  "at": "2026-10-14T22:41:23Z"
  }
 }
