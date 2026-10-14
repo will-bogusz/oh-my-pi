@@ -14,6 +14,7 @@ use core_graphics::{event::CGEvent, geometry::CGPoint};
 use foreign_types::ForeignType;
 use libc::pid_t;
 use objc2_core_foundation::{CFArray, CFDictionary, CFNumber, CFRetained, CFString, CFType};
+use parking_lot::Mutex;
 
 use super::{
 	super::{
@@ -43,6 +44,14 @@ const BACKGROUND_SETTLE: Duration = Duration::from_millis(200);
 /// Upper bound on waiting for a foreground activation to become observable.
 const ACTIVATION_TIMEOUT: Duration = Duration::from_millis(400);
 const ACTIVATION_POLL: Duration = Duration::from_millis(10);
+/// How recent a mouse click or ⌘/⌃ chord must be for a target activation to
+/// count as the user's own switch. Measured on a VM: ⌘-Tab activates the chosen
+/// app about 3 ms after ⌘ is released.
+const USER_SWITCH_WINDOW: Duration = Duration::from_millis(250);
+/// How often the sampler reads whether ⌘ or ⌃ is held and which app is in
+/// front: well inside the ~100 ms a ⌘-Tab holds ⌘, on a thread no AX probe
+/// blocks.
+const CHORD_SAMPLE: Duration = Duration::from_millis(5);
 /// Keeps the target frontmost until it has consumed foreground input.
 const FOREGROUND_SETTLE: Duration = Duration::from_millis(40);
 /// `SLSSetFrontProcessWithInfo`'s result when a user key press or click was
@@ -51,6 +60,8 @@ const EXPIRED_FRONT_REQUEST: i32 = -13066;
 
 unsafe extern "C" {
 	fn CGEventSourceCounterForEventType(state: i32, event_type: u32) -> u32;
+	fn CGEventSourceFlagsState(state: i32) -> u64;
+	fn CGEventSourceSecondsSinceLastEventType(state: i32, event_type: u32) -> f64;
 }
 
 #[repr(C)]
@@ -62,6 +73,8 @@ struct ProcessSerialNumber {
 
 type SLPSPostEventRecordToFn = unsafe extern "C" fn(*const ProcessSerialNumber, *const u8) -> i32;
 type SLPSGetFrontProcessFn = unsafe extern "C" fn(*mut ProcessSerialNumber) -> i32;
+/// Writes the process holding keyboard focus and a status byte.
+type SLPSGetKeyFocusProcessFn = unsafe extern "C" fn(*mut ProcessSerialNumber, *mut u8) -> i32;
 type CGSMainConnectionIDFn = unsafe extern "C" fn() -> u32;
 type SLSGetWindowOwnerFn = unsafe extern "C" fn(u32, u32, *mut u32) -> i32;
 type SLSGetConnectionPSNFn = unsafe extern "C" fn(u32, *mut ProcessSerialNumber) -> i32;
@@ -99,11 +112,14 @@ struct RequiredSpi {
 
 #[derive(Clone, Copy)]
 struct ForegroundSpi {
-	set_front:   SLPSSetFrontProcessWithOptionsFn,
-	get_front:   SLPSGetFrontProcessFn,
-	post_record: SLPSPostEventRecordToFn,
-	psn:         PsnLookup,
-	conditional: Option<ConditionalFront>,
+	set_front:     SLPSSetFrontProcessWithOptionsFn,
+	get_front:     SLPSGetFrontProcessFn,
+	/// Differs from the front process while a panel of another process, such
+	/// as Spotlight or a launcher, has the keyboard.
+	get_key_focus: Option<SLPSGetKeyFocusProcessFn>,
+	post_record:   SLPSPostEventRecordToFn,
+	psn:           PsnLookup,
+	conditional:   Option<ConditionalFront>,
 }
 
 /// The front-process request `WindowServer` refuses when the user pressed a
@@ -172,6 +188,7 @@ fn resolve_foreground() -> Option<ForegroundSpi> {
 	Some(ForegroundSpi {
 		set_front: symbol(c"_SLPSSetFrontProcessWithOptions")?,
 		get_front: symbol(c"_SLPSGetFrontProcess")?,
+		get_key_focus: symbol(c"SLPSGetKeyFocusProcess"),
 		post_record: symbol(c"SLPSPostEventRecordTo")?,
 		psn,
 		conditional: resolve_conditional_front(),
@@ -335,16 +352,215 @@ pub(super) fn after_cleanup<T>(result: CoreResult<T>, cleanup: CoreResult<()>) -
 	}
 }
 
-/// Physical activity is a conservative veto, not proof of which app the user
-/// chose. A source that updates HID counters for synthetic events can also veto
-/// restoration; yielding control is safer than fighting a deliberate switch.
-fn activation_activity() -> [u32; 5] {
-	// Left/right/other press, key press, and modifiers can change activation.
-	[1, 3, 25, 10, 12].map(|event_type| {
-		// SAFETY: HIDSystemState (1) and these public CGEventType values are
-		// defined by CGEventSource.h / CGEventTypes.h; this is a read-only query.
-		unsafe { CGEventSourceCounterForEventType(1, event_type) }
-	})
+/// `kCGEventSourceStateHIDSystemState`: input from hardware. Events posted to a
+/// pid, as background input is, leave it unchanged.
+const HID_SYSTEM_STATE: i32 = 1;
+/// Left, right and other mouse button down and up (`CGEventType`).
+const MOUSE_BUTTON_EVENTS: [u32; 6] = [1, 2, 3, 4, 25, 26];
+/// ⌘ and ⌃ (`kCGEventFlagMaskCommand | Control`). ⌥ is left out: it types
+/// characters on German, Polish, French and Nordic layouts, and alone it
+/// picks no app (⌥-click counts as a click).
+const SWITCH_MODIFIERS: u64 = 0x0010_0000 | 0x0004_0000;
+
+/// What one poll reads of how the user could be switching apps. Typing, Shift
+/// and Caps Lock pick no app, so none of them appear here.
+#[derive(Clone, Copy)]
+struct SwitchSignals {
+	/// HID counters of `MOUSE_BUTTON_EVENTS`.
+	buttons:     [u32; 6],
+	/// When a mouse button last went down or up.
+	last_click:  Option<Instant>,
+	/// A switch modifier is held now.
+	chord:       bool,
+	/// When the chord sampler last saw ⌘ or ⌃ held, however long this poll
+	/// was blocked.
+	last_chord:  Option<Instant>,
+	/// The process that has the keyboard.
+	key_focus:   Option<ProcessSerialNumber>,
+	/// The app the sampler last saw in front and when it first saw it there,
+	/// however long this poll was blocked.
+	front_since: Option<(ProcessSerialNumber, Instant)>,
+}
+
+impl SwitchSignals {
+	const fn new(
+		buttons: [u32; 6],
+		last_click: Option<Instant>,
+		flags: u64,
+		last_chord: Option<Instant>,
+		key_focus: Option<ProcessSerialNumber>,
+	) -> Self {
+		Self {
+			buttons,
+			last_click,
+			chord: flags & SWITCH_MODIFIERS != 0,
+			last_chord,
+			key_focus,
+			front_since: None,
+		}
+	}
+
+	/// These signals with the sampler's reading that `front` came forward at
+	/// `at`.
+	const fn with_front_since(self, front: ProcessSerialNumber, at: Instant) -> Self {
+		Self { front_since: Some((front, at)), ..self }
+	}
+
+	fn read(spi: &ForegroundSpi, now: Instant, sampled: &Sampled) -> Self {
+		// SAFETY: HIDSystemState and these public CGEventType values are defined
+		// by CGEventSource.h / CGEventTypes.h; these are read-only queries.
+		let buttons = MOUSE_BUTTON_EVENTS.map(|event_type| unsafe {
+			CGEventSourceCounterForEventType(HID_SYSTEM_STATE, event_type)
+		});
+		let last_click = MOUSE_BUTTON_EVENTS
+			.into_iter()
+			// SAFETY: as above.
+			.map(|event_type| unsafe {
+				CGEventSourceSecondsSinceLastEventType(HID_SYSTEM_STATE, event_type)
+			})
+			.filter_map(|seconds| Duration::try_from_secs_f64(seconds).ok())
+			.min()
+			.and_then(|since| now.checked_sub(since));
+		let flags = modifier_flags();
+		let last_chord = *sampled.chord.lock();
+		let key_focus = spi.get_key_focus.and_then(|get_key_focus| {
+			let mut psn = ProcessSerialNumber::default();
+			let mut status = 0u8;
+			// SAFETY: Both out-pointers are writable for the synchronous call,
+			// which writes the 8-byte PSN and one status byte.
+			(unsafe { get_key_focus(&mut psn, &mut status) } == 0).then_some(psn)
+		});
+		let signals = Self::new(buttons, last_click, flags, last_chord, key_focus);
+		let front_since = *sampled.front.lock();
+		match front_since {
+			Some((front, at)) => signals.with_front_since(front, at),
+			None => signals,
+		}
+	}
+}
+
+fn modifier_flags() -> u64 {
+	// SAFETY: HIDSystemState is defined by CGEventSource.h; a read-only query.
+	unsafe { CGEventSourceFlagsState(HID_SYSTEM_STATE) }
+}
+
+/// What the sampler thread, which no AX probe blocks, has seen.
+#[derive(Default)]
+struct Sampled {
+	/// When ⌘ or ⌃ was last seen held ([`sample_chord`]).
+	chord: Mutex<Option<Instant>>,
+	/// The app in front and when it was first seen there ([`sample_front`]).
+	front: Mutex<Option<(ProcessSerialNumber, Instant)>>,
+}
+
+/// One chord-sampler reading: `now` becomes the latest time ⌘ or ⌃ was seen
+/// held. Other modifiers leave it alone, so Shift or ⌥ while a poll is
+/// blocked never looks like a chord.
+fn sample_chord(last_chord: &Mutex<Option<Instant>>, flags: u64, now: Instant) {
+	if flags & SWITCH_MODIFIERS != 0 {
+		*last_chord.lock() = Some(now);
+	}
+}
+
+/// One front-app reading: an app newly in front is timed from `now`, so a
+/// poll that sees it late still knows when it came forward.
+fn sample_front(
+	seen: &Mutex<Option<(ProcessSerialNumber, Instant)>>,
+	front: ProcessSerialNumber,
+	now: Instant,
+) {
+	let mut seen = seen.lock();
+	if seen.is_none_or(|(psn, _)| psn != front) {
+		*seen = Some((front, now));
+	}
+}
+
+/// How the user, rather than an app, changed the front app.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum UserSwitch {
+	/// A hardware mouse button went down or up anywhere: on another app's
+	/// window, the Dock, the app switcher, a Spotlight result, or the user's
+	/// own app just before the target came forward.
+	Click,
+	/// ⌘ or ⌃ was held: ⌘-Tab, ⌘-H, Spaces, launcher hotkeys.
+	Chord,
+	/// Another process's panel had the keyboard, as Spotlight's does while the
+	/// user types an app name and presses Return.
+	Panel,
+}
+
+/// Answers "did the user switch apps on purpose since T, and how?" for an
+/// action between the user's app and the `target`, whose own focus grabs are
+/// not the user's doing. Clicks are timed exactly from the HID state, and a
+/// held ⌘/⌃ from the chord sampler, so a poll blocked in an AX probe neither
+/// loses a whole ⌘-Tab nor makes an older modifier change look like a recent
+/// chord. A panel is seen while it lasts.
+struct UserSwitchWatch {
+	user:    ProcessSerialNumber,
+	target:  ProcessSerialNumber,
+	buttons: [u32; 6],
+	click:   Option<Instant>,
+	chord:   Option<Instant>,
+	panel:   Option<Instant>,
+}
+
+impl UserSwitchWatch {
+	/// Starts with the user's app in front at `now`; a click up to `lookback`
+	/// earlier still counts.
+	fn new(
+		user: ProcessSerialNumber,
+		target: ProcessSerialNumber,
+		signals: SwitchSignals,
+		now: Instant,
+		lookback: Duration,
+	) -> Self {
+		let mut watch = Self {
+			user,
+			target,
+			buttons: signals.buttons,
+			click: signals
+				.last_click
+				.filter(|at| now.saturating_duration_since(*at) <= lookback),
+			chord: None,
+			panel: None,
+		};
+		watch.observe_held(signals, user, now);
+		watch
+	}
+
+	fn observe(&mut self, signals: SwitchSignals, front: ProcessSerialNumber, now: Instant) {
+		if signals.buttons != self.buttons {
+			self.buttons = signals.buttons;
+			self.click = Some(signals.last_click.unwrap_or(now));
+		}
+		self.chord = self.chord.max(signals.last_chord);
+		self.observe_held(signals, front, now);
+	}
+
+	fn observe_held(&mut self, signals: SwitchSignals, front: ProcessSerialNumber, now: Instant) {
+		if signals.chord {
+			self.chord = Some(now);
+		}
+		if signals
+			.key_focus
+			.is_some_and(|focus| focus != front && focus != self.user && focus != self.target)
+		{
+			self.panel = Some(now);
+		}
+	}
+
+	/// The latest switch seen at or after `start`.
+	fn since(&self, start: Instant) -> Option<UserSwitch> {
+		[
+			(self.click, UserSwitch::Click),
+			(self.chord, UserSwitch::Chord),
+			(self.panel, UserSwitch::Panel),
+		]
+		.into_iter()
+		.filter_map(|(at, how)| at.filter(|at| *at >= start).map(|at| (at, how)))
+		.max_by_key(|(at, _)| *at)
+		.map(|(_, how)| how)
+	}
 }
 
 /// Left, right and other mouse presses the HID system has counted.
@@ -370,42 +586,80 @@ struct BackgroundFocusLease {
 	target:   ProcessSerialNumber,
 	/// The user's key window; `None` when the front app showed no window.
 	key:      Option<u32>,
-	activity: [u32; 5],
+	user:     UserSwitchWatch,
 	disarmed: bool,
 }
 
 impl BackgroundFocusLease {
+	fn new(
+		previous: ProcessSerialNumber,
+		target: ProcessSerialNumber,
+		key: Option<u32>,
+		signals: SwitchSignals,
+		now: Instant,
+	) -> Self {
+		let user = UserSwitchWatch::new(previous, target, signals, now, USER_SWITCH_WINDOW);
+		Self { previous, target, key, user, disarmed: false }
+	}
+
 	fn observe(
 		&mut self,
 		front: ProcessSerialNumber,
 		key: Option<u32>,
-		activity: [u32; 5],
+		signals: SwitchSignals,
+		now: Instant,
 	) -> FocusDecision {
+		self.user.observe(signals, front, now);
+		// An app came forward right after a user switch: the user picked it.
+		// Otherwise the action brought it, whether the target activated itself
+		// or asked another app to open something, as Finder's ⌘O does with
+		// TextEdit, even while the user kept typing. The switch is timed against
+		// when the app came forward, which a poll blocked in an AX probe sees
+		// late.
+		let came_forward = signals
+			.front_since
+			.filter(|(psn, _)| *psn == front)
+			.map_or(now, |(_, at)| at.min(now));
+		let picked = came_forward
+			.checked_sub(USER_SWITCH_WINDOW)
+			.and_then(|start| self.user.since(start))
+			.is_some();
 		if self.disarmed
-			|| (front != self.previous && front != self.target)
 			|| (front == self.previous && key.is_some_and(|key| Some(key) != self.key))
-			|| (front == self.target && activity != self.activity)
+			|| (front != self.previous && picked)
 		{
 			self.disarmed = true;
 			return FocusDecision::Disarm;
 		}
-		if front == self.target {
-			FocusDecision::Restore
-		} else {
-			// Input while the user's original window is still frontmost is not
-			// a focus change. Remember it so a later app reflex can be contained.
-			self.activity = activity;
+		if front == self.previous {
 			FocusDecision::Observe
+		} else {
+			FocusDecision::Restore
 		}
+	}
+
+	/// Whether, after a restore, the target is in front again at the end of
+	/// the action without the user having switched to it.
+	fn reactivated(
+		&mut self,
+		restored: bool,
+		front: ProcessSerialNumber,
+		signals: SwitchSignals,
+		now: Instant,
+	) -> bool {
+		restored
+			&& front == self.target
+			&& self.observe(front, None, signals, now) == FocusDecision::Restore
 	}
 }
 
 /// Contains asynchronous self-activation during background input and its
 /// bounded post-action settle, without a process-lived observer or run loop.
-/// A third app, changed prior key window, or new hardware input permanently
-/// disarms the lease. Only the addressed target can be sent back behind the
-/// original front app; unlike cua's wildcard suppressor, unrelated activations
-/// are never undone.
+/// The target, or a third app the action brings forward (Finder's ⌘O opening
+/// a document in `TextEdit`), is sent back behind the original front app. A
+/// changed prior key window, or any app coming forward right after a click, a
+/// ⌘/⌃ chord or a Spotlight-style panel, permanently disarms the lease; typing
+/// does not, even where macOS refuses a hand-back because of it.
 pub(super) fn with_background_guard<T>(
 	pid: pid_t,
 	action: impl FnOnce() -> CoreResult<T>,
@@ -440,90 +694,29 @@ pub(super) fn with_background_guard<T>(
 			)
 		})?
 		.window();
-	let mut lease = BackgroundFocusLease {
-		previous: previous.psn,
+	let now = Instant::now();
+	let sampled = Sampled::default();
+	let mut lease = BackgroundFocusLease::new(
+		previous.psn,
 		target,
-		key: previous_key,
-		activity: activation_activity(),
-		disarmed: false,
-	};
+		previous_key,
+		SwitchSignals::read(spi, now, &sampled),
+		now,
+	);
 	let stopped = AtomicBool::new(false);
+	let start_failed = |error: std::io::Error| {
+		DesktopError::background_unavailable(format!(
+			"could not start the background focus guard: {error}; nothing was sent"
+		))
+	};
 	thread::scope(|scope| {
-		let stop = &stopped;
+		let sampled = &sampled;
+		let desktop =
+			WindowServerDesktop { spi, sampled, previous, key: previous_key, stopped: &stopped };
 		let observer = thread::Builder::new()
 			.name("desktop-focus-lease".to_string())
-			.spawn_scoped(scope, move || -> CoreResult<()> {
-				let mut restored = false;
-				loop {
-					let Some(front) = front_process(spi.get_front) else {
-						return Err(DesktopError::input_failed(
-							"lost the front process during background input",
-						));
-					};
-					let key = if front.psn == previous.psn {
-						previous.pid.and_then(ax::key_window_id)
-					} else {
-						None
-					};
-					match lease.observe(front.psn, key, activation_activity()) {
-						FocusDecision::Disarm => return Ok(()),
-						FocusDecision::Observe => {},
-						FocusDecision::Restore => {
-							// Re-check immediately before changing focus: an AX probe
-							// may have raced a newer application or hardware event.
-							// `WindowServer` then refuses the hand-back if the user
-							// pressed a key or clicked after the re-check began.
-							let handed_back = request_after_check(
-								event_clock_now,
-								|| {
-									front_process(spi.get_front).is_some_and(|front| front.psn == target)
-										&& activation_activity() == lease.activity
-								},
-								|since| {
-									set_front_unless_user_acted(
-										spi,
-										previous.psn,
-										previous_key.unwrap_or(0),
-										since,
-									)
-								},
-							)?;
-							match handed_back {
-								None => {},
-								// The user brought the target forward themselves.
-								Some(FrontRequest::UserActed) => return Ok(()),
-								Some(FrontRequest::Done) => {
-									restored = true;
-									if let Some(key) = previous_key
-										&& !post_record(spi.post_record, previous.psn, &focus_record(key))
-									{
-										return Err(DesktopError::input_failed(
-											"background key-window restoration was rejected",
-										));
-									}
-								},
-							}
-						},
-					}
-					if stop.load(Ordering::Acquire) {
-						if restored
-							&& front_process(spi.get_front).is_some_and(|front| front.psn == target)
-						{
-							return Err(DesktopError::input_failed(
-								"the background target reactivated after focus restoration; input may \
-								 already have landed; inspect the desktop before sending more",
-							));
-						}
-						return Ok(());
-					}
-					thread::park_timeout(ACTIVATION_POLL);
-				}
-			})
-			.map_err(|error| {
-				DesktopError::background_unavailable(format!(
-					"could not start the background focus guard: {error}; nothing was sent"
-				))
-			})?;
+			.spawn_scoped(scope, move || guard_focus(&mut lease, &desktop))
+			.map_err(start_failed)?;
 		struct StopObserver<'a> {
 			stopped: &'a AtomicBool,
 			thread:  thread::Thread,
@@ -535,6 +728,22 @@ pub(super) fn with_background_guard<T>(
 			}
 		}
 		let stop = StopObserver { stopped: &stopped, thread: observer.thread().clone() };
+		// Watches ⌘/⌃ and the front app apart from the observer, whose AX probes
+		// can block it for up to half a second, until the action ends.
+		let stopped = &stopped;
+		thread::Builder::new()
+			.name("desktop-switch-sampler".to_string())
+			.spawn_scoped(scope, move || {
+				while !stopped.load(Ordering::Acquire) {
+					let now = Instant::now();
+					sample_chord(&sampled.chord, modifier_flags(), now);
+					if let Some(front) = front_process(spi.get_front) {
+						sample_front(&sampled.front, front.psn, now);
+					}
+					thread::sleep(CHORD_SAMPLE);
+				}
+			})
+			.map_err(start_failed)?;
 		let result = run_then_settle(action, || control::wait(BACKGROUND_SETTLE));
 		drop(stop);
 		let cleanup = observer.join().unwrap_or_else(|_| {
@@ -542,6 +751,144 @@ pub(super) fn with_background_guard<T>(
 		});
 		after_cleanup(result, cleanup)
 	})
+}
+
+/// What the background guard's observer reads from `WindowServer` and asks of
+/// it.
+trait GuardedDesktop {
+	/// The front process; `None` when `WindowServer` cannot tell.
+	fn front(&self) -> Option<ProcessSerialNumber>;
+	/// The user's app's key window, read while that app is in front.
+	fn user_key(&self) -> Option<u32>;
+	fn now(&self) -> Instant;
+	fn signals(&self, now: Instant) -> SwitchSignals;
+	/// [`event_clock_now`].
+	fn event_clock(&self) -> u64;
+	/// Puts the user's app back in front unless they pressed a key or clicked
+	/// after `since` ([`set_front_unless_user_acted`]).
+	fn hand_back(&self, since: u64) -> CoreResult<FrontRequest>;
+	/// Makes `key` the user's key window again; false if `WindowServer` rejected
+	/// it.
+	fn restore_key(&self, key: u32) -> bool;
+	/// Whether the action and its settle are over.
+	fn stopped(&self) -> bool;
+	/// Waits one poll, or until the action ends.
+	fn wait(&self);
+}
+
+struct WindowServerDesktop<'a> {
+	spi:      &'a ForegroundSpi,
+	sampled:  &'a Sampled,
+	/// The user's app.
+	previous: FrontProcess,
+	/// Its key window; `None` when it showed no window.
+	key:      Option<u32>,
+	stopped:  &'a AtomicBool,
+}
+
+impl GuardedDesktop for WindowServerDesktop<'_> {
+	fn front(&self) -> Option<ProcessSerialNumber> {
+		front_process(self.spi.get_front).map(|front| front.psn)
+	}
+
+	fn user_key(&self) -> Option<u32> {
+		self.previous.pid.and_then(ax::key_window_id)
+	}
+
+	fn now(&self) -> Instant {
+		Instant::now()
+	}
+
+	fn signals(&self, now: Instant) -> SwitchSignals {
+		SwitchSignals::read(self.spi, now, self.sampled)
+	}
+
+	fn event_clock(&self) -> u64 {
+		event_clock_now()
+	}
+
+	fn hand_back(&self, since: u64) -> CoreResult<FrontRequest> {
+		set_front_unless_user_acted(self.spi, self.previous.psn, self.key.unwrap_or(0), since)
+	}
+
+	fn restore_key(&self, key: u32) -> bool {
+		post_record(self.spi.post_record, self.previous.psn, &focus_record(key))
+	}
+
+	fn stopped(&self) -> bool {
+		self.stopped.load(Ordering::Acquire)
+	}
+
+	fn wait(&self) {
+		thread::park_timeout(ACTIVATION_POLL);
+	}
+}
+
+/// The guard's observer: polls the front process until the lease disarms or
+/// the action and its settle end, sending an app the action brought forward
+/// back behind the user's app.
+fn guard_focus(lease: &mut BackgroundFocusLease, desktop: &impl GuardedDesktop) -> CoreResult<()> {
+	let mut restored = false;
+	loop {
+		let Some(front) = desktop.front() else {
+			return Err(DesktopError::input_failed("lost the front process during background input"));
+		};
+		let key = if front == lease.previous {
+			desktop.user_key()
+		} else {
+			None
+		};
+		let now = desktop.now();
+		match lease.observe(front, key, desktop.signals(now), now) {
+			FocusDecision::Disarm => return Ok(()),
+			FocusDecision::Observe => {},
+			FocusDecision::Restore => {
+				// Re-check immediately before changing focus: an AX probe may
+				// have raced a newer application or user switch. `WindowServer`
+				// then refuses the hand-back if the user pressed a key or clicked
+				// after the re-check began. The refusal does not say which, and
+				// typing picks no app, so the guard asks again on its next poll;
+				// there a click, ⌘/⌃ chord or panel that chose the app disarms
+				// the lease instead.
+				let handed_back = request_after_check(
+					|| desktop.event_clock(),
+					|| {
+						desktop.front() == Some(front) && {
+							let now = desktop.now();
+							lease.observe(front, None, desktop.signals(now), now) == FocusDecision::Restore
+						}
+					},
+					|since| desktop.hand_back(since),
+				)?;
+				// Otherwise the re-check observed instead (a disarm it recorded
+				// ends the guard on the next poll), or `WindowServer` refused.
+				if handed_back == Some(FrontRequest::Done) {
+					restored = true;
+					if let Some(key) = lease.key
+						&& !desktop.restore_key(key)
+					{
+						return Err(DesktopError::input_failed(
+							"background key-window restoration was rejected",
+						));
+					}
+				}
+			},
+		}
+		if desktop.stopped() {
+			let now = desktop.now();
+			if desktop
+				.front()
+				.is_some_and(|front| lease.reactivated(restored, front, desktop.signals(now), now))
+			{
+				return Err(DesktopError::input_failed(
+					"the background target reactivated after focus restoration; input may already have \
+					 landed; inspect the desktop before sending more",
+				));
+			}
+			return Ok(());
+		}
+		desktop.wait();
+	}
 }
 
 /// Runs a guarded action, then the settle during which the guard still sends
@@ -576,7 +923,7 @@ fn set_front(spi: &ForegroundSpi, psn: ProcessSerialNumber, wid: u32) -> CoreRes
 enum FrontRequest {
 	Done,
 	/// `WindowServer` refused it: the user pressed a key or clicked after its
-	/// timestamp, so the front application is theirs.
+	/// timestamp. Which one, and whether it chose an app, the caller decides.
 	UserActed,
 }
 
@@ -1137,64 +1484,386 @@ fn process_psn(lookup: PsnLookup, pid: pid_t, wid: u32) -> Option<ProcessSerialN
 
 #[cfg(test)]
 mod tests {
+	use std::cell::Cell;
+
 	use super::*;
 	use crate::desktop::error::ErrorCode;
 
-	#[test]
-	fn user_focus_changes_permanently_disarm_background_restoration() {
-		let previous = ProcessSerialNumber { high: 0, low: 7 };
-		let target = ProcessSerialNumber { high: 0, low: 8 };
-		let third = ProcessSerialNumber { high: 0, low: 9 };
-		let lease = || BackgroundFocusLease {
-			previous,
-			target,
-			key: Some(42),
-			activity: [0; 5],
-			disarmed: false,
-		};
-		let mut guard = lease();
-		assert_eq!(guard.observe(target, None, [0; 5]), FocusDecision::Restore);
-		assert_eq!(guard.observe(third, None, [0; 5]), FocusDecision::Disarm);
-		assert_eq!(guard.observe(target, None, [0; 5]), FocusDecision::Disarm);
+	const PREVIOUS: ProcessSerialNumber = ProcessSerialNumber { high: 0, low: 7 };
+	const TARGET: ProcessSerialNumber = ProcessSerialNumber { high: 0, low: 8 };
+	const THIRD: ProcessSerialNumber = ProcessSerialNumber { high: 0, low: 9 };
+	// HID flag states as a USB keyboard reports them on macOS.
+	const NO_MODIFIERS: u64 = 0x100;
+	const SHIFT: u64 = 0x2_0102;
+	const CAPS_LOCK: u64 = 0x1_0100;
+	const FN: u64 = 0x80_0100;
+	const COMMAND: u64 = 0x10_0108;
+	const OPTION: u64 = 0x8_0120;
+	const CONTROL: u64 = 0x4_0101;
 
-		let mut guard = lease();
-		assert_eq!(guard.observe(previous, Some(43), [0; 5]), FocusDecision::Disarm);
-		assert_eq!(guard.observe(target, None, [0; 5]), FocusDecision::Disarm);
+	/// Signals after `clicks` hardware clicks (left down and up), timed between
+	/// polls, with no key focus reading.
+	fn input(clicks: u32, flags: u64) -> SwitchSignals {
+		SwitchSignals::new([clicks, clicks, 0, 0, 0, 0], None, flags, None, None)
+	}
 
-		let mut guard = lease();
-		assert_eq!(guard.observe(target, None, [1; 5]), FocusDecision::Disarm);
+	/// Signals after the chord sampler read `readings` (flags, time), with no
+	/// modifier held as the poll reads them.
+	fn sampled(readings: &[(u64, Instant)]) -> SwitchSignals {
+		let last_chord = Mutex::new(None);
+		for &(flags, at) in readings {
+			sample_chord(&last_chord, flags, at);
+		}
+		SwitchSignals::new([0; 6], None, NO_MODIFIERS, *last_chord.lock(), None)
+	}
+
+	/// Signals after one click at `at`, timed by the HID state.
+	fn clicked_at(at: Instant) -> SwitchSignals {
+		SwitchSignals::new([1, 1, 0, 0, 0, 0], Some(at), NO_MODIFIERS, None, None)
+	}
+
+	/// Signals with no clicks or modifiers while `process` has the keyboard.
+	fn keyboard_in(process: ProcessSerialNumber) -> SwitchSignals {
+		SwitchSignals::new([0; 6], None, NO_MODIFIERS, None, Some(process))
+	}
+
+	fn ms(millis: u64) -> Duration {
+		Duration::from_millis(millis)
+	}
+
+	/// A lease started at `start`, the user's last hardware click at
+	/// `last_click`.
+	fn lease_at(start: Instant, last_click: Option<Instant>) -> BackgroundFocusLease {
+		let signals = SwitchSignals::new([0; 6], last_click, NO_MODIFIERS, None, None);
+		BackgroundFocusLease::new(PREVIOUS, TARGET, Some(42), signals, start)
 	}
 
 	#[test]
-	fn typing_in_the_original_window_does_not_claim_a_user_focus_switch() {
-		let previous = ProcessSerialNumber { high: 0, low: 7 };
-		let target = ProcessSerialNumber { high: 0, low: 8 };
-		let mut guard = BackgroundFocusLease {
-			previous,
-			target,
-			key: Some(42),
-			activity: [0; 5],
-			disarmed: false,
-		};
-		assert_eq!(guard.observe(previous, Some(42), [1; 5]), FocusDecision::Observe);
-		assert_eq!(guard.observe(target, None, [1; 5]), FocusDecision::Restore);
+	fn user_switch_watch_names_how_the_user_switched_since_a_time() {
+		let t0 = Instant::now();
+		let watch = |signals| UserSwitchWatch::new(PREVIOUS, TARGET, signals, t0, ms(250));
+		// Typing, Shift, Caps Lock, the Globe key and ⌥ switch nothing.
+		for flags in [NO_MODIFIERS, SHIFT, CAPS_LOCK, FN, OPTION] {
+			assert_eq!(watch(input(0, flags)).since(t0), None, "flags {flags:#x}");
+		}
+		for flags in [COMMAND, CONTROL] {
+			assert_eq!(watch(input(0, flags)).since(t0), Some(UserSwitch::Chord), "flags {flags:#x}");
+		}
+		assert_eq!(watch(keyboard_in(THIRD)).since(t0), Some(UserSwitch::Panel));
+		// The keyboard in either app of the action is not another panel.
+		assert_eq!(watch(keyboard_in(PREVIOUS)).since(t0), None);
+		assert_eq!(watch(keyboard_in(TARGET)).since(t0), None);
+
+		// A click is timed by the HID state, not by when a poll saw it.
+		assert_eq!(watch(clicked_at(t0)).since(t0), Some(UserSwitch::Click));
+		let mut later = watch(input(0, NO_MODIFIERS));
+		later.observe(clicked_at(t0 + ms(5)), PREVIOUS, t0 + ms(40));
+		assert_eq!(later.since(t0 + ms(5)), Some(UserSwitch::Click));
+		assert_eq!(later.since(t0 + ms(6)), None, "the click came before");
+		// A click older than the lookback when watching starts does not count.
+		let started = UserSwitchWatch::new(PREVIOUS, TARGET, clicked_at(t0), t0 + ms(251), ms(250));
+		assert_eq!(started.since(t0), None);
+
+		// A held ⌘/⌃ counts from when the sampler last saw it, not from when a
+		// poll read it.
+		let mut blocked = watch(input(0, NO_MODIFIERS));
+		let command_c = sampled(&[(COMMAND, t0 + ms(100)), (NO_MODIFIERS, t0 + ms(105))]);
+		blocked.observe(command_c, PREVIOUS, t0 + ms(500));
+		assert_eq!(blocked.since(t0 + ms(100)), Some(UserSwitch::Chord));
+		assert_eq!(blocked.since(t0 + ms(101)), None, "the chord came before");
+
+		// The latest switch names the reason; one before `start` does not count.
+		let mut both = watch(input(0, COMMAND));
+		both.observe(keyboard_in(THIRD), PREVIOUS, t0 + ms(30));
+		assert_eq!(both.since(t0), Some(UserSwitch::Panel));
+		assert_eq!(both.since(t0 + ms(31)), None);
+	}
+
+	#[test]
+	fn user_focus_changes_permanently_disarm_background_restoration() {
+		let t0 = Instant::now();
+		let idle = input(0, NO_MODIFIERS);
+		// The user clicks a third app forward.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(guard.observe(TARGET, None, idle, t0), FocusDecision::Restore);
+		assert_eq!(
+			guard.observe(THIRD, None, input(1, NO_MODIFIERS), t0 + ms(10)),
+			FocusDecision::Disarm
+		);
+		assert_eq!(guard.observe(TARGET, None, idle, t0 + ms(20)), FocusDecision::Disarm);
+
+		let mut guard = lease_at(t0, None);
+		assert_eq!(guard.observe(PREVIOUS, Some(43), idle, t0 + ms(10)), FocusDecision::Disarm);
+		assert_eq!(guard.observe(TARGET, None, idle, t0 + ms(20)), FocusDecision::Disarm);
+	}
+
+	#[test]
+	fn a_third_app_the_action_brings_forward_is_sent_back_like_the_target() {
+		// Finder's ⌘O opens a file in TextEdit, which comes forward 100-220 ms
+		// later while the user types on, with no click, chord or panel.
+		let t0 = Instant::now();
+		for flags in [NO_MODIFIERS, SHIFT, OPTION] {
+			let mut guard = lease_at(t0, None);
+			assert_eq!(
+				guard.observe(PREVIOUS, Some(42), input(0, flags), t0 + ms(10)),
+				FocusDecision::Observe
+			);
+			assert_eq!(
+				guard.observe(THIRD, None, input(0, flags), t0 + ms(220)),
+				FocusDecision::Restore,
+				"flags {flags:#x}"
+			);
+			assert_eq!(
+				guard.observe(PREVIOUS, Some(42), input(0, flags), t0 + ms(240)),
+				FocusDecision::Observe
+			);
+		}
+		// The third app holding the keyboard as it comes forward is no panel.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(THIRD, None, keyboard_in(THIRD), t0 + ms(20)),
+			FocusDecision::Restore
+		);
+		// A third app the user ⌘-Tabs or Spotlights to stays.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), input(0, COMMAND), t0 + ms(100)),
+			FocusDecision::Observe
+		);
+		assert_eq!(
+			guard.observe(THIRD, None, input(0, NO_MODIFIERS), t0 + ms(113)),
+			FocusDecision::Disarm
+		);
+		let mut guard = lease_at(t0, None);
+		let spotlight = ProcessSerialNumber { high: 0, low: 10 };
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), keyboard_in(spotlight), t0 + ms(100)),
+			FocusDecision::Observe
+		);
+		assert_eq!(
+			guard.observe(THIRD, None, keyboard_in(THIRD), t0 + ms(116)),
+			FocusDecision::Disarm
+		);
+	}
+
+	#[test]
+	fn typing_through_a_target_self_activation_keeps_the_users_app_in_front() {
+		let t0 = Instant::now();
+		// A capital letter's Shift, Caps Lock, the Globe key, or ⌥ typing a
+		// character on a German, Polish, French or Nordic layout.
+		for flags in [NO_MODIFIERS, SHIFT, CAPS_LOCK, FN, OPTION] {
+			let mut guard = lease_at(t0, None);
+			assert_eq!(
+				guard.observe(PREVIOUS, Some(42), input(0, flags), t0 + ms(10)),
+				FocusDecision::Observe
+			);
+			// The target activates itself while the key is held.
+			assert_eq!(
+				guard.observe(TARGET, None, input(0, flags), t0 + ms(20)),
+				FocusDecision::Restore,
+				"flags {flags:#x}"
+			);
+			// It may do so again later in the same lease.
+			assert_eq!(
+				guard.observe(PREVIOUS, Some(42), input(0, NO_MODIFIERS), t0 + ms(30)),
+				FocusDecision::Observe
+			);
+			assert_eq!(
+				guard.observe(TARGET, None, input(0, SHIFT), t0 + ms(40)),
+				FocusDecision::Restore
+			);
+		}
+
+		// Shift or ⌥ pressed and released while a poll was blocked for 500 ms in
+		// an AX probe, then the target activates itself.
+		let idle = input(0, NO_MODIFIERS);
+		for flags in [SHIFT, OPTION] {
+			let mut guard = lease_at(t0, None);
+			assert_eq!(guard.observe(PREVIOUS, Some(42), idle, t0 + ms(10)), FocusDecision::Observe);
+			let stall = sampled(&[(flags, t0 + ms(400)), (NO_MODIFIERS, t0 + ms(480))]);
+			assert_eq!(
+				guard.observe(TARGET, None, stall, t0 + ms(510)),
+				FocusDecision::Restore,
+				"flags {flags:#x}"
+			);
+		}
+		// ⌘C early in the same stall: by then the chord is 400 ms old, not new.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(guard.observe(PREVIOUS, Some(42), idle, t0 + ms(10)), FocusDecision::Observe);
+		let stall = sampled(&[(COMMAND, t0 + ms(100)), (NO_MODIFIERS, t0 + ms(110))]);
+		assert_eq!(guard.observe(TARGET, None, stall, t0 + ms(510)), FocusDecision::Restore);
+
+		// A chord or click that ended longer ago than the switch window picked
+		// nothing the target's activation follows from.
+		let late = t0 + USER_SWITCH_WINDOW + ms(1);
+		let mut guard = lease_at(t0, None);
+		assert_eq!(guard.observe(PREVIOUS, Some(42), input(1, COMMAND), t0), FocusDecision::Observe);
+		assert_eq!(guard.observe(TARGET, None, input(1, NO_MODIFIERS), late), FocusDecision::Restore);
+		let mut guard = lease_at(t0 + ms(50), Some(t0));
+		assert_eq!(guard.observe(TARGET, None, input(0, NO_MODIFIERS), late), FocusDecision::Restore);
+
+		// The keyboard in the user's app, or taken by the target itself, is no
+		// user switch either.
+		for holder in [PREVIOUS, TARGET] {
+			let mut guard = lease_at(t0, None);
+			assert_eq!(
+				guard.observe(PREVIOUS, Some(42), keyboard_in(holder), t0 + ms(10)),
+				FocusDecision::Observe
+			);
+			assert_eq!(
+				guard.observe(TARGET, None, keyboard_in(TARGET), t0 + ms(20)),
+				FocusDecision::Restore
+			);
+		}
+	}
+
+	#[test]
+	fn a_click_chord_or_spotlight_right_before_the_target_comes_forward_is_the_users_switch() {
+		let t0 = Instant::now();
+		let idle = input(0, NO_MODIFIERS);
+		// ⌘-Tab: ⌘ held at the last poll, released just before the target came
+		// forward (13 ms apart on a VM).
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), input(0, COMMAND), t0 + ms(100)),
+			FocusDecision::Observe
+		);
+		assert_eq!(guard.observe(TARGET, None, idle, t0 + ms(113)), FocusDecision::Disarm);
+		assert_eq!(
+			guard.observe(TARGET, None, idle, t0 + ms(1000)),
+			FocusDecision::Disarm,
+			"a switch disarms the lease for good"
+		);
+
+		// ⌘ or ⌃ still held as the target comes forward (⌘-H, Spaces,
+		// launchers).
+		for flags in [COMMAND, CONTROL] {
+			let mut guard = lease_at(t0, None);
+			assert_eq!(
+				guard.observe(TARGET, None, input(0, flags), t0 + ms(10)),
+				FocusDecision::Disarm,
+				"flags {flags:#x}"
+			);
+		}
+
+		// A whole ⌘-Tab while a poll was blocked in an AX probe: the poll never
+		// saw ⌘ held, but the sampler did until its release.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(guard.observe(PREVIOUS, Some(42), idle, t0 + ms(10)), FocusDecision::Observe);
+		let stall =
+			sampled(&[(COMMAND, t0 + ms(400)), (COMMAND, t0 + ms(500)), (NO_MODIFIERS, t0 + ms(505))]);
+		assert_eq!(guard.observe(TARGET, None, stall, t0 + ms(510)), FocusDecision::Disarm);
+
+		// A click on the Dock or another window, seen by the poll that also sees
+		// the target in front (a click seen earlier is in the test below).
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(TARGET, None, input(1, NO_MODIFIERS), t0 + ms(10)),
+			FocusDecision::Disarm
+		);
+
+		// A click just before the action began, or a chord held as it began.
+		let mut guard = lease_at(t0 + ms(50), Some(t0));
+		assert_eq!(guard.observe(TARGET, None, idle, t0 + ms(60)), FocusDecision::Disarm);
+		let mut guard = BackgroundFocusLease::new(PREVIOUS, TARGET, Some(42), input(0, COMMAND), t0);
+		assert_eq!(guard.observe(TARGET, None, idle, t0 + ms(10)), FocusDecision::Disarm);
+
+		// Spotlight: its panel has the keyboard while the user's app stays in
+		// front, then Return brings the target forward (about 10 ms later on a
+		// VM).
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), keyboard_in(THIRD), t0 + ms(500)),
+			FocusDecision::Observe
+		);
+		assert_eq!(
+			guard.observe(TARGET, None, keyboard_in(TARGET), t0 + ms(525)),
+			FocusDecision::Disarm
+		);
+	}
+
+	#[test]
+	fn a_click_in_the_users_app_right_before_the_target_comes_forward_leaves_the_target_in_front() {
+		let t0 = Instant::now();
+		let idle = input(0, NO_MODIFIERS);
+		// The user clicks a link in their app that opens in the target, during
+		// the action: the target stays in front for good.
+		let mut guard = lease_at(t0, None);
+		let click = clicked_at(t0 + ms(5));
+		assert_eq!(guard.observe(PREVIOUS, Some(42), click, t0 + ms(10)), FocusDecision::Observe);
+		assert_eq!(guard.observe(TARGET, None, click, t0 + ms(100)), FocusDecision::Disarm);
+		assert_eq!(guard.observe(TARGET, None, click, t0 + ms(1000)), FocusDecision::Disarm);
+		// The same click just before the action began.
+		let mut guard =
+			BackgroundFocusLease::new(PREVIOUS, TARGET, Some(42), clicked_at(t0), t0 + ms(50));
+		assert_eq!(guard.observe(TARGET, None, idle, t0 + ms(60)), FocusDecision::Disarm);
+		// Without the click, typing in the user's app still restores it.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(guard.observe(PREVIOUS, Some(42), idle, t0 + ms(10)), FocusDecision::Observe);
+		assert_eq!(guard.observe(TARGET, None, idle, t0 + ms(100)), FocusDecision::Restore);
+	}
+
+	#[test]
+	fn a_switch_right_before_the_target_came_forward_counts_when_the_poll_sees_it_late() {
+		// The observer's AX probe stalled for its 0.5 s timeout while the user
+		// clicked the target forward; its next poll sees the target 500 ms
+		// after the click, but the sampler saw it come forward 10 ms after.
+		let t0 = Instant::now();
+		let click = clicked_at(t0 + ms(10));
+		let late = t0 + ms(520);
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(TARGET, None, click.with_front_since(TARGET, t0 + ms(20)), late),
+			FocusDecision::Disarm
+		);
+		// The target coming forward long after the click is the action's doing.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(TARGET, None, click.with_front_since(TARGET, t0 + ms(400)), late),
+			FocusDecision::Restore
+		);
+		// A reading for another app says nothing about when the target came.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(TARGET, None, click.with_front_since(THIRD, t0 + ms(20)), late),
+			FocusDecision::Restore
+		);
+		// The sampler times an app from the first reading that has it in front.
+		let seen = Mutex::new(None);
+		sample_front(&seen, PREVIOUS, t0);
+		sample_front(&seen, TARGET, t0 + ms(20));
+		sample_front(&seen, TARGET, t0 + ms(25));
+		assert!(*seen.lock() == Some((TARGET, t0 + ms(20))));
+	}
+
+	#[test]
+	fn the_target_back_in_front_at_the_end_is_an_error_only_without_a_user_switch() {
+		let t0 = Instant::now();
+		let idle = input(0, NO_MODIFIERS);
+		// It reactivated itself after the restore: input may have landed there.
+		assert!(lease_at(t0, None).reactivated(true, TARGET, idle, t0 + ms(10)));
+		// The user switched to it just as the action ended.
+		assert!(!lease_at(t0, None).reactivated(true, TARGET, input(0, COMMAND), t0 + ms(10)));
+		assert!(!lease_at(t0, None).reactivated(true, TARGET, keyboard_in(THIRD), t0 + ms(10)));
+		// Nothing was restored, or another app is in front.
+		assert!(!lease_at(t0, None).reactivated(false, TARGET, idle, t0 + ms(10)));
+		assert!(!lease_at(t0, None).reactivated(true, THIRD, idle, t0 + ms(10)));
 	}
 
 	#[test]
 	fn a_window_appearing_in_a_windowless_front_app_is_a_user_focus_change() {
 		// Finder in front after a click on the desktop: no key window to restore.
-		let previous = ProcessSerialNumber { high: 0, low: 7 };
-		let target = ProcessSerialNumber { high: 0, low: 8 };
-		let lease =
-			|| BackgroundFocusLease { previous, target, key: None, activity: [0; 5], disarmed: false };
+		let t0 = Instant::now();
+		let idle = input(0, NO_MODIFIERS);
+		let lease = || BackgroundFocusLease::new(PREVIOUS, TARGET, None, idle, t0);
 		let mut guard = lease();
-		assert_eq!(guard.observe(previous, None, [0; 5]), FocusDecision::Observe);
-		assert_eq!(guard.observe(target, None, [0; 5]), FocusDecision::Restore);
+		assert_eq!(guard.observe(PREVIOUS, None, idle, t0 + ms(10)), FocusDecision::Observe);
+		assert_eq!(guard.observe(TARGET, None, idle, t0 + ms(20)), FocusDecision::Restore);
 
 		// The user opened a Finder window meanwhile: hands off.
 		let mut guard = lease();
-		assert_eq!(guard.observe(previous, Some(43), [0; 5]), FocusDecision::Disarm);
-		assert_eq!(guard.observe(target, None, [0; 5]), FocusDecision::Disarm);
+		assert_eq!(guard.observe(PREVIOUS, Some(43), idle, t0 + ms(10)), FocusDecision::Disarm);
+		assert_eq!(guard.observe(TARGET, None, idle, t0 + ms(20)), FocusDecision::Disarm);
 	}
 
 	#[test]
@@ -1234,6 +1903,106 @@ mod tests {
 		let result = run_then_settle(|| Ok(7), || Err(DesktopError::cancelled("stopped")));
 		assert_eq!(result.expect_err("the settle was cancelled").code, ErrorCode::Cancelled);
 		assert_eq!(run_then_settle(|| Ok(7), || Ok(())).ok(), Some(7));
+	}
+
+	/// The guard's view of a desktop where the target has just come forward over
+	/// the user's app. `WindowServer` puts the user's app back, except that the
+	/// first request is refused for input the user gives after the guard's
+	/// check, which leaves `refused_for` as the signals the next poll reads.
+	/// Polls are 10 ms apart; the action and its settle end at `end`.
+	struct FakeDesktop {
+		clock:       Cell<Instant>,
+		end:         Instant,
+		front:       Cell<ProcessSerialNumber>,
+		signals:     Cell<SwitchSignals>,
+		refused_for: Cell<Option<SwitchSignals>>,
+		hand_backs:  Cell<usize>,
+		keys:        std::cell::RefCell<Vec<u32>>,
+	}
+
+	impl GuardedDesktop for FakeDesktop {
+		fn front(&self) -> Option<ProcessSerialNumber> {
+			Some(self.front.get())
+		}
+
+		fn user_key(&self) -> Option<u32> {
+			Some(42)
+		}
+
+		fn now(&self) -> Instant {
+			self.clock.get()
+		}
+
+		fn signals(&self, _now: Instant) -> SwitchSignals {
+			self.signals.get()
+		}
+
+		fn event_clock(&self) -> u64 {
+			7
+		}
+
+		fn hand_back(&self, _since: u64) -> CoreResult<FrontRequest> {
+			self.hand_backs.set(self.hand_backs.get() + 1);
+			if let Some(after) = self.refused_for.take() {
+				self.signals.set(after);
+				return Ok(FrontRequest::UserActed);
+			}
+			self.front.set(PREVIOUS);
+			Ok(FrontRequest::Done)
+		}
+
+		fn restore_key(&self, key: u32) -> bool {
+			self.keys.borrow_mut().push(key);
+			true
+		}
+
+		fn stopped(&self) -> bool {
+			self.clock.get() >= self.end
+		}
+
+		fn wait(&self) {
+			self.clock.set(self.clock.get() + ACTIVATION_POLL);
+		}
+	}
+
+	#[test]
+	fn the_guard_asks_again_after_a_refusal_for_typing_but_not_for_a_switch() {
+		let t0 = Instant::now();
+		let idle = input(0, NO_MODIFIERS);
+		// The target came forward 20 ms into the action while the user typed;
+		// `WindowServer` refuses the guard's first hand-back for `input` the user
+		// gave after the guard's check.
+		let run = |input: SwitchSignals| {
+			let desktop = FakeDesktop {
+				clock:       Cell::new(t0 + ms(20)),
+				end:         t0 + ms(120),
+				front:       Cell::new(TARGET),
+				signals:     Cell::new(idle),
+				refused_for: Cell::new(Some(input)),
+				hand_backs:  Cell::new(0),
+				keys:        std::cell::RefCell::default(),
+			};
+			let mut lease = lease_at(t0, None);
+			let result = guard_focus(&mut lease, &desktop);
+			assert!(result.is_ok(), "the guard ends without an error");
+			(desktop.front.get(), desktop.hand_backs.get(), desktop.keys.into_inner())
+		};
+		// A key, or a capital letter's Shift, picks no app: the guard asks again
+		// and the user's app and key window are back.
+		for typing in [idle, input(0, SHIFT), input(0, OPTION)] {
+			let (front, hand_backs, keys) = run(typing);
+			assert!(front == PREVIOUS, "the user's app is back in front");
+			assert_eq!((hand_backs, keys), (2, vec![42]));
+		}
+		// A click (into the target, say), a ⌘/⌃ chord or typing into another
+		// app's panel after the check chose the target: it stays in front.
+		for choice in
+			[clicked_at(t0 + ms(21)), input(0, COMMAND), input(0, CONTROL), keyboard_in(THIRD)]
+		{
+			let (front, hand_backs, keys) = run(choice);
+			assert!(front == TARGET, "the target the user chose stays in front");
+			assert_eq!((hand_backs, keys), (1, vec![]));
+		}
 	}
 
 	#[test]
