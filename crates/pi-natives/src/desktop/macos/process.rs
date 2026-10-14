@@ -247,19 +247,19 @@ fn is_chromium_bundle(bundle: &str) -> bool {
 	})
 }
 
-const MH_MAGIC_64: u32 = 0xfeed_facf;
-const FAT_MAGIC: u32 = 0xcafe_babe;
-const FAT_MAGIC_64: u32 = 0xcafe_babf;
-const LC_REQ_DYLD: u32 = 0x8000_0000;
+const TK_MH_MAGIC_64: u32 = 0xfeed_facf;
+const TK_FAT_MAGIC: u32 = 0xcafe_babe;
+const TK_FAT_MAGIC_64: u32 = 0xcafe_babf;
+const TK_LC_REQ_DYLD: u32 = 0x8000_0000;
 /// `LC_LOAD_DYLIB`, `LC_LOAD_WEAK_DYLIB`, `LC_REEXPORT_DYLIB`,
 /// `LC_LAZY_LOAD_DYLIB`, `LC_LOAD_UPWARD_DYLIB`: commands whose payload is a
 /// `dylib_command` naming a library the image links.
-const DYLIB_COMMANDS: [u32; 5] =
-	[0x0c, 0x18 | LC_REQ_DYLD, 0x1f | LC_REQ_DYLD, 0x20, 0x23 | LC_REQ_DYLD];
+const TK_DYLIB_COMMANDS: [u32; 5] =
+	[0x0c, 0x18 | TK_LC_REQ_DYLD, 0x1f | TK_LC_REQ_DYLD, 0x20, 0x23 | TK_LC_REQ_DYLD];
 /// `sizeof(struct mach_header_64)`.
-const MACH_HEADER_64: usize = 32;
+const TK_MACH_HEADER_64: usize = 32;
 /// `sizeof(struct dylib_command)`, where the install name may start.
-const DYLIB_COMMAND: usize = 24;
+const TK_DYLIB_COMMAND: usize = 24;
 /// Largest `_tkinter` image read for its load commands; Python's are about
 /// 100 KiB. A larger one counts as unreadable.
 const MAX_IMAGE_BYTES: u64 = 16 << 20;
@@ -285,8 +285,8 @@ fn linked_tk(binary: &[u8]) -> Option<TkImage> {
 		Some(u32::from_be_bytes(binary.get(at..at.checked_add(4)?)?.try_into().ok()?))
 	};
 	let slices: Vec<&[u8]> = match be(0)? {
-		magic @ (FAT_MAGIC | FAT_MAGIC_64) => {
-			let wide = magic == FAT_MAGIC_64;
+		magic @ (TK_FAT_MAGIC | TK_FAT_MAGIC_64) => {
+			let wide = magic == TK_FAT_MAGIC_64;
 			let entry = if wide { 32 } else { 20 };
 			let count = usize::try_from(be(4)?).ok()?;
 			if count.checked_mul(entry)?.checked_add(8)? > binary.len() {
@@ -335,15 +335,15 @@ fn linked_libraries(image: &[u8]) -> Option<Vec<String>> {
 		usize::try_from(u32::from_le_bytes(bytes.try_into().ok()?)).ok()
 	};
 	let mut names = Vec::new();
-	if le(0) != usize::try_from(MH_MAGIC_64).ok() {
+	if le(0) != usize::try_from(TK_MH_MAGIC_64).ok() {
 		return Some(names);
 	}
 	let count = le(16)?;
-	let end = MACH_HEADER_64.checked_add(le(20)?)?;
+	let end = TK_MACH_HEADER_64.checked_add(le(20)?)?;
 	if end > image.len() {
 		return None;
 	}
-	let mut at = MACH_HEADER_64;
+	let mut at = TK_MACH_HEADER_64;
 	for _ in 0..count {
 		let command = u32::try_from(le(at)?).ok()?;
 		let size = le(at + 4)?;
@@ -351,9 +351,9 @@ fn linked_libraries(image: &[u8]) -> Option<Vec<String>> {
 		if size < 8 || next > end {
 			return None;
 		}
-		if DYLIB_COMMANDS.contains(&command) {
+		if TK_DYLIB_COMMANDS.contains(&command) {
 			let offset = le(at + 8)?;
-			if !(DYLIB_COMMAND..size).contains(&offset) {
+			if !(TK_DYLIB_COMMAND..size).contains(&offset) {
 				return None;
 			}
 			let name = &image[at + offset..next];
@@ -656,7 +656,7 @@ mod tests {
 
 	/// A thin arm64 Mach-O image whose load commands link `libraries`, after a
 	/// segment command that names no library.
-	fn macho(libraries: &[&str]) -> Vec<u8> {
+	fn tk_macho(libraries: &[&str]) -> Vec<u8> {
 		let mut commands = Vec::new();
 		let mut segment = vec![0u8; 72];
 		segment[..4].copy_from_slice(&0x19u32.to_le_bytes());
@@ -673,7 +673,7 @@ mod tests {
 		}
 		let commands = commands.concat();
 		let mut image = vec![0u8; 32];
-		image[..4].copy_from_slice(&MH_MAGIC_64.to_le_bytes());
+		image[..4].copy_from_slice(&TK_MH_MAGIC_64.to_le_bytes());
 		image[16..20].copy_from_slice(&u32::try_from(libraries.len() + 1).unwrap().to_le_bytes());
 		image[20..24].copy_from_slice(&u32::try_from(commands.len()).unwrap().to_le_bytes());
 		image.extend(commands);
@@ -687,10 +687,10 @@ mod tests {
 		image
 	}
 
-	/// A universal image holding `slices` back to back after a 32-bit fat
+	/// A tk_universal image holding `slices` back to back after a 32-bit fat
 	/// header.
-	fn universal(slices: &[Vec<u8>]) -> Vec<u8> {
-		let mut header = FAT_MAGIC.to_be_bytes().to_vec();
+	fn tk_universal(slices: &[Vec<u8>]) -> Vec<u8> {
+		let mut header = TK_FAT_MAGIC.to_be_bytes().to_vec();
 		header.extend(u32::try_from(slices.len()).unwrap().to_be_bytes());
 		let mut offset = 8 + 20 * slices.len();
 		for slice in slices {
@@ -709,16 +709,16 @@ mod tests {
 		const SYSTEM_TK: &str = "/System/Library/Frameworks/Tk.framework/Versions/8.5/Tk";
 		const SYSTEM_TCL: &str = "/System/Library/Frameworks/Tcl.framework/Versions/8.5/Tcl";
 		const BREW_TK: &str = "/opt/homebrew/opt/tcl-tk/lib/libtcl9tk9.1.dylib";
-		let system = macho(&[SYSTEM_TCL, SYSTEM_TK, "/usr/lib/libSystem.B.dylib"]);
+		let system = tk_macho(&[SYSTEM_TCL, SYSTEM_TK, "/usr/lib/libSystem.B.dylib"]);
 		assert_eq!(linked_tk(&system), Some(TkImage::Version(8, 5)));
-		assert_eq!(linked_tk(&macho(&[BREW_TK])), Some(TkImage::Version(9, 1)));
-		assert_eq!(linked_tk(&macho(&["/usr/lib/libSystem.B.dylib"])), None);
+		assert_eq!(linked_tk(&tk_macho(&[BREW_TK])), Some(TkImage::Version(9, 1)));
+		assert_eq!(linked_tk(&tk_macho(&["/usr/lib/libSystem.B.dylib"])), None);
 		assert_eq!(
-			linked_tk(&universal(&[system.clone(), system.clone()])),
+			linked_tk(&tk_universal(&[system.clone(), system.clone()])),
 			Some(TkImage::Version(8, 5))
 		);
 		assert_eq!(
-			linked_tk(&universal(&[system.clone(), macho(&[BREW_TK])])),
+			linked_tk(&tk_universal(&[system.clone(), tk_macho(&[BREW_TK])])),
 			Some(TkImage::Unversioned),
 		);
 		// Truncated or foreign bytes link nothing.
@@ -730,7 +730,7 @@ mod tests {
 	#[test]
 	fn malformed_mach_o_headers_link_no_known_tk() {
 		const SYSTEM_TK: &str = "/System/Library/Frameworks/Tk.framework/Versions/8.5/Tk";
-		let system = macho(&[SYSTEM_TK]);
+		let system = tk_macho(&[SYSTEM_TK]);
 		let segment_end = 32 + 72;
 		// Load commands outside `sizeofcmds`, or running past it.
 		assert_eq!(linked_tk(&patched(&system, 20, 0)), None);
@@ -745,14 +745,14 @@ mod tests {
 		assert_eq!(linked_tk(&patched(&system, 16, u32::MAX)), None);
 		// Universal headers whose architecture table or slices lie outside
 		// the file, including a huge advertised count, are rejected at once.
-		for magic in [FAT_MAGIC, FAT_MAGIC_64] {
+		for magic in [TK_FAT_MAGIC, TK_FAT_MAGIC_64] {
 			let mut fat = magic.to_be_bytes().to_vec();
 			fat.extend(u32::MAX.to_be_bytes());
 			let started = std::time::Instant::now();
 			assert_eq!(linked_tk(&fat), None);
 			assert!(started.elapsed() < std::time::Duration::from_millis(100));
 		}
-		let mut beyond = universal(std::slice::from_ref(&system));
+		let mut beyond = tk_universal(std::slice::from_ref(&system));
 		beyond[16..20].copy_from_slice(&u32::MAX.to_be_bytes());
 		assert_eq!(linked_tk(&beyond), None);
 		// A conservative verdict follows: an unknown Tk reads the pointer.
