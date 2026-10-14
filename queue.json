@@ -1482,15 +1482,16 @@
    ],
    "base": "c695605fbd07f7b61a485ee0af1326145e424afc",
    "body": "bodies/display-turn-hold.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 15762,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/display-turn-hold",
    "host": "MacBook-Pro",
    "added": "2026-10-14T03:39:10Z",
-   "updated": "2026-10-14T18:54:00Z",
+   "updated": "2026-10-14T18:56:00Z",
    "note": "",
-   "advanced": "2026-10-14T18:36:18Z"
+   "advanced": "2026-10-14T18:36:18Z",
+   "opened": "2026-10-14T18:55:59Z"
   },
   {
    "id": "computer-key-reroute",
