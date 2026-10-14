@@ -25,6 +25,10 @@
 - The `computer` tool and its errors no longer tell the model to retry with `takeover: true` after `BackgroundUnavailable`; the tool decides by `computer.backgroundFallback` ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 - The `computer` tool's instructions now tell the model never to call `raise()` or `apps.open(…, { activate: true })` to make input work, since both bring the app forward and take your keyboard, while launching, reopening and window input run in the background ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
+### Changed
+
+- The computer tool tells the model that Screen Sharing and iPhone Mirroring take background input, and that text no keyboard key types throws `InvalidKey` there ([#15193](https://github.com/can1357/oh-my-pi/pull/15193) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Fixed
 
 - Fixed `computer.apps.open` returning before the app had a window, or never giving a hidden running app one; it now returns the app's frontmost window as `window`, waiting up to 3 s on macOS ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
