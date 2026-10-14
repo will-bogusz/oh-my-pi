@@ -1488,10 +1488,11 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/display-turn-hold",
    "host": "MacBook-Pro",
    "added": "2026-10-14T03:39:10Z",
-   "updated": "2026-10-14T18:56:00Z",
+   "updated": "2026-10-14T18:56:17Z",
    "note": "",
    "advanced": "2026-10-14T18:36:18Z",
-   "opened": "2026-10-14T18:55:59Z"
+   "opened": "2026-10-14T18:55:59Z",
+   "readied": "2026-10-14T18:56:17Z"
   },
   {
    "id": "computer-key-reroute",
