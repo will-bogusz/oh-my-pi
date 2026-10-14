@@ -1444,6 +1444,8 @@ fn attach_keyboard_authentication(pid: pid_t, event: &CGEvent) {
 
 #[cfg(test)]
 mod tests {
+	use std::cell::Cell;
+
 	use super::*;
 	use crate::desktop::error::ErrorCode;
 
@@ -1861,6 +1863,106 @@ mod tests {
 		let result = run_then_settle(|| Ok(7), || Err(DesktopError::cancelled("stopped")));
 		assert_eq!(result.expect_err("the settle was cancelled").code, ErrorCode::Cancelled);
 		assert_eq!(run_then_settle(|| Ok(7), || Ok(())).ok(), Some(7));
+	}
+
+	/// The guard's view of a desktop where the target has just come forward over
+	/// the user's app. `WindowServer` puts the user's app back, except that the
+	/// first request is refused for input the user gives after the guard's
+	/// check, which leaves `refused_for` as the signals the next poll reads.
+	/// Polls are 10 ms apart; the action and its settle end at `end`.
+	struct FakeDesktop {
+		clock:       Cell<Instant>,
+		end:         Instant,
+		front:       Cell<ProcessSerialNumber>,
+		signals:     Cell<SwitchSignals>,
+		refused_for: Cell<Option<SwitchSignals>>,
+		hand_backs:  Cell<usize>,
+		keys:        std::cell::RefCell<Vec<u32>>,
+	}
+
+	impl GuardedDesktop for FakeDesktop {
+		fn front(&self) -> Option<ProcessSerialNumber> {
+			Some(self.front.get())
+		}
+
+		fn user_key(&self) -> Option<u32> {
+			Some(42)
+		}
+
+		fn now(&self) -> Instant {
+			self.clock.get()
+		}
+
+		fn signals(&self, _now: Instant) -> SwitchSignals {
+			self.signals.get()
+		}
+
+		fn event_clock(&self) -> u64 {
+			7
+		}
+
+		fn hand_back(&self, _since: u64) -> CoreResult<FrontRequest> {
+			self.hand_backs.set(self.hand_backs.get() + 1);
+			if let Some(after) = self.refused_for.take() {
+				self.signals.set(after);
+				return Ok(FrontRequest::UserActed);
+			}
+			self.front.set(PREVIOUS);
+			Ok(FrontRequest::Done)
+		}
+
+		fn restore_key(&self, key: u32) -> bool {
+			self.keys.borrow_mut().push(key);
+			true
+		}
+
+		fn stopped(&self) -> bool {
+			self.clock.get() >= self.end
+		}
+
+		fn wait(&self) {
+			self.clock.set(self.clock.get() + ACTIVATION_POLL);
+		}
+	}
+
+	#[test]
+	fn the_guard_asks_again_after_a_refusal_for_typing_but_not_for_a_switch() {
+		let t0 = Instant::now();
+		let idle = input(0, NO_MODIFIERS);
+		// The target came forward 20 ms into the action while the user typed;
+		// `WindowServer` refuses the guard's first hand-back for `input` the user
+		// gave after the guard's check.
+		let run = |input: SwitchSignals| {
+			let desktop = FakeDesktop {
+				clock:       Cell::new(t0 + ms(20)),
+				end:         t0 + ms(120),
+				front:       Cell::new(TARGET),
+				signals:     Cell::new(idle),
+				refused_for: Cell::new(Some(input)),
+				hand_backs:  Cell::new(0),
+				keys:        std::cell::RefCell::default(),
+			};
+			let mut lease = lease_at(t0, None);
+			let result = guard_focus(&mut lease, &desktop);
+			assert!(result.is_ok(), "the guard ends without an error");
+			(desktop.front.get(), desktop.hand_backs.get(), desktop.keys.into_inner())
+		};
+		// A key, or a capital letter's Shift, picks no app: the guard asks again
+		// and the user's app and key window are back.
+		for typing in [idle, input(0, SHIFT), input(0, OPTION)] {
+			let (front, hand_backs, keys) = run(typing);
+			assert!(front == PREVIOUS, "the user's app is back in front");
+			assert_eq!((hand_backs, keys), (2, vec![42]));
+		}
+		// A click (into the target, say), a ⌘/⌃ chord or typing into another
+		// app's panel after the check chose the target: it stays in front.
+		for choice in
+			[clicked_at(t0 + ms(21)), input(0, COMMAND), input(0, CONTROL), keyboard_in(THIRD)]
+		{
+			let (front, hand_backs, keys) = run(choice);
+			assert!(front == TARGET, "the target the user chose stays in front");
+			assert_eq!((hand_backs, keys), (1, vec![]));
+		}
 	}
 
 	#[test]
