@@ -1535,5 +1535,66 @@
    "readied": "2026-10-14T05:11:36Z",
    "merged_by": "pr"
   }
- ]
+ ],
+ "watch": {
+  "checked": "2026-10-14T19:15:53Z",
+  "host": "goliath",
+  "started": "2026-10-14T19:15:53Z",
+  "openable": {},
+  "conflicts": {},
+  "merged_through": "2026-10-14T15:18:19Z",
+  "unreleased": {
+   "15494": {
+    "title": "fix(coding-agent): open targets a relay page session creates in that page's browser",
+    "merge_commit": "bfbb1892f12be842ca1314f73724ffb235b7cc04",
+    "merged_at": "2026-10-14T09:20:33Z"
+   },
+   "15680": {
+    "title": "feat(coding-agent): record which omp build wrote each session entry",
+    "merge_commit": "8b161bf5cf7a5d833216574846f319d8d818e3c7",
+    "merged_at": "2026-10-14T09:20:37Z"
+   },
+   "15495": {
+    "title": "fix(coding-agent): keep puppeteer's own tab page listeners across browser runs",
+    "merge_commit": "a77787ebf37fb1df04329d821254b4140fa15bf8",
+    "merged_at": "2026-10-14T09:26:14Z"
+   },
+   "15607": {
+    "title": "fix(natives): open a scrolled-out row when pressing it in a macOS Catalyst app",
+    "merge_commit": "d2ba49dd2ee9298d6b1f3d77dd4b06fc54555b64",
+    "merged_at": "2026-10-14T09:32:45Z"
+   },
+   "15604": {
+    "title": "fix(natives): wait for a Chromium window's web content on the first macOS computer read",
+    "merge_commit": "a2b98efc771ade5cf82d8b912c267d130824adf2",
+    "merged_at": "2026-10-14T10:02:58Z"
+   },
+   "15414": {
+    "title": "fix(natives): release the macOS display-awake hold when a native call hangs",
+    "merge_commit": "6b2a27ae215e143289ad67d25f9905339fc7a906",
+    "merged_at": "2026-10-14T10:03:40Z"
+   },
+   "15599": {
+    "title": "fix(coding-agent): read the page body when browser text() or html() gets no selector",
+    "merge_commit": "fa495494a566c1bf975051b6636f0aaf33e55e15",
+    "merged_at": "2026-10-14T10:13:47Z"
+   },
+   "15502": {
+    "title": "fix(coding-agent): mask password values in browser ARIA snapshots",
+    "merge_commit": "f5145fd0271906cdf3bca6a218912fa1d8db3500",
+    "merged_at": "2026-10-14T10:15:38Z"
+   },
+   "15293": {
+    "title": "fix(natives): write macOS setValue text the way win.type does",
+    "merge_commit": "cea314c09d2c4cf0c5f149c36b13ffa30aa7330f",
+    "merged_at": "2026-10-14T11:51:12Z"
+   },
+   "15496": {
+    "title": "fix(browser): scroll text-query click targets into view",
+    "merge_commit": "f979f4639777858de28e6ecb99d577443abe0b7b",
+    "merged_at": "2026-10-14T15:18:19Z"
+   }
+  },
+  "events": []
+ }
 }
