@@ -1572,7 +1572,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-click-followups",
    "host": "MacBook-Pro",
    "added": "2026-10-14T22:39:45Z",
-   "updated": "2026-10-14T22:51:10Z",
+   "updated": "2026-10-14T22:51:29Z",
    "note": "",
    "built": [
     {
@@ -1729,7 +1729,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-14T22:51:10Z"
+   "opened": "2026-10-14T22:51:10Z",
+   "readied": "2026-10-14T22:51:29Z"
   },
   {
    "id": "inflight-epoch",
