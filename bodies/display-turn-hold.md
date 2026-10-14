@@ -30,11 +30,12 @@ Live in macOS VMs, each trial after powerd's post-input display hold expired: a 
 
 - `test/agent-session-computer-turn.test.ts`: a turn's steps keep it live; its end releases once; the next prompt is turn 2; an interrupt releases, also while setup is still unwinding. Each fails with its call reverted.
 - `computer.test.ts` "display hold follows the agent turn": `release-display` drops only the hold; a late run of an ended turn holds nothing; runs without a turn never hold. Each fails with its piece reverted.
-- Rust `desktop::capture_tests` (34 pass): the hold outlives the grace until released, then the next turn holds again, and later activity gets the grace. Mutations fail 2 (`expire` ignores the turn), 3 (release keeps the hold) and 2 (no grace, including the existing grace test). Full `pi-natives` on macOS 26: 574 pass; the one failure, `emergency_stop_revokes_idle_task_control_after_retirement`, fails the same on `main` and #15761 fixes it (575/575 with it merged in). `CI=1 bun check` clean.
+- Rust `desktop::capture_tests` (35 pass): the hold outlives the grace until released, then the next turn holds again, later activity gets the grace, and a turn's end leaves the grace of activity outside a turn. Mutations fail 2 (`expire` ignores the turn), 3 (release keeps the hold) and 2 (no grace, including the existing grace test). Full `pi-natives` on macOS 26: 575 pass; the one failure, `emergency_stop_revokes_idle_task_control_after_retirement`, fails the same on `main` and #15761 fixes it (576/576 with it merged in). `CI=1 bun check` clean.
 
 ---
 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
