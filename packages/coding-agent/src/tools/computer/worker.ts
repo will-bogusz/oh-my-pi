@@ -76,6 +76,10 @@ export interface NativeDesktopSession {
 	retire(): void;
 	/** Sets when the current run ends, `remainingMs` from now; bounds how long input waits for the user to pause. */
 	setRunDeadline(remainingMs: number): void;
+	/** Keep the display awake from the next activity until `releaseDisplayAwake()`, not just for the grace period. */
+	holdDisplayUntilReleased(): void;
+	/** Let a turn's hold go now (activity outside a turn keeps its grace); later activity gets the grace again. */
+	releaseDisplayAwake(): void;
 	listApplications(options?: ApplicationQuery): Promise<Application[]>;
 	openApplication(id: string, options?: ApplicationOpenOptions): Promise<OpenedApplication>;
 	menuItems(target: string, path?: string[]): Promise<MenuItem[]>;
@@ -1180,6 +1184,8 @@ export class ComputerWorkerCore {
 	 */
 	readonly #runContexts = new AsyncLocalStorage<ComputerRunContext>();
 	#closed = false;
+	/** The latest agent turn whose end was sent here; a run of that turn or earlier, arriving late, holds nothing. */
+	#releasedTurn = 0;
 
 	constructor(transport: ComputerWorkerTransport, createSession?: NativeDesktopSessionFactory) {
 		this.#transport = transport;
@@ -1207,6 +1213,10 @@ export class ComputerWorkerCore {
 				this.#active?.ac.abort(new ToolAbortError("Computer control revoked"));
 				this.#session?.cancel();
 				this.#transport.send({ type: "control-revoked", id: message.id });
+				return;
+			case "release-display":
+				this.#releasedTurn = Math.max(this.#releasedTurn, message.turn);
+				this.#session?.releaseDisplayAwake();
 				return;
 			case "tool-reply":
 				this.#deliverToolReply(message.id, message.reply);
@@ -1316,6 +1326,8 @@ export class ComputerWorkerCore {
 			// Under `refuse` no foreground control stands, including a grant the
 			// model acquired before the user chose `refuse`.
 			if (message.session.backgroundFallback === "refuse" && session.controlState().active) session.releaseControl();
+			const { displayTurn } = message.session;
+			if (displayTurn !== undefined && displayTurn > this.#releasedTurn) session.holdDisplayUntilReleased();
 			const runtime = this.#ensureRuntime(message.session);
 			runtime.setCwd(message.session.cwd);
 			const desktop = this.#createDesktopScope(session);
