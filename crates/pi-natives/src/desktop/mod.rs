@@ -4525,21 +4525,21 @@ mod capture_tests {
 
 	#[test]
 	fn only_takeover_requests_arm_the_physical_escape_stop() {
-		let token = CancellationSource::default().token();
 		let window = Target::Window("42".to_string());
 		let reply = || flume::unbounded().0;
-		let typing = |target: &Target, takeover| Request::TypeText {
+		let typing_with = |target: &Target, takeover| Request::TypeText {
 			target: target.clone(),
 			text: "abc".to_string(),
 			takeover,
 			reply: reply(),
 		};
+		let typing = |target: &Target, takeover| typing_with(target, Takeover::new(takeover, None));
 		let holding = |target: &Target, takeover| Request::HoldKeys {
-			target: target.clone(),
-			keys: parse_keys(&["shift".to_string()]).unwrap(),
+			target:   target.clone(),
+			keys:     parse_keys(&["shift".to_string()]).unwrap(),
 			duration: Duration::ZERO,
-			takeover,
-			reply: reply(),
+			takeover: Takeover::new(takeover, None),
+			reply:    reply(),
 		};
 		let clicking = |target: &Target, takeover| Request::Click {
 			target:  target.clone(),
@@ -4555,6 +4555,7 @@ mod capture_tests {
 		let perform = |action: &str| Request::AxPerform {
 			reference: "e1".to_string(),
 			action:    action.to_string(),
+			menu:      None,
 			reply:     reply(),
 		};
 		let open = |activate| Request::OpenApplication {
@@ -4565,6 +4566,8 @@ mod capture_tests {
 		let background = [
 			typing(&window, None),
 			typing(&window, Some(false)),
+			// Returning focus never makes background input a takeover.
+			typing_with(&window, Takeover::new(Some(false), Some(true))),
 			holding(&window, None),
 			clicking(&window, Some(false)),
 			perform("AXPress"),
@@ -4578,6 +4581,8 @@ mod capture_tests {
 		let display = Target::parse("display:screen-1");
 		let takeover = [
 			typing(&window, Some(true)),
+			// The host's own takeover rerun of a refused background call.
+			typing_with(&window, Takeover::new(Some(true), Some(true))),
 			holding(&window, Some(true)),
 			clicking(&window, Some(true)),
 			typing(&Target::Desktop, None),
@@ -4606,12 +4611,13 @@ mod capture_tests {
 		worker
 			.process(&capture_request(target.clone()), &token)
 			.unwrap();
-		for takeover in [None, Some(true)] {
+		for requested in [None, Some(true)] {
 			let options = ParsedPointerOptions::parse(Some(PointerOptions {
-				takeover,
+				takeover: requested,
 				..PointerOptions::default()
 			}))
 			.unwrap();
+			let takeover = Takeover::new(requested, None);
 			let (reply, _rx) = flume::bounded(1);
 			let click = Request::Click { target: target.clone(), x: 10.0, y: 10.0, options, reply };
 			worker.process(&click, &token).unwrap();
