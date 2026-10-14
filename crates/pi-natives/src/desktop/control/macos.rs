@@ -195,7 +195,7 @@ unsafe extern "C" fn observe(_proxy: Ref, kind: u32, event: Ref, user: Ref) -> R
 			None => {},
 		}
 		if physical_escape(kind, key, pid, tag) {
-			context.inner.cancel();
+			context.inner.escape();
 		}
 	}
 	event

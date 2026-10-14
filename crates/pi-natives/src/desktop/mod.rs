@@ -21,7 +21,7 @@ use std::{
 	panic::AssertUnwindSafe,
 	sync::{
 		Arc,
-		atomic::{AtomicUsize, Ordering},
+		atomic::{AtomicU32, AtomicUsize, Ordering},
 	},
 	thread::{self, JoinHandle},
 	time::{Duration, Instant},
@@ -1355,11 +1355,15 @@ struct SessionCore {
 	operation_timeout: Duration,
 }
 impl SessionCore {
-	fn new(selector: DisplaySelector) -> Arc<Self> {
-		Self::with_operation_timeout(selector, OPERATION_TIMEOUT)
+	fn new(selector: DisplaySelector, escape_stops: Arc<AtomicU32>) -> Arc<Self> {
+		Self::with_operation_timeout(selector, escape_stops, OPERATION_TIMEOUT)
 	}
 
-	fn with_operation_timeout(selector: DisplaySelector, operation_timeout: Duration) -> Arc<Self> {
+	fn with_operation_timeout(
+		selector: DisplaySelector,
+		escape_stops: Arc<AtomicU32>,
+		operation_timeout: Duration,
+	) -> Arc<Self> {
 		Arc::new(Self {
 			selector,
 			lifecycle: Mutex::new(Lifecycle {
@@ -1371,7 +1375,7 @@ impl SessionCore {
 			capabilities: Arc::default(),
 			display_awake: Arc::default(),
 			in_flight: AtomicUsize::new(0),
-			cancellation: CancellationSource::default(),
+			cancellation: CancellationSource::counting_escapes(escape_stops),
 			operation_timeout,
 		})
 	}
@@ -1497,6 +1501,19 @@ pub fn close_desktop_event_taps() {
 	control::close_event_taps();
 }
 
+/// Physical-Escape stops counted under `key` by every desktop session created
+/// with it, including closed ones, until the key is forgotten.
+#[napi]
+pub fn desktop_escape_stops(key: String) -> u32 {
+	control::escape_stops(&key)
+}
+
+/// Drops the stop count kept under `key` once no session will use it again.
+#[napi]
+pub fn forget_desktop_escape_stops(key: String) {
+	control::forget_escape_stops(&key);
+}
+
 /// Persistent, serialized native desktop capture/input/accessibility session.
 #[napi]
 pub struct DesktopSession {
@@ -1514,7 +1531,9 @@ impl Drop for DesktopSession {
 impl DesktopSession {
 	#[napi(constructor)]
 	pub fn new(options: Option<DesktopSessionOptions>) -> Result<Self> {
-		Ok(Self { core: SessionCore::new(DisplaySelector::parse(options.and_then(|o| o.display))) })
+		let options = options.unwrap_or_default();
+		let escape_stops = control::escape_stop_counter(options.escape_stop_key.as_deref());
+		Ok(Self { core: SessionCore::new(DisplaySelector::parse(options.display), escape_stops) })
 	}
 
 	/// Asks the worker when it is idle, so permissions are read live. While
@@ -1549,6 +1568,14 @@ impl DesktopSession {
 	#[napi(getter)]
 	pub fn screen_state(&self) -> ScreenState {
 		read_screen_state(&self.core.selector)
+	}
+
+	/// How many times the user's physical Escape has stopped takeover input in
+	/// this session, or under its `escapeStopKey`. Host cancels, retirement and
+	/// release never count, so a rise tells the host the user stopped the work.
+	#[napi(getter)]
+	pub fn escape_stops(&self) -> u32 {
+		self.core.cancellation.escape_stops()
 	}
 
 	#[napi]
@@ -2610,7 +2637,11 @@ mod capture_tests {
 	/// A session serving `backend` with an hour's grace, so while a request
 	/// hangs only the session giving up can release the display.
 	fn session_serving(backend: FakeWaylandBackend) -> Arc<SessionCore> {
-		let core = SessionCore::with_operation_timeout(DisplaySelector::Active, HUNG_CALL_TIMEOUT);
+		let core = SessionCore::with_operation_timeout(
+			DisplaySelector::Active,
+			Arc::default(),
+			HUNG_CALL_TIMEOUT,
+		);
 		let display_awake = Arc::clone(&core.display_awake);
 		let (tx, rx) = flume::unbounded();
 		let (done_tx, done) = flume::bounded(1);
@@ -2897,7 +2928,7 @@ mod capture_tests {
 
 	#[test]
 	fn capture_refreshes_the_nonblocking_capabilities_snapshot() {
-		let core = SessionCore::new(DisplaySelector::Active);
+		let core = SessionCore::new(DisplaySelector::Active, Arc::default());
 		let mut worker = worker_with(FakeWaylandBackend::new());
 		worker.capabilities = Arc::clone(&core.capabilities);
 		worker
@@ -2916,7 +2947,7 @@ mod capture_tests {
 
 	#[test]
 	fn busy_snapshot_reports_an_escape_stop_that_failed_after_it_was_taken() {
-		let core = SessionCore::new(DisplaySelector::Active);
+		let core = SessionCore::new(DisplaySelector::Active, Arc::default());
 		let mut snapshot = DesktopCapabilities::unavailable();
 		snapshot.global_escape = true;
 		*core.capabilities.lock() = Some(snapshot);
@@ -2928,7 +2959,7 @@ mod capture_tests {
 
 	#[test]
 	fn screen_state_never_queues_behind_a_stuck_request() {
-		let core = SessionCore::new(DisplaySelector::Active);
+		let core = SessionCore::new(DisplaySelector::Active, Arc::default());
 		// A worker that never serves its queue, with a request outstanding and
 		// no capabilities snapshot: a queued read would wait out its timeout.
 		let (tx, stuck) = flume::unbounded();
@@ -2941,7 +2972,7 @@ mod capture_tests {
 
 	#[test]
 	fn cancelled_calls_never_start_the_worker_or_count_as_in_flight() {
-		let core = SessionCore::new(DisplaySelector::Active);
+		let core = SessionCore::new(DisplaySelector::Active, Arc::default());
 		let token = core.cancellation.token();
 		core.cancellation.cancel();
 		assert_eq!(
@@ -2958,7 +2989,7 @@ mod capture_tests {
 
 	#[test]
 	fn failed_queue_delivery_releases_the_in_flight_count() {
-		let core = SessionCore::new(DisplaySelector::Active);
+		let core = SessionCore::new(DisplaySelector::Active, Arc::default());
 		let (tx, rx) = flume::unbounded();
 		core.lifecycle.lock().tx = Some(tx);
 		drop(rx);
