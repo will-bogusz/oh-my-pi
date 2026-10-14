@@ -1542,7 +1542,7 @@
    "branch": "will/latest-abandoned-turn-count",
    "title": "fix(agent): count the reasoning the latest Claude turn replays when picking the compaction cut point",
    "area": "other",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "c2cb79e4c227aa4b22c4ccb933ff72fd88bceba4",
    "body": "bodies/latest-abandoned-turn-count.md",
@@ -1552,7 +1552,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/latest-abandoned-turn-count",
    "host": "MacBook-Pro",
    "added": "2026-10-14T22:39:33Z",
-   "updated": "2026-10-14T22:43:24Z",
+   "updated": "2026-10-14T22:53:07Z",
    "note": "",
    "opened": "2026-10-14T22:43:06Z",
    "readied": "2026-10-14T22:43:24Z"
