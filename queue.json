@@ -202,7 +202,7 @@
    "area": "broker",
    "priority": "P2",
    "needs": [],
-   "base": null,
+   "base": "c2cb79e4c227aa4b22c4ccb933ff72fd88bceba4",
    "body": null,
    "state": "open",
    "pr": 15130,
@@ -210,8 +210,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-before-reserve",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:47:19Z",
-   "note": ""
+   "updated": "2026-10-14T22:39:08Z",
+   "note": "",
+   "advanced": "2026-10-14T22:39:08Z"
   },
   {
    "id": "reset-account-optout",
