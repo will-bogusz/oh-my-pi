@@ -210,9 +210,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-before-reserve",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-14T22:39:08Z",
+   "updated": "2026-10-14T23:04:39Z",
    "note": "",
-   "advanced": "2026-10-14T22:39:08Z"
+   "advanced": "2026-10-14T22:39:08Z",
+   "built": [
+    {
+     "with": "#15128",
+     "code": "060945a5c56fef07ba164a9f976cb82b0fdef6aa",
+     "with_code": "ca95834cec2c151c013a3b24dc542e9f1ed84fa5",
+     "tip": "b0fc30ee72b67d57755081fb53292f3bce322e16",
+     "with_tip": "feb13eb6bc3bdcdf460fbef35363a6e8a9adfe76",
+     "at": "2026-10-14T23:04:37Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "reset-account-optout",
