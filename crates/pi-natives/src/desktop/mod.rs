@@ -546,7 +546,9 @@ impl Request {
 			Self::AxPerform { reference, .. }
 			| Self::AxSetValue { reference, .. }
 			| Self::AxFocus { reference, .. }
-			| Self::AxClick { reference, .. } => Some(AppAccess::Element(reference)),
+			| Self::AxClick { reference, .. }
+			| Self::AxInput { reference, .. }
+			| Self::AxSelectText { reference, .. } => Some(AppAccess::Element(reference)),
 			_ => None,
 		}
 	}
@@ -3971,6 +3973,24 @@ mod capture_tests {
 			worker.process(&request, &token).expect("unchecked press");
 		}
 		assert_eq!(clicks.lock().len(), 4);
+	}
+
+	#[cfg(target_os = "macos")]
+	#[test]
+	fn element_typing_and_chords_watch_the_users_input_in_the_elements_app() {
+		let reply = || flume::unbounded().0;
+		let input = |input| Request::AxInput {
+			reference: "e1".to_string(),
+			input,
+			takeover: Takeover::default(),
+			reply: reply(),
+		};
+		for request in [
+			input(ElementInput::Text("x".to_string())),
+			input(ElementInput::Chord(parse_keys(&["enter".to_string()]).unwrap())),
+		] {
+			assert!(matches!(request.app_access(), Some(AppAccess::Element("e1"))));
+		}
 	}
 
 	#[test]
