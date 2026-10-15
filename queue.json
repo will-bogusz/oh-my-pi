@@ -755,15 +755,16 @@
    "needs": [],
    "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15410,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-artifact-raw-paging",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T22:55:18Z",
+   "updated": "2026-10-15T21:00:08Z",
    "note": "",
-   "advanced": "2026-10-13T22:55:18Z"
+   "advanced": "2026-10-13T22:55:18Z",
+   "merged_by": "pr"
   },
   {
    "id": "grep-eof-zero-width",
