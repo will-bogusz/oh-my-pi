@@ -1770,13 +1770,47 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-15T11:43:06Z",
+  "checked": "2026-10-15T12:14:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
-  "conflicts": {},
-  "merged_through": "2026-10-14T15:18:19Z",
-  "unreleased": {},
+  "conflicts": {
+   "#14235": {
+    "since": "2026-10-15T12:14:09Z",
+    "title": "feat(ai): let broker account-pool files act as a provider and API-key allow-list",
+    "files": [
+     "packages/ai/src/auth-broker/remote-store.ts"
+    ]
+   }
+  },
+  "merged_through": "2026-10-15T11:56:04Z",
+  "unreleased": {
+   "15443": {
+    "title": "fix(catalog): cap xai-oauth Grok 4.20 context windows at the server's 1M limit",
+    "merge_commit": "3c965be9ae6ec6364f571949f2d0db623f902814",
+    "merged_at": "2026-10-15T11:44:04Z"
+   },
+   "15411": {
+    "title": "fix(grep): show the end-of-line window for a zero-width match at end of file",
+    "merge_commit": "43c0e9141ecb138b916cba1d155d07871c013981",
+    "merged_at": "2026-10-15T11:48:13Z"
+   },
+   "15409": {
+    "title": "fix(coding-agent): keep each JS Eval run on its own artifact and local roots",
+    "merge_commit": "4e09b48702b4a0f9857070687537bdfdab198572",
+    "merged_at": "2026-10-15T11:51:24Z"
+   },
+   "15445": {
+    "title": "fix(catalog): drop retired Gemini 3.5 Flash from Antigravity",
+    "merge_commit": "05f47fab22292e23988bfd3ed398c501783f16ad",
+    "merged_at": "2026-10-15T11:55:05Z"
+   },
+   "15761": {
+    "title": "test(natives): serialize desktop worker tests with the input ownership tests",
+    "merge_commit": "3ec5f140fbf4ef40faeeb6c2aa3739f05a5ea60a",
+    "merged_at": "2026-10-15T11:56:04Z"
+   }
+  },
   "events": [
    {
     "at": "2026-10-14T19:47:58Z",
@@ -1856,6 +1890,55 @@
     "number": 15496,
     "title": "fix(browser): scroll text-query click targets into view",
     "tag": "v18.11.0"
+   },
+   {
+    "at": "2026-10-15T12:14:09Z",
+    "kind": "merged",
+    "number": 15443,
+    "title": "fix(catalog): cap xai-oauth Grok 4.20 context windows at the server's 1M limit",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-15T12:14:09Z",
+    "kind": "merged",
+    "number": 15411,
+    "title": "fix(grep): show the end-of-line window for a zero-width match at end of file",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-15T12:14:09Z",
+    "kind": "merged",
+    "number": 15409,
+    "title": "fix(coding-agent): keep each JS Eval run on its own artifact and local roots",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-15T12:14:09Z",
+    "kind": "merged",
+    "number": 15445,
+    "title": "fix(catalog): drop retired Gemini 3.5 Flash from Antigravity",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-15T12:14:09Z",
+    "kind": "merged",
+    "number": 15761,
+    "title": "test(natives): serialize desktop worker tests with the input ownership tests",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-15T12:14:09Z",
+    "kind": "conflict",
+    "label": "#14235",
+    "title": "feat(ai): let broker account-pool files act as a provider and API-key allow-list",
+    "files": [
+     "packages/ai/src/auth-broker/remote-store.ts"
+    ]
    }
   ]
  }
