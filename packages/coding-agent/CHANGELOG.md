@@ -5,9 +5,6 @@
 ### Added
 
 - Added `omp auth-gateway serve --clients=<file>`: per-client bearer tokens, each limited to listed models and broker OAuth accounts with no fallback to other accounts or API keys, re-read while serving ([#5098](https://github.com/can1357/oh-my-pi/issues/5098), [#15900](https://github.com/can1357/oh-my-pi/pull/15900) by [@alphastorm](https://github.com/alphastorm))
-
-### Added
-
 - Added a note to relay `browser.open` results when the OMP Browser Relay extension in Chrome was installed by an older omp, naming `omp browser-relay install` and a reload; `omp browser-relay install` now records the installing omp's version in the extension ([#15105](https://github.com/can1357/oh-my-pi/pull/15105) by [@will-bogusz](https://github.com/will-bogusz))
 - The browser relay now keeps its Chrome extension current after an omp upgrade: when the extension in `~/.omp/browser-relay/extension` is older and no omp session is using the relay, it rewrites the files and the extension reloads itself ([#15105](https://github.com/can1357/oh-my-pi/pull/15105) by [@will-bogusz](https://github.com/will-bogusz))
 
@@ -66,6 +63,8 @@
 - Fixed background relay and `app.cdp_url` tabs ignoring omp's clicks and keys or timing out on hover and drag; the page reads as visible while omp drives it and hidden again once released ([#15510](https://github.com/can1357/oh-my-pi/pull/15510) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed browser `uploadFile` in Chrome reporting success with no file attached when the element opens no file chooser and nothing on the page reads the dropped files; it now fails and says what to target ([#15491](https://github.com/can1357/oh-my-pi/pull/15491) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed Chrome element handles' `uploadFile()` failing "Node is not a file input element" on labels, chooser triggers and drop zones; it now uploads like `tab.uploadFile()` ([#15492](https://github.com/can1357/oh-my-pi/pull/15492) by [@will-bogusz](https://github.com/will-bogusz))
+- Browser `tab.fill` in Chrome sets colour, date, time and range inputs to the given value (it typed `2026-10-12` as `61012-02-02` and left a colour at `#000000`), and refuses a value the input rejects ([#15914](https://github.com/can1357/oh-my-pi/pull/15914) by [@will-bogusz](https://github.com/will-bogusz))
+- A page calling `window.print()` in a Chromium tab no longer freezes behind the print preview and times out the browser call: omp holds it, the page carries on as after a finished print, and the call says so (pointing at `tab.pdf()`) ([#15508](https://github.com/can1357/oh-my-pi/pull/15508) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.11.1] - 2026-10-15
 
@@ -187,10 +186,6 @@
 - Fixed hashline edits silently dropping the tail of a line that `read` or `grep` had cut at the column limit; such an edit is now refused until a `:raw` read shows the full line ([#15649](https://github.com/can1357/oh-my-pi/issues/15649))
 - Fixed isolated tasks failing on linked worktrees with initialized recursive submodules and leaving updated submodule pins unreachable after cleanup ([#15457](https://github.com/can1357/oh-my-pi/issues/15457))
 - Fixed `/tan` missing the parent's prompt cache by advertising `xd://` tools top-level and omitting `ask` ([#15578](https://github.com/can1357/oh-my-pi/issues/15578)).
-
-### Fixed
-
-- A page calling `window.print()` in a Chromium tab no longer freezes behind the print preview and times out the browser call: omp holds it, the page carries on as after a finished print, and the call says so (pointing at `tab.pdf()`) ([#15508](https://github.com/can1357/oh-my-pi/pull/15508) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.10.4] - 2026-10-13
 
