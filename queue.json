@@ -1922,7 +1922,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-15T18:56:06Z",
+  "checked": "2026-10-15T19:27:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -1935,8 +1935,14 @@
     ]
    }
   },
-  "merged_through": "2026-10-15T12:50:38Z",
-  "unreleased": {},
+  "merged_through": "2026-10-15T19:10:26Z",
+  "unreleased": {
+   "15402": {
+    "title": "feat(coding-agent): send todo updates alongside the next tool call",
+    "merge_commit": "ff0b9c2cace8dfbad04840cd11cde35dd6daefeb",
+    "merged_at": "2026-10-15T19:10:26Z"
+   }
+  },
   "events": [
    {
     "at": "2026-10-14T19:47:58Z",
@@ -2139,6 +2145,14 @@
     "files": [
      "packages/coding-agent/src/sdk.ts"
     ]
+   },
+   {
+    "at": "2026-10-15T19:27:09Z",
+    "kind": "merged",
+    "number": 15402,
+    "title": "feat(coding-agent): send todo updates alongside the next tool call",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
    }
   ]
  }
