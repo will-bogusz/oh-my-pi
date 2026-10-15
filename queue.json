@@ -2024,10 +2024,27 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-15T22:31:28Z",
+  "checked": "2026-10-15T23:01:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "browser-upload-chooser-session": {
+    "since": "2026-10-15T23:01:55Z",
+    "title": "fix(coding-agent): stop browser uploadFile swallowing later file choosers and hanging on File System Access pickers"
+   },
+   "browser-upload-element": {
+    "since": "2026-10-15T23:01:55Z",
+    "title": "fix(coding-agent): let browser element handles upload through chooser triggers and drop zones"
+   },
+   "browser-upload-inert-target": {
+    "since": "2026-10-15T23:01:55Z",
+    "title": "fix(coding-agent): fail browser uploadFile when nothing on the page takes the file"
+   },
+   "relay-detach": {
+    "since": "2026-10-15T23:01:55Z",
+    "title": "fix(browser): fail fast and reattach when Chrome detaches omp from a relay tab"
+   }
+  },
   "conflicts": {
    "#15433": {
     "since": "2026-10-15T14:48:07Z",
@@ -2281,6 +2298,30 @@
     "title": "fix(coding-agent): send file contents when uploading into relay and connected browsers",
     "merged_by": "H4vC",
     "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-15T23:01:55Z",
+    "kind": "openable",
+    "id": "browser-upload-chooser-session",
+    "title": "fix(coding-agent): stop browser uploadFile swallowing later file choosers and hanging on File System Access pickers"
+   },
+   {
+    "at": "2026-10-15T23:01:55Z",
+    "kind": "openable",
+    "id": "browser-upload-element",
+    "title": "fix(coding-agent): let browser element handles upload through chooser triggers and drop zones"
+   },
+   {
+    "at": "2026-10-15T23:01:55Z",
+    "kind": "openable",
+    "id": "browser-upload-inert-target",
+    "title": "fix(coding-agent): fail browser uploadFile when nothing on the page takes the file"
+   },
+   {
+    "at": "2026-10-15T23:01:55Z",
+    "kind": "openable",
+    "id": "relay-detach",
+    "title": "fix(browser): fail fast and reattach when Chrome detaches omp from a relay tab"
    }
   ]
  }
