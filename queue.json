@@ -85,7 +85,7 @@
    "area": "catalog",
    "priority": null,
    "needs": [],
-   "base": null,
+   "base": "d0b56045fff4367a23d839bf8250d49c05486566",
    "body": null,
    "state": "open",
    "pr": 14759,
@@ -93,8 +93,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-billed-cost",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:47:19Z",
-   "note": ""
+   "updated": "2026-10-15T14:15:52Z",
+   "note": "",
+   "advanced": "2026-10-15T14:15:52Z"
   },
   {
    "id": "relay-extension-version",
