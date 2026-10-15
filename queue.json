@@ -1056,15 +1056,15 @@
    "needs": [],
    "base": "682357e60f932495c563323b51d83618e9277b39",
    "body": "bodies/browser-upload-inert-target.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 15919,
    "closed_prs": [
     15491
    ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-upload-inert-target",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-15T23:15:35Z",
+   "updated": "2026-10-15T23:19:02Z",
    "note": "",
    "advanced": "2026-10-15T22:51:52Z",
    "built": [
@@ -1185,7 +1185,8 @@
      "at": "2026-10-15T23:15:35Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-15T23:19:01Z"
   },
   {
    "id": "browser-upload-element",
