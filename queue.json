@@ -914,15 +914,15 @@
    "needs": [],
    "base": "682357e60f932495c563323b51d83618e9277b39",
    "body": "bodies/browser-upload-chooser-session.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 15915,
    "closed_prs": [
     15490
    ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-upload-chooser-session",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-15T23:05:17Z",
+   "updated": "2026-10-15T23:06:27Z",
    "note": "",
    "advanced": "2026-10-15T22:51:33Z",
    "built": [
@@ -1043,7 +1043,8 @@
      "at": "2026-10-15T23:05:17Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-15T23:06:27Z"
   },
   {
    "id": "browser-upload-inert-target",
