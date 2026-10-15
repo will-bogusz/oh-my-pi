@@ -1923,7 +1923,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-15T20:29:07Z",
+  "checked": "2026-10-15T21:00:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -1936,12 +1936,17 @@
     ]
    }
   },
-  "merged_through": "2026-10-15T19:10:26Z",
+  "merged_through": "2026-10-15T20:48:32Z",
   "unreleased": {
    "15402": {
     "title": "feat(coding-agent): send todo updates alongside the next tool call",
     "merge_commit": "ff0b9c2cace8dfbad04840cd11cde35dd6daefeb",
     "merged_at": "2026-10-15T19:10:26Z"
+   },
+   "15410": {
+    "title": "fix(coding-agent): return large artifacts' text from Eval read() outside the session's artifacts dir",
+    "merge_commit": "8c7252508374299e18815f89f66690ec5cf58539",
+    "merged_at": "2026-10-15T20:48:32Z"
    }
   },
   "events": [
@@ -2152,6 +2157,14 @@
     "kind": "merged",
     "number": 15402,
     "title": "feat(coding-agent): send todo updates alongside the next tool call",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-15T21:00:09Z",
+    "kind": "merged",
+    "number": 15410,
+    "title": "fix(coding-agent): return large artifacts' text from Eval read() outside the session's artifacts dir",
     "merged_by": "H4vC",
     "maintainer_commits": 1
    }
