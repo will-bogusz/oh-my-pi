@@ -1064,7 +1064,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-upload-inert-target",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-15T23:19:02Z",
+   "updated": "2026-10-15T23:19:17Z",
    "note": "",
    "advanced": "2026-10-15T22:51:52Z",
    "built": [
@@ -1186,7 +1186,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-15T23:19:01Z"
+   "opened": "2026-10-15T23:19:01Z",
+   "readied": "2026-10-15T23:19:17Z"
   },
   {
    "id": "browser-upload-element",
