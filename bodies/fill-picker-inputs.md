@@ -33,7 +33,7 @@ Non-goals: Tern and cmux have their own `fill` and are untouched; the CHANGELOG 
 ## Testing
 
 - New test `fills colour, date, time and range inputs with their value instead of typing into them` (`test/tools/browser-interactions.test.ts`, headless Chrome) fills every type, refills a time, clears a month, refuses six bad values and checks that the page saw exactly one `input`/`change` per real change. With `interactions.ts` reverted to `main` it fails with the values in the main column above; on this branch it passes.
-- `bun test test/tools/browser-interactions.test.ts test/tools/browser-run-output.test.ts test/tools/browser-nav-frames-dialogs.test.ts test/eval/browser-prelude-facade.test.ts`: 49 pass. `bun check` passes.
+- `bun test test/tools/browser-interactions.test.ts test/tools/browser-run-output.test.ts test/tools/browser-nav-frames-dialogs.test.ts test/eval/browser-prelude-facade.test.ts`: 57 pass. `bun check` passes.
 - Not run: relay and visible Chrome; they use the same `fillViaHandle`.
 
 ---
