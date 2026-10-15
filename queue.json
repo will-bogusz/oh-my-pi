@@ -47,7 +47,7 @@
    "area": "broker",
    "priority": "P2",
    "needs": [],
-   "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
+   "base": "d0b56045fff4367a23d839bf8250d49c05486566",
    "body": null,
    "state": "open",
    "pr": 14235,
@@ -55,9 +55,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/account-pool-allowlist",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T22:56:07Z",
+   "updated": "2026-10-15T14:16:30Z",
    "note": "",
-   "advanced": "2026-10-13T22:56:07Z"
+   "advanced": "2026-10-15T14:16:30Z"
   },
   {
    "id": "account-reclaim",
