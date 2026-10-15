@@ -49,6 +49,9 @@ describe("desktop native ABI requirements", () => {
 			"releaseControl",
 			"controlState",
 			"bringToCurrentSpace",
+			"setRunDeadline",
+			"holdDisplayUntilReleased",
+			"releaseDisplayAwake",
 		]) {
 			Object.defineProperty(NativeSession.prototype, method, { value() {} });
 		}
@@ -74,6 +77,8 @@ describe("desktop native ABI requirements", () => {
 			"releaseControl",
 			"controlState",
 			"bringToCurrentSpace",
+			"setRunDeadline",
+			"axSelectText",
 		];
 		const sessionWith = (names: string[]) => {
 			class NativeSession {}
