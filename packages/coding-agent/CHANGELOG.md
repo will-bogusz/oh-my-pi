@@ -64,6 +64,7 @@
 - Fixed browser `uploadFile` on a control that opens `showOpenFilePicker()` hanging the cell until the tab was killed; it now fails at once with a named error ([#15490](https://github.com/can1357/oh-my-pi/pull/15490) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed every later file chooser on a page doing nothing, the user's own clicks in a relay tab included, after browser `uploadFile` clicked a chooser trigger or drop zone ([#15490](https://github.com/can1357/oh-my-pi/pull/15490) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed background relay and `app.cdp_url` tabs ignoring omp's clicks and keys or timing out on hover and drag; the page reads as visible while omp drives it and hidden again once released ([#15510](https://github.com/can1357/oh-my-pi/pull/15510) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed browser `uploadFile` in Chrome reporting success with no file attached when the element opens no file chooser and nothing on the page reads the dropped files; it now fails and says what to target ([#15491](https://github.com/can1357/oh-my-pi/pull/15491) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.11.1] - 2026-10-15
 
