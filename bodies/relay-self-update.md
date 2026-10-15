@@ -30,7 +30,7 @@ Reading order:
 
 - `browser-relay-self-update.test.ts`: which hellos update and which never do; waits for clients and attached tabs; nothing more reaches a browser asked to reload; once per version (A→B→A); real relay with files on disk: install folder rewritten, three profiles each reloaded, another folder and newer files left alone; Chromium's id fixtures (macOS/Linux and Windows). Removing any one guard fails its test.
 - Live, branded Chrome 155 in a macOS VM, *Load unpacked* from `~/.omp/browser-relay/extension`, relays from this branch stamped 18.11.1 to 18.11.6:
-  - extension from before this change: left alone, note shown; then one manual install and *Reload*.
+  - new relay, nothing connected: `extension reloading into update`, back on the new version with the same instance id, file-URL toggle still off, no error in `chrome://extensions`. An open's wait started with the relay (`waitForRelayExtension`) returned `ready` 459 ms later, on the new version, with no note.
   - new relay, nothing connected: `extension reloading into update`, back on the new version with the same instance id, file-URL toggle still off, no error in `chrome://extensions`.
   - two CDP clients holding a puppeteer tab: `update deferred … CDP clients connected`, the tab kept working; 0.5 s after they left, the extension was on the new version.
 - `bun test` on the relay files and `browser-open-lease`: 139 pass. `bun run check:ts` clean.
