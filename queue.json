@@ -1901,57 +1901,21 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-15T14:17:26Z",
+  "checked": "2026-10-15T14:48:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {
-   "#14235": {
-    "since": "2026-10-15T12:14:09Z",
-    "title": "feat(ai): let broker account-pool files act as a provider and API-key allow-list",
+   "#15433": {
+    "since": "2026-10-15T14:48:07Z",
+    "title": "feat(task): add omp agents show for what an agent's spawns run with",
     "files": [
-     "packages/ai/src/auth-broker/remote-store.ts"
+     "packages/coding-agent/src/sdk.ts"
     ]
    }
   },
   "merged_through": "2026-10-15T12:50:38Z",
-  "unreleased": {
-   "15443": {
-    "title": "fix(catalog): cap xai-oauth Grok 4.20 context windows at the server's 1M limit",
-    "merge_commit": "3c965be9ae6ec6364f571949f2d0db623f902814",
-    "merged_at": "2026-10-15T11:44:04Z"
-   },
-   "15411": {
-    "title": "fix(grep): show the end-of-line window for a zero-width match at end of file",
-    "merge_commit": "43c0e9141ecb138b916cba1d155d07871c013981",
-    "merged_at": "2026-10-15T11:48:13Z"
-   },
-   "15409": {
-    "title": "fix(coding-agent): keep each JS Eval run on its own artifact and local roots",
-    "merge_commit": "4e09b48702b4a0f9857070687537bdfdab198572",
-    "merged_at": "2026-10-15T11:51:24Z"
-   },
-   "15445": {
-    "title": "fix(catalog): drop retired Gemini 3.5 Flash from Antigravity",
-    "merge_commit": "05f47fab22292e23988bfd3ed398c501783f16ad",
-    "merged_at": "2026-10-15T11:55:05Z"
-   },
-   "15761": {
-    "title": "test(natives): serialize desktop worker tests with the input ownership tests",
-    "merge_commit": "3ec5f140fbf4ef40faeeb6c2aa3739f05a5ea60a",
-    "merged_at": "2026-10-15T11:56:04Z"
-   },
-   "15791": {
-    "title": "fix(agent,ai): count the reasoning the latest Claude turn replays when picking the compaction cut point",
-    "merge_commit": "326c862f986054a3d28214f803e94cac017ff157",
-    "merged_at": "2026-10-15T12:30:03Z"
-   },
-   "15792": {
-    "title": "fix(coding-agent): click a text match a scroll container shows only a strip of",
-    "merge_commit": "550e9902fc8c03800885bcde79d3104d61c9928c",
-    "merged_at": "2026-10-15T12:50:38Z"
-   }
-  },
+  "unreleased": {},
   "events": [
    {
     "at": "2026-10-14T19:47:58Z",
@@ -2096,6 +2060,64 @@
     "title": "fix(coding-agent): click a text match a scroll container shows only a strip of",
     "merged_by": "H4vC",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-15T14:48:07Z",
+    "kind": "released",
+    "number": 15443,
+    "title": "fix(catalog): cap xai-oauth Grok 4.20 context windows at the server's 1M limit",
+    "tag": "v18.11.1"
+   },
+   {
+    "at": "2026-10-15T14:48:07Z",
+    "kind": "released",
+    "number": 15411,
+    "title": "fix(grep): show the end-of-line window for a zero-width match at end of file",
+    "tag": "v18.11.1"
+   },
+   {
+    "at": "2026-10-15T14:48:07Z",
+    "kind": "released",
+    "number": 15409,
+    "title": "fix(coding-agent): keep each JS Eval run on its own artifact and local roots",
+    "tag": "v18.11.1"
+   },
+   {
+    "at": "2026-10-15T14:48:07Z",
+    "kind": "released",
+    "number": 15445,
+    "title": "fix(catalog): drop retired Gemini 3.5 Flash from Antigravity",
+    "tag": "v18.11.1"
+   },
+   {
+    "at": "2026-10-15T14:48:07Z",
+    "kind": "released",
+    "number": 15761,
+    "title": "test(natives): serialize desktop worker tests with the input ownership tests",
+    "tag": "v18.11.1"
+   },
+   {
+    "at": "2026-10-15T14:48:07Z",
+    "kind": "released",
+    "number": 15791,
+    "title": "fix(agent,ai): count the reasoning the latest Claude turn replays when picking the compaction cut point",
+    "tag": "v18.11.1"
+   },
+   {
+    "at": "2026-10-15T14:48:07Z",
+    "kind": "released",
+    "number": 15792,
+    "title": "fix(coding-agent): click a text match a scroll container shows only a strip of",
+    "tag": "v18.11.1"
+   },
+   {
+    "at": "2026-10-15T14:48:07Z",
+    "kind": "conflict",
+    "label": "#15433",
+    "title": "feat(task): add omp agents show for what an agent's spawns run with",
+    "files": [
+     "packages/coding-agent/src/sdk.ts"
+    ]
    }
   ]
  }
