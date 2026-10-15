@@ -1058,7 +1058,7 @@
    "needs": [
     "#15493"
    ],
-   "base": "64ece3d2634156c6d15a1a3de8f42b1c247fda32",
+   "base": "78b4650e832da4f22c9f0ed831083ec77bdd95d2",
    "body": "bodies/browser-worker-exit.md",
    "state": "queued",
    "pr": null,
@@ -1068,7 +1068,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-worker-exit",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-15T22:55:24Z",
+   "updated": "2026-10-15T22:55:48Z",
    "note": ""
   },
   {
