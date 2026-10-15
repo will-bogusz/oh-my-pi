@@ -1772,7 +1772,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-15T12:45:10Z",
+  "checked": "2026-10-15T13:16:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -1785,7 +1785,7 @@
     ]
    }
   },
-  "merged_through": "2026-10-15T12:30:03Z",
+  "merged_through": "2026-10-15T12:50:38Z",
   "unreleased": {
    "15443": {
     "title": "fix(catalog): cap xai-oauth Grok 4.20 context windows at the server's 1M limit",
@@ -1816,6 +1816,11 @@
     "title": "fix(agent,ai): count the reasoning the latest Claude turn replays when picking the compaction cut point",
     "merge_commit": "326c862f986054a3d28214f803e94cac017ff157",
     "merged_at": "2026-10-15T12:30:03Z"
+   },
+   "15792": {
+    "title": "fix(coding-agent): click a text match a scroll container shows only a strip of",
+    "merge_commit": "550e9902fc8c03800885bcde79d3104d61c9928c",
+    "merged_at": "2026-10-15T12:50:38Z"
    }
   },
   "events": [
@@ -1952,6 +1957,14 @@
     "kind": "merged",
     "number": 15791,
     "title": "fix(agent,ai): count the reasoning the latest Claude turn replays when picking the compaction cut point",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-15T13:16:09Z",
+    "kind": "merged",
+    "number": 15792,
+    "title": "fix(coding-agent): click a text match a scroll container shows only a strip of",
     "merged_by": "H4vC",
     "maintainer_commits": 0
    }
