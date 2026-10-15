@@ -715,15 +715,16 @@
    "needs": [],
    "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15402,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/todo-parallel",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T22:55:34Z",
+   "updated": "2026-10-15T19:27:07Z",
    "note": "",
-   "advanced": "2026-10-13T22:55:34Z"
+   "advanced": "2026-10-13T22:55:34Z",
+   "merged_by": "pr"
   },
   {
    "id": "eval-run-local-roots",
