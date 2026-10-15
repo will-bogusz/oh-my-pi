@@ -893,15 +893,16 @@
    "needs": [],
    "base": "687892d1046ecaf18829b45f5b86928a308258f4",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15489,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-upload-bytes",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T22:54:02Z",
+   "updated": "2026-10-15T22:31:26Z",
    "note": "",
-   "advanced": "2026-10-13T22:54:02Z"
+   "advanced": "2026-10-13T22:54:02Z",
+   "merged_by": "pr"
   },
   {
    "id": "browser-upload-chooser-session",
