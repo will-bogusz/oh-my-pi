@@ -45,14 +45,11 @@ Live relay harness: Chrome for Testing 150, the relay extension, and a stand-in 
 
 Remaining failures happen while the menu stays open.
 
-- `bun test packages/coding-agent/test/tools/browser-relay-detach.test.ts packages/coding-agent/test/tools/browser-relay-bridge.test.ts`: 61 pass (headless Chromium, fake relay extension). `src` reverted: 9 fail; without only the bridge's hold, the cancel check, the code-started mark or the tool-call abort, their tests fail.
-- `bun run check:ts` passes.
+- `bun test packages/coding-agent/test/tools/browser-relay-detach.test.ts packages/coding-agent/test/tools/browser-relay-bridge.test.ts`: 64 pass (headless Chromium, fake relay extension). Measured before rebasing onto current `main`: with `src` reverted, 9 fail; without only the bridge's hold, the cancel check, the code-started mark or the tool-call abort, their tests fail.
+- `bunx oxlint .`, `oxfmt --check` on the changed files and every package's `check:types` pass. (`bun run check:ts` stops at `main`'s unformatted `test/discovery/builtin-hooks.test.ts`, which this PR doesn't touch.)
 
 ---
 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated
-
-
-
