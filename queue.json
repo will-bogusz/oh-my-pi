@@ -228,7 +228,7 @@
   {
    "id": "relay-extension-version",
    "branch": "will/relay-extension-version",
-   "title": "feat(coding-agent,browser-relay): note when the relay extension came from an older omp",
+   "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
    "area": "browser",
    "priority": "P2",
    "needs": [],
@@ -240,7 +240,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-extension-version",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-14T22:35:41Z",
+   "updated": "2026-10-15T17:59:01Z",
    "note": "",
    "advanced": "2026-10-14T22:35:41Z"
   },
