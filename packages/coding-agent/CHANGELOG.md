@@ -6,6 +6,11 @@
 
 - Added `omp auth-gateway serve --clients=<file>`: per-client bearer tokens, each limited to listed models and broker OAuth accounts with no fallback to other accounts or API keys, re-read while serving ([#5098](https://github.com/can1357/oh-my-pi/issues/5098), [#15900](https://github.com/can1357/oh-my-pi/pull/15900) by [@alphastorm](https://github.com/alphastorm))
 
+### Added
+
+- Added a note to relay `browser.open` results when the OMP Browser Relay extension in Chrome was installed by an older omp, naming `omp browser-relay install` and a reload; `omp browser-relay install` now records the installing omp's version in the extension ([#15105](https://github.com/can1357/oh-my-pi/pull/15105) by [@will-bogusz](https://github.com/will-bogusz))
+- The browser relay now keeps its Chrome extension current after an omp upgrade: when the extension in `~/.omp/browser-relay/extension` is older and no omp session is using the relay, it rewrites the files and the extension reloads itself ([#15105](https://github.com/can1357/oh-my-pi/pull/15105) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Changed
 
 - Reduced CPU overhead during syntax checks and automatic edit repairs ([#15904](https://github.com/can1357/oh-my-pi/pull/15904) by [@iliaal](https://github.com/iliaal)).
