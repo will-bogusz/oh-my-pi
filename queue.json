@@ -2806,5 +2806,11 @@
     "title": "fix(browser): fail fast and reattach when Chrome detaches omp from a relay tab"
    }
   ]
+ },
+ "opening": {
+  "id": "relay-detach",
+  "token": "1a5eee6410d44101aef9f7de907b97dc",
+  "host": "MacBook-Pro",
+  "at": "2026-10-15T23:19:22Z"
  }
 }
