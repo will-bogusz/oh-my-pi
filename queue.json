@@ -221,8 +221,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-billed-cost",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-15T14:19:49Z",
-   "note": "2026-10-15: rebased onto origin/main d0b56045ff as fork/will/devin-billed-cost-rebased 8ea3ce61c5 (PR head still 127cc0a5dd; test conflict in agent-session-stats.test.ts resolved keeping both tests; stray released coding-agent CHANGELOG line dropped). Passed: check:types all packages, oxlint/oxfmt on changed files, gen:rpc no drift, bun test agent-session-stats+devin-router (30 pass) and rpc.test; bench-mac omp-rpc cargo build, clippy --all-targets -D warnings, cargo test (60 pass, 2 ignored), wire.rs rustfmt-clean. Blocker: needs a live paid Devin turn to confirm committed_quota/overage arrive; Devin plan is Free since 10-07; probe still permission_denied 10-15.",
+   "updated": "2026-10-15T16:23:14Z",
+   "note": "PARKED (Will, 2026-10-15): leave as is until he revisits with a Devin Pro plan; no pushes or follow-up. |2026-10-15: rebased onto origin/main d0b56045ff as fork/will/devin-billed-cost-rebased 8ea3ce61c5 (PR head still 127cc0a5dd; test conflict in agent-session-stats.test.ts resolved keeping both tests; stray released coding-agent CHANGELOG line dropped). Passed: check:types all packages, oxlint/oxfmt on changed files, gen:rpc no drift, bun test agent-session-stats+devin-router (30 pass) and rpc.test; bench-mac omp-rpc cargo build, clippy --all-targets -D warnings, cargo test (60 pass, 2 ignored), wire.rs rustfmt-clean. Blocker: needs a live paid Devin turn to confirm committed_quota/overage arrive; Devin plan is Free since 10-07; probe still permission_denied 10-15.",
    "advanced": "2026-10-15T14:15:52Z"
   },
   {
