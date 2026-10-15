@@ -1391,8 +1391,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-turn-end-detach",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-15T21:15:06Z",
-   "note": ""
+   "updated": "2026-10-15T21:15:25Z",
+   "note": "Refresh at reopen: the 330 ms / 312\u2013349 ms reattach figures, the Maintenance (ReattachReplay) text and Testing's 226 pass predate head e4c7c91838 (FormsAdopt, 2026-10-15). They are only in closed #15569's GitHub body; the stored body (set 2026-10-13 21:51Z) already describes the head and has none of them, so open from it and copy none of them back. The stored Testing's 54 ms / 50 ms was measured on ec583ace9f, a pre-rewrite build of the head design: rerun or say so at reopen."
   },
   {
    "id": "ax-stale-refind",
