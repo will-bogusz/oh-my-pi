@@ -2656,11 +2656,5 @@
     "title": "fix(browser): fail fast and reattach when Chrome detaches omp from a relay tab"
    }
   ]
- },
- "opening": {
-  "id": "browser-upload-chooser-session",
-  "token": "c32bd34dc0144dceaa63c3e4cee7bc7b",
-  "host": "MacBook-Pro",
-  "at": "2026-10-15T23:06:42Z"
  }
 }
