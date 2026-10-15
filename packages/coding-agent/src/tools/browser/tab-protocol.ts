@@ -100,7 +100,10 @@ export type WorkerInitPayload =
 			activateForScreenshot?: boolean;
 			/**
 			 * The user drives this browser (connected, relay): downloads keep its one browser-wide folder and real file
-			 * names, since the user's own downloads land there too. Unset means an OMP-launched browser.
+			 * names, since the user's own downloads land there too. The page, borrowed user tabs included, is also
+			 * focus-emulated so a background tab takes trusted input without being selected; the emulation ends with
+			 * the CDP session (on the relay, with the bridge's last session of the tab). Unset means an OMP-launched
+			 * browser.
 			 */
 			userDriven?: boolean;
 	  };
