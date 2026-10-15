@@ -16,21 +16,20 @@ Reading order: `tab-protocol.ts` (`page: create | owned | borrowed`) → `tab-su
 
 ## Why
 
-- **Default, not opt-in.** The tool prompt already forbade navigating the visible tab without authorization, yet the default path did. An opt-in (#12582, #11662) leaves every call that forgets the flag on the user's tab.
+- **Default, not opt-in.** The tool prompt already forbade navigating the visible tab unasked, yet the default path did; an opt-in (#12582, #11662) misses every call that forgets the flag.
 - **Screenshots.** The owned tab is focus-emulated, so Chrome captures it without activation; borrowed tabs keep `main`'s activate-before-capture.
-- **Older extension.** One predating #15109 opens the tab selected (as `browser.newPage()` does on `main`) but never navigates the user's page; refusing it would break relay users until they reinstall.
-- **Which browser.** New tabs followed the last hello, which flips when a service worker restarts. Each omp tab has its own relay connection, so the supervisor names the tab it used last (`nearTargetId`, a relay-only parameter). Known limit: unlike `main`'s adoption, the fallback doesn't probe `visibilityState`, so a minimized browser listed first beats a visible second one.
+- **Older extension.** One predating #15109 opens the tab selected but never navigates the user's page; refusing it would break relay users until they reinstall.
+- **Which browser.** New tabs followed the last hello, which flips when a service worker restarts. Each omp tab has its own relay connection, so the supervisor names the tab it used last (`nearTargetId`, a relay-only parameter); a page session's create still opens in that page's browser. Known limit: the fallback doesn't probe `visibilityState`, so a minimized browser listed first beats a visible second one.
 - With no relay browser target, create and close use Puppeteer's root connection.
-- **Upload staging.** A tab's staged upload copies go with its page, so they are now removed when omp closes any page it owns (an owned relay tab as well as a headless one); a borrowed tab keeps them until the sweep, as before.
-- A `Target.createTarget` sent on a relay page session still opens in that page's browser; only the browser-level create uses `nearTargetId`.
+- **Upload staging** now goes with any page omp owns and closes (owned relay tabs too, not only headless).
 - Non-goals: advisory claims; freezing or idle-closing owned relay tabs; closing a crashed omp's tabs; `app.cdp_url` still adopts.
 - Takes over #14060 by nnnnoel (co-author), without its close refusal for borrowed tabs. Related: #12101, #12314, #14881, #14865. Refs #14884, #11688, #12049.
 
 ## Testing
 
-- `browser-relay-tab-isolation.test.ts` (real extension in Chromium): own tabs unselected, user tab untouched, click works, close removes the tab, borrowed tab survives, dismissed-debugger tab closed, owned recovery target survives a failed init, a second browser's default tab opens beside the tab borrowed there. 4 of 5 fail with the source reverted. Bridge tests: routing fails without `#instanceForNewTab`; `closeRelayTarget` calling an offline browser's tab closed fails with `main`'s `Target.getTargets` check.
-- The isolation test also hovers the unselected owned tab (headless Chromium clicks hidden tabs); without the owned-tab focus emulation that hover times out.
-- `bun test test/tools/browser-*.test.ts`: 593 pass, 4 skipped; `oxlint`, `oxfmt --check` on the changed files and every package's `check:types` pass.
+- `browser-relay-tab-isolation.test.ts` (real extension in Chromium): own tabs unselected, user tab untouched, click works, close removes the tab, borrowed tab survives, dismissed-debugger tab closed, owned recovery target survives a failed init, a second browser's default tab opens beside the tab borrowed there; 4 of 5 fail with the source reverted. Bridge tests: routing fails without `#instanceForNewTab`; an offline browser's tab reported closed fails with `main`'s check.
+- The isolation test also hovers the unselected owned tab; without focus emulation that hover times out.
+- `bun test test/tools/browser-*.test.ts`: 593 pass, 4 skipped; `oxlint`, `oxfmt --check` and `check:types` pass.
 - Live, headful Chrome for Testing on an isolated relay, user tab selected, via `acquireTab`/`runInTab`/`releaseTab`:
 
 | extension | user tab after open | owned tab | click | screenshot | close |
