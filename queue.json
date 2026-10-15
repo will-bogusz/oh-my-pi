@@ -1924,7 +1924,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-15T22:01:07Z",
+  "checked": "2026-10-15T22:31:28Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -1937,7 +1937,7 @@
     ]
    }
   },
-  "merged_through": "2026-10-15T20:48:32Z",
+  "merged_through": "2026-10-15T22:29:04Z",
   "unreleased": {
    "15402": {
     "title": "feat(coding-agent): send todo updates alongside the next tool call",
@@ -1948,6 +1948,11 @@
     "title": "fix(coding-agent): return large artifacts' text from Eval read() outside the session's artifacts dir",
     "merge_commit": "8c7252508374299e18815f89f66690ec5cf58539",
     "merged_at": "2026-10-15T20:48:32Z"
+   },
+   "15489": {
+    "title": "fix(coding-agent): send file contents when uploading into relay and connected browsers",
+    "merge_commit": "682357e60f932495c563323b51d83618e9277b39",
+    "merged_at": "2026-10-15T22:29:04Z"
    }
   },
   "events": [
@@ -2166,6 +2171,14 @@
     "kind": "merged",
     "number": 15410,
     "title": "fix(coding-agent): return large artifacts' text from Eval read() outside the session's artifacts dir",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-15T22:31:28Z",
+    "kind": "merged",
+    "number": 15489,
+    "title": "fix(coding-agent): send file contents when uploading into relay and connected browsers",
     "merged_by": "H4vC",
     "maintainer_commits": 1
    }
