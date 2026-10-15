@@ -555,7 +555,7 @@ impl Drop for KernelLease {
 pub(super) mod tests {
 	use super::*;
 
-	pub(in crate::desktop) static OWNERSHIP_TEST: Mutex<()> = Mutex::new(());
+	static OWNERSHIP_TEST: Mutex<()> = Mutex::new(());
 
 	/// Real ownership without OS event monitoring: lifecycle regressions must
 	/// not depend on an interactive desktop or Accessibility permissions.
