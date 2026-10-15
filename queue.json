@@ -1771,7 +1771,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-15T12:14:09Z",
+  "checked": "2026-10-15T12:45:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -1784,7 +1784,7 @@
     ]
    }
   },
-  "merged_through": "2026-10-15T11:56:04Z",
+  "merged_through": "2026-10-15T12:30:03Z",
   "unreleased": {
    "15443": {
     "title": "fix(catalog): cap xai-oauth Grok 4.20 context windows at the server's 1M limit",
@@ -1810,6 +1810,11 @@
     "title": "test(natives): serialize desktop worker tests with the input ownership tests",
     "merge_commit": "3ec5f140fbf4ef40faeeb6c2aa3739f05a5ea60a",
     "merged_at": "2026-10-15T11:56:04Z"
+   },
+   "15791": {
+    "title": "fix(agent,ai): count the reasoning the latest Claude turn replays when picking the compaction cut point",
+    "merge_commit": "326c862f986054a3d28214f803e94cac017ff157",
+    "merged_at": "2026-10-15T12:30:03Z"
    }
   },
   "events": [
@@ -1940,6 +1945,14 @@
     "files": [
      "packages/ai/src/auth-broker/remote-store.ts"
     ]
+   },
+   {
+    "at": "2026-10-15T12:45:10Z",
+    "kind": "merged",
+    "number": 15791,
+    "title": "fix(agent,ai): count the reasoning the latest Claude turn replays when picking the compaction cut point",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  }
