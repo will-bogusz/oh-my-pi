@@ -605,15 +605,16 @@
    "needs": [],
    "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15409,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-run-local-roots",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T22:55:10Z",
+   "updated": "2026-10-15T12:14:07Z",
    "note": "",
-   "advanced": "2026-10-13T22:55:10Z"
+   "advanced": "2026-10-13T22:55:10Z",
+   "merged_by": "pr"
   },
   {
    "id": "eval-artifact-raw-paging",
@@ -643,15 +644,16 @@
    "needs": [],
    "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15411,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/grep-eof-zero-width",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T22:55:26Z",
+   "updated": "2026-10-15T12:14:07Z",
    "note": "",
-   "advanced": "2026-10-13T22:55:26Z"
+   "advanced": "2026-10-13T22:55:26Z",
+   "merged_by": "pr"
   },
   {
    "id": "display-awake-hung-call",
@@ -720,15 +722,16 @@
    "needs": [],
    "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15443,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/xai-oauth-grok-420-context",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T23:10:47Z",
+   "updated": "2026-10-15T12:14:07Z",
    "note": "",
-   "advanced": "2026-10-13T23:10:47Z"
+   "advanced": "2026-10-13T23:10:47Z",
+   "merged_by": "pr"
   },
   {
    "id": "antigravity-retired-gemini-flash",
@@ -739,15 +742,16 @@
    "needs": [],
    "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15445,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/antigravity-retired-gemini-flash",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T23:11:56Z",
+   "updated": "2026-10-15T12:14:07Z",
    "note": "",
-   "advanced": "2026-10-13T23:11:56Z"
+   "advanced": "2026-10-13T23:11:56Z",
+   "merged_by": "pr"
   },
   {
    "id": "browser-upload-bytes",
@@ -1315,7 +1319,7 @@
    ],
    "base": "c695605fbd07f7b61a485ee0af1326145e424afc",
    "body": "bodies/test-ownership-lock.md",
-   "state": "open",
+   "state": "merged",
    "pr": 15761,
    "closed_prs": [
     15580
@@ -1323,11 +1327,12 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/test-ownership-lock",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-14T18:53:48Z",
+   "updated": "2026-10-15T12:14:07Z",
    "note": "",
    "advanced": "2026-10-14T18:36:18Z",
    "opened": "2026-10-14T18:53:35Z",
-   "readied": "2026-10-14T18:53:48Z"
+   "readied": "2026-10-14T18:53:48Z",
+   "merged_by": "pr"
   },
   {
    "id": "computer-web-readonly",
