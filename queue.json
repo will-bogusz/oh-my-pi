@@ -688,8 +688,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/lsp-close-idle-docs",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-14T22:37:12Z",
-   "note": "",
+   "updated": "2026-10-15T00:33:50Z",
+   "note": "Ride along with the next needed push: docs/tools/lsp.md still says only a write already in progress tears the client down; since d0cbd9a402 a close outliving its cancelled opener has its own 2 s timeout and a stuck write tears the client down too.",
    "advanced": "2026-10-14T22:37:12Z"
   },
   {
