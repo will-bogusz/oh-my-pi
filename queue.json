@@ -251,7 +251,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "682357e60f932495c563323b51d83618e9277b39",
+   "base": "b221327013d82123d9e3e22c5cb00cf730709233",
    "body": "bodies/relay-own-tab.md",
    "state": "queued",
    "pr": null,
@@ -261,9 +261,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-own-tab",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-15T23:03:31Z",
+   "updated": "2026-10-15T23:03:43Z",
    "note": "",
-   "advanced": "2026-10-15T22:46:42Z"
+   "advanced": "2026-10-15T23:03:43Z"
   },
   {
    "id": "policy-priority-unmeasured",
