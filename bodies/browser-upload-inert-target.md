@@ -2,7 +2,7 @@
 
 I made browser `uploadFile` fail when nothing on the page read the dropped file, because it reported success on any element and the agent went on believing a file was attached.
 
-`tab.uploadFile(selector, …)` on an element that is neither a file input nor a chooser trigger falls back to a synthetic drag-and-drop. It now checks whether a page listener read the dropped files during `drop`; if none did, it throws `… opened no file chooser and nothing on the page took the dropped files; target the page's <input type=file>, the control that opens the chooser, or its drop zone`.
+`tab.uploadFile(selector, …)` on an element that is neither a file input nor a chooser trigger falls back to a synthetic drag-and-drop (`deliverToDropZone`). It now checks whether a page listener read the dropped files during `drop`; if none did, it throws `… opened no file chooser and nothing on the page took the dropped files; target the page's <input type=file>, the control that opens the chooser, or its drop zone`. The check covers both upload routes: files a picker built from staged copies (`paths`) and contents streamed into the page (`contents`).
 
 | Target | main | this PR |
 |---|---|---|
@@ -12,7 +12,9 @@ I made browser `uploadFile` fail when nothing on the page read the dropped file,
 
 ## Why
 
-Before, the drop path dispatched `dragenter`, `dragover` and `drop` and returned whatever happened. Cancellation is not proof either: drop zones cancel `dragover` to accept a drop, but many pages also cancel `dragover` and `drop` on `document` only so a stray drop does not navigate away, and react-dropzone does that by default. What a drop zone always does is read `event.dataTransfer.files` or `.items` while handling `drop`, so the dispatch counts reads of those two getters during `drop`. It runs in the page's main world, because a getter defined in Puppeteer's isolated world is invisible to the page's own listeners.
+Before, the drop path dispatched `dragenter`, `dragover` and `drop` and returned whatever happened. Cancellation is not proof either: drop zones cancel `dragover` to accept a drop, but many pages also cancel `dragover` and `drop` on `document` only so a stray drop does not navigate away, and react-dropzone does that by default. What a drop zone always does is read `event.dataTransfer.files` or `.items` while handling `drop`, so the upload counts reads of those two getters during `drop`.
+
+The files are still built and dropped from Puppeteer's isolated world, out of reach of page-replaced globals. The page's listeners see a different wrapper of the same `DataTransfer`, though, so a getter defined in the isolated world would be invisible to them. The watch is a capturing `drop` listener in the main world, on the element's document or shadow root, that wraps `files` and `items` on the main-world wrapper (using that wrapper's own prototype getters, not the page's `DataTransfer` global) and is removed after the drop.
 
 Decisions:
 - Reads during `dragenter`/`dragover` do not count: libraries inspect `items` there to style the zone.
@@ -24,14 +26,14 @@ Maintenance: depends on `DataTransfer.prototype` exposing `files` and `items` as
 
 ## Testing
 
-- `browser-upload-drop.test.ts`, headless Chrome, page with react-dropzone-style document guards: uploads to zones reading `files`, reading only `items`, and delegated from `document` succeed with `alpha.txt`; a div that listens for `drop` without reading files fails with the error above (on `main` it succeeds; counting only element-level reads fails the delegated zone).
-- `browser-interactions.test.ts` still passes.
+- `browser-upload-drop.test.ts`, headless Chrome omp launched, page with react-dropzone-style document guards: uploads to zones reading `files`, reading only `items`, and delegated from `document` succeed with `alpha.txt`; a div that listens for `drop` without reading files fails with the error above (on `main` it succeeds; counting only element-level reads fails the delegated zone).
+- `browser-upload-contents.test.ts`, a connected Chrome on each route (`paths`, and `contents` forced by refusing `DOM.setFileInputFiles`): an element the document guard cancels the drop for but nothing reads fails with the error above, and a drop zone inside a shadow root gets `alpha.txt`. The rest of that file (including drops on a page that replaces `DataTransfer`, `File` and `DragEvent`) still passes: 19 pass across the two files.
+- `browser-interactions.test.ts` still passes (20 pass).
 - Source check of react-dropzone 14 (default `getFilesFromEvent`), Dropzone.js 5 and 6, FilePond, Uppy's DragDrop and GitHub's `file-attachment` element: each reads `files` or `items` synchronously inside its `drop` listener. Not run against the libraries live.
-- `bun check` passes.
+- `bunx oxlint .`, `oxfmt --check` on the changed files and every package's `check:types` pass. `bun run check:ts` stops only at `check:tools` on `test/discovery/builtin-hooks.test.ts` formatting, which fails the same way on `main`.
 
 ---
 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
-
