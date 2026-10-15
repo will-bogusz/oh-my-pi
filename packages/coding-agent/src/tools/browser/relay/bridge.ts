@@ -244,6 +244,8 @@ class TabState {
 const INELIGIBLE_URL = /^(chrome|devtools|edge|view-source|chrome-extension|chrome-untrusted|chrome-search):/i;
 
 const RPC_TIMEOUT_MS = 20_000;
+/** How long after its timeout a late RPC result is still undone; a wedged extension must not grow the map forever. */
+const LATE_RPC_KEEP_MS = 60_000;
 const CDP_ERROR_METHOD_NOT_FOUND = -32601;
 const CDP_ERROR_SERVER = -32000;
 
@@ -277,6 +279,8 @@ export class RelayBridge {
 		string,
 		{ resolve: (value: unknown) => void; reject: (err: Error) => void; timer: NodeJS.Timeout }
 	>();
+	/** Timed-out RPCs whose late success still needs undoing (a tab Chrome created after omp gave up), by `instance:id`. */
+	#lateRpc = new Map<string, { onResult: (result: unknown) => void; timer: NodeJS.Timeout }>();
 	/** Real child session id → owning tab key, learned from `Target.attachedToTarget` events. */
 	#realSessionTabs = new Map<string, string>();
 	#log: (message: string, data?: Record<string, unknown>) => void;
@@ -319,6 +323,36 @@ export class RelayBridge {
 			if (inst.socket) return inst;
 		}
 		return undefined;
+	}
+
+	/**
+	 * The browser a new tab opens in: the one named by `nearTargetId` (a tab the caller drives on
+	 * another connection; omp gives every tab its own), else one holding a tab this connection
+	 * drives, else the one showing the first selected tab (the tab an open without a target used to
+	 * adopt), else the last hello. A reconnecting extension's hello must not move new tabs to another browser,
+	 * and neither may the caller's browser being offline: undefined then, instead of another browser.
+	 */
+	#instanceForNewTab(conn: CdpConnection, nearTargetId: unknown): ExtInstance | undefined {
+		const near = typeof nearTargetId === "string" ? parseTargetId(nearTargetId) : null;
+		if (near) {
+			// The target id names its browser even after the user closed that tab.
+			const code = near.key.slice(0, near.key.indexOf(":"));
+			for (const inst of this.#instances.values()) {
+				if (inst.code === code) return inst.socket ? inst : undefined;
+			}
+			return undefined;
+		}
+		const own = [...conn.claims].map(key => this.#tabs.get(key)).find(tab => tab !== undefined);
+		if (own) {
+			const inst = this.#instances.get(own.instanceId);
+			return inst?.socket ? inst : undefined;
+		}
+		for (const tab of this.#tabs.values()) {
+			if (!tab.active || tab.discarded || !this.#eligible(tab)) continue;
+			const inst = this.#instances.get(tab.instanceId);
+			if (inst?.socket) return inst;
+		}
+		return this.#lastHello();
 	}
 
 	/** True after the first hello, and stays true: separates a reaped service worker from an absent extension. */
@@ -400,6 +434,11 @@ export class RelayBridge {
 			pending.reject(error);
 			this.#pendingRpc.delete(key);
 		}
+		for (const [key, late] of this.#lateRpc) {
+			if (!key.startsWith(prefix)) continue;
+			clearTimeout(late.timer);
+			this.#lateRpc.delete(key);
+		}
 	}
 
 	/**
@@ -458,7 +497,14 @@ export class RelayBridge {
 			case "rpcResult": {
 				const key = `${instanceId}:${msg.id}`;
 				const pending = this.#pendingRpc.get(key);
-				if (!pending) return;
+				if (!pending) {
+					const late = this.#lateRpc.get(key);
+					if (!late) return;
+					this.#lateRpc.delete(key);
+					clearTimeout(late.timer);
+					if (msg.ok) late.onResult(msg.result);
+					return;
+				}
 				this.#pendingRpc.delete(key);
 				clearTimeout(pending.timer);
 				if (msg.ok) pending.resolve(msg.result);
@@ -1078,15 +1124,33 @@ export class RelayBridge {
 			case "Target.createTarget": {
 				const url =
 					typeof msg.params?.url === "string" && msg.params.url.length > 0 ? msg.params.url : "about:blank";
-				const inst = near ? this.#instances.get(near.instanceId) : this.#lastHello();
+				// `nearTargetId` is the relay's own parameter: open in the browser of that tab.
+				const inst = near
+					? this.#instances.get(near.instanceId)
+					: this.#instanceForNewTab(conn, msg.params?.nearTargetId);
 				if (!inst || !inst.socket) {
-					this.#replyError(conn, msg, "relay extension is not connected");
+					this.#replyError(conn, msg, "relay extension is not connected for the browser this tab would open in");
 					return;
 				}
 				// CDP `background: true` creates the tab without selecting it; an extension that predates `active` ignores it.
 				const active = msg.params?.background === true ? false : undefined;
-				const result = (await this.#rpc({ op: "createTab", url, active }, inst)) as { tab: TabSnapshot };
+				// Chrome can still create the tab after the RPC timed out: close it then, since nobody learns its id.
+				const result = (await this.#rpc({ op: "createTab", url, active }, inst, RPC_TIMEOUT_MS, late => {
+					const tabId = (late as { tab: TabSnapshot }).tab.tabId;
+					this.#rpc({ op: "removeTab", tabId }, inst).catch(err => {
+						this.#log("late relay tab left open", {
+							tabId,
+							error: err instanceof Error ? err.message : String(err),
+						});
+					});
+				})) as { tab: TabSnapshot };
 				this.#onTabUpsert(result.tab, inst.instanceId);
+				// The client left while Chrome created the tab (omp gave up on a slow open), so nobody
+				// can learn its id to close it later: close it now instead of leaving it in the user's browser.
+				if (this.#conns.get(conn.id) !== conn) {
+					await this.#rpc({ op: "removeTab", tabId: result.tab.tabId }, inst);
+					return;
+				}
 				// Creating a tab is an explicit act of driving it.
 				const createdKey = tabKeyOf(inst.code, result.tab.tabId);
 				this.#claimTab(conn, createdKey);
@@ -1689,12 +1753,23 @@ export class RelayBridge {
 		return inst;
 	}
 
-	#rpc(req: RelayRpcRequest, inst: ExtInstance, timeoutMs = RPC_TIMEOUT_MS): Promise<unknown> {
+	#rpc(
+		req: RelayRpcRequest,
+		inst: ExtInstance,
+		timeoutMs = RPC_TIMEOUT_MS,
+		onLateResult?: (result: unknown) => void,
+	): Promise<unknown> {
 		if (!inst.socket) return Promise.reject(new Error("relay extension is not connected"));
 		const id = ++this.#rpcSeq;
 		const { promise, resolve, reject } = Promise.withResolvers<unknown>();
 		const timer = setTimeout(() => {
 			this.#pendingRpc.delete(`${inst.instanceId}:${id}`);
+			if (onLateResult) {
+				const key = `${inst.instanceId}:${id}`;
+				const expiry = setTimeout(() => this.#lateRpc.delete(key), LATE_RPC_KEEP_MS);
+				expiry.unref?.();
+				this.#lateRpc.set(key, { onResult: onLateResult, timer: expiry });
+			}
 			reject(new Error(`extension rpc '${req.op}' timed out after ${timeoutMs}ms`));
 		}, timeoutMs);
 		this.#pendingRpc.set(`${inst.instanceId}:${id}`, { resolve, reject, timer });
