@@ -1898,6 +1898,26 @@
    "added": "2026-10-14T22:46:19Z",
    "updated": "2026-10-14T22:46:19Z",
    "note": ""
+  },
+  {
+   "id": "relay-self-update",
+   "branch": "will/relay-self-update",
+   "title": "feat(coding-agent,browser-relay): update the relay extension in place after an omp upgrade",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [
+    "#15105"
+   ],
+   "base": "ab692d55fdbe2a9f77380527617d17cf1f0c3e08",
+   "body": "bodies/relay-self-update.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-self-update",
+   "host": "MacBook-Pro",
+   "added": "2026-10-15T17:46:33Z",
+   "updated": "2026-10-15T17:46:33Z",
+   "note": ""
   }
  ],
  "watch": {
