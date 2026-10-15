@@ -2,16 +2,28 @@
 
 Chrome's "started debugging this browser" bar sat across every tab of my browser the whole time omp had one relay tab attached, even while I was just reading; now omp lets go of its tabs when the agent hands back to me and picks them up again on its next call.
 
+<picture>
+  <source media="(min-width: 1244px) and (prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/d7800b18-0dde-40ec-9a76-ab97d5c8cc84">
+  <source media="(min-width: 1244px) and (prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/f5bae185-5451-404e-a0cd-9a68a877894a">
+  <source media="(prefers-color-scheme: dark)" width="440" srcset="https://github.com/user-attachments/assets/0815a0dd-02cd-459d-ac18-5e480504d7eb">
+  <source media="(prefers-color-scheme: light)" width="440" srcset="https://github.com/user-attachments/assets/b152edee-7e55-4119-8592-d358eec825d7">
+  <img width="780" alt="Timeline across one hand-back. Main: Chrome's debugging bar stays on every tab through the agent's turn, the hand-back and the whole time you read. This PR: when the agent hands back, omp releases its relay tabs (still open, omp's, in its tab group) and the bar leaves about 5 s later; you read with no bar; the agent's next browser call reattaches the tab first, puts its settings back, and the bar returns. Carried over: the tab and its popups, element ids, run globals, console and request logs, emulated viewport and overrides, init scripts, user agent, downloads folder, HTTPS setting, dialog policy. Not carried over: what the page logged or requested while omp was away. A tab with a route, HAR, trace, profile or recording running, or a key or button held, stays attached and the next result says why." src="https://github.com/user-attachments/assets/f5bae185-5451-404e-a0cd-9a68a877894a" />
+</picture>
+
 A release lets go of Chrome's debugger only: what the agent built on a tab stays for its next turn.
+
+<details><summary>Between turns, row by row</summary>
 
 | relay browser, between turns | before | this PR |
 |---|---|---|
 | Chrome's debugging bar | on every tab until omp closes its tabs | leaves about 5 s after the agent hands back (run end, interrupt included); back on the next browser call |
 | omp's relay tabs | attached | open, owned and grouped, detached |
 | next call on such a tab | — | reattaches first, with the tab's state carried over (below) |
-| tab with routes, a capture, a recording or held keys, or a page waiting on a dialog or held chooser | — | stays attached, and the next result says why |
+| tab with a route, HAR, trace, profile or recording running, a key or button held, or a page waiting on a dialog or held chooser | — | stays attached, and the next result says why |
 | page that opens a dialog while released | — | next call fails at once naming it; works after the user answers |
 | `persist: true` or `allowed_domains` tabs, or `browser.relayReleaseOnTurnEnd: false` | — | stay attached |
+
+</details>
 
 What survives a release:
 
