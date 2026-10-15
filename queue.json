@@ -922,7 +922,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-upload-chooser-session",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-15T23:06:27Z",
+   "updated": "2026-10-15T23:06:45Z",
    "note": "",
    "advanced": "2026-10-15T22:51:33Z",
    "built": [
@@ -1044,7 +1044,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-15T23:06:27Z"
+   "opened": "2026-10-15T23:06:27Z",
+   "readied": "2026-10-15T23:06:45Z"
   },
   {
    "id": "browser-upload-inert-target",
