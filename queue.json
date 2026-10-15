@@ -1100,15 +1100,15 @@
    "needs": [],
    "base": "682357e60f932495c563323b51d83618e9277b39",
    "body": "bodies/fill-picker-inputs.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 15914,
    "closed_prs": [
     15503
    ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fill-picker-inputs",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-15T22:53:55Z",
+   "updated": "2026-10-15T22:54:51Z",
    "note": "",
    "advanced": "2026-10-15T22:47:47Z",
    "built": [
@@ -1202,7 +1202,8 @@
      "at": "2026-10-15T22:53:55Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-15T22:54:51Z"
   },
   {
    "id": "print-hold",
