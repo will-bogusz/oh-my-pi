@@ -14,7 +14,7 @@ Takes over #14866 by alnaggar-dev, which closed the tab when its worker exited; 
 
 ## Why
 
-#15493's `recoverWorkerTab(…, { recover: false, failedReason })` moves a relay tab to a new worker after Chrome detaches; this PR reuses it for a worker that exited, so there is one recovery path.
+`recoverWorkerTab(…, { recover: false, failedReason })` moves a relay tab to a new worker after Chrome detaches; this PR reuses it for a worker that exited, so there is one recovery path.
 
 Decisions:
 - **Reattach rather than close (#14866's shape).** Only the worker died; closing loses the agent's place and, in relay mode, the user's tab. Closing stays the fallback when reattaching fails.
