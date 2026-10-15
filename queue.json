@@ -1986,7 +1986,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
+   "base": "b221327013d82123d9e3e22c5cb00cf730709233",
    "body": null,
    "state": "open",
    "pr": 15574,
@@ -1994,7 +1994,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-stale-refind",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T22:53:49Z",
+   "updated": "2026-10-15T23:53:19Z",
    "note": "",
    "advanced": "2026-10-13T22:53:49Z"
   },
