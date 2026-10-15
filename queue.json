@@ -1910,14 +1910,14 @@
    ],
    "base": "ab692d55fdbe2a9f77380527617d17cf1f0c3e08",
    "body": "bodies/relay-self-update.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-self-update",
    "host": "MacBook-Pro",
    "added": "2026-10-15T17:46:33Z",
-   "updated": "2026-10-15T17:47:18Z",
-   "note": ""
+   "updated": "2026-10-15T17:58:59Z",
+   "note": "folded into #15105 (commit 100735778e on will/relay-extension-version, 2026-10-15)"
   }
  ],
  "watch": {
