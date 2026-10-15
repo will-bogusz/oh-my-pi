@@ -17,7 +17,7 @@ Reading order: `tab-worker.ts` `#init` (emulate focus when `payload.userDriven`)
 
 ## Why
 
-It widens #15490's per-tab file-chooser switch in the bridge into a table that also holds focus emulation.
+It widens the bridge's per-tab file-chooser switch into a table that also holds focus emulation.
 
 - **Cause.** `main` emulates focus only on omp's headless pages. `Emulation.setFocusEmulationEnabled` makes Chrome count a page as visible without selecting its tab or raising the window.
 - **Decision.** The `emulateFocus` doc said "never a borrowed user tab" (9b2a43514b); this reverses that for connected and relay browsers. Selecting the tab per action, as screenshots do, would take it from the user.
@@ -28,7 +28,7 @@ It widens #15490's per-tab file-chooser switch in the bridge into a table that a
 ## Testing
 
 - `browser-background-input.test.ts` (headless Chromium; real relay extension, and `app.cdp_url`): a hidden background tab takes hover and click through omp, the user's tab stays selected, and the page reads hidden after release, including after a second named tab's release and a killed worker. Input fails without the `#init` change (hover times out); release fails without the bridge change, as do 6 new `browser-relay-bridge.test.ts` cases.
-- `bun test test/tools/browser-*.test.ts`: 549 pass, 4 skipped; `bun run check:ts` passes.
+- `bun test test/tools/browser-background-input.test.ts test/tools/browser-relay-bridge.test.ts test/tools/browser-upload-chooser.test.ts`: 68 pass; `check:types` passes.
 - Headful Chrome in a macOS VM via the relay, page-side event log, the cases above: trusted events reached the page in 8 of 18 actions on `main`, 18 of 18 with this PR.
 
 Not run: headful Chrome on Linux or Windows.
