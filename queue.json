@@ -2736,19 +2736,11 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-16T04:08:06Z",
+  "checked": "2026-10-16T04:39:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
-  "conflicts": {
-   "#15433": {
-    "since": "2026-10-15T14:48:07Z",
-    "title": "feat(task): add omp agents show for what an agent's spawns run with",
-    "files": [
-     "packages/coding-agent/src/sdk.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-10-15T22:29:04Z",
   "unreleased": {
    "15402": {
