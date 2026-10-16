@@ -853,7 +853,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "c2cb79e4c227aa4b22c4ccb933ff72fd88bceba4",
+   "base": "a536558dc21634462c1b2647676953204569779c",
    "body": null,
    "state": "open",
    "pr": 15433,
@@ -861,9 +861,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agents-show",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-14T22:36:45Z",
+   "updated": "2026-10-16T04:31:00Z",
    "note": "",
-   "advanced": "2026-10-14T22:36:45Z"
+   "advanced": "2026-10-16T04:31:00Z"
   },
   {
    "id": "xai-oauth-grok-420-context",
