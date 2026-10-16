@@ -2262,11 +2262,31 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/display-turn-hold",
    "host": "MacBook-Pro",
    "added": "2026-10-14T03:39:10Z",
-   "updated": "2026-10-14T19:44:30Z",
+   "updated": "2026-10-16T02:17:02Z",
    "note": "",
    "advanced": "2026-10-14T18:36:18Z",
    "opened": "2026-10-14T18:55:59Z",
-   "readied": "2026-10-14T18:56:17Z"
+   "readied": "2026-10-14T18:56:17Z",
+   "built": [
+    {
+     "with": "#15157",
+     "code": "f420943a408e057a0d97acb3b3b27b2525c73934",
+     "with_code": "0b145229cb310f8953640a3c8f92c1b269db7562",
+     "tip": "063d6b6f59dfdeac9b79ad9b216648cedcec8fbf",
+     "with_tip": "2110a5d6ff40c0d85e04ac80c70054c034ba361e",
+     "at": "2026-10-16T02:16:59Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15574",
+     "code": "f420943a408e057a0d97acb3b3b27b2525c73934",
+     "with_code": "864e863864e81bea6cc084e9e975941eccd61211",
+     "tip": "063d6b6f59dfdeac9b79ad9b216648cedcec8fbf",
+     "with_tip": "92818faaaa6bd471fa849b362fbee170c1da55f8",
+     "at": "2026-10-16T02:17:02Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "computer-key-reroute",
