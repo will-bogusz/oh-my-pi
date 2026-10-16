@@ -27,4 +27,4 @@ Non-goal: that turn still loses its `power.sleepPrevention` and `computer` displ
 
 - [ ] `bun check` passes
 - [x] Tested locally
-- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+- [ ] CHANGELOG updated: no entry, since the regression came from #15947 and no release has shipped it
