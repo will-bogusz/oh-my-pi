@@ -2217,8 +2217,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-rich-text",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:52:09Z",
-   "note": ""
+   "updated": "2026-10-16T03:04:57Z",
+   "note": "#15574 went hint-only (2026-10-16, d05bbc41ac): this entry's need on it was only for code that push removed (read_ref, check_identity, AxText.refound, #reportRefound). Rebase onto main alone dropping that code and 7096338aea, then clear needs; if it lands after #15574, add its text request to Request::reference()."
   },
   {
    "id": "relay-popup-front",
