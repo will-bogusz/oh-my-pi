@@ -1587,7 +1587,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-worker-exit",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T20:55:17Z",
+   "updated": "2026-10-16T20:55:37Z",
    "note": "",
    "advanced": "2026-10-16T20:43:50Z",
    "built": [
@@ -1673,7 +1673,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-16T20:55:16Z"
+   "opened": "2026-10-16T20:55:16Z",
+   "readied": "2026-10-16T20:55:37Z"
   },
   {
    "id": "aria-password-mask",
