@@ -861,9 +861,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agents-show",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T04:31:00Z",
+   "updated": "2026-10-16T04:34:14Z",
    "note": "",
-   "advanced": "2026-10-16T04:31:00Z"
+   "advanced": "2026-10-16T04:31:00Z",
+   "built": [
+    {
+     "with": "#15762",
+     "code": "1ce36a0733ceec7856072a79c223b3c3cbb9970a",
+     "with_code": "73dba22eb66204e214f2865c3ae4df2d490b2575",
+     "tip": "6e695853478425279fc5bcddc34932e5c4ae5f8e",
+     "with_tip": "f67b2905f52aee200bead06f50ad6d44d9a74ab9",
+     "at": "2026-10-16T04:34:11Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "xai-oauth-grok-420-context",
