@@ -2915,15 +2915,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-16T21:05:27Z",
+  "checked": "2026-10-16T21:35:46Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "inflight-epoch": {
-    "since": "2026-10-16T21:05:27Z",
-    "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#15433": {
     "since": "2026-10-16T21:05:27Z",
@@ -3369,6 +3364,13 @@
      "packages/coding-agent/src/task/executor.ts",
      "packages/coding-agent/src/task/structured-subagent.ts"
     ]
+   },
+   {
+    "at": "2026-10-16T21:35:46Z",
+    "kind": "unopenable",
+    "id": "inflight-epoch",
+    "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
+    "why": "opened as #16038"
    }
   ]
  }
