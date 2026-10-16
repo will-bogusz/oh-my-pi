@@ -2561,7 +2561,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/power-assertion-bind",
    "host": "MacBook-Pro",
    "added": "2026-10-16T02:05:49Z",
-   "updated": "2026-10-16T02:09:36Z",
+   "updated": "2026-10-16T02:09:52Z",
    "note": "",
    "built": [
     {
@@ -2700,7 +2700,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-16T02:09:35Z"
+   "opened": "2026-10-16T02:09:35Z",
+   "readied": "2026-10-16T02:09:52Z"
   }
  ],
  "watch": {
