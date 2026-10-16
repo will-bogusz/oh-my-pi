@@ -2547,7 +2547,7 @@
   {
    "id": "inflight-epoch",
    "branch": "will/inflight-epoch",
-   "title": "fix(coding-agent): keep a turn's power and display holds when an interrupted prompt unwinds during it",
+   "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
    "area": "computer",
    "priority": "P2",
    "needs": [
@@ -2561,8 +2561,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/inflight-epoch",
    "host": "MacBook-Pro",
    "added": "2026-10-14T22:46:19Z",
-   "updated": "2026-10-16T20:47:26Z",
-   "note": "",
+   "updated": "2026-10-16T20:49:34Z",
+   "note": "narrowed 2026-10-16: #15947 (fixes #15946) landed the epoch guard; only the settle of a stale end with nothing in flight remains (steer test fails on main)",
    "advanced": "2026-10-16T20:47:26Z"
   },
   {
