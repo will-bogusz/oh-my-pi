@@ -1813,7 +1813,7 @@
     "#15489",
     "#15508"
    ],
-   "base": "b16b8de60b5d4b33e5e3304d7cd6d709c08f4100",
+   "base": "ca6558ea6a7b55a265b868b7813e3f8605b81010",
    "body": "bodies/webmcp-native.md",
    "state": "queued",
    "pr": null,
@@ -1823,7 +1823,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/webmcp-native",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:51:02Z",
+   "updated": "2026-10-16T00:06:15Z",
    "note": ""
   },
   {
