@@ -2555,13 +2555,13 @@
    "needs": [],
    "base": "afdc8bd10e69974bfcd7565a2c6f70d1b488919c",
    "body": "bodies/power-assertion-bind.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 15941,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/power-assertion-bind",
    "host": "MacBook-Pro",
    "added": "2026-10-16T02:05:49Z",
-   "updated": "2026-10-16T02:08:48Z",
+   "updated": "2026-10-16T02:09:36Z",
    "note": "",
    "built": [
     {
@@ -2699,7 +2699,8 @@
      "at": "2026-10-16T02:08:48Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-16T02:09:35Z"
   }
  ],
  "watch": {
