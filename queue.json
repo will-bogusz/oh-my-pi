@@ -2743,7 +2743,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-16T13:24:07Z",
+  "checked": "2026-10-16T14:25:25Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -2754,58 +2754,7 @@
   },
   "conflicts": {},
   "merged_through": "2026-10-16T12:06:48Z",
-  "unreleased": {
-   "15402": {
-    "title": "feat(coding-agent): send todo updates alongside the next tool call",
-    "merge_commit": "ff0b9c2cace8dfbad04840cd11cde35dd6daefeb",
-    "merged_at": "2026-10-15T19:10:26Z"
-   },
-   "15410": {
-    "title": "fix(coding-agent): return large artifacts' text from Eval read() outside the session's artifacts dir",
-    "merge_commit": "8c7252508374299e18815f89f66690ec5cf58539",
-    "merged_at": "2026-10-15T20:48:32Z"
-   },
-   "15489": {
-    "title": "fix(coding-agent): send file contents when uploading into relay and connected browsers",
-    "merge_commit": "682357e60f932495c563323b51d83618e9277b39",
-    "merged_at": "2026-10-15T22:29:04Z"
-   },
-   "15941": {
-    "title": "fix(coding-agent): keep the machine awake again under power.sleepPrevention",
-    "merge_commit": "fce2aeff8b43b90a7be1e01cecf7482915ba1c1b",
-    "merged_at": "2026-10-16T12:06:48Z"
-   },
-   "15920": {
-    "title": "fix(browser): fail fast and reattach when Chrome detaches omp from a relay tab",
-    "merge_commit": "830909af551f5c839bdf8459bbf1227ac664b557",
-    "merged_at": "2026-10-16T12:06:48Z"
-   },
-   "15919": {
-    "title": "fix(coding-agent): fail browser uploadFile when nothing on the page takes the file",
-    "merge_commit": "5a81ff35bbc0fb4cb7228345ceef5d70d4d8ac17",
-    "merged_at": "2026-10-16T12:06:48Z"
-   },
-   "15918": {
-    "title": "fix(coding-agent): let browser element handles upload through chooser triggers and drop zones",
-    "merge_commit": "e16846f8d09c7081779e9ae2e86bf52490faf44e",
-    "merged_at": "2026-10-16T12:06:48Z"
-   },
-   "15915": {
-    "title": "fix(coding-agent): stop browser uploadFile swallowing later file choosers and hanging on File System Access pickers",
-    "merge_commit": "2c31f304923cdc768c77319a5f42af0564412265",
-    "merged_at": "2026-10-16T12:06:48Z"
-   },
-   "15914": {
-    "title": "fix(browser): fill colour, date, time and range inputs with their value instead of typing into them",
-    "merge_commit": "8eb9000f6b06fd696f1c67a2c5cea345b2c4b13e",
-    "merged_at": "2026-10-16T12:06:48Z"
-   },
-   "15762": {
-    "title": "fix(natives,coding-agent): keep the macOS display awake for the agent's turn, not 5 minutes past its last action",
-    "merge_commit": "7062e2f4cdb07f2f7c9fac24bbe257e0905cef8e",
-    "merged_at": "2026-10-16T12:06:48Z"
-   }
-  },
+  "unreleased": {},
   "events": [
    {
     "at": "2026-10-14T19:47:58Z",
@@ -3146,6 +3095,76 @@
     "kind": "openable",
     "id": "browser-worker-exit",
     "title": "fix(browser): reattach a tab whose worker exits unexpectedly"
+   },
+   {
+    "at": "2026-10-16T14:25:25Z",
+    "kind": "released",
+    "number": 15402,
+    "title": "feat(coding-agent): send todo updates alongside the next tool call",
+    "tag": "v18.11.2"
+   },
+   {
+    "at": "2026-10-16T14:25:25Z",
+    "kind": "released",
+    "number": 15410,
+    "title": "fix(coding-agent): return large artifacts' text from Eval read() outside the session's artifacts dir",
+    "tag": "v18.11.2"
+   },
+   {
+    "at": "2026-10-16T14:25:25Z",
+    "kind": "released",
+    "number": 15489,
+    "title": "fix(coding-agent): send file contents when uploading into relay and connected browsers",
+    "tag": "v18.11.2"
+   },
+   {
+    "at": "2026-10-16T14:25:25Z",
+    "kind": "released",
+    "number": 15941,
+    "title": "fix(coding-agent): keep the machine awake again under power.sleepPrevention",
+    "tag": "v18.11.2"
+   },
+   {
+    "at": "2026-10-16T14:25:25Z",
+    "kind": "released",
+    "number": 15920,
+    "title": "fix(browser): fail fast and reattach when Chrome detaches omp from a relay tab",
+    "tag": "v18.11.2"
+   },
+   {
+    "at": "2026-10-16T14:25:25Z",
+    "kind": "released",
+    "number": 15919,
+    "title": "fix(coding-agent): fail browser uploadFile when nothing on the page takes the file",
+    "tag": "v18.11.2"
+   },
+   {
+    "at": "2026-10-16T14:25:25Z",
+    "kind": "released",
+    "number": 15918,
+    "title": "fix(coding-agent): let browser element handles upload through chooser triggers and drop zones",
+    "tag": "v18.11.2"
+   },
+   {
+    "at": "2026-10-16T14:25:25Z",
+    "kind": "released",
+    "number": 15915,
+    "title": "fix(coding-agent): stop browser uploadFile swallowing later file choosers and hanging on File System Access pickers",
+    "tag": "v18.11.2"
+   },
+   {
+    "at": "2026-10-16T14:25:25Z",
+    "kind": "released",
+    "number": 15914,
+    "title": "fix(browser): fill colour, date, time and range inputs with their value instead of typing into them",
+    "tag": "v18.11.2"
+   },
+   {
+    "at": "2026-10-16T14:25:25Z",
+    "kind": "released",
+    "number": 15762,
+    "title": "fix(natives,coding-agent): keep the macOS display awake for the agent's turn, not 5 minutes past its last action",
+    "tag": "v18.11.2"
    }
   ]
  }
