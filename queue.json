@@ -2646,7 +2646,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/inflight-epoch",
    "host": "MacBook-Pro",
    "added": "2026-10-14T22:46:19Z",
-   "updated": "2026-10-16T21:15:18Z",
+   "updated": "2026-10-16T21:15:32Z",
    "note": "narrowed 2026-10-16: #15947 (fixes #15946) landed the epoch guard; only the settle of a stale end with nothing in flight remains (steer test fails on main)",
    "advanced": "2026-10-16T20:47:26Z",
    "built": [
@@ -2732,7 +2732,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-16T21:15:17Z"
+   "opened": "2026-10-16T21:15:17Z",
+   "readied": "2026-10-16T21:15:32Z"
   },
   {
    "id": "relay-self-update",
