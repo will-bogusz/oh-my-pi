@@ -45,7 +45,7 @@ Model steps and a continuing steer keep the attachment; `app.cdp_url` tabs are u
 - **Maintainer call: on by default.** The bar flaps once per turn instead of staying up; `browser.relayReleaseOnTurnEnd: false` keeps main's behaviour. Per-call detach would flap per call; closing the tabs would lose the agent's page.
 - **One worker across the release.** The tab's worker keeps its state and moves it onto the new attachment; a new worker replaying settings would lose run globals, ids and logs. A new one takes over only if the worker died while released, saying what started fresh.
 - **Kept attached:** routes, captures and held keys act only while attached, so the gap would slip past them; `allowed_domains` likewise; an orphaned dialog can't be answered later; `persist` opts out.
-- **Relay contract 2** (`OMP.releaseTarget`) detaches the tab and its popups (#15590), keeping the claim and group; the extension is unchanged.
+- **Relay contract 2** (`OMP.releaseTarget`) detaches the tab and the popups omp owns from it, keeping the claim and group; the extension is unchanged.
 - **Also fixed:** on main, `tab.id(n)` called an element stale in a later run once an earlier run had used it.
 - **Maintenance:** a new per-tab instrument with state must move in `#reattach`, or keep the tab attached in `#release`.
 - Non-goals: managed, spawned, Tern and cmux browsers.
@@ -54,7 +54,7 @@ Model steps and a continuing steer keep the attachment; `app.cdp_url` tabs are u
 
 Live, isolated relay harness (real extension), n=5 per arm: turn 1 observes, clicks by id, logs, fetches, uploads and sets a timezone; turn 2 reuses the id and ARIA ref and reads it back. Same result 5/5, release off and on; first call after a reattach median 54 ms (50 ms attached). Earlier head, macOS VM, visible Chrome, n=5: bar between turns 5/5 → 0/5.
 
-`browser-relay-turn-release.test.ts` "gives the next turn everything the last one built…" runs those turns with the setting on and off and compares. Dropping any one carry-over fails it; the keep-attached and out-of-time tests fail with their checks removed. Browser suite: 8 relay-daemon failures as on main, 9 needing the native addon rebuilt (pass with a null `macOSFrontApp`).
+`browser-relay-turn-release.test.ts` "gives the next turn everything the last one built…" runs those turns with the setting on and off and compares. Dropping any one carry-over fails it; the keep-attached and out-of-time tests fail with their checks removed. `agent-session-relay-release`, `browser-relay-bridge`, `browser-relay-detach` and `browser-relay-turn-release`: 130 pass with the native addon built from this branch (with an older addon, the turn-release tests that click fail on its missing `macOSFrontApp`); `check:types`, oxlint and oxfmt on the changed files pass.
 
 Not run: Chrome on Windows and Linux.
 
