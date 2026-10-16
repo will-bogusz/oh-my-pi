@@ -2,7 +2,7 @@
 
 When omp clicked something in its relay tab that opened a popup while I was typing in another app, Chrome jumped to the front and the rest of what I typed went into the popup's page; now the relay puts my app back within a few milliseconds and my typing stays where it was.
 
-| user typing in another app, omp's relay tab opens a popup (macOS) | #15590 | this PR |
+| user typing in another app, omp's relay tab opens a popup (macOS) | before | this PR |
 |---|---|---|
 | user's app in front afterwards | 0/31 | 30/30 |
 | keys typed into the popup's page, of 150 | median 127 | 0 |
@@ -12,14 +12,14 @@ Reading order: `macos/skylight.rs` (`FrontHold`, `FrontApp::keep_in_front`) → 
 
 ## Why
 
-On macOS Chrome makes itself the active app whenever it shows a tab or window a page opened, 35-55 ms after the click, even from a background tab, and keeps it. Neither the extension nor CDP can stop it (`chrome.windows.update(id, {focused: false})` never hands the app back); #15590 named this as its known limit. The relay runs on the user's Mac, so it hands the front back itself, through the WindowServer calls the computer tool already uses.
+On macOS Chrome makes itself the active app whenever it shows a tab or window a page opened, 35-55 ms after the click, even from a background tab, and keeps it. Neither the extension nor CDP can stop it (`chrome.windows.update(id, {focused: false})` never hands the app back); owning omp's popups left this as a known limit. The relay runs on the user's Mac, so it hands the front back itself, through the WindowServer calls the computer tool already uses.
 
 - **Read at omp's input, not at the popup report.** Chrome's report reaches the relay only 2-4 ms before Chrome is in front, so the relay reads the front app as it forwards omp's input to a tab, and uses it once, for a popup from that tab within a second.
 - **Only the app that took the front goes back, for 500 ms.** A click, a held ⌘/⌃, or another app coming forward ends the hold, since that is the user picking an app; typing does not. The computer tool's guard on `main` stops at the first key press, which would leave exactly this user's keys in Chrome. The hold steps aside while the computer tool owns the desktop.
 <details><summary>Rejected options, maintenance, not covered</summary>
 
 - **Rejected:** holding after every input, popup or not, which would undo a launcher switch made right after omp's click; and waiting for #15195's rework of the computer tool's guard.
-- **Maintenance:** `_SLPSGetFrontProcess` and `_SLPSSetFrontProcessWithOptions` are private SkyLight calls the computer tool already resolves. If macOS drops them, `macOSFrontApp()` returns null and the relay behaves as on #15590.
+- **Maintenance:** `_SLPSGetFrontProcess` and `_SLPSSetFrontProcessWithOptions` are private SkyLight calls the computer tool already resolves. If macOS drops them, `macOSFrontApp()` returns null and the relay behaves as before.
 - **Not covered:** Linux and Windows (not measured), popups a page opens later on its own, and an app switch bound to a key without a modifier, made in the ~15 ms between omp's click and the report.
 
 </details>
@@ -28,7 +28,7 @@ On macOS Chrome makes itself the active app whenever it shows a tab or window a 
 
 Live: macOS 26.5 VM, Google Chrome 155 with the relay extension and the relay started as `omp browser-relay`; TextEdit in front receiving 150 hardware keystrokes 10 ms apart; omp clicks in its background relay tab 300 ms in.
 
-| | #15590 (1bfc434771) | this PR |
+| | before (1bfc434771) | this PR |
 |---|---|---|
 | `_blank` link: TextEdit in front after / keys in the page | 0/11 / 125-130 | 10/10 / 0 |
 | `window.open(url)` | 0/10 / 127-130 | 10/10 / 0 |
@@ -47,7 +47,7 @@ One of 150 keys, typed in the few ms Chrome was in front, reached neither app in
 
 </details>
 
-- `bun test test/tools/browser-relay-bridge.test.ts`, `bun run check:ts`, `CI=1 bun run check:rs` (on macOS) and `cargo nextest run -p pi-natives -E 'test(/skylight|control/)'` pass.
+- `browser-relay-bridge.test.ts`: 99 pass; `check:types`, oxlint and oxfmt on the changed files pass. On macOS, `cargo build -p pi-natives`, `cargo test -p pi-natives` (590 pass, the `skylight` and `control` tests included) and `bun run lint:rs` pass; `cargo fmt --check` flags only `pi-natives/src/grep.rs` and `pi-shell/src/shell.rs`, which this PR does not touch.
 
 ---
 
