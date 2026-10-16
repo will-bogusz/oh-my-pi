@@ -2915,7 +2915,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-16T22:36:36Z",
+  "checked": "2026-10-16T23:37:06Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -2924,6 +2924,7 @@
     "since": "2026-10-16T21:05:27Z",
     "title": "feat(task): add omp agents show for what an agent's spawns run with",
     "files": [
+     "packages/coding-agent/src/sdk.ts",
      "packages/coding-agent/src/task/executor.ts",
      "packages/coding-agent/src/task/structured-subagent.ts"
     ]
