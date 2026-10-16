@@ -2,7 +2,7 @@
 
 I made a browser call that gives up actually stop: a timed-out click no longer lands once a busy page answers, a drag or key combo cut off halfway no longer leaves the mouse button or Shift held, and relay waits and navigations the page needs more than 20 s for now get the time the call asked for.
 
-| relay tab, n=5 per row | #15493 | this PR |
+| relay tab, n=5 per row | before | this PR |
 |---|---|---|
 | `tab.clickAt` times out on a page busy 15-30 s | button clicked after the error, 10/10 | 0/10 |
 | `tab.drag` cut off with the button down | next `tab.click`: `'left' is already pressed`, 5/5 | released, next click works, 5/5 |
@@ -27,7 +27,7 @@ Reading order: `interactions.ts` (`withButtonDown`, `pressKey`), `tab-worker.ts`
 ## Testing
 
 - Live: omp's browser prelude driving the relay and extension in headless Chrome for Testing on macOS, on a background tab opened outside omp; n=5 per arm per row.
-- `browser-input-release`, `browser-interactions`, `browser-relay-bridge` and 7 other browser test files: 152 pass. With `src` reverted, 10 of the 12 new input tests fail (2 guard puppeteer refusals kept) and all 5 relay deadline tests.
+- `browser-input-release`, `browser-interactions`, `browser-relay-bridge` and `browser-run-output`: 126 pass; `check:types`, oxlint and oxfmt on the changed files pass. With `src` reverted, 10 of the 12 new input tests fail (2 guard puppeteer refusals kept) and all 5 relay deadline tests.
 - Not run: Windows, Linux, a real user's Chrome profile.
 
 ---
