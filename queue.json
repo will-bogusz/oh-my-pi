@@ -455,17 +455,26 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-honest-capabilities",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T00:01:14Z",
+   "updated": "2026-10-16T01:52:09Z",
    "note": "HOLD (Will, 2026-10-15): stays a draft, no push to the PR head and no opening until the Show and tell post is settled and posted (waits on the PR-visuals decision).",
    "advanced": "2026-10-13T23:06:21Z",
    "built": [
     {
+     "with": "#15574",
+     "code": "0b145229cb310f8953640a3c8f92c1b269db7562",
+     "with_code": "864e863864e81bea6cc084e9e975941eccd61211",
+     "tip": "2110a5d6ff40c0d85e04ac80c70054c034ba361e",
+     "with_tip": "92818faaaa6bd471fa849b362fbee170c1da55f8",
+     "at": "2026-10-16T01:52:06Z",
+     "host": "MacBook-Pro"
+    },
+    {
      "with": "#15762",
-     "code": "f46547944ba4f700a1e1e2699a39cc467d896348",
+     "code": "0b145229cb310f8953640a3c8f92c1b269db7562",
      "with_code": "50729e7002c1423a6b3e40dfc53a359345c575d6",
-     "tip": "1747c2bb52c24cdcc074047752282d71b61e4abc",
+     "tip": "2110a5d6ff40c0d85e04ac80c70054c034ba361e",
      "with_tip": "266c0518936512985e5b50d24d5241db8fc38dae",
-     "at": "2026-10-16T00:01:12Z",
+     "at": "2026-10-16T01:52:08Z",
      "host": "MacBook-Pro"
     }
    ]
