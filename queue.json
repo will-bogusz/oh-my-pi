@@ -2545,6 +2545,24 @@
    "added": "2026-10-15T17:46:33Z",
    "updated": "2026-10-15T17:58:59Z",
    "note": "folded into #15105 (commit 100735778e on will/relay-extension-version, 2026-10-15)"
+  },
+  {
+   "id": "power-assertion-bind",
+   "branch": "will/power-assertion-bind",
+   "title": "fix(coding-agent): keep the machine awake again under power.sleepPrevention",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "afdc8bd10e69974bfcd7565a2c6f70d1b488919c",
+   "body": "bodies/power-assertion-bind.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/power-assertion-bind",
+   "host": "MacBook-Pro",
+   "added": "2026-10-16T02:05:49Z",
+   "updated": "2026-10-16T02:05:49Z",
+   "note": ""
   }
  ],
  "watch": {
