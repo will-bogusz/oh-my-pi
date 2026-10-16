@@ -2913,16 +2913,25 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-16T20:34:53Z",
+  "checked": "2026-10-16T21:05:27Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "browser-worker-exit": {
-    "since": "2026-10-16T12:22:09Z",
-    "title": "fix(browser): reattach a tab whose worker exits unexpectedly"
+   "inflight-epoch": {
+    "since": "2026-10-16T21:05:27Z",
+    "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing"
    }
   },
-  "conflicts": {},
+  "conflicts": {
+   "#15433": {
+    "since": "2026-10-16T21:05:27Z",
+    "title": "feat(task): add omp agents show for what an agent's spawns run with",
+    "files": [
+     "packages/coding-agent/src/task/executor.ts",
+     "packages/coding-agent/src/task/structured-subagent.ts"
+    ]
+   }
+  },
   "merged_through": "2026-10-16T12:06:48Z",
   "unreleased": {},
   "events": [
@@ -3335,6 +3344,29 @@
     "number": 15762,
     "title": "fix(natives,coding-agent): keep the macOS display awake for the agent's turn, not 5 minutes past its last action",
     "tag": "v18.11.2"
+   },
+   {
+    "at": "2026-10-16T21:05:27Z",
+    "kind": "openable",
+    "id": "inflight-epoch",
+    "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing"
+   },
+   {
+    "at": "2026-10-16T21:05:27Z",
+    "kind": "unopenable",
+    "id": "browser-worker-exit",
+    "title": "fix(browser): reattach a tab whose worker exits unexpectedly",
+    "why": "opened as #16037"
+   },
+   {
+    "at": "2026-10-16T21:05:27Z",
+    "kind": "conflict",
+    "label": "#15433",
+    "title": "feat(task): add omp agents show for what an agent's spawns run with",
+    "files": [
+     "packages/coding-agent/src/task/executor.ts",
+     "packages/coding-agent/src/task/structured-subagent.ts"
+    ]
    }
   ]
  }
