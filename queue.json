@@ -861,17 +861,17 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agents-show",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T04:34:14Z",
+   "updated": "2026-10-16T04:52:00Z",
    "note": "",
    "advanced": "2026-10-16T04:31:00Z",
    "built": [
     {
      "with": "#15762",
-     "code": "1ce36a0733ceec7856072a79c223b3c3cbb9970a",
+     "code": "f932d274f8eab8473c5b426d71d6f4224225c7d2",
      "with_code": "73dba22eb66204e214f2865c3ae4df2d490b2575",
-     "tip": "6e695853478425279fc5bcddc34932e5c4ae5f8e",
+     "tip": "52ef96d88b565b44bdd3c0765808132e5f5718a0",
      "with_tip": "f67b2905f52aee200bead06f50ad6d44d9a74ab9",
-     "at": "2026-10-16T04:34:11Z",
+     "at": "2026-10-16T04:51:57Z",
      "host": "MacBook-Pro"
     }
    ]
