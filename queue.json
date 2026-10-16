@@ -2014,26 +2014,26 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-stale-refind",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T02:35:03Z",
+   "updated": "2026-10-16T02:53:09Z",
    "note": "",
    "advanced": "2026-10-13T22:53:49Z",
    "built": [
     {
      "with": "#15157",
-     "code": "4181aff43a64bff504ca97e381e9f43655d5c811",
+     "code": "9400322377d94ba1772e97364e1ea0d3cf677d41",
      "with_code": "0b145229cb310f8953640a3c8f92c1b269db7562",
-     "tip": "1b308a9035a35633ab597af7a49b47860938a0ec",
+     "tip": "d05bbc41ac6b85dc53f664ce9c50832ef56b86f9",
      "with_tip": "2110a5d6ff40c0d85e04ac80c70054c034ba361e",
-     "at": "2026-10-16T02:35:01Z",
+     "at": "2026-10-16T02:53:06Z",
      "host": "MacBook-Pro"
     },
     {
      "with": "#15762",
-     "code": "4181aff43a64bff504ca97e381e9f43655d5c811",
-     "with_code": "5a40303a690ed4216fed762395b77c1e5b57b210",
-     "tip": "1b308a9035a35633ab597af7a49b47860938a0ec",
-     "with_tip": "b2abbbbfd3e125d04be535ee6cd4ffe4693ad295",
-     "at": "2026-10-16T02:35:03Z",
+     "code": "9400322377d94ba1772e97364e1ea0d3cf677d41",
+     "with_code": "57cc647072fdaf27738f0fa47d72a88989fcba7c",
+     "tip": "d05bbc41ac6b85dc53f664ce9c50832ef56b86f9",
+     "with_tip": "6b104b4ac7ad835783b9c271ed7588857efcc4e9",
+     "at": "2026-10-16T02:53:08Z",
      "host": "MacBook-Pro"
     }
    ]
