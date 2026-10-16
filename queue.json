@@ -2553,7 +2553,7 @@
    "needs": [
     "#15762"
    ],
-   "base": "266c0518936512985e5b50d24d5241db8fc38dae",
+   "base": "3f89ab0ac2cee46fc13a0b37deeff64c5dd74cee",
    "body": "bodies/inflight-epoch.md",
    "state": "queued",
    "pr": null,
@@ -2561,8 +2561,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/inflight-epoch",
    "host": "MacBook-Pro",
    "added": "2026-10-14T22:46:19Z",
-   "updated": "2026-10-14T22:46:19Z",
-   "note": ""
+   "updated": "2026-10-16T20:47:26Z",
+   "note": "",
+   "advanced": "2026-10-16T20:47:26Z"
   },
   {
    "id": "relay-self-update",
