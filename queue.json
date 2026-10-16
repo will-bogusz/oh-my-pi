@@ -1579,15 +1579,15 @@
    ],
    "base": "3f89ab0ac2cee46fc13a0b37deeff64c5dd74cee",
    "body": "bodies/browser-worker-exit.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16037,
    "closed_prs": [
     15498
    ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-worker-exit",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T20:54:31Z",
+   "updated": "2026-10-16T20:55:17Z",
    "note": "",
    "advanced": "2026-10-16T20:43:50Z",
    "built": [
@@ -1672,7 +1672,8 @@
      "at": "2026-10-16T20:54:30Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-16T20:55:16Z"
   },
   {
    "id": "aria-password-mask",
