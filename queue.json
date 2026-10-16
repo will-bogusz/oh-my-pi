@@ -2646,9 +2646,92 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/inflight-epoch",
    "host": "MacBook-Pro",
    "added": "2026-10-14T22:46:19Z",
-   "updated": "2026-10-16T20:51:57Z",
+   "updated": "2026-10-16T21:03:30Z",
    "note": "narrowed 2026-10-16: #15947 (fixes #15946) landed the epoch guard; only the settle of a stale end with nothing in flight remains (steer test fails on main)",
-   "advanced": "2026-10-16T20:47:26Z"
+   "advanced": "2026-10-16T20:47:26Z",
+   "built": [
+    {
+     "with": "#15574",
+     "code": "800679e9fcee4636468a53f790b070a526cbba11",
+     "with_code": "ef22ec5b0bb7d02fd18a446b5a17232cfc8b92bd",
+     "tip": "29b1b9ad1a8e5eb3fa10b0aae5790a8cdda1916a",
+     "with_tip": "4bc538287fd5d330ce0d0ed9708d9cf9404e9ae6",
+     "at": "2026-10-16T21:03:26Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15418",
+     "code": "800679e9fcee4636468a53f790b070a526cbba11",
+     "with_code": "f7b12f10303e0e5e84435f844a650c18971a5e82",
+     "tip": "29b1b9ad1a8e5eb3fa10b0aae5790a8cdda1916a",
+     "with_tip": "d0cbd9a402b1ddd33044ecd08ff24ec32104e816",
+     "at": "2026-10-16T21:03:29Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15508",
+     "code": "800679e9fcee4636468a53f790b070a526cbba11",
+     "with_code": "1827c9d1fd7fe0e64d82b726a819a4b4d392d5c1",
+     "tip": "29b1b9ad1a8e5eb3fa10b0aae5790a8cdda1916a",
+     "with_tip": "5ccf9eac6bd472d32d7f51604189c2a0207963a4",
+     "at": "2026-10-16T21:03:29Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#14235",
+     "code": "800679e9fcee4636468a53f790b070a526cbba11",
+     "with_code": "5ca41aa364865ad8d91bf3e7385346847b260d40",
+     "tip": "29b1b9ad1a8e5eb3fa10b0aae5790a8cdda1916a",
+     "with_tip": "3880ea7d612d817a3915a8b5e97cb49039a22827",
+     "at": "2026-10-16T21:03:29Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#14237",
+     "code": "800679e9fcee4636468a53f790b070a526cbba11",
+     "with_code": "86fb0761833073d8eaf1266b65baf8e4ca365325",
+     "tip": "29b1b9ad1a8e5eb3fa10b0aae5790a8cdda1916a",
+     "with_tip": "57dee83b3fefa97dcb18e89d1b2b91853615d111",
+     "at": "2026-10-16T21:03:29Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15105",
+     "code": "800679e9fcee4636468a53f790b070a526cbba11",
+     "with_code": "5b659681c1c552624cb989fb4106a12bdaa0d5db",
+     "tip": "29b1b9ad1a8e5eb3fa10b0aae5790a8cdda1916a",
+     "with_tip": "3dd6beb62bde87218654d04d9160230a5b5d2759",
+     "at": "2026-10-16T21:03:29Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15128",
+     "code": "800679e9fcee4636468a53f790b070a526cbba11",
+     "with_code": "ca95834cec2c151c013a3b24dc542e9f1ed84fa5",
+     "tip": "29b1b9ad1a8e5eb3fa10b0aae5790a8cdda1916a",
+     "with_tip": "feb13eb6bc3bdcdf460fbef35363a6e8a9adfe76",
+     "at": "2026-10-16T21:03:30Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15130",
+     "code": "800679e9fcee4636468a53f790b070a526cbba11",
+     "with_code": "060945a5c56fef07ba164a9f976cb82b0fdef6aa",
+     "tip": "29b1b9ad1a8e5eb3fa10b0aae5790a8cdda1916a",
+     "with_tip": "b0fc30ee72b67d57755081fb53292f3bce322e16",
+     "at": "2026-10-16T21:03:30Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16037",
+     "code": "800679e9fcee4636468a53f790b070a526cbba11",
+     "with_code": "3679f4b50872ac27be44c5d573a2702cfd0fbef1",
+     "tip": "29b1b9ad1a8e5eb3fa10b0aae5790a8cdda1916a",
+     "with_tip": "172e019ccd3b7f6e25ca6ba84790edaabf7dea81",
+     "at": "2026-10-16T21:03:30Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "relay-self-update",
