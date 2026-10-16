@@ -8,17 +8,17 @@ On Chromium, a JavaScript dialog the page leaves open and a file chooser omp hol
 - Alerts in connected and relay browsers stay open for the user instead of being accepted. Managed browsers and beforeunload are unchanged.
 - A call that times out behind a dialog dismisses it, so the tab recovers instead of being killed.
 
-A held `print()` (#15508) is reported but never pending. Tern rejects `files`; cmux still rejects dialog calls.
+A `print()` omp holds is reported but never pending. Tern rejects `files`; cmux still rejects dialog calls.
 
 ## Why
 
-Joining #15489: the per-tab catcher replaces `catchChooserInput`/`pagesAwaitingChooser`; its paths and contents routes and both deadlines stay; a chooser whose delivery failed stays held and answerable; `handleDialog({ files })` uses the tab's route and staging.
+`uploadFile` now takes its chooser through the tab's catcher instead of a chooser wait of its own (`pagesAwaitingChooser`); the paths and contents routes, the route check's own deadline and the refusal of folders on the contents route stay; a chooser whose delivery failed stays held and answerable; `handleDialog({ files })` uses the tab's route and staging, folder refusal included.
 
 On `main` a `confirm()` stops the page's script, so the click that opened it waits out the cell, the tab is reset from a fresh session that cannot see the dialog, and then killed. In a relay tab that is the user's Chrome, and an `alert()` there is accepted before the user sees it. A chooser click raises the macOS Open panel on the user's screen or is cancelled, and the model is told nothing.
 
 ## Testing
 
-Headless Chrome for Testing on macOS; `user-` cases drive a separate Chromium through `cdp_url`. Base: #15490 + #15508 merged; n = 5 per arm.
+Headless Chrome for Testing on macOS; `user-` cases drive a separate Chromium through `cdp_url`. Base: the same tree without this change; n = 5 per arm.
 
 | case | arm | n | result |
 |---|---|---|---|
@@ -45,7 +45,7 @@ Headless Chrome for Testing on macOS; `user-` cases drive a separate Chromium th
 | picker | base | 5 | page gets AbortError 5/5; notice in result 0/5 |
 | picker | after | 5 | page gets AbortError 5/5; notice in result 5/5 |
 
-- The 22 new tests in `browser-nav-frames-dialogs.test.ts` and `browser-upload-chooser.test.ts` each fail with their fix reverted; both pass (55); `browser-relay-daemon.test.ts` fails 8 here and on the base alike.
+- The 22 new tests in `browser-nav-frames-dialogs.test.ts` and `browser-upload-chooser.test.ts` each fail with their fix reverted. `browser-nav-frames-dialogs`, `browser-upload-chooser` and `browser-upload-contents`: 74 pass; `check:types`, oxlint and oxfmt on the changed files pass.
 - `handleDialog({ files })` vs a separate `tab.chooseFiles()`, 15 runs each on gpt-5.6-luna: both 15/15, but with `chooseFiles` the model read `dialog()` as closed while a chooser waited.
 - Visible relay run of the prototype (macOS VM, CfT 150): no Open panel, focus stays in the front app, uploads answered (3/3); `main` shows the panel and reports nothing (2/2).
 
