@@ -443,11 +443,11 @@
   {
    "id": "computer-honest-capabilities",
    "branch": "will/computer-honest-capabilities",
-   "title": "fix(natives): report the macOS Escape stop honestly and never let it block input",
+   "title": "fix(natives): report the macOS Escape stop honestly",
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
+   "base": "afdc8bd10e69974bfcd7565a2c6f70d1b488919c",
    "body": null,
    "state": "open",
    "pr": 15157,
@@ -455,7 +455,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-honest-capabilities",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T01:52:09Z",
+   "updated": "2026-10-16T01:52:18Z",
    "note": "HOLD (Will, 2026-10-15): stays a draft, no push to the PR head and no opening until the Show and tell post is settled and posted (waits on the PR-visuals decision).",
    "advanced": "2026-10-13T23:06:21Z",
    "built": [
