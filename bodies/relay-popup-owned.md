@@ -2,19 +2,19 @@
 
 When a page omp was driving opened a link in a new tab or a popup, Chrome put it in front of the tab I was reading (or handed it my keyboard focus), and omp couldn't even see it; now the popup belongs to omp's tab, my tab and my Chrome window's focus stay where they were, and omp can drive the popup.
 
-| popup from omp's relay tab | #15554 | this PR |
+| popup from omp's relay tab | before | this PR |
 |---|---|---|
 | `target=_blank` link, `window.open(url)` | new tab is selected in place of the user's tab; not attached, no `popup` event | attached and owned by omp's tab (`openerId`, `popup` event); the user's tab is selected again |
 | sized `window.open(…, "width=…")` | new popup window, not attached; when the user is in Chrome it takes the keyboard focus | owned; the focus goes back to the user's window, the popup stays open behind it |
 | omp screenshots, clicks, types in the popup | unreachable | works while the popup is unselected |
 | popups from tabs omp does not drive, tabs the user opens | untouched | untouched |
-| relay extension installed before this PR | — | popups stay unowned, as in #15554 (reinstall for ownership) |
+| relay extension installed before this PR | — | popups stay unowned, as before (reinstall for ownership) |
 
 Reading order: `extension/background.ts` → `popup-placement.ts` → `relay/bridge.ts` → `tab-worker.ts`.
 
 ## Why
 
-> **Relay context.** Since #15554 the relay attaches only tabs a client opened or claimed, so a popup is a new, unclaimed tab. Chrome's `webNavigation.onCreatedNavigationTarget` names the tab (any frame) that opened it, `noopener` links included.
+> **Relay context.** The relay attaches only tabs a client opened or claimed, so a popup is a new, unclaimed tab. Chrome's `webNavigation.onCreatedNavigationTarget` names the tab (any frame) that opened it, `noopener` links included.
 
 - **Provenance from Chrome, not timing.** A popup goes to its opener's owners only when Chrome names the opener; a guess from `Page.windowOpen` timing attached a tab the user opened at the same moment.
 - **Each popup undoes only what it displaced**, and only while the window's selection count is unchanged, so a tab the user picked meanwhile is never overridden; chained popups resolve to the user's tab.
@@ -31,7 +31,7 @@ Reading order: `extension/background.ts` → `popup-placement.ts` → `relay/bri
 
 Live, headless (isolated Chrome for Testing with each branch's extension, a user tab selected), through omp's `acquireTab`/`runInTab`, n=5 runs per arm; each run clicks a `_blank` link, `window.open(url)`, a sized `window.open`, and a button opening two.
 
-| | #15554 (858199de15) | this PR |
+| | before (858199de15) | this PR |
 |---|---|---|
 | popup attached to omp / `popup` event | 0/20 / 0/15 | 20/20 / 15/15 |
 | user's tab still selected after a tab popup | 0/15 | 15/15 |
@@ -39,19 +39,19 @@ Live, headless (isolated Chrome for Testing with each branch's extension, a user
 
 Live, visible (macOS 26.5 VM, Chrome for Testing 150), n=5 per trial, the user's tab selected in their Chrome window:
 
-| user in their Chrome tab | #15554 | this PR |
+| user in their Chrome tab | before | this PR |
 |---|---|---|
 | `_blank` link, `window.open(url)`: user's tab visible and focused afterwards | 0/10 | 10/10 |
 | sized popup window: user's window in front with the keyboard focus | 0/5 | 5/5 |
 | omp screenshots, clicks and types in the popup | 0/15 | 15/15 |
 
-| user in TextEdit | #15554 | this PR |
+| user in TextEdit | before | this PR |
 |---|---|---|
 | `_blank` link, `window.open(url)`: user's tab still selected in Chrome | 0/10 | 10/10 |
 | omp screenshots, clicks and types in the popup | 0/15 | 15/15 |
 | Chrome became the active app (frontmost-app watcher) | 15/15 | 15/15 |
 
-An instrumented build showed Chrome activating before any extension call (n=15); a first #15554 run activated 7/15.
+An instrumented build showed Chrome activating before any extension call (n=15); a first run before this change activated 7/15.
 
 <details><summary>Regression tests (each fails with its fix reverted)</summary>
 
@@ -61,7 +61,7 @@ An instrumented build showed Chrome activating before any extension call (n=15);
 
 </details>
 
-- `bun test test/tools/browser-relay-*.test.ts test/tools/browser-attach.test.ts`, `bun run check:tools` and `bun run check:ts` pass.
+- `browser-relay-bridge`, `browser-relay-popup-placement` and `browser-relay-tab-isolation`: 135 pass; `check:types`, oxlint and oxfmt on the changed files pass.
 
 ---
 
