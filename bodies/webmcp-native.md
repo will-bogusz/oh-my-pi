@@ -37,8 +37,8 @@ Maintenance: the domain is experimental; if Chrome changes it, `webmcp*` report 
 ## Testing
 
 - `browser-webmcp.test.ts`, headless Chromium, 11 tests: no omp global, wrapped method or polyfill before or after `webmcpList`; native list/invoke/events; the two unavailable reasons; cross-origin and same-process iframes; navigation and back/forward cache; abort before and after start; a removed iframe's session released. With `src` reverted, 9 of 11 fail.
-- Live, rows above: relay harness (isolated CfT 150, relay and extension from each checkout) and Chrome 155 stable in a macOS VM via `cdp_url`; each page reports what it sees from its own main world. Relay rows rerun on #15110: same.
-- `bun run check:ts`; browser suites (tern-tab, open-options, tab-worker-startup, attach, webmcp): 119 pass. Not run: Chrome 147-148 (no build here).
+- Live, rows above: relay harness (isolated CfT 150, relay and extension from each checkout) and Chrome 155 stable in a macOS VM via `cdp_url`; each page reports what it sees from its own main world. Relay rows rerun with omp opening its own background relay tab: same.
+- `browser-webmcp.test.ts`: 11 pass; `check:types`, oxlint and oxfmt on the changed files pass. Not run: Chrome 147-148 (no build here).
 
 ```sh
 bun test packages/coding-agent/test/tools/browser-webmcp.test.ts
