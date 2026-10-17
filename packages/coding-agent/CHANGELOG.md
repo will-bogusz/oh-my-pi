@@ -47,6 +47,14 @@
 
 - Computer-use window input with `takeover` omitted now stays in the background after `computer.control.acquire`, so an acquired grant no longer activates the target app or moves the user's pointer; pass `takeover: true` for foreground input ([#15173](https://github.com/can1357/oh-my-pi/pull/15173) by [@will-bogusz](https://github.com/will-bogusz))
 
+### Breaking Changes
+
+- Removed `preparePageForScreenshot` (`tools/browser/tab-worker`), `shouldPreserveConnectedBrowserFocus` (`tools/browser/attach`) and the tab worker's `activateForScreenshot` init option: Chromium screenshots no longer activate their tab ([#15174](https://github.com/can1357/oh-my-pi/pull/15174) by [@will-bogusz](https://github.com/will-bogusz))
+
+### Fixed
+
+- Fixed browser `tab.screenshot()` raising Chrome over the app you were typing in and switching its visible tab; background tabs and windows behind other apps are now captured in place, as is a relay or `app.cdp_url` tab the user switched away from ([#15174](https://github.com/can1357/oh-my-pi/pull/15174) by [@will-bogusz](https://github.com/will-bogusz))
+
 ## [18.12.0] - 2026-10-17
 
 ### Added
