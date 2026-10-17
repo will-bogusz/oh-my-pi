@@ -16,3 +16,13 @@ export function createDesktopSession(options) {
 export function closeDesktopEventTaps() {
 	loadNative().closeDesktopEventTaps();
 }
+
+/** Physical-Escape stops counted under `key`, loading the native addon on first use. */
+export function desktopEscapeStops(key) {
+	return loadNative().desktopEscapeStops(key);
+}
+
+/** Drop the stop count kept under `key`. */
+export function forgetDesktopEscapeStops(key) {
+	loadNative().forgetDesktopEscapeStops(key);
+}

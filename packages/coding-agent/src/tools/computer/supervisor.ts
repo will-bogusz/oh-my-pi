@@ -1,7 +1,7 @@
 import type { AgentToolContext } from "@oh-my-pi/pi-agent-core";
 import { postmortem, untilAborted } from "@oh-my-pi/pi-utils";
 import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
-import { closeDesktopEventTaps } from "@oh-my-pi/pi-natives/desktop";
+import { closeDesktopEventTaps, desktopEscapeStops, forgetDesktopEscapeStops } from "@oh-my-pi/pi-natives/desktop";
 import { withTimeout } from "@oh-my-pi/pi-utils/async";
 import * as logger from "@oh-my-pi/pi-utils/logger";
 import { Snowflake } from "@oh-my-pi/pi-utils/snowflake";
@@ -11,10 +11,12 @@ import { ToolAbortError, toWorkerErrorPayload } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import {
 	COMPUTER_WORKER_ARG,
+	type ComputerEscapeScope,
 	type ComputerRunOk,
 	type ComputerSessionSnapshot,
 	type ComputerWorkerInbound,
 	type ComputerWorkerOutbound,
+	ESCAPE_STOPPED_MESSAGE,
 	type RunErrorPayload,
 } from "./protocol";
 
@@ -26,6 +28,8 @@ const SMOKE_TIMEOUT_MS = 5_000;
 // the first ensure may load the desktop addon, so it shares the start budget.
 const CAPABILITIES_TIMEOUT_MS = 10_000;
 const RESTART_MESSAGE = "computer worker restarted; captures and ax refs were reset";
+const ESCAPE_REFUSAL_MESSAGE =
+	"Computer use is stopped for this turn: the user pressed Escape to stop it. Nothing was sent. Do not retry; tell the user what you did and what remains. Computer use resumes after the user's next message.";
 
 /** Runs desktop scripts and owns their persistent worker session. */
 export interface ComputerController {
@@ -44,6 +48,8 @@ export interface ComputerController {
 	 * again.
 	 */
 	resumeDisplay?(from: number, turn: number): void;
+	/** The user's message acknowledges every Escape stop so far, lifting the refusal they set. */
+	resumeAfterEscape?(): void;
 	capabilities(snapshot: ComputerSessionSnapshot, signal?: AbortSignal): Promise<DesktopCapabilities | undefined>;
 	close(): Promise<void>;
 }
@@ -73,6 +79,14 @@ export type ComputerSessionToolCaller = (
 	args: unknown,
 	options: { session: ToolSession; signal?: AbortSignal; emitStatus?: () => void },
 ) => Promise<unknown>;
+
+/** Native physical-Escape stop counts, read on the host so they outlive the worker that observed them. */
+export interface ComputerEscapeStops {
+	read(key: string): number;
+	forget(key: string): void;
+}
+
+const NATIVE_ESCAPE_STOPS: ComputerEscapeStops = { read: desktopEscapeStops, forget: forgetDesktopEscapeStops };
 
 /** Creates an isolated computer worker handle. */
 export type ComputerWorkerFactory = () => ComputerWorkerHandle;
@@ -170,6 +184,13 @@ export class ComputerSupervisor implements ComputerController {
 	readonly #startingRuns = new Set<ComputerSessionSnapshot>();
 	#nextId = 0;
 	#controlEpoch = 0;
+	readonly #escapeStops: ComputerEscapeStops;
+	/** Key the worker's native sessions count the user's Escape stops under. */
+	readonly #escapeKey = `computer-${Snowflake.next()}`;
+	/** Stops the user's latest message acknowledged; any more refuse every call. */
+	#acknowledgedEscapeStops = 0;
+	/** A worker was started, so its sessions may have counted stops under the key. */
+	#started = false;
 	#closed = false;
 	#unsubscribeMessage?: () => void;
 	#unsubscribeError?: () => void;
@@ -181,11 +202,22 @@ export class ComputerSupervisor implements ComputerController {
 		callSessionTool: ComputerSessionToolCaller = async () => {
 			throw new ToolError("Computer session tool bridge is unavailable");
 		},
+		escapeStops: ComputerEscapeStops = NATIVE_ESCAPE_STOPS,
 	) {
 		this.#session = session;
 		this.#createWorker = createWorker;
 		this.#timeouts = timeouts;
 		this.#callSessionTool = callSessionTool;
+		this.#escapeStops = escapeStops;
+	}
+
+	/** Whether the user pressed Escape since their latest message; read live, so a stop no run reported still counts. */
+	#escapeStopped(): boolean {
+		return this.#started && this.#escapeStops.read(this.#escapeKey) > this.#acknowledgedEscapeStops;
+	}
+
+	#escapeScope(): ComputerEscapeScope {
+		return { key: this.#escapeKey, acknowledged: this.#acknowledgedEscapeStops };
 	}
 
 	async capabilities(
@@ -193,6 +225,7 @@ export class ComputerSupervisor implements ComputerController {
 		signal?: AbortSignal,
 	): Promise<DesktopCapabilities | undefined> {
 		if (this.#closed) throw new ToolError("Computer session is closed");
+		if (this.#escapeStopped()) throw new ToolError(ESCAPE_REFUSAL_MESSAGE);
 		if (signal?.aborted) throw new ToolAbortError();
 		await this.#start();
 		if (signal?.aborted) throw new ToolAbortError();
@@ -204,7 +237,7 @@ export class ComputerSupervisor implements ComputerController {
 		if (signal?.aborted) abort();
 		else signal?.addEventListener("abort", abort, { once: true });
 		try {
-			this.#safeSend({ type: "capabilities", id, session: snapshot });
+			this.#safeSend({ type: "capabilities", id, session: snapshot, escape: this.#escapeScope() });
 			return await withTimeout(promise, CAPABILITIES_TIMEOUT_MS, "Timed out fetching computer capabilities");
 		} finally {
 			signal?.removeEventListener("abort", abort);
@@ -220,6 +253,7 @@ export class ComputerSupervisor implements ComputerController {
 		context?: AgentToolContext,
 	): Promise<ComputerRunOk> {
 		if (this.#closed) throw new ToolError("Computer session is closed");
+		if (this.#escapeStopped()) throw new ToolError(ESCAPE_REFUSAL_MESSAGE);
 		if (signal?.aborted) throw new ToolAbortError();
 		const epoch = this.#controlEpoch;
 		const session = { ...snapshot };
@@ -243,8 +277,17 @@ export class ComputerSupervisor implements ComputerController {
 		else signal?.addEventListener("abort", abort, { once: true });
 
 		try {
-			this.#worker?.send({ type: "run", id, code, timeoutMs, session });
-			return await this.#raceWithGrace(promise, timeoutMs);
+			this.#worker?.send({ type: "run", id, code, timeoutMs, session, escape: this.#escapeScope() });
+			let result: ComputerRunOk;
+			try {
+				result = await this.#raceWithGrace(promise, timeoutMs);
+			} catch (error) {
+				if (this.#escapeStopped()) throw new ToolError(ESCAPE_STOPPED_MESSAGE);
+				throw error;
+			}
+			// A script that caught the cancelled operation still ends as the user's stop.
+			if (this.#escapeStopped()) throw new ToolError(ESCAPE_STOPPED_MESSAGE);
+			return result;
 		} finally {
 			signal?.removeEventListener("abort", abort);
 			this.#pending.delete(id);
@@ -254,6 +297,7 @@ export class ComputerSupervisor implements ComputerController {
 	#start(): Promise<void> {
 		if (this.#startPromise) return this.#startPromise;
 		const started = Promise.withResolvers<void>();
+		this.#started = true;
 		this.#startReject = started.reject;
 		this.#startResolve = started.resolve;
 		try {
@@ -380,6 +424,10 @@ export class ComputerSupervisor implements ComputerController {
 		this.#safeSend({ type: "resume-display", from, turn });
 	}
 
+	resumeAfterEscape(): void {
+		if (this.#started) this.#acknowledgedEscapeStops = this.#escapeStops.read(this.#escapeKey);
+	}
+
 	async #dispatchToolCall(message: Extract<ComputerWorkerOutbound, { type: "tool-call" }>): Promise<void> {
 		const pending = this.#pending.get(message.runId);
 		if (!pending) {
@@ -473,6 +521,7 @@ export class ComputerSupervisor implements ComputerController {
 	async close(): Promise<void> {
 		if (this.#closed) return;
 		this.#closed = true;
+		if (this.#started) this.#escapeStops.forget(this.#escapeKey);
 		const worker = this.#worker;
 		if (!worker) return;
 		const closed = Promise.withResolvers<void>();
@@ -557,6 +606,12 @@ export function resumeComputerTurnForOwner(ownerId: string | undefined): void {
 export function computerTurnInFlight(ownerId: string | undefined): number | undefined {
 	const state = ownerId ? ownerTurns.get(ownerId) : undefined;
 	return state?.inFlight ? state.turn : undefined;
+}
+
+/** The user's next message lifts the refusal their Escape set on an agent session's computer use. */
+export function resumeComputerUseForOwner(ownerId: string | undefined): void {
+	if (!ownerId) return;
+	for (const controller of ownedSupervisors.get(ownerId) ?? []) controller.resumeAfterEscape?.();
 }
 
 /** Closes every computer session owned by an agent session. */
