@@ -2,14 +2,15 @@
 
 I keep typing in my own app while the agent works in one behind it, and when that app popped a menu open or jumped forward mid-action my keys went into it or vanished into the menu; now they land where I'm typing.
 
-On macOS, while a background action runs, a target that takes the keyboard without the user choosing it no longer gets the user's keystrokes: omp posts them to the user's app and drops the originals until the user's app has the keyboard back. A key's repeats and release go where its press went.
+A context menu the agent's target opens during a background action: with the rest of the series merged, 390 of 400 of the user's keys reached their app, one lost in every run (10/10) → 400/400, none lost (0/10).
 
-| While the agent works in app B behind app A, the user types in A | `main` | this PR |
-|---|---|---|
-| B's context menu opens (`AXShowMenu`) and keeps the keyboard | 177 of 400 keys lost in the menu, 10/10 runs | 400/400 in A |
-| B activates itself (a button calling `activate`) | 400/400 in A | 400/400 in A, nothing moved |
-| User ⌘-Tabs to B mid-action | keys follow the user to B | unchanged, 0 moved |
-| Password field focused in A (secure input) | — | never tapped |
+<picture>
+  <source media="(min-width: 1244px) and (prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/6b6a0278-d2ff-4cf9-b075-9d1a5a305ea0">
+  <source media="(min-width: 1244px) and (prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/fa6856c2-4067-4728-87b2-b78d9c072f4f">
+  <source media="(prefers-color-scheme: dark)" width="440" srcset="https://github.com/user-attachments/assets/8e8598f6-1efe-4b10-be3e-381b6fb45a92">
+  <source media="(prefers-color-scheme: light)" width="440" srcset="https://github.com/user-attachments/assets/96f8f1f8-76ff-439b-a763-cad517ec845b">
+  <img width="780" alt="Routing diagram. Each of your keys that reaches app B while the agent's background action in B runs gets one check: did B take the keyboard without you choosing it (no click since the action began, no ⌘/⌃ in the 250 ms before, no Spotlight-style panel, no secure entry, not omp's own key)? Yes: the key is posted to your app and the original dropped, 27 µs a key. No: it passes to B unchanged, 1.4 µs a key (costs timed on an earlier prototype's handler; the current handler was not retimed). A key's repeats and release follow its press." src="https://github.com/user-attachments/assets/fa6856c2-4067-4728-87b2-b78d9c072f4f" />
+</picture>
 
 > **macOS context.** *Key focus* is the process WindowServer sends keystrokes to. A menu or popover takes it while its app stays behind the user's.
 
@@ -17,34 +18,43 @@ Reading order (`macos/key_reroute.rs`): `Theft::notify` (who holds the keyboard)
 
 ## Why
 
-The focus guard puts A back in front, but until it does, and while a menu B opened stays open, WindowServer sends the user's keys to B, and a menu eats them.
+The focus guard puts the user's app back in front, but until it does, and while a menu the target opened stays open, WindowServer sends the user's keys to the target, and a menu eats them.
 
-During each guarded action a listen-only tap reads WindowServer's front-app and key-focus notifications, and an active tap on B's process moves the user's keys. Nothing moves after a mouse button, ⌘ or ⌃ within 250 ms of B coming forward, a Spotlight-style panel, or a key pressed during secure keyboard entry; omp's own keys never move. The taps outlive the action while B still holds the keyboard (at most 30 s) or a moved key is still down.
+During each guarded action a listen-only tap reads WindowServer's front-app and key-focus notifications, and an active tap on the target's process moves the user's keys.
 
-- **Rejected: deciding each key-up on its own.** When B gives the keyboard back between a key's press and release, WindowServer still sends the release to B: an earlier head that did this left B a key-up without its key-down in 36 of 70 runs below.
-- **Rejected: closing the menu.** Releasing B's key focus from omp's process (`SLPSReleaseKeyFocusWithID`) fails with error 1003.
+- **Rejected: deciding each key-up on its own.** When the target gives the keyboard back between a key's press and release, WindowServer still sends the release to it: an earlier version that did this left the target a key-up without its key-down in 36 runs below.
+- **Rejected: closing the menu.** Releasing the target's key focus from omp's process (`SLPSReleaseKeyFocusWithID`) fails with error 1003.
 
-Risk: while an action runs, every key to B passes an active tap in omp (callback median 1.2 µs passed through, 27 µs moved).
+Risk: while an action runs, every key to the target passes an active tap in omp (the costs above, from an earlier prototype's handler, not retimed; its slowest moved key took 402 µs).
 
-Maintenance: the notification event (type 21) and its fields 40/64/73 are undocumented, checked on macOS 26.5. If they change, no theft is seen and keys behave as on `main`; the menu case losing keys again would show it.
+Maintenance: the notification event (type 21) and its fields 40/64/73 are undocumented, checked on macOS 26.5. If they change, no theft is seen and keys behave as without this change; the menu case losing keys again would show it.
 
 ## Testing
 
-A macOS 26.5 VM; the VNC keyboard types 40 keys into A while a computer-tool cell acts on B, 10 runs per case per arm, on a build with our other open macOS computer-use changes:
+A macOS 26.5 VM; the VNC keyboard types 40 keys into A while a computer-tool cell acts on B, 10 runs per case per arm (menu-then-idle rows: 150 keys a run; without this change, those, ⌘-Tab and password ran 5 runs, ⌘-click 9 valid):
 
-| Case | earlier head: keys in A; runs where B got a key-up without its key-down | this PR |
-|---|---|---|
-| B's context menu (`AXShowMenu`) | 400/400; 6/10 | 400/400; 0/10 |
-| Context-menu `menu:` choice | 400/400; 7/10 | 400/400; 0/10 |
-| Popup `setValue` | 400/400; 6/10 | 400/400; 0/10 |
-| Popup `menu:` path | 400/400; 4/10 | 400/400; 0/10 |
-| ⌘-click a link in Chrome B | 400/400; A missed a key-up in 2/10 | 400/400; 0/10 |
-| B activates itself | 400/400; 2/10 | 400/400; 0/10 |
-| Menu, then 16 s with no action (A = receiver / Terminal) | 1500/1500 each; 11/20 | 1500/1500 each; 0/20 |
-| User ⌘-Tabs to B | 0 moved (9 valid) | 0 moved |
-| Password field in A | 400/400 | 400/400 |
+| Case | without this change: keys in A (runs with a loss) | earlier version: runs where B got a key-up without its key-down | this change: keys in A; such runs |
+|---|---|---|---|
+| B's context menu (`AXShowMenu`) | 390/400 (10/10) | 6/10 | 400/400; 0/10 |
+| Context-menu `menu:` choice | 392/400 (8/10) | 7/10 | 400/400; 0/10 |
+| Popup `setValue` | 397/400 (3/10) | 6/10 | 400/400; 0/10 |
+| Popup `menu:` path | 392/400 (8/10) | 4/10 | 400/400; 0/10 |
+| ⌘-click a link in Chrome B | 346/360, 14 into Chrome (8/9) | A missed a key-up in 2/10 | 400/400; 0/10 |
+| B activates itself | 399/400 (1/10) | 2/10 | 400/400; 0/10 |
+| Menu, then 16 s with no action (A = receiver / Terminal) | 749/750 / 746/750 (1/5, 4/5) | 6/10 / 5/10 | 1500/1500 each; 0/20 |
+| User ⌘-Tabs to B | 0 moved | — | 0 moved |
+| Password field in A | 200/200 | — | 400/400 |
 
-While no action ran (5 idle checks, about 135 keys per run), neither arm touched a key and key-event age matched: receiver median 0.79–0.89 ms in both. The What table: same rig, `main` against an earlier head.
+On the restacked series build with this change, n=5 per case: every theft case 200/200 in A, no key row of the user's reached B, ⌘-Tab still ends the action with `UserIntervened` 5/5.
+
+With no action running (idle checks, about 135 keys per run), this change touched no key and key-event age in the receiver matched: median 0.80–0.89 ms, against 0.79–0.82 ms for the earlier version.
+
+<details><summary>Builds and sources</summary>
+
+- "Without this change" is the series merged on 10-13 (`0e8209b76a`); its "earlier version" column and the K13 arm are `dac88c543b`; "this change" is `24f729f0ce`, whose `key_reroute.rs` matches the queued head byte for byte outside its tests. Menu-then-idle rows ran 5 runs without this change, 10 with. Restacked series build: `24b3e98177`.
+- Cost on the routes: median time in the tap's handler over the stacked runs of a measurement build (`58e204ce`): user keys passed 1.4 µs (n=335, p95 2.2 µs), moved 27 µs (n=55, p95 352 µs, max 402 µs); omp's own keys pass in 1.2 µs (n=3,000).
+
+</details>
 
 `key_reroute.rs` has 19 rule tests; reverting the press/release pairing fails 8. `CI=1 bun run check:rs` and `bun check` pass; `cargo test -p pi-natives --lib` passes except `emergency_stop_revokes_idle_task_control_after_retirement`, which fails the same way without this change and passes alone.
 
