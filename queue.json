@@ -232,7 +232,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "c2cb79e4c227aa4b22c4ccb933ff72fd88bceba4",
+   "base": "7b92f745f68cf1936a5a2f35e62a5e9a2fd2f03e",
    "body": null,
    "state": "open",
    "pr": 15105,
@@ -240,9 +240,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-extension-version",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-15T17:59:01Z",
+   "updated": "2026-10-17T22:50:56Z",
    "note": "",
-   "advanced": "2026-10-14T22:35:41Z"
+   "advanced": "2026-10-17T22:50:56Z"
   },
   {
    "id": "relay-own-tab",
