@@ -2638,8 +2638,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-key-reroute",
    "host": "MacBook-Pro",
    "added": "2026-10-14T04:51:27Z",
-   "updated": "2026-10-17T22:34:00Z",
-   "note": ""
+   "updated": "2026-10-17T23:47:02Z",
+   "note": "series 1 item 14: named in the Show and tell post (https://github.com/can1357/oh-my-pi/discussions/16124) as one more follow-up coming later; branch 3ece974eb6 and base 9d76bbb436 (#15195's head) set 2026-10-17; opens after #15195 merges (stored body bodies/computer-key-reroute.md)."
   },
   {
    "id": "runtime-provenance",
