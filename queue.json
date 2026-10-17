@@ -3061,28 +3061,11 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-17T18:05:07Z",
+  "checked": "2026-10-17T18:35:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
-  "conflicts": {
-   "#15130": {
-    "since": "2026-10-17T18:05:07Z",
-    "title": "feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup",
-    "files": [
-     "packages/coding-agent/test/claude-auto-reset-integration.test.ts"
-    ]
-   },
-   "#15433": {
-    "since": "2026-10-16T21:05:27Z",
-    "title": "feat(task): add omp agents show for what an agent's spawns run with",
-    "files": [
-     "packages/coding-agent/src/sdk.ts",
-     "packages/coding-agent/src/task/executor.ts",
-     "packages/coding-agent/src/task/structured-subagent.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-10-17T14:06:44Z",
   "unreleased": {},
   "events": [
