@@ -6,6 +6,7 @@
 
 - macOS background keystrokes into an app with several windows now reach the target window instead of throwing `BackgroundUnavailable`, and stop with `InputFailed` once another of its windows becomes key ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - macOS background keystrokes, left clicks and menu actions aimed at a non-key window of the app the user is in now throw `BackgroundUnavailable` instead of moving the user's typing to that window; pass `takeover: true` for it ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
+- Computer use's physical Escape stop now watches the keyboard only during takeover input (`takeover: true`, held control, desktop-level input, raises); an Escape the user presses in their own app no longer cancels background window input, which the host interrupt still stops ([#15176](https://github.com/can1357/oh-my-pi/pull/15176) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 
@@ -25,6 +26,8 @@
 - Fixed macOS background clicks on a control in a popover or sheet, such as Calendar's event popover or Automator's Save sheet, closing the popover or landing in the window it is attached to; they now go to the popover or sheet, without the press that made the window key ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a macOS background AX action that reports an error yet brings its app forward, such as `AXOpen` on a file in Chrome's Open panel, leaving that app in front of the user's for good; the focus guard now keeps watching after a failed action and sends the app back ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed the macOS background focus guard able to put the user's app back in front just after they clicked the agent's target app themselves, when the click came between the guard's last check and its hand-back; macOS now refuses the hand-back if any key or click came after that check ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed macOS computer use reporting a working physical Escape stop (`globalEscape: true`) when Input Monitoring was turned off and the stop could not see keys; `inputPermission` now reports event-posting access, and permission errors name the terminal or IDE to grant ([#15157](https://github.com/can1357/oh-my-pi/pull/15157) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed macOS takeover input sending the user back to their previous app when they clicked in the takeover target as the input ended, and keeping the target in front for good when they merely kept typing while takeover held it: a click, a Command shortcut such as Command-Tab, or a switch to another app now leaves the front app to the user, and macOS refuses the hand-back if one came after the takeover's own input; typing alone no longer does, once Input Monitoring lets omp tell it apart ([#15176](https://github.com/can1357/oh-my-pi/pull/15176) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.12.0] - 2026-10-17
 
