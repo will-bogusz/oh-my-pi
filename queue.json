@@ -2917,7 +2917,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-17T13:30:27Z",
+  "checked": "2026-10-17T14:32:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -2932,12 +2932,17 @@
     ]
    }
   },
-  "merged_through": "2026-10-17T11:08:44Z",
+  "merged_through": "2026-10-17T14:06:44Z",
   "unreleased": {
    "16038": {
     "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
     "merge_commit": "12d5ccabe4eee15b1077aaab37ae292103f0790e",
     "merged_at": "2026-10-17T11:08:44Z"
+   },
+   "16037": {
+    "title": "fix(browser): reattach a tab whose worker exits unexpectedly",
+    "merge_commit": "f17968c24e572590691daf8cca4d8a67479a640f",
+    "merged_at": "2026-10-17T14:06:44Z"
    }
   },
   "events": [
@@ -3388,6 +3393,14 @@
     "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
     "merged_by": "H4vC",
     "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-17T14:32:08Z",
+    "kind": "merged",
+    "number": 16037,
+    "title": "fix(browser): reattach a tab whose worker exits unexpectedly",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  }
