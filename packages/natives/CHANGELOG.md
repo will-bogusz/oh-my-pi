@@ -13,6 +13,7 @@
 ### Added
 
 - Added a `menu` item path to `click` options and `axPerform`: a macOS click or action that opens a menu presses that item in it, submenus included, and returns with the menu closed ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- Added a `refuseMenu` option to `click`, `drag` and `holdMouse`: a macOS background left click that lands on a menu button or popup button, or a drag or hold that starts on one, throws `BackgroundUnavailable` before anything is sent, instead of opening the control's menu, which takes the user's keyboard ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 
@@ -21,6 +22,9 @@
 - Computer use's physical Escape stop now watches the keyboard only during takeover input (`takeover: true`, held control, desktop-level input, raises); an Escape the user presses in their own app no longer cancels background window input, which the host interrupt still stops ([#15176](https://github.com/can1357/oh-my-pi/pull/15176) by [@will-bogusz](https://github.com/will-bogusz))
 - macOS background drags, mouse holds, clicks with modifiers, right-clicks and scrolls in Electron apps now run without bringing the app forward, instead of throwing `BackgroundUnavailable`; drags and holds with the right button or Control, repeated right-clicks or Control-clicks, and gestures with modifiers or keys into Apple Screen Sharing, still throw it ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - macOS background clicks into apps built on macOS's own Tk 8.5 now run; Tk 8.6 and later still throw `BackgroundUnavailable` ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- macOS window input with `takeover` and the new `returnFocus` option hands focus back to the user's app even when they typed or clicked during the action; only a third app they switched to keeps focus. Plain `takeover` is unchanged ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
+- `BackgroundUnavailable` and partial-delivery errors no longer tell the caller to retry with `takeover:true`; they say whether any input was sent ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
+- Window input calls now resolve to a `DesktopFocusReturn` (`handedBack`, `previousPid`, `frontPid`) when a macOS takeover ran, read from `WindowServer` once focus was restored; otherwise they resolve to `null` ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 
@@ -48,6 +52,9 @@
 - Fixed a macOS background `press()`, `perform("AXShowMenu")`, click, mouse hold or drag on a menu button or popup button leaving its menu open, which took every key from the user's app; the menu now closes and the call throws `InputFailed` listing its items ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a macOS `menu` path or background `press()` on a popup in a system Open or Save panel, such as Automator's Save sheet Where: popup, failing with "its items could not be read" or "opened no menu", because the menu opens in `openAndSavePanelService` ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS `setValue` on a background popup button typing the user's keys into the target app: the menu it opens now ends with `AXCancel` right after the item is pressed, instead of flashing the item and fading out for about a third of a second while it holds the keyboard ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed X11 background input refusing with `BackgroundUnavailable` and "no input was sent" after part of the call was already sent (a later click of a double-click, a later scroll detent, a pointer event after held keys); it now throws `InputFailed` saying input may already have landed ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed macOS takeover `InputFailed` naming only the target window when another held focus; it now names the app's focused window, such as an alert or sheet, or the app that stayed in front ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed a macOS `takeover: true` click or key that opened a document or closed a sheet or panel leaving its app in front for good; focus now returns to your app unless you typed or clicked during the takeover ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.12.0] - 2026-10-17
 
