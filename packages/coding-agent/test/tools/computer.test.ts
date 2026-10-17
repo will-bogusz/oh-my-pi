@@ -3115,7 +3115,14 @@ describe("computer supervisor recovery", () => {
 
 describe("display hold follows the agent turn", () => {
 	async function runTurn(transport: MemoryTransport, id: string, code: string, displayTurn?: number) {
-		transport.inbound({ type: "run", id, code, timeoutMs: 2_000, session: snapshot(false, displayTurn) });
+		transport.inbound({
+			type: "run",
+			id,
+			code,
+			timeoutMs: 2_000,
+			session: snapshot(false, displayTurn),
+			escape: escapeScope(),
+		});
 		const message = await transport.waitFor(candidate => candidate.type === "result" && candidate.id === id);
 		if (message.type !== "result" || !message.ok) throw new Error(`run ${id} failed`);
 		return message.payload.returnValue;
@@ -3165,6 +3172,7 @@ describe("display hold follows the agent turn", () => {
 			code: 'await desktop.control.acquire({ reason: "Edit" }); return 1;',
 			timeoutMs: 2_000,
 			session: snapshot(false, 1),
+			escape: escapeScope(),
 		});
 		const confirm = await transport.waitFor(
 			message => message.type === "control-request" && message.runId === "confirming",
@@ -3193,7 +3201,14 @@ describe("display hold follows the agent turn", () => {
 			await created.promise;
 			return native;
 		});
-		transport.inbound({ type: "run", id: "cold", code: "return 1;", timeoutMs: 2_000, session: snapshot(false, 1) });
+		transport.inbound({
+			type: "run",
+			id: "cold",
+			code: "return 1;",
+			timeoutMs: 2_000,
+			session: snapshot(false, 1),
+			escape: escapeScope(),
+		});
 		// A dialog opens and is answered while the native session is still being created.
 		transport.inbound({ type: "release-display", turn: 1 });
 		transport.inbound({ type: "resume-display", from: 1, turn: 2 });

@@ -209,7 +209,7 @@ pub(crate) fn check_press() -> CoreResult<()> {
 }
 
 enum Tap {
-	/// Not started yet, or event-listening access was missing at the last try.
+	/// Not started yet, or the tap could not be created at the last try.
 	Stopped(fn(Arc<UserInputs>) -> CoreResult<UserInputMonitor>),
 	Running(#[allow(dead_code, reason = "dropping it stops the tap")] UserInputMonitor),
 	/// Tests feed events through [`Listener::record_for_test`].
@@ -219,8 +219,8 @@ enum Tap {
 
 /// The session's record of the user's input and the tap that feeds it. The
 /// tap starts when the session first reads or acts on an app and stops when
-/// the session's worker drops this. Without event-listening access it cannot
-/// start: nothing is recorded and no input waits.
+/// the session's worker drops this. Without event-listening access it starts
+/// but sees nothing: nothing is recorded and no input waits.
 pub(crate) struct Listener {
 	inputs: Arc<UserInputs>,
 	tap:    Tap,
