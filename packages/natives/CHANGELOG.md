@@ -66,6 +66,10 @@
 - Fixed an app that a macOS background action opens something in, such as TextEdit after a background ⌘O in Finder, staying in front of the user's app; it is sent back like the target ([#15195](https://github.com/can1357/oh-my-pi/pull/15195) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed the user's keystrokes landing in the app a macOS background action targets, or vanishing into a menu it opened, when it takes the keyboard mid-action; they now reach the user's app
 
+### Changed
+
+- Desktop window input with `takeover` omitted is now background on every platform even while task control is held; only `takeover: true` selects foreground delivery ([#15173](https://github.com/can1357/oh-my-pi/pull/15173) by [@will-bogusz](https://github.com/will-bogusz))
+
 ## [18.12.0] - 2026-10-17
 
 ### Breaking Changes

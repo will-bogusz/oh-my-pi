@@ -39,6 +39,14 @@
 - Fixed a key the user was typing in another app arriving twice or more on macOS when omp exited after computer use: the computer tool closes its event taps from the exit handler ([#15562](https://github.com/can1357/oh-my-pi/pull/15562) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed the `computer` tool's takeover-rerun notice saying "nothing was sent" about a call it had just delivered; it now says the input was delivered, so the model stops repeating the call ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
+### Added
+
+- Added `{ takeover: true }` to computer-use `win.move`, so a hover that a window refuses in the background can be retried in the foreground ([#15173](https://github.com/can1357/oh-my-pi/pull/15173) by [@will-bogusz](https://github.com/will-bogusz))
+
+### Changed
+
+- Computer-use window input with `takeover` omitted now stays in the background after `computer.control.acquire`, so an acquired grant no longer activates the target app or moves the user's pointer; pass `takeover: true` for foreground input ([#15173](https://github.com/can1357/oh-my-pi/pull/15173) by [@will-bogusz](https://github.com/will-bogusz))
+
 ## [18.12.0] - 2026-10-17
 
 ### Added
