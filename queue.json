@@ -2916,7 +2916,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-17T10:56:06Z",
+  "checked": "2026-10-17T11:27:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -2931,8 +2931,14 @@
     ]
    }
   },
-  "merged_through": "2026-10-16T12:06:48Z",
-  "unreleased": {},
+  "merged_through": "2026-10-17T11:08:44Z",
+  "unreleased": {
+   "16038": {
+    "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
+    "merge_commit": "12d5ccabe4eee15b1077aaab37ae292103f0790e",
+    "merged_at": "2026-10-17T11:08:44Z"
+   }
+  },
   "events": [
    {
     "at": "2026-10-14T19:47:58Z",
@@ -3373,6 +3379,14 @@
     "id": "inflight-epoch",
     "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
     "why": "opened as #16038"
+   },
+   {
+    "at": "2026-10-17T11:27:08Z",
+    "kind": "merged",
+    "number": 16038,
+    "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
    }
   ]
  }
