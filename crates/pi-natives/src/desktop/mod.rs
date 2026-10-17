@@ -995,7 +995,17 @@ impl Worker {
 		#[cfg(target_os = "macos")]
 		let watch = {
 			self.read = None;
-			self.watch_app(request, token)?
+			match self.watch_app(request, token) {
+				Ok(watch) => watch,
+				// Naming an element's app can find it destroyed; that `StaleRef`
+				// names its match like one from the request itself.
+				Err(error) => {
+					return Err(match request.reference() {
+						Some(reference) => self.name_match(reference, error, token),
+						None => error,
+					});
+				},
+			}
 		};
 		let lease = request
 			.is_mutation()
