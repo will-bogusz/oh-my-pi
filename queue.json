@@ -2917,11 +2917,18 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-17T17:35:04Z",
+  "checked": "2026-10-17T18:05:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {
+   "#15130": {
+    "since": "2026-10-17T18:05:07Z",
+    "title": "feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup",
+    "files": [
+     "packages/coding-agent/test/claude-auto-reset-integration.test.ts"
+    ]
+   },
    "#15433": {
     "since": "2026-10-16T21:05:27Z",
     "title": "feat(task): add omp agents show for what an agent's spawns run with",
@@ -2933,18 +2940,7 @@
    }
   },
   "merged_through": "2026-10-17T14:06:44Z",
-  "unreleased": {
-   "16038": {
-    "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
-    "merge_commit": "12d5ccabe4eee15b1077aaab37ae292103f0790e",
-    "merged_at": "2026-10-17T11:08:44Z"
-   },
-   "16037": {
-    "title": "fix(browser): reattach a tab whose worker exits unexpectedly",
-    "merge_commit": "f17968c24e572590691daf8cca4d8a67479a640f",
-    "merged_at": "2026-10-17T14:06:44Z"
-   }
-  },
+  "unreleased": {},
   "events": [
    {
     "at": "2026-10-14T19:47:58Z",
@@ -3401,6 +3397,29 @@
     "title": "fix(browser): reattach a tab whose worker exits unexpectedly",
     "merged_by": "H4vC",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-17T18:05:07Z",
+    "kind": "released",
+    "number": 16038,
+    "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
+    "tag": "v18.12.0"
+   },
+   {
+    "at": "2026-10-17T18:05:07Z",
+    "kind": "released",
+    "number": 16037,
+    "title": "fix(browser): reattach a tab whose worker exits unexpectedly",
+    "tag": "v18.12.0"
+   },
+   {
+    "at": "2026-10-17T18:05:07Z",
+    "kind": "conflict",
+    "label": "#15130",
+    "title": "feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup",
+    "files": [
+     "packages/coding-agent/test/claude-auto-reset-integration.test.ts"
+    ]
    }
   ]
  }
