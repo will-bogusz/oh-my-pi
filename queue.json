@@ -2545,7 +2545,7 @@
    "needs": [
     "#15195"
    ],
-   "base": "0da849e262fd3f095fea94e96646639bcf884a46",
+   "base": "9d76bbb436497aac1a85f01e60ac9ac4ae7c0ba9",
    "body": "bodies/computer-key-reroute.md",
    "state": "queued",
    "pr": null,
@@ -2553,7 +2553,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-key-reroute",
    "host": "MacBook-Pro",
    "added": "2026-10-14T04:51:27Z",
-   "updated": "2026-10-14T04:51:27Z",
+   "updated": "2026-10-17T22:34:00Z",
    "note": ""
   },
   {
