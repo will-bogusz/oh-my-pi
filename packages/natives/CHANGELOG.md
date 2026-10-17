@@ -56,6 +56,7 @@
 - Fixed macOS takeover `InputFailed` naming only the target window when another held focus; it now names the app's focused window, such as an alert or sheet, or the app that stayed in front ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a macOS `takeover: true` click or key that opened a document or closed a sheet or panel leaving its app in front for good; focus now returns to your app unless you typed or clicked during the takeover ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS typing into Screen Sharing and iPhone Mirroring: text, and characters in key presses and held keys, now use the keyboard layout's keys instead of arriving as a run of `a` or as the ANSI key's character; Screen Sharing types unmodified text in the background (text or shortcuts needing a modifier still need takeover), and iPhone Mirroring taps and scrolls land where aimed. Typing into other apps is unchanged ([#15193](https://github.com/can1357/oh-my-pi/pull/15193) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed macOS keys and mouse buttons staying down when omp is killed or its native input code panics mid-gesture; a key or button the user is physically holding is left for the user to release ([#15192](https://github.com/can1357/oh-my-pi/pull/15192) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.12.0] - 2026-10-17
 

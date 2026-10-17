@@ -516,9 +516,14 @@ impl KernelOwner {
 				let leases = ProcessLease::acquire()
 					.and_then(|process| KernelLease::acquire().map(|kernel| (kernel, process)));
 				match leases {
-					Ok(_leases) => {
+					Ok((kernel, process)) => {
+						// Withdrawn from release helpers before the lock is released.
+						#[cfg(target_os = "macos")]
+						let kernel = SharedOwnership::publish(kernel);
 						let _ = ready.send(Ok(()));
 						let _ = stopped.recv();
+						drop(kernel);
+						drop(process);
 					},
 					Err(error) => {
 						let _ = ready.send(Err(error));
@@ -543,6 +548,56 @@ impl Drop for KernelOwner {
 			let _ = thread.join();
 		}
 	}
+}
+
+/// A duplicate of the kernel ownership lock while this process holds it. A
+/// macOS input-release helper keeps one open (`macos/release_guard.rs`), so a
+/// host that dies mid-input keeps other hosts out until the helper has
+/// released what the host held.
+#[cfg(target_os = "macos")]
+static SHARED_OWNERSHIP: Mutex<Option<SharedLock>> = Mutex::new(None);
+
+#[cfg(target_os = "macos")]
+struct SharedLock {
+	file:   std::fs::File,
+	handed: bool,
+}
+
+/// The kernel lease while its lock is published to release helpers.
+#[cfg(target_os = "macos")]
+struct SharedOwnership {
+	lease: KernelLease,
+}
+
+#[cfg(target_os = "macos")]
+impl SharedOwnership {
+	fn publish(lease: KernelLease) -> Self {
+		*SHARED_OWNERSHIP.lock() = lease
+			.file
+			.try_clone()
+			.ok()
+			.map(|file| SharedLock { file, handed: false });
+		Self { lease }
+	}
+}
+
+#[cfg(target_os = "macos")]
+impl Drop for SharedOwnership {
+	fn drop(&mut self) {
+		let published = SHARED_OWNERSHIP.lock().take();
+		self.lease.shared = published.is_some_and(|published| published.handed);
+	}
+}
+
+/// A new close-on-exec descriptor for the kernel ownership lock, while this
+/// process holds it.
+#[cfg(target_os = "macos")]
+pub(crate) fn shared_ownership() -> Option<std::os::fd::OwnedFd> {
+	let mut published = SHARED_OWNERSHIP.lock();
+	let published = published.as_mut()?;
+	let duplicate = published.file.try_clone().ok()?;
+	published.handed = true;
+	Some(duplicate.into())
 }
 
 pub(crate) struct InputLease {
@@ -580,8 +635,16 @@ impl Drop for InputLease {
 	}
 }
 
+/// The `flock` belongs to the open file: every descriptor of it holds the lock
+/// until all of them close, or until one unlocks it for all.
 #[cfg(unix)]
-struct KernelLease(std::fs::File);
+struct KernelLease {
+	file:   std::fs::File,
+	/// A macOS release helper was handed a duplicate (`SharedOwnership`), so
+	/// the lease releases by closing its descriptor and the lock lasts until
+	/// the helper's closes too.
+	shared: bool,
+}
 
 #[cfg(unix)]
 impl KernelLease {
@@ -643,17 +706,22 @@ impl KernelLease {
 			}
 			return Err(DesktopError::input_failed(format!("cannot lock desktop ownership: {error}")));
 		}
-		Ok(Self(file))
+		Ok(Self { file, shared: false })
 	}
 }
 
 #[cfg(unix)]
 impl Drop for KernelLease {
 	fn drop(&mut self) {
-		use std::os::fd::AsRawFd;
-		// SAFETY: this guard owns the live locked descriptor.
-		unsafe {
-			libc::flock(self.0.as_raw_fd(), libc::LOCK_UN);
+		// Unlocked rather than closed when nothing else should hold it: a
+		// process another thread is spawning keeps a copy of the descriptor
+		// until it execs.
+		if !self.shared {
+			use std::os::fd::AsRawFd;
+			// SAFETY: this guard owns the live locked descriptor.
+			unsafe {
+				libc::flock(self.file.as_raw_fd(), libc::LOCK_UN);
+			}
 		}
 	}
 }
@@ -980,27 +1048,29 @@ mod tests {
 		}
 	}
 
+	/// Asserts in a separate process whether the kernel lock at `path` is free.
+	#[cfg(unix)]
+	fn child_probe(path: &std::path::Path, free: bool) {
+		let mut command = std::process::Command::new(std::env::current_exe().expect("test binary"));
+		command
+			.args(["--exact", "desktop::control::tests::kernel_child_probe"])
+			.env("PI_CONTROL_TEST_LOCK", path)
+			.env_remove("PI_CONTROL_TEST_FREE");
+		if free {
+			command.env("PI_CONTROL_TEST_FREE", "1");
+		}
+		assert!(command.status().expect("child probe").success());
+	}
+
 	#[cfg(unix)]
 	#[test]
 	fn independent_processes_contend_and_release() {
 		let path =
 			std::env::temp_dir().join(format!("pi-control-process-test-{}.lock", std::process::id()));
 		let first = KernelLease::at(&path).expect("parent lease");
-		let child = |free: bool| {
-			let mut command =
-				std::process::Command::new(std::env::current_exe().expect("test binary"));
-			command
-				.args(["--exact", "desktop::control::tests::kernel_child_probe"])
-				.env("PI_CONTROL_TEST_LOCK", &path)
-				.env_remove("PI_CONTROL_TEST_FREE");
-			if free {
-				command.env("PI_CONTROL_TEST_FREE", "1");
-			}
-			assert!(command.status().expect("child probe").success());
-		};
-		child(false);
+		child_probe(&path, false);
 		drop(first);
-		child(true);
+		child_probe(&path, true);
 		let recovered =
 			KernelLease::at(&path).expect("kernel releases ownership after abrupt child exit");
 		drop(recovered);
@@ -1017,5 +1087,62 @@ mod tests {
 		let second = KernelLease::at(&path).expect("lease after release");
 		drop(second);
 		std::fs::remove_file(path).expect("remove test lock");
+	}
+
+	#[cfg(unix)]
+	#[test]
+	fn a_lease_releases_while_a_process_spawned_under_it_still_holds_its_descriptor() {
+		let path =
+			std::env::temp_dir().join(format!("pi-control-copy-test-{}.lock", std::process::id()));
+		let lease = KernelLease::at(&path).expect("lease");
+		// A process spawned while the lease is held carries a copy of its
+		// descriptor until it execs; this one keeps it.
+		let mut copy = std::process::Command::new("/bin/cat")
+			.stdin(std::process::Stdio::piped())
+			.stdout(lease.file.try_clone().expect("descriptor copy"))
+			.spawn()
+			.expect("process holding a copy");
+		drop(lease);
+		child_probe(&path, true);
+		drop(copy.stdin.take());
+		assert!(copy.wait().expect("copy exits").success());
+		std::fs::remove_file(path).expect("remove copy test lock");
+	}
+
+	#[cfg(target_os = "macos")]
+	#[test]
+	fn a_helper_holding_the_shared_lock_keeps_other_hosts_out_until_it_exits() {
+		// The worker tests in this process take its one input ownership to send
+		// input, so the test runs alone in a child test process.
+		const ALONE: &str = "PI_DESKTOP_TEST_ALONE";
+		if std::env::var_os(ALONE).is_none() {
+			let output = std::process::Command::new(std::env::current_exe().expect("test binary"))
+				.args([
+					"--exact",
+					"desktop::control::tests::a_helper_holding_the_shared_lock_keeps_other_hosts_out_until_it_exits",
+				])
+				.env(ALONE, "1")
+				.output()
+				.expect("child test");
+			let stdout = String::from_utf8_lossy(&output.stdout);
+			assert!(output.status.success() && stdout.contains(" 1 passed;"), "{stdout}");
+			return;
+		}
+		assert!(shared_ownership().is_none());
+		let owner = KernelOwner::acquire().expect("test kernel owner");
+		// Started as the release helper is: the shared lock is its standard
+		// output, and it exits when its standard input ends.
+		let mut helper = std::process::Command::new("/bin/cat")
+			.stdin(std::process::Stdio::piped())
+			.stdout(shared_ownership().expect("held lock is shared"))
+			.spawn()
+			.expect("helper stand-in");
+		drop(owner);
+		assert!(shared_ownership().is_none());
+		child_probe(&KernelLease::path(), false);
+		drop(helper.stdin.take());
+		assert!(helper.wait().expect("helper exits").success());
+		child_probe(&KernelLease::path(), true);
+		remove_test_lock();
 	}
 }
