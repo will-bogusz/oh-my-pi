@@ -403,16 +403,13 @@ pub(crate) fn last_user_typing() -> u64 {
 	LAST_USER_TYPING.load(Ordering::Acquire)
 }
 
-/// Whether the current operation runs the physical Escape monitor, so
-/// [`user_choices`] and [`last_user_typing`] see the user's input; also
-/// during the operation's cleanup.
+/// Whether an operation is current, also during its cleanup. A takeover
+/// operation runs the physical Escape monitor (it is refused when the monitor
+/// cannot start), so [`user_choices`] and [`last_user_typing`] see the user's
+/// input whenever event-listening access lets the monitor see it.
 #[cfg(target_os = "macos")]
 pub(crate) fn observes_user_input() -> bool {
-	CURRENT.with_borrow(|token| {
-		token
-			.as_ref()
-			.is_some_and(|token| !token.escape_unavailable())
-	})
+	CURRENT.with_borrow(Option::is_some)
 }
 
 static OWNED: AtomicBool = AtomicBool::new(false);

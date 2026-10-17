@@ -1137,6 +1137,7 @@ pub(super) fn with_foreground<T>(
 	);
 	let user_picked = |front: ProcessSerialNumber| {
 		!control::observes_user_input()
+			|| !super::permission::listen_events()
 			|| user_acted()
 			|| before
 				.since(start.checked_sub(USER_SWITCH_WINDOW).unwrap_or(start))
