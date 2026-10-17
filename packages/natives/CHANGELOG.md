@@ -15,6 +15,10 @@
 - Added a `menu` item path to `click` options and `axPerform`: a macOS click or action that opens a menu presses that item in it, submenus included, and returns with the menu closed ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - Added a `refuseMenu` option to `click`, `drag` and `holdMouse`: a macOS background left click that lands on a menu button or popup button, or a drag or hold that starts on one, throws `BackgroundUnavailable` before anything is sent, instead of opening the control's menu, which takes the user's keyboard ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
+### Added
+
+- Added `DesktopSession.axType` and `axKeyChord`, which type into or press keys in one accessibility element; on macOS a field that does not report keyboard focus gets nothing and the error names what has focus ([#15563](https://github.com/can1357/oh-my-pi/pull/15563) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Changed
 
 - macOS background keystrokes into an app with several windows now reach the target window instead of throwing `BackgroundUnavailable`, and stop with `InputFailed` once another of its windows becomes key ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
