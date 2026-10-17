@@ -27,9 +27,8 @@ Reading order: `tab-protocol.ts` (`page: create | owned | borrowed`) → `tab-su
 
 ## Testing
 
-- `browser-relay-tab-isolation.test.ts` (real extension in Chromium): a relay open with a `url` and no `app.target` leaves the selected tab where it is; on `main` that test fails, as the open adopts the selected tab and navigates it to the `url`. The others: own tabs unselected, user tab untouched, click works, close removes the tab, borrowed tab survives, dismissed-debugger tab closed, owned recovery target survives a failed init, a second browser's default tab opens beside the tab borrowed there; 4 of 5 fail with the source reverted. Bridge tests: routing fails without `#instanceForNewTab`; an offline browser's tab reported closed fails with `main`'s check.
-- The isolation test also hovers the unselected owned tab; without focus emulation that hover times out.
-- `bun test test/tools/browser-*.test.ts`: 633 pass, 4 skipped; the 10 failures, all in `browser-run-listeners.test.ts`, fail the same on `main` on this host. `oxlint`, `oxfmt --check` and `check:ts` pass.
+- `browser-relay-tab-isolation.test.ts` (real extension in Chromium): a no-target open with a `url` leaves the selected tab alone (on `main` it adopts and navigates it); own tabs unselected, click and hover work (hover needs focus emulation), close removes the tab, borrowed tab survives, dismissed-debugger tab closed, owned recovery target survives a failed init, a second browser's default tab opens beside a tab borrowed there. Bridge tests: routing fails without `#instanceForNewTab`; an offline browser's tab reported closed fails with `main`'s check.
+- `bun test test/tools/browser-*.test.ts`: 633 pass; 10 `browser-run-listeners` failures also fail on `main`. Lint, format, `check:ts` pass.
 - Live, headful Chrome for Testing on an isolated relay, user tab selected, via `acquireTab`/`runInTab`/`releaseTab`:
 
 | extension | user tab after open | owned tab | click | screenshot | close |
