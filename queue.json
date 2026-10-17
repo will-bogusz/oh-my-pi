@@ -933,7 +933,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agents-show",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-17T18:15:12Z",
+   "updated": "2026-10-17T18:22:36Z",
    "note": "",
    "advanced": "2026-10-17T18:15:12Z",
    "built": [
@@ -944,6 +944,78 @@
      "tip": "52ef96d88b565b44bdd3c0765808132e5f5718a0",
      "with_tip": "f67b2905f52aee200bead06f50ad6d44d9a74ab9",
      "at": "2026-10-16T04:51:57Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#14235",
+     "code": "9a28f42c918c5bdc25a11813ba390cb902d44c0d",
+     "with_code": "5ca41aa364865ad8d91bf3e7385346847b260d40",
+     "tip": "fd44fbdffdea13f81ec5bb261c3b3d1a8a90cf6b",
+     "with_tip": "3880ea7d612d817a3915a8b5e97cb49039a22827",
+     "at": "2026-10-17T18:22:32Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#14237",
+     "code": "9a28f42c918c5bdc25a11813ba390cb902d44c0d",
+     "with_code": "86fb0761833073d8eaf1266b65baf8e4ca365325",
+     "tip": "fd44fbdffdea13f81ec5bb261c3b3d1a8a90cf6b",
+     "with_tip": "57dee83b3fefa97dcb18e89d1b2b91853615d111",
+     "at": "2026-10-17T18:22:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15105",
+     "code": "9a28f42c918c5bdc25a11813ba390cb902d44c0d",
+     "with_code": "5b659681c1c552624cb989fb4106a12bdaa0d5db",
+     "tip": "fd44fbdffdea13f81ec5bb261c3b3d1a8a90cf6b",
+     "with_tip": "3dd6beb62bde87218654d04d9160230a5b5d2759",
+     "at": "2026-10-17T18:22:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15128",
+     "code": "9a28f42c918c5bdc25a11813ba390cb902d44c0d",
+     "with_code": "ca95834cec2c151c013a3b24dc542e9f1ed84fa5",
+     "tip": "fd44fbdffdea13f81ec5bb261c3b3d1a8a90cf6b",
+     "with_tip": "feb13eb6bc3bdcdf460fbef35363a6e8a9adfe76",
+     "at": "2026-10-17T18:22:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15130",
+     "code": "9a28f42c918c5bdc25a11813ba390cb902d44c0d",
+     "with_code": "489401adc377f34ce309e0500122b62f9a00cc89",
+     "tip": "fd44fbdffdea13f81ec5bb261c3b3d1a8a90cf6b",
+     "with_tip": "01eaca12da3ad399cd319718dc3c0239baf7347d",
+     "at": "2026-10-17T18:22:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15418",
+     "code": "9a28f42c918c5bdc25a11813ba390cb902d44c0d",
+     "with_code": "f7b12f10303e0e5e84435f844a650c18971a5e82",
+     "tip": "fd44fbdffdea13f81ec5bb261c3b3d1a8a90cf6b",
+     "with_tip": "d0cbd9a402b1ddd33044ecd08ff24ec32104e816",
+     "at": "2026-10-17T18:22:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15508",
+     "code": "9a28f42c918c5bdc25a11813ba390cb902d44c0d",
+     "with_code": "1827c9d1fd7fe0e64d82b726a819a4b4d392d5c1",
+     "tip": "fd44fbdffdea13f81ec5bb261c3b3d1a8a90cf6b",
+     "with_tip": "5ccf9eac6bd472d32d7f51604189c2a0207963a4",
+     "at": "2026-10-17T18:22:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15574",
+     "code": "9a28f42c918c5bdc25a11813ba390cb902d44c0d",
+     "with_code": "ef22ec5b0bb7d02fd18a446b5a17232cfc8b92bd",
+     "tip": "fd44fbdffdea13f81ec5bb261c3b3d1a8a90cf6b",
+     "with_tip": "4bc538287fd5d330ce0d0ed9708d9cf9404e9ae6",
+     "at": "2026-10-17T18:22:35Z",
      "host": "MacBook-Pro"
     }
    ]
