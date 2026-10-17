@@ -3790,6 +3790,12 @@ mod capture_tests {
 		let mut backend = FakeWaylandBackend::new();
 		backend.tree = Some(Arc::clone(&tree));
 		let mut worker = worker_with(backend);
+		// PR 15562's user-input watch names a real macOS element's app; these
+		// fake elements have none, so the watch stays off.
+		#[cfg(target_os = "macos")]
+		{
+			worker.listener = control::intervention::Listener::off();
+		}
 		let target = Target::Window(WAYLAND_ID.to_string());
 		worker
 			.snapshot(&target, &AxSnapshotOptions::default())
