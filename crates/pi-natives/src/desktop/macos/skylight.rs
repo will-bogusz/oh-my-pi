@@ -22,7 +22,9 @@ use super::{
 		error::{CoreResult, DesktopError},
 		types::DesktopFocusReturn,
 	},
-	ax, capture, process,
+	ax, capture,
+	key_reroute::KeyReroute,
+	process,
 	release::Route,
 	release_guard,
 	route::{self, Routes, symbol},
@@ -703,6 +705,9 @@ pub(super) fn with_background_guard<T>(
 		SwitchSignals::read(spi, now, &sampled),
 		now,
 	);
+	// Sends the user's keys back to their app while the target holds the
+	// keyboard uninvited, until the guard below has put their app back.
+	let _reroute = previous.pid.and_then(|user| KeyReroute::arm(user, pid));
 	let stopped = AtomicBool::new(false);
 	let start_failed = |error: std::io::Error| {
 		DesktopError::background_unavailable(format!(
