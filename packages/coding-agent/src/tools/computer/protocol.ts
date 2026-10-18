@@ -24,11 +24,24 @@ export interface ComputerSessionSnapshot {
 /** Reply envelope for a session tool invoked by desktop JavaScript. */
 export type ToolReply = { ok: true; value: unknown } | { ok: false; error: RunErrorPayload };
 
+/** Where the native session counts the user's Escape stops, and how many the user's latest message acknowledged. */
+export interface ComputerEscapeScope {
+	key: string;
+	acknowledged: number;
+}
+
 /** Commands accepted by the persistent computer worker. */
 export type ComputerWorkerInbound =
 	| { type: "ping"; id: string }
-	| { type: "run"; id: string; code: string; timeoutMs: number; session: ComputerSessionSnapshot }
-	| { type: "capabilities"; id: string; session: ComputerSessionSnapshot }
+	| {
+			type: "run";
+			id: string;
+			code: string;
+			timeoutMs: number;
+			session: ComputerSessionSnapshot;
+			escape: ComputerEscapeScope;
+	  }
+	| { type: "capabilities"; id: string; session: ComputerSessionSnapshot; escape: ComputerEscapeScope }
 	| { type: "abort"; id: string }
 	| { type: "revoke-control"; id: string }
 	/** Agent turn `turn` ended: let the display sleep now, keeping every other piece of session state. */
@@ -48,6 +61,10 @@ export interface ComputerRunOk {
 	screenshots: ComputerScreenshot[];
 	capabilities?: DesktopCapabilities;
 }
+
+/** Result of a computer call the user stopped with physical Escape during takeover input. */
+export const ESCAPE_STOPPED_MESSAGE =
+	"The user pressed Escape to stop computer use; this call stopped and its input may be partial. Do not use the computer again this turn: tell the user what you did and what remains.";
 
 /** Appended to a screenshot taken while the macOS lock screen is up. */
 export const SCREEN_LOCKED_CAPTURE_NOTE = prompt.render(screenLockedCaptureNote);

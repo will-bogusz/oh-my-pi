@@ -5,11 +5,12 @@
 //! until its held input and focus have been restored.
 use std::{
 	cell::{Cell, RefCell},
+	collections::HashMap,
 	marker::PhantomData,
 	rc::Rc,
 	sync::{
-		Arc, Weak,
-		atomic::{AtomicBool, AtomicU64, Ordering},
+		Arc, LazyLock, Weak,
+		atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering},
 	},
 	thread,
 	time::{Duration, Instant},
@@ -32,21 +33,30 @@ pub(crate) use macos::SYNTHETIC_EVENT_TAG;
 
 #[derive(Default)]
 struct CancellationState {
-	generation: AtomicU64,
-	state:      Mutex<Option<Arc<ControlLease>>>,
-	wake:       Condvar,
+	generation:   AtomicU64,
+	state:        Mutex<Option<Arc<ControlLease>>>,
+	wake:         Condvar,
 	/// When the current computer run ends; input waiting for the user to
 	/// pause stops shortly before it.
 	#[cfg(target_os = "macos")]
-	deadline:   Mutex<Option<Instant>>,
+	deadline:     Mutex<Option<Instant>>,
+	/// Takeover input stopped by the user's physical Escape. Host cancels,
+	/// retirement and release never count, so the host can tell the user's
+	/// stop from its own. Shared with every session under the same key.
+	escape_stops: Arc<AtomicU32>,
 	#[cfg(target_os = "linux")]
-	async_wake: tokio::sync::Notify,
+	async_wake:   tokio::sync::Notify,
 }
 
 #[derive(Clone, Default)]
 pub(crate) struct CancellationSource(Arc<CancellationState>);
 
 impl CancellationSource {
+	/// A source whose physical-Escape stops count into `stops`.
+	pub(crate) fn counting_escapes(stops: Arc<AtomicU32>) -> Self {
+		Self(Arc::new(CancellationState { escape_stops: stops, ..CancellationState::default() }))
+	}
+
 	pub(crate) fn token(&self) -> OperationToken {
 		OperationToken {
 			source: self.clone(),
@@ -107,6 +117,11 @@ impl CancellationSource {
 	pub(crate) fn set_deadline(&self, deadline: Option<Instant>) {
 		*self.0.deadline.lock() = deadline;
 	}
+
+	/// How many times the user's physical Escape has stopped this session.
+	pub(crate) fn escape_stops(&self) -> u32 {
+		self.0.escape_stops.load(Ordering::Acquire)
+	}
 }
 
 /// Weak callback ownership avoids a lease -> monitor -> source -> lease cycle.
@@ -116,6 +131,15 @@ pub(super) struct EmergencyStop(Weak<CancellationState>);
 impl EmergencyStop {
 	fn cancel(&self) {
 		if let Some(source) = self.0.upgrade() {
+			CancellationSource(source).cancel();
+		}
+	}
+
+	/// The user's physical Escape: counted before the cancel, so a host that
+	/// sees the cancelled operation already sees the stop that caused it.
+	fn escape(&self) {
+		if let Some(source) = self.0.upgrade() {
+			source.escape_stops.fetch_add(1, Ordering::AcqRel);
 			CancellationSource(source).cancel();
 		}
 	}
@@ -319,6 +343,30 @@ pub(crate) fn with_token_for_test<T>(token: &OperationToken, action: impl FnOnce
 pub(crate) fn close_event_taps() {
 	#[cfg(target_os = "macos")]
 	macos::close_taps();
+}
+
+/// Physical-Escape stop counts by host-chosen key. A count outlives the
+/// session that observed it, so a host that replaces a hung worker's session
+/// still sees a stop the old session never reported.
+static ESCAPE_STOPS: LazyLock<Mutex<HashMap<String, Arc<AtomicU32>>>> =
+	LazyLock::new(Mutex::default);
+
+/// The shared count for `key`; a session without a key counts alone.
+pub(crate) fn escape_stop_counter(key: Option<&str>) -> Arc<AtomicU32> {
+	key.map_or_else(Arc::default, |key| {
+		Arc::clone(ESCAPE_STOPS.lock().entry(key.to_owned()).or_default())
+	})
+}
+
+pub(crate) fn escape_stops(key: &str) -> u32 {
+	ESCAPE_STOPS
+		.lock()
+		.get(key)
+		.map_or(0, |stops| stops.load(Ordering::Acquire))
+}
+
+pub(crate) fn forget_escape_stops(key: &str) {
+	ESCAPE_STOPS.lock().remove(key);
 }
 
 #[cfg(target_os = "macos")]
@@ -727,6 +775,39 @@ mod tests {
 		assert!(fresh.check().is_err());
 		drop(KernelOwner::acquire().expect("idle Escape releases kernel ownership"));
 		remove_test_lock();
+	}
+
+	#[test]
+	fn only_the_users_escape_counts_as_an_escape_stop() {
+		let source = CancellationSource::default();
+		let emergency = EmergencyStop(Arc::downgrade(&source.0));
+		source.retire();
+		source.cancel();
+		source.release_control();
+		emergency.cancel();
+		assert_eq!(source.escape_stops(), 0, "host and monitor-failure stops are not the user's");
+		let running = source.token();
+		emergency.escape();
+		assert_eq!(source.escape_stops(), 1);
+		assert!(running.check().is_err(), "the user's Escape cancels running input");
+		source.cancel();
+		assert_eq!(source.escape_stops(), 1);
+	}
+
+	#[test]
+	fn escape_stops_outlive_the_session_under_its_key() {
+		let key = format!("escape-key-test-{}", std::process::id());
+		let first = CancellationSource::counting_escapes(escape_stop_counter(Some(&key)));
+		EmergencyStop(Arc::downgrade(&first.0)).escape();
+		drop(first);
+		assert_eq!(escape_stops(&key), 1, "the host reads a stop after its session is gone");
+		let replacement = CancellationSource::counting_escapes(escape_stop_counter(Some(&key)));
+		assert_eq!(replacement.escape_stops(), 1, "a replacement session keeps the count");
+		let keyless = CancellationSource::counting_escapes(escape_stop_counter(None));
+		EmergencyStop(Arc::downgrade(&keyless.0)).escape();
+		assert_eq!(escape_stops(&key), 1, "a session without the key counts alone");
+		forget_escape_stops(&key);
+		assert_eq!(escape_stops(&key), 0);
 	}
 
 	#[test]
