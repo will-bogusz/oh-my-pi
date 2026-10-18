@@ -3790,6 +3790,24 @@
    "added": "2026-10-18T11:18:03Z",
    "updated": "2026-10-18T11:18:03Z",
    "note": ""
+  },
+  {
+   "id": "computer-target-sent-back-late",
+   "branch": "will/computer-target-sent-back-late",
+   "title": "fix(natives): send a macOS background target back however late it activates itself",
+   "area": "natives",
+   "priority": "P1",
+   "needs": [],
+   "base": "58349dc80de381057437818b8354c86826c8fa10",
+   "body": "bodies/computer-target-sent-back-late.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/tmp/oh-my-pi/s1k-target-late",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T12:38:01Z",
+   "updated": "2026-10-18T12:38:01Z",
+   "note": ""
   }
  ],
  "watch": {
