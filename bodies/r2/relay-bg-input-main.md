@@ -1,6 +1,6 @@
 ## What
 
-omp kept telling me it clicked something on a tab I had in the background when the page never got the click, so the pages it drives in my Chrome now count as visible while it drives them and go back to hidden when it lets go.
+omp kept telling me it clicked something on a tab I had in the background when the page never got the click, so tabs I lend it now count as visible while it drives them and go back to hidden when it lets go.
 
 In relay and `app.cdp_url` mode, a page omp borrows (`app.target`) or adopts can sit in an unselected tab, which Chrome treats as hidden. Since #16119, tabs omp opens itself already count as visible; this PR covers the tabs it borrows.
 
