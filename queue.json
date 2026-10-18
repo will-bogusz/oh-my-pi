@@ -3454,7 +3454,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-args",
    "host": "MacBook-Pro",
    "added": "2026-10-18T04:33:40Z",
-   "updated": "2026-10-18T05:33:49Z",
+   "updated": "2026-10-18T05:36:45Z",
    "note": "",
    "built": [
     {
@@ -3527,24 +3527,6 @@
      "tip": "6489bf49a00f56740ac40702b078bfc1b087633d",
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-18T04:35:42Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#15184",
-     "code": "068407c326a0ae8babbe7c4712b5ee8c47a94577",
-     "with_code": "7cf928f447d681980cc978434f798b1523f2c860",
-     "tip": "6489bf49a00f56740ac40702b078bfc1b087633d",
-     "with_tip": "56dde0a5dae9bf962f88a62e4e172c40269ade2d",
-     "at": "2026-10-18T05:18:39Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#16119",
-     "code": "068407c326a0ae8babbe7c4712b5ee8c47a94577",
-     "with_code": "707a5f5844970215671d134e22e3d4b5365a17c8",
-     "tip": "6489bf49a00f56740ac40702b078bfc1b087633d",
-     "with_tip": "d3764a3a9dd539814469a92fbd5467fe6b8058d9",
-     "at": "2026-10-18T05:18:41Z",
      "host": "MacBook-Pro"
     },
     {
@@ -3626,6 +3608,33 @@
      "tip": "6489bf49a00f56740ac40702b078bfc1b087633d",
      "with_tip": "05484abb87af74724046bafabc67287379a5f0ea",
      "at": "2026-10-18T05:33:49Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16119",
+     "code": "068407c326a0ae8babbe7c4712b5ee8c47a94577",
+     "with_code": "a29d4c4e0dc1052fff60731797a4c0acbdb57a6e",
+     "tip": "6489bf49a00f56740ac40702b078bfc1b087633d",
+     "with_tip": "e7f51758225679020e2d36da6621a012ec9a2dee",
+     "at": "2026-10-18T05:36:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15184",
+     "code": "068407c326a0ae8babbe7c4712b5ee8c47a94577",
+     "with_code": "b84351b3634b6956682ee8a0f289aea9f55281f1",
+     "tip": "6489bf49a00f56740ac40702b078bfc1b087633d",
+     "with_tip": "af5dcffc23e1c5891d72906051ed35e988775552",
+     "at": "2026-10-18T05:36:44Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16140",
+     "code": "068407c326a0ae8babbe7c4712b5ee8c47a94577",
+     "with_code": "46a5bb5d58b7ce1023016e087a23177a467dd5da",
+     "tip": "6489bf49a00f56740ac40702b078bfc1b087633d",
+     "with_tip": "50bd07bda0e2f4e40f615a393f318ba6f889abee",
+     "at": "2026-10-18T05:36:44Z",
      "host": "MacBook-Pro"
     }
    ]
