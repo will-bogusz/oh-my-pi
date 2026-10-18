@@ -5479,13 +5479,13 @@
    "needs": [],
    "base": "151bc26cdc3cfb93291235d537a0fd68d1e76746",
    "body": "bodies/compact-tool-result.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16241,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/compact-tool-result",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:35:54Z",
-   "updated": "2026-10-18T19:45:03Z",
+   "updated": "2026-10-18T19:50:51Z",
    "note": "",
    "advanced": "2026-10-18T19:39:58Z",
    "built": [
@@ -5660,7 +5660,8 @@
      "at": "2026-10-18T19:45:02Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-18T19:50:50Z"
   },
   {
    "id": "aside-back-to-back",
