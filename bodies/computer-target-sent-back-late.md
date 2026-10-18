@@ -16,11 +16,11 @@ Fixes a regression from #15195 (merged in `4d956dad0f`, unreleased): a backgroun
 
 The 500 ms limit now applies only to other apps; the target is sent back whenever the user did not pick it with a click on it, ⌘/⌃, or a panel such as Spotlight. This restores the pre-#15195 result for the target activating itself, not the pre-#15195 rule: before #15195 any key or click disarmed the guard, and #15195 deliberately stopped typing from doing so.
 
-Risk: a switch to the target with an ⌥ or F-key switcher, which shows no click, ⌘/⌃ or panel, is sent back for the rest of the action, and if macOS refuses the hand-back while the user types, the action fails naming the target. Main already does this within 500 ms of a send; now it holds for the whole action. The VM runs did not exercise keyboard switchers.
+Risk: a switch to the target with the keyboard alone, which shows no click, ⌘/⌃ or panel (an ⌥ or F-key switcher, `open -a` + Return typed in the user's terminal, Mission Control picked with the arrows), is sent back for the rest of the action, and if macOS refuses the hand-back while the user types, the action fails naming the target. Main already does this within 500 ms of a send; now it holds for the whole action. The VM runs did not exercise keyboard switchers.
 
 ## Testing
 
-`only_an_app_that_comes_forward_right_after_the_actions_acts_is_sent_back` now has the target activating itself 1.3 s after the last send, idle and with ⌥ held: sent back, and the action fails if it is still in front at the end. With the one-line fix reverted it fails on both. A third app coming forward that late still ends the guard.
+`the_target_is_sent_back_however_late_but_another_app_only_right_after_an_act` (renamed from `only_an_app_that_comes_forward_right_after_the_actions_acts_is_sent_back`) now has the target activating itself 1.3 s after the last send, idle and with ⌥ held: sent back, and the action fails if it is still in front at the end. With the one-line fix reverted it fails on both. A third app coming forward that late still ends the guard.
 
 "Main after #16140" is `cad87a899d`; current main `58349dc80d` (#15562) changes only the visibility of `front_pid` in `skylight.rs` since then, and fails the new test the same way. The table runs drive the real computer tool in the VM through the VNC keyboard and pointer, comparing front-app samples every 150 ms for 0.9 s after the click.
 
