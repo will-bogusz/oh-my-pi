@@ -10259,7 +10259,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-refusal-handoff",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:09:46Z",
-   "updated": "2026-10-18T22:03:49Z",
+   "updated": "2026-10-18T22:04:07Z",
    "note": "",
    "built": [
     {
@@ -10363,7 +10363,8 @@
     }
    ],
    "advanced": "2026-10-18T21:41:13Z",
-   "opened": "2026-10-18T22:03:49Z"
+   "opened": "2026-10-18T22:03:49Z",
+   "readied": "2026-10-18T22:04:07Z"
   },
   {
    "id": "factory-droid-credit-promotions",
