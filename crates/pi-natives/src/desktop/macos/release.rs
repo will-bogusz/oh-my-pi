@@ -274,8 +274,10 @@ impl UserHolds {
 	/// hold it: one the user held before the gap may have been let go of and
 	/// pressed by the request in it.
 	pub(crate) const fn resync(&mut self, down: Self) {
-		self.held = down.held;
-		self.unsure = down.held;
+		let down = down.held;
+		self.unsure.keys = (self.unsure.keys | !self.held.keys) & down.keys;
+		self.unsure.buttons = (self.unsure.buttons | !self.held.buttons) & down.buttons;
+		self.held = down;
 	}
 
 	/// The holds a release plan for `open` trusts: an unsure hold of an input
