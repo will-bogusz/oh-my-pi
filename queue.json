@@ -4104,24 +4104,24 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T15:06:57Z",
+  "checked": "2026-10-18T15:38:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "computer-sent-not-cancelled": {
+    "since": "2026-10-18T15:38:08Z",
+    "title": "fix(natives): keep computer input that already went out from reporting Cancelled"
+   },
    "computer-release-helper-followup": {
     "since": "2026-10-18T14:36:42Z",
     "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press"
+   },
+   "computer-intervened-followup": {
+    "since": "2026-10-18T15:38:08Z",
+    "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened"
    }
   },
-  "conflicts": {
-   "#16185": {
-    "since": "2026-10-18T14:36:42Z",
-    "title": "fix(natives): send a macOS background target back however late it activates itself",
-    "files": [
-     "docs/computer-use.md"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-10-18T14:51:08Z",
   "unreleased": {
    "15157": {
@@ -4229,7 +4229,8 @@
    16119,
    16149,
    16185,
-   16188
+   16188,
+   16200
   ],
   "events": [
    {
@@ -5061,6 +5062,18 @@
     "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test",
     "merged_by": "H4vC",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T15:38:08Z",
+    "kind": "openable",
+    "id": "computer-sent-not-cancelled",
+    "title": "fix(natives): keep computer input that already went out from reporting Cancelled"
+   },
+   {
+    "at": "2026-10-18T15:38:08Z",
+    "kind": "openable",
+    "id": "computer-intervened-followup",
+    "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened"
    }
   ]
  }
