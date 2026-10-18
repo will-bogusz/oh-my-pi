@@ -10521,7 +10521,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-org-lookup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:18:31Z",
-   "updated": "2026-10-18T23:07:10Z",
+   "updated": "2026-10-18T23:07:26Z",
    "note": "",
    "built": [
     {
@@ -10625,7 +10625,8 @@
     }
    ],
    "advanced": "2026-10-18T21:41:19Z",
-   "opened": "2026-10-18T23:07:09Z"
+   "opened": "2026-10-18T23:07:09Z",
+   "readied": "2026-10-18T23:07:26Z"
   },
   {
    "id": "factory-droid-gemini-tool-schema",
