@@ -15,13 +15,17 @@ use core_graphics::{
 };
 use foreign_types::ForeignType;
 use objc2_app_kit::{NSPasteboard, NSPasteboardNameDrag};
+use objc2_application_services::AXUIElement;
 use xutf::graphemes_str;
 
 use super::{
 	super::{
-		backend::{DeliveryMode, Modifiers, MouseButton, PointerEvent},
+		backend::{
+			DeliveryMode, ElementDelivery, ElementInput, KeyboardFocus, Modifiers, MouseButton,
+			PointerEvent,
+		},
 		control,
-		error::{CoreResult, DesktopError},
+		error::{CoreResult, DesktopError, ErrorCode},
 		keys::KeyName,
 		types::{DesktopWindow, Target},
 	},
@@ -158,62 +162,8 @@ impl MacInput {
 				type_keys(&self.source, &unicode_keys(text), KEY_GAP, || Ok(()), post_global)
 			},
 			Target::Window(id) => {
-				let window = capture.window(id)?;
-				let (pid, wid) = window_identity(&window)?;
-				let remote = process::remote_screen(pid);
-				if mode == DeliveryMode::Background
-					&& remote.is_none()
-					&& !process::is_terminal(pid)
-					&& ax::insert_native_text(pid, wid, text)?
-				{
-					return Ok(());
-				}
-				// The whole text is mapped before anything is posted, so a
-				// character a remote screen cannot receive refuses cleanly.
-				let keys = keys_for(text, remote, layout_strokes)?;
-				let gap = key_gap(remote);
-				match mode {
-					DeliveryMode::Background => {
-						if remote == Some(RemoteScreen::KeyEvents) {
-							let modified = modified_text(&keys);
-							if !modified.is_empty() {
-								return Err(keyboard_modifiers_refusal(
-									&window,
-									&format!("type {}", modified.join(" ")),
-								));
-							}
-						}
-						with_background_keyboard(&self.source, pid, wid, &window, |to, guard| {
-							type_keys(&self.source, &keys, gap, guard, |event| {
-								skylight::post_keyboard(to, event)
-							})
-						})
-					},
-					DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => {
-						skylight::with_foreground(pid, wid, returns_focus(mode), |activated| {
-							control::wait(first_key_settle(activated))?;
-							if remote.is_some() {
-								// A remote screen may read modifiers from the keyboard
-								// state, which only bare key transitions at the HID tap
-								// move. They post globally, so every press first
-								// checks that the target still has focus.
-								post_bare_keys(&bare_transitions(&keys), gap, || {
-									skylight::require_front_window(pid, wid)
-								})
-							} else {
-								// Stop rather than typing into a newly user-selected
-								// app or window.
-								type_keys(
-									&self.source,
-									&keys,
-									gap,
-									|| skylight::require_front_window(pid, wid),
-									post_global,
-								)
-							}
-						})
-					},
-				}
+				self.window_type(&capture.window(id)?, text, mode, None)?;
+				Ok(())
 			},
 		}
 	}
@@ -232,37 +182,151 @@ impl MacInput {
 		match target {
 			Target::Desktop | Target::Display(_) => global_chord(&self.source, keys),
 			Target::Window(id) => {
-				let window = capture.window(id)?;
-				let (pid, wid) = window_identity(&window)?;
-				let remote = process::remote_screen(pid);
-				let gap = key_gap(remote);
-				let chord = chord_keys(keys, remote, layout_strokes)?;
-				match mode {
-					DeliveryMode::Background => {
-						if remote == Some(RemoteScreen::KeyEvents)
-							&& chord.iter().any(|key| key.name.is_modifier())
-						{
-							return Err(keyboard_modifiers_refusal(&window, "press this shortcut"));
+				self.window_chord(&capture.window(id)?, keys, mode, None)?;
+				Ok(())
+			},
+		}
+	}
+
+	/// Types or presses `input` into `element`, an element of window `id`.
+	#[allow(
+		clippy::needless_pass_by_ref_mut,
+		reason = "`&mut self` exclusivity backs the `Send` safety argument for the CF event source"
+	)]
+	pub(super) fn element_input(
+		&mut self,
+		id: &str,
+		element: &AXUIElement,
+		input: &ElementInput,
+		mode: DeliveryMode,
+		capture: &MacCapture,
+	) -> CoreResult<ElementDelivery> {
+		let window = capture.window(id)?;
+		match input {
+			ElementInput::Text(text) => self.window_type(&window, text, mode, Some(element)),
+			ElementInput::Chord(keys) => self.window_chord(&window, keys, mode, Some(element)),
+		}
+	}
+
+	/// Types `text` into `window`; with an `element`, into that element: AX
+	/// insertion when it takes it ([`inserts_first`]), else keys once it holds
+	/// keyboard focus ([`element_keys`]).
+	fn window_type(
+		&self,
+		window: &DesktopWindow,
+		text: &str,
+		mode: DeliveryMode,
+		element: Option<&AXUIElement>,
+	) -> CoreResult<ElementDelivery> {
+		let (pid, wid) = window_identity(window)?;
+		let remote = process::remote_screen(pid);
+		let inserted = inserts_first(mode, element.is_some(), || {
+			if remote.is_some() || process::is_terminal(pid) {
+				return Ok(false);
+			}
+			match element {
+				Some(element) => ax::insert_into_element(element, text),
+				None => ax::insert_native_text(pid, wid, text),
+			}
+		})?;
+		if inserted {
+			return Ok(ElementDelivery::Delivered);
+		}
+		// The whole text is mapped before anything is posted, so a
+		// character a remote screen cannot receive refuses cleanly.
+		let keys = keys_for(text, remote, layout_strokes)?;
+		let gap = key_gap(remote);
+		match mode {
+			DeliveryMode::Background => {
+				if remote == Some(RemoteScreen::KeyEvents) {
+					let modified = modified_text(&keys);
+					if !modified.is_empty() {
+						return Err(keyboard_modifiers_refusal(
+							window,
+							&format!("type {}", modified.join(" ")),
+						));
+					}
+				}
+				with_background_keyboard(&self.source, pid, wid, window, |to, guard| {
+					element_keys(pid, element, || {
+						type_keys(&self.source, &keys, gap, guard, |event| {
+							skylight::post_keyboard(to, event)
+						})
+					})
+				})
+			},
+			DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => {
+				skylight::with_foreground(pid, wid, returns_focus(mode), |activated| {
+					control::wait(first_key_settle(activated))?;
+					element_keys(pid, element, || {
+						if remote.is_some() {
+							// A remote screen may read modifiers from the keyboard
+							// state, which only bare key transitions at the HID tap
+							// move. They post globally, so every press first
+							// checks that the target still has focus.
+							post_bare_keys(&bare_transitions(&keys), gap, || {
+								skylight::require_front_window(pid, wid)
+							})
+						} else {
+							// Stop rather than typing into a newly user-selected
+							// app or window.
+							type_keys(
+								&self.source,
+								&keys,
+								gap,
+								|| skylight::require_front_window(pid, wid),
+								post_global,
+							)
 						}
-						with_background_keyboard(&self.source, pid, wid, &window, |to, guard| {
+					})
+				})
+			},
+		}
+	}
+
+	/// Presses `keys` in `window`; with an `element`, once that element holds
+	/// keyboard focus ([`element_keys`]).
+	fn window_chord(
+		&self,
+		window: &DesktopWindow,
+		keys: &[KeyName],
+		mode: DeliveryMode,
+		element: Option<&AXUIElement>,
+	) -> CoreResult<ElementDelivery> {
+		let (pid, wid) = window_identity(window)?;
+		let remote = process::remote_screen(pid);
+		let gap = key_gap(remote);
+		let chord = chord_keys(keys, remote, layout_strokes)?;
+		match mode {
+			DeliveryMode::Background => {
+				if remote == Some(RemoteScreen::KeyEvents)
+					&& chord.iter().any(|key| key.name.is_modifier())
+				{
+					return Err(keyboard_modifiers_refusal(window, "press this shortcut"));
+				}
+				let delivery =
+					with_background_keyboard(&self.source, pid, wid, window, |to, guard| {
+						element_keys(pid, element, || {
 							press_chord(&self.source, &chord, gap, |event| {
 								post_guarded(event, guard, |event| skylight::post_keyboard(to, event))
 							})
-						})?;
-						confirm_shortcut_answered(&window, keys, || {
-							control::wait(SHORTCUT_REPLY_DELAY)?;
-							Ok(ax::stopped_answering(pid, SHORTCUT_REPLY_TIMEOUT_SECONDS))
 						})
-					},
-					DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => {
-						skylight::with_foreground(pid, wid, returns_focus(mode), |activated| {
-							control::wait(first_key_settle(activated))?;
-							press_chord(&self.source, &chord, gap, |event| {
-								post_takeover_key(pid, wid, event)
-							})
-						})
-					},
+					})?;
+				if matches!(delivery, ElementDelivery::Delivered) {
+					confirm_shortcut_answered(window, keys, || {
+						control::wait(SHORTCUT_REPLY_DELAY)?;
+						Ok(ax::stopped_answering(pid, SHORTCUT_REPLY_TIMEOUT_SECONDS))
+					})?;
 				}
+				Ok(delivery)
+			},
+			DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus => {
+				skylight::with_foreground(pid, wid, returns_focus(mode), |activated| {
+					control::wait(first_key_settle(activated))?;
+					element_keys(pid, element, || {
+						press_chord(&self.source, &chord, gap, |event| post_takeover_key(pid, wid, event))
+					})
+				})
 			},
 		}
 	}
@@ -455,6 +519,92 @@ fn sibling_keyboard_refusal(wid: u32, siblings: usize) -> DesktopError {
 		"window {wid} shares its application with {siblings} other window(s) and did not become its \
 		 key window, so background keystrokes could reach another window; nothing was sent",
 	))
+}
+
+/// Whether text tries AX insertion before keys: text addressed to an element
+/// always does, so a native field takes it at its own selection with no keys
+/// and no focus change; text for a window only in the background, where
+/// takeover sends keys to whatever the window has focused.
+fn inserts_first(
+	mode: DeliveryMode,
+	addressed: bool,
+	insert: impl FnOnce() -> CoreResult<bool>,
+) -> CoreResult<bool> {
+	if addressed || mode == DeliveryMode::Background {
+		insert()
+	} else {
+		Ok(false)
+	}
+}
+
+/// Runs `send` at once without an `element`. With one, focuses it and runs
+/// `send` only once `pid` reports it as its focused element within
+/// [`ELEMENT_FOCUS_TIMEOUT`], read every [`ELEMENT_FOCUS_POLL`]
+/// ([`keys_after_focus`]).
+fn element_keys(
+	pid: libc::pid_t,
+	element: Option<&AXUIElement>,
+	send: impl FnOnce() -> CoreResult<()>,
+) -> CoreResult<ElementDelivery> {
+	let Some(element) = element else {
+		send()?;
+		return Ok(ElementDelivery::Delivered);
+	};
+	let deadline = Instant::now() + ELEMENT_FOCUS_TIMEOUT;
+	keys_after_focus(
+		|| ax::set_focused(element),
+		|| {
+			deadline
+				.checked_duration_since(Instant::now())
+				.filter(|left| !left.is_zero())
+		},
+		|left| ax::holds_keyboard_focus(pid, element, left),
+		|left| control::wait(ELEMENT_FOCUS_POLL.min(left)),
+		|| ax::keyboard_focus(pid),
+		send,
+	)
+}
+
+/// Keys addressed to an element: `focus` gives it keyboard focus, and `send`
+/// runs once `holds_focus` reports that it has it, read again after each
+/// `wait` while `remaining` time is left; when it never does, nothing is sent
+/// and `unfocused` reads where focus is instead.
+///
+/// A focus setter the element refuses does not end the call on its own: the
+/// read decides, so the refusal names where focus is; only a destroyed
+/// element stops at once. Each read is bounded by the time left, and a read
+/// that returns after the deadline counts as unconfirmed. Focus is confirmed
+/// once, before the first key: a field that moves focus to the next one as
+/// each character lands, as split code inputs do, keeps receiving the rest,
+/// while every background press is still checked against the window that
+/// proved the keys reach it ([`keys_still_reach`]).
+fn keys_after_focus(
+	focus: impl FnOnce() -> CoreResult<()>,
+	mut remaining: impl FnMut() -> Option<Duration>,
+	mut holds_focus: impl FnMut(Duration) -> bool,
+	mut wait: impl FnMut(Duration) -> CoreResult<()>,
+	unfocused: impl FnOnce() -> KeyboardFocus,
+	send: impl FnOnce() -> CoreResult<()>,
+) -> CoreResult<ElementDelivery> {
+	if let Err(error) = focus()
+		&& error.code == ErrorCode::StaleRef
+	{
+		return Err(error);
+	}
+	loop {
+		let Some(left) = remaining() else {
+			return Ok(ElementDelivery::Unfocused(unfocused()));
+		};
+		let held = holds_focus(left);
+		let Some(left) = remaining() else {
+			return Ok(ElementDelivery::Unfocused(unfocused()));
+		};
+		if held {
+			send()?;
+			return Ok(ElementDelivery::Delivered);
+		}
+		wait(left)?;
+	}
 }
 
 /// Before a background press: keys posted to the process now still reach
@@ -923,6 +1073,10 @@ const ACTIVATION_FLAGS: u64 = 0xc0000;
 /// [`make_key_in_background`] asked for.
 const KEY_WINDOW_TIMEOUT: Duration = Duration::from_millis(250);
 const KEY_WINDOW_POLL: Duration = Duration::from_millis(10);
+/// How long an element given `AXFocused` may take to report itself as its
+/// application's focused element before keys addressed to it are refused.
+const ELEMENT_FOCUS_TIMEOUT: Duration = Duration::from_millis(250);
+const ELEMENT_FOCUS_POLL: Duration = Duration::from_millis(10);
 /// How long an application may take to report the activation
 /// [`activate_then_await`] posted.
 const ACTIVE_STATE_TIMEOUT: Duration = Duration::from_millis(500);
@@ -3976,6 +4130,218 @@ mod tests {
 		// A lone window: one opened during the input stops it once key.
 		assert!(keys_still_reach(7, None, id(7), || id(9)).is_err());
 		assert!(keys_still_reach(7, None, id(7), || unreported).is_ok());
+	}
+
+	/// Time since element keys started, advanced by the test's waits and
+	/// reads.
+	struct FocusClock(std::cell::Cell<Duration>);
+
+	impl FocusClock {
+		fn new() -> Self {
+			Self(std::cell::Cell::new(Duration::ZERO))
+		}
+
+		fn advance(&self, by: Duration) {
+			self.0.set(self.0.get() + by);
+		}
+
+		fn remaining(&self) -> Option<Duration> {
+			ELEMENT_FOCUS_TIMEOUT
+				.checked_sub(self.0.get())
+				.filter(|left| !left.is_zero())
+		}
+	}
+
+	#[test]
+	fn element_keys_wait_until_the_element_reports_focus() {
+		let source = source().expect("event source");
+		let clock = FocusClock::new();
+		let mut bounds = Vec::new();
+		let mut pressed = 0;
+		let delivery = keys_after_focus(
+			|| Ok(()),
+			|| clock.remaining(),
+			|left| {
+				bounds.push(left);
+				bounds.len() == 3
+			},
+			|left| {
+				clock.advance(ELEMENT_FOCUS_POLL.min(left));
+				Ok(())
+			},
+			|| panic!("a focused element needs no fresh read"),
+			|| {
+				type_text(&source, "ab", |event| {
+					pressed += usize::from(matches!(event.get_type(), CGEventType::KeyDown));
+					Ok(())
+				})
+			},
+		);
+		assert!(matches!(delivery, Ok(ElementDelivery::Delivered)));
+		// Each read may take only the time left.
+		let ms = Duration::from_millis;
+		assert_eq!(bounds, [ms(250), ms(240), ms(230)]);
+		assert_eq!(pressed, 2);
+	}
+
+	#[test]
+	fn focus_is_confirmed_once_so_an_auto_advancing_code_input_fills() {
+		let source = source().expect("event source");
+		let clock = FocusClock::new();
+		let focused_box = std::cell::Cell::new(0);
+		let reads = std::cell::Cell::new(0);
+		let mut boxes = Vec::new();
+		let delivery = keys_after_focus(
+			|| Ok(()),
+			|| clock.remaining(),
+			|_| {
+				reads.set(reads.get() + 1);
+				focused_box.get() == 0
+			},
+			|_| panic!("the first box has focus at once"),
+			|| panic!("the first box took focus"),
+			|| {
+				type_text(&source, "123456", |event| {
+					match event.get_type() {
+						CGEventType::KeyDown => boxes.push(focused_box.get()),
+						// Each box hands focus to the next once its digit lands.
+						CGEventType::KeyUp => focused_box.set(focused_box.get() + 1),
+						_ => {},
+					}
+					Ok(())
+				})
+			},
+		);
+		assert!(matches!(delivery, Ok(ElementDelivery::Delivered)));
+		assert_eq!(boxes, [0, 1, 2, 3, 4, 5]);
+		assert_eq!(reads.get(), 1);
+	}
+
+	#[test]
+	fn element_keys_are_never_sent_while_the_element_lacks_focus() {
+		let clock = FocusClock::new();
+		let polls = std::cell::Cell::new(0);
+		let delivery = keys_after_focus(
+			|| Ok(()),
+			|| clock.remaining(),
+			|_| false,
+			|left| {
+				polls.set(polls.get() + 1);
+				clock.advance(ELEMENT_FOCUS_POLL.min(left));
+				Ok(())
+			},
+			|| KeyboardFocus { window: Some("9".to_owned()), element: None },
+			|| panic!("nothing is sent to an element without focus"),
+		);
+		let Ok(ElementDelivery::Unfocused(focus)) = delivery else {
+			panic!("an element that never took focus is refused");
+		};
+		assert_eq!(focus.window.as_deref(), Some("9"));
+		assert_eq!(polls.get(), 25);
+		// Cancelling the wait stops it with nothing sent either.
+		let cancelled = keys_after_focus(
+			|| Ok(()),
+			|| Some(ELEMENT_FOCUS_TIMEOUT),
+			|_| false,
+			|_| Err(DesktopError::cancelled("cancelled")),
+			|| panic!("a cancelled wait reads nothing"),
+			|| panic!("nothing is sent once the wait is cancelled"),
+		);
+		assert!(matches!(cancelled, Err(error) if error.code == ErrorCode::Cancelled));
+	}
+
+	#[test]
+	fn focus_reported_only_after_the_deadline_sends_nothing() {
+		let refused = |elapsed_before_read: u64, read_takes: u64| {
+			let clock = FocusClock::new();
+			clock.advance(Duration::from_millis(elapsed_before_read));
+			let fresh_reads = std::cell::Cell::new(0);
+			let sent = std::cell::Cell::new(false);
+			let delivery = keys_after_focus(
+				|| Ok(()),
+				|| clock.remaining(),
+				|_| {
+					clock.advance(Duration::from_millis(read_takes));
+					true
+				},
+				|_| panic!("the first read answers"),
+				|| {
+					fresh_reads.set(fresh_reads.get() + 1);
+					KeyboardFocus::default()
+				},
+				|| {
+					sent.set(true);
+					Ok(())
+				},
+			);
+			let unfocused = matches!(delivery, Ok(ElementDelivery::Unfocused(_)));
+			assert_eq!(fresh_reads.get(), usize::from(unfocused));
+			assert_eq!(sent.get(), !unfocused);
+			unfocused
+		};
+		// A read that answers yes after the deadline is no confirmation.
+		assert!(refused(200, 60));
+		assert!(refused(0, 250));
+		// One that answers in time is, however close to the deadline.
+		assert!(!refused(249, 0));
+		assert!(!refused(200, 49));
+		// So does a deadline that passed before the first read.
+		assert!(refused(250, 0));
+	}
+
+	#[test]
+	fn a_refused_focus_setter_still_ends_in_the_focus_read() {
+		let reads = std::cell::Cell::new(0);
+		let delivery = keys_after_focus(
+			|| Err(DesktopError::ax_failed("setting AXFocused=true failed")),
+			|| (reads.get() < 3).then_some(ELEMENT_FOCUS_TIMEOUT),
+			|_| {
+				reads.set(reads.get() + 1);
+				false
+			},
+			|_| Ok(()),
+			|| KeyboardFocus { window: Some("9".to_owned()), element: None },
+			|| panic!("nothing is sent to an element without focus"),
+		);
+		let Ok(ElementDelivery::Unfocused(focus)) = delivery else {
+			panic!("a refused setter ends in the refusal naming where focus is");
+		};
+		assert_eq!(focus.window.as_deref(), Some("9"));
+		assert_eq!(reads.get(), 3);
+		// A destroyed element is a stale ref at once.
+		let gone = keys_after_focus(
+			|| Err(DesktopError::stale_ref("the element no longer exists")),
+			|| panic!("a destroyed element is not waited for"),
+			|_| panic!("a destroyed element is not read"),
+			|_| panic!("a destroyed element is not waited for"),
+			|| panic!("a destroyed element needs no focus read"),
+			|| panic!("nothing is sent to a destroyed element"),
+		);
+		assert!(matches!(gone, Err(error) if error.code == ErrorCode::StaleRef));
+	}
+
+	#[test]
+	fn element_text_tries_insertion_in_every_mode_and_window_text_only_in_background() {
+		let tried = |mode, addressed| {
+			let called = std::cell::Cell::new(false);
+			let inserted = inserts_first(mode, addressed, || {
+				called.set(true);
+				Ok(true)
+			})
+			.unwrap();
+			assert_eq!(inserted, called.get());
+			called.get()
+		};
+		assert!(tried(DeliveryMode::Background, true));
+		assert!(tried(DeliveryMode::Foreground, true));
+		assert!(tried(DeliveryMode::Background, false));
+		// Takeover `win.type` keys whatever the window has focused.
+		assert!(!tried(DeliveryMode::Foreground, false));
+		// A write that was attempted never falls through to keys.
+		let failed = inserts_first(DeliveryMode::Foreground, true, || {
+			Err(DesktopError::ax_failed("delivery may be partial"))
+		});
+		assert!(failed.is_err());
 	}
 
 	#[test]

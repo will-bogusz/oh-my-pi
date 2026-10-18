@@ -112,6 +112,8 @@ export interface NativeDesktopSession {
 	axSetValue(ref: string, value: string): Promise<void>;
 	axFocus(ref: string): Promise<void>;
 	axClick(ref: string, opts?: PointerOptions | null): InputCall;
+	axType(ref: string, text: string, opts?: PointerOptions | null): Promise<void>;
+	axKeyChord(ref: string, keys: string[], opts?: PointerOptions | null): Promise<void>;
 	close(): Promise<void>;
 }
 
@@ -227,13 +229,20 @@ function menuOption(options?: MenuOptions): string[] | undefined {
 	return options.menu;
 }
 
-function chordKeys(chord: string | string[]): string[] {
-	return typeof chord === "string"
-		? chord
-				.split("+")
-				.map(key => key.trim())
-				.filter(Boolean)
-		: chord;
+function chordKeys(chord: unknown): string[] {
+	const keys =
+		typeof chord === "string"
+			? chord
+					.split("+")
+					.map(key => key.trim())
+					.filter(Boolean)
+			: chord;
+	if (!isStringList(keys) || keys.length === 0) {
+		throw new ToolError(
+			`press(chord) requires a key chord such as "cmd+shift+p" or ["cmd", "shift", "p"], got ${describeArgument(chord)}`,
+		);
+	}
+	return keys;
 }
 
 /** Keys and menu titles share one rule: an array of strings, none blank. */
@@ -677,13 +686,29 @@ class El {
 		await nativeCall(context.signal, () => this.#session.axPerform(this.ref, action, menu));
 	}
 
-	async press(options?: MenuOptions): Promise<void> {
+	/**
+	 * Without a chord, the element's native press action (`{ menu }` picks an item of the menu it opens); with
+	 * one, that chord typed into the element.
+	 */
+	async press(chord?: string | string[] | MenuOptions, options?: InputOptions): Promise<void> {
 		const context = this.#getContext();
 		guardRun(context, "press");
-		const menu = menuOption(options);
-		if (menu !== undefined) refuseMenu(this.#session, context, "press with menu", "a menu");
-		refuseControlMenu(this.#session, context, "press()", this.nativeRole);
-		await nativeCall(context.signal, () => this.#session.axPerform(this.ref, "press", menu));
+		if (chord === undefined || (typeof chord === "object" && !Array.isArray(chord))) {
+			const menu = menuOption(chord);
+			if (menu !== undefined) refuseMenu(this.#session, context, "press with menu", "a menu");
+			refuseControlMenu(this.#session, context, "press()", this.nativeRole);
+			await nativeCall(context.signal, () => this.#session.axPerform(this.ref, "press", menu));
+			return;
+		}
+		const keys = chordKeys(chord);
+		await nativeCall(context.signal, () => this.#session.axKeyChord(this.ref, keys, pointerOptions(options)));
+	}
+
+	async type(text: string, options?: InputOptions): Promise<void> {
+		const context = this.#getContext();
+		guardRun(context, "type");
+		validateString(text, "type(text)");
+		await nativeCall(context.signal, () => this.#session.axType(this.ref, text, pointerOptions(options)));
 	}
 
 	async click(options?: ClickOptions): Promise<void> {
@@ -827,8 +852,16 @@ class ElRef implements PromiseLike<El> {
 		await (await this.#resolve()).perform(action, options);
 	}
 
-	async press(options?: MenuOptions): Promise<void> {
-		await (await this.#resolve()).press(options);
+	async press(chord?: string | string[] | MenuOptions, options?: InputOptions): Promise<void> {
+		guardRun(this.#getContext(), "press");
+		if (typeof chord === "string" || Array.isArray(chord)) chordKeys(chord);
+		await (await this.#resolve()).press(chord, options);
+	}
+
+	async type(text: string, options?: InputOptions): Promise<void> {
+		guardRun(this.#getContext(), "type");
+		validateString(text, "type(text)");
+		await (await this.#resolve()).type(text, options);
 	}
 
 	async click(options?: ClickOptions): Promise<void> {
@@ -996,11 +1029,6 @@ class Win {
 	async press(chord: string | string[], options?: InputOptions): Promise<void> {
 		const context = this.#guardInput("press");
 		const keys = chordKeys(chord);
-		if (!isStringList(keys) || keys.length === 0) {
-			throw new ToolError(
-				`press(chord) requires a key chord such as "cmd+shift+p" or ["cmd", "shift", "p"], got ${describeArgument(chord)}`,
-			);
-		}
 		const native = pointerOptions(options);
 		await sendInput(
 			this.#session,
