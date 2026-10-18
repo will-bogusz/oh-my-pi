@@ -4695,7 +4695,7 @@
    "branch": "will/relay-popup-front-main",
    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
    "body": "bodies/relay-popup-front-main.md",
@@ -4705,7 +4705,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front-main",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:46:45Z",
-   "updated": "2026-10-18T20:46:25Z",
+   "updated": "2026-10-18T20:54:14Z",
    "note": "",
    "built": [
     {
