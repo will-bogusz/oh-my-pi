@@ -606,13 +606,13 @@
    "needs": [],
    "base": "afdc8bd10e69974bfcd7565a2c6f70d1b488919c",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15157,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-honest-capabilities",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T01:59:29Z",
+   "updated": "2026-10-18T00:11:22Z",
    "note": "Sent to Brit by Will 2026-10-15 (with #15574, #15762). Brit review 2026-10-16 answered in 2110a5d6ff; reply posted (issuecomment-6206316968), waiting on Brit.",
    "advanced": "2026-10-13T23:06:21Z",
    "built": [
@@ -634,7 +634,8 @@
      "at": "2026-10-16T01:52:08Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "computer-grant-keeps-background",
@@ -2340,13 +2341,13 @@
    "needs": [],
    "base": "b221327013d82123d9e3e22c5cb00cf730709233",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15574,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-stale-refind",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T06:17:25Z",
+   "updated": "2026-10-18T00:11:22Z",
    "note": "Brit review 2026-10-16 answered: hint-only redesign d05bbc41ac, reply posted; waiting on Brit.",
    "advanced": "2026-10-13T22:53:49Z",
    "built": [
@@ -2368,7 +2369,8 @@
      "at": "2026-10-16T06:17:24Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "native-window-report",
