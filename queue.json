@@ -10352,6 +10352,24 @@
    "added": "2026-10-18T20:42:32Z",
    "updated": "2026-10-18T20:42:32Z",
    "note": ""
+  },
+  {
+   "id": "exact-provider-model-selector",
+   "branch": "will/exact-provider-model-selector",
+   "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling",
+   "area": "models",
+   "priority": "P2",
+   "needs": [],
+   "base": "ba11b7f022a9126e8ab01e1ca3d9be22ed7f8c67",
+   "body": "bodies/exact-provider-model-selector.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/exact-provider-model-selector",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T20:48:32Z",
+   "updated": "2026-10-18T20:48:32Z",
+   "note": ""
   }
  ],
  "watch": {
