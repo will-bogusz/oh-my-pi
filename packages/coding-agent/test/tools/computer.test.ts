@@ -3755,6 +3755,12 @@ describe("computer background fallback", () => {
 			override async axClick(_ref: string, opts?: PointerOptions | null): Promise<void> {
 				this.calls.push(`axClick:${opts?.takeover ?? "-"}`);
 			}
+			override async axType(_ref: string, _text: string, opts?: PointerOptions | null): Promise<void> {
+				this.calls.push(`axType:${opts?.takeover ?? "-"}`);
+			}
+			override async axKeyChord(_ref: string, _keys: string[], opts?: PointerOptions | null): Promise<void> {
+				this.calls.push(`axKeyChord:${opts?.takeover ?? "-"}`);
+			}
 			override async axFocus(ref: string): Promise<void> {
 				this.calls.push(`focus:${ref}`);
 			}
@@ -3777,6 +3783,16 @@ describe("computer background fallback", () => {
 			{
 				code: 'await (await desktop.ref("e1")).click({ takeover: true })',
 				call: "axClick:true",
+				route: "Call it without takeover",
+			},
+			{
+				code: 'await (await desktop.ref("e1")).type("x", { takeover: true })',
+				call: "axType:true",
+				route: "Call it without takeover",
+			},
+			{
+				code: 'await (await desktop.ref("e1")).press("a", { takeover: true })',
+				call: "axKeyChord:true",
 				route: "Call it without takeover",
 			},
 			{ code: 'await (await desktop.window("42")).raise()', call: "raise:42", route: "no raise is needed" },

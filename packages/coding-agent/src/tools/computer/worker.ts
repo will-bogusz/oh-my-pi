@@ -368,6 +368,18 @@ function refuseForeground(
 	);
 }
 
+/** `refuseForeground` for an element's own keys (`el.type`, `el.press(chord)`) sent with `takeover: true`. */
+function refuseElementTakeover(context: ComputerRunContext, method: string, native: PointerOptions, ref: string): void {
+	if (native.takeover !== true) return;
+	refuseForeground(
+		context,
+		`${method} with takeover: true`,
+		"bring its application to the front and take the user's keyboard and pointer",
+		"Call it without takeover: element input runs in the background.",
+		`element ${ref}`,
+	);
+}
+
 const MENU_ROUTE =
 	"Use the window's menu bar with win.menu.select(...), or an element action such as press(), instead.";
 /** AX roles of the controls that open a menu when pressed, as native's `open_menu` reads them. */
@@ -764,14 +776,18 @@ class El {
 			return;
 		}
 		const keys = chordKeys(chord);
-		await nativeCall(context.signal, () => this.#session.axKeyChord(this.ref, keys, pointerOptions(options)));
+		const native = pointerOptions(options);
+		refuseElementTakeover(context, "press", native, this.ref);
+		await nativeCall(context.signal, () => this.#session.axKeyChord(this.ref, keys, native));
 	}
 
 	async type(text: string, options?: InputOptions): Promise<void> {
 		const context = this.#getContext();
 		guardRun(context, "type");
 		validateString(text, "type(text)");
-		await nativeCall(context.signal, () => this.#session.axType(this.ref, text, pointerOptions(options)));
+		const native = pointerOptions(options);
+		refuseElementTakeover(context, "type", native, this.ref);
+		await nativeCall(context.signal, () => this.#session.axType(this.ref, text, native));
 	}
 
 	async click(options?: ClickOptions): Promise<void> {
