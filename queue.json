@@ -2676,30 +2676,27 @@
    "merged_by": "pr"
   },
   {
-   "id": "native-window-report",
-   "branch": "will/native-window-report",
+   "id": "r2/native-window-report",
+   "branch": "will/r2/native-window-report",
    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
    "area": "browser",
    "priority": "P2",
    "needs": [
-    "#15555",
-    "#15554",
-    "#15489",
-    "#15508",
-    "#15493"
+    "#15105",
+    "#15508"
    ],
-   "base": "d456e45483964bf74c7758796d5ea27a6cc92ca5",
-   "body": "bodies/native-window-report.md",
+   "base": "fe06ba979b6192877fa4f416b82de78272fdded1",
+   "body": "bodies/r2/native-window-report.md",
    "state": "queued",
    "pr": null,
    "closed_prs": [
     15575
    ],
-   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/native-window-report",
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-native-window-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T00:07:38Z",
-   "note": ""
+   "updated": "2026-10-18T23:27:29Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): held behind #15105 and #15508 per Will; no code need on #15105; sits on main + #15508 head 5ccf9eac6b"
   },
   {
    "id": "test-ownership-lock",
