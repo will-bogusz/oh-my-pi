@@ -3643,15 +3643,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T04:53:09Z",
+  "checked": "2026-10-18T05:55:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "computer-run-args": {
-    "since": "2026-10-18T04:53:09Z",
-    "title": "fix(coding-agent): reject computer.run and tab.run args the function cannot receive"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-10-18T03:12:45Z",
   "unreleased": {
@@ -3693,6 +3688,7 @@
    15184,
    15185,
    15191,
+   15192,
    15193,
    15195,
    15418,
@@ -3701,7 +3697,9 @@
    15562,
    15563,
    15564,
-   16119
+   16119,
+   16140,
+   16149
   ],
   "events": [
    {
@@ -4238,6 +4236,13 @@
     "kind": "openable",
     "id": "computer-run-args",
     "title": "fix(coding-agent): reject computer.run and tab.run args the function cannot receive"
+   },
+   {
+    "at": "2026-10-18T05:55:08Z",
+    "kind": "unopenable",
+    "id": "computer-run-args",
+    "title": "fix(coding-agent): reject computer.run and tab.run args the function cannot receive",
+    "why": "opened as #16149"
    }
   ]
  }
