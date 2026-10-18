@@ -2745,30 +2745,26 @@
    "note": ""
   },
   {
-   "id": "relay-popup-owned",
-   "branch": "will/relay-popup-owned",
+   "id": "r2/relay-popup-owned",
+   "branch": "will/r2/relay-popup-owned",
    "title": "fix(browser): own popups omp's relay tabs open and keep them behind the user's selection",
    "area": "browser",
    "priority": "P2",
    "needs": [
-    "#15554",
-    "#15556",
-    "#15110",
-    "#15493",
-    "#15510"
+    "r2/relay-own-only"
    ],
-   "base": "b2d1a516c3e60348061e2c78b82ed003b564533e",
-   "body": "bodies/relay-popup-owned.md",
+   "base": "f25b98b8986eeef052ad4af816ef2e22e12c8aac",
+   "body": "bodies/r2/relay-popup-owned.md",
    "state": "queued",
    "pr": null,
    "closed_prs": [
     15590
    ],
-   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-owned",
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-popup-owned",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T00:07:31Z",
-   "note": ""
+   "updated": "2026-10-18T23:27:44Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): needs own-only's owned-only attach; combined macOS run with relay-popup-front-main owed (focus hand-back of each)"
   },
   {
    "id": "browser-text-page",
