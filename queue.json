@@ -4958,27 +4958,28 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T18:41:09Z",
+  "checked": "2026-10-18T19:11:35Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "refind-cancel-root": {
-    "since": "2026-10-18T18:41:09Z",
-    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window"
+   "browser-options-hints": {
+    "since": "2026-10-18T19:11:35Z",
+    "title": "fix(coding-agent): name the expected shape when browser tab.run gets an args array or open gets a URL"
+   },
+   "computer-no-ui-confirm": {
+    "since": "2026-10-18T19:11:35Z",
+    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal"
+   },
+   "relay-popup-front-main": {
+    "since": "2026-10-18T19:11:35Z",
+    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS"
+   },
+   "release-helper-wait-test": {
+    "since": "2026-10-18T19:11:35Z",
+    "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in"
    }
   },
-  "conflicts": {
-   "#15105": {
-    "since": "2026-10-18T17:40:06Z",
-    "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
-    "files": [
-     "packages/browser-relay/extension/background.ts",
-     "packages/coding-agent/src/tools/browser/relay/bridge.ts",
-     "packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt",
-     "packages/coding-agent/src/tools/browser/relay/protocol.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-10-18T18:19:23Z",
   "unreleased": {
    "15157": {
@@ -5126,7 +5127,9 @@
    16217,
    16223,
    16230,
-   16231
+   16231,
+   16233,
+   16235
   ],
   "events": [
    {
@@ -6108,6 +6111,37 @@
     "kind": "openable",
     "id": "refind-cancel-root",
     "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window"
+   },
+   {
+    "at": "2026-10-18T19:11:35Z",
+    "kind": "openable",
+    "id": "browser-options-hints",
+    "title": "fix(coding-agent): name the expected shape when browser tab.run gets an args array or open gets a URL"
+   },
+   {
+    "at": "2026-10-18T19:11:35Z",
+    "kind": "openable",
+    "id": "computer-no-ui-confirm",
+    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal"
+   },
+   {
+    "at": "2026-10-18T19:11:35Z",
+    "kind": "openable",
+    "id": "relay-popup-front-main",
+    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS"
+   },
+   {
+    "at": "2026-10-18T19:11:35Z",
+    "kind": "openable",
+    "id": "release-helper-wait-test",
+    "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in"
+   },
+   {
+    "at": "2026-10-18T19:11:35Z",
+    "kind": "unopenable",
+    "id": "refind-cancel-root",
+    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
+    "why": "opened as #16233"
    }
   ]
  }
