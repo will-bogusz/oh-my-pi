@@ -3808,6 +3808,24 @@
    "added": "2026-10-18T12:38:01Z",
    "updated": "2026-10-18T12:38:04Z",
    "note": "Regression fix for #15195 (merged 4d956dad0f, unreleased). SamePollClick's will/computer-same-poll-click touches the same BackgroundFocusLease::observe(); it rebases onto this."
+  },
+  {
+   "id": "computer-sent-not-cancelled",
+   "branch": "will/computer-sent-not-cancelled",
+   "title": "fix(natives): keep computer input that already went out from reporting Cancelled",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "58349dc80de381057437818b8354c86826c8fa10",
+   "body": "bodies/computer-sent-not-cancelled.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-sent-not-cancelled",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T13:09:04Z",
+   "updated": "2026-10-18T13:09:04Z",
+   "note": ""
   }
  ],
  "watch": {
