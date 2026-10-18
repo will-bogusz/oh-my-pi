@@ -2413,36 +2413,26 @@
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): stacked on call-deadline, bg-input, native-window-report for shared lines (code needs none of them); the live Testing table predates the rebase onto #16119, rerun before open"
   },
   {
-   "id": "page-waiting",
-   "branch": "will/page-waiting",
+   "id": "r2/page-waiting",
+   "branch": "will/r2/page-waiting",
    "title": "feat(coding-agent): make a browser dialog or held file chooser one pending state that page calls fail fast on",
    "area": "browser",
    "priority": "P2",
    "needs": [
-    "#15489",
-    "#15490",
-    "#15491",
-    "#15493",
-    "#15503",
-    "#15508",
-    "#15510",
-    "#15554",
-    "#15556",
-    "#15559",
-    "#15110"
+    "r2/relay-own-only"
    ],
-   "base": "91e4d91a382d335ecdaf499f5d5bb460520ec57a",
-   "body": "bodies/page-waiting.md",
+   "base": "f25b98b8986eeef052ad4af816ef2e22e12c8aac",
+   "body": "bodies/r2/page-waiting.md",
    "state": "queued",
    "pr": null,
    "closed_prs": [
     15555
    ],
-   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/page-waiting",
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-page-waiting",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T00:07:36Z",
-   "note": ""
+   "updated": "2026-10-18T23:28:39Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): true need #15508 (print-hold DialogStop) via own-only's base; holds an unfilled chooser, reversing main's 7d50d3d815 per Will's 2026-10-12 hold-and-ask; carries the tab.id(n) fix moved from turn-end; visible relay run predates #16119, rerun before open"
   },
   {
    "id": "r2/webmcp-native",
@@ -2606,7 +2596,7 @@
    "priority": "P2",
    "needs": [
     "r2/relay-popup-owned",
-    "page-waiting",
+    "r2/page-waiting",
     "r2/webmcp-native"
    ],
    "base": "8e94db1484964f59e18ecadcacdba6173502280f",
