@@ -2387,32 +2387,30 @@
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): held behind #15105 and #15508 per Will; no code need on either; sits on main 9d5d4ac5b5"
   },
   {
-   "id": "relay-own-only",
-   "branch": "will/relay-own-only",
+   "id": "r2/relay-own-only",
+   "branch": "will/r2/relay-own-only",
    "title": "fix(browser): attach only the relay tabs omp opened or borrowed",
    "area": "browser",
    "priority": "P2",
    "needs": [
     "#15105",
-    "#15110",
-    "#15489",
-    "#15493",
     "#15508",
-    "#15510",
-    "#15559"
+    "r2/relay-call-deadline",
+    "r2/relay-bg-input-main",
+    "r2/native-window-report"
    ],
-   "base": "178693506823ba41b3138bbf40130a14071e9f7f",
-   "body": "bodies/relay-own-only.md",
+   "base": "3ba6ca248d623330bd35e27415d36d5133caf42d",
+   "body": "bodies/r2/relay-own-only.md",
    "state": "queued",
    "pr": null,
    "closed_prs": [
     15554
    ],
-   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-own-only",
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-own-only",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T00:07:27Z",
-   "note": ""
+   "updated": "2026-10-18T23:27:42Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): stacked on call-deadline, bg-input, native-window-report for shared lines (code needs none of them); the live Testing table predates the rebase onto #16119, rerun before open"
   },
   {
    "id": "page-waiting",
