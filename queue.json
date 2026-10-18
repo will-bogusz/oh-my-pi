@@ -10462,6 +10462,26 @@
    "added": "2026-10-18T21:02:38Z",
    "updated": "2026-10-18T21:02:38Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-gemini-4-argon",
+   "branch": "will/factory-droid-gemini-4-argon",
+   "title": "feat(catalog,ai): add Gemini 4 Argon to Factory Droid with its request dialect",
+   "area": "providers",
+   "priority": "P1",
+   "needs": [
+    "factory-droid-0244"
+   ],
+   "base": "6f7597b1f2645d3dd04380202bc96529298d4304",
+   "body": "bodies/factory-droid-gemini-4-argon.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-gemini-4-argon",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T21:06:38Z",
+   "updated": "2026-10-18T21:06:38Z",
+   "note": ""
   }
  ],
  "watch": {
