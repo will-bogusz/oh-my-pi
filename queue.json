@@ -2490,7 +2490,7 @@
    "branch": "will/computer-user-intervened",
    "title": "feat(computer): stop typing and re-read when the user types in the agent's macOS app",
    "area": "computer",
-   "priority": null,
+   "priority": "P2",
    "needs": [
     "#15184",
     "#15176"
@@ -2503,7 +2503,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-user-intervened",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T04:29:25Z",
+   "updated": "2026-10-18T04:53:07Z",
    "note": "ready by Will's call 2026-10-18, merges after #15176, #15185 and #15195"
   },
   {
@@ -2511,7 +2511,7 @@
    "branch": "will/computer-element-type",
    "title": "feat(computer): type into one element with el.type and el.press, sending nothing if it won't take focus",
    "area": "computer",
-   "priority": null,
+   "priority": "P3",
    "needs": [
     "#15184"
    ],
@@ -2523,7 +2523,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-element-type",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T04:29:22Z",
+   "updated": "2026-10-18T04:53:07Z",
    "note": "ready by Will's call 2026-10-18, merges after #15193 and #15562 (and their parents)"
   },
   {
@@ -2531,7 +2531,7 @@
    "branch": "will/computer-escape-stops-turn",
    "title": "feat(computer): stop computer use for the rest of the turn when the user presses Escape",
    "area": "computer",
-   "priority": null,
+   "priority": "P2",
    "needs": [
     "#15176"
    ],
@@ -2543,7 +2543,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-escape-stops-turn",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T04:29:28Z",
+   "updated": "2026-10-18T04:53:07Z",
    "note": "ready by Will's call 2026-10-18, merges after #15192 (last of series 1; contains #15176)"
   },
   {
