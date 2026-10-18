@@ -929,6 +929,7 @@ impl BackgroundFocusLease {
 		signals: SwitchSignals,
 		now: Instant,
 	) -> FocusDecision {
+		let now = asked;
 		self.user.observe(signals, front, now);
 		let (came, caused) = self.came_forward(front, signals, now);
 		// The target coming forward with no switch of the user's just before is
