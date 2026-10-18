@@ -4126,7 +4126,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-release-helper-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T14:29:14Z",
-   "updated": "2026-10-18T15:52:42Z",
+   "updated": "2026-10-18T15:52:54Z",
    "note": "",
    "built": [
     {
@@ -4175,7 +4175,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-18T15:52:41Z"
+   "opened": "2026-10-18T15:52:41Z",
+   "readied": "2026-10-18T15:52:54Z"
   },
   {
    "id": "iphone-mirroring-test",
