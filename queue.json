@@ -1100,8 +1100,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-remote-screens",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T05:23:43Z",
-   "note": "ready by Will's call 2026-10-18, merges after #15184, #15185 (conflicts with #15185 in macos/input.rs, process.rs); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours"
+   "updated": "2026-10-18T10:57:22Z",
+   "note": "ready by Will's call 2026-10-18, merges after #15184, #15185 (conflicts with #15185 in macos/input.rs, process.rs); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; overlaps queued computer-sent-not-cancelled (main fix: a posted call never reports Cancelled): whichever lands second drops its duplicate (S1Keeper 2026-10-18)"
   },
   {
    "id": "computer-focus-guard",
