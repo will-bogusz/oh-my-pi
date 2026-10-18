@@ -4393,16 +4393,29 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T17:09:24Z",
+  "checked": "2026-10-18T17:40:06Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "computer-text-drag-select": {
-    "since": "2026-10-18T17:09:24Z",
-    "title": "feat(natives): make a macOS background drag across native text an accessibility selection"
+  "openable": {},
+  "conflicts": {
+   "#15105": {
+    "since": "2026-10-18T17:40:06Z",
+    "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
+    "files": [
+     "packages/browser-relay/extension/background.ts",
+     "packages/coding-agent/src/tools/browser/relay/bridge.ts",
+     "packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt",
+     "packages/coding-agent/src/tools/browser/relay/protocol.ts"
+    ]
+   },
+   "#16217": {
+    "since": "2026-10-18T17:40:06Z",
+    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/skylight.rs"
+    ]
    }
   },
-  "conflicts": {},
   "merged_through": "2026-10-18T16:46:28Z",
   "unreleased": {
    "15157": {
@@ -4539,7 +4552,8 @@
    15508,
    16202,
    16205,
-   16217
+   16217,
+   16223
   ],
   "events": [
    {
@@ -5471,6 +5485,34 @@
     "id": "computer-same-reading-key-window",
     "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
     "why": "opened as #16217"
+   },
+   {
+    "at": "2026-10-18T17:40:06Z",
+    "kind": "unopenable",
+    "id": "computer-text-drag-select",
+    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
+    "why": "opened as #16223"
+   },
+   {
+    "at": "2026-10-18T17:40:06Z",
+    "kind": "conflict",
+    "label": "#15105",
+    "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
+    "files": [
+     "packages/browser-relay/extension/background.ts",
+     "packages/coding-agent/src/tools/browser/relay/bridge.ts",
+     "packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt",
+     "packages/coding-agent/src/tools/browser/relay/protocol.ts"
+    ]
+   },
+   {
+    "at": "2026-10-18T17:40:06Z",
+    "kind": "conflict",
+    "label": "#16217",
+    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/skylight.rs"
+    ]
    }
   ]
  }
