@@ -286,11 +286,16 @@ function validateString(value: unknown, call: string, options?: { nonEmpty?: boo
 /** `value()`'s format: `"text"` (the default) or `"markdown"`. */
 function valueFormat(options: unknown): "text" | "markdown" {
 	if (options === undefined) return "text";
-	const format =
-		typeof options === "object" && options !== null ? ("format" in options ? options.format : undefined) : null;
+	if (typeof options !== "object" || options === null || Array.isArray(options)) {
+		throw badValueOptions(describeArgument(options));
+	}
+	const format = "format" in options ? options.format : undefined;
 	if (format === undefined || format === "text" || format === "markdown") return format ?? "text";
-	const got = format === null ? describeArgument(options) : `format ${describeArgument(format)}`;
-	throw new ToolError(`value(options) takes { format: "text" } or { format: "markdown" }, got ${got}`);
+	throw badValueOptions(`format ${describeArgument(format)}`);
+}
+
+function badValueOptions(got: string): ToolError {
+	return new ToolError(`value(options) takes { format: "text" } or { format: "markdown" }, got ${got}`);
 }
 
 /** A menu path is one title, an array of titles, or the titles as separate arguments. */

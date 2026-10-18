@@ -3146,6 +3146,8 @@ describe("expanded computer APIs", () => {
 		for (const [code, got] of [
 			['await desktop.ref("e1").value({ format: "html" })', 'format "html"'],
 			['await desktop.ref("e1").value("markdown")', '"markdown"'],
+			['await desktop.ref("e1").value(["markdown"])', "an array"],
+			['await desktop.ref("e1").value({ format: null })', "format null"],
 		]) {
 			const result = await runWorker(transport, `markdown-bad-${got}`, code);
 			expect(result.ok ? undefined : result.error).toMatchObject({
