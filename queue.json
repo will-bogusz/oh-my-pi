@@ -4408,6 +4408,24 @@
    "added": "2026-10-18T18:18:09Z",
    "updated": "2026-10-18T18:18:09Z",
    "note": ""
+  },
+  {
+   "id": "screenshot-session-abort",
+   "branch": "will/screenshot-session-abort",
+   "title": "fix(coding-agent): stop a browser screenshot waiting on a DevTools session past its deadline",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
+   "body": "bodies/screenshot-session-abort.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/screenshot-session-abort",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T18:18:16Z",
+   "updated": "2026-10-18T18:18:16Z",
+   "note": ""
   }
  ],
  "watch": {
