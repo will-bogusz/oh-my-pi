@@ -5735,5 +5735,11 @@
     ]
    }
   ]
+ },
+ "opening": {
+  "id": "screenshot-session-abort",
+  "token": "3a04a8a607694808803c1486b44eb7f7",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T18:22:30Z"
  }
 }
