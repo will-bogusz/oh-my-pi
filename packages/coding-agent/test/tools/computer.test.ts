@@ -3846,7 +3846,10 @@ describe("computer background fallback", () => {
 				console.log(`PROVE-B ${code} => ok=${result.ok} calls=${JSON.stringify(native.calls)} error=${result.ok ? "-" : result.error.message}`);
 				expect(result.ok).toBe(false);
 				if (result.ok) continue;
-				expect(result.error.message).toStartWith("BackgroundUnavailable: ");
+				const method = code.includes(".type(") ? "type" : "press";
+				expect(result.error.message).toBe(
+					`BackgroundUnavailable: ${method} with takeover: true would bring its application to the front and take the user's keyboard and pointer, and the user's computer.backgroundFallback setting is "refuse", which keeps the agent in the background; nothing was sent. Call it without takeover: window input runs in the background.`,
+				);
 				expect(native.calls).toEqual([]);
 			}
 		});
