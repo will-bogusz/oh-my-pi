@@ -3847,14 +3847,14 @@
    "needs": [],
    "base": "58349dc80de381057437818b8354c86826c8fa10",
    "body": "bodies/natives-test-click-placed-in-users-app.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16187,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/natives-test-click-placed-in-users-app",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:26:31Z",
-   "updated": "2026-10-18T13:35:46Z",
-   "note": "",
+   "updated": "2026-10-18T13:36:46Z",
+   "note": "opened by hand 2026-10-18 (pr-queue open refused on #15191/#15192 skylight.rs conflicts): makes main's pi-natives tests green, outranks the open-PR rule (S1Keeper)",
    "built": [
     {
      "with": "#16163",
