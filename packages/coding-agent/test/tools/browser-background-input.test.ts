@@ -137,7 +137,7 @@ async function withRelay(run: (fixture: RelayFixture) => Promise<void>): Promise
 describe.skipIf(!CHROMIUM_AVAILABLE)("background tab input", () => {
 	it("drives a relay tab in the background without selecting it", async () => {
 		await withRelay(async ({ cdpUrl, extension, target }) => {
-			// The relay keeps the tab's debugger session after omp lets go, so the release must end the emulation itself.
+			// Releasing the tab must end its focus emulation and leave the user's tab selected.
 			await driveAndRelease({ kind: "relay", cdpUrl }, target);
 			expect(
 				await extension.evaluate(
@@ -173,7 +173,7 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("background tab input", () => {
 		await withRelay(async ({ cdpUrl, target }) => {
 			const handle = await acquireBrowser({ kind: "relay", cdpUrl }, { cwd: process.cwd() });
 			const name = `background-killed-${process.pid}`;
-			// Another live tab keeps omp's relay connection, and with it the page's debugger session, attached.
+			// Another live tab keeps omp's relay connection open while this tab's worker dies.
 			const other = `background-other-${process.pid}`;
 			try {
 				await acquireTab(other, handle, { target: "Human", timeoutMs: 15_000 });
