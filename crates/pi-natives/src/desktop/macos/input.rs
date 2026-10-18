@@ -4534,7 +4534,8 @@ mod tests {
 		assert!(error.message.contains("window 42 (Screen Sharing)"), "{}", error.message);
 		assert_eq!(posted, 0);
 		// The user presses Command after a is typed: b would reach the remote
-		// computer as Cmd-B, so it is not pressed.
+		// computer as Cmd-B, so it is not pressed. a already went out, so the
+		// stop is not one takeover may retry: that would type a again.
 		let flags = std::cell::Cell::new(0);
 		let mut check = physical_modifier_check(&window, || flags.get());
 		let mut typed = Vec::new();
@@ -4613,6 +4614,112 @@ mod tests {
 		assert!(result.is_err());
 		assert_eq!(posted, [(55, true), (55, false)]);
 		assert_eq!(body_at, None);
+	}
+
+	#[test]
+	fn input_whose_last_key_is_out_is_not_reported_cancelled() {
+		let source = source().expect("event source");
+		let gap = Duration::from_millis(20);
+		let cancelled = |post: &mut dyn FnMut(&control::CancellationSource) -> CoreResult<()>| {
+			let cancellation = control::CancellationSource::default();
+			let token = cancellation.token();
+			control::with_token_for_test(&token, || post(&cancellation))
+		};
+		let (down, up) = (CGEventType::KeyDown as u32, CGEventType::KeyUp as u32);
+		// Typed text: the user cancels as the last key goes down.
+		let mut typed = Vec::new();
+		cancelled(&mut |cancellation| {
+			type_keys(
+				&source,
+				&us_keys("ab").unwrap(),
+				gap,
+				|| Ok(()),
+				|event| {
+					let event = typed_event(event);
+					if (event.0, event.1) == (down, 11) {
+						cancellation.cancel();
+					}
+					typed.push((event.0, event.1));
+					Ok(())
+				},
+			)
+		})
+		.unwrap();
+		assert_eq!(typed, [(down, 0), (up, 0), (down, 11), (up, 11)]);
+		// A shortcut fires on its last key-down: cmd+a.
+		let chord = [KeyPress { name: KeyName::Meta, code: 55 }, KeyPress {
+			name: KeyName::Char('a'),
+			code: 0,
+		}];
+		let mut posted = Vec::new();
+		cancelled(&mut |cancellation| {
+			press_chord(&source, &chord, gap, |event| {
+				let event = typed_event(event);
+				if (event.0, event.1) == (down, 0) {
+					cancellation.cancel();
+				}
+				posted.push(event.1);
+				Ok(())
+			})
+		})
+		.unwrap();
+		assert_eq!(posted, [55, 0, 0, 55]);
+		// Remote takeover: bare transitions, as a chord and as typed text.
+		let mut bare = Vec::new();
+		cancelled(&mut |cancellation| {
+			hold_transitions(
+				&chord,
+				gap,
+				|| Ok(()),
+				|| Ok(()),
+				|code, pressed| {
+					if (code, pressed) == (0, true) {
+						cancellation.cancel();
+					}
+					bare.push((code, pressed));
+					Ok(())
+				},
+			)
+		})
+		.unwrap();
+		assert_eq!(bare, [(55, true), (0, true), (0, false), (55, false)]);
+		let mut bare = Vec::new();
+		cancelled(&mut |cancellation| {
+			let transitions = bare_transitions(&us_keys("aB").unwrap());
+			post_transitions(
+				&transitions,
+				gap,
+				|| Ok(()),
+				|code, pressed| {
+					if (code, pressed) == (11, true) {
+						cancellation.cancel();
+					}
+					bare.push((code, pressed));
+					Ok(())
+				},
+			)
+		})
+		.unwrap();
+		assert_eq!(bare, [(0, true), (0, false), (56, true), (11, true), (11, false), (56, false)]);
+		// A cancel before the last press still stops the rest.
+		let mut bare = Vec::new();
+		let result = cancelled(&mut |cancellation| {
+			let transitions = bare_transitions(&us_keys("aB").unwrap());
+			post_transitions(
+				&transitions,
+				gap,
+				|| Ok(()),
+				|code, pressed| {
+					if (code, pressed) == (0, false) {
+						cancellation.cancel();
+					}
+					bare.push((code, pressed));
+					Ok(())
+				},
+			)
+		});
+		assert!(result.is_err());
+		assert_eq!(bare, [(0, true), (0, false)]);
 	}
 
 	/// The transitions `post_transitions` posts for "aB" on a remote screen,
