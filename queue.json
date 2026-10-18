@@ -4707,6 +4707,24 @@
    "added": "2026-10-18T18:46:45Z",
    "updated": "2026-10-18T18:46:45Z",
    "note": ""
+  },
+  {
+   "id": "browser-options-hints",
+   "branch": "will/browser-options-hints",
+   "title": "fix(coding-agent): name the expected shape when browser tab.run gets an args array or open gets a URL",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/browser-options-hints.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-options-hints",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:00:21Z",
+   "updated": "2026-10-18T19:00:21Z",
+   "note": ""
   }
  ],
  "watch": {
