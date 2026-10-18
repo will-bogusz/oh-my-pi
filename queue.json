@@ -3775,25 +3775,25 @@
    "merged_by": "pr"
   },
   {
-   "id": "s1r/text-drag-select",
-   "branch": "will/s1r/text-drag-select",
+   "id": "computer-text-drag-select",
+   "branch": "will/computer-text-drag-select",
    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
    "area": "computer",
-   "priority": null,
+   "priority": "P2",
    "needs": [
     "#15185",
     "#15195"
    ],
    "base": "f2f8fd0c5dea830714185b760133afbe0cd34d87",
-   "body": "bodies/s1r/text-drag-select.md",
+   "body": "bodies/computer-text-drag-select.md",
    "state": "queued",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-drag-select",
    "host": "MacBook-Pro",
    "added": "2026-10-18T11:18:03Z",
-   "updated": "2026-10-18T14:06:46Z",
-   "note": "HOLD (Main 2026-10-18): Will has not decided whether this becomes a PR; never open it until he does"
+   "updated": "2026-10-18T16:45:00Z",
+   "note": ""
   },
   {
    "id": "computer-target-sent-back-late",
