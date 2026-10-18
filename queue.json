@@ -3932,13 +3932,13 @@
    "needs": [],
    "base": "58349dc80de381057437818b8354c86826c8fa10",
    "body": "bodies/computer-sent-not-cancelled.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16202,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-sent-not-cancelled",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:09:04Z",
-   "updated": "2026-10-18T16:05:41Z",
+   "updated": "2026-10-18T18:41:08Z",
    "note": "Overlap: #15195, #15563, #15193, #15191, #15185 each fix their own instance of \"input already out reports Cancelled\" (settle/reply waits, run_then_settle BACKGROUND_SETTLE, window_chord reply sleep) in their advance pushes; this entry fixes main-owned ones via control::settle + Worker::execute. Whichever lands second drops its duplicate copy. Red: fork will/s1k-wip/sent-not-cancelled-red.",
    "built": [
     {
@@ -4006,7 +4006,8 @@
     }
    ],
    "opened": "2026-10-18T15:43:12Z",
-   "readied": "2026-10-18T15:43:27Z"
+   "readied": "2026-10-18T15:43:27Z",
+   "merged_by": "pr"
   },
   {
    "id": "natives-test-click-placed-in-users-app",
@@ -4271,13 +4272,13 @@
    "needs": [],
    "base": "33eeebc138e214813fe1190154b7ecc086f2ad12",
    "body": "bodies/computer-release-helper-followup.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16205,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-release-helper-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T14:29:14Z",
-   "updated": "2026-10-18T17:58:09Z",
+   "updated": "2026-10-18T18:41:08Z",
    "note": "Held for the next needed push: rebased onto main 1a97f79d28 (has 13d09929b7, #16200) as e011c5e90b on fork will/s1k-wip/16205-rebased, = PR head + test-only commit (exit wait as ledger field via scope_waiting; waits test 10 s, 500 ms bound stays covered by the stuck-helper test). No conflict with main; 13d09929b7 touches none of release.rs/release_guard.rs/release_helper.rs/control.rs. Ships with #16205's next needed push; if #16205 merges first, the test-only commit becomes its own PR off main. Do not push only for this (clean Codex head).",
    "built": [
     {
@@ -4327,7 +4328,8 @@
     }
    ],
    "opened": "2026-10-18T15:52:41Z",
-   "readied": "2026-10-18T15:52:54Z"
+   "readied": "2026-10-18T15:52:54Z",
+   "merged_by": "pr"
   },
   {
    "id": "iphone-mirroring-test",
@@ -4434,7 +4436,7 @@
    "branch": "will/screenshot-session-abort",
    "title": "fix(coding-agent): stop a browser screenshot waiting on a DevTools session past its deadline",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
    "body": "bodies/screenshot-session-abort.md",
@@ -4444,7 +4446,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/screenshot-session-abort",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:16Z",
-   "updated": "2026-10-18T18:23:35Z",
+   "updated": "2026-10-18T18:41:08Z",
    "note": "",
    "built": [
     {
@@ -4537,7 +4539,7 @@
    "branch": "will/todo-serial-tools",
    "title": "fix(coding-agent): give todo guidance a fallback for models without parallel tool calls",
    "area": "other",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
    "body": "bodies/todo-serial-tools.md",
@@ -4547,7 +4549,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/todo-serial-tools",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:22Z",
-   "updated": "2026-10-18T18:35:21Z",
+   "updated": "2026-10-18T18:41:08Z",
    "note": "opened #16231",
    "built": [
     {
