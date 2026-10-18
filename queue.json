@@ -4406,8 +4406,28 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/refind-cancel-root",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:09Z",
-   "updated": "2026-10-18T18:18:09Z",
-   "note": ""
+   "updated": "2026-10-18T18:40:57Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16217",
+     "code": "f31c8679167d32247c9962e9af64542d5b548491",
+     "with_code": "ae5a22a6cdb4ef7258ed64959accacf1913f2385",
+     "tip": "458797ccf20c6e565f4fafca22bb303905faf8f8",
+     "with_tip": "1960a17f7c254c3ec8d18e8c6108eaeb416d06ee",
+     "at": "2026-10-18T18:40:53Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16223",
+     "code": "f31c8679167d32247c9962e9af64542d5b548491",
+     "with_code": "0f882f7d78303ab8456cc8b7f89ac14390b296af",
+     "tip": "458797ccf20c6e565f4fafca22bb303905faf8f8",
+     "with_tip": "91c3da50c6638c9d177d6b5dbe12f89d3de28daf",
+     "at": "2026-10-18T18:40:56Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "screenshot-session-abort",
