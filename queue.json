@@ -11581,5 +11581,11 @@
     "why": "opened as #16236"
    }
   ]
+ },
+ "opening": {
+  "id": "conflict-bulk-per-id",
+  "token": "73dac0bee93b43c4b3edcd01a63c1018",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T20:33:17Z"
  }
 }
