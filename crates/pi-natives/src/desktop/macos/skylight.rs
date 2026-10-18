@@ -637,6 +637,9 @@ struct SwitchSignals {
 	/// placed it: menus and Dock tiles over a window count as theirs, not the
 	/// window's.
 	in_user_app: bool,
+	/// [`ClickPlacer`] has placed the latest click, in the user's own app or
+	/// not.
+	placed:      bool,
 }
 
 impl SwitchSignals {
@@ -653,6 +656,7 @@ impl SwitchSignals {
 			key_focus,
 			last_send: None,
 			in_user_app: false,
+			placed: true,
 		}
 	}
 
@@ -665,6 +669,12 @@ impl SwitchSignals {
 	#[cfg(test)]
 	const fn in_user_app(self) -> Self {
 		Self { in_user_app: true, ..self }
+	}
+
+	/// These signals with their latest click not placed yet.
+	#[cfg(test)]
+	const fn unplaced(self) -> Self {
+		Self { placed: false, ..self }
 	}
 
 	/// Reads the signals at `now`, with whether `placer` has placed the latest
@@ -684,6 +694,7 @@ impl SwitchSignals {
 		});
 		let mut signals = Self::new(buttons, last_click, flags, key_focus);
 		signals.in_user_app = placer.in_user_app(buttons);
+		signals.placed = placer.placed(buttons);
 		let last_send = *LAST_SEND.lock();
 		match last_send {
 			Some(at) => signals.sent_at(at),
@@ -743,6 +754,17 @@ impl ClickPlacer {
 			.latest
 			.lock()
 			.is_some_and(|place| place.buttons == buttons && place.in_user_app)
+	}
+
+	/// Whether the click that left the button counters at `buttons` has been
+	/// placed, in the user's own app or not. With no user app to place it in,
+	/// every click is placed outside it.
+	fn placed(&self, buttons: [u32; 6]) -> bool {
+		self.user.is_none()
+			|| self
+				.latest
+				.lock()
+				.is_some_and(|place| place.buttons == buttons)
 	}
 }
 
@@ -814,7 +836,7 @@ impl UserSwitchWatch {
 			click: signals
 				.last_click
 				.filter(|at| !signals.in_user_app && now.saturating_duration_since(*at) <= lookback),
-			placement: if signals.in_user_app {
+			placement: if signals.in_user_app || signals.placed {
 				ClickPlacement::Settled
 			} else {
 				ClickPlacement::Pending {
@@ -843,39 +865,57 @@ impl UserSwitchWatch {
 				.into_iter()
 				.any(|i| signals.buttons[i] != self.buttons[i]);
 			self.buttons = signals.buttons;
-			// A click in the user's own app, menus included, picks no app: the
-			// target activating itself right after is still sent back.
-			let pending = self.placement;
-			self.placement = ClickPlacement::Settled;
-			if signals.in_user_app {
-				if pressed {
-					self.own_click = Some(signals.last_click.unwrap_or(now));
-				}
-			} else {
-				self.placement = match pending {
-					// A release while its press still waits for placement is part
-					// of that click.
-					ClickPlacement::Pending { previous, press } if !pressed => {
-						ClickPlacement::Pending { previous, press }
-					},
-					_ => ClickPlacement::Pending {
-						previous: self.click,
-						press:    pressed.then(|| signals.last_click.unwrap_or(now)),
-					},
-				};
-				self.click = Some(signals.last_click.unwrap_or(now));
+			let at = signals.last_click.unwrap_or(now);
+			match self.placement {
+				// A release while its press still waits for placement is part of
+				// that click, placed below with it.
+				ClickPlacement::Pending { .. } if !pressed => {},
+				// A click in the user's own app, menus included, picks no app: the
+				// target activating itself right after is still sent back.
+				_ if signals.in_user_app => {
+					self.placement = ClickPlacement::Settled;
+					if pressed {
+						self.own_click = Some(at);
+					}
+				},
+				_ => {
+					self.placement =
+						ClickPlacement::Pending { previous: self.click, press: pressed.then_some(at) };
+					self.click = Some(at);
+				},
 			}
-		} else if signals.in_user_app
-			&& let ClickPlacement::Pending { previous, press } = self.placement
-		{
-			// Placed in the user's app after a reading had counted it.
-			self.placement = ClickPlacement::Settled;
-			self.click = previous;
-			if press.is_some() {
-				self.own_click = press;
+		}
+		if let ClickPlacement::Pending { previous, press } = self.placement {
+			if signals.in_user_app {
+				// Placed in the user's app after a reading had counted it.
+				self.placement = ClickPlacement::Settled;
+				self.click = previous;
+				if press.is_some() {
+					self.own_click = press;
+				}
+			} else if signals.placed {
+				// Placed outside it: the click stands.
+				self.placement = ClickPlacement::Settled;
+			} else if press.is_some_and(|at| now.saturating_duration_since(at) > USER_SWITCH_WINDOW) {
+				// Never placed in time: it picked no app.
+				self.placement = ClickPlacement::Settled;
+				self.click = previous;
 			}
 		}
 		self.observe_held(signals, front, now);
+	}
+
+	/// Whether a press of the user's still waits for [`ClickPlacer`]: it may
+	/// yet turn out to be in their own app, so neither a change of their key
+	/// window nor an app coming forward after it is judged until it is placed.
+	/// A press placed no sooner than [`USER_SWITCH_WINDOW`] after it picked no
+	/// app.
+	fn awaiting_placement(&self, now: Instant) -> bool {
+		matches!(
+			self.placement,
+			ClickPlacement::Pending { press: Some(at), .. }
+				if now.saturating_duration_since(at) <= USER_SWITCH_WINDOW
+		)
 	}
 
 	/// Whether a click in the user's own app, seen up to
@@ -1048,8 +1088,8 @@ impl BackgroundFocusLease {
 		// switcher) or unrelated, and the guard stands down. The switch sampler
 		// sees every app as it comes forward, however long the observer's AX
 		// probes block it.
-		let action_brought =
-			(front == self.target || caused) && self.user.picked(came, front).is_none();
+		let picked = self.user.picked(came, front);
+		let action_brought = (front == self.target || caused) && picked.is_none();
 		// A click in the user's own app that picked another of its windows
 		// keeps them in their app: that window is the one the lease keeps.
 		if !self.disarmed
@@ -1058,6 +1098,15 @@ impl BackgroundFocusLease {
 			&& self.user.take_own_click(asked)
 		{
 			self.key = key;
+		}
+		// A press that may yet be placed in the user's app decides nothing it
+		// could explain until it is placed.
+		if !self.disarmed
+			&& self.user.awaiting_placement(now)
+			&& ((front == self.previous && key.is_some_and(|key| Some(key) != self.key))
+				|| (front != self.previous && picked == Some(UserSwitch::Click)))
+		{
+			return FocusDecision::Observe;
 		}
 		if self.disarmed
 			|| (front == self.previous && key.is_some_and(|key| Some(key) != self.key))
@@ -2582,14 +2631,20 @@ mod tests {
 		let t0 = Instant::now();
 		let click = clicked_at(t0 + ms(5));
 		let mut guard = lease_at(t0, None);
-		assert_eq!(guard.observe(PREVIOUS, Some(42), click, t0 + ms(10)), FocusDecision::Observe);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), click.unplaced(), t0 + ms(10)),
+			FocusDecision::Observe
+		);
 		let placed = click.in_user_app();
 		assert_eq!(guard.observe(TARGET, None, placed, t0 + ms(60)), FocusDecision::Restore);
 		// A click elsewhere before it still counts once it is taken back.
 		let mut guard = lease_at(t0, None);
 		let own = SwitchSignals::new([2, 2, 0, 0, 0, 0], Some(t0 + ms(40)), NO_MODIFIERS, None);
 		assert_eq!(guard.observe(PREVIOUS, Some(42), click, t0 + ms(10)), FocusDecision::Observe);
-		assert_eq!(guard.observe(PREVIOUS, Some(42), own, t0 + ms(45)), FocusDecision::Observe);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), own.unplaced(), t0 + ms(45)),
+			FocusDecision::Observe
+		);
 		let placed = own.in_user_app();
 		assert_eq!(guard.observe(TARGET, None, placed, t0 + ms(60)), FocusDecision::Disarm);
 	}
@@ -2930,7 +2985,10 @@ mod tests {
 		// as a click elsewhere.
 		let mut guard = lease_at(t0, None);
 		let click = clicked_at(t0 + ms(5));
-		assert_eq!(guard.observe(PREVIOUS, Some(42), click, t0 + ms(10)), FocusDecision::Observe);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), click.unplaced(), t0 + ms(10)),
+			FocusDecision::Observe
+		);
 		assert_eq!(
 			guard.observe(PREVIOUS, Some(43), click.in_user_app(), t0 + ms(20)),
 			FocusDecision::Observe
@@ -2940,11 +2998,68 @@ mod tests {
 		let mut guard = lease_at(t0, None);
 		let down = SwitchSignals::new([1, 0, 0, 0, 0, 0], Some(t0 + ms(5)), NO_MODIFIERS, None);
 		let up = clicked_at(t0 + ms(8));
-		assert_eq!(guard.observe(PREVIOUS, Some(42), down, t0 + ms(10)), FocusDecision::Observe);
-		assert_eq!(guard.observe(PREVIOUS, Some(42), up, t0 + ms(15)), FocusDecision::Observe);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), down.unplaced(), t0 + ms(10)),
+			FocusDecision::Observe
+		);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), up.unplaced(), t0 + ms(15)),
+			FocusDecision::Observe
+		);
 		let placed = up.in_user_app();
 		assert_eq!(guard.observe(PREVIOUS, Some(43), placed, t0 + ms(20)), FocusDecision::Observe);
 		assert_eq!(guard.observe(TARGET, None, placed, t0 + ms(30)), FocusDecision::Restore);
+	}
+
+	#[test]
+	fn a_press_waiting_for_its_placement_decides_nothing_until_placed() {
+		let t0 = Instant::now();
+		let press = clicked_at(t0 + ms(5));
+		// Placed in the user's app only after the guard saw the window it
+		// picked: that window is kept, and the target is sent back.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), press.unplaced(), t0 + ms(10)),
+			FocusDecision::Observe
+		);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(43), press.unplaced(), t0 + ms(20)),
+			FocusDecision::Observe
+		);
+		assert_eq!(guard.key, Some(42), "nothing taken on before the placement");
+		let placed = press.in_user_app();
+		assert_eq!(guard.observe(PREVIOUS, Some(43), placed, t0 + ms(30)), FocusDecision::Observe);
+		assert_eq!(guard.key, Some(43));
+		assert_eq!(guard.observe(TARGET, None, placed, t0 + ms(40)), FocusDecision::Restore);
+		// Placed in the user's app only after the target came forward: it is
+		// sent back then.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(42), press.unplaced(), t0 + ms(10)),
+			FocusDecision::Observe
+		);
+		assert_eq!(
+			guard.observe(TARGET, None, press.unplaced(), t0 + ms(20)),
+			FocusDecision::Observe
+		);
+		assert_eq!(guard.observe(TARGET, None, placed, t0 + ms(30)), FocusDecision::Restore);
+		// Placed elsewhere, on the target say: the user's switch.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(TARGET, None, press.unplaced(), t0 + ms(20)),
+			FocusDecision::Observe
+		);
+		assert_eq!(guard.observe(TARGET, None, press, t0 + ms(30)), FocusDecision::Disarm);
+		// Never placed in time: it picked no app, and the target is sent back.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(TARGET, None, press.unplaced(), t0 + ms(20)),
+			FocusDecision::Observe
+		);
+		assert_eq!(
+			guard.observe(TARGET, None, press.unplaced(), t0 + ms(300)),
+			FocusDecision::Restore
+		);
 	}
 
 	#[test]
