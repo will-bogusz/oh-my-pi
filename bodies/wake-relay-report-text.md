@@ -11,16 +11,20 @@ The wake path now picks its text with `lastReportTurnText()`, the same selection
 `attachIrcWakeTurnMonitor` read `turnMonitor.rawOutput()`, which is `finalOutputChunks.join("")` over the whole turn. The first-run path moved off `rawOutput()` for message results; the wake relay never did, so narration before tool calls ran straight into the answer for both peer relays (`relayWakeTurnOutput`) and the parent's wake-job result (`buildWakeRelayBody`).
 
 Decisions:
-- The `lastAssistantSalvageText()` fallback is dropped. It held the last message's text even when that text came before tool or Cursor server work, which is the narration `lastReportTurnText()` deliberately leaves out; the failed and cancelled branches of `buildWakeRelayBody` never read the turn text. A turn with no report now gets the existing "produced no output" or "sent a message during this turn" notice, as a first-run message result gets its empty-message outcome.
+- The `lastAssistantSalvageText()` fallback (the session's last assistant text) now applies only when the monitor saw no assistant message in the wake turn, which is where `main`'s relay found its text before. A turn the monitor did see never falls back to it: that text can be narration `lastReportTurnText()` set aside, such as prose before a Cursor-resolved call with no report after it. Such a turn gets the existing "produced no output" or "sent a message during this turn" notice, as a first-run message result gets its empty-message outcome.
 - Structured first runs (`task.structured: true`) still finalize from `rawOutput()` when they don't yield; that path is untouched here.
 
 Non-goals: the yielded path (it relays the `<task-result>` summary) and failure notices are unchanged.
 
 ## Testing
 
-New test in `test/task/executor-result-acceptance.test.ts`: a peer wakes an idle subagent, the turn emits `[text "Checking." + read toolCall]`, then `[text "Answer."]`, then `agent_end`; the relay the peer receives is `Answer.`. With the `executor.ts` change reverted it fails: `Expected: "Answer." Received: "Checking.Answer."`.
+Two tests in `test/task/executor-result-acceptance.test.ts`, each a peer waking an idle subagent:
+- The turn emits `[text "Checking." + read toolCall]`, then `[text "Answer."]`; the peer receives `Answer.`. With the `executor.ts` change reverted it fails: `Expected: "Answer." Received: "Checking.Answer."`.
+- The turn ends on `[text "Running the tests." + Cursor-resolved bash call]`; the peer gets the "produced no output" notice, not the narration. With the fallback applied unconditionally it fails (`Received: "Running the tests."`).
 
-Live, with Haiku: a parent messaged an idle subagent that had to read `notes.txt` for a secret word. On `main` the reply was `I'll read notes.txt to find the secret word.MARMALADE`; with the fix it was `MARMALADE` (2 of 2 runs). That run used a build of the same fix that still fell back to `lastAssistantSalvageText()`, its only difference from this head; the scenario never reaches that fallback.
+The existing wake relay tests that drive only the session's last assistant message (`persisted-revive.test.ts`, `irc.test.ts`) still pass.
+
+Live, with Haiku: a parent messaged an idle subagent that had to read `notes.txt` for a secret word. On `main` the reply was `I'll read notes.txt to find the secret word.MARMALADE`; with the fix it was `MARMALADE` (2 of 2 runs). That run used a build of the same fix whose salvage fallback was unconditional, its only difference from this head; the scenario has a report turn, so it never reaches the fallback.
 
 ```sh
 cd packages/coding-agent && bun test test/task/executor-result-acceptance.test.ts test/task/executor-irc-wake-yield-reset.test.ts
