@@ -11059,6 +11059,24 @@
    "added": "2026-10-18T21:39:24Z",
    "updated": "2026-10-18T21:39:24Z",
    "note": ""
+  },
+  {
+   "id": "natives-dts-regen",
+   "branch": "will/natives-dts-regen",
+   "title": "chore(natives): regenerate index.d.ts from the current bindings",
+   "area": "natives",
+   "priority": "P2",
+   "needs": [],
+   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
+   "body": "bodies/natives-dts-regen.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/natives-dts-regen",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T22:04:10Z",
+   "updated": "2026-10-18T22:04:10Z",
+   "note": ""
   }
  ],
  "watch": {
