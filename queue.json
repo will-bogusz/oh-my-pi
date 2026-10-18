@@ -10482,6 +10482,24 @@
    "added": "2026-10-18T21:06:38Z",
    "updated": "2026-10-18T21:06:38Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-image-generation",
+   "branch": "will/factory-droid-image-generation",
+   "title": "feat(ai,catalog): generate images through a Factory Droid login",
+   "area": "providers",
+   "priority": "P2",
+   "needs": [],
+   "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
+   "body": "bodies/factory-droid-image-generation.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-image-generation",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T21:11:27Z",
+   "updated": "2026-10-18T21:11:27Z",
+   "note": ""
   }
  ],
  "watch": {
