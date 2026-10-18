@@ -34,10 +34,9 @@ const save = await win.ref("e12");
 await save.press();
 const [field] = await win.find({ role: "textfield", title: "Search" });
 await field.setValue("todo");
-await computer.run(async ({ desktop, wait }) => {
+await computer.run(async ({ desktop }) => {
 	const target = await desktop.window({ title: "Settings" });
 	await target.press("cmd+f");
-	await wait(300);
 	return await target.ax();
 }, { timeout: 30 });
 ```
@@ -66,6 +65,7 @@ await win.click(120, 48, button="right")
 - When the user's setting refuses takeover, `perform("open")`, `perform("showMenu")` and every other spelling `perform()` takes for `AXOpen` and `AXShowMenu` are refused too.
 - On macOS, `AxUnconfirmed` means an AX action may already have taken effect. Inspect fresh AX or a screenshot before repeating it; NEVER retry blindly.
 - `UserIntervened` (macOS): the user came to that app, or typed or clicked in it, during the call; nothing more was sent, and the tool never reruns it in takeover. The user's edits stand: NEVER undo or retype over them. Read that window again (`win.ax()`, `win.observe()` or `win.screenshot()`) and continue the task from what it shows.
+- Reads and input after input (`ax()`, `find()`, `observe()`, screenshots, window lookups, element reads, clicks, keys) already wait until the apps that input reached stop changing; NEVER add sleeps.
 - After changing the UI, verify the expected state with fresh AX evidence or a screenshot. In a run, use `wait(predicate, {timeout, interval})` for a specific state rather than assuming a fixed sleep means success.
 - Desktop-root pointer helpers (`computer.click`, `computer.move`, …) drive the user's real pointer; act through window handles.
 - Wayland: per-window native input and `.raise()` are unavailable; use AX, or desktop input after focusing the target yourself.
