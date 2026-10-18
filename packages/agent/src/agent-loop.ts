@@ -3753,8 +3753,8 @@ async function executeToolCalls(
 		await checkSteering().catch(() => undefined);
 	};
 
-	// Everything a later "exclusive" or "ordered" call waits for: the latest
-	// exclusive call, or every call of the latest run of adjacent "ordered" calls.
+	// What a later call waits for: the latest exclusive call, or the latest
+	// closed run of adjacent "ordered" calls.
 	let lastExclusive: Promise<unknown> = Promise.resolve();
 	let sharedTasks: Promise<void>[] = [];
 	// The open run of adjacent "ordered" calls: their common start and their tasks.
@@ -3854,29 +3854,31 @@ async function executeToolCalls(
 		}
 		let start: Promise<unknown>;
 		if (concurrency === "ordered") {
-			// The first call of a run waits for everything before it; the rest of
-			// the run starts with it.
+			// The first call of a run waits for every earlier call to settle; the
+			// rest of the run starts with it.
 			if (!orderedStart) {
-				orderedStart = Promise.all([lastExclusive, ...sharedTasks]);
+				orderedStart = Promise.allSettled([lastExclusive, ...sharedTasks]);
 				orderedTasks = [];
+				sharedTasks = [];
 			}
 			start = orderedStart;
 		} else {
-			orderedStart = undefined;
+			if (orderedStart) {
+				// Close the run: later calls wait for all of it to settle.
+				lastExclusive = Promise.allSettled(orderedTasks);
+				orderedStart = undefined;
+			}
 			start = concurrency === "exclusive" ? Promise.all([lastExclusive, ...sharedTasks]) : lastExclusive;
 		}
 		const task = start.then(() => runTool(record, index));
 		tasks.push(task);
-		if (concurrency === "shared") {
-			sharedTasks.push(task);
-		} else {
-			if (concurrency === "ordered") {
-				orderedTasks.push(task);
-				lastExclusive = Promise.all(orderedTasks);
-			} else {
-				lastExclusive = task;
-			}
+		if (concurrency === "ordered") {
+			orderedTasks.push(task);
+		} else if (concurrency === "exclusive") {
+			lastExclusive = task;
 			sharedTasks = [];
+		} else {
+			sharedTasks.push(task);
 		}
 	}
 	try {

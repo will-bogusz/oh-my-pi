@@ -21,7 +21,7 @@ describe("bash and read in one assistant message", () => {
 	it("reads the file the earlier bash call rewrote", async () => {
 		const directory = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "bash-read-order-")));
 		temporaryDirectories.push(directory);
-		await fs.writeFile(path.join(directory, "f"), "old\n");
+		await Bun.write(path.join(directory, "f"), "old\n");
 		const session = {
 			cwd: directory,
 			hasUI: false,

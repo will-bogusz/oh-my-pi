@@ -744,8 +744,8 @@ export class SpeculativeOperationCoordinator {
 			this.ineligible(toolCall, "invalid speculation effect", source, parentToolCallId);
 			return undefined;
 		}
-		if (tool.concurrency === "exclusive") {
-			this.ineligible(toolCall, "exclusive tool is not speculation-safe", source, parentToolCallId);
+		if (tool.concurrency === "exclusive" || tool.concurrency === "ordered") {
+			this.ineligible(toolCall, `${tool.concurrency} tool is not speculation-safe`, source, parentToolCallId);
 			return undefined;
 		}
 		if (effect.kind !== "pure" && !this.config.host) {

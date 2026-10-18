@@ -28,6 +28,7 @@ import { AssistantMessageEventStream } from "@oh-my-pi/pi-ai/utils/event-stream"
 import type { HarmonyDetection } from "@oh-my-pi/pi-ai/utils/harmony-leak";
 import * as harmonyLeak from "@oh-my-pi/pi-ai/utils/harmony-leak";
 import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
+import { type Span, type Tracer, trace } from "@opentelemetry/api";
 import { createAssistantMessage, createHarmonyMitigationModel, createUserMessage } from "./helpers";
 
 declare module "@oh-my-pi/pi-agent-core/types" {
@@ -2599,6 +2600,55 @@ describe("agentLoop with AgentMessage", () => {
 		expect(at("start:r2")).toBeLessThan(at("end:r1"));
 		// The ordered call after the shared calls waited for both of them.
 		expect(at("start:w3")).toBeGreaterThan(Math.max(at("end:r1"), at("end:r2")));
+	});
+
+	it("runs the rest of an ordered run and the calls after it when one ordered call fails outside the tool", async () => {
+		const toolSchema = type({ value: "string", mode: "'shared' | 'ordered'" });
+		const executed: string[] = [];
+		let executeSpans = 0;
+		// A tracer that throws on the first tool's execute span: the failure
+		// escapes the tool's own error handling and rejects that call's task.
+		const tracer: Tracer = {
+			startSpan(name): Span {
+				if (name.startsWith("execute_tool") && executeSpans++ === 0) throw new Error("execute span failure");
+				return trace.wrapSpanContext({ traceId: "0".repeat(32), spanId: "0".repeat(16), traceFlags: 0 });
+			},
+			startActiveSpan(): never {
+				throw new Error("startActiveSpan is unused");
+			},
+		};
+		const tool: AgentTool<typeof toolSchema, { value: string }> = {
+			name: "op",
+			label: "Op",
+			description: "Op tool",
+			parameters: toolSchema,
+			concurrency: args => (args.mode === "ordered" ? "ordered" : "shared"),
+			async execute(_toolCallId, params) {
+				executed.push(params.value);
+				return { content: [{ type: "text", text: `ok:${params.value}` }], details: { value: params.value } };
+			},
+		};
+		const mock = createMockModel({
+			responses: [
+				{
+					content: [
+						{ type: "toolCall", id: "tool-w1", name: "op", arguments: { value: "w1", mode: "ordered" } },
+						{ type: "toolCall", id: "tool-w2", name: "op", arguments: { value: "w2", mode: "ordered" } },
+						{ type: "toolCall", id: "tool-r1", name: "op", arguments: { value: "r1", mode: "shared" } },
+					],
+				},
+				{ content: ["done"] },
+			],
+		});
+		const context: AgentContext = { systemPrompt: [""], messages: [], tools: [tool] };
+		const config: AgentLoopConfig = { model: mock.model, convertToLlm: identityConverter, telemetry: { tracer } };
+
+		const messages = await agentLoop([createUserMessage("start")], context, config, undefined, mock.stream).result();
+
+		expect(executed).toEqual(["w2", "r1"]);
+		const results = messages.filter((message): message is ToolResultMessage => message.role === "toolResult");
+		expect(results.map(result => result.toolCallId)).toEqual(["tool-w1", "tool-w2", "tool-r1"]);
+		expect(results.map(result => result.isError)).toEqual([true, false, false]);
 	});
 
 	it("drops incomplete tool calls when assistant aborts before toolcall_end", async () => {
@@ -8529,6 +8579,49 @@ describe("speculative tool execution", () => {
 
 		await expect(coordinator.claim(tool, toolCall, { value: "run" })).resolves.toBeUndefined();
 		expect(speculativeExecutions).toBe(1);
+		await coordinator.close("test complete");
+	});
+
+	it("does not speculate an ordered call or the calls after it", async () => {
+		const schema = type({ value: "string" });
+		const speculated: string[] = [];
+		const makeTool = (name: string, concurrency: "ordered" | "shared"): AgentTool<typeof schema> => ({
+			name,
+			label: name,
+			description: `${concurrency} tool`,
+			parameters: schema,
+			concurrency,
+			speculation: {
+				finalized: {
+					assess: () => ({ eligible: true, effect: { kind: "pure" } }),
+					async execute() {
+						speculated.push(name);
+						return { kind: "result", result: { content: [{ type: "text", text: name }] }, isError: false };
+					},
+				},
+			},
+			async execute() {
+				return { content: [{ type: "text", text: name }] };
+			},
+		});
+		const writer = makeTool("writer", "ordered");
+		const reader = makeTool("reader", "shared");
+		const context: AgentContext = { systemPrompt: [""], messages: [], tools: [writer, reader] };
+		const loopConfig: AgentLoopConfig = {
+			model: createMockModel({ responses: [] }).model,
+			convertToLlm: identityConverter,
+		};
+		const coordinator = new SpeculativeOperationCoordinator({ enabled: true }, { context, loopConfig });
+		const writeCall = { type: "toolCall" as const, id: "writer-1", name: "writer", arguments: { value: "w" } };
+		const readCall = { type: "toolCall" as const, id: "reader-1", name: "reader", arguments: { value: "r" } };
+
+		coordinator.admitFinalized(context, writeCall, loopConfig, undefined);
+		coordinator.admitFinalized(context, readCall, loopConfig, undefined);
+		await coordinator.finalizeAdmissions();
+
+		await expect(coordinator.claim(writer, writeCall, { value: "w" })).resolves.toBeUndefined();
+		await expect(coordinator.claim(reader, readCall, { value: "r" })).resolves.toBeUndefined();
+		expect(speculated).toEqual([]);
 		await coordinator.close("test complete");
 	});
 
