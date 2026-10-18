@@ -4527,7 +4527,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/todo-serial-tools",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:22Z",
-   "updated": "2026-10-18T18:24:27Z",
+   "updated": "2026-10-18T18:24:44Z",
    "note": "",
    "built": [
     {
@@ -4612,7 +4612,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-18T18:24:26Z"
+   "opened": "2026-10-18T18:24:26Z",
+   "readied": "2026-10-18T18:24:44Z"
   }
  ],
  "watch": {
