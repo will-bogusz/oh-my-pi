@@ -3656,7 +3656,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ast-temp-tree",
    "host": "MacBook-Pro",
    "added": "2026-10-18T09:11:48Z",
-   "updated": "2026-10-18T09:21:31Z",
+   "updated": "2026-10-18T09:21:46Z",
    "note": "",
    "built": [
     {
@@ -3759,7 +3759,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-18T09:21:31Z"
+   "opened": "2026-10-18T09:21:31Z",
+   "readied": "2026-10-18T09:21:45Z"
   }
  ],
  "watch": {
