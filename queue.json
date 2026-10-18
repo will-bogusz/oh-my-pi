@@ -3442,7 +3442,7 @@
   {
    "id": "computer-run-args",
    "branch": "will/computer-run-args",
-   "title": "fix(coding-agent): reject computer.run and tab.run args the function cannot receive",
+   "title": "fix(coding-agent): reject unusable run args and explain busy errors in computer and browser calls",
    "area": "computer",
    "priority": "P0",
    "needs": [],
@@ -3454,7 +3454,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-args",
    "host": "MacBook-Pro",
    "added": "2026-10-18T04:33:40Z",
-   "updated": "2026-10-18T05:55:06Z",
+   "updated": "2026-10-18T06:08:16Z",
    "note": "",
    "built": [
     {
