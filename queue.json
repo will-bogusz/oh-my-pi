@@ -3439,12 +3439,12 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T02:19:06Z",
+  "checked": "2026-10-18T02:50:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {},
-  "merged_through": "2026-10-17T23:51:33Z",
+  "merged_through": "2026-10-18T02:33:52Z",
   "unreleased": {
    "15157": {
     "title": "fix(natives): report the macOS Escape stop honestly",
@@ -3455,6 +3455,16 @@
     "title": "fix(natives,coding-agent): name the element that replaced a stale macOS computer ref",
     "merge_commit": "dc4a66a84c6144a4d5f57233e3b150cd5e3b49cf",
     "merged_at": "2026-10-17T23:51:33Z"
+   },
+   "15173": {
+    "title": "fix(natives,coding-agent): keep omitted takeover in the background while computer control is held",
+    "merge_commit": "46d67f63c24d65fc4e25d09bfebaadfe0d2033a8",
+    "merged_at": "2026-10-18T02:32:47Z"
+   },
+   "15175": {
+    "title": "feat(computer): select text in a background macOS element by accessibility",
+    "merge_commit": "0c03e13bc9ae590638332446fff60f723561f34a",
+    "merged_at": "2026-10-18T02:33:52Z"
    }
   },
   "events": [
@@ -3950,6 +3960,22 @@
     "kind": "merged",
     "number": 15574,
     "title": "fix(natives,coding-agent): name the element that replaced a stale macOS computer ref",
+    "merged_by": "H4vC",
+    "maintainer_commits": 2
+   },
+   {
+    "at": "2026-10-18T02:50:08Z",
+    "kind": "merged",
+    "number": 15173,
+    "title": "fix(natives,coding-agent): keep omitted takeover in the background while computer control is held",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T02:50:08Z",
+    "kind": "merged",
+    "number": 15175,
+    "title": "feat(computer): select text in a background macOS element by accessibility",
     "merged_by": "H4vC",
     "maintainer_commits": 2
    }
