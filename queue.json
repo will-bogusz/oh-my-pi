@@ -3878,13 +3878,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T13:05:05Z",
+  "checked": "2026-10-18T13:35:29Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "computer-target-sent-back-late": {
-    "since": "2026-10-18T13:05:05Z",
-    "title": "fix(natives): send a macOS background target back however late it activates itself"
+   "natives-test-click-placed-in-users-app": {
+    "since": "2026-10-18T13:35:29Z",
+    "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test"
    }
   },
   "conflicts": {
@@ -4016,7 +4016,8 @@
    15508,
    16119,
    16149,
-   16163
+   16163,
+   16185
   ],
   "events": [
    {
@@ -4747,6 +4748,19 @@
     "kind": "openable",
     "id": "computer-target-sent-back-late",
     "title": "fix(natives): send a macOS background target back however late it activates itself"
+   },
+   {
+    "at": "2026-10-18T13:35:29Z",
+    "kind": "openable",
+    "id": "natives-test-click-placed-in-users-app",
+    "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test"
+   },
+   {
+    "at": "2026-10-18T13:35:29Z",
+    "kind": "unopenable",
+    "id": "computer-target-sent-back-late",
+    "title": "fix(natives): send a macOS background target back however late it activates itself",
+    "why": "opened as #16185"
    }
   ]
  },
