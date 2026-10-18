@@ -12650,5 +12650,11 @@
     "why": "opened as #16241"
    }
   ]
+ },
+ "opening": {
+  "id": "utok-perf",
+  "token": "38decd5134c6422daff83b93eadff9ca",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T22:28:01Z"
  }
 }
