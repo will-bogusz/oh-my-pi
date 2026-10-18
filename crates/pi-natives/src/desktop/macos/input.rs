@@ -2712,7 +2712,9 @@ fn button_presses(
 ) -> CoreResult<()> {
 	let count = i64::from(count.max(1));
 	for click_state in 1..=count {
-		before_press()?;
+		if click_state == 1 {
+			before_press()?;
+		}
 		let result = post(true, click_state).and_then(|()| control::wait(PRESS_GAP));
 		let release = control::cleanup(|| post(false, click_state));
 		skylight::after_cleanup(result, release)?;
