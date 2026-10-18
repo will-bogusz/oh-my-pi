@@ -4064,7 +4064,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T14:36:42Z",
+  "checked": "2026-10-18T15:06:57Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -4082,7 +4082,7 @@
     ]
    }
   },
-  "merged_through": "2026-10-18T14:25:05Z",
+  "merged_through": "2026-10-18T14:51:08Z",
   "unreleased": {
    "15157": {
     "title": "fix(natives): report the macOS Escape stop honestly",
@@ -4163,6 +4163,16 @@
     "title": "feat(computer): rerun refused macOS background input in takeover, set by computer.backgroundFallback",
     "merge_commit": "89ae2976d783d33ec48de7ff2a6dc7aedf0a78e6",
     "merged_at": "2026-10-18T14:25:05Z"
+   },
+   "16163": {
+    "title": "test(natives): gave each ast test tree its own temp directory",
+    "merge_commit": "dcd2014ccd829c1152954f952df858fdf6c57034",
+    "merged_at": "2026-10-18T14:51:04Z"
+   },
+   "16187": {
+    "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test",
+    "merge_commit": "499508e06c4686c1999a2ece8f53c304f1ad8c9f",
+    "merged_at": "2026-10-18T14:51:08Z"
    }
   },
   "ready": [
@@ -4178,9 +4188,7 @@
    15508,
    16119,
    16149,
-   16163,
    16185,
-   16187,
    16188
   ],
   "events": [
@@ -4997,6 +5005,22 @@
     "files": [
      "docs/computer-use.md"
     ]
+   },
+   {
+    "at": "2026-10-18T15:06:57Z",
+    "kind": "merged",
+    "number": 16163,
+    "title": "test(natives): gave each ast test tree its own temp directory",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T15:06:57Z",
+    "kind": "merged",
+    "number": 16187,
+    "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  }
