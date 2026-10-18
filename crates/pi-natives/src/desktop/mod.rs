@@ -4612,8 +4612,9 @@ mod capture_tests {
 		let token = source.token();
 		let (reply, _rx) = flume::bounded(1);
 		let keys = parse_keys(&["cmd".to_string(), "s".to_string()]).unwrap();
-		let chord = Request::KeyChord { target: target.clone(), keys, takeover: None, reply };
-		assert!(matches!(worker.execute(&chord, &token), Ok(Response::Unit)));
+		let takeover = Takeover::default();
+		let chord = Request::KeyChord { target: target.clone(), keys, takeover, reply };
+		assert!(matches!(worker.execute(&chord, &token), Ok(Response::Input(_))));
 		assert_eq!(*modes.lock(), [DeliveryMode::Background]);
 		// The cancel stops what was queued behind it.
 		let error = worker.execute(&capture_request(target), &token).err();

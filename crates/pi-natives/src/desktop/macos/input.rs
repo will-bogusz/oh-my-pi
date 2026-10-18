@@ -4617,6 +4617,36 @@ mod tests {
 	}
 
 	#[test]
+	fn a_click_whose_last_press_is_out_is_not_reported_cancelled() {
+		use crate::desktop::error::ErrorCode;
+		let (down, up) = (CGEventType::LeftMouseDown as u32, CGEventType::LeftMouseUp as u32);
+		// A double tap cancelled as its `cancel_at`th press goes out.
+		let run = |cancel_at: i64| {
+			let source = control::CancellationSource::default();
+			let token = source.token();
+			let posted = std::cell::RefCell::new(Vec::new());
+			let result = control::with_token_for_test(&token, || {
+				report_taps(
+					2,
+					|| Ok(()),
+					|event, click_state| {
+						posted.borrow_mut().push((event as u32, click_state));
+						if event as u32 == down && click_state == cancel_at {
+							source.cancel();
+						}
+						Ok(())
+					},
+				)
+			});
+			(result.map_err(|error| error.code), posted.into_inner())
+		};
+		// Cancelled at the last press: the click went out whole and stands.
+		assert_eq!(run(2), (Ok(()), vec![(down, 1), (up, 1), (down, 2), (up, 2)]));
+		// Cancelled at an earlier press: released, and the rest is not sent.
+		assert_eq!(run(1), (Err(ErrorCode::Cancelled), vec![(down, 1), (up, 1)]));
+	}
+
+	#[test]
 	fn input_whose_last_key_is_out_is_not_reported_cancelled() {
 		let source = source().expect("event source");
 		let gap = Duration::from_millis(20);
