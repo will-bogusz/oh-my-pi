@@ -2925,7 +2925,7 @@
    "needs": [
     "#15195"
    ],
-   "base": "d0a3224d63d4977a86c912cfca14872b15bbe601",
+   "base": "c2df773fae577ecd0c8f6b9302824e7005af0f38",
    "body": "bodies/computer-key-reroute.md",
    "state": "queued",
    "pr": null,
@@ -2933,7 +2933,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-key-reroute",
    "host": "MacBook-Pro",
    "added": "2026-10-14T04:51:27Z",
-   "updated": "2026-10-18T01:07:22Z",
+   "updated": "2026-10-18T04:16:40Z",
    "note": "series 1 item 14: named in the Show and tell post (https://github.com/can1357/oh-my-pi/discussions/16124) as one more follow-up coming later; branch 3647873669 and base d0a3224d63 (#15195's head) set 2026-10-18 after the restack onto main dc4a66a84c; opens after #15195 merges (stored body bodies/computer-key-reroute.md)."
   },
   {
