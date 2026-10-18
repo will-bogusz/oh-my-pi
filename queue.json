@@ -4274,5 +4274,11 @@
     "why": "opened as #16149"
    }
   ]
+ },
+ "opening": {
+  "id": "ast-temp-tree",
+  "token": "570b99d5411743648356be72090b5edf",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T09:13:21Z"
  }
 }
