@@ -12650,5 +12650,11 @@
     "why": "opened as #16241"
    }
   ]
+ },
+ "opening": {
+  "id": "factory-droid-org-lookup",
+  "token": "b40e102f14b0403490ea57a097b04d78",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T22:21:18Z"
  }
 }
