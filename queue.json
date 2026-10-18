@@ -5829,5 +5829,11 @@
     "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window"
    }
   ]
+ },
+ "opening": {
+  "id": "refind-cancel-root",
+  "token": "7649bb46536d433897f2d8be8cceefdb",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T18:48:18Z"
  }
 }
