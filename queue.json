@@ -4025,7 +4025,7 @@
   {
    "id": "computer-same-reading-key-window",
    "branch": "will/computer-same-reading-key-window",
-   "title": "fix(natives): hand a macOS user's app back with the window they clicked as the target came forward",
+   "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
    "area": "computer",
    "priority": "P2",
    "needs": [
@@ -4039,8 +4039,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-same-reading-key-window",
    "host": "MacBook-Pro",
    "added": "2026-10-18T14:05:14Z",
-   "updated": "2026-10-18T14:05:20Z",
-   "note": "queued behind #16185 (S1Keeper 2026-10-18); review 815304c43c needs-changes, both findings fixed in 8a8ff32957 with test; bench kw3: red fails new test, fix green except main's #16187 test"
+   "updated": "2026-10-18T14:58:08Z",
+   "note": "P2 queued behind #16185 (S1Keeper 2026-10-18). 338fa84156: own-app click adopts the new key window (guest A n=6: target kept front 3/6 before -> sent back 6/6, clicked window key 6/6) + same-reading hand-back restores current key. Review 815304c43c needs-changes, both findings fixed with tests; bench kw4: red fails both new tests, fix green but for ast flakes + main test fixed by #16187 (merged)"
   },
   {
    "id": "computer-release-helper-followup",

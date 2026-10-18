@@ -1,22 +1,29 @@
 ## What
 
-If I click a different window of my own app at the moment the agent's background target brings itself forward, I now get my app back with the window I clicked focused, not the window that had focus when the action started.
+If I click another window of my own app just as the agent's background target brings itself forward, I now keep my app in front with the window I clicked, instead of losing the front to the target about half the time.
 
-During macOS background input, the focus guard sends a target that activates itself back behind your app. Since 89892decd0, a click in your own app no longer counts as you choosing the target, so the guard sends the target back even when your click and its activation come together. The hand-back then restored the window that was key when the action began, which undid a click on another of your app's windows, and on its next poll the guard read your new key window as a switch of yours and stood down for the rest of the action. After a click in your app, the hand-back now restores the key window your app reports once it is back in front (the starting one if it reports none), and the guard keeps that window and stays armed.
+During macOS background input, the focus guard sends a target that activates itself back behind your app. A click on another of your app's windows makes that window key, and the guard read the changed key window as you switching away and stood down. A target that came forward right then stayed in front. After a click the guard placed in your own app, it now keeps the window you clicked: it sends the target back, and the hand-back restores that window.
 
-**Non-goals.** Without a click in your app, the hand-back restores the starting window as before. With your app in front, a key window that changes without a hand-back still stands the guard down.
+Guest run on a macOS VM. iTerm2 is your app with two windows and TextEdit is the target, holding a background `holdKeys`. You click the second iTerm2 window, and TextEdit activates itself as the button goes down. The front app was sampled throughout:
+
+| n=6 each | TextEdit came forward | sent back | your app in front after | key window after |
+|---|---|---|---|---|
+| before (c0435fa702) | 6/6 | 3/6 | 3/6 | the clicked window, 6/6 |
+| this PR | 6/6 | 6/6 | 6/6 | the clicked window, 6/6 |
+
+**Non-goals.** A key window that changes with no click of yours in your app, such as a window you open from the keyboard, still stands the guard down.
 
 ## Why
 
-`guard_focus` restored `lease.key`, the key window read when the action started. A click on another window of your app changes it, but the guard reads the key window only on polls where your app is in front, so a click and the target coming forward between two polls never show it the change. The switch watch now notes a click it placed in your app (`own_click`). After such a click, the hand-back reads your app's key window once your app is in front again, which is when `GuardedDesktop::user_key` is meant to be read, at the cost of one accessibility read. Hand-backs with no click keep the starting window, so a panel that hides while its app is inactive can't swap in another window. macOS reports `AXFocusedWindow` for inactive apps too; I checked this live on ten inactive apps.
-
-No CHANGELOG entry: no release has the same-reading hand-back. In v18.12.1 any click with the target in front disarmed the guard.
+The guard compares your key window with the one the action started with, and any change disarmed it, so your own click on another window lost you the front to the target. The switch watch now records a click it placed in your app (`own_click`). After one, a changed key window becomes the one the lease keeps. When the click and the target land in the same reading, the guard never sees the new window before the hand-back, so the hand-back then restores the key window your app reports once it is in front again, which costs one accessibility read. macOS reports `AXFocusedWindow` for inactive apps too; I checked this on ten inactive apps. Without such a click, the hand-back restores the starting window as before.
 
 ## Testing
 
-- New `a_hand_back_restores_the_window_the_user_clicked_as_the_target_came_forward` drives `guard_focus` with a fake desktop whose user app reports key window 43 (42 at start). When the target comes forward in the same reading as a click placed in your app, your app comes back with 43 restored and kept, and the guard stays armed. With no click, 42 is restored. With the fix reverted, the click case restores 42 and the test fails.
-- `cargo test -p pi-natives --lib`, `cargo check -p pi-natives --tests`, `CI=1 bun check`, `bun run build:native` and the computer tool TS tests on an Apple Silicon Mac.
-- Not run: a live repro. The click and the activation have to land between two 10 ms polls.
+- `a_window_the_user_clicked_in_their_app_is_kept_when_the_target_comes_forward`: after a click placed in your app, a key window of 43 (42 at start) is kept and the target coming forward is sent back. With no click, 43 still disarms.
+- `a_hand_back_restores_the_window_the_user_clicked_as_the_target_came_forward` drives `guard_focus` with a fake desktop. When the click and the target land in the same reading, your app comes back with 43 restored and kept, and the guard stays armed. With no click, 42 is restored.
+- With the fix reverted, both tests fail.
+- `cargo test -p pi-natives --lib`, `cargo check -p pi-natives --tests`, `CI=1 bun check`, `bun run build:native` and the computer tool TS tests pass on an Apple Silicon Mac.
+- The guest table above comes from the agent-cells rig on a macOS VM, with clicks sent over VNC. Clicking the key window instead was sent back 3/3 on both arms.
 
 ---
 
