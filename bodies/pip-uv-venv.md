@@ -29,11 +29,12 @@ Maintenance: if uv adds or drops a `uv pip` subcommand, `_UV_PIP_SUBCOMMANDS` in
 
 - Live: `bun packages/coding-agent/src/cli.ts -p --model anthropic/claude-haiku-5-5 --config overlay.yml`, with `python.interpreter` set to a fresh `uv venv`, asked for one eval of `%pip install six`. `main` printed `No module named pip`; this branch printed uv's install lines and `venv/bin/python -c "import six"` worked.
 - `PI_PYTHON_INTEGRATION=1 bun test test/core/python-runner.integration.test.ts -t "pip"` (packages/coding-agent), on `python -m venv --without-pip` venvs, 3 new cases: a recording `uv` on `PATH` gets `pip install six` with `UV_PYTHON` at the kernel's interpreter, the status event lists `six`, and `%pip --version` never reaches uv; cancelling a cell whose `uv` sleeps leaves no uv process; with `uv` off `PATH`, `%pip --version` succeeds after `ensurepip`. With `runner.py` reverted to `main`, all 3 fail.
+- `bun run check` in packages/coding-agent passes.
 
 Not run: Windows (the new tests skip there; the code uses `shutil.which` and `sys.executable`, no POSIX-only calls).
 
 ---
 
-- [x] `bun check` passes
+- [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
