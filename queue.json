@@ -5123,5 +5123,11 @@
     "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened"
    }
   ]
+ },
+ "opening": {
+  "id": "computer-sent-not-cancelled",
+  "token": "1db5022051fa43ce91ed8c0faeced053",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T15:42:28Z"
  }
 }
