@@ -2211,7 +2211,8 @@ fn pointer_rechecks<'a>(
 ) -> impl Fn() -> CoreResult<()> + 'a {
 	let checks = std::cell::Cell::new(0_u32);
 	move || {
-		let sent = sent_first || checks.replace(checks.get() + 1) > 0;
+		let _ = &checks;
+		let sent = sent_first;
 		pointer_recheck((prepared, sent), entry_front, (pid, wid, app), &front, &visited)
 	}
 }
@@ -2737,7 +2738,9 @@ fn button_presses(
 ) -> CoreResult<()> {
 	let count = i64::from(count.max(1));
 	for click_state in 1..=count {
-		before_press()?;
+		if click_state == 1 {
+			before_press()?;
+		}
 		let result =
 			post(true, click_state).and_then(|()| sent_gap_wait(PRESS_GAP, click_state == count));
 		let release = control::cleanup(|| post(false, click_state));
