@@ -4077,8 +4077,28 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirroring-test",
    "host": "MacBook-Pro",
    "added": "2026-10-18T15:30:46Z",
-   "updated": "2026-10-18T15:30:46Z",
-   "note": ""
+   "updated": "2026-10-18T15:31:11Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16185",
+     "code": "60a08a44bc4d915d78ac7ea26d73f3da2fdc986b",
+     "with_code": "f9d67df16c8f4adab00cea52f5970673b610fd6a",
+     "tip": "6e231e5ee9139d66df353d85ac38e27389664ef5",
+     "with_tip": "08f84b5a371abf6739fa3b12e261b05c84f8e61b",
+     "at": "2026-10-18T15:31:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16188",
+     "code": "60a08a44bc4d915d78ac7ea26d73f3da2fdc986b",
+     "with_code": "540bb6bc8803ee71e7a710f9a59ba55904f08097",
+     "tip": "6e231e5ee9139d66df353d85ac38e27389664ef5",
+     "with_tip": "3c2826419fa0b83613efb684fe002369b3a86d03",
+     "at": "2026-10-18T15:31:11Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
