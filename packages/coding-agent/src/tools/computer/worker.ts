@@ -965,14 +965,15 @@ class Win {
 		);
 	}
 
-	async move(x: number, y: number): Promise<void> {
+	async move(x: number, y: number, options?: InputOptions): Promise<void> {
 		const context = this.#guardInput("move");
+		const native = pointerOptions(options);
 		await sendInput(
 			this.#session,
 			context,
 			"move",
-			undefined,
-			fallback => this.#session.moveMouse(this.id, x, y, { ...fallback }),
+			native.takeover,
+			fallback => this.#session.moveMouse(this.id, x, y, { ...native, ...fallback }),
 			this.pid,
 		);
 	}

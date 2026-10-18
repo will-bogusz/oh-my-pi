@@ -158,10 +158,6 @@ pub(crate) struct OperationToken {
 }
 
 impl OperationToken {
-	pub(crate) fn control_active(&self) -> bool {
-		self.source.control_active()
-	}
-
 	/// When this operation must have answered: the run's end or the caller's
 	/// reply timeout, whichever comes first.
 	#[cfg(target_os = "macos")]
@@ -797,11 +793,11 @@ pub(crate) fn grant_for_test(source: &CancellationSource) {
 }
 
 #[cfg(test)]
-mod tests {
+pub(super) mod tests {
 	use super::*;
 
 	/// Removes this process's private kernel lock (see `KernelLease::path`).
-	fn remove_test_lock() {
+	pub(in crate::desktop) fn remove_test_lock() {
 		#[cfg(unix)]
 		let _ = std::fs::remove_file(KernelLease::path());
 	}

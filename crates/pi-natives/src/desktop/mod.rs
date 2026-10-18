@@ -422,7 +422,7 @@ impl Request {
 	/// through held control), input to a desktop or display target (it drives
 	/// the user's real pointer and keyboard), an explicit raise, and an
 	/// activating launch.
-	fn takes_over(&self, token: &OperationToken) -> bool {
+	fn takes_over(&self) -> bool {
 		let (target, takeover) = match self {
 			Self::HoldKeys { target, takeover, .. }
 			| Self::HoldMouse { target, takeover, .. }
@@ -440,7 +440,7 @@ impl Request {
 			_ => return false,
 		};
 		target.is_some_and(|target| !matches!(target, Target::Window(_)))
-			|| delivery_mode(takeover, token) == DeliveryMode::Foreground
+			|| takeover.mode() != DeliveryMode::Background
 	}
 
 	const fn frame_target(&self) -> Option<&Target> {
@@ -593,8 +593,8 @@ impl ParsedPointerOptions {
 		})
 	}
 
-	fn mode(&self, token: &OperationToken) -> DeliveryMode {
-		delivery_mode(self.takeover, token)
+	const fn mode(&self) -> DeliveryMode {
+		self.takeover.mode()
 	}
 
 	/// Sends the click `event`, choosing [`Self::menu`] in the menu it opens
@@ -608,7 +608,7 @@ impl ParsedPointerOptions {
 		frame: &FrameGeometry,
 		token: &OperationToken,
 	) -> CoreResult<()> {
-		let mode = self.mode(token);
+		let mode = self.mode();
 		if let Some(path) = &self.menu {
 			return backend.pointer_menu(target, event, path, frame, mode, token);
 		}
@@ -645,11 +645,10 @@ impl Takeover {
 	const fn new(requested: Option<bool>, return_focus: Option<bool>) -> Self {
 		Self { requested, return_focus: matches!(return_focus, Some(true)) }
 	}
-}
 
-fn delivery_mode(takeover: Takeover, token: &OperationToken) -> DeliveryMode {
-	DeliveryMode::from_takeover(Some(takeover.requested.unwrap_or_else(|| token.control_active())))
-		.returning_focus(takeover.return_focus)
+	const fn mode(self) -> DeliveryMode {
+		DeliveryMode::from_takeover(self.requested).returning_focus(self.return_focus)
+	}
 }
 
 fn hold_duration(seconds: f64) -> CoreResult<Duration> {
@@ -997,7 +996,7 @@ impl Worker {
 		};
 		let lease = request
 			.is_mutation()
-			.then(|| InputLease::acquire(token, request.takes_over(token)))
+			.then(|| InputLease::acquire(token, request.takes_over()))
 			.transpose()?;
 		token.check()?;
 		// A full capture replaces coordinates only if it completes in its
@@ -1213,7 +1212,7 @@ impl Worker {
 					target,
 					keys,
 					*duration,
-					delivery_mode(*takeover, token),
+					DeliveryMode::from_takeover(*takeover),
 					token,
 				)?;
 				Ok(Response::Input(control::take_focus_return()))
@@ -1232,7 +1231,7 @@ impl Worker {
 					keys: keys.clone(),
 					duration: *duration,
 				};
-				let mode = delivery_mode(*takeover, token);
+				let mode = takeover.mode();
 				let backend = self.backend()?;
 				refuse_menu_press(backend.as_mut(), *refuse_menu, mode, target, &event)?;
 				backend.pointer(target, event, &frame, mode, token)?;
@@ -1308,7 +1307,7 @@ impl Worker {
 					target,
 					PointerEvent::Move { x, y },
 					&frame,
-					delivery_mode(*takeover, token),
+					DeliveryMode::from_takeover(*takeover),
 					token,
 				)?;
 				Ok(Response::Input(control::take_focus_return()))
@@ -1328,7 +1327,7 @@ impl Worker {
 					modifiers: options.modifiers,
 					keys:      options.keys.clone(),
 				};
-				let mode = options.mode(token);
+				let mode = options.mode();
 				let backend = self.backend()?;
 				refuse_menu_press(backend.as_mut(), options.refuse_menu, mode, target, &event)?;
 				backend.pointer(target, event, &frame, mode, token)?;
@@ -1340,7 +1339,7 @@ impl Worker {
 					target,
 					PointerEvent::Scroll { x, y, dx: *dx, dy: *dy },
 					&frame,
-					delivery_mode(*takeover, token),
+					DeliveryMode::from_takeover(*takeover),
 					token,
 				)?;
 				Ok(Response::Input(control::take_focus_return()))
@@ -1349,14 +1348,14 @@ impl Worker {
 				self.validate_keyboard_target(target)?;
 				self
 					.backend()?
-					.type_text(target, text, delivery_mode(*takeover, token), token)?;
+					.type_text(target, text, takeover.mode(), token)?;
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::KeyChord { target, keys, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
 				self
 					.backend()?
-					.key_chord(target, keys, delivery_mode(*takeover, token), token)?;
+					.key_chord(target, keys, takeover.mode(), token)?;
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::RaiseWindow { id, .. } => {
@@ -1504,7 +1503,7 @@ impl Worker {
 				let h = self.registry.resolve(reference)?;
 				let windows = self.backend()?.windows()?;
 				let target = Target::Window(self.ax()?.window_id(&h, &windows)?);
-				let mode = delivery_mode(*takeover, token);
+				let mode = takeover.mode();
 				match self
 					.backend()?
 					.element_input(&target, &h, input, mode, token)?
@@ -2587,6 +2586,7 @@ mod capture_tests {
 		/// button.
 		tree:                   Option<Arc<Mutex<FakeTree>>>,
 		clicks:                 Arc<Mutex<Vec<String>>>,
+		modes:                  Arc<Mutex<Vec<DeliveryMode>>>,
 		layout:                 Arc<Mutex<Vec<DesktopDisplay>>>,
 		active_display:         Arc<Mutex<String>>,
 		captures:               Arc<Mutex<u8>>,
@@ -2627,6 +2627,7 @@ mod capture_tests {
 				tree:                   None,
 				menu_control:           false,
 				clicks:                 Arc::new(Mutex::new(Vec::new())),
+				modes:                  Arc::new(Mutex::new(Vec::new())),
 				layout:                 Arc::new(Mutex::new(vec![DesktopDisplay {
 					id:           "screen-1".to_string(),
 					name:         "Test screen".to_string(),
@@ -2906,10 +2907,11 @@ mod capture_tests {
 			target: &Target,
 			_: PointerEvent,
 			_: &FrameGeometry,
-			_: DeliveryMode,
+			mode: DeliveryMode,
 			_: &OperationToken,
 		) -> CoreResult<()> {
 			self.clicks.lock().push(target.key().to_string());
+			self.modes.lock().push(mode);
 			Ok(())
 		}
 
@@ -2943,20 +2945,22 @@ mod capture_tests {
 			&mut self,
 			_: &Target,
 			_: &str,
-			_: DeliveryMode,
+			mode: DeliveryMode,
 			_: &OperationToken,
 		) -> CoreResult<()> {
-			unreachable!("type_text not exercised")
+			self.modes.lock().push(mode);
+			Ok(())
 		}
 
 		fn key_chord(
 			&mut self,
 			_: &Target,
 			_: &[KeyName],
-			_: DeliveryMode,
+			mode: DeliveryMode,
 			_: &OperationToken,
 		) -> CoreResult<()> {
-			unreachable!("key_chord not exercised")
+			self.modes.lock().push(mode);
+			Ok(())
 		}
 
 		fn hold_keys(
@@ -4423,10 +4427,9 @@ mod capture_tests {
 		}
 		assert_eq!(hold_duration(0.0).unwrap(), Duration::ZERO);
 		assert_eq!(hold_duration(100.0).unwrap(), Duration::from_secs(100));
-		let token = CancellationSource::default().token();
 		let default = ParsedPointerOptions::parse(None).unwrap();
 		assert_eq!(default.takeover.requested, None);
-		assert_eq!(default.mode(&token), DeliveryMode::Background);
+		assert_eq!(default.mode(), DeliveryMode::Background);
 		for (takeover, return_focus, expected) in [
 			(false, None, DeliveryMode::Background),
 			(true, None, DeliveryMode::Foreground),
@@ -4442,7 +4445,7 @@ mod capture_tests {
 			}))
 			.unwrap();
 			assert_eq!(options.takeover.requested, Some(takeover));
-			assert_eq!(options.mode(&token), expected);
+			assert_eq!(options.mode(), expected);
 		}
 	}
 
@@ -4496,7 +4499,7 @@ mod capture_tests {
 			open(Some(false)),
 		];
 		for request in background {
-			assert!(!request.takes_over(&token), "background input leaves Escape to the user");
+			assert!(!request.takes_over(), "background input leaves Escape to the user");
 		}
 		let display = Target::parse("display:screen-1");
 		let takeover = [
@@ -4512,8 +4515,53 @@ mod capture_tests {
 			open(Some(true)),
 		];
 		for request in takeover {
-			assert!(request.takes_over(&token), "takeover input keeps the Escape stop");
+			assert!(request.takes_over(), "takeover input keeps the Escape stop");
 		}
+	}
+
+	#[test]
+	fn held_control_leaves_omitted_takeover_in_the_background() {
+		let _serial = control::tests::OWNERSHIP_TEST.lock();
+		let backend = FakeWaylandBackend::new();
+		let modes = Arc::clone(&backend.modes);
+		let mut worker = worker_with(backend);
+		let source = CancellationSource::default();
+		control::tests::grant_for_test(&source);
+		assert!(source.control_active());
+		let token = source.token();
+		let target = Target::Window(WAYLAND_ID.to_string());
+		worker
+			.process(&capture_request(target.clone()), &token)
+			.unwrap();
+		for takeover in [None, Some(true)] {
+			let options = ParsedPointerOptions::parse(Some(PointerOptions {
+				takeover,
+				..PointerOptions::default()
+			}))
+			.unwrap();
+			let (reply, _rx) = flume::bounded(1);
+			let click = Request::Click { target: target.clone(), x: 10.0, y: 10.0, options, reply };
+			worker.process(&click, &token).unwrap();
+			let (reply, _rx) = flume::bounded(1);
+			let text = "a".to_string();
+			let typed = Request::TypeText { target: target.clone(), text, takeover, reply };
+			worker.process(&typed, &token).unwrap();
+			let (reply, _rx) = flume::bounded(1);
+			let keys = parse_keys(&["a".to_string()]).unwrap();
+			let chord = Request::KeyChord { target: target.clone(), keys, takeover, reply };
+			worker.process(&chord, &token).unwrap();
+			let (reply, _rx) = flume::bounded(1);
+			let hover =
+				Request::MoveMouse { target: target.clone(), x: 10.0, y: 10.0, takeover, reply };
+			worker.process(&hover, &token).unwrap();
+		}
+		source.release_control();
+		control::tests::remove_test_lock();
+		let (background, foreground) = (DeliveryMode::Background, DeliveryMode::Foreground);
+		assert_eq!(*modes.lock(), [
+			background, background, background, background, foreground, foreground, foreground,
+			foreground
+		]);
 	}
 
 	#[test]
