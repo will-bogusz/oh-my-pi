@@ -4723,7 +4723,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-options-hints",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:00:21Z",
-   "updated": "2026-10-18T19:03:00Z",
+   "updated": "2026-10-18T19:04:56Z",
    "note": "",
    "built": [
     {
@@ -4810,10 +4810,10 @@
     {
      "with": "#16223",
      "code": "0face0cb9a66bbe6131aa1fd4173655666f40096",
-     "with_code": "0f882f7d78303ab8456cc8b7f89ac14390b296af",
+     "with_code": "ef929ae433668a7ce545ec4fcce24bb967e7e05f",
      "tip": "6514c0bfbd6f42a5ebad10606dc3000192d8c322",
-     "with_tip": "91c3da50c6638c9d177d6b5dbe12f89d3de28daf",
-     "at": "2026-10-18T19:03:00Z",
+     "with_tip": "aac0a36d757a4c219f5ca91e38cc8ab8a5fd8ad7",
+     "at": "2026-10-18T19:04:50Z",
      "host": "MacBook-Pro"
     }
    ]
