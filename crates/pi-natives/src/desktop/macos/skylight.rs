@@ -845,23 +845,15 @@ impl UserSwitchWatch {
 			self.buttons = signals.buttons;
 			// A click in the user's own app, menus included, picks no app: the
 			// target activating itself right after is still sent back.
-			let pending = self.placement;
 			self.placement = ClickPlacement::Settled;
 			if signals.in_user_app {
 				if pressed {
 					self.own_click = Some(signals.last_click.unwrap_or(now));
 				}
 			} else {
-				self.placement = match pending {
-					// A release while its press still waits for placement is part
-					// of that click.
-					ClickPlacement::Pending { previous, press } if !pressed => {
-						ClickPlacement::Pending { previous, press }
-					},
-					_ => ClickPlacement::Pending {
-						previous: self.click,
-						press:    pressed.then(|| signals.last_click.unwrap_or(now)),
-					},
+				self.placement = ClickPlacement::Pending {
+					previous: self.click,
+					press:    pressed.then(|| signals.last_click.unwrap_or(now)),
 				};
 				self.click = Some(signals.last_click.unwrap_or(now));
 			}
