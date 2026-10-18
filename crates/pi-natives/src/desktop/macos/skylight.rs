@@ -575,10 +575,13 @@ impl BackgroundFocusLease {
 		activity: [u32; 5],
 		on_target: bool,
 	) -> FocusDecision {
+		// A key or modifier press may have switched apps (⌘-Tab, Spotlight); a
+		// click did only if the poll placed it on the target.
+		let switched = on_target || activity[3..] != self.activity[3..];
 		if self.disarmed
 			|| (front != self.previous && front != self.target)
 			|| (front == self.previous && key.is_some_and(|key| Some(key) != self.key))
-			|| (front == self.target && (activity != self.activity || self.click_polls > 0))
+			|| (front == self.target && (switched || self.click_polls > 0))
 		{
 			// The target in front now is the user's: they acted there, or the
 			// lease no longer sends it back.
@@ -586,9 +589,7 @@ impl BackgroundFocusLease {
 			self.disarmed = true;
 			return FocusDecision::Disarm;
 		}
-		if front == self.target {
-			FocusDecision::Restore
-		} else {
+		if front == self.previous {
 			// Typing or clicking in the user's original window while it is still
 			// frontmost is not a focus change. Remember it so a later app reflex
 			// can be contained. A click on the target brings it forward only on a
@@ -598,7 +599,13 @@ impl BackgroundFocusLease {
 			} else {
 				self.click_polls.saturating_sub(1)
 			};
-			self.activity = activity;
+		}
+		// A click in the user's own app seen in the poll that finds the target
+		// in front is absorbed too, so the hand-back's re-check still holds.
+		self.activity = activity;
+		if front == self.target {
+			FocusDecision::Restore
+		} else {
 			FocusDecision::Observe
 		}
 	}
@@ -1533,6 +1540,35 @@ mod tests {
 		assert_eq!(guard.observe(previous, Some(42), clicked, false), FocusDecision::Observe);
 		assert_eq!(guard.observe(target, None, clicked, false), FocusDecision::Restore);
 		assert!(!guard.visited);
+	}
+
+	#[test]
+	fn a_click_seen_in_the_poll_the_target_comes_forward_counts_only_on_the_target() {
+		// The user's click and the target (8) coming forward land in one poll.
+		let previous = ProcessSerialNumber { high: 0, low: 7 };
+		let target = ProcessSerialNumber { high: 0, low: 8 };
+		let lease = || BackgroundFocusLease {
+			previous,
+			target,
+			key: Some(42),
+			activity: [0; 5],
+			click_polls: 0,
+			disarmed: false,
+			visited: false,
+		};
+		let clicked = [1, 0, 0, 0, 0];
+		// The poll placed the click off the target, in the user's own app (7):
+		// the target is sent back, and the click is absorbed so the hand-back's
+		// re-check of the counters still holds.
+		let mut guard = lease();
+		assert_eq!(guard.observe(target, None, clicked, false), FocusDecision::Restore);
+		assert_eq!(guard.activity, clicked);
+		assert!(!guard.visited);
+		assert_eq!(guard.observe(target, None, clicked, false), FocusDecision::Restore);
+		// The poll placed it on the target: the user brought it forward.
+		let mut guard = lease();
+		assert_eq!(guard.observe(target, None, clicked, true), FocusDecision::Disarm);
+		assert!(guard.visited);
 	}
 
 	#[test]
