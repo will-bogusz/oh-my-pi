@@ -9082,7 +9082,7 @@
    "area": "agent",
    "priority": null,
    "needs": [],
-   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/irc-broadcast-no-relay.md",
    "state": "queued",
    "pr": null,
@@ -9090,7 +9090,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/irc-broadcast-no-relay",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:43:52Z",
-   "updated": "2026-10-18T20:13:01Z",
+   "updated": "2026-10-18T21:20:35Z",
    "note": "",
    "built": [
     {
@@ -9345,7 +9345,8 @@
      "at": "2026-10-18T20:13:00Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "advanced": "2026-10-18T21:20:35Z"
   },
   {
    "id": "wake-relay-final-turn",
