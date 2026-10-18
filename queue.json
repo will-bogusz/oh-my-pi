@@ -11031,6 +11031,24 @@
    "added": "2026-10-18T21:33:09Z",
    "updated": "2026-10-18T21:33:09Z",
    "note": ""
+  },
+  {
+   "id": "read-after-bash-revalidate",
+   "branch": "will/read-after-bash-revalidate",
+   "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
+   "body": "bodies/read-after-bash-revalidate.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-after-bash-revalidate",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T21:39:24Z",
+   "updated": "2026-10-18T21:39:24Z",
+   "note": ""
   }
  ],
  "watch": {
