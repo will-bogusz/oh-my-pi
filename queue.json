@@ -5633,9 +5633,254 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/builtin-rule-conditions",
    "host": "goliath",
    "added": "2026-10-18T19:42:35Z",
-   "updated": "2026-10-18T19:46:06Z",
+   "updated": "2026-10-18T19:48:04Z",
    "note": "",
-   "advanced": "2026-10-18T19:46:06Z"
+   "advanced": "2026-10-18T19:46:06Z",
+   "built": [
+    {
+     "with": "#16231",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "5a6e2f555f59544976ddcdc61da20c709107eaae",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "15dedc6f754fd28dac7f6e2cfee47ba754c31659",
+     "at": "2026-10-18T19:48:01Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16236",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "0face0cb9a66bbe6131aa1fd4173655666f40096",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "80fc960e2676258f57d6916a5ae814059ae76fc7",
+     "at": "2026-10-18T19:48:02Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16230",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "944ab95293c838447e386ccc50fd4d5d13606952",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "7d7afab89845b2056551ac8a36e6a5695c18ceb6",
+     "at": "2026-10-18T19:48:02Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15418",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "f7b12f10303e0e5e84435f844a650c18971a5e82",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "d0cbd9a402b1ddd33044ecd08ff24ec32104e816",
+     "at": "2026-10-18T19:48:02Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15508",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "1827c9d1fd7fe0e64d82b726a819a4b4d392d5c1",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "5ccf9eac6bd472d32d7f51604189c2a0207963a4",
+     "at": "2026-10-18T19:48:02Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#14235",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "5ca41aa364865ad8d91bf3e7385346847b260d40",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "3880ea7d612d817a3915a8b5e97cb49039a22827",
+     "at": "2026-10-18T19:48:02Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#14237",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "86fb0761833073d8eaf1266b65baf8e4ca365325",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "57dee83b3fefa97dcb18e89d1b2b91853615d111",
+     "at": "2026-10-18T19:48:02Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15105",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "499c32f33227da723e82e624fe5899e3280e6913",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "5ffd7af248517bde8a08f3d9ae9dfcf75215f35e",
+     "at": "2026-10-18T19:48:02Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15128",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "ca95834cec2c151c013a3b24dc542e9f1ed84fa5",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "feb13eb6bc3bdcdf460fbef35363a6e8a9adfe76",
+     "at": "2026-10-18T19:48:02Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15130",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "489401adc377f34ce309e0500122b62f9a00cc89",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "01eaca12da3ad399cd319718dc3c0239baf7347d",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15433",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16223",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "0d98b32063868a225160cd53b36c0676202cb911",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "c7eff2c5e0d01b6d30cffacc0929ec97928de1bc",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "browser-role-name",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "2a85ca9bc473000b10a93b85ea8c2003e8254322",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "08811778d74e78b456ca8c4f9a00b960e957cb1d",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "compact-tool-result",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "1f079c7f03025c0ebe6d25abc3f0517178d0a693",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "91326b08e9945bc37169817992fac38825e8c017",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "report-issue-colon",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "4e75cdc112063a1bd3e4f6c6deeef9f80b0a3931",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "b5f5d4349ed6c4416e26c408e314bd66d5f18a8e",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "revive-tools",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "8a947682052022268b183c37196e67695e27baeb",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "c580bc228d19ed00807aaa545f11fbae5e44a76c",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "snapcompact-archive-persist",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "253eeb090aa4296711f5208b827f5f09285ddf45",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "493e8e33c83395941d2e3896adab96f47835e8d2",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "ssh-search-tier",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "61a3811c91742b4e003e12fae313b49e736783df",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "4d722783a15ff41aeb589b82f6a096906083a9a9",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "aside-back-to-back",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "207f2f180354833cf99d469b909e7239804c2026",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "a958002417240e8dca807ee884d43eb8fe05b394",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "browser-app-precedence-docs",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "453fcad38f443eee4b731bf13623980fb6368e16",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "87cad9d4be0e920245e55fbd36f409e3a171b323",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "computer-no-ui-confirm",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "ef82aa66c4bb741f7aab8061879e59e88217f035",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "d84a4214dcaf7da28695c752a3b101e2a1b6466f",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "computer-windows-doc",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "7001e8af28925f8c1a3fc8f86ce1a81cc4f13c7c",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "99ec63b93cf7afc82c337bf2e4174a3e5660ac5d",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "pip-uv-venv",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "44cc9eddb29e74251cbdf3f4d4f10bb7706b4112",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "c41aa1434510748a4c5055c68fff944119bb8359",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "relay-popup-front-main",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "85ebeb34468af2365daf4b8c1238cb42fbf2c9a1",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "7bce54031580906a60c9e1cb343707a9ca66f560",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "wait-queued-completion",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "0f32564d31cf6c36513db586d59fa5aa7e6eec32",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "b9b76da67802bf64a1931c60307c1ec3ce1de703",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "wake-relay-final-turn",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "3ffb43c4fed52ef2c6f36c1ca2a0a9b13791d5ed",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "64629226b36904f49c4950986875a8d62a1d62a0",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "irc-broadcast-no-relay",
+     "code": "a76bc004dee0cca65c90b23d8da9bb899f04ab46",
+     "with_code": "6ac0901e1f4e2a491e12acb90302a0fe6118d9fd",
+     "tip": "320fc03ccb714effbac18d9c604714f954d7b08a",
+     "with_tip": "bae7ee14c5570f366e64e9f18be1afb52444ac08",
+     "at": "2026-10-18T19:48:03Z",
+     "host": "goliath"
+    }
+   ]
   },
   {
    "id": "ssh-search-tier",
