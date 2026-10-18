@@ -4521,13 +4521,13 @@
    "needs": [],
    "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
    "body": "bodies/todo-serial-tools.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16231,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/todo-serial-tools",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:22Z",
-   "updated": "2026-10-18T18:22:23Z",
+   "updated": "2026-10-18T18:24:27Z",
    "note": "",
    "built": [
     {
@@ -4611,7 +4611,8 @@
      "at": "2026-10-18T18:22:22Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-18T18:24:26Z"
   }
  ],
  "watch": {
