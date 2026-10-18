@@ -2,48 +2,28 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Removed `preparePageForScreenshot` (`tools/browser/tab-worker`), `shouldPreserveConnectedBrowserFocus` (`tools/browser/attach`) and the tab worker's `activateForScreenshot` init option: Chromium screenshots no longer activate their tab ([#15174](https://github.com/can1357/oh-my-pi/pull/15174) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Added
 
 - Added the `computer` tool's `UserIntervened` error on macOS: input into an app the user has used since the agent last read its window fails without sending, and the tool prompt tells the agent to read the window again and keep the user's edits ([#15562](https://github.com/can1357/oh-my-pi/pull/15562) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Added
-
 - Added stopping computer use for the rest of the turn when the user presses Escape during takeover input: later `computer` calls are refused before anything is sent until the user's next message ([#15564](https://github.com/can1357/oh-my-pi/pull/15564) by [@will-bogusz](https://github.com/will-bogusz))
+- Added a `menu` option to the computer tool's `win.click`, `el.click`, `el.press` and `el.perform`: on macOS the call that opens a context menu or menu button's menu chooses that item, e.g. `menu: ["Add to", "Fonts"]`, and leaves no menu open ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- Added `computer.backgroundFallback` (`takeover` by default, or `refuse`). When a `computer` window input call's background route is unavailable, the tool reruns that one call in takeover, hands focus back to your app (on macOS even if you kept typing), and says so in its result (`click ran in takeover because …; the input was delivered, and focus returned to …`); `refuse` fails the call without taking over, and also refuses, before anything is sent, the model's own `takeover: true`, `raise()`, activating `apps.open`, `control.acquire`, desktop-root input, off macOS `el.focus()`, and on macOS any call that opens a menu (right-click, Control-click, `AXShowMenu`, a `menu` item, a press, or a left click, hold or drag, on a popup button or menu button, `setValue` on a popup button), which takes your keyboard while open, and `AXOpen`, which can bring an Open panel's app to the front even when it fails, naming the background route instead. `/computer status` shows the setting ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
+- Added `el.type(text)` and `el.press(chord)` to the `computer` tool, which send text and keys to that element instead of wherever its window's focus is; on macOS nothing is sent if it does not take focus ([#15563](https://github.com/can1357/oh-my-pi/pull/15563) by [@will-bogusz](https://github.com/will-bogusz))
+- Added `{ takeover: true }` to computer-use `win.move`, so a hover that a window refuses in the background can be retried in the foreground ([#15173](https://github.com/can1357/oh-my-pi/pull/15173) by [@will-bogusz](https://github.com/will-bogusz))
+- Added `el.selectText(text, { prefix?, suffix?, select? })` to the macOS `computer` tool: it selects text (or places a caret) in a background app's text field without taking focus, moving the pointer or sending keys, so typing into that field replaces it ([#15175](https://github.com/can1357/oh-my-pi/pull/15175) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 
 - The `computer` tool prompt now says physical Escape stops only takeover input, so background input keeps running while the user presses Escape in their own app ([#15176](https://github.com/can1357/oh-my-pi/pull/15176) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Added
-
-- Added a `menu` option to the computer tool's `win.click`, `el.click`, `el.press` and `el.perform`: on macOS the call that opens a context menu or menu button's menu chooses that item, e.g. `menu: ["Add to", "Fonts"]`, and leaves no menu open ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
-- Added `computer.backgroundFallback` (`takeover` by default, or `refuse`). When a `computer` window input call's background route is unavailable, the tool reruns that one call in takeover, hands focus back to your app (on macOS even if you kept typing), and says so in its result (`click ran in takeover because …; the input was delivered, and focus returned to …`); `refuse` fails the call without taking over, and also refuses, before anything is sent, the model's own `takeover: true`, `raise()`, activating `apps.open`, `control.acquire`, desktop-root input, off macOS `el.focus()`, and on macOS any call that opens a menu (right-click, Control-click, `AXShowMenu`, a `menu` item, a press, or a left click, hold or drag, on a popup button or menu button, `setValue` on a popup button), which takes your keyboard while open, and `AXOpen`, which can bring an Open panel's app to the front even when it fails, naming the background route instead. `/computer status` shows the setting ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Changed
-
 - The `computer` tool's instructions now tell the model that macOS drags, mouse holds, modified clicks, right-clicks and scrolls run in the background, so it no longer reaches for `takeover` for them ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
 - The `computer` tool and its errors no longer tell the model to retry with `takeover: true` after `BackgroundUnavailable`; the tool decides by `computer.backgroundFallback` ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 - The `computer` tool's instructions now tell the model never to call `raise()` or `apps.open(…, { activate: true })` to make input work, since both bring the app forward and take your keyboard, while launching, reopening and window input run in the background ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Changed
-
 - The computer tool tells the model that Screen Sharing and iPhone Mirroring take background input, and that text no keyboard key types throws `InvalidKey` there ([#15193](https://github.com/can1357/oh-my-pi/pull/15193) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Added
-
-- Added `el.type(text)` and `el.press(chord)` to the `computer` tool, which send text and keys to that element instead of wherever its window's focus is; on macOS nothing is sent if it does not take focus ([#15563](https://github.com/can1357/oh-my-pi/pull/15563) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Added
-
-- Added `{ takeover: true }` to computer-use `win.move`, so a hover that a window refuses in the background can be retried in the foreground ([#15173](https://github.com/can1357/oh-my-pi/pull/15173) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Changed
-
 - Computer-use window input with `takeover` omitted now stays in the background after `computer.control.acquire`, so an acquired grant no longer activates the target app or moves the user's pointer; pass `takeover: true` for foreground input ([#15173](https://github.com/can1357/oh-my-pi/pull/15173) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Added
-
-- Added `el.selectText(text, { prefix?, suffix?, select? })` to the macOS `computer` tool: it selects text (or places a caret) in a background app's text field without taking focus, moving the pointer or sending keys, so typing into that field replaces it ([#15175](https://github.com/can1357/oh-my-pi/pull/15175) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 
@@ -52,6 +32,7 @@
 - Fixed `computer.apps.open` returning before the app had a window, or never giving a hidden running app one; it now returns the app's frontmost window as `window`, waiting up to 3 s on macOS ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a key the user was typing in another app arriving twice or more on macOS when omp exited after computer use: the computer tool closes its event taps from the exit handler ([#15562](https://github.com/can1357/oh-my-pi/pull/15562) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed the `computer` tool's takeover-rerun notice saying "nothing was sent" about a call it had just delivered; it now says the input was delivered, so the model stops repeating the call ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed browser `tab.screenshot()` raising Chrome over the app you were typing in and switching its visible tab; background tabs and windows behind other apps are now captured in place, as is a relay or `app.cdp_url` tab the user switched away from ([#15174](https://github.com/can1357/oh-my-pi/pull/15174) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.12.1] - 2026-10-17
 
@@ -72,14 +53,6 @@
 ### Fixed
 
 - Fixed context-file `@` imports failing to load paths containing backslash-escaped spaces ([#16090](https://github.com/can1357/oh-my-pi/issues/16090))
-
-### Breaking Changes
-
-- Removed `preparePageForScreenshot` (`tools/browser/tab-worker`), `shouldPreserveConnectedBrowserFocus` (`tools/browser/attach`) and the tab worker's `activateForScreenshot` init option: Chromium screenshots no longer activate their tab ([#15174](https://github.com/can1357/oh-my-pi/pull/15174) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Fixed
-
-- Fixed browser `tab.screenshot()` raising Chrome over the app you were typing in and switching its visible tab; background tabs and windows behind other apps are now captured in place, as is a relay or `app.cdp_url` tab the user switched away from ([#15174](https://github.com/can1357/oh-my-pi/pull/15174) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.12.0] - 2026-10-17
 
