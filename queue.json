@@ -2458,8 +2458,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [
-    "#15105",
-    "#15508"
+    "#15105"
    ],
    "base": "a25352c21a7c2b87982c4f4956687d339f003a9b",
    "body": "bodies/r2/relay-call-deadline.md",
@@ -2471,8 +2470,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-call-deadline",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T23:27:22Z",
-   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): held behind #15105 and #15508 per Will; no code need on #15508; sits on main + #15105 head 50a5e959c4"
+   "updated": "2026-10-18T23:32:42Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main + #15105 head 50a5e959c4 (one bridge.ts import line); bridge.ts conflicts with relay-popup-front-main"
   },
   {
    "id": "computer-user-intervened",
