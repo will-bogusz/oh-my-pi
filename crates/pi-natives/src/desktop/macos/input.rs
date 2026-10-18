@@ -4567,7 +4567,7 @@ mod tests {
 			Ok(())
 		})
 		.unwrap_err();
-		assert_eq!(error.code, ErrorCode::BackgroundUnavailable);
+		assert_eq!(error.code, ErrorCode::InputFailed);
 		assert!(
 			error
 				.message
