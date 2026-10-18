@@ -141,7 +141,9 @@ const browserSchema = type({
 	"timeout?": type("number").describe("timeout in seconds"),
 	"all?": type("boolean").describe("release every managed tab"),
 	"kill?": type("boolean").describe("also kill spawned-app browsers"),
-	"persist?": type("boolean").describe("keep tab live across turn settle and idle close"),
+	"persist?": type("boolean").describe(
+		"keep tab live across turn settle and idle close; a relay tab also keeps omp's debugger between turns",
+	),
 });
 
 type BrowserParams = typeof browserSchema.infer;

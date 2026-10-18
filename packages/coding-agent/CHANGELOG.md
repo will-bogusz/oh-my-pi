@@ -33,6 +33,7 @@
 - Fixed browser calls on Chromium hanging until the cell timed out, and the tab then being killed, when the page opened a confirm or prompt; other calls now fail at once naming `tab.handleDialog()` ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a Chromium browser tab being killed, its page still stopped in a JavaScript dialog, after a call timed out behind that dialog; omp now dismisses it and the tab recovers ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed browser `tab.id(n)` calling an element stale in a later run once an earlier run had used that id ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed Chrome's debugging bar staying on every tab of a relay browser between turns: omp now lets go of its relay tabs' debugger when the agent hands back and reattaches on the next call, with element ids, logs, settings and run globals carried over; a tab with routes, a capture or recording running stays attached, and `browser.relayReleaseOnTurnEnd: false` keeps all of them attached ([#15569](https://github.com/can1357/oh-my-pi/pull/15569) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Breaking Changes
 

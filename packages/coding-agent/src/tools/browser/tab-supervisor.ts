@@ -43,7 +43,9 @@ import {
 import {
 	type AttachPage,
 	ownsPage,
+	type ReattachReplay,
 	type ReadyInfo,
+	type ReleaseOutcome,
 	type RunErrorPayload,
 	type RunResultOk,
 	type SessionSnapshot,
@@ -137,12 +139,28 @@ export interface WorkerTabSession extends TabSessionBase<PuppeteerBrowserHandle>
 	 * does, and goes with the page when omp closes it; a page left open in the user's browser keeps it until the sweep.
 	 */
 	uploadDir: string;
-	/** In flight while a worker that exited on its own is replaced; runs wait for it before driving the tab. */
+	/**
+	 * In flight while the tab's worker is replaced (it exited on its own, or a released tab is reattached) or while
+	 * the tab is being released; runs wait for it before driving the tab.
+	 */
 	workerRecovery?: Promise<boolean>;
 	/** `Date.now()` of the last unexpected worker exit; a second one soon after closes the tab instead. */
 	workerExitedAt?: number;
-	/** Set when a worker exited with no run in flight and the tab was reattached; the next call reports it. */
-	workerExitNotice?: string;
+	/**
+	 * What the next call on the tab reports: its worker exited with no run in flight and was replaced, or a turn end
+	 * let go of the tab (and the call reattached it) or kept it attached.
+	 */
+	nextCallNotice?: string;
+	/**
+	 * omp letting go of the relay's debugger on this tab between turns. `releasing`: the worker is letting go, and its
+	 * exit is the release's to handle. `released`: the worker drives nothing and keeps what the tab built, and the next
+	 * call has it take the tab back; `lost`: that worker went meanwhile (it exited, or the release broke off, `unread`
+	 * when omp could not read back what it had set), so the next call reattaches the tab on a new worker that puts
+	 * `replay` back.
+	 */
+	turnRelease?: { state: "releasing" } | { state: "released"; replay: ReattachReplay; lost?: "exited" | "unread" };
+	/** Runs dispatched to the tab so far; a hand-back that waited out a transition skips the tab if this moved. */
+	runsStarted: number;
 }
 
 export interface CmuxTabSession extends TabSessionBase<CmuxBrowserHandle> {
@@ -292,6 +310,8 @@ class DebuggerDetachedError extends ToolError {
 		super(message);
 	}
 }
+/** A relay tab omp released between turns stopped meanwhile; its reattach was refused and it stays released. */
+class PageStoppedError extends ToolError {}
 const REPORTED_INIT_FAILURE = Symbol("reported-init-failure");
 
 type ReportedInitFailure = Error & { [REPORTED_INIT_FAILURE]?: true };
@@ -366,10 +386,11 @@ export function acquireTab(name: string, browser: BrowserHandle, opts: AcquireTa
 	const result = acquisition.then(
 		async value => {
 			await releaseBrowser(browser, { kill: false });
-			// A worker that exited with no run in flight left the reset unreported; reusing its tab reports it.
-			if (!value.created && value.tab.backend === "worker" && value.tab.workerExitNotice) {
-				const notice = value.tab.workerExitNotice;
-				value.tab.workerExitNotice = undefined;
+			// What happened to the tab since the last call (a worker that exited with no run in flight, a turn end's
+			// release) went unreported; reusing the tab reports it.
+			if (!value.created && value.tab.backend === "worker" && value.tab.nextCallNotice) {
+				const notice = value.tab.nextCallNotice;
+				value.tab.nextCallNotice = undefined;
 				return { ...value, note: value.note ? `${notice}\n${value.note}` : notice };
 			}
 			return value;
@@ -467,13 +488,16 @@ async function acquireTabImpl(
 					existing.persist = opts.persist;
 				}
 				const reuseSteps: string[] = [];
-				if (opts.viewport && browser.kind.kind !== "cmux" && browser.kind.kind !== "tern") {
+				// Through `tab.emulate` on the relay too: a turn end's release takes off, and its reattach puts back,
+				// only what the tab's emulation holds; a size set past it would stay on the page while omp is away.
+				const viaEmulation = existing.backend === "tern" || existing.kindTag === "relay";
+				if (opts.viewport && browser.kind.kind !== "cmux" && !viaEmulation) {
 					const dsf = opts.viewport.deviceScaleFactor;
 					reuseSteps.push(
 						`await page.setViewport({ width: ${opts.viewport.width}, height: ${opts.viewport.height}, deviceScaleFactor: ${dsf === undefined ? "undefined" : String(dsf)} });`,
 					);
 				}
-				if (opts.viewport && existing.backend === "tern") {
+				if (opts.viewport && viaEmulation) {
 					reuseSteps.push(
 						`await tab.emulate({ viewport: ${JSON.stringify({ width: opts.viewport.width, height: opts.viewport.height, scale: opts.viewport.deviceScaleFactor })} });`,
 					);
@@ -627,6 +651,7 @@ async function acquireTabImpl(
 		lastActivityAt: Date.now(),
 		frozen: false,
 		uploadDir: initPayload.uploadDir,
+		runsStarted: 0,
 	};
 	attachTabWorker(tab, worker);
 	tabs.set(name, tab);
@@ -891,12 +916,12 @@ export async function runInTab(name: string, opts: RunInTabOptions): Promise<Run
 			excludeWebP: webpExclusionForModel(opts.session.getActiveModel?.()),
 		},
 	);
-	// A worker that exited with no run in flight left the reset unreported; this call reports it. Runs an open
-	// makes on the tab leave it for the open to report.
+	// What happened to the tab since the last call (a worker that exited with no run in flight, a turn end's release)
+	// is reported by this call. Runs an open makes on the tab leave it for the open to report.
 	const tab = tabs.get(name);
-	if (tab?.backend === "worker" && tab.workerExitNotice) {
-		result.displays.unshift({ type: "text", text: tab.workerExitNotice });
-		tab.workerExitNotice = undefined;
+	if (tab?.backend === "worker" && tab.nextCallNotice) {
+		result.displays.unshift({ type: "text", text: tab.nextCallNotice });
+		tab.nextCallNotice = undefined;
 	}
 	return result;
 }
@@ -913,8 +938,9 @@ async function runInTabWithSnapshot(
 	},
 	snapshot: SessionSnapshot,
 ): Promise<RunResultOk> {
-	// A worker that exited on its own is being replaced: wait for that within this call's budget, and run only on the
-	// same tab. A tab closed and reopened under this name meanwhile is not the one this call was meant for.
+	// A worker that exited on its own is being replaced, or a turn end let go of the tab: wait for its reattach within
+	// this call's budget, and run only on the same tab. A tab closed and reopened under this name meanwhile is not the
+	// one this call was meant for.
 	const waitStartedAt = performance.now();
 	const reattaching = awaitWorkerRecovery(name, opts);
 	if (reattaching) {
@@ -945,6 +971,7 @@ async function runInTabWithSnapshot(
 	if (opts.signal?.aborted) throw new ToolAbortError();
 	// A run is use: refresh the idle clock for idle-close.
 	tab.lastActivityAt = Date.now();
+	if (tab.backend === "worker") tab.runsStarted++;
 	// A retry after a detach gets only what is left of this call's budget, not a fresh one.
 	const startedAt = performance.now();
 	const id = Snowflake.next();
@@ -1194,6 +1221,8 @@ async function recoverWorkerTab(
 		recover?: boolean;
 		/** Kill reason when the recycle fails; defaults to a generic recovery failure. */
 		failedReason?: string;
+		/** The tab was released between turns: its new worker puts these back (see {@link recycleTimedOutWorkerTab}). */
+		replay?: ReattachReplay;
 	} = {},
 ): Promise<boolean> {
 	// The kills go by name: a tab closed meanwhile may have been reopened under it, and that one is not ours to kill.
@@ -1203,13 +1232,195 @@ async function recoverWorkerTab(
 	};
 	try {
 		if (tab.worker.mode === "inline") return await killTab(reason);
-		return await recycleTimedOutWorkerTab(tab, timeoutMs + GRACE_MS, { recover: opts.recover });
+		return await recycleTimedOutWorkerTab(tab, timeoutMs + GRACE_MS, { recover: opts.recover, replay: opts.replay });
 	} catch (recycleError) {
+		// The released tab's page stopped while omp was away: it stays released, the call says why.
+		if (recycleError instanceof PageStoppedError) throw recycleError;
 		logger.warn("Failed to recycle browser tab worker; killing tab", {
 			error: recycleError instanceof Error ? recycleError.message : String(recycleError),
 		});
 		return await killTab(opts.failedReason ?? "Browser tab worker recovery failed; tab killed");
 	}
+}
+
+/**
+ * How long a hand-back waits for a tab's worker to answer the release before it presumes the worker wedged. The
+ * worker bounds its own steps (a page that starts waiting ends the release at once), so this is a backstop.
+ */
+const RELEASE_TIMEOUT_MS = 15_000;
+
+/** Add `text` to what the next call on `tab` reports. */
+function noteNextCall(tab: WorkerTabSession, text: string): void {
+	if (tab.nextCallNotice?.includes(text)) return;
+	tab.nextCallNotice = tab.nextCallNotice ? `${tab.nextCallNotice}\n${text}` : text;
+}
+
+/**
+ * Hand-back checkpoint for the relay (the agent's turn ended, interrupts included): let go of the relay's debugger on
+ * every live tab `ownerId` opened or adopted there, so Chrome's debugging bar, which it shows on every tab of the
+ * browser while omp has any one attached, goes away between turns. The tabs stay open, owned and grouped; the next
+ * call reattaches each with what it built. Kept attached: `persist` tabs, tabs whose `allowed_domains` only the
+ * attachment enforces, tabs a call still drives, pages waiting on an answer, and tabs whose worker runs inline. A tab
+ * whose worker is being replaced (a reattach an interrupted call started goes on without it) is released once that
+ * settles, unless a call started on it meanwhile. Never throws; resolves how many tabs were released.
+ */
+export async function releaseRelayTabsForOwner(ownerId: string): Promise<number> {
+	if (!ownerId) return 0;
+	const releases: Promise<boolean>[] = [];
+	for (const tab of tabs.values()) {
+		if (tab.backend !== "worker" || tab.kindTag !== "relay" || tab.ownerSessionId !== ownerId) continue;
+		releases.push(releaseWhenSettled(tab, tab.runsStarted));
+	}
+	const released = await Promise.all(releases);
+	return released.filter(Boolean).length;
+}
+
+/** Release `tab` after the transition it is in, if it is still eligible and no call started on it since `runsStarted`. */
+async function releaseWhenSettled(tab: WorkerTabSession, runsStarted: number): Promise<boolean> {
+	for (let transition = tab.workerRecovery; transition; transition = tab.workerRecovery) {
+		if (tab.turnRelease?.state === "releasing") return false;
+		await transition.catch(() => false);
+	}
+	if (tab.runsStarted !== runsStarted || tab.state !== "alive" || tab.turnRelease || tab.pending.size > 0)
+		return false;
+	if (tab.persist || (tab.allowedDomains?.length ?? 0) > 0 || tab.worker.mode === "inline") return false;
+	// Set before any await: a call arriving meanwhile waits for the release, then reattaches.
+	tab.turnRelease = { state: "releasing" };
+	const release = releaseRelayTab(tab).finally(() => {
+		if (tab.workerRecovery === release) tab.workerRecovery = undefined;
+	});
+	tab.workerRecovery = release;
+	return await release;
+}
+
+/**
+ * Ask the tab's worker to let go of the relay's debugger and record what it answers. The release owns the tab until
+ * then: the worker exiting meanwhile ends it (its connection, and with it the attachment, is gone) instead of
+ * starting a recovery, and an answer is applied only to the worker it came from.
+ */
+async function releaseRelayTab(tab: WorkerTabSession): Promise<boolean> {
+	const worker = tab.worker;
+	const { promise, resolve } = Promise.withResolvers<ReleaseOutcome | "exited">();
+	const unsubscribe = worker.onMessage(msg => {
+		if (msg.type === "released") resolve(msg.outcome);
+	});
+	const unlistenExit = worker.onExit(() => resolve("exited"));
+	let outcome: ReleaseOutcome;
+	let lost: "unread" | undefined;
+	try {
+		worker.send({ type: "release" });
+		const answer = await raceWithTimeout(promise, RELEASE_TIMEOUT_MS, "The tab worker did not answer the release");
+		if (answer === "exited") throw new Error("The tab worker exited during the release");
+		if (!answer.released && answer.failed) throw new Error(answer.failed);
+		outcome = answer;
+	} catch (error) {
+		// The worker may have let go halfway, or wedged: the next call reattaches on a new worker rather than trust it.
+		logger.warn("Releasing a relay tab failed; reattaching it on its next use", {
+			name: tab.name,
+			error: error instanceof Error ? error.message : String(error),
+		});
+		if (tab.worker === worker) await worker.terminate().catch(() => undefined);
+		outcome = { released: true, replay: { dialogs: tab.dialogPolicy } };
+		lost = "unread";
+	} finally {
+		unsubscribe();
+		unlistenExit();
+	}
+	tab.turnRelease = undefined;
+	if (tab.state !== "alive" || tab.worker !== worker) return false;
+	if (!outcome.released) {
+		if (outcome.kept) {
+			noteNextCall(
+				tab,
+				`omp kept its debugger on this tab when a turn ended, because ${outcome.kept}; Chrome's debugging bar stayed up.`,
+			);
+		}
+		return false;
+	}
+	tab.turnRelease = { state: "released", replay: outcome.replay, lost };
+	return true;
+}
+
+/**
+ * Reattach a tab released between turns; resolves `false` when the tab was closed instead. The worker that released
+ * it takes it back with everything it holds; a new worker that puts the release's `replay` back does only when that
+ * one was lost or cannot. A page that stopped while omp was away rejects with the reason and leaves the tab released
+ * for the next call.
+ */
+async function reattachReleasedTab(tab: WorkerTabSession, timeoutMs: number): Promise<boolean> {
+	const released = tab.turnRelease;
+	if (released?.state !== "released") return true;
+	const startedAt = performance.now();
+	if (!released.lost) {
+		const worker = tab.worker;
+		const { promise, resolve, reject } = Promise.withResolvers<ReadyInfo>();
+		const unsubscribe = worker.onMessage(msg => {
+			if (msg.type !== "reattached") return;
+			if (msg.ok) resolve(msg.info);
+			else reject(errorFromPayload(msg.error));
+		});
+		const unlistenExit = worker.onExit(() => reject(new Error("The tab worker exited during the reattach")));
+		try {
+			worker.send({ type: "reattach" });
+			const info = await raceWithTimeout(promise, timeoutMs, "The tab worker did not take the tab back in time");
+			if (tab.state !== "alive" || tab.worker !== worker) return false;
+			tab.info = info;
+			tab.turnRelease = undefined;
+			noteNextCall(
+				tab,
+				"omp let go of this tab when the last turn ended, so Chrome's debugging bar could go, and reattached it for this call with what the tab had: element ids, run globals, logs and settings carried over. What the page logged or requested while omp was away is not in the console and request logs.",
+			);
+			return true;
+		} catch (error) {
+			// The tab stays released; the worker still holds what it had for the next call.
+			if (error instanceof PageStoppedError) throw error;
+			logger.warn("Reattaching a released relay tab on its worker failed; reattaching it on a new one", {
+				name: tab.name,
+				error: error instanceof Error ? error.message : String(error),
+			});
+			released.lost = "exited";
+			// With no time left, a new worker could only fail and close the tab: it stays released for the next call.
+			if (performance.now() - startedAt >= timeoutMs) {
+				throw new ToolError(
+					`Tab ${JSON.stringify(tab.name)} could not be reattached within ${timeoutMs}ms; the next call reattaches it on a new worker.`,
+				);
+			}
+		} finally {
+			unsubscribe();
+			unlistenExit();
+		}
+	}
+	const lostReason =
+		"omp let go of this relay tab when the last turn ended and could not reattach to it (it was closed, or Chrome refused omp's debugger)";
+	const reattached = await recoverWorkerTab(
+		tab,
+		tab.name,
+		Math.max(1, timeoutMs - Math.round(performance.now() - startedAt)),
+		lostReason,
+		{ recover: false, failedReason: lostReason, replay: released.replay },
+	);
+	tab.turnRelease = undefined;
+	if (reattached) {
+		const replay = released.replay;
+		const back = [
+			Object.keys(replay.emulation ?? {}).length > 0 && "emulation",
+			(replay.initScripts?.length ?? 0) > 0 && "init scripts",
+			replay.userAgent && "the open's user agent",
+			replay.downloadsPath && "downloads folder",
+			replay.ignoreHttpsErrors && "ignore_https_errors",
+			replay.dialogs && "dialog policy",
+		].filter(item => typeof item === "string");
+		const putBack = back.length > 0 ? `; ${back.join(", ")} ${back.length === 1 ? "was" : "were"} put back` : "";
+		const unread =
+			released.lost === "unread"
+				? "; any emulation, init scripts and open options omp had set are gone, since it could not read them back"
+				: "";
+		noteNextCall(
+			tab,
+			`omp let go of this tab when the last turn ended and lost the tab worker that held its state, so this call reattached it on a new one: element ids, run globals and the console and request logs start fresh${putBack}${unread}.`,
+		);
+	}
+	return reattached;
 }
 
 /**
@@ -1953,9 +2164,9 @@ async function dispatchToolCall(
 }
 
 /**
- * The wait, within `opts`' timeout and abort signal, for the reattach of the tab `name` whose worker exited on its
- * own; it resolves to the tab waited on. `undefined` when none is being reattached, so a caller with nothing to wait
- * for goes on in the same tick.
+ * The wait, within `opts`' timeout and abort signal, for the tab `name`'s worker to be reattached: one that exited on
+ * its own, or one a turn end let go of, whose reattach this starts unless the call was interrupted. It resolves to the
+ * tab waited on. `undefined` when there is nothing to wait for, so the caller goes on in the same tick.
  */
 function awaitWorkerRecovery(
 	name: string,
@@ -1963,19 +2174,44 @@ function awaitWorkerRecovery(
 	abortMessage?: string,
 ): Promise<WorkerTabSession> | undefined {
 	const recovering = tabs.get(name);
-	if (recovering?.backend !== "worker" || !recovering.workerRecovery) return undefined;
+	if (
+		recovering?.backend !== "worker" ||
+		(!recovering.workerRecovery && recovering.turnRelease?.state !== "released")
+	) {
+		return undefined;
+	}
 	recovering.lastActivityAt = Date.now();
-	return raceWithTimeout(
-		untilAborted(opts.signal, recovering.workerRecovery),
-		opts.timeoutMs,
-		`Tab ${JSON.stringify(name)}'s worker was still being reattached after ${opts.timeoutMs}ms`,
-	).then(
-		() => recovering,
-		error => {
-			if (opts.signal?.aborted) throw new ToolAbortError(abortMessage);
-			throw error;
-		},
-	);
+	const startedAt = performance.now();
+	const wait = async (): Promise<WorkerTabSession> => {
+		// A turn end's release that settles meanwhile leaves the tab released: the next round reattaches it.
+		while (tabs.get(name) === recovering) {
+			const timeoutMs = Math.max(1, opts.timeoutMs - Math.round(performance.now() - startedAt));
+			if (
+				!recovering.workerRecovery &&
+				recovering.turnRelease?.state === "released" &&
+				recovering.state === "alive"
+			) {
+				// An interrupted call starts no reattach: the tab stays released, and nothing is left attached unasked.
+				if (opts.signal?.aborted) throw new ToolAbortError(abortMessage);
+				const reattach = reattachReleasedTab(recovering, timeoutMs).finally(() => {
+					if (recovering.workerRecovery === reattach) recovering.workerRecovery = undefined;
+				});
+				recovering.workerRecovery = reattach;
+			}
+			const transition = recovering.workerRecovery;
+			if (!transition) break;
+			await raceWithTimeout(
+				untilAborted(opts.signal, transition),
+				timeoutMs,
+				`Tab ${JSON.stringify(name)}'s worker was still being reattached after ${opts.timeoutMs}ms`,
+			);
+		}
+		return recovering;
+	};
+	return wait().catch(error => {
+		if (opts.signal?.aborted) throw new ToolAbortError(abortMessage);
+		throw error;
+	});
 }
 
 function safeSend(tab: WorkerTabSession, msg: WorkerInbound): void {
@@ -2001,9 +2237,21 @@ function attachTabWorker(tab: WorkerTabSession, worker: WorkerHandle): void {
 		if (!(error instanceof WorkerMessageError)) lastError = error;
 	});
 	worker.onExit(exitCode => {
-		// A release or recycle owns a worker it replaced or is tearing down.
-		if (tabs.get(tab.name) !== tab || tab.worker !== worker || tab.state !== "alive" || releaseInflight.has(tab))
+		// A release or recycle owns a worker it replaced or is tearing down, and a turn end's release one exiting under it.
+		if (
+			tabs.get(tab.name) !== tab ||
+			tab.worker !== worker ||
+			tab.state !== "alive" ||
+			releaseInflight.has(tab) ||
+			tab.turnRelease?.state === "releasing"
+		)
 			return;
+		// A released tab's worker drives nothing, and reattaching the tab now would bring Chrome's debugging bar back
+		// between turns: the next call reattaches it on a new worker, without its state.
+		if (tab.turnRelease?.state === "released") {
+			tab.turnRelease.lost ??= "exited";
+			return;
+		}
 		// Bun's ErrorEvent message embeds a source excerpt; keep only its `error: …` line.
 		const cause = lastError && (/^error: (.+)$/m.exec(lastError.message)?.[1] ?? lastError.message.split("\n", 1)[0]);
 		const exited = `Browser tab worker exited unexpectedly (exit code ${exitCode}${cause ? `, ${cause}` : ""})`;
@@ -2040,7 +2288,10 @@ function attachTabWorker(tab: WorkerTabSession, worker: WorkerHandle): void {
 			.then(reattached => {
 				// No run was in flight to report the reset, so the next call on the tab does.
 				if (reattached && idle) {
-					tab.workerExitNotice = `${exited} since the last call; omp reattached the tab to a new worker on the same page, without reloading it. ${WORKER_RESETS}.`;
+					noteNextCall(
+						tab,
+						`${exited} since the last call; omp reattached the tab to a new worker on the same page, without reloading it. ${WORKER_RESETS}.`,
+					);
 				}
 				return reattached;
 			})
@@ -2052,17 +2303,22 @@ function attachTabWorker(tab: WorkerTabSession, worker: WorkerHandle): void {
 	});
 }
 
-/** Resolves `false` when the tab was closed while its new worker started; the new worker is then discarded. */
+/**
+ * Resolves `false` when the tab was closed while its new worker started; the new worker is then discarded. With
+ * `replay` the tab was released between turns: its new worker puts those settings back, and the old one, which drives
+ * nothing, goes only once the new one has the tab, so the tab stays owned (and in omp's tab group) throughout.
+ */
 async function recycleTimedOutWorkerTab(
 	tab: WorkerTabSession,
 	timeoutMs: number,
-	opts: { recover?: boolean } = {},
+	opts: { recover?: boolean; replay?: ReattachReplay } = {},
 ): Promise<boolean> {
 	// Same deadline carry-over as acquireTabImpl: the inline-fallback retry
 	// must not restart the recycle's init budget.
 	const startedAt = performance.now();
 	const oldWorker = tab.worker;
-	await oldWorker.terminate().catch(() => undefined);
+	const replay = opts.replay;
+	if (!replay) await oldWorker.terminate().catch(() => undefined);
 	const browserWSEndpoint = tab.browser.browser.wsEndpoint();
 	if (!browserWSEndpoint) throw new ToolError("Browser websocket endpoint is unavailable");
 	const payload: WorkerInitPayload = {
@@ -2071,12 +2327,18 @@ async function recycleTimedOutWorkerTab(
 		safeDir: getPuppeteerDir(),
 		uploadDir: tab.uploadDir,
 		page: { kind: tab.ownsPage ? "owned" : "borrowed", targetId: tab.targetId },
-		dialogs: tab.dialogPolicy,
+		dialogs: replay ? replay.dialogs : tab.dialogPolicy,
 		allowedDomains: tab.allowedDomains,
+		initScripts: replay?.initScripts,
+		downloadsPath: replay?.downloadsPath,
+		userAgent: replay?.userAgent,
+		ignoreHttpsErrors: replay?.ignoreHttpsErrors,
+		emulation: replay?.emulation,
 		// Unblock a wedged page (open JS dialog, hung navigation) before adopting it —
 		// otherwise init stalls, times out, and the tab gets force-killed.
 		recover: opts.recover ?? true,
 		userDriven: tab.kindTag === "connected" || tab.kindTag === "relay",
+		reattach: replay !== undefined,
 		showsWindows: browserShowsWindows(tab.browser.kind),
 		relay: tab.kindTag === "relay",
 	};
@@ -2091,6 +2353,7 @@ async function recycleTimedOutWorkerTab(
 		tab.info = info;
 		tab.state = "alive";
 		attachTabWorker(tab, replacement);
+		if (replay) await oldWorker.terminate().catch(() => undefined);
 		return true;
 	};
 	let worker = await spawnTabWorker();
@@ -2099,7 +2362,8 @@ async function recycleTimedOutWorkerTab(
 	} catch (error) {
 		await worker.terminate().catch(() => undefined);
 		// The page crashed again as this attach brought it back; a second attach would only revive it once more.
-		if (error instanceof RendererCrashedError) throw error;
+		// A released tab's stopped page stays stopped for a second attach too.
+		if (error instanceof RendererCrashedError || error instanceof PageStoppedError) throw error;
 		// The recycle's budget is exhausted: the run caller already timed out, so a
 		// retried init can't beat its deadline — fail fast and let the caller
 		// force-kill the tab instead of spending the phase floors' excess.
@@ -2303,6 +2567,11 @@ function errorFromPayload(payload: RunErrorPayload): Error {
 			payload.debuggerDetached.when,
 			payload.debuggerDetached.reason,
 		);
+		if (payload.stack) error.stack = payload.stack;
+		return error;
+	}
+	if (payload.pageStopped) {
+		const error = new PageStoppedError(payload.message);
 		if (payload.stack) error.stack = payload.stack;
 		return error;
 	}

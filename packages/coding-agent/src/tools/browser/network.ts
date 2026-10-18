@@ -156,7 +156,7 @@ interface HarSession {
 
 /** Persistent per-tab routing, request logging, HAR capture, and host allowlisting. */
 export class BrowserNetworkManager {
-	readonly #page: Page;
+	#page: Page;
 	readonly #allowedDomains: string[];
 	readonly #routes: StoredRoute[] = [];
 	readonly #records: StoredRequest[] = [];
@@ -266,6 +266,24 @@ export class BrowserNetworkManager {
 		this.#interceptionEnabled = false;
 	}
 
+	/**
+	 * Go on on `page`, the tab's page as a new attachment exposes it: the request log, routes and allowed domains
+	 * carry over, and the observers and any interception are installed there.
+	 */
+	async rebind(page: Page): Promise<void> {
+		await this.close();
+		this.#page = page;
+		await this.start();
+	}
+
+	/**
+	 * Read every logged response body the page's session still holds, so `tab.request()` and `harStop()` can return
+	 * them once that session is gone. Never rejects; a body that cannot be read stays unavailable.
+	 */
+	async keepBodies(): Promise<void> {
+		await Promise.all(this.#records.map(record => this.#loadBody(record).catch(() => undefined)));
+	}
+
 	/** Whether routes or allowed domains require interception to remain enabled between runs. */
 	hasPersistentInterception(): boolean {
 		return this.#allowedDomains.length > 0 || this.#routes.length > 0;
@@ -352,6 +370,11 @@ export class BrowserNetworkManager {
 	clearRequests(): void {
 		this.#records.length = 0;
 		this.#recordsById.clear();
+	}
+
+	/** Whether `harStart()` is collecting a HAR that `harStop()` has not written yet. */
+	harActive(): boolean {
+		return this.#harSession !== undefined;
 	}
 
 	/** Begin collecting subsequent request-log entries for a HAR file. */

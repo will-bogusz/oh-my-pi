@@ -24,8 +24,18 @@ export class ChromeBackedExtension {
 	readonly #inFlight = new Map<number, number>();
 	/** Resolved by the next forwarded command each one matches. */
 	readonly #sendWaiters = new Set<{ method: string; match: (params: unknown) => boolean; resolve: () => void }>();
+	/** Held back from Chrome: the next forwarded command each one matches reaches Chrome once its gate opens. */
+	readonly #holds = new Set<{
+		method: string;
+		match: (params: unknown) => boolean;
+		arrived: () => void;
+		gate: Promise<void>;
+	}>();
 	/** Answer attaches with Chrome's refusal, as while a foreign extension frame is in the tab. */
 	refuseAttach = false;
+	/** `attach` and `detach` requests the relay made. */
+	attaches = 0;
+	detaches = 0;
 
 	private constructor(
 		relay: WebSocket,
@@ -122,6 +132,7 @@ export class ChromeBackedExtension {
 		const id = message.id;
 		switch (message.op) {
 			case "attach": {
+				this.attaches++;
 				if (this.refuseAttach) return this.#reply(id, { error: FOREIGN_FRAME_REFUSAL });
 				const answer = await this.#chromeSend("Target.attachToTarget", { targetId: this.targetId, flatten: true })
 					.promise;
@@ -132,8 +143,13 @@ export class ChromeBackedExtension {
 				return this.#reply(id, { result: {} });
 			}
 			case "detach": {
+				this.detaches++;
 				const root = this.#root;
 				this.#root = undefined;
+				// `chrome.debugger.detach` fails the extension's commands still in flight, as Chrome's own detach does.
+				for (const rpcId of this.#inFlight.values())
+					this.#reply(rpcId, { error: "Detached while handling command." });
+				this.#inFlight.clear();
 				if (root) await this.#chromeSend("Target.detachFromTarget", { sessionId: root }).promise;
 				this.#relay.send(
 					JSON.stringify({ t: "detached", tabId: TAB_ID, reason: "target_closed", relayInitiated: true }),
@@ -141,9 +157,16 @@ export class ChromeBackedExtension {
 				return this.#reply(id, { result: {} });
 			}
 			case "send": {
+				const method = String(message.method);
+				for (const hold of this.#holds) {
+					if (hold.method !== method || !hold.match(message.params)) continue;
+					this.#holds.delete(hold);
+					hold.arrived();
+					await hold.gate;
+					break;
+				}
 				const root = this.#root;
 				if (!root) return this.#reply(id, { error: "Debugger is not attached to the tab with id: 1." });
-				const method = String(message.method);
 				const sent = this.#chromeSend(
 					method,
 					isRecord(message.params) ? message.params : {},
@@ -171,6 +194,20 @@ export class ChromeBackedExtension {
 		const { promise, resolve } = Promise.withResolvers<void>();
 		this.#sendWaiters.add({ method, match, resolve });
 		return promise;
+	}
+
+	/**
+	 * Hold the next command of `method` whose params `match` accepts before it reaches Chrome: `arrived` resolves once
+	 * the relay forwards it, and Chrome gets it, on the attachment as it is then, when `release` is called.
+	 */
+	holdSend(
+		method: string,
+		match: (params: unknown) => boolean = () => true,
+	): { arrived: Promise<void>; release: () => void } {
+		const arrived = Promise.withResolvers<void>();
+		const gate = Promise.withResolvers<void>();
+		this.#holds.add({ method, match, arrived: arrived.resolve, gate: gate.promise });
+		return { arrived: arrived.promise, release: gate.resolve };
 	}
 
 	/**
@@ -211,6 +248,11 @@ export class ChromeBackedExtension {
 		this.#inFlight.clear();
 		if (root) await this.#chromeSend("Target.detachFromTarget", { sessionId: root }).promise;
 		this.#relay.send(JSON.stringify({ t: "detached", tabId: TAB_ID, reason }));
+	}
+
+	/** Whether "chrome.debugger" is attached to the tab. */
+	get attached(): boolean {
+		return this.#root !== undefined;
 	}
 
 	close(): void {

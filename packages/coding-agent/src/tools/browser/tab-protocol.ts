@@ -1,4 +1,6 @@
 import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
+import type { BrowserEmulateOptions } from "./emulation";
+import type { InitScriptInfo } from "./init-scripts";
 
 export type Transferable = Bun.Transferable;
 
@@ -89,8 +91,11 @@ export type WorkerInitPayload =
 			dialogs?: "accept" | "dismiss";
 			/** Hostname patterns allowed for every page request. */
 			allowedDomains?: string[];
-			/** Document-start JavaScript sources registered before navigation. */
-			initScripts?: string[];
+			/**
+			 * Document-start JavaScript sources registered before navigation; an `{ id, source }` keeps the id the
+			 * previous worker of a released relay tab returned for it.
+			 */
+			initScripts?: Array<string | InitScriptInfo>;
 			/** Absolute directory enabled for completed downloads. */
 			downloadsPath?: string;
 			/** Explicit tab user agent applied during worker initialization. */
@@ -118,6 +123,13 @@ export type WorkerInitPayload =
 			showsWindows?: boolean;
 			/** The browser is the omp relay: claim `owned`/`borrowed` tabs there before adopting them, or it never attaches them. */
 			relay?: boolean;
+			/** `tab.emulate()` overrides to put back: the tab's previous worker released it between turns and was lost. */
+			emulation?: BrowserEmulateOptions;
+			/**
+			 * This attach reattaches a relay tab omp released between turns: a page that stopped meanwhile (a dialog
+			 * Chrome showed the user, or a long script) is not adopted, and the tab is released again.
+			 */
+			reattach?: boolean;
 	  };
 
 /** Result of one host tool requested by browser-run JavaScript. */
@@ -128,7 +140,11 @@ export type WorkerInbound =
 	| { type: "run"; id: string; name: string; code: string; timeoutMs: number; session: SessionSnapshot }
 	| { type: "abort"; id: string; expectedCleanup?: boolean }
 	| { type: "tool-reply"; id: string; reply: ToolReply }
-	| { type: "close" };
+	| { type: "close" }
+	/** Let go of the relay's debugger on this tab between turns; answered by `released`. */
+	| { type: "release" }
+	/** Take back the tab a `release` let go of, with everything the worker holds for it; answered by `reattached`. */
+	| { type: "reattach" };
 
 export interface ReadyInfo {
 	url: string;
@@ -136,6 +152,30 @@ export interface ReadyInfo {
 	viewport: { width: number; height: number; deviceScaleFactor?: number };
 	targetId: string;
 }
+
+/**
+ * Per-tab settings a new worker puts back on a released relay tab whose worker was lost before it reattached; the
+ * payload fields of the same names.
+ */
+export interface ReattachReplay {
+	emulation?: BrowserEmulateOptions;
+	initScripts?: InitScriptInfo[];
+	userAgent?: string;
+	downloadsPath?: string;
+	ignoreHttpsErrors?: boolean;
+	/** The dialog policy last set, at open or by `tab.setDialogs()`. */
+	dialogs?: "accept" | "dismiss";
+}
+
+/**
+ * A worker's answer to `release`. Released: the worker drives the tab no more until `reattach`, and keeps what the
+ * tab built; `replay` is what a new worker puts back should this one be lost meanwhile. Not released: `kept` says why
+ * the tab stays attached, absent when nothing was attached; `failed` says the release broke off partway, leaving the
+ * worker's state unknown.
+ */
+export type ReleaseOutcome =
+	| { released: true; replay: ReattachReplay }
+	| { released: false; kept?: string; failed?: string };
 
 export interface RunResultOk {
 	displays: Array<TextContent | ImageContent>;
@@ -163,6 +203,8 @@ export interface RunErrorPayload {
 	 * (`target_closed`, `canceled_by_user`): after a user cancel the relay hides the tab, otherwise it is re-adopted.
 	 */
 	debuggerDetached?: { when: "during" | "before"; reason: string };
+	/** A released relay tab's page stopped while omp was away; the tab stays released and nothing ran. */
+	pageStopped?: boolean;
 }
 
 export type WorkerOutbound =
@@ -188,7 +230,10 @@ export type WorkerOutbound =
 	| { type: "result"; id: string; ok: false; error: RunErrorPayload }
 	| { type: "tool-call"; id: string; runId: string; name: string; args: unknown }
 	| { type: "log"; level: "debug" | "warn" | "error"; msg: string; meta?: Record<string, unknown> }
-	| { type: "closed" };
+	| { type: "closed" }
+	| { type: "released"; outcome: ReleaseOutcome }
+	| { type: "reattached"; ok: true; info: ReadyInfo }
+	| { type: "reattached"; ok: false; error: RunErrorPayload };
 
 export interface Transport {
 	send(msg: WorkerOutbound | WorkerInbound, transferList?: Transferable[]): void;

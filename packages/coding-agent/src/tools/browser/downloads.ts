@@ -46,7 +46,7 @@ const DOWNLOAD_GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
 /** Owns tab-scoped Chromium download behavior and completion events. */
 export class DownloadManager {
 	readonly #browser: Browser;
-	readonly #page: Page;
+	#page: Page;
 	readonly #defaultDirectory: string;
 	readonly #perTab: boolean;
 	#directory?: string;
@@ -69,6 +69,14 @@ export class DownloadManager {
 		this.#page = page;
 		this.#defaultDirectory = path.join(os.tmpdir(), `omp-downloads-${tabId}`);
 		this.#perTab = options.perTab;
+	}
+
+	/**
+	 * Go on on `page`, the tab's page as a new attachment exposes it. Tracking runs on a browser session, which
+	 * outlives the page's: the folder, finished downloads and pending waits carry over.
+	 */
+	rebind(page: Page): void {
+		this.#page = page;
 	}
 
 	/**
