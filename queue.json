@@ -6853,5 +6853,11 @@
     "why": "opened as #16236"
    }
   ]
+ },
+ "opening": {
+  "id": "compact-tool-result",
+  "token": "07ebb772720d49b5b62d0c8b8191a82d",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T19:45:19Z"
  }
 }
