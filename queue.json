@@ -3806,8 +3806,19 @@
    "worktree": "/Users/viathebrink/tmp/oh-my-pi/s1k-target-late",
    "host": "MacBook-Pro",
    "added": "2026-10-18T12:38:01Z",
-   "updated": "2026-10-18T12:38:04Z",
-   "note": "Regression fix for #15195 (merged 4d956dad0f, unreleased). SamePollClick's will/computer-same-poll-click touches the same BackgroundFocusLease::observe(); it rebases onto this."
+   "updated": "2026-10-18T13:27:15Z",
+   "note": "Regression fix for #15195 (merged 4d956dad0f, unreleased). SamePollClick's will/computer-same-poll-click touches the same BackgroundFocusLease::observe(); it rebases onto this.",
+   "built": [
+    {
+     "with": "#16163",
+     "code": "d53799fa2a7e111d3ff4ab7a095d29d70eaf6351",
+     "with_code": "5f7740a415d860e041b015e202d65b8e1120c286",
+     "tip": "1e1f36d4b5f52866874e96859d760a1659e5a536",
+     "with_tip": "7cb4e3bdfa3246d73daee60107122b18b5409102",
+     "at": "2026-10-18T13:27:13Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "computer-sent-not-cancelled",
