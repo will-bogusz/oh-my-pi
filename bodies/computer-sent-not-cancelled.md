@@ -37,7 +37,7 @@ Failing on `main` plus only the tests, passing with the fix (`cargo test -p pi-n
 - `macos::skylight::tests::a_cancel_once_the_input_is_out_keeps_it_through_the_settle`: `main`'s `FOREGROUND_SETTLE` turns `Ok(7)` into an error.
 - `macos::input::tests::input_whose_last_key_is_out_is_not_reported_cancelled` and `a_click_whose_last_press_is_out_is_not_reported_cancelled`: text, a chord, Screen Sharing keys and a double tap cancelled at their last press; a cancel before it still stops.
 
-The rest of the suite passes (884 of 885) except `iphone_mirroring_taps_and_scrolls_stop_once_the_user_brings_it_forward`, failing on `main` too. `CI=1 bun check`, `build:native` and the computer bun tests pass.
+The rest of the suite passes (884 of 885) except `iphone_mirroring_taps_and_scrolls_stop_once_the_user_brings_it_forward`, failing on `main` too. `CI=1 bun check`, `build:native` and computer bun tests pass.
 
 Not run: the X11 and Windows changes were not compiled here (macOS only); the Screen Sharing wording was not checked on a live session.
 
