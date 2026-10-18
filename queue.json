@@ -3650,13 +3650,13 @@
    "needs": [],
    "base": "ba85aef0b343a25f3c90b4f86628a9bd92d8414d",
    "body": "bodies/ast-temp-tree.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16163,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ast-temp-tree",
    "host": "MacBook-Pro",
    "added": "2026-10-18T09:11:48Z",
-   "updated": "2026-10-18T09:20:49Z",
+   "updated": "2026-10-18T09:21:31Z",
    "note": "",
    "built": [
     {
@@ -3758,7 +3758,8 @@
      "at": "2026-10-18T09:20:49Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-18T09:21:31Z"
   }
  ],
  "watch": {
