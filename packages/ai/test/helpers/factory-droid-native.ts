@@ -111,6 +111,7 @@ export const NATIVE_CASES: readonly NativeCase[] = [
 	{ model: "gemini-3.8-flash", upstream: "google", effort: "medium" },
 	{ model: "gemini-3.6-flash", upstream: "google", effort: "medium" },
 	{ model: "gemini-3.1-pro-preview", upstream: "google", effort: "low" },
+	{ model: "gemini-4-argon", upstream: "google", effort: "medium" },
 ];
 
 /** Conversation content and per-session values; neither is dialect policy. */

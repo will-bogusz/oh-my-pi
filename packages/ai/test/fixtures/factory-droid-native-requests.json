@@ -3702,5 +3702,54 @@
 				}
 			}
 		]
+	},
+	{
+		"model": "gemini-4-argon",
+		"upstream": "google",
+		"effort": "medium",
+		"requests": [
+			{
+				"path": "/api/llm/g/v1/generate",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "google",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock"
+				},
+				"body": {
+					"model": "gemini-4-argon",
+					"generationConfig": {
+						"maxOutputTokens": 65536,
+						"thinkingConfig": {
+							"includeThoughts": true,
+							"thinkingLevel": "MEDIUM"
+						}
+					},
+					"<tool-keys>": []
+				}
+			},
+			{
+				"path": "/api/llm/g/v1/generate",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "google",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock"
+				},
+				"body": {
+					"model": "gemini-4-argon",
+					"generationConfig": {
+						"maxOutputTokens": 65536,
+						"thinkingConfig": {
+							"includeThoughts": true,
+							"thinkingLevel": "MEDIUM"
+						}
+					},
+					"<tool-keys>": []
+				}
+			}
+		]
 	}
 ]

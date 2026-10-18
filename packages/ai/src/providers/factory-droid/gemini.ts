@@ -3,7 +3,16 @@ import type { Effort } from "@oh-my-pi/pi-catalog/effort";
 import { calculateCost } from "@oh-my-pi/pi-catalog/models";
 import { readSseJson } from "@oh-my-pi/pi-utils";
 import * as AIError from "../../error";
-import type { AssistantMessage, Context, Message, Model, StreamOptions, Tool, ToolCall } from "../../types";
+import type {
+	AssistantMessage,
+	Context,
+	GeminiNativeContentPayload,
+	Message,
+	Model,
+	StreamOptions,
+	Tool,
+	ToolCall,
+} from "../../types";
 import { createAbortSourceTracker } from "../../utils/abort";
 import { AssistantMessageEventStream } from "../../utils/event-stream";
 import {
@@ -22,7 +31,7 @@ import {
 	nextToolCallId,
 	SKIP_THOUGHT_SIGNATURE,
 } from "../google-shared";
-import type { GenerateContentResponse, Part } from "../google-types";
+import type { Content, GenerateContentResponse, Part } from "../google-types";
 import { transformMessages } from "../transform-messages";
 
 /** Factory's Gemini endpoint speaks native generateContent SSE at `/api/llm/g/v1/generate`. */
@@ -113,6 +122,44 @@ const GOOGLE_APIS: Record<string, true> = {
 };
 
 /**
+ * Digest of what a turn says: visible text, thinking and tool calls. A turn
+ * whose digest still matches its recorded native content was not rewritten
+ * (shaken, repaired, edited), so that content may replay in its place.
+ */
+function geminiTurnDigest(content: AssistantMessage["content"]): string {
+	const projected = content.flatMap(block => {
+		if (block.type === "text") return [["text", block.text]];
+		if (block.type === "thinking") return [["thinking", block.thinking]];
+		if (block.type === "toolCall") return [["call", block.name, block.arguments]];
+		return [];
+	});
+	return Bun.SHA256.hash(JSON.stringify(projected), "hex");
+}
+
+/**
+ * The native content recorded for this model's own turn, while the turn still
+ * says what Gemini sent and its calls line up with the native ones.
+ */
+function replayableNativeContent(
+	message: AssistantMessage,
+	model: Model<"factory-droid-agent">,
+): GeminiNativeContentPayload | undefined {
+	const payload = message.providerPayload;
+	if (payload?.type !== "geminiNativeContent") return undefined;
+	if (message.provider !== model.provider || message.model !== model.id) return undefined;
+	if (payload.digest !== geminiTurnDigest(message.content)) return undefined;
+	const nativeCalls = payload.content.parts.flatMap(part => {
+		const call = part.functionCall;
+		return call && typeof call === "object" ? ["name" in call ? call.name : undefined] : [];
+	});
+	const calls = message.content.flatMap(block =>
+		block.type === "toolCall" ? [sanitizeFactoryDroidToolName(block.name)] : [],
+	);
+	if (nativeCalls.length !== calls.length || nativeCalls.some((name, i) => name !== calls[i])) return undefined;
+	return payload;
+}
+
+/**
  * Apply Factory's replay provenance before canonical normalization: only
  * signed, Google-origin thinking and Google-origin call signatures survive;
  * everything else is DROPPED (never demoted to visible text). A text block
@@ -131,10 +178,12 @@ const GOOGLE_APIS: Record<string, true> = {
  * Responses-origin call), and with its reasoning already gone there is
  * nothing left for a cross-model pass to demote.
  */
-function adoptFactoryReplay(message: Message, model: Model<"factory-droid-agent">): Message {
+function adoptFactoryReplay(message: Message, model: Model<"factory-droid-agent">, nativeReplay: boolean): Message {
 	if (message.role !== "assistant") return message;
 	const googleOrigin = GOOGLE_APIS[message.api] === true;
 	const sameModel = googleOrigin && message.provider === model.provider && message.model === model.id;
+	// Settled on the stored turn: adoption below rewrites names and drops blocks.
+	const native = nativeReplay ? replayableNativeContent(message, model) : undefined;
 	const content: AssistantMessage["content"] = [];
 	for (const block of message.content) {
 		if (block.type === "thinking") {
@@ -151,9 +200,11 @@ function adoptFactoryReplay(message: Message, model: Model<"factory-droid-agent"
 			content.push(block);
 		}
 	}
+	const providerPayload =
+		native ?? (message.providerPayload?.type === "geminiNativeContent" ? undefined : message.providerPayload);
 	return googleOrigin
-		? { ...message, content, api: model.api, provider: model.provider, model: model.id }
-		: { ...message, content };
+		? { ...message, content, providerPayload, api: model.api, provider: model.provider, model: model.id }
+		: { ...message, content, providerPayload };
 }
 
 /**
@@ -171,19 +222,25 @@ function adoptFactoryReplay(message: Message, model: Model<"factory-droid-agent"
  * - Tool names are sanitized to the CLI's `[a-zA-Z0-9_-]` shape on
  *   declarations and on replayed call/response names.
  * - After the latest user turn containing a non-response part, function calls
- *   missing a signature get the validator-skip sentinel.
+ *   missing a signature get the validator-skip sentinel; under native replay,
+ *   every rebuilt model turn gets it.
  * - Model turns with no valid parts are dropped.
+ * - Under native replay, this model's own unrewritten turns go back as the
+ *   native content Gemini streamed, and their tool results carry Gemini's call ids.
  */
 function toGeminiContents(
 	model: Model<"factory-droid-agent">,
 	context: Context,
+	nativeReplay: boolean,
 ): {
 	contents: Array<{ role: "user" | "model"; parts: Part[] }>;
 	systemInstruction?: { parts: Part[] };
 } {
 	const contents: Array<{ role: "user" | "model"; parts: Part[] }> = [];
+	const nativeContents = new Set<Content>();
+	const nativeCallIds = new Map<string, string>();
 	const messages = transformMessages(
-		context.messages.map(message => adoptFactoryReplay(message, model)),
+		context.messages.map(message => adoptFactoryReplay(message, model, nativeReplay)),
 		model,
 	);
 	for (const message of messages) {
@@ -202,6 +259,19 @@ function toGeminiContents(
 			continue;
 		}
 		if (message.role === "assistant") {
+			if (message.providerPayload?.type === "geminiNativeContent") {
+				const native = structuredClone(message.providerPayload.content) as Content & { parts: Part[] };
+				const nativeIds = native.parts.flatMap(part => (part.functionCall ? [part.functionCall.id] : []));
+				let callIndex = 0;
+				for (const block of message.content) {
+					if (block.type !== "toolCall") continue;
+					const nativeId = nativeIds[callIndex++];
+					if (nativeId) nativeCallIds.set(block.id, nativeId);
+				}
+				nativeContents.add(native);
+				contents.push(native as { role: "model"; parts: Part[] });
+				continue;
+			}
 			const parts: Part[] = [];
 			for (const block of message.content) {
 				if (block.type === "text" && block.text) {
@@ -225,8 +295,10 @@ function toGeminiContents(
 			else if (block.type === "image")
 				binaryParts.push({ inlineData: { mimeType: block.mimeType, data: block.data } });
 		}
+		const nativeId = nativeCallIds.get(message.toolCallId);
 		const part: Part = {
 			functionResponse: {
+				...(nativeId ? { id: nativeId } : {}),
 				name: sanitizeFactoryDroidToolName(message.toolName),
 				response: {
 					result:
@@ -248,8 +320,9 @@ function toGeminiContents(
 	}
 	// Sentinel injection: scope to model turns at/after the latest user turn
 	// with a non-response part (the validator only checks the current tail).
+	// Native replay sends recorded turns untouched and stamps every rebuilt one.
 	let lastUserText = 0;
-	for (let i = contents.length - 1; i >= 0; i--) {
+	for (let i = contents.length - 1; i >= 0 && !nativeReplay; i--) {
 		const entry = contents[i];
 		if (entry.role === "user" && entry.parts.some(part => !part.functionResponse)) {
 			lastUserText = i;
@@ -258,7 +331,7 @@ function toGeminiContents(
 	}
 	for (let i = lastUserText; i < contents.length; i++) {
 		const entry = contents[i];
-		if (entry.role !== "model") continue;
+		if (entry.role !== "model" || nativeContents.has(entry)) continue;
 		for (const part of entry.parts) {
 			if (part.functionCall && !part.thoughtSignature?.trim()) part.thoughtSignature = SKIP_THOUGHT_SIGNATURE;
 		}
@@ -293,6 +366,8 @@ export interface FactoryDroidGeminiOptions extends StreamOptions {
 	headers: Record<string, string>;
 	/** Thinking dialect selected by the route policy. */
 	thinkingDialect?: RequestPolicy["googleThinking"];
+	/** Argon-style request policy selected by the route. */
+	requestPolicy?: Pick<RequestPolicy, "googleOmitSampling" | "googlePinMaxOutputTokens" | "googleNativeReplay">;
 }
 
 export function streamFactoryDroidGemini(
@@ -332,15 +407,22 @@ export function streamFactoryDroidGemini(
 		let firstEventTimer: NodeJS.Timeout | undefined;
 
 		try {
-			const { contents, systemInstruction } = toGeminiContents(model, context);
+			const policy = options.requestPolicy ?? {};
+			const nativeReplay = policy.googleNativeReplay === true;
+			const { contents, systemInstruction } = toGeminiContents(model, context, nativeReplay);
 			let body: Record<string, unknown> = {
 				model: model.requestModelId ?? model.id,
 				contents,
 				...(systemInstruction ? { systemInstruction } : {}),
 				generationConfig: {
-					temperature: options.temperature ?? 1,
-					topP: options.topP ?? 0.95,
-					topK: options.topK ?? 64,
+					...(policy.googleOmitSampling
+						? {}
+						: {
+								temperature: options.temperature ?? 1,
+								topP: options.topP ?? 0.95,
+								topK: options.topK ?? 64,
+							}),
+					...(policy.googlePinMaxOutputTokens ? { maxOutputTokens: model.maxTokens } : {}),
 					...(options.stopSequences !== undefined ? { stopSequences: options.stopSequences } : {}),
 					thinkingConfig:
 						options.disableReasoning === true
@@ -401,6 +483,8 @@ export function streamFactoryDroidGemini(
 			let finishReason: string | undefined;
 			let blockReason: string | undefined;
 			const toolCallIndices: number[] = [];
+			// Native replay keeps every streamed part in order, merged like the CLI.
+			let nativeContent: GeminiNativeContentPayload["content"] | undefined;
 
 			clearTimeout(firstEventTimer);
 			const chunks = iterateWithIdleTimeout(
@@ -432,7 +516,14 @@ export function streamFactoryDroidGemini(
 				// intermediate reasons before the terminal one).
 				finishReason = chunk.candidates?.[0]?.finishReason ?? finishReason;
 				blockReason = chunk.promptFeedback?.blockReason ?? blockReason;
-				const parts = chunk.candidates?.[0]?.content?.parts ?? [];
+				const candidateContent = chunk.candidates?.[0]?.content;
+				if (nativeReplay && candidateContent) {
+					const { parts: chunkParts, ...fields } = structuredClone(candidateContent);
+					nativeContent ??= { parts: [] };
+					Object.assign(nativeContent, fields);
+					nativeContent.parts.push(...((chunkParts ?? []) as unknown as Record<string, unknown>[]));
+				}
+				const parts = candidateContent?.parts ?? [];
 				for (const part of parts) {
 					if (part.functionCall) {
 						textBlocks.close();
@@ -476,6 +567,13 @@ export function streamFactoryDroidGemini(
 						kind: "incomplete-stream",
 					},
 				);
+			}
+			if (nativeContent) {
+				output.providerPayload = {
+					type: "geminiNativeContent",
+					digest: geminiTurnDigest(output.content),
+					content: nativeContent,
+				};
 			}
 			for (const contentIndex of toolCallIndices) {
 				const toolCall = output.content[contentIndex] as ToolCall;

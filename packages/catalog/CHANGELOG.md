@@ -5,6 +5,7 @@
 ### Added
 
 - Added Factory Droid GPT-6 Sol and Luna Fast Mode, GPT-6 Astra and GPT-6.1 Sol Ultra Fast (after the high-cost opt-in), Nemotron 3.5 Super, Muse Spark Open, Muse Spark 1.2 and Beam 1.0, each shown once the account's feature flag enables it
+- Added Factory Droid Gemini 4 Argon, shown on Global inference once the account's feature flag enables it
 
 ### Changed
 
