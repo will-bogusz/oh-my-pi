@@ -3978,8 +3978,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-same-reading-key-window",
    "host": "MacBook-Pro",
    "added": "2026-10-18T14:05:14Z",
-   "updated": "2026-10-18T14:05:14Z",
-   "note": ""
+   "updated": "2026-10-18T14:05:20Z",
+   "note": "queued behind #16185 (S1Keeper 2026-10-18); review 815304c43c needs-changes, both findings fixed in 8a8ff32957 with test; bench kw3: red fails new test, fix green except main's #16187 test"
   }
  ],
  "watch": {
