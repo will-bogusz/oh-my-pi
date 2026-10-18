@@ -6899,6 +6899,24 @@
    "updated": "2026-10-18T20:08:53Z",
    "note": "",
    "advanced": "2026-10-18T20:08:53Z"
+  },
+  {
+   "id": "anthropic-refusal-handoff",
+   "branch": "will/anthropic-refusal-handoff",
+   "title": "fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff",
+   "area": "providers",
+   "priority": "P1",
+   "needs": [],
+   "base": "151bc26cdc3cfb93291235d537a0fd68d1e76746",
+   "body": "bodies/anthropic-refusal-handoff.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-refusal-handoff",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T20:09:46Z",
+   "updated": "2026-10-18T20:09:46Z",
+   "note": ""
   }
  ],
  "watch": {
