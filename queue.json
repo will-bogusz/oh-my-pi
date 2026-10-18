@@ -10401,7 +10401,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gemini-tool-result-order",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:29Z",
-   "updated": "2026-10-18T23:15:03Z",
+   "updated": "2026-10-18T23:15:21Z",
    "note": "",
    "built": [
     {
@@ -10505,7 +10505,8 @@
     }
    ],
    "advanced": "2026-10-18T21:41:26Z",
-   "opened": "2026-10-18T23:15:02Z"
+   "opened": "2026-10-18T23:15:02Z",
+   "readied": "2026-10-18T23:15:20Z"
   },
   {
    "id": "factory-droid-org-lookup",
