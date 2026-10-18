@@ -11,7 +11,7 @@ import {
 	notifyWorkspaceWatchedFiles,
 	sendRequest,
 } from "./client";
-import { getConfig, getServersForFile } from "./config";
+import { getConfig, getLspRootForFile, getServersForFile } from "./config";
 import {
 	captureDiagnosticVersions,
 	captureOpenFileVersions,
@@ -44,18 +44,20 @@ function supportsTsserverRequest(capabilities: unknown): boolean {
  * typescript-language-server; every other server proceeds without a barrier.
  */
 async function reloadTypeScriptProjectsAfterCreate(
+	createdPath: string,
 	cwd: string,
 	servers: Array<[string, ServerConfig]>,
 	signal?: AbortSignal,
 	{ createMissing = true }: { createMissing?: boolean } = {},
 ): Promise<void> {
+	const root = getLspRootForFile(createdPath, cwd);
 	await Promise.all(
 		servers.map(async ([, serverConfig]) => {
 			let client: LspClient | undefined;
 			try {
 				client = createMissing
-					? await getOrCreateClient(serverConfig, cwd, undefined, signal)
-					: await getActiveOrPendingClient(serverConfig, cwd, signal);
+					? await getOrCreateClient(serverConfig, root, undefined, signal)
+					: await getActiveOrPendingClient(serverConfig, root, signal);
 			} catch {
 				signal?.throwIfAborted();
 				return;
@@ -439,7 +441,9 @@ async function runLspWritethrough(
 	// Capture diagnostic versions BEFORE syncing to detect stale diagnostics
 	// Bound client creation by the writethrough budget: a hung/broken server
 	// must not add its full init wait (30s default) to every edit.
-	const minVersionsPromise = enableDiagnostics ? captureDiagnosticVersions(cwd, servers, 5_000, signal) : undefined;
+	const minVersionsPromise = enableDiagnostics
+		? captureDiagnosticVersions(dst, cwd, servers, 5_000, signal)
+		: undefined;
 	let minVersions = useCustomFormatter ? undefined : await minVersionsPromise;
 	let expectedDocumentVersions: ServerVersionMap | undefined;
 
@@ -483,7 +487,7 @@ async function runLspWritethrough(
 				await commitWrite();
 				await notifyWriteCommitted(operationSignal);
 				if (changeType === FileChangeType.Created) {
-					await reloadTypeScriptProjectsAfterCreate(cwd, lspServers, operationSignal, {
+					await reloadTypeScriptProjectsAfterCreate(dst, cwd, lspServers, operationSignal, {
 						createMissing: enableDiagnostics,
 					});
 				}
@@ -496,7 +500,7 @@ async function runLspWritethrough(
 				if (changeType === FileChangeType.Created) {
 					await commitWrite();
 					await notifyWriteCommitted(operationSignal);
-					await reloadTypeScriptProjectsAfterCreate(cwd, lspServers, operationSignal);
+					await reloadTypeScriptProjectsAfterCreate(dst, cwd, lspServers, operationSignal);
 				}
 
 				// 1. Sync original content to LSP servers

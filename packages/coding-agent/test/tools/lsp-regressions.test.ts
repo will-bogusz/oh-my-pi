@@ -3691,6 +3691,93 @@ describe("lsp regressions", () => {
 		}
 	});
 
+	it("keeps the session root for its own checkout and roots another checkout at its own root", async () => {
+		const tempDir = TempDir.createSync("@omp-lsp-checkout-root-");
+		try {
+			const mainRoot = path.join(tempDir.path(), "main");
+			const siblingRoot = path.join(tempDir.path(), "feature");
+			const sessionCwd = path.join(mainRoot, "packages", "app");
+			await fsp.mkdir(path.join(mainRoot, ".git"), { recursive: true });
+			await fsp.mkdir(sessionCwd, { recursive: true });
+			// A linked git worktree carries a `.git` file, not a directory.
+			await Bun.write(path.join(siblingRoot, ".git"), "gitdir: ../main/.git/worktrees/feature\n");
+
+			expect(lspConfig.getLspRootForFile(path.join(sessionCwd, "src", "a.ts"), sessionCwd)).toBe(sessionCwd);
+			expect(lspConfig.getLspRootForFile(path.join(mainRoot, "packages", "lib", "b.ts"), sessionCwd)).toBe(
+				sessionCwd,
+			);
+			expect(lspConfig.getLspRootForFile(path.join(siblingRoot, "packages", "app", "a.ts"), sessionCwd)).toBe(
+				siblingRoot,
+			);
+			expect(lspConfig.getLspRootForFile(path.join(tempDir.path(), "loose.ts"), sessionCwd)).toBe(sessionCwd);
+		} finally {
+			tempDir.removeSync();
+		}
+	});
+
+	it("serves a file in a sibling checkout from a client rooted at that checkout", async () => {
+		const tempDir = TempDir.createSync("@omp-lsp-sibling-checkout-");
+		const sessionRoot = path.join(tempDir.path(), "main");
+		const siblingRoot = path.join(tempDir.path(), "feature");
+		const filePath = path.join(siblingRoot, "src", "target.py");
+		const uri = fileToUri(filePath);
+		try {
+			await fsp.mkdir(path.join(sessionRoot, ".git"), { recursive: true });
+			await Bun.write(path.join(siblingRoot, ".git"), "gitdir: ../main/.git/worktrees/feature\n");
+			await Bun.write(filePath, "def target():\n    return 1\nvalue = target()\n");
+			const serverConfig: ServerConfig = {
+				command: "fake-pyls",
+				fileTypes: ["py"],
+				rootMarkers: [],
+				isLinter: true,
+			};
+			const server = installFakeLsp((message, srv) => {
+				if (message.method === "initialize") {
+					srv.send({ jsonrpc: "2.0", id: message.id, result: { capabilities: { referencesProvider: true } } });
+				} else if (message.method === "textDocument/references") {
+					srv.send({
+						jsonrpc: "2.0",
+						id: message.id,
+						result: [{ uri, range: { start: { line: 2, character: 8 }, end: { line: 2, character: 14 } } }],
+					});
+				} else if (message.method === "shutdown") {
+					srv.send({ jsonrpc: "2.0", id: message.id, result: null });
+				} else if (message.method === "exit") {
+					srv.exit(0);
+				}
+			});
+			vi.spyOn(lspConfig, "loadConfig").mockReturnValue({
+				servers: { "fake-pyls": serverConfig },
+				idleTimeoutMs: undefined,
+			});
+
+			await new LspTool(makeLspSession(sessionRoot)).execute("sibling-references", {
+				action: "references",
+				file: filePath,
+				line: 1,
+				symbol: "target",
+			});
+
+			const init = server.received.find(message => message.method === "initialize");
+			expect(init?.params).toMatchObject({
+				rootUri: fileToUri(siblingRoot),
+				workspaceFolders: [{ uri: fileToUri(siblingRoot), name: "feature" }],
+			});
+
+			// A harness edit in the sibling checkout reaches the client rooted there.
+			await lspClient.notifyWorkspaceWatchedFiles(sessionRoot, [
+				{ filePath, type: lspClient.FileChangeType.Changed },
+			]);
+			const watched = await server.waitFor(message => message.method === "workspace/didChangeWatchedFiles");
+			expect(watched.params).toEqual({ changes: [{ uri, type: lspClient.FileChangeType.Changed }] });
+		} finally {
+			configCache.delete(sessionRoot);
+			configCache.delete(siblingRoot);
+			await lspClient.shutdownAll();
+			tempDir.removeSync();
+		}
+	});
+
 	it("skips disk reconciliation while an OMP write holds the overlay ahead of disk", async () => {
 		const tempDir = TempDir.createSync("@omp-lsp-pending-write-");
 		const filePath = path.join(tempDir.path(), "target.py");

@@ -14,7 +14,7 @@ import {
 	syncContent,
 	WARMUP_TIMEOUT_MS,
 } from "./client";
-import { getServersForFile, type LspConfig, loadConfig } from "./config";
+import { getLspRootForFile, getServersForFile, type LspConfig, loadConfig } from "./config";
 import { MUX_RESTART_METHOD } from "./mux/protocol";
 import type { LspClient, ServerConfig } from "./types";
 import { uriToFile } from "./utils";
@@ -142,6 +142,7 @@ export async function syncFileContent(
 	createMissing = true,
 ): Promise<void> {
 	throwIfAborted(signal);
+	const root = getLspRootForFile(absolutePath, cwd);
 	await Promise.allSettled(
 		servers.map(async ([_serverName, serverConfig]) => {
 			throwIfAborted(signal);
@@ -149,8 +150,8 @@ export async function syncFileContent(
 				return;
 			}
 			const client = createMissing
-				? await getOrCreateClient(serverConfig, cwd, undefined, signal)
-				: await getActiveOrPendingClient(serverConfig, cwd, signal);
+				? await getOrCreateClient(serverConfig, root, undefined, signal)
+				: await getActiveOrPendingClient(serverConfig, root, signal);
 			if (!client) return;
 			throwIfAborted(signal);
 			await syncContent(client, absolutePath, content, signal);
@@ -175,6 +176,7 @@ export async function notifyFileSaved(
 	createMissing = true,
 ): Promise<void> {
 	throwIfAborted(signal);
+	const root = getLspRootForFile(absolutePath, cwd);
 	await Promise.allSettled(
 		servers.map(async ([_serverName, serverConfig]) => {
 			throwIfAborted(signal);
@@ -182,8 +184,8 @@ export async function notifyFileSaved(
 				return;
 			}
 			const client = createMissing
-				? await getOrCreateClient(serverConfig, cwd, undefined, signal)
-				: await getActiveOrPendingClient(serverConfig, cwd, signal);
+				? await getOrCreateClient(serverConfig, root, undefined, signal)
+				: await getActiveOrPendingClient(serverConfig, root, signal);
 			if (!client) return;
 			await notifySaved(client, absolutePath, signal);
 		}),

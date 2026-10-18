@@ -2,7 +2,7 @@ import * as path from "node:path";
 import { isEnoent, logger, postmortem, ptree, stableStringifyJson, untilAborted } from "@oh-my-pi/pi-utils";
 import { encodeMessageFrame, MessageFramer } from "../jsonrpc/message-framing";
 import { ToolAbortError, throwIfAborted } from "../tools/tool-errors";
-import { getConfig } from "./config";
+import { getConfig, getLspRootForFile } from "./config";
 import { applyWorkspaceEdit, type ExecutedWorkspaceChange } from "./edits";
 import { getLspmuxCommand, isLspmuxSupported } from "./lspmux";
 import { connectSharedLspTransport } from "./mux/daemon";
@@ -621,9 +621,12 @@ async function reconcileExecutedChanges(
 ): Promise<void> {
 	if (executed.length === 0) return;
 	const { finalUris, deletedRoots, watchedFiles } = workspaceEditChanges(executed);
-	const workspace = path.resolve(cwd);
+	const roots = sessionClientRoots(
+		cwd,
+		watchedFiles.map(change => change.filePath),
+	);
 	const activeClients = Array.from(clients.values()).filter(
-		client => client.status === "ready" && path.resolve(client.cwd) === workspace,
+		client => client.status === "ready" && roots.has(path.resolve(client.cwd)),
 	);
 
 	for (const activeClient of activeClients) {
@@ -1553,13 +1556,22 @@ function isPathInsideWorkspace(filePath: string, workspace: string): boolean {
 	return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
+/** Roots of the clients that serve `filePaths` for a session at `cwd`, the session root included. */
+function sessionClientRoots(cwd: string, filePaths: readonly string[]): Set<string> {
+	const roots = new Set([path.resolve(cwd)]);
+	for (const filePath of filePaths) roots.add(path.resolve(getLspRootForFile(filePath, cwd)));
+	return roots;
+}
+
 /** Budget for the one-way watched-files notification: a wedged server that
  *  stops draining stdin must never hang the filesystem mutation that
  *  triggered it. Failures degrade to a debug log below. */
 const WATCHED_FILES_NOTIFY_TIMEOUT_MS = 2_000;
 
 /**
- * Announce harness-authored filesystem changes to active LSP clients for `cwd`.
+ * Announce harness-authored filesystem changes to the active LSP clients a session
+ * at `cwd` uses: its own, and those rooted at another checkout a changed file lives
+ * in ({@link getLspRootForFile}). Each client hears only the changes under its root.
  *
  * Created or deleted files can change module resolution for otherwise untouched
  * open documents, so those overlays are refreshed after the watcher notification.
@@ -1578,9 +1590,12 @@ export async function notifyWorkspaceWatchedFiles(
 	throwIfAborted(signal);
 	if (changes.length === 0) return;
 
-	const workspace = path.resolve(cwd);
+	const roots = sessionClientRoots(
+		cwd,
+		changes.map(change => change.filePath),
+	);
 	const activeClients = Array.from(clients.values()).filter(
-		client => client.status === "ready" && path.resolve(client.cwd) === workspace,
+		client => client.status === "ready" && roots.has(path.resolve(client.cwd)),
 	);
 	if (activeClients.length === 0) return;
 
@@ -1589,7 +1604,7 @@ export async function notifyWorkspaceWatchedFiles(
 	const results = await Promise.allSettled(
 		activeClients.map(async client => {
 			const clientChanges = changes
-				.filter(change => isPathInsideWorkspace(change.filePath, workspace))
+				.filter(change => isPathInsideWorkspace(change.filePath, path.resolve(client.cwd)))
 				.map(change => {
 					const uri = fileToUri(change.filePath);
 					client.diagnostics.delete(uri);

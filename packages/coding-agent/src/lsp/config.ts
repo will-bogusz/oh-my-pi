@@ -217,6 +217,30 @@ export function hasRootMarkerAncestor(filePath: string, markers: string[]): bool
 	}
 }
 
+/**
+ * Workspace root a language server should use for `filePath`.
+ *
+ * Files under `cwd`, or in the checkout that contains `cwd`, keep the session
+ * root. A file in another checkout (a sibling git worktree, another repository)
+ * gets a server rooted at that checkout: a server rooted at `cwd` never loads
+ * that project, so rust-analyzer finds no references there and other servers
+ * answer from the session checkout's copy.
+ */
+export function getLspRootForFile(filePath: string, cwd: string): string {
+	const file = path.resolve(filePath);
+	if (pathIsWithin(cwd, file)) return cwd;
+
+	let dir = path.dirname(file);
+	while (true) {
+		if (fs.existsSync(path.join(dir, ".git"))) {
+			return pathIsWithin(dir, cwd) ? cwd : dir;
+		}
+		const parent = path.dirname(dir);
+		if (parent === dir) return cwd;
+		dir = parent;
+	}
+}
+
 // =============================================================================
 // Local Binary Resolution
 // =============================================================================
