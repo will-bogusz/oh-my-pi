@@ -2872,7 +2872,7 @@
    ],
    "base": "c5d49dda61e5160c9a359f68e4a881ed7fb1eff3",
    "body": "bodies/relay-popup-front.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [
     15611
@@ -2880,8 +2880,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T00:07:33Z",
-   "note": ""
+   "updated": "2026-10-18T18:48:00Z",
+   "note": "superseded 2026-10-18 by relay-popup-front-main (standalone on main: triggers on CDP Page.windowOpen instead of relay-popup-owned's popupCreated); branch will/relay-popup-front kept; reopen with --state queued"
   },
   {
    "id": "display-turn-hold",
