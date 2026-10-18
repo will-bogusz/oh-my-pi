@@ -902,14 +902,15 @@
    ],
    "base": null,
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15176,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-escape-takeover-only",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T05:23:36Z",
-   "note": "ready by Will's call 2026-10-18, merges after #15184 (real conflict in macos/skylight.rs, ax.rs; resolution prepared in restack-20261018b/merge-15184-15176.diff); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours"
+   "updated": "2026-10-18T10:58:33Z",
+   "note": "ready by Will's call 2026-10-18, merges after #15184 (real conflict in macos/skylight.rs, ax.rs; resolution prepared in restack-20261018b/merge-15184-15176.diff); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours",
+   "merged_by": "pr"
   },
   {
    "id": "background-input",
