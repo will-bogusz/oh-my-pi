@@ -12650,5 +12650,11 @@
     "why": "opened as #16241"
    }
   ]
+ },
+ "opening": {
+  "id": "gemini-tool-result-order",
+  "token": "ee9bafc4f48546a38c34c511999745df",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T22:17:38Z"
  }
 }
