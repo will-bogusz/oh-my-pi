@@ -1059,8 +1059,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-background-fallback",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T05:23:52Z",
-   "note": "ready by Will's call 2026-10-18, merges after #15563 and item 14 (needs #15185); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours"
+   "updated": "2026-10-18T08:44:04Z",
+   "note": "ready by Will's call 2026-10-18, merges after #15563 and item 14 (needs #15185); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; shares native ErrorCode UserIntervened with #15562 (same name/wire/doc, S1Keeper 2026-10-18): the second to merge takes one copy; merge-tree + cargo check of both orders before either merges"
   },
   {
    "id": "computer-release-on-death",
