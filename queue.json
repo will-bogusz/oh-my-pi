@@ -5241,6 +5241,24 @@
    "added": "2026-10-18T19:40:50Z",
    "updated": "2026-10-18T19:40:50Z",
    "note": ""
+  },
+  {
+   "id": "snapcompact-archive-persist",
+   "branch": "will/snapcompact-archive-persist",
+   "title": "fix(coding-agent): persist snapcompact archive source text whole",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/snapcompact-archive-persist.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-archive-persist",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:41:21Z",
+   "updated": "2026-10-18T19:41:21Z",
+   "note": ""
   }
  ],
  "watch": {
