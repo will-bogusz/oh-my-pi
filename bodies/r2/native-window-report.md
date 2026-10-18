@@ -25,6 +25,8 @@ Before, these windows appear while the call reports success. Read `roster.rs`, `
 
 Non-goals: answering the windows; Linux and Windows. Untested: a window the user opens in that browser inside the tab's frame mid-call would be named.
 
+Known limit: a picker opened in a tab omp holds in the background, such as a relay tab it opened itself (#16119), isn't named.
+
 ## Testing
 
 macOS 26 VM, Chrome for Testing 150, TextEdit frontmost, a TextEdit window opened over the tab during each call. Managed `headed` tab and a relay tab borrowed by `app.target`; arms `af86757741` (before) and this head `c43fc6560d`. Calls wait 700 ms after the click so TextEdit's window shows mid-call.

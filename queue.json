@@ -2652,7 +2652,6 @@
    "area": "browser",
    "priority": "P2",
    "needs": [
-    "#15105",
     "#15508"
    ],
    "base": "fe06ba979b6192877fa4f416b82de78272fdded1",
@@ -2665,8 +2664,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-native-window-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T23:27:29Z",
-   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): held behind #15105 and #15508 per Will; no code need on #15105; sits on main + #15508 head 5ccf9eac6b"
+   "updated": "2026-10-18T23:32:44Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main + #15508 head 5ccf9eac6b (adjacent print-hold lines)"
   },
   {
    "id": "test-ownership-lock",
