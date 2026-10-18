@@ -749,18 +749,11 @@ impl UserSwitchWatch {
 
 	fn observe(&mut self, signals: SwitchSignals, front: ProcessSerialNumber, now: Instant) {
 		if signals.buttons != self.buttons {
-			// A press, not its release, is the click: the sampler can see the two
-			// on separate readings.
-			let pressed = [0, 2, 4]
-				.into_iter()
-				.any(|i| signals.buttons[i] != self.buttons[i]);
 			self.buttons = signals.buttons;
 			// A click in the user's own app, menus included, picks no app: the
 			// target activating itself right after is still sent back.
 			if signals.in_user_app {
-				if pressed {
-					self.own_click = Some(signals.last_click.unwrap_or(now));
-				}
+				self.own_click = Some(signals.last_click.unwrap_or(now));
 			} else {
 				self.click = Some(signals.last_click.unwrap_or(now));
 			}
@@ -769,17 +762,10 @@ impl UserSwitchWatch {
 	}
 
 	/// Whether a click in the user's own app, seen up to
-	/// [`USER_SWITCH_WINDOW`] before `now`, may have picked another of their
-	/// windows.
-	fn own_click_since(&self, now: Instant) -> bool {
-		self
-			.own_click
-			.is_some_and(|at| now.saturating_duration_since(at) <= USER_SWITCH_WINDOW)
-	}
-
-	/// [`Self::own_click_since`], using the click up: one click explains one
-	/// change of the user's key window; a later change, such as a window opened
-	/// from the keyboard, is the user's switch.
+	/// [`USER_SWITCH_WINDOW`] before `now`, explains a change of their key
+	/// window: it may have picked another of their windows. One click explains
+	/// one change; a later change, such as a window opened from the keyboard,
+	/// is the user's switch.
 	fn take_own_click(&mut self, now: Instant) -> bool {
 		self
 			.own_click
@@ -1268,14 +1254,13 @@ fn guard_focus(
 					// front again: that click may have picked another of its
 					// windows, which is then the one the lease keeps. That read can
 					// block, so the window is put back only while their app is still
-					// in front and the lease armed, and the click is used up only
-					// then. Otherwise the re-check observed instead (a disarm it
-					// recorded stops the hand-backs from the next poll), or
-					// `WindowServer` refused.
+					// in front and the lease armed. Otherwise the re-check observed
+					// instead (a disarm it recorded stops the hand-backs from the
+					// next poll), or `WindowServer` refused.
 					if handed_back == Some(FrontRequest::Done) {
 						let (kept, own_click) = {
-							let lease = lease.lock();
-							(lease.key, lease.user.own_click_since(desktop.now()))
+							let mut lease = lease.lock();
+							(lease.key, lease.user.take_own_click(desktop.now()))
 						};
 						let fresh = if own_click { desktop.user_key() } else { None };
 						let current =
@@ -1286,11 +1271,7 @@ fn guard_focus(
 									"background key-window restoration was rejected",
 								));
 							}
-							let mut lease = lease.lock();
-							lease.key = Some(key);
-							if own_click {
-								lease.user.own_click = None;
-							}
+							lease.lock().key = Some(key);
 						}
 					}
 				}
