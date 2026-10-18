@@ -4424,7 +4424,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/screenshot-session-abort",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:16Z",
-   "updated": "2026-10-18T18:23:20Z",
+   "updated": "2026-10-18T18:23:35Z",
    "note": "",
    "built": [
     {
@@ -4509,7 +4509,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-18T18:23:20Z"
+   "opened": "2026-10-18T18:23:20Z",
+   "readied": "2026-10-18T18:23:35Z"
   },
   {
    "id": "todo-serial-tools",
