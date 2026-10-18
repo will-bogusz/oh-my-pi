@@ -575,13 +575,10 @@ impl BackgroundFocusLease {
 		activity: [u32; 5],
 		on_target: bool,
 	) -> FocusDecision {
-		// A key or modifier press may have switched apps (⌘-Tab, Spotlight); a
-		// click did only if the poll placed it on the target.
-		let switched = on_target || activity[3..] != self.activity[3..];
 		if self.disarmed
 			|| (front != self.previous && front != self.target)
 			|| (front == self.previous && key.is_some_and(|key| Some(key) != self.key))
-			|| (front == self.target && (switched || self.click_polls > 0))
+			|| (front == self.target && (activity != self.activity || self.click_polls > 0))
 		{
 			// The target in front now is the user's: they acted there, or the
 			// lease no longer sends it back.
@@ -589,7 +586,9 @@ impl BackgroundFocusLease {
 			self.disarmed = true;
 			return FocusDecision::Disarm;
 		}
-		if front == self.previous {
+		if front == self.target {
+			FocusDecision::Restore
+		} else {
 			// Typing or clicking in the user's original window while it is still
 			// frontmost is not a focus change. Remember it so a later app reflex
 			// can be contained. A click on the target brings it forward only on a
@@ -599,13 +598,7 @@ impl BackgroundFocusLease {
 			} else {
 				self.click_polls.saturating_sub(1)
 			};
-		}
-		// A click in the user's own app seen in the poll that finds the target
-		// in front is absorbed too, so the hand-back's re-check still holds.
-		self.activity = activity;
-		if front == self.target {
-			FocusDecision::Restore
-		} else {
+			self.activity = activity;
 			FocusDecision::Observe
 		}
 	}
@@ -1569,6 +1562,22 @@ mod tests {
 		let mut guard = lease();
 		assert_eq!(guard.observe(target, None, clicked, true), FocusDecision::Disarm);
 		assert!(guard.visited);
+	}
+
+	#[test]
+	fn probe_a_plain_key_seen_in_the_poll_the_target_comes_forward_is_sent_back() {
+		let previous = ProcessSerialNumber { high: 0, low: 7 };
+		let target = ProcessSerialNumber { high: 0, low: 8 };
+		let mut guard = BackgroundFocusLease {
+			previous,
+			target,
+			key: Some(42),
+			activity: [0; 5],
+			click_polls: 0,
+			disarmed: false,
+			visited: false,
+		};
+		assert_eq!(guard.observe(target, None, [0, 0, 0, 1, 0], false), FocusDecision::Restore);
 	}
 
 	#[test]
