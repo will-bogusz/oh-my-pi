@@ -7852,7 +7852,7 @@
    "area": "agent",
    "priority": "P2",
    "needs": [],
-   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "base": "151bc26cdc3cfb93291235d537a0fd68d1e76746",
    "body": "bodies/wait-queued-completion.md",
    "state": "queued",
    "pr": null,
@@ -7860,7 +7860,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wait-queued-completion",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:41:43Z",
-   "updated": "2026-10-18T20:12:47Z",
+   "updated": "2026-10-18T20:13:42Z",
    "note": "",
    "built": [
     {
@@ -8115,7 +8115,8 @@
      "at": "2026-10-18T20:12:47Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "advanced": "2026-10-18T20:13:42Z"
   },
   {
    "id": "builtin-rule-conditions",
