@@ -5223,6 +5223,24 @@
    "added": "2026-10-18T19:40:09Z",
    "updated": "2026-10-18T19:40:09Z",
    "note": ""
+  },
+  {
+   "id": "pip-uv-venv",
+   "branch": "will/pip-uv-venv",
+   "title": "fix(coding-agent): install with %pip into venvs that have no pip",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/pip-uv-venv.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/pip-uv-venv",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:40:50Z",
+   "updated": "2026-10-18T19:40:50Z",
+   "note": ""
   }
  ],
  "watch": {
