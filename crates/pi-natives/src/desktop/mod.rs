@@ -3106,7 +3106,7 @@ mod capture_tests {
 
 	fn press_request(reference: &str) -> impl FnOnce(Reply) -> Request {
 		let reference = reference.to_string();
-		move |reply| Request::AxPerform { reference, action: "press".to_string(), reply }
+		move |reply| Request::AxPerform { reference, action: "press".to_string(), menu: None, reply }
 	}
 
 	fn press(worker: &mut Worker, reference: &str) -> CoreResult<()> {
@@ -3149,7 +3149,12 @@ mod capture_tests {
 			|reply| Request::AxAttributes { reference: e2(), reply },
 			|reply| Request::AxChildren { reference: e2(), reply },
 			|reply| Request::AxParent { reference: e2(), reply },
-			|reply| Request::AxPerform { reference: e2(), action: "press".to_string(), reply },
+			|reply| Request::AxPerform {
+				reference: e2(),
+				action: "press".to_string(),
+				menu: None,
+				reply,
+			},
 			|reply| Request::AxSetValue { reference: e2(), value: "Stop".to_string(), reply },
 			|reply| Request::AxFocus { reference: e2(), reply },
 			|reply| Request::AxClick {
