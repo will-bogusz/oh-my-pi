@@ -2627,6 +2627,25 @@ mod tests {
 	}
 
 	#[test]
+	fn a_cancel_once_the_input_is_out_keeps_it_through_the_settle() {
+		// main's call sites: `action().and_then(|v| control::wait(FOREGROUND_SETTLE)...)`
+		// and `run_then_settle(action, || control::wait(BACKGROUND_SETTLE))`.
+		let source = control::CancellationSource::default();
+		let token = source.token();
+		let result = control::with_token_for_test(&token, || {
+			run_then_settle(
+				|| {
+					source.cancel();
+					Ok(7)
+				},
+				|| control::wait(FOREGROUND_SETTLE),
+			)
+		});
+		assert_eq!(result.ok(), Some(7));
+		assert!(token.check().is_err(), "the cancel still stops what follows");
+	}
+
+	#[test]
 	fn a_failed_action_still_settles_under_the_guard() {
 		// AXOpen in Chrome's Open panel fails with -25205, then Chrome comes
 		// forward: the guard must still be watching.

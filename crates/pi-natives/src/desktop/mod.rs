@@ -2717,6 +2717,9 @@ mod capture_tests {
 		cancel_on_capabilities: Arc<Mutex<Option<CancellationSource>>>,
 		snapshot_error:         Arc<Mutex<bool>>,
 		cancel_on_snapshot:     Arc<Mutex<Option<CancellationSource>>>,
+		/// Cancelled once a key chord has gone out, as a cancel landing in the
+		/// shortcut's reply wait is.
+		cancel_after_chord:     Arc<Mutex<Option<CancellationSource>>>,
 		screen:                 Arc<Mutex<ScreenState>>,
 		/// Display selector each `screen_state` read was narrowed to.
 		screen_displays:        Arc<Mutex<Vec<Option<String>>>>,
@@ -2782,6 +2785,7 @@ mod capture_tests {
 				cancel_on_capabilities: Arc::new(Mutex::new(None)),
 				snapshot_error: Arc::new(Mutex::new(false)),
 				cancel_on_snapshot: Arc::new(Mutex::new(None)),
+				cancel_after_chord: Arc::new(Mutex::new(None)),
 				screen: Arc::new(Mutex::new(ScreenState::default())),
 				screen_displays: Arc::new(Mutex::new(Vec::new())),
 				awake: Arc::new(Mutex::new(Vec::new())),
@@ -3129,6 +3133,9 @@ mod capture_tests {
 			_: &OperationToken,
 		) -> CoreResult<()> {
 			self.modes.lock().push(mode);
+			if let Some(source) = self.cancel_after_chord.lock().take() {
+				source.cancel();
+			}
 			Ok(())
 		}
 
@@ -4587,6 +4594,30 @@ mod capture_tests {
 		);
 		assert_eq!(worker.frame(&target).unwrap(), original);
 		assert!(worker.execute(&request, &source.token()).is_ok());
+	}
+
+	#[test]
+	fn a_shortcut_sent_before_a_cancel_reports_sent() {
+		let backend = FakeWaylandBackend::new();
+		let cancel = Arc::clone(&backend.cancel_after_chord);
+		let modes = Arc::clone(&backend.modes);
+		let mut worker = worker_with(backend);
+		let source = granted();
+		let target = Target::Window(WAYLAND_ID.to_string());
+		worker
+			.execute(&capture_request(target.clone()), &source.token())
+			.unwrap();
+		// The keys are out when the cancel lands, as in the shortcut's reply wait.
+		*cancel.lock() = Some(source.clone());
+		let token = source.token();
+		let (reply, _rx) = flume::bounded(1);
+		let keys = parse_keys(&["cmd".to_string(), "s".to_string()]).unwrap();
+		let chord = Request::KeyChord { target: target.clone(), keys, takeover: None, reply };
+		assert!(matches!(worker.execute(&chord, &token), Ok(Response::Unit)));
+		assert_eq!(*modes.lock(), [DeliveryMode::Background]);
+		// The cancel stops what was queued behind it.
+		let error = worker.execute(&capture_request(target), &token).err();
+		assert_eq!(error.map(|error| error.code), Some(ErrorCode::Cancelled));
 	}
 
 	#[test]
