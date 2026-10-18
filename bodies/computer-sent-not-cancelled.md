@@ -39,7 +39,7 @@ Failing before, on `main` plus only the tests (`cargo test -p pi-natives --lib`,
 
 With the fix all three pass, as does the rest of `cargo test -p pi-natives --lib` (808 of 809) except `a_click_placed_in_the_users_app_does_not_let_the_target_keep_the_front`, which fails on `main` too. `CI=1 bun check`, `bun run build:native` and the computer bun tests (112) pass.
 
-Not run: the Linux X11 and Windows changes were not compiled or run here (macOS host only); CI covers them. The Screen Sharing wording was not checked against a live Screen Sharing session.
+Not run: the Linux X11 and Windows changes were not compiled here (macOS host only). The Screen Sharing wording was not checked on a live Screen Sharing session.
 
 ---
 
