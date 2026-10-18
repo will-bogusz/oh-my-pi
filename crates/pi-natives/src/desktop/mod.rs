@@ -1149,6 +1149,23 @@ impl Worker {
 		}
 	}
 
+	/// `error` from reading `reference`'s element, naming the ref and its
+	/// window's title and app; the code stays. A `StaleRef` is left to
+	/// [`Self::name_match`] and a cancel stays as it is.
+	fn name_refusal(&mut self, reference: &str, error: DesktopError) -> DesktopError {
+		if matches!(error.code, ErrorCode::StaleRef | ErrorCode::Cancelled) {
+			return error;
+		}
+		let Ok(target) = self.registry.target(reference) else {
+			return error;
+		};
+		let window = match self.window(&Target::Window(target.clone())) {
+			Ok(window) => format!(" in window {target} ({:?} in {})", window.title, window.app),
+			Err(_) => String::new(),
+		};
+		DesktopError::new(error.code, format!("{reference}{window}: {}", error.message))
+	}
+
 	/// Watches the user's own input into the app `request` reads or acts on,
 	/// starting with the first request to name it. Input to an app the user
 	/// has used since the session last read it waits for them to pause, then
@@ -1508,7 +1525,10 @@ impl Worker {
 			},
 			Request::AxMarkdown { reference, .. } => {
 				let h = self.registry.resolve(reference)?;
-				Ok(Response::Text(self.ax()?.markdown(&h)?))
+				let markdown = self.ax()?.markdown(&h);
+				markdown
+					.map(Response::Text)
+					.map_err(|error| self.name_refusal(reference, error))
 			},
 			Request::AxAttributes { reference, .. } => {
 				let h = self.registry.resolve(reference)?;
@@ -2703,6 +2723,8 @@ mod capture_tests {
 		probes:            u32,
 		/// Calls that read an element's fields.
 		reads:             u32,
+		/// What a Markdown read refuses with, as a secure field's would.
+		markdown_refusal:  Option<&'static str>,
 		/// Runs as each press is delivered and as each probe asks.
 		on_call:           Option<Box<dyn Fn(Call) + Send>>,
 	}
@@ -2984,7 +3006,11 @@ mod capture_tests {
 				.as_ref()
 				.expect("formatted text needs a tree")
 				.lock();
-			Ok(format!("**{}**", tree.titles[&tree.element(h)?]))
+			let id = tree.element(h)?;
+			if let Some(refusal) = tree.markdown_refusal {
+				return Err(DesktopError::ax_failed(refusal));
+			}
+			Ok(format!("**{}**", tree.titles[&id]))
 		}
 
 		fn destroyed(&mut self, h: &AxHandle) -> bool {
@@ -3890,6 +3916,22 @@ mod capture_tests {
 			assert_eq!(named(&error, "e2").as_deref(), Some("e4"));
 		}
 		assert!(tree.lock().pressed.is_empty());
+	}
+
+	#[test]
+	fn a_refused_markdown_read_names_the_ref_and_its_window() {
+		let (mut worker, tree) = read_buttons(&[(2, "Go")]);
+		tree.lock().markdown_refusal = Some("a secure text field's text is never read");
+		let read = |reply| Request::AxMarkdown { reference: "e2".to_string(), reply };
+		let error = call(&mut worker, read, &granted()).unwrap_err();
+		assert_eq!(error.code, ErrorCode::AxFailed);
+		assert_eq!(
+			error.message,
+			format!(
+				"e2 in window {WAYLAND_ID} (\"Obsidian\" in obsidian): a secure text field's text is \
+				 never read"
+			)
+		);
 	}
 
 	#[test]
