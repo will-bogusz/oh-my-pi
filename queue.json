@@ -11745,5 +11745,11 @@
     "why": "opened as #16236"
    }
   ]
+ },
+ "opening": {
+  "id": "pip-uv-venv",
+  "token": "a86b95b9fe184972baa71d68f5888b61",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T21:05:13Z"
  }
 }
