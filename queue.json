@@ -3787,7 +3787,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T11:03:22Z",
+  "checked": "2026-10-18T11:33:52Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -3867,17 +3867,6 @@
      "crates/pi-natives/src/desktop/macos/ax/menus.rs",
      "crates/pi-natives/src/desktop/macos/input.rs",
      "crates/pi-natives/src/desktop/macos/mod.rs",
-     "crates/pi-natives/src/desktop/macos/skylight.rs",
-     "crates/pi-natives/src/desktop/mod.rs"
-    ]
-   },
-   "#15563": {
-    "since": "2026-10-18T11:03:22Z",
-    "title": "feat(computer): type into one element with el.type and el.press, sending nothing if it won't take focus",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/applications.rs",
-     "crates/pi-natives/src/desktop/macos/ax.rs",
-     "crates/pi-natives/src/desktop/macos/input.rs",
      "crates/pi-natives/src/desktop/macos/skylight.rs",
      "crates/pi-natives/src/desktop/mod.rs"
     ]
