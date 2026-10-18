@@ -11011,6 +11011,26 @@
    "added": "2026-10-18T21:26:57Z",
    "updated": "2026-10-18T21:26:57Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-completions-tool-names",
+   "branch": "will/factory-droid-completions-tool-names",
+   "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests",
+   "area": "providers",
+   "priority": "P1",
+   "needs": [
+    "factory-droid-tool-name-cap"
+   ],
+   "base": "1d183d20ff89c805e32e6f47fcbc3a53e84d4485",
+   "body": "bodies/factory-droid-completions-tool-names.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-completions-tool-names",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T21:33:09Z",
+   "updated": "2026-10-18T21:33:09Z",
+   "note": ""
   }
  ],
  "watch": {
