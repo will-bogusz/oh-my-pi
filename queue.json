@@ -3835,7 +3835,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-sent-not-cancelled",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:09:04Z",
-   "updated": "2026-10-18T13:09:13Z",
+   "updated": "2026-10-18T13:42:54Z",
    "note": "Overlap: #15195, #15563, #15193, #15191, #15185 each fix their own instance of \"input already out reports Cancelled\" (settle/reply waits, run_then_settle BACKGROUND_SETTLE, window_chord reply sleep) in their advance pushes; this entry fixes main-owned ones via control::settle + Worker::execute. Whichever lands second drops its duplicate copy. Red: fork will/s1k-wip/sent-not-cancelled-red."
   },
   {
