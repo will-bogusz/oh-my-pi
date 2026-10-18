@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -71,7 +72,7 @@ import {
 	readPageViewport,
 } from "./launch";
 import { extractReadableFromHtml, type ReadableExtractOptions, type ReadableFormat } from "./readable";
-import { PrintHold } from "./print-hold";
+import { PrintHold, USER_DRIVEN_RELEASE_MS } from "./print-hold";
 import { claimRelayTarget } from "./relay/claim";
 import { assertTabPressArgs } from "./tab-arguments";
 import {
@@ -175,6 +176,7 @@ import {
 	clickElement,
 	composedContains,
 	clickQueryHandlerText,
+	deliverToChooser,
 	dragBetween,
 	fillViaHandle,
 	focusTextEntryTarget,
@@ -214,7 +216,15 @@ import {
 	screenshotThreshold,
 	whileDrawing,
 } from "./screenshot";
-import { RuntimeDialogController, type DialogPolicy, type DialogState } from "./dialogs";
+import {
+	type DialogPolicy,
+	type DialogState,
+	describeAnswer,
+	describeWaiting,
+	PageWaitError,
+	RuntimeDialogController,
+} from "./dialogs";
+import { FileChooserCatcher } from "./file-choosers";
 import { NativeWindowWatch, readTabFrame } from "./native-windows";
 import {
 	type BrowserFrameApi,
@@ -227,7 +237,7 @@ import {
 import { navigateMainFrame, pushState, reloadPage, traverseHistory, type NavigationWaitUntil } from "./navigation";
 
 import { cloneSafe, RunOutput } from "./run-output";
-import { type UploadRoute, UploadStaging } from "./upload-files";
+import { openUploadSources, refuseFolders, type UploadRoute, UploadStaging } from "./upload-files";
 import {
 	type Observation,
 	type ObservationEntry,
@@ -428,7 +438,7 @@ interface TabApi {
 	frames(): Promise<BrowserFrameInfo[]>;
 	frame(selectorOrNameOrUrl: string): Promise<BrowserFrameApi>;
 	dialog(): Promise<DialogState>;
-	handleDialog(opts: { accept: boolean; text?: string }): Promise<void>;
+	handleDialog(opts: { accept: boolean; text?: string; files?: string[] }): Promise<void>;
 	setDialogs(policy: DialogPolicy | null): Promise<void>;
 	/** Without a selector, reads the page `<body>`. */
 	text(selector?: string): Promise<string | null>;
@@ -554,8 +564,7 @@ export type HandleOpGuard = <T>(label: string, fn: (signal: AbortSignal) => Prom
  * work and can therefore stall on a busy page. When {@link toActionableHandle} is given a
  * guard, each is routed through the per-op fail-fast wrapper; without it the inherited
  * puppeteer method runs outside the op map and a stall consumes the whole cell (issue #9535).
- * Pure reads (`boundingBox`, `screenshot`, `evaluate`, queries) are omitted — they are not
- * user-driven actions and keep their native puppeteer behavior.
+ * Reads ({@link READ_HANDLE_METHODS}) keep their native puppeteer behavior apart from the page-wait check.
  */
 const GUARDED_HANDLE_METHODS = [
 	"click",
@@ -578,12 +587,42 @@ const GUARDED_HANDLE_METHODS = [
 	"autofill",
 ] as const satisfies readonly (keyof ElementHandle)[];
 
+/**
+ * `ElementHandle` methods that read the page without acting on it. Given a `read` guard, {@link toActionableHandle}
+ * runs each under the page-wait check, so a handle kept from before the page started waiting on a dialog or a held
+ * chooser fails at once instead of stalling the cell; they get no deadline of their own.
+ */
+const READ_HANDLE_METHODS = [
+	"evaluate",
+	"evaluateHandle",
+	"$eval",
+	"$$eval",
+	"$",
+	"$$",
+	"waitForSelector",
+	"boundingBox",
+	"boxModel",
+	"clickablePoint",
+	"isVisible",
+	"isHidden",
+	"isIntersectingViewport",
+	"screenshot",
+	"contentFrame",
+	"getProperty",
+	"getProperties",
+	"jsonValue",
+	"toElement",
+] as const satisfies readonly (keyof ElementHandle)[];
+
 type GuardedHandleMethod = (typeof GUARDED_HANDLE_METHODS)[number];
+type ReadHandleMethod = (typeof READ_HANDLE_METHODS)[number];
 type RawHandleMethod = (...args: unknown[]) => Promise<unknown>;
 
 interface RawHandleMethods {
 	interactive: Partial<Record<GuardedHandleMethod, RawHandleMethod>>;
+	reads: Partial<Record<ReadHandleMethod, RawHandleMethod>>;
 	type: ElementHandle["type"];
+	/** Why the handle was poisoned: an unfinished action it may still be running. */
 	invalidatedBy?: string;
 }
 
@@ -602,7 +641,7 @@ async function runGuardedHandleAction<T>(
 ): Promise<T> {
 	if (state.invalidatedBy) {
 		throw new ToolError(
-			`${label} cannot run: this handle was invalidated after ${state.invalidatedBy} timed out; ` +
+			`${label} cannot run: this handle was invalidated after ${state.invalidatedBy}; ` +
 				"run tab.observe() or tab.ariaSnapshot() to resolve a fresh handle",
 		);
 	}
@@ -612,7 +651,10 @@ async function runGuardedHandleAction<T>(
 		return await untilAborted(signal, () => pending);
 	} catch (error) {
 		if (!signal.aborted) throw error;
-		state.invalidatedBy = label;
+		// A dialog ending the action stops it mid-way, but the page is fine: no navigation to stop.
+		const byDialog = signal.reason instanceof PageWaitError;
+		state.invalidatedBy = byDialog ? `the page's dialog interrupted ${label}` : `${label} timed out`;
+		if (byDialog) invalidate = undefined;
 		let actionError: unknown;
 		await withTimeout(
 			Promise.all([
@@ -734,21 +776,27 @@ async function adoptElementArgs(
  * dispatch a duplicate retry through the stale handle. Puppeteer handles expose
  * `type()` but no `fill()`; the `fill()` semantics mirror the selector-based
  * `tab.fill()`: focus, clear any existing value, then type, or set the value of a
- * colour, date, time or range input directly.
+ * colour, date, time or range input directly. A `read` guard runs the handle's
+ * reads ({@link READ_HANDLE_METHODS}) under the page-wait check.
  */
 export function toActionableHandle(
 	handle: ElementHandle,
 	guard?: HandleOpGuard,
 	invalidate?: () => Promise<void>,
+	read?: HandleOpGuard,
 	uploads?: HandleUploads,
 ): ActionableHandle {
 	const enriched = handle as HandleWithRawMethods;
-	const methods = enriched as unknown as Partial<Record<GuardedHandleMethod, RawHandleMethod>>;
+	const methods = enriched as unknown as Partial<Record<GuardedHandleMethod | ReadHandleMethod, RawHandleMethod>>;
 	const preserved = enriched[RAW_HANDLE_METHODS];
 	if (!guard) {
 		if (preserved) {
 			for (const method of GUARDED_HANDLE_METHODS) {
 				const original = preserved.interactive[method];
+				if (original) methods[method] = original;
+			}
+			for (const method of READ_HANDLE_METHODS) {
+				const original = preserved.reads[method];
 				if (original) methods[method] = original;
 			}
 		}
@@ -774,6 +822,11 @@ export function toActionableHandle(
 			const original = methods[method];
 			if (typeof original === "function") interactive[method] = original.bind(enriched);
 		}
+		const reads: Partial<Record<ReadHandleMethod, RawHandleMethod>> = {};
+		for (const method of READ_HANDLE_METHODS) {
+			const original = methods[method];
+			if (typeof original === "function") reads[method] = original.bind(enriched);
+		}
 		// Puppeteer's `ElementHandle.press` takes a single key name; focus and press
 		// through `pressKey` so combos and the macOS editing commands work on handles too.
 		// The guard below passes its signal, so a cut-off press releases what it held.
@@ -785,7 +838,7 @@ export function toActionableHandle(
 			};
 			interactive.press = press as RawHandleMethod;
 		}
-		originals = { interactive, type: enriched.type.bind(enriched) };
+		originals = { interactive, reads, type: enriched.type.bind(enriched) };
 		enriched[RAW_HANDLE_METHODS] = originals;
 	}
 
@@ -804,6 +857,22 @@ export function toActionableHandle(
 					invalidate,
 				),
 			);
+	}
+	// An element handle a read returns gets the same guards, so a child resolved before the page started waiting
+	// fails as fast as its parent.
+	const guarded = (value: unknown): unknown => {
+		const element = isPuppeteerHandle(value) ? value.asElement() : null;
+		return element ? toActionableHandle(element, guard, invalidate, read) : value;
+	};
+	for (const method of READ_HANDLE_METHODS) {
+		const original = originals.reads[method];
+		if (!original) continue;
+		methods[method] = read
+			? async (...args) => {
+					const value = await read(`handle.${method}()`, signal => untilAborted(signal, () => original(...args)));
+					return Array.isArray(value) ? value.map(guarded) : guarded(value);
+				}
+			: original;
 	}
 	enriched.type = (text, options) =>
 		guard<void>("handle.type()", signal =>
@@ -1471,6 +1540,69 @@ export interface InflightOp {
 	startedAt: number;
 }
 
+/** How one tab helper runs under the per-op wrapper. */
+interface OpOptions<T> {
+	/** The selector the op targets, for its timeout hint and zero-match watchdog. */
+	selector?: string;
+	/** Fail early once `selector` has matched nothing for this long. */
+	zeroMatchAfterMs?: number;
+	/**
+	 * How the op meets the page waiting on a dialog or a held chooser. Unset, it fails while the page waits and ends
+	 * when the page starts to. `input` sends input or navigates: it also returns, done, when the wait starts after its
+	 * input went out, since that input is what opened it. `answers` settles the wait, so it runs while the page waits
+	 * and returns once its answer makes the page wait again. `reads` neither touches the page nor waits on it.
+	 */
+	pageWait?: "input" | "answers" | "reads";
+	/** What an `input` op returns when the page starts waiting after its input went out; nothing by default. */
+	whenWaiting?: () => T;
+}
+
+/** Handle methods that send input, so a dialog after that input went out ends them as done. */
+const INPUT_HANDLE_OPS: Record<string, true> = {
+	"handle.click()": true,
+	"handle.dblclick()": true,
+	"handle.tap()": true,
+	"handle.press()": true,
+	"handle.check()": true,
+	"handle.uncheck()": true,
+};
+
+/** CDP methods by which an op sends the page input or a navigation. */
+const PAGE_INPUT_METHODS: Record<string, true> = {
+	"Input.dispatchMouseEvent": true,
+	"Input.dispatchKeyEvent": true,
+	"Input.dispatchTouchEvent": true,
+	"Input.insertText": true,
+	"Page.navigate": true,
+	"Page.reload": true,
+	"Page.navigateToHistoryEntry": true,
+};
+
+/** Inputs and navigations one op's own work has sent; an op running inside another counts for both. */
+interface OpInputs {
+	sent: number;
+	outer: OpInputs | undefined;
+}
+
+/** The op whose work is running, so an input counts only for the op that sent it, not for one running beside it. */
+const opInputs = new AsyncLocalStorage<OpInputs>();
+
+/**
+ * Count each input or navigation the page's own session sends for the op that sent it, so a dialog that opens during
+ * an input op can be told apart from one a page timer or another op raised. Returns the undo.
+ */
+function countPageInput(page: Page): () => void {
+	const client = page.mainFrame().client;
+	const send = client.send;
+	Reflect.set(client, "send", (method: string, ...rest: unknown[]) => {
+		if (PAGE_INPUT_METHODS[method]) {
+			for (let op = opInputs.getStore(); op; op = op.outer) op.sent++;
+		}
+		return Reflect.apply(send, client, [method, ...rest]);
+	});
+	return () => Reflect.set(client, "send", send);
+}
+
 interface ActiveRun {
 	id: string;
 	ac: AbortController;
@@ -1534,6 +1666,11 @@ export class WorkerCore {
 	#screenshotHistory = new Map<string, ScreenshotHistory>();
 	#webmcp?: WebMcpController;
 	#printHold?: PrintHold;
+	/** Holds file choosers so no OS file dialog appears: for the tab's life in a browser omp launched, else around calls. */
+	#choosers?: FileChooserCatcher;
+	/** Nobody but omp drives this browser: holds last the tab's life and alerts close themselves. */
+	#ownBrowser = true;
+	#uncountInput: (() => void) | undefined;
 	/** Names the native windows a call raised on screen; only for a browser that shows windows, on macOS. */
 	#nativeWindows?: NativeWindowWatch;
 	readonly #recording = new RecordingController();
@@ -1706,6 +1843,7 @@ export class WorkerCore {
 		try {
 			this.#mode = payload.mode;
 			this.#ownsPage = ownsPage(payload);
+			this.#ownBrowser = payload.mode === "headless" || payload.userDriven !== true;
 			this.#uploads = new UploadStaging(payload.uploadDir);
 			const puppeteer = await loadPuppeteerInWorker(payload.safeDir);
 			registerSemanticQueryHandlers(puppeteer);
@@ -1757,12 +1895,10 @@ export class WorkerCore {
 			// Nobody else drives a browser omp launched, so its tabs hold every print(); the user's own browser only
 			// while omp acts, so the page's Print buttons still work for the user. The hold comes first: it covers the
 			// setup below, and its script must reach new documents before any init script the tab adds.
-			this.#printHold = await PrintHold.install(
-				this.#page,
-				payload.mode === "headless" || payload.userDriven !== true ? "tab" : "calls",
-			);
+			this.#printHold = await PrintHold.install(this.#page, this.#ownBrowser ? "tab" : "calls");
 			this.#page.mainFrame().client.on("Page.frameNavigated", this.#onFrameNavigated);
 			this.#page.mainFrame().client.on("OMP.debuggerDetached", this.#onDebuggerDetached);
+			this.#uncountInput = countPageInput(this.#page);
 			this.#page.on("error", this.#onPageCrashed);
 			if (this.#ownsPage || (payload.mode === "attach" && payload.userDriven)) {
 				// Background Chromium tabs stop producing frames, stalling rAF,
@@ -1775,9 +1911,21 @@ export class WorkerCore {
 			}
 			if (payload.mode === "attach" && payload.relay === true) this.#page.on("popup", this.#onRelayPopup);
 			this.#webmcp = await installWebMcp(this.#page);
+			// Nobody else drives a browser omp launched, so its tabs hold every file chooser; the user's own browser only
+			// while omp acts, so the page's upload buttons still work for the user.
+			const choosers = await FileChooserCatcher.attach(this.#page);
+			this.#choosers = choosers;
+			if (this.#ownBrowser) await choosers.arm();
+			// A cell's raw `page.waitForFileChooser()` fills or cancels its chooser itself; the catcher leaves it be, and
+			// turns off the interception Puppeteer leaves on, which would swallow the user's later choosers.
+			const page = this.#page;
+			const waitForFileChooser = page.waitForFileChooser.bind(page);
+			page.waitForFileChooser = options =>
+				choosers.leaveTo(waitForFileChooser(options), () =>
+					page.mainFrame().client.send("Page.setInterceptFileChooserDialog", { enabled: false }),
+				);
 			// Only a browser that draws its windows on the user's screen raises native ones.
 			if (payload.showsWindows && process.platform === "darwin") {
-				const page = this.#page;
 				this.#nativeWindows = new NativeWindowWatch(() => readTabFrame(page));
 			}
 			await installVitalsObservers(this.#page);
@@ -1787,7 +1935,7 @@ export class WorkerCore {
 			this.#initScripts = new InitScriptManager(this.#page);
 			for (const source of payload.initScripts ?? []) await this.#initScripts.add(source);
 			this.#downloads = new DownloadManager(this.#browser, this.#page, this.#targetId, {
-				perTab: payload.mode === "headless" || payload.userDriven !== true,
+				perTab: this.#ownBrowser,
 			});
 			if (payload.downloadsPath) await this.#downloads.enable(payload.downloadsPath);
 			const baseUserAgent = await this.#page.evaluate(() => navigator.userAgent);
@@ -1814,6 +1962,8 @@ export class WorkerCore {
 			this.#webmcp = undefined;
 			await this.#printHold?.dispose().catch(() => undefined);
 			this.#printHold = undefined;
+			await this.#choosers?.dispose();
+			this.#choosers = undefined;
 			if (payload.mode === "headless" && page && !page.isClosed()) {
 				await page.close().catch(() => undefined);
 			}
@@ -1885,11 +2035,18 @@ export class WorkerCore {
 		}
 	}
 
-	/** Install runtime dialog observation and default handling. */
+	/**
+	 * Install runtime dialog observation and default handling. Alerts close themselves only in a browser omp
+	 * launched: in the user's own browser an alert may be meant for them, so it waits for an answer from either.
+	 */
 	#observeDialogs(): void {
 		const page = this.#requirePage();
 		this.#dialogs?.dispose();
-		this.#dialogs = new RuntimeDialogController(page, (message, details) => this.#log("debug", message, details));
+		this.#dialogs = new RuntimeDialogController(
+			page,
+			(message, details) => this.#log("debug", message, details),
+			this.#ownBrowser,
+		);
 		this.#dialogs.observe();
 	}
 
@@ -1988,7 +2145,7 @@ export class WorkerCore {
 		let runPage: RunPageScope | undefined;
 		try {
 			throwIfAborted(signal);
-			await untilAborted(signal, () => this.#emulation?.reapply() ?? Promise.resolve());
+			await untilAborted(signal, () => this.#reapplyEmulation());
 			runPage = createRunPageScope(this.#requirePage(), () => this.#requireNetwork().restoreInterception());
 			const browser = this.#requireBrowser();
 			const tabApi = this.#createTabApi(msg.name, msg.timeoutMs, signal, msg.session, output, screenshots, active);
@@ -2011,8 +2168,13 @@ export class WorkerCore {
 							? undefined
 							: { timeout: resolvePredicateTimeout(msg.timeoutMs, opts?.timeout), interval: opts?.interval };
 					return observeBrowserRunPromise(
-						this.#runOp(active, label, signal, Number.POSITIVE_INFINITY, sig =>
-							waitForRun(msOrPredicate, sig, resolved),
+						this.#runOp(
+							active,
+							label,
+							signal,
+							Number.POSITIVE_INFINITY,
+							sig => waitForRun(msOrPredicate, sig, resolved),
+							{ pageWait: "reads" },
 						),
 						active.rejectionOwner,
 						onFloatingRejection,
@@ -2028,8 +2190,11 @@ export class WorkerCore {
 				if (timeoutSignal.aborted) {
 					const stalled = describeInflight(active.inflight);
 					const dialog = this.#dialogs?.state();
+					// The tab is reset after a timeout, and only this session can answer a dialog it saw: a fresh one
+					// gets "No dialog is showing" and the page stays stopped. Dismiss it here, as the reset would.
+					if (dialog?.open) void this.#dialogs?.handle({ accept: false }).catch(() => undefined);
 					const dialogNote = dialog?.open
-						? `; a ${dialog.type}(${JSON.stringify(dialog.message?.slice(0, 80) ?? "")}) dialog opened during this run and may still block the page — use tab.handleDialog() or tab.setDialogs("accept"|"dismiss")`
+						? `; the page was waiting on ${describeWaiting(dialog)}, which omp dismissed so the tab can recover`
 						: "";
 					const pageErrorCount = this.#consoleCapture.errorCountSince(runErrorStartSeq);
 					const pageErrorNote =
@@ -2057,6 +2222,7 @@ export class WorkerCore {
 				this.#nativeWindows?.beginCall(this.#dialogs?.state().open === true);
 				// A renderer already blocked in a print nobody held never answers; the run's timeout reports that.
 				await Promise.race([this.#printHold?.beginCall(msg.timeoutMs), cancelRejection]);
+				await Promise.race([this.#choosers?.beginCall(), cancelRejection]);
 				const hooks = this.#hooksForActiveRun();
 				if (!hooks) throw new ToolError("Browser runtime started without an active run");
 				returnValue = await withBrowserPromiseCombinatorTracking(
@@ -2107,6 +2273,7 @@ export class WorkerCore {
 			failure = this.#foldFloatingRejections(active, failure);
 			if (this.#active?.id === msg.id) this.#active = null;
 			this.#printHold?.endCall();
+			this.#choosers?.endCall(this.#ownBrowser ? undefined : USER_DRIVEN_RELEASE_MS);
 		}
 		// What the call raised on screen that no page call can reach, named on failures too: a native panel is often
 		// why the call failed.
@@ -2114,6 +2281,8 @@ export class WorkerCore {
 		// A renderer crash or a debugger detach answers the run itself.
 		if (this.#unanswered !== active) return;
 		if (failure) {
+			// A chooser this call left waiting is named by the next call that touches the page.
+			this.#choosers?.dropNotices();
 			this.#unanswered = null;
 			const error = errorPayload(failure.error);
 			if (nativeNotices.length > 0) error.message = [error.message, ...nativeNotices].join("\n");
@@ -2121,10 +2290,17 @@ export class WorkerCore {
 			return;
 		}
 		if (completed) {
+			// The page's renderer answers this read only after it has asked for any chooser the call's last click
+			// opened, so the notices below include it.
+			await this.#postReadyInfo();
+			if (this.#unanswered !== active) return;
+			for (const notice of (await this.#choosers?.takeNotices()) ?? []) output.pushText(`${notice}\n`);
 			const printNotice = this.#printHold?.takeNotice();
 			if (printNotice) output.pushText(`${printNotice}\n`);
 			for (const notice of nativeNotices) output.pushText(`${notice}\n`);
-			await this.#postReadyInfo();
+			// A dialog the call's last input opened ends that input as delivered; the result says what waits, once.
+			const dialog = this.#dialogs?.takeUnreported();
+			if (dialog) output.pushText(`The page is waiting on ${describeWaiting(dialog)}. ${describeAnswer(dialog)}\n`);
 			if (this.#unanswered !== active) return;
 			this.#unanswered = null;
 			this.#transport.send({
@@ -2218,6 +2394,10 @@ export class WorkerCore {
 	 * the fail-fast timeout carries a best-effort match-count hint, and — when
 	 * `zeroMatchAfterMs` is set — a watchdog aborts the op early once the selector has
 	 * matched nothing for that long.
+	 *
+	 * While the page waits on an answer (a JavaScript dialog, or a file chooser omp holds) the op fails at once
+	 * naming the remedy, and one that starts waiting during the op ends it the same way; see {@link OpOptions.pageWait}
+	 * for the ops that answer, read around, or open that wait themselves.
 	 */
 	async #runOp<T>(
 		active: ActiveRun,
@@ -2225,7 +2405,7 @@ export class WorkerCore {
 		cellSignal: AbortSignal,
 		perOpTimeoutMs: number,
 		fn: (signal: AbortSignal) => Promise<T>,
-		opts?: { selector?: string; zeroMatchAfterMs?: number },
+		opts?: OpOptions<T>,
 	): Promise<T> {
 		const opId = active.opCounter++;
 		active.inflight.set(opId, { label, startedAt: Date.now() });
@@ -2240,22 +2420,52 @@ export class WorkerCore {
 		// Fired when the watchdog wins the race (tears down the in-flight action) and in
 		// the finally (stops the watchdog's polling once the op settles either way).
 		const earlyAc = new AbortController();
+		const pageWait = opts?.pageWait;
+		// Subscribed before anything else, so a wait that starts during the checks below still ends the op.
+		const started = pageWait === "reads" ? undefined : Promise.withResolvers<DialogState>();
+		const unsubscribe = started && this.#onPageWaits(started.resolve);
+		const inputs: OpInputs = { sent: 0, outer: opInputs.getStore() };
 		try {
-			// A download this op starts before a pending `waitForDownload()` has enabled
-			// tracking would bypass it, so hold the op until tracking applies — within
-			// the op's own deadline, so a stalled enable surfaces as this op's timeout.
-			const arming = this.#downloads?.arming;
-			if (arming)
-				await untilAborted(
-					opSignal,
-					arming.catch(() => undefined),
+			if (pageWait === undefined || pageWait === "input") {
+				const waiting = await this.#pageWaitsOn();
+				if (waiting) {
+					throw new PageWaitError(
+						`${label} cannot run: the page is waiting on ${describeWaiting(waiting)}. ${describeAnswer(waiting)}`,
+					);
+				}
+			}
+			if (!watchdog && !started) return await this.#afterDownloadsArm(opSignal, fn);
+			// Ends the op's work when the page starts waiting; only then, so a finished op's lingering work goes on.
+			const interruptAc = new AbortController();
+			const signals = [opSignal, interruptAc.signal];
+			if (watchdog) signals.push(earlyAc.signal);
+			const racedSignal = AbortSignal.any(signals);
+			const work = this.#afterDownloadsArm(racedSignal, async sig => {
+				const result = await opInputs.run(inputs, () => fn(sig));
+				// A chooser the input opened is waiting before the next op starts, not just before the call ends.
+				if (pageWait === "input") await this.#choosers?.sync(sig);
+				return result;
+			});
+			const racers: Promise<T>[] = [work];
+			if (watchdog) racers.push(this.#zeroMatchWatchdog(watchdog.selector, label, watchdog.afterMs, racedSignal));
+			if (started) {
+				racers.push(
+					started.promise.then(state => {
+						// A page stopped in a dialog never answers the op's own wait, so the op ends here.
+						markHandled(work);
+						// The answer, or an input the op already sent, is what the page waits on now: the op did its part.
+						if (pageWait === "answers" || (pageWait === "input" && inputs.sent > 0)) {
+							return opts?.whenWaiting ? opts.whenWaiting() : (undefined as T);
+						}
+						const error = new PageWaitError(
+							`${label}: the page opened ${describeWaiting(state)} and waits on it. ${describeAnswer(state)}`,
+						);
+						interruptAc.abort(error);
+						throw error;
+					}),
 				);
-			if (!watchdog) return await fn(opSignal);
-			const racedSignal = AbortSignal.any([opSignal, earlyAc.signal]);
-			return await Promise.race([
-				fn(racedSignal),
-				this.#zeroMatchWatchdog(watchdog.selector, label, watchdog.afterMs, racedSignal),
-			]);
+			}
+			return await Promise.race(racers);
 		} catch (err) {
 			// Fail fast with a named, attributable error instead of the opaque whole-cell timeout:
 			// our per-op deadline fired, or puppeteer's own (equal) timeout fired first — having
@@ -2281,6 +2491,7 @@ export class WorkerCore {
 			throw markBrowserRunRejection(err, active.rejectionOwner);
 		} finally {
 			earlyAc.abort();
+			unsubscribe?.();
 			active.inflight.delete(opId);
 		}
 	}
@@ -2357,20 +2568,22 @@ export class WorkerCore {
 			label: string,
 			perOpMs: number,
 			fn: (sig: AbortSignal) => Promise<T>,
-			selectorOpts?: { selector?: string; zeroMatchAfterMs?: number },
-		): Promise<T> => markHandled(this.#runOp(active, label, signal, perOpMs, fn, selectorOpts));
+			opts?: OpOptions<T>,
+		): Promise<T> => markHandled(this.#runOp(active, label, signal, perOpMs, fn, opts));
 		// Hand user-facing handles the fail-fast per-op guard so their interactive
-		// methods (`.click()`, `.type()`, …) can't outrun the cell budget (issue #9535).
+		// methods (`.click()`, `.type()`, …) can't outrun the cell budget (issue #9535),
+		// and their reads the page-wait check with no deadline of their own.
 		const enrich = (handle: ElementHandle): ActionableHandle =>
 			toActionableHandle(
 				handle,
-				(label, fn) => op(label, actionOpMs, fn),
+				(label, fn) => op(label, actionOpMs, fn, INPUT_HANDLE_OPS[label] ? { pageWait: "input" } : undefined),
 				async () => {
 					// Raw Puppeteer actions have no AbortSignal. Poison + dispose every
 					// cached handle and stop navigation before reporting a recoverable timeout.
 					this.#clearElementCache();
 					await this.#stopLoading();
 				},
+				(label, fn) => op(label, INF, fn),
 				{
 					route: sig => this.#requireUploads().route(page, sig),
 					prepare: (filePaths, label, route, sig) =>
@@ -2381,11 +2594,14 @@ export class WorkerCore {
 							label,
 							route,
 							this.#requireUploads(),
+							this.#requireChoosers(),
 							sig,
 						),
 					deliverGuard: (label, fn) => op(label, budgetBound, fn),
 				},
 			);
+		// A navigation whose new page opens a dialog still answers with the URL it reached.
+		const navigation: OpOptions<string> = { pageWait: "input", whenWaiting: () => page.url() };
 		return {
 			name,
 			page,
@@ -2393,27 +2609,32 @@ export class WorkerCore {
 			url: () => page.url(),
 			title: () => op("tab.title()", INF, sig => untilAborted(sig, () => page.title())),
 			goto: (url, opts) =>
-				op(`tab.goto(${JSON.stringify(url)})`, INF, async sig => {
-					this.#clearElementCache();
-					try {
-						// Default to "load" because dev servers with HMR/WS never reach networkidle.
-						// budgetBound (not the full cell) so a hung navigation fails named and
-						// catchable inside the run instead of dying with the whole cell.
-						await navigateMainFrame(page, opts?.waitUntil ?? "load", budgetBound, sig, options =>
-							page.goto(url, options),
-						);
-					} catch (err) {
-						if (err instanceof Error && err.name === "TimeoutError") {
-							// Abandon the hung navigation NOW — a still-pending load stalls every
-							// later op on this page and cascades into more opaque timeouts.
-							await this.#stopLoading();
-							throw new NavigationTimeoutError(
-								`tab.goto(${JSON.stringify(url)}) timed out after ${budgetBound}ms; pending navigation stopped — retry with a longer tool timeout or waitUntil:"domcontentloaded"`,
+				op(
+					`tab.goto(${JSON.stringify(url)})`,
+					INF,
+					async sig => {
+						this.#clearElementCache();
+						try {
+							// Default to "load" because dev servers with HMR/WS never reach networkidle.
+							// budgetBound (not the full cell) so a hung navigation fails named and
+							// catchable inside the run instead of dying with the whole cell.
+							await navigateMainFrame(page, opts?.waitUntil ?? "load", budgetBound, sig, options =>
+								page.goto(url, options),
 							);
+						} catch (err) {
+							if (err instanceof Error && err.name === "TimeoutError") {
+								// Abandon the hung navigation NOW — a still-pending load stalls every
+								// later op on this page and cascades into more opaque timeouts.
+								await this.#stopLoading();
+								throw new NavigationTimeoutError(
+									`tab.goto(${JSON.stringify(url)}) timed out after ${budgetBound}ms; pending navigation stopped — retry with a longer tool timeout or waitUntil:"domcontentloaded"`,
+								);
+							}
+							throw err;
 						}
-						throw err;
-					}
-				}),
+					},
+					{ pageWait: "input" },
+				),
 			observe: opts => op("tab.observe()", quickOpMs, sig => this.#collectObservation({ ...opts, signal: sig })),
 			ariaSnapshot: (selector, opts) =>
 				op(
@@ -2479,7 +2700,7 @@ export class WorkerCore {
 							void handle.dispose().catch(() => undefined);
 						}
 					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, pageWait: "input" },
 				),
 			type: (selector, text) =>
 				op(
@@ -2511,21 +2732,26 @@ export class WorkerCore {
 					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
 				),
 			press: (key, opts) =>
-				op(`tab.press(${JSON.stringify(key)})`, actionOpMs, async sig => {
-					assertTabPressArgs(key, opts);
-					const selector = opts?.selector;
-					if (selector) {
-						if (parseAriaRefSelector(selector) !== null) {
-							const handle = await this.#resolveAriaRef(selector);
-							try {
-								await untilAborted(sig, () => handle.focus());
-							} finally {
-								await handle.dispose().catch(() => undefined);
-							}
-						} else await untilAborted(sig, () => page.focus(normalizeSelector(selector)));
-					}
-					await pressKey(page, key, undefined, sig);
-				}),
+				op(
+					`tab.press(${JSON.stringify(key)})`,
+					actionOpMs,
+					async sig => {
+						assertTabPressArgs(key, opts);
+						const selector = opts?.selector;
+						if (selector) {
+							if (parseAriaRefSelector(selector) !== null) {
+								const handle = await this.#resolveAriaRef(selector);
+								try {
+									await untilAborted(sig, () => handle.focus());
+								} finally {
+									await handle.dispose().catch(() => undefined);
+								}
+							} else await untilAborted(sig, () => page.focus(normalizeSelector(selector)));
+						}
+						await pressKey(page, key, undefined, sig);
+					},
+					{ pageWait: "input" },
+				),
 			scroll: (deltaX, deltaY, opts) =>
 				op("tab.scroll()", actionOpMs, async sig => {
 					if (!opts?.selector) {
@@ -2593,20 +2819,25 @@ export class WorkerCore {
 				);
 			},
 			evaluate: (fn, ...args) =>
-				op("tab.evaluate()", INF, sig =>
-					untilAborted(sig, async () => {
-						const realm = page.mainFrame().mainRealm();
-						// Puppeteer evaluates strings as expressions and ignores extra args; preserve
-						// that behavior without inspecting or adopting otherwise-unused handles.
-						if (typeof fn === "string") return realm.evaluate(fn);
-						const { args: adopted, dispose } = await adoptElementArgs(realm, args);
-						try {
-							throwIfAborted(sig);
-							return await realm.evaluate(fn as (...a: unknown[]) => unknown, ...adopted);
-						} finally {
-							await dispose();
-						}
-					}),
+				op(
+					"tab.evaluate()",
+					INF,
+					sig =>
+						untilAborted(sig, async () => {
+							const realm = page.mainFrame().mainRealm();
+							// Puppeteer evaluates strings as expressions and ignores extra args; preserve
+							// that behavior without inspecting or adopting otherwise-unused handles.
+							if (typeof fn === "string") return realm.evaluate(fn);
+							const { args: adopted, dispose } = await adoptElementArgs(realm, args);
+							try {
+								throwIfAborted(sig);
+								return await realm.evaluate(fn as (...a: unknown[]) => unknown, ...adopted);
+							} finally {
+								await dispose();
+							}
+						}),
+					// Page script can click a file input; a dialog it opens still fails it, since no value comes back.
+					{ pageWait: "input" },
 				) as never,
 			scrollIntoView: selector =>
 				op(
@@ -2669,8 +2900,15 @@ export class WorkerCore {
 				const w = waitMs(opts?.timeout);
 				return op("tab.waitForResponse()", w, sig => this.#waitForResponse(pattern, w, sig));
 			},
-			id: async id => enrich(await this.#resolveCachedHandle(id)),
-			ref: async id => enrich(await this.#resolveAriaRef(id)),
+			// Bounded by the cell only; the wrapper is for the page-wait check.
+			id: id =>
+				op(`tab.id(${JSON.stringify(id)})`, INF, sig =>
+					untilAborted(sig, async () => enrich(await this.#resolveCachedHandle(id))),
+				),
+			ref: id =>
+				op(`tab.ref(${JSON.stringify(id)})`, INF, sig =>
+					untilAborted(sig, async () => enrich(await this.#resolveAriaRef(id))),
+				),
 			cookies: opts => op("tab.cookies()", quickOpMs, sig => readCookies(page, opts, sig)),
 			setCookies: (...cookies) => op("tab.setCookies()", actionOpMs, sig => setPageCookies(page, cookies, sig)),
 			clearCookies: opts => op("tab.clearCookies()", actionOpMs, sig => clearPageCookies(page, opts, sig)),
@@ -2726,20 +2964,35 @@ export class WorkerCore {
 			reactRenders: opts => op("tab.reactRenders()", quickOpMs, sig => collectReactRenders(page, opts, sig)),
 			reactSuspense: opts => op("tab.reactSuspense()", quickOpMs, sig => readReactSuspense(page, opts, sig)),
 			back: opts =>
-				op("tab.back()", INF, async sig => {
-					this.#clearElementCache();
-					return await traverseHistory(page, "back", opts?.waitUntil ?? "load", budgetBound, sig);
-				}),
+				op(
+					"tab.back()",
+					INF,
+					async sig => {
+						this.#clearElementCache();
+						return await traverseHistory(page, "back", opts?.waitUntil ?? "load", budgetBound, sig);
+					},
+					navigation,
+				),
 			forward: opts =>
-				op("tab.forward()", INF, async sig => {
-					this.#clearElementCache();
-					return await traverseHistory(page, "forward", opts?.waitUntil ?? "load", budgetBound, sig);
-				}),
+				op(
+					"tab.forward()",
+					INF,
+					async sig => {
+						this.#clearElementCache();
+						return await traverseHistory(page, "forward", opts?.waitUntil ?? "load", budgetBound, sig);
+					},
+					navigation,
+				),
 			reload: opts =>
-				op("tab.reload()", INF, async sig => {
-					this.#clearElementCache();
-					return await reloadPage(page, opts?.waitUntil ?? "load", budgetBound, sig);
-				}),
+				op(
+					"tab.reload()",
+					INF,
+					async sig => {
+						this.#clearElementCache();
+						return await reloadPage(page, opts?.waitUntil ?? "load", budgetBound, sig);
+					},
+					navigation,
+				),
 			pushState: url =>
 				op(`tab.pushState(${JSON.stringify(url)})`, actionOpMs, async sig => {
 					this.#clearElementCache();
@@ -2769,15 +3022,25 @@ export class WorkerCore {
 					});
 				}),
 			dialog: () =>
-				op("tab.dialog()", quickOpMs, async sig => {
-					throwIfAborted(sig);
-					return this.#requireDialogs().state();
+				op("tab.dialog()", quickOpMs, async () => (await this.#pageWaitsOn()) ?? { open: false }, {
+					pageWait: "reads",
 				}),
 			handleDialog: opts =>
-				op("tab.handleDialog()", actionOpMs, sig => untilAborted(sig, () => this.#requireDialogs().handle(opts))),
+				// Files for a held chooser may be streamed, which takes the cell's budget like `tab.uploadFile`'s delivery.
+				op(
+					"tab.handleDialog()",
+					opts.files?.length ? budgetBound : actionOpMs,
+					sig => this.#handleDialog(opts, sig, session),
+					{
+						pageWait: "answers",
+					},
+				),
 			setDialogs: policy =>
-				op("tab.setDialogs()", actionOpMs, sig =>
-					untilAborted(sig, () => this.#requireDialogs().setPolicy(policy)),
+				op(
+					"tab.setDialogs()",
+					actionOpMs,
+					sig => untilAborted(sig, () => this.#requireDialogs().setPolicy(policy)),
+					{ pageWait: "reads" },
 				),
 			route: (pattern, opts) =>
 				op("tab.route()", actionOpMs, sig =>
@@ -2934,7 +3197,7 @@ export class WorkerCore {
 							await handle.dispose().catch(() => undefined);
 						}
 					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, pageWait: "input" },
 				),
 			hover: selector =>
 				op(
@@ -2976,7 +3239,7 @@ export class WorkerCore {
 							await handle.dispose().catch(() => undefined);
 						}
 					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, pageWait: "input" },
 				),
 			uncheck: selector =>
 				op(
@@ -2990,31 +3253,52 @@ export class WorkerCore {
 							await handle.dispose().catch(() => undefined);
 						}
 					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, pageWait: "input" },
 				),
 			// A press is held from when it lands; one cut off on its way is released by the helper itself.
 			keyDown: key =>
-				op(`tab.keyDown(${JSON.stringify(key)})`, actionOpMs, async sig => {
-					await keyDown(page, key, sig);
-					this.#heldKeys.add(key);
-				}),
+				op(
+					`tab.keyDown(${JSON.stringify(key)})`,
+					actionOpMs,
+					async sig => {
+						await keyDown(page, key, sig);
+						this.#heldKeys.add(key);
+					},
+					{ pageWait: "input" },
+				),
 			keyUp: key =>
-				op(`tab.keyUp(${JSON.stringify(key)})`, actionOpMs, sig => {
-					this.#heldKeys.delete(key);
-					return keyUp(page, key, sig);
-				}),
+				op(
+					`tab.keyUp(${JSON.stringify(key)})`,
+					actionOpMs,
+					sig => {
+						this.#heldKeys.delete(key);
+						return keyUp(page, key, sig);
+					},
+					{ pageWait: "input" },
+				),
 			mouseMove: (x, y, opts) => op("tab.mouseMove()", actionOpMs, sig => mouseMove(page, x, y, opts, sig)),
 			mouseDown: opts =>
-				op("tab.mouseDown()", actionOpMs, async sig => {
-					await mouseDown(page, opts, sig);
-					this.#heldButtons.add(opts?.button ?? "left");
-				}),
+				op(
+					"tab.mouseDown()",
+					actionOpMs,
+					async sig => {
+						await mouseDown(page, opts, sig);
+						this.#heldButtons.add(opts?.button ?? "left");
+					},
+					{ pageWait: "input" },
+				),
 			mouseUp: opts =>
-				op("tab.mouseUp()", actionOpMs, sig => {
-					this.#heldButtons.delete(opts?.button ?? "left");
-					return mouseUp(page, opts, sig);
-				}),
-			clickAt: (x, y, opts) => op("tab.clickAt()", actionOpMs, sig => clickAt(page, x, y, opts, sig)),
+				op(
+					"tab.mouseUp()",
+					actionOpMs,
+					sig => {
+						this.#heldButtons.delete(opts?.button ?? "left");
+						return mouseUp(page, opts, sig);
+					},
+					{ pageWait: "input" },
+				),
+			clickAt: (x, y, opts) =>
+				op("tab.clickAt()", actionOpMs, sig => clickAt(page, x, y, opts, sig), { pageWait: "input" }),
 			wheel: (deltaX, deltaY) => op("tab.wheel()", actionOpMs, sig => wheel(page, deltaX, deltaY, sig)),
 			highlight: (selector, opts) =>
 				op(
@@ -3373,6 +3657,7 @@ export class WorkerCore {
 				label,
 				route,
 				this.#requireUploads(),
+				this.#requireChoosers(),
 				signal,
 			);
 			return {
@@ -3448,7 +3733,11 @@ export class WorkerCore {
 			return resolved;
 		}
 		try {
-			const isConnected = (await handle.evaluate(el => el.isConnected)) as boolean;
+			// An earlier run enriched the cached handle with its own deadline, which ended with that run: check through
+			// Puppeteer's evaluate.
+			const evaluate = (handle as HandleWithRawMethods)[RAW_HANDLE_METHODS]?.reads.evaluate;
+			const connected = (el: Element) => el.isConnected;
+			const isConnected = evaluate ? await evaluate.call(handle, connected) : await handle.evaluate(connected);
 			if (!isConnected) {
 				this.#clearElementCache();
 				throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
@@ -3525,6 +3814,10 @@ export class WorkerCore {
 		this.#webmcp = undefined;
 		await this.#printHold?.dispose().catch(() => undefined);
 		this.#printHold = undefined;
+		await this.#choosers?.dispose();
+		this.#uncountInput?.();
+		this.#uncountInput = undefined;
+		this.#choosers = undefined;
 		this.#dialogs?.dispose();
 		await this.#network?.close();
 		await this.#downloads?.close();
@@ -3550,6 +3843,115 @@ export class WorkerCore {
 	#requireDialogs(): RuntimeDialogController {
 		if (!this.#dialogs) throw new ToolError("Tab worker dialog handling is not initialized");
 		return this.#dialogs;
+	}
+
+	/**
+	 * Re-applies the tab's emulation for a run. A page stopped in a JavaScript dialog answers none of it until someone
+	 * answers the dialog, and the run is what reports or answers it: so the run goes on without waiting, and the
+	 * emulation reaches the page once the dialog closes.
+	 */
+	async #reapplyEmulation(): Promise<void> {
+		const emulation = this.#emulation;
+		if (!emulation) return;
+		const dialogs = this.#requireDialogs();
+		if (dialogs.state().open) return;
+		const { promise: stopped, resolve: stop } = Promise.withResolvers<void>();
+		const offPending = dialogs.onPending(() => stop());
+		const reapply = emulation.reapply();
+		try {
+			await Promise.race([reapply, stopped]);
+		} finally {
+			offPending();
+			reapply.catch(() => undefined);
+		}
+	}
+
+	/** What the page waits on an answer to: a JavaScript dialog, else a file chooser omp holds. */
+	async #pageWaitsOn(): Promise<DialogState | undefined> {
+		const dialog = this.#requireDialogs().state();
+		if (dialog.open) return dialog;
+		return await this.#choosers?.heldState();
+	}
+
+	/** Call `listener` when the page starts waiting on a dialog or a held chooser; returns the unsubscribe. */
+	#onPageWaits(listener: (state: DialogState) => void): () => void {
+		const offDialogs = this.#requireDialogs().onPending(listener);
+		const offChoosers = this.#choosers?.onHeld(listener);
+		return () => {
+			offDialogs();
+			offChoosers?.();
+		};
+	}
+
+	/**
+	 * Run `fn` once download tracking applies: a download this op starts before a pending `waitForDownload()` has
+	 * enabled tracking would bypass it. Within the op's own deadline, so a stalled enable is this op's timeout.
+	 */
+	async #afterDownloadsArm<T>(signal: AbortSignal, fn: (signal: AbortSignal) => Promise<T>): Promise<T> {
+		const arming = this.#downloads?.arming;
+		if (arming)
+			await untilAborted(
+				signal,
+				arming.catch(() => undefined),
+			);
+		return await fn(signal);
+	}
+
+	/** Settle what the page waits on: a JavaScript dialog, else the held file chooser, filled or cancelled. */
+	async #handleDialog(
+		opts: { accept: boolean; text?: string; files?: string[] },
+		signal: AbortSignal,
+		session: SessionSnapshot,
+	): Promise<void> {
+		const dialogs = this.#requireDialogs();
+		const dialog = dialogs.state();
+		if (dialog.open) {
+			if (opts.files !== undefined) {
+				throw new ToolError(
+					`tab.handleDialog(): the page is waiting on ${describeWaiting(dialog)}, not a file chooser, so files do not apply. ${describeAnswer(dialog)}`,
+				);
+			}
+			await untilAborted(signal, () => dialogs.handle(opts));
+			return;
+		}
+		const choosers = this.#requireChoosers();
+		const held = choosers.held;
+		if (!held) {
+			throw new ToolError(
+				opts.files === undefined
+					? "tab.handleDialog() found nothing waiting: no JavaScript dialog and no held file chooser"
+					: "No file chooser is waiting. Use tab.uploadFile(selector, ...paths) on the file input, the control that opens its chooser, or its drop zone.",
+			);
+		}
+		if (!opts.accept) {
+			await choosers.cancelHeld(signal);
+			return;
+		}
+		if (!opts.files?.length) {
+			throw new ToolError(
+				"tab.handleDialog(): a file chooser is waiting; pass files: [path, ...] to fill it, or accept: false to cancel it",
+			);
+		}
+		const absolute = opts.files.map(filePath => resolveToCwd(filePath, session.cwd));
+		// Through the tab's upload route, as `tab.uploadFile` fills a chooser: a browser that cannot read omp's paths
+		// gets the files' contents.
+		const page = this.#requirePage();
+		const release = choosers.answering(held);
+		try {
+			await choosers.check(held, absolute, "tab.handleDialog()");
+			const sources = await openUploadSources(absolute, signal);
+			const uploads = this.#requireUploads();
+			const route = await uploads.route(page, signal);
+			if (route === "contents") refuseFolders(sources);
+			await deliverToChooser(page, choosers, held, sources, route, uploads, "tab.handleDialog()", signal);
+		} finally {
+			release();
+		}
+	}
+
+	#requireChoosers(): FileChooserCatcher {
+		if (!this.#choosers) throw new ToolError("Tab worker file chooser handling is not initialized");
+		return this.#choosers;
 	}
 
 	#requireNetwork(): BrowserNetworkManager {

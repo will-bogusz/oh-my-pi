@@ -2096,8 +2096,13 @@ export class TernTab implements InProcessRunTab {
 		};
 	}
 
-	/** Accept or dismiss the held dialog. */
-	async handleDialog(opts: { accept: boolean; text?: string }): Promise<void> {
+	/** Accept or dismiss the held dialog. Tern holds no file chooser, so `files` has nothing to answer. */
+	async handleDialog(opts: { accept: boolean; text?: string; files?: string[] }): Promise<void> {
+		if (opts.files !== undefined) {
+			throw new ToolError(
+				"tab.handleDialog({ files }) answers a file chooser omp holds, which the Tern backend does not; use tab.uploadFile(selector, ...paths)",
+			);
+		}
 		try {
 			await this.#op("dialog", {
 				accept: opts.accept === true,
