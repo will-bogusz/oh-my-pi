@@ -5336,5 +5336,11 @@
     "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward"
    }
   ]
+ },
+ "opening": {
+  "id": "computer-same-reading-key-window",
+  "token": "8c11883b9abf4cbdadad51923c9abd15",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T16:46:26Z"
  }
 }
