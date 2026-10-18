@@ -3800,13 +3800,13 @@
    "needs": [],
    "base": "58349dc80de381057437818b8354c86826c8fa10",
    "body": "bodies/computer-target-sent-back-late.md",
-   "state": "queued",
+   "state": "open",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/tmp/oh-my-pi/s1k-target-late",
    "host": "MacBook-Pro",
    "added": "2026-10-18T12:38:01Z",
-   "updated": "2026-10-18T13:28:47Z",
+   "updated": "2026-10-18T13:32:23Z",
    "note": "Regression fix for #15195 (merged 4d956dad0f, unreleased). SamePollClick's will/computer-same-poll-click touches the same BackgroundFocusLease::observe(); it rebases onto this.",
    "built": [
     {
