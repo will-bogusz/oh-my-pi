@@ -6191,7 +6191,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/builtin-rule-conditions",
    "host": "goliath",
    "added": "2026-10-18T19:42:35Z",
-   "updated": "2026-10-18T19:52:23Z",
+   "updated": "2026-10-18T19:52:35Z",
    "note": "",
    "advanced": "2026-10-18T19:46:06Z",
    "built": [
@@ -6439,7 +6439,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-18T19:52:23Z"
+   "opened": "2026-10-18T19:52:23Z",
+   "readied": "2026-10-18T19:52:35Z"
   },
   {
    "id": "ssh-search-tier",
