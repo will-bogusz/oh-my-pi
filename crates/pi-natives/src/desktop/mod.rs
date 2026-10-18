@@ -158,6 +158,9 @@ enum Response {
 	MenuItems(Vec<DesktopMenuItem>),
 	Unit,
 	Snapshot(AxSnapshot),
+	/// An input call's takeover focus report; see
+	/// [`control::take_focus_return`].
+	Input(Option<DesktopFocusReturn>),
 	Nodes(Vec<AxNode>),
 	Node(Option<AxNode>),
 	Attributes(Vec<(String, String)>),
@@ -224,18 +227,19 @@ enum Request {
 		target:   Target,
 		keys:     Vec<keys::KeyName>,
 		duration: Duration,
-		takeover: Option<bool>,
+		takeover: Takeover,
 		reply:    Reply,
 	},
 	HoldMouse {
-		target:   Target,
-		x:        f64,
-		y:        f64,
-		button:   MouseButton,
-		keys:     Vec<keys::KeyName>,
-		duration: Duration,
-		takeover: Option<bool>,
-		reply:    Reply,
+		target:      Target,
+		x:           f64,
+		y:           f64,
+		button:      MouseButton,
+		keys:        Vec<keys::KeyName>,
+		duration:    Duration,
+		takeover:    Takeover,
+		refuse_menu: bool,
+		reply:       Reply,
 	},
 	Click {
 		target:  Target,
@@ -248,7 +252,7 @@ enum Request {
 		target:   Target,
 		x:        f64,
 		y:        f64,
-		takeover: Option<bool>,
+		takeover: Takeover,
 		reply:    Reply,
 	},
 	Drag {
@@ -263,19 +267,19 @@ enum Request {
 		y:        f64,
 		dx:       f64,
 		dy:       f64,
-		takeover: Option<bool>,
+		takeover: Takeover,
 		reply:    Reply,
 	},
 	TypeText {
 		target:   Target,
 		text:     String,
-		takeover: Option<bool>,
+		takeover: Takeover,
 		reply:    Reply,
 	},
 	KeyChord {
 		target:   Target,
 		keys:     Vec<keys::KeyName>,
-		takeover: Option<bool>,
+		takeover: Takeover,
 		reply:    Reply,
 	},
 	RaiseWindow {
@@ -554,12 +558,13 @@ struct AppWatch {
 
 #[derive(Clone)]
 struct ParsedPointerOptions {
-	button:    MouseButton,
-	count:     u32,
-	modifiers: backend::Modifiers,
-	keys:      Vec<keys::KeyName>,
-	takeover:  Option<bool>,
-	menu:      Option<Vec<String>>,
+	button:      MouseButton,
+	count:       u32,
+	modifiers:   backend::Modifiers,
+	keys:        Vec<keys::KeyName>,
+	takeover:    Takeover,
+	menu:        Option<Vec<String>>,
+	refuse_menu: bool,
 }
 impl ParsedPointerOptions {
 	fn parse(options: Option<PointerOptions>) -> CoreResult<Self> {
@@ -568,12 +573,13 @@ impl ParsedPointerOptions {
 			menus::validate_path(menu, false)?;
 		}
 		Ok(Self {
-			button:    MouseButton::parse(options.button.as_deref())?,
-			count:     options.count.unwrap_or(1).max(1),
-			modifiers: parse_modifiers(options.modifiers.as_deref().unwrap_or_default())?,
-			keys:      parse_keys(options.keys.as_deref().unwrap_or_default())?,
-			takeover:  options.takeover,
-			menu:      options.menu,
+			button:      MouseButton::parse(options.button.as_deref())?,
+			count:       options.count.unwrap_or(1).max(1),
+			modifiers:   parse_modifiers(options.modifiers.as_deref().unwrap_or_default())?,
+			keys:        parse_keys(options.keys.as_deref().unwrap_or_default())?,
+			takeover:    Takeover::new(options.takeover, options.return_focus),
+			menu:        options.menu,
+			refuse_menu: options.refuse_menu == Some(true),
 		})
 	}
 
@@ -582,7 +588,8 @@ impl ParsedPointerOptions {
 	}
 
 	/// Sends the click `event`, choosing [`Self::menu`] in the menu it opens
-	/// when that is set.
+	/// when that is set. With [`Self::refuse_menu`], a background click that
+	/// would open a control's menu is refused first.
 	fn click(
 		&self,
 		backend: &mut dyn Backend,
@@ -591,15 +598,48 @@ impl ParsedPointerOptions {
 		frame: &FrameGeometry,
 		token: &OperationToken,
 	) -> CoreResult<()> {
-		match &self.menu {
-			Some(path) => backend.pointer_menu(target, event, path, frame, self.mode(token), token),
-			None => backend.pointer(target, event, frame, self.mode(token), token),
+		let mode = self.mode(token);
+		if let Some(path) = &self.menu {
+			return backend.pointer_menu(target, event, path, frame, mode, token);
 		}
+		refuse_menu_press(backend, self.refuse_menu, mode, target, &event)?;
+		backend.pointer(target, event, frame, mode, token)
 	}
 }
 
-fn delivery_mode(takeover: Option<bool>, token: &OperationToken) -> DeliveryMode {
-	DeliveryMode::from_takeover(Some(takeover.unwrap_or_else(|| token.control_active())))
+/// With `refuse`, refuses background `event` on `target` before anything is
+/// sent when its left press would open a control's menu
+/// ([`Backend::refuse_menu_press`]); the host asks for this when the user
+/// refuses foreground takeover, since an open menu takes their keyboard.
+fn refuse_menu_press(
+	backend: &mut dyn Backend,
+	refuse: bool,
+	mode: DeliveryMode,
+	target: &Target,
+	event: &PointerEvent,
+) -> CoreResult<()> {
+	if refuse && mode == DeliveryMode::Background {
+		backend.refuse_menu_press(target, event)?;
+	}
+	Ok(())
+}
+
+/// The `takeover` and `returnFocus` options of one input request.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+struct Takeover {
+	requested:    Option<bool>,
+	return_focus: bool,
+}
+
+impl Takeover {
+	const fn new(requested: Option<bool>, return_focus: Option<bool>) -> Self {
+		Self { requested, return_focus: matches!(return_focus, Some(true)) }
+	}
+}
+
+fn delivery_mode(takeover: Takeover, token: &OperationToken) -> DeliveryMode {
+	DeliveryMode::from_takeover(Some(takeover.requested.unwrap_or_else(|| token.control_active())))
+		.returning_focus(takeover.return_focus)
 }
 
 fn hold_duration(seconds: f64) -> CoreResult<Duration> {
@@ -956,6 +996,7 @@ impl Worker {
 		let previous_frame = request
 			.frame_target()
 			.and_then(|target| self.frames.remove(target.key()));
+		control::take_focus_return();
 		let result = self.process(request, token).and_then(|response| {
 			token.check()?;
 			Ok(response)
@@ -1165,27 +1206,27 @@ impl Worker {
 					delivery_mode(*takeover, token),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
-			Request::HoldMouse { target, x, y, button, keys, duration, takeover, .. } => {
+			Request::HoldMouse {
+				target, x, y, button, keys, duration, takeover, refuse_menu, ..
+			} => {
 				if !keys.is_empty() {
 					self.validate_keyboard_target(target)?;
 				}
 				let (x, y, frame) = self.map_point(target, *x, *y)?;
-				self.backend()?.pointer(
-					target,
-					PointerEvent::Hold {
-						x,
-						y,
-						button: *button,
-						keys: keys.clone(),
-						duration: *duration,
-					},
-					&frame,
-					delivery_mode(*takeover, token),
-					token,
-				)?;
-				Ok(Response::Unit)
+				let event = PointerEvent::Hold {
+					x,
+					y,
+					button: *button,
+					keys: keys.clone(),
+					duration: *duration,
+				};
+				let mode = delivery_mode(*takeover, token);
+				let backend = self.backend()?;
+				refuse_menu_press(backend.as_mut(), *refuse_menu, mode, target, &event)?;
+				backend.pointer(target, event, &frame, mode, token)?;
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::CaptureRegion { target, region, caps, .. } => {
 				let (base, _) = self.validated_frame(target)?;
@@ -1249,7 +1290,7 @@ impl Worker {
 					&frame,
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::MoveMouse { target, x, y, takeover, .. } => {
 				let (x, y, frame) = self.map_point(target, *x, *y)?;
@@ -1260,7 +1301,7 @@ impl Worker {
 					delivery_mode(*takeover, token),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::Drag { target, path, options, .. } => {
 				if !options.keys.is_empty() || options.modifiers != backend::Modifiers::default() {
@@ -1271,19 +1312,17 @@ impl Worker {
 					.iter()
 					.map(|(x, y)| frame.map_point(*x, *y, current.as_ref()))
 					.collect::<CoreResult<Vec<_>>>()?;
-				self.backend()?.pointer(
-					target,
-					PointerEvent::Drag {
-						path:      mapped,
-						button:    options.button,
-						modifiers: options.modifiers,
-						keys:      options.keys.clone(),
-					},
-					&frame,
-					options.mode(token),
-					token,
-				)?;
-				Ok(Response::Unit)
+				let event = PointerEvent::Drag {
+					path:      mapped,
+					button:    options.button,
+					modifiers: options.modifiers,
+					keys:      options.keys.clone(),
+				};
+				let mode = options.mode(token);
+				let backend = self.backend()?;
+				refuse_menu_press(backend.as_mut(), options.refuse_menu, mode, target, &event)?;
+				backend.pointer(target, event, &frame, mode, token)?;
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::Scroll { target, x, y, dx, dy, takeover, .. } => {
 				let (x, y, frame) = self.map_point(target, *x, *y)?;
@@ -1294,21 +1333,21 @@ impl Worker {
 					delivery_mode(*takeover, token),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::TypeText { target, text, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
 				self
 					.backend()?
 					.type_text(target, text, delivery_mode(*takeover, token), token)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::KeyChord { target, keys, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
 				self
 					.backend()?
 					.key_chord(target, keys, delivery_mode(*takeover, token), token)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::RaiseWindow { id, .. } => {
 				self.backend()?.raise_window(id, token)?;
@@ -1449,7 +1488,7 @@ impl Worker {
 					&FrameGeometry::identity_global(),
 					token,
 				)?;
-				Ok(Response::Unit)
+				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::Close { .. } => Ok(Response::Unit),
 		}
@@ -1873,17 +1912,17 @@ impl DesktopSession {
 		target: String,
 		keys: Vec<String>,
 		options: HoldOptions,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let keys = parse_keys(&keys).map_err(napi::Error::from)?;
 		if keys.is_empty() {
 			return Err(DesktopError::invalid_key("holdKeys requires at least one key").into());
 		}
 		let duration = hold_duration(options.duration).map_err(napi::Error::from)?;
-		Ok(self.unit("desktop.holdKeys", move |reply| Request::HoldKeys {
+		Ok(self.input("desktop.holdKeys", move |reply| Request::HoldKeys {
 			target: Target::parse(&target),
 			keys,
 			duration,
-			takeover: options.takeover,
+			takeover: Takeover::new(options.takeover, options.return_focus),
 			reply,
 		}))
 	}
@@ -1895,19 +1934,20 @@ impl DesktopSession {
 		x: f64,
 		y: f64,
 		options: HoldOptions,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let duration = hold_duration(options.duration).map_err(napi::Error::from)?;
 		let button = MouseButton::parse(options.button.as_deref()).map_err(napi::Error::from)?;
 		let keys =
 			parse_keys(options.keys.as_deref().unwrap_or_default()).map_err(napi::Error::from)?;
-		Ok(self.unit("desktop.holdMouse", move |reply| Request::HoldMouse {
+		Ok(self.input("desktop.holdMouse", move |reply| Request::HoldMouse {
 			target: Target::parse(&target),
 			x,
 			y,
 			button,
 			keys,
 			duration,
-			takeover: options.takeover,
+			takeover: Takeover::new(options.takeover, options.return_focus),
+			refuse_menu: options.refuse_menu == Some(true),
 			reply,
 		}))
 	}
@@ -2017,9 +2057,9 @@ impl DesktopSession {
 		x: f64,
 		y: f64,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let o = ParsedPointerOptions::parse(opts).map_err(napi::Error::from)?;
-		Ok(self.unit("desktop.click", move |reply| Request::Click {
+		Ok(self.input("desktop.click", move |reply| Request::Click {
 			target: Target::parse(&target),
 			x,
 			y,
@@ -2035,11 +2075,11 @@ impl DesktopSession {
 		x: f64,
 		y: f64,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.moveMouse", move |reply| Request::MoveMouse {
+		Ok(self.input("desktop.moveMouse", move |reply| Request::MoveMouse {
 			target: Target::parse(&target),
 			x,
 			y,
@@ -2054,7 +2094,7 @@ impl DesktopSession {
 		target: String,
 		path: Vec<DesktopPoint>,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let o = ParsedPointerOptions::parse(opts).map_err(napi::Error::from)?;
 		if o.menu.is_some() {
 			return Err(
@@ -2065,7 +2105,7 @@ impl DesktopSession {
 			);
 		}
 		let path = path.into_iter().map(|p| (p.x, p.y)).collect();
-		Ok(self.unit("desktop.drag", move |reply| Request::Drag {
+		Ok(self.input("desktop.drag", move |reply| Request::Drag {
 			target: Target::parse(&target),
 			path,
 			options: o,
@@ -2082,11 +2122,11 @@ impl DesktopSession {
 		dx: f64,
 		dy: f64,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.scroll", move |reply| Request::Scroll {
+		Ok(self.input("desktop.scroll", move |reply| Request::Scroll {
 			target: Target::parse(&target),
 			x,
 			y,
@@ -2103,11 +2143,11 @@ impl DesktopSession {
 		target: String,
 		text: String,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.typeText", move |reply| Request::TypeText {
+		Ok(self.input("desktop.typeText", move |reply| Request::TypeText {
 			target: Target::parse(&target),
 			text,
 			takeover,
@@ -2121,12 +2161,12 @@ impl DesktopSession {
 		target: String,
 		keys: Vec<String>,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let keys = parse_keys(&keys).map_err(napi::Error::from)?;
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.unit("desktop.keyChord", move |reply| Request::KeyChord {
+		Ok(self.input("desktop.keyChord", move |reply| Request::KeyChord {
 			target: Target::parse(&target),
 			keys,
 			takeover,
@@ -2267,9 +2307,9 @@ impl DesktopSession {
 		&self,
 		reference: String,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<()>> {
+	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
 		let o = ParsedPointerOptions::parse(opts).map_err(napi::Error::from)?;
-		Ok(self.unit("desktop.axClick", move |reply| Request::AxClick {
+		Ok(self.input("desktop.axClick", move |reply| Request::AxClick {
 			reference,
 			options: o,
 			reply,
@@ -2302,6 +2342,24 @@ impl DesktopSession {
 			c.call(token, make)
 				.and_then(response_unit)
 				.map_err(Into::into)
+		})
+	}
+
+	/// An input call, resolving to where its takeover left focus, if it took
+	/// over.
+	fn input(
+		&self,
+		label: &'static str,
+		make: impl FnOnce(Reply) -> Request + Send + 'static,
+	) -> task::Promise<Option<DesktopFocusReturn>> {
+		let c = Arc::clone(&self.core);
+		let token = c.cancellation.token();
+		task::blocking(label, (), move |_| {
+			match c.call(token, make)? {
+				Response::Input(report) => Ok(report),
+				_ => Err(DesktopError::internal("unexpected desktop worker response")),
+			}
+			.map_err(Into::into)
 		})
 	}
 
@@ -2426,6 +2484,8 @@ mod capture_tests {
 		/// Each window listing signals the sender, then blocks until the
 		/// receiver's sender drops.
 		hang_windows:           Option<(flume::Sender<()>, flume::Receiver<()>)>,
+		/// Every click lands on a control whose menu would take the keyboard.
+		menu_control:           bool,
 	}
 
 	impl FakeWaylandBackend {
@@ -2445,6 +2505,7 @@ mod capture_tests {
 				overlap:                None,
 				window_present:         true,
 				tree:                   None,
+				menu_control:           false,
 				clicks:                 Arc::new(Mutex::new(Vec::new())),
 				layout:                 Arc::new(Mutex::new(vec![DesktopDisplay {
 					id:           "screen-1".to_string(),
@@ -2745,6 +2806,16 @@ mod capture_tests {
 				.clicks
 				.lock()
 				.push(format!("{} menu {}", target.key(), path.join(" > ")));
+			Ok(())
+		}
+
+		fn refuse_menu_press(&mut self, target: &Target, _: &PointerEvent) -> CoreResult<()> {
+			if self.menu_control {
+				return Err(DesktopError::background_unavailable(format!(
+					"the press on window {} lands on a popup button; nothing was sent",
+					target.key()
+				)));
+			}
 			Ok(())
 		}
 
@@ -3593,6 +3664,108 @@ mod capture_tests {
 		assert!(ParsedPointerOptions::parse(Some(empty)).is_err());
 	}
 
+	#[test]
+	fn refuse_menu_checks_a_background_click_before_anything_is_sent() {
+		let mut backend = FakeWaylandBackend::new();
+		backend.menu_control = true;
+		let clicks = Arc::clone(&backend.clicks);
+		let mut worker = worker_with(backend);
+		let token = CancellationSource::default().token();
+		let target = Target::Window(WAYLAND_ID.to_string());
+		let event = PointerEvent::Click {
+			x:         1.0,
+			y:         1.0,
+			button:    MouseButton::Left,
+			count:     1,
+			modifiers: backend::Modifiers::default(),
+		};
+		let mut click =
+			|refuse_menu: Option<bool>, takeover: Option<bool>, menu: Option<Vec<String>>| {
+				ParsedPointerOptions::parse(Some(PointerOptions {
+					refuse_menu,
+					takeover,
+					menu,
+					..PointerOptions::default()
+				}))
+				.unwrap()
+				.click(
+					worker.backend().unwrap().as_mut(),
+					&target,
+					event.clone(),
+					&FrameGeometry::identity_global(),
+					&token,
+				)
+			};
+		let refused = click(Some(true), None, None).expect_err("a click on a menu control refuses");
+		assert_eq!(refused.code, ErrorCode::BackgroundUnavailable);
+		assert!(clicks.lock().is_empty(), "nothing may be sent before the refusal");
+		// Without the option, in takeover, or with a menu path the click is sent
+		// unchecked.
+		click(None, None, None).expect("plain click");
+		click(Some(true), Some(true), None).expect("takeover click");
+		click(Some(true), None, Some(vec!["Large".to_string()])).expect("menu click");
+		assert_eq!(*clicks.lock(), [
+			WAYLAND_ID.to_string(),
+			WAYLAND_ID.to_string(),
+			format!("{WAYLAND_ID} menu Large"),
+		]);
+	}
+
+	#[test]
+	fn refuse_menu_checks_a_background_hold_and_drag_before_anything_is_sent() {
+		let mut backend = FakeWaylandBackend::new();
+		backend.menu_control = true;
+		let clicks = Arc::clone(&backend.clicks);
+		let mut worker = worker_with(backend);
+		let token = CancellationSource::default().token();
+		let target = Target::Window(WAYLAND_ID.to_string());
+		worker
+			.process(&capture_request(target.clone()), &token)
+			.unwrap();
+		let hold = |refuse_menu: bool, takeover: Option<bool>| {
+			let (reply, _rx) = flume::bounded(1);
+			Request::HoldMouse {
+				target: target.clone(),
+				x: 1.0,
+				y: 1.0,
+				button: MouseButton::Left,
+				keys: Vec::new(),
+				duration: Duration::ZERO,
+				takeover: Takeover::new(takeover, None),
+				refuse_menu,
+				reply,
+			}
+		};
+		let drag = |refuse_menu: Option<bool>, takeover: Option<bool>| {
+			let (reply, _rx) = flume::bounded(1);
+			Request::Drag {
+				target: target.clone(),
+				path: vec![(1.0, 1.0), (2.0, 2.0)],
+				options: ParsedPointerOptions::parse(Some(PointerOptions {
+					refuse_menu,
+					takeover,
+					..PointerOptions::default()
+				}))
+				.unwrap(),
+				reply,
+			}
+		};
+		for request in [hold(true, None), drag(Some(true), None)] {
+			let Err(refused) = worker.process(&request, &token) else {
+				panic!("a press on a menu control refuses");
+			};
+			assert_eq!(refused.code, ErrorCode::BackgroundUnavailable);
+		}
+		assert!(clicks.lock().is_empty(), "nothing may be sent before the refusal");
+		// Without the option or in takeover the hold and drag are sent unchecked.
+		for request in
+			[hold(false, None), hold(true, Some(true)), drag(None, None), drag(Some(true), Some(true))]
+		{
+			worker.process(&request, &token).expect("unchecked press");
+		}
+		assert_eq!(clicks.lock().len(), 4);
+	}
+
 	fn capture_request(target: Target) -> Request {
 		let (reply, _rx) = flume::bounded(1);
 		Request::Capture { target, caps: CaptureCaps::default(), reply }
@@ -4068,17 +4241,23 @@ mod capture_tests {
 		assert_eq!(hold_duration(100.0).unwrap(), Duration::from_secs(100));
 		let token = CancellationSource::default().token();
 		let default = ParsedPointerOptions::parse(None).unwrap();
-		assert_eq!(default.takeover, None);
+		assert_eq!(default.takeover.requested, None);
 		assert_eq!(default.mode(&token), DeliveryMode::Background);
-		for (takeover, expected) in
-			[(false, DeliveryMode::Background), (true, DeliveryMode::Foreground)]
-		{
+		for (takeover, return_focus, expected) in [
+			(false, None, DeliveryMode::Background),
+			(true, None, DeliveryMode::Foreground),
+			(true, Some(false), DeliveryMode::Foreground),
+			(true, Some(true), DeliveryMode::ForegroundReturnFocus),
+			// Returning focus never turns background input into a takeover.
+			(false, Some(true), DeliveryMode::Background),
+		] {
 			let options = ParsedPointerOptions::parse(Some(PointerOptions {
 				takeover: Some(takeover),
+				return_focus,
 				..PointerOptions::default()
 			}))
 			.unwrap();
-			assert_eq!(options.takeover, Some(takeover));
+			assert_eq!(options.takeover.requested, Some(takeover));
 			assert_eq!(options.mode(&token), expected);
 		}
 	}

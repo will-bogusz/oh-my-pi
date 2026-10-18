@@ -17,10 +17,13 @@
 ### Added
 
 - Added a `menu` option to the computer tool's `win.click`, `el.click`, `el.press` and `el.perform`: on macOS the call that opens a context menu or menu button's menu chooses that item, e.g. `menu: ["Add to", "Fonts"]`, and leaves no menu open ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- Added `computer.backgroundFallback` (`takeover` by default, or `refuse`). When a `computer` window input call's background route is unavailable, the tool reruns that one call in takeover, hands focus back to your app (on macOS even if you kept typing), and says so in its result (`click ran in takeover because …; the input was delivered, and focus returned to …`); `refuse` fails the call without taking over, and also refuses, before anything is sent, the model's own `takeover: true`, `raise()`, activating `apps.open`, `control.acquire`, desktop-root input, off macOS `el.focus()`, and on macOS any call that opens a menu (right-click, Control-click, `AXShowMenu`, a `menu` item, a press, or a left click, hold or drag, on a popup button or menu button, `setValue` on a popup button), which takes your keyboard while open, and `AXOpen`, which can bring an Open panel's app to the front even when it fails, naming the background route instead. `/computer status` shows the setting ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 
 - The `computer` tool's instructions now tell the model that macOS drags, mouse holds, modified clicks, right-clicks and scrolls run in the background, so it no longer reaches for `takeover` for them ([#15185](https://github.com/can1357/oh-my-pi/pull/15185) by [@will-bogusz](https://github.com/will-bogusz))
+- The `computer` tool and its errors no longer tell the model to retry with `takeover: true` after `BackgroundUnavailable`; the tool decides by `computer.backgroundFallback` ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
+- The `computer` tool's instructions now tell the model never to call `raise()` or `apps.open(…, { activate: true })` to make input work, since both bring the app forward and take your keyboard, while launching, reopening and window input run in the background ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 
@@ -28,6 +31,7 @@
 - Fixed the macOS `computer` tool's `StaleRef` for an element the app rebuilt in place, such as an Automator rule popup after its neighbour changed, leaving the agent to re-read the window: it now names the one element of the window with the fields the ref was read with, for the agent to check before acting on it ([#15574](https://github.com/can1357/oh-my-pi/pull/15574) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed `computer.apps.open` returning before the app had a window, or never giving a hidden running app one; it now returns the app's frontmost window as `window`, waiting up to 3 s on macOS ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a key the user was typing in another app arriving twice or more on macOS when omp exited after computer use: the computer tool closes its event taps from the exit handler ([#15562](https://github.com/can1357/oh-my-pi/pull/15562) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed the `computer` tool's takeover-rerun notice saying "nothing was sent" about a call it had just delivered; it now says the input was delivered, so the model stops repeating the call ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.12.1] - 2026-10-17
 
