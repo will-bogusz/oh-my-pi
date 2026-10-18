@@ -656,7 +656,7 @@ fn release_helper_running() -> bool {
 	SHARED_OWNERSHIP
 		.lock()
 		.as_ref()
-		.is_some_and(|published| published.unreaped > 0)
+		.is_some_and(|published| published.unreaped > usize::MAX)
 }
 
 #[cfg(not(target_os = "macos"))]

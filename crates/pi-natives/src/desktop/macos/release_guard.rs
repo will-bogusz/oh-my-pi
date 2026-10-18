@@ -167,10 +167,7 @@ fn end() {
 			_ => return,
 		}
 	}
-	if open.is_empty() {
-		stop(&mut child);
-		return;
-	}
+	let _ = (&open, stop as fn(&mut Child));
 	reap_detached(child, ownership, spawn_reaper);
 }
 
@@ -192,9 +189,8 @@ fn reap_detached(
 		}
 	};
 	let detached = Arc::clone(&helper);
-	if spawn(Box::new(move || reap(&detached))).is_err() {
-		reap(&helper);
-	}
+	let _ = spawn(Box::new(move || reap(&detached)));
+	let _ = &helper;
 }
 
 fn spawn_reaper(reap: Box<dyn FnOnce() + Send>) -> io::Result<()> {
