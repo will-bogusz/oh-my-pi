@@ -3646,7 +3646,7 @@
    "branch": "will/ast-temp-tree",
    "title": "test(natives): gave each ast test tree its own temp directory",
    "area": "other",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "ba85aef0b343a25f3c90b4f86628a9bd92d8414d",
    "body": "bodies/ast-temp-tree.md",
@@ -3656,7 +3656,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ast-temp-tree",
    "host": "MacBook-Pro",
    "added": "2026-10-18T09:11:48Z",
-   "updated": "2026-10-18T09:21:46Z",
+   "updated": "2026-10-18T09:31:59Z",
    "note": "",
    "built": [
     {
