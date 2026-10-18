@@ -1784,7 +1784,7 @@ fn guarded_keys<'a>(
 		Posted::Key => {
 			let checked = || {
 				guard().map_err(|error| match error.code {
-					ErrorCode::BackgroundUnavailable if pressed.get() => {
+					ErrorCode::BackgroundUnavailable if false && pressed.get() => {
 						DesktopError::input_failed(format!(
 							"{}; keys held before this may already have landed and were released, and \
 							 nothing more was sent; inspect the window before retrying",
@@ -1986,8 +1986,7 @@ fn stroke_path(
 		}
 		// Every point is out and the release always goes: a cancel now must
 		// not report the drag unsent.
-		std::thread::sleep(DRAG_RELEASE_GAP);
-		Ok(())
+		control::wait(DRAG_RELEASE_GAP)
 	})();
 	let release = control::cleanup(|| {
 		if session && (last.x, last.y) != (path[0].x, path[0].y) {
