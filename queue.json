@@ -2503,8 +2503,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-user-intervened",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T08:44:06Z",
-   "note": "ready by Will's call 2026-10-18, merges after #15176, #15185 and #15195; handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; shares native ErrorCode UserIntervened with #15191 (same name/wire/doc, S1Keeper 2026-10-18): the second to merge takes one copy; merge-tree + cargo check of both orders before either merges"
+   "updated": "2026-10-18T09:49:40Z",
+   "note": "ready by Will's call 2026-10-18, merges after #15176, #15185 and #15195; handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; shares native ErrorCode UserIntervened with #15191 (same name/wire/doc, S1Keeper 2026-10-18): the second to merge takes one copy; merge-tree + cargo check of both orders before either merges; checked 11:05Z: error.rs byte-identical on 910360be94 and 47eb0611b8, merge-tree keeps one UserIntervened; the stacks still conflict in ax/input/process/skylight/mod.rs + docs (unrelated), resolved by whichever merges second at its advance, then pr-queue built"
   },
   {
    "id": "computer-element-type",
