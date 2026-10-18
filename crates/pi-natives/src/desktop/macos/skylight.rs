@@ -383,28 +383,25 @@ pub(super) fn after_cleanup<T>(result: CoreResult<T>, cleanup: CoreResult<()>) -
 	}
 }
 
-/// Hardware mouse presses (left, right, other `CGEventType`s): a click is how a
-/// user picks a window, while typing in their own window is not. Events posted
-/// to a pid do not advance these counters.
-const POINTER_PRESS_TYPES: [u32; 3] = [1, 3, 25];
-
-fn hid_counter(event_type: u32) -> u32 {
-	// SAFETY: HIDSystemState (1) and these public CGEventType values are
-	// defined by CGEventSource.h / CGEventTypes.h; this is a read-only query.
-	unsafe { CGEventSourceCounterForEventType(1, event_type) }
-}
-
 /// Physical activity is a conservative veto, not proof of which app the user
 /// chose. A source that updates HID counters for synthetic events can also veto
 /// restoration; yielding control is safer than fighting a deliberate switch.
 fn activation_activity() -> [u32; 5] {
-	// Pointer presses, key press, and modifiers can change activation.
-	let [left, right, other] = POINTER_PRESS_TYPES;
-	[left, right, other, 10, 12].map(hid_counter)
+	// Left/right/other press, key press, and modifiers can change activation.
+	[1, 3, 25, 10, 12].map(|event_type| {
+		// SAFETY: HIDSystemState (1) and these public CGEventType values are
+		// defined by CGEventSource.h / CGEventTypes.h; this is a read-only query.
+		unsafe { CGEventSourceCounterForEventType(1, event_type) }
+	})
 }
 
+/// Left, right and other mouse presses the HID system has counted.
 fn pointer_presses() -> [u32; 3] {
-	POINTER_PRESS_TYPES.map(hid_counter)
+	[1, 3, 25].map(|event_type| {
+		// SAFETY: HIDSystemState (1) and these public CGEventType values are
+		// defined by CGEventSource.h / CGEventTypes.h; this is a read-only query.
+		unsafe { CGEventSourceCounterForEventType(1, event_type) }
+	})
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -771,42 +768,6 @@ fn restorable_key(
 		.then_some(UserKey::Windowless)
 }
 
-/// Checks [`hands_back`] twice, the second time with the final front-process
-/// check, re-reading the key window and the press counter each time: a window
-/// the user picks or a click on the target between the two still vetoes the
-/// hand-back.
-fn hand_back_confirmed(
-	same_process: bool,
-	previous_key: u32,
-	wid: u32,
-	mut key_window: impl FnMut() -> Option<u32>,
-	mut clicked: impl FnMut() -> bool,
-	still_front: impl FnOnce() -> bool,
-) -> bool {
-	let mut hands_back_now = || hands_back(same_process, key_window(), previous_key, wid, clicked());
-	hands_back_now() && still_front() && hands_back_now()
-}
-
-/// Whether focus goes back to `previous_key`, given the previous front
-/// process's key window now. Another window there was the user's choice. The
-/// target itself is still key after the focus record within one process, so
-/// there only a hardware click marks it as the user's choice. Typing in their
-/// own window never stops the hand-back: background input watches no keys.
-const fn hands_back(
-	same_process: bool,
-	key: Option<u32>,
-	previous_key: u32,
-	wid: u32,
-	clicked: bool,
-) -> bool {
-	match key {
-		Some(key) if key == previous_key => true,
-		Some(key) if same_process && key == wid => !clicked,
-		Some(_) => false,
-		None => true,
-	}
-}
-
 /// Makes `wid` the frontmost key window, runs `action`, then restores the
 /// previous front process (or, within one process, its previous key window).
 ///
@@ -877,12 +838,11 @@ pub(super) fn with_foreground<T>(
 			event_clock_now,
 			still_ours,
 			|since| control::last_user_typing() >= since,
-			|since| set_front_unless_user_acted(spi, previous.psn, previous_key, since),
+			|since| set_front_unless_user_acted(spi, previous.psn, previous_key.unwrap_or(0), since),
 		)?;
 		if handed_back != Some(FrontRequest::Done) {
 			return Ok(());
 		}
-		set_front(spi, previous.psn, previous_key.unwrap_or(0))?;
 		// A previous app that showed no window gets only its front status back.
 		let Some(previous_key) = previous_key else {
 			return Ok(());
@@ -1322,81 +1282,6 @@ mod tests {
 	}
 
 	#[test]
-	fn a_front_request_the_user_overtook_is_their_choice_not_an_error() {
-		assert_eq!(front_request(0).ok(), Some(FrontRequest::Done));
-		assert_eq!(front_request(EXPIRED_FRONT_REQUEST).ok(), Some(FrontRequest::UserActed));
-		assert_eq!(
-			front_request(-1)
-				.expect_err("other failures stay errors")
-				.code,
-			ErrorCode::InputFailed
-		);
-	}
-
-	#[test]
-	fn focus_hand_back_yields_only_to_a_window_the_user_picked() {
-		let (user, target) = (7, 42);
-		// Typing in their own app moves no window: focus goes back to it.
-		assert!(hands_back(false, Some(user), user, target, false));
-		assert!(hands_back(true, Some(user), user, target, true), "a click in their own window");
-		assert!(hands_back(true, None, user, target, false));
-		// A sibling target still key after the focus record is ours to hand back,
-		// unless the user clicked it.
-		assert!(hands_back(true, Some(target), user, target, false));
-		assert!(!hands_back(true, Some(target), user, target, true));
-		assert!(!hands_back(true, Some(9), user, target, false), "another window the user picked");
-		assert!(!hands_back(false, Some(9), user, target, false));
-	}
-
-	#[test]
-	fn final_hand_back_check_rereads_the_key_window() {
-		let (user, target) = (7, 42);
-		let mut keys = [Some(user), Some(9)].into_iter();
-		assert!(
-			!hand_back_confirmed(false, user, target, || keys.next().unwrap(), || false, || true),
-			"a window the user picked between the two checks"
-		);
-		let mut presses = [false, true].into_iter();
-		assert!(!hand_back_confirmed(
-			true,
-			user,
-			target,
-			|| Some(target),
-			|| presses.next().unwrap(),
-			|| true
-		));
-		assert!(!hand_back_confirmed(false, user, target, || Some(user), || false, || false));
-		assert!(hand_back_confirmed(false, user, target, || Some(user), || false, || true));
-	}
-
-	#[test]
-	fn the_hand_back_timestamp_precedes_the_last_check() {
-		use std::cell::RefCell;
-		let steps = RefCell::new(Vec::new());
-		let handed = request_after_check(
-			|| {
-				steps.borrow_mut().push("clock");
-				7
-			},
-			|| {
-				steps.borrow_mut().push("check");
-				true
-			},
-			|since| {
-				steps.borrow_mut().push("request");
-				assert_eq!(since, 7, "the request carries the timestamp taken before the check");
-				Ok(FrontRequest::UserActed)
-			},
-		);
-		assert_eq!(handed.ok(), Some(Some(FrontRequest::UserActed)));
-		assert_eq!(*steps.borrow(), ["clock", "check", "request"]);
-
-		let unwanted =
-			request_after_check(|| 7, || false, |_| panic!("no request once the check fails"));
-		assert_eq!(unwanted.ok(), Some(None));
-	}
-
-	#[test]
 	fn takeover_hands_back_through_the_users_typing_but_not_their_click() {
 		use std::cell::Cell;
 		// The monitor saw the user type after each refused timestamp, and
@@ -1471,7 +1356,6 @@ mod tests {
 
 	#[test]
 	fn a_front_request_the_user_overtook_is_their_choice_not_an_error() {
-		use crate::desktop::error::ErrorCode;
 		assert_eq!(front_request(0).ok(), Some(FrontRequest::Done));
 		assert_eq!(front_request(EXPIRED_FRONT_REQUEST).ok(), Some(FrontRequest::UserActed));
 		assert_eq!(
