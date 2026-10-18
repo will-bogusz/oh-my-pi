@@ -4636,6 +4636,26 @@
    ],
    "opened": "2026-10-18T18:24:26Z",
    "readied": "2026-10-18T18:24:44Z"
+  },
+  {
+   "id": "computer-uinput-release",
+   "branch": "will/computer-uinput-release",
+   "title": "fix(natives): never cancel X11 uinput releases",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [
+    "#16202"
+   ],
+   "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
+   "body": "bodies/computer-uinput-release.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-uinput-release",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T18:43:41Z",
+   "updated": "2026-10-18T18:43:41Z",
+   "note": ""
   }
  ],
  "watch": {
