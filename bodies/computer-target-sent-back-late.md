@@ -22,7 +22,7 @@ The 500 ms limit now applies only to other apps; the target is sent back wheneve
 
 The table runs drive the real computer tool in the VM through the VNC keyboard and pointer, comparing front-app samples every 150 ms for 0.9 s after the click.
 
-On bench-mac: `cargo check -p pi-natives --tests`, `cargo clippy -p pi-natives --all-targets`, `CI=1 bun check`, `cargo test -p pi-natives --lib` and the computer TS tests. `a_click_placed_in_the_users_app_does_not_let_the_target_keep_the_front` fails on main as well as here (a test reading an idle counter after a click as a new click); it is not touched by this change.
+On bench-mac: `cargo check -p pi-natives --tests`, `CI=1 bun run check:rs` (clippy), `CI=1 bun check`, `cargo test -p pi-natives --lib` and the computer TS tests pass, except `a_click_placed_in_the_users_app_does_not_let_the_target_keep_the_front`, which fails the same way on main `58349dc80d` (it reads an idle counter after a click as a new click) and is not touched here.
 
 Not run: a hardware keyboard and mouse (the VM's VNC input stands in).
 

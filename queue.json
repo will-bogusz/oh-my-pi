@@ -3806,7 +3806,7 @@
    "worktree": "/Users/viathebrink/tmp/oh-my-pi/s1k-target-late",
    "host": "MacBook-Pro",
    "added": "2026-10-18T12:38:01Z",
-   "updated": "2026-10-18T13:27:15Z",
+   "updated": "2026-10-18T13:27:18Z",
    "note": "Regression fix for #15195 (merged 4d956dad0f, unreleased). SamePollClick's will/computer-same-poll-click touches the same BackgroundFocusLease::observe(); it rebases onto this.",
    "built": [
     {
