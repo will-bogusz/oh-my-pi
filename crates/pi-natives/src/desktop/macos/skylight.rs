@@ -1550,14 +1550,17 @@ mod tests {
 			visited: false,
 		};
 		let clicked = [1, 0, 0, 0, 0];
-		// The poll placed the click off the target, in the user's own app (7):
-		// the target is sent back, and the click is absorbed so the hand-back's
-		// re-check of the counters still holds.
+		// The poll placed the click off the target, in the user's own app (7),
+		// whose key window is still 42: the target is sent back, and the click
+		// is absorbed so the hand-back's re-check of the counters still holds.
 		let mut guard = lease();
-		assert_eq!(guard.observe(target, None, clicked, false), FocusDecision::Restore);
+		assert_eq!(guard.observe(target, Some(42), clicked, false), FocusDecision::Restore);
 		assert_eq!(guard.activity, clicked);
 		assert!(!guard.visited);
 		assert_eq!(guard.observe(target, None, clicked, false), FocusDecision::Restore);
+		// The click picked another window of the user's app: hands off.
+		let mut guard = lease();
+		assert_eq!(guard.observe(target, Some(43), clicked, false), FocusDecision::Disarm);
 		// The poll placed it on the target: the user brought it forward.
 		let mut guard = lease();
 		assert_eq!(guard.observe(target, None, clicked, true), FocusDecision::Disarm);
