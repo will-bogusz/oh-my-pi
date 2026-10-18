@@ -263,3 +263,25 @@ fn ioctl_ptr(fd: libc::c_int, request: libc::Ioctl, setup: &UInputSetup) -> Core
 		Ok(())
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::desktop::error::ErrorCode;
+
+	#[test]
+	fn a_cancel_stops_presses_but_never_releases() {
+		let file = OpenOptions::new().write(true).open("/dev/null").unwrap();
+		let mut device = UInputDevice { file, created: false };
+		let source = control::CancellationSource::default();
+		let token = source.token();
+		source.cancel();
+		control::with_token_for_test(&token, || {
+			assert_eq!(device.key(38, true).unwrap_err().code, ErrorCode::Cancelled);
+			assert_eq!(device.button(1, true).unwrap_err().code, ErrorCode::Cancelled);
+			// The chord's last press is out: its releases still go.
+			device.key(38, false).unwrap();
+			device.button(1, false).unwrap();
+		});
+	}
+}
