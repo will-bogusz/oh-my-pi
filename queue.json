@@ -3853,8 +3853,28 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/natives-test-click-placed-in-users-app",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:26:31Z",
-   "updated": "2026-10-18T13:26:31Z",
-   "note": ""
+   "updated": "2026-10-18T13:35:46Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16163",
+     "code": "561a45ca97a5778c5947d56e98acf364f3b5e081",
+     "with_code": "5f7740a415d860e041b015e202d65b8e1120c286",
+     "tip": "cc124ff47e02eade5f816d70a5fbdb9e90370d14",
+     "with_tip": "7cb4e3bdfa3246d73daee60107122b18b5409102",
+     "at": "2026-10-18T13:35:44Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16185",
+     "code": "561a45ca97a5778c5947d56e98acf364f3b5e081",
+     "with_code": "d53799fa2a7e111d3ff4ab7a095d29d70eaf6351",
+     "tip": "cc124ff47e02eade5f816d70a5fbdb9e90370d14",
+     "with_tip": "1e1f36d4b5f52866874e96859d760a1659e5a536",
+     "at": "2026-10-18T13:35:46Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
