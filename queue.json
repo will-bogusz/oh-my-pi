@@ -4725,6 +4725,24 @@
    "added": "2026-10-18T19:00:21Z",
    "updated": "2026-10-18T19:00:21Z",
    "note": ""
+  },
+  {
+   "id": "computer-no-ui-confirm",
+   "branch": "will/computer-no-ui-confirm",
+   "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/computer-no-ui-confirm.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-no-ui-confirm",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:01:19Z",
+   "updated": "2026-10-18T19:01:19Z",
+   "note": ""
   }
  ],
  "watch": {
