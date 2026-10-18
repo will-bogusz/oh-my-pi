@@ -3790,7 +3790,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T11:33:52Z",
+  "checked": "2026-10-18T12:04:14Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -3799,29 +3799,24 @@
     "since": "2026-10-18T11:03:22Z",
     "title": "feat(natives): deliver macOS background drags, holds, modified and right-clicks",
     "files": [
-     "crates/pi-natives/src/desktop/macos/applications.rs",
      "crates/pi-natives/src/desktop/macos/ax.rs",
-     "crates/pi-natives/src/desktop/macos/capture.rs",
      "crates/pi-natives/src/desktop/macos/input.rs",
-     "crates/pi-natives/src/desktop/macos/skylight.rs",
-     "crates/pi-natives/src/desktop/mod.rs",
-     "docs/computer-use.md",
-     "docs/tools/computer.md"
+     "docs/tools/computer.md",
+     "packages/coding-agent/src/tools/computer/worker.ts"
     ]
    },
    "#15191": {
     "since": "2026-10-18T11:03:22Z",
     "title": "feat(computer): rerun refused macOS background input in takeover, set by computer.backgroundFallback",
     "files": [
-     "crates/pi-natives/src/desktop/macos/applications.rs",
      "crates/pi-natives/src/desktop/macos/ax.rs",
-     "crates/pi-natives/src/desktop/macos/capture.rs",
      "crates/pi-natives/src/desktop/macos/input.rs",
      "crates/pi-natives/src/desktop/macos/skylight.rs",
      "crates/pi-natives/src/desktop/mod.rs",
      "docs/computer-use.md",
      "docs/tools/computer.md",
-     "packages/coding-agent/src/tools/computer/worker.ts"
+     "packages/coding-agent/src/tools/computer/worker.ts",
+     "packages/coding-agent/test/tools/computer.test.ts"
     ]
    },
    "#15192": {
@@ -3829,64 +3824,48 @@
     "title": "fix(natives): release keys and buttons a macOS input request still holds when omp dies",
     "files": [
      "crates/pi-natives/src/desktop/control.rs",
-     "crates/pi-natives/src/desktop/macos/applications.rs",
      "crates/pi-natives/src/desktop/macos/ax.rs",
-     "crates/pi-natives/src/desktop/macos/capture.rs",
      "crates/pi-natives/src/desktop/macos/input.rs",
      "crates/pi-natives/src/desktop/macos/skylight.rs",
-     "crates/pi-natives/src/desktop/mod.rs",
-     "docs/computer-use.md",
-     "docs/tools/computer.md"
+     "docs/tools/computer.md",
+     "packages/coding-agent/src/tools/computer/worker.ts"
     ]
    },
    "#15193": {
     "since": "2026-10-18T11:03:22Z",
     "title": "fix(natives): type into macOS Screen Sharing and iPhone Mirroring with the keyboard layout's keys",
     "files": [
-     "crates/pi-natives/src/desktop/macos/applications.rs",
      "crates/pi-natives/src/desktop/macos/input.rs",
-     "crates/pi-natives/src/desktop/macos/skylight.rs",
-     "crates/pi-natives/src/desktop/mod.rs",
-     "docs/computer-use.md",
-     "docs/tools/computer.md"
-    ]
-   },
-   "#15195": {
-    "since": "2026-10-18T11:03:22Z",
-    "title": "fix(natives): keep the user's app in front when a macOS background target activates itself while they type",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/applications.rs",
-     "crates/pi-natives/src/desktop/macos/input.rs",
-     "crates/pi-natives/src/desktop/macos/skylight.rs",
-     "crates/pi-natives/src/desktop/mod.rs",
-     "docs/computer-use.md"
+     "packages/coding-agent/src/prompts/tools/computer.md"
     ]
    },
    "#15562": {
     "since": "2026-10-18T11:03:22Z",
     "title": "feat(computer): stop typing and re-read when the user types in the agent's macOS app",
     "files": [
-     "crates/pi-natives/src/desktop/macos/applications.rs",
-     "crates/pi-natives/src/desktop/macos/ax/menus.rs",
+     "crates/pi-natives/src/desktop/control.rs",
+     "crates/pi-natives/src/desktop/control/macos.rs",
      "crates/pi-natives/src/desktop/macos/input.rs",
      "crates/pi-natives/src/desktop/macos/mod.rs",
      "crates/pi-natives/src/desktop/macos/skylight.rs",
-     "crates/pi-natives/src/desktop/mod.rs"
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/tools/computer.md",
+     "packages/coding-agent/src/tools/computer/supervisor.ts",
+     "packages/coding-agent/src/tools/computer/worker.ts",
+     "packages/natives/native/desktop.d.ts",
+     "packages/natives/native/desktop.js"
     ]
    },
    "#16140": {
     "since": "2026-10-18T11:03:22Z",
     "title": "feat(natives): send the user's keys back to their app while a macOS background target holds the keyboard uninvited",
     "files": [
-     "crates/pi-natives/src/desktop/macos/applications.rs",
-     "crates/pi-natives/src/desktop/macos/input.rs",
      "crates/pi-natives/src/desktop/macos/skylight.rs",
-     "crates/pi-natives/src/desktop/mod.rs",
      "docs/computer-use.md"
     ]
    }
   },
-  "merged_through": "2026-10-18T10:57:18Z",
+  "merged_through": "2026-10-18T11:52:03Z",
   "unreleased": {
    "15157": {
     "title": "fix(natives): report the macOS Escape stop honestly",
@@ -3922,6 +3901,21 @@
     "title": "fix(natives): stop computer use on physical Escape only during takeover input",
     "merge_commit": "509105c1ef99a3b38b898fb33f8766df23f0a6eb",
     "merged_at": "2026-10-18T10:57:18Z"
+   },
+   "15564": {
+    "title": "feat(computer): stop computer use for the rest of the turn when the user presses Escape",
+    "merge_commit": "5bdbeeafea5f995e547d91b8c32a87431f80da08",
+    "merged_at": "2026-10-18T11:40:08Z"
+   },
+   "15563": {
+    "title": "feat(computer): type into one element with el.type and el.press, sending nothing if it won't take focus",
+    "merge_commit": "8d7a7d7369852b94425785afb4efa7538d22396f",
+    "merged_at": "2026-10-18T11:51:49Z"
+   },
+   "15195": {
+    "title": "fix(natives): keep the user's app in front when a macOS background target activates itself while they type",
+    "merge_commit": "4d956dad0fa9f37621f059df20e6f00ba6004cbd",
+    "merged_at": "2026-10-18T11:52:03Z"
    }
   },
   "ready": [
@@ -3936,13 +3930,10 @@
    15191,
    15192,
    15193,
-   15195,
    15418,
    15433,
    15508,
    15562,
-   15563,
-   15564,
    16119,
    16140,
    16149,
@@ -4623,6 +4614,30 @@
      "crates/pi-natives/src/desktop/mod.rs",
      "docs/computer-use.md"
     ]
+   },
+   {
+    "at": "2026-10-18T12:04:14Z",
+    "kind": "merged",
+    "number": 15564,
+    "title": "feat(computer): stop computer use for the rest of the turn when the user presses Escape",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-18T12:04:14Z",
+    "kind": "merged",
+    "number": 15563,
+    "title": "feat(computer): type into one element with el.type and el.press, sending nothing if it won't take focus",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-18T12:04:14Z",
+    "kind": "merged",
+    "number": 15195,
+    "title": "fix(natives): keep the user's app in front when a macOS background target activates itself while they type",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
    }
   ]
  }
