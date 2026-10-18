@@ -3793,7 +3793,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T12:04:14Z",
+  "checked": "2026-10-18T12:34:47Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -3804,6 +3804,7 @@
     "files": [
      "crates/pi-natives/src/desktop/macos/ax.rs",
      "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/process.rs",
      "docs/tools/computer.md",
      "packages/coding-agent/src/tools/computer/worker.ts"
     ]
@@ -3814,10 +3815,12 @@
     "files": [
      "crates/pi-natives/src/desktop/macos/ax.rs",
      "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/process.rs",
      "crates/pi-natives/src/desktop/macos/skylight.rs",
      "crates/pi-natives/src/desktop/mod.rs",
      "docs/computer-use.md",
      "docs/tools/computer.md",
+     "packages/coding-agent/src/prompts/tools/computer.md",
      "packages/coding-agent/src/tools/computer/worker.ts",
      "packages/coding-agent/test/tools/computer.test.ts"
     ]
@@ -3826,49 +3829,20 @@
     "since": "2026-10-18T11:03:22Z",
     "title": "fix(natives): release keys and buttons a macOS input request still holds when omp dies",
     "files": [
+     "crates/pi-natives/BUILD.bazel",
+     "crates/pi-natives/build.rs",
      "crates/pi-natives/src/desktop/control.rs",
      "crates/pi-natives/src/desktop/macos/ax.rs",
      "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/mod.rs",
+     "crates/pi-natives/src/desktop/macos/process.rs",
      "crates/pi-natives/src/desktop/macos/skylight.rs",
      "docs/tools/computer.md",
      "packages/coding-agent/src/tools/computer/worker.ts"
     ]
-   },
-   "#15193": {
-    "since": "2026-10-18T11:03:22Z",
-    "title": "fix(natives): type into macOS Screen Sharing and iPhone Mirroring with the keyboard layout's keys",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/input.rs",
-     "packages/coding-agent/src/prompts/tools/computer.md"
-    ]
-   },
-   "#15562": {
-    "since": "2026-10-18T11:03:22Z",
-    "title": "feat(computer): stop typing and re-read when the user types in the agent's macOS app",
-    "files": [
-     "crates/pi-natives/src/desktop/control.rs",
-     "crates/pi-natives/src/desktop/control/macos.rs",
-     "crates/pi-natives/src/desktop/macos/input.rs",
-     "crates/pi-natives/src/desktop/macos/mod.rs",
-     "crates/pi-natives/src/desktop/macos/skylight.rs",
-     "crates/pi-natives/src/desktop/mod.rs",
-     "docs/tools/computer.md",
-     "packages/coding-agent/src/tools/computer/supervisor.ts",
-     "packages/coding-agent/src/tools/computer/worker.ts",
-     "packages/natives/native/desktop.d.ts",
-     "packages/natives/native/desktop.js"
-    ]
-   },
-   "#16140": {
-    "since": "2026-10-18T11:03:22Z",
-    "title": "feat(natives): send the user's keys back to their app while a macOS background target holds the keyboard uninvited",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/skylight.rs",
-     "docs/computer-use.md"
-    ]
    }
   },
-  "merged_through": "2026-10-18T11:52:03Z",
+  "merged_through": "2026-10-18T12:33:49Z",
   "unreleased": {
    "15157": {
     "title": "fix(natives): report the macOS Escape stop honestly",
@@ -3919,6 +3893,21 @@
     "title": "fix(natives): keep the user's app in front when a macOS background target activates itself while they type",
     "merge_commit": "4d956dad0fa9f37621f059df20e6f00ba6004cbd",
     "merged_at": "2026-10-18T11:52:03Z"
+   },
+   "16140": {
+    "title": "feat(natives): send the user's keys back to their app while a macOS background target holds the keyboard uninvited",
+    "merge_commit": "cad87a899d648aa36cf9ce776224b5b49f4cd64b",
+    "merged_at": "2026-10-18T12:14:40Z"
+   },
+   "15193": {
+    "title": "fix(natives): type into macOS Screen Sharing and iPhone Mirroring with the keyboard layout's keys",
+    "merge_commit": "31a84c75086a00d2f30dcaab1cf0ded5fb66c624",
+    "merged_at": "2026-10-18T12:23:37Z"
+   },
+   "15562": {
+    "title": "feat(computer): stop typing and re-read when the user types in the agent's macOS app",
+    "merge_commit": "58349dc80de381057437818b8354c86826c8fa10",
+    "merged_at": "2026-10-18T12:33:49Z"
    }
   },
   "ready": [
@@ -3932,13 +3921,10 @@
    15185,
    15191,
    15192,
-   15193,
    15418,
    15433,
    15508,
-   15562,
    16119,
-   16140,
    16149,
    16163
   ],
@@ -4639,6 +4625,30 @@
     "kind": "merged",
     "number": 15195,
     "title": "fix(natives): keep the user's app in front when a macOS background target activates itself while they type",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-18T12:34:47Z",
+    "kind": "merged",
+    "number": 16140,
+    "title": "feat(natives): send the user's keys back to their app while a macOS background target holds the keyboard uninvited",
+    "merged_by": "H4vC",
+    "maintainer_commits": 2
+   },
+   {
+    "at": "2026-10-18T12:34:47Z",
+    "kind": "merged",
+    "number": 15193,
+    "title": "fix(natives): type into macOS Screen Sharing and iPhone Mirroring with the keyboard layout's keys",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T12:34:47Z",
+    "kind": "merged",
+    "number": 15562,
+    "title": "feat(computer): stop typing and re-read when the user types in the agent's macOS app",
     "merged_by": "H4vC",
     "maintainer_commits": 1
    }
