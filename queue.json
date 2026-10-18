@@ -5726,6 +5726,26 @@
    "added": "2026-10-18T19:47:10Z",
    "updated": "2026-10-18T19:47:10Z",
    "note": ""
+  },
+  {
+   "id": "revive-prompt-cache",
+   "branch": "will/revive-prompt-cache",
+   "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it",
+   "area": "other",
+   "priority": "P1",
+   "needs": [
+    "revive-tools"
+   ],
+   "base": "c580bc228d19ed00807aaa545f11fbae5e44a76c",
+   "body": "bodies/revive-prompt-cache.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/revive-prompt-cache",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:47:39Z",
+   "updated": "2026-10-18T19:47:39Z",
+   "note": ""
   }
  ],
  "watch": {
