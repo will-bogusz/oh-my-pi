@@ -4426,6 +4426,24 @@
    "added": "2026-10-18T18:18:16Z",
    "updated": "2026-10-18T18:18:16Z",
    "note": ""
+  },
+  {
+   "id": "todo-serial-tools",
+   "branch": "will/todo-serial-tools",
+   "title": "fix(coding-agent): give todo guidance a fallback for models without parallel tool calls",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
+   "body": "bodies/todo-serial-tools.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/todo-serial-tools",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T18:18:22Z",
+   "updated": "2026-10-18T18:18:22Z",
+   "note": ""
   }
  ],
  "watch": {
