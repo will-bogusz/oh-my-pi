@@ -55,10 +55,10 @@ const ACTIVATION_POLL: Duration = Duration::from_millis(10);
 /// the user's switch to it. Measured on a VM: ⌘-Tab activates the chosen app
 /// about 3 ms after ⌘ is released.
 const USER_SWITCH_WINDOW: Duration = Duration::from_millis(250);
-/// How soon after one of the action's own sends an app coming forward is the
-/// action's doing, to be sent back: Finder's ⌘O brings `TextEdit` forward
-/// 100-220 ms after the key, Chrome comes forward about 20 ms after a failed
-/// `AXOpen`. An app coming forward later is the user's or unrelated.
+/// How soon after one of the action's own sends another app coming forward is
+/// the action's doing, to be sent back: Finder's ⌘O brings `TextEdit` forward
+/// 100-220 ms after the key. Another app coming forward later is the user's or
+/// unrelated; the target is sent back however late, unless the user picked it.
 const ACTION_REFLEX: Duration = Duration::from_millis(500);
 /// How often the switch sampler shows the lease the front app, ⌘/⌃, clicks
 /// and the keyboard's process: well inside the ~100 ms a ⌘-Tab holds ⌘, on a
@@ -850,9 +850,9 @@ impl BackgroundFocusLease {
 		}
 	}
 
-	/// When `front` came forward, first seen at `now`, and whether the action
-	/// brought it: it came within [`ACTION_REFLEX`] of the action's latest act
-	/// on its target.
+	/// When `front` came forward, first seen at `now`, and whether it came
+	/// within [`ACTION_REFLEX`] of the action's latest act on its target: what
+	/// makes an app other than the target the action's doing.
 	fn came_forward(
 		&mut self,
 		front: ProcessSerialNumber,
@@ -881,15 +881,17 @@ impl BackgroundFocusLease {
 	) -> FocusDecision {
 		self.user.observe(signals, front, now);
 		let (came, caused) = self.came_forward(front, signals, now);
-		// An app that came forward right after one of the action's acts on
-		// its target, with no switch of the user's just before, is the
-		// action's doing: the target activating itself, or another app it asked
-		// to open something, as Finder's ⌘O does with TextEdit, even while the
-		// user kept typing. Any other app coming forward is the user's (a slow
-		// launch, a Space swipe, an ⌥ or F-key switcher) or unrelated, and the
-		// guard stands down. The switch sampler sees every app as it comes
-		// forward, however long the observer's AX probes block it.
-		let action_brought = caused && self.user.picked(came, front).is_none();
+		// The target coming forward with no switch of the user's just before is
+		// the target activating itself, however long after the action's last
+		// act, even while the user kept typing. Another app is the action's
+		// doing only when it came right after one of the action's acts on its
+		// target, as `TextEdit` does after Finder's ⌘O; any other app coming
+		// forward is the user's (a slow launch, a Space swipe, an ⌥ or F-key
+		// switcher) or unrelated, and the guard stands down. The switch sampler
+		// sees every app as it comes forward, however long the observer's AX
+		// probes block it.
+		let action_brought =
+			(front == self.target || caused) && self.user.picked(came, front).is_none();
 		if self.disarmed
 			|| (front == self.previous && key.is_some_and(|key| Some(key) != self.key))
 			|| (front != self.previous && !action_brought)
@@ -967,12 +969,13 @@ pub(super) fn with_background_guard<T>(
 
 /// Contains asynchronous self-activation during background input and its
 /// bounded post-action settle, without a process-lived observer or run loop.
-/// The target, or a third app the action brings forward (Finder's ⌘O opening
-/// a document in `TextEdit`), coming forward within [`ACTION_REFLEX`] of one
-/// of the action's acts on the target is sent back behind the original front
-/// app. A changed prior key window, an app coming forward right after a
-/// click, a ⌘/⌃ chord or a Spotlight-style panel, or any app coming forward
-/// later permanently disarms the lease; typing does not, even where macOS
+/// The target, whenever it comes forward without the user picking it, and a
+/// third app the action brings forward (Finder's ⌘O opening a document in
+/// `TextEdit`) within [`ACTION_REFLEX`] of one of the action's acts on the
+/// target, are sent back behind the original front app. A changed prior key
+/// window, an app coming forward right after a click, a ⌘/⌃ chord or a
+/// Spotlight-style panel, or a third app coming forward later permanently
+/// disarms the lease; typing does not, even where macOS
 /// refuses a hand-back because of it. `action` gets the [`TargetVisit`] the
 /// guard records, which keeps being watched after the lease disarms.
 pub(super) fn with_background_watch<T>(
@@ -1066,7 +1069,7 @@ pub(super) fn with_background_watch<T>(
 				note_send();
 				result
 			},
-			|| control::wait(BACKGROUND_SETTLE),
+			BACKGROUND_SETTLE,
 		);
 		drop(stop);
 		let cleanup = observer.join().unwrap_or_else(|_| {
@@ -1257,18 +1260,16 @@ fn guard_focus(
 }
 
 /// Runs a guarded action, then the settle during which the guard still sends
-/// back an app the action brought forward. The settle follows a failed action
-/// too: an AX action can report an error and still activate its app, as
-/// `AXOpen` on a file in Chrome's Open panel fails with -25205 within 20 ms
-/// and Chrome comes to the front some 20 ms later. The action's own error wins
-/// over the settle's.
-fn run_then_settle<T>(
-	action: impl FnOnce() -> CoreResult<T>,
-	settle: impl FnOnce() -> CoreResult<()>,
-) -> CoreResult<T> {
+/// back an app the action brought forward, or takeover still holds the front
+/// for its input. The settle follows a failed action too: an AX action can
+/// report an error and still activate its app, as `AXOpen` on a file in
+/// Chrome's Open panel fails with -25205 within 20 ms and Chrome comes to the
+/// front some 20 ms later. A cancel during the settle leaves the action's
+/// result as it was ([`control::settle`]).
+fn run_then_settle<T>(action: impl FnOnce() -> CoreResult<T>, settle: Duration) -> CoreResult<T> {
 	let result = action();
-	let settled = settle();
-	result.and_then(|value| settled.map(|()| value))
+	control::settle(settle);
+	result
 }
 
 fn set_front(spi: &ForegroundSpi, psn: ProcessSerialNumber, wid: u32) -> CoreResult<()> {
@@ -1499,7 +1500,7 @@ pub(super) fn with_foreground<T>(
 	})?;
 	let focused = ax::focused_window_id(pid);
 	if preserves_exact_existing_focus(Some(previous.psn), target, focused, wid) {
-		let result = action(false).and_then(|value| control::wait(FOREGROUND_SETTLE).map(|()| value));
+		let result = run_then_settle(|| action(false), FOREGROUND_SETTLE);
 		report_focus_return(false, previous.pid);
 		return result;
 	}
@@ -1578,7 +1579,7 @@ pub(super) fn with_foreground<T>(
 	let result = if let Err(error) = prepare {
 		after_cleanup(Err(error), control::cleanup(restore))
 	} else {
-		let result = action(true).and_then(|value| control::wait(FOREGROUND_SETTLE).map(|()| value));
+		let result = run_then_settle(|| action(true), FOREGROUND_SETTLE);
 		after_cleanup(result, control::cleanup(restore))
 	};
 	report_focus_return(handed_back.get(), previous.pid);
@@ -2137,7 +2138,7 @@ mod tests {
 	}
 
 	#[test]
-	fn only_an_app_that_comes_forward_right_after_the_actions_acts_is_sent_back() {
+	fn the_target_is_sent_back_however_late_but_another_app_only_right_after_an_act() {
 		let t0 = Instant::now();
 		let idle = input(0, NO_MODIFIERS);
 		// Finder's ⌘O sent at 800 ms brings TextEdit forward 200 ms later.
@@ -2147,22 +2148,34 @@ mod tests {
 		// The target activating itself 20 ms after the action's last key.
 		let mut guard = lease_at(t0, None);
 		assert_eq!(guard.observe(TARGET, None, opened, t0 + ms(820)), FocusDecision::Restore);
-		// A cold launch from the Dock the user clicked well before, a Space swipe
-		// or an ⌥ or F-key switcher (no click or ⌘/⌃ at all), or an unrelated
-		// alert: an app coming forward long after the action's last act is the
-		// user's or not the action's, and the guard stands down, leaving it in
-		// front without failing the action.
-		for (front, signals) in
-			[(THIRD, clicked_at(t0 + ms(100))), (THIRD, input(0, OPTION)), (TARGET, input(0, OPTION))]
-		{
+		// The target activating itself long after the action's last act, as
+		// after a click in the user's busy app 700 ms into a held key: it is
+		// sent back too, and so is an ⌥ or F-key switch to it, which shows no
+		// click or ⌘/⌃.
+		for signals in [idle, input(0, OPTION)] {
 			let lease = Mutex::new(lease_at(t0, None));
 			let late = signals.sent_at(t0 + ms(100));
 			let visited =
-				sample_all(&lease, &[(PREVIOUS, idle, t0 + ms(300)), (front, late, t0 + ms(1400))]);
-			assert_eq!(visited, front == TARGET, "a switch to the target is a visit");
+				sample_all(&lease, &[(PREVIOUS, idle, t0 + ms(300)), (TARGET, late, t0 + ms(1400))]);
+			assert!(!visited);
 			let mut lease = lease.lock();
-			assert_eq!(lease.observe(front, None, late, t0 + ms(1500)), FocusDecision::Disarm);
-			assert!(!lease.left_in_front(front, late, t0 + ms(1600)), "process {}", front.low);
+			assert_eq!(lease.observe(TARGET, None, late, t0 + ms(1500)), FocusDecision::Restore);
+			assert!(lease.left_in_front(TARGET, late, t0 + ms(1600)));
+		}
+		// A cold launch from the Dock the user clicked well before, a Space swipe
+		// or an ⌥ or F-key switcher to another app, or an unrelated alert: an app
+		// other than the target coming forward long after the action's last act
+		// is the user's or not the action's, and the guard stands down, leaving
+		// it in front without failing the action.
+		for signals in [clicked_at(t0 + ms(100)), input(0, OPTION)] {
+			let lease = Mutex::new(lease_at(t0, None));
+			let late = signals.sent_at(t0 + ms(100));
+			let visited =
+				sample_all(&lease, &[(PREVIOUS, idle, t0 + ms(300)), (THIRD, late, t0 + ms(1400))]);
+			assert!(!visited);
+			let mut lease = lease.lock();
+			assert_eq!(lease.observe(THIRD, None, late, t0 + ms(1500)), FocusDecision::Disarm);
+			assert!(!lease.left_in_front(THIRD, late, t0 + ms(1600)));
 		}
 		// The window is counted from when the app came forward, not from when a
 		// later reading saw it: a hand-back refused for typing is asked again.
@@ -2487,24 +2500,35 @@ mod tests {
 	fn a_failed_action_still_settles_under_the_guard() {
 		// AXOpen in Chrome's Open panel fails with -25205, then Chrome comes
 		// forward: the guard must still be watching.
-		let mut settled = false;
+		let started = Instant::now();
 		let result: CoreResult<()> = run_then_settle(
 			|| Err(DesktopError::ax_failed("AX action 'AXOpen' failed (AXError(-25205))")),
-			|| {
-				settled = true;
-				Err(DesktopError::cancelled("stopped"))
-			},
+			BACKGROUND_SETTLE,
 		);
-		assert!(settled);
+		assert!(started.elapsed() >= BACKGROUND_SETTLE);
 		let error = result.expect_err("the action failed");
 		assert_eq!(
 			(error.code, error.message.as_str()),
 			(ErrorCode::AxFailed, "AX action 'AXOpen' failed (AXError(-25205))")
 		);
+	}
 
-		let result = run_then_settle(|| Ok(7), || Err(DesktopError::cancelled("stopped")));
-		assert_eq!(result.expect_err("the settle was cancelled").code, ErrorCode::Cancelled);
-		assert_eq!(run_then_settle(|| Ok(7), || Ok(())).ok(), Some(7));
+	#[test]
+	fn a_cancel_once_the_input_is_out_keeps_it_through_the_settle() {
+		// Escape or an abort arriving once takeover's keys are out.
+		let source = control::CancellationSource::default();
+		let token = source.token();
+		let result = control::with_token_for_test(&token, || {
+			run_then_settle(
+				|| {
+					source.cancel();
+					Ok(7)
+				},
+				FOREGROUND_SETTLE,
+			)
+		});
+		assert_eq!(result.ok(), Some(7));
+		assert!(token.check().is_err(), "the cancel still stops what follows");
 	}
 
 	/// The guard's view of a desktop where the target has just come forward over
