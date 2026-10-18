@@ -10803,8 +10803,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/utok-perf",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:42:32Z",
-   "updated": "2026-10-18T20:53:08Z",
-   "note": "",
+   "updated": "2026-10-18T23:20:06Z",
+   "note": "worker: handoff at ~/tmp/adhoc/2026-10-18-toks-port/HANDOFF.md (Mac); merged tree built on bench-mac; take bot rounds once opened",
    "built": [
     {
      "with": "#16233",
