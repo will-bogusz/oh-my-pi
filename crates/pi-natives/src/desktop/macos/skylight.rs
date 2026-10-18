@@ -1498,7 +1498,7 @@ pub(super) fn with_foreground<T>(
 	})?;
 	let focused = ax::focused_window_id(pid);
 	if preserves_exact_existing_focus(Some(previous.psn), target, focused, wid) {
-		let result = action(false).and_then(|value| control::wait(FOREGROUND_SETTLE).map(|()| value));
+		let result = settled(action(false));
 		report_focus_return(false, previous.pid);
 		return result;
 	}
@@ -1578,11 +1578,20 @@ pub(super) fn with_foreground<T>(
 	let result = if let Err(error) = prepare {
 		after_cleanup(Err(error), control::cleanup(restore))
 	} else {
-		let result = action(true).and_then(|value| control::wait(FOREGROUND_SETTLE).map(|()| value));
+		let result = settled(action(true));
 		after_cleanup(result, control::cleanup(restore))
 	};
 	report_focus_return(returned.get(), previous.pid);
 	result
+}
+
+/// A takeover action's result after its settle. Its input is out by then, so
+/// a cancel during the settle must not report it unsent.
+fn settled<T>(result: CoreResult<T>) -> CoreResult<T> {
+	result.map(|value| {
+		thread::sleep(FOREGROUND_SETTLE);
+		value
+	})
 }
 
 /// Records for the host where a takeover left focus, read from `WindowServer`
@@ -2017,6 +2026,22 @@ mod tests {
 		spotlight.observe(keyboard_in(SPOTLIGHT), PREVIOUS, t0 + ms(100));
 		spotlight.observe(keyboard_in(THIRD), PREVIOUS, t0 + ms(110));
 		assert_eq!(spotlight.picked(t0 + ms(115), THIRD), Some(UserSwitch::Panel));
+	}
+
+	#[test]
+	fn a_takeover_cancelled_while_it_settles_reports_its_delivered_input() {
+		let cancellation = control::CancellationSource::default();
+		let token = cancellation.token();
+		// Every key of a takeover went out, then the user pressed Escape.
+		let result = control::with_token_for_test(&token, || {
+			settled((|| {
+				cancellation.cancel();
+				Ok(7)
+			})())
+		});
+		assert_eq!(result.ok(), Some(7));
+		let failed = settled::<()>(Err(DesktopError::input_failed("refused")));
+		assert_eq!(failed.unwrap_err().code, ErrorCode::InputFailed);
 	}
 
 	#[test]
