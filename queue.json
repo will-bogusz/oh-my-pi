@@ -4819,13 +4819,13 @@
    "needs": [],
    "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
    "body": "bodies/browser-options-hints.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16236,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-options-hints",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:00:21Z",
-   "updated": "2026-10-18T19:18:32Z",
+   "updated": "2026-10-18T19:22:00Z",
    "note": "",
    "built": [
     {
@@ -4927,7 +4927,8 @@
      "at": "2026-10-18T19:18:20Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-18T19:21:59Z"
   },
   {
    "id": "computer-no-ui-confirm",
