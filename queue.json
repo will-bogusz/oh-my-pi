@@ -5018,8 +5018,46 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/release-helper-wait-test",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:04:31Z",
-   "updated": "2026-10-18T19:21:06Z",
-   "note": ""
+   "updated": "2026-10-18T19:38:16Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16233",
+     "code": "f35195c0d94ba003cf2d9ae00664aa6b18d5e7f7",
+     "with_code": "f31c8679167d32247c9962e9af64542d5b548491",
+     "tip": "c22df3fd4e666b7f935ec54342efa84f16e4655d",
+     "with_tip": "d5bc6504430ff40df8ea5b6a57bc9e09aa2d8c06",
+     "at": "2026-10-18T19:38:12Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16235",
+     "code": "f35195c0d94ba003cf2d9ae00664aa6b18d5e7f7",
+     "with_code": "a27795e7758c4bbeee2742aa7987a8f53f9f745b",
+     "tip": "c22df3fd4e666b7f935ec54342efa84f16e4655d",
+     "with_tip": "bade3a6d10b2a6704e80b381b8410323014d2904",
+     "at": "2026-10-18T19:38:16Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16217",
+     "code": "f35195c0d94ba003cf2d9ae00664aa6b18d5e7f7",
+     "with_code": "8ea79c1f67b4e717dcad6f73a5aa486ee6f54142",
+     "tip": "c22df3fd4e666b7f935ec54342efa84f16e4655d",
+     "with_tip": "e7541c31bec975e6734b1d36acf933cfdad2d19b",
+     "at": "2026-10-18T19:38:16Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16223",
+     "code": "f35195c0d94ba003cf2d9ae00664aa6b18d5e7f7",
+     "with_code": "ef929ae433668a7ce545ec4fcce24bb967e7e05f",
+     "tip": "c22df3fd4e666b7f935ec54342efa84f16e4655d",
+     "with_tip": "aac0a36d757a4c219f5ca91e38cc8ab8a5fd8ad7",
+     "at": "2026-10-18T19:38:16Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "browser-app-precedence-docs",
