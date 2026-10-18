@@ -25,7 +25,7 @@ Non-goal: archives already saved with the notice. Their lost text is not on disk
 - With the fix: passes (1 pass), along with a unit test that both views' frames still become blob refs while their text stays whole.
 - Fix reverted (`main`'s `session-persistence.ts`): fails at the first assertion, the reloaded archive's source containing `[Session persistence truncated large content]`.
 
-The focused session persistence files (archive, images, lazy frame resolution, reasoning dedup, signatures) pass: 29 of 29. Ran on Linux; no model call is involved.
+The focused session persistence files (archive, images, lazy frame resolution, reasoning dedup, signatures) pass: 29 of 29. Ran on Linux; no model call is involved. `bun run check` in `packages/coding-agent` passes.
 
 `bun test packages/coding-agent/test/session-manager/snapcompact-archive-persistence.test.ts packages/coding-agent/test/session-persistence-images.test.ts packages/coding-agent/test/session-manager/snapcompact-frame-lazy-resolution.test.ts`
 
