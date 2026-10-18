@@ -4268,8 +4268,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-right-click-per-press",
    "host": "MacBook-Pro",
    "added": "2026-10-18T16:33:04Z",
-   "updated": "2026-10-18T16:33:04Z",
-   "note": ""
+   "updated": "2026-10-18T16:33:11Z",
+   "note": "rebuild after #16206 merges: lift its 'a background right or middle click checks only before it starts' doc qualification in docs/computer-use.md and docs/tools/computer.md"
   }
  ],
  "watch": {
