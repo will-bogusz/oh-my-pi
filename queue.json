@@ -6356,5 +6356,11 @@
     "why": "opened as #16233"
    }
   ]
+ },
+ "opening": {
+  "id": "release-helper-wait-test",
+  "token": "4a93693f6ca34a3b96cef32cec626f05",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T19:38:19Z"
  }
 }
