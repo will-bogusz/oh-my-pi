@@ -3766,12 +3766,114 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T10:32:45Z",
+  "checked": "2026-10-18T11:03:22Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
-  "conflicts": {},
-  "merged_through": "2026-10-18T03:12:45Z",
+  "conflicts": {
+   "#15185": {
+    "since": "2026-10-18T11:03:22Z",
+    "title": "feat(natives): deliver macOS background drags, holds, modified and right-clicks",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/ax.rs",
+     "crates/pi-natives/src/desktop/macos/capture.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md",
+     "docs/tools/computer.md"
+    ]
+   },
+   "#15191": {
+    "since": "2026-10-18T11:03:22Z",
+    "title": "feat(computer): rerun refused macOS background input in takeover, set by computer.backgroundFallback",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/ax.rs",
+     "crates/pi-natives/src/desktop/macos/capture.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md",
+     "docs/tools/computer.md",
+     "packages/coding-agent/src/tools/computer/worker.ts"
+    ]
+   },
+   "#15192": {
+    "since": "2026-10-18T11:03:22Z",
+    "title": "fix(natives): release keys and buttons a macOS input request still holds when omp dies",
+    "files": [
+     "crates/pi-natives/src/desktop/control.rs",
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/ax.rs",
+     "crates/pi-natives/src/desktop/macos/capture.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md",
+     "docs/tools/computer.md"
+    ]
+   },
+   "#15193": {
+    "since": "2026-10-18T11:03:22Z",
+    "title": "fix(natives): type into macOS Screen Sharing and iPhone Mirroring with the keyboard layout's keys",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md",
+     "docs/tools/computer.md"
+    ]
+   },
+   "#15195": {
+    "since": "2026-10-18T11:03:22Z",
+    "title": "fix(natives): keep the user's app in front when a macOS background target activates itself while they type",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md"
+    ]
+   },
+   "#15562": {
+    "since": "2026-10-18T11:03:22Z",
+    "title": "feat(computer): stop typing and re-read when the user types in the agent's macOS app",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/ax/menus.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/mod.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs"
+    ]
+   },
+   "#15563": {
+    "since": "2026-10-18T11:03:22Z",
+    "title": "feat(computer): type into one element with el.type and el.press, sending nothing if it won't take focus",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/ax.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs"
+    ]
+   },
+   "#16140": {
+    "since": "2026-10-18T11:03:22Z",
+    "title": "feat(natives): send the user's keys back to their app while a macOS background target holds the keyboard uninvited",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md"
+    ]
+   }
+  },
+  "merged_through": "2026-10-18T10:57:18Z",
   "unreleased": {
    "15157": {
     "title": "fix(natives): report the macOS Escape stop honestly",
@@ -3797,6 +3899,16 @@
     "title": "fix(coding-agent): capture browser tabs in place instead of raising Chrome",
     "merge_commit": "076a85ed7dd037225f6d399ed40c4c21e9726251",
     "merged_at": "2026-10-18T03:12:45Z"
+   },
+   "15184": {
+    "title": "fix(natives): keep the user's app focused during macOS background input",
+    "merge_commit": "082e2cad18eed55a9f5728d2b7134a03866b6f17",
+    "merged_at": "2026-10-18T10:49:47Z"
+   },
+   "15176": {
+    "title": "fix(natives): stop computer use on physical Escape only during takeover input",
+    "merge_commit": "509105c1ef99a3b38b898fb33f8766df23f0a6eb",
+    "merged_at": "2026-10-18T10:57:18Z"
    }
   },
   "ready": [
@@ -3807,8 +3919,6 @@
    15124,
    15128,
    15130,
-   15176,
-   15184,
    15185,
    15191,
    15192,
@@ -4367,6 +4477,139 @@
     "id": "computer-run-args",
     "title": "fix(coding-agent): reject computer.run and tab.run args the function cannot receive",
     "why": "opened as #16149"
+   },
+   {
+    "at": "2026-10-18T11:03:22Z",
+    "kind": "merged",
+    "number": 15184,
+    "title": "fix(natives): keep the user's app focused during macOS background input",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-18T11:03:22Z",
+    "kind": "merged",
+    "number": 15176,
+    "title": "fix(natives): stop computer use on physical Escape only during takeover input",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-18T11:03:22Z",
+    "kind": "conflict",
+    "label": "#15185",
+    "title": "feat(natives): deliver macOS background drags, holds, modified and right-clicks",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/ax.rs",
+     "crates/pi-natives/src/desktop/macos/capture.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md",
+     "docs/tools/computer.md"
+    ]
+   },
+   {
+    "at": "2026-10-18T11:03:22Z",
+    "kind": "conflict",
+    "label": "#15191",
+    "title": "feat(computer): rerun refused macOS background input in takeover, set by computer.backgroundFallback",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/ax.rs",
+     "crates/pi-natives/src/desktop/macos/capture.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md",
+     "docs/tools/computer.md",
+     "packages/coding-agent/src/tools/computer/worker.ts"
+    ]
+   },
+   {
+    "at": "2026-10-18T11:03:22Z",
+    "kind": "conflict",
+    "label": "#15192",
+    "title": "fix(natives): release keys and buttons a macOS input request still holds when omp dies",
+    "files": [
+     "crates/pi-natives/src/desktop/control.rs",
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/ax.rs",
+     "crates/pi-natives/src/desktop/macos/capture.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md",
+     "docs/tools/computer.md"
+    ]
+   },
+   {
+    "at": "2026-10-18T11:03:22Z",
+    "kind": "conflict",
+    "label": "#15193",
+    "title": "fix(natives): type into macOS Screen Sharing and iPhone Mirroring with the keyboard layout's keys",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md",
+     "docs/tools/computer.md"
+    ]
+   },
+   {
+    "at": "2026-10-18T11:03:22Z",
+    "kind": "conflict",
+    "label": "#15195",
+    "title": "fix(natives): keep the user's app in front when a macOS background target activates itself while they type",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md"
+    ]
+   },
+   {
+    "at": "2026-10-18T11:03:22Z",
+    "kind": "conflict",
+    "label": "#15562",
+    "title": "feat(computer): stop typing and re-read when the user types in the agent's macOS app",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/ax/menus.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/mod.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs"
+    ]
+   },
+   {
+    "at": "2026-10-18T11:03:22Z",
+    "kind": "conflict",
+    "label": "#15563",
+    "title": "feat(computer): type into one element with el.type and el.press, sending nothing if it won't take focus",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/ax.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs"
+    ]
+   },
+   {
+    "at": "2026-10-18T11:03:22Z",
+    "kind": "conflict",
+    "label": "#16140",
+    "title": "feat(natives): send the user's keys back to their app while a macOS background target holds the keyboard uninvited",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/applications.rs",
+     "crates/pi-natives/src/desktop/macos/input.rs",
+     "crates/pi-natives/src/desktop/macos/skylight.rs",
+     "crates/pi-natives/src/desktop/mod.rs",
+     "docs/computer-use.md"
+    ]
    }
   ]
  }
