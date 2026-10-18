@@ -6109,11 +6109,5 @@
     "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window"
    }
   ]
- },
- "opening": {
-  "id": "browser-options-hints",
-  "token": "7f7eae18be1d4f809d9dee93c0d7edee",
-  "host": "MacBook-Pro",
-  "at": "2026-10-18T19:04:59Z"
  }
 }
