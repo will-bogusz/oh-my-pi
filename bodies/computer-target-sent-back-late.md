@@ -14,7 +14,9 @@ Fixes a regression from #15195 (merged in `4d956dad0f`, unreleased): a backgroun
 
 #15195 sent back an app the action brings forward (Finder's ⌘O bringing TextEdit) only if it came forward within 500 ms of one of the action's sends, so an app the user opens later is left alone. That limit also applied to the target itself (`action_brought = caused && …` in `BackgroundFocusLease::observe`): in a held key or any action longer than half a second, the target activating itself later counted as the user's switch, and the guard stood down with the target in front.
 
-The 500 ms limit now applies only to other apps; the target is sent back whenever the user did not pick it with a click on it, ⌘/⌃, or a panel such as Spotlight. An ⌥ or F-key switcher to the target, which shows none of those, is sent back too, as it was before #15195.
+The 500 ms limit now applies only to other apps; the target is sent back whenever the user did not pick it with a click on it, ⌘/⌃, or a panel such as Spotlight. This restores the pre-#15195 result for the target activating itself, not the pre-#15195 rule: before #15195 any key or click disarmed the guard, and #15195 deliberately stopped typing from doing so.
+
+Risk: a switch to the target with an ⌥ or F-key switcher, which shows no click, ⌘/⌃ or panel, is sent back for the rest of the action, and if macOS refuses the hand-back while the user types, the action fails naming the target. Main already does this within 500 ms of a send; now it holds for the whole action. The VM runs did not exercise keyboard switchers.
 
 ## Testing
 
