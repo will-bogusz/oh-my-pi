@@ -4,6 +4,8 @@ When omp clicked something in its relay tab that opened a popup while I was typi
 
 In 31 trials on `main` Chrome kept the front every time and a median of 127 of 150 keystrokes went into its page; with this PR the user's app was back in front in 30 of 30, within 2-13 ms, and 1 keystroke in total reached Chrome.
 
+Known limit: a key typed in those 2-13 ms can still be lost: 12 of the 30 trials lost one or two (13 in all), and only one of those reached Chrome's page. On `main` each popup cost a median of 127 keys, all into Chrome.
+
 <picture>
   <source media="(min-width: 1244px) and (prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/819e373b-af3e-4224-ae39-9778420a548e">
   <source media="(min-width: 1244px) and (prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/e1ff3ac2-1e98-4432-9141-05d0f51ee212">
@@ -56,9 +58,7 @@ Live: macOS 26.5 VM, Google Chrome 155.0.8059.80 with the relay extension each t
 |---|---|
 |Chrome seen in front during the popup trials|29/30|
 |plain click, no click: front-app changes|0/20|
-|every key typed with Shift, all three popups: TextEdit in front after / keys reaching Chrome|15/15 / 0|
-
-In 12 of the 30 popup trials one or two of the 150 keys, typed in the few ms Chrome was in front, did not reach TextEdit; one of them reached the page.
+|every key typed with Shift, all three popups: TextEdit in front after / keys reaching Chrome / trials that lost a key|15/15 / 0 / 3|
 
 <details><summary>Regression tests</summary>
 
