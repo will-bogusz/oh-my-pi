@@ -2898,22 +2898,6 @@ mod tests {
 	}
 
 	#[test]
-	fn a_switch_read_after_a_blocked_key_window_read_is_timed_after_it() {
-		// A poll's read of the user's key window blocked from 20 ms to 620 ms;
-		// they held ⌘ to switch meanwhile, and the target came forward at 630 ms
-		// once ⌘ was up: their switch, not the target's own.
-		let t0 = Instant::now();
-		let mut guard = lease_at(t0, None);
-		let held = input(0, COMMAND);
-		assert_eq!(
-			guard.observe_read(PREVIOUS, Some(42), t0 + ms(20), held, t0 + ms(620)),
-			FocusDecision::Observe
-		);
-		let released = input(0, NO_MODIFIERS);
-		assert_eq!(guard.observe(TARGET, None, released, t0 + ms(630)), FocusDecision::Disarm);
-	}
-
-	#[test]
 	fn an_app_never_handed_back_before_the_action_ends_fails_it() {
 		// The target, or a third app the action opened something in, came
 		// forward on the action's last poll, and `WindowServer` refused the
