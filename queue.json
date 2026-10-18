@@ -612,8 +612,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-honest-capabilities",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T00:11:22Z",
-   "note": "Sent to Brit by Will 2026-10-15 (with #15574, #15762). Brit review 2026-10-16 answered in 2110a5d6ff; reply posted (issuecomment-6206316968), waiting on Brit.",
+   "updated": "2026-10-18T00:11:37Z",
+   "note": "Merged by Brit 2026-10-17 (with his own commit).",
    "advanced": "2026-10-13T23:06:21Z",
    "built": [
     {
