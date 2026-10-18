@@ -35,6 +35,8 @@ export const attachFactoryDroidRegion: AfterExchangeHook = async (credentials, c
 			headers: {
 				Authorization: `Bearer ${credentials.access}`,
 				Accept: "application/json",
+				// Without it the backend withholds the newer identity fields.
+				"X-Factory-Whoami-Extended": "true",
 				...(identity.orgId ? { "X-Factory-Org-Id": identity.orgId } : {}),
 			},
 			signal,

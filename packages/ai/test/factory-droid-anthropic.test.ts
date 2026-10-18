@@ -60,6 +60,30 @@ describe("Factory Droid anthropic wire (Claude)", () => {
 		expect(request.headers["anthropic-beta"] ?? "").not.toContain("fallback-credit-2026-06-01");
 	});
 
+	it("offers Opus 5.5's refusal fallback on Anthropic only while the account can run it", async () => {
+		const send = async (available: string[] | undefined) => {
+			const captured: CapturedRequest[] = [];
+			const model = factoryModel("claude-opus-5-5", ["anthropic"]);
+			model.factoryDroidRefusalFallbacks = available;
+			await streamFactoryDroid(
+				model,
+				{ messages: [{ role: "user", content: "hello", timestamp: 1 }] },
+				{ apiKey: WORKOS_TOKEN, fetch: captureFetch(captured, anthropicChunks("OK")), reasoning: Effort.High },
+			).result();
+			return captured[0]!;
+		};
+
+		const offered = await send(["claude-opus-5"]);
+		expect(offered.body.fallbacks).toEqual([{ model: "claude-opus-5" }]);
+		expect(offered.headers["anthropic-beta"]).toContain("server-side-fallback-2026-06-01");
+		expect(offered.headers["anthropic-beta"]).toContain("fallback-credit-2026-06-01");
+
+		const unavailable = await send([]);
+		expect(unavailable.body.fallbacks).toBeUndefined();
+		expect(unavailable.headers["anthropic-beta"] ?? "").not.toContain("server-side-fallback-2026-06-01");
+		expect(unavailable.headers["anthropic-beta"] ?? "").not.toContain("fallback-credit-2026-06-01");
+	});
+
 	it.each([
 		["required", () => ({ type: "any" })],
 		[{ type: "function", function: { name: "Read" } }, (toolName: string) => ({ type: "tool", name: toolName })],

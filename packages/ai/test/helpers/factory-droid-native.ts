@@ -56,6 +56,11 @@ export const NATIVE_CASES: readonly NativeCase[] = [
 	{ model: "minimax-m3", upstream: "fireworks", effort: "high" },
 	{ model: "qwen3.8-max", upstream: "fireworks", effort: "xhigh" },
 	{ model: "inkling", upstream: "fireworks", effort: "medium" },
+	{ model: "nemotron-3.5-super", upstream: "baseten", effort: "high", flag: "nemotron_3_5_super" },
+	{ model: "nemotron-3.5-super", upstream: "baseten", effort: "off", flag: "nemotron_3_5_super" },
+	{ model: "muse-spark-open", upstream: "baseten", effort: "high", flag: "muse_spark_open" },
+	{ model: "muse-spark-1.2", upstream: "fireworks", effort: "high", flag: "muse_spark_1_2" },
+	{ model: "beam-1.0", upstream: "baseten", effort: "high", flag: "beam_1_0" },
 	// Responses dialects.
 	{ model: "gpt-5.6-sol", upstream: "openai", effort: "high" },
 	{ model: "gpt-5.6-sol", upstream: "openai", effort: "none" },
@@ -67,6 +72,11 @@ export const NATIVE_CASES: readonly NativeCase[] = [
 	{ model: "gpt-5.2", upstream: "azure_openai", effort: "off" },
 	{ model: "gpt-5.6-sol", upstream: "azure_openai", effort: "none" },
 	{ model: "gpt-6-sol", upstream: "openai", effort: "max" },
+	{ model: "gpt-6-sol-fast", upstream: "openai", effort: "medium", flag: "gpt_6_fast_modes" },
+	{ model: "gpt-6-luna-fast", upstream: "openai", effort: "none", flag: "gpt_6_fast_modes" },
+	// The Ultra Fast tiers need a high-cost opt-in the capture account lacks
+	// (droid 0.244: "Model blocked by organization policy"), so
+	// factory-droid-stream.test.ts owns their `ultrafast` service tier.
 	{ model: "grok-4.7", upstream: "xai", effort: "high" },
 	// Anthropic Messages dialects.
 	{ model: "claude-opus-4-5-20251101", upstream: "anthropic", effort: "high" },
@@ -83,6 +93,7 @@ export const NATIVE_CASES: readonly NativeCase[] = [
 	{ model: "claude-sonnet-5-5", upstream: "anthropic", effort: "off" },
 	{ model: "claude-sonnet-5-5", upstream: "bedrock_anthropic", effort: "off" },
 	{ model: "claude-opus-5-5", upstream: "azure_anthropic", effort: "high" },
+	{ model: "claude-opus-5-5", upstream: "anthropic", effort: "high" },
 	// Not capturable from droid 0.237 on the capture account, so unit tests own
 	// them (factory-droid-anthropic.test.ts):
 	// - claude-sonnet-5-5@vertex_anthropic off: "Requested model was not found

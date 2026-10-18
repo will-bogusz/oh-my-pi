@@ -49,8 +49,8 @@ import { streamAnthropic, streamOpenAICompletions, streamOpenAIResponses } from 
  *   fingerprint, and v4-shaped `x-session-id` /
  *   `x-assistant-message-id` used for usage attribution.
  * - System identity: one Droid identity sentence precedes the caller's system
- *   prompt without changing its contents. A historical plugin-without-prefix
- *   403 is not evidence that the same gate remains active today.
+ *   prompt without changing its contents; the proxy answers 403 to a request
+ *   whose system channel lacks it.
  * - `x-api-provider` selects the upstream router from the model's registry
  *   rotation list (first entry pinned); the registry is KDL
  *   (`rules/providers/factory-droid.kdl`, read through `compat/factory-droid`).
@@ -279,7 +279,7 @@ function buildIdentityHeaders(input: {
 	}
 	if (input.wire !== "google-generate") {
 		headers["X-Stainless-Lang"] = "js";
-		headers["X-Stainless-Package-Version"] = input.wire === "anthropic-messages" ? "0.70.1" : "6.25.0";
+		headers["X-Stainless-Package-Version"] = input.wire === "anthropic-messages" ? "0.128.0" : "7.23.0";
 		headers["X-Stainless-Runtime"] = "node";
 		headers["X-Stainless-Runtime-Version"] = FACTORY_DROID_RUNTIME_VERSION;
 		headers["X-Stainless-Arch"] = mapStainlessArch(process.arch);
@@ -316,7 +316,11 @@ function buildCompletionsReasoningBody(
 		case "none":
 			return {};
 		case "effort":
-			return { ...effortField(disabled ? "none" : effort), ...history };
+			return {
+				...effortField(disabled ? "none" : effort),
+				...history,
+				...(policy.completionsAllowMissingThinking ? { allow_missing_thinking: true } : {}),
+			};
 		case "forced-on":
 			// The route cannot turn thinking off; off maps to its lowest rung.
 			return { ...effortField(disabled ? "low" : effort), ...history };
@@ -409,7 +413,10 @@ function streamMessagesWire(a: Attempt, inner: Model<"anthropic-messages">): Ass
 			: !adaptive && (effort === "xhigh" || effort === "max")
 				? "high"
 				: effort;
-	const fallbackModels = a.route.serverSideFallbackModels;
+	// Discovery narrows the route's fallbacks to models the account can run;
+	// a model built without discovery keeps the route's full list.
+	const available = a.model.factoryDroidRefusalFallbacks;
+	const fallbackModels = a.route.serverSideFallbackModels?.filter(model => available?.includes(model) ?? true);
 	const refusalFallbacks = fallbackModels?.length ? fallbackModels.map(model => ({ model })) : undefined;
 	return streamAnthropic(inner, a.context, {
 		...a.forwarded,

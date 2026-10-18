@@ -7,13 +7,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -34,13 +34,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -68,13 +68,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -94,13 +94,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -127,13 +127,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -153,13 +153,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -186,13 +186,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -212,13 +212,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -245,13 +245,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -273,13 +273,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -308,13 +308,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -336,13 +336,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -371,13 +371,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -398,13 +398,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -432,13 +432,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -459,13 +459,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -493,13 +493,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -519,13 +519,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -552,13 +552,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -578,13 +578,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -611,13 +611,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -638,13 +638,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -672,13 +672,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -698,13 +698,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "baseten",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -731,13 +731,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "mistral",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -757,13 +757,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "mistral",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -790,13 +790,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "mistral",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -816,13 +816,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "mistral",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -850,13 +850,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "mistral",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -876,13 +876,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "mistral",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -909,13 +909,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -935,13 +935,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -968,13 +968,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -995,13 +995,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1029,13 +1029,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1056,13 +1056,13 @@
 			{
 				"path": "/api/llm/o/v1/chat/completions",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1083,6 +1083,310 @@
 		]
 	},
 	{
+		"model": "nemotron-3.5-super",
+		"upstream": "baseten",
+		"effort": "high",
+		"flag": "nemotron_3_5_super",
+		"requests": [
+			{
+				"path": "/api/llm/o/v1/chat/completions",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "baseten",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "configured_order",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "nemotron-3.5-super",
+					"stream": true,
+					"stream_options": {
+						"include_usage": true
+					},
+					"max_tokens": 65536,
+					"temperature": 1,
+					"reasoning_effort": "high",
+					"<tool-keys>": []
+				}
+			},
+			{
+				"path": "/api/llm/o/v1/chat/completions",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "baseten",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "nemotron-3.5-super",
+					"stream": true,
+					"stream_options": {
+						"include_usage": true
+					},
+					"max_tokens": 65536,
+					"temperature": 1,
+					"reasoning_effort": "high",
+					"<tool-keys>": []
+				}
+			}
+		]
+	},
+	{
+		"model": "nemotron-3.5-super",
+		"upstream": "baseten",
+		"effort": "off",
+		"flag": "nemotron_3_5_super",
+		"requests": [
+			{
+				"path": "/api/llm/o/v1/chat/completions",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "baseten",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "configured_order",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "nemotron-3.5-super",
+					"stream": true,
+					"stream_options": {
+						"include_usage": true
+					},
+					"max_tokens": 65536,
+					"temperature": 1,
+					"reasoning_effort": "none",
+					"<tool-keys>": []
+				}
+			},
+			{
+				"path": "/api/llm/o/v1/chat/completions",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "baseten",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "nemotron-3.5-super",
+					"stream": true,
+					"stream_options": {
+						"include_usage": true
+					},
+					"max_tokens": 65536,
+					"temperature": 1,
+					"reasoning_effort": "none",
+					"<tool-keys>": []
+				}
+			}
+		]
+	},
+	{
+		"model": "muse-spark-open",
+		"upstream": "baseten",
+		"effort": "high",
+		"flag": "muse_spark_open",
+		"requests": [
+			{
+				"path": "/api/llm/o/v1/chat/completions",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "baseten",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "configured_order",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "muse-spark-open",
+					"stream": true,
+					"stream_options": {
+						"include_usage": true
+					},
+					"max_tokens": 131072,
+					"temperature": 1,
+					"reasoning_effort": "high",
+					"<tool-keys>": []
+				}
+			},
+			{
+				"path": "/api/llm/o/v1/chat/completions",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "baseten",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "muse-spark-open",
+					"stream": true,
+					"stream_options": {
+						"include_usage": true
+					},
+					"max_tokens": 131072,
+					"temperature": 1,
+					"reasoning_effort": "high",
+					"<tool-keys>": []
+				}
+			}
+		]
+	},
+	{
+		"model": "muse-spark-1.2",
+		"upstream": "fireworks",
+		"effort": "high",
+		"flag": "muse_spark_1_2",
+		"requests": [
+			{
+				"path": "/api/llm/o/v1/chat/completions",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "fireworks",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "configured_order",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "muse-spark-1.2",
+					"stream": true,
+					"stream_options": {
+						"include_usage": true
+					},
+					"max_tokens": 131072,
+					"temperature": 1,
+					"reasoning_effort": "high",
+					"reasoning_history": "preserved",
+					"<tool-keys>": []
+				}
+			},
+			{
+				"path": "/api/llm/o/v1/chat/completions",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "fireworks",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "muse-spark-1.2",
+					"stream": true,
+					"stream_options": {
+						"include_usage": true
+					},
+					"max_tokens": 131072,
+					"temperature": 1,
+					"reasoning_effort": "high",
+					"reasoning_history": "preserved",
+					"<tool-keys>": []
+				}
+			}
+		]
+	},
+	{
+		"model": "beam-1.0",
+		"upstream": "baseten",
+		"effort": "high",
+		"flag": "beam_1_0",
+		"requests": [
+			{
+				"path": "/api/llm/o/v1/chat/completions",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "baseten",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "configured_order",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "beam-1.0",
+					"stream": true,
+					"stream_options": {
+						"include_usage": true
+					},
+					"max_tokens": 32768,
+					"temperature": 1,
+					"reasoning_effort": "high",
+					"allow_missing_thinking": true,
+					"<tool-keys>": []
+				}
+			},
+			{
+				"path": "/api/llm/o/v1/chat/completions",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "baseten",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "beam-1.0",
+					"stream": true,
+					"stream_options": {
+						"include_usage": true
+					},
+					"max_tokens": 32768,
+					"temperature": 1,
+					"reasoning_effort": "high",
+					"allow_missing_thinking": true,
+					"<tool-keys>": []
+				}
+			}
+		]
+	},
+	{
 		"model": "gpt-5.6-sol",
 		"upstream": "openai",
 		"effort": "high",
@@ -1090,13 +1394,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1128,13 +1432,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1173,13 +1477,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1207,13 +1511,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1248,13 +1552,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "azure_openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1285,13 +1589,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "azure_openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1329,13 +1633,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "snowflake",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1362,13 +1666,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "snowflake",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1402,13 +1706,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "bedrock_openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1435,13 +1739,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "bedrock_openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1475,13 +1779,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1514,13 +1818,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1560,13 +1864,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1592,13 +1896,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1631,13 +1935,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "azure_openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1663,13 +1967,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "azure_openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1702,13 +2006,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "azure_openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1735,13 +2039,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "azure_openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1775,13 +2079,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1813,13 +2117,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "openai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1843,6 +2147,170 @@
 						"verbosity": "low"
 					},
 					"safety_identifier": "<session>",
+					"<tool-keys>": [
+						"strict"
+					]
+				}
+			}
+		]
+	},
+	{
+		"model": "gpt-6-sol-fast",
+		"upstream": "openai",
+		"effort": "medium",
+		"flag": "gpt_6_fast_modes",
+		"requests": [
+			{
+				"path": "/api/llm/o/v1/responses",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "openai",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "configured_order",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "gpt-6-sol-fast",
+					"store": false,
+					"stream": true,
+					"tool_choice": "auto",
+					"parallel_tool_calls": true,
+					"include": [
+						"reasoning.encrypted_content"
+					],
+					"reasoning": {
+						"effort": "medium",
+						"summary": "auto"
+					},
+					"prompt_cache_key": "<session>",
+					"prompt_cache_retention": "24h",
+					"text": {
+						"verbosity": "low"
+					},
+					"safety_identifier": "<session>",
+					"service_tier": "priority",
+					"<tool-keys>": [
+						"strict"
+					]
+				}
+			},
+			{
+				"path": "/api/llm/o/v1/responses",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "openai",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "gpt-6-sol-fast",
+					"store": false,
+					"stream": true,
+					"tool_choice": "auto",
+					"parallel_tool_calls": true,
+					"include": [
+						"reasoning.encrypted_content"
+					],
+					"reasoning": {
+						"effort": "medium",
+						"summary": "auto"
+					},
+					"prompt_cache_key": "<session>",
+					"prompt_cache_retention": "24h",
+					"text": {
+						"verbosity": "low"
+					},
+					"safety_identifier": "<session>",
+					"service_tier": "priority",
+					"<tool-keys>": [
+						"strict"
+					]
+				}
+			}
+		]
+	},
+	{
+		"model": "gpt-6-luna-fast",
+		"upstream": "openai",
+		"effort": "none",
+		"flag": "gpt_6_fast_modes",
+		"requests": [
+			{
+				"path": "/api/llm/o/v1/responses",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "openai",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "configured_order",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "gpt-6-luna-fast",
+					"store": false,
+					"stream": true,
+					"tool_choice": "auto",
+					"parallel_tool_calls": true,
+					"reasoning": {
+						"effort": "none"
+					},
+					"prompt_cache_key": "<session>",
+					"prompt_cache_retention": "24h",
+					"text": {
+						"verbosity": "low"
+					},
+					"safety_identifier": "<session>",
+					"service_tier": "priority",
+					"<tool-keys>": [
+						"strict"
+					]
+				}
+			},
+			{
+				"path": "/api/llm/o/v1/responses",
+				"headers": {
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "openai",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "7.23.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "gpt-6-luna-fast",
+					"store": false,
+					"stream": true,
+					"tool_choice": "auto",
+					"parallel_tool_calls": true,
+					"reasoning": {
+						"effort": "none"
+					},
+					"prompt_cache_key": "<session>",
+					"prompt_cache_retention": "24h",
+					"text": {
+						"verbosity": "low"
+					},
+					"safety_identifier": "<session>",
+					"service_tier": "priority",
 					"<tool-keys>": [
 						"strict"
 					]
@@ -1858,13 +2326,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "xai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1890,13 +2358,13 @@
 			{
 				"path": "/api/llm/o/v1/responses",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "xai",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "6.25.0",
+					"x-stainless-package-version": "7.23.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1930,13 +2398,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "effort-2025-11-24,fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1961,13 +2429,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "effort-2025-11-24,fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -1999,13 +2467,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "effort-2025-11-24,fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "bedrock_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2028,13 +2496,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "effort-2025-11-24,fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "bedrock_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2064,13 +2532,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14,interleaved-thinking-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2092,13 +2560,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14,interleaved-thinking-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2127,13 +2595,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14,interleaved-thinking-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "bedrock_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2153,13 +2621,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14,interleaved-thinking-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "bedrock_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2186,13 +2654,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2210,13 +2678,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2241,13 +2709,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2271,13 +2739,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2308,13 +2776,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "effort-2025-11-24,fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "vertex_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2339,13 +2807,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "effort-2025-11-24,fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "vertex_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2377,13 +2845,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2404,13 +2872,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2439,13 +2907,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2473,13 +2941,13 @@
 			{
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "azure_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2501,13 +2969,13 @@
 			{
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "azure_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2536,13 +3004,13 @@
 			{
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "snowflake",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2560,13 +3028,13 @@
 			{
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "snowflake",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2592,13 +3060,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2622,13 +3090,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2659,13 +3127,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "effort-2025-11-24,fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "bedrock_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2687,13 +3155,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "effort-2025-11-24,fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "bedrock_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2722,13 +3190,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "thinking-binding-controls-2026-08-01",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "azure_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2754,13 +3222,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "thinking-binding-controls-2026-08-01",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "azure_anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2785,6 +3253,85 @@
 		]
 	},
 	{
+		"model": "claude-opus-5-5",
+		"upstream": "anthropic",
+		"effort": "high",
+		"requests": [
+			{
+				"path": "/api/llm/a/v1/messages",
+				"headers": {
+					"anthropic-beta": "fallback-credit-2026-06-01,fine-grained-tool-streaming-2025-05-14,server-side-fallback-2026-06-01",
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "anthropic",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "configured_order",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "0.128.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "claude-opus-5-5",
+					"max_tokens": 128000,
+					"thinking": {
+						"type": "adaptive",
+						"display": "summarized"
+					},
+					"output_config": {
+						"effort": "high"
+					},
+					"fallbacks": [
+						{
+							"model": "claude-opus-5"
+						}
+					],
+					"stream": true,
+					"<tool-keys>": [
+						"eager_input_streaming"
+					]
+				}
+			},
+			{
+				"path": "/api/llm/a/v1/messages",
+				"headers": {
+					"anthropic-beta": "fallback-credit-2026-06-01,fine-grained-tool-streaming-2025-05-14,server-side-fallback-2026-06-01",
+					"user-agent": "factory-cli/0.244.0",
+					"x-api-provider": "anthropic",
+					"x-client-version": "0.244.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock",
+					"x-stainless-lang": "js",
+					"x-stainless-package-version": "0.128.0",
+					"x-stainless-retry-count": "0",
+					"x-stainless-runtime": "node",
+					"x-stainless-runtime-version": "v26.3.0"
+				},
+				"body": {
+					"model": "claude-opus-5-5",
+					"max_tokens": 128000,
+					"thinking": {
+						"type": "adaptive",
+						"display": "summarized"
+					},
+					"output_config": {
+						"effort": "high"
+					},
+					"fallbacks": [
+						{
+							"model": "claude-opus-5"
+						}
+					],
+					"stream": true,
+					"<tool-keys>": [
+						"eager_input_streaming"
+					]
+				}
+			}
+		]
+	},
+	{
 		"model": "claude-fable-5",
 		"upstream": "anthropic",
 		"effort": "high",
@@ -2793,13 +3340,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fallback-credit-2026-06-01,fine-grained-tool-streaming-2025-05-14,server-side-fallback-2026-06-01",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2829,13 +3376,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fallback-credit-2026-06-01,fine-grained-tool-streaming-2025-05-14,server-side-fallback-2026-06-01",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2872,13 +3419,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fast-mode-2026-02-01,fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2904,13 +3451,13 @@
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
 					"anthropic-beta": "fast-mode-2026-02-01,fine-grained-tool-streaming-2025-05-14",
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "anthropic",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2942,13 +3489,13 @@
 			{
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "configured_order",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -2970,13 +3517,13 @@
 			{
 				"path": "/api/llm/a/v1/messages",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "fireworks",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock",
 					"x-stainless-lang": "js",
-					"x-stainless-package-version": "0.70.1",
+					"x-stainless-package-version": "0.128.0",
 					"x-stainless-retry-count": "0",
 					"x-stainless-runtime": "node",
 					"x-stainless-runtime-version": "v26.3.0"
@@ -3005,9 +3552,9 @@
 			{
 				"path": "/api/llm/g/v1/generate",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "google",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock"
 				},
@@ -3028,9 +3575,9 @@
 			{
 				"path": "/api/llm/g/v1/generate",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "google",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock"
 				},
@@ -3058,9 +3605,9 @@
 			{
 				"path": "/api/llm/g/v1/generate",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "google",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock"
 				},
@@ -3081,9 +3628,9 @@
 			{
 				"path": "/api/llm/g/v1/generate",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "google",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock"
 				},
@@ -3111,9 +3658,9 @@
 			{
 				"path": "/api/llm/g/v1/generate",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "google",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock"
 				},
@@ -3134,9 +3681,9 @@
 			{
 				"path": "/api/llm/g/v1/generate",
 				"headers": {
-					"user-agent": "factory-cli/0.237.0",
+					"user-agent": "factory-cli/0.244.0",
 					"x-api-provider": "google",
-					"x-client-version": "0.237.0",
+					"x-client-version": "0.244.0",
 					"x-factory-client": "cli",
 					"x-provider-routing-source": "session_lock"
 				},

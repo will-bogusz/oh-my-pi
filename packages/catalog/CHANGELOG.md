@@ -2,9 +2,18 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added Factory Droid GPT-6 Sol and Luna Fast Mode, GPT-6 Astra and GPT-6.1 Sol Ultra Fast (after the high-cost opt-in), Nemotron 3.5 Super, Muse Spark Open, Muse Spark 1.2 and Beam 1.0, each shown once the account's feature flag enables it
+
 ### Changed
 
 - Seeded TypeSafe `jev-1.14.0` and OpenRouter `typesafe/jev-1.14`, and made them the `judge` role defaults and TypeSafe's default model; TypeSafe discovery keeps seeded ids its alias-only `/v1/models` listing omits
+- Changed Factory Droid requests to identify as droid 0.244.0
+
+### Fixed
+
+- Fixed Factory Droid availability and routing to match droid 0.244: Opus 5.5 Fast, GPT-6.1 Sol and MiniMax M3 no longer wait on retired feature flags, GPT-5.5 no longer routes to Snowflake, and Opus 5.5 falls back to Opus 5 on a refusal when the account can use Opus 5
 
 ## [18.12.1] - 2026-10-17
 

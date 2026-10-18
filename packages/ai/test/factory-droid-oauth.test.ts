@@ -121,14 +121,17 @@ describe("Factory Droid stored region", () => {
 		expect(scopeOf(usage)).toEqual(expected);
 	});
 
-	it("resolves canonical whoami identity independently of WorkOS organization and residency", async () => {
+	it("requests the extended whoami identity and resolves it independently of WorkOS organization and residency", async () => {
 		const credentials = await attachFactoryDroidRegion(
 			{ access: "new", refresh: "refresh", expires: 1, orgId: "jwt-org" },
 			{
 				provider: "factory-droid",
 				phase: "login",
 				raw: { refresh_token: "refresh", organization_id: "workos-org" },
-				fetch: async () => jsonResponse(200, { orgId: "canonical-org", region: "global", inferenceRegion: "us" }),
+				fetch: async (_url, init) => {
+					expect(new Headers(init?.headers).get("x-factory-whoami-extended")).toBe("true");
+					return jsonResponse(200, { orgId: "canonical-org", region: "global", inferenceRegion: "us" });
+				},
 			},
 		);
 		expect(credentials).toMatchObject({

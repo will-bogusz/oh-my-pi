@@ -70,4 +70,20 @@ describe("Factory Droid public stream controls", () => {
 		expect(result.stopReason).toBe("stop");
 		expect(captured[0]?.body.text).toMatchObject({ verbosity: "high" });
 	});
+
+	it.each([
+		["gpt-6.1-sol-ultrafast", "ultrafast"],
+		["gpt-6-astra-ultrafast", "ultrafast"],
+	])("requests %s on OpenAI's %s service tier", async (id, tier) => {
+		const captured: CapturedRequest[] = [];
+		const result = await streamSimple(factoryModel(id), context, {
+			apiKey: WORKOS_TOKEN,
+			reasoning: Effort.Low,
+			fetch: captureFetch(captured, responsesChunks("ok")),
+		}).result();
+
+		expect(result.stopReason).toBe("stop");
+		expect(captured[0]?.headers["x-api-provider"]).toBe("openai");
+		expect(captured[0]?.body.service_tier).toBe(tier);
+	});
 });

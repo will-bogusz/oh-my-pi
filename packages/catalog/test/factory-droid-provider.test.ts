@@ -436,6 +436,27 @@ describe("Factory Droid discovery gates", () => {
 		expect(ids).toContain("deepseek-v4.1-flash");
 	});
 
+	it("lists Opus 5.5 Fast, GPT-6.1 Sol and MiniMax M3 without their retired flags", async () => {
+		const ids = await discoverIds({ flags: { claude_opus_5_5_fast: false, gpt_6_1_sol: false, minimax_m3: false } });
+		expect(ids).toContain("claude-opus-5-5-fast");
+		expect(ids).toContain("gpt-6.1-sol");
+		expect(ids).toContain("minimax-m3");
+	});
+
+	it("offers a refusal fallback only while the account can run the fallback model", async () => {
+		const open = await discover({ modelPolicy: { allowAllFactoryModels: true } });
+		const openIds = open?.map(model => model.id) ?? [];
+		const withFallback = open?.filter(model => model.factoryDroidRefusalFallbacks?.length) ?? [];
+		expect(withFallback.map(model => model.id)).toContain("claude-opus-5-5");
+		const fallbackIds = [...new Set(withFallback.flatMap(model => model.factoryDroidRefusalFallbacks ?? []))];
+		for (const id of fallbackIds) expect(openIds).toContain(id);
+
+		const blocked = await discover({ modelPolicy: { allowAllFactoryModels: true, blockedModelIds: fallbackIds } });
+		for (const { id } of withFallback) {
+			expect(blocked?.find(model => model.id === id)?.factoryDroidRefusalFallbacks).toEqual([]);
+		}
+	});
+
 	it("keeps global overrides restrictive without removing the EU Mistral route", async () => {
 		const endpoints = {
 			flags: {},
