@@ -3946,7 +3946,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-intervened-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:41:58Z",
-   "updated": "2026-10-18T15:54:08Z",
+   "updated": "2026-10-18T15:54:21Z",
    "note": "",
    "built": [
     {
@@ -4031,7 +4031,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-18T15:54:07Z"
+   "opened": "2026-10-18T15:54:07Z",
+   "readied": "2026-10-18T15:54:21Z"
   },
   {
    "id": "natives-name-takeover-tap-kinds",
