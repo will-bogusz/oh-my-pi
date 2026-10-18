@@ -27,9 +27,9 @@ Throwing was chosen over wrapping a lone object as the first argument: the model
 
   | Cell | `main` | This PR |
   |---|---|---|
-  | `computer.run(async (_s, p) => \`p=${p}\`, { args: { p: "/tmp" } })` | `p=undefined` | throws `computer.run() args must be an array …` |
+  | `` computer.run(async (_s, p) => `ran, p=${String(p)}`, { args: { p: "/tmp" } }) `` | `ran, p=undefined` | throws `computer.run() args must be an array …` |
   | `computer.run("return 'ran code'", { args: ["/tmp"] })` | `ran code` | throws `computer.run() passes args only to a function …` |
-  | `computer.run(async (_s, p) => \`p=${p}\`, { args: ["/tmp"] })` | `p=/tmp` | `p=/tmp` |
+  | `` computer.run(async (_s, p) => `ran, p=${p}`, { args: ["/tmp"] }) `` | `ran, p=/tmp` | `ran, p=/tmp` |
   | `computer.run("return 'ran code'", { args: [] })` | `ran code` | `ran code` |
 
   `tab.run` was not run live; its guard is the same code and the facade test above covers it.
