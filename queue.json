@@ -3826,6 +3826,24 @@
    "added": "2026-10-18T13:09:04Z",
    "updated": "2026-10-18T13:09:13Z",
    "note": "Overlap: #15195, #15563, #15193, #15191, #15185 each fix their own instance of \"input already out reports Cancelled\" (settle/reply waits, run_then_settle BACKGROUND_SETTLE, window_chord reply sleep) in their advance pushes; this entry fixes main-owned ones via control::settle + Worker::execute. Whichever lands second drops its duplicate copy. Red: fork will/s1k-wip/sent-not-cancelled-red."
+  },
+  {
+   "id": "natives-test-click-placed-in-users-app",
+   "branch": "will/natives-test-click-placed-in-users-app",
+   "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test",
+   "area": "computer",
+   "priority": "P0",
+   "needs": [],
+   "base": "58349dc80de381057437818b8354c86826c8fa10",
+   "body": "bodies/natives-test-click-placed-in-users-app.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/natives-test-click-placed-in-users-app",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T13:26:31Z",
+   "updated": "2026-10-18T13:26:31Z",
+   "note": ""
   }
  ],
  "watch": {
