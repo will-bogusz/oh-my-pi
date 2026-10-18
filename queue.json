@@ -3909,7 +3909,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/natives-name-takeover-tap-kinds",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:42:54Z",
-   "updated": "2026-10-18T13:46:01Z",
+   "updated": "2026-10-18T13:46:14Z",
    "note": "",
    "built": [
     {
@@ -3940,7 +3940,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-18T13:46:01Z"
+   "opened": "2026-10-18T13:46:01Z",
+   "readied": "2026-10-18T13:46:14Z"
   }
  ],
  "watch": {
