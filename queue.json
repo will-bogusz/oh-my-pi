@@ -4656,6 +4656,24 @@
    "added": "2026-10-18T18:43:41Z",
    "updated": "2026-10-18T18:43:47Z",
    "note": "Follow-up to #16202 (Codex thread 4307926709). Fail-before: uinput::tests::a_cancel_stops_presses_but_never_releases fails on main+test (red fork will/s1k-wip/uinput-release-red 662cd6a84c), passes on d776df149c (Linux, goliath). Review round not yet run."
+  },
+  {
+   "id": "relay-popup-front-main",
+   "branch": "will/relay-popup-front-main",
+   "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "1a97f79d28f164b02d3b58b227adee999d255ec4",
+   "body": "bodies/relay-popup-front-main.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front-main",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T18:46:45Z",
+   "updated": "2026-10-18T18:46:45Z",
+   "note": ""
   }
  ],
  "watch": {
