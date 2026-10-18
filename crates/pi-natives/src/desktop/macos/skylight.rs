@@ -741,9 +741,7 @@ impl UserSwitchWatch {
 			chord: None,
 			panel: None,
 			before: None,
-			own_click: signals
-				.last_click
-				.filter(|at| signals.in_user_app && now.saturating_duration_since(*at) <= lookback),
+			own_click: None,
 		};
 		watch.observe_held(signals, user, now);
 		watch
@@ -1244,18 +1242,12 @@ fn guard_focus(
 				));
 			},
 			Some(front) => {
-				// The poll is timed before the user's key window is read, since
-				// that read can block and a click of theirs must not age while it
-				// does; its signals are read after it, never older than what the
-				// sampler already fed the lease.
-				let now = desktop.now();
 				let key = if !disarmed && front == previous {
 					desktop.user_key()
 				} else {
 					None
 				};
-				let signals = desktop.signals(desktop.now());
-				if lease.lock().observe(front, key, signals, now) == FocusDecision::Restore {
+				if observe(front, key) == FocusDecision::Restore {
 					// Re-check immediately before changing focus: an AX probe may
 					// have raced a newer application or user switch.
 					// `WindowServer` then refuses the hand-back if the user
