@@ -2,17 +2,17 @@
 
 Waking a parked subagent re-sent its whole conversation uncached, because the revived session re-rendered the peer roster at the end of its system prompt, so I made the revive show the roster the agent last saw and refresh it on later rebuilds as a live agent does.
 
-The first request after a revival now reads the whole cached prompt: in a live Haiku run it wrote 1,274 → 110 tokens to the cache and read 18,197 → 19,342. The write that goes away is everything after the roster, so it grows with the conversation; one real Opus revival wrote 254,328 tokens and read 0.
+The first request after a revival now reads the whole cached prompt: in a live Haiku run it wrote 1,274 → 110 tokens to the cache. The saved write is everything after the roster, so it grows with the conversation; one real Opus revival wrote 254,328 tokens and read 0.
 
-- `task/executor.ts`: `SubagentPromptInputs` records the roster each prompt render shows and, when a session is disposed, keeps the one its prompt holds (`ircRoster`). `createWarmSubagentReviver` sets `reviving` while it rebuilds the session, and the prompt builder renders that roster again instead of the registry's; once the revive returns, rebuilds read the live registry.
+- `task/executor.ts`: each prompt render records the roster it shows; when a session is disposed, the roster its prompt holds is kept (`ircRoster`). While `createWarmSubagentReviver` rebuilds the session (`reviving`), the prompt builder renders that roster instead of the registry's.
 
 Closes #15523
 
 ## Why
 
-A subagent parked after `task.agentIdleTtlMs` is rebuilt from its spawn spec when a message wakes it. The subagent prompt's `# Peers` block lists live peers with their status and activity plus a parked count, and the rebuild read them from the registry at that moment. Peers almost always change while an agent sleeps (it parked itself, siblings finished), so the revived system prompt differed near its end and the provider cached nothing past it. On Anthropic each such revival re-wrote the full conversation at cache-write price.
+A parked subagent is rebuilt from its spawn spec when a message wakes it. The prompt's `# Peers` block lists live peers with status and activity plus a parked count, and the rebuild read them from the registry at that moment. Peers almost always change while an agent sleeps, so the revived system prompt differed near its end and nothing past it was cached; on Anthropic each revival re-wrote the full conversation at cache-write price.
 
-**Decision:** the revived agent sees the roster it last saw, exactly what it would see had it stayed live: a live subagent's prompt keeps its roster until something rebuilds it, and so does a revived one. Changed peers stay discoverable through `history://`, which the prompt already points to, and any later rebuild (a work-pool batch, a tool change) renders the live roster. Cold revival already replays the transcript's recorded prompt the same way. Rejected: delivering a roster delta as a reminder message on revival, a new delivery path that would tell a revived agent more than a live one gets.
+**Decision:** the revived agent sees the roster it last saw, as it would had it stayed live: a live subagent's prompt keeps its roster until something rebuilds it. Changed peers stay discoverable through `history://`, which the prompt points to, and any later rebuild renders the live roster. Cold revival already replays the recorded prompt the same way. Rejected: a roster-delta reminder on revival, a new delivery path that tells a revived agent more than a live one gets.
 
 Non-goal: tools an extension registers only from `before_agent_start` still don't come back on revival, so a revived agent using such a plugin still misses the cache.
 
