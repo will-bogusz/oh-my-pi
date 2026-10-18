@@ -5358,8 +5358,55 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/req-debug-redact",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:39:00Z",
-   "updated": "2026-10-18T19:44:07Z",
-   "note": ""
+   "updated": "2026-10-18T19:45:09Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#13677",
+     "code": "b7727846b55f20cc5c0c10f0e2dea20af8c9b3bb",
+     "with_code": "48ed40cb133644f3de1bb7020dea7dcffa41fb8b",
+     "tip": "5e775ca60a3fd31fdd8d0e03bc402801ad37187a",
+     "with_tip": "b79743411ae5052d23dc10a349254f989cf339b8",
+     "at": "2026-10-18T19:44:59Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15124",
+     "code": "b7727846b55f20cc5c0c10f0e2dea20af8c9b3bb",
+     "with_code": "e04bec4c0f6b3e751e4162c8cb2222365b4db9df",
+     "tip": "5e775ca60a3fd31fdd8d0e03bc402801ad37187a",
+     "with_tip": "f9884c71e9805d399f159b7011beb85614af67c7",
+     "at": "2026-10-18T19:45:07Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#14235",
+     "code": "b7727846b55f20cc5c0c10f0e2dea20af8c9b3bb",
+     "with_code": "5ca41aa364865ad8d91bf3e7385346847b260d40",
+     "tip": "5e775ca60a3fd31fdd8d0e03bc402801ad37187a",
+     "with_tip": "3880ea7d612d817a3915a8b5e97cb49039a22827",
+     "at": "2026-10-18T19:45:07Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#14237",
+     "code": "b7727846b55f20cc5c0c10f0e2dea20af8c9b3bb",
+     "with_code": "86fb0761833073d8eaf1266b65baf8e4ca365325",
+     "tip": "5e775ca60a3fd31fdd8d0e03bc402801ad37187a",
+     "with_tip": "57dee83b3fefa97dcb18e89d1b2b91853615d111",
+     "at": "2026-10-18T19:45:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15130",
+     "code": "b7727846b55f20cc5c0c10f0e2dea20af8c9b3bb",
+     "with_code": "489401adc377f34ce309e0500122b62f9a00cc89",
+     "tip": "5e775ca60a3fd31fdd8d0e03bc402801ad37187a",
+     "with_tip": "01eaca12da3ad399cd319718dc3c0239baf7347d",
+     "at": "2026-10-18T19:45:08Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "browser-role-name",
