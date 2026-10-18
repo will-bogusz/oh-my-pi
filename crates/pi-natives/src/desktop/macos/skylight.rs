@@ -915,6 +915,20 @@ impl BackgroundFocusLease {
 		signals: SwitchSignals,
 		now: Instant,
 	) -> FocusDecision {
+		self.observe_read(front, key, now, signals, now)
+	}
+
+	/// [`Self::observe`] with the user's `key` window read from `asked` on: a
+	/// click of theirs that may have picked it is aged from then, since that
+	/// read can block, while `signals` and `now` come after it.
+	fn observe_read(
+		&mut self,
+		front: ProcessSerialNumber,
+		key: Option<u32>,
+		asked: Instant,
+		signals: SwitchSignals,
+		now: Instant,
+	) -> FocusDecision {
 		self.user.observe(signals, front, now);
 		let (came, caused) = self.came_forward(front, signals, now);
 		// The target coming forward with no switch of the user's just before is
@@ -933,7 +947,7 @@ impl BackgroundFocusLease {
 		if !self.disarmed
 			&& front == self.previous
 			&& key.is_some_and(|key| Some(key) != self.key)
-			&& self.user.take_own_click(now)
+			&& self.user.take_own_click(asked)
 		{
 			self.key = key;
 		}
@@ -1244,18 +1258,20 @@ fn guard_focus(
 				));
 			},
 			Some(front) => {
-				// The poll is timed before the user's key window is read, since
-				// that read can block and a click of theirs must not age while it
-				// does; its signals are read after it, never older than what the
-				// sampler already fed the lease.
-				let now = desktop.now();
+				// The user's key window read can block, so a click of theirs is
+				// aged from when it began; the signals and the poll's time come
+				// after it, never older than what the sampler already fed the
+				// lease.
+				let asked = desktop.now();
 				let key = if !disarmed && front == previous {
 					desktop.user_key()
 				} else {
 					None
 				};
-				let signals = desktop.signals(desktop.now());
-				if lease.lock().observe(front, key, signals, now) == FocusDecision::Restore {
+				let now = desktop.now();
+				let signals = desktop.signals(now);
+				if lease.lock().observe_read(front, key, asked, signals, now) == FocusDecision::Restore
+				{
 					// Re-check immediately before changing focus: an AX probe may
 					// have raced a newer application or user switch.
 					// `WindowServer` then refuses the hand-back if the user
@@ -2814,6 +2830,22 @@ mod tests {
 		assert!(guard_focus(&lease, &desktop, &AtomicBool::new(false)).is_ok());
 		let lease = lease.into_inner();
 		assert_eq!((lease.key, lease.disarmed), (Some(43), false));
+	}
+
+	#[test]
+	fn a_switch_read_after_a_blocked_key_window_read_is_timed_after_it() {
+		// A poll's read of the user's key window blocked from 20 ms to 620 ms;
+		// they held ⌘ to switch meanwhile, and the target came forward at 630 ms
+		// once ⌘ was up: their switch, not the target's own.
+		let t0 = Instant::now();
+		let mut guard = lease_at(t0, None);
+		let held = input(0, COMMAND);
+		assert_eq!(
+			guard.observe_read(PREVIOUS, Some(42), t0 + ms(20), held, t0 + ms(620)),
+			FocusDecision::Observe
+		);
+		let released = input(0, NO_MODIFIERS);
+		assert_eq!(guard.observe(TARGET, None, released, t0 + ms(630)), FocusDecision::Disarm);
 	}
 
 	#[test]
