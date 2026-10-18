@@ -5708,6 +5708,24 @@
    "added": "2026-10-18T19:46:57Z",
    "updated": "2026-10-18T19:46:57Z",
    "note": ""
+  },
+  {
+   "id": "conflict-hidden-ids",
+   "branch": "will/conflict-hidden-ids",
+   "title": "fix(coding-agent): name registered conflict ids when a hidden block is guessed",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/conflict-hidden-ids.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:47:10Z",
+   "updated": "2026-10-18T19:47:10Z",
+   "note": ""
   }
  ],
  "watch": {
