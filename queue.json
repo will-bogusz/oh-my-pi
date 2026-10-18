@@ -4071,13 +4071,13 @@
    "needs": [],
    "base": "3f020bd85001c33d351ab1b923d69fa24c7f06f5",
    "body": "bodies/iphone-mirroring-test.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16200,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirroring-test",
    "host": "MacBook-Pro",
    "added": "2026-10-18T15:30:46Z",
-   "updated": "2026-10-18T15:31:11Z",
+   "updated": "2026-10-18T15:32:00Z",
    "note": "",
    "built": [
     {
@@ -4098,7 +4098,8 @@
      "at": "2026-10-18T15:31:11Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-18T15:32:00Z"
   }
  ],
  "watch": {
