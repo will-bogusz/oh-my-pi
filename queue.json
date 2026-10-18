@@ -3840,8 +3840,55 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-sent-not-cancelled",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:09:04Z",
-   "updated": "2026-10-18T15:04:42Z",
-   "note": "Overlap: #15195, #15563, #15193, #15191, #15185 each fix their own instance of \"input already out reports Cancelled\" (settle/reply waits, run_then_settle BACKGROUND_SETTLE, window_chord reply sleep) in their advance pushes; this entry fixes main-owned ones via control::settle + Worker::execute. Whichever lands second drops its duplicate copy. Red: fork will/s1k-wip/sent-not-cancelled-red."
+   "updated": "2026-10-18T15:42:25Z",
+   "note": "Overlap: #15195, #15563, #15193, #15191, #15185 each fix their own instance of \"input already out reports Cancelled\" (settle/reply waits, run_then_settle BACKGROUND_SETTLE, window_chord reply sleep) in their advance pushes; this entry fixes main-owned ones via control::settle + Worker::execute. Whichever lands second drops its duplicate copy. Red: fork will/s1k-wip/sent-not-cancelled-red.",
+   "built": [
+    {
+     "with": "#16185",
+     "code": "e7ec465c601d08283f6589c8a9481e8f932c7efb",
+     "with_code": "f9d67df16c8f4adab00cea52f5970673b610fd6a",
+     "tip": "8c91484b041ad31c659ad17bc93eabe206e4f7de",
+     "with_tip": "08f84b5a371abf6739fa3b12e261b05c84f8e61b",
+     "at": "2026-10-18T15:42:22Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16188",
+     "code": "e7ec465c601d08283f6589c8a9481e8f932c7efb",
+     "with_code": "540bb6bc8803ee71e7a710f9a59ba55904f08097",
+     "tip": "8c91484b041ad31c659ad17bc93eabe206e4f7de",
+     "with_tip": "3c2826419fa0b83613efb684fe002369b3a86d03",
+     "at": "2026-10-18T15:42:24Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16200",
+     "code": "e7ec465c601d08283f6589c8a9481e8f932c7efb",
+     "with_code": "60a08a44bc4d915d78ac7ea26d73f3da2fdc986b",
+     "tip": "8c91484b041ad31c659ad17bc93eabe206e4f7de",
+     "with_tip": "6e231e5ee9139d66df353d85ac38e27389664ef5",
+     "at": "2026-10-18T15:42:24Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "computer-release-helper-followup",
+     "code": "e7ec465c601d08283f6589c8a9481e8f932c7efb",
+     "with_code": "2069a10e35d7bf8ac48a66da4f66dc06c9dcb0e6",
+     "tip": "8c91484b041ad31c659ad17bc93eabe206e4f7de",
+     "with_tip": "d09827d2ea18b4554b8981a89fc7182e687b4e17",
+     "at": "2026-10-18T15:42:24Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "computer-intervened-followup",
+     "code": "e7ec465c601d08283f6589c8a9481e8f932c7efb",
+     "with_code": "63fac15212197cc3482d669e145f485d1a975cd7",
+     "tip": "8c91484b041ad31c659ad17bc93eabe206e4f7de",
+     "with_tip": "1eccbc52123a95f83c1f449d12b2a2529916118e",
+     "at": "2026-10-18T15:42:25Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "natives-test-click-placed-in-users-app",
