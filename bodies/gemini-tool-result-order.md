@@ -1,6 +1,6 @@
 ## What
 
-Gemini now gets parallel tool results back in the order it made the calls, not the order they finished.
+I made Gemini get parallel tool results back in the order it made the calls, not the order they finished.
 
 Both Gemini converters (`google-shared.ts` for the Gemini API, Vertex, Cloud Code Assist and Antigravity, and the Factory Droid Gemini wire) sort each turn's `functionResponse` parts into call order. The responses stay in the slots they already hold, and parts without a matching call stay where they are. This matches what Factory's `droid` CLI does as of 0.241 (still in 0.244).
 
