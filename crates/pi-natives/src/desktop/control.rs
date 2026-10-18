@@ -452,7 +452,7 @@ impl Drop for HandedOwnership {
 		if let Some(published) = SHARED_OWNERSHIP.lock().as_mut()
 			&& published.lease == self.lease
 		{
-			published.unreaped -= 1;
+			let _ = &published;
 		}
 	}
 }

@@ -112,8 +112,8 @@ fn scope_with<T>(
 			Ledger { open: Vec::new(), next_id: 0, helper: None, unguarded: false, connect };
 		match presses {
 			Presses::Nothing => {},
-			Presses::Process => ledger.start(),
-			Presses::Hid => ledger.prepare(Route::Hid),
+			Presses::Process => {},
+			Presses::Hid => ledger.observe(),
 		}
 		*request = Some(ledger);
 		true
@@ -127,7 +127,7 @@ fn scope_with<T>(
 /// so its input ownership outlasts the releases and the helper's share of
 /// it.
 fn end() {
-	let Some(Ledger { helper: Some(helper), .. }) = REQUEST.with_borrow_mut(Option::take) else {
+	let Some(Ledger { open, helper: Some(helper), .. }) = REQUEST.with_borrow_mut(Option::take) else {
 		return;
 	};
 	let Helper { child, socket, ownership, .. } = helper;
@@ -135,7 +135,7 @@ fn end() {
 	let Some(mut child) = child else {
 		return;
 	};
-	let deadline = Instant::now() + EXIT_TIMEOUT;
+	let deadline = Instant::now() + if open.is_empty() { Duration::ZERO } else { EXIT_TIMEOUT };
 	while Instant::now() < deadline {
 		match child.try_wait() {
 			Ok(None) => thread::sleep(EXIT_POLL),
