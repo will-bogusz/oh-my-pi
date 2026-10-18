@@ -22,4 +22,4 @@ No declaration is added or removed, and `index.js` regenerates byte-identical.
 
 - [ ] `bun check` passes
 - [x] Tested locally
-- [ ] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
