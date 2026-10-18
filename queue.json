@@ -5277,6 +5277,24 @@
    "added": "2026-10-18T19:41:43Z",
    "updated": "2026-10-18T19:41:43Z",
    "note": ""
+  },
+  {
+   "id": "builtin-rule-conditions",
+   "branch": "will/builtin-rule-conditions",
+   "title": "fix(coding-agent): fire ts-set-map, ts-import-type and ts-no-any only on code they flag",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/builtin-rule-conditions.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/home/will/.omp/main-wt/oh-my-pi/builtin-rule-conditions",
+   "host": "goliath",
+   "added": "2026-10-18T19:42:35Z",
+   "updated": "2026-10-18T19:42:35Z",
+   "note": ""
   }
  ],
  "watch": {
