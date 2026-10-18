@@ -9,7 +9,7 @@
 
 ### Changed
 
-- Changed Factory Droid requests to report droid 0.244.0's Anthropic and OpenAI SDK versions, and Factory login to request the extended identity response; the native parity corpus now records droid 0.244.0 traffic
+- Changed Factory Droid requests to report droid 0.244.0's Anthropic and OpenAI SDK versions, and Factory login to request the extended identity response
 
 ### Fixed
 
