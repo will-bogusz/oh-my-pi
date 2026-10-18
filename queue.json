@@ -3940,13 +3940,13 @@
    "needs": [],
    "base": "58349dc80de381057437818b8354c86826c8fa10",
    "body": "bodies/computer-intervened-followup.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16206,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-intervened-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:41:58Z",
-   "updated": "2026-10-18T15:53:20Z",
+   "updated": "2026-10-18T15:54:08Z",
    "note": "",
    "built": [
     {
@@ -4030,7 +4030,8 @@
      "at": "2026-10-18T15:53:18Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-18T15:54:07Z"
   },
   {
    "id": "natives-name-takeover-tap-kinds",
