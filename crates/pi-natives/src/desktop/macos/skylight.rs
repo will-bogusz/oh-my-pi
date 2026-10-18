@@ -741,7 +741,9 @@ impl UserSwitchWatch {
 			chord: None,
 			panel: None,
 			before: None,
-			own_click: None,
+			own_click: signals
+				.last_click
+				.filter(|at| signals.in_user_app && now.saturating_duration_since(*at) <= lookback),
 		};
 		watch.observe_held(signals, user, now);
 		watch
@@ -1242,12 +1244,18 @@ fn guard_focus(
 				));
 			},
 			Some(front) => {
+				// The poll is timed before the user's key window is read, since
+				// that read can block and a click of theirs must not age while it
+				// does; its signals are read after it, never older than what the
+				// sampler already fed the lease.
+				let now = desktop.now();
 				let key = if !disarmed && front == previous {
 					desktop.user_key()
 				} else {
 					None
 				};
-				if observe(front, key) == FocusDecision::Restore {
+				let signals = desktop.signals(desktop.now());
+				if lease.lock().observe(front, key, signals, now) == FocusDecision::Restore {
 					// Re-check immediately before changing focus: an AX probe may
 					// have raced a newer application or user switch.
 					// `WindowServer` then refuses the hand-back if the user
@@ -2600,6 +2608,8 @@ mod tests {
 		/// The app the user ⌘-Tabs to, with what the next reading sees of it,
 		/// while that report is read.
 		switch_on_key_read: Cell<Option<(ProcessSerialNumber, SwitchSignals)>>,
+		/// How long that report takes to read.
+		key_read_takes:     Duration,
 	}
 
 	impl GuardedDesktop for FakeDesktop {
@@ -2608,6 +2618,7 @@ mod tests {
 		}
 
 		fn user_key(&self) -> Option<u32> {
+			self.clock.set(self.clock.get() + self.key_read_takes);
 			if let Some((front, signals)) = self.switch_on_key_read.take() {
 				self.front.set(front);
 				self.signals.set(signals);
@@ -2673,6 +2684,7 @@ mod tests {
 				keys:               std::cell::RefCell::default(),
 				user_window:        42,
 				switch_on_key_read: Cell::new(None),
+				key_read_takes:     Duration::ZERO,
 			};
 			let lease = Mutex::new(lease_at(t0, None));
 			let visit = AtomicBool::new(false);
@@ -2731,6 +2743,14 @@ mod tests {
 		);
 		assert_eq!(guard.observe(PREVIOUS, Some(43), up, t0 + ms(15)), FocusDecision::Observe);
 		assert_eq!(guard.observe(PREVIOUS, Some(44), up, t0 + ms(20)), FocusDecision::Disarm);
+		// A click already in the guard's first reading counts too.
+		let own_at_start = clicked_at(t0).in_user_app();
+		let mut guard =
+			BackgroundFocusLease::new(PREVIOUS, TARGET, Some(42), own_at_start, t0 + ms(5));
+		assert_eq!(
+			guard.observe(PREVIOUS, Some(43), own_at_start, t0 + ms(10)),
+			FocusDecision::Observe
+		);
 	}
 
 	#[test]
@@ -2750,6 +2770,7 @@ mod tests {
 				keys:               std::cell::RefCell::default(),
 				user_window:        43,
 				switch_on_key_read: Cell::new(switch),
+				key_read_takes:     Duration::ZERO,
 			};
 			let lease = Mutex::new(lease_at(t0, None));
 			let result = guard_focus(&lease, &desktop, &AtomicBool::new(false));
@@ -2773,6 +2794,29 @@ mod tests {
 	}
 
 	#[test]
+	fn a_users_click_does_not_age_while_their_key_window_is_read() {
+		// Reading the user's key window takes the accessibility timeout; it
+		// reports window 43, which their click just before the read picked.
+		let t0 = Instant::now();
+		let desktop = FakeDesktop {
+			clock:              Cell::new(t0 + ms(20)),
+			end:                t0 + ms(30),
+			front:              Cell::new(PREVIOUS),
+			signals:            Cell::new(clicked_at(t0 + ms(15)).in_user_app()),
+			refused_for:        Cell::new(None),
+			hand_backs:         Cell::new(0),
+			keys:               std::cell::RefCell::default(),
+			user_window:        43,
+			switch_on_key_read: Cell::new(None),
+			key_read_takes:     ms(600),
+		};
+		let lease = Mutex::new(lease_at(t0, None));
+		assert!(guard_focus(&lease, &desktop, &AtomicBool::new(false)).is_ok());
+		let lease = lease.into_inner();
+		assert_eq!((lease.key, lease.disarmed), (Some(43), false));
+	}
+
+	#[test]
 	fn an_app_never_handed_back_before_the_action_ends_fails_it() {
 		// The target, or a third app the action opened something in, came
 		// forward on the action's last poll, and `WindowServer` refused the
@@ -2789,6 +2833,7 @@ mod tests {
 				keys:               std::cell::RefCell::default(),
 				user_window:        42,
 				switch_on_key_read: Cell::new(None),
+				key_read_takes:     Duration::ZERO,
 			};
 			let lease = Mutex::new(lease_at(t0, None));
 			let result = guard_focus(&lease, &desktop, &AtomicBool::new(false));
