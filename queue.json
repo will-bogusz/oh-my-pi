@@ -10253,13 +10253,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/anthropic-refusal-handoff.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16250,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-refusal-handoff",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:09:46Z",
-   "updated": "2026-10-18T21:41:13Z",
+   "updated": "2026-10-18T22:03:49Z",
    "note": "",
    "built": [
     {
@@ -10362,7 +10362,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-18T21:41:13Z"
+   "advanced": "2026-10-18T21:41:13Z",
+   "opened": "2026-10-18T22:03:49Z"
   },
   {
    "id": "factory-droid-credit-promotions",
