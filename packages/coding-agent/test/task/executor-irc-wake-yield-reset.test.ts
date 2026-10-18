@@ -116,7 +116,7 @@ describe("IRC wake turn relay", () => {
 				trackIrcReply: () => {},
 			} as unknown as AgentSession;
 			const emit = (event: AgentSessionEvent) => {
-				for (const listener of [...listeners]) listener(event);
+				for (const listener of listeners) listener(event);
 			};
 			const registry = AgentRegistry.global();
 			registry.register({ id: "Peer", displayName: "Peer", kind: "main", session, status: "running" });
