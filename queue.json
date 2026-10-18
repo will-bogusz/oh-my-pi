@@ -6634,7 +6634,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "base": "151bc26cdc3cfb93291235d537a0fd68d1e76746",
    "body": "bodies/browser-timeout-names.md",
    "state": "queued",
    "pr": null,
@@ -6642,8 +6642,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-timeout-names",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:01:52Z",
-   "updated": "2026-10-18T20:01:52Z",
-   "note": ""
+   "updated": "2026-10-18T20:08:53Z",
+   "note": "",
+   "advanced": "2026-10-18T20:08:53Z"
   }
  ],
  "watch": {
