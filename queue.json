@@ -3892,8 +3892,64 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-intervened-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:41:58Z",
-   "updated": "2026-10-18T14:12:31Z",
-   "note": ""
+   "updated": "2026-10-18T14:12:38Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#15192",
+     "code": "45fa6e4deb37cb829977fa4b29766b074acfab38",
+     "with_code": "c46e3d50b12d32eedf7f5e7351f9007f3bca9f13",
+     "tip": "9b5d2acc2f3cb2038c8fac76fe711622712d967a",
+     "with_tip": "919ca9d7418cb062003310f4e132f424cd7d3f28",
+     "at": "2026-10-18T14:12:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16163",
+     "code": "45fa6e4deb37cb829977fa4b29766b074acfab38",
+     "with_code": "5f7740a415d860e041b015e202d65b8e1120c286",
+     "tip": "9b5d2acc2f3cb2038c8fac76fe711622712d967a",
+     "with_tip": "7cb4e3bdfa3246d73daee60107122b18b5409102",
+     "at": "2026-10-18T14:12:37Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16187",
+     "code": "45fa6e4deb37cb829977fa4b29766b074acfab38",
+     "with_code": "561a45ca97a5778c5947d56e98acf364f3b5e081",
+     "tip": "9b5d2acc2f3cb2038c8fac76fe711622712d967a",
+     "with_tip": "cc124ff47e02eade5f816d70a5fbdb9e90370d14",
+     "at": "2026-10-18T14:12:37Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16185",
+     "code": "45fa6e4deb37cb829977fa4b29766b074acfab38",
+     "with_code": "22def651af89241ab875beb52bf50ba5f23a3a73",
+     "tip": "9b5d2acc2f3cb2038c8fac76fe711622712d967a",
+     "with_tip": "c0435fa702f374c83594112bc597fd23d5e992ee",
+     "at": "2026-10-18T14:12:37Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16188",
+     "code": "45fa6e4deb37cb829977fa4b29766b074acfab38",
+     "with_code": "f2bc26952b4ca76872cc7550c93fe46c8f7cbfed",
+     "tip": "9b5d2acc2f3cb2038c8fac76fe711622712d967a",
+     "with_tip": "bb0b89796bb1416287b5ccb4beca5ef1fb158216",
+     "at": "2026-10-18T14:12:37Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "computer-sent-not-cancelled",
+     "code": "45fa6e4deb37cb829977fa4b29766b074acfab38",
+     "with_code": "e032e472d3aeae3587bc77709d0fb9828b4e270f",
+     "tip": "9b5d2acc2f3cb2038c8fac76fe711622712d967a",
+     "with_tip": "2b0a9bca36ba991c1dd7589f68d4288ed4a93ba7",
+     "at": "2026-10-18T14:12:37Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "natives-name-takeover-tap-kinds",
