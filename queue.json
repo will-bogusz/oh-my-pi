@@ -4749,5 +4749,11 @@
     "title": "fix(natives): send a macOS background target back however late it activates itself"
    }
   ]
+ },
+ "opening": {
+  "id": "natives-test-click-placed-in-users-app",
+  "token": "09b09d388bbb47138591eab8150ac550",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T13:35:49Z"
  }
 }
