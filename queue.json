@@ -6183,7 +6183,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "base": "151bc26cdc3cfb93291235d537a0fd68d1e76746",
    "body": "bodies/pip-uv-venv.md",
    "state": "queued",
    "pr": null,
@@ -6191,8 +6191,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/pip-uv-venv",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:40:50Z",
-   "updated": "2026-10-18T19:40:50Z",
-   "note": ""
+   "updated": "2026-10-18T19:53:03Z",
+   "note": "",
+   "advanced": "2026-10-18T19:53:03Z"
   },
   {
    "id": "snapcompact-archive-persist",
