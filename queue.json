@@ -3811,10 +3811,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T12:34:47Z",
+  "checked": "2026-10-18T13:05:05Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "computer-target-sent-back-late": {
+    "since": "2026-10-18T13:05:05Z",
+    "title": "fix(natives): send a macOS background target back however late it activates itself"
+   }
+  },
   "conflicts": {
    "#15185": {
     "since": "2026-10-18T11:03:22Z",
@@ -4669,6 +4674,12 @@
     "title": "feat(computer): stop typing and re-read when the user types in the agent's macOS app",
     "merged_by": "H4vC",
     "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-18T13:05:05Z",
+    "kind": "openable",
+    "id": "computer-target-sent-back-late",
+    "title": "fix(natives): send a macOS background target back however late it activates itself"
    }
   ]
  }
