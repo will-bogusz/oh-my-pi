@@ -4299,17 +4299,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T16:39:07Z",
+  "checked": "2026-10-18T17:09:24Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "computer-same-reading-key-window": {
-    "since": "2026-10-18T16:39:07Z",
-    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward"
+   "computer-text-drag-select": {
+    "since": "2026-10-18T17:09:24Z",
+    "title": "feat(natives): make a macOS background drag across native text an accessibility selection"
    }
   },
   "conflicts": {},
-  "merged_through": "2026-10-18T16:32:13Z",
+  "merged_through": "2026-10-18T16:46:28Z",
   "unreleased": {
    "15157": {
     "title": "fix(natives): report the macOS Escape stop honestly",
@@ -4420,6 +4420,16 @@
     "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened",
     "merge_commit": "c21b2ac607e4414f54d11ab52aadda17d8103131",
     "merged_at": "2026-10-18T16:32:13Z"
+   },
+   "16149": {
+    "title": "fix(coding-agent): reject unusable run args and explain busy errors in computer and browser calls",
+    "merge_commit": "a9f44805752517dc4a3fb4f07af482117565520b",
+    "merged_at": "2026-10-18T16:43:45Z"
+   },
+   "16119": {
+    "title": "feat(browser): open relay tabs omp owns in the background",
+    "merge_commit": "18746ce05b0ffbbe68c969863109f57dcdc0e728",
+    "merged_at": "2026-10-18T16:46:28Z"
    }
   },
   "ready": [
@@ -4433,10 +4443,9 @@
    15418,
    15433,
    15508,
-   16119,
-   16149,
    16202,
-   16205
+   16205,
+   16217
   ],
   "events": [
    {
@@ -5339,6 +5348,35 @@
     "kind": "openable",
     "id": "computer-same-reading-key-window",
     "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward"
+   },
+   {
+    "at": "2026-10-18T17:09:24Z",
+    "kind": "merged",
+    "number": 16149,
+    "title": "fix(coding-agent): reject unusable run args and explain busy errors in computer and browser calls",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T17:09:24Z",
+    "kind": "merged",
+    "number": 16119,
+    "title": "feat(browser): open relay tabs omp owns in the background",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-18T17:09:24Z",
+    "kind": "openable",
+    "id": "computer-text-drag-select",
+    "title": "feat(natives): make a macOS background drag across native text an accessibility selection"
+   },
+   {
+    "at": "2026-10-18T17:09:24Z",
+    "kind": "unopenable",
+    "id": "computer-same-reading-key-window",
+    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
+    "why": "opened as #16217"
    }
   ]
  }
