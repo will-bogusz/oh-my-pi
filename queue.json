@@ -5923,7 +5923,7 @@
    "id": "wake-relay-final-turn",
    "branch": "will/wake-relay-final-turn",
    "title": "fix(task): relay a woken subagent's final answer, not its turn's narration",
-   "area": "broker",
+   "area": "task",
    "priority": "P2",
    "needs": [],
    "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
@@ -5934,7 +5934,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wake-relay-final-turn",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:44:22Z",
-   "updated": "2026-10-18T19:44:22Z",
+   "updated": "2026-10-18T19:49:26Z",
    "note": ""
   },
   {
