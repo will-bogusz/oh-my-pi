@@ -2933,8 +2933,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-key-reroute",
    "host": "MacBook-Pro",
    "added": "2026-10-14T04:51:27Z",
-   "updated": "2026-10-18T04:30:14Z",
-   "note": "series 1 item 14, opened as #16140 by Will's call 2026-10-18 (draft until the second ready hour), merges after #15195, #15193 and #15562"
+   "updated": "2026-10-18T05:29:45Z",
+   "note": "series 1 item 14; ready by Will's call 2026-10-18, merges after #15195, #15193 and #15562"
   },
   {
    "id": "runtime-provenance",
