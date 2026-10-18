@@ -896,11 +896,6 @@ impl BackgroundFocusLease {
 		// probes block it.
 		let action_brought =
 			(front == self.target || caused) && self.user.picked(came, front).is_none();
-		// A click in the user's own app that picked another of its windows
-		// keeps them in their app: that window is the one the lease keeps.
-		if !self.disarmed && front == self.previous && self.user.own_click && key.is_some() {
-			self.key = key;
-		}
 		if self.disarmed
 			|| (front == self.previous && key.is_some_and(|key| Some(key) != self.key))
 			|| (front != self.previous && !action_brought)
@@ -1240,18 +1235,13 @@ fn guard_focus(
 							let lease = lease.lock();
 							(lease.key, lease.user.own_click)
 						};
-						let key = if own_click {
-							desktop.user_key().or(kept)
-						} else {
-							kept
-						};
+						let key = if own_click { kept } else { kept };
 						if let Some(key) = key {
 							if !desktop.restore_key(key) {
 								return Err(DesktopError::input_failed(
 									"background key-window restoration was rejected",
 								));
 							}
-							lease.lock().key = Some(key);
 						}
 					}
 				}
