@@ -766,11 +766,9 @@ enum UserSwitch {
 enum ClickPlacement {
 	Settled,
 	/// [`ClickPlacer`] may place the change in the user's app only some
-	/// readings later; `previous` is the click to put back then, and `press`
-	/// when the change pressed a button, the user's own-app click it becomes.
+	/// readings later; `previous` is the click to put back then.
 	Pending {
 		previous: Option<Instant>,
-		press:    Option<Instant>,
 	},
 }
 
@@ -792,9 +790,6 @@ struct UserSwitchWatch {
 	/// The one seen before it: Spotlight's panel, once the app picked from it
 	/// takes the keyboard a moment before `WindowServer` lists it in front.
 	before:    Option<(ProcessSerialNumber, Instant)>,
-	/// When a click placed in the user's own app was last seen, until a
-	/// change of their key window uses it ([`Self::take_own_click`]).
-	own_click: Option<Instant>,
 }
 
 impl UserSwitchWatch {
@@ -817,19 +812,11 @@ impl UserSwitchWatch {
 			placement: if signals.in_user_app {
 				ClickPlacement::Settled
 			} else {
-				ClickPlacement::Pending {
-					previous: None,
-					press:    signals
-						.last_click
-						.filter(|at| now.saturating_duration_since(*at) <= lookback),
-				}
+				ClickPlacement::Pending { previous: None }
 			},
 			chord: None,
 			panel: None,
 			before: None,
-			own_click: signals
-				.last_click
-				.filter(|at| signals.in_user_app && now.saturating_duration_since(*at) <= lookback),
 		};
 		watch.observe_held(signals, user, now);
 		watch
@@ -837,56 +824,22 @@ impl UserSwitchWatch {
 
 	fn observe(&mut self, signals: SwitchSignals, front: ProcessSerialNumber, now: Instant) {
 		if signals.buttons != self.buttons {
-			// A press, not its release, is the click: the sampler can see the two
-			// on separate readings.
-			let pressed = [0, 2, 4]
-				.into_iter()
-				.any(|i| signals.buttons[i] != self.buttons[i]);
 			self.buttons = signals.buttons;
 			// A click in the user's own app, menus included, picks no app: the
 			// target activating itself right after is still sent back.
 			self.placement = ClickPlacement::Settled;
-			if signals.in_user_app {
-				if pressed {
-					self.own_click = Some(signals.last_click.unwrap_or(now));
-				}
-			} else {
-				self.placement = ClickPlacement::Pending {
-					previous: self.click,
-					press:    pressed.then(|| signals.last_click.unwrap_or(now)),
-				};
+			if !signals.in_user_app {
+				self.placement = ClickPlacement::Pending { previous: self.click };
 				self.click = Some(signals.last_click.unwrap_or(now));
 			}
 		} else if signals.in_user_app
-			&& let ClickPlacement::Pending { previous, press } = self.placement
+			&& let ClickPlacement::Pending { previous } = self.placement
 		{
 			// Placed in the user's app after a reading had counted it.
 			self.placement = ClickPlacement::Settled;
 			self.click = previous;
-			if press.is_some() {
-				self.own_click = press;
-			}
 		}
 		self.observe_held(signals, front, now);
-	}
-
-	/// Whether a click in the user's own app, seen up to
-	/// [`USER_SWITCH_WINDOW`] before `now`, may have picked another of their
-	/// windows.
-	fn own_click_since(&self, now: Instant) -> bool {
-		self
-			.own_click
-			.is_some_and(|at| now.saturating_duration_since(at) <= USER_SWITCH_WINDOW)
-	}
-
-	/// [`Self::own_click_since`], using the click up: one click explains one
-	/// change of the user's key window; a later change, such as a window opened
-	/// from the keyboard, is the user's switch.
-	fn take_own_click(&mut self, now: Instant) -> bool {
-		self
-			.own_click
-			.take()
-			.is_some_and(|at| now.saturating_duration_since(at) <= USER_SWITCH_WINDOW)
 	}
 
 	fn observe_held(&mut self, signals: SwitchSignals, front: ProcessSerialNumber, now: Instant) {
@@ -950,9 +903,7 @@ enum FocusDecision {
 struct BackgroundFocusLease {
 	previous:    ProcessSerialNumber,
 	target:      ProcessSerialNumber,
-	/// The user's key window; `None` when the front app showed no window. A
-	/// click of theirs in their app that picks another of its windows makes
-	/// that one the key window kept here.
+	/// The user's key window; `None` when the front app showed no window.
 	key:         Option<u32>,
 	user:        UserSwitchWatch,
 	/// When the action started, its first act on the target.
@@ -1015,20 +966,6 @@ impl BackgroundFocusLease {
 		signals: SwitchSignals,
 		now: Instant,
 	) -> FocusDecision {
-		self.observe_read(front, key, now, signals, now)
-	}
-
-	/// [`Self::observe`] with the user's `key` window read from `asked` on: a
-	/// click of theirs that may have picked it is aged from then, since that
-	/// read can block, while `signals` and `now` come after it.
-	fn observe_read(
-		&mut self,
-		front: ProcessSerialNumber,
-		key: Option<u32>,
-		asked: Instant,
-		signals: SwitchSignals,
-		now: Instant,
-	) -> FocusDecision {
 		self.user.observe(signals, front, now);
 		let (came, caused) = self.came_forward(front, signals, now);
 		// The target coming forward with no switch of the user's just before is
@@ -1042,15 +979,6 @@ impl BackgroundFocusLease {
 		// probes block it.
 		let action_brought =
 			(front == self.target || caused) && self.user.picked(came, front).is_none();
-		// A click in the user's own app that picked another of its windows
-		// keeps them in their app: that window is the one the lease keeps.
-		if !self.disarmed
-			&& front == self.previous
-			&& key.is_some_and(|key| Some(key) != self.key)
-			&& self.user.take_own_click(asked)
-		{
-			self.key = key;
-		}
 		if self.disarmed
 			|| (front == self.previous && key.is_some_and(|key| Some(key) != self.key))
 			|| (front != self.previous && !action_brought)
@@ -1132,10 +1060,9 @@ pub(super) fn with_background_guard<T>(
 /// third app the action brings forward (Finder's ⌘O opening a document in
 /// `TextEdit`) within [`ACTION_REFLEX`] of one of the action's acts on the
 /// target, are sent back behind the original front app. A changed prior key
-/// window that no click of the user's in their app just picked, an app coming
-/// forward right after a click elsewhere, a ⌘/⌃ chord or a Spotlight-style
-/// panel, or a third app coming forward later permanently disarms the lease;
-/// typing does not, even where macOS
+/// window, an app coming forward right after a click, a ⌘/⌃ chord or a
+/// Spotlight-style panel, or a third app coming forward later permanently
+/// disarms the lease; typing does not, even where macOS
 /// refuses a hand-back because of it. `action` gets the [`TargetVisit`] the
 /// guard records, which keeps being watched after the lease disarms.
 pub(super) fn with_background_watch<T>(
@@ -1360,7 +1287,10 @@ fn guard_focus(
 	desktop: &impl GuardedDesktop,
 	visit: &AtomicBool,
 ) -> CoreResult<()> {
-	let previous = lease.lock().previous;
+	let (previous, user_key) = {
+		let lease = lease.lock();
+		(lease.previous, lease.key)
+	};
 	let observe = |front, key| {
 		let now = desktop.now();
 		let signals = desktop.signals(now);
@@ -1378,20 +1308,12 @@ fn guard_focus(
 				));
 			},
 			Some(front) => {
-				// The user's key window read can block, so a click of theirs is
-				// aged from when it began; the signals and the poll's time come
-				// after it, never older than what the sampler already fed the
-				// lease.
-				let asked = desktop.now();
 				let key = if !disarmed && front == previous {
 					desktop.user_key()
 				} else {
 					None
 				};
-				let now = desktop.now();
-				let signals = desktop.signals(now);
-				if lease.lock().observe_read(front, key, asked, signals, now) == FocusDecision::Restore
-				{
+				if observe(front, key) == FocusDecision::Restore {
 					// Re-check immediately before changing focus: an AX probe may
 					// have raced a newer application or user switch.
 					// `WindowServer` then refuses the hand-back if the user
@@ -1407,35 +1329,16 @@ fn guard_focus(
 						},
 						|since| desktop.hand_back(since),
 					)?;
-					// A hand-back puts the user's key window back too. After a click
-					// in their app it is the one their app reports now that it is in
-					// front again: that click may have picked another of its
-					// windows, which is then the one the lease keeps. That read can
-					// block, so the window is put back only while their app is still
-					// in front and the lease armed, and the click is used up only
-					// then. Otherwise the re-check observed instead (a disarm it
-					// recorded stops the hand-backs from the next poll), or
-					// `WindowServer` refused.
-					if handed_back == Some(FrontRequest::Done) {
-						let (kept, own_click) = {
-							let lease = lease.lock();
-							(lease.key, lease.user.own_click_since(desktop.now()))
-						};
-						let fresh = if own_click { desktop.user_key() } else { None };
-						let current =
-							!own_click || (!lease.lock().disarmed && desktop.front() == Some(previous));
-						if current && let Some(key) = fresh.or(kept) {
-							if !desktop.restore_key(key) {
-								return Err(DesktopError::input_failed(
-									"background key-window restoration was rejected",
-								));
-							}
-							let mut lease = lease.lock();
-							lease.key = Some(key);
-							if own_click {
-								lease.user.own_click = None;
-							}
-						}
+					// A hand-back puts the user's key window back too. Otherwise the
+					// re-check observed instead (a disarm it recorded stops the
+					// hand-backs from the next poll), or `WindowServer` refused.
+					if handed_back == Some(FrontRequest::Done)
+						&& let Some(key) = user_key
+						&& !desktop.restore_key(key)
+					{
+						return Err(DesktopError::input_failed(
+							"background key-window restoration was rejected",
+						));
 					}
 				}
 			},
