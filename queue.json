@@ -4274,12 +4274,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T16:08:55Z",
+  "checked": "2026-10-18T16:39:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "computer-same-reading-key-window": {
+    "since": "2026-10-18T16:39:07Z",
+    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward"
+   }
+  },
   "conflicts": {},
-  "merged_through": "2026-10-18T14:51:08Z",
+  "merged_through": "2026-10-18T16:32:13Z",
   "unreleased": {
    "15157": {
     "title": "fix(natives): report the macOS Escape stop honestly",
@@ -4370,6 +4375,26 @@
     "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test",
     "merge_commit": "499508e06c4686c1999a2ece8f53c304f1ad8c9f",
     "merged_at": "2026-10-18T14:51:08Z"
+   },
+   "16200": {
+    "title": "test(natives): expect UserIntervened when the user brings iPhone Mirroring forward mid-tap",
+    "merge_commit": "be29e7af767fc511461cf101eb2185145c76f753",
+    "merged_at": "2026-10-18T16:30:48Z"
+   },
+   "16185": {
+    "title": "fix(natives): send a macOS background target back however late it activates itself",
+    "merge_commit": "6badfbda98003dedc1b0d9995285981626ea75dc",
+    "merged_at": "2026-10-18T16:31:01Z"
+   },
+   "16188": {
+    "title": "fix(natives): count a takeover tap kind without an arm as the user's input",
+    "merge_commit": "6007d8c2694cd08eddbef3139faf3884293c57f3",
+    "merged_at": "2026-10-18T16:31:19Z"
+   },
+   "16206": {
+    "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened",
+    "merge_commit": "c21b2ac607e4414f54d11ab52aadda17d8103131",
+    "merged_at": "2026-10-18T16:32:13Z"
    }
   },
   "ready": [
@@ -4385,12 +4410,8 @@
    15508,
    16119,
    16149,
-   16185,
-   16188,
-   16200,
    16202,
-   16205,
-   16206
+   16205
   ],
   "events": [
    {
@@ -5255,6 +5276,44 @@
     "id": "computer-intervened-followup",
     "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened",
     "why": "opened as #16206"
+   },
+   {
+    "at": "2026-10-18T16:39:07Z",
+    "kind": "merged",
+    "number": 16200,
+    "title": "test(natives): expect UserIntervened when the user brings iPhone Mirroring forward mid-tap",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T16:39:07Z",
+    "kind": "merged",
+    "number": 16185,
+    "title": "fix(natives): send a macOS background target back however late it activates itself",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T16:39:07Z",
+    "kind": "merged",
+    "number": 16188,
+    "title": "fix(natives): count a takeover tap kind without an arm as the user's input",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T16:39:07Z",
+    "kind": "merged",
+    "number": 16206,
+    "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T16:39:07Z",
+    "kind": "openable",
+    "id": "computer-same-reading-key-window",
+    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward"
    }
   ]
  }
