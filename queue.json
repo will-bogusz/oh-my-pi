@@ -4067,7 +4067,7 @@
    "branch": "will/iphone-mirroring-test",
    "title": "test(natives): expect UserIntervened when the user brings iPhone Mirroring forward mid-tap",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "3f020bd85001c33d351ab1b923d69fa24c7f06f5",
    "body": "bodies/iphone-mirroring-test.md",
@@ -4077,7 +4077,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirroring-test",
    "host": "MacBook-Pro",
    "added": "2026-10-18T15:30:46Z",
-   "updated": "2026-10-18T15:32:13Z",
+   "updated": "2026-10-18T15:38:07Z",
    "note": "",
    "built": [
     {
