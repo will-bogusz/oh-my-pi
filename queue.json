@@ -253,7 +253,7 @@
    "needs": [],
    "base": "1a75e9ba60bb989f190aee8d01ac15a730d3f487",
    "body": "bodies/relay-own-tab.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16119,
    "closed_prs": [
     15110
@@ -261,7 +261,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-own-tab",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-17T23:49:34Z",
+   "updated": "2026-10-18T16:55:42Z",
    "note": "",
    "advanced": "2026-10-17T23:49:34Z",
    "built": [
@@ -348,7 +348,8 @@
     }
    ],
    "opened": "2026-10-17T23:02:44Z",
-   "readied": "2026-10-17T23:03:08Z"
+   "readied": "2026-10-17T23:03:08Z",
+   "merged_by": "pr"
   },
   {
    "id": "policy-priority-unmeasured",
@@ -3459,13 +3460,13 @@
    "needs": [],
    "base": "076a85ed7dd037225f6d399ed40c4c21e9726251",
    "body": "bodies/computer-run-args.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16149,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-args",
    "host": "MacBook-Pro",
    "added": "2026-10-18T04:33:40Z",
-   "updated": "2026-10-18T06:08:16Z",
+   "updated": "2026-10-18T16:55:42Z",
    "note": "",
    "built": [
     {
@@ -3650,7 +3651,8 @@
     }
    ],
    "opened": "2026-10-18T05:37:26Z",
-   "readied": "2026-10-18T05:37:43Z"
+   "readied": "2026-10-18T05:37:43Z",
+   "merged_by": "pr"
   },
   {
    "id": "ast-temp-tree",
