@@ -5092,6 +5092,24 @@
    "added": "2026-10-18T19:35:52Z",
    "updated": "2026-10-18T19:35:52Z",
    "note": ""
+  },
+  {
+   "id": "compact-tool-result",
+   "branch": "will/compact-tool-result",
+   "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/compact-tool-result.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/compact-tool-result",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:35:54Z",
+   "updated": "2026-10-18T19:35:54Z",
+   "note": ""
   }
  ],
  "watch": {
