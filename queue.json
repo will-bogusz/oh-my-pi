@@ -3438,6 +3438,24 @@
    "opened": "2026-10-16T02:09:35Z",
    "readied": "2026-10-16T02:09:52Z",
    "merged_by": "pr"
+  },
+  {
+   "id": "computer-run-args",
+   "branch": "will/computer-run-args",
+   "title": "fix(coding-agent): reject computer.run and tab.run args the function cannot receive",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "076a85ed7dd037225f6d399ed40c4c21e9726251",
+   "body": "bodies/computer-run-args.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-args",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T04:33:40Z",
+   "updated": "2026-10-18T04:33:40Z",
+   "note": ""
   }
  ],
  "watch": {
