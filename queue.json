@@ -4140,8 +4140,28 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-same-reading-key-window",
    "host": "MacBook-Pro",
    "added": "2026-10-18T14:05:14Z",
-   "updated": "2026-10-18T15:30:46Z",
-   "note": "P2 queued behind #16185 (S1Keeper 2026-10-18). 338fa84156: own-app click adopts the new key window (guest A n=6: target kept front 3/6 before -> sent back 6/6, clicked window key 6/6) + same-reading hand-back restores current key. Review 815304c43c needs-changes, both findings fixed with tests; bench kw4: red fails both new tests, fix green but for ast flakes + main test fixed by #16187 (merged)"
+   "updated": "2026-10-18T16:46:24Z",
+   "note": "P2 queued behind #16185 (S1Keeper 2026-10-18). 338fa84156: own-app click adopts the new key window (guest A n=6: target kept front 3/6 before -> sent back 6/6, clicked window key 6/6) + same-reading hand-back restores current key. Review 815304c43c needs-changes, both findings fixed with tests; bench kw4: red fails both new tests, fix green but for ast flakes + main test fixed by #16187 (merged)",
+   "built": [
+    {
+     "with": "#16202",
+     "code": "f9af67fe5538e33808af3c5322b89b08dce9c06a",
+     "with_code": "5731437585b5a3cb6b078b738bff2557f7914260",
+     "tip": "453bc047ac4d327bd13ccd3a783ef07d9fbd5804",
+     "with_tip": "a26b82a065ba261dd688d47650d9c344677e8a66",
+     "at": "2026-10-18T16:46:21Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16205",
+     "code": "f9af67fe5538e33808af3c5322b89b08dce9c06a",
+     "with_code": "2069a10e35d7bf8ac48a66da4f66dc06c9dcb0e6",
+     "tip": "453bc047ac4d327bd13ccd3a783ef07d9fbd5804",
+     "with_tip": "d09827d2ea18b4554b8981a89fc7182e687b4e17",
+     "at": "2026-10-18T16:46:23Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "computer-release-helper-followup",
