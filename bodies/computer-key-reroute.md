@@ -14,7 +14,7 @@ A context menu the agent's target opens during a background action: with the res
 
 > **macOS context.** *Key focus* is the process WindowServer sends keystrokes to. A menu or popover takes it while its app stays behind the user's.
 
-Reading order (`macos/key_reroute.rs`): `Theft::notify` (who holds the keyboard), `Theft::route` (which keys move), `KeyReroute::arm` (the taps and their lifetime); then the one line in `skylight.rs::with_background_guard`.
+Reading order (`macos/key_reroute.rs`): `Theft::notify` (who holds the keyboard), `Theft::route` (which keys move), `KeyReroute::arm` (the taps and their lifetime); then the one line in `skylight.rs::with_background_watch`.
 
 ## Why
 
