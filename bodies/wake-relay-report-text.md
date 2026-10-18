@@ -20,6 +20,8 @@ Non-goals: the yielded path (it relays the `<task-result>` summary) and failure 
 
 New test in `test/task/executor-result-acceptance.test.ts`: a peer wakes an idle subagent, the turn emits `[text "Checking." + read toolCall]`, then `[text "Answer."]`, then `agent_end`; the relay the peer receives is `Answer.`. With the `executor.ts` change reverted it fails: `Expected: "Answer." Received: "Checking.Answer."`.
 
+Live, with Haiku: a parent messaged an idle subagent that had to read `notes.txt` for a secret word. On `main` the reply was `I'll read notes.txt to find the secret word.MARMALADE`; with the fix it was `MARMALADE` (2 of 2 runs). That run used a build of the same fix that still fell back to `lastAssistantSalvageText()`, its only difference from this head; the scenario never reaches that fallback.
+
 ```sh
 cd packages/coding-agent && bun test test/task/executor-result-acceptance.test.ts test/task/executor-irc-wake-yield-reset.test.ts
 ```
