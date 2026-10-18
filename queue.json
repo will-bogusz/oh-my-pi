@@ -7998,7 +7998,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/snapcompact-archive-persist.md",
    "state": "queued",
    "pr": null,
@@ -8006,7 +8006,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-archive-persist",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:41:21Z",
-   "updated": "2026-10-18T20:11:06Z",
+   "updated": "2026-10-18T21:55:14Z",
    "note": "",
    "built": [
     {
@@ -8261,7 +8261,8 @@
      "at": "2026-10-18T20:11:06Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "advanced": "2026-10-18T21:55:14Z"
   },
   {
    "id": "wait-queued-completion",
