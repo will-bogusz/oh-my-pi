@@ -3942,6 +3942,24 @@
    ],
    "opened": "2026-10-18T13:46:01Z",
    "readied": "2026-10-18T13:46:14Z"
+  },
+  {
+   "id": "computer-element-front-first",
+   "branch": "will/computer-element-front-first",
+   "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "58349dc80de381057437818b8354c86826c8fa10",
+   "body": "bodies/computer-element-front-first.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-element-front-first",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T13:49:27Z",
+   "updated": "2026-10-18T13:49:27Z",
+   "note": ""
   }
  ],
  "watch": {
