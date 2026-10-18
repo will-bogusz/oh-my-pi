@@ -15,7 +15,11 @@ use objc2_app_kit::{NSApplicationActivationOptions, NSRunningApplication};
 pub(super) use session::screen_state;
 pub(super) use spaces::window_on_another_space;
 
-use self::{ax::MacAx, capture::MacCapture, input::MacInput};
+use self::{
+	ax::MacAx,
+	capture::MacCapture,
+	input::{EntryFront, MacInput},
+};
 use super::{
 	ax::AxHandle,
 	backend::{
@@ -155,7 +159,6 @@ impl Backend for MacosBackend {
 
 	fn element_input(
 		&mut self,
-		target: &Target,
 		element: &AxHandle,
 		input: &ElementInput,
 		mode: DeliveryMode,
@@ -163,12 +166,21 @@ impl Backend for MacosBackend {
 	) -> CoreResult<ElementDelivery> {
 		token.check()?;
 		Self::require_input_permission()?;
-		let Target::Window(id) = target else {
-			return Err(DesktopError::invalid_target("element input needs the element's window"));
-		};
-		self
-			.input
-			.element_input(id, ax::mac_handle(element)?, input, mode, &self.capture)
+		// The window lookup asks the element's application, which blocks while it
+		// is busy; the user's front app is read before it
+		// ([`EntryFront::before`]).
+		let (entry_front, id) = EntryFront::before(skylight::front_pid, || {
+			let windows = self.capture.windows()?;
+			self.ax.window_id(element, &windows)
+		})?;
+		self.input.element_input(
+			&id,
+			ax::mac_handle(element)?,
+			input,
+			mode,
+			entry_front,
+			&self.capture,
+		)
 	}
 
 	fn hold_keys(

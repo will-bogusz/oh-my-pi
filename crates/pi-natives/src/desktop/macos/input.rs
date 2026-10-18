@@ -127,7 +127,8 @@ impl MacInput {
 		match target {
 			Target::Desktop | Target::Display(_) => global_type(&self.source, text),
 			Target::Window(id) => {
-				self.window_type(&capture.window(id)?, text, mode, None)?;
+				let window = capture.window(id)?;
+				self.window_type(&window, text, mode, None, EntryFront::now())?;
 				Ok(())
 			},
 		}
@@ -147,13 +148,16 @@ impl MacInput {
 		match target {
 			Target::Desktop | Target::Display(_) => global_chord(&self.source, keys),
 			Target::Window(id) => {
-				self.window_chord(&capture.window(id)?, keys, mode, None)?;
+				let window = capture.window(id)?;
+				self.window_chord(&window, keys, mode, None, EntryFront::now())?;
 				Ok(())
 			},
 		}
 	}
 
-	/// Types or presses `input` into `element`, an element of window `id`.
+	/// Types or presses `input` into `element`, an element of window `id`;
+	/// `entry_front` was read before anything asked the element's application
+	/// ([`EntryFront`]).
 	#[allow(
 		clippy::needless_pass_by_ref_mut,
 		reason = "`&mut self` exclusivity backs the `Send` safety argument for the CF event source"
@@ -164,12 +168,17 @@ impl MacInput {
 		element: &AXUIElement,
 		input: &ElementInput,
 		mode: DeliveryMode,
+		entry_front: EntryFront,
 		capture: &MacCapture,
 	) -> CoreResult<ElementDelivery> {
 		let window = capture.window(id)?;
 		match input {
-			ElementInput::Text(text) => self.window_type(&window, text, mode, Some(element)),
-			ElementInput::Chord(keys) => self.window_chord(&window, keys, mode, Some(element)),
+			ElementInput::Text(text) => {
+				self.window_type(&window, text, mode, Some(element), entry_front)
+			},
+			ElementInput::Chord(keys) => {
+				self.window_chord(&window, keys, mode, Some(element), entry_front)
+			},
 		}
 	}
 
@@ -182,9 +191,9 @@ impl MacInput {
 		text: &str,
 		mode: DeliveryMode,
 		element: Option<&AXUIElement>,
+		entry_front: EntryFront,
 	) -> CoreResult<ElementDelivery> {
 		let (pid, wid) = window_identity(window)?;
-		let entry_front = EntryFront::now();
 		if mode == DeliveryMode::Background && process::is_screen_sharing(pid) {
 			return Err(screen_sharing_refusal(window, "synthesized text"));
 		}
@@ -242,11 +251,11 @@ impl MacInput {
 		keys: &[KeyName],
 		mode: DeliveryMode,
 		element: Option<&AXUIElement>,
+		entry_front: EntryFront,
 	) -> CoreResult<ElementDelivery> {
 		let (pid, wid) = window_identity(window)?;
 		match mode {
 			DeliveryMode::Background => {
-				let entry_front = EntryFront::now();
 				if keys.iter().copied().any(KeyName::is_modifier) && process::is_screen_sharing(pid) {
 					return Err(screen_sharing_refusal(window, "modifier flags on routed chords"));
 				}
@@ -261,12 +270,11 @@ impl MacInput {
 					},
 				)?;
 				if matches!(delivery, ElementDelivery::Delivered) {
-					confirm_shortcut_answered(window, keys, || {
-						// The shortcut is out: a cancel now must not report it
-						// unsent.
-						std::thread::sleep(SHORTCUT_REPLY_DELAY);
-						Ok(ax::stopped_answering(pid, SHORTCUT_REPLY_TIMEOUT_SECONDS))
-					})?;
+					confirm_shortcut_answered(
+						window,
+						keys,
+						shortcut_reply(|| ax::stopped_answering(pid, SHORTCUT_REPLY_TIMEOUT_SECONDS)),
+					)?;
 				}
 				Ok(delivery)
 			},
@@ -927,6 +935,16 @@ fn confirm_shortcut_answered(
 		 be busy or hung. Inspect it before retrying or reporting success",
 		window.id, window.app,
 	)))
+}
+
+/// The reply check for a posted shortcut: gives the application
+/// [`SHORTCUT_REPLY_DELAY`] to take it up, then reads `stopped_answering`.
+fn shortcut_reply(stopped_answering: impl FnOnce() -> bool) -> impl FnOnce() -> CoreResult<bool> {
+	move || {
+		// The shortcut is out: a cancel now must not report it unsent.
+		std::thread::sleep(SHORTCUT_REPLY_DELAY);
+		Ok(stopped_answering())
+	}
 }
 
 const fn pointer_kind(event: &PointerEvent) -> &'static str {
@@ -3719,6 +3737,23 @@ mod tests {
 		let unchecked =
 			|| -> CoreResult<bool> { panic!("a chord without a modifier is not checked") };
 		assert!(confirm_shortcut_answered(&window, &[KeyName::Enter], unchecked).is_ok());
+	}
+
+	#[test]
+	fn a_cancel_after_a_shortcut_was_posted_still_reads_its_reply() {
+		let source = control::CancellationSource::default();
+		let token = source.token();
+		source.cancel();
+		let read = std::cell::Cell::new(false);
+		let reply = control::with_token_for_test(
+			&token,
+			shortcut_reply(|| {
+				read.set(true);
+				false
+			}),
+		);
+		assert!(matches!(reply, Ok(false)), "a sent shortcut reported {reply:?}");
+		assert!(read.get());
 	}
 
 	#[test]
