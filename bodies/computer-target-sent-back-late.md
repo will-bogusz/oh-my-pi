@@ -1,13 +1,13 @@
 ## What
 
-I type in my own app while the agent works in another one behind it, and when that app pulled itself to the front my typing sometimes just kept going into it, because one keystroke at the wrong moment made omp give up on putting my app back.
+I type in my own app while the agent works in another one behind it, and when that app pulled itself to the front a little later it stayed there and my typing went into it.
 
 Fixes a regression from #15195 (merged in `4d956dad0f`, unreleased): a background target that activates itself more than 500 ms after the action's last send stays in front again, and the user's typing goes to it. With this change it is sent back as before #15195, in 6/6 runs where main left it in front in 6/6.
 
-| Guest A (macOS 26.5 VM), n=3 per case | main before #15195 (`509105c1ef`) | main now (`cad87a899d`) | this PR |
+| Guest A (macOS 26.5 VM), n=3 per case | main before #15195 (`509105c1ef`) | main after #16140 (`cad87a899d`) | this PR |
 |---|---|---|---|
 | Click in the user's busy app (iTerm2 stopped for 0.5 s), then TextEdit (the target, holding ⇧ for 4 s) activates itself | user's app back 3/3 | TextEdit stays 3/3 | user's app back 3/3 |
-| Pick an item from the user's context menu over TextEdit, then TextEdit activates itself | user's app stays 3/3 | TextEdit stays 3/3 | user's app stays 3/3 |
+| Pick an item from the user's context menu over TextEdit, then TextEdit activates itself | user's app back 3/3 | TextEdit stays 3/3 | user's app back 3/3 |
 | Click on the target's window (Safari page) | Safari kept 3/3 | Safari kept 3/3 | Safari kept 3/3 |
 
 ## Why
@@ -22,7 +22,7 @@ Risk: a switch to the target with an ⌥ or F-key switcher, which shows no click
 
 `only_an_app_that_comes_forward_right_after_the_actions_acts_is_sent_back` now has the target activating itself 1.3 s after the last send, idle and with ⌥ held: sent back, and the action fails if it is still in front at the end. With the one-line fix reverted it fails on both. A third app coming forward that late still ends the guard.
 
-The table runs drive the real computer tool in the VM through the VNC keyboard and pointer, comparing front-app samples every 150 ms for 0.9 s after the click.
+"Main after #16140" is `cad87a899d`; current main `58349dc80d` (#15562) changes only the visibility of `front_pid` in `skylight.rs` since then, and fails the new test the same way. The table runs drive the real computer tool in the VM through the VNC keyboard and pointer, comparing front-app samples every 150 ms for 0.9 s after the click.
 
 On bench-mac: `cargo check -p pi-natives --tests`, `CI=1 bun run check:rs` (clippy), `CI=1 bun check`, `cargo test -p pi-natives --lib` and the computer TS tests pass, except `a_click_placed_in_the_users_app_does_not_let_the_target_keep_the_front`, which fails the same way on main `58349dc80d` (it reads an idle counter after a click as a new click) and is not touched here.
 
