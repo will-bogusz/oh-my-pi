@@ -4126,8 +4126,55 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-release-helper-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T14:29:14Z",
-   "updated": "2026-10-18T15:38:45Z",
-   "note": ""
+   "updated": "2026-10-18T15:51:55Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16200",
+     "code": "2069a10e35d7bf8ac48a66da4f66dc06c9dcb0e6",
+     "with_code": "60a08a44bc4d915d78ac7ea26d73f3da2fdc986b",
+     "tip": "d09827d2ea18b4554b8981a89fc7182e687b4e17",
+     "with_tip": "6e231e5ee9139d66df353d85ac38e27389664ef5",
+     "at": "2026-10-18T15:51:52Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16185",
+     "code": "2069a10e35d7bf8ac48a66da4f66dc06c9dcb0e6",
+     "with_code": "f9d67df16c8f4adab00cea52f5970673b610fd6a",
+     "tip": "d09827d2ea18b4554b8981a89fc7182e687b4e17",
+     "with_tip": "08f84b5a371abf6739fa3b12e261b05c84f8e61b",
+     "at": "2026-10-18T15:51:54Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16188",
+     "code": "2069a10e35d7bf8ac48a66da4f66dc06c9dcb0e6",
+     "with_code": "540bb6bc8803ee71e7a710f9a59ba55904f08097",
+     "tip": "d09827d2ea18b4554b8981a89fc7182e687b4e17",
+     "with_tip": "3c2826419fa0b83613efb684fe002369b3a86d03",
+     "at": "2026-10-18T15:51:54Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16202",
+     "code": "2069a10e35d7bf8ac48a66da4f66dc06c9dcb0e6",
+     "with_code": "e7ec465c601d08283f6589c8a9481e8f932c7efb",
+     "tip": "d09827d2ea18b4554b8981a89fc7182e687b4e17",
+     "with_tip": "2c4d64dc770fc792eed663d79673e2597fd746c0",
+     "at": "2026-10-18T15:51:54Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "computer-intervened-followup",
+     "code": "2069a10e35d7bf8ac48a66da4f66dc06c9dcb0e6",
+     "with_code": "63fac15212197cc3482d669e145f485d1a975cd7",
+     "tip": "d09827d2ea18b4554b8981a89fc7182e687b4e17",
+     "with_tip": "1eccbc52123a95f83c1f449d12b2a2529916118e",
+     "at": "2026-10-18T15:51:54Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "iphone-mirroring-test",
