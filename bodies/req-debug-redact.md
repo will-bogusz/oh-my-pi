@@ -25,6 +25,7 @@ Non-goals: the request URL's query string stays in the dump (no provider here pu
 - `bun test packages/ai/test/request-debug.test.ts`: 8 pass. Two new cases write a dump through `transportFetch` (a `Headers` object) and through `createRequestDebugSession` / `openResponseLog` with plain records (the socket transports' shape, including a multi-value `Set-Cookie`), and assert neither file contains the bearer token, `x-goog-api-key` or cookie values. The existing case that asserted the bearer token was written verbatim now expects `[redacted]`.
 - Negative control: with the `src/` change reverted, 3 of 8 fail (the two new cases and the updated assertion), each showing the secret values in the written files.
 - Live: `PI_REQ_DEBUG=1 omp -p --model anthropic/claude-haiku-5-5 --no-session "Reply with just: ok"` against Anthropic. On `main` the `/v1/messages` dump held the OAuth bearer token in plain text; on this branch it reads `authorization: [redacted]` and neither dump file contains the token. That response sent no `set-cookie`, so the cookie side is covered by the unit tests only.
+- `bun run check` in `packages/ai` (oxlint, oxfmt, tsgo) passes; the root `bun check` was not run, since only `packages/ai` changed and no Rust.
 
 ---
 
