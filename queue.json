@@ -4249,23 +4249,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T15:38:08Z",
+  "checked": "2026-10-18T16:08:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "computer-sent-not-cancelled": {
-    "since": "2026-10-18T15:38:08Z",
-    "title": "fix(natives): keep computer input that already went out from reporting Cancelled"
-   },
-   "computer-release-helper-followup": {
-    "since": "2026-10-18T14:36:42Z",
-    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press"
-   },
-   "computer-intervened-followup": {
-    "since": "2026-10-18T15:38:08Z",
-    "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-10-18T14:51:08Z",
   "unreleased": {
@@ -4375,7 +4362,10 @@
    16149,
    16185,
    16188,
-   16200
+   16200,
+   16202,
+   16205,
+   16206
   ],
   "events": [
    {
@@ -5219,6 +5209,27 @@
     "kind": "openable",
     "id": "computer-intervened-followup",
     "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened"
+   },
+   {
+    "at": "2026-10-18T16:08:55Z",
+    "kind": "unopenable",
+    "id": "computer-sent-not-cancelled",
+    "title": "fix(natives): keep computer input that already went out from reporting Cancelled",
+    "why": "opened as #16202"
+   },
+   {
+    "at": "2026-10-18T16:08:55Z",
+    "kind": "unopenable",
+    "id": "computer-release-helper-followup",
+    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press",
+    "why": "opened as #16205"
+   },
+   {
+    "at": "2026-10-18T16:08:55Z",
+    "kind": "unopenable",
+    "id": "computer-intervened-followup",
+    "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened",
+    "why": "opened as #16206"
    }
   ]
  }
