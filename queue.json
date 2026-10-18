@@ -1056,14 +1056,15 @@
    ],
    "base": null,
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15191,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-background-fallback",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T10:57:26Z",
-   "note": "ready by Will's call 2026-10-18, merges after #15563 and item 14 (needs #15185); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; shares native ErrorCode UserIntervened with #15562 (same name/wire/doc, S1Keeper 2026-10-18): the second to merge takes one copy; merge-tree + cargo check of both orders before either merges; checked 11:05Z: error.rs byte-identical on 910360be94 and 47eb0611b8, merge-tree keeps one UserIntervened; the stacks still conflict in ax/input/process/skylight/mod.rs + docs (unrelated), resolved by whichever merges second at its advance, then pr-queue built; overlaps queued computer-sent-not-cancelled (main fix: a posted call never reports Cancelled): whichever lands second drops its duplicate (S1Keeper 2026-10-18)"
+   "updated": "2026-10-18T14:36:41Z",
+   "note": "ready by Will's call 2026-10-18, merges after #15563 and item 14 (needs #15185); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; shares native ErrorCode UserIntervened with #15562 (same name/wire/doc, S1Keeper 2026-10-18): the second to merge takes one copy; merge-tree + cargo check of both orders before either merges; checked 11:05Z: error.rs byte-identical on 910360be94 and 47eb0611b8, merge-tree keeps one UserIntervened; the stacks still conflict in ax/input/process/skylight/mod.rs + docs (unrelated), resolved by whichever merges second at its advance, then pr-queue built; overlaps queued computer-sent-not-cancelled (main fix: a posted call never reports Cancelled): whichever lands second drops its duplicate (S1Keeper 2026-10-18)",
+   "merged_by": "pr"
   },
   {
    "id": "computer-release-on-death",
@@ -1076,14 +1077,15 @@
    ],
    "base": null,
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15192,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-release-on-death",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T10:20:53Z",
-   "note": "ready by Will's call 2026-10-18, merges after #15191 (needs #15185); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; at the #15191/#15192 merge: #15191's post_activation posts straight through post_to_pid; route it through release_guard if #15192 guards every press (Fix15185/Fix15192, 2026-10-18)"
+   "updated": "2026-10-18T14:36:41Z",
+   "note": "ready by Will's call 2026-10-18, merges after #15191 (needs #15185); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; at the #15191/#15192 merge: #15191's post_activation posts straight through post_to_pid; route it through release_guard if #15192 guards every press (Fix15185/Fix15192, 2026-10-18)",
+   "merged_by": "pr"
   },
   {
    "id": "computer-remote-screens",
