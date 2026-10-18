@@ -12,6 +12,7 @@ mod macos;
 mod menus;
 #[cfg(target_os = "macos")]
 mod native_helper;
+mod text_range;
 mod types;
 #[cfg(any(target_os = "windows", test))]
 mod win32;
@@ -165,6 +166,7 @@ enum Response {
 	Nodes(Vec<AxNode>),
 	Node(Option<AxNode>),
 	Attributes(Vec<(String, String)>),
+	TextSelection(AxTextSelection),
 }
 
 type Reply = flume::Sender<CoreResult<Response>>;
@@ -333,6 +335,11 @@ enum Request {
 		value:     String,
 		reply:     Reply,
 	},
+	AxSelectText {
+		reference: String,
+		request:   text_range::TextSelectRequest,
+		reply:     Reply,
+	},
 	AxFocus {
 		reference: String,
 		reply:     Reply,
@@ -386,6 +393,7 @@ impl Request {
 			| Self::AxParent { reply, .. }
 			| Self::AxPerform { reply, .. }
 			| Self::AxSetValue { reply, .. }
+			| Self::AxSelectText { reply, .. }
 			| Self::AxFocus { reply, .. }
 			| Self::AxClick { reply, .. }
 			| Self::AxInput { reply, .. }
@@ -406,6 +414,7 @@ impl Request {
 				| Self::RaiseWindow { .. }
 				| Self::AxPerform { .. }
 				| Self::AxSetValue { .. }
+				| Self::AxSelectText { .. }
 				| Self::AxFocus { .. }
 				| Self::AxClick { .. }
 				| Self::AxInput { .. }
@@ -484,6 +493,7 @@ impl Request {
 			| Self::AxPerform { reference, .. }
 			| Self::AxSetValue { reference, .. }
 			| Self::AxInput { reference, .. }
+			| Self::AxSelectText { reference, .. }
 			| Self::AxFocus { reference, .. }
 			| Self::AxClick { reference, .. } => Some(reference),
 			_ => None,
@@ -1467,6 +1477,10 @@ impl Worker {
 				self.ax()?.set_value(&h, value)?;
 				Ok(Response::Unit)
 			},
+			Request::AxSelectText { reference, request, .. } => {
+				let h = self.registry.resolve(reference)?;
+				Ok(Response::TextSelection(self.ax()?.select_text(&h, request)?))
+			},
 			Request::AxFocus { reference, .. } => {
 				let h = self.registry.resolve(reference)?;
 				self.ax()?.focus(&h)?;
@@ -2376,6 +2390,33 @@ impl DesktopSession {
 		}))
 	}
 
+	/// Selects `text` in the element's value by accessibility, or places a
+	/// caret at its start or end, without focus change or keystrokes.
+	#[napi]
+	pub fn ax_select_text(
+		&self,
+		reference: String,
+		text: String,
+		opts: Option<AxSelectTextOptions>,
+	) -> Result<task::Promise<AxTextSelection>> {
+		let opts = opts.unwrap_or_default();
+		let request = text_range::TextSelectRequest {
+			text,
+			prefix: opts.prefix.unwrap_or_default(),
+			suffix: opts.suffix.unwrap_or_default(),
+			part: text_range::SelectPart::parse(opts.select.as_deref()).map_err(napi::Error::from)?,
+		};
+		let c = Arc::clone(&self.core);
+		let token = c.cancellation.token();
+		Ok(task::blocking("desktop.axSelectText", (), move |_| {
+			match c.call(token, |reply| Request::AxSelectText { reference, request, reply })? {
+				Response::TextSelection(v) => Ok(v),
+				_ => Err(DesktopError::internal("unexpected response")),
+			}
+			.map_err(Into::into)
+		}))
+	}
+
 	#[napi]
 	pub fn ax_focus(&self, reference: String) -> Result<task::Promise<()>> {
 		Ok(self.unit("desktop.axFocus", move |reply| Request::AxFocus { reference, reply }))
@@ -2763,6 +2804,17 @@ mod capture_tests {
 				.lock()
 				.push(format!("perform {action} menu {}", path.join(" > ")));
 			Ok(())
+		}
+
+		fn select_text(
+			&mut self,
+			h: &AxHandle,
+			_: &text_range::TextSelectRequest,
+		) -> CoreResult<AxTextSelection> {
+			if let Some(tree) = &self.tree {
+				tree.lock().element(h)?;
+			}
+			unreachable!("text selection not exercised")
 		}
 
 		fn set_value(&mut self, h: &AxHandle, _: &str) -> CoreResult<()> {
@@ -3642,7 +3694,7 @@ mod capture_tests {
 		}
 		let (mut worker, tree) = read_buttons(&[(2, "Go"), (3, "Stop")]);
 		rebuild(&tree, 2, &[(4, "Go"), (3, "Stop")]);
-		let requests: [fn(Reply) -> Request; 9] = [
+		let requests: [fn(Reply) -> Request; 10] = [
 			|reply| Request::AxNode { reference: e2(), reply },
 			|reply| Request::AxAttributes { reference: e2(), reply },
 			|reply| Request::AxChildren { reference: e2(), reply },
@@ -3653,6 +3705,11 @@ mod capture_tests {
 				reference: e2(),
 				input: ElementInput::Text("Stop".to_owned()),
 				takeover: None,
+				reply,
+			},
+			|reply| Request::AxSelectText {
+				reference: e2(),
+				request: text_range::TextSelectRequest { text: "Go".to_string(), ..Default::default() },
 				reply,
 			},
 			|reply| Request::AxFocus { reference: e2(), reply },
