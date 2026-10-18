@@ -4061,6 +4061,24 @@
    "added": "2026-10-18T14:29:14Z",
    "updated": "2026-10-18T14:29:14Z",
    "note": ""
+  },
+  {
+   "id": "iphone-mirroring-test",
+   "branch": "will/iphone-mirroring-test",
+   "title": "test(natives): expect UserIntervened when the user brings iPhone Mirroring forward mid-tap",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "3f020bd85001c33d351ab1b923d69fa24c7f06f5",
+   "body": "bodies/iphone-mirroring-test.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirroring-test",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T15:30:46Z",
+   "updated": "2026-10-18T15:30:46Z",
+   "note": ""
   }
  ],
  "watch": {
