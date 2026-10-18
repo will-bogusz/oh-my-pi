@@ -2921,7 +2921,7 @@
    "branch": "will/computer-key-reroute",
    "title": "feat(natives): send the user's keys back to their app while a macOS background target holds the keyboard uninvited",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P3",
    "needs": [
     "#15195"
    ],
@@ -2933,7 +2933,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-key-reroute",
    "host": "MacBook-Pro",
    "added": "2026-10-14T04:51:27Z",
-   "updated": "2026-10-18T05:29:56Z",
+   "updated": "2026-10-18T05:55:06Z",
    "note": "series 1 item 14; ready by Will's call 2026-10-18, merges after #15195, #15193 and #15562; handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours"
   },
   {
@@ -3444,7 +3444,7 @@
    "branch": "will/computer-run-args",
    "title": "fix(coding-agent): reject computer.run and tab.run args the function cannot receive",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "076a85ed7dd037225f6d399ed40c4c21e9726251",
    "body": "bodies/computer-run-args.md",
@@ -3454,7 +3454,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-args",
    "host": "MacBook-Pro",
    "added": "2026-10-18T04:33:40Z",
-   "updated": "2026-10-18T05:37:43Z",
+   "updated": "2026-10-18T05:55:06Z",
    "note": "",
    "built": [
     {
