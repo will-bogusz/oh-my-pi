@@ -3948,6 +3948,20 @@ mod capture_tests {
 	}
 
 	#[test]
+	fn a_menu_read_cancelled_while_it_reads_is_discarded() {
+		let source = CancellationSource::default();
+		let canceller = source.clone();
+		let mut backend = FakeWaylandBackend::new();
+		backend.on_menu_read = Some(Box::new(move || canceller.cancel()));
+		let mut worker = worker_with(backend);
+		control::grant_for_test(&source);
+		let target = Target::Window(WAYLAND_ID.to_string());
+		let read = |reply| Request::MenuItems { target, path: Vec::new(), reply };
+		let error = call(&mut worker, read, &source).err().map(|error| error.code);
+		assert_eq!(error, Some(ErrorCode::Cancelled));
+	}
+
+	#[test]
 	fn a_stale_ref_search_runs_with_input_released() {
 		let (mut worker, tree) = read_buttons(&[(2, "Go"), (3, "Stop")]);
 		rebuild(&tree, 2, &[(4, "Go"), (3, "Stop")]);

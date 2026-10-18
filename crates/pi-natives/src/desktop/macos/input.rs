@@ -4548,7 +4548,7 @@ mod tests {
 			Ok(())
 		})
 		.unwrap_err();
-		assert_eq!(error.code, ErrorCode::BackgroundUnavailable);
+		assert_eq!(error.code, ErrorCode::InputFailed);
 		assert!(error.message.contains("1 key press(es) sent"), "{}", error.message);
 		assert_eq!(typed, [(CGEventType::KeyDown as u32, 0), (CGEventType::KeyUp as u32, 0)]);
 		// Flags that change no key, such as the keypad's, do not stop it.

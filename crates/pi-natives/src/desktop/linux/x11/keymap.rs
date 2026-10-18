@@ -584,4 +584,37 @@ mod tests {
 	fn text_with_an_unmapped_glyph_is_refused_whole() {
 		assert!(keymap().plan_text("a€").is_err());
 	}
+
+	#[test]
+	fn a_cancel_once_the_last_press_is_out_still_releases_and_succeeds() {
+		let source = control::CancellationSource::default();
+		let token = source.token();
+		let mut emitted = Vec::new();
+		let result = control::with_token_for_test(&token, || {
+			run_steps(&[press(CTRL), press(A), release(A), release(CTRL)], |step| {
+				emitted.push(step);
+				if step == press(A) {
+					source.cancel();
+				}
+				Ok(())
+			})
+		});
+		assert!(result.is_ok());
+		assert_eq!(emitted, vec![press(CTRL), press(A), release(A), release(CTRL)]);
+		// A cancel before the last press still stops it.
+		let source = control::CancellationSource::default();
+		let token = source.token();
+		let mut emitted = Vec::new();
+		let result = control::with_token_for_test(&token, || {
+			run_steps(&[press(CTRL), press(A), release(A), release(CTRL)], |step| {
+				emitted.push(step);
+				if step == press(CTRL) {
+					source.cancel();
+				}
+				Ok(())
+			})
+		});
+		assert!(result.is_err());
+		assert_eq!(emitted, vec![press(CTRL), release(CTRL)]);
+	}
 }
