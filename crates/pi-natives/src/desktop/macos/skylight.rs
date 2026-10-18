@@ -2272,6 +2272,35 @@ mod tests {
 	}
 
 	#[test]
+	fn probe_same_reading_click_in_users_app_is_sent_back() {
+		let t0 = Instant::now();
+		// The user's click and the target coming forward are in one reading.
+		let mut guard = lease_at(t0, None);
+		let own = clicked_at(t0 + ms(5)).in_user_app();
+		assert_eq!(guard.observe(TARGET, None, own, t0 + ms(10)), FocusDecision::Restore);
+		assert_eq!(guard.observe(TARGET, None, own, t0 + ms(20)), FocusDecision::Restore);
+		// The same click not placed in the user's app: Disarm.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(TARGET, None, clicked_at(t0 + ms(5)), t0 + ms(10)),
+			FocusDecision::Disarm
+		);
+	}
+
+	#[test]
+	fn probe_same_reading_plain_key_is_sent_back() {
+		let t0 = Instant::now();
+		let mut guard = lease_at(t0, None);
+		assert_eq!(
+			guard.observe(TARGET, None, input(0, NO_MODIFIERS), t0 + ms(10)),
+			FocusDecision::Restore
+		);
+		// ⌘-Tab still disarms.
+		let mut guard = lease_at(t0, None);
+		assert_eq!(guard.observe(TARGET, None, input(0, COMMAND), t0 + ms(10)), FocusDecision::Disarm);
+	}
+
+	#[test]
 	fn the_switch_sampler_sees_what_a_blocked_observer_misses() {
 		// The observer polls at 10 ms and next at 700 ms, after an AX probe's
 		// 0.5 s timeout; by then any switch during the stall is older than the
