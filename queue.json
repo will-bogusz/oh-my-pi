@@ -3954,7 +3954,7 @@
    "branch": "will/computer-intervened-followup",
    "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened",
    "area": "computer",
-   "priority": "P3",
+   "priority": "P0",
    "needs": [],
    "base": "58349dc80de381057437818b8354c86826c8fa10",
    "body": "bodies/computer-intervened-followup.md",
@@ -3964,7 +3964,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-intervened-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:41:58Z",
-   "updated": "2026-10-18T15:54:21Z",
+   "updated": "2026-10-18T16:08:53Z",
    "note": "",
    "built": [
     {
@@ -4145,7 +4145,7 @@
    "branch": "will/computer-release-helper-followup",
    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "33eeebc138e214813fe1190154b7ecc086f2ad12",
    "body": "bodies/computer-release-helper-followup.md",
@@ -4155,7 +4155,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-release-helper-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T14:29:14Z",
-   "updated": "2026-10-18T15:52:54Z",
+   "updated": "2026-10-18T16:08:53Z",
    "note": "",
    "built": [
     {
