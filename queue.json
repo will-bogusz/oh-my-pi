@@ -4408,7 +4408,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/refind-cancel-root",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:09Z",
-   "updated": "2026-10-18T18:49:19Z",
+   "updated": "2026-10-18T18:49:52Z",
    "note": "",
    "built": [
     {
@@ -4430,7 +4430,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-18T18:49:18Z"
+   "opened": "2026-10-18T18:49:18Z",
+   "readied": "2026-10-18T18:49:52Z"
   },
   {
    "id": "screenshot-session-abort",
