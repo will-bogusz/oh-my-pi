@@ -2599,39 +2599,28 @@
    "note": ""
   },
   {
-   "id": "relay-turn-end-detach",
-   "branch": "will/relay-turn-end-detach",
+   "id": "r2/relay-turn-end-detach",
+   "branch": "will/r2/relay-turn-end-detach",
    "title": "fix(browser): release relay tabs from Chrome's debugger between turns",
    "area": "browser",
    "priority": "P2",
    "needs": [
-    "#15575",
-    "#15555",
-    "#15590",
-    "#15554",
-    "#15556",
-    "#15559",
-    "#15498",
-    "#15493",
-    "#15489",
-    "#15490",
-    "#15503",
-    "#15508",
-    "#15510",
-    "#15110"
+    "r2/relay-popup-owned",
+    "page-waiting",
+    "r2/webmcp-native"
    ],
-   "base": "c389012edada2489e7b5dbb0f68ad2ab4bb640fb",
-   "body": "bodies/relay-turn-end-detach.md",
+   "base": "8e94db1484964f59e18ecadcacdba6173502280f",
+   "body": "bodies/r2/relay-turn-end-detach.md",
    "state": "queued",
    "pr": null,
    "closed_prs": [
     15569
    ],
-   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-turn-end-detach",
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-turn-end-detach",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T00:07:39Z",
-   "note": "Refresh at reopen: the 330 ms / 312\u2013349 ms reattach figures, the Maintenance (ReattachReplay) text and Testing's 226 pass predate head e4c7c91838 (FormsAdopt, 2026-10-15). They are only in closed #15569's GitHub body; the stored body (set 2026-10-13 21:51Z) already describes the head and has none of them, so open from it and copy none of them back. The stored Testing's 54 ms / 50 ms was measured on ec583ace9f, a pre-rewrite build of the head design: rerun or say so at reopen."
+   "updated": "2026-10-18T23:28:01Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): reshaped onto main's #16037 recovery (awaitWorkerRecovery, one next-call notice); tab.id fix moved to page-waiting; 54 ms reattach and macOS bar 5/5->0/5 figures are from earlier builds, rerun before open"
   },
   {
    "id": "ax-stale-refind",
