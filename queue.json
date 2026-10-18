@@ -10280,6 +10280,24 @@
    "added": "2026-10-18T20:28:41Z",
    "updated": "2026-10-18T20:28:41Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-0244",
+   "branch": "will/factory-droid-0244",
+   "title": "feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback)",
+   "area": "providers",
+   "priority": "P1",
+   "needs": [],
+   "base": "151bc26cdc3cfb93291235d537a0fd68d1e76746",
+   "body": "bodies/factory-droid-0244.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-0244",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T20:33:08Z",
+   "updated": "2026-10-18T20:33:08Z",
+   "note": ""
   }
  ],
  "watch": {
