@@ -4654,8 +4654,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-uinput-release",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:43:41Z",
-   "updated": "2026-10-18T18:43:41Z",
-   "note": ""
+   "updated": "2026-10-18T18:43:47Z",
+   "note": "Follow-up to #16202 (Codex thread 4307926709). Fail-before: uinput::tests::a_cancel_stops_presses_but_never_releases fails on main+test (red fork will/s1k-wip/uinput-release-red 662cd6a84c), passes on d776df149c (Linux, goliath). Review round not yet run."
   }
  ],
  "watch": {
