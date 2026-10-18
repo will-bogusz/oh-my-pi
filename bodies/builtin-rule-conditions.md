@@ -22,13 +22,12 @@ Decisions:
 
 ## Testing
 
-- `bun test test/discovery/builtin-defaults.test.ts`: three new tests, one per rule, each a table of true positives that must fire and observed false positives that must not, plus a split-delta stream case for `ts-import-type` and `ts-no-any`. With the three `.md` changes reverted, all three fail on their first false-positive row.
+- `bun test test/discovery/builtin-defaults.test.ts` (15 pass): three new tests, one per rule, each a table of true positives that must fire and observed false positives that must not, plus a split-delta stream case for `ts-import-type` and `ts-no-any`. With the three `.md` changes reverted, all three fail on their first false-positive row.
 - `omp ttsr test --rule <rule.md> --source tool --tool edit --path src/foo.ts '<snippet>'` with `main`'s and this branch's rule file: `const seen = new Set<string>();`, `await import("./x.js")` and `// mapping: any tool call wins` fire on `main` and not here; `new Set(["a", "b"])`, `type P = import("puppeteer-core").Page;` and `y as any;` fire on both.
 - The counts above replay each recorded firing's tool-call arguments against both conditions. No `: any`/`as any` type use that fired on `main` is lost, and every silenced `ts-import-type` hit was a runtime `import()`.
-- Not run: the AST rule tests in the same file on Linux, which need a native addon newer than the one on the machine I tested on; this PR does not touch AST rules.
 
 ---
 
-- [x] `bun check` passes
+- [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
