@@ -11080,7 +11080,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T19:40:43Z",
+  "checked": "2026-10-18T22:12:47Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -11088,9 +11088,49 @@
     "since": "2026-10-18T19:40:43Z",
     "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows"
    },
-   "compact-tool-result": {
-    "since": "2026-10-18T19:40:43Z",
-    "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it"
+   "browser-timeout-names": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(browser): recognize Puppeteer timeouts in release builds"
+   },
+   "conflict-bulk-per-id": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values"
+   },
+   "conflict-hidden-ids": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(coding-agent): name registered conflict ids when a hidden block is guessed"
+   },
+   "factory-droid-media-budget": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images"
+   },
+   "factory-droid-org-lookup": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(ai): sign Factory Droid logins without an organization claim into the account's organization"
+   },
+   "factory-droid-tool-name-cap": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests"
+   },
+   "gemini-tool-result-order": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(ai): send parallel Gemini tool results back in call order"
+   },
+   "lsp-workspace-folders": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(lsp): add another checkout to the language server workspace before opening its files"
+   },
+   "oauth-refresh-keep-rotated-token": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget"
+   },
+   "read-after-bash-revalidate": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message"
+   },
+   "relay-popup-front-main": {
+    "since": "2026-10-18T19:11:35Z",
+    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS"
    },
    "report-issue-colon": {
     "since": "2026-10-18T19:40:43Z",
@@ -11103,6 +11143,18 @@
    "revive-tools": {
     "since": "2026-10-18T19:40:43Z",
     "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent"
+   },
+   "snapcompact-archive-persist": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(coding-agent): persist snapcompact archive source text whole"
+   },
+   "ssh-search-tier": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep"
+   },
+   "factory-droid-prompt-cache": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models"
    },
    "aside-back-to-back": {
     "since": "2026-10-18T19:40:43Z",
@@ -11120,153 +11172,58 @@
     "since": "2026-10-18T19:40:43Z",
     "title": "fix(coding-agent): say computer.windows() returns plain records, not window handles"
    },
-   "relay-popup-front-main": {
-    "since": "2026-10-18T19:11:35Z",
-    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS"
+   "exact-provider-model-selector": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling"
+   },
+   "pip-uv-venv": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(coding-agent): install with %pip into venvs that have no pip"
+   },
+   "ssh-minimizer-width": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(pi-shell): keep ssh remote output intact in the minimizer"
+   },
+   "wait-queued-completion": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short"
    },
    "wake-relay-report-text": {
     "since": "2026-10-18T19:40:43Z",
     "title": "fix(task): relay a woken subagent's final report, not all its turn text"
    },
+   "natives-dts-regen": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "chore(natives): regenerate index.d.ts from the current bindings"
+   },
+   "utok-perf": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "perf(natives/utok): memoize short-piece merge counts per thread"
+   },
+   "factory-droid-credit-promotions": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "feat(catalog,tui): show Factory Droid credit promotions in the model browser"
+   },
+   "factory-droid-image-generation": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "feat(ai,catalog): generate images through a Factory Droid login"
+   },
+   "factory-droid-web-search": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)"
+   },
    "release-helper-wait-test": {
     "since": "2026-10-18T19:11:35Z",
     "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in"
+   },
+   "irc-broadcast-no-relay": {
+    "since": "2026-10-18T22:12:47Z",
+    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts"
    }
   },
   "conflicts": {},
   "merged_through": "2026-10-18T18:19:23Z",
-  "unreleased": {
-   "15157": {
-    "title": "fix(natives): report the macOS Escape stop honestly",
-    "merge_commit": "681aaa0b2e174e5e1cf7358145c8b700a271cd49",
-    "merged_at": "2026-10-17T23:49:51Z"
-   },
-   "15574": {
-    "title": "fix(natives,coding-agent): name the element that replaced a stale macOS computer ref",
-    "merge_commit": "dc4a66a84c6144a4d5f57233e3b150cd5e3b49cf",
-    "merged_at": "2026-10-17T23:51:33Z"
-   },
-   "15173": {
-    "title": "fix(natives,coding-agent): keep omitted takeover in the background while computer control is held",
-    "merge_commit": "46d67f63c24d65fc4e25d09bfebaadfe0d2033a8",
-    "merged_at": "2026-10-18T02:32:47Z"
-   },
-   "15175": {
-    "title": "feat(computer): select text in a background macOS element by accessibility",
-    "merge_commit": "0c03e13bc9ae590638332446fff60f723561f34a",
-    "merged_at": "2026-10-18T02:33:52Z"
-   },
-   "15174": {
-    "title": "fix(coding-agent): capture browser tabs in place instead of raising Chrome",
-    "merge_commit": "076a85ed7dd037225f6d399ed40c4c21e9726251",
-    "merged_at": "2026-10-18T03:12:45Z"
-   },
-   "15184": {
-    "title": "fix(natives): keep the user's app focused during macOS background input",
-    "merge_commit": "082e2cad18eed55a9f5728d2b7134a03866b6f17",
-    "merged_at": "2026-10-18T10:49:47Z"
-   },
-   "15176": {
-    "title": "fix(natives): stop computer use on physical Escape only during takeover input",
-    "merge_commit": "509105c1ef99a3b38b898fb33f8766df23f0a6eb",
-    "merged_at": "2026-10-18T10:57:18Z"
-   },
-   "15564": {
-    "title": "feat(computer): stop computer use for the rest of the turn when the user presses Escape",
-    "merge_commit": "5bdbeeafea5f995e547d91b8c32a87431f80da08",
-    "merged_at": "2026-10-18T11:40:08Z"
-   },
-   "15563": {
-    "title": "feat(computer): type into one element with el.type and el.press, sending nothing if it won't take focus",
-    "merge_commit": "8d7a7d7369852b94425785afb4efa7538d22396f",
-    "merged_at": "2026-10-18T11:51:49Z"
-   },
-   "15195": {
-    "title": "fix(natives): keep the user's app in front when a macOS background target activates itself while they type",
-    "merge_commit": "4d956dad0fa9f37621f059df20e6f00ba6004cbd",
-    "merged_at": "2026-10-18T11:52:03Z"
-   },
-   "16140": {
-    "title": "feat(natives): send the user's keys back to their app while a macOS background target holds the keyboard uninvited",
-    "merge_commit": "cad87a899d648aa36cf9ce776224b5b49f4cd64b",
-    "merged_at": "2026-10-18T12:14:40Z"
-   },
-   "15193": {
-    "title": "fix(natives): type into macOS Screen Sharing and iPhone Mirroring with the keyboard layout's keys",
-    "merge_commit": "31a84c75086a00d2f30dcaab1cf0ded5fb66c624",
-    "merged_at": "2026-10-18T12:23:37Z"
-   },
-   "15562": {
-    "title": "feat(computer): stop typing and re-read when the user types in the agent's macOS app",
-    "merge_commit": "58349dc80de381057437818b8354c86826c8fa10",
-    "merged_at": "2026-10-18T12:33:49Z"
-   },
-   "15185": {
-    "title": "feat(natives): deliver macOS background drags, holds, modified and right-clicks",
-    "merge_commit": "08c8af012cd49478b3a791fc4f458148bebd0d42",
-    "merged_at": "2026-10-18T13:55:52Z"
-   },
-   "15192": {
-    "title": "fix(natives): release keys and buttons a macOS input request still holds when omp dies",
-    "merge_commit": "33eeebc138e214813fe1190154b7ecc086f2ad12",
-    "merged_at": "2026-10-18T14:15:55Z"
-   },
-   "15191": {
-    "title": "feat(computer): rerun refused macOS background input in takeover, set by computer.backgroundFallback",
-    "merge_commit": "89ae2976d783d33ec48de7ff2a6dc7aedf0a78e6",
-    "merged_at": "2026-10-18T14:25:05Z"
-   },
-   "16163": {
-    "title": "test(natives): gave each ast test tree its own temp directory",
-    "merge_commit": "dcd2014ccd829c1152954f952df858fdf6c57034",
-    "merged_at": "2026-10-18T14:51:04Z"
-   },
-   "16187": {
-    "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test",
-    "merge_commit": "499508e06c4686c1999a2ece8f53c304f1ad8c9f",
-    "merged_at": "2026-10-18T14:51:08Z"
-   },
-   "16200": {
-    "title": "test(natives): expect UserIntervened when the user brings iPhone Mirroring forward mid-tap",
-    "merge_commit": "be29e7af767fc511461cf101eb2185145c76f753",
-    "merged_at": "2026-10-18T16:30:48Z"
-   },
-   "16185": {
-    "title": "fix(natives): send a macOS background target back however late it activates itself",
-    "merge_commit": "6badfbda98003dedc1b0d9995285981626ea75dc",
-    "merged_at": "2026-10-18T16:31:01Z"
-   },
-   "16188": {
-    "title": "fix(natives): count a takeover tap kind without an arm as the user's input",
-    "merge_commit": "6007d8c2694cd08eddbef3139faf3884293c57f3",
-    "merged_at": "2026-10-18T16:31:19Z"
-   },
-   "16206": {
-    "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened",
-    "merge_commit": "c21b2ac607e4414f54d11ab52aadda17d8103131",
-    "merged_at": "2026-10-18T16:32:13Z"
-   },
-   "16149": {
-    "title": "fix(coding-agent): reject unusable run args and explain busy errors in computer and browser calls",
-    "merge_commit": "a9f44805752517dc4a3fb4f07af482117565520b",
-    "merged_at": "2026-10-18T16:43:45Z"
-   },
-   "16119": {
-    "title": "feat(browser): open relay tabs omp owns in the background",
-    "merge_commit": "18746ce05b0ffbbe68c969863109f57dcdc0e728",
-    "merged_at": "2026-10-18T16:46:28Z"
-   },
-   "16202": {
-    "title": "fix(natives): keep computer input that already went out from reporting Cancelled",
-    "merge_commit": "e7a17f78fcc56836610e80ca352d9eebf9eeafe2",
-    "merged_at": "2026-10-18T18:19:12Z"
-   },
-   "16205": {
-    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press",
-    "merge_commit": "4a05cbf9f80313e61af17ec98e1bfb97d6fb093d",
-    "merged_at": "2026-10-18T18:19:23Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    13677,
    14235,
@@ -11284,7 +11241,11 @@
    16231,
    16233,
    16235,
-   16236
+   16236,
+   16241,
+   16242,
+   16249,
+   16250
   ],
   "events": [
    {
@@ -12358,6 +12319,333 @@
     "id": "browser-options-hints",
     "title": "fix(coding-agent): name the expected shape when browser tab.run gets an args array or open gets a URL",
     "why": "opened as #16236"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15157,
+    "title": "fix(natives): report the macOS Escape stop honestly",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15574,
+    "title": "fix(natives,coding-agent): name the element that replaced a stale macOS computer ref",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15173,
+    "title": "fix(natives,coding-agent): keep omitted takeover in the background while computer control is held",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15175,
+    "title": "feat(computer): select text in a background macOS element by accessibility",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15174,
+    "title": "fix(coding-agent): capture browser tabs in place instead of raising Chrome",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15184,
+    "title": "fix(natives): keep the user's app focused during macOS background input",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15176,
+    "title": "fix(natives): stop computer use on physical Escape only during takeover input",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15564,
+    "title": "feat(computer): stop computer use for the rest of the turn when the user presses Escape",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15563,
+    "title": "feat(computer): type into one element with el.type and el.press, sending nothing if it won't take focus",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15195,
+    "title": "fix(natives): keep the user's app in front when a macOS background target activates itself while they type",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16140,
+    "title": "feat(natives): send the user's keys back to their app while a macOS background target holds the keyboard uninvited",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15193,
+    "title": "fix(natives): type into macOS Screen Sharing and iPhone Mirroring with the keyboard layout's keys",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15562,
+    "title": "feat(computer): stop typing and re-read when the user types in the agent's macOS app",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15185,
+    "title": "feat(natives): deliver macOS background drags, holds, modified and right-clicks",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15192,
+    "title": "fix(natives): release keys and buttons a macOS input request still holds when omp dies",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 15191,
+    "title": "feat(computer): rerun refused macOS background input in takeover, set by computer.backgroundFallback",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16163,
+    "title": "test(natives): gave each ast test tree its own temp directory",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16187,
+    "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16200,
+    "title": "test(natives): expect UserIntervened when the user brings iPhone Mirroring forward mid-tap",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16185,
+    "title": "fix(natives): send a macOS background target back however late it activates itself",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16188,
+    "title": "fix(natives): count a takeover tap kind without an arm as the user's input",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16206,
+    "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16149,
+    "title": "fix(coding-agent): reject unusable run args and explain busy errors in computer and browser calls",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16119,
+    "title": "feat(browser): open relay tabs omp owns in the background",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16202,
+    "title": "fix(natives): keep computer input that already went out from reporting Cancelled",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "released",
+    "number": 16205,
+    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press",
+    "tag": "v18.12.2"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "browser-timeout-names",
+    "title": "fix(browser): recognize Puppeteer timeouts in release builds"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "conflict-bulk-per-id",
+    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "conflict-hidden-ids",
+    "title": "fix(coding-agent): name registered conflict ids when a hidden block is guessed"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "factory-droid-media-budget",
+    "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "factory-droid-org-lookup",
+    "title": "fix(ai): sign Factory Droid logins without an organization claim into the account's organization"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "factory-droid-tool-name-cap",
+    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "gemini-tool-result-order",
+    "title": "fix(ai): send parallel Gemini tool results back in call order"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "lsp-workspace-folders",
+    "title": "fix(lsp): add another checkout to the language server workspace before opening its files"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "oauth-refresh-keep-rotated-token",
+    "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "read-after-bash-revalidate",
+    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "snapcompact-archive-persist",
+    "title": "fix(coding-agent): persist snapcompact archive source text whole"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "ssh-search-tier",
+    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "factory-droid-prompt-cache",
+    "title": "feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "exact-provider-model-selector",
+    "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "pip-uv-venv",
+    "title": "fix(coding-agent): install with %pip into venvs that have no pip"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "ssh-minimizer-width",
+    "title": "fix(pi-shell): keep ssh remote output intact in the minimizer"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "wait-queued-completion",
+    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "natives-dts-regen",
+    "title": "chore(natives): regenerate index.d.ts from the current bindings"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "utok-perf",
+    "title": "perf(natives/utok): memoize short-piece merge counts per thread"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "factory-droid-credit-promotions",
+    "title": "feat(catalog,tui): show Factory Droid credit promotions in the model browser"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "factory-droid-image-generation",
+    "title": "feat(ai,catalog): generate images through a Factory Droid login"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "factory-droid-web-search",
+    "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "openable",
+    "id": "irc-broadcast-no-relay",
+    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts"
+   },
+   {
+    "at": "2026-10-18T22:12:47Z",
+    "kind": "unopenable",
+    "id": "compact-tool-result",
+    "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it",
+    "why": "opened as #16241"
    }
   ]
  },
