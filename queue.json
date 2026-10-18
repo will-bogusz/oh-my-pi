@@ -6185,13 +6185,13 @@
    "needs": [],
    "base": "151bc26cdc3cfb93291235d537a0fd68d1e76746",
    "body": "bodies/builtin-rule-conditions.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16242,
    "closed_prs": [],
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/builtin-rule-conditions",
    "host": "goliath",
    "added": "2026-10-18T19:42:35Z",
-   "updated": "2026-10-18T19:48:06Z",
+   "updated": "2026-10-18T19:52:23Z",
    "note": "",
    "advanced": "2026-10-18T19:46:06Z",
    "built": [
@@ -6438,7 +6438,8 @@
      "at": "2026-10-18T19:48:03Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-10-18T19:52:23Z"
   },
   {
    "id": "ssh-search-tier",
