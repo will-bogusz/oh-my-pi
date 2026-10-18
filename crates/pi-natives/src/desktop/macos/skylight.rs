@@ -1588,10 +1588,7 @@ pub(super) fn with_foreground<T>(
 /// A takeover action's result after its settle. Its input is out by then, so
 /// a cancel during the settle must not report it unsent.
 fn settled<T>(result: CoreResult<T>) -> CoreResult<T> {
-	result.map(|value| {
-		thread::sleep(FOREGROUND_SETTLE);
-		value
-	})
+	result.and_then(|value| control::wait(FOREGROUND_SETTLE).map(|()| value))
 }
 
 /// Records for the host where a takeover left focus, read from `WindowServer`

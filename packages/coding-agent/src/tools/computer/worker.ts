@@ -777,7 +777,6 @@ class El {
 		}
 		const keys = chordKeys(chord);
 		const native = pointerOptions(options);
-		refuseElementTakeover(context, "press", native, this.ref);
 		await nativeCall(context.signal, () => this.#session.axKeyChord(this.ref, keys, native));
 	}
 
@@ -786,7 +785,6 @@ class El {
 		guardRun(context, "type");
 		validateString(text, "type(text)");
 		const native = pointerOptions(options);
-		refuseElementTakeover(context, "type", native, this.ref);
 		await nativeCall(context.signal, () => this.#session.axType(this.ref, text, native));
 	}
 
