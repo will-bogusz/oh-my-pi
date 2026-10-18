@@ -4955,6 +4955,24 @@
    "added": "2026-10-18T19:04:31Z",
    "updated": "2026-10-18T19:04:31Z",
    "note": ""
+  },
+  {
+   "id": "browser-app-precedence-docs",
+   "branch": "will/browser-app-precedence-docs",
+   "title": "fix(browser): tell agents how to skip a configured relay",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/browser-app-precedence-docs.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-app-precedence-docs",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:14:13Z",
+   "updated": "2026-10-18T19:14:13Z",
+   "note": ""
   }
  ],
  "watch": {
