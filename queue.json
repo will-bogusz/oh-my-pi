@@ -10298,6 +10298,24 @@
    "added": "2026-10-18T20:33:08Z",
    "updated": "2026-10-18T20:33:08Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-web-search",
+   "branch": "will/factory-droid-web-search",
+   "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)",
+   "area": "web",
+   "priority": "P2",
+   "needs": [],
+   "base": "04d4ab14b45f8dbd4055b675519f8815a1eb1841",
+   "body": "bodies/factory-droid-web-search.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-web-search",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T20:37:53Z",
+   "updated": "2026-10-18T20:37:53Z",
+   "note": ""
   }
  ],
  "watch": {
