@@ -5259,6 +5259,24 @@
    "added": "2026-10-18T19:41:21Z",
    "updated": "2026-10-18T19:41:21Z",
    "note": ""
+  },
+  {
+   "id": "wait-queued-completion",
+   "branch": "will/wait-queued-completion",
+   "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short",
+   "area": "agent",
+   "priority": "P2",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/wait-queued-completion.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wait-queued-completion",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:41:43Z",
+   "updated": "2026-10-18T19:41:43Z",
+   "note": ""
   }
  ],
  "watch": {
