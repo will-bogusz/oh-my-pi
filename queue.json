@@ -10971,6 +10971,24 @@
    "added": "2026-10-18T21:14:46Z",
    "updated": "2026-10-18T21:14:46Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-tool-name-cap",
+   "branch": "will/factory-droid-tool-name-cap",
+   "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
+   "area": "providers",
+   "priority": "P1",
+   "needs": [],
+   "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
+   "body": "bodies/factory-droid-tool-name-cap.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-tool-name-cap",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T21:20:03Z",
+   "updated": "2026-10-18T21:20:03Z",
+   "note": ""
   }
  ],
  "watch": {
