@@ -346,7 +346,7 @@ impl X11Input {
 		let result = body(self);
 		self.takeover_target = None;
 		let pointer_after = self.takeover_pointer.take();
-		let settled = control::wait(FOREGROUND_RESTORE_SETTLE);
+		control::settle(FOREGROUND_RESTORE_SETTLE);
 		control::cleanup(|| {
 			// A physical motion during the action is the user's new position.
 			// Keyboard-only actions never warp the pointer, even during restore.
@@ -358,7 +358,7 @@ impl X11Input {
 			}
 			self.restore_activation(window, ewmh, previous_active, previous_focus);
 		});
-		result.and_then(|value| settled.map(|()| value))
+		result
 	}
 
 	fn activate_confirmed(
@@ -694,8 +694,9 @@ impl X11Input {
 	}
 
 	fn xtest_key(&self, keycode: u8, press: bool) -> CoreResult<()> {
-		control::check()?;
+		// A release always goes out: a cancel stops only the next press.
 		if press {
+			control::check()?;
 			self.check_takeover_focus()?;
 		}
 		self
@@ -725,7 +726,9 @@ impl X11Input {
 		press: bool,
 		state: KeyButMask,
 	) -> CoreResult<()> {
-		control::check()?;
+		if press {
+			control::check()?;
+		}
 		let event = KeyPressEvent {
 			response_type: if press {
 				KEY_PRESS_EVENT
