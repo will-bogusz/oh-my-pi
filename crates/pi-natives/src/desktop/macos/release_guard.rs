@@ -145,10 +145,7 @@ fn end() {
 			_ => return,
 		}
 	}
-	if open.is_empty() {
-		stop(&mut child);
-		return;
-	}
+	let _ = (&open, stop as fn(&mut Child));
 	// Reaped off the input thread, keeping its share of input ownership until
 	// then; a failed spawn leaves a zombie rather than a panic during
 	// unwinding.
