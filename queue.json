@@ -10515,13 +10515,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/factory-droid-org-lookup.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16257,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-org-lookup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:18:31Z",
-   "updated": "2026-10-18T22:17:59Z",
+   "updated": "2026-10-18T23:07:10Z",
    "note": "",
    "built": [
     {
@@ -10624,7 +10624,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-18T21:41:19Z"
+   "advanced": "2026-10-18T21:41:19Z",
+   "opened": "2026-10-18T23:07:09Z"
   },
   {
    "id": "factory-droid-gemini-tool-schema",
