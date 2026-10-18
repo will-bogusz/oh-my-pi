@@ -10500,6 +10500,26 @@
    "added": "2026-10-18T21:11:27Z",
    "updated": "2026-10-18T21:11:27Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-image-role-default",
+   "branch": "will/factory-droid-image-role-default",
+   "title": "feat(catalog): fall back to Factory Droid image models in the image role",
+   "area": "providers",
+   "priority": "P2",
+   "needs": [
+    "factory-droid-image-generation"
+   ],
+   "base": "eaafcd3931227c7b1629139d4d4bcb23d9bbe5af",
+   "body": "bodies/factory-droid-image-role-default.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-image-role-default",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T21:11:36Z",
+   "updated": "2026-10-18T21:11:36Z",
+   "note": ""
   }
  ],
  "watch": {
