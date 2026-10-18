@@ -3763,6 +3763,27 @@
    ],
    "opened": "2026-10-18T09:21:31Z",
    "readied": "2026-10-18T09:21:45Z"
+  },
+  {
+   "id": "s1r/text-drag-select",
+   "branch": "will/s1r/text-drag-select",
+   "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
+   "area": "computer",
+   "priority": null,
+   "needs": [
+    "#15185",
+    "#15195"
+   ],
+   "base": "f2f8fd0c5dea830714185b760133afbe0cd34d87",
+   "body": "bodies/s1r/text-drag-select.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-drag-select",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T11:18:03Z",
+   "updated": "2026-10-18T11:18:03Z",
+   "note": ""
   }
  ],
  "watch": {
