@@ -4277,8 +4277,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-release-helper-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T14:29:14Z",
-   "updated": "2026-10-18T17:44:56Z",
-   "note": "Held for the next needed push: ce85872bd6 (local branch tip, also fork will/s1k-wip/16205-flake), test-only fix for a_request_waits_for_its_helper_to_exit_with_or_without_presses_open (3/20 in-suite failures at load ~5 on cf082d5204; main and head 0/20 at load ~3.5). Exit wait now a ledger field set by scope_waiting; that test waits 10 s, the 500 ms bound stays covered by the stuck-helper stop test. Ships with #16205's next needed push plus a rebase onto main (#16200 clears the iPhone failure); if #16205 merges first, it becomes a test-only PR off main. Do not push only for this (clean Codex head).",
+   "updated": "2026-10-18T17:58:09Z",
+   "note": "Held for the next needed push: rebased onto main 1a97f79d28 (has 13d09929b7, #16200) as e011c5e90b on fork will/s1k-wip/16205-rebased, = PR head + test-only commit (exit wait as ledger field via scope_waiting; waits test 10 s, 500 ms bound stays covered by the stuck-helper test). No conflict with main; 13d09929b7 touches none of release.rs/release_guard.rs/release_helper.rs/control.rs. Ships with #16205's next needed push; if #16205 merges first, the test-only commit becomes its own PR off main. Do not push only for this (clean Codex head).",
    "built": [
     {
      "with": "#16200",
