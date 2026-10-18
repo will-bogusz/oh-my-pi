@@ -4835,6 +4835,24 @@
    "added": "2026-10-18T19:01:19Z",
    "updated": "2026-10-18T19:01:19Z",
    "note": ""
+  },
+  {
+   "id": "release-helper-wait-test",
+   "branch": "will/release-helper-wait-test",
+   "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in",
+   "area": "computer",
+   "priority": "P3",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/release-helper-wait-test.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/release-helper-wait-test",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:04:31Z",
+   "updated": "2026-10-18T19:04:31Z",
+   "note": ""
   }
  ],
  "watch": {
