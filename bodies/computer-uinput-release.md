@@ -1,12 +1,12 @@
 ## What
 
-I made the X11 virtual keyboard and pointer always send a release, so a shortcut or click stopped right after its last key or button went down reports success instead of `Cancelled`.
+I made the X11 virtual keyboard always send key releases, so a background shortcut or typed text stopped right after its last key went down reports success instead of `Cancelled`.
 
-#16202 made computer use treat input as sent once its last press is out. On X11 with the MPX route, the releases after that press go through `UInputDevice::key` and `::button`, which checked the cancel token before every event. A stop landing in that gap made the release call fail, so the chord or click reported `Cancelled` even though the target saw a full press (Codex finding on #16202).
+#16202 made computer use treat input as sent once its last press is out. On the X11 MPX route, `run_steps` and `emit_keys` already let the releases after that press go through, but `UInputDevice::key` checked the cancel token before every event. A stop landing in that gap made a release fail, so the call reported `Cancelled` even though the target saw the full chord (Codex finding on #16202).
 
 ## Why
 
-`key` and `button` now check the token only before a press. A release always goes out, and a cancel still stops the next press. Every caller already releases held keys and buttons under cleanup, so nothing else changes.
+`UInputDevice::key` now checks the token only before a press. A release always goes out, and a cancel still stops the next press. `UInputDevice::button` gets the same rule so the device has one release contract; MPX clicks already release under cleanup, so their behaviour does not change.
 
 ## Testing
 
