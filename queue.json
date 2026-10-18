@@ -4250,6 +4250,26 @@
    "opened": "2026-10-18T15:32:00Z",
    "readied": "2026-10-18T15:32:13Z",
    "merged_by": "pr"
+  },
+  {
+   "id": "computer-right-click-per-press",
+   "branch": "will/computer-right-click-per-press",
+   "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input",
+   "area": "computer",
+   "priority": "P3",
+   "needs": [
+    "#16206"
+   ],
+   "base": "3aad93f3adf27aabde151a70e87417a62e032dce",
+   "body": "bodies/computer-right-click-per-press.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-right-click-per-press",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T16:33:04Z",
+   "updated": "2026-10-18T16:33:04Z",
+   "note": ""
   }
  ],
  "watch": {
