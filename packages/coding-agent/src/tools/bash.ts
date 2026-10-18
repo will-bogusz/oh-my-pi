@@ -13,6 +13,7 @@ import type {
 	AgentToolResult,
 	AgentToolUpdateCallback,
 	ToolApprovalDecision,
+	ToolConcurrency,
 	ToolTier,
 } from "@oh-my-pi/pi-agent-core";
 import type { ImageContent } from "@oh-my-pi/pi-ai";
@@ -632,11 +633,12 @@ export class BashTool implements AgentTool<BashToolSchema, BashToolDetails> {
 		if (this.#launchEnabled) return asyncEnabled ? bashSchemaWithAsyncAndService : bashSchemaWithService;
 		return asyncEnabled ? bashSchemaWithAsync : bashSchemaBase;
 	}
-	// Non-pty calls run alongside each other (the executor isolates overlapping
-	// runs on the same shell session); pty takes over the terminal UI and must
-	// run alone.
-	readonly concurrency = (args: Partial<BashToolInput>): "shared" | "exclusive" =>
-		args.pty === true ? "exclusive" : "shared";
+	// Non-pty calls run alongside adjacent bash calls (the executor isolates
+	// overlapping runs on the same shell session) but keep their place against
+	// other tools, so a `read` after a bash that rewrites the file sees the new
+	// content; pty takes over the terminal UI and must run alone.
+	readonly concurrency = (args: Partial<BashToolInput>): ToolConcurrency =>
+		args.pty === true ? "exclusive" : "ordered";
 	readonly strict = true;
 
 	constructor(private readonly session: ToolSession) {}

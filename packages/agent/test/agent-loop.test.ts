@@ -2537,6 +2537,70 @@ describe("agentLoop with AgentMessage", () => {
 		expect(startTimes.exclusive).toBeGreaterThan(finishTimes.fast);
 	});
 
+	it("runs adjacent ordered calls together and keeps them in call order against shared calls", async () => {
+		const toolSchema = type({ value: "string", mode: "'shared' | 'ordered'" });
+		const log: string[] = [];
+		const w2Started = Promise.withResolvers<void>();
+		const r1Started = Promise.withResolvers<void>();
+		const r2Started = Promise.withResolvers<void>();
+		// Each call that must overlap a sibling blocks until that sibling starts,
+		// so a schedule that serializes them never settles and the test times out.
+		const gates: Record<string, () => Promise<void>> = {
+			w1: () => w2Started.promise,
+			w2: async () => w2Started.resolve(),
+			r1: async () => {
+				r1Started.resolve();
+				await r2Started.promise;
+			},
+			r2: async () => {
+				r2Started.resolve();
+				await r1Started.promise;
+			},
+		};
+		const tool: AgentTool<typeof toolSchema, { value: string }> = {
+			name: "op",
+			label: "Op",
+			description: "Op tool",
+			parameters: toolSchema,
+			concurrency: args => (args.mode === "ordered" ? "ordered" : "shared"),
+			async execute(_toolCallId, params) {
+				log.push(`start:${params.value}`);
+				await gates[params.value]?.();
+				log.push(`end:${params.value}`);
+				return { content: [{ type: "text", text: `ok:${params.value}` }], details: { value: params.value } };
+			},
+		};
+		const call = (value: string, mode: "shared" | "ordered") =>
+			({ type: "toolCall", id: `tool-${value}`, name: "op", arguments: { value, mode } }) as const;
+		const mock = createMockModel({
+			responses: [
+				{
+					content: [
+						call("w1", "ordered"),
+						call("w2", "ordered"),
+						call("r1", "shared"),
+						call("r2", "shared"),
+						call("w3", "ordered"),
+					],
+				},
+				{ content: ["done"] },
+			],
+		});
+		const context: AgentContext = { systemPrompt: [""], messages: [], tools: [tool] };
+		const config: AgentLoopConfig = { model: mock.model, convertToLlm: identityConverter };
+
+		await agentLoop([createUserMessage("start")], context, config, undefined, mock.stream).result();
+
+		const at = (entry: string) => log.indexOf(entry);
+		// The two adjacent ordered calls overlapped (w1 ended only after w2 started).
+		expect(at("start:w2")).toBeLessThan(at("end:w1"));
+		// The shared calls after them waited for both, and overlapped each other.
+		expect(at("start:r1")).toBeGreaterThan(Math.max(at("end:w1"), at("end:w2")));
+		expect(at("start:r2")).toBeLessThan(at("end:r1"));
+		// The ordered call after the shared calls waited for both of them.
+		expect(at("start:w3")).toBeGreaterThan(Math.max(at("end:r1"), at("end:r2")));
+	});
+
 	it("drops incomplete tool calls when assistant aborts before toolcall_end", async () => {
 		const context: AgentContext = {
 			systemPrompt: ["You are helpful."],

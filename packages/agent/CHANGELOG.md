@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `AgentTool.concurrency` accepts `"ordered"` for tools whose calls may overlap each other but not other tools: adjacent ordered calls run together, and the run waits for earlier calls in the message while later calls wait for it
+
 ### Fixed
 
 - Fixed Ollama chat history estimates counting stripped native thinking and missing foreign thinking replayed as text, which skewed compaction after model switches ([#16164](https://github.com/can1357/oh-my-pi/issues/16164))

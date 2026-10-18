@@ -102,6 +102,7 @@ import type {
 	SteeringInterruptSource,
 	SteeringQueueState,
 	StreamFn,
+	ToolConcurrency,
 } from "./types";
 import {
 	ASIDE_MESSAGE_COMMIT,
@@ -3752,8 +3753,13 @@ async function executeToolCalls(
 		await checkSteering().catch(() => undefined);
 	};
 
-	let lastExclusive: Promise<void> = Promise.resolve();
+	// Everything a later "exclusive" or "ordered" call waits for: the latest
+	// exclusive call, or every call of the latest run of adjacent "ordered" calls.
+	let lastExclusive: Promise<unknown> = Promise.resolve();
 	let sharedTasks: Promise<void>[] = [];
+	// The open run of adjacent "ordered" calls: their common start and their tasks.
+	let orderedStart: Promise<unknown> | undefined;
+	let orderedTasks: Promise<void>[] = [];
 	const tasks: Promise<void>[] = [];
 
 	// While tool calls are in flight, queued steering or interrupting IRC would
@@ -3832,7 +3838,7 @@ async function executeToolCalls(
 	for (let index = 0; index < records.length; index++) {
 		const record = records[index];
 		const concurrencyMode = record.tool?.concurrency;
-		let concurrency: "shared" | "exclusive";
+		let concurrency: ToolConcurrency;
 		if (typeof concurrencyMode === "function") {
 			// Resolved from the prepared (possibly hook-revised) args — raw args
 			// only when validation failed, and those records error out before
@@ -3846,14 +3852,31 @@ async function executeToolCalls(
 		} else {
 			concurrency = concurrencyMode ?? "shared";
 		}
-		const start = concurrency === "exclusive" ? Promise.all([lastExclusive, ...sharedTasks]) : lastExclusive;
+		let start: Promise<unknown>;
+		if (concurrency === "ordered") {
+			// The first call of a run waits for everything before it; the rest of
+			// the run starts with it.
+			if (!orderedStart) {
+				orderedStart = Promise.all([lastExclusive, ...sharedTasks]);
+				orderedTasks = [];
+			}
+			start = orderedStart;
+		} else {
+			orderedStart = undefined;
+			start = concurrency === "exclusive" ? Promise.all([lastExclusive, ...sharedTasks]) : lastExclusive;
+		}
 		const task = start.then(() => runTool(record, index));
 		tasks.push(task);
-		if (concurrency === "exclusive") {
-			lastExclusive = task;
-			sharedTasks = [];
-		} else {
+		if (concurrency === "shared") {
 			sharedTasks.push(task);
+		} else {
+			if (concurrency === "ordered") {
+				orderedTasks.push(task);
+				lastExclusive = Promise.all(orderedTasks);
+			} else {
+				lastExclusive = task;
+			}
+			sharedTasks = [];
 		}
 	}
 	try {

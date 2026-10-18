@@ -1053,6 +1053,9 @@ export type ToolTier = "read" | "write" | "exec";
  */
 export type ToolLoadMode = "essential" | "discoverable";
 
+/** How a tool call is scheduled against the other calls of its batch; see {@link AgentTool.concurrency}. */
+export type ToolConcurrency = "shared" | "exclusive" | "ordered";
+
 /**
  * Per-tool approval declaration.
  * - bare tier ("read" / "write" / "exec") — static classification.
@@ -1161,9 +1164,12 @@ export interface AgentTool<
 	 * Concurrency mode for tool scheduling when multiple calls are in one turn.
 	 * - "shared": can run alongside other shared tools (default)
 	 * - "exclusive": runs alone; other tools wait until it finishes
+	 * - "ordered": for tools with side effects that may overlap each other: adjacent
+	 *   "ordered" calls run together, and the run keeps its place in call order like
+	 *   an "exclusive" call (it waits for earlier calls; later calls wait for it)
 	 * - function: resolved per call from the (raw, pre-validation) arguments
 	 */
-	concurrency?: "shared" | "exclusive" | ((args: Partial<Static<TParameters>>) => "shared" | "exclusive");
+	concurrency?: ToolConcurrency | ((args: Partial<Static<TParameters>>) => ToolConcurrency);
 
 	/**
 	 * Declares the bounded, validated effect of a finalized call that may execute
