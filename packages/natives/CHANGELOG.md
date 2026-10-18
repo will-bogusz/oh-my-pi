@@ -59,6 +59,9 @@
 - Fixed a macOS `takeover: true` click or key that opened a document or closed a sheet or panel leaving its app in front for good; focus now returns to your app unless you typed or clicked during the takeover ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS typing into Screen Sharing and iPhone Mirroring: text, and characters in key presses and held keys, now use the keyboard layout's keys instead of arriving as a run of `a` or as the ANSI key's character; Screen Sharing types unmodified text in the background (text or shortcuts needing a modifier still need takeover), and iPhone Mirroring taps and scrolls land where aimed. Typing into other apps is unchanged ([#15193](https://github.com/can1357/oh-my-pi/pull/15193) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS keys and mouse buttons staying down when omp is killed or its native input code panics mid-gesture; a key or button the user is physically holding is left for the user to release ([#15192](https://github.com/can1357/oh-my-pi/pull/15192) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed the user's typing landing in the macOS app a background action targets when that app brings itself to the front while they type ([#15195](https://github.com/can1357/oh-my-pi/pull/15195) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed macOS background input sending the user back to their previous app after they opened the target app from Spotlight during the action ([#15195](https://github.com/can1357/oh-my-pi/pull/15195) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed an app that a macOS background action opens something in, such as TextEdit after a background ⌘O in Finder, staying in front of the user's app; it is sent back like the target ([#15195](https://github.com/can1357/oh-my-pi/pull/15195) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.12.1] - 2026-10-17
 
