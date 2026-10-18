@@ -10629,7 +10629,7 @@
    "branch": "will/factory-droid-gemini-tool-schema",
    "title": "fix(ai): keep Factory Droid Gemini tool schemas valid when a parameter takes a string or a list",
    "area": "providers",
-   "priority": "P0",
+   "priority": "P1",
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/factory-droid-gemini-tool-schema.md",
@@ -10639,7 +10639,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-gemini-tool-schema",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:28:41Z",
-   "updated": "2026-10-18T21:59:35Z",
+   "updated": "2026-10-18T22:12:45Z",
    "note": "",
    "built": [
     {
