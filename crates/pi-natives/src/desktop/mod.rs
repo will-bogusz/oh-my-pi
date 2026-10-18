@@ -3880,6 +3880,7 @@ mod capture_tests {
 			move |reply| Request::AxPerform {
 				reference: "e2".to_string(),
 				action: action.to_string(),
+				menu: None,
 				reply,
 			}
 		};
@@ -3948,6 +3949,7 @@ mod capture_tests {
 		let perform = |action: &str| Request::AxPerform {
 			reference: "e1".to_string(),
 			action:    action.to_string(),
+			menu:      None,
 			reply:     reply(),
 		};
 		let open = |activate| Request::OpenApplication {
