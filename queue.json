@@ -4278,7 +4278,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-release-helper-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T14:29:14Z",
-   "updated": "2026-10-18T18:41:08Z",
+   "updated": "2026-10-18T19:04:41Z",
    "note": "Held for the next needed push: rebased onto main 1a97f79d28 (has 13d09929b7, #16200) as e011c5e90b on fork will/s1k-wip/16205-rebased, = PR head + test-only commit (exit wait as ledger field via scope_waiting; waits test 10 s, 500 ms bound stays covered by the stuck-helper test). No conflict with main; 13d09929b7 touches none of release.rs/release_guard.rs/release_helper.rs/control.rs. Ships with #16205's next needed push; if #16205 merges first, the test-only commit becomes its own PR off main. Do not push only for this (clean Codex head).",
    "built": [
     {
