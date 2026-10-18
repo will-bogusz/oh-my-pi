@@ -4705,7 +4705,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front-main",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:46:45Z",
-   "updated": "2026-10-18T21:07:28Z",
+   "updated": "2026-10-18T21:16:11Z",
    "note": "",
    "built": [
     {
@@ -4898,15 +4898,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#16242",
-     "code": "85ebeb34468af2365daf4b8c1238cb42fbf2c9a1",
-     "with_code": "a866cc1609896e2cd8f67b12bb6657a144c0fcce",
-     "tip": "7bce54031580906a60c9e1cb343707a9ca66f560",
-     "with_tip": "2003832948c7e071ba30a7cc338aaaca658e785b",
-     "at": "2026-10-18T20:17:51Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "#15105",
      "code": "85ebeb34468af2365daf4b8c1238cb42fbf2c9a1",
      "with_code": "0e8556e2c421098aaa357507730834167b3ddd72",
@@ -5021,6 +5012,42 @@
      "tip": "7bce54031580906a60c9e1cb343707a9ca66f560",
      "with_tip": "7b696fe060ae7187b179792e8571bbfc8290d69e",
      "at": "2026-10-18T20:46:25Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16242",
+     "code": "85ebeb34468af2365daf4b8c1238cb42fbf2c9a1",
+     "with_code": "2810bba93eb5f0926736c08d224af8bcaf39107c",
+     "tip": "17473d8eb375ece0cb221db729b92000e06e227d",
+     "with_tip": "140c57628f76a3572854020a1b50938fe3e0f538",
+     "at": "2026-10-18T21:16:04Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "factory-droid-prompt-cache",
+     "code": "85ebeb34468af2365daf4b8c1238cb42fbf2c9a1",
+     "with_code": "bd50f5e4345d53e2d3cc02cbb1a99c4cf6271f5b",
+     "tip": "17473d8eb375ece0cb221db729b92000e06e227d",
+     "with_tip": "24cf01258cc0388f45340ee6f3b8135dc104b1f2",
+     "at": "2026-10-18T21:16:10Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "exact-provider-model-selector",
+     "code": "85ebeb34468af2365daf4b8c1238cb42fbf2c9a1",
+     "with_code": "c15b709639cc0907848b1ac98228f3e60a57fa77",
+     "tip": "17473d8eb375ece0cb221db729b92000e06e227d",
+     "with_tip": "d33475813d7424d5e6d1d6b770a6e259b21b94dc",
+     "at": "2026-10-18T21:16:10Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "factory-droid-web-search",
+     "code": "85ebeb34468af2365daf4b8c1238cb42fbf2c9a1",
+     "with_code": "cf0c37be2c29ae87650dfac3cf781cb8dad994e8",
+     "tip": "17473d8eb375ece0cb221db729b92000e06e227d",
+     "with_tip": "08f000f45010886b72b3e8f1dba8ae01b1361c40",
+     "at": "2026-10-18T21:16:10Z",
      "host": "MacBook-Pro"
     }
    ],
