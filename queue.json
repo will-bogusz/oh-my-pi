@@ -4238,5 +4238,11 @@
     "title": "fix(coding-agent): reject computer.run and tab.run args the function cannot receive"
    }
   ]
+ },
+ "opening": {
+  "id": "computer-run-args",
+  "token": "472b24101ae64ecd8e1ba2093ac50f85",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T05:36:47Z"
  }
 }
