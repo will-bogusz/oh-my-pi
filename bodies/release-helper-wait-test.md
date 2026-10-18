@@ -7,8 +7,8 @@ I'm making one macOS release-helper test stop failing at random on a busy Mac: i
 ## Why
 
 - **Pass the wait in, rather than change it for every test.** The wait is now a field of the request, set by a new `scope_waiting`. Production `scope` and `scope_with` still pass `EXIT_TIMEOUT` (500 ms), and only this test waits 10 s for its shell.
-- **The 500 ms bound stays tested.** `a_request_with_nothing_open_stops_a_helper_that_outlasts_the_wait` runs on `EXIT_TIMEOUT` with a helper that never exits, so its outcome does not depend on load.
-- **What production does past 500 ms** is unchanged and now written on `EXIT_TIMEOUT`: a helper with presses still open keeps its share of input ownership until it exits within its 2 s release deadline; one with nothing open is stopped and reaped.
+- **The 500 ms bound stays tested.** `a_request_with_nothing_open_stops_a_helper_that_outlasts_the_wait` runs on `EXIT_TIMEOUT` with a helper that sleeps 5 s, well past it, and asserts the call returns within 3 s.
+- **What production does past 500 ms** is unchanged and now written on `EXIT_TIMEOUT`: a helper with presses still open keeps its share of input ownership until it exits: it stops releasing at its 2 s release deadline and ends itself at most a second later. One with nothing open is stopped and reaped.
 
 No CHANGELOG line: test-only.
 
