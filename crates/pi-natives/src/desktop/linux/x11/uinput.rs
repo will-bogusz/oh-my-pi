@@ -68,9 +68,12 @@ impl UInputDevice {
 		Ok(Self { file, created: true })
 	}
 
-	/// Press or release X button 1..=3.
+	/// Press or release X button 1..=3. A release always goes out: a cancel
+	/// stops only the next press.
 	pub(super) fn button(&mut self, button: u8, press: bool) -> CoreResult<()> {
-		control::check()?;
+		if press {
+			control::check()?;
+		}
 		let code = match button {
 			1 => BTN_LEFT,
 			2 => BTN_MIDDLE,
@@ -106,9 +109,12 @@ impl UInputDevice {
 		self.sync()
 	}
 
-	/// Press or release the key at X keycode `keycode`.
+	/// Press or release the key at X keycode `keycode`. A release always goes
+	/// out: a cancel stops only the next press.
 	pub(super) fn key(&mut self, keycode: u8, press: bool) -> CoreResult<()> {
-		control::check()?;
+		if press {
+			control::check()?;
+		}
 		let code = evdev_code(keycode).ok_or_else(|| {
 			DesktopError::input_failed(format!("X keycode {keycode} has no evdev counterpart"))
 		})?;
