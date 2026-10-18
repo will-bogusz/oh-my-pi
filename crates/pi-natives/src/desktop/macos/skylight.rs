@@ -704,16 +704,19 @@ enum UserSwitch {
 /// observer's polls is still seen when it happened. Clicks are timed exactly
 /// from the HID state.
 struct UserSwitchWatch {
-	user:    ProcessSerialNumber,
-	target:  ProcessSerialNumber,
-	buttons: [u32; 6],
-	click:   Option<Instant>,
-	chord:   Option<Instant>,
+	user:      ProcessSerialNumber,
+	target:    ProcessSerialNumber,
+	buttons:   [u32; 6],
+	click:     Option<Instant>,
+	chord:     Option<Instant>,
 	/// The other process last seen holding the keyboard, and when.
-	panel:   Option<(ProcessSerialNumber, Instant)>,
+	panel:     Option<(ProcessSerialNumber, Instant)>,
 	/// The one seen before it: Spotlight's panel, once the app picked from it
 	/// takes the keyboard a moment before `WindowServer` lists it in front.
-	before:  Option<(ProcessSerialNumber, Instant)>,
+	before:    Option<(ProcessSerialNumber, Instant)>,
+	/// A click placed in the user's own app was seen: it may have picked
+	/// another of their windows.
+	own_click: bool,
 }
 
 impl UserSwitchWatch {
@@ -736,6 +739,7 @@ impl UserSwitchWatch {
 			chord: None,
 			panel: None,
 			before: None,
+			own_click: false,
 		};
 		watch.observe_held(signals, user, now);
 		watch
@@ -746,7 +750,9 @@ impl UserSwitchWatch {
 			self.buttons = signals.buttons;
 			// A click in the user's own app, menus included, picks no app: the
 			// target activating itself right after is still sent back.
-			if !signals.in_user_app {
+			if signals.in_user_app {
+				self.own_click = true;
+			} else {
 				self.click = Some(signals.last_click.unwrap_or(now));
 			}
 		}
@@ -890,6 +896,11 @@ impl BackgroundFocusLease {
 		// probes block it.
 		let action_brought =
 			(front == self.target || caused) && self.user.picked(came, front).is_none();
+		// A click in the user's own app that picked another of its windows
+		// keeps them in their app: that window is the one the lease keeps.
+		if !self.disarmed && front == self.previous && self.user.own_click && key.is_some() {
+			self.key = key;
+		}
 		if self.disarmed
 			|| (front == self.previous && key.is_some_and(|key| Some(key) != self.key))
 			|| (front != self.previous && !action_brought)
@@ -1179,10 +1190,7 @@ fn guard_focus(
 	desktop: &impl GuardedDesktop,
 	visit: &AtomicBool,
 ) -> CoreResult<()> {
-	let (previous, user_key) = {
-		let lease = lease.lock();
-		(lease.previous, lease.key)
-	};
+	let previous = lease.lock().previous;
 	let observe = |front, key| {
 		let now = desktop.now();
 		let signals = desktop.signals(now);
@@ -1221,16 +1229,30 @@ fn guard_focus(
 						},
 						|since| desktop.hand_back(since),
 					)?;
-					// A hand-back puts the user's key window back too. Otherwise the
+					// A hand-back puts the user's key window back too. After a click
+					// in their app it is the one their app reports now that it is in
+					// front again: that click may have picked another of its
+					// windows, which is then the one the lease keeps. Otherwise the
 					// re-check observed instead (a disarm it recorded stops the
 					// hand-backs from the next poll), or `WindowServer` refused.
-					if handed_back == Some(FrontRequest::Done)
-						&& let Some(key) = user_key
-						&& !desktop.restore_key(key)
-					{
-						return Err(DesktopError::input_failed(
-							"background key-window restoration was rejected",
-						));
+					if handed_back == Some(FrontRequest::Done) {
+						let (kept, own_click) = {
+							let lease = lease.lock();
+							(lease.key, lease.user.own_click)
+						};
+						let key = if own_click {
+							desktop.user_key().or(kept)
+						} else {
+							kept
+						};
+						if let Some(key) = key {
+							if !desktop.restore_key(key) {
+								return Err(DesktopError::input_failed(
+									"background key-window restoration was rejected",
+								));
+							}
+							lease.lock().key = Some(key);
+						}
 					}
 				}
 			},
@@ -2460,6 +2482,8 @@ mod tests {
 		refused_for: Cell<Option<SwitchSignals>>,
 		hand_backs:  Cell<usize>,
 		keys:        std::cell::RefCell<Vec<u32>>,
+		/// The key window the user's app reports.
+		user_window: u32,
 	}
 
 	impl GuardedDesktop for FakeDesktop {
@@ -2468,7 +2492,7 @@ mod tests {
 		}
 
 		fn user_key(&self) -> Option<u32> {
-			Some(42)
+			Some(self.user_window)
 		}
 
 		fn now(&self) -> Instant {
@@ -2527,6 +2551,7 @@ mod tests {
 				refused_for: Cell::new(Some(input)),
 				hand_backs:  Cell::new(0),
 				keys:        std::cell::RefCell::default(),
+				user_window: 42,
 			};
 			let lease = Mutex::new(lease_at(t0, None));
 			let visit = AtomicBool::new(false);
@@ -2552,6 +2577,55 @@ mod tests {
 	}
 
 	#[test]
+	fn a_window_the_user_clicked_in_their_app_is_kept_when_the_target_comes_forward() {
+		let t0 = Instant::now();
+		// The user clicks another window (43) of their app, which the guard
+		// sees key before the target activates itself: the target is sent back.
+		let mut guard = lease_at(t0, None);
+		let own = clicked_at(t0 + ms(5)).in_user_app();
+		assert_eq!(guard.observe(PREVIOUS, Some(43), own, t0 + ms(10)), FocusDecision::Observe);
+		assert_eq!(guard.key, Some(43));
+		assert_eq!(guard.observe(TARGET, None, own, t0 + ms(30)), FocusDecision::Restore);
+		// Another key window with no click of theirs in it, a window they
+		// opened from the keyboard, say, still stands the guard down.
+		let mut guard = lease_at(t0, None);
+		let idle = input(0, NO_MODIFIERS);
+		assert_eq!(guard.observe(PREVIOUS, Some(43), idle, t0 + ms(10)), FocusDecision::Disarm);
+	}
+
+	#[test]
+	fn a_hand_back_restores_the_window_the_user_clicked_as_the_target_came_forward() {
+		// The user's app, whose key window was 42 when the action began,
+		// reports 43 once handed back, and the target came forward in the same
+		// reading as `signals`.
+		let t0 = Instant::now();
+		let run = |signals: SwitchSignals| {
+			let desktop = FakeDesktop {
+				clock:       Cell::new(t0 + ms(20)),
+				end:         t0 + ms(40),
+				front:       Cell::new(TARGET),
+				signals:     Cell::new(signals),
+				refused_for: Cell::new(None),
+				hand_backs:  Cell::new(0),
+				keys:        std::cell::RefCell::default(),
+				user_window: 43,
+			};
+			let lease = Mutex::new(lease_at(t0, None));
+			let result = guard_focus(&lease, &desktop, &AtomicBool::new(false));
+			assert!(result.is_ok(), "the guard ends without an error");
+			assert!(desktop.front.get() == PREVIOUS, "the user's app is back in front");
+			let lease = lease.into_inner();
+			(desktop.keys.into_inner(), lease.key, lease.disarmed)
+		};
+		// A click in their app picked window 43: it is put back, and the lease
+		// keeps it, so the next poll does not take it for a switch of theirs.
+		assert_eq!(run(clicked_at(t0 + ms(15)).in_user_app()), (vec![43], Some(43), false));
+		// With no click, the window the action began with is put back; 43
+		// turning up later in the user's app is then their switch.
+		assert_eq!(run(input(0, NO_MODIFIERS)), (vec![42], Some(42), true));
+	}
+
+	#[test]
 	fn an_app_never_handed_back_before_the_action_ends_fails_it() {
 		// The target, or a third app the action opened something in, came
 		// forward on the action's last poll, and `WindowServer` refused the
@@ -2566,6 +2640,7 @@ mod tests {
 				refused_for: Cell::new(Some(input(0, SHIFT))),
 				hand_backs:  Cell::new(0),
 				keys:        std::cell::RefCell::default(),
+				user_window: 42,
 			};
 			let lease = Mutex::new(lease_at(t0, None));
 			let result = guard_focus(&lease, &desktop, &AtomicBool::new(false));
