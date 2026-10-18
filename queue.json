@@ -3454,18 +3454,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-args",
    "host": "MacBook-Pro",
    "added": "2026-10-18T04:33:40Z",
-   "updated": "2026-10-18T05:13:53Z",
+   "updated": "2026-10-18T05:18:42Z",
    "note": "",
    "built": [
-    {
-     "with": "#15184",
-     "code": "068407c326a0ae8babbe7c4712b5ee8c47a94577",
-     "with_code": "8ee8e1a39d0373c30a0d42a9dffb0ffbc545ec17",
-     "tip": "6489bf49a00f56740ac40702b078bfc1b087633d",
-     "with_tip": "773fd1268d66e8de4f3b115ff58a960b10acdabf",
-     "at": "2026-10-18T04:35:40Z",
-     "host": "MacBook-Pro"
-    },
     {
      "with": "#15418",
      "code": "068407c326a0ae8babbe7c4712b5ee8c47a94577",
@@ -3539,12 +3530,21 @@
      "host": "MacBook-Pro"
     },
     {
+     "with": "#15184",
+     "code": "068407c326a0ae8babbe7c4712b5ee8c47a94577",
+     "with_code": "7cf928f447d681980cc978434f798b1523f2c860",
+     "tip": "6489bf49a00f56740ac40702b078bfc1b087633d",
+     "with_tip": "56dde0a5dae9bf962f88a62e4e172c40269ade2d",
+     "at": "2026-10-18T05:18:39Z",
+     "host": "MacBook-Pro"
+    },
+    {
      "with": "#16119",
      "code": "068407c326a0ae8babbe7c4712b5ee8c47a94577",
-     "with_code": "84906ecb22e4027fa66606d223fbc08e44fbff4d",
+     "with_code": "707a5f5844970215671d134e22e3d4b5365a17c8",
      "tip": "6489bf49a00f56740ac40702b078bfc1b087633d",
-     "with_tip": "694bec2a8362b8a75d6c4586405b11ec49899a49",
-     "at": "2026-10-18T04:35:42Z",
+     "with_tip": "d3764a3a9dd539814469a92fbd5467fe6b8058d9",
+     "at": "2026-10-18T05:18:41Z",
      "host": "MacBook-Pro"
     }
    ]
