@@ -4697,7 +4697,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "1a97f79d28f164b02d3b58b227adee999d255ec4",
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
    "body": "bodies/relay-popup-front-main.md",
    "state": "queued",
    "pr": null,
@@ -4705,7 +4705,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front-main",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:46:45Z",
-   "updated": "2026-10-18T19:07:23Z",
+   "updated": "2026-10-18T19:11:21Z",
    "note": "",
    "built": [
     {
@@ -4807,7 +4807,8 @@
      "at": "2026-10-18T19:07:22Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "advanced": "2026-10-18T19:11:21Z"
   },
   {
    "id": "browser-options-hints",
