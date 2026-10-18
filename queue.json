@@ -5110,6 +5110,24 @@
    "added": "2026-10-18T19:35:54Z",
    "updated": "2026-10-18T19:35:54Z",
    "note": ""
+  },
+  {
+   "id": "aside-back-to-back",
+   "branch": "will/aside-back-to-back",
+   "title": "fix(coding-agent): deliver both of two asides sent together to an idle session",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/aside-back-to-back.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/aside-back-to-back",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:36:07Z",
+   "updated": "2026-10-18T19:36:07Z",
+   "note": ""
   }
  ],
  "watch": {
