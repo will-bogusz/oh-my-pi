@@ -10316,6 +10316,24 @@
    "added": "2026-10-18T20:37:53Z",
    "updated": "2026-10-18T20:37:53Z",
    "note": ""
+  },
+  {
+   "id": "utok-perf",
+   "branch": "will/utok-perf",
+   "title": "perf(natives/utok): memoize short-piece merge counts per thread",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "4a05cbf9f80313e61af17ec98e1bfb97d6fb093d",
+   "body": "bodies/utok-perf.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/utok-perf",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T20:42:32Z",
+   "updated": "2026-10-18T20:42:32Z",
+   "note": ""
   }
  ],
  "watch": {
