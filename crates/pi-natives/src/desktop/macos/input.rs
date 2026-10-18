@@ -2108,11 +2108,9 @@ fn background_gesture(
 				to,
 				to_wid,
 				window,
-				x,
-				y,
-				button,
-				count,
+				(x, y, button, count),
 				modifier_flags(modifiers),
+				before_post,
 			)
 		},
 		PointerEvent::Move { x, y } => {
@@ -2681,45 +2679,43 @@ fn background_left_click(
 
 /// Background right or middle click: a hover primer, then presses stamped with
 /// their button number (a right press stamped as button 0 is handled as a left
-/// press) and the window-routing fields that reach a non-key window.
+/// press) and the window-routing fields that reach a non-key window. Each
+/// press first passes `before_press`.
 fn background_button_click(
 	source: &CGEventSource,
 	pid: libc::pid_t,
 	wid: u32,
 	window: &DesktopWindow,
-	x: f64,
-	y: f64,
-	button: MouseButton,
-	count: u32,
+	(x, y, button, count): (f64, f64, MouseButton, u32),
 	flags: CGEventFlags,
+	before_press: impl Fn() -> CoreResult<()>,
 ) -> CoreResult<()> {
 	let group = click_group_id();
 	let (cg_button, down, up, _, number) = button_types(button);
 	post_hover(source, pid, wid, window, x, y, group)?;
 	control::wait(Duration::from_millis(12))?;
-	let count = count.max(1);
+	button_presses(count, before_press, |pressed, click_state| {
+		let event =
+			mouse_event(source, if pressed { down } else { up }, CGPoint::new(x, y), cg_button)?;
+		event.set_flags(flags);
+		post_window_pointer(pid, wid, window, &event, x, y, click_state, number, group)
+	})
+}
+
+/// `count` presses for [`background_button_click`]: each press, posted
+/// through `post` (`true` for the press) with its click state once
+/// `before_press` passes, is always released.
+fn button_presses(
+	count: u32,
+	before_press: impl Fn() -> CoreResult<()>,
+	post: impl Fn(bool, i64) -> CoreResult<()>,
+) -> CoreResult<()> {
+	let count = i64::from(count.max(1));
 	for click_state in 1..=count {
-		let press = mouse_event(source, down, CGPoint::new(x, y), cg_button)?;
-		let release = mouse_event(source, up, CGPoint::new(x, y), cg_button)?;
-		press.set_flags(flags);
-		release.set_flags(flags);
-		let result =
-			post_window_pointer(pid, wid, window, &press, x, y, i64::from(click_state), number, group)
-				.and_then(|()| control::wait(PRESS_GAP));
-		let cleanup = control::cleanup(|| {
-			post_window_pointer(
-				pid,
-				wid,
-				window,
-				&release,
-				x,
-				y,
-				i64::from(click_state),
-				number,
-				group,
-			)
-		});
-		skylight::after_cleanup(result, cleanup)?;
+		before_press()?;
+		let result = post(true, click_state).and_then(|()| control::wait(PRESS_GAP));
+		let release = control::cleanup(|| post(false, click_state));
+		skylight::after_cleanup(result, release)?;
 		if click_state < count {
 			control::wait(MULTI_CLICK_GAP)?;
 		}
@@ -5094,6 +5090,38 @@ mod tests {
 		// The user types in TextEdit while the click makes its window key.
 		listener.record_for_test(7, Instant::now());
 		assert_eq!(recheck().unwrap_err().code, ErrorCode::UserIntervened);
+	}
+
+	#[test]
+	fn a_background_right_double_click_stops_at_the_users_input_after_its_first_click() {
+		use crate::desktop::error::ErrorCode;
+		let listener = control::intervention::Listener::simulated();
+		listener.touch(7, Some(1), || "TextEdit".to_string());
+		let token = control::CancellationSource::default().token();
+		let _watch = listener
+			.admit(7, &token)
+			.expect("the user has not used TextEdit");
+		let before_press = || {
+			pointer_recheck(
+				(false, false),
+				EntryFront(Some(9)),
+				(7, 42, "TextEdit"),
+				|| Some(9),
+				|| false,
+			)
+		};
+		let posted = std::cell::RefCell::new(Vec::new());
+		let error = button_presses(2, before_press, |pressed, click_state| {
+			posted.borrow_mut().push((pressed, click_state));
+			// The user clicks in TextEdit as the first right click ends.
+			if !pressed {
+				listener.record_for_test(7, Instant::now());
+			}
+			Ok(())
+		})
+		.unwrap_err();
+		assert_eq!(error.code, ErrorCode::UserIntervened);
+		assert_eq!(*posted.borrow(), [(true, 1), (false, 1)]);
 	}
 
 	#[test]
