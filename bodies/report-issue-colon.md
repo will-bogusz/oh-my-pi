@@ -23,7 +23,7 @@ The two-line form (tool on line 1, report below) is unchanged. Non-goals: rows a
 ## Testing
 
 - `bun test packages/coding-agent/test/tools/report-tool-issue.test.ts`: 30 pass. New rows record the three URI shapes above and refuse the two colon-only shapes with `Invalid report format`. With the parser change reverted, those 5 fail (`xd` stored for `xd://tui`, and the two refusals resolve instead).
-- LIVE_PLACEHOLDER
+- Live, on Linux: `omp -p` on `claude-haiku-5-5` told to write three reports to `xd://report_issue`, with the auto-QA database in a scratch config root and push pointed at a local stub collector. With this PR the rows were `xd://tui` / `start fails because kitty-vt-wasm is missing` and `write conflict://*` / `per-id content …`, and `read agent://ReviewLifecycleLever returned an empty response` came back to the model as `Invalid report format` with the usage hint. With the parser change reverted, the same run stored `xd` / `//tui: start fails …` and `write conflict` / `//*: per-id …`.
 
 ---
 
