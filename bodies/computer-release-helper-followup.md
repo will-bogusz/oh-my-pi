@@ -20,6 +20,7 @@ No CHANGELOG line: all three fix behaviour of #15192, which no release has shipp
 
 - `control::tests::held_control_refuses_input_until_an_earlier_operations_helper_is_reaped`: held control, a helper's share still out → `InputBusy`; once it is reaped → input proceeds.
 - `release_guard::tests::a_request_with_nothing_open_stops_a_helper_that_outlasts_the_wait`: a helper that never reads its stream is stopped and reaped before the call returns.
+- `release_guard::tests::a_helper_whose_reaper_cannot_start_is_reaped_before_the_request_returns`: when no reaper thread starts, the call reaps the helper itself, so its share of ownership does not end early.
 - `release::tests::holds_read_back_after_the_tap_missed_events_are_the_users_unless_a_press_holds_them`: after a gap, your right Shift keeps this call's Shift down, and A's release carries Shift and not the Option you let go of.
 
 Each fails with its fix reverted. `cargo test -p pi-natives --lib`, `CI=1 bun check` and the computer tool tests pass on macOS 26 (Apple silicon). Not run: a real tap timeout.
@@ -29,3 +30,4 @@ Each fails with its fix reverted. `cargo test -p pi-natives --lib`, `CI=1 bun ch
 - [x] `bun check` passes
 - [x] Tested locally
 - [ ] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
