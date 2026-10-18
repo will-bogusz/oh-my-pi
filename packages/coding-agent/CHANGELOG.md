@@ -25,6 +25,10 @@
 - The `computer` tool and its errors no longer tell the model to retry with `takeover: true` after `BackgroundUnavailable`; the tool decides by `computer.backgroundFallback` ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 - The `computer` tool's instructions now tell the model never to call `raise()` or `apps.open(…, { activate: true })` to make input work, since both bring the app forward and take your keyboard, while launching, reopening and window input run in the background ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
+### Changed
+
+- The computer tool tells the model that Screen Sharing and iPhone Mirroring take background input, and that text no keyboard key types throws `InvalidKey` there ([#15193](https://github.com/can1357/oh-my-pi/pull/15193) by [@will-bogusz](https://github.com/will-bogusz))
+
 ### Fixed
 
 - Fixed a Codex turn stopping on "Request failed … unsupported_native_inflight_message" when you sent a message while the response was writing text; the session now keeps the partial reply and continues with your message
