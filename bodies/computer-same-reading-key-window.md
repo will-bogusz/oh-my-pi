@@ -1,6 +1,6 @@
 ## What
 
-If I click another window of my own app just as the agent's background target brings itself forward, I now keep my app in front with the window I clicked, instead of losing the front to the target about half the time.
+When I clicked another window of my own app just as the agent's background target brought itself forward, the agent's app stayed in front of mine 3 of 6 times; with this change my app stays in front with the window I clicked 6 of 6 times (n=6 per arm, macOS guest).
 
 During macOS background input, the focus guard sends a target that activates itself back behind your app. A click on another of your app's windows makes that window key, and the guard read the changed key window as you switching away and stood down. A target that came forward right then stayed in front. After a click the guard placed in your own app, it now keeps the window you clicked: it sends the target back, and the hand-back restores that window.
 
