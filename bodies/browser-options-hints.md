@@ -1,6 +1,6 @@
 ## What
 
-Agents kept calling `tab.run(fn, [url])` and `browser.open("https://…")`, got back "expects an options object", and then guessed at the fix, so now the error just tells them the shape.
+I kept seeing agents call `tab.run(fn, [url])` or `browser.open("https://…")`, get back "expects an options object", and then guess at the fix, so I made the error just tell them the shape.
 
 | Call | `main` | this PR |
 |---|---|---|
