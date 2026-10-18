@@ -4418,13 +4418,13 @@
    "needs": [],
    "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
    "body": "bodies/screenshot-session-abort.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16230,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/screenshot-session-abort",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:16Z",
-   "updated": "2026-10-18T18:22:15Z",
+   "updated": "2026-10-18T18:23:20Z",
    "note": "",
    "built": [
     {
@@ -4508,7 +4508,8 @@
      "at": "2026-10-18T18:22:14Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-18T18:23:20Z"
   },
   {
    "id": "todo-serial-tools",
