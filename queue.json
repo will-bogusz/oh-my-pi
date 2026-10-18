@@ -2447,28 +2447,27 @@
    "note": ""
   },
   {
-   "id": "webmcp-native",
-   "branch": "will/webmcp-native",
+   "id": "r2/webmcp-native",
+   "branch": "will/r2/webmcp-native",
    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
    "area": "browser",
    "priority": "P2",
    "needs": [
-    "#15110",
-    "#15489",
+    "#15105",
     "#15508"
    ],
-   "base": "ca6558ea6a7b55a265b868b7813e3f8605b81010",
-   "body": "bodies/webmcp-native.md",
+   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
+   "body": "bodies/r2/webmcp-native.md",
    "state": "queued",
    "pr": null,
    "closed_prs": [
     15556
    ],
-   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/webmcp-native",
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-webmcp-native",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T00:07:29Z",
-   "note": ""
+   "updated": "2026-10-18T23:27:26Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): held behind #15105 and #15508 per Will; no code need on either; sits on main 9d5d4ac5b5"
   },
   {
    "id": "r2/relay-call-deadline",
