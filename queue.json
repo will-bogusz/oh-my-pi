@@ -2470,28 +2470,27 @@
    "note": ""
   },
   {
-   "id": "relay-call-deadline",
-   "branch": "will/relay-call-deadline",
+   "id": "r2/relay-call-deadline",
+   "branch": "will/r2/relay-call-deadline",
    "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
    "area": "browser",
    "priority": "P1",
    "needs": [
     "#15105",
-    "#15110",
-    "#15493"
+    "#15508"
    ],
-   "base": "5c58503b8480d0c811bf17ad397cfc30cd38268f",
-   "body": "bodies/relay-call-deadline.md",
+   "base": "a25352c21a7c2b87982c4f4956687d339f003a9b",
+   "body": "bodies/r2/relay-call-deadline.md",
    "state": "queued",
    "pr": null,
    "closed_prs": [
     15559
    ],
-   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-call-deadline",
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-call-deadline",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T00:07:25Z",
-   "note": ""
+   "updated": "2026-10-18T23:27:22Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): held behind #15105 and #15508 per Will; no code need on #15508; sits on main + #15105 head 50a5e959c4"
   },
   {
    "id": "computer-user-intervened",
