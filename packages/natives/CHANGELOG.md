@@ -5,6 +5,7 @@
 ### Added
 
 - Added `macOSFrontApp()`, which reads the app macOS has in front and can put it back in front for a while (`keepInFront`) without stopping for the user's typing
+- Added a `browserPid` argument to `macOSFrontApp()` and `MacOSFrontApp.keepInFront`: for a second after the read, and while it holds the app in front, the user's keys sent to that app go to the read app instead; and `macOSLoopbackPeerApp(localPort, peerPort)`, which finds the app holding the other end of a loopback TCP connection to this process
 
 ## [18.12.2] - 2026-10-18
 

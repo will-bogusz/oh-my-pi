@@ -5,6 +5,7 @@
 ### Fixed
 
 - Fixed keys you type in another app going into a page on macOS when omp's click in a relay tab opened a new tab or popup: Chrome made itself the active app and kept it; the relay now puts your app back in front within milliseconds
+- Fixed a key or two you type in another app on macOS being lost while omp's relay tab opens a new tab or popup; they now reach your app (needs Accessibility permission)
 
 ## [18.12.2] - 2026-10-18
 

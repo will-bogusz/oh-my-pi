@@ -13,7 +13,7 @@
  * Binds loopback only: anything that can reach this port can drive the
  * user's logged-in browser.
  */
-import { macOSFrontApp } from "@oh-my-pi/pi-natives";
+import { macOSFrontApp, macOSLoopbackPeerApp } from "@oh-my-pi/pi-natives";
 import { VERSION } from "@oh-my-pi/pi-utils/dirs";
 import { RelayBridge } from "./bridge";
 
@@ -50,6 +50,8 @@ export interface RelayServer {
 }
 
 interface SocketData {
+	/** The extension end's TCP port, which names the browser behind it. */
+	peerPort?: number;
 	role: "cdp" | "ext";
 	connId?: number;
 }
@@ -81,7 +83,14 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 	const sockets = new Set<RelayWebSocket>();
 	const startedAt = Date.now();
 	// Only macOS can hand the front app back; elsewhere the relay never reads it.
-	if (process.platform === "darwin") bridge.keepFrontAppWith(macOSFrontApp);
+	if (process.platform === "darwin") {
+		bridge.keepFrontAppWith(macOSFrontApp, async socket => {
+			const peerPort = (socket as RelayWebSocket).data.peerPort;
+			const port = server.port;
+			if (peerPort === undefined || port === undefined) return null;
+			return (await macOSLoopbackPeerApp(port, peerPort)) ?? null;
+		});
+	}
 
 	const server = Bun.serve({
 		hostname: "127.0.0.1",
@@ -112,7 +121,7 @@ export function startRelayServer(opts: RelayServerOptions): RelayServer {
 				if (opts.token && url.searchParams.get("token") !== opts.token) {
 					return new Response("Unauthorized", { status: 401 });
 				}
-				const data: SocketData = { role: "ext" };
+				const data: SocketData = { role: "ext", peerPort: srv.requestIP(req)?.port };
 				if (srv.upgrade(req, { data })) return undefined;
 				return new Response("websocket upgrade required", { status: 426 });
 			}

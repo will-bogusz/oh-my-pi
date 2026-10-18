@@ -1410,13 +1410,18 @@ pub(in super::super) struct FrontApp {
 }
 
 /// The app `WindowServer` has in front now; `None` without the focus SPI.
-/// Starts the [`PickLog`] watching what the user does from now on.
-pub(in super::super) fn front_app() -> Option<FrontApp> {
+/// Starts the [`PickLog`] watching what the user does from now on. With
+/// `browser`, the app omp's input is about to reach, the keys the user types
+/// while that app holds the keyboard uninvited go to the app in front from
+/// now until [`PICK_WATCH`] after the latest read, or through the hold that
+/// takes it over ([`FrontApp::keep_in_front`]): the browser can activate
+/// before the relay hears of the window it opens.
+pub(in super::super) fn front_app(browser: Option<pid_t>) -> Option<FrontApp> {
 	let spi = FOREGROUND.as_ref()?;
 	let read_at = Instant::now();
 	let picks = Picks::read(spi);
 	let psn = picks.front?;
-	watch_picks(spi, picks, read_at);
+	watch_picks(spi, picks, read_at, browser.zip(psn_pid(&psn)));
 	Some(FrontApp { psn, read_at })
 }
 
@@ -1425,11 +1430,28 @@ impl FrontApp {
 	/// each time the app that took the front from it takes it again, as
 	/// [`FrontHold`] decides, and returns how many times it did. Typing does not
 	/// end it. Busy while another operation owns desktop input/focus control.
-	pub(in super::super) fn keep_in_front(&self, duration: Duration) -> CoreResult<u32> {
+	///
+	/// `browser` is the app expected to take the front. The keys `WindowServer`
+	/// sends it before each hand-back, which it drops while it activates, go
+	/// to this app instead ([`KeyReroute`]), through the reroute this app's
+	/// read armed when it still serves them.
+	pub(in super::super) fn keep_in_front(
+		&self,
+		duration: Duration,
+		browser: Option<pid_t>,
+	) -> CoreResult<u32> {
 		let spi = FOREGROUND.as_ref().ok_or_else(|| {
 			DesktopError::background_unavailable("the front-process SPI is unavailable")
 		})?;
 		let _owner = control::own_focus()?;
+		let armed = PICK_LOG.lock().reroute.take().map(|(_, reroute)| reroute);
+		// Carrying on with the read's reroute keeps a click since then the
+		// user's choice, as it is for the hold.
+		let _reroute = browser.zip(psn_pid(&self.psn)).and_then(|(browser, user)| {
+			armed
+				.filter(|reroute| reroute.serves(user, browser))
+				.or_else(|| KeyReroute::arm(user, browser))
+		});
 		let mut hold = FrontHold::new(self.psn, PICK_LOG.lock().since(self.read_at));
 		let desktop = WindowServerHold {
 			spi,
@@ -1490,6 +1512,10 @@ struct PickLog {
 	/// The processes last seen holding the keyboard while not in front (see
 	/// [`Picks::panel`]), latest first.
 	panels:      [Option<(ProcessSerialNumber, Instant)>; 2],
+	/// The reroute the latest reads armed, and when ([`PickLog::rearm`]):
+	/// dropped with the sampler, replaced by a read it does not cover, or
+	/// taken over by a hold.
+	reroute:     Option<(Instant, KeyReroute)>,
 }
 
 static PICK_LOG: Mutex<PickLog> = Mutex::new(PickLog {
@@ -1498,6 +1524,7 @@ static PICK_LOG: Mutex<PickLog> = Mutex::new(PickLog {
 	chord:       None,
 	option:      None,
 	panels:      [None; 2],
+	reroute:     None,
 });
 
 impl PickLog {
@@ -1527,14 +1554,47 @@ impl PickLog {
 				.map(|panel| panel.filter(|(_, when)| *when >= at).map(|(psn, _)| psn)),
 		}
 	}
+
+	/// Keeps a [`KeyReroute`] moving the keys the user types while `apps`'
+	/// browser holds the keyboard uninvited to their app in front, as of a
+	/// read at `now`. Input comes in bursts (each step of a move, both halves
+	/// of each key), so the one armed for an earlier read stays while it
+	/// [`covers`](KeyReroute::covers) this one and the user picked no app
+	/// since (⌘/⌃, or a launcher's or Spotlight's panel), after which it would
+	/// take the browser coming forward for their choice for good. Arming makes
+	/// this the latest action, which ends the reroute of an operation that
+	/// owns the desktop: none is armed while one does.
+	fn rearm(&mut self, apps: Option<(pid_t, pid_t)>, now: Instant) {
+		let Some((browser, user)) = apps else {
+			self.reroute = None;
+			return;
+		};
+		let covered = self.reroute.as_ref().is_some_and(|(armed_at, reroute)| {
+			let since = self.since(*armed_at);
+			reroute.covers(user, browser) && !since.chord && since.panels.iter().all(Option::is_none)
+		});
+		if !covered {
+			self.reroute = control::own_focus()
+				.ok()
+				.and_then(|_owner| KeyReroute::arm(user, browser))
+				.map(|reroute| (now, reroute));
+		}
+	}
 }
 
-/// Records `picks`, read at `now`, and keeps the [`PickLog`] sampling until
-/// [`PICK_WATCH`] after it, starting its sampler unless one runs.
-fn watch_picks(spi: &'static ForegroundSpi, picks: Picks, now: Instant) {
+/// Records `picks`, read at `now`, keeps a reroute for `apps` (the browser and
+/// the app in front: [`PickLog::rearm`]), and keeps the [`PickLog`] sampling
+/// until [`PICK_WATCH`] after it, starting its sampler unless one runs.
+fn watch_picks(
+	spi: &'static ForegroundSpi,
+	picks: Picks,
+	now: Instant,
+	apps: Option<(pid_t, pid_t)>,
+) {
 	let mut log = PICK_LOG.lock();
 	log.record(picks, now);
 	log.watch_until = Some(now + PICK_WATCH);
+	log.rearm(apps, now);
 	if mem::replace(&mut log.sampling, true) {
 		return;
 	}
@@ -1550,13 +1610,17 @@ fn watch_picks(spi: &'static ForegroundSpi, picks: Picks, now: Instant) {
 				log.record(picks, now);
 				if log.watch_until.is_none_or(|until| now >= until) {
 					log.sampling = false;
+					log.reroute = None;
 					return;
 				}
 			}
 		});
-	// Without a sampler the hold sees only its own readings.
+	// Without a sampler the hold sees only its own readings, and nothing
+	// would end the read's reroute.
 	if sampler.is_err() {
-		PICK_LOG.lock().sampling = false;
+		let mut log = PICK_LOG.lock();
+		log.sampling = false;
+		log.reroute = None;
 	}
 }
 
@@ -3652,6 +3716,7 @@ mod tests {
 			chord:       None,
 			option:      None,
 			panels:      [None; 2],
+			reroute:     None,
 		};
 		log.record(
 			Picks { flags: COMMAND, front: Some(HOLD_USER), key_focus: Some(HOLD_THIRD) },
