@@ -179,20 +179,26 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("browser uploadFile", () => {
 			expect(await attempt(`await tab.uploadFile("#trigger", "alpha.txt");`)).toEqual({
 				log: [{ id: "trigger-input", event: "change", names: ["alpha.txt"] }],
 			});
-
 		} finally {
 			await close();
 		}
 	}, 60_000);
 
 	test.skipIf(!MODE_BITS_ENFORCED)(
-		"cancels the chooser when delivering the files fails",
+		"keeps the chooser waiting when delivering the files fails",
 		async () => {
-			const { attempt, close } = await openFixture();
+			const { attempt, step, log, close } = await openFixture();
 			try {
-				const failed = await attempt(`await tab.uploadFile("#trigger", "locked.txt");`);
-				expect(failed.error).toBeDefined();
-				expect(failed.log).toEqual([{ id: "trigger-input", event: "cancel", names: [] }]);
+				await attempt("");
+				// The copy fails with the file system's own error; the chooser it was for still waits for an answer.
+				const failed = await step(`try { await tab.uploadFile("#trigger", "locked.txt"); } catch (e) {
+	return { error: e.message, state: await tab.dialog() };
+}`);
+				const { error, state } = failed.value as { error?: string; state: unknown };
+				expect(error).toBeDefined();
+				expect(state).toEqual({ open: true, type: "file-chooser", multiple: false });
+				await step(`await tab.handleDialog({ accept: false });`);
+				expect(await log()).toEqual([{ id: "trigger-input", event: "cancel", names: [] }]);
 			} finally {
 				await close();
 			}
