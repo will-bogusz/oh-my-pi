@@ -4007,7 +4007,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "58349dc80de381057437818b8354c86826c8fa10",
+   "base": "89ae2976d783d33ec48de7ff2a6dc7aedf0a78e6",
    "body": "bodies/computer-element-front-first.md",
    "state": "queued",
    "pr": null,
@@ -4015,8 +4015,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-element-front-first",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:49:27Z",
-   "updated": "2026-10-18T13:49:27Z",
-   "note": ""
+   "updated": "2026-10-18T14:28:04Z",
+   "note": "",
+   "advanced": "2026-10-18T14:28:04Z"
   },
   {
    "id": "computer-same-reading-key-window",
