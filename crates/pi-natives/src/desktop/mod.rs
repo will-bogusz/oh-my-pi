@@ -452,6 +452,7 @@ impl Request {
 			| Self::AxParent { reference, .. }
 			| Self::AxPerform { reference, .. }
 			| Self::AxSetValue { reference, .. }
+			| Self::AxInput { reference, .. }
 			| Self::AxFocus { reference, .. }
 			| Self::AxClick { reference, .. } => Some(reference),
 			_ => None,
@@ -2570,11 +2571,14 @@ mod capture_tests {
 		fn element_input(
 			&mut self,
 			_: &Target,
-			_: &AxHandle,
+			h: &AxHandle,
 			_: &ElementInput,
 			_: DeliveryMode,
 			_: &OperationToken,
 		) -> CoreResult<ElementDelivery> {
+			if let Some(tree) = &self.tree {
+				tree.lock().element(h)?;
+			}
 			Ok(ElementDelivery::Unfocused(KeyboardFocus {
 				window:  Some(self.window.id.clone()),
 				element: Some(AxHandle::Test(7)),
@@ -3216,13 +3220,19 @@ mod capture_tests {
 		}
 		let (mut worker, tree) = read_buttons(&[(2, "Go"), (3, "Stop")]);
 		rebuild(&tree, 2, &[(4, "Go"), (3, "Stop")]);
-		let requests: [fn(Reply) -> Request; 8] = [
+		let requests: [fn(Reply) -> Request; 9] = [
 			|reply| Request::AxNode { reference: e2(), reply },
 			|reply| Request::AxAttributes { reference: e2(), reply },
 			|reply| Request::AxChildren { reference: e2(), reply },
 			|reply| Request::AxParent { reference: e2(), reply },
 			|reply| Request::AxPerform { reference: e2(), action: "press".to_string(), reply },
 			|reply| Request::AxSetValue { reference: e2(), value: "Stop".to_string(), reply },
+			|reply| Request::AxInput {
+				reference: e2(),
+				input: ElementInput::Text("Stop".to_owned()),
+				takeover: None,
+				reply,
+			},
 			|reply| Request::AxFocus { reference: e2(), reply },
 			|reply| Request::AxClick {
 				reference: e2(),
