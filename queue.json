@@ -4656,8 +4656,37 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-uinput-release",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:43:41Z",
-   "updated": "2026-10-18T18:53:56Z",
-   "note": "Follow-up to #16202 (Codex thread 4307926709). Fail-before: uinput::tests::a_cancel_stops_presses_but_never_releases fails on main+test (red fork will/s1k-wip/uinput-release-red 662cd6a84c), passes on d776df149c (Linux, goliath). Review round not yet run."
+   "updated": "2026-10-18T18:58:07Z",
+   "note": "Follow-up to #16202 (Codex thread 4307926709). Fail-before: uinput::tests::a_cancel_stops_presses_but_never_releases fails on main+test (red fork will/s1k-wip/uinput-release-red 662cd6a84c), passes on d776df149c (Linux, goliath). Review round not yet run.",
+   "built": [
+    {
+     "with": "#16217",
+     "code": "a27795e7758c4bbeee2742aa7987a8f53f9f745b",
+     "with_code": "ae5a22a6cdb4ef7258ed64959accacf1913f2385",
+     "tip": "e0b4910a068bdd664040c8b84398e2db008d9a12",
+     "with_tip": "1960a17f7c254c3ec8d18e8c6108eaeb416d06ee",
+     "at": "2026-10-18T18:57:59Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16223",
+     "code": "a27795e7758c4bbeee2742aa7987a8f53f9f745b",
+     "with_code": "0f882f7d78303ab8456cc8b7f89ac14390b296af",
+     "tip": "e0b4910a068bdd664040c8b84398e2db008d9a12",
+     "with_tip": "91c3da50c6638c9d177d6b5dbe12f89d3de28daf",
+     "at": "2026-10-18T18:58:06Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16233",
+     "code": "a27795e7758c4bbeee2742aa7987a8f53f9f745b",
+     "with_code": "f31c8679167d32247c9962e9af64542d5b548491",
+     "tip": "e0b4910a068bdd664040c8b84398e2db008d9a12",
+     "with_tip": "d5bc6504430ff40df8ea5b6a57bc9e09aa2d8c06",
+     "at": "2026-10-18T18:58:06Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "relay-popup-front-main",
