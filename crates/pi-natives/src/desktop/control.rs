@@ -802,11 +802,11 @@ pub(crate) fn grant_for_test(source: &CancellationSource) {
 }
 
 #[cfg(test)]
-pub(super) mod tests {
+mod tests {
 	use super::*;
 
 	/// Removes this process's private kernel lock (see `KernelLease::path`).
-	pub(in crate::desktop) fn remove_test_lock() {
+	fn remove_test_lock() {
 		#[cfg(unix)]
 		let _ = std::fs::remove_file(KernelLease::path());
 	}

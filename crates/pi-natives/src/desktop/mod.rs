@@ -4621,7 +4621,7 @@ mod capture_tests {
 		let modes = Arc::clone(&backend.modes);
 		let mut worker = worker_with(backend);
 		let source = CancellationSource::default();
-		control::tests::grant_for_test(&source);
+		control::grant_for_test(&source);
 		assert!(source.control_active());
 		let token = source.token();
 		let target = Target::Window(WAYLAND_ID.to_string());
@@ -4652,7 +4652,6 @@ mod capture_tests {
 			worker.process(&hover, &token).unwrap();
 		}
 		source.release_control();
-		control::tests::remove_test_lock();
 		let (background, foreground) = (DeliveryMode::Background, DeliveryMode::Foreground);
 		assert_eq!(*modes.lock(), [
 			background, background, background, background, foreground, foreground, foreground,
