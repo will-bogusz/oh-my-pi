@@ -682,6 +682,31 @@ return { errors, text: await status.evaluate(el => el.textContent) };`,
 		await invoke({ action: "close", name: "ask-kept" });
 	}, 60_000);
 
+	test("keeps an element id a run used valid in the next run", async () => {
+		const invoke = createHost();
+		await invoke({ action: "open", name: "id-runs", url: `${baseUrl}/ask` });
+		// The first run's tab.id(n) gives the cached handle that run's page-wait check, which ends with the run.
+		const first = await invoke({
+			action: "run",
+			name: "id-runs",
+			timeout: 10,
+			code: `const { elements } = await tab.observe();
+const id = elements.find(element => element.name === "Delete").id;
+await (await tab.id(id)).evaluate(el => el.id);
+return id;`,
+		});
+		const id = valueOf(first) as number;
+		// The next run's lookup used to check the cached handle through that ended check and call the element stale.
+		const next = await invoke({
+			action: "run",
+			name: "id-runs",
+			timeout: 10,
+			code: `return await (await tab.id(${id})).evaluate(el => el.id);`,
+		});
+		expect(valueOf(next)).toBe("delete");
+		await invoke({ action: "close", name: "id-runs" });
+	}, 60_000);
+
 	test("keeps a tab whose page asks for a confirm while it opens, and answers it", async () => {
 		const invoke = createHost();
 		// The open used to treat the dialog as a failed navigation and close the tab it was waiting in.

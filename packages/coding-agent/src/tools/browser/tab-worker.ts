@@ -3720,7 +3720,11 @@ export class WorkerCore {
 			return resolved;
 		}
 		try {
-			const isConnected = (await handle.evaluate(el => el.isConnected)) as boolean;
+			// An earlier run enriched the cached handle with its own deadline, which ended with that run: check through
+			// Puppeteer's evaluate.
+			const evaluate = (handle as HandleWithRawMethods)[RAW_HANDLE_METHODS]?.reads.evaluate;
+			const connected = (el: Element) => el.isConnected;
+			const isConnected = evaluate ? await evaluate.call(handle, connected) : await handle.evaluate(connected);
 			if (!isConnected) {
 				this.#clearElementCache();
 				throw new ToolError(`Element id ${id} is stale. Run tab.observe() again.`);
