@@ -4062,43 +4062,25 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T14:06:07Z",
+  "checked": "2026-10-18T14:36:42Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "computer-sent-not-cancelled": {
-    "since": "2026-10-18T14:06:07Z",
-    "title": "fix(natives): keep computer input that already went out from reporting Cancelled"
-   },
-   "computer-intervened-followup": {
-    "since": "2026-10-18T14:06:07Z",
-    "title": "fix(natives): say a macOS click stopped by the user may have landed, and test that el.type waits for them"
+   "computer-release-helper-followup": {
+    "since": "2026-10-18T14:36:42Z",
+    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press"
    }
   },
   "conflicts": {
-   "#15191": {
-    "since": "2026-10-18T11:03:22Z",
-    "title": "feat(computer): rerun refused macOS background input in takeover, set by computer.backgroundFallback",
+   "#16185": {
+    "since": "2026-10-18T14:36:42Z",
+    "title": "fix(natives): send a macOS background target back however late it activates itself",
     "files": [
-     "crates/pi-natives/src/desktop/backend.rs",
-     "crates/pi-natives/src/desktop/macos/ax.rs",
-     "crates/pi-natives/src/desktop/macos/ax/open_menu.rs",
-     "crates/pi-natives/src/desktop/macos/input.rs",
-     "crates/pi-natives/src/desktop/macos/mod.rs",
-     "crates/pi-natives/src/desktop/macos/process.rs",
-     "crates/pi-natives/src/desktop/macos/skylight.rs",
-     "crates/pi-natives/src/desktop/mod.rs",
-     "crates/pi-natives/src/desktop/types.rs",
-     "docs/computer-use.md",
-     "docs/tools/computer.md",
-     "packages/coding-agent/src/prompts/tools/computer.md",
-     "packages/coding-agent/src/tools/computer/worker.ts",
-     "packages/coding-agent/test/tools/computer.test.ts",
-     "packages/natives/native/index.d.ts"
+     "docs/computer-use.md"
     ]
    }
   },
-  "merged_through": "2026-10-18T13:55:52Z",
+  "merged_through": "2026-10-18T14:25:05Z",
   "unreleased": {
    "15157": {
     "title": "fix(natives): report the macOS Escape stop honestly",
@@ -4169,6 +4151,16 @@
     "title": "feat(natives): deliver macOS background drags, holds, modified and right-clicks",
     "merge_commit": "08c8af012cd49478b3a791fc4f458148bebd0d42",
     "merged_at": "2026-10-18T13:55:52Z"
+   },
+   "15192": {
+    "title": "fix(natives): release keys and buttons a macOS input request still holds when omp dies",
+    "merge_commit": "33eeebc138e214813fe1190154b7ecc086f2ad12",
+    "merged_at": "2026-10-18T14:15:55Z"
+   },
+   "15191": {
+    "title": "feat(computer): rerun refused macOS background input in takeover, set by computer.backgroundFallback",
+    "merge_commit": "89ae2976d783d33ec48de7ff2a6dc7aedf0a78e6",
+    "merged_at": "2026-10-18T14:25:05Z"
    }
   },
   "ready": [
@@ -4179,8 +4171,6 @@
    15124,
    15128,
    15130,
-   15191,
-   15192,
    15418,
    15433,
    15508,
@@ -4960,6 +4950,51 @@
     "id": "natives-test-click-placed-in-users-app",
     "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test",
     "why": "opened as #16187"
+   },
+   {
+    "at": "2026-10-18T14:36:42Z",
+    "kind": "merged",
+    "number": 15192,
+    "title": "fix(natives): release keys and buttons a macOS input request still holds when omp dies",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T14:36:42Z",
+    "kind": "merged",
+    "number": 15191,
+    "title": "feat(computer): rerun refused macOS background input in takeover, set by computer.backgroundFallback",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T14:36:42Z",
+    "kind": "openable",
+    "id": "computer-release-helper-followup",
+    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press"
+   },
+   {
+    "at": "2026-10-18T14:36:42Z",
+    "kind": "unopenable",
+    "id": "computer-sent-not-cancelled",
+    "title": "fix(natives): keep computer input that already went out from reporting Cancelled",
+    "why": "plan: wait (conflicts with #16185 in docs/computer-use.md)"
+   },
+   {
+    "at": "2026-10-18T14:36:42Z",
+    "kind": "unopenable",
+    "id": "computer-intervened-followup",
+    "title": "fix(natives): say a macOS click stopped by the user may have landed, and test that el.type waits for them",
+    "why": "plan: wait (conflicts with #16185 in docs/computer-use.md)"
+   },
+   {
+    "at": "2026-10-18T14:36:42Z",
+    "kind": "conflict",
+    "label": "#16185",
+    "title": "fix(natives): send a macOS background target back however late it activates itself",
+    "files": [
+     "docs/computer-use.md"
+    ]
    }
   ]
  }
