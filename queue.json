@@ -5061,5 +5061,11 @@
     "maintainer_commits": 0
    }
   ]
+ },
+ "opening": {
+  "id": "iphone-mirroring-test",
+  "token": "967ba88491644fea9e4f8a8583634b21",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T15:31:13Z"
  }
 }
