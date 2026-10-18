@@ -3150,13 +3150,24 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-17T23:44:06Z",
+  "checked": "2026-10-18T00:15:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {},
-  "merged_through": "2026-10-17T14:06:44Z",
-  "unreleased": {},
+  "merged_through": "2026-10-17T23:51:33Z",
+  "unreleased": {
+   "15157": {
+    "title": "fix(natives): report the macOS Escape stop honestly",
+    "merge_commit": "681aaa0b2e174e5e1cf7358145c8b700a271cd49",
+    "merged_at": "2026-10-17T23:49:51Z"
+   },
+   "15574": {
+    "title": "fix(natives,coding-agent): name the element that replaced a stale macOS computer ref",
+    "merge_commit": "dc4a66a84c6144a4d5f57233e3b150cd5e3b49cf",
+    "merged_at": "2026-10-17T23:51:33Z"
+   }
+  },
   "events": [
    {
     "at": "2026-10-14T19:47:58Z",
@@ -3636,6 +3647,22 @@
     "files": [
      "packages/coding-agent/test/claude-auto-reset-integration.test.ts"
     ]
+   },
+   {
+    "at": "2026-10-18T00:15:07Z",
+    "kind": "merged",
+    "number": 15157,
+    "title": "fix(natives): report the macOS Escape stop honestly",
+    "merged_by": "H4vC",
+    "maintainer_commits": 2
+   },
+   {
+    "at": "2026-10-18T00:15:07Z",
+    "kind": "merged",
+    "number": 15574,
+    "title": "fix(natives,coding-agent): name the element that replaced a stale macOS computer ref",
+    "merged_by": "H4vC",
+    "maintainer_commits": 2
    }
   ]
  }
