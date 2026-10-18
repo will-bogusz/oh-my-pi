@@ -259,15 +259,24 @@ function toGeminiContents(
 			continue;
 		}
 		if (message.role === "assistant") {
-			if (message.providerPayload?.type === "geminiNativeContent") {
-				const native = structuredClone(message.providerPayload.content) as Content & { parts: Part[] };
-				const nativeIds = native.parts.flatMap(part => (part.functionCall ? [part.functionCall.id] : []));
-				let callIndex = 0;
-				for (const block of message.content) {
-					if (block.type !== "toolCall") continue;
-					const nativeId = nativeIds[callIndex++];
+			// Checked again after canonical normalization, which may drop calls
+			// (e.g. names over the route's bound): a native turn whose calls no
+			// longer line up with the surviving ones is rebuilt instead.
+			const native =
+				message.providerPayload?.type === "geminiNativeContent"
+					? (structuredClone(message.providerPayload.content) as Content & { parts: Part[] })
+					: undefined;
+			const nativeCalls = native?.parts.flatMap(part => (part.functionCall ? [part.functionCall] : [])) ?? [];
+			const calls = message.content.filter(block => block.type === "toolCall");
+			if (
+				native &&
+				nativeCalls.length === calls.length &&
+				nativeCalls.every((call, i) => call.name === calls[i].name)
+			) {
+				calls.forEach((block, i) => {
+					const nativeId = nativeCalls[i].id;
 					if (nativeId) nativeCallIds.set(block.id, nativeId);
-				}
+				});
 				nativeContents.add(native);
 				contents.push(native as { role: "model"; parts: Part[] });
 				continue;

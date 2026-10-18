@@ -715,6 +715,51 @@ describe("Factory Droid gemini wire — native replay policy", () => {
 		expect(contents[2].parts[0].functionResponse).not.toHaveProperty("id");
 	});
 
+	it("rebuilds a native turn when normalization drops one of its calls", async () => {
+		const longName = `mcp__${"x".repeat(65)}`;
+		const longTools = [...tools, { name: longName, description: "Long", parameters: type({ path: "string" }) }];
+		const longWire = `${longName.slice(0, 64)}_${Bun.SHA256.hash(longName, "hex").slice(0, 8)}`;
+		const chunks = [
+			JSON.stringify({
+				candidates: [
+					{
+						content: {
+							role: "model",
+							parts: [
+								{ functionCall: { id: "fc-1", name: "Read", args: { path: "a" } }, thoughtSignature: "sig-1" },
+								{ functionCall: { id: "fc-2", name: longWire, args: { path: "b" } } },
+							],
+						},
+						finishReason: "STOP",
+					},
+				],
+			}),
+		];
+		const first = await run(
+			{ messages: [{ role: "user", content: "go", timestamp: 1 }], tools: longTools },
+			chunks,
+			{ requestPolicy: argonPolicy },
+			argon(),
+		);
+		const calls = first.result.content.filter(block => block.type === "toolCall");
+		expect(calls).toHaveLength(2);
+		const { contents } = await run(
+			{
+				messages: [
+					{ role: "user", content: "go", timestamp: 1 },
+					first.result,
+					...calls.map(call => toolResult(call.id, "body", call.name)),
+				],
+				tools: longTools,
+			},
+			undefined,
+			{ requestPolicy: argonPolicy },
+			argon(),
+		);
+		// Neither Gemini's call ids nor their response ids survive the rebuild.
+		expect(JSON.stringify(contents)).not.toContain('"id":');
+	});
+
 	it("records no native content for models without the policy", async () => {
 		const { result } = await run({ messages: [{ role: "user", content: "go", timestamp: 1 }], tools }, nativeChunks);
 		expect(result.providerPayload).toBeUndefined();
