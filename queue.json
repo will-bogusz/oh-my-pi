@@ -3440,12 +3440,21 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T02:50:08Z",
+  "checked": "2026-10-18T03:20:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
-  "conflicts": {},
-  "merged_through": "2026-10-18T02:33:52Z",
+  "conflicts": {
+   "#16119": {
+    "since": "2026-10-18T03:20:10Z",
+    "title": "feat(browser): open relay tabs omp owns in the background",
+    "files": [
+     "packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ]
+   }
+  },
+  "merged_through": "2026-10-18T03:12:45Z",
   "unreleased": {
    "15157": {
     "title": "fix(natives): report the macOS Escape stop honestly",
@@ -3466,6 +3475,11 @@
     "title": "feat(computer): select text in a background macOS element by accessibility",
     "merge_commit": "0c03e13bc9ae590638332446fff60f723561f34a",
     "merged_at": "2026-10-18T02:33:52Z"
+   },
+   "15174": {
+    "title": "fix(coding-agent): capture browser tabs in place instead of raising Chrome",
+    "merge_commit": "076a85ed7dd037225f6d399ed40c4c21e9726251",
+    "merged_at": "2026-10-18T03:12:45Z"
    }
   },
   "events": [
@@ -3979,6 +3993,24 @@
     "title": "feat(computer): select text in a background macOS element by accessibility",
     "merged_by": "H4vC",
     "maintainer_commits": 2
+   },
+   {
+    "at": "2026-10-18T03:20:10Z",
+    "kind": "merged",
+    "number": 15174,
+    "title": "fix(coding-agent): capture browser tabs in place instead of raising Chrome",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-18T03:20:10Z",
+    "kind": "conflict",
+    "label": "#16119",
+    "title": "feat(browser): open relay tabs omp owns in the background",
+    "files": [
+     "packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ]
    }
   ]
  }
