@@ -4398,7 +4398,7 @@
    "branch": "will/refind-cancel-root",
    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
    "body": "bodies/refind-cancel-root.md",
@@ -4408,7 +4408,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/refind-cancel-root",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:09Z",
-   "updated": "2026-10-18T18:49:52Z",
+   "updated": "2026-10-18T19:00:17Z",
    "note": "",
    "built": [
     {
