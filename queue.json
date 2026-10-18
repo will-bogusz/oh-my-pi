@@ -3960,6 +3960,26 @@
    "added": "2026-10-18T13:49:27Z",
    "updated": "2026-10-18T13:49:27Z",
    "note": ""
+  },
+  {
+   "id": "computer-same-reading-key-window",
+   "branch": "will/computer-same-reading-key-window",
+   "title": "fix(natives): hand a macOS user's app back with the window they clicked as the target came forward",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "#16185"
+   ],
+   "base": "c0435fa702f374c83594112bc597fd23d5e992ee",
+   "body": "bodies/computer-same-reading-key-window.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-same-reading-key-window",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T14:05:14Z",
+   "updated": "2026-10-18T14:05:14Z",
+   "note": ""
   }
  ],
  "watch": {
