@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Fixed
+### Added
+- Added a report at the end of `computer` Eval cells that send desktop input: once the apps go quiet, you see what changed in each window the input touched since your last tree of it, so no re-read is needed
+- Added `computer.backgroundFallback` (`takeover` by default, or `refuse`): when a `computer` window input call has no background route, the tool reruns that one call in takeover, hands focus back to your app and says so in its result; `refuse` fails the call instead and also refuses the agent's own foreground requests (`takeover: true`, `raise()`, an activating `apps.open`, desktop input, and on macOS menus and `AXOpen`) ([#15191](https://github.com/can1357/oh-my-pi/pull/15191) by [@will-bogusz](https://github.com/will-bogusz))
 
 - Fixed `computer` input and reads going out before your app finished reacting to the input before them: they now wait until it goes quiet, so a name typed right after ⌘⇧N in Finder lands in the new folder
 
