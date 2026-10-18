@@ -5262,21 +5262,53 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T19:11:35Z",
+  "checked": "2026-10-18T19:40:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "browser-options-hints": {
-    "since": "2026-10-18T19:11:35Z",
-    "title": "fix(coding-agent): name the expected shape when browser tab.run gets an args array or open gets a URL"
+   "browser-role-name": {
+    "since": "2026-10-18T19:40:43Z",
+    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows"
+   },
+   "compact-tool-result": {
+    "since": "2026-10-18T19:40:43Z",
+    "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it"
+   },
+   "report-issue-colon": {
+    "since": "2026-10-18T19:40:43Z",
+    "title": "fix(coding-agent): keep URIs in auto-QA report tool names"
+   },
+   "req-debug-redact": {
+    "since": "2026-10-18T19:40:43Z",
+    "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps"
+   },
+   "revive-tools": {
+    "since": "2026-10-18T19:40:43Z",
+    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent"
+   },
+   "aside-back-to-back": {
+    "since": "2026-10-18T19:40:43Z",
+    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session"
+   },
+   "browser-app-precedence-docs": {
+    "since": "2026-10-18T19:40:43Z",
+    "title": "fix(browser): tell agents how to skip a configured relay"
    },
    "computer-no-ui-confirm": {
     "since": "2026-10-18T19:11:35Z",
     "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal"
    },
+   "computer-windows-doc": {
+    "since": "2026-10-18T19:40:43Z",
+    "title": "fix(coding-agent): say computer.windows() returns plain records, not window handles"
+   },
    "relay-popup-front-main": {
     "since": "2026-10-18T19:11:35Z",
     "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS"
+   },
+   "wake-relay-report-text": {
+    "since": "2026-10-18T19:40:43Z",
+    "title": "fix(task): relay a woken subagent's final report, not all its turn text"
    },
    "release-helper-wait-test": {
     "since": "2026-10-18T19:11:35Z",
@@ -5433,7 +5465,8 @@
    16230,
    16231,
    16233,
-   16235
+   16235,
+   16236
   ],
   "events": [
    {
@@ -6446,6 +6479,67 @@
     "id": "refind-cancel-root",
     "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
     "why": "opened as #16233"
+   },
+   {
+    "at": "2026-10-18T19:40:43Z",
+    "kind": "openable",
+    "id": "browser-role-name",
+    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows"
+   },
+   {
+    "at": "2026-10-18T19:40:43Z",
+    "kind": "openable",
+    "id": "compact-tool-result",
+    "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it"
+   },
+   {
+    "at": "2026-10-18T19:40:43Z",
+    "kind": "openable",
+    "id": "report-issue-colon",
+    "title": "fix(coding-agent): keep URIs in auto-QA report tool names"
+   },
+   {
+    "at": "2026-10-18T19:40:43Z",
+    "kind": "openable",
+    "id": "req-debug-redact",
+    "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps"
+   },
+   {
+    "at": "2026-10-18T19:40:43Z",
+    "kind": "openable",
+    "id": "revive-tools",
+    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent"
+   },
+   {
+    "at": "2026-10-18T19:40:43Z",
+    "kind": "openable",
+    "id": "aside-back-to-back",
+    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session"
+   },
+   {
+    "at": "2026-10-18T19:40:43Z",
+    "kind": "openable",
+    "id": "browser-app-precedence-docs",
+    "title": "fix(browser): tell agents how to skip a configured relay"
+   },
+   {
+    "at": "2026-10-18T19:40:43Z",
+    "kind": "openable",
+    "id": "computer-windows-doc",
+    "title": "fix(coding-agent): say computer.windows() returns plain records, not window handles"
+   },
+   {
+    "at": "2026-10-18T19:40:43Z",
+    "kind": "openable",
+    "id": "wake-relay-report-text",
+    "title": "fix(task): relay a woken subagent's final report, not all its turn text"
+   },
+   {
+    "at": "2026-10-18T19:40:43Z",
+    "kind": "unopenable",
+    "id": "browser-options-hints",
+    "title": "fix(coding-agent): name the expected shape when browser tab.run gets an args array or open gets a URL",
+    "why": "opened as #16236"
    }
   ]
  },
