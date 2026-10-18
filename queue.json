@@ -3441,20 +3441,11 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T03:20:10Z",
+  "checked": "2026-10-18T03:51:06Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
-  "conflicts": {
-   "#16119": {
-    "since": "2026-10-18T03:20:10Z",
-    "title": "feat(browser): open relay tabs omp owns in the background",
-    "files": [
-     "packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-10-18T03:12:45Z",
   "unreleased": {
    "15157": {
@@ -3483,6 +3474,20 @@
     "merged_at": "2026-10-18T03:12:45Z"
    }
   },
+  "ready": [
+   13677,
+   14235,
+   14237,
+   15105,
+   15124,
+   15128,
+   15130,
+   15184,
+   15418,
+   15433,
+   15508,
+   16119
+  ],
   "events": [
    {
     "at": "2026-10-14T19:47:58Z",
