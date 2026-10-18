@@ -10350,8 +10350,64 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/utok-perf",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:42:32Z",
-   "updated": "2026-10-18T20:42:32Z",
-   "note": ""
+   "updated": "2026-10-18T20:53:08Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16233",
+     "code": "f8c67e92fbf68493450916f900b17d0682852f7d",
+     "with_code": "f31c8679167d32247c9962e9af64542d5b548491",
+     "tip": "a399fff251774e4827ff39b47f900776031677cc",
+     "with_tip": "d5bc6504430ff40df8ea5b6a57bc9e09aa2d8c06",
+     "at": "2026-10-18T20:52:59Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16235",
+     "code": "f8c67e92fbf68493450916f900b17d0682852f7d",
+     "with_code": "a27795e7758c4bbeee2742aa7987a8f53f9f745b",
+     "tip": "a399fff251774e4827ff39b47f900776031677cc",
+     "with_tip": "bade3a6d10b2a6704e80b381b8410323014d2904",
+     "at": "2026-10-18T20:53:07Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16217",
+     "code": "f8c67e92fbf68493450916f900b17d0682852f7d",
+     "with_code": "8ea79c1f67b4e717dcad6f73a5aa486ee6f54142",
+     "tip": "a399fff251774e4827ff39b47f900776031677cc",
+     "with_tip": "e7541c31bec975e6734b1d36acf933cfdad2d19b",
+     "at": "2026-10-18T20:53:07Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16223",
+     "code": "f8c67e92fbf68493450916f900b17d0682852f7d",
+     "with_code": "0d98b32063868a225160cd53b36c0676202cb911",
+     "tip": "a399fff251774e4827ff39b47f900776031677cc",
+     "with_tip": "c7eff2c5e0d01b6d30cffacc0929ec97928de1bc",
+     "at": "2026-10-18T20:53:07Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "relay-popup-front-main",
+     "code": "f8c67e92fbf68493450916f900b17d0682852f7d",
+     "with_code": "85ebeb34468af2365daf4b8c1238cb42fbf2c9a1",
+     "tip": "a399fff251774e4827ff39b47f900776031677cc",
+     "with_tip": "7bce54031580906a60c9e1cb343707a9ca66f560",
+     "at": "2026-10-18T20:53:07Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "release-helper-wait-test",
+     "code": "f8c67e92fbf68493450916f900b17d0682852f7d",
+     "with_code": "f35195c0d94ba003cf2d9ae00664aa6b18d5e7f7",
+     "tip": "a399fff251774e4827ff39b47f900776031677cc",
+     "with_tip": "c22df3fd4e666b7f935ec54342efa84f16e4655d",
+     "at": "2026-10-18T20:53:08Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "exact-provider-model-selector",
