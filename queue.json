@@ -9939,7 +9939,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/ssh-minimizer-width.md",
    "state": "queued",
    "pr": null,
@@ -9947,8 +9947,9 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:53:00Z",
-   "updated": "2026-10-18T19:53:00Z",
-   "note": ""
+   "updated": "2026-10-18T21:20:43Z",
+   "note": "",
+   "advanced": "2026-10-18T21:20:43Z"
   },
   {
    "id": "browser-timeout-names",
