@@ -7161,7 +7161,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-role-name",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:39:41Z",
-   "updated": "2026-10-18T22:17:10Z",
+   "updated": "2026-10-18T22:17:28Z",
    "note": "",
    "advanced": "2026-10-18T21:54:50Z",
    "built": [
@@ -7418,7 +7418,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-18T22:17:10Z"
+   "opened": "2026-10-18T22:17:10Z",
+   "readied": "2026-10-18T22:17:28Z"
   },
   {
    "id": "wake-relay-report-text",
