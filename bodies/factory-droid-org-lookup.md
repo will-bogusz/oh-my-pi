@@ -1,6 +1,6 @@
 ## What
 
-Factory Droid accounts whose WorkOS token carries no organization now get a token scoped to the account's organization, as the `droid` CLI does, instead of every request failing with 401 "User not affiliated with an organization".
+I made Factory Droid accounts whose WorkOS token carries no organization get a token scoped to the account's organization, as the `droid` CLI does, instead of every request failing with 401 "User not affiliated with an organization".
 
 After a login or refresh, the `factory-droid-region` hook calls whoami with the new token as before. If whoami returns no Factory org (a 401 or no `orgId`), and no WorkOS organization has been selected yet, the hook asks Factory which WorkOS organizations the user belongs to (`GET /api/cli/org`). If one comes back, it refreshes the grant with that `organization_id` and uses the re-issued token, with its `external_org_id` claim and the whoami identity for that token.
 
@@ -15,11 +15,11 @@ refresh_token grant + organization_id ──► scoped token ──► whoami �
 ```
 
 - **Org ids stay separate:** the WorkOS id from `/api/cli/org` is used only in the refresh grant and stored as `activeOrganizationId`. `X-Factory-Org-Id` still comes only from the token claim or whoami.
-- **At most one lookup:** the scoped refresh runs the hook again, with a WorkOS organization now selected, so the lookup and grant happen at most once per exchange.
+- **At most one lookup:** the scoped refresh reruns the hook with a WorkOS organization selected, so lookup and grant happen at most once per exchange.
 - **Failures:** if the account has no organization, the lookup or scoped grant fails, or the scoped token still resolves no org, login fails with #14035's `Factory identity check failed (401): …` and the server's reason.
 - **On refresh:** the scoped grant has already rotated the refresh token, so a refresh keeps the scoped credential either way.
 
-This adds a second token rotation and two round trips to an org-less refresh, all within the 10 s refresh budget. That budget can already drop a refresh token the provider has rotated when it expires mid-exchange; that is fixed separately.
+This adds a second token rotation and two round trips to an org-less refresh, within the 10 s refresh budget. That budget dropping a rotated refresh token mid-exchange is fixed separately.
 
 ## Why
 
