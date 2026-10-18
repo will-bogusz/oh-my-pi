@@ -1115,14 +1115,15 @@
    ],
    "base": null,
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15195,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-focus-guard",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T10:57:19Z",
-   "note": "ready by Will's call 2026-10-18, merges after #15184, #15176 (conflicts with #15176 in macos/ax.rs, skylight.rs); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; overlaps queued computer-sent-not-cancelled (main fix: a posted call never reports Cancelled): whichever lands second drops its duplicate (S1Keeper 2026-10-18)"
+   "updated": "2026-10-18T12:04:13Z",
+   "note": "ready by Will's call 2026-10-18, merges after #15184, #15176 (conflicts with #15176 in macos/ax.rs, skylight.rs); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; overlaps queued computer-sent-not-cancelled (main fix: a posted call never reports Cancelled): whichever lands second drops its duplicate (S1Keeper 2026-10-18)",
+   "merged_by": "pr"
   },
   {
    "id": "computer-input-diff-report",
@@ -2519,14 +2520,15 @@
    ],
    "base": null,
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15563,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-element-type",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T10:57:24Z",
-   "note": "ready by Will's call 2026-10-18, merges after #15193 and #15562 (and their parents); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; overlaps queued computer-sent-not-cancelled (main fix: a posted call never reports Cancelled): whichever lands second drops its duplicate (S1Keeper 2026-10-18)"
+   "updated": "2026-10-18T12:04:13Z",
+   "note": "ready by Will's call 2026-10-18, merges after #15193 and #15562 (and their parents); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; overlaps queued computer-sent-not-cancelled (main fix: a posted call never reports Cancelled): whichever lands second drops its duplicate (S1Keeper 2026-10-18)",
+   "merged_by": "pr"
   },
   {
    "id": "computer-escape-stops-turn",
@@ -2539,14 +2541,15 @@
    ],
    "base": null,
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15564,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-escape-stops-turn",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T05:23:50Z",
-   "note": "ready by Will's call 2026-10-18, merges after #15192 (last of series 1; contains #15176); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours"
+   "updated": "2026-10-18T12:04:13Z",
+   "note": "ready by Will's call 2026-10-18, merges after #15192 (last of series 1; contains #15176); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours",
+   "merged_by": "pr"
   },
   {
    "id": "computer-settle-debt",
