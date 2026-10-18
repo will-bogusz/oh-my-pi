@@ -10253,8 +10253,109 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-refusal-handoff",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:09:46Z",
-   "updated": "2026-10-18T20:09:46Z",
-   "note": ""
+   "updated": "2026-10-18T21:17:43Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#13677",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "48ed40cb133644f3de1bb7020dea7dcffa41fb8b",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "b79743411ae5052d23dc10a349254f989cf339b8",
+     "at": "2026-10-18T21:17:37Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15124",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "e04bec4c0f6b3e751e4162c8cb2222365b4db9df",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "f9884c71e9805d399f159b7011beb85614af67c7",
+     "at": "2026-10-18T21:17:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#14235",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "5ca41aa364865ad8d91bf3e7385346847b260d40",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "3880ea7d612d817a3915a8b5e97cb49039a22827",
+     "at": "2026-10-18T21:17:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#14237",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "86fb0761833073d8eaf1266b65baf8e4ca365325",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "57dee83b3fefa97dcb18e89d1b2b91853615d111",
+     "at": "2026-10-18T21:17:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15130",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "489401adc377f34ce309e0500122b62f9a00cc89",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "01eaca12da3ad399cd319718dc3c0239baf7347d",
+     "at": "2026-10-18T21:17:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "factory-droid-gemini-tool-schema",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "8475257499899a7f5dfe1359c41d95a39c1bfafb",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "d8768e3b328dc9d28552d2c80e6b16d9d6c41fdf",
+     "at": "2026-10-18T21:17:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "factory-droid-org-lookup",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "d1528d8fcc02c5273722276c8e5dfc8efb1ee752",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "7f6f45b287debe7c5d7a7c114b5acfb162efc727",
+     "at": "2026-10-18T21:17:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "gemini-tool-result-order",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "d8ce757302e8471f131827d20b384746817ebd1a",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "ff8a343d419970c23567b973cdeb8ce0be023e5d",
+     "at": "2026-10-18T21:17:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "oauth-refresh-keep-rotated-token",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "0f6dd25668581bfd973fafcd920a489c6f8a5be6",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "e3291bd4bc9bc996fb7bbd72699c957123383840",
+     "at": "2026-10-18T21:17:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "req-debug-redact",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "b7727846b55f20cc5c0c10f0e2dea20af8c9b3bb",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "5e775ca60a3fd31fdd8d0e03bc402801ad37187a",
+     "at": "2026-10-18T21:17:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "factory-droid-prompt-cache",
+     "code": "ea04926a68eeb4e834ee065b45e4d36d45b18526",
+     "with_code": "bd50f5e4345d53e2d3cc02cbb1a99c4cf6271f5b",
+     "tip": "d54717dace150dc9cd544b37d83e577c8e480e20",
+     "with_tip": "24cf01258cc0388f45340ee6f3b8135dc104b1f2",
+     "at": "2026-10-18T21:17:42Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "factory-droid-credit-promotions",
