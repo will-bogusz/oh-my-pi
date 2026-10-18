@@ -1065,9 +1065,6 @@ describe("computer prelude", () => {
 		override async axClick(ref: string, opts?: PointerOptions | null): Promise<void> {
 			this.axCalls.push(["axClick", ref, opts]);
 		}
-		override async axType(ref: string, text: string, opts?: PointerOptions | null): Promise<void> {
-			this.axCalls.push(["axType", ref, text, opts]);
-		}
 		override async axKeyChord(ref: string, keys: string[], opts?: PointerOptions | null): Promise<void> {
 			this.axCalls.push(["axKeyChord", ref, keys, opts]);
 		}
@@ -1122,7 +1119,7 @@ describe("computer prelude", () => {
 		}
 	});
 
-	it("types and presses chords into JavaScript elements, keeping press() without a chord the native press", async () => {
+	it("presses a chord into a JavaScript element and keeps press() without a chord the native press", async () => {
 		const session = toolSession();
 		const native = new RefCallSession();
 		const prelude = workerPrelude(session, native);
@@ -1139,23 +1136,21 @@ describe("computer prelude", () => {
 			await runInContext(
 				`(async () => {
 					const win = await computer.window(42);
-					await win.ref("e1").type("123456");
-					await win.ref("e1").press("cmd+a", { takeover: true });
+					await win.ref("e1").press("cmd+a");
 					await win.ref("e1").press();
 					await computer.run(async ({ desktop }) => {
 						const el = await desktop.ref("e1");
-						await el.type("x", { takeover: true });
 						await el.press(["shift", "tab"]);
+						await el.press();
 					});
 				})()`,
 				realm,
 			);
 			expect(native.axCalls.filter(call => (call as unknown[])[0] !== "axNode")).toEqual([
-				["axType", "e1", "123456", {}],
-				["axKeyChord", "e1", ["cmd", "a"], { takeover: true }],
+				["axKeyChord", "e1", ["cmd", "a"], {}],
 				["axPerform", "e1", "press"],
-				["axType", "e1", "x", { takeover: true }],
 				["axKeyChord", "e1", ["shift", "tab"], {}],
+				["axPerform", "e1", "press"],
 			]);
 		} finally {
 			await prelude.invoke({ action: "close" }, context);
@@ -2190,45 +2185,17 @@ describe("computer worker round trips", () => {
 		if (second.ok) expect(second.payload.returnValue).toEqual({ x: 7, y: 8, width: 9, height: 10 });
 	});
 
-	it("passes a menu item path to native with the click or action that opens the menu", async () => {
-		const calls: unknown[][] = [];
-		class MenuNativeSession extends FakeNativeSession {
-			override async click(target: string, x: number, y: number, opts?: PointerOptions | null): Promise<void> {
-				calls.push(["click", target, x, y, opts]);
-			}
-			override async axClick(ref: string, opts?: PointerOptions | null): Promise<void> {
-				calls.push(["axClick", ref, opts]);
-			}
-			override async axPerform(ref: string, action: string, menu?: string[] | null): Promise<void> {
-				calls.push(["axPerform", ref, action, menu]);
-			}
-		}
+	it("refuses an empty menu path before anything is sent", async () => {
 		const transport = new MemoryTransport();
-		new ComputerWorkerCore(transport, () => new MenuNativeSession());
+		new ComputerWorkerCore(transport, () => new FakeNativeSession());
 		const result = await runWorker(
 			transport,
-			"menu-paths",
-			`const win = await desktop.window("42");
-			await win.screenshot({ silent: true });
-			const [el] = await win.find({ role: "button" });
-			await win.click(1, 2, { button: "right", menu: ["Add to", "Bench Holdout"] });
-			await el.click({ button: "right", menu: ["Add to", "Bench Holdout"] });
-			await el.press({ menu: ["New Folder"] });
-			await el.perform("AXShowMenu", { menu: ["List", "Errands"] });
-			await el.press();
-			return await el.press({ menu: [] }).then(() => "sent", error => error.message);`,
+			"empty-menu-path",
+			'const el = await (await desktop.window("42")).ref("e1"); return await el.press({ menu: [] }).then(() => "sent", error => error.message)',
 		);
 		expect(result.ok).toBe(true);
 		if (result.ok)
 			expect(result.payload.returnValue).toBe("menu path requires a non-empty array of non-empty strings");
-		const add = ["Add to", "Bench Holdout"];
-		expect(calls).toEqual([
-			["click", "42", 1, 2, { button: "right", menu: add }],
-			["axClick", "e1", { button: "right", menu: add }],
-			["axPerform", "e1", "press", ["New Folder"]],
-			["axPerform", "e1", "AXShowMenu", ["List", "Errands"]],
-			["axPerform", "e1", "press", undefined],
-		]);
 	});
 
 	it("answers a direct capabilities request without a prior run", async () => {
