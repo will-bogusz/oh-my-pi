@@ -3804,13 +3804,13 @@
    "needs": [],
    "base": "89ae2976d783d33ec48de7ff2a6dc7aedf0a78e6",
    "body": "bodies/computer-target-sent-back-late.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16185,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/tmp/oh-my-pi/s1k-target-late",
    "host": "MacBook-Pro",
    "added": "2026-10-18T12:38:01Z",
-   "updated": "2026-10-18T14:28:15Z",
+   "updated": "2026-10-18T16:33:07Z",
    "note": "Regression fix for #15195 (merged 4d956dad0f, unreleased). SamePollClick's will/computer-same-poll-click touches the same BackgroundFocusLease::observe(); it rebases onto this.",
    "built": [
     {
@@ -3823,7 +3823,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-18T14:28:15Z"
+   "advanced": "2026-10-18T14:28:15Z",
+   "merged_by": "pr"
   },
   {
    "id": "computer-sent-not-cancelled",
@@ -3958,13 +3959,13 @@
    "needs": [],
    "base": "58349dc80de381057437818b8354c86826c8fa10",
    "body": "bodies/computer-intervened-followup.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16206,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-intervened-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:41:58Z",
-   "updated": "2026-10-18T16:24:57Z",
+   "updated": "2026-10-18T16:33:07Z",
    "note": "",
    "built": [
     {
@@ -4050,7 +4051,8 @@
     }
    ],
    "opened": "2026-10-18T15:54:07Z",
-   "readied": "2026-10-18T15:54:21Z"
+   "readied": "2026-10-18T15:54:21Z",
+   "merged_by": "pr"
   },
   {
    "id": "natives-name-takeover-tap-kinds",
@@ -4061,13 +4063,13 @@
    "needs": [],
    "base": "58349dc80de381057437818b8354c86826c8fa10",
    "body": "bodies/natives-name-takeover-tap-kinds.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16188,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/natives-name-takeover-tap-kinds",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:42:54Z",
-   "updated": "2026-10-18T14:06:05Z",
+   "updated": "2026-10-18T16:33:07Z",
    "note": "",
    "built": [
     {
@@ -4099,7 +4101,8 @@
     }
    ],
    "opened": "2026-10-18T13:46:01Z",
-   "readied": "2026-10-18T13:46:14Z"
+   "readied": "2026-10-18T13:46:14Z",
+   "merged_by": "pr"
   },
   {
    "id": "computer-element-front-first",
@@ -4216,13 +4219,13 @@
    "needs": [],
    "base": "3f020bd85001c33d351ab1b923d69fa24c7f06f5",
    "body": "bodies/iphone-mirroring-test.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16200,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirroring-test",
    "host": "MacBook-Pro",
    "added": "2026-10-18T15:30:46Z",
-   "updated": "2026-10-18T15:38:07Z",
+   "updated": "2026-10-18T16:33:07Z",
    "note": "",
    "built": [
     {
@@ -4245,7 +4248,8 @@
     }
    ],
    "opened": "2026-10-18T15:32:00Z",
-   "readied": "2026-10-18T15:32:13Z"
+   "readied": "2026-10-18T15:32:13Z",
+   "merged_by": "pr"
   }
  ],
  "watch": {
