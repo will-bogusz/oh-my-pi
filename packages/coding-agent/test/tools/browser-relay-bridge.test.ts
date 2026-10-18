@@ -2850,3 +2850,158 @@ describe("RelayBridge focus emulation", () => {
 		expect(switchSends(back, FOCUS)).toEqual([false]);
 	});
 });
+
+describe("RelayBridge release between turns", () => {
+	async function release(bridge: RelayBridge, ext: FakeExtSocket, cdp: FakeCdpSocket, connId: number, tabId: number) {
+		const releaseId = ++msgSeq;
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: releaseId, method: "OMP.releaseTarget", params: { targetId: `PAGE${ANON}.${tabId}` } }),
+		);
+		await flush();
+		ack(bridge, ext, "detach");
+		await flush();
+		return cdp.messages.find(message => message.id === releaseId);
+	}
+
+	function autoAttach(bridge: RelayBridge, connId: number): void {
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: ++msgSeq, method: "Target.setAutoAttach", params: { autoAttach: true } }),
+		);
+	}
+
+	it("takes the debugger off a tab its client releases and keeps the tab the client's, grouped and unattached", async () => {
+		const bridge = new RelayBridge({ group: { title: "omp", color: "cyan" } });
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		autoAttach(bridge, connId);
+		await flush();
+		const pageSession = await attachPage(bridge, ext, cdp, connId, 1);
+		ack(bridge, ext, "group", { grouped: { "1": 42 } });
+		await flush();
+
+		const reply = await release(bridge, ext, cdp, connId, 1);
+		expect(reply).toMatchObject({ result: { detached: true } });
+		expect(ext.rpcs("detach").map(rpc => rpc.tabId)).toEqual([1]);
+		const detachedSessions = cdp.messages.flatMap(message =>
+			message.method === "Target.detachedFromTarget" && message.params && typeof message.params === "object"
+				? [(message.params as { sessionId?: string }).sessionId]
+				: [],
+		);
+		expect(detachedSessions).toContain(pageSession);
+		expect(ext.rpcs("ungroup")).toHaveLength(0);
+
+		// Chrome discards the tab and brings it back while the client is away: the relay does not attach it again.
+		const attaches = ext.rpcs("attach").length;
+		bridge.extMessage(ext, JSON.stringify({ t: "tabUpdated", tab: tab({ tabId: 1, discarded: true }) }));
+		await flush();
+		bridge.extMessage(ext, JSON.stringify({ t: "tabUpdated", tab: tab({ tabId: 1, discarded: false }) }));
+		await flush();
+		expect(ext.rpcs("attach")).toHaveLength(attaches);
+		expect(ext.rpcs("ungroup")).toHaveLength(0);
+
+		// Claiming it again attaches it again.
+		await claimTab(bridge, ext, cdp, connId, 1);
+		expect(ext.rpcs("attach")).toHaveLength(attaches + 1);
+	});
+
+	it("releases the popups a released tab opened with it, and attaches one again when its client claims it", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })]);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		await claimTab(bridge, ext, cdp, connId, 1);
+		autoAttach(bridge, connId);
+		ack(bridge, ext, "attach");
+		await flush();
+		// Tab 1 opens a popup, which opens one of its own; the user's tab 2 opens one that stays theirs.
+		for (const [sourceTabId, tabId] of [
+			[1, 3],
+			[3, 4],
+			[2, 5],
+		]) {
+			bridge.extMessage(ext, JSON.stringify({ t: "tabCreated", tab: tab({ tabId: tabId!, url: "" }) }));
+			bridge.extMessage(ext, JSON.stringify({ t: "popupCreated", sourceTabId, tabId }));
+		}
+		ack(bridge, ext, "attach");
+		await flush();
+		expect(ext.rpcs("attach").map(rpc => rpc.tabId)).toEqual([1, 3, 4]);
+
+		const reply = await release(bridge, ext, cdp, connId, 1);
+		expect(reply).toMatchObject({ result: { detached: true } });
+		expect(
+			ext
+				.rpcs("detach")
+				.map(rpc => rpc.tabId)
+				.sort(),
+		).toEqual([1, 3, 4]);
+
+		await claimTab(bridge, ext, cdp, connId, 3);
+		expect(ext.rpcs("attach").map(rpc => rpc.tabId)).toEqual([1, 3, 4, 3]);
+	});
+
+	it("keeps the debugger on while another client still holds a session on the released tab", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const first = new FakeCdpSocket();
+		const firstId = bridge.cdpConnected(first);
+		const second = new FakeCdpSocket();
+		const secondId = bridge.cdpConnected(second);
+		await attachPage(bridge, ext, first, firstId, 1);
+		await attachPage(bridge, ext, second, secondId, 1);
+
+		const reply = await release(bridge, ext, first, firstId, 1);
+		expect(reply).toMatchObject({ result: { detached: false } });
+		expect(ext.rpcs("detach")).toHaveLength(0);
+	});
+
+	it("refuses to release a tab the client does not own", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const owner = new FakeCdpSocket();
+		const ownerId = bridge.cdpConnected(owner);
+		await attachPage(bridge, ext, owner, ownerId, 1);
+		const other = new FakeCdpSocket();
+		const otherId = bridge.cdpConnected(other);
+
+		const reply = await release(bridge, ext, other, otherId, 1);
+		expect(reply && "error" in reply).toBe(true);
+		expect(ext.rpcs("detach")).toHaveLength(0);
+	});
+
+	it("keeps a released tab detached when an attach for it was still in flight", async () => {
+		const bridge = new RelayBridge({});
+		const ext = new FakeExtSocket();
+		connect(bridge, ext, [tab({ tabId: 1 })]);
+		const cdp = new FakeCdpSocket();
+		const connId = bridge.cdpConnected(cdp);
+		// Claimed without auto-attach, so nothing attaches until the client asks for it.
+		await claimTab(bridge, ext, cdp, connId, 1);
+		autoAttach(bridge, connId);
+		await flush();
+		expect(ext.pending("attach")).toHaveLength(1);
+
+		const releaseId = ++msgSeq;
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: releaseId, method: "OMP.releaseTarget", params: { targetId: `PAGE${ANON}.1` } }),
+		);
+		await flush();
+		// The reply waits for the attach in flight, which would otherwise land after it.
+		expect(cdp.messages.find(message => message.id === releaseId)).toBeUndefined();
+		ack(bridge, ext, "attach");
+		await flush();
+		ack(bridge, ext, "detach");
+		await flush();
+
+		expect(cdp.messages.find(message => message.id === releaseId)).toMatchObject({ result: { detached: true } });
+		expect(cdp.attachedSessions()).toHaveLength(0);
+		expect(ext.rpcs("detach").map(rpc => rpc.tabId)).toEqual([1]);
+	});
+});

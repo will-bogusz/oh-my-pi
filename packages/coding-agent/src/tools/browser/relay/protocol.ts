@@ -89,9 +89,10 @@ export function stampRelayExtensionManifest(manifestJson: string, ompVersion: st
 /**
  * The relay's CDP contract this omp relies on, reported in `/json/version`; omp replaces (or refuses) a
  * relay reporting another. 1: the relay attaches only tabs a connection created (`Target.createTarget`)
- * or claimed with the browser-level `OMP.claimTarget`.
+ * or claimed with the browser-level `OMP.claimTarget`. 2: a connection lets go of a tab's debugger and
+ * keeps the tab with `OMP.releaseTarget`.
  */
-export const RELAY_CDP_PROTOCOL_VERSION = 1;
+export const RELAY_CDP_PROTOCOL_VERSION = 2;
 
 /** Messages sent extension → relay. */
 export type ExtToRelayMessage =
