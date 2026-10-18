@@ -4402,13 +4402,13 @@
    "needs": [],
    "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
    "body": "bodies/refind-cancel-root.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16233,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/refind-cancel-root",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:09Z",
-   "updated": "2026-10-18T18:40:57Z",
+   "updated": "2026-10-18T18:49:19Z",
    "note": "",
    "built": [
     {
@@ -4429,7 +4429,8 @@
      "at": "2026-10-18T18:40:56Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-18T18:49:18Z"
   },
   {
    "id": "screenshot-session-abort",
