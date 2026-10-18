@@ -478,6 +478,7 @@ impl Request {
 			| Self::AxFocused { .. }
 			| Self::AxNode { .. }
 			| Self::AxAttributes { .. }
+			| Self::AxMarkdown { .. }
 			| Self::AxChildren { .. }
 			| Self::AxParent { .. }
 			| Self::Close { .. } => return false,
@@ -522,6 +523,7 @@ impl Request {
 		match self {
 			Self::AxNode { reference, .. }
 			| Self::AxAttributes { reference, .. }
+			| Self::AxMarkdown { reference, .. }
 			| Self::AxChildren { reference, .. }
 			| Self::AxParent { reference, .. }
 			| Self::AxPerform { reference, .. }
@@ -593,6 +595,7 @@ impl Request {
 			| Self::AxFocused { .. }
 			| Self::AxNode { .. }
 			| Self::AxAttributes { .. }
+			| Self::AxMarkdown { .. }
 			| Self::AxChildren { .. }
 			| Self::AxParent { .. }
 			| Self::Close { .. } => None,
@@ -2975,6 +2978,15 @@ mod capture_tests {
 			Ok(vec![("AXTitle".to_string(), title.to_string())])
 		}
 
+		fn markdown(&mut self, h: &AxHandle) -> CoreResult<String> {
+			let tree = self
+				.tree
+				.as_ref()
+				.expect("formatted text needs a tree")
+				.lock();
+			Ok(format!("**{}**", tree.titles[&tree.element(h)?]))
+		}
+
 		fn destroyed(&mut self, h: &AxHandle) -> bool {
 			let AxHandle::Test(id) = h else { return false };
 			self.tree.as_ref().is_some_and(|tree| {
@@ -3840,9 +3852,10 @@ mod capture_tests {
 		}
 		let (mut worker, tree) = read_buttons(&[(2, "Go"), (3, "Stop")]);
 		rebuild(&tree, 2, &[(4, "Go"), (3, "Stop")]);
-		let requests: [fn(Reply) -> Request; 10] = [
+		let requests: [fn(Reply) -> Request; 11] = [
 			|reply| Request::AxNode { reference: e2(), reply },
 			|reply| Request::AxAttributes { reference: e2(), reply },
+			|reply| Request::AxMarkdown { reference: e2(), reply },
 			|reply| Request::AxChildren { reference: e2(), reply },
 			|reply| Request::AxParent { reference: e2(), reply },
 			|reply| Request::AxPerform {

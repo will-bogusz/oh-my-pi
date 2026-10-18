@@ -2,8 +2,8 @@ mod enablement;
 pub(crate) mod menus;
 pub(super) mod open_menu;
 mod popup;
-mod selection;
 mod rich_text;
+mod selection;
 
 use std::{
 	collections::VecDeque,
