@@ -12,18 +12,18 @@ Before, a `computer` call whose keys or click had gone out could still throw `Ca
 
 ## Why
 
-Brit's `78bf1669cc` made the macOS shortcut reply wait a plain sleep, but the desktop worker still checked the cancel token after every request, so a shortcut cancelled in that sleep came back `Cancelled` anyway. The same class sat in the waits after input: macOS's gap after the last key or tap and the chord's final check, takeover's front-app hold, the background guard's settle, the click and drag settles, X11's takeover restore, key settle, last-key confirmation and focus watch, and Windows takeover's settle.
+Brit's `78bf1669cc` made the macOS shortcut reply wait a plain sleep, but the desktop worker still checked the cancel token after every request, so a shortcut cancelled in that sleep came back `Cancelled` anyway. The same class sat in the waits after input: macOS's hold after the last key, click or tap press and the chord's final check, takeover's front-app hold, the background guard's settle, the click and drag settles, X11's takeover restore, key settle, last-key confirmation and focus watch, and Windows takeover's settle.
 
 - `Worker::execute` checks the token after a call only for reads, which must not commit a frame they were cancelled during.
 - A new `control::settle` is the one wait used after input has gone out; it sleeps through a cancel. The X11 last-key confirmation runs under `control::cleanup` for the same reason.
 - `run_then_settle` now takes a duration and serves the background guard and takeover, so takeover also settles after a failed action (at most 40 ms).
 - A Screen Sharing key stopped by a held modifier after earlier keys went out now says they may already have landed, as the pointer recheck does.
 
-Non-goal: a cancel between keys still stops and reports partial input.
+Non-goal: a cancel between keys or clicks still stops and reports partial input. The settles also run in full after a cancelled action, adding up to 200 ms before the stop reports: a cancel can land after partial input, and the guard must still send back an app it brought forward.
 
 <details><summary>Reading order, and why the JS abort check stays</summary>
 
-`control.rs` `settle` → `mod.rs` `Worker::execute` → `macos/skylight.rs` `run_then_settle` → `macos/input.rs` `key_gap_wait` → `linux/x11/{input,mpx,wm}.rs` → `win32/input.rs`.
+`control.rs` `settle` → `mod.rs` `Worker::execute` → `macos/skylight.rs` `run_then_settle` → `macos/input.rs` `sent_gap_wait` → `linux/x11/{input,mpx,wm}.rs` → `win32/input.rs`.
 
 The JS `nativeCall` abort check after a native call is unchanged: an aborted run already rejects through its own race, and the run facade checks every awaited call too, so removing it changes nothing a script sees.
 
@@ -31,15 +31,15 @@ The JS `nativeCall` abort check after a native call is unchanged: an aborted run
 
 ## Testing
 
-Failing before, on `main` plus only the tests (`cargo test -p pi-natives --lib`, macOS arm64):
+Failing on `main` plus only the tests, passing with the fix (`cargo test -p pi-natives --lib`, macOS arm64):
 
-- `desktop::capture_tests::a_shortcut_sent_before_a_cancel_reports_sent`: the fake backend sends the chord, then the session is cancelled; `main`'s post-call token check turns it into an error. With the fix it returns `Unit`, and a request queued behind it is still `Cancelled`.
-- `desktop::macos::skylight::tests::a_cancel_once_the_input_is_out_keeps_it_through_the_settle`: `main`'s cancellable `FOREGROUND_SETTLE` wait turns `Ok(7)` into an error; with the fix it stays `Ok(7)`.
-- `desktop::macos::input::tests::input_whose_last_key_is_out_is_not_reported_cancelled`: typed text, a chord and Screen Sharing transitions cancelled at their last press return `Cancelled` on `main` and succeed with the fix; a cancel before the last press still stops.
+- `desktop::capture_tests::a_shortcut_sent_before_a_cancel_reports_sent`: the fake backend sends a chord, then the session is cancelled; `main` returns an error. A request queued behind it is still `Cancelled`.
+- `macos::skylight::tests::a_cancel_once_the_input_is_out_keeps_it_through_the_settle`: `main`'s `FOREGROUND_SETTLE` turns `Ok(7)` into an error.
+- `macos::input::tests::input_whose_last_key_is_out_is_not_reported_cancelled` and `a_click_whose_last_press_is_out_is_not_reported_cancelled`: text, a chord, Screen Sharing keys and a double tap cancelled at their last press; a cancel before it still stops.
 
-With the fix all three pass, as does the rest of `cargo test -p pi-natives --lib` (808 of 809) except `a_click_placed_in_the_users_app_does_not_let_the_target_keep_the_front`, which fails on `main` too. `CI=1 bun check`, `bun run build:native` and the computer bun tests (112) pass.
+The rest of the suite passes (884 of 885) except `iphone_mirroring_taps_and_scrolls_stop_once_the_user_brings_it_forward`, failing on `main` too. `CI=1 bun check`, `build:native` and the computer bun tests pass.
 
-Not run: the Linux X11 and Windows changes were not compiled here (macOS host only). The Screen Sharing wording was not checked on a live Screen Sharing session.
+Not run: the X11 and Windows changes were not compiled here (macOS only); the Screen Sharing wording was not checked on a live session.
 
 ---
 
