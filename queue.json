@@ -1035,14 +1035,15 @@
    ],
    "base": null,
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15185,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-background-gaps",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T10:57:17Z",
-   "note": "ready by Will's call 2026-10-18, merges after #15184, #15176 (conflicts with #15176 in macos/ax.rs, skylight.rs); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; overlaps queued computer-sent-not-cancelled (main fix: a posted call never reports Cancelled): whichever lands second drops its duplicate (S1Keeper 2026-10-18)"
+   "updated": "2026-10-18T14:06:05Z",
+   "note": "ready by Will's call 2026-10-18, merges after #15184, #15176 (conflicts with #15176 in macos/ax.rs, skylight.rs); handed to Brit (Will's call 2026-10-18): every valid Codex finding is ours; overlaps queued computer-sent-not-cancelled (main fix: a posted call never reports Cancelled): whichever lands second drops its duplicate (S1Keeper 2026-10-18)",
+   "merged_by": "pr"
   },
   {
    "id": "computer-background-fallback",
@@ -3899,7 +3900,7 @@
    "branch": "will/natives-name-takeover-tap-kinds",
    "title": "fix(natives): count a takeover tap kind without an arm as the user's input",
    "area": "computer",
-   "priority": "P3",
+   "priority": "P1",
    "needs": [],
    "base": "58349dc80de381057437818b8354c86826c8fa10",
    "body": "bodies/natives-name-takeover-tap-kinds.md",
@@ -3909,7 +3910,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/natives-name-takeover-tap-kinds",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:42:54Z",
-   "updated": "2026-10-18T13:46:14Z",
+   "updated": "2026-10-18T14:06:05Z",
    "note": "",
    "built": [
     {
