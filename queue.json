@@ -646,13 +646,13 @@
    "needs": [],
    "base": null,
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15173,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-grant-keeps-background",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T01:21:25Z",
+   "updated": "2026-10-18T02:50:07Z",
    "note": "ready on 2026-10-18 01:2xZ as series 1 layer 1; with Brit (hand-off: every valid Codex finding is ours). Show and tell post: https://github.com/can1357/oh-my-pi/discussions/16124",
    "built": [
     {
@@ -754,7 +754,8 @@
      "at": "2026-10-18T01:20:51Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "browser-screenshot-no-raise",
@@ -785,13 +786,13 @@
    "needs": [],
    "base": "dc4a66a84c6144a4d5f57233e3b150cd5e3b49cf",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15175,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-select-text",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T00:34:52Z",
+   "updated": "2026-10-18T02:50:07Z",
    "note": "ready on 2026-10-18 00:34Z as series 1 layer 1; with Brit (hand-off: every valid Codex finding is ours). Show and tell post: https://github.com/can1357/oh-my-pi/discussions/16124",
    "advanced": "2026-10-18T00:12:49Z",
    "built": [
@@ -885,7 +886,8 @@
      "at": "2026-10-18T00:33:11Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "computer-escape-takeover-only",
