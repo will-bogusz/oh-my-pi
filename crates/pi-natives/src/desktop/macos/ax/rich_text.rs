@@ -24,9 +24,14 @@ use super::{
 	CoreResult, DesktopError, Subrole, ax_error, copy_attribute_result, copy_held_attribute,
 	copy_string, read_subrole, secure_subrole,
 };
+use crate::desktop::control;
 
 /// How many times a text that changes while it is read is read again.
 const READ_ATTEMPTS: usize = 3;
+
+/// Most link addresses one read looks up, one accessibility call each, so a
+/// text full of links fails in bounded time instead of holding the session.
+const MAX_LINKS: usize = 2_000;
 
 /// The styles Markdown can show.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -48,9 +53,18 @@ pub(super) struct Span {
 
 /// `element`'s whole text as Markdown.
 pub(super) fn markdown(element: &AXUIElement) -> CoreResult<String> {
-	ensure_readable(read_subrole(element))?;
 	// The font lookups run on the session thread, which has no pool of its own.
-	autoreleasepool(|_| Ok(to_markdown(&spans(element)?)))
+	autoreleasepool(|_| markdown_after(read_subrole(element), || spans(element)))
+}
+
+/// The Markdown of the spans `read` returns, read only once `subrole` shows
+/// the element is not a secure text field.
+fn markdown_after(
+	subrole: Result<Subrole, AXError>,
+	read: impl FnOnce() -> CoreResult<Vec<Span>>,
+) -> CoreResult<String> {
+	ensure_readable(subrole)?;
+	Ok(to_markdown(&read()?))
 }
 
 /// A secure text field's text is never read, masked or not, and neither is the
@@ -169,19 +183,23 @@ fn no_formatted_text(element: &AXUIElement) -> DesktopError {
 }
 
 fn read_spans(text: &CFAttributedString) -> CoreResult<Vec<Span>> {
+	let length = text.length();
 	let Some(string) = text.string() else {
-		return Ok(Vec::new());
+		return if length == 0 {
+			Ok(Vec::new())
+		} else {
+			Err(unreadable_runs(0, length))
+		};
 	};
 	let units: Vec<u16> = string.to_string().encode_utf16().collect();
-	let length = text.length();
 	let mut spans = Vec::new();
-	let mut location = 0;
-	while location < length {
+	let mut links = 0;
+	each_run(length, control::check, |location| {
 		let mut run = CFRange { location, length: 0 };
 		// SAFETY: `location` is inside the string and `run` is writable.
 		let attributes = unsafe { text.attributes(location, &mut run) };
 		if run.length <= 0 {
-			break;
+			return Ok(location);
 		}
 		let start = usize::try_from(run.location).unwrap_or(0).min(units.len());
 		let end = usize::try_from(run.location + run.length)
@@ -193,15 +211,67 @@ fn read_spans(text: &CFAttributedString) -> CoreResult<Vec<Span>> {
 			// SAFETY: AX attributed strings key their attributes by CFString.
 			let attributes =
 				unsafe { CFRetained::cast_unchecked::<CFDictionary<CFString, CFType>>(attributes) };
-			style_span(&mut span.style, &attributes)?;
+			style_span(&mut span.style, &attributes, |link| {
+				read_link(&mut links, control::check, || copy_attribute_result(link, "AXURL"))
+			})?;
 		}
 		spans.push(span);
-		location = run.location + run.length;
-	}
+		Ok(run.location + run.length)
+	})?;
 	Ok(spans)
 }
 
-fn style_span(style: &mut Style, attributes: &CFDictionary<CFString, CFType>) -> CoreResult<()> {
+/// Walks `length` UTF-16 units run by run: `run(location)` reads the run that
+/// starts there and returns where it ends. `check` runs before each run, so a
+/// cancel stops the read between runs, and a run that ends where it started
+/// fails the read rather than leaving the rest of the text out.
+fn each_run(
+	length: CFIndex,
+	check: impl Fn() -> CoreResult<()>,
+	mut run: impl FnMut(CFIndex) -> CoreResult<CFIndex>,
+) -> CoreResult<()> {
+	let mut location = 0;
+	while location < length {
+		check()?;
+		let end = run(location)?;
+		if end <= location {
+			return Err(unreadable_runs(location, length));
+		}
+		location = end;
+	}
+	Ok(())
+}
+
+fn unreadable_runs(location: CFIndex, length: CFIndex) -> DesktopError {
+	DesktopError::ax_failed(format!(
+		"the text's formatting could not be read past character {location} of {length}; read \
+		 value() for its plain text"
+	))
+}
+
+/// A link's address from `read`, the read's `links`-th, after `check`. Past
+/// [`MAX_LINKS`] the whole read fails before another lookup.
+fn read_link(
+	links: &mut usize,
+	check: impl Fn() -> CoreResult<()>,
+	read: impl FnOnce() -> Result<Option<CFRetained<CFType>>, AXError>,
+) -> CoreResult<Option<String>> {
+	check()?;
+	*links += 1;
+	if *links > MAX_LINKS {
+		return Err(DesktopError::ax_failed(format!(
+			"the text has more than {MAX_LINKS} links, too many to read their addresses; read \
+			 value() for its plain text"
+		)));
+	}
+	link_url(read())
+}
+
+fn style_span(
+	style: &mut Style,
+	attributes: &CFDictionary<CFString, CFType>,
+	link_address: impl FnOnce(&AXUIElement) -> CoreResult<Option<String>>,
+) -> CoreResult<()> {
 	let get = |key: &'static str| attributes.get(&CFString::from_static_str(key));
 	if let Some((bold, italic)) = get("AXFont")
 		.and_then(|font| font.downcast::<CFDictionary>().ok())
@@ -214,7 +284,7 @@ fn style_span(style: &mut Style, attributes: &CFDictionary<CFString, CFType>) ->
 	}
 	style.strike = get("AXStrikethrough").is_some_and(|value| truthy(&value));
 	style.link = match get("AXLink").and_then(|link| link.downcast::<AXUIElement>().ok()) {
-		Some(link) => link_url(copy_attribute_result(&link, "AXURL"))?,
+		Some(link) => link_address(&link)?,
 		None => None,
 	};
 	style.heading = get("AXHeadingLevel")
@@ -566,14 +636,16 @@ fn escape_into(out: &mut String, text: &str, offset: usize, escapes: [Option<usi
 
 #[cfg(test)]
 mod tests {
+	use std::cell::Cell;
+
 	use objc2_application_services::AXError;
 	use objc2_core_foundation::{
 		CFBoolean, CFDictionary, CFIndex, CFNumber, CFRetained, CFString, CFType, Type,
 	};
 
 	use super::{
-		Span, Style, Subrole, ensure_readable, font_traits, link_url, read_whole, style_span,
-		text_length, to_markdown,
+		MAX_LINKS, Span, Style, Subrole, each_run, font_traits, link_url, markdown_after, read_link,
+		read_whole, style_span, text_length, to_markdown,
 	};
 	use crate::desktop::error::{DesktopError, ErrorCode};
 
@@ -753,7 +825,7 @@ mod tests {
 			let attributes =
 				CFDictionary::from_slices(&[&*CFString::from_static_str("AXFont")], &[font]);
 			let mut style = Style::default();
-			style_span(&mut style, &attributes).unwrap();
+			style_span(&mut style, &attributes, |_| unreachable!("no link")).unwrap();
 			style
 		}
 		let (bold_name, italic_name, regular_name) = (
@@ -812,17 +884,79 @@ mod tests {
 	#[test]
 	fn secure_text_fields_and_fields_of_unknown_subrole_are_never_read() {
 		let named = |name: &str| -> Result<Subrole, AXError> { Ok(Subrole::Named(name.into())) };
-		let code = |subrole| ensure_readable(subrole).map_err(|error: DesktopError| error.code);
-		assert_eq!(code(named("AXSecureTextField")), Err(ErrorCode::AxFailed));
+		// The code the read ends with, and whether the text was read.
+		let code = |subrole| {
+			let read = Cell::new(false);
+			let result = markdown_after(subrole, || {
+				read.set(true);
+				Ok(vec![bold("text")])
+			});
+			(result.map(drop).map_err(|error: DesktopError| error.code), read.get())
+		};
+		assert_eq!(code(named("AXSecureTextField")), (Err(ErrorCode::AxFailed), false));
 		// A subrole read that fails may have been a secure field's.
-		assert_eq!(code(Err(AXError::CannotComplete)), Err(ErrorCode::AxFailed));
-		assert_eq!(code(Err(AXError::InvalidUIElement)), Err(ErrorCode::StaleRef));
-		assert_eq!(code(named("AXSearchField")), Ok(()));
-		assert_eq!(code(Ok(Subrole::Absent)), Ok(()));
-		assert_eq!(code(Err(AXError::NoValue)), Ok(()));
-		assert_eq!(code(Err(AXError::AttributeUnsupported)), Ok(()));
+		assert_eq!(code(Err(AXError::CannotComplete)), (Err(ErrorCode::AxFailed), false));
+		assert_eq!(code(Err(AXError::InvalidUIElement)), (Err(ErrorCode::StaleRef), false));
 		// A subrole that is not a string says nothing about the field.
-		assert_eq!(code(Ok(Subrole::Malformed)), Err(ErrorCode::AxFailed));
+		assert_eq!(code(Ok(Subrole::Malformed)), (Err(ErrorCode::AxFailed), false));
+		assert_eq!(code(named("AXSearchField")), (Ok(()), true));
+		assert_eq!(code(Ok(Subrole::Absent)), (Ok(()), true));
+		assert_eq!(code(Err(AXError::NoValue)), (Ok(()), true));
+		assert_eq!(code(Err(AXError::AttributeUnsupported)), (Ok(()), true));
+	}
+
+	#[test]
+	fn a_cancel_stops_the_read_between_runs() {
+		let runs = Cell::new(0);
+		let checks = Cell::new(0);
+		let check = || {
+			checks.set(checks.get() + 1);
+			if checks.get() > 2 {
+				Err(DesktopError::cancelled("cancelled"))
+			} else {
+				Ok(())
+			}
+		};
+		let result = each_run(10, check, |location| {
+			runs.set(runs.get() + 1);
+			Ok(location + 1)
+		});
+		assert_eq!(result.unwrap_err().code, ErrorCode::Cancelled);
+		assert_eq!(runs.get(), 2);
+		// A run that ends where it started fails instead of cutting the text.
+		let stuck =
+			each_run(10, || Ok(()), |location| Ok(if location < 4 { location + 2 } else { 4 }));
+		assert_eq!(stuck.unwrap_err().code, ErrorCode::AxFailed);
+	}
+
+	#[test]
+	fn link_addresses_are_read_only_until_a_cancel_or_the_link_budget() {
+		let url: &CFType = &CFString::from_static_str("https://x.test");
+		let reads = Cell::new(0);
+		let read = || {
+			reads.set(reads.get() + 1);
+			Ok(Some(url.retain()))
+		};
+		let mut links = 0;
+		let cancelled = read_link(&mut links, || Err(DesktopError::cancelled("cancelled")), read);
+		assert_eq!(cancelled.unwrap_err().code, ErrorCode::Cancelled);
+		assert_eq!(reads.get(), 0);
+		let mut links = MAX_LINKS - 1;
+		assert_eq!(
+			read_link(&mut links, || Ok(()), read).unwrap().as_deref(),
+			Some("https://x.test")
+		);
+		assert_eq!(reads.get(), 1);
+		let over = read_link(&mut links, || Ok(()), read).unwrap_err();
+		assert_eq!(over.code, ErrorCode::AxFailed);
+		assert!(
+			over
+				.message
+				.contains(&format!("more than {MAX_LINKS} links")),
+			"{}",
+			over.message
+		);
+		assert_eq!(reads.get(), 1);
 	}
 
 	#[test]
