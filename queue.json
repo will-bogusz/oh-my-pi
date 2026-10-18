@@ -3880,7 +3880,7 @@
   {
    "id": "computer-intervened-followup",
    "branch": "will/computer-intervened-followup",
-   "title": "fix(natives): say a macOS click stopped by the user may have landed, and test that el.type waits for them",
+   "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened",
    "area": "computer",
    "priority": "P3",
    "needs": [],
@@ -3892,7 +3892,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-intervened-followup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:41:58Z",
-   "updated": "2026-10-18T13:41:58Z",
+   "updated": "2026-10-18T14:12:31Z",
    "note": ""
   },
   {

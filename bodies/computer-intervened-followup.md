@@ -12,6 +12,6 @@ Follow-up to #15562. The agent reads this message to decide what to re-check. "K
 
 ## Testing
 
-On bench-mac: `cargo check -p pi-natives --tests`, `CI=1 bun check` (includes clippy) and `cargo test -p pi-natives --lib` pass. With `AxInput` removed from the watch's `app_access`, the extended test fails.
+On bench-mac: `cargo check -p pi-natives --tests`, `CI=1 bun check` (which runs clippy) and `cargo test -p pi-natives --lib` pass merged with the other open computer-use PRs (#15192, #16163, #16185, #16187, #16188): 879 tests. Alone on `main`, the only test failure is `a_click_placed_in_the_users_app_does_not_let_the_target_keep_the_front`, which fails on `main` too and which #16187 fixes. With `AxInput` removed from the watch's `app_access`, the extended test fails.
 
-No CHANGELOG line: `UserIntervened` is unreleased and its `[Unreleased]` entry already says keys and clicks stop.
+`UserIntervened` is unreleased, so no CHANGELOG line; its `[Unreleased]` entry already says keys and clicks stop.
