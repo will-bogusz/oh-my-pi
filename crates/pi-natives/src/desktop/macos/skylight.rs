@@ -896,6 +896,11 @@ impl BackgroundFocusLease {
 		// probes block it.
 		let action_brought =
 			(front == self.target || caused) && self.user.picked(came, front).is_none();
+		// A click in the user's own app that picked another of its windows
+		// keeps them in their app: that window is the one the lease keeps.
+		if !self.disarmed && front == self.previous && self.user.own_click && key.is_some() {
+			self.key = key;
+		}
 		if self.disarmed
 			|| (front == self.previous && key.is_some_and(|key| Some(key) != self.key))
 			|| (front != self.previous && !action_brought)
