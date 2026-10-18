@@ -4984,6 +4984,24 @@
    "added": "2026-10-18T19:14:13Z",
    "updated": "2026-10-18T19:14:13Z",
    "note": ""
+  },
+  {
+   "id": "report-issue-colon",
+   "branch": "will/report-issue-colon",
+   "title": "fix(coding-agent): keep URIs in auto-QA report tool names",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/report-issue-colon.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/report-issue-colon",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:31:34Z",
+   "updated": "2026-10-18T19:31:34Z",
+   "note": ""
   }
  ],
  "watch": {
