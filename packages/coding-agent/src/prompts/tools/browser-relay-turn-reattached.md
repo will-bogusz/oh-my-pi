@@ -1,0 +1,1 @@
+omp let go of this tab when the last turn ended, so Chrome's debugging bar could go, and reattached it for this call with what the tab had: element ids, run globals, logs and settings carried over. Console output from while omp was away may be incomplete, and network requests from that time are missing.

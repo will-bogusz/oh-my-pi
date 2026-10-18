@@ -46,6 +46,7 @@
 - Fixed browser `tab.id(n)` calling an element stale in a later run once an earlier run had used that id ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed the browser relay attaching Chrome's debugger to every tab of the user's browser whenever omp connected; it now attaches only tabs omp opened or borrowed with `app.target` ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed popups and `target=_blank` tabs from a relay tab omp drives taking the user's selected tab or keyboard focus while omp could not reach them; with the reinstalled extension omp owns and drives them ([#15590](https://github.com/can1357/oh-my-pi/pull/15590) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed Chrome's debugging bar staying on every tab of a relay browser between turns: omp now lets go of its relay tabs' debugger when the agent hands back and reattaches on the next call, with element ids, logs, settings and run globals carried over; a tab with routes, a capture or recording running stays attached, and `browser.relayReleaseOnTurnEnd: false` keeps all of them attached ([#15569](https://github.com/can1357/oh-my-pi/pull/15569) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.22.0] - 2026-11-16
 

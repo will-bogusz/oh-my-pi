@@ -49,7 +49,7 @@ const FRAME_SESSION_EVENTS = ["frameattached", "framenavigated", "framedetached"
 /** Owns tab-scoped Chromium download behavior and completion events. */
 export class DownloadManager {
 	readonly #browser: Browser;
-	readonly #page: Page;
+	#page: Page;
 	readonly #defaultDirectory: string;
 	readonly #perTab: boolean;
 	/**
@@ -92,6 +92,18 @@ export class DownloadManager {
 	async start(directory?: string): Promise<void> {
 		if (this.#pageEvents) this.#hearPage();
 		else if (directory) await this.enable(directory);
+	}
+
+	/** Move tracking to the page a new attachment exposes, keeping finished downloads and pending waits. */
+	rebind(page: Page): void {
+		if (this.#onFrame) {
+			for (const event of FRAME_SESSION_EVENTS) this.#page.off(event, this.#onFrame);
+		}
+		this.#page = page;
+		if (this.#onFrame) {
+			for (const event of FRAME_SESSION_EVENTS) page.on(event, this.#onFrame);
+			this.#onFrame();
+		}
 	}
 
 	/**

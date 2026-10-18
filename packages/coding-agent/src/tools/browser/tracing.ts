@@ -144,6 +144,11 @@ export class BrowserTracingController {
 		};
 	}
 
+	/** What is still recording: a `traceStart()` trace, a `profileStart()` CPU profile. */
+	running(): { trace: boolean; profile: boolean } {
+		return { trace: this.#traceActive, profile: this.#profileSession !== undefined };
+	}
+
 	/** Stop and discard active trace/profile state during tab teardown. */
 	async dispose(): Promise<void> {
 		if (this.#traceActive) {

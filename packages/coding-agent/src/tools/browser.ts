@@ -1,7 +1,8 @@
 import { type } from "@oh-my-pi/omptype";
 import type { AgentToolResult } from "@oh-my-pi/pi-agent-core";
-import { getWebKitHostPath, isRecord, logger, untilAborted } from "@oh-my-pi/pi-utils";
+import { getWebKitHostPath, isRecord, logger, prompt, untilAborted } from "@oh-my-pi/pi-utils";
 import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
+import persistDescription from "../prompts/tools/browser-persist-description.md" with { type: "text" };
 import type { ToolSession } from "../sdk";
 import { enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { resolveCmuxKind } from "./browser/cmux/rpc";
@@ -152,9 +153,7 @@ const browserSchema = type({
 	"timeout?": type("number").describe("timeout in seconds"),
 	"all?": type("boolean").describe("release every managed tab this agent opened"),
 	"kill?": type("boolean").describe("also kill spawned-app browsers"),
-	"persist?": type("boolean").describe(
-		"keep tab live across turn settle and idle close; on a relay tab omp opened, keep it open after the session ends",
-	),
+	"persist?": type("boolean").describe(prompt.render(persistDescription).trim()),
 });
 
 type BrowserParams = typeof browserSchema.infer;

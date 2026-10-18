@@ -214,6 +214,38 @@ function protocolExceptionLocation(
 	return url ? `${url}:${details.lineNumber}:${details.columnNumber}` : undefined;
 }
 
+interface ProtocolCaptureCursor {
+	timestamp: number;
+	events: Map<string, number>;
+}
+
+/** Runtime.enable replays buffered events; equal-timestamp occurrences still count separately. */
+function captureProtocolEvent(
+	cursor: ProtocolCaptureCursor,
+	replay: ProtocolCaptureCursor | undefined,
+	timestamp: number,
+	event: Protocol.Runtime.ConsoleAPICalledEvent | Protocol.Runtime.ExceptionThrownEvent,
+): boolean {
+	if (replay && timestamp < replay.timestamp) return false;
+	// Handles change with the attachment; live events include previews that Runtime.enable replay omits.
+	const key = JSON.stringify(event, (name, value) =>
+		name === "objectId" || name === "preview" || name === "customPreview" ? undefined : value,
+	);
+	if (replay && timestamp === replay.timestamp) {
+		const remaining = replay.events.get(key) ?? 0;
+		if (remaining > 0) {
+			replay.events.set(key, remaining - 1);
+			return false;
+		}
+	}
+	if (timestamp > cursor.timestamp) {
+		cursor.timestamp = timestamp;
+		cursor.events.clear();
+	}
+	if (timestamp === cursor.timestamp) cursor.events.set(key, (cursor.events.get(key) ?? 0) + 1);
+	return true;
+}
+
 /** Persistent bounded capture of page console messages, uncaught exceptions, and failed requests. */
 export class PageConsoleCapture {
 	readonly #limit: number;
@@ -233,6 +265,8 @@ export class PageConsoleCapture {
 	#protocolRequestFinishedHandler?: (event: Protocol.Network.LoadingFinishedEvent) => void;
 	#protocolRequestFailedHandler?: (event: Protocol.Network.LoadingFailedEvent) => void;
 	readonly #requests = new Map<Protocol.Network.RequestId, { method: string; url: string }>();
+	readonly #consoleCursor: ProtocolCaptureCursor = { timestamp: -Infinity, events: new Map() };
+	readonly #exceptionCursor: ProtocolCaptureCursor = { timestamp: -Infinity, events: new Map() };
 
 	constructor(limit = DEFAULT_CAPTURE_LIMIT) {
 		this.#limit = Math.max(1, Math.floor(limit));
@@ -243,11 +277,19 @@ export class PageConsoleCapture {
 		return this.#nextSeq;
 	}
 
-	/** Attach capture listeners to a page once. */
+	/** Attach capture listeners to a page; entries captured on an earlier page of the same tab are kept. */
 	async install(page: Page): Promise<void> {
-		await this.detach();
+		await this.suspend();
 		this.#page = page;
 		const generation = this.#generation;
+		let consoleReplay: ProtocolCaptureCursor | undefined = {
+			timestamp: this.#consoleCursor.timestamp,
+			events: new Map(this.#consoleCursor.events),
+		};
+		let exceptionReplay: ProtocolCaptureCursor | undefined = {
+			timestamp: this.#exceptionCursor.timestamp,
+			events: new Map(this.#exceptionCursor.events),
+		};
 		this.#consoleHandler = message => {
 			if (this.#cdp) return;
 			const seq = this.#allocateSequence();
@@ -300,7 +342,9 @@ export class PageConsoleCapture {
 		try {
 			const activeSession = await page.createCDPSession();
 			session = activeSession;
+			this.#cdp = activeSession;
 			this.#protocolConsoleHandler = event => {
+				if (!captureProtocolEvent(this.#consoleCursor, consoleReplay, event.timestamp, event)) return;
 				const seq = this.#allocateSequence();
 				const serializedArgs = Promise.all(
 					event.args.map(argument => serializeRemoteObject(activeSession, argument)),
@@ -321,6 +365,7 @@ export class PageConsoleCapture {
 				});
 			};
 			this.#protocolExceptionHandler = event => {
+				if (!captureProtocolEvent(this.#exceptionCursor, exceptionReplay, event.timestamp, event)) return;
 				const details = event.exceptionDetails;
 				const exception = details.exception;
 				if (exception && exception.subtype !== "error") {
@@ -381,8 +426,10 @@ export class PageConsoleCapture {
 			activeSession.on("Network.loadingFinished", this.#protocolRequestFinishedHandler);
 			activeSession.on("Network.loadingFailed", this.#protocolRequestFailedHandler);
 			await Promise.all([activeSession.send("Runtime.enable"), activeSession.send("Network.enable")]);
-			this.#cdp = activeSession;
+			consoleReplay = undefined;
+			exceptionReplay = undefined;
 		} catch {
+			this.#cdp = undefined;
 			await session?.detach().catch(() => undefined);
 			this.#protocolConsoleHandler = undefined;
 			this.#protocolExceptionHandler = undefined;
@@ -426,8 +473,23 @@ export class PageConsoleCapture {
 		this.#dropped = 0;
 	}
 
+	/** Settles once every console message heard so far is recorded (their arguments are read from the page). */
+	settled(): Promise<void> {
+		return this.#pending;
+	}
+
 	/** Detach listeners and clear all captured state. */
 	async detach(): Promise<void> {
+		await this.suspend();
+		this.clear();
+		this.#consoleCursor.timestamp = -Infinity;
+		this.#consoleCursor.events.clear();
+		this.#exceptionCursor.timestamp = -Infinity;
+		this.#exceptionCursor.events.clear();
+	}
+
+	/** Detach listeners and keep what was captured, for a later `install` on the same tab to go on from. */
+	async suspend(): Promise<void> {
 		this.#generation += 1;
 		if (this.#page && this.#consoleHandler) this.#page.off("console", this.#consoleHandler);
 		if (this.#page && this.#pageErrorHandler) this.#page.off("pageerror", this.#pageErrorHandler);
@@ -459,7 +521,6 @@ export class PageConsoleCapture {
 		this.#protocolRequestFinishedHandler = undefined;
 		this.#protocolRequestFailedHandler = undefined;
 		this.#requests.clear();
-		this.clear();
 	}
 
 	#allocateSequence(): number {

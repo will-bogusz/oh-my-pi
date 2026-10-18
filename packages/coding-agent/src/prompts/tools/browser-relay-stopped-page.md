@@ -1,0 +1,1 @@
+omp let go of this tab when the last turn ended, and its page has stopped since: most likely it opened a dialog, which Chrome shows the user and omp cannot answer from a new attachment (or it runs a script that does not yield). This call did not run. Ask the user to answer the dialog; the next call reattaches the tab. Closing the tab also ends it.

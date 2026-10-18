@@ -248,6 +248,7 @@ import {
 	cancelIdleCloseForOwner,
 	freezeTabsForOwner,
 	releaseIdleTabsForOwner,
+	releaseRelayTabsForOwner,
 	releaseTabsForOwner,
 } from "../tools/browser/tab-supervisor";
 import type { CheckpointState, CompletedRewindState } from "../tools/checkpoint";
@@ -535,7 +536,12 @@ import { TtsrCoordinator, type TtsrCoordinatorHost } from "./ttsr-coordinator";
 
 import { cfgAdvisorEnabled, cfgAdvisorMaxNotesPerUpdate } from "../advisor/settings";
 import { cfgDisasmBackend } from "../disasm/active";
-import { cfgBrowserEnabled, cfgBrowserFreezeOnTurnEnd, cfgBrowserIdleCloseSec } from "../tools/browser/settings";
+import {
+	cfgBrowserEnabled,
+	cfgBrowserFreezeOnTurnEnd,
+	cfgBrowserIdleCloseSec,
+	cfgBrowserRelayReleaseOnTurnEnd,
+} from "../tools/browser/settings";
 import {
 	cfgClaudeResets,
 	cfgCodexResets,
@@ -4136,6 +4142,7 @@ export class AgentSession implements SettingsScope, AgentViewSession {
 		// unrelated events, mid-turn maintenance, or queued steering. `agent_end` needs
 		// no deferral: #checkRun emits it only once no prompt is in flight.
 		this.#emit(event);
+		if (event.type === "agent_end") void this.#releaseRelayBrowserTabs();
 		const extensionEmit = this.#emitExtensionEvent(event);
 		if (options.detachExtensions) {
 			void extensionEmit.catch(error => {
@@ -6943,6 +6950,20 @@ export class AgentSession implements SettingsScope, AgentViewSession {
 		} catch (error) {
 			logger.warn("Failed to settle owned browser tabs at turn end", { error: String(error) });
 		}
+	}
+
+	/**
+	 * Called with each published `agent_end`. When it is the agent handing back (its run settled for good, an interrupt
+	 * included; not a settle a queued steer or follow-up continues), let go of the relay's debugger on this session's
+	 * relay tabs until their next call, so Chrome's debugging bar, shown on every tab while omp has any one attached,
+	 * goes away between turns (`browser.relayReleaseOnTurnEnd`). Never throws.
+	 */
+	async #releaseRelayBrowserTabs(): Promise<void> {
+		if (!cfgBrowserRelayReleaseOnTurnEnd.get(this.settings)) return;
+		const ownerId = this.#eval.getKernelOwnerId();
+		if (!ownerId) return;
+		const released = await releaseRelayTabsForOwner(ownerId);
+		if (released > 0) logger.debug("Released relay browser tabs at hand-back", { ownerId, released });
 	}
 
 	async #releaseOwnedComputerSessions(ownerId: string | undefined): Promise<void> {
