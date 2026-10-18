@@ -10395,13 +10395,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/gemini-tool-result-order.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16259,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gemini-tool-result-order",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:29Z",
-   "updated": "2026-10-18T23:11:08Z",
+   "updated": "2026-10-18T23:15:03Z",
    "note": "",
    "built": [
     {
@@ -10504,7 +10504,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-18T21:41:26Z"
+   "advanced": "2026-10-18T21:41:26Z",
+   "opened": "2026-10-18T23:15:02Z"
   },
   {
    "id": "factory-droid-org-lookup",
