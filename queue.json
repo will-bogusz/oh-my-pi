@@ -10444,6 +10444,24 @@
    "added": "2026-10-18T20:51:28Z",
    "updated": "2026-10-18T20:51:28Z",
    "note": ""
+  },
+  {
+   "id": "oauth-refresh-keep-rotated-token",
+   "branch": "will/oauth-refresh-keep-rotated-token",
+   "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget",
+   "area": "auth",
+   "priority": "P1",
+   "needs": [],
+   "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
+   "body": "bodies/oauth-refresh-keep-rotated-token.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/oauth-refresh-keep-rotated-token",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T21:02:38Z",
+   "updated": "2026-10-18T21:02:38Z",
+   "note": ""
   }
  ],
  "watch": {
