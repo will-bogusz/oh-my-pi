@@ -3923,7 +3923,9 @@ mod capture_tests {
 		let (mut worker, tree) = read_buttons(&[(2, "Go")]);
 		tree.lock().markdown_refusal = Some("a secure text field's text is never read");
 		let read = |reply| Request::AxMarkdown { reference: "e2".to_string(), reply };
-		let error = call(&mut worker, read, &granted()).unwrap_err();
+		let error = call(&mut worker, read, &granted())
+			.err()
+			.expect("a secure field is refused");
 		assert_eq!(error.code, ErrorCode::AxFailed);
 		assert_eq!(
 			error.message,
