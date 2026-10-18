@@ -4729,11 +4729,5 @@
     "title": "fix(natives): send a macOS background target back however late it activates itself"
    }
   ]
- },
- "opening": {
-  "id": "computer-target-sent-back-late",
-  "token": "51484ae42e804c2f959e56de4a2ae119",
-  "host": "MacBook-Pro",
-  "at": "2026-10-18T13:31:17Z"
  }
 }
