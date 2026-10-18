@@ -5074,6 +5074,24 @@
    "added": "2026-10-18T19:32:27Z",
    "updated": "2026-10-18T19:32:27Z",
    "note": ""
+  },
+  {
+   "id": "revive-tools",
+   "branch": "will/revive-tools",
+   "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
+   "body": "bodies/revive-tools.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/revive-tools",
+   "host": "MacBook-Pro",
+   "added": "2026-10-18T19:35:52Z",
+   "updated": "2026-10-18T19:35:52Z",
+   "note": ""
   }
  ],
  "watch": {
