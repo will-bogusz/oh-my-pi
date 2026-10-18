@@ -263,10 +263,15 @@ describe("relay extension self-update decisions", () => {
 		const socket = new FakeExtSocket();
 		hello(bridge, socket);
 		const code = new Bun.CryptoHasher("sha256").update("chrome").digest("base64url").slice(0, 8);
+		// The relay attaches only a tab the client owns.
+		bridge.cdpMessage(
+			conn,
+			JSON.stringify({ id: 1, method: "OMP.claimTarget", params: { targetId: `PAGE${code}.1` } }),
+		);
 		bridge.cdpMessage(
 			conn,
 			JSON.stringify({
-				id: 1,
+				id: 2,
 				method: "Target.attachToTarget",
 				params: { targetId: `PAGE${code}.1`, flatten: true },
 			}),
