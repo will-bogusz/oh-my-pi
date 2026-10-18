@@ -6520,7 +6520,7 @@
    "id": "irc-broadcast-no-relay",
    "branch": "will/irc-broadcast-no-relay",
    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts",
-   "area": "browser",
+   "area": "agent",
    "priority": null,
    "needs": [],
    "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
@@ -6531,7 +6531,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/irc-broadcast-no-relay",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:43:52Z",
-   "updated": "2026-10-18T19:43:52Z",
+   "updated": "2026-10-18T19:57:03Z",
    "note": ""
   },
   {
