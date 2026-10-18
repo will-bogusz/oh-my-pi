@@ -4639,10 +4639,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T17:40:06Z",
+  "checked": "2026-10-18T18:41:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "refind-cancel-root": {
+    "since": "2026-10-18T18:41:09Z",
+    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window"
+   }
+  },
   "conflicts": {
    "#15105": {
     "since": "2026-10-18T17:40:06Z",
@@ -4653,16 +4658,9 @@
      "packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt",
      "packages/coding-agent/src/tools/browser/relay/protocol.ts"
     ]
-   },
-   "#16217": {
-    "since": "2026-10-18T17:40:06Z",
-    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/skylight.rs"
-    ]
    }
   },
-  "merged_through": "2026-10-18T16:46:28Z",
+  "merged_through": "2026-10-18T18:19:23Z",
   "unreleased": {
    "15157": {
     "title": "fix(natives): report the macOS Escape stop honestly",
@@ -4783,6 +4781,16 @@
     "title": "feat(browser): open relay tabs omp owns in the background",
     "merge_commit": "18746ce05b0ffbbe68c969863109f57dcdc0e728",
     "merged_at": "2026-10-18T16:46:28Z"
+   },
+   "16202": {
+    "title": "fix(natives): keep computer input that already went out from reporting Cancelled",
+    "merge_commit": "e7a17f78fcc56836610e80ca352d9eebf9eeafe2",
+    "merged_at": "2026-10-18T18:19:12Z"
+   },
+   "16205": {
+    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press",
+    "merge_commit": "4a05cbf9f80313e61af17ec98e1bfb97d6fb093d",
+    "merged_at": "2026-10-18T18:19:23Z"
    }
   },
   "ready": [
@@ -4796,10 +4804,10 @@
    15418,
    15433,
    15508,
-   16202,
-   16205,
    16217,
-   16223
+   16223,
+   16230,
+   16231
   ],
   "events": [
    {
@@ -5759,6 +5767,28 @@
     "files": [
      "crates/pi-natives/src/desktop/macos/skylight.rs"
     ]
+   },
+   {
+    "at": "2026-10-18T18:41:09Z",
+    "kind": "merged",
+    "number": 16202,
+    "title": "fix(natives): keep computer input that already went out from reporting Cancelled",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-18T18:41:09Z",
+    "kind": "merged",
+    "number": 16205,
+    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-18T18:41:09Z",
+    "kind": "openable",
+    "id": "refind-cancel-root",
+    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window"
    }
   ]
  }
