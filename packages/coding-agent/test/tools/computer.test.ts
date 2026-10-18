@@ -3836,6 +3836,21 @@ describe("computer background fallback", () => {
 			}
 		});
 
+		it("PROVE-B el.type and el.press with takeover under refuse", async () => {
+			for (const code of [
+				'await (await desktop.ref("e1")).type("a", { takeover: true })',
+				'await (await desktop.ref("e1")).press("cmd+a", { takeover: true })',
+			]) {
+				const native = new ForegroundSession();
+				const result = await run(native, code, "refuse");
+				console.log(`PROVE-B ${code} => ok=${result.ok} calls=${JSON.stringify(native.calls)} error=${result.ok ? "-" : result.error.message}`);
+				expect(result.ok).toBe(false);
+				if (result.ok) continue;
+				expect(result.error.message).toStartWith("BackgroundUnavailable: ");
+				expect(native.calls).toEqual([]);
+			}
+		});
+
 		it("names the window or element a refusal kept input from", async () => {
 			for (const [code, target] of [
 				['await (await desktop.window("42")).raise()', "window 42"],
