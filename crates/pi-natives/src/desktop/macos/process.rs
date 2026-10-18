@@ -223,6 +223,17 @@ pub(super) fn is_uikit(pid: libc::pid_t) -> bool {
 	})
 }
 
+/// The URL of `pid`'s application bundle, as the Dock gives it for a tile
+/// (`file:///Applications/Safari.app/`). Brings its own autorelease pool.
+pub(super) fn bundle_url(pid: libc::pid_t) -> Option<String> {
+	autoreleasepool(|_| {
+		NSRunningApplication::runningApplicationWithProcessIdentifier(pid)
+			.and_then(|app| app.bundleURL())
+			.and_then(|url| url.absoluteString())
+			.map(|url| url.to_string())
+	})
+}
+
 /// Terminal AX text areas represent a rendered grid, not the pty input. Even a
 /// successful AXSelectedText/AXValue write is not proof that the shell received
 /// it.

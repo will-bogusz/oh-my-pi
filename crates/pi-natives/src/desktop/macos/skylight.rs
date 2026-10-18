@@ -567,7 +567,10 @@ impl BackgroundFocusLease {
 	/// `on_target` says whether a click seen since the last poll landed on a
 	/// window of the target ([`poll`]): the counters count every physical
 	/// click, the user's clicks in their own app included, but not the events
-	/// background input posts to a process.
+	/// background input posts to a process. With the target in front, a key or
+	/// modifier, or a click that landed on it, is the user's doing there; a
+	/// click elsewhere, such as in their own app as the target activated
+	/// itself, still sends the target back.
 	fn observe(
 		&mut self,
 		front: ProcessSerialNumber,
@@ -578,7 +581,8 @@ impl BackgroundFocusLease {
 		if self.disarmed
 			|| (front != self.previous && front != self.target)
 			|| (front == self.previous && key.is_some_and(|key| Some(key) != self.key))
-			|| (front == self.target && (activity != self.activity || self.click_polls > 0))
+			|| (front == self.target
+				&& (activity[3..] != self.activity[3..] || on_target || self.click_polls > 0))
 		{
 			// The target in front now is the user's: they acted there, or the
 			// lease no longer sends it back.
@@ -587,6 +591,7 @@ impl BackgroundFocusLease {
 			return FocusDecision::Disarm;
 		}
 		if front == self.target {
+			self.activity = activity;
 			FocusDecision::Restore
 		} else {
 			// Typing or clicking in the user's original window while it is still
@@ -611,19 +616,32 @@ impl BackgroundFocusLease {
 	}
 }
 
-/// Whether the pointer is over a surface of `pid`, hit-tested the way a click
-/// there lands: a menu, the menu bar or a Dock tile over the target's window
-/// is not the target, while the pointer sprite and transparent overlays that
-/// let clicks through do not count.
-fn pointer_over(pid: pid_t) -> bool {
+/// Whether the user's latest click landed on `pid`, placed from Quartz's
+/// window list ([`capture::click_lands_on`]) at the pointer, which asks only
+/// the Dock, never the app under the click; `pid`'s own Dock tile counts.
+/// A background operation runs no event tap, so the pointer's point now
+/// stands for the press. A click that cannot be placed did not reach `pid`,
+/// so the target is sent back behind the user's app.
+fn click_on(pid: pid_t) -> bool {
 	let Ok(source) = CGEventSource::new(CGEventSourceStateID::HIDSystemState) else {
 		return false;
 	};
 	let Ok(event) = CGEvent::new(source) else {
 		return false;
 	};
-	let point = event.location();
-	ax::point_owner(point.x, point.y).is_some_and(|owner| owner.pid == pid)
+	let CGPoint { x, y } = event.location();
+	capture::click_lands_on(pid, x, y, |dock| {
+		ax::dock_at(dock, x, y).map(|spot| match spot {
+			ax::DockSpot::Off => capture::DockClick::Through,
+			ax::DockSpot::Tile(Some(url))
+				if super::process::bundle_url(pid)
+					.is_some_and(|own| own.trim_end_matches('/') == url.trim_end_matches('/')) =>
+			{
+				capture::DockClick::TargetTile
+			},
+			ax::DockSpot::Tile(_) => capture::DockClick::Tile,
+		})
+	})
 }
 
 /// Whether the user has come to the background target since its guard
@@ -722,7 +740,7 @@ pub(super) fn with_background_watch<T>(
 					let (activity, on_target, front) = poll(
 						lease.activity,
 						activation_activity,
-						|| !lease.disarmed && pointer_over(pid),
+						|| !lease.disarmed && click_on(pid),
 						|| front_process(spi.get_front),
 					);
 					match front {
@@ -1533,6 +1551,34 @@ mod tests {
 		assert_eq!(guard.observe(previous, Some(42), clicked, false), FocusDecision::Observe);
 		assert_eq!(guard.observe(target, None, clicked, false), FocusDecision::Restore);
 		assert!(!guard.visited);
+	}
+
+	#[test]
+	fn a_click_elsewhere_in_the_poll_the_target_comes_forward_still_sends_it_back() {
+		// The user clicks a button in their own app (7), and the target (8)
+		// activates itself before the guard's next poll, which sees both.
+		let previous = ProcessSerialNumber { high: 0, low: 7 };
+		let target = ProcessSerialNumber { high: 0, low: 8 };
+		let lease = || BackgroundFocusLease {
+			previous,
+			target,
+			key: Some(42),
+			activity: [0; 5],
+			click_polls: 0,
+			disarmed: false,
+			visited: false,
+		};
+		let clicked = [1, 0, 0, 0, 0];
+		let mut guard = lease();
+		assert_eq!(guard.observe(target, None, clicked, false), FocusDecision::Restore);
+		assert_eq!(guard.activity, clicked, "the hand-back's own check reads the click as seen");
+		assert!(!guard.visited);
+		// The same poll with the click on the target, or a key, is the user's.
+		let mut guard = lease();
+		assert_eq!(guard.observe(target, None, clicked, true), FocusDecision::Disarm);
+		assert!(guard.visited);
+		let mut guard = lease();
+		assert_eq!(guard.observe(target, None, [0, 0, 0, 1, 0], false), FocusDecision::Disarm);
 	}
 
 	#[test]

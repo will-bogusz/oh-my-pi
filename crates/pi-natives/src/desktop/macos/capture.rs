@@ -10,8 +10,8 @@ use objc2_core_foundation::{
 };
 use objc2_core_graphics::{
 	CGRectMakeWithDictionaryRepresentation, CGWindowListCopyWindowInfo, CGWindowListOption,
-	kCGWindowBounds, kCGWindowIsOnscreen, kCGWindowLayer, kCGWindowName, kCGWindowNumber,
-	kCGWindowOwnerName, kCGWindowOwnerPID, kCGWindowSharingState,
+	kCGWindowAlpha, kCGWindowBounds, kCGWindowIsOnscreen, kCGWindowLayer, kCGWindowName,
+	kCGWindowNumber, kCGWindowOwnerName, kCGWindowOwnerPID, kCGWindowSharingState,
 };
 use screen_capture_kit::{CaptureRequest, CaptureTarget};
 use xcap::Monitor;
@@ -371,6 +371,106 @@ pub(in crate::desktop) fn has_onscreen_window(pid: libc::pid_t) -> Option<bool> 
 	}))
 }
 
+/// `kCGCursorWindowLevel`: the pointer sprite, which sits over every point.
+const CURSOR_LAYER: i64 = 2_147_483_630;
+/// `kCGDockWindowLevel`.
+const DOCK_LAYER: i64 = 20;
+
+/// A visible on-screen window at a click's point, as [`lands_on`] reads it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum AtPoint {
+	/// The pointer sprite, which a click passes through.
+	Sprite,
+	/// The Dock's one full-screen window, process `pid`: a tile there ends the
+	/// click, the transparent rest lets it through ([`DockClick`]).
+	Dock(libc::pid_t),
+	/// Any other window, owned by this process: menus, the menu bar and its
+	/// extras included.
+	Window(i64),
+}
+
+/// Where a click on the Dock's full-screen window went.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(in crate::desktop) enum DockClick {
+	/// Through its transparent part, to the window below.
+	Through,
+	/// To a tile of another item, or between tiles.
+	Tile,
+	/// To the tile of the application the guard watches, which brings it
+	/// forward as the user's switch.
+	TargetTile,
+}
+
+/// Whether a click at a point reached `pid`, given the visible windows there
+/// front to back. The first window other than the pointer sprite, and the
+/// Dock where `dock` says the click did not pass through it, takes the click;
+/// `pid`'s own Dock tile counts as `pid`. A click that cannot be placed,
+/// because no window is there or the Dock did not say, did not reach `pid`.
+fn lands_on(
+	pid: i64,
+	windows: impl IntoIterator<Item = AtPoint>,
+	dock: impl FnOnce(libc::pid_t) -> Option<DockClick>,
+) -> bool {
+	let mut dock = Some(dock);
+	for window in windows {
+		match window {
+			AtPoint::Sprite => {},
+			AtPoint::Dock(process) => match dock.take().and_then(|spot| spot(process)) {
+				Some(DockClick::Through) => {},
+				Some(DockClick::TargetTile) => return true,
+				Some(DockClick::Tile) | None => return false,
+			},
+			AtPoint::Window(owner) => return owner == pid,
+		}
+	}
+	false
+}
+
+/// Whether a click at the global point `(x, y)` reached `pid`, read from
+/// Quartz's on-screen window list ([`lands_on`]); `dock` asks the Dock where a
+/// click on it went. `false` when the list cannot be read.
+pub(in crate::desktop) fn click_lands_on(
+	pid: libc::pid_t,
+	x: f64,
+	y: f64,
+	dock: impl FnOnce(libc::pid_t) -> Option<DockClick>,
+) -> bool {
+	let Some(snapshot) = CGWindowListCopyWindowInfo(
+		CGWindowListOption::OptionOnScreenOnly | CGWindowListOption::ExcludeDesktopElements,
+		0,
+	) else {
+		return false;
+	};
+	// SAFETY: CoreGraphics returns an immutable array of dictionaries whose
+	// documented window keys are CFStrings and whose values are CFTypes.
+	let snapshot = unsafe { CFRetained::cast_unchecked::<CFArray<WindowDictionary>>(snapshot) };
+	// SAFETY: This copy-rule snapshot remains alive and is never mutated; the
+	// CoreGraphics key constants are process-lived. The list is front to back.
+	let windows = unsafe { snapshot.iter_unchecked() }.filter_map(|dictionary| unsafe {
+		let transparent = window_value(dictionary, kCGWindowAlpha)
+			.and_then(|alpha| alpha.downcast_ref::<CFNumber>())
+			.and_then(CFNumber::as_f64)
+			.is_some_and(|alpha| alpha <= 0.0);
+		let bounds = window_value(dictionary, kCGWindowBounds)?.downcast_ref::<CFDictionary>()?;
+		let mut rect = CGRect::default();
+		let inside = CGRectMakeWithDictionaryRepresentation(Some(bounds), &mut rect)
+			&& (rect.origin.x..rect.origin.x + rect.size.width).contains(&x)
+			&& (rect.origin.y..rect.origin.y + rect.size.height).contains(&y);
+		if transparent || !inside {
+			return None;
+		}
+		let owner = window_number(dictionary, kCGWindowOwnerPID)?;
+		Some(match window_number(dictionary, kCGWindowLayer).unwrap_or(0) {
+			CURSOR_LAYER => AtPoint::Sprite,
+			DOCK_LAYER if window_string(dictionary, kCGWindowOwnerName) == "Dock" => {
+				AtPoint::Dock(libc::pid_t::try_from(owner).ok()?)
+			},
+			_ => AtPoint::Window(owner),
+		})
+	});
+	lands_on(i64::from(pid), windows, dock)
+}
+
 /// `pid`'s normal-layer window ids, on screen or not: windows on other Spaces,
 /// minimized ones and ones the application keeps ordered out. `None` when the
 /// list cannot be read.
@@ -511,7 +611,42 @@ fn logical_bounds(bounds: CGRect) -> CoreResult<(i32, i32, u32, u32)> {
 
 #[cfg(test)]
 mod tests {
-	use super::key_window;
+	use super::{AtPoint, DockClick, key_window, lands_on};
+
+	#[test]
+	fn a_click_is_placed_on_the_first_window_that_takes_it() {
+		let no_dock = |_| -> Option<DockClick> { panic!("no Dock window here") };
+		// Over TextEdit (2280) on a macOS 26.5 VM: the pointer sprite, the
+		// Dock's full-screen window away from its tiles, TextEdit, then
+		// Activity Monitor (386).
+		let over_textedit =
+			[AtPoint::Sprite, AtPoint::Dock(388), AtPoint::Window(2280), AtPoint::Window(386)];
+		assert!(lands_on(2280, over_textedit, |dock| (dock == 388).then_some(DockClick::Through)));
+		assert!(!lands_on(386, over_textedit, |_| Some(DockClick::Through)));
+		// A context menu (iTerm, 900) or the menu bar (WindowServer, 162) over
+		// TextEdit takes the click itself.
+		assert!(!lands_on(2280, [AtPoint::Window(900), AtPoint::Window(2280)], no_dock));
+		assert!(!lands_on(
+			2280,
+			[AtPoint::Sprite, AtPoint::Window(162), AtPoint::Window(2280)],
+			no_dock
+		));
+		// Another app's Dock tile in front of TextEdit's window; TextEdit's own
+		// tile is the user switching to it.
+		let on_dock = [AtPoint::Dock(388), AtPoint::Window(2280)];
+		assert!(!lands_on(2280, on_dock, |_| Some(DockClick::Tile)));
+		assert!(lands_on(2280, [AtPoint::Dock(388)], |_| Some(DockClick::TargetTile)));
+		// A floating panel of the target over another app's window.
+		assert!(lands_on(2280, [AtPoint::Window(2280), AtPoint::Window(386)], no_dock));
+	}
+
+	#[test]
+	fn a_click_that_cannot_be_placed_did_not_reach_the_target() {
+		// The Dock did not answer where the click went.
+		assert!(!lands_on(2280, [AtPoint::Dock(388), AtPoint::Window(2280)], |_| None));
+		// Nothing but the pointer sprite is there.
+		assert!(!lands_on(2280, [AtPoint::Sprite], |_| None));
+	}
 
 	#[test]
 	fn key_window_is_the_accessibility_focused_window_not_the_frontmost() {

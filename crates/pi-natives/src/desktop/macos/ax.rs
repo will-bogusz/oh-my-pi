@@ -675,6 +675,45 @@ pub(super) fn point_owner(x: f64, y: f64) -> Option<PointOwner> {
 	Some(PointOwner { pid, window: window.as_deref().and_then(window_id) })
 }
 
+/// What of the Dock is at a point ([`dock_at`]).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) enum DockSpot {
+	/// The transparent rest of the Dock's full-screen window.
+	Off,
+	/// A tile, with the URL of the item it opens (`AXURL`) when it has one,
+	/// or the strip between tiles.
+	Tile(Option<String>),
+}
+
+/// What of the Dock (process `dock`) is at the global point `(x, y)`, asking
+/// the Dock alone: its one full-screen window holds both the tiles and the
+/// transparent rest of the screen that clicks pass through. `None` when the
+/// Dock does not answer within the probe timeout.
+pub(super) fn dock_at(dock: libc::pid_t, x: f64, y: f64) -> Option<DockSpot> {
+	if !x.is_finite() || !y.is_finite() {
+		return None;
+	}
+	let app = probe_application(dock)?;
+	let mut output: *const AXUIElement = ptr::null();
+	let slot = NonNull::from(&mut output);
+	// SAFETY: `slot` is writable and the retained application element remains
+	// retained through the synchronous hit-test.
+	match unsafe { app.copy_element_at_position(x as f32, y as f32, slot) } {
+		AXError::Success => {},
+		AXError::NoValue => return Some(DockSpot::Off),
+		_ => return None,
+	}
+	let element = retained_element(output).ok()?;
+	Some(match copy_string(&element, "AXRole").as_deref() {
+		Some("AXDockItem") => DockSpot::Tile(copy_attribute(&element, "AXURL").and_then(|url| {
+			url.downcast_ref::<CFURL>()
+				.map(|url| url.string().to_string())
+		})),
+		Some("AXList") => DockSpot::Tile(None),
+		_ => DockSpot::Off,
+	})
+}
+
 /// Raises a known window for explicit takeover or restoration.
 pub(super) fn raise_window_id(pid: libc::pid_t, wid: u32) -> CoreResult<()> {
 	let app = probe_application(pid).ok_or_else(|| {

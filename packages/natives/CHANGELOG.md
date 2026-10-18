@@ -26,6 +26,7 @@
 - Fixed macOS `openApplication` leaving a hidden running app without a window and bringing Notes or Contacts to the front; it now shows the app behind yours and returns its first window ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS background and takeover input refusing while your front app showed no window, as Finder does after a click on the desktop ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a macOS background AX action that failed yet brought its app forward, such as `AXOpen` in Chrome's Open panel, leaving that app in front of yours ([#15184](https://github.com/can1357/oh-my-pi/pull/15184) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed the macOS focus guard sending the agent's target app back when you clicked a web page in it, and letting it stay in front of yours when you clicked in your own app just as it activated itself
 
 ## [18.12.1] - 2026-10-17
 
