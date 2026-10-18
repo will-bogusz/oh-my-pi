@@ -11617,5 +11617,11 @@
     "why": "opened as #16236"
    }
   ]
+ },
+ "opening": {
+  "id": "browser-timeout-names",
+  "token": "010c138c38fa49e6a63e8c78fc0b54b7",
+  "host": "MacBook-Pro",
+  "at": "2026-10-18T20:43:02Z"
  }
 }
