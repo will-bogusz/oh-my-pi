@@ -4119,8 +4119,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-element-front-first",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:49:27Z",
-   "updated": "2026-10-18T14:28:04Z",
-   "note": "",
+   "updated": "2026-10-18T16:36:23Z",
+   "note": "queued; waits on #16149 (prompt) and #16185 (docs/computer-use.md); keep whole (S1Keeper2). bench-mac b165593d2b-equivalent 15c6de1279: clippy 0, test 883/0; revert proofs at cde555a517",
    "advanced": "2026-10-18T14:28:04Z"
   },
   {

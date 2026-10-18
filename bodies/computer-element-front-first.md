@@ -15,7 +15,7 @@ Two small corrections ride along:
 
 ## Why
 
-The worker used to look up the element's window (and a click's bounds) and hand the result to the backend. Now `Backend::element_input` and the new `Backend::element_click` do those lookups themselves, so the macOS backend reads the front app first and passes that reading down, as the window calls do. On Windows, Linux and Wayland the lookups only move into the backend; delivery is unchanged.
+The worker used to look up the element's window (and a click's bounds) and hand the result to the backend. Now `Backend::element_input` and the new `Backend::element_click` do those lookups themselves, so the macOS backend reads the front app first and passes that reading down, as the window calls do. On Windows, Linux and Wayland the lookups only move into the backend; delivery is unchanged. `el.click` keeps its `menu` and `refuseMenu` options: `win.click` and `el.click` now share one `ClickOptions::send`, and on macOS `el.click` checks for a menu control after reading the front app, before anything is sent.
 
 Decisions:
 - I moved the lookups into the backend instead of giving the cross-platform worker a "read the front app" step, because only macOS reads the front app.
@@ -25,7 +25,7 @@ Decisions:
 
 - `element_calls_leave_the_elements_window_to_the_backend` covers `el.type` and `el.click`: the worker doesn't list windows before the backend runs. Each row fails with the old worker code put back, checked on bench-mac.
 - The focus-refusal test asserts the new wording and fails with the old one.
-- `cargo test -p pi-natives --lib`, `CI=1 bun check` and the computer TS tests on macOS. One test, `skylight::…a_click_placed_in_the_users_app_does_not_let_the_target_keep_the_front`, also fails on `main` 58349dc80d and isn't touched here.
+- `cargo test -p pi-natives --lib`, `CI=1 bun check`, `bun run check:rs` (clippy) and the computer TS tests on macOS.
 - Live on a macOS VM, as a regression check: while the user types in their own app, 16 `el.type` calls go into one field of a background Chrome page whose other field has focus. They landed in the named field with the focused one left empty, 3/3 runs at this head. The race itself, the target app busy while you switch to it, wasn't reproduced live.
 - Windows: `cargo check -p pi-natives --tests --target x86_64-pc-windows-gnu` passes. Not run on a Windows machine.
 
