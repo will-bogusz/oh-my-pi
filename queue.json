@@ -7869,7 +7869,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/aside-back-to-back",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:36:07Z",
-   "updated": "2026-10-19T04:31:43Z",
+   "updated": "2026-10-19T04:32:02Z",
    "note": "",
    "advanced": "2026-10-18T21:55:26Z",
    "built": [
@@ -8353,7 +8353,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T04:31:42Z"
+   "opened": "2026-10-19T04:31:42Z",
+   "readied": "2026-10-19T04:32:01Z"
   },
   {
    "id": "req-debug-redact",
