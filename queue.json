@@ -18885,7 +18885,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T17:39:09Z",
+  "checked": "2026-10-19T18:09:47Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -18915,7 +18915,7 @@
     ]
    }
   },
-  "merged_through": "2026-10-19T17:33:37Z",
+  "merged_through": "2026-10-19T17:41:37Z",
   "unreleased": {
    "16293": {
     "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps",
@@ -19011,6 +19011,11 @@
     "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal",
     "merge_commit": "44fae6e61a81a4c4fe4523af1844fafff0c27d40",
     "merged_at": "2026-10-19T17:33:37Z"
+   },
+   "16252": {
+    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
+    "merge_commit": "6595f9b1f9bd5871b6909468dcfa2c9b65d2b39b",
+    "merged_at": "2026-10-19T17:41:37Z"
    }
   },
   "ready": [
@@ -19030,7 +19035,6 @@
    16236,
    16242,
    16250,
-   16252,
    16257,
    16269,
    16271,
@@ -20865,6 +20869,14 @@
     "kind": "openable",
     "id": "revive-prompt-cache",
     "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it"
+   },
+   {
+    "at": "2026-10-19T18:09:47Z",
+    "kind": "merged",
+    "number": 16252,
+    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
    }
   ]
  }
