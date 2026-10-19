@@ -4616,13 +4616,13 @@
    ],
    "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
    "body": "bodies/computer-uinput-release.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16235,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-uinput-release",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:43:41Z",
-   "updated": "2026-10-18T19:08:02Z",
+   "updated": "2026-10-19T17:08:09Z",
    "note": "Follow-up to #16202 (Codex thread 4307926709). Fail-before: uinput::tests::a_cancel_stops_presses_but_never_releases fails on main+test (red fork will/s1k-wip/uinput-release-red 662cd6a84c), passes on d776df149c (Linux, goliath). Review round not yet run.",
    "built": [
     {
@@ -4654,7 +4654,8 @@
     }
    ],
    "opened": "2026-10-18T18:59:24Z",
-   "readied": "2026-10-18T18:59:50Z"
+   "readied": "2026-10-18T18:59:50Z",
+   "merged_by": "pr"
   },
   {
    "id": "relay-popup-front-main",
@@ -7778,13 +7779,13 @@
    "needs": [],
    "base": "151bc26cdc3cfb93291235d537a0fd68d1e76746",
    "body": "bodies/compact-tool-result.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16241,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/compact-tool-result",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:35:54Z",
-   "updated": "2026-10-18T19:55:20Z",
+   "updated": "2026-10-19T17:08:09Z",
    "note": "",
    "advanced": "2026-10-18T19:39:58Z",
    "built": [
@@ -7961,7 +7962,8 @@
     }
    ],
    "opened": "2026-10-18T19:50:50Z",
-   "readied": "2026-10-18T19:51:21Z"
+   "readied": "2026-10-18T19:51:21Z",
+   "merged_by": "pr"
   },
   {
    "id": "aside-back-to-back",
@@ -8474,13 +8476,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/req-debug-redact.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16293,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/req-debug-redact",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:39:00Z",
-   "updated": "2026-10-19T07:55:55Z",
+   "updated": "2026-10-19T17:08:09Z",
    "note": "",
    "built": [
     {
@@ -8645,7 +8647,8 @@
    ],
    "advanced": "2026-10-18T21:55:57Z",
    "opened": "2026-10-19T04:37:41Z",
-   "readied": "2026-10-19T04:37:59Z"
+   "readied": "2026-10-19T04:37:59Z",
+   "merged_by": "pr"
   },
   {
    "id": "browser-role-name",
@@ -10096,13 +10099,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/snapcompact-archive-persist.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16282,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-archive-persist",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:41:21Z",
-   "updated": "2026-10-19T02:16:55Z",
+   "updated": "2026-10-19T17:08:09Z",
    "note": "",
    "built": [
     {
@@ -10523,7 +10526,8 @@
     }
    ],
    "advanced": "2026-10-18T21:55:14Z",
-   "opened": "2026-10-19T02:14:22Z"
+   "opened": "2026-10-19T02:14:22Z",
+   "merged_by": "pr"
   },
   {
    "id": "wait-queued-completion",
@@ -11374,13 +11378,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/ssh-search-tier.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16285,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ssh-search-tier",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:43:18Z",
-   "updated": "2026-10-19T04:21:07Z",
+   "updated": "2026-10-19T17:08:09Z",
    "note": "",
    "built": [
     {
@@ -11811,7 +11815,8 @@
    ],
    "advanced": "2026-10-18T21:55:20Z",
    "opened": "2026-10-19T02:54:44Z",
-   "readied": "2026-10-19T02:55:02Z"
+   "readied": "2026-10-19T02:55:02Z",
+   "merged_by": "pr"
   },
   {
    "id": "irc-broadcast-no-relay",
@@ -12440,13 +12445,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/conflict-bulk-per-id.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16267,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/conflict-bulk-per-id",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:46:57Z",
-   "updated": "2026-10-19T00:29:23Z",
+   "updated": "2026-10-19T17:08:09Z",
    "note": "",
    "built": [
     {
@@ -12813,7 +12818,8 @@
     }
    ],
    "advanced": "2026-10-18T21:13:18Z",
-   "opened": "2026-10-19T00:28:49Z"
+   "opened": "2026-10-19T00:28:49Z",
+   "merged_by": "pr"
   },
   {
    "id": "conflict-hidden-ids",
@@ -13249,13 +13255,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/browser-timeout-names.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16266,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-timeout-names",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:01:52Z",
-   "updated": "2026-10-19T00:20:44Z",
+   "updated": "2026-10-19T17:08:09Z",
    "note": "",
    "advanced": "2026-10-18T21:54:56Z",
    "built": [
@@ -13629,7 +13635,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T00:18:54Z"
+   "opened": "2026-10-19T00:18:54Z",
+   "merged_by": "pr"
   },
   {
    "id": "anthropic-refusal-handoff",
@@ -14268,13 +14275,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/gemini-tool-result-order.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16259,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gemini-tool-result-order",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:29Z",
-   "updated": "2026-10-18T23:15:21Z",
+   "updated": "2026-10-19T17:08:09Z",
    "note": "",
    "built": [
     {
@@ -14379,7 +14386,8 @@
    ],
    "advanced": "2026-10-18T21:41:26Z",
    "opened": "2026-10-18T23:15:02Z",
-   "readied": "2026-10-18T23:15:20Z"
+   "readied": "2026-10-18T23:15:20Z",
+   "merged_by": "pr"
   },
   {
    "id": "factory-droid-org-lookup",
@@ -14512,13 +14520,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/factory-droid-gemini-tool-schema.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16249,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-gemini-tool-schema",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:28:41Z",
-   "updated": "2026-10-18T22:12:45Z",
+   "updated": "2026-10-19T17:08:09Z",
    "note": "",
    "built": [
     {
@@ -14623,7 +14631,8 @@
    ],
    "advanced": "2026-10-18T21:41:07Z",
    "opened": "2026-10-18T21:59:16Z",
-   "readied": "2026-10-18T21:59:35Z"
+   "readied": "2026-10-18T21:59:35Z",
+   "merged_by": "pr"
   },
   {
    "id": "factory-droid-0244",
@@ -17738,13 +17747,13 @@
    "needs": [],
    "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
    "body": "bodies/factory-droid-tool-name-cap.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16283,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-tool-name-cap",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:20:03Z",
-   "updated": "2026-10-19T04:21:07Z",
+   "updated": "2026-10-19T17:08:09Z",
    "note": "",
    "built": [
     {
@@ -17875,7 +17884,8 @@
     }
    ],
    "opened": "2026-10-19T02:25:15Z",
-   "readied": "2026-10-19T02:25:33Z"
+   "readied": "2026-10-19T02:25:33Z",
+   "merged_by": "pr"
   },
   {
    "id": "lsp-workspace-folders",
