@@ -31671,13 +31671,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/computer-shell-exception.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16403,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-shell-exception",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:50:15Z",
-   "updated": "2026-10-19T23:46:24Z",
+   "updated": "2026-10-19T23:53:07Z",
    "note": "",
    "built": [
     {
@@ -32250,7 +32250,8 @@
      "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z"
+   "advanced": "2026-10-19T22:06:15Z",
+   "opened": "2026-10-19T23:53:07Z"
   },
   {
    "id": "edit-mismatch-seen-lines",
