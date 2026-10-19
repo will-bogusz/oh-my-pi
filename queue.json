@@ -16108,13 +16108,13 @@
    "needs": [],
    "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
    "body": "bodies/factory-droid-media-budget.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16288,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-media-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:14:46Z",
-   "updated": "2026-10-19T03:39:41Z",
+   "updated": "2026-10-19T03:42:39Z",
    "note": "",
    "built": [
     {
@@ -16566,7 +16566,8 @@
      "at": "2026-10-19T03:39:37Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-19T03:42:38Z"
   },
   {
    "id": "factory-droid-tool-name-cap",
