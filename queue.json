@@ -13229,10 +13229,11 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:53:00Z",
-   "updated": "2026-10-19T07:21:33Z",
+   "updated": "2026-10-19T07:21:52Z",
    "note": "",
    "advanced": "2026-10-18T21:20:43Z",
-   "opened": "2026-10-19T07:21:32Z"
+   "opened": "2026-10-19T07:21:32Z",
+   "readied": "2026-10-19T07:21:52Z"
   },
   {
    "id": "browser-timeout-names",
