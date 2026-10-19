@@ -18622,7 +18622,7 @@
    "branch": "will/factory-droid-completions-tool-names",
    "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests",
    "area": "providers",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [
     "factory-droid-tool-name-cap"
    ],
@@ -18634,7 +18634,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-completions-tool-names",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:33:09Z",
-   "updated": "2026-10-19T21:29:04Z",
+   "updated": "2026-10-19T22:14:46Z",
    "note": "",
    "advanced": "2026-10-19T19:12:57Z",
    "built": [
@@ -20449,7 +20449,7 @@
    "branch": "will/edit-fileop-tag-check",
    "title": "fix(edit): required a live tag for bare hashline MV and REM",
    "area": "other",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/edit-fileop-tag-check.md",
@@ -20459,7 +20459,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-fileop-tag-check",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:22:37Z",
-   "updated": "2026-10-19T21:20:12Z",
+   "updated": "2026-10-19T22:14:46Z",
    "note": "",
    "built": [
     {
@@ -21906,7 +21906,7 @@
    "branch": "will/computer-control-unanswered",
    "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/computer-control-unanswered.md",
@@ -21916,7 +21916,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-control-unanswered",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:32:36Z",
-   "updated": "2026-10-19T22:04:26Z",
+   "updated": "2026-10-19T22:14:46Z",
    "note": "",
    "built": [
     {
