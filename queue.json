@@ -2821,8 +2821,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-rich-text",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-19T07:27:22Z",
-   "note": "#15574 went hint-only (2026-10-16, d05bbc41ac): this entry's need on it was only for code that push removed (read_ref, check_identity, AxText.refound, #reportRefound). Rebase onto main alone dropping that code and 7096338aea, then clear needs; if it lands after #15574, add its text request to Request::reference()."
+   "updated": "2026-10-19T07:27:40Z",
+   "note": "Series 2 restack (2026-10-19): restacked on c6ec2ff47a as e07f43a775 (no longer needs #15574); after computer-ui-quiet and computer-ax-lines. Pre-restack head kept as local backup/will/computer-rich-text-pre-s2r (7096338aea)."
   },
   {
    "id": "relay-popup-front",
