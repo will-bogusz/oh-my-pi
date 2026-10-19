@@ -19131,6 +19131,24 @@
    "added": "2026-10-19T19:13:33Z",
    "updated": "2026-10-19T19:13:33Z",
    "note": ""
+  },
+  {
+   "id": "tsp-stall-log",
+   "branch": "will/tsp-stall-log",
+   "title": "fix(tui): warn once per TSP ack stall instead of every 5 s",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/tsp-stall-log.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tsp-stall-log",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:13:34Z",
+   "updated": "2026-10-19T19:13:34Z",
+   "note": ""
   }
  ],
  "watch": {
