@@ -1156,8 +1156,10 @@
    "title": "feat(natives): show what macOS ax() elements can do",
    "area": "computer",
    "priority": "P2",
-   "needs": [],
-   "base": null,
+   "needs": [
+    "#16233"
+   ],
+   "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
    "body": null,
    "state": "open",
    "pr": 15282,
@@ -1165,7 +1167,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:48:27Z",
+   "updated": "2026-10-19T07:27:20Z",
    "note": "series 2 (B: draft until Will's presentation review). #15280 -> #15565; #15282 -> #15566, #15584 (children queued)."
   },
   {
