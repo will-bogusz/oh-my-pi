@@ -11113,13 +11113,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/conflict-hidden-ids.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16269,
    "closed_prs": [],
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:47:10Z",
-   "updated": "2026-10-19T00:40:39Z",
+   "updated": "2026-10-19T00:46:09Z",
    "note": "",
    "built": [
     {
@@ -11484,7 +11484,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-18T21:13:31Z"
+   "advanced": "2026-10-18T21:13:31Z",
+   "opened": "2026-10-19T00:46:09Z"
   },
   {
    "id": "revive-prompt-cache",
