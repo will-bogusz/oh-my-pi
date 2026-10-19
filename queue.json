@@ -20001,7 +20001,7 @@
    "branch": "will/r2-browser-match-count-error",
    "title": "fix(coding-agent): say why a timed-out browser selector's matches could not be counted",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/r2-browser-match-count-error.md",
@@ -20011,7 +20011,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-match-count-error",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:22:15Z",
-   "updated": "2026-10-19T22:34:34Z",
+   "updated": "2026-10-19T22:45:08Z",
    "note": "",
    "built": [
     {
@@ -21091,7 +21091,7 @@
    "branch": "will/r2-browser-relay-guidance",
    "title": "fix(coding-agent): tell the model an open without app drives the user's Chrome while the relay is on",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/r2-browser-relay-guidance.md",
@@ -21101,7 +21101,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-relay-guidance",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:30:07Z",
-   "updated": "2026-10-19T22:39:15Z",
+   "updated": "2026-10-19T22:45:08Z",
    "note": "",
    "built": [
     {
