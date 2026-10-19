@@ -2582,8 +2582,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-focus",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-19T07:27:26Z",
-   "note": "Series 2 restack (2026-10-19): absorbed into nothing queued: superseded by the series 2 triage (s2/TRIAGE.md); old head 943409777a"
+   "updated": "2026-10-19T07:27:38Z",
+   "note": "Series 2 restack (2026-10-19): dropped, not restacked: main's el.type/el.press already name where focus is (#15563), its in-tree lines repeat #15282's marks, and its dev set showed no step saving (s2/TRIAGE.md). Old head 943409777a."
   },
   {
    "id": "r2/relay-turn-end-detach",
