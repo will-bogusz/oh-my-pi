@@ -5820,13 +5820,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/browser-app-precedence-docs.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16294,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-app-precedence-docs",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:14:13Z",
-   "updated": "2026-10-19T04:46:46Z",
+   "updated": "2026-10-19T04:50:55Z",
    "note": "",
    "built": [
     {
@@ -6327,7 +6327,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-18T21:20:21Z"
+   "advanced": "2026-10-18T21:20:21Z",
+   "opened": "2026-10-19T04:50:55Z"
   },
   {
    "id": "report-issue-colon",
