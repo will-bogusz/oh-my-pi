@@ -19275,6 +19275,24 @@
    "added": "2026-10-19T19:32:36Z",
    "updated": "2026-10-19T19:32:36Z",
    "note": ""
+  },
+  {
+   "id": "edit-parse-only-ambiguity",
+   "branch": "will/edit-parse-only-ambiguity",
+   "title": "fix(edit): name the trailing comma when a one-row replacement only fails on it",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/edit-parse-only-ambiguity.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-parse-only-ambiguity",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:38:47Z",
+   "updated": "2026-10-19T19:38:47Z",
+   "note": ""
   }
  ],
  "watch": {
