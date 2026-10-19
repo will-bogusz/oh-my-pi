@@ -17907,33 +17907,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T02:17:16Z",
+  "checked": "2026-10-19T04:21:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "factory-droid-media-budget": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images"
-   },
-   "factory-droid-tool-name-cap": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests"
-   },
    "oauth-refresh-keep-rotated-token": {
     "since": "2026-10-18T22:12:47Z",
     "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget"
    },
-   "relay-popup-front-main": {
-    "since": "2026-10-18T19:11:35Z",
-    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS"
-   },
    "req-debug-redact": {
     "since": "2026-10-18T19:40:43Z",
     "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps"
-   },
-   "ssh-search-tier": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep"
    },
    "factory-droid-prompt-cache": {
     "since": "2026-10-18T22:12:47Z",
@@ -18039,7 +18023,11 @@
    16274,
    16278,
    16281,
-   16282
+   16282,
+   16283,
+   16284,
+   16285,
+   16288
   ],
   "events": [
    {
@@ -19517,6 +19505,34 @@
     "id": "snapcompact-archive-persist",
     "title": "fix(coding-agent): persist snapcompact archive source text whole",
     "why": "opened as #16282"
+   },
+   {
+    "at": "2026-10-19T04:21:09Z",
+    "kind": "unopenable",
+    "id": "factory-droid-media-budget",
+    "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images",
+    "why": "opened as #16288"
+   },
+   {
+    "at": "2026-10-19T04:21:09Z",
+    "kind": "unopenable",
+    "id": "factory-droid-tool-name-cap",
+    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
+    "why": "opened as #16283"
+   },
+   {
+    "at": "2026-10-19T04:21:09Z",
+    "kind": "unopenable",
+    "id": "relay-popup-front-main",
+    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
+    "why": "opened as #16284"
+   },
+   {
+    "at": "2026-10-19T04:21:09Z",
+    "kind": "unopenable",
+    "id": "ssh-search-tier",
+    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
+    "why": "opened as #16285"
    }
   ]
  },
