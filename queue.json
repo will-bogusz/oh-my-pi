@@ -4656,7 +4656,7 @@
    "branch": "will/relay-popup-front-main",
    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
    "body": "bodies/relay-popup-front-main.md",
@@ -4666,7 +4666,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front-main",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:46:45Z",
-   "updated": "2026-10-19T02:42:52Z",
+   "updated": "2026-10-19T04:21:07Z",
    "note": "",
    "built": [
     {
@@ -10945,7 +10945,7 @@
    "branch": "will/ssh-search-tier",
    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
    "area": "other",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/ssh-search-tier.md",
@@ -10955,7 +10955,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ssh-search-tier",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:43:18Z",
-   "updated": "2026-10-19T02:55:02Z",
+   "updated": "2026-10-19T04:21:07Z",
    "note": "",
    "built": [
     {
@@ -16806,7 +16806,7 @@
    "branch": "will/factory-droid-tool-name-cap",
    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
    "area": "providers",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
    "body": "bodies/factory-droid-tool-name-cap.md",
@@ -16816,7 +16816,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-tool-name-cap",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:20:03Z",
-   "updated": "2026-10-19T02:25:34Z",
+   "updated": "2026-10-19T04:21:07Z",
    "note": "",
    "built": [
     {
