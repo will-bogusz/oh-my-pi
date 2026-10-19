@@ -2552,7 +2552,7 @@
    ],
    "base": "73330e1926981d973b67411bacc9c48003c4646b",
    "body": "bodies/computer-settle-debt.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [
     15565
@@ -2560,8 +2560,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-settle-debt",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:52:19Z",
-   "note": ""
+   "updated": "2026-10-19T07:27:24Z",
+   "note": "Series 2 restack (2026-10-19): absorbed into computer-ui-quiet (will/computer-ui-quiet cca9912e4e)"
   },
   {
    "id": "computer-ax-focus",
