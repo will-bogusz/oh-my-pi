@@ -16528,13 +16528,13 @@
    "needs": [],
    "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
    "body": "bodies/factory-droid-image-generation.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16316,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-image-generation",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:11:27Z",
-   "updated": "2026-10-19T07:26:45Z",
+   "updated": "2026-10-19T07:29:44Z",
    "note": "",
    "built": [
     {
@@ -17112,7 +17112,8 @@
      "at": "2026-10-19T07:26:41Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-19T07:29:44Z"
   },
   {
    "id": "factory-droid-image-role-default",
