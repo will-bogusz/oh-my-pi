@@ -21755,13 +21755,13 @@
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/edit-remap-refuse.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16383,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-remap-refuse",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:07:13Z",
-   "updated": "2026-10-19T20:59:31Z",
+   "updated": "2026-10-19T21:24:12Z",
    "note": "",
    "built": [
     {
@@ -21791,7 +21791,8 @@
      "at": "2026-10-19T20:59:30Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-10-19T21:24:12Z"
   },
   {
    "id": "builtin-rule-reminder",
