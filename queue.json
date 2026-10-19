@@ -19111,8 +19111,8 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-19T07:26:45Z",
-   "updated": "2026-10-19T07:30:46Z",
-   "note": ""
+   "updated": "2026-10-19T19:31:33Z",
+   "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block)."
   },
   {
    "id": "vscode-mcp-missing",
