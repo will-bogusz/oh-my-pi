@@ -18885,7 +18885,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T18:09:47Z",
+  "checked": "2026-10-19T18:40:03Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -18916,108 +18916,7 @@
    }
   },
   "merged_through": "2026-10-19T17:41:37Z",
-  "unreleased": {
-   "16293": {
-    "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps",
-    "merge_commit": "abb184ded7e2ac8158905504a7a32fd8cea68279",
-    "merged_at": "2026-10-19T16:41:38Z"
-   },
-   "16241": {
-    "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it",
-    "merge_commit": "eb8682132501c10f0e0fe59f7975199217ec5c6b",
-    "merged_at": "2026-10-19T16:45:05Z"
-   },
-   "16282": {
-    "title": "fix(coding-agent): persist snapcompact archive source text whole",
-    "merge_commit": "36ccf0839f3bc2baf901c1d0868baec4a6abc98b",
-    "merged_at": "2026-10-19T16:46:08Z"
-   },
-   "16267": {
-    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values",
-    "merge_commit": "5d1c86007c684c695aa5ff6b43b3738bf7240af9",
-    "merged_at": "2026-10-19T16:52:55Z"
-   },
-   "16285": {
-    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
-    "merge_commit": "c270e3595d5eae958d498b9a032a72d6d5335235",
-    "merged_at": "2026-10-19T16:56:50Z"
-   },
-   "16235": {
-    "title": "fix(natives): never cancel X11 uinput releases",
-    "merge_commit": "19f8df410036760f460316e734593b7e6fc5639e",
-    "merged_at": "2026-10-19T16:57:06Z"
-   },
-   "16249": {
-    "title": "fix(ai): keep Factory Droid Gemini tool schemas valid when a parameter takes a string or a list",
-    "merge_commit": "188c457d3fc6cde8ed950ebef6a756d602b3d498",
-    "merged_at": "2026-10-19T16:58:51Z"
-   },
-   "16283": {
-    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
-    "merge_commit": "87c3e9b7d710203d08b640bece58d08d72276e50",
-    "merged_at": "2026-10-19T16:59:16Z"
-   },
-   "16259": {
-    "title": "fix(ai): send parallel Gemini tool results back in call order",
-    "merge_commit": "fcc36032b3fe6ef242186ed17f73124b8b686ad2",
-    "merged_at": "2026-10-19T16:59:54Z"
-   },
-   "16266": {
-    "title": "fix(browser): recognize Puppeteer timeouts in release builds",
-    "merge_commit": "caa898abe8e4bda3861a82876a61ca1d6f2259a4",
-    "merged_at": "2026-10-19T17:03:02Z"
-   },
-   "16302": {
-    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
-    "merge_commit": "0c12c9054a1fe85a0c3d1254bd6155d77babd7cb",
-    "merged_at": "2026-10-19T17:12:04Z"
-   },
-   "16312": {
-    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts",
-    "merge_commit": "896aa52a1a2a77e0f070d3a53c9d01d72683af72",
-    "merged_at": "2026-10-19T17:19:41Z"
-   },
-   "16292": {
-    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session",
-    "merge_commit": "209cafd9b1ff675cfbe9d2753edc7372a981449e",
-    "merged_at": "2026-10-19T17:20:17Z"
-   },
-   "16301": {
-    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short",
-    "merge_commit": "05b355a459481d8f50c256828b2a9bb15ba659eb",
-    "merged_at": "2026-10-19T17:20:49Z"
-   },
-   "16314": {
-    "title": "fix(pi-shell,tui): keep ssh remote output intact in the minimizer",
-    "merge_commit": "3461f602d29b0c184659ec273c8a31e86486e7e5",
-    "merged_at": "2026-10-19T17:23:16Z"
-   },
-   "16281": {
-    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
-    "merge_commit": "c388b92d314791f1ffff39403c0f34393a6ada84",
-    "merged_at": "2026-10-19T17:29:47Z"
-   },
-   "16233": {
-    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
-    "merge_commit": "82809961f9c4e2b962e2f5823a425a51c0dd9b65",
-    "merged_at": "2026-10-19T17:32:33Z"
-   },
-   "16230": {
-    "title": "fix(coding-agent): stop a browser screenshot waiting on a DevTools session past its deadline",
-    "merge_commit": "49af397ae4fa3aeb778a6c29a32de260389dc105",
-    "merged_at": "2026-10-19T17:32:52Z"
-   },
-   "16295": {
-    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal",
-    "merge_commit": "44fae6e61a81a4c4fe4523af1844fafff0c27d40",
-    "merged_at": "2026-10-19T17:33:37Z"
-   },
-   "16252": {
-    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
-    "merge_commit": "6595f9b1f9bd5871b6909468dcfa2c9b65d2b39b",
-    "merged_at": "2026-10-19T17:41:37Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    13677,
    14235,
@@ -20877,6 +20776,146 @@
     "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
     "merged_by": "H4vC",
     "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16293,
+    "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16241,
+    "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16282,
+    "title": "fix(coding-agent): persist snapcompact archive source text whole",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16267,
+    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16285,
+    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16235,
+    "title": "fix(natives): never cancel X11 uinput releases",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16249,
+    "title": "fix(ai): keep Factory Droid Gemini tool schemas valid when a parameter takes a string or a list",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16283,
+    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16259,
+    "title": "fix(ai): send parallel Gemini tool results back in call order",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16266,
+    "title": "fix(browser): recognize Puppeteer timeouts in release builds",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16302,
+    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16312,
+    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16292,
+    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16301,
+    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16314,
+    "title": "fix(pi-shell,tui): keep ssh remote output intact in the minimizer",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16281,
+    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16233,
+    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16230,
+    "title": "fix(coding-agent): stop a browser screenshot waiting on a DevTools session past its deadline",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16295,
+    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal",
+    "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T18:40:03Z",
+    "kind": "released",
+    "number": 16252,
+    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
+    "tag": "v18.12.3"
    }
   ]
  }
