@@ -19723,7 +19723,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T20:11:33Z",
+  "checked": "2026-10-19T20:42:30Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -19742,6 +19742,10 @@
    "factory-droid-completions-tool-names": {
     "since": "2026-10-19T17:08:11Z",
     "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests"
+   },
+   "test-log-dir": {
+    "since": "2026-10-19T20:42:30Z",
+    "title": "fix(utils,natives): keep test runs out of the real ~/.omp/logs"
    },
    "computer-control-unanswered": {
     "since": "2026-10-19T19:41:31Z",
@@ -19774,6 +19778,10 @@
    "utok-perf": {
     "since": "2026-10-18T22:12:47Z",
     "title": "perf(natives/utok): memoize short-piece merge counts per thread"
+   },
+   "r2-browser-wait-line": {
+    "since": "2026-10-19T20:42:30Z",
+    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps"
    },
    "release-helper-wait-test": {
     "since": "2026-10-18T19:11:35Z",
@@ -19846,6 +19854,10 @@
    "read-sqlite-q-paging": {
     "since": "2026-10-19T20:11:33Z",
     "title": "feat(read): page SQLite ?q= query rows with limit and offset"
+   },
+   "subagent-wait-reply": {
+    "since": "2026-10-19T20:42:30Z",
+    "title": "feat(coding-agent): let wait block for the reply to a message the agent sent"
    }
   },
   "conflicts": {
@@ -22028,6 +22040,24 @@
     "kind": "openable",
     "id": "read-sqlite-q-paging",
     "title": "feat(read): page SQLite ?q= query rows with limit and offset"
+   },
+   {
+    "at": "2026-10-19T20:42:30Z",
+    "kind": "openable",
+    "id": "test-log-dir",
+    "title": "fix(utils,natives): keep test runs out of the real ~/.omp/logs"
+   },
+   {
+    "at": "2026-10-19T20:42:30Z",
+    "kind": "openable",
+    "id": "r2-browser-wait-line",
+    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps"
+   },
+   {
+    "at": "2026-10-19T20:42:30Z",
+    "kind": "openable",
+    "id": "subagent-wait-reply",
+    "title": "feat(coding-agent): let wait block for the reply to a message the agent sent"
    }
   ]
  }
