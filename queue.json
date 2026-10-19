@@ -20193,13 +20193,13 @@
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/predict-newer-daemon.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16380,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/predict-newer-daemon",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:30:30Z",
-   "updated": "2026-10-19T21:11:17Z",
+   "updated": "2026-10-19T21:15:40Z",
    "note": "",
    "built": [
     {
@@ -20589,7 +20589,8 @@
      "at": "2026-10-19T21:11:17Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-10-19T21:15:39Z"
   },
   {
    "id": "computer-control-unanswered",
