@@ -19669,7 +19669,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T19:41:31Z",
+  "checked": "2026-10-19T20:11:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -19680,6 +19680,10 @@
    "edit-fileop-tag-check": {
     "since": "2026-10-19T19:41:31Z",
     "title": "fix(edit): required a live tag for bare hashline MV and REM"
+   },
+   "edit-remap-refuse": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(edit): refuse stale-tag remaps aimed at the current lines"
    },
    "factory-droid-completions-tool-names": {
     "since": "2026-10-19T17:08:11Z",
@@ -19697,6 +19701,14 @@
     "since": "2026-10-19T19:41:31Z",
     "title": "fix(coding-agent): tell the model an open without app drives the user's Chrome while the relay is on"
    },
+   "read-inmemory-range": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(coding-agent): kept requested lines in in-memory range reads"
+   },
+   "tar-stream-index": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit"
+   },
    "thinking-drop-log": {
     "since": "2026-10-19T19:41:31Z",
     "title": "fix(ai): log one warning per request for dropped thinking blocks"
@@ -19713,17 +19725,73 @@
     "since": "2026-10-18T19:11:35Z",
     "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in"
    },
+   "anthropic-unsupported-media": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(ai): fail Claude turns that attach media Claude cannot read"
+   },
+   "autoqa-home-paths": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances"
+   },
+   "builtin-rule-narrow-2": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(coding-agent): fire ts-no-tiny-functions and ts-promise-with-resolvers only on code they flag"
+   },
+   "builtin-rule-reminder": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST"
+   },
+   "custom-tool-host-imports": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(coding-agent): load custom tools that import omp packages in the binary"
+   },
+   "deepseek-image-tokens": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config"
+   },
    "edit-parse-only-ambiguity": {
     "since": "2026-10-19T19:41:31Z",
     "title": "fix(edit): name the trailing comma when a one-row replacement only fails on it"
+   },
+   "ln-uri-source": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(pi-builtins): link host paths to the file a backed URL aliases"
    },
    "read-raw-line": {
     "since": "2026-10-19T19:41:31Z",
     "title": "fix(read): read one line for a bare N beside :raw"
    },
+   "read-selector-edges": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(read): read tail chunks in comma line lists"
+   },
+   "rg-count-zero": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(pi-builtins): print rg counts only for files with matches"
+   },
+   "rm-force-enoent": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(pi-builtins): treat entries already gone as removed under rm -f"
+   },
+   "snapcompact-wire-images": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(coding-agent): gate snapcompact on images the wire actually sends"
+   },
+   "thinking-loop-accounting": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(ai): keep usage and timing on thinking-loop aborts"
+   },
    "vscode-mcp-missing": {
     "since": "2026-10-19T19:41:31Z",
     "title": "fix(coding-agent): skip a missing .vscode/mcp.json without warning"
+   },
+   "write-prefix-contiguous": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "fix(write): keep content whose leading numbers do not count up by one"
+   },
+   "read-sqlite-q-paging": {
+    "since": "2026-10-19T20:11:33Z",
+    "title": "feat(read): page SQLite ?q= query rows with limit and offset"
    }
   },
   "conflicts": {
@@ -21804,6 +21872,108 @@
     "kind": "openable",
     "id": "vscode-mcp-missing",
     "title": "fix(coding-agent): skip a missing .vscode/mcp.json without warning"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "edit-remap-refuse",
+    "title": "fix(edit): refuse stale-tag remaps aimed at the current lines"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "read-inmemory-range",
+    "title": "fix(coding-agent): kept requested lines in in-memory range reads"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "tar-stream-index",
+    "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "anthropic-unsupported-media",
+    "title": "fix(ai): fail Claude turns that attach media Claude cannot read"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "autoqa-home-paths",
+    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "builtin-rule-narrow-2",
+    "title": "fix(coding-agent): fire ts-no-tiny-functions and ts-promise-with-resolvers only on code they flag"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "builtin-rule-reminder",
+    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "custom-tool-host-imports",
+    "title": "fix(coding-agent): load custom tools that import omp packages in the binary"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "deepseek-image-tokens",
+    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "ln-uri-source",
+    "title": "fix(pi-builtins): link host paths to the file a backed URL aliases"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "read-selector-edges",
+    "title": "fix(read): read tail chunks in comma line lists"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "rg-count-zero",
+    "title": "fix(pi-builtins): print rg counts only for files with matches"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "rm-force-enoent",
+    "title": "fix(pi-builtins): treat entries already gone as removed under rm -f"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "snapcompact-wire-images",
+    "title": "fix(coding-agent): gate snapcompact on images the wire actually sends"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "thinking-loop-accounting",
+    "title": "fix(ai): keep usage and timing on thinking-loop aborts"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "write-prefix-contiguous",
+    "title": "fix(write): keep content whose leading numbers do not count up by one"
+   },
+   {
+    "at": "2026-10-19T20:11:33Z",
+    "kind": "openable",
+    "id": "read-sqlite-q-paging",
+    "title": "feat(read): page SQLite ?q= query rows with limit and offset"
    }
   ]
  }
