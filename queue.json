@@ -20011,7 +20011,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-match-count-error",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:22:15Z",
-   "updated": "2026-10-19T22:34:14Z",
+   "updated": "2026-10-19T22:34:34Z",
    "note": "",
    "built": [
     {
@@ -20483,7 +20483,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-19T22:34:13Z"
+   "opened": "2026-10-19T22:34:13Z",
+   "readied": "2026-10-19T22:34:34Z"
   },
   {
    "id": "edit-fileop-tag-check",
