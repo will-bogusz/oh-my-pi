@@ -20199,7 +20199,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/predict-newer-daemon",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:30:30Z",
-   "updated": "2026-10-19T21:15:40Z",
+   "updated": "2026-10-19T21:16:00Z",
    "note": "",
    "built": [
     {
@@ -20590,7 +20590,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-19T21:15:39Z"
+   "opened": "2026-10-19T21:15:39Z",
+   "readied": "2026-10-19T21:15:59Z"
   },
   {
    "id": "computer-control-unanswered",
