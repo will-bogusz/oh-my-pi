@@ -32800,11 +32800,5 @@
     "title": "feat(coding-agent): let wait block for the reply to a message the agent sent"
    }
   ]
- },
- "opening": {
-  "id": "r2-browser-match-count-error",
-  "token": "9f2d84984b954945a10f75433d8b07f9",
-  "host": "MacBook-Pro",
-  "at": "2026-10-19T22:06:23Z"
  }
 }
