@@ -18884,13 +18884,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T17:08:11Z",
+  "checked": "2026-10-19T17:39:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "factory-droid-completions-tool-names": {
     "since": "2026-10-19T17:08:11Z",
     "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests"
+   },
+   "revive-prompt-cache": {
+    "since": "2026-10-19T17:39:09Z",
+    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it"
    },
    "utok-perf": {
     "since": "2026-10-18T22:12:47Z",
@@ -18902,13 +18906,6 @@
    }
   },
   "conflicts": {
-   "#16302": {
-    "since": "2026-10-19T16:07:08Z",
-    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
-    "files": [
-     "packages/coding-agent/test/task/executor-result-acceptance.test.ts"
-    ]
-   },
    "#16274": {
     "since": "2026-10-19T16:37:48Z",
     "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
@@ -18917,7 +18914,7 @@
     ]
    }
   },
-  "merged_through": "2026-10-19T17:03:02Z",
+  "merged_through": "2026-10-19T17:33:37Z",
   "unreleased": {
    "16293": {
     "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps",
@@ -18968,6 +18965,51 @@
     "title": "fix(browser): recognize Puppeteer timeouts in release builds",
     "merge_commit": "caa898abe8e4bda3861a82876a61ca1d6f2259a4",
     "merged_at": "2026-10-19T17:03:02Z"
+   },
+   "16302": {
+    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
+    "merge_commit": "0c12c9054a1fe85a0c3d1254bd6155d77babd7cb",
+    "merged_at": "2026-10-19T17:12:04Z"
+   },
+   "16312": {
+    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts",
+    "merge_commit": "896aa52a1a2a77e0f070d3a53c9d01d72683af72",
+    "merged_at": "2026-10-19T17:19:41Z"
+   },
+   "16292": {
+    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session",
+    "merge_commit": "209cafd9b1ff675cfbe9d2753edc7372a981449e",
+    "merged_at": "2026-10-19T17:20:17Z"
+   },
+   "16301": {
+    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short",
+    "merge_commit": "05b355a459481d8f50c256828b2a9bb15ba659eb",
+    "merged_at": "2026-10-19T17:20:49Z"
+   },
+   "16314": {
+    "title": "fix(pi-shell,tui): keep ssh remote output intact in the minimizer",
+    "merge_commit": "3461f602d29b0c184659ec273c8a31e86486e7e5",
+    "merged_at": "2026-10-19T17:23:16Z"
+   },
+   "16281": {
+    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
+    "merge_commit": "c388b92d314791f1ffff39403c0f34393a6ada84",
+    "merged_at": "2026-10-19T17:29:47Z"
+   },
+   "16233": {
+    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
+    "merge_commit": "82809961f9c4e2b962e2f5823a425a51c0dd9b65",
+    "merged_at": "2026-10-19T17:32:33Z"
+   },
+   "16230": {
+    "title": "fix(coding-agent): stop a browser screenshot waiting on a DevTools session past its deadline",
+    "merge_commit": "49af397ae4fa3aeb778a6c29a32de260389dc105",
+    "merged_at": "2026-10-19T17:32:52Z"
+   },
+   "16295": {
+    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal",
+    "merge_commit": "44fae6e61a81a4c4fe4523af1844fafff0c27d40",
+    "merged_at": "2026-10-19T17:33:37Z"
    }
   },
   "ready": [
@@ -18983,9 +19025,7 @@
    15508,
    16217,
    16223,
-   16230,
    16231,
-   16233,
    16236,
    16242,
    16250,
@@ -18995,23 +19035,16 @@
    16271,
    16274,
    16278,
-   16281,
    16284,
    16288,
    16291,
-   16292,
    16294,
-   16295,
    16296,
    16297,
    16299,
    16300,
-   16301,
-   16302,
    16306,
    16309,
-   16312,
-   16314,
    16316
   ],
   "events": [
@@ -20753,6 +20786,84 @@
     "kind": "openable",
     "id": "factory-droid-completions-tool-names",
     "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests"
+   },
+   {
+    "at": "2026-10-19T17:39:09Z",
+    "kind": "merged",
+    "number": 16302,
+    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-19T17:39:09Z",
+    "kind": "merged",
+    "number": 16312,
+    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:39:09Z",
+    "kind": "merged",
+    "number": 16292,
+    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:39:09Z",
+    "kind": "merged",
+    "number": 16301,
+    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:39:09Z",
+    "kind": "merged",
+    "number": 16314,
+    "title": "fix(pi-shell,tui): keep ssh remote output intact in the minimizer",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:39:09Z",
+    "kind": "merged",
+    "number": 16281,
+    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:39:09Z",
+    "kind": "merged",
+    "number": 16233,
+    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:39:09Z",
+    "kind": "merged",
+    "number": 16230,
+    "title": "fix(coding-agent): stop a browser screenshot waiting on a DevTools session past its deadline",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:39:09Z",
+    "kind": "merged",
+    "number": 16295,
+    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:39:09Z",
+    "kind": "openable",
+    "id": "revive-prompt-cache",
+    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it"
    }
   ]
  }
