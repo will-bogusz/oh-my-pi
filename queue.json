@@ -14652,13 +14652,15 @@
    "needs": [],
    "base": "c28feb8c4a8e09f3f51ec3d63c3c8170172cd05f",
    "body": "bodies/factory-droid-web-search.md",
-   "state": "open",
-   "pr": 16326,
-   "closed_prs": [],
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [
+    16326
+   ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-web-search",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:37:53Z",
-   "updated": "2026-10-19T10:31:11Z",
+   "updated": "2026-10-19T10:31:15Z",
    "note": "",
    "built": [
     {
@@ -15183,8 +15185,7 @@
    ],
    "advanced": "2026-10-19T09:08:43Z",
    "opened": "2026-10-19T09:17:17Z",
-   "readied": "2026-10-19T09:17:43Z",
-   "requeue": 16326
+   "readied": "2026-10-19T09:17:43Z"
   },
   {
    "id": "utok-perf",
