@@ -19720,6 +19720,24 @@
    "added": "2026-10-19T20:37:51Z",
    "updated": "2026-10-19T20:37:51Z",
    "note": ""
+  },
+  {
+   "id": "bash-session-env",
+   "branch": "will/bash-session-env",
+   "title": "feat(coding-agent): expose PI_SESSION_ID and PI_SESSION_FILE to bash commands",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/bash-session-env.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-session-env",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T20:45:07Z",
+   "updated": "2026-10-19T20:45:07Z",
+   "note": ""
   }
  ],
  "watch": {
