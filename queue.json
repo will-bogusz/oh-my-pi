@@ -22590,7 +22590,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-profile-ranges",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:41:52Z",
-   "updated": "2026-10-19T23:18:37Z",
+   "updated": "2026-10-19T23:19:00Z",
    "note": "",
    "built": [
     {
@@ -23084,7 +23084,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-19T23:18:37Z"
+   "opened": "2026-10-19T23:18:37Z",
+   "readied": "2026-10-19T23:18:59Z"
   },
   {
    "id": "read-inmemory-range",
