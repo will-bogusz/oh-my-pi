@@ -19448,5 +19448,11 @@
     "why": "opened as #16282"
    }
   ]
+ },
+ "opening": {
+  "id": "oauth-refresh-keep-rotated-token",
+  "token": "a108c56870c045a9bde292052389415e",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T04:18:14Z"
  }
 }
