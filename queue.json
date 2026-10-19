@@ -19314,13 +19314,41 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T19:10:49Z",
+  "checked": "2026-10-19T19:41:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "predict-newer-daemon": {
+    "since": "2026-10-19T19:41:31Z",
+    "title": "fix(coding-agent): keep a newer text-predict daemon instead of shutting it down"
+   },
+   "edit-fileop-tag-check": {
+    "since": "2026-10-19T19:41:31Z",
+    "title": "fix(edit): required a live tag for bare hashline MV and REM"
+   },
    "factory-droid-completions-tool-names": {
     "since": "2026-10-19T17:08:11Z",
     "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests"
+   },
+   "computer-control-unanswered": {
+    "since": "2026-10-19T19:41:31Z",
+    "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out"
+   },
+   "r2-browser-match-count-error": {
+    "since": "2026-10-19T19:41:31Z",
+    "title": "fix(coding-agent): say why a timed-out browser selector's matches could not be counted"
+   },
+   "r2-browser-relay-guidance": {
+    "since": "2026-10-19T19:41:31Z",
+    "title": "fix(coding-agent): tell the model an open without app drives the user's Chrome while the relay is on"
+   },
+   "thinking-drop-log": {
+    "since": "2026-10-19T19:41:31Z",
+    "title": "fix(ai): log one warning per request for dropped thinking blocks"
+   },
+   "tsp-stall-log": {
+    "since": "2026-10-19T19:41:31Z",
+    "title": "fix(tui): warn once per TSP ack stall instead of every 5 s"
    },
    "utok-perf": {
     "since": "2026-10-18T22:12:47Z",
@@ -19329,6 +19357,18 @@
    "release-helper-wait-test": {
     "since": "2026-10-18T19:11:35Z",
     "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in"
+   },
+   "edit-parse-only-ambiguity": {
+    "since": "2026-10-19T19:41:31Z",
+    "title": "fix(edit): name the trailing comma when a one-row replacement only fails on it"
+   },
+   "read-raw-line": {
+    "since": "2026-10-19T19:41:31Z",
+    "title": "fix(read): read one line for a bare N beside :raw"
+   },
+   "vscode-mcp-missing": {
+    "since": "2026-10-19T19:41:31Z",
+    "title": "fix(coding-agent): skip a missing .vscode/mcp.json without warning"
    }
   },
   "conflicts": {
@@ -21349,6 +21389,66 @@
     "id": "revive-prompt-cache",
     "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it",
     "why": "opened as #16369"
+   },
+   {
+    "at": "2026-10-19T19:41:31Z",
+    "kind": "openable",
+    "id": "predict-newer-daemon",
+    "title": "fix(coding-agent): keep a newer text-predict daemon instead of shutting it down"
+   },
+   {
+    "at": "2026-10-19T19:41:31Z",
+    "kind": "openable",
+    "id": "edit-fileop-tag-check",
+    "title": "fix(edit): required a live tag for bare hashline MV and REM"
+   },
+   {
+    "at": "2026-10-19T19:41:31Z",
+    "kind": "openable",
+    "id": "computer-control-unanswered",
+    "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out"
+   },
+   {
+    "at": "2026-10-19T19:41:31Z",
+    "kind": "openable",
+    "id": "r2-browser-match-count-error",
+    "title": "fix(coding-agent): say why a timed-out browser selector's matches could not be counted"
+   },
+   {
+    "at": "2026-10-19T19:41:31Z",
+    "kind": "openable",
+    "id": "r2-browser-relay-guidance",
+    "title": "fix(coding-agent): tell the model an open without app drives the user's Chrome while the relay is on"
+   },
+   {
+    "at": "2026-10-19T19:41:31Z",
+    "kind": "openable",
+    "id": "thinking-drop-log",
+    "title": "fix(ai): log one warning per request for dropped thinking blocks"
+   },
+   {
+    "at": "2026-10-19T19:41:31Z",
+    "kind": "openable",
+    "id": "tsp-stall-log",
+    "title": "fix(tui): warn once per TSP ack stall instead of every 5 s"
+   },
+   {
+    "at": "2026-10-19T19:41:31Z",
+    "kind": "openable",
+    "id": "edit-parse-only-ambiguity",
+    "title": "fix(edit): name the trailing comma when a one-row replacement only fails on it"
+   },
+   {
+    "at": "2026-10-19T19:41:31Z",
+    "kind": "openable",
+    "id": "read-raw-line",
+    "title": "fix(read): read one line for a bare N beside :raw"
+   },
+   {
+    "at": "2026-10-19T19:41:31Z",
+    "kind": "openable",
+    "id": "vscode-mcp-missing",
+    "title": "fix(coding-agent): skip a missing .vscode/mcp.json without warning"
    }
   ]
  }
