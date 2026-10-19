@@ -10633,13 +10633,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/conflict-bulk-per-id.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16267,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/conflict-bulk-per-id",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:46:57Z",
-   "updated": "2026-10-19T00:24:58Z",
+   "updated": "2026-10-19T00:28:49Z",
    "note": "",
    "built": [
     {
@@ -10996,7 +10996,8 @@
      "tree": "ca643b4d1e6fb39f4445790181e522465b3de935"
     }
    ],
-   "advanced": "2026-10-18T21:13:18Z"
+   "advanced": "2026-10-18T21:13:18Z",
+   "opened": "2026-10-19T00:28:49Z"
   },
   {
    "id": "conflict-hidden-ids",
