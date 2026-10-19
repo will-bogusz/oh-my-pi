@@ -28108,7 +28108,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/test-log-dir",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:37:51Z",
-   "updated": "2026-10-19T21:42:14Z",
+   "updated": "2026-10-19T21:42:36Z",
    "note": "",
    "built": [
     {
@@ -28611,7 +28611,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-19T21:42:13Z"
+   "opened": "2026-10-19T21:42:13Z",
+   "readied": "2026-10-19T21:42:35Z"
   },
   {
    "id": "bash-session-env",
