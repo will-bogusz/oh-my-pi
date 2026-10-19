@@ -16165,5 +16165,11 @@
     "why": "opened as #16282"
    }
   ]
+ },
+ "opening": {
+  "id": "ssh-search-tier",
+  "token": "1204e95c771c4bd9a5d74ae745b44bc9",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T02:29:56Z"
  }
 }
