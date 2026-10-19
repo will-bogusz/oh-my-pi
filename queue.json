@@ -19203,6 +19203,24 @@
    "added": "2026-10-19T19:22:37Z",
    "updated": "2026-10-19T19:22:37Z",
    "note": ""
+  },
+  {
+   "id": "read-raw-line",
+   "branch": "will/read-raw-line",
+   "title": "fix(read): read one line for a bare N beside :raw",
+   "area": "read",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/read-raw-line.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-raw-line",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:29:28Z",
+   "updated": "2026-10-19T19:29:28Z",
+   "note": ""
   }
  ],
  "watch": {
