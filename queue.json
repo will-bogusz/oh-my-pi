@@ -33859,5 +33859,11 @@
     "why": "opened as #16388"
    }
   ]
+ },
+ "opening": {
+  "id": "r2-browser-match-count-error",
+  "token": "986c206d84f74c8dbd54dce03d068578",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T22:29:59Z"
  }
 }
