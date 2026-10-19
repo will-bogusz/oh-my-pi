@@ -22,7 +22,7 @@ Limits:
 
 ## Testing
 
-- `provider-image-budget.test.ts`: an over-limit Factory request is trimmed under 4.5 MB and untouched on a gateway; five 1 MB screenshots go to three; a fresh 3.8 MB image survives older ones, a competing tool image, unsent assistant images, details and foreign payloads, but not 800 KB of text, UTF-8 text or the envelope. Each fails without its fix.
+- `provider-image-budget.test.ts`: an over-limit Factory request is trimmed under 4.5 MB and untouched on a gateway; five 1 MB screenshots go to three; keep-latest and each reserve rule have a case that fails without it.
 - `budgeted-host.test.ts`: the gate across unset, global, EU, lookalike, `http:`, gateway and unparseable URLs, and other providers.
 - `snapcompact.test.ts`: Factory's hosted frame budget.
 - `bun test` for catalog, ai, snapcompact, coding-agent; `bun run check:ts`; `bun check`.
