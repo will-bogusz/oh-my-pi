@@ -18865,7 +18865,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T16:07:08Z",
+  "checked": "2026-10-19T16:37:48Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -18884,6 +18884,23 @@
     "title": "fix(task): relay a woken subagent's final report, not all its turn text",
     "files": [
      "packages/coding-agent/test/task/executor-result-acceptance.test.ts"
+    ]
+   },
+   "#16285": {
+    "since": "2026-10-19T16:37:48Z",
+    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
+    "files": [
+     "packages/coding-agent/src/tools/ast-grep.ts",
+     "packages/coding-agent/src/tools/glob.ts",
+     "packages/coding-agent/src/tools/grep.ts",
+     "packages/coding-agent/src/tools/jfind/index.ts"
+    ]
+   },
+   "#16274": {
+    "since": "2026-10-19T16:37:48Z",
+    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
+    "files": [
+     "packages/coding-agent/src/tools/read.ts"
     ]
    }
   },
@@ -20574,6 +20591,27 @@
     "title": "fix(task): relay a woken subagent's final report, not all its turn text",
     "files": [
      "packages/coding-agent/test/task/executor-result-acceptance.test.ts"
+    ]
+   },
+   {
+    "at": "2026-10-19T16:37:48Z",
+    "kind": "conflict",
+    "label": "#16285",
+    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
+    "files": [
+     "packages/coding-agent/src/tools/ast-grep.ts",
+     "packages/coding-agent/src/tools/glob.ts",
+     "packages/coding-agent/src/tools/grep.ts",
+     "packages/coding-agent/src/tools/jfind/index.ts"
+    ]
+   },
+   {
+    "at": "2026-10-19T16:37:48Z",
+    "kind": "conflict",
+    "label": "#16274",
+    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
+    "files": [
+     "packages/coding-agent/src/tools/read.ts"
     ]
    }
   ]
