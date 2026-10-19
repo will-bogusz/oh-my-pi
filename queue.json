@@ -31923,5 +31923,11 @@
     "title": "feat(coding-agent): let wait block for the reply to a message the agent sent"
    }
   ]
+ },
+ "opening": {
+  "id": "computer-control-unanswered",
+  "token": "bee57aff7db8406b926567d8c4e19e6d",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T21:42:43Z"
  }
 }
