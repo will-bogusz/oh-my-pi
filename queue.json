@@ -13222,7 +13222,7 @@
   {
    "id": "ssh-minimizer-width",
    "branch": "will/ssh-minimizer-width",
-   "title": "fix(pi-shell): keep ssh remote output intact in the minimizer",
+   "title": "fix(pi-shell,tui): keep ssh remote output intact in the minimizer",
    "area": "other",
    "priority": "P2",
    "needs": [],
@@ -13234,7 +13234,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:53:00Z",
-   "updated": "2026-10-19T07:21:52Z",
+   "updated": "2026-10-19T07:38:15Z",
    "note": "",
    "advanced": "2026-10-18T21:20:43Z",
    "opened": "2026-10-19T07:21:32Z",
