@@ -19221,6 +19221,24 @@
    "added": "2026-10-19T19:29:28Z",
    "updated": "2026-10-19T19:29:28Z",
    "note": ""
+  },
+  {
+   "id": "r2-browser-relay-guidance",
+   "branch": "will/r2-browser-relay-guidance",
+   "title": "fix(coding-agent): tell the model an open without app drives the user's Chrome while the relay is on",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/r2-browser-relay-guidance.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-relay-guidance",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:30:07Z",
+   "updated": "2026-10-19T19:30:07Z",
+   "note": ""
   }
  ],
  "watch": {
