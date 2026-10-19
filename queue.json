@@ -6638,7 +6638,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-windows-doc",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:32:27Z",
-   "updated": "2026-10-19T02:55:31Z",
+   "updated": "2026-10-19T03:24:36Z",
    "note": "",
    "advanced": "2026-10-18T21:55:51Z",
    "built": [
@@ -7008,15 +7008,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#16271",
-     "code": "7001e8af28925f8c1a3fc8f86ce1a81cc4f13c7c",
-     "with_code": "d8c9ecc67a28f28194016b06985d132ba8aab328",
-     "tip": "ac0617bacf13c1c6f7641e3a913111993d42c649",
-     "with_tip": "3e43cbe8b7e90ffef8d8122a60da4f00901811e0",
-     "at": "2026-10-19T02:16:15Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "factory-droid-media-budget",
      "code": "7001e8af28925f8c1a3fc8f86ce1a81cc4f13c7c",
      "with_code": "98f9d85ac02f0920d511733e236afa915d584802",
@@ -7092,6 +7083,15 @@
      "tip": "ac0617bacf13c1c6f7641e3a913111993d42c649",
      "with_tip": "a6bebfd122869f3b0fddb79de84f0b2216be4365",
      "at": "2026-10-19T02:55:28Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16271",
+     "code": "7001e8af28925f8c1a3fc8f86ce1a81cc4f13c7c",
+     "with_code": "819f797124df5e40693aebceea6da085139783f8",
+     "tip": "ac0617bacf13c1c6f7641e3a913111993d42c649",
+     "with_tip": "275af103b5a8105d720d31d934a9b098f2c60965",
+     "at": "2026-10-19T03:24:32Z",
      "host": "MacBook-Pro"
     }
    ]
