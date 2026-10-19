@@ -19201,8 +19201,37 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-fileop-tag-check",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:22:37Z",
-   "updated": "2026-10-19T19:22:37Z",
-   "note": ""
+   "updated": "2026-10-19T20:59:26Z",
+   "note": "",
+   "built": [
+    {
+     "with": "edit-remap-refuse",
+     "code": "b059bdcb33322903df03404abf3ffe405e738daf",
+     "with_code": "84bbebb75da83f3ebc7feec797f49138ccf5e3b8",
+     "tip": "9aaba6730e35301648da7456040713eae12ef136",
+     "with_tip": "1688e985b2d5c7e0a379965afcc7c2f592471113",
+     "at": "2026-10-19T20:59:24Z",
+     "host": "goliath"
+    },
+    {
+     "with": "edit-parse-only-ambiguity",
+     "code": "b059bdcb33322903df03404abf3ffe405e738daf",
+     "with_code": "351ec16ec8705e78961485f4e077f7e22181cbcf",
+     "tip": "9aaba6730e35301648da7456040713eae12ef136",
+     "with_tip": "25e1c055db4ce774068e2f51c185fccdb119a56e",
+     "at": "2026-10-19T20:59:26Z",
+     "host": "goliath"
+    },
+    {
+     "with": "write-prefix-contiguous",
+     "code": "b059bdcb33322903df03404abf3ffe405e738daf",
+     "with_code": "3552a0ec91841bf44cdb596c8d5473196e0deee5",
+     "tip": "9aaba6730e35301648da7456040713eae12ef136",
+     "with_tip": "3ce29f9b81022da78d9fb8e9c8f36bf1d50e5cac",
+     "at": "2026-10-19T20:59:26Z",
+     "host": "goliath"
+    }
+   ]
   },
   {
    "id": "read-raw-line",
