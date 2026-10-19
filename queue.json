@@ -21822,7 +21822,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "81fa40eadef31a578b8acb922c7054c43f0c0f2c",
    "body": "bodies/computer-control-unanswered.md",
    "state": "queued",
    "pr": null,
@@ -21830,7 +21830,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-control-unanswered",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:32:36Z",
-   "updated": "2026-10-19T21:33:15Z",
+   "updated": "2026-10-19T21:46:40Z",
    "note": "",
    "built": [
     {
@@ -22260,7 +22260,8 @@
      "host": "goliath",
      "tree": "bd142e6ce10f9e9a0cddaa0c60543314d55af99a"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T21:46:40Z"
   },
   {
    "id": "edit-parse-only-ambiguity",
