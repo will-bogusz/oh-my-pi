@@ -7,7 +7,7 @@ I made a `provider/model` selector name a model that provider really has. Before
 | `anthropic/claude-haiku-9-9` | not found | not found |
 | `openai-codex/gpt-5.5` (retired) | runs `openai-codex/gpt-5.6-luna` | not found, suggests `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra` |
 | `--provider openai --model 4o` | runs `openai/gpt-4o` | not found, suggests `openai/gpt-4o` |
-| `google-vertex/claude-opus-4-8` | runs `claude-opus-4-8@default` | not found |
+| `google-vertex/claude-opus-4-8` | runs `claude-opus-4-8@default` | runs `claude-opus-4-8@default` (sole revision) |
 | `openai/gpt-4o`, `anthropic/claude-sonnet-4-5` (exact) | resolves | resolves |
 | `opus`, `spark` (bare) | fuzzy | fuzzy |
 
@@ -16,22 +16,21 @@ The change is in `matchModel`. When the prefix names a provider in the candidate
 Places that used to switch silently now say what happened:
 
 - **`--provider p --model id`** now waits for extensions and discovery before failing, like `--model p/id`.
-- **A configured `default` that no longer resolves** still falls back, but startup warns `Default model <selector> not found. Using <provider/id>`.
-- **Role chains** mark the candidate replacing an unresolved configured `provider/…` selector; dictation warns with it (the case in the issue's last comment). Other role consumers still skip silently.
+- **A configured `default` that no longer resolves** still falls back, but startup warns `Default model <selector> not found` (or `is unavailable (no credentials, or not in enabledModels)` when the catalog has it), then names the model used.
+- **Role chains** mark the candidate replacing an unresolved configured `provider/…` selector; dictation warns with it, also when only the built-in local model is left (the case in the issue's last comment). Other role consumers still skip silently.
 - **Built-in role defaults:** `smol`'s `cerebras/zai-glm` and `slow`'s retired `openai-codex/gpt-5.5` name no bundled model and are removed; `cerebras/zai-glm-4.6` and `openai-codex/gpt-5.6-sol` already precede them. A catalog test catches any qualified default that only near-matches.
 
 ## Why
 
-Refs #12884. The maintainer scoped the remaining half of that issue as "known-provider `provider/model` selectors resolve exactly or fail; bare selectors retain fuzzy matching". A qualified selector is usually written on purpose, often into config, and swapping in a neighbour bills the wrong model with nothing in TUI or JSON mode saying so.
+Refs #12884. The triage there scoped the remaining half as "known-provider `provider/model` selectors resolve exactly or fail; bare selectors retain fuzzy matching", pending the maintainer's call on the breakage below. A qualified selector is usually written on purpose, often into config, and swapping in a neighbour bills the wrong model with nothing in TUI or JSON mode saying so.
 
-**Upgrade cost.** `provider/…` values that relied on the fuzzy step stop matching: retired or renamed ids (`openai-codex/gpt-5.5`), dated ids without their date, `-latest` shorthands (`openai/gpt-5-latest`), and Vertex ids without `@default`. Use the id `omp models <provider>` lists, or the bare id to keep fuzzy matching; the suggestions and warning name the replacement.
+**Upgrade cost.** `provider/…` values that relied on the fuzzy step stop matching: retired or renamed ids (`openai-codex/gpt-5.5`), dated ids without their date, and `-latest` shorthands (`openai/gpt-5-latest`). Use the id `omp models <provider>` lists or the bare id; the suggestions and warning name the replacement. An id without its `@revision` (Vertex `claude-opus-4-8`) still resolves while it has only one revision.
 
 ## Testing
 
-- New tests fail on the previous head. They cover: qualified and `--provider` near misses fail; the error suggests the sibling; `--provider` defers; a stale default warns; a role chain marks its replacement; no qualified role default is a near miss.
-- Changed fixture: a startup-fallback test's `runtime-provider/runtime-m*` only resolved through the fuzzy step; it is now the bare `runtime-m`.
-- `check:ts` and the catalog suite pass. The `coding-agent` suite's remaining failures also fail on `main` locally (ambient Bedrock, message-pipeline, npm, JS package env) or are Chrome-timing flakes.
-- `omp -p --model anthropic/claude-haiku-9-9 hi` and the `--provider` form exit 1 without a request.
+- New tests fail without the change: qualified and `--provider` near misses, the shared suggestion (also after deferral), stale/unavailable default warnings, role-chain and empty-chain dictation warnings, the Vertex revision alias, and no qualified role default being a near miss.
+- Changed fixture: `runtime-provider/runtime-m*` only resolved fuzzily; it is now the bare `runtime-m`.
+- `check:ts` and the catalog suite pass; other `coding-agent` failures also fail on `main`.
 
 ---
 
