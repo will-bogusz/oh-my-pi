@@ -16527,7 +16527,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-image-generation",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:11:27Z",
-   "updated": "2026-10-19T07:09:35Z",
+   "updated": "2026-10-19T07:20:03Z",
    "note": "",
    "built": [
     {
@@ -16917,15 +16917,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#16302",
-     "code": "10da32fa90c6c6e550314d9c1c40bfe5277c6243",
-     "with_code": "2651255095a583ea554054f8abc45d12aaff5cfc",
-     "tip": "eaafcd3931227c7b1629139d4d4bcb23d9bbe5af",
-     "with_tip": "7f86187dff4dca118e4a28bbbfa4a29542d2398f",
-     "at": "2026-10-19T07:09:32Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "#16300",
      "code": "10da32fa90c6c6e550314d9c1c40bfe5277c6243",
      "with_code": "5b3d0abc461082d888d75b27644589d6e8bb3035",
@@ -17094,6 +17085,15 @@
      "tip": "eaafcd3931227c7b1629139d4d4bcb23d9bbe5af",
      "with_tip": "00f19ce31748c2d007159c71e660bfa6c5a1d5a5",
      "at": "2026-10-19T07:09:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16302",
+     "code": "10da32fa90c6c6e550314d9c1c40bfe5277c6243",
+     "with_code": "e523b6b16f9a4f15e4274a7170721727bfdb7f4e",
+     "tip": "eaafcd3931227c7b1629139d4d4bcb23d9bbe5af",
+     "with_tip": "68eecab798e4046a93b77f0385fbf3da9ac00e26",
+     "at": "2026-10-19T07:19:59Z",
      "host": "MacBook-Pro"
     }
    ]
