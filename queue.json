@@ -19831,7 +19831,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tsp-stall-log",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:13:34Z",
-   "updated": "2026-10-19T23:02:28Z",
+   "updated": "2026-10-19T23:02:49Z",
    "note": "",
    "built": [
     {
@@ -19865,7 +19865,8 @@
      "tree": "bd142e6ce10f9e9a0cddaa0c60543314d55af99a"
     }
    ],
-   "opened": "2026-10-19T23:02:27Z"
+   "opened": "2026-10-19T23:02:27Z",
+   "readied": "2026-10-19T23:02:48Z"
   },
   {
    "id": "thinking-drop-log",
