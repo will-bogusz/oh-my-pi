@@ -2708,7 +2708,7 @@
    ],
    "base": "8c323e882d102e77aa5f1b88bbd451ce21184d50",
    "body": "bodies/computer-web-readonly.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [
     15584
@@ -2716,8 +2716,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-web-readonly",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:52:36Z",
-   "note": ""
+   "updated": "2026-10-19T07:27:28Z",
+   "note": "Series 2 restack (2026-10-19): absorbed into #15282 (will/computer-ax-lines a300e47e51)"
   },
   {
    "id": "r2/relay-popup-owned",
