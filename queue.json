@@ -8926,13 +8926,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/wake-relay-report-text.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16302,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wake-relay-report-text",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:40:09Z",
-   "updated": "2026-10-19T06:03:16Z",
+   "updated": "2026-10-19T06:06:29Z",
    "note": "",
    "advanced": "2026-10-18T21:55:39Z",
    "built": [
@@ -9513,7 +9513,8 @@
      "at": "2026-10-19T06:03:12Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-19T06:06:29Z"
   },
   {
    "id": "pip-uv-venv",
