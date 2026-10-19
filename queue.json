@@ -21761,7 +21761,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-remap-refuse",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:07:13Z",
-   "updated": "2026-10-19T21:24:12Z",
+   "updated": "2026-10-19T21:24:31Z",
    "note": "",
    "built": [
     {
@@ -21792,7 +21792,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-19T21:24:12Z"
+   "opened": "2026-10-19T21:24:12Z",
+   "readied": "2026-10-19T21:24:30Z"
   },
   {
    "id": "builtin-rule-reminder",
