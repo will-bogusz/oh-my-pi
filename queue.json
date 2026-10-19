@@ -20138,5 +20138,11 @@
     "why": "opened as #16285"
    }
   ]
+ },
+ "opening": {
+  "id": "natives-dts-regen",
+  "token": "48abb0cf30d54a6f86a21d28853bafec",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T06:13:42Z"
  }
 }
