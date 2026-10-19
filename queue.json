@@ -19257,6 +19257,24 @@
    "added": "2026-10-19T19:30:30Z",
    "updated": "2026-10-19T19:30:30Z",
    "note": ""
+  },
+  {
+   "id": "computer-control-unanswered",
+   "branch": "will/computer-control-unanswered",
+   "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/computer-control-unanswered.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-control-unanswered",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:32:36Z",
+   "updated": "2026-10-19T19:32:36Z",
+   "note": ""
   }
  ],
  "watch": {
