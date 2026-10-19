@@ -12697,7 +12697,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/lsp-workspace-folders",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:26:57Z",
-   "updated": "2026-10-19T00:40:46Z",
+   "updated": "2026-10-19T00:46:38Z",
    "note": "",
    "built": [
     {
@@ -13096,6 +13096,15 @@
      "tip": "b0525089f78a636ba5d968ffb3d557e4bfdb8974",
      "with_tip": "7d38d467e9465cf06c48924b18709d4a54f8ae1d",
      "at": "2026-10-19T00:40:46Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16269",
+     "code": "6123e76037fb9f40802236174aa8b82e81008c8e",
+     "with_code": "6bc317e0d027d77d5dceb65394e133f28825bd04",
+     "tip": "b0525089f78a636ba5d968ffb3d557e4bfdb8974",
+     "with_tip": "42b191b0e2aa8ee75ad59a865af744056fcb9ab6",
+     "at": "2026-10-19T00:46:34Z",
      "host": "MacBook-Pro"
     }
    ]
