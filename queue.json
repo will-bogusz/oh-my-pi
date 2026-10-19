@@ -18863,17 +18863,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T08:56:44Z",
+  "checked": "2026-10-19T09:27:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "utok-perf": {
     "since": "2026-10-18T22:12:47Z",
     "title": "perf(natives/utok): memoize short-piece merge counts per thread"
-   },
-   "factory-droid-web-search": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)"
    },
    "release-helper-wait-test": {
     "since": "2026-10-18T19:11:35Z",
@@ -18935,7 +18931,8 @@
    16309,
    16312,
    16314,
-   16316
+   16316,
+   16326
   ],
   "events": [
    {
@@ -20553,6 +20550,13 @@
     "id": "irc-broadcast-no-relay",
     "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts",
     "why": "opened as #16312"
+   },
+   {
+    "at": "2026-10-19T09:27:08Z",
+    "kind": "unopenable",
+    "id": "factory-droid-web-search",
+    "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)",
+    "why": "opened as #16326"
    }
   ]
  }
