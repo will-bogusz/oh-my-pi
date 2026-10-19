@@ -19113,6 +19113,24 @@
    "added": "2026-10-19T07:26:45Z",
    "updated": "2026-10-19T07:30:46Z",
    "note": ""
+  },
+  {
+   "id": "vscode-mcp-missing",
+   "branch": "will/vscode-mcp-missing",
+   "title": "fix(coding-agent): skip a missing .vscode/mcp.json without warning",
+   "area": "discovery",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/vscode-mcp-missing.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/vscode-mcp-missing",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:13:33Z",
+   "updated": "2026-10-19T19:13:33Z",
+   "note": ""
   }
  ],
  "watch": {
