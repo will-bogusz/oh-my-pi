@@ -31472,22 +31472,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T22:14:48Z",
+  "checked": "2026-10-19T22:45:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "r2-browser-match-count-error": {
-    "since": "2026-10-19T19:41:31Z",
-    "title": "fix(coding-agent): say why a timed-out browser selector's matches could not be counted"
-   },
-   "r2-browser-relay-guidance": {
-    "since": "2026-10-19T19:41:31Z",
-    "title": "fix(coding-agent): tell the model an open without app drives the user's Chrome while the relay is on"
-   },
-   "read-inmemory-range": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "fix(coding-agent): kept requested lines in in-memory range reads"
-   },
    "read-profile-ranges": {
     "since": "2026-10-19T22:14:48Z",
     "title": "fix(coding-agent): read profile line ranges from the file, not its summary"
@@ -31543,6 +31531,10 @@
    "deepseek-image-tokens": {
     "since": "2026-10-19T20:11:33Z",
     "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config"
+   },
+   "edit-mismatch-seen-lines": {
+    "since": "2026-10-19T22:45:09Z",
+    "title": "fix(edit): counted only a mismatch reply's displayed rows as seen"
    },
    "edit-parse-only-ambiguity": {
     "since": "2026-10-19T19:41:31Z",
@@ -31643,7 +31635,10 @@
    16383,
    16384,
    16386,
-   16388
+   16388,
+   16389,
+   16390,
+   16391
   ],
   "events": [
    {
@@ -33863,6 +33858,33 @@
     "id": "computer-control-unanswered",
     "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out",
     "why": "opened as #16388"
+   },
+   {
+    "at": "2026-10-19T22:45:09Z",
+    "kind": "openable",
+    "id": "edit-mismatch-seen-lines",
+    "title": "fix(edit): counted only a mismatch reply's displayed rows as seen"
+   },
+   {
+    "at": "2026-10-19T22:45:09Z",
+    "kind": "unopenable",
+    "id": "r2-browser-match-count-error",
+    "title": "fix(coding-agent): say why a timed-out browser selector's matches could not be counted",
+    "why": "opened as #16389"
+   },
+   {
+    "at": "2026-10-19T22:45:09Z",
+    "kind": "unopenable",
+    "id": "r2-browser-relay-guidance",
+    "title": "fix(coding-agent): tell the model an open without app drives the user's Chrome while the relay is on",
+    "why": "opened as #16390"
+   },
+   {
+    "at": "2026-10-19T22:45:09Z",
+    "kind": "unopenable",
+    "id": "read-inmemory-range",
+    "title": "fix(coding-agent): kept requested lines in in-memory range reads",
+    "why": "opened as #16391"
    }
   ]
  }
