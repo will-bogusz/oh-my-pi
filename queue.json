@@ -18565,7 +18565,7 @@
    "needs": [
     "factory-droid-tool-name-cap"
    ],
-   "base": "1d183d20ff89c805e32e6f47fcbc3a53e84d4485",
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/factory-droid-completions-tool-names.md",
    "state": "queued",
    "pr": null,
@@ -18573,8 +18573,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-completions-tool-names",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:33:09Z",
-   "updated": "2026-10-18T21:33:09Z",
-   "note": ""
+   "updated": "2026-10-19T19:12:57Z",
+   "note": "",
+   "advanced": "2026-10-19T19:12:57Z"
   },
   {
    "id": "read-after-bash-revalidate",
