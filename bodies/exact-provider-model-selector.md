@@ -7,28 +7,29 @@ I made a `provider/model` selector name a model that provider really has. Before
 | `anthropic/claude-haiku-9-9` | not found | not found |
 | `openai-codex/gpt-5.5` (retired) | runs `openai-codex/gpt-5.6-luna` | not found, suggests `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra` |
 | `--provider openai --model 4o` | runs `openai/gpt-4o` | not found, suggests `openai/gpt-4o` |
-| `google-vertex/claude-opus-4-8` | runs `claude-opus-4-8@default` | runs `claude-opus-4-8@default` (sole revision) |
+| `google-vertex/claude-opus-4-8` | runs `claude-opus-4-8@default` | runs `claude-opus-4-8@default` (declared revision) |
 | `openai/gpt-4o`, `anthropic/claude-sonnet-4-5` (exact) | resolves | resolves |
 | `opus`, `spark` (bare) | fuzzy | fuzzy |
 
-The change is in `matchModel`. When the prefix names a provider in the candidate set, matching stops after the exact phases (reference, id, variant and native aliases) instead of scoring that provider's ids by subsequence. A prefix that is not a known provider is still read as part of a raw id, so OpenRouter ids like `openai/gpt-4o:extended` and `@upstream` routing work as before.
+In `matchModel`, a selector whose prefix is a known provider stops after the exact phases (reference, id, aliases). Known means in the candidate set or defined in the KDL catalog, including discovery-only providers such as `ollama` and providers without credentials, so the selector can't fall through to another provider's raw ids. Other prefixes are still read as part of a raw id (`openai/gpt-4o:extended`, `@upstream`).
 
-Places that used to switch silently now say what happened:
+What else changed:
 
-- **`--provider p --model id`** now waits for extensions and discovery before failing, like `--model p/id`.
-- **A configured `default` that no longer resolves** still falls back, but startup warns `Default model <selector> not found` (or `is unavailable (no credentials, or not in enabledModels)` when the catalog has it), then names the model used.
-- **Role chains** mark the candidate replacing an unresolved configured `provider/…` selector; dictation warns with it, also when only the built-in local model is left (the case in the issue's last comment). Other role consumers still skip silently.
-- **Built-in role defaults:** `smol`'s `cerebras/zai-glm` and `slow`'s retired `openai-codex/gpt-5.5` name no bundled model and are removed; `cerebras/zai-glm-4.6` and `openai-codex/gpt-5.6-sol` already precede them. A catalog test catches any qualified default that only near-matches.
+- **Revision aliases:** a new `selector-revision-suffix` catalog setting (`@default` on Google Vertex) lets an id be written without its declared revision.
+- **One hint:** the not-found hint is shared by the CLI resolver and the deferred startup failure. Print mode no longer adds a cross-provider list for qualified misses.
+- **`--provider p --model id`** waits for extensions and discovery like `--model p/id`, using the registry's provider knowledge, so a discovery provider with no rows yet still resolves.
+- **No silent swaps:** a configured `default` that misses warns `not found` (or `unavailable` when it lacks credentials) and names the model used. A saved-session restore failure is kept. Non-interactive runs print this on stderr. Role chains report the first qualified entry they skipped, through aliases and comma lists, and dictation warns with it. Other role consumers still skip silently.
+- **Built-in role defaults:** `smol`'s `cerebras/zai-glm` and `slow`'s retired `openai-codex/gpt-5.5` named no bundled model and are removed. A catalog test catches any qualified default that only near-matches.
 
 ## Why
 
-Refs #12884. The triage there scoped the remaining half as "known-provider `provider/model` selectors resolve exactly or fail; bare selectors retain fuzzy matching", pending the maintainer's call on the breakage below. A qualified selector is usually written on purpose, often into config, and swapping in a neighbour bills the wrong model with nothing in TUI or JSON mode saying so.
+Refs #12884. The triage there scoped the remaining half as "known-provider `provider/model` selectors resolve exactly or fail; bare selectors retain fuzzy matching", pending the maintainer's call on the breakage below. A qualified selector is usually written on purpose, often into config, and swapping in a neighbour bills the wrong model without a word.
 
-**Upgrade cost.** `provider/…` values that relied on the fuzzy step stop matching: retired or renamed ids (`openai-codex/gpt-5.5`), dated ids without their date, and `-latest` shorthands (`openai/gpt-5-latest`). Use the id `omp models <provider>` lists or the bare id; the suggestions and warning name the replacement. An id without its `@revision` (Vertex `claude-opus-4-8`) still resolves while it has only one revision.
+**Upgrade cost.** `provider/…` values that relied on the fuzzy step stop matching: retired or renamed ids (`openai-codex/gpt-5.5`), dated ids without their date, and `-latest` shorthands (`openai/gpt-5-latest`). Use the id `omp models <provider>` lists or the bare id; the hint and warnings name the replacement.
 
 ## Testing
 
-- New tests fail without the change: qualified and `--provider` near misses, the shared suggestion (also after deferral), stale/unavailable default warnings, role-chain and empty-chain dictation warnings, the Vertex revision alias, and no qualified role default being a near miss.
+- New tests fail without the change: qualified misses, hints, deferral, default and role-chain warnings, Vertex alias, known-provider rule.
 - Changed fixture: `runtime-provider/runtime-m*` only resolved fuzzily; it is now the bare `runtime-m`.
 - `check:ts` and the catalog suite pass; other `coding-agent` failures also fail on `main`.
 
