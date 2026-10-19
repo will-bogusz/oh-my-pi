@@ -19558,6 +19558,24 @@
    "added": "2026-10-19T19:51:53Z",
    "updated": "2026-10-19T19:51:53Z",
    "note": ""
+  },
+  {
+   "id": "thinking-loop-accounting",
+   "branch": "will/thinking-loop-accounting",
+   "title": "fix(ai): keep usage and timing on thinking-loop aborts",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/thinking-loop-accounting.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/thinking-loop-accounting",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:52:03Z",
+   "updated": "2026-10-19T19:52:03Z",
+   "note": ""
   }
  ],
  "watch": {
