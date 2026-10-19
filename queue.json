@@ -19666,6 +19666,24 @@
    "added": "2026-10-19T20:10:36Z",
    "updated": "2026-10-19T20:10:36Z",
    "note": ""
+  },
+  {
+   "id": "subagent-wait-reply",
+   "branch": "will/subagent-wait-reply",
+   "title": "feat(coding-agent): let wait block for the reply to a message the agent sent",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/subagent-wait-reply.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-wait-reply",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T20:22:04Z",
+   "updated": "2026-10-19T20:22:04Z",
+   "note": ""
   }
  ],
  "watch": {
