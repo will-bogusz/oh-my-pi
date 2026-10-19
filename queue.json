@@ -19383,8 +19383,19 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rg-count-zero",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:44:31Z",
-   "updated": "2026-10-19T19:44:31Z",
-   "note": ""
+   "updated": "2026-10-19T19:47:49Z",
+   "note": "",
+   "built": [
+    {
+     "with": "ln-uri-source",
+     "code": "f42e2ba1d6e50e267ec0c3152c61ccad18d150c8",
+     "with_code": "2071237e9354fbfa32792fb77b8a50cebbdb0dd1",
+     "tip": "89ac68ec91ff4fe3c3fe49c70b601f1c9e429c72",
+     "with_tip": "fa00c8dc228df73782b64040943c7ac2b7eefaa3",
+     "at": "2026-10-19T19:47:44Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "ln-uri-source",
