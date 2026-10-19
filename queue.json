@@ -19721,13 +19721,13 @@
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/edit-fileop-tag-check.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16381,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-fileop-tag-check",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:22:37Z",
-   "updated": "2026-10-19T20:59:26Z",
+   "updated": "2026-10-19T21:19:53Z",
    "note": "",
    "built": [
     {
@@ -19757,7 +19757,8 @@
      "at": "2026-10-19T20:59:26Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-10-19T21:19:53Z"
   },
   {
    "id": "read-raw-line",
