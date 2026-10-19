@@ -6038,13 +6038,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/report-issue-colon.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16278,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/report-issue-colon",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:31:34Z",
-   "updated": "2026-10-19T01:36:09Z",
+   "updated": "2026-10-19T01:40:49Z",
    "note": "",
    "advanced": "2026-10-18T21:55:01Z",
    "built": [
@@ -6446,7 +6446,8 @@
      "at": "2026-10-19T01:36:09Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-19T01:40:49Z"
   },
   {
    "id": "computer-windows-doc",
