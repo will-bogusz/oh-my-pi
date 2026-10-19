@@ -5754,7 +5754,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-app-precedence-docs",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:14:13Z",
-   "updated": "2026-10-19T02:46:04Z",
+   "updated": "2026-10-19T02:47:28Z",
    "note": "",
    "built": [
     {
@@ -6114,15 +6114,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#16282",
-     "code": "453fcad38f443eee4b731bf13623980fb6368e16",
-     "with_code": "253eeb090aa4296711f5208b827f5f09285ddf45",
-     "tip": "b5a138b82b0e4e060df121dd33c71ed7e5c28103",
-     "with_tip": "7af0ad089c4defbd8ba1661df409d4bab1347902",
-     "at": "2026-10-19T02:17:14Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "factory-droid-media-budget",
      "code": "453fcad38f443eee4b731bf13623980fb6368e16",
      "with_code": "98f9d85ac02f0920d511733e236afa915d584802",
@@ -6181,6 +6172,15 @@
      "at": "2026-10-19T02:46:03Z",
      "host": "goliath",
      "tree": "97e49d3708e6c2ca99e55e482fb4225571fd6055"
+    },
+    {
+     "with": "#16282",
+     "code": "453fcad38f443eee4b731bf13623980fb6368e16",
+     "with_code": "2f14b4c037cc19a8c109c2dd2df9d3f7345b6e99",
+     "tip": "b5a138b82b0e4e060df121dd33c71ed7e5c28103",
+     "with_tip": "92ca808e6892e6b42aab4df011b736b355a46466",
+     "at": "2026-10-19T02:47:24Z",
+     "host": "MacBook-Pro"
     }
    ],
    "advanced": "2026-10-18T21:20:21Z"
