@@ -18464,7 +18464,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/natives-dts-regen",
    "host": "MacBook-Pro",
    "added": "2026-10-18T22:04:10Z",
-   "updated": "2026-10-19T06:16:30Z",
+   "updated": "2026-10-19T06:16:51Z",
    "note": "",
    "built": [
     {
@@ -18487,7 +18487,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T06:16:30Z"
+   "opened": "2026-10-19T06:16:30Z",
+   "readied": "2026-10-19T06:16:51Z"
   },
   {
    "id": "relay-popup-lossless",
