@@ -24244,11 +24244,5 @@
     "title": "feat(coding-agent): let wait block for the reply to a message the agent sent"
    }
   ]
- },
- "opening": {
-  "id": "factory-droid-completions-tool-names",
-  "token": "0fd7ed1d8a9d4ee18e76fcc8fcfd1004",
-  "host": "MacBook-Pro",
-  "at": "2026-10-19T21:29:01Z"
  }
 }
