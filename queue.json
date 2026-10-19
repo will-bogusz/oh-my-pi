@@ -19702,6 +19702,24 @@
    "added": "2026-10-19T20:26:08Z",
    "updated": "2026-10-19T20:26:08Z",
    "note": ""
+  },
+  {
+   "id": "test-log-dir",
+   "branch": "will/test-log-dir",
+   "title": "fix(utils,natives): keep test runs out of the real ~/.omp/logs",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/test-log-dir.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/test-log-dir",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T20:37:51Z",
+   "updated": "2026-10-19T20:37:51Z",
+   "note": ""
   }
  ],
  "watch": {
