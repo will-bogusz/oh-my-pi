@@ -19239,6 +19239,24 @@
    "added": "2026-10-19T19:30:07Z",
    "updated": "2026-10-19T19:30:07Z",
    "note": ""
+  },
+  {
+   "id": "predict-newer-daemon",
+   "branch": "will/predict-newer-daemon",
+   "title": "fix(coding-agent): keep a newer text-predict daemon instead of shutting it down",
+   "area": "other",
+   "priority": "P0",
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/predict-newer-daemon.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/predict-newer-daemon",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:30:30Z",
+   "updated": "2026-10-19T19:30:30Z",
+   "note": ""
   }
  ],
  "watch": {
