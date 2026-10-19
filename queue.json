@@ -19352,7 +19352,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/vscode-mcp-missing",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:13:33Z",
-   "updated": "2026-10-19T23:13:19Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -19823,6 +19823,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:13:18Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "5e9295f06e6fdae3b460bcba46f24482cf07497e",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "0b80dfd5497567bc37fc75b5847accd876dbd0b8",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "5e9295f06e6fdae3b460bcba46f24482cf07497e",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "0b80dfd5497567bc37fc75b5847accd876dbd0b8",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "5e9295f06e6fdae3b460bcba46f24482cf07497e",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "0b80dfd5497567bc37fc75b5847accd876dbd0b8",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -20595,7 +20625,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-raw-line",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:29:28Z",
-   "updated": "2026-10-19T23:13:57Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -21146,6 +21176,46 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:13:55Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16384",
+     "code": "913a3cacb1535d777f1855ba03f2ed93d5dbacbd",
+     "with_code": "abb25b01011a391a5eb42a948821f7aef8731b86",
+     "tip": "6bd87856ff8806c8241e18a0b3295b9a1fd32131",
+     "with_tip": "a2c19ff1659eed526c8931d971cf5257eebe980b",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16389",
+     "code": "913a3cacb1535d777f1855ba03f2ed93d5dbacbd",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "6bd87856ff8806c8241e18a0b3295b9a1fd32131",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "913a3cacb1535d777f1855ba03f2ed93d5dbacbd",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "6bd87856ff8806c8241e18a0b3295b9a1fd32131",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "913a3cacb1535d777f1855ba03f2ed93d5dbacbd",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "6bd87856ff8806c8241e18a0b3295b9a1fd32131",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -23665,7 +23735,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ln-uri-source",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:44:46Z",
-   "updated": "2026-10-19T23:00:06Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -24147,6 +24217,36 @@
      "at": "2026-10-19T23:00:06Z",
      "host": "goliath",
      "tree": "b96e6d7debbee74633a84843cd9267712f263ac4"
+    },
+    {
+     "with": "#16389",
+     "code": "064bc7cbb166521463fd7b8b4935febf6f064eef",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "ac1bc6db6f48841c43c6a5fa3be15fe6237ede69",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "064bc7cbb166521463fd7b8b4935febf6f064eef",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "ac1bc6db6f48841c43c6a5fa3be15fe6237ede69",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "064bc7cbb166521463fd7b8b4935febf6f064eef",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "ac1bc6db6f48841c43c6a5fa3be15fe6237ede69",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -24166,7 +24266,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/autoqa-home-paths",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:16Z",
-   "updated": "2026-10-19T23:13:24Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -24637,6 +24737,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:13:22Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "98807b5c043ccd17613b6e10c65264dc27cbac86",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "a637f56ee5363073ac4ae1ffc364afef3a8e6360",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "98807b5c043ccd17613b6e10c65264dc27cbac86",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "a637f56ee5363073ac4ae1ffc364afef3a8e6360",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "98807b5c043ccd17613b6e10c65264dc27cbac86",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "a637f56ee5363073ac4ae1ffc364afef3a8e6360",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -24656,7 +24786,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-selector-edges",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:28Z",
-   "updated": "2026-10-19T23:13:47Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -25137,6 +25267,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:13:46Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "c41ff1e4743312b7e217fc8fb2f985c14acafc9b",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "1a3bbfa6dbd89c6ea4cf56533b238ac698b604c6",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "c41ff1e4743312b7e217fc8fb2f985c14acafc9b",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "1a3bbfa6dbd89c6ea4cf56533b238ac698b604c6",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "c41ff1e4743312b7e217fc8fb2f985c14acafc9b",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "1a3bbfa6dbd89c6ea4cf56533b238ac698b604c6",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -25156,7 +25316,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-unsupported-media",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:34Z",
-   "updated": "2026-10-19T21:33:15Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -25298,6 +25458,16 @@
      "at": "2026-10-19T21:33:13Z",
      "host": "goliath",
      "tree": "bd142e6ce10f9e9a0cddaa0c60543314d55af99a"
+    },
+    {
+     "with": "#16384",
+     "code": "d5e7611acba1dc175a5a7148e14e001bd622ce9f",
+     "with_code": "abb25b01011a391a5eb42a948821f7aef8731b86",
+     "tip": "e3a4c67a562d9c3281fd84695b6a88a181707540",
+     "with_tip": "a2c19ff1659eed526c8931d971cf5257eebe980b",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ]
   },
@@ -25316,7 +25486,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-sqlite-q-paging",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:45Z",
-   "updated": "2026-10-19T23:13:52Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -25787,6 +25957,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:13:50Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "19d57f70e9562ae562099d6d73c7b887c67b0135",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "6e52eed451b2a8eef4e4348eaf69d634c8c6f364",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "19d57f70e9562ae562099d6d73c7b887c67b0135",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "6e52eed451b2a8eef4e4348eaf69d634c8c6f364",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "19d57f70e9562ae562099d6d73c7b887c67b0135",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "6e52eed451b2a8eef4e4348eaf69d634c8c6f364",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -25806,7 +26006,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/custom-tool-host-imports",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:48Z",
-   "updated": "2026-10-19T23:13:38Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -26277,6 +26477,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:13:36Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "d946a06a147435b3635dcc52e025a4f9d959ec05",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "61685efa392e3d39681733037a6ab9c22804f21c",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "d946a06a147435b3635dcc52e025a4f9d959ec05",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "61685efa392e3d39681733037a6ab9c22804f21c",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "d946a06a147435b3635dcc52e025a4f9d959ec05",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "61685efa392e3d39681733037a6ab9c22804f21c",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -26296,7 +26526,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/builtin-rule-narrow-2",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:49:28Z",
-   "updated": "2026-10-19T23:13:28Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -26767,6 +26997,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:13:27Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "e9e5e592b7faac1f2448638b82de463ba1d3d8df",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "82f0156933def012911389376c0a96875ca9035b",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "e9e5e592b7faac1f2448638b82de463ba1d3d8df",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "82f0156933def012911389376c0a96875ca9035b",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "e9e5e592b7faac1f2448638b82de463ba1d3d8df",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "82f0156933def012911389376c0a96875ca9035b",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -26786,7 +27046,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-wire-images",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:51:43Z",
-   "updated": "2026-10-19T23:13:42Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -27257,6 +27517,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:13:41Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "2537904b9b00eb4f062fd5986089affcd3eecc19",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "81a7224e0d357779481f20ab1e348f5e3bfa5703",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "2537904b9b00eb4f062fd5986089affcd3eecc19",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "81a7224e0d357779481f20ab1e348f5e3bfa5703",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "2537904b9b00eb4f062fd5986089affcd3eecc19",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "81a7224e0d357779481f20ab1e348f5e3bfa5703",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -27356,7 +27646,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/thinking-loop-accounting",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:52:03Z",
-   "updated": "2026-10-19T21:33:15Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -27498,6 +27788,16 @@
      "at": "2026-10-19T21:33:14Z",
      "host": "goliath",
      "tree": "bd142e6ce10f9e9a0cddaa0c60543314d55af99a"
+    },
+    {
+     "with": "#16384",
+     "code": "2608e4dd2fa2b2a813b6d9b8116fbc680fac9c4c",
+     "with_code": "abb25b01011a391a5eb42a948821f7aef8731b86",
+     "tip": "db72f4bf139507c6ec686137ae8db617b51db163",
+     "with_tip": "a2c19ff1659eed526c8931d971cf5257eebe980b",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ]
   },
@@ -27557,7 +27857,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/write-prefix-contiguous",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:02:04Z",
-   "updated": "2026-10-19T23:14:16Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -28058,6 +28358,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:14:14Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "3552a0ec91841bf44cdb596c8d5473196e0deee5",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "bac28c51c787da8232ff07d053edd13d23772822",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "3552a0ec91841bf44cdb596c8d5473196e0deee5",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "bac28c51c787da8232ff07d053edd13d23772822",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "3552a0ec91841bf44cdb596c8d5473196e0deee5",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "bac28c51c787da8232ff07d053edd13d23772822",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -28077,7 +28407,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-tagless-errors",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:03:12Z",
-   "updated": "2026-10-19T23:14:20Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "advanced": "2026-10-19T22:15:04Z",
    "built": [
@@ -28609,6 +28939,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:14:19Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "7da6c2ece5c465da3c3ade290f9abf6e723a756f",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "296d1af3cfe699eaf7063b2bb636b80ff0f4a000",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "7da6c2ece5c465da3c3ade290f9abf6e723a756f",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "296d1af3cfe699eaf7063b2bb636b80ff0f4a000",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "7da6c2ece5c465da3c3ade290f9abf6e723a756f",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "296d1af3cfe699eaf7063b2bb636b80ff0f4a000",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ]
   },
@@ -28676,7 +29036,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/builtin-rule-reminder",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:10:36Z",
-   "updated": "2026-10-19T23:13:33Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -29147,6 +29507,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:13:31Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "b2836db596ebaf801b805aa3301d939404473e83",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "734f8d5902de0029264f4dd6695cb8bb02a2bf1b",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "b2836db596ebaf801b805aa3301d939404473e83",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "734f8d5902de0029264f4dd6695cb8bb02a2bf1b",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "b2836db596ebaf801b805aa3301d939404473e83",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "734f8d5902de0029264f4dd6695cb8bb02a2bf1b",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -29166,7 +29556,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-wait-reply",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:22:04Z",
-   "updated": "2026-10-19T23:14:07Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -29637,6 +30027,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:14:05Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "90d557ceac0d8c78dc5b555b0f35440a5dd8be33",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "3b62bca10b164daf33ed93459b02b0fdbf6f9e1e",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "90d557ceac0d8c78dc5b555b0f35440a5dd8be33",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "3b62bca10b164daf33ed93459b02b0fdbf6f9e1e",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "90d557ceac0d8c78dc5b555b0f35440a5dd8be33",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "3b62bca10b164daf33ed93459b02b0fdbf6f9e1e",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -29656,7 +30076,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-wait-line",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:26:08Z",
-   "updated": "2026-10-19T23:13:15Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -30127,6 +30547,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:13:13Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "138f4baba19fc86f7fc9e4d987eacc2c790839af",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "2942d21d3f28ab2cff93ef9e2b534dce336fe1b8",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "138f4baba19fc86f7fc9e4d987eacc2c790839af",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "2942d21d3f28ab2cff93ef9e2b534dce336fe1b8",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "138f4baba19fc86f7fc9e4d987eacc2c790839af",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "2942d21d3f28ab2cff93ef9e2b534dce336fe1b8",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -30667,7 +31117,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-session-env",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:45:07Z",
-   "updated": "2026-10-19T23:14:02Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -31178,6 +31628,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:14:00Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "f452728a913d819b28c5baa31163144484e1dc89",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "84254dc7d96aaee6413b5bc1f7764ecffba52b97",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "f452728a913d819b28c5baa31163144484e1dc89",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "84254dc7d96aaee6413b5bc1f7764ecffba52b97",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "f452728a913d819b28c5baa31163144484e1dc89",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "84254dc7d96aaee6413b5bc1f7764ecffba52b97",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -31197,7 +31677,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-shell-exception",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:50:15Z",
-   "updated": "2026-10-19T23:14:11Z",
+   "updated": "2026-10-19T23:46:24Z",
    "note": "",
    "built": [
     {
@@ -31738,6 +32218,36 @@
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-19T23:14:10Z",
      "host": "goliath"
+    },
+    {
+     "with": "#16389",
+     "code": "964de9c8d0d6452e02274fb546010c394cb81e68",
+     "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
+     "tip": "092cc34a60fb63f54fe331cd284c79fdf189abaa",
+     "with_tip": "f75bd8807b89ee8c5d2d59d7c741ffd07de38c92",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16391",
+     "code": "964de9c8d0d6452e02274fb546010c394cb81e68",
+     "with_code": "05c7278705dab750db22251d78fa3f175dd01647",
+     "tip": "092cc34a60fb63f54fe331cd284c79fdf189abaa",
+     "with_tip": "a63668a86eb90415eb59977236339a3c56bc341e",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
+    },
+    {
+     "with": "#16390",
+     "code": "964de9c8d0d6452e02274fb546010c394cb81e68",
+     "with_code": "d04ca091007efeaa66a2c7f7617eec51a73e5f60",
+     "tip": "092cc34a60fb63f54fe331cd284c79fdf189abaa",
+     "with_tip": "168ceaabdf1b41e9fecbd72ac41f6030c0a41278",
+     "at": "2026-10-19T23:46:23Z",
+     "host": "goliath",
+     "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
