@@ -18865,7 +18865,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T15:05:44Z",
+  "checked": "2026-10-19T16:07:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -18878,7 +18878,15 @@
     "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in"
    }
   },
-  "conflicts": {},
+  "conflicts": {
+   "#16302": {
+    "since": "2026-10-19T16:07:08Z",
+    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
+    "files": [
+     "packages/coding-agent/test/task/executor-result-acceptance.test.ts"
+    ]
+   }
+  },
   "merged_through": "2026-10-18T18:19:23Z",
   "unreleased": {},
   "ready": [
@@ -20558,6 +20566,15 @@
     "id": "factory-droid-web-search",
     "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)",
     "why": "opened as #16326"
+   },
+   {
+    "at": "2026-10-19T16:07:08Z",
+    "kind": "conflict",
+    "label": "#16302",
+    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
+    "files": [
+     "packages/coding-agent/test/task/executor-result-acceptance.test.ts"
+    ]
    }
   ]
  }
