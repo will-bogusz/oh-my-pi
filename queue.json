@@ -18713,6 +18713,26 @@
    "added": "2026-10-19T00:03:17Z",
    "updated": "2026-10-19T05:05:41Z",
    "note": "HOLD (Will, 2026-10-18): waits for Will's OK on the Accessibility dependency"
+  },
+  {
+   "id": "computer-ui-quiet",
+   "branch": "will/computer-ui-quiet",
+   "title": "fix(computer): wait for the app to finish reacting before the next read or input",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "#16223"
+   ],
+   "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
+   "body": "bodies/computer-ui-quiet.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T07:26:45Z",
+   "updated": "2026-10-19T07:26:45Z",
+   "note": ""
   }
  ],
  "watch": {
