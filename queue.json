@@ -1136,8 +1136,10 @@
    "title": "feat(computer): report what input changed as a diff once the app goes quiet",
    "area": "computer",
    "priority": "P2",
-   "needs": [],
-   "base": null,
+   "needs": [
+    "computer-ui-quiet"
+   ],
+   "base": "cca9912e4eba284ec06939159ae4b6b3f773b34b",
    "body": null,
    "state": "open",
    "pr": 15280,
@@ -1145,7 +1147,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-input-diff-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:48:25Z",
+   "updated": "2026-10-19T07:27:18Z",
    "note": "series 2 (B: draft until Will's presentation review). #15280 -> #15565; #15282 -> #15566, #15584 (children queued)."
   },
   {
