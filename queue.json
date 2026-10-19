@@ -16114,7 +16114,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-media-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:14:46Z",
-   "updated": "2026-10-19T03:42:39Z",
+   "updated": "2026-10-19T03:42:58Z",
    "note": "",
    "built": [
     {
@@ -16567,7 +16567,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T03:42:38Z"
+   "opened": "2026-10-19T03:42:38Z",
+   "readied": "2026-10-19T03:42:58Z"
   },
   {
    "id": "factory-droid-tool-name-cap",
