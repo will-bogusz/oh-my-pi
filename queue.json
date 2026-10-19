@@ -19837,5 +19837,11 @@
     "why": "opened as #16285"
    }
   ]
+ },
+ "opening": {
+  "id": "computer-no-ui-confirm",
+  "token": "97711d85ea0a41d48317cb908ad585bc",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T04:55:18Z"
  }
 }
