@@ -22520,7 +22520,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-parse-only-ambiguity",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:38:47Z",
-   "updated": "2026-10-19T22:29:54Z",
+   "updated": "2026-10-19T23:14:30Z",
    "note": "",
    "built": [
     {
@@ -22562,6 +22562,15 @@
      "at": "2026-10-19T22:29:54Z",
      "host": "goliath",
      "tree": "2fb51f1d5eb25b8c16cf27467a46cba5630ea9d6"
+    },
+    {
+     "with": "#15433",
+     "code": "351ec16ec8705e78961485f4e077f7e22181cbcf",
+     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
+     "tip": "d759e4638e044d3843ccb5b64d1ae477edad5cf2",
+     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
+     "at": "2026-10-19T23:14:28Z",
+     "host": "goliath"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
