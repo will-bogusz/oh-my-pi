@@ -18458,13 +18458,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/natives-dts-regen.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16306,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/natives-dts-regen",
    "host": "MacBook-Pro",
    "added": "2026-10-18T22:04:10Z",
-   "updated": "2026-10-19T06:11:37Z",
+   "updated": "2026-10-19T06:16:30Z",
    "note": "",
    "built": [
     {
@@ -18486,7 +18486,8 @@
      "at": "2026-10-19T06:11:33Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-19T06:16:30Z"
   },
   {
    "id": "relay-popup-lossless",
