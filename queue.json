@@ -19504,6 +19504,24 @@
    "added": "2026-10-19T19:46:48Z",
    "updated": "2026-10-19T19:46:48Z",
    "note": ""
+  },
+  {
+   "id": "builtin-rule-narrow-2",
+   "branch": "will/builtin-rule-narrow-2",
+   "title": "fix(coding-agent): fire ts-no-tiny-functions and ts-promise-with-resolvers only on code they flag",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/builtin-rule-narrow-2.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/builtin-rule-narrow-2",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:49:28Z",
+   "updated": "2026-10-19T19:49:28Z",
+   "note": ""
   }
  ],
  "watch": {
