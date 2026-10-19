@@ -18875,10 +18875,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T16:37:48Z",
+  "checked": "2026-10-19T17:08:11Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "factory-droid-completions-tool-names": {
+    "since": "2026-10-19T17:08:11Z",
+    "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests"
+   },
    "utok-perf": {
     "since": "2026-10-18T22:12:47Z",
     "title": "perf(natives/utok): memoize short-piece merge counts per thread"
@@ -18896,16 +18900,6 @@
      "packages/coding-agent/test/task/executor-result-acceptance.test.ts"
     ]
    },
-   "#16285": {
-    "since": "2026-10-19T16:37:48Z",
-    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
-    "files": [
-     "packages/coding-agent/src/tools/ast-grep.ts",
-     "packages/coding-agent/src/tools/glob.ts",
-     "packages/coding-agent/src/tools/grep.ts",
-     "packages/coding-agent/src/tools/jfind/index.ts"
-    ]
-   },
    "#16274": {
     "since": "2026-10-19T16:37:48Z",
     "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
@@ -18914,8 +18908,59 @@
     ]
    }
   },
-  "merged_through": "2026-10-18T18:19:23Z",
-  "unreleased": {},
+  "merged_through": "2026-10-19T17:03:02Z",
+  "unreleased": {
+   "16293": {
+    "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps",
+    "merge_commit": "abb184ded7e2ac8158905504a7a32fd8cea68279",
+    "merged_at": "2026-10-19T16:41:38Z"
+   },
+   "16241": {
+    "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it",
+    "merge_commit": "eb8682132501c10f0e0fe59f7975199217ec5c6b",
+    "merged_at": "2026-10-19T16:45:05Z"
+   },
+   "16282": {
+    "title": "fix(coding-agent): persist snapcompact archive source text whole",
+    "merge_commit": "36ccf0839f3bc2baf901c1d0868baec4a6abc98b",
+    "merged_at": "2026-10-19T16:46:08Z"
+   },
+   "16267": {
+    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values",
+    "merge_commit": "5d1c86007c684c695aa5ff6b43b3738bf7240af9",
+    "merged_at": "2026-10-19T16:52:55Z"
+   },
+   "16285": {
+    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
+    "merge_commit": "c270e3595d5eae958d498b9a032a72d6d5335235",
+    "merged_at": "2026-10-19T16:56:50Z"
+   },
+   "16235": {
+    "title": "fix(natives): never cancel X11 uinput releases",
+    "merge_commit": "19f8df410036760f460316e734593b7e6fc5639e",
+    "merged_at": "2026-10-19T16:57:06Z"
+   },
+   "16249": {
+    "title": "fix(ai): keep Factory Droid Gemini tool schemas valid when a parameter takes a string or a list",
+    "merge_commit": "188c457d3fc6cde8ed950ebef6a756d602b3d498",
+    "merged_at": "2026-10-19T16:58:51Z"
+   },
+   "16283": {
+    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
+    "merge_commit": "87c3e9b7d710203d08b640bece58d08d72276e50",
+    "merged_at": "2026-10-19T16:59:16Z"
+   },
+   "16259": {
+    "title": "fix(ai): send parallel Gemini tool results back in call order",
+    "merge_commit": "fcc36032b3fe6ef242186ed17f73124b8b686ad2",
+    "merged_at": "2026-10-19T16:59:54Z"
+   },
+   "16266": {
+    "title": "fix(browser): recognize Puppeteer timeouts in release builds",
+    "merge_commit": "caa898abe8e4bda3861a82876a61ca1d6f2259a4",
+    "merged_at": "2026-10-19T17:03:02Z"
+   }
+  },
   "ready": [
    13677,
    14235,
@@ -18932,30 +18977,20 @@
    16230,
    16231,
    16233,
-   16235,
    16236,
-   16241,
    16242,
-   16249,
    16250,
    16252,
    16257,
-   16259,
-   16266,
-   16267,
    16269,
    16271,
    16274,
    16278,
    16281,
-   16282,
-   16283,
    16284,
-   16285,
    16288,
    16291,
    16292,
-   16293,
    16294,
    16295,
    16296,
@@ -20623,6 +20658,92 @@
     "files": [
      "packages/coding-agent/src/tools/read.ts"
     ]
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "merged",
+    "number": 16293,
+    "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "merged",
+    "number": 16241,
+    "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "merged",
+    "number": 16282,
+    "title": "fix(coding-agent): persist snapcompact archive source text whole",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "merged",
+    "number": 16267,
+    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "merged",
+    "number": 16285,
+    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "merged",
+    "number": 16235,
+    "title": "fix(natives): never cancel X11 uinput releases",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "merged",
+    "number": 16249,
+    "title": "fix(ai): keep Factory Droid Gemini tool schemas valid when a parameter takes a string or a list",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "merged",
+    "number": 16283,
+    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "merged",
+    "number": 16259,
+    "title": "fix(ai): send parallel Gemini tool results back in call order",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "merged",
+    "number": 16266,
+    "title": "fix(browser): recognize Puppeteer timeouts in release builds",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-19T17:08:11Z",
+    "kind": "openable",
+    "id": "factory-droid-completions-tool-names",
+    "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests"
    }
   ]
  }
