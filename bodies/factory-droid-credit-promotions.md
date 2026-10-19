@@ -28,27 +28,27 @@ credit-promotion { discount 0.2; starts "2026-08-22T00:00:00Z"; ends "2026-11-22
 - `readPolicy` → `FactoryDroidCreditPromotion` in `compat/factory-droid.ts`; `buildFactoryDroidModel` copies it onto the model
 - `getFactoryDroidCreditRate` in `catalog/src/models.ts` (window check, discount)
 - `withCreditBadge` / `creditPromotionNote` in `tui/src/overlays/model-browser.ts`
-- the five `credit-promotion` lines in `providers/factory-droid.kdl`
+- the four `credit-promotion` lines in `providers/factory-droid.kdl`
 
 </details>
 
 ## Why
 
-Factory runs time-boxed credit discounts on top of each model's multiplier. omp shows that multiplier only in the model browser, which overstated GPT-5.6 Sol (and Fast) by 25% and Gemini 3.7/3.8 Flash and Mistral Large 4 by 2×.
+Factory runs time-boxed credit discounts on top of each model's multiplier. omp shows that multiplier only in the model browser, which overstated GPT-5.6 Sol (and Fast) by 25% and Gemini 3.7/3.8 Flash by 2×.
 
 Decisions:
 - The model keeps the base rate plus the promotion window, and the browser applies the discount against the clock when it renders. Baking the discount in at discovery was rejected: cached and offline models would keep it past the end.
 - A separate axis rather than a child of `credit-rates`, so adding a promotion never rewrites the base rates. It must follow `credit-rates` in its block.
 - Row cells show only the rate; the label and end date go last in the detail line and in the preview, so narrow widths cut them before reasoning, vision or speed facts.
 
-Maintenance: promotions are hand-entered, one KDL line each; a malformed one fails `gen:compat` with file and line. Mistral Large 4's launch discount ends 2026-10-20; after that the line is inert.
+Maintenance: promotions are hand-entered, one KDL line each; a malformed one fails `gen:compat` with file and line. An ended promotion is inert; removing ended lines is a maintainer call.
 
 ## Testing
 
 - Compiler: a valid promotion compiles; 10 malformed ones fail at their line (discount 0 or ≥ 1, end before start, `2026-02-30`, `24:00`, non-ISO or non-UTC dates, missing or empty label, unknown key), as does a promotion without `credit-rates`.
 - Window: discounted at the start, base rate 1 ms before it and at the end.
 - Cache: discover online inside a registry promotion's window, move the clock past the end, then resolve offline and with Factory failing: both return the cached model and it reads the base rate with no promotion.
-- Browser at 80 and 120 columns: row shows `$1.25/10 1.6×` without the label and the detail keeps `reasoning · vision`; at 160 the detail ends `· 20% off until …`; an ended promotion shows `2×` and no label. Picker column stays `$3·15 1.6×`.
+- Browser at 80 and 120 columns: row shows `$1.25/10 1.6×` without the label and the detail keeps `reasoning · vision`; at 160 the detail ends `· 20% off until …`; an ended promotion shows `2×` and no label, including in a browser left open across the end (rows, picker and compact preview, which also names the promotion). Picker column stays `$3·15 1.6×`.
 - Negative control: against the first commit's code (discount baked in at discovery), the browser and picker tests fail; against `main`, the catalog tests fail as well.
 - Suites: catalog 1228 / 0; tui 3939 pass, 7 skip, 1 fail (`terminal background SIXEL repaint`, which fails the same way on `main`); `model-browser.test.ts` 34 / 0; `bun run check:ts` clean.
 
@@ -66,3 +66,4 @@ bun test packages/coding-agent/test/model-browser.test.ts packages/tui/test/mode
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
