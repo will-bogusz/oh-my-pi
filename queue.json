@@ -27416,13 +27416,13 @@
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/tar-stream-index.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16394,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tar-stream-index",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:52:35Z",
-   "updated": "2026-10-19T23:03:48Z",
+   "updated": "2026-10-19T23:07:15Z",
    "note": "",
    "built": [
     {
@@ -27444,7 +27444,8 @@
      "at": "2026-10-19T23:03:42Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-19T23:07:14Z"
   },
   {
    "id": "write-prefix-contiguous",
