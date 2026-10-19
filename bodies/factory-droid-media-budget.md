@@ -1,6 +1,6 @@
 ## What
 
-Factory Droid requests now keep inline images under 3.5 MB, the Droid CLI's budget under Factory's 4.5 MB request limit, while the newest message's and newest tool result's images stay if they alone fit that limit.
+I made Factory Droid requests keep inline images under 3.5 MB, the Droid CLI's budget under Factory's 4.5 MB request limit, while the newest message's and newest tool result's images stay if they alone fit that limit.
 
 omp already capped Factory at 5 images (the default count budget), but had no byte budget, and five large screenshots can exceed 4.5 MB. `[INFERENCE]` That likely explains the 413s seen on screenshot-heavy Factory sessions; our transcript sizes are an upper bound, not wire captures.
 
