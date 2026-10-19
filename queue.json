@@ -28102,13 +28102,13 @@
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/test-log-dir.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16386,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/test-log-dir",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:37:51Z",
-   "updated": "2026-10-19T21:38:25Z",
+   "updated": "2026-10-19T21:42:14Z",
    "note": "",
    "built": [
     {
@@ -28610,7 +28610,8 @@
      "at": "2026-10-19T21:38:23Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-10-19T21:42:13Z"
   },
   {
    "id": "bash-session-env",
