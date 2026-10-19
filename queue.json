@@ -11044,6 +11044,26 @@
    "added": "2026-10-18T22:04:10Z",
    "updated": "2026-10-18T22:05:07Z",
    "note": ""
+  },
+  {
+   "id": "relay-popup-lossless",
+   "branch": "will/relay-popup-lossless",
+   "title": "fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [
+    "relay-popup-front-main"
+   ],
+   "base": "17473d8eb375ece0cb221db729b92000e06e227d",
+   "body": "bodies/relay-popup-lossless.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-lossless",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T00:03:17Z",
+   "updated": "2026-10-19T00:03:17Z",
+   "note": ""
   }
  ],
  "watch": {
