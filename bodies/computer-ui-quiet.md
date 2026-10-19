@@ -18,11 +18,11 @@ Reading order: `crates/pi-natives/src/desktop/macos/settle.rs` `wait_for_quiet`,
 On `main` no call waits for the app to finish reacting to the one before, so it can land while the app is still opening a sheet, a popover, a rename field or a window.
 
 <picture>
-  <source media="(min-width: 1244px) and (prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/3f665448-7f4a-490b-850b-91057303eba3">
-  <source media="(min-width: 1244px) and (prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/9856fa1e-0459-4051-8359-2a4dc828aa2c">
-  <source media="(prefers-color-scheme: dark)" width="440" srcset="https://github.com/user-attachments/assets/7e6f6c9b-e9c0-4b3a-8dcc-7165c1981cc3">
-  <source media="(prefers-color-scheme: light)" width="440" srcset="https://github.com/user-attachments/assets/7881b903-1bef-463a-8e7b-7901beed7637">
-  <img width="780" alt="Timeline of a Finder new-folder cell. main: after cmd+shift+n the name is typed at once, while Finder is still opening the name field, and the folder can stay &quot;untitled folder&quot;. This PR: the typing waits until Finder sends no accessibility notification for 250 ms, then the folder gets its name." src="https://github.com/user-attachments/assets/9856fa1e-0459-4051-8359-2a4dc828aa2c" />
+  <source media="(min-width: 1244px) and (prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/0f30bd99-ae44-48fe-84a8-7585431e33ab">
+  <source media="(min-width: 1244px) and (prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/6a16f37d-d874-44fb-a046-e9560e51aeda">
+  <source media="(prefers-color-scheme: dark)" width="440" srcset="https://github.com/user-attachments/assets/f636ba23-afc2-466b-a171-f70fda65f205">
+  <source media="(prefers-color-scheme: light)" width="440" srcset="https://github.com/user-attachments/assets/07e8811c-6780-47e0-9f44-a6f0d586fe01">
+  <img width="780" alt="Timeline of a Finder new-folder cell. main: after cmd+shift+n the name is typed at once, while Finder is still opening the name field, and the folder can stay &quot;untitled folder&quot;. This PR: the typing waits until Finder sends no accessibility notification for 250 ms, then the folder gets its name." src="https://github.com/user-attachments/assets/6a16f37d-d874-44fb-a046-e9560e51aeda" />
 </picture>
 
 Quiet means 250 ms without an accessibility notification (focus, layout, windows or sheets created) from the apps that input reached, 5 s at most. Value changes don't count: carets and clocks send them forever.
