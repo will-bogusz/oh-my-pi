@@ -20005,13 +20005,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/r2-browser-match-count-error.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16389,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-match-count-error",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:22:15Z",
-   "updated": "2026-10-19T22:29:54Z",
+   "updated": "2026-10-19T22:34:14Z",
    "note": "",
    "built": [
     {
@@ -20482,7 +20482,8 @@
      "tree": "2fb51f1d5eb25b8c16cf27467a46cba5630ea9d6"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z"
+   "advanced": "2026-10-19T22:06:15Z",
+   "opened": "2026-10-19T22:34:13Z"
   },
   {
    "id": "edit-fileop-tag-check",
