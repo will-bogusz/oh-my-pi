@@ -8270,7 +8270,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/req-debug-redact",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:39:00Z",
-   "updated": "2026-10-19T04:14:51Z",
+   "updated": "2026-10-19T04:16:45Z",
    "note": "",
    "built": [
     {
@@ -8349,16 +8349,6 @@
      "tree": "a2490375beaf08bd3af92cb37e408baa685b1f92"
     },
     {
-     "with": "#16257",
-     "code": "b7727846b55f20cc5c0c10f0e2dea20af8c9b3bb",
-     "with_code": "5e84f8c35b9859d74c313deb05b836c944871925",
-     "tip": "fd74e5ee2810e522ad4f689c187951f4c22a39af",
-     "with_tip": "5f7bd43151ef743e1c23c03c6945af1ede7141d5",
-     "at": "2026-10-19T02:46:03Z",
-     "host": "goliath",
-     "tree": "97e49d3708e6c2ca99e55e482fb4225571fd6055"
-    },
-    {
      "with": "#16259",
      "code": "b7727846b55f20cc5c0c10f0e2dea20af8c9b3bb",
      "with_code": "b11a2af6df3e3f7ae51154138a98f52cdaf0a900",
@@ -8405,6 +8395,15 @@
      "tip": "fd74e5ee2810e522ad4f689c187951f4c22a39af",
      "with_tip": "afe39cc4a4d5bfa4f65c709d78669160f79e562d",
      "at": "2026-10-19T04:14:46Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16257",
+     "code": "b7727846b55f20cc5c0c10f0e2dea20af8c9b3bb",
+     "with_code": "5e84f8c35b9859d74c313deb05b836c944871925",
+     "tip": "fd74e5ee2810e522ad4f689c187951f4c22a39af",
+     "with_tip": "5f7bd43151ef743e1c23c03c6945af1ede7141d5",
+     "at": "2026-10-19T04:16:42Z",
      "host": "MacBook-Pro"
     }
    ],
