@@ -19311,6 +19311,24 @@
    "added": "2026-10-19T19:41:52Z",
    "updated": "2026-10-19T19:41:52Z",
    "note": ""
+  },
+  {
+   "id": "read-inmemory-range",
+   "branch": "will/read-inmemory-range",
+   "title": "fix(coding-agent): kept requested lines in in-memory range reads",
+   "area": "read",
+   "priority": "P2",
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/read-inmemory-range.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-inmemory-range",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:42:25Z",
+   "updated": "2026-10-19T19:42:25Z",
+   "note": ""
   }
  ],
  "watch": {
