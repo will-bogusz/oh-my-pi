@@ -19851,7 +19851,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/thinking-drop-log",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:15:24Z",
-   "updated": "2026-10-19T22:56:50Z",
+   "updated": "2026-10-19T22:57:14Z",
    "note": "",
    "built": [
     {
@@ -19995,7 +19995,8 @@
      "tree": "bd142e6ce10f9e9a0cddaa0c60543314d55af99a"
     }
    ],
-   "opened": "2026-10-19T22:56:50Z"
+   "opened": "2026-10-19T22:56:50Z",
+   "readied": "2026-10-19T22:57:14Z"
   },
   {
    "id": "r2-browser-match-count-error",
