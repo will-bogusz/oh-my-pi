@@ -30461,6 +30461,24 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
+  },
+  {
+   "id": "edit-mismatch-seen-lines",
+   "branch": "will/edit-mismatch-seen-lines",
+   "title": "fix(edit): counted only a mismatch reply's displayed rows as seen",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
+   "body": "bodies/edit-mismatch-seen-lines.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-mismatch-seen-lines",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T22:23:03Z",
+   "updated": "2026-10-19T22:23:03Z",
+   "note": ""
   }
  ],
  "watch": {
