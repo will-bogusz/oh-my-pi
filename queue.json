@@ -5826,7 +5826,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-app-precedence-docs",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:14:13Z",
-   "updated": "2026-10-19T04:50:55Z",
+   "updated": "2026-10-19T04:51:15Z",
    "note": "",
    "built": [
     {
@@ -6328,7 +6328,8 @@
     }
    ],
    "advanced": "2026-10-18T21:20:21Z",
-   "opened": "2026-10-19T04:50:55Z"
+   "opened": "2026-10-19T04:50:55Z",
+   "readied": "2026-10-19T04:51:14Z"
   },
   {
    "id": "report-issue-colon",
