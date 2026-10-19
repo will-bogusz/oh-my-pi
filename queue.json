@@ -13743,7 +13743,7 @@
    "area": "providers",
    "priority": "P2",
    "needs": [],
-   "base": "ba11b7f022a9126e8ab01e1ca3d9be22ed7f8c67",
+   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/factory-droid-credit-promotions.md",
    "state": "queued",
    "pr": null,
@@ -13751,7 +13751,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-credit-promotions",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:02Z",
-   "updated": "2026-10-19T02:46:04Z",
+   "updated": "2026-10-19T06:41:21Z",
    "note": "",
    "built": [
     {
@@ -14154,7 +14154,8 @@
      "host": "goliath",
      "tree": "97e49d3708e6c2ca99e55e482fb4225571fd6055"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T06:41:21Z"
   },
   {
    "id": "gemini-tool-result-order",
