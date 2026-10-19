@@ -27422,7 +27422,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tar-stream-index",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:52:35Z",
-   "updated": "2026-10-19T23:00:06Z",
+   "updated": "2026-10-19T23:03:48Z",
    "note": "",
    "built": [
     {
@@ -27441,9 +27441,8 @@
      "with_code": "855dc6079591e388b4558a88b20d69ed90889af9",
      "tip": "d0cb5834207220abe87e4f8974c8665038855c09",
      "with_tip": "ba42a6786c93a0d9715ed01e4c57cbaed218a407",
-     "at": "2026-10-19T23:00:06Z",
-     "host": "goliath",
-     "tree": "b96e6d7debbee74633a84843cd9267712f263ac4"
+     "at": "2026-10-19T23:03:42Z",
+     "host": "MacBook-Pro"
     }
    ]
   },
