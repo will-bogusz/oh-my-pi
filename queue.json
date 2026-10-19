@@ -5245,13 +5245,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/computer-no-ui-confirm.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16295,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-no-ui-confirm",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:01:19Z",
-   "updated": "2026-10-19T04:51:23Z",
+   "updated": "2026-10-19T04:58:01Z",
    "note": "",
    "built": [
     {
@@ -5761,7 +5761,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-18T21:20:28Z"
+   "advanced": "2026-10-18T21:20:28Z",
+   "opened": "2026-10-19T04:58:01Z"
   },
   {
    "id": "release-helper-wait-test",
