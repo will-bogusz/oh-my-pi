@@ -15519,5 +15519,11 @@
     "why": "opened as #16241"
    }
   ]
+ },
+ "opening": {
+  "id": "read-after-bash-revalidate",
+  "token": "59d8f594842e4b09ac27b7ea75978d92",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T01:03:53Z"
  }
 }
