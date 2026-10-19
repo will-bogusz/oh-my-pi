@@ -21095,13 +21095,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/r2-browser-relay-guidance.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16390,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-relay-guidance",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:30:07Z",
-   "updated": "2026-10-19T22:29:54Z",
+   "updated": "2026-10-19T22:38:53Z",
    "note": "",
    "built": [
     {
@@ -21572,7 +21572,8 @@
      "tree": "2fb51f1d5eb25b8c16cf27467a46cba5630ea9d6"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z"
+   "advanced": "2026-10-19T22:06:15Z",
+   "opened": "2026-10-19T22:38:52Z"
   },
   {
    "id": "predict-newer-daemon",
