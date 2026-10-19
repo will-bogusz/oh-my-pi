@@ -13037,7 +13037,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-after-bash-revalidate",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:39:24Z",
-   "updated": "2026-10-19T00:24:58Z",
+   "updated": "2026-10-19T00:40:53Z",
    "note": "",
    "built": [
     {
@@ -13433,12 +13433,20 @@
     {
      "with": "#16252",
      "code": "0db9f7aca77b9bfbbb1078c3af78ada2000c166a",
-     "with_code": "b0c2ff3f2bd6bb0fb67633e346ce81f64a2c0b3b",
+     "with_code": "11dd06ad87bbd283731932fa173524ec2cd2975b",
      "tip": "107645a27fe7799676c6c50481cdee54852ccbba",
-     "with_tip": "29907f0964c54e05f31f12828bdd31f0260e3823",
-     "at": "2026-10-19T00:24:57Z",
-     "host": "MacBook-Pro",
-     "tree": "ca643b4d1e6fb39f4445790181e522465b3de935"
+     "with_tip": "23ff8ed4bfea858bd266b8f57dd4145ae0ea221e",
+     "at": "2026-10-19T00:40:49Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16266",
+     "code": "0db9f7aca77b9bfbbb1078c3af78ada2000c166a",
+     "with_code": "c669992bd47fc7888624f7c4ce781f0dc891764e",
+     "tip": "107645a27fe7799676c6c50481cdee54852ccbba",
+     "with_tip": "7d38d467e9465cf06c48924b18709d4a54f8ae1d",
+     "at": "2026-10-19T00:40:53Z",
+     "host": "MacBook-Pro"
     }
    ]
   },
