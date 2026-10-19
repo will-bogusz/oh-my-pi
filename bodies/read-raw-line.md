@@ -29,7 +29,7 @@ Non-goals: continuation footers keep `Use :N to continue`.
 
 ## Testing
 
-- New tests: a raw bare line through `ReadTool` (both orders, plus `:58-:raw` open-ended), `parseReadUrlTarget`, `selectorLineRanges`, and `cursorRawReadPath`. With the source changes reverted all four fail; with them, the read, grep, fetch and cursor suites pass apart from 6 failures that fail identically on `main` (bash auto-background and two others).
+- New tests: a raw bare line through `ReadTool` (both orders, plus `:58-:raw` open-ended), `parseReadUrlTarget`, `selectorLineRanges`, and `cursorRawReadPath`. With the source changes reverted all four fail; with them, the read, grep, fetch and cursor suites pass (124 files, 1,447 tests).
 - `grep` on an artifact with matches on lines 17-20: `artifact://N:17:raw` matched lines 17-20 on `main` and line 17 here; `:17-:raw` and `:17` match 17-20 on both.
 - Replay above: a scratch script runs each recorded path through `ReadTool` on a `main` checkout and on this branch and compares the text with line N of the file.
 - `bun run check` in `packages/tui`, `packages/ai`, `packages/coding-agent`.
