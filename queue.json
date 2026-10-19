@@ -13223,7 +13223,7 @@
    "needs": [
     "revive-tools"
    ],
-   "base": "c580bc228d19ed00807aaa545f11fbae5e44a76c",
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/revive-prompt-cache.md",
    "state": "queued",
    "pr": null,
@@ -13231,8 +13231,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/revive-prompt-cache",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:47:39Z",
-   "updated": "2026-10-18T19:51:02Z",
-   "note": ""
+   "updated": "2026-10-19T18:46:10Z",
+   "note": "",
+   "advanced": "2026-10-19T18:46:10Z"
   },
   {
    "id": "ssh-minimizer-width",
