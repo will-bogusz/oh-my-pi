@@ -27422,7 +27422,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tar-stream-index",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:52:35Z",
-   "updated": "2026-10-19T23:07:15Z",
+   "updated": "2026-10-19T23:07:37Z",
    "note": "",
    "built": [
     {
@@ -27445,7 +27445,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T23:07:14Z"
+   "opened": "2026-10-19T23:07:14Z",
+   "readied": "2026-10-19T23:07:36Z"
   },
   {
    "id": "write-prefix-contiguous",
