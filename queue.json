@@ -19345,8 +19345,28 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rm-force-enoent",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:44:18Z",
-   "updated": "2026-10-19T19:44:18Z",
-   "note": ""
+   "updated": "2026-10-19T19:47:41Z",
+   "note": "",
+   "built": [
+    {
+     "with": "rg-count-zero",
+     "code": "75e1c93e0674794508895c63d80bcd40ae1d319a",
+     "with_code": "f42e2ba1d6e50e267ec0c3152c61ccad18d150c8",
+     "tip": "d00f45e08c18812271b6977f8cf6de891b6f54bf",
+     "with_tip": "89ac68ec91ff4fe3c3fe49c70b601f1c9e429c72",
+     "at": "2026-10-19T19:47:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "ln-uri-source",
+     "code": "75e1c93e0674794508895c63d80bcd40ae1d319a",
+     "with_code": "2071237e9354fbfa32792fb77b8a50cebbdb0dd1",
+     "tip": "d00f45e08c18812271b6977f8cf6de891b6f54bf",
+     "with_tip": "fa00c8dc228df73782b64040943c7ac2b7eefaa3",
+     "at": "2026-10-19T19:47:40Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "rg-count-zero",
