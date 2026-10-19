@@ -27,7 +27,7 @@ Not covered, as on `main`: a read placed *before* a bash; URLs and internal URLs
 ## Testing
 
 - Live (Haiku 5.5; `bash "sleep 0.5; echo new > f"` then `read f`): `main` returned `1:old` 6 ms in; this PR returned `1:new` 1 ms after bash ended (538 ms), both calls starting together.
-- `packages/coding-agent/test/tools/read-after-bash.test.ts` runs the real tools through the agent loop, bash changing the file only after the read has returned: a rewritten, created and deleted file, `file://`, a suffix-matched file, a tar member, a SQLite table, an entry two levels into a listed directory, and an abort while waiting. With `read.ts` as on `main` the eight bash cases fail.
+- `packages/coding-agent/test/tools/read-after-bash.test.ts` runs the real tools through the agent loop, bash changing the file only after the read has returned: a rewritten, created and deleted file, `file://`, a suffix-matched file, a tar member, a SQLite table (also in WAL mode with another connection open), an entry two levels into a listed directory and one past 2,000 entries, an exact file created where a curly-quote fallback matched, and an abort while waiting. With `read.ts` as on `main` the eleven bash cases fail.
 - `packages/agent/test/agent-loop.test.ts`: only a call beside an earlier writing call gets the promise, settled after that call (fails with `agent-loop.ts` reverted).
 - `bun run check` (lint, format, types) and `bun test` in `packages/agent` (795 pass); `bun run check` and the read, bash and tool suites in `packages/coding-agent` (306 pass).
 
@@ -44,3 +44,4 @@ Every assistant message with two or more tool calls in one machine's recent omp 
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
