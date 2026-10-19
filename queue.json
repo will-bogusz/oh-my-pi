@@ -19902,5 +19902,11 @@
     "why": "opened as #16285"
    }
   ]
+ },
+ "opening": {
+  "id": "exact-provider-model-selector",
+  "token": "9830dbf904cc459c9babfaf7d2fddec2",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T05:08:56Z"
  }
 }
