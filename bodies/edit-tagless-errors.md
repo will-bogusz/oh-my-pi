@@ -26,7 +26,7 @@ Agents that saw a file only through `bash` have no tag and fill in a stand-in. I
 
 The wording matters: an earlier first line, "the header carries no 4-hex snapshot tag", still sent Haiku 5.5 to `read` on 5/8 `#AUTO` runs; "needs this file's current tag, #X" got 8/8 to resend.
 
-Decisions: placeholders go down the same `mismatch` path as `#0000` (same snapshot recording, same advice line), so this allows nothing a model can't already get by sending `#0000`. I didn't add the "read first, never invent a tag" prompt line: #16253 adds it to both hashline prompts.
+Decisions: placeholders take the `#0000` path (same snapshot recording, so the same seen-line check on the resend), so this allows nothing a model can't already get by sending `#0000`. I didn't add the "read first, never invent a tag" prompt line: #16253 adds it to both hashline prompts.
 
 Related: #16000.
 
