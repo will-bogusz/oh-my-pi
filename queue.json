@@ -2808,9 +2808,10 @@
    "area": "computer",
    "priority": "P2",
    "needs": [
-    "#15574"
+    "computer-ui-quiet",
+    "computer-ax-lines"
    ],
-   "base": "c393c878951242e8fabdb2ced2f01378bcd1d7a1",
+   "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
    "body": "bodies/computer-rich-text.md",
    "state": "queued",
    "pr": null,
@@ -2820,7 +2821,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-rich-text",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-16T03:04:57Z",
+   "updated": "2026-10-19T07:27:22Z",
    "note": "#15574 went hint-only (2026-10-16, d05bbc41ac): this entry's need on it was only for code that push removed (read_ref, check_identity, AxText.refound, #reportRefound). Rebase onto main alone dropping that code and 7096338aea, then clear needs; if it lands after #15574, add its text request to Request::reference()."
   },
   {
