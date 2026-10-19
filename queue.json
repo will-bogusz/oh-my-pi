@@ -19837,5 +19837,11 @@
     "why": "opened as #16285"
    }
   ]
+ },
+ "opening": {
+  "id": "factory-droid-prompt-cache",
+  "token": "7b3c6e3ac39344f6b98bc6eddd37c3b9",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T04:51:59Z"
  }
 }
