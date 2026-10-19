@@ -9931,7 +9931,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wait-queued-completion",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:41:43Z",
-   "updated": "2026-10-19T02:46:04Z",
+   "updated": "2026-10-19T02:47:54Z",
    "note": "",
    "built": [
     {
@@ -10291,15 +10291,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#16282",
-     "code": "0f32564d31cf6c36513db586d59fa5aa7e6eec32",
-     "with_code": "253eeb090aa4296711f5208b827f5f09285ddf45",
-     "tip": "513a0d9e6b05d7963ac6d79135fed14f34ef7be8",
-     "with_tip": "7af0ad089c4defbd8ba1661df409d4bab1347902",
-     "at": "2026-10-19T02:17:42Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "factory-droid-media-budget",
      "code": "0f32564d31cf6c36513db586d59fa5aa7e6eec32",
      "with_code": "98f9d85ac02f0920d511733e236afa915d584802",
@@ -10358,6 +10349,15 @@
      "at": "2026-10-19T02:46:03Z",
      "host": "goliath",
      "tree": "97e49d3708e6c2ca99e55e482fb4225571fd6055"
+    },
+    {
+     "with": "#16282",
+     "code": "0f32564d31cf6c36513db586d59fa5aa7e6eec32",
+     "with_code": "2f14b4c037cc19a8c109c2dd2df9d3f7345b6e99",
+     "tip": "513a0d9e6b05d7963ac6d79135fed14f34ef7be8",
+     "with_tip": "92ca808e6892e6b42aab4df011b736b355a46466",
+     "at": "2026-10-19T02:47:50Z",
+     "host": "MacBook-Pro"
     }
    ],
    "advanced": "2026-10-18T21:55:45Z"
