@@ -19576,6 +19576,24 @@
    "added": "2026-10-19T19:52:03Z",
    "updated": "2026-10-19T19:52:03Z",
    "note": ""
+  },
+  {
+   "id": "tar-stream-index",
+   "branch": "will/tar-stream-index",
+   "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/tar-stream-index.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tar-stream-index",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:52:35Z",
+   "updated": "2026-10-19T19:52:35Z",
+   "note": ""
   }
  ],
  "watch": {
