@@ -18573,7 +18573,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-completions-tool-names",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:33:09Z",
-   "updated": "2026-10-19T21:28:42Z",
+   "updated": "2026-10-19T21:29:04Z",
    "note": "",
    "advanced": "2026-10-19T19:12:57Z",
    "built": [
@@ -18713,7 +18713,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-19T21:28:42Z"
+   "opened": "2026-10-19T21:28:42Z",
+   "readied": "2026-10-19T21:29:03Z"
   },
   {
    "id": "read-after-bash-revalidate",
