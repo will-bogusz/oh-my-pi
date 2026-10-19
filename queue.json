@@ -19293,6 +19293,24 @@
    "added": "2026-10-19T19:38:47Z",
    "updated": "2026-10-19T19:38:47Z",
    "note": ""
+  },
+  {
+   "id": "read-profile-ranges",
+   "branch": "will/read-profile-ranges",
+   "title": "fix(coding-agent): read profile line ranges from the file, not its summary",
+   "area": "read",
+   "priority": "P2",
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/read-profile-ranges.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-profile-ranges",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:41:52Z",
+   "updated": "2026-10-19T19:41:52Z",
+   "note": ""
   }
  ],
  "watch": {
