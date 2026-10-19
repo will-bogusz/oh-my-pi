@@ -12805,7 +12805,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/lsp-workspace-folders",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:26:57Z",
-   "updated": "2026-10-19T00:53:59Z",
+   "updated": "2026-10-19T00:54:24Z",
    "note": "",
    "built": [
     {
@@ -13216,7 +13216,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T00:53:59Z"
+   "opened": "2026-10-19T00:53:59Z",
+   "readied": "2026-10-19T00:54:24Z"
   },
   {
    "id": "factory-droid-completions-tool-names",
