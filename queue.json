@@ -8398,7 +8398,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/req-debug-redact",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:39:00Z",
-   "updated": "2026-10-19T04:37:41Z",
+   "updated": "2026-10-19T04:37:59Z",
    "note": "",
    "built": [
     {
@@ -8562,7 +8562,8 @@
     }
    ],
    "advanced": "2026-10-18T21:55:57Z",
-   "opened": "2026-10-19T04:37:41Z"
+   "opened": "2026-10-19T04:37:41Z",
+   "readied": "2026-10-19T04:37:59Z"
   },
   {
    "id": "browser-role-name",
