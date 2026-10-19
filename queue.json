@@ -30076,7 +30076,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-wait-line",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:26:08Z",
-   "updated": "2026-10-19T23:57:51Z",
+   "updated": "2026-10-19T23:58:14Z",
    "note": "",
    "built": [
     {
@@ -30580,7 +30580,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-19T23:57:51Z"
+   "opened": "2026-10-19T23:57:51Z",
+   "readied": "2026-10-19T23:58:14Z"
   },
   {
    "id": "test-log-dir",
