@@ -19115,17 +19115,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T18:40:03Z",
+  "checked": "2026-10-19T19:10:49Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "factory-droid-completions-tool-names": {
     "since": "2026-10-19T17:08:11Z",
     "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests"
-   },
-   "revive-prompt-cache": {
-    "since": "2026-10-19T17:39:09Z",
-    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it"
    },
    "utok-perf": {
     "since": "2026-10-18T22:12:47Z",
@@ -19179,7 +19175,8 @@
    16300,
    16306,
    16309,
-   16316
+   16316,
+   16369
   ],
   "events": [
    {
@@ -21146,6 +21143,13 @@
     "number": 16252,
     "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
     "tag": "v18.12.3"
+   },
+   {
+    "at": "2026-10-19T19:10:49Z",
+    "kind": "unopenable",
+    "id": "revive-prompt-cache",
+    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it",
+    "why": "opened as #16369"
    }
   ]
  }
