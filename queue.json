@@ -22584,13 +22584,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-profile-ranges.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16397,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-profile-ranges",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:41:52Z",
-   "updated": "2026-10-19T23:13:10Z",
+   "updated": "2026-10-19T23:18:37Z",
    "note": "",
    "built": [
     {
@@ -23083,7 +23083,8 @@
      "host": "goliath"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z"
+   "advanced": "2026-10-19T22:06:15Z",
+   "opened": "2026-10-19T23:18:37Z"
   },
   {
    "id": "read-inmemory-range",
