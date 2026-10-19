@@ -19594,6 +19594,24 @@
    "added": "2026-10-19T19:52:35Z",
    "updated": "2026-10-19T19:52:35Z",
    "note": ""
+  },
+  {
+   "id": "write-prefix-contiguous",
+   "branch": "will/write-prefix-contiguous",
+   "title": "fix(write): keep content whose leading numbers do not count up by one",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/write-prefix-contiguous.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/write-prefix-contiguous",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T20:02:04Z",
+   "updated": "2026-10-19T20:02:04Z",
+   "note": ""
   }
  ],
  "watch": {
