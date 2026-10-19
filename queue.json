@@ -15485,13 +15485,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/utok-perf.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16399,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/utok-perf",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:42:32Z",
-   "updated": "2026-10-19T23:00:06Z",
+   "updated": "2026-10-19T23:33:35Z",
    "note": "worker: handoff at ~/tmp/adhoc/2026-10-18-toks-port/HANDOFF.md (Mac); merged tree built on bench-mac; take bot rounds once opened",
    "built": [
     {
@@ -15589,7 +15589,8 @@
      "tree": "b96e6d7debbee74633a84843cd9267712f263ac4"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z"
+   "advanced": "2026-10-19T22:06:15Z",
+   "opened": "2026-10-19T23:33:35Z"
   },
   {
    "id": "exact-provider-model-selector",
