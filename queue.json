@@ -32333,30 +32333,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T22:45:09Z",
+  "checked": "2026-10-19T23:47:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "read-profile-ranges": {
-    "since": "2026-10-19T22:14:48Z",
-    "title": "fix(coding-agent): read profile line ranges from the file, not its summary"
-   },
-   "tar-stream-index": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit"
-   },
-   "thinking-drop-log": {
-    "since": "2026-10-19T19:41:31Z",
-    "title": "fix(ai): log one warning per request for dropped thinking blocks"
-   },
-   "tsp-stall-log": {
-    "since": "2026-10-19T19:41:31Z",
-    "title": "fix(tui): warn once per TSP ack stall instead of every 5 s"
-   },
-   "utok-perf": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "perf(natives/utok): memoize short-piece merge counts per thread"
-   },
    "computer-shell-exception": {
     "since": "2026-10-19T22:14:48Z",
     "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS"
@@ -32499,7 +32479,12 @@
    16388,
    16389,
    16390,
-   16391
+   16391,
+   16392,
+   16393,
+   16394,
+   16397,
+   16399
   ],
   "events": [
    {
@@ -34746,6 +34731,41 @@
     "id": "read-inmemory-range",
     "title": "fix(coding-agent): kept requested lines in in-memory range reads",
     "why": "opened as #16391"
+   },
+   {
+    "at": "2026-10-19T23:47:09Z",
+    "kind": "unopenable",
+    "id": "read-profile-ranges",
+    "title": "fix(coding-agent): read profile line ranges from the file, not its summary",
+    "why": "opened as #16397"
+   },
+   {
+    "at": "2026-10-19T23:47:09Z",
+    "kind": "unopenable",
+    "id": "tar-stream-index",
+    "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit",
+    "why": "opened as #16394"
+   },
+   {
+    "at": "2026-10-19T23:47:09Z",
+    "kind": "unopenable",
+    "id": "thinking-drop-log",
+    "title": "fix(ai): log one warning per request for dropped thinking blocks",
+    "why": "opened as #16392"
+   },
+   {
+    "at": "2026-10-19T23:47:09Z",
+    "kind": "unopenable",
+    "id": "tsp-stall-log",
+    "title": "fix(tui): warn once per TSP ack stall instead of every 5 s",
+    "why": "opened as #16393"
+   },
+   {
+    "at": "2026-10-19T23:47:09Z",
+    "kind": "unopenable",
+    "id": "utok-perf",
+    "title": "perf(natives/utok): memoize short-piece merge counts per thread",
+    "why": "opened as #16399"
    }
   ]
  }
