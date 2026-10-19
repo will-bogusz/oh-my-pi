@@ -8664,13 +8664,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/browser-role-name.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16252,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-role-name",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:39:41Z",
-   "updated": "2026-10-18T22:17:28Z",
+   "updated": "2026-10-19T18:09:45Z",
    "note": "",
    "advanced": "2026-10-18T21:54:50Z",
    "built": [
@@ -8928,7 +8928,8 @@
     }
    ],
    "opened": "2026-10-18T22:17:10Z",
-   "readied": "2026-10-18T22:17:28Z"
+   "readied": "2026-10-18T22:17:28Z",
+   "merged_by": "pr"
   },
   {
    "id": "wake-relay-report-text",
