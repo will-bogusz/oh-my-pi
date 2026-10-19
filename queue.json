@@ -11420,13 +11420,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/browser-timeout-names.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16266,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-timeout-names",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:01:52Z",
-   "updated": "2026-10-19T00:14:25Z",
+   "updated": "2026-10-19T00:18:54Z",
    "note": "",
    "advanced": "2026-10-18T21:54:56Z",
    "built": [
@@ -11800,7 +11800,8 @@
      "host": "MacBook-Pro",
      "tree": "a2490375beaf08bd3af92cb37e408baa685b1f92"
     }
-   ]
+   ],
+   "opened": "2026-10-19T00:18:54Z"
   },
   {
    "id": "anthropic-refusal-handoff",
