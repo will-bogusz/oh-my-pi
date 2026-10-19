@@ -19185,6 +19185,24 @@
    "added": "2026-10-19T19:22:15Z",
    "updated": "2026-10-19T19:22:15Z",
    "note": ""
+  },
+  {
+   "id": "edit-fileop-tag-check",
+   "branch": "will/edit-fileop-tag-check",
+   "title": "fix(edit): required a live tag for bare hashline MV and REM",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/edit-fileop-tag-check.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-fileop-tag-check",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:22:37Z",
+   "updated": "2026-10-19T19:22:37Z",
+   "note": ""
   }
  ],
  "watch": {
