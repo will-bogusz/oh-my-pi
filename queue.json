@@ -15155,7 +15155,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/oauth-refresh-keep-rotated-token",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:02:38Z",
-   "updated": "2026-10-19T03:01:46Z",
+   "updated": "2026-10-19T03:39:47Z",
    "note": "",
    "built": [
     {
@@ -15284,16 +15284,6 @@
      "with_code": "152036f1496e476a6b03809738f38a87dd51c986",
      "tip": "e3291bd4bc9bc996fb7bbd72699c957123383840",
      "with_tip": "296385d19ec27f6d74569bb79bf54d59a41f3023",
-     "at": "2026-10-19T02:46:03Z",
-     "host": "goliath",
-     "tree": "97e49d3708e6c2ca99e55e482fb4225571fd6055"
-    },
-    {
-     "with": "#16271",
-     "code": "0f6dd25668581bfd973fafcd920a489c6f8a5be6",
-     "with_code": "d8c9ecc67a28f28194016b06985d132ba8aab328",
-     "tip": "e3291bd4bc9bc996fb7bbd72699c957123383840",
-     "with_tip": "3e43cbe8b7e90ffef8d8122a60da4f00901811e0",
      "at": "2026-10-19T02:46:03Z",
      "host": "goliath",
      "tree": "97e49d3708e6c2ca99e55e482fb4225571fd6055"
@@ -15485,6 +15475,24 @@
      "tip": "e3291bd4bc9bc996fb7bbd72699c957123383840",
      "with_tip": "92ca808e6892e6b42aab4df011b736b355a46466",
      "at": "2026-10-19T03:01:43Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16271",
+     "code": "0f6dd25668581bfd973fafcd920a489c6f8a5be6",
+     "with_code": "819f797124df5e40693aebceea6da085139783f8",
+     "tip": "e3291bd4bc9bc996fb7bbd72699c957123383840",
+     "with_tip": "275af103b5a8105d720d31d934a9b098f2c60965",
+     "at": "2026-10-19T03:39:44Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16284",
+     "code": "0f6dd25668581bfd973fafcd920a489c6f8a5be6",
+     "with_code": "6a340391492bad4f711d47474424f1c21f10572f",
+     "tip": "e3291bd4bc9bc996fb7bbd72699c957123383840",
+     "with_tip": "b75be53cdbcfa257b6725c2c1ce93e7e036d4783",
+     "at": "2026-10-19T03:39:47Z",
      "host": "MacBook-Pro"
     }
    ]
