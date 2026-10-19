@@ -16034,7 +16034,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-media-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:14:46Z",
-   "updated": "2026-10-19T03:20:08Z",
+   "updated": "2026-10-19T03:39:41Z",
    "note": "",
    "built": [
     {
@@ -16043,16 +16043,6 @@
      "with_code": "b6fb2287a6778c13baaf5522606cf21e8e2e9748",
      "tip": "383a7a1f3dda383f37cab82348f184f03785bc3d",
      "with_tip": "1d183d20ff89c805e32e6f47fcbc3a53e84d4485",
-     "at": "2026-10-19T02:46:03Z",
-     "host": "goliath",
-     "tree": "97e49d3708e6c2ca99e55e482fb4225571fd6055"
-    },
-    {
-     "with": "#16284",
-     "code": "98f9d85ac02f0920d511733e236afa915d584802",
-     "with_code": "85ebeb34468af2365daf4b8c1238cb42fbf2c9a1",
-     "tip": "383a7a1f3dda383f37cab82348f184f03785bc3d",
-     "with_tip": "17473d8eb375ece0cb221db729b92000e06e227d",
      "at": "2026-10-19T02:46:03Z",
      "host": "goliath",
      "tree": "97e49d3708e6c2ca99e55e482fb4225571fd6055"
@@ -16485,6 +16475,15 @@
      "tip": "383a7a1f3dda383f37cab82348f184f03785bc3d",
      "with_tip": "275af103b5a8105d720d31d934a9b098f2c60965",
      "at": "2026-10-19T03:20:04Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16284",
+     "code": "d39f0a5c3fc88de95459b251a08f9b678cee874f",
+     "with_code": "6a340391492bad4f711d47474424f1c21f10572f",
+     "tip": "383a7a1f3dda383f37cab82348f184f03785bc3d",
+     "with_tip": "b75be53cdbcfa257b6725c2c1ce93e7e036d4783",
+     "at": "2026-10-19T03:39:37Z",
      "host": "MacBook-Pro"
     }
    ]
