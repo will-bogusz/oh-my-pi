@@ -30,7 +30,7 @@ Maintenance: a Factory response-shape change shows up as empty results; `parseFa
 - Negative controls: giving the refusal a 403 status, removing either policy cache, skipping the 403 re-read, reading the error body unbounded, or sending any session model as `x-client-model` each fails its test.
 - Live with a real Factory login: `omp search --model web/factory --limit 3 "bun javascript runtime"` returned 3 sources, shown as `Provider: Factory (OAuth)`.
 - `bun run check:ts` passes; `packages/catalog` 1224 pass; coding-agent web search tests 437 pass.
-- Not run: a real org with `webSearchDisabled: true` (mocked only).
+- Not run: a real org with search disabled (mocked only).
 
 ---
 
