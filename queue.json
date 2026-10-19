@@ -11154,7 +11154,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/irc-broadcast-no-relay",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:43:52Z",
-   "updated": "2026-10-19T02:55:58Z",
+   "updated": "2026-10-19T03:25:01Z",
    "note": "",
    "built": [
     {
@@ -11505,15 +11505,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#16271",
-     "code": "6ac0901e1f4e2a491e12acb90302a0fe6118d9fd",
-     "with_code": "d8c9ecc67a28f28194016b06985d132ba8aab328",
-     "tip": "785a57674d750097104f9baf4afc70db5e0f9808",
-     "with_tip": "3e43cbe8b7e90ffef8d8122a60da4f00901811e0",
-     "at": "2026-10-19T02:16:44Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "factory-droid-media-budget",
      "code": "6ac0901e1f4e2a491e12acb90302a0fe6118d9fd",
      "with_code": "98f9d85ac02f0920d511733e236afa915d584802",
@@ -11589,6 +11580,15 @@
      "tip": "785a57674d750097104f9baf4afc70db5e0f9808",
      "with_tip": "a6bebfd122869f3b0fddb79de84f0b2216be4365",
      "at": "2026-10-19T02:55:55Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16271",
+     "code": "6ac0901e1f4e2a491e12acb90302a0fe6118d9fd",
+     "with_code": "819f797124df5e40693aebceea6da085139783f8",
+     "tip": "785a57674d750097104f9baf4afc70db5e0f9808",
+     "with_tip": "275af103b5a8105d720d31d934a9b098f2c60965",
+     "at": "2026-10-19T03:24:58Z",
      "host": "MacBook-Pro"
     }
    ],
