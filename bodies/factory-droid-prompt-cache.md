@@ -41,10 +41,9 @@ This branch with `cacheRetention: "long"` sent `ttl: "1h"` without the beta on `
 Tests:
 - `factory-droid-anthropic.test.ts`: retention `long` writes `ttl: "1h"` with no beta on each of the four upstreams, and no `ttl` on `snowflake`.
 - `cache-warmer.test.ts`: on a Factory upstream that writes 5m entries (Snowflake), `long` still schedules at 4.5 min; a response reporting a 1h write moves it to 54 min.
-- `anthropic-alignment.test.ts`: a first-party model rerouted to a Vertex rawPredict URL by `ANTHROPIC_BASE_URL` sends no beta.
 - The existing `anthropic-alignment.test.ts` cases still pass: Vertex sends `ttl: "1h"` without the beta, and a direct API key with `long` still sends it.
 
-Negative controls: with the source changes reverted, the four upstream cases, the warmer case and the reroute case fail. With only `extended-cache-ttl-beta #false` removed, the upstream cases fail on the beta header.
+Negative controls: with the source changes reverted, the four upstream cases, and the warmer case fail. With only `extended-cache-ttl-beta #false` removed, the upstream cases fail on the beta header.
 
 `bun test` in `packages/ai` and `packages/catalog`, and `bun run check:ts`, pass.
 
@@ -53,3 +52,4 @@ Negative controls: with the source changes reverted, the four upstream cases, th
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
