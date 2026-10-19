@@ -11119,7 +11119,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:47:10Z",
-   "updated": "2026-10-19T00:46:09Z",
+   "updated": "2026-10-19T00:46:29Z",
    "note": "",
    "built": [
     {
@@ -11485,7 +11485,8 @@
     }
    ],
    "advanced": "2026-10-18T21:13:31Z",
-   "opened": "2026-10-19T00:46:09Z"
+   "opened": "2026-10-19T00:46:09Z",
+   "readied": "2026-10-19T00:46:28Z"
   },
   {
    "id": "revive-prompt-cache",
