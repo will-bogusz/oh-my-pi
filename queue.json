@@ -19648,6 +19648,24 @@
    "added": "2026-10-19T20:07:13Z",
    "updated": "2026-10-19T20:07:13Z",
    "note": ""
+  },
+  {
+   "id": "builtin-rule-reminder",
+   "branch": "will/builtin-rule-reminder",
+   "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/builtin-rule-reminder.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/builtin-rule-reminder",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T20:10:36Z",
+   "updated": "2026-10-19T20:10:36Z",
+   "note": ""
   }
  ],
  "watch": {
