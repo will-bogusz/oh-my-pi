@@ -14333,73 +14333,29 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-18T22:12:47Z",
+  "checked": "2026-10-19T02:17:16Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "browser-role-name": {
-    "since": "2026-10-18T19:40:43Z",
-    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows"
-   },
-   "browser-timeout-names": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(browser): recognize Puppeteer timeouts in release builds"
-   },
-   "conflict-bulk-per-id": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values"
-   },
-   "conflict-hidden-ids": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(coding-agent): name registered conflict ids when a hidden block is guessed"
-   },
    "factory-droid-media-budget": {
     "since": "2026-10-18T22:12:47Z",
     "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images"
-   },
-   "factory-droid-org-lookup": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(ai): sign Factory Droid logins without an organization claim into the account's organization"
    },
    "factory-droid-tool-name-cap": {
     "since": "2026-10-18T22:12:47Z",
     "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests"
    },
-   "gemini-tool-result-order": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(ai): send parallel Gemini tool results back in call order"
-   },
-   "lsp-workspace-folders": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(lsp): add another checkout to the language server workspace before opening its files"
-   },
    "oauth-refresh-keep-rotated-token": {
     "since": "2026-10-18T22:12:47Z",
     "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget"
-   },
-   "read-after-bash-revalidate": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message"
    },
    "relay-popup-front-main": {
     "since": "2026-10-18T19:11:35Z",
     "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS"
    },
-   "report-issue-colon": {
-    "since": "2026-10-18T19:40:43Z",
-    "title": "fix(coding-agent): keep URIs in auto-QA report tool names"
-   },
    "req-debug-redact": {
     "since": "2026-10-18T19:40:43Z",
     "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps"
-   },
-   "revive-tools": {
-    "since": "2026-10-18T19:40:43Z",
-    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent"
-   },
-   "snapcompact-archive-persist": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(coding-agent): persist snapcompact archive source text whole"
    },
    "ssh-search-tier": {
     "since": "2026-10-18T22:12:47Z",
@@ -14498,7 +14454,18 @@
    16241,
    16242,
    16249,
-   16250
+   16250,
+   16252,
+   16257,
+   16259,
+   16266,
+   16267,
+   16269,
+   16271,
+   16274,
+   16278,
+   16281,
+   16282
   ],
   "events": [
    {
@@ -15899,6 +15866,83 @@
     "id": "compact-tool-result",
     "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it",
     "why": "opened as #16241"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "browser-role-name",
+    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
+    "why": "opened as #16252"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "browser-timeout-names",
+    "title": "fix(browser): recognize Puppeteer timeouts in release builds",
+    "why": "opened as #16266"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "conflict-bulk-per-id",
+    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values",
+    "why": "opened as #16267"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "conflict-hidden-ids",
+    "title": "fix(coding-agent): name registered conflict ids when a hidden block is guessed",
+    "why": "opened as #16269"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "factory-droid-org-lookup",
+    "title": "fix(ai): sign Factory Droid logins without an organization claim into the account's organization",
+    "why": "opened as #16257"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "gemini-tool-result-order",
+    "title": "fix(ai): send parallel Gemini tool results back in call order",
+    "why": "opened as #16259"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "lsp-workspace-folders",
+    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
+    "why": "opened as #16271"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "read-after-bash-revalidate",
+    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
+    "why": "opened as #16274"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "report-issue-colon",
+    "title": "fix(coding-agent): keep URIs in auto-QA report tool names",
+    "why": "opened as #16278"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "revive-tools",
+    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
+    "why": "opened as #16281"
+   },
+   {
+    "at": "2026-10-19T02:17:16Z",
+    "kind": "unopenable",
+    "id": "snapcompact-archive-persist",
+    "title": "fix(coding-agent): persist snapcompact archive source text whole",
+    "why": "opened as #16282"
    }
   ]
  },
