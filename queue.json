@@ -15628,5 +15628,11 @@
     "why": "opened as #16241"
    }
   ]
+ },
+ "opening": {
+  "id": "report-issue-colon",
+  "token": "35f250e5c33c4257a76180dd0a6d8a4e",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T01:26:48Z"
  }
 }
