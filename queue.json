@@ -19329,6 +19329,24 @@
    "added": "2026-10-19T19:42:25Z",
    "updated": "2026-10-19T19:42:25Z",
    "note": ""
+  },
+  {
+   "id": "rm-force-enoent",
+   "branch": "will/rm-force-enoent",
+   "title": "fix(pi-builtins): treat entries already gone as removed under rm -f",
+   "area": "builtins",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/rm-force-enoent.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rm-force-enoent",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:44:18Z",
+   "updated": "2026-10-19T19:44:18Z",
+   "note": ""
   }
  ],
  "watch": {
