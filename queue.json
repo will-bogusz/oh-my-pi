@@ -13751,7 +13751,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-credit-promotions",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:02Z",
-   "updated": "2026-10-19T06:56:14Z",
+   "updated": "2026-10-19T06:56:45Z",
    "note": "",
    "built": [
     {
@@ -14239,7 +14239,8 @@
     }
    ],
    "advanced": "2026-10-19T06:41:21Z",
-   "opened": "2026-10-19T06:56:13Z"
+   "opened": "2026-10-19T06:56:13Z",
+   "readied": "2026-10-19T06:56:45Z"
   },
   {
    "id": "gemini-tool-result-order",
