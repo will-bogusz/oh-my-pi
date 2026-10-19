@@ -20098,5 +20098,11 @@
     "why": "opened as #16285"
    }
   ]
+ },
+ "opening": {
+  "id": "wait-queued-completion",
+  "token": "01ff6f3ca194486ba71eb4c88d86a35b",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T05:46:01Z"
  }
 }
