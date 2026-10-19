@@ -31912,5 +31912,11 @@
     "title": "feat(coding-agent): let wait block for the reply to a message the agent sent"
    }
   ]
+ },
+ "opening": {
+  "id": "test-log-dir",
+  "token": "291acef8703d45109fd9229979f34891",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T21:33:23Z"
  }
 }
