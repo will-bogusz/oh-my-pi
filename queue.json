@@ -13231,7 +13231,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/revive-prompt-cache",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:47:39Z",
-   "updated": "2026-10-19T18:54:12Z",
+   "updated": "2026-10-19T18:54:47Z",
    "note": "",
    "advanced": "2026-10-19T18:46:10Z",
    "built": [
@@ -13461,7 +13461,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T18:54:12Z"
+   "opened": "2026-10-19T18:54:12Z",
+   "readied": "2026-10-19T18:54:47Z"
   },
   {
    "id": "ssh-minimizer-width",
