@@ -15481,7 +15481,7 @@
    "branch": "will/utok-perf",
    "title": "perf(natives/utok): memoize short-piece merge counts per thread",
    "area": "other",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/utok-perf.md",
@@ -15491,7 +15491,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/utok-perf",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:42:32Z",
-   "updated": "2026-10-19T23:33:56Z",
+   "updated": "2026-10-19T23:47:07Z",
    "note": "worker: handoff at ~/tmp/adhoc/2026-10-18-toks-port/HANDOFF.md (Mac); merged tree built on bench-mac; take bot rounds once opened",
    "built": [
     {
@@ -19862,7 +19862,7 @@
    "branch": "will/tsp-stall-log",
    "title": "fix(tui): warn once per TSP ack stall instead of every 5 s",
    "area": "other",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/tsp-stall-log.md",
@@ -19872,7 +19872,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tsp-stall-log",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:13:34Z",
-   "updated": "2026-10-19T23:02:49Z",
+   "updated": "2026-10-19T23:47:07Z",
    "note": "",
    "built": [
     {
@@ -19914,7 +19914,7 @@
    "branch": "will/thinking-drop-log",
    "title": "fix(ai): log one warning per request for dropped thinking blocks",
    "area": "ai",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/thinking-drop-log.md",
@@ -19924,7 +19924,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/thinking-drop-log",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:15:24Z",
-   "updated": "2026-10-19T22:57:14Z",
+   "updated": "2026-10-19T23:47:07Z",
    "note": "",
    "built": [
     {
@@ -22652,7 +22652,7 @@
    "branch": "will/read-profile-ranges",
    "title": "fix(coding-agent): read profile line ranges from the file, not its summary",
    "area": "read",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-profile-ranges.md",
@@ -22662,7 +22662,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-profile-ranges",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:41:52Z",
-   "updated": "2026-10-19T23:19:00Z",
+   "updated": "2026-10-19T23:47:07Z",
    "note": "",
    "built": [
     {
@@ -23164,7 +23164,7 @@
    "branch": "will/read-inmemory-range",
    "title": "fix(coding-agent): kept requested lines in in-memory range reads",
    "area": "read",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-inmemory-range.md",
@@ -23174,7 +23174,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-inmemory-range",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:42:25Z",
-   "updated": "2026-10-19T22:44:01Z",
+   "updated": "2026-10-19T23:47:07Z",
    "note": "",
    "built": [
     {
@@ -27806,7 +27806,7 @@
    "branch": "will/tar-stream-index",
    "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit",
    "area": "other",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/tar-stream-index.md",
@@ -27816,7 +27816,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tar-stream-index",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:52:35Z",
-   "updated": "2026-10-19T23:07:37Z",
+   "updated": "2026-10-19T23:47:07Z",
    "note": "",
    "built": [
     {
