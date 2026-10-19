@@ -19738,6 +19738,24 @@
    "added": "2026-10-19T20:45:07Z",
    "updated": "2026-10-19T20:45:07Z",
    "note": ""
+  },
+  {
+   "id": "computer-shell-exception",
+   "branch": "will/computer-shell-exception",
+   "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/computer-shell-exception.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-shell-exception",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T20:50:15Z",
+   "updated": "2026-10-19T20:50:15Z",
+   "note": ""
   }
  ],
  "watch": {
