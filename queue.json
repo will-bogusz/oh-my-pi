@@ -19727,7 +19727,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-fileop-tag-check",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:22:37Z",
-   "updated": "2026-10-19T21:19:53Z",
+   "updated": "2026-10-19T21:20:12Z",
    "note": "",
    "built": [
     {
@@ -19758,7 +19758,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-19T21:19:53Z"
+   "opened": "2026-10-19T21:19:53Z",
+   "readied": "2026-10-19T21:20:12Z"
   },
   {
    "id": "read-raw-line",
