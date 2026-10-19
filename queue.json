@@ -18843,73 +18843,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T04:21:09Z",
+  "checked": "2026-10-19T07:55:57Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "oauth-refresh-keep-rotated-token": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget"
-   },
-   "req-debug-redact": {
-    "since": "2026-10-18T19:40:43Z",
-    "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps"
-   },
-   "factory-droid-prompt-cache": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models"
-   },
-   "aside-back-to-back": {
-    "since": "2026-10-18T19:40:43Z",
-    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session"
-   },
-   "browser-app-precedence-docs": {
-    "since": "2026-10-18T19:40:43Z",
-    "title": "fix(browser): tell agents how to skip a configured relay"
-   },
-   "computer-no-ui-confirm": {
-    "since": "2026-10-18T19:11:35Z",
-    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal"
-   },
-   "computer-windows-doc": {
-    "since": "2026-10-18T19:40:43Z",
-    "title": "fix(coding-agent): say computer.windows() returns plain records, not window handles"
-   },
-   "exact-provider-model-selector": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling"
-   },
-   "pip-uv-venv": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(coding-agent): install with %pip into venvs that have no pip"
-   },
-   "ssh-minimizer-width": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(pi-shell): keep ssh remote output intact in the minimizer"
-   },
-   "wait-queued-completion": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short"
-   },
-   "wake-relay-report-text": {
-    "since": "2026-10-18T19:40:43Z",
-    "title": "fix(task): relay a woken subagent's final report, not all its turn text"
-   },
-   "natives-dts-regen": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "chore(natives): regenerate index.d.ts from the current bindings"
-   },
    "utok-perf": {
     "since": "2026-10-18T22:12:47Z",
     "title": "perf(natives/utok): memoize short-piece merge counts per thread"
-   },
-   "factory-droid-credit-promotions": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "feat(catalog,tui): show Factory Droid credit promotions in the model browser"
-   },
-   "factory-droid-image-generation": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "feat(ai,catalog): generate images through a Factory Droid login"
    },
    "factory-droid-web-search": {
     "since": "2026-10-18T22:12:47Z",
@@ -18918,10 +18858,6 @@
    "release-helper-wait-test": {
     "since": "2026-10-18T19:11:35Z",
     "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in"
-   },
-   "irc-broadcast-no-relay": {
-    "since": "2026-10-18T22:12:47Z",
-    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts"
    }
   },
   "conflicts": {},
@@ -18963,7 +18899,23 @@
    16283,
    16284,
    16285,
-   16288
+   16288,
+   16291,
+   16292,
+   16293,
+   16294,
+   16295,
+   16296,
+   16297,
+   16299,
+   16300,
+   16301,
+   16302,
+   16306,
+   16309,
+   16312,
+   16314,
+   16316
   ],
   "events": [
    {
@@ -20469,6 +20421,118 @@
     "id": "ssh-search-tier",
     "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
     "why": "opened as #16285"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "oauth-refresh-keep-rotated-token",
+    "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget",
+    "why": "opened as #16291"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "req-debug-redact",
+    "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps",
+    "why": "opened as #16293"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "factory-droid-prompt-cache",
+    "title": "feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models",
+    "why": "opened as #16296"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "aside-back-to-back",
+    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session",
+    "why": "opened as #16292"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "browser-app-precedence-docs",
+    "title": "fix(browser): tell agents how to skip a configured relay",
+    "why": "opened as #16294"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "computer-no-ui-confirm",
+    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal",
+    "why": "opened as #16295"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "computer-windows-doc",
+    "title": "fix(coding-agent): say computer.windows() returns plain records, not window handles",
+    "why": "opened as #16299"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "exact-provider-model-selector",
+    "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling",
+    "why": "opened as #16297"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "pip-uv-venv",
+    "title": "fix(coding-agent): install with %pip into venvs that have no pip",
+    "why": "opened as #16300"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "ssh-minimizer-width",
+    "title": "fix(pi-shell): keep ssh remote output intact in the minimizer",
+    "why": "opened as #16314"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "wait-queued-completion",
+    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short",
+    "why": "opened as #16301"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "wake-relay-report-text",
+    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
+    "why": "opened as #16302"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "natives-dts-regen",
+    "title": "chore(natives): regenerate index.d.ts from the current bindings",
+    "why": "opened as #16306"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "factory-droid-credit-promotions",
+    "title": "feat(catalog,tui): show Factory Droid credit promotions in the model browser",
+    "why": "opened as #16309"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "factory-droid-image-generation",
+    "title": "feat(ai,catalog): generate images through a Factory Droid login",
+    "why": "opened as #16316"
+   },
+   {
+    "at": "2026-10-19T07:55:57Z",
+    "kind": "unopenable",
+    "id": "irc-broadcast-no-relay",
+    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts",
+    "why": "opened as #16312"
    }
   ]
  }
