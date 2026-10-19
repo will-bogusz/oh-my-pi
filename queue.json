@@ -20140,5 +20140,11 @@
     "why": "opened as #16285"
    }
   ]
+ },
+ "opening": {
+  "id": "irc-broadcast-no-relay",
+  "token": "7f7141fcd459454786af36c0e7af0faa",
+  "host": "MacBook-Pro",
+  "at": "2026-10-19T06:35:57Z"
  }
 }
