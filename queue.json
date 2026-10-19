@@ -19401,6 +19401,24 @@
    "added": "2026-10-19T19:46:16Z",
    "updated": "2026-10-19T19:46:16Z",
    "note": ""
+  },
+  {
+   "id": "read-selector-edges",
+   "branch": "will/read-selector-edges",
+   "title": "fix(read): read tail chunks in comma line lists",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/read-selector-edges.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-selector-edges",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:46:28Z",
+   "updated": "2026-10-19T19:46:28Z",
+   "note": ""
   }
  ],
  "watch": {
