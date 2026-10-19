@@ -15473,7 +15473,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "4a05cbf9f80313e61af17ec98e1bfb97d6fb093d",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/utok-perf.md",
    "state": "queued",
    "pr": null,
@@ -15481,7 +15481,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/utok-perf",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:42:32Z",
-   "updated": "2026-10-19T21:33:15Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "worker: handoff at ~/tmp/adhoc/2026-10-18-toks-port/HANDOFF.md (Mac); merged tree built on bench-mac; take bot rounds once opened",
    "built": [
     {
@@ -15568,7 +15568,8 @@
      "host": "goliath",
      "tree": "bd142e6ce10f9e9a0cddaa0c60543314d55af99a"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "exact-provider-model-selector",
@@ -19321,7 +19322,7 @@
    "area": "discovery",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/vscode-mcp-missing.md",
    "state": "queued",
    "pr": null,
@@ -19329,7 +19330,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/vscode-mcp-missing",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:13:33Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -19762,7 +19763,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "tsp-stall-log",
@@ -19981,7 +19983,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/r2-browser-match-count-error.md",
    "state": "queued",
    "pr": null,
@@ -19989,7 +19991,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-match-count-error",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:22:15Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -20439,7 +20441,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "edit-fileop-tag-check",
@@ -20497,7 +20500,7 @@
    "area": "read",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-raw-line.md",
    "state": "queued",
    "pr": null,
@@ -20505,7 +20508,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-raw-line",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:29:28Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -21018,7 +21021,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "r2-browser-relay-guidance",
@@ -21027,7 +21031,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/r2-browser-relay-guidance.md",
    "state": "queued",
    "pr": null,
@@ -21035,7 +21039,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-relay-guidance",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:30:07Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -21485,7 +21489,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "predict-newer-daemon",
@@ -22361,7 +22366,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/edit-parse-only-ambiguity.md",
    "state": "queued",
    "pr": null,
@@ -22369,7 +22374,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-parse-only-ambiguity",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:38:47Z",
-   "updated": "2026-10-19T22:00:21Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -22392,7 +22397,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "read-profile-ranges",
@@ -22401,7 +22407,7 @@
    "area": "read",
    "priority": "P2",
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-profile-ranges.md",
    "state": "queued",
    "pr": null,
@@ -22409,7 +22415,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-profile-ranges",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:41:52Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -22872,7 +22878,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "read-inmemory-range",
@@ -22881,7 +22888,7 @@
    "area": "read",
    "priority": "P2",
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-inmemory-range.md",
    "state": "queued",
    "pr": null,
@@ -22889,7 +22896,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-inmemory-range",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:42:25Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -23339,7 +23346,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "rm-force-enoent",
@@ -23348,7 +23356,7 @@
    "area": "builtins",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/rm-force-enoent.md",
    "state": "queued",
    "pr": null,
@@ -23356,7 +23364,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rm-force-enoent",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:44:18Z",
-   "updated": "2026-10-19T21:33:15Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -23378,7 +23386,8 @@
      "host": "goliath",
      "tree": "bd142e6ce10f9e9a0cddaa0c60543314d55af99a"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "rg-count-zero",
@@ -23387,7 +23396,7 @@
    "area": "builtins",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/rg-count-zero.md",
    "state": "queued",
    "pr": null,
@@ -23395,7 +23404,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rg-count-zero",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:44:31Z",
-   "updated": "2026-10-19T21:33:15Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -23408,7 +23417,8 @@
      "host": "goliath",
      "tree": "bd142e6ce10f9e9a0cddaa0c60543314d55af99a"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "ln-uri-source",
@@ -23417,7 +23427,7 @@
    "area": "builtins",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/ln-uri-source.md",
    "state": "queued",
    "pr": null,
@@ -23425,7 +23435,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ln-uri-source",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:44:46Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -23878,7 +23888,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "autoqa-home-paths",
@@ -23887,7 +23898,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/autoqa-home-paths.md",
    "state": "queued",
    "pr": null,
@@ -23895,7 +23906,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/autoqa-home-paths",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:16Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -24328,7 +24339,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "read-selector-edges",
@@ -24337,7 +24349,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-selector-edges.md",
    "state": "queued",
    "pr": null,
@@ -24345,7 +24357,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-selector-edges",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:28Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -24788,7 +24800,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "anthropic-unsupported-media",
@@ -24957,7 +24970,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-sqlite-q-paging.md",
    "state": "queued",
    "pr": null,
@@ -24965,7 +24978,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-sqlite-q-paging",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:45Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -25398,7 +25411,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "custom-tool-host-imports",
@@ -25407,7 +25421,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/custom-tool-host-imports.md",
    "state": "queued",
    "pr": null,
@@ -25415,7 +25429,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/custom-tool-host-imports",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:48Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -25848,7 +25862,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "builtin-rule-narrow-2",
@@ -25857,7 +25872,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/builtin-rule-narrow-2.md",
    "state": "queued",
    "pr": null,
@@ -25865,7 +25880,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/builtin-rule-narrow-2",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:49:28Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -26298,7 +26313,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "snapcompact-wire-images",
@@ -26307,7 +26323,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/snapcompact-wire-images.md",
    "state": "queued",
    "pr": null,
@@ -26315,7 +26331,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-wire-images",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:51:43Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -26748,7 +26764,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "deepseek-image-tokens",
@@ -27027,7 +27044,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/write-prefix-contiguous.md",
    "state": "queued",
    "pr": null,
@@ -27035,7 +27052,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/write-prefix-contiguous",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:02:04Z",
-   "updated": "2026-10-19T22:00:21Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -27488,7 +27505,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "edit-tagless-errors",
@@ -27564,7 +27582,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/builtin-rule-reminder.md",
    "state": "queued",
    "pr": null,
@@ -27572,7 +27590,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/builtin-rule-reminder",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:10:36Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -28005,7 +28023,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "subagent-wait-reply",
@@ -28014,7 +28033,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/subagent-wait-reply.md",
    "state": "queued",
    "pr": null,
@@ -28022,7 +28041,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-wait-reply",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:22:04Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -28455,7 +28474,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "r2-browser-wait-line",
@@ -28464,7 +28484,7 @@
    "area": "browser",
    "priority": "P3",
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/r2-browser-wait-line.md",
    "state": "queued",
    "pr": null,
@@ -28472,7 +28492,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-wait-line",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:26:08Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -28905,7 +28925,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "test-log-dir",
@@ -29435,7 +29456,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/bash-session-env.md",
    "state": "queued",
    "pr": null,
@@ -29443,7 +29464,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-session-env",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:45:07Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -29916,7 +29937,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   },
   {
    "id": "computer-shell-exception",
@@ -29925,7 +29947,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/computer-shell-exception.md",
    "state": "queued",
    "pr": null,
@@ -29933,7 +29955,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-shell-exception",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:50:15Z",
-   "updated": "2026-10-19T21:58:39Z",
+   "updated": "2026-10-19T22:06:15Z",
    "note": "",
    "built": [
     {
@@ -30436,7 +30458,8 @@
      "host": "goliath",
      "tree": "77706d0acad6e9af5dcfa4a7b1bf2f80556b076c"
     }
-   ]
+   ],
+   "advanced": "2026-10-19T22:06:15Z"
   }
  ],
  "watch": {
