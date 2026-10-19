@@ -13378,13 +13378,13 @@
    "needs": [],
    "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
    "body": "bodies/factory-droid-tool-name-cap.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16283,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-tool-name-cap",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:20:03Z",
-   "updated": "2026-10-19T02:21:11Z",
+   "updated": "2026-10-19T02:25:16Z",
    "note": "",
    "built": [
     {
@@ -13513,7 +13513,8 @@
      "at": "2026-10-19T02:21:11Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-19T02:25:15Z"
   },
   {
    "id": "lsp-workspace-folders",
