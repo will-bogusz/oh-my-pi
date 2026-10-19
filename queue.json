@@ -18567,13 +18567,13 @@
    ],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/factory-droid-completions-tool-names.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16384,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-completions-tool-names",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:33:09Z",
-   "updated": "2026-10-19T21:11:44Z",
+   "updated": "2026-10-19T21:28:42Z",
    "note": "",
    "advanced": "2026-10-19T19:12:57Z",
    "built": [
@@ -18712,7 +18712,8 @@
      "at": "2026-10-19T21:11:43Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-10-19T21:28:42Z"
   },
   {
    "id": "read-after-bash-revalidate",
