@@ -15275,13 +15275,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/factory-droid-prompt-cache.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16296,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-prompt-cache",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:51:28Z",
-   "updated": "2026-10-19T04:55:57Z",
+   "updated": "2026-10-19T05:02:03Z",
    "note": "",
    "built": [
     {
@@ -15779,7 +15779,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-19T04:35:16Z"
+   "advanced": "2026-10-19T04:35:16Z",
+   "opened": "2026-10-19T05:02:02Z"
   },
   {
    "id": "oauth-refresh-keep-rotated-token",
