@@ -13384,7 +13384,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-tool-name-cap",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:20:03Z",
-   "updated": "2026-10-19T02:25:16Z",
+   "updated": "2026-10-19T02:25:34Z",
    "note": "",
    "built": [
     {
@@ -13514,7 +13514,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T02:25:15Z"
+   "opened": "2026-10-19T02:25:15Z",
+   "readied": "2026-10-19T02:25:33Z"
   },
   {
    "id": "lsp-workspace-folders",
