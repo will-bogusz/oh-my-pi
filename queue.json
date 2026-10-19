@@ -9465,7 +9465,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/pip-uv-venv",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:40:50Z",
-   "updated": "2026-10-19T05:00:09Z",
+   "updated": "2026-10-19T05:07:29Z",
    "note": "",
    "advanced": "2026-10-18T21:55:33Z",
    "built": [
@@ -9949,15 +9949,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#16288",
-     "code": "44cc9eddb29e74251cbdf3f4d4f10bb7706b4112",
-     "with_code": "8dbee2e9432157ef482828a70d90f406b23b09c4",
-     "tip": "cb4ec7c9a292f3f7724072a091699dc0cb495f66",
-     "with_tip": "c91813405c7336fa2ee67f0b293e764116f38161",
-     "at": "2026-10-19T04:45:26Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "#16293",
      "code": "44cc9eddb29e74251cbdf3f4d4f10bb7706b4112",
      "with_code": "4ec8c559aef08078b5d86c87760b0bb46970cfc7",
@@ -9982,6 +9973,15 @@
      "tip": "cb4ec7c9a292f3f7724072a091699dc0cb495f66",
      "with_tip": "dd647668cc0d625a976baef29b50bfd1f965f0cb",
      "at": "2026-10-19T05:00:06Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16288",
+     "code": "44cc9eddb29e74251cbdf3f4d4f10bb7706b4112",
+     "with_code": "d6f253af01c14c1c5ebed8c2857a1a1ba5d8994f",
+     "tip": "cb4ec7c9a292f3f7724072a091699dc0cb495f66",
+     "with_tip": "31f401558df45e382aa76c9778fab54dae0dab02",
+     "at": "2026-10-19T05:07:25Z",
      "host": "MacBook-Pro"
     }
    ]
