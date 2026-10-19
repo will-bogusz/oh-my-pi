@@ -9512,7 +9512,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/pip-uv-venv",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:40:50Z",
-   "updated": "2026-10-19T05:44:55Z",
+   "updated": "2026-10-19T05:45:16Z",
    "note": "",
    "advanced": "2026-10-18T21:55:33Z",
    "built": [
@@ -10059,7 +10059,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T05:44:54Z"
+   "opened": "2026-10-19T05:44:54Z",
+   "readied": "2026-10-19T05:45:15Z"
   },
   {
    "id": "snapcompact-archive-persist",
