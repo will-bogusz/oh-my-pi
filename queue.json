@@ -31677,7 +31677,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-shell-exception",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:50:15Z",
-   "updated": "2026-10-19T23:53:07Z",
+   "updated": "2026-10-19T23:53:31Z",
    "note": "",
    "built": [
     {
@@ -32251,7 +32251,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-19T23:53:07Z"
+   "opened": "2026-10-19T23:53:07Z",
+   "readied": "2026-10-19T23:53:30Z"
   },
   {
    "id": "edit-mismatch-seen-lines",
