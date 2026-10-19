@@ -19365,6 +19365,24 @@
    "added": "2026-10-19T19:44:31Z",
    "updated": "2026-10-19T19:44:31Z",
    "note": ""
+  },
+  {
+   "id": "ln-uri-source",
+   "branch": "will/ln-uri-source",
+   "title": "fix(pi-builtins): link host paths to the file a backed URL aliases",
+   "area": "builtins",
+   "priority": null,
+   "needs": [],
+   "base": "53a0377db6845e0dae606146130766ec92d407fd",
+   "body": "bodies/ln-uri-source.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ln-uri-source",
+   "host": "MacBook-Pro",
+   "added": "2026-10-19T19:44:46Z",
+   "updated": "2026-10-19T19:44:46Z",
+   "note": ""
   }
  ],
  "watch": {
