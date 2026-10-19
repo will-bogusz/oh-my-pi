@@ -24242,11 +24242,5 @@
     "title": "feat(coding-agent): let wait block for the reply to a message the agent sent"
    }
   ]
- },
- "opening": {
-  "id": "edit-remap-refuse",
-  "token": "dde6c4fbdb3e46749c7a23c666b418f2",
-  "host": "MacBook-Pro",
-  "at": "2026-10-19T21:24:28Z"
  }
 }
