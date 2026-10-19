@@ -2574,7 +2574,7 @@
    ],
    "base": "8c323e882d102e77aa5f1b88bbd451ce21184d50",
    "body": "bodies/computer-ax-focus.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [
     15566
@@ -2582,8 +2582,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-focus",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:54:38Z",
-   "note": ""
+   "updated": "2026-10-19T07:27:26Z",
+   "note": "Series 2 restack (2026-10-19): absorbed into nothing queued: superseded by the series 2 triage (s2/TRIAGE.md); old head 943409777a"
   },
   {
    "id": "r2/relay-turn-end-detach",
