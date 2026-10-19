@@ -21101,7 +21101,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-relay-guidance",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:30:07Z",
-   "updated": "2026-10-19T22:38:53Z",
+   "updated": "2026-10-19T22:39:15Z",
    "note": "",
    "built": [
     {
@@ -21573,7 +21573,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-19T22:38:52Z"
+   "opened": "2026-10-19T22:38:52Z",
+   "readied": "2026-10-19T22:39:14Z"
   },
   {
    "id": "predict-newer-daemon",
