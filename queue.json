@@ -6770,13 +6770,13 @@
    "needs": [],
    "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
    "body": "bodies/computer-windows-doc.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16299,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-windows-doc",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:32:27Z",
-   "updated": "2026-10-19T05:36:29Z",
+   "updated": "2026-10-19T05:40:20Z",
    "note": "",
    "advanced": "2026-10-18T21:55:51Z",
    "built": [
@@ -7331,7 +7331,8 @@
      "at": "2026-10-19T05:36:28Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-19T05:40:19Z"
   },
   {
    "id": "revive-tools",
