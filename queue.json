@@ -36805,6 +36805,24 @@
    "added": "2026-10-20T23:53:27Z",
    "updated": "2026-10-20T23:53:27Z",
    "note": ""
+  },
+  {
+   "id": "log-session-id",
+   "branch": "will/log-session-id",
+   "title": "feat(coding-agent): tag each log record with the session that wrote it",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/log-session-id.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/log-session-id",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:54:49Z",
+   "updated": "2026-10-20T23:54:49Z",
+   "note": ""
   }
  ],
  "watch": {
