@@ -33127,7 +33127,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T17:05:39Z",
+  "checked": "2026-10-20T17:36:23Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -33145,16 +33145,9 @@
     "files": [
      "packages/ai/src/providers/amazon-bedrock.ts"
     ]
-   },
-   "#16445": {
-    "since": "2026-10-20T17:05:39Z",
-    "title": "feat(coding-agent): let wait block for the reply to a message the agent sent",
-    "files": [
-     "packages/coding-agent/src/tools/wait.ts"
-    ]
    }
   },
-  "merged_through": "2026-10-20T17:01:25Z",
+  "merged_through": "2026-10-20T17:31:31Z",
   "unreleased": {
    "16432": {
     "title": "fix(pi-builtins): print rg counts only for files with matches",
@@ -33215,12 +33208,119 @@
     "title": "fix(edit): counted only a mismatch reply's displayed rows as seen",
     "merge_commit": "f1b410824bc8043b86e88e9daf5a11db26967cea",
     "merged_at": "2026-10-20T17:01:25Z"
+   },
+   "16407": {
+    "title": "fix(ai): fail Claude turns that attach media Claude cannot read",
+    "merge_commit": "2dd832a0ee1f5ea2a007b4c23cb2b0ff9d179b19",
+    "merged_at": "2026-10-20T17:07:22Z"
+   },
+   "16436": {
+    "title": "fix(coding-agent): gate snapcompact on images the wire actually sends",
+    "merge_commit": "ecc71b8b6ac03ad1a84921d9f60ea0ac0bbe6a09",
+    "merged_at": "2026-10-20T17:08:28Z"
+   },
+   "16394": {
+    "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit",
+    "merge_commit": "4a4f2d5edde644d24207c759ffd74e625b2673f2",
+    "merged_at": "2026-10-20T17:09:22Z"
+   },
+   "16397": {
+    "title": "fix(coding-agent): read profile line ranges from the file, not its summary",
+    "merge_commit": "aafbf61d07eed22d2200f634596e7d220d765558",
+    "merged_at": "2026-10-20T17:10:15Z"
+   },
+   "16369": {
+    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it",
+    "merge_commit": "b44c24172539905011a5a2e87a2a691cfbdf2f55",
+    "merged_at": "2026-10-20T17:11:14Z"
+   },
+   "16442": {
+    "title": "feat(coding-agent): expose PI_SESSION_ID and PI_SESSION_FILE to bash commands",
+    "merge_commit": "3bac72a7833f1cddb74528f8830f6801d8c3e3d5",
+    "merged_at": "2026-10-20T17:12:09Z"
+   },
+   "16437": {
+    "title": "fix(ai): keep usage and timing on thinking-loop aborts",
+    "merge_commit": "ef3a92da32f63a842df1d2c05afcb7091741b764",
+    "merged_at": "2026-10-20T17:13:01Z"
+   },
+   "16399": {
+    "title": "perf(natives/utok): memoize short-piece merge counts per thread",
+    "merge_commit": "8d88d291be5676c0c2ad9331465b38f837c6d966",
+    "merged_at": "2026-10-20T17:14:47Z"
+   },
+   "13677": {
+    "title": "fix(ai,catalog): encode Devin credentials by shape and drop the Windsurf fallbacks",
+    "merge_commit": "9e631e47f792307836f92a2f7dd79b39cb5195c2",
+    "merged_at": "2026-10-20T17:15:50Z"
+   },
+   "16383": {
+    "title": "fix(edit): refuse stale-tag remaps aimed at the current lines",
+    "merge_commit": "161920c920e7d4d752900bb80f191fde23722d1c",
+    "merged_at": "2026-10-20T17:18:24Z"
+   },
+   "16418": {
+    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config",
+    "merge_commit": "5ea81098ec02f3080a30a4936969f8969f1cfb84",
+    "merged_at": "2026-10-20T17:19:25Z"
+   },
+   "16288": {
+    "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images",
+    "merge_commit": "360b9bd6841d89b841189aebf409c37af0d0d929",
+    "merged_at": "2026-10-20T17:20:25Z"
+   },
+   "16425": {
+    "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag",
+    "merge_commit": "1e97f758b0e79408aeeec47bb72a76dfc430e619",
+    "merged_at": "2026-10-20T17:21:31Z"
+   },
+   "16300": {
+    "title": "fix(coding-agent): install with %pip into venvs that have no pip",
+    "merge_commit": "0bba68154823781aa16409548fedee335d8aefec",
+    "merged_at": "2026-10-20T17:22:23Z"
+   },
+   "16435": {
+    "title": "fix(read): read tail chunks in comma line lists",
+    "merge_commit": "1d3ec67ee36beed3e65383900b27b85ea96a12d0",
+    "merged_at": "2026-10-20T17:23:20Z"
+   },
+   "16444": {
+    "title": "feat(read): page SQLite ?q= query rows with limit and offset",
+    "merge_commit": "bdfa4e02f65ebe3b133bba5546a3ff683f939bb0",
+    "merged_at": "2026-10-20T17:24:11Z"
+   },
+   "16420": {
+    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
+    "merge_commit": "6c0f8f0ba9fff1b58585c7ff521e11d8107c3a98",
+    "merged_at": "2026-10-20T17:25:05Z"
+   },
+   "14235": {
+    "title": "feat(ai): let broker account-pool files act as a provider and API-key allow-list",
+    "merge_commit": "99d883d0c7f39d69b78d8b831c5cf73dbc1b157e",
+    "merged_at": "2026-10-20T17:26:10Z"
+   },
+   "14237": {
+    "title": "feat(ai): opt-in account reclaim for accountPolicies",
+    "merge_commit": "266bac13f00ca46fda81d920326d70ffc4c3d3e6",
+    "merged_at": "2026-10-20T17:27:11Z"
+   },
+   "16384": {
+    "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests",
+    "merge_commit": "ff4c41c0c532273d19c4f01eac3030e59f2961cb",
+    "merged_at": "2026-10-20T17:28:04Z"
+   },
+   "16294": {
+    "title": "fix(browser): tell agents how to skip a configured relay",
+    "merge_commit": "ec76da2efb00f8a559b8e43d991d3cb79a1acd85",
+    "merged_at": "2026-10-20T17:30:24Z"
+   },
+   "16386": {
+    "title": "fix(utils,natives): keep test runs out of the real ~/.omp/logs",
+    "merge_commit": "229ad8a57a0781fcc72dcd276cff0d6b4faa78a9",
+    "merged_at": "2026-10-20T17:31:31Z"
    }
   },
   "ready": [
-   13677,
-   14235,
-   14237,
    15105,
    15124,
    15128,
@@ -33240,42 +33340,23 @@
    16274,
    16278,
    16284,
-   16288,
    16291,
-   16294,
    16296,
    16297,
-   16300,
    16306,
    16309,
    16316,
-   16369,
-   16383,
-   16384,
-   16386,
    16389,
    16390,
    16392,
    16393,
-   16394,
-   16397,
-   16399,
    16403,
    16405,
-   16407,
-   16418,
    16419,
-   16420,
    16423,
-   16425,
    16428,
    16433,
    16434,
-   16435,
-   16436,
-   16437,
-   16442,
-   16444,
    16445
   ],
   "events": [
@@ -35849,6 +35930,182 @@
     "files": [
      "packages/coding-agent/src/tools/wait.ts"
     ]
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16407,
+    "title": "fix(ai): fail Claude turns that attach media Claude cannot read",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16436,
+    "title": "fix(coding-agent): gate snapcompact on images the wire actually sends",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16394,
+    "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16397,
+    "title": "fix(coding-agent): read profile line ranges from the file, not its summary",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16369,
+    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16442,
+    "title": "feat(coding-agent): expose PI_SESSION_ID and PI_SESSION_FILE to bash commands",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16437,
+    "title": "fix(ai): keep usage and timing on thinking-loop aborts",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16399,
+    "title": "perf(natives/utok): memoize short-piece merge counts per thread",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 13677,
+    "title": "fix(ai,catalog): encode Devin credentials by shape and drop the Windsurf fallbacks",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16383,
+    "title": "fix(edit): refuse stale-tag remaps aimed at the current lines",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16418,
+    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16288,
+    "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16425,
+    "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16300,
+    "title": "fix(coding-agent): install with %pip into venvs that have no pip",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16435,
+    "title": "fix(read): read tail chunks in comma line lists",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16444,
+    "title": "feat(read): page SQLite ?q= query rows with limit and offset",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16420,
+    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 14235,
+    "title": "feat(ai): let broker account-pool files act as a provider and API-key allow-list",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 14237,
+    "title": "feat(ai): opt-in account reclaim for accountPolicies",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16384,
+    "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16294,
+    "title": "fix(browser): tell agents how to skip a configured relay",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:36:23Z",
+    "kind": "merged",
+    "number": 16386,
+    "title": "fix(utils,natives): keep test runs out of the real ~/.omp/logs",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  }
