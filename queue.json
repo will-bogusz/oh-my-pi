@@ -25737,13 +25737,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-sqlite-q-paging.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16444,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-sqlite-q-paging",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:45Z",
-   "updated": "2026-10-20T04:34:32Z",
+   "updated": "2026-10-20T04:38:30Z",
    "note": "",
    "built": [
     {
@@ -26316,7 +26316,8 @@
      "tree": "d0ade499e511c4465db3de996542005959e3cf1a"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z"
+   "advanced": "2026-10-19T22:06:15Z",
+   "opened": "2026-10-20T04:38:29Z"
   },
   {
    "id": "custom-tool-host-imports",
