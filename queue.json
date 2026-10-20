@@ -34026,11 +34026,37 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T21:32:33Z",
+  "checked": "2026-10-20T22:03:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
-  "conflicts": {},
+  "conflicts": {
+   "#16555": {
+    "since": "2026-10-20T22:03:07Z",
+    "title": "fix(coding-agent): scan the whole file for :conflicts",
+    "files": [
+     "packages/coding-agent/src/tools/conflict-detect.ts",
+     "packages/coding-agent/src/tools/read.ts",
+     "packages/coding-agent/test/tools/conflict-integration.test.ts"
+    ]
+   },
+   "#16556": {
+    "since": "2026-10-20T22:03:07Z",
+    "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
+    "files": [
+     "packages/coding-agent/src/discovery/builtin-rules/ts-import-type.md",
+     "packages/coding-agent/src/discovery/builtin-rules/ts-set-map.md",
+     "packages/coding-agent/test/discovery/builtin-defaults.test.ts"
+    ]
+   },
+   "#16553": {
+    "since": "2026-10-20T22:03:07Z",
+    "title": "fix(natives): keep a macOS user's press placed in their app through a release during its hit-test",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/skylight.rs"
+    ]
+   }
+  },
   "merged_through": "2026-10-20T18:11:02Z",
   "unreleased": {},
   "ready": [
@@ -34083,15 +34109,7 @@
     "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
     "merge_commit": "3024a3711472d6a49dcaad551da33cf2d13cb96b",
     "merged_at": "2026-10-20T18:07:13Z",
-    "findings": [
-     {
-      "bot": "chatgpt-codex-connector",
-      "severity": "P2",
-      "path": "crates/pi-natives/src/desktop/macos/skylight.rs",
-      "end": 860,
-      "url": "https://github.com/can1357/oh-my-pi/pull/16217#pullrequestreview-5589582465"
-     }
-    ]
+    "findings": []
    },
    "16230": {
     "title": "fix(coding-agent): stop a browser screenshot waiting on a DevTools session past its deadline",
@@ -34127,29 +34145,7 @@
     "title": "fix(coding-agent): fire ts-set-map, ts-import-type and ts-no-any only on code they flag",
     "merge_commit": "dc2993ed435e4b434101779f53d3b5fc023a6d38",
     "merged_at": "2026-10-20T17:48:31Z",
-    "findings": [
-     {
-      "bot": "chatgpt-codex-connector",
-      "severity": "P2",
-      "path": "packages/coding-agent/src/discovery/builtin-rules/ts-set-map.md",
-      "end": 5,
-      "url": "https://github.com/can1357/oh-my-pi/pull/16242#pullrequestreview-5589428425"
-     },
-     {
-      "bot": "chatgpt-codex-connector",
-      "severity": "P2",
-      "path": "packages/coding-agent/src/discovery/builtin-rules/ts-set-map.md",
-      "end": 5,
-      "url": "https://github.com/can1357/oh-my-pi/pull/16242#pullrequestreview-5589428425"
-     },
-     {
-      "bot": "chatgpt-codex-connector",
-      "severity": "P2",
-      "path": "packages/coding-agent/src/discovery/builtin-rules/ts-import-type.md",
-      "end": 5,
-      "url": "https://github.com/can1357/oh-my-pi/pull/16242#pullrequestreview-5589428425"
-     }
-    ]
+    "findings": []
    },
    "16249": {
     "title": "fix(ai): keep Factory Droid Gemini tool schemas valid when a parameter takes a string or a list",
@@ -34185,15 +34181,7 @@
     "title": "fix(coding-agent): name registered conflict ids when a hidden block is guessed",
     "merge_commit": "894c8eb9b9c2706782caf82d0931222575fa110a",
     "merged_at": "2026-10-20T18:02:14Z",
-    "findings": [
-     {
-      "bot": "chatgpt-codex-connector",
-      "severity": "P2",
-      "path": "packages/coding-agent/src/tools/conflict-uri.ts",
-      "end": 78,
-      "url": "https://github.com/can1357/oh-my-pi/pull/16269#pullrequestreview-5589496744"
-     }
-    ]
+    "findings": []
    },
    "16278": {
     "title": "fix(coding-agent): keep URIs in auto-QA report tool names",
@@ -37898,6 +37886,37 @@
     "id": "factory-screenshot-budget",
     "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts",
     "why": "opened as #16564"
+   },
+   {
+    "at": "2026-10-20T22:03:07Z",
+    "kind": "conflict",
+    "label": "#16555",
+    "title": "fix(coding-agent): scan the whole file for :conflicts",
+    "files": [
+     "packages/coding-agent/src/tools/conflict-detect.ts",
+     "packages/coding-agent/src/tools/read.ts",
+     "packages/coding-agent/test/tools/conflict-integration.test.ts"
+    ]
+   },
+   {
+    "at": "2026-10-20T22:03:07Z",
+    "kind": "conflict",
+    "label": "#16556",
+    "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
+    "files": [
+     "packages/coding-agent/src/discovery/builtin-rules/ts-import-type.md",
+     "packages/coding-agent/src/discovery/builtin-rules/ts-set-map.md",
+     "packages/coding-agent/test/discovery/builtin-defaults.test.ts"
+    ]
+   },
+   {
+    "at": "2026-10-20T22:03:07Z",
+    "kind": "conflict",
+    "label": "#16553",
+    "title": "fix(natives): keep a macOS user's press placed in their app through a release during its hit-test",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/skylight.rs"
+    ]
    }
   ]
  },
