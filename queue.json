@@ -34242,7 +34242,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T23:03:55Z",
+  "checked": "2026-10-20T23:34:32Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -34253,6 +34253,10 @@
    "eval-py-await-tool": {
     "since": "2026-10-20T23:03:55Z",
     "title": "fix(coding-agent): tell Python-only eval sessions to await tool calls"
+   },
+   "gateway-settle-log": {
+    "since": "2026-10-20T23:34:32Z",
+    "title": "fix(ai): stop logging a usage-limit retry the gateway does not make"
    },
    "proc-kill-read-hint": {
     "since": "2026-10-20T23:03:55Z",
@@ -34266,13 +34270,29 @@
     "since": "2026-10-20T23:03:55Z",
     "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file"
    },
+   "minimizer-diff-hunk-lines": {
+    "since": "2026-10-20T23:34:32Z",
+    "title": "fix(pi-shell): keep diff hunk lines starting with -- or ++ inside their hunk"
+   },
+   "minimizer-keep-small-whole": {
+    "since": "2026-10-20T23:34:32Z",
+    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer"
+   },
    "read-display-budget": {
     "since": "2026-10-20T23:03:55Z",
     "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget"
    },
+   "read-nav-gate": {
+    "since": "2026-10-20T23:34:32Z",
+    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code"
+   },
    "rg-follow-root": {
     "since": "2026-10-20T23:03:55Z",
     "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd"
+   },
+   "task-result-inline": {
+    "since": "2026-10-20T23:34:32Z",
+    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k"
    }
   },
   "conflicts": {
@@ -38194,6 +38214,36 @@
     "kind": "openable",
     "id": "rg-follow-root",
     "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd"
+   },
+   {
+    "at": "2026-10-20T23:34:32Z",
+    "kind": "openable",
+    "id": "gateway-settle-log",
+    "title": "fix(ai): stop logging a usage-limit retry the gateway does not make"
+   },
+   {
+    "at": "2026-10-20T23:34:32Z",
+    "kind": "openable",
+    "id": "minimizer-diff-hunk-lines",
+    "title": "fix(pi-shell): keep diff hunk lines starting with -- or ++ inside their hunk"
+   },
+   {
+    "at": "2026-10-20T23:34:32Z",
+    "kind": "openable",
+    "id": "minimizer-keep-small-whole",
+    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer"
+   },
+   {
+    "at": "2026-10-20T23:34:32Z",
+    "kind": "openable",
+    "id": "read-nav-gate",
+    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code"
+   },
+   {
+    "at": "2026-10-20T23:34:32Z",
+    "kind": "openable",
+    "id": "task-result-inline",
+    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k"
    }
   ]
  },
