@@ -34617,7 +34617,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/write-keep-crlf",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:50:50Z",
-   "updated": "2026-10-20T23:58:47Z",
+   "updated": "2026-10-20T23:59:09Z",
    "note": "",
    "built": [
     {
@@ -34890,7 +34890,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-20T23:58:47Z"
+   "opened": "2026-10-20T23:58:47Z",
+   "readied": "2026-10-20T23:59:09Z"
   },
   {
    "id": "fetch-ua-retry",
