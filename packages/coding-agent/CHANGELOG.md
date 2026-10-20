@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `read` of a web page keeps only the description, author and dates of the page's `<meta>` tags and drops the targets of links to anchors on the same page, so docs and API references cost about a tenth fewer tokens
+
 ### Fixed
 
 - Fixed `read` of web pages with tables, code or pricing lists (API references, specs, pricing pages) returning a shorter trafilatura or Jina rendering that leaves out much of the page, and noting the page "appears to require JavaScript or is mostly navigation"
