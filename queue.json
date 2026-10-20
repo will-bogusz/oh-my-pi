@@ -27816,13 +27816,13 @@
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/deepseek-image-tokens.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16418,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/deepseek-image-tokens",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:51:53Z",
-   "updated": "2026-10-19T21:33:15Z",
+   "updated": "2026-10-20T01:18:10Z",
    "note": "",
    "built": [
     {
@@ -27885,7 +27885,8 @@
      "host": "goliath",
      "tree": "bd142e6ce10f9e9a0cddaa0c60543314d55af99a"
     }
-   ]
+   ],
+   "opened": "2026-10-20T01:18:10Z"
   },
   {
    "id": "thinking-loop-accounting",
