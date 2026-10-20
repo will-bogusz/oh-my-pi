@@ -770,7 +770,7 @@ describe("AgentSession auto-compaction progress guard", () => {
 		expect(latestCompactionEntry().thresholdTokens).toBeUndefined();
 	});
 
-	it("records the idle timer's threshold on an idle compaction", async () => {
+	it("records the idle trigger and the idle timer's threshold", async () => {
 		seedPriorTurns();
 
 		await session.runIdleCompaction(150_000);
