@@ -5782,13 +5782,13 @@
    "needs": [],
    "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
    "body": "bodies/release-helper-wait-test.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16405,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/release-helper-wait-test",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:04:31Z",
-   "updated": "2026-10-19T23:00:06Z",
+   "updated": "2026-10-20T00:02:34Z",
    "note": "",
    "built": [
     {
@@ -5868,7 +5868,8 @@
      "host": "goliath",
      "tree": "b96e6d7debbee74633a84843cd9267712f263ac4"
     }
-   ]
+   ],
+   "opened": "2026-10-20T00:02:34Z"
   },
   {
    "id": "browser-app-precedence-docs",
