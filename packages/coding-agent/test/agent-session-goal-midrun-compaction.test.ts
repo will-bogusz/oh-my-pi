@@ -15,7 +15,6 @@ import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
 import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
 import { convertToLlm } from "@oh-my-pi/pi-coding-agent/session/messages";
 import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { cfgCompactionThresholdTokens } from "@oh-my-pi/pi-coding-agent/session/context-settings";
 import { createSubagentSettings } from "@oh-my-pi/pi-coding-agent/task/executor";
 import { EventBus } from "@oh-my-pi/pi-coding-agent/utils/event-bus";
 import { TempDir } from "@oh-my-pi/pi-utils";
@@ -591,7 +590,7 @@ describe("AgentSession mid-run threshold compaction", () => {
 		expect(persistedToolTurnRoles).toEqual(["assistant", "toolResult"]);
 	});
 
-	it("records the threshold the mid-run decision compared when settings change before the commit", async () => {
+	it("records the threshold the mid-run decision compared when the model changes before the commit", async () => {
 		const releaseMessageEnd = Promise.withResolvers<void>();
 		const messageEndEntered = Promise.withResolvers<void>();
 		const turnEndEntered = Promise.withResolvers<void>();
@@ -613,19 +612,28 @@ describe("AgentSession mid-run threshold compaction", () => {
 				}
 			}),
 		} as unknown as ExtensionRunner;
-		const { session, sessionManager } = await createHarness({}, { extensionRunner });
+		const { session, sessionManager } = await createHarness(
+			{ "compaction.thresholdTokens": -1, "compaction.thresholdPercent": 1 },
+			{ extensionRunner },
+		);
 		mockCompaction("MID-RUN-COMPACTED");
+		const model = session.agent.state.model;
+		const decidedThreshold = Math.floor(model.contextWindow / 100);
 
 		const prompt = session.prompt("work on the release");
 		await messageEndEntered.promise;
 		await turnEndEntered.promise;
-		// The decision compared 1,000 and now waits on the persistence barrier.
-		cfgCompactionThresholdTokens.set(session.settings, 2000);
+		// The decision compared 1% of this window and now waits on the persistence barrier.
+		session.agent.setModel({ ...model, contextWindow: model.contextWindow * 2 });
 		releaseMessageEnd.resolve();
 		await prompt;
 
 		const entry = sessionManager.getBranch().findLast(e => e.type === "compaction");
-		expect(entry).toMatchObject({ trigger: "threshold", thresholdTokens: 1000, providerContextTokens: 50_100 });
+		expect(entry).toMatchObject({
+			trigger: "threshold",
+			thresholdTokens: decidedThreshold,
+			providerContextTokens: 50_100,
+		});
 	});
 
 	it("preserves passive tool context when message_end persistence overlaps mid-run compaction", async () => {
