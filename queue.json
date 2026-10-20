@@ -35566,5 +35566,11 @@
     "why": "opened as #16434"
    }
   ]
+ },
+ "opening": {
+  "id": "bash-session-env",
+  "token": "ff6094528b0e450aa38a4996d308c32b",
+  "host": "MacBook-Pro",
+  "at": "2026-10-20T04:11:54Z"
  }
 }
