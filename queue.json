@@ -36634,11 +36634,5 @@
     "tag": "v18.12.4"
    }
   ]
- },
- "opening": {
-  "id": "pip-procfs-fallback",
-  "token": "a33dc8a557b04a94a5a4e05b1354ee3c",
-  "host": "MacBook-Pro",
-  "at": "2026-10-20T20:09:51Z"
  }
 }
