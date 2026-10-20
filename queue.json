@@ -37883,5 +37883,11 @@
     "host": "Wills-MacBook-Pro"
    }
   }
+ },
+ "opening": {
+  "id": "conflicts-whole-file",
+  "token": "8f01ef6b8e544ac89e5aa13892620024",
+  "host": "MacBook-Pro",
+  "at": "2026-10-20T20:23:37Z"
  }
 }
