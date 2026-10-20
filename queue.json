@@ -34013,21 +34013,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T20:21:52Z",
+  "checked": "2026-10-20T20:51:17Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "conflicts-whole-file": {
-    "since": "2026-10-20T20:21:52Z",
-    "title": "fix(coding-agent): scan the whole file for :conflicts"
-   },
    "factory-screenshot-budget": {
     "since": "2026-10-20T20:21:52Z",
     "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts"
-   },
-   "ts-rule-followups": {
-    "since": "2026-10-20T20:21:52Z",
-    "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes"
    }
   },
   "conflicts": {},
@@ -34055,7 +34047,9 @@
    16316,
    16403,
    16552,
-   16553
+   16553,
+   16555,
+   16556
   ],
   "post_merge": {
    "13677": {
@@ -37874,6 +37868,20 @@
     "path": "packages/coding-agent/src/eval/py/runner.py",
     "end": 1336,
     "url": "https://github.com/can1357/oh-my-pi/pull/16300#pullrequestreview-5589029446"
+   },
+   {
+    "at": "2026-10-20T20:51:17Z",
+    "kind": "unopenable",
+    "id": "conflicts-whole-file",
+    "title": "fix(coding-agent): scan the whole file for :conflicts",
+    "why": "opened as #16555"
+   },
+   {
+    "at": "2026-10-20T20:51:17Z",
+    "kind": "unopenable",
+    "id": "ts-rule-followups",
+    "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
+    "why": "opened as #16556"
    }
   ]
  },
