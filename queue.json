@@ -28069,7 +28069,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/thinking-loop-accounting",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:52:03Z",
-   "updated": "2026-10-20T03:32:52Z",
+   "updated": "2026-10-20T03:33:16Z",
    "note": "",
    "built": [
     {
@@ -28242,7 +28242,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-20T03:32:52Z"
+   "opened": "2026-10-20T03:32:52Z",
+   "readied": "2026-10-20T03:33:16Z"
   },
   {
    "id": "tar-stream-index",
