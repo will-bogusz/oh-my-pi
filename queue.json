@@ -37246,5 +37246,14 @@
     "tag": "v18.12.4"
    }
   ]
+ },
+ "rust_checks": {
+  "2bf50ffe6db789d8a6e1965d1d78d910498ab07a": {
+   "linux": {
+    "sha": "2effb4366c29350c46ad4d51d7cdd564aa66f8ab",
+    "at": "2026-10-20T20:17:45Z",
+    "host": "goliath"
+   }
+  }
  }
 }
