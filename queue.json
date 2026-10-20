@@ -32995,14 +32995,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T01:50:28Z",
+  "checked": "2026-10-20T02:21:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "ln-uri-source": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "fix(pi-builtins): link host paths to the file a backed URL aliases"
-   },
    "read-raw-line": {
     "since": "2026-10-19T19:41:31Z",
     "title": "fix(read): read one line for a bare N beside :raw"
@@ -33110,7 +33106,8 @@
    16421,
    16422,
    16423,
-   16425
+   16425,
+   16428
   ],
   "events": [
    {
@@ -35476,6 +35473,13 @@
     "id": "edit-tagless-errors",
     "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag",
     "why": "opened as #16425"
+   },
+   {
+    "at": "2026-10-20T02:21:07Z",
+    "kind": "unopenable",
+    "id": "ln-uri-source",
+    "title": "fix(pi-builtins): link host paths to the file a backed URL aliases",
+    "why": "opened as #16428"
    }
   ]
  }
