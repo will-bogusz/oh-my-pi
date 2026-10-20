@@ -5788,7 +5788,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/release-helper-wait-test",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:04:31Z",
-   "updated": "2026-10-20T00:02:34Z",
+   "updated": "2026-10-20T00:02:55Z",
    "note": "",
    "built": [
     {
@@ -5869,7 +5869,8 @@
      "tree": "b96e6d7debbee74633a84843cd9267712f263ac4"
     }
    ],
-   "opened": "2026-10-20T00:02:34Z"
+   "opened": "2026-10-20T00:02:34Z",
+   "readied": "2026-10-20T00:02:55Z"
   },
   {
    "id": "browser-app-precedence-docs",
