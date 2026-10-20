@@ -35484,5 +35484,11 @@
     "why": "opened as #16428"
    }
   ]
+ },
+ "opening": {
+  "id": "rm-force-enoent",
+  "token": "944f734b69594f5bbda403890959ff6b",
+  "host": "MacBook-Pro",
+  "at": "2026-10-20T03:12:29Z"
  }
 }
