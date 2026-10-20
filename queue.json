@@ -34024,15 +34024,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T20:51:17Z",
+  "checked": "2026-10-20T21:32:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "factory-screenshot-budget": {
-    "since": "2026-10-20T20:21:52Z",
-    "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-10-20T18:11:02Z",
   "unreleased": {},
@@ -34060,7 +34055,8 @@
    16552,
    16553,
    16555,
-   16556
+   16556,
+   16564
   ],
   "post_merge": {
    "13677": {
@@ -37893,6 +37889,13 @@
     "id": "ts-rule-followups",
     "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
     "why": "opened as #16556"
+   },
+   {
+    "at": "2026-10-20T21:32:33Z",
+    "kind": "unopenable",
+    "id": "factory-screenshot-budget",
+    "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts",
+    "why": "opened as #16564"
    }
   ]
  },
