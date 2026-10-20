@@ -21,7 +21,7 @@ Decision: scan to the end rather than tell the agent how to reach the rest. A fi
 
 - New `conflict-integration.test.ts` cases: the files in the table get the listings above, and `read conflict://1/theirs` renders the block past 10 MiB; a block of 11 MiB, one of 11 Mi empty lines, the second of two 6 MiB blocks, one holding an 11 MB `€` line, and one whose opener label runs 11 MiB are each named while the block after is listed; of 11,000 empty blocks, listed + named + `+N more` = 11,000; a BOM inside the file stays text. `bun test test/tools/conflict-integration.test.ts test/tools/conflict-detect.test.ts`: 109 pass. New `stream.test.ts` case for `maxLineBytes` (45 pass).
 - Negative controls: with `src/tools` reverted to `main` the first case fails (`Received: "No unresolved git merge conflicts in after-cap.ts."`), and the same with `:conflicts` passing the default cap again; with the budget check off, line breaks uncounted, completed blocks or the per-block cost uncharged, or characters charged instead of bytes, the matching case keeps the dropped block; with `maxLineBytes` ignored the `stream.test.ts` case fails.
-- `bun run check` in `packages/coding-agent` and `packages/utils` passes.
+- `bun run check` passes in both packages.
 
 ---
 
