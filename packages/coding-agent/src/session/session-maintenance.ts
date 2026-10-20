@@ -2072,9 +2072,9 @@ export class SessionMaintenance {
 	}
 
 	/** Trigger idle compaction through the auto-compaction flow (with UI events). */
-	async runIdleCompaction(): Promise<void> {
+	async runIdleCompaction(thresholdTokens?: number): Promise<void> {
 		if (this.#host.isStreaming() || this.isCompacting) return;
-		await this.runAutoCompaction("idle", false);
+		await this.runAutoCompaction("idle", false, { thresholdTokens });
 	}
 
 	/**
@@ -2670,6 +2670,7 @@ export class SessionMaintenance {
 		await this.runAutoCompaction("threshold", false, {
 			autoContinue: false,
 			triggerContextTokens: contextTokens,
+			thresholdTokens: resolveThresholdTokens(contextWindow, compactionSettings),
 			providerContextTokens,
 			estimatedContextTokens,
 			pendingContextTokens: this.#tokenizer.countMessages(messages, { excludeEncryptedReasoning: true }),
@@ -2815,6 +2816,7 @@ export class SessionMaintenance {
 			autoContinue: false,
 			suppressContinuation: true,
 			triggerContextTokens: contextTokens,
+			thresholdTokens: resolveThresholdTokens(contextWindow, compactionSettings),
 			providerContextTokens: billedContextTokens,
 			estimatedContextTokens: storedContextTokens,
 			phase: "mid_turn",
@@ -3398,6 +3400,7 @@ export class SessionMaintenance {
 				return await this.runAutoCompaction("threshold", false, {
 					autoContinue,
 					triggerContextTokens: postMaintenanceContextTokens,
+					thresholdTokens,
 					providerContextTokens: assistantUsageContextTokens,
 					estimatedContextTokens: storedContextTokens,
 					phase: "pre_turn",
@@ -4698,6 +4701,8 @@ export class SessionMaintenance {
 		options: {
 			autoContinue?: boolean;
 			triggerContextTokens?: number;
+			/** Threshold the trigger decision compared, recorded on the entry. */
+			thresholdTokens?: number;
 			/** Provider-reported context tokens the trigger decision read, recorded on the entry. */
 			providerContextTokens?: number;
 			/** Local stored-context estimate the trigger decision read, recorded on the entry. */
@@ -4737,15 +4742,9 @@ export class SessionMaintenance {
 		if (reason !== "idle" && !compactionSettings.enabled && !explicitNewContextRequest) {
 			return COMPACTION_CHECK_NONE;
 		}
-		const contextWindow = this.#model?.contextWindow ?? 0;
 		const trigger: CompactionTriggerRecord = {
 			trigger: explicitNewContextRequest ? "new_context" : reason,
-			thresholdTokens:
-				reason === "idle"
-					? compactionSettings.idleThresholdTokens
-					: reason === "threshold" && !explicitNewContextRequest && contextWindow > 0
-						? resolveThresholdTokens(contextWindow, compactionSettings)
-						: undefined,
+			thresholdTokens: options.thresholdTokens,
 			providerContextTokens: options.providerContextTokens,
 			estimatedContextTokens: options.estimatedContextTokens,
 		};

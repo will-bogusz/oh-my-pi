@@ -6981,8 +6981,8 @@ export class AgentSession implements SettingsScope {
 		void this.#maintenance.abortCompaction(reason);
 	}
 
-	/** Trigger idle compaction through the automatic maintenance flow. */
-	async runIdleCompaction(): Promise<void> {
+	/** Trigger idle compaction through the automatic maintenance flow; `thresholdTokens` is the idle trigger point the caller compared. */
+	async runIdleCompaction(thresholdTokens?: number): Promise<void> {
 		// A pending async wake means the session is waiting, not idle: a
 		// background job (bash/task) owned by this agent re-wakes the loop when it
 		// completes, and the async-result delivery continues the run. Idle
@@ -6995,7 +6995,7 @@ export class AgentSession implements SettingsScope {
 		// history; a warm replay racing a slow summary would be paid for nothing.
 		// A streaming session owns a live run whose warming must survive.
 		if (!this.isStreaming && !this.isCompacting) this.#cacheWarmer?.cancel();
-		await this.#inLogContext(() => this.#maintenance.runIdleCompaction());
+		await this.#inLogContext(() => this.#maintenance.runIdleCompaction(thresholdTokens));
 	}
 
 	/** Override cache warming for this session only, never writing config.yml; returns the effective mode. */

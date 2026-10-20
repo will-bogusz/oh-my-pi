@@ -770,6 +770,14 @@ describe("AgentSession auto-compaction progress guard", () => {
 		expect(latestCompactionEntry().thresholdTokens).toBeUndefined();
 	});
 
+	it("records the idle timer's threshold on an idle compaction", async () => {
+		seedPriorTurns();
+
+		await session.runIdleCompaction(150_000);
+
+		expect(latestCompactionEntry()).toMatchObject({ trigger: "idle", thresholdTokens: 150_000 });
+	});
+
 	it("drops a content-less overflow error when no recovery path is available", async () => {
 		// Content-less provider rejection turns are live UI only: persisting them
 		// writes an empty assistant turn that replays on reload and re-sends the

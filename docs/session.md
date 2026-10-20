@@ -278,7 +278,10 @@ default instead of restoring that role's temporary model.
 ```
 
 Optional compaction metadata includes `tokensAfter`, `method`,
-`providerReplayThroughEntryId`, and `warning`. `preserveData` can carry native
+`providerReplayThroughEntryId`, `warning`, and the trigger record: `trigger`
+(`threshold`, `overflow`, `idle`, `incomplete`, `manual`, or `new_context`),
+`thresholdTokens`, `providerContextTokens`, and `estimatedContextTokens` (the
+threshold and the two counts an automatic decision compared). `preserveData` can carry native
 OpenAI/Anthropic replay state or a snapcompact archive; it is not just extension
 state. `providerReplayThroughEntryId` marks the last entry represented by native
 replacement history so later entries still replay normally.

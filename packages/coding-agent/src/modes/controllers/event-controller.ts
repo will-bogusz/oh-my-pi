@@ -2830,7 +2830,7 @@ export class EventController {
 			if (this.ctx.editor.getText().trim()) return;
 			if (this.#promptCachePersistent()) return;
 			if (this.#currentContextTokens() < threshold) return;
-			void this.ctx.viewSession.runIdleCompaction();
+			void this.ctx.viewSession.runIdleCompaction(threshold);
 		}, timeoutMs);
 		this.#idleCompactionTimer.unref?.();
 	}

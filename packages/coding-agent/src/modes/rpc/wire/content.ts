@@ -178,6 +178,12 @@ export const messageDefs = {
 		timestamp: "number",
 	},
 	BranchSummaryMessage: { role: "'branchSummary'", summary: "string", fromId: "string", timestamp: "number" },
+	CompactionSummaryTrigger: {
+		reason: "string",
+		"thresholdTokens?": "number.integer",
+		"providerContextTokens?": "number.integer",
+		"estimatedContextTokens?": "number.integer",
+	},
 	CompactionSummaryMessage: {
 		role: "'compactionSummary'",
 		summary: "string",
@@ -185,6 +191,7 @@ export const messageDefs = {
 		tokensBefore: "number.integer",
 		"tokensAfter?": "number.integer",
 		"method?": "string",
+		"trigger?": "CompactionSummaryTrigger",
 		"providerPayload?": JSON_OBJECT,
 		timestamp: "number",
 	},

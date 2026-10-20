@@ -38,6 +38,7 @@ Compaction and branch summaries are first-class session entries, not plain assis
    - optional `details`, `preserveData`, `fromExtension`
    - optional `method`, `tokensAfter`, `warning` (maintenance/display metadata)
    - optional `providerReplayThroughEntryId` (last entry covered by a native replay snapshot)
+   - optional `trigger` (`threshold`, `overflow`, `idle`, `incomplete`, `manual`, `new_context`; absent on older sessions), with `thresholdTokens` for threshold and idle triggers and `providerContextTokens`/`estimatedContextTokens` for threshold decisions (the provider-reported count and the local estimate; the larger was compared)
 - `BranchSummaryEntry`
    - `type: "branch_summary"`
    - `fromId`, `summary`
@@ -223,7 +224,7 @@ Automatic maintenance checks that the rewritten context creates real headroom (n
 
 ### Display transcript
 
-Compaction no longer visually restarts the conversation. The TUI renders the **display transcript** (`buildSessionContext({ transcript: true })` / `AgentSession.buildTranscriptSessionContext()`): every path entry in chronological order, with each compaction shown inline as a slim divider — `── 📷 compacted · ctrl+o ──` — at the point it fired. Expanding (ctrl+o) reveals the summary. Only the LLM context resets at the compaction boundary; the scrollback above the divider stays intact, including across session resume.
+Compaction no longer visually restarts the conversation. The TUI renders the **display transcript** (`buildSessionContext({ transcript: true })` / `AgentSession.buildTranscriptSessionContext()`): every path entry in chronological order, with each compaction shown inline as a slim divider — `── 📷 snap-compacted · threshold · 48K→39K · ctrl+o ──` — at the point it fired, naming the method, the trigger and the before → after amounts. Expanding (ctrl+o) reveals the trigger's threshold and token counts, then the summary. Only the LLM context resets at the compaction boundary; the scrollback above the divider stays intact, including across session resume.
 
 ### Pre-compaction pruning
 
