@@ -20679,7 +20679,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-raw-line",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:29:28Z",
-   "updated": "2026-10-20T03:37:02Z",
+   "updated": "2026-10-20T03:37:27Z",
    "note": "",
    "built": [
     {
@@ -21333,7 +21333,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-20T03:37:02Z"
+   "opened": "2026-10-20T03:37:02Z",
+   "readied": "2026-10-20T03:37:27Z"
   },
   {
    "id": "r2-browser-relay-guidance",
