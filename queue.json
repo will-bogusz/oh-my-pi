@@ -35589,5 +35589,11 @@
     "why": "opened as #16434"
    }
   ]
+ },
+ "opening": {
+  "id": "subagent-wait-reply",
+  "token": "0aeebe12868643b39a5417105439f32e",
+  "host": "MacBook-Pro",
+  "at": "2026-10-20T04:39:01Z"
  }
 }
