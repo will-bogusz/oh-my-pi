@@ -25743,7 +25743,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-sqlite-q-paging",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:45Z",
-   "updated": "2026-10-20T04:38:30Z",
+   "updated": "2026-10-20T04:38:56Z",
    "note": "",
    "built": [
     {
@@ -26317,7 +26317,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-20T04:38:29Z"
+   "opened": "2026-10-20T04:38:29Z",
+   "readied": "2026-10-20T04:38:55Z"
   },
   {
    "id": "custom-tool-host-imports",
