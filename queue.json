@@ -33105,7 +33105,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T16:35:21Z",
+  "checked": "2026-10-20T17:05:39Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -33123,9 +33123,16 @@
     "files": [
      "packages/ai/src/providers/amazon-bedrock.ts"
     ]
+   },
+   "#16445": {
+    "since": "2026-10-20T17:05:39Z",
+    "title": "feat(coding-agent): let wait block for the reply to a message the agent sent",
+    "files": [
+     "packages/coding-agent/src/tools/wait.ts"
+    ]
    }
   },
-  "merged_through": "2026-10-20T14:25:41Z",
+  "merged_through": "2026-10-20T17:01:25Z",
   "unreleased": {
    "16432": {
     "title": "fix(pi-builtins): print rg counts only for files with matches",
@@ -33181,6 +33188,11 @@
     "title": "fix(coding-agent): kept requested lines in in-memory range reads",
     "merge_commit": "8923f62212581adfad67a822e789e5c580b46ef5",
     "merged_at": "2026-10-20T14:25:41Z"
+   },
+   "16422": {
+    "title": "fix(edit): counted only a mismatch reply's displayed rows as seen",
+    "merge_commit": "f1b410824bc8043b86e88e9daf5a11db26967cea",
+    "merged_at": "2026-10-20T17:01:25Z"
    }
   },
   "ready": [
@@ -33232,7 +33244,6 @@
    16418,
    16419,
    16420,
-   16422,
    16423,
    16425,
    16428,
@@ -35799,6 +35810,23 @@
     "title": "fix(coding-agent): kept requested lines in in-memory range reads",
     "merged_by": "H4vC",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:05:39Z",
+    "kind": "merged",
+    "number": 16422,
+    "title": "fix(edit): counted only a mismatch reply's displayed rows as seen",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T17:05:39Z",
+    "kind": "conflict",
+    "label": "#16445",
+    "title": "feat(coding-agent): let wait block for the reply to a message the agent sent",
+    "files": [
+     "packages/coding-agent/src/tools/wait.ts"
+    ]
    }
   ]
  }
