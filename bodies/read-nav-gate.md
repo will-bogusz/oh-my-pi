@@ -18,9 +18,9 @@ On the pages that check rejected, the first page `read` returns now answers 77 o
 Decisions:
 - The short-line rule still judges lynx output; the JavaScript-gate phrase check still applies to every reader.
 - A short-line rendering still has its linked PDF or DOCX tried, as on `main`, whichever reader rendered it: a landing page around a report looks the same as a menu. It no longer gets the section `llms.txt` substituted or the note; in this machine's sessions `llms.txt` replaced a page once in 12,477 URL reads.
-- Not changed: a page whose native body is empty under its `<head>` metadata still counts as content, because the 100-character check includes the metadata. The two pages where a fallback beat native were of that kind; that is a separate fix.
+- Not changed: a page whose native body is empty under its `<head>` metadata still counts as content, since the 100-character check counts the metadata. Both pages where a fallback beat native were such pages; that is a separate fix.
 
-Cost: none on pages the check passed. On the 42 pages, 7% more tokens on the first page; session medians were 0.8 s for a native read against 1.6 s (trafilatura) and 4.1 s (Jina) for the fallbacks this skips.
+Cost: none on pages the check passed. On the 42 pages, 7% more tokens on the first page; session medians: native 0.8 s, trafilatura 1.6 s, Jina 4.1 s.
 
 ## Testing
 
