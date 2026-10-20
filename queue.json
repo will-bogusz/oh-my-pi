@@ -34611,13 +34611,13 @@
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/write-keep-crlf.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16575,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/write-keep-crlf",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:50:50Z",
-   "updated": "2026-10-20T23:55:06Z",
+   "updated": "2026-10-20T23:58:47Z",
    "note": "",
    "built": [
     {
@@ -34889,7 +34889,8 @@
      "at": "2026-10-20T23:55:01Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-20T23:58:47Z"
   },
   {
    "id": "fetch-ua-retry",
