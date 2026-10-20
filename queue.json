@@ -28307,13 +28307,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/write-prefix-contiguous.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16441,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/write-prefix-contiguous",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:02:04Z",
-   "updated": "2026-10-20T04:07:32Z",
+   "updated": "2026-10-20T04:11:25Z",
    "note": "",
    "built": [
     {
@@ -28916,7 +28916,8 @@
      "tree": "43d4586da1147842d90ba253d20750a3ce54816a"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z"
+   "advanced": "2026-10-19T22:06:15Z",
+   "opened": "2026-10-20T04:11:25Z"
   },
   {
    "id": "edit-tagless-errors",
