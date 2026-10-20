@@ -34257,6 +34257,24 @@
    "added": "2026-10-20T23:37:15Z",
    "updated": "2026-10-20T23:37:15Z",
    "note": ""
+  },
+  {
+   "id": "compaction-trigger",
+   "branch": "will/compaction-trigger",
+   "title": "feat(coding-agent): record what triggered each compaction",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/compaction-trigger.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/compaction-trigger",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:41:41Z",
+   "updated": "2026-10-20T23:41:41Z",
+   "note": ""
   }
  ],
  "watch": {
