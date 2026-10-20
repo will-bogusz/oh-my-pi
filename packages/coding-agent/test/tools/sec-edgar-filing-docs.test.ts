@@ -41,6 +41,8 @@ describe("SEC EDGAR handler on Archives URLs", () => {
 
 		for (const url of [
 			"https://www.sec.gov/Archives/edgar/data/1407583/000149315226044876/form8-k.htm",
+			"https://www.sec.gov/Archives/edgar/data/1407583/000149315226044876/0001493152-26-044876-index.htm",
+			"https://www.sec.gov/Archives/edgar/data/1407583/000149315226044876/0001493152-26-044876.txt",
 			"https://www.sec.gov/Archives/edgar/data/1407583/000149315226044876/",
 		]) {
 			expect(await handleSecEdgar(url, 5)).toBeNull();
@@ -51,10 +53,14 @@ describe("SEC EDGAR handler on Archives URLs", () => {
 	it("still lists the filings of a company's Archives folder", async () => {
 		const loadPage = stubSubmissions();
 
-		const result = await handleSecEdgar("https://www.sec.gov/Archives/edgar/data/1407583/", 5);
-
-		expect(result?.method).toBe("sec-edgar");
-		expect(result?.content).toContain("Example Filer Inc");
+		for (const url of [
+			"https://www.sec.gov/Archives/edgar/data/1407583/",
+			"https://www.sec.gov/Archives/edgar/data/1407583",
+		]) {
+			const result = await handleSecEdgar(url, 5);
+			expect(result?.method).toBe("sec-edgar");
+			expect(result?.content).toContain("Example Filer Inc");
+		}
 		expect(loadPage).toHaveBeenCalledWith("https://data.sec.gov/submissions/CIK0001407583.json", expect.anything());
 	});
 });
