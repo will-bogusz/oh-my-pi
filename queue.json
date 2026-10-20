@@ -34185,6 +34185,24 @@
    "added": "2026-10-20T23:07:24Z",
    "updated": "2026-10-20T23:07:24Z",
    "note": ""
+  },
+  {
+   "id": "task-result-inline",
+   "branch": "will/task-result-inline",
+   "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/task-result-inline.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/task-result-inline",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:07:24Z",
+   "updated": "2026-10-20T23:07:24Z",
+   "note": ""
   }
  ],
  "watch": {
