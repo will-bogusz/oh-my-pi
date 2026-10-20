@@ -6,6 +6,7 @@
 
 - Anthropic web search and Files API uploads follow `PI_ANTHROPIC_API_VERSION=2026-10-21`; web search omits `temperature` under that version ([#16706](https://github.com/can1357/oh-my-pi/pull/16706) by [@H4vC](https://github.com/H4vC))
 - `/debug` report bundles now include `session-logs.txt`: every log record written today by the reporting session and its subagents, including records older than the last 1,000 lines of each process log that `logs.txt` keeps ([#16587](https://github.com/can1357/oh-my-pi/pull/16587) by [@will-bogusz](https://github.com/will-bogusz))
+- Compaction entries now record what started them (threshold, overflow, idle, length stop, `/compact` or `new_context`) and the threshold and provider and local token counts behind an automatic one; the transcript divider names the trigger and ctrl+o shows the counts
 
 ### Changed
 

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- The compaction divider names what triggered the compaction, and its expanded view shows the threshold and token counts the decision compared
+
 ## [18.12.6] - 2026-10-21
 
 ### Changed

@@ -5,6 +5,7 @@
 ### Added
 
 - Added `Agent.logContext`, fields added to every log record written during the agent's runs ([#16587](https://github.com/can1357/oh-my-pi/pull/16587) by [@will-bogusz](https://github.com/will-bogusz))
+- Compaction summary messages carry an optional `trigger` (what started the compaction and the token counts its decision compared) for display
 
 ## [18.12.4] - 2026-10-20
 
