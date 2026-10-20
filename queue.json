@@ -25743,7 +25743,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-sqlite-q-paging",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:45Z",
-   "updated": "2026-10-20T04:07:32Z",
+   "updated": "2026-10-20T04:34:32Z",
    "note": "",
    "built": [
     {
@@ -26304,6 +26304,16 @@
      "at": "2026-10-20T04:07:32Z",
      "host": "goliath",
      "tree": "43d4586da1147842d90ba253d20750a3ce54816a"
+    },
+    {
+     "with": "#16441",
+     "code": "19d57f70e9562ae562099d6d73c7b887c67b0135",
+     "with_code": "fe7044f03cfad8aec273496bfe73e5609882d5c7",
+     "tip": "6e52eed451b2a8eef4e4348eaf69d634c8c6f364",
+     "with_tip": "5435cca8281001cf34e5a367742804ac24386689",
+     "at": "2026-10-20T04:34:31Z",
+     "host": "goliath",
+     "tree": "d0ade499e511c4465db3de996542005959e3cf1a"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
@@ -30148,7 +30158,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-wait-reply",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:22:04Z",
-   "updated": "2026-10-20T04:07:32Z",
+   "updated": "2026-10-20T04:34:32Z",
    "note": "",
    "built": [
     {
@@ -30709,6 +30719,16 @@
      "at": "2026-10-20T04:07:32Z",
      "host": "goliath",
      "tree": "43d4586da1147842d90ba253d20750a3ce54816a"
+    },
+    {
+     "with": "#16441",
+     "code": "90d557ceac0d8c78dc5b555b0f35440a5dd8be33",
+     "with_code": "fe7044f03cfad8aec273496bfe73e5609882d5c7",
+     "tip": "3b62bca10b164daf33ed93459b02b0fdbf6f9e1e",
+     "with_tip": "5435cca8281001cf34e5a367742804ac24386689",
+     "at": "2026-10-20T04:34:31Z",
+     "host": "goliath",
+     "tree": "d0ade499e511c4465db3de996542005959e3cf1a"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
