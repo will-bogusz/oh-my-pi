@@ -33215,6 +33215,24 @@
    "added": "2026-10-20T20:04:43Z",
    "updated": "2026-10-20T20:04:43Z",
    "note": ""
+  },
+  {
+   "id": "ts-rule-followups",
+   "branch": "will/ts-rule-followups",
+   "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
+   "body": "bodies/ts-rule-followups.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ts-rule-followups",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T20:06:09Z",
+   "updated": "2026-10-20T20:06:09Z",
+   "note": ""
   }
  ],
  "watch": {
