@@ -36729,6 +36729,24 @@
    "added": "2026-10-20T23:41:41Z",
    "updated": "2026-10-20T23:41:41Z",
    "note": ""
+  },
+  {
+   "id": "revive-extension-tools",
+   "branch": "will/revive-extension-tools",
+   "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/revive-extension-tools.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/revive-extension-tools",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:42:54Z",
+   "updated": "2026-10-20T23:42:54Z",
+   "note": ""
   }
  ],
  "watch": {
