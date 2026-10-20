@@ -33330,14 +33330,14 @@
    "needs": [],
    "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/conflicts-whole-file.md",
-   "state": "open",
+   "state": "closed",
    "pr": 16555,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/conflicts-whole-file",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:04:43Z",
-   "updated": "2026-10-20T22:16:09Z",
-   "note": "",
+   "updated": "2026-10-20T22:21:52Z",
+   "note": "superseded by main 10b9b493f42 (Brit's range-read hint)",
    "built": [
     {
      "with": "#16231",
