@@ -28063,13 +28063,13 @@
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/thinking-loop-accounting.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16437,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/thinking-loop-accounting",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:52:03Z",
-   "updated": "2026-10-20T02:16:02Z",
+   "updated": "2026-10-20T03:32:52Z",
    "note": "",
    "built": [
     {
@@ -28241,7 +28241,8 @@
      "at": "2026-10-20T02:16:00Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-10-20T03:32:52Z"
   },
   {
    "id": "tar-stream-index",
