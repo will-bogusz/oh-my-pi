@@ -30154,13 +30154,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/subagent-wait-reply.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16445,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-wait-reply",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:22:04Z",
-   "updated": "2026-10-20T04:34:32Z",
+   "updated": "2026-10-20T04:42:57Z",
    "note": "",
    "built": [
     {
@@ -30733,7 +30733,8 @@
      "tree": "d0ade499e511c4465db3de996542005959e3cf1a"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z"
+   "advanced": "2026-10-19T22:06:15Z",
+   "opened": "2026-10-20T04:42:57Z"
   },
   {
    "id": "r2-browser-wait-line",
