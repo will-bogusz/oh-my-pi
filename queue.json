@@ -33101,17 +33101,67 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T13:32:09Z",
+  "checked": "2026-10-20T14:02:14Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
-  "conflicts": {},
-  "merged_through": "2026-10-20T13:13:55Z",
+  "conflicts": {
+   "#16250": {
+    "since": "2026-10-20T14:02:14Z",
+    "title": "fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff",
+    "files": [
+     "packages/ai/src/providers/anthropic.ts"
+    ]
+   },
+   "#16392": {
+    "since": "2026-10-20T14:02:14Z",
+    "title": "fix(ai): log one warning per request for dropped thinking blocks",
+    "files": [
+     "packages/ai/src/providers/amazon-bedrock.ts"
+    ]
+   }
+  },
+  "merged_through": "2026-10-20T13:59:28Z",
   "unreleased": {
    "16432": {
     "title": "fix(pi-builtins): print rg counts only for files with matches",
     "merge_commit": "b040cfeb542424cd5fd4606ff3aac70dce7af82f",
     "merged_at": "2026-10-20T13:13:55Z"
+   },
+   "16441": {
+    "title": "fix(write): keep content whose leading numbers do not count up by one",
+    "merge_commit": "c3862cbfab1a99446cbd6569e1760ac4c0444454",
+    "merged_at": "2026-10-20T13:48:32Z"
+   },
+   "16380": {
+    "title": "fix(coding-agent): keep a newer text-predict daemon instead of shutting it down",
+    "merge_commit": "eeb904d9a5da167e35f7156e79b4e8de7cdf6e44",
+    "merged_at": "2026-10-20T13:49:20Z"
+   },
+   "16381": {
+    "title": "fix(edit): required a live tag for bare hashline MV and REM",
+    "merge_commit": "fd4fea523a7231f4b3455e5014b80da3d5775c00",
+    "merged_at": "2026-10-20T13:49:46Z"
+   },
+   "16421": {
+    "title": "fix(coding-agent): load custom tools that import omp packages in the binary",
+    "merge_commit": "30afab1e198342f261f7694d13e0119049758ef2",
+    "merged_at": "2026-10-20T13:54:13Z"
+   },
+   "16404": {
+    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps",
+    "merge_commit": "61a26256e5059d54e129bd4d9cf97e39cc6d0bdd",
+    "merged_at": "2026-10-20T13:54:27Z"
+   },
+   "16299": {
+    "title": "fix(coding-agent): say computer.windows() returns plain records, not window handles",
+    "merge_commit": "8f08aadfda7927db8d8b9cfa9f09fe7c53cd412d",
+    "merged_at": "2026-10-20T13:54:32Z"
+   },
+   "16438": {
+    "title": "fix(read): read one line for a bare N beside :raw",
+    "merge_commit": "66f261f9598144fc1cc07b0552c093f459d8e56f",
+    "merged_at": "2026-10-20T13:59:28Z"
    }
   },
   "ready": [
@@ -33142,14 +33192,11 @@
    16294,
    16296,
    16297,
-   16299,
    16300,
    16306,
    16309,
    16316,
    16369,
-   16380,
-   16381,
    16383,
    16384,
    16386,
@@ -33163,14 +33210,12 @@
    16397,
    16399,
    16403,
-   16404,
    16405,
    16407,
    16409,
    16418,
    16419,
    16420,
-   16421,
    16422,
    16423,
    16425,
@@ -33180,8 +33225,6 @@
    16435,
    16436,
    16437,
-   16438,
-   16441,
    16442,
    16444,
    16445
@@ -35642,6 +35685,80 @@
     "title": "fix(pi-builtins): print rg counts only for files with matches",
     "merged_by": "H4vC",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T14:02:14Z",
+    "kind": "merged",
+    "number": 16441,
+    "title": "fix(write): keep content whose leading numbers do not count up by one",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T14:02:14Z",
+    "kind": "merged",
+    "number": 16380,
+    "title": "fix(coding-agent): keep a newer text-predict daemon instead of shutting it down",
+    "merged_by": "H4vC",
+    "maintainer_commits": 3
+   },
+   {
+    "at": "2026-10-20T14:02:14Z",
+    "kind": "merged",
+    "number": 16381,
+    "title": "fix(edit): required a live tag for bare hashline MV and REM",
+    "merged_by": "H4vC",
+    "maintainer_commits": 3
+   },
+   {
+    "at": "2026-10-20T14:02:14Z",
+    "kind": "merged",
+    "number": 16421,
+    "title": "fix(coding-agent): load custom tools that import omp packages in the binary",
+    "merged_by": "H4vC",
+    "maintainer_commits": 2
+   },
+   {
+    "at": "2026-10-20T14:02:14Z",
+    "kind": "merged",
+    "number": 16404,
+    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T14:02:14Z",
+    "kind": "merged",
+    "number": 16299,
+    "title": "fix(coding-agent): say computer.windows() returns plain records, not window handles",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-20T14:02:14Z",
+    "kind": "merged",
+    "number": 16438,
+    "title": "fix(read): read one line for a bare N beside :raw",
+    "merged_by": "H4vC",
+    "maintainer_commits": 2
+   },
+   {
+    "at": "2026-10-20T14:02:14Z",
+    "kind": "conflict",
+    "label": "#16250",
+    "title": "fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff",
+    "files": [
+     "packages/ai/src/providers/anthropic.ts"
+    ]
+   },
+   {
+    "at": "2026-10-20T14:02:14Z",
+    "kind": "conflict",
+    "label": "#16392",
+    "title": "fix(ai): log one warning per request for dropped thinking blocks",
+    "files": [
+     "packages/ai/src/providers/amazon-bedrock.ts"
+    ]
    }
   ]
  }
