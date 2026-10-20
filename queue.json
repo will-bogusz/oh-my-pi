@@ -14062,7 +14062,7 @@
    "area": "providers",
    "priority": "P2",
    "needs": [],
-   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/factory-droid-credit-promotions.md",
    "state": "open",
    "pr": 16309,
@@ -14070,7 +14070,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-credit-promotions",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:02Z",
-   "updated": "2026-10-19T07:45:30Z",
+   "updated": "2026-10-20T20:32:35Z",
    "note": "",
    "built": [
     {
@@ -14557,7 +14557,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-19T06:41:21Z",
+   "advanced": "2026-10-20T20:32:35Z",
    "opened": "2026-10-19T06:56:13Z",
    "readied": "2026-10-19T06:56:45Z"
   },
@@ -16076,7 +16076,7 @@
    "area": "providers",
    "priority": "P2",
    "needs": [],
-   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/factory-droid-prompt-cache.md",
    "state": "open",
    "pr": 16296,
@@ -16084,7 +16084,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-prompt-cache",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:51:28Z",
-   "updated": "2026-10-19T07:55:55Z",
+   "updated": "2026-10-20T20:32:35Z",
    "note": "",
    "built": [
     {
@@ -16591,7 +16591,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-19T04:35:16Z",
+   "advanced": "2026-10-20T20:32:35Z",
    "opened": "2026-10-19T05:02:02Z"
   },
   {
@@ -16998,7 +16998,7 @@
    "area": "providers",
    "priority": "P2",
    "needs": [],
-   "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/factory-droid-image-generation.md",
    "state": "open",
    "pr": 16316,
@@ -17006,7 +17006,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-image-generation",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:11:27Z",
-   "updated": "2026-10-19T08:44:49Z",
+   "updated": "2026-10-20T20:32:35Z",
    "note": "",
    "built": [
     {
@@ -17585,7 +17585,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T07:29:44Z"
+   "opened": "2026-10-19T07:29:44Z",
+   "advanced": "2026-10-20T20:32:35Z"
   },
   {
    "id": "factory-droid-image-role-default",
