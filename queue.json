@@ -4670,7 +4670,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/relay-popup-front-main.md",
    "state": "open",
    "pr": 16284,
@@ -4678,7 +4678,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front-main",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:46:45Z",
-   "updated": "2026-10-19T04:21:07Z",
+   "updated": "2026-10-20T20:26:26Z",
    "note": "",
    "built": [
     {
@@ -5123,7 +5123,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-18T21:07:28Z",
+   "advanced": "2026-10-20T20:26:26Z",
    "opened": "2026-10-19T02:42:33Z",
    "readied": "2026-10-19T02:42:52Z"
   },
@@ -14691,7 +14691,7 @@
    "area": "providers",
    "priority": "P1",
    "needs": [],
-   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/factory-droid-org-lookup.md",
    "state": "open",
    "pr": 16257,
@@ -14699,7 +14699,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-org-lookup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:18:31Z",
-   "updated": "2026-10-18T23:07:26Z",
+   "updated": "2026-10-20T20:26:26Z",
    "note": "",
    "built": [
     {
@@ -14802,7 +14802,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-18T21:41:19Z",
+   "advanced": "2026-10-20T20:26:26Z",
    "opened": "2026-10-18T23:07:09Z",
    "readied": "2026-10-18T23:07:26Z"
   },
@@ -16601,7 +16601,7 @@
    "area": "auth",
    "priority": "P1",
    "needs": [],
-   "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/oauth-refresh-keep-rotated-token.md",
    "state": "open",
    "pr": 16291,
@@ -16609,7 +16609,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/oauth-refresh-keep-rotated-token",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:02:38Z",
-   "updated": "2026-10-19T04:30:14Z",
+   "updated": "2026-10-20T20:26:26Z",
    "note": "",
    "built": [
     {
@@ -16968,7 +16968,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-19T04:28:23Z"
+   "opened": "2026-10-19T04:28:23Z",
+   "advanced": "2026-10-20T20:26:26Z"
   },
   {
    "id": "factory-droid-gemini-4-argon",
@@ -18234,7 +18235,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "1d5aff90b057ce7dbfe32ea557a527c1b3144b72",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/lsp-workspace-folders.md",
    "state": "open",
    "pr": 16271,
@@ -18242,7 +18243,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/lsp-workspace-folders",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:26:57Z",
-   "updated": "2026-10-19T00:54:24Z",
+   "updated": "2026-10-20T20:26:26Z",
    "note": "",
    "built": [
     {
@@ -18654,7 +18655,8 @@
     }
    ],
    "opened": "2026-10-19T00:53:59Z",
-   "readied": "2026-10-19T00:54:24Z"
+   "readied": "2026-10-19T00:54:24Z",
+   "advanced": "2026-10-20T20:26:26Z"
   },
   {
    "id": "factory-droid-completions-tool-names",
@@ -18824,7 +18826,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "81fa40eadef31a578b8acb922c7054c43f0c0f2c",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/read-after-bash-revalidate.md",
    "state": "open",
    "pr": 16274,
@@ -18832,7 +18834,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-after-bash-revalidate",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:39:24Z",
-   "updated": "2026-10-19T21:48:13Z",
+   "updated": "2026-10-20T20:26:26Z",
    "note": "",
    "built": [
     {
@@ -19272,7 +19274,7 @@
     }
    ],
    "opened": "2026-10-19T01:07:22Z",
-   "advanced": "2026-10-19T21:48:13Z"
+   "advanced": "2026-10-20T20:26:26Z"
   },
   {
    "id": "natives-dts-regen",
@@ -32475,7 +32477,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "2220e58146ebe31508e7a216242840d373e082d0",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/computer-shell-exception.md",
    "state": "open",
    "pr": 16403,
@@ -32483,7 +32485,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-shell-exception",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:50:15Z",
-   "updated": "2026-10-19T23:53:31Z",
+   "updated": "2026-10-20T20:26:26Z",
    "note": "",
    "built": [
     {
@@ -33056,7 +33058,7 @@
      "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z",
+   "advanced": "2026-10-20T20:26:26Z",
    "opened": "2026-10-19T23:53:07Z",
    "readied": "2026-10-19T23:53:30Z"
   },
