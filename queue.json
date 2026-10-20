@@ -23867,7 +23867,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ln-uri-source",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:44:46Z",
-   "updated": "2026-10-20T02:20:27Z",
+   "updated": "2026-10-20T02:20:53Z",
    "note": "",
    "built": [
     {
@@ -24441,7 +24441,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-20T02:20:27Z"
+   "opened": "2026-10-20T02:20:27Z",
+   "readied": "2026-10-20T02:20:53Z"
   },
   {
    "id": "autoqa-home-paths",
