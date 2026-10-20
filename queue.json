@@ -36785,6 +36785,26 @@
    "added": "2026-10-20T23:49:04Z",
    "updated": "2026-10-20T23:49:04Z",
    "note": ""
+  },
+  {
+   "id": "sec-edgar-filing-docs",
+   "branch": "will/sec-edgar-filing-docs",
+   "title": "fix(coding-agent): read an SEC EDGAR filing document instead of the company's filing list",
+   "area": "other",
+   "priority": null,
+   "needs": [
+    "fetch-ua-retry"
+   ],
+   "base": "5635bd12394dba67509de01859546402286307e5",
+   "body": "bodies/sec-edgar-filing-docs.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/sec-edgar-filing-docs",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:53:27Z",
+   "updated": "2026-10-20T23:53:27Z",
+   "note": ""
   }
  ],
  "watch": {
