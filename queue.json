@@ -24268,7 +24268,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/autoqa-home-paths",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:16Z",
-   "updated": "2026-10-20T00:14:38Z",
+   "updated": "2026-10-20T00:15:03Z",
    "note": "",
    "built": [
     {
@@ -24772,7 +24772,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-20T00:14:37Z"
+   "opened": "2026-10-20T00:14:37Z",
+   "readied": "2026-10-20T00:15:02Z"
   },
   {
    "id": "read-selector-edges",
