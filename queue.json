@@ -33757,7 +33757,7 @@
    "branch": "will/factory-screenshot-budget",
    "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts",
    "area": "other",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
    "body": "bodies/factory-screenshot-budget.md",
@@ -33767,7 +33767,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-screenshot-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:08Z",
-   "updated": "2026-10-20T21:02:25Z",
+   "updated": "2026-10-20T21:32:31Z",
    "note": "",
    "built": [
     {
