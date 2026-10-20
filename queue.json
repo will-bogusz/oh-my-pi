@@ -34239,6 +34239,24 @@
    "added": "2026-10-20T23:08:31Z",
    "updated": "2026-10-20T23:09:15Z",
    "note": ""
+  },
+  {
+   "id": "bash-view-tags",
+   "branch": "will/bash-view-tags",
+   "title": "feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them",
+   "area": "coding-agent",
+   "priority": "P1",
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/bash-view-tags.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-view-tags",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:37:15Z",
+   "updated": "2026-10-20T23:37:15Z",
+   "note": ""
   }
  ],
  "watch": {
