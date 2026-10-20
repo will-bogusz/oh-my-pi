@@ -33104,7 +33104,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T14:02:14Z",
+  "checked": "2026-10-20T14:33:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -33124,7 +33124,7 @@
     ]
    }
   },
-  "merged_through": "2026-10-20T13:59:28Z",
+  "merged_through": "2026-10-20T14:25:41Z",
   "unreleased": {
    "16432": {
     "title": "fix(pi-builtins): print rg counts only for files with matches",
@@ -33165,6 +33165,21 @@
     "title": "fix(read): read one line for a bare N beside :raw",
     "merge_commit": "66f261f9598144fc1cc07b0552c093f459d8e56f",
     "merged_at": "2026-10-20T13:59:28Z"
+   },
+   "16388": {
+    "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out",
+    "merge_commit": "4ca7dc5df62afd1a1be82331a392a03976732d78",
+    "merged_at": "2026-10-20T14:22:50Z"
+   },
+   "16409": {
+    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances",
+    "merge_commit": "d91feb6d2bd8c8b66959943757fd797ad47b7ac1",
+    "merged_at": "2026-10-20T14:23:43Z"
+   },
+   "16391": {
+    "title": "fix(coding-agent): kept requested lines in in-memory range reads",
+    "merge_commit": "8923f62212581adfad67a822e789e5c580b46ef5",
+    "merged_at": "2026-10-20T14:25:41Z"
    }
   },
   "ready": [
@@ -33203,10 +33218,8 @@
    16383,
    16384,
    16386,
-   16388,
    16389,
    16390,
-   16391,
    16392,
    16393,
    16394,
@@ -33215,7 +33228,6 @@
    16403,
    16405,
    16407,
-   16409,
    16418,
    16419,
    16420,
@@ -35762,6 +35774,30 @@
     "files": [
      "packages/ai/src/providers/amazon-bedrock.ts"
     ]
+   },
+   {
+    "at": "2026-10-20T14:33:01Z",
+    "kind": "merged",
+    "number": 16388,
+    "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out",
+    "merged_by": "H4vC",
+    "maintainer_commits": 2
+   },
+   {
+    "at": "2026-10-20T14:33:01Z",
+    "kind": "merged",
+    "number": 16409,
+    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-20T14:33:01Z",
+    "kind": "merged",
+    "number": 16391,
+    "title": "fix(coding-agent): kept requested lines in in-memory range reads",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  }
