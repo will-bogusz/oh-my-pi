@@ -36747,6 +36747,26 @@
    "added": "2026-10-20T23:42:54Z",
    "updated": "2026-10-20T23:42:54Z",
    "note": ""
+  },
+  {
+   "id": "read-url-markup-tokens",
+   "branch": "will/read-url-markup-tokens",
+   "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads",
+   "area": "other",
+   "priority": null,
+   "needs": [
+    "read-nav-gate"
+   ],
+   "base": "c34a85afb98747cfc246b725701538681f1907b0",
+   "body": "bodies/read-url-markup-tokens.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-url-markup-tokens",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:46:25Z",
+   "updated": "2026-10-20T23:46:25Z",
+   "note": ""
   }
  ],
  "watch": {
