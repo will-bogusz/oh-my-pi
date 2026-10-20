@@ -13940,7 +13940,7 @@
    "area": "providers",
    "priority": "P1",
    "needs": [],
-   "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/anthropic-refusal-handoff.md",
    "state": "open",
    "pr": 16250,
@@ -13948,7 +13948,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-refusal-handoff",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:09:46Z",
-   "updated": "2026-10-20T20:00:00Z",
+   "updated": "2026-10-20T22:02:03Z",
    "note": "",
    "built": [
     {
@@ -14051,7 +14051,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-20T19:56:54Z",
+   "advanced": "2026-10-20T22:02:03Z",
    "opened": "2026-10-18T22:03:49Z",
    "readied": "2026-10-18T22:04:07Z"
   },
@@ -33152,7 +33152,7 @@
    "area": "python",
    "priority": "P1",
    "needs": [],
-   "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
+   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
    "body": "bodies/pip-procfs-fallback.md",
    "state": "open",
    "pr": 16552,
@@ -33160,7 +33160,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/pip-procfs-fallback",
    "host": "MacBook-Pro",
    "added": "2026-10-20T19:58:45Z",
-   "updated": "2026-10-20T20:21:50Z",
+   "updated": "2026-10-20T22:02:03Z",
    "note": "",
    "built": [
     {
@@ -33318,7 +33318,8 @@
     }
    ],
    "opened": "2026-10-20T20:09:31Z",
-   "readied": "2026-10-20T20:09:54Z"
+   "readied": "2026-10-20T20:09:54Z",
+   "advanced": "2026-10-20T22:02:03Z"
   },
   {
    "id": "conflicts-whole-file",
