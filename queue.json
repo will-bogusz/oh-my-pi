@@ -36850,6 +36850,24 @@
    "added": "2026-10-20T23:54:49Z",
    "updated": "2026-10-20T23:54:49Z",
    "note": ""
+  },
+  {
+   "id": "pdf-scan-pages",
+   "branch": "will/pdf-scan-pages",
+   "title": "fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/pdf-scan-pages.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/home/will/.omp/main-wt/oh-my-pi/pdf-scan-pages",
+   "host": "goliath",
+   "added": "2026-10-20T23:55:18Z",
+   "updated": "2026-10-20T23:55:18Z",
+   "note": ""
   }
  ],
  "watch": {
