@@ -15,12 +15,12 @@ The per-read conflict count (the `⚠ 3 of 6 visible` warning on an ordinary ran
 
 Decision: scan to the end instead of telling the agent how to reach the rest. A first version named the line the scan stopped at and asked for a range read from there; the review found that a ranged read registers only blocks it shows whole, so a block split across two read pages stays unregistered, and a 50 MiB file means hundreds of pages. `scanFileForConflicts` now streams the file line by line through a `ConflictScanner` (the old `scanConflictLines` loop, holding its state between lines), and `:conflicts` passes no cap. `scanConflictLines` keeps its signature and stays the window scanner.
 
-**Cost:** time and memory grow with the file instead of stopping at 10 MiB. On goliath a 191 MiB file with one block at the end scans in 163 ms with +36 MB RSS. The worst case is a `<<<<<<<` that never closes: the scanner keeps the lines after it until the next opener, +491 MB RSS for the same file with a stray opener on line 1. The scan checks the read's abort signal between chunks.
+**Cost:** time grows with the file; memory does not. The scan keeps at most 10 MiB of one line (enough to match any marker) and 10 MiB of one block's sections: a block past that is dropped and named in the listing (`not listed (over 10 MiB of sections; resolve with a normal edit): conflicts opened at L1.`), so a `<<<<<<<` that never closes cannot hold the rest of the file. On goliath, 191 MiB files scan in 74-163 ms with a peak of +77 to +81 MB RSS whether they hold one block at the end, a stray opener on line 1, or a single 191 MiB line. The scan checks the read's abort signal between chunks.
 
 ## Testing
 
-- New `conflict-integration.test.ts` case: the two files in the table get the listings above, and `read conflict://1/theirs` renders the block found past 10 MiB. `bun test test/tools/conflict-integration.test.ts test/tools/conflict-detect.test.ts`: 105 pass, the existing scanner cases included.
-- Negative controls: with `src/tools` reverted to `main` the case fails (`Received: "No unresolved git merge conflicts in after-cap.ts."`); with `:conflicts` passing the default cap again it fails the same way.
+- New `conflict-integration.test.ts` cases: the two files in the table get the listings above, and `read conflict://1/theirs` renders the block found past 10 MiB; a block whose `ours` holds 11 MiB is named in the note while the block after it is still listed; a 12 MiB line with no newline before a block still lets that block be listed. `bun test test/tools/conflict-integration.test.ts test/tools/conflict-detect.test.ts`: 106 pass, the existing scanner cases included.
+- Negative controls: with `src/tools` reverted to `main` the first case fails (`Received: "No unresolved git merge conflicts in after-cap.ts."`); with `:conflicts` passing the default cap again it fails the same way; with the block-size check disabled the second case lists the 11 MiB block (`⚠ 2 unresolved conflicts`).
 - `bun run check` in `packages/coding-agent` passes.
 
 ---
