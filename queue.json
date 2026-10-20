@@ -34026,20 +34026,11 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T22:03:07Z",
+  "checked": "2026-10-20T22:33:18Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {
-   "#16555": {
-    "since": "2026-10-20T22:03:07Z",
-    "title": "fix(coding-agent): scan the whole file for :conflicts",
-    "files": [
-     "packages/coding-agent/src/tools/conflict-detect.ts",
-     "packages/coding-agent/src/tools/read.ts",
-     "packages/coding-agent/test/tools/conflict-integration.test.ts"
-    ]
-   },
    "#16556": {
     "since": "2026-10-20T22:03:07Z",
     "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
@@ -34082,7 +34073,6 @@
    16403,
    16552,
    16553,
-   16555,
    16556,
    16564
   ],
