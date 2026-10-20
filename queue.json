@@ -22654,7 +22654,7 @@
    "branch": "will/edit-parse-only-ambiguity",
    "title": "fix(edit): name the trailing comma when a one-row replacement only fails on it",
    "area": "other",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/edit-parse-only-ambiguity.md",
@@ -22664,7 +22664,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-parse-only-ambiguity",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:38:47Z",
-   "updated": "2026-10-20T01:40:54Z",
+   "updated": "2026-10-20T01:50:26Z",
    "note": "",
    "built": [
     {
@@ -26164,7 +26164,7 @@
    "branch": "will/custom-tool-host-imports",
    "title": "fix(coding-agent): load custom tools that import omp packages in the binary",
    "area": "other",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/custom-tool-host-imports.md",
@@ -26174,7 +26174,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/custom-tool-host-imports",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:48Z",
-   "updated": "2026-10-20T01:32:02Z",
+   "updated": "2026-10-20T01:50:26Z",
    "note": "",
    "built": [
     {
@@ -26716,7 +26716,7 @@
    "branch": "will/builtin-rule-narrow-2",
    "title": "fix(coding-agent): fire ts-no-tiny-functions and ts-promise-with-resolvers only on code they flag",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/builtin-rule-narrow-2.md",
@@ -26726,7 +26726,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/builtin-rule-narrow-2",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:49:28Z",
-   "updated": "2026-10-20T01:23:03Z",
+   "updated": "2026-10-20T01:50:26Z",
    "note": "",
    "built": [
     {
@@ -27818,7 +27818,7 @@
    "branch": "will/deepseek-image-tokens",
    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config",
    "area": "catalog",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/deepseek-image-tokens.md",
@@ -27828,7 +27828,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/deepseek-image-tokens",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:51:53Z",
-   "updated": "2026-10-20T01:18:32Z",
+   "updated": "2026-10-20T01:50:26Z",
    "note": "",
    "built": [
     {
@@ -28701,7 +28701,7 @@
    "branch": "will/edit-tagless-errors",
    "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/edit-tagless-errors.md",
@@ -28711,7 +28711,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-tagless-errors",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:03:12Z",
-   "updated": "2026-10-20T01:45:03Z",
+   "updated": "2026-10-20T01:50:26Z",
    "note": "",
    "advanced": "2026-10-19T22:15:04Z",
    "built": [
@@ -29362,7 +29362,7 @@
    "branch": "will/builtin-rule-reminder",
    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/builtin-rule-reminder.md",
@@ -29372,7 +29372,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/builtin-rule-reminder",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:10:36Z",
-   "updated": "2026-10-20T01:27:32Z",
+   "updated": "2026-10-20T01:50:26Z",
    "note": "",
    "built": [
     {
@@ -32689,7 +32689,7 @@
    "branch": "will/edit-mismatch-seen-lines",
    "title": "fix(edit): counted only a mismatch reply's displayed rows as seen",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/edit-mismatch-seen-lines.md",
@@ -32699,7 +32699,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-mismatch-seen-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-19T22:23:03Z",
-   "updated": "2026-10-20T01:36:27Z",
+   "updated": "2026-10-20T01:50:26Z",
    "note": "",
    "built": [
     {
