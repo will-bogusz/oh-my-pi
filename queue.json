@@ -34006,19 +34006,24 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T19:38:20Z",
+  "checked": "2026-10-20T20:21:52Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
-  "conflicts": {
-   "#16250": {
-    "since": "2026-10-20T14:02:14Z",
-    "title": "fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff",
-    "files": [
-     "packages/ai/src/providers/anthropic.ts"
-    ]
+  "openable": {
+   "conflicts-whole-file": {
+    "since": "2026-10-20T20:21:52Z",
+    "title": "fix(coding-agent): scan the whole file for :conflicts"
+   },
+   "factory-screenshot-budget": {
+    "since": "2026-10-20T20:21:52Z",
+    "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts"
+   },
+   "ts-rule-followups": {
+    "since": "2026-10-20T20:21:52Z",
+    "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes"
    }
   },
+  "conflicts": {},
   "merged_through": "2026-10-20T18:11:02Z",
   "unreleased": {},
   "ready": [
@@ -34041,8 +34046,492 @@
    16297,
    16309,
    16316,
-   16403
+   16403,
+   16552,
+   16553
   ],
+  "post_merge": {
+   "13677": {
+    "title": "fix(ai,catalog): encode Devin credentials by shape and drop the Windsurf fallbacks",
+    "merge_commit": "9e631e47f792307836f92a2f7dd79b39cb5195c2",
+    "merged_at": "2026-10-20T17:15:50Z",
+    "findings": []
+   },
+   "14235": {
+    "title": "feat(ai): let broker account-pool files act as a provider and API-key allow-list",
+    "merge_commit": "99d883d0c7f39d69b78d8b831c5cf73dbc1b157e",
+    "merged_at": "2026-10-20T17:26:10Z",
+    "findings": []
+   },
+   "14237": {
+    "title": "feat(ai): opt-in account reclaim for accountPolicies",
+    "merge_commit": "266bac13f00ca46fda81d920326d70ffc4c3d3e6",
+    "merged_at": "2026-10-20T17:27:11Z",
+    "findings": []
+   },
+   "16217": {
+    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
+    "merge_commit": "3024a3711472d6a49dcaad551da33cf2d13cb96b",
+    "merged_at": "2026-10-20T18:07:13Z",
+    "findings": [
+     {
+      "bot": "chatgpt-codex-connector",
+      "severity": "P2",
+      "path": "crates/pi-natives/src/desktop/macos/skylight.rs",
+      "end": 860,
+      "url": "https://github.com/can1357/oh-my-pi/pull/16217#pullrequestreview-5589582465"
+     }
+    ]
+   },
+   "16230": {
+    "title": "fix(coding-agent): stop a browser screenshot waiting on a DevTools session past its deadline",
+    "merge_commit": "49af397ae4fa3aeb778a6c29a32de260389dc105",
+    "merged_at": "2026-10-19T17:32:52Z",
+    "findings": []
+   },
+   "16233": {
+    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
+    "merge_commit": "82809961f9c4e2b962e2f5823a425a51c0dd9b65",
+    "merged_at": "2026-10-19T17:32:33Z",
+    "findings": []
+   },
+   "16235": {
+    "title": "fix(natives): never cancel X11 uinput releases",
+    "merge_commit": "19f8df410036760f460316e734593b7e6fc5639e",
+    "merged_at": "2026-10-19T16:57:06Z",
+    "findings": []
+   },
+   "16236": {
+    "title": "fix(coding-agent): name the expected shape when browser tab.run gets an args array or open gets a URL",
+    "merge_commit": "835135afd1b8decec0cb53d9bba72067cff83c23",
+    "merged_at": "2026-10-20T18:03:11Z",
+    "findings": []
+   },
+   "16241": {
+    "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it",
+    "merge_commit": "eb8682132501c10f0e0fe59f7975199217ec5c6b",
+    "merged_at": "2026-10-19T16:45:05Z",
+    "findings": []
+   },
+   "16242": {
+    "title": "fix(coding-agent): fire ts-set-map, ts-import-type and ts-no-any only on code they flag",
+    "merge_commit": "dc2993ed435e4b434101779f53d3b5fc023a6d38",
+    "merged_at": "2026-10-20T17:48:31Z",
+    "findings": [
+     {
+      "bot": "chatgpt-codex-connector",
+      "severity": "P2",
+      "path": "packages/coding-agent/src/discovery/builtin-rules/ts-set-map.md",
+      "end": 5,
+      "url": "https://github.com/can1357/oh-my-pi/pull/16242#pullrequestreview-5589428425"
+     },
+     {
+      "bot": "chatgpt-codex-connector",
+      "severity": "P2",
+      "path": "packages/coding-agent/src/discovery/builtin-rules/ts-set-map.md",
+      "end": 5,
+      "url": "https://github.com/can1357/oh-my-pi/pull/16242#pullrequestreview-5589428425"
+     },
+     {
+      "bot": "chatgpt-codex-connector",
+      "severity": "P2",
+      "path": "packages/coding-agent/src/discovery/builtin-rules/ts-import-type.md",
+      "end": 5,
+      "url": "https://github.com/can1357/oh-my-pi/pull/16242#pullrequestreview-5589428425"
+     }
+    ]
+   },
+   "16249": {
+    "title": "fix(ai): keep Factory Droid Gemini tool schemas valid when a parameter takes a string or a list",
+    "merge_commit": "188c457d3fc6cde8ed950ebef6a756d602b3d498",
+    "merged_at": "2026-10-19T16:58:51Z",
+    "findings": []
+   },
+   "16252": {
+    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
+    "merge_commit": "6595f9b1f9bd5871b6909468dcfa2c9b65d2b39b",
+    "merged_at": "2026-10-19T17:41:37Z",
+    "findings": []
+   },
+   "16259": {
+    "title": "fix(ai): send parallel Gemini tool results back in call order",
+    "merge_commit": "fcc36032b3fe6ef242186ed17f73124b8b686ad2",
+    "merged_at": "2026-10-19T16:59:54Z",
+    "findings": []
+   },
+   "16266": {
+    "title": "fix(browser): recognize Puppeteer timeouts in release builds",
+    "merge_commit": "caa898abe8e4bda3861a82876a61ca1d6f2259a4",
+    "merged_at": "2026-10-19T17:03:02Z",
+    "findings": []
+   },
+   "16267": {
+    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values",
+    "merge_commit": "5d1c86007c684c695aa5ff6b43b3738bf7240af9",
+    "merged_at": "2026-10-19T16:52:55Z",
+    "findings": []
+   },
+   "16269": {
+    "title": "fix(coding-agent): name registered conflict ids when a hidden block is guessed",
+    "merge_commit": "894c8eb9b9c2706782caf82d0931222575fa110a",
+    "merged_at": "2026-10-20T18:02:14Z",
+    "findings": [
+     {
+      "bot": "chatgpt-codex-connector",
+      "severity": "P2",
+      "path": "packages/coding-agent/src/tools/conflict-uri.ts",
+      "end": 78,
+      "url": "https://github.com/can1357/oh-my-pi/pull/16269#pullrequestreview-5589496744"
+     }
+    ]
+   },
+   "16278": {
+    "title": "fix(coding-agent): keep URIs in auto-QA report tool names",
+    "merge_commit": "137c9a1407f993581316267d896c3237553afa90",
+    "merged_at": "2026-10-20T18:04:07Z",
+    "findings": []
+   },
+   "16281": {
+    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
+    "merge_commit": "c388b92d314791f1ffff39403c0f34393a6ada84",
+    "merged_at": "2026-10-19T17:29:47Z",
+    "findings": []
+   },
+   "16282": {
+    "title": "fix(coding-agent): persist snapcompact archive source text whole",
+    "merge_commit": "36ccf0839f3bc2baf901c1d0868baec4a6abc98b",
+    "merged_at": "2026-10-19T16:46:08Z",
+    "findings": []
+   },
+   "16283": {
+    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
+    "merge_commit": "87c3e9b7d710203d08b640bece58d08d72276e50",
+    "merged_at": "2026-10-19T16:59:16Z",
+    "findings": []
+   },
+   "16285": {
+    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
+    "merge_commit": "c270e3595d5eae958d498b9a032a72d6d5335235",
+    "merged_at": "2026-10-19T16:56:50Z",
+    "findings": []
+   },
+   "16288": {
+    "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images",
+    "merge_commit": "360b9bd6841d89b841189aebf409c37af0d0d929",
+    "merged_at": "2026-10-20T17:20:25Z",
+    "findings": [
+     {
+      "bot": "chatgpt-codex-connector",
+      "severity": "P1",
+      "path": "packages/coding-agent/src/session/provider-image-budget.ts",
+      "end": 199,
+      "url": "https://github.com/can1357/oh-my-pi/pull/16288#pullrequestreview-5589040880"
+     }
+    ]
+   },
+   "16292": {
+    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session",
+    "merge_commit": "209cafd9b1ff675cfbe9d2753edc7372a981449e",
+    "merged_at": "2026-10-19T17:20:17Z",
+    "findings": []
+   },
+   "16293": {
+    "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps",
+    "merge_commit": "abb184ded7e2ac8158905504a7a32fd8cea68279",
+    "merged_at": "2026-10-19T16:41:38Z",
+    "findings": []
+   },
+   "16294": {
+    "title": "fix(browser): tell agents how to skip a configured relay",
+    "merge_commit": "ec76da2efb00f8a559b8e43d991d3cb79a1acd85",
+    "merged_at": "2026-10-20T17:30:24Z",
+    "findings": []
+   },
+   "16295": {
+    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal",
+    "merge_commit": "44fae6e61a81a4c4fe4523af1844fafff0c27d40",
+    "merged_at": "2026-10-19T17:33:37Z",
+    "findings": []
+   },
+   "16299": {
+    "title": "fix(coding-agent): say computer.windows() returns plain records, not window handles",
+    "merge_commit": "8f08aadfda7927db8d8b9cfa9f09fe7c53cd412d",
+    "merged_at": "2026-10-20T13:54:32Z",
+    "findings": []
+   },
+   "16300": {
+    "title": "fix(coding-agent): install with %pip into venvs that have no pip",
+    "merge_commit": "0bba68154823781aa16409548fedee335d8aefec",
+    "merged_at": "2026-10-20T17:22:23Z",
+    "findings": [
+     {
+      "bot": "chatgpt-codex-connector",
+      "severity": "P2",
+      "path": "packages/coding-agent/src/eval/py/runner.py",
+      "end": 1336,
+      "url": "https://github.com/can1357/oh-my-pi/pull/16300#pullrequestreview-5589029446"
+     }
+    ]
+   },
+   "16301": {
+    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short",
+    "merge_commit": "05b355a459481d8f50c256828b2a9bb15ba659eb",
+    "merged_at": "2026-10-19T17:20:49Z",
+    "findings": []
+   },
+   "16302": {
+    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
+    "merge_commit": "0c12c9054a1fe85a0c3d1254bd6155d77babd7cb",
+    "merged_at": "2026-10-19T17:12:04Z",
+    "findings": []
+   },
+   "16306": {
+    "title": "chore(natives): regenerate index.d.ts from the current bindings",
+    "merge_commit": "0ab804423b1161d5069ee409d7916c07d2643ad5",
+    "merged_at": "2026-10-20T18:11:02Z",
+    "findings": []
+   },
+   "16312": {
+    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts",
+    "merge_commit": "896aa52a1a2a77e0f070d3a53c9d01d72683af72",
+    "merged_at": "2026-10-19T17:19:41Z",
+    "findings": []
+   },
+   "16314": {
+    "title": "fix(pi-shell,tui): keep ssh remote output intact in the minimizer",
+    "merge_commit": "3461f602d29b0c184659ec273c8a31e86486e7e5",
+    "merged_at": "2026-10-19T17:23:16Z",
+    "findings": []
+   },
+   "16369": {
+    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it",
+    "merge_commit": "b44c24172539905011a5a2e87a2a691cfbdf2f55",
+    "merged_at": "2026-10-20T17:11:14Z",
+    "findings": []
+   },
+   "16380": {
+    "title": "fix(coding-agent): keep a newer text-predict daemon instead of shutting it down",
+    "merge_commit": "eeb904d9a5da167e35f7156e79b4e8de7cdf6e44",
+    "merged_at": "2026-10-20T13:49:20Z",
+    "findings": []
+   },
+   "16381": {
+    "title": "fix(edit): required a live tag for bare hashline MV and REM",
+    "merge_commit": "fd4fea523a7231f4b3455e5014b80da3d5775c00",
+    "merged_at": "2026-10-20T13:49:46Z",
+    "findings": []
+   },
+   "16383": {
+    "title": "fix(edit): refuse stale-tag remaps aimed at the current lines",
+    "merge_commit": "161920c920e7d4d752900bb80f191fde23722d1c",
+    "merged_at": "2026-10-20T17:18:24Z",
+    "findings": []
+   },
+   "16384": {
+    "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests",
+    "merge_commit": "ff4c41c0c532273d19c4f01eac3030e59f2961cb",
+    "merged_at": "2026-10-20T17:28:04Z",
+    "findings": []
+   },
+   "16386": {
+    "title": "fix(utils,natives): keep test runs out of the real ~/.omp/logs",
+    "merge_commit": "229ad8a57a0781fcc72dcd276cff0d6b4faa78a9",
+    "merged_at": "2026-10-20T17:31:31Z",
+    "findings": []
+   },
+   "16388": {
+    "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out",
+    "merge_commit": "4ca7dc5df62afd1a1be82331a392a03976732d78",
+    "merged_at": "2026-10-20T14:22:50Z",
+    "findings": []
+   },
+   "16389": {
+    "title": "fix(coding-agent): say why a timed-out browser selector's matches could not be counted",
+    "merge_commit": "4f8807c229ab226a45c3dcf78243dc91cf97c877",
+    "merged_at": "2026-10-20T17:59:27Z",
+    "findings": []
+   },
+   "16390": {
+    "title": "fix(coding-agent): tell the model an open without app drives the user's Chrome while the relay is on",
+    "merge_commit": "9b72010f8e109b11299d38f678dee35159a12f14",
+    "merged_at": "2026-10-20T17:55:42Z",
+    "findings": []
+   },
+   "16391": {
+    "title": "fix(coding-agent): kept requested lines in in-memory range reads",
+    "merge_commit": "8923f62212581adfad67a822e789e5c580b46ef5",
+    "merged_at": "2026-10-20T14:25:41Z",
+    "findings": []
+   },
+   "16392": {
+    "title": "fix(ai): log one warning per request for dropped thinking blocks",
+    "merge_commit": "21dc17a99ddef2c8756dc091479e14642b0df265",
+    "merged_at": "2026-10-20T17:56:46Z",
+    "findings": []
+   },
+   "16393": {
+    "title": "fix(tui): warn once per TSP ack stall instead of every 5 s",
+    "merge_commit": "7e64c5267974fc3f5627a834bb71e45dcfdc590d",
+    "merged_at": "2026-10-20T17:54:44Z",
+    "findings": []
+   },
+   "16394": {
+    "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit",
+    "merge_commit": "4a4f2d5edde644d24207c759ffd74e625b2673f2",
+    "merged_at": "2026-10-20T17:09:22Z",
+    "findings": []
+   },
+   "16397": {
+    "title": "fix(coding-agent): read profile line ranges from the file, not its summary",
+    "merge_commit": "aafbf61d07eed22d2200f634596e7d220d765558",
+    "merged_at": "2026-10-20T17:10:15Z",
+    "findings": []
+   },
+   "16399": {
+    "title": "perf(natives/utok): memoize short-piece merge counts per thread",
+    "merge_commit": "8d88d291be5676c0c2ad9331465b38f837c6d966",
+    "merged_at": "2026-10-20T17:14:47Z",
+    "findings": []
+   },
+   "16404": {
+    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps",
+    "merge_commit": "61a26256e5059d54e129bd4d9cf97e39cc6d0bdd",
+    "merged_at": "2026-10-20T13:54:27Z",
+    "findings": []
+   },
+   "16405": {
+    "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in",
+    "merge_commit": "af03483a885b134b03bc786405c60093e85b9211",
+    "merged_at": "2026-10-20T18:06:13Z",
+    "findings": []
+   },
+   "16407": {
+    "title": "fix(ai): fail Claude turns that attach media Claude cannot read",
+    "merge_commit": "2dd832a0ee1f5ea2a007b4c23cb2b0ff9d179b19",
+    "merged_at": "2026-10-20T17:07:22Z",
+    "findings": []
+   },
+   "16409": {
+    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances",
+    "merge_commit": "d91feb6d2bd8c8b66959943757fd797ad47b7ac1",
+    "merged_at": "2026-10-20T14:23:43Z",
+    "findings": []
+   },
+   "16418": {
+    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config",
+    "merge_commit": "5ea81098ec02f3080a30a4936969f8969f1cfb84",
+    "merged_at": "2026-10-20T17:19:25Z",
+    "findings": []
+   },
+   "16419": {
+    "title": "fix(coding-agent): fire ts-no-tiny-functions and ts-promise-with-resolvers only on code they flag",
+    "merge_commit": "0b4e8ca82db77a13e6c0820025bd3dce0a887d45",
+    "merged_at": "2026-10-20T17:49:25Z",
+    "findings": []
+   },
+   "16420": {
+    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
+    "merge_commit": "6c0f8f0ba9fff1b58585c7ff521e11d8107c3a98",
+    "merged_at": "2026-10-20T17:25:05Z",
+    "findings": []
+   },
+   "16421": {
+    "title": "fix(coding-agent): load custom tools that import omp packages in the binary",
+    "merge_commit": "30afab1e198342f261f7694d13e0119049758ef2",
+    "merged_at": "2026-10-20T13:54:13Z",
+    "findings": []
+   },
+   "16422": {
+    "title": "fix(edit): counted only a mismatch reply's displayed rows as seen",
+    "merge_commit": "f1b410824bc8043b86e88e9daf5a11db26967cea",
+    "merged_at": "2026-10-20T17:01:25Z",
+    "findings": []
+   },
+   "16423": {
+    "title": "fix(edit): name the trailing comma when a one-row replacement only fails on it",
+    "merge_commit": "073b0605458d7a8788c455e4657dd029a8487671",
+    "merged_at": "2026-10-20T18:01:14Z",
+    "findings": []
+   },
+   "16425": {
+    "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag",
+    "merge_commit": "1e97f758b0e79408aeeec47bb72a76dfc430e619",
+    "merged_at": "2026-10-20T17:21:31Z",
+    "findings": []
+   },
+   "16428": {
+    "title": "fix(pi-builtins): link host paths to the file a backed URL aliases",
+    "merge_commit": "7820b7de27ca79e4fb60e487957ee990caa30acb",
+    "merged_at": "2026-10-20T17:53:45Z",
+    "findings": []
+   },
+   "16432": {
+    "title": "fix(pi-builtins): print rg counts only for files with matches",
+    "merge_commit": "b040cfeb542424cd5fd4606ff3aac70dce7af82f",
+    "merged_at": "2026-10-20T13:13:55Z",
+    "findings": []
+   },
+   "16433": {
+    "title": "fix(pi-builtins): treat entries already gone as removed under rm -f",
+    "merge_commit": "0dcd064d7323e21b725640b0e827f8b4062d2dd0",
+    "merged_at": "2026-10-20T17:45:16Z",
+    "findings": []
+   },
+   "16434": {
+    "title": "fix(coding-agent): skip a missing .vscode/mcp.json without warning",
+    "merge_commit": "78167283488037a5fcc8da08d7939572427b20f5",
+    "merged_at": "2026-10-20T17:57:43Z",
+    "findings": []
+   },
+   "16435": {
+    "title": "fix(read): read tail chunks in comma line lists",
+    "merge_commit": "1d3ec67ee36beed3e65383900b27b85ea96a12d0",
+    "merged_at": "2026-10-20T17:23:20Z",
+    "findings": []
+   },
+   "16436": {
+    "title": "fix(coding-agent): gate snapcompact on images the wire actually sends",
+    "merge_commit": "ecc71b8b6ac03ad1a84921d9f60ea0ac0bbe6a09",
+    "merged_at": "2026-10-20T17:08:28Z",
+    "findings": []
+   },
+   "16437": {
+    "title": "fix(ai): keep usage and timing on thinking-loop aborts",
+    "merge_commit": "ef3a92da32f63a842df1d2c05afcb7091741b764",
+    "merged_at": "2026-10-20T17:13:01Z",
+    "findings": []
+   },
+   "16438": {
+    "title": "fix(read): read one line for a bare N beside :raw",
+    "merge_commit": "66f261f9598144fc1cc07b0552c093f459d8e56f",
+    "merged_at": "2026-10-20T13:59:28Z",
+    "findings": []
+   },
+   "16441": {
+    "title": "fix(write): keep content whose leading numbers do not count up by one",
+    "merge_commit": "c3862cbfab1a99446cbd6569e1760ac4c0444454",
+    "merged_at": "2026-10-20T13:48:32Z",
+    "findings": []
+   },
+   "16442": {
+    "title": "feat(coding-agent): expose PI_SESSION_ID and PI_SESSION_FILE to bash commands",
+    "merge_commit": "3bac72a7833f1cddb74528f8830f6801d8c3e3d5",
+    "merged_at": "2026-10-20T17:12:09Z",
+    "findings": []
+   },
+   "16444": {
+    "title": "feat(read): page SQLite ?q= query rows with limit and offset",
+    "merge_commit": "bdfa4e02f65ebe3b133bba5546a3ff683f939bb0",
+    "merged_at": "2026-10-20T17:24:11Z",
+    "findings": []
+   },
+   "16445": {
+    "title": "feat(coding-agent): let wait block for the reply to a message the agent sent",
+    "merge_commit": "1ea8ad1efab5ed5865057ca1a87f7a08b1e328ea",
+    "merged_at": "2026-10-20T17:50:28Z",
+    "findings": []
+   }
+  },
   "events": [
    {
     "at": "2026-10-14T19:47:58Z",
@@ -37283,6 +37772,101 @@
     "number": 16306,
     "title": "chore(natives): regenerate index.d.ts from the current bindings",
     "tag": "v18.12.4"
+   },
+   {
+    "at": "2026-10-20T20:21:52Z",
+    "kind": "openable",
+    "id": "conflicts-whole-file",
+    "title": "fix(coding-agent): scan the whole file for :conflicts"
+   },
+   {
+    "at": "2026-10-20T20:21:52Z",
+    "kind": "openable",
+    "id": "factory-screenshot-budget",
+    "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts"
+   },
+   {
+    "at": "2026-10-20T20:21:52Z",
+    "kind": "openable",
+    "id": "ts-rule-followups",
+    "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes"
+   },
+   {
+    "at": "2026-10-20T20:21:52Z",
+    "kind": "post-merge",
+    "number": 16217,
+    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
+    "bot": "chatgpt-codex-connector",
+    "severity": "P2",
+    "path": "crates/pi-natives/src/desktop/macos/skylight.rs",
+    "end": 860,
+    "url": "https://github.com/can1357/oh-my-pi/pull/16217#pullrequestreview-5589582465"
+   },
+   {
+    "at": "2026-10-20T20:21:52Z",
+    "kind": "post-merge",
+    "number": 16242,
+    "title": "fix(coding-agent): fire ts-set-map, ts-import-type and ts-no-any only on code they flag",
+    "bot": "chatgpt-codex-connector",
+    "severity": "P2",
+    "path": "packages/coding-agent/src/discovery/builtin-rules/ts-set-map.md",
+    "end": 5,
+    "url": "https://github.com/can1357/oh-my-pi/pull/16242#pullrequestreview-5589428425"
+   },
+   {
+    "at": "2026-10-20T20:21:52Z",
+    "kind": "post-merge",
+    "number": 16242,
+    "title": "fix(coding-agent): fire ts-set-map, ts-import-type and ts-no-any only on code they flag",
+    "bot": "chatgpt-codex-connector",
+    "severity": "P2",
+    "path": "packages/coding-agent/src/discovery/builtin-rules/ts-set-map.md",
+    "end": 5,
+    "url": "https://github.com/can1357/oh-my-pi/pull/16242#pullrequestreview-5589428425"
+   },
+   {
+    "at": "2026-10-20T20:21:52Z",
+    "kind": "post-merge",
+    "number": 16242,
+    "title": "fix(coding-agent): fire ts-set-map, ts-import-type and ts-no-any only on code they flag",
+    "bot": "chatgpt-codex-connector",
+    "severity": "P2",
+    "path": "packages/coding-agent/src/discovery/builtin-rules/ts-import-type.md",
+    "end": 5,
+    "url": "https://github.com/can1357/oh-my-pi/pull/16242#pullrequestreview-5589428425"
+   },
+   {
+    "at": "2026-10-20T20:21:52Z",
+    "kind": "post-merge",
+    "number": 16269,
+    "title": "fix(coding-agent): name registered conflict ids when a hidden block is guessed",
+    "bot": "chatgpt-codex-connector",
+    "severity": "P2",
+    "path": "packages/coding-agent/src/tools/conflict-uri.ts",
+    "end": 78,
+    "url": "https://github.com/can1357/oh-my-pi/pull/16269#pullrequestreview-5589496744"
+   },
+   {
+    "at": "2026-10-20T20:21:52Z",
+    "kind": "post-merge",
+    "number": 16288,
+    "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images",
+    "bot": "chatgpt-codex-connector",
+    "severity": "P1",
+    "path": "packages/coding-agent/src/session/provider-image-budget.ts",
+    "end": 199,
+    "url": "https://github.com/can1357/oh-my-pi/pull/16288#pullrequestreview-5589040880"
+   },
+   {
+    "at": "2026-10-20T20:21:52Z",
+    "kind": "post-merge",
+    "number": 16300,
+    "title": "fix(coding-agent): install with %pip into venvs that have no pip",
+    "bot": "chatgpt-codex-connector",
+    "severity": "P2",
+    "path": "packages/coding-agent/src/eval/py/runner.py",
+    "end": 1336,
+    "url": "https://github.com/can1357/oh-my-pi/pull/16300#pullrequestreview-5589029446"
    }
   ]
  },
