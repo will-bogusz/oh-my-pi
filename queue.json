@@ -19354,7 +19354,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/vscode-mcp-missing",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:13:33Z",
-   "updated": "2026-10-20T03:20:30Z",
+   "updated": "2026-10-20T03:20:54Z",
    "note": "",
    "built": [
     {
@@ -19908,7 +19908,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-20T03:20:30Z"
+   "opened": "2026-10-20T03:20:30Z",
+   "readied": "2026-10-20T03:20:54Z"
   },
   {
    "id": "tsp-stall-log",
