@@ -8,22 +8,23 @@ Cancelling `%pip` without procfs: installer killed, its child left running → t
 |---|---|---|
 | `/proc` mounted | children read from `/proc/<pid>/stat` | unchanged |
 | `/proc` missing or unlistable | `os.listdir("/proc")` raises after the installer was stopped; no `SIGKILL`, no reap | installer leads its own process group; cancel `SIGKILL`s the group |
-| `/proc` an empty, unmounted directory | empty walk: the installer is killed, its child keeps running | same own-group kill |
-| kernel shutdown mid-install, no procfs | — (installer is in the kernel's group) | the kernel's `SIGTERM` handler kills the installer group, then lets `SIGTERM` take the kernel down |
+| `/proc` an empty, unmounted directory | empty walk: the installer's child keeps running | same |
+| kernel shutdown mid-install, no procfs | installer in the kernel's group | the kernel's `SIGTERM` handler kills the installer group, then exits on `SIGTERM` |
 
 ## Why
 
-`_kill_process_tree` stops each process before listing its children, then kills every stopped one. On `main` the exception from `_child_pids` escaped between those two steps, and the eval still returned cancelled while the stopped installer and its child stayed in the kernel's process group until kernel shutdown. Containers and chroots without a mounted or readable `/proc` hit this on every cancelled install. Linux `ps` reads `/proc` too, so it cannot list the children there either.
+`_kill_process_tree` stops each process before listing its children, then kills every stopped one. On `main` the exception from `_child_pids` escaped between those steps, leaving the stopped installer and its child until kernel shutdown. Containers and chroots without a readable `/proc` hit this on every cancelled install, and Linux `ps` reads `/proc` too.
 
 Decisions:
-- Without procfs nothing on Linux can list processes, so the installer gets a process group of its own instead (`start_new_session`) and cancelling kills that group. With procfs, and on macOS, the tree stays in the kernel's group as #16300 chose.
-- A separate group no longer gets kernel shutdown's group `SIGTERM`, so while such an installer runs the kernel forwards `SIGTERM` to it. A direct `SIGKILL` of the kernel mid-install skips that forwarding; the host only sends one after `SIGTERM` failed.
-- `/proc` counts as usable only when its listing holds the kernel's own pid, which tells a mounted procfs from an empty mountpoint without parsing mount tables.
+- Without procfs nothing can list processes, so the installer gets its own group (`start_new_session`) and cancel kills it. With procfs, and on macOS, the tree stays in the kernel's group as #16300 chose.
+- That group misses shutdown's group `SIGTERM`, so the kernel forwards it while the installer runs. A direct `SIGKILL` of the kernel skips this; the host sends one only after `SIGTERM` failed.
+- Only the main thread can install that handler, and only it gets `SIGINT`, so a `%pip` on another thread (inside a tool call) stays in the kernel's group, where shutdown reaches it.
+- `/proc` is usable only when its listing holds the kernel's own pid, which tells procfs from an empty mountpoint.
 
 ## Testing
 
-- `PI_PYTHON_INTEGRATION=1 bun test test/core/python-runner.integration.test.ts` (packages/coding-agent, Linux): 27 pass. Four no-procfs cases: a `sitecustomize` makes `os.listdir("/proc")` raise `PermissionError` or return `[]` and hides `ps`, a fake `ensurepip` spawns a child, and the cell is cancelled or the kernel shut down. With `runner.py` from the previous head both cancel cases fail with the child still running; with the `SIGTERM` forwarding removed both shutdown cases fail.
-- Real `/proc`-less namespace (`unshare -m`, tmpfs over `/proc`) driving `_run_installer`: previous head leaves the child alive on cancel; this head kills installer and child on cancel and on group `SIGTERM`. Without forwarding, `SIGTERM` leaves both alive.
+- `PI_PYTHON_INTEGRATION=1 bun test test/core/python-runner.integration.test.ts` (Linux): 29 pass. Six no-procfs cases: a `sitecustomize` makes `os.listdir("/proc")` raise or return `[]` and hides `ps`, a fake `ensurepip` spawns a child, then cancel or shutdown, `%pip` on the main thread or another. Controls: `runner.py` from 34eb211 fails both cancel cases; without `SIGTERM` forwarding both main-thread shutdown cases fail; from 778c5a8 both other-thread ones fail.
+- Real `/proc`-less namespace (`unshare -m`, tmpfs over `/proc`) driving `_run_installer`: 34eb211 leaves the child alive on cancel; this head kills both on cancel and on group `SIGTERM`.
 - `bun run check` in packages/coding-agent passes.
 
 ---
