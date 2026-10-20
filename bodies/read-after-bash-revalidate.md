@@ -13,7 +13,7 @@ A `read` placed after a `bash` call in one assistant message returned the file a
 </picture>
 
 - The agent loop hands each call `ctx.toolCall.earlierEffectsSettled`, a promise for the earlier calls of its message that run beside it and may write (any approval tier but `read`: `bash`, `task`, MCP tools; not `read`, `grep`, `glob`).
-- `read` fingerprints every local path it may resolve to (identity, size, times, a hash up to 1 MiB, a SQLite `-wal` sidecar, two listing levels), reads, waits for that promise, and reads again unless its result came from a fingerprinted path that did not change. Errors, suffix matches, `;` lists and IDA views (an IDA edit changes the open database, not the file) always read again. A web URL fetches again only if a local `;` part it names appeared or changed.
+- `read` fingerprints every local path it may resolve to (identity, size, times, a hash up to 1 MiB, a SQLite `-wal` sidecar, two listing levels), reads, waits for that promise, and reads again unless its result came from a fingerprinted path that did not change. Errors, suffix matches, `;` lists, file-backed internal URLs (`local://`, `skill://`) and IDA views (an IDA edit changes the open database, not the file) always read again. A web URL fetches again only if a local `;` part it names appeared or changed.
 - The second read runs inside the tool, so approval prompts and extension hooks fire once; an abort during the wait rejects the read.
 
 ## Why
@@ -24,14 +24,14 @@ Rejected, replayed over 30,455 recorded multi-call batches:
 - Ordering `bash` against other calls: +0.33% (bash keeps its call-order place) to +1.04% (bash exclusive) of batch time, since every read, grep and web search beside a bash starts later.
 - Waiting in `read` for the earlier calls, then reading (tried on an earlier head): +90 s, about this PR's likely bound, but all 3,708 reads beside a writing call start late and 1,746 batches slow down, against 337–1,435 here.
 
-Not covered, as on `main`: a read placed *before* a bash; internal URLs (`local://`, `skill://`); writes by a bash call after it moves to the background; `grep`, `find`, `lsp`.
+Not covered, as on `main`: a read placed *before* a bash; internal URLs not backed by files (`mcp://`, `issue://`); writes by a bash call after it moves to the background; `grep`, `find`, `lsp`.
 
 ## Testing
 
 - Live (Haiku 5.5; `bash "sleep 0.5; echo new > f"` then `read f`, both starting within 1 ms): `main` returned `1:old` 6 ms in; this PR `1:new` 2 ms after bash ended (535 ms).
-- `packages/coding-agent/test/tools/read-after-bash.test.ts` runs the real tools through the agent loop, bash changing the target only after the read returned: a rewritten, created and deleted file, `file://`, a suffix match, a tar member, SQLite (also WAL with another connection open), directory entries two levels in and past 2,000, a curly-quote fallback, the cwd, web URLs (`;` in a query fetched once; split from a new file; a rewritten local or `local://` part), an IDA view, an abort. With `read.ts` from `main` 17 of 20 fail.
+- `packages/coding-agent/test/tools/read-after-bash.test.ts` runs the real tools through the agent loop, bash changing the target only after the read returned: a rewritten, created and deleted file, `file://`, a suffix match, a tar member, SQLite (also WAL with another connection open), directory entries two levels in and past 2,000, a curly-quote fallback, the cwd, `local://`, web URLs (`;` in a query fetched once; split from a new file; a rewritten local or `local://` part), an IDA view, an abort. With `read.ts` from `main` 18 of 21 fail.
 - `packages/agent/test/agent-loop.test.ts`: only a call beside an earlier writing call gets the promise, settled after it; a transform that makes a call write counts, transforming once.
-- `bun run check` and `bun test` in `packages/agent` (801 pass); `bun run check` and the read, IDA and fetch suites in `packages/coding-agent` (227 pass).
+- `bun run check` and `bun test` in `packages/agent` (801 pass); `bun run check` and the read, IDA, fetch and internal-URL suites in `packages/coding-agent` (556 pass).
 
 <details><summary>Replay cost and method</summary>
 
