@@ -20673,13 +20673,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-raw-line.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16438,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-raw-line",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:29:28Z",
-   "updated": "2026-10-20T02:15:42Z",
+   "updated": "2026-10-20T03:37:02Z",
    "note": "",
    "built": [
     {
@@ -21332,7 +21332,8 @@
      "host": "goliath"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z"
+   "advanced": "2026-10-19T22:06:15Z",
+   "opened": "2026-10-20T03:37:02Z"
   },
   {
    "id": "r2-browser-relay-guidance",
