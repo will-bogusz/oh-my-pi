@@ -28705,13 +28705,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/edit-tagless-errors.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16425,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-tagless-errors",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:03:12Z",
-   "updated": "2026-10-20T01:11:26Z",
+   "updated": "2026-10-20T01:44:40Z",
    "note": "",
    "advanced": "2026-10-19T22:15:04Z",
    "built": [
@@ -29304,7 +29304,8 @@
      "host": "goliath",
      "tree": "2c2e4b0f9effc49a2082e4336b27bd12f0404408"
     }
-   ]
+   ],
+   "opened": "2026-10-20T01:44:40Z"
   },
   {
    "id": "edit-remap-refuse",
