@@ -618,13 +618,15 @@ describe("AgentSession mid-run threshold compaction", () => {
 		);
 		mockCompaction("MID-RUN-COMPACTED");
 		const model = session.agent.state.model;
-		const decidedThreshold = Math.floor(model.contextWindow / 100);
+		const contextWindow = model.contextWindow;
+		if (!contextWindow) throw new Error("Expected claude-sonnet-4-5 to have a context window");
+		const decidedThreshold = Math.floor(contextWindow / 100);
 
 		const prompt = session.prompt("work on the release");
 		await messageEndEntered.promise;
 		await turnEndEntered.promise;
 		// The decision compared 1% of this window and now waits on the persistence barrier.
-		session.agent.setModel({ ...model, contextWindow: model.contextWindow * 2 });
+		session.agent.setModel({ ...model, contextWindow: contextWindow * 2 });
 		releaseMessageEnd.resolve();
 		await prompt;
 
