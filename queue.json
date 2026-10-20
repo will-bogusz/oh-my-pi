@@ -33325,7 +33325,7 @@
    "branch": "will/conflicts-whole-file",
    "title": "fix(coding-agent): scan the whole file for :conflicts",
    "area": "coding-agent",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
    "body": "bodies/conflicts-whole-file.md",
@@ -33335,7 +33335,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/conflicts-whole-file",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:04:43Z",
-   "updated": "2026-10-20T20:25:09Z",
+   "updated": "2026-10-20T20:51:15Z",
    "note": "",
    "built": [
     {
@@ -33545,7 +33545,7 @@
    "branch": "will/ts-rule-followups",
    "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
    "body": "bodies/ts-rule-followups.md",
@@ -33555,7 +33555,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ts-rule-followups",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:06:09Z",
-   "updated": "2026-10-20T20:46:53Z",
+   "updated": "2026-10-20T20:51:15Z",
    "note": "",
    "built": [
     {
@@ -33967,7 +33967,7 @@
    "branch": "will/click-place-release",
    "title": "fix(natives): keep a macOS user's press placed in their app through a release during its hit-test",
    "area": "natives-macos",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
    "body": "bodies/click-place-release.md",
@@ -33977,7 +33977,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-10-20T20:21:05Z",
+   "updated": "2026-10-20T20:51:15Z",
    "note": "",
    "built": [
     {
