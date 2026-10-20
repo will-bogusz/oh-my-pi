@@ -33,9 +33,16 @@ export function formatResultOutputFallback(result: Pick<SingleResult, "output" |
  * one huge string would otherwise preview as a lone `{`).
  */
 function previewHead(output: string): string {
-	const slice = output.slice(0, FULL_OUTPUT_THRESHOLD);
-	const lastNewline = slice.lastIndexOf("\n");
-	return lastNewline >= FULL_OUTPUT_THRESHOLD / 2 ? slice.slice(0, lastNewline) : slice;
+	// L7 V3 prototype: head + tail inside the same budget so the report's conclusion survives.
+	const TAIL = 1500;
+	const headBudget = FULL_OUTPUT_THRESHOLD - TAIL;
+	const headSlice = output.slice(0, headBudget);
+	const nl = headSlice.lastIndexOf("\n");
+	const head = nl >= headBudget / 2 ? headSlice.slice(0, nl) : headSlice;
+	const tailSlice = output.slice(-TAIL);
+	const tnl = tailSlice.indexOf("\n");
+	const tail = tnl >= 0 && tnl < TAIL / 2 ? tailSlice.slice(tnl + 1) : tailSlice;
+	return `${head}\n[… ${output.length - head.length - tail.length} chars omitted; full output at the link above …]\n${tail}`;
 }
 
 /** Render the `<task-result>` envelope for a settled run. */
