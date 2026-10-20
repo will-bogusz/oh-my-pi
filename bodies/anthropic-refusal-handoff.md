@@ -33,10 +33,10 @@ Maintenance: if Anthropic renames the `fallback` block, nothing is dropped and b
 ## Testing
 
 Scripted SSE over the provider's `fetch` option, no network:
-- `packages/ai/test/anthropic-fallback-handoff.test.ts` (7): finished turn, tool-call events, a response cut after the handoff, auth-gateway SSE, replay with and without the marker, live events when fallbacks are off.
+- `packages/ai/test/anthropic-fallback-handoff.test.ts` (8): finished turn, tool-call events, a response cut after the handoff, auth-gateway SSE, replay with and without the marker, live events when fallbacks are off, live events at their own blocks on a fallback-credit continuation.
 - `packages/agent/test/anthropic-fallback-handoff.test.ts` (3), agent loop with stream speculation on: the declined call never opens a session or runs; a cut response runs nothing; an abort after the handoff keeps it out.
 
-With the transport change reverted, 9 of the 10 fail; the tenth (fallbacks off) passes on `main` by design and fails if events are held on every request. The full `packages/ai` and `packages/agent` suites, the coding-agent speculation tests and `bun run check:ts` pass.
+With the transport change reverted, 9 of the 11 fail; the other two (fallbacks off, fallback-credit continuation) pass on `main` by design and fail if events are held on every request. The full `packages/ai` and `packages/agent` suites, the coding-agent speculation tests and `bun run check:ts` pass.
 
 Not run: a live handoff, since a refusal fallback cannot be triggered on demand.
 
@@ -45,3 +45,4 @@ Not run: a live handoff, since a refusal fallback cannot be triggered on demand.
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
