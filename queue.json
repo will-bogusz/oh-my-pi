@@ -33094,13 +33094,19 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T13:02:04Z",
+  "checked": "2026-10-20T13:32:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {},
-  "merged_through": "2026-10-19T17:41:37Z",
-  "unreleased": {},
+  "merged_through": "2026-10-20T13:13:55Z",
+  "unreleased": {
+   "16432": {
+    "title": "fix(pi-builtins): print rg counts only for files with matches",
+    "merge_commit": "b040cfeb542424cd5fd4606ff3aac70dce7af82f",
+    "merged_at": "2026-10-20T13:13:55Z"
+   }
+  },
   "ready": [
    13677,
    14235,
@@ -33162,7 +33168,6 @@
    16423,
    16425,
    16428,
-   16432,
    16433,
    16434,
    16435,
@@ -35622,6 +35627,14 @@
     "id": "subagent-wait-reply",
     "title": "feat(coding-agent): let wait block for the reply to a message the agent sent",
     "why": "opened as #16445"
+   },
+   {
+    "at": "2026-10-20T13:32:09Z",
+    "kind": "merged",
+    "number": 16432,
+    "title": "fix(pi-builtins): print rg counts only for files with matches",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  }
