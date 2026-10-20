@@ -25312,13 +25312,13 @@
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/anthropic-unsupported-media.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16407,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-unsupported-media",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:34Z",
-   "updated": "2026-10-19T23:46:24Z",
+   "updated": "2026-10-20T00:09:48Z",
    "note": "",
    "built": [
     {
@@ -25471,7 +25471,8 @@
      "host": "goliath",
      "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
-   ]
+   ],
+   "opened": "2026-10-20T00:09:47Z"
   },
   {
    "id": "read-sqlite-q-paging",
