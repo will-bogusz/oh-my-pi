@@ -34113,6 +34113,24 @@
    "added": "2026-10-20T22:59:53Z",
    "updated": "2026-10-20T22:59:53Z",
    "note": ""
+  },
+  {
+   "id": "grep-per-file-cap",
+   "branch": "will/grep-per-file-cap",
+   "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/grep-per-file-cap.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/grep-per-file-cap",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:01:15Z",
+   "updated": "2026-10-20T23:01:15Z",
+   "note": ""
   }
  ],
  "watch": {
