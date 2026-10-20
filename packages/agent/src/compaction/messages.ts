@@ -47,6 +47,14 @@ export interface BranchSummaryMessage {
 	timestamp: number;
 }
 
+/** What started a compaction and the context numbers its decision read (display metadata). */
+export interface CompactionSummaryTrigger {
+	reason: string;
+	thresholdTokens?: number;
+	providerContextTokens?: number;
+	estimatedContextTokens?: number;
+}
+
 export interface CompactionSummaryMessage {
 	role: "compactionSummary";
 	summary: string;
@@ -56,6 +64,8 @@ export interface CompactionSummaryMessage {
 	tokensAfter?: number;
 	/** Harness compaction method that produced this summary (display metadata). */
 	method?: string;
+	/** What started this compaction (display metadata). */
+	trigger?: CompactionSummaryTrigger;
 	providerPayload?: ProviderPayload;
 	/** Runtime-only ordered archive blocks for snapcompact: old text region,
 	 *  imaged middle, then new text region. When present, `summary` is already
@@ -141,6 +151,8 @@ export interface CompactionSummaryMessageOptions {
 	warning?: string;
 	/** Harness compaction method that produced this summary (e.g. "remote", "soft", "handoff"). */
 	method?: string;
+	/** What started this compaction, for display on the divider. */
+	trigger?: CompactionSummaryTrigger;
 	/** Estimated context tokens after the rewrite, for display alongside `tokensBefore`. */
 	tokensAfter?: number;
 	/** See {@link CompactionSummaryMessage.historyRewriteAt}. */
@@ -153,7 +165,8 @@ export function createCompactionSummaryMessage(
 	timestamp: string,
 	options: CompactionSummaryMessageOptions = {},
 ): CompactionSummaryMessage {
-	const { shortSummary, providerPayload, images, blocks, warning, method, tokensAfter, historyRewriteAt } = options;
+	const { shortSummary, providerPayload, images, blocks, warning, method, tokensAfter, trigger, historyRewriteAt } =
+		options;
 	const imageBlocks =
 		blocks?.filter((block): block is ImageContent => block.type === "image") ??
 		(images && images.length > 0 ? images : undefined);
@@ -164,6 +177,7 @@ export function createCompactionSummaryMessage(
 		tokensBefore,
 		tokensAfter,
 		method,
+		trigger,
 		providerPayload,
 		blocks: blocks && blocks.length > 0 ? blocks : undefined,
 		images: imageBlocks && imageBlocks.length > 0 ? imageBlocks : undefined,

@@ -109,7 +109,7 @@ import {
 } from "./role-models";
 import type { SessionContext } from "./session-context";
 import { buildSessionContext, getLatestCompactionEntry, getOpenAiRemoteCompactionPayload } from "./session-context";
-import type { CompactionEntry, SessionEntry } from "./session-entries";
+import type { CompactionEntry, CompactionTriggerRecord, SessionEntry } from "./session-entries";
 import type { SessionManager } from "./session-manager";
 import type { ShakeMode, ShakeResult } from "./shake-types";
 import { resolveSpeculationLeadTokens, SPECULATION_LEAD_MIN_TOKENS } from "./speculation-lead";
@@ -1561,6 +1561,7 @@ export class SessionMaintenance {
 				codexCompaction,
 				providerReplayThroughEntryId,
 				advisorResetReason: "compact",
+				trigger: { trigger: "manual" },
 			});
 
 			const compactionResult: CompactionResult = {
@@ -1725,6 +1726,7 @@ export class SessionMaintenance {
 			method: undefined,
 			codexCompaction: undefined,
 			advisorResetReason: "experimental-context-rollover",
+			trigger: { trigger: "manual" },
 		});
 		this.#experimentalNotesReminderBoundaryId = undefined;
 		return {
@@ -1747,6 +1749,7 @@ export class SessionMaintenance {
 			triggerContextTokens?: number;
 			detachPostCommit?: boolean;
 		},
+		trigger: CompactionTriggerRecord,
 	): Promise<CompactionCheckResult> {
 		const model = this.#model;
 		if (!model || this.isCompacting) return COMPACTION_CHECK_NONE;
@@ -1881,6 +1884,7 @@ export class SessionMaintenance {
 				codexCompaction: undefined,
 				advisorResetReason: "experimental-context-rollover",
 				detachExtensionEmit: detachPostCommit,
+				trigger,
 			});
 			this.#experimentalNotesReminderBoundaryId = undefined;
 
@@ -2114,6 +2118,7 @@ export class SessionMaintenance {
 				method: "handoff",
 				codexCompaction: undefined,
 				advisorResetReason: "handoff",
+				trigger: { trigger: "manual" },
 			});
 			return result;
 		} finally {
@@ -2480,6 +2485,7 @@ export class SessionMaintenance {
 		providerReplayThroughEntryId?: string;
 		advisorResetReason: string;
 		detachExtensionEmit?: boolean;
+		trigger: CompactionTriggerRecord;
 	}): Promise<CompactionEntry | undefined> {
 		const entryId = this.#host.sessionManager.appendCompaction(
 			args.summary,
@@ -2492,6 +2498,7 @@ export class SessionMaintenance {
 				preserveData: args.preserveData,
 				method: args.method,
 				providerReplayThroughEntryId: args.providerReplayThroughEntryId,
+				...args.trigger,
 				tokensAfter:
 					isRecord(args.details) && args.details.kind === "experimental-context-rollover"
 						? this.#projectExperimentalContextRolloverTokens(args)
@@ -2566,15 +2573,6 @@ export class SessionMaintenance {
 		);
 	}
 
-	#estimatePrePromptContextTokens(messages: AgentMessage[], contextWindow: number): number {
-		const breakdown = this.#host.getContextBreakdown({ contextWindow, pendingMessages: messages });
-		const localEstimate = this.#estimateStoredContextTokens(messages);
-		// Floor by the local estimate: a payload-shrinking before_provider_request
-		// hook deflates the provider-anchored breakdown, which must not suppress
-		// pre-prompt compaction (see #estimateStoredContextTokens).
-		return compactionContextTokens(breakdown?.usedTokens ?? 0, localEstimate);
-	}
-
 	/**
 	 * Local pre-compaction context for a snapcompact preparation, measured on the
 	 * exact same non-message overhead and tokenizer as
@@ -2617,7 +2615,13 @@ export class SessionMaintenance {
 		const contextWindow = model.contextWindow ?? 0;
 		if (contextWindow <= 0) return;
 		const compactionSettings = this.#compactionSettings;
-		const contextTokens = this.#estimatePrePromptContextTokens(messages, contextWindow);
+		const providerContextTokens =
+			this.#host.getContextBreakdown({ contextWindow, pendingMessages: messages })?.usedTokens ?? 0;
+		const estimatedContextTokens = this.#estimateStoredContextTokens(messages);
+		// Floor by the local estimate: a payload-shrinking before_provider_request
+		// hook deflates the provider-anchored breakdown, which must not suppress
+		// pre-prompt compaction (see #estimateStoredContextTokens).
+		const contextTokens = compactionContextTokens(providerContextTokens, estimatedContextTokens);
 		const pendingMidTurnDeadEnd = this.#midTurnDeadEndPendingPrePrompt;
 		this.#midTurnDeadEndPendingPrePrompt = false;
 		if (!shouldCompact(contextTokens, contextWindow, compactionSettings)) {
@@ -2666,6 +2670,8 @@ export class SessionMaintenance {
 		await this.runAutoCompaction("threshold", false, {
 			autoContinue: false,
 			triggerContextTokens: contextTokens,
+			providerContextTokens,
+			estimatedContextTokens,
 			pendingContextTokens: this.#tokenizer.countMessages(messages, { excludeEncryptedReasoning: true }),
 			preparedContextTokens: this.#estimateStoredContextTokens(),
 			phase: "pre_turn",
@@ -2809,6 +2815,8 @@ export class SessionMaintenance {
 			autoContinue: false,
 			suppressContinuation: true,
 			triggerContextTokens: contextTokens,
+			providerContextTokens: billedContextTokens,
+			estimatedContextTokens: storedContextTokens,
 			phase: "mid_turn",
 			detachPostCommit: true,
 		});
@@ -3390,6 +3398,8 @@ export class SessionMaintenance {
 				return await this.runAutoCompaction("threshold", false, {
 					autoContinue,
 					triggerContextTokens: postMaintenanceContextTokens,
+					providerContextTokens: assistantUsageContextTokens,
+					estimatedContextTokens: storedContextTokens,
 					phase: "pre_turn",
 					terminalTextAnswer: isTerminalTextAssistantAnswer(assistantMessage),
 				});
@@ -4409,6 +4419,10 @@ export class SessionMaintenance {
 				details: result.details,
 				preserveData: result.preserveData,
 				method: "snapcompact",
+				trigger: staleEntry.trigger,
+				thresholdTokens: staleEntry.thresholdTokens,
+				providerContextTokens: staleEntry.providerContextTokens,
+				estimatedContextTokens: staleEntry.estimatedContextTokens,
 				tokensAfter: this.#projectCompactedContextTokens({
 					summary: result.summary,
 					shortSummary: result.shortSummary,
@@ -4684,6 +4698,10 @@ export class SessionMaintenance {
 		options: {
 			autoContinue?: boolean;
 			triggerContextTokens?: number;
+			/** Provider-reported context tokens the trigger decision read, recorded on the entry. */
+			providerContextTokens?: number;
+			/** Local stored-context estimate the trigger decision read, recorded on the entry. */
+			estimatedContextTokens?: number;
 			/** Tokens from pending messages included in triggerContextTokens but absent from the prepared history. */
 			pendingContextTokens?: number;
 			/** Stored context before pending messages, measured before preparation rewrites its representation. */
@@ -4719,8 +4737,20 @@ export class SessionMaintenance {
 		if (reason !== "idle" && !compactionSettings.enabled && !explicitNewContextRequest) {
 			return COMPACTION_CHECK_NONE;
 		}
+		const contextWindow = this.#model?.contextWindow ?? 0;
+		const trigger: CompactionTriggerRecord = {
+			trigger: explicitNewContextRequest ? "new_context" : reason,
+			thresholdTokens:
+				reason === "idle"
+					? compactionSettings.idleThresholdTokens
+					: reason === "threshold" && !explicitNewContextRequest && contextWindow > 0
+						? resolveThresholdTokens(contextWindow, compactionSettings)
+						: undefined,
+			providerContextTokens: options.providerContextTokens,
+			estimatedContextTokens: options.estimatedContextTokens,
+		};
 		if (this.#usesExperimentalContextManagement()) {
-			return await this.#runExperimentalContextRollover(reason, willRetry, options);
+			return await this.#runExperimentalContextRollover(reason, willRetry, options, trigger);
 		}
 		// The explicit request is valid only on the notes-backed rollover path.
 		// If the experimental capability disappeared between request recognition
@@ -4875,6 +4905,7 @@ export class SessionMaintenance {
 					suppressContinuation,
 					fallbackFromShake,
 					detachPostCommit: options.detachPostCommit === true,
+					trigger,
 					autoCompactionSignal,
 					onCommitted: () => {
 						compactionCommitted = true;
@@ -5565,6 +5596,7 @@ export class SessionMaintenance {
 				suppressContinuation,
 				fallbackFromShake,
 				detachPostCommit: options.detachPostCommit === true,
+				trigger,
 				autoCompactionSignal,
 				onCommitted: () => {
 					compactionCommitted = true;
@@ -5660,6 +5692,7 @@ export class SessionMaintenance {
 		detachPostCommit: boolean;
 		autoCompactionSignal: AbortSignal;
 		onCommitted: () => void;
+		trigger: CompactionTriggerRecord;
 	}): Promise<CompactionCheckResult> {
 		const { action, reason, willRetry, detachPostCommit, autoCompactionSignal } = args;
 		if (autoCompactionSignal.aborted) {
@@ -5689,6 +5722,7 @@ export class SessionMaintenance {
 			method: args.method,
 			providerReplayThroughEntryId: args.providerReplayThroughEntryId,
 			advisorResetReason: "auto-compaction",
+			trigger: args.trigger,
 			detachExtensionEmit: detachPostCommit,
 		});
 

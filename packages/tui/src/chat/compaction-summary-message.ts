@@ -26,6 +26,36 @@ function compactionAmount(message: CompactionSummaryMessage): string | undefined
 	return `${formatNumber(message.tokensBefore)}→${formatNumber(message.tokensAfter)}`;
 }
 
+/** Divider words per compaction trigger; unknown triggers show as recorded. */
+const COMPACTION_TRIGGER_LABELS: Record<string, string> = {
+	threshold: "threshold",
+	overflow: "overflow",
+	idle: "idle",
+	incomplete: "length stop",
+	manual: "manual",
+	new_context: "new context",
+};
+
+/** The trigger word on the divider, or undefined when the entry predates `trigger`. */
+function compactionTrigger(message: CompactionSummaryMessage): string | undefined {
+	const reason = message.trigger?.reason;
+	return reason && (COMPACTION_TRIGGER_LABELS[reason] ?? reason);
+}
+
+/** `Trigger: threshold 300,000 · provider count 191,329 · local estimate 307,624`, or undefined for legacy entries. */
+function compactionTriggerLine(message: CompactionSummaryMessage): string | undefined {
+	const trigger = message.trigger;
+	const name = compactionTrigger(message);
+	if (!trigger || !name) return undefined;
+	let line = `Trigger: ${name}`;
+	if (trigger.thresholdTokens !== undefined) line += ` ${trigger.thresholdTokens.toLocaleString()}`;
+	if (trigger.providerContextTokens !== undefined)
+		line += ` · provider count ${trigger.providerContextTokens.toLocaleString()}`;
+	if (trigger.estimatedContextTokens !== undefined)
+		line += ` · local estimate ${trigger.estimatedContextTokens.toLocaleString()}`;
+	return line;
+}
+
 interface SummaryDividerOptions {
 	label: () => string;
 	/** Themed spans of the label for native terminals. */
@@ -191,14 +221,14 @@ class SummaryMessageComponent implements Component {
 /**
  * Compaction point in the transcript, rendered as a slim horizontal divider:
  *
- *   ──────── 📷 remote-compacted · 256K→20K · ctrl+o ────────
+ *   ──────── 📷 remote-compacted · threshold · 256K→20K · ctrl+o ────────
  *
  * The label names the maintenance method that fired (remote/soft/handoff/
- * snapcompact; "compacted" for legacy or extension-provided entries) and the
- * before → after context amounts when the entry recorded them. The
- * conversation above the divider stays visible (display transcript keeps
- * full history); only the LLM context was reset. Expanding (ctrl+o) reveals
- * the compaction summary below the divider.
+ * snapcompact; "compacted" for legacy or extension-provided entries), what
+ * triggered it, and the before → after context amounts when the entry
+ * recorded them. The conversation above the divider stays visible (display
+ * transcript keeps full history); only the LLM context was reset. Expanding
+ * (ctrl+o) reveals the compaction summary below the divider.
  */
 export class CompactionSummaryMessageComponent extends SummaryMessageComponent {
 	constructor(message: CompactionSummaryMessage) {
@@ -214,10 +244,12 @@ export class CompactionSummaryMessageComponent extends SummaryMessageComponent {
 	}
 }
 
-/** The divider chip: `Soft-compacted · 19K → 6.9K tokens`, the arrow dimmed. */
+/** The divider chip: `Soft-compacted · threshold · 19K → 6.9K tokens`, the arrow dimmed. */
 function compactionNativeLabel(message: CompactionSummaryMessage): TspSpan[] {
 	const name = (message.method && COMPACTION_METHOD_LABELS[message.method]) || "compacted";
 	const spans = [span(`${name[0]!.toUpperCase()}${name.slice(1)}`, "muted")];
+	const trigger = compactionTrigger(message);
+	if (trigger) spans.push(span(` · ${trigger}`, "muted"));
 	if (message.tokensAfter !== undefined && message.tokensBefore > 0) {
 		spans.push(
 			span(` · ${formatNumber(message.tokensBefore)}`, "muted mono"),
@@ -229,7 +261,7 @@ function compactionNativeLabel(message: CompactionSummaryMessage): TspSpan[] {
 	return spans;
 }
 
-/** The expanded divider: a caption, the warning if any, then the summary itself (the chip already has the amounts). */
+/** The expanded divider: a caption, the trigger and warning if any, then the summary itself (the chip already has the amounts). */
 function compactionNativeDetail(message: CompactionSummaryMessage): NativeChild[] {
 	const frames = message.images?.length ?? 0;
 	const caption =
@@ -237,6 +269,8 @@ function compactionNativeDetail(message: CompactionSummaryMessage): NativeChild[
 			? `Summary · ${frames} snapcompact frame${frames === 1 ? "" : "s"} attached`
 			: "Summary of the earlier conversation";
 	const detail: NativeChild[] = [text([span(caption, "dim")], { role: "omp.compaction.caption", key: "caption" })];
+	const triggerLine = compactionTriggerLine(message);
+	if (triggerLine) detail.push(text([span(triggerLine, "dim")], { wrap: "word", key: "trigger" }));
 	if (message.warning) detail.push(text([span(message.warning, "warning")], { wrap: "word", key: "warning" }));
 	detail.push(md(message.summary, { key: "summary" }));
 	return detail;
@@ -245,6 +279,8 @@ function compactionNativeDetail(message: CompactionSummaryMessage): NativeChild[
 function compactionLabel(message: CompactionSummaryMessage): string {
 	const name = (message.method && COMPACTION_METHOD_LABELS[message.method]) || "compacted";
 	let label = `${theme.icon.camera} ${name}`;
+	const trigger = compactionTrigger(message);
+	if (trigger) label += `${theme.sep.dot}${trigger}`;
 	const amount = compactionAmount(message);
 	if (amount) label += `${theme.sep.dot}${amount}`;
 	if (message.warning) label += ` ${theme.fg("warning", theme.icon.warning)}`;
@@ -263,8 +299,10 @@ function compactionDetailMarkdown(message: CompactionSummaryMessage): string {
 	const frameCount = message.images?.length ?? 0;
 	const frameNote =
 		frameCount > 0 ? `\n\n_${frameCount} snapcompact frame${frameCount === 1 ? "" : "s"} attached_` : "";
+	const triggerLine = compactionTriggerLine(message);
+	const triggerNote = triggerLine ? `\n\n${triggerLine}` : "";
 	const warningNote = message.warning ? `\n\n${theme.icon.warning} **Warning:** ${message.warning}` : "";
-	return `**${tokenLine}**${warningNote}\n\n${message.summary}${frameNote}`;
+	return `**${tokenLine}**${triggerNote}${warningNote}\n\n${message.summary}${frameNote}`;
 }
 
 /**

@@ -214,6 +214,16 @@ function snapcompactHistoryBlocksForContext(
 	return snapcompact.historyBlocks(archive, snapcompactHistoryBlockOptions(archive, options));
 }
 
+function compactionSummaryTrigger(entry: CompactionEntry) {
+	if (!entry.trigger) return undefined;
+	return {
+		reason: entry.trigger,
+		thresholdTokens: entry.thresholdTokens,
+		providerContextTokens: entry.providerContextTokens,
+		estimatedContextTokens: entry.estimatedContextTokens,
+	};
+}
+
 /** Reads validated OpenAI Responses replacement history from a compaction entry. */
 export function getOpenAiRemoteCompactionPayload(
 	compaction: Pick<CompactionEntry, "preserveData"> | null | undefined,
@@ -453,6 +463,7 @@ export function buildSessionContext(
 							blocks: snapcompactHistoryBlocksForContext(snapcompactArchive, options),
 							warning: entry.warning,
 							method: entry.method,
+							trigger: compactionSummaryTrigger(entry),
 							tokensAfter: entry.tokensAfter,
 						},
 					),
@@ -535,6 +546,7 @@ export function buildSessionContext(
 				blocks: snapcompactHistoryBlocksForContext(snapcompactArchive, options),
 				warning: compaction.warning,
 				method: compaction.method,
+				trigger: compactionSummaryTrigger(compaction),
 				tokensAfter: compaction.tokensAfter,
 				historyRewriteAt,
 			},

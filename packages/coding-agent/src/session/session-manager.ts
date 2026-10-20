@@ -52,6 +52,7 @@ import {
 import {
 	type BranchSummaryEntry,
 	type CompactionEntry,
+	type CompactionTriggerRecord,
 	type CredentialPinEntry,
 	CURRENT_SESSION_VERSION,
 	type CustomEntry,
@@ -3567,7 +3568,7 @@ export class SessionManager {
 			method?: CompactionMethod;
 			providerReplayThroughEntryId?: string;
 			tokensAfter?: number;
-		} = {},
+		} & CompactionTriggerRecord = {},
 	): string {
 		const entry: CompactionEntry<T> = {
 			type: "compaction",
@@ -3579,6 +3580,10 @@ export class SessionManager {
 			tokensAfter: options.tokensAfter,
 			method: options.method,
 			providerReplayThroughEntryId: options.providerReplayThroughEntryId,
+			trigger: options.trigger,
+			thresholdTokens: options.thresholdTokens,
+			providerContextTokens: options.providerContextTokens,
+			estimatedContextTokens: options.estimatedContextTokens,
 			details: options.details,
 			fromExtension: options.fromExtension,
 			preserveData: options.preserveData,

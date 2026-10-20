@@ -92,6 +92,8 @@ const FIELD_RULES: Record<string, Rule> = {
 		"excludeFromContext",
 		"tokensBefore",
 		"tokensAfter",
+		"providerContextTokens",
+		"estimatedContextTokens",
 		"fromExtension",
 		"readOnly",
 		"restrictToolNames",

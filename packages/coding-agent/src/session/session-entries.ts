@@ -141,6 +141,18 @@ export interface ServiceTierChangeEntry extends SessionEntryBase {
 	serviceTier: ServiceTierByFamily | null;
 }
 
+/**
+ * What started a compaction: an automatic maintenance trigger, an explicit
+ * `/compact`/`/handoff` (or SDK `compact()`), or a model `new_context` request.
+ */
+export type CompactionTrigger = "threshold" | "overflow" | "idle" | "incomplete" | "manual" | "new_context";
+
+/** The trigger fields a compaction entry records about the decision that started it. */
+export type CompactionTriggerRecord = Pick<
+	CompactionEntry,
+	"trigger" | "thresholdTokens" | "providerContextTokens" | "estimatedContextTokens"
+>;
+
 export interface CompactionEntry<T = unknown> extends SessionEntryBase {
 	type: "compaction";
 	summary: string;
@@ -153,6 +165,14 @@ export interface CompactionEntry<T = unknown> extends SessionEntryBase {
 	method?: CompactionMethod;
 	/** Last branch entry represented by provider-native replay history; later entries replay normally. */
 	providerReplayThroughEntryId?: string;
+	/** What started this compaction; absent on legacy sessions. */
+	trigger?: CompactionTrigger;
+	/** Trigger point the context crossed (`threshold` and `idle` triggers). */
+	thresholdTokens?: number;
+	/** Provider-reported context tokens the trigger decision read. */
+	providerContextTokens?: number;
+	/** Local estimate of the stored context the trigger decision read; the larger of the two decides. */
+	estimatedContextTokens?: number;
 	/** Extension-specific data (e.g., ArtifactIndex, version markers for structured compaction) */
 	details?: T;
 	/** Hook-provided data to persist across compaction */
