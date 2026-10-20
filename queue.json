@@ -38247,6 +38247,11 @@
     "sha": "c18fd0d69581dc80e1866dbe33c3b160bed3ef73",
     "at": "2026-10-20T23:06:17Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "c18fd0d69581dc80e1866dbe33c3b160bed3ef73",
+    "at": "2026-10-20T23:06:55Z",
+    "host": "goliath"
    }
   }
  }
