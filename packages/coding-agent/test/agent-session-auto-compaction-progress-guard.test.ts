@@ -716,7 +716,7 @@ describe("AgentSession auto-compaction progress guard", () => {
 	}
 
 	it("records the threshold trigger and the counts its decision read on the compaction entry", async () => {
-		vi.spyOn(session.agent, "prompt").mockResolvedValue(undefined as never);
+		vi.spyOn(session.agent, "prompt").mockResolvedValue();
 		const { promise: compactionDone, resolve: onCompactionDone } = Promise.withResolvers<void>();
 		session.subscribe(event => {
 			if (event.type === "auto_compaction_end") onCompactionDone();
@@ -742,7 +742,7 @@ describe("AgentSession auto-compaction progress guard", () => {
 	it("records an overflow recovery's trigger without threshold counts", async () => {
 		seedPriorTurns();
 		vi.spyOn(session.agent, "continue").mockResolvedValue();
-		vi.spyOn(session.agent, "prompt").mockResolvedValue(undefined as never);
+		vi.spyOn(session.agent, "prompt").mockResolvedValue();
 		vi.spyOn(session, "getContextUsage").mockReturnValue({ tokens: 150000, contextWindow: 200000, percent: 75 });
 		const { promise: compactionDone, resolve: onCompactionDone } = Promise.withResolvers<void>();
 		session.subscribe(event => {
