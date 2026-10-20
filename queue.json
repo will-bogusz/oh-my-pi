@@ -27822,7 +27822,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/deepseek-image-tokens",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:51:53Z",
-   "updated": "2026-10-20T01:18:10Z",
+   "updated": "2026-10-20T01:18:32Z",
    "note": "",
    "built": [
     {
@@ -27886,7 +27886,8 @@
      "tree": "bd142e6ce10f9e9a0cddaa0c60543314d55af99a"
     }
    ],
-   "opened": "2026-10-20T01:18:10Z"
+   "opened": "2026-10-20T01:18:10Z",
+   "readied": "2026-10-20T01:18:32Z"
   },
   {
    "id": "thinking-loop-accounting",
