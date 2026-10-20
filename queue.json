@@ -36947,6 +36947,24 @@
    "added": "2026-10-20T23:55:18Z",
    "updated": "2026-10-20T23:55:18Z",
    "note": ""
+  },
+  {
+   "id": "edit-error-kind",
+   "branch": "will/edit-error-kind",
+   "title": "feat(edit): record why an edit failed and count it in /session",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/edit-error-kind.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-error-kind",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:58:49Z",
+   "updated": "2026-10-20T23:58:49Z",
+   "note": ""
   }
  ],
  "watch": {
