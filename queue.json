@@ -36767,6 +36767,24 @@
    "added": "2026-10-20T23:46:25Z",
    "updated": "2026-10-20T23:46:25Z",
    "note": ""
+  },
+  {
+   "id": "bash-minimizer-meta",
+   "branch": "will/bash-minimizer-meta",
+   "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
+   "area": "bash",
+   "priority": "P2",
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/bash-minimizer-meta.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-minimizer-meta",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:49:04Z",
+   "updated": "2026-10-20T23:49:04Z",
+   "note": ""
   }
  ],
  "watch": {
