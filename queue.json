@@ -41122,5 +41122,11 @@
     "host": "Wills-MacBook-Pro"
    }
   }
+ },
+ "opening": {
+  "id": "bash-view-tags",
+  "token": "64c61b0a6bf94dfc92bfb8ff2c014883",
+  "host": "MacBook-Pro",
+  "at": "2026-10-20T23:59:18Z"
  }
 }
