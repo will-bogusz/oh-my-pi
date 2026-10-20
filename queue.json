@@ -34152,10 +34152,39 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T22:33:18Z",
+  "checked": "2026-10-20T23:03:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "write-keep-crlf": {
+    "since": "2026-10-20T23:03:55Z",
+    "title": "fix(coding-agent): keep a replaced file's CRLF line endings and BOM in write"
+   },
+   "eval-py-await-tool": {
+    "since": "2026-10-20T23:03:55Z",
+    "title": "fix(coding-agent): tell Python-only eval sessions to await tool calls"
+   },
+   "proc-kill-read-hint": {
+    "since": "2026-10-20T23:03:55Z",
+    "title": "fix(coding-agent): name the write call when proc:// kill or mode is read"
+   },
+   "fetch-ua-retry": {
+    "since": "2026-10-20T23:03:55Z",
+    "title": "fix(coding-agent): retry a refused web read with the next user agent"
+   },
+   "grep-per-file-cap": {
+    "since": "2026-10-20T23:03:55Z",
+    "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file"
+   },
+   "read-display-budget": {
+    "since": "2026-10-20T23:03:55Z",
+    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget"
+   },
+   "rg-follow-root": {
+    "since": "2026-10-20T23:03:55Z",
+    "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd"
+   }
+  },
   "conflicts": {
    "#16556": {
     "since": "2026-10-20T22:03:07Z",
@@ -38033,6 +38062,48 @@
     "files": [
      "crates/pi-natives/src/desktop/macos/skylight.rs"
     ]
+   },
+   {
+    "at": "2026-10-20T23:03:55Z",
+    "kind": "openable",
+    "id": "write-keep-crlf",
+    "title": "fix(coding-agent): keep a replaced file's CRLF line endings and BOM in write"
+   },
+   {
+    "at": "2026-10-20T23:03:55Z",
+    "kind": "openable",
+    "id": "eval-py-await-tool",
+    "title": "fix(coding-agent): tell Python-only eval sessions to await tool calls"
+   },
+   {
+    "at": "2026-10-20T23:03:55Z",
+    "kind": "openable",
+    "id": "proc-kill-read-hint",
+    "title": "fix(coding-agent): name the write call when proc:// kill or mode is read"
+   },
+   {
+    "at": "2026-10-20T23:03:55Z",
+    "kind": "openable",
+    "id": "fetch-ua-retry",
+    "title": "fix(coding-agent): retry a refused web read with the next user agent"
+   },
+   {
+    "at": "2026-10-20T23:03:55Z",
+    "kind": "openable",
+    "id": "grep-per-file-cap",
+    "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file"
+   },
+   {
+    "at": "2026-10-20T23:03:55Z",
+    "kind": "openable",
+    "id": "read-display-budget",
+    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget"
+   },
+   {
+    "at": "2026-10-20T23:03:55Z",
+    "kind": "openable",
+    "id": "rg-follow-root",
+    "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd"
    }
   ]
  },
