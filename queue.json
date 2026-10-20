@@ -26722,7 +26722,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/builtin-rule-narrow-2",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:49:28Z",
-   "updated": "2026-10-20T01:22:40Z",
+   "updated": "2026-10-20T01:23:03Z",
    "note": "",
    "built": [
     {
@@ -27256,7 +27256,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-20T01:22:40Z"
+   "opened": "2026-10-20T01:22:40Z",
+   "readied": "2026-10-20T01:23:03Z"
   },
   {
    "id": "snapcompact-wire-images",
