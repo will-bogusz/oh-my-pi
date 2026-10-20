@@ -34041,6 +34041,24 @@
    "added": "2026-10-20T22:46:23Z",
    "updated": "2026-10-20T22:46:23Z",
    "note": ""
+  },
+  {
+   "id": "proc-kill-read-hint",
+   "branch": "will/proc-kill-read-hint",
+   "title": "fix(coding-agent): name the write call when proc:// kill or mode is read",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/proc-kill-read-hint.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/proc-kill-read-hint",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T22:48:18Z",
+   "updated": "2026-10-20T22:48:18Z",
+   "note": ""
   }
  ],
  "watch": {
