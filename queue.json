@@ -26172,7 +26172,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/custom-tool-host-imports",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:48Z",
-   "updated": "2026-10-20T01:31:39Z",
+   "updated": "2026-10-20T01:32:02Z",
    "note": "",
    "built": [
     {
@@ -26706,7 +26706,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-20T01:31:38Z"
+   "opened": "2026-10-20T01:31:38Z",
+   "readied": "2026-10-20T01:32:02Z"
   },
   {
    "id": "builtin-rule-narrow-2",
