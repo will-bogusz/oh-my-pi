@@ -32343,30 +32343,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-19T23:47:09Z",
+  "checked": "2026-10-20T00:17:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "computer-shell-exception": {
-    "since": "2026-10-19T22:14:48Z",
-    "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS"
-   },
-   "r2-browser-wait-line": {
-    "since": "2026-10-19T20:42:30Z",
-    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps"
-   },
-   "release-helper-wait-test": {
-    "since": "2026-10-18T19:11:35Z",
-    "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in"
-   },
-   "anthropic-unsupported-media": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "fix(ai): fail Claude turns that attach media Claude cannot read"
-   },
-   "autoqa-home-paths": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances"
-   },
    "builtin-rule-narrow-2": {
     "since": "2026-10-19T20:11:33Z",
     "title": "fix(coding-agent): fire ts-no-tiny-functions and ts-promise-with-resolvers only on code they flag"
@@ -32494,7 +32474,12 @@
    16393,
    16394,
    16397,
-   16399
+   16399,
+   16403,
+   16404,
+   16405,
+   16407,
+   16409
   ],
   "events": [
    {
@@ -34776,6 +34761,41 @@
     "id": "utok-perf",
     "title": "perf(natives/utok): memoize short-piece merge counts per thread",
     "why": "opened as #16399"
+   },
+   {
+    "at": "2026-10-20T00:17:58Z",
+    "kind": "unopenable",
+    "id": "computer-shell-exception",
+    "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS",
+    "why": "opened as #16403"
+   },
+   {
+    "at": "2026-10-20T00:17:58Z",
+    "kind": "unopenable",
+    "id": "r2-browser-wait-line",
+    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps",
+    "why": "opened as #16404"
+   },
+   {
+    "at": "2026-10-20T00:17:58Z",
+    "kind": "unopenable",
+    "id": "release-helper-wait-test",
+    "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in",
+    "why": "opened as #16405"
+   },
+   {
+    "at": "2026-10-20T00:17:58Z",
+    "kind": "unopenable",
+    "id": "anthropic-unsupported-media",
+    "title": "fix(ai): fail Claude turns that attach media Claude cannot read",
+    "why": "opened as #16407"
+   },
+   {
+    "at": "2026-10-20T00:17:58Z",
+    "kind": "unopenable",
+    "id": "autoqa-home-paths",
+    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances",
+    "why": "opened as #16409"
    }
   ]
  }
