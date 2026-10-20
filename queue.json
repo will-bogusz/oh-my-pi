@@ -23778,7 +23778,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rm-force-enoent",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:44:18Z",
-   "updated": "2026-10-20T03:16:17Z",
+   "updated": "2026-10-20T03:16:40Z",
    "note": "",
    "built": [
     {
@@ -23811,7 +23811,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-20T03:16:16Z"
+   "opened": "2026-10-20T03:16:16Z",
+   "readied": "2026-10-20T03:16:39Z"
   },
   {
    "id": "rg-count-zero",
