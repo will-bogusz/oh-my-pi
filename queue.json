@@ -22664,7 +22664,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-parse-only-ambiguity",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:38:47Z",
-   "updated": "2026-10-20T01:40:33Z",
+   "updated": "2026-10-20T01:40:54Z",
    "note": "",
    "built": [
     {
@@ -22718,7 +22718,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-20T01:40:32Z"
+   "opened": "2026-10-20T01:40:32Z",
+   "readied": "2026-10-20T01:40:54Z"
   },
   {
    "id": "read-profile-ranges",
