@@ -25733,7 +25733,7 @@
    "branch": "will/read-sqlite-q-paging",
    "title": "feat(read): page SQLite ?q= query rows with limit and offset",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-sqlite-q-paging.md",
@@ -25743,7 +25743,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-sqlite-q-paging",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:45Z",
-   "updated": "2026-10-20T04:38:56Z",
+   "updated": "2026-10-20T04:53:58Z",
    "note": "",
    "built": [
     {
@@ -28315,7 +28315,7 @@
    "branch": "will/write-prefix-contiguous",
    "title": "fix(write): keep content whose leading numbers do not count up by one",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/write-prefix-contiguous.md",
@@ -28325,7 +28325,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/write-prefix-contiguous",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:02:04Z",
-   "updated": "2026-10-20T04:11:50Z",
+   "updated": "2026-10-20T04:53:58Z",
    "note": "",
    "built": [
     {
@@ -30150,7 +30150,7 @@
    "branch": "will/subagent-wait-reply",
    "title": "feat(coding-agent): let wait block for the reply to a message the agent sent",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/subagent-wait-reply.md",
@@ -30160,7 +30160,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-wait-reply",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:22:04Z",
-   "updated": "2026-10-20T04:45:51Z",
+   "updated": "2026-10-20T04:53:58Z",
    "note": "",
    "built": [
     {
@@ -31802,7 +31802,7 @@
    "branch": "will/bash-session-env",
    "title": "feat(coding-agent): expose PI_SESSION_ID and PI_SESSION_FILE to bash commands",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/bash-session-env.md",
@@ -31812,7 +31812,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-session-env",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:45:07Z",
-   "updated": "2026-10-20T04:27:42Z",
+   "updated": "2026-10-20T04:53:58Z",
    "note": "",
    "built": [
     {
