@@ -32767,38 +32767,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T00:17:58Z",
+  "checked": "2026-10-20T01:50:28Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "builtin-rule-narrow-2": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "fix(coding-agent): fire ts-no-tiny-functions and ts-promise-with-resolvers only on code they flag"
-   },
-   "builtin-rule-reminder": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST"
-   },
-   "custom-tool-host-imports": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "fix(coding-agent): load custom tools that import omp packages in the binary"
-   },
-   "deepseek-image-tokens": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config"
-   },
-   "edit-mismatch-seen-lines": {
-    "since": "2026-10-19T22:45:09Z",
-    "title": "fix(edit): counted only a mismatch reply's displayed rows as seen"
-   },
-   "edit-parse-only-ambiguity": {
-    "since": "2026-10-19T19:41:31Z",
-    "title": "fix(edit): name the trailing comma when a one-row replacement only fails on it"
-   },
-   "edit-tagless-errors": {
-    "since": "2026-10-19T22:14:48Z",
-    "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag"
-   },
    "ln-uri-source": {
     "since": "2026-10-19T20:11:33Z",
     "title": "fix(pi-builtins): link host paths to the file a backed URL aliases"
@@ -32903,7 +32875,14 @@
    16404,
    16405,
    16407,
-   16409
+   16409,
+   16418,
+   16419,
+   16420,
+   16421,
+   16422,
+   16423,
+   16425
   ],
   "events": [
    {
@@ -35220,6 +35199,55 @@
     "id": "autoqa-home-paths",
     "title": "fix(coding-agent): redact home directory and login name from autoqa grievances",
     "why": "opened as #16409"
+   },
+   {
+    "at": "2026-10-20T01:50:28Z",
+    "kind": "unopenable",
+    "id": "builtin-rule-narrow-2",
+    "title": "fix(coding-agent): fire ts-no-tiny-functions and ts-promise-with-resolvers only on code they flag",
+    "why": "opened as #16419"
+   },
+   {
+    "at": "2026-10-20T01:50:28Z",
+    "kind": "unopenable",
+    "id": "builtin-rule-reminder",
+    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
+    "why": "opened as #16420"
+   },
+   {
+    "at": "2026-10-20T01:50:28Z",
+    "kind": "unopenable",
+    "id": "custom-tool-host-imports",
+    "title": "fix(coding-agent): load custom tools that import omp packages in the binary",
+    "why": "opened as #16421"
+   },
+   {
+    "at": "2026-10-20T01:50:28Z",
+    "kind": "unopenable",
+    "id": "deepseek-image-tokens",
+    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config",
+    "why": "opened as #16418"
+   },
+   {
+    "at": "2026-10-20T01:50:28Z",
+    "kind": "unopenable",
+    "id": "edit-mismatch-seen-lines",
+    "title": "fix(edit): counted only a mismatch reply's displayed rows as seen",
+    "why": "opened as #16422"
+   },
+   {
+    "at": "2026-10-20T01:50:28Z",
+    "kind": "unopenable",
+    "id": "edit-parse-only-ambiguity",
+    "title": "fix(edit): name the trailing comma when a one-row replacement only fails on it",
+    "why": "opened as #16423"
+   },
+   {
+    "at": "2026-10-20T01:50:28Z",
+    "kind": "unopenable",
+    "id": "edit-tagless-errors",
+    "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag",
+    "why": "opened as #16425"
    }
   ]
  }
