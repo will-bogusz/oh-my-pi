@@ -33370,6 +33370,24 @@
    "added": "2026-10-20T20:11:08Z",
    "updated": "2026-10-20T20:11:08Z",
    "note": ""
+  },
+  {
+   "id": "click-place-release",
+   "branch": "will/click-place-release",
+   "title": "fix(natives): keep a macOS user's press placed in their app through a release during its hit-test",
+   "area": "natives-macos",
+   "priority": "P2",
+   "needs": [],
+   "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
+   "body": "bodies/click-place-release.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T20:11:57Z",
+   "updated": "2026-10-20T20:11:57Z",
+   "note": ""
   }
  ],
  "watch": {
