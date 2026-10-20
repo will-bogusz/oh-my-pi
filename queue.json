@@ -35587,5 +35587,11 @@
     "why": "opened as #16434"
    }
   ]
+ },
+ "opening": {
+  "id": "read-sqlite-q-paging",
+  "token": "a5cbadf11dda4e469eb4ef8cfa2d9a6d",
+  "host": "MacBook-Pro",
+  "at": "2026-10-20T04:34:40Z"
  }
 }
