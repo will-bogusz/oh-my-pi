@@ -37963,6 +37963,11 @@
     "sha": "41c274be585fb5c6766a7e99ff75583ad7884ca3",
     "at": "2026-10-20T21:33:57Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "41c274be585fb5c6766a7e99ff75583ad7884ca3",
+    "at": "2026-10-20T21:34:11Z",
+    "host": "goliath"
    }
   }
  }
