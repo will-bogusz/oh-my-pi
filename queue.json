@@ -34095,6 +34095,24 @@
    "added": "2026-10-20T22:53:24Z",
    "updated": "2026-10-20T22:53:24Z",
    "note": ""
+  },
+  {
+   "id": "read-display-budget",
+   "branch": "will/read-display-budget",
+   "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/read-display-budget.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-display-budget",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T22:59:53Z",
+   "updated": "2026-10-20T22:59:53Z",
+   "note": ""
   }
  ],
  "watch": {
