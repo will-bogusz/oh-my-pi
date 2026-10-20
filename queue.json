@@ -25318,7 +25318,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-unsupported-media",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:34Z",
-   "updated": "2026-10-20T00:09:48Z",
+   "updated": "2026-10-20T00:10:10Z",
    "note": "",
    "built": [
     {
@@ -25472,7 +25472,8 @@
      "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
-   "opened": "2026-10-20T00:09:47Z"
+   "opened": "2026-10-20T00:09:47Z",
+   "readied": "2026-10-20T00:10:10Z"
   },
   {
    "id": "read-sqlite-q-paging",
