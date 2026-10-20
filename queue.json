@@ -33555,7 +33555,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ts-rule-followups",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:06:09Z",
-   "updated": "2026-10-20T20:46:33Z",
+   "updated": "2026-10-20T20:46:53Z",
    "note": "",
    "built": [
     {
@@ -33749,7 +33749,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-20T20:46:32Z"
+   "opened": "2026-10-20T20:46:32Z",
+   "readied": "2026-10-20T20:46:52Z"
   },
   {
    "id": "factory-screenshot-budget",
