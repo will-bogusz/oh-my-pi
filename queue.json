@@ -20677,7 +20677,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-raw-line",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:29:28Z",
-   "updated": "2026-10-20T02:07:34Z",
+   "updated": "2026-10-20T02:15:42Z",
    "note": "",
    "built": [
     {
@@ -21221,15 +21221,6 @@
      "tree": "b96e6d7debbee74633a84843cd9267712f263ac4"
     },
     {
-     "with": "#15433",
-     "code": "913a3cacb1535d777f1855ba03f2ed93d5dbacbd",
-     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
-     "tip": "6bd87856ff8806c8241e18a0b3295b9a1fd32131",
-     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
-     "at": "2026-10-19T23:13:55Z",
-     "host": "goliath"
-    },
-    {
      "with": "#16384",
      "code": "913a3cacb1535d777f1855ba03f2ed93d5dbacbd",
      "with_code": "abb25b01011a391a5eb42a948821f7aef8731b86",
@@ -21328,6 +21319,15 @@
      "at": "2026-10-20T02:07:34Z",
      "host": "goliath",
      "tree": "31120dadc8bbb872ba8a2f701c54c2d0893b9188"
+    },
+    {
+     "with": "#15433",
+     "code": "913a3cacb1535d777f1855ba03f2ed93d5dbacbd",
+     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
+     "tip": "6bd87856ff8806c8241e18a0b3295b9a1fd32131",
+     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
+     "at": "2026-10-20T02:15:41Z",
+     "host": "goliath"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
