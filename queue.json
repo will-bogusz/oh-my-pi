@@ -33141,6 +33141,24 @@
    "opened": "2026-10-20T01:36:04Z",
    "readied": "2026-10-20T01:36:27Z",
    "merged_by": "pr"
+  },
+  {
+   "id": "pip-procfs-fallback",
+   "branch": "will/pip-procfs-fallback",
+   "title": "fix(coding-agent): stop the %pip installer on cancel when /proc cannot be listed",
+   "area": "python",
+   "priority": "P2",
+   "needs": [],
+   "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
+   "body": "bodies/pip-procfs-fallback.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/pip-procfs-fallback",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T19:58:45Z",
+   "updated": "2026-10-20T19:58:45Z",
+   "note": ""
   }
  ],
  "watch": {
