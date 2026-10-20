@@ -32695,7 +32695,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-mismatch-seen-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-19T22:23:03Z",
-   "updated": "2026-10-20T01:36:04Z",
+   "updated": "2026-10-20T01:36:27Z",
    "note": "",
    "built": [
     {
@@ -32758,7 +32758,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-20T01:36:04Z"
+   "opened": "2026-10-20T01:36:04Z",
+   "readied": "2026-10-20T01:36:27Z"
   }
  ],
  "watch": {
