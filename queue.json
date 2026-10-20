@@ -33326,13 +33326,13 @@
    "needs": [],
    "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
    "body": "bodies/conflicts-whole-file.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16555,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/conflicts-whole-file",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:04:43Z",
-   "updated": "2026-10-20T20:20:28Z",
+   "updated": "2026-10-20T20:24:49Z",
    "note": "",
    "built": [
     {
@@ -33533,7 +33533,8 @@
      "at": "2026-10-20T20:20:28Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-20T20:24:48Z"
   },
   {
    "id": "ts-rule-followups",
