@@ -33964,13 +33964,13 @@
    "needs": [],
    "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
    "body": "bodies/click-place-release.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16553,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-10-20T20:19:20Z",
+   "updated": "2026-10-20T20:20:44Z",
    "note": "",
    "built": [
     {
@@ -34000,7 +34000,8 @@
      "at": "2026-10-20T20:19:20Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-20T20:20:44Z"
   }
  ],
  "watch": {
