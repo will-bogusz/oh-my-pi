@@ -13940,7 +13940,7 @@
    "area": "providers",
    "priority": "P1",
    "needs": [],
-   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
+   "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
    "body": "bodies/anthropic-refusal-handoff.md",
    "state": "open",
    "pr": 16250,
@@ -13948,7 +13948,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-refusal-handoff",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:09:46Z",
-   "updated": "2026-10-18T22:04:07Z",
+   "updated": "2026-10-20T19:56:54Z",
    "note": "",
    "built": [
     {
@@ -14051,7 +14051,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-18T21:41:13Z",
+   "advanced": "2026-10-20T19:56:54Z",
    "opened": "2026-10-18T22:03:49Z",
    "readied": "2026-10-18T22:04:07Z"
   },
