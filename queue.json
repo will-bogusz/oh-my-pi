@@ -34776,5 +34776,11 @@
     "why": "opened as #16399"
    }
   ]
+ },
+ "opening": {
+  "id": "autoqa-home-paths",
+  "token": "6e43151f819f4863b24ffab55972b7d1",
+  "host": "MacBook-Pro",
+  "at": "2026-10-20T00:10:15Z"
  }
 }
