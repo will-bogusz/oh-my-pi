@@ -37936,5 +37936,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "ts-rule-followups",
+  "token": "004aaeeaa2964542a9e25dce220195dd",
+  "host": "MacBook-Pro",
+  "at": "2026-10-20T20:45:26Z"
  }
 }
