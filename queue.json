@@ -5778,7 +5778,7 @@
    "branch": "will/release-helper-wait-test",
    "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in",
    "area": "computer",
-   "priority": "P3",
+   "priority": "P0",
    "needs": [],
    "base": "4e94436137f6b580576d354a6fa9790038b0e2c6",
    "body": "bodies/release-helper-wait-test.md",
@@ -5788,7 +5788,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/release-helper-wait-test",
    "host": "MacBook-Pro",
    "added": "2026-10-18T19:04:31Z",
-   "updated": "2026-10-20T00:02:55Z",
+   "updated": "2026-10-20T00:17:56Z",
    "note": "",
    "built": [
     {
@@ -24258,7 +24258,7 @@
    "branch": "will/autoqa-home-paths",
    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/autoqa-home-paths.md",
@@ -24268,7 +24268,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/autoqa-home-paths",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:16Z",
-   "updated": "2026-10-20T00:15:03Z",
+   "updated": "2026-10-20T00:17:56Z",
    "note": "",
    "built": [
     {
@@ -25310,7 +25310,7 @@
    "branch": "will/anthropic-unsupported-media",
    "title": "fix(ai): fail Claude turns that attach media Claude cannot read",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "53a0377db6845e0dae606146130766ec92d407fd",
    "body": "bodies/anthropic-unsupported-media.md",
@@ -25320,7 +25320,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-unsupported-media",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:34Z",
-   "updated": "2026-10-20T00:10:10Z",
+   "updated": "2026-10-20T00:17:56Z",
    "note": "",
    "built": [
     {
@@ -30072,7 +30072,7 @@
    "branch": "will/r2-browser-wait-line",
    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps",
    "area": "browser",
-   "priority": "P3",
+   "priority": "P2",
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/r2-browser-wait-line.md",
@@ -30082,7 +30082,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-browser-wait-line",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:26:08Z",
-   "updated": "2026-10-19T23:58:14Z",
+   "updated": "2026-10-20T00:17:56Z",
    "note": "",
    "built": [
     {
