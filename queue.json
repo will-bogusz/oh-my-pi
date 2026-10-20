@@ -28278,7 +28278,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/write-prefix-contiguous",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:02:04Z",
-   "updated": "2026-10-20T02:07:34Z",
+   "updated": "2026-10-20T02:15:37Z",
    "note": "",
    "built": [
     {
@@ -28772,15 +28772,6 @@
      "tree": "b96e6d7debbee74633a84843cd9267712f263ac4"
     },
     {
-     "with": "#15433",
-     "code": "3552a0ec91841bf44cdb596c8d5473196e0deee5",
-     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
-     "tip": "bac28c51c787da8232ff07d053edd13d23772822",
-     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
-     "at": "2026-10-19T23:14:14Z",
-     "host": "goliath"
-    },
-    {
      "with": "#16389",
      "code": "3552a0ec91841bf44cdb596c8d5473196e0deee5",
      "with_code": "53d2dba9bea701ee8e09ab365b3f745a3dbd010a",
@@ -28869,6 +28860,15 @@
      "at": "2026-10-20T02:07:34Z",
      "host": "goliath",
      "tree": "31120dadc8bbb872ba8a2f701c54c2d0893b9188"
+    },
+    {
+     "with": "#15433",
+     "code": "3552a0ec91841bf44cdb596c8d5473196e0deee5",
+     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
+     "tip": "bac28c51c787da8232ff07d053edd13d23772822",
+     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
+     "at": "2026-10-20T02:15:36Z",
+     "host": "goliath"
     }
    ],
    "advanced": "2026-10-19T22:06:15Z"
