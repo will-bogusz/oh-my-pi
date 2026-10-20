@@ -23827,7 +23827,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rg-count-zero",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:44:31Z",
-   "updated": "2026-10-20T03:12:03Z",
+   "updated": "2026-10-20T03:12:25Z",
    "note": "",
    "built": [
     {
@@ -23851,7 +23851,8 @@
     }
    ],
    "advanced": "2026-10-19T22:06:15Z",
-   "opened": "2026-10-20T03:12:03Z"
+   "opened": "2026-10-20T03:12:03Z",
+   "readied": "2026-10-20T03:12:24Z"
   },
   {
    "id": "ln-uri-source",
