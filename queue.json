@@ -23821,13 +23821,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/rg-count-zero.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16432,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rg-count-zero",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:44:31Z",
-   "updated": "2026-10-20T02:15:23Z",
+   "updated": "2026-10-20T03:12:03Z",
    "note": "",
    "built": [
     {
@@ -23850,7 +23850,8 @@
      "host": "goliath"
     }
    ],
-   "advanced": "2026-10-19T22:06:15Z"
+   "advanced": "2026-10-19T22:06:15Z",
+   "opened": "2026-10-20T03:12:03Z"
   },
   {
    "id": "ln-uri-source",
