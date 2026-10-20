@@ -33332,7 +33332,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/conflicts-whole-file",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:04:43Z",
-   "updated": "2026-10-20T20:24:49Z",
+   "updated": "2026-10-20T20:25:09Z",
    "note": "",
    "built": [
     {
@@ -33534,7 +33534,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-20T20:24:48Z"
+   "opened": "2026-10-20T20:24:48Z",
+   "readied": "2026-10-20T20:25:08Z"
   },
   {
    "id": "ts-rule-followups",
