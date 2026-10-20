@@ -37253,6 +37253,11 @@
     "sha": "2effb4366c29350c46ad4d51d7cdd564aa66f8ab",
     "at": "2026-10-20T20:17:45Z",
     "host": "goliath"
+   },
+   "macos": {
+    "sha": "2effb4366c29350c46ad4d51d7cdd564aa66f8ab",
+    "at": "2026-10-20T20:18:17Z",
+    "host": "Wills-MacBook-Pro"
    }
   }
  },
