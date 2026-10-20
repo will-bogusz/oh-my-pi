@@ -22248,13 +22248,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/computer-control-unanswered.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16388,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-control-unanswered",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:32:36Z",
-   "updated": "2026-10-19T22:14:46Z",
+   "updated": "2026-10-20T14:32:59Z",
    "note": "",
    "built": [
     {
@@ -22695,7 +22695,8 @@
     }
    ],
    "advanced": "2026-10-19T22:04:26Z",
-   "opened": "2026-10-19T21:50:53Z"
+   "opened": "2026-10-19T21:50:53Z",
+   "merged_by": "pr"
   },
   {
    "id": "edit-parse-only-ambiguity",
@@ -23290,13 +23291,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/read-inmemory-range.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16391,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-inmemory-range",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:42:25Z",
-   "updated": "2026-10-19T23:47:07Z",
+   "updated": "2026-10-20T14:32:59Z",
    "note": "",
    "built": [
     {
@@ -23769,7 +23770,8 @@
    ],
    "advanced": "2026-10-19T22:06:15Z",
    "opened": "2026-10-19T22:43:40Z",
-   "readied": "2026-10-19T22:44:01Z"
+   "readied": "2026-10-19T22:44:01Z",
+   "merged_by": "pr"
   },
   {
    "id": "rm-force-enoent",
@@ -24466,13 +24468,13 @@
    "needs": [],
    "base": "2220e58146ebe31508e7a216242840d373e082d0",
    "body": "bodies/autoqa-home-paths.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16409,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/autoqa-home-paths",
    "host": "MacBook-Pro",
    "added": "2026-10-19T19:46:16Z",
-   "updated": "2026-10-20T00:17:56Z",
+   "updated": "2026-10-20T14:32:59Z",
    "note": "",
    "built": [
     {
@@ -24977,7 +24979,8 @@
    ],
    "advanced": "2026-10-19T22:06:15Z",
    "opened": "2026-10-20T00:14:37Z",
-   "readied": "2026-10-20T00:15:02Z"
+   "readied": "2026-10-20T00:15:02Z",
+   "merged_by": "pr"
   },
   {
    "id": "read-selector-edges",
