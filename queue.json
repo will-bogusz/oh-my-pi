@@ -36212,7 +36212,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-nav-gate",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:08:31Z",
-   "updated": "2026-10-20T23:42:26Z",
+   "updated": "2026-10-20T23:55:50Z",
    "note": "",
    "built": [
     {
@@ -36474,6 +36474,15 @@
      "at": "2026-10-20T23:42:25Z",
      "host": "goliath",
      "tree": "e3d540b92e266118201dc8b5a9224205c26361e7"
+    },
+    {
+     "with": "#15433",
+     "code": "a81ab76389a6cbe2fd0cc9a22ba2c2542e2aaa8d",
+     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
+     "tip": "c34a85afb98747cfc246b725701538681f1907b0",
+     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
+     "at": "2026-10-20T23:55:46Z",
+     "host": "MacBook-Pro"
     }
    ]
   },
