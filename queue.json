@@ -28711,7 +28711,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-tagless-errors",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:03:12Z",
-   "updated": "2026-10-20T01:44:40Z",
+   "updated": "2026-10-20T01:45:03Z",
    "note": "",
    "advanced": "2026-10-19T22:15:04Z",
    "built": [
@@ -29305,7 +29305,8 @@
      "tree": "2c2e4b0f9effc49a2082e4336b27bd12f0404408"
     }
    ],
-   "opened": "2026-10-20T01:44:40Z"
+   "opened": "2026-10-20T01:44:40Z",
+   "readied": "2026-10-20T01:45:03Z"
   },
   {
    "id": "edit-remap-refuse",
