@@ -34221,6 +34221,24 @@
    "added": "2026-10-20T23:08:00Z",
    "updated": "2026-10-20T23:08:00Z",
    "note": ""
+  },
+  {
+   "id": "read-nav-gate",
+   "branch": "will/read-nav-gate",
+   "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/read-nav-gate.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-nav-gate",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T23:08:31Z",
+   "updated": "2026-10-20T23:08:31Z",
+   "note": ""
   }
  ],
  "watch": {
