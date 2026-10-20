@@ -33761,13 +33761,13 @@
    "needs": [],
    "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
    "body": "bodies/factory-screenshot-budget.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16564,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-screenshot-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:08Z",
-   "updated": "2026-10-20T20:59:20Z",
+   "updated": "2026-10-20T21:02:02Z",
    "note": "",
    "built": [
     {
@@ -33969,7 +33969,8 @@
      "at": "2026-10-20T20:59:17Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-20T21:02:02Z"
   },
   {
    "id": "click-place-release",
