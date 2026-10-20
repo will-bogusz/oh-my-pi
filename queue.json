@@ -33093,27 +33093,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T03:52:53Z",
+  "checked": "2026-10-20T04:54:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "write-prefix-contiguous": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "fix(write): keep content whose leading numbers do not count up by one"
-   },
-   "bash-session-env": {
-    "since": "2026-10-19T22:14:48Z",
-    "title": "feat(coding-agent): expose PI_SESSION_ID and PI_SESSION_FILE to bash commands"
-   },
-   "read-sqlite-q-paging": {
-    "since": "2026-10-19T20:11:33Z",
-    "title": "feat(read): page SQLite ?q= query rows with limit and offset"
-   },
-   "subagent-wait-reply": {
-    "since": "2026-10-19T20:42:30Z",
-    "title": "feat(coding-agent): let wait block for the reply to a message the agent sent"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-10-19T17:41:37Z",
   "unreleased": {},
@@ -33184,7 +33167,11 @@
    16435,
    16436,
    16437,
-   16438
+   16438,
+   16441,
+   16442,
+   16444,
+   16445
   ],
   "events": [
    {
@@ -35606,6 +35593,34 @@
     "id": "vscode-mcp-missing",
     "title": "fix(coding-agent): skip a missing .vscode/mcp.json without warning",
     "why": "opened as #16434"
+   },
+   {
+    "at": "2026-10-20T04:54:00Z",
+    "kind": "unopenable",
+    "id": "write-prefix-contiguous",
+    "title": "fix(write): keep content whose leading numbers do not count up by one",
+    "why": "opened as #16441"
+   },
+   {
+    "at": "2026-10-20T04:54:00Z",
+    "kind": "unopenable",
+    "id": "bash-session-env",
+    "title": "feat(coding-agent): expose PI_SESSION_ID and PI_SESSION_FILE to bash commands",
+    "why": "opened as #16442"
+   },
+   {
+    "at": "2026-10-20T04:54:00Z",
+    "kind": "unopenable",
+    "id": "read-sqlite-q-paging",
+    "title": "feat(read): page SQLite ?q= query rows with limit and offset",
+    "why": "opened as #16444"
+   },
+   {
+    "at": "2026-10-20T04:54:00Z",
+    "kind": "unopenable",
+    "id": "subagent-wait-reply",
+    "title": "feat(coding-agent): let wait block for the reply to a message the agent sent",
+    "why": "opened as #16445"
    }
   ]
  }
