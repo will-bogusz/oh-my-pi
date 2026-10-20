@@ -709,6 +709,67 @@ describe("AgentSession auto-compaction progress guard", () => {
 		);
 	});
 
+	function latestCompactionEntry(): CompactionEntry {
+		const entry = sessionManager.getBranch().findLast(e => e.type === "compaction");
+		if (entry?.type !== "compaction") throw new Error("Expected a committed compaction entry");
+		return entry;
+	}
+
+	it("records the threshold trigger and the counts its decision read on the compaction entry", async () => {
+		vi.spyOn(session.agent, "prompt").mockResolvedValue(undefined as never);
+		const { promise: compactionDone, resolve: onCompactionDone } = Promise.withResolvers<void>();
+		session.subscribe(event => {
+			if (event.type === "auto_compaction_end") onCompactionDone();
+		});
+
+		const assistantMsg = highUsageAssistant();
+		session.agent.emitExternalEvent({ type: "message_end", message: assistantMsg });
+		session.agent.emitExternalEvent({ type: "agent_end", messages: [assistantMsg] });
+		await compactionDone;
+		await session.waitForIdle();
+
+		const entry = latestCompactionEntry();
+		expect(entry).toMatchObject({
+			trigger: "threshold",
+			thresholdTokens: resolveThresholdTokens(200_000, cfgCompaction.get(session.settings)),
+			providerContextTokens: 191_000,
+		});
+		// The local estimate of the one-message branch is the other arm, far below the billed count.
+		expect(entry.estimatedContextTokens).toBeGreaterThan(0);
+		expect(entry.estimatedContextTokens).toBeLessThan(191_000);
+	});
+
+	it("records an overflow recovery's trigger without threshold counts", async () => {
+		seedPriorTurns();
+		vi.spyOn(session.agent, "continue").mockResolvedValue();
+		vi.spyOn(session.agent, "prompt").mockResolvedValue(undefined as never);
+		vi.spyOn(session, "getContextUsage").mockReturnValue({ tokens: 150000, contextWindow: 200000, percent: 75 });
+		const { promise: compactionDone, resolve: onCompactionDone } = Promise.withResolvers<void>();
+		session.subscribe(event => {
+			if (event.type === "auto_compaction_end") onCompactionDone();
+		});
+
+		const assistantMsg = overflowAssistant();
+		session.agent.emitExternalEvent({ type: "message_end", message: assistantMsg });
+		session.agent.emitExternalEvent({ type: "agent_end", messages: [assistantMsg] });
+		await compactionDone;
+		await session.waitForIdle();
+
+		const entry = latestCompactionEntry();
+		expect(entry.trigger).toBe("overflow");
+		expect(entry.thresholdTokens).toBeUndefined();
+		expect(entry.providerContextTokens).toBeUndefined();
+	});
+
+	it("records /compact as a manual trigger", async () => {
+		seedPriorTurns();
+
+		await session.compact();
+
+		expect(latestCompactionEntry()).toMatchObject({ trigger: "manual" });
+		expect(latestCompactionEntry().thresholdTokens).toBeUndefined();
+	});
+
 	it("drops a content-less overflow error when no recovery path is available", async () => {
 		// Content-less provider rejection turns are live UI only: persisting them
 		// writes an empty assistant turn that replays on reload and re-sends the

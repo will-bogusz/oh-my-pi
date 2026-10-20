@@ -47,6 +47,26 @@ describe("CompactionSummaryMessageComponent", () => {
 		expect(rule).toContain("256K→20K");
 	});
 
+	it("names the trigger on the divider and its counts in the expanded detail", () => {
+		const component = new CompactionSummaryMessageComponent(
+			createCompactionSummaryMessage(SUMMARY, 256_000, new Date().toISOString(), {
+				method: "snapcompact",
+				tokensAfter: 20_000,
+				trigger: {
+					reason: "threshold",
+					thresholdTokens: 250_000,
+					providerContextTokens: 191_329,
+					estimatedContextTokens: 256_000,
+				},
+			}),
+		);
+		expect(Bun.stripANSI(component.render(80)[1])).toContain("snap-compacted · threshold · 256K→20K");
+		component.setExpanded(true);
+		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain(
+			"Trigger: threshold 250,000 · provider count 191,329 · local estimate 256,000",
+		);
+	});
+
 	it("labels a handoff-method compaction as handed-off", () => {
 		const component = new CompactionSummaryMessageComponent(
 			createCompactionSummaryMessage(SUMMARY, 84_000, new Date().toISOString(), { method: "handoff" }),
