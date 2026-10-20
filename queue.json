@@ -34059,6 +34059,24 @@
    "added": "2026-10-20T22:48:18Z",
    "updated": "2026-10-20T22:48:18Z",
    "note": ""
+  },
+  {
+   "id": "write-keep-crlf",
+   "branch": "will/write-keep-crlf",
+   "title": "fix(coding-agent): keep a replaced file's CRLF line endings and BOM in write",
+   "area": "write",
+   "priority": "P1",
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/write-keep-crlf.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/write-keep-crlf",
+   "host": "MacBook-Pro",
+   "added": "2026-10-20T22:50:50Z",
+   "updated": "2026-10-20T22:50:50Z",
+   "note": ""
   }
  ],
  "watch": {
