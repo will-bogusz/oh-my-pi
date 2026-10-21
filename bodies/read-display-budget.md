@@ -48,9 +48,9 @@ Related: #13947 (no column cap for `artifact://` reads), #16024 (empty body for 
 
 `test/read-display-budget.test.ts` (12 cases): buffered and streamed (>4 MB, CJK/emoji heads) reads show all 300 lines cut and `:151` pages through; multi-range; 35-record JSONL whole; no tag from heads; a `:conflicts`-registered 80 KB side survives a numbered read; an overflowing first line pages on. Controls: edit on the cut line refused, `:raw` byte-capped, cap 0 stops at 150. On `main` the 7 budget cases fail, controls pass. `test/write-read-projection.test.ts`: writing back a cut read is refused (accepted without the `write.ts` change).
 
-All `packages/coding-agent` tests: 18,844 pass; the 22 failures (browser, PTY, clipboard, model registry) fail on `main` too or pass rerun alone. `bun run check` clean.
+All `packages/coding-agent` tests: 18,844 pass; the 22 failures (browser, PTY, clipboard, registry) fail on `main` too or pass alone. `bun run check` clean.
 
-Replay: numbered local reads from my sessions (10-01..20) that hit the column cap or a byte stop, on `main` and this branch, paged by each read's own `Use :N to continue`:
+Replay of my sessions' numbered reads (10-01..20) that hit the cap or a byte stop, paged by each read's own `Use :N to continue`:
 
 | 1,206 reads (1,150 identical output) | `main` | this PR |
 |---|---|---|
