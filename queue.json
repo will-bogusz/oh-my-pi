@@ -35816,7 +35816,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gateway-settle-log",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:07:24Z",
-   "updated": "2026-10-21T00:07:51Z",
+   "updated": "2026-10-21T00:08:11Z",
    "note": "",
    "built": [
     {
@@ -35890,7 +35890,8 @@
      "tree": "e3d540b92e266118201dc8b5a9224205c26361e7"
     }
    ],
-   "opened": "2026-10-21T00:07:51Z"
+   "opened": "2026-10-21T00:07:51Z",
+   "readied": "2026-10-21T00:08:11Z"
   },
   {
    "id": "task-result-inline",
