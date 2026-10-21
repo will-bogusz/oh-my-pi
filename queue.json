@@ -42060,45 +42060,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T03:38:12Z",
+  "checked": "2026-10-21T04:09:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "fetch-ua-retry": {
-    "since": "2026-10-20T23:03:55Z",
-    "title": "fix(coding-agent): retry a refused web read with the next user agent"
-   },
-   "grep-per-file-cap": {
-    "since": "2026-10-20T23:03:55Z",
-    "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file"
-   },
-   "read-display-budget": {
-    "since": "2026-10-20T23:03:55Z",
-    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget"
-   },
-   "read-nav-gate": {
-    "since": "2026-10-20T23:34:32Z",
-    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code"
-   },
-   "revive-extension-tools": {
-    "since": "2026-10-21T00:35:26Z",
-    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived"
-   },
-   "rg-follow-root": {
-    "since": "2026-10-20T23:03:55Z",
-    "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd"
-   },
-   "task-result-inline": {
-    "since": "2026-10-20T23:34:32Z",
-    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k"
-   },
    "turndown-intraword-underscore": {
     "since": "2026-10-21T03:38:12Z",
     "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown"
-   },
-   "compaction-trigger": {
-    "since": "2026-10-21T00:35:26Z",
-    "title": "feat(coding-agent): record what triggered each compaction"
    },
    "edit-error-kind": {
     "since": "2026-10-21T00:35:26Z",
@@ -42169,7 +42137,13 @@
    16586,
    16587,
    16588,
-   16589
+   16589,
+   16593,
+   16594,
+   16595,
+   16596,
+   16597,
+   16598
   ],
   "post_merge": {
    "13677": {
@@ -46217,6 +46191,62 @@
     "kind": "openable",
     "id": "read-heif-images",
     "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary"
+   },
+   {
+    "at": "2026-10-21T04:09:08Z",
+    "kind": "unopenable",
+    "id": "fetch-ua-retry",
+    "title": "fix(coding-agent): retry a refused web read with the next user agent",
+    "why": "opened as #16593"
+   },
+   {
+    "at": "2026-10-21T04:09:08Z",
+    "kind": "unopenable",
+    "id": "grep-per-file-cap",
+    "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file",
+    "why": "opened as #16594"
+   },
+   {
+    "at": "2026-10-21T04:09:08Z",
+    "kind": "unopenable",
+    "id": "read-display-budget",
+    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
+    "why": "opened as #16595"
+   },
+   {
+    "at": "2026-10-21T04:09:08Z",
+    "kind": "unopenable",
+    "id": "read-nav-gate",
+    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code",
+    "why": "opened as #16596"
+   },
+   {
+    "at": "2026-10-21T04:09:08Z",
+    "kind": "unopenable",
+    "id": "revive-extension-tools",
+    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived",
+    "why": "opened as #16597"
+   },
+   {
+    "at": "2026-10-21T04:09:08Z",
+    "kind": "unopenable",
+    "id": "rg-follow-root",
+    "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd",
+    "why": "opened as #16598"
+   },
+   {
+    "at": "2026-10-21T04:09:08Z",
+    "kind": "unopenable",
+    "id": "task-result-inline",
+    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k",
+    "why": "opened as #16599"
+   },
+   {
+    "at": "2026-10-21T04:09:08Z",
+    "kind": "unopenable",
+    "id": "compaction-trigger",
+    "title": "feat(coding-agent): record what triggered each compaction",
+    "why": "plan: wait (conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts)"
    }
   ]
  },
