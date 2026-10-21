@@ -46457,11 +46457,5 @@
     "host": "goliath"
    }
   }
- },
- "opening": {
-  "id": "compaction-trigger",
-  "token": "06fdb208d923497daf5b4df5dad22c82",
-  "host": "goliath",
-  "at": "2026-10-21T04:07:03Z"
  }
 }
