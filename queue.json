@@ -42659,7 +42659,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T18:52:13Z",
+  "checked": "2026-10-21T19:53:49Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -43065,15 +43065,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-14T19:47:58Z",
-    "kind": "conflict",
-    "label": "#13826",
-    "title": "feat(coding-agent): add opt-in timestamped transcripts of audio and video files to read",
-    "files": [
-     "packages/coding-agent/src/stt/asr-worker.ts"
-    ]
-   },
    {
     "at": "2026-10-14T20:18:07Z",
     "kind": "released",
