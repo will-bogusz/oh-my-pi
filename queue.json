@@ -34330,7 +34330,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/proc-kill-read-hint",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:48:18Z",
-   "updated": "2026-10-21T00:10:38Z",
+   "updated": "2026-10-21T00:11:01Z",
    "note": "",
    "built": [
     {
@@ -34603,7 +34603,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-21T00:10:38Z"
+   "opened": "2026-10-21T00:10:38Z",
+   "readied": "2026-10-21T00:11:00Z"
   },
   {
    "id": "write-keep-crlf",
