@@ -46450,5 +46450,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "read-nav-gate",
+  "token": "62497cec843f4143a1ee061cc984d376",
+  "host": "goliath",
+  "at": "2026-10-21T03:58:23Z"
  }
 }
