@@ -37697,18 +37697,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/revive-extension-tools",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:42:54Z",
-   "updated": "2026-10-21T01:07:26Z",
+   "updated": "2026-10-21T01:07:59Z",
    "note": "",
    "built": [
-    {
-     "with": "#15433",
-     "code": "57a941aa09d2c906634eda22c64aef2abf9e29c2",
-     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
-     "tip": "3f8bb63816dfbc83fc8bb5379eb58f8448e06c79",
-     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
-     "at": "2026-10-20T23:56:08Z",
-     "host": "MacBook-Pro"
-    },
     {
      "with": "#16231",
      "code": "57a941aa09d2c906634eda22c64aef2abf9e29c2",
@@ -38038,6 +38029,15 @@
      "at": "2026-10-21T01:07:26Z",
      "host": "goliath",
      "tree": "837ff67d4684110e977db5ada39e35e922868ed3"
+    },
+    {
+     "with": "#15433",
+     "code": "57a941aa09d2c906634eda22c64aef2abf9e29c2",
+     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
+     "tip": "3f8bb63816dfbc83fc8bb5379eb58f8448e06c79",
+     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
+     "at": "2026-10-21T01:07:58Z",
+     "host": "goliath"
     }
    ]
   },
