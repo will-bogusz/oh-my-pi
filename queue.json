@@ -35844,7 +35844,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/grep-per-file-cap",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:01:15Z",
-   "updated": "2026-10-21T03:55:28Z",
+   "updated": "2026-10-21T03:55:44Z",
    "note": "",
    "built": [
     {
@@ -36288,7 +36288,8 @@
     }
    ],
    "advanced": "2026-10-21T02:58:34Z",
-   "opened": "2026-10-21T03:55:28Z"
+   "opened": "2026-10-21T03:55:28Z",
+   "readied": "2026-10-21T03:55:43Z"
   },
   {
    "id": "rg-follow-root",
