@@ -38137,7 +38137,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/revive-extension-tools",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:42:54Z",
-   "updated": "2026-10-21T04:03:05Z",
+   "updated": "2026-10-21T04:03:21Z",
    "note": "",
    "built": [
     {
@@ -38551,7 +38551,8 @@
     }
    ],
    "advanced": "2026-10-21T02:58:42Z",
-   "opened": "2026-10-21T04:03:04Z"
+   "opened": "2026-10-21T04:03:04Z",
+   "readied": "2026-10-21T04:03:21Z"
   },
   {
    "id": "read-url-markup-tokens",
