@@ -46446,5 +46446,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "grep-per-file-cap",
+  "token": "3318beecc3104cdba1c80b7a7a22261c",
+  "host": "goliath",
+  "at": "2026-10-21T03:54:29Z"
  }
 }
