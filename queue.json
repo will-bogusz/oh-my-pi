@@ -38824,7 +38824,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/pdf-scan-pages",
    "host": "goliath",
    "added": "2026-10-20T23:55:18Z",
-   "updated": "2026-10-21T01:56:00Z",
+   "updated": "2026-10-21T01:56:25Z",
    "note": "",
    "built": [
     {
@@ -39167,7 +39167,8 @@
      "tree": "297104bd045116915edc465bc06e8bfc2fa52fc3"
     }
    ],
-   "opened": "2026-10-21T01:56:00Z"
+   "opened": "2026-10-21T01:56:00Z",
+   "readied": "2026-10-21T01:56:24Z"
   },
   {
    "id": "edit-error-kind",
