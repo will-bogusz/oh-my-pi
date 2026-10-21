@@ -34912,7 +34912,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fetch-ua-retry",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:53:24Z",
-   "updated": "2026-10-21T03:54:09Z",
+   "updated": "2026-10-21T03:54:24Z",
    "note": "",
    "built": [
     {
@@ -35356,7 +35356,8 @@
     }
    ],
    "advanced": "2026-10-21T02:57:33Z",
-   "opened": "2026-10-21T03:54:09Z"
+   "opened": "2026-10-21T03:54:09Z",
+   "readied": "2026-10-21T03:54:24Z"
   },
   {
    "id": "read-display-budget",
