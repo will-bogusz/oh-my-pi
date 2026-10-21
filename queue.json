@@ -38131,13 +38131,13 @@
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/revive-extension-tools.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16597,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/revive-extension-tools",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:42:54Z",
-   "updated": "2026-10-21T03:52:59Z",
+   "updated": "2026-10-21T04:03:05Z",
    "note": "",
    "built": [
     {
@@ -38550,7 +38550,8 @@
      "tree": "059e16c5899a65c86cabcf7ba734cce09fdee99f"
     }
    ],
-   "advanced": "2026-10-21T02:58:42Z"
+   "advanced": "2026-10-21T02:58:42Z",
+   "opened": "2026-10-21T04:03:04Z"
   },
   {
    "id": "read-url-markup-tokens",
