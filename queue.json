@@ -37033,25 +37033,29 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-20T23:34:32Z",
+  "checked": "2026-10-21T00:35:26Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "write-keep-crlf": {
-    "since": "2026-10-20T23:03:55Z",
-    "title": "fix(coding-agent): keep a replaced file's CRLF line endings and BOM in write"
+   "pdf-scan-pages": {
+    "since": "2026-10-21T00:35:26Z",
+    "title": "fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer"
    },
-   "eval-py-await-tool": {
-    "since": "2026-10-20T23:03:55Z",
-    "title": "fix(coding-agent): tell Python-only eval sessions to await tool calls"
+   "peer-reply-keeps-report": {
+    "since": "2026-10-21T00:35:26Z",
+    "title": "fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes"
    },
-   "gateway-settle-log": {
-    "since": "2026-10-20T23:34:32Z",
-    "title": "fix(ai): stop logging a usage-limit retry the gateway does not make"
+   "usage-json-policy": {
+    "since": "2026-10-21T00:35:26Z",
+    "title": "feat(coding-agent): include account policy state in omp usage --json"
    },
-   "proc-kill-read-hint": {
-    "since": "2026-10-20T23:03:55Z",
-    "title": "fix(coding-agent): name the write call when proc:// kill or mode is read"
+   "bash-minimizer-meta": {
+    "since": "2026-10-21T00:35:26Z",
+    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut"
+   },
+   "log-session-id": {
+    "since": "2026-10-21T00:35:26Z",
+    "title": "feat(coding-agent): tag each log record with the session that wrote it"
    },
    "fetch-ua-retry": {
     "since": "2026-10-20T23:03:55Z",
@@ -37077,6 +37081,10 @@
     "since": "2026-10-20T23:34:32Z",
     "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code"
    },
+   "revive-extension-tools": {
+    "since": "2026-10-21T00:35:26Z",
+    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived"
+   },
    "rg-follow-root": {
     "since": "2026-10-20T23:03:55Z",
     "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd"
@@ -37084,6 +37092,14 @@
    "task-result-inline": {
     "since": "2026-10-20T23:34:32Z",
     "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k"
+   },
+   "compaction-trigger": {
+    "since": "2026-10-21T00:35:26Z",
+    "title": "feat(coding-agent): record what triggered each compaction"
+   },
+   "edit-error-kind": {
+    "since": "2026-10-21T00:35:26Z",
+    "title": "feat(edit): record why an edit failed and count it in /session"
    }
   },
   "conflicts": {
@@ -37130,7 +37146,12 @@
    16552,
    16553,
    16556,
-   16564
+   16564,
+   16575,
+   16576,
+   16578,
+   16579,
+   16580
   ],
   "post_merge": {
    "13677": {
@@ -41035,6 +41056,82 @@
     "kind": "openable",
     "id": "task-result-inline",
     "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "openable",
+    "id": "pdf-scan-pages",
+    "title": "fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "openable",
+    "id": "peer-reply-keeps-report",
+    "title": "fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "openable",
+    "id": "usage-json-policy",
+    "title": "feat(coding-agent): include account policy state in omp usage --json"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "openable",
+    "id": "bash-minimizer-meta",
+    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "openable",
+    "id": "log-session-id",
+    "title": "feat(coding-agent): tag each log record with the session that wrote it"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "openable",
+    "id": "revive-extension-tools",
+    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "openable",
+    "id": "compaction-trigger",
+    "title": "feat(coding-agent): record what triggered each compaction"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "openable",
+    "id": "edit-error-kind",
+    "title": "feat(edit): record why an edit failed and count it in /session"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "unopenable",
+    "id": "write-keep-crlf",
+    "title": "fix(coding-agent): keep a replaced file's CRLF line endings and BOM in write",
+    "why": "opened as #16575"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "unopenable",
+    "id": "eval-py-await-tool",
+    "title": "fix(coding-agent): tell Python-only eval sessions to await tool calls",
+    "why": "opened as #16578"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "unopenable",
+    "id": "gateway-settle-log",
+    "title": "fix(ai): stop logging a usage-limit retry the gateway does not make",
+    "why": "opened as #16579"
+   },
+   {
+    "at": "2026-10-21T00:35:26Z",
+    "kind": "unopenable",
+    "id": "proc-kill-read-hint",
+    "title": "fix(coding-agent): name the write call when proc:// kill or mode is read",
+    "why": "opened as #16580"
    }
   ]
  },
