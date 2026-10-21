@@ -45182,5 +45182,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "read-display-budget",
+  "token": "44a4cf705f764399906a944982d68d57",
+  "host": "MacBook-Pro",
+  "at": "2026-10-21T03:01:11Z"
  }
 }
