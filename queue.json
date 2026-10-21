@@ -42659,7 +42659,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T16:19:51Z",
+  "checked": "2026-10-21T16:50:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -42789,12 +42789,6 @@
     "merged_at": "2026-10-20T18:03:11Z",
     "findings": []
    },
-   "16241": {
-    "title": "fix(coding-agent): keep a running tool's result when /compact, /new or a session switch aborts it",
-    "merge_commit": "eb8682132501c10f0e0fe59f7975199217ec5c6b",
-    "merged_at": "2026-10-19T16:45:05Z",
-    "findings": []
-   },
    "16242": {
     "title": "fix(coding-agent): fire ts-set-map, ts-import-type and ts-no-any only on code they flag",
     "merge_commit": "dc2993ed435e4b434101779f53d3b5fc023a6d38",
@@ -42849,12 +42843,6 @@
     "merged_at": "2026-10-19T17:29:47Z",
     "findings": []
    },
-   "16282": {
-    "title": "fix(coding-agent): persist snapcompact archive source text whole",
-    "merge_commit": "36ccf0839f3bc2baf901c1d0868baec4a6abc98b",
-    "merged_at": "2026-10-19T16:46:08Z",
-    "findings": []
-   },
    "16283": {
     "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
     "merge_commit": "87c3e9b7d710203d08b640bece58d08d72276e50",
@@ -42885,12 +42873,6 @@
     "title": "fix(coding-agent): deliver both of two asides sent together to an idle session",
     "merge_commit": "209cafd9b1ff675cfbe9d2753edc7372a981449e",
     "merged_at": "2026-10-19T17:20:17Z",
-    "findings": []
-   },
-   "16293": {
-    "title": "fix(ai): redact credential headers in PI_REQ_DEBUG dumps",
-    "merge_commit": "abb184ded7e2ac8158905504a7a32fd8cea68279",
-    "merged_at": "2026-10-19T16:41:38Z",
     "findings": []
    },
    "16294": {
