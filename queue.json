@@ -42659,7 +42659,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T16:50:07Z",
+  "checked": "2026-10-21T17:20:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -42777,12 +42777,6 @@
     "merged_at": "2026-10-19T17:32:33Z",
     "findings": []
    },
-   "16235": {
-    "title": "fix(natives): never cancel X11 uinput releases",
-    "merge_commit": "19f8df410036760f460316e734593b7e6fc5639e",
-    "merged_at": "2026-10-19T16:57:06Z",
-    "findings": []
-   },
    "16236": {
     "title": "fix(coding-agent): name the expected shape when browser tab.run gets an args array or open gets a URL",
     "merge_commit": "835135afd1b8decec0cb53d9bba72067cff83c23",
@@ -42795,34 +42789,10 @@
     "merged_at": "2026-10-20T17:48:31Z",
     "findings": []
    },
-   "16249": {
-    "title": "fix(ai): keep Factory Droid Gemini tool schemas valid when a parameter takes a string or a list",
-    "merge_commit": "188c457d3fc6cde8ed950ebef6a756d602b3d498",
-    "merged_at": "2026-10-19T16:58:51Z",
-    "findings": []
-   },
    "16252": {
     "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
     "merge_commit": "6595f9b1f9bd5871b6909468dcfa2c9b65d2b39b",
     "merged_at": "2026-10-19T17:41:37Z",
-    "findings": []
-   },
-   "16259": {
-    "title": "fix(ai): send parallel Gemini tool results back in call order",
-    "merge_commit": "fcc36032b3fe6ef242186ed17f73124b8b686ad2",
-    "merged_at": "2026-10-19T16:59:54Z",
-    "findings": []
-   },
-   "16266": {
-    "title": "fix(browser): recognize Puppeteer timeouts in release builds",
-    "merge_commit": "caa898abe8e4bda3861a82876a61ca1d6f2259a4",
-    "merged_at": "2026-10-19T17:03:02Z",
-    "findings": []
-   },
-   "16267": {
-    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values",
-    "merge_commit": "5d1c86007c684c695aa5ff6b43b3738bf7240af9",
-    "merged_at": "2026-10-19T16:52:55Z",
     "findings": []
    },
    "16269": {
@@ -42841,18 +42811,6 @@
     "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
     "merge_commit": "c388b92d314791f1ffff39403c0f34393a6ada84",
     "merged_at": "2026-10-19T17:29:47Z",
-    "findings": []
-   },
-   "16283": {
-    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
-    "merge_commit": "87c3e9b7d710203d08b640bece58d08d72276e50",
-    "merged_at": "2026-10-19T16:59:16Z",
-    "findings": []
-   },
-   "16285": {
-    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
-    "merge_commit": "c270e3595d5eae958d498b9a032a72d6d5335235",
-    "merged_at": "2026-10-19T16:56:50Z",
     "findings": []
    },
    "16288": {
@@ -42913,22 +42871,10 @@
     "merged_at": "2026-10-19T17:20:49Z",
     "findings": []
    },
-   "16302": {
-    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
-    "merge_commit": "0c12c9054a1fe85a0c3d1254bd6155d77babd7cb",
-    "merged_at": "2026-10-19T17:12:04Z",
-    "findings": []
-   },
    "16306": {
     "title": "chore(natives): regenerate index.d.ts from the current bindings",
     "merge_commit": "0ab804423b1161d5069ee409d7916c07d2643ad5",
     "merged_at": "2026-10-20T18:11:02Z",
-    "findings": []
-   },
-   "16312": {
-    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts",
-    "merge_commit": "896aa52a1a2a77e0f070d3a53c9d01d72683af72",
-    "merged_at": "2026-10-19T17:19:41Z",
     "findings": []
    },
    "16314": {
