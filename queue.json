@@ -40263,6 +40263,24 @@
     }
    ],
    "opened": "2026-10-21T01:11:33Z"
+  },
+  {
+   "id": "turndown-intraword-underscore",
+   "branch": "will/turndown-intraword-underscore",
+   "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown",
+   "area": "coding-agent",
+   "priority": null,
+   "needs": [],
+   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
+   "body": "bodies/turndown-intraword-underscore.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/turndown-intraword-underscore",
+   "host": "MacBook-Pro",
+   "added": "2026-10-21T02:42:03Z",
+   "updated": "2026-10-21T02:42:03Z",
+   "note": ""
   }
  ],
  "watch": {
