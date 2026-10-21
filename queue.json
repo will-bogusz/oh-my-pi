@@ -42659,7 +42659,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T19:53:49Z",
+  "checked": "2026-10-21T20:24:06Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -43065,76 +43065,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-14T20:18:07Z",
-    "kind": "released",
-    "number": 15494,
-    "title": "fix(coding-agent): open targets a relay page session creates in that page's browser",
-    "tag": "v18.11.0"
-   },
-   {
-    "at": "2026-10-14T20:18:07Z",
-    "kind": "released",
-    "number": 15680,
-    "title": "feat(coding-agent): record which omp build wrote each session entry",
-    "tag": "v18.11.0"
-   },
-   {
-    "at": "2026-10-14T20:18:07Z",
-    "kind": "released",
-    "number": 15495,
-    "title": "fix(coding-agent): keep puppeteer's own tab page listeners across browser runs",
-    "tag": "v18.11.0"
-   },
-   {
-    "at": "2026-10-14T20:18:07Z",
-    "kind": "released",
-    "number": 15607,
-    "title": "fix(natives): open a scrolled-out row when pressing it in a macOS Catalyst app",
-    "tag": "v18.11.0"
-   },
-   {
-    "at": "2026-10-14T20:18:07Z",
-    "kind": "released",
-    "number": 15604,
-    "title": "fix(natives): wait for a Chromium window's web content on the first macOS computer read",
-    "tag": "v18.11.0"
-   },
-   {
-    "at": "2026-10-14T20:18:07Z",
-    "kind": "released",
-    "number": 15414,
-    "title": "fix(natives): release the macOS display-awake hold when a native call hangs",
-    "tag": "v18.11.0"
-   },
-   {
-    "at": "2026-10-14T20:18:07Z",
-    "kind": "released",
-    "number": 15599,
-    "title": "fix(coding-agent): read the page body when browser text() or html() gets no selector",
-    "tag": "v18.11.0"
-   },
-   {
-    "at": "2026-10-14T20:18:07Z",
-    "kind": "released",
-    "number": 15502,
-    "title": "fix(coding-agent): mask password values in browser ARIA snapshots",
-    "tag": "v18.11.0"
-   },
-   {
-    "at": "2026-10-14T20:18:07Z",
-    "kind": "released",
-    "number": 15293,
-    "title": "fix(natives): write macOS setValue text the way win.type does",
-    "tag": "v18.11.0"
-   },
-   {
-    "at": "2026-10-14T20:18:07Z",
-    "kind": "released",
-    "number": 15496,
-    "title": "fix(browser): scroll text-query click targets into view",
-    "tag": "v18.11.0"
-   },
    {
     "at": "2026-10-15T12:14:09Z",
     "kind": "merged",
