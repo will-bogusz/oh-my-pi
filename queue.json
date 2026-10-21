@@ -40266,22 +40266,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T01:36:19Z",
+  "checked": "2026-10-21T02:37:18Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "pdf-scan-pages": {
-    "since": "2026-10-21T00:35:26Z",
-    "title": "fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer"
-   },
-   "bash-minimizer-meta": {
-    "since": "2026-10-21T00:35:26Z",
-    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut"
-   },
-   "log-session-id": {
-    "since": "2026-10-21T00:35:26Z",
-    "title": "feat(coding-agent): tag each log record with the session that wrote it"
-   },
    "fetch-ua-retry": {
     "since": "2026-10-20T23:03:55Z",
     "title": "fix(coding-agent): retry a refused web read with the next user agent"
@@ -40289,14 +40277,6 @@
    "grep-per-file-cap": {
     "since": "2026-10-20T23:03:55Z",
     "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file"
-   },
-   "minimizer-diff-hunk-lines": {
-    "since": "2026-10-20T23:34:32Z",
-    "title": "fix(pi-shell): keep diff hunk lines starting with -- or ++ inside their hunk"
-   },
-   "minimizer-keep-small-whole": {
-    "since": "2026-10-20T23:34:32Z",
-    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer"
    },
    "read-display-budget": {
     "since": "2026-10-20T23:03:55Z",
@@ -40377,7 +40357,12 @@
    16578,
    16579,
    16580,
-   16581
+   16581,
+   16583,
+   16585,
+   16586,
+   16588,
+   16589
   ],
   "post_merge": {
    "13677": {
@@ -44372,6 +44357,41 @@
     "id": "peer-reply-keeps-report",
     "title": "fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes",
     "why": "opened as #16583"
+   },
+   {
+    "at": "2026-10-21T02:37:18Z",
+    "kind": "unopenable",
+    "id": "pdf-scan-pages",
+    "title": "fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer",
+    "why": "opened as #16585"
+   },
+   {
+    "at": "2026-10-21T02:37:18Z",
+    "kind": "unopenable",
+    "id": "bash-minimizer-meta",
+    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
+    "why": "opened as #16586"
+   },
+   {
+    "at": "2026-10-21T02:37:18Z",
+    "kind": "unopenable",
+    "id": "log-session-id",
+    "title": "feat(coding-agent): tag each log record with the session that wrote it",
+    "why": "opened as #16587"
+   },
+   {
+    "at": "2026-10-21T02:37:18Z",
+    "kind": "unopenable",
+    "id": "minimizer-diff-hunk-lines",
+    "title": "fix(pi-shell): keep diff hunk lines starting with -- or ++ inside their hunk",
+    "why": "opened as #16588"
+   },
+   {
+    "at": "2026-10-21T02:37:18Z",
+    "kind": "unopenable",
+    "id": "minimizer-keep-small-whole",
+    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer",
+    "why": "opened as #16589"
    }
   ]
  },
