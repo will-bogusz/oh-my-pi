@@ -47079,5 +47079,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "turndown-intraword-underscore",
+  "token": "3a3f46f700f848c9b5b07b7810f056da",
+  "host": "goliath",
+  "at": "2026-10-21T05:59:10Z"
  }
 }
