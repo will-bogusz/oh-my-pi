@@ -39516,7 +39516,7 @@
    "branch": "will/usage-json-policy",
    "title": "feat(coding-agent): include account policy state in omp usage --json",
    "area": "broker",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/usage-json-policy.md",
@@ -39526,7 +39526,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-json-policy",
    "host": "MacBook-Pro",
    "added": "2026-10-21T00:22:22Z",
-   "updated": "2026-10-21T00:54:39Z",
+   "updated": "2026-10-21T01:06:07Z",
    "note": "",
    "built": [
     {
