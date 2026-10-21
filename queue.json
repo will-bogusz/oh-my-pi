@@ -40873,6 +40873,24 @@
      "tree": "ec59da4127dae5ff193688025ea741a695c49e7e"
     }
    ]
+  },
+  {
+   "id": "read-audio-transcripts",
+   "branch": "will/read-audio-transcripts",
+   "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
+   "area": "catalog",
+   "priority": null,
+   "needs": [],
+   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
+   "body": "bodies/read-audio-transcripts.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-audio-transcripts",
+   "host": "MacBook-Pro",
+   "added": "2026-10-21T03:04:56Z",
+   "updated": "2026-10-21T03:04:56Z",
+   "note": ""
   }
  ],
  "watch": {
