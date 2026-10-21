@@ -34324,13 +34324,13 @@
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/proc-kill-read-hint.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16580,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/proc-kill-read-hint",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:48:18Z",
-   "updated": "2026-10-20T23:55:28Z",
+   "updated": "2026-10-21T00:10:38Z",
    "note": "",
    "built": [
     {
@@ -34602,7 +34602,8 @@
      "at": "2026-10-20T23:55:24Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-21T00:10:38Z"
   },
   {
    "id": "write-keep-crlf",
