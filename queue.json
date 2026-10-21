@@ -38076,7 +38076,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-minimizer-meta",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:49:04Z",
-   "updated": "2026-10-21T01:59:39Z",
+   "updated": "2026-10-21T02:00:31Z",
    "note": "",
    "built": [
     {
@@ -38419,7 +38419,8 @@
      "tree": "297104bd045116915edc465bc06e8bfc2fa52fc3"
     }
    ],
-   "opened": "2026-10-21T01:59:39Z"
+   "opened": "2026-10-21T01:59:39Z",
+   "readied": "2026-10-21T02:00:31Z"
   },
   {
    "id": "sec-edgar-filing-docs",
