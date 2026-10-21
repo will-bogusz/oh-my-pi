@@ -36620,7 +36620,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/minimizer-keep-small-whole",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:08:00Z",
-   "updated": "2026-10-21T02:15:19Z",
+   "updated": "2026-10-21T02:15:44Z",
    "note": "",
    "built": [
     {
@@ -36634,7 +36634,8 @@
      "tree": "e3d540b92e266118201dc8b5a9224205c26361e7"
     }
    ],
-   "opened": "2026-10-21T02:15:18Z"
+   "opened": "2026-10-21T02:15:18Z",
+   "readied": "2026-10-21T02:15:44Z"
   },
   {
    "id": "read-nav-gate",
