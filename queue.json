@@ -44527,5 +44527,11 @@
     "host": "Wills-MacBook-Pro"
    }
   }
+ },
+ "opening": {
+  "id": "fetch-ua-retry",
+  "token": "21dc5e2ae39544ce98c39e2203f69721",
+  "host": "MacBook-Pro",
+  "at": "2026-10-21T01:20:23Z"
  }
 }
