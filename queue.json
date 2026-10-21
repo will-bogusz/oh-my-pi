@@ -34039,7 +34039,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-py-await-tool",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:46:23Z",
-   "updated": "2026-10-21T00:04:55Z",
+   "updated": "2026-10-21T00:05:18Z",
    "note": "",
    "built": [
     {
@@ -34312,7 +34312,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-21T00:04:55Z"
+   "opened": "2026-10-21T00:04:55Z",
+   "readied": "2026-10-21T00:05:18Z"
   },
   {
    "id": "proc-kill-read-hint",
