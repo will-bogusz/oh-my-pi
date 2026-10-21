@@ -35374,7 +35374,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-display-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:59:53Z",
-   "updated": "2026-10-21T03:57:52Z",
+   "updated": "2026-10-21T03:58:19Z",
    "note": "",
    "built": [
     {
@@ -35828,7 +35828,8 @@
     }
    ],
    "advanced": "2026-10-21T02:57:33Z",
-   "opened": "2026-10-21T03:57:52Z"
+   "opened": "2026-10-21T03:57:52Z",
+   "readied": "2026-10-21T03:58:18Z"
   },
   {
    "id": "grep-per-file-cap",
