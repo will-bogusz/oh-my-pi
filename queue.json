@@ -36981,8 +36981,10 @@
    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
    "area": "other",
    "priority": null,
-   "needs": [],
-   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "needs": [
+    "grep-per-file-cap"
+   ],
+   "base": "cb70a97de534bb967821c347cee71a31988e49a8",
    "body": "bodies/grep-exclude.md",
    "state": "queued",
    "pr": null,
@@ -36990,7 +36992,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-21T00:19:24Z",
-   "updated": "2026-10-21T00:19:24Z",
+   "updated": "2026-10-21T00:23:54Z",
    "note": ""
   },
   {
