@@ -42659,7 +42659,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T15:49:45Z",
+  "checked": "2026-10-21T16:19:51Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -42678,6 +42678,13 @@
     "title": "fix(natives): keep a macOS user's press placed in their app through a release during its hit-test",
     "files": [
      "crates/pi-natives/src/desktop/macos/skylight.rs"
+    ]
+   },
+   "#16587": {
+    "since": "2026-10-21T16:19:51Z",
+    "title": "feat(coding-agent): tag each log record with the session that wrote it",
+    "files": [
+     "packages/coding-agent/src/session/agent-session.ts"
     ]
    }
   },
@@ -46876,6 +46883,15 @@
     "id": "read-heif-images",
     "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary",
     "why": "opened as #16612"
+   },
+   {
+    "at": "2026-10-21T16:19:51Z",
+    "kind": "conflict",
+    "label": "#16587",
+    "title": "feat(coding-agent): tag each log record with the session that wrote it",
+    "files": [
+     "packages/coding-agent/src/session/agent-session.ts"
+    ]
    }
   ]
  },
