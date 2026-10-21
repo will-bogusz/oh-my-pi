@@ -37691,7 +37691,9 @@
    "title": "feat(coding-agent): record what triggered each compaction",
    "area": "other",
    "priority": null,
-   "needs": [],
+   "needs": [
+    "#16587"
+   ],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/compaction-trigger.md",
    "state": "queued",
@@ -37700,8 +37702,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/compaction-trigger",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:41:41Z",
-   "updated": "2026-10-21T03:52:59Z",
-   "note": "",
+   "updated": "2026-10-21T04:10:36Z",
+   "note": "waits for #16587: both edit AgentSession.runIdleCompaction (6892-6910); after it merges, pr-queue advance compaction-trigger rebases onto main",
    "built": [
     {
      "with": "#16231",
