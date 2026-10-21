@@ -31,14 +31,14 @@
    "needs": [],
    "base": "a66558815743a61164ceebceb2bb528989fb09b3",
    "body": null,
-   "state": "open",
+   "state": "closed",
    "pr": 13826,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/media-transcript",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-14T19:52:39Z",
-   "note": "",
+   "updated": "2026-10-21T06:12:44Z",
+   "note": "superseded by #16611 (read-audio-transcripts)",
    "advanced": "2026-10-14T19:52:39Z"
   },
   {
