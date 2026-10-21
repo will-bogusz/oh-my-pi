@@ -45178,5 +45178,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "fetch-ua-retry",
+  "token": "3f0269ffba8c4459a3cfb7f490e8e0b1",
+  "host": "MacBook-Pro",
+  "at": "2026-10-21T02:58:10Z"
  }
 }
