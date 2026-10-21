@@ -37012,6 +37012,24 @@
    "added": "2026-10-21T00:22:22Z",
    "updated": "2026-10-21T00:24:10Z",
    "note": ""
+  },
+  {
+   "id": "peer-reply-keeps-report",
+   "branch": "will/peer-reply-keeps-report",
+   "title": "fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "body": "bodies/peer-reply-keeps-report.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/home/will/.omp/main-wt/oh-my-pi/peer-reply-keeps-report",
+   "host": "goliath",
+   "added": "2026-10-21T00:27:45Z",
+   "updated": "2026-10-21T00:27:45Z",
+   "note": ""
   }
  ],
  "watch": {
