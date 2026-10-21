@@ -47089,5 +47089,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "edit-error-kind",
+  "token": "34adf456a7434b2a8e95052df7d0a166",
+  "host": "goliath",
+  "at": "2026-10-21T06:00:19Z"
  }
 }
