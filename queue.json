@@ -38451,13 +38451,13 @@
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/log-session-id.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16587,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/log-session-id",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:54:49Z",
-   "updated": "2026-10-21T01:52:37Z",
+   "updated": "2026-10-21T02:03:30Z",
    "note": "",
    "built": [
     {
@@ -38809,7 +38809,8 @@
      "host": "goliath",
      "tree": "297104bd045116915edc465bc06e8bfc2fa52fc3"
     }
-   ]
+   ],
+   "opened": "2026-10-21T02:03:30Z"
   },
   {
    "id": "pdf-scan-pages",
