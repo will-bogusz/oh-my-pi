@@ -34029,7 +34029,7 @@
    "branch": "will/eval-py-await-tool",
    "title": "fix(coding-agent): tell Python-only eval sessions to await tool calls",
    "area": "eval",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/eval-py-await-tool.md",
@@ -34039,7 +34039,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-py-await-tool",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:46:23Z",
-   "updated": "2026-10-21T00:05:18Z",
+   "updated": "2026-10-21T00:35:23Z",
    "note": "",
    "built": [
     {
@@ -34320,7 +34320,7 @@
    "branch": "will/proc-kill-read-hint",
    "title": "fix(coding-agent): name the write call when proc:// kill or mode is read",
    "area": "other",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/proc-kill-read-hint.md",
@@ -34330,7 +34330,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/proc-kill-read-hint",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:48:18Z",
-   "updated": "2026-10-21T00:11:01Z",
+   "updated": "2026-10-21T00:35:23Z",
    "note": "",
    "built": [
     {
@@ -35808,7 +35808,7 @@
    "branch": "will/gateway-settle-log",
    "title": "fix(ai): stop logging a usage-limit retry the gateway does not make",
    "area": "other",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/gateway-settle-log.md",
@@ -35818,7 +35818,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gateway-settle-log",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:07:24Z",
-   "updated": "2026-10-21T00:08:11Z",
+   "updated": "2026-10-21T00:35:23Z",
    "note": "",
    "built": [
     {
@@ -36508,7 +36508,7 @@
    "branch": "will/bash-view-tags",
    "title": "feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them",
    "area": "coding-agent",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/bash-view-tags.md",
@@ -36518,7 +36518,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-view-tags",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:37:15Z",
-   "updated": "2026-10-21T00:02:12Z",
+   "updated": "2026-10-21T00:35:23Z",
    "note": "",
    "built": [
     {
