@@ -41142,5 +41142,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "grep-per-file-cap",
+  "token": "4c544aeb951a4e32a3e1c3fbc872e582",
+  "host": "MacBook-Pro",
+  "at": "2026-10-21T00:13:33Z"
  }
 }
