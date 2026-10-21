@@ -27,11 +27,11 @@ then f.txt:151 shows only line 150 and:               [Some lines truncated to 7
 | 35-line JSONL of ~5 KB records | 9 lines per read | 35 lines in one read |
 | same file past the 4 MB snapshot cap (streamed) | same refusal | same as the buffered file |
 
-**Beyond the budget:** `write` now refuses content ending in the column-cap notice (`[Some lines truncated to 768 chars. …]`) when it covers less than the file, as it already does for `read`'s other truncation notices. `main` showed a 60 KB line as a byte-capped partial line, which `write` refused to write back; it is now shown cut, and without this the write-back would drop the rest of the line. The same gap exists on `main` for lines between 769 bytes and the budget, which this closes too.
+**Beyond the budget:** `write` now refuses content ending in the column-cap notice when it covers less than the file, as it does for `read`'s other truncation notices. Otherwise a 60 KB line, which `main` showed as a byte-capped partial that `write` refused, would now be shown cut and written back cut. `main` has the same gap for lines from 769 bytes up to the budget; this closes it too.
 
 ## Why
 
-The page budget (~50 KB) bounds the text a read returns, but numbered reads charged each line its source size while showing at most 768 columns of it: an 80 KB line spent the whole budget to display 771 bytes. `:raw` reads and `tools.outputMaxColumns: 0` are unchanged; the oversized-line notices still apply there, which is where five existing tests now pin them. Cut lines stay out of the seen-line set, so an edit on line 151 is still refused until a `:raw` read shows it.
+The page budget (~50 KB) bounds the text a read returns, but numbered reads charged each line its source size while showing at most 768 columns of it: an 80 KB line spent the whole budget to display 771 bytes. `:raw` reads and `tools.outputMaxColumns: 0` are unchanged, and five existing tests now pin the oversized-line notices there. Cut lines stay unseen, so an edit on line 151 is still refused until a `:raw` read.
 
 <details><summary>Decisions</summary>
 
@@ -46,13 +46,11 @@ Related: #13947 (no column cap for `artifact://` reads), #16024 (empty body for 
 
 ## Testing
 
-`test/read-display-budget.test.ts`, 12 cases: buffered and streamed (>4 MB, CJK and emoji wide lines kept as heads) reads show all 300 lines with the wide lines cut and `:151` pages through; streamed multi-range; 35-record JSONL whole; no hashline tag from heads; an 80 KB conflict side registered by `:conflicts` survives a numbered read and `conflict://1` resolves it; a first line whose display overflows is shown and pages on. Controls: an edit on the cut line is refused, `:raw:151-151` stays byte-capped, cap 0 still stops at 150. On `main` the 7 budget cases fail and the controls pass; removing the head-snapshot guard fails the tag case.
+`test/read-display-budget.test.ts` (12 cases): buffered and streamed (>4 MB, CJK/emoji heads) reads show all 300 lines cut and `:151` pages through; multi-range; 35-record JSONL whole; no tag from heads; a `:conflicts`-registered 80 KB side survives a numbered read; an overflowing first line pages on. Controls: edit on the cut line refused, `:raw` byte-capped, cap 0 stops at 150. On `main` the 7 budget cases fail, controls pass. `test/write-read-projection.test.ts`: writing back a cut read is refused (accepted without the `write.ts` change).
 
-`test/write-read-projection.test.ts`: writing back a read whose long line was shown cut is refused and the file is unchanged (accepted, and the line dropped, without the `write.ts` change).
+All `packages/coding-agent` tests: 18,844 pass; the 22 failures (browser, PTY, clipboard, model registry) fail on `main` too or pass rerun alone. `bun run check` clean.
 
-All `packages/coding-agent` tests on goliath: 18,844 pass; the 22 failures are browser, PTY, clipboard and model-registry tests that fail the same on `main` or pass when rerun alone. `bun run check` clean.
-
-Replay: every numbered local read from my sessions (10-01..20) that hit the column cap or a byte stop, run on `main` and on this branch, then paged by following each read's own `Use :N to continue`:
+Replay: numbered local reads from my sessions (10-01..20) that hit the column cap or a byte stop, on `main` and this branch, paged by each read's own `Use :N to continue`:
 
 | 1,206 reads (1,150 identical output) | `main` | this PR |
 |---|---|---|
