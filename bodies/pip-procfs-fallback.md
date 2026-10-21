@@ -1,6 +1,6 @@
 ## What
 
-Follow-up to #16300: Codex pointed out after the merge that cancelling `%pip` breaks on Linux hosts without a usable `/proc`, so I made the process walk fall back to `ps` there instead of raising.
+Follow-up to #16300: Codex pointed out after the merge that cancelling `%pip` breaks on Linux hosts without a usable `/proc`, so there I made the installer run in its own process group and cancel kill that whole group instead of raising.
 
 Cancelling `%pip` without procfs: installer killed, its child left running → the whole installer tree killed and reaped, on cancel and on kernel shutdown.
 
@@ -32,3 +32,4 @@ Decisions:
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
