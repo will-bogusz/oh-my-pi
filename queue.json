@@ -41140,5 +41140,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "proc-kill-read-hint",
+  "token": "a31b1720e9c84f4b9f47d407b5f9392b",
+  "host": "MacBook-Pro",
+  "at": "2026-10-21T00:08:17Z"
  }
 }
