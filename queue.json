@@ -38951,14 +38951,14 @@
    ],
    "base": "5635bd12394dba67509de01859546402286307e5",
    "body": "bodies/sec-edgar-filing-docs.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/sec-edgar-filing-docs",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:53:27Z",
-   "updated": "2026-10-20T23:53:27Z",
-   "note": ""
+   "updated": "2026-10-21T14:34:19Z",
+   "note": "Will 2026-10-21: not opening (SEC asks for a declared contact in User-Agent; omp has none)"
   },
   {
    "id": "log-session-id",
