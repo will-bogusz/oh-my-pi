@@ -41142,11 +41142,5 @@
     "host": "goliath"
    }
   }
- },
- "opening": {
-  "id": "fetch-ua-retry",
-  "token": "cb3ebafa908c487ab1251a97fc9eeb3d",
-  "host": "MacBook-Pro",
-  "at": "2026-10-21T00:11:06Z"
  }
 }
