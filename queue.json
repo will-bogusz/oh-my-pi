@@ -39526,7 +39526,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-json-policy",
    "host": "MacBook-Pro",
    "added": "2026-10-21T00:22:22Z",
-   "updated": "2026-10-21T00:54:16Z",
+   "updated": "2026-10-21T00:54:39Z",
    "note": "",
    "built": [
     {
@@ -39845,7 +39845,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-21T00:54:16Z"
+   "opened": "2026-10-21T00:54:16Z",
+   "readied": "2026-10-21T00:54:39Z"
   },
   {
    "id": "peer-reply-keeps-report",
