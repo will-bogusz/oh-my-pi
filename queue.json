@@ -44535,5 +44535,11 @@
     "host": "Wills-MacBook-Pro"
    }
   }
+ },
+ "opening": {
+  "id": "minimizer-diff-hunk-lines",
+  "token": "79e9ba5738904735926141a62ff3ed58",
+  "host": "MacBook-Pro",
+  "at": "2026-10-21T02:09:19Z"
  }
 }
