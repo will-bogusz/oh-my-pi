@@ -34902,7 +34902,7 @@
    "branch": "will/fetch-ua-retry",
    "title": "fix(coding-agent): retry a refused web read with the next user agent",
    "area": "other",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/fetch-ua-retry.md",
@@ -34912,7 +34912,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fetch-ua-retry",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:53:24Z",
-   "updated": "2026-10-21T03:54:24Z",
+   "updated": "2026-10-21T04:09:06Z",
    "note": "",
    "built": [
     {
@@ -35364,7 +35364,7 @@
    "branch": "will/read-display-budget",
    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/read-display-budget.md",
@@ -35374,7 +35374,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-display-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:59:53Z",
-   "updated": "2026-10-21T03:58:19Z",
+   "updated": "2026-10-21T04:09:06Z",
    "note": "",
    "built": [
     {
@@ -35836,7 +35836,7 @@
    "branch": "will/grep-per-file-cap",
    "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file",
    "area": "other",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/grep-per-file-cap.md",
@@ -35846,7 +35846,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/grep-per-file-cap",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:01:15Z",
-   "updated": "2026-10-21T03:55:44Z",
+   "updated": "2026-10-21T04:09:06Z",
    "note": "",
    "built": [
     {
@@ -36298,7 +36298,7 @@
    "branch": "will/rg-follow-root",
    "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd",
    "area": "other",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/rg-follow-root.md",
@@ -36308,7 +36308,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rg-follow-root",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:02:32Z",
-   "updated": "2026-10-21T04:04:42Z",
+   "updated": "2026-10-21T04:09:06Z",
    "note": "",
    "advanced": "2026-10-21T02:58:34Z",
    "opened": "2026-10-21T04:04:26Z",
@@ -36937,7 +36937,7 @@
    "branch": "will/read-nav-gate",
    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/read-nav-gate.md",
@@ -36947,7 +36947,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-nav-gate",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:08:31Z",
-   "updated": "2026-10-21T04:00:52Z",
+   "updated": "2026-10-21T04:09:06Z",
    "note": "",
    "built": [
     {
@@ -38130,7 +38130,7 @@
    "branch": "will/revive-extension-tools",
    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/revive-extension-tools.md",
@@ -38140,7 +38140,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/revive-extension-tools",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:42:54Z",
-   "updated": "2026-10-21T04:03:21Z",
+   "updated": "2026-10-21T04:09:06Z",
    "note": "",
    "built": [
     {
