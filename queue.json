@@ -37328,18 +37328,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/compaction-trigger",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:41:41Z",
-   "updated": "2026-10-21T01:07:26Z",
+   "updated": "2026-10-21T01:07:54Z",
    "note": "",
    "built": [
-    {
-     "with": "#15433",
-     "code": "b6b1cdee4180028327469aca542c163d933d713c",
-     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
-     "tip": "a0f527a41648fc3fb17406630f6b38a2bfe1bfb0",
-     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
-     "at": "2026-10-20T23:56:00Z",
-     "host": "MacBook-Pro"
-    },
     {
      "with": "#16231",
      "code": "b6b1cdee4180028327469aca542c163d933d713c",
@@ -37679,6 +37670,15 @@
      "at": "2026-10-21T01:07:26Z",
      "host": "goliath",
      "tree": "837ff67d4684110e977db5ada39e35e922868ed3"
+    },
+    {
+     "with": "#15433",
+     "code": "b6b1cdee4180028327469aca542c163d933d713c",
+     "with_code": "00f429f63d005aba558351db5b8fcb8f5dc9fb0e",
+     "tip": "a0f527a41648fc3fb17406630f6b38a2bfe1bfb0",
+     "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
+     "at": "2026-10-21T01:07:53Z",
+     "host": "goliath"
     }
    ]
   },
