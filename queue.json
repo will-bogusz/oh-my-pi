@@ -40210,7 +40210,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T00:35:26Z",
+  "checked": "2026-10-21T01:06:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -40221,10 +40221,6 @@
    "peer-reply-keeps-report": {
     "since": "2026-10-21T00:35:26Z",
     "title": "fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes"
-   },
-   "usage-json-policy": {
-    "since": "2026-10-21T00:35:26Z",
-    "title": "feat(coding-agent): include account policy state in omp usage --json"
    },
    "bash-minimizer-meta": {
     "since": "2026-10-21T00:35:26Z",
@@ -40328,7 +40324,8 @@
    16576,
    16578,
    16579,
-   16580
+   16580,
+   16581
   ],
   "post_merge": {
    "13677": {
@@ -44309,6 +44306,13 @@
     "id": "proc-kill-read-hint",
     "title": "fix(coding-agent): name the write call when proc:// kill or mode is read",
     "why": "opened as #16580"
+   },
+   {
+    "at": "2026-10-21T01:06:09Z",
+    "kind": "unopenable",
+    "id": "usage-json-policy",
+    "title": "feat(coding-agent): include account policy state in omp usage --json",
+    "why": "opened as #16581"
    }
   ]
  },
