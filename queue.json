@@ -45303,6 +45303,11 @@
     "sha": "b501554400787baedfb9e18a5882a9f56a432be0",
     "at": "2026-10-21T03:49:08Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "b501554400787baedfb9e18a5882a9f56a432be0",
+    "at": "2026-10-21T03:49:26Z",
+    "host": "goliath"
    }
   }
  }
