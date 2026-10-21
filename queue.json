@@ -36944,7 +36944,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-nav-gate",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:08:31Z",
-   "updated": "2026-10-21T04:00:31Z",
+   "updated": "2026-10-21T04:00:52Z",
    "note": "",
    "built": [
     {
@@ -37388,7 +37388,8 @@
     }
    ],
    "advanced": "2026-10-21T02:57:33Z",
-   "opened": "2026-10-21T04:00:31Z"
+   "opened": "2026-10-21T04:00:31Z",
+   "readied": "2026-10-21T04:00:51Z"
   },
   {
    "id": "bash-view-tags",
