@@ -42659,31 +42659,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T05:40:20Z",
+  "checked": "2026-10-21T06:41:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "steer-agent-notice": {
-    "since": "2026-10-21T05:40:20Z",
-    "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer"
-   },
-   "turndown-intraword-underscore": {
-    "since": "2026-10-21T03:38:12Z",
-    "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown"
-   },
-   "edit-error-kind": {
-    "since": "2026-10-21T00:35:26Z",
-    "title": "feat(edit): record why an edit failed and count it in /session"
-   },
-   "read-audio-transcripts": {
-    "since": "2026-10-21T03:38:12Z",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio"
-   },
-   "read-heif-images": {
-    "since": "2026-10-21T03:38:12Z",
-    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16556": {
     "since": "2026-10-20T22:03:07Z",
@@ -42746,7 +42725,13 @@
    16595,
    16596,
    16597,
-   16598
+   16598,
+   16599,
+   16607,
+   16608,
+   16611,
+   16612,
+   16614
   ],
   "post_merge": {
    "13677": {
@@ -46856,6 +46841,41 @@
     "kind": "openable",
     "id": "steer-agent-notice",
     "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer"
+   },
+   {
+    "at": "2026-10-21T06:41:10Z",
+    "kind": "unopenable",
+    "id": "steer-agent-notice",
+    "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer",
+    "why": "opened as #16614"
+   },
+   {
+    "at": "2026-10-21T06:41:10Z",
+    "kind": "unopenable",
+    "id": "turndown-intraword-underscore",
+    "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown",
+    "why": "opened as #16607"
+   },
+   {
+    "at": "2026-10-21T06:41:10Z",
+    "kind": "unopenable",
+    "id": "edit-error-kind",
+    "title": "feat(edit): record why an edit failed and count it in /session",
+    "why": "opened as #16608"
+   },
+   {
+    "at": "2026-10-21T06:41:10Z",
+    "kind": "unopenable",
+    "id": "read-audio-transcripts",
+    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
+    "why": "opened as #16611"
+   },
+   {
+    "at": "2026-10-21T06:41:10Z",
+    "kind": "unopenable",
+    "id": "read-heif-images",
+    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary",
+    "why": "opened as #16612"
    }
   ]
  },
