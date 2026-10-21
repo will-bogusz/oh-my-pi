@@ -40913,7 +40913,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T02:37:18Z",
+  "checked": "2026-10-21T03:38:12Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -40945,6 +40945,10 @@
     "since": "2026-10-20T23:34:32Z",
     "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k"
    },
+   "turndown-intraword-underscore": {
+    "since": "2026-10-21T03:38:12Z",
+    "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown"
+   },
    "compaction-trigger": {
     "since": "2026-10-21T00:35:26Z",
     "title": "feat(coding-agent): record what triggered each compaction"
@@ -40952,6 +40956,14 @@
    "edit-error-kind": {
     "since": "2026-10-21T00:35:26Z",
     "title": "feat(edit): record why an edit failed and count it in /session"
+   },
+   "read-audio-transcripts": {
+    "since": "2026-10-21T03:38:12Z",
+    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio"
+   },
+   "read-heif-images": {
+    "since": "2026-10-21T03:38:12Z",
+    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary"
    }
   },
   "conflicts": {
@@ -41008,6 +41020,7 @@
    16583,
    16585,
    16586,
+   16587,
    16588,
    16589
   ],
@@ -45039,6 +45052,24 @@
     "id": "minimizer-keep-small-whole",
     "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer",
     "why": "opened as #16589"
+   },
+   {
+    "at": "2026-10-21T03:38:12Z",
+    "kind": "openable",
+    "id": "turndown-intraword-underscore",
+    "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown"
+   },
+   {
+    "at": "2026-10-21T03:38:12Z",
+    "kind": "openable",
+    "id": "read-audio-transcripts",
+    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio"
+   },
+   {
+    "at": "2026-10-21T03:38:12Z",
+    "kind": "openable",
+    "id": "read-heif-images",
+    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary"
    }
   ]
  },
