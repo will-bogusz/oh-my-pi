@@ -39708,7 +39708,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-error-kind",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:58:49Z",
-   "updated": "2026-10-21T06:02:21Z",
+   "updated": "2026-10-21T06:03:01Z",
    "note": "",
    "built": [
     {
@@ -40172,7 +40172,8 @@
     }
    ],
    "advanced": "2026-10-21T02:58:23Z",
-   "opened": "2026-10-21T06:02:21Z"
+   "opened": "2026-10-21T06:02:21Z",
+   "readied": "2026-10-21T06:03:01Z"
   },
   {
    "id": "grep-exclude",
