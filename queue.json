@@ -46446,11 +46446,5 @@
     "host": "goliath"
    }
   }
- },
- "opening": {
-  "id": "fetch-ua-retry",
-  "token": "c100353ed15f4786aac1f420ecf5f2b6",
-  "host": "goliath",
-  "at": "2026-10-21T03:54:21Z"
  }
 }
