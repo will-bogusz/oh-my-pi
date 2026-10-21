@@ -36444,7 +36444,7 @@
    "branch": "will/task-result-inline",
    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/task-result-inline.md",
@@ -36454,7 +36454,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/task-result-inline",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:07:24Z",
-   "updated": "2026-10-21T04:05:47Z",
+   "updated": "2026-10-21T06:41:08Z",
    "note": "",
    "built": [
     {
@@ -39698,7 +39698,7 @@
    "branch": "will/edit-error-kind",
    "title": "feat(edit): record why an edit failed and count it in /session",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/edit-error-kind.md",
@@ -39708,7 +39708,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-error-kind",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:58:49Z",
-   "updated": "2026-10-21T06:03:01Z",
+   "updated": "2026-10-21T06:41:08Z",
    "note": "",
    "built": [
     {
@@ -40907,7 +40907,7 @@
    "branch": "will/turndown-intraword-underscore",
    "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown",
    "area": "coding-agent",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/turndown-intraword-underscore.md",
@@ -40917,7 +40917,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/turndown-intraword-underscore",
    "host": "MacBook-Pro",
    "added": "2026-10-21T02:42:03Z",
-   "updated": "2026-10-21T06:00:14Z",
+   "updated": "2026-10-21T06:41:08Z",
    "note": "",
    "built": [
     {
@@ -41357,7 +41357,7 @@
    "branch": "will/read-audio-transcripts",
    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
    "area": "catalog",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/read-audio-transcripts.md",
@@ -41367,7 +41367,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-audio-transcripts",
    "host": "MacBook-Pro",
    "added": "2026-10-21T03:04:56Z",
-   "updated": "2026-10-21T06:08:02Z",
+   "updated": "2026-10-21T06:41:08Z",
    "note": "",
    "built": [
     {
@@ -41848,7 +41848,7 @@
    "branch": "will/read-heif-images",
    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary",
    "area": "coding-agent",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/read-heif-images.md",
@@ -41858,7 +41858,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-heif-images",
    "host": "MacBook-Pro",
    "added": "2026-10-21T03:06:40Z",
-   "updated": "2026-10-21T06:10:56Z",
+   "updated": "2026-10-21T06:41:08Z",
    "note": "",
    "built": [
     {
@@ -42298,7 +42298,7 @@
    "branch": "will/steer-agent-notice",
    "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer",
    "area": "session",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/steer-agent-notice.md",
@@ -42308,7 +42308,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/steer-agent-notice",
    "host": "MacBook-Pro",
    "added": "2026-10-21T05:24:16Z",
-   "updated": "2026-10-21T06:14:18Z",
+   "updated": "2026-10-21T06:41:08Z",
    "note": "",
    "built": [
     {
