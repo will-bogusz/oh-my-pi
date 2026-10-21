@@ -42659,7 +42659,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T17:20:09Z",
+  "checked": "2026-10-21T17:50:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -42765,18 +42765,6 @@
     "merged_at": "2026-10-20T18:07:13Z",
     "findings": []
    },
-   "16230": {
-    "title": "fix(coding-agent): stop a browser screenshot waiting on a DevTools session past its deadline",
-    "merge_commit": "49af397ae4fa3aeb778a6c29a32de260389dc105",
-    "merged_at": "2026-10-19T17:32:52Z",
-    "findings": []
-   },
-   "16233": {
-    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
-    "merge_commit": "82809961f9c4e2b962e2f5823a425a51c0dd9b65",
-    "merged_at": "2026-10-19T17:32:33Z",
-    "findings": []
-   },
    "16236": {
     "title": "fix(coding-agent): name the expected shape when browser tab.run gets an args array or open gets a URL",
     "merge_commit": "835135afd1b8decec0cb53d9bba72067cff83c23",
@@ -42789,12 +42777,6 @@
     "merged_at": "2026-10-20T17:48:31Z",
     "findings": []
    },
-   "16252": {
-    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
-    "merge_commit": "6595f9b1f9bd5871b6909468dcfa2c9b65d2b39b",
-    "merged_at": "2026-10-19T17:41:37Z",
-    "findings": []
-   },
    "16269": {
     "title": "fix(coding-agent): name registered conflict ids when a hidden block is guessed",
     "merge_commit": "894c8eb9b9c2706782caf82d0931222575fa110a",
@@ -42805,12 +42787,6 @@
     "title": "fix(coding-agent): keep URIs in auto-QA report tool names",
     "merge_commit": "137c9a1407f993581316267d896c3237553afa90",
     "merged_at": "2026-10-20T18:04:07Z",
-    "findings": []
-   },
-   "16281": {
-    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
-    "merge_commit": "c388b92d314791f1ffff39403c0f34393a6ada84",
-    "merged_at": "2026-10-19T17:29:47Z",
     "findings": []
    },
    "16288": {
@@ -42827,22 +42803,10 @@
      }
     ]
    },
-   "16292": {
-    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session",
-    "merge_commit": "209cafd9b1ff675cfbe9d2753edc7372a981449e",
-    "merged_at": "2026-10-19T17:20:17Z",
-    "findings": []
-   },
    "16294": {
     "title": "fix(browser): tell agents how to skip a configured relay",
     "merge_commit": "ec76da2efb00f8a559b8e43d991d3cb79a1acd85",
     "merged_at": "2026-10-20T17:30:24Z",
-    "findings": []
-   },
-   "16295": {
-    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal",
-    "merge_commit": "44fae6e61a81a4c4fe4523af1844fafff0c27d40",
-    "merged_at": "2026-10-19T17:33:37Z",
     "findings": []
    },
    "16299": {
@@ -42865,22 +42829,10 @@
      }
     ]
    },
-   "16301": {
-    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short",
-    "merge_commit": "05b355a459481d8f50c256828b2a9bb15ba659eb",
-    "merged_at": "2026-10-19T17:20:49Z",
-    "findings": []
-   },
    "16306": {
     "title": "chore(natives): regenerate index.d.ts from the current bindings",
     "merge_commit": "0ab804423b1161d5069ee409d7916c07d2643ad5",
     "merged_at": "2026-10-20T18:11:02Z",
-    "findings": []
-   },
-   "16314": {
-    "title": "fix(pi-shell,tui): keep ssh remote output intact in the minimizer",
-    "merge_commit": "3461f602d29b0c184659ec273c8a31e86486e7e5",
-    "merged_at": "2026-10-19T17:23:16Z",
     "findings": []
    },
    "16369": {
