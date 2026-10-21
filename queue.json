@@ -36097,7 +36097,7 @@
    "branch": "will/minimizer-diff-hunk-lines",
    "title": "fix(pi-shell): keep diff hunk lines starting with -- or ++ inside their hunk",
    "area": "other",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/minimizer-diff-hunk-lines.md",
@@ -36107,7 +36107,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/minimizer-diff-hunk-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:05:45Z",
-   "updated": "2026-10-21T02:12:28Z",
+   "updated": "2026-10-21T02:37:16Z",
    "note": "",
    "built": [
     {
@@ -36610,7 +36610,7 @@
    "branch": "will/minimizer-keep-small-whole",
    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/minimizer-keep-small-whole.md",
@@ -36620,7 +36620,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/minimizer-keep-small-whole",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:08:00Z",
-   "updated": "2026-10-21T02:15:44Z",
+   "updated": "2026-10-21T02:37:16Z",
    "note": "",
    "built": [
     {
