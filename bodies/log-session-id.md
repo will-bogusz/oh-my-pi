@@ -9,7 +9,7 @@ On 6 recorded runs of a session that spawned two subagents, log lines naming the
 | Record written by a session's turn, prompt setup, queued-message hooks, `/compact`, `/handoff`, or an IRC or background-job delivery to it | `pid` only | `pid` + that session's `sessionId` |
 | Record from an in-process subagent | same `pid` as its parent | its own `sessionId` |
 | Record from a service every session shares (LSP client, DAP idle sweep, eval kernels) | `pid` only | `pid` only |
-| `title-generator:`, DAP and eval kernel records | `sessionId` = a title request's provider id, a `debug-N` id or a kernel key | that value as `titleSessionId`, `debugSessionId`, `kernelSessionId` |
+| Records that logged another kind of id as `sessionId` (title requests, DAP, eval kernels, ACP, provider-facing ids) | `sessionId` = that id | that value as `titleSessionId`, `debugSessionId`, `kernelSessionId`, `acpSessionId`, `providerSessionId` |
 | `/debug` report bundle | `logs.txt`: last 1,000 lines of each same-day process log | also `session-logs.txt`: every same-day record of this session and its subagents |
 
 ## Why
@@ -19,9 +19,9 @@ Finding which session hit a provider error meant matching pid and timestamps aga
 **Decisions.**
 - An `AsyncLocalStorage` context in the logger (`logger.withContext`), not a `sessionId` at each call site, so providers, tools and compaction get it too. A nested context replaces the outer one.
 - `sessionId` is a getter on the session manager, read per record, so it follows re-keys, including a session moved to a new file mid-turn.
-- `Agent.logContext` covers `prompt()` and all of `continue()`; `AgentSession` enters it for prompt setup, `compact`, `shake`, `handoff`, and IRC and background-job delivery, where the sender's context is otherwise active. `agent.sessionId` can be a fresh provider id, so it is not used.
+- `Agent.logContext` covers `prompt()` and all of `continue()`; `AgentSession` enters it for prompt setup, `compact`, `shake`, `handoff`, idle compaction, and IRC and background-job delivery, where the sender's context is otherwise active. `agent.sessionId` can be a fresh provider id, so it is not used.
 - A shared service started in one session's turn would keep that id forever; the LSP reader and idle timer, the DAP idle sweep, and eval kernel starts run under `logger.withoutContext`.
-- A field passed to the log call wins, so existing callers that pass a real `sessionId` are unchanged; the ones that passed another kind of id now name it `titleSessionId`, `debugSessionId` or `kernelSessionId`.
+- A field passed to the log call wins, so existing callers that pass a real `sessionId` are unchanged; the ones that passed another kind of id now name it for what it is.
 - Log sinks (OTLP export) get the context's fields too, under the call's own.
 - **Not in this PR:** records written before any session exists.
 
