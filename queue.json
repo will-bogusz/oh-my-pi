@@ -44527,5 +44527,11 @@
     "host": "Wills-MacBook-Pro"
    }
   }
+ },
+ "opening": {
+  "id": "bash-minimizer-meta",
+  "token": "70f51c21c33f429ca4d99af1604bc2a2",
+  "host": "MacBook-Pro",
+  "at": "2026-10-21T01:15:10Z"
  }
 }
