@@ -42107,10 +42107,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-21T05:10:09Z",
+  "checked": "2026-10-21T05:40:20Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "steer-agent-notice": {
+    "since": "2026-10-21T05:40:20Z",
+    "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer"
+   },
    "turndown-intraword-underscore": {
     "since": "2026-10-21T03:38:12Z",
     "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown"
@@ -46294,6 +46298,12 @@
     "id": "compaction-trigger",
     "title": "feat(coding-agent): record what triggered each compaction",
     "why": "plan: wait (conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts)"
+   },
+   {
+    "at": "2026-10-21T05:40:20Z",
+    "kind": "openable",
+    "id": "steer-agent-notice",
+    "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer"
    }
   ]
  },
