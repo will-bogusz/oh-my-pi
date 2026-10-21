@@ -39893,13 +39893,13 @@
    "needs": [],
    "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
    "body": "bodies/peer-reply-keeps-report.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16583,
    "closed_prs": [],
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/peer-reply-keeps-report",
    "host": "goliath",
    "added": "2026-10-21T00:27:45Z",
-   "updated": "2026-10-21T01:08:23Z",
+   "updated": "2026-10-21T01:11:33Z",
    "note": "",
    "built": [
     {
@@ -40251,7 +40251,8 @@
      "at": "2026-10-21T01:08:21Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-10-21T01:11:33Z"
   }
  ],
  "watch": {
