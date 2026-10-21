@@ -35368,13 +35368,13 @@
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/read-display-budget.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16595,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-display-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:59:53Z",
-   "updated": "2026-10-21T03:52:59Z",
+   "updated": "2026-10-21T03:57:52Z",
    "note": "",
    "built": [
     {
@@ -35827,7 +35827,8 @@
      "tree": "059e16c5899a65c86cabcf7ba734cce09fdee99f"
     }
    ],
-   "advanced": "2026-10-21T02:57:33Z"
+   "advanced": "2026-10-21T02:57:33Z",
+   "opened": "2026-10-21T03:57:52Z"
   },
   {
    "id": "grep-per-file-cap",
