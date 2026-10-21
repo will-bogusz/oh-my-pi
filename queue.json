@@ -42086,6 +42086,24 @@
      "host": "goliath"
     }
    ]
+  },
+  {
+   "id": "steer-agent-notice",
+   "branch": "will/steer-agent-notice",
+   "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer",
+   "area": "session",
+   "priority": null,
+   "needs": [],
+   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
+   "body": "bodies/steer-agent-notice.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/steer-agent-notice",
+   "host": "MacBook-Pro",
+   "added": "2026-10-21T05:24:16Z",
+   "updated": "2026-10-21T05:24:16Z",
+   "note": ""
   }
  ],
  "watch": {
