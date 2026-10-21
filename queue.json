@@ -36512,7 +36512,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-view-tags",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:37:15Z",
-   "updated": "2026-10-21T00:01:51Z",
+   "updated": "2026-10-21T00:02:12Z",
    "note": "",
    "built": [
     {
@@ -36785,7 +36785,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-21T00:01:50Z"
+   "opened": "2026-10-21T00:01:50Z",
+   "readied": "2026-10-21T00:02:11Z"
   },
   {
    "id": "compaction-trigger",
