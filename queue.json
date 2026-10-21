@@ -35754,7 +35754,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/grep-per-file-cap.md",
    "state": "queued",
    "pr": null,
@@ -35762,7 +35762,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/grep-per-file-cap",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:01:15Z",
-   "updated": "2026-10-21T02:56:52Z",
+   "updated": "2026-10-21T02:58:34Z",
    "note": "",
    "built": [
     {
@@ -36164,7 +36164,8 @@
      "host": "goliath",
      "tree": "ec59da4127dae5ff193688025ea741a695c49e7e"
     }
-   ]
+   ],
+   "advanced": "2026-10-21T02:58:34Z"
   },
   {
    "id": "rg-follow-root",
@@ -36173,7 +36174,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/rg-follow-root.md",
    "state": "queued",
    "pr": null,
@@ -36181,8 +36182,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rg-follow-root",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:02:32Z",
-   "updated": "2026-10-20T23:02:32Z",
-   "note": ""
+   "updated": "2026-10-21T02:58:34Z",
+   "note": "",
+   "advanced": "2026-10-21T02:58:34Z"
   },
   {
    "id": "minimizer-diff-hunk-lines",
