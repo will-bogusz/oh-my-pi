@@ -37,6 +37,7 @@ import {
 	timersRoot,
 	uninstallTicker,
 } from "../timers";
+import { renderEstate, scanEstate } from "../timers/external";
 
 export const TIMER_ACTIONS = [
 	"set",
@@ -98,6 +99,9 @@ export interface TimerCommandArgs {
 	limit?: number;
 	/** install/uninstall/doctor: write files but run no launchctl/systemctl. */
 	dryRun: boolean;
+	/** ls: also list external systemd/launchd/cron jobs (`--all`) on this host and `--host` hosts. */
+	all?: boolean;
+	hosts?: string[];
 }
 
 class UsageError extends Error {}
@@ -241,9 +245,19 @@ async function runAction(cmd: TimerCommandArgs, now: number): Promise<number> {
 		case "list": {
 			const { rows, errors } = await listTimers(now);
 			const ticker = readTickerStatus();
-			if (cmd.json) return (json({ ticker, timers: rows.map(rowJson), errors }), 0);
+			const estate = cmd.all || cmd.hosts?.length ? await scanEstate({ hosts: cmd.hosts ?? [], now }) : undefined;
+			if (cmd.json) {
+				json({
+					ticker,
+					timers: rows.map(rowJson),
+					errors,
+					...(estate ? { external: estate.jobs, hosts: estate.hosts } : {}),
+				});
+				return 0;
+			}
 			out(rows.length ? renderTimerTable(rows, now, ticker) : "no timers");
 			for (const { id, error } of errors) out(chalk.yellow(`invalid spec ${id}: ${error}`));
+			if (estate) out(`\n${renderEstate(estate, now)}`);
 			return 0;
 		}
 		case "show": {

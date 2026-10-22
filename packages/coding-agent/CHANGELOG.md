@@ -9,6 +9,7 @@
 - `omp poke <session> <message>` delivers into a session exactly once: an idle omp starts a turn, a busy one takes it at its next step, after Esc it waits for your next message (`--force` delivers at once), and a closed session holds it until opened or runs one headless turn with `--resume`
 - SDK: `createAgentSession({ timerMailbox: { deliver: true } })` delivers timer fires and pokes as turns; by default an embedded session only marks itself open, so timer mail for it is held instead of resuming it in another process
 - Timers in the session: `/timer in 2h <prompt>` (or `at 8:00`, `every 30m`) wakes this session later, `/timer` also runs the `omp timer` verbs, `/timers` opens a sheet to show, fire, pause, resume, remove and read logs, the status line shows how many timers this session set and when the next fires, `timer://` reads and controls timers, and `timer` tool calls draw a card; setting `timer.enabled` turns the tool off
+- `omp timer ls --all` also lists scheduled work omp did not create (systemd user and system timers and long-running services, `~/Library/LaunchAgents`, the user crontab) with schedule, next/last run, last result, source file and log, and flags each as failed, never-ran, unarmed, no-failure-alert, interval-only, source-in-scratch or sleep-lossy; `--host <name>|all` adds other hosts over ssh, using their `omp timer ls --json --all` when available and otherwise running the same read-only listing commands remotely
 
 ## [18.12.6] - 2026-10-21
 
