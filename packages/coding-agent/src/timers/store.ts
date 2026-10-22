@@ -14,7 +14,10 @@
  * - `timer_state`, `runs`, `incidents`, `meta` ticker heartbeat: the tick
  *   (and manual fire, which takes the tick lock);
  * - `run_ends`: the runner process that carried the run;
- * - `deliveries`: whoever delivered the mail (runner, mailbox consumer).
+ * - `deliveries`: whoever delivered the mail (runner, mailbox consumer);
+ * - `machine_wakes` (pmset wakes scheduled for `wakeMachine` timers): the wake
+ *   scheduler, i.e. service mutations (set/edit/pause/resume/remove) and the
+ *   tick's reconcile pass.
  * Everything else reads.
  */
 import { Database } from "bun:sqlite";
@@ -352,6 +355,11 @@ CREATE TABLE IF NOT EXISTS incidents (
 	resolved_at TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS incidents_open ON incidents(timer_id, signature) WHERE resolved_at IS NULL;
+CREATE TABLE IF NOT EXISTS machine_wakes (
+	timer_id TEXT PRIMARY KEY,
+	wake_at INTEGER NOT NULL,
+	stamp TEXT NOT NULL
+);
 `;
 
 /** `busy_timeout`: writers are short transactions, so a contended one waits rather than failing. */
@@ -362,6 +370,26 @@ export interface TickerStatus {
 	pid?: number;
 	version?: string;
 }
+
+/** A pmset wake this store scheduled for a `wakeMachine` timer; `stamp` is the exact pmset argument. */
+export interface MachineWakeRow {
+	timerId: string;
+	/** Epoch ms of the wake. */
+	wakeAt: number;
+	stamp: string;
+}
+
+interface MachineWakeDbRow {
+	timer_id: string;
+	wake_at: number;
+	stamp: string;
+}
+
+const toMachineWake = (row: MachineWakeDbRow): MachineWakeRow => ({
+	timerId: row.timer_id,
+	wakeAt: row.wake_at,
+	stamp: row.stamp,
+});
 
 /** A run joined with its delivery and end, as `runs`/`ls`/`show` present it. */
 export interface RunView {
@@ -802,6 +830,33 @@ export class TimerDb {
 
 	resolveIncident(id: number, at: string): void {
 		this.#db.run("UPDATE incidents SET resolved_at = ? WHERE id = ?", [at, id]);
+	}
+
+	// wake scheduler: machine_wakes
+	readMachineWake(timerId: string): MachineWakeRow | undefined {
+		const row = this.#db
+			.query<MachineWakeDbRow, [string]>("SELECT * FROM machine_wakes WHERE timer_id = ?")
+			.get(timerId);
+		return row ? toMachineWake(row) : undefined;
+	}
+
+	listMachineWakes(): MachineWakeRow[] {
+		return this.#db
+			.query<MachineWakeDbRow, []>("SELECT * FROM machine_wakes ORDER BY timer_id")
+			.all()
+			.map(toMachineWake);
+	}
+
+	upsertMachineWake(wake: MachineWakeRow): void {
+		this.#db.run("INSERT OR REPLACE INTO machine_wakes (timer_id, wake_at, stamp) VALUES (?, ?, ?)", [
+			wake.timerId,
+			wake.wakeAt,
+			wake.stamp,
+		]);
+	}
+
+	deleteMachineWake(timerId: string): void {
+		this.#db.run("DELETE FROM machine_wakes WHERE timer_id = ?", [timerId]);
 	}
 }
 

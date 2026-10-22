@@ -7,11 +7,11 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { isEnoent } from "@oh-my-pi/pi-utils";
+import { isEnoent, logger } from "@oh-my-pi/pi-utils";
 import { readSessionInfo, resolveResumableSession } from "../session/session-listing";
 import { compileCondition, type TimerCondition } from "./conditions";
 import { runGate } from "./gate";
-import { createTimerHost, scheduleMachineWake, type TimerHost } from "./install";
+import { createTimerHost, syncMachineWake, type WakeHost } from "./install";
 import { runLogPath, TIMER_ID_PATTERN, timersRoot } from "./paths";
 import {
 	DAY,
@@ -86,7 +86,7 @@ export interface TimerSetContext {
 	now?: number;
 	root?: string;
 	/** OS seam for `wakeMachine` (tests pass a fake). */
-	host?: TimerHost;
+	host?: WakeHost;
 	/** Run the gate once at set time (default true). */
 	testGate?: boolean;
 }
@@ -208,12 +208,21 @@ async function testGate(spec: TimerSpec): Promise<Pick<TimerSetResult, "gateNow"
 	};
 }
 
-async function wakeWarnings(spec: TimerSpec, ctx: TimerSetContext): Promise<string[]> {
-	if (!spec.wakeMachine || !spec.at) return [];
-	const host = ctx.host ?? createTimerHost();
-	if (host.platform !== "darwin") return ["wakeMachine only applies on macOS; ignored"];
-	const result = await scheduleMachineWake(host, Date.parse(spec.at));
-	return result.scheduled ? [] : [`machine wake not scheduled: ${result.detail}`];
+/** Bring the timer's pmset wake in line with its spec (removed when `spec` is undefined); returns warnings. */
+async function syncWake(
+	id: string,
+	spec: TimerSpec | undefined,
+	opts: { root: string; now: number; host?: WakeHost },
+): Promise<string[]> {
+	const db = openTimerDb(opts.root);
+	return syncMachineWake({
+		db,
+		host: opts.host ?? createTimerHost(),
+		id,
+		spec,
+		state: spec && currentState(spec, db.readState(id)),
+		now: opts.now,
+	});
 }
 
 /** Validate everything up front: a timer that would fail at its first fire is rejected here. */
@@ -291,7 +300,8 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		root,
 	});
 	if (!written) throw new Error(`timer ${id} was not written`);
-	return { spec: written, replaced: previous !== undefined, ...gate, warnings: await wakeWarnings(written, ctx) };
+	const warnings = await syncWake(id, written, { root, now, host: ctx.host });
+	return { spec: written, replaced: previous !== undefined, ...gate, warnings };
 }
 
 /** Fields `edit` may change; absent fields keep their value. `null` clears an optional field. */
@@ -400,7 +410,10 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 	);
 	if (!spec) throw new Error(`No timer "${id}"`);
 	const gate = gateChanged && ctx.testGate !== false ? await testGate(spec) : {};
-	return { spec, rearmed, ...gate, warnings: patch.at !== undefined ? await wakeWarnings(spec, ctx) : [] };
+	const warnings = await syncWake(id, spec, { root, now, host: ctx.host });
+	// Wake warnings were already shown at set time; repeat them only when the edit touched the wake.
+	const wakeTouched = patch.at !== undefined || patch.wakeMachine !== undefined;
+	return { spec, rearmed, ...gate, warnings: wakeTouched ? warnings : [] };
 }
 
 export interface TimerRow {
@@ -441,15 +454,19 @@ export async function requireTimer(id: string, root = timersRoot()): Promise<Tim
 	return spec;
 }
 
-/** Pause (reason `user`) or resume. Resume also clears an auto-pause and restarts the failure count. */
+/**
+ * Pause (reason `user`) or resume. Resume also clears an auto-pause and restarts the failure count.
+ * Pause cancels a pending machine wake; resume schedules it again if it is still ahead.
+ */
 export async function setPaused(
 	id: string,
 	paused: boolean,
-	options: { now?: number; root?: string; expectedRev?: number } = {},
+	options: { now?: number; root?: string; expectedRev?: number; host?: WakeHost } = {},
 ): Promise<TimerSpec> {
 	const root = options.root ?? timersRoot();
 	await assertTimerMutationAllowed(id, paused ? "pause" : "resume", root);
-	const at = new Date(options.now ?? Date.now()).toISOString();
+	const now = options.now ?? Date.now();
+	const at = new Date(now).toISOString();
 	const { spec } = await mutateTimerSpec(
 		id,
 		current => {
@@ -460,13 +477,23 @@ export async function setPaused(
 		{ root, expectedRev: options.expectedRev },
 	);
 	if (!spec) throw new Error(`No timer "${id}"`);
+	const warnings = await syncWake(id, spec, { root, now, host: options.host });
+	if (warnings.length) logger.warn("timer machine wake not restored on resume", { id, warnings });
 	return spec;
 }
 
-/** Remove the spec (kept under history/). Run history stays in the store so `runs` still answers what happened. */
-export async function removeTimer(id: string, root = timersRoot()): Promise<boolean> {
+/**
+ * Remove the spec (kept under history/) and cancel its pending machine wake. Run history stays in the
+ * store so `runs` still answers what happened.
+ */
+export async function removeTimer(
+	id: string,
+	root = timersRoot(),
+	options: { now?: number; host?: WakeHost } = {},
+): Promise<boolean> {
 	await assertTimerMutationAllowed(id, "remove", root);
 	const { previous } = await mutateTimerSpec(id, () => undefined, { root });
+	await syncWake(id, undefined, { root, now: options.now ?? Date.now(), host: options.host });
 	return previous !== undefined;
 }
 

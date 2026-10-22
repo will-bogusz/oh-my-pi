@@ -25,6 +25,7 @@ import {
 	postMail,
 } from "./mailbox";
 import { loadTimerNotifyConfig, sendTimerAlerts } from "./notify";
+import { createTimerHost, syncMachineWake, type WakeHost } from "./install";
 import { firePayloadPath, runLockPath, runLogPath, tickLockPath, timersRoot, timerStateDir } from "./paths";
 import { applyFailure, applyNotice, applySuccess, firstErrorLine } from "./policy";
 import { type DueDecision, decideDue, formatDuration, MINUTE, nextFireAt } from "./schedule";
@@ -61,6 +62,8 @@ export interface TickDeps {
 	/** Whether the previous run of `spec` is still in flight. */
 	inFlight(spec: TimerSpec, root: string): boolean;
 	notify(alerts: TimerAlert[]): Promise<void>;
+	/** OS seam for cancelling (and re-stamping) recorded machine wakes. */
+	host: WakeHost;
 }
 
 /** Spawn the detached runner for one run; its stdout/stderr go to the run log. */
@@ -104,6 +107,7 @@ export function defaultTickDeps(overrides: Partial<TickDeps> = {}): TickDeps {
 		notify: async alerts => {
 			if (alerts.length) await sendTimerAlerts(alerts, await loadTimerNotifyConfig());
 		},
+		host: createTimerHost(),
 		...overrides,
 	};
 }
@@ -620,6 +624,7 @@ export async function runTick(now = Date.now(), overrides: Partial<TickDeps> = {
 				lines.push({ id: spec.id, action: "error", detail: err instanceof Error ? err.message : String(err) });
 			}
 		}
+		await reconcileMachineWakes(ctx, new Set(errors.map(error => error.id)));
 		ctx.db.writeHeartbeat({ lastTickAt: at, pid: process.pid, version: VERSION });
 	} finally {
 		lock.release();
@@ -627,6 +632,35 @@ export async function runTick(now = Date.now(), overrides: Partial<TickDeps> = {
 	// Alerts go out after the lock is released: a slow sink never delays the next tick.
 	await deps.notify(ctx.alerts);
 	return { at, locked: false, lines, alerts: ctx.alerts };
+}
+
+/**
+ * Bring every recorded machine wake in line with its timer after the spec loop: a timer that retired,
+ * expired, auto-paused or was removed by any path gets its pending wake cancelled. Only recorded wakes
+ * are visited, so the tick never schedules a first wake (no sudo attempts every minute on hosts without
+ * passwordless pmset); it only re-stamps a recorded one whose time moved.
+ */
+async function reconcileMachineWakes(ctx: TickContext, invalid: Set<string>): Promise<void> {
+	for (const wake of ctx.db.listMachineWakes()) {
+		// An unreadable spec is not a removed one: leave its wake until the file is fixed or removed.
+		if (invalid.has(wake.timerId)) continue;
+		try {
+			// Re-read: the spec loop may have just auto-paused this timer.
+			const spec = await readTimerSpec(wake.timerId, ctx.deps.root);
+			const state = spec && currentState(spec, ctx.db.readState(spec.id));
+			const warnings = await syncMachineWake({
+				db: ctx.db,
+				host: ctx.deps.host,
+				id: wake.timerId,
+				spec,
+				state,
+				now: ctx.now,
+			});
+			if (warnings.length) logger.warn("timer machine wake not re-stamped", { id: wake.timerId, warnings });
+		} catch (err) {
+			logger.error("timer machine wake reconcile failed", { id: wake.timerId, error: String(err) });
+		}
+	}
 }
 
 export interface FireNowOptions {
