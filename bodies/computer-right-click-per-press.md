@@ -10,6 +10,7 @@ Follow-up to #15562 and #16206, found in #16206's review. The agent re-reads the
 
 ## Testing
 
-On bench-mac on top of #16202: `cargo check -p pi-natives --tests`, `CI=1 bun check` (which runs clippy) pass; `cargo test -p pi-natives --lib` passes except `iphone_mirroring_taps_and_scrolls_stop_once_the_user_brings_it_forward`, which fails on `main` too and is fixed by #16200. With only the first press checked and every check reporting nothing sent, `a_background_right_double_click_stops_at_the_users_input_after_its_first_click` and `a_right_click_stopped_after_its_first_press_says_that_press_may_have_landed` fail.
+On bench-mac at this head: `CI=1 bun check` (which runs clippy) passes, and `cargo test -p pi-natives --lib` passes 931/931. Before the rebase onto `main`: with only the first press checked and every check reporting nothing sent, `a_background_right_double_click_stops_at_the_users_input_after_its_first_click` and `a_right_click_stopped_after_its_first_press_says_that_press_may_have_landed` fail.
 
-`UserIntervened` is unreleased, so no CHANGELOG line.
+`UserIntervened` shipped in 18.12.2, so the natives CHANGELOG gets a Fixed line, and `docs/computer-use.md` and `docs/tools/computer.md` no longer say a background right or middle click checks only before it starts.
+
