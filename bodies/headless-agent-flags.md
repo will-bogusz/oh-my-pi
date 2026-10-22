@@ -18,7 +18,9 @@ Everything else is unchanged: rules, skills, extensions, MCP, settings and expli
 
 Scheduled and scripted `omp -p` runs need the same prompt in any working directory. Today a caller passes `--no-rules --no-skills --no-extensions` and then `cd`s into a scratch directory, because nothing stops context-file discovery.
 
-Decision for the maintainer: one more `--no-*` flag in the existing family, rather than a bundle such as `--hermetic`. I prototyped the bundle first; keeping its promise would mean threading a discovery policy through `SYSTEM.md`/`APPEND_SYSTEM.md`, agent definitions, `WATCHDOG` files, memory and slash-command reloads, a much larger change. The narrow flag composes with the flags that exist.
+Decision for the maintainer: one more `--no-*` flag in the existing family, not a bundle such as `--hermetic`. I prototyped the bundle first; keeping its promise meant threading a discovery policy through `SYSTEM.md`, agent definitions, `WATCHDOG` files, memory and slash-command reloads. The narrow flag composes with the flags that exist.
+
+Related: #10049 and #11395 narrow which context files load; this turns them off.
 
 How it works, in review order:
 1. `buildSessionOptions` pins `contextFiles = []`, as `--no-rules` pins `rules = []`. A pinned set already survives prompt rebuilds and flows to subagents through `ToolSession.contextFiles`.
