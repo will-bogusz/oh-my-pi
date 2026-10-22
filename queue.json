@@ -46987,7 +46987,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T22:21:58Z",
+  "checked": "2026-10-22T22:52:15Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -47191,14 +47191,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-15T22:31:28Z",
-    "kind": "merged",
-    "number": 15489,
-    "title": "fix(coding-agent): send file contents when uploading into relay and connected browsers",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
    {
     "at": "2026-10-15T23:01:55Z",
     "kind": "openable",
