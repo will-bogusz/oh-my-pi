@@ -46844,18 +46844,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T16:47:57Z",
+  "checked": "2026-10-22T17:18:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "max-cost-gate": {
-    "since": "2026-10-22T16:17:10Z",
-    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend"
-   },
-   "timer-pr-1-poke": {
-    "since": "2026-10-22T16:17:10Z",
-    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke"
-   },
    "grep-exclude": {
     "since": "2026-10-22T10:41:01Z",
     "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
@@ -46965,15 +46957,11 @@
    16766,
    16768,
    16769,
-   16770
+   16770,
+   16801,
+   16803
   ],
   "post_merge": {
-   "13677": {
-    "title": "fix(ai,catalog): encode Devin credentials by shape and drop the Windsurf fallbacks",
-    "merge_commit": "9e631e47f792307836f92a2f7dd79b39cb5195c2",
-    "merged_at": "2026-10-20T17:15:50Z",
-    "findings": []
-   },
    "14235": {
     "title": "feat(ai): let broker account-pool files act as a provider and API-key allow-list",
     "merge_commit": "99d883d0c7f39d69b78d8b831c5cf73dbc1b157e",
@@ -47027,7 +47015,7 @@
       "path": "packages/coding-agent/src/session/provider-image-budget.ts",
       "end": 199,
       "url": "https://github.com/can1357/oh-my-pi/pull/16288#pullrequestreview-5589040880",
-      "addressed_by": null
+      "addressed_by": 16564
      }
     ]
    },
@@ -47048,7 +47036,7 @@
       "path": "packages/coding-agent/src/eval/py/runner.py",
       "end": 1336,
       "url": "https://github.com/can1357/oh-my-pi/pull/16300#pullrequestreview-5589029446",
-      "addressed_by": null
+      "addressed_by": 16552
      }
     ]
    },
@@ -47056,12 +47044,6 @@
     "title": "chore(natives): regenerate index.d.ts from the current bindings",
     "merge_commit": "0ab804423b1161d5069ee409d7916c07d2643ad5",
     "merged_at": "2026-10-20T18:11:02Z",
-    "findings": []
-   },
-   "16369": {
-    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it",
-    "merge_commit": "b44c24172539905011a5a2e87a2a691cfbdf2f55",
-    "merged_at": "2026-10-20T17:11:14Z",
     "findings": []
    },
    "16383": {
@@ -47106,34 +47088,10 @@
     "merged_at": "2026-10-20T17:54:44Z",
     "findings": []
    },
-   "16394": {
-    "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit",
-    "merge_commit": "4a4f2d5edde644d24207c759ffd74e625b2673f2",
-    "merged_at": "2026-10-20T17:09:22Z",
-    "findings": []
-   },
-   "16397": {
-    "title": "fix(coding-agent): read profile line ranges from the file, not its summary",
-    "merge_commit": "aafbf61d07eed22d2200f634596e7d220d765558",
-    "merged_at": "2026-10-20T17:10:15Z",
-    "findings": []
-   },
-   "16399": {
-    "title": "perf(natives/utok): memoize short-piece merge counts per thread",
-    "merge_commit": "8d88d291be5676c0c2ad9331465b38f837c6d966",
-    "merged_at": "2026-10-20T17:14:47Z",
-    "findings": []
-   },
    "16405": {
     "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in",
     "merge_commit": "af03483a885b134b03bc786405c60093e85b9211",
     "merged_at": "2026-10-20T18:06:13Z",
-    "findings": []
-   },
-   "16407": {
-    "title": "fix(ai): fail Claude turns that attach media Claude cannot read",
-    "merge_commit": "2dd832a0ee1f5ea2a007b4c23cb2b0ff9d179b19",
-    "merged_at": "2026-10-20T17:07:22Z",
     "findings": []
    },
    "16418": {
@@ -47152,12 +47110,6 @@
     "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
     "merge_commit": "6c0f8f0ba9fff1b58585c7ff521e11d8107c3a98",
     "merged_at": "2026-10-20T17:25:05Z",
-    "findings": []
-   },
-   "16422": {
-    "title": "fix(edit): counted only a mismatch reply's displayed rows as seen",
-    "merge_commit": "f1b410824bc8043b86e88e9daf5a11db26967cea",
-    "merged_at": "2026-10-20T17:01:25Z",
     "findings": []
    },
    "16423": {
@@ -47194,24 +47146,6 @@
     "title": "fix(read): read tail chunks in comma line lists",
     "merge_commit": "1d3ec67ee36beed3e65383900b27b85ea96a12d0",
     "merged_at": "2026-10-20T17:23:20Z",
-    "findings": []
-   },
-   "16436": {
-    "title": "fix(coding-agent): gate snapcompact on images the wire actually sends",
-    "merge_commit": "ecc71b8b6ac03ad1a84921d9f60ea0ac0bbe6a09",
-    "merged_at": "2026-10-20T17:08:28Z",
-    "findings": []
-   },
-   "16437": {
-    "title": "fix(ai): keep usage and timing on thinking-loop aborts",
-    "merge_commit": "ef3a92da32f63a842df1d2c05afcb7091741b764",
-    "merged_at": "2026-10-20T17:13:01Z",
-    "findings": []
-   },
-   "16442": {
-    "title": "feat(coding-agent): expose PI_SESSION_ID and PI_SESSION_FILE to bash commands",
-    "merge_commit": "3bac72a7833f1cddb74528f8830f6801d8c3e3d5",
-    "merged_at": "2026-10-20T17:12:09Z",
     "findings": []
    },
    "16444": {
@@ -51051,6 +50985,20 @@
     "files": [
      "packages/ai/src/auth-gateway/server.ts"
     ]
+   },
+   {
+    "at": "2026-10-22T17:18:04Z",
+    "kind": "unopenable",
+    "id": "max-cost-gate",
+    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
+    "why": "opened as #16803"
+   },
+   {
+    "at": "2026-10-22T17:18:04Z",
+    "kind": "unopenable",
+    "id": "timer-pr-1-poke",
+    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
+    "why": "opened as #16801"
    }
   ]
  },
