@@ -42663,10 +42663,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T06:34:58Z",
+  "checked": "2026-10-22T07:06:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "r2/webmcp-native": {
+    "since": "2026-10-22T07:06:04Z",
+    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook"
+   }
+  },
   "conflicts": {
    "#16556": {
     "since": "2026-10-20T22:03:07Z",
@@ -42803,7 +42808,8 @@
       "severity": "P1",
       "path": "packages/coding-agent/src/session/provider-image-budget.ts",
       "end": 199,
-      "url": "https://github.com/can1357/oh-my-pi/pull/16288#pullrequestreview-5589040880"
+      "url": "https://github.com/can1357/oh-my-pi/pull/16288#pullrequestreview-5589040880",
+      "addressed_by": 16564
      }
     ]
    },
@@ -42829,7 +42835,8 @@
       "severity": "P2",
       "path": "packages/coding-agent/src/eval/py/runner.py",
       "end": 1336,
-      "url": "https://github.com/can1357/oh-my-pi/pull/16300#pullrequestreview-5589029446"
+      "url": "https://github.com/can1357/oh-my-pi/pull/16300#pullrequestreview-5589029446",
+      "addressed_by": 16552
      }
     ]
    },
@@ -46697,6 +46704,12 @@
     "files": [
      "packages/coding-agent/src/session/agent-session.ts"
     ]
+   },
+   {
+    "at": "2026-10-22T07:06:04Z",
+    "kind": "openable",
+    "id": "r2/webmcp-native",
+    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook"
    }
   ]
  },
