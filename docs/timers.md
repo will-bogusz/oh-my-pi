@@ -19,7 +19,7 @@ Source: `packages/coding-agent/src/timers/` (store, schedule, tick, runner, deli
 | --- | --- |
 | `set [id]` | Create a timer, or re-arm an existing id (history kept). The id defaults to one derived from `--reason`. |
 | `edit <id>` | Change only the given fields. A new `--at`/`--every`/`--when`/`--tz` starts a new schedule generation; `none` clears `at`, `every`, `expires` or `grace`. |
-| `ls` (default) | Table of every timer with its status, next fire and last run, plus the ticker's heartbeat. |
+| `ls` (default) | Table of every timer with its status, next fire and last run, plus the ticker's heartbeat. `--all` / `--host` add scheduled work omp did not create (see [Other scheduled work](#other-scheduled-work)). |
 | `show <id>` | The timer's card: next fire (with `today`/`tomorrow` when it is that close), cadence, action, limits, last run, open incidents, ticker. |
 | `runs <id> [--limit N]` | Run history: trigger, outcome, slot, coalesced missed slots, delivery, end. |
 | `logs <id> [seq]` | The runner log of a shell run or headless resume (default: the newest). |
@@ -111,6 +111,27 @@ Both are read from global settings, since the ticker runs outside any project. `
 ## Recursion guard
 
 Every process a fire starts carries `OMP_TIMER_RUN=<id>#<seq>`, and so does every `bash` command of a turn a timer fire starts or joins in an open session (delivered live or held for the next opener), until your next message. Such a run may re-arm, edit, pause, remove or fire only its own timer, unless that timer was set with `--allow-timers`; reading stays open. A prompt timer's turn in the session it wakes, live or resumed headless, may also set, edit, pause, resume or remove prompt timers that wake that same session (not fire them): what they start lands in that one conversation, one turn at a time. Shell runs stay limited to their own timer. Without this, one fired run could arm timers that arm timers. Subagents a live fired turn spawns, and its `eval` cells, do not carry it.
+
+## Other scheduled work
+
+`omp timer ls --all` also lists what this host runs on a schedule outside omp, read-only:
+
+- systemd (Linux): user and system timers and long-running services you installed (units shipped by the distribution are left out);
+- launchd (macOS): `~/Library/LaunchAgents`;
+- cron: the invoking user's crontab.
+
+The table shows each job's schedule, next and last run, last result and flags; jobs that need attention also show their state, log and unit file or plist (resolved through symlinks), and `--json` carries all of these for every row. Next runs of cron and launchd jobs are computed in the host's time zone (cronie's `CRON_TZ=` is honoured; on other crons a line after `CRON_TZ=` has no next run). Health flags come from OS state:
+
+| Flag | Meaning |
+| --- | --- |
+| `failed` | The last run did not succeed, as the scheduler judges it: systemd's `Result=` (so `SuccessExitStatus=` codes count as success), a non-zero launchd exit or a signal. |
+| `never-ran` | Scheduled, but no run is recorded. |
+| `unarmed` | Nothing will start it: a timer with no next elapse, a plist not loaded or disabled. |
+| `no-failure-alert` | The scheduler has no failure hook for the job: no systemd `OnFailure=`; launchd has none; cron mails a job's output, so a line is flagged when `MAILTO=""`, when both stdout and stderr are redirected away from cron, or when its redirections are too complex to follow (pipes, lists). An unflagged job is not proof that anyone is notified. |
+| `interval-only` | A systemd timer with only monotonic triggers (`OnBootSec=`, `OnUnitActiveSec=`…): it has no calendar time, and runs missed while the machine was off are not caught up as `Persistent=` calendar timers are. |
+| `sleep-lossy` | A launchd `StartInterval`, whose intervals during sleep are dropped. |
+
+`failed` and `unarmed` jobs are repeated under "needs attention" with their log. omp's own ticker unit is not listed. `--host <name>[,<name>]` (or `all` for every host in `omp ssh`'s config; other names go to ssh as-is, so `~/.ssh/config` aliases work) adds those hosts over ssh: a host whose omp knows `timer ls --all` answers with its own listing, including its omp timers; otherwise the same read-only listing commands run over ssh, and the host's line says why its omp was not used. `--json` adds `external` (the rows) and `hosts` (per host: `via` `local`, `omp`, `ssh` or `none` when it could not be reached, the ssh `fallback` reason, and errors). A listing command that fails reports an error for its scheduler and keeps the other schedulers' rows; a remote listing's malformed rows are skipped and counted in that host's errors.
 
 ## Files on disk
 

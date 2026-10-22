@@ -62,10 +62,17 @@ export default class Timer extends Command {
 			description:
 				"install/uninstall/doctor: change nothing; install prints the unit files and commands it would use",
 		}),
+		all: Flags.boolean({
+			description: "ls: also list systemd/launchd/cron jobs omp did not create, with health flags",
+		}),
+		host: Flags.string({
+			description: "ls: also list another host's timers over ssh (name from `omp ssh`, comma-separated, or 'all')",
+		}),
 	};
 
 	static examples = [
 		"omp timer ls",
+		"omp timer ls --all --host build-box",
 		"omp timer set nightly --every 'daily 03:00' --shell 'make backup' --reason 'nightly backup'",
 		"omp timer set standup --at 'tomorrow 09:00' --session <id> --prompt 'Summarize yesterday' --reason 'standup notes'",
 		"omp timer edit nightly --every 'daily 04:00'",
@@ -84,6 +91,11 @@ export default class Timer extends Command {
 			data: flags.data,
 			limit: flags.limit,
 			dryRun: flags["dry-run"] ?? false,
+			all: flags.all ?? false,
+			hosts: flags.host
+				?.split(",")
+				.map(host => host.trim())
+				.filter(Boolean),
 			fields: {
 				reason: flags.reason,
 				title: flags.title,
