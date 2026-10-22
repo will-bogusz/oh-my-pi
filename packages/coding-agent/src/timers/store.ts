@@ -491,12 +491,17 @@ export class TimerDb {
 				`${file} has schema ${stored}, newer than this omp supports (${TIMER_DB_SCHEMA_VERSION}); update omp`,
 			);
 		}
-		this.#db.transaction(() => {
-			this.#db.run(SCHEMA);
-			this.#db.run("INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', ?)", [
-				String(TIMER_DB_SCHEMA_VERSION),
-			]);
-		})();
+		// IMMEDIATE: a deferred transaction that reads the schema and then writes fails at once with
+		// SQLITE_BUSY (busy_timeout does not apply to a stale read snapshot) when another process commits in
+		// between, e.g. two runners dispatched by the same tick.
+		this.#db
+			.transaction(() => {
+				this.#db.run(SCHEMA);
+				this.#db.run("INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', ?)", [
+					String(TIMER_DB_SCHEMA_VERSION),
+				]);
+			})
+			.immediate();
 	}
 
 	#metaRaw(key: string): string | undefined {

@@ -592,6 +592,34 @@ describe("timer spec writes", () => {
 		expect(final).toMatchObject({ rev: 11, title: "title-4", reason: "reason-4" });
 	});
 
+	it("opens the store while another process is committing", async () => {
+		const file = path.join(dir.path(), "timers.db");
+		new TimerDb(file).close();
+		const store = path.resolve(import.meta.dir, "../src/timers/store.ts");
+		const writer = Bun.spawn(
+			[
+				process.execPath,
+				"-e",
+				`import { TimerDb } from ${JSON.stringify(store)};
+				const db = new TimerDb(${JSON.stringify(file)});
+				await Bun.write(Bun.stdout, "ready\\n");
+				for (let n = 0; ; n++) {
+					db.recordRunEnd("w", { runId: "w#" + n, at: "x", ok: true, durationMs: 1 });
+					if (n % 20 === 0) Bun.sleepSync(1);
+				}`,
+			],
+			{ stdout: "pipe", stderr: "pipe" },
+		);
+		try {
+			await writer.stdout.getReader().read();
+			for (let i = 0; i < 200; i++) new TimerDb(file).close();
+		} finally {
+			// SIGTERM runs omp's async exit hooks, which the writer's synchronous loop never yields to.
+			writer.kill("SIGKILL");
+			await writer.exited;
+		}
+	});
+
 	it("refuses a write that names a stale rev", async () => {
 		const root = dir.path();
 		const { spec: first } = await setTimer(
