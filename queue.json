@@ -46098,7 +46098,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T11:41:29Z",
+  "checked": "2026-10-22T12:43:14Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -46594,55 +46594,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-15T12:14:09Z",
-    "kind": "merged",
-    "number": 15443,
-    "title": "fix(catalog): cap xai-oauth Grok 4.20 context windows at the server's 1M limit",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-15T12:14:09Z",
-    "kind": "merged",
-    "number": 15411,
-    "title": "fix(grep): show the end-of-line window for a zero-width match at end of file",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-15T12:14:09Z",
-    "kind": "merged",
-    "number": 15409,
-    "title": "fix(coding-agent): keep each JS Eval run on its own artifact and local roots",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-15T12:14:09Z",
-    "kind": "merged",
-    "number": 15445,
-    "title": "fix(catalog): drop retired Gemini 3.5 Flash from Antigravity",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-15T12:14:09Z",
-    "kind": "merged",
-    "number": 15761,
-    "title": "test(natives): serialize desktop worker tests with the input ownership tests",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-15T12:14:09Z",
-    "kind": "conflict",
-    "label": "#14235",
-    "title": "feat(ai): let broker account-pool files act as a provider and API-key allow-list",
-    "files": [
-     "packages/ai/src/auth-broker/remote-store.ts"
-    ]
-   },
    {
     "at": "2026-10-15T12:45:10Z",
     "kind": "merged",
