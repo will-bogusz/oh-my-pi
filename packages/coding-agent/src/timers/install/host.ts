@@ -9,7 +9,7 @@ export interface HostCommandResult {
 	stderr: string;
 }
 
-/** Every OS effect the installer has. Tests pass a fake; `dryRun` records argv without running. */
+/** Every OS effect the installer has. Tests pass a fake; `dryRun` runs, writes and removes nothing. */
 export interface TimerHost {
 	/** "darwin" | "linux"; anything else is unsupported. */
 	platform: NodeJS.Platform;
@@ -17,7 +17,7 @@ export interface TimerHost {
 	home: string;
 	uid: number;
 	user: string;
-	/** `run()` records commands instead of executing them; checks that need a real answer report "not checked". */
+	/** Commands, writes and removals are recorded or skipped; checks that need a real answer report "not checked". */
 	dryRun?: boolean;
 	run(argv: string[]): Promise<HostCommandResult>;
 	/** `undefined` on ENOENT. */
@@ -29,12 +29,14 @@ export interface TimerHost {
 	/** `false` on ENOENT. */
 	removeFile(file: string): Promise<boolean>;
 	exists(file: string): Promise<boolean>;
+	/** A regular file this user may execute. */
+	isExecutable(file: string): Promise<boolean>;
 }
 
 /**
- * Real host. With `dryRun`, `run()` never executes: it records argv in `.commands` and
- * returns a successful "(dry run)" result. File writes still happen, so
- * `HOME=<tmp> omp timer install --dry-run` writes units into the temp HOME.
+ * Real host. With `dryRun` nothing on disk or in launchd/systemd changes: `run()` records argv in
+ * `.commands` and returns a successful "(dry run)" result, writes and directory creation are skipped,
+ * and `removeFile()` only reports whether the file exists. Reads still happen.
  */
 export function createTimerHost(
 	options: { dryRun?: boolean; home?: string } = {},
@@ -42,6 +44,15 @@ export function createTimerHost(
 	const commands: string[][] = [];
 	const dryRun = options.dryRun ?? false;
 	const info = os.userInfo();
+	const exists = async (file: string): Promise<boolean> => {
+		try {
+			await fs.stat(file);
+			return true;
+		} catch (err) {
+			if (isEnoent(err)) return false;
+			throw err;
+		}
+	};
 	return {
 		platform: process.platform,
 		home: options.home ?? process.env.HOME ?? os.homedir(),
@@ -68,12 +79,13 @@ export function createTimerHost(
 			}
 		},
 		async writeFile(file, content) {
-			await Bun.write(file, content);
+			if (!dryRun) await Bun.write(file, content);
 		},
 		async makeDir(dir) {
-			await fs.mkdir(dir, { recursive: true });
+			if (!dryRun) await fs.mkdir(dir, { recursive: true });
 		},
 		async removeFile(file) {
+			if (dryRun) return exists(file);
 			try {
 				await fs.rm(file);
 				return true;
@@ -82,13 +94,14 @@ export function createTimerHost(
 				throw err;
 			}
 		},
-		async exists(file) {
+		exists,
+		async isExecutable(file) {
 			try {
-				await fs.stat(file);
+				if (!(await fs.stat(file)).isFile()) return false;
+				await fs.access(file, fs.constants.X_OK);
 				return true;
-			} catch (err) {
-				if (isEnoent(err)) return false;
-				throw err;
+			} catch {
+				return false;
 			}
 		},
 	};

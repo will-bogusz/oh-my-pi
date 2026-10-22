@@ -18,6 +18,7 @@ import {
 	listTimers,
 	loadTimerRow,
 	parseWhen,
+	planTickerInstall,
 	readTickerStatus,
 	removeTimer,
 	renderRuns,
@@ -224,7 +225,10 @@ function renderDoctor(report: DoctorReport): string {
 	const mark = { ok: chalk.green("✓"), warn: chalk.yellow("⚠"), fail: chalk.red("✗") };
 	return [
 		`ticker unit: ${report.kind}`,
-		...report.checks.map(check => `${mark[check.status]} ${check.name}: ${check.detail}`),
+		...report.checks.flatMap(check => [
+			`${mark[check.status]} ${check.name}: ${check.detail}`,
+			...(check.log ?? []).map(line => `    ${chalk.dim(line)}`),
+		]),
 		report.ok ? "doctor: ok" : "doctor: problems found",
 	].join("\n");
 }
@@ -336,7 +340,7 @@ async function runAction(cmd: TimerCommandArgs, now: number): Promise<number> {
 		}
 		case "install": {
 			const host = createTimerHost({ dryRun: cmd.dryRun });
-			const result = await installTicker(host, {
+			const input = {
 				ompCommand: resolveCliEntryCmd(),
 				// The unit runs outside any login shell: bake in this shell's PATH (deduped) and the store it ticks.
 				env: {
@@ -346,15 +350,29 @@ async function runAction(cmd: TimerCommandArgs, now: number): Promise<number> {
 					OMP_TIMERS_DIR: path.resolve(timersRoot()),
 				},
 				logPath: tickLogPath(),
-			});
-			if (cmd.json) return (json({ ...result, dryRun: cmd.dryRun, commands: host.commands }), result.ok ? 0 : 1);
-			out(
-				`${result.ok ? "installed" : "install failed:"} ${result.plan.kind} ticker${cmd.dryRun ? " (dry run: no launchctl/systemctl ran)" : ""}`,
-			);
+			};
+			if (cmd.dryRun) {
+				// Nothing is written: launchd loads any plist in ~/Library/LaunchAgents at the next login.
+				const plan = planTickerInstall(host, input);
+				if (cmd.json) return (json({ dryRun: true, plan }), 0);
+				out(
+					`dry run: omp timer install would write ${plan.files.length} file(s) and run ${plan.commands.length} command(s); nothing was changed`,
+				);
+				for (const file of plan.files) {
+					out(`\n--- ${file.path}`);
+					out(file.content.trimEnd());
+				}
+				out("");
+				for (const argv of plan.commands) out(`would run ${argv.join(" ")}`);
+				return 0;
+			}
+			const result = await installTicker(host, input);
+			if (cmd.json) return (json({ ...result, dryRun: false, commands: host.commands }), result.ok ? 0 : 1);
+			out(`${result.ok ? "installed" : "install failed:"} ${result.plan.kind} ticker`);
 			for (const file of result.plan.files) out(`  wrote ${file.path}`);
 			for (const run of result.results) {
 				out(
-					`  ${cmd.dryRun ? "would run" : "ran"} ${run.argv.join(" ")}${cmd.dryRun ? "" : ` → exit ${run.exitCode}`}${run.exitCode && run.stderr ? ` (${run.stderr.trim()})` : ""}`,
+					`  ran ${run.argv.join(" ")} → exit ${run.exitCode}${run.exitCode && run.stderr ? ` (${run.stderr.trim()})` : ""}`,
 				);
 			}
 			return result.ok ? 0 : 1;
@@ -363,8 +381,8 @@ async function runAction(cmd: TimerCommandArgs, now: number): Promise<number> {
 			const host = createTimerHost({ dryRun: cmd.dryRun });
 			const result = await uninstallTicker(host);
 			if (cmd.json) return (json({ ...result, dryRun: cmd.dryRun }), 0);
-			out(`uninstalled ${result.kind} ticker${cmd.dryRun ? " (dry run: no launchctl/systemctl ran)" : ""}`);
-			for (const file of result.removed) out(`  removed ${file}`);
+			out(`uninstalled ${result.kind} ticker${cmd.dryRun ? " (dry run: nothing was removed or unloaded)" : ""}`);
+			for (const file of result.removed) out(`  ${cmd.dryRun ? "would remove" : "removed"} ${file}`);
 			for (const run of result.results) out(`  ${cmd.dryRun ? "would run" : "ran"} ${run.argv.join(" ")}`);
 			return 0;
 		}

@@ -68,7 +68,8 @@ export default class Timer extends Command {
 		data: Flags.string({ description: "fire: untrusted data handed to the run" }),
 		limit: Flags.integer({ description: "runs: newest N runs only" }),
 		"dry-run": Flags.boolean({
-			description: "install/uninstall/doctor: write unit files but run no launchctl/systemctl",
+			description:
+				"install/uninstall/doctor: change nothing; install prints the unit files and commands it would use",
 		}),
 		all: Flags.boolean({
 			description: "ls: also list systemd/launchd/cron jobs omp did not create, with health flags",

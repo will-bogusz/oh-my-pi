@@ -83,6 +83,9 @@ export function planTickerInstall(host: TimerHost, input: TickerUnitInput): Tick
 		commands: [
 			["systemctl", "--user", "daemon-reload"],
 			["systemctl", "--user", "enable", "--now", SYSTEMD_TIMER],
+			// Tick once now, like launchd's RunAtLoad: the heartbeat is fresh right after install, and a unit
+			// that cannot run fails the install instead of failing silently every minute.
+			["systemctl", "--user", "start", `${TICKER_SYSTEMD_UNIT}.service`],
 		],
 	};
 }

@@ -7,10 +7,16 @@ import {
 	parseTimerSugar,
 } from "@oh-my-pi/pi-coding-agent/slash-commands/builtin-timer";
 import { TIMERS_DIR_ENV } from "@oh-my-pi/pi-coding-agent/timers/paths";
-import { setTimer, type TimerRow } from "@oh-my-pi/pi-coding-agent/timers/service";
+import { renderTimerCard } from "@oh-my-pi/pi-coding-agent/timers/render";
+import { loadTimerRow, setTimer, type TimerRow } from "@oh-my-pi/pi-coding-agent/timers/service";
 import { readTimerSpec } from "@oh-my-pi/pi-coding-agent/timers/store";
 import type { TimerSpec } from "@oh-my-pi/pi-coding-agent/timers/types";
-import { timerArgsTier, timerEditPatch, timerPillText } from "@oh-my-pi/pi-coding-agent/tools/timer-view";
+import {
+	timerArgsTier,
+	timerCardView,
+	timerEditPatch,
+	timerPillText,
+} from "@oh-my-pi/pi-coding-agent/tools/timer-view";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { TempDir } from "@oh-my-pi/pi-utils";
 
@@ -178,5 +184,29 @@ describe("timers pill", () => {
 		expect(timerPillText(rows, "me", now)).toBe("2 · next 06:05");
 		expect(timerPillText([row("g", "me", "armed", "gate")], "me", now)).toBe("1 · when gate");
 		expect(timerPillText(rows, "nobody", now)).toBeUndefined();
+	});
+});
+
+describe("timer card ticker line", () => {
+	it("says a one-shot fires within a minute after its time, and a recurring timer does not", async () => {
+		const now = Date.now();
+		const ticker = { lastTickAt: new Date(now - 20_000).toISOString() };
+		const once = await setTimer(
+			{ id: "once", reason: "r", at: "in 2h", shell: "true" },
+			{ by: "cli", cwd: dir.path(), now, testGate: false },
+		);
+		const daily = await setTimer(
+			{ id: "daily", reason: "r", every: "daily 09:00", shell: "true" },
+			{ by: "cli", cwd: dir.path(), now, testGate: false },
+		);
+		const tickerLine = async (spec: TimerSpec) =>
+			renderTimerCard(await loadTimerRow(spec, now), now, { verb: "armed", ticker })
+				.split("\n")
+				.find(line => line.startsWith("ticker "));
+		expect(await tickerLine(once.spec)).toBe("ticker last tick 20s ago · fires within a minute after its time");
+		expect(await tickerLine(daily.spec)).toBe("ticker last tick 20s ago");
+		expect(timerCardView(await loadTimerRow(once.spec, now), { verb: "armed", ticker, now }).ticker).toBe(
+			"last tick 20s ago · fires within a minute after its time",
+		);
 	});
 });

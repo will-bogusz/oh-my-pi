@@ -90,6 +90,7 @@ export function timerCardView(row: TimerRow, options: TimerCardOptions): TimerCa
 	} else {
 		card.ticker = ticker;
 	}
+	if (spec.at && !spec.every) card.ticker += " · fires within a minute after its time";
 	if (options.gateNow === "broken") card.warnings.push("the gate failed its dry run; each check counts as a failure");
 	if (options.gateNow === "met") card.warnings.push("the condition already holds: this fires at the next tick");
 	return card;

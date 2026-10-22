@@ -1,4 +1,5 @@
 import * as path from "node:path";
+import { tickAge } from "../render";
 import type { TimerHost } from "./host";
 import { launchdPlistPath, launchdTarget, readTickerPlist } from "./launchd";
 import { tickerKind } from "./plan";
@@ -10,6 +11,8 @@ export interface DoctorCheck {
 	name: string;
 	status: DoctorStatus;
 	detail: string;
+	/** Tail of the unit's log or journal, newest last. */
+	log?: string[];
 }
 
 export interface DoctorInput {
@@ -31,16 +34,121 @@ export interface DoctorReport {
 	ok: boolean;
 }
 
-/** The ticker fires every minute; three missed minutes means it is not running. */
-const STALE_TICK_MS = 3 * 60_000;
+/** Lines of unit log or journal shown with a failed last run. */
+const LOG_TAIL_LINES = 5;
 
-function formatAge(ms: number): string {
-	const seconds = Math.max(0, Math.round(ms / 1000));
-	if (seconds < 120) return `${seconds}s`;
-	const minutes = Math.round(seconds / 60);
-	if (minutes < 120) return `${minutes}m`;
-	const hours = Math.round(minutes / 60);
-	return hours < 48 ? `${hours}h` : `${Math.round(hours / 24)}d`;
+function tail(text: string): string[] {
+	return text
+		.split("\n")
+		.map(line => line.trimEnd())
+		.filter(Boolean)
+		.slice(-LOG_TAIL_LINES);
+}
+
+/**
+ * The recorded invocation must still run: the binary is executable and, for a source install,
+ * the entry script (`…/src/cli.ts`) still exists. A deleted worktree or moved install fails every tick.
+ */
+async function invocationChecks(host: TimerHost, argv: string[]): Promise<DoctorCheck[]> {
+	const prefix = argv.slice(0, -2); // drop "timer tick"
+	const [binary, ...rest] = prefix;
+	const rerun = "every tick fails; re-run omp timer install from a working omp";
+	const checks: DoctorCheck[] = [
+		binary && path.isAbsolute(binary) && (await host.isExecutable(binary))
+			? { name: "unit binary", status: "ok", detail: binary }
+			: {
+					name: "unit binary",
+					status: "fail",
+					detail: `${binary || "(empty command)"} is missing or not executable; ${rerun}`,
+				},
+	];
+	for (const arg of rest) {
+		if (!path.isAbsolute(arg)) continue;
+		checks.push(
+			(await host.exists(arg))
+				? { name: "unit entry", status: "ok", detail: arg }
+				: { name: "unit entry", status: "fail", detail: `${arg} does not exist; ${rerun}` },
+		);
+	}
+	return checks;
+}
+
+/** Parses `systemctl show -p …` output (`Key=value` lines). */
+function parseShow(stdout: string): Record<string, string> {
+	const props: Record<string, string> = {};
+	for (const line of stdout.split("\n")) {
+		const eq = line.indexOf("=");
+		if (eq > 0) props[line.slice(0, eq)] = line.slice(eq + 1).trim();
+	}
+	return props;
+}
+
+/** `ExecMainCode` is a `CLD_*` code from waitid(2). */
+const CLD_CODES: Record<string, string> = { "1": "exited", "2": "killed", "3": "dumped core" };
+
+async function systemdLastRun(host: TimerHost): Promise<DoctorCheck | undefined> {
+	const service = `${TICKER_SYSTEMD_UNIT}.service`;
+	const shown = await host.run([
+		"systemctl",
+		"--user",
+		"show",
+		service,
+		"-p",
+		"Result",
+		"-p",
+		"ExecMainCode",
+		"-p",
+		"ExecMainStatus",
+		"-p",
+		"ExecMainExitTimestamp",
+	]);
+	if (shown.exitCode !== 0) return undefined;
+	const props = parseShow(shown.stdout);
+	if (!props.ExecMainExitTimestamp) return undefined; // has not run since it was loaded
+	const code = props.ExecMainCode ?? "";
+	const status = props.ExecMainStatus ?? "";
+	const result = props.Result ?? "";
+	if (result === "success" && (code !== "1" || status === "0")) {
+		return { name: "last run", status: "ok", detail: `${service} exited 0` };
+	}
+	const how = CLD_CODES[code] ?? `code ${code || "?"}`;
+	const journal = await host.run([
+		"journalctl",
+		"--user",
+		"-u",
+		service,
+		"-n",
+		String(LOG_TAIL_LINES),
+		"--no-pager",
+		"-o",
+		"cat",
+	]);
+	return {
+		name: "last run",
+		status: "fail",
+		detail: `${service} failed: Result=${result || "?"}, ${how} with status ${status || "?"} (journalctl --user -u ${service})`,
+		log: journal.exitCode === 0 ? tail(journal.stdout) : undefined,
+	};
+}
+
+async function launchdLastRun(
+	host: TimerHost,
+	printed: string,
+	logPath: string | undefined,
+): Promise<DoctorCheck | undefined> {
+	const match = /^\s*last exit code = (.+)$/m.exec(printed);
+	if (!match) return undefined;
+	const value = match[1].trim();
+	const code = Number.parseInt(value, 10);
+	if (Number.isNaN(code)) return undefined; // "(never exited)"
+	if (code === 0) return { name: "last run", status: "ok", detail: "exited 0" };
+	const log = logPath ? await host.readFile(logPath) : undefined;
+	return {
+		name: "last run",
+		status: "fail",
+		detail: `last exit code ${value}${logPath ? ` (log ${logPath})` : ""}`,
+		log: log === undefined ? undefined : tail(log),
+	};
 }
 
 async function unitChecks(
@@ -61,7 +169,9 @@ async function unitChecks(
 		return;
 	}
 	checks.push({ name: "unit installed", status: "ok", detail: unitPath });
+	const baked = kind === "launchd" ? readTickerPlist(content) : readTickerService(content);
 
+	let lastRun: DoctorCheck | undefined;
 	if (host.dryRun) {
 		checks.push({ name: "unit loaded", status: "warn", detail: "not checked (dry run: no launchctl/systemctl ran)" });
 	} else if (kind === "launchd") {
@@ -72,6 +182,8 @@ async function unitChecks(
 				? { name: "unit loaded", status: "ok", detail: `${target} is loaded` }
 				: { name: "unit loaded", status: "fail", detail: `${target} is not loaded; run omp timer install` },
 		);
+		if (printed.exitCode === 0)
+			lastRun = await launchdLastRun(host, printed.stdout, readTickerPlist(content)?.logPath);
 	} else {
 		const timer = `${TICKER_SYSTEMD_UNIT}.timer`;
 		const active = (await host.run(["systemctl", "--user", "is-active", timer])).stdout.trim();
@@ -84,9 +196,10 @@ async function unitChecks(
 						detail: `${timer} is ${active || "not active"}; run omp timer install`,
 					},
 		);
+		lastRun = await systemdLastRun(host);
 	}
+	if (lastRun) checks.push(lastRun);
 
-	const baked = kind === "launchd" ? readTickerPlist(content) : readTickerService(content);
 	if (!baked) {
 		checks.push({ name: "unit command", status: "fail", detail: `cannot parse ${unitPath}; run omp timer install` });
 		return;
@@ -102,16 +215,7 @@ async function unitChecks(
 					detail: `unit runs \`${baked.argv.join(" ")}\`, this omp is \`${expected.join(" ")}\`; re-run omp timer install`,
 				},
 	);
-	const binary = baked.argv[0];
-	checks.push(
-		binary && (await host.exists(binary))
-			? { name: "unit binary", status: "ok", detail: binary }
-			: {
-					name: "unit binary",
-					status: "fail",
-					detail: `${binary || "(empty command)"} does not exist (stale binary path); re-run omp timer install`,
-				},
-	);
+	checks.push(...(await invocationChecks(host, baked.argv)));
 	const unitRoot = baked.env.OMP_TIMERS_DIR;
 	checks.push(
 		unitRoot && path.resolve(unitRoot) === path.resolve(input.timersRoot)
@@ -127,12 +231,11 @@ async function unitChecks(
 function heartbeatCheck(input: DoctorInput): DoctorCheck {
 	const { lastTickAt } = input.ticker;
 	if (!lastTickAt) return { name: "last tick", status: "fail", detail: "the ticker has never run" };
-	const at = Date.parse(lastTickAt);
-	if (Number.isNaN(at)) return { name: "last tick", status: "fail", detail: `unreadable heartbeat "${lastTickAt}"` };
-	const age = input.now - at;
-	return age > STALE_TICK_MS
-		? { name: "last tick", status: "fail", detail: `last tick ${formatAge(age)} ago; the ticker is not running` }
-		: { name: "last tick", status: "ok", detail: `last tick ${formatAge(age)} ago` };
+	const age = tickAge(lastTickAt, input.now);
+	if (!age) return { name: "last tick", status: "fail", detail: `unreadable heartbeat "${lastTickAt}"` };
+	return age.stale
+		? { name: "last tick", status: "fail", detail: `${age.text}; the ticker is not running` }
+		: { name: "last tick", status: "ok", detail: age.text };
 }
 
 function storeChecks(input: DoctorInput): DoctorCheck[] {

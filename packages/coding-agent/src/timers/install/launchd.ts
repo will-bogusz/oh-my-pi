@@ -155,8 +155,10 @@ export function parsePlist(xml: string): PlistValue {
 	}
 }
 
-/** Command + env baked into an installed ticker plist; `undefined` when unparseable. */
-export function readTickerPlist(xml: string): { argv: string[]; env: Record<string, string> } | undefined {
+/** Command, env and log path baked into an installed ticker plist; `undefined` when unparseable. */
+export function readTickerPlist(
+	xml: string,
+): { argv: string[]; env: Record<string, string>; logPath?: string } | undefined {
 	let root: PlistValue;
 	try {
 		root = parsePlist(xml);
@@ -171,5 +173,6 @@ export function readTickerPlist(xml: string): { argv: string[]; env: Record<stri
 	if (vars && typeof vars === "object" && !Array.isArray(vars)) {
 		for (const [key, value] of Object.entries(vars)) if (typeof value === "string") env[key] = value;
 	}
-	return { argv: args.filter((arg): arg is string => typeof arg === "string"), env };
+	const logPath = typeof root.StandardOutPath === "string" ? root.StandardOutPath : undefined;
+	return { argv: args.filter((arg): arg is string => typeof arg === "string"), env, logPath };
 }

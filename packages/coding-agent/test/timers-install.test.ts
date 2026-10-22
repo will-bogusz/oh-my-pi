@@ -17,6 +17,7 @@ import {
 	type TimerHost,
 	uninstallTicker,
 } from "@oh-my-pi/pi-coding-agent/timers/install/index";
+import { describeTicker } from "@oh-my-pi/pi-coding-agent/timers/render";
 import { TempDir } from "@oh-my-pi/pi-utils";
 import { $ } from "bun";
 
@@ -53,6 +54,11 @@ class FakeHost implements TimerHost {
 	}
 	async makeDir(dir: string) {
 		this.dirs.add(dir);
+	}
+	/** Files that exist but lack the execute bit. */
+	notExecutable = new Set<string>();
+	async isExecutable(file: string) {
+		return this.files.has(file) && !this.notExecutable.has(file);
 	}
 }
 
@@ -157,7 +163,7 @@ describe("systemd ticker unit", () => {
 		expect(timerUnit).toContain("WantedBy=timers.target");
 	});
 
-	it("installs by creating the log directory, reloading, then enabling the timer", async () => {
+	it("installs by creating the log directory, reloading, enabling the timer, then ticking once", async () => {
 		const host = new FakeHost("linux");
 		const result = await installTicker(host, unitInput());
 		expect(result.ok).toBe(true);
@@ -166,7 +172,19 @@ describe("systemd ticker unit", () => {
 		expect(host.commands).toEqual([
 			["systemctl", "--user", "daemon-reload"],
 			["systemctl", "--user", "enable", "--now", "omp-timer-tick.timer"],
+			["systemctl", "--user", "start", "omp-timer-tick.service"],
 		]);
+	});
+
+	it("reports install failure when the first tick fails", async () => {
+		const host = new FakeHost("linux");
+		host.script.set("systemctl --user start omp-timer-tick.service", {
+			exitCode: 1,
+			stderr: "Job for omp-timer-tick.service failed because the control process exited with error code.",
+		});
+		const result = await installTicker(host, unitInput());
+		expect(result.ok).toBe(false);
+		expect(result.results.at(-1)?.argv).toEqual(["systemctl", "--user", "start", "omp-timer-tick.service"]);
 	});
 
 	it("uninstall disables the timer, removes both units and reloads", async () => {
@@ -189,7 +207,7 @@ it("rejects unsupported platforms with a clear error", async () => {
 	await expect(uninstallTicker(host)).rejects.toThrow(/unsupported platform/);
 });
 
-it("dry-run host writes units under the given HOME, creates the tick log directory and runs no commands", async () => {
+it("dry-run host writes, creates and runs nothing", async () => {
 	if (process.platform !== "darwin" && process.platform !== "linux") return;
 	const dir = await TempDir.create("omp-ticker-home-");
 	tempDirs.push(dir);
@@ -197,13 +215,35 @@ it("dry-run host writes units under the given HOME, creates the tick log directo
 	const store = path.join(dir.path(), "fresh", "timers");
 	const result = await installTicker(host, unitInput({ logPath: path.join(store, "tick.log") }));
 	expect(result.ok).toBe(true);
-	for (const file of result.plan.files) {
-		expect(file.path.startsWith(dir.path())).toBe(true);
-		expect(await Bun.file(file.path).text()).toBe(file.content);
-	}
-	expect(fs.statSync(store).isDirectory()).toBe(true);
+	expect(fs.readdirSync(dir.path())).toEqual([]);
 	expect(host.commands).toEqual(result.plan.commands);
 	expect(result.results.every(r => r.stderr === "(dry run)")).toBe(true);
+});
+
+it("dry-run uninstall reports the unit files without removing them", async () => {
+	if (process.platform !== "darwin" && process.platform !== "linux") return;
+	const dir = await TempDir.create("omp-ticker-home-");
+	tempDirs.push(dir);
+	const real = createTimerHost({ home: dir.path() });
+	const plan = planTickerInstall(real, unitInput());
+	for (const file of plan.files) await real.writeFile(file.path, file.content);
+	const result = await uninstallTicker(createTimerHost({ dryRun: true, home: dir.path() }));
+	expect(result.removed.sort()).toEqual(plan.files.map(file => file.path).sort());
+	for (const file of plan.files) expect(fs.existsSync(file.path)).toBe(true);
+});
+
+it("real host isExecutable needs an executable regular file", async () => {
+	if (process.platform !== "darwin" && process.platform !== "linux") return;
+	const dir = await TempDir.create("omp-ticker-exec-");
+	tempDirs.push(dir);
+	const host = createTimerHost();
+	const script = path.join(dir.path(), "omp");
+	await Bun.write(script, "#!/bin/sh\n");
+	expect(await host.isExecutable(script)).toBe(false);
+	fs.chmodSync(script, 0o755);
+	expect(await host.isExecutable(script)).toBe(true);
+	expect(await host.isExecutable(dir.path())).toBe(false);
+	expect(await host.isExecutable(path.join(dir.path(), "missing"))).toBe(false);
 });
 
 describe("doctorTicker", () => {
@@ -220,6 +260,9 @@ describe("doctorTicker", () => {
 			...overrides,
 		};
 	}
+
+	const SYSTEMD_SHOW =
+		"systemctl --user show omp-timer-tick.service -p Result -p ExecMainCode -p ExecMainStatus -p ExecMainExitTimestamp";
 
 	async function healthyHost(platform: "darwin" | "linux"): Promise<FakeHost> {
 		const host = new FakeHost(platform);
@@ -339,12 +382,116 @@ describe("doctorTicker", () => {
 		}
 	});
 
+	it("states the same heartbeat age as `omp timer ls`", async () => {
+		const ticker = { lastTickAt: new Date(NOW - 4 * 60_000 - 30_000).toISOString() };
+		const report = await doctorTicker(await healthyHost("linux"), doctorInput({ ticker }));
+		expect(report.checks.find(check => check.name === "last tick")?.detail).toBe(
+			"last tick 4m ago; the ticker is not running",
+		);
+		expect(describeTicker(ticker, NOW)).toStartWith("⚠ last tick 4m ago:");
+	});
+
 	it("fails the loaded check when launchctl cannot print the job", async () => {
 		const host = await healthyHost("darwin");
 		host.script.set("launchctl print gui/501/sh.omp.timer-tick", { exitCode: 113 });
 		const report = await doctorTicker(host, doctorInput());
 		expect(statuses(report.checks)["unit loaded"]).toBe("fail");
 		expect(statuses(report.checks).linger).toBeUndefined();
+	});
+
+	it("shows launchd's last exit code and the tail of the tick log", async () => {
+		const host = await healthyHost("darwin");
+		host.script.set("launchctl print gui/501/sh.omp.timer-tick", {
+			stdout: "gui/501/sh.omp.timer-tick = {\n\truns = 4\n\tlast exit code = 1\n}\n",
+		});
+		host.files.set(
+			"/home/tester/.omp/timers/tick.log",
+			["one", "two", "three", "four", "five", "error: Cannot find module './cli.ts'", ""].join("\n"),
+		);
+		const report = await doctorTicker(host, doctorInput());
+		const lastRun = report.checks.find(check => check.name === "last run")!;
+		expect(lastRun).toMatchObject({
+			status: "fail",
+			detail: "last exit code 1 (log /home/tester/.omp/timers/tick.log)",
+		});
+		expect(lastRun.log).toEqual(["two", "three", "four", "five", "error: Cannot find module './cli.ts'"]);
+		expect(report.ok).toBe(false);
+	});
+
+	it("passes launchd's last run when it exited 0 and skips it before the first exit", async () => {
+		const host = await healthyHost("darwin");
+		host.script.set("launchctl print gui/501/sh.omp.timer-tick", { stdout: "\tlast exit code = 0\n" });
+		expect(statuses((await doctorTicker(host, doctorInput())).checks)["last run"]).toBe("ok");
+		host.script.set("launchctl print gui/501/sh.omp.timer-tick", { stdout: "\tlast exit code = (never exited)\n" });
+		expect(statuses((await doctorTicker(host, doctorInput())).checks)["last run"]).toBeUndefined();
+	});
+
+	it("shows a failed systemd run's result, exit status and journal tail", async () => {
+		const host = await healthyHost("linux");
+		host.script.set(SYSTEMD_SHOW, {
+			stdout:
+				"Result=exit-code\nExecMainCode=1\nExecMainStatus=209\nExecMainExitTimestamp=Thu 2026-10-22 04:51:00 EDT\n",
+		});
+		host.script.set("journalctl --user -u omp-timer-tick.service -n 5 --no-pager -o cat", {
+			stdout:
+				"Starting omp-timer-tick.service…\nomp-timer-tick.service: Failed to set up standard output: No such file or directory\nomp-timer-tick.service: Main process exited, code=exited, status=209/STDOUT\n",
+		});
+		const report = await doctorTicker(host, doctorInput());
+		const lastRun = report.checks.find(check => check.name === "last run")!;
+		expect(lastRun.status).toBe("fail");
+		expect(lastRun.detail).toBe(
+			"omp-timer-tick.service failed: Result=exit-code, exited with status 209 (journalctl --user -u omp-timer-tick.service)",
+		);
+		expect(lastRun.log?.at(-1)).toBe("omp-timer-tick.service: Main process exited, code=exited, status=209/STDOUT");
+	});
+
+	it("passes a successful systemd run and skips a service that has not run", async () => {
+		const host = await healthyHost("linux");
+		host.script.set(SYSTEMD_SHOW, {
+			stdout:
+				"Result=success\nExecMainCode=1\nExecMainStatus=0\nExecMainExitTimestamp=Thu 2026-10-22 04:52:00 EDT\n",
+		});
+		expect(statuses((await doctorTicker(host, doctorInput())).checks)["last run"]).toBe("ok");
+		host.script.set(SYSTEMD_SHOW, {
+			stdout: "Result=success\nExecMainCode=0\nExecMainStatus=0\nExecMainExitTimestamp=\n",
+		});
+		expect(statuses((await doctorTicker(host, doctorInput())).checks)["last run"]).toBeUndefined();
+	});
+
+	it("fails loudly when a source install's entry script or binary is gone or not executable", async () => {
+		const entry = "/home/tester/wt/packages/coding-agent/src/cli.ts";
+		const bun = "/home/tester/.bun/bin/bun";
+		const sourceInstall = async () => {
+			const host = new FakeHost("darwin");
+			await installTicker(host, unitInput({ ompCommand: [bun, entry] }));
+			host.files.set(bun, "binary");
+			host.files.set(entry, "source");
+			return host;
+		};
+		const input = doctorInput({ ompCommand: [bun, entry] });
+
+		const healthy = await doctorTicker(await sourceInstall(), input);
+		expect(healthy.checks.filter(check => check.name.startsWith("unit "))).toContainEqual({
+			name: "unit entry",
+			status: "ok",
+			detail: entry,
+		});
+		expect(healthy.ok).toBe(true);
+
+		const deleted = await sourceInstall();
+		deleted.files.delete(entry);
+		const report = await doctorTicker(deleted, input);
+		expect(report.ok).toBe(false);
+		expect(report.checks.find(check => check.name === "unit entry")).toMatchObject({
+			status: "fail",
+			detail: `${entry} does not exist; every tick fails; re-run omp timer install from a working omp`,
+		});
+
+		const notExecutable = await sourceInstall();
+		notExecutable.notExecutable.add(bun);
+		const binary = (await doctorTicker(notExecutable, input)).checks.find(check => check.name === "unit binary")!;
+		expect(binary.status).toBe("fail");
+		expect(binary.detail).toContain("is missing or not executable");
 	});
 });
 

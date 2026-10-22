@@ -45,15 +45,31 @@ export function describeAction(spec: TimerSpec, selfSessionId?: string): string 
 	return `wake session ${spec.target.sessionId}${self} → ${prompt}\n       if busy: after the current turn · if closed: ${closed}`;
 }
 
+export interface TickAge {
+	ms: number;
+	/** `last tick 4m ago`. */
+	text: string;
+	/** Older than {@link TICKER_STALE_MS}: no ticker is running. */
+	stale: boolean;
+}
+
+/** Age of the newest tick, the one computation the card, `omp timer ls` and `doctor` share; `undefined` when unreadable. */
+export function tickAge(lastTickAt: string, now: number): TickAge | undefined {
+	const at = Date.parse(lastTickAt);
+	if (Number.isNaN(at)) return undefined;
+	const ms = Math.max(0, now - at);
+	return { ms, text: `last tick ${formatDuration(ms)} ago`, stale: ms > TICKER_STALE_MS };
+}
+
 export function describeTicker(ticker: TickerStatus, now: number): string {
 	if (!ticker.lastTickAt) {
 		return "⚠ no tick recorded yet: timers fire only when `omp timer tick` runs — run `omp timer install`";
 	}
-	const age = now - Date.parse(ticker.lastTickAt);
-	const text = `last tick ${formatDuration(age)} ago`;
-	return age > TICKER_STALE_MS
-		? `⚠ ${text}: no ticker is running, nothing fires until one does (\`omp timer doctor\`)`
-		: text;
+	const age = tickAge(ticker.lastTickAt, now);
+	if (!age) return `⚠ unreadable heartbeat "${ticker.lastTickAt}" (\`omp timer doctor\`)`;
+	return age.stale
+		? `⚠ ${age.text}: no ticker is running, nothing fires until one does (\`omp timer doctor\`)`
+		: age.text;
 }
 
 export function describeRun(run: RunView | undefined): string {
@@ -104,7 +120,9 @@ export function renderTimerCard(row: TimerRow, now: number, options: CardOptions
 	for (const incident of row.incidents) {
 		lines.push(`⚠ open incident ×${incident.count} since ${incident.firstAt}: ${oneLine(incident.summary, 90)}`);
 	}
-	lines.push(`ticker ${describeTicker(options.ticker, now)}`);
+	// The ticker runs once a minute, so a one-shot lands up to a minute after its time.
+	const granularity = spec.at && !spec.every ? " · fires within a minute after its time" : "";
+	lines.push(`ticker ${describeTicker(options.ticker, now)}${granularity}`);
 	if (options.gateNow === "broken") lines.push("⚠ the gate failed its test run; it counts as a failure each tick");
 	if (options.gateNow === "met") {
 		lines.push(
