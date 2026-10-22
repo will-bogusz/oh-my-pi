@@ -45130,7 +45130,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/resume-cancel-bg-jobs",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:36:15Z",
-   "updated": "2026-10-22T08:32:18Z",
+   "updated": "2026-10-22T08:40:33Z",
    "note": "",
    "built": [
     {
@@ -45310,15 +45310,6 @@
      "with_code": "c80129c2b3a04a3ec8b36d4bb3437ddb1f484dc2",
      "tip": "66032cb52b5ecb5c94b930d76399f9de43900f30",
      "with_tip": "a2ab0c065dea87e5db191e080d09f45b4a1b9dc0",
-     "at": "2026-10-22T08:24:42Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#16284",
-     "code": "80f996e6e16fe6664cc9b852d4104e3a21f85dc1",
-     "with_code": "a33d0dd72d51fadb3bc714a2458b31eb66689527",
-     "tip": "66032cb52b5ecb5c94b930d76399f9de43900f30",
-     "with_tip": "9ac8b4f5a1e5c03d8d08e69005b54bdfe7ab4a73",
      "at": "2026-10-22T08:24:42Z",
      "host": "MacBook-Pro"
     },
@@ -45536,6 +45527,15 @@
      "tip": "66032cb52b5ecb5c94b930d76399f9de43900f30",
      "with_tip": "4cd300030241cc9f136f88315b9e52497dd050ec",
      "at": "2026-10-22T08:32:17Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16284",
+     "code": "80f996e6e16fe6664cc9b852d4104e3a21f85dc1",
+     "with_code": "763fffc68828967ba5f8acbf3864a0d48a13a25a",
+     "tip": "66032cb52b5ecb5c94b930d76399f9de43900f30",
+     "with_tip": "e3a693eb887774b77ab920ec068c9c7e5ef6e47e",
+     "at": "2026-10-22T08:40:28Z",
      "host": "MacBook-Pro"
     }
    ]
