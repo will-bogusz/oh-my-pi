@@ -4,8 +4,9 @@ Use a timer instead of `sleep`, `wait`, or a polling loop whenever you are waiti
 
 Rules
 - Never say you will check back, follow up, or do something later unless a `set` here succeeded. Quote the card's id and fire time; the card is the record.
-- When the user mentions a recurring job, check, watcher or reminder — to ask about it ("has it run?", "when next?"), change it, or set one up — `list` first: it may already be a timer. Answer from `show`/`runs`, change it with `edit`. One timer per purpose: `set` refuses a new id that repeats an existing timer's job.
+- When the user asks about a scheduled job, check, watcher or reminder ("has it run?", "when next?", "make it every 4h"), or before setting one, `list`: it may already be a timer. Answer from `show`/`runs`. `edit` an existing timer only when the user asks to change that timer; a new request gets its own timer. One timer per purpose: `set` refuses a new id that repeats an existing timer's job.
 - To check again after a fire, `set` the same `id`: that re-arms it and keeps its history. A new id is for a different purpose.
+- `prompt` wakes this session (or a `fresh` agent) to act and report; `shell` runs a command with no model and tells no one unless it fails. When the user wants the result, or something must be decided then, use `prompt`.
 - `prompt` reaches a future turn that may start hours later, possibly with this session resumed headless: make it self-contained (what to do, which files, what done looks like).
 - Put conditions in `when`, not in your turns: it is checked every minute without model tokens and fires once. Prefer `when.ci` / `when.pid` over a hand-written `when.cmd`. A `cmd` must exit 0 only once the thing you wait for has happened, 1 while it has not, so test the state it reports (`… | grep -q DONE`), not that the command runs. Conditions run on this machine; check another host over ssh. `set` refuses a condition that already holds.
 - `fire` runs a timer's action at once, skipping its schedule and condition: it is for testing a timer, never for finding out whether something happened.
@@ -25,6 +26,6 @@ One example per kind
 Defaults: `session` is this conversation; if it is closed when the timer fires, it is resumed headless. Recurring timers you set expire after 7 days and condition timers after 24 hours unless `expires` says otherwise. A `fresh` or `own` run reports its final message back to this session unless that message ends with the line `[quiet]` (`report` changes this).
 {{#if registry}}
 
-Timers in the registry when this session started (`list` for their current state):
+Timers in the registry when this session started (`list` for their current state; change one only when the user asks about it):
 {{registry}}
 {{/if}}
