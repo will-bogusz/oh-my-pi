@@ -42692,6 +42692,24 @@
    "added": "2026-10-22T07:23:22Z",
    "updated": "2026-10-22T07:23:22Z",
    "note": ""
+  },
+  {
+   "id": "advisor-quota-comment",
+   "branch": "will/advisor-quota-comment",
+   "title": "docs(coding-agent): say what clears an advisor's quota pause",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "body": "bodies/advisor-quota-comment.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/advisor-quota-comment",
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T07:23:33Z",
+   "updated": "2026-10-22T07:23:33Z",
+   "note": ""
   }
  ],
  "watch": {
