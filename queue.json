@@ -45563,7 +45563,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "2d39e5f5d26c12d49b241f58905b5526106d2a1e",
    "body": "bodies/headless-agent-flags.md",
    "state": "open",
    "pr": 16768,
@@ -45571,7 +45571,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/headless-agent-flags",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:48:44Z",
-   "updated": "2026-10-22T09:33:18Z",
+   "updated": "2026-10-22T09:40:00Z",
    "note": "",
    "built": [
     {
@@ -45981,7 +45981,8 @@
     }
    ],
    "opened": "2026-10-22T09:30:10Z",
-   "readied": "2026-10-22T09:33:17Z"
+   "readied": "2026-10-22T09:33:17Z",
+   "advanced": "2026-10-22T09:40:00Z"
   }
  ],
  "watch": {
