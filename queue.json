@@ -361,7 +361,7 @@
    "area": "broker",
    "priority": "P2",
    "needs": [],
-   "base": "b91db66e9b0b65a2c977e6a5bc74b0f4b1d58d1c",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": null,
    "state": "open",
    "pr": 15124,
@@ -369,9 +369,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/policy-priority-unmeasured",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T23:04:52Z",
+   "updated": "2026-10-22T07:01:08Z",
    "note": "",
-   "advanced": "2026-10-13T23:04:52Z"
+   "advanced": "2026-10-22T07:01:08Z"
   },
   {
    "id": "account-window-reserves",
