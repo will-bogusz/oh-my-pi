@@ -171,6 +171,10 @@ describe("timer card dates", () => {
 		);
 		// a date two days out names the day it means; no warning
 		expect((await setTimer({ ...input, id: "later", at: "2026-10-24 04:43" }, ctx())).warnings).toEqual([]);
+		// in daytime a date one day out is what "tomorrow" means; no warning
+		const noon = T0 + 10 * 60 * 60_000; // Thu 11:33
+		const daytime = await setTimer({ ...input, id: "daytime", at: "2026-10-23 12:00" }, { ...ctx(), now: noon });
+		expect(daytime.warnings).toEqual([]);
 	});
 });
 

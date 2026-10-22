@@ -347,14 +347,22 @@ async function refuse(message: string | undefined, key: string, root: string, no
 	throw new Error(message);
 }
 
+/** Local hours after midnight in which "tomorrow" in a person's head is still today's date. */
+const SMALL_HOURS_END = 6;
+
 /**
  * `at` given as a full date that lands about a day after the next occurrence
- * of the same clock time: the classic after-midnight slip ("04:43 on the 23rd"
- * typed at 01:30 on the 22nd). Warn with both readings.
+ * of the same clock time, typed in the small hours: the after-midnight slip
+ * ("04:43 on the 23rd" typed at 01:30 on the 22nd). Warn with both readings.
+ * In daytime a date one day out is what "tomorrow" means, so no warning.
  */
 function dateSlipWarning(text: string | undefined, resolved: number, now: number, tz: string): string | undefined {
 	const match = text && /^(?:at\s+)?\d{4}-\d{2}-\d{2}[ T](\d{1,2}:\d{2})/.exec(text.trim());
 	if (!match) return undefined;
+	const hour = Number(
+		new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", hourCycle: "h23" }).format(now),
+	);
+	if (hour >= SMALL_HOURS_END) return undefined;
 	const sooner = resolveAt(match[1], now, tz);
 	const gap = resolved - sooner;
 	if (gap < DAY - HOUR || gap > DAY + HOUR) return undefined;
