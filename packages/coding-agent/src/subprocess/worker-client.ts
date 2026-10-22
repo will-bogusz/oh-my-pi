@@ -178,6 +178,19 @@ export function resolveWorkerSpawnCmd(workerArg: string): WorkerSpawnCommand {
 }
 
 /**
+ * Argv prefix that re-enters this omp CLI as a normal command (`[...prefix,
+ * "timer", "tick"]`) from any cwd: the compiled binary, the declared host
+ * entry, or this package's absolute `src/cli.ts`.
+ */
+export function resolveCliCommand(): string[] {
+	const executable = resolveExecutablePath();
+	if (isCompiledBinary()) return [executable];
+	const hostEntry = workerHostEntry();
+	if (hostEntry) return [executable, hostEntry];
+	return [executable, path.resolve(import.meta.dir, "..", "cli.ts")];
+}
+
+/**
  * Snapshot the parent environment for the child. `process.env` carries
  * `undefined` slots that `Bun.spawn` rejects, so filter them out; an optional
  * `overlay` (e.g. the tiny-model device/dtype vars) wins over inherited keys.

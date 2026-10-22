@@ -560,6 +560,7 @@
 		"@opentelemetry/sdk-trace-base": "catalog:",
 		"@opentelemetry/sdk-trace-node": "catalog:",
 		"axe-core": "4.13.0",
+		"croner": "10.0.1",
 		"puppeteer-core": "catalog:"
 	},
 	"devDependencies": {

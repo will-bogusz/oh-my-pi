@@ -72,6 +72,7 @@ import type { PlanProposalHandler } from "./resolve";
 import { SecurityScanTool } from "./security-scan";
 import { supportsExternalThinking, ThinkTool } from "./think";
 import { type TodoPhase } from "@oh-my-pi/pi-tui/tools/todo";
+import { TimerTool } from "./timer";
 import { TodoTool } from "./todo";
 import { WriteTool } from "./write";
 import { WaitTool } from "./wait";
@@ -155,6 +156,7 @@ export type {
 } from "@oh-my-pi/pi-tui/tools/task";
 export * from "./security-scan";
 export * from "./think";
+export * from "./timer";
 export * from "./todo";
 export * from "./tts";
 export * from "./vibe";
@@ -576,6 +578,7 @@ export const BUILTIN_TOOLS: Record<BuiltinToolName, ToolFactory> = {
 	context_notes: ContextNotesTool.createIf,
 	new_context: NewContextTool.createIf,
 	task: s => TaskTool.create(s),
+	timer: TimerTool.createIf,
 	wait: s => new WaitTool(s),
 	todo: s => new TodoTool(s),
 	web_search: s => new WebSearchTool(s),

@@ -113,6 +113,10 @@ export const predictHelp = {
 	description: "Type a prompt and compare every word-completion engine's ghost text live",
 } satisfies CommandMetadata;
 
+export const pokeHelp = {
+	description: "Post a message into a session; a live omp holding it starts a turn on it",
+} satisfies CommandMetadata;
+
 export const psHelp = {
 	description: "List and control daemon-supervised background processes (logs, stop, kill, restart)",
 } satisfies CommandMetadata;
@@ -122,6 +126,10 @@ export const readHelp = {
 } satisfies CommandMetadata;
 export const renderHelp = {
 	description: "Draw a session's entire thread through the production transcript pipeline (with repaint timing)",
+} satisfies CommandMetadata;
+
+export const timerHelp = {
+	description: "Set, list and drive timers: wake sessions later, on a schedule, or when a condition holds",
 } satisfies CommandMetadata;
 
 export const sayHelp = {

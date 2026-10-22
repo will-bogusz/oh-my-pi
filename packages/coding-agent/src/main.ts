@@ -119,6 +119,7 @@ import { resolveResumableSession, type SessionInfo } from "./session/session-lis
 import { ForkSourceNotFoundError, SessionManager, SessionMoveRefusedError } from "./session/session-manager";
 import { forkIfMovedAway } from "./session/session-transfer";
 import { shouldShowStartupSplash } from "./startup-splash";
+import { watchTimerMailbox } from "./timers/mailbox-watcher";
 import {
 	discoverSystemPromptOverride,
 	discoverTitleSystemPromptFile,
@@ -2654,6 +2655,11 @@ export async function runRootCommand(
 				settingsInstance.startWatching();
 				postmortem.register("settings-file-watcher", () => settingsInstance.stopWatching(), { exitOnly: true });
 			}
+
+			// Timer fires and `omp poke` messages addressed to this session land in
+			// its mailbox; the watcher injects them as turns (interactive, RPC, print).
+			const timerMailbox = watchTimerMailbox(session);
+			postmortem.register("timer-mailbox", () => timerMailbox.stop(), { exitOnly: true });
 
 			if (mode === "rpc" || mode === "rpc-ui") {
 				// Branch-only protocol runner: keep RPC host code out of normal interactive startup.
