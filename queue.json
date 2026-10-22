@@ -47008,7 +47008,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T23:22:18Z",
+  "checked": "2026-10-22T23:52:48Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -47212,34 +47212,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-15T23:32:30Z",
-    "kind": "unopenable",
-    "id": "browser-upload-chooser-session",
-    "title": "fix(coding-agent): stop browser uploadFile swallowing later file choosers and hanging on File System Access pickers",
-    "why": "opened as #15915"
-   },
-   {
-    "at": "2026-10-15T23:32:30Z",
-    "kind": "unopenable",
-    "id": "browser-upload-element",
-    "title": "fix(coding-agent): let browser element handles upload through chooser triggers and drop zones",
-    "why": "opened as #15918"
-   },
-   {
-    "at": "2026-10-15T23:32:30Z",
-    "kind": "unopenable",
-    "id": "browser-upload-inert-target",
-    "title": "fix(coding-agent): fail browser uploadFile when nothing on the page takes the file",
-    "why": "opened as #15919"
-   },
-   {
-    "at": "2026-10-15T23:32:30Z",
-    "kind": "unopenable",
-    "id": "relay-detach",
-    "title": "fix(browser): fail fast and reattach when Chrome detaches omp from a relay tab",
-    "why": "opened as #15920"
-   },
    {
     "at": "2026-10-16T12:22:09Z",
     "kind": "merged",
