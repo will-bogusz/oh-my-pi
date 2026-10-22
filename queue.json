@@ -37408,7 +37408,7 @@
    "area": "coding-agent",
    "priority": "P2",
    "needs": [],
-   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/bash-view-tags.md",
    "state": "open",
    "pr": 16576,
@@ -37416,7 +37416,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-view-tags",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:37:15Z",
-   "updated": "2026-10-21T00:35:23Z",
+   "updated": "2026-10-22T07:11:44Z",
    "note": "",
    "built": [
     {
@@ -37690,7 +37690,8 @@
     }
    ],
    "opened": "2026-10-21T00:01:50Z",
-   "readied": "2026-10-21T00:02:11Z"
+   "readied": "2026-10-21T00:02:11Z",
+   "advanced": "2026-10-22T07:11:44Z"
   },
   {
    "id": "compaction-trigger",
