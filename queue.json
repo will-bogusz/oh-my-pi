@@ -16784,7 +16784,7 @@
    "area": "models",
    "priority": "P2",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "2d39e5f5d26c12d49b241f58905b5526106d2a1e",
    "body": "bodies/exact-provider-model-selector.md",
    "state": "open",
    "pr": 16297,
@@ -16792,7 +16792,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/exact-provider-model-selector",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:48:32Z",
-   "updated": "2026-10-22T08:24:50Z",
+   "updated": "2026-10-22T09:08:33Z",
    "note": "",
    "built": [
     {
@@ -17234,7 +17234,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-22T08:19:17Z",
+   "advanced": "2026-10-22T09:08:33Z",
    "opened": "2026-10-19T05:19:16Z"
   },
   {
