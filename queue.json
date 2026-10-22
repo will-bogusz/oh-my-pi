@@ -46098,7 +46098,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T14:45:57Z",
+  "checked": "2026-10-22T15:16:14Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -46528,64 +46528,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-15T14:48:07Z",
-    "kind": "released",
-    "number": 15443,
-    "title": "fix(catalog): cap xai-oauth Grok 4.20 context windows at the server's 1M limit",
-    "tag": "v18.11.1"
-   },
-   {
-    "at": "2026-10-15T14:48:07Z",
-    "kind": "released",
-    "number": 15411,
-    "title": "fix(grep): show the end-of-line window for a zero-width match at end of file",
-    "tag": "v18.11.1"
-   },
-   {
-    "at": "2026-10-15T14:48:07Z",
-    "kind": "released",
-    "number": 15409,
-    "title": "fix(coding-agent): keep each JS Eval run on its own artifact and local roots",
-    "tag": "v18.11.1"
-   },
-   {
-    "at": "2026-10-15T14:48:07Z",
-    "kind": "released",
-    "number": 15445,
-    "title": "fix(catalog): drop retired Gemini 3.5 Flash from Antigravity",
-    "tag": "v18.11.1"
-   },
-   {
-    "at": "2026-10-15T14:48:07Z",
-    "kind": "released",
-    "number": 15761,
-    "title": "test(natives): serialize desktop worker tests with the input ownership tests",
-    "tag": "v18.11.1"
-   },
-   {
-    "at": "2026-10-15T14:48:07Z",
-    "kind": "released",
-    "number": 15791,
-    "title": "fix(agent,ai): count the reasoning the latest Claude turn replays when picking the compaction cut point",
-    "tag": "v18.11.1"
-   },
-   {
-    "at": "2026-10-15T14:48:07Z",
-    "kind": "released",
-    "number": 15792,
-    "title": "fix(coding-agent): click a text match a scroll container shows only a strip of",
-    "tag": "v18.11.1"
-   },
-   {
-    "at": "2026-10-15T14:48:07Z",
-    "kind": "conflict",
-    "label": "#15433",
-    "title": "feat(task): add omp agents show for what an agent's spawns run with",
-    "files": [
-     "packages/coding-agent/src/sdk.ts"
-    ]
-   },
    {
     "at": "2026-10-15T19:27:09Z",
     "kind": "merged",
