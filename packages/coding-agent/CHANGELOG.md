@@ -5,6 +5,7 @@
 ### Added
 
 - Anthropic web search and Files API uploads follow `PI_ANTHROPIC_API_VERSION=2026-10-21`; web search omits `temperature` under that version ([#16706](https://github.com/can1357/oh-my-pi/pull/16706) by [@H4vC](https://github.com/H4vC))
+- `omp timer ls --all` also lists scheduled work omp did not create (systemd user and system timers and long-running services, `~/Library/LaunchAgents`, the user crontab) with schedule, next/last run, last result, source file and log, and flags each as failed, never-ran, unarmed, no-failure-alert, interval-only, source-in-scratch or sleep-lossy; `--host <name>|all` adds other hosts over ssh, using their `omp timer ls --json --all` when available and otherwise running the same read-only listing commands remotely
 
 ## [18.12.6] - 2026-10-21
 

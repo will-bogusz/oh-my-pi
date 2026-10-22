@@ -26,6 +26,7 @@ import {
 	type TimerSetInput,
 	timerRuns,
 } from "../timers";
+import { renderEstate, scanEstate } from "../timers/external";
 
 export const TIMER_ACTIONS = ["set", "ls", "show", "runs", "rm", "pause", "resume", "fire", "tick", "exec"] as const;
 export type TimerAction = (typeof TIMER_ACTIONS)[number];
@@ -35,6 +36,9 @@ export interface TimerCommandArgs {
 	id?: string;
 	extra: string[];
 	json: boolean;
+	/** ls: also list external systemd/launchd/cron jobs (`--all`) on this host and `--host` hosts. */
+	all?: boolean;
+	hosts?: string[];
 	set: Omit<TimerSetInput, "id" | "reason"> & { reason?: string };
 }
 
@@ -75,6 +79,7 @@ export async function runTimerCommand(cmd: TimerCommandArgs): Promise<void> {
 			case "ls": {
 				const { rows, errors } = await listTimers(now);
 				const ticker = await readTickerStatus();
+				const estate = cmd.all || cmd.hosts?.length ? await scanEstate({ hosts: cmd.hosts ?? [], now }) : undefined;
 				if (cmd.json) {
 					return out(
 						JSON.stringify(
@@ -92,6 +97,7 @@ export async function runTimerCommand(cmd: TimerCommandArgs): Promise<void> {
 									state: row.state,
 								})),
 								errors,
+								...(estate ? { external: estate.jobs, hosts: estate.hosts } : {}),
 							},
 							null,
 							2,
@@ -100,6 +106,7 @@ export async function runTimerCommand(cmd: TimerCommandArgs): Promise<void> {
 				}
 				out(rows.length ? renderTimerTable(rows, now, ticker) : "no timers");
 				for (const { id, error } of errors) out(chalk.yellow(`invalid spec ${id}: ${error}`));
+				if (estate) out(`\n${renderEstate(estate, now)}`);
 				return;
 			}
 			case "show": {

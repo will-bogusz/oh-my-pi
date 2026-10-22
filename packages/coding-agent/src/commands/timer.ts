@@ -20,6 +20,12 @@ export default class Timer extends Command {
 
 	static flags = {
 		json: Flags.boolean({ char: "j", description: "Emit machine-readable JSON" }),
+		all: Flags.boolean({
+			description: "ls: also list systemd/launchd/cron jobs omp did not create, with health flags",
+		}),
+		host: Flags.string({
+			description: "ls: also list another host's timers over ssh (name from `omp ssh`, comma-separated, or 'all')",
+		}),
 		reason: Flags.string({ description: "set: why this timer exists (required)" }),
 		at: Flags.string({ description: "set: one-shot time: now, 'in 2m', HH:MM, 'YYYY-MM-DD HH:MM', ISO" }),
 		every: Flags.string({ description: "set: recurring: 5m, 2h, 'daily 09:00', or 5-field cron" }),
@@ -42,6 +48,7 @@ export default class Timer extends Command {
 
 	static examples = [
 		"omp timer ls",
+		"omp timer ls --all --host goliath",
 		"omp timer set nightly --every 'daily 03:00' --shell 'make backup' --reason 'nightly backup'",
 		"omp timer set ci-done --until 'test -f /tmp/ci.ok' --session <id> --prompt 'CI finished; report' --reason 'watch CI'",
 		"omp timer runs nightly",
@@ -55,6 +62,11 @@ export default class Timer extends Command {
 			id: args.id,
 			extra: argv.slice(2),
 			json: flags.json ?? false,
+			all: flags.all ?? false,
+			hosts: flags.host
+				?.split(",")
+				.map(host => host.trim())
+				.filter(Boolean),
 			set: {
 				reason: flags.reason,
 				at: flags.at,
