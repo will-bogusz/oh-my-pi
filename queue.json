@@ -4354,7 +4354,7 @@
     "#16202",
     "#16206"
    ],
-   "base": "3aad93f3adf27aabde151a70e87417a62e032dce",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/computer-right-click-per-press.md",
    "state": "queued",
    "pr": null,
@@ -4362,8 +4362,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-right-click-per-press",
    "host": "MacBook-Pro",
    "added": "2026-10-18T16:33:04Z",
-   "updated": "2026-10-18T16:33:25Z",
-   "note": "rebuild after #16206 merges: lift its 'a background right or middle click checks only before it starts' doc qualification in docs/computer-use.md and docs/tools/computer.md"
+   "updated": "2026-10-22T07:07:54Z",
+   "note": "rebuild after #16206 merges: lift its 'a background right or middle click checks only before it starts' doc qualification in docs/computer-use.md and docs/tools/computer.md",
+   "advanced": "2026-10-22T07:07:54Z"
   },
   {
    "id": "refind-cancel-root",
