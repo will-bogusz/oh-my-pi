@@ -46116,24 +46116,40 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T15:16:14Z",
+  "checked": "2026-10-22T16:17:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "factory-droid-0244": {
+    "since": "2026-10-22T16:17:10Z",
+    "title": "feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback)"
+   },
+   "max-cost-gate": {
+    "since": "2026-10-22T16:17:10Z",
+    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend"
+   },
+   "computer-ui-quiet": {
+    "since": "2026-10-22T16:17:10Z",
+    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
+   },
+   "r2/relay-bg-input-main": {
+    "since": "2026-10-22T16:17:10Z",
+    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys"
+   },
+   "factory-droid-web-search": {
+    "since": "2026-10-22T16:17:10Z",
+    "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)"
+   },
+   "timer-pr-1-poke": {
+    "since": "2026-10-22T16:17:10Z",
+    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke"
+   },
    "grep-exclude": {
     "since": "2026-10-22T10:41:01Z",
     "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
    }
   },
-  "conflicts": {
-   "#16611": {
-    "since": "2026-10-22T10:41:01Z",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "files": [
-     "packages/ai/src/auth-gateway/server.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-10-22T09:44:50Z",
   "unreleased": {
    "16614": {
@@ -46182,55 +46198,7 @@
     "merged_at": "2026-10-22T09:44:50Z"
    }
   },
-  "ready": [
-   15105,
-   15124,
-   15128,
-   15130,
-   15418,
-   15433,
-   15508,
-   16223,
-   16231,
-   16250,
-   16257,
-   16271,
-   16274,
-   16284,
-   16291,
-   16296,
-   16297,
-   16309,
-   16316,
-   16403,
-   16552,
-   16553,
-   16556,
-   16564,
-   16575,
-   16576,
-   16579,
-   16581,
-   16583,
-   16585,
-   16586,
-   16587,
-   16589,
-   16595,
-   16596,
-   16597,
-   16599,
-   16608,
-   16611,
-   16612,
-   16756,
-   16762,
-   16763,
-   16766,
-   16768,
-   16769,
-   16770
-  ],
+  "ready": [],
   "post_merge": {
    "13677": {
     "title": "fix(ai,catalog): encode Devin credentials by shape and drop the Windsurf fallbacks",
@@ -46291,7 +46259,7 @@
       "path": "packages/coding-agent/src/session/provider-image-budget.ts",
       "end": 199,
       "url": "https://github.com/can1357/oh-my-pi/pull/16288#pullrequestreview-5589040880",
-      "addressed_by": 16564
+      "addressed_by": null
      }
     ]
    },
@@ -46312,7 +46280,7 @@
       "path": "packages/coding-agent/src/eval/py/runner.py",
       "end": 1336,
       "url": "https://github.com/can1357/oh-my-pi/pull/16300#pullrequestreview-5589029446",
-      "addressed_by": 16552
+      "addressed_by": null
      }
     ]
    },
@@ -50242,6 +50210,42 @@
     "files": [
      "packages/ai/src/auth-gateway/server.ts"
     ]
+   },
+   {
+    "at": "2026-10-22T16:17:10Z",
+    "kind": "openable",
+    "id": "factory-droid-0244",
+    "title": "feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback)"
+   },
+   {
+    "at": "2026-10-22T16:17:10Z",
+    "kind": "openable",
+    "id": "max-cost-gate",
+    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend"
+   },
+   {
+    "at": "2026-10-22T16:17:10Z",
+    "kind": "openable",
+    "id": "computer-ui-quiet",
+    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
+   },
+   {
+    "at": "2026-10-22T16:17:10Z",
+    "kind": "openable",
+    "id": "r2/relay-bg-input-main",
+    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys"
+   },
+   {
+    "at": "2026-10-22T16:17:10Z",
+    "kind": "openable",
+    "id": "factory-droid-web-search",
+    "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)"
+   },
+   {
+    "at": "2026-10-22T16:17:10Z",
+    "kind": "openable",
+    "id": "timer-pr-1-poke",
+    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke"
    }
   ]
  },
