@@ -16,6 +16,7 @@ One example per kind
 - Wait for anything else: {"op":"set","id":"build-done","when":{"cmd":"test -f dist/app.js"},"prompt":"…","reason":"…"}
 - Recurring check-in on this conversation: {"op":"set","id":"babysit","every":"30m","prompt":"…","reason":"…"}
 - Recurring work that doesn't need this conversation: {"op":"set","id":"nightly-digest","every":"daily 02:00","session":"fresh","prompt":"…","reason":"…"}
+- Recurring work in one session the timer keeps (it remembers earlier runs), with limits: {"op":"set","id":"weekly-review","every":"fri 16:00","session":"own","maxTime":"20m","maxCost":0.5,"prompt":"…","reason":"…"}
 - Recurring command, no model: {"op":"set","id":"prune-cache","every":"6h","shell":"…","reason":"…"}
 
-Defaults: `session` is this conversation; if it is closed when the timer fires, it is resumed headless. Recurring timers you set expire after 7 days and condition timers after 24 hours unless `expires` says otherwise.
+Defaults: `session` is this conversation; if it is closed when the timer fires, it is resumed headless. Recurring timers you set expire after 7 days and condition timers after 24 hours unless `expires` says otherwise. A `fresh` or `own` run reports its final message back to this session unless that message ends with the line `[quiet]` (`report` changes this).

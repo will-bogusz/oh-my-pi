@@ -5,7 +5,7 @@
  */
 import { formatWallClock } from "./fire-message";
 import { ownSessionDir } from "./paths";
-import { describeRunResult, formatCost } from "./run-result";
+import { describeRunResult } from "./run-result";
 import { formatDuration } from "./schedule";
 import type { TimerRow } from "./service";
 import type { RunView, TickerStatus } from "./store";
@@ -66,7 +66,8 @@ export function describeRunSettings(spec: TimerSpec): string | undefined {
 		run.hermetic ? "hermetic" : undefined,
 		run.runCwd ? "cwd per-run" : undefined,
 		run.maxTimeMs !== undefined ? `max ${formatDuration(run.maxTimeMs)}` : undefined,
-		run.maxCost !== undefined ? `max ${formatCost(run.maxCost)}` : undefined,
+		// A limit reads as typed: cents, or the sub-cent amount itself.
+		run.maxCost !== undefined ? `max $${run.maxCost >= 0.01 ? run.maxCost.toFixed(2) : run.maxCost}` : undefined,
 		run.expect?.length ? `expect ${run.expect.join(", ")}` : undefined,
 		hooks || undefined,
 		`report ${spec.report}`,
