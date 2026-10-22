@@ -14,6 +14,8 @@
 - The agent gets a `timer` tool (top-level sessions; `timer.enabled` turns it off) to wake this session later or on a schedule, schedule a shell command, and list, edit, fire, pause, resume or remove timers; its calls draw the timer card in the transcript, recurring wakes it sets expire after 7 days unless it says otherwise, `allowTimers: true` on `set` (approved like a shell command) lets the timer's runs manage other timers, and the `bash` and `wait` descriptions (and a `wait` that hits its cap) point waits longer than a few minutes at it
 - The `timer` tool refuses a new timer that repeats an existing one's job (naming that timer) and `fire` of a timer that wakes the calling session (firing checks nothing), saying why and what to do instead; sending the same call again within 10 minutes goes through
 - The `timer` tool description lists the timers this session or project already set, so asking about "the price watcher" or "the market check" finds it
+- Scheduled agent runs: a prompt timer with `--session fresh` (a new session per run) or `own` (one session the timer keeps and resumes) runs unattended with an agent profile, `model`, `thinking`, `hermetic`, a per-run directory (`cwd: run`), `maxTime` and `maxCost` limits, `expect`ed output paths and `before`/`after` shell hooks; each run writes `result.json` (shown by `omp timer runs|logs`, `timer://<id>/runs/<seq>`, `/timers` and the `timer` tool) and reports its final message back to the session that set it, or to the notify sinks when that session is closed
+- An unattended timer run fails with `approval` when a tool call needed an approval nobody could give, instead of waiting for one
 
 ### Fixed
 

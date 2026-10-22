@@ -7,9 +7,11 @@
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
+import { CLI_THINKING_LEVELS, parseCliThinkingLevel } from "@oh-my-pi/pi-tui/thinking";
 import { isEnoent } from "@oh-my-pi/pi-utils";
 import { formatWallClock } from "../mailbox/message";
 import { readSessionInfo, resolveResumableSession } from "../session/session-listing";
+import { resolveRunProfile } from "./agent-profile";
 import { CONFIRM_WINDOW_MS, recordRefusal, refusalKey, takeConfirmation } from "./confirm";
 import { findDuplicateTimer } from "./duplicates";
 import { normalizeTimerId, runLogPath, TIMER_ID_PATTERN, TIMER_RUN_ENV, timersRoot } from "./paths";
@@ -31,6 +33,7 @@ import {
 import { assertTimerMutationAllowed, currentTimerRun } from "./scope";
 import {
 	DEFAULT_PAUSE_AFTER,
+	DEFAULT_TIMER_REPORT,
 	type IncidentRow,
 	listTimerSpecs,
 	mutateTimerSpec,
@@ -39,9 +42,17 @@ import {
 	readTimerSpec,
 } from "./store";
 import { currentState } from "./tick";
-import type { TimerCatchup, TimerOverlap, TimerSpec, TimerState, TimerTarget } from "./types";
+import type {
+	AgentRunSettings,
+	TimerCatchup,
+	TimerOverlap,
+	TimerReport,
+	TimerSpec,
+	TimerState,
+	TimerTarget,
+} from "./types";
 
-/** Agent-set recurring session wakes retire after this unless `expires` says otherwise. */
+/** Agent-set recurring prompt timers (session wakes and agent runs) retire after this unless `expires` says otherwise. */
 const TOOL_RECURRING_EXPIRY_MS = 7 * DAY;
 
 export interface TimerSetInput {
@@ -53,13 +64,31 @@ export interface TimerSetInput {
 	tz?: string;
 	prompt?: string;
 	shell?: string;
-	/** Prompt timers: the session to wake, by id, id prefix or session file. */
+	/**
+	 * Prompt timers: the session to wake, by id, id prefix or session file; `fresh` (a new session per
+	 * run) or `own` (one session the timer keeps) for an unattended agent run.
+	 */
 	session?: string;
 	whenClosed?: "resume" | "hold";
+	/** Directory, or `run` for a fresh per-run directory (agent runs). */
 	cwd?: string;
 	/** Duration (`7d`), date/time, or `never`. */
 	expires?: string;
 	maxRuns?: number;
+	/** Model of a fresh/own run. */
+	model?: string;
+	/** Agent profile for fresh/own runs. */
+	agent?: string;
+	thinking?: string;
+	hermetic?: boolean;
+	/** Duration (`20m`): abort the run and fail it with `timeout` past this. */
+	maxTime?: string;
+	/** USD: abort the run and fail it with `budget` once its model calls cost more. */
+	maxCost?: number;
+	expect?: string[];
+	before?: string;
+	after?: string;
+	report?: TimerReport;
 	overlap?: TimerOverlap;
 	/** Duration: how late a slot may still run before it is recorded missed. */
 	grace?: string;
@@ -115,11 +144,17 @@ export const CALLER_SESSION_NAMES: Record<string, true> = { origin: true, this: 
 /** The session a prompt timer wakes: an id, id prefix or session file; by default the calling session. */
 async function resolveTarget(session: string | undefined, ctx: TimerSetContext): Promise<TimerTarget> {
 	const requested = session?.trim() || ctx.sessionId;
-	if (!requested) throw new Error("a prompt timer wakes a session: pass --session (an id, prefix or session file)");
+	if (!requested) {
+		throw new Error(
+			"a prompt timer needs a session: pass --session (an id, prefix or session file, or fresh/own for an agent run)",
+		);
+	}
+	if (requested === "fresh") return { kind: "fresh" };
+	if (requested === "own") return { kind: "own" };
 	if (requested === ctx.sessionId || Object.hasOwn(CALLER_SESSION_NAMES, requested)) {
 		if (!ctx.sessionId) {
 			throw new Error(
-				`session "${requested}" names the calling session, and there is none here; pass a session id, prefix or session file`,
+				`session "${requested}" names the calling session, and there is none here; pass a session id, prefix or session file, fresh or own`,
 			);
 		}
 		return { kind: "session", sessionId: ctx.sessionId, sessionFile: ctx.sessionFile };
@@ -157,9 +192,6 @@ async function assertDirectory(cwd: string): Promise<void> {
 function validateSpec(spec: TimerSpec, now: number): void {
 	if (!spec.reason.trim()) throw new Error("reason is required: why this timer exists, in the user's terms");
 	if (spec.action.kind === "prompt" && !spec.action.prompt.trim()) throw new Error("prompt is empty");
-	if (spec.action.kind === "prompt" && spec.target.kind !== "session") {
-		throw new Error("a prompt timer wakes a session; this timer has none, so set it again with a session");
-	}
 	if (spec.action.kind === "shell" && !spec.action.command.trim()) throw new Error("shell command is empty");
 	if (!spec.at && !spec.every) throw new Error("set at or every");
 	assertTimeZone(spec.tz);
@@ -183,6 +215,69 @@ function validateSpec(spec: TimerSpec, now: number): void {
 	}
 	if (!Number.isInteger(spec.pauseAfter) || spec.pauseAfter < 1)
 		throw new Error("pauseAfter must be a positive integer");
+	validateRunSettings(spec);
+}
+
+/** Keys of {@link AgentRunSettings} as the spec, tool and CLI name them. */
+const RUN_KEY_NAMES: Record<keyof AgentRunSettings, string> = {
+	agent: "agent",
+	thinking: "thinking",
+	hermetic: "hermetic",
+	runCwd: "cwd: run",
+	maxTimeMs: "maxTime",
+	maxCost: "maxCost",
+	expect: "expect",
+	before: "before",
+	after: "after",
+};
+
+function validateRunSettings(spec: TimerSpec): void {
+	const { run } = spec;
+	const agentRun = spec.action.kind === "prompt" && spec.target.kind !== "session";
+	if (!agentRun) {
+		const given = Object.entries(RUN_KEY_NAMES)
+			.filter(([key]) => run[key as keyof AgentRunSettings] !== undefined)
+			.map(([, name]) => name);
+		if (spec.model) given.push("model");
+		if (spec.report !== DEFAULT_TIMER_REPORT) given.push("report");
+		if (given.length) {
+			throw new Error(
+				`${given.join(", ")}: only prompt timers whose session is fresh or own run an agent of their own`,
+			);
+		}
+		return;
+	}
+	if (run.thinking !== undefined && parseCliThinkingLevel(run.thinking) === undefined) {
+		throw new Error(`thinking "${run.thinking}" is not one of ${CLI_THINKING_LEVELS.join(", ")}`);
+	}
+	if (run.maxTimeMs !== undefined && !(run.maxTimeMs >= MINUTE)) throw new Error("maxTime must be at least 1m");
+	if (run.maxCost !== undefined && !(run.maxCost > 0)) throw new Error("maxCost must be a positive USD amount");
+	for (const entry of run.expect ?? []) {
+		if (!entry.trim()) throw new Error("expect paths must not be empty");
+	}
+}
+
+/** Run settings from set/edit input; `null` clears a key, `undefined` keeps `base`'s. */
+function applyRunInput(base: AgentRunSettings, input: TimerRunInput): AgentRunSettings {
+	const run = { ...base };
+	const text = (value: string | null | undefined): string | undefined => value?.trim() || undefined;
+	if (input.agent !== undefined) run.agent = text(input.agent);
+	if (input.thinking !== undefined) run.thinking = text(input.thinking);
+	if (input.hermetic !== undefined) run.hermetic = input.hermetic || undefined;
+	if (input.maxTime !== undefined) run.maxTimeMs = input.maxTime === null ? undefined : parseDuration(input.maxTime);
+	if (input.maxCost !== undefined) run.maxCost = input.maxCost ?? undefined;
+	if (input.expect !== undefined) {
+		const expect = input.expect?.map(entry => entry.trim()).filter(Boolean);
+		run.expect = expect?.length ? expect : undefined;
+	}
+	if (input.before !== undefined) run.before = text(input.before);
+	if (input.after !== undefined) run.after = text(input.after);
+	return run;
+}
+
+/** A named agent profile must exist where the run will look it up. */
+async function assertAgentProfile(spec: TimerSpec): Promise<void> {
+	if (spec.run.agent) await resolveRunProfile(spec.run.agent, spec.cwd);
 }
 
 /** Local hours after midnight in which "tomorrow" in a person's head is still today's date. */
@@ -233,7 +328,8 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 	if (!prompt === !shell) throw new Error("set exactly one of prompt or shell");
 	const tz = input.tz?.trim() || hostTimeZone();
 	assertTimeZone(tz);
-	const cwd = path.resolve(ctx.cwd, input.cwd ?? ".");
+	const runCwd = input.cwd?.trim() === "run";
+	const cwd = path.resolve(ctx.cwd, runCwd ? "." : (input.cwd ?? "."));
 	await assertDirectory(cwd);
 
 	let id = normalizeTimerId(input.id);
@@ -261,7 +357,7 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		cwd,
 		expiresAt: input.expires?.trim()
 			? resolveExpiry(input.expires, now, tz)
-			: ctx.by === "tool" && every !== undefined && target.kind === "session"
+			: ctx.by === "tool" && every !== undefined && prompt
 				? new Date(now + TOOL_RECURRING_EXPIRY_MS).toISOString()
 				: undefined,
 		maxRuns: input.maxRuns,
@@ -270,6 +366,9 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		catchup: input.catchup ?? "run",
 		pauseAfter: input.pauseAfter ?? DEFAULT_PAUSE_AFTER,
 		allowTimers: input.allowTimers ?? false,
+		model: input.model?.trim() || undefined,
+		run: { ...applyRunInput({}, input), runCwd: runCwd || undefined },
+		report: input.report ?? DEFAULT_TIMER_REPORT,
 		paused: false,
 		armedAt: nowIso,
 		created: {
@@ -284,6 +383,7 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		},
 	};
 	validateSpec(spec, now);
+	await assertAgentProfile(spec);
 	// Tool callers are refused a near-duplicate unless they repeat the call.
 	if (ctx.by === "tool") {
 		const key = refusalKey("set", ctx.sessionId, input);
@@ -304,8 +404,22 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 	return { spec: written, replaced: previous !== undefined, warnings: slip ? [slip] : [] };
 }
 
+/** Agent-run keys shared by set and edit; on edit `null` clears one. */
+export interface TimerRunInput {
+	agent?: string | null;
+	thinking?: string | null;
+	hermetic?: boolean;
+	/** Duration (`20m`). */
+	maxTime?: string | null;
+	/** USD. */
+	maxCost?: number | null;
+	expect?: string[] | null;
+	before?: string | null;
+	after?: string | null;
+}
+
 /** Fields `edit` may change; absent fields keep their value. `null` clears an optional field. */
-export interface TimerEditInput {
+export interface TimerEditInput extends TimerRunInput {
 	title?: string | null;
 	reason?: string;
 	at?: string | null;
@@ -314,9 +428,12 @@ export interface TimerEditInput {
 	prompt?: string;
 	shell?: string;
 	whenClosed?: "resume" | "hold";
+	/** Directory, or `run` for a fresh per-run directory (agent runs). */
 	cwd?: string;
 	expires?: string | null;
 	maxRuns?: number | null;
+	model?: string | null;
+	report?: TimerReport;
 	overlap?: TimerOverlap;
 	grace?: string | null;
 	catchup?: TimerCatchup;
@@ -357,6 +474,11 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 			if (patch.reason !== undefined) next.reason = patch.reason.trim();
 			if (patch.prompt !== undefined && patch.shell !== undefined)
 				throw new Error("set at most one of prompt or shell");
+			// A shell timer has no session; as a prompt it would quietly become a paid agent run in a fresh one.
+			if (patch.prompt !== undefined && current.action.kind === "shell")
+				throw new Error(
+					`timer ${id} runs a shell command; to run a prompt instead, set it again with a session (an id, fresh or own)`,
+				);
 			if (patch.prompt !== undefined) next.action = { kind: "prompt", prompt: patch.prompt.trim() };
 			if (patch.shell !== undefined) {
 				next.action = { kind: "shell", command: patch.shell.trim() };
@@ -364,10 +486,15 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 			}
 			if (patch.whenClosed !== undefined) next.whenClosed = patch.whenClosed;
 			if (patch.cwd !== undefined) {
-				next.cwd = path.resolve(ctx.cwd, patch.cwd);
+				const runCwd = patch.cwd.trim() === "run";
+				next.run.runCwd = runCwd || undefined;
+				next.cwd = runCwd ? current.created.cwd || current.cwd : path.resolve(ctx.cwd, patch.cwd);
 				await assertDirectory(next.cwd);
 			}
+			next.run = applyRunInput(next.run, patch);
+			if (patch.report !== undefined) next.report = patch.report;
 			if (patch.maxRuns !== undefined) next.maxRuns = patch.maxRuns ?? undefined;
+			if (patch.model !== undefined) next.model = patch.model?.trim() || undefined;
 			if (patch.overlap !== undefined) next.overlap = patch.overlap;
 			if (patch.grace !== undefined) next.graceMs = patch.grace ? parseDuration(patch.grace) : undefined;
 			if (patch.catchup !== undefined) next.catchup = patch.catchup;
@@ -390,6 +517,7 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 			}
 			if (rearmed) next.armedAt = new Date(now).toISOString();
 			validateSpec(next, now);
+			if (patch.agent || patch.cwd !== undefined) await assertAgentProfile(next);
 			return next;
 		},
 		{ expectedRev: patch.expectedRev, root },

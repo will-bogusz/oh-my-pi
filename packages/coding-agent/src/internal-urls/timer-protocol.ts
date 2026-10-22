@@ -2,7 +2,7 @@
  * `timer://`: this machine's timer registry as readable resources, plus the
  * control verbs as handler writes. Reads list (`timer://`), show a card with
  * the full prompt (`timer://<id>`), list runs (`/runs`) and open one run with
- * its log (`/runs/<seq|latest>`).
+ * its log and, for an agent run, its `result.json` (`/runs/<seq|latest>`).
  * Writes fire (`/fire`, content = untrusted run data), edit (`/edit`, content =
  * JSON of the fields to change), pause, resume and remove. Everything renders
  * from the store.
@@ -19,12 +19,15 @@ import {
 	renderTimerCard,
 	renderTimerTable,
 	requireTimer,
+	runDirPath,
 	runLogPath,
+	runResultPath,
 	setPaused,
 	TIMER_ID_PATTERN,
 	type RunView,
 	timerRuns,
 } from "../timers";
+import { lastRunResult, readRunResult, runResults } from "../timers/run-result";
 import { cfgTimerEnabled } from "../tools/settings";
 import { type TimerEditFields, timerArgsTier, timerEditPatch, timerIdTier } from "../tools/timer-view";
 import type {
@@ -173,26 +176,31 @@ export class TimerProtocolHandler implements ProtocolHandler {
 			case "show": {
 				const spec = await requireTimer(target.id);
 				const row = await loadTimerRow(spec, now);
-				const card = renderTimerCard(row, now, { verb: "", selfSessionId, ticker: await readTickerStatus() });
+				const [ticker, lastResult] = await Promise.all([readTickerStatus(), lastRunResult(row)]);
+				const card = renderTimerCard(row, now, { verb: "", selfSessionId, ticker, lastResult });
 				const action =
 					spec.action.kind === "shell" ? `shell:\n${spec.action.command}` : `prompt:\n${spec.action.prompt}`;
 				return textResource(url, `${card}\n\n${action}`);
 			}
 			case "runs": {
 				const runs = await runsOf(target.id);
-				return textResource(url, renderRuns(runs), { isDirectory: true });
+				return textResource(url, renderRuns(runs, await runResults(target.id, runs)), { isDirectory: true });
 			}
 			case "run": {
 				const run = await findRun(target.id, target.seq);
 				const logPath = runLogPath(target.id, run.seq);
 				const log = Bun.file(logPath);
-				const hasLog = await log.exists();
-				const parts = [renderRuns([run]), `log: ${logPath}`];
+				const [hasLog, result] = await Promise.all([log.exists(), readRunResult(target.id, run.seq)]);
+				const parts = [renderRuns([run], result ? new Map([[run.seq, result]]) : undefined)];
+				const paths = [`log: ${logPath}`];
+				if (result) paths.unshift(`run dir: ${runDirPath(target.id, run.seq)}`);
+				parts.push(paths.join("\n"));
 				if (hasLog) parts.push((await log.text()).trimEnd());
 				else
 					parts.push(
 						`no log file for this run${run.delivery ? " (it was delivered into its session's transcript)" : ""}`,
 					);
+				if (result) parts.push(`${runResultPath(target.id, run.seq)}:\n${JSON.stringify(result, null, 2)}`);
 				return textResource(url, parts.join("\n\n"), hasLog ? { sourcePath: logPath } : undefined);
 			}
 			case "write":

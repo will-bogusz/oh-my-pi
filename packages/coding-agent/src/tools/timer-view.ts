@@ -13,6 +13,7 @@ import {
 	describeCadence,
 	describeNext,
 	describeRun,
+	describeRunSettings,
 	describeTicker,
 	normalizeTimerId,
 	parseTimerSpec,
@@ -21,12 +22,15 @@ import {
 	runLogPath,
 	specPath,
 	TIMER_ID_PATTERN,
+	type AgentRunResult,
 	type TickerStatus,
 	type TimerEditInput,
+	type TimerReport,
 	type TimerRow,
 	type TimerSpec,
 	timerRuns,
 } from "../timers";
+import { readRunResult, renderRunResultBlock } from "../timers/run-result";
 
 export interface TimerCardOptions {
 	/** What just happened (`armed`, `paused`, …); empty for a plain show. */
@@ -37,6 +41,8 @@ export interface TimerCardOptions {
 	now: number;
 	/** Problems `set`/`edit` found that did not block it. */
 	warnings?: string[];
+	/** `result.json` of the last run (see `lastRunResult`). */
+	lastResult?: AgentRunResult;
 }
 
 /** The card's fields for one stored timer. */
@@ -50,7 +56,7 @@ export function timerCardView(row: TimerRow, options: TimerCardOptions): TimerCa
 		cadence: describeCadence(spec),
 		does: "",
 		why: spec.reason,
-		last: describeRun(row.lastRun),
+		last: describeRun(row.lastRun, options.lastResult),
 		ticker: "",
 		warnings: [],
 	};
@@ -63,11 +69,18 @@ export function timerCardView(row: TimerRow, options: TimerCardOptions): TimerCa
 		card.body = spec.action.prompt;
 		card.ifBusy = "after the current turn";
 		card.ifClosed = spec.whenClosed === "hold" ? "hold until opened" : "resume headless";
+	} else {
+		const where = spec.run.runCwd ? "a per-run dir" : spec.cwd;
+		card.does = `${spec.target.kind} session in ${where} → "${spec.action.prompt.trim()}"`;
+		card.body = spec.action.prompt;
 	}
+	const run = describeRunSettings(spec);
 	const limits = [
 		spec.expiresAt ? `expires ${formatWallClock(Date.parse(spec.expiresAt), spec.tz)}` : undefined,
 		spec.maxRuns !== undefined ? `max ${spec.maxRuns} runs` : undefined,
 		row.state.runCount ? `${row.state.runCount} run(s) so far` : undefined,
+		// The card view has no run row: agent-run settings ride on the limits line.
+		run ? `run: ${run}` : undefined,
 	].filter(Boolean);
 	if (limits.length > 0) card.limits = limits.join(" · ");
 	// A stale or missing ticker is a warning, not a fact: the card keeps the short state.
@@ -98,7 +111,8 @@ export function timerListRowView(row: TimerRow, now: number): TimerListRowView {
 
 /**
  * Tier for acting on a stored timer from `sessionId`: waking that same
- * session is `write`; a shell command or another session is `exec`.
+ * session is `write`; a shell command, an agent run (fresh/own), or another
+ * session is `exec`.
  */
 export function timerSpecTier(spec: TimerSpec, sessionId: string | undefined): ToolTier {
 	if (spec.action.kind === "shell") return "exec";
@@ -129,6 +143,9 @@ export interface TimerTierArgs {
 	op?: string;
 	id?: string;
 	shell?: string;
+	/** Agent-run hooks: shell commands, tiered like `shell`. */
+	before?: string;
+	after?: string;
 	session?: string;
 	allowTimers?: boolean;
 }
@@ -136,10 +153,11 @@ export interface TimerTierArgs {
 /**
  * Approval tier for a timer request (a `timer` tool call, a `timer://<id>/edit`
  * write) from `sessionId`: inspecting is `read`; arming, editing or
- * controlling a wake of the calling session is `write`; a shell command,
- * another session or `allowTimers` is `exec`. `set` and `edit` on an existing
- * id also take that timer's tier, so re-arming someone else's timer is never
- * cheaper than controlling it.
+ * controlling a wake of the calling session is `write`; a shell command
+ * (including a `before`/`after` hook), an agent run (`fresh`/`own`), another
+ * session or `allowTimers` is `exec`. `set` and `edit` on an existing id also
+ * take that timer's tier, so re-arming someone else's timer is never cheaper
+ * than controlling it.
  */
 export function timerArgsTier(args: TimerTierArgs, sessionId: string | undefined): ToolTier {
 	if (args.op === "list" || args.op === "show" || args.op === "runs") return "read";
@@ -148,10 +166,13 @@ export function timerArgsTier(args: TimerTierArgs, sessionId: string | undefined
 	const session = args.session?.trim();
 	const foreign =
 		session !== undefined && session !== "" && session !== sessionId && !Object.hasOwn(CALLER_SESSION_NAMES, session);
-	return args.shell || args.allowTimers || foreign ? "exec" : "write";
+	return args.shell || args.before || args.after || args.allowTimers || foreign ? "exec" : "write";
 }
 
-/** JSON-shaped fields of an edit (`timer://<id>/edit` content). */
+/**
+ * JSON-shaped fields of an edit (tool params, `timer://<id>/edit` content).
+ * Agent-run keys clear with `"none"` (strings), `[]` (expect) or `0` (maxCost).
+ */
 export interface TimerEditFields {
 	reason?: string;
 	at?: string;
@@ -164,6 +185,16 @@ export interface TimerEditFields {
 	cwd?: string;
 	expires?: string;
 	maxRuns?: number;
+	model?: string;
+	agent?: string;
+	thinking?: string;
+	hermetic?: boolean;
+	maxTime?: string;
+	maxCost?: number;
+	expect?: string[];
+	before?: string;
+	after?: string;
+	report?: TimerReport;
 }
 
 const EDIT_FIELDS: Record<keyof TimerEditFields, true> = {
@@ -178,12 +209,26 @@ const EDIT_FIELDS: Record<keyof TimerEditFields, true> = {
 	cwd: true,
 	expires: true,
 	maxRuns: true,
+	model: true,
+	agent: true,
+	thinking: true,
+	hermetic: true,
+	maxTime: true,
+	maxCost: true,
+	expect: true,
+	before: true,
+	after: true,
+	report: true,
 };
+
+/** `"none"` clears an agent-run string key on edit. */
+const clearNone = (value: string | undefined): string | null | undefined => (value === "none" ? null : value);
 
 /**
  * Map JSON edit fields onto {@link TimerEditInput}: only given fields
  * change, a new at/every replaces the whole schedule (the unset kind is
- * cleared), and `expires: "never"` clears the expiry.
+ * cleared), `expires: "never"` clears the expiry, and agent-run keys clear
+ * with `"none"`, `expect: []` or `maxCost: 0`.
  */
 export function timerEditPatch(fields: TimerEditFields): TimerEditInput {
 	const unknown = Object.keys(fields).filter(key => !Object.hasOwn(EDIT_FIELDS, key));
@@ -203,13 +248,24 @@ export function timerEditPatch(fields: TimerEditFields): TimerEditInput {
 		cwd: fields.cwd,
 		expires: fields.expires === "never" ? null : fields.expires,
 		maxRuns: fields.maxRuns,
+		model: clearNone(fields.model),
+		agent: clearNone(fields.agent),
+		thinking: clearNone(fields.thinking),
+		hermetic: fields.hermetic,
+		maxTime: clearNone(fields.maxTime),
+		maxCost: fields.maxCost === 0 ? null : fields.maxCost,
+		expect: fields.expect && fields.expect.length === 0 ? null : fields.expect,
+		before: clearNone(fields.before),
+		after: clearNone(fields.after),
+		report: fields.report,
 	};
 	if (Object.values(patch).every(value => value === undefined)) throw new Error("edit: nothing to change");
 	return patch;
 }
 
 /**
- * Run `seq`'s log, or the newest run's that wrote one, under its run line.
+ * Run `seq`'s log, or the newest run's that wrote one, under its run line,
+ * followed by the run's `result.json` block for an agent run.
  * Session-target runs deliver into a transcript and write no log.
  */
 export async function readTimerRunLog(id: string, seq?: number): Promise<string> {
@@ -218,8 +274,12 @@ export async function readTimerRunLog(id: string, seq?: number): Promise<string>
 	const candidates = seq === undefined ? runs.toReversed() : runs.filter(run => run.seq === seq);
 	for (const run of candidates) {
 		const log = Bun.file(runLogPath(id, run.seq));
-		if (!(await log.exists())) continue;
-		return `${renderRuns([run])}\n\n${(await log.text()).trimEnd()}`;
+		const [hasLog, result] = await Promise.all([log.exists(), readRunResult(id, run.seq)]);
+		if (!hasLog && !result) continue;
+		const parts = [renderRuns([run], result ? new Map([[run.seq, result]]) : undefined)];
+		if (hasLog) parts.push((await log.text()).trimEnd());
+		if (result) parts.push(renderRunResultBlock(id, run.seq, result));
+		return parts.join("\n\n");
 	}
 	if (seq !== undefined) return `timer ${id} run ${seq}: no log file`;
 	return runs.length === 0

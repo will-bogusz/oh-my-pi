@@ -6,8 +6,8 @@
  * headless while it is open here. A process opened with `deliver` also
  * injects the mail:
  *
- * - idle: the message starts a turn, also after Esc for a timer fire (it is
- *   standing user intent);
+ * - idle: the message starts a turn, also after Esc for a timer fire or an
+ *   agent run's report (standing user intent);
  * - streaming: it joins the running turn at its next step boundary, without
  *   interrupting the tool batch in flight;
  * - a poke that arrives while an Esc still holds the session stays in `new/`
@@ -44,6 +44,7 @@ import {
 	renderMail,
 	SESSION_POKE_MESSAGE_TYPE,
 	TIMER_FIRE_MESSAGE_TYPE,
+	TIMER_REPORT_MESSAGE_TYPE,
 } from "./message";
 import { consumerLockPath, MAILBOX_ENV, MAILBOX_HEADLESS_ENV, mailDir } from "./paths";
 import { claimSessionPresence, type SessionPresence } from "./presence";
@@ -90,7 +91,7 @@ function fileSize(file: string | undefined): number {
 /** The transcript entry a delivered message leaves behind. */
 const DeliveryEntrySchema = type({
 	type: "'custom_message'",
-	customType: `'${SESSION_POKE_MESSAGE_TYPE}' | '${TIMER_FIRE_MESSAGE_TYPE}'`,
+	customType: `'${SESSION_POKE_MESSAGE_TYPE}' | '${TIMER_FIRE_MESSAGE_TYPE}' | '${TIMER_REPORT_MESSAGE_TYPE}'`,
 	details: { mailId: "string" },
 });
 
@@ -136,14 +137,27 @@ async function scanDeliveries(
 	}
 }
 
+const CUSTOM_TYPE_BY_KIND: Record<SessionMail["kind"], string> = {
+	poke: SESSION_POKE_MESSAGE_TYPE,
+	"timer-fire": TIMER_FIRE_MESSAGE_TYPE,
+	"timer-report": TIMER_REPORT_MESSAGE_TYPE,
+};
+
+/** The timer run a fire or report belongs to. */
+function mailRun(mail: SessionMail): { timerId: string; runId: string } | undefined {
+	if (mail.kind === "timer-fire") return mail.fire;
+	if (mail.kind === "timer-report") return mail.report;
+	return undefined;
+}
+
 function messageFor(mail: SessionMail, via: MailDeliveryVia): CustomMessage<MailMessageDetails> {
-	const fire = mail.kind === "timer-fire" ? mail.fire : undefined;
+	const run = mailRun(mail);
 	return {
 		role: "custom",
-		customType: fire ? TIMER_FIRE_MESSAGE_TYPE : SESSION_POKE_MESSAGE_TYPE,
+		customType: CUSTOM_TYPE_BY_KIND[mail.kind],
 		content: renderMail(mail, via, Date.now()),
 		display: true,
-		details: { mailId: mail.id, kind: mail.kind, timerId: fire?.timerId, runId: fire?.runId, via },
+		details: { mailId: mail.id, kind: mail.kind, timerId: run?.timerId, runId: run?.runId, via },
 		attribution: "agent",
 		timestamp: Date.now(),
 	};
@@ -346,18 +360,24 @@ export class SessionMailbox {
 	}
 
 	/**
-	 * A timer fire reached the session file: record how it was delivered. Bookkeeping only (the tick
-	 * settles a fire by its `done/` entry), so a failed write never holds the mailbox up.
+	 * A timer fire or an agent run's report reached the session file: record how it was delivered.
+	 * Bookkeeping only (the tick settles a fire by its `done/` entry), so a failed write never holds
+	 * the mailbox up.
 	 */
 	#recordFireDelivered(sessionId: string, mail: SessionMail, attempt: number): void {
-		if (mail.kind !== "timer-fire") return;
+		const run = mailRun(mail);
+		if (!run) return;
+		const notes = [
+			mail.kind === "timer-report" ? "report" : undefined,
+			attempt > 1 ? `re-delivery attempt ${attempt}` : undefined,
+		].filter(Boolean);
 		try {
-			recordDelivery(mail.fire.timerId, {
-				runId: mail.fire.runId,
+			recordDelivery(run.timerId, {
+				runId: run.runId,
 				at: new Date().toISOString(),
 				state: this.#via === "headless" ? "resumed-headless" : "delivered-live",
 				session: sessionId,
-				detail: attempt > 1 ? `re-delivery attempt ${attempt}` : undefined,
+				detail: notes.length ? notes.join("; ") : undefined,
 			});
 		} catch (error) {
 			logger.warn("timer delivery not recorded", { mailId: mail.id, error: String(error) });

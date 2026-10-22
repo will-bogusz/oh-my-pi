@@ -1,11 +1,12 @@
 # Timers
 
-A timer is standing work that fires later — at a time or on a schedule — and then runs a shell command or wakes an existing session with a prompt. Timers live in a per-host store outside any session, so they outlive the process that set them, and a once-a-minute OS unit (the ticker) fires them whether or not omp is open.
+A timer is standing work that fires later — at a time or on a schedule — and then runs a shell command, wakes an existing session with a prompt, or runs a prompt as an unattended agent in a session of its own. Timers live in a per-host store outside any session, so they outlive the process that set them, and a once-a-minute OS unit (the ticker) fires them whether or not omp is open.
 
 ```sh
 omp timer install                       # once per host: the ticker unit
 omp timer set nightly --every 'daily 03:00' --shell 'make backup' --reason 'nightly backup'
 omp timer set standup --at 'tomorrow 09:00' --session <id> --prompt 'Summarize yesterday' --reason 'standup notes'
+omp timer set triage --every 'weekdays 09:00' --session own --max-cost 0.5 --prompt 'Triage new issues' --reason 'issue triage'
 omp timer ls
 ```
 
@@ -18,11 +19,11 @@ Source: `packages/coding-agent/src/timers/` (store, schedule, tick, runner, deli
 | Verb | Does |
 | --- | --- |
 | `set [id]` | Create a timer, or re-arm an existing id (history kept). The id defaults to one derived from `--reason`. |
-| `edit <id>` | Change only the given fields. A new `--at`/`--every`/`--when`/`--tz` starts a new schedule generation; `none` clears `at`, `every`, `expires` or `grace`. |
+| `edit <id>` | Change only the given fields. A new `--at`/`--every`/`--when`/`--tz` starts a new schedule generation; `none` clears `at`, `every`, `expires` or `grace`. A shell timer cannot become a prompt timer here (it has no session): `set` it again with `--session`. |
 | `ls` (default) | Table of every timer with its status, next fire and last run, plus the ticker's heartbeat. |
 | `show <id>` | The timer's card: next fire (with `today`/`tomorrow` when it is that close), cadence, action, limits, last run, open incidents, ticker. |
 | `runs <id> [--limit N]` | Run history: trigger, outcome, slot, coalesced missed slots, delivery, end. |
-| `logs <id> [seq]` | The runner log of a shell run or headless resume (default: the newest). |
+| `logs <id> [seq]` | The runner log of a shell run or headless resume, and an agent run's `result.json` (default: the newest). |
 | `fire <id> [--data text]` | Run it now, outside its schedule. `--data` reaches a prompt timer's session as untrusted data. |
 | `pause <id>`, `resume <id>` | Pause; resume also clears an auto-pause and restarts the failure count. |
 | `rm <id>` | Remove the spec (kept under `history/`); its run history stays. |
@@ -38,12 +39,13 @@ Source: `packages/coding-agent/src/timers/` (store, schedule, tick, runner, deli
 | `--every` | Recurring: a duration (`30m`, `2h`, `1d`), `hourly`, `daily 09:00`, `weekdays 09:00`, `weekends 10:00`, `mon,thu 18:30`, or a 5-field cron (`cron 0 9 * * 1`). With `--at`, the first slot is at or after it. |
 | `--when` | Tern-style schedule mapped onto `--at` or `--every`: `in 20m`, `at 15:00`, `every 30m`, `daily 09:00`. A bare duration (`20m`) means `in 20m`. |
 | `--shell` / `--prompt` | Exactly one: a command run with `/bin/sh -c`, or an instruction delivered to `--session`. |
-| `--session` | Prompt timers: the session to wake, by id, id prefix or session file. A prompt timer without one is refused. |
+| `--session` | Prompt timers: the session to wake, by id, id prefix or session file; or `fresh` (a new session per run) or `own` (one session the timer keeps) for an [agent run](#agent-runs). A prompt timer without one is refused. |
 | `--when-closed` | The session is not open anywhere when it fires: `resume` it headless (default) or `hold` the message until it is next opened. |
 | `--tz` | IANA zone for clock times (default: this host's). Captured at set time, so a travelling laptop does not move the schedule. |
-| `--cwd` | Working directory of a shell run or headless resume (default: the current directory). |
+| `--cwd` | Working directory of a shell run, headless resume or agent run (default: the current directory); `run` gives an agent run a fresh directory. |
 | `--expires` | `7d`, a date, or `never`: the timer retires after it. |
 | `--max-runs` | Retire after this many runs. |
+| `--model`, `--agent`, `--thinking`, `--hermetic`/`--no-hermetic`, `--max-time`, `--max-cost`, `--expect` (repeatable), `--before`, `--after`, `--report` | Agent-run settings (`fresh`/`own` only); see [Agent runs](#agent-runs). On `edit`, `none` clears one. |
 | `--overlap` | A fire while the previous run is still in flight: `skip` it (default) or `queue` exactly one. |
 | `--grace` | How late a slot may still run; later slots are recorded `missed`. |
 | `--catchup` | `run` (default) or `skip`; see [Catch-up](#catch-up-and-grace). |
@@ -104,9 +106,33 @@ A run that fails (shell exit ≠ 0, headless resume failed, runner lost) counts 
 Alerts go to:
 
 - [`timer.notify`](./settings.md): `desktop` (default; a macOS notification, or `notify-send` on Linux when a graphical session exists) or `none`;
-- [`timer.alertCommand`](./settings.md): a shell command run once per alert with `OMP_TIMER_ID`, `OMP_TIMER_EVENT` (`failed`, `paused`, `missed`, `held`, `reminder`), `OMP_TIMER_SUMMARY`, `OMP_TIMER_COUNT` and, when known, `OMP_TIMER_RUN`, `OMP_TIMER_ERROR`, `OMP_TIMER_SIGNATURE`, `OMP_TIMER_LOG` in env, and the alert JSON on stdin.
+- [`timer.alertCommand`](./settings.md): a shell command run once per alert with `OMP_TIMER_ID`, `OMP_TIMER_EVENT` (`failed`, `paused`, `missed`, `held`, `reminder`, `report`), `OMP_TIMER_SUMMARY`, `OMP_TIMER_COUNT` and, when known, `OMP_TIMER_RUN`, `OMP_TIMER_ERROR`, `OMP_TIMER_SIGNATURE`, `OMP_TIMER_LOG` in env, and the alert JSON on stdin.
 
 Both are read from global settings, since the ticker runs outside any project. `omp poke` raises a `held` alert the same way when its message is held.
+
+## Agent runs
+
+A prompt timer whose session is `fresh` or `own` runs unattended: the runner (`omp timer exec`, started by the tick) starts the run's session as its own `omp --mode rpc --no-ui` host, sends the fire envelope, and watches the run. `fresh` starts a new session per run (stored in the run dir); `own` keeps one session in `<timers>/state/<id>/session/` and resumes its newest transcript on every run, so what one run leaves there the next run sees. While that session is open in another omp process the run does not start and fails with `busy` (the host checks again before it writes anything, as a headless resume does), so a run never forks the session away from someone using it.
+
+Settings (spec keys in snake_case: `max_time`, `max_cost`):
+
+- `model`: the run's model; otherwise the profile's, otherwise the default.
+- `agent`: an agent profile, found the way task subagents find one (project and user `agents/`, plugins, bundled), from the timer's `cwd`. It is applied through the host's flags: the profile's first model pattern (`--model`), thinking level, body as an appended system prompt, and tool allowlist (`yield` dropped, `exec` → `bash` + `eval`, `task` added for profiles that spawn, `wait` beside `task`/`bash`). `model` and `thinking` on the timer win over the profile's.
+- `hermetic`: `--no-rules --no-skills --no-extensions --no-title`. Context files (`AGENTS.md`, `CLAUDE.md`, …) still load from the cwd and its ancestors; combine with `cwd: run` to keep a project's context files out.
+- `cwd: run`: a fresh run in `<run dir>/work`, an own session in `<timers>/state/<id>/work` (kept across runs).
+- `maxTime` (default 30m): covers the `before` hook, the host's startup and the agent (a host not ready by then is never sent the run); past it the run is aborted (a hook's process group gets SIGTERM, then SIGKILL after 5 s) and fails with `timeout`.
+- `maxCost` (USD): the runner sums the cost of the run's model calls as they end; once the total exceeds the limit the run is aborted and fails with `budget`. The call that crosses the limit is the overshoot. Subagents the run spawns are not counted.
+- `expect`: paths (relative to the run's cwd) that must exist when the run ends, else it fails with `expect`.
+- `before` / `after`: shell commands in the run's cwd with `OMP_TIMER_ID`, `OMP_TIMER_RUN` and `OMP_TIMER_RUN_DIR`. A failing `before` fails the run (`before`) without starting the agent. `after` runs after every run that got its cwd, with `OMP_TIMER_RESULT` (the result file) and `OMP_TIMER_OUTCOME` (`ok` or `failed: <why>`); a failing `after` fails the run (`after`). Each hook is capped at 10 minutes and by what is left of `maxTime`; `after` always gets at least 1 minute.
+- `report`: `said` (default), `always`, `failure`, `never`; see below.
+
+Approvals: nobody can answer an approval prompt during an unattended run, so the host runs without a UI and a tool call that would prompt (by `tools.approvalMode`, a `tools.approval.<tool>: prompt` policy, or a tool's own override) is denied at once instead of waiting. The model sees the denial and can finish its turn; the run then fails with `approval` and `result.json` lists the denied tools. To let a run use such a tool, allow it in settings (`tools.approval.<tool>: allow`) or pick a profile without it.
+
+Each run leaves `<timers>/state/<id>/runs/<seq>/result.json`: outcome (`ok`, or a failure: `timeout`, `budget`, `approval`, `expect`, `before`, `after`, `model`, `busy`, `error`, with a detail line), whether it was `[quiet]`, stop reason, model, tokens, cost, start/end/duration, cwd, transcript path, the final message, missing `expect` paths, denied tools, and how the report went. `omp timer runs` and `/timer runs` add a summary per run (`ok · quiet · $0.0021 · 3.1k tok · 12s`, `failed: budget · …`), `omp timer logs <id> [seq]` prints the result after the runner log, `timer://<id>/runs/<seq>` includes the whole file, and the card and `/timers` sheet show it as the last run. The run record's end detail reads `failed: <failure>: <detail>`.
+
+Reporting: the envelope asks the agent to make its final message the run's report and to end with a single line `[quiet]` when there is nothing worth reporting. `report` decides which results go back: `always` every run, `said` runs that were not `[quiet]` (a failure always says something), `failure` failed runs, `never` none. A result goes to the session that set the timer (`/timer` or the `timer` tool) as a `timer-report` message through its mailbox: a live session gets it at once, starting a turn when idle, also after Esc; a closed one gets it when it next opens. The final message arrives inside `<timer-run-output untrusted="true">`. When no live session hears it (the CLI set the timer, or the origin is closed), it also goes to the notify sinks as a `report` alert. A failed one-shot run is alerted by the failure policy instead, so it is not announced twice.
+
+Runs carry `OMP_TIMER_RUN=<id>#<seq>`, so the [recursion guard](#recursion-guard) applies: a run may show, edit, re-arm or remove its own timer but not others unless the timer has `allowTimers: true`.
 
 ## In a session
 
@@ -118,7 +144,7 @@ Both are read from global settings, since the ticker runs outside any project. `
 
 ## Recursion guard
 
-Every process a fire starts carries `OMP_TIMER_RUN=<id>#<seq>`, and so does every `bash` command of a turn a timer fire starts or joins in an open session (delivered live or held for the next opener), until your next message. Such a run may re-arm, edit, pause, remove or fire only its own timer, unless that timer was set with `--allow-timers` (the `timer` tool's `allowTimers: true`); reading stays open. A prompt timer's turn in the session it wakes, live or resumed headless, may also set, edit, pause, resume or remove prompt timers that wake that same session (not fire them): what they start lands in that one conversation, one turn at a time. Shell runs stay limited to their own timer. Without this, one fired run could arm timers that arm timers. The `timer` tool holds such a turn to the same rule. Subagents a live fired turn spawns, and its `eval` cells, do not carry it.
+Every process a fire starts carries `OMP_TIMER_RUN=<id>#<seq>`, and so does every `bash` command of a turn a timer fire starts or joins in an open session (delivered live or held for the next opener), until your next message. Such a run may re-arm, edit, pause, remove or fire only its own timer, unless that timer was set with `--allow-timers` (the `timer` tool's `allowTimers: true`); reading stays open. A prompt timer's turn in the session it wakes, live or resumed headless, may also set, edit, pause, resume or remove prompt timers that wake that same session (not fire them): what they start lands in that one conversation, one turn at a time. Shell runs and `fresh`/`own` agent runs stay limited to their own timer. Without this, one fired run could arm timers that arm timers. The `timer` tool holds such a turn to the same rule. Subagents a live fired turn spawns, and its `eval` cells, do not carry it.
 
 ## Files on disk
 
@@ -131,6 +157,8 @@ The store root is `<agentDir>/timers` (`~/.omp/agent/timers`); `OMP_TIMERS_DIR` 
 | `timers.db` | SQLite run state: per-timer slot state, runs, run ends, deliveries, incidents, and the ticker heartbeat. |
 | `state/<id>/runs/<seq>.log` | Runner log of one shell run or headless resume. |
 | `state/<id>/runs/<seq>.json` | Fire payload the tick hands to the runner. |
+| `state/<id>/runs/<seq>/` | An agent run's directory: `result.json`, the session of a `fresh` run (`session/`), the per-run cwd (`work/`). |
+| `state/<id>/session/`, `state/<id>/work/` | The session an `own` timer resumes every run, and its `cwd: run` directory. |
 | `tick.log` | Output of the launchd ticker. |
 
-Spec frontmatter keys: `version`, `rev`, `title`, `reason`, `at`, `every`, `tz`, `session` (a session id, or `fresh` for a shell timer), `session_file`, `when_closed`, `shell`, `cwd`, `expires`, `max_runs`, `overlap`, `grace`, `catchup`, `pause_after`, `allow_timers`, `paused`, `paused_reason`, `armed_at` (start of the schedule generation), `resumed_at`, and `created` (`at`, `by`, `host`, `cwd`, `session` and `session_file` when `/timer` set it, `when_text`, and `run` when a fired run set it). A spec whose `version` is newer than this omp reads is listed as invalid rather than misread.
+Spec frontmatter keys: `version`, `rev`, `title`, `reason`, `at`, `every`, `tz`, `session` (a session id, `fresh` or `own`; `fresh` for a shell timer), `session_file`, `when_closed`, `shell`, `cwd`, `expires`, `max_runs`, `overlap`, `grace`, `catchup`, `pause_after`, `allow_timers`, the agent-run keys `model`, `agent`, `thinking`, `hermetic`, `max_time`, `max_cost`, `expect`, `before`, `after` and `report`, `paused`, `paused_reason`, `armed_at` (start of the schedule generation), `resumed_at`, and `created` (`at`, `by`, `host`, `cwd`, `session` and `session_file` when `/timer` set it, `when_text`, and `run` when a fired run set it). A spec whose `version` is newer than this omp reads is listed as invalid rather than misread.

@@ -10,9 +10,11 @@ Rules
 One example per kind
 - Wake this session later: {"op":"set","id":"finish-migration","at":"in 2h","prompt":"…","reason":"…"}
 - Recurring check-in on this conversation: {"op":"set","id":"babysit","every":"30m","prompt":"…","reason":"…"}
+- Recurring work that doesn't need this conversation: {"op":"set","id":"nightly-digest","every":"daily 02:00","session":"fresh","prompt":"…","reason":"…"}
+- Recurring work in one session the timer keeps (it remembers earlier runs), with limits: {"op":"set","id":"weekly-review","every":"fri 16:00","session":"own","maxTime":"20m","maxCost":0.5,"prompt":"…","reason":"…"}
 - Recurring command, no model: {"op":"set","id":"prune-cache","every":"6h","shell":"…","reason":"…"}
 
-Defaults: `session` is `origin`, this conversation; if it is closed when the timer fires, it is resumed headless. Recurring session wakes you set expire after 7 days unless `expires` says otherwise; recurring shell commands do not expire.
+Defaults: `session` is `origin`, this conversation; if it is closed when the timer fires, it is resumed headless. Recurring session wakes and agent runs you set expire after 7 days unless `expires` says otherwise; recurring shell commands do not expire. A `fresh` or `own` run reports its final message back to this session unless that message ends with the line `[quiet]` (`report` changes this).
 {{#if registry}}
 
 Timers this session or this project set, as of when this session started (`list` for every timer and its current state; change one only when the user asks about it):

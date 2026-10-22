@@ -29,6 +29,7 @@ import {
 	setTimer,
 	storeHealth,
 	type TimerEditInput,
+	type TimerReport,
 	type TimerRow,
 	type TimerSetInput,
 	tickerUnitEnv,
@@ -38,6 +39,7 @@ import {
 	timersRoot,
 	uninstallTicker,
 } from "../timers";
+import { lastRunResult, readRunResult, renderRunResultBlock, runResults } from "../timers/run-result";
 
 export const TIMER_ACTIONS = [
 	"set",
@@ -60,7 +62,10 @@ export const TIMER_ACTIONS = [
 ] as const;
 export type TimerAction = (typeof TIMER_ACTIONS)[number];
 
-/** Flags that set or edit a timer. `none` clears `at`/`every`/`expires`/`grace` on edit. */
+/**
+ * Flags that set or edit a timer. `none` clears `at`/`every`/`expires`/`grace`
+ * and the agent-run keys (model, agent, thinking, maxTime, maxCost, expect, before, after) on edit.
+ */
 export interface TimerFieldArgs {
 	reason?: string;
 	title?: string;
@@ -75,6 +80,19 @@ export interface TimerFieldArgs {
 	cwd?: string;
 	expires?: string;
 	maxRuns?: number;
+	model?: string;
+	agent?: string;
+	thinking?: string;
+	/** `--hermetic` true, `--no-hermetic` false. */
+	hermetic?: boolean;
+	maxTime?: string;
+	/** USD as typed (`0.5`), or `none` on edit. */
+	maxCost?: string;
+	/** Repeatable `--expect`; `none` clears on edit. */
+	expect?: string[];
+	before?: string;
+	after?: string;
+	report?: TimerReport;
 	overlap?: "skip" | "queue";
 	grace?: string;
 	catchup?: "run" | "skip";
@@ -119,6 +137,13 @@ function scheduleFields(fields: TimerFieldArgs): { at?: string; every?: string }
 	return parseWhen(fields.when);
 }
 
+/** `--max-cost` as USD; `none` is handled by the edit caller. */
+function usd(value: string): number {
+	const amount = Number(value);
+	if (!value.trim() || !Number.isFinite(amount)) throw new UsageError(`--max-cost takes a USD amount, got "${value}"`);
+	return amount;
+}
+
 export function setInput(cmd: TimerCommandArgs): TimerSetInput {
 	const { fields } = cmd;
 	return {
@@ -134,6 +159,16 @@ export function setInput(cmd: TimerCommandArgs): TimerSetInput {
 		cwd: fields.cwd,
 		expires: fields.expires,
 		maxRuns: fields.maxRuns,
+		model: fields.model,
+		agent: fields.agent,
+		thinking: fields.thinking,
+		hermetic: fields.hermetic,
+		maxTime: fields.maxTime,
+		maxCost: fields.maxCost === undefined ? undefined : usd(fields.maxCost),
+		expect: fields.expect,
+		before: fields.before,
+		after: fields.after,
+		report: fields.report,
 		overlap: fields.overlap,
 		grace: fields.grace,
 		catchup: fields.catchup,
@@ -160,6 +195,16 @@ export function editInput(fields: TimerFieldArgs): TimerEditInput {
 		cwd: fields.cwd,
 		expires: clearable(fields.expires),
 		maxRuns: fields.maxRuns,
+		model: clearable(fields.model),
+		agent: clearable(fields.agent),
+		thinking: clearable(fields.thinking),
+		hermetic: fields.hermetic,
+		maxTime: clearable(fields.maxTime),
+		maxCost: fields.maxCost === "none" ? null : fields.maxCost === undefined ? undefined : usd(fields.maxCost),
+		expect: fields.expect?.includes("none") ? null : fields.expect,
+		before: clearable(fields.before),
+		after: clearable(fields.after),
+		report: fields.report,
 		overlap: fields.overlap,
 		grace: clearable(fields.grace),
 		catchup: fields.catchup,
@@ -182,6 +227,8 @@ function rowJson(row: TimerRow): Record<string, unknown> {
 		last: row.lastRun ?? null,
 		incidents: row.incidents,
 		target: row.spec.target,
+		run: row.spec.run,
+		report: row.spec.report,
 		reason: row.spec.reason,
 		spec: row.spec,
 		state: row.state,
@@ -190,7 +237,12 @@ function rowJson(row: TimerRow): Record<string, unknown> {
 
 async function card(id: string, now: number, verb: string, warnings?: string[]): Promise<string> {
 	const row = await loadTimerRow(await requireTimer(id), now);
-	return renderTimerCard(row, now, { verb, ticker: readTickerStatus(), warnings });
+	return renderTimerCard(row, now, {
+		verb,
+		ticker: readTickerStatus(),
+		warnings,
+		lastResult: await lastRunResult(row),
+	});
 }
 
 function renderDoctor(report: DoctorReport): string {
@@ -238,8 +290,9 @@ async function runAction(cmd: TimerCommandArgs, now: number): Promise<number> {
 		case "runs": {
 			const id = requireId(cmd);
 			const runs = await timerRuns(id, { limit: cmd.limit });
-			if (cmd.json) return (json(runs), 0);
-			out(renderRuns(runs));
+			const results = await runResults(id, runs);
+			if (cmd.json) return (json(runs.map(run => ({ ...run, result: results.get(run.seq) ?? null }))), 0);
+			out(renderRuns(runs, results));
 			return 0;
 		}
 		case "logs": {
@@ -247,14 +300,22 @@ async function runAction(cmd: TimerCommandArgs, now: number): Promise<number> {
 			const seq = cmd.extra[0] !== undefined ? Number(cmd.extra[0]) : undefined;
 			if (seq !== undefined && !Number.isInteger(seq)) throw new UsageError("omp timer logs <id> [seq]");
 			const log = await timerLog(id, seq);
-			if (cmd.json) return (json(log ?? null), 0);
-			if (!log) {
+			// The run whose result.json goes with the log: the asked-for one, the logged one, else the newest.
+			let resultSeq = seq;
+			if (resultSeq === undefined) {
+				const runs = await timerRuns(id);
+				resultSeq = log ? runs.find(run => run.runId === log.runId)?.seq : runs.at(-1)?.seq;
+			}
+			const result = resultSeq === undefined ? undefined : await readRunResult(id, resultSeq);
+			if (cmd.json) return (json(log || result ? { ...log, seq: resultSeq, result: result ?? null } : null), 0);
+			if (!log && !result) {
 				out(
-					`no run log for ${id}${seq !== undefined ? `#${seq}` : ""} (only shell runs and headless resumes keep one)`,
+					`no run log for ${id}${seq !== undefined ? `#${seq}` : ""} (only shell runs, agent runs and headless resumes keep one)`,
 				);
 				return 0;
 			}
-			out(`${chalk.dim(`${log.runId} ${log.path}`)}\n${log.text.trimEnd()}`);
+			if (log) out(`${chalk.dim(`${log.runId} ${log.path}`)}\n${log.text.trimEnd()}`);
+			if (result && resultSeq !== undefined) out(`${log ? "\n" : ""}${renderRunResultBlock(id, resultSeq, result)}`);
 			return 0;
 		}
 		case "fire": {

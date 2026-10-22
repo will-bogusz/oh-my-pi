@@ -312,6 +312,42 @@ describe("session mailbox delivery", () => {
 		expect((await timerRuns("wake"))[0]?.delivery?.state).toBe("delivered-live");
 	});
 
+	it("after Esc, starts a turn for an agent run's report, its final message fenced as untrusted output", async () => {
+		const { session: opened } = openSession();
+		const sessionId = opened.sessionManager.getSessionId();
+		await interrupt(opened);
+
+		const at = new Date().toISOString();
+		await postMail({
+			v: 1,
+			id: "digest#1.report",
+			kind: "timer-report",
+			sessionId,
+			createdAt: at,
+			report: {
+				timerId: "digest",
+				runId: "digest#1",
+				seq: 1,
+				reason: "nightly digest",
+				session: "fresh",
+				ok: true,
+				quiet: false,
+				finalText: "REPORT_TEXT",
+				cost: 0.002,
+				durationMs: 12_000,
+				endedAt: at,
+				resultPath: "/tmp/result.json",
+				tz: "UTC",
+			},
+		});
+		await until(() => isMailDone(sessionId, "digest#1.report"), "the report to reach the transcript");
+
+		expect(contexts).toHaveLength(1);
+		const text = requestTexts(contexts[0]!).at(-1);
+		expect(text).toContain('<timer-report id="digest" run="1" outcome="ok" session="fresh"');
+		expect(text).toContain('<timer-run-output untrusted="true">\nREPORT_TEXT\n</timer-run-output>');
+	});
+
 	it("takes no waiting mail for a prompt that fails because a turn is running", async () => {
 		const { session: opened } = openSession();
 		const run = opened.prompt("go");

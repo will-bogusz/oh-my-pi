@@ -227,7 +227,10 @@ function fireSession(spec: TimerSpec): string | undefined {
 	return spec.action.kind === "prompt" && spec.target.kind === "session" ? spec.target.sessionId : undefined;
 }
 
-/** A shell run, or a prompt for a session nobody has open with `whenClosed: resume`, needs a detached runner. */
+/**
+ * A shell run, an agent run (fresh/own), or a prompt for a session nobody has open with
+ * `whenClosed: resume` needs a detached runner.
+ */
 function routesViaRunner(spec: TimerSpec, target: DeliveryTarget | undefined): boolean {
 	return !target || (target.kind === "free" && spec.whenClosed === "resume");
 }
@@ -315,7 +318,7 @@ async function sideEffects(
 	const sessionId = fireSession(spec);
 	if (!target || sessionId === undefined) {
 		deps.spawnRunner(spec, payload.seq, deps.root);
-		return `runner (${spec.action.kind})`;
+		return spec.action.kind === "prompt" ? `runner (agent run, ${spec.target.kind})` : "runner (shell)";
 	}
 	if (mailLocation(sessionId, runId) === undefined) {
 		await postMail({ v: 1, id: runId, kind: "timer-fire", sessionId, createdAt: at, fire: payload });

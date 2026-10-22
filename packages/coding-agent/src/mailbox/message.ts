@@ -2,7 +2,10 @@ import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
 import { escapeXmlAttribute, prompt } from "@oh-my-pi/pi-utils";
 import sessionPokeTemplate from "../prompts/session/session-poke.md" with { type: "text" };
 import timerFireTemplate from "../prompts/session/timer-fire.md" with { type: "text" };
+import timerReportTemplate from "../prompts/session/timer-report.md" with { type: "text" };
+import { formatCost } from "../timers/run-result";
 import { formatDuration, MINUTE } from "../timers/schedule";
+import type { AgentRunTarget } from "../timers/types";
 import type { SessionMail } from "./types";
 
 /** Lateness the envelope calls out, so the model re-checks a stale instruction before acting on it. */
@@ -10,9 +13,24 @@ const NOTABLY_LATE_MS = 10 * MINUTE;
 
 export const SESSION_POKE_MESSAGE_TYPE = "session-poke";
 export const TIMER_FIRE_MESSAGE_TYPE = "timer-fire";
+export const TIMER_REPORT_MESSAGE_TYPE = "timer-report";
 
-/** How the mail reached the session: a process that had it open, or one resumed headless to deliver it. */
-export type MailDeliveryVia = "live" | "headless";
+/** The run's final message is exactly this line (or ends with it): nothing worth reporting. */
+export const QUIET_MARKER = "[quiet]";
+
+/**
+ * How the mail reached the session: a process that had it open, one resumed headless to deliver it,
+ * or (`run`) the session an unattended agent run started for it.
+ */
+export type MailDeliveryVia = "live" | "headless" | "run";
+
+/** What the envelope of an unattended agent run (fresh/own session) tells the agent about its run. */
+export interface AgentRunEnvelope {
+	session: AgentRunTarget;
+	/** The run's cwd, which `expect` paths are relative to. */
+	cwd: string;
+	expect?: string[];
+}
 
 /** Details persisted on the transcript entry; `mailId` is how a delivery is confirmed in the session file. */
 export interface MailMessageDetails {
@@ -57,15 +75,36 @@ function fenceUntrusted(text: string, tag: string): string {
 /**
  * Render the model-visible message for one mail. The "now" line is computed
  * here, at injection time, so held mail never carries a stale clock. A timer
- * fire renders its times in the timer's zone.
+ * fire or report renders its times in the timer's zone; `run` renders the
+ * envelope of an unattended agent run instead of a session wake.
  */
-export function renderMail(mail: SessionMail, via: MailDeliveryVia, now: number): string {
+export function renderMail(mail: SessionMail, via: MailDeliveryVia, now: number, run?: AgentRunEnvelope): string {
 	if (mail.kind === "poke") {
 		return prompt.render(sessionPokeTemplate, {
 			from: escapeXmlAttribute(mail.poke.from),
 			sent: formatWallClock(Date.parse(mail.createdAt)),
 			text: fenceUntrusted(mail.poke.text, "session-poke"),
 			now: formatWallClock(now),
+		});
+	}
+	if (mail.kind === "timer-report") {
+		const { report } = mail;
+		return prompt.render(timerReportTemplate, {
+			timerId: report.timerId,
+			seq: report.seq,
+			title: report.title,
+			reason: report.reason,
+			session: report.session,
+			own: report.session === "own",
+			outcome: report.ok ? (report.quiet ? "ok (quiet)" : "ok") : `failed: ${report.failure ?? "error"}`,
+			detail: report.detail,
+			cost: formatCost(report.cost),
+			duration: formatDuration(report.durationMs),
+			ended: formatWallClock(Date.parse(report.endedAt), report.tz),
+			now: formatWallClock(now, report.tz),
+			resultPath: report.resultPath,
+			transcript: report.transcript,
+			finalText: report.finalText ? fenceUntrusted(report.finalText, "timer-run-output") : undefined,
 		});
 	}
 	const { fire } = mail;
@@ -82,6 +121,10 @@ export function renderMail(mail: SessionMail, via: MailDeliveryVia, now: number)
 		notablyLate: lateMs >= NOTABLY_LATE_MS,
 		via,
 		headless: via === "headless",
+		run: run !== undefined,
+		own: run?.session === "own",
+		cwd: run?.cwd,
+		expect: run?.expect?.length ? run.expect.join(", ") : undefined,
 		now: formatWallClock(now, tz),
 		setAt: formatWallClock(Date.parse(fire.setAt), tz),
 		reason: fire.reason,

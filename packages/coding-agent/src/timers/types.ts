@@ -1,6 +1,6 @@
 /**
  * Timers: standing work that fires later — at a time or on a schedule — and
- * then wakes a session or runs a shell command.
+ * then wakes a session, runs a fresh agent, or runs a shell command.
  *
  * Desired configuration is one Markdown spec per timer (`<root>/specs/<id>.md`,
  * YAML frontmatter + prompt body), written atomically with a `rev` check.
@@ -14,8 +14,92 @@ import { type } from "@oh-my-pi/omptype";
 export type TimerTarget =
 	/** Wake (or headlessly resume) an existing session with its context. */
 	| { kind: "session"; sessionId: string; sessionFile?: string }
-	/** No session: a shell timer. */
-	| { kind: "fresh" };
+	/** A new session per run (an unattended agent run); a shell timer stores this too. */
+	| { kind: "fresh" }
+	/** One session the timer keeps and resumes on every run (an unattended agent run). */
+	| { kind: "own" };
+
+/** Agent-run targets: the runner starts and owns the session, so run settings apply. */
+export type AgentRunTarget = Extract<TimerTarget, { kind: "fresh" | "own" }>["kind"];
+
+/**
+ * When an agent run's result goes back to the origin session (as mail) and the notify sinks:
+ * every run, runs that said something (not `[quiet]`; failures always say something), failures
+ * only, or never. Failure alerts from the failure policy are separate and always apply.
+ */
+export type TimerReport = "always" | "said" | "failure" | "never";
+
+/** Settings of an unattended agent run (prompt timers whose session is `fresh` or `own`). */
+export interface AgentRunSettings {
+	/** Agent profile (as task subagents resolve it): model, thinking, appended system prompt, tools. */
+	agent?: string;
+	/** Thinking level; wins over the profile's. */
+	thinking?: string;
+	/** No rules, skills, extensions or title generation in the run's session. */
+	hermetic?: boolean;
+	/** Run in a fresh per-run directory (`<run dir>/work`) instead of the timer's cwd. */
+	runCwd?: boolean;
+	/** Wall-clock limit: past it the run is aborted and fails with `timeout`. */
+	maxTimeMs?: number;
+	/** USD limit on the run's model calls: past it the run is aborted and fails with `budget`. */
+	maxCost?: number;
+	/** Paths (relative to the run's cwd) that must exist after the run, else it fails with `expect`. */
+	expect?: string[];
+	/** Shell run before the agent in its cwd; a non-zero exit fails the run without starting the agent. */
+	before?: string;
+	/** Shell run after the agent with `OMP_TIMER_RESULT`; a non-zero exit fails the run. */
+	after?: string;
+}
+
+/** Why an agent run failed; rendered as `failed: <failure>`. */
+export type AgentRunFailure =
+	| "timeout"
+	| "budget"
+	| "approval"
+	| "expect"
+	| "before"
+	| "after"
+	| "model"
+	| "busy"
+	| "error";
+
+/** How an agent run's report left the runner. */
+export type AgentRunReportState = "mailed-live" | "mailed-held" | "notified" | "skipped";
+
+/** `result.json` in an agent run's directory: what the run did, read by `runs`, `logs`, `timer://` and the sheet. */
+export interface AgentRunResult {
+	v: 1;
+	runId: string;
+	timerId: string;
+	seq: number;
+	session: AgentRunTarget;
+	ok: boolean;
+	failure?: AgentRunFailure;
+	/** One line: what failed, or a note on a successful run. */
+	detail?: string;
+	/** The final message was `[quiet]`: nothing worth reporting. */
+	quiet: boolean;
+	/** Stop reason of the last assistant message (`stop`, `aborted`, `error`, …). */
+	stopReason?: string;
+	model?: string;
+	tokens: { input: number; output: number; cacheRead: number; cacheWrite: number; total: number };
+	/** USD spent by the run's model calls. */
+	cost: number;
+	startedAt: string;
+	endedAt: string;
+	durationMs: number;
+	/** The agent's working directory. */
+	cwd: string;
+	/** The run's session file. */
+	transcript?: string;
+	/** The agent's final message (without the `[quiet]` marker). */
+	finalText?: string;
+	/** `expect` paths missing after the run. */
+	expectMissing?: string[];
+	/** Tools that needed an approval nobody could give, so they were denied. */
+	approvalsDenied?: string[];
+	report?: { mode: TimerReport; state: AgentRunReportState; session?: string; detail?: string };
+}
 
 export type TimerAction = { kind: "prompt"; prompt: string } | { kind: "shell"; command: string };
 
@@ -70,6 +154,12 @@ export interface TimerSpec {
 	pauseAfter: number;
 	/** Let runs this timer fires create or change other timers (recursion guard). */
 	allowTimers: boolean;
+	/** Model of a fresh/own run (`provider/id` or a pattern); the profile's otherwise. */
+	model?: string;
+	/** Agent-run settings; empty for session wakes and shell timers. */
+	run: AgentRunSettings;
+	/** Which agent-run results report back (fresh/own only). */
+	report: TimerReport;
 	paused: boolean;
 	/** Why it is paused: `user`, or the failure that tripped `pauseAfter`. */
 	pausedReason?: string;
@@ -186,11 +276,36 @@ export const TimerFirePayloadSchema = type({
 });
 export type TimerFirePayload = typeof TimerFirePayloadSchema.infer;
 
+/** The result of one agent run, as the origin session receives it (`timer-report` mail). */
+export const TimerReportPayloadSchema = type({
+	timerId: "string",
+	runId: "string",
+	seq: "number.integer",
+	"title?": "string",
+	reason: "string",
+	session: "'fresh' | 'own'",
+	ok: "boolean",
+	"failure?": "'timeout' | 'budget' | 'approval' | 'expect' | 'before' | 'after' | 'model' | 'busy' | 'error'",
+	"detail?": "string",
+	quiet: "boolean",
+	/** Untrusted: the run's final message. */
+	"finalText?": "string",
+	cost: "number",
+	durationMs: "number",
+	endedAt: "string",
+	/** `result.json` of the run. */
+	resultPath: "string",
+	"transcript?": "string",
+	/** The timer's zone: the report renders its times there. */
+	tz: "string",
+});
+export type TimerReportPayload = typeof TimerReportPayloadSchema.infer;
+
 /** Something a person should hear about: sent to the notify sinks once per incident. */
 export interface TimerAlert {
 	timerId: string;
 	runId?: string;
-	event: "failed" | "paused" | "missed" | "held" | "reminder";
+	event: "failed" | "paused" | "missed" | "held" | "reminder" | "report";
 	/** One line: what happened. */
 	summary: string;
 	/** First error line, raw. */

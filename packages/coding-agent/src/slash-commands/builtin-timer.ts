@@ -36,6 +36,7 @@ import {
 import { editInput, setInput, type TimerCommandArgs } from "../cli/timer-cli";
 import Timer, { timerRequest } from "../commands/timer";
 import { readShellWord } from "../tools/shell-tokenize";
+import { lastRunResult, runResults } from "../timers/run-result";
 import { readTimerRunLog, timerCardView, timerListRowView } from "../tools/timer-view";
 import type { AgentSession } from "../session/agent-session";
 import { clearSubmittedText } from "./helpers/draft";
@@ -43,7 +44,7 @@ import { commandConsumed, parseSubcommand, usage } from "./helpers/parse";
 import type { SlashCommandRuntime, SlashCommandSpec } from "./types";
 
 const TIMER_USAGE =
-	"Usage: /timer [in <dur>|at <time>|every <cadence>] <prompt> · /timer ls|show|runs|logs|fire|pause|resume|rm <id> · /timer set [<id>] --reason … --at|--every … --prompt|--shell … [--session <id>] · /timer edit <id> --<field> <value|none> …";
+	"Usage: /timer [in <dur>|at <time>|every <cadence>] <prompt> · /timer ls|show|runs|logs|fire|pause|resume|rm <id> · /timer set [<id>] --reason … --at|--every … --prompt|--shell … [--session <id>|fresh|own --agent … --max-time … --max-cost … --report …] · /timer edit <id> --<field> <value|none> …";
 
 /** What a `/timer` invocation produced: model-free text, plus the structured view the TUI draws. */
 export interface TimerSlashResult {
@@ -127,10 +128,10 @@ async function cardResult(
 ): Promise<TimerSlashResult> {
 	const now = Date.now();
 	const row = await loadTimerRow(await requireTimer(id), now);
-	const ticker = await readTickerStatus();
+	const [ticker, lastResult] = await Promise.all([readTickerStatus(), lastRunResult(row)]);
 	return {
-		text: renderTimerCard(row, now, { verb, selfSessionId: sessionId, ticker, warnings }),
-		card: timerCardView(row, { verb, selfSessionId: sessionId, ticker, now, warnings }),
+		text: renderTimerCard(row, now, { verb, selfSessionId: sessionId, ticker, warnings, lastResult }),
+		card: timerCardView(row, { verb, selfSessionId: sessionId, ticker, now, warnings, lastResult }),
 	};
 }
 
@@ -175,8 +176,9 @@ export async function runTimerSlash(args: string, session: AgentSession, cwd: st
 		case "show":
 			return cardResult(needId(), "", sessionId);
 		case "runs": {
-			const runs = await timerRuns(needId());
-			return { text: renderRuns(runs) };
+			const id = needId();
+			const runs = await timerRuns(id);
+			return { text: renderRuns(runs, await runResults(id, runs)) };
 		}
 		case "logs": {
 			const seq = extra[0] === undefined ? undefined : Number(extra[0]);

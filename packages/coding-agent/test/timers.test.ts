@@ -53,6 +53,8 @@ function spec(overrides: Partial<TimerSpec>): TimerSpec {
 		catchup: "run",
 		pauseAfter: 3,
 		allowTimers: false,
+		run: {},
+		report: "said",
 		paused: false,
 		armedAt: new Date(T0).toISOString(),
 		created: { at: new Date(T0).toISOString(), by: "cli", host: "h", cwd: "/", whenText: "" },
@@ -399,12 +401,15 @@ describe("timer engine (tick, runner records, policy) on an injected clock", () 
 				),
 			),
 		).toMatchObject({ message: expect.stringContaining("minimum is 5m") });
+		expect(
+			await rejectionOf(setTimer({ id: "f", reason: "r", every: "2m", prompt: "x", session: "fresh" }, ctx(T0))),
+		).toMatchObject({ message: expect.stringContaining("minimum is 5m") });
 		expect((await shell("s", "1m")).spec.every).toBe("1m");
 	});
 
-	it("refuses a prompt timer without a session to wake", async () => {
+	it("refuses a prompt timer without a session to wake or an agent run to start", async () => {
 		expect(await rejectionOf(setTimer({ id: "p", reason: "r", every: "1h", prompt: "x" }, ctx(T0)))).toMatchObject({
-			message: expect.stringContaining("wakes a session"),
+			message: expect.stringContaining("a prompt timer needs a session: pass --session"),
 		});
 		expect(await readTimerSpec("p", root)).toBeUndefined();
 	});
@@ -474,6 +479,18 @@ describe("timer engine (tick, runner records, policy) on an injected clock", () 
 		},
 		15_000,
 	);
+
+	it("hands a fresh or own prompt timer to a runner, with its fire payload, and never mails a session", async () => {
+		await setTimer({ id: "digest", reason: "r", every: "5m", prompt: "Summarize.", session: "fresh" }, ctx(T0));
+		await setTimer({ id: "review", reason: "r", every: "5m", prompt: "Review.", session: "own" }, ctx(T0));
+		await tick(T0 + 5 * MINUTE + 1);
+		expect(spawned.toSorted()).toEqual(["digest#1", "review#1"]);
+		expect(await Bun.file(firePayloadPath("digest", 1, root)).json()).toMatchObject({
+			runId: "digest#1",
+			prompt: "Summarize.",
+		});
+		expect(runs("review").map(run => run.delivery)).toEqual([undefined]);
+	});
 
 	it("keeps a queued run (and its fire data) when a manual fire arrives, running the queued one first", async () => {
 		await setTimer({ id: "q", reason: "test", every: "5m", shell: "true", overlap: "queue" }, ctx(T0));
@@ -985,6 +1002,28 @@ describe("timer recursion guard", () => {
 		expect((await readTimerSpec("follow-up", root))?.target).toMatchObject({ kind: "session", sessionId: "sess-a" });
 		expect(await readTimerSpec("sibling", root)).toMatchObject({ title: "edited", paused: true });
 		expect((await readTimerSpec("elsewhere", root))?.target).toMatchObject({ sessionId: "sess-b" });
+	});
+
+	it("keeps an unattended agent run to its own timer", async () => {
+		const root = dir.path();
+		const ctx = { cwd: root, root };
+		await setTimer(
+			{ id: "digest", reason: "r", every: "daily 02:00", prompt: "Write the digest.", session: "fresh" },
+			ctx,
+		);
+		const previous = Bun.env[TIMER_RUN_ENV];
+		Bun.env[TIMER_RUN_ENV] = "digest#1";
+		try {
+			expect(
+				await rejectionOf(setTimer({ reason: "r", at: "in 1h", prompt: "Write more.", session: "fresh" }, ctx)),
+			).toMatchObject({ message: expect.stringContaining("may set only timer digest, not a new timer") });
+			expect(
+				await rejectionOf(setTimer({ id: "keeper", reason: "r", at: "in 1h", prompt: "x", session: "own" }, ctx)),
+			).toBeInstanceOf(TimerScopeError);
+		} finally {
+			if (previous === undefined) delete Bun.env[TIMER_RUN_ENV];
+			else Bun.env[TIMER_RUN_ENV] = previous;
+		}
 	});
 });
 

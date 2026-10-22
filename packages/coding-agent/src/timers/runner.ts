@@ -9,6 +9,7 @@
  * target), never whichever revision exists by the time it starts.
  *
  * - shell: `/bin/sh -c` in the timer's cwd.
+ * - prompt → fresh/own: an unattended agent run (`agent-run.ts`).
  * - prompt → session nobody has open: headless delivery (an RPC host on
  *   `--resume <session>` whose own mailbox watcher claims the mail).
  *
@@ -18,12 +19,13 @@ import { acquireFileLock } from "@oh-my-pi/pi-utils";
 import { workerEnvFromParent } from "../subprocess/worker-client";
 import { deliverHeadless } from "../mailbox/headless";
 import { deliveryTarget, describeDeliveryTarget } from "../mailbox/mailbox";
-import { runLockPath, TIMER_RUN_ENV, timersRoot } from "./paths";
+import { type AgentRunDeps, agentRunEndDetail, defaultAgentRunDeps, runAgent } from "./agent-run";
+import { firePayloadPath, runLockPath, TIMER_RUN_ENV, timersRoot } from "./paths";
 import { firstErrorLine } from "./policy";
 import { type RunResult, runCommand } from "./run-command";
 import { HOUR } from "./schedule";
 import { openTimerDb, readTimerSpec, readTimerSpecAt } from "./store";
-import type { TimerSpec } from "./types";
+import type { TimerFirePayload, TimerSpec } from "./types";
 
 /** Wall-clock cap per shell run. */
 const MAX_SHELL_RUN_MS = HOUR;
@@ -76,7 +78,12 @@ async function runHeadless(
 	}
 }
 
-export async function execTimerRun(id: string, seq: number, root = timersRoot()): Promise<RunResult> {
+export async function execTimerRun(
+	id: string,
+	seq: number,
+	root = timersRoot(),
+	agentDeps: AgentRunDeps = defaultAgentRunDeps(),
+): Promise<RunResult> {
 	const runId = `${id}#${seq}`;
 	const db = openTimerDb(root);
 	const started = Date.now();
@@ -113,7 +120,10 @@ export async function execTimerRun(id: string, seq: number, root = timersRoot())
 		if (spec.action.kind === "shell") {
 			return finish(await runCommand(["/bin/sh", "-c", spec.action.command], spec.cwd, env, MAX_SHELL_RUN_MS));
 		}
-		return finish(await runHeadless(spec, runId, env, root));
+		if (spec.target.kind === "session") return finish(await runHeadless(spec, runId, env, root));
+		const payload = (await Bun.file(firePayloadPath(id, seq, root)).json()) as TimerFirePayload;
+		const result = await runAgent(spec, payload, { root, env }, agentDeps);
+		return finish({ ok: result.ok, detail: agentRunEndDetail(result) });
 	} catch (err) {
 		return finish({ ok: false, detail: firstErrorLine(err instanceof Error ? err.message : String(err)) });
 	} finally {

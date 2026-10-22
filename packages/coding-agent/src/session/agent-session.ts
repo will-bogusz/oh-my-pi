@@ -223,7 +223,7 @@ import {
 	shouldDisableReasoning,
 	toReasoningEffort,
 } from "@oh-my-pi/pi-tui/thinking";
-import { mailMessageDetails, TIMER_FIRE_MESSAGE_TYPE } from "../mailbox/message";
+import { mailMessageDetails, TIMER_FIRE_MESSAGE_TYPE, TIMER_REPORT_MESSAGE_TYPE } from "../mailbox/message";
 import { isAttachmentOnlyTitleInput, isLowSignalTitleInput } from "../tiny/text";
 import type { ImageAttachmentEntry, ToolSession } from "../tools";
 import { resolveApproval } from "../tools/approval";
@@ -827,9 +827,15 @@ function isEvalActivity(message: AgentMessage): boolean {
 	);
 }
 
-/** A timer fire follows standing intent the user set up earlier: it starts its turn even while an interrupt (Esc) holds the session. */
+/**
+ * A timer fire, or the report of an agent run a timer started, follows standing intent the user set
+ * up earlier: it starts its turn even while an interrupt (Esc) holds the session.
+ */
 function wakesThroughInterrupt(message: AgentMessage): boolean {
-	return message.role === "custom" && message.customType === TIMER_FIRE_MESSAGE_TYPE;
+	return (
+		message.role === "custom" &&
+		(message.customType === TIMER_FIRE_MESSAGE_TYPE || message.customType === TIMER_REPORT_MESSAGE_TYPE)
+	);
 }
 
 /** A retry supersedes a failed operation only when its intent matches, allowing a missing append phase to be supplied. */

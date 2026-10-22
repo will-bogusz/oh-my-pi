@@ -30,6 +30,7 @@ import {
 	timersRoot,
 } from "../timers";
 import type { ToolSession } from ".";
+import { lastRunResult, runResults } from "../timers/run-result";
 import { timerArgsTier, timerCardView, timerEditPatch, timerListRowView } from "./timer-view";
 import { toolResult } from "./tool-result";
 
@@ -48,15 +49,27 @@ const timerSchema = type({
 	),
 	"shell?": type("string").describe("command to run instead of a prompt"),
 	"session?": type("string").describe(
-		"the session a prompt wakes: 'origin' (default, this conversation), or a session id, id prefix or session file",
+		"where a prompt runs: 'origin' (default, this conversation), 'fresh' (new session per run), 'own' (one session the timer keeps), or a session id, id prefix or session file",
 	),
 	"whenClosed?": type('"resume" | "hold"').describe(
 		"target session not open when it fires: resume it headless (default) or hold the message until it opens",
 	),
 	"tz?": type("string").describe("IANA zone for clock times; default this machine's"),
-	"cwd?": type("string").describe("working directory; default this session's"),
+	"cwd?": type("string").describe("working directory, or 'run' for a fresh dir per run; default this session's"),
 	"expires?": type("string").describe("'7d', a date, or 'never'"),
 	"maxRuns?": type("number").describe("retire after this many runs"),
+	"model?": type("string").describe("model for fresh/own runs"),
+	"agent?": type("string").describe("fresh/own: agent profile to run as"),
+	"thinking?": type("string").describe("fresh/own: thinking level"),
+	"hermetic?": type("boolean").describe("fresh/own: no rules, skills or extensions"),
+	"maxTime?": type("string").describe("fresh/own: abort past this duration, e.g. '20m'"),
+	"maxCost?": type("number").describe("fresh/own: abort past this many USD"),
+	"expect?": type("string[]").describe("fresh/own: paths that must exist after the run"),
+	"before?": type("string").describe("fresh/own: shell run first; non-zero exit fails the run"),
+	"after?": type("string").describe("fresh/own: shell run after, with OMP_TIMER_RESULT"),
+	"report?": type('"always" | "said" | "failure" | "never"').describe(
+		"fresh/own: which runs report back (default said: not [quiet])",
+	),
 	"allowTimers?": type("boolean").describe(
 		"set: let the turns and commands this timer fires create or change other timers (default: only itself and prompt timers that wake the same session)",
 	),
@@ -74,8 +87,8 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 	readonly strict = true;
 	/**
 	 * list/show/runs are read. set/edit/fire/pause/resume/remove are write while
-	 * they wake this conversation, exec for a shell command or another
-	 * session's timer or target (see {@link timerArgsTier}).
+	 * they wake this conversation, exec for a shell command, a fresh or own
+	 * agent run, or another session's timer or target (see {@link timerArgsTier}).
 	 */
 	readonly approval = (args: unknown): ToolApprovalDecision =>
 		timerArgsTier((args ?? {}) as Partial<TimerParams>, this.session.getSessionId?.() ?? undefined);
@@ -121,10 +134,10 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 			warnings?: string[],
 		): Promise<AgentToolResult<TimerToolDetails>> => {
 			const row = await loadTimerRow(await requireTimer(id), now);
-			const ticker = await readTickerStatus();
+			const [ticker, lastResult] = await Promise.all([readTickerStatus(), lastRunResult(row)]);
 			details.id = id;
-			details.card = timerCardView(row, { verb, selfSessionId: sessionId, ticker, now, warnings });
-			const text = renderTimerCard(row, now, { verb, selfSessionId: sessionId, ticker, warnings });
+			details.card = timerCardView(row, { verb, selfSessionId: sessionId, ticker, now, warnings, lastResult });
+			const text = renderTimerCard(row, now, { verb, selfSessionId: sessionId, ticker, warnings, lastResult });
 			const manage = `manage timer {op:"show"|"runs"|"edit"|"pause"|"remove", id:"${id}"}`;
 			return toolResult<TimerToolDetails>(details).text(`${text}\n${manage}`).done();
 		};
@@ -154,6 +167,16 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 							cwd: params.cwd,
 							expires: params.expires,
 							maxRuns: params.maxRuns,
+							model: params.model,
+							agent: params.agent,
+							thinking: params.thinking,
+							hermetic: params.hermetic,
+							maxTime: params.maxTime,
+							maxCost: params.maxCost,
+							expect: params.expect,
+							before: params.before,
+							after: params.after,
+							report: params.report,
 							allowTimers: params.allowTimers,
 						},
 						setContext,
@@ -176,10 +199,13 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 				}
 				case "show":
 					return await card(requireId(), "");
-				case "runs":
+				case "runs": {
+					const id = requireId();
+					const runs = await timerRuns(id);
 					return toolResult<TimerToolDetails>(details)
-						.text(renderRuns(await timerRuns(requireId())))
+						.text(renderRuns(runs, await runResults(id, runs)))
 						.done();
+				}
 				case "pause":
 				case "resume": {
 					const id = requireId();

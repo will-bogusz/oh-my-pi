@@ -20,6 +20,7 @@ import {
 	requireTimer,
 	setPaused,
 } from "../timers";
+import { lastRunResult } from "../timers/run-result";
 import { readTimerRunLog, timerCardView, timerListRowView } from "../tools/timer-view";
 
 interface CachedDetail {
@@ -97,8 +98,10 @@ export class TimersSheetData implements Omit<TimersSheetSource, "close" | "maxRo
 			} else {
 				const now = Date.now();
 				const row = await loadTimerRow(await requireTimer(id), now);
-				const ticker = await readTickerStatus();
-				detail = { card: timerCardView(row, { verb: "", selfSessionId: this.sessionId, ticker, now }) };
+				const [ticker, lastResult] = await Promise.all([readTickerStatus(), lastRunResult(row)]);
+				detail = {
+					card: timerCardView(row, { verb: "", selfSessionId: this.sessionId, ticker, now, lastResult }),
+				};
 			}
 		} catch (error) {
 			detail = { log: errorText(error) };
