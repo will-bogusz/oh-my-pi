@@ -27,7 +27,7 @@ import {
 	tryAcquireMailboxLease,
 } from "./mailbox";
 import { TIMER_HEADLESS_RUN_ENV, TIMER_MAILBOX_ENV } from "./paths";
-import { appendLedger, readTimerSpec } from "./store";
+import { readTimerSpec, recordDelivery } from "./store";
 import type { TimerMail } from "./types";
 
 const POLL_MS = 1000;
@@ -83,8 +83,7 @@ export function watchTimerMailbox(session: AgentSession): TimerMailboxWatcher {
 			via,
 		};
 		if (mail.fire) {
-			await appendLedger(mail.fire.timerId, {
-				type: "delivery",
+			recordDelivery(mail.fire.timerId, {
 				runId: mail.fire.runId,
 				at: new Date().toISOString(),
 				state: headlessRun ? "resumed-headless" : "delivered-live",

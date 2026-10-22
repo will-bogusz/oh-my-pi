@@ -1,28 +1,35 @@
 /**
- * `omp timer tick`: evaluate every timer once, run due gates, and dispatch
- * fires. Stateless and short: it holds the tick lock only while deciding and
- * dispatching, never across a model turn or a shell action — those run in a
- * detached `omp timer exec` runner that holds the timer's own run lock.
+ * `omp timer tick`: evaluate every timer once, settle finished runs, run due
+ * gates and dispatch fires. Stateless and short: it holds the tick lock only
+ * while deciding and dispatching, never across a model turn or a shell action
+ * — those run in a detached `omp timer exec` runner that holds the timer's own
+ * run lock.
  *
- * Meant to be run once a minute by ONE OS unit per host (launchd
- * StartCalendarInterval / systemd OnCalendar=minutely). The lock makes
- * overlapping ticks harmless; the slot ledger (`state.lastSlot`, written before
- * dispatch) guarantees at most one run per scheduled instant.
+ * Meant to run once a minute from ONE OS unit per host (`omp timer install`).
+ * The lock makes overlapping ticks harmless; each decision commits the slot
+ * and its run row in one SQLite transaction before any side effect, so a slot
+ * is decided at most once. Side effects that a crash cut off (committed but
+ * never dispatched) are re-dispatched once by the next tick under the same
+ * run id, which mailbox and transcript dedupe by.
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { type FileLockHandle, acquireFileLock, logger, tryAcquireFileLock } from "@oh-my-pi/pi-utils";
-import { resolveCliCommand, workerEnvFromParent } from "../subprocess/worker-client";
-import { runGate } from "./gate";
-import { hasLiveMailboxConsumer, hasPendingMailForTimer, postMail } from "./mailbox";
-import { runLockPath, tickLockPath, timerStateDir, timersRoot } from "./paths";
-import { decideDue, nextFireAt } from "./schedule";
-import { currentState, firePayloadPath, runLogPath, tickerStatusPath } from "./service";
-import { appendLedger, listTimerSpecs, readTimerSpec, readTimerState, writeTimerState } from "./store";
-import type { RunOutcome, RunTrigger, TimerFirePayload, TimerSpec, TimerState } from "./types";
+import { acquireFileLock, type FileLockHandle, logger, tryAcquireFileLock, VERSION } from "@oh-my-pi/pi-utils";
+import { resolveCliEntryCmd, workerEnvFromParent } from "../subprocess/worker-client";
+import { type GateVerdict, runGate } from "./gate";
+import { type DeliveryTarget, deliveryTarget, hasPendingMailForTimer, postMail } from "./mailbox";
+import { loadTimerNotifyConfig, sendTimerAlerts } from "./notify";
+import { firePayloadPath, runLockPath, runLogPath, tickLockPath, timersRoot, timerStateDir } from "./paths";
+import { applyFailure, applyNotice, applySuccess, firstErrorLine } from "./policy";
+import { decideDue, MINUTE, nextFireAt } from "./schedule";
+import { assertTimerMutationAllowed } from "./scope";
+import { listTimerSpecs, mutateTimerSpec, openTimerDb, type RunView, readTimerSpec, type TimerDb } from "./store";
+import type { RunTrigger, TimerAlert, TimerFirePayload, TimerSpec, TimerState } from "./types";
 
-/** Consecutive failures that pause a timer. */
-const PAUSE_AFTER_FAILURES = 3;
+/** A runner-carried run with no recorded end this long after dispatch, and no run lock held, was lost. */
+const LOST_AFTER_MS = 2 * MINUTE;
+/** A committed run that never got its side effect is re-dispatched after this. */
+const REDISPATCH_AFTER_MS = MINUTE;
 
 export interface TickLine {
 	id: string;
@@ -35,38 +42,30 @@ export interface TickReport {
 	at: string;
 	locked: boolean;
 	lines: TickLine[];
+	alerts: TimerAlert[];
 }
 
-function firstLine(text: string): string {
-	return (
-		text
-			.split("\n")
-			.find(line => line.trim())
-			?.trim()
-			.slice(0, 200) ?? ""
-	);
-}
-
-function record(state: TimerState, runId: string, outcome: RunOutcome, now: number): void {
-	state.last = { runId, outcome, at: new Date(now).toISOString() };
-}
-
-interface DispatchInput {
-	slot?: number;
-	missedSlots: number;
-	trigger: RunTrigger;
-	gateOutput?: string;
+/** Everything a tick does outside the store; tests replace these to run the engine on a fake clock. */
+export interface TickDeps {
+	root: string;
+	/** Start the detached runner for one run. */
+	spawnRunner(spec: TimerSpec, seq: number, root: string): void;
+	runGate(command: string, cwd: string): Promise<GateVerdict>;
+	deliveryTarget(sessionId: string): DeliveryTarget;
+	/** Whether the previous run of `spec` is still in flight. */
+	inFlight(spec: TimerSpec, root: string): boolean;
+	notify(alerts: TimerAlert[]): Promise<void>;
 }
 
 /** Spawn the detached runner for one run; its stdout/stderr go to the run log. */
-function spawnRunner(spec: TimerSpec, seq: number): void {
-	const log = runLogPath(spec.id, seq);
+function spawnRunnerProcess(spec: TimerSpec, seq: number, root: string): void {
+	const log = runLogPath(spec.id, seq, root);
 	fs.mkdirSync(path.dirname(log), { recursive: true });
 	const fd = fs.openSync(log, "a");
 	try {
-		const child = Bun.spawn([...resolveCliCommand(), "timer", "exec", spec.id, String(seq)], {
+		const child = Bun.spawn([...resolveCliEntryCmd(), "timer", "exec", spec.id, String(seq)], {
 			cwd: spec.cwd,
-			env: workerEnvFromParent(),
+			env: workerEnvFromParent({ OMP_TIMERS_DIR: root }),
 			stdin: "ignore",
 			stdout: fd,
 			stderr: fd,
@@ -78,251 +77,540 @@ function spawnRunner(spec: TimerSpec, seq: number): void {
 	}
 }
 
+/** The run lock is held by a live runner, or the session has not taken the previous fire's mail yet. */
+function runInFlight(spec: TimerSpec, root: string): boolean {
+	fs.mkdirSync(timerStateDir(spec.id, root), { recursive: true });
+	const lock = tryAcquireFileLock(runLockPath(spec.id, root));
+	if (!lock) return true;
+	lock.release();
+	return spec.action.kind === "prompt" && spec.target.kind === "session"
+		? hasPendingMailForTimer(spec.target.sessionId, spec.id)
+		: false;
+}
+
+export function defaultTickDeps(overrides: Partial<TickDeps> = {}): TickDeps {
+	return {
+		root: timersRoot(),
+		spawnRunner: spawnRunnerProcess,
+		runGate: (command, cwd) => runGate(command, cwd),
+		deliveryTarget,
+		inFlight: runInFlight,
+		notify: async alerts => {
+			if (alerts.length) await sendTimerAlerts(alerts, await loadTimerNotifyConfig());
+		},
+		...overrides,
+	};
+}
+
+/** Scheduling state for the spec's current generation: a re-armed timer starts fresh counters (seq continues). */
+export function currentState(spec: TimerSpec, state: TimerState): TimerState {
+	if (state.armedAt === spec.armedAt) return state;
+	return { seq: state.seq, runCount: 0, failStreak: 0, armedAt: spec.armedAt, streakResetAt: spec.resumedAt };
+}
+
+/** Thrown inside a write transaction when another writer moved the timer's state since it was read. */
+class StaleStateError extends Error {}
+
+interface TickContext {
+	db: TimerDb;
+	deps: TickDeps;
+	now: number;
+	at: string;
+	alerts: TimerAlert[];
+}
+
+interface FireInput {
+	seq: number;
+	slot?: number;
+	missedSlots: number;
+	trigger: RunTrigger;
+	data?: { source: "gate" | "fire"; text: string };
+	/** Promote this already-recorded `queued` run instead of inserting a new one. */
+	fromQueue?: boolean;
+}
+
+/** Commit the state change and run row together; a concurrent writer that got there first aborts this one. */
+function commit(ctx: TickContext, spec: TimerSpec, readSeq: number, state: TimerState, apply: () => void): void {
+	ctx.db.write(() => {
+		if (ctx.db.readState(spec.id).seq !== readSeq) throw new StaleStateError(spec.id);
+		apply();
+		ctx.db.writeState(spec.id, state);
+	});
+}
+
+function recordNonFire(
+	ctx: TickContext,
+	spec: TimerSpec,
+	readSeq: number,
+	state: TimerState,
+	input: {
+		slot?: number;
+		missedSlots?: number;
+		trigger: RunTrigger;
+		outcome: "missed" | "skipped-overlap" | "queued" | "gated-not-yet" | "failed";
+		gateExit?: number;
+		detail?: string;
+	},
+): string {
+	state.seq++;
+	const runId = `${spec.id}#${state.seq}`;
+	const seq = state.seq;
+	commit(ctx, spec, readSeq, state, () =>
+		ctx.db.insertRun(
+			spec.id,
+			{
+				runId,
+				seq,
+				at: ctx.at,
+				slot: input.slot !== undefined ? new Date(input.slot).toISOString() : undefined,
+				trigger: input.trigger,
+				outcome: input.outcome,
+				missedSlots: input.missedSlots || undefined,
+				gateExit: input.gateExit,
+				detail: input.detail,
+				rev: spec.rev,
+			},
+			false,
+		),
+	);
+	return runId;
+}
+
 /**
- * Commit one run (advance the ledger before dispatch), then hand it to its
- * delivery path. Returns the tick line describing what happened.
+ * Commit one fire (slot + run row first), then hand it to its delivery path:
+ * the session's mailbox (live session, or held), or the detached runner
+ * (shell, fresh agent, headless resume of a closed session).
  */
-async function dispatch(spec: TimerSpec, state: TimerState, input: DispatchInput, now: number): Promise<TickLine> {
-	const seq = state.seq + 1;
-	const runId = `${spec.id}#${seq}`;
-	const sessionTarget = spec.action.kind === "prompt" && spec.target.kind === "session" ? spec.target : undefined;
-	const at = new Date(now).toISOString();
-	const slot = input.slot !== undefined ? new Date(input.slot).toISOString() : undefined;
-	state.seq = seq;
-	if (input.slot !== undefined) state.lastSlot = input.slot;
+async function fire(
+	ctx: TickContext,
+	spec: TimerSpec,
+	readSeq: number,
+	state: TimerState,
+	input: FireInput,
+): Promise<TickLine> {
+	const { db, deps, now, at } = ctx;
+	const runId = `${spec.id}#${input.seq}`;
+	const sessionId =
+		spec.action.kind === "prompt" && spec.target.kind === "session" ? spec.target.sessionId : undefined;
+	const target = sessionId !== undefined ? deps.deliveryTarget(sessionId) : undefined;
+	const viaRunner = !target || (target.kind === "free" && spec.whenClosed === "resume");
 
-	// Overlap: the previous run still holds its run lock, or its mail is still unclaimed.
-	fs.mkdirSync(timerStateDir(spec.id), { recursive: true });
-	const runLock = tryAcquireFileLock(runLockPath(spec.id));
-	const overlapping =
-		!runLock || (sessionTarget !== undefined && (await hasPendingMailForTimer(sessionTarget.sessionId, spec.id)));
-	runLock?.release();
-	if (overlapping) {
-		record(state, runId, "skipped-overlap", now);
-		await writeTimerState(spec.id, state);
-		await appendLedger(spec.id, {
-			type: "run",
-			runId,
-			seq,
-			at,
-			slot,
-			trigger: input.trigger,
-			outcome: "skipped-overlap",
-		});
-		return { id: spec.id, action: "skipped-overlap", runId };
-	}
-
+	if (!input.fromQueue) state.seq = input.seq;
+	if (input.slot !== undefined) state.lastSlot = Math.max(state.lastSlot ?? input.slot, input.slot);
+	state.queued = undefined;
 	state.runCount++;
-	state.failStreak = 0;
-	record(state, runId, "fired", now);
 	const recurring = spec.every !== undefined && !spec.until;
 	if (input.trigger === "gate") state.done = { at, why: "gate-met" };
 	else if (input.trigger === "schedule" && !recurring) state.done = { at, why: "once" };
 	else if (spec.maxRuns !== undefined && state.runCount >= spec.maxRuns) state.done = { at, why: "max-runs" };
 	const next = state.done ? undefined : nextFireAt(spec, state, now);
+	const slotIso = input.slot !== undefined ? new Date(input.slot).toISOString() : undefined;
 	const payload: TimerFirePayload = {
 		timerId: spec.id,
 		runId,
-		seq,
+		seq: input.seq,
 		title: spec.title,
 		reason: spec.reason,
 		setAt: spec.created.at,
-		scheduledAt: input.trigger === "schedule" ? slot : undefined,
+		scheduledAt: input.trigger === "manual" ? undefined : slotIso,
 		firedAt: at,
 		trigger: input.trigger,
 		prompt: spec.action.kind === "prompt" ? spec.action.prompt : spec.action.command,
 		once: state.done !== undefined,
 		missedSlots: input.missedSlots || undefined,
-		data: input.gateOutput ? { source: "gate", text: input.gateOutput } : undefined,
+		data: input.data,
 		next: typeof next === "number" ? new Date(next).toISOString() : undefined,
+		nextIsGate: next === "gate" || undefined,
+		expiresAt: spec.expiresAt,
 	};
-	// Advance before dispatch: a crash after this point never re-fires the slot.
-	await writeTimerState(spec.id, state);
-	await appendLedger(spec.id, {
-		type: "run",
-		runId,
-		seq,
-		at,
-		slot,
-		trigger: input.trigger,
-		outcome: "fired",
-		missedSlots: input.missedSlots || undefined,
+	// The payload exists before the commit, so a re-dispatch after a crash finds it.
+	await Bun.write(firePayloadPath(spec.id, input.seq, deps.root), JSON.stringify(payload));
+	commit(ctx, spec, readSeq, state, () => {
+		if (input.fromQueue) db.promoteQueuedRun(runId, at, viaRunner);
+		else
+			db.insertRun(
+				spec.id,
+				{
+					runId,
+					seq: input.seq,
+					at,
+					slot: slotIso,
+					trigger: input.trigger,
+					outcome: "fired",
+					missedSlots: input.missedSlots || undefined,
+					rev: spec.rev,
+				},
+				viaRunner,
+			);
 	});
-
-	if (!sessionTarget) {
-		await Bun.write(firePayloadPath(spec.id, seq), JSON.stringify(payload));
-		spawnRunner(spec, seq);
-		return { id: spec.id, action: "fired", runId, detail: `runner (${spec.action.kind}, ${spec.target.kind})` };
-	}
-	await postMail({
-		v: 1,
-		id: runId,
-		kind: "timer-fire",
-		sessionId: sessionTarget.sessionId,
-		createdAt: at,
-		fire: payload,
-	});
-	if (hasLiveMailboxConsumer(sessionTarget.sessionId)) {
-		await appendLedger(spec.id, { type: "delivery", runId, at, state: "queued", session: sessionTarget.sessionId });
-		return { id: spec.id, action: "fired", runId, detail: `mailed to live session ${sessionTarget.sessionId}` };
-	}
-	if (spec.whenClosed === "hold") {
-		await appendLedger(spec.id, {
-			type: "delivery",
-			runId,
-			at,
-			state: "held",
-			session: sessionTarget.sessionId,
-			detail: "session not open; held until it opens",
-		});
-		return { id: spec.id, action: "fired", runId, detail: "held (session not open)" };
-	}
-	spawnRunner(spec, seq);
-	return { id: spec.id, action: "fired", runId, detail: `resuming session ${sessionTarget.sessionId} headless` };
+	const detail = await sideEffects(ctx, spec, payload, target, viaRunner);
+	db.markDispatched(runId, at);
+	return { id: spec.id, action: "fired", runId, detail };
 }
 
-async function tickOne(spec: TimerSpec, now: number): Promise<TickLine | undefined> {
-	const state = currentState(spec, await readTimerState(spec.id));
-	if (state.done || spec.paused) return undefined;
+async function sideEffects(
+	ctx: TickContext,
+	spec: TimerSpec,
+	payload: TimerFirePayload,
+	target: DeliveryTarget | undefined,
+	viaRunner: boolean,
+): Promise<string> {
+	const { db, deps, at } = ctx;
+	const runId = payload.runId;
+	if (!target || spec.target.kind !== "session") {
+		deps.spawnRunner(spec, payload.seq, deps.root);
+		return `runner (${spec.action.kind}, ${spec.target.kind})`;
+	}
+	const sessionId = spec.target.sessionId;
+	await postMail({ v: 1, id: runId, kind: "timer-fire", sessionId, createdAt: at, fire: payload });
+	if (target.kind === "live") {
+		db.recordDelivery(spec.id, { runId, at, state: "queued", session: sessionId });
+		return `mailed to live session ${sessionId}`;
+	}
+	if (viaRunner) {
+		deps.spawnRunner(spec, payload.seq, deps.root);
+		return `resuming session ${sessionId} headless`;
+	}
+	const why =
+		target.kind === "held"
+			? `session ${sessionId} is open in an omp that cannot take timer mail (${target.reason}); held`
+			: `session ${sessionId} is not open; held until it opens`;
+	db.recordDelivery(spec.id, { runId, at, state: "held", session: sessionId, detail: why });
+	ctx.alerts.push(...applyNotice(db, spec, "held", why, { runId, at, now: ctx.now }));
+	return why;
+}
+
+/** Re-run the side effect of a committed fire that never got one (crash between commit and dispatch). */
+async function redispatch(ctx: TickContext, spec: TimerSpec, run: RunView): Promise<TickLine | undefined> {
+	let payload: TimerFirePayload;
+	try {
+		payload = (await Bun.file(firePayloadPath(spec.id, run.seq, ctx.deps.root)).json()) as TimerFirePayload;
+	} catch (err) {
+		logger.warn("timer redispatch: payload missing", { runId: run.runId, error: String(err) });
+		ctx.db.markSettled(run.runId, ctx.at, "failed", "lost before dispatch: fire payload missing");
+		return { id: spec.id, action: "lost", runId: run.runId };
+	}
+	const target = spec.target.kind === "session" ? ctx.deps.deliveryTarget(spec.target.sessionId) : undefined;
+	const detail = await sideEffects(ctx, spec, payload, target, run.runner);
+	ctx.db.markDispatched(run.runId, ctx.at);
+	return { id: spec.id, action: "redispatched", runId: run.runId, detail };
+}
+
+/**
+ * Apply finished runs to the failure policy, oldest first. Returns the pause
+ * reason when the streak reached `pauseAfter`.
+ */
+async function settleRuns(
+	ctx: TickContext,
+	spec: TimerSpec,
+	state: TimerState,
+	lines: TickLine[],
+): Promise<string | undefined> {
+	const { db, deps, now, at } = ctx;
+	let pauseReason: string | undefined;
+	for (const run of db.unsettledRuns(spec.id)) {
+		let error: string | undefined;
+		let lost = false;
+		if (run.end?.at !== undefined) {
+			if (run.end.ok !== true) {
+				error = run.end.detail ?? (run.end.exitCode !== undefined ? `exit ${run.end.exitCode}` : "failed");
+			}
+		} else if (
+			!run.runner &&
+			(run.delivery?.state === "delivered-live" || run.delivery?.state === "resumed-headless")
+		) {
+			// A live session took the mail: the turn is the session's own, so the fire succeeded.
+		} else if (!run.dispatchedAt) {
+			if (now - Date.parse(run.at) >= REDISPATCH_AFTER_MS) {
+				const line = await redispatch(ctx, spec, run);
+				if (line) lines.push(line);
+			}
+			continue;
+		} else if (run.runner && now - Date.parse(run.dispatchedAt) >= LOST_AFTER_MS && !deps.inFlight(spec, deps.root)) {
+			lost = true;
+			error = run.end?.startedAt
+				? "lost: the runner exited without recording a result"
+				: "lost: the runner never started";
+		} else {
+			continue; // still in flight
+		}
+		if (error === undefined) {
+			applySuccess(db, spec, state, at);
+			db.markSettled(run.runId, at);
+			continue;
+		}
+		const outcome = applyFailure(db, spec, state, {
+			runId: run.runId,
+			error,
+			at,
+			now,
+			final: !spec.every && !spec.until,
+			logPath: runLogPath(spec.id, run.seq, deps.root),
+		});
+		ctx.alerts.push(...outcome.alerts);
+		pauseReason ??= outcome.pauseReason;
+		db.markSettled(run.runId, at, lost ? "failed" : undefined, lost ? error : undefined);
+		if (lost) lines.push({ id: spec.id, action: "lost", runId: run.runId, detail: error });
+	}
+	return pauseReason;
+}
+
+async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
+	const { db, deps, now, at } = ctx;
+	const lines: TickLine[] = [];
+	const stored = db.readState(spec.id);
+	const readSeq = stored.seq;
+	const state = currentState(spec, stored);
+	if (spec.resumedAt && spec.resumedAt !== state.streakResetAt) {
+		state.failStreak = 0;
+		state.streakResetAt = spec.resumedAt;
+		db.resolveIncidents(spec.id, at);
+	}
+
+	const pauseReason = await settleRuns(ctx, spec, state, lines);
+	if (pauseReason && !spec.paused) {
+		commit(ctx, spec, readSeq, state, () => {});
+		await mutateTimerSpec(
+			spec.id,
+			current => (current ? { ...current, paused: true, pausedReason: pauseReason } : undefined),
+			{ root: deps.root },
+		);
+		lines.push({ id: spec.id, action: "paused", detail: pauseReason });
+		return lines;
+	}
+	if (state.done || spec.paused) {
+		if (JSON.stringify(state) !== JSON.stringify(stored)) commit(ctx, spec, readSeq, state, () => {});
+		return lines;
+	}
+
+	if (state.queued) {
+		if (!deps.inFlight(spec, deps.root)) {
+			const queued = state.queued;
+			lines.push(
+				await fire(ctx, spec, readSeq, state, {
+					seq: queued.seq,
+					slot: queued.slot,
+					missedSlots: queued.missedSlots,
+					// A queued manual fire has no slot; it stays manual so it never consumes the schedule.
+					trigger: queued.slot === undefined ? "manual" : "schedule",
+					fromQueue: true,
+				}),
+			);
+			return lines;
+		}
+	}
+
 	const decision = decideDue(spec, state, now);
-	const at = new Date(now).toISOString();
 	switch (decision.kind) {
 		case "idle":
-			if (state.armedAt !== spec.created.at) await writeTimerState(spec.id, state);
-			return undefined;
-		case "retire":
+			if (JSON.stringify(state) !== JSON.stringify(stored)) commit(ctx, spec, readSeq, state, () => {});
+			return lines;
+		case "retire": {
 			state.done = { at, why: decision.why };
-			await writeTimerState(spec.id, state);
-			return { id: spec.id, action: "retired", detail: decision.why };
+			commit(ctx, spec, readSeq, state, () => {});
+			if (decision.why === "expired" && spec.until && state.runCount === 0) {
+				ctx.alerts.push(
+					...applyNotice(
+						db,
+						spec,
+						"expired",
+						`expired without its condition holding: ${spec.condition ?? spec.until}`,
+						{
+							at,
+							now,
+						},
+					),
+				);
+			}
+			lines.push({ id: spec.id, action: "retired", detail: decision.why });
+			return lines;
+		}
 		case "missed": {
-			state.seq++;
-			const runId = `${spec.id}#${state.seq}`;
 			state.lastSlot = decision.slot;
-			record(state, runId, "missed", now);
-			if (!spec.every) state.done = { at, why: "once" };
-			await writeTimerState(spec.id, state);
-			await appendLedger(spec.id, {
-				type: "run",
-				runId,
-				seq: state.seq,
-				at,
-				slot: new Date(decision.slot).toISOString(),
+			if (!spec.every) state.done = { at, why: "missed" };
+			const late = now - decision.slot;
+			const detail = `${Math.round(late / MINUTE)}m late, past its grace; not run`;
+			const runId = recordNonFire(ctx, spec, readSeq, state, {
+				slot: decision.slot,
+				missedSlots: decision.missedSlots,
 				trigger: "schedule",
 				outcome: "missed",
-				missedSlots: decision.missedSlots || undefined,
-				detail: "later than the late limit; not run",
+				detail,
 			});
-			return { id: spec.id, action: "missed", runId };
+			ctx.alerts.push(
+				...applyNotice(db, spec, "missed", `missed the ${new Date(decision.slot).toISOString()} run (${detail})`, {
+					runId,
+					at,
+					now,
+				}),
+			);
+			lines.push({ id: spec.id, action: "missed", runId, detail });
+			return lines;
 		}
 		case "due":
 			break;
 	}
+
 	if (!spec.until) {
-		return dispatch(
-			spec,
-			state,
-			{ slot: decision.slot, missedSlots: decision.missedSlots, trigger: "schedule" },
-			now,
+		if (deps.inFlight(spec, deps.root)) {
+			const queue = spec.overlap === "queue" && !state.queued;
+			state.lastSlot = decision.slot;
+			if (queue) state.queued = { seq: state.seq + 1, slot: decision.slot, missedSlots: decision.missedSlots };
+			const runId = recordNonFire(ctx, spec, readSeq, state, {
+				slot: decision.slot,
+				missedSlots: decision.missedSlots,
+				trigger: "schedule",
+				outcome: queue ? "queued" : "skipped-overlap",
+				detail: queue ? "previous run still in flight; runs when it ends" : "previous run still in flight",
+			});
+			lines.push({ id: spec.id, action: queue ? "queued" : "skipped-overlap", runId });
+			return lines;
+		}
+		lines.push(
+			await fire(ctx, spec, readSeq, state, {
+				seq: state.seq + 1,
+				slot: decision.slot,
+				missedSlots: decision.missedSlots,
+				trigger: "schedule",
+			}),
 		);
+		return lines;
 	}
 
-	const verdict = await runGate(spec.until, spec.cwd);
+	// Condition timer: the gate runs outside any transaction (it may take up to its timeout).
+	const verdict = await deps.runGate(spec.until, spec.cwd);
 	state.gate = {
 		checks: (state.gate?.checks ?? 0) + 1,
 		lastCheckAt: at,
 		lastExit: verdict.kind === "met" ? 0 : verdict.kind === "not-yet" ? 1 : verdict.exitCode,
 	};
 	if (verdict.kind === "met") {
-		return dispatch(
-			spec,
-			state,
-			{ slot: decision.slot, missedSlots: 0, trigger: "gate", gateOutput: verdict.output || undefined },
-			now,
+		lines.push(
+			await fire(ctx, spec, readSeq, state, {
+				seq: state.seq + 1,
+				slot: decision.slot,
+				missedSlots: 0,
+				trigger: "gate",
+				data: verdict.output ? { source: "gate", text: verdict.output } : undefined,
+			}),
 		);
+		return lines;
 	}
 	state.lastSlot = decision.slot;
 	if (verdict.kind === "not-yet") {
-		// Quiet: one ledger line per streak of "not yet", the count lives in state.gate.
-		const streaking = state.last?.outcome === "gated-not-yet";
-		if (!streaking) {
-			state.seq++;
-			const runId = `${spec.id}#${state.seq}`;
-			record(state, runId, "gated-not-yet", now);
-			await appendLedger(spec.id, {
-				type: "run",
-				runId,
-				seq: state.seq,
-				at,
-				slot: new Date(decision.slot).toISOString(),
+		// A healthy check ends a failure streak. Quiet: one run row per streak of "not yet"; the count lives in state.
+		state.failStreak = 0;
+		const latest = db.listRuns(spec.id, 1)[0];
+		if (latest?.outcome === "gated-not-yet" && latest.rev === spec.rev) commit(ctx, spec, readSeq, state, () => {});
+		else
+			recordNonFire(ctx, spec, readSeq, state, {
+				slot: decision.slot,
 				trigger: "gate",
 				outcome: "gated-not-yet",
 				gateExit: 1,
 			});
-		}
-		await writeTimerState(spec.id, state);
-		return { id: spec.id, action: "gated-not-yet", detail: `check #${state.gate.checks}` };
+		lines.push({ id: spec.id, action: "gated-not-yet", detail: `check #${state.gate.checks}` });
+		return lines;
 	}
-	state.seq++;
-	const runId = `${spec.id}#${state.seq}`;
-	state.failStreak++;
-	record(state, runId, "failed", now);
-	const detail = verdict.timedOut
+	const error = verdict.timedOut
 		? "gate timed out"
-		: `gate exit ${verdict.exitCode ?? "?"}${verdict.output ? `: ${firstLine(verdict.output)}` : ""}`;
-	if (state.failStreak >= PAUSE_AFTER_FAILURES) state.done = { at, why: "failures" };
-	await writeTimerState(spec.id, state);
-	await appendLedger(spec.id, {
-		type: "run",
-		runId,
-		seq: state.seq,
-		at,
-		slot: new Date(decision.slot).toISOString(),
+		: `gate exit ${verdict.exitCode ?? "?"}${verdict.output ? `: ${firstErrorLine(verdict.output)}` : ""}`;
+	const runId = `${spec.id}#${state.seq + 1}`;
+	const outcome = applyFailure(db, spec, state, { runId, error, at, now, final: false });
+	ctx.alerts.push(...outcome.alerts);
+	recordNonFire(ctx, spec, readSeq, state, {
+		slot: decision.slot,
 		trigger: "gate",
 		outcome: "failed",
 		gateExit: verdict.exitCode,
-		detail,
+		detail: error,
 	});
-	return { id: spec.id, action: "failed", runId, detail };
+	db.markSettled(runId, at);
+	lines.push({ id: spec.id, action: "failed", runId, detail: error });
+	if (outcome.pauseReason) {
+		await mutateTimerSpec(
+			spec.id,
+			current => (current ? { ...current, paused: true, pausedReason: outcome.pauseReason } : undefined),
+			{ root: deps.root },
+		);
+		lines.push({ id: spec.id, action: "paused", detail: outcome.pauseReason });
+	}
+	return lines;
 }
 
-function takeTickLock(): FileLockHandle | null {
-	fs.mkdirSync(timersRoot(), { recursive: true });
-	return tryAcquireFileLock(tickLockPath());
+function takeTickLock(root: string): FileLockHandle | null {
+	fs.mkdirSync(root, { recursive: true });
+	return tryAcquireFileLock(tickLockPath(root));
 }
 
-export async function runTick(now = Date.now()): Promise<TickReport> {
+export async function runTick(now = Date.now(), overrides: Partial<TickDeps> = {}): Promise<TickReport> {
+	const deps = defaultTickDeps(overrides);
 	const at = new Date(now).toISOString();
-	const lock = takeTickLock();
-	if (!lock) return { at, locked: true, lines: [] };
+	const lock = takeTickLock(deps.root);
+	if (!lock) return { at, locked: true, lines: [], alerts: [] };
+	const ctx: TickContext = { db: openTimerDb(deps.root), deps, now, at, alerts: [] };
+	const lines: TickLine[] = [];
 	try {
-		const { specs, errors } = await listTimerSpecs();
-		const lines: TickLine[] = errors.map(({ id, error }) => ({ id, action: "invalid-spec", detail: error }));
+		const { specs, errors } = await listTimerSpecs(deps.root);
+		for (const { id, error } of errors) lines.push({ id, action: "invalid-spec", detail: error });
 		for (const spec of specs) {
 			try {
-				const line = await tickOne(spec, now);
-				if (line) lines.push(line);
+				lines.push(...(await tickOne(ctx, spec)));
 			} catch (err) {
+				if (err instanceof StaleStateError) {
+					lines.push({ id: spec.id, action: "raced", detail: "another writer decided this timer first" });
+					continue;
+				}
 				logger.error("timer tick failed", { id: spec.id, error: String(err) });
 				lines.push({ id: spec.id, action: "error", detail: err instanceof Error ? err.message : String(err) });
 			}
 		}
-		await Bun.write(tickerStatusPath(), JSON.stringify({ lastTickAt: at, pid: process.pid }));
-		return { at, locked: false, lines };
+		ctx.db.writeHeartbeat({ lastTickAt: at, pid: process.pid, version: VERSION });
 	} finally {
 		lock.release();
 	}
+	// Alerts go out after the lock is released: a slow sink never delays the next tick.
+	await deps.notify(ctx.alerts);
+	return { at, locked: false, lines, alerts: ctx.alerts };
+}
+
+export interface FireNowOptions {
+	/** Untrusted text handed to the run, fenced as `<timer-data source="fire">`. */
+	data?: string;
+	deps?: Partial<TickDeps>;
 }
 
 /** Run a timer now, outside its schedule. Waits (bounded) for a running tick to finish. */
-export async function fireTimerNow(id: string, now = Date.now()): Promise<TickLine> {
-	fs.mkdirSync(timersRoot(), { recursive: true });
-	const lock = await acquireFileLock(tickLockPath(), { retries: 600, retryDelayMs: 100 });
+export async function fireTimerNow(id: string, now = Date.now(), options: FireNowOptions = {}): Promise<TickLine> {
+	const deps = defaultTickDeps(options.deps);
+	await assertTimerMutationAllowed(id, "fire", deps.root);
+	fs.mkdirSync(deps.root, { recursive: true });
+	const lock = await acquireFileLock(tickLockPath(deps.root), { retries: 600, retryDelayMs: 100 });
+	const ctx: TickContext = { db: openTimerDb(deps.root), deps, now, at: new Date(now).toISOString(), alerts: [] };
 	try {
-		const spec = await readTimerSpec(id);
+		const spec = await readTimerSpec(id, deps.root);
 		if (!spec) throw new Error(`No timer "${id}"`);
-		const state = currentState(spec, await readTimerState(id));
-		return await dispatch(spec, state, { missedSlots: 0, trigger: "manual" }, now);
+		const stored = ctx.db.readState(id);
+		const state = currentState(spec, stored);
+		if (deps.inFlight(spec, deps.root)) {
+			const queue = spec.overlap === "queue" && !state.queued;
+			if (queue) state.queued = { seq: state.seq + 1, missedSlots: 0 };
+			const runId = recordNonFire(ctx, spec, stored.seq, state, {
+				trigger: "manual",
+				outcome: queue ? "queued" : "skipped-overlap",
+				detail: "previous run still in flight",
+			});
+			return { id, action: queue ? "queued" : "skipped-overlap", runId, detail: "previous run still in flight" };
+		}
+		// A manual fire never consumes the schedule (only maxRuns counts it).
+		return await fire(ctx, spec, stored.seq, state, {
+			seq: state.seq + 1,
+			missedSlots: 0,
+			trigger: "manual",
+			data: options.data ? { source: "fire", text: options.data } : undefined,
+		});
 	} finally {
 		lock.release();
+		await deps.notify(ctx.alerts);
 	}
 }

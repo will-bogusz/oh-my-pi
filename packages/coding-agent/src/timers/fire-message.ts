@@ -1,8 +1,11 @@
 import { prompt } from "@oh-my-pi/pi-utils";
 import timerFireTemplate from "../prompts/session/timer-fire.md" with { type: "text" };
 import timerPokeTemplate from "../prompts/session/timer-poke.md" with { type: "text" };
-import { formatDuration } from "./schedule";
+import { formatDuration, MINUTE } from "./schedule";
 import type { TimerMail } from "./types";
+
+/** Lateness the envelope calls out, so the model re-checks a stale instruction before acting on it. */
+const NOTABLY_LATE_MS = 10 * MINUTE;
 
 export const TIMER_FIRE_MESSAGE_TYPE = "timer-fire";
 export const SESSION_POKE_MESSAGE_TYPE = "session-poke";
@@ -58,13 +61,16 @@ export function renderTimerMail(mail: TimerMail, via: TimerDeliveryVia, now: num
 	if (!fire) throw new Error(`Mail ${mail.id} has no payload`);
 	const firedAt = Date.parse(fire.firedAt);
 	const scheduledAt = fire.scheduledAt ? Date.parse(fire.scheduledAt) : undefined;
+	const lateMs = Math.max(0, now - (scheduledAt ?? firedAt));
 	return prompt.render(timerFireTemplate, {
 		timerId: fire.timerId,
 		seq: fire.seq,
 		scheduled: scheduledAt !== undefined ? formatWallClock(scheduledAt, tz) : undefined,
 		fired: formatWallClock(firedAt, tz),
-		late: formatDuration(Math.max(0, now - (scheduledAt ?? firedAt))),
+		late: formatDuration(lateMs),
+		notablyLate: lateMs >= NOTABLY_LATE_MS,
 		via,
+		headless: via === "headless",
 		now: formatWallClock(now, tz),
 		setAt: formatWallClock(Date.parse(fire.setAt), tz),
 		reason: fire.reason,
@@ -73,7 +79,10 @@ export function renderTimerMail(mail: TimerMail, via: TimerDeliveryVia, now: num
 		prompt: fire.prompt,
 		data: fire.data ? fenceUntrusted(fire.data.text, "timer-data") : undefined,
 		dataSource: fire.data?.source,
+		dataFromGate: fire.data?.source === "gate",
 		once: fire.once,
 		next: fire.next ? formatWallClock(Date.parse(fire.next), tz) : undefined,
+		nextIsGate: fire.nextIsGate,
+		expires: fire.expiresAt && !fire.once ? formatWallClock(Date.parse(fire.expiresAt), tz) : undefined,
 	});
 }

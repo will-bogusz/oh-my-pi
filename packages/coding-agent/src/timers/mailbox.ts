@@ -10,6 +10,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { type FileLockHandle, isEnoent, tryAcquireFileLock } from "@oh-my-pi/pi-utils";
+import { tryAcquireSessionLease } from "../session/session-storage";
 import { mailDir, mailLivePath } from "./paths";
 import type { TimerMail } from "./types";
 
@@ -85,11 +86,15 @@ export async function completeMail(sessionId: string, name: string): Promise<voi
 }
 
 /** Whether a message for `timerId` is still unclaimed (overlap: the session hasn't taken the last one). */
-export async function hasPendingMailForTimer(sessionId: string, timerId: string): Promise<boolean> {
-	for (const name of await listNewMail(sessionId)) {
-		if (name.startsWith(`${timerId}#`)) return true;
+export function hasPendingMailForTimer(sessionId: string, timerId: string): boolean {
+	let names: string[];
+	try {
+		names = fs.readdirSync(path.join(mailDir(sessionId), "new"));
+	} catch (err) {
+		if (isEnoent(err)) return false;
+		throw err;
 	}
-	return false;
+	return names.some(name => name.startsWith(`${timerId}#`));
 }
 
 /** Take the live-consumer lease for a session's mailbox; `null` while another process holds it. */
@@ -105,4 +110,22 @@ export function hasLiveMailboxConsumer(sessionId: string): boolean {
 	if (!lease) return true;
 	lease.release();
 	return false;
+}
+
+/**
+ * Who can take a fire for this session right now. Engine-branch stub of the
+ * Delivery worker's presence-based `deliveryTarget` (same shape); the merge
+ * takes the Delivery implementation.
+ */
+export type DeliveryTarget =
+	| { kind: "live"; pid?: number }
+	| { kind: "held"; reason: "no-watcher" | "foreign-owner"; pid?: number }
+	| { kind: "free" };
+
+export function deliveryTarget(sessionId: string): DeliveryTarget {
+	if (hasLiveMailboxConsumer(sessionId)) return { kind: "live" };
+	const lease = tryAcquireSessionLease(sessionId);
+	if (!lease) return { kind: "held", reason: "no-watcher" };
+	lease.release();
+	return { kind: "free" };
 }

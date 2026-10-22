@@ -4,6 +4,7 @@
 
 ### Added
 
+- `omp timer install|uninstall|doctor` sets up and checks the once-a-minute ticker (launchd on macOS, a systemd user timer on Linux); timers now catch up missed slots with one late run, record runs past their grace as missed, pause after 3 consecutive failures with a single alert (`timer.notify` desktop notification and/or `timer.alertCommand`), and gain `edit`, `logs`, `fire --data`, `--when` (Tern-style schedules), `--overlap queue` and `--json` on every verb
 - Anthropic web search and Files API uploads follow `PI_ANTHROPIC_API_VERSION=2026-10-21`; web search omits `temperature` under that version ([#16706](https://github.com/can1357/oh-my-pi/pull/16706) by [@H4vC](https://github.com/H4vC))
 
 ## [18.12.6] - 2026-10-21

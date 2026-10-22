@@ -5,12 +5,12 @@
  */
 import { formatWallClock } from "./fire-message";
 import { formatDuration } from "./schedule";
-import type { TickerStatus, TimerRow } from "./service";
-import type { RunView } from "./store";
+import type { TimerRow } from "./service";
+import type { RunView, TickerStatus } from "./store";
 import type { TimerSpec } from "./types";
 
 /** A tick older than this means no ticker is running. */
-const TICKER_STALE_MS = 3 * 60_000;
+export const TICKER_STALE_MS = 3 * 60_000;
 
 function oneLine(text: string, max: number): string {
 	const flat = text.replace(/\s+/g, " ").trim();
@@ -19,15 +19,20 @@ function oneLine(text: string, max: number): string {
 
 export function describeNext(row: TimerRow, now: number): string {
 	if (row.status === "done") return `done (${row.state.done?.why ?? "?"})`;
-	if (row.status === "paused") return "paused";
+	if (row.status === "paused") {
+		const reason =
+			row.spec.pausedReason && row.spec.pausedReason !== "user" ? `: ${oneLine(row.spec.pausedReason, 60)}` : "";
+		return `paused${reason}`;
+	}
 	if (row.next === "gate") return "when gate passes (checked each minute)";
 	if (row.next === undefined) return "—";
 	const delta = row.next - now;
 	return `${formatWallClock(row.next, row.spec.tz)} (${delta >= 0 ? `in ${formatDuration(delta)}` : `${formatDuration(-delta)} overdue`})`;
 }
 
-function describeCadence(spec: TimerSpec): string {
+export function describeCadence(spec: TimerSpec): string {
 	if (spec.every) return `every ${spec.every}`;
+	if (spec.until) return "once, when its condition holds";
 	return "once";
 }
 
@@ -42,19 +47,22 @@ export function describeAction(spec: TimerSpec, selfSessionId?: string): string 
 
 export function describeTicker(ticker: TickerStatus, now: number): string {
 	if (!ticker.lastTickAt) {
-		return "⚠ no tick recorded yet: timers fire only when `omp timer tick` runs (once a minute from an OS unit)";
+		return "⚠ no tick recorded yet: timers fire only when `omp timer tick` runs — run `omp timer install`";
 	}
 	const age = now - Date.parse(ticker.lastTickAt);
 	const text = `last tick ${formatDuration(age)} ago`;
-	return age > TICKER_STALE_MS ? `⚠ ${text}: no ticker is running, nothing fires until one does` : text;
+	return age > TICKER_STALE_MS
+		? `⚠ ${text}: no ticker is running, nothing fires until one does (\`omp timer doctor\`)`
+		: text;
 }
 
-function describeRun(run: RunView | undefined): string {
+export function describeRun(run: RunView | undefined): string {
 	if (!run) return "never ran";
 	const delivery = run.delivery ? ` · ${run.delivery.state}` : "";
-	const end = run.end
-		? ` · ${run.end.ok ? "ok" : `failed${run.end.detail ? `: ${oneLine(run.end.detail, 60)}` : ""}`}`
-		: "";
+	const end =
+		run.end?.ok !== undefined
+			? ` · ${run.end.ok ? "ok" : `failed${run.end.detail ? `: ${oneLine(run.end.detail, 60)}` : ""}`}`
+			: "";
 	return `${run.outcome} ${run.at}${delivery}${end}`;
 }
 
@@ -64,12 +72,15 @@ export interface CardOptions {
 	ticker: TickerStatus;
 	gateNow?: "met" | "not-yet" | "broken";
 	gateDetail?: string;
+	warnings?: string[];
+	platform?: NodeJS.Platform;
 }
 
 /** Compact multi-line card; the same text goes to the model and to the CLI. */
 export function renderTimerCard(row: TimerRow, now: number, options: CardOptions): string {
 	const { spec } = row;
-	const lines = [`timer ${spec.id} ${options.verb} — ${describeNext(row, now)}, ${describeCadence(spec)}`];
+	const verb = options.verb ? ` ${options.verb}` : "";
+	const lines = [`timer ${spec.id}${verb} (rev ${spec.rev}) — ${describeNext(row, now)}, ${describeCadence(spec)}`];
 	lines.push(`does   ${describeAction(spec, options.selfSessionId)}`);
 	if (spec.until) {
 		const gateNow = options.gateNow
@@ -81,18 +92,27 @@ export function renderTimerCard(row: TimerRow, now: number, options: CardOptions
 	const limits = [
 		spec.expiresAt ? `expires ${formatWallClock(Date.parse(spec.expiresAt), spec.tz)}` : undefined,
 		spec.maxRuns !== undefined ? `max ${spec.maxRuns} runs` : undefined,
+		spec.every ? `overlap ${spec.overlap}` : undefined,
+		`pauses after ${spec.pauseAfter} failures`,
 		row.state.runCount ? `${row.state.runCount} run(s) so far` : undefined,
 	].filter(Boolean);
-	if (limits.length) lines.push(`limits ${limits.join(" · ")}`);
+	lines.push(`limits ${limits.join(" · ")}`);
 	lines.push(`why    ${oneLine(spec.reason, 120)}`);
 	lines.push(`last   ${describeRun(row.lastRun)}`);
+	for (const incident of row.incidents) {
+		lines.push(`⚠ open incident ×${incident.count} since ${incident.firstAt}: ${oneLine(incident.summary, 90)}`);
+	}
 	lines.push(`ticker ${describeTicker(options.ticker, now)}`);
-	if (options.gateNow === "broken") lines.push("⚠ the gate failed its dry run; it will count as a failure each tick");
+	if (options.gateNow === "broken") lines.push("⚠ the gate failed its test run; it counts as a failure each tick");
 	if (options.gateNow === "met") {
 		lines.push(
 			"⚠ the condition already holds: this fires at the next tick. If you meant to wait for a change, fix the check.",
 		);
 	}
+	if ((options.platform ?? process.platform) === "darwin" && (spec.at || spec.every) && !spec.wakeMachine) {
+		lines.push("⚠ a sleeping Mac runs this late, on wake (missed if past its grace)");
+	}
+	for (const warning of options.warnings ?? []) lines.push(`⚠ ${warning}`);
 	lines.push(`manage timer {op:"show"|"fire"|"pause"|"remove", id:"${spec.id}"}`);
 	return lines.join("\n");
 }
@@ -102,7 +122,7 @@ export function renderTimerTable(rows: TimerRow[], now: number, ticker: TickerSt
 	const header = ["ID", "STATUS", "NEXT", "LAST", "ORIGIN", "REASON"];
 	const body = rows.map(row => [
 		row.spec.id,
-		row.status,
+		row.incidents.length ? `${row.status}⚠` : row.status,
 		describeNext(row, now),
 		row.lastRun ? `${row.lastRun.outcome}${row.lastRun.delivery ? `/${row.lastRun.delivery.state}` : ""}` : "—",
 		row.spec.created.session ?? row.spec.created.by,
@@ -123,13 +143,15 @@ export function renderRuns(runs: RunView[]): string {
 	return runs
 		.map(run => {
 			const parts = [`#${run.seq}`, run.at, run.trigger, run.outcome];
-			if (run.missedSlots) parts.push(`missed ${run.missedSlots}`);
+			if (run.slot && run.trigger !== "manual") parts.push(`slot ${run.slot}`);
+			if (run.missedSlots) parts.push(`coalesced ${run.missedSlots} missed`);
 			if (run.delivery)
 				parts.push(`delivery=${run.delivery.state}${run.delivery.detail ? ` (${run.delivery.detail})` : ""}`);
-			if (run.end)
+			if (run.end?.ok !== undefined)
 				parts.push(
-					`end=${run.end.ok ? "ok" : "failed"} ${formatDuration(run.end.durationMs)}${run.end.detail ? ` (${oneLine(run.end.detail, 80)})` : ""}`,
+					`end=${run.end.ok ? "ok" : "failed"} ${formatDuration(run.end.durationMs ?? 0)}${run.end.detail ? ` (${oneLine(run.end.detail, 80)})` : ""}`,
 				);
+			else if (run.end?.startedAt) parts.push("running");
 			if (run.detail) parts.push(run.detail);
 			return parts.join("  ");
 		})
