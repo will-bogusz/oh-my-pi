@@ -313,15 +313,18 @@ export async function runTick(now = Date.now()): Promise<TickReport> {
 	}
 }
 
-/** Run a timer now, outside its schedule. Waits (bounded) for a running tick to finish. */
-export async function fireTimerNow(id: string, now = Date.now()): Promise<TickLine> {
+/**
+ * Run a timer now, outside its schedule. Waits (bounded) for a running tick to finish.
+ * `data` reaches the run fenced as untrusted, like gate output.
+ */
+export async function fireTimerNow(id: string, now = Date.now(), options: { data?: string } = {}): Promise<TickLine> {
 	fs.mkdirSync(timersRoot(), { recursive: true });
 	const lock = await acquireFileLock(tickLockPath(), { retries: 600, retryDelayMs: 100 });
 	try {
 		const spec = await readTimerSpec(id);
 		if (!spec) throw new Error(`No timer "${id}"`);
 		const state = currentState(spec, await readTimerState(id));
-		return await dispatch(spec, state, { missedSlots: 0, trigger: "manual" }, now);
+		return await dispatch(spec, state, { missedSlots: 0, trigger: "manual", gateOutput: options.data }, now);
 	} finally {
 		lock.release();
 	}

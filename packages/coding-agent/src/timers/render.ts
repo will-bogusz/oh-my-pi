@@ -26,7 +26,7 @@ export function describeNext(row: TimerRow, now: number): string {
 	return `${formatWallClock(row.next, row.spec.tz)} (${delta >= 0 ? `in ${formatDuration(delta)}` : `${formatDuration(-delta)} overdue`})`;
 }
 
-function describeCadence(spec: TimerSpec): string {
+export function describeCadence(spec: TimerSpec): string {
 	if (spec.every) return `every ${spec.every}`;
 	return "once";
 }
@@ -49,7 +49,7 @@ export function describeTicker(ticker: TickerStatus, now: number): string {
 	return age > TICKER_STALE_MS ? `⚠ ${text}: no ticker is running, nothing fires until one does` : text;
 }
 
-function describeRun(run: RunView | undefined): string {
+export function describeRun(run: RunView | undefined): string {
 	if (!run) return "never ran";
 	const delivery = run.delivery ? ` · ${run.delivery.state}` : "";
 	const end = run.end
