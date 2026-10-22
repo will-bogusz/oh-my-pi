@@ -46098,7 +46098,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T12:43:14Z",
+  "checked": "2026-10-22T13:13:51Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -46594,14 +46594,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-15T12:45:10Z",
-    "kind": "merged",
-    "number": 15791,
-    "title": "fix(agent,ai): count the reasoning the latest Claude turn replays when picking the compaction cut point",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-10-15T13:16:09Z",
     "kind": "merged",
