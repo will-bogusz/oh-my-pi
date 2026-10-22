@@ -5077,9 +5077,47 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-right-click-per-press",
    "host": "MacBook-Pro",
    "added": "2026-10-18T16:33:04Z",
-   "updated": "2026-10-22T07:31:44Z",
+   "updated": "2026-10-22T07:43:59Z",
    "note": "rebuild after #16206 merges: lift its 'a background right or middle click checks only before it starts' doc qualification in docs/computer-use.md and docs/tools/computer.md",
-   "advanced": "2026-10-22T07:07:54Z"
+   "advanced": "2026-10-22T07:07:54Z",
+   "built": [
+    {
+     "with": "#16223",
+     "code": "802010bb58f730941ce7c27b41591fde95c707d5",
+     "with_code": "6c9560b3c987266a48b5df24d92139e578a0c9be",
+     "tip": "e2feeeef2440e6442aded0638b856713e28ae8ef",
+     "with_tip": "c67722be4697e9b39b822e16f8a3ee514fc59f06",
+     "at": "2026-10-22T07:43:52Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16403",
+     "code": "802010bb58f730941ce7c27b41591fde95c707d5",
+     "with_code": "4d4a30a232814eb81d4d7878ba761b19c9f509ab",
+     "tip": "e2feeeef2440e6442aded0638b856713e28ae8ef",
+     "with_tip": "37725af1bcbbb5a8216d8f2b226779cff4f59800",
+     "at": "2026-10-22T07:43:58Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16608",
+     "code": "802010bb58f730941ce7c27b41591fde95c707d5",
+     "with_code": "8ebb6a17ca7a8525a3cfed4d918ac5e52fef393d",
+     "tip": "e2feeeef2440e6442aded0638b856713e28ae8ef",
+     "with_tip": "5a0e619cab970cce1e545901bc699c31cb5aa5e1",
+     "at": "2026-10-22T07:43:58Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "computer-element-front-first",
+     "code": "802010bb58f730941ce7c27b41591fde95c707d5",
+     "with_code": "44469f738df3dd0c20e0a4e967d9667da9401da3",
+     "tip": "e2feeeef2440e6442aded0638b856713e28ae8ef",
+     "with_tip": "8f5a604f393b5bf8e864ab9e6a72ea1e281ceed2",
+     "at": "2026-10-22T07:43:58Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "refind-cancel-root",
