@@ -5,6 +5,7 @@
  * The comparison is lexical and deliberately coarse: a false alarm costs one
  * repeated call, a missed duplicate costs a second wake-up for every fire.
  */
+import { typedCondition } from "./conditions";
 import type { TimerSpec } from "./types";
 
 /** Words that say nothing about which job a timer does. */
@@ -54,23 +55,31 @@ function intersects(a: Set<string>, b: Set<string>): boolean {
 	return sharedCount(a, b) > 0;
 }
 
-function jobText(spec: Pick<TimerSpec, "action" | "reason">): string {
+/**
+ * What the timer does, in words: its action, its condition as read (`CI on o/r#479 finished`; the compiled
+ * `--ci`/`--pid` gate is template shell every such timer shares, so only a hand-written check counts), and its reason.
+ */
+function jobText(spec: Pick<TimerSpec, "action" | "condition" | "until" | "reason">): string {
 	const action = spec.action.kind === "shell" ? spec.action.command : spec.action.prompt;
-	return `${action} ${spec.reason}`;
+	return `${action} ${spec.condition ?? spec.until ?? ""} ${spec.reason}`;
 }
 
 /**
  * The existing timer that `candidate` most plausibly duplicates, if any: the
- * same action kind about the same things (shared distinctive tokens, or most
- * content words in common), more readily at the same cadence.
+ * same condition, or the same action kind about the same things (shared
+ * distinctive tokens, or most content words in common), more readily at the same cadence.
+ * Two different typed CI or process conditions are different jobs, whatever their labels share.
  */
 export function findDuplicateTimer(candidate: TimerSpec, existing: readonly TimerSpec[]): TimerSpec | undefined {
 	const words = timerWords(jobText(candidate));
 	const marks = distinctive(words);
 	const ids = numbers(words);
+	const typed = candidate.until !== undefined && typedCondition(candidate.until) !== undefined;
 	let best: { spec: TimerSpec; score: number } | undefined;
 	for (const other of existing) {
 		if (other.id === candidate.id || other.action.kind !== candidate.action.kind) continue;
+		if (candidate.until && other.until && candidate.until.trim() === other.until.trim()) return other;
+		if (typed && other.until && typedCondition(other.until)) continue;
 		const otherWords = timerWords(jobText(other));
 		// PR #482 is not PR #479: both name numbers and none match
 		const otherIds = numbers(otherWords);
@@ -79,7 +88,8 @@ export function findDuplicateTimer(candidate: TimerSpec, existing: readonly Time
 		const shared = sharedCount(words, otherWords);
 		if (shared < 2) continue;
 		const overlap = shared / (words.size + otherWords.size - shared);
-		const sameKind = Boolean(candidate.every) === Boolean(other.every);
+		const sameKind =
+			Boolean(candidate.until) === Boolean(other.until) && Boolean(candidate.every) === Boolean(other.every);
 		const sameCadence = candidate.every !== undefined && candidate.every === other.every;
 		const sharedMark = intersects(marks, distinctive(otherWords));
 		const duplicate =

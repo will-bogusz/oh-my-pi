@@ -12,7 +12,7 @@ import { isEnoent } from "@oh-my-pi/pi-utils";
 import { formatWallClock } from "../mailbox/message";
 import { readSessionInfo, resolveResumableSession } from "../session/session-listing";
 import { resolveRunProfile } from "./agent-profile";
-import { compileCondition, type TimerCondition } from "./conditions";
+import { compileCondition, type TimerCondition, typedCondition } from "./conditions";
 import { CONFIRM_WINDOW_MS, recordRefusal, refusalKey, takeConfirmation } from "./confirm";
 import { findDuplicateTimer } from "./duplicates";
 import { runGate } from "./gate";
@@ -56,6 +56,8 @@ import type {
 
 /** Agent-set recurring prompt timers (session wakes and agent runs) retire after this unless `expires` says otherwise. */
 const TOOL_RECURRING_EXPIRY_MS = 7 * DAY;
+/** Agent-set condition timers retire after this unless `expires` says otherwise. */
+const TOOL_GATE_EXPIRY_MS = DAY;
 
 export interface TimerSetInput {
 	id?: string;
@@ -335,9 +337,51 @@ async function duplicateRefusal(spec: TimerSpec, root: string, now: number): Pro
 async function testGate(spec: TimerSpec): Promise<GateTest> {
 	if (!spec.until) return {};
 	const verdict = await runGate(spec.until, spec.cwd, GATE_DRY_RUN_TIMEOUT_MS);
-	if (verdict.kind !== "broken") return { gateNow: verdict.kind };
+	if (verdict.kind === "not-yet") return { gateNow: verdict.kind };
+	if (verdict.kind === "met") {
+		const printed = verdict.output.split("\n")[0]?.trim();
+		return { gateNow: "met", gateDetail: printed ? `printed: ${printed}` : undefined };
+	}
 	const firstLine = verdict.output.split("\n")[0];
 	return { gateNow: "broken", gateDetail: firstLine ? `${verdict.error}: ${firstLine}` : verdict.error };
+}
+
+/**
+ * A hand-written check that already holds almost always passes while the
+ * work is still pending (a status script that exits 0 on `IN_PROGRESS`); a
+ * typed CI condition that holds means CI has finished; a process condition
+ * that holds means no such process runs here, which is also what a process on
+ * another host looks like. Either way the timer would fire at the next tick.
+ */
+function gateMetRefusal(spec: TimerSpec, gate: GateTest): string | undefined {
+	if (gate.gateNow !== "met" || !spec.until) return undefined;
+	const printed = gate.gateDetail ? ` (${gate.gateDetail.slice(0, 120)})` : "";
+	const typed = typedCondition(spec.until);
+	const condition = typed ? compileCondition(typed).text : `\`${spec.until}\` exited 0`;
+	const head = `not armed: the condition already holds — ${condition}, checked just now${printed} — so this timer would fire at the next tick instead of waiting.`;
+	if (typed?.pid !== undefined) {
+		return [
+			head,
+			`No process ${typed.pid} runs on this machine. If it runs on another host, it is not done: wait for it there with a \`cmd\` over ssh that exits 1 while it runs (e.g. \`ssh <host> 'kill -0 ${typed.pid} 2>/dev/null && exit 1 || exit 0'\`). If it really finished, do the work now. To arm it anyway, ${REPEAT_TO_CONFIRM}.`,
+		].join("\n");
+	}
+	if (typed) {
+		return [head, `It has already happened: do the work now instead. To arm it anyway, ${REPEAT_TO_CONFIRM}.`].join(
+			"\n",
+		);
+	}
+	return [
+		head,
+		"A condition must exit 1 while the thing is still pending and 0 only once it has happened: test the status text (e.g. `… | grep -q DONE`), not just whether a command runs. Conditions run on this machine: check a remote host over ssh.",
+		`If it has already happened, do the work now instead. To arm it anyway, ${REPEAT_TO_CONFIRM}.`,
+	].join("\n");
+}
+
+/** Throw `message` (when there is one) as a refusal the same call repeated within the window overrides. */
+async function refuse(message: string | undefined, key: string, root: string, now: number): Promise<void> {
+	if (!message) return;
+	await recordRefusal(key, root, now);
+	throw new Error(message);
 }
 
 /** Validate everything up front: a timer that would fail at its first fire is rejected here. */
@@ -381,9 +425,13 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		cwd,
 		expiresAt: input.expires?.trim()
 			? resolveExpiry(input.expires, now, tz)
-			: ctx.by === "tool" && every !== undefined && prompt
-				? new Date(now + TOOL_RECURRING_EXPIRY_MS).toISOString()
-				: undefined,
+			: ctx.by !== "tool"
+				? undefined
+				: condition
+					? new Date(now + TOOL_GATE_EXPIRY_MS).toISOString()
+					: every !== undefined && prompt
+						? new Date(now + TOOL_RECURRING_EXPIRY_MS).toISOString()
+						: undefined,
 		maxRuns: input.maxRuns,
 		overlap: input.overlap ?? "skip",
 		graceMs: input.grace ? parseDuration(input.grace) : undefined,
@@ -414,18 +462,12 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 	};
 	validateSpec(spec, now);
 	await assertAgentProfile(spec);
-	// Tool callers are refused a near-duplicate unless they repeat the call.
-	if (ctx.by === "tool") {
-		const key = refusalKey("set", ctx.sessionId, input);
-		if (!(await takeConfirmation(key, root, now))) {
-			const refusal = await duplicateRefusal(spec, root, now);
-			if (refusal) {
-				await recordRefusal(key, root, now);
-				throw new Error(refusal);
-			}
-		}
-	}
+	// Tool callers are refused a near-duplicate or an already-met condition unless they repeat the call.
+	const confirmKey = ctx.by === "tool" ? refusalKey("set", ctx.sessionId, input) : undefined;
+	const guarded = confirmKey !== undefined && !(await takeConfirmation(confirmKey, root, now));
+	if (guarded) await refuse(await duplicateRefusal(spec, root, now), confirmKey, root, now);
 	const gate = await testGate(spec);
+	if (guarded) await refuse(gateMetRefusal(spec, gate), confirmKey, root, now);
 	const { spec: written, previous } = await mutateTimerSpec(id, () => spec, {
 		expectedRev: input.expectedRev,
 		root,
@@ -495,7 +537,7 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 		target: patch.shell !== undefined ? { kind: "fresh" } : undefined,
 	});
 	let rearmed = false;
-	let gateChanged = false;
+	let gate: GateTest = {};
 	const { spec } = await mutateTimerSpec(
 		id,
 		async current => {
@@ -553,18 +595,24 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 				next.until = condition?.until;
 				next.condition = condition?.text;
 				rearmed = true;
-				gateChanged = condition !== undefined;
 			}
 			if (rearmed) next.armedAt = new Date(now).toISOString();
 			validateSpec(next, now);
 			if (patch.agent || patch.cwd !== undefined) await assertAgentProfile(next);
+			// Inside the spec lock, so a refused edit is never written.
+			if (patch.when) {
+				gate = await testGate(next);
+				const key = refusalKey("edit", ctx.sessionId, [id, patch]);
+				if (ctx.by === "tool" && !(await takeConfirmation(key, root, now))) {
+					await refuse(gateMetRefusal(next, gate), key, root, now);
+				}
+			}
 			return next;
 		},
 		{ expectedRev: patch.expectedRev, root },
 	);
 	if (!spec) throw new Error(`No timer "${id}"`);
 	const slip = patch.at && spec.at ? dateSlipWarning(patch.at, Date.parse(spec.at), now, spec.tz) : undefined;
-	const gate = gateChanged ? await testGate(spec) : {};
 	return { spec, rearmed, warnings: slip ? [slip] : [], ...gate };
 }
 

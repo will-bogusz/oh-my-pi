@@ -3,9 +3,12 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { TimerTool } from "@oh-my-pi/pi-coding-agent/tools/timer";
+import { compileCondition } from "@oh-my-pi/pi-coding-agent/timers/conditions";
+import { findDuplicateTimer } from "@oh-my-pi/pi-coding-agent/timers/duplicates";
 import { TIMERS_DIR_ENV } from "@oh-my-pi/pi-coding-agent/timers/paths";
-import { setTimer, type TimerSetInput } from "@oh-my-pi/pi-coding-agent/timers/service";
+import { editTimer, setTimer, type TimerSetInput } from "@oh-my-pi/pi-coding-agent/timers/service";
 import { closeTimerDbs, readTimerSpec } from "@oh-my-pi/pi-coding-agent/timers/store";
+import type { TimerSpec } from "@oh-my-pi/pi-coding-agent/timers/types";
 import { TempDir } from "@oh-my-pi/pi-utils";
 import { rejectionOf } from "./helpers/rejection";
 
@@ -30,6 +33,8 @@ describe("timer set guards (tool callers)", () => {
 	});
 	const cli = () => ({ by: "cli" as const, cwd: root, now: T0, root, sessionId: "s1" });
 	const base: TimerSetInput = { reason: "test", tz: LA, prompt: "Do the thing." };
+	/** Condition checks run through `/bin/sh`. */
+	const posixIt = it.skipIf(process.platform === "win32");
 
 	beforeEach(() => {
 		dir = TempDir.createSync("@omp-timer-guards-");
@@ -116,6 +121,73 @@ describe("timer set guards (tool callers)", () => {
 		);
 		expect([reminder.replaced, prune.replaced]).toEqual([false, false]);
 	});
+
+	posixIt(
+		"refuses a condition that already holds, explains why, and arms it when the same call is repeated",
+		async () => {
+			const met = { ...base, id: "deploy-done", when: { cmd: "echo IN_PROGRESS" } };
+			expect(await failure(setTimer(met, tool()))).toMatch(
+				/not armed: the condition already holds .*printed: IN_PROGRESS.*send this same call again/s,
+			);
+			expect(await readTimerSpec("deploy-done", root)).toBeUndefined();
+			const repeated = await setTimer(met, tool());
+			expect(repeated.gateNow).toBe("met");
+			// a repeat after the confirmation window is a new call, checked again
+			const late = {
+				...base,
+				id: "export-ready",
+				reason: "export",
+				prompt: "Fetch it.",
+				when: { cmd: "echo RUNNING" },
+			};
+			expect(await failure(setTimer(late, tool()))).toMatch(/already holds/);
+			expect(await failure(setTimer(late, tool({ now: T0 + 11 * 60_000 })))).toMatch(/already holds/);
+			const pending = await setTimer(
+				{ ...base, id: "upload-wait", reason: "upload", when: { cmd: "echo PROCESSING | grep -q DONE" } },
+				tool(),
+			);
+			expect(pending.gateNow).toBe("not-yet");
+			// the CLI and /timer arm it and show the verdict on the card
+			const cliMet = await setTimer({ ...base, id: "cli-met", reason: "cli", when: { cmd: "true" } }, cli());
+			expect(cliMet.gateNow).toBe("met");
+		},
+	);
+
+	posixIt("refuses an edit to a condition that already holds and keeps the old one", async () => {
+		await setTimer({ ...base, id: "wait", when: { cmd: "exit 1" } }, tool());
+		expect(await failure(editTimer("wait", { when: { cmd: "true" } }, tool()))).toMatch(/already holds/);
+		const kept = await editTimer("wait", { prompt: "Changed." }, tool());
+		expect(kept.spec.until).toBe("exit 1");
+	});
+
+	posixIt(
+		"catches a second watcher on the same condition, and gives an agent's condition timer a 24-hour expiry",
+		async () => {
+			const ci = { ...base, id: "pr-479-ci", reason: "PR 479 CI", when: { cmd: "exit 1" } };
+			const first = await setTimer(ci, tool());
+			expect(first.spec.expiresAt).toBe(new Date(T0 + 24 * 60 * 60_000).toISOString());
+			expect(await failure(setTimer({ ...ci, id: "ci-479", prompt: "Fix it." }, tool()))).toMatch(/"pr-479-ci"/);
+			const user = await setTimer({ ...ci, id: "user-gate", reason: "user's", prompt: "Other." }, cli());
+			expect(user.spec.expiresAt).toBeUndefined();
+		},
+	);
+
+	posixIt(
+		"says a process condition that already holds runs on no process here, and how to wait for one on another host",
+		async () => {
+			const exited = Bun.spawn(["true"]);
+			await exited.exited;
+			const refusal = await failure(setTimer({ ...base, id: "train-done", when: { pid: exited.pid } }, tool()));
+			expect(refusal).toContain(`the condition already holds — process ${exited.pid} exited`);
+			expect(refusal).toContain(`No process ${exited.pid} runs on this machine`);
+			expect(refusal).toContain(`ssh <host> 'kill -0 ${exited.pid} 2>/dev/null && exit 1 || exit 0'`);
+			expect(refusal).toContain("If it really finished, do the work now");
+			expect(refusal).toContain("send this same call again");
+			expect(refusal).not.toContain("It has already happened");
+			expect(refusal).not.toContain("No such process");
+			expect(refusal).not.toContain("grep -q DONE");
+		},
+	);
 
 	it("gives a recurring wake set by an agent a 7-day expiry unless it names one; a recurring shell command none", async () => {
 		const agent = await setTimer({ ...base, id: "babysit", every: "30m" }, tool());
@@ -246,7 +318,7 @@ describe("timer tool", () => {
 		const tool = new TimerTool(session());
 		await tool.execute("c1", { op: "set", id: "deploy-wait", reason: "deploy", at: "in 1h", prompt: "Run smoke." });
 		expect(await failure(tool.execute("c2", { op: "fire", id: "deploy-wait" }))).toMatch(
-			/same session right now, skipping its schedule: it checks nothing/,
+			/same session right now, skipping its schedule and condition: it checks nothing/,
 		);
 		const fired = await tool.execute("c3", { op: "fire", id: "deploy-wait" });
 		expect(fired.content.map(part => (part.type === "text" ? part.text : "")).join("")).toContain(
@@ -331,5 +403,86 @@ describe("timer tool", () => {
 		expect(tool.approval(request)).toBe("exec");
 		await tool.execute("c1", request);
 		expect((await readTimerSpec("chain"))?.allowTimers).toBe(true);
+	});
+
+	it("asks exec approval for a when.cmd check, as for a shell command, and write for ci or pid", () => {
+		const tool = new TimerTool(session());
+		const wake = { op: "set", id: "wait", reason: "wait", prompt: "Go on." } as const;
+		expect(tool.approval({ ...wake, when: { cmd: "test -f dist/app.js" } })).toBe("exec");
+		expect(tool.approval({ ...wake, when: { ci: "owner/repo#123" } })).toBe("write");
+		expect(tool.approval({ ...wake, when: { pid: 4242 } })).toBe("write");
+	});
+
+	it("keeps a shell condition's text out of its description, credentials and all, and names a process condition", async () => {
+		const cmd =
+			"exit 1; curl -H 'Authorization: Bearer AUTH_SECRET' -H 'Cookie: sid=COOKIE_SECRET' -u user:BASIC_SECRET 'https://u:p@ci.invalid/run?token=QUERY_SECRET'; API_KEY=ENV_SECRET true";
+		await setTimer(
+			{ id: "deploy-gate", reason: "deploy", when: { cmd }, prompt: "Go on." },
+			{ cwd: dir.path(), sessionId: "s1" },
+		);
+		await setTimer(
+			{ id: "train-gate", reason: "training", when: { pid: process.pid }, prompt: "Read the loss." },
+			{ cwd: dir.path(), sessionId: "s1" },
+		);
+		const description = new TimerTool(session()).description;
+		expect(description).toContain("- deploy-gate · when a shell check passes · deploy");
+		expect(description).toContain(`- train-gate · when process ${process.pid} exited · training`);
+		for (const secret of [
+			"AUTH_SECRET",
+			"COOKIE_SECRET",
+			"BASIC_SECRET",
+			"QUERY_SECRET",
+			"ENV_SECRET",
+			"u:p@",
+			"curl",
+		]) {
+			expect(description).not.toContain(secret);
+		}
+	});
+
+	it("asks exec approval to control a stored timer with a shell check, write for one with a process condition", async () => {
+		const ctx = { cwd: dir.path(), sessionId: "s1" };
+		await setTimer({ id: "deploy-gate", reason: "deploy", when: { cmd: "exit 1" }, prompt: "Go on." }, ctx);
+		await setTimer({ id: "train-gate", reason: "training", when: { pid: process.pid }, prompt: "Read it." }, ctx);
+		const tool = new TimerTool(session());
+		for (const op of ["resume", "pause", "fire", "remove"] as const) {
+			expect(tool.approval({ op, id: "deploy-gate" })).toBe("exec");
+			expect(tool.approval({ op, id: "train-gate" })).toBe("write");
+		}
+		expect(tool.approval({ op: "edit", id: "deploy-gate", prompt: "Changed." })).toBe("exec");
+		expect(tool.approval({ op: "show", id: "deploy-gate" })).toBe("read");
+	});
+});
+
+describe("timer duplicate check", () => {
+	const watch = (id: string, ci: string, prompt = "CI finished: fix failures, else tell Will it is green.") => {
+		const { until, text } = compileCondition({ ci });
+		return { id, action: { kind: "prompt", prompt }, reason: "watch CI", until, condition: text } as TimerSpec;
+	};
+
+	it("tells CI watchers on other PRs and commits apart, and catches one on the same PR", () => {
+		const existing = [watch("pr-479-ci", "will-bogusz/apt-tools#479")];
+		expect(findDuplicateTimer(watch("pr-482-ci", "will-bogusz/apt-tools#482"), existing)).toBeUndefined();
+		const tag = watch(
+			"tag-after-ci",
+			"will-bogusz/apt-tools@15f6793b20e4",
+			"CI is green: tag v2.3 and push the tag.",
+		);
+		expect(findDuplicateTimer({ ...tag, reason: "tag v2.3 once CI on the push is green" }, existing)).toBeUndefined();
+		expect(findDuplicateTimer(watch("ci-479", "will-bogusz/apt-tools#479", "Fix it."), existing)?.id).toBe(
+			"pr-479-ci",
+		);
+	});
+
+	it("keeps typed CI conditions apart when their labels share a PR number or a commit prefix", () => {
+		const alpha = { ...watch("alpha-ci", "o/repo-a#479", "Deploy alpha artifact."), reason: "CI" };
+		const beta = { ...watch("beta-ci", "o/repo-b#479", "Archive beta artifact."), reason: "CI" };
+		expect(findDuplicateTimer(beta, [alpha])).toBeUndefined();
+		const fix = { ...watch("fix", "o/repo-a@123456789abc1111111111111111111111111111", "Fix it."), reason: "CI" };
+		const tag = { ...watch("tag", "o/repo-a@123456789abc2222222222222222222222222222", "Tag it."), reason: "CI" };
+		expect(findDuplicateTimer(tag, [fix])).toBeUndefined();
+		expect(findDuplicateTimer(watch("pr-13", "o/r#13"), [watch("pr-12", "o/r#12")])).toBeUndefined();
+		const same = { ...watch("again", "o/repo-a#479", "Something else entirely."), reason: "other words" };
+		expect(findDuplicateTimer(same, [alpha])?.id).toBe("alpha-ci");
 	});
 });

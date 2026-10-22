@@ -51,6 +51,8 @@ export interface TimerCardView {
 	ifBusy?: string;
 	/** Session targets only: what happens when no omp has the session open. */
 	ifClosed?: string;
+	/** The condition gate and its test-run verdict. */
+	gate?: string;
 	limits?: string;
 	why: string;
 	last: string;
@@ -85,6 +87,7 @@ export interface TimerRenderArgs {
 	id?: string;
 	at?: string;
 	every?: string;
+	when?: { cmd?: string; ci?: string; pid?: number };
 	prompt?: string;
 	shell?: string;
 }
@@ -105,6 +108,10 @@ function describeSchedule(args: TimerRenderArgs): string | undefined {
 	const parts: string[] = [];
 	if (args.at) parts.push(`at ${args.at}`);
 	if (args.every) parts.push(`every ${args.every}`);
+	const when = args.when;
+	if (when?.ci) parts.push(`when CI on ${when.ci}`);
+	if (when?.pid !== undefined) parts.push(`when pid ${when.pid} exits`);
+	if (when?.cmd) parts.push(`when \`${when.cmd}\``);
 	return parts.length > 0 ? clean(parts.join(", ")) : undefined;
 }
 
@@ -124,6 +131,7 @@ function cardRows(card: TimerCardView): Array<[string, string, ThemeColor?]> {
 	if (card.ifBusy || card.ifClosed) {
 		rows.push(["if busy", compact([card.ifBusy, card.ifClosed && `if closed: ${card.ifClosed}`]).join(" · ")]);
 	}
+	if (card.gate) rows.push(["gate", card.gate]);
 	if (card.limits) rows.push(["limits", card.limits]);
 	rows.push(["why", card.why], ["last", card.last], ["ticker", card.ticker]);
 	return rows;

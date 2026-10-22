@@ -10,6 +10,7 @@ import {
 	editTimer,
 	fireTimerNow,
 	formatDuration,
+	type GateTest,
 	listTimers,
 	loadTimerRow,
 	normalizeTimerId,
@@ -38,12 +39,19 @@ const TimerOp = type('"set" | "edit" | "list" | "show" | "runs" | "remove" | "fi
 
 const timerSchema = type({
 	op: TimerOp.describe(
-		"set: create, or replace an existing id (needs reason, one of at/every, one of prompt/shell). edit: change only the given fields of an existing id; a new at/every replaces its schedule. list/show/runs: inspect existing timers (what they do, next fire, whether and how they ran). fire: run the action now, skipping its schedule (to test a timer; it checks nothing). pause/resume/remove: control (need id).",
+		"set: create, or replace an existing id (needs reason, one of at/every/when, one of prompt/shell). edit: change only the given fields of an existing id; a new at/every/when replaces its schedule. list/show/runs: inspect existing timers (what they do, next fire, whether and how they ran). fire: run the action now, skipping schedule and condition (to test a timer; it checks nothing). pause/resume/remove: control (need id).",
 	),
 	"id?": type("string").describe("timer id ([a-z0-9][a-z0-9._-]*); optional for set (derived from reason)"),
 	"reason?": type("string").describe("REQUIRED for set: why this timer exists, in the user's terms"),
 	"at?": type("string").describe("one-shot: 'now', 'in 2h', '08:00' (next occurrence), '2026-10-22 08:00', or ISO"),
 	"every?": type("string").describe("recurring: '15m', '2h', 'daily 09:00', or a 5-field cron"),
+	"when?": type({
+		"cmd?": type("string").describe("shell check: exit 0 = fire, 1 = not yet, anything else = failure"),
+		"ci?": type("string").describe(
+			"PR ('owner/repo#123' or URL) or commit ('owner/repo@sha'): fires once every check finished, pass or fail",
+		),
+		"pid?": type("number").describe("fires once this process exits"),
+	}).describe("condition checked each minute without model tokens; fires once when it holds. Exactly one key"),
 	"prompt?": type("string").describe(
 		"set needs exactly one of prompt or shell: self-contained instruction delivered when it fires",
 	),
@@ -80,7 +88,8 @@ type TimerParams = typeof timerSchema.infer;
 export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails> {
 	readonly name = "timer";
 	readonly label = "Timer";
-	readonly summary = "Set, list and control timers that wake this session later or on a schedule";
+	readonly summary =
+		"Set, list and control timers that wake this session later, on a schedule, or when a condition holds";
 	/** Rendered once per tool instance: the registry snapshot stays fixed for the session's prompt prefix. */
 	readonly description: string;
 	readonly parameters = timerSchema;
@@ -131,13 +140,15 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 		const card = async (
 			id: string,
 			verb: string,
-			warnings?: string[],
+			result: GateTest & { warnings?: string[] } = {},
 		): Promise<AgentToolResult<TimerToolDetails>> => {
 			const row = await loadTimerRow(await requireTimer(id), now);
 			const [ticker, lastResult] = await Promise.all([readTickerStatus(), lastRunResult(row)]);
+			const { warnings, gateNow, gateDetail } = result;
+			const options = { verb, selfSessionId: sessionId, ticker, warnings, gateNow, gateDetail, lastResult };
 			details.id = id;
-			details.card = timerCardView(row, { verb, selfSessionId: sessionId, ticker, now, warnings, lastResult });
-			const text = renderTimerCard(row, now, { verb, selfSessionId: sessionId, ticker, warnings, lastResult });
+			details.card = timerCardView(row, { ...options, now });
+			const text = renderTimerCard(row, now, options);
 			const manage = `manage timer {op:"show"|"runs"|"edit"|"pause"|"remove", id:"${id}"}`;
 			return toolResult<TimerToolDetails>(details).text(`${text}\n${manage}`).done();
 		};
@@ -159,6 +170,7 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 							reason: params.reason ?? "",
 							at: params.at,
 							every: params.every,
+							when: params.when,
 							tz: params.tz,
 							prompt: params.prompt,
 							shell: params.shell,
@@ -181,13 +193,13 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 						},
 						setContext,
 					);
-					return await card(result.spec.id, result.replaced ? "re-armed" : "armed", result.warnings);
+					return await card(result.spec.id, result.replaced ? "re-armed" : "armed", result);
 				}
 				case "edit": {
 					const { op: _op, id: _id, ...fields } = params;
 					const id = requireId();
 					const result = await editTimer(id, timerEditPatch(fields), setContext);
-					return await card(id, result.rearmed ? "re-armed" : "edited", result.warnings);
+					return await card(id, result.rearmed ? "re-armed" : "edited", result);
 				}
 				case "list": {
 					const { rows, errors } = await listTimers(now);
@@ -225,7 +237,7 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 					if (intoCaller && !(await takeConfirmation(key, timersRoot(), now))) {
 						await recordRefusal(key, timersRoot(), now);
 						throw new ToolError(
-							`not fired: fire would deliver ${id}'s prompt to this same session right now, skipping its schedule: it checks nothing. To do the work now, do it directly; otherwise end your turn and the timer wakes you. To fire it anyway (e.g. the user asked to test it), send this same call again within ${formatDuration(CONFIRM_WINDOW_MS)}.`,
+							`not fired: fire would deliver ${id}'s prompt to this same session right now, skipping its schedule and condition: it checks nothing. To see whether the condition holds, run the check yourself; to do the work now, do it directly; otherwise end your turn and the timer wakes you. To fire it anyway (e.g. the user asked to test it), send this same call again within ${formatDuration(CONFIRM_WINDOW_MS)}.`,
 						);
 					}
 					const line = await fireTimerNow(id, now);

@@ -128,6 +128,16 @@ describe("write timer://<id>/edit approval", () => {
 		expect((await readTimerSpec("wake-a"))?.action).toEqual({ kind: "prompt", prompt: "check again" });
 	});
 
+	it("resuming or editing the caller's own wake that has a shell check needs exec", async () => {
+		await setTimer(
+			{ id: "gated", reason: "gated", when: { cmd: "exit 1" }, prompt: "check in" },
+			{ cwd: dir.path(), sessionId: "sess-a" },
+		);
+		const tool = writeTool();
+		expect(resolveToolTier(tool, { path: "timer://gated/resume", content: "" })).toBe("exec");
+		expect(resolveToolTier(tool, { path: "timer://gated/edit", content: '{"prompt":"x"}' })).toBe("exec");
+	});
+
 	it("refuses a line-range selector at the gate and any edit while timers are disabled", async () => {
 		await store("wake-a", { prompt: "check in" });
 		const lineRange = resolveApproval(writeTool(), { path: "timer://wake-a/edit:1-2", content: "{}" }, "yolo");

@@ -17,6 +17,7 @@
 - Scheduled agent runs: a prompt timer with `--session fresh` (a new session per run) or `own` (one session the timer keeps and resumes) runs unattended with an agent profile, `model`, `thinking`, `hermetic`, a per-run directory (`cwd: run`), `maxTime` and `maxCost` limits, `expect`ed output paths and `before`/`after` shell hooks; each run writes `result.json` (shown by `omp timer runs|logs`, `timer://<id>/runs/<seq>`, `/timers` and the `timer` tool) and reports its final message back to the session that set it, or to the notify sinks when that session is closed
 - An unattended timer run fails with `approval` when a tool call needed an approval nobody could give, instead of waiting for one
 - Condition timers: `omp timer set --until '<shell>'`, `--ci owner/repo#123` (or `owner/repo@<sha>`) or `--pid <pid>` fire once the condition holds, checked by the ticker every minute without model tokens; a not-yet streak is one recorded run, a broken check counts as a failure, and the check's output reaches the woken session as untrusted data
+- The `timer` tool sets condition timers too (`when: {cmd|ci|pid}`; a shell check is approved like a shell command, also when a later call controls that timer, and its description lists a shell check without its text); it refuses a condition that already holds (the check would fire at the next tick) until the same call is repeated, treats a second timer on the same condition as a duplicate, and condition timers it `set`s expire after 24 hours unless it says otherwise
 
 ### Fixed
 

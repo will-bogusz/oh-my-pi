@@ -92,3 +92,31 @@ export function compileCondition(condition: TimerCondition): CompiledCondition {
 	if (pid === undefined || !Number.isInteger(pid) || pid <= 0) throw new Error("when.pid must be a positive integer");
 	return { until: pidGate(pid), text: `process ${pid} exited` };
 }
+
+/** Where `compileCondition` puts each typed form's inputs; captures only what it accepts, so recompiling cannot throw. */
+const TYPED_SOURCES: ReadonlyArray<[RegExp, (match: RegExpExecArray) => TimerCondition]> = [
+	[/^e=\$\(kill -0 ([1-9]\d*) /, ([, pid]) => ({ pid: Number(pid) })],
+	[
+		/repository\(owner: "([A-Za-z0-9_.-]+)", name: "([A-Za-z0-9_.-]+)"\) \{ pullRequest\(number: (\d+)\)/,
+		([, owner, name, pr]) => ({ ci: `${owner}/${name}#${pr}` }),
+	],
+	[
+		/repository\(owner: "([A-Za-z0-9_.-]+)", name: "([A-Za-z0-9_.-]+)"\) \{ object\(expression: "([0-9a-f]{7,40})"\)/,
+		([, owner, name, sha]) => ({ ci: `${owner}/${name}@${sha}` }),
+	],
+];
+
+/**
+ * The typed `ci`/`pid` condition a stored gate was compiled from, or undefined
+ * for any other shell (a hand-written `cmd`, or an edited spec). Only a gate
+ * that recompiles to exactly the same command counts.
+ */
+export function typedCondition(until: string): TimerCondition | undefined {
+	for (const [pattern, condition] of TYPED_SOURCES) {
+		const match = pattern.exec(until);
+		if (!match) continue;
+		const typed = condition(match);
+		return compileCondition(typed).until === until.trim() ? typed : undefined;
+	}
+	return undefined;
+}

@@ -7,6 +7,7 @@
 - Added `modelEnds` to `GroupedFileSection`: per file, the model-line index just past its last line, so a caller cutting the output can tell which files it shows whole ([#16594](https://github.com/can1357/oh-my-pi/pull/16594) by [@will-bogusz](https://github.com/will-bogusz))
 - Added `timerCardComponent` and `renderTimerListLines` (timer card and listing from stored records), the `TimersSheet` overlay, `StatusLineComponent.setTimerBadge`, and the `icon.timer` symbol
 - Added `timerToolRenderer`: the `timer` tool's streaming call preview and its card, listing or text result
+- `TimerCardView.gate` draws a timer's condition as a `gate` row, and the `timer` tool's call preview shows a streaming `when` (`when CI on o/r#12`, `when pid 4242 exits`, ``when `cmd` ``)
 
 ### Fixed
 

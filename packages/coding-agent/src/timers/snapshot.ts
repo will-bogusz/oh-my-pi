@@ -14,10 +14,21 @@ import * as fs from "node:fs";
 import { logger, pathIsWithin } from "@oh-my-pi/pi-utils";
 import { redactUrlForLog } from "../mcp/json-rpc";
 import { redactMemorySecrets } from "../memory-backend/redact";
+import { compileCondition, typedCondition } from "./conditions";
 import { specPath, specsDir, timersRoot } from "./paths";
 import { openTimerDb, parseTimerSpec } from "./store";
 import { currentState } from "./tick";
 import type { TimerSpec } from "./types";
+
+/**
+ * A condition for the description: a typed CI or process condition by name; a
+ * shell check never by its text, which can carry credentials no redactor knows
+ * (headers, `-u user:pass`, env assignments). `show` prints it on request.
+ */
+function conditionLabel(until: string): string {
+	const typed = typedCondition(until);
+	return typed ? compileCondition(typed).text : "a shell check passes";
+}
 
 /** Most timers listed in the description; the rest are counted. */
 const SNAPSHOT_MAX = 12;
@@ -62,7 +73,11 @@ export function timerRegistrySnapshot(scope: SnapshotScope, root = timersRoot())
 			const file = specPath(id, root);
 			const spec = parseTimerSpec(id, fs.readFileSync(file, "utf8"), file);
 			if (!inScope(spec, scope) || currentState(spec, db.readState(id)).done) continue;
-			const schedule = spec.every ? `every ${spec.every}` : "once";
+			const schedule = spec.every
+				? `every ${spec.every}`
+				: spec.until
+					? `when ${conditionLabel(spec.until)}`
+					: "once";
 			const paused = spec.paused ? " · paused" : "";
 			lines.push(`- ${id} · ${schedule}${paused} · ${reasonLine(spec.reason)}`);
 		}
