@@ -2,7 +2,7 @@
 
 My agents kept getting the old file back when they regenerated something with bash and read it in the same message, so now the read checks whether that bash changed the file and reads it again, without making any call start later.
 
-A `read` placed after a `bash` call in one assistant message returned the file as it was before the command ran: `1:old` on `main`, `1:new` with this PR.
+In one assistant message, a `read` after a `bash` returned the file as it was before the command ran.
 
 <picture>
   <source media="(min-width: 1244px) and (prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/b39e52f8-17cd-49af-b9a4-b5ec2bd1dd2e">
@@ -29,15 +29,17 @@ Not covered, as on `main`: a read placed *before* a bash; internal URLs not back
 ## Testing
 
 - Live (Haiku 5.5; `bash "sleep 0.5; echo new > f"` then `read f`, both starting within 1 ms): `main` returned `1:old` 6 ms in; this PR `1:new` 2 ms after bash ended (535 ms).
-- `packages/coding-agent/test/tools/read-after-bash.test.ts` runs the real tools through the agent loop, bash changing the target only after the read returned: a rewritten, created and deleted file, `file://`, a suffix match, a tar member, SQLite (also WAL with another connection open), directory entries two levels in and past 2,000, a curly-quote fallback, the cwd, `local://`, web URLs (`;` in a query fetched once; split from a new file; a rewritten local or `local://` part), an IDA view, an abort. With `read.ts` from `main` 18 of 21 fail.
+- `packages/coding-agent/test/tools/read-after-bash.test.ts` runs the real tools through the agent loop, bash changing the target only after the read returned, for each path kind above (cases in the details below). With `read.ts` from `main` 18 of 21 fail.
 - `packages/agent/test/agent-loop.test.ts`: only a call beside an earlier writing call gets the promise, settled after it; a transform that makes a call write counts, transforming once.
 - `bun run check` and `bun test` in `packages/agent` (801 pass); `bun run check` and the read, IDA, fetch and internal-URL suites in `packages/coding-agent` (556 pass).
 
-<details><summary>Replay cost and method</summary>
+<details><summary>Replay cost, method and test cases</summary>
 
 2,938 local reads ran beside an earlier writing call, so they were fingerprinted twice: 0.05 ms for a 20 KB file, 0.16 ms for 1 MiB. Re-reading the 482 whose path an earlier bash command names adds 93 s in all (0.017% of batch time); re-reading all 2,938 adds 180 s (0.033%). Waiting instead adds 90 s (0.017%).
 
 Every assistant message with two or more tool calls in one machine's recent omp sessions (30,455 batches, 149.9 h of batch time), replayed with each call's recorded duration through `main`'s scheduler (within 2 ms of the recorded batch time at p90), then under each policy. Which files changed can't be read from the logs, so re-reads are bounded: reads whose file name appears in an earlier bash command of the same group, and every local read beside an earlier writing call.
+
+`read-after-bash.test.ts` cases: a rewritten, created and deleted file, `file://`, a suffix match, a tar member, SQLite (also WAL with another connection open), directory entries two levels in and past 2,000, a curly-quote fallback, the cwd, `local://`, web URLs (`;` in a query fetched once; split from a new file; a rewritten local or `local://` part), an IDA view, an abort.
 
 </details>
 
@@ -46,3 +48,4 @@ Every assistant message with two or more tool calls in one machine's recent omp 
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
