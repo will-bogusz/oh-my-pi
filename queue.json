@@ -46984,6 +46984,27 @@
    "added": "2026-10-22T18:59:23Z",
    "updated": "2026-10-22T22:35:03Z",
    "note": ""
+  },
+  {
+   "id": "timer-pr-9-tool-conditions",
+   "branch": "will/timer-pr-9-tool-conditions",
+   "title": "feat(coding-agent): let the timer tool set condition timers",
+   "area": "other",
+   "priority": null,
+   "needs": [
+    "timer-pr-5-agent-runs",
+    "timer-pr-7-conditions"
+   ],
+   "base": "f4a119184772eb7bd3b007e43bb306412652da73",
+   "body": "bodies/timer-pr-9-tool-conditions.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T23:10:38Z",
+   "updated": "2026-10-22T23:10:38Z",
+   "note": ""
   }
  ],
  "watch": {
