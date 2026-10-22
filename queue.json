@@ -46844,6 +46844,26 @@
    ],
    "opened": "2026-10-22T16:58:17Z",
    "readied": "2026-10-22T16:59:22Z"
+  },
+  {
+   "id": "timer-pr-2-engine",
+   "branch": "will/timer-pr-2-engine",
+   "title": "feat(coding-agent): run shell commands and wake sessions later with omp timer",
+   "area": "other",
+   "priority": null,
+   "needs": [
+    "timer-pr-1-poke"
+   ],
+   "base": "711a4309e5f1fa9c29d171b88ca1a4fe708b0a76",
+   "body": "bodies/timer-pr-2-engine.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T18:21:31Z",
+   "updated": "2026-10-22T18:21:31Z",
+   "note": ""
   }
  ],
  "watch": {
