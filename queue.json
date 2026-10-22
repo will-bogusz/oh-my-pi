@@ -46066,6 +46066,24 @@
    "opened": "2026-10-22T09:30:10Z",
    "readied": "2026-10-22T09:33:17Z",
    "advanced": "2026-10-22T09:40:00Z"
+  },
+  {
+   "id": "max-cost-gate",
+   "branch": "will/max-cost-gate",
+   "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
+   "area": "session",
+   "priority": "P1",
+   "needs": [],
+   "base": "fd440d9a6d6d387b444fcaa242f630fca34b2daa",
+   "body": "bodies/max-cost-gate.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/max-cost-gate",
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T10:06:56Z",
+   "updated": "2026-10-22T10:06:56Z",
+   "note": ""
   }
  ],
  "watch": {
