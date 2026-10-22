@@ -46987,7 +46987,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T19:19:26Z",
+  "checked": "2026-10-22T19:49:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -47191,14 +47191,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-15T19:27:09Z",
-    "kind": "merged",
-    "number": 15402,
-    "title": "feat(coding-agent): send todo updates alongside the next tool call",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
    {
     "at": "2026-10-15T21:00:09Z",
     "kind": "merged",
