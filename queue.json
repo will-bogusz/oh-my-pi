@@ -46098,7 +46098,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T14:15:22Z",
+  "checked": "2026-10-22T14:45:57Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -46328,12 +46328,6 @@
     "merged_at": "2026-10-20T17:31:31Z",
     "findings": []
    },
-   "16388": {
-    "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out",
-    "merge_commit": "4ca7dc5df62afd1a1be82331a392a03976732d78",
-    "merged_at": "2026-10-20T14:22:50Z",
-    "findings": []
-   },
    "16389": {
     "title": "fix(coding-agent): say why a timed-out browser selector's matches could not be counted",
     "merge_commit": "4f8807c229ab226a45c3dcf78243dc91cf97c877",
@@ -46344,12 +46338,6 @@
     "title": "fix(coding-agent): tell the model an open without app drives the user's Chrome while the relay is on",
     "merge_commit": "9b72010f8e109b11299d38f678dee35159a12f14",
     "merged_at": "2026-10-20T17:55:42Z",
-    "findings": []
-   },
-   "16391": {
-    "title": "fix(coding-agent): kept requested lines in in-memory range reads",
-    "merge_commit": "8923f62212581adfad67a822e789e5c580b46ef5",
-    "merged_at": "2026-10-20T14:25:41Z",
     "findings": []
    },
    "16392": {
@@ -46392,12 +46380,6 @@
     "title": "fix(ai): fail Claude turns that attach media Claude cannot read",
     "merge_commit": "2dd832a0ee1f5ea2a007b4c23cb2b0ff9d179b19",
     "merged_at": "2026-10-20T17:07:22Z",
-    "findings": []
-   },
-   "16409": {
-    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances",
-    "merge_commit": "d91feb6d2bd8c8b66959943757fd797ad47b7ac1",
-    "merged_at": "2026-10-20T14:23:43Z",
     "findings": []
    },
    "16418": {
