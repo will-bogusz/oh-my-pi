@@ -40486,7 +40486,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/edit-error-kind.md",
    "state": "open",
    "pr": 16608,
@@ -40494,7 +40494,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/edit-error-kind",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:58:49Z",
-   "updated": "2026-10-21T06:41:08Z",
+   "updated": "2026-10-22T08:10:04Z",
    "note": "",
    "built": [
     {
@@ -40957,7 +40957,7 @@
      "tree": "dc869133d2a4552222b5a33e7852869c9f58553a"
     }
    ],
-   "advanced": "2026-10-21T02:58:23Z",
+   "advanced": "2026-10-22T08:10:04Z",
    "opened": "2026-10-21T06:02:21Z",
    "readied": "2026-10-21T06:03:01Z"
   },
