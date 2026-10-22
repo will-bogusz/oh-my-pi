@@ -34913,7 +34913,7 @@
    "area": "other",
    "priority": "P0",
    "needs": [],
-   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/fetch-ua-retry.md",
    "state": "open",
    "pr": 16593,
@@ -34921,7 +34921,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fetch-ua-retry",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:53:24Z",
-   "updated": "2026-10-21T04:09:06Z",
+   "updated": "2026-10-22T07:14:59Z",
    "note": "",
    "built": [
     {
@@ -35364,7 +35364,7 @@
      "tree": "059e16c5899a65c86cabcf7ba734cce09fdee99f"
     }
    ],
-   "advanced": "2026-10-21T02:57:33Z",
+   "advanced": "2026-10-22T07:14:59Z",
    "opened": "2026-10-21T03:54:09Z",
    "readied": "2026-10-21T03:54:24Z"
   },
