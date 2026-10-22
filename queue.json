@@ -50517,5 +50517,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "computer-right-click-per-press",
+  "token": "6c47095e179b4e7e87b770fe2decb439",
+  "host": "MacBook-Pro",
+  "at": "2026-10-22T10:06:44Z"
  }
 }
