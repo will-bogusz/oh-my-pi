@@ -44289,7 +44289,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/advisor-quota-comment",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:23:33Z",
-   "updated": "2026-10-22T09:11:53Z",
+   "updated": "2026-10-22T09:22:54Z",
    "note": "",
    "built": [
     {
@@ -44470,15 +44470,6 @@
      "tip": "18bb21f4059697577dc6c5ea96ab46f37c616137",
      "with_tip": "a2ab0c065dea87e5db191e080d09f45b4a1b9dc0",
      "at": "2026-10-22T08:25:15Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#16297",
-     "code": "883b8808a43b16a3102d48d3a040577e4d1e3bea",
-     "with_code": "423af9b2360c5b0dc48e09123c3d27e4d07826f3",
-     "tip": "18bb21f4059697577dc6c5ea96ab46f37c616137",
-     "with_tip": "66ed9483763a0e47e3ad66077e7ee0289c6dd01b",
-     "at": "2026-10-22T08:25:16Z",
      "host": "MacBook-Pro"
     },
     {
@@ -44695,6 +44686,15 @@
      "tip": "818e72350005d1bd1fca467ffdb51a143df4cc6b",
      "with_tip": "e3aa0ac8f6f3e97adf4476606581e0c208d3f8ab",
      "at": "2026-10-22T09:06:13Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16297",
+     "code": "883b8808a43b16a3102d48d3a040577e4d1e3bea",
+     "with_code": "bf88c9a8a742242bb2a13080e526e4416cbaf2c2",
+     "tip": "9a8c8f5cb431a30841bc099243a154299a51fe9a",
+     "with_tip": "36a70a1f36095013ee496e36e1de6ddda2fdc4e2",
+     "at": "2026-10-22T09:22:48Z",
      "host": "MacBook-Pro"
     }
    ],
