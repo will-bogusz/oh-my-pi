@@ -459,6 +459,36 @@ describe("timer engine (tick, runner records, policy) on an injected clock", () 
 		expect(openTimerDb(root).readState("late").done?.why).toBe("expired");
 	});
 
+	it("drops an expired queued run on a manual fire too, and runs only the manual one", async () => {
+		await setTimer(
+			{ id: "exp", reason: "test", at: "in 1m", expires: "2m", shell: "true", overlap: "queue" },
+			ctx(T0),
+		);
+		inFlight = true;
+		await tick(T0 + MINUTE + 1);
+		inFlight = false;
+		const line = await fireTimerNow("exp", T0 + 3 * MINUTE, { deps: deps() });
+		expect(line).toMatchObject({ action: "fired", runId: "exp#2" });
+		expect(spawned).toEqual(["exp#2"]);
+		expect(runs("exp").map(run => run.outcome)).toEqual(["missed", "fired"]);
+	});
+
+	it("still runs a manual fire queued behind a one-shot's last run", async () => {
+		await setTimer({ id: "one", reason: "test", at: "in 1m", shell: "true", overlap: "queue" }, ctx(T0));
+		inFlight = true;
+		await tick(T0 + MINUTE + 1); // the one-shot slot is buffered
+		inFlight = false;
+		expect(await fireTimerNow("one", T0 + 2 * MINUTE, { deps: deps() })).toMatchObject({
+			action: "queued",
+			runId: "one#2",
+		});
+		end("one", 1, true);
+		await tick(T0 + 3 * MINUTE);
+		expect(spawned).toEqual(["one#1", "one#2"]);
+		expect(openTimerDb(root).readState("one")).toMatchObject({ done: { why: "once" } });
+		expect(openTimerDb(root).readState("one").queued).toBeUndefined();
+	});
+
 	it("raises one pause alert when several failures settle in the same tick", async () => {
 		await shell("batch", "1h");
 		for (let seq = 1; seq <= 4; seq++) {

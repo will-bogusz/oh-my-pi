@@ -21,7 +21,7 @@ import { type DeliveryTarget, deliveryTarget, hasPendingMailForTimer, postMail }
 import { loadTimerNotifyConfig, sendTimerAlerts } from "./notify";
 import { firePayloadPath, runLockPath, runLogPath, tickLockPath, timersRoot, timerStateDir } from "./paths";
 import { applyFailure, applyNotice, applySuccess, firstErrorLine } from "./policy";
-import { decideDue, MINUTE, nextFireAt } from "./schedule";
+import { type DueDecision, decideDue, MINUTE, nextFireAt } from "./schedule";
 import { assertTimerMutationAllowed } from "./scope";
 import { listTimerSpecs, mutateTimerSpec, openTimerDb, type RunView, readTimerSpec, type TimerDb } from "./store";
 import type { RunTrigger, TimerAlert, TimerFirePayload, TimerSpec, TimerState } from "./types";
@@ -136,6 +136,18 @@ function commit(ctx: TickContext, spec: TimerSpec, readSeq: number, state: Timer
 		apply();
 		ctx.db.writeState(spec.id, state);
 	});
+}
+
+/** A buffered run whose timer expired or ran out of runs while it waited never starts; it is recorded missed. */
+function dropStaleQueue(ctx: TickContext, spec: TimerSpec, state: TimerState, decision: DueDecision): void {
+	if (!state.queued || decision.kind !== "retire" || decision.why === "once") return;
+	ctx.db.markSettled(
+		`${spec.id}#${state.queued.seq}`,
+		ctx.at,
+		"missed",
+		`dropped: ${decision.why} before the previous run ended`,
+	);
+	state.queued = undefined;
 }
 
 function recordNonFire(
@@ -405,24 +417,17 @@ async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
 		lines.push(paused);
 		return lines;
 	}
-	if (state.done || spec.paused) {
+	// A done timer can still owe a buffered run (a manual fire queued behind its last run).
+	if (spec.paused || (state.done && !state.queued)) {
 		if (JSON.stringify(state) !== JSON.stringify(stored)) commit(ctx, spec, readSeq, state, () => {});
 		return lines;
 	}
 
 	const decision = decideDue(spec, state, now);
+	dropStaleQueue(ctx, spec, state, decision);
 	if (state.queued) {
 		const queued = state.queued;
-		if (decision.kind === "retire" && decision.why !== "once") {
-			// Expired or out of runs while it waited: the buffered run never starts.
-			state.queued = undefined;
-			db.markSettled(
-				`${spec.id}#${queued.seq}`,
-				at,
-				"missed",
-				`dropped: ${decision.why} before the previous run ended`,
-			);
-		} else if (!deps.inFlight(spec, deps.root)) {
+		if (!deps.inFlight(spec, deps.root)) {
 			lines.push(
 				await fire(ctx, spec, readSeq, state, {
 					seq: queued.seq,
@@ -435,11 +440,16 @@ async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
 				}),
 			);
 			return lines;
-		} else if (decision.kind === "retire") {
-			// A one-shot whose slot is buffered: wait for the buffer, never retire past it.
+		}
+		if (decision.kind === "retire" || state.done) {
+			// Wait for the buffered run; never retire past it.
 			if (JSON.stringify(state) !== JSON.stringify(stored)) commit(ctx, spec, readSeq, state, () => {});
 			return lines;
 		}
+	}
+	if (state.done) {
+		commit(ctx, spec, readSeq, state, () => {});
+		return lines;
 	}
 
 	switch (decision.kind) {
@@ -634,6 +644,7 @@ export async function fireTimerNow(id: string, now = Date.now(), options: FireNo
 		const data = options.data ? { source: "fire" as const, text: options.data } : undefined;
 		let busy = deps.inFlight(spec, deps.root);
 		const dispatched: TickLine[] = [];
+		dropStaleQueue(ctx, spec, state, decideDue(spec, state, now));
 		if (state.queued && !busy) {
 			// A buffered run was accepted first: start it now, and treat this fire as overlapping it.
 			const queued = state.queued;
