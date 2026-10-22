@@ -91,6 +91,7 @@ import {
 	cfgGrepEnabled,
 	cfgLaunchEnabled,
 	cfgSecurityEnabled,
+	cfgTimerEnabled,
 	cfgTodoEnabled,
 	cfgToolsXdev,
 	cfgWebSearchEnabled,
@@ -750,6 +751,7 @@ export async function resolveBuiltinToolPlan(session: ToolSession, toolNames?: s
 		if (name === "bash") return cfgBashEnabled.get(session.settings);
 		if (name === "eval") return allowEval;
 		if (name === "debug") return cfgDebugEnabled.get(session.settings);
+		if (name === "timer") return cfgTimerEnabled.get(session.settings);
 		if (name === "ida") return cfgIdaAvailable.get(session.settings);
 		if (name === "todo")
 			return (!includeYield || session.prewalkArmed === true) && cfgTodoEnabled.get(session.settings);

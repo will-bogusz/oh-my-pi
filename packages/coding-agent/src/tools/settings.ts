@@ -574,6 +574,19 @@ export const cfgLaunchEnabled = register({
 	},
 });
 
+export const cfgTimerEnabled = register({
+	id: "timer.enabled",
+	type: "boolean",
+	default: true,
+	ui: {
+		tab: "tools",
+		group: "Available Tools",
+		label: "Timers",
+		description:
+			"Enable the timer tool and timer:// control writes: wake this session later, on a schedule, or when a condition holds (/timer stays available)",
+	},
+});
+
 export const cfgSpeechgenEnabled = register({
 	id: "speechgen.enabled",
 	type: "boolean",

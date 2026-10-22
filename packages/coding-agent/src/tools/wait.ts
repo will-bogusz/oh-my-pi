@@ -18,7 +18,11 @@ import type { IrcMessage } from "@oh-my-pi/pi-tui/tools/irc";
 import type { CoordinationDetails } from "@oh-my-pi/pi-tui/tools/wait";
 import { throwIfAborted } from "./tool-errors";
 
-import { cfgLaunchEnabled } from "./settings";
+import { cfgLaunchEnabled, cfgTimerEnabled } from "./settings";
+
+/** Appended to a wait that hit its cap, when the session has the `timer` tool. */
+const WAIT_CAP_TIMER_HINT =
+	"To wait longer, set a `timer` (it wakes this session when it fires; no turn is held) and end your turn.";
 
 const waitSchema = type({});
 const WAIT_MAX_MS = 30 * 60_000;
@@ -92,7 +96,9 @@ export class WaitTool implements AgentTool<typeof waitSchema, CoordinationDetail
 	readonly name = "wait";
 	readonly label = "Wait";
 	readonly summary = "Wait for the next result of a background job or service you started, or a reply you asked for";
-	readonly description = prompt.render(waitDescription);
+	get description(): string {
+		return prompt.render(waitDescription, { hasTimer: this.#hasTimer() });
+	}
 	readonly parameters = waitSchema;
 	readonly strict = true;
 	readonly interruptible = true;
@@ -271,11 +277,15 @@ export class WaitTool implements AgentTool<typeof waitSchema, CoordinationDetail
 			}
 			if (manager && jobs.length > 0) {
 				const result = buildJobResult(this.session, manager, "wait", jobs, []);
+				if (wake === "timeout" && this.#hasTimer()) {
+					return { ...result, content: [...result.content, { type: "text", text: WAIT_CAP_TIMER_HINT }] };
+				}
 				// A finished service is news even while every watched job still runs.
 				if (wake !== "service") return result;
 				const { useless: _idle, ...woke } = result;
 				return woke;
 			}
+			const capHint = wake === "timeout" && this.#hasTimer() ? ` ${WAIT_CAP_TIMER_HINT}` : "";
 			return {
 				content: [
 					{
@@ -286,8 +296,8 @@ export class WaitTool implements AgentTool<typeof waitSchema, CoordinationDetail
 								: wake === "unanswerable" && noReply
 									? noReplyText(noReply)
 									: replyWait
-										? "Wait limit reached with no reply. Ask again, or finish without the answer."
-										: "Wait limit reached; background work may still be running. Read proc:// for status.",
+										? `Wait limit reached with no reply. Ask again, or finish without the answer.${capHint}`
+										: `Wait limit reached; background work may still be running. Read proc:// for status.${capHint}`,
 					},
 				],
 				details: { op: "wait", jobs: [] },
@@ -297,5 +307,13 @@ export class WaitTool implements AgentTool<typeof waitSchema, CoordinationDetail
 		} finally {
 			manager?.unwatchJobs(watchedIds);
 		}
+	}
+
+	/** The timer tool exists only in root sessions with `timer.enabled`, as `TimerTool.createIf` decides. */
+	#hasTimer(): boolean {
+		return (
+			this.session.isToolActive?.("timer") ??
+			((this.session.taskDepth ?? 0) === 0 && cfgTimerEnabled.get(this.session.settings))
+		);
 	}
 }
