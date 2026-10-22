@@ -46083,7 +46083,7 @@
    "branch": "will/max-cost-gate",
    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
    "area": "session",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "fd440d9a6d6d387b444fcaa242f630fca34b2daa",
    "body": "bodies/max-cost-gate.md",
@@ -46093,7 +46093,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/max-cost-gate",
    "host": "MacBook-Pro",
    "added": "2026-10-22T10:06:56Z",
-   "updated": "2026-10-22T17:09:28Z",
+   "updated": "2026-10-22T17:18:00Z",
    "note": "",
    "built": [
     {
