@@ -23,3 +23,8 @@ One example per kind
 - Recurring command, no model: {"op":"set","id":"prune-cache","every":"6h","shell":"…","reason":"…"}
 
 Defaults: `session` is this conversation; if it is closed when the timer fires, it is resumed headless. Recurring timers you set expire after 7 days and condition timers after 24 hours unless `expires` says otherwise. A `fresh` or `own` run reports its final message back to this session unless that message ends with the line `[quiet]` (`report` changes this).
+{{#if registry}}
+
+Timers in the registry when this session started (`list` for their current state):
+{{registry}}
+{{/if}}

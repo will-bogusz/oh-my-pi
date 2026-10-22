@@ -19,6 +19,7 @@ export * from "./runner";
 export * from "./schedule";
 export * from "./scope";
 export * from "./service";
+export * from "./snapshot";
 export * from "./store";
 export * from "./tick";
 export * from "./types";

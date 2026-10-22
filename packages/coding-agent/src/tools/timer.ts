@@ -17,6 +17,7 @@ import {
 	requireTimer,
 	setPaused,
 	setTimer,
+	timerRegistrySnapshot,
 	timerRuns,
 } from "../timers";
 import type { ToolSession } from ".";
@@ -85,7 +86,8 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 	readonly label = "Timer";
 	readonly summary =
 		"Set, list and control timers that wake this session later, on a schedule, or when a condition holds";
-	readonly description = prompt.render(timerDescription);
+	/** Rendered once per tool instance: the registry snapshot stays fixed for the session's prompt prefix. */
+	readonly description = prompt.render(timerDescription, { registry: timerRegistrySnapshot() });
 	readonly parameters = timerSchema;
 	readonly strict = true;
 	/**
