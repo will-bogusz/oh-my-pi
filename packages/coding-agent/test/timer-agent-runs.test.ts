@@ -207,6 +207,50 @@ describe("timer agent runs (fresh/own sessions)", () => {
 		expect(result).toMatchObject({ ok: false, failure: "timeout" });
 	});
 
+	it("counts hooks against maxTime and kills a hook that ignores SIGTERM", async () => {
+		await set({ id: "stubborn" });
+		const spec = await readTimerSpec("stubborn", root);
+		if (!spec) throw new Error("no spec");
+		await fireTimerNow("stubborn", T0 + MINUTE, { deps: tickDeps() });
+		const payload = (await Bun.file(firePayloadPath("stubborn", 1, root)).json()) as TimerFirePayload;
+		const started = Date.now();
+		const result = await runAgent(
+			{ ...spec, run: { maxTimeMs: 300, before: "trap '' TERM; while :; do sleep 1; done" } },
+			payload,
+			{ root, env: { PATH: Bun.env.PATH ?? "" } },
+			agentDeps(),
+		);
+		// SIGTERM at the deadline is ignored; the group SIGKILL follows after the grace.
+		expect(Date.now() - started).toBeLessThan(9000);
+		expect(hosts).toHaveLength(0);
+		expect(result).toMatchObject({
+			ok: false,
+			failure: "timeout",
+			detail: "before hook still running at maxTime 0s",
+		});
+		expect(await readRunResult("stubborn", 1, root)).toMatchObject({ failure: "timeout" });
+	}, 15_000);
+
+	it("records a result when the run cannot even be set up", async () => {
+		await set({ id: "broken-cwd" });
+		const spec = await readTimerSpec("broken-cwd", root);
+		if (!spec) throw new Error("no spec");
+		const notADir = path.join(root, "not-a-dir");
+		fs.writeFileSync(notADir, "");
+		await fireTimerNow("broken-cwd", T0 + MINUTE, { deps: tickDeps() });
+		const payload = (await Bun.file(firePayloadPath("broken-cwd", 1, root)).json()) as TimerFirePayload;
+		const result = await runAgent(
+			{ ...spec, cwd: notADir, run: { after: "true" } },
+			payload,
+			{ root, env: { PATH: Bun.env.PATH ?? "" } },
+			agentDeps(),
+		);
+		expect(hosts).toHaveLength(0);
+		expect(result).toMatchObject({ ok: false, failure: "error" });
+		expect(await readRunResult("broken-cwd", 1, root)).toMatchObject({ ok: false, failure: "error" });
+		expect(peekNewMail(ORIGIN, "broken-cwd#1.report.json")?.report).toMatchObject({ ok: false, failure: "error" });
+	});
+
 	it("fails a run whose expected artifacts are missing, and passes one that wrote them", async () => {
 		await set({ id: "artifact", expect: ["out/report.md"], session: "fresh", cwd: "run" });
 		const missing = await fireAndRun("artifact", 1);

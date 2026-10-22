@@ -55,6 +55,8 @@ export const DEFAULT_AGENT_RUN_MAX_TIME_MS = HOUR / 2;
 const ABORT_GRACE_MS = 15_000;
 /** Cap on one `before`/`after` hook. */
 const HOOK_TIMEOUT_MS = 10 * MINUTE;
+/** `after` runs even when the agent used up maxTime: it gets at least this long to clean up and record. */
+const AFTER_HOOK_FLOOR_MS = MINUTE;
 /** Final text kept in `result.json` and in the report mail. */
 const FINAL_TEXT_MAX = 8000;
 
@@ -192,8 +194,6 @@ export async function runAgent(
 			? path.resolve(timerStateDir(spec.id, ctx.root), "work")
 			: path.join(dir, "work")
 		: spec.cwd;
-	await fs.mkdir(dir, { recursive: true });
-	await fs.mkdir(cwd, { recursive: true });
 	const env = { ...ctx.env, OMP_TIMER_RUN_DIR: dir };
 	const maxTime = spec.run.maxTimeMs ?? DEFAULT_AGENT_RUN_MAX_TIME_MS;
 	const deadline = started + maxTime;
@@ -224,34 +224,50 @@ export async function runAgent(
 		result.endedAt = new Date(ended).toISOString();
 		result.durationMs = ended - started;
 	};
+	/** A hook gets the time left before the deadline (at most the hook cap); `floor` keeps `after` able to clean up. */
+	const hook = async (name: "before" | "after", command: string, extraEnv: Record<string, string>, floor = 0) => {
+		const budget = Math.max(floor, deadline - now());
+		const limit = Math.min(HOOK_TIMEOUT_MS, budget);
+		const done = await runCommand(["/bin/sh", "-c", command], cwd, { ...env, ...extraEnv }, limit);
+		if (done.ok) return;
+		if (done.timedOut && limit === budget)
+			fail("timeout", `${name} hook still running at maxTime ${formatDuration(maxTime)}`);
+		else fail(name, `${name} hook ${done.detail ?? "failed"}`);
+	};
 
-	if (spec.run.before) {
-		const hook = await runCommand(["/bin/sh", "-c", spec.run.before], cwd, env, HOOK_TIMEOUT_MS);
-		if (!hook.ok) fail("before", `before hook ${hook.detail ?? "failed"}`);
-	}
-	if (result.ok)
-		await runSession(spec, payload, { ...ctx, now }, deps, { cwd, dir, env, deadline, maxTime }, result, fail);
-	if (result.ok && spec.run.expect?.length) {
-		const missing: string[] = [];
-		for (const entry of spec.run.expect) {
-			if (!(await fs.exists(path.resolve(cwd, entry)))) missing.push(entry);
+	let cwdReady = false;
+	try {
+		await fs.mkdir(dir, { recursive: true });
+		await fs.mkdir(cwd, { recursive: true });
+		cwdReady = true;
+		if (spec.run.before) await hook("before", spec.run.before, {});
+		if (result.ok && now() >= deadline)
+			fail("timeout", `no time left for the agent within maxTime ${formatDuration(maxTime)}`);
+		if (result.ok)
+			await runSession(spec, payload, { ...ctx, now }, deps, { cwd, dir, env, deadline, maxTime }, result, fail);
+		if (result.ok && spec.run.expect?.length) {
+			const missing: string[] = [];
+			for (const entry of spec.run.expect) {
+				if (!(await fs.exists(path.resolve(cwd, entry)))) missing.push(entry);
+			}
+			if (missing.length) {
+				result.expectMissing = missing;
+				fail("expect", `missing after the run: ${missing.join(", ")}`);
+			}
 		}
-		if (missing.length) {
-			result.expectMissing = missing;
-			fail("expect", `missing after the run: ${missing.join(", ")}`);
-		}
+	} catch (err) {
+		fail("error", firstErrorLine(err instanceof Error ? err.message : String(err)));
 	}
 	stamp();
 	const resultPath = await writeRunResult(result, ctx.root);
-	if (spec.run.after) {
+	if (spec.run.after && cwdReady) {
 		const outcome = result.ok ? "ok" : `failed: ${result.failure}`;
-		const hook = await runCommand(
-			["/bin/sh", "-c", spec.run.after],
-			cwd,
-			{ ...env, OMP_TIMER_RESULT: resultPath, OMP_TIMER_OUTCOME: outcome },
-			HOOK_TIMEOUT_MS,
+		await hook(
+			"after",
+			spec.run.after,
+			{ OMP_TIMER_RESULT: resultPath, OMP_TIMER_OUTCOME: outcome },
+			AFTER_HOOK_FLOOR_MS,
 		);
-		if (!hook.ok) fail("after", `after hook ${hook.detail ?? "failed"}`);
 		stamp();
 	}
 	try {
@@ -305,7 +321,6 @@ async function runSession(
 		spec.tz,
 		{ session, cwd: place.cwd, expect: spec.run.expect },
 	);
-
 	const { promise: limitHit, resolve: hitLimit } = Promise.withResolvers<"budget" | "timeout">();
 	const denied = new Set<string>();
 	let lastError: string | undefined;
