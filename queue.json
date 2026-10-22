@@ -40922,7 +40922,7 @@
    "area": "coding-agent",
    "priority": "P0",
    "needs": [],
-   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/turndown-intraword-underscore.md",
    "state": "open",
    "pr": 16607,
@@ -40930,7 +40930,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/turndown-intraword-underscore",
    "host": "MacBook-Pro",
    "added": "2026-10-21T02:42:03Z",
-   "updated": "2026-10-21T06:41:08Z",
+   "updated": "2026-10-22T07:17:49Z",
    "note": "",
    "built": [
     {
@@ -41363,7 +41363,8 @@
      "tree": "dc869133d2a4552222b5a33e7852869c9f58553a"
     }
    ],
-   "opened": "2026-10-21T06:00:13Z"
+   "opened": "2026-10-21T06:00:13Z",
+   "advanced": "2026-10-22T07:17:49Z"
   },
   {
    "id": "read-audio-transcripts",
