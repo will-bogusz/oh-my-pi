@@ -2826,7 +2826,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "de66c35a16c9c08f6785423356b866a08aba6f17",
    "body": "bodies/r2/webmcp-native.md",
    "state": "open",
    "pr": 16756,
@@ -2836,9 +2836,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-webmcp-native",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-22T08:02:46Z",
+   "updated": "2026-10-22T08:58:37Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main 9d5d4ac5b5",
-   "advanced": "2026-10-22T07:06:13Z",
+   "advanced": "2026-10-22T08:58:37Z",
    "built": [
     {
      "with": "#16231",
