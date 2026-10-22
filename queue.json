@@ -14694,7 +14694,7 @@
    "area": "providers",
    "priority": "P1",
    "needs": [],
-   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/factory-droid-org-lookup.md",
    "state": "open",
    "pr": 16257,
@@ -14702,7 +14702,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-org-lookup",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:18:31Z",
-   "updated": "2026-10-20T20:26:26Z",
+   "updated": "2026-10-22T07:05:55Z",
    "note": "",
    "built": [
     {
@@ -14805,7 +14805,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-20T20:26:26Z",
+   "advanced": "2026-10-22T07:05:55Z",
    "opened": "2026-10-18T23:07:09Z",
    "readied": "2026-10-18T23:07:26Z"
   },
