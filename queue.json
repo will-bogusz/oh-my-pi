@@ -45569,7 +45569,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/headless-agent-flags",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:48:44Z",
-   "updated": "2026-10-22T09:30:12Z",
+   "updated": "2026-10-22T09:33:18Z",
    "note": "",
    "built": [
     {
@@ -45978,7 +45978,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-22T09:30:10Z"
+   "opened": "2026-10-22T09:30:10Z",
+   "readied": "2026-10-22T09:33:17Z"
   }
  ],
  "watch": {
