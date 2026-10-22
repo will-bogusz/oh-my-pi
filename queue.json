@@ -46093,8 +46093,19 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/max-cost-gate",
    "host": "MacBook-Pro",
    "added": "2026-10-22T10:06:56Z",
-   "updated": "2026-10-22T10:06:56Z",
-   "note": ""
+   "updated": "2026-10-22T16:51:10Z",
+   "note": "",
+   "built": [
+    {
+     "with": "timer-pr-1-poke",
+     "code": "76686890235e19ba70f54ed5a562947382f754bd",
+     "with_code": "5f66f1fe51bb7b8cfe6df473a19c69aba1aef162",
+     "tip": "398afce0fdda62bf60e0f5d2f78c830917dc13d8",
+     "with_tip": "711a4309e5f1fa9c29d171b88ca1a4fe708b0a76",
+     "at": "2026-10-22T16:51:09Z",
+     "host": "goliath"
+    }
+   ]
   },
   {
    "id": "timer-pr-1-poke",
