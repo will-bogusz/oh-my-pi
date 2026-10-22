@@ -2448,15 +2448,15 @@
    "needs": [],
    "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/r2/webmcp-native.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16756,
    "closed_prs": [
     15556
    ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-webmcp-native",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-22T07:58:20Z",
+   "updated": "2026-10-22T08:02:11Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main 9d5d4ac5b5",
    "advanced": "2026-10-22T07:06:13Z",
    "built": [
@@ -2829,7 +2829,8 @@
      "at": "2026-10-22T07:58:13Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-22T08:02:10Z"
   },
   {
    "id": "r2/relay-call-deadline",
