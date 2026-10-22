@@ -37230,7 +37230,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/task-result-inline.md",
    "state": "open",
    "pr": 16599,
@@ -37238,7 +37238,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/task-result-inline",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:07:24Z",
-   "updated": "2026-10-21T06:41:08Z",
+   "updated": "2026-10-22T08:09:52Z",
    "note": "",
    "built": [
     {
@@ -37681,7 +37681,7 @@
      "tree": "059e16c5899a65c86cabcf7ba734cce09fdee99f"
     }
    ],
-   "advanced": "2026-10-21T02:57:33Z",
+   "advanced": "2026-10-22T08:09:52Z",
    "opened": "2026-10-21T04:05:47Z"
   },
   {
