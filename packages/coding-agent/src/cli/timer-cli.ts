@@ -81,6 +81,7 @@ export interface TimerFieldArgs {
 	model?: string;
 	overlap?: "skip" | "queue";
 	grace?: string;
+	catchup?: "run" | "skip";
 	pauseAfter?: number;
 	allowTimers?: boolean;
 	wakeMachine?: boolean;
@@ -151,6 +152,7 @@ function setInput(cmd: TimerCommandArgs): TimerSetInput {
 		model: fields.model,
 		overlap: fields.overlap,
 		grace: fields.grace,
+		catchup: fields.catchup,
 		pauseAfter: fields.pauseAfter,
 		allowTimers: fields.allowTimers,
 		wakeMachine: fields.wakeMachine,
@@ -178,6 +180,7 @@ function editInput(fields: TimerFieldArgs): TimerEditInput {
 		model: fields.model,
 		overlap: fields.overlap,
 		grace: clearable(fields.grace),
+		catchup: fields.catchup,
 		pauseAfter: fields.pauseAfter,
 		allowTimers: fields.allowTimers,
 		wakeMachine: fields.wakeMachine,

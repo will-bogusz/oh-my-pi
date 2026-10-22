@@ -53,7 +53,11 @@ export default class Timer extends Command {
 			options: ["skip", "queue"],
 		}),
 		grace: Flags.string({
-			description: "set/edit: how late a run may still start (default 12h once, ≤6h recurring)",
+			description: "set/edit: how late a run may still start (default 12h once; recurring: always the newest slot)",
+		}),
+		catchup: Flags.string({
+			description: "set/edit: a slot reached late (asleep, no ticker): run it once (default) or skip it as missed",
+			options: ["run", "skip"],
 		}),
 		"pause-after": Flags.integer({ description: "set/edit: consecutive failures that pause it (default 3)" }),
 		"allow-timers": Flags.boolean({ description: "set/edit: let its runs manage other timers" }),
@@ -120,6 +124,7 @@ export default class Timer extends Command {
 				model: flags.model,
 				overlap: flags.overlap as "skip" | "queue" | undefined,
 				grace: flags.grace,
+				catchup: flags.catchup as "run" | "skip" | undefined,
 				pauseAfter: flags["pause-after"],
 				allowTimers: flags["allow-timers"],
 				wakeMachine: flags["wake-machine"],

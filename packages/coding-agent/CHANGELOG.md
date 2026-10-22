@@ -4,11 +4,12 @@
 
 ### Added
 
-- `omp timer install|uninstall|doctor` sets up and checks the once-a-minute ticker (launchd on macOS, a systemd user timer on Linux); timers now catch up missed slots with one late run, record runs past their grace as missed, pause after 3 consecutive failures with a single alert (`timer.notify` desktop notification and/or `timer.alertCommand`), and gain `edit`, `logs`, `fire --data`, `--when` (Tern-style schedules), `--overlap queue` and `--json` on every verb
 - Anthropic web search and Files API uploads follow `PI_ANTHROPIC_API_VERSION=2026-10-21`; web search omits `temperature` under that version ([#16706](https://github.com/can1357/oh-my-pi/pull/16706) by [@H4vC](https://github.com/H4vC))
+- Timers: a `timer` tool and `omp timer set|edit|ls|show|runs|logs|fire|pause|resume|rm` (all with `--json`) for work that happens later — at a time, on a schedule (`every 30m`, `daily 09:00`, cron, or Tern-style `--when` strings), or once a shell, CI or process condition holds — and then wakes a session, runs a fresh agent, or runs a shell command. Timers live in `<agentDir>/timers` (Markdown specs, SQLite run state), outlive the session that set them, and record every run and delivery
+- `omp timer install|uninstall|doctor` sets up and checks the once-a-minute ticker (a launchd agent on macOS, a systemd user timer on Linux). A slot missed while the machine slept or no ticker ran runs once, late (`catchup: skip` or `grace` records it missed instead); a timer pauses after 3 consecutive failures with one alert through `timer.notify` (desktop notification) and/or `timer.alertCommand`; `--overlap queue` buffers one run behind a running one; a fired run may change only its own timer unless `--allow-timers`
+- Timers in the session: `/timer in 2h <prompt>` (or `at 8:00`, `every 30m`) wakes this session later, `/timer` also runs the `omp timer` verbs including `edit`, `/timers` opens a sheet to show, fire, pause, resume, remove and read logs, the status line shows how many timers this session set and when the next fires, `timer://` reads timers and fires, edits, pauses, resumes or removes them, and `timer` tool calls draw a card; setting `timer.enabled` turns the tool off
 - `omp poke <session> <message>` delivers into a session exactly once: an idle omp starts a turn, a busy one takes it at its next step, after Esc it waits for your next message (`--force` delivers at once), and a closed session holds it until opened or runs one headless turn with `--resume`
 - SDK: `createAgentSession({ timerMailbox: { deliver: true } })` delivers timer fires and pokes as turns; by default an embedded session only marks itself open, so timer mail for it is held instead of resuming it in another process
-- Timers in the session: `/timer in 2h <prompt>` (or `at 8:00`, `every 30m`) wakes this session later, `/timer` also runs the `omp timer` verbs, `/timers` opens a sheet to show, fire, pause, resume, remove and read logs, the status line shows how many timers this session set and when the next fires, `timer://` reads and controls timers, and `timer` tool calls draw a card; setting `timer.enabled` turns the tool off
 - `omp timer ls --all` also lists scheduled work omp did not create (systemd user and system timers and long-running services, `~/Library/LaunchAgents`, the user crontab) with schedule, next/last run, last result, source file and log, and flags each as failed, never-ran, unarmed, no-failure-alert, interval-only, source-in-scratch or sleep-lossy; `--host <name>|all` adds other hosts over ssh, using their `omp timer ls --json --all` when available and otherwise running the same read-only listing commands remotely
 
 ## [18.12.6] - 2026-10-21
@@ -35,10 +36,6 @@
 - Fixed releasing or reaping a browser tab returning while Chromium still listed the page; the close now waits until Chromium reports the tab destroyed ([#16680](https://github.com/can1357/oh-my-pi/pull/16680) by [@H4vC](https://github.com/H4vC))
 - Fixed the advisor prompt forbidding all repeated advice, including real escalations: advisors may now re-raise a prior nit or concern as a blocker once new evidence makes it one ([#13887](https://github.com/can1357/oh-my-pi/issues/13887), [#16484](https://github.com/can1357/oh-my-pi/pull/16484) by [@pjh890321](https://github.com/pjh890321))
 - Fixed Esc no longer interrupting in the TUI after a second MCP OAuth login replaced an unfinished first one ([#16046](https://github.com/can1357/oh-my-pi/pull/16046) by [@marcintustin](https://github.com/marcintustin))
-
-### Added
-
-- Timers (prototype): a `timer` tool and `omp timer` CLI that wake a session later, on a schedule, or once a shell/CI/process condition holds, plus `omp poke <session> <message>` to start a turn in a session from any script. `omp timer tick` must be run once a minute (no OS unit is installed yet)
 
 ## [18.12.5] - 2026-10-21
 

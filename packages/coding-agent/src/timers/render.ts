@@ -93,6 +93,8 @@ export function renderTimerCard(row: TimerRow, now: number, options: CardOptions
 		spec.expiresAt ? `expires ${formatWallClock(Date.parse(spec.expiresAt), spec.tz)}` : undefined,
 		spec.maxRuns !== undefined ? `max ${spec.maxRuns} runs` : undefined,
 		spec.every ? `overlap ${spec.overlap}` : undefined,
+		spec.catchup === "skip" ? "late slots skipped" : undefined,
+		spec.graceMs !== undefined ? `grace ${formatDuration(spec.graceMs)}` : undefined,
 		`pauses after ${spec.pauseAfter} failures`,
 		row.state.runCount ? `${row.state.runCount} run(s) so far` : undefined,
 	].filter(Boolean);
@@ -110,10 +112,14 @@ export function renderTimerCard(row: TimerRow, now: number, options: CardOptions
 		);
 	}
 	if ((options.platform ?? process.platform) === "darwin" && (spec.at || spec.every) && !spec.wakeMachine) {
-		lines.push("⚠ a sleeping Mac runs this late, on wake (missed if past its grace)");
+		lines.push(
+			spec.catchup === "skip"
+				? "⚠ a sleeping Mac misses the slots it sleeps through (catchup: skip)"
+				: "⚠ a sleeping Mac runs this late, once, on wake",
+		);
 	}
 	for (const warning of options.warnings ?? []) lines.push(`⚠ ${warning}`);
-	lines.push(`manage timer {op:"show"|"fire"|"pause"|"remove", id:"${spec.id}"}`);
+	lines.push(`manage timer {op:"show"|"edit"|"fire"|"pause"|"remove", id:"${spec.id}"}`);
 	return lines.join("\n");
 }
 

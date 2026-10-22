@@ -21,8 +21,12 @@
  *   occurrence. Day-of-month and day-of-week both restricted means either
  *   matches (cron OR semantics).
  * - Every evaluation re-derives due slots from `now`, never from elapsed
- *   ticks: missed slots coalesce into one run of the newest slot; a newest
- *   slot later than its grace is `missed` instead of run.
+ *   ticks: missed slots coalesce into one run of the newest slot. By default
+ *   a recurring timer's newest slot runs however late it is (it is never
+ *   older than one period, or the next slot would be the newest: systemd
+ *   `Persistent=` semantics). A slot later than its grace (spec `grace`, or
+ *   {@link CATCHUP_SKIP_GRACE_MS} with `catchup: skip`, or 12 h for a
+ *   one-shot) is recorded `missed` instead of run.
  */
 import { Cron } from "croner";
 import type { TimerSpec, TimerState } from "./types";
@@ -34,8 +38,8 @@ const UNIT_MS: Record<string, number> = { s: 1000, m: MINUTE, h: HOUR, d: DAY };
 
 /** A one-shot fires late up to this by default, then is recorded `missed`. */
 export const ONE_SHOT_GRACE_MS = 12 * HOUR;
-/** Upper bound of a recurring timer's default grace (the default is one period). */
-export const RECURRING_GRACE_CAP_MS = 6 * HOUR;
+/** `catchup: skip`: lateness still counted on time (a tick delayed by the scheduler or a wake), beyond it the slot is missed. */
+export const CATCHUP_SKIP_GRACE_MS = 5 * MINUTE;
 /** Minimum spacing between runs: a model turn every minute is never what anyone meant. */
 export const MIN_PROMPT_INTERVAL_MS = 5 * MINUTE;
 export const MIN_SHELL_INTERVAL_MS = MINUTE;
@@ -316,12 +320,17 @@ export type DueDecision =
 	| { kind: "retire"; why: "expired" | "once" | "max-runs" };
 
 /** How late `slot` may still run. */
-export function graceFor(spec: Pick<TimerSpec, "graceMs">, source: SlotSource | undefined, slot: number): number {
+export function graceFor(
+	spec: Pick<TimerSpec, "graceMs" | "catchup">,
+	source: SlotSource | undefined,
+	slot: number,
+): number {
 	if (spec.graceMs !== undefined) return spec.graceMs;
+	if (spec.catchup === "skip") return CATCHUP_SKIP_GRACE_MS;
 	if (!source) return ONE_SHOT_GRACE_MS;
+	// One full period: the newest slot always runs once, however late.
 	const next = source.after(slot);
-	const period = next !== undefined ? next - slot : HOUR;
-	return Math.min(RECURRING_GRACE_CAP_MS, period);
+	return next !== undefined ? next - slot : Number.POSITIVE_INFINITY;
 }
 
 /** The gate of a condition timer is checked once per tick-minute; each minute is its own slot. */

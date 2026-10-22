@@ -114,6 +114,7 @@ export function parseTimerSpec(id: string, content: string, filePath: string): T
 		maxRuns: int(fm.max_runs),
 		overlap: fm.overlap === "queue" ? "queue" : "skip",
 		graceMs: grace ? parseDuration(grace) : undefined,
+		catchup: fm.catchup === "skip" ? "skip" : "run",
 		pauseAfter: int(fm.pause_after) ?? DEFAULT_PAUSE_AFTER,
 		allowTimers: fm.allow_timers === true,
 		wakeMachine: fm.wake_machine === true,
@@ -158,6 +159,7 @@ export function serializeTimerSpec(spec: TimerSpec): string {
 	if (spec.maxRuns !== undefined) fm.max_runs = spec.maxRuns;
 	fm.overlap = spec.overlap;
 	if (spec.graceMs !== undefined) fm.grace = serializeDuration(spec.graceMs);
+	if (spec.catchup === "skip") fm.catchup = "skip";
 	fm.pause_after = spec.pauseAfter;
 	if (spec.allowTimers) fm.allow_timers = true;
 	if (spec.wakeMachine) fm.wake_machine = true;

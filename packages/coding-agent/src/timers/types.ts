@@ -39,6 +39,8 @@ export interface TimerProvenance {
 	run?: string;
 }
 
+export type TimerCatchup = "run" | "skip";
+
 export interface TimerSpec {
 	id: string;
 	/** Bumped by every write; a writer holding an older rev gets a conflict instead of overwriting. */
@@ -63,8 +65,10 @@ export interface TimerSpec {
 	expiresAt?: string;
 	maxRuns?: number;
 	overlap: TimerOverlap;
-	/** How late a slot may still run, ms; later ⇒ `missed`. Default: one-shot 12h, recurring min(period, 6h). */
+	/** How late a slot may still run, ms; later ⇒ `missed`. Default: one-shot 12h, recurring one period (always catches up). */
 	graceMs?: number;
+	/** `skip`: a slot the ticker reached late (asleep, no ticker) is recorded `missed` instead of run late. */
+	catchup: TimerCatchup;
 	/** Consecutive failures that pause the timer. */
 	pauseAfter: number;
 	/** Let runs this timer fires create or change other timers (recursion guard). */

@@ -38,7 +38,7 @@ import {
 	readTimerSpec,
 } from "./store";
 import { currentState } from "./tick";
-import type { TimerOverlap, TimerSpec, TimerState, TimerTarget } from "./types";
+import type { TimerCatchup, TimerOverlap, TimerSpec, TimerState, TimerTarget } from "./types";
 
 /** Agent-set recurring session timers retire after this unless `expires` says otherwise. */
 const TOOL_RECURRING_EXPIRY_MS = 7 * DAY;
@@ -69,6 +69,8 @@ export interface TimerSetInput {
 	overlap?: TimerOverlap;
 	/** Duration: how late a slot may still run before it is recorded missed. */
 	grace?: string;
+	/** `skip`: a slot reached late (asleep, no ticker) is recorded missed instead of run late. */
+	catchup?: TimerCatchup;
 	pauseAfter?: number;
 	allowTimers?: boolean;
 	wakeMachine?: boolean;
@@ -258,6 +260,7 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		maxRuns: input.maxRuns,
 		overlap: input.overlap ?? "skip",
 		graceMs: input.grace ? parseDuration(input.grace) : undefined,
+		catchup: input.catchup ?? "run",
 		pauseAfter: input.pauseAfter ?? DEFAULT_PAUSE_AFTER,
 		allowTimers: input.allowTimers ?? false,
 		wakeMachine: input.wakeMachine ?? false,
@@ -308,6 +311,7 @@ export interface TimerEditInput {
 	model?: string | null;
 	overlap?: TimerOverlap;
 	grace?: string | null;
+	catchup?: TimerCatchup;
 	pauseAfter?: number;
 	allowTimers?: boolean;
 	wakeMachine?: boolean;
@@ -359,6 +363,7 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 			if (patch.model !== undefined) next.model = patch.model?.trim() || undefined;
 			if (patch.overlap !== undefined) next.overlap = patch.overlap;
 			if (patch.grace !== undefined) next.graceMs = patch.grace ? parseDuration(patch.grace) : undefined;
+			if (patch.catchup !== undefined) next.catchup = patch.catchup;
 			if (patch.pauseAfter !== undefined) next.pauseAfter = patch.pauseAfter;
 			if (patch.allowTimers !== undefined) next.allowTimers = patch.allowTimers;
 			if (patch.wakeMachine !== undefined) next.wakeMachine = patch.wakeMachine;

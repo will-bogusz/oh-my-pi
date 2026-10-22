@@ -27,7 +27,7 @@ import {
 import { loadTimerNotifyConfig, sendTimerAlerts } from "./notify";
 import { firePayloadPath, runLockPath, runLogPath, tickLockPath, timersRoot, timerStateDir } from "./paths";
 import { applyFailure, applyNotice, applySuccess, firstErrorLine } from "./policy";
-import { type DueDecision, decideDue, MINUTE, nextFireAt } from "./schedule";
+import { type DueDecision, decideDue, formatDuration, MINUTE, nextFireAt } from "./schedule";
 import { assertTimerMutationAllowed } from "./scope";
 import { listTimerSpecs, mutateTimerSpec, openTimerDb, type RunView, readTimerSpec, type TimerDb } from "./store";
 import type { RunTrigger, TimerAlert, TimerFirePayload, TimerSpec, TimerState } from "./types";
@@ -300,7 +300,7 @@ async function sideEffects(
 			: `session ${sessionId} is not open; held until it opens`;
 	db.recordDelivery(spec.id, { runId, at, state: "held", session: sessionId, detail: why });
 	ctx.alerts.push(...applyNotice(db, spec, "held", why, { runId, at, now: ctx.now }));
-	return why;
+	return `held (${why})`;
 }
 
 /** Re-run the side effect of a committed fire that never got one (crash between commit and dispatch). */
@@ -485,8 +485,8 @@ async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
 		case "missed": {
 			state.lastSlot = decision.slot;
 			if (!spec.every) state.done = { at, why: "missed" };
-			const late = now - decision.slot;
-			const detail = `${Math.round(late / MINUTE)}m late, past its grace; not run`;
+			const late = Math.round((now - decision.slot) / MINUTE) * MINUTE;
+			const detail = `${formatDuration(late)} late, past its grace; not run`;
 			const runId = recordNonFire(ctx, spec, readSeq, state, {
 				slot: decision.slot,
 				missedSlots: decision.missedSlots,

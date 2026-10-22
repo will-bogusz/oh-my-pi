@@ -38,6 +38,7 @@ function spec(overrides: Partial<TimerSpec>): TimerSpec {
 		action: { kind: "shell", command: "true" },
 		cwd: "/",
 		overlap: "skip",
+		catchup: "run",
 		pauseAfter: 3,
 		allowTimers: false,
 		wakeMachine: false,
@@ -80,11 +81,31 @@ describe("timer slot math", () => {
 		expect(decideDue(hourly, { ...fresh, lastSlot: T0 + 4 * HOUR }, T0 + 4 * HOUR + 11 * MINUTE).kind).toBe("idle");
 	});
 
-	it("records a calendar slot later than its grace (≤6h) as missed instead of running it", () => {
+	it("runs a recurring slot however late by default: the newest slot is never older than one period", () => {
 		const daily = spec({ every: "daily 09:00", tz: NY, armedAt: "2026-10-20T14:00:00Z" }); // 10:00 EDT, after that day's slot
 		const nine = Date.parse("2026-10-21T13:00:00Z");
-		expect(decideDue(daily, fresh, nine + 5 * HOUR).kind).toBe("due");
-		expect(decideDue(daily, fresh, nine + 7 * HOUR)).toEqual({ kind: "missed", slot: nine, missedSlots: 0 });
+		expect(decideDue(daily, fresh, nine + 23 * HOUR)).toEqual({ kind: "due", slot: nine, missedSlots: 0 });
+		// A day later the next slot has come: still one run, of the newest slot, the older one coalesced.
+		expect(decideDue(daily, fresh, nine + 25 * HOUR)).toEqual({
+			kind: "due",
+			slot: nine + 24 * HOUR,
+			missedSlots: 1,
+		});
+		// A spec grace still caps it.
+		expect(decideDue({ ...daily, graceMs: 6 * HOUR }, fresh, nine + 7 * HOUR)).toEqual({
+			kind: "missed",
+			slot: nine,
+			missedSlots: 0,
+		});
+	});
+
+	it("with catchup: skip, records a slot reached more than a few minutes late as missed", () => {
+		const daily = spec({ every: "daily 09:00", tz: NY, armedAt: "2026-10-20T14:00:00Z", catchup: "skip" });
+		const nine = Date.parse("2026-10-21T13:00:00Z");
+		expect(decideDue(daily, fresh, nine + 2 * MINUTE).kind).toBe("due");
+		expect(decideDue(daily, fresh, nine + 3 * HOUR)).toEqual({ kind: "missed", slot: nine, missedSlots: 0 });
+		const once = spec({ at: iso(T0 + MINUTE), catchup: "skip" });
+		expect(decideDue(once, fresh, T0 + HOUR).kind).toBe("missed");
 		expect(decideDue({ ...daily, graceMs: 8 * HOUR }, fresh, nine + 7 * HOUR).kind).toBe("due");
 	});
 
@@ -300,7 +321,7 @@ describe("timer engine (tick, runner records, policy) on an injected clock", () 
 	});
 
 	it("notifies a missed slot once per incident and reminds only after the cooldown", async () => {
-		await shell("brief", "daily 09:00", T0 - 2 * 24 * HOUR);
+		await shell("brief", "daily 09:00", T0 - 2 * 24 * HOUR, { catchup: "skip" });
 		const nine = Date.parse("2026-10-21T09:00:00Z");
 		await tick(nine + 7 * HOUR); // 7h late: missed
 		await tick(nine + 24 * HOUR + 6.5 * HOUR); // next day also missed, 23.5h after the alert
