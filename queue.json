@@ -4516,7 +4516,7 @@
    "area": "other",
    "priority": "P0",
    "needs": [],
-   "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/todo-serial-tools.md",
    "state": "open",
    "pr": 16231,
@@ -4524,7 +4524,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/todo-serial-tools",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:22Z",
-   "updated": "2026-10-18T18:41:08Z",
+   "updated": "2026-10-22T07:04:45Z",
    "note": "opened #16231",
    "built": [
     {
@@ -4610,7 +4610,8 @@
     }
    ],
    "opened": "2026-10-18T18:24:26Z",
-   "readied": "2026-10-18T18:24:44Z"
+   "readied": "2026-10-18T18:24:44Z",
+   "advanced": "2026-10-22T07:04:45Z"
   },
   {
    "id": "computer-uinput-release",
