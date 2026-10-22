@@ -46116,29 +46116,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T16:17:10Z",
+  "checked": "2026-10-22T16:47:57Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "factory-droid-0244": {
-    "since": "2026-10-22T16:17:10Z",
-    "title": "feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback)"
-   },
    "max-cost-gate": {
     "since": "2026-10-22T16:17:10Z",
     "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend"
-   },
-   "computer-ui-quiet": {
-    "since": "2026-10-22T16:17:10Z",
-    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
-   },
-   "r2/relay-bg-input-main": {
-    "since": "2026-10-22T16:17:10Z",
-    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys"
-   },
-   "factory-droid-web-search": {
-    "since": "2026-10-22T16:17:10Z",
-    "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)"
    },
    "timer-pr-1-poke": {
     "since": "2026-10-22T16:17:10Z",
@@ -46149,7 +46133,15 @@
     "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
    }
   },
-  "conflicts": {},
+  "conflicts": {
+   "#16611": {
+    "since": "2026-10-22T16:47:57Z",
+    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
+    "files": [
+     "packages/ai/src/auth-gateway/server.ts"
+    ]
+   }
+  },
   "merged_through": "2026-10-22T09:44:50Z",
   "unreleased": {
    "16614": {
@@ -46198,7 +46190,55 @@
     "merged_at": "2026-10-22T09:44:50Z"
    }
   },
-  "ready": [],
+  "ready": [
+   15105,
+   15124,
+   15128,
+   15130,
+   15418,
+   15433,
+   15508,
+   16223,
+   16231,
+   16250,
+   16257,
+   16271,
+   16274,
+   16284,
+   16291,
+   16296,
+   16297,
+   16309,
+   16316,
+   16403,
+   16552,
+   16553,
+   16556,
+   16564,
+   16575,
+   16576,
+   16579,
+   16581,
+   16583,
+   16585,
+   16586,
+   16587,
+   16589,
+   16595,
+   16596,
+   16597,
+   16599,
+   16608,
+   16611,
+   16612,
+   16756,
+   16762,
+   16763,
+   16766,
+   16768,
+   16769,
+   16770
+  ],
   "post_merge": {
    "13677": {
     "title": "fix(ai,catalog): encode Devin credentials by shape and drop the Windsurf fallbacks",
@@ -50246,6 +50286,43 @@
     "kind": "openable",
     "id": "timer-pr-1-poke",
     "title": "feat(coding-agent): deliver messages into a session from outside with omp poke"
+   },
+   {
+    "at": "2026-10-22T16:47:57Z",
+    "kind": "unopenable",
+    "id": "factory-droid-0244",
+    "title": "feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback)",
+    "why": "plan: wait (conflicts with #16257 in packages/ai/src/registry/oauth/factory-droid.ts; conflicts with #16316 in packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts)"
+   },
+   {
+    "at": "2026-10-22T16:47:57Z",
+    "kind": "unopenable",
+    "id": "computer-ui-quiet",
+    "title": "fix(computer): wait for the app to finish reacting before the next read or input",
+    "why": "plan: wait (conflicts with #16403 in packages/coding-agent/src/tools/computer/worker.ts)"
+   },
+   {
+    "at": "2026-10-22T16:47:57Z",
+    "kind": "unopenable",
+    "id": "r2/relay-bg-input-main",
+    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
+    "why": "plan: wait (conflicts with #16284 in packages/coding-agent/src/tools/browser/relay/bridge.ts)"
+   },
+   {
+    "at": "2026-10-22T16:47:57Z",
+    "kind": "unopenable",
+    "id": "factory-droid-web-search",
+    "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)",
+    "why": "plan: wait (conflicts with #16316 in packages/catalog/src/discovery/factory-droid.ts)"
+   },
+   {
+    "at": "2026-10-22T16:47:57Z",
+    "kind": "conflict",
+    "label": "#16611",
+    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
+    "files": [
+     "packages/ai/src/auth-gateway/server.ts"
+    ]
    }
   ]
  },
