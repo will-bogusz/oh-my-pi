@@ -35294,13 +35294,13 @@
    "needs": [],
    "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/eval-py-await-tool.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16578,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-py-await-tool",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:46:23Z",
-   "updated": "2026-10-22T07:12:22Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -35575,7 +35575,8 @@
    ],
    "opened": "2026-10-21T00:04:55Z",
    "readied": "2026-10-21T00:05:18Z",
-   "advanced": "2026-10-22T07:12:22Z"
+   "advanced": "2026-10-22T07:12:22Z",
+   "merged_by": "pr"
   },
   {
    "id": "proc-kill-read-hint",
@@ -35586,13 +35587,13 @@
    "needs": [],
    "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/proc-kill-read-hint.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16580,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/proc-kill-read-hint",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:48:18Z",
-   "updated": "2026-10-22T07:13:11Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -35867,7 +35868,8 @@
    ],
    "opened": "2026-10-21T00:10:38Z",
    "readied": "2026-10-21T00:11:00Z",
-   "advanced": "2026-10-22T07:13:11Z"
+   "advanced": "2026-10-22T07:13:11Z",
+   "merged_by": "pr"
   },
   {
    "id": "write-keep-crlf",
@@ -36170,13 +36172,13 @@
    "needs": [],
    "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/fetch-ua-retry.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16593,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fetch-ua-retry",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:53:24Z",
-   "updated": "2026-10-22T07:14:59Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -36621,7 +36623,8 @@
    ],
    "advanced": "2026-10-22T07:14:59Z",
    "opened": "2026-10-21T03:54:09Z",
-   "readied": "2026-10-21T03:54:24Z"
+   "readied": "2026-10-21T03:54:24Z",
+   "merged_by": "pr"
   },
   {
    "id": "read-display-budget",
@@ -37104,13 +37107,13 @@
    "needs": [],
    "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/grep-per-file-cap.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16594,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/grep-per-file-cap",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:01:15Z",
-   "updated": "2026-10-22T07:15:26Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -37555,7 +37558,8 @@
    ],
    "advanced": "2026-10-22T07:15:26Z",
    "opened": "2026-10-21T03:55:28Z",
-   "readied": "2026-10-21T03:55:43Z"
+   "readied": "2026-10-21T03:55:43Z",
+   "merged_by": "pr"
   },
   {
    "id": "rg-follow-root",
@@ -37566,17 +37570,18 @@
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/rg-follow-root.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16598,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rg-follow-root",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:02:32Z",
-   "updated": "2026-10-21T04:09:06Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "advanced": "2026-10-21T02:58:34Z",
    "opened": "2026-10-21T04:04:26Z",
-   "readied": "2026-10-21T04:04:41Z"
+   "readied": "2026-10-21T04:04:41Z",
+   "merged_by": "pr"
   },
   {
    "id": "minimizer-diff-hunk-lines",
@@ -37587,13 +37592,13 @@
    "needs": [],
    "base": "d5cd750e41fede277f9eb933455da92a0738915e",
    "body": "bodies/minimizer-diff-hunk-lines.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16588,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/minimizer-diff-hunk-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:05:45Z",
-   "updated": "2026-10-21T03:25:14Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -37609,7 +37614,8 @@
    ],
    "opened": "2026-10-21T02:12:05Z",
    "readied": "2026-10-21T02:12:28Z",
-   "advanced": "2026-10-21T03:25:14Z"
+   "advanced": "2026-10-21T03:25:14Z",
+   "merged_by": "pr"
   },
   {
    "id": "gateway-settle-log",
@@ -42180,13 +42186,13 @@
    "needs": [],
    "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/turndown-intraword-underscore.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16607,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/turndown-intraword-underscore",
    "host": "MacBook-Pro",
    "added": "2026-10-21T02:42:03Z",
-   "updated": "2026-10-22T07:17:49Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -42620,7 +42626,8 @@
     }
    ],
    "opened": "2026-10-21T06:00:13Z",
-   "advanced": "2026-10-22T07:17:49Z"
+   "advanced": "2026-10-22T07:17:49Z",
+   "merged_by": "pr"
   },
   {
    "id": "read-audio-transcripts",
@@ -43574,13 +43581,13 @@
    "needs": [],
    "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/steer-agent-notice.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16614,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/steer-agent-notice",
    "host": "MacBook-Pro",
    "added": "2026-10-21T05:24:16Z",
-   "updated": "2026-10-22T07:19:56Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -43928,14 +43935,15 @@
    ],
    "opened": "2026-10-21T06:13:53Z",
    "readied": "2026-10-21T06:14:18Z",
-   "advanced": "2026-10-22T07:19:56Z"
+   "advanced": "2026-10-22T07:19:56Z",
+   "merged_by": "pr"
   },
   {
    "id": "sleep-prevention-doc",
    "branch": "will/sleep-prevention-doc",
    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns",
    "area": "other",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "2d39e5f5d26c12d49b241f58905b5526106d2a1e",
    "body": "bodies/sleep-prevention-doc.md",
@@ -43945,7 +43953,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/sleep-prevention-doc",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:23:22Z",
-   "updated": "2026-10-22T09:34:47Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -44363,7 +44371,7 @@
    "branch": "will/advisor-quota-comment",
    "title": "docs(coding-agent): say what clears an advisor's quota pause",
    "area": "other",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "2d39e5f5d26c12d49b241f58905b5526106d2a1e",
    "body": "bodies/advisor-quota-comment.md",
@@ -44373,7 +44381,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/advisor-quota-comment",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:23:33Z",
-   "updated": "2026-10-22T09:35:42Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -44790,7 +44798,7 @@
    "branch": "will/drop-dead-jobs-op",
    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult",
    "area": "other",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/drop-dead-jobs-op.md",
@@ -44800,7 +44808,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/drop-dead-jobs-op",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:23:46Z",
-   "updated": "2026-10-22T09:06:27Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -45220,13 +45228,13 @@
    "needs": [],
    "base": "2d39e5f5d26c12d49b241f58905b5526106d2a1e",
    "body": "bodies/resume-cancel-bg-jobs.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16760,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/resume-cancel-bg-jobs",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:36:15Z",
-   "updated": "2026-10-22T09:33:36Z",
+   "updated": "2026-10-22T10:08:42Z",
    "note": "",
    "built": [
     {
@@ -45637,7 +45645,8 @@
    ],
    "opened": "2026-10-22T08:45:22Z",
    "readied": "2026-10-22T08:45:58Z",
-   "advanced": "2026-10-22T09:33:36Z"
+   "advanced": "2026-10-22T09:33:36Z",
+   "merged_by": "pr"
   },
   {
    "id": "headless-agent-flags",
