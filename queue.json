@@ -46473,7 +46473,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/timer-pr-1-poke",
    "host": "MacBook-Pro",
    "added": "2026-10-22T16:10:12Z",
-   "updated": "2026-10-22T16:58:18Z",
+   "updated": "2026-10-22T16:59:23Z",
    "note": "",
    "built": [
     {
@@ -46837,7 +46837,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-22T16:58:17Z"
+   "opened": "2026-10-22T16:58:17Z",
+   "readied": "2026-10-22T16:59:22Z"
   }
  ],
  "watch": {
