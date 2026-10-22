@@ -46093,7 +46093,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/max-cost-gate",
    "host": "MacBook-Pro",
    "added": "2026-10-22T10:06:56Z",
-   "updated": "2026-10-22T17:06:31Z",
+   "updated": "2026-10-22T17:09:28Z",
    "note": "",
    "built": [
     {
@@ -46457,7 +46457,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-22T17:06:30Z"
+   "opened": "2026-10-22T17:06:30Z",
+   "readied": "2026-10-22T17:09:27Z"
   },
   {
    "id": "timer-pr-1-poke",
