@@ -1170,8 +1170,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-22T08:24:20Z",
-   "note": "series 2 (B: draft until Will's presentation review). Rebased locally 2026-10-22 to fb8d040ff1 on main 3a2758b68f (worktree computer-ax-lines-s2), not pushed: code conflict with open ready #16403 (refuse-list sentence in docs/tools/computer.md and prompts/tools/computer.md). bench-mac s2ax-rb1 all exit 0 (Rust 944/0, TS 137+7). #15280 -> #15565; #15282 -> #15566, #15584 (children queued).",
+   "updated": "2026-10-22T08:29:42Z",
+   "note": "series 2 (B: draft until Will's presentation review). 2026-10-22: rebased onto main 3a2758b68f and pushed as draft head 3fff71c477 (was a300e47e51); refuse-list doc lines left as main has them (any-spelling refusal in its own sentence), so no conflict with #16403/#16223; fixed a Linux/Windows test compile error (DesktopError::ax_unconfirmed is macOS-only). rust-check linux/macos/windows recorded; built with 42 open ready PRs. Waits for the ax size rerun on today's main (bench-mac trusted python needs Accessibility) before ready. #15280 -> #15565; #15282 -> #15566, #15584 (children queued).",
    "advanced": "2026-10-22T07:03:53Z",
    "built": [
     {
