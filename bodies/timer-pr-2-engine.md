@@ -31,11 +31,11 @@ I wanted to leave omp jobs for later, like "run the backup every night" or "come
 Today a job for later is a crontab line you write yourself, and nothing wakes a session at 9. #2763 and #8757 ask for scheduled work. Related: #10363 (job-completion wakeups in print/headless mode), #7381 (durable cron prompts), #5838 (an in-session wakeup tool), #6336 (a scheduler extension). This one fires while omp is closed and delivers from outside, exactly once.
 
 Decisions:
-- **The OS schedules, no omp daemon**: launchd and systemd already run a unit each minute across reboots (Linux: with linger, checked by `doctor`). Ticks recompute due slots: missed recurring slots coalesce into the newest; grace and overlap can still skip it.
+- **The OS schedules, no omp daemon**: launchd and systemd already run a unit each minute across reboots (Linux: with linger, checked by `doctor`). Ticks recompute due slots; missed recurring slots coalesce into the newest.
 - **Prompts wake an existing session only**, at most every 5 min.
 - **Fires go in after Esc**, unlike pokes: you set them up.
 - **By default, 3 failures in a row pause a timer**, with one alert (`timer.notify`, `timer.alertCommand`).
-- **Recursion guard**: timer changes from a fired run, or a live fired turn's `bash`, are limited to its own timer unless `--allow-timers`.
+- **Recursion guard**: a fired run, or a live fired turn's `bash`, may change only its own timer unless `--allow-timers`; a prompt timer's turn may also manage (not fire) prompt timers that wake its session.
 
 The one decision for the maintainer: `omp timer install` adds a per-user launchd or systemd unit that runs `omp timer tick` every minute, and a tick may start a headless turn in a closed session (unless `--when-closed hold`). `omp timer uninstall` removes it.
 
@@ -43,7 +43,7 @@ Maintenance: new dependency `croner` 10.0.1 for cron and calendar slots; a SQLit
 
 ## Testing
 
-Live from this branch (claude-haiku-4-5, isolated stores). Linux, 5 of 5 passed: a shell timer per slot, a live RPC wake, a headless resume, the recursion guard's refusal, and a real systemd install, tick, `doctor` and `uninstall`. macOS: the same install checks with real launchd.
+Live from this branch (claude-haiku-4-5, isolated stores). Linux, 5 of 5 passed: a shell timer per slot, a live RPC wake, a headless resume, the recursion guard (rerun at the head), and a real systemd install, tick, `doctor` and `uninstall`. macOS: the same install checks with real launchd.
 
 <details><summary>Telling lines from the live run</summary>
 
@@ -62,9 +62,10 @@ message_end role=assistant  TIMER_WAKE_OK
 #1  …  schedule  fired  …  delivery=resumed-headless  end=ok 5s
 "text":"HEADLESS_OK"            # in the session file; each run id once
 
-  guard fired guard#1 — mailed to live session 01a164c9-…
-error: this run was started by timer guard (OMP_TIMER_RUN=guard#1); it may set only timer guard, not timer sneaky. …
-# control: the user's next prompt ran the same command: timer usermade armed (rev 1)
+  guard fired guard#1 — mailed to live session 01a165ad-…
+timer followup armed (rev 1) — … (today, in 30m), once       # its bash: a prompt timer for this session
+error: this turn was started by timer guard (OMP_TIMER_RUN=guard#1), which wakes this session; it may set only timer guard or prompt timers that wake this session, not timer sneaky. …   # its bash: a shell timer
+# control (first run): the user's next prompt set a shell timer: timer usermade armed (rev 1)
 
 $ omp timer install
   ran systemctl --user enable --now omp-timer-tick.timer → exit 0
@@ -93,11 +94,11 @@ Could not find service "sh.omp.timer-tick" in domain for user gui: 501
 
 </details>
 
-`bun test test/timers.test.ts test/timers-install.test.ts test/mailbox.test.ts test/session-mailbox.test.ts`: 113 pass. 16 negative controls: each fix's test fails with the bug put back. `bun run check` in `packages/coding-agent`.
+`bun test test/timers.test.ts test/timers-install.test.ts test/mailbox.test.ts test/session-mailbox.test.ts`: 115 pass. 17 negative controls: each fix's test fails with the bug put back. `bun run check` in `packages/coding-agent`.
 
 <details><summary>What the unit tests cover</summary>
 
-Schedules: intervals keep their seconds, calendar slots in the timer's zone across DST gaps and repeats, cron day-of-month or day-of-week, catch-up coalescing, `--grace`/`--catchup skip`, queued slots past their grace recorded missed. Delivery: a fire re-dispatched after a crash reaches the session once; it counts as delivered only once the session file has it; a lost headless runner fails its run and its mail is withdrawn; a re-dispatch takes the route the session needs now; a live fired turn's `bash` commands carry `OMP_TIMER_RUN` and the user's next turn doesn't; after Esc a fire starts a turn. Runs: the revision a run was fired from; a timed-out command's descendants killed; overlap skip and queue; two concurrent ticks decide a slot once. Store: concurrent edits rev-checked, revisions kept across remove and re-create. Ticker: plist and systemd units, install fails when the first tick fails, the unit bakes the profile or agent dir, doctor's checks.
+Schedules: intervals keep their seconds, calendar slots in the timer's zone across DST gaps and repeats, cron day-of-month or day-of-week, catch-up coalescing, `--grace`/`--catchup skip`, queued slots past their grace recorded missed. Delivery: a fire re-dispatched after a crash reaches the session once; it counts as delivered only once the session file has it; a lost headless runner fails its run and its mail is withdrawn; a re-dispatch takes the route the session needs now; a live fired turn's `bash` commands carry `OMP_TIMER_RUN` and the user's next turn doesn't; a fired turn's commands arm a prompt timer for its own session, and are refused a shell timer, another session's timer, or firing another timer; after Esc a fire starts a turn. Runs: the revision a run was fired from; a timed-out command's descendants killed; overlap skip and queue; two concurrent ticks decide a slot once. Store: concurrent edits rev-checked, revisions kept across remove and re-create. Ticker: plist and systemd units, install fails when the first tick fails, the unit bakes the profile or agent dir, doctor's checks.
 
 </details>
 
