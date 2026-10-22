@@ -46944,6 +46944,26 @@
    "added": "2026-10-22T18:27:14Z",
    "updated": "2026-10-22T18:27:14Z",
    "note": ""
+  },
+  {
+   "id": "timer-pr-3-tool",
+   "branch": "will/timer-pr-3-tool",
+   "title": "feat(coding-agent): let the agent set timers that wake its session later",
+   "area": "other",
+   "priority": null,
+   "needs": [
+    "timer-pr-4-surfaces"
+   ],
+   "base": "8a8843dff6ab2e60355c20f8d93bd0fba838e41d",
+   "body": "bodies/timer-pr-3-tool.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T18:59:17Z",
+   "updated": "2026-10-22T18:59:17Z",
+   "note": ""
   }
  ],
  "watch": {
