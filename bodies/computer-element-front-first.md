@@ -27,10 +27,11 @@ Decisions:
 - The focus-refusal test asserts the new wording and fails with the old one.
 - `cargo test -p pi-natives --lib`, `CI=1 bun check`, `bun run check:rs` (clippy) and the computer TS tests on macOS.
 - Live on a macOS VM, as a regression check: while the user types in their own app, 16 `el.type` calls go into one field of a background Chrome page whose other field has focus. They landed in the named field with the focused one left empty, 3/3 runs at this head. The race itself, the target app busy while you switch to it, wasn't reproduced live.
-- Windows: `cargo check -p pi-natives --tests --target x86_64-pc-windows-gnu` passes. Not run on a Windows machine.
+- Windows, before the rebase onto `main`: `cargo check -p pi-natives --tests --target x86_64-pc-windows-gnu` passed. Not run on a Windows machine.
 
 ---
 
 - [x] `bun check` passes
 - [x] Tested locally
-- [ ] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
