@@ -151,11 +151,16 @@ describe("timer agent runs (fresh/own sessions)", () => {
 			tickAlerts.push(...alerts);
 		},
 	});
-	/** Every timer here does the same job under another id: `force` skips the near-duplicate refusal. */
 	const set = (input: Partial<TimerSetInput> & { id: string }) =>
 		setTimer(
-			{ reason: "check the build", every: "1h", prompt: "Check the build.", session: "fresh", ...input },
-			{ by: "tool", cwd: root, now: T0, root, sessionId: ORIGIN, testGate: false, force: true },
+			{
+				reason: `${input.id}: check the build`,
+				every: "1h",
+				prompt: "Check the build.",
+				session: "fresh",
+				...input,
+			},
+			{ by: "tool", cwd: root, now: T0, root, sessionId: ORIGIN, testGate: false },
 		);
 	/** Fire by hand and carry the run in this process, as the detached runner would. */
 	const fireAndRun = async (id: string, seq: number, now = T0 + seq * MINUTE) => {

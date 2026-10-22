@@ -13,7 +13,7 @@ const LA = "America/Los_Angeles";
 describe("timer set guards (tool callers)", () => {
 	let dir: TempDir;
 	let root: string;
-	const tool = (extra: { force?: boolean; testGate?: boolean } = {}) => ({
+	const tool = (extra: { now?: number; testGate?: boolean } = {}) => ({
 		by: "tool" as const,
 		cwd: root,
 		now: T0,
@@ -34,13 +34,23 @@ describe("timer set guards (tool callers)", () => {
 		await dir.remove();
 	});
 
-	it("refuses a condition that already holds, explains why, and arms it with force", async () => {
+	it("refuses a condition that already holds, explains why, and arms it when the same call is repeated", async () => {
 		const met = { ...base, id: "deploy-done", when: { cmd: "echo IN_PROGRESS" } };
 		await expect(setTimer(met, tool({ testGate: true }))).rejects.toThrow(
-			/not armed: the condition already holds .*printed: IN_PROGRESS.*force: true/s,
+			/not armed: the condition already holds .*printed: IN_PROGRESS.*send this same call again/s,
 		);
-		const forced = await setTimer(met, tool({ testGate: true, force: true }));
-		expect(forced.gateNow).toBe("met");
+		const repeated = await setTimer(met, tool({ testGate: true }));
+		expect(repeated.gateNow).toBe("met");
+		// a repeat after the confirmation window is a new call, checked again
+		const late = {
+			...base,
+			id: "export-ready",
+			reason: "export",
+			prompt: "Fetch the export.",
+			when: { cmd: "echo RUNNING" },
+		};
+		await expect(setTimer(late, tool({ testGate: true }))).rejects.toThrow(/already holds/);
+		await expect(setTimer(late, tool({ testGate: true, now: T0 + 11 * 60_000 }))).rejects.toThrow(/already holds/);
 		const pending = await setTimer(
 			{ ...base, id: "upload-wait", reason: "upload", when: { cmd: "echo PROCESSING | grep -q DONE" } },
 			tool({ testGate: true }),
@@ -80,11 +90,11 @@ describe("timer set guards (tool callers)", () => {
 			reason: "Track which markets are open every couple of hours",
 		};
 		await expect(setTimer(again, tool())).rejects.toThrow(/timer "market-check" .* already looks like this job/);
-		// re-arming the same id is the way to change it; force arms a deliberate second one
+		// re-arming the same id is the way to change it; repeating the refused call arms a deliberate second one
 		expect((await setTimer({ ...again, id: "market-check" }, tool())).replaced).toBe(true);
-		expect((await setTimer({ ...again, id: "market-check-2" }, tool({ force: true }))).spec.id).toBe(
-			"market-check-2",
-		);
+		const second = { ...again, id: "market-check-2" };
+		await expect(setTimer(second, tool())).rejects.toThrow(/send this same call again within 10m/);
+		expect((await setTimer(second, tool())).spec.id).toBe("market-check-2");
 	});
 
 	it("catches a second watcher on the same condition and a re-check under a new id after a one-shot fired", async () => {
@@ -130,8 +140,7 @@ describe("timer set guards (tool callers)", () => {
 describe("timer card dates", () => {
 	let dir: TempDir;
 	let root: string;
-	// every timer here resumes the same work: `force` skips the near-duplicate refusal
-	const ctx = () => ({ by: "tool" as const, cwd: root, now: T0, root, sessionId: "s1", testGate: false, force: true });
+	const ctx = () => ({ by: "cli" as const, cwd: root, now: T0, root, testGate: false });
 	const ticker = { lastTickAt: new Date(T0 - 20_000).toISOString() };
 
 	beforeEach(() => {

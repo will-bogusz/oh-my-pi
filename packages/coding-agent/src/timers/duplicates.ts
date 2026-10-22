@@ -33,21 +33,25 @@ export function timerWords(text: string): Set<string> {
 	return words;
 }
 
-/** Tokens that name one specific thing: numbers of 3+ digits (PRs, pids, prices), paths, hosts. */
-function distinctive(words: Set<string>): Set<string> {
-	return new Set([...words].filter(word => /^\d{3,}$/.test(word) || /[./]/.test(word)));
+/** Numbers of 3+ digits: a PR, a pid, a price, a run id. */
+function numbers(words: Set<string>): Set<string> {
+	return new Set([...words].filter(word => /^\d{3,}$/.test(word)));
 }
 
-function jaccard(a: Set<string>, b: Set<string>): number {
-	if (a.size === 0 || b.size === 0) return 0;
+/** Tokens that name one specific thing: those numbers and file names (`notes/markets.md`, `sweep.py`); not `owner/repo`. */
+function distinctive(words: Set<string>): Set<string> {
+	return new Set([...words].filter(word => /^\d{3,}$/.test(word) || /[a-z0-9_-]\.[a-z]{1,5}$/.test(word)));
+}
+
+/** Words both sets hold. */
+function sharedCount(a: Set<string>, b: Set<string>): number {
 	let shared = 0;
 	for (const word of a) if (b.has(word)) shared++;
-	return shared / (a.size + b.size - shared);
+	return shared;
 }
 
 function intersects(a: Set<string>, b: Set<string>): boolean {
-	for (const word of a) if (b.has(word)) return true;
-	return false;
+	return sharedCount(a, b) > 0;
 }
 
 function jobText(spec: Pick<TimerSpec, "action" | "condition" | "until" | "reason">): string {
@@ -63,12 +67,19 @@ function jobText(spec: Pick<TimerSpec, "action" | "condition" | "until" | "reaso
 export function findDuplicateTimer(candidate: TimerSpec, existing: readonly TimerSpec[]): TimerSpec | undefined {
 	const words = timerWords(jobText(candidate));
 	const marks = distinctive(words);
+	const ids = numbers(words);
 	let best: { spec: TimerSpec; score: number } | undefined;
 	for (const other of existing) {
 		if (other.id === candidate.id || other.action.kind !== candidate.action.kind) continue;
 		if (candidate.until && other.until && candidate.until.trim() === other.until.trim()) return other;
 		const otherWords = timerWords(jobText(other));
-		const overlap = jaccard(words, otherWords);
+		// PR #482 is not PR #479: both name numbers and none match
+		const otherIds = numbers(otherWords);
+		if (ids.size > 0 && otherIds.size > 0 && !intersects(ids, otherIds)) continue;
+		// a word or two in common is chance, not the same job
+		const shared = sharedCount(words, otherWords);
+		if (shared < 2) continue;
+		const overlap = shared / (words.size + otherWords.size - shared);
 		const sameKind =
 			Boolean(candidate.until) === Boolean(other.until) && Boolean(candidate.every) === Boolean(other.every);
 		const sameCadence = candidate.every !== undefined && candidate.every === other.every;

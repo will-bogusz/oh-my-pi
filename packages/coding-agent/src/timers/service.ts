@@ -12,6 +12,7 @@ import { CLI_THINKING_LEVELS, parseCliThinkingLevel } from "@oh-my-pi/pi-tui/thi
 import { readSessionInfo, resolveResumableSession } from "../session/session-listing";
 import { resolveRunProfile } from "./agent-profile";
 import { compileCondition, type TimerCondition } from "./conditions";
+import { CONFIRM_WINDOW_MS, recordRefusal, refusalKey, takeConfirmation } from "./confirm";
 import { findDuplicateTimer } from "./duplicates";
 import { formatWallClock } from "./fire-message";
 import { runGate } from "./gate";
@@ -116,8 +117,6 @@ export interface TimerSetContext {
 	host?: WakeHost;
 	/** Run the gate once at set time (default true). */
 	testGate?: boolean;
-	/** Tool callers: arm despite a near-duplicate timer or a condition that already holds. */
-	force?: boolean;
 }
 
 export interface TimerSetResult {
@@ -304,46 +303,48 @@ async function testGate(spec: TimerSpec): Promise<Pick<TimerSetResult, "gateNow"
 	};
 }
 
+/** How a refusal tells the agent to override it (see `confirm.ts`). */
+const REPEAT_TO_CONFIRM = `send this same call again within ${formatDuration(CONFIRM_WINDOW_MS)}`;
+
 /**
  * An agent arming a condition that already holds almost always wrote a check
  * that passes while the work is still pending (a status script that exits 0
  * on `IN_PROGRESS`, a local `pid` for a remote process); the timer would fire
- * at the next tick. Refused for tool callers unless forced.
+ * at the next tick.
  */
-function assertGateNotMet(
-	spec: TimerSpec,
-	gate: Pick<TimerSetResult, "gateNow" | "gateDetail">,
-	ctx: TimerSetContext,
-): void {
-	if (gate.gateNow !== "met" || ctx.by !== "tool" || ctx.force) return;
+function gateMetRefusal(spec: TimerSpec, gate: Pick<TimerSetResult, "gateNow" | "gateDetail">): string | undefined {
+	if (gate.gateNow !== "met") return undefined;
 	const printed = gate.gateDetail ? ` (${gate.gateDetail.slice(0, 120)})` : "";
-	throw new Error(
-		[
-			`not armed: the condition already holds — \`${spec.until}\` exited 0 just now${printed} — so this timer would fire at the next tick instead of waiting.`,
-			"A condition must exit 1 while the thing is still pending and 0 only once it has happened: test the status text (e.g. `… | grep -q DONE`), not just whether a command runs. Conditions run on this machine: check a remote host over ssh.",
-			"If it has already happened, do the work now instead. To arm it anyway, set again with force: true.",
-		].join("\n"),
-	);
+	return [
+		`not armed: the condition already holds — \`${spec.until}\` exited 0 just now${printed} — so this timer would fire at the next tick instead of waiting.`,
+		"A condition must exit 1 while the thing is still pending and 0 only once it has happened: test the status text (e.g. `… | grep -q DONE`), not just whether a command runs. Conditions run on this machine: check a remote host over ssh.",
+		`If it has already happened, do the work now instead. To arm it anyway, ${REPEAT_TO_CONFIRM}.`,
+	].join("\n");
 }
 
-function describeExisting(spec: TimerSpec, status: string): string {
-	const schedule = spec.every ? `every ${spec.every}` : spec.until ? (spec.condition ?? "a condition") : "once";
-	return `"${spec.id}" (${status}, ${schedule}: ${spec.reason.replace(/\s+/g, " ").slice(0, 100)})`;
-}
-
-/** A tool `set` of a new id that repeats an existing timer's job is refused unless forced. */
-async function assertNotDuplicate(spec: TimerSpec, ctx: TimerSetContext, root: string, now: number): Promise<void> {
-	if (ctx.by !== "tool" || ctx.force || (await readTimerSpec(spec.id, root))) return;
+/** A `set` of a new id that repeats an existing timer's job. */
+async function duplicateRefusal(spec: TimerSpec, root: string, now: number): Promise<string | undefined> {
+	if (await readTimerSpec(spec.id, root)) return undefined;
 	const duplicate = findDuplicateTimer(spec, (await listTimerSpecs(root)).specs);
-	if (!duplicate) return;
-	const row = await loadTimerRow(duplicate, now, root);
-	throw new Error(
-		[
-			`not armed: timer ${describeExisting(duplicate, row.status)} already looks like this job.`,
-			`Use it: \`show\`/\`runs\` with id "${duplicate.id}" to answer questions about it, \`edit\` it to change it, or \`set\` with id "${duplicate.id}" to re-arm or replace it (keeps its history).`,
-			"If this really is a separate job, set again with force: true.",
-		].join("\n"),
-	);
+	if (!duplicate) return undefined;
+	const { status } = await loadTimerRow(duplicate, now, root);
+	const schedule = duplicate.every
+		? `every ${duplicate.every}`
+		: duplicate.until
+			? (duplicate.condition ?? "a condition")
+			: "once";
+	return [
+		`not armed: timer "${duplicate.id}" (${status}, ${schedule}: ${duplicate.reason.replace(/\s+/g, " ").slice(0, 100)}) already looks like this job.`,
+		`Use it: \`show\`/\`runs\` with id "${duplicate.id}" to answer questions about it, \`edit\` it to change it, or \`set\` with id "${duplicate.id}" to re-arm or replace it (keeps its history).`,
+		`If this really is a separate job, ${REPEAT_TO_CONFIRM}.`,
+	].join("\n");
+}
+
+/** Throw `message` (when there is one), remembering it so the same call repeated goes through. */
+async function refuse(message: string | undefined, key: string, root: string, now: number): Promise<void> {
+	if (!message) return;
+	await recordRefusal(key, root, now);
+	throw new Error(message);
 }
 
 /**
@@ -450,9 +451,12 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 	};
 	validateSpec(spec, now);
 	await assertAgentProfile(spec);
-	await assertNotDuplicate(spec, ctx, root, now);
+	// Tool callers are refused a near-duplicate or an already-met condition unless they repeat the call.
+	const confirmKey = ctx.by === "tool" ? refusalKey("set", ctx.sessionId, input) : undefined;
+	const guarded = confirmKey !== undefined && !(await takeConfirmation(confirmKey, root, now));
+	if (guarded) await refuse(await duplicateRefusal(spec, root, now), confirmKey, root, now);
 	const gate = ctx.testGate === false ? {} : await testGate(spec);
-	assertGateNotMet(spec, gate, ctx);
+	if (guarded) await refuse(gateMetRefusal(spec, gate), confirmKey, root, now);
 	const { spec: written, previous } = await mutateTimerSpec(id, () => spec, {
 		expectedRev: input.expectedRev,
 		root,
@@ -588,7 +592,10 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 			if (patch.agent || patch.cwd !== undefined) await assertAgentProfile(next);
 			if (gateChanged && ctx.testGate !== false) {
 				gate = await testGate(next);
-				assertGateNotMet(next, gate, ctx);
+				const key = refusalKey("edit", ctx.sessionId, [id, patch]);
+				if (ctx.by === "tool" && !(await takeConfirmation(key, root, now))) {
+					await refuse(gateMetRefusal(next, gate), key, root, now);
+				}
 			}
 			return next;
 		},

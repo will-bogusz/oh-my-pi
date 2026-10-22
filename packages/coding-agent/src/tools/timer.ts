@@ -5,11 +5,15 @@ import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { prompt } from "@oh-my-pi/pi-utils";
 import timerDescription from "../prompts/tools/timer.md" with { type: "text" };
 import {
+	CONFIRM_WINDOW_MS,
 	editTimer,
 	fireTimerNow,
+	formatDuration,
 	listTimers,
 	loadTimerRow,
 	readTickerStatus,
+	recordRefusal,
+	refusalKey,
 	removeTimer,
 	renderRuns,
 	renderTimerCard,
@@ -17,8 +21,10 @@ import {
 	requireTimer,
 	setPaused,
 	setTimer,
+	takeConfirmation,
 	timerRegistrySnapshot,
 	timerRuns,
+	timersRoot,
 } from "../timers";
 import type { ToolSession } from ".";
 import {
@@ -73,9 +79,6 @@ const timerSchema = type({
 	"after?": type("string").describe("fresh/own: shell run after, with OMP_TIMER_RESULT"),
 	"report?": type('"always" | "said" | "failure" | "never"').describe(
 		"fresh/own: which runs report back (default said: not [quiet])",
-	),
-	"force?": type("boolean").describe(
-		"set/edit: arm despite a near-duplicate timer or a condition that already holds; fire: allow firing into this session",
 	),
 });
 
@@ -164,13 +167,12 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 							sessionId,
 							sessionFile: this.session.getSessionFile() ?? undefined,
 							now,
-							force: params.force,
 						},
 					);
 					return await card(result.spec.id, result.replaced ? "re-armed" : "armed", result);
 				}
 				case "edit": {
-					const { op: _op, id: _id, force, ...fields } = params;
+					const { op: _op, id: _id, ...fields } = params;
 					const id = requireId();
 					const result = await editTimer(id, timerEditPatch(fields), {
 						by: "tool",
@@ -178,7 +180,6 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 						sessionId,
 						sessionFile: this.session.getSessionFile() ?? undefined,
 						now,
-						force,
 					});
 					return await card(id, result.rearmed ? "re-armed" : "edited", result);
 				}
@@ -213,9 +214,12 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 				case "fire": {
 					const id = requireId();
 					const spec = await requireTimer(id);
-					if (!params.force && spec.target.kind === "session" && spec.target.sessionId === sessionId) {
+					const key = refusalKey("fire", sessionId, id);
+					const intoCaller = spec.target.kind === "session" && spec.target.sessionId === sessionId;
+					if (intoCaller && !(await takeConfirmation(key, timersRoot(), now))) {
+						await recordRefusal(key, timersRoot(), now);
 						throw new ToolError(
-							`fire would deliver ${id}'s prompt to this same session right now, skipping its schedule and condition: it checks nothing. To see whether the condition holds, run the check yourself; to do the work now, do it directly; otherwise end your turn and the timer wakes you. To fire it anyway (e.g. the user asked to test it), pass force: true.`,
+							`not fired: fire would deliver ${id}'s prompt to this same session right now, skipping its schedule and condition: it checks nothing. To see whether the condition holds, run the check yourself; to do the work now, do it directly; otherwise end your turn and the timer wakes you. To fire it anyway (e.g. the user asked to test it), send this same call again within ${formatDuration(CONFIRM_WINDOW_MS)}.`,
 						);
 					}
 					const line = await fireTimerNow(id, now);
