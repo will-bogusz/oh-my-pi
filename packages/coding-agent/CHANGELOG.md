@@ -5,6 +5,7 @@
 ### Added
 
 - Anthropic web search and Files API uploads follow `PI_ANTHROPIC_API_VERSION=2026-10-21`; web search omits `temperature` under that version ([#16706](https://github.com/can1357/oh-my-pi/pull/16706) by [@H4vC](https://github.com/H4vC))
+- Timers in the session: `/timer in 2h <prompt>` (or `at 8:00`, `every 30m`) wakes this session later, `/timer` also runs the `omp timer` verbs, `/timers` opens a sheet to show, fire, pause, resume, remove and read logs, the status line shows how many timers this session set and when the next fires, `timer://` reads and controls timers, and `timer` tool calls draw a card; setting `timer.enabled` turns the tool off
 
 ## [18.12.6] - 2026-10-21
 

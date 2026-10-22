@@ -1,0 +1,1 @@
+`timer://`: this machine's timers; `timer://<id>` card + prompt; `timer://<id>/runs` history, `timer://<id>/runs/<seq|latest>` one run + its log; write `timer://<id>/fire` (content = data for the run, untrusted), `/pause`, `/resume`, `/remove` (omit `content`).

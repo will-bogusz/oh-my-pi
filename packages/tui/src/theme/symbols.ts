@@ -102,6 +102,7 @@ export type SymbolKey =
 	| "icon.ghost"
 	| "icon.agents"
 	| "icon.job"
+	| "icon.timer"
 	| "icon.cache"
 	| "icon.cacheMiss"
 	| "icon.input"
@@ -369,6 +370,7 @@ export type SlashCommandIconName =
 	| "loop"
 	| "session"
 	| "jobs"
+	| "timer"
 	| "gauge"
 	| "context"
 	| "ghost"
@@ -484,6 +486,7 @@ const UNICODE_SYMBOLS: SymbolMap = {
 	"icon.ghost": "👻",
 	"icon.agents": "👥",
 	"icon.job": "⚙",
+	"icon.timer": "⏰",
 	"icon.cache": "💾",
 	"icon.cacheMiss": "⊘",
 	"icon.input": "⤵",
@@ -871,6 +874,8 @@ const NERD_SYMBOLS: SymbolMap = {
 	"icon.agents": "\uf0c0",
 	// pick:  (nf-fa-gear) | alt:  ⚙
 	"icon.job": "\uf013",
+	// pick: nf-fa-clock_o
+	"icon.timer": "\uf017",
 	// pick:  | alt:  
 	"icon.cache": "\uf1c0",
 	// pick:  (fa-ban) | alt: ⊘
@@ -1269,6 +1274,7 @@ const ASCII_SYMBOLS: SymbolMap = {
 	"icon.ghost": "@",
 	"icon.agents": "AG",
 	"icon.job": "bg",
+	"icon.timer": "tm",
 	"icon.output": "out:",
 	"icon.throughput": "tok/s:",
 	"icon.intelligence": "IQ",

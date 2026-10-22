@@ -23,6 +23,7 @@ import type { ToolRenderer } from "./renderer";
 import { resolveRenderer } from "./resolve";
 import { taskToolRenderer } from "./task";
 import { thinkToolRenderer } from "./think";
+import { timerToolRenderer } from "./timer";
 import { todoToolRenderer } from "./todo";
 import { createVibeToolRenderer } from "./vibe";
 import { webSearchToolRenderer } from "./web-search";
@@ -58,6 +59,7 @@ export const toolRenderers: Record<string, ToolRenderer> = {
 	reflect: reflectToolRenderer,
 	task: taskToolRenderer,
 	think: thinkToolRenderer,
+	timer: timerToolRenderer,
 	todo: todoToolRenderer,
 	github: githubToolRenderer,
 	goal: goalToolRenderer,

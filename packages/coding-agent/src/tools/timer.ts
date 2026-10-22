@@ -1,8 +1,8 @@
 import { type } from "@oh-my-pi/omptype";
 import type { AgentTool, AgentToolResult, ToolApprovalDecision } from "@oh-my-pi/pi-agent-core";
-import { prompt } from "@oh-my-pi/pi-utils";
-import type { OutputMeta } from "@oh-my-pi/pi-tui/tools/output-meta";
+import type { TimerToolDetails } from "@oh-my-pi/pi-tui/tools/timer";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import { prompt } from "@oh-my-pi/pi-utils";
 import timerDescription from "../prompts/tools/timer.md" with { type: "text" };
 import {
 	fireTimerNow,
@@ -19,6 +19,7 @@ import {
 	timerRuns,
 } from "../timers";
 import type { ToolSession } from ".";
+import { timerArgsTier, timerCardView, timerListRowView } from "./timer-view";
 import { toolResult } from "./tool-result";
 
 const TimerOp = type('"set" | "list" | "show" | "runs" | "remove" | "fire" | "pause" | "resume"');
@@ -57,12 +58,6 @@ const timerSchema = type({
 
 type TimerParams = typeof timerSchema.infer;
 
-export interface TimerToolDetails {
-	op: TimerParams["op"];
-	id?: string;
-	meta?: OutputMeta;
-}
-
 export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails> {
 	readonly name = "timer";
 	readonly label = "Timer";
@@ -71,14 +66,13 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 	readonly description = prompt.render(timerDescription);
 	readonly parameters = timerSchema;
 	readonly strict = true;
-	/** Inspecting is read; arming a wake of this conversation is write; shell, fresh or foreign-session runs are exec. */
-	readonly approval = (args: unknown): ToolApprovalDecision => {
-		const params = (args ?? {}) as Partial<TimerParams>;
-		if (params.op === "list" || params.op === "show" || params.op === "runs") return "read";
-		if (params.op !== "set") return "write";
-		const session = params.session ?? "origin";
-		return params.shell || (session !== "origin" && session !== this.session.getSessionId?.()) ? "exec" : "write";
-	};
+	/**
+	 * list/show/runs are read. set/fire/pause/resume/remove are write while they
+	 * wake this conversation, exec for a shell command, a fresh agent, another
+	 * session's timer or target (see {@link timerArgsTier}).
+	 */
+	readonly approval = (args: unknown): ToolApprovalDecision =>
+		timerArgsTier((args ?? {}) as Partial<TimerParams>, this.session.getSessionId?.() ?? undefined);
 	readonly loadMode = "essential";
 	readonly intent = (args: Partial<TimerParams>) =>
 		args.op ? `timer ${args.op}${args.id ? ` ${args.id}` : ""}` : "timer";
@@ -98,17 +92,19 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 			if (!params.id) throw new ToolError(`op "${params.op}" needs id`);
 			return params.id;
 		};
+		/** The stored record as the model's text card and the transcript's card. */
 		const card = async (
 			id: string,
 			verb: string,
 			gate?: { gateNow?: "met" | "not-yet" | "broken"; gateDetail?: string },
-		) =>
-			renderTimerCard(await loadTimerRow(await requireTimer(id), now), now, {
-				verb,
-				selfSessionId: sessionId,
-				ticker: await readTickerStatus(),
-				...gate,
-			});
+		): Promise<AgentToolResult<TimerToolDetails>> => {
+			const row = await loadTimerRow(await requireTimer(id), now);
+			const ticker = await readTickerStatus();
+			details.id = id;
+			details.card = timerCardView(row, { verb, selfSessionId: sessionId, ticker, now, ...gate });
+			const text = renderTimerCard(row, now, { verb, selfSessionId: sessionId, ticker, ...gate });
+			return toolResult<TimerToolDetails>(details).text(text).done();
+		};
 		try {
 			switch (params.op) {
 				case "set": {
@@ -137,20 +133,18 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 							now,
 						},
 					);
-					details.id = result.spec.id;
-					const text = await card(result.spec.id, result.replaced ? "re-armed" : "armed", result);
-					return toolResult<TimerToolDetails>(details).text(text).done();
+					return await card(result.spec.id, result.replaced ? "re-armed" : "armed", result);
 				}
 				case "list": {
 					const { rows, errors } = await listTimers(now);
-					const lines = [rows.length ? renderTimerTable(rows, now, await readTickerStatus()) : "no timers"];
+					const ticker = await readTickerStatus();
+					details.rows = rows.map(row => timerListRowView(row, now));
+					const lines = [rows.length ? renderTimerTable(rows, now, ticker) : "no timers"];
 					for (const { id, error } of errors) lines.push(`invalid spec ${id}: ${error}`);
 					return toolResult<TimerToolDetails>(details).text(lines.join("\n")).done();
 				}
 				case "show":
-					return toolResult<TimerToolDetails>(details)
-						.text(await card(requireId(), ""))
-						.done();
+					return await card(requireId(), "");
 				case "runs":
 					return toolResult<TimerToolDetails>(details)
 						.text(renderRuns(await timerRuns(requireId())))
@@ -159,9 +153,7 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 				case "resume": {
 					const id = requireId();
 					await setPaused(id, params.op === "pause");
-					return toolResult<TimerToolDetails>(details)
-						.text(await card(id, params.op === "pause" ? "paused" : "resumed"))
-						.done();
+					return await card(id, params.op === "pause" ? "paused" : "resumed");
 				}
 				case "remove": {
 					const id = requireId();
