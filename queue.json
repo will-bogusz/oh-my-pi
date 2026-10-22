@@ -3189,7 +3189,7 @@
     "computer-ui-quiet",
     "computer-ax-lines"
    ],
-   "base": "fb8d040ff11ab0dbe3d4e9478138d2ff8447be9e",
+   "base": "3fff71c4772ca4b2027c7c30a6022f7eccf9e14c",
    "body": "bodies/computer-rich-text.md",
    "state": "queued",
    "pr": null,
@@ -3199,8 +3199,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-rich-text",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-22T07:37:23Z",
-   "note": "Rebased 2026-10-22 onto #15282's local rebase fb8d040ff1 (on main 3a2758b68f; #15282 not pushed: conflicts with open ready #16403 in the computer prompt/docs refuse sentence). Tip 0368e8d599: bench-mac s2rt-rb1 cargo check/clippy(check:rs)/bun check/cargo test 960 pass/build:native/computer TS tests 138+7 all exit 0. Still needs computer-ui-quiet (conflicts with it in El.value). Pre-rebase head: local backup/will/computer-rich-text-pre-rb-20261022 (e07f43a775)."
+   "updated": "2026-10-22T08:19:53Z",
+   "note": "Rebased 2026-10-22 onto #15282's pushed head 3fff71c477 (main 3a2758b68f). Tip 127a414eff: bench-mac s2rt-rb2 cargo check/clippy(check:rs)/bun check/cargo test 960 pass/build:native/computer TS 138+7 all exit 0. Still needs computer-ui-quiet (conflicts with it in El.value). Pre-rebase head: local backup/will/computer-rich-text-pre-rb-20261022 (e07f43a775)."
   },
   {
    "id": "relay-popup-front",
