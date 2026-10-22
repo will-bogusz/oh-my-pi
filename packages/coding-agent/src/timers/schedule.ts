@@ -312,7 +312,7 @@ export function minCadenceGapMs(every: string, tz: string, from: number): number
 export type DueDecision =
 	/** Nothing to do this tick. */
 	| { kind: "idle" }
-	/** Fire for `slot`; `missedSlots` older slots were coalesced into it. */
+	/** Fire (or, with a gate, check the gate) for `slot`; `missedSlots` older slots were coalesced into it. */
 	| { kind: "due"; slot: number; missedSlots: number }
 	/** The newest slot is later than its grace: record `missed`, consume it, don't run. */
 	| { kind: "missed"; slot: number; missedSlots: number }
@@ -331,6 +331,13 @@ export function graceFor(
 	// One full period: the newest slot always runs once, however late.
 	const next = source.after(slot);
 	return next !== undefined ? next - slot : Number.POSITIVE_INFINITY;
+}
+
+/** The gate of a condition timer is checked once per tick-minute; each minute is its own slot. */
+function gateSlot(state: TimerState, now: number): DueDecision {
+	const slot = Math.floor(now / MINUTE) * MINUTE;
+	if (state.lastSlot !== undefined && slot <= state.lastSlot) return { kind: "idle" };
+	return { kind: "due", slot, missedSlots: 0 };
 }
 
 /**
@@ -354,27 +361,33 @@ export function decideDue(spec: TimerSpec, state: TimerState, now: number): DueD
 
 	if (startAt !== undefined) {
 		if (now < startAt) return { kind: "idle" };
+		if (spec.until) return gateSlot(state, now);
 		if (state.lastSlot !== undefined && state.lastSlot >= startAt) return { kind: "retire", why: "once" };
 		if (now - startAt > graceFor(spec, undefined, startAt)) return { kind: "missed", slot: startAt, missedSlots: 0 };
 		return { kind: "due", slot: startAt, missedSlots: 0 };
 	}
 
-	// Timers without at/every fire only through `fire`.
+	if (spec.until) return gateSlot(state, now);
+	// Timers without at/every/until fire only through `fire`.
 	return { kind: "idle" };
 }
 
 /** Next instant a timer will act, for listings. `undefined` = never on its own (done, paused, manual-only). */
-export function nextFireAt(spec: TimerSpec, state: TimerState, now: number): number | undefined {
+export function nextFireAt(spec: TimerSpec, state: TimerState, now: number): number | "gate" | undefined {
 	if (state.done || spec.paused) return undefined;
 	if (spec.expiresAt && Date.parse(spec.expiresAt) <= now) return undefined;
 	if (spec.maxRuns !== undefined && state.runCount >= spec.maxRuns) return undefined;
 	const startAt = spec.at ? Date.parse(spec.at) : undefined;
-	let next: number | undefined;
+	let next: number | "gate" | undefined;
 	if (spec.every) {
-		next = slotSource(spec).after(Math.max(now, state.lastSlot ?? Number.NEGATIVE_INFINITY));
+		next = spec.until ? "gate" : slotSource(spec).after(Math.max(now, state.lastSlot ?? Number.NEGATIVE_INFINITY));
+	} else if (startAt !== undefined && now < startAt) {
+		next = startAt;
+	} else if (spec.until) {
+		next = "gate";
 	} else if (startAt !== undefined && (state.lastSlot === undefined || state.lastSlot < startAt)) {
 		next = startAt;
 	}
-	if (next !== undefined && spec.expiresAt && next >= Date.parse(spec.expiresAt)) return undefined;
+	if (typeof next === "number" && spec.expiresAt && next >= Date.parse(spec.expiresAt)) return undefined;
 	return next;
 }

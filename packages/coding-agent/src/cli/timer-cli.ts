@@ -13,6 +13,7 @@ import {
 	editTimer,
 	execTimerRun,
 	fireTimerNow,
+	type GateTest,
 	installTicker,
 	listTimers,
 	loadTimerRow,
@@ -63,7 +64,7 @@ export const TIMER_ACTIONS = [
 export type TimerAction = (typeof TIMER_ACTIONS)[number];
 
 /**
- * Flags that set or edit a timer. `none` clears `at`/`every`/`expires`/`grace`
+ * Flags that set or edit a timer. `none` clears `at`/`every`/`until`/`expires`/`grace`
  * and the agent-run keys (model, agent, thinking, maxTime, maxCost, expect, before, after) on edit.
  */
 export interface TimerFieldArgs {
@@ -72,6 +73,9 @@ export interface TimerFieldArgs {
 	when?: string;
 	at?: string;
 	every?: string;
+	until?: string;
+	ci?: string;
+	pid?: number;
 	prompt?: string;
 	shell?: string;
 	session?: string;
@@ -144,6 +148,12 @@ function usd(value: string): number {
 	return amount;
 }
 
+function conditionOf(fields: TimerFieldArgs): TimerSetInput["when"] {
+	return fields.until || fields.ci || fields.pid !== undefined
+		? { cmd: fields.until, ci: fields.ci, pid: fields.pid }
+		: undefined;
+}
+
 export function setInput(cmd: TimerCommandArgs): TimerSetInput {
 	const { fields } = cmd;
 	return {
@@ -151,6 +161,7 @@ export function setInput(cmd: TimerCommandArgs): TimerSetInput {
 		reason: fields.reason ?? "",
 		title: fields.title,
 		...scheduleFields(fields),
+		when: conditionOf(fields),
 		tz: fields.tz,
 		prompt: fields.prompt,
 		shell: fields.shell,
@@ -212,6 +223,8 @@ export function editInput(fields: TimerFieldArgs): TimerEditInput {
 		allowTimers: fields.allowTimers,
 		expectedRev: fields.rev,
 	};
+	if (fields.until === "none") patch.when = null;
+	else if (conditionOf(fields)) patch.when = conditionOf(fields);
 	if (Object.values(patch).every(value => value === undefined))
 		throw new UsageError("omp timer edit: nothing to change");
 	return patch;
@@ -223,7 +236,7 @@ function rowJson(row: TimerRow): Record<string, unknown> {
 		rev: row.spec.rev,
 		status: row.status,
 		pausedReason: row.spec.pausedReason ?? null,
-		next: row.next !== undefined ? new Date(row.next).toISOString() : null,
+		next: typeof row.next === "number" ? new Date(row.next).toISOString() : (row.next ?? null),
 		last: row.lastRun ?? null,
 		incidents: row.incidents,
 		target: row.spec.target,
@@ -235,12 +248,20 @@ function rowJson(row: TimerRow): Record<string, unknown> {
 	};
 }
 
-async function card(id: string, now: number, verb: string, warnings?: string[]): Promise<string> {
+async function card(
+	id: string,
+	now: number,
+	verb: string,
+	result: GateTest & { warnings?: string[] } = {},
+): Promise<string> {
 	const row = await loadTimerRow(await requireTimer(id), now);
+	const { warnings, gateNow, gateDetail } = result;
 	return renderTimerCard(row, now, {
 		verb,
 		ticker: readTickerStatus(),
 		warnings,
+		gateNow,
+		gateDetail,
 		lastResult: await lastRunResult(row),
 	});
 }
@@ -262,14 +283,14 @@ async function runAction(cmd: TimerCommandArgs, now: number): Promise<number> {
 		case "set": {
 			const result = await setTimer(setInput(cmd), { cwd: getProjectDir(), now });
 			if (cmd.json) return (json(result), 0);
-			out(await card(result.spec.id, now, result.replaced ? "re-armed" : "armed", result.warnings));
+			out(await card(result.spec.id, now, result.replaced ? "re-armed" : "armed", result));
 			return 0;
 		}
 		case "edit": {
 			const id = requireId(cmd);
 			const result = await editTimer(id, editInput(cmd.fields), { cwd: getProjectDir(), now });
 			if (cmd.json) return (json(result), 0);
-			out(await card(id, now, result.rearmed ? "edited, re-armed" : "edited", result.warnings));
+			out(await card(id, now, result.rearmed ? "edited, re-armed" : "edited", result));
 			return 0;
 		}
 		case "ls":

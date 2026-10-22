@@ -129,7 +129,8 @@ export const renderHelp = {
 } satisfies CommandMetadata;
 
 export const timerHelp = {
-	description: "Set, list and drive timers: run a command or wake a session later or on a schedule",
+	description:
+		"Set, list and drive timers: run a command or wake a session later, on a schedule, or when a condition holds",
 } satisfies CommandMetadata;
 
 export const sayHelp = {

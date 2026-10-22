@@ -35,6 +35,11 @@ export default class Timer extends Command {
 		every: Flags.string({
 			description: "set/edit: recurring: 30m, 2h, 'daily 09:00', 'weekdays 09:00', 'mon,thu 18:30', 5-field cron",
 		}),
+		until: Flags.string({ description: "set/edit: shell gate checked each minute; exit 0 fires once, 1 = not yet" }),
+		ci: Flags.string({
+			description: "set/edit: fire once CI on a PR (owner/repo#123) or commit (owner/repo@sha) finished",
+		}),
+		pid: Flags.integer({ description: "set/edit: fire once this process exits" }),
 		prompt: Flags.string({ description: "set/edit: instruction delivered when it fires" }),
 		shell: Flags.string({ description: "set/edit: command to run instead of a prompt" }),
 		session: Flags.string({
@@ -101,6 +106,7 @@ export default class Timer extends Command {
 		"omp timer set nightly --every 'daily 03:00' --shell 'make backup' --reason 'nightly backup'",
 		"omp timer set standup --at 'tomorrow 09:00' --session <id> --prompt 'Summarize yesterday' --reason 'standup notes'",
 		"omp timer set triage --every 'weekdays 09:00' --session own --agent reviewer --max-time 20m --max-cost 0.5 --prompt 'Triage new issues' --reason 'issue triage'",
+		"omp timer set ci-done --ci owner/repo#123 --session <id> --prompt 'CI finished; report' --reason 'watch CI'",
 		"omp timer edit nightly --every 'daily 04:00'",
 		"omp timer runs nightly",
 		"omp timer install",
@@ -132,6 +138,9 @@ export function timerRequest({
 			when: flags.when,
 			at: flags.at,
 			every: flags.every,
+			until: flags.until,
+			ci: flags.ci,
+			pid: flags.pid,
 			prompt: flags.prompt,
 			shell: flags.shell,
 			session: flags.session,

@@ -41,6 +41,7 @@ export function describeNext(row: TimerRow, now: number): string {
 			row.spec.pausedReason && row.spec.pausedReason !== "user" ? `: ${oneLine(row.spec.pausedReason, 60)}` : "";
 		return `paused${reason}`;
 	}
+	if (row.next === "gate") return "when gate passes (checked each minute)";
 	if (row.next === undefined) return "—";
 	const delta = row.next - now;
 	const day = relativeDay(row.next, now, row.spec.tz);
@@ -48,7 +49,9 @@ export function describeNext(row: TimerRow, now: number): string {
 }
 
 export function describeCadence(spec: TimerSpec): string {
-	return spec.every ? `every ${spec.every}` : "once";
+	if (spec.every) return `every ${spec.every}`;
+	if (spec.until) return "once, when its condition holds";
+	return "once";
 }
 
 export function describeAction(spec: TimerSpec, selfSessionId?: string): string {
@@ -136,6 +139,9 @@ export interface CardOptions {
 	selfSessionId?: string;
 	/** Problems `set`/`edit` found that did not block it. */
 	warnings?: string[];
+	/** What the gate answered when set or edit ran it once. */
+	gateNow?: "met" | "not-yet" | "broken";
+	gateDetail?: string;
 	platform?: NodeJS.Platform;
 	/** `result.json` of the last run, when it was an agent run that ended. */
 	lastResult?: AgentRunResult;
@@ -147,6 +153,13 @@ export function renderTimerCard(row: TimerRow, now: number, options: CardOptions
 	const verb = options.verb ? ` ${options.verb}` : "";
 	const lines = [`timer ${spec.id}${verb} (rev ${spec.rev}) — ${describeNext(row, now)}, ${describeCadence(spec)}`];
 	lines.push(`does   ${describeAction(spec, options.selfSessionId)}`);
+	if (spec.until) {
+		const gateNow = options.gateNow
+			? ` · now: ${options.gateNow}${options.gateDetail ? ` (${oneLine(options.gateDetail, 80)})` : ""}`
+			: "";
+		const condition = spec.condition ?? `\`${spec.until}\` exits 0`;
+		lines.push(`gate   ${oneLine(condition, 100)}, checked each minute${gateNow}`);
+	}
 	const limits = [
 		spec.expiresAt ? `expires ${formatWallClock(Date.parse(spec.expiresAt), spec.tz)}` : undefined,
 		spec.maxRuns !== undefined ? `max ${spec.maxRuns} runs` : undefined,
@@ -167,7 +180,13 @@ export function renderTimerCard(row: TimerRow, now: number, options: CardOptions
 	// The ticker runs once a minute, so a one-shot lands up to a minute after its time.
 	const granularity = spec.at && !spec.every ? " · fires within a minute after its time" : "";
 	lines.push(`ticker ${describeTicker(options.ticker, now)}${granularity}`);
-	if ((options.platform ?? process.platform) === "darwin") {
+	if (options.gateNow === "broken") lines.push("⚠ the gate failed its test run; it counts as a failure each tick");
+	if (options.gateNow === "met") {
+		lines.push(
+			"⚠ the condition already holds: this fires at the next tick. If you meant to wait for a change, fix the check.",
+		);
+	}
+	if ((options.platform ?? process.platform) === "darwin" && (spec.at || spec.every)) {
 		lines.push(
 			spec.catchup === "skip"
 				? "⚠ a sleeping Mac misses the slots it sleeps through (catchup: skip)"

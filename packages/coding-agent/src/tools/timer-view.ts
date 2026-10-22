@@ -301,7 +301,7 @@ export function timerPillText(
 	const own = rows.filter(row => row.status === "armed" && row.spec.created.session === sessionId);
 	if (own.length === 0) return undefined;
 	let next: number | undefined;
-	for (const row of own) if (row.next !== undefined && (next === undefined || row.next < next)) next = row.next;
+	for (const row of own) if (typeof row.next === "number" && (next === undefined || row.next < next)) next = row.next;
 	if (next === undefined) return `${own.length}`;
 	const date = new Date(next);
 	const clock = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;

@@ -1,4 +1,6 @@
+export * from "./conditions";
 export * from "./confirm";
+export * from "./gate";
 export * from "./install";
 export * from "./notify";
 export * from "./paths";

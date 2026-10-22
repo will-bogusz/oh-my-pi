@@ -146,6 +146,8 @@ export function parseTimerSpec(id: string, content: string, filePath: string): T
 		reason,
 		at: str(fm.at),
 		every: str(fm.every),
+		until: str(fm.until),
+		condition: str(fm.condition),
 		tz: str(fm.tz) ?? "UTC",
 		target,
 		whenClosed: fm.when_closed === "hold" ? "hold" : "resume",
@@ -185,6 +187,8 @@ export function serializeTimerSpec(spec: TimerSpec): string {
 	fm.reason = spec.reason;
 	if (spec.at) fm.at = spec.at;
 	if (spec.every) fm.every = spec.every;
+	if (spec.until) fm.until = spec.until;
+	if (spec.condition) fm.condition = spec.condition;
 	fm.tz = spec.tz;
 	if (spec.target.kind === "session") {
 		fm.session = spec.target.sessionId;
@@ -356,8 +360,6 @@ export async function listTimerSpecs(root = timersRoot()): Promise<LoadedTimers>
 
 // ─── Execution state (SQLite) ───────────────────────────────────────────────
 
-// The gate_* columns belong to condition timers; they are part of schema 1 so a store created before
-// conditions existed needs no migration.
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS timer_state (
@@ -449,6 +451,7 @@ export interface RunView {
 	trigger: RunTrigger;
 	outcome: RunOutcome;
 	missedSlots?: number;
+	gateExit?: number;
 	detail?: string;
 	rev: number;
 	generation?: string;
@@ -479,6 +482,9 @@ interface StateRow {
 	fail_streak: number;
 	streak_reset_at: string | null;
 	pending_pause: string | null;
+	gate_checks: number | null;
+	gate_last_check_at: string | null;
+	gate_last_exit: number | null;
 	done_at: string | null;
 	done_why: string | null;
 	queued_seq: number | null;
@@ -496,6 +502,7 @@ interface RunRow {
 	trigger: string;
 	outcome: string;
 	missed_slots: number | null;
+	gate_exit: number | null;
 	detail: string | null;
 	rev: number;
 	generation: string | null;
@@ -628,6 +635,14 @@ export class TimerDb {
 			failStreak: row.fail_streak,
 			streakResetAt: nullable(row.streak_reset_at),
 			pendingPause: nullable(row.pending_pause),
+			gate:
+				row.gate_checks !== null
+					? {
+							checks: row.gate_checks,
+							lastCheckAt: row.gate_last_check_at ?? "",
+							lastExit: nullable(row.gate_last_exit),
+						}
+					: undefined,
 			done: row.done_at !== null ? { at: row.done_at, why: (row.done_why ?? "once") as TimerDoneWhy } : undefined,
 			queued:
 				row.queued_seq !== null
@@ -644,8 +659,9 @@ export class TimerDb {
 	writeState(id: string, state: TimerState): void {
 		this.#db.run(
 			`INSERT OR REPLACE INTO timer_state (id, armed_at, last_slot, seq, run_count, fail_streak, streak_reset_at,
-				pending_pause, done_at, done_why, queued_seq, queued_slot, queued_missed, queued_data)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				pending_pause, gate_checks, gate_last_check_at, gate_last_exit, done_at, done_why, queued_seq, queued_slot,
+				queued_missed, queued_data)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			[
 				id,
 				state.armedAt ?? null,
@@ -655,6 +671,9 @@ export class TimerDb {
 				state.failStreak,
 				state.streakResetAt ?? null,
 				state.pendingPause ?? null,
+				state.gate?.checks ?? null,
+				state.gate?.lastCheckAt ?? null,
+				state.gate?.lastExit ?? null,
 				state.done?.at ?? null,
 				state.done?.why ?? null,
 				state.queued?.seq ?? null,
@@ -668,8 +687,8 @@ export class TimerDb {
 	// tick: runs
 	insertRun(id: string, run: RunRecord, runner: boolean): void {
 		this.#db.run(
-			`INSERT INTO runs (timer_id, seq, run_id, at, slot, trigger, outcome, missed_slots, detail, rev, generation,
-				runner) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			`INSERT INTO runs (timer_id, seq, run_id, at, slot, trigger, outcome, missed_slots, gate_exit, detail, rev,
+				generation, runner) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			[
 				id,
 				run.seq,
@@ -679,6 +698,7 @@ export class TimerDb {
 				run.trigger,
 				run.outcome,
 				run.missedSlots ?? null,
+				run.gateExit ?? null,
 				run.detail ?? null,
 				run.rev,
 				run.generation ?? null,
@@ -767,6 +787,7 @@ export class TimerDb {
 			trigger: row.trigger as RunTrigger,
 			outcome: (end?.ok === false ? "failed" : row.outcome) as RunOutcome,
 			missedSlots: nullable(row.missed_slots),
+			gateExit: nullable(row.gate_exit),
 			detail: nullable(row.detail),
 			rev: row.rev,
 			generation: nullable(row.generation),

@@ -84,3 +84,8 @@ export function specLockPath(id: string, root = timersRoot()): string {
 export function runLockPath(id: string, root = timersRoot()): string {
 	return path.join(timerStateDir(id, root), "run");
 }
+
+/** Held by the tick checking a timer's gate, from the check's start until its verdict is decided. */
+export function gateLockPath(id: string, root = timersRoot()): string {
+	return path.join(timerStateDir(id, root), "gate");
+}

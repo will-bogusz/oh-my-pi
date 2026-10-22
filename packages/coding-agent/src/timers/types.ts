@@ -1,6 +1,7 @@
 /**
- * Timers: standing work that fires later — at a time or on a schedule — and
- * then wakes a session, runs a fresh agent, or runs a shell command.
+ * Timers: standing work that fires later — at a time, on a schedule, or once a
+ * shell condition holds — and then wakes a session, runs a fresh agent, or runs
+ * a shell command.
  *
  * Desired configuration is one Markdown spec per timer (`<root>/specs/<id>.md`,
  * YAML frontmatter + prompt body), written atomically with a `rev` check.
@@ -118,7 +119,7 @@ export interface TimerProvenance {
 	/** The session that set it from inside omp (`/timer`); its timers pill counts it. */
 	session?: string;
 	sessionFile?: string;
-	/** The `at`/`every` text as typed, before resolution. */
+	/** The `at`/`every`/`when` text as typed, before resolution. */
 	whenText: string;
 	/** `<timer>#<seq>` when a fired run created this timer. */
 	run?: string;
@@ -136,6 +137,10 @@ export interface TimerSpec {
 	at?: string;
 	/** Recurring cadence, normalized: `30m`, `daily 09:00`, `weekdays 09:00`, `mon,thu 18:30`, `cron <5 fields>`. */
 	every?: string;
+	/** Condition gate: exit 0 fire (once), 1 not yet, anything else a failure. */
+	until?: string;
+	/** Readable form of the condition `until` was compiled from (`CI on o/r#12 finished`). */
+	condition?: string;
 	/** IANA zone for clock times; captured at set time so a travelling laptop does not move the schedule. */
 	tz: string;
 	target: TimerTarget;
@@ -171,12 +176,12 @@ export interface TimerSpec {
 }
 
 /** Outcome of one scheduled instant (or manual fire), recorded when the tick decides it. */
-export type RunOutcome = "fired" | "queued" | "skipped-overlap" | "missed" | "failed";
+export type RunOutcome = "fired" | "queued" | "gated-not-yet" | "skipped-overlap" | "missed" | "failed";
 
 /** How a fired session-targeted run reached its session; separate from {@link RunOutcome}. */
 export type DeliveryState = "queued" | "delivered-live" | "resumed-headless" | "held";
 
-export type RunTrigger = "schedule" | "manual";
+export type RunTrigger = "schedule" | "gate" | "manual";
 
 export interface RunRecord {
 	runId: string;
@@ -188,6 +193,7 @@ export interface RunRecord {
 	outcome: RunOutcome;
 	/** Earlier slots coalesced into this one (machine asleep, no ticker). */
 	missedSlots?: number;
+	gateExit?: number;
 	detail?: string;
 	/** Spec rev the run was decided against. */
 	rev: number;
@@ -213,16 +219,16 @@ export interface EndRecord {
 	detail?: string;
 }
 
-export type TimerDoneWhy = "once" | "max-runs" | "expired" | "missed";
+export type TimerDoneWhy = "once" | "max-runs" | "expired" | "gate-met" | "missed";
 
 export interface TimerDone {
 	at: string;
 	why: TimerDoneWhy;
 }
 
-/** Untrusted text handed to a run: `fire --data`. */
+/** Untrusted text handed to a run: gate stdout or `fire --data`. */
 export interface TimerFireData {
-	source: "fire";
+	source: "gate" | "fire";
 	text: string;
 }
 
@@ -240,6 +246,7 @@ export interface TimerState {
 	streakResetAt?: string;
 	/** The streak reached `pauseAfter`: the tick pauses the spec with this reason (kept until the spec write lands). */
 	pendingPause?: string;
+	gate?: { checks: number; lastCheckAt: string; lastExit?: number };
 	done?: TimerDone;
 	/** A run buffered by `overlap: queue`, dispatched once the in-flight run ends. */
 	queued?: {
@@ -264,13 +271,15 @@ export const TimerFirePayloadSchema = type({
 	/** The timer's zone: the envelope renders its times there. */
 	tz: "string",
 	firedAt: "string",
-	trigger: "'schedule' | 'manual'",
+	trigger: "'schedule' | 'gate' | 'manual'",
 	prompt: "string",
 	once: "boolean",
 	"missedSlots?": "number.integer",
-	"data?": { source: "'fire'", text: "string" },
+	"data?": { source: "'gate' | 'fire'", text: "string" },
 	/** Next scheduled fire after this one, ISO, for recurring timers. */
 	"next?": "string",
+	/** Recurring timer whose next action waits on its condition. */
+	"nextIsGate?": "boolean",
 	/** ISO expiry, rendered so the model knows when a recurring timer stops on its own. */
 	"expiresAt?": "string",
 });
@@ -305,7 +314,7 @@ export type TimerReportPayload = typeof TimerReportPayloadSchema.infer;
 export interface TimerAlert {
 	timerId: string;
 	runId?: string;
-	event: "failed" | "paused" | "missed" | "held" | "reminder" | "report";
+	event: "failed" | "paused" | "missed" | "expired" | "held" | "reminder" | "report";
 	/** One line: what happened. */
 	summary: string;
 	/** First error line, raw. */

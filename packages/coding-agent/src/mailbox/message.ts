@@ -133,8 +133,10 @@ export function renderMail(mail: SessionMail, via: MailDeliveryVia, now: number,
 		prompt: fire.prompt,
 		data: fire.data ? fenceUntrusted(fire.data.text, "timer-data") : undefined,
 		dataSource: fire.data?.source,
+		dataFromGate: fire.data?.source === "gate",
 		once: fire.once,
 		next: fire.next ? formatWallClock(Date.parse(fire.next), tz) : undefined,
+		nextIsGate: fire.nextIsGate,
 		expires: fire.expiresAt && !fire.once ? formatWallClock(Date.parse(fire.expiresAt), tz) : undefined,
 	});
 }

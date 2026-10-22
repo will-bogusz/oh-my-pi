@@ -97,7 +97,7 @@ function bump(db: TimerDb, spec: TimerSpec, signature: string, summary: string, 
 }
 
 /**
- * One failed run (run ended non-zero, runner lost). Mutates
+ * One failed run (gate broke, run ended non-zero, runner lost). Mutates
  * `state.failStreak`, and sets `state.pendingPause` on the transition into
  * auto-pause (the tick then pauses the spec); later failures settled while
  * that pause lands, or after it, never alert again.
@@ -136,13 +136,13 @@ export function applySuccess(db: TimerDb, spec: TimerSpec, state: TimerState, at
 
 /**
  * Something a person should hear about that is not a failure (a missed slot,
- * a delivery held because the session is open elsewhere): alert once per
- * incident, remind after the cooldown.
+ * a delivery held because the session is open elsewhere, a watch that expired
+ * without firing): alert once per incident, remind after the cooldown.
  */
 export function applyNotice(
 	db: TimerDb,
 	spec: TimerSpec,
-	event: "missed" | "held",
+	event: "missed" | "expired" | "held",
 	summary: string,
 	input: { runId?: string; at: string; now: number },
 ): TimerAlert[] {
