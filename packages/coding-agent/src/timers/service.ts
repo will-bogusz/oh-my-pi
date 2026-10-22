@@ -68,6 +68,9 @@ export interface TimerSetInput {
 
 export interface TimerSetContext {
 	cwd: string;
+	/** The session setting the timer from inside omp: a prompt timer with no session wakes it. */
+	sessionId?: string;
+	sessionFile?: string;
 	now?: number;
 	root?: string;
 }
@@ -97,10 +100,11 @@ async function freeDerivedId(base: string, root: string): Promise<string> {
 	throw new Error(`Cannot derive a free timer id from "${base}"; pass id`);
 }
 
-/** The session a prompt timer wakes: an id, id prefix or session file. */
+/** The session a prompt timer wakes: an id, id prefix or session file; by default the calling session. */
 async function resolveTarget(session: string | undefined, ctx: TimerSetContext): Promise<TimerTarget> {
-	const requested = session?.trim();
-	if (!requested) throw new Error("a prompt timer wakes a session: pass session (an id, prefix or session file)");
+	const requested = session?.trim() || ctx.sessionId;
+	if (!requested) throw new Error("a prompt timer wakes a session: pass --session (an id, prefix or session file)");
+	if (requested === ctx.sessionId) return { kind: "session", sessionId: requested, sessionFile: ctx.sessionFile };
 	if (requested.endsWith(".jsonl") || requested.includes(path.sep)) {
 		const info = await readSessionInfo(path.resolve(ctx.cwd, requested));
 		if (!info) throw new Error(`No session file at "${requested}"`);
@@ -229,6 +233,8 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 			by: "cli",
 			host: os.hostname(),
 			cwd: ctx.cwd,
+			session: ctx.sessionId,
+			sessionFile: ctx.sessionFile,
 			whenText: [input.at && `at ${input.at}`, input.every && `every ${input.every}`].filter(Boolean).join(", "),
 			run: currentTimerRun()?.runId,
 		},

@@ -31,6 +31,9 @@ export interface TimerProvenance {
 	by: "cli";
 	host: string;
 	cwd: string;
+	/** The session that set it from inside omp (`/timer`); its timers pill counts it. */
+	session?: string;
+	sessionFile?: string;
 	/** The `at`/`every` text as typed, before resolution. */
 	whenText: string;
 	/** `<timer>#<seq>` when a fired run created this timer. */

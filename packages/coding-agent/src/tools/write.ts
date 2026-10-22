@@ -459,6 +459,17 @@ function parseSqliteWriteTarget(subPath: string, queryString: string): { table: 
 }
 
 /**
+ * The target a `write` path names: hashline `[path#TAG]` wrapper unwrapped, a whole-file
+ * selector (`:raw`/`:conflicts`) peeled and a `<file>:conflict://N` prefix recovered (with a note
+ * for the model). Throws ToolError for any other selector.
+ */
+function resolveWriteTarget(rawPath: string): { path: string; note?: string } {
+	return recoverConflictUriPrefix(
+		InternalUrlRouter.instance().peelWriteSelector(unwrapHashlineHeaderPath(rawPath), "write"),
+	);
+}
+
+/**
  * Write tool implementation.
  *
  * Creates or overwrites files with optional LSP formatting and diagnostics.
@@ -468,10 +479,17 @@ export class WriteTool implements AgentTool<typeof writeSchema, WriteToolDetails
 	readonly approval = (args: unknown): ToolApprovalDecision => {
 		const { path: rawPath, content } = args as Partial<WriteParams>;
 		if (typeof rawPath !== "string") return "write";
-		// Unwrap a hashline `[path#TAG]` wrapper first (parity with execute) so a
-		// wrapped `[scheme://h/x#ABCD]` gets the same tier as the bare URL.
+		// Approve the target `execute` writes: a wrapper, whole-file selector or
+		// conflict prefix must not route the tier to a different URL than the write.
+		let path: string;
+		try {
+			path = resolveWriteTarget(rawPath).path;
+		} catch (error) {
+			if (!(error instanceof ToolError)) throw error;
+			return { tier: "write", policy: "deny", reason: error.message };
+		}
 		return InternalUrlRouter.instance().writeTier(
-			unwrapHashlineHeaderPath(rawPath),
+			path,
 			typeof content === "string" ? content : undefined,
 			this.session,
 		);
@@ -804,7 +822,7 @@ export class WriteTool implements AgentTool<typeof writeSchema, WriteToolDetails
 		// what `read` resolves for the same URL; line-range/malformed selectors throw.
 		// A `<file>:conflict://N` target is normalized to its URL; the note tells the model.
 		const router = InternalUrlRouter.instance();
-		const recovered = recoverConflictUriPrefix(router.peelWriteSelector(unwrapHashlineHeaderPath(rawPath), "write"));
+		const recovered = resolveWriteTarget(rawPath);
 		const path = recovered.path;
 		const target = router.writeTarget(path);
 		const policy = target?.spec.write;

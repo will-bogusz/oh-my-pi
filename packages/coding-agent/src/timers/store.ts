@@ -128,6 +128,8 @@ export function parseTimerSpec(id: string, content: string, filePath: string): T
 			by: "cli",
 			host: str(created.host) ?? "",
 			cwd: str(created.cwd) ?? "",
+			session: str(created.session),
+			sessionFile: str(created.session_file),
 			whenText: str(created.when_text) ?? "",
 			run: str(created.run),
 		},
@@ -170,6 +172,8 @@ export function serializeTimerSpec(spec: TimerSpec): string {
 		host: spec.created.host,
 		cwd: spec.created.cwd,
 	};
+	if (spec.created.session) created.session = spec.created.session;
+	if (spec.created.sessionFile) created.session_file = spec.created.sessionFile;
 	created.when_text = spec.created.whenText;
 	if (spec.created.run) created.run = spec.created.run;
 	fm.created = created;

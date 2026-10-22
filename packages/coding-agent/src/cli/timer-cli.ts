@@ -119,7 +119,7 @@ function scheduleFields(fields: TimerFieldArgs): { at?: string; every?: string }
 	return parseWhen(fields.when);
 }
 
-function setInput(cmd: TimerCommandArgs): TimerSetInput {
+export function setInput(cmd: TimerCommandArgs): TimerSetInput {
 	const { fields } = cmd;
 	return {
 		id: cmd.id,
@@ -146,7 +146,7 @@ function setInput(cmd: TimerCommandArgs): TimerSetInput {
 const clearable = (value: string | undefined): string | null | undefined =>
 	value === "none" || value === "never" ? null : value;
 
-function editInput(fields: TimerFieldArgs): TimerEditInput {
+export function editInput(fields: TimerFieldArgs): TimerEditInput {
 	const schedule = scheduleFields(fields);
 	const patch: TimerEditInput = {
 		title: fields.title,

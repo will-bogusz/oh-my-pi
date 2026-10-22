@@ -2,9 +2,9 @@
  * Set, inspect and drive timers from outside a session; `tick` is what the
  * per-host OS unit (`omp timer install`) runs once a minute.
  */
-import { Args, Command, Flags } from "@oh-my-pi/pi-utils/cli";
+import { Args, Command, Flags, type ParseOutput } from "@oh-my-pi/pi-utils/cli";
 import { timerHelp as commandHelp } from "../cli/command-help";
-import { runTimerCommand, TIMER_ACTIONS, type TimerAction } from "../cli/timer-cli";
+import { runTimerCommand, TIMER_ACTIONS, type TimerAction, type TimerCommandArgs } from "../cli/timer-cli";
 
 export default class Timer extends Command {
 	static description = commandHelp.description;
@@ -75,36 +75,44 @@ export default class Timer extends Command {
 	];
 
 	async run(): Promise<void> {
-		const { args, flags, argv } = await this.parse(Timer);
-		await runTimerCommand({
-			action: (args.action ?? "ls") as TimerAction,
-			id: args.id,
-			extra: argv.slice(2),
-			json: flags.json ?? false,
-			data: flags.data,
-			limit: flags.limit,
-			dryRun: flags["dry-run"] ?? false,
-			fields: {
-				reason: flags.reason,
-				title: flags.title,
-				when: flags.when,
-				at: flags.at,
-				every: flags.every,
-				prompt: flags.prompt,
-				shell: flags.shell,
-				session: flags.session,
-				whenClosed: flags["when-closed"] as "resume" | "hold" | undefined,
-				tz: flags.tz,
-				cwd: flags.cwd,
-				expires: flags.expires,
-				maxRuns: flags["max-runs"],
-				overlap: flags.overlap as "skip" | "queue" | undefined,
-				grace: flags.grace,
-				catchup: flags.catchup as "run" | "skip" | undefined,
-				pauseAfter: flags["pause-after"],
-				allowTimers: flags["allow-timers"],
-				rev: flags.rev,
-			},
-		});
+		await runTimerCommand(timerRequest(await this.parse(Timer)));
 	}
+}
+
+/** Parsed `omp timer` argv as the request {@link runTimerCommand} runs; `/timer set|edit` maps through it too. */
+export function timerRequest({
+	args,
+	flags,
+	argv,
+}: ParseOutput<typeof Timer.flags, typeof Timer.args>): TimerCommandArgs {
+	return {
+		action: (args.action ?? "ls") as TimerAction,
+		id: args.id,
+		extra: argv.slice(2),
+		json: flags.json ?? false,
+		data: flags.data,
+		limit: flags.limit,
+		dryRun: flags["dry-run"] ?? false,
+		fields: {
+			reason: flags.reason,
+			title: flags.title,
+			when: flags.when,
+			at: flags.at,
+			every: flags.every,
+			prompt: flags.prompt,
+			shell: flags.shell,
+			session: flags.session,
+			whenClosed: flags["when-closed"] as "resume" | "hold" | undefined,
+			tz: flags.tz,
+			cwd: flags.cwd,
+			expires: flags.expires,
+			maxRuns: flags["max-runs"],
+			overlap: flags.overlap as "skip" | "queue" | undefined,
+			grace: flags.grace,
+			catchup: flags.catchup as "run" | "skip" | undefined,
+			pauseAfter: flags["pause-after"],
+			allowTimers: flags["allow-timers"],
+			rev: flags.rev,
+		},
+	};
 }

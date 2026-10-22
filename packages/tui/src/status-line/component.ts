@@ -723,6 +723,8 @@ export class StatusLineComponent<TSession extends StatusLineSession = StatusLine
 	#subagentCount: number = 0;
 	#runningSubagentIds = new Set<string>();
 	#subagentTreeCost = 0;
+	/** Timers this session owns, as the badge text (`2 · next 08:00`); undefined hides the badge. */
+	#timerBadge: string | undefined;
 	/**
 	 * Active-processing accounting for the `time_spent` segment, keyed per
 	 * {@link StatusLineSession} so the focus-controller mid-turn attach path
@@ -1007,6 +1009,17 @@ export class StatusLineComponent<TSession extends StatusLineSession = StatusLine
 		const next = Number.isFinite(cost) && cost > 0 ? cost : 0;
 		if (next === this.#subagentTreeCost) return;
 		this.#subagentTreeCost = next;
+		this.#invalidateStatusLineRenderCache();
+	}
+
+	/**
+	 * The timers badge beside the background-jobs badge: the count of armed
+	 * timers this session set and their next fire (`2 · next 08:00`). The host
+	 * computes it from the timer store; undefined hides it.
+	 */
+	setTimerBadge(text: string | undefined): void {
+		if (text === this.#timerBadge) return;
+		this.#timerBadge = text;
 		this.#invalidateStatusLineRenderCache();
 	}
 
@@ -3070,6 +3083,9 @@ export class StatusLineComponent<TSession extends StatusLineSession = StatusLine
 		}
 
 		if (layout !== "plain-left") {
+			if (this.#timerBadge) {
+				rightParts.unshift(theme.fg("statusLineSubagents", `${theme.icon.timer} ${this.#timerBadge}`));
+			}
 			const runningBackgroundJobs = this.runningBackgroundJobCount();
 			if (runningBackgroundJobs > 0) {
 				const widget = this.#latestJobWidget();

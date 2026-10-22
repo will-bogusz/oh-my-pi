@@ -49,12 +49,13 @@ export function describeCadence(spec: TimerSpec): string {
 	return spec.every ? `every ${spec.every}` : "once";
 }
 
-export function describeAction(spec: TimerSpec): string {
+export function describeAction(spec: TimerSpec, selfSessionId?: string): string {
 	const { action, target } = spec;
 	if (action.kind === "shell") return `run \`${oneLine(action.command, 80)}\` in ${spec.cwd}`;
 	const session = target.kind === "session" ? target.sessionId : "(none)";
+	const self = target.kind === "session" && target.sessionId === selfSessionId ? " (this session)" : "";
 	const closed = spec.whenClosed === "hold" ? "hold until opened" : "resume headless";
-	return `wake session ${session} → "${oneLine(action.prompt, 90)}"\n       if busy: after the current turn · if closed: ${closed}`;
+	return `wake session ${session}${self} → "${oneLine(action.prompt, 90)}"\n       if busy: after the current turn · if closed: ${closed}`;
 }
 
 export interface TickAge {
@@ -97,6 +98,8 @@ export function describeRun(run: RunView | undefined): string {
 export interface CardOptions {
 	verb: string;
 	ticker: TickerStatus;
+	/** The session viewing the card: its own target reads as "this session". */
+	selfSessionId?: string;
 	/** Problems `set`/`edit` found that did not block it. */
 	warnings?: string[];
 	platform?: NodeJS.Platform;
@@ -107,7 +110,7 @@ export function renderTimerCard(row: TimerRow, now: number, options: CardOptions
 	const { spec } = row;
 	const verb = options.verb ? ` ${options.verb}` : "";
 	const lines = [`timer ${spec.id}${verb} (rev ${spec.rev}) — ${describeNext(row, now)}, ${describeCadence(spec)}`];
-	lines.push(`does   ${describeAction(spec)}`);
+	lines.push(`does   ${describeAction(spec, options.selfSessionId)}`);
 	const limits = [
 		spec.expiresAt ? `expires ${formatWallClock(Date.parse(spec.expiresAt), spec.tz)}` : undefined,
 		spec.maxRuns !== undefined ? `max ${spec.maxRuns} runs` : undefined,

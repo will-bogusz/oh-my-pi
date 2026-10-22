@@ -266,9 +266,13 @@ import { PlanSaveOverlay, type PlanSaveOverlayResult } from "@oh-my-pi/pi-tui/ov
 import { ServedModelTracker } from "@oh-my-pi/pi-tui/chat/served-model-marker";
 import { SessionInfoOverlay } from "@oh-my-pi/pi-tui/overlays/session-info-overlay";
 import { JobsSheet } from "@oh-my-pi/pi-tui/overlays/jobs-panel";
+import { TimersSheet } from "@oh-my-pi/pi-tui/overlays/timers-panel";
 import { SkillMessageComponent } from "@oh-my-pi/pi-tui/chat/skill-message";
 import { StatusLineComponent } from "@oh-my-pi/pi-tui/status-line";
 import { statusLineHost } from "./status-line-host";
+import { TimersSheetData } from "./timers-sheet-data";
+import { listTimers } from "../timers";
+import { timerPillText } from "../tools/timer-view";
 import { stopSharedSpinnerTicker, type ToolExecutionHandle } from "@oh-my-pi/pi-tui/chat/tool-execution";
 import { TranscriptContainer } from "@oh-my-pi/pi-tui/chrome/transcript-container";
 import {
@@ -717,11 +721,12 @@ class HudPillsRow implements Component {
 		return this.mode.describeHudPills();
 	}
 
-	/** A click on the agents segment opens the agent hub; one on the jobs segment, the jobs sheet. */
+	/** A click on the agents segment opens the agent hub; on the jobs segment, the jobs sheet; on timers, the timers sheet. */
 	handleNativeEvent(event: NativeUiEvent): void {
 		if (event.type !== "action") return;
 		if (event.act === "agents.open") this.mode.showAgentHub();
 		else if (event.act === "jobs.open") this.mode.showJobsSheet();
+		else if (event.act === "timers.open") this.mode.showTimersSheet();
 	}
 }
 
@@ -852,6 +857,27 @@ function describeRunningSegment(spec: RunningSegmentSpec, running: number): Nati
 			node("text", { spans: [span(String(running), "num")], wrap: "none" }, undefined, "count"),
 		],
 		spec.key,
+	);
+}
+
+/** The timers segment: a clock, then how many armed timers this session set and their next fire. */
+function describeTimersSegment(pill: string): NativeNode {
+	const label = `Timers this session set: ${pill}`;
+	return node(
+		"row",
+		{
+			role: "omp.hud.seg",
+			gap: "xs",
+			align: "center",
+			title: `${label}  /timers`,
+			aria: label,
+			actions: { click: "timers.open" },
+		},
+		[
+			node("icon", { name: "clock", tone: "accent" }, undefined, "icon"),
+			node("text", { spans: [span(pill, "num")], wrap: "none" }, undefined, "count"),
+		],
+		"timers",
 	);
 }
 
@@ -1277,6 +1303,11 @@ const CTRL_L_APPEARANCE_RESPONSE_DEADLINE_MS = 2000;
 /** Repaint cadence of the open jobs sheet: output tails, pids and list ages are polled, not pushed. */
 const JOBS_SHEET_REFRESH_MS = 250;
 
+/** Re-read cadence of the open timers sheet: timers change from other processes (the ticker, the CLI). */
+const TIMERS_SHEET_REFRESH_MS = 2_000;
+/** Re-read cadence of the timers pill; `/timer` refreshes it at once. */
+const TIMER_PILL_REFRESH_MS = 30_000;
+
 export class InteractiveMode implements InteractiveModeContext {
 	#ownsStartedUi: boolean;
 	session: AgentSession;
@@ -1463,6 +1494,14 @@ export class InteractiveMode implements InteractiveModeContext {
 	#hudPillsNative: { children: readonly NativeChild[]; node: NativeNode } | undefined;
 	#agentsSegment: RunningSegment | undefined;
 	#jobsSegment: JobsSegment | undefined;
+	/** The timers pill text it was described from, and the segment. */
+	#timersSegment: { pill: string; node: NativeNode } | undefined;
+	/** Armed timers this session set and their next fire (`2 · next 08:00`); undefined when none. */
+	#timerPill: string | undefined;
+	#timerPillTimer: NodeJS.Timeout | undefined;
+	/** A pill read is in flight; `#timerPillDirty` asks for one more after it, so no refresh is lost. */
+	#timerPillReading = false;
+	#timerPillDirty = false;
 	/** The job widget registry this mode repaints on, and how to stop listening to it. */
 	#jobWidgetsListener: { registry: JobWidgetRegistry; unsubscribe: () => void } | undefined;
 	/**
@@ -1529,6 +1568,9 @@ export class InteractiveMode implements InteractiveModeContext {
 		const segments: NativeChild[] = [];
 		if (this.#agentsSegment) segments.push(this.#agentsSegment.node);
 		if (this.#jobsSegment) segments.push(this.#jobsSegment.node);
+		const pill = this.#timerPill;
+		if (pill && this.#timersSegment?.pill !== pill) this.#timersSegment = { pill, node: describeTimersSegment(pill) };
+		if (pill && this.#timersSegment) segments.push(this.#timersSegment.node);
 		const memo = this.#hudPillsNative;
 		if (memo && sameItems(memo.children, segments)) return memo.node;
 		const counter =
@@ -1679,6 +1721,9 @@ export class InteractiveMode implements InteractiveModeContext {
 	#jobsSheetHandle: OverlayHandle | undefined;
 	/** Re-renders the open jobs sheet so output tails and pids stay live. */
 	#jobsSheetTimer: NodeJS.Timeout | undefined;
+	#timersSheetHandle: OverlayHandle | undefined;
+	/** Re-reads the timer store while the timers sheet is open. */
+	#timersSheetTimer: NodeJS.Timeout | undefined;
 	#planReviewOwner: object | undefined;
 	#planReviewCancel: (() => void) | undefined;
 	#planReviewPick: ((choice: string) => boolean) | undefined;
@@ -2302,6 +2347,9 @@ export class InteractiveMode implements InteractiveModeContext {
 		this.#headerAfter = headerAfter;
 		this.composer.setHeaderExtras(headerBefore, headerAfter);
 		this.statusLine.watchBranch(() => this.ui.requestRender());
+		this.refreshTimerPill();
+		this.#timerPillTimer = setInterval(() => this.refreshTimerPill(), TIMER_PILL_REFRESH_MS);
+		this.#timerPillTimer.unref?.();
 		this.composer.setStatusComponent(this.statusLine);
 
 		this.composer.setRuntimeChildren(
@@ -7218,6 +7266,10 @@ export class InteractiveMode implements InteractiveModeContext {
 		this.#cancelGoalContinuation();
 		clearInterval(this.#jobsSheetTimer);
 		this.#jobsSheetTimer = undefined;
+		clearInterval(this.#timersSheetTimer);
+		this.#timersSheetTimer = undefined;
+		clearInterval(this.#timerPillTimer);
+		this.#timerPillTimer = undefined;
 		if (this.#sttController) {
 			this.#sttController.dispose();
 			this.#sttController = undefined;
@@ -7691,6 +7743,75 @@ export class InteractiveMode implements InteractiveModeContext {
 		this.#jobsSheetTimer = setInterval(() => this.ui.requestRender(), JOBS_SHEET_REFRESH_MS);
 		this.ui.setFocus(sheet);
 		this.ui.requestRender();
+	}
+
+	/**
+	 * The timers sheet (`/timers`, the timers pill): every timer on this
+	 * machine beside the selected one's card or newest run log, with fire,
+	 * pause/resume and remove. It reads the store in the background and adds
+	 * nothing to the transcript.
+	 */
+	showTimersSheet(): void {
+		if (this.#timersSheetHandle) return;
+		const data = new TimersSheetData(this.sessionManager.getSessionId() ?? undefined, () => {
+			this.refreshTimerPill();
+			this.ui.requestRender();
+		});
+		const sheet = new TimersSheet({
+			load: () => data.load(),
+			inspect: (id, view) => data.inspect(id, view),
+			fire: id => data.fire(id),
+			togglePause: id => data.togglePause(id),
+			remove: id => data.remove(id),
+			close: () => this.#hideTimersSheet(),
+			// The overlay's `maxHeight: "90%"`, resolved the way the compositor does.
+			maxRows: () => Math.floor(this.ui.terminal.rows * 0.9),
+		});
+		void data.refresh();
+		this.#timersSheetHandle = this.ui.showOverlay(sheet, { anchor: "center", width: "90%", maxHeight: "90%" });
+		this.#timersSheetTimer = setInterval(() => void data.refresh(), TIMERS_SHEET_REFRESH_MS);
+		this.ui.setFocus(sheet);
+		this.ui.requestRender();
+	}
+
+	#hideTimersSheet(): void {
+		const handle = this.#timersSheetHandle;
+		this.#timersSheetHandle = undefined;
+		clearInterval(this.#timersSheetTimer);
+		this.#timersSheetTimer = undefined;
+		if (!handle) return;
+		handle.hide();
+		this.#selectorController.focusActiveEditorArea();
+		this.ui.requestRender();
+	}
+
+	/** Re-read the timers this session set for the timers pill (status line badge and HUD segment). */
+	refreshTimerPill(): void {
+		if (this.#timerPillReading) {
+			this.#timerPillDirty = true;
+			return;
+		}
+		this.#timerPillReading = true;
+		void this.#readTimerPill().finally(() => {
+			this.#timerPillReading = false;
+			if (!this.#timerPillDirty) return;
+			this.#timerPillDirty = false;
+			this.refreshTimerPill();
+		});
+	}
+
+	async #readTimerPill(): Promise<void> {
+		const now = Date.now();
+		try {
+			const { rows } = await listTimers(now);
+			const pill = timerPillText(rows, this.sessionManager.getSessionId() ?? undefined, now);
+			if (pill === this.#timerPill) return;
+			this.#timerPill = pill;
+			this.statusLine.setTimerBadge(pill);
+			this.ui.requestRender();
+		} catch (error) {
+			logger.debug("timer pill: listing failed", { error: String(error) });
+		}
 	}
 
 	#hideJobsSheet(): void {

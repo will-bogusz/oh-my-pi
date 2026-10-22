@@ -9,7 +9,7 @@ omp timer set standup --at 'tomorrow 09:00' --session <id> --prompt 'Summarize y
 omp timer ls
 ```
 
-Source: `packages/coding-agent/src/timers/` (store, schedule, tick, runner, delivery), `src/timers/install/` (ticker units), `src/cli/timer-cli.ts` (CLI).
+Source: `packages/coding-agent/src/timers/` (store, schedule, tick, runner, delivery), `src/timers/install/` (ticker units), `src/cli/timer-cli.ts` (CLI), `src/slash-commands/builtin-timer.ts` and `src/internal-urls/timer-protocol.ts` (in-session surfaces).
 
 ## CLI
 
@@ -108,6 +108,13 @@ Alerts go to:
 
 Both are read from global settings, since the ticker runs outside any project. `omp poke` raises a `held` alert the same way when its message is held.
 
+## In a session
+
+- **`/timer`** (TUI, RPC, ACP): `/timer in 2h <prompt>`, `/timer at 8:00 <prompt>`, `/timer at 2026-12-01 09:30 <prompt>` and `/timer every 30m <prompt>` set a wake of the current session; the prompt is also the reason, and the id is derived from it. The CLI verbs work too: `/timer ls`, `show <id>`, `runs <id>`, `logs <id> [seq]`, `fire <id> [data]`, `pause <id>`, `resume <id>`, `rm <id>`, `/timer set [<id>] --reason … --at|--every|--when … --prompt|--shell …` (every `omp timer set` flag but `--json`; a prompt timer without `--session` wakes the current session), and `/timer edit <id> --<field> <value>` (the `omp timer edit` flags; `none` clears `at`, `every`, `expires` or `grace`). In the TUI the result is a card or listing above the editor, not a transcript entry.
+- **`/timers`**: in the TUI, a sheet listing every timer beside the selected one's card. ↑/↓ select (a list taller than the sheet scrolls with the selection), ↵ card, `l` newest run log, `f` fire now, `p` pause/resume, `d` twice remove, Esc close. Elsewhere it prints the listing.
+- **Timers pill**: the status line (and the native HUD pill row) shows `⏰ <n> · next <HH:MM>` for the armed timers the current session set; clicking the native segment opens the sheet. It refreshes after `/timer` and every 30 s.
+- **`timer://`**: `read timer://` lists timers; `timer://<id>` is the card plus the full prompt or command; `timer://<id>/runs` the run history; `timer://<id>/runs/<seq|latest>` one run and its log (`grep`/`bash` can address the log). Writes: `timer://<id>/fire` (content, if any, reaches the run as untrusted data), `timer://<id>/edit` (content is a JSON object of the fields to change: `reason`, `at`, `every`, `tz`, `prompt`, `shell`, `whenClosed`, `cwd`, `expires`, `maxRuns`; e.g. `{"at":"in 3h"}`), `timer://<id>/pause`, `/resume`, `/remove` (no content needed). Acting on a timer that wakes the writing session needs `write` approval; a shell timer, another session's timer, or an edit that sets `shell` needs `exec`. Writes are refused when `timer.enabled` is off.
+
 ## Recursion guard
 
 Every process a fire starts carries `OMP_TIMER_RUN=<id>#<seq>`, and so does every `bash` command of a turn a timer fire starts or joins in an open session (delivered live or held for the next opener), until your next message. Such a run may re-arm, edit, pause, remove or fire only its own timer, unless that timer was set with `--allow-timers`; reading stays open. A prompt timer's turn in the session it wakes, live or resumed headless, may also set, edit, pause, resume or remove prompt timers that wake that same session (not fire them): what they start lands in that one conversation, one turn at a time. Shell runs stay limited to their own timer. Without this, one fired run could arm timers that arm timers. Subagents a live fired turn spawns, and its `eval` cells, do not carry it.
@@ -125,4 +132,4 @@ The store root is `<agentDir>/timers` (`~/.omp/agent/timers`); `OMP_TIMERS_DIR` 
 | `state/<id>/runs/<seq>.json` | Fire payload the tick hands to the runner. |
 | `tick.log` | Output of the launchd ticker. |
 
-Spec frontmatter keys: `version`, `rev`, `title`, `reason`, `at`, `every`, `tz`, `session` (a session id, or `fresh` for a shell timer), `session_file`, `when_closed`, `shell`, `cwd`, `expires`, `max_runs`, `overlap`, `grace`, `catchup`, `pause_after`, `allow_timers`, `paused`, `paused_reason`, `armed_at` (start of the schedule generation), `resumed_at`, and `created` (`at`, `by`, `host`, `cwd`, `when_text`, and `run` when a fired run set it). A spec whose `version` is newer than this omp reads is listed as invalid rather than misread.
+Spec frontmatter keys: `version`, `rev`, `title`, `reason`, `at`, `every`, `tz`, `session` (a session id, or `fresh` for a shell timer), `session_file`, `when_closed`, `shell`, `cwd`, `expires`, `max_runs`, `overlap`, `grace`, `catchup`, `pause_after`, `allow_timers`, `paused`, `paused_reason`, `armed_at` (start of the schedule generation), `resumed_at`, and `created` (`at`, `by`, `host`, `cwd`, `session` and `session_file` when `/timer` set it, `when_text`, and `run` when a fired run set it). A spec whose `version` is newer than this omp reads is listed as invalid rather than misread.

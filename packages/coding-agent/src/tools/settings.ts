@@ -574,6 +574,19 @@ export const cfgLaunchEnabled = register({
 	},
 });
 
+export const cfgTimerEnabled = register({
+	id: "timer.enabled",
+	type: "boolean",
+	default: true,
+	ui: {
+		tab: "tools",
+		group: "Available Tools",
+		label: "Timers",
+		description:
+			"Allow timer:// control writes (fire, edit, pause, resume, remove) from this session; /timer and omp timer stay available",
+	},
+});
+
 export const cfgSpeechgenEnabled = register({
 	id: "speechgen.enabled",
 	type: "boolean",
