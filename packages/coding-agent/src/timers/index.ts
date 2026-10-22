@@ -1,6 +1,7 @@
 export * from "./agent-profile";
 export * from "./agent-run";
 export * from "./conditions";
+export * from "./duplicates";
 export * from "./fire-message";
 export * from "./gate";
 export * from "./install";

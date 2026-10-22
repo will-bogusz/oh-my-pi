@@ -19,6 +19,21 @@ function oneLine(text: string, max: number): string {
 	return flat.length > max ? `${flat.slice(0, max - 1)}…` : flat;
 }
 
+/** Calendar date of `ms` in `tz` as YYYY-MM-DD. */
+function localDate(ms: number, tz: string | undefined): string {
+	return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(
+		new Date(ms),
+	);
+}
+
+/** `today` / `tomorrow` relative to `now` in `tz`, so a date typed across midnight reads as what it is. */
+function relativeDay(ms: number, now: number, tz: string | undefined): string | undefined {
+	const day = localDate(ms, tz);
+	if (day === localDate(now, tz)) return "today";
+	if (day === localDate(now + 24 * 60 * 60_000, tz)) return "tomorrow";
+	return undefined;
+}
+
 export function describeNext(row: TimerRow, now: number): string {
 	if (row.status === "done") return `done (${row.state.done?.why ?? "?"})`;
 	if (row.status === "paused") {
@@ -29,7 +44,8 @@ export function describeNext(row: TimerRow, now: number): string {
 	if (row.next === "gate") return "when gate passes (checked each minute)";
 	if (row.next === undefined) return "—";
 	const delta = row.next - now;
-	return `${formatWallClock(row.next, row.spec.tz)} (${delta >= 0 ? `in ${formatDuration(delta)}` : `${formatDuration(-delta)} overdue`})`;
+	const day = relativeDay(row.next, now, row.spec.tz);
+	return `${formatWallClock(row.next, row.spec.tz)} (${day ? `${day}, ` : ""}${delta >= 0 ? `in ${formatDuration(delta)}` : `${formatDuration(-delta)} overdue`})`;
 }
 
 export function describeCadence(spec: TimerSpec): string {
@@ -173,7 +189,7 @@ export function renderTimerCard(row: TimerRow, now: number, options: CardOptions
 		);
 	}
 	for (const warning of options.warnings ?? []) lines.push(`⚠ ${warning}`);
-	lines.push(`manage timer {op:"show"|"edit"|"fire"|"pause"|"remove", id:"${spec.id}"}`);
+	lines.push(`manage timer {op:"show"|"runs"|"edit"|"pause"|"remove", id:"${spec.id}"}`);
 	return lines.join("\n");
 }
 

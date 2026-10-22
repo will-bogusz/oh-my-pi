@@ -12,11 +12,14 @@ import { CLI_THINKING_LEVELS, parseCliThinkingLevel } from "@oh-my-pi/pi-tui/thi
 import { readSessionInfo, resolveResumableSession } from "../session/session-listing";
 import { resolveRunProfile } from "./agent-profile";
 import { compileCondition, type TimerCondition } from "./conditions";
+import { findDuplicateTimer } from "./duplicates";
+import { formatWallClock } from "./fire-message";
 import { runGate } from "./gate";
 import { createTimerHost, syncMachineWake, type WakeHost } from "./install";
 import { runLogPath, TIMER_ID_PATTERN, timersRoot } from "./paths";
 import {
 	DAY,
+	HOUR,
 	hostTimeZone,
 	MIN_PROMPT_INTERVAL_MS,
 	MIN_SHELL_INTERVAL_MS,
@@ -113,6 +116,8 @@ export interface TimerSetContext {
 	host?: WakeHost;
 	/** Run the gate once at set time (default true). */
 	testGate?: boolean;
+	/** Tool callers: arm despite a near-duplicate timer or a condition that already holds. */
+	force?: boolean;
 }
 
 export interface TimerSetResult {
@@ -286,13 +291,73 @@ async function assertAgentProfile(spec: TimerSpec): Promise<void> {
 async function testGate(spec: TimerSpec): Promise<Pick<TimerSetResult, "gateNow" | "gateDetail">> {
 	if (!spec.until) return {};
 	const verdict = await runGate(spec.until, spec.cwd, GATE_DRY_RUN_TIMEOUT_MS);
-	if (verdict.kind !== "broken") return { gateNow: verdict.kind };
+	if (verdict.kind === "not-yet") return { gateNow: verdict.kind };
+	if (verdict.kind === "met") {
+		const printed = verdict.output.split("\n")[0]?.trim();
+		return { gateNow: "met", gateDetail: printed ? `printed: ${printed}` : undefined };
+	}
 	return {
 		gateNow: "broken",
 		gateDetail: verdict.timedOut
 			? "timed out"
 			: `exit ${verdict.exitCode ?? "?"}: ${verdict.output.split("\n")[0] ?? ""}`,
 	};
+}
+
+/**
+ * An agent arming a condition that already holds almost always wrote a check
+ * that passes while the work is still pending (a status script that exits 0
+ * on `IN_PROGRESS`, a local `pid` for a remote process); the timer would fire
+ * at the next tick. Refused for tool callers unless forced.
+ */
+function assertGateNotMet(
+	spec: TimerSpec,
+	gate: Pick<TimerSetResult, "gateNow" | "gateDetail">,
+	ctx: TimerSetContext,
+): void {
+	if (gate.gateNow !== "met" || ctx.by !== "tool" || ctx.force) return;
+	const printed = gate.gateDetail ? ` (${gate.gateDetail.slice(0, 120)})` : "";
+	throw new Error(
+		[
+			`not armed: the condition already holds — \`${spec.until}\` exited 0 just now${printed} — so this timer would fire at the next tick instead of waiting.`,
+			"A condition must exit 1 while the thing is still pending and 0 only once it has happened: test the status text (e.g. `… | grep -q DONE`), not just whether a command runs. Conditions run on this machine: check a remote host over ssh.",
+			"If it has already happened, do the work now instead. To arm it anyway, set again with force: true.",
+		].join("\n"),
+	);
+}
+
+function describeExisting(spec: TimerSpec, status: string): string {
+	const schedule = spec.every ? `every ${spec.every}` : spec.until ? (spec.condition ?? "a condition") : "once";
+	return `"${spec.id}" (${status}, ${schedule}: ${spec.reason.replace(/\s+/g, " ").slice(0, 100)})`;
+}
+
+/** A tool `set` of a new id that repeats an existing timer's job is refused unless forced. */
+async function assertNotDuplicate(spec: TimerSpec, ctx: TimerSetContext, root: string, now: number): Promise<void> {
+	if (ctx.by !== "tool" || ctx.force || (await readTimerSpec(spec.id, root))) return;
+	const duplicate = findDuplicateTimer(spec, (await listTimerSpecs(root)).specs);
+	if (!duplicate) return;
+	const row = await loadTimerRow(duplicate, now, root);
+	throw new Error(
+		[
+			`not armed: timer ${describeExisting(duplicate, row.status)} already looks like this job.`,
+			`Use it: \`show\`/\`runs\` with id "${duplicate.id}" to answer questions about it, \`edit\` it to change it, or \`set\` with id "${duplicate.id}" to re-arm or replace it (keeps its history).`,
+			"If this really is a separate job, set again with force: true.",
+		].join("\n"),
+	);
+}
+
+/**
+ * `at` given as a full date that lands about a day after the next occurrence
+ * of the same clock time: the classic after-midnight slip ("04:43 on the 23rd"
+ * typed at 01:30 on the 22nd). Warn with both readings.
+ */
+function dateSlipWarning(text: string | undefined, resolved: number, now: number, tz: string): string | undefined {
+	const match = text && /^(?:at\s+)?\d{4}-\d{2}-\d{2}[ T](\d{1,2}:\d{2})/.exec(text.trim());
+	if (!match) return undefined;
+	const sooner = resolveAt(match[1], now, tz);
+	const gap = resolved - sooner;
+	if (gap < DAY - HOUR || gap > DAY + HOUR) return undefined;
+	return `${formatWallClock(resolved, tz)} is ${formatDuration(resolved - now)} away; the same clock time comes sooner, ${formatWallClock(sooner, tz)} (in ${formatDuration(sooner - now)}). If that is the one meant, edit at to "${match[1]}".`;
 }
 
 /** Bring the timer's pmset wake in line with its spec (removed when `spec` is undefined); returns warnings. */
@@ -385,13 +450,17 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 	};
 	validateSpec(spec, now);
 	await assertAgentProfile(spec);
+	await assertNotDuplicate(spec, ctx, root, now);
 	const gate = ctx.testGate === false ? {} : await testGate(spec);
+	assertGateNotMet(spec, gate, ctx);
 	const { spec: written, previous } = await mutateTimerSpec(id, () => spec, {
 		expectedRev: input.expectedRev,
 		root,
 	});
 	if (!written) throw new Error(`timer ${id} was not written`);
 	const warnings = await syncWake(id, written, { root, now, host: ctx.host });
+	const slip = written.at ? dateSlipWarning(input.at, Date.parse(written.at), now, tz) : undefined;
+	if (slip) warnings.push(slip);
 	return { spec: written, replaced: previous !== undefined, ...gate, warnings };
 }
 
@@ -455,6 +524,7 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 	await assertTimerMutationAllowed(id, "edit", root);
 	let rearmed = false;
 	let gateChanged = false;
+	let gate: Pick<TimerEditResult, "gateNow" | "gateDetail"> = {};
 	const { spec } = await mutateTimerSpec(
 		id,
 		async current => {
@@ -516,16 +586,20 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 			if (rearmed) next.armedAt = new Date(now).toISOString();
 			validateSpec(next, now);
 			if (patch.agent || patch.cwd !== undefined) await assertAgentProfile(next);
+			if (gateChanged && ctx.testGate !== false) {
+				gate = await testGate(next);
+				assertGateNotMet(next, gate, ctx);
+			}
 			return next;
 		},
 		{ expectedRev: patch.expectedRev, root },
 	);
 	if (!spec) throw new Error(`No timer "${id}"`);
-	const gate = gateChanged && ctx.testGate !== false ? await testGate(spec) : {};
 	const warnings = await syncWake(id, spec, { root, now, host: ctx.host });
 	// Wake warnings were already shown at set time; repeat them only when the edit touched the wake.
 	const wakeTouched = patch.at !== undefined || patch.wakeMachine !== undefined;
-	return { spec, rearmed, ...gate, warnings: wakeTouched ? warnings : [] };
+	const slip = patch.at && spec.at ? dateSlipWarning(patch.at, Date.parse(spec.at), now, spec.tz) : undefined;
+	return { spec, rearmed, ...gate, warnings: [...(wakeTouched ? warnings : []), ...(slip ? [slip] : [])] };
 }
 
 export interface TimerRow {

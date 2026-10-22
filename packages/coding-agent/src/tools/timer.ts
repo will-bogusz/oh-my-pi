@@ -34,7 +34,7 @@ const TimerOp = type('"set" | "edit" | "list" | "show" | "runs" | "remove" | "fi
 
 const timerSchema = type({
 	op: TimerOp.describe(
-		"set: create, or replace an existing id (needs reason, one of at/every/when, one of prompt/shell). edit: change only the given fields of an existing id; a new at/every/when replaces its schedule. list/show/runs: inspect. fire: run now. pause/resume/remove: control (need id).",
+		"set: create, or replace an existing id (needs reason, one of at/every/when, one of prompt/shell). edit: change only the given fields of an existing id; a new at/every/when replaces its schedule. list/show/runs: inspect existing timers (what they do, next fire, whether and how they ran). fire: run the action now, skipping schedule and condition (to test a timer; it checks nothing). pause/resume/remove: control (need id).",
 	),
 	"id?": type("string").describe("timer id ([a-z0-9][a-z0-9._-]*); optional for set (derived from reason)"),
 	"reason?": type("string").describe("REQUIRED for set: why this timer exists, in the user's terms"),
@@ -72,6 +72,9 @@ const timerSchema = type({
 	"after?": type("string").describe("fresh/own: shell run after, with OMP_TIMER_RESULT"),
 	"report?": type('"always" | "said" | "failure" | "never"').describe(
 		"fresh/own: which runs report back (default said: not [quiet])",
+	),
+	"force?": type("boolean").describe(
+		"set/edit: arm despite a near-duplicate timer or a condition that already holds; fire: allow firing into this session",
 	),
 });
 
@@ -159,12 +162,13 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 							sessionId,
 							sessionFile: this.session.getSessionFile() ?? undefined,
 							now,
+							force: params.force,
 						},
 					);
 					return await card(result.spec.id, result.replaced ? "re-armed" : "armed", result);
 				}
 				case "edit": {
-					const { op: _op, id: _id, ...fields } = params;
+					const { op: _op, id: _id, force, ...fields } = params;
 					const id = requireId();
 					const result = await editTimer(id, timerEditPatch(fields), {
 						by: "tool",
@@ -172,6 +176,7 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 						sessionId,
 						sessionFile: this.session.getSessionFile() ?? undefined,
 						now,
+						force,
 					});
 					return await card(id, result.rearmed ? "re-armed" : "edited", result);
 				}
@@ -204,7 +209,14 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 					return toolResult<TimerToolDetails>(details).text(`timer ${id} removed (run history kept)`).done();
 				}
 				case "fire": {
-					const line = await fireTimerNow(requireId(), now);
+					const id = requireId();
+					const spec = await requireTimer(id);
+					if (!params.force && spec.target.kind === "session" && spec.target.sessionId === sessionId) {
+						throw new ToolError(
+							`fire would deliver ${id}'s prompt to this same session right now, skipping its schedule and condition: it checks nothing. To see whether the condition holds, run the check yourself; to do the work now, do it directly; otherwise end your turn and the timer wakes you. To fire it anyway (e.g. the user asked to test it), pass force: true.`,
+						);
+					}
+					const line = await fireTimerNow(id, now);
 					return toolResult<TimerToolDetails>(details)
 						.text(
 							`timer ${line.id} ${line.action}${line.runId ? ` (${line.runId})` : ""}${line.detail ? `: ${line.detail}` : ""}`,
