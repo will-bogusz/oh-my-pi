@@ -1162,7 +1162,7 @@
    "needs": [
     "#16233"
    ],
-   "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": null,
    "state": "open",
    "pr": 15282,
@@ -1170,8 +1170,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-19T07:27:20Z",
-   "note": "series 2 (B: draft until Will's presentation review). #15280 -> #15565; #15282 -> #15566, #15584 (children queued)."
+   "updated": "2026-10-22T07:03:53Z",
+   "note": "series 2 (B: draft until Will's presentation review). #15280 -> #15565; #15282 -> #15566, #15584 (children queued).",
+   "advanced": "2026-10-22T07:03:53Z"
   },
   {
    "id": "setvalue-insertion",
