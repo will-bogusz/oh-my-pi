@@ -43855,7 +43855,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/sleep-prevention-doc",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:23:22Z",
-   "updated": "2026-10-22T08:50:22Z",
+   "updated": "2026-10-22T08:50:53Z",
    "note": "",
    "built": [
     {
@@ -44264,7 +44264,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-22T08:50:21Z"
+   "opened": "2026-10-22T08:50:21Z",
+   "readied": "2026-10-22T08:50:53Z"
   },
   {
    "id": "advisor-quota-comment",
