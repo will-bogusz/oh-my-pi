@@ -33549,7 +33549,7 @@
   {
    "id": "ts-rule-followups",
    "branch": "will/ts-rule-followups",
-   "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
+   "title": "fix(coding-agent): keep ts-set-map fast on long Set lines and stop two false reminders",
    "area": "other",
    "priority": "P1",
    "needs": [],
@@ -33561,7 +33561,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ts-rule-followups",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:06:09Z",
-   "updated": "2026-10-22T07:06:30Z",
+   "updated": "2026-10-22T07:36:15Z",
    "note": "",
    "built": [
     {
@@ -33984,7 +33984,7 @@
   {
    "id": "click-place-release",
    "branch": "will/click-place-release",
-   "title": "fix(natives): keep a macOS user's press placed in their app through a release during its hit-test",
+   "title": "fix(natives): keep a macOS drag from the user's app onto the target the user's pick",
    "area": "natives-macos",
    "priority": "P1",
    "needs": [],
@@ -33996,7 +33996,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-10-22T07:19:49Z",
+   "updated": "2026-10-22T07:36:15Z",
    "note": "",
    "built": [
     {
