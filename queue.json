@@ -20513,9 +20513,7 @@
    "title": "fix(computer): wait for the app to finish reacting before the next read or input",
    "area": "computer",
    "priority": "P2",
-   "needs": [
-    "#16403"
-   ],
+   "needs": [],
    "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/computer-ui-quiet.md",
    "state": "queued",
@@ -20524,8 +20522,8 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-19T07:26:45Z",
-   "updated": "2026-10-22T07:33:03Z",
-   "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block)."
+   "updated": "2026-10-22T09:07:40Z",
+   "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block). Real overlap with #16403: both change the apps.open native call in worker.ts (we wrap it in the quiet wait); if #16403 merges first, rebase onto it and wrap its new call (QueueRebase, 2026-10-22)."
   },
   {
    "id": "vscode-mcp-missing",
