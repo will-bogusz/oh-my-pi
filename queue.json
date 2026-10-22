@@ -46095,6 +46095,24 @@
    "added": "2026-10-22T10:06:56Z",
    "updated": "2026-10-22T10:06:56Z",
    "note": ""
+  },
+  {
+   "id": "timer-pr-1-poke",
+   "branch": "will/timer-pr-1-poke",
+   "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "fd440d9a6d6d387b444fcaa242f630fca34b2daa",
+   "body": "bodies/timer-pr-1-poke.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/timer-pr-1-poke",
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T16:10:12Z",
+   "updated": "2026-10-22T16:10:12Z",
+   "note": ""
   }
  ],
  "watch": {
