@@ -46864,6 +46864,26 @@
    "added": "2026-10-22T18:21:31Z",
    "updated": "2026-10-22T18:21:31Z",
    "note": ""
+  },
+  {
+   "id": "timer-pr-6-estate",
+   "branch": "will/timer-pr-6-estate",
+   "title": "feat(coding-agent): list scheduled work omp did not create with omp timer ls --all",
+   "area": "other",
+   "priority": null,
+   "needs": [
+    "timer-pr-2-engine"
+   ],
+   "base": "bf7de20288a598486088d3632cfe1972fd4713f3",
+   "body": "bodies/timer-pr-6-estate.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T18:22:01Z",
+   "updated": "2026-10-22T18:22:01Z",
+   "note": ""
   }
  ],
  "watch": {
