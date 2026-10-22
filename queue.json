@@ -37713,8 +37713,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/compaction-trigger",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:41:41Z",
-   "updated": "2026-10-21T04:10:36Z",
-   "note": "waits for #16587: both edit AgentSession.runIdleCompaction (6892-6910); after it merges, pr-queue advance compaction-trigger rebases onto main",
+   "updated": "2026-10-22T07:13:29Z",
+   "note": "waits for #16587 (head 98ef1f55dc after its 2026-10-22 rebase; still conflicts with it in AgentSession.runIdleCompaction's call, one line: resolve as 'await this.#inLogContext(() => this.#maintenance.runIdleCompaction(thresholdTokens));'). After #16587 merges, pr-queue advance compaction-trigger rebases onto main. Current tip is fork c53837cee6 (goliath worktree); the Mac worktree's branch is still the pre-rebase a0f527a416, so advance from goliath or reset the Mac branch to fork first.",
    "built": [
     {
      "with": "#16231",
