@@ -47924,6 +47924,11 @@
     "sha": "37725af1bcbbb5a8216d8f2b226779cff4f59800",
     "at": "2026-10-22T08:13:11Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "37725af1bcbbb5a8216d8f2b226779cff4f59800",
+    "at": "2026-10-22T08:13:36Z",
+    "host": "goliath"
    }
   }
  }
