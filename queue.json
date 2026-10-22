@@ -46844,7 +46844,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T17:18:04Z",
+  "checked": "2026-10-22T17:48:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -46962,18 +46962,6 @@
    16803
   ],
   "post_merge": {
-   "14235": {
-    "title": "feat(ai): let broker account-pool files act as a provider and API-key allow-list",
-    "merge_commit": "99d883d0c7f39d69b78d8b831c5cf73dbc1b157e",
-    "merged_at": "2026-10-20T17:26:10Z",
-    "findings": []
-   },
-   "14237": {
-    "title": "feat(ai): opt-in account reclaim for accountPolicies",
-    "merge_commit": "266bac13f00ca46fda81d920326d70ffc4c3d3e6",
-    "merged_at": "2026-10-20T17:27:11Z",
-    "findings": []
-   },
    "16217": {
     "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
     "merge_commit": "3024a3711472d6a49dcaad551da33cf2d13cb96b",
@@ -47019,12 +47007,6 @@
      }
     ]
    },
-   "16294": {
-    "title": "fix(browser): tell agents how to skip a configured relay",
-    "merge_commit": "ec76da2efb00f8a559b8e43d991d3cb79a1acd85",
-    "merged_at": "2026-10-20T17:30:24Z",
-    "findings": []
-   },
    "16300": {
     "title": "fix(coding-agent): install with %pip into venvs that have no pip",
     "merge_commit": "0bba68154823781aa16409548fedee335d8aefec",
@@ -47044,24 +47026,6 @@
     "title": "chore(natives): regenerate index.d.ts from the current bindings",
     "merge_commit": "0ab804423b1161d5069ee409d7916c07d2643ad5",
     "merged_at": "2026-10-20T18:11:02Z",
-    "findings": []
-   },
-   "16383": {
-    "title": "fix(edit): refuse stale-tag remaps aimed at the current lines",
-    "merge_commit": "161920c920e7d4d752900bb80f191fde23722d1c",
-    "merged_at": "2026-10-20T17:18:24Z",
-    "findings": []
-   },
-   "16384": {
-    "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests",
-    "merge_commit": "ff4c41c0c532273d19c4f01eac3030e59f2961cb",
-    "merged_at": "2026-10-20T17:28:04Z",
-    "findings": []
-   },
-   "16386": {
-    "title": "fix(utils,natives): keep test runs out of the real ~/.omp/logs",
-    "merge_commit": "229ad8a57a0781fcc72dcd276cff0d6b4faa78a9",
-    "merged_at": "2026-10-20T17:31:31Z",
     "findings": []
    },
    "16389": {
@@ -47094,22 +47058,10 @@
     "merged_at": "2026-10-20T18:06:13Z",
     "findings": []
    },
-   "16418": {
-    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config",
-    "merge_commit": "5ea81098ec02f3080a30a4936969f8969f1cfb84",
-    "merged_at": "2026-10-20T17:19:25Z",
-    "findings": []
-   },
    "16419": {
     "title": "fix(coding-agent): fire ts-no-tiny-functions and ts-promise-with-resolvers only on code they flag",
     "merge_commit": "0b4e8ca82db77a13e6c0820025bd3dce0a887d45",
     "merged_at": "2026-10-20T17:49:25Z",
-    "findings": []
-   },
-   "16420": {
-    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
-    "merge_commit": "6c0f8f0ba9fff1b58585c7ff521e11d8107c3a98",
-    "merged_at": "2026-10-20T17:25:05Z",
     "findings": []
    },
    "16423": {
@@ -47118,40 +47070,16 @@
     "merged_at": "2026-10-20T18:01:14Z",
     "findings": []
    },
-   "16425": {
-    "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag",
-    "merge_commit": "1e97f758b0e79408aeeec47bb72a76dfc430e619",
-    "merged_at": "2026-10-20T17:21:31Z",
-    "findings": []
-   },
    "16428": {
     "title": "fix(pi-builtins): link host paths to the file a backed URL aliases",
     "merge_commit": "7820b7de27ca79e4fb60e487957ee990caa30acb",
     "merged_at": "2026-10-20T17:53:45Z",
     "findings": []
    },
-   "16433": {
-    "title": "fix(pi-builtins): treat entries already gone as removed under rm -f",
-    "merge_commit": "0dcd064d7323e21b725640b0e827f8b4062d2dd0",
-    "merged_at": "2026-10-20T17:45:16Z",
-    "findings": []
-   },
    "16434": {
     "title": "fix(coding-agent): skip a missing .vscode/mcp.json without warning",
     "merge_commit": "78167283488037a5fcc8da08d7939572427b20f5",
     "merged_at": "2026-10-20T17:57:43Z",
-    "findings": []
-   },
-   "16435": {
-    "title": "fix(read): read tail chunks in comma line lists",
-    "merge_commit": "1d3ec67ee36beed3e65383900b27b85ea96a12d0",
-    "merged_at": "2026-10-20T17:23:20Z",
-    "findings": []
-   },
-   "16444": {
-    "title": "feat(read): page SQLite ?q= query rows with limit and offset",
-    "merge_commit": "bdfa4e02f65ebe3b133bba5546a3ff683f939bb0",
-    "merged_at": "2026-10-20T17:24:11Z",
     "findings": []
    },
    "16445": {
