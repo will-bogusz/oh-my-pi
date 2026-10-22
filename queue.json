@@ -45130,7 +45130,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/resume-cancel-bg-jobs",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:36:15Z",
-   "updated": "2026-10-22T08:45:23Z",
+   "updated": "2026-10-22T08:45:59Z",
    "note": "",
    "built": [
     {
@@ -45539,7 +45539,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-22T08:45:22Z"
+   "opened": "2026-10-22T08:45:22Z",
+   "readied": "2026-10-22T08:45:58Z"
   },
   {
    "id": "headless-agent-flags",
