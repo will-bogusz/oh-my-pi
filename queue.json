@@ -46098,42 +46098,72 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T08:06:38Z",
+  "checked": "2026-10-22T10:41:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "resume-cancel-bg-jobs": {
-    "since": "2026-10-22T08:06:38Z",
-    "title": "fix(coding-agent): cancel the outgoing session's background jobs on /resume"
-   },
-   "sleep-prevention-doc": {
-    "since": "2026-10-22T07:36:17Z",
-    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns"
-   },
-   "advisor-quota-comment": {
-    "since": "2026-10-22T07:36:17Z",
-    "title": "docs(coding-agent): say what clears an advisor's quota pause"
-   },
-   "drop-dead-jobs-op": {
-    "since": "2026-10-22T07:36:17Z",
-    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult"
-   },
-   "computer-element-front-first": {
-    "since": "2026-10-22T07:36:17Z",
-    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app"
-   },
-   "headless-agent-flags": {
-    "since": "2026-10-22T08:06:38Z",
-    "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files"
-   },
-   "computer-right-click-per-press": {
-    "since": "2026-10-22T07:36:17Z",
-    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input"
+   "grep-exclude": {
+    "since": "2026-10-22T10:41:01Z",
+    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
    }
   },
-  "conflicts": {},
-  "merged_through": "2026-10-20T18:11:02Z",
-  "unreleased": {},
+  "conflicts": {
+   "#16611": {
+    "since": "2026-10-22T10:41:01Z",
+    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
+    "files": [
+     "packages/ai/src/auth-gateway/server.ts"
+    ]
+   }
+  },
+  "merged_through": "2026-10-22T09:44:50Z",
+  "unreleased": {
+   "16614": {
+    "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer",
+    "merge_commit": "5c95d6f1020108df4ab91323f74323cfc74dba6e",
+    "merged_at": "2026-10-22T09:43:25Z"
+   },
+   "16607": {
+    "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown",
+    "merge_commit": "ce339e5fac92b88a1354a0d26fb31db5e1e808df",
+    "merged_at": "2026-10-22T09:43:25Z"
+   },
+   "16598": {
+    "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd",
+    "merge_commit": "5df69bb4eaeb93233f6632706b9389cacebf7c1c",
+    "merged_at": "2026-10-22T09:43:25Z"
+   },
+   "16594": {
+    "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file",
+    "merge_commit": "44d9bc2cb0adb852cb48b4749307287446543d08",
+    "merged_at": "2026-10-22T09:43:25Z"
+   },
+   "16593": {
+    "title": "fix(coding-agent): retry a refused web read with the next user agent",
+    "merge_commit": "a515bb9bc55d350fcd3e727a6cc6ce8198944a73",
+    "merged_at": "2026-10-22T09:43:25Z"
+   },
+   "16588": {
+    "title": "fix(pi-shell): keep diff hunk lines starting with -- or ++ inside their hunk",
+    "merge_commit": "fc4d54b342267d3e6f3d684d35994f6630e27b6c",
+    "merged_at": "2026-10-22T09:43:25Z"
+   },
+   "16580": {
+    "title": "fix(coding-agent): name the write call when proc:// kill or mode is read",
+    "merge_commit": "9af60c5200fcdda0ef70ffc1569fd4822a0f89c7",
+    "merged_at": "2026-10-22T09:43:25Z"
+   },
+   "16578": {
+    "title": "fix(coding-agent): tell Python-only eval sessions to await tool calls",
+    "merge_commit": "743d6b67ed15dc987d39d6de4997fe45d46812a1",
+    "merged_at": "2026-10-22T09:43:25Z"
+   },
+   "16760": {
+    "title": "fix(coding-agent): cancel the outgoing session's background jobs on /resume",
+    "merge_commit": "fd440d9a6d6d387b444fcaa242f630fca34b2daa",
+    "merged_at": "2026-10-22T09:44:50Z"
+   }
+  },
   "ready": [
    15105,
    15124,
@@ -46161,29 +46191,27 @@
    16564,
    16575,
    16576,
-   16578,
    16579,
-   16580,
    16581,
    16583,
    16585,
    16586,
    16587,
-   16588,
    16589,
-   16593,
-   16594,
    16595,
    16596,
    16597,
-   16598,
    16599,
-   16607,
    16608,
    16611,
    16612,
-   16614,
-   16756
+   16756,
+   16762,
+   16763,
+   16766,
+   16768,
+   16769,
+   16770
   ],
   "post_merge": {
    "13677": {
@@ -46508,6 +46536,60 @@
     "title": "feat(coding-agent): let wait block for the reply to a message the agent sent",
     "merge_commit": "1ea8ad1efab5ed5865057ca1a87f7a08b1e328ea",
     "merged_at": "2026-10-20T17:50:28Z",
+    "findings": []
+   },
+   "16578": {
+    "title": "fix(coding-agent): tell Python-only eval sessions to await tool calls",
+    "merge_commit": "743d6b67ed15dc987d39d6de4997fe45d46812a1",
+    "merged_at": "2026-10-22T09:43:25Z",
+    "findings": []
+   },
+   "16580": {
+    "title": "fix(coding-agent): name the write call when proc:// kill or mode is read",
+    "merge_commit": "9af60c5200fcdda0ef70ffc1569fd4822a0f89c7",
+    "merged_at": "2026-10-22T09:43:25Z",
+    "findings": []
+   },
+   "16588": {
+    "title": "fix(pi-shell): keep diff hunk lines starting with -- or ++ inside their hunk",
+    "merge_commit": "fc4d54b342267d3e6f3d684d35994f6630e27b6c",
+    "merged_at": "2026-10-22T09:43:25Z",
+    "findings": []
+   },
+   "16593": {
+    "title": "fix(coding-agent): retry a refused web read with the next user agent",
+    "merge_commit": "a515bb9bc55d350fcd3e727a6cc6ce8198944a73",
+    "merged_at": "2026-10-22T09:43:25Z",
+    "findings": []
+   },
+   "16594": {
+    "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file",
+    "merge_commit": "44d9bc2cb0adb852cb48b4749307287446543d08",
+    "merged_at": "2026-10-22T09:43:25Z",
+    "findings": []
+   },
+   "16598": {
+    "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd",
+    "merge_commit": "5df69bb4eaeb93233f6632706b9389cacebf7c1c",
+    "merged_at": "2026-10-22T09:43:25Z",
+    "findings": []
+   },
+   "16607": {
+    "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown",
+    "merge_commit": "ce339e5fac92b88a1354a0d26fb31db5e1e808df",
+    "merged_at": "2026-10-22T09:43:25Z",
+    "findings": []
+   },
+   "16614": {
+    "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer",
+    "merge_commit": "5c95d6f1020108df4ab91323f74323cfc74dba6e",
+    "merged_at": "2026-10-22T09:43:25Z",
+    "findings": []
+   },
+   "16760": {
+    "title": "fix(coding-agent): cancel the outgoing session's background jobs on /resume",
+    "merge_commit": "fd440d9a6d6d387b444fcaa242f630fca34b2daa",
+    "merged_at": "2026-10-22T09:44:50Z",
     "findings": []
    }
   },
@@ -50195,6 +50277,142 @@
     "id": "r2/webmcp-native",
     "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
     "why": "opened as #16756"
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "merged",
+    "number": 16614,
+    "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "merged",
+    "number": 16607,
+    "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "merged",
+    "number": 16598,
+    "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "merged",
+    "number": 16594,
+    "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "merged",
+    "number": 16593,
+    "title": "fix(coding-agent): retry a refused web read with the next user agent",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "merged",
+    "number": 16588,
+    "title": "fix(pi-shell): keep diff hunk lines starting with -- or ++ inside their hunk",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "merged",
+    "number": 16580,
+    "title": "fix(coding-agent): name the write call when proc:// kill or mode is read",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "merged",
+    "number": 16578,
+    "title": "fix(coding-agent): tell Python-only eval sessions to await tool calls",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "merged",
+    "number": 16760,
+    "title": "fix(coding-agent): cancel the outgoing session's background jobs on /resume",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "openable",
+    "id": "grep-exclude",
+    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "unopenable",
+    "id": "resume-cancel-bg-jobs",
+    "title": "fix(coding-agent): cancel the outgoing session's background jobs on /resume",
+    "why": "merged"
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "unopenable",
+    "id": "sleep-prevention-doc",
+    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns",
+    "why": "opened as #16762"
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "unopenable",
+    "id": "advisor-quota-comment",
+    "title": "docs(coding-agent): say what clears an advisor's quota pause",
+    "why": "opened as #16766"
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "unopenable",
+    "id": "drop-dead-jobs-op",
+    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult",
+    "why": "opened as #16763"
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "unopenable",
+    "id": "computer-element-front-first",
+    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app",
+    "why": "opened as #16769"
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "unopenable",
+    "id": "headless-agent-flags",
+    "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files",
+    "why": "opened as #16768"
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "unopenable",
+    "id": "computer-right-click-per-press",
+    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input",
+    "why": "opened as #16770"
+   },
+   {
+    "at": "2026-10-22T10:41:01Z",
+    "kind": "conflict",
+    "label": "#16611",
+    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
+    "files": [
+     "packages/ai/src/auth-gateway/server.ts"
+    ]
    }
   ]
  },
