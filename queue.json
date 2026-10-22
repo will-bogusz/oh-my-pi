@@ -32482,7 +32482,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "d24971e3fc35fbe69f451c6a8a20cfe7f540a66f",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/computer-shell-exception.md",
    "state": "open",
    "pr": 16403,
@@ -32490,7 +32490,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-shell-exception",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:50:15Z",
-   "updated": "2026-10-20T20:26:26Z",
+   "updated": "2026-10-22T07:10:01Z",
    "note": "",
    "built": [
     {
@@ -33063,7 +33063,7 @@
      "tree": "62eb15b02bdfeec59dd3647dfa6e1ceea7a3c07c"
     }
    ],
-   "advanced": "2026-10-20T20:26:26Z",
+   "advanced": "2026-10-22T07:10:01Z",
    "opened": "2026-10-19T23:53:07Z",
    "readied": "2026-10-19T23:53:30Z"
   },
