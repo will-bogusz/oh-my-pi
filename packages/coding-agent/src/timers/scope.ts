@@ -51,7 +51,7 @@ export async function assertTimerMutationAllowed(
 	if (own?.allowTimers) return;
 	const subject = `timer ${run.timerId} (${TIMER_RUN_ENV}=${run.runId})`;
 	const what = targetId ? `timer ${targetId}` : "a new timer";
-	const hint = `To let its runs manage other timers, set or edit ${run.timerId} with --allow-timers.`;
+	const hint = `To let its runs manage other timers, set ${run.timerId} with allowTimers: true (timer tool), or set or edit it with --allow-timers (omp timer).`;
 	const wakes = own ? wokenSession(own.target) : undefined;
 	if (wakes === undefined) {
 		throw new TimerScopeError(

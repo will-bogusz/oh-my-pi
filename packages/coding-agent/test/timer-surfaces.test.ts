@@ -12,9 +12,9 @@ import type { TimerSpec } from "@oh-my-pi/pi-coding-agent/timers/types";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 import { requiresApproval, resolveApproval, resolveToolTier } from "@oh-my-pi/pi-coding-agent/tools/approval";
 import {
+	timerArgsTier,
 	timerCardView,
 	timerEditPatch,
-	timerEditTier,
 	timerIdTier,
 	timerPillText,
 } from "@oh-my-pi/pi-coding-agent/tools/timer-view";
@@ -54,6 +54,14 @@ function sessionNamed(id: string): AgentSession {
 }
 
 describe("timer approval tiers", () => {
+	it("tiers a request by what it would run and whose session it wakes", () => {
+		expect(timerArgsTier({ op: "list" }, "sess-a")).toBe("read");
+		expect(timerArgsTier({ op: "set" }, "sess-a")).toBe("write");
+		expect(timerArgsTier({ op: "set", session: "sess-a" }, "sess-a")).toBe("write");
+		expect(timerArgsTier({ op: "set", shell: "make" }, "sess-a")).toBe("exec");
+		expect(timerArgsTier({ op: "set", session: "sess-b" }, "sess-a")).toBe("exec");
+	});
+
 	it("controlling a stored timer is write only for the session it wakes", async () => {
 		await store("wake-a", { prompt: "check in" });
 		await store("prune", { shell: "true" });
@@ -62,13 +70,20 @@ describe("timer approval tiers", () => {
 		expect(timerIdTier("prune", "sess-a")).toBe("exec");
 		// An unknown id fails on its own; nothing runs.
 		expect(timerIdTier("nope", "sess-a")).toBe("write");
+		expect(timerArgsTier({ op: "fire", id: "wake-a" }, "sess-a")).toBe("write");
+		expect(timerArgsTier({ op: "remove", id: "wake-a" }, "sess-b")).toBe("exec");
+		// Re-arming another session's timer as a wake of your own is not cheaper than controlling it.
+		expect(timerArgsTier({ op: "set", id: "wake-a" }, "sess-b")).toBe("exec");
+		expect(timerArgsTier({ op: "pause", id: "prune" }, "sess-a")).toBe("exec");
+		// Inspecting stays read whatever the timer runs.
+		expect(timerArgsTier({ op: "show", id: "prune" }, "sess-b")).toBe("read");
 	});
 
 	it("an edit that sets a shell command is exec even on the caller's own wake", async () => {
 		await store("wake-a", { prompt: "check in" });
-		expect(timerEditTier("wake-a", { at: "in 3h" }, "sess-a")).toBe("write");
-		expect(timerEditTier("wake-a", { shell: "make" }, "sess-a")).toBe("exec");
-		expect(timerEditTier("wake-a", { at: "in 3h" }, "sess-b")).toBe("exec");
+		expect(timerArgsTier({ op: "edit", id: "wake-a" }, "sess-a")).toBe("write");
+		expect(timerArgsTier({ op: "edit", id: "wake-a", shell: "make" }, "sess-a")).toBe("exec");
+		expect(timerArgsTier({ op: "edit", id: "wake-a" }, "sess-b")).toBe("exec");
 	});
 });
 

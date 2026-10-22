@@ -9,6 +9,7 @@ import {
 	type TimerCardView,
 	type TimerListRowView,
 	timerCardComponent,
+	timerToolRenderer,
 } from "../src/tools/timer";
 import { visibleWidth } from "../src/utils";
 import { withoutTerminalMultiplexer } from "./helpers/terminal-multiplexer";
@@ -211,5 +212,58 @@ describe("timers sheet in the terminal", () => {
 		for (const width of [1, 2, 3, 4, 8]) {
 			for (const line of sheet.render(width)) expect(visibleWidth(line)).toBeLessThanOrEqual(width);
 		}
+	});
+});
+
+describe("timer tool renderer", () => {
+	it("previews a streaming set call from partial args: op, id, schedule, and the prompt", () => {
+		const text = timerToolRenderer
+			.renderCall(
+				{ op: "set", id: "babysit", every: "30m", prompt: "check\tthe build" },
+				{ expanded: false, isPartial: true },
+				uiTheme,
+			)
+			.render(100)
+			.join("\n")
+			.replace(ANSI, "");
+		expect(text).toContain("set babysit");
+		expect(text).toContain("every 30m");
+		expect(text).toContain('"check the build"');
+		const partial = timerToolRenderer
+			.renderCall({ op: "set" }, { expanded: false, isPartial: true }, uiTheme)
+			.render(100)
+			.join("\n")
+			.replace(ANSI, "");
+		expect(partial).toContain("Timer");
+		expect(partial).toContain("set");
+	});
+
+	it("draws the stored card, a listing, or the error a call ended with", () => {
+		const render = (result: Parameters<typeof timerToolRenderer.renderResult>[0]) =>
+			timerToolRenderer
+				.renderResult(result, { expanded: false, isPartial: false }, uiTheme)
+				.render(100)
+				.join("\n")
+				.replace(ANSI, "");
+		const armed = render({ content: [{ type: "text", text: "card" }], details: { op: "set", card: card() } });
+		expect(armed).toContain("armed finish-pull");
+		expect(armed).toContain('wake this session → "Resume the pull"');
+		expect(armed).toContain("/timer rm finish-pull");
+		const rows: TimerListRowView[] = [
+			{ id: "nightly", status: "armed", next: "02:00 (in 3h)", last: "fired", reason: "nightly digest" },
+		];
+		const listing = render({
+			content: [{ type: "text", text: "table" }],
+			details: { op: "list", rows, ticker: "last tick 4s ago" },
+		});
+		expect(listing).toContain("1 timer");
+		expect(listing).toContain("nightly");
+		expect(listing).toContain("last tick 4s ago");
+		const refused = render({
+			content: [{ type: "text", text: 'not armed: timer "nightly" already looks like this job.' }],
+			details: { op: "set" },
+			isError: true,
+		});
+		expect(refused).toContain("already looks like this job");
 	});
 });

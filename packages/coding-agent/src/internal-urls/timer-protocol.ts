@@ -26,7 +26,7 @@ import {
 	timerRuns,
 } from "../timers";
 import { cfgTimerEnabled } from "../tools/settings";
-import { type TimerEditFields, timerEditPatch, timerEditTier, timerIdTier } from "../tools/timer-view";
+import { type TimerEditFields, timerArgsTier, timerEditPatch, timerIdTier } from "../tools/timer-view";
 import type {
 	InternalResource,
 	InternalUrl,
@@ -139,7 +139,7 @@ export class TimerProtocolHandler implements ProtocolHandler {
 				const sessionId = session?.getSessionId?.() ?? undefined;
 				const path = url.rawPathname ?? url.pathname;
 				if (!/^\/edit\/?$/.test(path)) return timerIdTier(url.rawHost, sessionId);
-				return timerEditTier(url.rawHost, editTierFields(content ?? ""), sessionId);
+				return timerArgsTier({ ...editTierFields(content ?? ""), op: "edit", id: url.rawHost }, sessionId);
 			},
 			contentOptional: () => true,
 		},

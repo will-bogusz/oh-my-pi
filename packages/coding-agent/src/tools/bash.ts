@@ -63,6 +63,7 @@ import {
 	cfgGlobEnabled,
 	cfgGrepEnabled,
 	cfgLaunchEnabled,
+	cfgTimerEnabled,
 	cfgToolsMaxTimeout,
 } from "./settings";
 import {
@@ -628,6 +629,11 @@ export class BashTool implements AgentTool<BashToolSchema, BashToolDetails> {
 			hasLaunch: this.#launchEnabled,
 			hasEval: isToolActive("eval", evalBackends.python || evalBackends.js),
 			hasShellBuiltins: !shellBuiltinsDisabled(this.session.settings),
+			// The timer tool exists only in root sessions with `timer.enabled` (`TimerTool.createIf` and the tool plan).
+			hasTimer: isToolActive(
+				"timer",
+				(this.session.taskDepth ?? 0) === 0 && cfgTimerEnabled.get(this.session.settings),
+			),
 			isWindows: process.platform === "win32",
 		});
 	}

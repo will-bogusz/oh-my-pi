@@ -9,6 +9,11 @@ export const TIMER_RUN_ENV = "OMP_TIMER_RUN";
 
 export const TIMER_ID_PATTERN = /^[a-z0-9][a-z0-9._-]{0,47}$/;
 
+/** A requested timer id as every reader takes it (approval, set, control): trimmed, blank as absent. */
+export function normalizeTimerId(id: string | undefined): string | undefined {
+	return id?.trim() || undefined;
+}
+
 export function timersRoot(): string {
 	return $env[TIMERS_DIR_ENV] || path.join(getAgentDir(), "timers");
 }

@@ -583,7 +583,7 @@ export const cfgTimerEnabled = register({
 		group: "Available Tools",
 		label: "Timers",
 		description:
-			"Allow timer:// control writes (fire, edit, pause, resume, remove) from this session; /timer and omp timer stay available",
+			"Enable the timer tool and timer:// control writes: wake this session later or on a schedule (/timer and omp timer stay available)",
 	},
 });
 

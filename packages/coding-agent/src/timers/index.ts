@@ -1,3 +1,4 @@
+export * from "./confirm";
 export * from "./install";
 export * from "./notify";
 export * from "./paths";
@@ -8,6 +9,7 @@ export * from "./runner";
 export * from "./schedule";
 export * from "./scope";
 export * from "./service";
+export * from "./snapshot";
 export * from "./store";
 export * from "./tick";
 export * from "./types";

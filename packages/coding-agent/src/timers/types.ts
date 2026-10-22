@@ -28,7 +28,7 @@ export type TimerOverlap = "skip" | "queue";
 export interface TimerProvenance {
 	/** ISO time the timer was first set. */
 	at: string;
-	by: "cli";
+	by: "tool" | "cli";
 	host: string;
 	cwd: string;
 	/** The session that set it from inside omp (`/timer`); its timers pill counts it. */

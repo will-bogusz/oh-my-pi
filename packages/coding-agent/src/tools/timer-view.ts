@@ -1,6 +1,6 @@
 /**
- * What every timer surface (`/timer`, `/timers`, `timer://`, the timers pill)
- * shows about a stored timer, and the approval tier an action on it needs.
+ * What every timer surface (tool card, `/timer`, `/timers`, `timer://`, the
+ * timers pill) shows about a stored timer, and the approval tier an action on it needs.
  * Views are built from the stored record, never from the request.
  */
 import * as fs from "node:fs";
@@ -9,10 +9,12 @@ import type { TimerCardView, TimerListRowView } from "@oh-my-pi/pi-tui/tools/tim
 import { isEnoent, logger } from "@oh-my-pi/pi-utils";
 import { formatWallClock } from "../mailbox/message";
 import {
+	CALLER_SESSION_NAMES,
 	describeCadence,
 	describeNext,
 	describeRun,
 	describeTicker,
+	normalizeTimerId,
 	parseTimerSpec,
 	renderRuns,
 	requireTimer,
@@ -109,7 +111,8 @@ export function timerSpecTier(spec: TimerSpec, sessionId: string | undefined): T
  * An id with no spec is `write` (the action fails on its own); a spec that
  * exists but cannot be read is `exec`, since its target is unknown.
  */
-export function timerIdTier(id: string | undefined, sessionId: string | undefined): ToolTier {
+export function timerIdTier(requested: string | undefined, sessionId: string | undefined): ToolTier {
+	const id = normalizeTimerId(requested);
 	if (!id || !TIMER_ID_PATTERN.test(id)) return "write";
 	const file = specPath(id);
 	try {
@@ -121,16 +124,31 @@ export function timerIdTier(id: string | undefined, sessionId: string | undefine
 	}
 }
 
+/** The fields of a timer request that decide its approval tier. */
+export interface TimerTierArgs {
+	op?: string;
+	id?: string;
+	shell?: string;
+	session?: string;
+	allowTimers?: boolean;
+}
+
 /**
- * Tier for editing the timer `id` from `sessionId`: the timer's own tier,
- * raised to `exec` when the edit sets a shell command.
+ * Approval tier for a timer request (a `timer` tool call, a `timer://<id>/edit`
+ * write) from `sessionId`: inspecting is `read`; arming, editing or
+ * controlling a wake of the calling session is `write`; a shell command,
+ * another session or `allowTimers` is `exec`. `set` and `edit` on an existing
+ * id also take that timer's tier, so re-arming someone else's timer is never
+ * cheaper than controlling it.
  */
-export function timerEditTier(
-	id: string | undefined,
-	fields: TimerEditFields,
-	sessionId: string | undefined,
-): ToolTier {
-	return fields.shell || timerIdTier(id, sessionId) === "exec" ? "exec" : "write";
+export function timerArgsTier(args: TimerTierArgs, sessionId: string | undefined): ToolTier {
+	if (args.op === "list" || args.op === "show" || args.op === "runs") return "read";
+	if (timerIdTier(args.id, sessionId) === "exec") return "exec";
+	if (args.op !== "set" && args.op !== "edit") return "write";
+	const session = args.session?.trim();
+	const foreign =
+		session !== undefined && session !== "" && session !== sessionId && !Object.hasOwn(CALLER_SESSION_NAMES, session);
+	return args.shell || args.allowTimers || foreign ? "exec" : "write";
 }
 
 /** JSON-shaped fields of an edit (`timer://<id>/edit` content). */

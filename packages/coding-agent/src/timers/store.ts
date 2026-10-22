@@ -125,7 +125,7 @@ export function parseTimerSpec(id: string, content: string, filePath: string): T
 		resumedAt: str(fm.resumed_at),
 		created: {
 			at: createdAt,
-			by: "cli",
+			by: created.by === "tool" ? "tool" : "cli",
 			host: str(created.host) ?? "",
 			cwd: str(created.cwd) ?? "",
 			session: str(created.session),

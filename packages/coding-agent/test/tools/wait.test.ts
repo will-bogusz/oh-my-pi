@@ -34,6 +34,27 @@ describe("wait", () => {
 		IrcBus.resetGlobalForTests();
 	});
 
+	test("at its cap, points a wait at the timer tool only when the session has it", async () => {
+		// The cap is a 30-minute timer; run it at once.
+		const realSetTimeout = globalThis.setTimeout;
+		vi.spyOn(globalThis, "setTimeout").mockImplementation(((fn: () => void, ms?: number) =>
+			realSetTimeout(fn, ms === 30 * 60_000 ? 1 : ms)) as typeof setTimeout);
+		const capped = async (timerActive: boolean): Promise<string> => {
+			const manager = new AsyncJobManager({ onJobComplete: () => {} });
+			const build = Promise.withResolvers<string>();
+			manager.register("bash", "build", async () => build.promise, { ownerId: "Main" });
+			const tool = new WaitTool({
+				...session(manager),
+				isToolActive: (name: string) => name === "timer" && timerActive,
+			});
+			const result = await tool.execute("wait-cap", {});
+			build.resolve("done");
+			return result.content.map(part => (part.type === "text" ? part.text : "")).join("\n");
+		};
+		expect(await capped(true)).toContain("To wait longer, set a `timer`");
+		expect(await capped(false)).not.toContain("timer");
+	});
+
 	test("a settling job is recovered once, suppressing its async duplicate", async () => {
 		const manager = new AsyncJobManager({ onJobComplete: () => {} });
 		const { promise, resolve } = Promise.withResolvers<string>();
@@ -324,6 +345,25 @@ describe("wait", () => {
 			const [first] = result.content;
 			return first?.type === "text" ? (first.text ?? "") : "";
 		};
+
+		test("at its cap with no reply, points at the timer tool only when the session has it", async () => {
+			registerParentAndChild();
+			await ask();
+			const realSetTimeout = globalThis.setTimeout;
+			vi.spyOn(globalThis, "setTimeout").mockImplementation(((fn: () => void, ms?: number) =>
+				realSetTimeout(fn, ms === 30 * 60_000 ? 1 : ms)) as typeof setTimeout);
+			const capped = (timerActive: boolean) =>
+				idleText(
+					new WaitTool({
+						...session(new AsyncJobManager({}), "Child"),
+						isToolActive: (name: string) => name === "timer" && timerActive,
+					}).execute("child-wait", {}),
+				);
+			const withTimer = await capped(true);
+			expect(withTimer).toContain("Wait limit reached with no reply.");
+			expect(withTimer).toContain("To wait longer, set a `timer`");
+			expect(await capped(false)).toBe("Wait limit reached with no reply. Ask again, or finish without the answer.");
+		});
 
 		test("blocks for the answer to a question the caller asked", async () => {
 			registerParentAndChild();

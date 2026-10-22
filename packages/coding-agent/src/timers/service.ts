@@ -1,6 +1,6 @@
 /**
- * Shared verbs behind `omp timer`: set, edit, list, show, runs, logs,
- * pause/resume, remove. Mutations change spec files only, through the
+ * Shared verbs behind the `timer` tool and `omp timer`: set, edit, list, show,
+ * runs, logs, pause/resume, remove. Mutations change spec files only, through the
  * rev-checked {@link mutateTimerSpec}; execution state stays with the tick and
  * the runner.
  */
@@ -10,7 +10,9 @@ import * as path from "node:path";
 import { isEnoent } from "@oh-my-pi/pi-utils";
 import { formatWallClock } from "../mailbox/message";
 import { readSessionInfo, resolveResumableSession } from "../session/session-listing";
-import { runLogPath, TIMER_ID_PATTERN, timersRoot } from "./paths";
+import { CONFIRM_WINDOW_MS, recordRefusal, refusalKey, takeConfirmation } from "./confirm";
+import { findDuplicateTimer } from "./duplicates";
+import { normalizeTimerId, runLogPath, TIMER_ID_PATTERN, TIMER_RUN_ENV, timersRoot } from "./paths";
 import {
 	assertTimeZone,
 	DAY,
@@ -38,6 +40,9 @@ import {
 } from "./store";
 import { currentState } from "./tick";
 import type { TimerCatchup, TimerOverlap, TimerSpec, TimerState, TimerTarget } from "./types";
+
+/** Agent-set recurring session wakes retire after this unless `expires` says otherwise. */
+const TOOL_RECURRING_EXPIRY_MS = 7 * DAY;
 
 export interface TimerSetInput {
 	id?: string;
@@ -67,10 +72,14 @@ export interface TimerSetInput {
 }
 
 export interface TimerSetContext {
+	/** Who sets it (default `cli`): `tool` callers get default expiries and duplicate refusals. */
+	by?: "tool" | "cli";
 	cwd: string;
 	/** The session setting the timer from inside omp: a prompt timer with no session wakes it. */
 	sessionId?: string;
 	sessionFile?: string;
+	/** The timer run (`<id>#<seq>`) the caller's turn answers; default the process's `OMP_TIMER_RUN`. */
+	timerRun?: string;
 	now?: number;
 	root?: string;
 }
@@ -100,11 +109,21 @@ async function freeDerivedId(base: string, root: string): Promise<string> {
 	throw new Error(`Cannot derive a free timer id from "${base}"; pass id`);
 }
 
+/** Names for the calling session that `session` takes instead of an id. */
+export const CALLER_SESSION_NAMES: Record<string, true> = { origin: true, this: true, current: true };
+
 /** The session a prompt timer wakes: an id, id prefix or session file; by default the calling session. */
 async function resolveTarget(session: string | undefined, ctx: TimerSetContext): Promise<TimerTarget> {
 	const requested = session?.trim() || ctx.sessionId;
 	if (!requested) throw new Error("a prompt timer wakes a session: pass --session (an id, prefix or session file)");
-	if (requested === ctx.sessionId) return { kind: "session", sessionId: requested, sessionFile: ctx.sessionFile };
+	if (requested === ctx.sessionId || Object.hasOwn(CALLER_SESSION_NAMES, requested)) {
+		if (!ctx.sessionId) {
+			throw new Error(
+				`session "${requested}" names the calling session, and there is none here; pass a session id, prefix or session file`,
+			);
+		}
+		return { kind: "session", sessionId: ctx.sessionId, sessionFile: ctx.sessionFile };
+	}
 	if (requested.endsWith(".jsonl") || requested.includes(path.sep)) {
 		const info = await readSessionInfo(path.resolve(ctx.cwd, requested));
 		if (!info) throw new Error(`No session file at "${requested}"`);
@@ -188,6 +207,23 @@ function dateSlipWarning(text: string | undefined, resolved: number, now: number
 	return `${formatWallClock(resolved, tz)} is ${formatDuration(resolved - now)} away; the same clock time comes sooner, ${formatWallClock(sooner, tz)} (in ${formatDuration(sooner - now)}). If that is the one meant, edit at to "${match[1]}".`;
 }
 
+/** How a refusal tells the agent to override it (see `confirm.ts`). */
+const REPEAT_TO_CONFIRM = `send this same call again within ${formatDuration(CONFIRM_WINDOW_MS)}`;
+
+/** A `set` of a new id that repeats an existing timer's job. */
+async function duplicateRefusal(spec: TimerSpec, root: string, now: number): Promise<string | undefined> {
+	if (await readTimerSpec(spec.id, root)) return undefined;
+	const duplicate = findDuplicateTimer(spec, (await listTimerSpecs(root)).specs);
+	if (!duplicate) return undefined;
+	const { status } = await loadTimerRow(duplicate, now, root);
+	const schedule = duplicate.every ? `every ${duplicate.every}` : "once";
+	return [
+		`not armed: timer "${duplicate.id}" (${status}, ${schedule}: ${duplicate.reason.replace(/\s+/g, " ").slice(0, 100)}) already looks like this job.`,
+		`Use it: \`show\`/\`runs\` with id "${duplicate.id}" to answer questions about it, \`edit\` it to change it, or \`set\` with id "${duplicate.id}" to re-arm or replace it (keeps its history).`,
+		`If this really is a separate job, ${REPEAT_TO_CONFIRM}.`,
+	].join("\n");
+}
+
 /** Validate everything up front: a timer that would fail at its first fire is rejected here. */
 export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Promise<TimerSetResult> {
 	const now = ctx.now ?? Date.now();
@@ -200,26 +236,34 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 	const cwd = path.resolve(ctx.cwd, input.cwd ?? ".");
 	await assertDirectory(cwd);
 
-	let id = input.id?.trim();
+	let id = normalizeTimerId(input.id);
 	if (id && !TIMER_ID_PATTERN.test(id)) throw new Error(`Invalid id "${id}": use [a-z0-9][a-z0-9._-]{0,47}`);
 	const target: TimerTarget = shell ? { kind: "fresh" } : await resolveTarget(input.session, ctx);
-	await assertTimerMutationAllowed(id, "set", root, { target });
+	await assertTimerMutationAllowed(id, "set", root, {
+		env: ctx.timerRun ? { [TIMER_RUN_ENV]: ctx.timerRun } : undefined,
+		target,
+	});
 	id ??= await freeDerivedId(deriveId(input.reason ?? ""), root);
 
 	const nowIso = new Date(now).toISOString();
+	const every = input.every ? normalizeEvery(input.every) : undefined;
 	const spec: TimerSpec = {
 		id,
 		rev: 0,
 		title: input.title?.trim() || undefined,
 		reason: input.reason?.trim() ?? "",
 		at: input.at ? new Date(resolveAt(input.at, now, tz)).toISOString() : undefined,
-		every: input.every ? normalizeEvery(input.every) : undefined,
+		every,
 		tz,
 		target,
 		whenClosed: input.whenClosed ?? "resume",
 		action: shell ? { kind: "shell", command: shell } : { kind: "prompt", prompt: prompt ?? "" },
 		cwd,
-		expiresAt: resolveExpiry(input.expires, now, tz),
+		expiresAt: input.expires?.trim()
+			? resolveExpiry(input.expires, now, tz)
+			: ctx.by === "tool" && every !== undefined && target.kind === "session"
+				? new Date(now + TOOL_RECURRING_EXPIRY_MS).toISOString()
+				: undefined,
 		maxRuns: input.maxRuns,
 		overlap: input.overlap ?? "skip",
 		graceMs: input.grace ? parseDuration(input.grace) : undefined,
@@ -230,16 +274,27 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		armedAt: nowIso,
 		created: {
 			at: nowIso,
-			by: "cli",
+			by: ctx.by ?? "cli",
 			host: os.hostname(),
 			cwd: ctx.cwd,
 			session: ctx.sessionId,
 			sessionFile: ctx.sessionFile,
 			whenText: [input.at && `at ${input.at}`, input.every && `every ${input.every}`].filter(Boolean).join(", "),
-			run: currentTimerRun()?.runId,
+			run: ctx.timerRun ?? currentTimerRun()?.runId,
 		},
 	};
 	validateSpec(spec, now);
+	// Tool callers are refused a near-duplicate unless they repeat the call.
+	if (ctx.by === "tool") {
+		const key = refusalKey("set", ctx.sessionId, input);
+		if (!(await takeConfirmation(key, root, now))) {
+			const refusal = await duplicateRefusal(spec, root, now);
+			if (refusal) {
+				await recordRefusal(key, root, now);
+				throw new Error(refusal);
+			}
+		}
+	}
 	const { spec: written, previous } = await mutateTimerSpec(id, () => spec, {
 		expectedRev: input.expectedRev,
 		root,
@@ -287,6 +342,7 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 	const root = ctx.root ?? timersRoot();
 	// A shell command replaces the session target (below).
 	await assertTimerMutationAllowed(id, "edit", root, {
+		env: ctx.timerRun ? { [TIMER_RUN_ENV]: ctx.timerRun } : undefined,
 		target: patch.shell !== undefined ? { kind: "fresh" } : undefined,
 	});
 	let rearmed = false;

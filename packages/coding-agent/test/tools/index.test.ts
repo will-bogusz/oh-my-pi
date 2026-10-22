@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
+import { TIMERS_DIR_ENV } from "@oh-my-pi/pi-coding-agent/timers/paths";
 import { createTools, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+import { TempDir } from "@oh-my-pi/pi-utils";
 
 Bun.env.PI_PYTHON_SKIP_CHECK = "1";
 
@@ -66,6 +68,32 @@ describe("createTools", () => {
 		expect(names).toContain("web_search");
 		expect(names).not.toContain("fetch");
 		expect(names).not.toContain("vim");
+	});
+
+	it("gives only a root session with timer.enabled the timer tool and the bash/wait pointers to it", async () => {
+		using timers = TempDir.createSync("@omp-tools-timer-");
+		const previous = Bun.env[TIMERS_DIR_ENV];
+		Bun.env[TIMERS_DIR_ENV] = timers.path();
+		try {
+			const plan = async (overrides: Partial<ToolSession>) => {
+				const tools = await createTools(
+					createTestSession({ settings: createSettingsWithOverrides(), ...overrides }),
+				);
+				const text = (name: string) => tools.find(tool => tool.name === name)?.description ?? "";
+				return {
+					timer: tools.some(tool => tool.name === "timer"),
+					bash: text("bash").includes("→ `timer`"),
+					wait: text("wait").includes("Set a `timer`"),
+				};
+			};
+			expect(await plan({})).toEqual({ timer: true, bash: true, wait: true });
+			expect(await plan({ taskDepth: 1 })).toEqual({ timer: false, bash: false, wait: false });
+			const off = createSettingsWithOverrides({ "timer.enabled": false });
+			expect(await plan({ settings: off })).toEqual({ timer: false, bash: false, wait: false });
+		} finally {
+			if (previous === undefined) delete Bun.env[TIMERS_DIR_ENV];
+			else Bun.env[TIMERS_DIR_ENV] = previous;
+		}
 	});
 
 	it("normalizes legacy explicit tool names", async () => {
