@@ -37706,7 +37706,7 @@
    "needs": [
     "#16587"
    ],
-   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
+   "base": "98ef1f55dc5ff955be5832b8c34be7f000cb13fa",
    "body": "bodies/compaction-trigger.md",
    "state": "queued",
    "pr": null,
@@ -37714,8 +37714,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/compaction-trigger",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:41:41Z",
-   "updated": "2026-10-22T07:13:29Z",
-   "note": "waits for #16587 (head 98ef1f55dc after its 2026-10-22 rebase; still conflicts with it in AgentSession.runIdleCompaction's call, one line: resolve as 'await this.#inLogContext(() => this.#maintenance.runIdleCompaction(thresholdTokens));'). After #16587 merges, pr-queue advance compaction-trigger rebases onto main. Current tip is fork c53837cee6 (goliath worktree); the Mac worktree's branch is still the pre-rebase a0f527a416, so advance from goliath or reset the Mac branch to fork first.",
+   "updated": "2026-10-22T07:23:14Z",
+   "note": "stacked on #16587 head 98ef1f55dc (2026-10-22, its runIdleCompaction line resolved as inLogContext(...runIdleCompaction(thresholdTokens))). After #16587 merges, pr-queue advance compaction-trigger replays its own commits onto main.",
    "built": [
     {
      "with": "#16231",
