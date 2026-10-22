@@ -176,8 +176,8 @@ export function describeDeliveryTarget(target: DeliveryTarget): string {
 			return `open in a live omp (${target.host}, pid ${target.pid}) that delivers it now`;
 		case "held":
 			return target.reason === "no-watcher"
-				? `open in an omp process that does not deliver timer mail (${target.host}, pid ${target.pid}); held until the session is next opened`
-				: "open in an omp process without timer support; held until the session is next opened";
+				? `open in an omp process that does not deliver timer mail (${target.host}, pid ${target.pid})`
+				: "open in an omp process without timer support";
 		case "free":
 			return "not open in any omp process";
 	}
