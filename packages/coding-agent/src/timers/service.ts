@@ -7,7 +7,7 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { isEnoent } from "@oh-my-pi/pi-utils";
-import { resolveResumableSession } from "../session/session-listing";
+import { readSessionInfo, resolveResumableSession } from "../session/session-listing";
 import { compileCondition, type TimerCondition } from "./conditions";
 import { runGate } from "./gate";
 import { TIMER_ID_PATTERN, timersRoot, timerStateDir } from "./paths";
@@ -95,9 +95,12 @@ async function resolveTarget(input: TimerSetInput, ctx: TimerSetContext): Promis
 		return { kind: "session", sessionId: ctx.sessionId, sessionFile: ctx.sessionFile };
 	}
 	if (requested === ctx.sessionId) return { kind: "session", sessionId: requested, sessionFile: ctx.sessionFile };
-	const match = await resolveResumableSession(requested, ctx.cwd, undefined, { allowGlobalFallback: true });
+	const match =
+		requested.endsWith(".jsonl") || requested.includes(path.sep)
+			? await readSessionInfo(path.resolve(ctx.cwd, requested))
+			: (await resolveResumableSession(requested, ctx.cwd, undefined, { allowGlobalFallback: true }))?.session;
 	if (!match) throw new Error(`No session matches "${requested}"`);
-	return { kind: "session", sessionId: match.session.id, sessionFile: match.session.path };
+	return { kind: "session", sessionId: match.id, sessionFile: match.path };
 }
 
 function resolveExpiry(input: TimerSetInput, ctx: TimerSetContext, now: number, tz: string): string | undefined {

@@ -134,7 +134,10 @@ export interface TimerMail {
 	sessionId: string;
 	createdAt: string;
 	fire?: TimerFirePayload;
-	poke?: { text: string; from: string };
+	/** `force`: deliver even while an Esc holds the session (`omp poke --force`). */
+	poke?: { text: string; from: string; force?: boolean };
+	/** Injection attempts so far, summed over every consumer that claimed it. */
+	attempts?: number;
 }
 
 export interface TimerFirePayload {

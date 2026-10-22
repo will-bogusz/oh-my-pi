@@ -119,7 +119,8 @@ import { resolveResumableSession, type SessionInfo } from "./session/session-lis
 import { ForkSourceNotFoundError, SessionManager, SessionMoveRefusedError } from "./session/session-manager";
 import { forkIfMovedAway } from "./session/session-transfer";
 import { shouldShowStartupSplash } from "./startup-splash";
-import { watchTimerMailbox } from "./timers/mailbox-watcher";
+import { exitUnlessHeadlessRunMayWrite } from "./timers/mailbox-headless";
+import { TIMER_HEADLESS_RUN_ENV } from "./timers/paths";
 import {
 	discoverSystemPromptOverride,
 	discoverTitleSystemPromptFile,
@@ -2266,6 +2267,11 @@ export async function runRootCommand(
 			clearPluginRootsCache: clearPluginRootsAndCaches,
 		});
 
+		// A headless timer run must never write a session another process has
+		// open: it takes the write lease before anything else can write, or
+		// leaves without writing so the runner records the mail as held.
+		if (sessionManager && $env[TIMER_HEADLESS_RUN_ENV]) exitUnlessHeadlessRunMayWrite(sessionManager);
+
 		const sessionOptions = await logger.time(
 			"buildSessionOptions",
 			buildSessionOptions,
@@ -2280,6 +2286,11 @@ export async function runRootCommand(
 		sessionOptions.hasUI = isInteractive || mode === "rpc-ui";
 		sessionOptions.allowSessionModelFallback = isInteractive;
 		sessionOptions.settingsApproval = isInteractive;
+		// omp's own hosts deliver timer fires and `omp poke` mail as turns.
+		sessionOptions.timerMailbox = {
+			deliver: true,
+			host: isInteractive ? "interactive" : (parsedArgs.mode ?? "print"),
+		};
 		sessionOptions.tuiTranscript = isInteractive;
 		sessionOptions.autoTitle = isInteractive;
 		sessionOptions.settings = settingsInstance;
@@ -2655,11 +2666,6 @@ export async function runRootCommand(
 				settingsInstance.startWatching();
 				postmortem.register("settings-file-watcher", () => settingsInstance.stopWatching(), { exitOnly: true });
 			}
-
-			// Timer fires and `omp poke` messages addressed to this session land in
-			// its mailbox; the watcher injects them as turns (interactive, RPC, print).
-			const timerMailbox = watchTimerMailbox(session);
-			postmortem.register("timer-mailbox", () => timerMailbox.stop(), { exitOnly: true });
 
 			if (mode === "rpc" || mode === "rpc-ui") {
 				// Branch-only protocol runner: keep RPC host code out of normal interactive startup.

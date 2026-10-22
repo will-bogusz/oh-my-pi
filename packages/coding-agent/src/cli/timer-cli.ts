@@ -1,19 +1,14 @@
 /**
- * `omp timer …` and `omp poke …`: out-of-session surfaces over the timer store.
+ * `omp timer …`: out-of-session surface over the timer store.
  * Standalone commands (no TUI), so they write to stdout/stderr directly.
  */
-import * as os from "node:os";
 import { getProjectDir } from "@oh-my-pi/pi-utils";
 import chalk from "@oh-my-pi/pi-utils/chalk";
-import { resolveResumableSession } from "../session/session-listing";
 import {
 	execTimerRun,
 	fireTimerNow,
-	hasLiveMailboxConsumer,
 	listTimers,
 	loadTimerRow,
-	newMailId,
-	postMail,
 	readTickerStatus,
 	removeTimer,
 	renderRuns,
@@ -151,26 +146,5 @@ export async function runTimerCommand(cmd: TimerCommandArgs): Promise<void> {
 		}
 	} catch (error) {
 		fail(error instanceof Error ? error.message : String(error));
-	}
-}
-
-/** `omp poke <session> <message…>`: post a message into a session's mailbox. */
-export async function runPokeCommand(sessionArg: string, text: string, from: string | undefined): Promise<void> {
-	if (!sessionArg || !text.trim()) fail("usage: omp poke <session> <message>");
-	const match = await resolveResumableSession(sessionArg, getProjectDir(), undefined, { allowGlobalFallback: true });
-	if (!match) fail(`no session matches "${sessionArg}"`);
-	const sessionId = match.session.id;
-	await postMail({
-		v: 1,
-		id: newMailId("poke"),
-		kind: "poke",
-		sessionId,
-		createdAt: new Date().toISOString(),
-		poke: { text, from: from ?? `${os.userInfo().username}@${os.hostname()} (pid ${process.pid})` },
-	});
-	if (hasLiveMailboxConsumer(sessionId)) {
-		out(`poked session ${sessionId}: a live omp holds it and will deliver now`);
-	} else {
-		out(`queued for session ${sessionId}: no live omp has it open; it is delivered when the session is next opened`);
 	}
 }

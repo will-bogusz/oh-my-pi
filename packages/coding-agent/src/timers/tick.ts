@@ -14,7 +14,7 @@ import * as path from "node:path";
 import { type FileLockHandle, acquireFileLock, logger, tryAcquireFileLock } from "@oh-my-pi/pi-utils";
 import { resolveCliCommand, workerEnvFromParent } from "../subprocess/worker-client";
 import { runGate } from "./gate";
-import { hasLiveMailboxConsumer, hasPendingMailForTimer, postMail } from "./mailbox";
+import { deliveryTarget, describeDeliveryTarget, hasPendingMailForTimer, postMail } from "./mailbox";
 import { runLockPath, tickLockPath, timerStateDir, timersRoot } from "./paths";
 import { decideDue, nextFireAt } from "./schedule";
 import { currentState, firePayloadPath, runLogPath, tickerStatusPath } from "./service";
@@ -95,7 +95,7 @@ async function dispatch(spec: TimerSpec, state: TimerState, input: DispatchInput
 	fs.mkdirSync(timerStateDir(spec.id), { recursive: true });
 	const runLock = tryAcquireFileLock(runLockPath(spec.id));
 	const overlapping =
-		!runLock || (sessionTarget !== undefined && (await hasPendingMailForTimer(sessionTarget.sessionId, spec.id)));
+		!runLock || (sessionTarget !== undefined && hasPendingMailForTimer(sessionTarget.sessionId, spec.id));
 	runLock?.release();
 	if (overlapping) {
 		record(state, runId, "skipped-overlap", now);
@@ -162,9 +162,22 @@ async function dispatch(spec: TimerSpec, state: TimerState, input: DispatchInput
 		createdAt: at,
 		fire: payload,
 	});
-	if (hasLiveMailboxConsumer(sessionTarget.sessionId)) {
+	const target = deliveryTarget(sessionTarget.sessionId);
+	if (target.kind === "live") {
 		await appendLedger(spec.id, { type: "delivery", runId, at, state: "queued", session: sessionTarget.sessionId });
 		return { id: spec.id, action: "fired", runId, detail: `mailed to live session ${sessionTarget.sessionId}` };
+	}
+	if (target.kind === "held") {
+		// Open where mail is not delivered: a headless resume would leave its turn on a branch that process never sees.
+		await appendLedger(spec.id, {
+			type: "delivery",
+			runId,
+			at,
+			state: "held",
+			session: sessionTarget.sessionId,
+			detail: describeDeliveryTarget(target),
+		});
+		return { id: spec.id, action: "fired", runId, detail: `held (${describeDeliveryTarget(target)})` };
 	}
 	if (spec.whenClosed === "hold") {
 		await appendLedger(spec.id, {

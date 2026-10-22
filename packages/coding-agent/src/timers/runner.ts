@@ -6,19 +6,15 @@
  *
  * - shell: `/bin/sh -c` in the timer's cwd.
  * - prompt → fresh: `omp -p` with the rendered fire envelope.
- * - prompt → session nobody has open: an RPC host on `--resume <session>`.
- *   That host's own mailbox watcher claims the mail and starts the turn, the
- *   same code path as a live delivery, so the turn lands in the session's own
- *   file. The runner waits for `session_settled`, then shuts the host down.
+ * - prompt → session nobody has open: `deliverHeadless` (mailbox-headless.ts)
+ *   resumes it in an RPC host whose own mailbox watcher delivers the mail, so
+ *   the turn lands in the session's own file.
  */
 import { tryAcquireFileLock } from "@oh-my-pi/pi-utils";
-import type { AgentMessage } from "@oh-my-pi/pi-agent-core";
-import { RpcClient } from "../modes/rpc/rpc-client";
-import { tryAcquireSessionLease } from "../session/session-storage";
 import { resolveCliCommand, workerEnvFromParent } from "../subprocess/worker-client";
 import { renderTimerMail } from "./fire-message";
-import { hasLiveMailboxConsumer, listNewMail } from "./mailbox";
-import { runLockPath, TIMER_HEADLESS_RUN_ENV } from "./paths";
+import { deliverHeadless } from "./mailbox-headless";
+import { runLockPath } from "./paths";
 import { parseDuration } from "./schedule";
 import { firePayloadPath } from "./service";
 import { appendLedger, readTimerSpec } from "./store";
@@ -26,10 +22,6 @@ import type { TimerFirePayload, TimerSpec } from "./types";
 
 /** Wall-clock cap per run. */
 const MAX_RUN_MS = parseDuration("30m");
-/** How long a headless host gets to claim its mail before the run is recorded held. */
-const CLAIM_TIMEOUT_MS = 90_000;
-/** After the mail left `new/`, how long the headless host gets to start the turn before we assume another consumer took it. */
-const TURN_START_TIMEOUT_MS = 30_000;
 
 interface RunResult {
 	ok: boolean;
@@ -73,15 +65,6 @@ async function runFresh(spec: TimerSpec, payload: TimerFirePayload, runId: strin
 	return { ok: exitCode === 0, exitCode };
 }
 
-function lastAssistantError(messages: AgentMessage[]): string | undefined {
-	for (let i = messages.length - 1; i >= 0; i--) {
-		const message = messages[i];
-		if (message.role !== "assistant") continue;
-		return message.stopReason === "error" ? (message.errorMessage ?? "model error") : undefined;
-	}
-	return undefined;
-}
-
 /** A delivery note on this run's ledger; `held` leaves the mail for the session's next opener. */
 async function noteDelivery(spec: TimerSpec, runId: string, state: "held" | "queued", detail: string): Promise<void> {
 	const session = spec.target.kind === "session" ? spec.target.sessionId : undefined;
@@ -90,63 +73,24 @@ async function noteDelivery(spec: TimerSpec, runId: string, state: "held" | "que
 
 async function runHeadlessResume(spec: TimerSpec, sessionRef: string, runId: string): Promise<RunResult> {
 	const sessionId = spec.target.kind === "session" ? spec.target.sessionId : "";
-	// The tick saw no live consumer, but one may have opened the session since. A
-	// second process on a live-owned session forks it to a sibling file on its
-	// first write (even the exit record), so never start one then.
-	if (hasLiveMailboxConsumer(sessionId)) {
-		await noteDelivery(spec, runId, "queued", "a live session took over before the headless resume started");
-		return { ok: true, detail: "delivered by a live session" };
-	}
-	const lease = tryAcquireSessionLease(sessionId);
-	if (!lease) {
-		await noteDelivery(spec, runId, "held", "session is open in an omp process that does not read timer mail");
-		return { ok: false, detail: "session open elsewhere without a mailbox watcher; mail held" };
-	}
-	lease.release();
-	const client = new RpcClient({
-		command: resolveCliCommand(),
+	const result = await deliverHeadless({
+		sessionId,
+		sessionRef,
 		cwd: spec.cwd,
-		env: { [TIMER_HEADLESS_RUN_ENV]: runId },
-		args: ["--resume", sessionRef],
+		mailId: runId,
+		timeoutMs: MAX_RUN_MS,
 	});
-	const settled = Promise.withResolvers<void>();
-	const started = Promise.withResolvers<void>();
-	let turnError: string | undefined;
-	let sawTurn = false;
-	client.onEvent(event => {
-		if (event.type === "agent_start") {
-			sawTurn = true;
-			started.resolve();
-		}
-		if (event.type === "agent_end") turnError = lastAssistantError(event.messages);
-	});
-	client.onSessionSettled(() => {
-		if (sawTurn) settled.resolve();
-	});
-	try {
-		await client.start();
-		const mailName = `${runId}.json`;
-		const claimDeadline = Date.now() + CLAIM_TIMEOUT_MS;
-		while ((await listNewMail(sessionId)).includes(mailName)) {
-			if (Date.now() > claimDeadline) {
-				await noteDelivery(spec, runId, "held", "headless host did not claim the mail (session open elsewhere?)");
-				return { ok: false, detail: "mail not claimed by the headless host" };
-			}
-			await Bun.sleep(500);
-		}
-		// Claimed, but possibly by another consumer that won the rename: then this host never starts a turn.
-		const turnStarted = await Promise.race([
-			started.promise.then(() => true),
-			Bun.sleep(TURN_START_TIMEOUT_MS).then(() => false),
-		]);
-		if (!turnStarted) return { ok: true, detail: "mail claimed by another consumer; headless host idle" };
-		const timedOut = await Promise.race([settled.promise.then(() => false), Bun.sleep(MAX_RUN_MS).then(() => true)]);
-		if (timedOut) return { ok: false, detail: "run exceeded 30m" };
-		return turnError ? { ok: false, detail: turnError } : { ok: true };
-	} catch (err) {
-		return { ok: false, detail: `${err instanceof Error ? err.message : String(err)}`.slice(0, 500) };
-	} finally {
-		await client.stop();
+	switch (result.outcome) {
+		case "delivered":
+			return { ok: true };
+		case "live":
+			await noteDelivery(spec, runId, "queued", result.detail ?? "a live session took over");
+			return { ok: true, detail: "delivered by a live session" };
+		case "held":
+			await noteDelivery(spec, runId, "held", result.detail ?? "session open elsewhere");
+			return { ok: false, detail: `mail held: ${result.detail ?? "session open elsewhere"}` };
+		case "failed":
+			return { ok: false, detail: result.detail };
 	}
 }
 

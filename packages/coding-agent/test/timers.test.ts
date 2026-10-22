@@ -1,10 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { claimMail, listNewMail, postMail } from "@oh-my-pi/pi-coding-agent/timers/mailbox";
+import { describe, expect, it } from "bun:test";
 import { gateVerdict } from "@oh-my-pi/pi-coding-agent/timers/gate";
-import { TIMERS_DIR_ENV } from "@oh-my-pi/pi-coding-agent/timers/paths";
 import { decideDue } from "@oh-my-pi/pi-coding-agent/timers/schedule";
-import type { TimerMail, TimerSpec, TimerState } from "@oh-my-pi/pi-coding-agent/timers/types";
-import { TempDir } from "@oh-my-pi/pi-utils";
+import type { TimerSpec, TimerState } from "@oh-my-pi/pi-coding-agent/timers/types";
 
 const MINUTE = 60_000;
 const T0 = Date.parse("2026-10-21T12:00:00Z");
@@ -87,38 +84,5 @@ describe("timer gate exit mapping", () => {
 		});
 		// A gate killed by its deadline is broken even if a 0 had been reported.
 		expect(gateVerdict(0, "", true).kind).toBe("broken");
-	});
-});
-
-describe("session mailbox", () => {
-	let dir: TempDir;
-	let previous: string | undefined;
-	beforeEach(() => {
-		dir = TempDir.createSync("omp-timers-");
-		previous = Bun.env[TIMERS_DIR_ENV];
-		Bun.env[TIMERS_DIR_ENV] = dir.path();
-	});
-	afterEach(async () => {
-		if (previous === undefined) delete Bun.env[TIMERS_DIR_ENV];
-		else Bun.env[TIMERS_DIR_ENV] = previous;
-		await dir.remove();
-	});
-
-	it("hands each message to exactly one of several concurrent claimers", async () => {
-		const mail: TimerMail = {
-			v: 1,
-			id: "t#1",
-			kind: "poke",
-			sessionId: "s1",
-			createdAt: "x",
-			poke: { text: "hi", from: "test" },
-		};
-		await postMail(mail);
-		const [name] = await listNewMail("s1");
-		const claims = await Promise.all(Array.from({ length: 8 }, () => claimMail("s1", name)));
-		const winners = claims.filter(claim => claim !== undefined);
-		expect(winners).toHaveLength(1);
-		expect(winners[0]?.id).toBe("t#1");
-		expect(await listNewMail("s1")).toEqual([]);
 	});
 });

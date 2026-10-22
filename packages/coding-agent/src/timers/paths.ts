@@ -29,7 +29,7 @@ export function timerStateDir(id: string): string {
 }
 
 /** Session ids come from files and argv: anything but a plain token is hashed so it cannot name a path. */
-function safeSessionKey(sessionId: string): string {
+export function safeSessionKey(sessionId: string): string {
 	return /^[A-Za-z0-9_-]{1,128}$/.test(sessionId)
 		? sessionId
 		: `h-${Bun.hash.wyhash(sessionId).toString(16).padStart(16, "0")}`;
@@ -37,11 +37,6 @@ function safeSessionKey(sessionId: string): string {
 
 export function mailDir(sessionId: string): string {
 	return path.join(timersRoot(), "mail", safeSessionKey(sessionId));
-}
-
-/** Held by the one live process that consumes a session's mailbox. */
-export function mailLivePath(sessionId: string): string {
-	return path.join(timersRoot(), "mail", "live", safeSessionKey(sessionId));
 }
 
 /** Held for the duration of one tick (evaluation + dispatch, never a model turn). */
