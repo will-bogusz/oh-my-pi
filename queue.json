@@ -50429,5 +50429,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "headless-agent-flags",
+  "token": "230d47d29be842358f7eb04efc1a57c9",
+  "host": "MacBook-Pro",
+  "at": "2026-10-22T09:23:27Z"
  }
 }
