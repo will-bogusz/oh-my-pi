@@ -142,6 +142,7 @@ import type { EvalPreludeDefinition } from "../eval/preludes";
 import type { PythonResult } from "../eval/py/executor";
 import { EVAL_STATE_CONTEXT_TYPE, formatEvalStateContext, isEvalStateContext } from "../eval/state";
 import { WorkPoolRegistry } from "../task/workpool";
+import { TIMER_FIRE_MESSAGE_TYPE } from "../timers/fire-message";
 import { type BashPtyOptions, type BashResult, releaseShellSessions } from "../exec/bash-executor";
 import type { TtsrManager } from "../export/ttsr";
 import type { LoadedCustomCommand } from "../extensibility/custom-commands";
@@ -825,6 +826,18 @@ function isEvalActivity(message: AgentMessage): boolean {
 	);
 }
 
+/**
+ * Stranded asides that still start a turn while a user interrupt (Esc) holds the session:
+ * a peer's IRC message, and a timer fire, which is standing intent the user set up earlier.
+ * One policy for the stranded-aside resume and the late idle-aside dispatch.
+ */
+function wakesThroughInterrupt(message: AgentMessage): boolean {
+	return (
+		message.role === "custom" &&
+		(message.customType === "irc:incoming" || message.customType === TIMER_FIRE_MESSAGE_TYPE)
+	);
+}
+
 /** A retry supersedes a failed operation only when its intent matches, allowing a missing append phase to be supplied. */
 function todoRetryMatches(failed: Record<string, unknown>, retry: Record<string, unknown>): boolean {
 	if (Bun.deepEquals(failed, retry)) return true;
@@ -924,6 +937,10 @@ export class AgentSession implements SettingsScope {
 	#autoQaEnabled = false;
 	/** Teardowns registered via {@link addDisposer} (including settings listeners bound to this session); drained on dispose. */
 	#disposers: Array<() => void> = [];
+	/** Run by {@link onClosed} once dispose has closed the session file. */
+	#closedListeners: Array<() => void> = [];
+	/** See {@link setHeldMailProvider}. */
+	#heldMailProvider: (() => CustomMessage[]) | undefined;
 	/** Last (enable, providerId) tuple resolved by `#syncAppendOnlyContext` — used to skip no-op invalidations. */
 	#lastAppendOnlyResolution?: { enable: boolean; providerId: string | undefined };
 	#eventListeners: AgentSessionEventListener[] = [];
@@ -1414,13 +1431,14 @@ export class AgentSession implements SettingsScope {
 		if (this.#advisors.autoResumeSuppressed) {
 			// A user interrupt is still in effect (clearQueue({ forInterrupt: true }) already
 			// dropped these same records from the agent-core queues to keep the run the user
-			// stopped from auto-resuming). Only a real peer IRC message justifies waking a fresh
-			// turn here; extension/user asides fold into context like the plan-mode branch above,
-			// staying user-driven until the next deliberate prompt.
+			// stopped from auto-resuming). Only a real peer IRC message or a timer fire (standing
+			// user intent) justifies waking a fresh turn here; extension/user asides fold into
+			// context like the plan-mode branch above, staying user-driven until the next
+			// deliberate prompt.
 			const wake: AgentMessage[] = [];
 			const fold: AgentMessage[] = [];
 			for (const record of records) {
-				if (record.role === "custom" && record.customType === "irc:incoming") wake.push(record);
+				if (wakesThroughInterrupt(record)) wake.push(record);
 				else fold.push(record);
 			}
 			this.#foldStrandedIrcAsidesIntoContext(fold);
@@ -2684,6 +2702,25 @@ export class AgentSession implements SettingsScope {
 	/** Registers teardown to run when this session is disposed (e.g. handle listeners bound to it). */
 	addDisposer(dispose: () => void): void {
 		this.#disposers.push(dispose);
+	}
+
+	/** Registers `listener` to run once dispose has closed the session file, after its last write. */
+	onClosed(listener: () => void): void {
+		this.#closedListeners.push(listener);
+	}
+
+	/**
+	 * Source of out-of-band mail an interrupt held back (`omp poke` after Esc). A
+	 * user-authored prompt calls it synchronously and sends what it returns ahead
+	 * of the user's message, in the same turn.
+	 */
+	setHeldMailProvider(provider: (() => CustomMessage[]) | undefined): void {
+		this.#heldMailProvider = provider;
+	}
+
+	/** A user interrupt (Esc) holds the session: autonomous resumes stay off until the user's next deliberate prompt. */
+	get interruptLatched(): boolean {
+		return this.#advisors.autoResumeSuppressed;
 	}
 
 	/**
@@ -6164,6 +6201,13 @@ export class AgentSession implements SettingsScope {
 		// closes the writer.
 		this.sessionManager.seal();
 		await this.sessionManager.close();
+		for (const listener of this.#closedListeners.splice(0)) {
+			try {
+				listener();
+			} catch (error) {
+				logger.warn("Session close listener failed", { error: String(error) });
+			}
+		}
 
 		// Release retained conversation memory. dispose() is terminal, and every
 		// revival path reopens the transcript from disk (AgentLifecycleManager
@@ -7817,12 +7861,20 @@ export class AgentSession implements SettingsScope {
 		// with the message via prependMessages — not as a separate steer — so the
 		// model sees both in the same turn (#14093).
 		const sessionAgentNotice = options?.synthetic ? undefined : this.#tools.takeSessionAgentNotice();
-		const prependNotices = sessionAgentNotice ? [...keywordNotices, sessionAgentNotice] : keywordNotices;
+		const userInitiated = options?.userInitiated ?? !options?.synthetic;
+		// Mail an interrupt held back (`omp poke` after Esc) goes in ahead of the
+		// prompt that releases the interrupt, claimed before any await below.
+		const heldMail = userInitiated ? (this.#heldMailProvider?.() ?? []) : [];
+		const prependNotices: CustomMessage[] = [
+			...heldMail,
+			...keywordNotices,
+			...(sessionAgentNotice ? [sessionAgentNotice] : []),
+		];
 
 		// A user-initiated prompt (typed message or the `.`/`c` continue shortcut)
 		// re-enables advisor auto-resume that a prior user interrupt suppressed.
 		// Agent-initiated synthetic prompts (auto-continue, plan, reminders) do not.
-		if (options?.userInitiated ?? !options?.synthetic) {
+		if (userInitiated) {
 			this.#advisors.autoResumeSuppressed = false;
 			this.#planModeReminderCount = 0;
 			this.#planModeReminderAwaitingProgress = false;
@@ -7983,11 +8035,13 @@ export class AgentSession implements SettingsScope {
 				...options,
 				images: normalizedImages,
 				prependMessages:
+					heldMail.length > 0 ||
 					preludeMessages.length > 0 ||
 					keywordNotices.length > 0 ||
 					attachmentSourceNotices.length > 0 ||
 					imageDescriptionNotice
 						? [
+								...heldMail,
 								...preludeMessages,
 								...keywordNotices,
 								...attachmentSourceNotices,
@@ -9735,13 +9789,14 @@ export class AgentSession implements SettingsScope {
 				this.#foldStrandedIrcAsidesIntoContext([normalizedAppMessage]);
 				return false;
 			}
-			if (this.#advisors.autoResumeSuppressed) {
+			if (this.#advisors.autoResumeSuppressed && !wakesThroughInterrupt(normalizedAppMessage)) {
 				// A user interrupt (Esc) is still in effect. isStreaming was true when this method
 				// was entered but image normalization above outlasted the interrupt, landing here
 				// instead of the streaming branch's queueAside — starting a fresh autonomous turn
 				// would undo the user's deliberate stop. Fold into context (same event-emitting path
 				// as the plan-mode branch above) and stay user-driven, matching
-				// #resumeStrandedIrcAsides's post-interrupt fold branch.
+				// #resumeStrandedIrcAsides's post-interrupt fold branch (timer fires and peer IRC
+				// messages wake there too, so they start their turn below).
 				this.#foldStrandedIrcAsidesIntoContext([normalizedAppMessage]);
 				return false;
 			}

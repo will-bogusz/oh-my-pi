@@ -15,7 +15,7 @@
 import { tryAcquireFileLock } from "@oh-my-pi/pi-utils";
 import { resolveCliEntryCmd, workerEnvFromParent } from "../subprocess/worker-client";
 import { renderTimerMail } from "./fire-message";
-import { deliveryTarget } from "./mailbox";
+import { deliveryTarget, describeDeliveryTarget } from "./mailbox";
 import { deliverHeadless } from "./mailbox-headless";
 import { firePayloadPath, runLockPath, TIMER_RUN_ENV, timersRoot } from "./paths";
 import { firstErrorLine } from "./policy";
@@ -104,7 +104,7 @@ async function runHeadless(
 		return { ok: true, detail: "delivered by a live session" };
 	}
 	if (target.kind === "held") {
-		note("held", `session is open in an omp that cannot take timer mail (${target.reason})`);
+		note("held", describeDeliveryTarget(target));
 		return { ok: true, detail: "held: session open elsewhere" };
 	}
 	const result = await deliverHeadless({
@@ -125,7 +125,7 @@ async function runHeadless(
 			note("held", result.detail ?? "held");
 			return { ok: true, detail: `held: ${result.detail ?? ""}`.trim() };
 		case "failed":
-			return { ok: false, detail: result.error ?? result.detail ?? "headless delivery failed" };
+			return { ok: false, detail: result.detail ?? "headless delivery failed" };
 	}
 }
 

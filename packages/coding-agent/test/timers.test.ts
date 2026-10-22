@@ -336,7 +336,7 @@ describe("timer engine (tick, runner records, policy) on an injected clock", () 
 		Bun.env[TIMERS_DIR_ENV] = root; // the mailbox resolves its directory from the store root
 		try {
 			await setTimer({ id: "live", reason: "test", every: "5m", prompt: "check" }, sessionCtx(T0));
-			target = { kind: "live" };
+			target = { kind: "live", pid: 1, host: "test" };
 			await tick(T0 + 5 * MINUTE + 1);
 			expect(runs("live")[0]?.delivery?.state).toBe("queued");
 			expect(await listNewMail("sess-1")).toEqual(["live#1.json"]);

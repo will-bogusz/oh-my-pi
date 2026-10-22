@@ -1,13 +1,11 @@
 /**
- * `omp timer …` and `omp poke …`: out-of-session surfaces over the timer store.
+ * `omp timer …`: out-of-session surface over the timer store.
  * Standalone commands (no TUI), so they write to stdout/stderr directly.
  * Every verb takes `--json` for a machine-readable result on stdout.
  */
-import * as os from "node:os";
 import * as path from "node:path";
 import { $env, getProjectDir, VERSION } from "@oh-my-pi/pi-utils";
 import chalk from "@oh-my-pi/pi-utils/chalk";
-import { resolveResumableSession } from "../session/session-listing";
 import { resolveCliEntryCmd } from "../subprocess/worker-client";
 import {
 	createTimerHost,
@@ -16,13 +14,10 @@ import {
 	editTimer,
 	execTimerRun,
 	fireTimerNow,
-	hasLiveMailboxConsumer,
 	installTicker,
 	listTimers,
 	loadTimerRow,
-	newMailId,
 	parseWhen,
-	postMail,
 	readTickerStatus,
 	removeTimer,
 	renderRuns,
@@ -384,31 +379,5 @@ export async function runTimerCommand(cmd: TimerCommandArgs): Promise<void> {
 			);
 		else process.stderr.write(`${chalk.red(`error: ${message}`)}\n`);
 		process.exitCode = error instanceof UsageError ? 2 : 1;
-	}
-}
-
-function fail(message: string): never {
-	process.stderr.write(`${chalk.red(`error: ${message}`)}\n`);
-	process.exit(1);
-}
-
-/** `omp poke <session> <message…>`: post a message into a session's mailbox. */
-export async function runPokeCommand(sessionArg: string, text: string, from: string | undefined): Promise<void> {
-	if (!sessionArg || !text.trim()) fail("usage: omp poke <session> <message>");
-	const match = await resolveResumableSession(sessionArg, getProjectDir(), undefined, { allowGlobalFallback: true });
-	if (!match) fail(`no session matches "${sessionArg}"`);
-	const sessionId = match.session.id;
-	await postMail({
-		v: 1,
-		id: newMailId("poke"),
-		kind: "poke",
-		sessionId,
-		createdAt: new Date().toISOString(),
-		poke: { text, from: from ?? `${os.userInfo().username}@${os.hostname()} (pid ${process.pid})` },
-	});
-	if (hasLiveMailboxConsumer(sessionId)) {
-		out(`poked session ${sessionId}: a live omp holds it and will deliver now`);
-	} else {
-		out(`queued for session ${sessionId}: no live omp has it open; it is delivered when the session is next opened`);
 	}
 }

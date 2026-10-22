@@ -4,6 +4,7 @@ export * from "./gate";
 export * from "./install";
 export * from "./mailbox";
 export * from "./mailbox-headless";
+export * from "./mailbox-presence";
 export * from "./mailbox-watcher";
 export * from "./notify";
 export * from "./paths";

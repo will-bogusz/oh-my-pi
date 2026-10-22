@@ -17,7 +17,13 @@ import * as path from "node:path";
 import { acquireFileLock, type FileLockHandle, logger, tryAcquireFileLock, VERSION } from "@oh-my-pi/pi-utils";
 import { resolveCliEntryCmd, workerEnvFromParent } from "../subprocess/worker-client";
 import { type GateVerdict, runGate } from "./gate";
-import { type DeliveryTarget, deliveryTarget, hasPendingMailForTimer, postMail } from "./mailbox";
+import {
+	type DeliveryTarget,
+	deliveryTarget,
+	describeDeliveryTarget,
+	hasPendingMailForTimer,
+	postMail,
+} from "./mailbox";
 import { loadTimerNotifyConfig, sendTimerAlerts } from "./notify";
 import { firePayloadPath, runLockPath, runLogPath, tickLockPath, timersRoot, timerStateDir } from "./paths";
 import { applyFailure, applyNotice, applySuccess, firstErrorLine } from "./policy";
@@ -290,7 +296,7 @@ async function sideEffects(
 	}
 	const why =
 		target.kind === "held"
-			? `session ${sessionId} is open in an omp that cannot take timer mail (${target.reason}); held`
+			? `session ${sessionId}: ${describeDeliveryTarget(target)}`
 			: `session ${sessionId} is not open; held until it opens`;
 	db.recordDelivery(spec.id, { runId, at, state: "held", session: sessionId, detail: why });
 	ctx.alerts.push(...applyNotice(db, spec, "held", why, { runId, at, now: ctx.now }));

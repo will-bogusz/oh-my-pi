@@ -382,6 +382,14 @@ Use these when you want partial control without recreating internal discovery lo
   `systemPrompt` control different prompt layers. See
   [System prompt customization](./system-prompt-customization.md) for their
   replacement and discovery contracts.
+- `timerMailbox` controls timer fires and `omp poke` messages addressed to the
+  session. Every file-backed session marks itself open while it is open, so a
+  timer never resumes it headless in another process (that turn would land on
+  a branch this host never sees); by default the mail is held until the
+  session is next opened in a process that delivers it. Pass
+  `timerMailbox: { deliver: true }` to have this host inject the mail as turns:
+  an idle session starts a turn, a running turn takes it at its next step, and
+  after an interrupt pokes wait for the next user prompt.
 
 ## Subagent-oriented options
 
