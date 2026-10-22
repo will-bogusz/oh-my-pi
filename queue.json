@@ -46904,6 +46904,26 @@
    "added": "2026-10-22T18:22:20Z",
    "updated": "2026-10-22T18:22:20Z",
    "note": ""
+  },
+  {
+   "id": "timer-pr-8-wake-machine",
+   "branch": "will/timer-pr-8-wake-machine",
+   "title": "feat(coding-agent): wake a sleeping Mac before a one-shot timer with --wake-machine",
+   "area": "other",
+   "priority": null,
+   "needs": [
+    "timer-pr-2-engine"
+   ],
+   "base": "bf7de20288a598486088d3632cfe1972fd4713f3",
+   "body": "bodies/timer-pr-8-wake-machine.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T18:22:38Z",
+   "updated": "2026-10-22T18:22:38Z",
+   "note": ""
   }
  ],
  "watch": {
