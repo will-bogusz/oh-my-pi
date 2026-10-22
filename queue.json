@@ -45124,13 +45124,13 @@
    "needs": [],
    "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/resume-cancel-bg-jobs.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16760,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/resume-cancel-bg-jobs",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:36:15Z",
-   "updated": "2026-10-22T08:40:33Z",
+   "updated": "2026-10-22T08:45:23Z",
    "note": "",
    "built": [
     {
@@ -45538,7 +45538,8 @@
      "at": "2026-10-22T08:40:28Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-22T08:45:22Z"
   },
   {
    "id": "headless-agent-flags",
