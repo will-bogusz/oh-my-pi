@@ -46964,6 +46964,26 @@
    "added": "2026-10-22T18:59:17Z",
    "updated": "2026-10-22T18:59:17Z",
    "note": ""
+  },
+  {
+   "id": "timer-pr-5-agent-runs",
+   "branch": "will/timer-pr-5-agent-runs",
+   "title": "feat(coding-agent): run a prompt timer as an unattended agent and report back",
+   "area": "other",
+   "priority": null,
+   "needs": [
+    "timer-pr-3-tool"
+   ],
+   "base": "bbfe6905bf697fd6ff9da56f26ab7d259921f47d",
+   "body": "bodies/timer-pr-5-agent-runs.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T18:59:23Z",
+   "updated": "2026-10-22T18:59:23Z",
+   "note": ""
   }
  ],
  "watch": {
