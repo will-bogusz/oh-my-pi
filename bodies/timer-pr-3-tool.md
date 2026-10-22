@@ -15,8 +15,8 @@ The agent gets a `timer` tool to wake its own session later or on a schedule, or
 | Op | Approval |
 |---|---|
 | `list`, `show`, `runs` | read |
-| the others, on a timer that wakes this session | write |
-| a shell command or another session's timer, also when `set` replaces one | exec |
+| the others, on a timer that wakes this session (`session` omitted, `origin`, `this` or `current`) | write |
+| a shell command or another session's timer, also when `set` replaces one, or `allowTimers` | exec |
 
 <details><summary>Reading order</summary>
 
@@ -26,18 +26,19 @@ The agent gets a `timer` tool to wake its own session later or on a schedule, or
 
 ## Why
 
-An agent can't keep a promise to come back: it sleeps in `bash`, writes its own crontab, or says "I'll check later" and ends the turn. In an eval of 16 scheduling asks on both models, the ask got done in 32% of runs with no tool and 91% with a stub of this one. #2763 and #8757 ask for this. Related: #5838 adds a `wakeup` tool for one delay inside the open session; these live in the timer registry, so they fire after omp exits, repeat, and run commands. Also #7381, #16690, #6336.
+An agent can't keep a promise to come back: it sleeps in `bash`, writes its own crontab, or says "I'll check later" and ends the turn. In an eval of 16 scheduling asks on both models, the ask got done in 32% of runs with no tool and 91% with a stub of this one. #2763 and #8757 ask for this. Related: #5838's `wakeup` tool waits once inside the open session; these timers fire after omp exits, repeat, and run commands. Also #7381, #16690, #6336.
 
 Decisions:
 - **Top level, not under `xd://`**: hidden there, correct calls fell from 92% to 75%.
-- **A tool, not `omp timer` through `bash`**: that route made the most invalid calls and junk test timers.
+- **A tool, not `omp timer` through `bash`**: that route made the most invalid calls and stray test timers.
 - **Root sessions only**: a subagent can't be resumed when its timer fires.
-- **The description lists this session's and project's timers** (up to 12, secrets redacted), the tuning's largest gain.
-- **A refused duplicate, or `fire` into this session, goes through when repeated** within 10 min; a `force` flag got passed before any refusal in 25 of 252 runs.
-- **Recurring session wakes it sets expire after 7 days** unless `expires` says otherwise; shell timers have no default expiry.
-- **A fired turn's `timer` changes are limited to its own timer** unless that timer has `--allow-timers`.
+- **The description lists this session's and project's timers** (up to 12, secrets redacted), tuning's biggest gain.
+- **A refused duplicate, or `fire` into this session, goes through when repeated** within 10 min; a `force` flag was passed unasked in 25/252 runs.
+- **Recurring session wakes it sets expire after 7 days** by default; shell timers don't.
+- **`session` defaults to `origin` (also `this`, `current`): this conversation**; without it, "wake yourself every 30 minutes" got 6/12 vs 12/12 (integration build).
+- **A fired turn may change only its own timer and prompt timers that wake this session** (not `fire`), unless set with `allowTimers: true` or `--allow-timers`.
 
-The one decision for the maintainer: a default-on, always-visible `timer` tool plus one line each in `bash` and `wait`, model-visible in every root session: about 975 o200k tokens with no timers listed, 1,350 with 12. `timer.enabled: false` removes all three. What that text bought:
+The one decision for the maintainer: a default-on, always-visible `timer` tool plus one line each in `bash` and `wait`, in every root session: about 975 o200k tokens with no timers listed, 1,350 with 12. `timer.enabled: false` removes all three. What that text bought:
 
 <picture>
   <source media="(min-width: 1244px) and (prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/f710fdcc-4f96-45b7-9ee8-109272a9dd02">
@@ -64,7 +65,7 @@ Maintenance: the duplicate check is word overlap; a false match costs one repeat
 
 ## Testing
 
-Live at `d522965b8c7` (same code as `bbfe6905bf6`), claude-haiku-4-5 over RPC, isolated store: asked "Remind me in 2 minutes to stretch…", the agent set a timer, the tick mailed the fire to the live session, and it answered `STRETCH_REMINDER_OK` (`delivered-live`). A real SDK session in a second project lists only that project's timer, its credential redacted.
+Live at `d522965b8c7` (before the guard, `allowTimers`, `origin`), claude-haiku-4-5 over RPC: asked to remind me in 2 minutes, the agent set a timer and the live session answered its fire (`delivered-live`). An SDK session in a second project lists only its project's timer, credential redacted. At the head, 4/4 "wake this conversation…" asks got `origin`.
 
 <details><summary>Telling lines from the live runs</summary>
 
@@ -86,15 +87,20 @@ $ (cd project-b) createAgentSession → timer tool description:
 Timers this session or this project set, as of when this session started (`list` for every timer and its current state; …):
 - b-sync · every 1h · mirror https://example.com/x?token=%5Bredacted%5D nightly
 contains "user:pass@": false · "token=abc": false · "FOREIGN_MARKER": false
+
+# at the head 9d4ec6280f9: "wake this conversation every 30 minutes to check the build"
+tool timer {"op":"set","id":"check-build","every":"30m","prompt":"Check the build status. …","reason":"Monitor build progress every 30 minutes"}
+does   wake session 01a165af-… (this session) → "Check the build status. …"
+# 4 of 4 runs: no `session` field; 0 "No session matches"
 ```
 
 </details>
 
-`bun test` of the guard, surface, timers, wait, tool registry, approval, prompt inventory, internal-urls, slash-command and session-mailbox suites at `bbfe6905bf6`: 844 pass; tui `timer-render`: 9 pass; each review fix's test fails with that fix reverted, and the new `wait` cap and availability tests fail with their code removed. `bun run check` in coding-agent and tui.
+`bun test`, 16 timer files at `9d4ec6280f9`: 261 pass; tui `timer-render`: 9 pass; each review fix's test, and each new guard, `origin`, `allowTimers`, `wait`-cap and availability test, fails with its code reverted. `bun run check` in coding-agent and tui.
 
 <details><summary>What the unit tests cover</summary>
 
-Approval (`timerArgsTier`, shared with `timer://…/edit`): reads `read`; own-session ops `write`; a shell command, another session's timer, or `set` re-arming another session's id `exec`; a padded id (`" foreign-shell "`) tiers and acts as the timer it names. Description: lists live timers as of its creation; another project's timer (stored by `/timer` with its prompt as reason) absent, one from there that wakes this session present, URL userinfo and token values redacted. Refusals: a duplicate job under a new id refused and named, also a re-check after a one-shot, while different PR numbers and unrelated timers arm; the same call within 10 min goes through, after that it is refused again; the CLI is never refused; `fire` into the calling session refused until repeated. Expiry: a recurring session wake gets 7 days, a recurring shell command none. Recursion: a fired turn changes only its own timer; `list` stays open. Render: a streaming `set` previewed from partial args; card, listing or error drawn. Availability: a root session gets the tool and both hints; a subagent (`taskDepth: 1`) and `timer.enabled: false` get none of them. `wait` at its cap: the timer hint appended to both cap messages only when the session has the tool.
+Approval (`timerArgsTier`, shared with `timer://…/edit`): reads `read`; own-session ops `write`, also with `session` `origin`, `this` or `current`; a shell command, another session's timer, `set` re-arming another session's id, or `allowTimers` `exec`; a padded id (`" foreign-shell "`) tiers and acts as the timer it names. Description: lists live timers as of its creation; another project's timer (stored by `/timer` with its prompt as reason) absent, one from there that wakes this session present, URL userinfo and token values redacted. Refusals: a duplicate job under a new id refused and named, also a re-check after a one-shot, while different PR numbers and unrelated timers arm; the same call within 10 min goes through, after that it is refused again; the CLI is never refused; `fire` into the calling session refused until repeated. Expiry: a recurring session wake gets 7 days, a recurring shell command none. Recursion: a fired turn arms and edits prompt timers that wake its own session, and is refused shell timers, other sessions' timers and firing another timer; `list` stays open. Render: a streaming `set` previewed from partial args; card, listing or error drawn. Availability: a root session gets the tool and both hints; a subagent (`taskDepth: 1`) and `timer.enabled: false` get none of them. `wait` at its cap: the timer hint appended to both cap messages only when the session has the tool.
 
 </details>
 
