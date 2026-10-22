@@ -33552,7 +33552,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "1882f586a73b6548e2639a0ae597e8a11d6c0b3a",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/ts-rule-followups.md",
    "state": "open",
    "pr": 16556,
@@ -33560,7 +33560,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ts-rule-followups",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:06:09Z",
-   "updated": "2026-10-20T20:51:15Z",
+   "updated": "2026-10-22T07:06:30Z",
    "note": "",
    "built": [
     {
@@ -33755,7 +33755,8 @@
     }
    ],
    "opened": "2026-10-20T20:46:32Z",
-   "readied": "2026-10-20T20:46:52Z"
+   "readied": "2026-10-20T20:46:52Z",
+   "advanced": "2026-10-22T07:06:30Z"
   },
   {
    "id": "factory-screenshot-budget",
