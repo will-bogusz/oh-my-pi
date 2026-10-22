@@ -36362,7 +36362,7 @@
    "area": "other",
    "priority": "P0",
    "needs": [],
-   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/gateway-settle-log.md",
    "state": "open",
    "pr": 16579,
@@ -36370,7 +36370,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gateway-settle-log",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:07:24Z",
-   "updated": "2026-10-21T00:35:23Z",
+   "updated": "2026-10-22T07:12:46Z",
    "note": "",
    "built": [
     {
@@ -36445,7 +36445,8 @@
     }
    ],
    "opened": "2026-10-21T00:07:51Z",
-   "readied": "2026-10-21T00:08:11Z"
+   "readied": "2026-10-21T00:08:11Z",
+   "advanced": "2026-10-22T07:12:46Z"
   },
   {
    "id": "task-result-inline",
