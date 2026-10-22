@@ -42750,40 +42750,36 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T07:06:04Z",
+  "checked": "2026-10-22T07:36:17Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "sleep-prevention-doc": {
+    "since": "2026-10-22T07:36:17Z",
+    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns"
+   },
+   "advisor-quota-comment": {
+    "since": "2026-10-22T07:36:17Z",
+    "title": "docs(coding-agent): say what clears an advisor's quota pause"
+   },
+   "drop-dead-jobs-op": {
+    "since": "2026-10-22T07:36:17Z",
+    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult"
+   },
+   "computer-element-front-first": {
+    "since": "2026-10-22T07:36:17Z",
+    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app"
+   },
    "r2/webmcp-native": {
     "since": "2026-10-22T07:06:04Z",
     "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook"
+   },
+   "computer-right-click-per-press": {
+    "since": "2026-10-22T07:36:17Z",
+    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input"
    }
   },
-  "conflicts": {
-   "#16556": {
-    "since": "2026-10-20T22:03:07Z",
-    "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
-    "files": [
-     "packages/coding-agent/src/discovery/builtin-rules/ts-import-type.md",
-     "packages/coding-agent/src/discovery/builtin-rules/ts-set-map.md",
-     "packages/coding-agent/test/discovery/builtin-defaults.test.ts"
-    ]
-   },
-   "#16553": {
-    "since": "2026-10-20T22:03:07Z",
-    "title": "fix(natives): keep a macOS user's press placed in their app through a release during its hit-test",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/skylight.rs"
-    ]
-   },
-   "#16587": {
-    "since": "2026-10-21T16:19:51Z",
-    "title": "feat(coding-agent): tag each log record with the session that wrote it",
-    "files": [
-     "packages/coding-agent/src/session/agent-session.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-10-20T18:11:02Z",
   "unreleased": {},
   "ready": [
@@ -46797,6 +46793,36 @@
     "kind": "openable",
     "id": "r2/webmcp-native",
     "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook"
+   },
+   {
+    "at": "2026-10-22T07:36:17Z",
+    "kind": "openable",
+    "id": "sleep-prevention-doc",
+    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns"
+   },
+   {
+    "at": "2026-10-22T07:36:17Z",
+    "kind": "openable",
+    "id": "advisor-quota-comment",
+    "title": "docs(coding-agent): say what clears an advisor's quota pause"
+   },
+   {
+    "at": "2026-10-22T07:36:17Z",
+    "kind": "openable",
+    "id": "drop-dead-jobs-op",
+    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult"
+   },
+   {
+    "at": "2026-10-22T07:36:17Z",
+    "kind": "openable",
+    "id": "computer-element-front-first",
+    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app"
+   },
+   {
+    "at": "2026-10-22T07:36:17Z",
+    "kind": "openable",
+    "id": "computer-right-click-per-press",
+    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input"
    }
   ]
  },
