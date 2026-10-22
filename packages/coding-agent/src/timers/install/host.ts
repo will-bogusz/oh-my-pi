@@ -24,6 +24,8 @@ export interface TimerHost {
 	readFile(file: string): Promise<string | undefined>;
 	/** Creates parent directories. */
 	writeFile(file: string, content: string): Promise<void>;
+	/** `mkdir -p`. */
+	makeDir(dir: string): Promise<void>;
 	/** `false` on ENOENT. */
 	removeFile(file: string): Promise<boolean>;
 	exists(file: string): Promise<boolean>;
@@ -67,6 +69,9 @@ export function createTimerHost(
 		},
 		async writeFile(file, content) {
 			await Bun.write(file, content);
+		},
+		async makeDir(dir) {
+			await fs.mkdir(dir, { recursive: true });
 		},
 		async removeFile(file) {
 			try {

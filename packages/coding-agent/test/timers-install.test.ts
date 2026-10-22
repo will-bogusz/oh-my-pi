@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
+import * as fs from "node:fs";
 import * as path from "node:path";
 import {
 	createTimerHost,
@@ -24,6 +25,7 @@ const BIN = "/opt/omp & co/bin/omp";
 
 class FakeHost implements TimerHost {
 	files = new Map<string, string>();
+	dirs = new Set<string>();
 	commands: string[][] = [];
 	/** Scripted results keyed by argv joined with spaces; unscripted commands succeed. */
 	script = new Map<string, Partial<HostCommandResult>>();
@@ -48,6 +50,9 @@ class FakeHost implements TimerHost {
 	}
 	async exists(file: string) {
 		return this.files.has(file);
+	}
+	async makeDir(dir: string) {
+		this.dirs.add(dir);
 	}
 }
 
@@ -152,11 +157,12 @@ describe("systemd ticker unit", () => {
 		expect(timerUnit).toContain("WantedBy=timers.target");
 	});
 
-	it("installs by reloading then enabling the timer", async () => {
+	it("installs by creating the log directory, reloading, then enabling the timer", async () => {
 		const host = new FakeHost("linux");
 		const result = await installTicker(host, unitInput());
 		expect(result.ok).toBe(true);
 		expect([...host.files.keys()].sort()).toEqual([service, timer]);
+		expect([...host.dirs]).toEqual(["/home/tester/.omp/timers"]);
 		expect(host.commands).toEqual([
 			["systemctl", "--user", "daemon-reload"],
 			["systemctl", "--user", "enable", "--now", "omp-timer-tick.timer"],
@@ -183,17 +189,19 @@ it("rejects unsupported platforms with a clear error", async () => {
 	await expect(uninstallTicker(host)).rejects.toThrow(/unsupported platform/);
 });
 
-it("dry-run host writes units under the given HOME and runs no commands", async () => {
+it("dry-run host writes units under the given HOME, creates the tick log directory and runs no commands", async () => {
 	if (process.platform !== "darwin" && process.platform !== "linux") return;
 	const dir = await TempDir.create("omp-ticker-home-");
 	tempDirs.push(dir);
 	const host = createTimerHost({ dryRun: true, home: dir.path() });
-	const result = await installTicker(host, unitInput());
+	const store = path.join(dir.path(), "fresh", "timers");
+	const result = await installTicker(host, unitInput({ logPath: path.join(store, "tick.log") }));
 	expect(result.ok).toBe(true);
 	for (const file of result.plan.files) {
 		expect(file.path.startsWith(dir.path())).toBe(true);
 		expect(await Bun.file(file.path).text()).toBe(file.content);
 	}
+	expect(fs.statSync(store).isDirectory()).toBe(true);
 	expect(host.commands).toEqual(result.plan.commands);
 	expect(result.results.every(r => r.stderr === "(dry run)")).toBe(true);
 });

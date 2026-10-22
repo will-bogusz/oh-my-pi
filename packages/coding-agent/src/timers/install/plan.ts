@@ -1,3 +1,4 @@
+import * as path from "node:path";
 import type { TimerHost } from "./host";
 import { launchdPlistPath, launchdTarget, renderTickerPlist } from "./launchd";
 import {
@@ -96,6 +97,8 @@ async function runRecorded(host: TimerHost, argv: string[], results: TickerComma
 export async function installTicker(host: TimerHost, input: TickerUnitInput): Promise<TickerInstallResult> {
 	const plan = planTickerInstall(host, input);
 	for (const file of plan.files) await host.writeFile(file.path, file.content);
+	// systemd's `append:` does not create the log's directory: on a host with no timer store yet, every tick fails with 209/STDOUT.
+	await host.makeDir(path.dirname(input.logPath));
 	const results: TickerCommandResult[] = [];
 	let bootedOut = false;
 	for (const argv of plan.commands) {
