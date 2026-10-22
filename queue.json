@@ -46098,7 +46098,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T13:44:28Z",
+  "checked": "2026-10-22T14:15:22Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -46283,12 +46283,6 @@
     "merged_at": "2026-10-20T17:30:24Z",
     "findings": []
    },
-   "16299": {
-    "title": "fix(coding-agent): say computer.windows() returns plain records, not window handles",
-    "merge_commit": "8f08aadfda7927db8d8b9cfa9f09fe7c53cd412d",
-    "merged_at": "2026-10-20T13:54:32Z",
-    "findings": []
-   },
    "16300": {
     "title": "fix(coding-agent): install with %pip into venvs that have no pip",
     "merge_commit": "0bba68154823781aa16409548fedee335d8aefec",
@@ -46314,18 +46308,6 @@
     "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it",
     "merge_commit": "b44c24172539905011a5a2e87a2a691cfbdf2f55",
     "merged_at": "2026-10-20T17:11:14Z",
-    "findings": []
-   },
-   "16380": {
-    "title": "fix(coding-agent): keep a newer text-predict daemon instead of shutting it down",
-    "merge_commit": "eeb904d9a5da167e35f7156e79b4e8de7cdf6e44",
-    "merged_at": "2026-10-20T13:49:20Z",
-    "findings": []
-   },
-   "16381": {
-    "title": "fix(edit): required a live tag for bare hashline MV and REM",
-    "merge_commit": "fd4fea523a7231f4b3455e5014b80da3d5775c00",
-    "merged_at": "2026-10-20T13:49:46Z",
     "findings": []
    },
    "16383": {
@@ -46400,12 +46382,6 @@
     "merged_at": "2026-10-20T17:14:47Z",
     "findings": []
    },
-   "16404": {
-    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps",
-    "merge_commit": "61a26256e5059d54e129bd4d9cf97e39cc6d0bdd",
-    "merged_at": "2026-10-20T13:54:27Z",
-    "findings": []
-   },
    "16405": {
     "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in",
     "merge_commit": "af03483a885b134b03bc786405c60093e85b9211",
@@ -46440,12 +46416,6 @@
     "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
     "merge_commit": "6c0f8f0ba9fff1b58585c7ff521e11d8107c3a98",
     "merged_at": "2026-10-20T17:25:05Z",
-    "findings": []
-   },
-   "16421": {
-    "title": "fix(coding-agent): load custom tools that import omp packages in the binary",
-    "merge_commit": "30afab1e198342f261f7694d13e0119049758ef2",
-    "merged_at": "2026-10-20T13:54:13Z",
     "findings": []
    },
    "16422": {
@@ -46500,18 +46470,6 @@
     "title": "fix(ai): keep usage and timing on thinking-loop aborts",
     "merge_commit": "ef3a92da32f63a842df1d2c05afcb7091741b764",
     "merged_at": "2026-10-20T17:13:01Z",
-    "findings": []
-   },
-   "16438": {
-    "title": "fix(read): read one line for a bare N beside :raw",
-    "merge_commit": "66f261f9598144fc1cc07b0552c093f459d8e56f",
-    "merged_at": "2026-10-20T13:59:28Z",
-    "findings": []
-   },
-   "16441": {
-    "title": "fix(write): keep content whose leading numbers do not count up by one",
-    "merge_commit": "c3862cbfab1a99446cbd6569e1760ac4c0444454",
-    "merged_at": "2026-10-20T13:48:32Z",
     "findings": []
    },
    "16442": {
