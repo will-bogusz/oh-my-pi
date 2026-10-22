@@ -44705,7 +44705,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/drop-dead-jobs-op",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:23:46Z",
-   "updated": "2026-10-22T08:33:04Z",
+   "updated": "2026-10-22T08:41:05Z",
    "note": "",
    "built": [
     {
@@ -44885,15 +44885,6 @@
      "with_code": "c80129c2b3a04a3ec8b36d4bb3437ddb1f484dc2",
      "tip": "1ac202cbef152f0660fea66b9bb63384b7a3cb8d",
      "with_tip": "a2ab0c065dea87e5db191e080d09f45b4a1b9dc0",
-     "at": "2026-10-22T08:25:32Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#16284",
-     "code": "36d572900313cbb63e27600069f5526d36f38c03",
-     "with_code": "a33d0dd72d51fadb3bc714a2458b31eb66689527",
-     "tip": "1ac202cbef152f0660fea66b9bb63384b7a3cb8d",
-     "with_tip": "9ac8b4f5a1e5c03d8d08e69005b54bdfe7ab4a73",
      "at": "2026-10-22T08:25:32Z",
      "host": "MacBook-Pro"
     },
@@ -45111,6 +45102,15 @@
      "tip": "1ac202cbef152f0660fea66b9bb63384b7a3cb8d",
      "with_tip": "4cd300030241cc9f136f88315b9e52497dd050ec",
      "at": "2026-10-22T08:33:03Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16284",
+     "code": "36d572900313cbb63e27600069f5526d36f38c03",
+     "with_code": "763fffc68828967ba5f8acbf3864a0d48a13a25a",
+     "tip": "1ac202cbef152f0660fea66b9bb63384b7a3cb8d",
+     "with_tip": "e3a693eb887774b77ab920ec068c9c7e5ef6e47e",
+     "at": "2026-10-22T08:40:59Z",
      "host": "MacBook-Pro"
     }
    ]
