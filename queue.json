@@ -50291,5 +50291,11 @@
     "host": "goliath"
    }
   }
+ },
+ "opening": {
+  "id": "resume-cancel-bg-jobs",
+  "token": "b1f7530977e445c3b66beea07ecc95bf",
+  "host": "MacBook-Pro",
+  "at": "2026-10-22T08:26:04Z"
  }
 }
