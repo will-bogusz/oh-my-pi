@@ -28,12 +28,14 @@ import { YAML } from "bun";
 import { specHistoryPath, specLockPath, specPath, specsDir, TIMER_ID_PATTERN, timersDbPath, timersRoot } from "./paths";
 import { parseDuration, serializeDuration } from "./schedule";
 import type {
+	AgentRunSettings,
 	DeliveryRecord,
 	EndRecord,
 	RunOutcome,
 	RunRecord,
 	RunTrigger,
 	TimerDoneWhy,
+	TimerReport,
 	TimerSpec,
 	TimerState,
 	TimerTarget,
@@ -76,6 +78,48 @@ function int(value: unknown): number | undefined {
 	return Number.isInteger(parsed) ? parsed : undefined;
 }
 
+function num(value: unknown): number | undefined {
+	if (value === undefined || value === null || value === "") return undefined;
+	const parsed = Number(value);
+	return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function strList(value: unknown): string[] | undefined {
+	if (value === undefined || value === null) return undefined;
+	const list = (Array.isArray(value) ? value : [value]).map(item => String(item).trim()).filter(Boolean);
+	return list.length ? list : undefined;
+}
+
+const REPORT_MODES: Record<TimerReport, true> = { always: true, said: true, failure: true, never: true };
+
+export function isTimerReport(value: unknown): value is TimerReport {
+	return typeof value === "string" && Object.hasOwn(REPORT_MODES, value);
+}
+
+/** `report` when the spec does not say. */
+export const DEFAULT_TIMER_REPORT: TimerReport = "said";
+
+function parseTarget(session: string | undefined, sessionFile: string | undefined): TimerTarget {
+	if (!session || session === "fresh") return { kind: "fresh" };
+	if (session === "own") return { kind: "own" };
+	return { kind: "session", sessionId: session, sessionFile };
+}
+
+function parseRunSettings(fm: Record<string, unknown>): AgentRunSettings {
+	const maxTime = str(fm.max_time);
+	return {
+		agent: str(fm.agent),
+		thinking: str(fm.thinking),
+		hermetic: fm.hermetic === true || undefined,
+		runCwd: fm.cwd === "run" || undefined,
+		maxTimeMs: maxTime ? parseDuration(maxTime) : undefined,
+		maxCost: num(fm.max_cost),
+		expect: strList(fm.expect),
+		before: str(fm.before),
+		after: str(fm.after),
+	};
+}
+
 /** Parse a spec file. Throws with the file path on malformed or newer-format content. */
 export function parseTimerSpec(id: string, content: string, filePath: string): TimerSpec {
 	const { frontmatter: fm, body } = parseFrontmatter(content, {
@@ -91,10 +135,7 @@ export function parseTimerSpec(id: string, content: string, filePath: string): T
 	const reason = str(fm.reason);
 	if (!reason) throw new Error(`${filePath}: missing reason`);
 	const session = str(fm.session);
-	const target: TimerTarget =
-		!session || session === "fresh"
-			? { kind: "fresh" }
-			: { kind: "session", sessionId: session, sessionFile: str(fm.session_file) };
+	const target = parseTarget(session, str(fm.session_file));
 	const shell = str(fm.shell);
 	const created = (fm.created ?? {}) as Record<string, unknown>;
 	const createdAt = str(created.at) ?? new Date(0).toISOString();
@@ -112,7 +153,7 @@ export function parseTimerSpec(id: string, content: string, filePath: string): T
 		target,
 		whenClosed: fm.when_closed === "hold" ? "hold" : "resume",
 		action: shell ? { kind: "shell", command: shell } : { kind: "prompt", prompt: body.trim() },
-		cwd: str(fm.cwd) ?? process.cwd(),
+		cwd: (fm.cwd === "run" ? str(created.cwd) : str(fm.cwd)) || process.cwd(),
 		expiresAt: str(fm.expires),
 		maxRuns: int(fm.max_runs),
 		overlap: fm.overlap === "queue" ? "queue" : "skip",
@@ -122,6 +163,8 @@ export function parseTimerSpec(id: string, content: string, filePath: string): T
 		allowTimers: fm.allow_timers === true,
 		wakeMachine: fm.wake_machine === true,
 		model: str(fm.model),
+		run: parseRunSettings(fm),
+		report: isTimerReport(fm.report) ? fm.report : DEFAULT_TIMER_REPORT,
 		paused: fm.paused === true,
 		pausedReason: str(fm.paused_reason),
 		armedAt: str(fm.armed_at) ?? createdAt,
@@ -154,10 +197,10 @@ export function serializeTimerSpec(spec: TimerSpec): string {
 		if (spec.target.sessionFile) fm.session_file = spec.target.sessionFile;
 		fm.when_closed = spec.whenClosed;
 	} else {
-		fm.session = "fresh";
+		fm.session = spec.target.kind;
 	}
 	if (spec.action.kind === "shell") fm.shell = spec.action.command;
-	fm.cwd = spec.cwd;
+	fm.cwd = spec.run.runCwd ? "run" : spec.cwd;
 	if (spec.expiresAt) fm.expires = spec.expiresAt;
 	if (spec.maxRuns !== undefined) fm.max_runs = spec.maxRuns;
 	fm.overlap = spec.overlap;
@@ -167,6 +210,15 @@ export function serializeTimerSpec(spec: TimerSpec): string {
 	if (spec.allowTimers) fm.allow_timers = true;
 	if (spec.wakeMachine) fm.wake_machine = true;
 	if (spec.model) fm.model = spec.model;
+	if (spec.run.agent) fm.agent = spec.run.agent;
+	if (spec.run.thinking) fm.thinking = spec.run.thinking;
+	if (spec.run.hermetic) fm.hermetic = true;
+	if (spec.run.maxTimeMs !== undefined) fm.max_time = serializeDuration(spec.run.maxTimeMs);
+	if (spec.run.maxCost !== undefined) fm.max_cost = spec.run.maxCost;
+	if (spec.run.expect?.length) fm.expect = spec.run.expect;
+	if (spec.run.before) fm.before = spec.run.before;
+	if (spec.run.after) fm.after = spec.run.after;
+	if (spec.report !== DEFAULT_TIMER_REPORT) fm.report = spec.report;
 	if (spec.paused) {
 		fm.paused = true;
 		if (spec.pausedReason) fm.paused_reason = spec.pausedReason;

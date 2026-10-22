@@ -1,3 +1,5 @@
+export * from "./agent-profile";
+export * from "./agent-run";
 export * from "./conditions";
 export * from "./fire-message";
 export * from "./gate";
@@ -10,6 +12,8 @@ export * from "./notify";
 export * from "./paths";
 export * from "./policy";
 export * from "./render";
+export * from "./run-command";
+export * from "./run-result";
 export * from "./runner";
 export * from "./schedule";
 export * from "./scope";

@@ -31,18 +31,19 @@ import {
 	setPaused,
 	setTimer,
 	type TimerEditInput,
+	type TimerRunInput,
 	type TimerSetInput,
 	timerRuns,
 } from "../timers";
 import { readShellWord } from "../tools/shell-tokenize";
-import { readTimerRunLog, timerCardView, timerListRowView } from "../tools/timer-view";
+import { lastRunResult, readTimerRunLog, runResults, timerCardView, timerListRowView } from "../tools/timer-view";
 import type { AgentSession } from "../session/agent-session";
 import { clearSubmittedText } from "./helpers/draft";
 import { commandConsumed, parseSubcommand, usage } from "./helpers/parse";
 import type { SlashCommandRuntime, SlashCommandSpec } from "./types";
 
 const TIMER_USAGE =
-	"Usage: /timer [in <dur>|at <time>|every <cadence>] <prompt> · /timer ls|show|runs|logs|fire|pause|resume|rm <id> · /timer set [<id>] --reason … --at|--every|--until|--ci|--pid … --prompt|--shell … · /timer edit <id> --<field> <value|none> …";
+	"Usage: /timer [in <dur>|at <time>|every <cadence>] <prompt> · /timer ls|show|runs|logs|fire|pause|resume|rm <id> · /timer set [<id>] --reason … --at|--every|--until|--ci|--pid … --prompt|--shell … [--session fresh|own --agent … --thinking … --hermetic --cwd run --max-time … --max-cost … --expect … --before … --after … --report …] · /timer edit <id> --<field> <value|none> …";
 
 /** What a `/timer` invocation produced: model-free text, plus the structured view the TUI draws. */
 export interface TimerSlashResult {
@@ -103,10 +104,67 @@ const SET_FLAGS: Record<string, (input: TimerSetInput, value: string) => void> =
 	model: (input, value) => {
 		input.model = value;
 	},
+	agent: (input, value) => {
+		input.agent = value;
+	},
+	thinking: (input, value) => {
+		input.thinking = value;
+	},
+	hermetic: (input, value) => {
+		if (value !== "true" && value !== "false") throw new Error("--hermetic takes true or false");
+		input.hermetic = value === "true";
+	},
+	"no-hermetic": input => {
+		input.hermetic = false;
+	},
+	"max-time": (input, value) => {
+		input.maxTime = value;
+	},
+	"max-cost": (input, value) => {
+		const usd = Number(value);
+		if (!value.trim() || !Number.isFinite(usd)) throw new Error(`--max-cost takes a USD amount, got "${value}"`);
+		input.maxCost = usd;
+	},
+	expect: (input, value) => {
+		input.expect = [...(input.expect ?? []), value];
+	},
+	before: (input, value) => {
+		input.before = value;
+	},
+	after: (input, value) => {
+		input.after = value;
+	},
+	report: (input, value) => {
+		if (value !== "always" && value !== "said" && value !== "failure" && value !== "never") {
+			throw new Error("--report takes always, said, failure or never");
+		}
+		input.report = value;
+	},
 };
 
-/** Parse `[<id>] --flag value …` (shell quoting) into a set request. */
-export function parseTimerSetArgs(text: string): TimerSetInput {
+/** Flags that take no value (`--hermetic`, or `--hermetic=false`). */
+const BOOLEAN_FLAGS: Record<string, true> = { hermetic: true, "no-hermetic": true };
+
+/** Agent-run keys an edit clears with `none` (hermetic turns off with `--no-hermetic`). */
+type ClearableRunKey = Exclude<keyof TimerRunInput, "hermetic">;
+
+/** Agent-run flags `none` clears on edit, by the edit key they clear. */
+const RUN_CLEAR_FLAGS: Record<string, ClearableRunKey> = {
+	agent: "agent",
+	thinking: "thinking",
+	"max-time": "maxTime",
+	"max-cost": "maxCost",
+	expect: "expect",
+	before: "before",
+	after: "after",
+};
+
+/**
+ * Parse `[<id>] --flag value …` (shell quoting) into set fields. With
+ * `cleared`, an agent-run flag whose value is `none` is collected there
+ * instead of applied (edit).
+ */
+function parseTimerFlags(text: string, cleared?: Set<ClearableRunKey>): TimerSetInput {
 	const words: string[] = [];
 	let rest = text;
 	for (let word = readShellWord(rest); word !== undefined; word = readShellWord(rest)) {
@@ -126,19 +184,30 @@ export function parseTimerSetArgs(text: string): TimerSetInput {
 		const name = eq === -1 ? word.slice(2) : word.slice(2, eq);
 		const apply = SET_FLAGS[name];
 		if (!apply) throw new Error(`Unknown flag --${name}`);
-		const value = eq === -1 ? words[++i] : word.slice(eq + 1);
+		const value = eq !== -1 ? word.slice(eq + 1) : BOOLEAN_FLAGS[name] ? "true" : words[++i];
 		if (value === undefined) throw new Error(`--${name} needs a value`);
-		apply(input, value);
+		const clears = RUN_CLEAR_FLAGS[name];
+		if (cleared && clears && value === "none") cleared.add(clears);
+		else apply(input, value);
 	}
 	return input;
+}
+
+/** Parse `[<id>] --flag value …` (shell quoting) into a set request; `--expect` repeats. */
+export function parseTimerSetArgs(text: string): TimerSetInput {
+	return parseTimerFlags(text);
 }
 
 const clearable = (value: string | undefined): string | null | undefined =>
 	value === "none" || value === "never" ? null : value;
 
-/** Parse `<id> --flag value …` into an edit: only the given fields change; `none` clears at/every/until/expires. */
+/**
+ * Parse `<id> --flag value …` into an edit: only the given fields change;
+ * `none` clears at/every/until/expires and the agent-run flags, `--no-hermetic` turns hermetic off.
+ */
 export function parseTimerEditArgs(text: string): { id: string; patch: TimerEditInput } {
-	const input = parseTimerSetArgs(text);
+	const cleared = new Set<ClearableRunKey>();
+	const input = parseTimerFlags(text, cleared);
 	if (!input.id) throw new Error("/timer edit needs a timer id");
 	if (input.session !== undefined) throw new Error("/timer edit cannot change --session; set the timer again");
 	const patch: TimerEditInput = {
@@ -155,7 +224,17 @@ export function parseTimerEditArgs(text: string): { id: string; patch: TimerEdit
 		expires: clearable(input.expires),
 		maxRuns: input.maxRuns,
 		model: input.model,
+		agent: input.agent,
+		thinking: input.thinking,
+		hermetic: input.hermetic,
+		maxTime: input.maxTime,
+		maxCost: input.maxCost,
+		expect: input.expect,
+		before: input.before,
+		after: input.after,
+		report: input.report,
 	};
+	for (const key of cleared) patch[key] = null;
 	if (Object.values(patch).every(value => value === undefined)) throw new Error("/timer edit: nothing to change");
 	return { id: input.id, patch };
 }
@@ -212,10 +291,10 @@ async function cardResult(
 ): Promise<TimerSlashResult> {
 	const now = Date.now();
 	const row = await loadTimerRow(await requireTimer(id), now);
-	const ticker = await readTickerStatus();
+	const [ticker, lastResult] = await Promise.all([readTickerStatus(), lastRunResult(row)]);
 	return {
-		text: renderTimerCard(row, now, { verb, selfSessionId: sessionId, ticker, ...gate }),
-		card: timerCardView(row, { verb, selfSessionId: sessionId, ticker, now, ...gate }),
+		text: renderTimerCard(row, now, { verb, selfSessionId: sessionId, ticker, lastResult, ...gate }),
+		card: timerCardView(row, { verb, selfSessionId: sessionId, ticker, now, lastResult, ...gate }),
 	};
 }
 
@@ -256,8 +335,10 @@ export async function runTimerSlash(args: string, session: AgentSession, cwd: st
 		}
 		case "show":
 			return cardResult(needId(), "", sessionId);
-		case "runs":
-			return { text: renderRuns(await timerRuns(needId())) };
+		case "runs": {
+			const runs = await timerRuns(needId());
+			return { text: renderRuns(runs, await runResults(id, runs)) };
+		}
 		case "logs": {
 			const seq = extra[0] === undefined ? undefined : Number(extra[0]);
 			if (seq !== undefined && !Number.isInteger(seq)) throw new Error(`Invalid run number "${extra[0]}"`);

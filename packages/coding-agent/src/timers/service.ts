@@ -8,7 +8,9 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { isEnoent, logger } from "@oh-my-pi/pi-utils";
+import { CLI_THINKING_LEVELS, parseCliThinkingLevel } from "@oh-my-pi/pi-tui/thinking";
 import { readSessionInfo, resolveResumableSession } from "../session/session-listing";
+import { resolveRunProfile } from "./agent-profile";
 import { compileCondition, type TimerCondition } from "./conditions";
 import { runGate } from "./gate";
 import { createTimerHost, syncMachineWake, type WakeHost } from "./install";
@@ -30,6 +32,7 @@ import {
 import { assertTimerMutationAllowed, currentTimerRun } from "./scope";
 import {
 	DEFAULT_PAUSE_AFTER,
+	DEFAULT_TIMER_REPORT,
 	type IncidentRow,
 	listTimerSpecs,
 	mutateTimerSpec,
@@ -38,7 +41,15 @@ import {
 	readTimerSpec,
 } from "./store";
 import { currentState } from "./tick";
-import type { TimerCatchup, TimerOverlap, TimerSpec, TimerState, TimerTarget } from "./types";
+import type {
+	AgentRunSettings,
+	TimerCatchup,
+	TimerOverlap,
+	TimerReport,
+	TimerSpec,
+	TimerState,
+	TimerTarget,
+} from "./types";
 
 /** Agent-set recurring session timers retire after this unless `expires` says otherwise. */
 const TOOL_RECURRING_EXPIRY_MS = 7 * DAY;
@@ -58,14 +69,27 @@ export interface TimerSetInput {
 	tz?: string;
 	prompt?: string;
 	shell?: string;
-	/** `origin` (the calling session), `fresh`, or a session id/prefix/path. */
+	/** `origin` (the calling session), `fresh`, `own`, or a session id/prefix/path. */
 	session?: string;
 	whenClosed?: "resume" | "hold";
+	/** Directory, or `run` for a fresh per-run directory (agent runs). */
 	cwd?: string;
 	/** Duration (`7d`), date/time, or `never`. */
 	expires?: string;
 	maxRuns?: number;
 	model?: string;
+	/** Agent profile for fresh/own runs. */
+	agent?: string;
+	thinking?: string;
+	hermetic?: boolean;
+	/** Duration (`20m`): abort the run and fail it with `timeout` past this. */
+	maxTime?: string;
+	/** USD: abort the run and fail it with `budget` once its model calls cost more. */
+	maxCost?: number;
+	expect?: string[];
+	before?: string;
+	after?: string;
+	report?: TimerReport;
 	overlap?: TimerOverlap;
 	/** Duration: how late a slot may still run before it is recorded missed. */
 	grace?: string;
@@ -122,6 +146,7 @@ async function freeDerivedId(base: string, root: string): Promise<string> {
 async function resolveTarget(session: string | undefined, ctx: TimerSetContext): Promise<TimerTarget> {
 	const requested = session?.trim() || (ctx.sessionId ? "origin" : "fresh");
 	if (requested === "fresh") return { kind: "fresh" };
+	if (requested === "own") return { kind: "own" };
 	if (requested === "origin") {
 		if (!ctx.sessionId) throw new Error('session "origin" needs a calling session; pass a session id or "fresh"');
 		return { kind: "session", sessionId: ctx.sessionId, sessionFile: ctx.sessionFile };
@@ -194,6 +219,68 @@ function validateSpec(spec: TimerSpec, now: number): void {
 	}
 	if (!Number.isInteger(spec.pauseAfter) || spec.pauseAfter < 1)
 		throw new Error("pauseAfter must be a positive integer");
+	validateRunSettings(spec);
+}
+
+/** Keys of {@link AgentRunSettings} as the spec, tool and CLI name them. */
+const RUN_KEY_NAMES: Record<keyof AgentRunSettings, string> = {
+	agent: "agent",
+	thinking: "thinking",
+	hermetic: "hermetic",
+	runCwd: "cwd: run",
+	maxTimeMs: "maxTime",
+	maxCost: "maxCost",
+	expect: "expect",
+	before: "before",
+	after: "after",
+};
+
+function validateRunSettings(spec: TimerSpec): void {
+	const { run } = spec;
+	const agentRun = spec.action.kind === "prompt" && spec.target.kind !== "session";
+	if (!agentRun) {
+		const given = Object.entries(RUN_KEY_NAMES)
+			.filter(([key]) => run[key as keyof AgentRunSettings] !== undefined)
+			.map(([, name]) => name);
+		if (spec.report !== DEFAULT_TIMER_REPORT) given.push("report");
+		if (given.length) {
+			throw new Error(
+				`${given.join(", ")}: only prompt timers whose session is fresh or own run an agent of their own`,
+			);
+		}
+		return;
+	}
+	if (run.thinking !== undefined && parseCliThinkingLevel(run.thinking) === undefined) {
+		throw new Error(`thinking "${run.thinking}" is not one of ${CLI_THINKING_LEVELS.join(", ")}`);
+	}
+	if (run.maxTimeMs !== undefined && !(run.maxTimeMs >= MINUTE)) throw new Error("maxTime must be at least 1m");
+	if (run.maxCost !== undefined && !(run.maxCost > 0)) throw new Error("maxCost must be a positive USD amount");
+	for (const entry of run.expect ?? []) {
+		if (!entry.trim()) throw new Error("expect paths must not be empty");
+	}
+}
+
+/** Run settings from set/edit input; `null` clears a key, `undefined` keeps `base`'s. */
+function applyRunInput(base: AgentRunSettings, input: TimerRunInput): AgentRunSettings {
+	const run = { ...base };
+	const text = (value: string | null | undefined): string | undefined => value?.trim() || undefined;
+	if (input.agent !== undefined) run.agent = text(input.agent);
+	if (input.thinking !== undefined) run.thinking = text(input.thinking);
+	if (input.hermetic !== undefined) run.hermetic = input.hermetic || undefined;
+	if (input.maxTime !== undefined) run.maxTimeMs = input.maxTime === null ? undefined : parseDuration(input.maxTime);
+	if (input.maxCost !== undefined) run.maxCost = input.maxCost ?? undefined;
+	if (input.expect !== undefined) {
+		const expect = input.expect?.map(entry => entry.trim()).filter(Boolean);
+		run.expect = expect?.length ? expect : undefined;
+	}
+	if (input.before !== undefined) run.before = text(input.before);
+	if (input.after !== undefined) run.after = text(input.after);
+	return run;
+}
+
+/** A named agent profile must exist where the run will look it up. */
+async function assertAgentProfile(spec: TimerSpec): Promise<void> {
+	if (spec.run.agent) await resolveRunProfile(spec.run.agent, spec.cwd);
 }
 
 async function testGate(spec: TimerSpec): Promise<Pick<TimerSetResult, "gateNow" | "gateDetail">> {
@@ -235,7 +322,8 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 	const condition = input.when ? compileCondition(input.when) : undefined;
 	const tz = input.tz?.trim() || hostTimeZone();
 	assertTimeZone(tz);
-	const cwd = path.resolve(ctx.cwd, input.cwd ?? ".");
+	const runCwd = input.cwd?.trim() === "run";
+	const cwd = path.resolve(ctx.cwd, runCwd ? "." : (input.cwd ?? "."));
 	await assertDirectory(cwd);
 
 	let id = input.id?.trim();
@@ -274,6 +362,8 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		allowTimers: input.allowTimers ?? false,
 		wakeMachine: input.wakeMachine ?? false,
 		model: input.model?.trim() || undefined,
+		run: { ...applyRunInput({}, input), runCwd: runCwd || undefined },
+		report: input.report ?? DEFAULT_TIMER_REPORT,
 		paused: false,
 		armedAt: nowIso,
 		created: {
@@ -294,6 +384,7 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		},
 	};
 	validateSpec(spec, now);
+	await assertAgentProfile(spec);
 	const gate = ctx.testGate === false ? {} : await testGate(spec);
 	const { spec: written, previous } = await mutateTimerSpec(id, () => spec, {
 		expectedRev: input.expectedRev,
@@ -304,8 +395,22 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 	return { spec: written, replaced: previous !== undefined, ...gate, warnings };
 }
 
+/** Agent-run keys shared by set and edit; on edit `null` clears one. */
+export interface TimerRunInput {
+	agent?: string | null;
+	thinking?: string | null;
+	hermetic?: boolean;
+	/** Duration (`20m`). */
+	maxTime?: string | null;
+	/** USD. */
+	maxCost?: number | null;
+	expect?: string[] | null;
+	before?: string | null;
+	after?: string | null;
+}
+
 /** Fields `edit` may change; absent fields keep their value. `null` clears an optional field. */
-export interface TimerEditInput {
+export interface TimerEditInput extends TimerRunInput {
 	title?: string | null;
 	reason?: string;
 	at?: string | null;
@@ -315,10 +420,12 @@ export interface TimerEditInput {
 	prompt?: string;
 	shell?: string;
 	whenClosed?: "resume" | "hold";
+	/** Directory, or `run` for a fresh per-run directory (agent runs). */
 	cwd?: string;
 	expires?: string | null;
 	maxRuns?: number | null;
 	model?: string | null;
+	report?: TimerReport;
 	overlap?: TimerOverlap;
 	grace?: string | null;
 	catchup?: TimerCatchup;
@@ -366,9 +473,13 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 			}
 			if (patch.whenClosed !== undefined) next.whenClosed = patch.whenClosed;
 			if (patch.cwd !== undefined) {
-				next.cwd = path.resolve(ctx.cwd, patch.cwd);
+				const runCwd = patch.cwd.trim() === "run";
+				next.run.runCwd = runCwd || undefined;
+				next.cwd = runCwd ? current.created.cwd || current.cwd : path.resolve(ctx.cwd, patch.cwd);
 				await assertDirectory(next.cwd);
 			}
+			next.run = applyRunInput(next.run, patch);
+			if (patch.report !== undefined) next.report = patch.report;
 			if (patch.maxRuns !== undefined) next.maxRuns = patch.maxRuns ?? undefined;
 			if (patch.model !== undefined) next.model = patch.model?.trim() || undefined;
 			if (patch.overlap !== undefined) next.overlap = patch.overlap;
@@ -404,6 +515,7 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 			}
 			if (rearmed) next.armedAt = new Date(now).toISOString();
 			validateSpec(next, now);
+			if (patch.agent || patch.cwd !== undefined) await assertAgentProfile(next);
 			return next;
 		},
 		{ expectedRev: patch.expectedRev, root },

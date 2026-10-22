@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
+import TimerCommand from "@oh-my-pi/pi-coding-agent/commands/timer";
 import { parseInternalUrl } from "@oh-my-pi/pi-coding-agent/internal-urls/parse";
 import { TimerProtocolHandler } from "@oh-my-pi/pi-coding-agent/internal-urls/timer-protocol";
 import {
@@ -6,11 +7,12 @@ import {
 	parseTimerSetArgs,
 	parseTimerSugar,
 } from "@oh-my-pi/pi-coding-agent/slash-commands/builtin-timer";
-import { TIMERS_DIR_ENV } from "@oh-my-pi/pi-coding-agent/timers/paths";
-import { renderTimerCard } from "@oh-my-pi/pi-coding-agent/timers/render";
+import { runResultPath, TIMERS_DIR_ENV } from "@oh-my-pi/pi-coding-agent/timers/paths";
+import { renderRuns, renderTimerCard } from "@oh-my-pi/pi-coding-agent/timers/render";
+import { writeRunResult } from "@oh-my-pi/pi-coding-agent/timers/run-result";
 import { loadTimerRow, setTimer, type TimerRow } from "@oh-my-pi/pi-coding-agent/timers/service";
-import { readTimerSpec } from "@oh-my-pi/pi-coding-agent/timers/store";
-import type { TimerSpec } from "@oh-my-pi/pi-coding-agent/timers/types";
+import { openTimerDb, type RunView, readTimerSpec } from "@oh-my-pi/pi-coding-agent/timers/store";
+import type { AgentRunResult, TimerSpec } from "@oh-my-pi/pi-coding-agent/timers/types";
 import {
 	timerArgsTier,
 	timerCardView,
@@ -208,5 +210,249 @@ describe("timer card ticker line", () => {
 		expect(timerCardView(await loadTimerRow(once.spec, now), { verb: "armed", ticker, now }).ticker).toBe(
 			"last tick 20s ago · fires within a minute after its time",
 		);
+	});
+});
+
+describe("agent-run surfaces", () => {
+	const at = "2026-10-22T09:00:00.000Z";
+	const result = (overrides: Partial<AgentRunResult> = {}): AgentRunResult => ({
+		v: 1,
+		runId: "triage#1",
+		timerId: "triage",
+		seq: 1,
+		session: "own",
+		ok: true,
+		quiet: true,
+		tokens: { input: 3000, output: 100, cacheRead: 0, cacheWrite: 0, total: 3100 },
+		cost: 0.0021,
+		startedAt: at,
+		endedAt: at,
+		durationMs: 12_000,
+		cwd: dir.path(),
+		finalText: "nothing new since yesterday",
+		...overrides,
+	});
+	const runView: RunView = {
+		runId: "triage#1",
+		seq: 1,
+		at,
+		trigger: "manual",
+		outcome: "fired",
+		rev: 1,
+		runner: true,
+	};
+
+	/** Run `omp timer <argv>` in-process; returns what it printed and its exit code. */
+	async function omp(...argv: string[]): Promise<{ out: string; code: number | undefined }> {
+		const write = spyOn(process.stdout, "write").mockImplementation(() => true);
+		const before = process.exitCode;
+		try {
+			await new TimerCommand(argv, { bin: "omp", version: "0.0.0-test", commands: new Map() }).run();
+			const code = process.exitCode === undefined ? undefined : Number(process.exitCode);
+			return { out: write.mock.calls.map(call => String(call[0])).join(""), code };
+		} finally {
+			write.mockRestore();
+			process.exitCode = before;
+		}
+	}
+
+	it("omp timer set/edit store the agent-run flags; edit clears with none and --no-hermetic", async () => {
+		const set = await omp(
+			"set",
+			"triage",
+			"--every",
+			"daily 09:00",
+			"--session",
+			"own",
+			"--thinking",
+			"low",
+			"--hermetic",
+			"--cwd",
+			"run",
+			"--max-time",
+			"20m",
+			"--max-cost",
+			"0.5",
+			"--expect",
+			"out/a.md",
+			"--expect",
+			"out/b.md",
+			"--before",
+			"make prep",
+			"--after",
+			"make check",
+			"--report",
+			"failure",
+			"--prompt",
+			"triage new issues",
+			"--reason",
+			"morning triage",
+			"--json",
+		);
+		expect(set).toMatchObject({ code: 0 });
+		const spec = await readTimerSpec("triage");
+		expect(spec?.target).toEqual({ kind: "own" });
+		expect(spec?.report).toBe("failure");
+		expect(spec?.run).toEqual({
+			thinking: "low",
+			hermetic: true,
+			runCwd: true,
+			maxTimeMs: 20 * 60_000,
+			maxCost: 0.5,
+			expect: ["out/a.md", "out/b.md"],
+			before: "make prep",
+			after: "make check",
+		});
+
+		const edit = await omp(
+			"edit",
+			"triage",
+			"--max-cost",
+			"none",
+			"--expect",
+			"none",
+			"--before",
+			"none",
+			"--no-hermetic",
+			"--thinking",
+			"high",
+			"--json",
+		);
+		expect(edit).toMatchObject({ code: 0 });
+		expect((await readTimerSpec("triage"))?.run).toEqual({
+			thinking: "high",
+			runCwd: true,
+			maxTimeMs: 20 * 60_000,
+			after: "make check",
+		});
+	});
+
+	it("/timer set maps the agent-run flags, with --expect repeatable", () => {
+		expect(
+			parseTimerSetArgs(
+				`triage --session own --agent reviewer --thinking low --hermetic --cwd run --max-time 20m --max-cost 0.5 --expect out/a.md --expect out/b.md --before 'make prep' --after "make check" --report said`,
+			),
+		).toEqual({
+			id: "triage",
+			reason: "",
+			session: "own",
+			agent: "reviewer",
+			thinking: "low",
+			hermetic: true,
+			cwd: "run",
+			maxTime: "20m",
+			maxCost: 0.5,
+			expect: ["out/a.md", "out/b.md"],
+			before: "make prep",
+			after: "make check",
+			report: "said",
+		});
+		expect(() => parseTimerSetArgs("--max-cost cheap")).toThrow("--max-cost takes a USD amount");
+		expect(() => parseTimerSetArgs("--report sometimes")).toThrow("--report takes");
+	});
+
+	it("/timer edit clears agent-run keys with none and turns hermetic off with --no-hermetic", () => {
+		const { patch } = parseTimerEditArgs(
+			"triage --agent none --max-cost none --expect none --before none --no-hermetic --thinking high --report never",
+		);
+		expect(patch).toMatchObject({
+			agent: null,
+			maxCost: null,
+			expect: null,
+			before: null,
+			hermetic: false,
+			thinking: "high",
+			report: "never",
+		});
+		expect(patch.after).toBeUndefined();
+		expect(parseTimerEditArgs("triage --expect out/c.md").patch.expect).toEqual(["out/c.md"]);
+	});
+
+	it("tool edit fields map onto the agent-run edit keys", () => {
+		expect(
+			timerEditPatch({
+				agent: "none",
+				thinking: "low",
+				hermetic: false,
+				maxTime: "30m",
+				maxCost: 0,
+				expect: [],
+				before: "make prep",
+				after: "none",
+				report: "always",
+			}),
+		).toMatchObject({
+			agent: null,
+			thinking: "low",
+			hermetic: false,
+			maxTime: "30m",
+			maxCost: null,
+			expect: null,
+			before: "make prep",
+			after: null,
+			report: "always",
+		});
+		expect(timerEditPatch({ maxCost: 2, expect: ["out/a.md"] })).toMatchObject({
+			maxCost: 2,
+			expect: ["out/a.md"],
+		});
+	});
+
+	it("before/after hooks are shell commands: they raise the tier like shell does", () => {
+		expect(timerArgsTier({ op: "set", session: "origin" }, "sess-a")).toBe("write");
+		expect(timerArgsTier({ op: "set", before: "make prep" }, "sess-a")).toBe(
+			timerArgsTier({ op: "set", shell: "make prep" }, "sess-a"),
+		);
+		expect(timerArgsTier({ op: "edit", after: "make check" }, "sess-a")).toBe("exec");
+		const url = parseInternalUrl("timer://wake-a/edit");
+		const sessA = { getSessionId: () => "sess-a" } as unknown as ToolSession;
+		expect(new TimerProtocolHandler().spec.write?.tier(url, '{"before":"make prep"}', sessA)).toBe("exec");
+	});
+
+	it("renderRuns appends the result summary of runs that have one", () => {
+		const text = renderRuns([runView, { ...runView, runId: "triage#2", seq: 2 }], new Map([[1, result()]]));
+		const [first, second] = text.split("\n");
+		expect(first).toContain("result=ok · quiet · $0.0021 · 3.1k tok");
+		expect(second).not.toContain("result=");
+		expect(renderRuns([runView], new Map([[1, result({ ok: false, failure: "budget", quiet: false })]]))).toContain(
+			"result=failed: budget",
+		);
+	});
+
+	it("timer://<id>/runs/<seq> returns the run with its result.json; the card shows run settings and the result", async () => {
+		await setTimer(
+			{
+				id: "triage",
+				reason: "morning triage",
+				every: "daily 09:00",
+				prompt: "triage new issues",
+				session: "own",
+				cwd: "run",
+				thinking: "low",
+				maxCost: 0.5,
+			},
+			{ by: "cli", cwd: dir.path(), sessionId: "sess-a" },
+		);
+		openTimerDb().insertRun(
+			"triage",
+			{ runId: "triage#1", seq: 1, at, trigger: "manual", outcome: "fired", rev: 1 },
+			true,
+		);
+		await writeRunResult(result());
+		const handler = new TimerProtocolHandler();
+		const read = async (url: string) => (await handler.resolve(parseInternalUrl(url))).content;
+
+		const run = await read("timer://triage/runs/1");
+		expect(run).toContain("result=ok · quiet · $0.0021");
+		expect(run).toContain(runResultPath("triage", 1));
+		expect(run).toContain('"finalText": "nothing new since yesterday"');
+		expect(await read("timer://triage/runs/latest")).toContain(runResultPath("triage", 1));
+		await expect(read("timer://triage/runs/2")).rejects.toThrow("has no run 2");
+
+		const card = await read("timer://triage");
+		expect(card).toContain("own session in a per-run dir");
+		expect(card).toMatch(/^run {4}thinking low · cwd per-run · max \$0\.50 · report said · session /m);
+		expect(card).toMatch(/^last {3}fired .* · ok · quiet · \$0\.0021/m);
+		expect(await read("timer://triage/runs")).toContain("result=ok · quiet");
 	});
 });

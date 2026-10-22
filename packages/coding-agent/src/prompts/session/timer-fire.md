@@ -1,10 +1,12 @@
 <timer-fire id="{{timerId}}" run="{{seq}}"{{#if scheduled}} scheduled="{{scheduled}}"{{/if}} fired="{{fired}}" late="{{late}}" via="{{via}}">
-Now: {{now}}. You set this timer {{setAt}} because: {{reason}}
+Now: {{now}}. {{#if run}}This timer was set{{else}}You set this timer{{/if}} {{setAt}} because: {{reason}}
 {{#if notablyLate}}It is {{late}} late: the machine was asleep, no ticker ran, or the session was busy. Check the instruction still makes sense now before acting on it.
 {{/if}}{{#if missedSlots}}{{missedSlots}} earlier scheduled run(s) were missed while no ticker ran; this one run covers them.
 {{/if}}{{#if manual}}It was fired by hand (`timer fire`), not by its schedule.
 {{/if}}{{#if headless}}The session was closed, so this turn runs headless: nobody is watching live. Leave a clear record of what you did.
-{{/if}}Your instruction:
+{{/if}}{{#if run}}This run is unattended, in {{#if own}}the session this timer keeps across runs: earlier runs are above, and what you leave here is here next run{{else}}a fresh session started for it{{/if}}. Nobody is watching live, and tools that need an approval are denied. Your final message is the run's report: lead with what matters. If there is nothing worth reporting, end with a single line `[quiet]`.
+{{#if expect}}The run counts as failed unless these paths exist when you finish (relative to {{cwd}}): {{expect}}.
+{{/if}}{{/if}}Your instruction:
 {{prompt}}
 </timer-fire>
 {{#if data}}<timer-data untrusted="true" source="{{dataSource}}">

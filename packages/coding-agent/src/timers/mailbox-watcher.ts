@@ -29,6 +29,7 @@ import {
 	renderTimerMail,
 	SESSION_POKE_MESSAGE_TYPE,
 	TIMER_FIRE_MESSAGE_TYPE,
+	TIMER_REPORT_MESSAGE_TYPE,
 	type TimerDeliveryVia,
 	type TimerMessageDetails,
 } from "./fire-message";
@@ -77,21 +78,28 @@ function mailIdOf(entry: SessionEntry): string | undefined {
 	return typeof details.mailId === "string" ? details.mailId : undefined;
 }
 
+const CUSTOM_TYPE_BY_KIND: Record<TimerMail["kind"], string> = {
+	"timer-fire": TIMER_FIRE_MESSAGE_TYPE,
+	poke: SESSION_POKE_MESSAGE_TYPE,
+	"timer-report": TIMER_REPORT_MESSAGE_TYPE,
+};
+
 function messageFor(
 	mail: TimerMail,
 	via: TimerDeliveryVia,
 	tz: string | undefined,
 ): CustomMessage<TimerMessageDetails> {
+	const run = mail.fire ?? mail.report;
 	return {
 		role: "custom",
-		customType: mail.kind === "poke" ? SESSION_POKE_MESSAGE_TYPE : TIMER_FIRE_MESSAGE_TYPE,
+		customType: CUSTOM_TYPE_BY_KIND[mail.kind],
 		content: renderTimerMail(mail, via, Date.now(), tz),
 		display: true,
 		details: {
 			mailId: mail.id,
 			kind: mail.kind,
-			timerId: mail.fire?.timerId,
-			runId: mail.fire?.runId,
+			timerId: run?.timerId,
+			runId: run?.runId,
 			via,
 		},
 		attribution: "agent",
@@ -283,14 +291,17 @@ export class SessionMailbox {
 		if (attempt === undefined) return;
 		const flight: InFlight = { sessionId, pending: true, since: Date.now() };
 		this.#inFlight.set(mail.id, flight);
-		const tz = mail.fire ? (await readTimerSpec(mail.fire.timerId))?.tz : undefined;
-		if (mail.fire) {
-			recordDelivery(mail.fire.timerId, {
-				runId: mail.fire.runId,
+		const run = mail.fire ?? mail.report;
+		const tz = run ? (await readTimerSpec(run.timerId))?.tz : undefined;
+		if (run) {
+			recordDelivery(run.timerId, {
+				runId: run.runId,
 				at: new Date().toISOString(),
 				state: this.#via === "headless" ? "resumed-headless" : "delivered-live",
 				session: sessionId,
-				detail: attempt > 1 ? `re-delivery attempt ${attempt}` : undefined,
+				detail:
+					[mail.report && "report", attempt > 1 && `re-delivery attempt ${attempt}`].filter(Boolean).join("; ") ||
+					undefined,
 			});
 		}
 		const { role: _role, timestamp: _timestamp, ...message } = messageFor(mail, this.#via, tz);

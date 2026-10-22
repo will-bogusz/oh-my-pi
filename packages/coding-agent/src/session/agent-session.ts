@@ -142,7 +142,7 @@ import type { EvalPreludeDefinition } from "../eval/preludes";
 import type { PythonResult } from "../eval/py/executor";
 import { EVAL_STATE_CONTEXT_TYPE, formatEvalStateContext, isEvalStateContext } from "../eval/state";
 import { WorkPoolRegistry } from "../task/workpool";
-import { TIMER_FIRE_MESSAGE_TYPE } from "../timers/fire-message";
+import { TIMER_FIRE_MESSAGE_TYPE, TIMER_REPORT_MESSAGE_TYPE } from "../timers/fire-message";
 import { type BashPtyOptions, type BashResult, releaseShellSessions } from "../exec/bash-executor";
 import type { TtsrManager } from "../export/ttsr";
 import type { LoadedCustomCommand } from "../extensibility/custom-commands";
@@ -828,13 +828,16 @@ function isEvalActivity(message: AgentMessage): boolean {
 
 /**
  * Stranded asides that still start a turn while a user interrupt (Esc) holds the session:
- * a peer's IRC message, and a timer fire, which is standing intent the user set up earlier.
- * One policy for the stranded-aside resume and the late idle-aside dispatch.
+ * a peer's IRC message, and a timer fire or a timer run's report, which follow standing
+ * intent the user set up earlier. One policy for the stranded-aside resume and the late
+ * idle-aside dispatch.
  */
 function wakesThroughInterrupt(message: AgentMessage): boolean {
 	return (
 		message.role === "custom" &&
-		(message.customType === "irc:incoming" || message.customType === TIMER_FIRE_MESSAGE_TYPE)
+		(message.customType === "irc:incoming" ||
+			message.customType === TIMER_FIRE_MESSAGE_TYPE ||
+			message.customType === TIMER_REPORT_MESSAGE_TYPE)
 	);
 }
 
