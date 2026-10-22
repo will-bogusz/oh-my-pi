@@ -42674,6 +42674,24 @@
    "opened": "2026-10-21T06:13:53Z",
    "readied": "2026-10-21T06:14:18Z",
    "advanced": "2026-10-22T07:19:56Z"
+  },
+  {
+   "id": "sleep-prevention-doc",
+   "branch": "will/sleep-prevention-doc",
+   "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "body": "bodies/sleep-prevention-doc.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/sleep-prevention-doc",
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T07:23:22Z",
+   "updated": "2026-10-22T07:23:22Z",
+   "note": ""
   }
  ],
  "watch": {
