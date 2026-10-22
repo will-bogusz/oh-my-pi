@@ -19350,9 +19350,9 @@
    "area": "computer",
    "priority": "P2",
    "needs": [
-    "#16223"
+    "#16403"
    ],
-   "base": "c6ec2ff47a7a9160a73c4cb7134d37c97ca9ca07",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/computer-ui-quiet.md",
    "state": "queued",
    "pr": null,
@@ -19360,7 +19360,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-19T07:26:45Z",
-   "updated": "2026-10-19T19:31:33Z",
+   "updated": "2026-10-22T07:17:32Z",
    "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block)."
   },
   {
