@@ -57,6 +57,8 @@ export interface HeadlessDeliveryRequest {
 	cwd: string;
 	/** The message whose turn the run waits for; it must already be in the session's mailbox. */
 	mailId: string;
+	/** Extra environment for the host (a timer fire's recursion guard and store root). */
+	env?: Record<string, string>;
 }
 
 /**
@@ -97,7 +99,7 @@ export async function deliverHeadless(request: HeadlessDeliveryRequest): Promise
 		spawn: args => {
 			child = ptree.spawn([...resolveCliEntryCmd(), ...args], {
 				cwd: request.cwd,
-				env: { ...Bun.env, [MAILBOX_HEADLESS_ENV]: mailId },
+				env: { ...Bun.env, [MAILBOX_HEADLESS_ENV]: mailId, ...request.env },
 				stdin: "pipe",
 			});
 			return child;

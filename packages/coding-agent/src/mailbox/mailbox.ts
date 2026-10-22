@@ -116,10 +116,18 @@ export function readClaimedMail(sessionId: string, name: string): SessionMail | 
  * Claim one message: rename `new/<name>` → `cur/<name>`. Exactly one caller
  * wins, across threads and processes; the rest get `undefined`. Synchronous so
  * a claim can happen inside a prompt's synchronous setup.
+ *
+ * A sender that retries publishes under the same id. A copy whose id is
+ * already claimed or delivered is a duplicate: it is removed unclaimed, so it
+ * never reaches the session twice and never resets the claim's attempt count.
  */
 export function claimMail(sessionId: string, name: string): SessionMail | undefined {
 	const dir = mailDir(sessionId);
 	const cur = path.join(dir, "cur", name);
+	if (fs.existsSync(cur) || fs.existsSync(path.join(dir, "done", name))) {
+		fs.rmSync(path.join(dir, "new", name), { force: true });
+		return undefined;
+	}
 	fs.mkdirSync(path.dirname(cur), { recursive: true });
 	try {
 		fs.renameSync(path.join(dir, "new", name), cur);
@@ -165,9 +173,33 @@ export function releaseMail(sessionId: string, name: string): void {
 	moveMail(sessionId, name, "cur", "failed");
 }
 
+/**
+ * Where `mailId` is: waiting (`new`), claimed (`cur`), in the session file (`done`), given up on
+ * (`failed`: out of attempts or unreadable), or nowhere.
+ */
+export function mailLocation(sessionId: string, mailId: string): MailBox | undefined {
+	const dir = mailDir(sessionId);
+	const name = mailFileName(mailId);
+	for (const where of ["done", "failed", "cur", "new"] as const) {
+		if (fs.existsSync(path.join(dir, where, name))) return where;
+	}
+	return undefined;
+}
+
 /** Whether `mailId` reached the session file (its message sits in `done/`). */
 export function isMailDone(sessionId: string, mailId: string): boolean {
 	return fs.existsSync(path.join(mailDir(sessionId), "done", mailFileName(mailId)));
+}
+
+/** Take back an unclaimed message; `false` when a consumer claimed it first (or it is gone). */
+export function withdrawMail(sessionId: string, mailId: string): boolean {
+	try {
+		fs.unlinkSync(path.join(mailDir(sessionId), "new", mailFileName(mailId)));
+		return true;
+	} catch (err) {
+		if (isEnoent(err)) return false;
+		throw err;
+	}
 }
 
 /**

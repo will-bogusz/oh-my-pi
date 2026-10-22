@@ -382,14 +382,15 @@ Use these when you want partial control without recreating internal discovery lo
   `systemPrompt` control different prompt layers. See
   [System prompt customization](./system-prompt-customization.md) for their
   replacement and discovery contracts.
-- `mailbox` controls `omp poke` messages addressed to the session. Every
-  file-backed session marks itself open while it is open, so `omp poke --resume`
-  never resumes it headless in another process (that turn would land on a
-  branch this host never sees); by default the mail is held until the session
-  is next opened in a process that delivers it. Pass
-  `mailbox: { deliver: true }` to have this host inject the mail as turns:
-  an idle session starts a turn, a running turn takes it at its next step, and
-  after an interrupt it waits for the next user prompt. An ACP client that
+- `mailbox` controls timer fires and `omp poke` messages addressed to the
+  session. Every file-backed session marks itself open while it is open, so
+  neither a timer nor `omp poke --resume` resumes it headless in another
+  process (that turn would land on a branch this host never sees); by default
+  the mail is held until the session is next opened in a process that
+  delivers it. Pass `mailbox: { deliver: true }` to have this host inject the
+  mail as turns: an idle session starts a turn, a running turn takes it at its
+  next step, and after an interrupt a timer fire still starts its turn while a
+  poke waits for the next user prompt. An ACP client that
   keeps agent-initiated turns off gets it with its next prompt. When several
   processes or managers have one session open, exactly one of them consumes
   its mail. Mail lives under `<agentDir>/mailbox/` (`OMP_MAILBOX_DIR`

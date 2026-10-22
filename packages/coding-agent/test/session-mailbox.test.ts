@@ -27,6 +27,13 @@ import {
 import { MAILBOX_DIR_ENV, MAILBOX_ENV, mailDir } from "@oh-my-pi/pi-coding-agent/mailbox/paths";
 import { listSessionPresence } from "@oh-my-pi/pi-coding-agent/mailbox/presence";
 import { SessionMailbox } from "@oh-my-pi/pi-coding-agent/mailbox/watcher";
+import { BashTool } from "@oh-my-pi/pi-coding-agent/tools/bash";
+import { resolveCliEntryCmd } from "@oh-my-pi/pi-coding-agent/subprocess/worker-client";
+import { firePayloadPath, TIMERS_DIR_ENV } from "@oh-my-pi/pi-coding-agent/timers/paths";
+import { setTimer, timerRuns } from "@oh-my-pi/pi-coding-agent/timers/service";
+import { closeTimerDbs, readTimerSpec, TimerDb } from "@oh-my-pi/pi-coding-agent/timers/store";
+import { runTick } from "@oh-my-pi/pi-coding-agent/timers/tick";
+import type { TimerSpec } from "@oh-my-pi/pi-coding-agent/timers/types";
 import { TempDir } from "@oh-my-pi/pi-utils";
 
 const SESSION_STORAGE_MODULE = path.resolve(import.meta.dir, "../src/session/session-storage.ts");
@@ -64,6 +71,7 @@ describe("session mailbox delivery", () => {
 	let tempDir: TempDir;
 	let authStorage: AuthStorage;
 	let previousRoot: string | undefined;
+	let previousTimersRoot: string | undefined;
 	let previousSwitch: string | undefined;
 	let sessions: AgentSession[];
 	let contexts: Context[];
@@ -75,6 +83,8 @@ describe("session mailbox delivery", () => {
 		previousRoot = Bun.env[MAILBOX_DIR_ENV];
 		previousSwitch = Bun.env[MAILBOX_ENV];
 		Bun.env[MAILBOX_DIR_ENV] = path.join(tempDir.path(), "mailbox");
+		previousTimersRoot = Bun.env[TIMERS_DIR_ENV];
+		Bun.env[TIMERS_DIR_ENV] = path.join(tempDir.path(), "timers");
 		delete Bun.env[MAILBOX_ENV];
 		authStorage = await AuthStorage.create(path.join(tempDir.path(), "auth.db"));
 		authStorage.keys.setRuntime("openai", "openai-test-key");
@@ -87,11 +97,14 @@ describe("session mailbox delivery", () => {
 	afterEach(async () => {
 		release.resolve();
 		for (const opened of sessions) await opened.dispose().catch(() => {});
+		closeTimerDbs();
 		authStorage.close();
 		if (previousRoot === undefined) delete Bun.env[MAILBOX_DIR_ENV];
 		else Bun.env[MAILBOX_DIR_ENV] = previousRoot;
 		if (previousSwitch === undefined) delete Bun.env[MAILBOX_ENV];
 		else Bun.env[MAILBOX_ENV] = previousSwitch;
+		if (previousTimersRoot === undefined) delete Bun.env[TIMERS_DIR_ENV];
+		else Bun.env[TIMERS_DIR_ENV] = previousTimersRoot;
 		tempDir.removeSync();
 	});
 
@@ -105,7 +118,11 @@ describe("session mailbox delivery", () => {
 		return file;
 	}
 
-	/** A session whose model calls `slow` when the prompt is "go", and answers text otherwise. */
+	/**
+	 * A session whose model calls `slow` when the prompt is "go", runs `omp timer set <id>` through the
+	 * real bash tool when the prompt says `SET_TIMER:<id>` (a shell timer) or `WAKE_ME:<id>` (a prompt
+	 * timer that wakes this session), and answers text otherwise.
+	 */
 	function openSession(
 		sessionManager = SessionManager.create(tempDir.path(), path.join(tempDir.path(), "sessions")),
 		clientBridge?: ClientBridge,
@@ -122,24 +139,52 @@ describe("session mailbox delivery", () => {
 				return { content: [{ type: "text", text: "SLOW_DONE" }] };
 			},
 		};
+		const bashTool = new BashTool({
+			cwd: tempDir.path(),
+			hasUI: false,
+			settings: Settings.isolated({ "bash.autoBackground.enabled": false, "bashInterceptor.enabled": false }),
+			getSessionFile: () => sessionManager.getSessionFile() ?? null,
+			getSessionSpawns: () => "*",
+			// Called only once a tool runs, after `opened` below exists.
+			getTimerRun: () => opened.getTimerRun(),
+		}) as unknown as AgentTool;
+		const timerCommand = (id: string, action: string[]) =>
+			[...resolveCliEntryCmd(), "timer", "set", id, "--at", "in 1h", ...action, "--reason", "child"]
+				.map(word => `'${word}'`)
+				.join(" ");
 		const agent = new Agent({
 			getApiKey: () => "test-key",
-			initialState: { model, systemPrompt: ["Test"], tools: [slowTool], messages: [] },
+			initialState: { model, systemPrompt: ["Test"], tools: [slowTool, bashTool], messages: [] },
 			convertToLlm,
 			streamFn: (_model, context) => {
 				contexts.push(context);
 				const last = requestTexts(context).at(-1);
+				const [, kind, timerId] = last?.match(/(SET_TIMER|WAKE_ME):([a-z0-9-]+)/) ?? [];
+				const action =
+					kind === "WAKE_ME"
+						? ["--prompt", "look again", "--session", sessionManager.getSessionFile() ?? ""]
+						: ["--shell", "true"];
+				const call =
+					last === "go"
+						? { name: "slow", arguments: {} }
+						: timerId
+							? {
+									name: "bash",
+									arguments: {
+										command: `OMP_TIMERS_DIR='${Bun.env[TIMERS_DIR_ENV]}' ${timerCommand(timerId, action)}`,
+									},
+								}
+							: undefined;
 				const message: AssistantMessage = {
 					role: "assistant",
-					content:
-						last === "go"
-							? [{ type: "toolCall", id: `tc-${contexts.length}`, name: "slow", arguments: {} }]
-							: [{ type: "text", text: "ok" }],
+					content: call
+						? [{ type: "toolCall", id: `tc-${contexts.length}`, ...call }]
+						: [{ type: "text", text: "ok" }],
 					api: model.api,
 					provider: model.provider,
 					model: model.id,
 					usage: zeroUsage,
-					stopReason: last === "go" ? "toolUse" : "stop",
+					stopReason: call ? "toolUse" : "stop",
 					timestamp: Date.now(),
 				};
 				const stream = new AssistantMessageEventStream();
@@ -158,7 +203,10 @@ describe("session mailbox delivery", () => {
 			sessionManager,
 			settings,
 			modelRegistry: new ModelRegistry(authStorage),
-			toolRegistry: new Map([[slowTool.name, slowTool]]),
+			toolRegistry: new Map([
+				[slowTool.name, slowTool],
+				[bashTool.name, bashTool],
+			]),
 		});
 		opened.setClientBridge(clientBridge);
 		mailbox.bind(opened);
@@ -237,6 +285,33 @@ describe("session mailbox delivery", () => {
 		await until(() => isMailDone(sessionId, heldId), "the held poke to be recorded as delivered");
 	});
 
+	it("after Esc, starts a turn for a timer fire at once and records it delivered live", async () => {
+		const { session: opened } = openSession();
+		const sessionId = opened.sessionManager.getSessionId();
+		await interrupt(opened);
+
+		const now = Date.now();
+		await setTimer(
+			{
+				id: "wake",
+				reason: "test",
+				at: "in 1m",
+				prompt: "TIMER_PROMPT",
+				session: opened.sessionManager.getSessionFile(),
+			},
+			{ cwd: tempDir.path(), now },
+		);
+		const tick = await runTick(now + 61_000);
+		expect(tick.lines).toMatchObject([
+			{ id: "wake", action: "fired", detail: `mailed to live session ${sessionId}` },
+		]);
+		await until(() => isMailDone(sessionId, "wake#1"), "the timer fire to reach the transcript");
+
+		expect(contexts).toHaveLength(1);
+		expect(requestTexts(contexts[0]!).at(-1)).toContain("TIMER_PROMPT");
+		expect((await timerRuns("wake"))[0]?.delivery?.state).toBe("delivered-live");
+	});
+
 	it("takes no waiting mail for a prompt that fails because a turn is running", async () => {
 		const { session: opened } = openSession();
 		const run = opened.prompt("go");
@@ -300,7 +375,7 @@ describe("session mailbox delivery", () => {
 		fs.writeFileSync(path.join(newDir, "a-truncated.json"), '{"v":1,"id":"a-trunc');
 		fs.writeFileSync(
 			path.join(newDir, "a-future.json"),
-			JSON.stringify({ v: 1, id: "a-future", kind: "timer-fire", sessionId, createdAt: new Date().toISOString() }),
+			JSON.stringify({ v: 1, id: "a-future", kind: "later-kind", sessionId, createdAt: new Date().toISOString() }),
 		);
 
 		const mailId = await poke(sessionId, "BEHIND_BAD_MAIL");
@@ -450,4 +525,243 @@ describe("session mailbox delivery", () => {
 		expect(requestTexts(contexts[0]!).some(text => text.includes("ACP_POKE"))).toBe(true);
 		await until(() => isMailDone(sessionId, mailId), "the poke to reach the session file");
 	});
+
+	const quiet = { notify: async () => {} };
+
+	it("injects a timer fire once when a cut-off dispatch is re-dispatched after the session took it", async () => {
+		const { session: opened } = openSession();
+		await opened.prompt("seed");
+		contexts.length = 0;
+		const sessionId = opened.sessionManager.getSessionId();
+		const now = Date.now();
+		await setTimer(
+			{
+				id: "dup",
+				reason: "test",
+				at: "now",
+				prompt: "DUP_SENTINEL",
+				session: opened.sessionManager.getSessionFile(),
+			},
+			{ cwd: tempDir.path(), now },
+		);
+		// The mail is posted, then the tick dies before recording the dispatch.
+		const mark = spyOn(TimerDb.prototype, "markDispatched").mockImplementationOnce(() => {
+			throw new Error("tick killed");
+		});
+		try {
+			await runTick(now, quiet);
+		} finally {
+			mark.mockRestore();
+		}
+		// The retry reads the fire payload while the first copy reaches the transcript.
+		const payload = firePayloadPath("dup", 1);
+		const file = Bun.file;
+		const read = spyOn(Bun, "file").mockImplementation(((target: string) => {
+			const real = file(target);
+			if (target !== payload) return real;
+			return {
+				json: async () => {
+					await until(() => isMailDone(sessionId, "dup#1"), "the first copy to reach the transcript");
+					return real.json();
+				},
+			};
+		}) as unknown as typeof Bun.file);
+		try {
+			expect((await runTick(now + 61_000, quiet)).lines).toMatchObject([{ id: "dup", action: "redispatched" }]);
+		} finally {
+			read.mockRestore();
+		}
+		// A poll that delivers a later poke has also seen any second copy of the fire (listed first).
+		const barrier = await poke(sessionId, "BARRIER");
+		await until(() => isMailDone(sessionId, barrier), "the barrier poke");
+		await opened.waitForIdle();
+		expect(contexts.filter(context => requestTexts(context).at(-1)?.includes("DUP_SENTINEL"))).toHaveLength(1);
+		expect(
+			opened.agent.state.messages.filter(message => JSON.stringify(message).includes("DUP_SENTINEL")),
+		).toHaveLength(1);
+		await runTick(now + 120_000, quiet);
+		expect((await timerRuns("dup"))[0]).toMatchObject({ outcome: "fired", delivery: { state: "delivered-live" } });
+		expect((await timerRuns("dup"))[0]?.settledAt).toBeDefined();
+	});
+
+	it("counts a timer fire delivered only once the session file has it, not when admission refused it", async () => {
+		const file = await savedSessionFile();
+		const { session: first } = openSession(await SessionManager.open(file));
+		const sessionId = first.sessionManager.getSessionId();
+		const now = Date.now();
+		await setTimer(
+			{ id: "admit", reason: "test", at: "now", prompt: "ADMIT_ME", session: file },
+			{ cwd: tempDir.path(), now },
+		);
+		const send = spyOn(first, "sendCustomMessage").mockRejectedValue(new Error("admission refused"));
+		await runTick(now, quiet);
+		await until(() => send.mock.calls.length === 1, "the fire to be offered to the session");
+		await runTick(now + 60_000, quiet);
+		expect(contexts).toHaveLength(0);
+		expect((await timerRuns("admit"))[0]).toMatchObject({ delivery: { state: "queued" }, settledAt: undefined });
+
+		// The next opener recovers the claim and delivers it.
+		send.mockRestore();
+		await first.dispose();
+		openSession(await SessionManager.open(file));
+		await until(() => isMailDone(sessionId, "admit#1"), "the recovered fire to reach the transcript");
+		expect(requestTexts(contexts[0]!).at(-1)).toContain("ADMIT_ME");
+		expect((await timerRuns("admit"))[0]?.delivery).toMatchObject({
+			state: "delivered-live",
+			detail: "re-delivery attempt 2",
+		});
+		await runTick(now + 120_000, quiet);
+		expect((await timerRuns("admit"))[0]?.settledAt).toBeDefined();
+	});
+
+	it("keeps delivering mail, and settles the fire, when recording a timer delivery fails", async () => {
+		const { session: opened } = openSession();
+		await opened.prompt("seed");
+		const sessionId = opened.sessionManager.getSessionId();
+		const now = Date.now();
+		await setTimer(
+			{
+				id: "book",
+				reason: "test",
+				at: "now",
+				prompt: "BOOKKEEPING",
+				session: opened.sessionManager.getSessionFile(),
+			},
+			{ cwd: tempDir.path(), now },
+		);
+		const record = TimerDb.prototype.recordDelivery;
+		const failing = spyOn(TimerDb.prototype, "recordDelivery").mockImplementation(
+			function (this: TimerDb, timerId, delivery) {
+				if (delivery.state === "delivered-live") throw new Error("database is locked");
+				record.call(this, timerId, delivery);
+			},
+		);
+		try {
+			await runTick(now, quiet);
+			await until(() => isMailDone(sessionId, "book#1"), "the fire to reach the transcript");
+			const mailId = await poke(sessionId, "AFTER_FAILED_RECORD");
+			await until(() => isMailDone(sessionId, mailId), "later mail to be delivered");
+		} finally {
+			failing.mockRestore();
+		}
+		await runTick(now + 60_000, quiet);
+		expect((await timerRuns("book"))[0]).toMatchObject({ outcome: "fired" });
+		expect((await timerRuns("book"))[0]?.settledAt).toBeDefined();
+	});
+
+	it("settles a closed-session fire that a session opened before the retry took live, with no lost runner", async () => {
+		const file = await savedSessionFile();
+		const now = Date.now();
+		await setTimer(
+			{ id: "handoff", reason: "test", at: "now", prompt: "HANDOFF", session: file },
+			{ cwd: tempDir.path(), now },
+		);
+		const crash = {
+			...quiet,
+			spawnRunner: () => {
+				throw new Error("tick killed");
+			},
+		};
+		expect((await runTick(now, crash)).lines).toMatchObject([{ id: "handoff", action: "error" }]);
+
+		const { session: opened } = openSession(await SessionManager.open(file));
+		const sessionId = opened.sessionManager.getSessionId();
+		const spawned: string[] = [];
+		const recording = { ...quiet, spawnRunner: (spec: TimerSpec, seq: number) => spawned.push(`${spec.id}#${seq}`) };
+		await runTick(now + 61_000, recording);
+		await until(() => isMailDone(sessionId, "handoff#1"), "the live session to take the fire");
+		const final = await runTick(now + 240_000, recording);
+		expect(final.lines.filter(line => line.action === "lost")).toEqual([]);
+		expect((await timerRuns("handoff"))[0]).toMatchObject({ outcome: "fired", runner: false });
+		expect((await timerRuns("handoff"))[0]?.settledAt).toBeDefined();
+		expect(spawned).toEqual([]);
+	});
+
+	/** Text of the newest tool result the model saw. */
+	const lastToolOutput = (): string => requestTexts(contexts.at(-1)!).at(-1) ?? "";
+
+	it.skipIf(process.platform === "win32")(
+		"runs a live timer turn's commands as that timer's run, and the user's next turn as no run",
+		async () => {
+			const { session: opened } = openSession();
+			await opened.prompt("seed");
+			contexts.length = 0;
+			const sessionId = opened.sessionManager.getSessionId();
+			const now = Date.now();
+			await setTimer(
+				{
+					id: "parent",
+					reason: "test",
+					at: "now",
+					prompt: "SET_TIMER:child-a",
+					session: opened.sessionManager.getSessionFile(),
+				},
+				{ cwd: tempDir.path(), now },
+			);
+			await runTick(now, quiet);
+			await until(() => contexts.length === 2, "the fired turn to run its command");
+			await opened.waitForIdle();
+			expect(lastToolOutput()).toContain(
+				"may set only timer parent or prompt timers that wake this session, not timer child-a",
+			);
+			expect(await readTimerSpec("child-a")).toBeUndefined();
+			await until(() => isMailDone(sessionId, "parent#1"), "the fire to be recorded delivered");
+
+			// The user's next message ends the fire's scope, in the same shell session.
+			await opened.prompt("SET_TIMER:child-b");
+			expect(await readTimerSpec("child-b")).toBeDefined();
+		},
+		30_000,
+	);
+
+	it.skipIf(process.platform === "win32")(
+		"lets a live timer turn's commands arm another timer that wakes this session",
+		async () => {
+			const { session: opened } = openSession();
+			await opened.prompt("seed");
+			contexts.length = 0;
+			const sessionId = opened.sessionManager.getSessionId();
+			const now = Date.now();
+			await setTimer(
+				{
+					id: "parent",
+					reason: "test",
+					at: "now",
+					prompt: "WAKE_ME:follow-up",
+					session: opened.sessionManager.getSessionFile(),
+				},
+				{ cwd: tempDir.path(), now },
+			);
+			await runTick(now, quiet);
+			await until(() => contexts.length === 2, "the fired turn to run its command");
+			await opened.waitForIdle();
+			expect(await readTimerSpec("follow-up")).toMatchObject({
+				target: { kind: "session", sessionId },
+				action: { kind: "prompt", prompt: "look again" },
+				created: { run: "parent#1" },
+			});
+		},
+		30_000,
+	);
+
+	it.skipIf(process.platform === "win32")(
+		"runs a held timer fire's turn as that timer's run once an opener delivers it",
+		async () => {
+			const file = await savedSessionFile();
+			const now = Date.now();
+			await setTimer(
+				{ id: "parent", reason: "test", at: "now", prompt: "SET_TIMER:child-c", session: file, whenClosed: "hold" },
+				{ cwd: tempDir.path(), now },
+			);
+			expect((await runTick(now, quiet)).lines).toMatchObject([{ id: "parent", action: "fired" }]);
+			const { session: opened } = openSession(await SessionManager.open(file));
+			await until(() => contexts.length === 2, "the delivered turn to run its command");
+			await opened.waitForIdle();
+			expect(lastToolOutput()).toContain(
+				"may set only timer parent or prompt timers that wake this session, not timer child-c",
+			);
+			expect(await readTimerSpec("child-c")).toBeUndefined();
+		},
+		30_000,
+	);
 });

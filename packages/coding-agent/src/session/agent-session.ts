@@ -223,6 +223,7 @@ import {
 	shouldDisableReasoning,
 	toReasoningEffort,
 } from "@oh-my-pi/pi-tui/thinking";
+import { mailMessageDetails, TIMER_FIRE_MESSAGE_TYPE } from "../mailbox/message";
 import { isAttachmentOnlyTitleInput, isLowSignalTitleInput } from "../tiny/text";
 import type { ImageAttachmentEntry, ToolSession } from "../tools";
 import { resolveApproval } from "../tools/approval";
@@ -826,6 +827,11 @@ function isEvalActivity(message: AgentMessage): boolean {
 	);
 }
 
+/** A timer fire follows standing intent the user set up earlier: it starts its turn even while an interrupt (Esc) holds the session. */
+function wakesThroughInterrupt(message: AgentMessage): boolean {
+	return message.role === "custom" && message.customType === TIMER_FIRE_MESSAGE_TYPE;
+}
+
 /** A retry supersedes a failed operation only when its intent matches, allowing a missing append phase to be supplied. */
 function todoRetryMatches(failed: Record<string, unknown>, retry: Record<string, unknown>): boolean {
 	if (Bun.deepEquals(failed, retry)) return true;
@@ -1421,13 +1427,15 @@ export class AgentSession implements SettingsScope {
 		if (this.#advisors.autoResumeSuppressed) {
 			// A user interrupt is still in effect (clearQueue({ forInterrupt: true }) already
 			// dropped these same records from the agent-core queues to keep the run the user
-			// stopped from auto-resuming). Only a real peer IRC message justifies waking a fresh
-			// turn here; extension/user asides fold into context like the plan-mode branch above,
-			// staying user-driven until the next deliberate prompt.
+			// stopped from auto-resuming). Only a real peer IRC message or a timer fire (standing
+			// user intent) justifies waking a fresh turn here; extension/user asides fold into
+			// context like the plan-mode branch above, staying user-driven until the next
+			// deliberate prompt.
 			const wake: AgentMessage[] = [];
 			const fold: AgentMessage[] = [];
 			for (const record of records) {
-				if (record.role === "custom" && record.customType === "irc:incoming") wake.push(record);
+				if ((record.role === "custom" && record.customType === "irc:incoming") || wakesThroughInterrupt(record))
+					wake.push(record);
 				else fold.push(record);
 			}
 			this.#foldStrandedIrcAsidesIntoContext(fold);
@@ -7200,6 +7208,23 @@ export class AgentSession implements SettingsScope {
 		return this.#eval.getKernelOwnerId();
 	}
 
+	/**
+	 * The timer run (`<id>#<seq>`) the current work answers: set when the newest user message or mail
+	 * in context is a timer fire. Tools hand it to the commands they start as `OMP_TIMER_RUN`, so a fired
+	 * turn in an open session is held to that timer's scope (its own timer and timers that wake this
+	 * session), as in a headless resume; your next message ends it.
+	 */
+	getTimerRun(): string | undefined {
+		const messages = this.agent.state.messages;
+		for (let i = messages.length - 1; i >= 0; i--) {
+			const message = messages[i];
+			if (message.role === "user") return undefined;
+			const mail = mailMessageDetails(message);
+			if (mail) return mail.runId;
+		}
+		return undefined;
+	}
+
 	/** Current session display name, if set */
 	get sessionName(): string | undefined {
 		return this.sessionManager.getSessionName();
@@ -9791,13 +9816,14 @@ export class AgentSession implements SettingsScope {
 				this.#foldStrandedIrcAsidesIntoContext([normalizedAppMessage]);
 				return false;
 			}
-			if (this.#advisors.autoResumeSuppressed) {
+			if (this.#advisors.autoResumeSuppressed && !wakesThroughInterrupt(normalizedAppMessage)) {
 				// A user interrupt (Esc) is still in effect. isStreaming was true when this method
 				// was entered but image normalization above outlasted the interrupt, landing here
 				// instead of the streaming branch's queueAside — starting a fresh autonomous turn
 				// would undo the user's deliberate stop. Fold into context (same event-emitting path
 				// as the plan-mode branch above) and stay user-driven, matching
-				// #resumeStrandedIrcAsides's post-interrupt fold branch.
+				// #resumeStrandedIrcAsides's post-interrupt fold branch (a timer fire wakes there too,
+				// so it starts its turn below).
 				this.#foldStrandedIrcAsidesIntoContext([normalizedAppMessage]);
 				return false;
 			}

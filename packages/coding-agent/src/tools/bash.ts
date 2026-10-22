@@ -17,7 +17,7 @@ import type {
 } from "@oh-my-pi/pi-agent-core";
 import type { ImageContent } from "@oh-my-pi/pi-ai";
 import { PipeStreams } from "@oh-my-pi/pi-natives";
-import { isEnoent, logger, prompt } from "@oh-my-pi/pi-utils";
+import { $env, isEnoent, logger, prompt } from "@oh-my-pi/pi-utils";
 import { isPosixShell } from "@oh-my-pi/pi-utils/procmgr";
 import { raceJobSettlement, resolveAutoBackgroundWaitMs } from "../async";
 import type { Settings } from "../config/settings";
@@ -35,6 +35,7 @@ import type {
 import { DEFAULT_MAX_BYTES, enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { resolveCliEntryCmd } from "../subprocess/worker-client";
 import { TerminalGraphicsDecoder } from "../utils/terminal-graphics";
+import { TIMER_RUN_ENV } from "../timers/paths";
 import type { ToolSession } from ".";
 import { truncateForPrompt } from "./approval";
 import { type BashInteractiveResult, runInteractiveBashPty } from "./bash-interactive";
@@ -653,14 +654,17 @@ export class BashTool implements AgentTool<BashToolSchema, BashToolDetails> {
 	/**
 	 * Session identity for a command, read when its tool call starts, so
 	 * `/fork`, `/new`, and `/resume` take effect on the next call while a call
-	 * already under way keeps the session it began in. Always set both keys: an
-	 * empty value replaces a stale one inherited from a parent omp process,
-	 * since an env overlay cannot unset.
+	 * already under way keeps the session it began in. Also the timer run the
+	 * turn answers (`OMP_TIMER_RUN`, the recursion guard), else the one that
+	 * started this process. Always set every key: an empty value replaces a
+	 * stale one inherited from a parent omp process or an earlier call, since
+	 * an env overlay cannot unset.
 	 */
 	#sessionEnv(): Record<string, string> {
 		return {
 			PI_SESSION_ID: this.session.sessionManager?.getSessionId?.() ?? this.session.getSessionId?.() ?? "",
 			PI_SESSION_FILE: this.session.getSessionFile() ?? "",
+			[TIMER_RUN_ENV]: this.session.getTimerRun?.() ?? $env[TIMER_RUN_ENV] ?? "",
 		};
 	}
 

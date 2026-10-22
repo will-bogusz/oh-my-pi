@@ -2,13 +2,15 @@
  * A session's mailbox in the process that has the session open.
  *
  * Every persisted session announces presence from the moment it opens (see
- * `presence.ts`), so `omp poke --resume` never resumes it headless while it
- * is open here. A process opened with `deliver` also injects the mail:
+ * `presence.ts`), so neither a timer nor `omp poke --resume` resumes it
+ * headless while it is open here. A process opened with `deliver` also
+ * injects the mail:
  *
- * - idle: the message starts a turn;
+ * - idle: the message starts a turn, also after Esc for a timer fire (it is
+ *   standing user intent);
  * - streaming: it joins the running turn at its next step boundary, without
  *   interrupting the tool batch in flight;
- * - mail that arrives while an Esc still holds the session stays in `new/`
+ * - a poke that arrives while an Esc still holds the session stays in `new/`
  *   until the user's next prompt, which carries it in ahead of the user's
  *   message (`omp poke --force` delivers at once).
  *
@@ -36,9 +38,16 @@ import {
 	recordMailAttempt,
 	releaseMail,
 } from "./mailbox";
-import { type MailDeliveryVia, type MailMessageDetails, renderMail, SESSION_POKE_MESSAGE_TYPE } from "./message";
+import {
+	type MailDeliveryVia,
+	type MailMessageDetails,
+	renderMail,
+	SESSION_POKE_MESSAGE_TYPE,
+	TIMER_FIRE_MESSAGE_TYPE,
+} from "./message";
 import { consumerLockPath, MAILBOX_ENV, MAILBOX_HEADLESS_ENV, mailDir } from "./paths";
 import { claimSessionPresence, type SessionPresence } from "./presence";
+import { recordDelivery } from "../timers/store";
 import type { SessionMail } from "./types";
 
 const POLL_MS = 1000;
@@ -56,6 +65,9 @@ interface InFlight {
 	/** Mailbox the claim sits in (the session may have switched since). */
 	sessionId: string;
 	name: string;
+	mail: SessionMail;
+	/** Injection attempt this claim is (1 = first). */
+	attempt: number;
 	/** Session file the message is appended to, and how far it has been scanned: the entry lands after the claim. */
 	file: string | undefined;
 	offset: number;
@@ -78,7 +90,7 @@ function fileSize(file: string | undefined): number {
 /** The transcript entry a delivered message leaves behind. */
 const DeliveryEntrySchema = type({
 	type: "'custom_message'",
-	customType: `'${SESSION_POKE_MESSAGE_TYPE}'`,
+	customType: `'${SESSION_POKE_MESSAGE_TYPE}' | '${TIMER_FIRE_MESSAGE_TYPE}'`,
 	details: { mailId: "string" },
 });
 
@@ -108,7 +120,7 @@ async function scanDeliveries(
 		const bytes = buffer.subarray(0, bytesRead);
 		const complete = bytes.lastIndexOf(0x0a) + 1;
 		for (const line of bytes.toString("utf8", 0, complete).split("\n")) {
-			if (!line.includes(SESSION_POKE_MESSAGE_TYPE)) continue;
+			if (!line.includes('"mailId"')) continue;
 			let entry: unknown;
 			try {
 				entry = JSON.parse(line);
@@ -125,12 +137,13 @@ async function scanDeliveries(
 }
 
 function messageFor(mail: SessionMail, via: MailDeliveryVia): CustomMessage<MailMessageDetails> {
+	const fire = mail.kind === "timer-fire" ? mail.fire : undefined;
 	return {
 		role: "custom",
-		customType: SESSION_POKE_MESSAGE_TYPE,
-		content: renderMail(mail, Date.now()),
+		customType: fire ? TIMER_FIRE_MESSAGE_TYPE : SESSION_POKE_MESSAGE_TYPE,
+		content: renderMail(mail, via, Date.now()),
 		display: true,
-		details: { mailId: mail.id, kind: mail.kind, via },
+		details: { mailId: mail.id, kind: mail.kind, timerId: fire?.timerId, runId: fire?.runId, via },
 		attribution: "agent",
 		timestamp: Date.now(),
 	};
@@ -283,9 +296,9 @@ export class SessionMailbox {
 		}
 	}
 
-	/** Mail waits out an Esc until the user's next prompt unless sent with `--force`. */
+	/** A poke waits out an Esc until the user's next prompt unless sent with `--force`; a timer fire does not. */
 	#waits(session: AgentSession, mail: SessionMail): boolean {
-		if (!session.interruptLatched || mail.poke.force) return false;
+		if (!session.interruptLatched || mail.kind !== "poke" || mail.poke.force) return false;
 		if (!this.#noted.has(mail.id)) {
 			this.#noted.add(mail.id);
 			logger.debug("poke held until the next prompt (session interrupted)", { mailId: mail.id });
@@ -304,6 +317,7 @@ export class SessionMailbox {
 			flight.offset = scan.offset;
 			if (scan.mailIds.has(mailId)) {
 				completeMail(flight.sessionId, flight.name);
+				this.#recordFireDelivered(flight.sessionId, flight.mail, flight.attempt);
 			} else if (stalled) {
 				logger.warn("mail did not reach the session file; returned to the mailbox", { mailId });
 				releaseMail(flight.sessionId, flight.name);
@@ -324,22 +338,52 @@ export class SessionMailbox {
 		for (const name of left) {
 			const mail = readClaimedMail(sessionId, name);
 			if (!mail) continue;
-			if (mailIds.has(mail.id)) completeMail(sessionId, name);
-			else releaseMail(sessionId, name);
+			if (mailIds.has(mail.id)) {
+				completeMail(sessionId, name);
+				this.#recordFireDelivered(sessionId, mail, mail.attempts ?? 1);
+			} else releaseMail(sessionId, name);
 		}
 	}
 
-	#track(sessionId: string, name: string, mailId: string, pending: boolean): InFlight {
+	/**
+	 * A timer fire reached the session file: record how it was delivered. Bookkeeping only (the tick
+	 * settles a fire by its `done/` entry), so a failed write never holds the mailbox up.
+	 */
+	#recordFireDelivered(sessionId: string, mail: SessionMail, attempt: number): void {
+		if (mail.kind !== "timer-fire") return;
+		try {
+			recordDelivery(mail.fire.timerId, {
+				runId: mail.fire.runId,
+				at: new Date().toISOString(),
+				state: this.#via === "headless" ? "resumed-headless" : "delivered-live",
+				session: sessionId,
+				detail: attempt > 1 ? `re-delivery attempt ${attempt}` : undefined,
+			});
+		} catch (error) {
+			logger.warn("timer delivery not recorded", { mailId: mail.id, error: String(error) });
+		}
+	}
+
+	#track(sessionId: string, name: string, mail: SessionMail, attempt: number, pending: boolean): InFlight {
 		const file = this.#sessionManager.getSessionFile();
-		const flight: InFlight = { sessionId, name, file, offset: fileSize(file), pending, since: Date.now() };
-		this.#inFlight.set(mailId, flight);
+		const flight: InFlight = {
+			sessionId,
+			name,
+			mail,
+			attempt,
+			file,
+			offset: fileSize(file),
+			pending,
+			since: Date.now(),
+		};
+		this.#inFlight.set(mail.id, flight);
 		return flight;
 	}
 
 	#inject(session: AgentSession, sessionId: string, name: string, mail: SessionMail): void {
 		const attempt = recordMailAttempt(sessionId, name);
 		if (attempt === undefined) return;
-		const flight = this.#track(sessionId, name, mail.id, true);
+		const flight = this.#track(sessionId, name, mail, attempt, true);
 		const { role: _role, timestamp: _timestamp, ...message } = messageFor(mail, this.#via);
 		// Streaming: join the running turn at its next step boundary. Idle: start
 		// a turn (a follow-up only if a turn began in between). Not awaited: an
@@ -369,10 +413,11 @@ export class SessionMailbox {
 		const messages: CustomMessage[] = [];
 		for (const name of listNewMail(sessionId)) {
 			const peeked = peekNewMail(sessionId, name);
-			if (!peeked) continue;
+			if (peeked?.kind !== "poke") continue;
 			const mail = claimMail(sessionId, name);
-			if (!mail || recordMailAttempt(sessionId, name) === undefined) continue;
-			this.#track(sessionId, name, mail.id, false);
+			const attempt = mail ? recordMailAttempt(sessionId, name) : undefined;
+			if (!mail || attempt === undefined) continue;
+			this.#track(sessionId, name, mail, attempt, false);
 			messages.push(messageFor(mail, this.#via));
 		}
 		return messages;

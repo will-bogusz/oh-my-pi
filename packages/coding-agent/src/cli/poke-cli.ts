@@ -14,6 +14,7 @@ import chalk from "@oh-my-pi/pi-utils/chalk";
 import { readSessionInfo, resolveResumableSession, type SessionInfo } from "../session/session-listing";
 import { deliveryTarget, describeDeliveryTarget, newMailId, postMail } from "../mailbox/mailbox";
 import { deliverHeadless } from "../mailbox/headless";
+import { loadTimerNotifyConfig, sendTimerAlerts } from "../timers/notify";
 
 export interface PokeCommandArgs {
 	session: string;
@@ -65,10 +66,16 @@ export async function runPokeCommand(args: PokeCommandArgs): Promise<void> {
 		);
 		return;
 	}
-	const held = (why: string) =>
+	// Held mail: say so here and through the user's notification sinks (the poker is often a script).
+	const held = async (why: string): Promise<void> => {
 		out(`held for session ${sessionId} (mail ${mailId}): ${why}; delivered when the session is next opened`);
+		await sendTimerAlerts(
+			[{ timerId: "poke", event: "held", summary: `A poke for session ${sessionId} is waiting: ${why}`, count: 1 }],
+			await loadTimerNotifyConfig(),
+		);
+	};
 	if (target.kind === "held" || !args.resume) {
-		held(describeDeliveryTarget(target));
+		await held(describeDeliveryTarget(target));
 		if (target.kind === "free") out("  pass --resume to resume it headless now");
 		return;
 	}
@@ -82,7 +89,7 @@ export async function runPokeCommand(args: PokeCommandArgs): Promise<void> {
 			out(`delivered by a live omp that opened the session meanwhile: ${result.detail ?? ""}`);
 			return;
 		case "held":
-			held(result.detail ?? "the session is open elsewhere");
+			await held(result.detail ?? "the session is open elsewhere");
 			return;
 		case "failed":
 			fail(`headless resume failed: ${result.detail ?? "unknown error"} (the message stays in the mailbox)`);

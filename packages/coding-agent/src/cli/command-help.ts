@@ -128,6 +128,10 @@ export const renderHelp = {
 	description: "Draw a session's entire thread through the production transcript pipeline (with repaint timing)",
 } satisfies CommandMetadata;
 
+export const timerHelp = {
+	description: "Set, list and drive timers: run a command or wake a session later or on a schedule",
+} satisfies CommandMetadata;
+
 export const sayHelp = {
 	description: "Synthesize text with the local TTS engine and play it through the speakers",
 } satisfies CommandMetadata;
