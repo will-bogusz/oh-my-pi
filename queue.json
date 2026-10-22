@@ -4942,7 +4942,7 @@
    "branch": "will/computer-element-front-first",
    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "fd440d9a6d6d387b444fcaa242f630fca34b2daa",
    "body": "bodies/computer-element-front-first.md",
@@ -4952,7 +4952,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-element-front-first",
    "host": "MacBook-Pro",
    "added": "2026-10-18T13:49:27Z",
-   "updated": "2026-10-22T10:06:31Z",
+   "updated": "2026-10-22T10:40:59Z",
    "note": "queued; waits on #16149 (prompt) and #16185 (docs/computer-use.md); keep whole (S1Keeper2). bench-mac b165593d2b-equivalent 15c6de1279: clippy 0, test 883/0; revert proofs at cde555a517",
    "advanced": "2026-10-22T10:02:28Z",
    "built": [
@@ -5549,7 +5549,7 @@
    "branch": "will/computer-right-click-per-press",
    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input",
    "area": "computer",
-   "priority": "P3",
+   "priority": "P1",
    "needs": [
     "#16202",
     "#16206"
@@ -5562,7 +5562,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-right-click-per-press",
    "host": "MacBook-Pro",
    "added": "2026-10-18T16:33:04Z",
-   "updated": "2026-10-22T10:12:50Z",
+   "updated": "2026-10-22T10:40:59Z",
    "note": "rebuild after #16206 merges: lift its 'a background right or middle click checks only before it starts' doc qualification in docs/computer-use.md and docs/tools/computer.md",
    "advanced": "2026-10-22T10:02:28Z",
    "built": [
