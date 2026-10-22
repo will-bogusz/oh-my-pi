@@ -43855,7 +43855,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/sleep-prevention-doc",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:23:22Z",
-   "updated": "2026-10-22T08:32:35Z",
+   "updated": "2026-10-22T08:40:44Z",
    "note": "",
    "built": [
     {
@@ -44035,15 +44035,6 @@
      "with_code": "c80129c2b3a04a3ec8b36d4bb3437ddb1f484dc2",
      "tip": "f9ef9a913637492e2c4ff5a99df753e41b34b4e2",
      "with_tip": "a2ab0c065dea87e5db191e080d09f45b4a1b9dc0",
-     "at": "2026-10-22T08:24:59Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#16284",
-     "code": "3672d2efcae1f6e2340e88d69debf328d42c083c",
-     "with_code": "a33d0dd72d51fadb3bc714a2458b31eb66689527",
-     "tip": "f9ef9a913637492e2c4ff5a99df753e41b34b4e2",
-     "with_tip": "9ac8b4f5a1e5c03d8d08e69005b54bdfe7ab4a73",
      "at": "2026-10-22T08:24:59Z",
      "host": "MacBook-Pro"
     },
@@ -44261,6 +44252,15 @@
      "tip": "f9ef9a913637492e2c4ff5a99df753e41b34b4e2",
      "with_tip": "4cd300030241cc9f136f88315b9e52497dd050ec",
      "at": "2026-10-22T08:32:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16284",
+     "code": "3672d2efcae1f6e2340e88d69debf328d42c083c",
+     "with_code": "763fffc68828967ba5f8acbf3864a0d48a13a25a",
+     "tip": "f9ef9a913637492e2c4ff5a99df753e41b34b4e2",
+     "with_tip": "e3a693eb887774b77ab920ec068c9c7e5ef6e47e",
+     "at": "2026-10-22T08:40:38Z",
      "host": "MacBook-Pro"
     }
    ]
