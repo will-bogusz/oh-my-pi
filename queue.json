@@ -42316,7 +42316,7 @@
    "area": "session",
    "priority": "P0",
    "needs": [],
-   "base": "d5cd750e41fede277f9eb933455da92a0738915e",
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
    "body": "bodies/steer-agent-notice.md",
    "state": "open",
    "pr": 16614,
@@ -42324,7 +42324,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/steer-agent-notice",
    "host": "MacBook-Pro",
    "added": "2026-10-21T05:24:16Z",
-   "updated": "2026-10-21T06:41:08Z",
+   "updated": "2026-10-22T07:19:56Z",
    "note": "",
    "built": [
     {
@@ -42671,7 +42671,8 @@
     }
    ],
    "opened": "2026-10-21T06:13:53Z",
-   "readied": "2026-10-21T06:14:18Z"
+   "readied": "2026-10-21T06:14:18Z",
+   "advanced": "2026-10-22T07:19:56Z"
   }
  ],
  "watch": {
