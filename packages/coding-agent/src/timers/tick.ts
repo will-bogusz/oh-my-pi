@@ -1,9 +1,10 @@
 /**
- * `omp timer tick`: evaluate every timer once, settle finished runs and
- * dispatch fires. Stateless and short: it holds the tick lock only while
- * deciding and dispatching, never across a model turn or a shell action —
- * those run in a detached `omp timer exec` runner that holds the timer's own
- * run lock.
+ * `omp timer tick`: evaluate every timer once, settle finished runs, check
+ * due gates and dispatch fires. Stateless and short: it holds the tick lock
+ * only while deciding and dispatching, never across a gate check, a model
+ * turn or a shell action. Gates run between two lock holds, each under its
+ * timer's gate lock; actions run in a detached `omp timer exec` runner that
+ * holds the timer's own run lock.
  *
  * Meant to run once a minute from ONE OS unit per host (`omp timer install`).
  * The lock makes overlapping ticks harmless; each decision commits the slot
@@ -21,6 +22,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { acquireFileLock, type FileLockHandle, logger, tryAcquireFileLock, VERSION } from "@oh-my-pi/pi-utils";
 import { resolveCliEntryCmd, workerEnvFromParent } from "../subprocess/worker-client";
+import { type GateVerdict, runGate } from "./gate";
 import {
 	type DeliveryTarget,
 	deliveryTarget,
@@ -30,8 +32,16 @@ import {
 	withdrawMail,
 } from "../mailbox/mailbox";
 import { loadTimerNotifyConfig, sendTimerAlerts } from "./notify";
-import { firePayloadPath, runLockPath, runLogPath, tickLockPath, timersRoot, timerStateDir } from "./paths";
-import { applyFailure, applyNotice, applySuccess } from "./policy";
+import {
+	firePayloadPath,
+	gateLockPath,
+	runLockPath,
+	runLogPath,
+	tickLockPath,
+	timersRoot,
+	timerStateDir,
+} from "./paths";
+import { applyFailure, applyNotice, applySuccess, firstErrorLine } from "./policy";
 import { type DueDecision, decideDue, formatDuration, graceFor, MINUTE, nextFireAt } from "./schedule";
 import { assertTimerMutationAllowed } from "./scope";
 import {
@@ -49,6 +59,8 @@ import type { RunTrigger, TimerAlert, TimerFireData, TimerFirePayload, TimerSpec
 const LOST_AFTER_MS = 2 * MINUTE;
 /** A committed run that never got its side effect is re-dispatched after this. */
 const REDISPATCH_AFTER_MS = MINUTE;
+/** Gates checked at once by one tick. */
+const GATE_CONCURRENCY = 4;
 
 export interface TickLine {
 	id: string;
@@ -69,6 +81,7 @@ export interface TickDeps {
 	root: string;
 	/** Start the detached runner for one run. */
 	spawnRunner(spec: TimerSpec, seq: number, root: string): void;
+	runGate(command: string, cwd: string): Promise<GateVerdict>;
 	deliveryTarget(sessionId: string): DeliveryTarget;
 	/** Whether a runner process holds the timer's run lock (it is alive). */
 	runnerAlive(spec: TimerSpec, root: string): boolean;
@@ -107,6 +120,7 @@ export function defaultTickDeps(overrides: Partial<TickDeps> = {}): TickDeps {
 	return {
 		root: timersRoot(),
 		spawnRunner: spawnRunnerProcess,
+		runGate: (command, cwd) => runGate(command, cwd),
 		deliveryTarget,
 		runnerAlive: runLockHeld,
 		notify: async alerts => {
@@ -131,6 +145,21 @@ interface TickContext {
 	now: number;
 	at: string;
 	alerts: TimerAlert[];
+	/** Gates found due while deciding, checked once the tick lock is released. */
+	gates: PendingGate[];
+}
+
+/** A due gate claimed by this tick: its gate lock is held until the verdict is decided. */
+interface PendingGate {
+	spec: TimerSpec;
+	command: string;
+	lock: FileLockHandle;
+}
+
+/** A gate's verdict, valid only for the spec revision it was checked against. */
+interface CheckedGate {
+	rev: number;
+	verdict: GateVerdict;
 }
 
 interface FireInput {
@@ -150,6 +179,16 @@ function commit(ctx: TickContext, spec: TimerSpec, readSeq: number, state: Timer
 		apply();
 		ctx.db.writeState(spec.id, state);
 	});
+}
+
+/**
+ * A buffered run with a slot came from the schedule or, on a condition timer,
+ * from its gate (a re-armed timer starts without its buffered run, so the
+ * spec's current gate decides); one without a slot is a manual fire.
+ */
+function queuedTrigger(spec: TimerSpec, queued: NonNullable<TimerState["queued"]>): RunTrigger {
+	if (queued.slot === undefined) return "manual";
+	return spec.until ? "gate" : "schedule";
 }
 
 /** A buffered run whose timer expired or ran out of runs while it waited never starts; it is recorded missed. */
@@ -194,8 +233,11 @@ function recordNonFire(
 		slot?: number;
 		missedSlots?: number;
 		trigger: RunTrigger;
-		outcome: "missed" | "skipped-overlap" | "queued";
+		outcome: "missed" | "skipped-overlap" | "queued" | "gated-not-yet" | "failed";
+		gateExit?: number;
 		detail?: string;
+		/** Runs inside the same transaction, after the row is written (a gate failure's own accounting). */
+		settle?: (runId: string) => void;
 	},
 ): string {
 	state.seq++;
@@ -212,12 +254,14 @@ function recordNonFire(
 				trigger: input.trigger,
 				outcome: input.outcome,
 				missedSlots: input.missedSlots || undefined,
+				gateExit: input.gateExit,
 				detail: input.detail,
 				rev: spec.rev,
 				generation: spec.armedAt,
 			},
 			false,
 		);
+		input.settle?.(runId);
 	});
 	return runId;
 }
@@ -254,7 +298,9 @@ async function fire(
 	if (input.slot !== undefined) state.lastSlot = Math.max(state.lastSlot ?? input.slot, input.slot);
 	if (input.fromQueue) state.queued = undefined;
 	state.runCount++;
-	if (input.trigger === "schedule" && !spec.every) state.done = { at, why: "once" };
+	const recurring = spec.every !== undefined && !spec.until;
+	if (input.trigger === "gate") state.done = { at, why: "gate-met" };
+	else if (input.trigger === "schedule" && !recurring) state.done = { at, why: "once" };
 	else if (spec.maxRuns !== undefined && state.runCount >= spec.maxRuns) state.done = { at, why: "max-runs" };
 	const next = state.done ? undefined : nextFireAt(spec, state, now);
 	const slotIso = input.slot !== undefined ? new Date(input.slot).toISOString() : undefined;
@@ -273,7 +319,8 @@ async function fire(
 		once: state.done !== undefined,
 		missedSlots: input.missedSlots || undefined,
 		data: input.data,
-		next: next !== undefined ? new Date(next).toISOString() : undefined,
+		next: typeof next === "number" ? new Date(next).toISOString() : undefined,
+		nextIsGate: next === "gate" || undefined,
 		expiresAt: spec.expiresAt,
 	};
 	// The payload exists before the commit, so a re-dispatch after a crash finds it.
@@ -483,7 +530,8 @@ async function settleRuns(ctx: TickContext, spec: TimerSpec, state: TimerState, 
 					error,
 					at,
 					now,
-					final: !spec.every,
+					// A gate fire retires its timer: its action never runs again, like a one-shot's.
+					final: (!spec.every && !spec.until) || state.done?.why === "gate-met",
 					logPath: runLogPath(spec.id, run.seq, deps.root),
 				}).alerts;
 			}
@@ -518,7 +566,38 @@ async function applyPendingPause(
 	return spec.paused ? undefined : { id: spec.id, action: "paused", detail: reason };
 }
 
-async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
+/** The previous run is still in flight: skip this fire, or buffer exactly one under `overlap: queue`. */
+function overlapped(
+	ctx: TickContext,
+	spec: TimerSpec,
+	readSeq: number,
+	state: TimerState,
+	input: { slot: number; missedSlots: number; trigger: "schedule" | "gate"; gateExit?: number; data?: TimerFireData },
+): TickLine {
+	const queue = spec.overlap === "queue" && !state.queued;
+	state.lastSlot = input.slot;
+	if (queue) state.queued = { seq: state.seq + 1, slot: input.slot, missedSlots: input.missedSlots, data: input.data };
+	const skipped =
+		input.trigger === "gate"
+			? "previous run still in flight; checked again next minute"
+			: "previous run still in flight";
+	const runId = recordNonFire(ctx, spec, readSeq, state, {
+		slot: input.slot,
+		missedSlots: input.missedSlots,
+		trigger: input.trigger,
+		outcome: queue ? "queued" : "skipped-overlap",
+		gateExit: input.gateExit,
+		detail: queue ? "previous run still in flight; runs when it ends" : skipped,
+	});
+	return { id: spec.id, action: queue ? "queued" : "skipped-overlap", runId };
+}
+
+/**
+ * Decide one timer. A due gate is not checked here: the first pass claims it
+ * (`ctx.gates`), and the second pass decides its verdict against the spec and
+ * state as they are once the check has finished.
+ */
+async function tickOne(ctx: TickContext, spec: TimerSpec, checked?: CheckedGate): Promise<TickLine[]> {
 	const { db, deps, now, at } = ctx;
 	const lines: TickLine[] = [];
 	const stored = db.readState(spec.id);
@@ -559,15 +638,15 @@ async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
 					slot: queued.slot,
 					missedSlots: queued.missedSlots,
 					// A queued manual fire has no slot; it stays manual so it never consumes the schedule.
-					trigger: queued.slot === undefined ? "manual" : "schedule",
+					trigger: queuedTrigger(spec, queued),
 					data: queued.data,
 					fromQueue: true,
 				}),
 			);
 			return lines;
 		}
-		if (decision.kind === "retire" || state.done) {
-			// Wait for the buffered run; never retire past it.
+		if (decision.kind === "retire" || state.done || spec.until) {
+			// Wait for the buffered run; never retire past it, nor check a gate whose fire is already buffered.
 			if (JSON.stringify(state) !== JSON.stringify(stored)) commit(ctx, spec, readSeq, state, () => {});
 			return lines;
 		}
@@ -584,6 +663,20 @@ async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
 		case "retire": {
 			state.done = { at, why: decision.why };
 			commit(ctx, spec, readSeq, state, () => {});
+			if (decision.why === "expired" && spec.until && state.runCount === 0) {
+				ctx.alerts.push(
+					...applyNotice(
+						db,
+						spec,
+						"expired",
+						`expired without its condition holding: ${spec.condition ?? spec.until}`,
+						{
+							at,
+							now,
+						},
+					),
+				);
+			}
 			lines.push({ id: spec.id, action: "retired", detail: decision.why });
 			return lines;
 		}
@@ -613,28 +706,108 @@ async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
 			break;
 	}
 
-	if (busy) {
-		const queue = spec.overlap === "queue" && !state.queued;
-		state.lastSlot = decision.slot;
-		if (queue) state.queued = { seq: state.seq + 1, slot: decision.slot, missedSlots: decision.missedSlots };
-		const runId = recordNonFire(ctx, spec, readSeq, state, {
-			slot: decision.slot,
-			missedSlots: decision.missedSlots,
-			trigger: "schedule",
-			outcome: queue ? "queued" : "skipped-overlap",
-			detail: queue ? "previous run still in flight; runs when it ends" : "previous run still in flight",
-		});
-		lines.push({ id: spec.id, action: queue ? "queued" : "skipped-overlap", runId });
+	if (!spec.until) {
+		if (busy) {
+			lines.push(
+				overlapped(ctx, spec, readSeq, state, {
+					slot: decision.slot,
+					missedSlots: decision.missedSlots,
+					trigger: "schedule",
+				}),
+			);
+			return lines;
+		}
+		lines.push(
+			await fire(ctx, spec, readSeq, state, {
+				seq: state.seq + 1,
+				slot: decision.slot,
+				missedSlots: decision.missedSlots,
+				trigger: "schedule",
+			}),
+		);
 		return lines;
 	}
-	lines.push(
-		await fire(ctx, spec, readSeq, state, {
-			seq: state.seq + 1,
-			slot: decision.slot,
-			missedSlots: decision.missedSlots,
-			trigger: "schedule",
-		}),
-	);
+
+	if (!checked) {
+		if (JSON.stringify(state) !== JSON.stringify(stored)) commit(ctx, spec, readSeq, state, () => {});
+		fs.mkdirSync(timerStateDir(spec.id, deps.root), { recursive: true });
+		const lock = tryAcquireFileLock(gateLockPath(spec.id, deps.root));
+		if (!lock) lines.push({ id: spec.id, action: "gate-busy", detail: "another tick is still checking this gate" });
+		else ctx.gates.push({ spec, command: spec.until, lock });
+		return lines;
+	}
+	if (checked.rev !== spec.rev) {
+		// Paused, edited or re-armed while its gate ran: that verdict answers a spec that no longer exists.
+		if (JSON.stringify(state) !== JSON.stringify(stored)) commit(ctx, spec, readSeq, state, () => {});
+		lines.push({ id: spec.id, action: "gate-stale", detail: `rev ${checked.rev} changed while its gate ran` });
+		return lines;
+	}
+	const { verdict } = checked;
+	state.gate = {
+		checks: (state.gate?.checks ?? 0) + 1,
+		lastCheckAt: at,
+		lastExit: verdict.kind === "met" ? 0 : verdict.kind === "not-yet" ? 1 : verdict.exitCode,
+	};
+	if (verdict.kind === "met") {
+		const data = verdict.output ? { source: "gate" as const, text: verdict.output } : undefined;
+		if (busy) {
+			lines.push(
+				overlapped(ctx, spec, readSeq, state, {
+					slot: decision.slot,
+					missedSlots: 0,
+					trigger: "gate",
+					gateExit: 0,
+					data,
+				}),
+			);
+			return lines;
+		}
+		lines.push(
+			await fire(ctx, spec, readSeq, state, {
+				seq: state.seq + 1,
+				slot: decision.slot,
+				missedSlots: 0,
+				trigger: "gate",
+				data,
+			}),
+		);
+		return lines;
+	}
+	state.lastSlot = decision.slot;
+	if (verdict.kind === "not-yet") {
+		// A healthy check ends a failure streak. Quiet: one run row per streak of "not yet"; the count lives in state.
+		state.failStreak = 0;
+		const latest = db.listRuns(spec.id, 1)[0];
+		if (latest?.outcome === "gated-not-yet" && latest.rev === spec.rev) commit(ctx, spec, readSeq, state, () => {});
+		else
+			recordNonFire(ctx, spec, readSeq, state, {
+				slot: decision.slot,
+				trigger: "gate",
+				outcome: "gated-not-yet",
+				gateExit: 1,
+			});
+		lines.push({ id: spec.id, action: "gated-not-yet", detail: `check #${state.gate.checks}` });
+		return lines;
+	}
+	const error = `gate ${verdict.error}${verdict.output ? `: ${firstErrorLine(verdict.output)}` : ""}`;
+	let gateAlerts: TimerAlert[] = [];
+	const runId = recordNonFire(ctx, spec, readSeq, state, {
+		slot: decision.slot,
+		trigger: "gate",
+		outcome: "failed",
+		gateExit: verdict.exitCode,
+		detail: error,
+		// The failure is its own result: account for it in the same transaction as the run row.
+		settle: id => {
+			gateAlerts = applyFailure(db, spec, state, { runId: id, error, at, now, final: false }).alerts;
+			db.markSettled(id, at);
+		},
+	});
+	// Alerts leave only after their transaction committed.
+	ctx.alerts.push(...gateAlerts);
+	lines.push({ id: spec.id, action: "failed", runId, detail: error });
+	const gatePause = await applyPendingPause(ctx, spec, state, state.seq);
+	if (gatePause) lines.push(gatePause);
 	return lines;
 }
 
@@ -643,32 +816,79 @@ function takeTickLock(root: string): FileLockHandle | null {
 	return tryAcquireFileLock(tickLockPath(root));
 }
 
+/** Run one timer's decision; a lost race becomes a `raced` line and any other failure an `error` line. */
+async function guarded(id: string, work: () => Promise<TickLine[]>): Promise<TickLine[]> {
+	try {
+		return await work();
+	} catch (err) {
+		if (err instanceof StaleStateError)
+			return [{ id, action: "raced", detail: "another writer decided this timer first" }];
+		logger.error("timer tick failed", { id, error: String(err) });
+		return [{ id, action: "error", detail: err instanceof Error ? err.message : String(err) }];
+	}
+}
+
+/**
+ * Check the gates the first pass claimed, outside the tick lock and a few at
+ * a time, then decide each verdict under the lock against the spec and the
+ * clock as they are once it finished: a timer paused, edited or removed
+ * meanwhile discards it, and an expiry passed meanwhile retires the timer.
+ */
+async function checkGates(ctx: TickContext, wallStart: number): Promise<TickLine[]> {
+	const { deps } = ctx;
+	const pending = ctx.gates;
+	const verdicts: GateVerdict[] = [];
+	let next = 0;
+	const worker = async (): Promise<void> => {
+		for (let i = next++; i < pending.length; i = next++) {
+			verdicts[i] = await deps.runGate(pending[i].command, pending[i].spec.cwd);
+		}
+	};
+	const lines: TickLine[] = [];
+	try {
+		await Promise.all(Array.from({ length: Math.min(GATE_CONCURRENCY, pending.length) }, worker));
+		const now = ctx.now + (Date.now() - wallStart);
+		const decide: TickContext = { ...ctx, now, at: new Date(now).toISOString(), gates: [] };
+		const lock = await acquireFileLock(tickLockPath(deps.root), { retries: 600, retryDelayMs: 100 });
+		try {
+			for (const [i, { spec }] of pending.entries()) {
+				lines.push(
+					...(await guarded(spec.id, async () => {
+						const current = await readTimerSpec(spec.id, deps.root);
+						if (!current) return [{ id: spec.id, action: "gate-stale", detail: "removed while its gate ran" }];
+						return tickOne(decide, current, { rev: spec.rev, verdict: verdicts[i] });
+					})),
+				);
+			}
+		} finally {
+			lock.release();
+		}
+	} finally {
+		for (const gate of pending) gate.lock.release();
+	}
+	return lines;
+}
+
 export async function runTick(now = Date.now(), overrides: Partial<TickDeps> = {}): Promise<TickReport> {
+	const wallStart = Date.now();
 	const deps = defaultTickDeps(overrides);
 	const at = new Date(now).toISOString();
 	const lock = takeTickLock(deps.root);
 	if (!lock) return { at, locked: true, lines: [], alerts: [] };
-	const ctx: TickContext = { db: openTimerDb(deps.root), deps, now, at, alerts: [] };
+	const ctx: TickContext = { db: openTimerDb(deps.root), deps, now, at, alerts: [], gates: [] };
 	const lines: TickLine[] = [];
 	try {
 		const { specs, errors } = await listTimerSpecs(deps.root);
 		for (const { id, error } of errors) lines.push({ id, action: "invalid-spec", detail: error });
-		for (const spec of specs) {
-			try {
-				lines.push(...(await tickOne(ctx, spec)));
-			} catch (err) {
-				if (err instanceof StaleStateError) {
-					lines.push({ id: spec.id, action: "raced", detail: "another writer decided this timer first" });
-					continue;
-				}
-				logger.error("timer tick failed", { id: spec.id, error: String(err) });
-				lines.push({ id: spec.id, action: "error", detail: err instanceof Error ? err.message : String(err) });
-			}
-		}
+		for (const spec of specs) lines.push(...(await guarded(spec.id, () => tickOne(ctx, spec))));
 		ctx.db.writeHeartbeat({ lastTickAt: at, pid: process.pid, version: VERSION });
+	} catch (err) {
+		for (const gate of ctx.gates) gate.lock.release();
+		throw err;
 	} finally {
 		lock.release();
 	}
+	if (ctx.gates.length) lines.push(...(await checkGates(ctx, wallStart)));
 	// Alerts go out after the lock is released: a slow sink never delays the next tick.
 	await deps.notify(ctx.alerts);
 	return { at, locked: false, lines, alerts: ctx.alerts };
@@ -686,7 +906,14 @@ export async function fireTimerNow(id: string, now = Date.now(), options: FireNo
 	await assertTimerMutationAllowed(id, "fire", deps.root);
 	fs.mkdirSync(deps.root, { recursive: true });
 	const lock = await acquireFileLock(tickLockPath(deps.root), { retries: 600, retryDelayMs: 100 });
-	const ctx: TickContext = { db: openTimerDb(deps.root), deps, now, at: new Date(now).toISOString(), alerts: [] };
+	const ctx: TickContext = {
+		db: openTimerDb(deps.root),
+		deps,
+		now,
+		at: new Date(now).toISOString(),
+		alerts: [],
+		gates: [],
+	};
 	try {
 		const spec = await readTimerSpec(id, deps.root);
 		if (!spec) throw new Error(`No timer "${id}"`);
@@ -705,7 +932,7 @@ export async function fireTimerNow(id: string, now = Date.now(), options: FireNo
 					seq: queued.seq,
 					slot: queued.slot,
 					missedSlots: queued.missedSlots,
-					trigger: queued.slot === undefined ? "manual" : "schedule",
+					trigger: queuedTrigger(spec, queued),
 					data: queued.data,
 					fromQueue: true,
 				}),

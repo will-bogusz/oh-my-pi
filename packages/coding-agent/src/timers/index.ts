@@ -1,3 +1,5 @@
+export * from "./conditions";
+export * from "./gate";
 export * from "./install";
 export * from "./notify";
 export * from "./paths";

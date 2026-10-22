@@ -10,6 +10,8 @@ import * as path from "node:path";
 import { isEnoent } from "@oh-my-pi/pi-utils";
 import { formatWallClock } from "../mailbox/message";
 import { readSessionInfo, resolveResumableSession } from "../session/session-listing";
+import { compileCondition, type TimerCondition } from "./conditions";
+import { runGate } from "./gate";
 import { runLogPath, TIMER_ID_PATTERN, timersRoot } from "./paths";
 import {
 	assertTimeZone,
@@ -45,6 +47,8 @@ export interface TimerSetInput {
 	title?: string;
 	at?: string;
 	every?: string;
+	/** Condition checked each minute without model tokens; fires once when it holds. */
+	when?: TimerCondition;
 	tz?: string;
 	prompt?: string;
 	shell?: string;
@@ -72,7 +76,16 @@ export interface TimerSetContext {
 	root?: string;
 }
 
-export interface TimerSetResult {
+/** Bound on the test run of a gate at set time. */
+const GATE_DRY_RUN_TIMEOUT_MS = 10_000;
+
+/** What the gate answered when it was run once at set time. */
+export interface GateTest {
+	gateNow?: "met" | "not-yet" | "broken";
+	gateDetail?: string;
+}
+
+export interface TimerSetResult extends GateTest {
 	spec: TimerSpec;
 	replaced: boolean;
 	/** Problems that did not block the set (a typed date that may be a day late, …). */
@@ -138,12 +151,12 @@ function validateSpec(spec: TimerSpec, now: number): void {
 		throw new Error("a prompt timer wakes a session; this timer has none, so set it again with a session");
 	}
 	if (spec.action.kind === "shell" && !spec.action.command.trim()) throw new Error("shell command is empty");
-	if (!spec.at && !spec.every) throw new Error("set at or every");
+	if (!spec.at && !spec.every && !spec.until) throw new Error("set at, every, or when");
 	assertTimeZone(spec.tz);
-	if (spec.at && Date.parse(spec.at) < now - MINUTE && !spec.every) {
+	if (spec.at && Date.parse(spec.at) < now - MINUTE && !spec.every && !spec.until) {
 		throw new Error(`at ${spec.at} is in the past`);
 	}
-	if (spec.every) {
+	if (spec.every && !spec.until) {
 		const min = spec.action.kind === "prompt" ? MIN_PROMPT_INTERVAL_MS : MIN_SHELL_INTERVAL_MS;
 		const gap = minCadenceGapMs(spec.every, spec.tz, now);
 		if (gap < min) {
@@ -184,6 +197,14 @@ function dateSlipWarning(text: string | undefined, resolved: number, now: number
 	return `${formatWallClock(resolved, tz)} is ${formatDuration(resolved - now)} away; the same clock time comes sooner, ${formatWallClock(sooner, tz)} (in ${formatDuration(sooner - now)}). If that is the one meant, edit at to "${match[1]}".`;
 }
 
+async function testGate(spec: TimerSpec): Promise<GateTest> {
+	if (!spec.until) return {};
+	const verdict = await runGate(spec.until, spec.cwd, GATE_DRY_RUN_TIMEOUT_MS);
+	if (verdict.kind !== "broken") return { gateNow: verdict.kind };
+	const firstLine = verdict.output.split("\n")[0];
+	return { gateNow: "broken", gateDetail: firstLine ? `${verdict.error}: ${firstLine}` : verdict.error };
+}
+
 /** Validate everything up front: a timer that would fail at its first fire is rejected here. */
 export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Promise<TimerSetResult> {
 	const now = ctx.now ?? Date.now();
@@ -191,6 +212,7 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 	const prompt = input.prompt?.trim();
 	const shell = input.shell?.trim();
 	if (!prompt === !shell) throw new Error("set exactly one of prompt or shell");
+	const condition = input.when ? compileCondition(input.when) : undefined;
 	const tz = input.tz?.trim() || hostTimeZone();
 	assertTimeZone(tz);
 	const cwd = path.resolve(ctx.cwd, input.cwd ?? ".");
@@ -210,6 +232,8 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		reason: input.reason?.trim() ?? "",
 		at: input.at ? new Date(resolveAt(input.at, now, tz)).toISOString() : undefined,
 		every: input.every ? normalizeEvery(input.every) : undefined,
+		until: condition?.until,
+		condition: condition?.text,
 		tz,
 		target,
 		whenClosed: input.whenClosed ?? "resume",
@@ -229,18 +253,25 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 			by: "cli",
 			host: os.hostname(),
 			cwd: ctx.cwd,
-			whenText: [input.at && `at ${input.at}`, input.every && `every ${input.every}`].filter(Boolean).join(", "),
+			whenText: [
+				input.at && `at ${input.at}`,
+				input.every && `every ${input.every}`,
+				condition && `when ${condition.text}`,
+			]
+				.filter(Boolean)
+				.join(", "),
 			run: currentTimerRun()?.runId,
 		},
 	};
 	validateSpec(spec, now);
+	const gate = await testGate(spec);
 	const { spec: written, previous } = await mutateTimerSpec(id, () => spec, {
 		expectedRev: input.expectedRev,
 		root,
 	});
 	if (!written) throw new Error(`timer ${id} was not written`);
 	const slip = written.at ? dateSlipWarning(input.at, Date.parse(written.at), now, tz) : undefined;
-	return { spec: written, replaced: previous !== undefined, warnings: slip ? [slip] : [] };
+	return { spec: written, replaced: previous !== undefined, warnings: slip ? [slip] : [], ...gate };
 }
 
 /** Fields `edit` may change; absent fields keep their value. `null` clears an optional field. */
@@ -249,6 +280,7 @@ export interface TimerEditInput {
 	reason?: string;
 	at?: string | null;
 	every?: string | null;
+	when?: TimerCondition | null;
 	tz?: string;
 	prompt?: string;
 	shell?: string;
@@ -264,7 +296,7 @@ export interface TimerEditInput {
 	expectedRev?: number;
 }
 
-export interface TimerEditResult {
+export interface TimerEditResult extends GateTest {
 	spec: TimerSpec;
 	/** The schedule changed: a new generation starts (slots and counters reset; history kept). */
 	rearmed: boolean;
@@ -273,7 +305,7 @@ export interface TimerEditResult {
 
 /**
  * Change some fields of an existing timer under its spec lock. A change to
- * when it fires (at/every/tz) starts a new schedule generation; a prompt or
+ * when it fires (at/every/when/tz) starts a new schedule generation; a prompt or
  * limit change keeps the current one, so it never re-fires a slot.
  */
 export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSetContext): Promise<TimerEditResult> {
@@ -284,6 +316,7 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 		target: patch.shell !== undefined ? { kind: "fresh" } : undefined,
 	});
 	let rearmed = false;
+	let gateChanged = false;
 	const { spec } = await mutateTimerSpec(
 		id,
 		async current => {
@@ -326,6 +359,13 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 				next.every = patch.every === null ? undefined : normalizeEvery(patch.every);
 				rearmed = true;
 			}
+			if (patch.when !== undefined) {
+				const condition = patch.when === null ? undefined : compileCondition(patch.when);
+				next.until = condition?.until;
+				next.condition = condition?.text;
+				rearmed = true;
+				gateChanged = condition !== undefined;
+			}
 			if (rearmed) next.armedAt = new Date(now).toISOString();
 			validateSpec(next, now);
 			return next;
@@ -334,13 +374,14 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 	);
 	if (!spec) throw new Error(`No timer "${id}"`);
 	const slip = patch.at && spec.at ? dateSlipWarning(patch.at, Date.parse(spec.at), now, spec.tz) : undefined;
-	return { spec, rearmed, warnings: slip ? [slip] : [] };
+	const gate = gateChanged ? await testGate(spec) : {};
+	return { spec, rearmed, warnings: slip ? [slip] : [], ...gate };
 }
 
 export interface TimerRow {
 	spec: TimerSpec;
 	state: TimerState;
-	next: number | undefined;
+	next: number | "gate" | undefined;
 	status: "armed" | "paused" | "done";
 	lastRun?: RunView;
 	/** Open incidents, newest last. */

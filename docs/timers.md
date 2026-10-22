@@ -1,11 +1,12 @@
 # Timers
 
-A timer is standing work that fires later — at a time or on a schedule — and then runs a shell command or wakes an existing session with a prompt. Timers live in a per-host store outside any session, so they outlive the process that set them, and a once-a-minute OS unit (the ticker) fires them whether or not omp is open.
+A timer is standing work that fires later — at a time, on a schedule, or once a condition holds — and then runs a shell command or wakes an existing session with a prompt. Timers live in a per-host store outside any session, so they outlive the process that set them, and a once-a-minute OS unit (the ticker) fires them whether or not omp is open.
 
 ```sh
 omp timer install                       # once per host: the ticker unit
 omp timer set nightly --every 'daily 03:00' --shell 'make backup' --reason 'nightly backup'
 omp timer set standup --at 'tomorrow 09:00' --session <id> --prompt 'Summarize yesterday' --reason 'standup notes'
+omp timer set ci-done --ci owner/repo#123 --session <id> --prompt 'CI finished; summarize failures' --reason 'watch CI'
 omp timer ls
 ```
 
@@ -18,9 +19,9 @@ Source: `packages/coding-agent/src/timers/` (store, schedule, tick, runner, deli
 | Verb | Does |
 | --- | --- |
 | `set [id]` | Create a timer, or re-arm an existing id (history kept). The id defaults to one derived from `--reason`. |
-| `edit <id>` | Change only the given fields. A new `--at`/`--every`/`--when`/`--tz` starts a new schedule generation; `none` clears `at`, `every`, `expires` or `grace`. |
+| `edit <id>` | Change only the given fields. A new `--at`/`--every`/`--when`/`--until`/`--ci`/`--pid`/`--tz` starts a new schedule generation; `none` clears `at`, `every`, `until` (the condition), `expires` or `grace`. |
 | `ls` (default) | Table of every timer with its status, next fire and last run, plus the ticker's heartbeat. |
-| `show <id>` | The timer's card: next fire (with `today`/`tomorrow` when it is that close), cadence, action, limits, last run, open incidents, ticker. |
+| `show <id>` | The timer's card: next fire (with `today`/`tomorrow` when it is that close), cadence, action, condition, limits, last run, open incidents, ticker. |
 | `runs <id> [--limit N]` | Run history: trigger, outcome, slot, coalesced missed slots, delivery, end. |
 | `logs <id> [seq]` | The runner log of a shell run or headless resume (default: the newest). |
 | `fire <id> [--data text]` | Run it now, outside its schedule. `--data` reaches a prompt timer's session as untrusted data. |
@@ -37,6 +38,7 @@ Source: `packages/coding-agent/src/timers/` (store, schedule, tick, runner, deli
 | `--at` | One-shot: `now`, `in 2m`, `in 1h30m`, `HH:MM` (next occurrence), `tomorrow 09:30`, `mon 09:00`, `2026-10-22 08:00`, or an ISO instant. A full date typed between midnight and 06:00 that lands a day after the same clock time's next occurrence is set as typed, with a warning on the card naming the sooner time. |
 | `--every` | Recurring: a duration (`30m`, `2h`, `1d`), `hourly`, `daily 09:00`, `weekdays 09:00`, `weekends 10:00`, `mon,thu 18:30`, or a 5-field cron (`cron 0 9 * * 1`). With `--at`, the first slot is at or after it. |
 | `--when` | Tern-style schedule mapped onto `--at` or `--every`: `in 20m`, `at 15:00`, `every 30m`, `daily 09:00`. A bare duration (`20m`) means `in 20m`. |
+| `--until` / `--ci` / `--pid` | A condition, at most one; see [Conditions](#conditions). |
 | `--shell` / `--prompt` | Exactly one: a command run with `/bin/sh -c`, or an instruction delivered to `--session`. |
 | `--session` | Prompt timers: the session to wake, by id, id prefix or session file. A prompt timer without one is refused. |
 | `--when-closed` | The session is not open anywhere when it fires: `resume` it headless (default) or `hold` the message until it is next opened. |
@@ -71,6 +73,18 @@ Granularity: a timer fires at the first tick at or after its due instant. A one-
 - A duration counts elapsed time from arming: `every 30m` set at 12:07:30 first fires at 12:37:30, never snapped to the clock. `every 24h` therefore drifts across DST; use `daily HH:MM` for wall-clock time.
 - Calendar cadences run in the timer's `tz`. A wall time that does not exist (spring forward) runs at the same offset after the gap (02:30 → 03:30); a repeated wall time (fall back) runs once, at its first occurrence. A cron restricting both day-of-month and day-of-week matches either.
 - A schedule change (`at`, `every`, `when`, `tz`) starts a new generation: slots and counters reset, history stays. A prompt, cwd or limit change keeps the current generation, so it never re-fires a slot.
+
+## Conditions
+
+A condition timer is checked by the ticker every minute, without model tokens, and fires once the condition holds:
+
+- `--until '<shell>'`: run with `/bin/sh -c` in the timer's cwd. Exit 0 = holds (fire); exit 1 = not yet; anything else (127 not found, a syntax error, a signal, the 60 s timeout, a cwd or shell that cannot start) = the gate is broken, which counts as a failed run toward `--pause-after`. The same contract as `/loop --until`. The check runs as its own process group: at the timeout the whole group is killed, and whatever it leaves running when the shell exits is killed then.
+- `--ci owner/repo#123` (or a PR URL) / `--ci owner/repo@<sha>`: fires once every check run and commit status on the PR's head or the commit has finished, whatever the result (needs `gh`). One GraphQL read per check decides it and supplies the summary; a failed read is a broken gate.
+- `--pid <pid>`: fires once that process has exited. The probe is the shell's `kill -0`; an answer other than "no such process" or "not permitted" is a broken gate, never a fire.
+
+`--ci` and `--pid` compile to a shell check stored as the spec's `until`, with the readable form as `condition`. A condition timer fires once, when the check first holds, and retires; a failure of that fire's action alerts at once, as a one-shot's does. The check runs every minute; with `--every` it runs on that cadence instead, and with `--at` it starts then. Checks run outside the tick lock, at most four at a time, so a slow check never holds up other timers or `fire`; the verdict is then decided against the timer as it is at that point, so one paused, edited or removed meanwhile does not fire, and one whose `--expires` passed meanwhile retires. When the check holds while the previous run is still in flight, `--overlap` applies: `skip` checks again next minute, `queue` buffers the fire (with the check's output) until that run ends. `set` and `edit` run the check once and warn when it already holds (the timer fires at the next tick) or is broken. A streak of not-yet checks is one `gated-not-yet` run, not one per minute.
+
+The check's stdout (first 16 KB, cut at a character boundary; the rest is discarded as it arrives) reaches a prompt timer's session as untrusted data, in a fenced `<timer-data source="gate">` block. A condition timer with `--expires` that has not fired by then retires with one `expired` alert.
 
 ## Catch-up and grace
 
@@ -125,4 +139,4 @@ The store root is `<agentDir>/timers` (`~/.omp/agent/timers`); `OMP_TIMERS_DIR` 
 | `state/<id>/runs/<seq>.json` | Fire payload the tick hands to the runner. |
 | `tick.log` | Output of the launchd ticker. |
 
-Spec frontmatter keys: `version`, `rev`, `title`, `reason`, `at`, `every`, `tz`, `session` (a session id, or `fresh` for a shell timer), `session_file`, `when_closed`, `shell`, `cwd`, `expires`, `max_runs`, `overlap`, `grace`, `catchup`, `pause_after`, `allow_timers`, `paused`, `paused_reason`, `armed_at` (start of the schedule generation), `resumed_at`, and `created` (`at`, `by`, `host`, `cwd`, `when_text`, and `run` when a fired run set it). A spec whose `version` is newer than this omp reads is listed as invalid rather than misread.
+Spec frontmatter keys: `version`, `rev`, `title`, `reason`, `at`, `every`, `until` (condition shell check), `condition` (its readable form), `tz`, `session` (a session id, or `fresh` for a shell timer), `session_file`, `when_closed`, `shell`, `cwd`, `expires`, `max_runs`, `overlap`, `grace`, `catchup`, `pause_after`, `allow_timers`, `paused`, `paused_reason`, `armed_at` (start of the schedule generation), `resumed_at`, and `created` (`at`, `by`, `host`, `cwd`, `when_text`, and `run` when a fired run set it). A spec whose `version` is newer than this omp reads is listed as invalid rather than misread.
