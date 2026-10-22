@@ -19,7 +19,7 @@ Case: the declining model reasons and starts `read a.txt`, declines, and the fal
 
 ## Why
 
-The fallback model never saw the declined call, yet omp treated it as the serving model's: speculation and the auth gateway acted on it mid-stream, and the agent ran it after. Replaying reasoning signed on both sides of a handoff is also refused by the API. Text stays because the fallback model continued from it.
+The fallback model never saw the declined call, yet omp treated it as the serving model's (table above). Replaying reasoning signed on both sides of a handoff is also refused by the API. Text stays because the fallback model continued from it.
 
 Decisions:
 - One place, the shared Anthropic transport (`providers/anthropic.ts`), so direct Anthropic, Factory and other Anthropic-messages routes behave the same.
@@ -45,4 +45,5 @@ Not run: a live handoff, since a refusal fallback cannot be triggered on demand.
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
