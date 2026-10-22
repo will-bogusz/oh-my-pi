@@ -60,6 +60,23 @@ export function parseDuration(text: string): number {
 	return total;
 }
 
+/** Lossless inverse of {@link parseDuration} for whole seconds (`90s` → `1m30s`); {@link formatDuration} is for display. */
+export function serializeDuration(ms: number): string {
+	let rest = Math.round(ms / 1000);
+	const parts: string[] = [];
+	for (const [unit, size] of [
+		["d", 86_400],
+		["h", 3600],
+		["m", 60],
+		["s", 1],
+	] as const) {
+		const count = Math.floor(rest / size);
+		if (count) parts.push(`${count}${unit}`);
+		rest -= count * size;
+	}
+	return parts.join("") || "0s";
+}
+
 export function formatDuration(ms: number): string {
 	const abs = Math.abs(ms);
 	if (abs < MINUTE) return `${Math.round(abs / 1000)}s`;
@@ -199,7 +216,7 @@ export function parseEvery(text: string): Cadence {
 export function normalizeEvery(text: string): string {
 	const trimmed = stripEvery(text);
 	const cadence = parseEvery(trimmed);
-	if (cadence.kind === "interval") return formatDuration(cadence.ms);
+	if (cadence.kind === "interval") return serializeDuration(cadence.ms);
 	if (trimmed.replace(/^cron\s+/i, "").split(/\s+/).length === 5) return `cron ${cadence.pattern}`;
 	return trimmed.toLowerCase().replace(/\s+/g, " ");
 }

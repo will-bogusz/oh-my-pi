@@ -104,6 +104,8 @@ export interface RunRecord {
 	detail?: string;
 	/** Spec rev the run was decided against. */
 	rev: number;
+	/** Schedule generation (`spec.armedAt`) the run belongs to; failures of an older generation never count. */
+	generation?: string;
 }
 
 export interface DeliveryRecord {
@@ -143,10 +145,18 @@ export interface TimerState {
 	failStreak: number;
 	/** `spec.resumedAt` the streak was last reset for. */
 	streakResetAt?: string;
+	/** The streak reached `pauseAfter`: the tick pauses the spec with this reason (kept until the spec write lands). */
+	pendingPause?: string;
 	gate?: { checks: number; lastCheckAt: string; lastExit?: number };
 	done?: TimerDone;
 	/** A run buffered by `overlap: queue`, dispatched once the in-flight run ends. */
-	queued?: { seq: number; slot?: number; missedSlots: number };
+	queued?: {
+		seq: number;
+		slot?: number;
+		missedSlots: number;
+		/** Untrusted `fire --data` of a queued manual fire. */
+		data?: { source: "gate" | "fire"; text: string };
+	};
 }
 
 /** One message in a session mailbox. */

@@ -23,7 +23,7 @@ import * as path from "node:path";
 import { acquireFileLock, isEnoent, parseFrontmatter } from "@oh-my-pi/pi-utils";
 import { YAML } from "bun";
 import { specHistoryPath, specLockPath, specPath, specsDir, TIMER_ID_PATTERN, timersDbPath, timersRoot } from "./paths";
-import { formatDuration, parseDuration } from "./schedule";
+import { parseDuration, serializeDuration } from "./schedule";
 import type {
 	DeliveryRecord,
 	EndRecord,
@@ -157,7 +157,7 @@ export function serializeTimerSpec(spec: TimerSpec): string {
 	if (spec.expiresAt) fm.expires = spec.expiresAt;
 	if (spec.maxRuns !== undefined) fm.max_runs = spec.maxRuns;
 	fm.overlap = spec.overlap;
-	if (spec.graceMs !== undefined) fm.grace = formatDuration(spec.graceMs);
+	if (spec.graceMs !== undefined) fm.grace = serializeDuration(spec.graceMs);
 	fm.pause_after = spec.pauseAfter;
 	if (spec.allowTimers) fm.allow_timers = true;
 	if (spec.wakeMachine) fm.wake_machine = true;
@@ -289,6 +289,7 @@ CREATE TABLE IF NOT EXISTS timer_state (
 	run_count INTEGER NOT NULL DEFAULT 0,
 	fail_streak INTEGER NOT NULL DEFAULT 0,
 	streak_reset_at TEXT,
+	pending_pause TEXT,
 	gate_checks INTEGER,
 	gate_last_check_at TEXT,
 	gate_last_exit INTEGER,
@@ -296,7 +297,8 @@ CREATE TABLE IF NOT EXISTS timer_state (
 	done_why TEXT,
 	queued_seq INTEGER,
 	queued_slot INTEGER,
-	queued_missed INTEGER
+	queued_missed INTEGER,
+	queued_data TEXT
 );
 CREATE TABLE IF NOT EXISTS runs (
 	timer_id TEXT NOT NULL,
@@ -310,6 +312,7 @@ CREATE TABLE IF NOT EXISTS runs (
 	gate_exit INTEGER,
 	detail TEXT,
 	rev INTEGER NOT NULL,
+	generation TEXT,
 	runner INTEGER NOT NULL DEFAULT 0,
 	dispatched_at TEXT,
 	settled_at TEXT,
@@ -370,6 +373,7 @@ export interface RunView {
 	gateExit?: number;
 	detail?: string;
 	rev: number;
+	generation?: string;
 	dispatchedAt?: string;
 	settledAt?: string;
 	runner: boolean;
@@ -396,6 +400,7 @@ interface StateRow {
 	run_count: number;
 	fail_streak: number;
 	streak_reset_at: string | null;
+	pending_pause: string | null;
 	gate_checks: number | null;
 	gate_last_check_at: string | null;
 	gate_last_exit: number | null;
@@ -404,6 +409,7 @@ interface StateRow {
 	queued_seq: number | null;
 	queued_slot: number | null;
 	queued_missed: number | null;
+	queued_data: string | null;
 }
 
 interface RunRow {
@@ -418,6 +424,7 @@ interface RunRow {
 	gate_exit: number | null;
 	detail: string | null;
 	rev: number;
+	generation: string | null;
 	runner: number;
 	dispatched_at: string | null;
 	settled_at: string | null;
@@ -541,6 +548,7 @@ export class TimerDb {
 			runCount: row.run_count,
 			failStreak: row.fail_streak,
 			streakResetAt: nullable(row.streak_reset_at),
+			pendingPause: nullable(row.pending_pause),
 			gate:
 				row.gate_checks !== null
 					? {
@@ -552,7 +560,14 @@ export class TimerDb {
 			done: row.done_at !== null ? { at: row.done_at, why: (row.done_why ?? "once") as TimerDoneWhy } : undefined,
 			queued:
 				row.queued_seq !== null
-					? { seq: row.queued_seq, slot: nullable(row.queued_slot), missedSlots: row.queued_missed ?? 0 }
+					? {
+							seq: row.queued_seq,
+							slot: nullable(row.queued_slot),
+							missedSlots: row.queued_missed ?? 0,
+							data: row.queued_data
+								? (JSON.parse(row.queued_data) as { source: "gate" | "fire"; text: string })
+								: undefined,
+						}
 					: undefined,
 		};
 	}
@@ -560,8 +575,9 @@ export class TimerDb {
 	writeState(id: string, state: TimerState): void {
 		this.#db.run(
 			`INSERT OR REPLACE INTO timer_state (id, armed_at, last_slot, seq, run_count, fail_streak, streak_reset_at,
-				gate_checks, gate_last_check_at, gate_last_exit, done_at, done_why, queued_seq, queued_slot, queued_missed)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				pending_pause, gate_checks, gate_last_check_at, gate_last_exit, done_at, done_why, queued_seq, queued_slot,
+				queued_missed, queued_data)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			[
 				id,
 				state.armedAt ?? null,
@@ -570,6 +586,7 @@ export class TimerDb {
 				state.runCount,
 				state.failStreak,
 				state.streakResetAt ?? null,
+				state.pendingPause ?? null,
 				state.gate?.checks ?? null,
 				state.gate?.lastCheckAt ?? null,
 				state.gate?.lastExit ?? null,
@@ -578,6 +595,7 @@ export class TimerDb {
 				state.queued?.seq ?? null,
 				state.queued?.slot ?? null,
 				state.queued?.missedSlots ?? null,
+				state.queued?.data ? JSON.stringify(state.queued.data) : null,
 			],
 		);
 	}
@@ -585,8 +603,8 @@ export class TimerDb {
 	// tick: runs
 	insertRun(id: string, run: RunRecord, runner: boolean): void {
 		this.#db.run(
-			`INSERT INTO runs (timer_id, seq, run_id, at, slot, trigger, outcome, missed_slots, gate_exit, detail, rev, runner)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			`INSERT INTO runs (timer_id, seq, run_id, at, slot, trigger, outcome, missed_slots, gate_exit, detail, rev,
+				generation, runner) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			[
 				id,
 				run.seq,
@@ -599,6 +617,7 @@ export class TimerDb {
 				run.gateExit ?? null,
 				run.detail ?? null,
 				run.rev,
+				run.generation ?? null,
 				runner ? 1 : 0,
 			],
 		);
@@ -686,6 +705,7 @@ export class TimerDb {
 			gateExit: nullable(row.gate_exit),
 			detail: nullable(row.detail),
 			rev: row.rev,
+			generation: nullable(row.generation),
 			runner: row.runner === 1,
 			dispatchedAt: nullable(row.dispatched_at),
 			settledAt: nullable(row.settled_at),
@@ -695,12 +715,18 @@ export class TimerDb {
 	}
 
 	// runner: run_ends
-	recordRunStart(timerId: string, runId: string, at: string): void {
-		this.#db.run("INSERT OR IGNORE INTO run_ends (run_id, timer_id, started_at) VALUES (?, ?, ?)", [
-			runId,
-			timerId,
-			at,
-		]);
+	/**
+	 * Claim a run for execution: exactly one runner ever wins a run id, so a
+	 * re-dispatched or doubly spawned runner never repeats a side effect.
+	 */
+	claimRunStart(timerId: string, runId: string, at: string): boolean {
+		return (
+			this.#db.run("INSERT OR IGNORE INTO run_ends (run_id, timer_id, started_at) VALUES (?, ?, ?)", [
+				runId,
+				timerId,
+				at,
+			]).changes === 1
+		);
 	}
 
 	recordRunEnd(timerId: string, end: EndRecord): void {

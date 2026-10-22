@@ -61,8 +61,6 @@ export interface FailureInput {
 
 export interface PolicyOutcome {
 	alerts: TimerAlert[];
-	/** Set when the streak reached `pauseAfter`: the tick pauses the spec with this reason. */
-	pauseReason?: string;
 }
 
 function alertFrom(
@@ -98,27 +96,23 @@ function bump(db: TimerDb, spec: TimerSpec, signature: string, summary: string, 
 	return db.bumpIncident(spec.id, signature, summary, at);
 }
 
-/** One failed run (gate broke, run ended non-zero, runner lost). Mutates `state.failStreak`. */
+/**
+ * One failed run (gate broke, run ended non-zero, runner lost). Mutates
+ * `state.failStreak`, and sets `state.pendingPause` on the transition into
+ * auto-pause (the tick then pauses the spec); later failures settled while
+ * that pause lands, or after it, never alert again.
+ */
 export function applyFailure(db: TimerDb, spec: TimerSpec, state: TimerState, input: FailureInput): PolicyOutcome {
 	state.failStreak++;
 	const error = firstErrorLine(input.error) || "failed";
 	const incident = bump(db, spec, errorSignature("failed", error), error, input.at, input.now);
 	const context = { runId: input.runId, error, logPath: input.logPath };
 	if (state.failStreak >= spec.pauseAfter) {
+		if (state.pendingPause || spec.paused) return { alerts: [] };
 		db.markIncidentAlerted(incident.id, input.at);
-		const pauseReason = `failures: ${state.failStreak} in a row; last: ${error}`;
-		return {
-			pauseReason,
-			alerts: [
-				alertFrom(
-					spec,
-					incident,
-					"paused",
-					`paused after ${state.failStreak} consecutive failures: ${error}`,
-					context,
-				),
-			],
-		};
+		state.pendingPause = `failures: ${state.failStreak} in a row; last: ${error}`;
+		const summary = `paused after ${state.failStreak} consecutive failures: ${error}`;
+		return { alerts: [alertFrom(spec, incident, "paused", summary, context)] };
 	}
 	if (incident.alertedAt === undefined && (input.final || incident.count >= spec.pauseAfter)) {
 		db.markIncidentAlerted(incident.id, input.at);

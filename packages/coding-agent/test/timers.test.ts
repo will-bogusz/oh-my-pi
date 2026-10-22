@@ -1,13 +1,14 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, spyOn, vi } from "bun:test";
 import * as path from "node:path";
 import { renderTimerMail } from "@oh-my-pi/pi-coding-agent/timers/fire-message";
 import { gateVerdict, type GateVerdict } from "@oh-my-pi/pi-coding-agent/timers/gate";
 import { claimMail, type DeliveryTarget, listNewMail, postMail } from "@oh-my-pi/pi-coding-agent/timers/mailbox";
 import { alertEnv, desktopAlertArgv, sendTimerAlerts } from "@oh-my-pi/pi-coding-agent/timers/notify";
-import { TIMERS_DIR_ENV } from "@oh-my-pi/pi-coding-agent/timers/paths";
+import { firePayloadPath, TIMER_RUN_ENV, TIMERS_DIR_ENV } from "@oh-my-pi/pi-coding-agent/timers/paths";
 import { errorSignature } from "@oh-my-pi/pi-coding-agent/timers/policy";
-import { decideDue, nextFireAt, parseWhen, resolveAt } from "@oh-my-pi/pi-coding-agent/timers/schedule";
-import { assertTimerMutationAllowed, TimerScopeError } from "@oh-my-pi/pi-coding-agent/timers/scope";
+import { execTimerRun } from "@oh-my-pi/pi-coding-agent/timers/runner";
+import { decideDue, nextFireAt, normalizeEvery, parseWhen, resolveAt } from "@oh-my-pi/pi-coding-agent/timers/schedule";
+import { TimerScopeError } from "@oh-my-pi/pi-coding-agent/timers/scope";
 import { editTimer, removeTimer, setPaused, setTimer } from "@oh-my-pi/pi-coding-agent/timers/service";
 import {
 	closeTimerDbs,
@@ -15,8 +16,9 @@ import {
 	openTimerDb,
 	readTimerSpec,
 	TimerConflictError,
+	TimerDb,
 } from "@oh-my-pi/pi-coding-agent/timers/store";
-import { runTick, type TickDeps } from "@oh-my-pi/pi-coding-agent/timers/tick";
+import { fireTimerNow, runTick, type TickDeps } from "@oh-my-pi/pi-coding-agent/timers/tick";
 import type { TimerAlert, TimerMail, TimerSpec, TimerState } from "@oh-my-pi/pi-coding-agent/timers/types";
 import { TempDir } from "@oh-my-pi/pi-utils";
 
@@ -400,6 +402,114 @@ describe("timer engine (tick, runner records, policy) on an injected clock", () 
 		expect(rescheduled).toMatchObject({ rearmed: true, spec: { rev: 3 } });
 		expect((await tick(T0 + 3 * HOUR + 4 * MINUTE)).lines).toMatchObject([{ action: "fired", runId: "gen#2" }]);
 	});
+
+	it("never executes a run twice when a cut-off dispatch is re-dispatched after the runner was spawned", async () => {
+		const out = path.resolve(root, "side-effect");
+		await setTimer({ id: "dup", reason: "test", every: "5m", shell: `printf x >> ${out}` }, ctx(T0));
+		// The spawn is accepted, then the tick dies before recording the dispatch.
+		const crashing: Partial<TickDeps> = {
+			...deps(),
+			spawnRunner: (s, seq) => {
+				spawned.push(`${s.id}#${seq}`);
+				throw new Error("tick killed");
+			},
+		};
+		await runTick(T0 + 5 * MINUTE + 1, crashing);
+		await tick(T0 + 6 * MINUTE + 2);
+		expect(spawned).toEqual(["dup#1", "dup#1"]);
+		const first = await execTimerRun("dup", 1, root);
+		const second = await execTimerRun("dup", 1, root);
+		expect(first.ok).toBe(true);
+		expect(second.detail).toContain("already claimed");
+		expect(await Bun.file(out).text()).toBe("x");
+		expect(runs("dup")[0]?.end).toMatchObject({ ok: true, exitCode: 0 });
+	});
+
+	it("keeps a queued run (and its fire data) when a manual fire arrives, running the queued one first", async () => {
+		await setTimer(
+			{ id: "q", reason: "test", every: "5m", prompt: "go", session: "fresh", overlap: "queue" },
+			ctx(T0),
+		);
+		inFlight = true;
+		await tick(T0 + 5 * MINUTE + 1);
+		inFlight = false;
+		const manual = await fireTimerNow("q", T0 + 6 * MINUTE, { data: "important result", deps: deps() });
+		expect(manual).toMatchObject({ action: "queued", runId: "q#2" });
+		expect(runs("q").map(run => [run.runId, run.outcome, run.trigger])).toEqual([
+			["q#1", "fired", "schedule"],
+			["q#2", "queued", "manual"],
+		]);
+		await tick(T0 + 7 * MINUTE);
+		expect(spawned).toEqual(["q#1", "q#2"]);
+		const payload = await Bun.file(firePayloadPath("q", 2, root)).json();
+		expect(payload).toMatchObject({ trigger: "manual", data: { source: "fire", text: "important result" } });
+	});
+
+	it("drops a queued run that expired while it waited instead of starting it late", async () => {
+		await setTimer(
+			{ id: "late", reason: "test", at: "in 1m", expires: "2m", shell: "true", overlap: "queue" },
+			ctx(T0),
+		);
+		inFlight = true;
+		await tick(T0 + MINUTE + 1);
+		inFlight = false;
+		await tick(T0 + 3 * MINUTE);
+		expect(spawned).toEqual([]);
+		expect(runs("late")).toMatchObject([{ runId: "late#1", outcome: "missed" }]);
+		expect(openTimerDb(root).readState("late").done?.why).toBe("expired");
+	});
+
+	it("raises one pause alert when several failures settle in the same tick", async () => {
+		await shell("batch", "1h");
+		for (let seq = 1; seq <= 4; seq++) {
+			await fireTimerNow("batch", T0 + seq * 1000, { deps: deps() });
+			end("batch", seq, false, "exit 1: boom");
+		}
+		await tick(T0 + MINUTE);
+		expect(alerts.map(alert => alert.event)).toEqual(["paused"]);
+		expect((await readTimerSpec("batch", root))?.paused).toBe(true);
+	});
+
+	it("keeps failure accounting when the tick dies mid-settlement, and pauses on the retry", async () => {
+		await shell("crash", "1h", T0, { pauseAfter: 1 });
+		await tick(T0 + HOUR + 1);
+		end("crash", 1, false, "exit 1: boom");
+		spyOn(TimerDb.prototype, "writeState").mockImplementationOnce(() => {
+			throw new Error("killed mid-settlement");
+		});
+		try {
+			expect((await tick(T0 + HOUR + MINUTE)).lines).toMatchObject([{ action: "error" }]);
+		} finally {
+			vi.restoreAllMocks();
+		}
+		expect(runs("crash")[0]?.settledAt).toBeUndefined();
+		await tick(T0 + HOUR + 2 * MINUTE);
+		expect((await readTimerSpec("crash", root))?.paused).toBe(true);
+		expect(alerts.map(alert => alert.event)).toEqual(["paused"]);
+	});
+
+	it("does not count failures from before a resume or from an earlier schedule generation", async () => {
+		await shell("resumed", "1h", T0, { pauseAfter: 1 });
+		await shell("rearmed", "1h", T0, { pauseAfter: 1 });
+		await tick(T0 + HOUR + 1);
+		end("resumed", 1, false, "exit 1: old bug");
+		end("rearmed", 1, false, "exit 1: old bug");
+		await setPaused("resumed", false, { root, now: T0 + HOUR + 30_000 });
+		await editTimer("rearmed", { every: "2h", shell: "true" }, ctx(T0 + HOUR + 30_000));
+		await tick(T0 + HOUR + MINUTE);
+		expect((await readTimerSpec("resumed", root))?.paused).toBe(false);
+		expect((await readTimerSpec("rearmed", root))?.paused).toBe(false);
+		expect(alerts).toEqual([]);
+		expect(runs("resumed")[0]?.settledAt).toBeDefined();
+	});
+
+	it("stores a duration cadence losslessly", async () => {
+		expect(normalizeEvery("90s")).toBe("1m30s");
+		expect(normalizeEvery("1d30m")).toBe("1d30m");
+		const { spec: stored } = await shell("odd", "5m30s");
+		expect(stored.every).toBe("5m30s");
+		expect(nextFireAt(stored, fresh, T0)).toBe(T0 + 330_000);
+	});
 });
 
 describe("timer spec writes", () => {
@@ -459,16 +569,29 @@ describe("timer recursion guard", () => {
 
 	it("lets a fired run change only its own timer unless that timer allows timers", async () => {
 		const root = dir.path();
-		const env = { OMP_TIMER_RUN: "parent#4" };
-		await setTimer(
-			{ id: "parent", reason: "r", every: "1h", shell: "true" },
-			{ by: "cli", cwd: root, root, testGate: false },
-		);
-		await assertTimerMutationAllowed("parent", "edit", root, env);
-		await expect(assertTimerMutationAllowed("other", "set", root, env)).rejects.toThrow(TimerScopeError);
-		await expect(assertTimerMutationAllowed(undefined, "set", root, env)).rejects.toThrow(/not a new timer/);
-		await editTimer("parent", { allowTimers: true }, { by: "cli", cwd: root, root });
-		await assertTimerMutationAllowed("other", "set", root, env);
+		const ctx = { by: "cli" as const, cwd: root, root, testGate: false };
+		await setTimer({ id: "parent", reason: "r", every: "1h", shell: "true" }, ctx);
+		await setTimer({ id: "other", reason: "r", every: "1h", shell: "true" }, ctx);
+		const previous = Bun.env[TIMER_RUN_ENV];
+		Bun.env[TIMER_RUN_ENV] = "parent#4";
+		try {
+			await editTimer("parent", { title: "own" }, ctx);
+			await expect(setTimer({ reason: "spawned", at: "in 1h", shell: "true" }, ctx)).rejects.toThrow(
+				/not a new timer/,
+			);
+			await expect(editTimer("other", { title: "x" }, ctx)).rejects.toThrow(TimerScopeError);
+			await expect(setPaused("other", true, { root })).rejects.toThrow(TimerScopeError);
+			await expect(removeTimer("other", root)).rejects.toThrow(TimerScopeError);
+			await expect(fireTimerNow("other", T0, { deps: { root, spawnRunner: () => {} } })).rejects.toThrow(
+				TimerScopeError,
+			);
+			await editTimer("parent", { allowTimers: true }, ctx);
+			await editTimer("other", { title: "allowed" }, ctx);
+		} finally {
+			if (previous === undefined) delete Bun.env[TIMER_RUN_ENV];
+			else Bun.env[TIMER_RUN_ENV] = previous;
+		}
+		expect((await readTimerSpec("other", root))?.title).toBe("allowed");
 	});
 });
 

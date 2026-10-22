@@ -133,7 +133,6 @@ export async function execTimerRun(id: string, seq: number, root = timersRoot())
 	const runId = `${id}#${seq}`;
 	const db = openTimerDb(root);
 	const started = Date.now();
-	db.recordRunStart(id, runId, new Date(started).toISOString());
 	const finish = (result: RunResult): RunResult => {
 		db.recordRunEnd(id, {
 			runId,
@@ -145,10 +144,21 @@ export async function execTimerRun(id: string, seq: number, root = timersRoot())
 		});
 		return result;
 	};
-	const spec = await readTimerSpec(id, root);
-	if (!spec) return finish({ ok: false, detail: "timer removed before its run started" });
+	// Lock, then claim: a second runner for this run id (re-dispatch after a
+	// tick crash, a double spawn) never executes, and never overwrites the
+	// first runner's record. One that cannot take the lock records nothing;
+	// the tick reports the run lost if no runner ever claims it.
 	const lock = tryAcquireFileLock(runLockPath(id, root));
-	if (!lock) return finish({ ok: false, detail: "overlap: the previous run still holds the run lock" });
+	if (!lock) return { ok: false, detail: "another run of this timer holds the run lock; not started" };
+	if (!db.claimRunStart(id, runId, new Date(started).toISOString())) {
+		lock.release();
+		return { ok: true, detail: `${runId} was already claimed by another runner; not run again` };
+	}
+	const spec = await readTimerSpec(id, root);
+	if (!spec) {
+		lock.release();
+		return finish({ ok: false, detail: "timer removed before its run started" });
+	}
 	try {
 		const env = runEnv(spec, runId, root);
 		if (spec.action.kind === "shell") {

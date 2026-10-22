@@ -150,12 +150,14 @@ function recordNonFire(
 		outcome: "missed" | "skipped-overlap" | "queued" | "gated-not-yet" | "failed";
 		gateExit?: number;
 		detail?: string;
+		/** Runs inside the same transaction, after the row is written (a gate failure's own accounting). */
+		settle?: (runId: string) => void;
 	},
 ): string {
 	state.seq++;
 	const runId = `${spec.id}#${state.seq}`;
 	const seq = state.seq;
-	commit(ctx, spec, readSeq, state, () =>
+	commit(ctx, spec, readSeq, state, () => {
 		ctx.db.insertRun(
 			spec.id,
 			{
@@ -169,10 +171,12 @@ function recordNonFire(
 				gateExit: input.gateExit,
 				detail: input.detail,
 				rev: spec.rev,
+				generation: spec.armedAt,
 			},
 			false,
-		),
-	);
+		);
+		input.settle?.(runId);
+	});
 	return runId;
 }
 
@@ -197,7 +201,7 @@ async function fire(
 
 	if (!input.fromQueue) state.seq = input.seq;
 	if (input.slot !== undefined) state.lastSlot = Math.max(state.lastSlot ?? input.slot, input.slot);
-	state.queued = undefined;
+	if (input.fromQueue) state.queued = undefined;
 	state.runCount++;
 	const recurring = spec.every !== undefined && !spec.until;
 	if (input.trigger === "gate") state.done = { at, why: "gate-met" };
@@ -239,6 +243,7 @@ async function fire(
 					outcome: "fired",
 					missedSlots: input.missedSlots || undefined,
 					rev: spec.rev,
+					generation: spec.armedAt,
 				},
 				viaRunner,
 			);
@@ -297,17 +302,14 @@ async function redispatch(ctx: TickContext, spec: TimerSpec, run: RunView): Prom
 }
 
 /**
- * Apply finished runs to the failure policy, oldest first. Returns the pause
- * reason when the streak reached `pauseAfter`.
+ * Apply finished runs to the failure policy, oldest first. Each run's
+ * settlement (incident, streak, pause intent, `settled_at`) commits in one
+ * transaction, so a crash never leaves a run settled without its accounting.
+ * Runs of an earlier schedule generation, or that ran before the last
+ * `resume`, are settled for the record but never count toward the streak.
  */
-async function settleRuns(
-	ctx: TickContext,
-	spec: TimerSpec,
-	state: TimerState,
-	lines: TickLine[],
-): Promise<string | undefined> {
+async function settleRuns(ctx: TickContext, spec: TimerSpec, state: TimerState, lines: TickLine[]): Promise<void> {
 	const { db, deps, now, at } = ctx;
-	let pauseReason: string | undefined;
 	for (const run of db.unsettledRuns(spec.id)) {
 		let error: string | undefined;
 		let lost = false;
@@ -320,13 +322,19 @@ async function settleRuns(
 			(run.delivery?.state === "delivered-live" || run.delivery?.state === "resumed-headless")
 		) {
 			// A live session took the mail: the turn is the session's own, so the fire succeeded.
-		} else if (!run.dispatchedAt) {
+		} else if (!run.dispatchedAt && !run.end) {
+			// Committed but its side effect never happened (the tick died in between). A runner that
+			// did start has claimed the run, so this re-dispatch can never execute it twice.
 			if (now - Date.parse(run.at) >= REDISPATCH_AFTER_MS) {
 				const line = await redispatch(ctx, spec, run);
 				if (line) lines.push(line);
 			}
 			continue;
-		} else if (run.runner && now - Date.parse(run.dispatchedAt) >= LOST_AFTER_MS && !deps.inFlight(spec, deps.root)) {
+		} else if (
+			run.runner &&
+			now - Date.parse(run.dispatchedAt ?? run.at) >= LOST_AFTER_MS &&
+			!deps.inFlight(spec, deps.root)
+		) {
 			lost = true;
 			error = run.end?.startedAt
 				? "lost: the runner exited without recording a result"
@@ -334,25 +342,48 @@ async function settleRuns(
 		} else {
 			continue; // still in flight
 		}
-		if (error === undefined) {
-			applySuccess(db, spec, state, at);
-			db.markSettled(run.runId, at);
-			continue;
-		}
-		const outcome = applyFailure(db, spec, state, {
-			runId: run.runId,
-			error,
-			at,
-			now,
-			final: !spec.every && !spec.until,
-			logPath: runLogPath(spec.id, run.seq, deps.root),
+		const counts = run.generation === spec.armedAt && (!spec.resumedAt || run.at >= spec.resumedAt);
+		let alerts: TimerAlert[] = [];
+		db.write(() => {
+			if (counts && error === undefined) applySuccess(db, spec, state, at);
+			if (counts && error !== undefined) {
+				alerts = applyFailure(db, spec, state, {
+					runId: run.runId,
+					error,
+					at,
+					now,
+					final: !spec.every && !spec.until,
+					logPath: runLogPath(spec.id, run.seq, deps.root),
+				}).alerts;
+			}
+			db.markSettled(run.runId, at, lost ? "failed" : undefined, lost ? error : undefined);
+			db.writeState(spec.id, state);
 		});
-		ctx.alerts.push(...outcome.alerts);
-		pauseReason ??= outcome.pauseReason;
-		db.markSettled(run.runId, at, lost ? "failed" : undefined, lost ? error : undefined);
+		// Alerts leave only after their transaction committed.
+		ctx.alerts.push(...alerts);
 		if (lost) lines.push({ id: spec.id, action: "lost", runId: run.runId, detail: error });
 	}
-	return pauseReason;
+}
+
+/** Land a pause the failure policy decided; idempotent, so a crash between the two writes just retries. */
+async function applyPendingPause(
+	ctx: TickContext,
+	spec: TimerSpec,
+	state: TimerState,
+	readSeq: number,
+): Promise<TickLine | undefined> {
+	const reason = state.pendingPause;
+	if (!reason) return undefined;
+	if (!spec.paused) {
+		await mutateTimerSpec(
+			spec.id,
+			current => (current && !current.paused ? { ...current, paused: true, pausedReason: reason } : current),
+			{ root: ctx.deps.root },
+		);
+	}
+	state.pendingPause = undefined;
+	commit(ctx, spec, readSeq, state, () => {});
+	return spec.paused ? undefined : { id: spec.id, action: "paused", detail: reason };
 }
 
 async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
@@ -363,19 +394,15 @@ async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
 	const state = currentState(spec, stored);
 	if (spec.resumedAt && spec.resumedAt !== state.streakResetAt) {
 		state.failStreak = 0;
+		state.pendingPause = undefined;
 		state.streakResetAt = spec.resumedAt;
 		db.resolveIncidents(spec.id, at);
 	}
 
-	const pauseReason = await settleRuns(ctx, spec, state, lines);
-	if (pauseReason && !spec.paused) {
-		commit(ctx, spec, readSeq, state, () => {});
-		await mutateTimerSpec(
-			spec.id,
-			current => (current ? { ...current, paused: true, pausedReason: pauseReason } : undefined),
-			{ root: deps.root },
-		);
-		lines.push({ id: spec.id, action: "paused", detail: pauseReason });
+	await settleRuns(ctx, spec, state, lines);
+	const paused = await applyPendingPause(ctx, spec, state, readSeq);
+	if (paused) {
+		lines.push(paused);
 		return lines;
 	}
 	if (state.done || spec.paused) {
@@ -383,9 +410,19 @@ async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
 		return lines;
 	}
 
+	const decision = decideDue(spec, state, now);
 	if (state.queued) {
-		if (!deps.inFlight(spec, deps.root)) {
-			const queued = state.queued;
+		const queued = state.queued;
+		if (decision.kind === "retire" && decision.why !== "once") {
+			// Expired or out of runs while it waited: the buffered run never starts.
+			state.queued = undefined;
+			db.markSettled(
+				`${spec.id}#${queued.seq}`,
+				at,
+				"missed",
+				`dropped: ${decision.why} before the previous run ended`,
+			);
+		} else if (!deps.inFlight(spec, deps.root)) {
 			lines.push(
 				await fire(ctx, spec, readSeq, state, {
 					seq: queued.seq,
@@ -393,14 +430,18 @@ async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
 					missedSlots: queued.missedSlots,
 					// A queued manual fire has no slot; it stays manual so it never consumes the schedule.
 					trigger: queued.slot === undefined ? "manual" : "schedule",
+					data: queued.data,
 					fromQueue: true,
 				}),
 			);
 			return lines;
+		} else if (decision.kind === "retire") {
+			// A one-shot whose slot is buffered: wait for the buffer, never retire past it.
+			if (JSON.stringify(state) !== JSON.stringify(stored)) commit(ctx, spec, readSeq, state, () => {});
+			return lines;
 		}
 	}
 
-	const decision = decideDue(spec, state, now);
 	switch (decision.kind) {
 		case "idle":
 			if (JSON.stringify(state) !== JSON.stringify(stored)) commit(ctx, spec, readSeq, state, () => {});
@@ -515,26 +556,24 @@ async function tickOne(ctx: TickContext, spec: TimerSpec): Promise<TickLine[]> {
 	const error = verdict.timedOut
 		? "gate timed out"
 		: `gate exit ${verdict.exitCode ?? "?"}${verdict.output ? `: ${firstErrorLine(verdict.output)}` : ""}`;
-	const runId = `${spec.id}#${state.seq + 1}`;
-	const outcome = applyFailure(db, spec, state, { runId, error, at, now, final: false });
-	ctx.alerts.push(...outcome.alerts);
-	recordNonFire(ctx, spec, readSeq, state, {
+	let gateAlerts: TimerAlert[] = [];
+	const runId = recordNonFire(ctx, spec, readSeq, state, {
 		slot: decision.slot,
 		trigger: "gate",
 		outcome: "failed",
 		gateExit: verdict.exitCode,
 		detail: error,
+		// The failure is its own result: account for it in the same transaction as the run row.
+		settle: id => {
+			gateAlerts = applyFailure(db, spec, state, { runId: id, error, at, now, final: false }).alerts;
+			db.markSettled(id, at);
+		},
 	});
-	db.markSettled(runId, at);
+	// Alerts leave only after their transaction committed.
+	ctx.alerts.push(...gateAlerts);
 	lines.push({ id: spec.id, action: "failed", runId, detail: error });
-	if (outcome.pauseReason) {
-		await mutateTimerSpec(
-			spec.id,
-			current => (current ? { ...current, paused: true, pausedReason: outcome.pauseReason } : undefined),
-			{ root: deps.root },
-		);
-		lines.push({ id: spec.id, action: "paused", detail: outcome.pauseReason });
-	}
+	const gatePause = await applyPendingPause(ctx, spec, state, state.seq);
+	if (gatePause) lines.push(gatePause);
 	return lines;
 }
 
@@ -592,23 +631,39 @@ export async function fireTimerNow(id: string, now = Date.now(), options: FireNo
 		if (!spec) throw new Error(`No timer "${id}"`);
 		const stored = ctx.db.readState(id);
 		const state = currentState(spec, stored);
-		if (deps.inFlight(spec, deps.root)) {
+		const data = options.data ? { source: "fire" as const, text: options.data } : undefined;
+		let busy = deps.inFlight(spec, deps.root);
+		const dispatched: TickLine[] = [];
+		if (state.queued && !busy) {
+			// A buffered run was accepted first: start it now, and treat this fire as overlapping it.
+			const queued = state.queued;
+			dispatched.push(
+				await fire(ctx, spec, stored.seq, state, {
+					seq: queued.seq,
+					slot: queued.slot,
+					missedSlots: queued.missedSlots,
+					trigger: queued.slot === undefined ? "manual" : "schedule",
+					data: queued.data,
+					fromQueue: true,
+				}),
+			);
+			busy = true;
+		}
+		if (busy) {
 			const queue = spec.overlap === "queue" && !state.queued;
-			if (queue) state.queued = { seq: state.seq + 1, missedSlots: 0 };
+			if (queue) state.queued = { seq: state.seq + 1, missedSlots: 0, data };
+			const detail = dispatched.length
+				? `queued run ${dispatched[0].runId} started first`
+				: "previous run still in flight";
 			const runId = recordNonFire(ctx, spec, stored.seq, state, {
 				trigger: "manual",
 				outcome: queue ? "queued" : "skipped-overlap",
-				detail: "previous run still in flight",
+				detail,
 			});
-			return { id, action: queue ? "queued" : "skipped-overlap", runId, detail: "previous run still in flight" };
+			return { id, action: queue ? "queued" : "skipped-overlap", runId, detail };
 		}
 		// A manual fire never consumes the schedule (only maxRuns counts it).
-		return await fire(ctx, spec, stored.seq, state, {
-			seq: state.seq + 1,
-			missedSlots: 0,
-			trigger: "manual",
-			data: options.data ? { source: "fire", text: options.data } : undefined,
-		});
+		return await fire(ctx, spec, stored.seq, state, { seq: state.seq + 1, missedSlots: 0, trigger: "manual", data });
 	} finally {
 		lock.release();
 		await deps.notify(ctx.alerts);
