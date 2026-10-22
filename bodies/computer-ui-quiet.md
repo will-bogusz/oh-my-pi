@@ -41,7 +41,7 @@ Linux and Windows can't watch notifications and wait a fixed half second after i
 - Live, guest macOS VM, no model: the table above, 10 cells per session, the two arms' sessions interleaved. Every miss on `main` left the folder "untitled folder", none of the name in it.
 - Dev set, guest macOS VM, GPT-6.1 Sol (medium), 4 tasks × 3 runs per build, all passed: on the long Automator task this PR used fewer tokens in every run (0.85–1.07M against 1.15–1.59M on `main`), steps overlapping (30–36 against 36–45); three short tasks showed no clear change.
 - `bun test test/tools/computer.test.ts -t "waits for the UI to settle"`: 15 pass; each rule, reverted alone, fails its own tests (10 reverts, below).
-- bench-mac: `bun check` exit 0, Rust tests 905 pass / 0 fail, native build exit 0.
+- bench-mac: `bun check` exit 0, Rust tests 940 pass / 0 fail, native build exit 0.
 - Not run: Linux and Windows (fixed wait, unit-tested only).
 
 <details><summary>Builds, per-session counts, revert checks</summary>
