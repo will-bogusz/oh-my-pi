@@ -43500,6 +43500,24 @@
    "added": "2026-10-22T07:36:15Z",
    "updated": "2026-10-22T07:36:15Z",
    "note": ""
+  },
+  {
+   "id": "headless-agent-flags",
+   "branch": "will/headless-agent-flags",
+   "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "body": "bodies/headless-agent-flags.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/headless-agent-flags",
+   "host": "MacBook-Pro",
+   "added": "2026-10-22T07:48:44Z",
+   "updated": "2026-10-22T07:48:44Z",
+   "note": ""
   }
  ],
  "watch": {
