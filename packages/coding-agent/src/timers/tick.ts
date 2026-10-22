@@ -29,8 +29,17 @@ import {
 	postMail,
 	withdrawMail,
 } from "../mailbox/mailbox";
+import { createTimerHost, syncMachineWake, type WakeHost } from "./install";
 import { loadTimerNotifyConfig, sendTimerAlerts } from "./notify";
-import { firePayloadPath, runLockPath, runLogPath, tickLockPath, timersRoot, timerStateDir } from "./paths";
+import {
+	firePayloadPath,
+	runLockPath,
+	runLogPath,
+	tickLockPath,
+	timersRoot,
+	timerStateDir,
+	wakeLockPath,
+} from "./paths";
 import { applyFailure, applyNotice, applySuccess } from "./policy";
 import { type DueDecision, decideDue, formatDuration, graceFor, MINUTE, nextFireAt } from "./schedule";
 import { assertTimerMutationAllowed } from "./scope";
@@ -73,6 +82,8 @@ export interface TickDeps {
 	/** Whether a runner process holds the timer's run lock (it is alive). */
 	runnerAlive(spec: TimerSpec, root: string): boolean;
 	notify(alerts: TimerAlert[]): Promise<void>;
+	/** OS seam for cancelling (and re-stamping) recorded machine wakes. */
+	host: WakeHost;
 }
 
 /** Spawn the detached runner for one run; its stdout/stderr go to the run log. */
@@ -109,6 +120,7 @@ export function defaultTickDeps(overrides: Partial<TickDeps> = {}): TickDeps {
 		spawnRunner: spawnRunnerProcess,
 		deliveryTarget,
 		runnerAlive: runLockHeld,
+		host: createTimerHost(),
 		notify: async alerts => {
 			if (alerts.length) await sendTimerAlerts(alerts, await loadTimerNotifyConfig());
 		},
@@ -665,6 +677,7 @@ export async function runTick(now = Date.now(), overrides: Partial<TickDeps> = {
 				lines.push({ id: spec.id, action: "error", detail: err instanceof Error ? err.message : String(err) });
 			}
 		}
+		await reconcileMachineWakes(ctx, new Set(errors.map(error => error.id)));
 		ctx.db.writeHeartbeat({ lastTickAt: at, pid: process.pid, version: VERSION });
 	} finally {
 		lock.release();
@@ -672,6 +685,44 @@ export async function runTick(now = Date.now(), overrides: Partial<TickDeps> = {
 	// Alerts go out after the lock is released: a slow sink never delays the next tick.
 	await deps.notify(ctx.alerts);
 	return { at, locked: false, lines, alerts: ctx.alerts };
+}
+
+/**
+ * Bring one timer's recorded machine wakes in line with its spec as it is now (removed when the spec is
+ * gone). Holds the timer's wake lock across reading the spec, pmset and the record, so a service
+ * mutation and the tick never act on each other's stale view; returns warnings.
+ */
+export async function syncTimerWake(id: string, root: string, host: WakeHost, now: number): Promise<string[]> {
+	fs.mkdirSync(timerStateDir(id, root), { recursive: true });
+	const lock = await acquireFileLock(wakeLockPath(id, root), { retries: 200, retryDelayMs: 50 });
+	try {
+		const db = openTimerDb(root);
+		const spec = await readTimerSpec(id, root);
+		const state = spec && currentState(spec, db.readState(id));
+		return await syncMachineWake({ db, host, id, spec, state, now });
+	} finally {
+		lock.release();
+	}
+}
+
+/**
+ * Bring every recorded machine wake in line with its timer after the spec loop: a timer that retired,
+ * expired, auto-paused or was removed by any path gets its pending wake cancelled, and a cancel pmset
+ * refused earlier is retried. Only timers with a recorded wake are visited, so the tick never schedules
+ * a first wake (no sudo attempts every minute on hosts without passwordless pmset); it only re-stamps a
+ * recorded one whose time moved.
+ */
+async function reconcileMachineWakes(ctx: TickContext, invalid: Set<string>): Promise<void> {
+	for (const id of new Set(ctx.db.listMachineWakes().map(wake => wake.timerId))) {
+		// An unreadable spec is not a removed one: leave its wake until the file is fixed or removed.
+		if (invalid.has(id)) continue;
+		try {
+			const warnings = await syncTimerWake(id, ctx.deps.root, ctx.deps.host, ctx.now);
+			if (warnings.length) logger.warn("timer machine wake not reconciled", { id, warnings });
+		} catch (err) {
+			logger.error("timer machine wake reconcile failed", { id, error: String(err) });
+		}
+	}
 }
 
 export interface FireNowOptions {

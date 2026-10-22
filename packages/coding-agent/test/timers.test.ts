@@ -53,6 +53,7 @@ function spec(overrides: Partial<TimerSpec>): TimerSpec {
 		catchup: "run",
 		pauseAfter: 3,
 		allowTimers: false,
+		wakeMachine: false,
 		paused: false,
 		armedAt: new Date(T0).toISOString(),
 		created: { at: new Date(T0).toISOString(), by: "cli", host: "h", cwd: "/", whenText: "" },

@@ -126,7 +126,7 @@ export function renderTimerCard(row: TimerRow, now: number, options: CardOptions
 	// The ticker runs once a minute, so a one-shot lands up to a minute after its time.
 	const granularity = spec.at && !spec.every ? " · fires within a minute after its time" : "";
 	lines.push(`ticker ${describeTicker(options.ticker, now)}${granularity}`);
-	if ((options.platform ?? process.platform) === "darwin") {
+	if ((options.platform ?? process.platform) === "darwin" && row.machineWakeAt === undefined) {
 		lines.push(
 			spec.catchup === "skip"
 				? "⚠ a sleeping Mac misses the slots it sleeps through (catchup: skip)"

@@ -67,6 +67,8 @@ export interface TimerSpec {
 	pauseAfter: number;
 	/** Let runs this timer fires create or change other timers (recursion guard). */
 	allowTimers: boolean;
+	/** macOS one-shots: schedule a wake shortly before `at` with `sudo -n pmset`. */
+	wakeMachine: boolean;
 	paused: boolean;
 	/** Why it is paused: `user`, or the failure that tripped `pauseAfter`. */
 	pausedReason?: string;

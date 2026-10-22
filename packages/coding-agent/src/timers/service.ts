@@ -10,6 +10,7 @@ import * as path from "node:path";
 import { isEnoent } from "@oh-my-pi/pi-utils";
 import { formatWallClock } from "../mailbox/message";
 import { readSessionInfo, resolveResumableSession } from "../session/session-listing";
+import { createTimerHost, desiredMachineWake, type WakeHost } from "./install";
 import { runLogPath, TIMER_ID_PATTERN, timersRoot } from "./paths";
 import {
 	assertTimeZone,
@@ -36,7 +37,7 @@ import {
 	type RunView,
 	readTimerSpec,
 } from "./store";
-import { currentState } from "./tick";
+import { currentState, syncTimerWake } from "./tick";
 import type { TimerCatchup, TimerOverlap, TimerSpec, TimerState, TimerTarget } from "./types";
 
 export interface TimerSetInput {
@@ -62,6 +63,8 @@ export interface TimerSetInput {
 	catchup?: TimerCatchup;
 	pauseAfter?: number;
 	allowTimers?: boolean;
+	/** macOS one-shots: wake the machine shortly before `at` (`sudo -n pmset`). */
+	wakeMachine?: boolean;
 	/** Replace only if the current spec is at this rev (0 = must not exist yet). */
 	expectedRev?: number;
 }
@@ -70,12 +73,14 @@ export interface TimerSetContext {
 	cwd: string;
 	now?: number;
 	root?: string;
+	/** OS seam for `wakeMachine` (tests pass a fake). */
+	host?: WakeHost;
 }
 
 export interface TimerSetResult {
 	spec: TimerSpec;
 	replaced: boolean;
-	/** Problems that did not block the set (a typed date that may be a day late, …). */
+	/** Problems that did not block the set (a typed date that may be a day late, a machine wake not scheduled or cancelled, …). */
 	warnings: string[];
 }
 
@@ -160,6 +165,9 @@ function validateSpec(spec: TimerSpec, now: number): void {
 	}
 	if (!Number.isInteger(spec.pauseAfter) || spec.pauseAfter < 1)
 		throw new Error("pauseAfter must be a positive integer");
+	if (spec.wakeMachine && (!spec.at || spec.every)) {
+		throw new Error("wakeMachine needs a one-shot: set at without every, or turn wakeMachine off");
+	}
 }
 
 /** Local hours after midnight in which "tomorrow" in a person's head is still today's date. */
@@ -222,6 +230,7 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 		catchup: input.catchup ?? "run",
 		pauseAfter: input.pauseAfter ?? DEFAULT_PAUSE_AFTER,
 		allowTimers: input.allowTimers ?? false,
+		wakeMachine: input.wakeMachine ?? false,
 		paused: false,
 		armedAt: nowIso,
 		created: {
@@ -240,7 +249,8 @@ export async function setTimer(input: TimerSetInput, ctx: TimerSetContext): Prom
 	});
 	if (!written) throw new Error(`timer ${id} was not written`);
 	const slip = written.at ? dateSlipWarning(input.at, Date.parse(written.at), now, tz) : undefined;
-	return { spec: written, replaced: previous !== undefined, warnings: slip ? [slip] : [] };
+	const wake = await syncTimerWake(id, root, ctx.host ?? createTimerHost(), now);
+	return { spec: written, replaced: previous !== undefined, warnings: [...(slip ? [slip] : []), ...wake] };
 }
 
 /** Fields `edit` may change; absent fields keep their value. `null` clears an optional field. */
@@ -261,6 +271,7 @@ export interface TimerEditInput {
 	catchup?: TimerCatchup;
 	pauseAfter?: number;
 	allowTimers?: boolean;
+	wakeMachine?: boolean;
 	expectedRev?: number;
 }
 
@@ -268,6 +279,7 @@ export interface TimerEditResult {
 	spec: TimerSpec;
 	/** The schedule changed: a new generation starts (slots and counters reset; history kept). */
 	rearmed: boolean;
+	/** Problems that did not block the edit (a typed date that may be a day late, a machine wake not moved, …). */
 	warnings: string[];
 }
 
@@ -311,6 +323,7 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 			if (patch.catchup !== undefined) next.catchup = patch.catchup;
 			if (patch.pauseAfter !== undefined) next.pauseAfter = patch.pauseAfter;
 			if (patch.allowTimers !== undefined) next.allowTimers = patch.allowTimers;
+			if (patch.wakeMachine !== undefined) next.wakeMachine = patch.wakeMachine;
 			if (patch.expires !== undefined) {
 				next.expiresAt = patch.expires === null ? undefined : resolveExpiry(patch.expires, now, tz);
 			}
@@ -334,7 +347,8 @@ export async function editTimer(id: string, patch: TimerEditInput, ctx: TimerSet
 	);
 	if (!spec) throw new Error(`No timer "${id}"`);
 	const slip = patch.at && spec.at ? dateSlipWarning(patch.at, Date.parse(spec.at), now, spec.tz) : undefined;
-	return { spec, rearmed, warnings: slip ? [slip] : [] };
+	const wake = await syncTimerWake(id, root, ctx.host ?? createTimerHost(), now);
+	return { spec, rearmed, warnings: [...(slip ? [slip] : []), ...wake] };
 }
 
 export interface TimerRow {
@@ -345,11 +359,14 @@ export interface TimerRow {
 	lastRun?: RunView;
 	/** Open incidents, newest last. */
 	incidents: IncidentRow[];
+	/** Epoch ms of the pmset wake on record ahead of the next fire (`wakeMachine` on macOS). */
+	machineWakeAt?: number;
 }
 
 export async function loadTimerRow(spec: TimerSpec, now: number, root = timersRoot()): Promise<TimerRow> {
 	const db = openTimerDb(root);
 	const state = currentState(spec, db.readState(spec.id));
+	const wakeAt = desiredMachineWake(spec, state);
 	return {
 		spec,
 		state,
@@ -357,6 +374,10 @@ export async function loadTimerRow(spec: TimerSpec, now: number, root = timersRo
 		status: state.done ? "done" : spec.paused ? "paused" : "armed",
 		lastRun: db.listRuns(spec.id, 1)[0],
 		incidents: db.listIncidents(spec.id).filter(incident => incident.resolvedAt === undefined),
+		machineWakeAt:
+			wakeAt !== undefined && wakeAt > now && db.listMachineWakes(spec.id).some(wake => wake.wakeAt === wakeAt)
+				? wakeAt
+				: undefined,
 	};
 }
 
@@ -375,15 +396,20 @@ export async function requireTimer(id: string, root = timersRoot()): Promise<Tim
 	return spec;
 }
 
-/** Pause (reason `user`) or resume. Resume also clears an auto-pause and restarts the failure count. */
+/**
+ * Pause (reason `user`) or resume. Resume also clears an auto-pause and restarts the failure count.
+ * Pause cancels a pending machine wake; resume schedules it again if it is still ahead. `warnings` says
+ * when either did not happen.
+ */
 export async function setPaused(
 	id: string,
 	paused: boolean,
-	options: { now?: number; root?: string; expectedRev?: number } = {},
-): Promise<TimerSpec> {
+	options: { now?: number; root?: string; expectedRev?: number; host?: WakeHost } = {},
+): Promise<{ spec: TimerSpec; warnings: string[] }> {
 	const root = options.root ?? timersRoot();
 	await assertTimerMutationAllowed(id, paused ? "pause" : "resume", root);
-	const at = new Date(options.now ?? Date.now()).toISOString();
+	const now = options.now ?? Date.now();
+	const at = new Date(now).toISOString();
 	const { spec } = await mutateTimerSpec(
 		id,
 		current => {
@@ -394,14 +420,23 @@ export async function setPaused(
 		{ root, expectedRev: options.expectedRev },
 	);
 	if (!spec) throw new Error(`No timer "${id}"`);
-	return spec;
+	const warnings = await syncTimerWake(id, root, options.host ?? createTimerHost(), now);
+	return { spec, warnings };
 }
 
-/** Remove the spec (kept under history/). Run history stays in the store so `runs` still answers what happened. */
-export async function removeTimer(id: string, root = timersRoot()): Promise<boolean> {
+/**
+ * Remove the spec (kept under history/) and cancel its pending machine wake; `warnings` says when the
+ * cancel did not happen. Run history stays in the store so `runs` still answers what happened.
+ */
+export async function removeTimer(
+	id: string,
+	root = timersRoot(),
+	options: { now?: number; host?: WakeHost } = {},
+): Promise<{ removed: boolean; warnings: string[] }> {
 	await assertTimerMutationAllowed(id, "remove", root);
 	const { previous } = await mutateTimerSpec(id, () => undefined, { root });
-	return previous !== undefined;
+	const warnings = await syncTimerWake(id, root, options.host ?? createTimerHost(), options.now ?? Date.now());
+	return { removed: previous !== undefined, warnings };
 }
 
 export async function timerRuns(id: string, options: { limit?: number; root?: string } = {}): Promise<RunView[]> {

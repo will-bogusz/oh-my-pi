@@ -49,6 +49,7 @@ Source: `packages/coding-agent/src/timers/` (store, schedule, tick, runner, deli
 | `--catchup` | `run` (default) or `skip`; see [Catch-up](#catch-up-and-grace). |
 | `--pause-after` | Consecutive failures that pause the timer (default 3). |
 | `--allow-timers` | Let this timer's runs create or change other timers. |
+| `--wake-machine` / `--no-wake-machine` | macOS one-shot: wake a sleeping Mac before `--at`; see [Sleeping Mac](#sleeping-mac). |
 | `--rev` | Fail unless the timer is at this rev (also on `pause`/`resume`). |
 
 Recurring timers run at most every 5 minutes for prompts and every minute for shell commands.
@@ -80,6 +81,10 @@ Every tick re-derives due slots from the clock, so slots missed while the machin
 - a one-shot runs up to 12 hours late, then is recorded `missed`.
 
 `--grace <duration>` caps the lateness for either. `--catchup skip` records any slot reached more than 5 minutes late as `missed` instead of running it. A slot buffered by `--overlap queue` is held to the same limit when its turn comes: past `--grace` (or the `--catchup skip` limit, or a one-shot's 12 hours) it is recorded `missed` instead of starting. A missed slot raises one `missed` alert per incident.
+
+### Sleeping Mac
+
+A sleeping Mac runs no ticker, so its timers fire late, on wake. `--wake-machine` on a one-shot (`--at` without `--every`; a recurring timer is rejected) schedules `sudo -n pmset schedule wake` 2 minutes before it is due, which needs passwordless pmset (sudoers: `<user> ALL=(root) NOPASSWD: /usr/bin/pmset`). When pmset refuses, or the timer is less than 2 minutes away, `set`, `edit` and `resume` print why no wake was scheduled and the timer still runs on wake. The wake follows the timer: removing or pausing it, moving its `--at`, `--no-wake-machine`, or the timer retiring cancels it (`pmset schedule cancel wake` at the same instant, in the Mac's current time zone), and `resume` schedules it again while it is still ahead. omp records a wake before asking pmset for it and forgets it only once a cancel succeeded or its time passed, so a cancel pmset refused is printed by the command and retried by every tick. The tick cancels the wake of a timer that retired or was removed by any other path; it never schedules a first wake itself. Elsewhere `--wake-machine` is ignored with a warning.
 
 ## Delivery
 
@@ -120,9 +125,9 @@ The store root is `<agentDir>/timers` (`~/.omp/agent/timers`); `OMP_TIMERS_DIR` 
 | --- | --- |
 | `specs/<id>.md` | The timer: YAML frontmatter plus the prompt as the body. Every write is atomic and rev-checked under a per-spec lock, so two concurrent edits never lose one. |
 | `history/<id>/<rev>.md` | Earlier revisions of a re-set, edited or removed spec. Revs keep counting when an id is removed and set again, so a rev names one revision for good. |
-| `timers.db` | SQLite run state: per-timer slot state, runs, run ends, deliveries, incidents, and the ticker heartbeat. |
+| `timers.db` | SQLite run state: per-timer slot state, runs, run ends, deliveries, incidents, pmset wakes omp may have scheduled, and the ticker heartbeat. |
 | `state/<id>/runs/<seq>.log` | Runner log of one shell run or headless resume. |
 | `state/<id>/runs/<seq>.json` | Fire payload the tick hands to the runner. |
 | `tick.log` | Output of the launchd ticker. |
 
-Spec frontmatter keys: `version`, `rev`, `title`, `reason`, `at`, `every`, `tz`, `session` (a session id, or `fresh` for a shell timer), `session_file`, `when_closed`, `shell`, `cwd`, `expires`, `max_runs`, `overlap`, `grace`, `catchup`, `pause_after`, `allow_timers`, `paused`, `paused_reason`, `armed_at` (start of the schedule generation), `resumed_at`, and `created` (`at`, `by`, `host`, `cwd`, `when_text`, and `run` when a fired run set it). A spec whose `version` is newer than this omp reads is listed as invalid rather than misread.
+Spec frontmatter keys: `version`, `rev`, `title`, `reason`, `at`, `every`, `tz`, `session` (a session id, or `fresh` for a shell timer), `session_file`, `when_closed`, `shell`, `cwd`, `expires`, `max_runs`, `overlap`, `grace`, `catchup`, `pause_after`, `allow_timers`, `wake_machine`, `paused`, `paused_reason`, `armed_at` (start of the schedule generation), `resumed_at`, and `created` (`at`, `by`, `host`, `cwd`, `when_text`, and `run` when a fired run set it). A spec whose `version` is newer than this omp reads is listed as invalid rather than misread.

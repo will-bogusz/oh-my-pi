@@ -15,7 +15,10 @@
  *   (and manual fire, which takes the tick lock);
  * - `run_ends`: the runner process that carried the run (the tick only to
  *   close a run whose runner never started);
- * - `deliveries`: whoever delivered the mail (runner, mailbox consumer).
+ * - `deliveries`: whoever delivered the mail (runner, mailbox consumer);
+ * - `machine_wakes` (pmset wakes omp may have scheduled for `wakeMachine`
+ *   timers): the wake scheduler under the timer's wake lock, i.e. service
+ *   mutations (set/edit/pause/resume/remove) and the tick's reconcile pass.
  * Everything else reads.
  */
 import { Database } from "bun:sqlite";
@@ -119,6 +122,7 @@ export function parseTimerSpec(id: string, content: string, filePath: string): T
 		catchup: fm.catchup === "skip" ? "skip" : "run",
 		pauseAfter: int(fm.pause_after) ?? DEFAULT_PAUSE_AFTER,
 		allowTimers: fm.allow_timers === true,
+		wakeMachine: fm.wake_machine === true,
 		paused: fm.paused === true,
 		pausedReason: str(fm.paused_reason),
 		armedAt: str(fm.armed_at) ?? createdAt,
@@ -158,6 +162,7 @@ export function serializeTimerSpec(spec: TimerSpec): string {
 	if (spec.catchup === "skip") fm.catchup = "skip";
 	fm.pause_after = spec.pauseAfter;
 	if (spec.allowTimers) fm.allow_timers = true;
+	if (spec.wakeMachine) fm.wake_machine = true;
 	if (spec.paused) {
 		fm.paused = true;
 		if (spec.pausedReason) fm.paused_reason = spec.pausedReason;
@@ -373,6 +378,11 @@ CREATE TABLE IF NOT EXISTS incidents (
 	resolved_at TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS incidents_open ON incidents(timer_id, signature) WHERE resolved_at IS NULL;
+CREATE TABLE IF NOT EXISTS machine_wakes (
+	timer_id TEXT NOT NULL,
+	wake_at INTEGER NOT NULL,
+	PRIMARY KEY (timer_id, wake_at)
+);
 `;
 
 /** `busy_timeout`: writers are short transactions, so a contended one waits rather than failing. */
@@ -382,6 +392,13 @@ export interface TickerStatus {
 	lastTickAt?: string;
 	pid?: number;
 	version?: string;
+}
+
+/** A pmset wake omp may have scheduled for a `wakeMachine` timer: recorded before pmset is asked, kept until cancelled. */
+export interface MachineWakeRow {
+	timerId: string;
+	/** Epoch ms of the wake. */
+	wakeAt: number;
 }
 
 /** A run joined with its delivery and end, as `runs`/`ls`/`show` present it. */
@@ -819,6 +836,24 @@ export class TimerDb {
 
 	resolveIncident(id: number, at: string): void {
 		this.#db.run("UPDATE incidents SET resolved_at = ? WHERE id = ?", [at, id]);
+	}
+
+	// wake scheduler: machine_wakes
+	/** Every recorded wake, or one timer's. */
+	listMachineWakes(timerId?: string): MachineWakeRow[] {
+		const select = "SELECT timer_id AS timerId, wake_at AS wakeAt FROM machine_wakes";
+		if (timerId === undefined) {
+			return this.#db.query<MachineWakeRow, []>(`${select} ORDER BY timer_id, wake_at`).all();
+		}
+		return this.#db.query<MachineWakeRow, [string]>(`${select} WHERE timer_id = ? ORDER BY wake_at`).all(timerId);
+	}
+
+	addMachineWake(timerId: string, wakeAt: number): void {
+		this.#db.run("INSERT OR IGNORE INTO machine_wakes (timer_id, wake_at) VALUES (?, ?)", [timerId, wakeAt]);
+	}
+
+	deleteMachineWake(timerId: string, wakeAt: number): void {
+		this.#db.run("DELETE FROM machine_wakes WHERE timer_id = ? AND wake_at = ?", [timerId, wakeAt]);
 	}
 }
 

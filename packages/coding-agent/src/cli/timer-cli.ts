@@ -80,6 +80,7 @@ export interface TimerFieldArgs {
 	catchup?: "run" | "skip";
 	pauseAfter?: number;
 	allowTimers?: boolean;
+	wakeMachine?: boolean;
 	rev?: number;
 }
 
@@ -139,6 +140,7 @@ function setInput(cmd: TimerCommandArgs): TimerSetInput {
 		catchup: fields.catchup,
 		pauseAfter: fields.pauseAfter,
 		allowTimers: fields.allowTimers,
+		wakeMachine: fields.wakeMachine,
 		expectedRev: fields.rev,
 	};
 }
@@ -165,6 +167,7 @@ function editInput(fields: TimerFieldArgs): TimerEditInput {
 		catchup: fields.catchup,
 		pauseAfter: fields.pauseAfter,
 		allowTimers: fields.allowTimers,
+		wakeMachine: fields.wakeMachine,
 		expectedRev: fields.rev,
 	};
 	if (Object.values(patch).every(value => value === undefined))
@@ -266,18 +269,20 @@ async function runAction(cmd: TimerCommandArgs, now: number): Promise<number> {
 		case "pause":
 		case "resume": {
 			const id = requireId(cmd);
-			const spec = await setPaused(id, cmd.action === "pause", { now, expectedRev: cmd.fields.rev });
-			if (cmd.json) return (json(spec), 0);
-			out(`timer ${id} ${cmd.action === "pause" ? "paused" : "resumed"} (rev ${spec.rev})`);
+			const result = await setPaused(id, cmd.action === "pause", { now, expectedRev: cmd.fields.rev });
+			if (cmd.json) return (json(result), 0);
+			out(`timer ${id} ${cmd.action === "pause" ? "paused" : "resumed"} (rev ${result.spec.rev})`);
+			for (const warning of result.warnings) out(`⚠ ${warning}`);
 			return 0;
 		}
 		case "rm":
 		case "remove": {
 			const id = requireId(cmd);
-			const removed = await removeTimer(id);
-			if (cmd.json) return (json({ id, removed }), removed ? 0 : 1);
+			const { removed, warnings } = await removeTimer(id);
+			if (cmd.json) return (json({ id, removed, warnings }), removed ? 0 : 1);
 			if (!removed) throw new Error(`no timer "${id}"`);
 			out(`timer ${id} removed (spec kept under history/, run history kept)`);
+			for (const warning of warnings) out(`⚠ ${warning}`);
 			return 0;
 		}
 		case "tick": {

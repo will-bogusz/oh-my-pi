@@ -8,9 +8,12 @@ import {
 	doctorTicker,
 	type HostCommandResult,
 	installTicker,
+	machineWakeArgv,
+	machineWakeAt,
 	type PlistValue,
 	parsePlist,
 	planTickerInstall,
+	scheduleMachineWake,
 	splitSystemdWords,
 	type TickerUnitInput,
 	type TimerHost,
@@ -596,5 +599,34 @@ describe("tickerUnitEnv", () => {
 		expect(await agentDirUnder(env)).toBe(getAgentDir());
 		expect(Object.keys(env).sort()).toEqual(["OMP_MAILBOX_DIR", "OMP_PROFILE", "OMP_TIMERS_DIR", "PATH"]);
 		expect(env.OMP_PROFILE).toBe("timer-unit-test");
+	});
+});
+
+describe("machine wake", () => {
+	it("formats pmset's local MM/dd/yyyy HH:mm:ss two minutes before the timer", () => {
+		expect(machineWakeArgv(machineWakeAt(new Date(2026, 9, 22, 9, 5, 30, 400).getTime()))).toEqual([
+			"sudo",
+			"-n",
+			"pmset",
+			"schedule",
+			"wake",
+			"10/22/2026 09:03:30",
+		]);
+		expect(machineWakeArgv(machineWakeAt(new Date(2027, 0, 1, 0, 1, 0).getTime())).at(-1)).toBe(
+			"12/31/2026 23:59:00",
+		);
+	});
+
+	it("returns a pmset failure instead of throwing, and is a no-op off macOS", async () => {
+		const at = new Date(2026, 9, 22, 9, 5, 30).getTime();
+		const mac = new FakeHost("darwin");
+		mac.script.set(machineWakeArgv(at).join(" "), { exitCode: 1, stderr: "sudo: a password is required" });
+		const failed = await scheduleMachineWake(mac, at);
+		expect(failed.scheduled).toBe(false);
+		expect(failed.detail).toContain("sudo: a password is required");
+
+		const linux = new FakeHost("linux");
+		expect((await scheduleMachineWake(linux, at)).scheduled).toBe(false);
+		expect(linux.commands).toEqual([]);
 	});
 });

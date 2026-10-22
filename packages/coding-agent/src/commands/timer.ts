@@ -55,6 +55,10 @@ export default class Timer extends Command {
 		}),
 		"pause-after": Flags.integer({ description: "set/edit: consecutive failures that pause it (default 3)" }),
 		"allow-timers": Flags.boolean({ description: "set/edit: let its runs manage other timers" }),
+		"wake-machine": Flags.boolean({
+			description: "set/edit: macOS one-shot: wake the Mac 2m before (sudo -n pmset)",
+		}),
+		"no-wake-machine": Flags.boolean({ description: "edit: stop waking the Mac and cancel its pending wake" }),
 		rev: Flags.integer({ description: "set/edit/pause/resume: fail unless the timer is at this rev" }),
 		data: Flags.string({ description: "fire: untrusted data handed to the run" }),
 		limit: Flags.integer({ description: "runs: newest N runs only" }),
@@ -103,6 +107,7 @@ export default class Timer extends Command {
 				catchup: flags.catchup as "run" | "skip" | undefined,
 				pauseAfter: flags["pause-after"],
 				allowTimers: flags["allow-timers"],
+				wakeMachine: flags["no-wake-machine"] ? false : flags["wake-machine"],
 				rev: flags.rev,
 			},
 		});

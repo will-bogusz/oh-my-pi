@@ -64,3 +64,8 @@ export function specLockPath(id: string, root = timersRoot()): string {
 export function runLockPath(id: string, root = timersRoot()): string {
 	return path.join(timerStateDir(id, root), "run");
 }
+
+/** Held while a timer's pmset wakes are read, changed and recorded (service mutations and the tick). */
+export function wakeLockPath(id: string, root = timersRoot()): string {
+	return path.join(timerStateDir(id, root), "wake");
+}
