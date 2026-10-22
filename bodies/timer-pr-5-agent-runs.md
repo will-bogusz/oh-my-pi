@@ -6,7 +6,7 @@ A prompt timer with `--session fresh` (a new session each run) or `own` (one ses
 
 | Flag (also `/timer`, `timer` tool) | Does |
 | --- | --- |
-| `--session fresh\|own` | only when named: the CLI still refuses a prompt without `--session`; `/timer` and the tool still default to waking this session |
+| `--session fresh\|own` | only when named: the CLI still refuses a prompt without `--session`; `/timer` and the tool still default to waking this session (`session: origin`) |
 | `--agent`, `--model`, `--thinking`, `--hermetic`, `--cwd run` | agent profile, model, thinking level, no rules/skills/extensions; `cwd run`: fresh directory for `fresh`, persistent directory for `own` |
 | `--max-time` (default 30m), `--max-cost` (USD) | abort the run and fail it `timeout` or `budget` |
 | `--expect <path>`, `--before`/`--after <cmd>` | outputs that must exist after the run; shell hooks around it |
@@ -39,6 +39,7 @@ Decisions:
 - **An `own` run never forks its session**: while another omp has it open, the run fails `busy` without starting.
 - **The run's final message is untrusted data**, fenced in `<timer-run-output untrusted="true">`.
 - **Recurring agent runs the `timer` tool sets expire after 7 days** unless `expires` says otherwise.
+- **An agent run may change only its own timer** unless set with `--allow-timers`.
 
 The one decision for the maintainer: a timer can start an unattended, billed agent session on a schedule; tool calls needing approval are denied, and the agent is aborted at `maxTime` (default 30 min) or after crossing an optional `maxCost`; teardown and the after hook can extend the run.
 
@@ -50,7 +51,7 @@ Live, claude-haiku-4-5, isolated stores: a `fresh` run set by `/timer` in an RPC
 
 <details><summary>Telling lines from the live runs</summary>
 
-Run at `d3d363e8a38`; the head `ae6c2ad07ab` carries the same diff on a parent that added only two test files.
+Run at `d3d363e8a38`. The head `b8da397b409` sits on a parent that since changed the recursion guard and added `allowTimers` and `session: origin`; this PR's diff changed only to merge with them (`resolveTarget`, the schema, the docs' guard line), plus one guard test and a dropped stale CHANGELOG line.
 
 ```
 > /timer set fresh-digest --session fresh --model anthropic/claude-haiku-4-5 --at 'in 1m' --max-cost 0.05 --prompt 'Reply with exactly: FRESH_RUN_OK' …
@@ -90,7 +91,7 @@ $ ls own session dir                # after run 3
 
 </details>
 
-At `ae6c2ad07ab`, `bun test` of the timer, mailbox, approval, `internal-urls`, `slash-commands`, extension, aside-delivery, tools, `wait` and RPC tests (75 files): 1180 pass, 0 fail. Each review fix (shell→prompt edit, tool expiry, `busy`, host not ready by `maxTime`, after-hook spawn failure) has a test that fails with it reverted. `bun run check` in `packages/coding-agent`.
+At `b8da397b409`, `bun test` of the 17 timer test files: 286 pass, 0 fail. Each review fix (shell→prompt edit, tool expiry, `busy`, host not ready by `maxTime`, after-hook spawn failure) has a test that fails with it reverted, as does the new own-timer guard test. `bun run check` in `packages/coding-agent`.
 
 Not run: Windows (the hook tests are skipped there).
 
