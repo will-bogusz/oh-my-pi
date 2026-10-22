@@ -2,9 +2,11 @@
  * Set, inspect and drive timers from outside a session; `tick` is what the
  * per-host OS unit (`omp timer install`) runs once a minute.
  */
+import { CLI_THINKING_LEVELS } from "@oh-my-pi/pi-tui/thinking";
 import { Args, Command, Flags } from "@oh-my-pi/pi-utils/cli";
 import { timerHelp as commandHelp } from "../cli/command-help";
 import { runTimerCommand, TIMER_ACTIONS, type TimerAction } from "../cli/timer-cli";
+import type { TimerReport } from "../timers/types";
 
 export default class Timer extends Command {
 	static description = commandHelp.description;
@@ -40,13 +42,42 @@ export default class Timer extends Command {
 		pid: Flags.integer({ description: "set/edit: fire once this process exits" }),
 		prompt: Flags.string({ description: "set/edit: instruction delivered when it fires" }),
 		shell: Flags.string({ description: "set/edit: command to run instead of a prompt" }),
-		session: Flags.string({ description: "set: target session id or file, or 'fresh' (default for the CLI)" }),
+		session: Flags.string({
+			description:
+				"set: target session id or file, 'fresh' (new session per run, default for the CLI) or 'own' (one session the timer keeps)",
+		}),
 		"when-closed": Flags.string({ description: "set/edit: resume (default) or hold", options: ["resume", "hold"] }),
 		tz: Flags.string({ description: "set/edit: IANA zone for clock times" }),
-		cwd: Flags.string({ description: "set/edit: working directory (default: current)" }),
+		cwd: Flags.string({
+			description: "set/edit: working directory (default: current), or 'run' for a fresh dir per run",
+		}),
 		expires: Flags.string({ description: "set/edit: '7d', a date, or never" }),
 		"max-runs": Flags.integer({ description: "set/edit: retire after this many runs" }),
-		model: Flags.string({ description: "set/edit: model for fresh runs" }),
+		model: Flags.string({ description: "set/edit: model for fresh/own runs" }),
+		agent: Flags.string({ description: "set/edit: fresh/own: agent profile to run as (edit: none clears)" }),
+		thinking: Flags.string({
+			description: `set/edit: fresh/own: thinking level: ${CLI_THINKING_LEVELS.join(", ")} (edit: none clears)`,
+		}),
+		hermetic: Flags.boolean({ description: "set/edit: fresh/own: no rules, skills, extensions or title generation" }),
+		"no-hermetic": Flags.boolean({ description: "edit: turn --hermetic off" }),
+		"max-time": Flags.string({ description: "set/edit: fresh/own: abort the run past this duration, e.g. 20m" }),
+		"max-cost": Flags.string({ description: "set/edit: fresh/own: abort the run past this many USD, e.g. 0.5" }),
+		expect: Flags.string({
+			description: "set/edit: fresh/own: path that must exist after the run; repeatable (edit: none clears)",
+			multiple: true,
+		}),
+		before: Flags.string({
+			description: "set/edit: fresh/own: shell run before the agent; non-zero exit fails the run",
+		}),
+		after: Flags.string({
+			description:
+				"set/edit: fresh/own: shell run after the agent with OMP_TIMER_RESULT; non-zero exit fails the run",
+		}),
+		report: Flags.string({
+			description:
+				"set/edit: fresh/own: which runs report back: always, said (default: not [quiet]), failure, never",
+			options: ["always", "said", "failure", "never"],
+		}),
 		title: Flags.string({ description: "set/edit: display title" }),
 		overlap: Flags.string({
 			description: "set/edit: a fire while the last run is in flight: skip (default) or queue one",
@@ -84,6 +115,7 @@ export default class Timer extends Command {
 		"omp timer set nightly --every 'daily 03:00' --shell 'make backup' --reason 'nightly backup'",
 		"omp timer set ci-done --ci owner/repo#123 --session <id> --prompt 'CI finished; report' --reason 'watch CI'",
 		"omp timer edit nightly --every 'daily 04:00'",
+		"omp timer set triage --every 'weekdays 09:00' --session own --agent reviewer --max-time 20m --max-cost 0.5 --expect out/triage.md --prompt 'Triage new issues into out/triage.md' --reason 'morning triage'",
 		"omp timer runs nightly",
 		"omp timer install",
 		"omp timer doctor",
@@ -122,6 +154,15 @@ export default class Timer extends Command {
 				expires: flags.expires,
 				maxRuns: flags["max-runs"],
 				model: flags.model,
+				agent: flags.agent,
+				thinking: flags.thinking,
+				hermetic: flags["no-hermetic"] ? false : flags.hermetic,
+				maxTime: flags["max-time"],
+				maxCost: flags["max-cost"],
+				expect: flags.expect,
+				before: flags.before,
+				after: flags.after,
+				report: flags.report as TimerReport | undefined,
 				overlap: flags.overlap as "skip" | "queue" | undefined,
 				grace: flags.grace,
 				catchup: flags.catchup as "run" | "skip" | undefined,

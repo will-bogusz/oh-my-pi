@@ -20,7 +20,14 @@ import {
 	timerRuns,
 } from "../timers";
 import type { ToolSession } from ".";
-import { timerArgsTier, timerCardView, timerEditPatch, timerListRowView } from "./timer-view";
+import {
+	lastRunResult,
+	runResults,
+	timerArgsTier,
+	timerCardView,
+	timerEditPatch,
+	timerListRowView,
+} from "./timer-view";
 import { toolResult } from "./tool-result";
 
 const TimerOp = type('"set" | "edit" | "list" | "show" | "runs" | "remove" | "fire" | "pause" | "resume"');
@@ -45,16 +52,27 @@ const timerSchema = type({
 	),
 	"shell?": type("string").describe("command to run instead of a prompt"),
 	"session?": type("string").describe(
-		"where a prompt runs: 'origin' (default, this conversation), 'fresh', or a session id",
+		"where a prompt runs: 'origin' (default, this conversation), 'fresh' (new session per run), 'own' (one session the timer keeps), or a session id",
 	),
 	"whenClosed?": type('"resume" | "hold"').describe(
 		"target session not open when it fires: resume it headless (default) or hold the message until it opens",
 	),
 	"tz?": type("string").describe("IANA zone for clock times; default this machine's"),
-	"cwd?": type("string").describe("working directory; default this session's"),
+	"cwd?": type("string").describe("working directory, or 'run' for a fresh dir per run; default this session's"),
 	"expires?": type("string").describe("'7d', a date, or 'never'"),
 	"maxRuns?": type("number").describe("retire after this many runs"),
-	"model?": type("string").describe("model for fresh runs"),
+	"model?": type("string").describe("model for fresh/own runs"),
+	"agent?": type("string").describe("fresh/own: agent profile to run as"),
+	"thinking?": type("string").describe("fresh/own: thinking level"),
+	"hermetic?": type("boolean").describe("fresh/own: no rules, skills or extensions"),
+	"maxTime?": type("string").describe("fresh/own: abort past this duration, e.g. '20m'"),
+	"maxCost?": type("number").describe("fresh/own: abort past this many USD"),
+	"expect?": type("string[]").describe("fresh/own: paths that must exist after the run"),
+	"before?": type("string").describe("fresh/own: shell run first; non-zero exit fails the run"),
+	"after?": type("string").describe("fresh/own: shell run after, with OMP_TIMER_RESULT"),
+	"report?": type('"always" | "said" | "failure" | "never"').describe(
+		"fresh/own: which runs report back (default said: not [quiet])",
+	),
 });
 
 type TimerParams = typeof timerSchema.infer;
@@ -100,10 +118,10 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 			gate?: { gateNow?: "met" | "not-yet" | "broken"; gateDetail?: string },
 		): Promise<AgentToolResult<TimerToolDetails>> => {
 			const row = await loadTimerRow(await requireTimer(id), now);
-			const ticker = await readTickerStatus();
+			const [ticker, lastResult] = await Promise.all([readTickerStatus(), lastRunResult(row)]);
 			details.id = id;
-			details.card = timerCardView(row, { verb, selfSessionId: sessionId, ticker, now, ...gate });
-			const text = renderTimerCard(row, now, { verb, selfSessionId: sessionId, ticker, ...gate });
+			details.card = timerCardView(row, { verb, selfSessionId: sessionId, ticker, now, lastResult, ...gate });
+			const text = renderTimerCard(row, now, { verb, selfSessionId: sessionId, ticker, lastResult, ...gate });
 			return toolResult<TimerToolDetails>(details).text(text).done();
 		};
 		try {
@@ -125,6 +143,15 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 							expires: params.expires,
 							maxRuns: params.maxRuns,
 							model: params.model,
+							agent: params.agent,
+							thinking: params.thinking,
+							hermetic: params.hermetic,
+							maxTime: params.maxTime,
+							maxCost: params.maxCost,
+							expect: params.expect,
+							before: params.before,
+							after: params.after,
+							report: params.report,
 						},
 						{
 							by: "tool",
@@ -158,10 +185,13 @@ export class TimerTool implements AgentTool<typeof timerSchema, TimerToolDetails
 				}
 				case "show":
 					return await card(requireId(), "");
-				case "runs":
+				case "runs": {
+					const id = requireId();
+					const runs = await timerRuns(id);
 					return toolResult<TimerToolDetails>(details)
-						.text(renderRuns(await timerRuns(requireId())))
+						.text(renderRuns(runs, await runResults(id, runs)))
 						.done();
+				}
 				case "pause":
 				case "resume": {
 					const id = requireId();

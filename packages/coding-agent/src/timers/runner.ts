@@ -6,19 +6,20 @@
  * end to the failure policy.
  *
  * - shell: `/bin/sh -c` in the timer's cwd.
- * - prompt → fresh: `omp -p` with the rendered fire envelope.
+ * - prompt → fresh/own: an unattended agent run (`agent-run.ts`).
  * - prompt → session nobody has open: headless delivery (an RPC host on
  *   `--resume <session>` whose own mailbox watcher claims the mail).
  *
  * Every child carries `OMP_TIMER_RUN=<id>#<seq>` (recursion guard).
  */
 import { tryAcquireFileLock } from "@oh-my-pi/pi-utils";
-import { resolveCliEntryCmd, workerEnvFromParent } from "../subprocess/worker-client";
-import { renderTimerMail } from "./fire-message";
+import { workerEnvFromParent } from "../subprocess/worker-client";
+import { type AgentRunDeps, agentRunEndDetail, defaultAgentRunDeps, runAgent } from "./agent-run";
 import { deliveryTarget, describeDeliveryTarget } from "./mailbox";
 import { deliverHeadless } from "./mailbox-headless";
 import { firePayloadPath, runLockPath, TIMER_RUN_ENV, timersRoot } from "./paths";
 import { firstErrorLine } from "./policy";
+import { type RunResult, runCommand } from "./run-command";
 import { HOUR } from "./schedule";
 import { openTimerDb, readTimerSpec } from "./store";
 import type { TimerFirePayload, TimerSpec } from "./types";
@@ -26,64 +27,9 @@ import type { TimerFirePayload, TimerSpec } from "./types";
 /** Wall-clock cap per run. */
 const MAX_PROMPT_RUN_MS = HOUR / 2;
 const MAX_SHELL_RUN_MS = HOUR;
-/** Bytes of a run's stderr kept to name its failure. */
-const ERROR_TAIL_BYTES = 4096;
-
-export interface RunResult {
-	ok: boolean;
-	exitCode?: number;
-	detail?: string;
-}
 
 function runEnv(spec: TimerSpec, runId: string, root: string): Record<string, string> {
 	return workerEnvFromParent({ OMP_TIMER_ID: spec.id, [TIMER_RUN_ENV]: runId, OMP_TIMERS_DIR: root });
-}
-
-/** Copy a child stream to ours (the run log) and keep its tail. */
-async function teeTail(stream: ReadableStream<Uint8Array>, sink: NodeJS.WriteStream): Promise<string> {
-	let tail = "";
-	const decoder = new TextDecoder();
-	for await (const chunk of stream) {
-		sink.write(chunk);
-		tail = (tail + decoder.decode(chunk, { stream: true })).slice(-ERROR_TAIL_BYTES);
-	}
-	return tail;
-}
-
-async function runCommand(
-	argv: string[],
-	spec: TimerSpec,
-	env: Record<string, string>,
-	timeout: number,
-): Promise<RunResult> {
-	const child = Bun.spawn(argv, { cwd: spec.cwd, env, stdin: "ignore", stdout: "pipe", stderr: "pipe", timeout });
-	const [, stderr, exitCode] = await Promise.all([
-		teeTail(child.stdout as ReadableStream<Uint8Array>, process.stdout),
-		teeTail(child.stderr as ReadableStream<Uint8Array>, process.stderr),
-		child.exited,
-	]);
-	if (child.signalCode)
-		return { ok: false, detail: `killed by ${child.signalCode} (limit ${Math.round(timeout / 60_000)}m)` };
-	if (exitCode === 0) return { ok: true, exitCode };
-	const lastLine = stderr
-		.split("\n")
-		.map(line => line.trim())
-		.filter(Boolean)
-		.at(-1);
-	return { ok: false, exitCode, detail: `exit ${exitCode}${lastLine ? `: ${firstErrorLine(lastLine)}` : ""}` };
-}
-
-async function runFresh(spec: TimerSpec, payload: TimerFirePayload, env: Record<string, string>): Promise<RunResult> {
-	const text = renderTimerMail(
-		{ v: 1, id: payload.runId, kind: "timer-fire", sessionId: "", createdAt: payload.firedAt, fire: payload },
-		"headless",
-		Date.now(),
-		spec.tz,
-	);
-	const argv = [...resolveCliEntryCmd(), "-p"];
-	if (spec.model) argv.push("--model", spec.model);
-	argv.push(text);
-	return runCommand(argv, spec, env, MAX_PROMPT_RUN_MS);
 }
 
 async function runHeadless(
@@ -129,7 +75,12 @@ async function runHeadless(
 	}
 }
 
-export async function execTimerRun(id: string, seq: number, root = timersRoot()): Promise<RunResult> {
+export async function execTimerRun(
+	id: string,
+	seq: number,
+	root = timersRoot(),
+	agentDeps: AgentRunDeps = defaultAgentRunDeps(),
+): Promise<RunResult> {
 	const runId = `${id}#${seq}`;
 	const db = openTimerDb(root);
 	const started = Date.now();
@@ -162,11 +113,12 @@ export async function execTimerRun(id: string, seq: number, root = timersRoot())
 	try {
 		const env = runEnv(spec, runId, root);
 		if (spec.action.kind === "shell") {
-			return finish(await runCommand(["/bin/sh", "-c", spec.action.command], spec, env, MAX_SHELL_RUN_MS));
+			return finish(await runCommand(["/bin/sh", "-c", spec.action.command], spec.cwd, env, MAX_SHELL_RUN_MS));
 		}
 		if (spec.target.kind === "session") return finish(await runHeadless(spec, runId, env, root));
 		const payload = (await Bun.file(firePayloadPath(id, seq, root)).json()) as TimerFirePayload;
-		return finish(await runFresh(spec, payload, env));
+		const result = await runAgent(spec, payload, { root, env }, agentDeps);
+		return finish({ ok: result.ok, detail: agentRunEndDetail(result) });
 	} catch (err) {
 		return finish({ ok: false, detail: firstErrorLine(err instanceof Error ? err.message : String(err)) });
 	} finally {

@@ -4,10 +4,12 @@
  * rendered from the record on disk, never from what the caller asked for.
  */
 import { formatWallClock } from "./fire-message";
+import { ownSessionDir } from "./paths";
+import { describeRunResult, formatCost } from "./run-result";
 import { formatDuration } from "./schedule";
 import type { TimerRow } from "./service";
 import type { RunView, TickerStatus } from "./store";
-import type { TimerSpec } from "./types";
+import type { AgentRunResult, TimerSpec } from "./types";
 
 /** A tick older than this means no ticker is running. */
 export const TICKER_STALE_MS = 3 * 60_000;
@@ -39,10 +41,38 @@ export function describeCadence(spec: TimerSpec): string {
 export function describeAction(spec: TimerSpec, selfSessionId?: string): string {
 	if (spec.action.kind === "shell") return `run \`${oneLine(spec.action.command, 80)}\` in ${spec.cwd}`;
 	const prompt = `"${oneLine(spec.action.prompt, 90)}"`;
-	if (spec.target.kind === "fresh") return `new session in ${spec.cwd} → ${prompt}`;
+	if (spec.target.kind !== "session") {
+		const where = spec.run.runCwd ? "a per-run dir" : spec.cwd;
+		return `${spec.target.kind} session in ${where} → ${prompt}`;
+	}
 	const self = spec.target.sessionId === selfSessionId ? " (this session)" : "";
 	const closed = spec.whenClosed === "hold" ? "hold until opened" : "resume headless";
 	return `wake session ${spec.target.sessionId}${self} → ${prompt}\n       if busy: after the current turn · if closed: ${closed}`;
+}
+
+/**
+ * Run settings of an agent run (prompt timer whose session is fresh or own):
+ * `agent reviewer · thinking low · hermetic · cwd per-run · max 20m · max $0.50 · expect out/report.md · before/after hooks · report said`,
+ * plus the session dir an `own` timer keeps. Undefined for other timers.
+ */
+export function describeRunSettings(spec: TimerSpec): string | undefined {
+	if (spec.action.kind !== "prompt" || spec.target.kind === "session") return undefined;
+	const { run } = spec;
+	const hooks =
+		run.before && run.after ? "before/after hooks" : run.before ? "before hook" : run.after ? "after hook" : "";
+	const parts = [
+		run.agent ? `agent ${run.agent}` : undefined,
+		run.thinking ? `thinking ${run.thinking}` : undefined,
+		run.hermetic ? "hermetic" : undefined,
+		run.runCwd ? "cwd per-run" : undefined,
+		run.maxTimeMs !== undefined ? `max ${formatDuration(run.maxTimeMs)}` : undefined,
+		run.maxCost !== undefined ? `max ${formatCost(run.maxCost)}` : undefined,
+		run.expect?.length ? `expect ${run.expect.join(", ")}` : undefined,
+		hooks || undefined,
+		`report ${spec.report}`,
+		spec.target.kind === "own" ? `session ${ownSessionDir(spec.id)}` : undefined,
+	].filter(Boolean);
+	return parts.join(" · ");
 }
 
 export function describeTicker(ticker: TickerStatus, now: number): string {
@@ -56,9 +86,11 @@ export function describeTicker(ticker: TickerStatus, now: number): string {
 		: text;
 }
 
-export function describeRun(run: RunView | undefined): string {
+/** The last run; an agent run's `result.json` summary replaces the runner's end line. */
+export function describeRun(run: RunView | undefined, result?: AgentRunResult): string {
 	if (!run) return "never ran";
 	const delivery = run.delivery ? ` · ${run.delivery.state}` : "";
+	if (result) return `${run.outcome} ${run.at}${delivery} · ${describeRunResult(result)}`;
 	const end =
 		run.end?.ok !== undefined
 			? ` · ${run.end.ok ? "ok" : `failed${run.end.detail ? `: ${oneLine(run.end.detail, 60)}` : ""}`}`
@@ -74,6 +106,8 @@ export interface CardOptions {
 	gateDetail?: string;
 	warnings?: string[];
 	platform?: NodeJS.Platform;
+	/** `result.json` of the last run, when it was an agent run that ended. */
+	lastResult?: AgentRunResult;
 }
 
 /** Compact multi-line card; the same text goes to the model and to the CLI. */
@@ -99,8 +133,10 @@ export function renderTimerCard(row: TimerRow, now: number, options: CardOptions
 		row.state.runCount ? `${row.state.runCount} run(s) so far` : undefined,
 	].filter(Boolean);
 	lines.push(`limits ${limits.join(" · ")}`);
+	const run = describeRunSettings(spec);
+	if (run) lines.push(`run    ${run}`);
 	lines.push(`why    ${oneLine(spec.reason, 120)}`);
-	lines.push(`last   ${describeRun(row.lastRun)}`);
+	lines.push(`last   ${describeRun(row.lastRun, options.lastResult)}`);
 	for (const incident of row.incidents) {
 		lines.push(`⚠ open incident ×${incident.count} since ${incident.firstAt}: ${oneLine(incident.summary, 90)}`);
 	}
@@ -144,7 +180,8 @@ export function renderTimerTable(rows: TimerRow[], now: number, ticker: TickerSt
 	return out.join("\n");
 }
 
-export function renderRuns(runs: RunView[]): string {
+/** Run history; `results` (seq → `result.json`) adds each ended agent run's summary. */
+export function renderRuns(runs: RunView[], results?: ReadonlyMap<number, AgentRunResult>): string {
 	if (runs.length === 0) return "no runs recorded";
 	return runs
 		.map(run => {
@@ -159,6 +196,8 @@ export function renderRuns(runs: RunView[]): string {
 				);
 			else if (run.end?.startedAt) parts.push("running");
 			if (run.detail) parts.push(run.detail);
+			const result = results?.get(run.seq);
+			if (result) parts.push(`result=${describeRunResult(result)}`);
 			return parts.join("  ");
 		})
 		.join("\n");

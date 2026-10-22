@@ -14,8 +14,83 @@
 export type TimerTarget =
 	/** Wake (or headlessly resume) an existing session with its context. */
 	| { kind: "session"; sessionId: string; sessionFile?: string }
-	/** A new session per run. */
-	| { kind: "fresh" };
+	/** A new session per run (an unattended agent run). */
+	| { kind: "fresh" }
+	/** One session the timer keeps and resumes on every run (an unattended agent run). */
+	| { kind: "own" };
+
+/** Agent-run targets: the runner starts and owns the session, so run settings apply. */
+export type AgentRunTarget = Extract<TimerTarget, { kind: "fresh" | "own" }>["kind"];
+
+/**
+ * When an agent run's result goes back to the origin session (as mail) and the notify sinks:
+ * every run, runs that said something (not `[quiet]`; failures always say something), failures
+ * only, or never. Failure alerts from the failure policy are separate and always apply.
+ */
+export type TimerReport = "always" | "said" | "failure" | "never";
+
+/** Settings of an unattended agent run (prompt timers whose session is `fresh` or `own`). */
+export interface AgentRunSettings {
+	/** Agent profile (as task subagents resolve it): model, thinking, appended system prompt, tools. */
+	agent?: string;
+	/** Thinking level; wins over the profile's. */
+	thinking?: string;
+	/** No rules, skills, extensions or title generation in the run's session. */
+	hermetic?: boolean;
+	/** Run in a fresh per-run directory (`<run dir>/work`) instead of the timer's cwd. */
+	runCwd?: boolean;
+	/** Wall-clock limit: past it the run is aborted and fails with `timeout`. */
+	maxTimeMs?: number;
+	/** USD limit on the run's model calls: past it the run is aborted and fails with `budget`. */
+	maxCost?: number;
+	/** Paths (relative to the run's cwd) that must exist after the run, else it fails with `expect`. */
+	expect?: string[];
+	/** Shell run before the agent in its cwd; a non-zero exit fails the run without starting the agent. */
+	before?: string;
+	/** Shell run after the agent with `OMP_TIMER_RESULT`; a non-zero exit fails the run. */
+	after?: string;
+}
+
+/** Why an agent run failed; rendered as `failed: <failure>`. */
+export type AgentRunFailure = "timeout" | "budget" | "approval" | "expect" | "before" | "after" | "model" | "error";
+
+/** How an agent run's report left the runner. */
+export type AgentRunReportState = "mailed-live" | "mailed-held" | "notified" | "skipped";
+
+/** `result.json` in an agent run's directory: what the run did, read by `runs`, `logs`, `timer://` and the sheet. */
+export interface AgentRunResult {
+	v: 1;
+	runId: string;
+	timerId: string;
+	seq: number;
+	session: AgentRunTarget;
+	ok: boolean;
+	failure?: AgentRunFailure;
+	/** One line: what failed, or a note on a successful run. */
+	detail?: string;
+	/** The final message was `[quiet]`: nothing worth reporting. */
+	quiet: boolean;
+	/** Stop reason of the last assistant message (`stop`, `aborted`, `error`, …). */
+	stopReason?: string;
+	model?: string;
+	tokens: { input: number; output: number; cacheRead: number; cacheWrite: number; total: number };
+	/** USD spent by the run's model calls. */
+	cost: number;
+	startedAt: string;
+	endedAt: string;
+	durationMs: number;
+	/** The agent's working directory. */
+	cwd: string;
+	/** The run's session file. */
+	transcript?: string;
+	/** The agent's final message (without the `[quiet]` marker). */
+	finalText?: string;
+	/** `expect` paths missing after the run. */
+	expectMissing?: string[];
+	/** Tools that needed an approval nobody could give, so they were denied. */
+	approvalsDenied?: string[];
+	report?: { mode: TimerReport; state: AgentRunReportState; session?: string; detail?: string };
+}
 
 export type TimerAction = { kind: "prompt"; prompt: string } | { kind: "shell"; command: string };
 
@@ -76,6 +151,10 @@ export interface TimerSpec {
 	/** macOS one-shots: schedule a wake shortly before `at` with `sudo -n pmset`. */
 	wakeMachine: boolean;
 	model?: string;
+	/** Agent-run settings; only for prompt timers whose session is `fresh` or `own`. */
+	run: AgentRunSettings;
+	/** Where an agent run's result goes (origin session mail, notify sinks). */
+	report: TimerReport;
 	paused: boolean;
 	/** Why it is paused: `user`, or the failure that tripped `pauseAfter`. */
 	pausedReason?: string;
@@ -168,11 +247,13 @@ export interface TimerMail {
 	v: 1;
 	/** Stable delivery id; the transcript entry carries it so a re-delivery after a crash is detected. */
 	id: string;
-	kind: "timer-fire" | "poke";
+	kind: "timer-fire" | "poke" | "timer-report";
 	sessionId: string;
 	createdAt: string;
 	fire?: TimerFirePayload;
 	poke?: { text: string; from: string; force?: boolean };
+	/** An agent run's result, reported to the session that set the timer. */
+	report?: TimerReportPayload;
 	attempts?: number;
 }
 
@@ -200,11 +281,33 @@ export interface TimerFirePayload {
 	expiresAt?: string;
 }
 
+/** The result of one agent run, as the origin session receives it. */
+export interface TimerReportPayload {
+	timerId: string;
+	runId: string;
+	seq: number;
+	title?: string;
+	reason: string;
+	session: AgentRunTarget;
+	ok: boolean;
+	failure?: AgentRunFailure;
+	detail?: string;
+	quiet: boolean;
+	/** Untrusted: the run's final message. */
+	finalText?: string;
+	cost: number;
+	durationMs: number;
+	endedAt: string;
+	/** `result.json` of the run. */
+	resultPath: string;
+	transcript?: string;
+}
+
 /** Something a person should hear about: sent to the notify sinks once per incident. */
 export interface TimerAlert {
 	timerId: string;
 	runId?: string;
-	event: "failed" | "paused" | "missed" | "expired" | "held" | "reminder";
+	event: "failed" | "paused" | "missed" | "expired" | "held" | "reminder" | "report";
 	/** One line: what happened. */
 	summary: string;
 	/** First error line, raw. */

@@ -51,6 +51,21 @@ export function firePayloadPath(id: string, seq: number, root = timersRoot()): s
 	return path.join(timerStateDir(id, root), "runs", `${seq}.json`);
 }
 
+/** Directory of one agent run: `result.json`, the fresh session (`session/`), the per-run cwd (`work/`). */
+export function runDirPath(id: string, seq: number, root = timersRoot()): string {
+	return path.join(timerStateDir(id, root), "runs", String(seq));
+}
+
+/** `result.json` of one agent run. */
+export function runResultPath(id: string, seq: number, root = timersRoot()): string {
+	return path.join(runDirPath(id, seq, root), "result.json");
+}
+
+/** Session directory of an `own` timer: the one session it resumes on every run. */
+export function ownSessionDir(id: string, root = timersRoot()): string {
+	return path.join(timerStateDir(id, root), "session");
+}
+
 /** Where the OS ticker unit appends `omp timer tick` output. */
 export function tickLogPath(root = timersRoot()): string {
 	return path.join(root, "tick.log");

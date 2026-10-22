@@ -96,7 +96,8 @@ export async function deliverHeadless(request: HeadlessDeliveryRequest): Promise
 	let child: ptree.ChildProcess<"pipe"> | undefined;
 	const client = new RpcClient({
 		cwd: request.cwd,
-		args: ["--resume", request.sessionRef],
+		// No UI: nobody can answer an approval, so a call that needs one is denied instead of waiting.
+		args: ["--resume", request.sessionRef, "--no-ui"],
 		spawn: args => {
 			child = ptree.spawn([...resolveCliEntryCmd(), ...args], {
 				cwd: request.cwd,

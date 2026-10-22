@@ -44,6 +44,12 @@ export type ApprovalPolicy = "allow" | "deny" | "prompt";
 const APPROVAL_MODES = ["always-ask", "always-ask-cached", "write", "yolo"] as const;
 export type ApprovalMode = (typeof APPROVAL_MODES)[number];
 
+/**
+ * In the error of a call that needed an approval with no UI to ask (`--no-ui` RPC hosts,
+ * print mode): unattended timer runs read it from tool results to report the denial.
+ */
+export const NO_UI_APPROVAL_DENIAL = "but no interactive UI available";
+
 /** The slice of `AgentToolContext` that approval resolution actually reads. */
 export type ApprovalContextSource = {
 	autoApprove?: boolean;

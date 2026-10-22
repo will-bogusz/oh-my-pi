@@ -1,17 +1,31 @@
 import { prompt } from "@oh-my-pi/pi-utils";
 import timerFireTemplate from "../prompts/session/timer-fire.md" with { type: "text" };
 import timerPokeTemplate from "../prompts/session/timer-poke.md" with { type: "text" };
+import timerReportTemplate from "../prompts/session/timer-report.md" with { type: "text" };
+import { formatCost } from "./run-result";
 import { formatDuration, MINUTE } from "./schedule";
-import type { TimerMail } from "./types";
+import type { AgentRunTarget, TimerMail } from "./types";
 
 /** Lateness the envelope calls out, so the model re-checks a stale instruction before acting on it. */
 const NOTABLY_LATE_MS = 10 * MINUTE;
 
 export const TIMER_FIRE_MESSAGE_TYPE = "timer-fire";
 export const SESSION_POKE_MESSAGE_TYPE = "session-poke";
+export const TIMER_REPORT_MESSAGE_TYPE = "timer-report";
 
-/** How the mail reached the session; rendered into the envelope. */
-export type TimerDeliveryVia = "live" | "headless";
+/** The run's final message is exactly this line (or ends with it): nothing worth reporting. */
+export const QUIET_MARKER = "[quiet]";
+
+/** How the mail reached the session; rendered into the envelope. `run`: the runner's own agent session. */
+export type TimerDeliveryVia = "live" | "headless" | "run";
+
+/** What the envelope of an unattended agent run (fresh/own session) tells the agent about its run. */
+export interface AgentRunEnvelope {
+	session: AgentRunTarget;
+	/** The run's cwd, which `expect` paths are relative to. */
+	cwd: string;
+	expect?: string[];
+}
 
 /** Details persisted on the transcript entry; `mailId` makes re-delivery after a crash detectable. */
 export interface TimerMessageDetails {
@@ -47,14 +61,41 @@ function fenceUntrusted(text: string, tag: string): string {
 /**
  * Render the model-visible message for one mail. The "now" line is computed
  * here, at injection time, so a held or queued fire never carries a stale clock.
+ * `run` renders the envelope of an unattended agent run instead of a session wake.
  */
-export function renderTimerMail(mail: TimerMail, via: TimerDeliveryVia, now: number, tz?: string): string {
+export function renderTimerMail(
+	mail: TimerMail,
+	via: TimerDeliveryVia,
+	now: number,
+	tz?: string,
+	run?: AgentRunEnvelope,
+): string {
 	if (mail.kind === "poke" && mail.poke) {
 		return prompt.render(timerPokeTemplate, {
 			from: mail.poke.from,
 			sent: formatWallClock(Date.parse(mail.createdAt), tz),
 			text: fenceUntrusted(mail.poke.text, "session-poke"),
 			now: formatWallClock(now, tz),
+		});
+	}
+	if (mail.kind === "timer-report" && mail.report) {
+		const report = mail.report;
+		return prompt.render(timerReportTemplate, {
+			timerId: report.timerId,
+			seq: report.seq,
+			title: report.title,
+			reason: report.reason,
+			session: report.session,
+			own: report.session === "own",
+			outcome: report.ok ? (report.quiet ? "ok (quiet)" : "ok") : `failed: ${report.failure ?? "error"}`,
+			detail: report.detail,
+			cost: formatCost(report.cost),
+			duration: formatDuration(report.durationMs),
+			ended: formatWallClock(Date.parse(report.endedAt), tz),
+			now: formatWallClock(now, tz),
+			resultPath: report.resultPath,
+			transcript: report.transcript,
+			finalText: report.finalText ? fenceUntrusted(report.finalText, "timer-run-output") : undefined,
 		});
 	}
 	const fire = mail.fire;
@@ -71,6 +112,10 @@ export function renderTimerMail(mail: TimerMail, via: TimerDeliveryVia, now: num
 		notablyLate: lateMs >= NOTABLY_LATE_MS,
 		via,
 		headless: via === "headless",
+		run: run !== undefined,
+		own: run?.session === "own",
+		cwd: run?.cwd,
+		expect: run?.expect?.length ? run.expect.join(", ") : undefined,
 		now: formatWallClock(now, tz),
 		setAt: formatWallClock(Date.parse(fire.setAt), tz),
 		reason: fire.reason,

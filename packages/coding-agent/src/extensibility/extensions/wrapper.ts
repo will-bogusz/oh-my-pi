@@ -20,6 +20,7 @@ import {
 	resolveApproval,
 	resolveApprovalFromContext,
 	sessionApprovalScope,
+	NO_UI_APPROVAL_DENIAL,
 	truncateForPrompt,
 } from "../../tools/approval";
 import { getApprovalGrants } from "../../tools/approval-cache";
@@ -424,12 +425,10 @@ export class ExtensionToolWrapper<TParameters extends TSchema = TSchema, TDetail
 				await emitApprovalResolved(false, reason);
 				cancelPreflight();
 				if (pendingSafetyChecks.length > 0) {
-					throw new Error(
-						`Tool "${this.tool.name}" has pending provider safety checks but no interactive UI is available.`,
-					);
+					throw new Error(`Tool "${this.tool.name}" has pending provider safety checks ${NO_UI_APPROVAL_DENIAL}.`);
 				}
 				throw new Error(
-					`Tool "${this.tool.name}" requires approval but no interactive UI available.\n` +
+					`Tool "${this.tool.name}" requires approval ${NO_UI_APPROVAL_DENIAL}.\n` +
 						`Options:\n` +
 						`  1. Set tools.approvalMode: yolo in /settings\n` +
 						`  2. Add tools.approval.${this.tool.name}: allow to config\n` +
