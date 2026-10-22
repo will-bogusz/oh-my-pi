@@ -44274,13 +44274,13 @@
    "needs": [],
    "base": "2d39e5f5d26c12d49b241f58905b5526106d2a1e",
    "body": "bodies/advisor-quota-comment.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16766,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/advisor-quota-comment",
    "host": "MacBook-Pro",
    "added": "2026-10-22T07:23:33Z",
-   "updated": "2026-10-22T09:06:14Z",
+   "updated": "2026-10-22T09:11:53Z",
    "note": "",
    "built": [
     {
@@ -44689,7 +44689,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-22T09:05:44Z"
+   "advanced": "2026-10-22T09:05:44Z",
+   "opened": "2026-10-22T09:11:53Z"
   },
   {
    "id": "drop-dead-jobs-op",
