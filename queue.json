@@ -43541,10 +43541,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-22T07:36:17Z",
+  "checked": "2026-10-22T08:06:38Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "resume-cancel-bg-jobs": {
+    "since": "2026-10-22T08:06:38Z",
+    "title": "fix(coding-agent): cancel the outgoing session's background jobs on /resume"
+   },
    "sleep-prevention-doc": {
     "since": "2026-10-22T07:36:17Z",
     "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns"
@@ -43561,9 +43565,9 @@
     "since": "2026-10-22T07:36:17Z",
     "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app"
    },
-   "r2/webmcp-native": {
-    "since": "2026-10-22T07:06:04Z",
-    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook"
+   "headless-agent-flags": {
+    "since": "2026-10-22T08:06:38Z",
+    "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files"
    },
    "computer-right-click-per-press": {
     "since": "2026-10-22T07:36:17Z",
@@ -43621,7 +43625,8 @@
    16608,
    16611,
    16612,
-   16614
+   16614,
+   16756
   ],
   "post_merge": {
    "13677": {
@@ -47614,6 +47619,25 @@
     "kind": "openable",
     "id": "computer-right-click-per-press",
     "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input"
+   },
+   {
+    "at": "2026-10-22T08:06:38Z",
+    "kind": "openable",
+    "id": "resume-cancel-bg-jobs",
+    "title": "fix(coding-agent): cancel the outgoing session's background jobs on /resume"
+   },
+   {
+    "at": "2026-10-22T08:06:38Z",
+    "kind": "openable",
+    "id": "headless-agent-flags",
+    "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files"
+   },
+   {
+    "at": "2026-10-22T08:06:38Z",
+    "kind": "unopenable",
+    "id": "r2/webmcp-native",
+    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
+    "why": "opened as #16756"
    }
   ]
  },
