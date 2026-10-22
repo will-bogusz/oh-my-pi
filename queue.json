@@ -5497,7 +5497,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-right-click-per-press",
    "host": "MacBook-Pro",
    "added": "2026-10-18T16:33:04Z",
-   "updated": "2026-10-22T07:43:59Z",
+   "updated": "2026-10-22T09:47:39Z",
    "note": "rebuild after #16206 merges: lift its 'a background right or middle click checks only before it starts' doc qualification in docs/computer-use.md and docs/tools/computer.md",
    "advanced": "2026-10-22T07:07:54Z",
    "built": [
@@ -5535,6 +5535,24 @@
      "tip": "e2feeeef2440e6442aded0638b856713e28ae8ef",
      "with_tip": "8f5a604f393b5bf8e864ab9e6a72ea1e281ceed2",
      "at": "2026-10-22T07:43:58Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16284",
+     "code": "802010bb58f730941ce7c27b41591fde95c707d5",
+     "with_code": "763fffc68828967ba5f8acbf3864a0d48a13a25a",
+     "tip": "e2feeeef2440e6442aded0638b856713e28ae8ef",
+     "with_tip": "18dd4125be03406dc3dd67bc9746407df2148552",
+     "at": "2026-10-22T09:47:32Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16553",
+     "code": "802010bb58f730941ce7c27b41591fde95c707d5",
+     "with_code": "ea0375ba065a391d784e6688e6c4c6e05b3a82f7",
+     "tip": "e2feeeef2440e6442aded0638b856713e28ae8ef",
+     "with_tip": "832f4fac43c7684723d9506e1bad50fc4a4967bc",
+     "at": "2026-10-22T09:47:38Z",
      "host": "MacBook-Pro"
     }
    ]
