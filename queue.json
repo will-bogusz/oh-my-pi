@@ -58497,5 +58497,11 @@
     "created": "2026-10-10T21:48:41Z"
    }
   ]
+ },
+ "opening": {
+  "id": "app-name-background-helper",
+  "token": "b0bd0b938a9845358b0d0fa6ecd95426",
+  "host": "goliath",
+  "at": "2026-10-23T23:51:13Z"
  }
 }
