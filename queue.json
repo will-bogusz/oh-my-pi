@@ -2750,9 +2750,12 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/print-hold",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-23T02:13:14Z",
+   "updated": "2026-10-23T23:47:58Z",
    "note": "",
-   "advanced": "2026-10-23T02:13:14Z"
+   "advanced": "2026-10-23T02:13:14Z",
+   "rebases_after": [
+    16907
+   ]
   },
   {
    "id": "r2/relay-bg-input-main",
@@ -50339,13 +50342,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/browser-read-after-navigation.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16907,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-read-after-navigation",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:41:28Z",
-   "updated": "2026-10-23T23:43:39Z",
+   "updated": "2026-10-23T23:47:58Z",
    "note": "",
    "built": [
     {
@@ -50798,7 +50801,8 @@
      "host": "goliath",
      "tree": "5a733a224124ac9e21fbecfc694ad77efd7baebe"
     }
-   ]
+   ],
+   "opened": "2026-10-23T23:47:58Z"
   },
   {
    "id": "relay-extension-frame",

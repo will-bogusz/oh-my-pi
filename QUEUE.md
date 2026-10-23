@@ -1,12 +1,12 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23 23:46Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23 23:47Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-10-23 23:17Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 10, conflict-held 9, stacked 23, held 1, open PRs 52, queued since the last plan 1; merged 135, closed 10
+**Counts:** openable now 9, conflict-held 9, stacked 23, held 1, open PRs 53, queued since the last plan 1; merged 135, closed 10
 
-## Openable now (10)
+## Openable now (9)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -16,7 +16,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | window-miss-apps-open | fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector | computer | P1 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/window-miss-apps-open) |
 | axpress-click-hint | fix(natives): tell an agent to click() a macOS element that has no press action | computer | P2 | 5h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/axpress-click-hint) |
 | app-name-background-helper | fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous | computer | P1 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/app-name-background-helper) |
-| browser-read-after-navigation | fix(browser): wait for the page a click navigates to before the next call | browser | P1 | 5h | open (over P2 #15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-read-after-navigation) |
 | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P1 | 4h | open (over P2 #16284, #15105) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
 | ax-placeholder-name | fix(natives): name macOS ax() text fields that have no label by their placeholder | computer | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-placeholder-name) |
 | finder-rename-keys | fix(natives): let macOS input reach Finder's inline rename field | computer | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-rename-keys) |
@@ -53,7 +52,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | factory-droid-image-role-default | feat(catalog): fall back to Factory Droid image models in the image role | providers | P2 | 5d | factory-droid-image-generation ([#16316](https://github.com/can1357/oh-my-pi/pull/16316)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-role-default) |
 | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 4d | relay-popup-front-main ([#16284](https://github.com/can1357/oh-my-pi/pull/16284)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
 | compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 3d | [#16587](https://github.com/can1357/oh-my-pi/pull/16587) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
-| read-url-markup-tokens | feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads | other |  | 2d | read-nav-gate ([#16596](https://github.com/can1357/oh-my-pi/pull/16596)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-markup-tokens) |
+| read-url-markup-tokens | feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads | other |  | 3d | read-nav-gate ([#16596](https://github.com/can1357/oh-my-pi/pull/16596)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-markup-tokens) |
 | timer-pr-2-engine | feat(coding-agent): run shell commands and wake sessions later with omp timer | other |  | 1d | timer-pr-1-poke ([#16801](https://github.com/can1357/oh-my-pi/pull/16801)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-2-engine) |
 | timer-pr-6-estate | feat(coding-agent): list scheduled work omp did not create with omp timer ls --all | other |  | 1d | timer-pr-2-engine | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-6-estate) |
 | timer-pr-7-conditions | feat(coding-agent): fire timers once a shell, CI or process condition holds | other |  | 1d | timer-pr-2-engine | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-7-conditions) |
@@ -69,7 +68,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 10d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 
-## Open PRs (52)
+## Open PRs (53)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -123,8 +122,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | [#16768](https://github.com/can1357/oh-my-pi/pull/16768) | headless-agent-flags | feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-agent-flags) |
 | [#16803](https://github.com/can1357/oh-my-pi/pull/16803) | max-cost-gate | feat(session): add --warn-cost and --max-cost to cap a session's spend | session | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/max-cost-gate) |
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
+| [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | browser-read-after-navigation | fix(browser): wait for the page a click navigates to before the next call | browser | P1 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-read-after-navigation) |
 | [#16906](https://github.com/can1357/oh-my-pi/pull/16906) | devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
-| [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
+| [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
 
 ## Queued since the last plan (1)
 
