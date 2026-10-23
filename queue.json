@@ -246,9 +246,12 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-extension-version",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-22T07:00:25Z",
+   "updated": "2026-10-23T23:50:41Z",
    "note": "",
-   "advanced": "2026-10-22T07:00:25Z"
+   "advanced": "2026-10-22T07:00:25Z",
+   "rebases_after": [
+    16908
+   ]
   },
   {
    "id": "relay-own-tab",
@@ -5946,7 +5949,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front-main",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:46:45Z",
-   "updated": "2026-10-22T09:08:17Z",
+   "updated": "2026-10-23T23:50:41Z",
    "note": "",
    "built": [
     {
@@ -6393,7 +6396,10 @@
    ],
    "advanced": "2026-10-22T09:08:17Z",
    "opened": "2026-10-19T02:42:33Z",
-   "readied": "2026-10-19T02:42:52Z"
+   "readied": "2026-10-19T02:42:52Z",
+   "rebases_after": [
+    16908
+   ]
   },
   {
    "id": "browser-options-hints",
@@ -50814,13 +50820,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/relay-extension-frame.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16908,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-extension-frame",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:03:59Z",
-   "updated": "2026-10-23T23:43:39Z",
+   "updated": "2026-10-23T23:50:41Z",
    "note": "",
    "built": [
     {
@@ -51263,7 +51269,8 @@
      "host": "goliath",
      "tree": "5a733a224124ac9e21fbecfc694ad77efd7baebe"
     }
-   ]
+   ],
+   "opened": "2026-10-23T23:50:41Z"
   },
   {
    "id": "relay-frame-detach-report",
