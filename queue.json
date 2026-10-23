@@ -57392,5 +57392,11 @@
     "created": "2026-10-10T21:48:41Z"
    }
   ]
+ },
+ "opening": {
+  "id": "devin-model-info-context",
+  "token": "fa861235fa6d4144b8cb2322d82c2d98",
+  "host": "MacBook-Pro",
+  "at": "2026-10-23T22:42:45Z"
  }
 }
