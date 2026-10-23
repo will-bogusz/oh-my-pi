@@ -51904,13 +51904,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/finder-rename-keys.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16910,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/finder-rename-keys",
    "host": "MacBook-Pro",
    "added": "2026-10-23T21:15:49Z",
-   "updated": "2026-10-23T23:42:01Z",
+   "updated": "2026-10-23T23:57:45Z",
    "note": "",
    "built": [
     {
@@ -52023,7 +52023,8 @@
      "host": "goliath",
      "tree": "19bc6d3bdf97fec49afcab4be3478bae2875c981"
     }
-   ]
+   ],
+   "opened": "2026-10-23T23:57:45Z"
   },
   {
    "id": "devin-cli-3000-11-205",
