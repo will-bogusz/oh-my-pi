@@ -55306,7 +55306,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-23T21:59:07Z",
+  "at": "2026-10-23T22:00:52Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -56788,6 +56788,23 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "devin-cli-3000-11-205",
+    "label": "devin-cli-3000-11-205",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": null,
+    "title": "fix(catalog): identify Devin requests as CLI 3000.11.205",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-23T21:58:47Z"
    },
    {
     "id": "account-window-reserves",
