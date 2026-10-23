@@ -47578,13 +47578,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/computer-no-ui-continue.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16909,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-no-ui-continue",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:04:19Z",
-   "updated": "2026-10-23T23:43:39Z",
+   "updated": "2026-10-23T23:55:34Z",
    "note": "",
    "built": [
     {
@@ -48077,7 +48077,8 @@
      "host": "goliath",
      "tree": "5a733a224124ac9e21fbecfc694ad77efd7baebe"
     }
-   ]
+   ],
+   "opened": "2026-10-23T23:55:34Z"
   },
   {
    "id": "computer-control-policy",
