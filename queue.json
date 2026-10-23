@@ -17866,7 +17866,7 @@
    "area": "auth",
    "priority": "P1",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/oauth-refresh-keep-rotated-token.md",
    "state": "open",
    "pr": 16291,
@@ -17874,7 +17874,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/oauth-refresh-keep-rotated-token",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:02:38Z",
-   "updated": "2026-10-22T07:08:11Z",
+   "updated": "2026-10-23T02:16:56Z",
    "note": "",
    "built": [
     {
@@ -18234,7 +18234,7 @@
     }
    ],
    "opened": "2026-10-19T04:28:23Z",
-   "advanced": "2026-10-22T07:08:11Z"
+   "advanced": "2026-10-23T02:16:56Z"
   },
   {
    "id": "factory-droid-gemini-4-argon",
