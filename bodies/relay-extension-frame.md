@@ -2,6 +2,8 @@
 
 I made the relay extension empty another extension's frame in a tab omp drives when Chrome refuses omp's debugger because of it, so a password manager's autofill menu no longer locks omp out of that tab.
 
+A sign-in task whose page loads a password-manager-style menu went from 0 of 2 to 2 of 2 runs passing with GPT-6.1 Sol driving omp's relay (main plus this and other pending fixes; main alone failed it in both earlier rounds).
+
 | | `main` | this PR |
 |---|---|---|
 | the call that focused the credential field | fails (Chrome detaches omp) | fails, the tab is reattached |
