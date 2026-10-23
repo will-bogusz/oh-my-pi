@@ -50348,7 +50348,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-read-after-navigation",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:41:28Z",
-   "updated": "2026-10-23T23:47:58Z",
+   "updated": "2026-10-23T23:48:17Z",
    "note": "",
    "built": [
     {
@@ -50802,7 +50802,8 @@
      "tree": "5a733a224124ac9e21fbecfc694ad77efd7baebe"
     }
    ],
-   "opened": "2026-10-23T23:47:58Z"
+   "opened": "2026-10-23T23:47:58Z",
+   "readied": "2026-10-23T23:48:17Z"
   },
   {
    "id": "relay-extension-frame",
