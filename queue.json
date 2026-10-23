@@ -51051,8 +51051,109 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-cli-3000-11-205",
    "host": "MacBook-Pro",
    "added": "2026-10-23T21:58:47Z",
-   "updated": "2026-10-23T22:02:05Z",
-   "note": ""
+   "updated": "2026-10-23T22:11:52Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16579",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "9a4ff6550dfceecd072f05a8792491fd6ee26f62",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "60584fd93ea2a78bf0d7e75333311519f43f90ac",
+     "at": "2026-10-23T22:11:44Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16250",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "7b3ff154ab1b6e4c5f0479645492dc048af36e61",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "4417572e3322d9bc36fb5e25f335f71d26dcca37",
+     "at": "2026-10-23T22:11:50Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16257",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "5e84f8c35b9859d74c313deb05b836c944871925",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "7a9c27f2a4c4b436a1247505b8e4f92b47932e44",
+     "at": "2026-10-23T22:11:50Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16291",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "2dbfc96869e02f8197cb9c539e47e9e5d25e8f3a",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "3d44fdc1c00281b33864b246052ad4bdc77c8da0",
+     "at": "2026-10-23T22:11:50Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15124",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "e04bec4c0f6b3e751e4162c8cb2222365b4db9df",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "3e01b114a5860392eb01a2c92917ef74e8bf247d",
+     "at": "2026-10-23T22:11:50Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16297",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "f8949aeabeabb5118794ecf99b07b0955272fd11",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "c7c5900c5d5d6ec59859b631f9074e9cda94f5d3",
+     "at": "2026-10-23T22:11:50Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15130",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "489401adc377f34ce309e0500122b62f9a00cc89",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "4a3819696d9003cda23ca5969ec211cb605ee528",
+     "at": "2026-10-23T22:11:50Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16296",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "df92087c86c74410412ad6156d4961eadff00e9f",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "d7fcd4ffec9c775a2498e6960072ab79c0ab3437",
+     "at": "2026-10-23T22:11:51Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16309",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "7861476897e27c46cecf7aeffb1de064e3add794",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "04cc224b016ee15cc5b24c6faee79cdc057da3b7",
+     "at": "2026-10-23T22:11:51Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16316",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "1e72f470186075f09f91e1b05c585fed2388b6c4",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "9ea6c916db0e8f01732a8e1350f6fa01c0c6a881",
+     "at": "2026-10-23T22:11:51Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16611",
+     "code": "d43336798dea9ca9f6afaca1ed2cc50374069aa1",
+     "with_code": "984da04415a076c85c562964e6186788f374ae59",
+     "tip": "661653f72411ac220d90a388fa2b2eabb8933704",
+     "with_tip": "3ab94934af97c837f5b583107188d21954cf24a0",
+     "at": "2026-10-23T22:11:51Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "devin-model-info-context",
