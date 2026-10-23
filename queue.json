@@ -15329,7 +15329,7 @@
    "area": "providers",
    "priority": "P2",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/factory-droid-credit-promotions.md",
    "state": "open",
    "pr": 16309,
@@ -15337,7 +15337,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-credit-promotions",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:02Z",
-   "updated": "2026-10-22T07:31:38Z",
+   "updated": "2026-10-23T03:06:48Z",
    "note": "",
    "built": [
     {
@@ -15824,7 +15824,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-22T07:31:38Z",
+   "advanced": "2026-10-23T03:06:48Z",
    "opened": "2026-10-19T06:56:13Z",
    "readied": "2026-10-19T06:56:45Z"
   },
