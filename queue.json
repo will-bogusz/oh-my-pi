@@ -47159,7 +47159,7 @@
    "branch": "will/relay-extension-frame",
    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
    "area": "browser",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/relay-extension-frame.md",
@@ -47169,7 +47169,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-extension-frame",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:03:59Z",
-   "updated": "2026-10-23T19:03:59Z",
+   "updated": "2026-10-23T19:09:33Z",
    "note": ""
   },
   {
