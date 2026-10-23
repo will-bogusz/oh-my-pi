@@ -51164,13 +51164,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/devin-model-info-context.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16905,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-model-info-context",
    "host": "MacBook-Pro",
    "added": "2026-10-23T22:11:00Z",
-   "updated": "2026-10-23T22:35:25Z",
+   "updated": "2026-10-23T22:47:39Z",
    "note": "",
    "built": [
     {
@@ -51227,7 +51227,8 @@
      "at": "2026-10-23T22:28:28Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-23T22:47:39Z"
   }
  ],
  "watch": {
