@@ -47012,7 +47012,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-23T12:04:00Z",
+  "checked": "2026-10-23T12:34:26Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -47203,68 +47203,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-16T12:22:09Z",
-    "kind": "merged",
-    "number": 15941,
-    "title": "fix(coding-agent): keep the machine awake again under power.sleepPrevention",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-16T12:22:09Z",
-    "kind": "merged",
-    "number": 15920,
-    "title": "fix(browser): fail fast and reattach when Chrome detaches omp from a relay tab",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-16T12:22:09Z",
-    "kind": "merged",
-    "number": 15919,
-    "title": "fix(coding-agent): fail browser uploadFile when nothing on the page takes the file",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-16T12:22:09Z",
-    "kind": "merged",
-    "number": 15918,
-    "title": "fix(coding-agent): let browser element handles upload through chooser triggers and drop zones",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-16T12:22:09Z",
-    "kind": "merged",
-    "number": 15915,
-    "title": "fix(coding-agent): stop browser uploadFile swallowing later file choosers and hanging on File System Access pickers",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-16T12:22:09Z",
-    "kind": "merged",
-    "number": 15914,
-    "title": "fix(browser): fill colour, date, time and range inputs with their value instead of typing into them",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-16T12:22:09Z",
-    "kind": "merged",
-    "number": 15762,
-    "title": "fix(natives,coding-agent): keep the macOS display awake for the agent's turn, not 5 minutes past its last action",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-16T12:22:09Z",
-    "kind": "openable",
-    "id": "browser-worker-exit",
-    "title": "fix(browser): reattach a tab whose worker exits unexpectedly"
-   },
    {
     "at": "2026-10-16T14:25:25Z",
     "kind": "released",
