@@ -38183,7 +38183,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "10b9b493f424933af884ae434f0cb96cd74b48fd",
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/minimizer-keep-small-whole.md",
    "state": "open",
    "pr": 16589,
@@ -38191,7 +38191,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/minimizer-keep-small-whole",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:08:00Z",
-   "updated": "2026-10-21T02:37:16Z",
+   "updated": "2026-10-23T02:23:47Z",
    "note": "",
    "built": [
     {
@@ -38206,7 +38206,8 @@
     }
    ],
    "opened": "2026-10-21T02:15:18Z",
-   "readied": "2026-10-21T02:15:44Z"
+   "readied": "2026-10-21T02:15:44Z",
+   "advanced": "2026-10-23T02:23:47Z"
   },
   {
    "id": "read-nav-gate",
