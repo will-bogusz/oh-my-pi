@@ -51910,7 +51910,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/finder-rename-keys",
    "host": "MacBook-Pro",
    "added": "2026-10-23T21:15:49Z",
-   "updated": "2026-10-23T23:57:45Z",
+   "updated": "2026-10-23T23:58:01Z",
    "note": "",
    "built": [
     {
@@ -52024,7 +52024,8 @@
      "tree": "19bc6d3bdf97fec49afcab4be3478bae2875c981"
     }
    ],
-   "opened": "2026-10-23T23:57:45Z"
+   "opened": "2026-10-23T23:57:45Z",
+   "readied": "2026-10-23T23:58:01Z"
   },
   {
    "id": "devin-cli-3000-11-205",
