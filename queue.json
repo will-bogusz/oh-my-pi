@@ -1703,7 +1703,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "df4f996e66a200ab7e0496114d43bdf85f32194d",
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": null,
    "state": "open",
    "pr": 15433,
@@ -1711,9 +1711,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agents-show",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-17T18:22:36Z",
+   "updated": "2026-10-23T02:10:49Z",
    "note": "",
-   "advanced": "2026-10-17T18:15:12Z",
+   "advanced": "2026-10-23T02:10:49Z",
    "built": [
     {
      "with": "#15762",
