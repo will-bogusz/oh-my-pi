@@ -47012,7 +47012,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-23T13:35:36Z",
+  "checked": "2026-10-23T14:37:30Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -47203,76 +47203,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-16T14:25:25Z",
-    "kind": "released",
-    "number": 15402,
-    "title": "feat(coding-agent): send todo updates alongside the next tool call",
-    "tag": "v18.11.2"
-   },
-   {
-    "at": "2026-10-16T14:25:25Z",
-    "kind": "released",
-    "number": 15410,
-    "title": "fix(coding-agent): return large artifacts' text from Eval read() outside the session's artifacts dir",
-    "tag": "v18.11.2"
-   },
-   {
-    "at": "2026-10-16T14:25:25Z",
-    "kind": "released",
-    "number": 15489,
-    "title": "fix(coding-agent): send file contents when uploading into relay and connected browsers",
-    "tag": "v18.11.2"
-   },
-   {
-    "at": "2026-10-16T14:25:25Z",
-    "kind": "released",
-    "number": 15941,
-    "title": "fix(coding-agent): keep the machine awake again under power.sleepPrevention",
-    "tag": "v18.11.2"
-   },
-   {
-    "at": "2026-10-16T14:25:25Z",
-    "kind": "released",
-    "number": 15920,
-    "title": "fix(browser): fail fast and reattach when Chrome detaches omp from a relay tab",
-    "tag": "v18.11.2"
-   },
-   {
-    "at": "2026-10-16T14:25:25Z",
-    "kind": "released",
-    "number": 15919,
-    "title": "fix(coding-agent): fail browser uploadFile when nothing on the page takes the file",
-    "tag": "v18.11.2"
-   },
-   {
-    "at": "2026-10-16T14:25:25Z",
-    "kind": "released",
-    "number": 15918,
-    "title": "fix(coding-agent): let browser element handles upload through chooser triggers and drop zones",
-    "tag": "v18.11.2"
-   },
-   {
-    "at": "2026-10-16T14:25:25Z",
-    "kind": "released",
-    "number": 15915,
-    "title": "fix(coding-agent): stop browser uploadFile swallowing later file choosers and hanging on File System Access pickers",
-    "tag": "v18.11.2"
-   },
-   {
-    "at": "2026-10-16T14:25:25Z",
-    "kind": "released",
-    "number": 15914,
-    "title": "fix(browser): fill colour, date, time and range inputs with their value instead of typing into them",
-    "tag": "v18.11.2"
-   },
-   {
-    "at": "2026-10-16T14:25:25Z",
-    "kind": "released",
-    "number": 15762,
-    "title": "fix(natives,coding-agent): keep the macOS display awake for the agent's turn, not 5 minutes past its last action",
-    "tag": "v18.11.2"
-   },
    {
     "at": "2026-10-16T21:05:27Z",
     "kind": "openable",
