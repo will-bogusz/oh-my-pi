@@ -47135,6 +47135,24 @@
    "added": "2026-10-23T18:33:35Z",
    "updated": "2026-10-23T18:33:35Z",
    "note": ""
+  },
+  {
+   "id": "browser-read-after-navigation",
+   "branch": "will/browser-read-after-navigation",
+   "title": "fix(browser): wait for the page a click navigates to before the next call",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/browser-read-after-navigation.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-read-after-navigation",
+   "host": "MacBook-Pro",
+   "added": "2026-10-23T18:41:28Z",
+   "updated": "2026-10-23T18:41:28Z",
+   "note": ""
   }
  ],
  "watch": {
