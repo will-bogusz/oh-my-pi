@@ -50220,13 +50220,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/app-name-background-helper.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16911,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/app-name-background-helper",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:33:35Z",
-   "updated": "2026-10-23T23:54:55Z",
+   "updated": "2026-10-23T23:59:54Z",
    "note": "",
    "built": [
     {
@@ -50339,7 +50339,8 @@
      "host": "goliath",
      "tree": "19bc6d3bdf97fec49afcab4be3478bae2875c981"
     }
-   ]
+   ],
+   "opened": "2026-10-23T23:59:54Z"
   },
   {
    "id": "browser-read-after-navigation",
