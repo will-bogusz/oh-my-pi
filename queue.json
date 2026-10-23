@@ -51041,7 +51041,7 @@
    "branch": "will/devin-cli-3000-11-205",
    "title": "fix(catalog): identify Devin requests as CLI 3000.11.205",
    "area": "broker",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/devin-cli-3000-11-205.md",
@@ -51051,7 +51051,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-cli-3000-11-205",
    "host": "MacBook-Pro",
    "added": "2026-10-23T21:58:47Z",
-   "updated": "2026-10-23T22:11:52Z",
+   "updated": "2026-10-23T22:35:44Z",
    "note": "",
    "built": [
     {
