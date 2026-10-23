@@ -17,6 +17,7 @@ import {
 	acquireTab,
 	getTabsMapForTest,
 	releaseTab,
+	releaseTabsForOwner,
 	runInTab,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import { WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
@@ -307,6 +308,61 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
 			await fixture.extension.evaluate("globalThis.testRefuseRemoves = 2");
 			await releaseTab(name);
 			// The close returned with the tab gone.
+			expect(await chromeTab(fixture, chromeTabId(tab.targetId))).toBeNull();
+		} finally {
+			await releaseTab(name).catch(() => undefined);
+			await releaseBrowser(relay, { kill: false });
+			await fixture.close();
+		}
+	}, 60_000);
+
+	it("leaves a persist tab open in the user's browser when its session ends and closes the others", async () => {
+		const fixture = await launchRelayFixture();
+		const relay = await acquireBrowser({ kind: "relay", cdpUrl: fixture.cdpUrl }, { cwd: process.cwd() });
+		const owner = `relay-session-${process.pid}`;
+		const names = [`relay-persist-${process.pid}`, `relay-plain-${process.pid}`];
+		try {
+			const kept = await acquireTab(names[0]!, relay, {
+				url: `${fixture.origin}/first`,
+				timeoutMs: 15_000,
+				ownerSessionId: owner,
+				persist: true,
+			});
+			const closed = await acquireTab(names[1]!, relay, {
+				url: `${fixture.origin}/second`,
+				timeoutMs: 15_000,
+				ownerSessionId: owner,
+			});
+			// What session dispose runs.
+			expect(await releaseTabsForOwner(owner, { kill: true })).toBe(2);
+			const keptTabId = chromeTabId(kept.tab.targetId);
+			expect(await fixture.extension.evaluate(`chrome.tabs.get(${keptTabId}).then(tab => tab.url)`)).toBe(
+				`${fixture.origin}/first`,
+			);
+			expect(await chromeTab(fixture, chromeTabId(closed.tab.targetId))).toBeNull();
+			expect(getTabsMapForTest().has(names[0]!)).toBeFalse();
+		} finally {
+			for (const name of names) await releaseTab(name).catch(() => undefined);
+			await releaseBrowser(relay, { kill: false });
+			await fixture.close();
+		}
+	}, 60_000);
+
+	it("closes a persist tab whose close joins its session's end", async () => {
+		const fixture = await launchRelayFixture();
+		const relay = await acquireBrowser({ kind: "relay", cdpUrl: fixture.cdpUrl }, { cwd: process.cwd() });
+		const owner = `relay-joined-session-${process.pid}`;
+		const name = `relay-joined-close-${process.pid}`;
+		try {
+			const { tab } = await acquireTab(name, relay, {
+				url: `${fixture.origin}/first`,
+				timeoutMs: 15_000,
+				ownerSessionId: owner,
+				persist: true,
+			});
+			const ending = releaseTabsForOwner(owner, { kill: true });
+			expect(await releaseTab(name)).toBe(true);
+			await ending;
 			expect(await chromeTab(fixture, chromeTabId(tab.targetId))).toBeNull();
 		} finally {
 			await releaseTab(name).catch(() => undefined);
