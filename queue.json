@@ -58499,5 +58499,11 @@
     "created": "2026-10-10T21:48:41Z"
    }
   ]
+ },
+ "opening": {
+  "id": "finder-rename-keys",
+  "token": "d382dfed321947f3a74df5ac406d1cc4",
+  "host": "goliath",
+  "at": "2026-10-23T23:56:00Z"
  }
 }
