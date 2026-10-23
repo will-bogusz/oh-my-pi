@@ -2,6 +2,8 @@
 
 I asked omp to right-click a list item so it could open the item's menu, and it left-clicked instead and opened the item's details, so `tab.click` and `frame.click` now press the button and count they're asked for, as element handles already do.
 
+In a benchmark task whose actions sit behind a right-click menu (GPT-6.1 Sol, this PR merged with other queued browser fixes), median steps went from 19.5 to 14.5, because the first `tab.click(chip, { button: "right" })` now opens the menu instead of the item's details.
+
 | call | `main` | this PR |
 |---|---|---|
 | `tab.click(sel, { button: "right" })`, Python `tab.click(sel, button="right")` | one left click | a right click (`contextmenu` fires) |
