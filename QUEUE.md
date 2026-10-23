@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23 23:43Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23 23:44Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-10-23 23:17Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 10, conflict-held 9, stacked 23, held 1, open PRs 52; merged 135, closed 10
+**Counts:** openable now 10, conflict-held 9, stacked 23, held 1, open PRs 52, queued since the last plan 1; merged 135, closed 10
 
 ## Openable now (10)
 
@@ -125,3 +125,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
 | [#16906](https://github.com/can1357/oh-my-pi/pull/16906) | devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
 | [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| computer-doc-inline | feat(coding-agent): start desktop tasks without a documentation read | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-doc-inline) |
