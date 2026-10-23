@@ -47063,6 +47063,24 @@
    "added": "2026-10-23T18:13:45Z",
    "updated": "2026-10-23T18:13:45Z",
    "note": ""
+  },
+  {
+   "id": "window-miss-apps-open",
+   "branch": "will/window-miss-apps-open",
+   "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/window-miss-apps-open.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/window-miss-apps-open",
+   "host": "MacBook-Pro",
+   "added": "2026-10-23T18:24:47Z",
+   "updated": "2026-10-23T18:24:47Z",
+   "note": ""
   }
  ],
  "watch": {
