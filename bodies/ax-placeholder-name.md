@@ -31,7 +31,7 @@ Decisions:
 - It also joins the attributes an element's identity hashes, so a read where the app answered everything but the placeholder leaves the field without an identity instead of matching a look-alike.
 - A fallback name, not a new `placeholder` field: nothing else needs the hint, and a field with a value stays labelled.
 
-Non-goals: Windows and Linux backends; fields that already carry a title or description.
+Non-goals: Windows and Linux; fields with a title or description.
 
 ## Testing
 
