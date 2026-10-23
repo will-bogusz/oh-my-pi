@@ -1,6 +1,6 @@
 ## What
 
-Pressing a button on a web page in Chrome through the computer tool just failed with a list of AX action names, so the error now says nothing happened and to click the element instead, which works.
+I watched agents press a button on a Chrome page through the computer tool and get back only a list of AX action names, so I made the error say nothing happened and to click the element instead, which works.
 
 On macOS, `el.press()` on a link, button or select in a Chrome page fails, because Chrome lists only `AXShowMenu` and `AXScrollToVisible` for them. The refusal now ends with what to do:
 
