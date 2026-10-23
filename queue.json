@@ -5783,14 +5783,14 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/todo-serial-tools.md",
-   "state": "open",
+   "state": "closed",
    "pr": 16231,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/todo-serial-tools",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:18:22Z",
-   "updated": "2026-10-23T02:13:44Z",
-   "note": "opened #16231",
+   "updated": "2026-10-23T20:37:43Z",
+   "note": "Closed 2026-10-23 on measured regression (TodoPromptEval, ~/tmp/adhoc/2026-10-23-todo-eval/RESULTS.md): Haiku 5.5 set up a todo list in 40% of runs vs 80% on main; Sol 6.1 +0.9 todo-only turns, +12.7k tokens per run; the targeted redundant start-after-done never occurred (0/440). alt wordings also regressed. Revisit only as serial-only text rendered for one-call transports.",
    "built": [
     {
      "with": "#15418",
