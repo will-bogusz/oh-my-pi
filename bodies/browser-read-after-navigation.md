@@ -37,6 +37,7 @@ Decisions:
 
 - `bun test test/tools/browser-read-after-navigation.test.ts` covers reads and a screenshot after a navigating click, a fill and click on the step it loads (three in a row), a read after a dismissed `beforeunload` (under 1 s), and which reads rerun. With the fix reverted three of the four fail (3 of 3 runs); without the `beforeunload` handling the fourth takes 5 s.
 - The table: a local form, next page after 0 or 150 ms, 20 tries per cell, headless Chrome and an isolated relay. After clicks that navigate nowhere (new tab, download, 204, hash, `pushState`) the next read took 12 ms at most.
+- On the GOV.UK calculator through the relay (GPT-6.1 Sol, this branch merged with ten other browser fixes), runs hitting `Cannot find context with specified id` went from 2 of 2 to 0 of 2.
 - Neighbouring browser suites pass; `tsgo` clean.
 
 ---
