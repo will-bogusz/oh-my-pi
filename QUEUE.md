@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23 23:17Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23 23:19Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-23 22:13Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-10-23 23:17Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 10, conflict-held 9, stacked 23, held 1, open PRs 52; merged 135, closed 10
 
 ## Openable now (10)
@@ -14,11 +14,11 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | computer-no-ui-continue | fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui | computer | P1 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-no-ui-continue) |
 | computer-control-policy | feat(coding-agent): let tools.approval grant computer foreground control on unattended machines | computer | P2 | 5h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-control-policy) |
 | window-miss-apps-open | fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector | computer | P1 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/window-miss-apps-open) |
-| axpress-click-hint | fix(natives): tell an agent to click() a macOS element that has no press action | computer | P2 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/axpress-click-hint) |
+| axpress-click-hint | fix(natives): tell an agent to click() a macOS element that has no press action | computer | P2 | 4h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/axpress-click-hint) |
 | app-name-background-helper | fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous | computer | P1 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/app-name-background-helper) |
 | browser-read-after-navigation | fix(browser): wait for the page a click navigates to before the next call | browser | P1 | 4h | open (over P2 #15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-read-after-navigation) |
 | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P1 | 4h | open (over P2 #16284, #15105) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
-| ax-placeholder-name | fix(natives): name macOS ax() text fields that have no label by their placeholder | computer | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-placeholder-name) |
+| ax-placeholder-name | fix(natives): name macOS ax() text fields that have no label by their placeholder | computer | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-placeholder-name) |
 | finder-rename-keys | fix(natives): let macOS input reach Finder's inline rename field | computer | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-rename-keys) |
 
 ## Conflict-held (9)
@@ -123,5 +123,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | [#16768](https://github.com/can1357/oh-my-pi/pull/16768) | headless-agent-flags | feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-agent-flags) |
 | [#16803](https://github.com/can1357/oh-my-pi/pull/16803) | max-cost-gate | feat(session): add --warn-cost and --max-cost to cap a session's spend | session | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/max-cost-gate) |
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
-| [#16906](https://github.com/can1357/oh-my-pi/pull/16906) | devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker | P0 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
-| [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
+| [#16906](https://github.com/can1357/oh-my-pi/pull/16906) | devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
+| [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |

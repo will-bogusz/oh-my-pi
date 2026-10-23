@@ -51235,10 +51235,51 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-23T21:15:54Z",
+  "checked": "2026-10-23T23:17:41Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "app-name-background-helper": {
+    "since": "2026-10-23T23:17:41Z",
+    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous"
+   },
+   "browser-read-after-navigation": {
+    "since": "2026-10-23T23:17:41Z",
+    "title": "fix(browser): wait for the page a click navigates to before the next call"
+   },
+   "computer-no-ui-continue": {
+    "since": "2026-10-23T23:17:41Z",
+    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui"
+   },
+   "finder-rename-keys": {
+    "since": "2026-10-23T23:17:41Z",
+    "title": "fix(natives): let macOS input reach Finder's inline rename field"
+   },
+   "relay-extension-frame": {
+    "since": "2026-10-23T23:17:41Z",
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it"
+   },
+   "window-miss-apps-open": {
+    "since": "2026-10-23T23:17:41Z",
+    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector"
+   },
+   "ax-placeholder-name": {
+    "since": "2026-10-23T23:17:41Z",
+    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder"
+   },
+   "axpress-click-hint": {
+    "since": "2026-10-23T23:17:41Z",
+    "title": "fix(natives): tell an agent to click() a macOS element that has no press action"
+   },
+   "computer-control-policy": {
+    "since": "2026-10-23T23:17:41Z",
+    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines"
+   },
+   "grep-exclude": {
+    "since": "2026-10-23T23:17:41Z",
+    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
+   }
+  },
   "conflicts": {},
   "merged_through": "2026-10-22T09:44:50Z",
   "unreleased": {
@@ -51336,7 +51377,9 @@
    16769,
    16770,
    16801,
-   16803
+   16803,
+   16905,
+   16906
   ],
   "post_merge": {
    "16288": {
@@ -51425,13 +51468,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-16T21:35:46Z",
-    "kind": "unopenable",
-    "id": "inflight-epoch",
-    "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
-    "why": "opened as #16038"
-   },
    {
     "at": "2026-10-17T11:27:08Z",
     "kind": "merged",
@@ -54984,6 +55020,66 @@
     "id": "grep-exclude",
     "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
     "why": "plan: paused"
+   },
+   {
+    "at": "2026-10-23T23:17:41Z",
+    "kind": "openable",
+    "id": "app-name-background-helper",
+    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous"
+   },
+   {
+    "at": "2026-10-23T23:17:41Z",
+    "kind": "openable",
+    "id": "browser-read-after-navigation",
+    "title": "fix(browser): wait for the page a click navigates to before the next call"
+   },
+   {
+    "at": "2026-10-23T23:17:41Z",
+    "kind": "openable",
+    "id": "computer-no-ui-continue",
+    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui"
+   },
+   {
+    "at": "2026-10-23T23:17:41Z",
+    "kind": "openable",
+    "id": "finder-rename-keys",
+    "title": "fix(natives): let macOS input reach Finder's inline rename field"
+   },
+   {
+    "at": "2026-10-23T23:17:41Z",
+    "kind": "openable",
+    "id": "relay-extension-frame",
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it"
+   },
+   {
+    "at": "2026-10-23T23:17:41Z",
+    "kind": "openable",
+    "id": "window-miss-apps-open",
+    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector"
+   },
+   {
+    "at": "2026-10-23T23:17:41Z",
+    "kind": "openable",
+    "id": "ax-placeholder-name",
+    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder"
+   },
+   {
+    "at": "2026-10-23T23:17:41Z",
+    "kind": "openable",
+    "id": "axpress-click-hint",
+    "title": "fix(natives): tell an agent to click() a macOS element that has no press action"
+   },
+   {
+    "at": "2026-10-23T23:17:41Z",
+    "kind": "openable",
+    "id": "computer-control-policy",
+    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines"
+   },
+   {
+    "at": "2026-10-23T23:17:41Z",
+    "kind": "openable",
+    "id": "grep-exclude",
+    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
    }
   ]
  },
@@ -55509,12 +55605,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-23T22:13:39.143571Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-23T23:17:41.864888Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -55567,6 +55663,40 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-22T08:50:21Z"
+   },
+   {
+    "id": "devin-model-info-context",
+    "label": "#16905",
+    "number": 16905,
+    "state": "open",
+    "area": "catalog",
+    "priority": "P0",
+    "title": "fix(catalog): read Devin context windows from model info",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-23T22:47:38Z"
+   },
+   {
+    "id": "devin-cli-3000-11-205",
+    "label": "#16906",
+    "number": 16906,
+    "state": "open",
+    "area": "broker",
+    "priority": "P0",
+    "title": "fix(catalog): identify Devin requests as CLI 3000.11.205",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-23T22:53:04Z"
    },
    {
     "id": "drop-dead-jobs-op",
@@ -56572,7 +56702,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -56589,7 +56719,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -56991,40 +57121,6 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "devin-cli-3000-11-205",
-    "label": "devin-cli-3000-11-205",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "fix(catalog): identify Devin requests as CLI 3000.11.205",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T21:58:47Z"
-   },
-   {
-    "id": "devin-model-info-context",
-    "label": "devin-model-info-context",
-    "number": null,
-    "state": "queued",
-    "area": "catalog",
-    "priority": null,
-    "title": "fix(catalog): read Devin context windows from model info",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T22:11:00Z"
    },
    {
     "id": "account-window-reserves",
