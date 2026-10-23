@@ -47099,6 +47099,24 @@
    "added": "2026-10-23T18:26:13Z",
    "updated": "2026-10-23T18:26:13Z",
    "note": ""
+  },
+  {
+   "id": "axpress-click-hint",
+   "branch": "will/axpress-click-hint",
+   "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/axpress-click-hint.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/axpress-click-hint",
+   "host": "MacBook-Pro",
+   "added": "2026-10-23T18:28:58Z",
+   "updated": "2026-10-23T18:28:58Z",
+   "note": ""
   }
  ],
  "watch": {
