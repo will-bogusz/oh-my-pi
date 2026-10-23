@@ -2,12 +2,15 @@
 
 omp kept telling me it clicked something on a tab I had in the background when the page never got the click, so tabs I lend it now count as visible while it drives them and go back to hidden when it lets go.
 
-In relay and `app.cdp_url` mode, a page omp borrows (`app.target`) or adopts can sit in an unselected tab, which Chrome treats as hidden. Since #16119, tabs omp opens itself already count as visible; this PR covers the tabs it borrows.
+On `main` today a background tab's click fails as "did not deliver the click to the element (disabled or inert)" on a button that is neither, and type, press and fill still report success while the page gets nothing.
 
-| background tab omp borrows (relay `app.target`, `app.cdp_url`; headful Chrome) | main | this PR |
+In relay and `app.cdp_url` mode, a page omp borrows (`app.target`) or adopts can sit in an unselected tab, or in a window another window covers on macOS, which Chrome treats as hidden. Chrome holds back input to a page until it has drawn, and a hidden page never draws, so a borrowed page that loaded in the background, or navigated there (a form's Next), drops trusted input. Since #16119, tabs omp opens itself already count as visible; this PR covers the tabs it borrows.
+
+| background tab omp borrows (relay `app.target`; headful Chrome 150) | main | this PR |
 |---|---|---|
-| never selected | click, type, press and fill report success in about 35 ms, but the page gets none of it; hover and drag time out after 8 s | all six reach the page |
+| never selected | click fails: "did not deliver the click to the element (disabled or inert)"; type, press and fill report success, but the page gets none of it; hover and drag time out after 8 s | all six reach the page |
 | selected before, then the user moved on | click, type, press and fill work; hover and drag time out | all six reach the page |
+| selected before, then it navigated in the background | as never selected | all six reach the page |
 | the user's selected tab and the frontmost app | unchanged | unchanged |
 | the page after `browser.close` | hidden | hidden |
 
@@ -28,10 +31,10 @@ It widens the bridge's per-tab file-chooser switch into a table that also holds 
 ## Testing
 
 - `browser-background-input.test.ts` (headless Chromium; real relay extension, and `app.cdp_url`): a hidden background tab takes hover and click through omp, the user's tab stays selected, and the page reads hidden after release, including after a second named tab's release and a killed worker. Its 4 tests fail on `main` (hover times out), as do the 5 new `browser-relay-bridge.test.ts` focus-emulation cases.
-- `browser-background-input.test.ts` with the `browser-relay-*` files: 140 pass; `bun check` passes.
-- Headful Chrome in a macOS VM via the relay, page-side event log, the cases above (2026-10-13, before #16119): trusted events reached the page in 8 of 18 actions on `main`, 18 of 18 with this PR.
+- The table: headful Chrome 150 on Linux (Xvfb) through the real relay extension, each action checked against a page-side event log, on `main` 0b5c27ab24 and on this PR's commits replayed onto it (2026-10-23). Headless Chromium cannot show the click and key rows: it lets input through before a page draws.
+- Headful Chrome in a macOS VM via the relay, the first two rows (2026-10-13, before #16119): trusted events reached the page in 8 of 18 actions on `main`, 18 of 18 with this PR.
 
-Not run: headful Chrome on Linux or Windows.
+Not run: headful Chrome on Windows.
 
 ---
 
