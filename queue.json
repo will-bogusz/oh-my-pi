@@ -40616,7 +40616,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/pdf-scan-pages.md",
    "state": "open",
    "pr": 16585,
@@ -40624,7 +40624,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/pdf-scan-pages",
    "host": "goliath",
    "added": "2026-10-20T23:55:18Z",
-   "updated": "2026-10-22T07:14:34Z",
+   "updated": "2026-10-23T02:22:21Z",
    "note": "",
    "built": [
     {
@@ -40969,7 +40969,7 @@
    ],
    "opened": "2026-10-21T01:56:00Z",
    "readied": "2026-10-21T01:56:24Z",
-   "advanced": "2026-10-22T07:14:34Z"
+   "advanced": "2026-10-23T02:22:21Z"
   },
   {
    "id": "edit-error-kind",
