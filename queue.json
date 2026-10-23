@@ -35247,7 +35247,7 @@
    "area": "natives-macos",
    "priority": "P1",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/click-place-release.md",
    "state": "open",
    "pr": 16553,
@@ -35255,7 +35255,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-10-22T07:36:15Z",
+   "updated": "2026-10-23T02:19:42Z",
    "note": "",
    "built": [
     {
@@ -35288,7 +35288,7 @@
    ],
    "opened": "2026-10-20T20:20:44Z",
    "readied": "2026-10-20T20:21:05Z",
-   "advanced": "2026-10-22T07:19:49Z"
+   "advanced": "2026-10-23T02:19:42Z"
   },
   {
    "id": "eval-py-await-tool",
