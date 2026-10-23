@@ -47584,7 +47584,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-no-ui-continue",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:04:19Z",
-   "updated": "2026-10-23T23:55:34Z",
+   "updated": "2026-10-23T23:55:53Z",
    "note": "",
    "built": [
     {
@@ -48078,7 +48078,8 @@
      "tree": "5a733a224124ac9e21fbecfc694ad77efd7baebe"
     }
    ],
-   "opened": "2026-10-23T23:55:34Z"
+   "opened": "2026-10-23T23:55:34Z",
+   "readied": "2026-10-23T23:55:52Z"
   },
   {
    "id": "computer-control-policy",
