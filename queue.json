@@ -50826,7 +50826,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-extension-frame",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:03:59Z",
-   "updated": "2026-10-23T23:50:41Z",
+   "updated": "2026-10-23T23:51:01Z",
    "note": "",
    "built": [
     {
@@ -51270,7 +51270,8 @@
      "tree": "5a733a224124ac9e21fbecfc694ad77efd7baebe"
     }
    ],
-   "opened": "2026-10-23T23:50:41Z"
+   "opened": "2026-10-23T23:50:41Z",
+   "readied": "2026-10-23T23:51:00Z"
   },
   {
    "id": "relay-frame-detach-report",
