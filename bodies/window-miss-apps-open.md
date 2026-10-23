@@ -1,6 +1,6 @@
 ## What
 
-When an agent looked for the window of an app that wasn't open yet, the computer tool only said no window matched, so the error now names the `apps.open` call that opens the app and hands back its window.
+When an agent looked for the window of an app that wasn't open yet, the computer tool only said no window matched, so I made the error name the `apps.open` call that opens the app and hands back its window.
 
 On macOS, `computer.window({ app: "Reminders" })` for an app that is not running, or runs with no window (Finder after its last window closed), now says what to call:
 
