@@ -47010,7 +47010,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-23T01:54:58Z",
+  "checked": "2026-10-23T02:25:12Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -47019,15 +47019,7 @@
     "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
    }
   },
-  "conflicts": {
-   "#16611": {
-    "since": "2026-10-22T16:47:57Z",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "files": [
-     "packages/ai/src/auth-gateway/server.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-10-22T09:44:50Z",
   "unreleased": {
    "16614": {
