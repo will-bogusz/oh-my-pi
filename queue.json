@@ -41462,7 +41462,7 @@
    "needs": [
     "grep-per-file-cap"
    ],
-   "base": "cb70a97de534bb967821c347cee71a31988e49a8",
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/grep-exclude.md",
    "state": "queued",
    "pr": null,
@@ -41470,8 +41470,9 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-21T00:19:24Z",
-   "updated": "2026-10-21T00:23:54Z",
-   "note": ""
+   "updated": "2026-10-23T02:11:12Z",
+   "note": "",
+   "advanced": "2026-10-23T02:11:12Z"
   },
   {
    "id": "usage-json-policy",
