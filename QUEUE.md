@@ -1,25 +1,26 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23 22:02Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23 22:07Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-23 21:59Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 10, conflict-held 9, stacked 23, held 1, open PRs 50, queued since the last plan 1; merged 135, closed 10
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-23 22:00Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 11, conflict-held 9, stacked 23, held 1, open PRs 50; merged 135, closed 10
 
-## Openable now (10)
+## Openable now (11)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | grep-exclude | feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries | other |  | 2d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/grep-exclude) |
-| computer-no-ui-continue | fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui | computer | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-no-ui-continue) |
+| computer-no-ui-continue | fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui | computer | P1 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-no-ui-continue) |
 | computer-control-policy | feat(coding-agent): let tools.approval grant computer foreground control on unattended machines | computer | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-control-policy) |
 | window-miss-apps-open | fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector | computer | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/window-miss-apps-open) |
 | axpress-click-hint | fix(natives): tell an agent to click() a macOS element that has no press action | computer | P2 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/axpress-click-hint) |
 | app-name-background-helper | fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous | computer | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/app-name-background-helper) |
 | browser-read-after-navigation | fix(browser): wait for the page a click navigates to before the next call | browser | P1 | 3h | open (over P2 #15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-read-after-navigation) |
-| relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P1 | 2h | open (over P2 #16284, #15105) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
+| relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P1 | 3h | open (over P2 #16284, #15105) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
 | ax-placeholder-name | fix(natives): name macOS ax() text fields that have no label by their placeholder | computer | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-placeholder-name) |
 | finder-rename-keys | fix(natives): let macOS input reach Finder's inline rename field | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-rename-keys) |
+| devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
 
 ## Conflict-held (9)
 
@@ -33,7 +34,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 4d | [#16403](https://github.com/can1357/oh-my-pi/pull/16403), window-miss-apps-open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 3h | relay-extension-frame | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 3h | browser-read-after-navigation | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
-| relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 2h | browser-read-after-navigation | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
+| relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 3h | browser-read-after-navigation | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
 
 ## Stacked (23)
 
@@ -87,7 +88,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | [#16769](https://github.com/can1357/oh-my-pi/pull/16769) | computer-element-front-first | fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app | computer | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-element-front-first) |
 | [#16770](https://github.com/can1357/oh-my-pi/pull/16770) | computer-right-click-per-press | fix(natives): stop a macOS background right or middle multi-click at the user's input | computer | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-right-click-per-press) |
 | [#16284](https://github.com/can1357/oh-my-pi/pull/16284) | relay-popup-front-main | fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS | browser | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-front-main) |
-| [#16250](https://github.com/can1357/oh-my-pi/pull/16250) | anthropic-refusal-handoff | fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff | providers | P1 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-refusal-handoff) |
+| [#16250](https://github.com/can1357/oh-my-pi/pull/16250) | anthropic-refusal-handoff | fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff | providers | P1 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-refusal-handoff) |
 | [#16309](https://github.com/can1357/oh-my-pi/pull/16309) | factory-droid-credit-promotions | feat(catalog,tui): show Factory Droid credit promotions in the model browser | providers | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-credit-promotions) |
 | [#16257](https://github.com/can1357/oh-my-pi/pull/16257) | factory-droid-org-lookup | fix(ai): sign Factory Droid logins without an organization claim into the account's organization | providers | P1 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-org-lookup) |
 | [#16297](https://github.com/can1357/oh-my-pi/pull/16297) | exact-provider-model-selector | fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling | models | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/exact-provider-model-selector) |
@@ -123,9 +124,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | [#16768](https://github.com/can1357/oh-my-pi/pull/16768) | headless-agent-flags | feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-agent-flags) |
 | [#16803](https://github.com/can1357/oh-my-pi/pull/16803) | max-cost-gate | feat(session): add --warn-cost and --max-cost to cap a session's spend | session | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/max-cost-gate) |
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
