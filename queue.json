@@ -47189,6 +47189,24 @@
    "added": "2026-10-23T19:04:15Z",
    "updated": "2026-10-23T19:09:37Z",
    "note": ""
+  },
+  {
+   "id": "ax-placeholder-name",
+   "branch": "will/ax-placeholder-name",
+   "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/ax-placeholder-name.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-placeholder-name",
+   "host": "MacBook-Pro",
+   "added": "2026-10-23T21:15:40Z",
+   "updated": "2026-10-23T21:15:40Z",
+   "note": ""
   }
  ],
  "watch": {
