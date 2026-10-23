@@ -55286,11 +55286,5 @@
     "host": "goliath"
    }
   }
- },
- "opening": {
-  "id": "grep-exclude",
-  "token": "322ca1c125794c68b2af42279d273e66",
-  "host": "goliath",
-  "at": "2026-10-23T21:45:37Z"
  }
 }
