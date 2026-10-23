@@ -47117,6 +47117,24 @@
    "added": "2026-10-23T18:28:58Z",
    "updated": "2026-10-23T18:28:58Z",
    "note": ""
+  },
+  {
+   "id": "app-name-background-helper",
+   "branch": "will/app-name-background-helper",
+   "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/app-name-background-helper.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/app-name-background-helper",
+   "host": "MacBook-Pro",
+   "added": "2026-10-23T18:33:35Z",
+   "updated": "2026-10-23T18:33:35Z",
+   "note": ""
   }
  ],
  "watch": {
