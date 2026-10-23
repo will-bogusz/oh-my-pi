@@ -34415,7 +34415,7 @@
    "area": "python",
    "priority": "P1",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/pip-procfs-fallback.md",
    "state": "open",
    "pr": 16552,
@@ -34423,7 +34423,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/pip-procfs-fallback",
    "host": "MacBook-Pro",
    "added": "2026-10-20T19:58:45Z",
-   "updated": "2026-10-22T07:10:26Z",
+   "updated": "2026-10-23T02:19:26Z",
    "note": "",
    "built": [
     {
@@ -34582,7 +34582,7 @@
    ],
    "opened": "2026-10-20T20:09:31Z",
    "readied": "2026-10-20T20:09:54Z",
-   "advanced": "2026-10-22T07:10:26Z"
+   "advanced": "2026-10-23T02:19:26Z"
   },
   {
    "id": "conflicts-whole-file",
