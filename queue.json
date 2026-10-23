@@ -47207,6 +47207,24 @@
    "added": "2026-10-23T21:15:40Z",
    "updated": "2026-10-23T21:15:40Z",
    "note": ""
+  },
+  {
+   "id": "finder-rename-keys",
+   "branch": "will/finder-rename-keys",
+   "title": "fix(natives): let macOS input reach Finder's inline rename field",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/finder-rename-keys.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/finder-rename-keys",
+   "host": "MacBook-Pro",
+   "added": "2026-10-23T21:15:49Z",
+   "updated": "2026-10-23T21:15:49Z",
+   "note": ""
   }
  ],
  "watch": {
