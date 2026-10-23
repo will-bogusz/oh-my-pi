@@ -58489,5 +58489,11 @@
     "created": "2026-10-10T21:48:41Z"
    }
   ]
+ },
+ "opening": {
+  "id": "relay-extension-frame",
+  "token": "d4cc0e03851341dcaec63baf3ed4a876",
+  "host": "goliath",
+  "at": "2026-10-23T23:48:45Z"
  }
 }
