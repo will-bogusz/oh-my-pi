@@ -39863,7 +39863,7 @@
    "area": "bash",
    "priority": "P2",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/bash-minimizer-meta.md",
    "state": "open",
    "pr": 16586,
@@ -39871,7 +39871,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-minimizer-meta",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:49:04Z",
-   "updated": "2026-10-22T07:21:37Z",
+   "updated": "2026-10-23T02:22:48Z",
    "note": "",
    "built": [
     {
@@ -40216,7 +40216,7 @@
    ],
    "opened": "2026-10-21T01:59:39Z",
    "readied": "2026-10-21T02:00:31Z",
-   "advanced": "2026-10-22T07:21:37Z"
+   "advanced": "2026-10-23T02:22:48Z"
   },
   {
    "id": "sec-edgar-filing-docs",
