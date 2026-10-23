@@ -47009,6 +47009,24 @@
    "added": "2026-10-22T23:10:38Z",
    "updated": "2026-10-22T23:10:38Z",
    "note": ""
+  },
+  {
+   "id": "computer-no-ui-continue",
+   "branch": "will/computer-no-ui-continue",
+   "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/computer-no-ui-continue.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-no-ui-continue",
+   "host": "MacBook-Pro",
+   "added": "2026-10-23T18:04:19Z",
+   "updated": "2026-10-23T18:04:19Z",
+   "note": ""
   }
  ],
  "watch": {
