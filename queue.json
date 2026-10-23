@@ -47012,15 +47012,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-23T02:25:12Z",
+  "checked": "2026-10-23T02:55:26Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "grep-exclude": {
-    "since": "2026-10-22T10:41:01Z",
-    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-10-22T09:44:50Z",
   "unreleased": {
@@ -50915,6 +50910,13 @@
     "id": "timer-pr-1-poke",
     "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
     "why": "opened as #16801"
+   },
+   {
+    "at": "2026-10-23T02:55:26Z",
+    "kind": "unopenable",
+    "id": "grep-exclude",
+    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
+    "why": "plan: paused"
    }
   ]
  },
