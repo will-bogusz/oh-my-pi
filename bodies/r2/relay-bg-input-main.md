@@ -2,7 +2,7 @@
 
 omp kept telling me it clicked something on a tab I had in the background when the page never got the click, so tabs I lend it now count as visible while it drives them and go back to hidden when it lets go.
 
-On `main` today a background tab's click fails as "did not deliver the click to the element (disabled or inert)" on a button that is neither, and type, press and fill still report success while the page gets nothing.
+In a benchmark task that submits a two-page form in a borrowed background tab (GPT-6.1 Sol, this PR merged with other queued browser fixes), median steps went from 13 to 8: on `main` the review page's Submit click fails as "did not deliver the click to the element (disabled or inert)" on a button that is neither, and type, press and fill report success while the page gets nothing.
 
 In relay and `app.cdp_url` mode, a page omp borrows (`app.target`) or adopts can sit in an unselected tab, or in a window another window covers on macOS, which Chrome treats as hidden. Chrome holds back input to a page until it has drawn, and a hidden page never draws, so a borrowed page that loaded in the background, or navigated there (a form's Next), drops trusted input. Since #16119, tabs omp opens itself already count as visible; this PR covers the tabs it borrows.
 
