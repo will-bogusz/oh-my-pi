@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23 23:51Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23 23:53Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-10-23 23:17Z on goliath; groups below are from it, states from the manifest)
@@ -94,7 +94,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | factory-droid-image-generation | feat(ai,catalog): generate images through a Factory Droid login | providers | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-generation) |
 | [#16271](https://github.com/can1357/oh-my-pi/pull/16271) | lsp-workspace-folders | fix(lsp): add another checkout to the language server workspace before opening its files | other | P1 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-workspace-folders) |
 | [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
-| [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | computer-shell-exception | feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS | computer | P2 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-shell-exception) |
+| [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | computer-shell-exception | feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS | computer | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-shell-exception) |
 | [#16552](https://github.com/can1357/oh-my-pi/pull/16552) | pip-procfs-fallback | fix(coding-agent): stop the %pip installer on cancel when /proc cannot be listed | python | P1 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/pip-procfs-fallback) |
 | [#16556](https://github.com/can1357/oh-my-pi/pull/16556) | ts-rule-followups | fix(coding-agent): keep ts-set-map fast on long Set lines and stop two false reminders | other | P1 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ts-rule-followups) |
 | [#16564](https://github.com/can1357/oh-my-pi/pull/16564) | factory-screenshot-budget | fix(coding-agent): drop computer screenshots the Factory image budget evicts | other | P0 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-screenshot-budget) |
@@ -123,7 +123,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-23
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
 | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | browser-read-after-navigation | fix(browser): wait for the page a click navigates to before the next call | browser | P1 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-read-after-navigation) |
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P1 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
-| [#16906](https://github.com/can1357/oh-my-pi/pull/16906) | devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
+| [#16906](https://github.com/can1357/oh-my-pi/pull/16906) | devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
 | [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
 
 ## Queued since the last plan (1)
