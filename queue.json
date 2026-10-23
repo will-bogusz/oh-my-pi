@@ -1,8 +1,6 @@
 {
  "version": 1,
- "config": {
-  "pause": "Will, 2026-10-22: no new PRs until Brit catches up (51 open); finish open ones"
- },
+ "config": {},
  "entries": [
   {
    "id": "devin-credential-form",
