@@ -47027,6 +47027,24 @@
    "added": "2026-10-23T18:04:19Z",
    "updated": "2026-10-23T18:04:19Z",
    "note": ""
+  },
+  {
+   "id": "computer-control-policy",
+   "branch": "will/computer-control-policy",
+   "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/computer-control-policy.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-control-policy",
+   "host": "MacBook-Pro",
+   "added": "2026-10-23T18:12:14Z",
+   "updated": "2026-10-23T18:12:14Z",
+   "note": ""
   }
  ],
  "watch": {
