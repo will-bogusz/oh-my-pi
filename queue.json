@@ -51041,7 +51041,7 @@
    "branch": "will/devin-cli-3000-11-205",
    "title": "fix(catalog): identify Devin requests as CLI 3000.11.205",
    "area": "broker",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/devin-cli-3000-11-205.md",
@@ -51051,7 +51051,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-cli-3000-11-205",
    "host": "MacBook-Pro",
    "added": "2026-10-23T21:58:47Z",
-   "updated": "2026-10-23T22:53:36Z",
+   "updated": "2026-10-23T23:17:39Z",
    "note": "",
    "built": [
     {
@@ -51162,7 +51162,7 @@
    "branch": "will/devin-model-info-context",
    "title": "fix(catalog): read Devin context windows from model info",
    "area": "catalog",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/devin-model-info-context.md",
@@ -51172,7 +51172,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-model-info-context",
    "host": "MacBook-Pro",
    "added": "2026-10-23T22:11:00Z",
-   "updated": "2026-10-23T22:48:09Z",
+   "updated": "2026-10-23T23:17:39Z",
    "note": "",
    "built": [
     {
