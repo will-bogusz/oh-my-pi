@@ -47177,7 +47177,7 @@
    "branch": "will/relay-frame-detach-report",
    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
    "area": "browser",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/relay-frame-detach-report.md",
@@ -47187,7 +47187,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-frame-detach-report",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:04:15Z",
-   "updated": "2026-10-23T19:04:15Z",
+   "updated": "2026-10-23T19:09:37Z",
    "note": ""
   }
  ],
