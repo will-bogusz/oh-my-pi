@@ -47045,6 +47045,24 @@
    "added": "2026-10-23T18:12:14Z",
    "updated": "2026-10-23T18:12:14Z",
    "note": ""
+  },
+  {
+   "id": "persist-tabs-exit",
+   "branch": "will/persist-tabs-exit",
+   "title": "fix(browser): keep persist relay tabs open when the session ends",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/persist-tabs-exit.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/persist-tabs-exit",
+   "host": "MacBook-Pro",
+   "added": "2026-10-23T18:13:45Z",
+   "updated": "2026-10-23T18:13:45Z",
+   "note": ""
   }
  ],
  "watch": {
