@@ -2,7 +2,7 @@
 
 I kept seeing the agent set Reminders due dates through the Details popover because `ax()` listed the new reminder's Add Date field as a bare `textfield`, so now a text field with no label of its own is named by its placeholder.
 
-The new-reminder row as `ax()` printed it on `main` in a recorded run, and the names this head gives it (the placeholder strings another accessibility client read from the same row):
+The new-reminder row as `ax()` printed it on `main` in a recorded run, and the names this head gives it (placeholders as another accessibility client read them from the same row):
 
 ```diff
          - group "Incomplete" [ref=e429]
@@ -29,7 +29,7 @@ Decisions:
 
 - The placeholder is read in the same batched attribute read as the other labels, among the attributes a batch that fails as a whole skips. An app too busy to answer the batch shows the field unnamed and under a new ref, as on `main`, rather than paying one more lone read with its own timeout for every element.
 - It also joins the attributes an element's identity hashes, so a read where the app answered everything but the placeholder leaves the field without an identity instead of matching a look-alike.
-- A fallback name rather than a new `placeholder` field on every node: nothing else needs the hint, and a field with a value keeps its name so the value stays labelled.
+- A fallback name, not a new `placeholder` field: nothing else needs the hint, and a field with a value stays labelled.
 
 Non-goals: Windows and Linux backends; fields that already carry a title or description.
 
