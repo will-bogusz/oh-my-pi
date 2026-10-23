@@ -1,6 +1,6 @@
 ## What
 
-Asking omp to do anything in Contacts on a Mac started with an error, because macOS has a hidden helper that is also called Contacts, so `apps.open("Contacts")` now just opens the Contacts app.
+I kept seeing omp's Contacts work on a Mac start with an error, because macOS has a hidden helper that is also called Contacts, so I made `apps.open("Contacts")` just open the Contacts app.
 
 On macOS, `computer.apps.open("Contacts")` failed as ambiguous 9 times in a day of agent runs on macOS 26 (GPT-6.1 Sol), in every run that opened Contacts by name, and 0 times when the same tasks ran again with this change; it now opens `/System/Applications/Contacts.app`. `apps.open("Messages")` failed the same way while Messages ran, and now opens Messages.
 
