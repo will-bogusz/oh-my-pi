@@ -35025,7 +35025,7 @@
    "area": "other",
    "priority": "P0",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/factory-screenshot-budget.md",
    "state": "open",
    "pr": 16564,
@@ -35033,7 +35033,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-screenshot-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:08Z",
-   "updated": "2026-10-22T08:21:57Z",
+   "updated": "2026-10-23T02:20:37Z",
    "note": "",
    "built": [
     {
@@ -35238,7 +35238,7 @@
    ],
    "opened": "2026-10-20T21:02:02Z",
    "readied": "2026-10-20T21:02:25Z",
-   "advanced": "2026-10-22T07:10:51Z"
+   "advanced": "2026-10-23T02:20:37Z"
   },
   {
    "id": "click-place-release",
