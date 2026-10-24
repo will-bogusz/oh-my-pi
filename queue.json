@@ -52359,7 +52359,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-doc-inline",
    "host": "MacBook-Pro",
    "added": "2026-10-23T23:44:14Z",
-   "updated": "2026-10-24T01:42:06Z",
+   "updated": "2026-10-24T01:42:27Z",
    "note": "",
    "built": [
     {
@@ -52833,7 +52833,8 @@
      "tree": "724d7f7d72522e719898a362fc73950c5a1e18be"
     }
    ],
-   "opened": "2026-10-24T01:42:06Z"
+   "opened": "2026-10-24T01:42:06Z",
+   "readied": "2026-10-24T01:42:27Z"
   },
   {
    "id": "git-guard-defects",
