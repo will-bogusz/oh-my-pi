@@ -1,16 +1,14 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 01:45Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 01:46Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-24 01:19Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 9, stacked 24, held 1, open PRs 63; merged 135, closed 10
+**Counts:** openable now 0, conflict-held 9, stacked 24, held 1, open PRs 64; merged 135, closed 10
 
-## Openable now (1)
+## Openable now (0)
 
-| id | title | area | priority | age | plan | branch |
-|---|---|---|---|---|---|---|
-| grep-exclude | feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries | other |  | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/grep-exclude) |
+none
 
 ## Conflict-held (9)
 
@@ -61,7 +59,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 10d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 
-## Open PRs (63)
+## Open PRs (64)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -105,6 +103,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | [#16587](https://github.com/can1357/oh-my-pi/pull/16587) | log-session-id | feat(coding-agent): tag each log record with the session that wrote it | other | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/log-session-id) |
 | [#16585](https://github.com/can1357/oh-my-pi/pull/16585) | pdf-scan-pages | fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer | other | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/pdf-scan-pages) |
 | [#16608](https://github.com/can1357/oh-my-pi/pull/16608) | edit-error-kind | feat(edit): record why an edit failed and count it in /session | other | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/edit-error-kind) |
+| [#16920](https://github.com/can1357/oh-my-pi/pull/16920) | grep-exclude | feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries | other |  | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/grep-exclude) |
 | [#16581](https://github.com/can1357/oh-my-pi/pull/16581) | usage-json-policy | feat(coding-agent): include account policy state in omp usage --json | broker | P2 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-json-policy) |
 | [#16583](https://github.com/can1357/oh-my-pi/pull/16583) | peer-reply-keeps-report | fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes | agent | P1 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/peer-reply-keeps-report) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
