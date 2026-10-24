@@ -59311,5 +59311,11 @@
     "created": "2026-10-10T21:48:41Z"
    }
   ]
+ },
+ "opening": {
+  "id": "computer-control-policy",
+  "token": "692bcd5493b043189a0c5791e6221876",
+  "host": "goliath",
+  "at": "2026-10-24T01:38:14Z"
  }
 }
