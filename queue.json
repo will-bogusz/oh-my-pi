@@ -52851,7 +52851,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/git-guard-defects",
    "host": "MacBook-Pro",
    "added": "2026-10-24T00:58:42Z",
-   "updated": "2026-10-24T01:44:17Z",
+   "updated": "2026-10-24T01:44:32Z",
    "note": "",
    "built": [
     {
@@ -52865,7 +52865,8 @@
      "tree": "e989fc03aae9744de921e823d8c7c5cf493ed74c"
     }
    ],
-   "opened": "2026-10-24T01:44:17Z"
+   "opened": "2026-10-24T01:44:17Z",
+   "readied": "2026-10-24T01:44:31Z"
   },
   {
    "id": "git-guard-scope",
