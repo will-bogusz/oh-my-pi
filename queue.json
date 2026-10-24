@@ -59307,5 +59307,11 @@
     "created": "2026-10-10T21:48:41Z"
    }
   ]
+ },
+ "opening": {
+  "id": "ax-placeholder-name",
+  "token": "95b1378996b44fd9a60c21464d02d171",
+  "host": "goliath",
+  "at": "2026-10-24T01:34:07Z"
  }
 }
