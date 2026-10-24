@@ -58015,7 +58015,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T03:51:07.146939Z",
+  "at": "2026-10-24T04:21:13.139978Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -58536,25 +58536,6 @@
     "created": "2026-10-24T01:44:16Z"
    },
    {
-    "id": "computer-apps-open-first",
-    "label": "#16925",
-    "number": 16925,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
-    "action": "keep",
-    "reasons": [],
-    "note": "opened over P2 #16403",
-    "over": [],
-    "paired": [
-     "#16403"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-24T03:50:10Z"
-   },
-   {
     "id": "policy-priority-unmeasured",
     "label": "#15124",
     "number": 15124,
@@ -58730,6 +58711,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-23T23:50:40Z"
+   },
+   {
+    "id": "computer-apps-open-first",
+    "label": "#16925",
+    "number": 16925,
+    "state": "open",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
+    "action": "keep",
+    "reasons": [],
+    "note": "opened over P2 #16403",
+    "over": [],
+    "paired": [
+     "#16403"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T03:50:10Z"
    },
    {
     "id": "relay-extension-version",
