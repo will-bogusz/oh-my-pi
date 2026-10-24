@@ -49096,7 +49096,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/window-miss-apps-open",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:24:47Z",
-   "updated": "2026-10-24T00:01:57Z",
+   "updated": "2026-10-24T00:02:17Z",
    "note": "",
    "built": [
     {
@@ -49590,7 +49590,8 @@
      "tree": "5a733a224124ac9e21fbecfc694ad77efd7baebe"
     }
    ],
-   "opened": "2026-10-24T00:01:57Z"
+   "opened": "2026-10-24T00:01:57Z",
+   "readied": "2026-10-24T00:02:17Z"
   },
   {
    "id": "tab-click-options",
