@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-24T08:56:32Z",
+  "checked": "2026-10-24T09:57:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53579,60 +53579,6 @@
       "addressed_by": 16552
      }
     ]
-   },
-   "16578": {
-    "title": "fix(coding-agent): tell Python-only eval sessions to await tool calls",
-    "merge_commit": "743d6b67ed15dc987d39d6de4997fe45d46812a1",
-    "merged_at": "2026-10-22T09:43:25Z",
-    "findings": []
-   },
-   "16580": {
-    "title": "fix(coding-agent): name the write call when proc:// kill or mode is read",
-    "merge_commit": "9af60c5200fcdda0ef70ffc1569fd4822a0f89c7",
-    "merged_at": "2026-10-22T09:43:25Z",
-    "findings": []
-   },
-   "16588": {
-    "title": "fix(pi-shell): keep diff hunk lines starting with -- or ++ inside their hunk",
-    "merge_commit": "fc4d54b342267d3e6f3d684d35994f6630e27b6c",
-    "merged_at": "2026-10-22T09:43:25Z",
-    "findings": []
-   },
-   "16593": {
-    "title": "fix(coding-agent): retry a refused web read with the next user agent",
-    "merge_commit": "a515bb9bc55d350fcd3e727a6cc6ce8198944a73",
-    "merged_at": "2026-10-22T09:43:25Z",
-    "findings": []
-   },
-   "16594": {
-    "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file",
-    "merge_commit": "44d9bc2cb0adb852cb48b4749307287446543d08",
-    "merged_at": "2026-10-22T09:43:25Z",
-    "findings": []
-   },
-   "16598": {
-    "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd",
-    "merge_commit": "5df69bb4eaeb93233f6632706b9389cacebf7c1c",
-    "merged_at": "2026-10-22T09:43:25Z",
-    "findings": []
-   },
-   "16607": {
-    "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown",
-    "merge_commit": "ce339e5fac92b88a1354a0d26fb31db5e1e808df",
-    "merged_at": "2026-10-22T09:43:25Z",
-    "findings": []
-   },
-   "16614": {
-    "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer",
-    "merge_commit": "5c95d6f1020108df4ab91323f74323cfc74dba6e",
-    "merged_at": "2026-10-22T09:43:25Z",
-    "findings": []
-   },
-   "16760": {
-    "title": "fix(coding-agent): cancel the outgoing session's background jobs on /resume",
-    "merge_commit": "fd440d9a6d6d387b444fcaa242f630fca34b2daa",
-    "merged_at": "2026-10-22T09:44:50Z",
-    "findings": []
    }
   },
   "events": [
