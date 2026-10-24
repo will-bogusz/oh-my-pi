@@ -50182,13 +50182,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/axpress-click-hint.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16916,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/axpress-click-hint",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:28:58Z",
-   "updated": "2026-10-24T01:32:07Z",
+   "updated": "2026-10-24T01:37:52Z",
    "note": "",
    "built": [
     {
@@ -50311,7 +50311,8 @@
      "host": "goliath",
      "tree": "e989fc03aae9744de921e823d8c7c5cf493ed74c"
     }
-   ]
+   ],
+   "opened": "2026-10-24T01:37:52Z"
   },
   {
    "id": "app-name-background-helper",
