@@ -33758,7 +33758,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-shell-exception",
    "host": "MacBook-Pro",
    "added": "2026-10-19T20:50:15Z",
-   "updated": "2026-10-22T07:10:01Z",
+   "updated": "2026-10-24T03:50:11Z",
    "note": "",
    "built": [
     {
@@ -34333,7 +34333,10 @@
    ],
    "advanced": "2026-10-22T07:10:01Z",
    "opened": "2026-10-19T23:53:07Z",
-   "readied": "2026-10-19T23:53:30Z"
+   "readied": "2026-10-19T23:53:30Z",
+   "rebases_after": [
+    16925
+   ]
   },
   {
    "id": "edit-mismatch-seen-lines",
@@ -52907,13 +52910,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/computer-apps-open-first.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16925,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-apps-open-first",
    "host": "MacBook-Pro",
    "added": "2026-10-24T02:52:37Z",
-   "updated": "2026-10-24T03:48:21Z",
+   "updated": "2026-10-24T03:50:11Z",
    "note": "",
    "built": [
     {
@@ -53386,7 +53389,8 @@
      "host": "goliath",
      "tree": "6e73b7dc1709fbe281e16e337a1d37270f915c37"
     }
-   ]
+   ],
+   "opened": "2026-10-24T03:50:11Z"
   }
  ],
  "watch": {
