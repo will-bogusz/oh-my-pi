@@ -47574,7 +47574,7 @@
    "branch": "will/computer-no-ui-continue",
    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/computer-no-ui-continue.md",
@@ -47584,7 +47584,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-no-ui-continue",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:04:19Z",
-   "updated": "2026-10-23T23:55:53Z",
+   "updated": "2026-10-24T00:18:30Z",
    "note": "",
    "built": [
     {
@@ -49086,7 +49086,7 @@
    "branch": "will/window-miss-apps-open",
    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/window-miss-apps-open.md",
@@ -49096,7 +49096,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/window-miss-apps-open",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:24:47Z",
-   "updated": "2026-10-24T00:02:17Z",
+   "updated": "2026-10-24T00:18:30Z",
    "note": "",
    "built": [
     {
@@ -50218,7 +50218,7 @@
    "branch": "will/app-name-background-helper",
    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/app-name-background-helper.md",
@@ -50228,7 +50228,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/app-name-background-helper",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:33:35Z",
-   "updated": "2026-10-24T00:00:10Z",
+   "updated": "2026-10-24T00:18:30Z",
    "note": "",
    "built": [
     {
@@ -50822,7 +50822,7 @@
    "branch": "will/relay-extension-frame",
    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/relay-extension-frame.md",
@@ -50832,7 +50832,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-extension-frame",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:03:59Z",
-   "updated": "2026-10-23T23:51:01Z",
+   "updated": "2026-10-24T00:18:30Z",
    "note": "",
    "built": [
     {
@@ -51904,7 +51904,7 @@
    "branch": "will/finder-rename-keys",
    "title": "fix(natives): let macOS input reach Finder's inline rename field",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/finder-rename-keys.md",
@@ -51914,7 +51914,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/finder-rename-keys",
    "host": "MacBook-Pro",
    "added": "2026-10-23T21:15:49Z",
-   "updated": "2026-10-23T23:58:01Z",
+   "updated": "2026-10-24T00:18:30Z",
    "note": "",
    "built": [
     {
