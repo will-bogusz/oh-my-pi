@@ -52263,6 +52263,26 @@
    "added": "2026-10-24T00:58:42Z",
    "updated": "2026-10-24T00:58:42Z",
    "note": ""
+  },
+  {
+   "id": "git-guard-scope",
+   "branch": "will/git-guard-scope",
+   "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
+   "area": "other",
+   "priority": null,
+   "needs": [
+    "git-guard-defects"
+   ],
+   "base": "10b5ecc43788e8ac726d55e67113c2437223263d",
+   "body": "bodies/git-guard-scope.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/git-guard-scope",
+   "host": "MacBook-Pro",
+   "added": "2026-10-24T01:07:47Z",
+   "updated": "2026-10-24T01:07:47Z",
+   "note": ""
   }
  ],
  "watch": {
