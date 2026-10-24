@@ -59320,5 +59320,11 @@
     "created": "2026-10-10T21:48:41Z"
    }
   ]
+ },
+ "opening": {
+  "id": "git-guard-defects",
+  "token": "52177f031fa6478d908ab4a4aa5e6602",
+  "host": "goliath",
+  "at": "2026-10-24T01:42:37Z"
  }
 }
