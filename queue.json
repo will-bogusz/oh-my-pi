@@ -57463,6 +57463,11 @@
     "sha": "f7bea6e2ca84adae4633986ae60121d3935344d4",
     "at": "2026-10-24T02:19:27Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "f7bea6e2ca84adae4633986ae60121d3935344d4",
+    "at": "2026-10-24T02:19:47Z",
+    "host": "goliath"
    }
   }
  },
