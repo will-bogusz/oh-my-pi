@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-24T14:31:54Z",
+  "checked": "2026-10-24T15:02:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,14 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-17T14:32:08Z",
-    "kind": "merged",
-    "number": 16037,
-    "title": "fix(browser): reattach a tab whose worker exits unexpectedly",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-10-17T18:05:07Z",
     "kind": "released",
