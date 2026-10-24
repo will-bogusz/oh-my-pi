@@ -52897,6 +52897,24 @@
    "added": "2026-10-24T01:07:47Z",
    "updated": "2026-10-24T02:30:11Z",
    "note": ""
+  },
+  {
+   "id": "computer-apps-open-first",
+   "branch": "will/computer-apps-open-first",
+   "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/computer-apps-open-first.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-apps-open-first",
+   "host": "MacBook-Pro",
+   "added": "2026-10-24T02:52:37Z",
+   "updated": "2026-10-24T02:52:37Z",
+   "note": ""
   }
  ],
  "watch": {
