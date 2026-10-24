@@ -51884,7 +51884,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-placeholder-name",
    "host": "MacBook-Pro",
    "added": "2026-10-23T21:15:40Z",
-   "updated": "2026-10-24T01:35:47Z",
+   "updated": "2026-10-24T01:36:03Z",
    "note": "",
    "built": [
     {
@@ -52008,7 +52008,8 @@
      "tree": "e989fc03aae9744de921e823d8c7c5cf493ed74c"
     }
    ],
-   "opened": "2026-10-24T01:35:47Z"
+   "opened": "2026-10-24T01:35:47Z",
+   "readied": "2026-10-24T01:36:03Z"
   },
   {
    "id": "finder-rename-keys",
