@@ -50190,7 +50190,7 @@
    "branch": "will/axpress-click-hint",
    "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/axpress-click-hint.md",
@@ -50200,7 +50200,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/axpress-click-hint",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:28:58Z",
-   "updated": "2026-10-24T01:38:07Z",
+   "updated": "2026-10-24T01:49:21Z",
    "note": "",
    "built": [
     {
@@ -51888,7 +51888,7 @@
    "branch": "will/ax-placeholder-name",
    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/ax-placeholder-name.md",
@@ -51898,7 +51898,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-placeholder-name",
    "host": "MacBook-Pro",
    "added": "2026-10-23T21:15:40Z",
-   "updated": "2026-10-24T01:36:03Z",
+   "updated": "2026-10-24T01:49:21Z",
    "note": "",
    "built": [
     {
@@ -52851,7 +52851,7 @@
    "branch": "will/git-guard-defects",
    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/git-guard-defects.md",
@@ -52861,7 +52861,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/git-guard-defects",
    "host": "MacBook-Pro",
    "added": "2026-10-24T00:58:42Z",
-   "updated": "2026-10-24T01:44:32Z",
+   "updated": "2026-10-24T01:49:21Z",
    "note": "",
    "built": [
     {
