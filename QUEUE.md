@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 11:00Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 11:30Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-24 10:28Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-24 11:29Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 11, stacked 24, held 1, open PRs 65; merged 135, closed 10
 
 ## Openable now (0)
@@ -20,11 +20,11 @@ none
 | factory-droid-0244 | feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback) | providers | P1 | 5d | [#16257](https://github.com/can1357/oh-my-pi/pull/16257), [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-0244) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 5d | [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 5d | [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
-| persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 16h | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
-| tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 16h | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
-| relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 15h | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
-| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 5h | [#16925](https://github.com/can1357/oh-my-pi/pull/16925), [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
-| computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 5h | [#16912](https://github.com/can1357/oh-my-pi/pull/16912) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
+| persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 17h | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
+| tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 17h | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
+| relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 16h | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
+| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 6h | [#16925](https://github.com/can1357/oh-my-pi/pull/16925), [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
+| computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 6h | [#16912](https://github.com/can1357/oh-my-pi/pull/16912) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
 
 ## Stacked (24)
 
@@ -53,7 +53,7 @@ none
 | timer-pr-3-tool | feat(coding-agent): let the agent set timers that wake its session later | other |  | 1d | timer-pr-4-surfaces | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-3-tool) |
 | timer-pr-5-agent-runs | feat(coding-agent): run a prompt timer as an unattended agent and report back | other |  | 1d | timer-pr-3-tool | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-5-agent-runs) |
 | timer-pr-9-tool-conditions | feat(coding-agent): let the timer tool set condition timers | other |  | 1d | timer-pr-5-agent-runs, timer-pr-7-conditions | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-9-tool-conditions) |
-| git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 9h | git-guard-defects ([#16919](https://github.com/can1357/oh-my-pi/pull/16919)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
+| git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 10h | git-guard-defects ([#16919](https://github.com/can1357/oh-my-pi/pull/16919)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
 
 ## Held (1)
 
@@ -118,7 +118,7 @@ none
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
 | [#16909](https://github.com/can1357/oh-my-pi/pull/16909) | computer-no-ui-continue | fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui | computer | P0 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-no-ui-continue) |
 | [#16917](https://github.com/can1357/oh-my-pi/pull/16917) | computer-control-policy | feat(coding-agent): let tools.approval grant computer foreground control on unattended machines | computer | P2 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-control-policy) |
-| [#16912](https://github.com/can1357/oh-my-pi/pull/16912) | window-miss-apps-open | fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector | computer | P0 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/window-miss-apps-open) |
+| [#16912](https://github.com/can1357/oh-my-pi/pull/16912) | window-miss-apps-open | fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector | computer | P0 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/window-miss-apps-open) |
 | [#16916](https://github.com/can1357/oh-my-pi/pull/16916) | axpress-click-hint | fix(natives): tell an agent to click() a macOS element that has no press action | computer | P0 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/axpress-click-hint) |
 | [#16911](https://github.com/can1357/oh-my-pi/pull/16911) | app-name-background-helper | fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous | computer | P0 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/app-name-background-helper) |
 | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | browser-read-after-navigation | fix(browser): wait for the page a click navigates to before the next call | browser | P1 | 11h | keep; opened over P2 #15508 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-read-after-navigation) |

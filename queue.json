@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-24T10:58:59Z",
+  "checked": "2026-10-24T11:29:18Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,14 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-17T11:27:08Z",
-    "kind": "merged",
-    "number": 16038,
-    "title": "fix(coding-agent): settle a turn begun while an interrupt is finishing",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
    {
     "at": "2026-10-17T14:32:08Z",
     "kind": "merged",
@@ -57997,7 +57989,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T10:28:04.318945Z",
+  "at": "2026-10-24T11:29:19.778833Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
