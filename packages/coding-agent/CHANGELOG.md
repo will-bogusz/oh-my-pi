@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- With `bash.gitGuard` on, `git checkout`, `switch`, `restore`, `reset` and `stash` run in a linked worktree instead of being refused; uncommitted changes they discard are saved first (`git stash apply --index <id>` brings them back), and `git stash pop`, `apply` and `drop` refuse an entry another branch saved. A repository's main checkout keeps every refusal
+
 ### Added
 
 - Anthropic web search and Files API uploads follow `PI_ANTHROPIC_API_VERSION=2026-10-21`; web search omits `temperature` under that version ([#16706](https://github.com/can1357/oh-my-pi/pull/16706) by [@H4vC](https://github.com/H4vC))
