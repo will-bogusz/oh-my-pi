@@ -48146,7 +48146,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-control-policy",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:12:14Z",
-   "updated": "2026-10-24T01:39:54Z",
+   "updated": "2026-10-24T01:40:13Z",
    "note": "",
    "built": [
     {
@@ -48680,7 +48680,8 @@
      "tree": "e989fc03aae9744de921e823d8c7c5cf493ed74c"
     }
    ],
-   "opened": "2026-10-24T01:39:54Z"
+   "opened": "2026-10-24T01:39:54Z",
+   "readied": "2026-10-24T01:40:13Z"
   },
   {
    "id": "persist-tabs-exit",
