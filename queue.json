@@ -48140,13 +48140,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/computer-control-policy.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16917,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-control-policy",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:12:14Z",
-   "updated": "2026-10-24T01:32:07Z",
+   "updated": "2026-10-24T01:39:54Z",
    "note": "",
    "built": [
     {
@@ -48679,7 +48679,8 @@
      "host": "goliath",
      "tree": "e989fc03aae9744de921e823d8c7c5cf493ed74c"
     }
-   ]
+   ],
+   "opened": "2026-10-24T01:39:54Z"
   },
   {
    "id": "persist-tabs-exit",
