@@ -1,16 +1,14 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 03:48Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 03:50Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-24 02:53Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 9, stacked 24, held 1, open PRs 64; merged 135, closed 10
+**Counts:** openable now 0, conflict-held 9, stacked 24, held 1, open PRs 65; merged 135, closed 10
 
-## Openable now (1)
+## Openable now (0)
 
-| id | title | area | priority | age | plan | branch |
-|---|---|---|---|---|---|---|
-| computer-apps-open-first | fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks | computer | P1 | 0h | open (over P2 #16403) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-apps-open-first) |
+none
 
 ## Conflict-held (9)
 
@@ -61,7 +59,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 10d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 
-## Open PRs (64)
+## Open PRs (65)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -129,3 +127,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
 | [#16918](https://github.com/can1357/oh-my-pi/pull/16918) | computer-doc-inline | feat(coding-agent): start desktop tasks without a documentation read | computer | P2 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-doc-inline) |
 | [#16919](https://github.com/can1357/oh-my-pi/pull/16919) | git-guard-defects | fix(pi-shell): end the git guard's conflict exemption with the conflict | other | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-defects) |
+| [#16925](https://github.com/can1357/oh-my-pi/pull/16925) | computer-apps-open-first | fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-apps-open-first) |
