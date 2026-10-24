@@ -52248,34 +52248,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-23T23:17:41Z",
+  "checked": "2026-10-24T00:18:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "app-name-background-helper": {
-    "since": "2026-10-23T23:17:41Z",
-    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous"
-   },
-   "browser-read-after-navigation": {
-    "since": "2026-10-23T23:17:41Z",
-    "title": "fix(browser): wait for the page a click navigates to before the next call"
-   },
-   "computer-no-ui-continue": {
-    "since": "2026-10-23T23:17:41Z",
-    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui"
-   },
-   "finder-rename-keys": {
-    "since": "2026-10-23T23:17:41Z",
-    "title": "fix(natives): let macOS input reach Finder's inline rename field"
-   },
-   "relay-extension-frame": {
-    "since": "2026-10-23T23:17:41Z",
-    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it"
-   },
-   "window-miss-apps-open": {
-    "since": "2026-10-23T23:17:41Z",
-    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector"
-   },
    "ax-placeholder-name": {
     "since": "2026-10-23T23:17:41Z",
     "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder"
@@ -52287,6 +52263,10 @@
    "computer-control-policy": {
     "since": "2026-10-23T23:17:41Z",
     "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines"
+   },
+   "computer-doc-inline": {
+    "since": "2026-10-24T00:18:33Z",
+    "title": "feat(coding-agent): start desktop tasks without a documentation read"
    },
    "grep-exclude": {
     "since": "2026-10-23T23:17:41Z",
@@ -52392,7 +52372,13 @@
    16801,
    16803,
    16905,
-   16906
+   16906,
+   16907,
+   16908,
+   16909,
+   16910,
+   16911,
+   16912
   ],
   "post_merge": {
    "16288": {
@@ -56093,6 +56079,54 @@
     "kind": "openable",
     "id": "grep-exclude",
     "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
+   },
+   {
+    "at": "2026-10-24T00:18:33Z",
+    "kind": "openable",
+    "id": "computer-doc-inline",
+    "title": "feat(coding-agent): start desktop tasks without a documentation read"
+   },
+   {
+    "at": "2026-10-24T00:18:33Z",
+    "kind": "unopenable",
+    "id": "app-name-background-helper",
+    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
+    "why": "opened as #16911"
+   },
+   {
+    "at": "2026-10-24T00:18:33Z",
+    "kind": "unopenable",
+    "id": "browser-read-after-navigation",
+    "title": "fix(browser): wait for the page a click navigates to before the next call",
+    "why": "opened as #16907"
+   },
+   {
+    "at": "2026-10-24T00:18:33Z",
+    "kind": "unopenable",
+    "id": "computer-no-ui-continue",
+    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
+    "why": "opened as #16909"
+   },
+   {
+    "at": "2026-10-24T00:18:33Z",
+    "kind": "unopenable",
+    "id": "finder-rename-keys",
+    "title": "fix(natives): let macOS input reach Finder's inline rename field",
+    "why": "opened as #16910"
+   },
+   {
+    "at": "2026-10-24T00:18:33Z",
+    "kind": "unopenable",
+    "id": "relay-extension-frame",
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
+    "why": "opened as #16908"
+   },
+   {
+    "at": "2026-10-24T00:18:33Z",
+    "kind": "unopenable",
+    "id": "window-miss-apps-open",
+    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
+    "why": "opened as #16912"
    }
   ]
  },
@@ -56637,12 +56671,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-23T23:17:41.864888Z",
+  "at": "2026-10-24T00:18:34.041822Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 6,
+   "left": 2
   },
   "rows": [
    {
@@ -56729,6 +56763,74 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-23T22:53:04Z"
+   },
+   {
+    "id": "computer-no-ui-continue",
+    "label": "#16909",
+    "number": 16909,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-23T23:55:33Z"
+   },
+   {
+    "id": "finder-rename-keys",
+    "label": "#16910",
+    "number": 16910,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): let macOS input reach Finder's inline rename field",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-23T23:57:44Z"
+   },
+   {
+    "id": "app-name-background-helper",
+    "label": "#16911",
+    "number": 16911,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-23T23:59:53Z"
+   },
+   {
+    "id": "window-miss-apps-open",
+    "label": "#16912",
+    "number": 16912,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T00:01:56Z"
    },
    {
     "id": "drop-dead-jobs-op",
@@ -57020,6 +57122,25 @@
     "created": "2026-10-22T10:12:13Z"
    },
    {
+    "id": "browser-read-after-navigation",
+    "label": "#16907",
+    "number": 16907,
+    "state": "open",
+    "area": "browser",
+    "priority": "P1",
+    "title": "fix(browser): wait for the page a click navigates to before the next call",
+    "action": "keep",
+    "reasons": [],
+    "note": "opened over P2 #15508",
+    "over": [],
+    "paired": [
+     "#15508"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-23T23:47:57Z"
+   },
+   {
     "id": "policy-priority-unmeasured",
     "label": "#15124",
     "number": 15124,
@@ -57063,9 +57184,11 @@
     "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "rebases after #16907 merges",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#16907"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-12T18:13:54Z"
@@ -57080,9 +57203,11 @@
     "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "rebases after #16908 merges",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#16908"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-19T02:42:32Z"
@@ -57173,6 +57298,26 @@
     "created": "2026-10-22T08:02:10Z"
    },
    {
+    "id": "relay-extension-frame",
+    "label": "#16908",
+    "number": 16908,
+    "state": "open",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
+    "action": "keep",
+    "reasons": [],
+    "note": "opened over P2 #15105; opened over P2 #16284",
+    "over": [],
+    "paired": [
+     "#15105",
+     "#16284"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-23T23:50:40Z"
+   },
+   {
     "id": "relay-extension-version",
     "label": "#15105",
     "number": 15105,
@@ -57182,9 +57327,11 @@
     "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "rebases after #16908 merges",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#16908"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-09T22:10:39Z"
@@ -57496,76 +57643,6 @@
     "created": "2026-10-22T17:06:29Z"
    },
    {
-    "id": "app-name-background-helper",
-    "label": "app-name-background-helper",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T18:33:35Z"
-   },
-   {
-    "id": "browser-read-after-navigation",
-    "label": "browser-read-after-navigation",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser): wait for the page a click navigates to before the next call",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [
-     "#15508"
-    ],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T18:41:28Z"
-   },
-   {
-    "id": "computer-no-ui-continue",
-    "label": "computer-no-ui-continue",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T18:04:19Z"
-   },
-   {
-    "id": "finder-rename-keys",
-    "label": "finder-rename-keys",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): let macOS input reach Finder's inline rename field",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T21:15:49Z"
-   },
-   {
     "id": "r2/relay-call-deadline",
     "label": "r2/relay-call-deadline",
     "number": null,
@@ -57576,40 +57653,22 @@
     "action": "wait",
     "reasons": [
      "needs #15105 (open)",
+     "conflicts with #16907 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
-     "conflicts with browser-read-after-navigation in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#16907",
      "#16284",
-     "browser-read-after-navigation"
+     "#16908"
     ],
     "needs": [
      "#15105"
     ],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "relay-extension-frame",
-    "label": "relay-extension-frame",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [
-     "#16284",
-     "#15105"
-    ],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T19:03:59Z"
    },
    {
     "id": "relay-popup-lossless",
@@ -57623,8 +57682,8 @@
     "reasons": [
      "needs #16284 (open)",
      "conflicts with #16284 in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/natives/native/index.d.ts, packages/natives/native/index.js",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #15105 in packages/coding-agent/src/tools/browser/relay/server.ts",
-     "conflicts with relay-extension-frame in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with main in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/natives/native/index.d.ts"
     ],
     "note": "",
@@ -57632,8 +57691,8 @@
     "paired": [],
     "blocked_by": [
      "#16284",
-     "#15105",
-     "relay-extension-frame"
+     "#16908",
+     "#15105"
     ],
     "needs": [
      "relay-popup-front-main"
@@ -57650,33 +57709,16 @@
     "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
     "action": "wait",
     "reasons": [
-     "conflicts with browser-read-after-navigation in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #16907 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "browser-read-after-navigation"
+     "#16907"
     ],
     "needs": [],
     "created": "2026-10-23T18:26:13Z"
-   },
-   {
-    "id": "window-miss-apps-open",
-    "label": "window-miss-apps-open",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T18:24:47Z"
    },
    {
     "id": "factory-droid-0244",
@@ -57734,7 +57776,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -57751,7 +57793,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -57770,15 +57812,13 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
-     "conflicts with #16403 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with window-miss-apps-open in packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with #16403 in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16403",
-     "window-miss-apps-open"
+     "#16403"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -57793,13 +57833,13 @@
     "title": "fix(browser): keep persist relay tabs open when the session ends",
     "action": "wait",
     "reasons": [
-     "conflicts with relay-extension-frame in packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+     "conflicts with #16908 in packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "relay-extension-frame"
+     "#16908"
     ],
     "needs": [],
     "created": "2026-10-23T18:13:45Z"
@@ -57836,10 +57876,10 @@
     "action": "wait",
     "reasons": [
      "needs #15105 (open), #15508 (open), r2/relay-call-deadline (queued), r2/relay-bg-input-main (queued), r2/native-window-report (queued)",
+     "conflicts with #16907 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with browser-read-after-navigation in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-extension-frame in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/relay-call-deadline conflicts with main in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
@@ -57848,10 +57888,10 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#16907",
      "#16284",
      "#16756",
-     "browser-read-after-navigation",
-     "relay-extension-frame"
+     "#16908"
     ],
     "needs": [
      "#15105",
@@ -57873,20 +57913,20 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
+     "conflicts with #16907 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with browser-read-after-navigation in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-extension-frame in packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #16908 in packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#16907",
      "#16284",
      "#16756",
-     "browser-read-after-navigation",
-     "relay-extension-frame"
+     "#16908"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -57904,9 +57944,9 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued), #16756 (open)",
+     "conflicts with #16907 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts",
-     "conflicts with browser-read-after-navigation in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-extension-frame in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need #16756 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
@@ -57915,9 +57955,9 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#16907",
      "#16284",
-     "browser-read-after-navigation",
-     "relay-extension-frame"
+     "#16908"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -57936,13 +57976,13 @@
     "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
     "action": "wait",
     "reasons": [
-     "conflicts with browser-read-after-navigation in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #16907 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "browser-read-after-navigation"
+     "#16907"
     ],
     "needs": [],
     "created": "2026-10-23T19:04:15Z"
@@ -57963,6 +58003,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-23T18:12:14Z"
+   },
+   {
+    "id": "computer-doc-inline",
+    "label": "computer-doc-inline",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "feat(coding-agent): start desktop tasks without a documentation read",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-23T23:44:14Z"
    },
    {
     "id": "computer-rich-text",
@@ -58077,15 +58134,15 @@
     "action": "wait",
     "reasons": [
      "needs #15508 (open)",
-     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with browser-read-after-navigation in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #16907 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16756",
-     "browser-read-after-navigation"
+     "#16907",
+     "#16756"
     ],
     "needs": [
      "#15508"
@@ -58103,10 +58160,10 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
+     "conflicts with #16907 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in docs/tools/browser.md",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with browser-read-after-navigation in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-extension-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -58114,10 +58171,10 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#16907",
      "#16284",
      "#16756",
-     "browser-read-after-navigation",
-     "relay-extension-frame"
+     "#16908"
     ],
     "needs": [
      "r2/relay-own-only"
