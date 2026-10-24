@@ -52245,6 +52245,24 @@
    "added": "2026-10-23T23:44:14Z",
    "updated": "2026-10-23T23:44:14Z",
    "note": ""
+  },
+  {
+   "id": "git-guard-defects",
+   "branch": "will/git-guard-defects",
+   "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "body": "bodies/git-guard-defects.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/git-guard-defects",
+   "host": "MacBook-Pro",
+   "added": "2026-10-24T00:58:42Z",
+   "updated": "2026-10-24T00:58:42Z",
+   "note": ""
   }
  ],
  "watch": {
