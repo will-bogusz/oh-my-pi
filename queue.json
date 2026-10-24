@@ -58510,5 +58510,11 @@
     "created": "2026-10-10T21:48:41Z"
    }
   ]
+ },
+ "opening": {
+  "id": "window-miss-apps-open",
+  "token": "ddf8bb5ad33848ddb61fd247fd561c5e",
+  "host": "goliath",
+  "at": "2026-10-24T00:00:17Z"
  }
 }
