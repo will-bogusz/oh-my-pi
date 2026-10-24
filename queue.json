@@ -53395,15 +53395,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-24T03:20:41Z",
+  "checked": "2026-10-24T03:51:06Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "computer-apps-open-first": {
-    "since": "2026-10-24T03:20:41Z",
-    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-10-22T09:44:50Z",
   "unreleased": {
@@ -53515,7 +53510,8 @@
    16917,
    16918,
    16919,
-   16920
+   16920,
+   16925
   ],
   "post_merge": {
    "16288": {
@@ -57318,6 +57314,13 @@
     "kind": "openable",
     "id": "computer-apps-open-first",
     "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks"
+   },
+   {
+    "at": "2026-10-24T03:51:06Z",
+    "kind": "unopenable",
+    "id": "computer-apps-open-first",
+    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
+    "why": "opened as #16925"
    }
   ]
  },
@@ -58012,12 +58015,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T02:53:27.393813Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-24T03:51:07.146939Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -58533,6 +58536,25 @@
     "created": "2026-10-24T01:44:16Z"
    },
    {
+    "id": "computer-apps-open-first",
+    "label": "#16925",
+    "number": 16925,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
+    "action": "keep",
+    "reasons": [],
+    "note": "opened over P2 #16403",
+    "over": [],
+    "paired": [
+     "#16403"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T03:50:10Z"
+   },
+   {
     "id": "policy-priority-unmeasured",
     "label": "#15124",
     "number": 15124,
@@ -58857,9 +58879,11 @@
     "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "rebases after #16925 merges",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#16925"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-19T23:53:06Z"
@@ -59084,25 +59108,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-24T01:46:43Z"
-   },
-   {
-    "id": "computer-apps-open-first",
-    "label": "computer-apps-open-first",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [
-     "#16403"
-    ],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-24T02:52:37Z"
    },
    {
     "id": "r2/relay-call-deadline",
