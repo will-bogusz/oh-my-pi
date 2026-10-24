@@ -52918,10 +52918,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-24T02:50:02Z",
+  "checked": "2026-10-24T03:20:41Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "computer-apps-open-first": {
+    "since": "2026-10-24T03:20:41Z",
+    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks"
+   }
+  },
   "conflicts": {},
   "merged_through": "2026-10-22T09:44:50Z",
   "unreleased": {
@@ -56830,6 +56835,12 @@
     "id": "grep-exclude",
     "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
     "why": "opened as #16920"
+   },
+   {
+    "at": "2026-10-24T03:20:41Z",
+    "kind": "openable",
+    "id": "computer-apps-open-first",
+    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks"
    }
   ]
  },
