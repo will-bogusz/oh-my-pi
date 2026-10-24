@@ -41474,13 +41474,13 @@
    ],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/grep-exclude.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16920,
    "closed_prs": [],
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-21T00:19:24Z",
-   "updated": "2026-10-24T01:32:07Z",
+   "updated": "2026-10-24T01:46:44Z",
    "note": "",
    "advanced": "2026-10-23T02:11:25Z",
    "built": [
@@ -42084,7 +42084,8 @@
      "host": "goliath",
      "tree": "e989fc03aae9744de921e823d8c7c5cf493ed74c"
     }
-   ]
+   ],
+   "opened": "2026-10-24T01:46:44Z"
   },
   {
    "id": "usage-json-policy",
