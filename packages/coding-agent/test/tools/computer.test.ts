@@ -4846,4 +4846,3 @@ describe("computer background fallback", () => {
 		expect(notice(await run(front, clickTarget, "takeover"))).toContain("not confirmed");
 	});
 });
-
