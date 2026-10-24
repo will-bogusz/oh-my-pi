@@ -52887,7 +52887,7 @@
    "needs": [
     "git-guard-defects"
    ],
-   "base": "10b5ecc43788e8ac726d55e67113c2437223263d",
+   "base": "6799c74fcb0fba3b94208450df41a61e9e17ad5a",
    "body": "bodies/git-guard-scope.md",
    "state": "queued",
    "pr": null,
@@ -52895,7 +52895,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/git-guard-scope",
    "host": "MacBook-Pro",
    "added": "2026-10-24T01:07:47Z",
-   "updated": "2026-10-24T01:07:47Z",
+   "updated": "2026-10-24T02:04:53Z",
    "note": ""
   }
  ],
