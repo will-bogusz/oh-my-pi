@@ -1,19 +1,19 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 01:07Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 01:21Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-10-24 00:59Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 9, stacked 23, held 1, open PRs 58, queued since the last plan 1; merged 135, closed 10
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-24 01:19Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 6, conflict-held 9, stacked 24, held 1, open PRs 58; merged 135, closed 10
 
 ## Openable now (6)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | grep-exclude | feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries | other |  | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/grep-exclude) |
-| computer-control-policy | feat(coding-agent): let tools.approval grant computer foreground control on unattended machines | computer | P2 | 6h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-control-policy) |
+| computer-control-policy | feat(coding-agent): let tools.approval grant computer foreground control on unattended machines | computer | P2 | 7h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-control-policy) |
 | axpress-click-hint | fix(natives): tell an agent to click() a macOS element that has no press action | computer | P2 | 6h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/axpress-click-hint) |
-| ax-placeholder-name | fix(natives): name macOS ax() text fields that have no label by their placeholder | computer | P2 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-placeholder-name) |
+| ax-placeholder-name | fix(natives): name macOS ax() text fields that have no label by their placeholder | computer | P2 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-placeholder-name) |
 | computer-doc-inline | feat(coding-agent): start desktop tasks without a documentation read | computer | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-doc-inline) |
 | git-guard-defects | fix(pi-shell): end the git guard's conflict exemption with the conflict | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-defects) |
 
@@ -27,11 +27,11 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | factory-droid-0244 | feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback) | providers | P1 | 5d | [#16257](https://github.com/can1357/oh-my-pi/pull/16257), [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-0244) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 5d | [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 4d | [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
-| persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 6h | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
+| persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 7h | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 6h | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 6h | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
 
-## Stacked (23)
+## Stacked (24)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -58,6 +58,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | timer-pr-3-tool | feat(coding-agent): let the agent set timers that wake its session later | other |  | 1d | timer-pr-4-surfaces | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-3-tool) |
 | timer-pr-5-agent-runs | feat(coding-agent): run a prompt timer as an unattended agent and report back | other |  | 1d | timer-pr-3-tool | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-5-agent-runs) |
 | timer-pr-9-tool-conditions | feat(coding-agent): let the timer tool set condition timers | other |  | 1d | timer-pr-5-agent-runs, timer-pr-7-conditions | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-9-tool-conditions) |
+| git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 0h | git-guard-defects | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
 
 ## Held (1)
 
@@ -110,7 +111,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | [#16585](https://github.com/can1357/oh-my-pi/pull/16585) | pdf-scan-pages | fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer | other | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/pdf-scan-pages) |
 | [#16608](https://github.com/can1357/oh-my-pi/pull/16608) | edit-error-kind | feat(edit): record why an edit failed and count it in /session | other | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/edit-error-kind) |
 | [#16581](https://github.com/can1357/oh-my-pi/pull/16581) | usage-json-policy | feat(coding-agent): include account policy state in omp usage --json | broker | P2 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-json-policy) |
-| [#16583](https://github.com/can1357/oh-my-pi/pull/16583) | peer-reply-keeps-report | fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes | agent | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/peer-reply-keeps-report) |
+| [#16583](https://github.com/can1357/oh-my-pi/pull/16583) | peer-reply-keeps-report | fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes | agent | P1 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/peer-reply-keeps-report) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#16612](https://github.com/can1357/oh-my-pi/pull/16612) | read-heif-images | feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary | coding-agent | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-heif-images) |
 | [#16762](https://github.com/can1357/oh-my-pi/pull/16762) | sleep-prevention-doc | fix(coding-agent): describe power.sleepPrevention as held only during turns | other | P0 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sleep-prevention-doc) |
@@ -127,9 +128,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | [#16910](https://github.com/can1357/oh-my-pi/pull/16910) | finder-rename-keys | fix(natives): let macOS input reach Finder's inline rename field | computer | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-rename-keys) |
 | [#16906](https://github.com/can1357/oh-my-pi/pull/16906) | devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
 | [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
