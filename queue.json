@@ -57472,7 +57472,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T01:49:24.648005Z",
+  "at": "2026-10-24T02:19:36.813674Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -58534,7 +58534,7 @@
     "number": 16920,
     "state": "open",
     "area": "other",
-    "priority": null,
+    "priority": "P2",
     "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
     "action": "keep",
     "reasons": [],
