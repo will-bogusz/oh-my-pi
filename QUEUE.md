@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-10-24 00:59Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 9, stacked 23, held 1, open PRs 58; merged 135, closed 10
+**Counts:** openable now 6, conflict-held 9, stacked 23, held 1, open PRs 58, queued since the last plan 1; merged 135, closed 10
 
 ## Openable now (6)
 
@@ -127,3 +127,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | [#16910](https://github.com/can1357/oh-my-pi/pull/16910) | finder-rename-keys | fix(natives): let macOS input reach Finder's inline rename field | computer | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-rename-keys) |
 | [#16906](https://github.com/can1357/oh-my-pi/pull/16906) | devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
 | [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
