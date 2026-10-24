@@ -58051,7 +58051,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T05:07:21.057799Z",
+  "at": "2026-10-24T05:22:59.419124Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -59506,6 +59506,27 @@
      "computer-ax-lines"
     ],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "computer-window-wait",
+    "label": "computer-window-wait",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "feat(computer): wait for windows opened by actions",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #16912 in packages/coding-agent/src/tools/computer/worker.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#16912"
+    ],
+    "needs": [],
+    "created": "2026-10-24T05:07:50Z"
    },
    {
     "id": "factory-droid-image-role-default",
