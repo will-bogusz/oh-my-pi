@@ -52916,7 +52916,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-apps-open-first",
    "host": "MacBook-Pro",
    "added": "2026-10-24T02:52:37Z",
-   "updated": "2026-10-24T03:50:11Z",
+   "updated": "2026-10-24T03:50:29Z",
    "note": "",
    "built": [
     {
@@ -53390,7 +53390,8 @@
      "tree": "6e73b7dc1709fbe281e16e337a1d37270f915c37"
     }
    ],
-   "opened": "2026-10-24T03:50:11Z"
+   "opened": "2026-10-24T03:50:11Z",
+   "readied": "2026-10-24T03:50:29Z"
   }
  ],
  "watch": {
