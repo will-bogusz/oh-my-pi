@@ -1,16 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 05:07Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 05:09Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-24 04:52Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 9, stacked 24, held 1, open PRs 65, queued since the last plan 2; merged 135, closed 10
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-24 05:07Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 0, conflict-held 10, stacked 24, held 1, open PRs 65, queued since the last plan 1; merged 135, closed 10
 
 ## Openable now (0)
 
 none
 
-## Conflict-held (9)
+## Conflict-held (10)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -23,6 +23,7 @@ none
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 10h | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 10h | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 10h | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
+| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 0h | [#16925](https://github.com/can1357/oh-my-pi/pull/16925), [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 
 ## Stacked (24)
 
@@ -129,9 +130,8 @@ none
 | [#16919](https://github.com/can1357/oh-my-pi/pull/16919) | git-guard-defects | fix(pi-shell): end the git guard's conflict exemption with the conflict | other | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-defects) |
 | [#16925](https://github.com/can1357/oh-my-pi/pull/16925) | computer-apps-open-first | fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks | computer | P2 | 1h | keep; opened over P2 #16403 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-apps-open-first) |
 
-## Queued since the last plan (2)
+## Queued since the last plan (1)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |

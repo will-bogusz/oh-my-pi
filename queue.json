@@ -58051,7 +58051,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T04:52:03.212731Z",
+  "at": "2026-10-24T05:07:21.057799Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -59455,6 +59455,29 @@
     ],
     "needs": [],
     "created": "2026-10-23T19:04:15Z"
+   },
+   {
+    "id": "computer-menu-subtree",
+    "label": "computer-menu-subtree",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "feat(coding-agent): find nested menu commands in one read",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #16925 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #16403 in packages/coding-agent/src/prompts/tools/computer.md"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#16925",
+     "#16403"
+    ],
+    "needs": [],
+    "created": "2026-10-24T05:06:00Z"
    },
    {
     "id": "computer-rich-text",
