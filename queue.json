@@ -57396,12 +57396,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T01:19:20.837967Z",
-  "host": "goliath",
+  "at": "2026-10-24T01:43:04.945695Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 4,
+   "left": 4
   },
   "rows": [
    {
@@ -57556,6 +57556,40 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-24T00:01:56Z"
+   },
+   {
+    "id": "ax-placeholder-name",
+    "label": "#16915",
+    "number": 16915,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T01:35:46Z"
+   },
+   {
+    "id": "axpress-click-hint",
+    "label": "#16916",
+    "number": 16916,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T01:37:50Z"
    },
    {
     "id": "drop-dead-jobs-op",
@@ -58368,6 +58402,40 @@
     "created": "2026-10-22T17:06:29Z"
    },
    {
+    "id": "computer-control-policy",
+    "label": "#16917",
+    "number": 16917,
+    "state": "open",
+    "area": "computer",
+    "priority": "P2",
+    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T01:39:53Z"
+   },
+   {
+    "id": "computer-doc-inline",
+    "label": "#16918",
+    "number": 16918,
+    "state": "open",
+    "area": "computer",
+    "priority": "P2",
+    "title": "feat(coding-agent): start desktop tasks without a documentation read",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T01:42:05Z"
+   },
+   {
     "id": "r2/relay-call-deadline",
     "label": "r2/relay-call-deadline",
     "number": null,
@@ -58492,40 +58560,6 @@
      "factory-droid-0244"
     ],
     "created": "2026-10-18T21:06:38Z"
-   },
-   {
-    "id": "ax-placeholder-name",
-    "label": "ax-placeholder-name",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T21:15:40Z"
-   },
-   {
-    "id": "axpress-click-hint",
-    "label": "axpress-click-hint",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T18:28:58Z"
    },
    {
     "id": "computer-ui-quiet",
@@ -58713,40 +58747,6 @@
     "created": "2026-10-23T19:04:15Z"
    },
    {
-    "id": "computer-control-policy",
-    "label": "computer-control-policy",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T18:12:14Z"
-   },
-   {
-    "id": "computer-doc-inline",
-    "label": "computer-doc-inline",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "feat(coding-agent): start desktop tasks without a documentation read",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T23:44:14Z"
-   },
-   {
     "id": "computer-rich-text",
     "label": "computer-rich-text",
     "number": null,
@@ -58757,16 +58757,16 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued), #15282 (open)",
-     "conflicts with ax-placeholder-name in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with axpress-click-hint in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #16915 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #16916 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "ax-placeholder-name",
-     "axpress-click-hint"
+     "#16915",
+     "#16916"
     ],
     "needs": [
      "computer-ui-quiet",
