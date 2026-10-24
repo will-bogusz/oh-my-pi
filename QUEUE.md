@@ -1,18 +1,17 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 00:00Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 00:01Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-10-23 23:17Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 5, conflict-held 9, stacked 23, held 1, open PRs 57, queued since the last plan 1; merged 135, closed 10
+**Counts:** openable now 4, conflict-held 9, stacked 23, held 1, open PRs 58, queued since the last plan 1; merged 135, closed 10
 
-## Openable now (5)
+## Openable now (4)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | grep-exclude | feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries | other |  | 2d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/grep-exclude) |
 | computer-control-policy | feat(coding-agent): let tools.approval grant computer foreground control on unattended machines | computer | P2 | 5h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-control-policy) |
-| window-miss-apps-open | fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector | computer | P1 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/window-miss-apps-open) |
 | axpress-click-hint | fix(natives): tell an agent to click() a macOS element that has no press action | computer | P2 | 5h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/axpress-click-hint) |
 | ax-placeholder-name | fix(natives): name macOS ax() text fields that have no label by their placeholder | computer | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-placeholder-name) |
 
@@ -64,7 +63,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 10d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 
-## Open PRs (57)
+## Open PRs (58)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -102,7 +101,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | [#16599](https://github.com/can1357/oh-my-pi/pull/16599) | task-result-inline | fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k | other | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/task-result-inline) |
 | [#16589](https://github.com/can1357/oh-my-pi/pull/16589) | minimizer-keep-small-whole | fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer | other | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/minimizer-keep-small-whole) |
 | [#16596](https://github.com/can1357/oh-my-pi/pull/16596) | read-nav-gate | fix(coding-agent): keep a web page's native rendering when its short lines are tables and code | other | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-nav-gate) |
-| [#16576](https://github.com/can1357/oh-my-pi/pull/16576) | bash-view-tags | feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them | coding-agent | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-view-tags) |
+| [#16576](https://github.com/can1357/oh-my-pi/pull/16576) | bash-view-tags | feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them | coding-agent | P2 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-view-tags) |
 | [#16597](https://github.com/can1357/oh-my-pi/pull/16597) | revive-extension-tools | fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived | other | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/revive-extension-tools) |
 | [#16586](https://github.com/can1357/oh-my-pi/pull/16586) | bash-minimizer-meta | feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut | bash | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-minimizer-meta) |
 | [#16587](https://github.com/can1357/oh-my-pi/pull/16587) | log-session-id | feat(coding-agent): tag each log record with the session that wrote it | other | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/log-session-id) |
@@ -119,6 +118,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | [#16803](https://github.com/can1357/oh-my-pi/pull/16803) | max-cost-gate | feat(session): add --warn-cost and --max-cost to cap a session's spend | session | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/max-cost-gate) |
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
 | [#16909](https://github.com/can1357/oh-my-pi/pull/16909) | computer-no-ui-continue | fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui | computer | P1 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-no-ui-continue) |
+| [#16912](https://github.com/can1357/oh-my-pi/pull/16912) | window-miss-apps-open | fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector | computer | P1 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/window-miss-apps-open) |
 | [#16911](https://github.com/can1357/oh-my-pi/pull/16911) | app-name-background-helper | fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous | computer | P1 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/app-name-background-helper) |
 | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | browser-read-after-navigation | fix(browser): wait for the page a click navigates to before the next call | browser | P1 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-read-after-navigation) |
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P1 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |

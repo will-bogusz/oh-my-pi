@@ -49090,13 +49090,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/window-miss-apps-open.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 16912,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/window-miss-apps-open",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:24:47Z",
-   "updated": "2026-10-23T23:55:10Z",
+   "updated": "2026-10-24T00:01:57Z",
    "note": "",
    "built": [
     {
@@ -49589,7 +49589,8 @@
      "host": "goliath",
      "tree": "5a733a224124ac9e21fbecfc694ad77efd7baebe"
     }
-   ]
+   ],
+   "opened": "2026-10-24T00:01:57Z"
   },
   {
    "id": "tab-click-options",
