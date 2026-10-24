@@ -56683,12 +56683,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T00:18:34.041822Z",
+  "at": "2026-10-24T00:48:59.172118Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 6,
-   "left": 2
+   "used": 5,
+   "left": 3
   },
   "rows": [
    {
@@ -58007,7 +58007,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],

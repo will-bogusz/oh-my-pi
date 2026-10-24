@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 00:39Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 00:50Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 6 of 8 ready events used in the hour before the last plan, 2 left (plan of 2026-10-24 00:18Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-10-24 00:48Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 5, conflict-held 9, stacked 23, held 1, open PRs 58; merged 135, closed 10
 
 ## Openable now (5)
@@ -11,10 +11,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | grep-exclude | feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries | other |  | 3d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/grep-exclude) |
-| computer-control-policy | feat(coding-agent): let tools.approval grant computer foreground control on unattended machines | computer | P2 | 6h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-control-policy) |
+| computer-control-policy | feat(coding-agent): let tools.approval grant computer foreground control on unattended machines | computer | P2 | 6h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-control-policy) |
 | axpress-click-hint | fix(natives): tell an agent to click() a macOS element that has no press action | computer | P2 | 6h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/axpress-click-hint) |
 | ax-placeholder-name | fix(natives): name macOS ax() text fields that have no label by their placeholder | computer | P2 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-placeholder-name) |
-| computer-doc-inline | feat(coding-agent): start desktop tasks without a documentation read | computer | P2 | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-doc-inline) |
+| computer-doc-inline | feat(coding-agent): start desktop tasks without a documentation read | computer | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-doc-inline) |
 
 ## Conflict-held (9)
 
@@ -71,7 +71,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | [#15105](https://github.com/can1357/oh-my-pi/pull/15105) | relay-extension-version | feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade | browser | P2 | 14d | keep; rebases after #16908 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-version) |
 | [#15124](https://github.com/can1357/oh-my-pi/pull/15124) | policy-priority-unmeasured | fix(ai): rank account policy priority ahead of a missing usage report | broker | P2 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/policy-priority-unmeasured) |
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
-| [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 13d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
+| [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 | [#15280](https://github.com/can1357/oh-my-pi/pull/15280) | computer-input-diff-report | feat(computer): report what input changed as a diff once the app goes quiet | computer | P2 | 13d | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-input-diff-report) |
 | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | computer-ax-lines | feat(natives): show what macOS ax() elements can do | computer | P2 | 13d | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ax-lines) |
 | [#15418](https://github.com/can1357/oh-my-pi/pull/15418) | lsp-close-idle-docs | fix(lsp): release language server memory by closing documents unused for 5 minutes | other | P2 | 12d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-close-idle-docs) |
@@ -121,8 +121,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24
 | [#16909](https://github.com/can1357/oh-my-pi/pull/16909) | computer-no-ui-continue | fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-no-ui-continue) |
 | [#16912](https://github.com/can1357/oh-my-pi/pull/16912) | window-miss-apps-open | fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/window-miss-apps-open) |
 | [#16911](https://github.com/can1357/oh-my-pi/pull/16911) | app-name-background-helper | fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/app-name-background-helper) |
-| [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | browser-read-after-navigation | fix(browser): wait for the page a click navigates to before the next call | browser | P1 | 0h | keep; opened over P2 #15508 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-read-after-navigation) |
+| [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | browser-read-after-navigation | fix(browser): wait for the page a click navigates to before the next call | browser | P1 | 1h | keep; opened over P2 #15508 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-read-after-navigation) |
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 0h | keep; opened over P2 #15105; opened over P2 #16284 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
 | [#16910](https://github.com/can1357/oh-my-pi/pull/16910) | finder-rename-keys | fix(natives): let macOS input reach Finder's inline rename field | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-rename-keys) |
 | [#16906](https://github.com/can1357/oh-my-pi/pull/16906) | devin-cli-3000-11-205 | fix(catalog): identify Devin requests as CLI 3000.11.205 | broker | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-cli-3000-11-205) |
-| [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
+| [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
