@@ -56723,12 +56723,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T00:48:59.172118Z",
+  "at": "2026-10-24T00:59:40.125258Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 5,
-   "left": 3
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -58064,7 +58064,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(coding-agent): start desktop tasks without a documentation read",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -58264,6 +58264,23 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
+    "id": "git-guard-defects",
+    "label": "git-guard-defects",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": null,
+    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T00:58:42Z"
+   },
+   {
     "id": "account-window-reserves",
     "label": "account-window-reserves",
     "number": null,
@@ -58421,7 +58438,7 @@
     "area": "other",
     "priority": null,
     "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
