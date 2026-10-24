@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 02:04Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-24 02:07Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 6 of 8 ready events used in the hour before the last plan, 2 left (plan of 2026-10-24 01:49Z on goliath; groups below are from it, states from the manifest)
@@ -51,7 +51,7 @@ none
 | timer-pr-3-tool | feat(coding-agent): let the agent set timers that wake its session later | other |  | 1d | timer-pr-4-surfaces | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-3-tool) |
 | timer-pr-5-agent-runs | feat(coding-agent): run a prompt timer as an unattended agent and report back | other |  | 1d | timer-pr-3-tool | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-5-agent-runs) |
 | timer-pr-9-tool-conditions | feat(coding-agent): let the timer tool set condition timers | other |  | 1d | timer-pr-5-agent-runs, timer-pr-7-conditions | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-9-tool-conditions) |
-| git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 0h | git-guard-defects ([#16919](https://github.com/can1357/oh-my-pi/pull/16919)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
+| git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 1h | git-guard-defects ([#16919](https://github.com/can1357/oh-my-pi/pull/16919)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
 
 ## Held (1)
 
