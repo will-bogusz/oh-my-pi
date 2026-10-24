@@ -52900,35 +52900,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-24T01:19:19Z",
+  "checked": "2026-10-24T01:49:23Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "ax-placeholder-name": {
-    "since": "2026-10-23T23:17:41Z",
-    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder"
-   },
-   "axpress-click-hint": {
-    "since": "2026-10-23T23:17:41Z",
-    "title": "fix(natives): tell an agent to click() a macOS element that has no press action"
-   },
-   "computer-control-policy": {
-    "since": "2026-10-23T23:17:41Z",
-    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines"
-   },
-   "computer-doc-inline": {
-    "since": "2026-10-24T00:18:33Z",
-    "title": "feat(coding-agent): start desktop tasks without a documentation read"
-   },
-   "git-guard-defects": {
-    "since": "2026-10-24T01:19:19Z",
-    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict"
-   },
-   "grep-exclude": {
-    "since": "2026-10-23T23:17:41Z",
-    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-10-22T09:44:50Z",
   "unreleased": {
@@ -53034,7 +53009,13 @@
    16909,
    16910,
    16911,
-   16912
+   16912,
+   16915,
+   16916,
+   16917,
+   16918,
+   16919,
+   16920
   ],
   "post_merge": {
    "16288": {
@@ -56789,6 +56770,48 @@
     "kind": "openable",
     "id": "git-guard-defects",
     "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict"
+   },
+   {
+    "at": "2026-10-24T01:49:23Z",
+    "kind": "unopenable",
+    "id": "ax-placeholder-name",
+    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
+    "why": "opened as #16915"
+   },
+   {
+    "at": "2026-10-24T01:49:23Z",
+    "kind": "unopenable",
+    "id": "axpress-click-hint",
+    "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
+    "why": "opened as #16916"
+   },
+   {
+    "at": "2026-10-24T01:49:23Z",
+    "kind": "unopenable",
+    "id": "computer-control-policy",
+    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines",
+    "why": "opened as #16917"
+   },
+   {
+    "at": "2026-10-24T01:49:23Z",
+    "kind": "unopenable",
+    "id": "computer-doc-inline",
+    "title": "feat(coding-agent): start desktop tasks without a documentation read",
+    "why": "opened as #16918"
+   },
+   {
+    "at": "2026-10-24T01:49:23Z",
+    "kind": "unopenable",
+    "id": "git-guard-defects",
+    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
+    "why": "opened as #16919"
+   },
+   {
+    "at": "2026-10-24T01:49:23Z",
+    "kind": "unopenable",
+    "id": "grep-exclude",
+    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
+    "why": "opened as #16920"
    }
   ]
  },
@@ -57396,12 +57419,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T01:43:04.945695Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-24T01:49:24.648005Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 4,
-   "left": 4
+   "used": 6,
+   "left": 2
   },
   "rows": [
    {
@@ -57898,6 +57921,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-23T23:47:57Z"
+   },
+   {
+    "id": "git-guard-defects",
+    "label": "#16919",
+    "number": 16919,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T01:44:16Z"
    },
    {
     "id": "policy-priority-unmeasured",
@@ -58436,6 +58476,23 @@
     "created": "2026-10-24T01:42:05Z"
    },
    {
+    "id": "grep-exclude",
+    "label": "#16920",
+    "number": 16920,
+    "state": "open",
+    "area": "other",
+    "priority": null,
+    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T01:46:43Z"
+   },
+   {
     "id": "r2/relay-call-deadline",
     "label": "r2/relay-call-deadline",
     "number": null,
@@ -58937,23 +58994,6 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
-    "id": "git-guard-defects",
-    "label": "git-guard-defects",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-24T00:58:42Z"
-   },
-   {
     "id": "account-window-reserves",
     "label": "account-window-reserves",
     "number": null,
@@ -59113,7 +59153,7 @@
     "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
     "action": "wait",
     "reasons": [
-     "needs git-guard-defects (queued)"
+     "needs #16919 (open)"
     ],
     "note": "",
     "over": [],
@@ -59123,23 +59163,6 @@
      "git-guard-defects"
     ],
     "created": "2026-10-24T01:07:47Z"
-   },
-   {
-    "id": "grep-exclude",
-    "label": "grep-exclude",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T00:19:24Z"
    },
    {
     "id": "read-url-markup-tokens",
