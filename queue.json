@@ -57524,8 +57524,8 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T02:50:03.403108Z",
-  "host": "goliath",
+  "at": "2026-10-24T02:53:27.393813Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -58596,6 +58596,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-24T01:46:43Z"
+   },
+   {
+    "id": "computer-apps-open-first",
+    "label": "computer-apps-open-first",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [
+     "#16403"
+    ],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-24T02:52:37Z"
    },
    {
     "id": "r2/relay-call-deadline",
