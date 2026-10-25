@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T11:27:15Z",
+  "checked": "2026-10-25T12:27:37Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,30 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T12:04:14Z",
-    "kind": "merged",
-    "number": 15564,
-    "title": "feat(computer): stop computer use for the rest of the turn when the user presses Escape",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-18T12:04:14Z",
-    "kind": "merged",
-    "number": 15563,
-    "title": "feat(computer): type into one element with el.type and el.press, sending nothing if it won't take focus",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-18T12:04:14Z",
-    "kind": "merged",
-    "number": 15195,
-    "title": "fix(natives): keep the user's app in front when a macOS background target activates itself while they type",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
    {
     "at": "2026-10-18T12:34:47Z",
     "kind": "merged",
