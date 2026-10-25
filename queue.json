@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T17:02:40Z",
+  "checked": "2026-10-25T17:33:28Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,35 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T17:09:24Z",
-    "kind": "merged",
-    "number": 16149,
-    "title": "fix(coding-agent): reject unusable run args and explain busy errors in computer and browser calls",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-18T17:09:24Z",
-    "kind": "merged",
-    "number": 16119,
-    "title": "feat(browser): open relay tabs omp owns in the background",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-18T17:09:24Z",
-    "kind": "openable",
-    "id": "computer-text-drag-select",
-    "title": "feat(natives): make a macOS background drag across native text an accessibility selection"
-   },
-   {
-    "at": "2026-10-18T17:09:24Z",
-    "kind": "unopenable",
-    "id": "computer-same-reading-key-window",
-    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
-    "why": "opened as #16217"
-   },
    {
     "at": "2026-10-18T17:40:06Z",
     "kind": "unopenable",
