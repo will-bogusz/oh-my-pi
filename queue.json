@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T18:03:38Z",
+  "checked": "2026-10-25T19:04:44Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,28 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T18:41:09Z",
-    "kind": "merged",
-    "number": 16202,
-    "title": "fix(natives): keep computer input that already went out from reporting Cancelled",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-18T18:41:09Z",
-    "kind": "merged",
-    "number": 16205,
-    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-18T18:41:09Z",
-    "kind": "openable",
-    "id": "refind-cancel-root",
-    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window"
-   },
    {
     "at": "2026-10-18T19:11:35Z",
     "kind": "openable",
@@ -57479,7 +57457,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-25T18:03:39.145475Z",
+  "at": "2026-10-25T19:04:45.139792Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
