@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T14:29:41Z",
+  "checked": "2026-10-25T15:00:19Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,51 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T14:36:42Z",
-    "kind": "merged",
-    "number": 15192,
-    "title": "fix(natives): release keys and buttons a macOS input request still holds when omp dies",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-18T14:36:42Z",
-    "kind": "merged",
-    "number": 15191,
-    "title": "feat(computer): rerun refused macOS background input in takeover, set by computer.backgroundFallback",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-18T14:36:42Z",
-    "kind": "openable",
-    "id": "computer-release-helper-followup",
-    "title": "fix(natives): keep a lingering macOS release helper from cutting short a later press"
-   },
-   {
-    "at": "2026-10-18T14:36:42Z",
-    "kind": "unopenable",
-    "id": "computer-sent-not-cancelled",
-    "title": "fix(natives): keep computer input that already went out from reporting Cancelled",
-    "why": "plan: wait (conflicts with #16185 in docs/computer-use.md)"
-   },
-   {
-    "at": "2026-10-18T14:36:42Z",
-    "kind": "unopenable",
-    "id": "computer-intervened-followup",
-    "title": "fix(natives): say a macOS click stopped by the user may have landed, and test that el.type waits for them",
-    "why": "plan: wait (conflicts with #16185 in docs/computer-use.md)"
-   },
-   {
-    "at": "2026-10-18T14:36:42Z",
-    "kind": "conflict",
-    "label": "#16185",
-    "title": "fix(natives): send a macOS background target back however late it activates itself",
-    "files": [
-     "docs/computer-use.md"
-    ]
-   },
    {
     "at": "2026-10-18T15:06:57Z",
     "kind": "merged",
@@ -57668,7 +57623,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-25T13:59:16.709779Z",
+  "at": "2026-10-25T15:00:20.218687Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
