@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T03:18:20Z",
+  "checked": "2026-10-25T03:49:17Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,24 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T03:20:10Z",
-    "kind": "merged",
-    "number": 15174,
-    "title": "fix(coding-agent): capture browser tabs in place instead of raising Chrome",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-18T03:20:10Z",
-    "kind": "conflict",
-    "label": "#16119",
-    "title": "feat(browser): open relay tabs omp owns in the background",
-    "files": [
-     "packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ]
-   },
    {
     "at": "2026-10-18T04:53:09Z",
     "kind": "openable",
@@ -57926,7 +57908,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-25T02:48:06.612119Z",
+  "at": "2026-10-25T03:49:18.121909Z",
   "host": "goliath",
   "budget": {
    "limit": 8,

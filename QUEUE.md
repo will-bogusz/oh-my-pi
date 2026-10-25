@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-25 03:19Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-25 03:50Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-25 02:48Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-25 03:49Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 11, stacked 24, held 1, open PRs 65; merged 135, closed 10
 
 ## Openable now (0)
@@ -72,7 +72,7 @@ none
 | [#15280](https://github.com/can1357/oh-my-pi/pull/15280) | computer-input-diff-report | feat(computer): report what input changed as a diff once the app goes quiet | computer | P2 | 14d | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-input-diff-report) |
 | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | computer-ax-lines | feat(natives): show what macOS ax() elements can do | computer | P2 | 14d | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ax-lines) |
 | [#15418](https://github.com/can1357/oh-my-pi/pull/15418) | lsp-close-idle-docs | fix(lsp): release language server memory by closing documents unused for 5 minutes | other | P2 | 13d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-close-idle-docs) |
-| [#15433](https://github.com/can1357/oh-my-pi/pull/15433) | agents-show | feat(task): add omp agents show for what an agent's spawns run with | other | P2 | 12d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agents-show) |
+| [#15433](https://github.com/can1357/oh-my-pi/pull/15433) | agents-show | feat(task): add omp agents show for what an agent's spawns run with | other | P2 | 13d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agents-show) |
 | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | print-hold | fix(coding-agent): keep browser calls going when a page calls window.print() | browser | P2 | 12d | keep; rebases after #16907 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-hold) |
 | [#16756](https://github.com/can1357/oh-my-pi/pull/16756) | r2/webmcp-native | fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook | browser | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/webmcp-native) |
 | [#16223](https://github.com/can1357/oh-my-pi/pull/16223) | computer-text-drag-select | feat(natives): make a macOS background drag across native text an accessibility selection | computer | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-text-drag-select) |
@@ -129,4 +129,4 @@ none
 | [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
 | [#16918](https://github.com/can1357/oh-my-pi/pull/16918) | computer-doc-inline | feat(coding-agent): start desktop tasks without a documentation read | computer | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-doc-inline) |
 | [#16919](https://github.com/can1357/oh-my-pi/pull/16919) | git-guard-defects | fix(pi-shell): end the git guard's conflict exemption with the conflict | other | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-defects) |
-| [#16925](https://github.com/can1357/oh-my-pi/pull/16925) | computer-apps-open-first | fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks | computer | P2 | 23h | keep; opened over P2 #16403 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-apps-open-first) |
+| [#16925](https://github.com/can1357/oh-my-pi/pull/16925) | computer-apps-open-first | fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks | computer | P2 | 1d | keep; opened over P2 #16403 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-apps-open-first) |
