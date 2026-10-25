@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T15:30:27Z",
+  "checked": "2026-10-25T16:01:18Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,18 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T15:38:08Z",
-    "kind": "openable",
-    "id": "computer-sent-not-cancelled",
-    "title": "fix(natives): keep computer input that already went out from reporting Cancelled"
-   },
-   {
-    "at": "2026-10-18T15:38:08Z",
-    "kind": "openable",
-    "id": "computer-intervened-followup",
-    "title": "fix(natives): say that clicks, not only keys, stop at the user's input in macOS UserIntervened"
-   },
    {
     "at": "2026-10-18T16:08:55Z",
     "kind": "unopenable",
@@ -57607,7 +57595,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-25T15:00:20.218687Z",
+  "at": "2026-10-25T16:01:19.683435Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
