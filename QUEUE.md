@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-25 07:24Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-25 07:54Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-25 06:52Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-25 07:53Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 11, stacked 24, held 1, open PRs 65; merged 135, closed 10
 
 ## Openable now (0)
@@ -19,7 +19,7 @@ none
 | r2/relay-bg-input-main | fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys | browser | P2 | 11d | [#16284](https://github.com/can1357/oh-my-pi/pull/16284) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-bg-input-main) |
 | factory-droid-0244 | feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback) | providers | P1 | 6d | [#16257](https://github.com/can1357/oh-my-pi/pull/16257), [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-0244) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 6d | [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
-| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 5d | [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
+| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 6d | [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 1d | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 1d | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 1d | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
@@ -85,7 +85,7 @@ none
 | [#16297](https://github.com/can1357/oh-my-pi/pull/16297) | exact-provider-model-selector | fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling | models | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/exact-provider-model-selector) |
 | [#16296](https://github.com/can1357/oh-my-pi/pull/16296) | factory-droid-prompt-cache | feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models | providers | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-prompt-cache) |
 | [#16291](https://github.com/can1357/oh-my-pi/pull/16291) | oauth-refresh-keep-rotated-token | fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget | auth | P1 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/oauth-refresh-keep-rotated-token) |
-| [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | factory-droid-image-generation | feat(ai,catalog): generate images through a Factory Droid login | providers | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-generation) |
+| [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | factory-droid-image-generation | feat(ai,catalog): generate images through a Factory Droid login | providers | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-generation) |
 | [#16271](https://github.com/can1357/oh-my-pi/pull/16271) | lsp-workspace-folders | fix(lsp): add another checkout to the language server workspace before opening its files | other | P1 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-workspace-folders) |
 | [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
 | [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | computer-shell-exception | feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS | computer | P2 | 5d | keep; rebases after #16925 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-shell-exception) |
