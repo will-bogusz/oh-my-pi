@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T02:48:05Z",
+  "checked": "2026-10-25T03:18:20Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,22 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T02:50:08Z",
-    "kind": "merged",
-    "number": 15173,
-    "title": "fix(natives,coding-agent): keep omitted takeover in the background while computer control is held",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-18T02:50:08Z",
-    "kind": "merged",
-    "number": 15175,
-    "title": "feat(computer): select text in a background macOS element by accessibility",
-    "merged_by": "H4vC",
-    "maintainer_commits": 2
-   },
    {
     "at": "2026-10-18T03:20:10Z",
     "kind": "merged",
