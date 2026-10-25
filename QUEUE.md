@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-25 02:49Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-25 03:19Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-25 02:48Z on goliath; groups below are from it, states from the manifest)
@@ -23,8 +23,8 @@ none
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 1d | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 1d | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 1d | [#16907](https://github.com/can1357/oh-my-pi/pull/16907) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
-| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 21h | [#16925](https://github.com/can1357/oh-my-pi/pull/16925), [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
-| computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 21h | [#16912](https://github.com/can1357/oh-my-pi/pull/16912) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
+| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 22h | [#16925](https://github.com/can1357/oh-my-pi/pull/16925), [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
+| computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 22h | [#16912](https://github.com/can1357/oh-my-pi/pull/16912) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
 
 ## Stacked (24)
 
@@ -129,4 +129,4 @@ none
 | [#16905](https://github.com/can1357/oh-my-pi/pull/16905) | devin-model-info-context | fix(catalog): read Devin context windows from model info | catalog | P0 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-model-info-context) |
 | [#16918](https://github.com/can1357/oh-my-pi/pull/16918) | computer-doc-inline | feat(coding-agent): start desktop tasks without a documentation read | computer | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-doc-inline) |
 | [#16919](https://github.com/can1357/oh-my-pi/pull/16919) | git-guard-defects | fix(pi-shell): end the git guard's conflict exemption with the conflict | other | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-defects) |
-| [#16925](https://github.com/can1357/oh-my-pi/pull/16925) | computer-apps-open-first | fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks | computer | P2 | 22h | keep; opened over P2 #16403 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-apps-open-first) |
+| [#16925](https://github.com/can1357/oh-my-pi/pull/16925) | computer-apps-open-first | fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks | computer | P2 | 23h | keep; opened over P2 #16403 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-apps-open-first) |
