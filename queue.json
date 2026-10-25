@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T00:13:55Z",
+  "checked": "2026-10-25T00:45:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,22 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T00:15:07Z",
-    "kind": "merged",
-    "number": 15157,
-    "title": "fix(natives): report the macOS Escape stop honestly",
-    "merged_by": "H4vC",
-    "maintainer_commits": 2
-   },
-   {
-    "at": "2026-10-18T00:15:07Z",
-    "kind": "merged",
-    "number": 15574,
-    "title": "fix(natives,coding-agent): name the element that replaced a stale macOS computer ref",
-    "merged_by": "H4vC",
-    "maintainer_commits": 2
-   },
    {
     "at": "2026-10-18T02:50:08Z",
     "kind": "merged",
@@ -57958,7 +57942,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-24T23:43:18.782948Z",
+  "at": "2026-10-25T00:45:01.309629Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
