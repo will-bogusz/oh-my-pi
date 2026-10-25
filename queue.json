@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T04:50:21Z",
+  "checked": "2026-10-25T05:21:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,12 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T04:53:09Z",
-    "kind": "openable",
-    "id": "computer-run-args",
-    "title": "fix(coding-agent): reject computer.run and tab.run args the function cannot receive"
-   },
    {
     "at": "2026-10-18T05:55:08Z",
     "kind": "unopenable",
