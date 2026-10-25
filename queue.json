@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T19:04:44Z",
+  "checked": "2026-10-25T19:35:20Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,37 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T19:11:35Z",
-    "kind": "openable",
-    "id": "browser-options-hints",
-    "title": "fix(coding-agent): name the expected shape when browser tab.run gets an args array or open gets a URL"
-   },
-   {
-    "at": "2026-10-18T19:11:35Z",
-    "kind": "openable",
-    "id": "computer-no-ui-confirm",
-    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal"
-   },
-   {
-    "at": "2026-10-18T19:11:35Z",
-    "kind": "openable",
-    "id": "relay-popup-front-main",
-    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS"
-   },
-   {
-    "at": "2026-10-18T19:11:35Z",
-    "kind": "openable",
-    "id": "release-helper-wait-test",
-    "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in"
-   },
-   {
-    "at": "2026-10-18T19:11:35Z",
-    "kind": "unopenable",
-    "id": "refind-cancel-root",
-    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
-    "why": "opened as #16233"
-   },
    {
     "at": "2026-10-18T19:40:43Z",
     "kind": "openable",
