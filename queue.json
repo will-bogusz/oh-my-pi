@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T13:59:15Z",
+  "checked": "2026-10-25T14:29:41Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,33 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T14:06:07Z",
-    "kind": "merged",
-    "number": 15185,
-    "title": "feat(natives): deliver macOS background drags, holds, modified and right-clicks",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-18T14:06:07Z",
-    "kind": "openable",
-    "id": "computer-sent-not-cancelled",
-    "title": "fix(natives): keep computer input that already went out from reporting Cancelled"
-   },
-   {
-    "at": "2026-10-18T14:06:07Z",
-    "kind": "openable",
-    "id": "computer-intervened-followup",
-    "title": "fix(natives): say a macOS click stopped by the user may have landed, and test that el.type waits for them"
-   },
-   {
-    "at": "2026-10-18T14:06:07Z",
-    "kind": "unopenable",
-    "id": "natives-test-click-placed-in-users-app",
-    "title": "test(natives): keep a click placed in the user's app from reading as a new click in the macOS focus guard test",
-    "why": "opened as #16187"
-   },
    {
     "at": "2026-10-18T14:36:42Z",
     "kind": "merged",
