@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-25T17:33:28Z",
+  "checked": "2026-10-25T18:03:38Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,34 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-18T17:40:06Z",
-    "kind": "unopenable",
-    "id": "computer-text-drag-select",
-    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
-    "why": "opened as #16223"
-   },
-   {
-    "at": "2026-10-18T17:40:06Z",
-    "kind": "conflict",
-    "label": "#15105",
-    "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
-    "files": [
-     "packages/browser-relay/extension/background.ts",
-     "packages/coding-agent/src/tools/browser/relay/bridge.ts",
-     "packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt",
-     "packages/coding-agent/src/tools/browser/relay/protocol.ts"
-    ]
-   },
-   {
-    "at": "2026-10-18T17:40:06Z",
-    "kind": "conflict",
-    "label": "#16217",
-    "title": "fix(natives): keep a macOS user's app in front with the window they clicked when the target comes forward",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/skylight.rs"
-    ]
-   },
    {
     "at": "2026-10-18T18:41:09Z",
     "kind": "merged",
@@ -57507,7 +57479,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-25T17:02:41.969795Z",
+  "at": "2026-10-25T18:03:39.145475Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
