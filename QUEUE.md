@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-26 06:49Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-26 07:19Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-26 06:17Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-26 07:17Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 11, stacked 24, held 1, open PRs 65; merged 135, closed 10
 
 ## Openable now (0)
@@ -80,7 +80,7 @@ none
 | [#16770](https://github.com/can1357/oh-my-pi/pull/16770) | computer-right-click-per-press | fix(natives): stop a macOS background right or middle multi-click at the user's input | computer | P1 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-right-click-per-press) |
 | [#16284](https://github.com/can1357/oh-my-pi/pull/16284) | relay-popup-front-main | fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS | browser | P2 | 7d | keep; rebases after #16908 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-front-main) |
 | [#16250](https://github.com/can1357/oh-my-pi/pull/16250) | anthropic-refusal-handoff | fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff | providers | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-refusal-handoff) |
-| [#16309](https://github.com/can1357/oh-my-pi/pull/16309) | factory-droid-credit-promotions | feat(catalog,tui): show Factory Droid credit promotions in the model browser | providers | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-credit-promotions) |
+| [#16309](https://github.com/can1357/oh-my-pi/pull/16309) | factory-droid-credit-promotions | feat(catalog,tui): show Factory Droid credit promotions in the model browser | providers | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-credit-promotions) |
 | [#16257](https://github.com/can1357/oh-my-pi/pull/16257) | factory-droid-org-lookup | fix(ai): sign Factory Droid logins without an organization claim into the account's organization | providers | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-org-lookup) |
 | [#16297](https://github.com/can1357/oh-my-pi/pull/16297) | exact-provider-model-selector | fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling | models | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/exact-provider-model-selector) |
 | [#16296](https://github.com/can1357/oh-my-pi/pull/16296) | factory-droid-prompt-cache | feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models | providers | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-prompt-cache) |
