@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-26 00:42Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-26 01:13Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-26 00:10Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-26 01:12Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 11, stacked 24, held 1, open PRs 65; merged 135, closed 10
 
 ## Openable now (0)
@@ -53,7 +53,7 @@ none
 | timer-pr-3-tool | feat(coding-agent): let the agent set timers that wake its session later | other |  | 3d | timer-pr-4-surfaces | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-3-tool) |
 | timer-pr-5-agent-runs | feat(coding-agent): run a prompt timer as an unattended agent and report back | other |  | 3d | timer-pr-3-tool | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-5-agent-runs) |
 | timer-pr-9-tool-conditions | feat(coding-agent): let the timer tool set condition timers | other |  | 3d | timer-pr-5-agent-runs, timer-pr-7-conditions | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-9-tool-conditions) |
-| git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 1d | git-guard-defects ([#16919](https://github.com/can1357/oh-my-pi/pull/16919)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
+| git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 2d | git-guard-defects ([#16919](https://github.com/can1357/oh-my-pi/pull/16919)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
 
 ## Held (1)
 
@@ -86,8 +86,8 @@ none
 | [#16296](https://github.com/can1357/oh-my-pi/pull/16296) | factory-droid-prompt-cache | feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models | providers | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-prompt-cache) |
 | [#16291](https://github.com/can1357/oh-my-pi/pull/16291) | oauth-refresh-keep-rotated-token | fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget | auth | P1 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/oauth-refresh-keep-rotated-token) |
 | [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | factory-droid-image-generation | feat(ai,catalog): generate images through a Factory Droid login | providers | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-generation) |
-| [#16271](https://github.com/can1357/oh-my-pi/pull/16271) | lsp-workspace-folders | fix(lsp): add another checkout to the language server workspace before opening its files | other | P1 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-workspace-folders) |
-| [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
+| [#16271](https://github.com/can1357/oh-my-pi/pull/16271) | lsp-workspace-folders | fix(lsp): add another checkout to the language server workspace before opening its files | other | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-workspace-folders) |
+| [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
 | [#16403](https://github.com/can1357/oh-my-pi/pull/16403) | computer-shell-exception | feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS | computer | P2 | 6d | keep; rebases after #16925 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-shell-exception) |
 | [#16552](https://github.com/can1357/oh-my-pi/pull/16552) | pip-procfs-fallback | fix(coding-agent): stop the %pip installer on cancel when /proc cannot be listed | python | P1 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/pip-procfs-fallback) |
 | [#16556](https://github.com/can1357/oh-my-pi/pull/16556) | ts-rule-followups | fix(coding-agent): keep ts-set-map fast on long Set lines and stop two false reminders | other | P1 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ts-rule-followups) |
@@ -106,8 +106,8 @@ none
 | [#16585](https://github.com/can1357/oh-my-pi/pull/16585) | pdf-scan-pages | fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer | other | P1 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/pdf-scan-pages) |
 | [#16608](https://github.com/can1357/oh-my-pi/pull/16608) | edit-error-kind | feat(edit): record why an edit failed and count it in /session | other | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/edit-error-kind) |
 | [#16920](https://github.com/can1357/oh-my-pi/pull/16920) | grep-exclude | feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/grep-exclude) |
-| [#16581](https://github.com/can1357/oh-my-pi/pull/16581) | usage-json-policy | feat(coding-agent): include account policy state in omp usage --json | broker | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-json-policy) |
-| [#16583](https://github.com/can1357/oh-my-pi/pull/16583) | peer-reply-keeps-report | fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes | agent | P1 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/peer-reply-keeps-report) |
+| [#16581](https://github.com/can1357/oh-my-pi/pull/16581) | usage-json-policy | feat(coding-agent): include account policy state in omp usage --json | broker | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-json-policy) |
+| [#16583](https://github.com/can1357/oh-my-pi/pull/16583) | peer-reply-keeps-report | fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes | agent | P1 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/peer-reply-keeps-report) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#16612](https://github.com/can1357/oh-my-pi/pull/16612) | read-heif-images | feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary | coding-agent | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-heif-images) |
 | [#16762](https://github.com/can1357/oh-my-pi/pull/16762) | sleep-prevention-doc | fix(coding-agent): describe power.sleepPrevention as held only during turns | other | P0 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sleep-prevention-doc) |
