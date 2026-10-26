@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-26T22:04:36Z",
+  "checked": "2026-10-26T22:35:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53803,72 +53803,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-19T22:14:48Z",
-    "kind": "openable",
-    "id": "read-profile-ranges",
-    "title": "fix(coding-agent): read profile line ranges from the file, not its summary"
-   },
-   {
-    "at": "2026-10-19T22:14:48Z",
-    "kind": "openable",
-    "id": "computer-shell-exception",
-    "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS"
-   },
-   {
-    "at": "2026-10-19T22:14:48Z",
-    "kind": "openable",
-    "id": "edit-tagless-errors",
-    "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag"
-   },
-   {
-    "at": "2026-10-19T22:14:48Z",
-    "kind": "openable",
-    "id": "bash-session-env",
-    "title": "feat(coding-agent): expose PI_SESSION_ID and PI_SESSION_FILE to bash commands"
-   },
-   {
-    "at": "2026-10-19T22:14:48Z",
-    "kind": "unopenable",
-    "id": "predict-newer-daemon",
-    "title": "fix(coding-agent): keep a newer text-predict daemon instead of shutting it down",
-    "why": "opened as #16380"
-   },
-   {
-    "at": "2026-10-19T22:14:48Z",
-    "kind": "unopenable",
-    "id": "edit-fileop-tag-check",
-    "title": "fix(edit): required a live tag for bare hashline MV and REM",
-    "why": "opened as #16381"
-   },
-   {
-    "at": "2026-10-19T22:14:48Z",
-    "kind": "unopenable",
-    "id": "edit-remap-refuse",
-    "title": "fix(edit): refuse stale-tag remaps aimed at the current lines",
-    "why": "opened as #16383"
-   },
-   {
-    "at": "2026-10-19T22:14:48Z",
-    "kind": "unopenable",
-    "id": "factory-droid-completions-tool-names",
-    "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests",
-    "why": "opened as #16384"
-   },
-   {
-    "at": "2026-10-19T22:14:48Z",
-    "kind": "unopenable",
-    "id": "test-log-dir",
-    "title": "fix(utils,natives): keep test runs out of the real ~/.omp/logs",
-    "why": "opened as #16386"
-   },
-   {
-    "at": "2026-10-19T22:14:48Z",
-    "kind": "unopenable",
-    "id": "computer-control-unanswered",
-    "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out",
-    "why": "opened as #16388"
-   },
    {
     "at": "2026-10-19T22:45:09Z",
     "kind": "openable",
@@ -57185,7 +57119,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-26T21:34:27.473091Z",
+  "at": "2026-10-26T22:35:34.036708Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
