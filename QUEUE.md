@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-26 04:16Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-26 04:47Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-26 04:15Z on goliath; groups below are from it, states from the manifest)
@@ -84,7 +84,7 @@ none
 | [#16257](https://github.com/can1357/oh-my-pi/pull/16257) | factory-droid-org-lookup | fix(ai): sign Factory Droid logins without an organization claim into the account's organization | providers | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-org-lookup) |
 | [#16297](https://github.com/can1357/oh-my-pi/pull/16297) | exact-provider-model-selector | fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling | models | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/exact-provider-model-selector) |
 | [#16296](https://github.com/can1357/oh-my-pi/pull/16296) | factory-droid-prompt-cache | feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models | providers | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-prompt-cache) |
-| [#16291](https://github.com/can1357/oh-my-pi/pull/16291) | oauth-refresh-keep-rotated-token | fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget | auth | P1 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/oauth-refresh-keep-rotated-token) |
+| [#16291](https://github.com/can1357/oh-my-pi/pull/16291) | oauth-refresh-keep-rotated-token | fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget | auth | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/oauth-refresh-keep-rotated-token) |
 | [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | factory-droid-image-generation | feat(ai,catalog): generate images through a Factory Droid login | providers | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-generation) |
 | [#16271](https://github.com/can1357/oh-my-pi/pull/16271) | lsp-workspace-folders | fix(lsp): add another checkout to the language server workspace before opening its files | other | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-workspace-folders) |
 | [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
