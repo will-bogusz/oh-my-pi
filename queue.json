@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-26T01:42:47Z",
+  "checked": "2026-10-26T02:43:39Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,83 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "browser-role-name",
-    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
-    "why": "opened as #16252"
-   },
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "browser-timeout-names",
-    "title": "fix(browser): recognize Puppeteer timeouts in release builds",
-    "why": "opened as #16266"
-   },
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "conflict-bulk-per-id",
-    "title": "fix(coding-agent): reject conflict://* per-id blocks with literal values",
-    "why": "opened as #16267"
-   },
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "conflict-hidden-ids",
-    "title": "fix(coding-agent): name registered conflict ids when a hidden block is guessed",
-    "why": "opened as #16269"
-   },
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "factory-droid-org-lookup",
-    "title": "fix(ai): sign Factory Droid logins without an organization claim into the account's organization",
-    "why": "opened as #16257"
-   },
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "gemini-tool-result-order",
-    "title": "fix(ai): send parallel Gemini tool results back in call order",
-    "why": "opened as #16259"
-   },
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "lsp-workspace-folders",
-    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
-    "why": "opened as #16271"
-   },
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "read-after-bash-revalidate",
-    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
-    "why": "opened as #16274"
-   },
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "report-issue-colon",
-    "title": "fix(coding-agent): keep URIs in auto-QA report tool names",
-    "why": "opened as #16278"
-   },
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "revive-tools",
-    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
-    "why": "opened as #16281"
-   },
-   {
-    "at": "2026-10-19T02:17:16Z",
-    "kind": "unopenable",
-    "id": "snapcompact-archive-persist",
-    "title": "fix(coding-agent): persist snapcompact archive source text whole",
-    "why": "opened as #16282"
-   },
    {
     "at": "2026-10-19T04:21:09Z",
     "kind": "unopenable",
