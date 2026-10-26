@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-26T14:57:08Z",
+  "checked": "2026-10-26T15:27:48Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53543,7 +53543,6 @@
    16756,
    16801,
    16908,
-   16910,
    16917,
    16918,
    16925
@@ -57699,7 +57698,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-26T14:57:09.395808Z",
+  "at": "2026-10-26T15:27:48.728742Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -57740,23 +57739,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-21T00:07:50Z"
-   },
-   {
-    "id": "finder-rename-keys",
-    "label": "#16910",
-    "number": 16910,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): let macOS input reach Finder's inline rename field",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T23:57:44Z"
    },
    {
     "id": "lsp-workspace-folders",
