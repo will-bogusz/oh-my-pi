@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-26T19:00:55Z",
+  "checked": "2026-10-26T19:31:52Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53803,13 +53803,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-19T19:10:49Z",
-    "kind": "unopenable",
-    "id": "revive-prompt-cache",
-    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it",
-    "why": "opened as #16369"
-   },
    {
     "at": "2026-10-19T19:41:31Z",
     "kind": "openable",
@@ -57372,7 +57365,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-26T18:30:20.841499Z",
+  "at": "2026-10-26T19:31:53.231528Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
