@@ -53431,7 +53431,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-26T03:44:25Z",
+  "checked": "2026-10-26T04:45:39Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -53582,34 +53582,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-19T04:21:09Z",
-    "kind": "unopenable",
-    "id": "factory-droid-media-budget",
-    "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images",
-    "why": "opened as #16288"
-   },
-   {
-    "at": "2026-10-19T04:21:09Z",
-    "kind": "unopenable",
-    "id": "factory-droid-tool-name-cap",
-    "title": "fix(ai): keep Factory Droid Gemini calls to long-named tools in later requests",
-    "why": "opened as #16283"
-   },
-   {
-    "at": "2026-10-19T04:21:09Z",
-    "kind": "unopenable",
-    "id": "relay-popup-front-main",
-    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
-    "why": "opened as #16284"
-   },
-   {
-    "at": "2026-10-19T04:21:09Z",
-    "kind": "unopenable",
-    "id": "ssh-search-tier",
-    "title": "fix(coding-agent): ask exec approval for ssh:// paths in find, glob and ast_grep",
-    "why": "opened as #16285"
-   },
    {
     "at": "2026-10-19T07:55:57Z",
     "kind": "unopenable",
