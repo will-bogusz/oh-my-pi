@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-26T12:54:24Z",
+  "checked": "2026-10-26T13:55:36Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57699,7 +57699,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-26T13:24:39.389798Z",
+  "at": "2026-10-26T13:55:37.321360Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -58582,7 +58582,7 @@
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts"
+     "conflicts with main in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
     "over": [],
