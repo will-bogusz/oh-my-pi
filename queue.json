@@ -52070,13 +52070,13 @@
    "needs": [],
    "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
    "body": "bodies/finder-rename-keys.md",
-   "state": "open",
+   "state": "closed",
    "pr": 16910,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/finder-rename-keys",
    "host": "MacBook-Pro",
    "added": "2026-10-23T21:15:49Z",
-   "updated": "2026-10-24T00:18:30Z",
+   "updated": "2026-10-26T15:27:45Z",
    "note": "",
    "built": [
     {
