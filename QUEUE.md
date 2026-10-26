@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-26 09:21Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-26 09:52Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-26 09:20Z on goliath; groups below are from it, states from the manifest)
@@ -113,7 +113,7 @@ none
 | [#16762](https://github.com/can1357/oh-my-pi/pull/16762) | sleep-prevention-doc | fix(coding-agent): describe power.sleepPrevention as held only during turns | other | P0 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sleep-prevention-doc) |
 | [#16766](https://github.com/can1357/oh-my-pi/pull/16766) | advisor-quota-comment | docs(coding-agent): say what clears an advisor's quota pause | other | P0 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/advisor-quota-comment) |
 | [#16763](https://github.com/can1357/oh-my-pi/pull/16763) | drop-dead-jobs-op | refactor(coding-agent,tui): drop the unused jobs op from buildJobResult | other | P0 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/drop-dead-jobs-op) |
-| [#16768](https://github.com/can1357/oh-my-pi/pull/16768) | headless-agent-flags | feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files | other | P2 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-agent-flags) |
+| [#16768](https://github.com/can1357/oh-my-pi/pull/16768) | headless-agent-flags | feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files | other | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-agent-flags) |
 | [#16803](https://github.com/can1357/oh-my-pi/pull/16803) | max-cost-gate | feat(session): add --warn-cost and --max-cost to cap a session's spend | session | P2 | 3d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/max-cost-gate) |
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
 | [#16909](https://github.com/can1357/oh-my-pi/pull/16909) | computer-no-ui-continue | fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui | computer | P0 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-no-ui-continue) |
