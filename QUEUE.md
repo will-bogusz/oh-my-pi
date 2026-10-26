@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-26 05:18Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-26 05:48Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-26 05:16Z on goliath; groups below are from it, states from the manifest)
@@ -82,7 +82,7 @@ none
 | [#16250](https://github.com/can1357/oh-my-pi/pull/16250) | anthropic-refusal-handoff | fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff | providers | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-refusal-handoff) |
 | [#16309](https://github.com/can1357/oh-my-pi/pull/16309) | factory-droid-credit-promotions | feat(catalog,tui): show Factory Droid credit promotions in the model browser | providers | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-credit-promotions) |
 | [#16257](https://github.com/can1357/oh-my-pi/pull/16257) | factory-droid-org-lookup | fix(ai): sign Factory Droid logins without an organization claim into the account's organization | providers | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-org-lookup) |
-| [#16297](https://github.com/can1357/oh-my-pi/pull/16297) | exact-provider-model-selector | fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling | models | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/exact-provider-model-selector) |
+| [#16297](https://github.com/can1357/oh-my-pi/pull/16297) | exact-provider-model-selector | fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling | models | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/exact-provider-model-selector) |
 | [#16296](https://github.com/can1357/oh-my-pi/pull/16296) | factory-droid-prompt-cache | feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models | providers | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-prompt-cache) |
 | [#16291](https://github.com/can1357/oh-my-pi/pull/16291) | oauth-refresh-keep-rotated-token | fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget | auth | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/oauth-refresh-keep-rotated-token) |
 | [#16316](https://github.com/can1357/oh-my-pi/pull/16316) | factory-droid-image-generation | feat(ai,catalog): generate images through a Factory Droid login | providers | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-generation) |
