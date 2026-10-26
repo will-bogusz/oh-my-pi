@@ -53467,21 +53467,50 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-26T10:52:24Z",
+  "checked": "2026-10-26T11:23:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "factory-droid-image-role-default": {
+    "since": "2026-10-26T11:23:01Z",
+    "title": "feat(catalog): fall back to Factory Droid image models in the image role"
+   },
+   "git-guard-scope": {
+    "since": "2026-10-26T11:23:01Z",
+    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share"
+   },
+   "read-url-markup-tokens": {
+    "since": "2026-10-26T11:23:01Z",
+    "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads"
+   }
+  },
   "conflicts": {
-   "#16803": {
-    "since": "2026-10-26T09:20:07Z",
-    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
+   "#15508": {
+    "since": "2026-10-26T11:23:01Z",
+    "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
     "files": [
-     "docs/cli-reference.md",
-     "packages/coding-agent/src/modes/print-mode.ts"
+     "packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ]
+   },
+   "#16908": {
+    "since": "2026-10-26T11:23:01Z",
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
+    "files": [
+     "packages/browser-relay/extension/chrome.d.ts",
+     "packages/coding-agent/src/tools/browser/relay/bridge.ts",
+     "packages/coding-agent/src/tools/browser/relay/server.ts"
+    ]
+   },
+   "#16925": {
+    "since": "2026-10-26T11:23:01Z",
+    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
+    "files": [
+     "packages/coding-agent/src/prompts/system/computer-use.md",
+     "packages/coding-agent/src/prompts/tools/computer.md"
     ]
    }
   },
-  "merged_through": "2026-10-22T09:44:50Z",
+  "merged_through": "2026-10-26T10:58:22Z",
   "unreleased": {
    "16614": {
     "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer",
@@ -53527,74 +53556,242 @@
     "title": "fix(coding-agent): cancel the outgoing session's background jobs on /resume",
     "merge_commit": "fd440d9a6d6d387b444fcaa242f630fca34b2daa",
     "merged_at": "2026-10-22T09:44:50Z"
+   },
+   "16920": {
+    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
+    "merge_commit": "eebc54f49d2b77835bd7c2a087eb76928dd00a72",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16919": {
+    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
+    "merge_commit": "5babef173d3e3747d452ff17658e05996d7b49ec",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16916": {
+    "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
+    "merge_commit": "6c9147f0304e5763182d918d4c0845a00450de51",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16915": {
+    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
+    "merge_commit": "9ef07d3a368c8e097d623b8368f795a6daed6780",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16912": {
+    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
+    "merge_commit": "8f2812997981446aebc82520aaece48a234dd657",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16911": {
+    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
+    "merge_commit": "44567619ebe3395b50e6cd7712fdff02dfe2f244",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16909": {
+    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
+    "merge_commit": "e872e7715195b855840bc91267e38fd344803dbd",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16907": {
+    "title": "fix(browser): wait for the page a click navigates to before the next call",
+    "merge_commit": "1e41c2fd0f6a248c7ce39f7ac249151efc63a353",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16906": {
+    "title": "fix(catalog): identify Devin requests as CLI 3000.11.205",
+    "merge_commit": "fe0ce6e2fffcb8ceab303817043f9c2a26e10e06",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16905": {
+    "title": "fix(catalog): read Devin context windows from model info",
+    "merge_commit": "164a529b66956a0a79065031293ad7f90e5149c4",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16803": {
+    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
+    "merge_commit": "44f3c9ce1af3565694c038c7147bdacbe2defa4e",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16770": {
+    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input",
+    "merge_commit": "00a73d832fce37cd0168381ae5faf7fe510f006d",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16769": {
+    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app",
+    "merge_commit": "b026b4f2e1e3b93bdfead0a80c8598d53ea9ecc9",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16768": {
+    "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files",
+    "merge_commit": "2a012916194e172f7d25398335b9eeeb76eecf8e",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16766": {
+    "title": "docs(coding-agent): say what clears an advisor's quota pause",
+    "merge_commit": "94032c8df5f5f8229d903e3ac14b651cee0d84eb",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16763": {
+    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult",
+    "merge_commit": "c7d72f0eee9a4101704226a8e9cc371607d1a792",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16762": {
+    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns",
+    "merge_commit": "6aa2a9e6b0426299f69e86f14af82017f2df6ede",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16612": {
+    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary",
+    "merge_commit": "5540fdb4952c3fb1861c3e0b8a8596f7469f7b41",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16608": {
+    "title": "feat(edit): record why an edit failed and count it in /session",
+    "merge_commit": "1f25de0b579bc5a8f0d9a97a911b3a71c87ad60f",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16599": {
+    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k",
+    "merge_commit": "87a018e0c8856d7d885ed7f13fff62562222e0f8",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16597": {
+    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived",
+    "merge_commit": "b552d78fb7692929b2422bb686399e616fcfce47",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16596": {
+    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code",
+    "merge_commit": "c616c702644d5cc2fc80be61ea7a3f487ae3e829",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16585": {
+    "title": "fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer",
+    "merge_commit": "bfd83f62d84d25e3cf15611990686cc2578b6269",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16583": {
+    "title": "fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes",
+    "merge_commit": "4eec89dd816457264929aaf9c2dafae23ee61502",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16581": {
+    "title": "feat(coding-agent): include account policy state in omp usage --json",
+    "merge_commit": "a6d20fab17a7998d36e6725fed2014890c9c7d2a",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16556": {
+    "title": "fix(coding-agent): keep ts-set-map fast on long Set lines and stop two false reminders",
+    "merge_commit": "c939a6ffc11e4c1ae6a30da0b0649e537224a46a",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16403": {
+    "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS",
+    "merge_commit": "cdef81cb6e8f63c0886994b17f6652740b262ca7",
+    "merged_at": "2026-10-26T10:58:21Z"
+   },
+   "16589": {
+    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer",
+    "merge_commit": "bd921d14345590d314d793e2a6d685937b332248",
+    "merged_at": "2026-10-26T10:58:22Z"
+   },
+   "16575": {
+    "title": "fix(coding-agent): keep a replaced file's CRLF line endings and BOM in write",
+    "merge_commit": "87592980ff761b1b48041bc919aeaf31082c1471",
+    "merged_at": "2026-10-26T10:58:22Z"
+   },
+   "16316": {
+    "title": "feat(ai,catalog): generate images through a Factory Droid login",
+    "merge_commit": "24a1a5f1eee50ff378e1f72d763a52233a0c70c4",
+    "merged_at": "2026-10-26T10:58:22Z"
+   },
+   "16296": {
+    "title": "feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models",
+    "merge_commit": "8c887eaaec4a2fbf8c47cc9fb22b73301c789350",
+    "merged_at": "2026-10-26T10:58:22Z"
+   },
+   "16291": {
+    "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget",
+    "merge_commit": "4b0c7c1eda75afcc6467b0c70bb697e92fff62f7",
+    "merged_at": "2026-10-26T10:58:22Z"
+   },
+   "16257": {
+    "title": "fix(ai): sign Factory Droid logins without an organization claim into the account's organization",
+    "merge_commit": "6ada33f6d68764b696e9da453d7db25855d8e8fb",
+    "merged_at": "2026-10-26T10:58:22Z"
+   },
+   "16250": {
+    "title": "fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff",
+    "merge_commit": "5bc0abb888222ccd4157d8bbc85c6d0303452e5d",
+    "merged_at": "2026-10-26T10:58:22Z"
+   },
+   "15418": {
+    "title": "fix(lsp): release language server memory by closing documents unused for 5 minutes",
+    "merge_commit": "5f1b4364847f4c2db6ef4c95245481306204f371",
+    "merged_at": "2026-10-26T10:58:22Z"
+   },
+   "15105": {
+    "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
+    "merge_commit": "c184c0a1bf2c68ee6237a2f1565c4eb1543ffae0",
+    "merged_at": "2026-10-26T10:58:22Z"
    }
   },
   "ready": [
-   15105,
    15124,
    15128,
    15130,
-   15418,
    15433,
    15508,
    16223,
-   16250,
-   16257,
    16271,
    16274,
    16284,
-   16291,
-   16296,
    16297,
    16309,
-   16316,
-   16403,
    16552,
    16553,
-   16556,
    16564,
-   16575,
    16576,
    16579,
-   16581,
-   16583,
-   16585,
    16586,
    16587,
-   16589,
    16595,
-   16596,
-   16597,
-   16599,
-   16608,
    16611,
-   16612,
    16756,
-   16762,
-   16763,
-   16766,
-   16768,
-   16769,
-   16770,
    16801,
-   16803,
-   16905,
-   16906,
-   16907,
    16908,
-   16909,
    16910,
-   16911,
-   16912,
-   16915,
-   16916,
    16917,
    16918,
-   16919,
-   16920,
    16925
   ],
   "post_merge": {
+   "15105": {
+    "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
+    "merge_commit": "c184c0a1bf2c68ee6237a2f1565c4eb1543ffae0",
+    "merged_at": "2026-10-26T10:58:22Z",
+    "findings": []
+   },
+   "15418": {
+    "title": "fix(lsp): release language server memory by closing documents unused for 5 minutes",
+    "merge_commit": "5f1b4364847f4c2db6ef4c95245481306204f371",
+    "merged_at": "2026-10-26T10:58:22Z",
+    "findings": []
+   },
+   "16250": {
+    "title": "fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff",
+    "merge_commit": "5bc0abb888222ccd4157d8bbc85c6d0303452e5d",
+    "merged_at": "2026-10-26T10:58:22Z",
+    "findings": []
+   },
+   "16257": {
+    "title": "fix(ai): sign Factory Droid logins without an organization claim into the account's organization",
+    "merge_commit": "6ada33f6d68764b696e9da453d7db25855d8e8fb",
+    "merged_at": "2026-10-26T10:58:22Z",
+    "findings": []
+   },
    "16288": {
     "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images",
     "merge_commit": "360b9bd6841d89b841189aebf409c37af0d0d929",
@@ -53610,6 +53807,18 @@
      }
     ]
    },
+   "16291": {
+    "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget",
+    "merge_commit": "4b0c7c1eda75afcc6467b0c70bb697e92fff62f7",
+    "merged_at": "2026-10-26T10:58:22Z",
+    "findings": []
+   },
+   "16296": {
+    "title": "feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models",
+    "merge_commit": "8c887eaaec4a2fbf8c47cc9fb22b73301c789350",
+    "merged_at": "2026-10-26T10:58:22Z",
+    "findings": []
+   },
    "16300": {
     "title": "fix(coding-agent): install with %pip into venvs that have no pip",
     "merge_commit": "0bba68154823781aa16409548fedee335d8aefec",
@@ -53624,6 +53833,186 @@
       "addressed_by": 16552
      }
     ]
+   },
+   "16316": {
+    "title": "feat(ai,catalog): generate images through a Factory Droid login",
+    "merge_commit": "24a1a5f1eee50ff378e1f72d763a52233a0c70c4",
+    "merged_at": "2026-10-26T10:58:22Z",
+    "findings": []
+   },
+   "16403": {
+    "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS",
+    "merge_commit": "cdef81cb6e8f63c0886994b17f6652740b262ca7",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16556": {
+    "title": "fix(coding-agent): keep ts-set-map fast on long Set lines and stop two false reminders",
+    "merge_commit": "c939a6ffc11e4c1ae6a30da0b0649e537224a46a",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16575": {
+    "title": "fix(coding-agent): keep a replaced file's CRLF line endings and BOM in write",
+    "merge_commit": "87592980ff761b1b48041bc919aeaf31082c1471",
+    "merged_at": "2026-10-26T10:58:22Z",
+    "findings": []
+   },
+   "16581": {
+    "title": "feat(coding-agent): include account policy state in omp usage --json",
+    "merge_commit": "a6d20fab17a7998d36e6725fed2014890c9c7d2a",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16583": {
+    "title": "fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes",
+    "merge_commit": "4eec89dd816457264929aaf9c2dafae23ee61502",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16585": {
+    "title": "fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer",
+    "merge_commit": "bfd83f62d84d25e3cf15611990686cc2578b6269",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16589": {
+    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer",
+    "merge_commit": "bd921d14345590d314d793e2a6d685937b332248",
+    "merged_at": "2026-10-26T10:58:22Z",
+    "findings": []
+   },
+   "16596": {
+    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code",
+    "merge_commit": "c616c702644d5cc2fc80be61ea7a3f487ae3e829",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16597": {
+    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived",
+    "merge_commit": "b552d78fb7692929b2422bb686399e616fcfce47",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16599": {
+    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k",
+    "merge_commit": "87a018e0c8856d7d885ed7f13fff62562222e0f8",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16608": {
+    "title": "feat(edit): record why an edit failed and count it in /session",
+    "merge_commit": "1f25de0b579bc5a8f0d9a97a911b3a71c87ad60f",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16612": {
+    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary",
+    "merge_commit": "5540fdb4952c3fb1861c3e0b8a8596f7469f7b41",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16762": {
+    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns",
+    "merge_commit": "6aa2a9e6b0426299f69e86f14af82017f2df6ede",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16763": {
+    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult",
+    "merge_commit": "c7d72f0eee9a4101704226a8e9cc371607d1a792",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16766": {
+    "title": "docs(coding-agent): say what clears an advisor's quota pause",
+    "merge_commit": "94032c8df5f5f8229d903e3ac14b651cee0d84eb",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16768": {
+    "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files",
+    "merge_commit": "2a012916194e172f7d25398335b9eeeb76eecf8e",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16769": {
+    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app",
+    "merge_commit": "b026b4f2e1e3b93bdfead0a80c8598d53ea9ecc9",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16770": {
+    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input",
+    "merge_commit": "00a73d832fce37cd0168381ae5faf7fe510f006d",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16803": {
+    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
+    "merge_commit": "44f3c9ce1af3565694c038c7147bdacbe2defa4e",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16905": {
+    "title": "fix(catalog): read Devin context windows from model info",
+    "merge_commit": "164a529b66956a0a79065031293ad7f90e5149c4",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16906": {
+    "title": "fix(catalog): identify Devin requests as CLI 3000.11.205",
+    "merge_commit": "fe0ce6e2fffcb8ceab303817043f9c2a26e10e06",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16907": {
+    "title": "fix(browser): wait for the page a click navigates to before the next call",
+    "merge_commit": "1e41c2fd0f6a248c7ce39f7ac249151efc63a353",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16909": {
+    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
+    "merge_commit": "e872e7715195b855840bc91267e38fd344803dbd",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16911": {
+    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
+    "merge_commit": "44567619ebe3395b50e6cd7712fdff02dfe2f244",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16912": {
+    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
+    "merge_commit": "8f2812997981446aebc82520aaece48a234dd657",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16915": {
+    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
+    "merge_commit": "9ef07d3a368c8e097d623b8368f795a6daed6780",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16916": {
+    "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
+    "merge_commit": "6c9147f0304e5763182d918d4c0845a00450de51",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16919": {
+    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
+    "merge_commit": "5babef173d3e3747d452ff17658e05996d7b49ec",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
+   },
+   "16920": {
+    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
+    "merge_commit": "eebc54f49d2b77835bd7c2a087eb76928dd00a72",
+    "merged_at": "2026-10-26T10:58:21Z",
+    "findings": []
    }
   },
   "events": [
@@ -56175,6 +56564,342 @@
      "docs/cli-reference.md",
      "packages/coding-agent/src/modes/print-mode.ts"
     ]
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16920,
+    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16919,
+    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16916,
+    "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16915,
+    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16912,
+    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16911,
+    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16909,
+    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16907,
+    "title": "fix(browser): wait for the page a click navigates to before the next call",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16906,
+    "title": "fix(catalog): identify Devin requests as CLI 3000.11.205",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16905,
+    "title": "fix(catalog): read Devin context windows from model info",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16803,
+    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16770,
+    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16769,
+    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16768,
+    "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16766,
+    "title": "docs(coding-agent): say what clears an advisor's quota pause",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16763,
+    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16762,
+    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16612,
+    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16608,
+    "title": "feat(edit): record why an edit failed and count it in /session",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16599,
+    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16597,
+    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16596,
+    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16585,
+    "title": "fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16583,
+    "title": "fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16581,
+    "title": "feat(coding-agent): include account policy state in omp usage --json",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16556,
+    "title": "fix(coding-agent): keep ts-set-map fast on long Set lines and stop two false reminders",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16403,
+    "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16589,
+    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16575,
+    "title": "fix(coding-agent): keep a replaced file's CRLF line endings and BOM in write",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16316,
+    "title": "feat(ai,catalog): generate images through a Factory Droid login",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16296,
+    "title": "feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16291,
+    "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16257,
+    "title": "fix(ai): sign Factory Droid logins without an organization claim into the account's organization",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 16250,
+    "title": "fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 15418,
+    "title": "fix(lsp): release language server memory by closing documents unused for 5 minutes",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "merged",
+    "number": 15105,
+    "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "openable",
+    "id": "factory-droid-image-role-default",
+    "title": "feat(catalog): fall back to Factory Droid image models in the image role"
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "openable",
+    "id": "git-guard-scope",
+    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share"
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "openable",
+    "id": "read-url-markup-tokens",
+    "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads"
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "conflict",
+    "label": "#15508",
+    "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
+    "files": [
+     "packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ]
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "conflict",
+    "label": "#16908",
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
+    "files": [
+     "packages/browser-relay/extension/chrome.d.ts",
+     "packages/coding-agent/src/tools/browser/relay/bridge.ts",
+     "packages/coding-agent/src/tools/browser/relay/server.ts"
+    ]
+   },
+   {
+    "at": "2026-10-26T11:23:01Z",
+    "kind": "conflict",
+    "label": "#16925",
+    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
+    "files": [
+     "packages/coding-agent/src/prompts/system/computer-use.md",
+     "packages/coding-agent/src/prompts/tools/computer.md"
+    ]
    }
   ]
  },
@@ -56869,7 +57594,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-26T10:21:28.643345Z",
+  "at": "2026-10-26T11:23:02.638003Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -56912,74 +57637,6 @@
     "created": "2026-10-21T00:07:50Z"
    },
    {
-    "id": "sleep-prevention-doc",
-    "label": "#16762",
-    "number": 16762,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-22T08:50:21Z"
-   },
-   {
-    "id": "devin-model-info-context",
-    "label": "#16905",
-    "number": 16905,
-    "state": "open",
-    "area": "catalog",
-    "priority": "P0",
-    "title": "fix(catalog): read Devin context windows from model info",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T22:47:38Z"
-   },
-   {
-    "id": "devin-cli-3000-11-205",
-    "label": "#16906",
-    "number": 16906,
-    "state": "open",
-    "area": "broker",
-    "priority": "P0",
-    "title": "fix(catalog): identify Devin requests as CLI 3000.11.205",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T22:53:04Z"
-   },
-   {
-    "id": "computer-no-ui-continue",
-    "label": "#16909",
-    "number": 16909,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T23:55:33Z"
-   },
-   {
     "id": "finder-rename-keys",
     "label": "#16910",
     "number": 16910,
@@ -56995,142 +57652,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-23T23:57:44Z"
-   },
-   {
-    "id": "app-name-background-helper",
-    "label": "#16911",
-    "number": 16911,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T23:59:53Z"
-   },
-   {
-    "id": "window-miss-apps-open",
-    "label": "#16912",
-    "number": 16912,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-24T00:01:56Z"
-   },
-   {
-    "id": "ax-placeholder-name",
-    "label": "#16915",
-    "number": 16915,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-24T01:35:46Z"
-   },
-   {
-    "id": "axpress-click-hint",
-    "label": "#16916",
-    "number": 16916,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-24T01:37:50Z"
-   },
-   {
-    "id": "drop-dead-jobs-op",
-    "label": "#16763",
-    "number": 16763,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-22T08:59:31Z"
-   },
-   {
-    "id": "advisor-quota-comment",
-    "label": "#16766",
-    "number": 16766,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "docs(coding-agent): say what clears an advisor's quota pause",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-22T09:11:52Z"
-   },
-   {
-    "id": "anthropic-refusal-handoff",
-    "label": "#16250",
-    "number": 16250,
-    "state": "open",
-    "area": "providers",
-    "priority": "P1",
-    "title": "fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-18T22:03:48Z"
-   },
-   {
-    "id": "factory-droid-org-lookup",
-    "label": "#16257",
-    "number": 16257,
-    "state": "open",
-    "area": "providers",
-    "priority": "P1",
-    "title": "fix(ai): sign Factory Droid logins without an organization claim into the account's organization",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-18T23:07:08Z"
    },
    {
     "id": "lsp-workspace-folders",
@@ -57167,23 +57688,6 @@
     "created": "2026-10-19T01:07:21Z"
    },
    {
-    "id": "oauth-refresh-keep-rotated-token",
-    "label": "#16291",
-    "number": 16291,
-    "state": "open",
-    "area": "auth",
-    "priority": "P1",
-    "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-19T04:28:23Z"
-   },
-   {
     "id": "pip-procfs-fallback",
     "label": "#16552",
     "number": 16552,
@@ -57218,74 +57722,6 @@
     "created": "2026-10-20T20:20:43Z"
    },
    {
-    "id": "ts-rule-followups",
-    "label": "#16556",
-    "number": 16556,
-    "state": "open",
-    "area": "other",
-    "priority": "P1",
-    "title": "fix(coding-agent): keep ts-set-map fast on long Set lines and stop two false reminders",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-20T20:46:32Z"
-   },
-   {
-    "id": "write-keep-crlf",
-    "label": "#16575",
-    "number": 16575,
-    "state": "open",
-    "area": "write",
-    "priority": "P1",
-    "title": "fix(coding-agent): keep a replaced file's CRLF line endings and BOM in write",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-20T23:58:46Z"
-   },
-   {
-    "id": "peer-reply-keeps-report",
-    "label": "#16583",
-    "number": 16583,
-    "state": "open",
-    "area": "agent",
-    "priority": "P1",
-    "title": "fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T01:11:32Z"
-   },
-   {
-    "id": "pdf-scan-pages",
-    "label": "#16585",
-    "number": 16585,
-    "state": "open",
-    "area": "other",
-    "priority": "P1",
-    "title": "fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T01:55:59Z"
-   },
-   {
     "id": "read-display-budget",
     "label": "#16595",
     "number": 16595,
@@ -57301,93 +57737,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-21T03:57:51Z"
-   },
-   {
-    "id": "read-nav-gate",
-    "label": "#16596",
-    "number": 16596,
-    "state": "open",
-    "area": "other",
-    "priority": "P1",
-    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T04:00:30Z"
-   },
-   {
-    "id": "computer-element-front-first",
-    "label": "#16769",
-    "number": 16769,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-22T10:05:52Z"
-   },
-   {
-    "id": "computer-right-click-per-press",
-    "label": "#16770",
-    "number": 16770,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-22T10:12:13Z"
-   },
-   {
-    "id": "browser-read-after-navigation",
-    "label": "#16907",
-    "number": 16907,
-    "state": "open",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser): wait for the page a click navigates to before the next call",
-    "action": "keep",
-    "reasons": [],
-    "note": "opened over P2 #15508",
-    "over": [],
-    "paired": [
-     "#15508"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T23:47:57Z"
-   },
-   {
-    "id": "git-guard-defects",
-    "label": "#16919",
-    "number": 16919,
-    "state": "open",
-    "area": "other",
-    "priority": "P1",
-    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-24T01:44:16Z"
    },
    {
     "id": "policy-priority-unmeasured",
@@ -57407,23 +57756,6 @@
     "created": "2026-10-10T00:21:29Z"
    },
    {
-    "id": "lsp-close-idle-docs",
-    "label": "#15418",
-    "number": 15418,
-    "state": "open",
-    "area": "other",
-    "priority": "P2",
-    "title": "fix(lsp): release language server memory by closing documents unused for 5 minutes",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-11T22:56:59Z"
-   },
-   {
     "id": "print-hold",
     "label": "#15508",
     "number": 15508,
@@ -57431,13 +57763,13 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
-    "action": "keep",
-    "reasons": [],
-    "note": "rebases after #16907 merges",
-    "over": [],
-    "paired": [
-     "#16907"
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
+    "note": "",
+    "over": [],
+    "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-12T18:13:54Z"
@@ -57479,57 +57811,6 @@
     "created": "2026-10-19T05:19:15Z"
    },
    {
-    "id": "minimizer-keep-small-whole",
-    "label": "#16589",
-    "number": 16589,
-    "state": "open",
-    "area": "other",
-    "priority": "P2",
-    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T02:15:18Z"
-   },
-   {
-    "id": "revive-extension-tools",
-    "label": "#16597",
-    "number": 16597,
-    "state": "open",
-    "area": "other",
-    "priority": "P2",
-    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T04:03:03Z"
-   },
-   {
-    "id": "task-result-inline",
-    "label": "#16599",
-    "number": 16599,
-    "state": "open",
-    "area": "other",
-    "priority": "P2",
-    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T04:05:46Z"
-   },
-   {
     "id": "r2/webmcp-native",
     "label": "#16756",
     "number": 16756,
@@ -57554,12 +57835,13 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
-    "action": "keep",
-    "reasons": [],
-    "note": "opened over P2 #15105; opened over P2 #16284",
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/browser-relay/extension/chrome.d.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts"
+    ],
+    "note": "opened over P2 #16284",
     "over": [],
     "paired": [
-     "#15105",
      "#16284"
     ],
     "blocked_by": [],
@@ -57574,35 +57856,16 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
-    "action": "keep",
-    "reasons": [],
-    "note": "opened over P2 #16403",
-    "over": [],
-    "paired": [
-     "#16403"
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/prompts/system/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
+    "note": "",
+    "over": [],
+    "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-24T03:50:10Z"
-   },
-   {
-    "id": "relay-extension-version",
-    "label": "#15105",
-    "number": 15105,
-    "state": "open",
-    "area": "browser",
-    "priority": "P2",
-    "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
-    "action": "keep",
-    "reasons": [],
-    "note": "rebases after #16908 merges",
-    "over": [],
-    "paired": [
-     "#16908"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-09T22:10:39Z"
    },
    {
     "id": "reset-restore-longest-wait",
@@ -57673,23 +57936,6 @@
     "created": "2026-10-18T17:39:04Z"
    },
    {
-    "id": "factory-droid-prompt-cache",
-    "label": "#16296",
-    "number": 16296,
-    "state": "open",
-    "area": "providers",
-    "priority": "P2",
-    "title": "feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-19T05:02:01Z"
-   },
-   {
     "id": "factory-droid-credit-promotions",
     "label": "#16309",
     "number": 16309,
@@ -57707,42 +57953,6 @@
     "created": "2026-10-19T06:56:13Z"
    },
    {
-    "id": "factory-droid-image-generation",
-    "label": "#16316",
-    "number": 16316,
-    "state": "open",
-    "area": "providers",
-    "priority": "P2",
-    "title": "feat(ai,catalog): generate images through a Factory Droid login",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-19T07:29:43Z"
-   },
-   {
-    "id": "computer-shell-exception",
-    "label": "#16403",
-    "number": 16403,
-    "state": "open",
-    "area": "computer",
-    "priority": "P2",
-    "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS",
-    "action": "keep",
-    "reasons": [],
-    "note": "rebases after #16925 merges",
-    "over": [],
-    "paired": [
-     "#16925"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-19T23:53:06Z"
-   },
-   {
     "id": "bash-view-tags",
     "label": "#16576",
     "number": 16576,
@@ -57758,23 +57968,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-21T00:01:49Z"
-   },
-   {
-    "id": "usage-json-policy",
-    "label": "#16581",
-    "number": 16581,
-    "state": "open",
-    "area": "broker",
-    "priority": "P2",
-    "title": "feat(coding-agent): include account policy state in omp usage --json",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T00:54:15Z"
    },
    {
     "id": "bash-minimizer-meta",
@@ -57811,23 +58004,6 @@
     "created": "2026-10-21T02:03:29Z"
    },
    {
-    "id": "edit-error-kind",
-    "label": "#16608",
-    "number": 16608,
-    "state": "open",
-    "area": "other",
-    "priority": "P2",
-    "title": "feat(edit): record why an edit failed and count it in /session",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T06:02:20Z"
-   },
-   {
     "id": "read-audio-transcripts",
     "label": "#16611",
     "number": 16611,
@@ -57845,40 +58021,6 @@
     "created": "2026-10-21T06:07:03Z"
    },
    {
-    "id": "read-heif-images",
-    "label": "#16612",
-    "number": 16612,
-    "state": "open",
-    "area": "coding-agent",
-    "priority": "P2",
-    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T06:10:55Z"
-   },
-   {
-    "id": "headless-agent-flags",
-    "label": "#16768",
-    "number": 16768,
-    "state": "open",
-    "area": "other",
-    "priority": "P2",
-    "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-22T09:30:09Z"
-   },
-   {
     "id": "timer-pr-1-poke",
     "label": "#16801",
     "number": 16801,
@@ -57894,25 +58036,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-22T16:58:16Z"
-   },
-   {
-    "id": "max-cost-gate",
-    "label": "#16803",
-    "number": 16803,
-    "state": "open",
-    "area": "session",
-    "priority": "P2",
-    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in docs/cli-reference.md, packages/coding-agent/src/modes/print-mode.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-22T17:06:29Z"
    },
    {
     "id": "computer-control-policy",
@@ -57949,23 +58072,6 @@
     "created": "2026-10-24T01:42:05Z"
    },
    {
-    "id": "grep-exclude",
-    "label": "#16920",
-    "number": 16920,
-    "state": "open",
-    "area": "other",
-    "priority": "P2",
-    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-24T01:46:43Z"
-   },
-   {
     "id": "r2/relay-call-deadline",
     "label": "r2/relay-call-deadline",
     "number": null,
@@ -57975,22 +58081,18 @@
     "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
     "action": "wait",
     "reasons": [
-     "needs #15105 (open)",
-     "conflicts with #16907 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts"
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16907",
      "#16284",
      "#16908"
     ],
-    "needs": [
-     "#15105"
-    ],
+    "needs": [],
     "created": "2026-10-13T21:47:19Z"
    },
    {
@@ -58006,16 +58108,14 @@
      "needs #16284 (open)",
      "conflicts with #16284 in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/natives/native/index.d.ts, packages/natives/native/index.js",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
-     "conflicts with #15105 in packages/coding-agent/src/tools/browser/relay/server.ts",
-     "conflicts with main in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/natives/native/index.d.ts"
+     "conflicts with main in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/natives/native/index.d.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#16284",
-     "#16908",
-     "#15105"
+     "#16908"
     ],
     "needs": [
      "relay-popup-front-main"
@@ -58032,14 +58132,12 @@
     "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
     "action": "wait",
     "reasons": [
-     "conflicts with #16907 in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16907"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-23T18:26:13Z"
    },
@@ -58053,16 +58151,12 @@
     "title": "feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback)",
     "action": "wait",
     "reasons": [
-     "conflicts with #16257 in packages/ai/src/registry/oauth/factory-droid.ts",
-     "conflicts with #16316 in packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts"
+     "conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16257",
-     "#16316"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-18T20:33:08Z"
    },
@@ -58077,15 +58171,13 @@
     "action": "wait",
     "reasons": [
      "needs factory-droid-0244 (queued)",
-     "conflicts with #16316 in packages/catalog/src/compat/rules/runtime/behavior.kdl",
+     "its need factory-droid-0244 conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts",
      "conflicts with main in packages/ai/src/providers/factory-droid/gemini.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16316"
-    ],
+    "blocked_by": [],
     "needs": [
      "factory-droid-0244"
     ],
@@ -58101,14 +58193,12 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
-     "conflicts with #16403 in packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16403"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
    },
@@ -58164,12 +58254,12 @@
     "title": "fix(browser): attach only the relay tabs omp opened or borrowed",
     "action": "wait",
     "reasons": [
-     "needs #15105 (open), #15508 (open), r2/relay-call-deadline (queued), r2/relay-bg-input-main (queued), r2/native-window-report (queued)",
-     "conflicts with #16907 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "needs #15508 (open), r2/relay-call-deadline (queued), r2/relay-bg-input-main (queued), r2/native-window-report (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need r2/relay-call-deadline conflicts with main in packages/coding-agent/src/tools/browser/relay/bridge.ts",
+     "its need #15508 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need r2/relay-call-deadline conflicts with main in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
      "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
     ],
@@ -58177,13 +58267,11 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16907",
      "#16284",
      "#16756",
      "#16908"
     ],
     "needs": [
-     "#15105",
      "#15508",
      "r2/relay-call-deadline",
      "r2/relay-bg-input-main",
@@ -58202,17 +58290,15 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with #16907 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16907",
      "#16284",
      "#16756",
      "#16908"
@@ -58233,18 +58319,16 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued), #16756 (open)",
-     "conflicts with #16907 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
-     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
-     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
+     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need #16756 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16907",
      "#16284",
      "#16908"
     ],
@@ -58265,14 +58349,12 @@
     "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
     "action": "wait",
     "reasons": [
-     "conflicts with #16907 in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16907"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-23T19:04:15Z"
    },
@@ -58287,14 +58369,13 @@
     "action": "wait",
     "reasons": [
      "conflicts with #16925 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #16403 in packages/coding-agent/src/prompts/tools/computer.md"
+     "conflicts with main in packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16925",
-     "#16403"
+     "#16925"
     ],
     "needs": [],
     "created": "2026-10-24T05:06:00Z"
@@ -58310,17 +58391,14 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued), #15282 (open)",
-     "conflicts with #16915 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with #16916 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
+     "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
+     "its need #15282 conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16915",
-     "#16916"
-    ],
+    "blocked_by": [],
     "needs": [
      "computer-ui-quiet",
      "computer-ax-lines"
@@ -58337,14 +58415,12 @@
     "title": "feat(computer): wait for windows opened by actions",
     "action": "wait",
     "reasons": [
-     "conflicts with #16912 in packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16912"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-24T05:07:50Z"
    },
@@ -58356,17 +58432,13 @@
     "area": "providers",
     "priority": "P2",
     "title": "feat(catalog): fall back to Factory Droid image models in the image role",
-    "action": "wait",
-    "reasons": [
-     "needs #16316 (open)"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "advance first",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [
-     "factory-droid-image-generation"
-    ],
+    "needs": [],
     "created": "2026-10-18T21:11:36Z"
    },
    {
@@ -58379,14 +58451,12 @@
     "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)",
     "action": "wait",
     "reasons": [
-     "conflicts with #16316 in packages/catalog/src/discovery/factory-droid.ts"
+     "conflicts with main in packages/catalog/src/discovery/factory-droid.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16316"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-18T20:37:53Z"
    },
@@ -58400,24 +58470,20 @@
     "title": "feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks",
     "action": "wait",
     "reasons": [
-     "conflicts with #16583 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #16803 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16583",
      "#15128",
      "#15130",
      "#16587",
-     "#16801",
-     "#16803"
+     "#16801"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -58433,14 +58499,13 @@
     "action": "wait",
     "reasons": [
      "needs #15508 (open)",
-     "conflicts with #16907 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need #15508 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16907",
      "#16756"
     ],
     "needs": [
@@ -58459,18 +58524,15 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with #16907 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in docs/tools/browser.md",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16907",
      "#16284",
      "#16756",
      "#16908"
@@ -58494,8 +58556,7 @@
      "conflicts with #16297 in docs/auth-broker-gateway.md",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #16581 in packages/coding-agent/src/cli/usage-cli.ts",
-     "conflicts with main in docs/auth-broker-gateway.md, docs/settings.md, packages/ai/src/auth-broker/discover.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/claude-auto-reset.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts, packages/coding-agent/test/claude-auto-reset.test.ts"
+     "conflicts with main in docs/auth-broker-gateway.md, docs/settings.md, packages/ai/src/auth-broker/discover.ts, packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/claude-auto-reset.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts, packages/coding-agent/test/claude-auto-reset.test.ts"
     ],
     "note": "",
     "over": [],
@@ -58504,8 +58565,7 @@
      "#15124",
      "#16297",
      "#15128",
-     "#15130",
-     "#16581"
+     "#15130"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -58521,22 +58581,18 @@
     "action": "wait",
     "reasons": [
      "needs #14074 (open)",
-     "conflicts with #16291 in packages/ai/src/auth/types.ts",
      "conflicts with #15124 in docs/auth-broker-gateway.md, packages/ai/src/auth/types.ts",
      "conflicts with #16297 in docs/auth-broker-gateway.md",
      "conflicts with #15130 in packages/ai/src/auth/types.ts",
-     "conflicts with #16581 in packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/test/usage-cli.test.ts",
      "conflicts with main in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/ai/src/auth/policy.ts, packages/ai/src/auth/reserve.ts, packages/ai/src/auth/types.ts, packages/ai/test/auth-broker-config-discovery.test.ts, packages/ai/test/auth-storage-codex-selection.test.ts, packages/ai/test/auth-storage-model-usage-health.test.ts, packages/coding-agent/src/cli/usage-cli.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16291",
      "#15124",
      "#16297",
-     "#15130",
-     "#16581"
+     "#15130"
     ],
     "needs": [
      "#14074"
@@ -58554,28 +58610,24 @@
     "action": "wait",
     "reasons": [
      "needs reset-account-optout (queued)",
-     "conflicts with #16583 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15124 in docs/auth-broker-gateway.md",
      "conflicts with #16297 in docs/auth-broker-gateway.md",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #16803 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16583",
      "#15124",
      "#16297",
      "#15128",
      "#15130",
      "#16587",
-     "#16801",
-     "#16803"
+     "#16801"
     ],
     "needs": [
      "#15133"
@@ -58597,7 +58649,6 @@
      "conflicts with #16297 in docs/auth-broker-gateway.md",
      "conflicts with #15128 in packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in packages/coding-agent/test/claude-auto-reset-integration.test.ts",
-     "conflicts with #16581 in packages/coding-agent/src/cli/usage-cli.ts",
      "conflicts with main in packages/coding-agent/src/cli/auth-broker-cli.ts, packages/coding-agent/src/session/auto-reset.ts, packages/coding-agent/src/session/broker-reset-sweep.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts"
     ],
     "note": "",
@@ -58607,8 +58658,7 @@
      "#15124",
      "#16297",
      "#15128",
-     "#15130",
-     "#16581"
+     "#15130"
     ],
     "needs": [
      "#15143",
@@ -58648,15 +58698,12 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-10-22: parked; reopens only when Will asks",
-     "conflicts with #16608 in packages/coding-agent/test/agent-session-stats.test.ts",
      "conflicts with main in packages/coding-agent/test/agent-session-stats.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16608"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
    },
@@ -58668,17 +58715,13 @@
     "area": "other",
     "priority": null,
     "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
-    "action": "wait",
-    "reasons": [
-     "needs #16919 (open)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [
-     "git-guard-defects"
-    ],
+    "needs": [],
     "created": "2026-10-24T01:07:47Z"
    },
    {
@@ -58689,17 +58732,13 @@
     "area": "other",
     "priority": null,
     "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads",
-    "action": "wait",
-    "reasons": [
-     "needs #16596 (open)"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "advance first",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [
-     "read-nav-gate"
-    ],
+    "needs": [],
     "created": "2026-10-20T23:46:25Z"
    },
    {
