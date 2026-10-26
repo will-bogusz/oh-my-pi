@@ -53431,11 +53431,20 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-26T08:18:08Z",
+  "checked": "2026-10-26T09:20:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
-  "conflicts": {},
+  "conflicts": {
+   "#16803": {
+    "since": "2026-10-26T09:20:07Z",
+    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
+    "files": [
+     "docs/cli-reference.md",
+     "packages/coding-agent/src/modes/print-mode.ts"
+    ]
+   }
+  },
   "merged_through": "2026-10-22T09:44:50Z",
   "unreleased": {
    "16614": {
@@ -56127,6 +56136,16 @@
     "id": "computer-apps-open-first",
     "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
     "why": "opened as #16925"
+   },
+   {
+    "at": "2026-10-26T09:20:07Z",
+    "kind": "conflict",
+    "label": "#16803",
+    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
+    "files": [
+     "docs/cli-reference.md",
+     "packages/coding-agent/src/modes/print-mode.ts"
+    ]
    }
   ]
  },
@@ -56821,7 +56840,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-26T08:18:09.147120Z",
+  "at": "2026-10-26T09:20:08.616253Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -57855,8 +57874,10 @@
     "area": "session",
     "priority": "P2",
     "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/cli-reference.md, packages/coding-agent/src/modes/print-mode.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
