@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-26T17:29:41Z",
+  "checked": "2026-10-26T18:30:19Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53803,92 +53803,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-19T17:39:09Z",
-    "kind": "merged",
-    "number": 16302,
-    "title": "fix(task): relay a woken subagent's final report, not all its turn text",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-19T17:39:09Z",
-    "kind": "merged",
-    "number": 16312,
-    "title": "fix(coding-agent,tui): stop woken agents auto-replying to agent://all broadcasts",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-19T17:39:09Z",
-    "kind": "merged",
-    "number": 16292,
-    "title": "fix(coding-agent): deliver both of two asides sent together to an idle session",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-19T17:39:09Z",
-    "kind": "merged",
-    "number": 16301,
-    "title": "fix(coding-agent): return a just-finished job from a wait its completion notice cut short",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-19T17:39:09Z",
-    "kind": "merged",
-    "number": 16314,
-    "title": "fix(pi-shell,tui): keep ssh remote output intact in the minimizer",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-19T17:39:09Z",
-    "kind": "merged",
-    "number": 16281,
-    "title": "fix(coding-agent): keep todo stripped from a warm-revived subagent",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-19T17:39:09Z",
-    "kind": "merged",
-    "number": 16233,
-    "title": "fix(natives): stop a cancelled macOS stale-ref search before it looks up the window",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-19T17:39:09Z",
-    "kind": "merged",
-    "number": 16230,
-    "title": "fix(coding-agent): stop a browser screenshot waiting on a DevTools session past its deadline",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-19T17:39:09Z",
-    "kind": "merged",
-    "number": 16295,
-    "title": "fix(coding-agent): tell a computer.control.acquire nobody could answer apart from a refusal",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-19T17:39:09Z",
-    "kind": "openable",
-    "id": "revive-prompt-cache",
-    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it"
-   },
-   {
-    "at": "2026-10-19T18:09:47Z",
-    "kind": "merged",
-    "number": 16252,
-    "title": "fix(coding-agent): match browser role/ exact names to the names observe() shows",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
    {
     "at": "2026-10-19T18:40:03Z",
     "kind": "released",
@@ -57598,7 +57512,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-26T17:29:42.231138Z",
+  "at": "2026-10-26T18:30:20.841499Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
