@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T13:54:35Z",
+  "checked": "2026-10-27T14:25:46Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53826,80 +53826,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T14:02:14Z",
-    "kind": "merged",
-    "number": 16441,
-    "title": "fix(write): keep content whose leading numbers do not count up by one",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T14:02:14Z",
-    "kind": "merged",
-    "number": 16380,
-    "title": "fix(coding-agent): keep a newer text-predict daemon instead of shutting it down",
-    "merged_by": "H4vC",
-    "maintainer_commits": 3
-   },
-   {
-    "at": "2026-10-20T14:02:14Z",
-    "kind": "merged",
-    "number": 16381,
-    "title": "fix(edit): required a live tag for bare hashline MV and REM",
-    "merged_by": "H4vC",
-    "maintainer_commits": 3
-   },
-   {
-    "at": "2026-10-20T14:02:14Z",
-    "kind": "merged",
-    "number": 16421,
-    "title": "fix(coding-agent): load custom tools that import omp packages in the binary",
-    "merged_by": "H4vC",
-    "maintainer_commits": 2
-   },
-   {
-    "at": "2026-10-20T14:02:14Z",
-    "kind": "merged",
-    "number": 16404,
-    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T14:02:14Z",
-    "kind": "merged",
-    "number": 16299,
-    "title": "fix(coding-agent): say computer.windows() returns plain records, not window handles",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-20T14:02:14Z",
-    "kind": "merged",
-    "number": 16438,
-    "title": "fix(read): read one line for a bare N beside :raw",
-    "merged_by": "H4vC",
-    "maintainer_commits": 2
-   },
-   {
-    "at": "2026-10-20T14:02:14Z",
-    "kind": "conflict",
-    "label": "#16250",
-    "title": "fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff",
-    "files": [
-     "packages/ai/src/providers/anthropic.ts"
-    ]
-   },
-   {
-    "at": "2026-10-20T14:02:14Z",
-    "kind": "conflict",
-    "label": "#16392",
-    "title": "fix(ai): log one warning per request for dropped thinking blocks",
-    "files": [
-     "packages/ai/src/providers/amazon-bedrock.ts"
-    ]
-   },
    {
     "at": "2026-10-20T14:33:01Z",
     "kind": "merged",
@@ -56931,7 +56857,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-27T13:23:49.573438Z",
+  "at": "2026-10-27T14:25:47.125651Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
