@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T21:02:04Z",
+  "checked": "2026-10-27T21:32:51Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53798,13 +53798,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T21:32:33Z",
-    "kind": "unopenable",
-    "id": "factory-screenshot-budget",
-    "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts",
-    "why": "opened as #16564"
-   },
    {
     "at": "2026-10-20T22:03:07Z",
     "kind": "conflict",
