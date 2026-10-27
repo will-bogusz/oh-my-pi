@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T17:29:38Z",
+  "checked": "2026-10-27T17:58:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53486,35 +53486,6 @@
    }
   },
   "conflicts": {
-   "#15508": {
-    "since": "2026-10-26T11:23:01Z",
-    "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
-    "files": [
-     "packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ]
-   },
-   "#16274": {
-    "since": "2026-10-26T16:28:42Z",
-    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
-    "files": [
-     "packages/agent/src/agent-loop.ts"
-    ]
-   },
-   "#16595": {
-    "since": "2026-10-27T12:22:45Z",
-    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
-    "files": [
-     "packages/coding-agent/src/tools/read.ts"
-    ]
-   },
-   "#16611": {
-    "since": "2026-10-26T12:24:08Z",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "files": [
-     "packages/catalog/src/build.ts",
-     "packages/coding-agent/src/tools/read.ts"
-    ]
-   },
    "#16801": {
     "since": "2026-10-27T12:22:45Z",
     "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
@@ -53827,182 +53798,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16407,
-    "title": "fix(ai): fail Claude turns that attach media Claude cannot read",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16436,
-    "title": "fix(coding-agent): gate snapcompact on images the wire actually sends",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16394,
-    "title": "fix(utils): stream tar.gz and tar.zst archives that decompress past the in-memory limit",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16397,
-    "title": "fix(coding-agent): read profile line ranges from the file, not its summary",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16369,
-    "title": "fix(coding-agent): keep a warm-revived subagent's peer roster as it last saw it",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16442,
-    "title": "feat(coding-agent): expose PI_SESSION_ID and PI_SESSION_FILE to bash commands",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16437,
-    "title": "fix(ai): keep usage and timing on thinking-loop aborts",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16399,
-    "title": "perf(natives/utok): memoize short-piece merge counts per thread",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 13677,
-    "title": "fix(ai,catalog): encode Devin credentials by shape and drop the Windsurf fallbacks",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16383,
-    "title": "fix(edit): refuse stale-tag remaps aimed at the current lines",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16418,
-    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16288,
-    "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16425,
-    "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16300,
-    "title": "fix(coding-agent): install with %pip into venvs that have no pip",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16435,
-    "title": "fix(read): read tail chunks in comma line lists",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16444,
-    "title": "feat(read): page SQLite ?q= query rows with limit and offset",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16420,
-    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 14235,
-    "title": "feat(ai): let broker account-pool files act as a provider and API-key allow-list",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 14237,
-    "title": "feat(ai): opt-in account reclaim for accountPolicies",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16384,
-    "title": "fix(ai): keep Factory Droid Core calls to long-named tools in later requests",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16294,
-    "title": "fix(browser): tell agents how to skip a configured relay",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T17:36:23Z",
-    "kind": "merged",
-    "number": 16386,
-    "title": "fix(utils,natives): keep test runs out of the real ~/.omp/logs",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-10-20T18:07:10Z",
     "kind": "merged",
@@ -56851,7 +56646,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-27T17:29:38.959538Z",
+  "at": "2026-10-27T17:58:44.349211Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -56918,10 +56713,8 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/agent/src/agent-loop.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -56971,10 +56764,8 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/read.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -57007,10 +56798,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -57259,10 +57048,8 @@
     "area": "catalog",
     "priority": "P2",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/catalog/src/build.ts, packages/coding-agent/src/tools/read.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -57344,6 +57131,7 @@
     "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
     "action": "wait",
     "reasons": [
+     "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
@@ -57352,6 +57140,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#15508",
      "#16284",
      "#16908"
     ],
@@ -57395,12 +57184,15 @@
     "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
     "action": "wait",
     "reasons": [
+     "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15508"
+    ],
     "needs": [],
     "created": "2026-10-23T18:26:13Z"
    },
@@ -57464,12 +57256,14 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with #16925 in packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#16925"
+    ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
    },
@@ -57529,7 +57323,6 @@
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need #15508 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-call-deadline conflicts with main in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
      "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
@@ -57621,12 +57414,15 @@
     "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
     "action": "wait",
     "reasons": [
+     "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15508"
+    ],
     "needs": [],
     "created": "2026-10-23T19:04:15Z"
    },
@@ -57663,9 +57459,7 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued), #15282 (open)",
-     "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
-     "its need #15282 conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
+     "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
@@ -57772,8 +57566,7 @@
     "action": "wait",
     "reasons": [
      "needs #15508 (open)",
-     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need #15508 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
