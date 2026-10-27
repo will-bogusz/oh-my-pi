@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T20:31:07Z",
+  "checked": "2026-10-27T21:02:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53798,20 +53798,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T20:51:17Z",
-    "kind": "unopenable",
-    "id": "conflicts-whole-file",
-    "title": "fix(coding-agent): scan the whole file for :conflicts",
-    "why": "opened as #16555"
-   },
-   {
-    "at": "2026-10-20T20:51:17Z",
-    "kind": "unopenable",
-    "id": "ts-rule-followups",
-    "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
-    "why": "opened as #16556"
-   },
    {
     "at": "2026-10-20T21:32:33Z",
     "kind": "unopenable",
@@ -56058,7 +56044,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-27T20:00:21.151690Z",
+  "at": "2026-10-27T21:02:05.605154Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
