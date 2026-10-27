@@ -27,7 +27,7 @@ Non-goals: speaker labels, transcript paging, local models.
 
 Maintenance: if a host stops taking inline audio, the read fails naming the model; drop `audio` from its rule.
 
-Reading order: `INPUT_MODALITIES` and `classes/gemini.kdl` (`models.json`: only `input` changes, on 70 Gemini rows) → `audioInputMimeType` and the two `input_audio` converters → `utils/media-transcript.ts` → `#readTranscript` in `tools/read.ts`.
+Reading order: `INPUT_MODALITIES` and `classes/gemini.kdl` (`models.json`: only `input` changes, on 71 Gemini rows) → `audioInputMimeType` and the two `input_audio` converters → `utils/media-transcript.ts` → `#readTranscript` in `tools/read.ts`.
 
 ## Testing
 
@@ -51,12 +51,13 @@ Agent eval: Haiku 5.5 answering every question about each recording in one sandb
 
 Tokens and time are run medians; transcription adds 3k, 32k and 2k Gemini tokens. GPT-6-luna with this design's prototype: 17/18, 6/6, 15/15, against `main`'s 6/24, 2/8, 8/20 (n=4).
 
-New tests: catalog `audio-input.test.ts` (KDL rule, bundled rows, OpenRouter discovery through merge and cache reload), ai `audio-input.test.ts` (gate, three wire shapes), coding-agent `read-audio-transcript.test.ts` (Gemini and OpenRouter transcripts, no model, `blockImages`, empty, untimed and cut answers, Gemini on Copilot, parser shapes). With `src/` reset to `main` all three fail. `check:ts` clean; catalog 1239/1239, ai 6147 pass, read/video/models 249/249.
+New tests: catalog `audio-input.test.ts` (KDL rule, bundled rows, OpenRouter discovery through merge and cache reload), ai `audio-input.test.ts` (gate, three wire shapes), coding-agent `read-audio-transcript.test.ts` (Gemini and OpenRouter transcripts, no model, `blockImages`, empty, untimed and cut answers, Gemini on Copilot, parser shapes). With `src/` reset to `main` all three fail. `check:ts` clean; catalog 1281/1282 (the one failure, a 5 s timeout in `model-cache-rewrites.test.ts`, fails on `main` too), ai 6407 pass, read/video/models 538/538.
 
 ---
 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
 
