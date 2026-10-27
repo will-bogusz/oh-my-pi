@@ -20110,7 +20110,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
    "body": "bodies/read-after-bash-revalidate.md",
    "state": "open",
    "pr": 16274,
@@ -20118,7 +20118,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-after-bash-revalidate",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:39:24Z",
-   "updated": "2026-10-23T02:16:16Z",
+   "updated": "2026-10-27T17:20:49Z",
    "note": "",
    "built": [
     {
@@ -20558,7 +20558,7 @@
     }
    ],
    "opened": "2026-10-19T01:07:22Z",
-   "advanced": "2026-10-23T02:16:16Z"
+   "advanced": "2026-10-27T17:20:49Z"
   },
   {
    "id": "natives-dts-regen",
