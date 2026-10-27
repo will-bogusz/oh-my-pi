@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T12:22:45Z",
+  "checked": "2026-10-27T13:23:48Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53518,7 +53518,8 @@
     "since": "2026-10-27T12:22:45Z",
     "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
     "files": [
-     "packages/coding-agent/src/main.ts"
+     "packages/coding-agent/src/main.ts",
+     "packages/coding-agent/src/session/agent-session.ts"
     ]
    },
    "#16908": {
@@ -56938,7 +56939,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-27T12:22:46.200994Z",
+  "at": "2026-10-27T13:23:49.573438Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -57363,7 +57364,7 @@
     "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/coding-agent/src/main.ts"
+     "conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58014,7 +58015,8 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
-     "needs #16587 (open)"
+     "needs #16587 (open)",
+     "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
@@ -58090,8 +58092,7 @@
     "action": "wait",
     "reasons": [
      "needs #16801 (open)",
-     "its need #16801 conflicts with main in packages/coding-agent/src/main.ts",
-     "conflicts with main in packages/coding-agent/src/session/agent-session.ts"
+     "its need #16801 conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
