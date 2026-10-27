@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T21:32:51Z",
+  "checked": "2026-10-27T22:33:21Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53798,37 +53798,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T22:03:07Z",
-    "kind": "conflict",
-    "label": "#16555",
-    "title": "fix(coding-agent): scan the whole file for :conflicts",
-    "files": [
-     "packages/coding-agent/src/tools/conflict-detect.ts",
-     "packages/coding-agent/src/tools/read.ts",
-     "packages/coding-agent/test/tools/conflict-integration.test.ts"
-    ]
-   },
-   {
-    "at": "2026-10-20T22:03:07Z",
-    "kind": "conflict",
-    "label": "#16556",
-    "title": "fix(coding-agent): keep ts-set-map fast on long streamed lines and catch two missed rule shapes",
-    "files": [
-     "packages/coding-agent/src/discovery/builtin-rules/ts-import-type.md",
-     "packages/coding-agent/src/discovery/builtin-rules/ts-set-map.md",
-     "packages/coding-agent/test/discovery/builtin-defaults.test.ts"
-    ]
-   },
-   {
-    "at": "2026-10-20T22:03:07Z",
-    "kind": "conflict",
-    "label": "#16553",
-    "title": "fix(natives): keep a macOS user's press placed in their app through a release during its hit-test",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/skylight.rs"
-    ]
-   },
    {
     "at": "2026-10-20T23:03:55Z",
     "kind": "openable",
