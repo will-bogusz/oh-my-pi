@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-27 04:43Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-27 05:14Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-27 04:42Z on goliath; groups below are from it, states from the manifest)
@@ -28,8 +28,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-27
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 3d | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 3d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 3d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
-| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 2d | [#16925](https://github.com/can1357/oh-my-pi/pull/16925), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
-| computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 2d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
+| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 3d | [#16925](https://github.com/can1357/oh-my-pi/pull/16925), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
+| computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 3d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
 
 ## Stacked (20)
 
