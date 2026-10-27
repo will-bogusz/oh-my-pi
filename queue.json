@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T03:40:51Z",
+  "checked": "2026-10-27T04:12:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53803,55 +53803,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T03:52:53Z",
-    "kind": "unopenable",
-    "id": "read-raw-line",
-    "title": "fix(read): read one line for a bare N beside :raw",
-    "why": "opened as #16438"
-   },
-   {
-    "at": "2026-10-20T03:52:53Z",
-    "kind": "unopenable",
-    "id": "read-selector-edges",
-    "title": "fix(read): read tail chunks in comma line lists",
-    "why": "opened as #16435"
-   },
-   {
-    "at": "2026-10-20T03:52:53Z",
-    "kind": "unopenable",
-    "id": "rg-count-zero",
-    "title": "fix(pi-builtins): print rg counts only for files with matches",
-    "why": "opened as #16432"
-   },
-   {
-    "at": "2026-10-20T03:52:53Z",
-    "kind": "unopenable",
-    "id": "rm-force-enoent",
-    "title": "fix(pi-builtins): treat entries already gone as removed under rm -f",
-    "why": "opened as #16433"
-   },
-   {
-    "at": "2026-10-20T03:52:53Z",
-    "kind": "unopenable",
-    "id": "snapcompact-wire-images",
-    "title": "fix(coding-agent): gate snapcompact on images the wire actually sends",
-    "why": "opened as #16436"
-   },
-   {
-    "at": "2026-10-20T03:52:53Z",
-    "kind": "unopenable",
-    "id": "thinking-loop-accounting",
-    "title": "fix(ai): keep usage and timing on thinking-loop aborts",
-    "why": "opened as #16437"
-   },
-   {
-    "at": "2026-10-20T03:52:53Z",
-    "kind": "unopenable",
-    "id": "vscode-mcp-missing",
-    "title": "fix(coding-agent): skip a missing .vscode/mcp.json without warning",
-    "why": "opened as #16434"
-   },
    {
     "at": "2026-10-20T04:54:00Z",
     "kind": "unopenable",
