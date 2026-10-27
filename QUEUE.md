@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-27 21:02Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-27 21:33Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-27 21:02Z on goliath; groups below are from it, states from the manifest)
@@ -10,7 +10,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-27
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| factory-droid-image-role-default | feat(catalog): fall back to Factory Droid image models in the image role | providers | P2 | 8d | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-role-default) |
+| factory-droid-image-role-default | feat(catalog): fall back to Factory Droid image models in the image role | providers | P2 | 9d | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-role-default) |
 | read-url-markup-tokens | feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads | other |  | 6d | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-markup-tokens) |
 | git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
 
@@ -44,7 +44,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-27
 | r2/native-window-report | feat(coding-agent): name the native windows a browser call raised on macOS | browser | P2 | 13d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/native-window-report) |
 | r2/relay-popup-owned | fix(browser): own popups omp's relay tabs open and keep them behind the user's selection | browser | P2 | 13d | r2/relay-own-only | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-popup-owned) |
 | computer-rich-text | feat(computer): read macOS text as Markdown with value({ format: "markdown" }) | computer | P2 | 13d | computer-ui-quiet, computer-ax-lines ([#15282](https://github.com/can1357/oh-my-pi/pull/15282)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-rich-text) |
-| factory-droid-gemini-4-argon | feat(catalog,ai): add Gemini 4 Argon to Factory Droid with its request dialect | providers | P1 | 8d | factory-droid-0244 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon) |
+| factory-droid-gemini-4-argon | feat(catalog,ai): add Gemini 4 Argon to Factory Droid with its request dialect | providers | P1 | 9d | factory-droid-0244 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon) |
 | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 8d | relay-popup-front-main ([#16284](https://github.com/can1357/oh-my-pi/pull/16284)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
 | compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 6d | [#16587](https://github.com/can1357/oh-my-pi/pull/16587) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | timer-pr-2-engine | feat(coding-agent): run shell commands and wake sessions later with omp timer | other |  | 5d | timer-pr-1-poke ([#16801](https://github.com/can1357/oh-my-pi/pull/16801)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-2-engine) |
