@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T14:25:46Z",
+  "checked": "2026-10-27T14:56:46Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53826,30 +53826,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T14:33:01Z",
-    "kind": "merged",
-    "number": 16388,
-    "title": "fix(coding-agent): close an unanswered computer.control.acquire prompt before the call times out",
-    "merged_by": "H4vC",
-    "maintainer_commits": 2
-   },
-   {
-    "at": "2026-10-20T14:33:01Z",
-    "kind": "merged",
-    "number": 16409,
-    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-20T14:33:01Z",
-    "kind": "merged",
-    "number": 16391,
-    "title": "fix(coding-agent): kept requested lines in in-memory range reads",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-10-20T17:05:39Z",
     "kind": "merged",
