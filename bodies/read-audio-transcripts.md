@@ -51,7 +51,7 @@ Agent eval: Haiku 5.5 answering every question about each recording in one sandb
 
 Tokens and time are run medians; transcription adds 3k, 32k and 2k Gemini tokens. GPT-6-luna with this design's prototype: 17/18, 6/6, 15/15, against `main`'s 6/24, 2/8, 8/20 (n=4).
 
-New tests: catalog `audio-input.test.ts` (KDL rule, bundled rows, OpenRouter discovery through merge and cache reload), ai `audio-input.test.ts` (gate, three wire shapes), coding-agent `read-audio-transcript.test.ts` (Gemini and OpenRouter transcripts, no model, `blockImages`, empty, untimed and cut answers, Gemini on Copilot, parser shapes). With `src/` reset to `main` all three fail. `check:ts` clean; catalog 1281/1282 (one timeout, also on `main`), ai 6407, read/video/models 538/538.
+New tests: catalog `audio-input.test.ts` (KDL rule, bundled rows, OpenRouter discovery through merge and cache reload), ai `audio-input.test.ts` (gate, three wire shapes), coding-agent `read-audio-transcript.test.ts` (Gemini and OpenRouter transcripts, no model, `blockImages`, empty, untimed and cut answers, Gemini on Copilot, parser shapes). With `src/` reset to `main` all three fail. `check:ts` clean; catalog 1281/1282 (as on `main`), ai 6407, read/video/models 538/538.
 
 ---
 
