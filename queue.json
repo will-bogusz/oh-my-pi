@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T11:20:54Z",
+  "checked": "2026-10-27T12:22:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53499,11 +53499,26 @@
      "packages/agent/src/agent-loop.ts"
     ]
    },
+   "#16595": {
+    "since": "2026-10-27T12:22:45Z",
+    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
+    "files": [
+     "packages/coding-agent/src/tools/read.ts"
+    ]
+   },
    "#16611": {
     "since": "2026-10-26T12:24:08Z",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
     "files": [
-     "packages/catalog/src/build.ts"
+     "packages/catalog/src/build.ts",
+     "packages/coding-agent/src/tools/read.ts"
+    ]
+   },
+   "#16801": {
+    "since": "2026-10-27T12:22:45Z",
+    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
+    "files": [
+     "packages/coding-agent/src/main.ts"
     ]
    },
    "#16908": {
@@ -53513,6 +53528,13 @@
      "packages/browser-relay/extension/chrome.d.ts",
      "packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "packages/coding-agent/src/tools/browser/relay/server.ts"
+    ]
+   },
+   "#16918": {
+    "since": "2026-10-27T12:22:45Z",
+    "title": "feat(coding-agent): start desktop tasks without a documentation read",
+    "files": [
+     "packages/coding-agent/src/tools/eval.ts"
     ]
    },
    "#16925": {
@@ -56195,6 +56217,33 @@
     "files": [
      "packages/agent/src/agent-loop.ts"
     ]
+   },
+   {
+    "at": "2026-10-27T12:22:45Z",
+    "kind": "conflict",
+    "label": "#16595",
+    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
+    "files": [
+     "packages/coding-agent/src/tools/read.ts"
+    ]
+   },
+   {
+    "at": "2026-10-27T12:22:45Z",
+    "kind": "conflict",
+    "label": "#16801",
+    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
+    "files": [
+     "packages/coding-agent/src/main.ts"
+    ]
+   },
+   {
+    "at": "2026-10-27T12:22:45Z",
+    "kind": "conflict",
+    "label": "#16918",
+    "title": "feat(coding-agent): start desktop tasks without a documentation read",
+    "files": [
+     "packages/coding-agent/src/tools/eval.ts"
+    ]
    }
   ]
  },
@@ -56889,7 +56938,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-27T11:51:49.660606Z",
+  "at": "2026-10-27T12:22:46.200994Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -57009,8 +57058,10 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/tools/read.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -57293,7 +57344,7 @@
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/catalog/src/build.ts"
+     "conflicts with main in packages/catalog/src/build.ts, packages/coding-agent/src/tools/read.ts"
     ],
     "note": "",
     "over": [],
@@ -57310,8 +57361,10 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/main.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -57344,8 +57397,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(coding-agent): start desktop tasks without a documentation read",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/tools/eval.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -58034,7 +58089,9 @@
     "title": "feat(coding-agent): run shell commands and wake sessions later with omp timer",
     "action": "wait",
     "reasons": [
-     "needs #16801 (open)"
+     "needs #16801 (open)",
+     "its need #16801 conflicts with main in packages/coding-agent/src/main.ts",
+     "conflicts with main in packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58055,7 +58112,8 @@
     "title": "feat(coding-agent): let the agent set timers that wake its session later",
     "action": "wait",
     "reasons": [
-     "needs timer-pr-4-surfaces (queued)"
+     "needs timer-pr-4-surfaces (queued)",
+     "its need timer-pr-4-surfaces conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58076,7 +58134,8 @@
     "title": "feat(coding-agent): set and control timers from inside a session",
     "action": "wait",
     "reasons": [
-     "needs timer-pr-2-engine (queued)"
+     "needs timer-pr-2-engine (queued)",
+     "its need timer-pr-2-engine conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58097,7 +58156,8 @@
     "title": "feat(coding-agent): run a prompt timer as an unattended agent and report back",
     "action": "wait",
     "reasons": [
-     "needs timer-pr-3-tool (queued)"
+     "needs timer-pr-3-tool (queued)",
+     "its need timer-pr-3-tool conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58118,7 +58178,8 @@
     "title": "feat(coding-agent): list scheduled work omp did not create with omp timer ls --all",
     "action": "wait",
     "reasons": [
-     "needs timer-pr-2-engine (queued)"
+     "needs timer-pr-2-engine (queued)",
+     "its need timer-pr-2-engine conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58139,7 +58200,8 @@
     "title": "feat(coding-agent): fire timers once a shell, CI or process condition holds",
     "action": "wait",
     "reasons": [
-     "needs timer-pr-2-engine (queued)"
+     "needs timer-pr-2-engine (queued)",
+     "its need timer-pr-2-engine conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58160,7 +58222,8 @@
     "title": "feat(coding-agent): wake a sleeping Mac before a one-shot timer with --wake-machine",
     "action": "wait",
     "reasons": [
-     "needs timer-pr-2-engine (queued)"
+     "needs timer-pr-2-engine (queued)",
+     "its need timer-pr-2-engine conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58182,7 +58245,8 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
-     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-5-agent-runs conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",
