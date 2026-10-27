@@ -20629,7 +20629,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "3a2758b68f7c8e6bdf22c3a76b86c8675e5e0c9e",
+   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
    "body": "bodies/computer-ui-quiet.md",
    "state": "queued",
    "pr": null,
@@ -20637,8 +20637,9 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-19T07:26:45Z",
-   "updated": "2026-10-22T09:07:40Z",
-   "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block). Real overlap with #16403: both change the apps.open native call in worker.ts (we wrap it in the quiet wait); if #16403 merges first, rebase onto it and wrap its new call (QueueRebase, 2026-10-22)."
+   "updated": "2026-10-27T17:25:15Z",
+   "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block). Real overlap with #16403: both change the apps.open native call in worker.ts (we wrap it in the quiet wait); if #16403 merges first, rebase onto it and wrap its new call (QueueRebase, 2026-10-22).",
+   "advanced": "2026-10-27T17:25:15Z"
   },
   {
    "id": "vscode-mcp-missing",
