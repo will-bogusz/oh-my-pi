@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T01:38:29Z",
+  "checked": "2026-10-27T02:08:42Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53803,55 +53803,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T01:50:28Z",
-    "kind": "unopenable",
-    "id": "builtin-rule-narrow-2",
-    "title": "fix(coding-agent): fire ts-no-tiny-functions and ts-promise-with-resolvers only on code they flag",
-    "why": "opened as #16419"
-   },
-   {
-    "at": "2026-10-20T01:50:28Z",
-    "kind": "unopenable",
-    "id": "builtin-rule-reminder",
-    "title": "fix(coding-agent): word built-in rule reminders as a check against the rule, not a user-defined MUST",
-    "why": "opened as #16420"
-   },
-   {
-    "at": "2026-10-20T01:50:28Z",
-    "kind": "unopenable",
-    "id": "custom-tool-host-imports",
-    "title": "fix(coding-agent): load custom tools that import omp packages in the binary",
-    "why": "opened as #16421"
-   },
-   {
-    "at": "2026-10-20T01:50:28Z",
-    "kind": "unopenable",
-    "id": "deepseek-image-tokens",
-    "title": "fix(catalog): price DeepSeek V4.1 Flash images by its own vision config",
-    "why": "opened as #16418"
-   },
-   {
-    "at": "2026-10-20T01:50:28Z",
-    "kind": "unopenable",
-    "id": "edit-mismatch-seen-lines",
-    "title": "fix(edit): counted only a mismatch reply's displayed rows as seen",
-    "why": "opened as #16422"
-   },
-   {
-    "at": "2026-10-20T01:50:28Z",
-    "kind": "unopenable",
-    "id": "edit-parse-only-ambiguity",
-    "title": "fix(edit): name the trailing comma when a one-row replacement only fails on it",
-    "why": "opened as #16423"
-   },
-   {
-    "at": "2026-10-20T01:50:28Z",
-    "kind": "unopenable",
-    "id": "edit-tagless-errors",
-    "title": "fix(edit): answered placeholder tags, missing tags and header-only input with the current tag",
-    "why": "opened as #16425"
-   },
    {
     "at": "2026-10-20T02:21:07Z",
     "kind": "unopenable",
