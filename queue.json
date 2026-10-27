@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T00:07:05Z",
+  "checked": "2026-10-27T00:37:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53803,41 +53803,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T00:17:58Z",
-    "kind": "unopenable",
-    "id": "computer-shell-exception",
-    "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS",
-    "why": "opened as #16403"
-   },
-   {
-    "at": "2026-10-20T00:17:58Z",
-    "kind": "unopenable",
-    "id": "r2-browser-wait-line",
-    "title": "fix(coding-agent): point browser waits at waitFor* helpers instead of fixed sleeps",
-    "why": "opened as #16404"
-   },
-   {
-    "at": "2026-10-20T00:17:58Z",
-    "kind": "unopenable",
-    "id": "release-helper-wait-test",
-    "title": "test(natives): let the macOS release-helper wait test wait for its shell stand-in",
-    "why": "opened as #16405"
-   },
-   {
-    "at": "2026-10-20T00:17:58Z",
-    "kind": "unopenable",
-    "id": "anthropic-unsupported-media",
-    "title": "fix(ai): fail Claude turns that attach media Claude cannot read",
-    "why": "opened as #16407"
-   },
-   {
-    "at": "2026-10-20T00:17:58Z",
-    "kind": "unopenable",
-    "id": "autoqa-home-paths",
-    "title": "fix(coding-agent): redact home directory and login name from autoqa grievances",
-    "why": "opened as #16409"
-   },
    {
     "at": "2026-10-20T01:50:28Z",
     "kind": "unopenable",
@@ -57057,7 +57022,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-26T23:36:17.264607Z",
+  "at": "2026-10-27T00:37:43.902743Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
