@@ -53467,7 +53467,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T13:23:48Z",
+  "checked": "2026-10-27T13:54:35Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53826,14 +53826,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T13:32:09Z",
-    "kind": "merged",
-    "number": 16432,
-    "title": "fix(pi-builtins): print rg counts only for files with matches",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-10-20T14:02:14Z",
     "kind": "merged",
