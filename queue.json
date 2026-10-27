@@ -376,9 +376,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/policy-priority-unmeasured",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-27T17:18:35Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
-   "advanced": "2026-10-27T17:18:35Z"
+   "advanced": "2026-10-27T17:26:24Z"
   },
   {
    "id": "account-window-reserves",
@@ -417,9 +417,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-restore-longest-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
-   "advanced": "2026-10-27T17:19:07Z"
+   "advanced": "2026-10-27T17:26:24Z"
   },
   {
    "id": "reset-before-reserve",
@@ -436,9 +436,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-before-reserve",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
-   "advanced": "2026-10-27T17:19:07Z",
+   "advanced": "2026-10-27T17:26:24Z",
    "built": [
     {
      "with": "#13677",
@@ -1716,9 +1716,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agents-show",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
-   "advanced": "2026-10-27T17:19:07Z",
+   "advanced": "2026-10-27T17:26:24Z",
    "built": [
     {
      "with": "#15762",
@@ -4540,9 +4540,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-drag-select",
    "host": "MacBook-Pro",
    "added": "2026-10-18T11:18:03Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
-   "advanced": "2026-10-27T17:19:07Z",
+   "advanced": "2026-10-27T17:26:24Z",
    "built": [
     {
      "with": "#16202",
@@ -5953,7 +5953,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front-main",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:46:45Z",
-   "updated": "2026-10-27T17:21:14Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -6398,7 +6398,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-27T17:21:14Z",
+   "advanced": "2026-10-27T17:26:24Z",
    "opened": "2026-10-19T02:42:33Z",
    "readied": "2026-10-19T02:42:52Z",
    "rebases_after": [
@@ -15349,7 +15349,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-credit-promotions",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:02Z",
-   "updated": "2026-10-27T17:20:56Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -15836,7 +15836,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-27T17:20:56Z",
+   "advanced": "2026-10-27T17:26:24Z",
    "opened": "2026-10-19T06:56:13Z",
    "readied": "2026-10-19T06:56:45Z"
   },
@@ -16904,7 +16904,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/exact-provider-model-selector",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:48:32Z",
-   "updated": "2026-10-27T17:20:56Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -17346,7 +17346,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-27T17:20:56Z",
+   "advanced": "2026-10-27T17:26:24Z",
    "opened": "2026-10-19T05:19:16Z"
   },
   {
@@ -19527,7 +19527,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/lsp-workspace-folders",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:26:57Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -19940,7 +19940,7 @@
    ],
    "opened": "2026-10-19T00:53:59Z",
    "readied": "2026-10-19T00:54:24Z",
-   "advanced": "2026-10-27T17:19:07Z"
+   "advanced": "2026-10-27T17:26:24Z"
   },
   {
    "id": "factory-droid-completions-tool-names",
@@ -34446,7 +34446,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/pip-procfs-fallback",
    "host": "MacBook-Pro",
    "added": "2026-10-20T19:58:45Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -34605,7 +34605,7 @@
    ],
    "opened": "2026-10-20T20:09:31Z",
    "readied": "2026-10-20T20:09:54Z",
-   "advanced": "2026-10-27T17:19:07Z"
+   "advanced": "2026-10-27T17:26:24Z"
   },
   {
    "id": "conflicts-whole-file",
@@ -35057,7 +35057,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-screenshot-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:08Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -35262,7 +35262,7 @@
    ],
    "opened": "2026-10-20T21:02:02Z",
    "readied": "2026-10-20T21:02:25Z",
-   "advanced": "2026-10-27T17:19:07Z"
+   "advanced": "2026-10-27T17:26:24Z"
   },
   {
    "id": "click-place-release",
@@ -35279,7 +35279,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -35312,7 +35312,7 @@
    ],
    "opened": "2026-10-20T20:20:44Z",
    "readied": "2026-10-20T20:21:05Z",
-   "advanced": "2026-10-27T17:19:07Z"
+   "advanced": "2026-10-27T17:26:24Z"
   },
   {
    "id": "eval-py-await-tool",
@@ -37662,7 +37662,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gateway-settle-log",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:07:24Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -37738,7 +37738,7 @@
    ],
    "opened": "2026-10-21T00:07:51Z",
    "readied": "2026-10-21T00:08:11Z",
-   "advanced": "2026-10-27T17:19:07Z"
+   "advanced": "2026-10-27T17:26:24Z"
   },
   {
    "id": "task-result-inline",
@@ -38714,7 +38714,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-view-tags",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:37:15Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -38989,7 +38989,7 @@
    ],
    "opened": "2026-10-21T00:01:50Z",
    "readied": "2026-10-21T00:02:11Z",
-   "advanced": "2026-10-27T17:19:07Z"
+   "advanced": "2026-10-27T17:26:24Z"
   },
   {
    "id": "compaction-trigger",
@@ -39901,7 +39901,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-minimizer-meta",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:49:04Z",
-   "updated": "2026-10-27T17:20:56Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -40246,7 +40246,7 @@
    ],
    "opened": "2026-10-21T01:59:39Z",
    "readied": "2026-10-21T02:00:31Z",
-   "advanced": "2026-10-27T17:20:56Z"
+   "advanced": "2026-10-27T17:26:24Z"
   },
   {
    "id": "sec-edgar-filing-docs",
@@ -40283,7 +40283,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/log-session-id",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:54:49Z",
-   "updated": "2026-10-27T17:19:07Z",
+   "updated": "2026-10-27T17:26:24Z",
    "note": "",
    "built": [
     {
@@ -40637,7 +40637,7 @@
     }
    ],
    "opened": "2026-10-21T02:03:30Z",
-   "advanced": "2026-10-27T17:19:07Z"
+   "advanced": "2026-10-27T17:26:24Z"
   },
   {
    "id": "pdf-scan-pages",
