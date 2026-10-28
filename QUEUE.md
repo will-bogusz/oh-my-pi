@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-28 15:22Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-28 16:23Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-28 15:22Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-28 16:23Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 3, conflict-held 12, stacked 20, held 1, open PRs 28; merged 171, closed 11
 
 ## Openable now (3)
@@ -86,7 +86,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-28
 | [#16595](https://github.com/can1357/oh-my-pi/pull/16595) | read-display-budget | fix(coding-agent): charge column-cut lines their shown width against the read page budget | other | P1 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-display-budget) |
 | [#16579](https://github.com/can1357/oh-my-pi/pull/16579) | gateway-settle-log | fix(ai): stop logging a usage-limit retry the gateway does not make | other | P0 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gateway-settle-log) |
 | [#16576](https://github.com/can1357/oh-my-pi/pull/16576) | bash-view-tags | feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them | coding-agent | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-view-tags) |
-| [#16586](https://github.com/can1357/oh-my-pi/pull/16586) | bash-minimizer-meta | feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut | bash | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-minimizer-meta) |
+| [#16586](https://github.com/can1357/oh-my-pi/pull/16586) | bash-minimizer-meta | feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut | bash | P2 | 7d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-minimizer-meta) |
 | [#16587](https://github.com/can1357/oh-my-pi/pull/16587) | log-session-id | feat(coding-agent): tag each log record with the session that wrote it | other | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/log-session-id) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 5d | requeue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
