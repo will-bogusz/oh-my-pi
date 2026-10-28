@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-28T10:48:48Z",
+  "checked": "2026-10-28T11:19:05Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53550,30 +53550,6 @@
    16925
   ],
   "post_merge": {
-   "15105": {
-    "title": "feat(coding-agent,browser-relay): keep the relay extension current after an omp upgrade",
-    "merge_commit": "c184c0a1bf2c68ee6237a2f1565c4eb1543ffae0",
-    "merged_at": "2026-10-26T10:58:22Z",
-    "findings": []
-   },
-   "15418": {
-    "title": "fix(lsp): release language server memory by closing documents unused for 5 minutes",
-    "merge_commit": "5f1b4364847f4c2db6ef4c95245481306204f371",
-    "merged_at": "2026-10-26T10:58:22Z",
-    "findings": []
-   },
-   "16250": {
-    "title": "fix(ai): keep a declining Claude model's tool calls out of the turn after a fallback handoff",
-    "merge_commit": "5bc0abb888222ccd4157d8bbc85c6d0303452e5d",
-    "merged_at": "2026-10-26T10:58:22Z",
-    "findings": []
-   },
-   "16257": {
-    "title": "fix(ai): sign Factory Droid logins without an organization claim into the account's organization",
-    "merge_commit": "6ada33f6d68764b696e9da453d7db25855d8e8fb",
-    "merged_at": "2026-10-26T10:58:22Z",
-    "findings": []
-   },
    "16288": {
     "title": "fix(catalog,coding-agent): keep Factory Droid requests under its body limit by budgeting inline images",
     "merge_commit": "360b9bd6841d89b841189aebf409c37af0d0d929",
@@ -53589,18 +53565,6 @@
      }
     ]
    },
-   "16291": {
-    "title": "fix(ai): keep a rotated OAuth refresh token when the exchange outlasts the caller's budget",
-    "merge_commit": "4b0c7c1eda75afcc6467b0c70bb697e92fff62f7",
-    "merged_at": "2026-10-26T10:58:22Z",
-    "findings": []
-   },
-   "16296": {
-    "title": "feat(ai,catalog): use the 1h prompt cache and cache warming on Factory Droid Claude models",
-    "merge_commit": "8c887eaaec4a2fbf8c47cc9fb22b73301c789350",
-    "merged_at": "2026-10-26T10:58:22Z",
-    "findings": []
-   },
    "16300": {
     "title": "fix(coding-agent): install with %pip into venvs that have no pip",
     "merge_commit": "0bba68154823781aa16409548fedee335d8aefec",
@@ -53615,186 +53579,6 @@
       "addressed_by": 16552
      }
     ]
-   },
-   "16316": {
-    "title": "feat(ai,catalog): generate images through a Factory Droid login",
-    "merge_commit": "24a1a5f1eee50ff378e1f72d763a52233a0c70c4",
-    "merged_at": "2026-10-26T10:58:22Z",
-    "findings": []
-   },
-   "16403": {
-    "title": "feat(computer): open files, folders and URLs and reveal them in Finder with apps.open on macOS",
-    "merge_commit": "cdef81cb6e8f63c0886994b17f6652740b262ca7",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16556": {
-    "title": "fix(coding-agent): keep ts-set-map fast on long Set lines and stop two false reminders",
-    "merge_commit": "c939a6ffc11e4c1ae6a30da0b0649e537224a46a",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16575": {
-    "title": "fix(coding-agent): keep a replaced file's CRLF line endings and BOM in write",
-    "merge_commit": "87592980ff761b1b48041bc919aeaf31082c1471",
-    "merged_at": "2026-10-26T10:58:22Z",
-    "findings": []
-   },
-   "16581": {
-    "title": "feat(coding-agent): include account policy state in omp usage --json",
-    "merge_commit": "a6d20fab17a7998d36e6725fed2014890c9c7d2a",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16583": {
-    "title": "fix(coding-agent,agent): keep a subagent's report when a peer message lands as it finishes",
-    "merge_commit": "4eec89dd816457264929aaf9c2dafae23ee61502",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16585": {
-    "title": "fix(coding-agent): stop read doc.pdf:page<N>.png returning an empty PDF viewer",
-    "merge_commit": "bfd83f62d84d25e3cf15611990686cc2578b6269",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16589": {
-    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer",
-    "merge_commit": "bd921d14345590d314d793e2a6d685937b332248",
-    "merged_at": "2026-10-26T10:58:22Z",
-    "findings": []
-   },
-   "16596": {
-    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code",
-    "merge_commit": "c616c702644d5cc2fc80be61ea7a3f487ae3e829",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16597": {
-    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived",
-    "merge_commit": "b552d78fb7692929b2422bb686399e616fcfce47",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16599": {
-    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k",
-    "merge_commit": "87a018e0c8856d7d885ed7f13fff62562222e0f8",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16608": {
-    "title": "feat(edit): record why an edit failed and count it in /session",
-    "merge_commit": "1f25de0b579bc5a8f0d9a97a911b3a71c87ad60f",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16612": {
-    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary",
-    "merge_commit": "5540fdb4952c3fb1861c3e0b8a8596f7469f7b41",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16762": {
-    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns",
-    "merge_commit": "6aa2a9e6b0426299f69e86f14af82017f2df6ede",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16763": {
-    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult",
-    "merge_commit": "c7d72f0eee9a4101704226a8e9cc371607d1a792",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16766": {
-    "title": "docs(coding-agent): say what clears an advisor's quota pause",
-    "merge_commit": "94032c8df5f5f8229d903e3ac14b651cee0d84eb",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16768": {
-    "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files",
-    "merge_commit": "2a012916194e172f7d25398335b9eeeb76eecf8e",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16769": {
-    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app",
-    "merge_commit": "b026b4f2e1e3b93bdfead0a80c8598d53ea9ecc9",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16770": {
-    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input",
-    "merge_commit": "00a73d832fce37cd0168381ae5faf7fe510f006d",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16803": {
-    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
-    "merge_commit": "44f3c9ce1af3565694c038c7147bdacbe2defa4e",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16905": {
-    "title": "fix(catalog): read Devin context windows from model info",
-    "merge_commit": "164a529b66956a0a79065031293ad7f90e5149c4",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16906": {
-    "title": "fix(catalog): identify Devin requests as CLI 3000.11.205",
-    "merge_commit": "fe0ce6e2fffcb8ceab303817043f9c2a26e10e06",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16907": {
-    "title": "fix(browser): wait for the page a click navigates to before the next call",
-    "merge_commit": "1e41c2fd0f6a248c7ce39f7ac249151efc63a353",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16909": {
-    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
-    "merge_commit": "e872e7715195b855840bc91267e38fd344803dbd",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16911": {
-    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
-    "merge_commit": "44567619ebe3395b50e6cd7712fdff02dfe2f244",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16912": {
-    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
-    "merge_commit": "8f2812997981446aebc82520aaece48a234dd657",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16915": {
-    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
-    "merge_commit": "9ef07d3a368c8e097d623b8368f795a6daed6780",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16916": {
-    "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
-    "merge_commit": "6c9147f0304e5763182d918d4c0845a00450de51",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16919": {
-    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
-    "merge_commit": "5babef173d3e3747d452ff17658e05996d7b49ec",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
-   },
-   "16920": {
-    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
-    "merge_commit": "eebc54f49d2b77835bd7c2a087eb76928dd00a72",
-    "merged_at": "2026-10-26T10:58:21Z",
-    "findings": []
    }
   },
   "events": [
@@ -55694,7 +55478,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-28T10:48:49.613318Z",
+  "at": "2026-10-28T11:19:06.311563Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -56256,7 +56040,7 @@
     "reasons": [
      "conflicts with #16297 in packages/catalog/src/compat/rules/runtime/behavior.kdl",
      "conflicts with #16309 in packages/catalog/src/discovery/factory-droid.ts",
-     "conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts"
+     "conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts"
     ],
     "note": "",
     "over": [],
@@ -56280,7 +56064,7 @@
     "reasons": [
      "needs factory-droid-0244 (queued)",
      "conflicts with #16297 in packages/catalog/src/compat/rules/runtime/behavior.kdl",
-     "its need factory-droid-0244 conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts",
+     "its need factory-droid-0244 conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts",
      "conflicts with main in packages/ai/src/providers/factory-droid/gemini.ts"
     ],
     "note": "",
