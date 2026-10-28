@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-28T16:23:06Z",
+  "checked": "2026-10-28T16:53:50Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53486,6 +53486,13 @@
    }
   },
   "conflicts": {
+   "#16271": {
+    "since": "2026-10-28T16:53:50Z",
+    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
+    "files": [
+     "packages/coding-agent/src/lsp/tool.ts"
+    ]
+   },
    "#16586": {
     "since": "2026-10-28T16:23:06Z",
     "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
@@ -54757,6 +54764,15 @@
     "files": [
      "packages/tui/src/chat/transcript-render-helpers.ts"
     ]
+   },
+   {
+    "at": "2026-10-28T16:53:50Z",
+    "kind": "conflict",
+    "label": "#16271",
+    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
+    "files": [
+     "packages/coding-agent/src/lsp/tool.ts"
+    ]
    }
   ]
  },
@@ -55485,7 +55501,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-28T16:23:07.255950Z",
+  "at": "2026-10-28T16:53:51.579142Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -55535,8 +55551,10 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/lsp/tool.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
