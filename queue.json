@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-28T09:46:49Z",
+  "checked": "2026-10-28T10:48:48Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -55694,7 +55694,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-28T10:17:49.867721Z",
+  "at": "2026-10-28T10:48:49.613318Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -56325,7 +56325,8 @@
     "title": "fix(browser): keep persist relay tabs open when the session ends",
     "action": "wait",
     "reasons": [
-     "conflicts with #16908 in packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+     "conflicts with #16908 in packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
@@ -56436,7 +56437,7 @@
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need #16756 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts"
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
     ],
     "note": "",
     "over": [],
