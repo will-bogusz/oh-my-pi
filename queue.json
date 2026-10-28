@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-27T23:04:02Z",
+  "checked": "2026-10-28T00:04:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53798,36 +53798,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-20T23:34:32Z",
-    "kind": "openable",
-    "id": "gateway-settle-log",
-    "title": "fix(ai): stop logging a usage-limit retry the gateway does not make"
-   },
-   {
-    "at": "2026-10-20T23:34:32Z",
-    "kind": "openable",
-    "id": "minimizer-diff-hunk-lines",
-    "title": "fix(pi-shell): keep diff hunk lines starting with -- or ++ inside their hunk"
-   },
-   {
-    "at": "2026-10-20T23:34:32Z",
-    "kind": "openable",
-    "id": "minimizer-keep-small-whole",
-    "title": "fix(pi-shell): keep diffs, jq results and ssh output whole up to 16 KB in the minimizer"
-   },
-   {
-    "at": "2026-10-20T23:34:32Z",
-    "kind": "openable",
-    "id": "read-nav-gate",
-    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code"
-   },
-   {
-    "at": "2026-10-20T23:34:32Z",
-    "kind": "openable",
-    "id": "task-result-inline",
-    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k"
-   },
    {
     "at": "2026-10-21T00:35:26Z",
     "kind": "openable",
@@ -55964,7 +55934,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-27T23:04:02.928916Z",
+  "at": "2026-10-28T00:04:59.484313Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
