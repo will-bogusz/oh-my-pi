@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-28T05:11:16Z",
+  "checked": "2026-10-28T05:42:18Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53798,12 +53798,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-21T05:40:20Z",
-    "kind": "openable",
-    "id": "steer-agent-notice",
-    "title": "fix(coding-agent): deliver a steered model mention's agent notice with the steer"
-   },
    {
     "at": "2026-10-21T06:41:10Z",
     "kind": "unopenable",
