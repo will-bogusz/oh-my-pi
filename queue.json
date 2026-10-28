@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-28T03:39:19Z",
+  "checked": "2026-10-28T04:10:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53798,62 +53798,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-21T04:09:08Z",
-    "kind": "unopenable",
-    "id": "fetch-ua-retry",
-    "title": "fix(coding-agent): retry a refused web read with the next user agent",
-    "why": "opened as #16593"
-   },
-   {
-    "at": "2026-10-21T04:09:08Z",
-    "kind": "unopenable",
-    "id": "grep-per-file-cap",
-    "title": "fix(coding-agent): tell the model when grep's per-file match cap trims a file",
-    "why": "opened as #16594"
-   },
-   {
-    "at": "2026-10-21T04:09:08Z",
-    "kind": "unopenable",
-    "id": "read-display-budget",
-    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
-    "why": "opened as #16595"
-   },
-   {
-    "at": "2026-10-21T04:09:08Z",
-    "kind": "unopenable",
-    "id": "read-nav-gate",
-    "title": "fix(coding-agent): keep a web page's native rendering when its short lines are tables and code",
-    "why": "opened as #16596"
-   },
-   {
-    "at": "2026-10-21T04:09:08Z",
-    "kind": "unopenable",
-    "id": "revive-extension-tools",
-    "title": "fix(coding-agent): keep extension tools registered at a subagent's first prompt after it is revived",
-    "why": "opened as #16597"
-   },
-   {
-    "at": "2026-10-21T04:09:08Z",
-    "kind": "unopenable",
-    "id": "rg-follow-root",
-    "title": "fix(pi-builtins): follow a symlinked path operand in rg and fd",
-    "why": "opened as #16598"
-   },
-   {
-    "at": "2026-10-21T04:09:08Z",
-    "kind": "unopenable",
-    "id": "task-result-inline",
-    "title": "fix(task): inline subagent reports up to 11.5k characters instead of cutting them at 5k",
-    "why": "opened as #16599"
-   },
-   {
-    "at": "2026-10-21T04:09:08Z",
-    "kind": "unopenable",
-    "id": "compaction-trigger",
-    "title": "feat(coding-agent): record what triggered each compaction",
-    "why": "plan: wait (conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts)"
-   },
    {
     "at": "2026-10-21T05:40:20Z",
     "kind": "openable",
@@ -55791,7 +55735,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-28T03:08:47.288194Z",
+  "at": "2026-10-28T04:10:08.465561Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
