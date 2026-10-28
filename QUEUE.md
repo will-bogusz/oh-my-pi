@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-28 18:27Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-28 19:28Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-28 18:26Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-28 19:28Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 3, conflict-held 12, stacked 20, held 1, open PRs 28; merged 171, closed 11
 
 ## Openable now (3)
@@ -27,7 +27,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-28
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 9d | [#16925](https://github.com/can1357/oh-my-pi/pull/16925) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 5d | [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 5d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
-| relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 4d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
+| relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 5d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
 | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 4d | [#16925](https://github.com/can1357/oh-my-pi/pull/16925), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 4d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
 
@@ -52,8 +52,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-28
 | timer-pr-7-conditions | feat(coding-agent): fire timers once a shell, CI or process condition holds | other |  | 6d | timer-pr-2-engine | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-7-conditions) |
 | timer-pr-8-wake-machine | feat(coding-agent): wake a sleeping Mac before a one-shot timer with --wake-machine | other |  | 6d | timer-pr-2-engine | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-8-wake-machine) |
 | timer-pr-4-surfaces | feat(coding-agent): set and control timers from inside a session | other |  | 6d | timer-pr-2-engine | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-4-surfaces) |
-| timer-pr-3-tool | feat(coding-agent): let the agent set timers that wake its session later | other |  | 5d | timer-pr-4-surfaces | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-3-tool) |
-| timer-pr-5-agent-runs | feat(coding-agent): run a prompt timer as an unattended agent and report back | other |  | 5d | timer-pr-3-tool | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-5-agent-runs) |
+| timer-pr-3-tool | feat(coding-agent): let the agent set timers that wake its session later | other |  | 6d | timer-pr-4-surfaces | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-3-tool) |
+| timer-pr-5-agent-runs | feat(coding-agent): run a prompt timer as an unattended agent and report back | other |  | 6d | timer-pr-3-tool | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-5-agent-runs) |
 | timer-pr-9-tool-conditions | feat(coding-agent): let the timer tool set condition timers | other |  | 5d | timer-pr-5-agent-runs, timer-pr-7-conditions | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-9-tool-conditions) |
 
 ## Held (1)
