@@ -53468,7 +53468,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-28T02:37:47Z",
+  "checked": "2026-10-28T03:39:19Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -53798,24 +53798,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-21T03:38:12Z",
-    "kind": "openable",
-    "id": "turndown-intraword-underscore",
-    "title": "fix(coding-agent): keep underscores inside words literal in converted Markdown"
-   },
-   {
-    "at": "2026-10-21T03:38:12Z",
-    "kind": "openable",
-    "id": "read-audio-transcripts",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio"
-   },
-   {
-    "at": "2026-10-21T03:38:12Z",
-    "kind": "openable",
-    "id": "read-heif-images",
-    "title": "feat(coding-agent): show HEIC and AVIF photos in read instead of refusing them as binary"
-   },
    {
     "at": "2026-10-21T04:09:08Z",
     "kind": "unopenable",
