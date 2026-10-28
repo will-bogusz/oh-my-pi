@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-28 07:45Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-28 08:15Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-28 07:13Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-28 08:14Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 3, conflict-held 12, stacked 20, held 1, open PRs 28; merged 171, closed 11
 
 ## Openable now (3)
@@ -73,7 +73,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-28
 | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | computer-ax-lines | feat(natives): show what macOS ax() elements can do | computer | P2 | 17d | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ax-lines) |
 | [#15433](https://github.com/can1357/oh-my-pi/pull/15433) | agents-show | feat(task): add omp agents show for what an agent's spawns run with | other | P2 | 16d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agents-show) |
 | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | print-hold | fix(coding-agent): keep browser calls going when a page calls window.print() | browser | P2 | 15d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-hold) |
-| [#16756](https://github.com/can1357/oh-my-pi/pull/16756) | r2/webmcp-native | fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook | browser | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/webmcp-native) |
+| [#16756](https://github.com/can1357/oh-my-pi/pull/16756) | r2/webmcp-native | fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook | browser | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/webmcp-native) |
 | [#16223](https://github.com/can1357/oh-my-pi/pull/16223) | computer-text-drag-select | feat(natives): make a macOS background drag across native text an accessibility selection | computer | P2 | 9d | requeue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-text-drag-select) |
 | [#16284](https://github.com/can1357/oh-my-pi/pull/16284) | relay-popup-front-main | fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS | browser | P2 | 9d | keep; rebases after #16908 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-front-main) |
 | [#16309](https://github.com/can1357/oh-my-pi/pull/16309) | factory-droid-credit-promotions | feat(catalog,tui): show Factory Droid credit promotions in the model browser | providers | P2 | 9d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-credit-promotions) |
