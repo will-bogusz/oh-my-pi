@@ -55158,74 +55158,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T17:51:36Z",
+  "checked": "2026-10-29T18:22:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {},
   "merged_through": "2026-10-29T13:09:14Z",
-  "unreleased": {
-   "17351": {
-    "title": "feat(catalog): fall back to Factory Droid image models in the image role",
-    "merge_commit": "11c0a2300fb3a58b540818946ce9a87888d5f5bf",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "17349": {
-    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
-    "merge_commit": "2efb636fdecc16acfcf5e57e3ec4a9f58c41e394",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "16925": {
-    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
-    "merge_commit": "b52e0e33bf2f76b0d9443946ae766fadd43e28bc",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "16918": {
-    "title": "feat(coding-agent): start desktop tasks without a documentation read",
-    "merge_commit": "6510917019e26302ebd6b77f820837849f437cba",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "16917": {
-    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines",
-    "merge_commit": "9d2ec3a913ef05682495fc62b0b8c4dc17984713",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "16756": {
-    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
-    "merge_commit": "1110569c79ffb21705ee614c073bb33ef3cf57d2",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "16587": {
-    "title": "feat(coding-agent): tag each log record with the session that wrote it",
-    "merge_commit": "4c686b9e5d7840f79f97f09577c866ab5e70c7da",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "16579": {
-    "title": "fix(ai): stop logging a usage-limit retry the gateway does not make",
-    "merge_commit": "17b626b666ac93af850a7083c34fb02aecff1d3a",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "16564": {
-    "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts",
-    "merge_commit": "dca58068f97bd58ade85e018a0ead8635f1a0e12",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "16297": {
-    "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling",
-    "merge_commit": "86ba2c3ab951c052c696c3a8feebb8488edc82eb",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "16271": {
-    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
-    "merge_commit": "7658eb48b758983f98a422456e13507e83fa0839",
-    "merged_at": "2026-10-29T13:09:14Z"
-   },
-   "15124": {
-    "title": "fix(ai): rank account policy priority ahead of a missing usage report",
-    "merge_commit": "1d164c6c99fabca36ea53e1b39fed48b0c7da7c8",
-    "merged_at": "2026-10-29T13:09:14Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    15128,
    15130,
@@ -56535,6 +56474,90 @@
     "id": "read-url-native-prune",
     "title": "feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads",
     "why": "opened as #17393"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 17351,
+    "title": "feat(catalog): fall back to Factory Droid image models in the image role",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 17349,
+    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 16925,
+    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 16918,
+    "title": "feat(coding-agent): start desktop tasks without a documentation read",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 16917,
+    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 16756,
+    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 16587,
+    "title": "feat(coding-agent): tag each log record with the session that wrote it",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 16579,
+    "title": "fix(ai): stop logging a usage-limit retry the gateway does not make",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 16564,
+    "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 16297,
+    "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 16271,
+    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
+    "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T18:22:08Z",
+    "kind": "released",
+    "number": 15124,
+    "title": "fix(ai): rank account policy priority ahead of a missing usage report",
+    "tag": "v18.14.0"
    }
   ]
  },
