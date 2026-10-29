@@ -20878,7 +20878,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-19T07:26:45Z",
-   "updated": "2026-10-29T05:49:18Z",
+   "updated": "2026-10-29T06:25:03Z",
    "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block). Real overlap with #16403: both change the apps.open native call in worker.ts (we wrap it in the quiet wait); if #16403 merges first, rebase onto it and wrap its new call (QueueRebase, 2026-10-22). 2026-10-29 (ComputerDocs): 00427ab9a8 replaces the Bun.sleep in 'waits after an unawaited input ends' with gates (precheck timing FIX cleared; fails with 25b3c0c99's worker fix reverted); computer-input-diff-report restacked on it. The Mac worktree's local branch (0725dcaf40) is a stale pre-advance copy; work from fork.",
    "advanced": "2026-10-29T05:18:57Z",
    "built": [
@@ -20891,6 +20891,276 @@
      "at": "2026-10-29T05:49:18Z",
      "host": "goliath",
      "tree": "966f7b272cb2d9f4eb828e5ecd06dcb023596c3e"
+    },
+    {
+     "with": "#16564",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "10f5714404b40a0697470c23fd2c82a8e5cdcea7",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "bf9892020aeb3377c6586b9815cb8ac494146014",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16271",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "23f5cfadc56e4fad80ea417ddbb755ddb8614888",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "4d91b2aaf4fcc8efb01309cec1ea598197e0374b",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16274",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "f2a28b15a1abbb80e0a04f5121fa2097c793d3e2",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "3db21f85c0aa756492e84c9afae6b56bb684a3b2",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16552",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "b04130b5fe1350d454a78d9dad26872b6f00ee7e",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "e44ffb7e01c51f22e0352a2f26f53a58f8cd1275",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16553",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "2335e24141c63cad4f0e5fb5fd3222446af9acdd",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "8cb2b8b542ed6a7220451aa96f293f2282771946",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16595",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "c6b9e5974f6e36d0b4a7eb361b0ef3cbacec0404",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "8061516f7a02542823c74ad07277648b0a491c3d",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#15508",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "d2c5434fc235f80605e04b468f1ca34a1f7bcf32",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "e080e5536a0815345111cb07d67eb557d4610c05",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16284",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "7ba84973357f9cc6e6d11f32831d57fb3f159040",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "883cd7bfb4bf155ee7c4818359081ded43f15d2d",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16297",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "91f0a8bf726ad6d94a287ebabcee482e9f84ca9f",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "f57b3bd7b49f728bee4745656f43a755937a213a",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16756",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "e3efe68ff68bcfd724bc34e939ffb6f472dafdc3",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "565fa97043ce7fd67bfd6674be27b4b36d5f3af9",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16925",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "52d862215380a32758f27019f04b46e1cfec41a5",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "d13da2f2caa0ad1505e226c23441da73d89a9b9b",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#15128",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "ca95834cec2c151c013a3b24dc542e9f1ed84fa5",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "216cfa17f3293ef483950379ef78029c4cf676de",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#15130",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "05b17611c9113c6c327b5f6d7b92083abb37e37e",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "fbfc1c6bb3bf8f04c73377c911f1171608d9d270",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#15282",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "b5fa72af5ba713626972d0b4eb0de85fc9f7520a",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "00e86087ef028962228956ce5105419a8294c49f",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#15433",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "d2bf94525d7b76ec6e42543e92e0e43b5330118d",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "6fe8cde69edd575e6895e2d18bddddda4426cf9f",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16223",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "23928780160628ae00427bf27cebecd57542c288",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "98d33ddc231f5b4b86295471de199e5d5ce14f3a",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16309",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "82cfd074f1ca519cf4b60df8a85f8885e6945f23",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "c81eb0e8db1e552fcfabbec02545a21de37740f5",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16576",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "540b4fea24ab0a4320581e66f14f99efbabef7b8",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "b556170762ad929a1c6bca2ccb095d45f9e72ede",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16586",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "e42964ea7eb2d7b27a2876a35e7175d86c0f0e5d",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "3eef3a8cba837783dbd2a183d026763759c2b659",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16587",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "e15b4b9bc8b1fa04083500fb7b6aed57e24e2d02",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "0d85e606dbe71b81439b842051fb7253a2b99a27",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16611",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "3814acc5ba49444ef9d4580857a33a1649d151d6",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "1d9fb111b77160ed6985e12bcdba11c331b94409",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16801",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "a60a29e002dbf5a7b370b71574b25bfb85b2dcec",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "064cbe2992ae3a84969ee3324eae98b3fe70f3e3",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16917",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "4c9b4c6c9d4d84e25eb906a53c01dde92d18f139",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "a05f51e816fd9bb26a5d4eeb0209bdbbdf19c00a",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#16918",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "b3a50bf567bb73aaf1fa87981ba7d2dfea547259",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "f74199a046d382679b5af1a854c75bf00c7590fb",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#17349",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "bb0fe9b0adf8e05e2cd262554326b944540f6f4d",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "fb57f3987b6f4bf5cd080caab3d38e59472a469c",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#17350",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "c204001d78c047213310a45a259a88e69bd28545",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "d1a47b27b2a12a99dc30f85f7c5398350f47a7eb",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
+    },
+    {
+     "with": "#17351",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "88f35633fad63e3f3faf4e04049d1f8de9e0db2f",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "c29dca10a933aa4cedf5c36286918822c9f279a5",
+     "at": "2026-10-29T06:25:02Z",
+     "host": "goliath",
+     "tree": "e85bc21f8935972400e93bee2202dd3d1924c340"
     }
    ]
   },
