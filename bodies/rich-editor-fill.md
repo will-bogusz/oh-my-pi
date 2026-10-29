@@ -19,7 +19,7 @@ In `fillViaHandle`, a contenteditable target gets its contents selected in the p
 `main` cleared a contenteditable with `innerText = ""`, then typed per key. Rich-text editors keep their own document and learn of edits only through input events, so that write is undone (Lexical, and the keys land in front of the old text) or leaves the editor out of step with its DOM (Slate). An insertion over a selection reaches the editor through `beforeinput`, like a user's paste.
 
 - Rejected: select-all by shortcut (Ctrl vs Cmd, and headless macOS needs the edit command named); the Selection API is platform-neutral. Per-key typing over the selection: a round trip per key on the relay. `insertText("")` to clear: Slate ignores it.
-- Non-goals: cmux (script fallback, no trusted input), and `tab.type`, which types where `focus()` leaves the caret, at the start.
+- Non-goals: cmux (script fallback, no trusted input), and `tab.type`, which types at the start, where `focus()` leaves the caret.
 
 Maintenance: editors must handle `beforeinput` `insertText` and `deleteContentBackward`, the path of pastes and IME, so a break shows there too.
 
@@ -28,7 +28,7 @@ Maintenance: editors must handle `beforeinput` `insertText` and `deleteContentBa
 - New test with a page editor that, like Slate and Lexical, keeps its own model and undoes foreign DOM writes: with the fix reverted, fill and clear both leave `"new queryold query"`.
 - Boundary tests: an empty fill removes an image-only editor's image and leaves the text around a blank span alone; an abort that lands after the insertion was sent reports it. Both fail without the second commit.
 - Slate 0.147, Lexical 0.53 and ProseMirror 1.42 bundled into local pages, driven through `browser` `run` cells (fill, refill, `fill("")`, fill, type, emoji fill) and read from each editor's model: `main` 12 of 18 steps wrong, this PR 0, in headless Chromium and through the relay in an isolated Chrome for Testing profile.
-- `bun test test/tools/browser-interactions.test.ts test/tools/browser-run-output.test.ts` in `packages/coding-agent` passes, as do the frames, tab-call and snapshot-plus browser files (62 tests); root `bun run check:ts` passes.
+- `bun test test/tools/browser-interactions.test.ts test/tools/browser-run-output.test.ts` in `packages/coding-agent` passes, with three more browser test files (62 tests); root `bun run check:ts` passes.
 
 ---
 
