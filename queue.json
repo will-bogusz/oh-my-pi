@@ -52401,7 +52401,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/computer-doc-inline.md",
    "state": "open",
    "pr": 16918,
@@ -52409,7 +52409,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-doc-inline",
    "host": "MacBook-Pro",
    "added": "2026-10-23T23:44:14Z",
-   "updated": "2026-10-24T01:42:27Z",
+   "updated": "2026-10-29T04:53:41Z",
    "note": "",
    "built": [
     {
@@ -52884,7 +52884,8 @@
     }
    ],
    "opened": "2026-10-24T01:42:06Z",
-   "readied": "2026-10-24T01:42:27Z"
+   "readied": "2026-10-24T01:42:27Z",
+   "advanced": "2026-10-29T04:53:41Z"
   },
   {
    "id": "git-guard-defects",
