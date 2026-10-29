@@ -54762,7 +54762,7 @@
    "branch": "will/archive-cache-racy",
    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "6693ddbfd58ce9edcdc0dc3fe98a8882c9bae834",
    "body": "bodies/archive-cache-racy.md",
@@ -54772,7 +54772,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/archive-cache-racy",
    "host": "MacBook-Pro",
    "added": "2026-10-29T15:29:53Z",
-   "updated": "2026-10-29T15:55:09Z",
+   "updated": "2026-10-29T16:19:57Z",
    "note": "",
    "built": [
     {
