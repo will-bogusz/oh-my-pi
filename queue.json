@@ -55408,10 +55408,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T21:56:43Z",
+  "checked": "2026-10-29T22:27:06Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "snapcompact-reduction-baseline": {
+    "since": "2026-10-29T22:27:06Z",
+    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once"
+   },
    "bash-tool-call-env": {
     "since": "2026-10-29T21:56:43Z",
     "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands"
@@ -56820,6 +56824,12 @@
     "kind": "openable",
     "id": "bash-tool-call-env",
     "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands"
+   },
+   {
+    "at": "2026-10-29T22:27:06Z",
+    "kind": "openable",
+    "id": "snapcompact-reduction-baseline",
+    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once"
    }
   ]
  },
@@ -57680,8 +57690,8 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T22:18:41.194555Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-29T22:27:07.790776Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -58039,7 +58049,7 @@
     "state": "open",
     "area": "other",
     "priority": "P2",
-    "title": "feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads",
+    "title": "feat(coding-agent): list unused meta tags by name in native web reads",
     "action": "keep",
     "reasons": [],
     "note": "",
@@ -58945,7 +58955,7 @@
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
      "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",
