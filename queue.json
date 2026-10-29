@@ -55390,10 +55390,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T21:26:04Z",
+  "checked": "2026-10-29T21:56:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "bash-tool-call-env": {
+    "since": "2026-10-29T21:56:43Z",
+    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands"
+   }
+  },
   "conflicts": {},
   "merged_through": "2026-10-29T13:09:14Z",
   "unreleased": {},
@@ -56791,6 +56796,12 @@
     "number": 15124,
     "title": "fix(ai): rank account policy priority ahead of a missing usage report",
     "tag": "v18.14.0"
+   },
+   {
+    "at": "2026-10-29T21:56:43Z",
+    "kind": "openable",
+    "id": "bash-tool-call-env",
+    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands"
    }
   ]
  },
@@ -57651,8 +57662,8 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T21:28:35.370160Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-29T21:56:44.263853Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -58895,7 +58906,7 @@
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
      "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",
