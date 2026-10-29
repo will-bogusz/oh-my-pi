@@ -54481,20 +54481,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:07:50Z",
-   "updated": "2026-10-29T15:36:00Z",
+   "updated": "2026-10-29T16:35:30Z",
    "note": "",
    "advanced": "2026-10-29T15:36:00Z",
    "built": [
-    {
-     "with": "#16908",
-     "code": "786c05ffd7707bb2c16683184d52bdc160a2f2e5",
-     "with_code": "3ca6264b07a5cea55249eaa16e6b92f7df506ce7",
-     "tip": "8ac69c62279796613e1156d543c6d17468cbf062",
-     "with_tip": "dc332eff193ea70a23de16c35b22a8ff94652109",
-     "at": "2026-10-29T06:37:41Z",
-     "host": "goliath",
-     "tree": "de0d62247a11bbaeba1709108a3e4806cd2bc928"
-    },
     {
      "with": "#16564",
      "code": "786c05ffd7707bb2c16683184d52bdc160a2f2e5",
@@ -54754,6 +54744,16 @@
      "at": "2026-10-29T06:38:30Z",
      "host": "goliath",
      "tree": "e9947664f18a150d4598514933632d206e8cd3d5"
+    },
+    {
+     "with": "#16908",
+     "code": "b3bc10a522e249d6d962eb89270e6adb3e9859ce",
+     "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
+     "tip": "e7acf23d019404d4c458e5cc4d0dd84a867daf3b",
+     "with_tip": "9d3a3b1d23bdd7223ee004a49dc92f8f855acb59",
+     "at": "2026-10-29T16:35:29Z",
+     "host": "goliath",
+     "tree": "fbe93334240a87c35d46f42e55ab0a66ad9b4036"
     }
    ]
   },
