@@ -18890,7 +18890,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-image-role-default",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:11:36Z",
-   "updated": "2026-10-29T05:39:22Z",
+   "updated": "2026-10-29T05:39:44Z",
    "note": "",
    "advanced": "2026-10-29T04:53:54Z",
    "built": [
@@ -19129,7 +19129,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-29T05:39:22Z"
+   "opened": "2026-10-29T05:39:22Z",
+   "readied": "2026-10-29T05:39:44Z"
   },
   {
    "id": "factory-droid-media-budget",
