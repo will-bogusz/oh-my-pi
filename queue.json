@@ -55385,8 +55385,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-tool-call-env",
    "host": "MacBook-Pro",
    "added": "2026-10-29T21:27:54Z",
-   "updated": "2026-10-29T21:27:54Z",
-   "note": ""
+   "updated": "2026-10-29T22:38:42Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
+     "at": "2026-10-29T22:38:41Z",
+     "host": "MacBook-Pro",
+     "tree": "799e90e6014fc38d283ff0d07bca43f092a4d3e1"
+    }
+   ]
   },
   {
    "id": "snapcompact-reduction-baseline",
@@ -55403,8 +55415,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-reduction-baseline",
    "host": "MacBook-Pro",
    "added": "2026-10-29T22:18:26Z",
-   "updated": "2026-10-29T22:18:26Z",
-   "note": ""
+   "updated": "2026-10-29T22:38:42Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "3db4bcca60dfb5af7f69b05e04ee0a26d86b6fc5",
+     "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
+     "tip": "c1afa440472dcc4639317f6f6446209cfdf430b2",
+     "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
+     "at": "2026-10-29T22:38:41Z",
+     "host": "MacBook-Pro",
+     "tree": "799e90e6014fc38d283ff0d07bca43f092a4d3e1"
+    }
+   ]
   }
  ],
  "watch": {
