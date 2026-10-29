@@ -55372,7 +55372,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T20:24:54Z",
+  "checked": "2026-10-29T21:26:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -55399,7 +55399,8 @@
    16908,
    17389,
    17391,
-   17393
+   17393,
+   17417
   ],
   "post_merge": {
    "15124": {
@@ -57632,12 +57633,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T20:56:36.822111Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-29T21:26:05.558179Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -57779,6 +57780,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-23T23:50:40Z"
+   },
+   {
+    "id": "rich-editor-fill",
+    "label": "#17417",
+    "number": 17417,
+    "state": "open",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(browser): replace a rich-text editor's text when filling it",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-29T21:13:02Z"
    },
    {
     "id": "reset-restore-longest-wait",
@@ -57997,6 +58015,7 @@
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #17417 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-interactions.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -58005,7 +58024,8 @@
     "blocked_by": [
      "#15508",
      "#16284",
-     "#16908"
+     "#16908",
+     "#17417"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -58049,6 +58069,7 @@
     "reasons": [
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #17417 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -58056,7 +58077,8 @@
     "paired": [],
     "blocked_by": [
      "#15508",
-     "#16908"
+     "#16908",
+     "#17417"
     ],
     "needs": [],
     "created": "2026-10-23T18:26:13Z"
@@ -58145,6 +58167,7 @@
      "conflicts with #15508 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in docs/tools/browser.md",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #17417 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
@@ -58153,7 +58176,8 @@
     "blocked_by": [
      "#15508",
      "#16284",
-     "#16908"
+     "#16908",
+     "#17417"
     ],
     "needs": [],
     "created": "2026-10-23T18:13:45Z"
@@ -58192,6 +58216,7 @@
      "needs #15508 (open), r2/relay-call-deadline (queued), r2/relay-bg-input-main (queued), r2/native-window-report (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #17417 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-call-deadline conflicts with main in packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
      "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
@@ -58201,7 +58226,8 @@
     "paired": [],
     "blocked_by": [
      "#16284",
-     "#16908"
+     "#16908",
+     "#17417"
     ],
     "needs": [
      "#15508",
@@ -58224,6 +58250,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #17417 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
@@ -58231,7 +58258,8 @@
     "paired": [],
     "blocked_by": [
      "#16284",
-     "#16908"
+     "#16908",
+     "#17417"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -58251,6 +58279,7 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #17417 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
@@ -58259,7 +58288,8 @@
     "paired": [],
     "blocked_by": [
      "#16284",
-     "#16908"
+     "#16908",
+     "#17417"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -58279,6 +58309,7 @@
     "reasons": [
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #17417 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -58286,7 +58317,8 @@
     "paired": [],
     "blocked_by": [
      "#15508",
-     "#16908"
+     "#16908",
+     "#17417"
     ],
     "needs": [],
     "created": "2026-10-23T19:04:15Z"
@@ -58433,13 +58465,15 @@
     "reasons": [
      "needs #15508 (open)",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #17417 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16908"
+     "#16908",
+     "#17417"
     ],
     "needs": [
      "#15508"
@@ -58459,6 +58493,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #16284 in docs/tools/browser.md",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #17417 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
@@ -58466,7 +58501,8 @@
     "paired": [],
     "blocked_by": [
      "#16284",
-     "#16908"
+     "#16908",
+     "#17417"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -58496,23 +58532,6 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "rich-editor-fill",
-    "label": "rich-editor-fill",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": null,
-    "title": "fix(browser): replace a rich-text editor's text when filling it",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-29T20:56:02Z"
    },
    {
     "id": "account-window-reserves",
@@ -58837,7 +58856,7 @@
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
      "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",
