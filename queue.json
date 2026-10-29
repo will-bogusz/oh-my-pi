@@ -20356,7 +20356,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
+   "base": "d33a0edb00c8b76b28d71eb976cd82d69617bcba",
    "body": "bodies/read-after-bash-revalidate.md",
    "state": "open",
    "pr": 16274,
@@ -20364,7 +20364,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-after-bash-revalidate",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:39:24Z",
-   "updated": "2026-10-29T04:54:43Z",
+   "updated": "2026-10-29T20:11:57Z",
    "note": "",
    "built": [
     {
@@ -20804,7 +20804,7 @@
     }
    ],
    "opened": "2026-10-19T01:07:22Z",
-   "advanced": "2026-10-29T04:54:43Z"
+   "advanced": "2026-10-29T20:11:57Z"
   },
   {
    "id": "natives-dts-regen",
@@ -37192,7 +37192,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
+   "base": "d33a0edb00c8b76b28d71eb976cd82d69617bcba",
    "body": "bodies/read-display-budget.md",
    "state": "open",
    "pr": 16595,
@@ -37200,7 +37200,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-display-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:59:53Z",
-   "updated": "2026-10-29T04:54:43Z",
+   "updated": "2026-10-29T20:11:57Z",
    "note": "",
    "built": [
     {
@@ -37653,7 +37653,7 @@
      "tree": "059e16c5899a65c86cabcf7ba734cce09fdee99f"
     }
    ],
-   "advanced": "2026-10-29T04:54:43Z",
+   "advanced": "2026-10-29T20:11:57Z",
    "opened": "2026-10-21T03:57:52Z",
    "readied": "2026-10-21T03:58:18Z"
   },
