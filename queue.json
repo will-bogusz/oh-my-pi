@@ -54747,7 +54747,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T07:08:58Z",
+  "checked": "2026-10-29T07:39:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -54824,36 +54824,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-22T07:36:17Z",
-    "kind": "openable",
-    "id": "sleep-prevention-doc",
-    "title": "fix(coding-agent): describe power.sleepPrevention as held only during turns"
-   },
-   {
-    "at": "2026-10-22T07:36:17Z",
-    "kind": "openable",
-    "id": "advisor-quota-comment",
-    "title": "docs(coding-agent): say what clears an advisor's quota pause"
-   },
-   {
-    "at": "2026-10-22T07:36:17Z",
-    "kind": "openable",
-    "id": "drop-dead-jobs-op",
-    "title": "refactor(coding-agent,tui): drop the unused jobs op from buildJobResult"
-   },
-   {
-    "at": "2026-10-22T07:36:17Z",
-    "kind": "openable",
-    "id": "computer-element-front-first",
-    "title": "fix(natives,computer): read the macOS front app before el.type, el.press and el.click ask the target app"
-   },
-   {
-    "at": "2026-10-22T07:36:17Z",
-    "kind": "openable",
-    "id": "computer-right-click-per-press",
-    "title": "fix(natives): stop a macOS background right or middle multi-click at the user's input"
-   },
    {
     "at": "2026-10-22T08:06:38Z",
     "kind": "openable",
