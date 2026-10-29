@@ -54766,13 +54766,13 @@
    "needs": [],
    "base": "6693ddbfd58ce9edcdc0dc3fe98a8882c9bae834",
    "body": "bodies/archive-cache-racy.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17389,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/archive-cache-racy",
    "host": "MacBook-Pro",
    "added": "2026-10-29T15:29:53Z",
-   "updated": "2026-10-29T15:52:12Z",
+   "updated": "2026-10-29T15:54:44Z",
    "note": "",
    "built": [
     {
@@ -54928,7 +54928,8 @@
      "at": "2026-10-29T15:52:12Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-29T15:54:44Z"
   }
  ],
  "watch": {
