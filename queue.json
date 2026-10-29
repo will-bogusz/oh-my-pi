@@ -54953,13 +54953,13 @@
    "needs": [],
    "base": "8bbfa5f13407e1b82ca5f3ea25a1be9b105c031c",
    "body": "bodies/read-url-native-prune.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17393,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-url-native-prune",
    "host": "MacBook-Pro",
    "added": "2026-10-29T16:21:19Z",
-   "updated": "2026-10-29T17:39:30Z",
+   "updated": "2026-10-29T17:40:38Z",
    "note": "",
    "built": [
     {
@@ -55152,7 +55152,8 @@
      "host": "MacBook-Pro",
      "tree": "c588edcfb0bc9f08ce84989a3126f9bb58e184b2"
     }
-   ]
+   ],
+   "opened": "2026-10-29T17:40:38Z"
   }
  ],
  "watch": {
