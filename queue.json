@@ -56546,8 +56546,8 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T06:08:11.626417Z",
-  "host": "goliath",
+  "at": "2026-10-29T06:27:11.643788Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 3,
@@ -57213,12 +57213,16 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15282"
+    ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
    },
@@ -57403,6 +57407,7 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued)",
+     "conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #16223 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #16917 in packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
@@ -57410,6 +57415,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#15282",
      "#16223",
      "#16917"
     ],
@@ -57429,16 +57435,14 @@
     "action": "wait",
     "reasons": [
      "conflicts with #16925 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #15282 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with computer-ui-quiet in packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with #15282 in packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#16925",
-     "#15282",
-     "computer-ui-quiet"
+     "#15282"
     ],
     "needs": [],
     "created": "2026-10-24T05:06:00Z"
@@ -57455,15 +57459,14 @@
     "reasons": [
      "needs computer-ui-quiet (queued), #15282 (open)",
      "conflicts with #16223 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with computer-ui-quiet in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
+     "its need #15282 conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16223",
-     "computer-ui-quiet"
+     "#16223"
     ],
     "needs": [
      "computer-ui-quiet",
@@ -57479,16 +57482,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(computer): wait for windows opened by actions",
-    "action": "wait",
-    "reasons": [
-     "conflicts with computer-ui-quiet in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "computer-ui-quiet"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-24T05:07:50Z"
    },
