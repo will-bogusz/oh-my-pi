@@ -54747,13 +54747,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T06:08:10Z",
+  "checked": "2026-10-29T06:38:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "computer-ui-quiet": {
-    "since": "2026-10-29T05:06:49Z",
-    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
+   "computer-window-wait": {
+    "since": "2026-10-29T06:38:43Z",
+    "title": "feat(computer): wait for windows opened by actions"
    }
   },
   "conflicts": {},
@@ -56037,6 +56037,19 @@
     "id": "read-url-markup-tokens",
     "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads",
     "why": "opened as #17350"
+   },
+   {
+    "at": "2026-10-29T06:38:43Z",
+    "kind": "openable",
+    "id": "computer-window-wait",
+    "title": "feat(computer): wait for windows opened by actions"
+   },
+   {
+    "at": "2026-10-29T06:38:43Z",
+    "kind": "unopenable",
+    "id": "computer-ui-quiet",
+    "title": "fix(computer): wait for the app to finish reacting before the next read or input",
+    "why": "plan: wait (conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts)"
    }
   ]
  },
@@ -56818,12 +56831,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T06:27:11.643788Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-29T06:38:44.109167Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 3,
-   "left": 5
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
