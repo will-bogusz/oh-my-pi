@@ -1,19 +1,18 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 05:33Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 05:35Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-10-29 05:14Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 11, stacked 21, held 1, open PRs 27; merged 171, closed 11
+**Counts:** openable now 3, conflict-held 11, stacked 21, held 1, open PRs 28; merged 171, closed 11
 
-## Openable now (4)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-image-role-default | feat(catalog): fall back to Factory Droid image models in the image role | providers | P2 | 10d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-role-default) |
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 9d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | read-url-markup-tokens | feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads | other |  | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-markup-tokens) |
-| git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 5d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
 
 ## Conflict-held (11)
 
@@ -63,7 +62,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 15d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 
-## Open PRs (27)
+## Open PRs (28)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -93,4 +92,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 | [#16917](https://github.com/can1357/oh-my-pi/pull/16917) | computer-control-policy | feat(coding-agent): let tools.approval grant computer foreground control on unattended machines | computer | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-control-policy) |
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 5d | rebase; opened over P2 #16284 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
 | [#16918](https://github.com/can1357/oh-my-pi/pull/16918) | computer-doc-inline | feat(coding-agent): start desktop tasks without a documentation read | computer | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-doc-inline) |
+| [#17349](https://github.com/can1357/oh-my-pi/pull/17349) | git-guard-scope | feat(pi-shell): keep the git guard's refusals to checkouts other sessions share | other |  | 5d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/git-guard-scope) |
 | [#16925](https://github.com/can1357/oh-my-pi/pull/16925) | computer-apps-open-first | fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks | computer | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-apps-open-first) |
