@@ -1150,15 +1150,16 @@
     "computer-ui-quiet"
    ],
    "base": "40f2941faca9c17ffc2ec22e5495a830b40c3cc5",
-   "body": null,
+   "body": "bodies/computer-input-diff-report.md",
    "state": "open",
    "pr": 15280,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-input-diff-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-27T17:41:38Z",
-   "note": "series 2 (B: draft until Will's presentation review). #15280 -> #15565; #15282 -> #15566, #15584 (children queued)."
+   "updated": "2026-10-29T05:02:00Z",
+   "note": "series 2 (B: draft until Will's presentation review). #15280 -> #15565; #15282 -> #15566, #15584 (children queued).",
+   "requeue": 15280
   },
   {
    "id": "computer-ax-lines",
