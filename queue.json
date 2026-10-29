@@ -54205,73 +54205,23 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T05:06:49Z",
+  "checked": "2026-10-29T06:08:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "computer-ui-quiet": {
     "since": "2026-10-29T05:06:49Z",
     "title": "fix(computer): wait for the app to finish reacting before the next read or input"
-   },
-   "factory-droid-image-role-default": {
-    "since": "2026-10-26T11:23:01Z",
-    "title": "feat(catalog): fall back to Factory Droid image models in the image role"
-   },
-   "git-guard-scope": {
-    "since": "2026-10-26T11:23:01Z",
-    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share"
-   },
-   "read-url-markup-tokens": {
-    "since": "2026-10-26T11:23:01Z",
-    "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads"
    }
   },
-  "conflicts": {
-   "#16271": {
-    "since": "2026-10-28T16:53:50Z",
-    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
-    "files": [
-     "packages/coding-agent/src/lsp/tool.ts"
-    ]
-   },
-   "#16576": {
-    "since": "2026-10-28T17:24:41Z",
-    "title": "feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them",
-    "files": [
-     "packages/coding-agent/src/tools/bash.ts"
-    ]
-   },
-   "#16586": {
-    "since": "2026-10-28T16:23:06Z",
-    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
-    "files": [
-     "packages/tui/src/chat/transcript-render-helpers.ts"
-    ]
-   },
-   "#16801": {
-    "since": "2026-10-27T12:22:45Z",
-    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
-    "files": [
-     "packages/coding-agent/src/main.ts",
-     "packages/coding-agent/src/session/agent-session.ts"
-    ]
-   },
-   "#16908": {
-    "since": "2026-10-26T11:23:01Z",
-    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
-    "files": [
-     "packages/browser-relay/extension/chrome.d.ts",
-     "packages/coding-agent/src/tools/browser/relay/bridge.ts",
-     "packages/coding-agent/src/tools/browser/relay/server.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-10-26T10:58:22Z",
   "unreleased": {},
   "ready": [
    15124,
    15128,
    15130,
+   15282,
    15433,
    15508,
    16223,
@@ -54294,7 +54244,10 @@
    16908,
    16917,
    16918,
-   16925
+   16925,
+   17349,
+   17350,
+   17351
   ],
   "post_merge": {
    "16288": {
@@ -55521,6 +55474,27 @@
     "kind": "openable",
     "id": "computer-ui-quiet",
     "title": "fix(computer): wait for the app to finish reacting before the next read or input"
+   },
+   {
+    "at": "2026-10-29T06:08:10Z",
+    "kind": "unopenable",
+    "id": "factory-droid-image-role-default",
+    "title": "feat(catalog): fall back to Factory Droid image models in the image role",
+    "why": "opened as #17351"
+   },
+   {
+    "at": "2026-10-29T06:08:10Z",
+    "kind": "unopenable",
+    "id": "git-guard-scope",
+    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
+    "why": "opened as #17349"
+   },
+   {
+    "at": "2026-10-29T06:08:10Z",
+    "kind": "unopenable",
+    "id": "read-url-markup-tokens",
+    "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads",
+    "why": "opened as #17350"
    }
   ]
  },
@@ -56297,12 +56271,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T05:14:33.501481Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-29T06:08:11.626417Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -56519,10 +56493,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/browser-relay/extension/chrome.d.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "opened over P2 #16284",
     "over": [],
     "paired": [
@@ -56771,6 +56743,57 @@
     "created": "2026-10-24T01:42:05Z"
    },
    {
+    "id": "git-guard-scope",
+    "label": "#17349",
+    "number": 17349,
+    "state": "open",
+    "area": "other",
+    "priority": "P2",
+    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-29T05:34:59Z"
+   },
+   {
+    "id": "read-url-markup-tokens",
+    "label": "#17350",
+    "number": 17350,
+    "state": "open",
+    "area": "other",
+    "priority": "P2",
+    "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-29T05:37:07Z"
+   },
+   {
+    "id": "factory-droid-image-role-default",
+    "label": "#17351",
+    "number": 17351,
+    "state": "open",
+    "area": "providers",
+    "priority": "P2",
+    "title": "feat(catalog): fall back to Factory Droid image models in the image role",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-29T05:39:20Z"
+   },
+   {
     "id": "r2/relay-call-deadline",
     "label": "r2/relay-call-deadline",
     "number": null,
@@ -56783,7 +56806,7 @@
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -56810,7 +56833,7 @@
     "reasons": [
      "needs #16284 (open)",
      "conflicts with #16284 in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/natives/native/index.d.ts, packages/natives/native/index.js",
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts",
      "conflicts with main in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/natives/native/index.d.ts"
     ],
     "note": "",
@@ -56837,6 +56860,7 @@
     "reasons": [
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -56844,7 +56868,8 @@
     "paired": [],
     "blocked_by": [
      "#15508",
-     "#16756"
+     "#16756",
+     "#16908"
     ],
     "needs": [],
     "created": "2026-10-23T18:26:13Z"
@@ -56861,6 +56886,7 @@
     "reasons": [
      "conflicts with #16297 in packages/catalog/src/compat/rules/runtime/behavior.kdl",
      "conflicts with #16309 in packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/discovery/factory-droid.ts",
+     "conflicts with #17351 in packages/catalog/src/compat/rules/runtime/behavior.kdl",
      "conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts"
     ],
     "note": "",
@@ -56868,7 +56894,8 @@
     "paired": [],
     "blocked_by": [
      "#16297",
-     "#16309"
+     "#16309",
+     "#17351"
     ],
     "needs": [],
     "created": "2026-10-18T20:33:08Z"
@@ -56886,6 +56913,7 @@
      "needs factory-droid-0244 (queued)",
      "conflicts with #16297 in packages/catalog/src/compat/rules/runtime/behavior.kdl",
      "conflicts with #16309 in packages/catalog/src/compat/rules/providers/factory-droid.kdl",
+     "conflicts with #17351 in packages/catalog/src/compat/rules/runtime/behavior.kdl",
      "its need factory-droid-0244 conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts",
      "conflicts with main in packages/ai/src/providers/factory-droid/gemini.ts"
     ],
@@ -56894,7 +56922,8 @@
     "paired": [],
     "blocked_by": [
      "#16297",
-     "#16309"
+     "#16309",
+     "#17351"
     ],
     "needs": [
      "factory-droid-0244"
@@ -56928,14 +56957,16 @@
     "title": "fix(browser): keep persist relay tabs open when the session ends",
     "action": "wait",
     "reasons": [
+     "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #16908 in packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#15508",
      "#16756",
      "#16908"
     ],
@@ -56976,9 +57007,9 @@
      "needs #15508 (open), r2/relay-call-deadline (queued), r2/relay-bg-input-main (queued), r2/native-window-report (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/relay-call-deadline conflicts with main in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
-     "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
     ],
     "note": "",
@@ -57010,7 +57041,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #16908 in packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #16908 in packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts"
     ],
     "note": "",
@@ -57039,7 +57070,7 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued), #16756 (open)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/webmcp.ts",
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need #16756 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -57072,6 +57103,7 @@
     "reasons": [
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -57079,7 +57111,8 @@
     "paired": [],
     "blocked_by": [
      "#15508",
-     "#16756"
+     "#16756",
+     "#16908"
     ],
     "needs": [],
     "created": "2026-10-23T19:04:15Z"
@@ -57185,23 +57218,6 @@
     "created": "2026-10-24T05:07:50Z"
    },
    {
-    "id": "factory-droid-image-role-default",
-    "label": "factory-droid-image-role-default",
-    "number": null,
-    "state": "queued",
-    "area": "providers",
-    "priority": "P2",
-    "title": "feat(catalog): fall back to Factory Droid image models in the image role",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-18T21:11:36Z"
-   },
-   {
     "id": "factory-droid-web-search",
     "label": "factory-droid-web-search",
     "number": null,
@@ -57262,13 +57278,15 @@
     "action": "wait",
     "reasons": [
      "needs #15508 (open)",
-     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16756"
+     "#16756",
+     "#16908"
     ],
     "needs": [
      "#15508"
@@ -57378,6 +57396,7 @@
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #17349 in docs/settings.md",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -57389,7 +57408,8 @@
      "#15128",
      "#15130",
      "#16587",
-     "#16801"
+     "#16801",
+     "#17349"
     ],
     "needs": [
      "#15133"
@@ -57469,40 +57489,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "git-guard-scope",
-    "label": "git-guard-scope",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-24T01:07:47Z"
-   },
-   {
-    "id": "read-url-markup-tokens",
-    "label": "read-url-markup-tokens",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-20T23:46:25Z"
    },
    {
     "id": "timer-pr-2-engine",
