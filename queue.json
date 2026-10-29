@@ -55156,6 +55156,24 @@
    ],
    "opened": "2026-10-29T17:40:38Z",
    "readied": "2026-10-29T17:41:03Z"
+  },
+  {
+   "id": "rich-editor-fill",
+   "branch": "will/rich-editor-fill",
+   "title": "fix(browser): replace a rich-text editor's text when filling it",
+   "area": "browser",
+   "priority": null,
+   "needs": [],
+   "base": "d33a0edb00c8b76b28d71eb976cd82d69617bcba",
+   "body": "bodies/rich-editor-fill.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rich-editor-fill",
+   "host": "MacBook-Pro",
+   "added": "2026-10-29T20:56:02Z",
+   "updated": "2026-10-29T20:56:02Z",
+   "note": ""
   }
  ],
  "watch": {
