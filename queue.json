@@ -54481,7 +54481,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:07:50Z",
-   "updated": "2026-10-29T16:41:15Z",
+   "updated": "2026-10-29T16:41:35Z",
    "note": "",
    "advanced": "2026-10-29T15:36:00Z",
    "built": [
@@ -54766,7 +54766,8 @@
      "tree": "f745eb407d732a8b8266837060df20b709096247"
     }
    ],
-   "opened": "2026-10-29T16:41:15Z"
+   "opened": "2026-10-29T16:41:15Z",
+   "readied": "2026-10-29T16:41:34Z"
   },
   {
    "id": "archive-cache-racy",
