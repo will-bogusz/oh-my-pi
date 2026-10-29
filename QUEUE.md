@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 16:20Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 16:21Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-10-29 16:20Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 12, stacked 20, held 1, open PRs 19; merged 183, closed 11
+**Counts:** openable now 1, conflict-held 12, stacked 20, held 1, open PRs 19, queued since the last plan 1; merged 183, closed 11
 
 ## Openable now (1)
 
@@ -83,3 +83,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 6d | requeue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 5d | keep; opened over P2 #16284 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
 | [#17389](https://github.com/can1357/oh-my-pi/pull/17389) | archive-cache-racy | fix(coding-agent): re-read an archive rewritten inside one timestamp granule | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/archive-cache-racy) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| read-url-native-prune | feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads | other | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-native-prune) |
