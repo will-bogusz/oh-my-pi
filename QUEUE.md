@@ -1,14 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 20:57Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 20:58Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-29 20:24Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 12, stacked 20, held 1, open PRs 20, queued since the last plan 1; merged 183, closed 12
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-29 20:56Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 1, conflict-held 12, stacked 20, held 1, open PRs 20; merged 183, closed 12
 
-## Openable now (0)
+## Openable now (1)
 
-none
+| id | title | area | priority | age | plan | branch |
+|---|---|---|---|---|---|---|
+| rich-editor-fill | fix(browser): replace a rich-text editor's text when filling it | browser |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill) |
 
 ## Conflict-held (12)
 
@@ -82,9 +84,3 @@ none
 | [#17391](https://github.com/can1357/oh-my-pi/pull/17391) | computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
 | [#17389](https://github.com/can1357/oh-my-pi/pull/17389) | archive-cache-racy | fix(coding-agent): re-read an archive rewritten inside one timestamp granule | other | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/archive-cache-racy) |
 | [#17393](https://github.com/can1357/oh-my-pi/pull/17393) | read-url-native-prune | feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads | other | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-native-prune) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| rich-editor-fill | fix(browser): replace a rich-text editor's text when filling it | browser |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill) |
