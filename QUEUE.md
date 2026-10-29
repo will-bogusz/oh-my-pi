@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-29 04:36Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 12, stacked 20, held 1, open PRs 28; merged 171, closed 11
+**Counts:** openable now 3, conflict-held 12, stacked 20, held 1, open PRs 27, queued since the last plan 1; merged 171, closed 11
 
 ## Openable now (3)
 
@@ -62,14 +62,13 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 15d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 
-## Open PRs (28)
+## Open PRs (27)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
 | [#15124](https://github.com/can1357/oh-my-pi/pull/15124) | policy-priority-unmeasured | fix(ai): rank account policy priority ahead of a missing usage report | broker | P2 | 19d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/policy-priority-unmeasured) |
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 19d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 19d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
-| [#15280](https://github.com/can1357/oh-my-pi/pull/15280) | computer-input-diff-report | feat(computer): report what input changed as a diff once the app goes quiet | computer | P2 | 18d | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-input-diff-report) |
 | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | computer-ax-lines | feat(natives): show what macOS ax() elements can do | computer | P2 | 18d | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ax-lines) |
 | [#15433](https://github.com/can1357/oh-my-pi/pull/15433) | agents-show | feat(task): add omp agents show for what an agent's spawns run with | other | P2 | 17d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agents-show) |
 | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | print-hold | fix(coding-agent): keep browser calls going when a page calls window.print() | browser | P2 | 16d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-hold) |
@@ -94,3 +93,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 5d | rebase; opened over P2 #16284 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
 | [#16918](https://github.com/can1357/oh-my-pi/pull/16918) | computer-doc-inline | feat(coding-agent): start desktop tasks without a documentation read | computer | P2 | 5d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-doc-inline) |
 | [#16925](https://github.com/can1357/oh-my-pi/pull/16925) | computer-apps-open-first | fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks | computer | P2 | 5d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-apps-open-first) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| computer-input-diff-report | feat(computer): report what input changed as a diff once the app goes quiet | computer | P2 | 15d | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-input-diff-report) |
