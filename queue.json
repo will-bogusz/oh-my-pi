@@ -55146,7 +55146,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T16:50:45Z",
+  "checked": "2026-10-29T17:20:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -55330,20 +55330,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-22T17:18:04Z",
-    "kind": "unopenable",
-    "id": "max-cost-gate",
-    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
-    "why": "opened as #16803"
-   },
-   {
-    "at": "2026-10-22T17:18:04Z",
-    "kind": "unopenable",
-    "id": "timer-pr-1-poke",
-    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
-    "why": "opened as #16801"
-   },
    {
     "at": "2026-10-23T02:55:26Z",
     "kind": "unopenable",
@@ -57363,12 +57349,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T16:50:46.071817Z",
+  "at": "2026-10-29T17:20:55.902147Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
