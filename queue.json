@@ -4544,9 +4544,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-drag-select",
    "host": "MacBook-Pro",
    "added": "2026-10-18T11:18:03Z",
-   "updated": "2026-10-29T20:11:14Z",
+   "updated": "2026-10-29T20:26:54Z",
    "note": "",
-   "advanced": "2026-10-29T20:11:14Z",
+   "advanced": "2026-10-29T20:26:54Z",
    "built": [
     {
      "with": "#16202",
@@ -15353,7 +15353,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-credit-promotions",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:02Z",
-   "updated": "2026-10-29T20:18:34Z",
+   "updated": "2026-10-29T20:26:54Z",
    "note": "",
    "built": [
     {
@@ -15840,7 +15840,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-29T20:18:34Z",
+   "advanced": "2026-10-29T20:26:54Z",
    "opened": "2026-10-19T06:56:13Z",
    "readied": "2026-10-19T06:56:45Z"
   },
@@ -35808,7 +35808,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-10-29T20:11:14Z",
+   "updated": "2026-10-29T20:26:54Z",
    "note": "",
    "built": [
     {
@@ -35841,7 +35841,7 @@
    ],
    "opened": "2026-10-20T20:20:44Z",
    "readied": "2026-10-20T20:21:05Z",
-   "advanced": "2026-10-29T20:11:14Z"
+   "advanced": "2026-10-29T20:26:54Z"
   },
   {
    "id": "eval-py-await-tool",
@@ -44067,7 +44067,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-audio-transcripts",
    "host": "MacBook-Pro",
    "added": "2026-10-21T03:04:56Z",
-   "updated": "2026-10-29T20:18:34Z",
+   "updated": "2026-10-29T20:26:54Z",
    "note": "",
    "built": [
     {
@@ -44542,7 +44542,7 @@
    ],
    "opened": "2026-10-21T06:07:04Z",
    "readied": "2026-10-21T06:08:01Z",
-   "advanced": "2026-10-29T20:18:34Z"
+   "advanced": "2026-10-29T20:26:54Z"
   },
   {
    "id": "read-heif-images",
