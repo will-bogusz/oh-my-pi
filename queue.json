@@ -18884,13 +18884,13 @@
    ],
    "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/factory-droid-image-role-default.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17351,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-image-role-default",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:11:36Z",
-   "updated": "2026-10-29T05:33:19Z",
+   "updated": "2026-10-29T05:39:22Z",
    "note": "",
    "advanced": "2026-10-29T04:53:54Z",
    "built": [
@@ -19128,7 +19128,8 @@
      "at": "2026-10-29T05:33:19Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-29T05:39:22Z"
   },
   {
    "id": "factory-droid-media-budget",
