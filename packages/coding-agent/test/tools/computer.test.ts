@@ -4971,27 +4971,41 @@ describe("computer input waits for the UI to settle", () => {
 		const transport = new MemoryTransport();
 		const native = new FakeNativeSession();
 		const calls: string[] = [];
+		// The key stays down until the read issued during it has run. The clipboard read before that read
+		// waits on nothing in the worker and returns once the key is down, so the read comes while it is sent.
+		const keyStarted = Promise.withResolvers<void>();
+		const readDuringKey = Promise.withResolvers<void>();
 		native.keyChord = async () => {
 			calls.push("key-start");
-			await Bun.sleep(150);
+			keyStarted.resolve();
+			await readDuringKey.promise;
 			calls.push("key-end");
 		};
 		native.axSnapshot = async () => {
 			calls.push("ax");
+			readDuringKey.resolve();
 			return { text: "- button [ref=e1]" };
 		};
 		native.waitForUiQuiet = async pids => {
 			calls.push(`quiet ${pids.join(",")}`);
 			return native.quiet;
 		};
+		const clipboardRead = vi.spyOn(clipboard, "readTextFromClipboard").mockImplementation(async () => {
+			await keyStarted.promise;
+			return "";
+		});
 		new ComputerWorkerCore(transport, () => native);
-		const run = await runWorker(
-			transport,
-			"overlap",
-			'const w = await desktop.window("42"); const p = w.press("cmd+s"); await wait(30); await w.ax(); await p; await w.ax()',
-		);
-		expect(run.ok).toBe(true);
-		expect(calls.slice(calls.indexOf("key-end"))).toEqual(["key-end", "quiet 123", "ax"]);
+		try {
+			const run = await runWorker(
+				transport,
+				"overlap",
+				'const w = await desktop.window("42"); const p = w.press("cmd+s"); await desktop.clipboard.read(); await w.ax(); await p; await w.ax()',
+			);
+			expect(run.ok).toBe(true);
+			expect(calls).toEqual(["key-start", "quiet 123", "ax", "key-end", "quiet 123", "ax"]);
+		} finally {
+			clipboardRead.mockRestore();
+		}
 	});
 
 	it("makes a desktop key wait for the app it activated too", async () => {
