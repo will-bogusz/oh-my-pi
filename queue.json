@@ -55535,12 +55535,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T05:06:49.927813Z",
-  "host": "goliath",
+  "at": "2026-10-29T05:14:33.501481Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -55585,10 +55585,8 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/lsp/tool.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -55824,6 +55822,23 @@
     "created": "2026-10-10T00:42:10Z"
    },
    {
+    "id": "computer-ax-lines",
+    "label": "#15282",
+    "number": 15282,
+    "state": "open",
+    "area": "computer",
+    "priority": "P2",
+    "title": "feat(natives): show what macOS ax() elements can do",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-10T21:48:41Z"
+   },
+   {
     "id": "agents-show",
     "label": "#15433",
     "number": 15433,
@@ -55882,10 +55897,8 @@
     "area": "coding-agent",
     "priority": "P2",
     "title": "feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/bash.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -55901,10 +55914,8 @@
     "area": "bash",
     "priority": "P2",
     "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/tui/src/chat/transcript-render-helpers.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -55954,23 +55965,12 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #16297 in packages/coding-agent/src/main.ts",
-     "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16297",
-     "#15128",
-     "#15130",
-     "#16587"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-22T16:58:16Z"
    },
@@ -56020,6 +56020,7 @@
     "reasons": [
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
+     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -56029,6 +56030,7 @@
     "blocked_by": [
      "#15508",
      "#16284",
+     "#16756",
      "#16908"
     ],
     "needs": [],
@@ -56072,13 +56074,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15508"
+     "#15508",
+     "#16756"
     ],
     "needs": [],
     "created": "2026-10-23T18:26:13Z"
@@ -56094,7 +56098,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #16297 in packages/catalog/src/compat/rules/runtime/behavior.kdl",
-     "conflicts with #16309 in packages/catalog/src/discovery/factory-droid.ts",
+     "conflicts with #16309 in packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/discovery/factory-droid.ts",
      "conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts"
     ],
     "note": "",
@@ -56119,6 +56123,7 @@
     "reasons": [
      "needs factory-droid-0244 (queued)",
      "conflicts with #16297 in packages/catalog/src/compat/rules/runtime/behavior.kdl",
+     "conflicts with #16309 in packages/catalog/src/compat/rules/providers/factory-droid.kdl",
      "its need factory-droid-0244 conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts",
      "conflicts with main in packages/ai/src/providers/factory-droid/gemini.ts"
     ],
@@ -56126,7 +56131,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16297"
+     "#16297",
+     "#16309"
     ],
     "needs": [
      "factory-droid-0244"
@@ -56160,6 +56166,7 @@
     "title": "fix(browser): keep persist relay tabs open when the session ends",
     "action": "wait",
     "reasons": [
+     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -56167,6 +56174,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#16756",
      "#16908"
     ],
     "needs": [],
@@ -56268,6 +56276,7 @@
     "reasons": [
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued), #16756 (open)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/webmcp.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -56279,6 +56288,7 @@
     "paired": [],
     "blocked_by": [
      "#16284",
+     "#16756",
      "#16908"
     ],
     "needs": [
@@ -56299,13 +56309,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15508"
+     "#15508",
+     "#16756"
     ],
     "needs": [],
     "created": "2026-10-23T19:04:15Z"
@@ -56347,16 +56359,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #16925 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #16223 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with computer-ui-quiet in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in packages/coding-agent/src/prompts/tools/computer.md"
+     "conflicts with #15282 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with computer-ui-quiet in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#16925",
-     "#16223",
+     "#15282",
      "computer-ui-quiet"
     ],
     "needs": [],
@@ -56400,15 +56411,12 @@
     "title": "feat(computer): wait for windows opened by actions",
     "action": "wait",
     "reasons": [
-     "conflicts with #16223 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with computer-ui-quiet in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with computer-ui-quiet in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16223",
      "computer-ui-quiet"
     ],
     "needs": [],
@@ -56466,6 +56474,7 @@
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
@@ -56474,7 +56483,8 @@
     "blocked_by": [
      "#15128",
      "#15130",
-     "#16587"
+     "#16587",
+     "#16801"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -56605,6 +56615,7 @@
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -56615,7 +56626,8 @@
      "#16297",
      "#15128",
      "#15130",
-     "#16587"
+     "#16587",
+     "#16801"
     ],
     "needs": [
      "#15133"
@@ -56924,11 +56936,6 @@
     "created": "2026-10-22T23:10:38Z"
    }
   ],
-  "drafts": [
-   {
-    "label": "#15282",
-    "created": "2026-10-10T21:48:41Z"
-   }
-  ]
+  "drafts": []
  }
 }
