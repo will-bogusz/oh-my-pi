@@ -57213,12 +57213,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T16:30:34.044295Z",
+  "at": "2026-10-29T16:44:20.836937Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -57532,13 +57532,13 @@
     "created": "2026-10-22T16:58:16Z"
    },
    {
-    "id": "read-url-markup-tokens",
-    "label": "#17350",
-    "number": 17350,
+    "id": "computer-window-wait",
+    "label": "#17391",
+    "number": 17391,
     "state": "open",
-    "area": "other",
+    "area": "computer",
     "priority": "P2",
-    "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads",
+    "title": "feat(computer): wait for windows opened by actions",
     "action": "keep",
     "reasons": [],
     "note": "",
@@ -57546,7 +57546,7 @@
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-10-29T05:37:07Z"
+    "created": "2026-10-29T16:41:14Z"
    },
    {
     "id": "r2/relay-call-deadline",
@@ -57683,13 +57683,15 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
-     "conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #17391 in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282"
+     "#15282",
+     "#17391"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -57866,6 +57868,7 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #15282 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #17391 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
     "note": "",
@@ -57873,7 +57876,8 @@
     "paired": [],
     "blocked_by": [
      "#15282",
-     "#16223"
+     "#16223",
+     "#17391"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -57892,6 +57896,7 @@
     "reasons": [
      "conflicts with #15282 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #16223 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #17391 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -57899,7 +57904,8 @@
     "paired": [],
     "blocked_by": [
      "#15282",
-     "#16223"
+     "#16223",
+     "#17391"
     ],
     "needs": [],
     "created": "2026-10-24T05:06:00Z"
@@ -57930,23 +57936,6 @@
      "computer-ax-lines"
     ],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "computer-window-wait",
-    "label": "computer-window-wait",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "feat(computer): wait for windows opened by actions",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-24T05:07:50Z"
    },
    {
     "id": "factory-droid-web-search",
@@ -58056,16 +58045,12 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #17350 in packages/coding-agent/src/tools/fetch.ts, packages/coding-agent/test/tools/fetch-markup-tokens.test.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#17350"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-29T16:21:19Z"
    },
