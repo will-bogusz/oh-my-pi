@@ -21,7 +21,7 @@ Decisions:
 - Not taken: an option on html-to-markdown-rs's own DOM. Its front matter and same-page link test are private, so that needs an upstream change.
 - Links without text of their own keep their target, so empty permalinks stay left out as on `main` (#17350 printed `[](#)` for them on 11 of 200 pages). So does every link on a page with a `<base href>`: none of the 7 corpus pages with one has a same-page link.
 
-Maintenance: `lol_html` 3.0 adds `cssparser`, `selectors` and `mime` to the natives build (+0.9 MB unstripped).
+Maintenance: `lol_html` 3.0 adds `cssparser`, `selectors` and `mime` to the natives build (+0.9 MB unstripped). `html5ever`, already in the build, can't do the cut: neither its tokenizer nor its tree reports where a token sits in the source (only its line), so it would have to re-serialize every page the converter then reads, or find the tags by hand as #17350 did.
 
 ## Testing
 
