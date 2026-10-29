@@ -52945,7 +52945,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/computer-apps-open-first.md",
    "state": "open",
    "pr": 16925,
@@ -52953,7 +52953,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-apps-open-first",
    "host": "MacBook-Pro",
    "added": "2026-10-24T02:52:37Z",
-   "updated": "2026-10-24T04:21:10Z",
+   "updated": "2026-10-29T04:52:57Z",
    "note": "",
    "built": [
     {
@@ -53428,7 +53428,8 @@
     }
    ],
    "opened": "2026-10-24T03:50:11Z",
-   "readied": "2026-10-24T03:50:29Z"
+   "readied": "2026-10-24T03:50:29Z",
+   "advanced": "2026-10-29T04:52:57Z"
   },
   {
    "id": "computer-menu-subtree",
