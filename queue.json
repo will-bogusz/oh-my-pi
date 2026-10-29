@@ -47126,7 +47126,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "fd440d9a6d6d387b444fcaa242f630fca34b2daa",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/timer-pr-1-poke.md",
    "state": "open",
    "pr": 16801,
@@ -47134,7 +47134,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/timer-pr-1-poke",
    "host": "MacBook-Pro",
    "added": "2026-10-22T16:10:12Z",
-   "updated": "2026-10-22T16:59:23Z",
+   "updated": "2026-10-29T04:59:05Z",
    "note": "",
    "built": [
     {
@@ -47499,7 +47499,8 @@
     }
    ],
    "opened": "2026-10-22T16:58:17Z",
-   "readied": "2026-10-22T16:59:22Z"
+   "readied": "2026-10-22T16:59:22Z",
+   "advanced": "2026-10-29T04:59:05Z"
   },
   {
    "id": "timer-pr-2-engine",
