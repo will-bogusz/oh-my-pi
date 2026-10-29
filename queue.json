@@ -54959,7 +54959,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-url-native-prune",
    "host": "MacBook-Pro",
    "added": "2026-10-29T16:21:19Z",
-   "updated": "2026-10-29T17:40:38Z",
+   "updated": "2026-10-29T17:41:03Z",
    "note": "",
    "built": [
     {
@@ -55153,7 +55153,8 @@
      "tree": "c588edcfb0bc9f08ce84989a3126f9bb58e184b2"
     }
    ],
-   "opened": "2026-10-29T17:40:38Z"
+   "opened": "2026-10-29T17:40:38Z",
+   "readied": "2026-10-29T17:41:03Z"
   }
  ],
  "watch": {
