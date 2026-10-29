@@ -53477,10 +53477,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T04:36:30Z",
+  "checked": "2026-10-29T05:06:49Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "computer-ui-quiet": {
+    "since": "2026-10-29T05:06:49Z",
+    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
+   },
    "factory-droid-image-role-default": {
     "since": "2026-10-26T11:23:01Z",
     "title": "feat(catalog): fall back to Factory Droid image models in the image role"
@@ -53531,21 +53535,6 @@
      "packages/browser-relay/extension/chrome.d.ts",
      "packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "packages/coding-agent/src/tools/browser/relay/server.ts"
-    ]
-   },
-   "#16918": {
-    "since": "2026-10-27T12:22:45Z",
-    "title": "feat(coding-agent): start desktop tasks without a documentation read",
-    "files": [
-     "packages/coding-agent/src/tools/eval.ts"
-    ]
-   },
-   "#16925": {
-    "since": "2026-10-26T11:23:01Z",
-    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
-    "files": [
-     "packages/coding-agent/src/prompts/system/computer-use.md",
-     "packages/coding-agent/src/prompts/tools/computer.md"
     ]
    }
   },
@@ -54798,6 +54787,12 @@
     "files": [
      "packages/coding-agent/src/tools/bash.ts"
     ]
+   },
+   {
+    "at": "2026-10-29T05:06:49Z",
+    "kind": "openable",
+    "id": "computer-ui-quiet",
+    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
    }
   ]
  },
@@ -55538,7 +55533,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T04:36:31.728579Z",
+  "at": "2026-10-29T05:06:49.927813Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -55783,10 +55778,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/prompts/system/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -55853,16 +55846,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #16925 in packages/coding-agent/src/prompts/tools/computer.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16925"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-18T17:39:04Z"
    },
@@ -56008,10 +55997,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(coding-agent): start desktop tasks without a documentation read",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/eval.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -56152,16 +56139,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #16925 in packages/coding-agent/src/prompts/tools/computer.md"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#16925"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
    },
@@ -56326,6 +56309,32 @@
     "created": "2026-10-23T19:04:15Z"
    },
    {
+    "id": "computer-input-diff-report",
+    "label": "computer-input-diff-report",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "feat(computer): report what input changed as a diff once the app goes quiet",
+    "action": "wait",
+    "reasons": [
+     "needs computer-ui-quiet (queued)",
+     "conflicts with #16223 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #16917 in packages/coding-agent/src/tools/computer/supervisor.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#16223",
+     "#16917"
+    ],
+    "needs": [
+     "computer-ui-quiet"
+    ],
+    "created": "2026-10-13T21:47:19Z"
+   },
+   {
     "id": "computer-menu-subtree",
     "label": "computer-menu-subtree",
     "number": null,
@@ -56336,13 +56345,17 @@
     "action": "wait",
     "reasons": [
      "conflicts with #16925 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #16223 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with computer-ui-quiet in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16925"
+     "#16925",
+     "#16223",
+     "computer-ui-quiet"
     ],
     "needs": [],
     "created": "2026-10-24T05:06:00Z"
@@ -56358,12 +56371,17 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued), #15282 (open)",
+     "conflicts with #16223 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with computer-ui-quiet in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#16223",
+     "computer-ui-quiet"
+    ],
     "needs": [
      "computer-ui-quiet",
      "computer-ax-lines"
@@ -56380,12 +56398,17 @@
     "title": "feat(computer): wait for windows opened by actions",
     "action": "wait",
     "reasons": [
+     "conflicts with #16223 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with computer-ui-quiet in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#16223",
+     "computer-ui-quiet"
+    ],
     "needs": [],
     "created": "2026-10-24T05:07:50Z"
    },
@@ -56399,7 +56422,7 @@
     "title": "feat(catalog): fall back to Factory Droid image models in the image role",
     "action": "open",
     "reasons": [],
-    "note": "advance first",
+    "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
@@ -56698,7 +56721,7 @@
     "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads",
     "action": "open",
     "reasons": [],
-    "note": "advance first",
+    "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
@@ -56719,7 +56742,7 @@
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
-     "its need #16801 conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
+     "conflicts with main in packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -56900,10 +56923,6 @@
    }
   ],
   "drafts": [
-   {
-    "label": "#15280",
-    "created": "2026-10-10T21:43:50Z"
-   },
    {
     "label": "#15282",
     "created": "2026-10-10T21:48:41Z"
