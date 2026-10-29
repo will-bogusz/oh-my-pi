@@ -19520,7 +19520,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/lsp-workspace-folders.md",
    "state": "open",
    "pr": 16271,
@@ -19528,7 +19528,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/lsp-workspace-folders",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:26:57Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:54:09Z",
    "note": "",
    "built": [
     {
@@ -19941,7 +19941,7 @@
    ],
    "opened": "2026-10-19T00:53:59Z",
    "readied": "2026-10-19T00:54:24Z",
-   "advanced": "2026-10-27T17:26:24Z"
+   "advanced": "2026-10-29T04:54:09Z"
   },
   {
    "id": "factory-droid-completions-tool-names",
