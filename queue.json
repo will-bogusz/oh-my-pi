@@ -54747,7 +54747,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T10:43:53Z",
+  "checked": "2026-10-29T11:14:13Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -54756,7 +54756,88 @@
     "title": "feat(computer): wait for windows opened by actions"
    }
   },
-  "conflicts": {},
+  "conflicts": {
+   "#15433": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "feat(task): add omp agents show for what an agent's spawns run with",
+    "files": [
+     "docs/cli-reference.md"
+    ]
+   },
+   "#15508": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
+    "files": [
+     "packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
+    ]
+   },
+   "#16756": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
+    "files": [
+     "packages/coding-agent/test/tools/browser-webmcp.test.ts"
+    ]
+   },
+   "#16297": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling",
+    "files": [
+     "docs/cli-reference.md"
+    ]
+   },
+   "#16271": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
+    "files": [
+     "docs/tools/lsp.md",
+     "packages/coding-agent/test/lsp-mux.test.ts"
+    ]
+   },
+   "#16576": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them",
+    "files": [
+     "packages/coding-agent/src/tools/bash.ts"
+    ]
+   },
+   "#16586": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
+    "files": [
+     "docs/tools/bash.md"
+    ]
+   },
+   "#16587": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "feat(coding-agent): tag each log record with the session that wrote it",
+    "files": [
+     "docs/tools/debug.md"
+    ]
+   },
+   "#16801": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
+    "files": [
+     "docs/cli-reference.md",
+     "packages/coding-agent/src/session/agent-session.ts"
+    ]
+   },
+   "#16908": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
+    "files": [
+     "packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+    ]
+   },
+   "#17349": {
+    "since": "2026-10-29T11:14:13Z",
+    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
+    "files": [
+     "docs/natives-shell-pty-process.md",
+     "docs/settings.md"
+    ]
+   }
+  },
   "merged_through": "2026-10-26T10:58:22Z",
   "unreleased": {},
   "ready": [
@@ -55859,6 +55940,108 @@
     "id": "computer-ui-quiet",
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "why": "plan: wait (conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts)"
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#15433",
+    "title": "feat(task): add omp agents show for what an agent's spawns run with",
+    "files": [
+     "docs/cli-reference.md"
+    ]
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#15508",
+    "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
+    "files": [
+     "packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
+    ]
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#16756",
+    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
+    "files": [
+     "packages/coding-agent/test/tools/browser-webmcp.test.ts"
+    ]
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#16297",
+    "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling",
+    "files": [
+     "docs/cli-reference.md"
+    ]
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#16271",
+    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
+    "files": [
+     "docs/tools/lsp.md",
+     "packages/coding-agent/test/lsp-mux.test.ts"
+    ]
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#16576",
+    "title": "feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them",
+    "files": [
+     "packages/coding-agent/src/tools/bash.ts"
+    ]
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#16586",
+    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
+    "files": [
+     "docs/tools/bash.md"
+    ]
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#16587",
+    "title": "feat(coding-agent): tag each log record with the session that wrote it",
+    "files": [
+     "docs/tools/debug.md"
+    ]
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#16801",
+    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
+    "files": [
+     "docs/cli-reference.md",
+     "packages/coding-agent/src/session/agent-session.ts"
+    ]
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#16908",
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
+    "files": [
+     "packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+    ]
+   },
+   {
+    "at": "2026-10-29T11:14:13Z",
+    "kind": "conflict",
+    "label": "#17349",
+    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
+    "files": [
+     "docs/natives-shell-pty-process.md",
+     "docs/settings.md"
+    ]
    }
   ]
  },
@@ -56640,7 +56823,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T10:13:12.513598Z",
+  "at": "2026-10-29T11:14:14.168809Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -56690,8 +56873,10 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/tools/lsp.md, packages/coding-agent/test/lsp-mux.test.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -56792,8 +56977,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -56828,8 +57015,10 @@
     "area": "models",
     "priority": "P2",
     "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/cli-reference.md"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -56845,8 +57034,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/test/tools/browser-webmcp.test.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -56862,8 +57053,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+    ],
     "note": "opened over P2 #16284",
     "over": [],
     "paired": [
@@ -56949,8 +57142,10 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(task): add omp agents show for what an agent's spawns run with",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/cli-reference.md"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -57000,8 +57195,10 @@
     "area": "coding-agent",
     "priority": "P2",
     "title": "feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/tools/bash.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -57017,8 +57214,10 @@
     "area": "bash",
     "priority": "P2",
     "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/tools/bash.md"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -57034,8 +57233,10 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(coding-agent): tag each log record with the session that wrote it",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/tools/debug.md"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -57068,8 +57269,10 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/cli-reference.md, packages/coding-agent/src/session/agent-session.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -57119,8 +57322,10 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/natives-shell-pty-process.md, docs/settings.md"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -57333,7 +57538,7 @@
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -57381,9 +57586,10 @@
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need r2/relay-call-deadline conflicts with main in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
+     "its need #15508 conflicts with main in packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
+     "its need r2/relay-call-deadline conflicts with main in packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
      "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
+     "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -57415,7 +57621,7 @@
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts"
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -57444,10 +57650,10 @@
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/webmcp.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
-     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
-     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need #16756 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
+     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "its need #16756 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-webmcp.test.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts"
     ],
     "note": "",
     "over": [],
@@ -57503,7 +57709,8 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #16223 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with #16917 in packages/coding-agent/src/tools/computer/supervisor.ts"
+     "conflicts with #16917 in packages/coding-agent/src/tools/computer/supervisor.ts",
+     "conflicts with main in docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
@@ -57596,7 +57803,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #16309 in packages/catalog/src/discovery/factory-droid.ts",
-     "conflicts with main in packages/catalog/src/discovery/factory-droid.ts"
+     "conflicts with main in docs/tools/web_search.md, packages/catalog/src/discovery/factory-droid.ts"
     ],
     "note": "",
     "over": [],
@@ -57621,7 +57828,7 @@
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
+     "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
     "over": [],
@@ -57647,7 +57854,8 @@
     "reasons": [
      "needs #15508 (open)",
      "conflicts with #16756 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need #15508 conflicts with main in packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
     ],
     "note": "",
     "over": [],
@@ -57675,7 +57883,7 @@
      "conflicts with #16284 in docs/tools/browser.md",
      "conflicts with #16756 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts"
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -57827,6 +58035,7 @@
     "action": "wait",
     "reasons": [
      "needs #16587 (open)",
+     "its need #16587 conflicts with main in docs/tools/debug.md",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -57849,7 +58058,7 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-10-22: parked; reopens only when Will asks",
-     "conflicts with main in packages/coding-agent/test/agent-session-stats.test.ts"
+     "conflicts with main in docs/provider-quirks.md, packages/coding-agent/test/agent-session-stats.test.ts"
     ],
     "note": "",
     "over": [],
@@ -57872,7 +58081,8 @@
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in packages/coding-agent/src/session/agent-session.ts"
+     "its need #16801 conflicts with main in docs/cli-reference.md, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with main in docs/settings.md"
     ],
     "note": "",
     "over": [],
@@ -57898,7 +58108,8 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-4-surfaces (queued)",
-     "its need timer-pr-4-surfaces conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
+     "its need timer-pr-4-surfaces conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts"
     ],
     "note": "",
     "over": [],
@@ -57920,7 +58131,7 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-2-engine (queued)",
-     "its need timer-pr-2-engine conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
+     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -57945,7 +58156,7 @@
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16587 in packages/coding-agent/src/session/agent-session.ts",
-     "its need timer-pr-3-tool conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
+     "its need timer-pr-3-tool conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -57971,7 +58182,7 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-2-engine (queued)",
-     "its need timer-pr-2-engine conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
+     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -57993,7 +58204,7 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-2-engine (queued)",
-     "its need timer-pr-2-engine conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
+     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58015,7 +58226,7 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-2-engine (queued)",
-     "its need timer-pr-2-engine conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
+     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58037,7 +58248,7 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
-     "its need timer-pr-5-agent-runs conflicts with main in packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts",
+     "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
      "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
