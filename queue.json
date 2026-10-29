@@ -1180,8 +1180,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-29T15:34:02Z",
-   "note": "series 2. 2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed 6305e50a4e (was d337daa51b); clean rebase, the computer.md lines merge clean with #16925's rebased head (no sibling FIX); rust records still valid; cargo test desktop:: 211 pass and computer.test.ts 126 pass on goliath; marked ready (Will: evals showed a clear win on Haiku and Sol). #15282 -> #15566, #15584 (children queued).",
+   "updated": "2026-10-29T16:57:54Z",
+   "note": "series 2. 2026-10-29 (Ax15282): rebased onto main 3b1408f629 (after 2407a34d11 changelog rewrite) and pushed e43b606ef5 then d71890830b (was f96486b3e0): ComputerDocs b22c71f (Codex P1 4409368429, macOS-only normalized action key) + Codex P2 4414313929 fix (actions= deduped, max 16 + cut note); docs table conflicts resolved toward main padding; rust-check linux/windows/macos at d71890830b; cargo desktop:: 211 pass, computer.test.ts 132 pass; Codex pass on d71890830b failed (no result). Goliath worktree ~/.omp/main-wt/oh-my-pi/computer-ax-lines is current; Mac worktree is behind fork. #15282 -> #15566, #15584 (children queued).",
    "advanced": "2026-10-29T15:34:02Z",
    "built": [
     {
