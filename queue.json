@@ -54747,7 +54747,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T07:39:01Z",
+  "checked": "2026-10-29T08:09:36Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -54824,25 +54824,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-22T08:06:38Z",
-    "kind": "openable",
-    "id": "resume-cancel-bg-jobs",
-    "title": "fix(coding-agent): cancel the outgoing session's background jobs on /resume"
-   },
-   {
-    "at": "2026-10-22T08:06:38Z",
-    "kind": "openable",
-    "id": "headless-agent-flags",
-    "title": "feat(coding-agent): add --no-context-files to start without AGENTS.md and other context files"
-   },
-   {
-    "at": "2026-10-22T08:06:38Z",
-    "kind": "unopenable",
-    "id": "r2/webmcp-native",
-    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
-    "why": "opened as #16756"
-   },
    {
     "at": "2026-10-22T10:41:01Z",
     "kind": "merged",
@@ -56795,7 +56776,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T07:08:59.059191Z",
+  "at": "2026-10-29T08:09:36.899016Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
