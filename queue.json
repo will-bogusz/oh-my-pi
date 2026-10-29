@@ -57051,8 +57051,8 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T15:19:23.744644Z",
-  "host": "goliath",
+  "at": "2026-10-29T15:30:02.825351Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -57247,14 +57247,16 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(task): add omp agents show for what an agent's spawns run with",
-    "action": "rebase",
+    "action": "requeue",
     "reasons": [
-     "conflicts with main in docs/cli-reference.md, packages/coding-agent/src/sdk.ts"
+     "conflicts with #15130 in packages/coding-agent/src/sdk.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15130"
+    ],
     "needs": [],
     "created": "2026-10-12T03:29:21Z"
    },
@@ -57302,10 +57304,8 @@
     "area": "coding-agent",
     "priority": "P2",
     "title": "feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/bash.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -57321,10 +57321,8 @@
     "area": "bash",
     "priority": "P2",
     "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in docs/tools/bash.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -57357,14 +57355,16 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
-    "action": "rebase",
+    "action": "requeue",
     "reasons": [
-     "conflicts with main in docs/cli-reference.md, packages/coding-agent/src/session/agent-session.ts"
+     "conflicts with #15130 in packages/coding-agent/src/sdk.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15130"
+    ],
     "needs": [],
     "created": "2026-10-22T16:58:16Z"
    },
@@ -57816,7 +57816,6 @@
     "reasons": [
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
-     "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
@@ -57824,8 +57823,7 @@
     "paired": [],
     "blocked_by": [
      "#15128",
-     "#15130",
-     "#16801"
+     "#15130"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -57908,6 +57906,23 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
+    "id": "archive-cache-racy",
+    "label": "archive-cache-racy",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": null,
+    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-29T15:29:53Z"
+   },
+   {
     "id": "account-window-reserves",
     "label": "account-window-reserves",
     "number": null,
@@ -57945,7 +57960,6 @@
      "needs reset-account-optout (queued)",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
-     "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -57953,8 +57967,7 @@
     "paired": [],
     "blocked_by": [
      "#15128",
-     "#15130",
-     "#16801"
+     "#15130"
     ],
     "needs": [
      "#15133"
@@ -58041,8 +58054,7 @@
      "needs #16801 (open)",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
-     "its need #16801 conflicts with main in docs/cli-reference.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in docs/settings.md"
+     "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
@@ -58206,7 +58218,7 @@
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
      "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",
