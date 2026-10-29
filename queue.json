@@ -40122,7 +40122,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-url-markup-tokens",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:46:25Z",
-   "updated": "2026-10-29T05:37:08Z",
+   "updated": "2026-10-29T05:37:31Z",
    "note": "",
    "advanced": "2026-10-29T04:53:54Z",
    "built": [
@@ -40361,7 +40361,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-29T05:37:08Z"
+   "opened": "2026-10-29T05:37:08Z",
+   "readied": "2026-10-29T05:37:30Z"
   },
   {
    "id": "bash-minimizer-meta",
