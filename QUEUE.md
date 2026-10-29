@@ -1,16 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 06:26Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 06:29Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-10-29 06:08Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-10-29 06:27Z on MacBook-Pro; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 11, stacked 21, held 1, open PRs 30; merged 171, closed 11
 
 ## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 9d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
+| computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 5d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
 
 ## Conflict-held (11)
 
@@ -22,11 +22,11 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 | r2/relay-call-deadline | fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s | browser | P1 | 15d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16284](https://github.com/can1357/oh-my-pi/pull/16284), [#16756](https://github.com/can1357/oh-my-pi/pull/16756), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-call-deadline) |
 | factory-droid-0244 | feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback) | providers | P1 | 10d | [#16297](https://github.com/can1357/oh-my-pi/pull/16297), [#16309](https://github.com/can1357/oh-my-pi/pull/16309), [#17351](https://github.com/can1357/oh-my-pi/pull/17351), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-0244) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 10d | [#16309](https://github.com/can1357/oh-my-pi/pull/16309), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
+| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 9d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 5d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16756](https://github.com/can1357/oh-my-pi/pull/16756), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 5d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16756](https://github.com/can1357/oh-my-pi/pull/16756), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 5d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16756](https://github.com/can1357/oh-my-pi/pull/16756), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
-| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 5d | [#16925](https://github.com/can1357/oh-my-pi/pull/16925), [#15282](https://github.com/can1357/oh-my-pi/pull/15282), computer-ui-quiet | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
-| computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 5d | computer-ui-quiet | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
+| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 5d | [#16925](https://github.com/can1357/oh-my-pi/pull/16925), [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 
 ## Stacked (21)
 
