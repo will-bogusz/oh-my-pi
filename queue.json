@@ -55158,15 +55158,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T17:20:55Z",
+  "checked": "2026-10-29T17:51:36Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "read-url-native-prune": {
-    "since": "2026-10-29T16:50:45Z",
-    "title": "feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-10-29T13:09:14Z",
   "unreleased": {
@@ -55250,7 +55245,8 @@
    16801,
    16908,
    17389,
-   17391
+   17391,
+   17393
   ],
   "post_merge": {
    "15124": {
@@ -56532,6 +56528,13 @@
     "id": "computer-window-wait",
     "title": "feat(computer): wait for windows opened by actions",
     "why": "opened as #17391"
+   },
+   {
+    "at": "2026-10-29T17:51:36Z",
+    "kind": "unopenable",
+    "id": "read-url-native-prune",
+    "title": "feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads",
+    "why": "opened as #17393"
    }
   ]
  },
@@ -57361,7 +57364,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T17:20:55.902147Z",
+  "at": "2026-10-29T17:51:36.917774Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -57695,6 +57698,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-29T16:41:14Z"
+   },
+   {
+    "id": "read-url-native-prune",
+    "label": "#17393",
+    "number": 17393,
+    "state": "open",
+    "area": "other",
+    "priority": "P2",
+    "title": "feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-29T17:40:37Z"
    },
    {
     "id": "r2/relay-call-deadline",
@@ -58184,23 +58204,6 @@
      "r2/relay-own-only"
     ],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "read-url-native-prune",
-    "label": "read-url-native-prune",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": "P2",
-    "title": "feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-29T16:21:19Z"
    },
    {
     "id": "reset-account-optout",
