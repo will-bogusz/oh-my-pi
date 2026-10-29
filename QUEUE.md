@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 21:57Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 22:18Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-10-29 21:56Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 12, stacked 20, held 1, open PRs 21; merged 183, closed 12
+**Counts:** openable now 1, conflict-held 12, stacked 20, held 1, open PRs 21, queued since the last plan 1; merged 183, closed 12
 
 ## Openable now (1)
 
@@ -84,4 +84,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 | [#17391](https://github.com/can1357/oh-my-pi/pull/17391) | computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
 | [#17389](https://github.com/can1357/oh-my-pi/pull/17389) | archive-cache-racy | fix(coding-agent): re-read an archive rewritten inside one timestamp granule | other | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/archive-cache-racy) |
 | [#17393](https://github.com/can1357/oh-my-pi/pull/17393) | read-url-native-prune | feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads | other | P2 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-native-prune) |
-| [#17417](https://github.com/can1357/oh-my-pi/pull/17417) | rich-editor-fill | fix(browser): replace a rich-text editor's text when filling it | browser | P2 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill) |
+| [#17417](https://github.com/can1357/oh-my-pi/pull/17417) | rich-editor-fill | fix(browser): replace a rich-text editor's text when filling it | browser | P2 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| snapcompact-reduction-baseline | fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once | compaction | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-reduction-baseline) |
