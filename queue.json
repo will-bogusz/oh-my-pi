@@ -55369,6 +55369,24 @@
    ],
    "opened": "2026-10-29T21:13:04Z",
    "readied": "2026-10-29T21:13:44Z"
+  },
+  {
+   "id": "bash-tool-call-env",
+   "branch": "will/bash-tool-call-env",
+   "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "26b266748e2df6027706add63b7c7f44effbdf99",
+   "body": "bodies/bash-tool-call-env.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-tool-call-env",
+   "host": "MacBook-Pro",
+   "added": "2026-10-29T21:27:54Z",
+   "updated": "2026-10-29T21:27:54Z",
+   "note": ""
   }
  ],
  "watch": {
