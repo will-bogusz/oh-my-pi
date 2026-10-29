@@ -44067,7 +44067,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-audio-transcripts",
    "host": "MacBook-Pro",
    "added": "2026-10-21T03:04:56Z",
-   "updated": "2026-10-29T21:27:59Z",
+   "updated": "2026-10-29T21:28:51Z",
    "note": "",
    "built": [
     {
@@ -44542,7 +44542,7 @@
    ],
    "opened": "2026-10-21T06:07:04Z",
    "readied": "2026-10-21T06:08:01Z",
-   "advanced": "2026-10-29T21:27:59Z"
+   "advanced": "2026-10-29T21:28:51Z"
   },
   {
    "id": "read-heif-images",
@@ -54481,9 +54481,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:07:50Z",
-   "updated": "2026-10-29T21:27:59Z",
+   "updated": "2026-10-29T21:28:51Z",
    "note": "2026-10-29 (Ax15282): advanced onto main 3b1408f629 (e7acf23d01), merged trees f745eb407d (+16 open PRs, natives built; 1197 coding-agent tests pass, check:ts 0 errors) and fbe9333424 (with #16908; computer tests pass, #16908 relay tab-isolation tests fail identically on #16908 alone: need a real Chrome) recorded; opened as #17391.",
-   "advanced": "2026-10-29T21:27:59Z",
+   "advanced": "2026-10-29T21:28:51Z",
    "built": [
     {
      "with": "#16564",
