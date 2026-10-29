@@ -1179,9 +1179,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-29T05:40:09Z",
+   "updated": "2026-10-29T06:25:14Z",
    "note": "series 2. 2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed 6305e50a4e (was d337daa51b); clean rebase, the computer.md lines merge clean with #16925's rebased head (no sibling FIX); rust records still valid; cargo test desktop:: 211 pass and computer.test.ts 126 pass on goliath; marked ready (Will: evals showed a clear win on Haiku and Sol). #15282 -> #15566, #15584 (children queued).",
-   "advanced": "2026-10-29T05:40:09Z",
+   "advanced": "2026-10-29T06:25:14Z",
    "built": [
     {
      "with": "#15105",
