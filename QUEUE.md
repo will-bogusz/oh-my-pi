@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 20:58Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 21:06Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-29 20:56Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -43,7 +43,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 | r2/native-window-report | feat(coding-agent): name the native windows a browser call raised on macOS | browser | P2 | 15d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/native-window-report) |
 | r2/relay-popup-owned | fix(browser): own popups omp's relay tabs open and keep them behind the user's selection | browser | P2 | 15d | r2/relay-own-only | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-popup-owned) |
 | computer-rich-text | feat(computer): read macOS text as Markdown with value({ format: "markdown" }) | computer | P2 | 15d | computer-ui-quiet, computer-ax-lines ([#15282](https://github.com/can1357/oh-my-pi/pull/15282)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-rich-text) |
-| factory-droid-gemini-4-argon | feat(catalog,ai): add Gemini 4 Argon to Factory Droid with its request dialect | providers | P1 | 10d | factory-droid-0244 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon) |
+| factory-droid-gemini-4-argon | feat(catalog,ai): add Gemini 4 Argon to Factory Droid with its request dialect | providers | P1 | 11d | factory-droid-0244 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon) |
 | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 10d | relay-popup-front-main ([#16284](https://github.com/can1357/oh-my-pi/pull/16284)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
 | timer-pr-2-engine | feat(coding-agent): run shell commands and wake sessions later with omp timer | other |  | 7d | timer-pr-1-poke ([#16801](https://github.com/can1357/oh-my-pi/pull/16801)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-2-engine) |
 | timer-pr-6-estate | feat(coding-agent): list scheduled work omp did not create with omp timer ls --all | other |  | 7d | timer-pr-2-engine | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-6-estate) |
