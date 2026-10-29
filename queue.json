@@ -55162,7 +55162,7 @@
    "branch": "will/rich-editor-fill",
    "title": "fix(browser): replace a rich-text editor's text when filling it",
    "area": "browser",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "5dabff10fa5f069ec619c54d0daf7b269687b19c",
    "body": "bodies/rich-editor-fill.md",
@@ -55172,7 +55172,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rich-editor-fill",
    "host": "MacBook-Pro",
    "added": "2026-10-29T20:56:02Z",
-   "updated": "2026-10-29T21:13:45Z",
+   "updated": "2026-10-29T21:23:05Z",
    "note": "",
    "advanced": "2026-10-29T20:58:19Z",
    "built": [
