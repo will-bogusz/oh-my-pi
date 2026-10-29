@@ -1179,8 +1179,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-29T05:07:49Z",
-   "note": "series 2 (B: draft until Will's presentation review). 2026-10-22: rebased onto main 3a2758b68f and pushed as draft head 3fff71c477 (was a300e47e51); refuse-list doc lines left as main has them (any-spelling refusal in its own sentence), so no conflict with #16403/#16223; fixed a Linux/Windows test compile error (DesktopError::ax_unconfirmed is macOS-only). rust-check linux/macos/windows recorded; built with 42 open ready PRs. Waits for the ax size rerun on today's main (bench-mac trusted python needs Accessibility) before ready. #15280 -> #15565; #15282 -> #15566, #15584 (children queued).",
+   "updated": "2026-10-29T05:08:15Z",
+   "note": "series 2. 2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed 6305e50a4e (was d337daa51b); clean rebase, the computer.md lines merge clean with #16925's rebased head (no sibling FIX); rust records still valid; cargo test desktop:: 211 pass and computer.test.ts 126 pass on goliath; marked ready (Will: evals showed a clear win on Haiku and Sol). #15282 -> #15566, #15584 (children queued).",
    "advanced": "2026-10-29T05:07:49Z",
    "built": [
     {
