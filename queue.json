@@ -54473,7 +54473,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "6693ddbfd58ce9edcdc0dc3fe98a8882c9bae834",
+   "base": "3b1408f6291182f64e7adad238b0ec0a212b5740",
    "body": "bodies/computer-window-wait.md",
    "state": "queued",
    "pr": null,
@@ -54481,9 +54481,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:07:50Z",
-   "updated": "2026-10-29T15:19:14Z",
+   "updated": "2026-10-29T15:36:00Z",
    "note": "",
-   "advanced": "2026-10-29T15:19:14Z",
+   "advanced": "2026-10-29T15:36:00Z",
    "built": [
     {
      "with": "#16908",
