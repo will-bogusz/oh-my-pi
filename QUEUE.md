@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 20:40Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 20:48Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-29 20:24Z on goliath; groups below are from it, states from the manifest)
@@ -79,6 +79,6 @@ none
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 5d | keep; opened over P2 #16284 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
-| [#17391](https://github.com/can1357/oh-my-pi/pull/17391) | computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
+| [#17391](https://github.com/can1357/oh-my-pi/pull/17391) | computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
 | [#17389](https://github.com/can1357/oh-my-pi/pull/17389) | archive-cache-racy | fix(coding-agent): re-read an archive rewritten inside one timestamp granule | other | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/archive-cache-racy) |
-| [#17393](https://github.com/can1357/oh-my-pi/pull/17393) | read-url-native-prune | feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads | other | P2 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-native-prune) |
+| [#17393](https://github.com/can1357/oh-my-pi/pull/17393) | read-url-native-prune | feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads | other | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-native-prune) |
