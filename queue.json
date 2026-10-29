@@ -56281,6 +56281,11 @@
     "sha": "f96486b3e04accd60a73469578feddcf93615492",
     "at": "2026-10-29T05:54:14Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "f96486b3e04accd60a73469578feddcf93615492",
+    "at": "2026-10-29T05:54:43Z",
+    "host": "goliath"
    }
   }
  },
