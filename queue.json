@@ -40775,8 +40775,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/log-session-id",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:54:49Z",
-   "updated": "2026-10-29T04:53:17Z",
-   "note": "",
+   "updated": "2026-10-29T05:56:39Z",
+   "note": "On its next needed push: logger-contract-probe.ts:98 Bun.sleep(5) -> Bun.sleep(0) (it only crosses a timer turn; precheck timing FIX, 2026-10-29). Not worth a push of its own.",
    "built": [
     {
      "with": "#16231",
