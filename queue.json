@@ -428,7 +428,7 @@
    "area": "broker",
    "priority": "P2",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": null,
    "state": "open",
    "pr": 15130,
@@ -436,9 +436,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-before-reserve",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:53:25Z",
    "note": "",
-   "advanced": "2026-10-27T17:26:24Z",
+   "advanced": "2026-10-29T04:53:25Z",
    "built": [
     {
      "with": "#13677",
