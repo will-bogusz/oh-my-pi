@@ -15345,7 +15345,7 @@
    "area": "providers",
    "priority": "P2",
    "needs": [],
-   "base": "3b1408f6291182f64e7adad238b0ec0a212b5740",
+   "base": "d33a0edb00c8b76b28d71eb976cd82d69617bcba",
    "body": "bodies/factory-droid-credit-promotions.md",
    "state": "open",
    "pr": 16309,
@@ -15353,7 +15353,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-credit-promotions",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:02Z",
-   "updated": "2026-10-29T15:43:59Z",
+   "updated": "2026-10-29T20:18:34Z",
    "note": "",
    "built": [
     {
@@ -15840,7 +15840,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-29T15:18:34Z",
+   "advanced": "2026-10-29T20:18:34Z",
    "opened": "2026-10-19T06:56:13Z",
    "readied": "2026-10-19T06:56:45Z"
   },
@@ -44059,7 +44059,7 @@
    "area": "catalog",
    "priority": "P2",
    "needs": [],
-   "base": "3b1408f6291182f64e7adad238b0ec0a212b5740",
+   "base": "d33a0edb00c8b76b28d71eb976cd82d69617bcba",
    "body": "bodies/read-audio-transcripts.md",
    "state": "open",
    "pr": 16611,
@@ -44067,7 +44067,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-audio-transcripts",
    "host": "MacBook-Pro",
    "added": "2026-10-21T03:04:56Z",
-   "updated": "2026-10-29T15:44:05Z",
+   "updated": "2026-10-29T20:18:34Z",
    "note": "",
    "built": [
     {
@@ -44542,7 +44542,7 @@
    ],
    "opened": "2026-10-21T06:07:04Z",
    "readied": "2026-10-21T06:08:01Z",
-   "advanced": "2026-10-29T15:20:07Z"
+   "advanced": "2026-10-29T20:18:34Z"
   },
   {
    "id": "read-heif-images",
