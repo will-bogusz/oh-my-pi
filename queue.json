@@ -20878,8 +20878,8 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-19T07:26:45Z",
-   "updated": "2026-10-29T06:25:03Z",
-   "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block). Real overlap with #16403: both change the apps.open native call in worker.ts (we wrap it in the quiet wait); if #16403 merges first, rebase onto it and wrap its new call (QueueRebase, 2026-10-22). 2026-10-29 (ComputerDocs): 00427ab9a8 replaces the Bun.sleep in 'waits after an unawaited input ends' with gates (precheck timing FIX cleared; fails with 25b3c0c99's worker fix reverted); computer-input-diff-report restacked on it. The Mac worktree's local branch (0725dcaf40) is a stale pre-advance copy; work from fork.",
+   "updated": "2026-10-29T06:30:07Z",
+   "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block). Real overlap with #16403: both change the apps.open native call in worker.ts (we wrap it in the quiet wait); if #16403 merges first, rebase onto it and wrap its new call (QueueRebase, 2026-10-22). 2026-10-29 (ComputerDocs): 00427ab9a8 replaces the Bun.sleep in 'waits after an unawaited input ends' with gates (precheck timing FIX cleared; fails with 25b3c0c99's worker fix reverted); computer-input-diff-report restacked on it. The Mac worktree's local branch (0725dcaf40) is a stale pre-advance copy; work from fork. 2026-10-29 later: rebased onto main b0756921ed and pushed (049c16bba4), precheck clean then; #15282's Codex fix f96486b3e0 changed the axPerform call ui-quiet wraps in worker.ts, so it now waits for #15282 to merge, then rebases (wrap the call with the native key).",
    "advanced": "2026-10-29T05:18:57Z",
    "built": [
     {
