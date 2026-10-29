@@ -1149,7 +1149,7 @@
    "needs": [
     "computer-ui-quiet"
    ],
-   "base": "40f2941faca9c17ffc2ec22e5495a830b40c3cc5",
+   "base": "00427ab9a80cec8995f199dc97b77b7946e16e5f",
    "body": "bodies/computer-input-diff-report.md",
    "state": "queued",
    "pr": null,
@@ -1159,8 +1159,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-input-diff-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-29T05:02:04Z",
-   "note": "series 2 (B: draft until Will's presentation review). #15280 -> #15565; #15282 -> #15566, #15584 (children queued)."
+   "updated": "2026-10-29T05:07:15Z",
+   "note": "series 2. #15280 closed 2026-10-29 (Will: stop carrying an 18-day draft), queued until computer-ui-quiet merges. Timing FIX fixed: the sleep in computer-ui-quiet's overlapping-input test is now gated on the key and a clipboard read (computer-ui-quiet 00427ab9a8, fails with 25b3c0c99's worker fix reverted); this branch restacked onto it (e4158932eb), computer.test.ts and prelude-cell-settle.test.ts pass on goliath. On reopening: it conflicts with #16223 (worker.ts), #16917 (supervisor.ts), #16918 (eval.ts), #16925 (computer prompts); the stored body's CHANGELOG link needs the new PR number. #15282 -> #15566, #15584 (children queued)."
   },
   {
    "id": "computer-ax-lines",
