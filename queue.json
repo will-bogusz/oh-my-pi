@@ -57196,7 +57196,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T16:22:06.171874Z",
+  "at": "2026-10-29T16:30:34.044295Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -57369,10 +57369,8 @@
     "area": "broker",
     "priority": "P2",
     "title": "feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/sdk.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -57405,16 +57403,12 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(task): add omp agents show for what an agent's spawns run with",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #15130 in packages/coding-agent/src/sdk.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#15130"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-12T03:29:21Z"
    },
@@ -57511,16 +57505,12 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #15130 in packages/coding-agent/src/sdk.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#15130"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-22T16:58:16Z"
    },
@@ -57974,7 +57964,8 @@
     "action": "wait",
     "reasons": [
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
+     "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
+     "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
@@ -57982,7 +57973,8 @@
     "paired": [],
     "blocked_by": [
      "#15128",
-     "#15130"
+     "#15130",
+     "#16801"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -58049,14 +58041,12 @@
     "title": "feat(coding-agent,natives): drop social-card meta tags and same-page anchor targets from native web reads",
     "action": "wait",
     "reasons": [
-     "conflicts with #16223 in Cargo.lock",
      "conflicts with #17350 in packages/coding-agent/src/tools/fetch.ts, packages/coding-agent/test/tools/fetch-markup-tokens.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16223",
      "#17350"
     ],
     "needs": [],
@@ -58124,6 +58114,7 @@
      "needs reset-account-optout (queued)",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
+     "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -58131,7 +58122,8 @@
     "paired": [],
     "blocked_by": [
      "#15128",
-     "#15130"
+     "#15130",
+     "#16801"
     ],
     "needs": [
      "#15133"
@@ -58176,12 +58168,17 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
+     "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15130",
+     "#16801"
+    ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
    },
@@ -58217,15 +58214,17 @@
     "reasons": [
      "needs #16801 (open)",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
+     "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #15433 in docs/cli-reference.md",
+     "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/session-mailbox.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#15128",
-     "#15130"
+     "#15130",
+     "#15433"
     ],
     "needs": [
      "timer-pr-1-poke"
@@ -58243,13 +58242,16 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-4-surfaces (queued)",
+     "conflicts with #15130 in docs/settings.md",
      "its need timer-pr-4-surfaces conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15130"
+    ],
     "needs": [
      "timer-pr-4-surfaces"
     ],
@@ -58266,12 +58268,15 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-2-engine (queued)",
+     "conflicts with #15130 in docs/settings.md",
      "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15130"
+    ],
     "needs": [
      "timer-pr-2-engine"
     ],
@@ -58289,7 +58294,7 @@
     "reasons": [
      "needs timer-pr-3-tool (queued)",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "its need timer-pr-3-tool conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -58315,12 +58320,15 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-2-engine (queued)",
+     "conflicts with #15433 in docs/cli-reference.md",
      "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15433"
+    ],
     "needs": [
      "timer-pr-2-engine"
     ],
@@ -58337,12 +58345,15 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-2-engine (queued)",
+     "conflicts with #15433 in docs/cli-reference.md",
      "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15433"
+    ],
     "needs": [
      "timer-pr-2-engine"
     ],
