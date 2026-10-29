@@ -15341,7 +15341,7 @@
    "area": "providers",
    "priority": "P2",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/factory-droid-credit-promotions.md",
    "state": "open",
    "pr": 16309,
@@ -15349,7 +15349,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-credit-promotions",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:15:02Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:56:39Z",
    "note": "",
    "built": [
     {
@@ -15836,7 +15836,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-27T17:26:24Z",
+   "advanced": "2026-10-29T04:56:39Z",
    "opened": "2026-10-19T06:56:13Z",
    "readied": "2026-10-19T06:56:45Z"
   },
@@ -16896,7 +16896,7 @@
    "area": "models",
    "priority": "P2",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/exact-provider-model-selector.md",
    "state": "open",
    "pr": 16297,
@@ -16904,7 +16904,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/exact-provider-model-selector",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:48:32Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:56:39Z",
    "note": "",
    "built": [
     {
@@ -17346,7 +17346,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-27T17:26:24Z",
+   "advanced": "2026-10-29T04:56:39Z",
    "opened": "2026-10-19T05:19:16Z"
   },
   {
@@ -38707,7 +38707,7 @@
    "area": "coding-agent",
    "priority": "P2",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/bash-view-tags.md",
    "state": "open",
    "pr": 16576,
@@ -38715,7 +38715,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-view-tags",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:37:15Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:56:39Z",
    "note": "",
    "built": [
     {
@@ -38990,7 +38990,7 @@
    ],
    "opened": "2026-10-21T00:01:50Z",
    "readied": "2026-10-21T00:02:11Z",
-   "advanced": "2026-10-27T17:26:24Z"
+   "advanced": "2026-10-29T04:56:39Z"
   },
   {
    "id": "compaction-trigger",
@@ -39895,7 +39895,7 @@
    "area": "bash",
    "priority": "P2",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/bash-minimizer-meta.md",
    "state": "open",
    "pr": 16586,
@@ -39903,7 +39903,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-minimizer-meta",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:49:04Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:56:39Z",
    "note": "",
    "built": [
     {
@@ -40248,7 +40248,7 @@
    ],
    "opened": "2026-10-21T01:59:39Z",
    "readied": "2026-10-21T02:00:31Z",
-   "advanced": "2026-10-27T17:26:24Z"
+   "advanced": "2026-10-29T04:56:39Z"
   },
   {
    "id": "sec-edgar-filing-docs",
