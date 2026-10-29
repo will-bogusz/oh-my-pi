@@ -4536,7 +4536,7 @@
     "#15185",
     "#15195"
    ],
-   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
+   "base": "6693ddbfd58ce9edcdc0dc3fe98a8882c9bae834",
    "body": "bodies/computer-text-drag-select.md",
    "state": "open",
    "pr": 16223,
@@ -4544,9 +4544,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-drag-select",
    "host": "MacBook-Pro",
    "added": "2026-10-18T11:18:03Z",
-   "updated": "2026-10-29T04:53:47Z",
+   "updated": "2026-10-29T15:16:58Z",
    "note": "",
-   "advanced": "2026-10-29T04:53:47Z",
+   "advanced": "2026-10-29T15:16:58Z",
    "built": [
     {
      "with": "#16202",
