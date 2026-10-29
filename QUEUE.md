@@ -1,18 +1,17 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 05:35Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 05:37Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-10-29 05:14Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 11, stacked 21, held 1, open PRs 28; merged 171, closed 11
+**Counts:** openable now 2, conflict-held 11, stacked 21, held 1, open PRs 29; merged 171, closed 11
 
-## Openable now (3)
+## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-image-role-default | feat(catalog): fall back to Factory Droid image models in the image role | providers | P2 | 10d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-image-role-default) |
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 9d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
-| read-url-markup-tokens | feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads | other |  | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-markup-tokens) |
 
 ## Conflict-held (11)
 
@@ -62,7 +61,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 15d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 
-## Open PRs (28)
+## Open PRs (29)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -85,6 +84,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 | [#16595](https://github.com/can1357/oh-my-pi/pull/16595) | read-display-budget | fix(coding-agent): charge column-cut lines their shown width against the read page budget | other | P1 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-display-budget) |
 | [#16579](https://github.com/can1357/oh-my-pi/pull/16579) | gateway-settle-log | fix(ai): stop logging a usage-limit retry the gateway does not make | other | P0 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gateway-settle-log) |
 | [#16576](https://github.com/can1357/oh-my-pi/pull/16576) | bash-view-tags | feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them | coding-agent | P2 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-view-tags) |
+| [#17350](https://github.com/can1357/oh-my-pi/pull/17350) | read-url-markup-tokens | feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads | other |  | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-markup-tokens) |
 | [#16586](https://github.com/can1357/oh-my-pi/pull/16586) | bash-minimizer-meta | feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut | bash | P2 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-minimizer-meta) |
 | [#16587](https://github.com/can1357/oh-my-pi/pull/16587) | log-session-id | feat(coding-agent): tag each log record with the session that wrote it | other | P2 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/log-session-id) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
