@@ -55159,7 +55159,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T19:23:49Z",
+  "checked": "2026-10-29T20:24:54Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -57407,7 +57407,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T19:54:15.514977Z",
+  "at": "2026-10-29T20:24:55.057542Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -58180,7 +58180,7 @@
     "title": "feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks",
     "action": "wait",
     "reasons": [
-     "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
@@ -58364,6 +58364,7 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
+     "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
@@ -58372,6 +58373,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#15128",
      "#15130",
      "#16801"
     ],
@@ -58409,7 +58411,7 @@
     "action": "wait",
     "reasons": [
      "needs #16801 (open)",
-     "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15433 in docs/cli-reference.md",
      "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/session-mailbox.test.ts"
@@ -58438,6 +58440,7 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-4-surfaces (queued)",
+     "conflicts with #15128 in docs/settings.md",
      "conflicts with #15130 in docs/settings.md",
      "its need timer-pr-4-surfaces conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts"
@@ -58446,6 +58449,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#15128",
      "#15130"
     ],
     "needs": [
@@ -58464,6 +58468,7 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-2-engine (queued)",
+     "conflicts with #15128 in docs/settings.md",
      "conflicts with #15130 in docs/settings.md",
      "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
@@ -58471,6 +58476,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#15128",
      "#15130"
     ],
     "needs": [
@@ -58489,7 +58495,7 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-3-tool (queued)",
-     "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "its need timer-pr-3-tool conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
