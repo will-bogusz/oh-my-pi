@@ -52927,7 +52927,7 @@
    "needs": [
     "git-guard-defects"
    ],
-   "base": "c7c9b8dfc7c3bf469bb6697d0d7e9c9ae0a1c588",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/git-guard-scope.md",
    "state": "queued",
    "pr": null,
@@ -52935,8 +52935,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/git-guard-scope",
    "host": "MacBook-Pro",
    "added": "2026-10-24T01:07:47Z",
-   "updated": "2026-10-24T02:30:11Z",
-   "note": ""
+   "updated": "2026-10-29T04:53:09Z",
+   "note": "",
+   "advanced": "2026-10-29T04:53:09Z"
   },
   {
    "id": "computer-apps-open-first",
