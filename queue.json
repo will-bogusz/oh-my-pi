@@ -53446,7 +53446,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/computer-menu-subtree.md",
    "state": "queued",
    "pr": null,
@@ -53454,8 +53454,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-menu-subtree",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:06:00Z",
-   "updated": "2026-10-24T05:06:00Z",
-   "note": ""
+   "updated": "2026-10-29T05:08:58Z",
+   "note": "",
+   "advanced": "2026-10-29T05:08:58Z"
   },
   {
    "id": "computer-window-wait",
@@ -53464,7 +53465,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/computer-window-wait.md",
    "state": "queued",
    "pr": null,
@@ -53472,8 +53473,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:07:50Z",
-   "updated": "2026-10-24T05:07:50Z",
-   "note": ""
+   "updated": "2026-10-29T05:08:58Z",
+   "note": "",
+   "advanced": "2026-10-29T05:08:58Z"
   }
  ],
  "watch": {
