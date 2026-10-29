@@ -54934,17 +54934,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T15:49:38Z",
+  "checked": "2026-10-29T16:20:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "computer-window-wait": {
     "since": "2026-10-29T06:38:43Z",
     "title": "feat(computer): wait for windows opened by actions"
-   },
-   "archive-cache-racy": {
-    "since": "2026-10-29T15:49:38Z",
-    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule"
    }
   },
   "conflicts": {
@@ -55037,7 +55033,8 @@
    16611,
    16801,
    16908,
-   17350
+   17350,
+   17389
   ],
   "post_merge": {
    "15124": {
@@ -55129,42 +55126,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-22T16:17:10Z",
-    "kind": "openable",
-    "id": "factory-droid-0244",
-    "title": "feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback)"
-   },
-   {
-    "at": "2026-10-22T16:17:10Z",
-    "kind": "openable",
-    "id": "max-cost-gate",
-    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend"
-   },
-   {
-    "at": "2026-10-22T16:17:10Z",
-    "kind": "openable",
-    "id": "computer-ui-quiet",
-    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
-   },
-   {
-    "at": "2026-10-22T16:17:10Z",
-    "kind": "openable",
-    "id": "r2/relay-bg-input-main",
-    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys"
-   },
-   {
-    "at": "2026-10-22T16:17:10Z",
-    "kind": "openable",
-    "id": "factory-droid-web-search",
-    "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)"
-   },
-   {
-    "at": "2026-10-22T16:17:10Z",
-    "kind": "openable",
-    "id": "timer-pr-1-poke",
-    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke"
-   },
    {
     "at": "2026-10-22T16:47:57Z",
     "kind": "unopenable",
@@ -56386,6 +56347,13 @@
     "kind": "openable",
     "id": "archive-cache-racy",
     "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule"
+   },
+   {
+    "at": "2026-10-29T16:20:00Z",
+    "kind": "unopenable",
+    "id": "archive-cache-racy",
+    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule",
+    "why": "opened as #17389"
    }
   ]
  },
@@ -57198,12 +57166,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T15:49:39.341789Z",
+  "at": "2026-10-29T16:20:00.980663Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -57273,6 +57241,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-21T03:57:51Z"
+   },
+   {
+    "id": "archive-cache-racy",
+    "label": "#17389",
+    "number": 17389,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-29T15:54:42Z"
    },
    {
     "id": "print-hold",
@@ -58047,23 +58032,6 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "archive-cache-racy",
-    "label": "archive-cache-racy",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-29T15:29:53Z"
    },
    {
     "id": "account-window-reserves",
