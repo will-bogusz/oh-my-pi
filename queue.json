@@ -40124,7 +40124,7 @@
    "branch": "will/read-url-markup-tokens",
    "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [
     "read-nav-gate"
    ],
@@ -40136,7 +40136,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-url-markup-tokens",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:46:25Z",
-   "updated": "2026-10-29T06:03:26Z",
+   "updated": "2026-10-29T06:08:08Z",
    "note": "",
    "advanced": "2026-10-29T04:53:54Z",
    "built": [
@@ -53418,7 +53418,7 @@
    "branch": "will/git-guard-scope",
    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [
     "git-guard-defects"
    ],
@@ -53430,7 +53430,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/git-guard-scope",
    "host": "MacBook-Pro",
    "added": "2026-10-24T01:07:47Z",
-   "updated": "2026-10-29T05:35:23Z",
+   "updated": "2026-10-29T06:08:08Z",
    "note": "",
    "advanced": "2026-10-29T04:53:09Z",
    "built": [
