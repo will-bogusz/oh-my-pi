@@ -368,7 +368,7 @@
    "area": "broker",
    "priority": "P2",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": null,
    "state": "open",
    "pr": 15124,
@@ -376,9 +376,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/policy-priority-unmeasured",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:51:35Z",
    "note": "",
-   "advanced": "2026-10-27T17:26:24Z"
+   "advanced": "2026-10-29T04:51:35Z"
   },
   {
    "id": "account-window-reserves",
@@ -409,7 +409,7 @@
    "area": "broker",
    "priority": "P2",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": null,
    "state": "open",
    "pr": 15128,
@@ -417,9 +417,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-restore-longest-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:51:35Z",
    "note": "",
-   "advanced": "2026-10-27T17:26:24Z"
+   "advanced": "2026-10-29T04:51:35Z"
   },
   {
    "id": "reset-before-reserve",
@@ -1708,7 +1708,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": null,
    "state": "open",
    "pr": 15433,
@@ -1716,9 +1716,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agents-show",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:51:35Z",
    "note": "",
-   "advanced": "2026-10-27T17:26:24Z",
+   "advanced": "2026-10-29T04:51:35Z",
    "built": [
     {
      "with": "#15762",
@@ -2837,7 +2837,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "de66c35a16c9c08f6785423356b866a08aba6f17",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/r2/webmcp-native.md",
    "state": "open",
    "pr": 16756,
@@ -2847,9 +2847,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-webmcp-native",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-22T08:58:37Z",
+   "updated": "2026-10-29T04:51:35Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main 9d5d4ac5b5",
-   "advanced": "2026-10-22T08:58:37Z",
+   "advanced": "2026-10-29T04:51:35Z",
    "built": [
     {
      "with": "#16231",
@@ -34438,7 +34438,7 @@
    "area": "python",
    "priority": "P1",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/pip-procfs-fallback.md",
    "state": "open",
    "pr": 16552,
@@ -34446,7 +34446,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/pip-procfs-fallback",
    "host": "MacBook-Pro",
    "added": "2026-10-20T19:58:45Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:51:35Z",
    "note": "",
    "built": [
     {
@@ -34605,7 +34605,7 @@
    ],
    "opened": "2026-10-20T20:09:31Z",
    "readied": "2026-10-20T20:09:54Z",
-   "advanced": "2026-10-27T17:26:24Z"
+   "advanced": "2026-10-29T04:51:35Z"
   },
   {
    "id": "conflicts-whole-file",
@@ -35049,7 +35049,7 @@
    "area": "other",
    "priority": "P0",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/factory-screenshot-budget.md",
    "state": "open",
    "pr": 16564,
@@ -35057,7 +35057,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-screenshot-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:08Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:51:35Z",
    "note": "",
    "built": [
     {
@@ -35262,7 +35262,7 @@
    ],
    "opened": "2026-10-20T21:02:02Z",
    "readied": "2026-10-20T21:02:25Z",
-   "advanced": "2026-10-27T17:26:24Z"
+   "advanced": "2026-10-29T04:51:35Z"
   },
   {
    "id": "click-place-release",
@@ -37654,7 +37654,7 @@
    "area": "other",
    "priority": "P0",
    "needs": [],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/gateway-settle-log.md",
    "state": "open",
    "pr": 16579,
@@ -37662,7 +37662,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gateway-settle-log",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:07:24Z",
-   "updated": "2026-10-27T17:26:24Z",
+   "updated": "2026-10-29T04:51:35Z",
    "note": "",
    "built": [
     {
@@ -37738,7 +37738,7 @@
    ],
    "opened": "2026-10-21T00:07:51Z",
    "readied": "2026-10-21T00:08:11Z",
-   "advanced": "2026-10-27T17:26:24Z"
+   "advanced": "2026-10-29T04:51:35Z"
   },
   {
    "id": "task-result-inline",
