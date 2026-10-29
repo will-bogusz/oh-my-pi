@@ -1169,7 +1169,7 @@
    "needs": [
     "#16233"
    ],
-   "base": "e996e1c7ac476f60e02b8ed9764cf30fa8c00a8e",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": null,
    "state": "open",
    "pr": 15282,
@@ -1177,9 +1177,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-27T17:24:09Z",
+   "updated": "2026-10-29T04:58:30Z",
    "note": "series 2 (B: draft until Will's presentation review). 2026-10-22: rebased onto main 3a2758b68f and pushed as draft head 3fff71c477 (was a300e47e51); refuse-list doc lines left as main has them (any-spelling refusal in its own sentence), so no conflict with #16403/#16223; fixed a Linux/Windows test compile error (DesktopError::ax_unconfirmed is macOS-only). rust-check linux/macos/windows recorded; built with 42 open ready PRs. Waits for the ax size rerun on today's main (bench-mac trusted python needs Accessibility) before ready. #15280 -> #15565; #15282 -> #15566, #15584 (children queued).",
-   "advanced": "2026-10-27T17:24:09Z",
+   "advanced": "2026-10-29T04:58:30Z",
    "built": [
     {
      "with": "#15105",
