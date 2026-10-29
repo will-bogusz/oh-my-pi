@@ -55172,7 +55172,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rich-editor-fill",
    "host": "MacBook-Pro",
    "added": "2026-10-29T20:56:02Z",
-   "updated": "2026-10-29T21:13:04Z",
+   "updated": "2026-10-29T21:13:45Z",
    "note": "",
    "advanced": "2026-10-29T20:58:19Z",
    "built": [
@@ -55367,7 +55367,8 @@
      "tree": "b80ab698deb1dff982630101dc6c66d5c69d5d27"
     }
    ],
-   "opened": "2026-10-29T21:13:04Z"
+   "opened": "2026-10-29T21:13:04Z",
+   "readied": "2026-10-29T21:13:44Z"
   }
  ],
  "watch": {
