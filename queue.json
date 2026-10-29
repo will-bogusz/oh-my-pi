@@ -51746,7 +51746,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "6693ddbfd58ce9edcdc0dc3fe98a8882c9bae834",
+   "base": "3b1408f6291182f64e7adad238b0ec0a212b5740",
    "body": "bodies/relay-extension-frame.md",
    "state": "open",
    "pr": 16908,
@@ -51754,7 +51754,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-extension-frame",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:03:59Z",
-   "updated": "2026-10-29T15:15:35Z",
+   "updated": "2026-10-29T15:43:46Z",
    "note": "",
    "built": [
     {
