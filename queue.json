@@ -20878,9 +20878,21 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-19T07:26:45Z",
-   "updated": "2026-10-29T05:18:57Z",
+   "updated": "2026-10-29T05:49:18Z",
    "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block). Real overlap with #16403: both change the apps.open native call in worker.ts (we wrap it in the quiet wait); if #16403 merges first, rebase onto it and wrap its new call (QueueRebase, 2026-10-22). 2026-10-29 (ComputerDocs): 00427ab9a8 replaces the Bun.sleep in 'waits after an unawaited input ends' with gates (precheck timing FIX cleared; fails with 25b3c0c99's worker fix reverted); computer-input-diff-report restacked on it. The Mac worktree's local branch (0725dcaf40) is a stale pre-advance copy; work from fork.",
-   "advanced": "2026-10-29T05:18:57Z"
+   "advanced": "2026-10-29T05:18:57Z",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "9315a540508959f59c8ef667cba1342c0e5c296a",
+     "with_code": "3ca6264b07a5cea55249eaa16e6b92f7df506ce7",
+     "tip": "049c16bba48cc73530498b1704ceacfdb7391075",
+     "with_tip": "dc332eff193ea70a23de16c35b22a8ff94652109",
+     "at": "2026-10-29T05:49:18Z",
+     "host": "goliath",
+     "tree": "966f7b272cb2d9f4eb828e5ecd06dcb023596c3e"
+    }
+   ]
   },
   {
    "id": "vscode-mcp-missing",
