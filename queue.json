@@ -53408,13 +53408,13 @@
    ],
    "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/git-guard-scope.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17349,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/git-guard-scope",
    "host": "MacBook-Pro",
    "added": "2026-10-24T01:07:47Z",
-   "updated": "2026-10-29T05:33:00Z",
+   "updated": "2026-10-29T05:35:00Z",
    "note": "",
    "advanced": "2026-10-29T04:53:09Z",
    "built": [
@@ -53652,7 +53652,8 @@
      "at": "2026-10-29T05:33:00Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-29T05:35:00Z"
   },
   {
    "id": "computer-apps-open-first",
