@@ -54772,7 +54772,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/archive-cache-racy",
    "host": "MacBook-Pro",
    "added": "2026-10-29T15:29:53Z",
-   "updated": "2026-10-29T15:54:44Z",
+   "updated": "2026-10-29T15:55:09Z",
    "note": "",
    "built": [
     {
@@ -54929,7 +54929,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-29T15:54:44Z"
+   "opened": "2026-10-29T15:54:44Z",
+   "readied": "2026-10-29T15:55:08Z"
   }
  ],
  "watch": {
