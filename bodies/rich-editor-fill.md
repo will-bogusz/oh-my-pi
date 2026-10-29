@@ -21,7 +21,7 @@ In `fillViaHandle`, a contenteditable target gets its contents selected in the p
 - Rejected: select-all by shortcut (Ctrl vs Cmd, and headless macOS needs the edit command named); the Selection API is platform-neutral. Per-key typing over the selection: a round trip per key on the relay. `insertText("")` to clear: Slate ignores it.
 - Non-goals: cmux (script fallback, no trusted input), and `tab.type`, which types where `focus()` leaves the caret, at the start.
 
-Maintenance: editors must handle `beforeinput` `insertText` and `deleteContentBackward`, the path pastes and IME take, so a break would show there too.
+Maintenance: editors must handle `beforeinput` `insertText` and `deleteContentBackward`, the path of pastes and IME, so a break shows there too.
 
 ## Testing
 
