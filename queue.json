@@ -1180,9 +1180,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-29T20:11:14Z",
+   "updated": "2026-10-29T20:20:20Z",
    "note": "series 2. 2026-10-29 (Ax15282): rebased onto main 3b1408f629 (after 2407a34d11 changelog rewrite) and pushed e43b606ef5 then d71890830b (was f96486b3e0): ComputerDocs b22c71f (Codex P1 4409368429, macOS-only normalized action key) + Codex P2 4414313929 fix (actions= deduped, max 16 + cut note); docs table conflicts resolved toward main padding; rust-check linux/windows/macos at d71890830b; cargo desktop:: 211 pass, computer.test.ts 132 pass; Codex pass on d71890830b failed (no result). Goliath worktree ~/.omp/main-wt/oh-my-pi/computer-ax-lines is current; Mac worktree is behind fork. #15282 -> #15566, #15584 (children queued).",
-   "advanced": "2026-10-29T20:11:14Z",
+   "advanced": "2026-10-29T20:20:20Z",
    "built": [
     {
      "with": "#15105",
@@ -2758,9 +2758,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/print-hold",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-29T20:11:14Z",
+   "updated": "2026-10-29T20:20:20Z",
    "note": "",
-   "advanced": "2026-10-29T20:11:14Z",
+   "advanced": "2026-10-29T20:20:20Z",
    "rebases_after": [
     16907
    ]
@@ -5957,7 +5957,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-front-main",
    "host": "MacBook-Pro",
    "added": "2026-10-18T18:46:45Z",
-   "updated": "2026-10-29T20:11:14Z",
+   "updated": "2026-10-29T20:20:20Z",
    "note": "",
    "built": [
     {
@@ -6402,7 +6402,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-10-29T20:11:14Z",
+   "advanced": "2026-10-29T20:20:20Z",
    "opened": "2026-10-19T02:42:33Z",
    "readied": "2026-10-19T02:42:52Z",
    "rebases_after": [
@@ -51754,7 +51754,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-extension-frame",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:03:59Z",
-   "updated": "2026-10-29T20:11:14Z",
+   "updated": "2026-10-29T20:20:20Z",
    "note": "",
    "built": [
     {
@@ -52200,7 +52200,7 @@
    ],
    "opened": "2026-10-23T23:50:41Z",
    "readied": "2026-10-23T23:51:00Z",
-   "advanced": "2026-10-29T20:11:14Z"
+   "advanced": "2026-10-29T20:20:20Z"
   },
   {
    "id": "relay-frame-detach-report",
@@ -54481,9 +54481,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:07:50Z",
-   "updated": "2026-10-29T20:11:14Z",
+   "updated": "2026-10-29T20:20:20Z",
    "note": "2026-10-29 (Ax15282): advanced onto main 3b1408f629 (e7acf23d01), merged trees f745eb407d (+16 open PRs, natives built; 1197 coding-agent tests pass, check:ts 0 errors) and fbe9333424 (with #16908; computer tests pass, #16908 relay tab-isolation tests fail identically on #16908 alone: need a real Chrome) recorded; opened as #17391.",
-   "advanced": "2026-10-29T20:11:14Z",
+   "advanced": "2026-10-29T20:20:20Z",
    "built": [
     {
      "with": "#16564",
