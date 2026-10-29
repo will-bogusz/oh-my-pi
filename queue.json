@@ -53414,7 +53414,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/git-guard-scope",
    "host": "MacBook-Pro",
    "added": "2026-10-24T01:07:47Z",
-   "updated": "2026-10-29T05:35:00Z",
+   "updated": "2026-10-29T05:35:23Z",
    "note": "",
    "advanced": "2026-10-29T04:53:09Z",
    "built": [
@@ -53653,7 +53653,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-29T05:35:00Z"
+   "opened": "2026-10-29T05:35:00Z",
+   "readied": "2026-10-29T05:35:22Z"
   },
   {
    "id": "computer-apps-open-first",
