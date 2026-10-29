@@ -18880,7 +18880,7 @@
    "needs": [
     "factory-droid-image-generation"
    ],
-   "base": "eaafcd3931227c7b1629139d4d4bcb23d9bbe5af",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/factory-droid-image-role-default.md",
    "state": "queued",
    "pr": null,
@@ -18888,8 +18888,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-image-role-default",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:11:36Z",
-   "updated": "2026-10-18T21:11:36Z",
-   "note": ""
+   "updated": "2026-10-29T04:53:54Z",
+   "note": "",
+   "advanced": "2026-10-29T04:53:54Z"
   },
   {
    "id": "factory-droid-media-budget",
@@ -39875,7 +39876,7 @@
    "needs": [
     "read-nav-gate"
    ],
-   "base": "c34a85afb98747cfc246b725701538681f1907b0",
+   "base": "b0756921ed231869ea92feef0056629a429d3fe1",
    "body": "bodies/read-url-markup-tokens.md",
    "state": "queued",
    "pr": null,
@@ -39883,8 +39884,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-url-markup-tokens",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:46:25Z",
-   "updated": "2026-10-20T23:46:25Z",
-   "note": ""
+   "updated": "2026-10-29T04:53:54Z",
+   "note": "",
+   "advanced": "2026-10-29T04:53:54Z"
   },
   {
    "id": "bash-minimizer-meta",
