@@ -1,17 +1,17 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 22:38Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29 23:29Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-29 22:27Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-29 23:28Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 2, conflict-held 12, stacked 20, held 1, open PRs 21; merged 183, closed 12
 
 ## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| bash-tool-call-env | feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands | other | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-tool-call-env) |
-| snapcompact-reduction-baseline | fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once | compaction | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-reduction-baseline) |
+| bash-tool-call-env | feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands | other | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-tool-call-env) |
+| snapcompact-reduction-baseline | fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once | compaction | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-reduction-baseline) |
 
 ## Conflict-held (12)
 
@@ -53,7 +53,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 | timer-pr-4-surfaces | feat(coding-agent): set and control timers from inside a session | other |  | 7d | timer-pr-2-engine | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-4-surfaces) |
 | timer-pr-3-tool | feat(coding-agent): let the agent set timers that wake its session later | other |  | 7d | timer-pr-4-surfaces | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-3-tool) |
 | timer-pr-5-agent-runs | feat(coding-agent): run a prompt timer as an unattended agent and report back | other |  | 7d | timer-pr-3-tool | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-5-agent-runs) |
-| timer-pr-9-tool-conditions | feat(coding-agent): let the timer tool set condition timers | other |  | 6d | timer-pr-5-agent-runs, timer-pr-7-conditions | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-9-tool-conditions) |
+| timer-pr-9-tool-conditions | feat(coding-agent): let the timer tool set condition timers | other |  | 7d | timer-pr-5-agent-runs, timer-pr-7-conditions | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-9-tool-conditions) |
 
 ## Held (1)
 
@@ -82,7 +82,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-29
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 5d | keep; opened over P2 #16284 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
-| [#17391](https://github.com/can1357/oh-my-pi/pull/17391) | computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
-| [#17389](https://github.com/can1357/oh-my-pi/pull/17389) | archive-cache-racy | fix(coding-agent): re-read an archive rewritten inside one timestamp granule | other | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/archive-cache-racy) |
-| [#17393](https://github.com/can1357/oh-my-pi/pull/17393) | read-url-native-prune | feat(coding-agent): list unused meta tags by name in native web reads | other | P2 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-native-prune) |
-| [#17417](https://github.com/can1357/oh-my-pi/pull/17417) | rich-editor-fill | fix(browser): replace a rich-text editor's text when filling it | browser | P2 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill) |
+| [#17391](https://github.com/can1357/oh-my-pi/pull/17391) | computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
+| [#17389](https://github.com/can1357/oh-my-pi/pull/17389) | archive-cache-racy | fix(coding-agent): re-read an archive rewritten inside one timestamp granule | other | P1 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/archive-cache-racy) |
+| [#17393](https://github.com/can1357/oh-my-pi/pull/17393) | read-url-native-prune | feat(coding-agent): list unused meta tags by name in native web reads | other | P2 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-native-prune) |
+| [#17417](https://github.com/can1357/oh-my-pi/pull/17417) | rich-editor-fill | fix(browser): replace a rich-text editor's text when filling it | browser | P2 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill) |
