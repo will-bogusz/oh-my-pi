@@ -55387,6 +55387,24 @@
    "added": "2026-10-29T21:27:54Z",
    "updated": "2026-10-29T21:27:54Z",
    "note": ""
+  },
+  {
+   "id": "snapcompact-reduction-baseline",
+   "branch": "will/snapcompact-reduction-baseline",
+   "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
+   "area": "compaction",
+   "priority": "P1",
+   "needs": [],
+   "base": "5dabff10fa5f069ec619c54d0daf7b269687b19c",
+   "body": "bodies/snapcompact-reduction-baseline.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-reduction-baseline",
+   "host": "MacBook-Pro",
+   "added": "2026-10-29T22:18:26Z",
+   "updated": "2026-10-29T22:18:26Z",
+   "note": ""
   }
  ],
  "watch": {
