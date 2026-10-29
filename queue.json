@@ -54747,7 +54747,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-29T06:38:43Z",
+  "checked": "2026-10-29T07:08:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -54824,12 +54824,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-22T07:06:04Z",
-    "kind": "openable",
-    "id": "r2/webmcp-native",
-    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook"
-   },
    {
     "at": "2026-10-22T07:36:17Z",
     "kind": "openable",
@@ -56831,12 +56825,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-29T06:38:44.109167Z",
+  "at": "2026-10-29T07:08:59.059191Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
