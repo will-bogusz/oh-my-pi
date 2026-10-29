@@ -54475,13 +54475,13 @@
    "needs": [],
    "base": "3b1408f6291182f64e7adad238b0ec0a212b5740",
    "body": "bodies/computer-window-wait.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17391,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:07:50Z",
-   "updated": "2026-10-29T16:40:15Z",
+   "updated": "2026-10-29T16:41:15Z",
    "note": "",
    "advanced": "2026-10-29T15:36:00Z",
    "built": [
@@ -54765,7 +54765,8 @@
      "host": "goliath",
      "tree": "f745eb407d732a8b8266837060df20b709096247"
     }
-   ]
+   ],
+   "opened": "2026-10-29T16:41:15Z"
   },
   {
    "id": "archive-cache-racy",
