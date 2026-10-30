@@ -56680,6 +56680,24 @@
    "added": "2026-10-30T21:36:10Z",
    "updated": "2026-10-30T21:36:10Z",
    "note": ""
+  },
+  {
+   "id": "snapcompact-text-reader",
+   "branch": "will/snapcompact-text-reader",
+   "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
+   "area": "snapcompact",
+   "priority": null,
+   "needs": [],
+   "base": "37b033b140b0d69d2b0b53ce7a8af0be202d6454",
+   "body": "bodies/snapcompact-text-reader.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-text-reader",
+   "host": "MacBook-Pro",
+   "added": "2026-10-30T22:43:52Z",
+   "updated": "2026-10-30T22:43:52Z",
+   "note": ""
   }
  ],
  "watch": {
