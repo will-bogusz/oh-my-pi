@@ -56124,6 +56124,24 @@
    "added": "2026-10-30T20:20:52Z",
    "updated": "2026-10-30T20:20:52Z",
    "note": ""
+  },
+  {
+   "id": "read-url-long-line",
+   "branch": "will/read-url-long-line",
+   "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
+   "area": "read",
+   "priority": "P2",
+   "needs": [],
+   "base": "5d30c790b883ad0ae05dac2a4d2ccc8ecd103611",
+   "body": "bodies/read-url-long-line.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/home/will/.omp/main-wt/oh-my-pi/read-url-long-line",
+   "host": "goliath",
+   "added": "2026-10-30T20:32:21Z",
+   "updated": "2026-10-30T20:32:21Z",
+   "note": ""
   }
  ],
  "watch": {
