@@ -56122,7 +56122,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/remove-stray-dbs",
    "host": "MacBook-Pro",
    "added": "2026-10-30T20:20:52Z",
-   "updated": "2026-10-30T20:51:51Z",
+   "updated": "2026-10-30T20:52:19Z",
    "note": "",
    "built": [
     {
@@ -56336,7 +56336,8 @@
      "tree": "83e82be49cb66a5a89bf10ef534664a1c3e9acad"
     }
    ],
-   "opened": "2026-10-30T20:51:51Z"
+   "opened": "2026-10-30T20:51:51Z",
+   "readied": "2026-10-30T20:52:19Z"
   },
   {
    "id": "read-url-long-line",
