@@ -55389,7 +55389,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-tool-call-env",
    "host": "MacBook-Pro",
    "added": "2026-10-29T21:27:54Z",
-   "updated": "2026-10-30T17:24:15Z",
+   "updated": "2026-10-30T17:24:36Z",
    "note": "",
    "built": [
     {
@@ -55546,7 +55546,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-10-30T17:24:15Z"
+   "opened": "2026-10-30T17:24:15Z",
+   "readied": "2026-10-30T17:24:36Z"
   },
   {
    "id": "snapcompact-reduction-baseline",
