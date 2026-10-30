@@ -56696,7 +56696,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-text-reader",
    "host": "MacBook-Pro",
    "added": "2026-10-30T22:43:52Z",
-   "updated": "2026-10-30T23:08:51Z",
+   "updated": "2026-10-30T23:09:23Z",
    "note": "",
    "built": [
     {
@@ -56920,7 +56920,8 @@
      "tree": "5b623cc6d03f10c2f48df361a6dc94b8ba11aac1"
     }
    ],
-   "opened": "2026-10-30T23:08:51Z"
+   "opened": "2026-10-30T23:08:51Z",
+   "readied": "2026-10-30T23:09:23Z"
   },
   {
    "id": "switch-remote-reexpand",
