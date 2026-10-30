@@ -6,6 +6,10 @@
 
 - Added `FileLock.isHeld(path)`, which reports whether a lock is held without acquiring it ([#17428](https://github.com/can1357/oh-my-pi/pull/17428) by [@andrebrait](https://github.com/andrebrait))
 
+### Fixed
+
+- Fixed background taps on iPhone Mirroring reaching nothing once one takeover tap had gone to the phone.
+
 ## [18.14.0] - 2026-10-29
 
 ### Breaking Changes
