@@ -59349,7 +59349,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-30T22:46:00.161686Z",
+  "at": "2026-10-30T22:47:40.516235Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -60389,16 +60389,12 @@
     "area": "snapcompact",
     "priority": null,
     "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#17490"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-30T22:43:52Z"
    },
@@ -60524,6 +60520,7 @@
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with snapcompact-text-reader in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -60534,7 +60531,8 @@
      "#15128",
      "#15130",
      "#16801",
-     "#17496"
+     "#17496",
+     "snapcompact-text-reader"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
