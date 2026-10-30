@@ -55389,18 +55389,161 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-tool-call-env",
    "host": "MacBook-Pro",
    "added": "2026-10-29T21:27:54Z",
-   "updated": "2026-10-29T22:38:42Z",
+   "updated": "2026-10-30T17:22:41Z",
    "note": "",
    "built": [
+    {
+     "with": "snapcompact-reduction-baseline",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "3db4bcca60dfb5af7f69b05e04ee0a26d86b6fc5",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "c1afa440472dcc4639317f6f6446209cfdf430b2",
+     "at": "2026-10-30T17:22:39Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16274",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "f2a28b15a1abbb80e0a04f5121fa2097c793d3e2",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "2d1822c433cca513abd7a317ab3cbc87c2bc32e0",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16552",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "b04130b5fe1350d454a78d9dad26872b6f00ee7e",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "da8e936782cbefb55ea07dfb72faea3beee2950e",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16595",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "2cbd5d2021e4c25e52d2d44e25e0da600aeeca86",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "73ed71a9e6e76938032dacf1a7cefd697565c78a",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15508",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "b84ccb390b77bacc0a5a119347b98a400a3a1005",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "731f26cd0426992c4275315282264c12ab76e07e",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16284",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "7ba84973357f9cc6e6d11f32831d57fb3f159040",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "dea10391b924a6131b70919c9914074443174cc7",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15128",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "ca95834cec2c151c013a3b24dc542e9f1ed84fa5",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "fed657bda09faa8217ad869165c264a0c23d8d0a",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15130",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "eeeff9d805e6ab418642972126a9f9841b3700ed",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "9227d8b9f6378a49a12cdf7a21b20779c62c3c67",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15282",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "0b6fbdaecd9c8a65b15500c1232af6cff5cb8fc7",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "ef20f6432376ef5dbd7e1664df31c7dcc3cee21f",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#15433",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "fe4bd9175de2d08d1c401b6d8d8dcdf42d59a3a0",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "798bc5834df5ce839d5e58dc3e7815544c096ae7",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16223",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "23928780160628ae00427bf27cebecd57542c288",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "97d71f59f347d0b449eca699cca0623fd7ee0d37",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16309",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "70ab9f79851e26f70927c1362fda774e4a69ae6f",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "575ec2092e012f2d61b5b1589174eb7cff8a76ef",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16576",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "5e10929ff72b14accc4c6be7d5a8ce6b8117045a",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "9be8b033f236dc76cdc30e6a6e47b95122d1f199",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16586",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "e42964ea7eb2d7b27a2876a35e7175d86c0f0e5d",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "1d9fa27d0d6650046dcd76946299d36a776d449c",
+     "at": "2026-10-30T17:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16611",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "9c77cd02ad6f0ae0e0d1d7509849bea6daa7cba2",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "202299edcb39d1f333dde604e82bb41508fc918d",
+     "at": "2026-10-30T17:22:41Z",
+     "host": "goliath"
+    },
     {
      "with": "#16908",
      "code": "9ebd18bddab1e357e000101e87d577157de38995",
      "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
      "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
      "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
-     "at": "2026-10-29T22:38:41Z",
-     "host": "MacBook-Pro",
-     "tree": "799e90e6014fc38d283ff0d07bca43f092a4d3e1"
+     "at": "2026-10-30T17:22:41Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16801",
+     "code": "9ebd18bddab1e357e000101e87d577157de38995",
+     "with_code": "c1cd3bf18db7ca64fcd57faee2e44c4555d574d4",
+     "tip": "e92e00f51867f7d4bb8899714b65dc9886fc4aaa",
+     "with_tip": "160c1058283e2b1668dce4193279bd3076c2bab1",
+     "at": "2026-10-30T17:22:41Z",
+     "host": "goliath"
     }
    ]
   },
