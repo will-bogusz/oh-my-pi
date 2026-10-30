@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30 21:35Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30 21:36Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-10-30 21:25Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 12, stacked 20, held 1, open PRs 23, queued since the last plan 1; merged 187, closed 12
+**Counts:** openable now 2, conflict-held 12, stacked 20, held 1, open PRs 23, queued since the last plan 2; merged 187, closed 12
 
 ## Openable now (2)
 
@@ -89,8 +89,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 | [#17501](https://github.com/can1357/oh-my-pi/pull/17501) | remove-stray-dbs | chore(coding-agent): remove SQLite files committed with the RPC test fixture | repo | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/remove-stray-dbs) |
 | [#17500](https://github.com/can1357/oh-my-pi/pull/17500) | read-url-long-line | fix(coding-agent): show the head of an over-budget first line on whole-URL reads | read | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-long-line) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
+| iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
