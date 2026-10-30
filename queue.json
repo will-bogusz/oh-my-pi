@@ -56112,7 +56112,7 @@
    "branch": "will/remove-stray-dbs",
    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
    "area": "repo",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "5d30c790b883ad0ae05dac2a4d2ccc8ecd103611",
    "body": "bodies/remove-stray-dbs.md",
@@ -56122,7 +56122,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/remove-stray-dbs",
    "host": "MacBook-Pro",
    "added": "2026-10-30T20:20:52Z",
-   "updated": "2026-10-30T20:52:19Z",
+   "updated": "2026-10-30T20:54:28Z",
    "note": "",
    "built": [
     {
@@ -56344,7 +56344,7 @@
    "branch": "will/read-url-long-line",
    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
    "area": "read",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "5d30c790b883ad0ae05dac2a4d2ccc8ecd103611",
    "body": "bodies/read-url-long-line.md",
@@ -56354,7 +56354,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/read-url-long-line",
    "host": "goliath",
    "added": "2026-10-30T20:32:21Z",
-   "updated": "2026-10-30T20:46:21Z",
+   "updated": "2026-10-30T20:54:28Z",
    "note": "",
    "built": [
     {
