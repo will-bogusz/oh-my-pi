@@ -56352,7 +56352,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/read-url-long-line",
    "host": "goliath",
    "added": "2026-10-30T20:32:21Z",
-   "updated": "2026-10-30T20:46:05Z",
+   "updated": "2026-10-30T20:46:21Z",
    "note": "",
    "built": [
     {
@@ -56566,7 +56566,8 @@
      "tree": "83e82be49cb66a5a89bf10ef534664a1c3e9acad"
     }
    ],
-   "opened": "2026-10-30T20:46:05Z"
+   "opened": "2026-10-30T20:46:05Z",
+   "readied": "2026-10-30T20:46:21Z"
   }
  ],
  "watch": {
