@@ -55917,15 +55917,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-30T17:52:05Z",
+  "checked": "2026-10-30T18:22:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "anthropic-128mb-requests": {
-    "since": "2026-10-30T17:52:05Z",
-    "title": "fix(catalog,coding-agent,snapcompact): size Anthropic image budgets from the 128 MB request limit"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16801": {
     "since": "2026-10-30T14:16:43Z",
@@ -55977,7 +55972,8 @@
    16801,
    16908,
    17489,
-   17490
+   17490,
+   17492
   ],
   "post_merge": {
    "15124": {
@@ -57440,6 +57436,13 @@
     "id": "bash-tool-call-env",
     "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
     "why": "opened as #17489"
+   },
+   {
+    "at": "2026-10-30T18:22:10Z",
+    "kind": "unopenable",
+    "id": "anthropic-128mb-requests",
+    "title": "fix(catalog,coding-agent,snapcompact): size Anthropic image budgets from the 128 MB request limit",
+    "why": "opened as #17492"
    }
   ]
  },
@@ -58300,12 +58303,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-30T17:52:06.424691Z",
+  "at": "2026-10-30T18:22:11.547913Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -58392,6 +58395,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-30T17:27:10Z"
+   },
+   {
+    "id": "anthropic-128mb-requests",
+    "label": "#17492",
+    "number": 17492,
+    "state": "open",
+    "area": "catalog",
+    "priority": "P1",
+    "title": "fix(catalog,coding-agent,snapcompact): size Anthropic image budgets from the 128 MB request limit",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T17:53:11Z"
    },
    {
     "id": "print-hold",
@@ -59148,23 +59168,6 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "anthropic-128mb-requests",
-    "label": "anthropic-128mb-requests",
-    "number": null,
-    "state": "queued",
-    "area": "catalog",
-    "priority": null,
-    "title": "fix(catalog,coding-agent,snapcompact): size Anthropic image budgets from the 128 MB request limit",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T17:43:14Z"
    },
    {
     "id": "account-window-reserves",
