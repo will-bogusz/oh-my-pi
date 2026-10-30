@@ -56946,7 +56946,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-30T22:56:30Z",
+  "checked": "2026-10-30T23:27:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -56965,14 +56965,10 @@
    "iphone-mirror-key-gap": {
     "since": "2026-10-30T21:25:06Z",
     "title": "perf(natives): type on iPhone Mirroring twice as fast"
-   },
-   "snapcompact-text-reader": {
-    "since": "2026-10-30T22:56:30Z",
-    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames"
    }
   },
   "conflicts": {},
-  "merged_through": "2026-10-30T11:25:57Z",
+  "merged_through": "2026-10-30T23:02:49Z",
   "unreleased": {
    "17417": {
     "title": "fix(browser): replace a rich-text editor's text when filling it",
@@ -56993,6 +56989,11 @@
     "title": "feat(coding-agent): list unused meta tags by name in native web reads",
     "merge_commit": "78c576cb91525e6be646d27bbcd137a0120f4e3d",
     "merged_at": "2026-10-30T11:25:57Z"
+   },
+   "17492": {
+    "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
+    "merge_commit": "c391fc2ad5ac5f26533eb6f2ca7eed97b0e36dd5",
+    "merged_at": "2026-10-30T23:02:49Z"
    }
   },
   "ready": [
@@ -57015,10 +57016,10 @@
    16908,
    17489,
    17490,
-   17492,
    17496,
    17500,
-   17501
+   17501,
+   17510
   ],
   "post_merge": {
    "15124": {
@@ -57131,69 +57132,15 @@
     "merge_commit": "07fc07d2497540d41a583e0752f37dbe48d0c167",
     "merged_at": "2026-10-30T11:25:56Z",
     "findings": []
+   },
+   "17492": {
+    "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
+    "merge_commit": "c391fc2ad5ac5f26533eb6f2ca7eed97b0e36dd5",
+    "merged_at": "2026-10-30T23:02:49Z",
+    "findings": []
    }
   },
   "events": [
-   {
-    "at": "2026-10-23T23:17:41Z",
-    "kind": "openable",
-    "id": "app-name-background-helper",
-    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous"
-   },
-   {
-    "at": "2026-10-23T23:17:41Z",
-    "kind": "openable",
-    "id": "browser-read-after-navigation",
-    "title": "fix(browser): wait for the page a click navigates to before the next call"
-   },
-   {
-    "at": "2026-10-23T23:17:41Z",
-    "kind": "openable",
-    "id": "computer-no-ui-continue",
-    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui"
-   },
-   {
-    "at": "2026-10-23T23:17:41Z",
-    "kind": "openable",
-    "id": "finder-rename-keys",
-    "title": "fix(natives): let macOS input reach Finder's inline rename field"
-   },
-   {
-    "at": "2026-10-23T23:17:41Z",
-    "kind": "openable",
-    "id": "relay-extension-frame",
-    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it"
-   },
-   {
-    "at": "2026-10-23T23:17:41Z",
-    "kind": "openable",
-    "id": "window-miss-apps-open",
-    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector"
-   },
-   {
-    "at": "2026-10-23T23:17:41Z",
-    "kind": "openable",
-    "id": "ax-placeholder-name",
-    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder"
-   },
-   {
-    "at": "2026-10-23T23:17:41Z",
-    "kind": "openable",
-    "id": "axpress-click-hint",
-    "title": "fix(natives): tell an agent to click() a macOS element that has no press action"
-   },
-   {
-    "at": "2026-10-23T23:17:41Z",
-    "kind": "openable",
-    "id": "computer-control-policy",
-    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines"
-   },
-   {
-    "at": "2026-10-23T23:17:41Z",
-    "kind": "openable",
-    "id": "grep-exclude",
-    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries"
-   },
    {
     "at": "2026-10-24T00:18:33Z",
     "kind": "openable",
@@ -58555,6 +58502,21 @@
     "kind": "openable",
     "id": "snapcompact-text-reader",
     "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames"
+   },
+   {
+    "at": "2026-10-30T23:27:09Z",
+    "kind": "merged",
+    "number": 17492,
+    "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-10-30T23:27:09Z",
+    "kind": "unopenable",
+    "id": "snapcompact-text-reader",
+    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
+    "why": "opened as #17510"
    }
   ]
  },
@@ -59586,12 +59548,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-30T22:56:31.537101Z",
+  "at": "2026-10-30T23:27:10.380257Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -59714,13 +59676,13 @@
     "created": "2026-10-30T17:27:10Z"
    },
    {
-    "id": "anthropic-128mb-requests",
-    "label": "#17492",
-    "number": 17492,
+    "id": "snapcompact-text-reader",
+    "label": "#17510",
+    "number": 17510,
     "state": "open",
-    "area": "catalog",
+    "area": "snapcompact",
     "priority": "P1",
-    "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
+    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
     "action": "keep",
     "reasons": [],
     "note": "",
@@ -59728,7 +59690,7 @@
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-10-30T17:53:11Z"
+    "created": "2026-10-30T23:08:50Z"
    },
    {
     "id": "print-hold",
@@ -60523,6 +60485,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #17510 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
@@ -60534,6 +60497,7 @@
     "paired": [],
     "blocked_by": [
      "#17490",
+     "#17510",
      "#15128",
      "#15130",
      "#16801",
@@ -60619,23 +60583,6 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
-    "id": "snapcompact-text-reader",
-    "label": "snapcompact-text-reader",
-    "number": null,
-    "state": "queued",
-    "area": "snapcompact",
-    "priority": null,
-    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T22:43:52Z"
-   },
-   {
     "id": "switch-remote-reexpand",
     "label": "switch-remote-reexpand",
     "number": null,
@@ -60645,15 +60592,13 @@
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "action": "wait",
     "reasons": [
-     "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with #17496 in packages/coding-agent/src/session/agent-session.ts"
+     "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17490",
-     "#17496"
+     "#17490"
     ],
     "needs": [],
     "created": "2026-10-30T22:45:47Z"
@@ -60753,11 +60698,11 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #17510 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with snapcompact-text-reader in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -60765,11 +60710,11 @@
     "paired": [],
     "blocked_by": [
      "#17490",
+     "#17510",
      "#15128",
      "#15130",
      "#16801",
-     "#17496",
-     "snapcompact-text-reader"
+     "#17496"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
