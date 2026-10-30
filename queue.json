@@ -55383,13 +55383,13 @@
    "needs": [],
    "base": "26b266748e2df6027706add63b7c7f44effbdf99",
    "body": "bodies/bash-tool-call-env.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17489,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-tool-call-env",
    "host": "MacBook-Pro",
    "added": "2026-10-29T21:27:54Z",
-   "updated": "2026-10-30T17:22:41Z",
+   "updated": "2026-10-30T17:24:15Z",
    "note": "",
    "built": [
     {
@@ -55545,7 +55545,8 @@
      "at": "2026-10-30T17:22:41Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-10-30T17:24:15Z"
   },
   {
    "id": "snapcompact-reduction-baseline",

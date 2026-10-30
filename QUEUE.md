@@ -4,13 +4,12 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-30 17:21Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 12, stacked 20, held 1, open PRs 17; merged 187, closed 12
+**Counts:** openable now 1, conflict-held 12, stacked 20, held 1, open PRs 18; merged 187, closed 12
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| bash-tool-call-env | feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands | other | P2 | 19h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-tool-call-env) |
 | snapcompact-reduction-baseline | fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once | compaction | P1 | 19h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-reduction-baseline) |
 
 ## Conflict-held (12)
@@ -61,7 +60,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 16d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 
-## Open PRs (17)
+## Open PRs (18)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -82,3 +81,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 9d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 8d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 6d | keep; opened over P2 #16284 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
+| [#17489](https://github.com/can1357/oh-my-pi/pull/17489) | bash-tool-call-env | feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands | other | P2 | 19h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-tool-call-env) |
