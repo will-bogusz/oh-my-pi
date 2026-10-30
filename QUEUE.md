@@ -1,12 +1,12 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30 22:48Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30 22:50Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-30 22:46Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 15, stacked 21, held 1, open PRs 23; merged 187, closed 12
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-30 22:47Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 5, conflict-held 14, stacked 21, held 1, open PRs 23; merged 187, closed 12
 
-## Openable now (4)
+## Openable now (5)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -14,8 +14,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 | macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
 | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | iphone-mirror-not-showing | fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-not-showing) |
+| snapcompact-text-reader | fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames | snapcompact |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-text-reader) |
 
-## Conflict-held (15)
+## Conflict-held (14)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -26,13 +27,12 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 | factory-droid-0244 | feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback) | providers | P1 | 12d | [#16309](https://github.com/can1357/oh-my-pi/pull/16309), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-0244) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 12d | [#16309](https://github.com/can1357/oh-my-pi/pull/16309), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 11d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
-| compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 9d | [#17490](https://github.com/can1357/oh-my-pi/pull/17490), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), [#16801](https://github.com/can1357/oh-my-pi/pull/16801), [#17496](https://github.com/can1357/oh-my-pi/pull/17496), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
+| compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 9d | [#17490](https://github.com/can1357/oh-my-pi/pull/17490), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), [#16801](https://github.com/can1357/oh-my-pi/pull/16801), [#17496](https://github.com/can1357/oh-my-pi/pull/17496), snapcompact-text-reader, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 7d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16284](https://github.com/can1357/oh-my-pi/pull/16284), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 7d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 7d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
 | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 6d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#16223](https://github.com/can1357/oh-my-pi/pull/16223), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 1h | iphone-mirror-pointer | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
-| snapcompact-text-reader | fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames | snapcompact |  | 0h | [#17490](https://github.com/can1357/oh-my-pi/pull/17490) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-text-reader) |
 | switch-remote-reexpand | fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch | other |  | 0h | [#17490](https://github.com/can1357/oh-my-pi/pull/17490), [#17496](https://github.com/can1357/oh-my-pi/pull/17496) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/switch-remote-reexpand) |
 
 ## Stacked (21)
