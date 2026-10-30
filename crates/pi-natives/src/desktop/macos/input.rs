@@ -1692,6 +1692,9 @@ const MAX_WHEEL_STEP: u32 = 30;
 /// Upper bound on the wheel events of one scroll, which keeps the wheel train
 /// under about 0.6 s; beyond 1200 px the events grow instead.
 const MAX_WHEEL_EVENTS: u32 = 40;
+/// Upper bound on the wheel events of one iPhone Mirroring scroll, whose
+/// device moves each event only so far: 6000 px in 30 px steps, about 3.5 s.
+const MAX_REPORT_WHEEL_EVENTS: u32 = 200;
 /// Pacing between the wheel events of one scroll, roughly one 60 Hz frame
 /// like a physical wheel's detents.
 const WHEEL_STEP_GAP: Duration = Duration::from_millis(16);
@@ -2874,6 +2877,18 @@ fn background_scroll(
 	// the event reaches the process.
 	post_hover(source, pid, wid, window, x, y, click_group_id())?;
 	control::wait(Duration::from_millis(12))?;
+	post_background_wheel(source, pid, wid, window, x, y, (wheel_x, wheel_y))
+}
+
+fn post_background_wheel(
+	source: &CGEventSource,
+	pid: libc::pid_t,
+	wid: u32,
+	window: &DesktopWindow,
+	x: f64,
+	y: f64,
+	(wheel_x, wheel_y): (i32, i32),
+) -> CoreResult<()> {
 	let event =
 		CGEvent::new_scroll_event(source.clone(), ScrollEventUnit::PIXEL, 2, wheel_y, wheel_x, 0)
 			.map_err(|()| DesktopError::input_failed("failed to create a Quartz scroll event"))?;
@@ -2935,9 +2950,18 @@ fn report_pointer(
 			})
 		},
 		PointerEvent::Scroll { x, y, dx, dy } => report_scroll(
+			dx,
+			dy,
 			before_post,
-			|| post(CGEventType::LeftMouseUp, x, y, 1),
-			|| background_scroll(source, pid, wid, window, x, y, dx, dy),
+			|| {
+				post(CGEventType::LeftMouseUp, x, y, 1)?;
+				post_hover(source, pid, wid, window, x, y, click_group_id())?;
+				control::wait(Duration::from_millis(12))
+			},
+			|wheel_x, wheel_y| {
+				post_background_wheel(source, pid, wid, window, x, y, (wheel_x, wheel_y))
+			},
+			control::wait,
 		),
 		event => background_pointer(
 			source,
@@ -2976,18 +3000,36 @@ fn report_taps(
 	Ok(())
 }
 
-/// A [`report_pointer`] scroll: `aim` moves the device's pointer, then
-/// `scroll` posts; each first passes `before_post`.
+/// A [`report_pointer`] scroll: aim once, then post the distance as wheel
+/// events of at most `MAX_WHEEL_STEP` pixels (the device moves one event
+/// only so far), checking the target before every post.
 fn report_scroll(
+	dx: f64,
+	dy: f64,
 	before_post: impl Fn() -> CoreResult<()>,
 	aim: impl FnOnce() -> CoreResult<()>,
-	scroll: impl FnOnce() -> CoreResult<()>,
+	mut scroll: impl FnMut(i32, i32) -> CoreResult<()>,
+	mut wait: impl FnMut(Duration) -> CoreResult<()>,
 ) -> CoreResult<()> {
+	let steps = wheel_steps_within(
+		finite_i32(dx, "horizontal scroll delta")?,
+		finite_i32(dy, "vertical scroll delta")?,
+		MAX_REPORT_WHEEL_EVENTS,
+	);
+	if steps.is_empty() {
+		return Ok(());
+	}
 	before_post()?;
 	aim()?;
-	control::wait(TAP_HOLD)?;
-	before_post()?;
-	scroll()
+	wait(TAP_HOLD)?;
+	for (index, (wheel_x, wheel_y)) in steps.into_iter().enumerate() {
+		if index > 0 {
+			wait(WHEEL_STEP_GAP)?;
+		}
+		before_post()?;
+		scroll(wheel_x, wheel_y)?;
+	}
+	Ok(())
 }
 
 /// A pointer event whose flags carry no modifiers: a `HIDSystemState` source
@@ -4142,11 +4184,16 @@ fn prime_pointer(source: &CGEventSource, point: CGPoint, side: f64) -> CoreResul
 /// event (iPhone Mirroring moves about 99 points however large it is); in the
 /// `AppKit` scroll views measured, per-event pixel deltas add up.
 fn wheel_steps(dx: i32, dy: i32) -> Vec<(i32, i32)> {
+	wheel_steps_within(dx, dy, MAX_WHEEL_EVENTS)
+}
+
+/// [`wheel_steps`] with at most `max_events` events.
+fn wheel_steps_within(dx: i32, dy: i32, max_events: u32) -> Vec<(i32, i32)> {
 	let count = dx
 		.unsigned_abs()
 		.max(dy.unsigned_abs())
 		.div_ceil(MAX_WHEEL_STEP)
-		.min(MAX_WHEEL_EVENTS);
+		.min(max_events);
 	// `index <= count` keeps each share between 0 and `total`, so it fits i32.
 	let share =
 		|total: i32, index: u32| (i64::from(total) * i64::from(index) / i64::from(count)) as i32;
@@ -7329,18 +7376,18 @@ mod tests {
 		.unwrap_err();
 		assert_eq!(error.code, ErrorCode::UserIntervened);
 		assert_eq!(*posted.borrow(), [(down, 1), (up, 1)]);
-		// A scroll checks before its aiming release and again before it scrolls.
+		// A scroll checks before its aiming release and before each wheel event.
 		front.set(9);
 		let scrolled = std::cell::Cell::new(false);
 		let aim = || {
 			front.set(7);
 			Ok(())
 		};
-		let scroll = || {
+		let scroll = |_, _| {
 			scrolled.set(true);
 			Ok(())
 		};
-		let error = report_scroll(before_post, aim, scroll).unwrap_err();
+		let error = report_scroll(0.0, 600.0, before_post, aim, scroll, |_| Ok(())).unwrap_err();
 		assert_eq!(error.code, ErrorCode::UserIntervened);
 		assert!(!scrolled.get(), "nothing scrolls once the user has the target");
 		let aimed = std::cell::Cell::new(false);
@@ -7348,9 +7395,120 @@ mod tests {
 			aimed.set(true);
 			Ok(())
 		};
-		let error = report_scroll(before_post, aim, || Ok(())).unwrap_err();
+		let error =
+			report_scroll(0.0, 600.0, before_post, aim, |_, _| Ok(()), |_| Ok(())).unwrap_err();
 		assert_eq!(error.code, ErrorCode::UserIntervened);
 		assert!(!aimed.get(), "no aiming release once the user has the target");
+	}
+
+	#[test]
+	fn report_scroll_aims_once_then_posts_the_requested_distance_in_paced_chunks() {
+		let posted = std::cell::RefCell::new(Vec::new());
+		report_scroll(
+			300.0,
+			600.0,
+			|| {
+				posted.borrow_mut().push(("check", 0, 0));
+				Ok(())
+			},
+			|| {
+				posted.borrow_mut().push(("aim", 0, 0));
+				Ok(())
+			},
+			|x, y| {
+				posted.borrow_mut().push(("wheel", x, y));
+				Ok(())
+			},
+			|gap| {
+				posted
+					.borrow_mut()
+					.push(("wait", i32::try_from(gap.as_millis()).unwrap(), 0));
+				Ok(())
+			},
+		)
+		.unwrap();
+		let mut expected = vec![("check", 0, 0), ("aim", 0, 0), ("wait", 60, 0)];
+		for index in 0..20 {
+			if index > 0 {
+				expected.push(("wait", 16, 0));
+			}
+			expected.push(("check", 0, 0));
+			expected.push(("wheel", 15, 30));
+		}
+		assert_eq!(posted.into_inner(), expected);
+	}
+
+	#[test]
+	fn report_scroll_stops_mid_train_and_keeps_long_distances_in_small_steps() {
+		use crate::desktop::error::ErrorCode;
+		let checks = std::cell::Cell::new(0);
+		let wheels = std::cell::Cell::new(0);
+		let error = report_scroll(
+			0.0,
+			300.0,
+			|| {
+				checks.set(checks.get() + 1);
+				// The aim's check and three wheels pass; the fourth wheel's fails.
+				if checks.get() > 4 {
+					Err(DesktopError::input_failed("target changed"))
+				} else {
+					Ok(())
+				}
+			},
+			|| Ok(()),
+			|_, _| {
+				wheels.set(wheels.get() + 1);
+				Ok(())
+			},
+			|_| Ok(()),
+		)
+		.unwrap_err();
+		assert_eq!(error.code, ErrorCode::InputFailed);
+		assert_eq!(wheels.get(), 3);
+		let error = report_scroll(
+			0.0,
+			300.0,
+			|| Ok(()),
+			|| Ok(()),
+			|_, _| Ok(()),
+			|gap| {
+				if gap == WHEEL_STEP_GAP {
+					Err(DesktopError::cancelled("cancelled"))
+				} else {
+					Ok(())
+				}
+			},
+		)
+		.unwrap_err();
+		assert_eq!(error.code, ErrorCode::Cancelled);
+		let mut steps = Vec::new();
+		report_scroll(
+			0.0,
+			6000.0,
+			|| Ok(()),
+			|| Ok(()),
+			|x, y| {
+				steps.push((x, y));
+				Ok(())
+			},
+			|_| Ok(()),
+		)
+		.unwrap();
+		assert_eq!(steps, vec![(0, 30); 200]);
+		let mut posted = false;
+		report_scroll(
+			0.0,
+			0.0,
+			|| Ok(()),
+			|| {
+				posted = true;
+				Ok(())
+			},
+			|_, _| Ok(()),
+			|_| Ok(()),
+		)
+		.unwrap();
+		assert!(!posted, "a zero scroll aims nothing");
 	}
 
 	#[test]
