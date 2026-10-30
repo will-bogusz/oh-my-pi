@@ -54475,13 +54475,13 @@
    "needs": [],
    "base": "bbe075fda6fcd5b9e7b1cb6213a70f00fd7600f5",
    "body": "bodies/computer-window-wait.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17391,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:07:50Z",
-   "updated": "2026-10-29T21:28:51Z",
+   "updated": "2026-10-30T11:44:28Z",
    "note": "2026-10-29 (Ax15282): advanced onto main 3b1408f629 (e7acf23d01), merged trees f745eb407d (+16 open PRs, natives built; 1197 coding-agent tests pass, check:ts 0 errors) and fbe9333424 (with #16908; computer tests pass, #16908 relay tab-isolation tests fail identically on #16908 alone: need a real Chrome) recorded; opened as #17391.",
    "advanced": "2026-10-29T21:28:51Z",
    "built": [
@@ -54767,7 +54767,8 @@
     }
    ],
    "opened": "2026-10-29T16:41:15Z",
-   "readied": "2026-10-29T16:41:34Z"
+   "readied": "2026-10-29T16:41:34Z",
+   "merged_by": "pr"
   },
   {
    "id": "archive-cache-racy",
@@ -54778,13 +54779,13 @@
    "needs": [],
    "base": "d33a0edb00c8b76b28d71eb976cd82d69617bcba",
    "body": "bodies/archive-cache-racy.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17389,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/archive-cache-racy",
    "host": "MacBook-Pro",
    "added": "2026-10-29T15:29:53Z",
-   "updated": "2026-10-29T20:19:04Z",
+   "updated": "2026-10-30T11:44:28Z",
    "note": "",
    "built": [
     {
@@ -54943,7 +54944,8 @@
    ],
    "opened": "2026-10-29T15:54:44Z",
    "readied": "2026-10-29T15:55:08Z",
-   "advanced": "2026-10-29T20:19:04Z"
+   "advanced": "2026-10-29T20:19:04Z",
+   "merged_by": "pr"
   },
   {
    "id": "read-url-native-prune",
@@ -54954,13 +54956,13 @@
    "needs": [],
    "base": "8bbfa5f13407e1b82ca5f3ea25a1be9b105c031c",
    "body": "bodies/read-url-native-prune.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17393,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-url-native-prune",
    "host": "MacBook-Pro",
    "added": "2026-10-29T16:21:19Z",
-   "updated": "2026-10-29T22:19:13Z",
+   "updated": "2026-10-30T11:44:28Z",
    "note": "",
    "built": [
     {
@@ -55155,7 +55157,8 @@
     }
    ],
    "opened": "2026-10-29T17:40:38Z",
-   "readied": "2026-10-29T17:41:03Z"
+   "readied": "2026-10-29T17:41:03Z",
+   "merged_by": "pr"
   },
   {
    "id": "rich-editor-fill",
@@ -55166,13 +55169,13 @@
    "needs": [],
    "base": "5dabff10fa5f069ec619c54d0daf7b269687b19c",
    "body": "bodies/rich-editor-fill.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17417,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rich-editor-fill",
    "host": "MacBook-Pro",
    "added": "2026-10-29T20:56:02Z",
-   "updated": "2026-10-29T21:23:05Z",
+   "updated": "2026-10-30T11:44:28Z",
    "note": "",
    "advanced": "2026-10-29T20:58:19Z",
    "built": [
@@ -55368,7 +55371,8 @@
     }
    ],
    "opened": "2026-10-29T21:13:04Z",
-   "readied": "2026-10-29T21:13:44Z"
+   "readied": "2026-10-29T21:13:44Z",
+   "merged_by": "pr"
   },
   {
    "id": "bash-tool-call-env",
