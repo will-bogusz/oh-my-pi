@@ -56683,10 +56683,18 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-30T21:25:06Z",
+  "checked": "2026-10-30T21:55:44Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "iphone-mirror-not-showing": {
+    "since": "2026-10-30T21:55:44Z",
+    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone"
+   },
+   "iphone-mirror-pointer": {
+    "since": "2026-10-30T21:55:44Z",
+    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap"
+   },
    "macos-capture-geometry": {
     "since": "2026-10-30T21:25:06Z",
     "title": "fix(natives): match macOS window screenshots to the window on screen"
@@ -58262,6 +58270,18 @@
     "kind": "openable",
     "id": "iphone-mirror-key-gap",
     "title": "perf(natives): type on iPhone Mirroring twice as fast"
+   },
+   {
+    "at": "2026-10-30T21:55:44Z",
+    "kind": "openable",
+    "id": "iphone-mirror-not-showing",
+    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone"
+   },
+   {
+    "at": "2026-10-30T21:55:44Z",
+    "kind": "openable",
+    "id": "iphone-mirror-pointer",
+    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap"
    }
   ]
  },
@@ -59293,12 +59313,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-30T21:42:20.158215Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-30T21:55:44.921686Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -60674,7 +60694,7 @@
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
      "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",
