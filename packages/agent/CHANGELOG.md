@@ -2,9 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `canReplayRemoteCompactionFrom()` to check whether a model can replay the provider-native compaction another model would write
+
 ### Fixed
 
 - Long tool-call intents no longer block tool execution when intent tracing is enabled ([#13140](https://github.com/can1357/oh-my-pi/issues/13140)).
+- Compaction preparation re-expands a trailing OpenAI remote compaction the active model cannot replay instead of reporting nothing to compact
 
 ## [18.14.0] - 2026-10-29
 
