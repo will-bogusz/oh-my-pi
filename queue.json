@@ -56660,6 +56660,26 @@
    "added": "2026-10-30T21:36:03Z",
    "updated": "2026-10-30T21:36:03Z",
    "note": ""
+  },
+  {
+   "id": "macos-scroll-direction",
+   "branch": "will/macos-scroll-direction",
+   "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "iphone-mirror-scroll-distance"
+   ],
+   "base": "f32a0eda46d0cc17ca9f751467fc3b6c1129ec0c",
+   "body": "bodies/macos-scroll-direction.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-scroll-direction",
+   "host": "MacBook-Pro",
+   "added": "2026-10-30T21:36:10Z",
+   "updated": "2026-10-30T21:36:10Z",
+   "note": ""
   }
  ],
  "watch": {
