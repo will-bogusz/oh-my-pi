@@ -1,17 +1,17 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30 05:04Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30 05:35Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-30 04:34Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-30 05:35Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 2, conflict-held 12, stacked 20, held 1, open PRs 21; merged 183, closed 12
 
 ## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| bash-tool-call-env | feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands | other | P2 | 7h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-tool-call-env) |
-| snapcompact-reduction-baseline | fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once | compaction | P1 | 6h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-reduction-baseline) |
+| bash-tool-call-env | feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands | other | P2 | 8h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-tool-call-env) |
+| snapcompact-reduction-baseline | fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once | compaction | P1 | 7h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-reduction-baseline) |
 
 ## Conflict-held (12)
 
@@ -28,7 +28,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 6d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16284](https://github.com/can1357/oh-my-pi/pull/16284), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), [#17417](https://github.com/can1357/oh-my-pi/pull/17417), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 6d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), [#17417](https://github.com/can1357/oh-my-pi/pull/17417), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 6d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), [#17417](https://github.com/can1357/oh-my-pi/pull/17417), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
-| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 5d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#16223](https://github.com/can1357/oh-my-pi/pull/16223), [#17391](https://github.com/can1357/oh-my-pi/pull/17391), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
+| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 6d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#16223](https://github.com/can1357/oh-my-pi/pull/16223), [#17391](https://github.com/can1357/oh-my-pi/pull/17391), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 
 ## Stacked (20)
 
@@ -85,4 +85,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 | [#17391](https://github.com/can1357/oh-my-pi/pull/17391) | computer-window-wait | feat(computer): wait for windows opened by actions | computer | P2 | 12h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-wait) |
 | [#17389](https://github.com/can1357/oh-my-pi/pull/17389) | archive-cache-racy | fix(coding-agent): re-read an archive rewritten inside one timestamp granule | other | P1 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/archive-cache-racy) |
 | [#17393](https://github.com/can1357/oh-my-pi/pull/17393) | read-url-native-prune | feat(coding-agent): list unused meta tags by name in native web reads | other | P2 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-native-prune) |
-| [#17417](https://github.com/can1357/oh-my-pi/pull/17417) | rich-editor-fill | fix(browser): replace a rich-text editor's text when filling it | browser | P2 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill) |
+| [#17417](https://github.com/can1357/oh-my-pi/pull/17417) | rich-editor-fill | fix(browser): replace a rich-text editor's text when filling it | browser | P2 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill) |
