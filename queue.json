@@ -58990,6 +58990,11 @@
     "sha": "bb53e58af5e40a586cc7e4f256a55b729fb6ef89",
     "at": "2026-10-30T20:53:31Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "bb53e58af5e40a586cc7e4f256a55b729fb6ef89",
+    "at": "2026-10-30T20:54:32Z",
+    "host": "goliath"
    }
   }
  },
