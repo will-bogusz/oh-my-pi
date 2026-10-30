@@ -1259,13 +1259,10 @@ export class SessionMaintenance {
 			for (let index = methodOffset; index < methods.length; index++) {
 				const method = methods[index];
 				if (method === "remote") {
-					const remoteSettings = resolveMethodSettings(compactionSettings, method);
-					// A configured endpoint returns a plain summary; native lanes may not.
+					// Native lanes run before a configured endpoint, so the reader check holds for both.
 					if (
-						canUseRemoteCompaction(activeModel, remoteSettings) &&
-						(!options?.readerModel ||
-							Boolean(remoteSettings.remoteEndpoint) ||
-							canReplayRemoteCompactionFrom(activeModel, options.readerModel))
+						canUseRemoteCompaction(activeModel, resolveMethodSettings(compactionSettings, method)) &&
+						(!options?.readerModel || canReplayRemoteCompactionFrom(activeModel, options.readerModel))
 					) {
 						selectedMethod = method;
 						selectedMethodIndex = index;
@@ -1297,15 +1294,17 @@ export class SessionMaintenance {
 			const effectiveSettings = resolveMethodSettings(compactionSettings, selectedMethod);
 			const availableModels = this.#host.modelRegistry.getAvailable();
 			const requireProviderRemote = selectedMethod === "remote" && !effectiveSettings.remoteEndpoint;
+			const remoteReader = selectedMethod === "remote" ? options?.readerModel : undefined;
 			const compactionCandidates = this.#getCompactionModelCandidates(
 				availableModels,
-				requireProviderRemote
+				requireProviderRemote || remoteReader
 					? candidate =>
-							canUseLiveProviderNativeCompaction(candidate, activeModel, effectiveSettings) &&
-							(!options?.readerModel || canReplayRemoteCompactionFrom(candidate, options.readerModel))
+							(!requireProviderRemote ||
+								canUseLiveProviderNativeCompaction(candidate, activeModel, effectiveSettings)) &&
+							(!remoteReader || canReplayRemoteCompactionFrom(candidate, remoteReader))
 					: undefined,
 			);
-			if (requireProviderRemote && compactionCandidates.length === 0) {
+			if ((requireProviderRemote || remoteReader) && compactionCandidates.length === 0) {
 				this.#host.emitNotice(
 					"warning",
 					`remote compaction is unavailable for ${activeModel.id}; trying the next preferred method`,
