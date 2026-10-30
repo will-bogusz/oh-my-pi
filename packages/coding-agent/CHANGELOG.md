@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- A snapcompact archive kept under one model and then sent to a model whose host takes fewer archive frames (for example 107 frames from the Codex backend, then a switch to Claude) sends only the newest frames that host allows
+
 ## [18.14.2] - 2026-10-31
 
 ### Added

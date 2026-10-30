@@ -248,6 +248,14 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		expect(officialFrames * framePrice(official)).toBeLessThanOrEqual(SHARE * 600_000);
 	});
 
+	it("caps a roomy trigger at the host's snapcompact-frame-budget", async () => {
+		// Both 1M windows leave room for more frames than either host's budget at the default trigger.
+		const codex = getBundledModel("openai-codex", "gpt-5.6-sol");
+		if (!codex) throw new Error("Expected bundled openai-codex/gpt-5.6-sol");
+		expect(await requestedFrames(codex, {})).toBe(107);
+		expect(await requestedFrames(opus(1_000_000), {})).toBe(80);
+	});
+
 	it("sizes from the active model's compaction.modelThresholds entry", async () => {
 		const model = opus(1_000_000);
 		const perModel = await requestedFrames(model, {

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added the `snapcompact-frame-budget` rule, the most snapcompact archive frames one request may carry: 80 on the Anthropic API, whose responses fail past about 95 high-res frames although it accepts 600 images, and 107 on the Codex backend, where gpt-6.1-sol's recall stops improving
+
 ## [18.14.2] - 2026-10-31
 
 ### Breaking Changes

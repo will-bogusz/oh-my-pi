@@ -115,7 +115,10 @@ describe("snapcompact archive read by a Claude model", () => {
 	});
 
 	/** Appends an archive rendered under GPT (reasoning included) and a kept reply. */
-	async function seedArchive(sessionManager: SessionManager): Promise<snapcompact.CompactionResult> {
+	async function seedArchive(
+		sessionManager: SessionManager,
+		options: snapcompact.Options = { model: gpt },
+	): Promise<snapcompact.CompactionResult> {
 		const keptId = sessionManager.appendMessage({ role: "user", content: "Kept turn.", timestamp: Date.now() });
 		const archive = await snapcompact.compact(
 			{
@@ -125,7 +128,7 @@ describe("snapcompact archive read by a Claude model", () => {
 				tokensBefore: 100_000,
 				fileOps: snapcompact.createFileOps(),
 			},
-			{ model: gpt },
+			options,
 		);
 		expect(snapcompact.getPreservedArchive(archive.preserveData)?.frames.length).toBeGreaterThan(0);
 		expect(archive.summary).toContain("¶think:");
@@ -287,6 +290,27 @@ describe("snapcompact archive read by a Claude model", () => {
 		const entry = latestCompaction(sessionManager);
 		expect(snapcompact.getPreservedArchive(entry.preserveData)?.withoutThinking).toBeUndefined();
 		expectOriginalIntact(entry, original);
+	});
+
+	it("renders the no-reasoning variant within the reader's frame budget", async () => {
+		const sessionManager = SessionManager.inMemory();
+		// More frames than Claude's 80-frame budget, as a Codex archive may hold.
+		const original = await seedArchive(sessionManager, { model: gpt, frameSize: 320, maxFrames: 90 });
+		expect(snapcompact.getPreservedArchive(original.preserveData)?.frames).toHaveLength(90);
+		const { session, mock } = startSession(sessionManager, gpt);
+		const render = snapcompact.compact;
+		const requested: (number | undefined)[] = [];
+		vi.spyOn(snapcompact, "compact").mockImplementation((preparation, options) => {
+			requested.push(options?.maxFrames);
+			return render(preparation, { ...options, frameSize: 320 });
+		});
+
+		await session.setModel(claude);
+		await session.prompt("Continue.");
+
+		expect(requested).toEqual([snapcompact.providerFrameBudget(claude)]);
+		expect(requestContent(mock.calls[0]?.context.messages).images.length).toBeLessThanOrEqual(80);
+		expectOriginalIntact(latestCompaction(sessionManager), original);
 	});
 
 	it("checks only messages appended since the previous model call of a tool loop", async () => {
