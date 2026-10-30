@@ -58107,12 +58107,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-30T17:24:19.575086Z",
+  "at": "2026-10-30T17:43:24.318945Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -58182,6 +58182,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-21T03:57:51Z"
+   },
+   {
+    "id": "snapcompact-reduction-baseline",
+    "label": "#17490",
+    "number": 17490,
+    "state": "open",
+    "area": "compaction",
+    "priority": "P1",
+    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T17:27:10Z"
    },
    {
     "id": "print-hold",
@@ -58411,6 +58428,23 @@
     "created": "2026-10-22T16:58:16Z"
    },
    {
+    "id": "bash-tool-call-env",
+    "label": "#17489",
+    "number": 17489,
+    "state": "open",
+    "area": "other",
+    "priority": "P2",
+    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T17:24:14Z"
+   },
+   {
     "id": "r2/relay-call-deadline",
     "label": "r2/relay-call-deadline",
     "number": null,
@@ -58462,23 +58496,6 @@
      "relay-popup-front-main"
     ],
     "created": "2026-10-19T00:03:17Z"
-   },
-   {
-    "id": "snapcompact-reduction-baseline",
-    "label": "snapcompact-reduction-baseline",
-    "number": null,
-    "state": "queued",
-    "area": "compaction",
-    "priority": "P1",
-    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-29T22:18:26Z"
    },
    {
     "id": "tab-click-options",
@@ -58845,20 +58862,20 @@
     "title": "feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks",
     "action": "wait",
     "reasons": [
+     "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with snapcompact-reduction-baseline in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17490",
      "#15128",
      "#15130",
-     "#16801",
-     "snapcompact-reduction-baseline"
+     "#16801"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -58938,6 +58955,23 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "anthropic-128mb-requests",
+    "label": "anthropic-128mb-requests",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": null,
+    "title": "fix(catalog,coding-agent,snapcompact): size Anthropic image budgets from the 128 MB request limit",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T17:43:14Z"
    },
    {
     "id": "account-window-reserves",
@@ -59031,20 +59065,20 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
+     "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with snapcompact-reduction-baseline in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17490",
      "#15128",
      "#15130",
-     "#16801",
-     "snapcompact-reduction-baseline"
+     "#16801"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -59083,6 +59117,7 @@
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15433 in docs/cli-reference.md",
+     "conflicts with #17489 in packages/coding-agent/src/tools/bash.ts",
      "its need #16801 conflicts with main in packages/coding-agent/src/session/session-storage.ts",
      "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/session-mailbox.test.ts"
     ],
@@ -59092,7 +59127,8 @@
     "blocked_by": [
      "#15128",
      "#15130",
-     "#15433"
+     "#15433",
+     "#17489"
     ],
     "needs": [
      "timer-pr-1-poke"
@@ -59112,6 +59148,7 @@
      "needs timer-pr-4-surfaces (queued)",
      "conflicts with #15128 in docs/settings.md",
      "conflicts with #15130 in docs/settings.md",
+     "conflicts with #17489 in packages/coding-agent/src/tools/bash.ts",
      "its need timer-pr-4-surfaces conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts"
     ],
@@ -59120,7 +59157,8 @@
     "paired": [],
     "blocked_by": [
      "#15128",
-     "#15130"
+     "#15130",
+     "#17489"
     ],
     "needs": [
      "timer-pr-4-surfaces"
