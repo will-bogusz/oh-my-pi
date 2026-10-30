@@ -55930,7 +55930,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/cache-marker",
    "host": "MacBook-Pro",
    "added": "2026-10-30T19:19:28Z",
-   "updated": "2026-10-30T19:41:53Z",
+   "updated": "2026-10-30T19:43:16Z",
    "note": "",
    "built": [
     {
@@ -56104,7 +56104,8 @@
      "tree": "ca3be894e49c3185172e04371feccd4059793ba1"
     }
    ],
-   "opened": "2026-10-30T19:41:53Z"
+   "opened": "2026-10-30T19:41:53Z",
+   "readied": "2026-10-30T19:43:15Z"
   }
  ],
  "watch": {
