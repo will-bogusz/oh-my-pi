@@ -56109,15 +56109,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-30T19:23:22Z",
+  "checked": "2026-10-30T19:53:51Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "cache-marker": {
-    "since": "2026-10-30T19:23:22Z",
-    "title": "feat(coding-agent): show whether the next message reads the prompt cache"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16801": {
     "since": "2026-10-30T14:16:43Z",
@@ -56179,7 +56174,8 @@
    16908,
    17489,
    17490,
-   17492
+   17492,
+   17496
   ],
   "post_merge": {
    "15124": {
@@ -57666,6 +57662,13 @@
      "packages/coding-agent/test/session/provider-image-budget.test.ts",
      "packages/snapcompact/test/snapcompact.test.ts"
     ]
+   },
+   {
+    "at": "2026-10-30T19:53:51Z",
+    "kind": "unopenable",
+    "id": "cache-marker",
+    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
+    "why": "opened as #17496"
    }
   ]
  },
@@ -58526,12 +58529,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-30T19:23:24.617936Z",
+  "at": "2026-10-30T19:53:52.573790Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -58883,6 +58886,23 @@
     "created": "2026-10-30T17:24:14Z"
    },
    {
+    "id": "cache-marker",
+    "label": "#17496",
+    "number": 17496,
+    "state": "open",
+    "area": "status-line",
+    "priority": "P2",
+    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T19:41:51Z"
+   },
+   {
     "id": "r2/relay-call-deadline",
     "label": "r2/relay-call-deadline",
     "number": null,
@@ -59189,23 +59209,6 @@
     "created": "2026-10-23T19:04:15Z"
    },
    {
-    "id": "cache-marker",
-    "label": "cache-marker",
-    "number": null,
-    "state": "queued",
-    "area": "status-line",
-    "priority": "P2",
-    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T19:19:28Z"
-   },
-   {
     "id": "computer-input-diff-report",
     "label": "computer-input-diff-report",
     "number": null,
@@ -59321,7 +59324,7 @@
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with cache-marker in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
@@ -59332,7 +59335,7 @@
      "#15128",
      "#15130",
      "#16801",
-     "cache-marker"
+     "#17496"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -59452,7 +59455,7 @@
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with cache-marker in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -59462,7 +59465,7 @@
      "#15128",
      "#15130",
      "#16801",
-     "cache-marker"
+     "#17496"
     ],
     "needs": [
      "#15133"
@@ -59511,7 +59514,7 @@
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with cache-marker in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -59522,7 +59525,7 @@
      "#15128",
      "#15130",
      "#16801",
-     "cache-marker"
+     "#17496"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -59562,7 +59565,7 @@
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15433 in docs/cli-reference.md",
      "conflicts with #17489 in packages/coding-agent/src/tools/bash.ts",
-     "conflicts with cache-marker in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "its need #16801 conflicts with main in packages/coding-agent/src/session/session-storage.ts",
      "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/session-mailbox.test.ts"
     ],
@@ -59574,7 +59577,7 @@
      "#15130",
      "#15433",
      "#17489",
-     "cache-marker"
+     "#17496"
     ],
     "needs": [
      "timer-pr-1-poke"
@@ -59595,7 +59598,7 @@
      "conflicts with #15128 in docs/settings.md",
      "conflicts with #15130 in docs/settings.md",
      "conflicts with #17489 in packages/coding-agent/src/tools/bash.ts",
-     "conflicts with cache-marker in docs/settings.md, packages/coding-agent/src/modes/controllers/event-controller.ts",
+     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/modes/controllers/event-controller.ts",
      "its need timer-pr-4-surfaces conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts"
     ],
@@ -59606,7 +59609,7 @@
      "#15128",
      "#15130",
      "#17489",
-     "cache-marker"
+     "#17496"
     ],
     "needs": [
      "timer-pr-4-surfaces"
@@ -59626,7 +59629,7 @@
      "needs timer-pr-2-engine (queued)",
      "conflicts with #15128 in docs/settings.md",
      "conflicts with #15130 in docs/settings.md",
-     "conflicts with cache-marker in docs/settings.md",
+     "conflicts with #17496 in docs/settings.md",
      "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts"
     ],
     "note": "",
@@ -59635,7 +59638,7 @@
     "blocked_by": [
      "#15128",
      "#15130",
-     "cache-marker"
+     "#17496"
     ],
     "needs": [
      "timer-pr-2-engine"
@@ -59655,7 +59658,7 @@
      "needs timer-pr-3-tool (queued)",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with cache-marker in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "its need timer-pr-3-tool conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts"
     ],
     "note": "",
@@ -59664,7 +59667,7 @@
     "blocked_by": [
      "#15128",
      "#15130",
-     "cache-marker"
+     "#17496"
     ],
     "needs": [
      "timer-pr-3-tool"
