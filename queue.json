@@ -59064,6 +59064,11 @@
     "sha": "d5896fae4620fa2379b181fb426930ddcd71a112",
     "at": "2026-10-30T21:13:32Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "d5896fae4620fa2379b181fb426930ddcd71a112",
+    "at": "2026-10-30T21:14:05Z",
+    "host": "goliath"
    }
   }
  },
