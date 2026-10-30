@@ -56122,8 +56122,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/remove-stray-dbs",
    "host": "MacBook-Pro",
    "added": "2026-10-30T20:20:52Z",
-   "updated": "2026-10-30T20:20:52Z",
-   "note": ""
+   "updated": "2026-10-30T20:41:46Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "3f0ebdc2f99d45a7c57976b7ed9849094e13a450",
+     "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
+     "tip": "d5ec5e985d2b87081089f4774319ff409236d4a8",
+     "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
+     "at": "2026-10-30T20:41:46Z",
+     "host": "goliath",
+     "tree": "fe77ad1902d6f760ac9514b102ebf7a1abf3ab8b"
+    }
+   ]
   },
   {
    "id": "read-url-long-line",
@@ -56140,8 +56152,20 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/read-url-long-line",
    "host": "goliath",
    "added": "2026-10-30T20:32:21Z",
-   "updated": "2026-10-30T20:32:21Z",
-   "note": ""
+   "updated": "2026-10-30T20:41:46Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "5c7a755762efddd614309eea9dae49dcd176d698",
+     "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
+     "tip": "b7b76e84b6c0c85a35505b4cf28147c029f68c36",
+     "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
+     "at": "2026-10-30T20:41:46Z",
+     "host": "goliath",
+     "tree": "fe77ad1902d6f760ac9514b102ebf7a1abf3ab8b"
+    }
+   ]
   }
  ],
  "watch": {
