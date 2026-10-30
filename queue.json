@@ -56570,6 +56570,24 @@
    ],
    "opened": "2026-10-30T20:46:05Z",
    "readied": "2026-10-30T20:46:21Z"
+  },
+  {
+   "id": "iphone-mirror-key-gap",
+   "branch": "will/iphone-mirror-key-gap",
+   "title": "perf(natives): type on iPhone Mirroring twice as fast",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "5d30c790b883ad0ae05dac2a4d2ccc8ecd103611",
+   "body": "bodies/iphone-mirror-key-gap.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-key-gap",
+   "host": "MacBook-Pro",
+   "added": "2026-10-30T21:15:44Z",
+   "updated": "2026-10-30T21:15:44Z",
+   "note": ""
   }
  ],
  "watch": {
