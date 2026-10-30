@@ -13,6 +13,7 @@
 ### Changed
 
 - `read` of a web page keeps the title, description, author and dates of its `<meta>` tags and lists the others by name only, so pages cost about 6% fewer tokens ([#17393](https://github.com/can1357/oh-my-pi/pull/17393) by [@will-bogusz](https://github.com/will-bogusz))
+- Snapcompact archives now fill the compacted context up to 75% of the compaction trigger instead of about half the room under it, so long sessions keep about 45% more archive frames of discarded history, at the cost of compacting more often
 
 ### Fixed
 

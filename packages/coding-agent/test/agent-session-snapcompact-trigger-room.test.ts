@@ -1,7 +1,7 @@
 /**
  * Snapcompact archive size follows the room under the compaction trigger, not
- * the window: half of what the trigger leaves after the system prompt, kept
- * turns and the archive's text, planned within 60% of the trigger.
+ * the window: what the trigger leaves after the system prompt, kept turns and
+ * the archive's text, planned within 75% of the trigger.
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import { Agent, type AgentMessage } from "@oh-my-pi/pi-agent-core";
@@ -20,8 +20,7 @@ import { computeNonMessageTokens } from "@oh-my-pi/pi-tui/status-line/context-us
 import * as snapcompact from "@oh-my-pi/snapcompact";
 import { rejectionOf } from "./helpers/rejection";
 
-const SHARE = 0.5;
-const TARGET = 0.6;
+const TARGET = 0.75;
 
 describe("snapcompact archive sized by the compaction trigger", () => {
 	let authStorage: AuthStorage;
@@ -211,15 +210,15 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		expect(smallWindow).toBe(high);
 		expect(low).toBeGreaterThan(0);
 		expect(high).toBeGreaterThan(2 * low - 2);
-		expect(low * frame).toBeLessThanOrEqual(SHARE * 80_000);
-		expect(high * frame).toBeLessThanOrEqual(SHARE * 160_000);
+		expect(low * frame).toBeLessThanOrEqual(TARGET * 80_000);
+		expect(high * frame).toBeLessThanOrEqual(TARGET * 160_000);
 	});
 
 	it("keeps a trigger far below the window from getting a window-sized archive", async () => {
 		const model = opus(1_000_000);
 		const frames = await requestedFrames(model, { "compaction.thresholdTokens": 60_000 });
 		expect(frames).toBeGreaterThan(0);
-		expect(frames * framePrice(model)).toBeLessThanOrEqual(SHARE * 60_000);
+		expect(frames * framePrice(model)).toBeLessThanOrEqual(TARGET * 60_000);
 		// The window alone would allow the full payload cap.
 		expect(frames).toBeLessThan(
 			snapcompact.maxFramesForDataBudget(snapcompact.resolveShape(model), snapcompact.frameDataBytesBudget(model)),
@@ -245,7 +244,7 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		expect(officialFrames).toBeLessThan(
 			snapcompact.maxFramesForDataBudget(shape, snapcompact.frameDataBytesBudget(official)),
 		);
-		expect(officialFrames * framePrice(official)).toBeLessThanOrEqual(SHARE * 600_000);
+		expect(officialFrames * framePrice(official)).toBeLessThanOrEqual(TARGET * 600_000);
 	});
 
 	it("sizes from the active model's compaction.modelThresholds entry", async () => {
@@ -255,10 +254,10 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		});
 		const global = await requestedFrames(model, { "compaction.thresholdTokens": 80_000 });
 		expect(perModel).toBe(global);
-		expect(perModel * framePrice(model)).toBeLessThanOrEqual(SHARE * 80_000);
+		expect(perModel * framePrice(model)).toBeLessThanOrEqual(TARGET * 80_000);
 	});
 
-	it("never plans the compacted context past 60% of the trigger when kept turns fill much of it", async () => {
+	it("never plans the compacted context past 75% of the trigger when kept turns fill much of it", async () => {
 		const model = opus(1_000_000);
 		const thresholdTokens = 100_000;
 		const { session } = createSession(model, {
@@ -282,10 +281,10 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 			Math.ceil((2 * snapcompact.geometry(snapcompact.resolveShape(model)).capacity * 1.15) / 4) + 2000;
 		const fixedTokens = storedContextTokens(session) - session.agent.tokenizer.countMessage(summary) + archiveText;
 
-		// Half the room alone would allow another frame; the 60% target is what binds.
-		expect(SHARE * (thresholdTokens - fixedTokens)).toBeGreaterThanOrEqual((frames + 1) * framePrice(model));
+		// The target binds: one more frame would carry the compacted context past it.
 		expect(frames).toBeGreaterThan(0);
 		expect(frames * framePrice(model)).toBeLessThanOrEqual(TARGET * thresholdTokens - fixedTokens);
+		expect((frames + 1) * framePrice(model)).toBeGreaterThan(TARGET * thresholdTokens - fixedTokens);
 	});
 
 	it("sizes the trigger room without the kept turns' opaque reasoning replay bytes", async () => {
@@ -352,7 +351,7 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 
 		const [onOpus, onHaiku] = requested;
 		expect(onHaiku).toBeGreaterThan(0);
-		expect(onHaiku * framePrice(haiku)).toBeLessThanOrEqual(SHARE * 40_000);
+		expect(onHaiku * framePrice(haiku)).toBeLessThanOrEqual(TARGET * 40_000);
 		expect(onOpus).toBeGreaterThan(onHaiku);
 	});
 
@@ -369,7 +368,7 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		expect(snapcompact.resolveShape(unverified).frameTokenEstimate).toBe(price);
 		expect(price).toBe(2882);
 
-		// Room for 15 frames at 2,882 but not at 3,000, so a near-miss divisor fails too.
+		// Room for 21 frames at 2,882 but not at 3,000, so a near-miss divisor fails too.
 		const thresholdTokens = 102_000;
 		const plan = async (model: Model): Promise<{ frames: number; room: number }> => {
 			const { session } = createSession(model, { "compaction.thresholdTokens": thresholdTokens });
@@ -392,7 +391,7 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 			const fixedTokens = storedContextTokens(session) - session.agent.tokenizer.countMessage(summary) + archiveText;
 			return {
 				frames,
-				room: Math.min(SHARE * (thresholdTokens - fixedTokens), TARGET * thresholdTokens - fixedTokens),
+				room: TARGET * thresholdTokens - fixedTokens,
 			};
 		};
 		const atPrice = await plan(verified);
@@ -613,7 +612,7 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		expect(notices.some(notice => notice.includes("could not leave room under the compaction trigger"))).toBe(false);
 	});
 
-	it("counts a pending prompt toward the 60% target when it triggers pre-prompt compaction", async () => {
+	it("counts a pending prompt toward the 75% target when it triggers pre-prompt compaction", async () => {
 		const model = opus(1_000_000);
 		const thresholdTokens = 100_000;
 		const { session } = createSession(
@@ -705,7 +704,7 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		expect(requestTokens).toBeLessThanOrEqual(1_000_000 - 16_384);
 	});
 
-	it("re-renders toward 60% of the trigger, dropping the oldest frames when a render overshoots", async () => {
+	it("re-renders toward 75% of the trigger, dropping the oldest frames when a render overshoots", async () => {
 		const thresholdTokens = 100_000;
 		const { session } = createSession(opus(1_000_000), { "compaction.thresholdTokens": thresholdTokens }, 500);
 		const compact = snapcompact.compact;
@@ -726,7 +725,7 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		const stored = storedContextTokens(session);
 		expect(stored).toBeLessThanOrEqual(TARGET * thresholdTokens);
 		// The archive still fills most of the allowed room rather than collapsing.
-		expect(stored).toBeGreaterThan(0.4 * thresholdTokens);
+		expect(stored).toBeGreaterThan(0.5 * thresholdTokens);
 	});
 
 	it("lands a real archive under the target, priced as the trigger counts it", async () => {
@@ -738,7 +737,7 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		expect(spy).toHaveBeenCalledTimes(1);
 		const stored = storedContextTokens(session);
 		expect(stored).toBeLessThanOrEqual(TARGET * thresholdTokens);
-		expect(stored).toBeGreaterThan(0.4 * thresholdTokens);
+		expect(stored).toBeGreaterThan(0.5 * thresholdTokens);
 		const frames = latestArchive(session)?.frames.length ?? 0;
 		expect(frames).toBeGreaterThan(3);
 		expect(committedFrameTokens(session)).toBeLessThanOrEqual(frames * framePrice(model));

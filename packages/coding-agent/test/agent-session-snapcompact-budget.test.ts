@@ -437,8 +437,8 @@ describe("AgentSession snapcompact frame-budget sizing", () => {
 		);
 
 		const settings = { enabled: true as const, reserveTokens: 16384, keepRecentTokens: 4000 };
-		// The archive plans within 60% of the trigger.
-		const budget = 0.6 * resolveThresholdTokens(model.contextWindow, settings);
+		// The archive plans within 75% of the trigger.
+		const budget = 0.75 * resolveThresholdTokens(model.contextWindow, settings);
 		const preparation = prepareCompaction(branchEntries, settings);
 		if (!preparation) throw new Error("Expected non-empty preparation");
 		const tokenizer = session.agent.tokenizer;

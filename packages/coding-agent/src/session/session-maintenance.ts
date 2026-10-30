@@ -322,15 +322,15 @@ const PRUNE_CACHE_WARM_SUFFIX_TOKENS = 8_000;
  */
 const PRUNE_IDLE_FLUSH_MS = 90 * 60_000;
 
-/** Share of the room under the compaction trigger a snapcompact archive may fill; the rest is left for new turns. */
-const SNAPCOMPACT_ARCHIVE_SHARE = 0.5;
-
 /**
  * Sizing target for a snapcompact-compacted context, as a share of the
- * compaction trigger: the archive budget never plans past it, and a render
- * that lands above it is re-rendered with fewer frames.
+ * compaction trigger: the archive fills the room up to it, a render that
+ * lands above it is re-rendered with fewer frames, and the rest of the trigger
+ * is left for new turns. MUST stay below `COMPACTION_RECOVERY_BAND` (0.8, in
+ * `@oh-my-pi/pi-agent-core`'s compaction), or passes that need the recovery
+ * band reject the archive the plan sized.
  */
-const SNAPCOMPACT_POST_COMPACTION_TARGET = 0.6;
+const SNAPCOMPACT_POST_COMPACTION_TARGET = 0.75;
 
 /** Payload-shaped 413s share text patterns with overflow; trust the payload classification when local
  *  occupancy stays under this ceiling (≥10% headroom) and reported usage stays within the window (#9235). */
@@ -3824,11 +3824,11 @@ export class SessionMaintenance {
 
 	/**
 	 * Cap on snapcompact frames, sized from the room under the compaction
-	 * trigger rather than the window: {@link SNAPCOMPACT_ARCHIVE_SHARE} of
-	 * `threshold − (system prompt + tools + kept recent + cap reserve)`, never
-	 * past {@link SNAPCOMPACT_POST_COMPACTION_TARGET} of the threshold, and never
-	 * past what the post-compaction context can carry without busting the model
-	 * window. Charges each frame {@link snapcompact.plannedFrameTokens}, never
+	 * trigger rather than the window: what keeps the compacted context
+	 * (system prompt + tools + kept recent + pending prompt + cap reserve +
+	 * frames) within {@link SNAPCOMPACT_POST_COMPACTION_TARGET} of the
+	 * threshold, and never past what the post-compaction context can carry
+	 * without busting the model window. Charges each frame {@link snapcompact.plannedFrameTokens}, never
 	 * less than the per-frame price the tokenizer will bill, so picking
 	 * `maxFrames` from this helper makes
 	 * {@link #projectSnapcompactContextTokens} succeed by construction.
@@ -3917,10 +3917,7 @@ export class SessionMaintenance {
 			this.#tokenizer.countMessages(preparation.recentMessages, { excludeEncryptedReasoning: true }) +
 			pendingTokens +
 			capReserve;
-		const roomBudget = Math.min(
-			SNAPCOMPACT_ARCHIVE_SHARE * (thresholdTokens - fixedTokens),
-			SNAPCOMPACT_POST_COMPACTION_TARGET * thresholdTokens - fixedTokens,
-		);
+		const roomBudget = SNAPCOMPACT_POST_COMPACTION_TARGET * thresholdTokens - fixedTokens;
 		const frameBudget = Math.min(totalBudget - baseTokens - capReserve, roomBudget);
 		const frameCost = snapcompact.plannedFrameTokens(shape);
 		if (roomBudget < frameCost) {
@@ -3966,7 +3963,7 @@ export class SessionMaintenance {
 	 *   `pendingTokens` (a pre-prompt pass's prompt, not yet in the session):
 	 *   the cap reserves text from an estimate that can run short, so the fit
 	 *   drops the measured excess at the archive's mean frame price.
-	 * A single frame cannot shrink further, so 60% is a sizing target, not a
+	 * A single frame cannot shrink further, so the target is a sizing goal, not a
 	 * guarantee. The caller still rejects a payload that stays over budget, and
 	 * passes that need the recovery band reject a context above it
 	 * ({@link #snapcompactLeavesNoHeadroom}).
