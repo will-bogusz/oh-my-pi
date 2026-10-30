@@ -56573,15 +56573,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-30T20:24:05Z",
+  "checked": "2026-10-30T20:54:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "remove-stray-dbs": {
-    "since": "2026-10-30T20:24:05Z",
-    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-10-30T11:25:57Z",
   "unreleased": {
@@ -56627,7 +56622,9 @@
    17489,
    17490,
    17492,
-   17496
+   17496,
+   17500,
+   17501
   ],
   "post_merge": {
    "15124": {
@@ -58127,6 +58124,13 @@
     "kind": "openable",
     "id": "remove-stray-dbs",
     "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture"
+   },
+   {
+    "at": "2026-10-30T20:54:31Z",
+    "kind": "unopenable",
+    "id": "remove-stray-dbs",
+    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
+    "why": "opened as #17501"
    }
   ]
  },
@@ -58999,14 +59003,48 @@
   }
  },
  "plan": {
-  "at": "2026-10-30T20:45:22.340117Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-30T20:54:31.790022Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
+   {
+    "id": "read-url-long-line",
+    "label": "#17500",
+    "number": 17500,
+    "state": "open",
+    "area": "read",
+    "priority": "P0",
+    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T20:46:04Z"
+   },
+   {
+    "id": "remove-stray-dbs",
+    "label": "#17501",
+    "number": 17501,
+    "state": "open",
+    "area": "repo",
+    "priority": "P0",
+    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T20:51:50Z"
+   },
    {
     "id": "read-after-bash-revalidate",
     "label": "#16274",
@@ -59651,23 +59689,6 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
-    "id": "read-url-long-line",
-    "label": "read-url-long-line",
-    "number": null,
-    "state": "queued",
-    "area": "read",
-    "priority": "P2",
-    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T20:32:21Z"
-   },
-   {
     "id": "relay-frame-detach-report",
     "label": "relay-frame-detach-report",
     "number": null,
@@ -59690,23 +59711,6 @@
     ],
     "needs": [],
     "created": "2026-10-23T19:04:15Z"
-   },
-   {
-    "id": "remove-stray-dbs",
-    "label": "remove-stray-dbs",
-    "number": null,
-    "state": "queued",
-    "area": "repo",
-    "priority": "P2",
-    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T20:20:52Z"
    },
    {
     "id": "computer-input-diff-report",
@@ -60265,7 +60269,7 @@
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
      "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",
