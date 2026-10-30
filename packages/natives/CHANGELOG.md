@@ -6,6 +6,10 @@
 
 - Added `FileLock.isHeld(path)`, which reports whether a lock is held without acquiring it ([#17428](https://github.com/can1357/oh-my-pi/pull/17428) by [@andrebrait](https://github.com/andrebrait))
 
+### Fixed
+
+- Fixed iPhone Mirroring clicks, scrolls and keys reporting success while the mirror showed a connection screen such as "iPhone in Use" instead of the phone; they now fail and quote that screen.
+
 ## [18.14.0] - 2026-10-29
 
 ### Breaking Changes
