@@ -55721,6 +55721,24 @@
    "opened": "2026-10-30T17:27:11Z",
    "readied": "2026-10-30T17:27:31Z",
    "advanced": "2026-10-30T17:35:21Z"
+  },
+  {
+   "id": "anthropic-128mb-requests",
+   "branch": "will/anthropic-128mb-requests",
+   "title": "fix(catalog,coding-agent,snapcompact): size Anthropic image budgets from the 128 MB request limit",
+   "area": "catalog",
+   "priority": null,
+   "needs": [],
+   "base": "338d2ce6658dfdbfba19efe0f006f0d5a8edd66d",
+   "body": "bodies/anthropic-128mb-requests.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-128mb-requests",
+   "host": "MacBook-Pro",
+   "added": "2026-10-30T17:43:14Z",
+   "updated": "2026-10-30T17:43:14Z",
+   "note": ""
   }
  ],
  "watch": {
