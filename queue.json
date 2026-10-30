@@ -55564,7 +55564,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-reduction-baseline",
    "host": "MacBook-Pro",
    "added": "2026-10-29T22:18:26Z",
-   "updated": "2026-10-30T17:27:11Z",
+   "updated": "2026-10-30T17:27:31Z",
    "note": "",
    "built": [
     {
@@ -55718,7 +55718,8 @@
      "tree": "2dbf3fd55aee3667ab3ba2fd0d7ec45f1fdeb9b7"
     }
    ],
-   "opened": "2026-10-30T17:27:11Z"
+   "opened": "2026-10-30T17:27:11Z",
+   "readied": "2026-10-30T17:27:31Z"
   }
  ],
  "watch": {
