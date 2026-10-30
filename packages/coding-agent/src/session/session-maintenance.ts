@@ -3854,9 +3854,8 @@ export class SessionMaintenance {
 	 * automatically when the discarded text fits in the edges, so giving it
 	 * the minimum cap lets it succeed instead of being skipped outright.
 	 *
-	 * Without this cap, the bundled `MAX_FRAMES_DEFAULT = 80` × 5024 tokens =
-	 * ~402k frame-token projection always overflows any sub-1M-token window
-	 * (issue #3247).
+	 * Without this cap, an 80-frame archive × 5024 tokens = ~402k frame-token
+	 * projection always overflows any sub-1M-token window (issue #3247).
 	 */
 	#computeSnapcompactMaxFrames(
 		preparation: CompactionPreparation,
@@ -3867,7 +3866,6 @@ export class SessionMaintenance {
 		const shape = snapcompact.resolveShape(this.#model, cfgSnapcompactShape.get(this.#host.settings));
 		if (ctxWindow <= 0) {
 			return Math.min(
-				snapcompact.MAX_FRAMES_DEFAULT,
 				snapcompact.maxFramesForDataBudget(shape, snapcompact.frameDataBytesBudget(this.#model)),
 				snapcompact.providerFrameBudget(this.#model),
 			);
@@ -3930,7 +3928,6 @@ export class SessionMaintenance {
 		if (frameBudget < frameCost) return 1;
 		return Math.min(
 			Math.floor(frameBudget / frameCost),
-			snapcompact.MAX_FRAMES_DEFAULT,
 			snapcompact.maxFramesForDataBudget(shape, snapcompact.frameDataBytesBudget(this.#model)),
 			snapcompact.providerFrameBudget(this.#model),
 		);
@@ -4485,7 +4482,6 @@ export class SessionMaintenance {
 		const shape = snapcompact.resolveShape(this.#model, cfgSnapcompactShape.get(this.#host.settings));
 		if (ctxWindow <= 0) {
 			return Math.min(
-				snapcompact.MAX_FRAMES_DEFAULT,
 				snapcompact.maxFramesForDataBudget(shape, snapcompact.frameDataBytesBudget(this.#model)),
 				snapcompact.providerFrameBudget(this.#model),
 			);
@@ -4509,7 +4505,6 @@ export class SessionMaintenance {
 		// attach anyway.
 		return Math.min(
 			Math.floor(frameBudget / frameCost),
-			snapcompact.MAX_FRAMES_DEFAULT,
 			snapcompact.maxFramesForDataBudget(shape, snapcompact.frameDataBytesBudget(this.#model)),
 			snapcompact.providerFrameBudget(this.#model),
 		);
@@ -4810,10 +4805,11 @@ export class SessionMaintenance {
 
 	/**
 	 * The no-reasoning view of `entry`'s archive. One the entry lacks is
-	 * re-rendered locally from the archive's source at its frame count and
-	 * stored next to the original (`Archive.withoutThinking`), which stays
-	 * intact for readers that keep reasoning and for other branches. When the
-	 * render fails, the text-only form without frames is read instead.
+	 * re-rendered locally from the archive's source at its frame count, within
+	 * the reader's frame budget, and stored next to the original
+	 * (`Archive.withoutThinking`), which stays intact for readers that keep
+	 * reasoning and for other branches. When the render fails, the text-only
+	 * form without frames is read instead.
 	 */
 	async #renderViewWithoutThinking(entry: CompactionEntry, model: Model): Promise<snapcompact.ArchiveView> {
 		const archive = snapcompact.getPreservedArchive(entry.preserveData)!;
@@ -4834,7 +4830,12 @@ export class SessionMaintenance {
 		}
 		let view: snapcompact.ArchiveView;
 		try {
-			const result = await this.#rerenderSnapcompactArchive(entry, archiveText, model, archive.frames.length);
+			const result = await this.#rerenderSnapcompactArchive(
+				entry,
+				archiveText,
+				model,
+				Math.min(archive.frames.length, snapcompact.providerFrameBudget(model)),
+			);
 			const rendered = snapcompact.getPreservedArchive(result.preserveData);
 			if (!rendered) throw new Error("The re-render produced no archive");
 			view = { summary: result.summary, archive: rendered };

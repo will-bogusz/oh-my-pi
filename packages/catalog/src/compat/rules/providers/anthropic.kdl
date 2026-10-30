@@ -93,6 +93,15 @@ provider "anthropic" {
 	// https://platform.claude.com/docs/en/build-with-claude/vision
 	image-count-budget 90
 	official-image-count-budget 600
+	// Large frames hit an undocumented generation ceiling well below 600
+	// images and 128 MB: `/v1/messages` answers a deterministic
+	// `api_error` ("Unable to complete this request right now", ~2 s, no
+	// usage) while `count_tokens` accepts the same body. Opus and Sonnet 5.5
+	// on OAuth (2026-10-30) passed 95 native 1932px frames and failed 100;
+	// real archives of omp's default frames passed at 80 (13.7 MB, 10 of 10)
+	// and failed at 120 (20.5 MB); 80 frames of a denser forced shape (8x8,
+	// 18.6 MB) failed too, so the budget holds for default shapes.
+	snapcompact-frame-budget 80
 	// The Messages API decodes gzip request bodies and rejects zstd and br
 	// with a 400 (`request_body_encoding_invalid`). Gzip bytes that arrive
 	// without their `Content-Encoding` (a proxy dropped the header) get a 400

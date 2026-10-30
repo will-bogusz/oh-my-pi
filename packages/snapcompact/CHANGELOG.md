@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Snapcompact archives on the Codex backend can hold up to 107 frames instead of 80: `providerFrameBudget(model)` reads the catalog's `snapcompact-frame-budget`, and `compact()` no longer clamps `maxFrames` to `MAX_FRAMES_DEFAULT`
+
 ## [18.13.3] - 2026-10-28
 
 ### Changed

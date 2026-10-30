@@ -500,13 +500,11 @@ export function resolveShapeForText(text: string, model?: ShapeTarget, variant?:
  *  shapes carry their own `frameSize`. */
 export const FRAME_SIZE = 2576;
 
-/** Default upper bound on archive frames carried per compaction. Sized to hold
- *  ~400k tokens of the high-res Anthropic frame Opus reads (1932px ≈ 5,000
- *  billed tokens each → 80 frames) while staying under the ~100-image
- *  per-request wire cap. Oldest frames are dropped first once the budget is
- *  exceeded (mirrors how iterative text summaries fade the oldest detail); a
- *  caller may pass a lower `maxFrames` upper limit, and per-model context
- *  fitting is handled by the caller's overflow guard. */
+/** Archive frame cap for a deployment whose catalog rules set no
+ *  `snapcompact-frame-budget`. Oldest frames are dropped first once it is
+ *  exceeded (mirrors how iterative text summaries fade the oldest detail);
+ *  per-model context fitting is the caller's (the room under the compaction
+ *  trigger usually binds first). */
 export const MAX_FRAMES_DEFAULT = 80;
 
 /** High-quality (legible) frames rendered at each chronological edge of a
@@ -586,9 +584,12 @@ export function providerImageBudget(model: Model | undefined): number {
 	);
 }
 
-/** Archive frame cap for `model`: its image budget, never above {@link MAX_FRAMES_DEFAULT}. */
+/** Archive frame cap for `model`: its catalog `snapcompact-frame-budget` (else
+ *  {@link MAX_FRAMES_DEFAULT}), never above its image budget. */
 export function providerFrameBudget(model: Model | undefined): number {
-	return Math.min(providerImageBudget(model), MAX_FRAMES_DEFAULT);
+	const value = model ? resolveCatalogPolicy(model).snapcompactFrameBudget : undefined;
+	const frameBudget = typeof value === "number" && Number.isInteger(value) && value > 0 ? value : MAX_FRAMES_DEFAULT;
+	return Math.min(providerImageBudget(model), frameBudget);
 }
 
 /** Whether `model` may get a fresh `read` result as frames (catalog `snapcompact-image-reads`, opt-in). */
@@ -673,7 +674,7 @@ export interface Options<TMessage = Message> extends SerializeOptions {
 	shape?: Shape;
 	/** Frame edge in pixels. Defaults to the shape's `frameSize`. */
 	frameSize?: number;
-	/** Upper limit on archive frames; clamped to (and defaulting to) {@link MAX_FRAMES_DEFAULT}. */
+	/** Upper limit on archive frames (default {@link MAX_FRAMES_DEFAULT}); size it with {@link providerFrameBudget}. */
 	maxFrames?: number;
 }
 
@@ -2025,13 +2026,14 @@ export function historyBlocks(archive: Archive, options: HistoryBlockOptions = {
 }
 
 /**
- * Re-applies a smaller frame byte budget to blocks {@link historyBlocks} already built: keeps the newest frames that
- * fit, priced as {@link historyBlocks} prices them, and replaces each run of dropped frames with one omission notice.
- * Returns `blocks` itself when every frame fits.
+ * Re-applies a smaller frame byte budget, and optionally a frame count, to blocks {@link historyBlocks} already
+ * built: keeps the newest frames that fit, priced as {@link historyBlocks} prices them, and replaces each run of
+ * dropped frames with one omission notice. Returns `blocks` itself when every frame fits.
  */
 export function capFrameDataBytes(
 	blocks: (TextContent | ImageContent)[],
 	maxFrameDataBytes: number,
+	maxFrames = Number.POSITIVE_INFINITY,
 ): (TextContent | ImageContent)[] {
 	const kept = new Set<number>();
 	let usedBytes = 0;
@@ -2039,7 +2041,7 @@ export function capFrameDataBytes(
 	for (let index = blocks.length - 1; index >= 0; index--) {
 		const block = blocks[index];
 		if (block.type !== "image") continue;
-		if (usedBytes + block.data.length > maxFrameDataBytes) {
+		if (kept.size >= maxFrames || usedBytes + block.data.length > maxFrameDataBytes) {
 			dropped = true;
 			continue;
 		}
@@ -2382,9 +2384,7 @@ export async function compact<TMessage = Message>(
 	const high = frameSize === baseShape.frameSize ? baseShape : { ...baseShape, frameSize };
 	const low = denseCompanion(high, options?.model?.api);
 	const geo = geometry(high);
-	// The engine default caps archive growth; a caller-supplied maxFrames only
-	// lowers it further (an upper limit), never raising it past the default.
-	const maxFrames = Math.max(1, Math.min(options?.maxFrames ?? MAX_FRAMES_DEFAULT, MAX_FRAMES_DEFAULT));
+	const maxFrames = Math.max(1, options?.maxFrames ?? MAX_FRAMES_DEFAULT);
 
 	let archiveText = normalize(serialized, { shape: high });
 

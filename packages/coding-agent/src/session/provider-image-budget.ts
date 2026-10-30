@@ -16,7 +16,12 @@ import { resolveFactoryDroidPolicy } from "@oh-my-pi/pi-catalog/compat/factory-d
 import { resolveInlineImageByteBudget, resolveRequestBodyByteLimit } from "@oh-my-pi/pi-catalog/compat/request-size";
 import { isRecord } from "@oh-my-pi/pi-utils";
 import { LRUCache } from "@oh-my-pi/pi-utils/lru";
-import { capFrameDataBytes, frameDataBytesBudget, providerImageBudget } from "@oh-my-pi/snapcompact";
+import {
+	capFrameDataBytes,
+	frameDataBytesBudget,
+	providerFrameBudget,
+	providerImageBudget,
+} from "@oh-my-pi/snapcompact";
 import { supportsRemoteImageUrls } from "../blob-broker/context-images";
 import { imageDecodeFailureReason } from "@oh-my-pi/pi-tui/chat/image-loading";
 
@@ -304,7 +309,7 @@ export function clampProviderContextImageBytes(context: Context, model: Model): 
 }
 
 /**
- * Caps snapcompact archive frames at `model`'s frame payload budget.
+ * Caps snapcompact archive frames at `model`'s frame payload budget and frame count ({@link providerFrameBudget}).
  *
  * The archive is sized when the agent context is built, for the model active then. A later switch to a host with a
  * smaller budget (`/model`, cycling, retry and role fallbacks, prewalk hand-offs, context promotion, an advisor on
@@ -313,13 +318,14 @@ export function clampProviderContextImageBytes(context: Context, model: Model): 
  */
 export function capArchiveFrameBytes(context: Context, model: Model): Context {
 	const budget = frameDataBytesBudget(model);
+	const maxFrames = providerFrameBudget(model);
 	let messages: Message[] | undefined;
 	for (let index = 0; index < context.messages.length; index++) {
 		const message = context.messages[index];
 		if (message.role !== "user" || message.historyRewriteAt === undefined || !Array.isArray(message.content)) {
 			continue;
 		}
-		const content = capFrameDataBytes(message.content, budget);
+		const content = capFrameDataBytes(message.content, budget, maxFrames);
 		if (content === message.content) continue;
 		messages ??= context.messages.slice();
 		messages[index] = { ...message, content };

@@ -247,6 +247,15 @@ describe("snapcompact archive sized by the compaction trigger", () => {
 		expect(officialFrames * framePrice(official)).toBeLessThanOrEqual(TARGET * 600_000);
 	});
 
+	it("caps a roomy trigger at the host's snapcompact-frame-budget", async () => {
+		const sol = getBundledModel("openai-codex", "gpt-6.1-sol");
+		if (!sol) throw new Error("Expected bundled openai-codex/gpt-6.1-sol");
+		const codex = { ...sol, contextWindow: 500_000, maxTokens: 64_000 };
+		// Room for well over 107 frames at 2,882 tokens each, under both triggers.
+		expect(await requestedFrames(codex, { "compaction.thresholdTokens": 480_000 })).toBe(107);
+		expect(await requestedFrames(opus(1_000_000), { "compaction.thresholdTokens": 900_000 })).toBe(80);
+	});
+
 	it("sizes from the active model's compaction.modelThresholds entry", async () => {
 		const model = opus(1_000_000);
 		const perModel = await requestedFrames(model, {

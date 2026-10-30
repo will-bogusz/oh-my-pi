@@ -21,6 +21,12 @@ provider "openai-codex" {
 	inline-image-byte-budget 24000000
 	image-count-budget 200
 	official-image-count-budget 2000
+	// gpt-6.1-sol recall over long real archives (2026-10-30): 107 frames
+	// beat 80 by +0.10 [0.06, 0.14] with no loss on facts both archives held;
+	// 128 frames (near the 500k window) added none, missing facts in their
+	// oldest quarter. 107 is also what the 12 MB frame share of the inline
+	// budget holds.
+	snapcompact-frame-budget 107
 	// The backend decodes zstd request bodies, as the official client sends.
 	// Its rejection body is undocumented, so any 400/415 re-checks uncompressed.
 	request-encodings "zstd"

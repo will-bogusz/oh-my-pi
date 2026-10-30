@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added the `snapcompact-frame-budget` rule, the most snapcompact archive frames one request may carry: 80 on the Anthropic API, whose responses fail past about 95 high-res frames although it accepts 600 images, and 107 on the Codex backend, where gpt-6.1-sol's recall stops improving
+
 ### Changed
 
 - Clamping a requested thinking effort now resolves through the model's `effortMap` alias first, so the request lands on the tier the model serves instead of the nearest lower one ([#17395](https://github.com/can1357/oh-my-pi/pull/17395) by [@Maziar123](https://github.com/Maziar123))

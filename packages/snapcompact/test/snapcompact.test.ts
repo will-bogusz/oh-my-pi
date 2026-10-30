@@ -1208,6 +1208,15 @@ describe("compact", () => {
 		expect(shrunkArchive?.textHead ?? shrunkArchive?.text).toContain("HEAD SENTINEL.");
 	});
 
+	it("renders as many frames as the caller's maxFrames allows, past MAX_FRAMES_DEFAULT", async () => {
+		const maxFrames = snapcompact.MAX_FRAMES_DEFAULT + 5;
+		const result = await snapcompact.compact(
+			makePreparation({ messagesToSummarize: [createUserMessage("Important fact number one. ".repeat(4000))] }),
+			{ frameSize: TEST_FRAME_SIZE, maxFrames },
+		);
+		expect(snapcompact.getPreservedArchive(result.preserveData)?.frames.length).toBe(maxFrames);
+	});
+
 	it("keeps the original text head across later compactions", async () => {
 		const first = await snapcompact.compact(
 			makePreparation({
@@ -1654,14 +1663,16 @@ describe("archive helpers", () => {
 		expect(snapcompact.providerImageBudget(ramp)).toBe(snapcompact.DEFAULT_PROVIDER_IMAGE_BUDGET);
 		expect(snapcompact.providerImageBudget(undefined)).toBe(snapcompact.DEFAULT_PROVIDER_IMAGE_BUDGET);
 		expect(snapcompact.providerFrameBudget(ramp)).toBe(snapcompact.DEFAULT_PROVIDER_IMAGE_BUDGET);
-		// The frame cap never exceeds the default frame count, even under a 600-image budget.
+		// The frame cap is the host's `snapcompact-frame-budget`, not its image budget.
 		const opus = getBundledModel("anthropic", "claude-opus-5-5");
 		expect(snapcompact.providerImageBudget(opus)).toBe(600);
-		expect(snapcompact.providerFrameBudget(opus)).toBe(snapcompact.MAX_FRAMES_DEFAULT);
-		// The strictest Anthropic budget (200k-window models) still holds a full default archive.
-		expect(snapcompact.MAX_FRAMES_DEFAULT).toBeLessThanOrEqual(
-			snapcompact.providerImageBudget(getBundledModel("anthropic", "claude-haiku-4-5")),
+		expect(snapcompact.providerFrameBudget(opus)).toBe(80);
+		expect(snapcompact.providerFrameBudget(getBundledModel("openai-codex", "gpt-6.1-sol"))).toBe(107);
+		// A host without one keeps the default; the strictest Anthropic image budget (200k-window models) holds it.
+		expect(snapcompact.providerFrameBudget(getBundledModel("openai", "gpt-5.5"))).toBe(
+			snapcompact.MAX_FRAMES_DEFAULT,
 		);
+		expect(snapcompact.providerFrameBudget(getBundledModel("anthropic", "claude-haiku-4-5"))).toBe(80);
 	});
 });
 

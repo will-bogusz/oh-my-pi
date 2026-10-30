@@ -1165,4 +1165,21 @@ describe("provider context image budgets", () => {
 		expect(textData(capped)).toContainEqual(expect.stringContaining("2 archived image frames could not be included"));
 		expect(capArchiveFrameBytes(context, ANTHROPIC_MODEL)).toBe(context);
 	});
+
+	it("caps summary archive frames at the request model's frame count", () => {
+		const frames = Array.from({ length: 107 }, (_, index) => image(`frame-${index}`));
+		const context: Context = {
+			systemPrompt: [],
+			tools: [],
+			messages: [{ role: "user", content: [text("summary"), ...frames], historyRewriteAt: 1, timestamp: 1 }],
+		};
+
+		// An archive sized for the Codex backend, sent to Anthropic: the newest 80 frames go.
+		const capped = capArchiveFrameBytes(context, ANTHROPIC_MODEL);
+		expect(imageData(capped)).toEqual(frames.slice(-80).map(frame => frame.data));
+		expect(textData(capped)).toContainEqual(
+			expect.stringContaining("27 archived image frames could not be included"),
+		);
+		expect(capArchiveFrameBytes(context, CODEX_MODEL)).toBe(context);
+	});
 });
