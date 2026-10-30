@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30 22:43Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30 22:45Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-30 21:55Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 13, stacked 21, held 1, open PRs 23, queued since the last plan 1; merged 187, closed 12
+**Counts:** openable now 4, conflict-held 13, stacked 21, held 1, open PRs 23, queued since the last plan 2; merged 187, closed 12
 
 ## Openable now (4)
 
@@ -93,8 +93,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 | [#17501](https://github.com/can1357/oh-my-pi/pull/17501) | remove-stray-dbs | chore(coding-agent): remove SQLite files committed with the RPC test fixture | repo | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/remove-stray-dbs) |
 | [#17500](https://github.com/can1357/oh-my-pi/pull/17500) | read-url-long-line | fix(coding-agent): show the head of an over-budget first line on whole-URL reads | read | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-url-long-line) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | snapcompact-text-reader | fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames | snapcompact |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-text-reader) |
+| switch-remote-reexpand | fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/switch-remote-reexpand) |

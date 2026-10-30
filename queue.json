@@ -56698,6 +56698,24 @@
    "added": "2026-10-30T22:43:52Z",
    "updated": "2026-10-30T22:43:52Z",
    "note": ""
+  },
+  {
+   "id": "switch-remote-reexpand",
+   "branch": "will/switch-remote-reexpand",
+   "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "37b033b140b0d69d2b0b53ce7a8af0be202d6454",
+   "body": "bodies/switch-remote-reexpand.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/switch-remote-reexpand",
+   "host": "MacBook-Pro",
+   "added": "2026-10-30T22:45:47Z",
+   "updated": "2026-10-30T22:45:47Z",
+   "note": ""
   }
  ],
  "watch": {
