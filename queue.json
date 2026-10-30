@@ -55729,7 +55729,7 @@
    "area": "catalog",
    "priority": null,
    "needs": [],
-   "base": "338d2ce6658dfdbfba19efe0f006f0d5a8edd66d",
+   "base": "6a86df8539fccf3ad7818081266e554022fc21bc",
    "body": "bodies/anthropic-128mb-requests.md",
    "state": "queued",
    "pr": null,
@@ -55737,8 +55737,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-128mb-requests",
    "host": "MacBook-Pro",
    "added": "2026-10-30T17:43:14Z",
-   "updated": "2026-10-30T17:43:14Z",
-   "note": ""
+   "updated": "2026-10-30T17:44:53Z",
+   "note": "",
+   "advanced": "2026-10-30T17:44:53Z"
   }
  ],
  "watch": {
