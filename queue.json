@@ -55558,13 +55558,13 @@
    "needs": [],
    "base": "5dabff10fa5f069ec619c54d0daf7b269687b19c",
    "body": "bodies/snapcompact-reduction-baseline.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17490,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-reduction-baseline",
    "host": "MacBook-Pro",
    "added": "2026-10-29T22:18:26Z",
-   "updated": "2026-10-30T17:24:12Z",
+   "updated": "2026-10-30T17:27:11Z",
    "note": "",
    "built": [
     {
@@ -55717,7 +55717,8 @@
      "host": "MacBook-Pro",
      "tree": "2dbf3fd55aee3667ab3ba2fd0d7ec45f1fdeb9b7"
     }
-   ]
+   ],
+   "opened": "2026-10-30T17:27:11Z"
   }
  ],
  "watch": {
