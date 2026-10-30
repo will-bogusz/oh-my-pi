@@ -55725,7 +55725,7 @@
   {
    "id": "anthropic-128mb-requests",
    "branch": "will/anthropic-128mb-requests",
-   "title": "fix(catalog,coding-agent,snapcompact): size Anthropic image budgets from the 128 MB request limit",
+   "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
    "area": "catalog",
    "priority": "P1",
    "needs": [],
@@ -55737,7 +55737,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-128mb-requests",
    "host": "MacBook-Pro",
    "added": "2026-10-30T17:43:14Z",
-   "updated": "2026-10-30T18:22:08Z",
+   "updated": "2026-10-30T19:57:23Z",
    "note": "",
    "advanced": "2026-10-30T17:44:53Z",
    "built": [
