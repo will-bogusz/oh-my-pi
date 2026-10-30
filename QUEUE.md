@@ -1,16 +1,14 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30 19:39Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30 19:41Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-30 19:23Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 12, stacked 20, held 1, open PRs 20; merged 187, closed 12
+**Counts:** openable now 0, conflict-held 12, stacked 20, held 1, open PRs 21; merged 187, closed 12
 
-## Openable now (1)
+## Openable now (0)
 
-| id | title | area | priority | age | plan | branch |
-|---|---|---|---|---|---|---|
-| cache-marker | feat(coding-agent): show whether the next message reads the prompt cache | status-line | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cache-marker) |
+none
 
 ## Conflict-held (12)
 
@@ -60,7 +58,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 16d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 
-## Open PRs (20)
+## Open PRs (21)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -84,3 +82,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-30
 | [#17489](https://github.com/can1357/oh-my-pi/pull/17489) | bash-tool-call-env | feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands | other | P2 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-tool-call-env) |
 | [#17490](https://github.com/can1357/oh-my-pi/pull/17490) | snapcompact-reduction-baseline | fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once | compaction | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-reduction-baseline) |
 | [#17492](https://github.com/can1357/oh-my-pi/pull/17492) | anthropic-128mb-requests | fix(catalog,coding-agent,snapcompact): size Anthropic image budgets from the 128 MB request limit | catalog | P1 | 1h | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-128mb-requests) |
+| [#17496](https://github.com/can1357/oh-my-pi/pull/17496) | cache-marker | feat(coding-agent): show whether the next message reads the prompt cache | status-line | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cache-marker) |
