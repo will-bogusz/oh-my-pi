@@ -6,6 +6,10 @@
 
 - Added `FileLock.isHeld(path)`, which reports whether a lock is held without acquiring it ([#17428](https://github.com/can1357/oh-my-pi/pull/17428) by [@andrebrait](https://github.com/andrebrait))
 
+### Changed
+
+- Typing and key presses on iPhone Mirroring are about twice as fast (about 150 ms per character instead of 290).
+
 ## [18.14.0] - 2026-10-29
 
 ### Breaking Changes
