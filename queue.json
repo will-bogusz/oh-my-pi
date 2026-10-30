@@ -56609,10 +56609,19 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-30T20:54:31Z",
+  "checked": "2026-10-30T21:25:06Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "macos-capture-geometry": {
+    "since": "2026-10-30T21:25:06Z",
+    "title": "fix(natives): match macOS window screenshots to the window on screen"
+   },
+   "iphone-mirror-key-gap": {
+    "since": "2026-10-30T21:25:06Z",
+    "title": "perf(natives): type on iPhone Mirroring twice as fast"
+   }
+  },
   "conflicts": {},
   "merged_through": "2026-10-30T11:25:57Z",
   "unreleased": {
@@ -58167,6 +58176,18 @@
     "id": "remove-stray-dbs",
     "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
     "why": "opened as #17501"
+   },
+   {
+    "at": "2026-10-30T21:25:06Z",
+    "kind": "openable",
+    "id": "macos-capture-geometry",
+    "title": "fix(natives): match macOS window screenshots to the window on screen"
+   },
+   {
+    "at": "2026-10-30T21:25:06Z",
+    "kind": "openable",
+    "id": "iphone-mirror-key-gap",
+    "title": "perf(natives): type on iPhone Mirroring twice as fast"
    }
   ]
  },
@@ -59164,7 +59185,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-30T20:54:31.790022Z",
+  "at": "2026-10-30T21:25:07.638711Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -59568,6 +59589,23 @@
     "created": "2026-10-30T19:41:51Z"
    },
    {
+    "id": "macos-capture-geometry",
+    "label": "macos-capture-geometry",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): match macOS window screenshots to the window on screen",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T21:16:44Z"
+   },
+   {
     "id": "r2/relay-call-deadline",
     "label": "r2/relay-call-deadline",
     "number": null,
@@ -59872,6 +59910,23 @@
     ],
     "needs": [],
     "created": "2026-10-23T19:04:15Z"
+   },
+   {
+    "id": "iphone-mirror-key-gap",
+    "label": "iphone-mirror-key-gap",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "perf(natives): type on iPhone Mirroring twice as fast",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T21:15:44Z"
    },
    {
     "id": "computer-input-diff-report",
