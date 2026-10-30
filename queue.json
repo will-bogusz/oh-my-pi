@@ -58559,7 +58559,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-30T20:24:06.699533Z",
+  "at": "2026-10-30T20:32:30.865065Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -59209,6 +59209,23 @@
      "r2/page-waiting"
     ],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "read-url-long-line",
+    "label": "read-url-long-line",
+    "number": null,
+    "state": "queued",
+    "area": "read",
+    "priority": "P2",
+    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T20:32:21Z"
    },
    {
     "id": "relay-frame-detach-report",
