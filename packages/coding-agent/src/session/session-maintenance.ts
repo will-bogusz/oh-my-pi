@@ -1253,17 +1253,20 @@ export class SessionMaintenance {
 			}
 
 			const compactionSettings = this.#compactionSettings;
-			methods = resolveCompactionMethodOrder(compactMode?.overrides.methodOrder ?? compactionSettings.methodOrder);
+			// A reader that cannot replay the active model's native payload rules out the remote method; its
+			// native lanes run before a configured endpoint, so an endpoint does not make it portable.
+			const readerModel = options?.readerModel;
+			methods = resolveCompactionMethodOrder(
+				compactMode?.overrides.methodOrder ?? compactionSettings.methodOrder,
+			).filter(
+				method => method !== "remote" || !readerModel || canReplayRemoteCompactionFrom(activeModel, readerModel),
+			);
 			const explicitSnapcompact = compactMode?.name === "snapcompact";
 			let selectedMethod: CompactionMethod | undefined;
 			for (let index = methodOffset; index < methods.length; index++) {
 				const method = methods[index];
 				if (method === "remote") {
-					// Native lanes run before a configured endpoint, so the reader check holds for both.
-					if (
-						canUseRemoteCompaction(activeModel, resolveMethodSettings(compactionSettings, method)) &&
-						(!options?.readerModel || canReplayRemoteCompactionFrom(activeModel, options.readerModel))
-					) {
+					if (canUseRemoteCompaction(activeModel, resolveMethodSettings(compactionSettings, method))) {
 						selectedMethod = method;
 						selectedMethodIndex = index;
 						break;
