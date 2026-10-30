@@ -446,7 +446,12 @@ import {
 	type SessionAdvisorsHost,
 } from "./session-advisors";
 import type { SessionContext, TranscriptSessionContextOptions } from "./session-context";
-import { buildSessionContext, getRestorableSessionModels, isTranscriptEntry } from "./session-context";
+import {
+	buildSessionContext,
+	getReadableCompactionEntry,
+	getRestorableSessionModels,
+	isTranscriptEntry,
+} from "./session-context";
 import type { CacheWarmer, CacheWarmingMode, CacheWarmingStatus, PromptCacheEntry } from "./cache-warmer";
 import { isUserRequestEntry, transcriptEntryMessage, userTurnDraft } from "@oh-my-pi/pi-tui/chat/transcript-entry";
 import { anonymizeSessionTranscripts } from "./session-anonymizer";
@@ -2729,7 +2734,7 @@ export class AgentSession implements SettingsScope {
 			disconnectFromAgent: () => this.#disconnectFromAgent(),
 			reconnectToAgent: () => this.#reconnectToAgent(),
 			drainStrandedQueuedMessages: () => this.#drainStrandedQueuedMessages(),
-			buildDisplaySessionContext: () => this.buildDisplaySessionContext(),
+			buildDisplaySessionContext: model => this.buildDisplaySessionContext(model),
 			persistEvalStateContext: () => {
 				// The rewritten history carries no snapshot yet, so always build one.
 				const message = this.#buildEvalStateContextMessage([]);
@@ -12307,6 +12312,16 @@ export class AgentSession implements SettingsScope {
 			this.#emit({ type: "model_changed" });
 		}
 
+		// A model that cannot replay the latest provider-native compaction reads
+		// the history behind it instead (see `BuildSessionContextOptions.model`):
+		// rebuild the context whenever the two models stand on different boundaries.
+		if (isChanging) {
+			const branch = this.sessionManager.getBranch();
+			if (getReadableCompactionEntry(branch, currentModel) !== getReadableCompactionEntry(branch, model)) {
+				this.agent.replaceMessages(this.buildDisplaySessionContext(model).messages);
+			}
+		}
+
 		await this.#reconcileModelDependentState(model);
 	}
 
@@ -13208,10 +13223,17 @@ export class AgentSession implements SettingsScope {
 						: `Could not restore model ${targetModelStrings[0]}`;
 				}
 			}
-			// The first build used the departing model's frame budget; size the
-			// archive for the model this session is about to adopt.
-			if (targetModel && frameDataBytesBudget(targetModel) !== frameDataBytesBudget(this.model)) {
-				sessionContext = this.buildDisplaySessionContext(targetModel);
+			// The first build was read by the departing model; rebuild it for the
+			// model this session is about to adopt when that one sizes the archive
+			// differently or stands on another compaction boundary.
+			if (targetModel) {
+				const branch = this.sessionManager.getBranch();
+				if (
+					frameDataBytesBudget(targetModel) !== frameDataBytesBudget(this.model) ||
+					getReadableCompactionEntry(branch, targetModel) !== getReadableCompactionEntry(branch, this.model)
+				) {
+					sessionContext = this.buildDisplaySessionContext(targetModel);
+				}
 			}
 			const didReloadConversationChange =
 				previousSessionContext !== undefined &&
@@ -14039,6 +14061,7 @@ export class AgentSession implements SettingsScope {
 		// Update agent state — build display context to populate agent messages.
 		const stateContext = this.sessionManager.buildSessionContext({
 			maxFrameDataBytes: frameDataBytesBudget(this.model),
+			model: this.model,
 		});
 		const displayContext = this.#withEvalStateContext(deobfuscateSessionContext(stateContext, this.#obfuscator));
 		this.agent.replaceMessages(displayContext.messages);
@@ -14071,6 +14094,7 @@ export class AgentSession implements SettingsScope {
 			});
 			const rawContext = this.sessionManager.buildSessionContext({
 				maxFrameDataBytes: frameDataBytesBudget(this.model),
+				model: this.model,
 			});
 			return {
 				editorText,
