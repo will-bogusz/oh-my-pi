@@ -56688,7 +56688,7 @@
    "area": "snapcompact",
    "priority": null,
    "needs": [],
-   "base": "37b033b140b0d69d2b0b53ce7a8af0be202d6454",
+   "base": "442231fc2a4f89e3853aef59c6f8cd43b75b7ff9",
    "body": "bodies/snapcompact-text-reader.md",
    "state": "open",
    "pr": 17510,
@@ -56696,7 +56696,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-text-reader",
    "host": "MacBook-Pro",
    "added": "2026-10-30T22:43:52Z",
-   "updated": "2026-10-30T23:09:23Z",
+   "updated": "2026-10-30T23:21:15Z",
    "note": "",
    "built": [
     {
@@ -56921,7 +56921,8 @@
     }
    ],
    "opened": "2026-10-30T23:08:51Z",
-   "readied": "2026-10-30T23:09:23Z"
+   "readied": "2026-10-30T23:09:23Z",
+   "advanced": "2026-10-30T23:21:15Z"
   },
   {
    "id": "switch-remote-reexpand",
