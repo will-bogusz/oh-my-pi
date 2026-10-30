@@ -55737,7 +55737,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-128mb-requests",
    "host": "MacBook-Pro",
    "added": "2026-10-30T17:43:14Z",
-   "updated": "2026-10-30T17:53:12Z",
+   "updated": "2026-10-30T17:53:32Z",
    "note": "",
    "advanced": "2026-10-30T17:44:53Z",
    "built": [
@@ -55912,7 +55912,8 @@
      "tree": "49729d37fbd9a9eec5a38e0cac3c7250f1508a9e"
     }
    ],
-   "opened": "2026-10-30T17:53:12Z"
+   "opened": "2026-10-30T17:53:12Z",
+   "readied": "2026-10-30T17:53:32Z"
   }
  ],
  "watch": {
