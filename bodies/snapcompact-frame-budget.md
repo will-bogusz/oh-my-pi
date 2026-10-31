@@ -2,9 +2,7 @@
 
 why cant opus archives go higher than that? why are we artifically limiting? we should experiment up to theoretical limits to ensure we are getting full value
 
-Anthropic documents 600 images per request, yet archives stopped at 80 frames: past that its API starts failing around 100 high-res frames, while gpt-6.1-sol kept reading better up to 107, so the frame cap is now set per host.
-
-Snapcompact archives on the Codex backend can hold up to 107 frames instead of 80; the Anthropic API keeps 80, now a measured limit. With archives forced to each size, gpt-6.1-sol's recall went from 36% at 80 frames to 46% at 107, and no higher.
+Anthropic's API starts failing around 100 high-res frames although it documents 600 images, while gpt-6.1-sol kept reading better up to 107, so the frame cap is now set per host: the Codex backend holds up to 107 frames instead of 80, and the Anthropic API keeps 80, now a measured limit. With archives forced to each size, gpt-6.1-sol's recall went from 36% at 80 frames to 46% at 107, and no higher.
 
 | Archive frames | Opus 5.5 (Anthropic API) | gpt-6.1-sol (Codex backend) |
 |---|---|---|
@@ -29,7 +27,7 @@ Snapcompact archives on the Codex backend can hold up to 107 frames instead of 8
 - **80 for Anthropic, not 95:** denser frames failed at 80.
 - **Non-goals:** how much of the trigger the archive gets, other hosts, frame shapes, byte budgets.
 
-Maintenance: two numbers in `anthropic.kdl` and `openai-codex.kdl`; if Anthropic lifts its ceiling, archives forced past 80 stop returning that `api_error`.
+Maintenance: two numbers in `anthropic.kdl` and `openai-codex.kdl`.
 
 ## Testing
 
