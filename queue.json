@@ -55932,7 +55932,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/cache-marker",
    "host": "MacBook-Pro",
    "added": "2026-10-30T19:19:28Z",
-   "updated": "2026-10-31T22:26:08Z",
+   "updated": "2026-10-31T22:41:18Z",
    "note": "",
    "built": [
     {
@@ -56108,7 +56108,7 @@
    ],
    "opened": "2026-10-30T19:41:53Z",
    "readied": "2026-10-30T19:43:15Z",
-   "advanced": "2026-10-31T22:26:08Z"
+   "advanced": "2026-10-31T22:41:18Z"
   },
   {
    "id": "remove-stray-dbs",
