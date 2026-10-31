@@ -57423,7 +57423,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T23:27:29Z",
+  "checked": "2026-10-31T23:58:29Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57442,6 +57442,10 @@
    "iphone-mirror-key-gap": {
     "since": "2026-10-30T21:25:06Z",
     "title": "perf(natives): type on iPhone Mirroring twice as fast"
+   },
+   "date-reminder-journal": {
+    "since": "2026-10-31T23:58:29Z",
+    "title": "fix(coding-agent): keep each message's date across resume and subagent revival"
    }
   },
   "conflicts": {
@@ -58929,6 +58933,12 @@
     "id": "claude-refusal-strip-retry",
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "why": "opened as #17610"
+   },
+   {
+    "at": "2026-10-31T23:58:29Z",
+    "kind": "openable",
+    "id": "date-reminder-journal",
+    "title": "fix(coding-agent): keep each message's date across resume and subagent revival"
    }
   ]
  },
@@ -59960,8 +59970,8 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T23:51:37.554540Z",
-  "host": "MacBook-Pro",
+  "at": "2026-10-31T23:58:30.297173Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -61449,7 +61459,7 @@
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
      "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",
