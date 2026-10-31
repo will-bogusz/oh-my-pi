@@ -56963,8 +56963,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-frame-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-31T20:07:36Z",
-   "updated": "2026-10-31T21:12:13Z",
-   "note": ""
+   "updated": "2026-10-31T21:59:13Z",
+   "note": "",
+   "hold": "Will, 2026-10-31: no user effect without archive-target except 1M gpt-5.6 models, whose recall past 80 frames is unmeasured; decide together with archive-target after the continuation eval"
   },
   {
    "id": "snapcompact-archive-target",
