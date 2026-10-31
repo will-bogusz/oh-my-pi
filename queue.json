@@ -56946,7 +56946,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T00:59:56Z",
+  "checked": "2026-10-31T01:30:53Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57115,12 +57115,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-24T01:19:19Z",
-    "kind": "openable",
-    "id": "git-guard-defects",
-    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict"
-   },
    {
     "at": "2026-10-24T01:49:23Z",
     "kind": "unopenable",
@@ -59509,7 +59503,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T00:28:59.098202Z",
+  "at": "2026-10-31T01:30:54.428568Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
