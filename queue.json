@@ -56946,7 +56946,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-30T23:27:09Z",
+  "checked": "2026-10-31T00:28:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57141,54 +57141,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-24T00:18:33Z",
-    "kind": "openable",
-    "id": "computer-doc-inline",
-    "title": "feat(coding-agent): start desktop tasks without a documentation read"
-   },
-   {
-    "at": "2026-10-24T00:18:33Z",
-    "kind": "unopenable",
-    "id": "app-name-background-helper",
-    "title": "fix(natives): open Contacts and Messages by name on macOS instead of calling them ambiguous",
-    "why": "opened as #16911"
-   },
-   {
-    "at": "2026-10-24T00:18:33Z",
-    "kind": "unopenable",
-    "id": "browser-read-after-navigation",
-    "title": "fix(browser): wait for the page a click navigates to before the next call",
-    "why": "opened as #16907"
-   },
-   {
-    "at": "2026-10-24T00:18:33Z",
-    "kind": "unopenable",
-    "id": "computer-no-ui-continue",
-    "title": "fix(coding-agent): keep a headless computer run going after control.acquire answers no-ui",
-    "why": "opened as #16909"
-   },
-   {
-    "at": "2026-10-24T00:18:33Z",
-    "kind": "unopenable",
-    "id": "finder-rename-keys",
-    "title": "fix(natives): let macOS input reach Finder's inline rename field",
-    "why": "opened as #16910"
-   },
-   {
-    "at": "2026-10-24T00:18:33Z",
-    "kind": "unopenable",
-    "id": "relay-extension-frame",
-    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
-    "why": "opened as #16908"
-   },
-   {
-    "at": "2026-10-24T00:18:33Z",
-    "kind": "unopenable",
-    "id": "window-miss-apps-open",
-    "title": "fix(coding-agent): say what to call when computer.window finds no window for an app, or gets no selector",
-    "why": "opened as #16912"
-   },
    {
     "at": "2026-10-24T01:19:19Z",
     "kind": "openable",
@@ -59548,12 +59500,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-30T23:27:10.380257Z",
+  "at": "2026-10-31T00:28:59.098202Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
