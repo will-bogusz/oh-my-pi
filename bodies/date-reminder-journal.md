@@ -33,10 +33,10 @@ Non-goal: the system prompt or tool list changing on resume.
 
 ## Testing
 
-- `bun test test/date-cwd-reminder.test.ts` (in `packages/coding-agent`): 38 pass. The 6 new tests fail with the source change reverted:
+- `bun test test/date-cwd-reminder.test.ts` (in `packages/coding-agent`): 38 pass. 5 of the 6 new tests fail on `main`; the sixth guards the journal itself and fails against a journal that records turns under their original keys:
   - a fresh injector with the same journal, days later, resends an earlier injector's messages byte-for-byte, including a developer reminder placed mid tool loop, and puts the new date on the new message;
   - each placement is recorded once;
-  - after a compaction renumbered a retained message, or a developer reminder's anchor, a fresh injector resends the compacted request unchanged;
+  - after a compaction renumbered a retained message, or a developer reminder's anchor, a fresh injector resends the compacted request unchanged (the anchor case is the sixth);
   - a first message a context hook re-creates on every request keeps its date across a fresh injector, and the journal is read once over six requests;
   - a file-backed `AgentSession` sends a message on Aug 14, is disposed and reopened from its file on Aug 16: the second request starts with the first request's messages unchanged.
 - Live, real Anthropic, Haiku 5.5 (same prefix binding and binding controls as Opus 5.5 in `classes/anthropic.kdl`), request bodies dumped before sending: the two table rows. Next day for the resumed session: process one under `TZ=Pacific/Kiritimati`, resumed under `TZ=America/New_York`. After midnight for the subagent: `new Date()` shifted one day once it had parked.
