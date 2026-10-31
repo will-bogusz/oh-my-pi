@@ -57206,7 +57206,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/claude-refusal-strip-retry",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:44:06Z",
-   "updated": "2026-10-31T21:57:20Z",
+   "updated": "2026-10-31T21:57:58Z",
    "note": "",
    "built": [
     {
@@ -57381,7 +57381,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-10-31T21:57:20Z"
+   "opened": "2026-10-31T21:57:20Z",
+   "readied": "2026-10-31T21:57:58Z"
   }
  ],
  "watch": {
