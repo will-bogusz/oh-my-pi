@@ -57003,6 +57003,26 @@
    "updated": "2026-10-31T21:05:12Z",
    "note": "",
    "advanced": "2026-10-31T21:05:12Z"
+  },
+  {
+   "id": "text-reader-usage-shift",
+   "branch": "will/text-reader-usage-shift",
+   "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check",
+   "area": "coding-agent",
+   "priority": null,
+   "needs": [
+    "#17510"
+   ],
+   "base": "8ce534d53a0a576ef4f21b81700f2dba3ca6dc26",
+   "body": "bodies/text-reader-usage-shift.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-reader-usage-shift",
+   "host": "MacBook-Pro",
+   "added": "2026-10-31T21:07:28Z",
+   "updated": "2026-10-31T21:07:28Z",
+   "note": ""
   }
  ],
  "watch": {
