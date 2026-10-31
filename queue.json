@@ -56949,7 +56949,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T17:18:31Z",
+  "checked": "2026-10-31T17:49:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -56981,23 +56981,7 @@
    }
   },
   "merged_through": "2026-10-31T14:56:17Z",
-  "unreleased": {
-   "17501": {
-    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
-    "merge_commit": "59cd125cd140d5a89b685023d8022d6bb659d7c0",
-    "merged_at": "2026-10-31T13:58:26Z"
-   },
-   "17500": {
-    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
-    "merge_commit": "065f8edbc5a988362a299a10966d1cad6b3de0f3",
-    "merged_at": "2026-10-31T14:56:17Z"
-   },
-   "17489": {
-    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
-    "merge_commit": "5a6a481d5824698f88f7db77e96a1791f7df4760",
-    "merged_at": "2026-10-31T14:56:17Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    15128,
    15130,
@@ -58422,6 +58406,27 @@
      "packages/coding-agent/src/config/model-resolver.ts",
      "packages/coding-agent/src/task/executor.ts"
     ]
+   },
+   {
+    "at": "2026-10-31T17:49:07Z",
+    "kind": "released",
+    "number": 17501,
+    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
+    "tag": "v18.14.2"
+   },
+   {
+    "at": "2026-10-31T17:49:07Z",
+    "kind": "released",
+    "number": 17500,
+    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
+    "tag": "v18.14.2"
+   },
+   {
+    "at": "2026-10-31T17:49:07Z",
+    "kind": "released",
+    "number": 17489,
+    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
+    "tag": "v18.14.2"
    }
   ]
  },
