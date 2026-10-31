@@ -23,7 +23,7 @@ Median estimate error against billed input, 21 requests replayed from a compacti
 - Unknown families count in o200k_base: the natives default, and what the now-removed `PI_TOKENIZER_ACCURATE=1` opted into.
 - Signatures: `dropsForeignReasoningPayload` sits in `transform-messages.ts` beside the rules it mirrors and answers "certainly stripped" only for directly encoded APIs and a turn not the reader's own. Anthropic → Anthropic replays and agent proxies (Factory, Cursor, Devin, GitLab Duo) stay charged, as on `main`.
 - Rejected: mapping Gemini or Grok to the nearest embedded vocabulary; another vendor's tokenizer belongs in catalog policy with its own measurements.
-- Cost: native counting where bytes/4 was arithmetic, behind the same per-message memo GPT and Claude already use.
+- Cost: native counting where bytes/4 was arithmetic, behind the per-message memo GPT and Claude already use.
 
 Non-goal: Gemini still reads ~15% under; its tokenizer is denser than o200k here.
 
