@@ -55557,7 +55557,7 @@
    "area": "compaction",
    "priority": "P1",
    "needs": [],
-   "base": "6a86df8539fccf3ad7818081266e554022fc21bc",
+   "base": "7efd77219374ca4e8767979809835e4aa90666ba",
    "body": "bodies/snapcompact-reduction-baseline.md",
    "state": "open",
    "pr": 17490,
@@ -55565,7 +55565,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-reduction-baseline",
    "host": "MacBook-Pro",
    "added": "2026-10-29T22:18:26Z",
-   "updated": "2026-10-30T17:35:21Z",
+   "updated": "2026-10-31T19:57:05Z",
    "note": "",
    "built": [
     {
@@ -55721,7 +55721,7 @@
    ],
    "opened": "2026-10-30T17:27:11Z",
    "readied": "2026-10-30T17:27:31Z",
-   "advanced": "2026-10-30T17:35:21Z"
+   "advanced": "2026-10-31T19:57:05Z"
   },
   {
    "id": "anthropic-128mb-requests",
