@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 20:11Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 20:16Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-31 20:08Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -10,7 +10,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 22h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
+| iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 23h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
 | macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P1 | 22h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
 | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 22h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | iphone-mirror-not-showing | fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone | computer | P1 | 22h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-not-showing) |
