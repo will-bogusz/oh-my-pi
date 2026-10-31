@@ -56947,6 +56947,24 @@
    "updated": "2026-10-30T22:57:42Z",
    "note": "",
    "advanced": "2026-10-30T22:57:42Z"
+  },
+  {
+   "id": "snapcompact-frame-budget",
+   "branch": "will/snapcompact-frame-budget",
+   "title": "feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107)",
+   "area": "catalog",
+   "priority": "P2",
+   "needs": [],
+   "base": "62f4f7cccfd38adde9a2ae203d69b27bc187a84f",
+   "body": "bodies/snapcompact-frame-budget.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-frame-budget",
+   "host": "MacBook-Pro",
+   "added": "2026-10-31T20:07:36Z",
+   "updated": "2026-10-31T20:07:36Z",
+   "note": ""
   }
  ],
  "watch": {
