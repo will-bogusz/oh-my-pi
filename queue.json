@@ -56990,7 +56990,7 @@
    "branch": "will/unknown-tokenizer-o200k",
    "title": "fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips",
    "area": "agent",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "62f4f7cccfd38adde9a2ae203d69b27bc187a84f",
    "body": "bodies/unknown-tokenizer-o200k.md",
@@ -57000,7 +57000,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/unknown-tokenizer-o200k",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:02:55Z",
-   "updated": "2026-10-31T21:47:12Z",
+   "updated": "2026-10-31T21:54:52Z",
    "note": "",
    "advanced": "2026-10-31T21:47:12Z",
    "built": [
