@@ -16,6 +16,7 @@ import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import { SessionMaintenance, type SessionMaintenanceHost } from "@oh-my-pi/pi-coding-agent/session/session-maintenance";
 import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+import { SessionStatsTracker, type SessionStatsTrackerHost } from "@oh-my-pi/pi-coding-agent/session/session-stats";
 import * as snapcompact from "@oh-my-pi/snapcompact";
 
 const active = getBundledModel<"openai-codex-responses">("openai-codex", "gpt-6.1-sol");
@@ -148,6 +149,8 @@ describe("SessionMaintenance.contextFitsModel with a snapcompact archive", () =>
 	const gpt = getBundledModel("openai", "gpt-5.4");
 	// Takes no image input: it reads the archive as text instead of frames.
 	const deepseek = getBundledModel("deepseek", "deepseek-v4-flash");
+	// Reads frames, and prices them above their text.
+	const opus = getBundledModel("anthropic", "claude-opus-5-5");
 
 	function turn(model: Model, text: string, input = 0): AssistantMessage {
 		return {
@@ -169,10 +172,19 @@ describe("SessionMaintenance.contextFitsModel with a snapcompact archive", () =>
 		};
 	}
 
-	/** A session standing on a snapcompact archive with frames, whose last reply `gpt` (an image reader) billed. */
-	async function archivedSession(): Promise<{ sessionManager: SessionManager; messages: AgentMessage[] }> {
+	/**
+	 * A session standing on a snapcompact archive with frames. `retained` replies in the kept turns,
+	 * before the compaction; unless `reply` is false, `gpt` (an image reader) then replies, billing
+	 * `usageTokens` (its own count of the request, frames included).
+	 */
+	async function archivedSession(options: { retained?: Model; reply?: boolean } = {}): Promise<{
+		sessionManager: SessionManager;
+		messages: AgentMessage[];
+		usageTokens: number;
+	}> {
 		const sessionManager = SessionManager.inMemory();
 		const keptId = sessionManager.appendMessage({ role: "user", content: "Kept turn.", timestamp: Date.now() });
+		if (options.retained) sessionManager.appendMessage(turn(options.retained, "Retained reply.", 1));
 		const filler = "the quick brown fox jumps over the lazy dog. ".repeat(20);
 		const archived: Message[] = Array.from({ length: 200 }, (_, i) => [
 			{ role: "user" as const, content: `turn ${i}: ${filler}`, timestamp: Date.now() },
@@ -194,71 +206,109 @@ describe("SessionMaintenance.contextFitsModel with a snapcompact archive", () =>
 			preserveData: archive.preserveData,
 			method: "snapcompact",
 		});
-		sessionManager.appendMessage(turn(gpt, "Kept reply.", 1));
-		return { sessionManager, messages: sessionManager.buildSessionContext().messages };
+		const usageTokens = new Tokenizer(gpt).countMessages(sessionManager.buildSessionContext().messages);
+		if (options.reply !== false) sessionManager.appendMessage(turn(gpt, "Kept reply.", usageTokens));
+		return { sessionManager, messages: sessionManager.buildSessionContext().messages, usageTokens };
 	}
 
-	/** Maintenance with `active` selected; the provider usage stays the one `gpt`'s last reply reported. */
+	/** Maintenance with `active` selected, its usage read by the session's own stats tracker. */
 	function archiveMaintenance(
 		sessionManager: SessionManager,
 		messages: AgentMessage[],
-		usageTokens: number,
 		active: Model = gpt,
-	): SessionMaintenance {
+	): { maintenance: SessionMaintenance; stats: SessionStatsTracker } {
 		const agent = new Agent({ initialState: { model: active, systemPrompt: [], tools: [], messages } });
+		const modelRegistry = {
+			find: (provider: string, id: string) =>
+				[gpt, deepseek, opus].find(model => model.provider === provider && model.id === id),
+		};
+		const stats = new SessionStatsTracker({
+			session: {},
+			agent,
+			sessionManager,
+			modelRegistry,
+			model: () => active,
+			sessionId: () => "session",
+		} as unknown as SessionStatsTrackerHost);
 		const host = {
 			agent,
 			sessionManager,
 			settings: Settings.isolated({ "compaction.reserveTokens": 200 }),
 			model: () => active,
-			modelRegistry: {
-				find: (provider: string, id: string) =>
-					[gpt, deepseek].find(model => model.provider === provider && model.id === id),
-			},
+			modelRegistry,
 			messages: () => agent.state.messages,
 			nonMessageTokenSource: () => ({}),
-			getContextUsage: ({ contextWindow }: { contextWindow: number }) => ({
-				tokens: usageTokens,
-				contextWindow,
-				percent: (usageTokens / contextWindow) * 100,
-			}),
+			getContextBreakdown: (options: { contextWindow?: number }) => stats.getContextBreakdown(options),
+			getContextUsage: (options: { contextWindow?: number }) => stats.getContextUsage(options),
 		} as unknown as SessionMaintenanceHost;
-		return new SessionMaintenance(host);
+		return { maintenance: new SessionMaintenance(host), stats };
+	}
+
+	/** The smallest window `fits` admits, at most twice `from`. */
+	function smallestWindow(fits: (contextWindow: number) => boolean, from: number): number {
+		let low = 1;
+		let high = from * 2;
+		expect(fits(high)).toBe(true);
+		expect(fits(low)).toBe(false);
+		while (high - low > 1) {
+			const mid = Math.floor((low + high) / 2);
+			if (fits(mid)) high = mid;
+			else low = mid;
+		}
+		return high;
 	}
 
 	it("moves provider usage off the frames a candidate without image input reads as text", async () => {
-		const { sessionManager, messages } = await archivedSession();
-		// The active model's last request carried the archive's frames, at its own count.
-		const usageTokens = new Tokenizer(gpt).countMessages(messages);
-		// A window under that request, which the archive's text (0.6 of the threshold) and the kept turns fit.
+		const { sessionManager, messages, usageTokens } = await archivedSession();
+		// A window under the active model's request, which the archive's text (0.6 of the threshold) and the kept turns fit.
 		const contextWindow = Math.floor(usageTokens * 0.8);
-		const reader: Model = { ...deepseek, contextWindow };
-		expect(archiveMaintenance(sessionManager, messages, usageTokens).contextFitsModel(reader)).toBe(true);
+		const { maintenance } = archiveMaintenance(sessionManager, messages);
+		expect(maintenance.contextFitsModel({ ...deepseek, contextWindow })).toBe(true);
 		// Control: a candidate with image input reads the same frames, which the window cannot hold.
-		expect(
-			archiveMaintenance(sessionManager, messages, usageTokens).contextFitsModel({ ...gpt, contextWindow }),
-		).toBe(false);
+		expect(maintenance.contextFitsModel({ ...gpt, contextWindow })).toBe(false);
 	});
 
 	it("moves provider usage from the model that reported it, after a switch without a reply since", async () => {
-		const { sessionManager, messages } = await archivedSession();
-		const usageTokens = new Tokenizer(gpt).countMessages(messages);
-		// The smallest window that holds `gpt`'s request while `gpt` is active.
-		const fits = (active: Model, contextWindow: number) =>
-			archiveMaintenance(sessionManager, messages, usageTokens, active).contextFitsModel({ ...gpt, contextWindow });
-		let low = usageTokens;
-		let high = usageTokens * 2;
-		expect(fits(gpt, high)).toBe(true);
-		while (high - low > 1) {
-			const mid = Math.floor((low + high) / 2);
-			if (fits(gpt, mid)) high = mid;
-			else low = mid;
-		}
+		const { sessionManager, messages, usageTokens } = await archivedSession();
+		const window = (active: Model) =>
+			smallestWindow(
+				contextWindow =>
+					archiveMaintenance(sessionManager, messages, active).maintenance.contextFitsModel({
+						...gpt,
+						contextWindow,
+					}),
+				usageTokens,
+			);
 		// After a switch to a reader without image input that has not replied (its window holds only part
 		// of the archive's text), the usage still priced `gpt`'s frames, so falling back to `gpt` needs the
 		// same window.
-		const switched: Model = { ...deepseek, contextWindow: 20_000 };
-		expect(fits(switched, high)).toBe(true);
-		expect(fits(switched, low)).toBe(false);
+		expect(window({ ...deepseek, contextWindow: 20_000 })).toBe(window(gpt));
 	});
+
+	it.each([
+		["a local count", false],
+		["an in-flight snapshot rebased by the compaction", true],
+	] as const)(
+		"keeps usage resting on %s in the stored form, past a reply the compaction retained",
+		async (_case, rebased) => {
+			// No reply since the compaction anchors the usage, so a reply it retained says nothing of its form:
+			// usage counts the context as stored, here the archive's text rendered for the active reader
+			// without image input.
+			const window = async (retained: Model) => {
+				const { sessionManager, messages, usageTokens } = await archivedSession({ retained, reply: false });
+				const { maintenance, stats } = archiveMaintenance(sessionManager, messages, deepseek);
+				await maintenance.renderArchiveForModel();
+				if (rebased) {
+					stats.setPendingSnapshot({ promptTokens: 1, nonMessageTokens: 0, cutoffCount: messages.length });
+					stats.rebaseAfterCompaction();
+				}
+				expect(stats.getContextBreakdown()?.anchor).toBeUndefined();
+				return smallestWindow(
+					contextWindow => maintenance.contextFitsModel({ ...deepseek, contextWindow }),
+					usageTokens,
+				);
+			};
+			expect(await window(gpt)).toBe(await window(deepseek));
+		},
+	);
 });

@@ -35,6 +35,8 @@ interface PendingContextSnapshot {
 	nonMessageTokens: number;
 	toolSchemaTokens: number;
 	cutoffCount: number;
+	/** The reply whose provider usage `promptTokens` was derived from; absent for a local count. */
+	anchor?: AssistantMessage;
 	/**
 	 * Compaction epoch at rebase time. Distinguishes a genuinely fresh in-turn
 	 * anchor (same epoch) from a post-cutoff anchor that predates a mid-run
@@ -303,6 +305,7 @@ export class SessionStatsTracker {
 		const compactionIndex = latestCompaction ? branchEntries.lastIndexOf(latestCompaction) : -1;
 		let usedTokens = 0;
 		let anchored = false;
+		let anchor: AssistantMessage | undefined;
 		const pendingMessages = options?.pendingMessages ?? [];
 		const pendingTokens = this.#tokenizer.countMessages(pendingMessages);
 		const pending = this.#pendingContextSnapshot;
@@ -336,6 +339,7 @@ export class SessionStatsTracker {
 			(!pending || (anchorIndex >= pending.cutoffCount && anchorEpoch >= pending.epoch));
 		if (useAnchor && anchorAssistant) {
 			anchored = true;
+			anchor = anchorAssistant;
 			usedTokens = this.#anchoredUsedTokens(
 				correctedPromptTokens(anchorAssistant),
 				anchorAssistant.contextSnapshot ?? current,
@@ -346,6 +350,7 @@ export class SessionStatsTracker {
 			);
 		} else if (pending) {
 			anchored = true;
+			anchor = pending.anchor;
 			usedTokens = this.#anchoredUsedTokens(
 				pending.promptTokens,
 				pending,
@@ -368,6 +373,7 @@ export class SessionStatsTracker {
 					pendingTokens,
 				);
 				anchored = true;
+				anchor = liveAnchor.message;
 			}
 		}
 		if (!anchored) {
@@ -376,6 +382,7 @@ export class SessionStatsTracker {
 		return {
 			contextWindow,
 			anchored,
+			anchor,
 			usedTokens,
 			systemPromptTokens,
 			systemToolsTokens: toolsTokens,

@@ -571,6 +571,11 @@ export interface RoleModelCycle {
 export interface ContextUsageBreakdown {
 	contextWindow: number;
 	anchored: boolean;
+	/**
+	 * The reply whose provider-reported usage `usedTokens` rests on, directly or
+	 * through an in-flight snapshot; absent when it rests on a local count.
+	 */
+	anchor?: AssistantMessage;
 	usedTokens: number;
 	systemPromptTokens: number;
 	systemToolsTokens: number;

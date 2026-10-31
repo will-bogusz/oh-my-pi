@@ -9054,6 +9054,7 @@ export class AgentSession implements SettingsScope {
 				promptTokens,
 				nonMessageTokens,
 				cutoffCount: this.messages.length + messages.length,
+				anchor: breakdown?.anchor,
 			});
 			// Commit the plan-reference delivery flag only now that the message is
 			// actually handed to agent.prompt. Every pre-send setup step above can
