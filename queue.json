@@ -56946,7 +56946,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T03:02:40Z",
+  "checked": "2026-10-31T03:33:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57115,12 +57115,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-24T03:20:41Z",
-    "kind": "openable",
-    "id": "computer-apps-open-first",
-    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks"
-   },
    {
     "at": "2026-10-24T03:51:06Z",
     "kind": "unopenable",
@@ -59461,7 +59455,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T02:32:03.925718Z",
+  "at": "2026-10-31T03:33:05.302233Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
