@@ -57402,6 +57402,24 @@
    "added": "2026-10-31T23:51:18Z",
    "updated": "2026-10-31T23:51:18Z",
    "note": ""
+  },
+  {
+   "id": "cold-revive-xdev-mounts",
+   "branch": "will/cold-revive-xdev-mounts",
+   "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "62f4f7cccfd38adde9a2ae203d69b27bc187a84f",
+   "body": "bodies/cold-revive-xdev-mounts.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/prompt-drift",
+   "host": "MacBook-Pro",
+   "added": "2026-10-31T23:51:27Z",
+   "updated": "2026-10-31T23:51:27Z",
+   "note": ""
   }
  ],
  "watch": {
