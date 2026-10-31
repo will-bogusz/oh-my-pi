@@ -56984,6 +56984,24 @@
    "updated": "2026-10-31T20:07:48Z",
    "note": "",
    "hold": "Will, 2026-10-31: wait until the continuation eval with calibrated judges shows bigger archives help continued work, not only recall (+0.16 Opus recall, but 1.7x compactions)"
+  },
+  {
+   "id": "unknown-tokenizer-o200k",
+   "branch": "will/unknown-tokenizer-o200k",
+   "title": "fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips",
+   "area": "agent",
+   "priority": null,
+   "needs": [],
+   "base": "7efd77219374ca4e8767979809835e4aa90666ba",
+   "body": "bodies/unknown-tokenizer-o200k.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/unknown-tokenizer-o200k",
+   "host": "MacBook-Pro",
+   "added": "2026-10-31T21:02:55Z",
+   "updated": "2026-10-31T21:02:55Z",
+   "note": ""
   }
  ],
  "watch": {
