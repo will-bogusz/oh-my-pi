@@ -56117,13 +56117,13 @@
    "needs": [],
    "base": "5d30c790b883ad0ae05dac2a4d2ccc8ecd103611",
    "body": "bodies/remove-stray-dbs.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17501,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/remove-stray-dbs",
    "host": "MacBook-Pro",
    "added": "2026-10-30T20:20:52Z",
-   "updated": "2026-10-30T20:54:28Z",
+   "updated": "2026-10-31T14:14:51Z",
    "note": "",
    "built": [
     {
@@ -56338,7 +56338,8 @@
     }
    ],
    "opened": "2026-10-30T20:51:51Z",
-   "readied": "2026-10-30T20:52:19Z"
+   "readied": "2026-10-30T20:52:19Z",
+   "merged_by": "pr"
   },
   {
    "id": "read-url-long-line",
