@@ -56994,13 +56994,13 @@
    "needs": [],
    "base": "62f4f7cccfd38adde9a2ae203d69b27bc187a84f",
    "body": "bodies/unknown-tokenizer-o200k.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17607,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/unknown-tokenizer-o200k",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:02:55Z",
-   "updated": "2026-10-31T21:25:42Z",
+   "updated": "2026-10-31T21:27:21Z",
    "note": "",
    "advanced": "2026-10-31T21:05:12Z",
    "built": [
@@ -57167,7 +57167,8 @@
      "at": "2026-10-31T21:25:42Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-10-31T21:27:21Z"
   },
   {
    "id": "text-reader-usage-shift",
