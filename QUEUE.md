@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-31 23:27Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 14, stacked 22, held 3, open PRs 22, queued since the last plan 1; merged 191, closed 12
+**Counts:** openable now 4, conflict-held 14, stacked 22, held 3, open PRs 22, queued since the last plan 2; merged 191, closed 12
 
 ## Openable now (4)
 
@@ -96,8 +96,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31
 | [#17607](https://github.com/can1357/oh-my-pi/pull/17607) | unknown-tokenizer-o200k | fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips | agent | P2 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/unknown-tokenizer-o200k) |
 | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | claude-refusal-strip-retry | fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it | other | P2 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/claude-refusal-strip-retry) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | date-reminder-journal | fix(coding-agent): keep each message's date across resume and subagent revival | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/date-reminder-journal) |
+| cold-revive-xdev-mounts | fix(task): keep a cold-revived subagent's xd:// devices mounted | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cold-revive-xdev-mounts) |
