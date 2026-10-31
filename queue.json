@@ -56949,7 +56949,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T14:14:53Z",
+  "checked": "2026-10-31T15:16:16Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -56971,12 +56971,22 @@
    }
   },
   "conflicts": {},
-  "merged_through": "2026-10-31T13:58:26Z",
+  "merged_through": "2026-10-31T14:56:17Z",
   "unreleased": {
    "17501": {
     "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
     "merge_commit": "59cd125cd140d5a89b685023d8022d6bb659d7c0",
     "merged_at": "2026-10-31T13:58:26Z"
+   },
+   "17500": {
+    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
+    "merge_commit": "065f8edbc5a988362a299a10966d1cad6b3de0f3",
+    "merged_at": "2026-10-31T14:56:17Z"
+   },
+   "17489": {
+    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
+    "merge_commit": "5a6a481d5824698f88f7db77e96a1791f7df4760",
+    "merged_at": "2026-10-31T14:56:17Z"
    }
   },
   "ready": [
@@ -56997,10 +57007,8 @@
    16611,
    16801,
    16908,
-   17489,
    17490,
    17496,
-   17500,
    17510
   ],
   "post_merge": {
@@ -57043,10 +57051,22 @@
     "merged_at": "2026-10-30T11:25:56Z",
     "findings": []
    },
+   "17489": {
+    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
+    "merge_commit": "5a6a481d5824698f88f7db77e96a1791f7df4760",
+    "merged_at": "2026-10-31T14:56:17Z",
+    "findings": []
+   },
    "17492": {
     "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
     "merge_commit": "c391fc2ad5ac5f26533eb6f2ca7eed97b0e36dd5",
     "merged_at": "2026-10-30T23:02:49Z",
+    "findings": []
+   },
+   "17500": {
+    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
+    "merge_commit": "065f8edbc5a988362a299a10966d1cad6b3de0f3",
+    "merged_at": "2026-10-31T14:56:17Z",
     "findings": []
    },
    "17501": {
@@ -58367,6 +58387,22 @@
     "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
     "merged_by": "H4vC",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-31T15:16:16Z",
+    "kind": "merged",
+    "number": 17500,
+    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-31T15:16:16Z",
+    "kind": "merged",
+    "number": 17489,
+    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  },
@@ -59398,7 +59434,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T14:45:32.560854Z",
+  "at": "2026-10-31T15:16:17.058999Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -59406,23 +59442,6 @@
    "left": 8
   },
   "rows": [
-   {
-    "id": "read-url-long-line",
-    "label": "#17500",
-    "number": 17500,
-    "state": "open",
-    "area": "read",
-    "priority": "P0",
-    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T20:46:04Z"
-   },
    {
     "id": "read-after-bash-revalidate",
     "label": "#16274",
@@ -59749,23 +59768,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-22T16:58:16Z"
-   },
-   {
-    "id": "bash-tool-call-env",
-    "label": "#17489",
-    "number": 17489,
-    "state": "open",
-    "area": "other",
-    "priority": "P2",
-    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T17:24:14Z"
    },
    {
     "id": "cache-marker",
@@ -60323,7 +60325,7 @@
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
+     "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
     "over": [],
@@ -60587,9 +60589,8 @@
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15433 in docs/cli-reference.md",
      "conflicts with #16801 in docs/cli-reference.md, docs/sdk.md, packages/coding-agent/src/cli/poke-cli.ts, packages/coding-agent/src/mailbox/headless.ts, packages/coding-agent/src/mailbox/mailbox.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/mailbox.test.ts, packages/coding-agent/test/session-mailbox.test.ts",
-     "conflicts with #17489 in packages/coding-agent/src/tools/bash.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/session-mailbox.test.ts"
+     "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts"
     ],
     "note": "",
     "over": [],
@@ -60599,7 +60600,6 @@
      "#15130",
      "#15433",
      "#16801",
-     "#17489",
      "#17496"
     ],
     "needs": [
@@ -60620,9 +60620,8 @@
      "needs timer-pr-4-surfaces (queued)",
      "conflicts with #15128 in docs/settings.md",
      "conflicts with #15130 in docs/settings.md",
-     "conflicts with #17489 in packages/coding-agent/src/tools/bash.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/modes/controllers/event-controller.ts",
-     "its need timer-pr-4-surfaces conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts",
+     "its need timer-pr-4-surfaces conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts"
     ],
     "note": "",
@@ -60631,7 +60630,6 @@
     "blocked_by": [
      "#15128",
      "#15130",
-     "#17489",
      "#17496"
     ],
     "needs": [
@@ -60653,7 +60651,7 @@
      "conflicts with #15128 in docs/settings.md",
      "conflicts with #15130 in docs/settings.md",
      "conflicts with #17496 in docs/settings.md",
-     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts"
+     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
     ],
     "note": "",
     "over": [],
@@ -60683,7 +60681,7 @@
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/session-mailbox.test.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "its need timer-pr-3-tool conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts"
+     "its need timer-pr-3-tool conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
     ],
     "note": "",
     "over": [],
@@ -60712,7 +60710,7 @@
      "needs timer-pr-2-engine (queued)",
      "conflicts with #15433 in docs/cli-reference.md",
      "conflicts with #16801 in docs/cli-reference.md",
-     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts"
+     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
     ],
     "note": "",
     "over": [],
@@ -60739,7 +60737,7 @@
      "needs timer-pr-2-engine (queued)",
      "conflicts with #15433 in docs/cli-reference.md",
      "conflicts with #16801 in docs/cli-reference.md, packages/coding-agent/src/mailbox/message.ts",
-     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts"
+     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
     ],
     "note": "",
     "over": [],
@@ -60764,7 +60762,7 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-2-engine (queued)",
-     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts"
+     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
     ],
     "note": "",
     "over": [],
@@ -60786,8 +60784,8 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
-     "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",

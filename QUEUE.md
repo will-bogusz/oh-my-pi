@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 15:16Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 15:17Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-31 14:45Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-31 15:16Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 4, conflict-held 14, stacked 21, held 1, open PRs 20; merged 191, closed 12
 
 ## Openable now (4)
@@ -11,7 +11,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 18h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
-| macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P1 | 17h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
+| macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P1 | 18h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
 | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 17h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | iphone-mirror-not-showing | fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone | computer | P1 | 17h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-not-showing) |
 
