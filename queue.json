@@ -56946,7 +56946,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T00:28:58Z",
+  "checked": "2026-10-31T00:59:56Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -56969,33 +56969,7 @@
   },
   "conflicts": {},
   "merged_through": "2026-10-30T23:02:49Z",
-  "unreleased": {
-   "17417": {
-    "title": "fix(browser): replace a rich-text editor's text when filling it",
-    "merge_commit": "07fc07d2497540d41a583e0752f37dbe48d0c167",
-    "merged_at": "2026-10-30T11:25:56Z"
-   },
-   "17391": {
-    "title": "feat(computer): wait for windows opened by actions",
-    "merge_commit": "d9c1e23d25592511325ef4fb1c2894dfd08b170e",
-    "merged_at": "2026-10-30T11:25:56Z"
-   },
-   "17389": {
-    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule",
-    "merge_commit": "f4446ca8d4df1cbc3cebdeb20cba158e2c615931",
-    "merged_at": "2026-10-30T11:25:56Z"
-   },
-   "17393": {
-    "title": "feat(coding-agent): list unused meta tags by name in native web reads",
-    "merge_commit": "78c576cb91525e6be646d27bbcd137a0120f4e3d",
-    "merged_at": "2026-10-30T11:25:57Z"
-   },
-   "17492": {
-    "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
-    "merge_commit": "c391fc2ad5ac5f26533eb6f2ca7eed97b0e36dd5",
-    "merged_at": "2026-10-30T23:02:49Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    15128,
    15130,
@@ -58469,6 +58443,41 @@
     "id": "snapcompact-text-reader",
     "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
     "why": "opened as #17510"
+   },
+   {
+    "at": "2026-10-31T00:59:56Z",
+    "kind": "released",
+    "number": 17417,
+    "title": "fix(browser): replace a rich-text editor's text when filling it",
+    "tag": "v18.14.1"
+   },
+   {
+    "at": "2026-10-31T00:59:56Z",
+    "kind": "released",
+    "number": 17391,
+    "title": "feat(computer): wait for windows opened by actions",
+    "tag": "v18.14.1"
+   },
+   {
+    "at": "2026-10-31T00:59:56Z",
+    "kind": "released",
+    "number": 17389,
+    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule",
+    "tag": "v18.14.1"
+   },
+   {
+    "at": "2026-10-31T00:59:56Z",
+    "kind": "released",
+    "number": 17393,
+    "title": "feat(coding-agent): list unused meta tags by name in native web reads",
+    "tag": "v18.14.1"
+   },
+   {
+    "at": "2026-10-31T00:59:56Z",
+    "kind": "released",
+    "number": 17492,
+    "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
+    "tag": "v18.14.1"
    }
   ]
  },
