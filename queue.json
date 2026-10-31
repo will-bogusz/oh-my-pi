@@ -57197,7 +57197,7 @@
    "branch": "will/claude-refusal-strip-retry",
    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "62f4f7cccfd38adde9a2ae203d69b27bc187a84f",
    "body": "bodies/claude-refusal-strip-retry.md",
@@ -57207,7 +57207,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/claude-refusal-strip-retry",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:44:06Z",
-   "updated": "2026-10-31T21:57:58Z",
+   "updated": "2026-10-31T22:25:32Z",
    "note": "",
    "built": [
     {
