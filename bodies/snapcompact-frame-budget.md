@@ -1,6 +1,8 @@
 ## What
 
-Anthropic documents 600 images per request, so I wanted to know why Opus archives stop at 80 frames; past that its API starts failing around 100 high-res frames, while gpt-6.1-sol kept reading better up to 107, so the frame cap is now set per host.
+why cant opus archives go higher than that? why are we artifically limiting? we should experiment up to theoretical limits to ensure we are getting full value
+
+Anthropic documents 600 images per request, yet archives stopped at 80 frames: past that its API starts failing around 100 high-res frames, while gpt-6.1-sol kept reading better up to 107, so the frame cap is now set per host.
 
 Snapcompact archives on the Codex backend can hold up to 107 frames instead of 80; the Anthropic API keeps 80, now a measured limit. With archives forced to each size, gpt-6.1-sol's recall went from 36% at 80 frames to 46% at 107, and no higher.
 
