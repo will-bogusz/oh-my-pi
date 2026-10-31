@@ -1,6 +1,8 @@
 ## What
 
-I'd like to explore snapcompact as a fallback when switching models, and here a text-only fallback got skipped as too big: the fit check charged it for the image model's frames, which it is never sent.
+I'd like to explore the idea of snapcompact fallback when switching models, and generally exploring more cross model/provider switching behaviors. I have a feeling this is underexplored right now, and probably not optimized.
+
+Here a text-only fallback got skipped as too big: the fit check charged it for the image model's frames, which it is never sent.
 
 On a real session (a 38-frame snapcompact archive; the last Codex request billed 187,664 input tokens) the retry fallback's fit check charged a 131K-window GLM-5.3 fallback 187,664 tokens and skipped it; it now charges 75,963, against 76,562 that GLM's tokenizer counts in the request that fallback would be sent.
 
