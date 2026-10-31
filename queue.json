@@ -59396,7 +59396,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T14:14:54.447715Z",
+  "at": "2026-10-31T14:45:32.560854Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -60216,7 +60216,7 @@
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with iphone-mirror-not-showing in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/tools/computer/supervisor.ts"
+     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
     "note": "",
     "over": [],
