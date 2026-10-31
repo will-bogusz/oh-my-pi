@@ -56992,7 +56992,7 @@
    "area": "agent",
    "priority": null,
    "needs": [],
-   "base": "7efd77219374ca4e8767979809835e4aa90666ba",
+   "base": "62f4f7cccfd38adde9a2ae203d69b27bc187a84f",
    "body": "bodies/unknown-tokenizer-o200k.md",
    "state": "queued",
    "pr": null,
@@ -57000,8 +57000,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/unknown-tokenizer-o200k",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:02:55Z",
-   "updated": "2026-10-31T21:02:55Z",
-   "note": ""
+   "updated": "2026-10-31T21:05:12Z",
+   "note": "",
+   "advanced": "2026-10-31T21:05:12Z"
   }
  ],
  "watch": {
