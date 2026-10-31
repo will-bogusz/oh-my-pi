@@ -57387,7 +57387,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T22:25:34Z",
+  "checked": "2026-10-31T23:27:29Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -59924,12 +59924,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T22:56:33.128079Z",
+  "at": "2026-10-31T23:27:30.382049Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 5,
-   "left": 3
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -60734,7 +60734,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
