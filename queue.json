@@ -57387,7 +57387,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T21:54:54Z",
+  "checked": "2026-10-31T22:25:34Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57406,10 +57406,6 @@
    "iphone-mirror-key-gap": {
     "since": "2026-10-30T21:25:06Z",
     "title": "perf(natives): type on iPhone Mirroring twice as fast"
-   },
-   "claude-refusal-strip-retry": {
-    "since": "2026-10-31T21:54:54Z",
-    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it"
    }
   },
   "conflicts": {
@@ -57445,7 +57441,8 @@
    17490,
    17496,
    17510,
-   17607
+   17607,
+   17610
   ],
   "post_merge": {
    "16300": {
@@ -58889,6 +58886,13 @@
     "id": "unknown-tokenizer-o200k",
     "title": "fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips",
     "why": "opened as #17607"
+   },
+   {
+    "at": "2026-10-31T22:25:34Z",
+    "kind": "unopenable",
+    "id": "claude-refusal-strip-retry",
+    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
+    "why": "opened as #17610"
    }
   ]
  },
@@ -59920,12 +59924,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T21:54:54.932190Z",
+  "at": "2026-10-31T22:25:36.300133Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 6,
+   "left": 2
   },
   "rows": [
    {
@@ -60021,12 +60025,16 @@
     "area": "snapcompact",
     "priority": "P1",
     "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
-    "action": "keep",
-    "reasons": [],
+    "action": "requeue",
+    "reasons": [
+     "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#17490"
+    ],
     "needs": [],
     "created": "2026-10-30T23:08:50Z"
    },
@@ -60101,6 +60109,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-31T21:27:20Z"
+   },
+   {
+    "id": "claude-refusal-strip-retry",
+    "label": "#17610",
+    "number": 17610,
+    "state": "open",
+    "area": "other",
+    "priority": "P2",
+    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-31T21:57:19Z"
    },
    {
     "id": "reset-restore-longest-wait",
@@ -60354,7 +60379,7 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): match macOS window screenshots to the window on screen",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -60450,6 +60475,7 @@
     "title": "feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback)",
     "action": "wait",
     "reasons": [
+     "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #16309 in packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/discovery/factory-droid.ts",
      "conflicts with main in packages/ai/src/providers/factory-droid.ts, packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts"
     ],
@@ -60457,6 +60483,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17610",
      "#16309"
     ],
     "needs": [],
@@ -60473,6 +60500,7 @@
     "action": "wait",
     "reasons": [
      "needs factory-droid-0244 (queued)",
+     "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #16309 in packages/catalog/src/compat/rules/providers/factory-droid.kdl",
      "its need factory-droid-0244 conflicts with main in packages/ai/src/providers/factory-droid.ts, packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts",
      "conflicts with main in packages/ai/src/providers/factory-droid/gemini.ts"
@@ -60481,6 +60509,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17610",
      "#16309"
     ],
     "needs": [
@@ -60701,7 +60730,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -60825,7 +60854,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with #17510 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
@@ -60837,7 +60866,7 @@
     "paired": [],
     "blocked_by": [
      "#17490",
-     "#17510",
+     "#17610",
      "#15128",
      "#15130",
      "#16801",
@@ -60950,35 +60979,16 @@
     "area": "catalog",
     "priority": "P2",
     "title": "feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107)",
-    "action": "wait",
+    "action": "held",
     "reasons": [
-     "conflicts with #17510 in packages/coding-agent/test/agent-session-snapcompact-reader.test.ts"
+     "held: Will, 2026-10-31: no user effect without archive-target except 1M gpt-5.6 models, whose recall past 80 frames is unmeasured; decide together with archive-target after the continuation eval"
     ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#17510"
-    ],
-    "needs": [],
-    "created": "2026-10-31T20:07:36Z"
-   },
-   {
-    "id": "claude-refusal-strip-retry",
-    "label": "claude-refusal-strip-retry",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
-    "action": "open",
-    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-10-31T21:44:06Z"
+    "created": "2026-10-31T20:07:36Z"
    },
    {
     "id": "switch-remote-reexpand",
@@ -61058,22 +61068,22 @@
     "action": "wait",
     "reasons": [
      "needs reset-account-optout (queued)",
+     "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with claude-refusal-strip-retry in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17610",
      "#15128",
      "#15130",
      "#16801",
-     "#17496",
-     "claude-refusal-strip-retry"
+     "#17496"
     ],
     "needs": [
      "#15133"
@@ -61119,12 +61129,11 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with #17510 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with claude-refusal-strip-retry in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -61132,12 +61141,11 @@
     "paired": [],
     "blocked_by": [
      "#17490",
-     "#17510",
+     "#17610",
      "#15128",
      "#15130",
      "#16801",
-     "#17496",
-     "claude-refusal-strip-retry"
+     "#17496"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -61173,24 +61181,24 @@
     "action": "wait",
     "reasons": [
      "needs #16801 (open)",
+     "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15433 in docs/cli-reference.md",
      "conflicts with #16801 in docs/cli-reference.md, docs/sdk.md, packages/coding-agent/src/cli/poke-cli.ts, packages/coding-agent/src/mailbox/headless.ts, packages/coding-agent/src/mailbox/mailbox.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/mailbox.test.ts, packages/coding-agent/test/session-mailbox.test.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with claude-refusal-strip-retry in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17610",
      "#15128",
      "#15130",
      "#15433",
      "#16801",
-     "#17496",
-     "claude-refusal-strip-retry"
+     "#17496"
     ],
     "needs": [
      "timer-pr-1-poke"
@@ -61267,22 +61275,22 @@
     "action": "wait",
     "reasons": [
      "needs timer-pr-3-tool (queued)",
+     "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/session-mailbox.test.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with claude-refusal-strip-retry in packages/coding-agent/src/session/agent-session.ts",
      "its need timer-pr-3-tool conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17610",
      "#15128",
      "#15130",
      "#16801",
-     "#17496",
-     "claude-refusal-strip-retry"
+     "#17496"
     ],
     "needs": [
      "timer-pr-3-tool"
