@@ -4380,27 +4380,38 @@ export class SessionMaintenance {
 		// so it moves into `model`'s domain by the difference in replayed
 		// reasoning. Usage leaves out the anchor turn's own output, so this may
 		// subtract reasoning it never held; the local floor below still bounds it.
+		const retained = activeExcludedMessage ? messages.filter(m => m !== activeExcludedMessage) : messages;
 		let replayedReasoningShift = 0;
 		if (tokenizer !== this.#tokenizer) {
-			const retained = activeExcludedMessage ? messages.filter(m => m !== activeExcludedMessage) : messages;
 			replayedReasoningShift =
 				tokenizer.replayedReasoningTokens(retained) - this.#tokenizer.replayedReasoningTokens(retained);
 		}
+		// It also priced each archive as the active model read it (frames for an
+		// image reader), so an archive `model` reads in another form (its text,
+		// for a reader without image input) moves it by that form's difference.
+		const branchView = this.#host.sessionManager.getBranchView();
+		const asActiveReads = this.#messagesAsRead(retained, branchView);
+		const asModelReads = this.#messagesAsRead(retained, branchView, model);
+		let archiveFormShift = 0;
+		asModelReads.forEach((message, index) => {
+			const activeForm = asActiveReads[index]!;
+			if (message !== activeForm) {
+				archiveFormShift += tokenizer.countMessage(message) - this.#tokenizer.countMessage(activeForm);
+			}
+		});
 		const compactionSettings = this.#compactionSettings;
 		const residualTokens = compactionContextTokens(
 			Math.max(
 				0,
 				(this.#host.getContextUsage({ contextWindow })?.tokens ?? 0) -
 					providerExcludedTokens +
-					replayedReasoningShift,
+					replayedReasoningShift +
+					archiveFormShift,
 			),
 			Math.max(
 				0,
-				this.#estimateStoredContextTokens(
-					[],
-					tokenizer,
-					this.#messagesAsRead(messages, this.#host.sessionManager.getBranchView(), model),
-				) - storedExcludedTokens,
+				this.#estimateStoredContextTokens([], tokenizer, this.#messagesAsRead(messages, branchView, model)) -
+					storedExcludedTokens,
 			),
 		);
 		const fitBudget = Math.max(0, contextWindow - resolveBudgetReserveTokens(contextWindow, compactionSettings));

@@ -10,6 +10,7 @@
 ### Fixed
 
 - `omp -p` text mode now prints each automatic retry with its error (for example "Couldn't reach api.anthropic.com … check your network") instead of showing only `Working...` while a turn retries ([#17529](https://github.com/can1357/oh-my-pi/pull/17529) by [@Mannan-Goyal](https://github.com/Mannan-Goyal))
+- A retry fallback without image input is no longer skipped as too large for its window when the failed model's last request priced a snapcompact archive's frames: the fit check moves that request's provider-reported size to the archive's text, which is what the fallback would be sent
 
 ## [18.15.0] - 2026-11-01
 

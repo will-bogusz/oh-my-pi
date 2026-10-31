@@ -4,16 +4,19 @@
  * model that produced it, and only while its session replays native history,
  * so a different retry candidate is not charged the active model's replayed
  * reasoning, in the local floor or in the provider usage that carried it, while
- * the producing model still is.
+ * the producing model still is. Likewise a candidate without image input is
+ * charged a snapcompact archive's text, not the frames the active request
+ * carried.
  */
 import { describe, expect, it } from "bun:test";
-import { Agent, type AgentMessage } from "@oh-my-pi/pi-agent-core";
-import type { AssistantMessage, Model, ProviderSessionState } from "@oh-my-pi/pi-ai";
+import { Agent, type AgentMessage, Tokenizer } from "@oh-my-pi/pi-agent-core";
+import type { AssistantMessage, Message, Model, ProviderSessionState } from "@oh-my-pi/pi-ai";
 import { convertCodexResponsesMessages } from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
 import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import { SessionMaintenance, type SessionMaintenanceHost } from "@oh-my-pi/pi-coding-agent/session/session-maintenance";
 import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
+import * as snapcompact from "@oh-my-pi/snapcompact";
 
 const active = getBundledModel<"openai-codex-responses">("openai-codex", "gpt-6.1-sol");
 // Same encoding, another model: it gets the turns re-encoded without their reasoning.
@@ -138,5 +141,96 @@ describe("SessionMaintenance.contextFitsModel", () => {
 		const retained: AgentMessage = { role: "user", content: "x".repeat(7_600), timestamp: 0 };
 		const failed = codexTurn("Partial answer.", 1);
 		expect(maintenance([retained, failed]).contextFitsModel(candidate, failed)).toBe(false);
+	});
+});
+
+describe("SessionMaintenance.contextFitsModel with a snapcompact archive", () => {
+	const gpt = getBundledModel("openai", "gpt-5.4");
+	// Takes no image input: it reads the archive as text instead of frames.
+	const deepseek = getBundledModel("deepseek", "deepseek-v4-flash");
+
+	function turn(model: Model, text: string): AssistantMessage {
+		return {
+			role: "assistant",
+			content: [{ type: "text", text }],
+			api: model.api,
+			provider: model.provider,
+			model: model.id,
+			stopReason: "stop",
+			usage: {
+				input: 0,
+				output: 0,
+				cacheRead: 0,
+				cacheWrite: 0,
+				totalTokens: 0,
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+			},
+			timestamp: Date.now(),
+		};
+	}
+
+	/** A session standing on a snapcompact archive with frames, written under the image-reading `gpt`. */
+	async function archivedSession(): Promise<{ sessionManager: SessionManager; messages: AgentMessage[] }> {
+		const sessionManager = SessionManager.inMemory();
+		const keptId = sessionManager.appendMessage({ role: "user", content: "Kept turn.", timestamp: Date.now() });
+		const filler = "the quick brown fox jumps over the lazy dog. ".repeat(20);
+		const archived: Message[] = Array.from({ length: 200 }, (_, i) => [
+			{ role: "user" as const, content: `turn ${i}: ${filler}`, timestamp: Date.now() },
+			turn(gpt, `reply ${i}: ${filler}`),
+		]).flat();
+		const archive = await snapcompact.compact(
+			{
+				firstKeptEntryId: keptId,
+				messagesToSummarize: archived,
+				turnPrefixMessages: [],
+				tokensBefore: 500_000,
+				fileOps: snapcompact.createFileOps(),
+			},
+			{ model: gpt },
+		);
+		expect(snapcompact.getPreservedArchive(archive.preserveData)?.frames.length).toBeGreaterThan(0);
+		sessionManager.appendCompaction(archive.summary, archive.shortSummary, keptId, archive.tokensBefore, {
+			details: archive.details,
+			preserveData: archive.preserveData,
+			method: "snapcompact",
+		});
+		sessionManager.appendMessage(turn(gpt, "Kept reply."));
+		return { sessionManager, messages: sessionManager.buildSessionContext().messages };
+	}
+
+	function archiveMaintenance(
+		sessionManager: SessionManager,
+		messages: AgentMessage[],
+		usageTokens: number,
+	): SessionMaintenance {
+		const agent = new Agent({ initialState: { model: gpt, systemPrompt: [], tools: [], messages } });
+		const host = {
+			agent,
+			sessionManager,
+			settings: Settings.isolated({ "compaction.reserveTokens": 200 }),
+			model: () => gpt,
+			messages: () => agent.state.messages,
+			nonMessageTokenSource: () => ({}),
+			getContextUsage: ({ contextWindow }: { contextWindow: number }) => ({
+				tokens: usageTokens,
+				contextWindow,
+				percent: (usageTokens / contextWindow) * 100,
+			}),
+		} as unknown as SessionMaintenanceHost;
+		return new SessionMaintenance(host);
+	}
+
+	it("moves provider usage off the frames a candidate without image input reads as text", async () => {
+		const { sessionManager, messages } = await archivedSession();
+		// The active model's last request carried the archive's frames, at its own count.
+		const usageTokens = new Tokenizer(gpt).countMessages(messages);
+		// A window under that request, which the archive's text (0.6 of the threshold) and the kept turns fit.
+		const contextWindow = Math.floor(usageTokens * 0.8);
+		const reader: Model = { ...deepseek, contextWindow };
+		expect(archiveMaintenance(sessionManager, messages, usageTokens).contextFitsModel(reader)).toBe(true);
+		// Control: a candidate with image input reads the same frames, which the window cannot hold.
+		expect(
+			archiveMaintenance(sessionManager, messages, usageTokens).contextFitsModel({ ...gpt, contextWindow }),
+		).toBe(false);
 	});
 });
