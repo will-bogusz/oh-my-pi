@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 23:28Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 23:51Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-31 23:27Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 14, stacked 22, held 3, open PRs 22; merged 191, closed 12
+**Counts:** openable now 4, conflict-held 14, stacked 22, held 3, open PRs 22, queued since the last plan 1; merged 191, closed 12
 
 ## Openable now (4)
 
@@ -26,7 +26,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31
 | factory-droid-0244 | feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback) | providers | P1 | 13d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#16309](https://github.com/can1357/oh-my-pi/pull/16309), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-0244) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 13d | [#16309](https://github.com/can1357/oh-my-pi/pull/16309), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 12d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
-| compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 10d | [#17490](https://github.com/can1357/oh-my-pi/pull/17490), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), [#16801](https://github.com/can1357/oh-my-pi/pull/16801), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
+| compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 11d | [#17490](https://github.com/can1357/oh-my-pi/pull/17490), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), [#16801](https://github.com/can1357/oh-my-pi/pull/16801), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 8d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16284](https://github.com/can1357/oh-my-pi/pull/16284), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 8d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 8d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
@@ -89,9 +89,15 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31
 | [#16586](https://github.com/can1357/oh-my-pi/pull/16586) | bash-minimizer-meta | feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut | bash | P2 | 10d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-minimizer-meta) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 10d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#16801](https://github.com/can1357/oh-my-pi/pull/16801) | timer-pr-1-poke | feat(coding-agent): deliver messages into a session from outside with omp poke | other | P2 | 9d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-1-poke) |
-| [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 7d | keep; opened over P2 #16284 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
+| [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 8d | keep; opened over P2 #16284 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
 | [#17490](https://github.com/can1357/oh-my-pi/pull/17490) | snapcompact-reduction-baseline | fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once | compaction | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-reduction-baseline) |
 | [#17496](https://github.com/can1357/oh-my-pi/pull/17496) | cache-marker | feat(coding-agent): show whether the next message reads the prompt cache | status-line | P2 | 1d | requeue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cache-marker) |
 | [#17510](https://github.com/can1357/oh-my-pi/pull/17510) | snapcompact-text-reader | fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames | snapcompact | P1 | 1d | requeue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-text-reader) |
 | [#17607](https://github.com/can1357/oh-my-pi/pull/17607) | unknown-tokenizer-o200k | fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips | agent | P2 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/unknown-tokenizer-o200k) |
 | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | claude-refusal-strip-retry | fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it | other | P2 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/claude-refusal-strip-retry) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| date-reminder-journal | fix(coding-agent): keep each message's date across resume and subagent revival | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/date-reminder-journal) |
