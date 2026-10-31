@@ -56947,7 +56947,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T13:13:39Z",
+  "checked": "2026-10-31T14:14:53Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -56969,8 +56969,14 @@
    }
   },
   "conflicts": {},
-  "merged_through": "2026-10-30T23:02:49Z",
-  "unreleased": {},
+  "merged_through": "2026-10-31T13:58:26Z",
+  "unreleased": {
+   "17501": {
+    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
+    "merge_commit": "59cd125cd140d5a89b685023d8022d6bb659d7c0",
+    "merged_at": "2026-10-31T13:58:26Z"
+   }
+  },
   "ready": [
    15128,
    15130,
@@ -56993,7 +56999,6 @@
    17490,
    17496,
    17500,
-   17501,
    17510
   ],
   "post_merge": {
@@ -57040,6 +57045,12 @@
     "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
     "merge_commit": "c391fc2ad5ac5f26533eb6f2ca7eed97b0e36dd5",
     "merged_at": "2026-10-30T23:02:49Z",
+    "findings": []
+   },
+   "17501": {
+    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
+    "merge_commit": "59cd125cd140d5a89b685023d8022d6bb659d7c0",
+    "merged_at": "2026-10-31T13:58:26Z",
     "findings": []
    }
   },
@@ -58346,6 +58357,14 @@
     "number": 17492,
     "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
     "tag": "v18.14.1"
+   },
+   {
+    "at": "2026-10-31T14:14:53Z",
+    "kind": "merged",
+    "number": 17501,
+    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  },
@@ -59377,7 +59396,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T13:43:55.079982Z",
+  "at": "2026-10-31T14:14:54.447715Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -59401,23 +59420,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-30T20:46:04Z"
-   },
-   {
-    "id": "remove-stray-dbs",
-    "label": "#17501",
-    "number": 17501,
-    "state": "open",
-    "area": "repo",
-    "priority": "P0",
-    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T20:51:50Z"
    },
    {
     "id": "read-after-bash-revalidate",
