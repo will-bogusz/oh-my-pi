@@ -57000,9 +57000,21 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/unknown-tokenizer-o200k",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:02:55Z",
-   "updated": "2026-10-31T21:12:23Z",
+   "updated": "2026-10-31T21:22:04Z",
    "note": "",
-   "advanced": "2026-10-31T21:05:12Z"
+   "advanced": "2026-10-31T21:05:12Z",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "61ad0c28f77485e9f733062d060248ad3b4d8bc1",
+     "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
+     "tip": "497de1514893c12f2a555552370ba2572492c33a",
+     "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
+     "at": "2026-10-31T21:22:04Z",
+     "host": "MacBook-Pro",
+     "tree": "8409920f14550e7539b1095ca1f7d3d32a5b0a70"
+    }
+   ]
   },
   {
    "id": "text-reader-usage-shift",

@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 21:12Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 21:22Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-31 21:03Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -10,8 +10,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 23h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
-| macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P1 | 23h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
+| iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 1d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
+| macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P1 | 1d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
 | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 23h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | iphone-mirror-not-showing | fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone | computer | P1 | 23h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-not-showing) |
 | unknown-tokenizer-o200k | fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips | agent |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/unknown-tokenizer-o200k) |
