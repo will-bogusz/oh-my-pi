@@ -59496,7 +59496,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T19:54:42.817203Z",
+  "at": "2026-10-31T20:08:18.580857Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -60480,6 +60480,47 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "snapcompact-archive-target",
+    "label": "snapcompact-archive-target",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": "P2",
+    "title": "feat(coding-agent): size snapcompact archives to 75% of the compaction trigger",
+    "action": "held",
+    "reasons": [
+     "held: Will, 2026-10-31: wait until the continuation eval with calibrated judges shows bigger archives help continued work, not only recall (+0.16 Opus recall, but 1.7x compactions)",
+     "conflicts with main in docs/compaction.md"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-31T20:07:42Z"
+   },
+   {
+    "id": "snapcompact-frame-budget",
+    "label": "snapcompact-frame-budget",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": "P2",
+    "title": "feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107)",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #17510 in packages/coding-agent/test/agent-session-snapcompact-reader.test.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#17510"
+    ],
+    "needs": [],
+    "created": "2026-10-31T20:07:36Z"
    },
    {
     "id": "switch-remote-reexpand",
