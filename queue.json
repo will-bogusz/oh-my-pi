@@ -56949,7 +56949,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T15:16:16Z",
+  "checked": "2026-10-31T16:17:38Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -56970,7 +56970,16 @@
     "title": "perf(natives): type on iPhone Mirroring twice as fast"
    }
   },
-  "conflicts": {},
+  "conflicts": {
+   "#15433": {
+    "since": "2026-10-31T16:17:38Z",
+    "title": "feat(task): add omp agents show for what an agent's spawns run with",
+    "files": [
+     "packages/coding-agent/src/config/model-resolver.ts",
+     "packages/coding-agent/src/task/executor.ts"
+    ]
+   }
+  },
   "merged_through": "2026-10-31T14:56:17Z",
   "unreleased": {
    "17501": {
@@ -58403,6 +58412,16 @@
     "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
     "merged_by": "H4vC",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-10-31T16:17:38Z",
+    "kind": "conflict",
+    "label": "#15433",
+    "title": "feat(task): add omp agents show for what an agent's spawns run with",
+    "files": [
+     "packages/coding-agent/src/config/model-resolver.ts",
+     "packages/coding-agent/src/task/executor.ts"
+    ]
    }
   ]
  },
@@ -59434,7 +59453,7 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T15:16:17.058999Z",
+  "at": "2026-10-31T16:17:38.947790Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -59658,8 +59677,10 @@
     "area": "other",
     "priority": "P2",
     "title": "feat(task): add omp agents show for what an agent's spawns run with",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/config/model-resolver.ts, packages/coding-agent/src/task/executor.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -59946,7 +59967,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #16309 in packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/discovery/factory-droid.ts",
-     "conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts"
+     "conflicts with main in packages/ai/src/providers/factory-droid.ts, packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts"
     ],
     "note": "",
     "over": [],
@@ -59969,7 +59990,7 @@
     "reasons": [
      "needs factory-droid-0244 (queued)",
      "conflicts with #16309 in packages/catalog/src/compat/rules/providers/factory-droid.kdl",
-     "its need factory-droid-0244 conflicts with main in packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts",
+     "its need factory-droid-0244 conflicts with main in packages/ai/src/providers/factory-droid.ts, packages/ai/src/registry/oauth/factory-droid.ts, packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/src/discovery/factory-droid.ts",
      "conflicts with main in packages/ai/src/providers/factory-droid/gemini.ts"
     ],
     "note": "",
