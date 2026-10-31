@@ -4402,11 +4402,10 @@ export class SessionMaintenance {
 				: undefined;
 			let usageTokenizer = this.#tokenizer;
 			let asUsageReads = messages;
-			if (usageModel && archiveReader(usageModel).key !== archiveReader(model).key) {
+			// Equal reader flags are not equal forms: a text view is fitted to its reader's own budget.
+			if (usageModel) {
 				if (!this.#tokenizer.countsAlike(usageModel)) usageTokenizer = new Tokenizer(usageModel);
 				asUsageReads = this.#messagesAsRead(messages, branchView, usageModel);
-			} else if (usageModel) {
-				asUsageReads = asModelReads;
 			}
 			if (asModelReads !== asUsageReads) {
 				asModelReads.forEach((message, index) => {

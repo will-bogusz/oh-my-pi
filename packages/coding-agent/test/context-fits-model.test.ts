@@ -216,7 +216,7 @@ describe("SessionMaintenance.contextFitsModel with a snapcompact archive", () =>
 		sessionManager: SessionManager,
 		messages: AgentMessage[],
 		active: Model = gpt,
-	): { maintenance: SessionMaintenance; stats: SessionStatsTracker } {
+	): { maintenance: SessionMaintenance; stats: SessionStatsTracker; agent: Agent } {
 		const agent = new Agent({ initialState: { model: active, systemPrompt: [], tools: [], messages } });
 		const modelRegistry = {
 			find: (provider: string, id: string) =>
@@ -241,7 +241,7 @@ describe("SessionMaintenance.contextFitsModel with a snapcompact archive", () =>
 			getContextBreakdown: (options: { contextWindow?: number }) => stats.getContextBreakdown(options),
 			getContextUsage: (options: { contextWindow?: number }) => stats.getContextUsage(options),
 		} as unknown as SessionMaintenanceHost;
-		return { maintenance: new SessionMaintenance(host), stats };
+		return { maintenance: new SessionMaintenance(host), stats, agent };
 	}
 
 	/** The smallest window `fits` admits, at most twice `from`. */
@@ -283,6 +283,26 @@ describe("SessionMaintenance.contextFitsModel with a snapcompact archive", () =>
 		// of the archive's text), the usage still priced `gpt`'s frames, so falling back to `gpt` needs the
 		// same window.
 		expect(window({ ...deepseek, contextWindow: 20_000 })).toBe(window(gpt));
+	});
+
+	it("moves provider usage between text views fitted to different windows", async () => {
+		// A reader without image input billed the archive's text at its own large window.
+		const { sessionManager, messages } = await archivedSession({ reply: false });
+		const first = archiveMaintenance(sessionManager, messages, deepseek);
+		await first.maintenance.renderArchiveForModel();
+		const usageTokens = new Tokenizer(deepseek).countMessages(first.agent.state.messages);
+		sessionManager.appendMessage(turn(deepseek, "Text reply.", usageTokens));
+		const { maintenance, stats } = archiveMaintenance(
+			sessionManager,
+			sessionManager.buildSessionContext().messages,
+			deepseek,
+		);
+		await maintenance.renderArchiveForModel();
+		expect(stats.getContextBreakdown()?.anchor?.model).toBe(deepseek.id);
+		// The same kind of reader with a small window gets the archive's text cut to its budget.
+		const contextWindow = 20_000;
+		expect(usageTokens).toBeGreaterThan(contextWindow);
+		expect(maintenance.contextFitsModel({ ...deepseek, contextWindow })).toBe(true);
 	});
 
 	it.each([
