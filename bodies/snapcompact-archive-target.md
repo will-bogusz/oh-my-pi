@@ -1,6 +1,8 @@
 ## What
 
-I kept asking why my Opus archives couldn't go higher and why we were artificially limiting them, so I ran archive sizes up to the providers' real limits on my longest sessions, and what actually held them back was our own half-the-room sizing rule.
+why cant opus archives go higher than that? why are we artifically limiting? we should experiment up to theoretical limits to ensure we are getting full value
+
+Running archive sizes up to the providers' real limits on my longest sessions showed what actually held them back was our own half-the-room sizing rule.
 
 Snapcompact archives now fill the compacted context up to 75% of the compaction trigger. On five long real sessions at their per-model triggers, archives grew from 50 → 72 frames on Opus 5.5 and 54 → 79 on gpt-6.1-sol, and recall of the discarded history rose from 37% → 53% and 29% → 36%.
 
