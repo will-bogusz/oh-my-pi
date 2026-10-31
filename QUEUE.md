@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 20:01Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 20:07Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-31 19:54Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 14, stacked 21, held 1, open PRs 20; merged 191, closed 12
+**Counts:** openable now 4, conflict-held 14, stacked 21, held 1, open PRs 20, queued since the last plan 1; merged 191, closed 12
 
 ## Openable now (4)
 
@@ -90,3 +90,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31
 | [#17490](https://github.com/can1357/oh-my-pi/pull/17490) | snapcompact-reduction-baseline | fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once | compaction | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-reduction-baseline) |
 | [#17496](https://github.com/can1357/oh-my-pi/pull/17496) | cache-marker | feat(coding-agent): show whether the next message reads the prompt cache | status-line | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cache-marker) |
 | [#17510](https://github.com/can1357/oh-my-pi/pull/17510) | snapcompact-text-reader | fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames | snapcompact | P1 | 20h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-text-reader) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| snapcompact-frame-budget | feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107) | catalog | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-budget) |
