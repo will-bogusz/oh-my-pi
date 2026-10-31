@@ -1,6 +1,8 @@
 ## What
 
-After switching to Claude from Gemini, Kimi or Codex, Claude sometimes refused the whole turn over the other model's reasoning we carry along, and for some switches that reasoning wasn't even reaching it anymore, so this fixes the carry and retries a refused turn once without it.
+I'd like to explore the idea of snapcompact fallback when switching models, and generally exploring more cross model/provider switching behaviors. I have a feeling this is underexplored right now, and probably not optimized.
+
+One case: after switching to Claude from Gemini, Kimi or Codex, Claude sometimes refused the whole turn over the other model's reasoning we carry along, and for some switches that reasoning no longer reached it, so this fixes the carry and retries a refused turn once without it.
 
 On real model-switch points from the author's sessions, turns refused over carried reasoning go from 3 of 21 to 0 of 21 (paired runs, below), and Codex, Kimi and Grok turns that `main` stripped reach Claude again.
 
