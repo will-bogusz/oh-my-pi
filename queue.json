@@ -57206,7 +57206,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/claude-refusal-strip-retry",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:44:06Z",
-   "updated": "2026-10-31T21:50:58Z",
+   "updated": "2026-10-31T21:55:09Z",
    "note": "",
    "built": [
     {
@@ -57369,6 +57369,15 @@
      "tip": "0b6c93360938c8ddde20d7810f263d0333a35df8",
      "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
      "at": "2026-10-31T21:50:54Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17607",
+     "code": "bb3fa1db98f7dcecf23e610f919a1685be02c976",
+     "with_code": "7a717944eb30c4fb8b8b0eaff8e46c546954d2f3",
+     "tip": "0b6c93360938c8ddde20d7810f263d0333a35df8",
+     "with_tip": "6215af9d69376203aa0b44a4310f1bb7d80fcce1",
+     "at": "2026-10-31T21:55:05Z",
      "host": "MacBook-Pro"
     }
    ]
