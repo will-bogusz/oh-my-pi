@@ -55924,7 +55924,7 @@
    "area": "status-line",
    "priority": "P2",
    "needs": [],
-   "base": "5d30c790b883ad0ae05dac2a4d2ccc8ecd103611",
+   "base": "7efd77219374ca4e8767979809835e4aa90666ba",
    "body": "bodies/cache-marker.md",
    "state": "open",
    "pr": 17496,
@@ -55932,7 +55932,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/cache-marker",
    "host": "MacBook-Pro",
    "added": "2026-10-30T19:19:28Z",
-   "updated": "2026-10-30T19:43:16Z",
+   "updated": "2026-10-31T19:59:23Z",
    "note": "",
    "built": [
     {
@@ -56107,7 +56107,8 @@
     }
    ],
    "opened": "2026-10-30T19:41:53Z",
-   "readied": "2026-10-30T19:43:15Z"
+   "readied": "2026-10-30T19:43:15Z",
+   "advanced": "2026-10-31T19:59:23Z"
   },
   {
    "id": "remove-stray-dbs",
