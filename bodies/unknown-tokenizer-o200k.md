@@ -1,6 +1,8 @@
 ## What
 
-I have a feeling cross model/provider switching is underexplored and probably not optimized, and the context estimate after a switch to Grok or Gemini is one place it shows: omp guessed their tokens at 4 bytes each, so compaction fired late.
+I'd like to explore the idea of snapcompact fallback when switching models, and generally exploring more cross model/provider switching behaviors. I have a feeling this is underexplored right now, and probably not optimized.
+
+The context estimate after a switch to Grok or Gemini is one place it shows: omp guessed their tokens at 4 bytes each, so compaction fired late.
 
 After a switch to Grok 4.7, a request Grok billed at 358,493 input tokens was estimated at 221,840 (−38%); it is now 351,057 (−2%). The same request under Factory's Gemini 3.8 Flash goes from 209,071 to 338,287 against 402,518 billed (−48% → −16%).
 

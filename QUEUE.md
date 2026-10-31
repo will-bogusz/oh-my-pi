@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 21:07Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31 21:08Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-10-31 21:03Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -34,7 +34,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31
 | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 7d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#16223](https://github.com/can1357/oh-my-pi/pull/16223), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 23h | iphone-mirror-pointer | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | switch-remote-reexpand | fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch | other |  | 22h | [#17490](https://github.com/can1357/oh-my-pi/pull/17490) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/switch-remote-reexpand) |
-| snapcompact-frame-budget | feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107) | catalog | P2 | 0h | [#17510](https://github.com/can1357/oh-my-pi/pull/17510) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-budget) |
+| snapcompact-frame-budget | feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107) | catalog | P2 | 1h | [#17510](https://github.com/can1357/oh-my-pi/pull/17510) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-budget) |
 
 ## Stacked (21)
 
@@ -67,7 +67,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-10-31
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 17d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
-| snapcompact-archive-target | feat(coding-agent): size snapcompact archives to 75% of the compaction trigger | other | P2 | 0h | Will, 2026-10-31: wait until the continuation eval with calibrated judges shows bigger archives help continued work, not only recall (+0.16 Opus recall, but 1.7x compactions) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-archive-target) |
+| snapcompact-archive-target | feat(coding-agent): size snapcompact archives to 75% of the compaction trigger | other | P2 | 1h | Will, 2026-10-31: wait until the continuation eval with calibrated judges shows bigger archives help continued work, not only recall (+0.16 Opus recall, but 1.7x compactions) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-archive-target) |
 
 ## Open PRs (20)
 
