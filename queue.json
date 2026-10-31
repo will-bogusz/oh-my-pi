@@ -56946,7 +56946,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T01:30:53Z",
+  "checked": "2026-10-31T02:01:30Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57115,48 +57115,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-24T01:49:23Z",
-    "kind": "unopenable",
-    "id": "ax-placeholder-name",
-    "title": "fix(natives): name macOS ax() text fields that have no label by their placeholder",
-    "why": "opened as #16915"
-   },
-   {
-    "at": "2026-10-24T01:49:23Z",
-    "kind": "unopenable",
-    "id": "axpress-click-hint",
-    "title": "fix(natives): tell an agent to click() a macOS element that has no press action",
-    "why": "opened as #16916"
-   },
-   {
-    "at": "2026-10-24T01:49:23Z",
-    "kind": "unopenable",
-    "id": "computer-control-policy",
-    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines",
-    "why": "opened as #16917"
-   },
-   {
-    "at": "2026-10-24T01:49:23Z",
-    "kind": "unopenable",
-    "id": "computer-doc-inline",
-    "title": "feat(coding-agent): start desktop tasks without a documentation read",
-    "why": "opened as #16918"
-   },
-   {
-    "at": "2026-10-24T01:49:23Z",
-    "kind": "unopenable",
-    "id": "git-guard-defects",
-    "title": "fix(pi-shell): end the git guard's conflict exemption with the conflict",
-    "why": "opened as #16919"
-   },
-   {
-    "at": "2026-10-24T01:49:23Z",
-    "kind": "unopenable",
-    "id": "grep-exclude",
-    "title": "feat(coding-agent,natives): exclude files and folders from grep with `!glob` path entries",
-    "why": "opened as #16920"
-   },
    {
     "at": "2026-10-24T03:20:41Z",
     "kind": "openable",
