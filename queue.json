@@ -57607,7 +57607,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-10-31T23:58:29Z",
+  "checked": "2026-11-01T00:29:05Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57626,10 +57626,6 @@
    "iphone-mirror-key-gap": {
     "since": "2026-10-30T21:25:06Z",
     "title": "perf(natives): type on iPhone Mirroring twice as fast"
-   },
-   "date-reminder-journal": {
-    "since": "2026-10-31T23:58:29Z",
-    "title": "fix(coding-agent): keep each message's date across resume and subagent revival"
    }
   },
   "conflicts": {
@@ -57666,7 +57662,8 @@
    17496,
    17510,
    17607,
-   17610
+   17610,
+   17622
   ],
   "post_merge": {
    "16300": {
@@ -59123,6 +59120,13 @@
     "kind": "openable",
     "id": "date-reminder-journal",
     "title": "fix(coding-agent): keep each message's date across resume and subagent revival"
+   },
+   {
+    "at": "2026-11-01T00:29:05Z",
+    "kind": "unopenable",
+    "id": "date-reminder-journal",
+    "title": "fix(coding-agent): keep each message's date across resume and subagent revival",
+    "why": "opened as #17622"
    }
   ]
  },
@@ -60154,12 +60158,12 @@
   }
  },
  "plan": {
-  "at": "2026-10-31T23:58:30.297173Z",
+  "at": "2026-11-01T00:29:06.202933Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -60356,6 +60360,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-31T21:57:19Z"
+   },
+   {
+    "id": "date-reminder-journal",
+    "label": "#17622",
+    "number": 17622,
+    "state": "open",
+    "area": "other",
+    "priority": "P2",
+    "title": "fix(coding-agent): keep each message's date across resume and subagent revival",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-01T00:10:27Z"
    },
    {
     "id": "reset-restore-longest-wait",
@@ -61242,23 +61263,6 @@
     ],
     "needs": [],
     "created": "2026-10-31T23:51:27Z"
-   },
-   {
-    "id": "date-reminder-journal",
-    "label": "date-reminder-journal",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(coding-agent): keep each message's date across resume and subagent revival",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-31T23:51:18Z"
    },
    {
     "id": "switch-remote-reexpand",
