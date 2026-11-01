@@ -11,7 +11,7 @@ Resuming a session, or waking a parked subagent, on a later day made Claude lose
 
 The date/cwd line rides on the first user message (#7404). `DateCwdReminderInjector` remembered each message's date only in memory, and a resume, a revived subagent or `/resume` gets a new injector.
 
-Reading order: `session/date-cwd-reminder.ts` (`DateCwdReminderJournal`, `#restoredRootState`, the `record` calls), then `sdk.ts`.
+Reading order: `session/date-cwd-reminder.ts`, then `sdk.ts`.
 
 ## Why
 
@@ -31,7 +31,7 @@ Each placement is recorded as a `date-cwd-reminder` custom entry (`{ conversatio
 
 ## Testing
 
-- `bun test test/date-cwd-reminder.test.ts`: 42 pass. 8 of 10 new tests fail on `main`; the other two (a compaction dropping a developer reminder's anchor, a repeated first message after `/clear`) guard the journal and fail against earlier versions of it. Cases: resume byte-for-byte, compaction, interrupted request, session switch, tree move, `/clear`, re-created first message, journal reads, a file-backed session reopened two days later.
+- `bun test test/date-cwd-reminder.test.ts`: 42 pass. 8 of 10 new tests fail on `main`; the other two (a compaction dropping a developer reminder's anchor, a repeated first message after `/clear`) fail against earlier versions of the journal. Cases: resume byte-for-byte, compaction, interrupted request, session switch, tree move, `/clear`, re-created first message, journal reads, a file-backed session reopened two days later.
 - Live, real Anthropic, Haiku 5.5 (same thinking binding as Opus 5.5), request bodies dumped before sending: the table.
 - Full `packages/coding-agent` suite: failures match `main`'s.
 
