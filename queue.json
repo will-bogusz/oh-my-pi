@@ -57607,7 +57607,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-01T10:41:59Z",
+  "checked": "2026-11-01T11:44:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57680,30 +57680,6 @@
       "addressed_by": 16552
      }
     ]
-   },
-   "17389": {
-    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule",
-    "merge_commit": "f4446ca8d4df1cbc3cebdeb20cba158e2c615931",
-    "merged_at": "2026-10-30T11:25:56Z",
-    "findings": []
-   },
-   "17391": {
-    "title": "feat(computer): wait for windows opened by actions",
-    "merge_commit": "d9c1e23d25592511325ef4fb1c2894dfd08b170e",
-    "merged_at": "2026-10-30T11:25:56Z",
-    "findings": []
-   },
-   "17393": {
-    "title": "feat(coding-agent): list unused meta tags by name in native web reads",
-    "merge_commit": "78c576cb91525e6be646d27bbcd137a0120f4e3d",
-    "merged_at": "2026-10-30T11:25:57Z",
-    "findings": []
-   },
-   "17417": {
-    "title": "fix(browser): replace a rich-text editor's text when filling it",
-    "merge_commit": "07fc07d2497540d41a583e0752f37dbe48d0c167",
-    "merged_at": "2026-10-30T11:25:56Z",
-    "findings": []
    },
    "17489": {
     "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
@@ -60158,7 +60134,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-01T10:42:00.242627Z",
+  "at": "2026-11-01T11:44:05.018404Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
