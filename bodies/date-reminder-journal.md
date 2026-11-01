@@ -21,7 +21,7 @@ Each placement is recorded as a `date-cwd-reminder` custom entry (`{ conversatio
 
 - After a compaction renumbers same-key turns, the new conversation journals what it inherits under the new keys.
 - A first message a context hook rebuilds every request is found again by a digest of its content.
-- The branch is read once per resume, not per request. A turn recorded without a reply (an interrupted request) counts as sent. Switching sessions or moving in the tree drops the in-memory state, and placements before `/clear` are not read back.
+- The branch is read once per resume, not per request. A turn recorded without a reply (an interrupted request) counts as sent. Switching sessions, moving in the tree or reloading turns another process wrote drops the in-memory state, and placements before `/clear` are not read back.
 - Rejected: dating the first message from its timestamp (#15364's first version); it cannot place a later reminder (mid tool loop, after `cd`).
 - Advisors keep unjournaled injectors. Older transcripts keep `main`'s behaviour.
 
@@ -31,7 +31,7 @@ Each placement is recorded as a `date-cwd-reminder` custom entry (`{ conversatio
 
 ## Testing
 
-- `bun test test/date-cwd-reminder.test.ts`: 42 pass. 8 of 10 new tests fail on `main`; the other two (a compaction dropping a developer reminder's anchor, a repeated first message after `/clear`) fail against earlier versions of the journal. Cases: resume byte-for-byte, compaction, interrupted request, session switch, tree move, `/clear`, re-created first message, journal reads, a file-backed session reopened two days later.
+- `bun test test/date-cwd-reminder.test.ts`: 43 pass. 9 of 11 new tests fail on `main`; the other two (a compaction dropping a developer reminder's anchor, a repeated first message after `/clear`) fail against earlier versions of the journal. Cases: resume byte-for-byte, compaction, interrupted request, session switch, tree move, reload, `/clear`, re-created first message, journal reads, a file-backed session reopened two days later.
 - Live, real Anthropic, Haiku 5.5 (same thinking binding as Opus 5.5), request bodies dumped before sending: the table.
 - Full `packages/coding-agent` suite: failures match `main`'s.
 
