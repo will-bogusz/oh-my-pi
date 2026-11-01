@@ -57400,7 +57400,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-31T23:51:18Z",
-   "updated": "2026-11-01T00:10:28Z",
+   "updated": "2026-11-01T00:10:48Z",
    "note": "",
    "built": [
     {
@@ -57584,7 +57584,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-01T00:10:28Z"
+   "opened": "2026-11-01T00:10:28Z",
+   "readied": "2026-11-01T00:10:48Z"
   },
   {
    "id": "cold-revive-xdev-mounts",
