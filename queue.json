@@ -57390,7 +57390,7 @@
    "branch": "will/date-reminder-journal",
    "title": "fix(coding-agent): keep each message's date across resume and subagent revival",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "62f4f7cccfd38adde9a2ae203d69b27bc187a84f",
    "body": "bodies/date-reminder-journal.md",
@@ -57400,7 +57400,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-31T23:51:18Z",
-   "updated": "2026-11-01T00:20:39Z",
+   "updated": "2026-11-01T00:29:03Z",
    "note": "",
    "built": [
     {
