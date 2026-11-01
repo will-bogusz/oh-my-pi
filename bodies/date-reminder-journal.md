@@ -31,7 +31,7 @@ Each placement is recorded as a `date-cwd-reminder` custom entry (`{ conversatio
 
 ## Testing
 
-- `bun test test/date-cwd-reminder.test.ts`: 42 pass. 8 of 10 new tests fail on `main`; the other two (a compaction dropping a developer reminder's anchor, a repeated first message after `/clear`) guard the journal and fail against earlier versions of it. They cover a fresh injector resending earlier turns byte-for-byte, compaction, an interrupted request, a session switch, a tree move, `/clear`, a re-created first message, journal reads, and a file-backed session reopened two days later.
+- `bun test test/date-cwd-reminder.test.ts`: 42 pass. 8 of 10 new tests fail on `main`; the other two (a compaction dropping a developer reminder's anchor, a repeated first message after `/clear`) guard the journal and fail against earlier versions of it. Cases: resume byte-for-byte, compaction, interrupted request, session switch, tree move, `/clear`, re-created first message, journal reads, a file-backed session reopened two days later.
 - Live, real Anthropic, Haiku 5.5 (same thinking binding as Opus 5.5), request bodies dumped before sending: the table.
 - Full `packages/coding-agent` suite: failures match `main`'s.
 
