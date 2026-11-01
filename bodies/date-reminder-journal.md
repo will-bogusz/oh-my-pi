@@ -17,17 +17,21 @@ Reading order: `session/date-cwd-reminder.ts` (`DateCwdReminderJournal`, `#resto
 
 Over one week of my sessions on 18.14.0 this caused 144 of the 406 requests sent with thinking dropped (`inputTransformations: prefix_binding_mismatch`), mostly subagents woken overnight.
 
-Each placement is recorded as a `date-cwd-reminder` custom entry (`{ conversation, turn, reminder, placement }`), and an injector meeting a conversation it has no state for rebuilds its reminders from the branch: the contract #15364's review proposed, so fork, branch switch, compaction and `/resume` see the right set. #15364 predates the injector rework (#17117); this is a fresh implementation.
+Each placement is recorded as a `date-cwd-reminder` custom entry (`{ conversation, turn, reminder, placement }`), and an injector meeting a conversation it has no state for rebuilds its reminders from the branch: so fork, branch switch, compaction and `/resume` see the right set.
 
 - After a compaction renumbers same-key turns, the new conversation journals what it inherits under the new keys.
 - A first message a context hook rebuilds every request is found again by a digest of its content.
-- The branch is read once per resume, not per request.
+- The branch is read once per resume, not per request. A turn recorded without a reply (an interrupted request) counts as sent, and switching sessions drops the in-memory state.
 - Rejected: dating the first message from its timestamp (#15364's first version); it cannot place a later reminder (mid tool loop, after `cd`).
 - Advisors keep unjournaled injectors. Older transcripts keep `main`'s behaviour.
 
+## Decisions
+
+- This PR or #15364: this one. #15364 edits the injector as it was before #17117 reworked it and has conflicted since 10-21; this PR implements the contract #15364's review settled on (a custom entry read back from the branch) on the current injector, so #15364 can close if this merges.
+
 ## Testing
 
-- `bun test test/date-cwd-reminder.test.ts`: 38 pass. 5 of 6 new tests fail on `main`; the sixth (a compaction dropping a developer reminder's anchor) fails against a journal keyed by original turns. They cover a fresh injector resending earlier turns byte-for-byte, compaction, a re-created first message, journal reads, and a file-backed session reopened two days later.
+- `bun test test/date-cwd-reminder.test.ts`: 40 pass. 7 of 8 new tests fail on `main`; the other (a compaction dropping a developer reminder's anchor) fails against a journal keyed by original turns. They cover a fresh injector resending earlier turns byte-for-byte, compaction, a re-created first message, journal reads, and a file-backed session reopened two days later.
 - Live, real Anthropic, Haiku 5.5 (same thinking binding as Opus 5.5), request bodies dumped before sending: the table.
 - Full `packages/coding-agent` suite: failures match `main`'s.
 
