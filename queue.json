@@ -57609,7 +57609,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-01T12:45:55Z",
+  "checked": "2026-11-01T13:46:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57652,18 +57652,7 @@
    }
   },
   "merged_through": "2026-11-01T12:34:35Z",
-  "unreleased": {
-   "17510": {
-    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
-    "merge_commit": "7c8346132aa7381b90155dcfe7e794e435e88f16",
-    "merged_at": "2026-11-01T12:34:35Z"
-   },
-   "17490": {
-    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
-    "merge_commit": "6eedc5d3b97accc31e6bb14554e2191b47f366ea",
-    "merged_at": "2026-11-01T12:34:35Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    15128,
    15130,
@@ -59168,6 +59157,20 @@
     "files": [
      "packages/coding-agent/src/sdk.ts"
     ]
+   },
+   {
+    "at": "2026-11-01T13:46:43Z",
+    "kind": "released",
+    "number": 17510,
+    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
+    "tag": "v18.15.0"
+   },
+   {
+    "at": "2026-11-01T13:46:43Z",
+    "kind": "released",
+    "number": 17490,
+    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
+    "tag": "v18.15.0"
    }
   ]
  },
@@ -60199,7 +60202,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-01T12:45:56.026056Z",
+  "at": "2026-11-01T13:46:44.261055Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
