@@ -57609,7 +57609,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-01T22:56:40Z",
+  "checked": "2026-11-01T23:27:36Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57710,12 +57710,6 @@
     "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
     "merge_commit": "6eedc5d3b97accc31e6bb14554e2191b47f366ea",
     "merged_at": "2026-11-01T12:34:35Z",
-    "findings": []
-   },
-   "17492": {
-    "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
-    "merge_commit": "c391fc2ad5ac5f26533eb6f2ca7eed97b0e36dd5",
-    "merged_at": "2026-10-30T23:02:49Z",
     "findings": []
    },
    "17500": {
