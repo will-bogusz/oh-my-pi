@@ -57609,7 +57609,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-01T11:44:04Z",
+  "checked": "2026-11-01T12:45:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57628,9 +57628,20 @@
    "iphone-mirror-key-gap": {
     "since": "2026-10-30T21:25:06Z",
     "title": "perf(natives): type on iPhone Mirroring twice as fast"
+   },
+   "text-reader-usage-shift": {
+    "since": "2026-11-01T12:45:55Z",
+    "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check"
    }
   },
   "conflicts": {
+   "#15130": {
+    "since": "2026-11-01T12:45:55Z",
+    "title": "feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup",
+    "files": [
+     "packages/coding-agent/src/sdk.ts"
+    ]
+   },
    "#15433": {
     "since": "2026-10-31T16:17:38Z",
     "title": "feat(task): add omp agents show for what an agent's spawns run with",
@@ -57640,8 +57651,19 @@
     ]
    }
   },
-  "merged_through": "2026-10-31T14:56:17Z",
-  "unreleased": {},
+  "merged_through": "2026-11-01T12:34:35Z",
+  "unreleased": {
+   "17510": {
+    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
+    "merge_commit": "7c8346132aa7381b90155dcfe7e794e435e88f16",
+    "merged_at": "2026-11-01T12:34:35Z"
+   },
+   "17490": {
+    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
+    "merge_commit": "6eedc5d3b97accc31e6bb14554e2191b47f366ea",
+    "merged_at": "2026-11-01T12:34:35Z"
+   }
+  },
   "ready": [
    15128,
    15130,
@@ -57660,9 +57682,7 @@
    16611,
    16801,
    16908,
-   17490,
    17496,
-   17510,
    17607,
    17610,
    17622
@@ -57689,6 +57709,12 @@
     "merged_at": "2026-10-31T14:56:17Z",
     "findings": []
    },
+   "17490": {
+    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
+    "merge_commit": "6eedc5d3b97accc31e6bb14554e2191b47f366ea",
+    "merged_at": "2026-11-01T12:34:35Z",
+    "findings": []
+   },
    "17492": {
     "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
     "merge_commit": "c391fc2ad5ac5f26533eb6f2ca7eed97b0e36dd5",
@@ -57705,6 +57731,12 @@
     "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
     "merge_commit": "59cd125cd140d5a89b685023d8022d6bb659d7c0",
     "merged_at": "2026-10-31T13:58:26Z",
+    "findings": []
+   },
+   "17510": {
+    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
+    "merge_commit": "7c8346132aa7381b90155dcfe7e794e435e88f16",
+    "merged_at": "2026-11-01T12:34:35Z",
     "findings": []
    }
   },
@@ -59105,6 +59137,37 @@
     "id": "date-reminder-journal",
     "title": "fix(coding-agent): keep each message's date across resume and subagent revival",
     "why": "opened as #17622"
+   },
+   {
+    "at": "2026-11-01T12:45:55Z",
+    "kind": "merged",
+    "number": 17510,
+    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-01T12:45:55Z",
+    "kind": "merged",
+    "number": 17490,
+    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-01T12:45:55Z",
+    "kind": "openable",
+    "id": "text-reader-usage-shift",
+    "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check"
+   },
+   {
+    "at": "2026-11-01T12:45:55Z",
+    "kind": "conflict",
+    "label": "#15130",
+    "title": "feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup",
+    "files": [
+     "packages/coding-agent/src/sdk.ts"
+    ]
    }
   ]
  },
@@ -60136,7 +60199,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-01T11:44:05.018404Z",
+  "at": "2026-11-01T12:45:56.026056Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -60211,44 +60274,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-21T03:57:51Z"
-   },
-   {
-    "id": "snapcompact-reduction-baseline",
-    "label": "#17490",
-    "number": 17490,
-    "state": "open",
-    "area": "compaction",
-    "priority": "P1",
-    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T17:27:10Z"
-   },
-   {
-    "id": "snapcompact-text-reader",
-    "label": "#17510",
-    "number": 17510,
-    "state": "open",
-    "area": "snapcompact",
-    "priority": "P1",
-    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#17490"
-    ],
-    "needs": [],
-    "created": "2026-10-30T23:08:50Z"
    },
    {
     "id": "print-hold",
@@ -60381,8 +60406,10 @@
     "area": "broker",
     "priority": "P2",
     "title": "feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/sdk.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -60832,7 +60859,8 @@
     "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
     "action": "wait",
     "reasons": [
-     "conflicts with #16284 in packages/coding-agent/src/tools/browser/relay/bridge.ts"
+     "conflicts with #16284 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts"
     ],
     "note": "",
     "over": [],
@@ -60857,6 +60885,7 @@
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/relay-call-deadline conflicts with main in packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts",
+     "its need r2/relay-bg-input-main conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
@@ -60888,7 +60917,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -60915,8 +60944,8 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
-     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -61086,7 +61115,6 @@
     "title": "feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks",
     "action": "wait",
     "reasons": [
-     "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
@@ -61097,7 +61125,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17490",
      "#17610",
      "#15128",
      "#15130",
@@ -61144,7 +61171,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #16284 in docs/tools/browser.md",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -61212,7 +61239,8 @@
     "title": "feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107)",
     "action": "held",
     "reasons": [
-     "held: Will, 2026-10-31: no user effect without archive-target except 1M gpt-5.6 models, whose recall past 80 frames is unmeasured; decide together with archive-target after the continuation eval"
+     "held: Will, 2026-10-31: no user effect without archive-target except 1M gpt-5.6 models, whose recall past 80 frames is unmeasured; decide together with archive-target after the continuation eval",
+     "conflicts with main in packages/coding-agent/test/agent-session-snapcompact-reader.test.ts"
     ],
     "note": "",
     "over": [],
@@ -61252,14 +61280,12 @@
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "action": "wait",
     "reasons": [
-     "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts"
+     "conflicts with main in packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#17490"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-30T22:45:47Z"
    },
@@ -61271,17 +61297,13 @@
     "area": "coding-agent",
     "priority": null,
     "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check",
-    "action": "wait",
-    "reasons": [
-     "needs #17510 (open)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [
-     "#17510"
-    ],
+    "needs": [],
     "created": "2026-10-31T21:07:28Z"
    },
    {
@@ -61324,6 +61346,7 @@
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -61333,7 +61356,8 @@
      "#17610",
      "#15128",
      "#15130",
-     "#16801"
+     "#16801",
+     "text-reader-usage-shift"
     ],
     "needs": [
      "#15133"
@@ -61378,22 +61402,22 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
-     "conflicts with #17490 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17490",
      "#17610",
      "#15128",
      "#15130",
-     "#16801"
+     "#16801",
+     "text-reader-usage-shift"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -61434,6 +61458,7 @@
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15433 in docs/cli-reference.md",
      "conflicts with #16801 in docs/cli-reference.md, docs/sdk.md, packages/coding-agent/src/cli/poke-cli.ts, packages/coding-agent/src/mailbox/headless.ts, packages/coding-agent/src/mailbox/mailbox.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/mailbox.test.ts, packages/coding-agent/test/session-mailbox.test.ts",
+     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts"
     ],
     "note": "",
@@ -61444,7 +61469,8 @@
      "#15128",
      "#15130",
      "#15433",
-     "#16801"
+     "#16801",
+     "text-reader-usage-shift"
     ],
     "needs": [
      "timer-pr-1-poke"
@@ -61521,6 +61547,7 @@
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/session-mailbox.test.ts",
+     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts",
      "its need timer-pr-3-tool conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
     ],
     "note": "",
@@ -61530,7 +61557,8 @@
      "#17610",
      "#15128",
      "#15130",
-     "#16801"
+     "#16801",
+     "text-reader-usage-shift"
     ],
     "needs": [
      "timer-pr-3-tool"
