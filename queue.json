@@ -57179,7 +57179,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-not-showing",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:36:03Z",
-   "updated": "2026-11-02T03:24:51Z",
+   "updated": "2026-11-02T03:25:11Z",
    "note": "",
    "built": [
     {
@@ -57251,7 +57251,8 @@
     }
    ],
    "advanced": "2026-11-02T02:40:57Z",
-   "opened": "2026-11-02T03:24:51Z"
+   "opened": "2026-11-02T03:24:51Z",
+   "readied": "2026-11-02T03:25:11Z"
   },
   {
    "id": "macos-scroll-direction",
