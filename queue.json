@@ -50609,13 +50609,13 @@
    "needs": [],
    "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/tab-click-options.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17767,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tab-click-options",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:26:13Z",
-   "updated": "2026-11-02T04:29:52Z",
+   "updated": "2026-11-02T04:32:15Z",
    "note": "",
    "built": [
     {
@@ -51198,7 +51198,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-02T02:39:08Z"
+   "advanced": "2026-11-02T02:39:08Z",
+   "opened": "2026-11-02T04:32:15Z"
   },
   {
    "id": "axpress-click-hint",
