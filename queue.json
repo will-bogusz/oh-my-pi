@@ -59737,15 +59737,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T16:46:00Z",
+  "checked": "2026-11-02T17:16:36Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "factory-droid-gemini-4-argon-110": {
-    "since": "2026-11-02T14:43:43Z",
-    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-11-02T14:27:50Z",
   "unreleased": {
@@ -61061,6 +61056,13 @@
     "kind": "openable",
     "id": "factory-droid-gemini-4-argon-110",
     "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect"
+   },
+   {
+    "at": "2026-11-02T17:16:36Z",
+    "kind": "unopenable",
+    "id": "factory-droid-gemini-4-argon-110",
+    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
+    "why": "plan: wait (conflicts with main in packages/coding-agent/test/session/provider-image-budget.test.ts)"
    }
   ]
  },
@@ -62222,7 +62224,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T16:46:01.248902Z",
+  "at": "2026-11-02T17:16:37.569353Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -62778,8 +62780,10 @@
     "area": "providers",
     "priority": "P2",
     "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/test/session/provider-image-budget.test.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
