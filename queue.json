@@ -21078,8 +21078,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-lossless",
    "host": "MacBook-Pro",
    "added": "2026-10-19T00:03:17Z",
-   "updated": "2026-11-02T14:32:49Z",
-   "note": "HOLD (Will, 2026-10-18): waits for Will's OK on the Accessibility dependency",
+   "updated": "2026-11-02T14:33:20Z",
+   "note": "HOLD (Will, 2026-10-18): waits for Will's OK on the Accessibility dependency 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard).",
    "hold": "Will, 2026-10-18: waits for Will's OK on the Accessibility dependency (moved from note, QueueRestructure 2026-11-02)"
   },
   {
