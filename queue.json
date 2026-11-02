@@ -59240,8 +59240,64 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-opus-refusal-fallback",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:23:59Z",
-   "updated": "2026-11-02T03:23:59Z",
-   "note": ""
+   "updated": "2026-11-02T03:45:20Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#17607",
+     "code": "8856e0cc8b7555d4c702d5f22026aa265e5ca2f7",
+     "with_code": "5fd19bf0d553f8c2b8b8d145dae24bd3438a1255",
+     "tip": "7c11eff5f1bbf1e1b3de2f75b4106dec2d66b7d3",
+     "with_tip": "6af882afe52816adca90abbb7473d052495c596e",
+     "at": "2026-11-02T03:45:15Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17610",
+     "code": "8856e0cc8b7555d4c702d5f22026aa265e5ca2f7",
+     "with_code": "9da13ec727c2a582a3d747dec1f794dadd1aed44",
+     "tip": "7c11eff5f1bbf1e1b3de2f75b4106dec2d66b7d3",
+     "with_tip": "e6cfaadb7b30db78feb86a90f0a3c69d0067cb2c",
+     "at": "2026-11-02T03:45:19Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15130",
+     "code": "8856e0cc8b7555d4c702d5f22026aa265e5ca2f7",
+     "with_code": "0060b29986d9f3944914810d980c3877111db246",
+     "tip": "7c11eff5f1bbf1e1b3de2f75b4106dec2d66b7d3",
+     "with_tip": "63d2562c068c206434d5c611dcb02b871a352574",
+     "at": "2026-11-02T03:45:19Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16309",
+     "code": "8856e0cc8b7555d4c702d5f22026aa265e5ca2f7",
+     "with_code": "70ab9f79851e26f70927c1362fda774e4a69ae6f",
+     "tip": "7c11eff5f1bbf1e1b3de2f75b4106dec2d66b7d3",
+     "with_tip": "575ec2092e012f2d61b5b1589174eb7cff8a76ef",
+     "at": "2026-11-02T03:45:19Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16611",
+     "code": "8856e0cc8b7555d4c702d5f22026aa265e5ca2f7",
+     "with_code": "8a2e0e10c1c7d7a54e90c7821e50860ed40802af",
+     "tip": "7c11eff5f1bbf1e1b3de2f75b4106dec2d66b7d3",
+     "with_tip": "477261b9bb01720f58aedf77f97345f56969ea89",
+     "at": "2026-11-02T03:45:19Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "factory-droid-110-models",
+     "code": "8856e0cc8b7555d4c702d5f22026aa265e5ca2f7",
+     "with_code": "883dffa72382b54b6a5620360e994cdfb627bf9b",
+     "tip": "7c11eff5f1bbf1e1b3de2f75b4106dec2d66b7d3",
+     "with_tip": "1956ff2a6f07c39cb0c4d0a6ee8ae50b8882d17c",
+     "at": "2026-11-02T03:45:20Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "factory-droid-muse-spark-1-3",
