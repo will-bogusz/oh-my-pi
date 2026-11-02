@@ -58592,13 +58592,13 @@
    "needs": [],
    "base": "686b5e2fb542848dc3ff1a9e36a42a8fefdd2278",
    "body": "bodies/rich-editor-fill-followup.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17742,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rich-editor-fill-followup",
    "host": "MacBook-Pro",
    "added": "2026-11-02T01:52:49Z",
-   "updated": "2026-11-02T02:11:36Z",
+   "updated": "2026-11-02T02:12:04Z",
    "note": "",
    "built": [
     {
@@ -58809,7 +58809,8 @@
      "host": "MacBook-Pro",
      "tree": "bd88f2489ca3b2136a8f8ee2af0a8c154ecb4a7b"
     }
-   ]
+   ],
+   "opened": "2026-11-02T02:12:04Z"
   }
  ],
  "watch": {
