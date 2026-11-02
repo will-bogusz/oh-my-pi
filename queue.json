@@ -50507,7 +50507,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "0b5c27ab24719c86a5986b95ee55f4e75bc1aaa0",
+   "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/tab-click-options.md",
    "state": "queued",
    "pr": null,
@@ -50515,7 +50515,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tab-click-options",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:26:13Z",
-   "updated": "2026-10-23T21:45:27Z",
+   "updated": "2026-11-02T02:36:32Z",
    "note": "",
    "built": [
     {
@@ -50988,7 +50988,8 @@
      "host": "goliath",
      "tree": "7c59369b637c05b6a96f29b88ed3c28d1ba056a2"
     }
-   ]
+   ],
+   "advanced": "2026-11-02T02:36:32Z"
   },
   {
    "id": "axpress-click-hint",
