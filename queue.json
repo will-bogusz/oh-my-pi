@@ -57183,7 +57183,7 @@
    "needs": [
     "#17510"
    ],
-   "base": "8ce534d53a0a576ef4f21b81700f2dba3ca6dc26",
+   "base": "686b5e2fb542848dc3ff1a9e36a42a8fefdd2278",
    "body": "bodies/text-reader-usage-shift.md",
    "state": "queued",
    "pr": null,
@@ -57191,8 +57191,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-reader-usage-shift",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:07:28Z",
-   "updated": "2026-10-31T21:12:11Z",
-   "note": ""
+   "updated": "2026-11-02T01:17:58Z",
+   "note": "",
+   "advanced": "2026-11-02T01:17:58Z"
   },
   {
    "id": "claude-refusal-strip-retry",
