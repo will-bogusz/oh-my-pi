@@ -58089,7 +58089,7 @@
    "branch": "will/cold-revive-xdev-mounts",
    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
    "area": "other",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "686b5e2fb542848dc3ff1a9e36a42a8fefdd2278",
    "body": "bodies/cold-revive-xdev-mounts.md",
@@ -58099,7 +58099,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/prompt-drift",
    "host": "MacBook-Pro",
    "added": "2026-10-31T23:51:27Z",
-   "updated": "2026-11-02T02:23:55Z",
+   "updated": "2026-11-02T02:27:01Z",
    "note": "",
    "advanced": "2026-11-02T01:40:14Z",
    "built": [
@@ -58342,7 +58342,7 @@
    "branch": "will/snapcompact-think-legend",
    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "686b5e2fb542848dc3ff1a9e36a42a8fefdd2278",
    "body": "bodies/snapcompact-think-legend.md",
@@ -58352,7 +58352,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-think-legend",
    "host": "MacBook-Pro",
    "added": "2026-11-02T01:38:07Z",
-   "updated": "2026-11-02T02:18:27Z",
+   "updated": "2026-11-02T02:27:01Z",
    "note": "",
    "built": [
     {
