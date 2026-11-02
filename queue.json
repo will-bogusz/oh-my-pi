@@ -59207,6 +59207,24 @@
    "updated": "2026-11-02T03:28:04Z",
    "note": "",
    "hold": "DroidSync110, 2026-11-02: live two-read turn on muse-spark-1.3 not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes"
+  },
+  {
+   "id": "factory-droid-110-pin",
+   "branch": "will/factory-droid-110-pin",
+   "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
+   "area": "providers",
+   "priority": "P1",
+   "needs": [],
+   "base": "256b3211bca7458391866a8bcc9369902664be55",
+   "body": "bodies/factory-droid-110-pin.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-110-pin",
+   "host": "MacBook-Pro",
+   "added": "2026-11-02T03:32:33Z",
+   "updated": "2026-11-02T03:32:33Z",
+   "note": ""
   }
  ],
  "watch": {
