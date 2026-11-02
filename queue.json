@@ -58349,7 +58349,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-think-legend",
    "host": "MacBook-Pro",
    "added": "2026-11-02T01:38:07Z",
-   "updated": "2026-11-02T02:18:04Z",
+   "updated": "2026-11-02T02:18:27Z",
    "note": "",
    "built": [
     {
@@ -58583,7 +58583,8 @@
      "tree": "bd88f2489ca3b2136a8f8ee2af0a8c154ecb4a7b"
     }
    ],
-   "opened": "2026-11-02T02:18:04Z"
+   "opened": "2026-11-02T02:18:04Z",
+   "readied": "2026-11-02T02:18:26Z"
   },
   {
    "id": "rich-editor-fill-followup",
