@@ -59607,7 +59607,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T13:11:46Z",
+  "checked": "2026-11-02T14:12:47Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -59679,12 +59679,6 @@
     "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
     "merge_commit": "065f8edbc5a988362a299a10966d1cad6b3de0f3",
     "merged_at": "2026-10-31T14:56:17Z",
-    "findings": []
-   },
-   "17501": {
-    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
-    "merge_commit": "59cd125cd140d5a89b685023d8022d6bb659d7c0",
-    "merged_at": "2026-10-31T13:58:26Z",
     "findings": []
    },
    "17510": {
@@ -61815,7 +61809,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T13:11:47.175920Z",
+  "at": "2026-11-02T14:12:48.862258Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
