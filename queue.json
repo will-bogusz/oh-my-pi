@@ -60480,8 +60480,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T01:30:17.917504Z",
-  "host": "goliath",
+  "at": "2026-11-02T01:38:24.296634Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -61542,6 +61542,23 @@
     "created": "2026-10-31T23:51:27Z"
    },
    {
+    "id": "snapcompact-think-legend",
+    "label": "snapcompact-think-legend",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": null,
+    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T01:38:07Z"
+   },
+   {
     "id": "switch-remote-reexpand",
     "label": "switch-remote-reexpand",
     "number": null,
@@ -61549,10 +61566,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/session/session-maintenance.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -61568,12 +61583,16 @@
     "area": "coding-agent",
     "priority": null,
     "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/session-maintenance.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "switch-remote-reexpand"
+    ],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
    },
@@ -61618,7 +61637,7 @@
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -61630,7 +61649,7 @@
      "#15130",
      "#16801",
      "#17496",
-     "text-reader-usage-shift"
+     "switch-remote-reexpand"
     ],
     "needs": [
      "#15133"
@@ -61680,7 +61699,8 @@
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with snapcompact-think-legend in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -61692,7 +61712,8 @@
      "#15130",
      "#16801",
      "#17496",
-     "text-reader-usage-shift"
+     "snapcompact-think-legend",
+     "switch-remote-reexpand"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -61734,7 +61755,7 @@
      "conflicts with #15433 in docs/cli-reference.md",
      "conflicts with #16801 in docs/cli-reference.md, docs/sdk.md, packages/coding-agent/src/cli/poke-cli.ts, packages/coding-agent/src/mailbox/headless.ts, packages/coding-agent/src/mailbox/mailbox.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/mailbox.test.ts, packages/coding-agent/test/session-mailbox.test.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts"
     ],
     "note": "",
@@ -61747,7 +61768,7 @@
      "#15433",
      "#16801",
      "#17496",
-     "text-reader-usage-shift"
+     "switch-remote-reexpand"
     ],
     "needs": [
      "timer-pr-1-poke"
@@ -61829,7 +61850,7 @@
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #16801 in packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/session-mailbox.test.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/agent-session.ts",
      "its need timer-pr-3-tool conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
     ],
     "note": "",
@@ -61841,7 +61862,7 @@
      "#15130",
      "#16801",
      "#17496",
-     "text-reader-usage-shift"
+     "switch-remote-reexpand"
     ],
     "needs": [
      "timer-pr-3-tool"
@@ -61936,7 +61957,7 @@
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
      "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",
