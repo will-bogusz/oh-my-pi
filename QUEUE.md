@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 06:41Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 06:44Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-02 06:35Z on goliath; groups below are from it, states from the manifest)
@@ -59,7 +59,7 @@ none
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 23d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | computer-ax-lines | feat(natives): show what macOS ax() elements can do | computer | P2 | 22d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ax-lines) |
 | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | print-hold | fix(coding-agent): keep browser calls going when a page calls window.print() | browser | P2 | 20d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-hold) |
-| [#17778](https://github.com/can1357/oh-my-pi/pull/17778) | r2/relay-call-deadline | fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s | browser | P1 | 0h | keep; opened over P2 #16284; opened over P2 #16908 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-call-deadline) |
+| [#17778](https://github.com/can1357/oh-my-pi/pull/17778) | r2/relay-call-deadline | fix(browser): stop later input steps after timeout and let relay page waits use the call deadline | browser | P1 | 1h | keep; opened over P2 #16284; opened over P2 #16908 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-call-deadline) |
 | [#16223](https://github.com/can1357/oh-my-pi/pull/16223) | computer-text-drag-select | feat(natives): make a macOS background drag across native text an accessibility selection | computer | P2 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-text-drag-select) |
 | [#16284](https://github.com/can1357/oh-my-pi/pull/16284) | relay-popup-front-main | fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS | browser | P2 | 14d | keep; rebases after #17778 merges; rebases after #16908 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-front-main) |
 | [#16309](https://github.com/can1357/oh-my-pi/pull/16309) | factory-droid-credit-promotions | feat(catalog,tui): show Factory Droid credit promotions in the model browser | providers | P2 | 13d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-credit-promotions) |

@@ -3237,7 +3237,7 @@
   {
    "id": "r2/relay-call-deadline",
    "branch": "will/r2/relay-call-deadline",
-   "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
+   "title": "fix(browser): stop later input steps after timeout and let relay page waits use the call deadline",
    "area": "browser",
    "priority": "P1",
    "needs": [
@@ -3253,7 +3253,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-call-deadline",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-02T06:41:37Z",
+   "updated": "2026-11-02T06:44:17Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main + #15105 head 50a5e959c4 (one bridge.ts import line); bridge.ts conflicts with relay-popup-front-main",
    "advanced": "2026-11-02T06:41:37Z",
    "built": [
