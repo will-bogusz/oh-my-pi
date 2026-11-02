@@ -59607,7 +59607,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T09:07:41Z",
+  "checked": "2026-11-02T09:38:41Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -59695,16 +59695,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-26T09:20:07Z",
-    "kind": "conflict",
-    "label": "#16803",
-    "title": "feat(session): add --warn-cost and --max-cost to cap a session's spend",
-    "files": [
-     "docs/cli-reference.md",
-     "packages/coding-agent/src/modes/print-mode.ts"
-    ]
-   },
    {
     "at": "2026-10-26T11:23:01Z",
     "kind": "merged",
