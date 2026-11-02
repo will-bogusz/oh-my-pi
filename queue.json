@@ -563,8 +563,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fallback-revert-when-healthy",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:50:15Z",
-   "note": ""
+   "updated": "2026-11-02T02:39:16Z",
+   "note": "",
+   "hold": "Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance"
   },
   {
    "id": "broker-reset-sweep",

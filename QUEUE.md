@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 
 **Opening:** not paused
 **Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-02 02:31Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 13, stacked 12, held 5, open PRs 22; merged 193, closed 23
+**Counts:** openable now 4, conflict-held 12, stacked 12, held 6, open PRs 22; merged 193, closed 23
 
 ## Openable now (4)
 
@@ -15,11 +15,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | iphone-mirror-not-showing | fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone | computer | P1 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-not-showing) |
 
-## Conflict-held (13)
+## Conflict-held (12)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
-| fallback-revert-when-healthy | feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks | broker | P2 | 19d | [#17745](https://github.com/can1357/oh-my-pi/pull/17745), [#17747](https://github.com/can1357/oh-my-pi/pull/17747), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), [#17496](https://github.com/can1357/oh-my-pi/pull/17496), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fallback-revert-when-healthy) |
 | r2/relay-bg-input-main | fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys | browser | P2 | 19d | [#16284](https://github.com/can1357/oh-my-pi/pull/16284), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-bg-input-main) |
 | r2/relay-call-deadline | fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s | browser | P1 | 19d | [#17742](https://github.com/can1357/oh-my-pi/pull/17742), [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16284](https://github.com/can1357/oh-my-pi/pull/16284), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-call-deadline) |
 | factory-droid-0244 | feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback) | providers | P1 | 14d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#16309](https://github.com/can1357/oh-my-pi/pull/16309), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-0244) |
@@ -50,13 +49,14 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 14d | relay-popup-front-main ([#16284](https://github.com/can1357/oh-my-pi/pull/16284)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
 | macos-scroll-direction | fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux | computer | P2 | 2d | iphone-mirror-scroll-distance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-scroll-direction) |
 
-## Held (5)
+## Held (6)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 19d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 | account-window-reserves | feat(ai,coding-agent): set account reserves per usage window | broker |  | 19d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/account-window-reserves) |
 | reset-account-optout | feat(ai,coding-agent): let an account policy turn saved-reset auto-redeem on or off | broker | P2 | 19d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-account-optout) |
+| fallback-revert-when-healthy | feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks | broker | P2 | 19d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fallback-revert-when-healthy) |
 | snapcompact-frame-budget | feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107) | catalog | P2 | 1d | Will, 2026-10-31: no user effect without archive-target except 1M gpt-5.6 models, whose recall past 80 frames is unmeasured; decide together with archive-target after the continuation eval | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-budget) |
 | snapcompact-archive-target | feat(coding-agent): size snapcompact archives to 75% of the compaction trigger | other | P2 | 1d | Will, 2026-10-31: wait until the continuation eval with calibrated judges shows bigger archives help continued work, not only recall (+0.16 Opus recall, but 1.7x compactions) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-archive-target) |
 
