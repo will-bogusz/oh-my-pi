@@ -61954,7 +61954,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T03:12:36.951774Z",
+  "at": "2026-11-02T03:28:15.645994Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -62099,6 +62099,40 @@
     "created": "2026-11-02T02:26:17Z"
    },
    {
+    "id": "iphone-mirror-not-showing",
+    "label": "#17755",
+    "number": 17755,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T03:24:50Z"
+   },
+   {
+    "id": "iphone-mirror-pointer",
+    "label": "#17756",
+    "number": 17756,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T03:27:31Z"
+   },
+   {
     "id": "print-hold",
     "label": "#15508",
     "number": 15508,
@@ -62144,10 +62178,11 @@
     "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
     "action": "keep",
     "reasons": [],
-    "note": "opened over P2 #16284",
+    "note": "opened over P2 #16284; rebases after #17751 merges",
     "over": [],
     "paired": [
-     "#16284"
+     "#16284",
+     "#17751"
     ],
     "blocked_by": [],
     "needs": [],
@@ -62203,6 +62238,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-01T00:10:27Z"
+   },
+   {
+    "id": "persist-tabs-exit",
+    "label": "#17751",
+    "number": 17751,
+    "state": "open",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(browser): keep persist relay tabs open when the session ends",
+    "action": "keep",
+    "reasons": [],
+    "note": "opened over P2 #16908",
+    "over": [],
+    "paired": [
+     "#16908"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T03:16:45Z"
    },
    {
     "id": "reset-restore-longest-wait",
@@ -62341,40 +62395,6 @@
     "created": "2026-10-30T19:41:51Z"
    },
    {
-    "id": "iphone-mirror-not-showing",
-    "label": "iphone-mirror-not-showing",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T21:36:03Z"
-   },
-   {
-    "id": "iphone-mirror-pointer",
-    "label": "iphone-mirror-pointer",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T21:35:47Z"
-   },
-   {
     "id": "iphone-mirror-scroll-distance",
     "label": "iphone-mirror-scroll-distance",
     "number": null,
@@ -62384,13 +62404,13 @@
     "title": "fix(natives): scroll iPhone Mirroring the whole distance asked for in the background",
     "action": "wait",
     "reasons": [
-     "conflicts with iphone-mirror-pointer in crates/pi-natives/src/desktop/macos/input.rs"
+     "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "iphone-mirror-pointer"
+     "#17756"
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
@@ -62411,25 +62431,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-30T21:16:44Z"
-   },
-   {
-    "id": "persist-tabs-exit",
-    "label": "persist-tabs-exit",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser): keep persist relay tabs open when the session ends",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [
-     "#16908"
-    ],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-23T18:13:45Z"
    },
    {
     "id": "r2/relay-call-deadline",
@@ -62488,7 +62489,7 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -62529,13 +62530,13 @@
     "action": "wait",
     "reasons": [
      "needs iphone-mirror-scroll-distance (queued)",
-     "conflicts with iphone-mirror-pointer in crates/pi-natives/src/desktop/macos/input.rs"
+     "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "iphone-mirror-pointer"
+     "#17756"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -62576,7 +62577,7 @@
      "needs #15508 (open), r2/relay-call-deadline (queued), r2/relay-bg-input-main (queued), r2/native-window-report (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "conflicts with persist-tabs-exit in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #17751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with tab-click-options in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
@@ -62587,7 +62588,7 @@
     "blocked_by": [
      "#16284",
      "#16908",
-     "persist-tabs-exit",
+     "#17751",
      "tab-click-options"
     ],
     "needs": [
@@ -62611,7 +62612,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "conflicts with persist-tabs-exit in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #17751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with tab-click-options in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
@@ -62621,7 +62622,7 @@
     "blocked_by": [
      "#16284",
      "#16908",
-     "persist-tabs-exit",
+     "#17751",
      "tab-click-options"
     ],
     "needs": [
@@ -62642,7 +62643,7 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
-     "conflicts with persist-tabs-exit in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #17751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with tab-click-options in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
@@ -62653,7 +62654,7 @@
     "blocked_by": [
      "#16284",
      "#16908",
-     "persist-tabs-exit",
+     "#17751",
      "tab-click-options"
     ],
     "needs": [
@@ -62670,7 +62671,7 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -62687,7 +62688,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -62707,18 +62708,18 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued)",
+     "conflicts with #17755 in docs/tools/computer.md",
      "conflicts with #15282 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with iphone-mirror-not-showing in docs/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17755",
      "#15282",
-     "#16223",
-     "iphone-mirror-not-showing"
+     "#16223"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -62774,6 +62775,62 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
+    "id": "factory-droid-110-models",
+    "label": "factory-droid-110-models",
+    "number": null,
+    "state": "queued",
+    "area": "providers",
+    "priority": "P2",
+    "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T03:16:27Z"
+   },
+   {
+    "id": "factory-droid-muse-spark-1-3",
+    "label": "factory-droid-muse-spark-1-3",
+    "number": null,
+    "state": "queued",
+    "area": "providers",
+    "priority": "P2",
+    "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
+    "action": "held",
+    "reasons": [
+     "held: DroidSync110, 2026-11-02: live two-read turn on muse-spark-1.3 not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes",
+     "needs factory-droid-110-models (queued)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "factory-droid-110-models"
+    ],
+    "created": "2026-11-02T03:27:27Z"
+   },
+   {
+    "id": "factory-droid-opus-refusal-fallback",
+    "label": "factory-droid-opus-refusal-fallback",
+    "number": null,
+    "state": "queued",
+    "area": "providers",
+    "priority": "P2",
+    "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T03:23:59Z"
+   },
+   {
     "id": "factory-droid-web-search",
     "label": "factory-droid-web-search",
     "number": null,
@@ -62784,13 +62841,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #16309 in packages/catalog/src/discovery/factory-droid.ts",
+     "conflicts with factory-droid-opus-refusal-fallback in packages/catalog/src/discovery/factory-droid.ts",
      "conflicts with main in docs/tools/web_search.md, packages/catalog/src/discovery/factory-droid.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16309"
+     "#16309",
+     "factory-droid-opus-refusal-fallback"
     ],
     "needs": [],
     "created": "2026-10-18T20:37:53Z"
@@ -62840,7 +62899,7 @@
     "reasons": [
      "needs #15508 (open)",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with persist-tabs-exit in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #17751 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with r2/relay-call-deadline in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with tab-click-options in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with relay-frame-detach-report in packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -62851,7 +62910,7 @@
     "paired": [],
     "blocked_by": [
      "#16908",
-     "persist-tabs-exit",
+     "#17751",
      "r2/relay-call-deadline",
      "tab-click-options",
      "relay-frame-detach-report"
@@ -62874,7 +62933,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #16284 in docs/tools/browser.md",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with persist-tabs-exit in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #17751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with tab-click-options in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with relay-frame-detach-report in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
@@ -62885,7 +62944,7 @@
     "blocked_by": [
      "#16284",
      "#16908",
-     "persist-tabs-exit",
+     "#17751",
      "tab-click-options",
      "relay-frame-detach-report"
     ],
