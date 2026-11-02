@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-02 03:28Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 7, stacked 9, held 9, open PRs 26, queued since the last plan 1; merged 193, closed 25
+**Counts:** openable now 6, conflict-held 7, stacked 9, held 10, open PRs 26; merged 193, closed 25
 
 ## Openable now (6)
 
@@ -43,7 +43,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 14d | relay-popup-front-main ([#16284](https://github.com/can1357/oh-my-pi/pull/16284)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
 | macos-scroll-direction | fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux | computer | P2 | 2d | iphone-mirror-scroll-distance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-scroll-direction) |
 
-## Held (9)
+## Held (10)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -56,6 +56,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | snapcompact-frame-budget | feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107) | catalog | P2 | 1d | Will, 2026-10-31: no user effect without archive-target except 1M gpt-5.6 models, whose recall past 80 frames is unmeasured; decide together with archive-target after the continuation eval | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-budget) |
 | snapcompact-archive-target | feat(coding-agent): size snapcompact archives to 75% of the compaction trigger | other | P2 | 1d | Will, 2026-10-31: wait until the continuation eval with calibrated judges shows bigger archives help continued work, not only recall (+0.16 Opus recall, but 1.7x compactions) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-archive-target) |
 | factory-droid-muse-spark-1-3 | feat(catalog): add Muse Spark 1.3 to Factory Droid | providers | P2 | 0h | DroidSync110, 2026-11-02: live two-read turn on muse-spark-1.3 not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-muse-spark-1-3) |
+| factory-droid-110-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.1.0 | providers | P1 | 0h | Will, 2026-11-02: awaiting native corpus recapture approval (~1M Factory tokens) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-110-pin) |
 
 ## Open PRs (26)
 
@@ -87,9 +88,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | [#17746](https://github.com/can1357/oh-my-pi/pull/17746) | cold-revive-xdev-mounts | fix(task): keep a cold-revived subagent's xd:// devices mounted | other | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cold-revive-xdev-mounts) |
 | [#17745](https://github.com/can1357/oh-my-pi/pull/17745) | snapcompact-think-legend | fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none | other | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-think-legend) |
 | [#17742](https://github.com/can1357/oh-my-pi/pull/17742) | rich-editor-fill-followup | fix(browser): stop rich-text fill landing before the old text or outside the editor | browser | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill-followup) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| factory-droid-110-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.1.0 | providers | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-110-pin) |
