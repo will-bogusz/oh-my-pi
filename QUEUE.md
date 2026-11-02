@@ -1,16 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 03:14Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 03:15Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-02 02:53Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-02 03:12Z on MacBook-Pro; groups below are from it, states from the manifest)
 **Counts:** openable now 8, conflict-held 7, stacked 9, held 8, open PRs 22; merged 193, closed 25
 
 ## Openable now (8)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| r2/relay-call-deadline | fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s | browser | P1 | 19d | next-hour (over P2 #16284, #16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-call-deadline) |
+| r2/relay-call-deadline | fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s | browser | P1 | 19d | open (over P2 #16284, #16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-call-deadline) |
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P1 | 9d | open (over P2 #16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 9d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 9d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |

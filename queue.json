@@ -61866,12 +61866,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T02:53:21.894407Z",
+  "at": "2026-11-02T03:12:36.951774Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 4,
-   "left": 4
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -62351,7 +62351,7 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [
