@@ -59611,15 +59611,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T05:04:59Z",
+  "checked": "2026-11-02T06:05:29Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "r2/relay-call-deadline": {
-    "since": "2026-11-02T03:02:27Z",
-    "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-11-01T12:34:35Z",
   "unreleased": {},
@@ -59653,7 +59648,8 @@
    17766,
    17767,
    17768,
-   17772
+   17772,
+   17778
   ],
   "post_merge": {
    "16300": {
@@ -61325,6 +61321,13 @@
     "id": "factory-droid-opus-refusal-fallback",
     "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback",
     "why": "opened as #17772"
+   },
+   {
+    "at": "2026-11-02T06:05:29Z",
+    "kind": "unopenable",
+    "id": "r2/relay-call-deadline",
+    "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
+    "why": "opened as #17778"
    }
   ]
  },
@@ -62486,12 +62489,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T05:35:03.839355Z",
+  "at": "2026-11-02T06:05:30.426063Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -62716,6 +62719,26 @@
     "created": "2026-11-02T03:27:31Z"
    },
    {
+    "id": "r2/relay-call-deadline",
+    "label": "#17778",
+    "number": 17778,
+    "state": "open",
+    "area": "browser",
+    "priority": "P1",
+    "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
+    "action": "keep",
+    "reasons": [],
+    "note": "opened over P2 #16284; opened over P2 #16908",
+    "over": [],
+    "paired": [
+     "#16284",
+     "#16908"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T05:43:12Z"
+   },
+   {
     "id": "print-hold",
     "label": "#15508",
     "number": 15508,
@@ -62742,9 +62765,10 @@
     "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
     "action": "keep",
     "reasons": [],
-    "note": "rebases after #16908 merges",
+    "note": "rebases after #17778 merges; rebases after #16908 merges",
     "over": [],
     "paired": [
+     "#17778",
      "#16908"
     ],
     "blocked_by": [],
@@ -62761,9 +62785,10 @@
     "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
     "action": "keep",
     "reasons": [],
-    "note": "opened over P2 #16284; rebases after #17751 merges",
+    "note": "rebases after #17778 merges; opened over P2 #16284; rebases after #17751 merges",
     "over": [],
     "paired": [
+     "#17778",
      "#16284",
      "#17751"
     ],
@@ -63033,26 +63058,6 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
-    "id": "r2/relay-call-deadline",
-    "label": "r2/relay-call-deadline",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [
-     "#16284",
-     "#16908"
-    ],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-13T21:47:19Z"
-   },
-   {
     "id": "relay-popup-lossless",
     "label": "relay-popup-lossless",
     "number": null,
@@ -63063,18 +63068,18 @@
     "action": "wait",
     "reasons": [
      "needs #16284 (open)",
+     "conflicts with #17778 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #16284 in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/natives/native/index.d.ts, packages/natives/native/index.js",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts",
-     "conflicts with r2/relay-call-deadline in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with main in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/natives/native/index.d.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17778",
      "#16284",
-     "#16908",
-     "r2/relay-call-deadline"
+     "#16908"
     ],
     "needs": [
      "relay-popup-front-main"
@@ -63176,7 +63181,7 @@
     "title": "fix(browser): attach only the relay tabs omp opened or borrowed",
     "action": "wait",
     "reasons": [
-     "needs #15508 (open), r2/relay-call-deadline (queued), r2/relay-bg-input-main (queued), r2/native-window-report (queued)",
+     "needs #15508 (open), #17778 (open), r2/relay-bg-input-main (queued), r2/native-window-report (queued)",
      "conflicts with #17767 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17768 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
@@ -63481,9 +63486,9 @@
      "needs #15508 (open)",
      "conflicts with #17767 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17768 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #17778 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17751 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with r2/relay-call-deadline in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -63492,9 +63497,9 @@
     "blocked_by": [
      "#17767",
      "#17768",
+     "#17778",
      "#16908",
-     "#17751",
-     "r2/relay-call-deadline"
+     "#17751"
     ],
     "needs": [
      "#15508"
