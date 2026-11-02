@@ -57200,13 +57200,13 @@
    "needs": [],
    "base": "686b5e2fb542848dc3ff1a9e36a42a8fefdd2278",
    "body": "bodies/switch-remote-reexpand.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17747,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/switch-remote-reexpand",
    "host": "MacBook-Pro",
    "added": "2026-10-30T22:45:47Z",
-   "updated": "2026-11-02T02:11:36Z",
+   "updated": "2026-11-02T02:26:18Z",
    "note": "Waits for #17490 to merge (code conflict in session-maintenance.ts). After it merges: pr-queue advance switch-remote-reexpand; resolve by keeping #17490's #contextBuildOptions getter and adding model: this.#model to it.",
    "advanced": "2026-11-02T01:39:53Z",
    "built": [
@@ -57440,7 +57440,8 @@
      "host": "MacBook-Pro",
      "tree": "bd88f2489ca3b2136a8f8ee2af0a8c154ecb4a7b"
     }
-   ]
+   ],
+   "opened": "2026-11-02T02:26:18Z"
   },
   {
    "id": "snapcompact-frame-budget",
