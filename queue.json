@@ -63316,5 +63316,11 @@
     "created": "2026-11-02T05:04:37Z"
    }
   ]
+ },
+ "opening": {
+  "id": "factory-droid-gemini-4-argon-110",
+  "token": "48b79d6494074936ad7f1b9a6d412aff",
+  "host": "MacBook-Pro",
+  "at": "2026-11-02T20:03:33Z"
  }
 }
