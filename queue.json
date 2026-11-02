@@ -3243,7 +3243,7 @@
    "needs": [
     "#15105"
    ],
-   "base": "256b3211bca7458391866a8bcc9369902664be55",
+   "base": "a25352c21a7c2b87982c4f4956687d339f003a9b",
    "body": "bodies/r2/relay-call-deadline.md",
    "state": "queued",
    "pr": null,
@@ -3253,7 +3253,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-call-deadline",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-02T02:37:16Z",
+   "updated": "2026-11-02T02:39:54Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main + #15105 head 50a5e959c4 (one bridge.ts import line); bridge.ts conflicts with relay-popup-front-main",
    "advanced": "2026-11-02T02:37:16Z"
   },
