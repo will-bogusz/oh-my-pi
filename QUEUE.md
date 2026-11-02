@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-02 06:05Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 7, stacked 9, held 8, open PRs 32, queued since the last plan 3; merged 193, closed 26
+**Counts:** openable now 0, conflict-held 7, stacked 9, held 8, open PRs 32, queued since the last plan 2; merged 193, closed 27
 
 ## Openable now (0)
 
@@ -86,10 +86,9 @@ none
 | [#17772](https://github.com/can1357/oh-my-pi/pull/17772) | factory-droid-opus-refusal-fallback | feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback | providers | P2 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-opus-refusal-fallback) |
 | [#17773](https://github.com/can1357/oh-my-pi/pull/17773) | visuals-guidance | feat(coding-agent): ask for one designed SVG figure where an answer has shape | other |  | 1h | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/visuals-guidance) |
 
-## Queued since the last plan (3)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| snapcompact-frame-budget | feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107) | catalog | P2 | 1d | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-budget) |
 | factory-droid-muse-spark-1-3 | feat(catalog): add Muse Spark 1.3 to Factory Droid | providers | P2 | 3h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-muse-spark-1-3) |
 | factory-droid-gemini-4-argon-110 | feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect | providers | P2 | 2h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon-110) |
