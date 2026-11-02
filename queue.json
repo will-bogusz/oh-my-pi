@@ -59362,26 +59362,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T03:02:27Z",
+  "checked": "2026-11-02T04:03:14Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "iphone-mirror-not-showing": {
-    "since": "2026-10-30T21:55:44Z",
-    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone"
-   },
-   "iphone-mirror-pointer": {
-    "since": "2026-10-30T21:55:44Z",
-    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap"
-   },
-   "macos-capture-geometry": {
-    "since": "2026-10-30T21:25:06Z",
-    "title": "fix(natives): match macOS window screenshots to the window on screen"
-   },
-   "persist-tabs-exit": {
-    "since": "2026-11-02T03:02:27Z",
-    "title": "fix(browser): keep persist relay tabs open when the session ends"
-   },
    "r2/relay-call-deadline": {
     "since": "2026-11-02T03:02:27Z",
     "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s"
@@ -59390,6 +59374,10 @@
     "since": "2026-11-02T03:02:27Z",
     "title": "fix(browser): press the button and count tab.click and frame.click are asked for"
    },
+   "computer-ui-quiet": {
+    "since": "2026-11-02T04:03:14Z",
+    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
+   },
    "relay-frame-detach-report": {
     "since": "2026-11-02T03:02:27Z",
     "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame"
@@ -59397,6 +59385,14 @@
    "iphone-mirror-key-gap": {
     "since": "2026-10-30T21:25:06Z",
     "title": "perf(natives): type on iPhone Mirroring twice as fast"
+   },
+   "factory-droid-110-models": {
+    "since": "2026-11-02T04:03:14Z",
+    "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves"
+   },
+   "factory-droid-opus-refusal-fallback": {
+    "since": "2026-11-02T04:03:14Z",
+    "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback"
    }
   },
   "conflicts": {},
@@ -59424,7 +59420,11 @@
    17742,
    17745,
    17746,
-   17747
+   17747,
+   17751,
+   17755,
+   17756,
+   17757
   ],
   "post_merge": {
    "16300": {
@@ -61008,6 +61008,52 @@
     "kind": "openable",
     "id": "relay-frame-detach-report",
     "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame"
+   },
+   {
+    "at": "2026-11-02T04:03:14Z",
+    "kind": "openable",
+    "id": "computer-ui-quiet",
+    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
+   },
+   {
+    "at": "2026-11-02T04:03:14Z",
+    "kind": "openable",
+    "id": "factory-droid-110-models",
+    "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves"
+   },
+   {
+    "at": "2026-11-02T04:03:14Z",
+    "kind": "openable",
+    "id": "factory-droid-opus-refusal-fallback",
+    "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback"
+   },
+   {
+    "at": "2026-11-02T04:03:14Z",
+    "kind": "unopenable",
+    "id": "iphone-mirror-not-showing",
+    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone",
+    "why": "opened as #17755"
+   },
+   {
+    "at": "2026-11-02T04:03:14Z",
+    "kind": "unopenable",
+    "id": "iphone-mirror-pointer",
+    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
+    "why": "opened as #17756"
+   },
+   {
+    "at": "2026-11-02T04:03:14Z",
+    "kind": "unopenable",
+    "id": "macos-capture-geometry",
+    "title": "fix(natives): match macOS window screenshots to the window on screen",
+    "why": "opened as #17757"
+   },
+   {
+    "at": "2026-11-02T04:03:14Z",
+    "kind": "unopenable",
+    "id": "persist-tabs-exit",
+    "title": "fix(browser): keep persist relay tabs open when the session ends",
+    "why": "opened as #17751"
    }
   ]
  },
@@ -62135,8 +62181,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T03:31:34.323829Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-02T04:03:14.990329Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 4,
@@ -62498,12 +62544,16 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(natives): show what macOS ax() elements can do",
-    "action": "keep",
-    "reasons": [],
+    "action": "requeue",
+    "reasons": [
+     "conflicts with #17755 in crates/pi-natives/src/desktop/ax.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#17755"
+    ],
     "needs": [],
     "created": "2026-10-10T21:48:41Z"
    },
@@ -62680,6 +62730,25 @@
     "created": "2026-10-23T18:26:13Z"
    },
    {
+    "id": "factory-droid-110-pin",
+    "label": "factory-droid-110-pin",
+    "number": null,
+    "state": "queued",
+    "area": "providers",
+    "priority": "P1",
+    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
+    "action": "held",
+    "reasons": [
+     "held: Will, 2026-11-02: awaiting native corpus recapture approval (~1M Factory tokens)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T03:32:33Z"
+   },
+   {
     "id": "computer-ui-quiet",
     "label": "computer-ui-quiet",
     "number": null,
@@ -62687,16 +62756,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#15282"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
    },
@@ -62869,7 +62934,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -62890,7 +62955,6 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #17755 in docs/tools/computer.md",
-     "conflicts with #15282 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
@@ -62899,7 +62963,6 @@
     "paired": [],
     "blocked_by": [
      "#17755",
-     "#15282",
      "#16223"
     ],
     "needs": [
@@ -62917,13 +62980,13 @@
     "title": "feat(coding-agent): find nested menu commands in one read",
     "action": "wait",
     "reasons": [
-     "conflicts with #15282 in packages/coding-agent/src/prompts/tools/computer.md"
+     "conflicts with computer-ui-quiet in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282"
+     "computer-ui-quiet"
     ],
     "needs": [],
     "created": "2026-10-24T05:06:00Z"
@@ -62940,6 +63003,7 @@
     "reasons": [
      "needs computer-ui-quiet (queued), #15282 (open)",
      "conflicts with #16223 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with computer-ui-quiet in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts",
      "its need #15282 conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -62947,7 +63011,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16223"
+     "#16223",
+     "computer-ui-quiet"
     ],
     "needs": [
      "computer-ui-quiet",
@@ -62971,6 +63036,28 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:16:27Z"
+   },
+   {
+    "id": "factory-droid-gemini-4-argon-110",
+    "label": "factory-droid-gemini-4-argon-110",
+    "number": null,
+    "state": "queued",
+    "area": "providers",
+    "priority": "P2",
+    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
+    "action": "held",
+    "reasons": [
+     "held: DroidSync110, 2026-11-02: live two-read turn on gemini-4-argon not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes",
+     "needs factory-droid-110-models (queued)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "factory-droid-110-models"
+    ],
+    "created": "2026-11-02T03:41:15Z"
    },
    {
     "id": "factory-droid-muse-spark-1-3",
