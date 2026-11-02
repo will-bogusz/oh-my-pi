@@ -2772,7 +2772,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "9d5d4ac5b50ac2bb5866e4202efc0cf785dfc57a",
+   "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/r2/relay-bg-input-main.md",
    "state": "queued",
    "pr": null,
@@ -2782,8 +2782,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-bg-input-main",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-23T20:36:47Z",
-   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main 9d5d4ac5b5; bridge.ts conflicts with relay-popup-front-main. 2026-10-23 InertClickVerdict: body re-derived with headful Linux matrix (main 0b5c27ab24 vs this PR replayed, clean cherry-pick): fixes the bench form Submit 'did not deliver (disabled or inert)' after a background navigation"
+   "updated": "2026-11-02T02:36:40Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main 9d5d4ac5b5; bridge.ts conflicts with relay-popup-front-main. 2026-10-23 InertClickVerdict: body re-derived with headful Linux matrix (main 0b5c27ab24 vs this PR replayed, clean cherry-pick): fixes the bench form Submit 'did not deliver (disabled or inert)' after a background navigation",
+   "advanced": "2026-11-02T02:36:40Z"
   },
   {
    "id": "r2/relay-own-only",
