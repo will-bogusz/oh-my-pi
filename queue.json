@@ -58011,14 +58011,14 @@
    "needs": [],
    "base": "62f4f7cccfd38adde9a2ae203d69b27bc187a84f",
    "body": "bodies/snapcompact-frame-budget.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-frame-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-31T20:07:36Z",
-   "updated": "2026-11-02T06:32:54Z",
-   "note": ""
+   "updated": "2026-11-02T06:32:56Z",
+   "note": "Will's call delegated, 2026-11-02: ContinuationR2 found no archive-size cap binds at real thresholds (28 real compaction points: shipped archive drops no history; 107 frames unreachable at 340K). Branch kept; reopen only if archives start dropping history."
   },
   {
    "id": "snapcompact-archive-target",
