@@ -2787,9 +2787,119 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-bg-input-main",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-02T14:37:47Z",
+   "updated": "2026-11-02T14:41:37Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main 9d5d4ac5b5; bridge.ts conflicts with relay-popup-front-main. 2026-10-23 InertClickVerdict: body re-derived with headful Linux matrix (main 0b5c27ab24 vs this PR replayed, clean cherry-pick): fixes the bench form Submit 'did not deliver (disabled or inert)' after a background navigation",
-   "advanced": "2026-11-02T14:34:35Z"
+   "advanced": "2026-11-02T14:34:35Z",
+   "built": [
+    {
+     "with": "#15128",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "ca95834cec2c151c013a3b24dc542e9f1ed84fa5",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "fed657bda09faa8217ad869165c264a0c23d8d0a",
+     "at": "2026-11-02T14:41:33Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15130",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "0060b29986d9f3944914810d980c3877111db246",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "63d2562c068c206434d5c611dcb02b871a352574",
+     "at": "2026-11-02T14:41:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15282",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "174a8b362025d3bef0d82c692f2501fa7caa3d51",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "e2632d9a47f7cb1eb3420be187ae3450e0d6750a",
+     "at": "2026-11-02T14:41:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15508",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "5f71fafbb6b086571476e8341ef14249743f47b9",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "92e1169c9b2a8f00fb76c309c1ab2d23f8ab322c",
+     "at": "2026-11-02T14:41:36Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16223",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "eb8b21f00a894bfc5c33098a10de08e171da8383",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "b86b9720ec2b79ddc7a991a3f1811fb6a4d4068f",
+     "at": "2026-11-02T14:41:36Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16274",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "dbcb7f5f5b3ebe47e48d2ddf40e594b9a01373e3",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "6f4085a160bb1eb50da7008ab2ed9d650377e687",
+     "at": "2026-11-02T14:41:36Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16611",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "8a2e0e10c1c7d7a54e90c7821e50860ed40802af",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "477261b9bb01720f58aedf77f97345f56969ea89",
+     "at": "2026-11-02T14:41:36Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16908",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "ed2fe71c597d7ac137db2b9acfc106efb01305e4",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "b3ded6ee9a5566cdadcdd79c362817a1f5c6d070",
+     "at": "2026-11-02T14:41:36Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17496",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "eb1d8317b43380cc13e22456bd5529ba6aefdc79",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "23fdb200f970d86434a76c4a795d709d20e57686",
+     "at": "2026-11-02T14:41:36Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17610",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "9da13ec727c2a582a3d747dec1f794dadd1aed44",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "e6cfaadb7b30db78feb86a90f0a3c69d0067cb2c",
+     "at": "2026-11-02T14:41:36Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17747",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "c152411f7f22177efd244f5c3c5a1370b7491331",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "44790f6ab54e5b3ed142d6e3feabbd62a50248dc",
+     "at": "2026-11-02T14:41:37Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "factory-droid-gemini-4-argon-110",
+     "code": "ef565495e24acf6484428fb47fee6905f079cf6a",
+     "with_code": "3958eeb997879c9101af83da537c8703e017ca47",
+     "tip": "8680f97e3961e09a817a0552f2deff7bc745bccd",
+     "with_tip": "da87305c08e3fd165fc620e9c6f92b60439080f6",
+     "at": "2026-11-02T14:41:37Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "r2/relay-own-only",
