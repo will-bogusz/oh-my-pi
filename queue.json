@@ -58588,7 +58588,7 @@
    "branch": "will/rich-editor-fill-followup",
    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor",
    "area": "browser",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "686b5e2fb542848dc3ff1a9e36a42a8fefdd2278",
    "body": "bodies/rich-editor-fill-followup.md",
@@ -58598,7 +58598,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rich-editor-fill-followup",
    "host": "MacBook-Pro",
    "added": "2026-11-02T01:52:49Z",
-   "updated": "2026-11-02T02:12:27Z",
+   "updated": "2026-11-02T02:15:55Z",
    "note": "",
    "built": [
     {
