@@ -62198,12 +62198,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T04:03:14.990329Z",
-  "host": "goliath",
+  "at": "2026-11-02T04:17:53.651146Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 4,
-   "left": 4
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -62561,16 +62561,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(natives): show what macOS ax() elements can do",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #17755 in crates/pi-natives/src/desktop/ax.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#17755"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-10T21:48:41Z"
    },
@@ -62773,12 +62769,16 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#15282"
+    ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
    },
@@ -62951,7 +62951,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -62972,6 +62972,7 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #17755 in docs/tools/computer.md",
+     "conflicts with #15282 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
@@ -62980,6 +62981,7 @@
     "paired": [],
     "blocked_by": [
      "#17755",
+     "#15282",
      "#16223"
     ],
     "needs": [
@@ -62997,13 +62999,13 @@
     "title": "feat(coding-agent): find nested menu commands in one read",
     "action": "wait",
     "reasons": [
-     "conflicts with computer-ui-quiet in packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with #15282 in packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "computer-ui-quiet"
+     "#15282"
     ],
     "needs": [],
     "created": "2026-10-24T05:06:00Z"
@@ -63020,7 +63022,6 @@
     "reasons": [
      "needs computer-ui-quiet (queued), #15282 (open)",
      "conflicts with #16223 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with computer-ui-quiet in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts",
      "its need #15282 conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -63028,8 +63029,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16223",
-     "computer-ui-quiet"
+     "#16223"
     ],
     "needs": [
      "computer-ui-quiet",
@@ -63045,7 +63045,7 @@
     "area": "providers",
     "priority": "P2",
     "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
