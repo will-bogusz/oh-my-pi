@@ -59715,9 +59715,128 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-gemini-4-argon-110",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:41:15Z",
-   "updated": "2026-11-02T19:24:35Z",
+   "updated": "2026-11-02T20:03:19Z",
    "note": "",
-   "advanced": "2026-11-02T19:24:35Z"
+   "advanced": "2026-11-02T19:24:35Z",
+   "built": [
+    {
+     "with": "#16274",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "dbcb7f5f5b3ebe47e48d2ddf40e594b9a01373e3",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "6f4085a160bb1eb50da7008ab2ed9d650377e687",
+     "at": "2026-11-02T20:03:15Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17747",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "c152411f7f22177efd244f5c3c5a1370b7491331",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "44790f6ab54e5b3ed142d6e3feabbd62a50248dc",
+     "at": "2026-11-02T20:03:17Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17831",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "5d29121b2c0aaa43bf05f67da956956055c3ea2c",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "974e542422f4d9ebb00c693d5c463b5aa9617259",
+     "at": "2026-11-02T20:03:18Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15508",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "5f71fafbb6b086571476e8341ef14249743f47b9",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "92e1169c9b2a8f00fb76c309c1ab2d23f8ab322c",
+     "at": "2026-11-02T20:03:18Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16908",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "ed2fe71c597d7ac137db2b9acfc106efb01305e4",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "b3ded6ee9a5566cdadcdd79c362817a1f5c6d070",
+     "at": "2026-11-02T20:03:18Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17610",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "9da13ec727c2a582a3d747dec1f794dadd1aed44",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "e6cfaadb7b30db78feb86a90f0a3c69d0067cb2c",
+     "at": "2026-11-02T20:03:18Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15128",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "ca95834cec2c151c013a3b24dc542e9f1ed84fa5",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "fed657bda09faa8217ad869165c264a0c23d8d0a",
+     "at": "2026-11-02T20:03:18Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15130",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "0060b29986d9f3944914810d980c3877111db246",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "63d2562c068c206434d5c611dcb02b871a352574",
+     "at": "2026-11-02T20:03:18Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15282",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "174a8b362025d3bef0d82c692f2501fa7caa3d51",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "e2632d9a47f7cb1eb3420be187ae3450e0d6750a",
+     "at": "2026-11-02T20:03:18Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16223",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "eb8b21f00a894bfc5c33098a10de08e171da8383",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "b86b9720ec2b79ddc7a991a3f1811fb6a4d4068f",
+     "at": "2026-11-02T20:03:19Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16611",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "8a2e0e10c1c7d7a54e90c7821e50860ed40802af",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "477261b9bb01720f58aedf77f97345f56969ea89",
+     "at": "2026-11-02T20:03:19Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17496",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "eb1d8317b43380cc13e22456bd5529ba6aefdc79",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "23fdb200f970d86434a76c4a795d709d20e57686",
+     "at": "2026-11-02T20:03:19Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "factory-droid-muse-spark-1-3",
+     "code": "b210ee50681175bc63277a289ed61a6198bd2da4",
+     "with_code": "094f164c5762b7681b7cfdbb2602c1e9b64f2ad8",
+     "tip": "51ff2b57013e4f6a8a4ee0e1c3e10ca29dd4da4f",
+     "with_tip": "4226f1f2a894c7d559e7ffad773a1021378313ab",
+     "at": "2026-11-02T20:03:19Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "visuals-guidance",
