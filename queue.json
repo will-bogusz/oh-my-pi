@@ -59737,7 +59737,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T14:43:43Z",
+  "checked": "2026-11-02T15:13:51Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -59883,22 +59883,10 @@
     "merged_at": "2026-11-02T14:27:50Z",
     "findings": []
    },
-   "17489": {
-    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
-    "merge_commit": "5a6a481d5824698f88f7db77e96a1791f7df4760",
-    "merged_at": "2026-10-31T14:56:17Z",
-    "findings": []
-   },
    "17490": {
     "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
     "merge_commit": "6eedc5d3b97accc31e6bb14554e2191b47f366ea",
     "merged_at": "2026-11-01T12:34:35Z",
-    "findings": []
-   },
-   "17500": {
-    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
-    "merge_commit": "065f8edbc5a988362a299a10966d1cad6b3de0f3",
-    "merged_at": "2026-10-31T14:56:17Z",
     "findings": []
    },
    "17510": {
@@ -62243,7 +62231,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T14:43:44.032235Z",
+  "at": "2026-11-02T15:13:51.869186Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -62337,6 +62325,23 @@
     "created": "2026-11-02T03:27:31Z"
    },
    {
+    "id": "r2/relay-bg-input-main",
+    "label": "#17831",
+    "number": 17831,
+    "state": "open",
+    "area": "browser",
+    "priority": "P1",
+    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T14:42:35Z"
+   },
+   {
     "id": "print-hold",
     "label": "#15508",
     "number": 15508,
@@ -62386,23 +62391,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-31T21:57:19Z"
-   },
-   {
-    "id": "r2/relay-bg-input-main",
-    "label": "#17831",
-    "number": 17831,
-    "state": "open",
-    "area": "browser",
-    "priority": "P2",
-    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-02T14:42:35Z"
    },
    {
     "id": "reset-restore-longest-wait",
@@ -62538,16 +62526,16 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-10-18: waits for Will's OK on the Accessibility dependency (moved from note, QueueRestructure 2026-11-02)",
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #17831 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with main in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/natives/native/index.d.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16908",
-     "#17831"
+     "#17831",
+     "#16908"
     ],
     "needs": [],
     "created": "2026-10-19T00:03:17Z"
@@ -62888,16 +62876,16 @@
     "action": "wait",
     "reasons": [
      "needs #15508 (open)",
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17831 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16908",
-     "#17831"
+     "#17831",
+     "#16908"
     ],
     "needs": [
      "#15508"
