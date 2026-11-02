@@ -56985,7 +56985,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-capture-geometry",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:16:44Z",
-   "updated": "2026-11-02T03:30:17Z",
+   "updated": "2026-11-02T03:30:39Z",
    "note": "",
    "built": [
     {
@@ -57057,7 +57057,8 @@
     }
    ],
    "advanced": "2026-11-02T02:40:57Z",
-   "opened": "2026-11-02T03:30:17Z"
+   "opened": "2026-11-02T03:30:17Z",
+   "readied": "2026-11-02T03:30:38Z"
   },
   {
    "id": "iphone-mirror-pointer",
