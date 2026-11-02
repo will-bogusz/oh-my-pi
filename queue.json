@@ -57887,7 +57887,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "62f4f7cccfd38adde9a2ae203d69b27bc187a84f",
+   "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/date-reminder-journal.md",
    "state": "open",
    "pr": 17622,
@@ -57895,7 +57895,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-31T23:51:18Z",
-   "updated": "2026-11-01T00:37:17Z",
+   "updated": "2026-11-02T02:16:39Z",
    "note": "",
    "built": [
     {
@@ -58080,7 +58080,8 @@
     }
    ],
    "opened": "2026-11-01T00:10:28Z",
-   "readied": "2026-11-01T00:10:48Z"
+   "readied": "2026-11-01T00:10:48Z",
+   "advanced": "2026-11-02T02:16:39Z"
   },
   {
    "id": "cold-revive-xdev-mounts",
