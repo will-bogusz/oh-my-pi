@@ -59667,7 +59667,7 @@
    "needs": [
     "factory-droid-110-models"
    ],
-   "base": "1956ff2a6f07c39cb0c4d0a6ee8ae50b8882d17c",
+   "base": "7a1fd37e82293c8761c19385ffdccd63992b04c8",
    "body": "bodies/factory-droid-muse-spark-1-3.md",
    "state": "queued",
    "pr": null,
@@ -59675,8 +59675,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-muse-spark-1-3",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:27:27Z",
-   "updated": "2026-11-02T06:16:43Z",
-   "note": ""
+   "updated": "2026-11-02T19:24:35Z",
+   "note": "",
+   "advanced": "2026-11-02T19:24:35Z"
   },
   {
    "id": "factory-droid-110-pin",
@@ -59706,7 +59707,7 @@
    "needs": [
     "factory-droid-110-models"
    ],
-   "base": "1956ff2a6f07c39cb0c4d0a6ee8ae50b8882d17c",
+   "base": "7a1fd37e82293c8761c19385ffdccd63992b04c8",
    "body": "bodies/factory-droid-gemini-4-argon-110.md",
    "state": "queued",
    "pr": null,
@@ -59714,8 +59715,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-gemini-4-argon-110",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:41:15Z",
-   "updated": "2026-11-02T06:16:41Z",
-   "note": ""
+   "updated": "2026-11-02T19:24:35Z",
+   "note": "",
+   "advanced": "2026-11-02T19:24:35Z"
   },
   {
    "id": "visuals-guidance",
