@@ -57196,7 +57196,7 @@
    "branch": "will/switch-remote-reexpand",
    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "686b5e2fb542848dc3ff1a9e36a42a8fefdd2278",
    "body": "bodies/switch-remote-reexpand.md",
@@ -57206,7 +57206,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/switch-remote-reexpand",
    "host": "MacBook-Pro",
    "added": "2026-10-30T22:45:47Z",
-   "updated": "2026-11-02T02:27:14Z",
+   "updated": "2026-11-02T02:31:38Z",
    "note": "Waits for #17490 to merge (code conflict in session-maintenance.ts). After it merges: pr-queue advance switch-remote-reexpand; resolve by keeping #17490's #contextBuildOptions getter and adding model: this.#model to it.",
    "advanced": "2026-11-02T01:39:53Z",
    "built": [
