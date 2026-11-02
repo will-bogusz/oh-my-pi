@@ -61827,7 +61827,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T14:31:09.750684Z",
+  "at": "2026-11-02T14:35:03.119150Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -61945,10 +61945,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -62104,9 +62102,10 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS",
-    "action": "wait",
+    "action": "held",
     "reasons": [
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts",
+     "held: Will, 2026-10-18: waits for Will's OK on the Accessibility dependency (moved from note, QueueRestructure 2026-11-02)",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with main in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/natives/native/index.d.ts"
     ],
     "note": "",
@@ -62190,10 +62189,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/browser/relay/bridge.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -62213,9 +62210,8 @@
     "reasons": [
      "needs #15508 (open), r2/relay-bg-input-main (queued), r2/native-window-report (queued)",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need r2/relay-bg-input-main conflicts with main in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+     "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -62475,13 +62471,15 @@
     "reasons": [
      "needs #15508 (open)",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with r2/relay-bg-input-main in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16908"
+     "#16908",
+     "r2/relay-bg-input-main"
     ],
     "needs": [
      "#15508"
