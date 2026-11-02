@@ -59182,6 +59182,26 @@
    "added": "2026-11-02T03:23:59Z",
    "updated": "2026-11-02T03:23:59Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-muse-spark-1-3",
+   "branch": "will/factory-droid-muse-spark-1-3",
+   "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
+   "area": "providers",
+   "priority": "P2",
+   "needs": [
+    "factory-droid-110-models"
+   ],
+   "base": "1956ff2a6f07c39cb0c4d0a6ee8ae50b8882d17c",
+   "body": "bodies/factory-droid-muse-spark-1-3.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-muse-spark-1-3",
+   "host": "MacBook-Pro",
+   "added": "2026-11-02T03:27:27Z",
+   "updated": "2026-11-02T03:27:27Z",
+   "note": ""
   }
  ],
  "watch": {
