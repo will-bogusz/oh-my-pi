@@ -39238,14 +39238,14 @@
    "needs": [],
    "base": "d33a0edb00c8b76b28d71eb976cd82d69617bcba",
    "body": "bodies/bash-view-tags.md",
-   "state": "open",
+   "state": "closed",
    "pr": 16576,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/bash-view-tags",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:37:15Z",
-   "updated": "2026-10-29T20:19:04Z",
-   "note": "",
+   "updated": "2026-11-02T02:16:04Z",
+   "note": "Will, 2026-11-02: PR closed (not pursuing now); branch and worktree kept.",
    "built": [
     {
      "with": "#16231",
