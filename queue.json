@@ -59244,8 +59244,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-gemini-4-argon-110",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:41:15Z",
-   "updated": "2026-11-02T03:41:15Z",
-   "note": ""
+   "updated": "2026-11-02T03:42:29Z",
+   "note": "",
+   "hold": "DroidSync110, 2026-11-02: live two-read turn on gemini-4-argon not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes"
   }
  ],
  "watch": {
