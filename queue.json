@@ -59166,7 +59166,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-110-models",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:16:27Z",
-   "updated": "2026-11-02T04:22:50Z",
+   "updated": "2026-11-02T04:23:21Z",
    "note": "",
    "built": [
     {
@@ -59224,7 +59224,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-02T04:22:50Z"
+   "opened": "2026-11-02T04:22:50Z",
+   "readied": "2026-11-02T04:23:21Z"
   },
   {
    "id": "factory-droid-opus-refusal-fallback",
