@@ -59900,19 +59900,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T19:49:08Z",
+  "checked": "2026-11-02T20:19:38Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "factory-droid-gemini-4-argon-110": {
-    "since": "2026-11-02T19:49:08Z",
-    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect"
-   },
-   "factory-droid-muse-spark-1-3": {
-    "since": "2026-11-02T19:49:08Z",
-    "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-11-02T14:27:50Z",
   "unreleased": {},
@@ -59931,7 +59922,9 @@
    17747,
    17756,
    17757,
-   17831
+   17831,
+   17861,
+   17862
   ],
   "post_merge": {
    "16284": {
@@ -61280,6 +61273,20 @@
     "kind": "openable",
     "id": "factory-droid-muse-spark-1-3",
     "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid"
+   },
+   {
+    "at": "2026-11-02T20:19:38Z",
+    "kind": "unopenable",
+    "id": "factory-droid-gemini-4-argon-110",
+    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
+    "why": "opened as #17861"
+   },
+   {
+    "at": "2026-11-02T20:19:38Z",
+    "kind": "unopenable",
+    "id": "factory-droid-muse-spark-1-3",
+    "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
+    "why": "opened as #17862"
    }
   ]
  },
@@ -62441,12 +62448,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T19:27:57.526161Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-02T20:19:39.694437Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -62703,6 +62710,40 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-30T19:41:51Z"
+   },
+   {
+    "id": "factory-droid-gemini-4-argon-110",
+    "label": "#17861",
+    "number": 17861,
+    "state": "open",
+    "area": "providers",
+    "priority": "P2",
+    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T20:12:49Z"
+   },
+   {
+    "id": "factory-droid-muse-spark-1-3",
+    "label": "#17862",
+    "number": 17862,
+    "state": "open",
+    "area": "providers",
+    "priority": "P2",
+    "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T20:14:32Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -62990,40 +63031,6 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
-    "id": "factory-droid-gemini-4-argon-110",
-    "label": "factory-droid-gemini-4-argon-110",
-    "number": null,
-    "state": "queued",
-    "area": "providers",
-    "priority": "P2",
-    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-02T03:41:15Z"
-   },
-   {
-    "id": "factory-droid-muse-spark-1-3",
-    "label": "factory-droid-muse-spark-1-3",
-    "number": null,
-    "state": "queued",
-    "area": "providers",
-    "priority": "P2",
-    "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-02T03:27:27Z"
-   },
-   {
     "id": "factory-droid-web-search",
     "label": "factory-droid-web-search",
     "number": null,
@@ -63033,14 +63040,14 @@
     "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)",
     "action": "wait",
     "reasons": [
-     "conflicts with factory-droid-muse-spark-1-3 in packages/catalog/src/discovery/factory-droid.ts",
+     "conflicts with #17862 in packages/catalog/src/discovery/factory-droid.ts",
      "conflicts with main in docs/tools/web_search.md, packages/catalog/src/discovery/factory-droid.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "factory-droid-muse-spark-1-3"
+     "#17862"
     ],
     "needs": [],
     "created": "2026-10-18T20:37:53Z"
