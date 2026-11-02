@@ -29,12 +29,12 @@ Maintenance: if Factory drops the dialect, removing the three axes reverts Argon
 
 - Live, Global account: `omp models factory-droid` from this branch lists `gemini-4-argon` (934K / 66K / low, medium, high).
 - New tests: the request shape; second turn sent verbatim with call ids; rewritten turn rebuilt; with redaction on, a credential in a call argument or an unsigned thought stays off the wire; parallel results in call order; a 600K raw turn survives save/reload; the clamp charges the raw size. Reverting the redaction check, the call-order line, the clamp flag or the persistence guard fails its test. With the whole change reverted, 4 of 7 replay tests and the clamp test fail.
-- A droid-recorded Argon request pair matches omp's bodies on both turns (only the client-version header differs from the pin).
+- Live tool turn on `factory-droid/gemini-4-argon` ("read a.txt and b.txt, reply with their sum"): both `read` calls ran, and the second request, which sends Argon's first turn back verbatim with its call ids, answered `SUM=4817`.
 - ai, catalog and coding-agent session suites pass, and `bun run check:ts` is clean.
-- Not run: a live Argon tool turn. The account's Standard credit window was exhausted (402).
 
 ---
 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
