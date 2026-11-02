@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-02 02:00Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 8, conflict-held 14, stacked 17, held 3, open PRs 21; merged 193, closed 16
+**Counts:** openable now 8, conflict-held 14, stacked 16, held 3, open PRs 21; merged 193, closed 17
 
 ## Openable now (8)
 
@@ -38,7 +38,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 2d | iphone-mirror-pointer | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 1d | switch-remote-reexpand | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 
-## Stacked (17)
+## Stacked (16)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -54,7 +54,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | computer-rich-text | feat(computer): read macOS text as Markdown with value({ format: "markdown" }) | computer | P2 | 19d | computer-ui-quiet, computer-ax-lines ([#15282](https://github.com/can1357/oh-my-pi/pull/15282)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-rich-text) |
 | factory-droid-gemini-4-argon | feat(catalog,ai): add Gemini 4 Argon to Factory Droid with its request dialect | providers | P1 | 14d | factory-droid-0244 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon) |
 | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 14d | relay-popup-front-main ([#16284](https://github.com/can1357/oh-my-pi/pull/16284)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
-| timer-pr-6-estate | feat(coding-agent): list scheduled work omp did not create with omp timer ls --all | other |  | 10d | timer-pr-2-engine | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-6-estate) |
 | timer-pr-7-conditions | feat(coding-agent): fire timers once a shell, CI or process condition holds | other |  | 10d | timer-pr-2-engine | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-7-conditions) |
 | timer-pr-8-wake-machine | feat(coding-agent): wake a sleeping Mac before a one-shot timer with --wake-machine | other |  | 10d | timer-pr-2-engine | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-8-wake-machine) |
 | timer-pr-9-tool-conditions | feat(coding-agent): let the timer tool set condition timers | other |  | 10d | timer-pr-5-agent-runs, timer-pr-7-conditions | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/timer-pr-9-tool-conditions) |
