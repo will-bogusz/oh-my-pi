@@ -58836,7 +58836,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T02:31:41Z",
+  "checked": "2026-11-02T03:02:27Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -58851,6 +58851,22 @@
    "macos-capture-geometry": {
     "since": "2026-10-30T21:25:06Z",
     "title": "fix(natives): match macOS window screenshots to the window on screen"
+   },
+   "persist-tabs-exit": {
+    "since": "2026-11-02T03:02:27Z",
+    "title": "fix(browser): keep persist relay tabs open when the session ends"
+   },
+   "r2/relay-call-deadline": {
+    "since": "2026-11-02T03:02:27Z",
+    "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s"
+   },
+   "tab-click-options": {
+    "since": "2026-11-02T03:02:27Z",
+    "title": "fix(browser): press the button and count tab.click and frame.click are asked for"
+   },
+   "relay-frame-detach-report": {
+    "since": "2026-11-02T03:02:27Z",
+    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame"
    },
    "iphone-mirror-key-gap": {
     "since": "2026-10-30T21:25:06Z",
@@ -60442,6 +60458,30 @@
     "id": "switch-remote-reexpand",
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "why": "opened as #17747"
+   },
+   {
+    "at": "2026-11-02T03:02:27Z",
+    "kind": "openable",
+    "id": "persist-tabs-exit",
+    "title": "fix(browser): keep persist relay tabs open when the session ends"
+   },
+   {
+    "at": "2026-11-02T03:02:27Z",
+    "kind": "openable",
+    "id": "r2/relay-call-deadline",
+    "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s"
+   },
+   {
+    "at": "2026-11-02T03:02:27Z",
+    "kind": "openable",
+    "id": "tab-click-options",
+    "title": "fix(browser): press the button and count tab.click and frame.click are asked for"
+   },
+   {
+    "at": "2026-11-02T03:02:27Z",
+    "kind": "openable",
+    "id": "relay-frame-detach-report",
+    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame"
    }
   ]
  },
