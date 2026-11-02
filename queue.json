@@ -21078,8 +21078,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-lossless",
    "host": "MacBook-Pro",
    "added": "2026-10-19T00:03:17Z",
-   "updated": "2026-10-19T05:05:41Z",
-   "note": "HOLD (Will, 2026-10-18): waits for Will's OK on the Accessibility dependency"
+   "updated": "2026-11-02T14:32:49Z",
+   "note": "HOLD (Will, 2026-10-18): waits for Will's OK on the Accessibility dependency",
+   "hold": "Will, 2026-10-18: waits for Will's OK on the Accessibility dependency (moved from note, QueueRestructure 2026-11-02)"
   },
   {
    "id": "computer-ui-quiet",
