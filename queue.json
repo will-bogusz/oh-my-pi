@@ -50605,7 +50605,7 @@
    "branch": "will/tab-click-options",
    "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/tab-click-options.md",
@@ -50615,7 +50615,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tab-click-options",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:26:13Z",
-   "updated": "2026-11-02T04:32:49Z",
+   "updated": "2026-11-02T05:04:56Z",
    "note": "",
    "built": [
     {
@@ -52422,7 +52422,7 @@
    "branch": "will/relay-frame-detach-report",
    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/relay-frame-detach-report.md",
@@ -52432,7 +52432,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-frame-detach-report",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:04:15Z",
-   "updated": "2026-11-02T04:35:21Z",
+   "updated": "2026-11-02T05:04:56Z",
    "note": "",
    "built": [
     {
@@ -59386,6 +59386,24 @@
    "updated": "2026-11-02T03:42:29Z",
    "note": "",
    "hold": "DroidSync110, 2026-11-02: live two-read turn on gemini-4-argon not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes"
+  },
+  {
+   "id": "visuals-guidance",
+   "branch": "will/visuals-guidance",
+   "title": "feat(coding-agent): ask for one designed SVG figure where an answer has shape",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": null,
+   "body": null,
+   "state": "open",
+   "pr": 17773,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "goliath",
+   "added": "2026-11-02T05:04:52Z",
+   "updated": "2026-11-02T05:04:52Z",
+   "note": ""
   }
  ],
  "watch": {
