@@ -59675,7 +59675,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-muse-spark-1-3",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:27:27Z",
-   "updated": "2026-11-02T20:14:34Z",
+   "updated": "2026-11-02T20:14:56Z",
    "note": "",
    "advanced": "2026-11-02T20:05:56Z",
    "built": [
@@ -59716,7 +59716,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-02T20:14:34Z"
+   "opened": "2026-11-02T20:14:34Z",
+   "readied": "2026-11-02T20:14:56Z"
   },
   {
    "id": "factory-droid-110-pin",
