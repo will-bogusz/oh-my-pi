@@ -57173,13 +57173,13 @@
    "needs": [],
    "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/iphone-mirror-not-showing.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17755,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-not-showing",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:36:03Z",
-   "updated": "2026-11-02T03:14:26Z",
+   "updated": "2026-11-02T03:24:51Z",
    "note": "",
    "built": [
     {
@@ -57250,7 +57250,8 @@
      "tree": "1c2e904f816765145387f519b84705329a98de9a"
     }
    ],
-   "advanced": "2026-11-02T02:40:57Z"
+   "advanced": "2026-11-02T02:40:57Z",
+   "opened": "2026-11-02T03:24:51Z"
   },
   {
    "id": "macos-scroll-direction",
