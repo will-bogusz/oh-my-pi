@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 04:37Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 04:56Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-02 04:17Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -54,7 +54,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | snapcompact-archive-target | feat(coding-agent): size snapcompact archives to 75% of the compaction trigger | other | P2 | 1d | Will, 2026-10-31: wait until the continuation eval with calibrated judges shows bigger archives help continued work, not only recall (+0.16 Opus recall, but 1.7x compactions) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-archive-target) |
 | factory-droid-muse-spark-1-3 | feat(catalog): add Muse Spark 1.3 to Factory Droid | providers | P2 | 1h | DroidSync110, 2026-11-02: live two-read turn on muse-spark-1.3 not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-muse-spark-1-3) |
 | factory-droid-110-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.1.0 | providers | P1 | 1h | Will, 2026-11-02: awaiting native corpus recapture approval (~1M Factory tokens) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-110-pin) |
-| factory-droid-gemini-4-argon-110 | feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect | providers | P2 | 0h | DroidSync110, 2026-11-02: live two-read turn on gemini-4-argon not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon-110) |
+| factory-droid-gemini-4-argon-110 | feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect | providers | P2 | 1h | DroidSync110, 2026-11-02: live two-read turn on gemini-4-argon not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon-110) |
 
 ## Open PRs (29)
 
