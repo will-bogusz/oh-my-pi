@@ -57857,7 +57857,7 @@
    "area": "other",
    "priority": null,
    "needs": [],
-   "base": "62f4f7cccfd38adde9a2ae203d69b27bc187a84f",
+   "base": "686b5e2fb542848dc3ff1a9e36a42a8fefdd2278",
    "body": "bodies/cold-revive-xdev-mounts.md",
    "state": "queued",
    "pr": null,
@@ -57865,8 +57865,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/prompt-drift",
    "host": "MacBook-Pro",
    "added": "2026-10-31T23:51:27Z",
-   "updated": "2026-10-31T23:54:04Z",
-   "note": ""
+   "updated": "2026-11-02T01:40:14Z",
+   "note": "",
+   "advanced": "2026-11-02T01:40:14Z"
   },
   {
    "id": "snapcompact-think-legend",
