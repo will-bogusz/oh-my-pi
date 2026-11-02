@@ -62273,6 +62273,11 @@
     "sha": "dffbf3f32448c88029afa3e40c4e8876dc1b6803",
     "at": "2026-11-02T05:09:22Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "dffbf3f32448c88029afa3e40c4e8876dc1b6803",
+    "at": "2026-11-02T05:10:31Z",
+    "host": "goliath"
    }
   }
  },
