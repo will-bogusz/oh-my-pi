@@ -57688,8 +57688,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-reader-usage-shift",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:07:28Z",
-   "updated": "2026-11-02T01:40:04Z",
-   "note": "",
+   "updated": "2026-11-02T02:36:42Z",
+   "note": "QueueSteward, 2026-11-02: waits for #17747 (switch-remote-reexpand) to merge: both change contextFitsModel's tail in session-maintenance.ts (#17747 hoists fitBudget and drops the compactionSettings line; this branch inserts the archive-form shift there). Then pr-queue advance text-reader-usage-shift and open.",
    "advanced": "2026-11-02T01:40:04Z"
   },
   {
