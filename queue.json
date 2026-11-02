@@ -58822,7 +58822,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T02:00:55Z",
+  "checked": "2026-11-02T02:31:41Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -58841,22 +58841,6 @@
    "iphone-mirror-key-gap": {
     "since": "2026-10-30T21:25:06Z",
     "title": "perf(natives): type on iPhone Mirroring twice as fast"
-   },
-   "cold-revive-xdev-mounts": {
-    "since": "2026-11-02T01:30:17Z",
-    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted"
-   },
-   "rich-editor-fill-followup": {
-    "since": "2026-11-02T02:00:55Z",
-    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor"
-   },
-   "snapcompact-think-legend": {
-    "since": "2026-11-02T02:00:55Z",
-    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none"
-   },
-   "switch-remote-reexpand": {
-    "since": "2026-11-02T02:00:55Z",
-    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch"
    }
   },
   "conflicts": {},
@@ -58866,7 +58850,6 @@
    15128,
    15130,
    15282,
-   15433,
    15508,
    16223,
    16274,
@@ -58874,16 +58857,18 @@
    16309,
    16552,
    16553,
-   16576,
    16586,
    16595,
    16611,
-   16801,
    16908,
    17496,
    17607,
    17610,
-   17622
+   17622,
+   17742,
+   17745,
+   17746,
+   17747
   ],
   "post_merge": {
    "16300": {
@@ -60415,6 +60400,34 @@
     "id": "text-reader-usage-shift",
     "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check",
     "why": "plan: wait (conflicts with switch-remote-reexpand in packages/coding-agent/src/session/session-maintenance.ts)"
+   },
+   {
+    "at": "2026-11-02T02:31:41Z",
+    "kind": "unopenable",
+    "id": "cold-revive-xdev-mounts",
+    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
+    "why": "opened as #17746"
+   },
+   {
+    "at": "2026-11-02T02:31:41Z",
+    "kind": "unopenable",
+    "id": "rich-editor-fill-followup",
+    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor",
+    "why": "opened as #17742"
+   },
+   {
+    "at": "2026-11-02T02:31:41Z",
+    "kind": "unopenable",
+    "id": "snapcompact-think-legend",
+    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
+    "why": "opened as #17745"
+   },
+   {
+    "at": "2026-11-02T02:31:41Z",
+    "kind": "unopenable",
+    "id": "switch-remote-reexpand",
+    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
+    "why": "opened as #17747"
    }
   ]
  },
@@ -61453,12 +61466,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T02:27:10.905866Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-02T02:31:41.772597Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 3,
-   "left": 5
+   "used": 4,
+   "left": 4
   },
   "rows": [
    {
@@ -61579,6 +61592,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T02:18:02Z"
+   },
+   {
+    "id": "switch-remote-reexpand",
+    "label": "#17747",
+    "number": 17747,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T02:26:17Z"
    },
    {
     "id": "print-hold",
@@ -62364,6 +62394,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17745 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
@@ -62375,6 +62406,7 @@
     "paired": [],
     "blocked_by": [
      "#17745",
+     "#17747",
      "#17610",
      "#15128",
      "#15130",
@@ -62470,12 +62502,15 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-10-31: wait until the continuation eval with calibrated judges shows bigger archives help continued work, not only recall (+0.16 Opus recall, but 1.7x compactions)",
+     "conflicts with #17747 in docs/compaction.md",
      "conflicts with main in docs/compaction.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#17747"
+    ],
     "needs": [],
     "created": "2026-10-31T20:07:42Z"
    },
@@ -62510,12 +62545,16 @@
     "area": "coding-agent",
     "priority": null,
     "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #17747 in packages/coding-agent/src/session/session-maintenance.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#17747"
+    ],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
    },
@@ -62555,22 +62594,22 @@
     "action": "wait",
     "reasons": [
      "needs reset-account-optout (queued)",
+     "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17747",
      "#17610",
      "#15128",
      "#15130",
-     "#17496",
-     "text-reader-usage-shift"
+     "#17496"
     ],
     "needs": [
      "#15133"
@@ -62616,11 +62655,11 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17745 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -62628,11 +62667,11 @@
     "paired": [],
     "blocked_by": [
      "#17745",
+     "#17747",
      "#17610",
      "#15128",
      "#15130",
-     "#17496",
-     "text-reader-usage-shift"
+     "#17496"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -62658,11 +62697,6 @@
     "created": "2026-10-13T21:47:19Z"
    }
   ],
-  "drafts": [
-   {
-    "label": "#17747",
-    "created": "2026-11-02T02:26:17Z"
-   }
-  ]
+  "drafts": []
  }
 }
