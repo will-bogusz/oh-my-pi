@@ -62485,7 +62485,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T06:05:30.426063Z",
+  "at": "2026-11-02T06:35:41.091552Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -63376,9 +63376,8 @@
     "area": "providers",
     "priority": "P2",
     "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: DroidSync110, 2026-11-02: live two-read turn on gemini-4-argon not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes",
      "needs #17766 (open)"
     ],
     "note": "",
@@ -63398,9 +63397,8 @@
     "area": "providers",
     "priority": "P2",
     "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: DroidSync110, 2026-11-02: live two-read turn on muse-spark-1.3 not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes",
      "needs #17766 (open)"
     ],
     "note": "",
@@ -63559,52 +63557,6 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "snapcompact-archive-target",
-    "label": "snapcompact-archive-target",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": "P2",
-    "title": "feat(coding-agent): size snapcompact archives to 75% of the compaction trigger",
-    "action": "held",
-    "reasons": [
-     "held: Will, 2026-10-31: wait until the continuation eval with calibrated judges shows bigger archives help continued work, not only recall (+0.16 Opus recall, but 1.7x compactions)",
-     "conflicts with #17747 in docs/compaction.md",
-     "conflicts with main in docs/compaction.md"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#17747"
-    ],
-    "needs": [],
-    "created": "2026-10-31T20:07:42Z"
-   },
-   {
-    "id": "snapcompact-frame-budget",
-    "label": "snapcompact-frame-budget",
-    "number": null,
-    "state": "queued",
-    "area": "catalog",
-    "priority": "P2",
-    "title": "feat(catalog,coding-agent,snapcompact): cap snapcompact archives per host (Anthropic 80, Codex 107)",
-    "action": "held",
-    "reasons": [
-     "held: Will, 2026-10-31: no user effect without archive-target except 1M gpt-5.6 models, whose recall past 80 frames is unmeasured; decide together with archive-target after the continuation eval",
-     "conflicts with #17745 in packages/coding-agent/test/agent-session-snapcompact-reader.test.ts",
-     "conflicts with main in packages/coding-agent/test/agent-session-snapcompact-reader.test.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#17745"
-    ],
-    "needs": [],
-    "created": "2026-10-31T20:07:36Z"
    },
    {
     "id": "text-reader-usage-shift",
