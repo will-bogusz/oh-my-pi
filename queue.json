@@ -57206,7 +57206,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/switch-remote-reexpand",
    "host": "MacBook-Pro",
    "added": "2026-10-30T22:45:47Z",
-   "updated": "2026-11-02T02:09:21Z",
+   "updated": "2026-11-02T02:09:26Z",
    "note": "Waits for #17490 to merge (code conflict in session-maintenance.ts). After it merges: pr-queue advance switch-remote-reexpand; resolve by keeping #17490's #contextBuildOptions getter and adding model: this.#model to it.",
    "advanced": "2026-11-02T01:39:53Z",
    "built": [
@@ -57429,6 +57429,16 @@
      "at": "2026-11-02T02:09:20Z",
      "host": "MacBook-Pro",
      "tree": "645f0215ea9ea29dde61b362e2b41042dd654a34"
+    },
+    {
+     "with": "#16908",
+     "code": "0d71fdf618d2b832f48f8d0cdbec8c935f1fa24e",
+     "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
+     "tip": "c3d1f2750dac33eb573c9021c2a041c83de4ad8d",
+     "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
+     "at": "2026-11-02T02:09:26Z",
+     "host": "MacBook-Pro",
+     "tree": "6ce03e736ca24c0272451d5b1b0a799d083c834f"
     }
    ]
   },
@@ -58087,7 +58097,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/prompt-drift",
    "host": "MacBook-Pro",
    "added": "2026-10-31T23:51:27Z",
-   "updated": "2026-11-02T02:09:21Z",
+   "updated": "2026-11-02T02:09:26Z",
    "note": "",
    "advanced": "2026-11-02T01:40:14Z",
    "built": [
@@ -58310,6 +58320,16 @@
      "at": "2026-11-02T02:09:20Z",
      "host": "MacBook-Pro",
      "tree": "645f0215ea9ea29dde61b362e2b41042dd654a34"
+    },
+    {
+     "with": "#16908",
+     "code": "344a689620f9079db1babf4f097583f07e1eb162",
+     "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
+     "tip": "8fdc3a6866c30510fdc5e82970f5f42d941b669f",
+     "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
+     "at": "2026-11-02T02:09:26Z",
+     "host": "MacBook-Pro",
+     "tree": "6ce03e736ca24c0272451d5b1b0a799d083c834f"
     }
    ]
   },
@@ -58328,7 +58348,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-think-legend",
    "host": "MacBook-Pro",
    "added": "2026-11-02T01:38:07Z",
-   "updated": "2026-11-02T02:09:21Z",
+   "updated": "2026-11-02T02:09:26Z",
    "note": "",
    "built": [
     {
@@ -58550,6 +58570,16 @@
      "at": "2026-11-02T02:09:20Z",
      "host": "MacBook-Pro",
      "tree": "645f0215ea9ea29dde61b362e2b41042dd654a34"
+    },
+    {
+     "with": "#16908",
+     "code": "7ea4ec1350145bdec6dba86c2df573ee558c767c",
+     "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
+     "tip": "60b38ec2d76d2523f161a520e14e6ae8a90925c0",
+     "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
+     "at": "2026-11-02T02:09:26Z",
+     "host": "MacBook-Pro",
+     "tree": "6ce03e736ca24c0272451d5b1b0a799d083c834f"
     }
    ]
   },
@@ -58568,7 +58598,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rich-editor-fill-followup",
    "host": "MacBook-Pro",
    "added": "2026-11-02T01:52:49Z",
-   "updated": "2026-11-02T02:09:21Z",
+   "updated": "2026-11-02T02:09:26Z",
    "note": "",
    "built": [
     {
@@ -58790,6 +58820,16 @@
      "at": "2026-11-02T02:09:20Z",
      "host": "MacBook-Pro",
      "tree": "645f0215ea9ea29dde61b362e2b41042dd654a34"
+    },
+    {
+     "with": "#16908",
+     "code": "aafa7698d5002c174ebddba6a8585936d6482003",
+     "with_code": "05a6be299d2c11fe41995497e0cb82819ed94e26",
+     "tip": "8d6fa7585ce721f4b4b1e8557b005ac36a0e7c0b",
+     "with_tip": "19c851003a742046219c649bf55bd9528961f78a",
+     "at": "2026-11-02T02:09:26Z",
+     "host": "MacBook-Pro",
+     "tree": "6ce03e736ca24c0272451d5b1b0a799d083c834f"
     }
    ]
   }
