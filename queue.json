@@ -586,8 +586,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-reset-sweep",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-13T21:52:45Z",
-   "note": ""
+   "updated": "2026-11-02T02:39:19Z",
+   "note": "",
+   "hold": "Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance"
   },
   {
    "id": "broker-sweep-clients-defer",
