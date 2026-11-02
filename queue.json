@@ -59162,6 +59162,24 @@
    "added": "2026-11-02T03:16:27Z",
    "updated": "2026-11-02T03:16:27Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-opus-refusal-fallback",
+   "branch": "will/factory-droid-opus-refusal-fallback",
+   "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback",
+   "area": "providers",
+   "priority": "P2",
+   "needs": [],
+   "base": "256b3211bca7458391866a8bcc9369902664be55",
+   "body": "bodies/factory-droid-opus-refusal-fallback.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-opus-refusal-fallback",
+   "host": "MacBook-Pro",
+   "added": "2026-11-02T03:23:59Z",
+   "updated": "2026-11-02T03:23:59Z",
+   "note": ""
   }
  ],
  "watch": {
