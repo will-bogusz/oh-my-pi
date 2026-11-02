@@ -52432,7 +52432,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-frame-detach-report",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:04:15Z",
-   "updated": "2026-11-02T04:34:58Z",
+   "updated": "2026-11-02T04:35:21Z",
    "note": "",
    "built": [
     {
@@ -53016,7 +53016,8 @@
     }
    ],
    "advanced": "2026-11-02T02:39:08Z",
-   "opened": "2026-11-02T04:34:58Z"
+   "opened": "2026-11-02T04:34:58Z",
+   "readied": "2026-11-02T04:35:21Z"
   },
   {
    "id": "ax-placeholder-name",
