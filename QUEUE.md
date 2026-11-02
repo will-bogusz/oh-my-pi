@@ -1,12 +1,12 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 01:40Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 01:41Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-02 01:30Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 14, stacked 21, held 3, open PRs 21, queued since the last plan 1; merged 193, closed 12
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-02 01:38Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 7, conflict-held 14, stacked 21, held 3, open PRs 21; merged 193, closed 12
 
-## Openable now (6)
+## Openable now (7)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -14,8 +14,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P1 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
 | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | iphone-mirror-not-showing | fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone | computer | P1 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-not-showing) |
-| text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 1d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
+| switch-remote-reexpand | fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch | other |  | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/switch-remote-reexpand) |
 | cold-revive-xdev-mounts | fix(task): keep a cold-revived subagent's xd:// devices mounted | other |  | 1d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cold-revive-xdev-mounts) |
+| snapcompact-think-legend | fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-think-legend) |
 
 ## Conflict-held (14)
 
@@ -28,13 +29,13 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | factory-droid-0244 | feat(ai,catalog): bring Factory Droid up to droid 0.244 (GPT-6 Fast, Beam, Nemotron, Muse Spark, Opus 5.5 fallback) | providers | P1 | 14d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#16309](https://github.com/can1357/oh-my-pi/pull/16309), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-0244) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 14d | [#16309](https://github.com/can1357/oh-my-pi/pull/16309), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 13d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
-| compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 12d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), [#16801](https://github.com/can1357/oh-my-pi/pull/16801), [#17496](https://github.com/can1357/oh-my-pi/pull/17496), text-reader-usage-shift, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
+| compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 12d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), [#16801](https://github.com/can1357/oh-my-pi/pull/16801), [#17496](https://github.com/can1357/oh-my-pi/pull/17496), snapcompact-think-legend, switch-remote-reexpand, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 9d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16284](https://github.com/can1357/oh-my-pi/pull/16284), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
 | tab-click-options | fix(browser): press the button and count tab.click and frame.click are asked for | browser | P1 | 9d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tab-click-options) |
 | relay-frame-detach-report | fix(browser): report Chrome's relay detach to a call running in a cross-site frame | browser | P2 | 9d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#16908](https://github.com/can1357/oh-my-pi/pull/16908), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-detach-report) |
 | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 8d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#16223](https://github.com/can1357/oh-my-pi/pull/16223), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 2d | iphone-mirror-pointer | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
-| switch-remote-reexpand | fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch | other |  | 2d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/switch-remote-reexpand) |
+| text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 1d | switch-remote-reexpand | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 
 ## Stacked (21)
 
@@ -95,9 +96,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | [#17607](https://github.com/can1357/oh-my-pi/pull/17607) | unknown-tokenizer-o200k | fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips | agent | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/unknown-tokenizer-o200k) |
 | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | claude-refusal-strip-retry | fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/claude-refusal-strip-retry) |
 | [#17622](https://github.com/can1357/oh-my-pi/pull/17622) | date-reminder-journal | fix(coding-agent): keep each message's date across resume and subagent revival | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/date-reminder-journal) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| snapcompact-think-legend | fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-think-legend) |
