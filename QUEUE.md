@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 01:42Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 01:52Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-02 01:40Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 7, conflict-held 14, stacked 21, held 3, open PRs 21; merged 193, closed 12
+**Counts:** openable now 7, conflict-held 14, stacked 21, held 3, open PRs 21, queued since the last plan 1; merged 193, closed 12
 
 ## Openable now (7)
 
@@ -96,3 +96,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | [#17607](https://github.com/can1357/oh-my-pi/pull/17607) | unknown-tokenizer-o200k | fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips | agent | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/unknown-tokenizer-o200k) |
 | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | claude-refusal-strip-retry | fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/claude-refusal-strip-retry) |
 | [#17622](https://github.com/can1357/oh-my-pi/pull/17622) | date-reminder-journal | fix(coding-agent): keep each message's date across resume and subagent revival | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/date-reminder-journal) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| rich-editor-fill-followup | fix(browser): stop rich-text fill landing before the old text or outside the editor | browser |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill-followup) |
