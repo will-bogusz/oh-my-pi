@@ -1,17 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 04:56Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 04:59Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-02 04:17Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 7, stacked 9, held 12, open PRs 29; merged 193, closed 25
+**Counts:** openable now 1, conflict-held 7, stacked 9, held 12, open PRs 30; merged 193, closed 25
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | r2/relay-call-deadline | fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s | browser | P1 | 19d | open (over P2 #16284, #16908) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-call-deadline) |
-| factory-droid-opus-refusal-fallback | feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback | providers | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-opus-refusal-fallback) |
 
 ## Conflict-held (7)
 
@@ -56,7 +55,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | factory-droid-110-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.1.0 | providers | P1 | 1h | Will, 2026-11-02: awaiting native corpus recapture approval (~1M Factory tokens) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-110-pin) |
 | factory-droid-gemini-4-argon-110 | feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect | providers | P2 | 1h | DroidSync110, 2026-11-02: live two-read turn on gemini-4-argon not run yet (Factory Standard window exhausted until ~06:14Z); unhold once it passes | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon-110) |
 
-## Open PRs (29)
+## Open PRs (30)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -89,3 +88,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | [#17745](https://github.com/can1357/oh-my-pi/pull/17745) | snapcompact-think-legend | fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none | other | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-think-legend) |
 | [#17742](https://github.com/can1357/oh-my-pi/pull/17742) | rich-editor-fill-followup | fix(browser): stop rich-text fill landing before the old text or outside the editor | browser | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill-followup) |
 | [#17766](https://github.com/can1357/oh-my-pi/pull/17766) | factory-droid-110-models | feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves | providers | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-110-models) |
+| [#17772](https://github.com/can1357/oh-my-pi/pull/17772) | factory-droid-opus-refusal-fallback | feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback | providers | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-opus-refusal-fallback) |
