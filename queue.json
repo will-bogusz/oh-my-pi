@@ -56664,8 +56664,73 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-not-showing",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:36:03Z",
-   "updated": "2026-10-30T21:36:03Z",
-   "note": ""
+   "updated": "2026-11-02T01:22:13Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16553",
+     "code": "277f37eba5944408be0030de16b23d04493a44fe",
+     "with_code": "2335e24141c63cad4f0e5fb5fd3222446af9acdd",
+     "tip": "25c47c4e93898073930599fb2e5b1112b8c06707",
+     "with_tip": "f364cacea4c0837a17e659e1069135647178a8f5",
+     "at": "2026-11-02T01:22:06Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16284",
+     "code": "277f37eba5944408be0030de16b23d04493a44fe",
+     "with_code": "7ba84973357f9cc6e6d11f32831d57fb3f159040",
+     "tip": "25c47c4e93898073930599fb2e5b1112b8c06707",
+     "with_tip": "dea10391b924a6131b70919c9914074443174cc7",
+     "at": "2026-11-02T01:22:11Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15282",
+     "code": "277f37eba5944408be0030de16b23d04493a44fe",
+     "with_code": "0b6fbdaecd9c8a65b15500c1232af6cff5cb8fc7",
+     "tip": "25c47c4e93898073930599fb2e5b1112b8c06707",
+     "with_tip": "ef20f6432376ef5dbd7e1664df31c7dcc3cee21f",
+     "at": "2026-11-02T01:22:11Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16223",
+     "code": "277f37eba5944408be0030de16b23d04493a44fe",
+     "with_code": "23928780160628ae00427bf27cebecd57542c288",
+     "tip": "25c47c4e93898073930599fb2e5b1112b8c06707",
+     "with_tip": "97d71f59f347d0b449eca699cca0623fd7ee0d37",
+     "at": "2026-11-02T01:22:11Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "iphone-mirror-pointer",
+     "code": "277f37eba5944408be0030de16b23d04493a44fe",
+     "with_code": "75413d49f263710ee49feae31ce0b7a5a2f1a7a5",
+     "tip": "25c47c4e93898073930599fb2e5b1112b8c06707",
+     "with_tip": "dad97457139f599e44148e29cf3945cb94ec97f6",
+     "at": "2026-11-02T01:22:12Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "macos-capture-geometry",
+     "code": "277f37eba5944408be0030de16b23d04493a44fe",
+     "with_code": "bcc626a556acbcd28940d1c643e577e91e7e8025",
+     "tip": "25c47c4e93898073930599fb2e5b1112b8c06707",
+     "with_tip": "d5896fae4620fa2379b181fb426930ddcd71a112",
+     "at": "2026-11-02T01:22:12Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "iphone-mirror-key-gap",
+     "code": "277f37eba5944408be0030de16b23d04493a44fe",
+     "with_code": "0335a57cf270dd99ab4619e4e063954e8c0d17da",
+     "tip": "25c47c4e93898073930599fb2e5b1112b8c06707",
+     "with_tip": "c15381bb204481cd95c4c2897cf63f7d9c4b9a39",
+     "at": "2026-11-02T01:22:12Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "macos-scroll-direction",
