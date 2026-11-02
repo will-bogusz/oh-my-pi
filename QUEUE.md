@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 03:03Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 03:14Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-02 02:53Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -83,4 +83,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | [#17622](https://github.com/can1357/oh-my-pi/pull/17622) | date-reminder-journal | fix(coding-agent): keep each message's date across resume and subagent revival | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/date-reminder-journal) |
 | [#17746](https://github.com/can1357/oh-my-pi/pull/17746) | cold-revive-xdev-mounts | fix(task): keep a cold-revived subagent's xd:// devices mounted | other | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cold-revive-xdev-mounts) |
 | [#17745](https://github.com/can1357/oh-my-pi/pull/17745) | snapcompact-think-legend | fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-think-legend) |
-| [#17742](https://github.com/can1357/oh-my-pi/pull/17742) | rich-editor-fill-followup | fix(browser): stop rich-text fill landing before the old text or outside the editor | browser | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill-followup) |
+| [#17742](https://github.com/can1357/oh-my-pi/pull/17742) | rich-editor-fill-followup | fix(browser): stop rich-text fill landing before the old text or outside the editor | browser | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill-followup) |
