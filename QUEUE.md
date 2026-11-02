@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 06:44Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 07:06Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-02 06:35Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-02 07:05Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 7, stacked 11, held 8, open PRs 32; merged 193, closed 27
 
 ## Openable now (0)
@@ -62,7 +62,7 @@ none
 | [#17778](https://github.com/can1357/oh-my-pi/pull/17778) | r2/relay-call-deadline | fix(browser): stop later input steps after timeout and let relay page waits use the call deadline | browser | P1 | 1h | keep; opened over P2 #16284; opened over P2 #16908 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-call-deadline) |
 | [#16223](https://github.com/can1357/oh-my-pi/pull/16223) | computer-text-drag-select | feat(natives): make a macOS background drag across native text an accessibility selection | computer | P2 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-text-drag-select) |
 | [#16284](https://github.com/can1357/oh-my-pi/pull/16284) | relay-popup-front-main | fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS | browser | P2 | 14d | keep; rebases after #17778 merges; rebases after #16908 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-front-main) |
-| [#16309](https://github.com/can1357/oh-my-pi/pull/16309) | factory-droid-credit-promotions | feat(catalog,tui): show Factory Droid credit promotions in the model browser | providers | P2 | 13d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-credit-promotions) |
+| [#16309](https://github.com/can1357/oh-my-pi/pull/16309) | factory-droid-credit-promotions | feat(catalog,tui): show Factory Droid credit promotions in the model browser | providers | P2 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-credit-promotions) |
 | [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
 | [#16552](https://github.com/can1357/oh-my-pi/pull/16552) | pip-procfs-fallback | fix(coding-agent): stop the %pip installer on cancel when /proc cannot be listed | python | P1 | 12d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/pip-procfs-fallback) |
 | [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | click-place-release | fix(natives): keep a macOS drag from the user's app onto the target the user's pick | natives-macos | P1 | 12d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-place-release) |
@@ -85,5 +85,5 @@ none
 | [#17745](https://github.com/can1357/oh-my-pi/pull/17745) | snapcompact-think-legend | fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none | other | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-think-legend) |
 | [#17742](https://github.com/can1357/oh-my-pi/pull/17742) | rich-editor-fill-followup | fix(browser): stop rich-text fill landing before the old text or outside the editor | browser | P0 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill-followup) |
 | [#17766](https://github.com/can1357/oh-my-pi/pull/17766) | factory-droid-110-models | feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves | providers | P2 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-110-models) |
-| [#17772](https://github.com/can1357/oh-my-pi/pull/17772) | factory-droid-opus-refusal-fallback | feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback | providers | P2 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-opus-refusal-fallback) |
-| [#17773](https://github.com/can1357/oh-my-pi/pull/17773) | visuals-guidance | feat(coding-agent): ask for one designed SVG figure where an answer has shape | other |  | 1h | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/visuals-guidance) |
+| [#17772](https://github.com/can1357/oh-my-pi/pull/17772) | factory-droid-opus-refusal-fallback | feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback | providers | P2 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-opus-refusal-fallback) |
+| [#17773](https://github.com/can1357/oh-my-pi/pull/17773) | visuals-guidance | feat(coding-agent): ask for one designed SVG figure where an answer has shape | other |  | 2h | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/visuals-guidance) |

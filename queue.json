@@ -59607,7 +59607,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T06:05:29Z",
+  "checked": "2026-11-02T07:05:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -62485,12 +62485,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T06:35:41.091552Z",
+  "at": "2026-11-02T07:05:46.515193Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -62721,7 +62721,7 @@
     "state": "open",
     "area": "browser",
     "priority": "P1",
-    "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
+    "title": "fix(browser): stop later input steps after timeout and let relay page waits use the call deadline",
     "action": "keep",
     "reasons": [],
     "note": "opened over P2 #16284; opened over P2 #16908",
