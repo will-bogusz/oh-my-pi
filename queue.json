@@ -57907,7 +57907,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T01:30:17Z",
+  "checked": "2026-11-02T02:00:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -57931,9 +57931,17 @@
     "since": "2026-11-02T01:30:17Z",
     "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted"
    },
-   "text-reader-usage-shift": {
-    "since": "2026-11-01T12:45:55Z",
-    "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check"
+   "rich-editor-fill-followup": {
+    "since": "2026-11-02T02:00:55Z",
+    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor"
+   },
+   "snapcompact-think-legend": {
+    "since": "2026-11-02T02:00:55Z",
+    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none"
+   },
+   "switch-remote-reexpand": {
+    "since": "2026-11-02T02:00:55Z",
+    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch"
    }
   },
   "conflicts": {},
@@ -59467,6 +59475,31 @@
     "kind": "openable",
     "id": "cold-revive-xdev-mounts",
     "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted"
+   },
+   {
+    "at": "2026-11-02T02:00:55Z",
+    "kind": "openable",
+    "id": "rich-editor-fill-followup",
+    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor"
+   },
+   {
+    "at": "2026-11-02T02:00:55Z",
+    "kind": "openable",
+    "id": "snapcompact-think-legend",
+    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none"
+   },
+   {
+    "at": "2026-11-02T02:00:55Z",
+    "kind": "openable",
+    "id": "switch-remote-reexpand",
+    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch"
+   },
+   {
+    "at": "2026-11-02T02:00:55Z",
+    "kind": "unopenable",
+    "id": "text-reader-usage-shift",
+    "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check",
+    "why": "plan: wait (conflicts with switch-remote-reexpand in packages/coding-agent/src/session/session-maintenance.ts)"
    }
   ]
  },
@@ -60498,8 +60531,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T01:55:54.073176Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-02T02:00:55.751241Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -61992,7 +62025,7 @@
     "reasons": [
      "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
      "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
+     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
     ],
     "note": "",
