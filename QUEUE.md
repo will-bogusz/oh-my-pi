@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-02 03:28Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 7, stacked 9, held 9, open PRs 26; merged 193, closed 25
+**Counts:** openable now 6, conflict-held 7, stacked 9, held 9, open PRs 26, queued since the last plan 1; merged 193, closed 25
 
 ## Openable now (6)
 
@@ -87,3 +87,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | [#17746](https://github.com/can1357/oh-my-pi/pull/17746) | cold-revive-xdev-mounts | fix(task): keep a cold-revived subagent's xd:// devices mounted | other | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cold-revive-xdev-mounts) |
 | [#17745](https://github.com/can1357/oh-my-pi/pull/17745) | snapcompact-think-legend | fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none | other | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-think-legend) |
 | [#17742](https://github.com/can1357/oh-my-pi/pull/17742) | rich-editor-fill-followup | fix(browser): stop rich-text fill landing before the old text or outside the editor | browser | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rich-editor-fill-followup) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| factory-droid-110-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.1.0 | providers | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-110-pin) |
