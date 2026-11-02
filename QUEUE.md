@@ -1,18 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 16:46Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 17:17Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-02 16:46Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 7, stacked 8, held 9, open PRs 16; merged 210, closed 27
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-02 17:16Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 0, conflict-held 8, stacked 8, held 9, open PRs 16; merged 210, closed 27
 
-## Openable now (1)
+## Openable now (0)
 
-| id | title | area | priority | age | plan | branch |
-|---|---|---|---|---|---|---|
-| factory-droid-gemini-4-argon-110 | feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect | providers | P2 | 13h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon-110) |
+none
 
-## Conflict-held (7)
+## Conflict-held (8)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -23,6 +21,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 2d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 1d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | factory-droid-muse-spark-1-3 | feat(catalog): add Muse Spark 1.3 to Factory Droid | providers | P2 | 13h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-muse-spark-1-3) |
+| factory-droid-gemini-4-argon-110 | feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect | providers | P2 | 13h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon-110) |
 
 ## Stacked (8)
 
@@ -70,4 +69,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | switch-remote-reexpand | fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch | other | P1 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/switch-remote-reexpand) |
 | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | claude-refusal-strip-retry | fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/claude-refusal-strip-retry) |
-| [#17773](https://github.com/can1357/oh-my-pi/pull/17773) | visuals-guidance | feat(coding-agent): ask for one designed SVG figure where an answer has shape | other |  | 11h | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/visuals-guidance) |
+| [#17773](https://github.com/can1357/oh-my-pi/pull/17773) | visuals-guidance | feat(coding-agent): ask for one designed SVG figure where an answer has shape | other |  | 12h | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/visuals-guidance) |
