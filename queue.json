@@ -61442,14 +61442,31 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T02:00:55.751241Z",
-  "host": "goliath",
+  "at": "2026-11-02T02:18:45.243827Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
+   {
+    "id": "rich-editor-fill-followup",
+    "label": "#17742",
+    "number": 17742,
+    "state": "open",
+    "area": "browser",
+    "priority": "P0",
+    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T02:12:03Z"
+   },
    {
     "id": "read-after-bash-revalidate",
     "label": "#16274",
@@ -61676,23 +61693,6 @@
     "created": "2026-10-10T21:48:41Z"
    },
    {
-    "id": "agents-show",
-    "label": "#15433",
-    "number": 15433,
-    "state": "open",
-    "area": "other",
-    "priority": "P2",
-    "title": "feat(task): add omp agents show for what an agent's spawns run with",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-12T03:29:21Z"
-   },
-   {
     "id": "computer-text-drag-select",
     "label": "#16223",
     "number": 16223,
@@ -61725,23 +61725,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-19T06:56:13Z"
-   },
-   {
-    "id": "bash-view-tags",
-    "label": "#16576",
-    "number": 16576,
-    "state": "open",
-    "area": "coding-agent",
-    "priority": "P2",
-    "title": "feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T00:01:49Z"
    },
    {
     "id": "bash-minimizer-meta",
@@ -61778,23 +61761,6 @@
     "created": "2026-10-21T06:07:03Z"
    },
    {
-    "id": "timer-pr-1-poke",
-    "label": "#16801",
-    "number": 16801,
-    "state": "open",
-    "area": "other",
-    "priority": "P2",
-    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-22T16:58:16Z"
-   },
-   {
     "id": "cache-marker",
     "label": "#17496",
     "number": 17496,
@@ -61810,6 +61776,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-30T19:41:51Z"
+   },
+   {
+    "id": "snapcompact-think-legend",
+    "label": "#17745",
+    "number": 17745,
+    "state": "open",
+    "area": "other",
+    "priority": null,
+    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T02:18:02Z"
    },
    {
     "id": "iphone-mirror-not-showing",
@@ -61893,6 +61876,7 @@
     "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
     "action": "wait",
     "reasons": [
+     "conflicts with #17742 in packages/coding-agent/test/tools/browser-interactions.test.ts",
      "conflicts with #15508 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16284 in packages/coding-agent/src/tools/browser/relay/bridge.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -61902,6 +61886,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17742",
      "#15508",
      "#16284",
      "#16908"
@@ -62353,8 +62338,8 @@
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
-     "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #17745 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
@@ -62364,8 +62349,8 @@
      "#17610",
      "#15128",
      "#15130",
-     "#16801",
-     "#17496"
+     "#17496",
+     "#17745"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -62477,12 +62462,15 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-10-31: no user effect without archive-target except 1M gpt-5.6 models, whose recall past 80 frames is unmeasured; decide together with archive-target after the continuation eval",
+     "conflicts with #17745 in packages/coding-agent/test/agent-session-snapcompact-reader.test.ts",
      "conflicts with main in packages/coding-agent/test/agent-session-snapcompact-reader.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#17745"
+    ],
     "needs": [],
     "created": "2026-10-31T20:07:36Z"
    },
@@ -62502,40 +62490,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-31T23:51:27Z"
-   },
-   {
-    "id": "rich-editor-fill-followup",
-    "label": "rich-editor-fill-followup",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": null,
-    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-02T01:52:49Z"
-   },
-   {
-    "id": "snapcompact-think-legend",
-    "label": "snapcompact-think-legend",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-02T01:38:07Z"
    },
    {
     "id": "switch-remote-reexpand",
@@ -62614,7 +62568,6 @@
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
-     "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
@@ -62626,7 +62579,6 @@
      "#17610",
      "#15128",
      "#15130",
-     "#16801",
      "#17496",
      "switch-remote-reexpand"
     ],
@@ -62676,9 +62628,8 @@
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #16801 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with snapcompact-think-legend in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #17745 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
@@ -62689,9 +62640,8 @@
      "#17610",
      "#15128",
      "#15130",
-     "#16801",
      "#17496",
-     "snapcompact-think-legend",
+     "#17745",
      "switch-remote-reexpand"
     ],
     "needs": [],
@@ -62716,238 +62666,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "timer-pr-2-engine",
-    "label": "timer-pr-2-engine",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(coding-agent): run shell commands and wake sessions later with omp timer",
-    "action": "wait",
-    "reasons": [
-     "needs #16801 (open)",
-     "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #15433 in docs/cli-reference.md",
-     "conflicts with #16801 in docs/cli-reference.md, docs/sdk.md, packages/coding-agent/src/cli/poke-cli.ts, packages/coding-agent/src/mailbox/headless.ts, packages/coding-agent/src/mailbox/mailbox.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/mailbox.test.ts, packages/coding-agent/test/session-mailbox.test.ts",
-     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#17610",
-     "#15128",
-     "#15130",
-     "#15433",
-     "#16801",
-     "#17496",
-     "switch-remote-reexpand"
-    ],
-    "needs": [
-     "timer-pr-1-poke"
-    ],
-    "created": "2026-10-22T18:21:31Z"
-   },
-   {
-    "id": "timer-pr-3-tool",
-    "label": "timer-pr-3-tool",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(coding-agent): let the agent set timers that wake its session later",
-    "action": "wait",
-    "reasons": [
-     "needs timer-pr-4-surfaces (queued)",
-     "conflicts with #15128 in docs/settings.md",
-     "conflicts with #15130 in docs/settings.md",
-     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/modes/controllers/event-controller.ts",
-     "its need timer-pr-4-surfaces conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts",
-     "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#15128",
-     "#15130",
-     "#17496"
-    ],
-    "needs": [
-     "timer-pr-4-surfaces"
-    ],
-    "created": "2026-10-22T18:59:17Z"
-   },
-   {
-    "id": "timer-pr-4-surfaces",
-    "label": "timer-pr-4-surfaces",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(coding-agent): set and control timers from inside a session",
-    "action": "wait",
-    "reasons": [
-     "needs timer-pr-2-engine (queued)",
-     "conflicts with #15128 in docs/settings.md",
-     "conflicts with #15130 in docs/settings.md",
-     "conflicts with #17496 in docs/settings.md",
-     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#15128",
-     "#15130",
-     "#17496"
-    ],
-    "needs": [
-     "timer-pr-2-engine"
-    ],
-    "created": "2026-10-22T18:27:14Z"
-   },
-   {
-    "id": "timer-pr-5-agent-runs",
-    "label": "timer-pr-5-agent-runs",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(coding-agent): run a prompt timer as an unattended agent and report back",
-    "action": "wait",
-    "reasons": [
-     "needs timer-pr-3-tool (queued)",
-     "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #16801 in packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/session-mailbox.test.ts",
-     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/agent-session.ts",
-     "its need timer-pr-3-tool conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#17610",
-     "#15128",
-     "#15130",
-     "#16801",
-     "#17496",
-     "switch-remote-reexpand"
-    ],
-    "needs": [
-     "timer-pr-3-tool"
-    ],
-    "created": "2026-10-22T18:59:23Z"
-   },
-   {
-    "id": "timer-pr-6-estate",
-    "label": "timer-pr-6-estate",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(coding-agent): list scheduled work omp did not create with omp timer ls --all",
-    "action": "wait",
-    "reasons": [
-     "needs timer-pr-2-engine (queued)",
-     "conflicts with #15433 in docs/cli-reference.md",
-     "conflicts with #16801 in docs/cli-reference.md",
-     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#15433",
-     "#16801"
-    ],
-    "needs": [
-     "timer-pr-2-engine"
-    ],
-    "created": "2026-10-22T18:22:01Z"
-   },
-   {
-    "id": "timer-pr-7-conditions",
-    "label": "timer-pr-7-conditions",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(coding-agent): fire timers once a shell, CI or process condition holds",
-    "action": "wait",
-    "reasons": [
-     "needs timer-pr-2-engine (queued)",
-     "conflicts with #15433 in docs/cli-reference.md",
-     "conflicts with #16801 in docs/cli-reference.md, packages/coding-agent/src/mailbox/message.ts",
-     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#15433",
-     "#16801"
-    ],
-    "needs": [
-     "timer-pr-2-engine"
-    ],
-    "created": "2026-10-22T18:22:20Z"
-   },
-   {
-    "id": "timer-pr-8-wake-machine",
-    "label": "timer-pr-8-wake-machine",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(coding-agent): wake a sleeping Mac before a one-shot timer with --wake-machine",
-    "action": "wait",
-    "reasons": [
-     "needs timer-pr-2-engine (queued)",
-     "its need timer-pr-2-engine conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [
-     "timer-pr-2-engine"
-    ],
-    "created": "2026-10-22T18:22:38Z"
-   },
-   {
-    "id": "timer-pr-9-tool-conditions",
-    "label": "timer-pr-9-tool-conditions",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "feat(coding-agent): let the timer tool set condition timers",
-    "action": "wait",
-    "reasons": [
-     "needs timer-pr-5-agent-runs (queued), timer-pr-7-conditions (queued)",
-     "its need timer-pr-5-agent-runs conflicts with main in docs/cli-reference.md, docs/settings.md, packages/coding-agent/src/main.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/tools/bash.ts",
-     "its need timer-pr-7-conditions conflicts with main in docs/cli-reference.md, docs/settings.md, docs/timers.md, packages/coding-agent/src/cli/command-help.ts, packages/coding-agent/src/cli/timer-cli.ts, packages/coding-agent/src/commands/timer.ts, packages/coding-agent/src/mailbox/message.ts, packages/coding-agent/src/mailbox/types.ts, packages/coding-agent/src/mailbox/watcher.ts, packages/coding-agent/src/main.ts, packages/coding-agent/src/prompts/session/timer-fire.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-storage.ts, packages/coding-agent/src/timers/index.ts, packages/coding-agent/src/timers/paths.ts, packages/coding-agent/src/timers/policy.ts, packages/coding-agent/src/timers/render.ts, packages/coding-agent/src/timers/run-command.ts, packages/coding-agent/src/timers/runner.ts, packages/coding-agent/src/timers/schedule.ts, packages/coding-agent/src/timers/scope.ts, packages/coding-agent/src/timers/service.ts, packages/coding-agent/src/timers/store.ts, packages/coding-agent/src/timers/tick.ts, packages/coding-agent/src/timers/types.ts, packages/coding-agent/src/tools/bash.ts, packages/coding-agent/test/session-mailbox.test.ts, packages/coding-agent/test/timers.test.ts",
-     "conflicts with main in packages/coding-agent/src/tools/timer-view.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [
-     "timer-pr-5-agent-runs",
-     "timer-pr-7-conditions"
-    ],
-    "created": "2026-10-22T23:10:38Z"
    }
   ],
   "drafts": []
