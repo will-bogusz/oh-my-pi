@@ -58030,14 +58030,14 @@
    "needs": [],
    "base": "5d30c790b883ad0ae05dac2a4d2ccc8ecd103611",
    "body": "bodies/snapcompact-archive-target.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-archive-target",
    "host": "MacBook-Pro",
    "added": "2026-10-31T20:07:42Z",
-   "updated": "2026-11-02T06:32:48Z",
-   "note": ""
+   "updated": "2026-11-02T06:32:51Z",
+   "note": "Will's call delegated, 2026-11-02: ContinuationR2 found no archive-size cap binds at real thresholds (28 real compaction points: shipped archive drops no history; 107 frames unreachable at 340K). Branch kept; reopen only if archives start dropping history."
   },
   {
    "id": "unknown-tokenizer-o200k",
