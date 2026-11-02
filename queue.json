@@ -37192,7 +37192,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "d33a0edb00c8b76b28d71eb976cd82d69617bcba",
+   "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/read-display-budget.md",
    "state": "open",
    "pr": 16595,
@@ -37200,7 +37200,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-display-budget",
    "host": "MacBook-Pro",
    "added": "2026-10-20T22:59:53Z",
-   "updated": "2026-10-29T20:19:04Z",
+   "updated": "2026-11-02T02:18:19Z",
    "note": "",
    "built": [
     {
@@ -37653,7 +37653,7 @@
      "tree": "059e16c5899a65c86cabcf7ba734cce09fdee99f"
     }
    ],
-   "advanced": "2026-10-29T20:19:04Z",
+   "advanced": "2026-11-02T02:18:19Z",
    "opened": "2026-10-21T03:57:52Z",
    "readied": "2026-10-21T03:58:18Z"
   },
