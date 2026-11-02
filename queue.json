@@ -49509,7 +49509,7 @@
    "branch": "will/persist-tabs-exit",
    "title": "fix(browser): keep persist relay tabs open when the session ends",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/persist-tabs-exit.md",
@@ -49519,7 +49519,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/persist-tabs-exit",
    "host": "MacBook-Pro",
    "added": "2026-10-23T18:13:45Z",
-   "updated": "2026-11-02T03:37:21Z",
+   "updated": "2026-11-02T04:03:11Z",
    "note": "",
    "built": [
     {
@@ -56975,7 +56975,7 @@
    "branch": "will/macos-capture-geometry",
    "title": "fix(natives): match macOS window screenshots to the window on screen",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/macos-capture-geometry.md",
@@ -56985,7 +56985,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-capture-geometry",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:16:44Z",
-   "updated": "2026-11-02T03:30:39Z",
+   "updated": "2026-11-02T04:03:11Z",
    "note": "",
    "built": [
     {
