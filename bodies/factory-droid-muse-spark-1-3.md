@@ -34,11 +34,11 @@ Maintenance: if Vertex starts accepting none or max, or Factory moves 1.3 to ano
 - catalog `test/factory-droid-provider.test.ts`, 47 pass. New: the row (route, pool, ladder, Global only, hidden without the flag) and the family-default fallback.
 - Negative controls: without `filter-reasoning-history` turn 2 replays the reasoning item; without the clamp it sends 64,000; with the KDL reverted all new cases fail; with `resolveRotation` reverted the fallback test fails.
 - Full catalog suite 1311 pass, ai `factory-droid*` 267 pass, `check:types` passes for both.
-- Live, with the flag on: `omp models factory-droid` lists muse-spark-1.3, and the request it sent had the shape above.
-- Not run: a completed live turn. The account's 5-hour Standard window was spent, so Factory answered 402 before the model ran.
+- Live, with the flag on: `omp models factory-droid` lists muse-spark-1.3, its first request had the shape above, and a "read a.txt and b.txt, reply with their sum" turn ran both `read` calls and answered `SUM=4817`.
 
 ---
 
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
