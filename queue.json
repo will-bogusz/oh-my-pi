@@ -57073,7 +57073,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-pointer",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:47Z",
-   "updated": "2026-11-02T03:27:34Z",
+   "updated": "2026-11-02T03:27:56Z",
    "note": "",
    "built": [
     {
@@ -57145,7 +57145,8 @@
     }
    ],
    "advanced": "2026-11-02T02:40:57Z",
-   "opened": "2026-11-02T03:27:34Z"
+   "opened": "2026-11-02T03:27:34Z",
+   "readied": "2026-11-02T03:27:55Z"
   },
   {
    "id": "iphone-mirror-scroll-distance",
