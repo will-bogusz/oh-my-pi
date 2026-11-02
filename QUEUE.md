@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 03:50Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02 04:03Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-02 03:31Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -73,7 +73,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-02
 | [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
 | [#16552](https://github.com/can1357/oh-my-pi/pull/16552) | pip-procfs-fallback | fix(coding-agent): stop the %pip installer on cancel when /proc cannot be listed | python | P1 | 12d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/pip-procfs-fallback) |
 | [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | click-place-release | fix(natives): keep a macOS drag from the user's app onto the target the user's pick | natives-macos | P1 | 12d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-place-release) |
-| [#16595](https://github.com/can1357/oh-my-pi/pull/16595) | read-display-budget | fix(coding-agent): charge column-cut lines their shown width against the read page budget | other | P1 | 11d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-display-budget) |
+| [#16595](https://github.com/can1357/oh-my-pi/pull/16595) | read-display-budget | fix(coding-agent): charge column-cut lines their shown width against the read page budget | other | P1 | 12d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-display-budget) |
 | [#16586](https://github.com/can1357/oh-my-pi/pull/16586) | bash-minimizer-meta | feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut | bash | P2 | 12d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/bash-minimizer-meta) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 11d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#17751](https://github.com/can1357/oh-my-pi/pull/17751) | persist-tabs-exit | fix(browser): keep persist relay tabs open when the session ends | browser | P2 | 0h | keep; opened over P2 #16908 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/persist-tabs-exit) |
