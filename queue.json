@@ -52426,13 +52426,13 @@
    "needs": [],
    "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": "bodies/relay-frame-detach-report.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17768,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-frame-detach-report",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:04:15Z",
-   "updated": "2026-11-02T04:30:00Z",
+   "updated": "2026-11-02T04:34:58Z",
    "note": "",
    "built": [
     {
@@ -53015,7 +53015,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-02T02:39:08Z"
+   "advanced": "2026-11-02T02:39:08Z",
+   "opened": "2026-11-02T04:34:58Z"
   },
   {
    "id": "ax-placeholder-name",
