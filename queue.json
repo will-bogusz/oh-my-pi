@@ -59737,13 +59737,104 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T14:12:47Z",
+  "checked": "2026-11-02T14:43:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "factory-droid-gemini-4-argon-110": {
+    "since": "2026-11-02T14:43:43Z",
+    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect"
+   }
+  },
   "conflicts": {},
-  "merged_through": "2026-11-01T12:34:35Z",
-  "unreleased": {},
+  "merged_through": "2026-11-02T14:27:50Z",
+  "unreleased": {
+   "17778": {
+    "title": "fix(browser): stop later input steps after timeout and let relay page waits use the call deadline",
+    "merge_commit": "db3c604f7bd59c029f6fa6661b941cf55cb1072f",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17772": {
+    "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback",
+    "merge_commit": "90bc6c35c6527878e436811e79f2a733f5b327cb",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17768": {
+    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
+    "merge_commit": "dd04de4c2b8a7ef0445b525232660629b7f89fa8",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17767": {
+    "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
+    "merge_commit": "57d64d95ab26e628d9d4df662b7d84de27dd47df",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17766": {
+    "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves",
+    "merge_commit": "9babe8ca57969b0dd11811b8ae2dc3430aedc01d",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17755": {
+    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone",
+    "merge_commit": "c3d37bd48b2a1df82d01c6b897c004137665c641",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17751": {
+    "title": "fix(browser): keep persist relay tabs open when the session ends",
+    "merge_commit": "58d5039d338047bbb1d2d7d99c23176331d4c7d6",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17746": {
+    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
+    "merge_commit": "de5d68d2e2a91a7c120cf40ba4a6556f95b8aaba",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17745": {
+    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
+    "merge_commit": "25f6b894c988de71510d79134fc3ba200d7927b9",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17742": {
+    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor",
+    "merge_commit": "b01e26e64bd0de1c1d47f1dd50daaa1011cf6b47",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17622": {
+    "title": "fix(coding-agent): keep each message's date across resume and subagent revival",
+    "merge_commit": "46982b7ddd495b07824607bc1919a001fd6fd0d7",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "17607": {
+    "title": "fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips",
+    "merge_commit": "aa17c12bacacd257f2c6815345f3def4612aa519",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "16586": {
+    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
+    "merge_commit": "078c5199ca2b674af2f8e89d68b858b21a05f8a8",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "16552": {
+    "title": "fix(coding-agent): stop the %pip installer on cancel when /proc cannot be listed",
+    "merge_commit": "619e414164618c2fe297b9406328cab1a24f106e",
+    "merged_at": "2026-11-02T14:27:49Z"
+   },
+   "16595": {
+    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
+    "merge_commit": "584db96bb51267c4fb850469291da2c7fc107087",
+    "merged_at": "2026-11-02T14:27:50Z"
+   },
+   "16309": {
+    "title": "feat(catalog,tui): show Factory Droid credit promotions in the model browser",
+    "merge_commit": "fa0485609f901cd4c735bbc2f3f026341399bdc7",
+    "merged_at": "2026-11-02T14:27:50Z"
+   },
+   "16284": {
+    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
+    "merge_commit": "7918dc1047d4350f3505b1c5c45d9b51ea123734",
+    "merged_at": "2026-11-02T14:27:50Z"
+   }
+  },
   "ready": [
    15128,
    15130,
@@ -59751,47 +59842,46 @@
    15508,
    16223,
    16274,
-   16284,
-   16309,
-   16552,
    16553,
-   16586,
-   16595,
    16611,
    16908,
    17496,
-   17607,
    17610,
-   17622,
-   17742,
-   17745,
-   17746,
    17747,
-   17751,
-   17755,
    17756,
    17757,
-   17766,
-   17767,
-   17768,
-   17772,
-   17778
+   17831
   ],
   "post_merge": {
-   "16300": {
-    "title": "fix(coding-agent): install with %pip into venvs that have no pip",
-    "merge_commit": "0bba68154823781aa16409548fedee335d8aefec",
-    "merged_at": "2026-10-20T17:22:23Z",
-    "findings": [
-     {
-      "bot": "chatgpt-codex-connector",
-      "severity": "P2",
-      "path": "packages/coding-agent/src/eval/py/runner.py",
-      "end": 1336,
-      "url": "https://github.com/can1357/oh-my-pi/pull/16300#pullrequestreview-5589029446",
-      "addressed_by": 16552
-     }
-    ]
+   "16284": {
+    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
+    "merge_commit": "7918dc1047d4350f3505b1c5c45d9b51ea123734",
+    "merged_at": "2026-11-02T14:27:50Z",
+    "findings": []
+   },
+   "16309": {
+    "title": "feat(catalog,tui): show Factory Droid credit promotions in the model browser",
+    "merge_commit": "fa0485609f901cd4c735bbc2f3f026341399bdc7",
+    "merged_at": "2026-11-02T14:27:50Z",
+    "findings": []
+   },
+   "16552": {
+    "title": "fix(coding-agent): stop the %pip installer on cancel when /proc cannot be listed",
+    "merge_commit": "619e414164618c2fe297b9406328cab1a24f106e",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "16586": {
+    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
+    "merge_commit": "078c5199ca2b674af2f8e89d68b858b21a05f8a8",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "16595": {
+    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
+    "merge_commit": "584db96bb51267c4fb850469291da2c7fc107087",
+    "merged_at": "2026-11-02T14:27:50Z",
+    "findings": []
    },
    "17489": {
     "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
@@ -59815,6 +59905,78 @@
     "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
     "merge_commit": "7c8346132aa7381b90155dcfe7e794e435e88f16",
     "merged_at": "2026-11-01T12:34:35Z",
+    "findings": []
+   },
+   "17607": {
+    "title": "fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips",
+    "merge_commit": "aa17c12bacacd257f2c6815345f3def4612aa519",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17622": {
+    "title": "fix(coding-agent): keep each message's date across resume and subagent revival",
+    "merge_commit": "46982b7ddd495b07824607bc1919a001fd6fd0d7",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17742": {
+    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor",
+    "merge_commit": "b01e26e64bd0de1c1d47f1dd50daaa1011cf6b47",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17745": {
+    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
+    "merge_commit": "25f6b894c988de71510d79134fc3ba200d7927b9",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17746": {
+    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
+    "merge_commit": "de5d68d2e2a91a7c120cf40ba4a6556f95b8aaba",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17751": {
+    "title": "fix(browser): keep persist relay tabs open when the session ends",
+    "merge_commit": "58d5039d338047bbb1d2d7d99c23176331d4c7d6",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17755": {
+    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone",
+    "merge_commit": "c3d37bd48b2a1df82d01c6b897c004137665c641",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17766": {
+    "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves",
+    "merge_commit": "9babe8ca57969b0dd11811b8ae2dc3430aedc01d",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17767": {
+    "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
+    "merge_commit": "57d64d95ab26e628d9d4df662b7d84de27dd47df",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17768": {
+    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
+    "merge_commit": "dd04de4c2b8a7ef0445b525232660629b7f89fa8",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17772": {
+    "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback",
+    "merge_commit": "90bc6c35c6527878e436811e79f2a733f5b327cb",
+    "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17778": {
+    "title": "fix(browser): stop later input steps after timeout and let relay page waits use the call deadline",
+    "merge_commit": "db3c604f7bd59c029f6fa6661b941cf55cb1072f",
+    "merged_at": "2026-11-02T14:27:49Z",
     "findings": []
    }
   },
@@ -60778,6 +60940,148 @@
     "id": "r2/relay-call-deadline",
     "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s",
     "why": "opened as #17778"
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17778,
+    "title": "fix(browser): stop later input steps after timeout and let relay page waits use the call deadline",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17772,
+    "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17768,
+    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17767,
+    "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17766,
+    "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17755,
+    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17751,
+    "title": "fix(browser): keep persist relay tabs open when the session ends",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17746,
+    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17745,
+    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17742,
+    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17622,
+    "title": "fix(coding-agent): keep each message's date across resume and subagent revival",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 17607,
+    "title": "fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 16586,
+    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 16552,
+    "title": "fix(coding-agent): stop the %pip installer on cancel when /proc cannot be listed",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 16595,
+    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 16309,
+    "title": "feat(catalog,tui): show Factory Droid credit promotions in the model browser",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "merged",
+    "number": 16284,
+    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-02T14:43:43Z",
+    "kind": "openable",
+    "id": "factory-droid-gemini-4-argon-110",
+    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect"
    }
   ]
  },
@@ -61939,12 +62243,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T14:35:03.119150Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-02T14:43:44.032235Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -62084,6 +62388,23 @@
     "created": "2026-10-31T21:57:19Z"
    },
    {
+    "id": "r2/relay-bg-input-main",
+    "label": "#17831",
+    "number": 17831,
+    "state": "open",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T14:42:35Z"
+   },
+   {
     "id": "reset-restore-longest-wait",
     "label": "#15128",
     "number": 15128,
@@ -62218,13 +62539,15 @@
     "reasons": [
      "held: Will, 2026-10-18: waits for Will's OK on the Accessibility dependency (moved from note, QueueRestructure 2026-11-02)",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #17831 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with main in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/natives/native/index.d.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16908"
+     "#16908",
+     "#17831"
     ],
     "needs": [],
     "created": "2026-10-19T00:03:17Z"
@@ -62294,23 +62617,6 @@
     "created": "2026-10-30T21:36:10Z"
    },
    {
-    "id": "r2/relay-bg-input-main",
-    "label": "r2/relay-bg-input-main",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P2",
-    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-13T21:47:19Z"
-   },
-   {
     "id": "r2/relay-own-only",
     "label": "r2/relay-own-only",
     "number": null,
@@ -62320,7 +62626,7 @@
     "title": "fix(browser): attach only the relay tabs omp opened or borrowed",
     "action": "wait",
     "reasons": [
-     "needs #15508 (open), r2/relay-bg-input-main (queued), r2/native-window-report (queued)",
+     "needs #15508 (open), #17831 (open), r2/native-window-report (queued)",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
@@ -62583,7 +62889,7 @@
     "reasons": [
      "needs #15508 (open)",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with r2/relay-bg-input-main in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #17831 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -62591,7 +62897,7 @@
     "paired": [],
     "blocked_by": [
      "#16908",
-     "r2/relay-bg-input-main"
+     "#17831"
     ],
     "needs": [
      "#15508"
