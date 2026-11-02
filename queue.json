@@ -58098,7 +58098,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/prompt-drift",
    "host": "MacBook-Pro",
    "added": "2026-10-31T23:51:27Z",
-   "updated": "2026-11-02T02:23:13Z",
+   "updated": "2026-11-02T02:23:55Z",
    "note": "",
    "advanced": "2026-11-02T01:40:14Z",
    "built": [
@@ -58333,7 +58333,8 @@
      "tree": "bd88f2489ca3b2136a8f8ee2af0a8c154ecb4a7b"
     }
    ],
-   "opened": "2026-11-02T02:23:13Z"
+   "opened": "2026-11-02T02:23:13Z",
+   "readied": "2026-11-02T02:23:55Z"
   },
   {
    "id": "snapcompact-think-legend",
