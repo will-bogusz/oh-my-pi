@@ -18276,14 +18276,14 @@
    ],
    "base": "6f7597b1f2645d3dd04380202bc96529298d4304",
    "body": "bodies/factory-droid-gemini-4-argon.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-gemini-4-argon",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:06:38Z",
-   "updated": "2026-10-18T21:06:38Z",
-   "note": ""
+   "updated": "2026-11-02T02:39:28Z",
+   "note": "Will, 2026-11-02: superseded; redo the Factory Droid update against droid 1.1.0 (omp pins 0.237). Branch kept for reference."
   },
   {
    "id": "factory-droid-image-generation",
