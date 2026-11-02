@@ -16229,14 +16229,14 @@
    "needs": [],
    "base": "151bc26cdc3cfb93291235d537a0fd68d1e76746",
    "body": "bodies/factory-droid-0244.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-0244",
    "host": "MacBook-Pro",
    "added": "2026-10-18T20:33:08Z",
-   "updated": "2026-10-18T20:33:08Z",
-   "note": ""
+   "updated": "2026-11-02T02:39:24Z",
+   "note": "Will, 2026-11-02: superseded; redo the Factory Droid update against droid 1.1.0 (omp pins 0.237). Branch kept for reference."
   },
   {
    "id": "factory-droid-web-search",
