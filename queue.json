@@ -1177,7 +1177,7 @@
    "needs": [
     "#16233"
    ],
-   "base": "d33a0edb00c8b76b28d71eb976cd82d69617bcba",
+   "base": "256b3211bca7458391866a8bcc9369902664be55",
    "body": null,
    "state": "open",
    "pr": 15282,
@@ -1185,9 +1185,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-29T20:20:20Z",
+   "updated": "2026-11-02T02:40:10Z",
    "note": "series 2. 2026-10-29 (Ax15282): rebased onto main 3b1408f629 (after 2407a34d11 changelog rewrite) and pushed e43b606ef5 then d71890830b (was f96486b3e0): ComputerDocs b22c71f (Codex P1 4409368429, macOS-only normalized action key) + Codex P2 4414313929 fix (actions= deduped, max 16 + cut note); docs table conflicts resolved toward main padding; rust-check linux/windows/macos at d71890830b; cargo desktop:: 211 pass, computer.test.ts 132 pass; Codex pass on d71890830b failed (no result). Goliath worktree ~/.omp/main-wt/oh-my-pi/computer-ax-lines is current; Mac worktree is behind fork. #15282 -> #15566, #15584 (children queued).",
-   "advanced": "2026-10-29T20:20:20Z",
+   "advanced": "2026-11-02T02:40:10Z",
    "built": [
     {
      "with": "#15105",
