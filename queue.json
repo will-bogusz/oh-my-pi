@@ -61446,12 +61446,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T02:18:45.243827Z",
+  "at": "2026-11-02T02:27:10.905866Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -61470,6 +61470,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T02:12:03Z"
+   },
+   {
+    "id": "cold-revive-xdev-mounts",
+    "label": "#17746",
+    "number": 17746,
+    "state": "open",
+    "area": "other",
+    "priority": "P0",
+    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T02:23:12Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -61538,6 +61555,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-21T03:57:51Z"
+   },
+   {
+    "id": "snapcompact-think-legend",
+    "label": "#17745",
+    "number": 17745,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-02T02:18:02Z"
    },
    {
     "id": "print-hold",
@@ -61782,23 +61816,6 @@
     "created": "2026-10-30T19:41:51Z"
    },
    {
-    "id": "snapcompact-think-legend",
-    "label": "#17745",
-    "number": 17745,
-    "state": "open",
-    "area": "other",
-    "priority": null,
-    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-02T02:18:02Z"
-   },
-   {
     "id": "iphone-mirror-not-showing",
     "label": "iphone-mirror-not-showing",
     "number": null,
@@ -61869,6 +61886,32 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-30T21:16:44Z"
+   },
+   {
+    "id": "persist-tabs-exit",
+    "label": "persist-tabs-exit",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P1",
+    "title": "fix(browser): keep persist relay tabs open when the session ends",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #15508 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #16284 in docs/tools/browser.md",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#15508",
+     "#16284",
+     "#16908"
+    ],
+    "needs": [],
+    "created": "2026-10-23T18:13:45Z"
    },
    {
     "id": "r2/relay-call-deadline",
@@ -62046,32 +62089,6 @@
      "iphone-mirror-scroll-distance"
     ],
     "created": "2026-10-30T21:36:10Z"
-   },
-   {
-    "id": "persist-tabs-exit",
-    "label": "persist-tabs-exit",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P2",
-    "title": "fix(browser): keep persist relay tabs open when the session ends",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #15508 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #16284 in docs/tools/browser.md",
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#15508",
-     "#16284",
-     "#16908"
-    ],
-    "needs": [],
-    "created": "2026-10-23T18:13:45Z"
    },
    {
     "id": "r2/relay-bg-input-main",
@@ -62339,22 +62356,22 @@
     "title": "feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks",
     "action": "wait",
     "reasons": [
+     "conflicts with #17745 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #17745 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17745",
      "#17610",
      "#15128",
      "#15130",
-     "#17496",
-     "#17745"
+     "#17496"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -62479,40 +62496,6 @@
     "created": "2026-10-31T20:07:36Z"
    },
    {
-    "id": "cold-revive-xdev-mounts",
-    "label": "cold-revive-xdev-mounts",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-31T23:51:27Z"
-   },
-   {
-    "id": "switch-remote-reexpand",
-    "label": "switch-remote-reexpand",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T22:45:47Z"
-   },
-   {
     "id": "text-reader-usage-shift",
     "label": "text-reader-usage-shift",
     "number": null,
@@ -62520,16 +62503,12 @@
     "area": "coding-agent",
     "priority": null,
     "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check",
-    "action": "wait",
-    "reasons": [
-     "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/session-maintenance.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "switch-remote-reexpand"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
    },
@@ -62573,7 +62552,7 @@
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -62584,7 +62563,7 @@
      "#15128",
      "#15130",
      "#17496",
-     "switch-remote-reexpand"
+     "text-reader-usage-shift"
     ],
     "needs": [
      "#15133"
@@ -62629,24 +62608,24 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
+     "conflicts with #17745 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #17745 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with switch-remote-reexpand in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with text-reader-usage-shift in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17745",
      "#17610",
      "#15128",
      "#15130",
      "#17496",
-     "#17745",
-     "switch-remote-reexpand"
+     "text-reader-usage-shift"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -62672,6 +62651,11 @@
     "created": "2026-10-13T21:47:19Z"
    }
   ],
-  "drafts": []
+  "drafts": [
+   {
+    "label": "#17747",
+    "created": "2026-11-02T02:26:17Z"
+   }
+  ]
  }
 }
