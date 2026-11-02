@@ -30,7 +30,7 @@ Non-goals: droid 1.1.0's new models (separate PR), its stream-deadline header, t
 ## Testing
 
 - droid 1.1.0's own requests, checked without spending Factory credits on Messages, Responses and Chat Completions, carry none of the removed headers; its whoami carries `X-Factory-Whoami-Extended: true`.
-- Live turns from this branch (read two files, reply with their sum): `kimi-k3` on Chat Completions and `minimax-m2.7` on Messages both answered `SUM=4817`. Not run: a live Responses turn; those models bill from the Standard pool, which answered 402 (5-hour window used up).
+- Live turns from this branch (read two files, reply with their sum), each answering `SUM=4817`: `kimi-k3` on Chat Completions, `minimax-m2.7` and `claude-haiku-4-5-20251001` on Messages, `gpt-6-luna` on Responses.
 - New tests check that no Factory wire sends the removed headers even with a first-event budget set, that only whoami asks for the extended response, and that Azure Foundry gets eager tool streaming. With the source reverted, 6 fail.
 - **Native parity corpus recaptured with droid 1.1.0 (`bun packages/ai/scripts/capture-factory-droid-native.ts --droid <droid 1.1.0>`): ⟪TO FILL IN: parity cases passing / total⟫**
 - `bun test` in `packages/ai` and `packages/catalog` and `bun run check` in both pass.
@@ -40,3 +40,4 @@ Non-goals: droid 1.1.0's new models (separate PR), its stream-deadline header, t
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
