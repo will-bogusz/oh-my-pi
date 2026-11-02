@@ -2836,8 +2836,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-page-waiting",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-10-18T23:28:39Z",
-   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): true need #15508 (print-hold DialogStop) via own-only's base; holds an unfilled chooser, reversing main's 7d50d3d815 per Will's 2026-10-12 hold-and-ask; carries the tab.id(n) fix moved from turn-end; visible relay run predates #16119, rerun before open"
+   "updated": "2026-11-02T14:33:12Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): true need #15508 (print-hold DialogStop) via own-only's base; holds an unfilled chooser, reversing main's 7d50d3d815 per Will's 2026-10-12 hold-and-ask; carries the tab.id(n) fix moved from turn-end; visible relay run predates #16119, rerun before open 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard)."
   },
   {
    "id": "r2/webmcp-native",
