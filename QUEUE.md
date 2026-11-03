@@ -1,17 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 02:17Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 02:18Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-03 02:09Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 8, stacked 10, held 6, open PRs 24; merged 210, closed 27
+**Counts:** openable now 1, conflict-held 8, stacked 10, held 6, open PRs 25; merged 210, closed 27
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
-| windows-app-id | fix(coding-agent): find app windows by application id or path | computer | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/windows-app-id) |
 
 ## Conflict-held (8)
 
@@ -52,7 +51,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 20d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 20d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
 
-## Open PRs (24)
+## Open PRs (25)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -78,5 +77,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | [#17773](https://github.com/can1357/oh-my-pi/pull/17773) | visuals-guidance | feat(coding-agent): ask for one designed SVG figure where an answer has shape | other |  | 21h | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/visuals-guidance) |
 | [#17881](https://github.com/can1357/oh-my-pi/pull/17881) | cli-reference-models-row | docs(coding-agent): restore the --models row in the CLI reference | other | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cli-reference-models-row) |
 | [#17883](https://github.com/can1357/oh-my-pi/pull/17883) | snapcompact-legacy-archive-credit | fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced | other | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-legacy-archive-credit) |
+| [#17896](https://github.com/can1357/oh-my-pi/pull/17896) | windows-app-id | fix(coding-agent): find app windows by application id or path | computer | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/windows-app-id) |
 | [#17895](https://github.com/can1357/oh-my-pi/pull/17895) | role-implicit-landmarks | fix(coding-agent): find named sections and other implicit roles with role/ selectors | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-implicit-landmarks) |
 | [#17893](https://github.com/can1357/oh-my-pi/pull/17893) | relay-downloads | fix(browser): report a relay tab's downloads where Chrome saved them | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-downloads) |
