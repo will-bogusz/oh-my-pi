@@ -62183,7 +62183,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-element-input",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:12:35Z",
-   "updated": "2026-11-03T05:25:10Z",
+   "updated": "2026-11-03T05:25:31Z",
    "note": "",
    "built": [
     {
@@ -62317,7 +62317,8 @@
      "tree": "408b6a2ef58a7aad9198f6ef1e8b1a7597693322"
     }
    ],
-   "opened": "2026-11-03T05:25:10Z"
+   "opened": "2026-11-03T05:25:10Z",
+   "readied": "2026-11-03T05:25:30Z"
   }
  ],
  "watch": {
