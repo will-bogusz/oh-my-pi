@@ -61749,13 +61749,13 @@
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/x11-qt-background-keys.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17911,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-qt-background-keys",
    "host": "MacBook-Pro",
    "added": "2026-11-03T04:23:54Z",
-   "updated": "2026-11-03T05:03:02Z",
+   "updated": "2026-11-03T05:10:19Z",
    "note": "",
    "built": [
     {
@@ -61878,7 +61878,8 @@
      "host": "MacBook-Pro",
      "tree": "128d8429f9b7ac9f6762d5d7e00d428374eb9e42"
     }
-   ]
+   ],
+   "opened": "2026-11-03T05:10:19Z"
   },
   {
    "id": "mirror-takeover-keys",
