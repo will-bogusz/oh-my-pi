@@ -62792,21 +62792,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T06:01:17Z",
+  "checked": "2026-11-03T07:02:12Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "wayland-pipewire-dlopen": {
-    "since": "2026-11-03T06:01:17Z",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland"
+   "apps-open-tilde": {
+    "since": "2026-11-03T07:02:12Z",
+    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open"
    },
-   "x11-element-focus-steal": {
-    "since": "2026-11-03T06:01:17Z",
-    "title": "fix(natives): keep X11 background element typing from raising the element's window"
-   },
-   "atspi-file-chooser": {
-    "since": "2026-11-03T06:01:17Z",
-    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows"
+   "wayland-consent-deadline": {
+    "since": "2026-11-03T07:02:12Z",
+    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends"
    }
   },
   "conflicts": {},
@@ -62846,7 +62842,9 @@
    17911,
    17912,
    17913,
-   17915
+   17915,
+   17921,
+   17922
   ],
   "post_merge": {
    "16284": {
@@ -64409,6 +64407,39 @@
     "kind": "openable",
     "id": "atspi-file-chooser",
     "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows"
+   },
+   {
+    "at": "2026-11-03T07:02:12Z",
+    "kind": "openable",
+    "id": "apps-open-tilde",
+    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open"
+   },
+   {
+    "at": "2026-11-03T07:02:12Z",
+    "kind": "openable",
+    "id": "wayland-consent-deadline",
+    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends"
+   },
+   {
+    "at": "2026-11-03T07:02:12Z",
+    "kind": "unopenable",
+    "id": "wayland-pipewire-dlopen",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "why": "plan: wait (conflicts with #17922 in crates/pi-natives/src/desktop/linux/wayland/mod.rs)"
+   },
+   {
+    "at": "2026-11-03T07:02:12Z",
+    "kind": "unopenable",
+    "id": "x11-element-focus-steal",
+    "title": "fix(natives): keep X11 background element typing from raising the element's window",
+    "why": "opened as #17921"
+   },
+   {
+    "at": "2026-11-03T07:02:12Z",
+    "kind": "unopenable",
+    "id": "atspi-file-chooser",
+    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
+    "why": "plan: wait (conflicts with #17922 in crates/pi-natives/src/desktop/linux/ax.rs)"
    }
   ]
  },
