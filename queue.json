@@ -60558,7 +60558,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
+   "base": "ff0a986b88c223a0a746ed95cda8ddada236140c",
    "body": "bodies/role-implicit-landmarks.md",
    "state": "open",
    "pr": 17895,
@@ -60566,7 +60566,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-implicit-landmarks",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:12:51Z",
-   "updated": "2026-11-03T02:20:54Z",
+   "updated": "2026-11-03T20:15:39Z",
    "note": "",
    "built": [
     {
@@ -60741,7 +60741,8 @@
     }
    ],
    "opened": "2026-11-03T02:16:08Z",
-   "readied": "2026-11-03T02:16:29Z"
+   "readied": "2026-11-03T02:16:29Z",
+   "advanced": "2026-11-03T20:15:39Z"
   },
   {
    "id": "token-count-policy",
