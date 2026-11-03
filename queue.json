@@ -62041,7 +62041,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-silent-drag",
    "host": "MacBook-Pro",
    "added": "2026-11-03T04:36:23Z",
-   "updated": "2026-11-03T05:15:05Z",
+   "updated": "2026-11-03T05:15:29Z",
    "note": "",
    "built": [
     {
@@ -62165,7 +62165,8 @@
      "tree": "128d8429f9b7ac9f6762d5d7e00d428374eb9e42"
     }
    ],
-   "opened": "2026-11-03T05:15:05Z"
+   "opened": "2026-11-03T05:15:05Z",
+   "readied": "2026-11-03T05:15:28Z"
   },
   {
    "id": "wayland-element-input",
