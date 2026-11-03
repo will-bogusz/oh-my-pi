@@ -9,6 +9,8 @@
 ### Fixed
 
 - Fixed `press()`, `perform()` and `menu.select()` refusing on Linux in Firefox, Chromium, VS Code and LibreOffice, and in apps under a non-English locale, with "AT-SPI action 'press' is unavailable"; `actions()` now lists the actions' untranslated names (`press`, `click`) instead of empty or translated labels, and `press()` toggles toggle buttons as it does checkboxes
+- Fixed `press()`, `perform()` and `menu.select()` refusing on Linux in Firefox, Thunderbird, Chromium, VS Code and LibreOffice, and in every app under a non-English locale, with "AT-SPI action 'press' is unavailable"; `actions()` now lists the actions' names (`press`, `click`) instead of empty or translated labels, and `press()` toggles toggle buttons as it does checkboxes
+- Fixed `find()`, `ax()` and element reads on Linux taking seconds in large apps such as LibreOffice, Kate and Dolphin (about 3× faster), and `value()` returning nothing for every text field and document in Qt apps such as Kate and LibreOffice on KDE
 
 ## [18.16.0] - 2026-11-02
 
