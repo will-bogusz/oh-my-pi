@@ -62848,7 +62848,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-input-capability",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:05:34Z",
-   "updated": "2026-11-03T22:42:04Z",
+   "updated": "2026-11-03T22:42:28Z",
    "note": "",
    "advanced": "2026-11-03T21:26:01Z",
    "built": [
@@ -62943,7 +62943,8 @@
      "tree": "0451c3dc9f805ef34da3c7306bc67c9cb559fd6d"
     }
    ],
-   "opened": "2026-11-03T22:42:04Z"
+   "opened": "2026-11-03T22:42:04Z",
+   "readied": "2026-11-03T22:42:28Z"
   },
   {
    "id": "wayland-ei-text",
