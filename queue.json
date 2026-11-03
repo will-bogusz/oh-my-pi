@@ -62552,7 +62552,7 @@
    "branch": "will/atspi-file-chooser",
    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
    "area": "computer",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "ff0a986b88c223a0a746ed95cda8ddada236140c",
    "body": "bodies/atspi-file-chooser.md",
@@ -62562,7 +62562,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/atspi-file-chooser",
    "host": "goliath",
    "added": "2026-11-03T05:52:28Z",
-   "updated": "2026-11-03T22:40:23Z",
+   "updated": "2026-11-03T22:45:06Z",
    "note": "",
    "advanced": "2026-11-03T21:24:47Z",
    "built": [
