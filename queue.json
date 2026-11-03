@@ -66788,6 +66788,11 @@
     "sha": "7b03fb477f66c75e574cbfc04cab03d593c482fb",
     "at": "2026-11-03T08:30:51Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "7b03fb477f66c75e574cbfc04cab03d593c482fb",
+    "at": "2026-11-03T08:32:08Z",
+    "host": "goliath"
    }
   }
  },
