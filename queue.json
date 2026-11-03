@@ -60214,6 +60214,27 @@
    "added": "2026-11-03T01:33:55Z",
    "updated": "2026-11-03T01:33:55Z",
    "note": ""
+  },
+  {
+   "id": "encoded-prefix-count",
+   "branch": "will/encoded-prefix-count",
+   "title": "fix(ai,agent,tui,coding-agent): count the system prompt and tools as the provider request encodes them",
+   "area": "broker",
+   "priority": null,
+   "needs": [
+    "token-count-policy",
+    "wire-delta-count"
+   ],
+   "base": "4448b4f6e9c1035f6c18bd1d5c7c5df3cc309ab0",
+   "body": "bodies/encoded-prefix-count.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/encoded-prefix-count",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T01:54:17Z",
+   "updated": "2026-11-03T01:54:17Z",
+   "note": ""
   }
  ],
  "watch": {
