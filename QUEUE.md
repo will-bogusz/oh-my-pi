@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 
 **Opening:** not paused
 **Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-03 06:07Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 12, stacked 10, held 6, open PRs 36, queued since the last plan 1; merged 210, closed 27
+**Counts:** openable now 1, conflict-held 12, stacked 10, held 6, open PRs 36, queued since the last plan 2; merged 210, closed 27
 
 ## Openable now (1)
 
@@ -96,8 +96,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | [#17915](https://github.com/can1357/oh-my-pi/pull/17915) | wayland-element-input | fix(natives): refuse Wayland element input before focusing the element | natives | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-element-input) |
 | [#17921](https://github.com/can1357/oh-my-pi/pull/17921) | x11-element-focus-steal | fix(natives): keep X11 background element typing from raising the element's window | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-element-focus-steal) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
+| computer-gap-round3 | fix(coding-agent): open ~ paths from the home folder in computer apps.open | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-gap-round3) |
