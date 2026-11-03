@@ -63856,7 +63856,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T17:44:43Z",
+  "checked": "2026-11-03T18:46:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -63866,14 +63866,6 @@
     "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
     "files": [
      "packages/coding-agent/src/tools/read.ts"
-    ]
-   },
-   "#17496": {
-    "since": "2026-11-03T12:38:09Z",
-    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
-    "files": [
-     "packages/agent/src/append-only-context.ts",
-     "packages/coding-agent/src/session/agent-session.ts"
     ]
    },
    "#17747": {
@@ -63891,8 +63883,14 @@
     ]
    }
   },
-  "merged_through": "2026-11-02T14:27:50Z",
-  "unreleased": {},
+  "merged_through": "2026-11-03T18:41:34Z",
+  "unreleased": {
+   "17496": {
+    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
+    "merge_commit": "1bceb753ae60ee13900f1893ce58ccbf7658bff2",
+    "merged_at": "2026-11-03T18:41:34Z"
+   }
+  },
   "ready": [
    15128,
    15130,
@@ -63903,7 +63901,6 @@
    16553,
    16611,
    16908,
-   17496,
    17610,
    17747,
    17756,
@@ -63964,6 +63961,12 @@
     "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
     "merge_commit": "584db96bb51267c4fb850469291da2c7fc107087",
     "merged_at": "2026-11-02T14:27:50Z",
+    "findings": []
+   },
+   "17496": {
+    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
+    "merge_commit": "1bceb753ae60ee13900f1893ce58ccbf7658bff2",
+    "merged_at": "2026-11-03T18:41:34Z",
     "findings": []
    },
    "17607": {
@@ -65566,6 +65569,14 @@
     "files": [
      "packages/coding-agent/src/session/session-provider-boundary.ts"
     ]
+   },
+   {
+    "at": "2026-11-03T18:46:10Z",
+    "kind": "merged",
+    "number": 17496,
+    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
+    "merged_by": "H4vC",
+    "maintainer_commits": 3
    }
   ]
  },
@@ -67445,7 +67456,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T18:15:29.176954Z",
+  "at": "2026-11-03T18:46:11.652848Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -67453,25 +67464,6 @@
    "left": 8
   },
   "rows": [
-   {
-    "id": "cache-marker",
-    "label": "#17496",
-    "number": 17496,
-    "state": "open",
-    "area": "status-line",
-    "priority": "P2",
-    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/agent/src/append-only-context.ts, packages/coding-agent/src/session/agent-session.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T19:41:51Z"
-   },
    {
     "id": "macos-capture-geometry",
     "label": "#17757",
@@ -68589,7 +68581,6 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
-     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17883 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
@@ -68601,7 +68592,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17496",
      "#17747",
      "#17883",
      "#17610",
@@ -68876,7 +68866,6 @@
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "needs reset-account-optout (queued)",
-     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
@@ -68887,7 +68876,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17496",
      "#17747",
      "#17610",
      "#15128",
@@ -68937,7 +68925,6 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
-     "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17883 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
@@ -68949,7 +68936,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17496",
      "#17747",
      "#17883",
      "#17610",
