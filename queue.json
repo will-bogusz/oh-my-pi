@@ -63620,13 +63620,13 @@
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/relay-linux-click-front.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17940,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-linux-click-front",
    "host": "MacBook-Pro",
    "added": "2026-11-03T10:42:50Z",
-   "updated": "2026-11-03T11:06:28Z",
+   "updated": "2026-11-03T11:09:08Z",
    "note": "",
    "built": [
     {
@@ -63849,7 +63849,8 @@
      "host": "MacBook-Pro",
      "tree": "8e1ee342e919054486453bdd5e97e8cd51fc5804"
     }
-   ]
+   ],
+   "opened": "2026-11-03T11:09:08Z"
   }
  ],
  "watch": {
