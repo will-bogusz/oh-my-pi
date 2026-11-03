@@ -69356,5 +69356,11 @@
     "created": "2026-11-02T05:04:37Z"
    }
   ]
+ },
+ "opening": {
+  "id": "atspi-file-chooser",
+  "token": "616511d0412644b7ba04fae44af6caf7",
+  "host": "MacBook-Pro",
+  "at": "2026-11-03T22:38:25Z"
  }
 }
