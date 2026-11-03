@@ -1007,6 +1007,14 @@ export interface CustomAgentMessages {
  */
 export type AgentMessage = Message | CustomAgentMessages[keyof CustomAgentMessages];
 
+/** The tool definitions the agent loop sends one model, as its provider adapter receives them. */
+export interface RequestTools {
+	/** Native tool definitions, after the loop's intent and description-pruning normalization; empty for an owned dialect. */
+	tools: Tool[];
+	/** An owned dialect's tool definitions, rendered in-band and appended to the system prompt. */
+	inbandToolPrompt?: string;
+}
+
 /**
  * Agent state containing all configuration and conversation data.
  */

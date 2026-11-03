@@ -4,6 +4,7 @@ import { Agent } from "@oh-my-pi/pi-agent-core";
 import { normalizeTools } from "@oh-my-pi/pi-agent-core/agent-loop";
 import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
 import type { AgentTool } from "@oh-my-pi/pi-agent-core/types";
+import type { Model } from "@oh-my-pi/pi-ai";
 import { INTENT_FIELD } from "@oh-my-pi/pi-wire";
 
 const toolSchema = type({
@@ -45,19 +46,57 @@ function fieldDescription(parameters: unknown, field: string): unknown {
 	return undefined;
 }
 
-describe("Agent.prunesToolDescriptions", () => {
-	// Context accounting reads this; owned dialects render full definitions
-	// in-band, so counting pruned specs would undercount their prompt.
-	it("reports pruning only when the requested model uses native tool calling", () => {
+describe("Agent.requestToolsFor", () => {
+	// Context accounting counts these definitions; they must be what the loop sends.
+	it("returns the loop's normalized tools, and an owned dialect's in-band prompt instead", () => {
 		const model = getBundledModel("google", "gemini-2.5-pro");
-		let dialect: "glm" | undefined;
-		const agent = new Agent({ pruneToolDescriptions: true, dialectResolver: () => dialect });
-		expect(agent.prunesToolDescriptions(model)).toBe(true);
-		dialect = "glm";
-		expect(agent.prunesToolDescriptions(model)).toBe(false);
-		dialect = undefined;
-		agent.pruneToolDescriptions = false;
-		expect(agent.prunesToolDescriptions(model)).toBe(false);
+		const resolved: { dialect?: "glm" } = {};
+		const agent = new Agent({
+			initialState: { tools: [makeTool()] },
+			intentTracing: true,
+			pruneToolDescriptions: true,
+			dialectResolver: () => resolved.dialect,
+		});
+		const native = agent.requestToolsFor(model);
+		expect(native.inbandToolPrompt).toBeUndefined();
+		expect(native.tools.map(tool => tool.description)).toEqual([""]);
+		expect(hasField(native.tools[0]!.parameters, INTENT_FIELD)).toBe(true);
+
+		// Owned dialects render full definitions in-band, so nothing is pruned.
+		resolved.dialect = "glm";
+		const inband = agent.requestToolsFor(model);
+		expect(inband.tools).toEqual([]);
+		expect(inband.inbandToolPrompt).toContain("top-level tool description");
+	});
+
+	it("memoizes per roster and revision", () => {
+		const model = getBundledModel("google", "gemini-2.5-pro");
+		const agent = new Agent({ initialState: { tools: [makeTool()] } });
+		const first = agent.requestToolsFor(model);
+		expect(agent.requestToolsFor(model)).toBe(first);
+		expect(agent.requestToolsFor(model, 1)).not.toBe(first);
+		agent.setTools([makeTool(), { ...makeTool(), name: "other" }]);
+		expect(agent.requestToolsFor(model, 1).tools.map(tool => tool.name)).toEqual(["demo", "other"]);
+	});
+
+	it("stays memoized while the Cursor bridge offers the same tools", () => {
+		const model: Model = { ...getBundledModel("google", "gemini-2.5-pro"), api: "cursor-agent" };
+		const bridgeTool = (name: string): AgentTool => ({
+			name,
+			label: name,
+			description: "bridged tool",
+			parameters: type({ query: "string" }),
+			execute: async () => ({ content: [{ type: "text", text: "ok" }] }),
+		});
+		const bridge = [bridgeTool("mcp_bridge")];
+		// The bridge hands out a fresh array on every call.
+		const agent = new Agent({ initialState: { tools: [makeTool()] }, getCursorTools: () => bridge.slice() });
+		const first = agent.requestToolsFor(model);
+		expect(first.tools.map(tool => tool.name)).toEqual(["demo", "mcp_bridge"]);
+		expect(agent.requestToolsFor(model)).toBe(first);
+
+		bridge.push(bridgeTool("mcp_late"));
+		expect(agent.requestToolsFor(model).tools.map(tool => tool.name)).toEqual(["demo", "mcp_bridge", "mcp_late"]);
 	});
 });
 

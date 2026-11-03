@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Replaced `Agent.prunesToolDescriptions(model)` with `Agent.requestToolsFor(model, revision?)`, which returns the tool definitions the loop sends that model (intent field and description pruning applied) or an owned dialect's in-band tool prompt
+
 ## [18.16.0] - 2026-11-02
 
 ### Changed

@@ -22,7 +22,7 @@ import {
 	type ToolChoice,
 	type ToolResultMessage,
 } from "@oh-my-pi/pi-ai";
-import type { Dialect } from "@oh-my-pi/pi-ai/dialect";
+import { type Dialect, renderInbandToolPrompt } from "@oh-my-pi/pi-ai/dialect";
 import { openAIResponsesReplaysNativeHistory } from "@oh-my-pi/pi-ai/providers/openai-responses-state";
 import type { HarmonyAuditEvent } from "@oh-my-pi/pi-ai/utils/harmony-leak";
 import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
@@ -63,6 +63,7 @@ import type {
 	AsideMessage,
 	PrepareQueuedMessages,
 	QueuedMessageQueue,
+	RequestTools,
 	SpeculativeToolExecutionConfig,
 	StreamFn,
 	ToolCallContext,
@@ -496,6 +497,18 @@ export class Agent {
 	#pruneToolDescriptions: boolean;
 	#dialect?: Dialect;
 	#dialectResolver?: (model: Model) => Dialect | undefined;
+	#requestTools?: {
+		roster: AgentTool[];
+		model: Model;
+		dialect: Dialect | undefined;
+		injectIntent: boolean;
+		pruneDescriptions: boolean;
+		noIntent: string | undefined;
+		revision: number;
+		value: RequestTools;
+	};
+	/** The roster `#toolsForModel` last merged with the Cursor bridge's tools. */
+	#cursorRoster?: { base: AgentTool[]; cursorTools: AgentTool[]; merged: AgentTool[] };
 	#abortOnFabricatedToolResult?: boolean;
 	#getToolChoice?: () => ToolChoiceDirective | undefined;
 	#onToolChoiceUnavailable?: () => void;
@@ -839,13 +852,36 @@ export class Agent {
 	}
 
 	/**
-	 * Whether requests to `model` actually ship description-stripped tool specs.
-	 * Owned dialects render full definitions in-band, so they never prune; the
-	 * loop applies the same rule (`pruneToolDescriptions && !ownedDialect`).
-	 * Context accounting reads this instead of the raw setting.
+	 * The tool definitions the loop sends `model`: `normalizeTools` over the
+	 * model's roster with the intent and description-pruning options, or, for an
+	 * owned dialect, the in-band tool prompt the loop appends to the system
+	 * prompt. Memoized per roster, model, options and `revision`; a caller whose
+	 * tool descriptions or schemas change in place passes a new `revision`.
 	 */
-	prunesToolDescriptions(model: Model | undefined): boolean {
-		return this.#pruneToolDescriptions && model !== undefined && !this.#ownedDialect(model);
+	requestToolsFor(model: Model, revision = 0): RequestTools {
+		const roster = this.#toolsForModel(model);
+		const dialect = this.#ownedDialect(model);
+		const injectIntent = this.#intentTracing;
+		const pruneDescriptions = this.#pruneToolDescriptions && !dialect;
+		const noIntent = Bun.env.PI_NO_INTENT;
+		const memo = this.#requestTools;
+		if (
+			memo?.roster === roster &&
+			memo.model === model &&
+			memo.dialect === dialect &&
+			memo.injectIntent === injectIntent &&
+			memo.pruneDescriptions === pruneDescriptions &&
+			memo.noIntent === noIntent &&
+			memo.revision === revision
+		) {
+			return memo.value;
+		}
+		const tools = normalizeTools(roster, { injectIntent, pruneDescriptions }) ?? [];
+		const value: RequestTools = dialect
+			? { tools: [], inbandToolPrompt: tools.length > 0 ? renderInbandToolPrompt(tools, dialect) : undefined }
+			: { tools };
+		this.#requestTools = { roster, model, dialect, injectIntent, pruneDescriptions, noIntent, revision, value };
+		return value;
 	}
 
 	#ownedDialect(model: Model): Dialect | undefined {
@@ -934,15 +970,26 @@ export class Agent {
 		const cursorTools = this.#getCursorTools();
 		if (cursorTools.length === 0) return this.#state.tools;
 
-		const names = new Set(this.#state.tools.map(tool => tool.name));
+		// Same roster and bridge tools → same array, so `requestToolsFor` stays memoized.
+		const base = this.#state.tools;
+		const memo = this.#cursorRoster;
+		if (
+			memo?.base === base &&
+			memo.cursorTools.length === cursorTools.length &&
+			memo.cursorTools.every((tool, index) => tool === cursorTools[index])
+		) {
+			return memo.merged;
+		}
+		const names = new Set(base.map(tool => tool.name));
 		let merged: AgentTool[] | undefined;
 		for (const tool of cursorTools) {
 			if (names.has(tool.name)) continue;
-			merged ??= this.#state.tools.slice();
+			merged ??= base.slice();
 			merged.push(tool);
 			names.add(tool.name);
 		}
-		return merged ?? this.#state.tools;
+		this.#cursorRoster = { base, cursorTools: cursorTools.slice(), merged: merged ?? base };
+		return merged ?? base;
 	}
 
 	/**
