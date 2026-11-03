@@ -61473,7 +61473,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keymap-switch",
    "host": "MacBook-Pro",
    "added": "2026-11-03T04:23:33Z",
-   "updated": "2026-11-03T05:12:36Z",
+   "updated": "2026-11-03T05:13:00Z",
    "note": "",
    "built": [
     {
@@ -61597,7 +61597,8 @@
      "tree": "128d8429f9b7ac9f6762d5d7e00d428374eb9e42"
     }
    ],
-   "opened": "2026-11-03T05:12:36Z"
+   "opened": "2026-11-03T05:12:36Z",
+   "readied": "2026-11-03T05:13:00Z"
   },
   {
    "id": "x11-mpx-focus-release",
