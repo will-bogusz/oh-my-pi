@@ -61347,6 +61347,24 @@
    "added": "2026-11-03T04:23:54Z",
    "updated": "2026-11-03T04:23:54Z",
    "note": ""
+  },
+  {
+   "id": "mirror-takeover-keys",
+   "branch": "will/mirror-takeover-keys",
+   "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
+   "area": "natives",
+   "priority": "P1",
+   "needs": [],
+   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "body": "bodies/mirror-takeover-keys.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/mirror-takeover-keys",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T04:33:04Z",
+   "updated": "2026-11-03T04:33:04Z",
+   "note": ""
   }
  ],
  "watch": {
