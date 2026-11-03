@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 01:41Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 01:42Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-03 01:34Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 8, stacked 9, held 7, open PRs 21; merged 210, closed 27
+**Counts:** openable now 4, conflict-held 8, stacked 9, held 6, open PRs 21, queued since the last plan 1; merged 210, closed 27
 
 ## Openable now (4)
 
@@ -42,7 +42,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | macos-scroll-direction | fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux | computer | P2 | 3d | iphone-mirror-scroll-distance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-scroll-direction) |
 | gemma-tokenizer | feat(natives,catalog): count Gemini in the Gemma vocabulary | catalog |  | 0h | token-count-policy | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gemma-tokenizer) |
 
-## Held (7)
+## Held (6)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -52,7 +52,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | fallback-revert-when-healthy | feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks | broker | P2 | 20d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fallback-revert-when-healthy) |
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 20d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 20d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
-| relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 15d | Main, 2026-11-02: rework in progress (honor PI_BROWSER_RELAY_KEEP_FRONT=0 for the key reroute) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
 
 ## Open PRs (21)
 
@@ -79,3 +78,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | [#17773](https://github.com/can1357/oh-my-pi/pull/17773) | visuals-guidance | feat(coding-agent): ask for one designed SVG figure where an answer has shape | other |  | 20h | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/visuals-guidance) |
 | [#17881](https://github.com/can1357/oh-my-pi/pull/17881) | cli-reference-models-row | docs(coding-agent): restore the --models row in the CLI reference | other | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cli-reference-models-row) |
 | [#17883](https://github.com/can1357/oh-my-pi/pull/17883) | snapcompact-legacy-archive-credit | fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-legacy-archive-credit) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 15d | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
