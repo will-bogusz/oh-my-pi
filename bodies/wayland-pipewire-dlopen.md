@@ -2,7 +2,7 @@
 
 Released builds couldn't take a single Wayland screenshot because the pipewire crate has to link libpipewire at build time, so I moved the one frame grab onto a runtime `dlopen` of libpipewire, the way verusferro proposed in #9385.
 
-**The decision this asks for:** whether the default Linux addon ships Wayland capture, the packaging question #9385 and #9935 are waiting on. The alternatives are a second `-pipewire` addon variant, or keeping capture an opt-in build feature as today. Loading at runtime keeps the addon free of linked desktop libraries (`readelf -d` lists no libpipewire), so headless hosts and CI load it as before and only see `capture: false`.
+**The decision this asks for:** whether the default Linux addon ships Wayland capture, the packaging question #9385 and #9935 wait on. The alternatives are a second `-pipewire` addon variant, or keeping capture an opt-in build feature. Loading at runtime keeps the addon free of linked desktop libraries (`readelf -d` lists no libpipewire), so headless hosts and CI load it as before and see `capture: false`.
 
 On GNOME 50 and KDE Plasma 6.8 the 18.16.0 addon fails every screenshot, click, drag and scroll; this branch, built with no Cargo features, captures in 110–330 ms and those actions land.
 
