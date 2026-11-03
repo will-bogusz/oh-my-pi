@@ -63399,10 +63399,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T08:02:55Z",
+  "checked": "2026-11-03T09:03:52Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "atspi-action-names": {
+    "since": "2026-11-03T09:03:52Z",
+    "title": "fix(natives): match AT-SPI actions by their machine names"
+   }
+  },
   "conflicts": {},
   "merged_through": "2026-11-02T14:27:50Z",
   "unreleased": {},
@@ -65054,6 +65059,12 @@
     "id": "wayland-consent-deadline",
     "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
     "why": "opened as #17932"
+   },
+   {
+    "at": "2026-11-03T09:03:52Z",
+    "kind": "openable",
+    "id": "atspi-action-names",
+    "title": "fix(natives): match AT-SPI actions by their machine names"
    }
   ]
  },
@@ -66926,12 +66937,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T08:42:22.496327Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-03T09:03:52.962324Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -67589,6 +67600,23 @@
     "created": "2026-11-03T00:59:06Z"
    },
    {
+    "id": "atspi-action-names",
+    "label": "atspi-action-names",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): match AT-SPI actions by their machine names",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T08:46:34Z"
+   },
+   {
     "id": "atspi-unanswered-app",
     "label": "atspi-unanswered-app",
     "number": null,
@@ -67598,6 +67626,7 @@
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
     "action": "wait",
     "reasons": [
+     "needs atspi-action-names (queued)",
      "conflicts with #17922 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #17932 in crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs"
@@ -67610,7 +67639,9 @@
      "#17932",
      "#15282"
     ],
-    "needs": [],
+    "needs": [
+     "atspi-action-names"
+    ],
     "created": "2026-11-03T08:39:53Z"
    },
    {
@@ -67675,6 +67706,27 @@
     ],
     "needs": [],
     "created": "2026-11-03T05:43:31Z"
+   },
+   {
+    "id": "ax-find-depth",
+    "label": "ax-find-depth",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): search 64 levels deep in find()",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#15282"
+    ],
+    "needs": [],
+    "created": "2026-11-03T08:48:18Z"
    },
    {
     "id": "computer-ui-quiet",
@@ -68135,13 +68187,15 @@
     "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
     "action": "wait",
     "reasons": [
-     "conflicts with #15282 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #15282 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with atspi-action-names in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282"
+     "#15282",
+     "atspi-action-names"
     ],
     "needs": [],
     "created": "2026-11-03T05:52:19Z"
