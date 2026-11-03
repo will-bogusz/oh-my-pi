@@ -57,7 +57,7 @@ Fields: `tokenizer`, `scale`, `base`, `per-message`, `tool-preamble`, `per-tool`
 
 ## Why
 
-Tokenizer choice and endpoint framing are per-model policy, which AGENTS.md puts in KDL. The mapping is unchanged for every bundled row but Venice's `claude-opus-45` and `claude-sonnet-45` (below; tested against each row's baked `tokenizer`); Grok 4.7 now names `o200k`, already its fallback.
+Tokenizer choice and endpoint framing are per-model policy, which AGENTS.md puts in KDL. The mapping is unchanged for every bundled row but Venice's two 4.5 rows (below); Grok 4.7 now names `o200k`, already its fallback.
 
 Seeds:
 - **Grok 4.7:** billed ≈ 1.053 × o200k + 1,065 on 22 billed requests (leave-one-out p90 error 2.3%); 4.20 predates 4.7.
@@ -67,7 +67,7 @@ Seeds:
 Decisions:
 - Only unanchored estimates are framed; a billed anchor already includes it.
 - Window, threshold and band checks frame both sides (compaction projections too); reduction checks stay local on both.
-- Separator-collapsed Claude ids (`claude-opus-45`) parsed as revision 45, so Opus/Sonnet 4.5 counted in the Claude 5 vocabularies and matched every 4.7+ rule; the anthropic revision prefix now reads them as 4.5 (`collapsed-minor`), and the `>=10`/`<10`/`<45.1` ranges that worked around the old parse are gone.
+- `claude-opus-45` parsed as revision 45: Claude 5 vocabulary, every 4.7+ rule. The anthropic revision prefix reads it as 4.5 (`collapsed-minor`); its workaround ranges are gone.
 
 Maintenance: an unmeasured line gets no framing and behaves as on main; if xAI changes Grok's tokenizer, the fix is two numbers in `xai.kdl`.
 
