@@ -66075,12 +66075,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T06:07:41.693158Z",
+  "at": "2026-11-03T06:34:17.898370Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 5,
-   "left": 3
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -66443,6 +66443,40 @@
     "created": "2026-11-03T05:12:34Z"
    },
    {
+    "id": "x11-element-focus-steal",
+    "label": "#17921",
+    "number": 17921,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): keep X11 background element typing from raising the element's window",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T06:27:02Z"
+   },
+   {
+    "id": "wayland-focused-window",
+    "label": "#17922",
+    "number": 17922,
+    "state": "open",
+    "area": "natives",
+    "priority": "P1",
+    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T06:33:22Z"
+   },
+   {
     "id": "print-hold",
     "label": "#15508",
     "number": 15508,
@@ -66666,6 +66700,25 @@
     "created": "2026-11-03T00:59:06Z"
    },
    {
+    "id": "apps-open-tilde",
+    "label": "apps-open-tilde",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [
+     "#16223"
+    ],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T06:31:35Z"
+   },
+   {
     "id": "iphone-mirror-scroll-distance",
     "label": "iphone-mirror-scroll-distance",
     "number": null,
@@ -66687,23 +66740,6 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
-    "id": "wayland-focused-window",
-    "label": "wayland-focused-window",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P1",
-    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T06:05:22Z"
-   },
-   {
     "id": "wayland-input-capability",
     "label": "wayland-input-capability",
     "number": null,
@@ -66713,13 +66749,13 @@
     "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
     "action": "wait",
     "reasons": [
-     "conflicts with wayland-focused-window in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+     "conflicts with #17922 in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "wayland-focused-window"
+     "#17922"
     ],
     "needs": [],
     "created": "2026-11-03T06:05:34Z"
@@ -66734,33 +66770,16 @@
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "action": "wait",
     "reasons": [
-     "conflicts with wayland-focused-window in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+     "conflicts with #17922 in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "wayland-focused-window"
+     "#17922"
     ],
     "needs": [],
     "created": "2026-11-03T05:43:31Z"
-   },
-   {
-    "id": "x11-element-focus-steal",
-    "label": "x11-element-focus-steal",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): keep X11 background element typing from raising the element's window",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T05:41:09Z"
    },
    {
     "id": "computer-ui-quiet",
@@ -66822,6 +66841,7 @@
      "needs #15508 (open), #17831 (open), r2/native-window-report (queued)",
      "conflicts with #17893 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #17894 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17908 in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/native-window-report conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
@@ -66833,6 +66853,7 @@
     "blocked_by": [
      "#17893",
      "#17894",
+     "#17895",
      "#17908",
      "#16908"
     ],
@@ -66856,6 +66877,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #17893 in docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #17894 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17908 in packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
@@ -66866,6 +66888,7 @@
     "blocked_by": [
      "#17893",
      "#17894",
+     "#17895",
      "#17908",
      "#16908"
     ],
@@ -66887,6 +66910,7 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #17893 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #17894 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17908 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -66899,6 +66923,7 @@
     "blocked_by": [
      "#17893",
      "#17894",
+     "#17895",
      "#17908",
      "#16908"
     ],
@@ -66920,9 +66945,10 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #17896 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #17921 in docs/tools/computer.md",
      "conflicts with #15282 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with x11-element-focus-steal in docs/tools/computer.md",
+     "conflicts with apps-open-tilde in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
     "note": "",
@@ -66930,9 +66956,10 @@
     "paired": [],
     "blocked_by": [
      "#17896",
+     "#17921",
      "#15282",
      "#16223",
-     "x11-element-focus-steal"
+     "apps-open-tilde"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -67056,6 +67083,7 @@
      "conflicts with #17831 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17893 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17894 in crates/pi-natives/src/desktop/macos/mod.rs",
+     "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -67066,6 +67094,7 @@
      "#17831",
      "#17893",
      "#17894",
+     "#17895",
      "#16908"
     ],
     "needs": [
@@ -67086,6 +67115,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #17893 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17894 in docs/tools/browser.md",
+     "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
@@ -67095,6 +67125,7 @@
     "blocked_by": [
      "#17893",
      "#17894",
+     "#17895",
      "#16908"
     ],
     "needs": [
@@ -67128,6 +67159,23 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
+    "id": "wayland-ei-text",
+    "label": "wayland-ei-text",
+    "number": null,
+    "state": "queued",
+    "area": "natives",
+    "priority": "P2",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T06:23:33Z"
+   },
+   {
     "id": "atspi-file-chooser",
     "label": "atspi-file-chooser",
     "number": null,
@@ -67137,13 +67185,13 @@
     "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
     "action": "wait",
     "reasons": [
-     "conflicts with wayland-focused-window in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #17922 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "wayland-focused-window"
+     "#17922"
     ],
     "needs": [],
     "created": "2026-11-03T05:52:28Z"
