@@ -63855,7 +63855,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T15:41:59Z",
+  "checked": "2026-11-03T16:12:59Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -63872,6 +63872,13 @@
     "title": "feat(coding-agent): show whether the next message reads the prompt cache",
     "files": [
      "packages/agent/src/append-only-context.ts"
+    ]
+   },
+   "#17747": {
+    "since": "2026-11-03T16:12:59Z",
+    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
+    "files": [
+     "packages/coding-agent/src/session/session-provider-boundary.ts"
     ]
    },
    "#17610": {
@@ -65547,6 +65554,15 @@
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "files": [
      "packages/ai/src/providers/anthropic.ts"
+    ]
+   },
+   {
+    "at": "2026-11-03T16:12:59Z",
+    "kind": "conflict",
+    "label": "#17747",
+    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
+    "files": [
+     "packages/coding-agent/src/session/session-provider-boundary.ts"
     ]
    }
   ]
@@ -67427,7 +67443,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T15:42:00.477892Z",
+  "at": "2026-11-03T16:13:00.464120Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -67651,8 +67667,10 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/session/session-provider-boundary.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -68241,7 +68259,8 @@
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "action": "wait",
     "reasons": [
-     "conflicts with #17922 in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+     "conflicts with #17922 in crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -68691,7 +68710,8 @@
     "title": "feat(natives): type text the wayland layout lacks through libei text",
     "action": "wait",
     "reasons": [
-     "conflicts with #17932 in crates/pi-natives/src/desktop/linux/wayland/libei.rs"
+     "conflicts with #17932 in crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
