@@ -62753,21 +62753,21 @@
    "note": ""
   },
   {
-   "id": "computer-gap-round3",
-   "branch": "will/computer-gap-round3",
+   "id": "apps-open-tilde",
+   "branch": "will/apps-open-tilde",
    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
    "area": "computer",
    "priority": "P1",
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
-   "body": "bodies/computer-gap-round3.md",
+   "body": "bodies/apps-open-tilde.md",
    "state": "queued",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-gap-round3",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:31:35Z",
-   "updated": "2026-11-03T06:31:35Z",
+   "updated": "2026-11-03T06:31:49Z",
    "note": ""
   }
  ],
