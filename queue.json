@@ -59981,7 +59981,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-legacy-archive-credit",
    "host": "MacBook-Pro",
    "added": "2026-11-03T00:30:41Z",
-   "updated": "2026-11-03T00:42:54Z",
+   "updated": "2026-11-03T00:44:58Z",
    "note": "",
    "built": [
     {
@@ -60026,15 +60026,6 @@
      "with_code": "5d29121b2c0aaa43bf05f67da956956055c3ea2c",
      "tip": "be4c7562a63610b2c31dcb99eb5bc5205e607f06",
      "with_tip": "6b6a3d259804275482a1a75fdb83f1f145135d83",
-     "at": "2026-11-03T00:39:55Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#15508",
-     "code": "55c4efe7c7d1035e5c42fc7b034cb9a600bf9644",
-     "with_code": "7f4b7416d9c22ff4b171acf20a77d2f7edad5994",
-     "tip": "be4c7562a63610b2c31dcb99eb5bc5205e607f06",
-     "with_tip": "d6fe5f5fda351c2ebaa7967d0685b54bae755267",
      "at": "2026-11-03T00:39:55Z",
      "host": "MacBook-Pro"
     },
@@ -60099,6 +60090,15 @@
      "tip": "be4c7562a63610b2c31dcb99eb5bc5205e607f06",
      "with_tip": "e6cfaadb7b30db78feb86a90f0a3c69d0067cb2c",
      "at": "2026-11-03T00:42:54Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15508",
+     "code": "55c4efe7c7d1035e5c42fc7b034cb9a600bf9644",
+     "with_code": "e70af3b35b72ef55eced6c3128622af589c190b4",
+     "tip": "be4c7562a63610b2c31dcb99eb5bc5205e607f06",
+     "with_tip": "2a15f5abd3d9c5d7f283185850dd487d89b371b3",
+     "at": "2026-11-03T00:44:54Z",
      "host": "MacBook-Pro"
     }
    ]
