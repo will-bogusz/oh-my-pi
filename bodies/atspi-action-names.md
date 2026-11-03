@@ -11,7 +11,7 @@ In Firefox, Chromium, VS Code and LibreOffice on Linux, `press()` refused every 
 | Kate, GNOME Text Editor (GTK4) | `["Press"]`, `["Click"]` | pressed | pressed, `actions()` reads `["Press"]`, `["click"]` |
 
 - `linux/ax.rs` `action_names` reads `NActions` (capped at 256: the app supplies it), then every `GetName(i)` at once; `props().actions`, `perform()` (through `resolve_action`) and `menu_select` use it. `Self::action` skips zbus's property cache, whose `GetAll` Qt refuses, so `NActions` would fail on every Qt element.
-- `resolve_action`: a generic press of a toggle button falls back on its `check`/`uncheck` action, as checkboxes already did. VS Code's Toggle Panel is a toggle button whose only activation is `check`.
+- `resolve_action`: a generic press of a toggle button falls back on its `check`/`uncheck` action, as checkboxes already did; VS Code's Toggle Panel has only `check`.
 
 **Beyond the fix:**
 - `actions()` lists untranslated names: GTK3 lists `click` where `main` listed `Click`, Qt keeps `Press`, and under a non-English locale every toolkit's list changes from translated labels (`Klicken`) to these names.
@@ -21,7 +21,7 @@ In Firefox, Chromium, VS Code and LibreOffice on Linux, `press()` refused every 
 
 AT-SPI's `GetActions` returns each action's localized name, for screen readers to speak: Firefox fills it with `;;`, Chromium, Electron and LibreOffice's GTK3 build leave it empty, and every toolkit translates it. libatspi, which Orca uses, calls `GetName`, documented as "the non-localized name of the action" (`atspi_action_get_action_name` in at-spi2-core): `press` in all four apps above. An element with no activation action is still refused.
 
-`GetName` costs one call per action, sent together; parsing `GetActions` instead has nothing to parse when the name is empty.
+`GetName` costs one call per action, sent together; `GetActions` has nothing to parse when the name is empty.
 
 ## Testing
 
