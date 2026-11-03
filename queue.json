@@ -59920,10 +59920,19 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-02T23:23:07Z",
+  "checked": "2026-11-03T00:24:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "factory-droid-110-pin": {
+    "since": "2026-11-03T00:24:02Z",
+    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0"
+   },
+   "iphone-mirror-key-gap": {
+    "since": "2026-11-03T00:24:02Z",
+    "title": "perf(natives): type on iPhone Mirroring twice as fast"
+   }
+  },
   "conflicts": {},
   "merged_through": "2026-11-02T14:27:50Z",
   "unreleased": {},
@@ -59944,7 +59953,8 @@
    17757,
    17831,
    17861,
-   17862
+   17862,
+   17881
   ],
   "post_merge": {
    "16284": {
@@ -61307,6 +61317,18 @@
     "id": "factory-droid-muse-spark-1-3",
     "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
     "why": "opened as #17862"
+   },
+   {
+    "at": "2026-11-03T00:24:02Z",
+    "kind": "openable",
+    "id": "factory-droid-110-pin",
+    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0"
+   },
+   {
+    "at": "2026-11-03T00:24:02Z",
+    "kind": "openable",
+    "id": "iphone-mirror-key-gap",
+    "title": "perf(natives): type on iPhone Mirroring twice as fast"
    }
   ]
  },
@@ -62497,12 +62519,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T00:10:52.725035Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-03T00:24:02.936443Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -62521,6 +62543,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:30:16Z"
+   },
+   {
+    "id": "cli-reference-models-row",
+    "label": "#17881",
+    "number": 17881,
+    "state": "open",
+    "area": "other",
+    "priority": "P0",
+    "title": "docs(coding-agent): restore the --models row in the CLI reference",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T00:13:36Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -62827,35 +62866,22 @@
     "reasons": [
      "held: Main, 2026-11-02: rework in progress (honor PI_BROWSER_RELAY_KEEP_FRONT=0 for the key reroute)",
      "conflicts with #17831 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #15508 in docs/tools/browser.md",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
-     "conflicts with main in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/natives/native/index.d.ts"
+     "conflicts with #16223 in packages/natives/native/index.d.ts",
+     "conflicts with main in crates/pi-natives/src/desktop/front_app.rs, crates/pi-natives/src/desktop/macos/skylight.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/natives/native/index.d.ts, packages/natives/native/index.js"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#17831",
-     "#16908"
+     "#15508",
+     "#16908",
+     "#16223"
     ],
     "needs": [],
     "created": "2026-10-19T00:03:17Z"
-   },
-   {
-    "id": "cli-reference-models-row",
-    "label": "cli-reference-models-row",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": "P1",
-    "title": "docs(coding-agent): restore the --models row in the CLI reference",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T00:10:42Z"
    },
    {
     "id": "factory-droid-110-pin",
@@ -63008,10 +63034,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "action": "held",
-    "reasons": [
-     "held: Will, 2026-11-02: robustness of the 60 ms gap on a weak wireless link unmeasured"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
