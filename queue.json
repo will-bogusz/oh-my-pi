@@ -64530,6 +64530,11 @@
     "sha": "77a3dd091ac8ebb69400ab2816e39e1aabe30c37",
     "at": "2026-11-03T04:48:46Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "77a3dd091ac8ebb69400ab2816e39e1aabe30c37",
+    "at": "2026-11-03T04:49:04Z",
+    "host": "goliath"
    }
   }
  },
