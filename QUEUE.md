@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 05:30Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 05:31Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 6 of 8 ready events used in the hour before the last plan, 2 left (plan of 2026-11-03 05:16Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 7 of 8 ready events used in the hour before the last plan, 1 left (plan of 2026-11-03 05:30Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 8, stacked 10, held 6, open PRs 35; merged 210, closed 27
 
 ## Openable now (0)
@@ -87,4 +87,4 @@ none
 | [#17911](https://github.com/can1357/oh-my-pi/pull/17911) | x11-qt-background-keys | fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-qt-background-keys) |
 | [#17909](https://github.com/can1357/oh-my-pi/pull/17909) | mirror-takeover-keys | fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held | natives | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/mirror-takeover-keys) |
 | [#17913](https://github.com/can1357/oh-my-pi/pull/17913) | win-silent-drag | fix(natives): refuse background drags on Windows Tk windows | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-silent-drag) |
-| [#17915](https://github.com/can1357/oh-my-pi/pull/17915) | wayland-element-input | fix(natives): refuse Wayland element input before focusing the element | natives | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-element-input) |
+| [#17915](https://github.com/can1357/oh-my-pi/pull/17915) | wayland-element-input | fix(natives): refuse Wayland element input before focusing the element | natives | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-element-input) |
