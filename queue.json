@@ -63343,19 +63343,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T07:02:12Z",
+  "checked": "2026-11-03T08:02:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "apps-open-tilde": {
-    "since": "2026-11-03T07:02:12Z",
-    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open"
-   },
-   "wayland-consent-deadline": {
-    "since": "2026-11-03T07:02:12Z",
-    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-11-02T14:27:50Z",
   "unreleased": {},
@@ -63395,7 +63386,9 @@
    17913,
    17915,
    17921,
-   17922
+   17922,
+   17931,
+   17932
   ],
   "post_merge": {
    "16284": {
@@ -64991,6 +64984,20 @@
     "id": "atspi-file-chooser",
     "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
     "why": "plan: wait (conflicts with #17922 in crates/pi-natives/src/desktop/linux/ax.rs)"
+   },
+   {
+    "at": "2026-11-03T08:02:55Z",
+    "kind": "unopenable",
+    "id": "apps-open-tilde",
+    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
+    "why": "opened as #17931"
+   },
+   {
+    "at": "2026-11-03T08:02:55Z",
+    "kind": "unopenable",
+    "id": "wayland-consent-deadline",
+    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
+    "why": "opened as #17932"
    }
   ]
  },
@@ -66730,8 +66737,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T07:45:50.123069Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-03T08:02:56.029433Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 2,
@@ -67151,6 +67158,23 @@
     "created": "2026-11-03T06:27:02Z"
    },
    {
+    "id": "wayland-consent-deadline",
+    "label": "#17932",
+    "number": 17932,
+    "state": "open",
+    "area": "natives",
+    "priority": "P1",
+    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T07:44:29Z"
+   },
+   {
     "id": "print-hold",
     "label": "#15508",
     "number": 15508,
@@ -67202,23 +67226,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-31T21:57:19Z"
-   },
-   {
-    "id": "wayland-consent-deadline",
-    "label": "#17932",
-    "number": 17932,
-    "state": "open",
-    "area": "natives",
-    "priority": "P2",
-    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T07:44:29Z"
    },
    {
     "id": "iphone-mirror-key-gap",
