@@ -61188,10 +61188,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T02:57:27Z",
+  "checked": "2026-11-03T03:28:25Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "wayland-click-pacing": {
+    "since": "2026-11-03T03:28:25Z",
+    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks"
+   },
    "read-block-pages": {
     "since": "2026-11-03T02:57:27Z",
     "title": "fix(coding-agent): stop URL reads returning bot block pages as content"
@@ -62672,6 +62676,12 @@
     "kind": "openable",
     "id": "read-block-pages",
     "title": "fix(coding-agent): stop URL reads returning bot block pages as content"
+   },
+   {
+    "at": "2026-11-03T03:28:25Z",
+    "kind": "openable",
+    "id": "wayland-click-pacing",
+    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks"
    }
   ]
  },
