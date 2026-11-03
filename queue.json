@@ -62769,8 +62769,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-gap-round3",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:31:35Z",
-   "updated": "2026-11-03T06:31:49Z",
-   "note": ""
+   "updated": "2026-11-03T07:34:04Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "7c5e74c4981ba934d27f17ccceccebc8528dc241",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "5595640c29c8e4f5ba158f37c136630dcee5e5b2",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-03T07:34:04Z",
+     "host": "MacBook-Pro",
+     "tree": "b47a3021b9b8904f699fd2f5707c747589f0634b"
+    }
+   ]
   },
   {
    "id": "wayland-consent-deadline",
@@ -62787,8 +62799,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-consent-deadline",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:48:11Z",
-   "updated": "2026-11-03T06:48:31Z",
-   "note": ""
+   "updated": "2026-11-03T07:34:04Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "5f5fd62853cbf74d83fc990928f3af8a03ac9ba5",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "3d3a22642c02b7c55fb12993161266ca99cb7c83",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-03T07:34:04Z",
+     "host": "MacBook-Pro",
+     "tree": "b47a3021b9b8904f699fd2f5707c747589f0634b"
+    }
+   ]
   }
  ],
  "watch": {

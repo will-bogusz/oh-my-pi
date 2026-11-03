@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 07:33Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 07:34Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-03 07:32Z on goliath; groups below are from it, states from the manifest)
@@ -24,7 +24,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 3d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 2d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 6h | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
-| wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 5h | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
+| wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 6h | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
 | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P1 | 1h | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
 | gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 1h | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
 | atspi-file-chooser | fix(natives): read GTK3 file dialogs as AT-SPI windows | computer |  | 1h | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-file-chooser) |
