@@ -59918,6 +59918,24 @@
    "note": "",
    "opened": "2026-11-03T00:13:38Z",
    "readied": "2026-11-03T00:13:56Z"
+  },
+  {
+   "id": "snapcompact-legacy-archive-credit",
+   "branch": "will/snapcompact-legacy-archive-credit",
+   "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
+   "body": "bodies/snapcompact-legacy-archive-credit.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-legacy-archive-credit",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T00:30:41Z",
+   "updated": "2026-11-03T00:30:41Z",
+   "note": ""
   }
  ],
  "watch": {
