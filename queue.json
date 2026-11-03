@@ -61293,6 +61293,24 @@
      "tree": "3988d3bf7ec7fd73a143ef5a553fd3c09bd81ce6"
     }
    ]
+  },
+  {
+   "id": "x11-takeover-keymap-switch",
+   "branch": "will/x11-takeover-keymap-switch",
+   "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "body": "bodies/x11-takeover-keymap-switch.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keymap-switch",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T04:23:33Z",
+   "updated": "2026-11-03T04:23:33Z",
+   "note": ""
   }
  ],
  "watch": {
