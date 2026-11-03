@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 09:34Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 09:35Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-03 09:07Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-03 09:34Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 15, stacked 12, held 6, open PRs 40; merged 210, closed 27
 
 ## Openable now (0)
@@ -23,7 +23,7 @@ none
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 8h | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 8h | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
 | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P1 | 3h | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
-| gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 3h | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), atspi-action-names | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
+| gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 3h | [#17936](https://github.com/can1357/oh-my-pi/pull/17936), [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
 | atspi-file-chooser | fix(natives): read GTK3 file dialogs as AT-SPI windows | computer |  | 3h | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-file-chooser) |
 | wayland-input-capability | fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists | natives | P1 | 3h | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-capability) |
 | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 3h | [#17932](https://github.com/can1357/oh-my-pi/pull/17932) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
@@ -101,4 +101,4 @@ none
 | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | wayland-focused-window | fix(natives): name the focused application window on Wayland, not an always-active shell frame | natives | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-focused-window) |
 | [#17931](https://github.com/can1357/oh-my-pi/pull/17931) | apps-open-tilde | fix(coding-agent): open ~ paths from the home folder in computer apps.open | computer | P0 | 1h | keep; opened over P2 #16223 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/apps-open-tilde) |
 | [#17932](https://github.com/can1357/oh-my-pi/pull/17932) | wayland-consent-deadline | fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends | natives | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-consent-deadline) |
-| [#17936](https://github.com/can1357/oh-my-pi/pull/17936) | atspi-action-names | fix(natives): match AT-SPI actions by their machine names | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-action-names) |
+| [#17936](https://github.com/can1357/oh-my-pi/pull/17936) | atspi-action-names | fix(natives): match AT-SPI actions by their machine names | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-action-names) |
