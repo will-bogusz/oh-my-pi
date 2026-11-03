@@ -61527,6 +61527,24 @@
    "added": "2026-11-03T04:33:04Z",
    "updated": "2026-11-03T04:33:04Z",
    "note": ""
+  },
+  {
+   "id": "win-silent-drag",
+   "branch": "will/win-silent-drag",
+   "title": "fix(natives): refuse background drags on Windows Tk windows",
+   "area": "computer",
+   "priority": null,
+   "needs": [],
+   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "body": "bodies/win-silent-drag.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-silent-drag",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T04:36:23Z",
+   "updated": "2026-11-03T04:36:23Z",
+   "note": ""
   }
  ],
  "watch": {
