@@ -25,14 +25,14 @@ Gemini had no local tokenizer, so context bars and compaction thresholds counted
 - **No merges list.** The 514,906 merges are every two-piece split of every merged piece in a fixed order; the packer proves the rebuild equals `tokenizer.json`, and the engine rebuilds it at load (54 ms once).
 - **No scale or base**: the tokenizer alone lands at +1.1%.
 
-**Maintenance.** A new Gemma vocabulary is a new pin in `tools/pack-gemma.ts`; its asserts fail if the merge order or segment cuts stop holding.
-
 <details><summary>License texts relied on</summary>
 
 - [Gemma Terms of Use](https://ai.google.dev/gemma/terms) (last modified April 1, 2026), §3.1: "You must include the use restrictions referenced in Section 3.2 as an enforceable provision in any agreement (e.g., license agreement, terms of use, etc.) governing the use and/or distribution of Gemma or Model Derivatives…" and "All Distributions (other than through a Hosted Service) must be accompanied by a "Notice" text file that contains the following notice: "Gemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms"". The page opens: "For Gemma 4 terms, see the [Gemma 4 license](https://ai.google.dev/gemma/apache_2)", which is the Apache License 2.0.
 - [google/gemma-4-E4B-it @ ee0ef60](https://huggingface.co/google/gemma-4-E4B-it/blob/ee0ef6023621cff504d758262d4e04895a5af4a2/README.md) model card: `license: apache-2.0`; the repo has no NOTICE file. `tokenizer.json` sha256 `cc8d3a0c…bfe0f`, pinned in the packer.
 
 </details>
+
+**Maintenance.** A new Gemma vocabulary is a new pin in `tools/pack-gemma.ts`; its asserts fail if the merge order or segment cuts stop holding.
 
 ## Testing
 
