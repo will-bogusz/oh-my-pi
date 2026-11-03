@@ -34,7 +34,8 @@ export function factoryDroidWireTarget<TModel extends Pick<Model, "id" | "provid
 	target: Omit<TModel, "api" | "compat" | "thinking"> &
 		Pick<Model<FactoryDroidSharedWire>, "api" | "compat" | "thinking">;
 } {
-	// Policy resolution reads only identity fields; a replay reader may be a partial row.
+	// Policy resolution reads identity fields and `baseUrl`, never name, limits or
+	// cost, so a replay reader's partial row resolves (as a host-less spec).
 	const spec = { ...model, api: wire } as unknown as ModelSpec<FactoryDroidSharedWire>;
 	const resolved = resolveModelPolicy(spec, { upstream });
 	return {
