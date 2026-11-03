@@ -34,7 +34,7 @@ Non-goals: droid 1.1.0's stream-deadline header and Responses WebSocket.
 - New tests check that no Factory wire sends the removed headers even with a first-event budget set, that only whoami asks for the extended response, and that Azure Foundry gets eager tool streaming. With the source reverted, 6 fail.
 - Native parity corpus recaptured with droid 1.1.0: 56 cases, adding Nemotron 3.5 Super, Muse Spark 1.2, Beam 1.0, GPT-6 Sol/Luna Fast and Opus 5.5 on Anthropic; `factory-droid-native-parity.test.ts` 57 pass. The capture account cannot run Muse Spark Open, GPT-6.1 Terra or Ultra Fast, so they have no case.
 - The capture now deletes droid's cached feature flags before each case: droid 1.1.0 serves them while refetching, so two cases first recorded the previous case's upstream and failed parity until recaptured.
-- `bun test`: `packages/ai` 6551 pass, `packages/catalog` 1315 pass. `bun run check:ts` reports format issues only in `packages/tui/src/tui.ts` and `packages/coding-agent/test/interactive-click-focus.test.ts`, which this PR does not touch.
+- `bun test`: `packages/ai` 6551 pass, `packages/catalog` 1315 pass. `bun run check:ts` flags formatting only in `tui.ts` and `interactive-click-focus.test.ts`, which this PR does not touch.
 
 ---
 
