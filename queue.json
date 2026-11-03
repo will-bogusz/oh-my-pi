@@ -59726,7 +59726,7 @@
    "area": "providers",
    "priority": "P1",
    "needs": [],
-   "base": "256b3211bca7458391866a8bcc9369902664be55",
+   "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
    "body": "bodies/factory-droid-110-pin.md",
    "state": "queued",
    "pr": null,
@@ -59734,8 +59734,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-110-pin",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:32:33Z",
-   "updated": "2026-11-03T00:07:51Z",
-   "note": ""
+   "updated": "2026-11-03T00:08:05Z",
+   "note": "",
+   "advanced": "2026-11-03T00:08:05Z"
   },
   {
    "id": "factory-droid-gemini-4-argon-110",
