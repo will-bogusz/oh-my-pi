@@ -61000,7 +61000,7 @@
    "branch": "will/read-block-pages",
    "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/read-block-pages.md",
@@ -61010,7 +61010,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-block-pages",
    "host": "MacBook-Pro",
    "added": "2026-11-03T02:52:49Z",
-   "updated": "2026-11-03T03:48:30Z",
+   "updated": "2026-11-03T03:58:46Z",
    "note": "",
    "built": [
     {
@@ -61184,7 +61184,7 @@
    "branch": "will/wayland-click-pacing",
    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
    "area": "natives",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/wayland-click-pacing.md",
@@ -61194,7 +61194,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-click-pacing",
    "host": "MacBook-Pro",
    "added": "2026-11-03T03:23:44Z",
-   "updated": "2026-11-03T03:46:27Z",
+   "updated": "2026-11-03T03:58:46Z",
    "note": "",
    "built": [
     {
