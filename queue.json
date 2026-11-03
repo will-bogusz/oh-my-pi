@@ -62961,7 +62961,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-ei-text",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:23:33Z",
-   "updated": "2026-11-03T22:44:08Z",
+   "updated": "2026-11-03T22:44:34Z",
    "note": "",
    "advanced": "2026-11-03T21:25:44Z",
    "built": [
@@ -63056,7 +63056,8 @@
      "tree": "0451c3dc9f805ef34da3c7306bc67c9cb559fd6d"
     }
    ],
-   "opened": "2026-11-03T22:44:08Z"
+   "opened": "2026-11-03T22:44:08Z",
+   "readied": "2026-11-03T22:44:32Z"
   },
   {
    "id": "apps-open-tilde",
