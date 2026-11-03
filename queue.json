@@ -62764,7 +62764,7 @@
    "area": "natives",
    "priority": "P2",
    "needs": [],
-   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "base": "ff0a986b88c223a0a746ed95cda8ddada236140c",
    "body": "bodies/wayland-ei-text.md",
    "state": "queued",
    "pr": null,
@@ -62772,8 +62772,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-ei-text",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:23:33Z",
-   "updated": "2026-11-03T06:23:33Z",
-   "note": ""
+   "updated": "2026-11-03T21:25:44Z",
+   "note": "",
+   "advanced": "2026-11-03T21:25:44Z"
   },
   {
    "id": "apps-open-tilde",
