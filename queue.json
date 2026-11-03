@@ -66959,5 +66959,11 @@
     "created": "2026-11-02T05:04:37Z"
    }
   ]
+ },
+ "opening": {
+  "id": "x11-element-focus-steal",
+  "token": "5cd8c4e775cc48bd8d4ea7b78c9048c8",
+  "host": "MacBook-Pro",
+  "at": "2026-11-03T06:05:28Z"
  }
 }
