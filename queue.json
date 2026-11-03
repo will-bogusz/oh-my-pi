@@ -63853,10 +63853,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T10:36:07Z",
+  "checked": "2026-11-03T11:06:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "relay-linux-click-front": {
+    "since": "2026-11-03T11:06:09Z",
+    "title": "fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11"
+   }
+  },
   "conflicts": {},
   "merged_through": "2026-11-02T14:27:50Z",
   "unreleased": {},
@@ -65522,6 +65527,12 @@
     "id": "atspi-action-names",
     "title": "fix(natives): match AT-SPI actions by their machine names",
     "why": "opened as #17936"
+   },
+   {
+    "at": "2026-11-03T11:06:09Z",
+    "kind": "openable",
+    "id": "relay-linux-click-front",
+    "title": "fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11"
    }
   ]
  },
