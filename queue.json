@@ -59735,9 +59735,56 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-110-pin",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:32:33Z",
-   "updated": "2026-11-03T00:34:44Z",
+   "updated": "2026-11-03T00:43:18Z",
    "note": "",
-   "advanced": "2026-11-03T00:08:05Z"
+   "advanced": "2026-11-03T00:08:05Z",
+   "built": [
+    {
+     "with": "#15130",
+     "code": "bdac6692f6fb8a7425f0ffacb09aa6352bc12fa5",
+     "with_code": "0060b29986d9f3944914810d980c3877111db246",
+     "tip": "237ee022ffbc2879c5c619b82c3b35e39086f345",
+     "with_tip": "63d2562c068c206434d5c611dcb02b871a352574",
+     "at": "2026-11-03T00:43:10Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16611",
+     "code": "bdac6692f6fb8a7425f0ffacb09aa6352bc12fa5",
+     "with_code": "8a2e0e10c1c7d7a54e90c7821e50860ed40802af",
+     "tip": "237ee022ffbc2879c5c619b82c3b35e39086f345",
+     "with_tip": "477261b9bb01720f58aedf77f97345f56969ea89",
+     "at": "2026-11-03T00:43:16Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17610",
+     "code": "bdac6692f6fb8a7425f0ffacb09aa6352bc12fa5",
+     "with_code": "9da13ec727c2a582a3d747dec1f794dadd1aed44",
+     "tip": "237ee022ffbc2879c5c619b82c3b35e39086f345",
+     "with_tip": "e6cfaadb7b30db78feb86a90f0a3c69d0067cb2c",
+     "at": "2026-11-03T00:43:17Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17861",
+     "code": "bdac6692f6fb8a7425f0ffacb09aa6352bc12fa5",
+     "with_code": "0d4af0dac24c7b0b617f1487300c5a96d5873327",
+     "tip": "237ee022ffbc2879c5c619b82c3b35e39086f345",
+     "with_tip": "9089a03d78289e57c7a83ad060e15741c1e4f5f8",
+     "at": "2026-11-03T00:43:17Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17862",
+     "code": "bdac6692f6fb8a7425f0ffacb09aa6352bc12fa5",
+     "with_code": "44d92d62a35cbba9f585ffd5ba22808f9e327cc8",
+     "tip": "237ee022ffbc2879c5c619b82c3b35e39086f345",
+     "with_tip": "a4607028032929548eabc9fa1145d720d1476508",
+     "at": "2026-11-03T00:43:17Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "factory-droid-gemini-4-argon-110",
