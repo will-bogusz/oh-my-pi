@@ -61550,10 +61550,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T04:29:20Z",
+  "checked": "2026-11-03T04:59:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "mirror-takeover-keys": {
+    "since": "2026-11-03T04:59:31Z",
+    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held"
+   },
    "x11-mpx-focus-release": {
     "since": "2026-11-03T04:29:20Z",
     "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window"
@@ -61566,9 +61570,9 @@
     "since": "2026-11-03T04:29:20Z",
     "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source"
    },
-   "headless-chrome-pipe": {
-    "since": "2026-11-03T03:58:48Z",
-    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed"
+   "win-silent-drag": {
+    "since": "2026-11-03T04:59:31Z",
+    "title": "fix(natives): refuse background drags on Windows Tk windows"
    }
   },
   "conflicts": {},
@@ -61601,7 +61605,8 @@
    17896,
    17897,
    17903,
-   17904
+   17904,
+   17908
   ],
   "post_merge": {
    "16284": {
@@ -63092,6 +63097,25 @@
     "kind": "openable",
     "id": "x11-takeover-keymap-switch",
     "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source"
+   },
+   {
+    "at": "2026-11-03T04:59:31Z",
+    "kind": "openable",
+    "id": "mirror-takeover-keys",
+    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held"
+   },
+   {
+    "at": "2026-11-03T04:59:31Z",
+    "kind": "openable",
+    "id": "win-silent-drag",
+    "title": "fix(natives): refuse background drags on Windows Tk windows"
+   },
+   {
+    "at": "2026-11-03T04:59:31Z",
+    "kind": "unopenable",
+    "id": "headless-chrome-pipe",
+    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
+    "why": "opened as #17908"
    }
   ]
  },
