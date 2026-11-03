@@ -2,7 +2,9 @@
 
 Released builds couldn't take a single Wayland screenshot because the pipewire crate has to link libpipewire at build time, so I moved the one frame grab onto a runtime `dlopen` of libpipewire, the way verusferro proposed in #9385.
 
-On GNOME 50 and KDE Plasma 6.8, the released 18.16.0 addon fails every screenshot and every click, drag and scroll; the cargo build of this branch, with no Cargo features, captures in 110–330 ms, and those actions land.
+**The decision this asks for:** whether the default Linux addon ships Wayland capture, the packaging question #9385 and #9935 are waiting on. The alternatives are a second `-pipewire` addon variant, or keeping capture an opt-in build feature as today. Loading at runtime keeps the addon free of linked desktop libraries (`readelf -d` lists no libpipewire), so headless hosts and CI load it as before and only see `capture: false`.
+
+On GNOME 50 and KDE Plasma 6.8 the 18.16.0 addon fails every screenshot, click, drag and scroll; this branch, built with no Cargo features, captures in 110–330 ms and those actions land.
 
 | | 18.16.0 release addon | This PR, no Cargo features |
 |---|---|---|
@@ -11,10 +13,9 @@ On GNOME 50 and KDE Plasma 6.8, the released 18.16.0 addon fails every screensho
 | `click` / `drag` / `scroll` | `InvalidCoordinateFrame: no capture of 'desktop' yet` | act (text read back in Testing) |
 | Host without libpipewire | addon loads, `capture: false` | addon loads, `capture: false`; screenshot fails with `… libpipewire-0.3.so.0 could not be loaded (<dlerror>)` |
 
-> **Wayland capture context.** OMP asks the ScreenCast portal for a stream through `ashpd` (pure Rust, unchanged). The portal hands back a PipeWire node and socket; only `grab_pipewire_frame`, which pulls one frame from it, needed libpipewire.
-
 <details><summary>Reading order</summary>
 
+- Context: OMP asks the ScreenCast portal for a stream through `ashpd` (pure Rust, unchanged). The portal hands back a PipeWire node and socket; only `grab_pipewire_frame`, which pulls one frame from it, needed libpipewire.
 - `wayland/pipewire.rs`: the 15 `pw_*` functions, resolved once per process (`library()`); the leading fields of the C structs read; the `EnumFormat` POD encoder (`enum_format`) and the negotiated-format decoder (`parse_video_format`).
 - `wayland/capture.rs`: `grab_pipewire_frame` over that table; `Connection` destroys the objects in reverse order; `rgba_from_buffer` keeps its stride and format handling.
 - `wayland/mod.rs`: the backend holds the load result, which `capabilities()`, `capture()` and `validate_frame_layout()` read instead of `wayland-pipewire` cfg gates.
