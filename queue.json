@@ -60195,8 +60195,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wire-delta-count",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:33:54Z",
-   "updated": "2026-11-03T01:38:13Z",
-   "note": ""
+   "updated": "2026-11-03T01:38:30Z",
+   "note": "head 3fd835fbb97: prompts restored, send-path truncation answered"
   },
   {
    "id": "relay-downloads",
