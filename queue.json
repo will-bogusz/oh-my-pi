@@ -61192,7 +61192,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-click-pacing",
    "host": "MacBook-Pro",
    "added": "2026-11-03T03:23:44Z",
-   "updated": "2026-11-03T03:46:05Z",
+   "updated": "2026-11-03T03:46:27Z",
    "note": "",
    "built": [
     {
@@ -61259,7 +61259,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-03T03:46:05Z"
+   "opened": "2026-11-03T03:46:05Z",
+   "readied": "2026-11-03T03:46:27Z"
   },
   {
    "id": "headless-chrome-pipe",
