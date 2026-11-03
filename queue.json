@@ -62448,8 +62448,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-02T23:23:08.239249Z",
-  "host": "goliath",
+  "at": "2026-11-03T00:09:20.646309Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -62799,10 +62799,8 @@
     "area": "providers",
     "priority": "P1",
     "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
-    "action": "held",
-    "reasons": [
-     "held: Will, 2026-11-02: awaiting native corpus recapture approval (~1M Factory tokens)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
