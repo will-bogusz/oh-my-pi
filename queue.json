@@ -57245,7 +57245,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-key-gap",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:15:44Z",
-   "updated": "2026-11-03T00:18:43Z",
+   "updated": "2026-11-03T00:19:09Z",
    "note": "",
    "built": [
     {
@@ -57316,8 +57316,7 @@
      "tree": "1c2e904f816765145387f519b84705329a98de9a"
     }
    ],
-   "advanced": "2026-11-02T02:40:57Z",
-   "hold": "Will, 2026-11-02: robustness of the 60 ms gap on a weak wireless link unmeasured"
+   "advanced": "2026-11-02T02:40:57Z"
   },
   {
    "id": "macos-capture-geometry",
