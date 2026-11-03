@@ -63818,5 +63818,11 @@
     "created": "2026-11-02T05:04:37Z"
    }
   ]
+ },
+ "opening": {
+  "id": "token-count-policy",
+  "token": "4187342838fd407cbf6ae471c421a518",
+  "host": "MacBook-Pro",
+  "at": "2026-11-03T01:27:56Z"
  }
 }
