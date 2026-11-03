@@ -62812,7 +62812,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T01:07:07.883161Z",
+  "at": "2026-11-03T01:13:44.748162Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -63327,6 +63327,40 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
+    "id": "role-implicit-landmarks",
+    "label": "role-implicit-landmarks",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T01:12:51Z"
+   },
+   {
+    "id": "windows-app-id",
+    "label": "windows-app-id",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(coding-agent): find app windows by application id or path",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T01:11:09Z"
+   },
+   {
     "id": "iphone-mirror-key-gap",
     "label": "iphone-mirror-key-gap",
     "number": null,
@@ -63356,6 +63390,7 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #15282 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with windows-app-id in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
     "note": "",
@@ -63363,7 +63398,8 @@
     "paired": [],
     "blocked_by": [
      "#15282",
-     "#16223"
+     "#16223",
+     "windows-app-id"
     ],
     "needs": [
      "computer-ui-quiet"
