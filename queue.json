@@ -62955,13 +62955,13 @@
    "needs": [],
    "base": "ff0a986b88c223a0a746ed95cda8ddada236140c",
    "body": "bodies/wayland-ei-text.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18013,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-ei-text",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:23:33Z",
-   "updated": "2026-11-03T22:38:21Z",
+   "updated": "2026-11-03T22:44:08Z",
    "note": "",
    "advanced": "2026-11-03T21:25:44Z",
    "built": [
@@ -63055,7 +63055,8 @@
      "host": "MacBook-Pro",
      "tree": "0451c3dc9f805ef34da3c7306bc67c9cb559fd6d"
     }
-   ]
+   ],
+   "opened": "2026-11-03T22:44:08Z"
   },
   {
    "id": "apps-open-tilde",
