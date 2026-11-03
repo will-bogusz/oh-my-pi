@@ -59970,7 +59970,7 @@
    "branch": "will/snapcompact-legacy-archive-credit",
    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
    "body": "bodies/snapcompact-legacy-archive-credit.md",
@@ -59980,7 +59980,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-legacy-archive-credit",
    "host": "MacBook-Pro",
    "added": "2026-11-03T00:30:41Z",
-   "updated": "2026-11-03T00:46:55Z",
+   "updated": "2026-11-03T00:54:44Z",
    "note": "",
    "built": [
     {
