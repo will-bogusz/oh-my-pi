@@ -66800,6 +66800,11 @@
     "sha": "093d23ddd9e45d08530db22b98a36f55a89d47e0",
     "at": "2026-11-03T08:34:53Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "093d23ddd9e45d08530db22b98a36f55a89d47e0",
+    "at": "2026-11-03T08:35:17Z",
+    "host": "goliath"
    }
   }
  },
