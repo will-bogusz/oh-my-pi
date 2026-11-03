@@ -17,7 +17,7 @@ A 39-character mixed string took 283–297 ms/character at 120 ms and 154 ms wit
 
 The HID-report sampling model is consistent with these numbers, not proven. The prototype lost letters at 60 ms in Spotlight's "Full Keyboard Access" (`ll/cc/ss`); its pacing was the same, but it released Shift per character and lacked per-press focus checks. Omp now passes that string and doubled-letter Safari text at 60 ms.
 
-60 ms is three times the only gap that lost a key on omp's route, 20 ms unloaded; saturating Wi-Fi did not raise the observed failure point. Not measured: takeover `type` and `press`, `holdKeys`, other phones/iOS versions, weak-signal or hotspot links. Load is not weak-link coverage; if keys go missing silently, raise this constant.
+60 ms is three times the only gap that lost a key on omp's route, 20 ms unloaded; saturating Wi-Fi did not raise the observed failure point. Not measured: other phones/iOS versions, weak-signal or hotspot links. Load is not weak-link coverage; if keys go missing silently, raise this constant.
 
 ## Testing
 
@@ -25,6 +25,7 @@ Live on iPhone 16 Pro, iOS 18.7, macOS 26.1; background `type` with addons diffe
 
 - Doubled-letter Safari text: "Full Keyboard Access: Hello Will, see you soon at 11:00, Mississippi!"; Spotlight queries: "Full Keyboard Access" and "Settings". At 40 ms the Safari miss was an empty field, not a dropped letter; focus/clear is a hypothesis, not proven.
 - Wi-Fi load, 2026-11-02: four parallel 10 GB downloads, 239–439 Mbit/s. The 39-character string was exact 3/3 at each of 20/40/60/120 ms; 60 ms took 152 ms/char, 120 ms 283–290.
+- Every other path at 60 ms, 3/3 each in background: chords (Shift+a, Option+c, Shift+1), Cmd+A then Delete, `holdKeys` Shift (released after) and a held letter. Takeover `type` failed the same way at 60 and 120 ms (exact 1/7 vs 0/4; Shift lost, then "lost exact keyboard focus"): a defect on `main` this PR neither causes nor fixes.
 - `cargo test -p pi-natives --lib desktop` on macOS; clippy and rustfmt on macOS and Linux.
 
 ---
@@ -32,3 +33,4 @@ Live on iPhone 16 Pro, iOS 18.7, macOS 26.1; background `type` with addons diffe
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
