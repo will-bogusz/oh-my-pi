@@ -60197,6 +60197,24 @@
    "added": "2026-11-03T01:33:54Z",
    "updated": "2026-11-03T01:33:54Z",
    "note": ""
+  },
+  {
+   "id": "relay-downloads",
+   "branch": "will/relay-downloads",
+   "title": "fix(browser): report a relay tab's downloads where Chrome saved them",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
+   "body": "bodies/relay-downloads.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-downloads",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T01:33:55Z",
+   "updated": "2026-11-03T01:33:55Z",
+   "note": ""
   }
  ],
  "watch": {
