@@ -62322,31 +62322,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T04:59:31Z",
+  "checked": "2026-11-03T05:30:29Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "mirror-takeover-keys": {
-    "since": "2026-11-03T04:59:31Z",
-    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held"
-   },
-   "x11-mpx-focus-release": {
-    "since": "2026-11-03T04:29:20Z",
-    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window"
-   },
-   "x11-qt-background-keys": {
-    "since": "2026-11-03T04:29:20Z",
-    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent"
-   },
-   "x11-takeover-keymap-switch": {
-    "since": "2026-11-03T04:29:20Z",
-    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source"
-   },
-   "win-silent-drag": {
-    "since": "2026-11-03T04:59:31Z",
-    "title": "fix(natives): refuse background drags on Windows Tk windows"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-11-02T14:27:50Z",
   "unreleased": {},
@@ -62378,7 +62357,13 @@
    17897,
    17903,
    17904,
-   17908
+   17908,
+   17909,
+   17910,
+   17911,
+   17912,
+   17913,
+   17915
   ],
   "post_merge": {
    "16284": {
@@ -63888,6 +63873,41 @@
     "id": "headless-chrome-pipe",
     "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
     "why": "opened as #17908"
+   },
+   {
+    "at": "2026-11-03T05:30:29Z",
+    "kind": "unopenable",
+    "id": "mirror-takeover-keys",
+    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
+    "why": "opened as #17909"
+   },
+   {
+    "at": "2026-11-03T05:30:29Z",
+    "kind": "unopenable",
+    "id": "x11-mpx-focus-release",
+    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
+    "why": "opened as #17910"
+   },
+   {
+    "at": "2026-11-03T05:30:29Z",
+    "kind": "unopenable",
+    "id": "x11-qt-background-keys",
+    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
+    "why": "opened as #17911"
+   },
+   {
+    "at": "2026-11-03T05:30:29Z",
+    "kind": "unopenable",
+    "id": "x11-takeover-keymap-switch",
+    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
+    "why": "opened as #17912"
+   },
+   {
+    "at": "2026-11-03T05:30:29Z",
+    "kind": "unopenable",
+    "id": "win-silent-drag",
+    "title": "fix(natives): refuse background drags on Windows Tk windows",
+    "why": "opened as #17913"
    }
   ]
  },
@@ -65426,12 +65446,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T05:16:02.718290Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-03T05:30:30.570583Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 6,
-   "left": 2
+   "used": 7,
+   "left": 1
   },
   "rows": [
    {
@@ -65501,6 +65521,40 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T05:05:30Z"
+   },
+   {
+    "id": "win-silent-drag",
+    "label": "#17913",
+    "number": 17913,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): refuse background drags on Windows Tk windows",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T05:15:00Z"
+   },
+   {
+    "id": "wayland-element-input",
+    "label": "#17915",
+    "number": 17915,
+    "state": "open",
+    "area": "natives",
+    "priority": "P0",
+    "title": "fix(natives): refuse Wayland element input before focusing the element",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T05:25:08Z"
    },
    {
     "id": "cli-reference-models-row",
@@ -65983,23 +66037,6 @@
     "created": "2026-11-03T00:59:06Z"
    },
    {
-    "id": "win-silent-drag",
-    "label": "#17913",
-    "number": 17913,
-    "state": "open",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): refuse background drags on Windows Tk windows",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T05:15:00Z"
-   },
-   {
     "id": "iphone-mirror-scroll-distance",
     "label": "iphone-mirror-scroll-distance",
     "number": null,
@@ -66019,23 +66056,6 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
-   },
-   {
-    "id": "wayland-element-input",
-    "label": "wayland-element-input",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P1",
-    "title": "fix(natives): refuse Wayland element input before focusing the element",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T05:12:35Z"
    },
    {
     "id": "computer-ui-quiet",
