@@ -23,7 +23,7 @@ Limitation, seen live on GNOME: closing the session does not take the dialog dow
 
 ## Testing
 
-- Live in a Fedora 44 KVM guest (GNOME Shell 50.6, xdg-desktop-portal-gnome 50.0) through the real path (`AgentSession` → eval → `computer` prelude → pi-natives built with `wayland-pipewire`): a screenshot, then `computer.click` with the dialog left unanswered gave the table's outcomes. With the dialog approved over VNC the click went through in 9.2 s.
+- Live in a Fedora 44 KVM guest (GNOME Shell 50.6, xdg-desktop-portal-gnome 50.0) through the real path (`AgentSession` → eval → `computer` prelude → pi-natives built with `wayland-pipewire`): a screenshot, then `computer.click` with the dialog unanswered gave the table. Approved over VNC, the click went through in 9.2 s.
 - `an_unanswered_permission_dialog_is_given_up_before_the_run_ends`: a run ending inside the margin must make a never-answered wait fail with `Timeout` on its first poll; a run with an hour left lets a dialog answered after a yield through. It fails at once with the deadline ignored (a plain await), with the margin removed, or with the give-up time in the past; without the Linux plumbing it does not compile.
 - `cargo test -p pi-natives --lib -- desktop::` on Linux: 208/208. `scripts/rust-check`: clean on Linux, Windows and macOS.
 - Not run: the full `bun check`, KDE (its dialog opens in front).
