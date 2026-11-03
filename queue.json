@@ -60982,7 +60982,7 @@
     "token-count-policy",
     "wire-delta-count"
    ],
-   "base": "4448b4f6e9c1035f6c18bd1d5c7c5df3cc309ab0",
+   "base": "e5fcd57ff7d8e25e7ec4e3682bee1350969f5b0e",
    "body": "bodies/encoded-prefix-count.md",
    "state": "queued",
    "pr": null,
@@ -60990,7 +60990,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/encoded-prefix-count",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:54:17Z",
-   "updated": "2026-11-03T01:54:42Z",
+   "updated": "2026-11-03T02:18:45Z",
    "note": "Needs wire-delta-count only for a known textual conflict: adjacent import hunks in packages/agent/src/agent.ts (Dialect import line) and packages/ai/src/providers/factory-droid.ts (factory-droid/gemini import line); resolve on the rebase after D merges. precheck also names code conflicts with open #17885 (factory-droid.ts) and #17861 (factory-droid/gemini.ts); token-count-policy's own conflict with #17747 is C's. Review (one round) done at b9aedbaf95; findings 1-5 fixed with fail-on-revert tests."
   }
  ],
