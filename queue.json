@@ -66840,6 +66840,11 @@
     "sha": "c4b8f23f2d35c956c30c1417e74f32d6003fc93d",
     "at": "2026-11-03T08:45:48Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "c4b8f23f2d35c956c30c1417e74f32d6003fc93d",
+    "at": "2026-11-03T08:46:03Z",
+    "host": "goliath"
    }
   }
  },
