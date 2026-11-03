@@ -3247,7 +3247,7 @@ mod tests {
 
 	#[test]
 	fn an_element_is_read_in_two_rounds_and_only_on_its_interfaces() {
-		use std::time::Duration;
+		use std::cell::RefCell;
 
 		use atspi::zbus::{
 			MessageStream,
@@ -3257,32 +3257,47 @@ mod tests {
 		};
 		use futures::StreamExt;
 
-		/// Answers like a Qt app: a Kate text view at `/text` and a button at
-		/// `/button`, with `GetAll` refused as Qt refuses it. Calls wait until
-		/// no new one has come for 100 ms and are answered together; the result
-		/// is each batch's `path member` list.
-		async fn qt(server: atspi::zbus::Connection) -> Vec<Vec<String>> {
+		/// Answers like a Qt app: a Kate text view at `/text`, a button at
+		/// `/button`, and at `/legacy` a text view that cannot list its
+		/// interfaces, with `GetAll` refused as Qt refuses it. Each call must
+		/// belong to the round under way, whose calls are held until all of
+		/// them have come and then answered together; each answered round's
+		/// `path member` list goes to `batches`.
+		async fn qt(
+			server: atspi::zbus::Connection,
+			rounds: &[Vec<String>],
+			batches: &RefCell<Vec<Vec<String>>>,
+		) {
 			let mut stream = MessageStream::from(&server);
-			let mut batches = Vec::new();
-			loop {
+			// After the last round, any call is outside it.
+			for round in rounds.iter().chain(std::iter::once(&Vec::new())) {
 				let mut batch = Vec::new();
-				while let Ok(Some(Ok(message))) =
-					tokio::time::timeout(Duration::from_millis(100), stream.next()).await
-				{
-					if message.message_type() == Type::MethodCall {
-						batch.push(message);
-					}
-				}
-				if batch.is_empty() {
-					return batches;
-				}
 				let mut names = Vec::new();
+				while names.len() < round.len() || round.is_empty() {
+					let Some(Ok(message)) = stream.next().await else {
+						return;
+					};
+					if message.message_type() != Type::MethodCall {
+						continue;
+					}
+					let header = message.header();
+					let mut name = format!("{} {}", header.path().unwrap(), header.member().unwrap());
+					if header.member().unwrap().as_str() == "Get" {
+						let (_, property): (String, String) = message.body().deserialize().unwrap();
+						name = format!("{name} {property}");
+					}
+					assert!(
+						round.contains(&name) && !names.contains(&name),
+						"{name} outside the round {round:?}"
+					);
+					names.push(name);
+					batch.push(message);
+				}
 				for message in batch {
 					let header = message.header();
 					let path = header.path().unwrap().to_string();
-					let member = header.member().unwrap().to_string();
-					let text = path == "/text";
-					match member.as_str() {
+					let text = path != "/button";
+					match header.member().unwrap().as_str() {
 						"Get" => {
 							let (_, property): (String, String) = message.body().deserialize().unwrap();
 							let value = match property.as_str() {
@@ -3292,9 +3307,7 @@ mod tests {
 								"NActions" => Value::from(1),
 								_ => Value::from(0),
 							};
-							names.push(format!("{path} Get {property}"));
 							server.reply(&header, &value).await.unwrap();
-							continue;
 						},
 						"GetAll" => server
 							.reply_error(&header, "org.freedesktop.DBus.Error.UnknownInterface", &"")
@@ -3307,7 +3320,7 @@ mod tests {
 								.unwrap();
 						},
 						"GetState" => server.reply(&header, &vec![0_u32, 0]).await.unwrap(),
-						"GetInterfaces" => {
+						"GetInterfaces" if path != "/legacy" => {
 							let interfaces: &[&str] = if text {
 								&["org.a11y.atspi.Accessible", "org.a11y.atspi.Text"]
 							} else {
@@ -3336,15 +3349,46 @@ mod tests {
 							.await
 							.unwrap(),
 					}
-					names.push(format!("{path} {member}"));
 				}
 				names.sort();
-				batches.push(names);
+				batches.borrow_mut().push(names);
 			}
 		}
 
+		let round = |path: &str, members: &[&str]| {
+			let mut names: Vec<_> = members
+				.iter()
+				.map(|member| format!("{path} {member}"))
+				.collect();
+			names.sort();
+			names
+		};
+		let own = ["Get Name", "Get Description", "GetRoleName", "GetState", "GetInterfaces"];
+		let first = |path: &str, children: &str| {
+			let mut members = own.to_vec();
+			members.push(children);
+			round(path, &members)
+		};
+		let expected = [
+			first("/text", "Get ChildCount"),
+			round("/text", &["Get CharacterCount", "GetChildren"]),
+			round("/text", &["GetText"]),
+			first("/button", "Get ChildCount"),
+			round("/button", &["Get NActions", "GetChildren"]),
+			round("/button", &["GetName"]),
+			// Without its interfaces, every one is asked.
+			first("/legacy", "Get ChildCount"),
+			round("/legacy", &["Get CharacterCount", "Get NActions", "GetExtents", "GetChildren"]),
+			round("/legacy", &["GetText", "GetName"]),
+			// Without its children, only their count is.
+			first("/button", "Get ChildCount"),
+			round("/button", &["Get NActions"]),
+			round("/button", &["GetName"]),
+		];
+		let batches = RefCell::new(Vec::new());
+
 		let rt = Builder::new_current_thread().enable_all().build().unwrap();
-		let (reads, batches) = rt.block_on(async {
+		let reads = rt.block_on(async {
 			let (client, server) = tokio::net::UnixStream::pair().unwrap();
 			let server = ConnectionBuilder::unix_stream(server)
 				.server(atspi::zbus::Guid::generate())
@@ -3356,51 +3400,38 @@ mod tests {
 			let reads = async {
 				let mut frames = FrameCache::default();
 				let mut reads = Vec::new();
-				for path in ["/text", "/button"] {
+				for (path, children) in
+					[("/text", true), ("/button", true), ("/legacy", true), ("/button", false)]
+				{
 					let (props, _) = AtSpiAx::read_element(
 						&client,
 						&mut frames,
 						None,
 						&object(path),
 						WalkBounds::Read,
-						true,
+						children,
 					)
 					.await
 					.unwrap();
 					reads.push((props.role, props.title, props.value, props.actions));
 				}
-				drop(client);
 				reads
 			};
-			tokio::join!(reads, qt(server))
+			tokio::select! {
+				reads = reads => reads,
+				() = qt(server, &expected, &batches) => unreachable!("the app stopped answering"),
+			}
 		});
-		assert_eq!(reads, [
-			("textfield".to_owned(), Some("notes.txt".to_owned()), Some("hello".to_owned()), vec![]),
-			("button".to_owned(), Some("New".to_owned()), None, vec!["press".to_owned()]),
-		]);
-		let round = |path: &str, members: &[&str]| {
-			let mut names: Vec<_> = members
-				.iter()
-				.map(|member| format!("{path} {member}"))
-				.collect();
-			names.sort();
-			names
+		let read = |role: &str, title: &str, value: Option<&str>, actions: &[&str]| {
+			let actions: Vec<_> = actions.iter().map(|action| (*action).to_owned()).collect();
+			(role.to_owned(), Some(title.to_owned()), value.map(str::to_owned), actions)
 		};
-		let first = [
-			"Get Name",
-			"Get Description",
-			"GetRoleName",
-			"GetState",
-			"GetInterfaces",
-			"Get ChildCount",
-		];
-		assert_eq!(batches, [
-			round("/text", &first),
-			round("/text", &["Get CharacterCount", "GetChildren"]),
-			round("/text", &["GetText"]),
-			round("/button", &first),
-			round("/button", &["Get NActions", "GetChildren"]),
-			round("/button", &["GetName"]),
+		assert_eq!(reads, [
+			read("textfield", "notes.txt", Some("hello"), &[]),
+			read("button", "New", None, &["press"]),
+			read("textfield", "notes.txt", Some("hello"), &["press"]),
+			read("button", "New", None, &["press"]),
 		]);
+		assert_eq!(batches.into_inner(), expected);
 	}
 }
