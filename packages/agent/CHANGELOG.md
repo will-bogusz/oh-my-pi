@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Context estimates count models whose tokenizer is `gemma4` in the Gemma 4 vocabulary
+
 ## [18.16.0] - 2026-11-02
 
 ### Changed

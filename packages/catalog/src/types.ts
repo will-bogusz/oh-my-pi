@@ -1492,6 +1492,7 @@ export const MODEL_TOKENIZERS = [
 	"deepseek-v3",
 	"kimi-k2",
 	"glm5",
+	"gemma4",
 	"cl100k",
 	"o200k",
 ] as const;

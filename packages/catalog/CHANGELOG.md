@@ -10,6 +10,10 @@
 
 - Fixed Claude ids that drop the version separator (`claude-opus-45`, `claude-sonnet-45`, `claude-haiku-45`) reading as revision 45 instead of 4.5, which counted them in the Claude 5 vocabulary and gave them the 4.7+ adaptive-thinking settings; the taxonomy's new `collapsed-minor` revision flag reads them as their line
 
+### Changed
+
+- Gemini 2.x and later and Gemma 3 and later count context in the Gemma 4 vocabulary, the vocabulary Google's SDK counts them in, instead of o200k, which undercounted billed Gemini input by about 9%
+
 ## [18.16.0] - 2026-11-02
 
 ### Added

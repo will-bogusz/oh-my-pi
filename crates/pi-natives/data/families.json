@@ -115,5 +115,14 @@
     "pre": "qwen3.pre (Qwen3.5 split pattern)",
     "window": 512,
     "frame": "269 tokens for a minimal one-noul request; excluded from counts"
+  },
+  "gemma4": {
+    "source": "cache/gemma-4.tokenizer.json (google/gemma-4-E4B-it @ ee0ef6023621cff504d758262d4e04895a5af4a2, sha256 cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f; Apache-2.0, see LICENSE.gemma4)",
+    "container": "GEMMA1, not UTOK1: magic 'GEMMA1\\n', u32le vocab size, u32le id of <0x00>, u32le top-tier count + that many u32le ids, then per id varint(len)+UTF-8 piece ('▁' stored as ' ', merge-unreachable multi-codepoint pieces empty); zstd -19 (tools/pack-gemma.ts)",
+    "vocab": 262144,
+    "normalizer": "Replace ' ' -> '▁'",
+    "pre": "none effective (Split ' ' MergedWithPrevious after the normalizer never matches)",
+    "model": "BPE over codepoints, byte_fallback, ignore_merges false; merges rebuilt from the vocab: every split of every merged piece, top tier first by (len a desc, len b desc, ids), then by (id, len a desc)",
+    "added_tokens": "not matched in text"
   }
 }

@@ -25,6 +25,7 @@ const ENCODINGS = [
 	Encoding.KimiK2,
 	Encoding.Glm5,
 	Encoding.Jev,
+	Encoding.Gemma4,
 ];
 
 console.log("pi-natives countTokens (JS string → UTF-16 → native)");

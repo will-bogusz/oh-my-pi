@@ -41,7 +41,7 @@ use crate::utok::{
 /// lookups hash short byte keys on every merge step; `SipHash` is the
 /// dominant cost there (~30% end-to-end at the default hasher).
 #[derive(Default)]
-struct FxHasher(u64);
+pub(crate) struct FxHasher(u64);
 
 impl Hasher for FxHasher {
 	#[inline]
@@ -68,7 +68,7 @@ impl Hasher for FxHasher {
 	}
 }
 
-type Fx = BuildHasherDefault<FxHasher>;
+pub(crate) type Fx = BuildHasherDefault<FxHasher>;
 type FxMap = HashMap<Box<[u8]>, u32, Fx>;
 
 const SHORT_MAX: usize = 15;
@@ -177,10 +177,35 @@ impl PieceMemo {
 			.wrapping_mul(0x9e37_79b9_7f4a_7c15);
 		&mut self.slots[(hash >> (64 - Self::BITS)) as usize]
 	}
+
+	/// `count()` of `piece` under `table` (a [`next_table_id`] name),
+	/// memoized for 2..=15-byte pieces; other lengths compute directly.
+	/// The count must depend only on the piece bytes and the table.
+	pub(crate) fn count(&mut self, piece: &[u8], table: u32, count: impl FnOnce() -> u32) -> u32 {
+		let Some(key) = (2..=SHORT_MAX)
+			.contains(&piece.len())
+			.then(|| pack(piece))
+			.flatten()
+		else {
+			return count();
+		};
+		let slot = self.slot(key, table);
+		if slot.table == table && slot.key == key {
+			return slot.count;
+		}
+		let n = count();
+		*slot = MemoSlot { key, table, count: n };
+		n
+	}
 }
 
 /// Source of [`RankTable::id`]s; 0 is [`PieceMemo`]'s empty slot.
 static NEXT_TABLE_ID: AtomicU32 = AtomicU32::new(1);
+
+/// A fresh table name for [`PieceMemo::count`]; one per process-wide table.
+pub(crate) fn next_table_id() -> u32 {
+	NEXT_TABLE_ID.fetch_add(1, Ordering::Relaxed)
+}
 
 /// Token bytes → rank map decoded from a UTOK1 blob.
 ///
@@ -258,8 +283,7 @@ impl RankTable {
 			}
 		}
 		assert!(p.is_empty(), "utoken: trailing bytes in UTOK1 blob");
-		let id = NEXT_TABLE_ID.fetch_add(1, Ordering::Relaxed);
-		Self { pairs, short, long, max_token_len, id }
+		Self { pairs, short, long, max_token_len, id: next_table_id() }
 	}
 
 	/// Rank of an exact token byte sequence, if present.
@@ -317,20 +341,7 @@ impl RankTable {
 		if piece.is_empty() {
 			return 0;
 		}
-		let Some(key) = (2..=SHORT_MAX)
-			.contains(&piece.len())
-			.then(|| pack(piece))
-			.flatten()
-		else {
-			return self.merge_count(piece);
-		};
-		let slot = memo.slot(key, self.id);
-		if slot.table == self.id && slot.key == key {
-			return slot.count;
-		}
-		let count = self.merge_count(piece);
-		*slot = MemoSlot { key, table: self.id, count };
-		count
+		memo.count(piece, self.id, || self.merge_count(piece))
 	}
 
 	fn merge_count(&self, piece: &[u8]) -> u32 {
@@ -453,7 +464,7 @@ impl RankTable {
 	}
 }
 
-fn read_token<'a>(p: &mut &'a [u8]) -> &'a [u8] {
+pub(crate) fn read_token<'a>(p: &mut &'a [u8]) -> &'a [u8] {
 	let mut len = 0usize;
 	let mut shift = 0;
 	loop {

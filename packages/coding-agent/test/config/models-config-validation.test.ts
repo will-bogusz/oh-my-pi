@@ -66,7 +66,7 @@ describe("ModelsConfigSchema Bedrock compat overrides", () => {
 });
 
 describe("ModelsConfigSchema tokenizer", () => {
-	test("accepts the cl100k tokenizer and rejects an unknown one", () => {
+	test("accepts the cl100k and gemma4 tokenizers and rejects an unknown one", () => {
 		const config = (tokenizer: string) => ({
 			providers: {
 				p: {
@@ -78,6 +78,8 @@ describe("ModelsConfigSchema tokenizer", () => {
 		});
 		expect(ModelsConfigSchema(config("cl100k"))).not.toBeInstanceOf(OmpErrors);
 		expect(getModelsConfigSchema()(config("cl100k"))).not.toBeInstanceOf(OmpErrors);
+		expect(ModelsConfigSchema(config("gemma4"))).not.toBeInstanceOf(OmpErrors);
+		expect(getModelsConfigSchema()(config("gemma4"))).not.toBeInstanceOf(OmpErrors);
 		expect(ModelsConfigSchema(config("cl200k"))).toBeInstanceOf(OmpErrors);
 	});
 });

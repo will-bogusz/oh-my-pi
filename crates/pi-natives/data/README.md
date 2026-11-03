@@ -51,3 +51,22 @@ blobs from the measured sets with:
 cd ../tools
 bun pack-jev.ts   # cache/jev-1.13.vocab.json + cache/o200k_base.tiktoken → ../data/jev_*.bin.zst
 ```
+
+`gemma4.bin.zst` is **generated** from the Gemma 4 `tokenizer.json` of
+[google/gemma-4-E4B-it](https://huggingface.co/google/gemma-4-E4B-it)
+(revision `ee0ef6023621cff504d758262d4e04895a5af4a2`, sha256 pinned in the
+packer), Copyright Google LLC, Apache-2.0 licensed — see `LICENSE.gemma4`.
+Gemma 4 ships under Apache-2.0 (<https://ai.google.dev/gemma/apache_2>);
+earlier Gemma vocabularies (the Gemma 3 `tokenizer.model`) are under the
+Gemma Terms of Use and are not embedded. The pack keeps the vocabulary only:
+the 514,906 merges are every two-piece split of every merged piece in a
+fixed order, so the engine (`../src/utok/gemma.rs`) rebuilds them at load,
+and the packer asserts the rebuild equals `tokenizer.json`'s list before
+writing (~2.2 MB raw → ~1.1 MB after zstd -19). Regenerate the blob and its
+HF-reference fixture with:
+
+```sh
+cd ..
+bun tools/pack-gemma.ts                                  # fetches the pinned revision into tools/cache/
+uv run --with tokenizers tools/gen-gemma-fixtures.py     # fixtures/gemma4.json
+```

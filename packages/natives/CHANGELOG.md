@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `Encoding.Gemma4` to `countTokens`, counting text in the Gemma 4 vocabulary the way Hugging Face `tokenizers` does, with chat-template specials counted as plain text
+
 ## [18.16.0] - 2026-11-02
 
 ### Added

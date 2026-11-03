@@ -33,6 +33,10 @@ describe("resolveModelTokenizer", () => {
 	test("routes only tokenizer generations covered by embedded vocabularies", () => {
 		expect(resolveModelTokenizer("anthropic/claude-opus-4-7")).toBe("claude-v47");
 		expect(resolveModelTokenizer("claude-sonnet-5")).toBe("claude-v5-sonnet");
+		expect(resolveModelTokenizer("gemini-3.8-flash")).toBe("gemma4");
+		expect(resolveModelTokenizer("google/gemini-2.5-pro", "openrouter")).toBe("gemma4");
+		expect(resolveModelTokenizer("gemini-1.5-pro")).toBeUndefined();
+		expect(resolveModelTokenizer("google/gemma-3-12b-it", "openrouter")).toBe("gemma4");
 		expect(resolveModelTokenizer("Qwen/Qwen3.8-27B")).toBe("qwen3");
 		expect(resolveModelTokenizer("qwen3-32b")).toBeUndefined();
 		expect(resolveModelTokenizer("deepseek-chat")).toBe("deepseek-v3");

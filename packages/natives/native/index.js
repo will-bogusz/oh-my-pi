@@ -191,6 +191,7 @@ export const Encoding = {
 	KimiK2: "KimiK2",
 	Glm5: "Glm5",
 	Jev: "Jev",
+	Gemma4: "Gemma4",
 };
 export const FileType = {
 	File: 1,

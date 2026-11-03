@@ -163,6 +163,22 @@ class "gemini" {
 	}
 }
 
+// Pre-send token counting: Gemini 2.x and later count in the Gemma vocabulary,
+// the vocabulary Google's own SDK counts them in locally (python-genai
+// `_local_tokenizer_loader.py`: Gemini 2.0-3 → gemma3, 3.1+ → google/gemma-4-E4B-it,
+// embedded here as `gemma4`; Gemma 3 and 4 share 262,125 of 262,144 pieces,
+// differing only in special and unused ids). Unlike the SDK's Gemma 3 model,
+// markup such as `<table>` counts as plain text, not one user-defined piece.
+// On 20 billed Factory Gemini 3.8 Flash bodies this counts +1.1% median against
+// usage, o200k −9.4%.
+class "gemini" {
+	revision ">=2" {
+		token-count {
+			tokenizer "gemma4"
+		}
+	}
+}
+
 // Gemini 3+ bills a fixed `media_resolution` budget per image regardless of
 // pixels; the default for images is HIGH, 1,120 tokens.
 // https://ai.google.dev/gemini-api/docs/media-resolution

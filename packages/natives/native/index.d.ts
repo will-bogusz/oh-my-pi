@@ -1435,7 +1435,7 @@ export declare function cosineSimilarityPairs(vectors: Float64Array, count: numb
  * use ordinary encoding (no special-token handling) and the Claude
  * encodings count message content without the fixed per-message frame.
  * Defaults to `o200k_base`; pass a `Claude*` encoding for exact Claude
- * counts, or the matching family encoding for Qwen/DeepSeek/Kimi/GLM/Jev.
+ * counts, or the matching family encoding for Qwen/DeepSeek/Kimi/GLM/Jev/Gemma.
  */
 export declare function countTokens(input: string | string[], encoding?: Encoding | undefined | null): number
 
@@ -2015,7 +2015,9 @@ export declare enum Encoding {
   /** GLM-5.x exact; GLM-4.x near-exact. */
   Glm5 = 'Glm5',
   /** `TypeSafe` Jev 1.13 judgment `state` (request frame excluded). */
-  Jev = 'Jev'
+  Jev = 'Jev',
+  /** Gemma 4 vocabulary (Gemini 2.x+). */
+  Gemma4 = 'Gemma4'
 }
 
 /**

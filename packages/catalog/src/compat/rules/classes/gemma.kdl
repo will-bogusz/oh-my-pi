@@ -23,3 +23,13 @@ class "gemma" {
 		}
 	}
 }
+
+// Pre-send token counting: Gemma 3 and 4 share the embedded Gemma 4
+// vocabulary (262,125 of 262,144 pieces; the rest are special and unused ids).
+class "gemma" {
+	revision ">=3" {
+		token-count {
+			tokenizer "gemma4"
+		}
+	}
+}

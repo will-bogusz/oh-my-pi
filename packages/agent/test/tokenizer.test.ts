@@ -33,6 +33,7 @@ describe("tokenizerEncodingForModel", () => {
 		expect(tokenizerEncodingForModel({ tokenizer: "deepseek-v3" })).toBe(natives.Encoding.DeepSeekV3);
 		expect(tokenizerEncodingForModel({ tokenizer: "kimi-k2" })).toBe(natives.Encoding.KimiK2);
 		expect(tokenizerEncodingForModel({ tokenizer: "glm5" })).toBe(natives.Encoding.Glm5);
+		expect(tokenizerEncodingForModel({ tokenizer: "gemma4" })).toBe(natives.Encoding.Gemma4);
 		expect(tokenizerEncodingForModel({ tokenizer: "o200k" })).toBe(natives.Encoding.O200kBase);
 	});
 
@@ -63,6 +64,22 @@ describe("Tokenizer", () => {
 		expect(t1.encoding).toBe(natives.Encoding.ClaudeV47);
 		expect(t2.encoding).toBe(natives.Encoding.Qwen3);
 		expect(t3.encoding).toBeNull();
+	});
+
+	// Gemini 2.x+ count in the Gemma 4 vocabulary (catalog `token-count`); 33 is
+	// HF `tokenizers` on google/gemma-4-E4B-it with added-token matching off, so
+	// `<start_of_turn>` is text. o200k, the fallback before, counts 31.
+	test("counts a bundled Gemini model in the Gemma vocabulary", () => {
+		const gemini = getBundledModel("google", "gemini-3.8-flash");
+		expect(gemini?.tokenizer).toBe("gemma4");
+		const tokenizer = new Tokenizer(gemini);
+		expect(tokenizer.encoding).toBe(natives.Encoding.Gemma4);
+		expect(
+			tokenizer.countTokens(
+				"Gemini counts this sentence in the Gemma vocabulary: 深度学习 <start_of_turn>user 👨‍👩‍👧 12345",
+				"strict",
+			),
+		).toBe(33);
 	});
 });
 

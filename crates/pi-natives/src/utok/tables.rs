@@ -141,7 +141,7 @@ pub(crate) fn bpe_for(enc: Encoding) -> &'static BpeEncoding {
 		Encoding::DeepSeekV3 => &DEEPSEEK3,
 		Encoding::KimiK2 => &KIMI_K2,
 		Encoding::Glm5 => &GLM5,
-		_ => unreachable!("count-only families (claude, jev) never reach bpe_for"),
+		_ => unreachable!("non-rank-table families (claude, jev, gemma) never reach bpe_for"),
 	}
 }
 

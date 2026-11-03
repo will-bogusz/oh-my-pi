@@ -14,6 +14,7 @@
 //!   - `Glm5` — GLM-5.x exact; GLM-4.x near-exact (ID-preserving subset).
 //!   - `Jev` — `TypeSafe` Jev 1.13 `state` input tokens (measured
 //!     reconstruction, request frame excluded).
+//!   - `Gemma4` — Gemma 4 vocabulary; Gemini 2.x+ count in it.
 //!
 //! `o200k_base` is the default. All vocabularies are zstd-embedded in the
 //! binary and decoded once on first use. Counting consumes the JS string's
@@ -54,6 +55,8 @@ pub enum Encoding {
 	Glm5,
 	/// `TypeSafe` Jev 1.13 judgment `state` (request frame excluded).
 	Jev,
+	/// Gemma 4 vocabulary (Gemini 2.x+).
+	Gemma4,
 }
 
 impl Encoding {
@@ -70,6 +73,7 @@ impl Encoding {
 			Self::KimiK2 => utok::Encoding::KimiK2,
 			Self::Glm5 => utok::Encoding::Glm5,
 			Self::Jev => utok::Encoding::Jev,
+			Self::Gemma4 => utok::Encoding::Gemma4,
 		}
 	}
 }
@@ -85,7 +89,8 @@ impl Encoding {
 /// use ordinary encoding (no special-token handling) and the Claude
 /// encodings count message content without the fixed per-message frame.
 /// Defaults to `o200k_base`; pass a `Claude*` encoding for exact Claude
-/// counts, or the matching family encoding for Qwen/DeepSeek/Kimi/GLM/Jev.
+/// counts, or the matching family encoding for
+/// Qwen/DeepSeek/Kimi/GLM/Jev/Gemma.
 #[napi]
 pub fn count_tokens(
 	#[napi(ts_arg_type = "string | string[]")] input: Either<JsString, Array>,
