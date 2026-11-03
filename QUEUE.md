@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 08:26Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 08:28Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-03 08:02Z on goliath; groups below are from it, states from the manifest)
@@ -93,7 +93,7 @@ none
 | [#17909](https://github.com/can1357/oh-my-pi/pull/17909) | mirror-takeover-keys | fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held | natives | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/mirror-takeover-keys) |
 | [#17913](https://github.com/can1357/oh-my-pi/pull/17913) | win-silent-drag | fix(natives): refuse background drags on Windows Tk windows | computer | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-silent-drag) |
 | [#17915](https://github.com/can1357/oh-my-pi/pull/17915) | wayland-element-input | fix(natives): refuse Wayland element input before focusing the element | natives | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-element-input) |
-| [#17921](https://github.com/can1357/oh-my-pi/pull/17921) | x11-element-focus-steal | fix(natives): keep X11 background element typing from raising the element's window | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-element-focus-steal) |
+| [#17921](https://github.com/can1357/oh-my-pi/pull/17921) | x11-element-focus-steal | fix(natives): keep X11 background element typing from raising the element's window | computer | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-element-focus-steal) |
 | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | wayland-focused-window | fix(natives): name the focused application window on Wayland, not an always-active shell frame | natives | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-focused-window) |
 | [#17931](https://github.com/can1357/oh-my-pi/pull/17931) | apps-open-tilde | fix(coding-agent): open ~ paths from the home folder in computer apps.open | computer | P0 | 0h | keep; opened over P2 #16223 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/apps-open-tilde) |
 | [#17932](https://github.com/can1357/oh-my-pi/pull/17932) | wayland-consent-deadline | fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends | natives | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-consent-deadline) |
