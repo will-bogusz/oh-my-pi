@@ -62746,7 +62746,7 @@
    "area": "natives",
    "priority": "P1",
    "needs": [],
-   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "base": "ff0a986b88c223a0a746ed95cda8ddada236140c",
    "body": "bodies/wayland-input-capability.md",
    "state": "queued",
    "pr": null,
@@ -62754,8 +62754,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-input-capability",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:05:34Z",
-   "updated": "2026-11-03T06:05:34Z",
-   "note": ""
+   "updated": "2026-11-03T21:26:01Z",
+   "note": "",
+   "advanced": "2026-11-03T21:26:01Z"
   },
   {
    "id": "wayland-ei-text",
