@@ -59734,7 +59734,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-110-pin",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:32:33Z",
-   "updated": "2026-11-03T00:59:08Z",
+   "updated": "2026-11-03T01:00:18Z",
    "note": "",
    "advanced": "2026-11-03T00:08:05Z",
    "built": [
@@ -59784,7 +59784,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-03T00:59:08Z"
+   "opened": "2026-11-03T00:59:08Z",
+   "readied": "2026-11-03T01:00:17Z"
   },
   {
    "id": "factory-droid-gemini-4-argon-110",
