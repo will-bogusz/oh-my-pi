@@ -63875,18 +63875,11 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T20:17:45Z",
+  "checked": "2026-11-03T20:46:56Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {
-   "#16223": {
-    "since": "2026-11-03T20:17:45Z",
-    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
-    "files": [
-     "packages/coding-agent/test/tools/computer.test.ts"
-    ]
-   },
    "#16274": {
     "since": "2026-11-03T12:38:09Z",
     "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
@@ -67793,8 +67786,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T20:11:33.466594Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-03T20:46:56.917149Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -68125,10 +68118,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/test/tools/computer.test.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -68365,13 +68356,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #16223 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282"
+     "#15282",
+     "#16223"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
