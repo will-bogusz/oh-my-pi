@@ -62744,12 +62744,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T00:30:51.673743Z",
+  "at": "2026-11-03T00:48:35.138050Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -63057,6 +63057,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T20:14:32Z"
+   },
+   {
+    "id": "snapcompact-legacy-archive-credit",
+    "label": "#17883",
+    "number": 17883,
+    "state": "open",
+    "area": "other",
+    "priority": null,
+    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T00:46:22Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -63373,6 +63390,7 @@
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #17883 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
@@ -63383,7 +63401,8 @@
      "#17610",
      "#15128",
      "#15130",
-     "#17496"
+     "#17496",
+     "#17883"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -63464,23 +63483,6 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "snapcompact-legacy-archive-credit",
-    "label": "snapcompact-legacy-archive-credit",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T00:30:41Z"
    },
    {
     "id": "text-reader-usage-shift",
@@ -63607,7 +63609,7 @@
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with snapcompact-legacy-archive-credit in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #17883 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -63619,7 +63621,7 @@
      "#15128",
      "#15130",
      "#17496",
-     "snapcompact-legacy-archive-credit"
+     "#17883"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
