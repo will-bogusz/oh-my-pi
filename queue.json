@@ -59934,7 +59934,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-legacy-archive-credit",
    "host": "MacBook-Pro",
    "added": "2026-11-03T00:30:41Z",
-   "updated": "2026-11-03T00:39:57Z",
+   "updated": "2026-11-03T00:42:54Z",
    "note": "",
    "built": [
     {
@@ -60010,15 +60010,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#15282",
-     "code": "55c4efe7c7d1035e5c42fc7b034cb9a600bf9644",
-     "with_code": "35552c41cb2633d8144b8e696040206f8a2b5ede",
-     "tip": "be4c7562a63610b2c31dcb99eb5bc5205e607f06",
-     "with_tip": "e831a9aa316f061eaafe97976589d0e7ab6f9f09",
-     "at": "2026-11-03T00:39:56Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "#16223",
      "code": "55c4efe7c7d1035e5c42fc7b034cb9a600bf9644",
      "with_code": "eb8b21f00a894bfc5c33098a10de08e171da8383",
@@ -60034,6 +60025,33 @@
      "tip": "be4c7562a63610b2c31dcb99eb5bc5205e607f06",
      "with_tip": "7358c8412873b1b3e60884f88b0896ffb151f4a0",
      "at": "2026-11-03T00:39:57Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15282",
+     "code": "55c4efe7c7d1035e5c42fc7b034cb9a600bf9644",
+     "with_code": "6ebb56b8d1da0cbef6b0a0301367f96b7a203e17",
+     "tip": "be4c7562a63610b2c31dcb99eb5bc5205e607f06",
+     "with_tip": "a7fc1b1d2c9e65dcf9ef79d02e835a467c8574ed",
+     "at": "2026-11-03T00:42:48Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16611",
+     "code": "55c4efe7c7d1035e5c42fc7b034cb9a600bf9644",
+     "with_code": "8a2e0e10c1c7d7a54e90c7821e50860ed40802af",
+     "tip": "be4c7562a63610b2c31dcb99eb5bc5205e607f06",
+     "with_tip": "477261b9bb01720f58aedf77f97345f56969ea89",
+     "at": "2026-11-03T00:42:53Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17610",
+     "code": "55c4efe7c7d1035e5c42fc7b034cb9a600bf9644",
+     "with_code": "9da13ec727c2a582a3d747dec1f794dadd1aed44",
+     "tip": "be4c7562a63610b2c31dcb99eb5bc5205e607f06",
+     "with_tip": "e6cfaadb7b30db78feb86a90f0a3c69d0067cb2c",
+     "at": "2026-11-03T00:42:54Z",
      "host": "MacBook-Pro"
     }
    ]
