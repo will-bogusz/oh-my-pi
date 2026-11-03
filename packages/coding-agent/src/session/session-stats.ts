@@ -24,17 +24,25 @@ import type { SessionManager } from "./session-manager";
 import { cfgSkillful } from "./settings";
 import { frameUnanchoredEstimate } from "./token-framing";
 
+/**
+ * Version of the non-message estimate stamped on each snapshot. Bump it when
+ * the estimate's basis changes, so anchors recorded by an older build rebase
+ * instead of charging the change as context growth. 1: system texts and tool
+ * definitions as the provider adapter encodes them.
+ */
+const NON_MESSAGE_ESTIMATE_VERSION = 1;
+
 /** Non-message accounting recorded with a provider prompt. */
 interface NonMessageSnapshot {
 	nonMessageTokens: number;
 	/** Schema tokens inside `nonMessageTokens`; absent on snapshots that predate the field. */
 	toolSchemaTokens?: number;
+	/** {@link NON_MESSAGE_ESTIMATE_VERSION} the snapshot was estimated with; absent before version 1. */
+	nonMessageVersion?: number;
 }
 
-interface PendingContextSnapshot {
+interface PendingContextSnapshot extends Required<NonMessageSnapshot> {
 	promptTokens: number;
-	nonMessageTokens: number;
-	toolSchemaTokens: number;
 	cutoffCount: number;
 	/**
 	 * Compaction epoch at rebase time. Distinguishes a genuinely fresh in-turn
@@ -100,6 +108,11 @@ export class SessionStatsTracker {
 	#pendingContextSnapshot: PendingContextSnapshot | undefined;
 	#contextUsageRevision = 0;
 	#compactionEpoch = 0;
+	/**
+	 * Current-version readings that stand in for anchors estimated by another
+	 * version, taken the first time each such anchor is read.
+	 */
+	readonly #rebasedAnchors = new WeakMap<NonMessageSnapshot, Required<NonMessageSnapshot>>();
 
 	constructor(host: SessionStatsTrackerHost) {
 		this.#host = host;
@@ -109,13 +122,10 @@ export class SessionStatsTracker {
 		return this.#host.agent.tokenizer;
 	}
 
-	/** Tool-schema tokens the active model carries in its prompt. */
+	/** Tool-definition tokens the active model's requests carry, as its provider adapter encodes them. */
 	#currentToolSchemaTokens(): number {
 		const session = this.#host.session;
-		return estimateContextToolSchemaTokens(session.agent?.state?.tools ?? [], this.#tokenizer, session.model, {
-			sourceRevision: session.settings?.revision,
-			pruneDescriptions: session.agent?.prunesToolDescriptions?.(session.model),
-		});
+		return estimateContextToolSchemaTokens(session, this.#tokenizer, session.settings?.revision);
 	}
 
 	/**
@@ -125,6 +135,10 @@ export class SessionStatsTracker {
 	 * Non-schema overhead only ever adds growth. Schema tokens move both ways:
 	 * the provider base already contains every schema it was sent, so a roster
 	 * shrink or a switch to a model that defers schemas must leave the base.
+	 * An anchor estimated by another version (every snapshot without
+	 * `toolSchemaTokens` predates version 1) is not comparable, so it rebases
+	 * once: the first current reading stands in for it, the base is charged
+	 * nothing at that point, and later changes diff against that reading.
 	 */
 	#anchoredUsedTokens(
 		base: number,
@@ -134,17 +148,23 @@ export class SessionStatsTracker {
 		activeMessages: readonly AgentMessage[],
 		pendingTokens: number,
 	): number {
+		let reference = anchor;
+		if (anchor.nonMessageVersion !== current.nonMessageVersion || anchor.toolSchemaTokens === undefined) {
+			let rebased = this.#rebasedAnchors.get(anchor);
+			if (!rebased) {
+				rebased = { ...current };
+				this.#rebasedAnchors.set(anchor, rebased);
+			}
+			reference = rebased;
+		}
+		const referenceSchemaTokens = reference.toolSchemaTokens ?? 0;
 		const nonMessageDelta =
-			anchor.toolSchemaTokens === undefined
-				? Math.max(0, current.nonMessageTokens - anchor.nonMessageTokens)
-				: Math.max(
-						0,
-						current.nonMessageTokens -
-							current.toolSchemaTokens -
-							(anchor.nonMessageTokens - anchor.toolSchemaTokens),
-					) +
-					current.toolSchemaTokens -
-					anchor.toolSchemaTokens;
+			Math.max(
+				0,
+				current.nonMessageTokens - current.toolSchemaTokens - (reference.nonMessageTokens - referenceSchemaTokens),
+			) +
+			current.toolSchemaTokens -
+			referenceSchemaTokens;
 		return (
 			Math.max(0, base + nonMessageDelta) +
 			this.#tokenizer.countMessages(activeMessages.slice(tailFromIndex)) +
@@ -298,6 +318,7 @@ export class SessionStatsTracker {
 		const current = {
 			nonMessageTokens: computeNonMessageTokens(this.#host.session, this.#tokenizer, settings?.revision),
 			toolSchemaTokens: toolsTokens,
+			nonMessageVersion: NON_MESSAGE_ESTIMATE_VERSION,
 		};
 		const branchEntries = this.#host.sessionManager.getBranchView();
 		const latestCompaction = getLatestCompactionEntry(branchEntries);
@@ -422,7 +443,13 @@ export class SessionStatsTracker {
 	 */
 	nonMessageSnapshot(): Required<NonMessageSnapshot> {
 		const pending = this.#pendingContextSnapshot;
-		if (pending) return { nonMessageTokens: pending.nonMessageTokens, toolSchemaTokens: pending.toolSchemaTokens };
+		if (pending) {
+			return {
+				nonMessageTokens: pending.nonMessageTokens,
+				toolSchemaTokens: pending.toolSchemaTokens,
+				nonMessageVersion: pending.nonMessageVersion,
+			};
+		}
 		return this.#currentNonMessageSnapshot();
 	}
 
@@ -434,6 +461,7 @@ export class SessionStatsTracker {
 				this.#host.session.settings?.revision,
 			),
 			toolSchemaTokens: this.#currentToolSchemaTokens(),
+			nonMessageVersion: NON_MESSAGE_ESTIMATE_VERSION,
 		};
 	}
 
@@ -472,9 +500,16 @@ export class SessionStatsTracker {
 	}
 
 	/** Sets or clears the in-flight context snapshot. */
-	setPendingSnapshot(snapshot: Omit<PendingContextSnapshot, "epoch" | "toolSchemaTokens"> | undefined): void {
+	setPendingSnapshot(
+		snapshot: Omit<PendingContextSnapshot, "epoch" | "toolSchemaTokens" | "nonMessageVersion"> | undefined,
+	): void {
 		this.#pendingContextSnapshot = snapshot
-			? { ...snapshot, toolSchemaTokens: this.#currentToolSchemaTokens(), epoch: this.#compactionEpoch }
+			? {
+					...snapshot,
+					toolSchemaTokens: this.#currentToolSchemaTokens(),
+					nonMessageVersion: NON_MESSAGE_ESTIMATE_VERSION,
+					epoch: this.#compactionEpoch,
+				}
 			: undefined;
 		this.#contextUsageRevision++;
 	}

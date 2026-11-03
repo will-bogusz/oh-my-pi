@@ -86,7 +86,10 @@ import { serviceTierForAllFamilies, serviceTierSettingToTier } from "../config/s
 import type { Settings } from "../config/settings";
 import { CursorExecHandlers, type CursorMcpResourceAdapter } from "../cursor";
 import { bridgeToolMap } from "../cursor-bridge-tools";
-import { estimateContextToolSchemaTokens } from "@oh-my-pi/pi-tui/status-line/context-usage";
+import {
+	estimateContextToolSchemaTokens,
+	type NonMessageTokenSource,
+} from "@oh-my-pi/pi-tui/status-line/context-usage";
 import type { PlanModeState } from "../plan-mode/state";
 import advisorBoundaryGuidance from "../prompts/advisor/boundary-guidance.md" with { type: "text" };
 import advisorSystemPrompt from "../prompts/advisor/system.md" with { type: "text" };
@@ -327,6 +330,8 @@ interface ActiveAdvisor {
 	recorderClosed: Promise<void>;
 	agentUnsubscribe?: () => void;
 	model: Model;
+	/** The advisor's request prefix as context accounting reads it; one object, so its estimates stay cached. */
+	prefixSource: NonMessageTokenSource;
 	thinkingLevel: ThinkingLevel;
 	/**
 	 * The user selected `auto` for this advisor's effort. The classifier only
@@ -1678,6 +1683,13 @@ export class SessionAdvisors {
 				recorder,
 				recorderClosed: Promise.resolve(),
 				model: advisorModel,
+				prefixSource: {
+					get systemPrompt() {
+						return advisorAgent.state.systemPrompt;
+					},
+					agent: advisorAgent,
+					usesOAuth: model => this.#host.modelRegistry.isUsingOAuth(model),
+				},
 				thinkingLevel: advisorThinkingLevel,
 				autoThinking: advisorAutoThinking,
 				providerSessionId: advisorProviderSessionId,
@@ -2433,10 +2445,12 @@ export class SessionAdvisors {
 				frameUnanchoredEstimate(
 					model,
 					fixedPromptTokens +
-						estimateContextToolSchemaTokens(agent.state.tools, agent.tokenizer, model, {
-							sourceRevision: this.#host.settings.revision,
-							pruneDescriptions: agent.prunesToolDescriptions(model),
-						}) +
+						estimateContextToolSchemaTokens(
+							advisor.prefixSource,
+							agent.tokenizer,
+							this.#host.settings.revision,
+							model,
+						) +
 						storedConversationTokens +
 						incomingTokens,
 					messages.length + 1,

@@ -9,7 +9,11 @@ import {
 	type ContextViewData,
 	type ContextViewEntry,
 } from "@oh-my-pi/pi-tui/chrome/context-view-model";
-import { type ContextBreakdown, toolSchemaFragments } from "@oh-my-pi/pi-tui/status-line/context-usage";
+import {
+	type ContextBreakdown,
+	type EncodedNonMessagePrefix,
+	encodeNonMessagePrefix,
+} from "@oh-my-pi/pi-tui/status-line/context-usage";
 import { stringifyJson } from "@oh-my-pi/pi-utils";
 import type { AgentSession } from "./agent-session";
 import { computeSessionContextBreakdown } from "./context-usage-runtime";
@@ -107,8 +111,13 @@ function appendToolOutput(state: SnapshotBuildState, toolName: string, entry: Co
 	appendEntry(state, "tool-output", entry);
 }
 
-function appendSystemPromptEntries(session: AgentSession, state: SnapshotBuildState, skillListingTokens: number): void {
-	for (const [index, block] of session.systemPrompt.entries()) {
+function appendSystemPromptEntries(
+	session: AgentSession,
+	state: SnapshotBuildState,
+	prefix: EncodedNonMessagePrefix,
+	skillListingTokens: number,
+): void {
+	for (const [index, block] of prefix.system.entries()) {
 		appendEntry(state, "system-prompt", {
 			id: `system-prompt/${index}`,
 			label: `System Block ${index + 1}`,
@@ -124,26 +133,36 @@ function appendSystemPromptEntries(session: AgentSession, state: SnapshotBuildSt
 	systemPromptCategory.tokens = Math.max(0, systemPromptCategory.tokens - skillListingTokens);
 }
 
-function appendToolDefinitionEntries(session: AgentSession, state: SnapshotBuildState): void {
+function appendToolDefinitionEntries(
+	session: AgentSession,
+	state: SnapshotBuildState,
+	prefix: EncodedNonMessagePrefix,
+): void {
 	const toolSourcesByName = new Map(session.getAllToolInfos().map(info => [info.name, info.sourceInfo]));
-	for (const [index, tool] of session.agent.state.tools.entries()) {
+	// Server-side deferred catalogs carry no schemas in context.
+	const countTokens = (text: string): number =>
+		session.model?.toolSchemasInContext === false ? 0 : session.agent.tokenizer.countTokens(text);
+	for (const [index, tool] of prefix.tools.entries()) {
 		const categoryId = session.hasBuiltInTool(tool.name) ? "built-in-tools" : "custom-tools";
-		// Count the compact wire text; show the same fragments with an indented schema.
-		const { fragments, display, schemaError } = toolSchemaFragments(tool, {
-			displayIndent: 2,
-			pruneDescriptions: session.agent.prunesToolDescriptions(session.model),
-		});
-		const tokens = session.model?.toolSchemasInContext === false ? 0 : session.agent.tokenizer.countTokens(fragments);
-		const shown = display ?? fragments;
-		if (schemaError !== undefined) shown.push(`Schema unavailable: ${schemaError}`);
 		const source = toolSourcesByName.get(tool.name);
+		// Pretty-printed for reading; the tokens are the compact wire JSON's.
+		const text = JSON.stringify(JSON.parse(tool.definition), null, 2);
 		appendEntry(state, categoryId, {
 			id: `${categoryId}/${index}`,
 			label: tool.name,
-			text: shown.join("\n\n"),
+			text: tool.schemaError === undefined ? text : `${text}\nSchema unavailable: ${tool.schemaError}`,
 			info: source?.source ?? "unknown",
 			path: source?.path,
-			tokens,
+			tokens: countTokens(tool.definition),
+		});
+	}
+	if (prefix.inbandToolPrompt !== undefined) {
+		appendEntry(state, "built-in-tools", {
+			id: "built-in-tools/inband",
+			label: "In-band tool prompt",
+			text: prefix.inbandToolPrompt,
+			info: "dialect",
+			tokens: countTokens(prefix.inbandToolPrompt),
 		});
 	}
 }
@@ -383,8 +402,14 @@ export function buildSessionContextView(
 		serverToolNamesByCallId: new Map(),
 	};
 
-	appendSystemPromptEntries(session, state, breakdown.categories.find(category => category.id === "skills")!.tokens);
-	appendToolDefinitionEntries(session, state);
+	const prefix = encodeNonMessagePrefix(session, session.agent.tokenizer, session.settings.revision);
+	appendSystemPromptEntries(
+		session,
+		state,
+		prefix,
+		breakdown.categories.find(category => category.id === "skills")!.tokens,
+	);
+	appendToolDefinitionEntries(session, state, prefix);
 	appendMessageEntries(session, state);
 	finalizeToolOutputGroups(state);
 

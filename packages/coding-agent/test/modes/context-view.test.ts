@@ -191,10 +191,8 @@ describe("context snapshot system prompt and skills", () => {
 		const data = buildSessionContextView(session);
 		expect(category(data, "skills").tokens).toBeGreaterThan(0);
 		expect(category(data, "skills").entries).toEqual([]);
-		expect(category(data, "system-prompt")).toMatchObject({
-			tokens: 0,
-			entries: [{ id: "system-prompt/0", text: "", tokens: 0 }],
-		});
+		// The adapter drops an empty system block, so there is nothing to list either.
+		expect(category(data, "system-prompt")).toMatchObject({ tokens: 0, entries: [] });
 	});
 });
 

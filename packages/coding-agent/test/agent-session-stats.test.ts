@@ -8,7 +8,7 @@ import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
 import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
 import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
 import { TempDir } from "@oh-my-pi/pi-utils";
-import { computeNonMessageTokens, estimateToolSchemaTokens } from "@oh-my-pi/pi-tui/status-line/context-usage";
+import { computeNonMessageTokens, estimateContextToolSchemaTokens } from "@oh-my-pi/pi-tui/status-line/context-usage";
 
 describe("AgentSession session stats", () => {
 	let authStorage: AuthStorage;
@@ -523,7 +523,7 @@ describe("AgentSession session stats", () => {
 			execute: async () => ({ content: [{ type: "text" as const, text: "ok" }] }),
 		};
 		const agent = new Agent({ initialState: { model: inlineModel, systemPrompt: ["Test"], tools: [tool] } });
-		const schemaTokens = estimateToolSchemaTokens(agent.state.tools, agent.tokenizer);
+		const schemaTokens = estimateContextToolSchemaTokens({ agent }, agent.tokenizer, 0, inlineModel);
 		const promptTokens = schemaTokens + 1_000;
 		const messages: Message[] = [
 			{ role: "user", content: "Look up the account.", timestamp: 1 },
@@ -541,7 +541,12 @@ describe("AgentSession session stats", () => {
 					totalTokens: promptTokens,
 					cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
 				},
-				contextSnapshot: { promptTokens, nonMessageTokens: schemaTokens, toolSchemaTokens: schemaTokens },
+				contextSnapshot: {
+					promptTokens,
+					nonMessageTokens: schemaTokens,
+					toolSchemaTokens: schemaTokens,
+					nonMessageVersion: 1,
+				},
 				stopReason: "stop",
 				timestamp: 2,
 			},
@@ -638,5 +643,63 @@ describe("AgentSession session stats", () => {
 			expect(current.getContextBreakdown()?.anchored).toBe(true);
 			expect(current.getContextUsage()?.tokens).toBe(promptTokens + current.agent.tokenizer.countMessages(tail));
 		});
+	});
+
+	it("rebases a provider anchor estimated by an older build once, then charges later changes", () => {
+		const inlineModel = { ...model(), toolSchemasInContext: true };
+		const deferredModel: Model = { ...inlineModel, toolSchemasInContext: false };
+		const makeTool = (name: string): AgentTool => ({
+			name,
+			label: name,
+			description: "Search account records with detailed filters. ".repeat(200),
+			parameters: type({ query: "string" }),
+			execute: async () => ({ content: [{ type: "text" as const, text: "ok" }] }),
+		});
+		const tool = makeTool("search");
+		const agent = new Agent({ initialState: { model: inlineModel, systemPrompt: ["Test"], tools: [tool] } });
+		const promptTokens = 50_000;
+		const messages: Message[] = [
+			{ role: "user", content: "Look up the account.", timestamp: 1 },
+			{
+				role: "assistant",
+				content: [{ type: "text", text: "Found it." }],
+				api: agent.state.model.api,
+				provider: agent.state.model.provider,
+				model: agent.state.model.id,
+				usage: {
+					input: promptTokens,
+					output: 0,
+					cacheRead: 0,
+					cacheWrite: 0,
+					totalTokens: promptTokens,
+					cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+				},
+				// Recorded before the estimate counted the encoded request prefix: lower than today's.
+				contextSnapshot: { promptTokens, nonMessageTokens: 10, toolSchemaTokens: 5 },
+				stopReason: "stop",
+				timestamp: 2,
+			},
+		];
+		const sessionManager = SessionManager.inMemory();
+		for (const message of messages) sessionManager.appendMessage(message);
+		agent.replaceMessages(messages);
+		session = new AgentSession({
+			agent,
+			sessionManager,
+			settings: Settings.isolated({ "compaction.enabled": false }),
+			modelRegistry,
+		});
+		// The first reading stands in for the old anchor: no growth is charged.
+		expect(session.getContextUsage()?.tokens).toBe(promptTokens);
+
+		const oneToolSchemas = estimateContextToolSchemaTokens({ agent }, agent.tokenizer, 0, inlineModel);
+		agent.setTools([tool, makeTool("lookup")]);
+		const twoToolSchemas = estimateContextToolSchemaTokens({ agent }, agent.tokenizer, 0, inlineModel);
+		expect(twoToolSchemas).toBeGreaterThan(oneToolSchemas);
+		expect(session.getContextUsage()?.tokens).toBe(promptTokens + twoToolSchemas - oneToolSchemas);
+
+		// The provider base carried the one schema it was sent; a deferring model drops it.
+		agent.setModel(deferredModel);
+		expect(session.getContextUsage()?.tokens).toBe(promptTokens - oneToolSchemas);
 	});
 });

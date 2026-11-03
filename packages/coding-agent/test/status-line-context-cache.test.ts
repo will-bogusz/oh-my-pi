@@ -204,6 +204,23 @@ describe("StatusLineComponent context breakdown", () => {
 		expect(usageCalls()).toBe(2);
 	});
 
+	it("re-queries when the credential kind or the model changes at the same window", () => {
+		const { session, usageCalls } = makeSession({ messages: [userMessage("hi")], contextWindow: 200_000 });
+		const mutable = session as unknown as { model: object; modelRegistry: { isUsingOAuth: () => boolean } };
+		const comp = statusLines.track(new StatusLineComponent(session, statusLineHost));
+		comp.getCachedContextBreakdown();
+
+		// OAuth requests encode a different prefix (Claude's `_` tool names).
+		mutable.modelRegistry.isUsingOAuth = () => true;
+		comp.getCachedContextBreakdown();
+		// Another adapter encodes the same tools differently.
+		mutable.model = { id: "other-model", contextWindow: 200_000, input: ["text"] };
+		comp.getCachedContextBreakdown();
+		comp.getCachedContextBreakdown();
+
+		expect(usageCalls()).toBe(3);
+	});
+
 	it("re-queries when settings or tokenizer identity changes", () => {
 		const { session, usageCalls } = makeSession({ messages: [userMessage("hi")] });
 		const mutable = session as unknown as {

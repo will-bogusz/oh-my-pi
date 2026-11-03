@@ -1,76 +1,144 @@
 /**
- * Contract: tool schema token estimation reflects the wire JSON Schema.
- *
- * Tools authored with arktype must be counted by the JSON Schema providers
- * actually receive — not by stringifying the arktype instance's enumerable
- * internals, which massively overcounts.
+ * Contract: non-message accounting counts the system texts and tool
+ * definitions the provider adapter encodes for the request, not omp's own
+ * tool objects.
  */
 import { describe, expect, it } from "bun:test";
 import { type } from "@oh-my-pi/omptype";
 import { buildModel } from "@oh-my-pi/pi-catalog/build";
 import type { Model, ModelSpec } from "@oh-my-pi/pi-catalog/types";
-import { Tokenizer } from "@oh-my-pi/pi-agent-core";
+import { Agent, type AgentTool, Tokenizer } from "@oh-my-pi/pi-agent-core";
 import { normalizeTools } from "@oh-my-pi/pi-agent-core/agent-loop";
 import {
 	compactionContextTokens,
 	DEFAULT_COMPACTION_SETTINGS,
 	shouldCompact,
 } from "@oh-my-pi/pi-agent-core/compaction";
-import { arkToWireSchema } from "@oh-my-pi/pi-ai/utils/schema";
+import type { Tool } from "@oh-my-pi/pi-ai";
+import { streamAnthropic } from "@oh-my-pi/pi-ai/providers/anthropic";
+import { arkToWireSchema, toolWireSchema } from "@oh-my-pi/pi-ai/utils/schema";
 import {
 	type NonMessageTokenSource,
 	computeNonMessageBreakdown,
 	computeNonMessageTokens,
+	encodeNonMessagePrefix,
+	estimateContextToolSchemaTokens,
 	estimateSkillsTokens,
-	estimateToolSchemaTokens,
 	getToolSchemaMetadataRevision,
 	invalidateToolSchemaMetadata,
 } from "../src/status-line/context-usage";
 
 const tokenizer = new Tokenizer();
 
-describe("estimateToolSchemaTokens", () => {
+const claudeSpec: ModelSpec<"anthropic-messages"> = {
+	id: "claude-opus-5-5",
+	name: "Claude Opus",
+	api: "anthropic-messages",
+	provider: "anthropic",
+	baseUrl: "https://api.anthropic.com",
+	reasoning: true,
+	input: ["text"],
+	cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+	contextWindow: 100_000,
+	maxTokens: 8192,
+};
+
+/** Tokens of the `{name, description, parameters}` JSON the encoder falls back to without an adapter. */
+function genericToolTokens(tools: readonly Tool[]): number {
+	return tokenizer.countTokens(
+		tools.map(tool =>
+			JSON.stringify({ name: tool.name, description: tool.description, parameters: toolWireSchema(tool) }),
+		),
+	);
+}
+
+/** A session whose one tool has a runtime shape the types rule out, as an extension can hand over. */
+function untypedRoster(tool: unknown): NonMessageTokenSource {
+	return { systemPrompt: [], agent: { state: { tools: [tool] } } } as NonMessageTokenSource;
+}
+
+describe("encoded request prefix", () => {
+	it("counts the tool definitions and system blocks a Claude OAuth request carries", async () => {
+		const model = buildModel(claudeSpec);
+		const grep: AgentTool = {
+			name: "grep",
+			label: "Grep",
+			description: "Search files by regex.",
+			parameters: type({ "pattern /** regular expression to search for */": "string", "path?": "string" }),
+			examples: [{ caption: "Find TODOs", call: { pattern: "TODO", path: "src" } }],
+			async execute() {
+				return { content: [{ type: "text", text: "ok" }] };
+			},
+		};
+		// Capture the body the adapter builds from the loop's own provider context; nothing is sent.
+		let payload: { system: { text: string }[]; tools: Record<string, unknown>[] } | undefined;
+		const agent = new Agent({
+			initialState: { model, systemPrompt: ["You are a test agent."], tools: [grep] },
+			intentTracing: true,
+			getApiKey: () => "sk-ant-oat-test",
+			streamFn: (streamModel, context, options) =>
+				streamAnthropic(streamModel as Model<"anthropic-messages">, context, {
+					...options,
+					apiKey: "sk-ant-oat-test",
+					isOAuth: true,
+					signal: AbortSignal.abort(),
+					onPayload: body => {
+						payload = body as typeof payload;
+					},
+				}),
+		});
+		await agent.prompt("hi").catch(() => undefined);
+		if (!payload) throw new Error("the adapter built no request body");
+
+		// Cache breakpoints are request metadata, not prompt text.
+		const wireTools = payload.tools.map(({ cache_control: _cacheControl, ...tool }) => JSON.stringify(tool));
+		expect(wireTools.join("")).toContain('"name":"_grep"');
+		const session: NonMessageTokenSource = {
+			model,
+			systemPrompt: agent.state.systemPrompt,
+			agent,
+			usesOAuth: () => true,
+		};
+		const toolTokens = estimateContextToolSchemaTokens(session, tokenizer);
+		expect(toolTokens).toBe(tokenizer.countTokens(wireTools));
+		// The billing header's fingerprint hashes the first user turn, which the prefix cannot know.
+		const systemTokens = tokenizer.countTokens(payload.system.map(block => block.text));
+		expect(Math.abs(computeNonMessageTokens(session, tokenizer) - toolTokens - systemTokens)).toBeLessThanOrEqual(2);
+		expect(encodeNonMessagePrefix(session, tokenizer).system[1]).toBe(payload.system[1]!.text);
+	});
+
 	it("counts arktype tool schemas by their wire JSON Schema, not arktype internals", () => {
 		const parameters = type({
 			"query /** search query */": "string",
 			"limit?": "number",
 		});
-		const arktypeEstimate = estimateToolSchemaTokens(
-			[{ name: "web_search", description: "Searches the web.", parameters } as never],
-			tokenizer,
-		);
-		const wireEstimate = estimateToolSchemaTokens(
-			[{ name: "web_search", description: "Searches the web.", parameters: arkToWireSchema(parameters) } as never],
-			tokenizer,
-		);
-		expect(arktypeEstimate).toBe(wireEstimate);
+		const arktype: NonMessageTokenSource = {
+			systemPrompt: [],
+			agent: { state: { tools: [{ name: "web_search", description: "Searches the web.", parameters }] } },
+		};
+		const wire: NonMessageTokenSource = {
+			systemPrompt: [],
+			agent: {
+				state: {
+					tools: [
+						{ name: "web_search", description: "Searches the web.", parameters: arkToWireSchema(parameters) },
+					],
+				},
+			},
+		};
+		expect(computeNonMessageTokens(arktype, tokenizer)).toBe(computeNonMessageTokens(wire, tokenizer));
 	});
 
-	it("skips a parameters value that stringifies to undefined, counting exactly name + description", () => {
-		// A plain function is neither an arktype schema nor JSON-serializable:
-		// the independent unserializable-schema fallback must skip it while the
-		// tool's own strings still contribute their exact token share.
-		const estimate = estimateToolSchemaTokens(
-			[{ name: "odd", description: "odd tool", parameters: function bareSchema() {} } as never],
-			tokenizer,
+	it("keeps a tool's own strings when its parameters cannot be serialized", () => {
+		const session = untypedRoster({ name: "odd", description: "odd tool", parameters: function bareSchema() {} });
+		expect(computeNonMessageTokens(session, tokenizer)).toBe(
+			tokenizer.countTokens(JSON.stringify({ name: "odd", description: "odd tool" })),
 		);
-		expect(estimate).toBe(estimateToolSchemaTokens([{ name: "odd", description: "odd tool" } as never], tokenizer));
 	});
 
-	it("counts rendered examples, which the agent loop appends to the wire description", () => {
-		const tool = { name: "grep", description: "Search files.", parameters: { type: "object" } };
-		const examples = [{ caption: "Find TODOs", call: { pattern: "TODO", path: "src" } }];
-		const without = estimateToolSchemaTokens([tool as never], tokenizer);
-		const withExamples = estimateToolSchemaTokens([{ ...tool, examples } as never], tokenizer);
-		expect(withExamples).toBeGreaterThan(without);
-	});
-
-	it("skips non-string name/description fragments", () => {
-		const estimate = estimateToolSchemaTokens(
-			[{ name: "odd", description: undefined, parameters: { type: "object" } } as never],
-			tokenizer,
-		);
-		expect(estimate).toBeGreaterThan(0);
+	it("tolerates a tool without a description", () => {
+		const session = untypedRoster({ name: "odd", description: undefined, parameters: { type: "object" } });
+		expect(computeNonMessageTokens(session, tokenizer)).toBeGreaterThan(0);
 	});
 
 	it("does not reread dynamic metadata until its explicit revision changes", () => {
@@ -85,19 +153,20 @@ describe("estimateToolSchemaTokens", () => {
 			parameters: {},
 		};
 		const tools = [tool];
-		const first = estimateToolSchemaTokens(tools, tokenizer);
+		const session: NonMessageTokenSource = { systemPrompt: [], agent: { state: { tools } } };
+		const first = computeNonMessageTokens(session, tokenizer);
 		expect(reads).toBe(1);
-		expect(estimateToolSchemaTokens(tools, tokenizer)).toBe(first);
+		expect(computeNonMessageTokens(session, tokenizer)).toBe(first);
 		expect(reads).toBe(1);
 
 		description = "a substantially longer dynamic description after a live policy update";
 		invalidateToolSchemaMetadata(tools);
 		expect(getToolSchemaMetadataRevision(tools)).toBe(1);
-		expect(estimateToolSchemaTokens(tools, tokenizer)).toBeGreaterThan(first);
+		expect(computeNonMessageTokens(session, tokenizer)).toBeGreaterThan(first);
 		expect(reads).toBe(2);
 	});
 
-	it("separates array, tokenizer, source-revision, and prune-mode cache keys", () => {
+	it("separates roster, tokenizer and source-revision cache keys", () => {
 		let reads = 0;
 		const tool = {
 			name: "dynamic",
@@ -107,21 +176,19 @@ describe("estimateToolSchemaTokens", () => {
 			},
 			parameters: {},
 		};
-		const tools = [tool];
-		estimateToolSchemaTokens(tools, tokenizer, { sourceRevision: 1 });
-		estimateToolSchemaTokens(tools, tokenizer, { sourceRevision: 1 });
+		const state = { tools: [tool] };
+		const session: NonMessageTokenSource = { systemPrompt: [], agent: { state } };
+		computeNonMessageTokens(session, tokenizer, 1);
+		computeNonMessageTokens(session, tokenizer, 1);
 		expect(reads).toBe(1);
 
-		estimateToolSchemaTokens(tools, tokenizer, { sourceRevision: 2 });
+		computeNonMessageTokens(session, tokenizer, 2);
 		expect(reads).toBe(2);
-		estimateToolSchemaTokens([...tools], tokenizer, { sourceRevision: 2 });
+		state.tools = [tool];
+		computeNonMessageTokens(session, tokenizer, 2);
 		expect(reads).toBe(3);
-		estimateToolSchemaTokens(tools, new Tokenizer(), { sourceRevision: 2 });
+		computeNonMessageTokens(session, new Tokenizer(), 2);
 		expect(reads).toBe(4);
-		const full = estimateToolSchemaTokens(tools, tokenizer, { sourceRevision: 2 });
-		expect(estimateToolSchemaTokens(tools, tokenizer, { sourceRevision: 2, pruneDescriptions: true })).toBeLessThan(
-			full,
-		);
 	});
 });
 
@@ -129,36 +196,43 @@ describe("pruned tool description accounting", () => {
 	// With the catalog inlined into the system prompt, normalizeTools ships each
 	// tool as its name plus the description-stripped schema. Counting the full
 	// specs again double-counts every description (issue #17329).
-	const tools = [
+	const tools: AgentTool[] = [
 		{
 			name: "grep",
+			label: "Grep",
 			description: `Search files by regex. ${"Supports globs, context lines, and multiline patterns. ".repeat(20)}`,
 			parameters: type({
 				"pattern /** regular expression to search for */": "string",
 				"path? /** file or directory to search */": "string",
 			}),
 			examples: [{ caption: "Find TODOs", call: { pattern: "TODO", path: "src" } }],
+			async execute() {
+				return { content: [{ type: "text", text: "ok" }] };
+			},
 		},
 	];
-	const prunedWireTokens = tokenizer.countTokens(
-		(normalizeTools(tools as never, { injectIntent: false, pruneDescriptions: true }) ?? []).flatMap(tool =>
-			[tool.name, tool.description, JSON.stringify(tool.parameters)].filter(part => part !== ""),
-		),
-	);
+	// An API without an adapter encoder: the loop's normalized tools are counted as generic JSON.
+	const model = buildModel({
+		...claudeSpec,
+		api: "ollama-chat",
+		provider: "ollama",
+		baseUrl: "http://localhost:11434",
+	});
 
 	it("counts the pruned wire specs while the agent prunes, and the full specs otherwise", () => {
 		const systemPrompt = ["You are an assistant."];
-		let prune = true;
-		const agent = { state: { tools }, prunesToolDescriptions: () => prune };
-		const session: NonMessageTokenSource = { systemPrompt, agent };
+		const agent = new Agent({ initialState: { model, tools }, pruneToolDescriptions: true });
+		const session: NonMessageTokenSource = { model, systemPrompt, agent };
 		const pruned = computeNonMessageBreakdown(session, tokenizer).toolsTokens;
-		expect(pruned).toBe(prunedWireTokens);
+		expect(pruned).toBe(
+			genericToolTokens(normalizeTools(tools, { injectIntent: false, pruneDescriptions: true }) ?? []),
+		);
 		expect(computeNonMessageTokens(session, tokenizer)).toBe(tokenizer.countTokens(systemPrompt) + pruned);
 
-		// A model or dialect switch flips pruning on the live agent without replacing the roster.
-		prune = false;
+		// The prune setting flips on the live agent without replacing the roster.
+		agent.pruneToolDescriptions = false;
 		const full = computeNonMessageBreakdown(session, tokenizer).toolsTokens;
-		expect(full).toBe(estimateToolSchemaTokens(tools as never, tokenizer));
+		expect(full).toBe(genericToolTokens(normalizeTools(tools, { injectIntent: false }) ?? []));
 		expect(full).toBeGreaterThan(pruned);
 		expect(computeNonMessageTokens(session, tokenizer)).toBe(tokenizer.countTokens(systemPrompt) + full);
 	});
@@ -166,20 +240,8 @@ describe("pruned tool description accounting", () => {
 
 describe("deferred tool schema accounting", () => {
 	it("does not let Cursor's server-side MCP catalog force compaction below provider usage", () => {
-		const spec: ModelSpec<"anthropic-messages"> = {
-			id: "claude-opus-5-5",
-			name: "Claude Opus",
-			api: "anthropic-messages",
-			provider: "anthropic",
-			baseUrl: "https://api.anthropic.com",
-			reasoning: true,
-			input: ["text"],
-			cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-			contextWindow: 100_000,
-			maxTokens: 8192,
-		};
-		const directModel = buildModel(spec);
-		const cursorModel = buildModel({ ...spec, api: "cursor-agent", provider: "cursor" });
+		const directModel = buildModel(claudeSpec);
+		const cursorModel = buildModel({ ...claudeSpec, api: "cursor-agent", provider: "cursor" });
 		const tools = Array.from({ length: 200 }, (_, index) => ({
 			name: `mcp__service__tool_${index}`,
 			description: `Search records ${"search account records with detailed query filters and output metadata ".repeat(110)}`,

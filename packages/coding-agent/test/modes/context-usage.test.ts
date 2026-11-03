@@ -1,9 +1,15 @@
 import { describe, expect, it } from "bun:test";
 import { Tokenizer } from "@oh-my-pi/pi-agent-core";
-import { computeNonMessageBreakdown, estimateToolSchemaTokens } from "@oh-my-pi/pi-tui/status-line/context-usage";
+import { computeNonMessageBreakdown, type NonMessageTokenSource } from "@oh-my-pi/pi-tui/status-line/context-usage";
 import { applyToolProxy } from "../../src/extensibility/tool-proxy";
 
 const tokenizer = new Tokenizer();
+
+function toolTokens(tool: unknown): number {
+	// Extension tools reach accounting untyped; the proxy is what this file tests.
+	const session = { systemPrompt: [], agent: { state: { tools: [tool] } } } as NonMessageTokenSource;
+	return computeNonMessageBreakdown(session, tokenizer).toolsTokens;
+}
 
 /** External arktype copies expose bind on callable schemas, unlike omptype. */
 function bindCapableSchema() {
@@ -21,10 +27,8 @@ describe("extension tool context accounting", () => {
 		const wrapper: Record<string, unknown> = {};
 		applyToolProxy(unwrapped, wrapper);
 		const proxied = wrapper as { name: string; description: string; parameters: unknown };
-		expect(estimateToolSchemaTokens([proxied as never], tokenizer)).toBe(
-			estimateToolSchemaTokens([unwrapped as never], tokenizer),
-		);
-		expect(estimateToolSchemaTokens([proxied as never], tokenizer)).toBeGreaterThan(0);
+		expect(toolTokens(proxied)).toBe(toolTokens(unwrapped));
+		expect(toolTokens(proxied)).toBeGreaterThan(toolTokens({ name: "ext", description: "ext tool" }));
 	});
 
 	it("runs the full non-message breakdown on a proxied extension tool", () => {

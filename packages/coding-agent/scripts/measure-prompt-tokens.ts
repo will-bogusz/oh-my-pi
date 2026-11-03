@@ -1,6 +1,6 @@
 import { Tokenizer } from "@oh-my-pi/pi-agent-core";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { estimateToolSchemaTokens } from "@oh-my-pi/pi-tui/status-line/context-usage";
+import { encodeRequestPrefix } from "@oh-my-pi/pi-ai/request-prefix";
 import { buildSystemPrompt } from "@oh-my-pi/pi-coding-agent/system-prompt";
 import { createTools, type Tool, type ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
 
@@ -31,16 +31,17 @@ const toolsMap = new Map<string, Tool>(tools.map(t => [t.name, t]));
 
 console.log(`active tools (${tools.length}): ${tools.map(t => t.name).join(", ")}\n`);
 
+// Without a model the encoder serializes each tool as `{name, description, parameters}` JSON.
+const encodedTools = encodeRequestPrefix(undefined, undefined, tools).tools;
 const rows: Array<{ name: string; descBytes: number; tok: number; schemaTok: number }> = [];
-for (const t of tools) {
-	const tok = estimateToolSchemaTokens([t as never], tokenizer);
-	const descBytes = bytes(t.description ?? "");
-	const descTok = est(t.description ?? "");
-	rows.push({ name: t.name, descBytes, tok, schemaTok: tok - descTok });
+for (const encoded of encodedTools) {
+	const description = toolsMap.get(encoded.name)?.description ?? "";
+	const tok = tokenizer.countTokens(encoded.definition);
+	rows.push({ name: encoded.name, descBytes: bytes(description), tok, schemaTok: tok - est(description) });
 }
 rows.sort((a, b) => b.tok - a.tok);
 
-const totalTok = estimateToolSchemaTokens(tools as never, tokenizer);
+const totalTok = tokenizer.countTokens(encodedTools.map(encoded => encoded.definition));
 console.log("per-tool tokens (sorted): name | total tok | desc bytes | ~schema tok");
 for (const r of rows) {
 	console.log(

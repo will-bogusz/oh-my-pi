@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Removed `toolSchemaFragments()` and `estimateToolSchemaTokens()`; `estimateContextToolSchemaTokens(session, tokenizer, sourceRevision?, model?)` now takes the session and counts the tool definitions its provider adapter encodes, and `encodeNonMessagePrefix()` returns the encoded system texts and tool definitions
+
 ### Added
 
 - `StatusLineComponent.setSessionPinned()` / `setPinnedSessionIds()` / `isSessionPinned()` track pinned sessions; `session_name` prefixes the theme's pin icon for a pinned session ([#17848](https://github.com/can1357/oh-my-pi/pull/17848) by [@SuperUserA](https://github.com/SuperUserA))

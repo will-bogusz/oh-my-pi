@@ -10,7 +10,7 @@ import { buildParams } from "@oh-my-pi/pi-ai/providers/openai-responses";
 import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
 import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { estimateToolSchemaTokens } from "@oh-my-pi/pi-tui/status-line/context-usage";
+import { estimateContextToolSchemaTokens } from "@oh-my-pi/pi-tui/status-line/context-usage";
 import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
 import type { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
 import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
@@ -297,7 +297,7 @@ describe("AgentSession advisor context maintenance", () => {
 		const storedTokens = advisor.tokenizer.countMessage(seed, { excludeEncryptedReasoning: true });
 		const fixedPrefixTokens =
 			advisor.tokenizer.countTokens(advisor.state.systemPrompt) +
-			estimateToolSchemaTokens(advisor.state.tools, advisor.tokenizer);
+			estimateContextToolSchemaTokens({ agent: advisor }, advisor.tokenizer, 0, advisor.state.model);
 		const threshold = storedTokens + Math.floor(fixedPrefixTokens / 2);
 		cfgCompactionThresholdTokens.set(settings, threshold);
 
@@ -321,7 +321,7 @@ describe("AgentSession advisor context maintenance", () => {
 		const localTokens =
 			advisor.tokenizer.countMessage(seed, { excludeEncryptedReasoning: true }) +
 			advisor.tokenizer.countTokens(advisor.state.systemPrompt) +
-			estimateToolSchemaTokens(advisor.state.tools, advisor.tokenizer);
+			estimateContextToolSchemaTokens({ agent: advisor }, advisor.tokenizer, 0, advisor.state.model);
 		// Under the framed floor, above every local count this update can add.
 		cfgCompactionThresholdTokens.set(settings, localTokens + 500);
 
@@ -349,7 +349,12 @@ describe("AgentSession advisor context maintenance", () => {
 		const seed: AgentMessage = { role: "user", content: "stored advisor message", timestamp: 1 };
 		advisor.state.messages.push(seed);
 		const storedTokens = advisor.tokenizer.countMessage(seed, { excludeEncryptedReasoning: true });
-		const schemaTokens = estimateToolSchemaTokens(advisor.state.tools, advisor.tokenizer);
+		const schemaTokens = estimateContextToolSchemaTokens(
+			{ agent: advisor },
+			advisor.tokenizer,
+			0,
+			advisor.state.model,
+		);
 		const threshold =
 			storedTokens + advisor.tokenizer.countTokens(advisor.state.systemPrompt) + Math.floor(schemaTokens / 2);
 		cfgCompactionThresholdTokens.set(settings, threshold);

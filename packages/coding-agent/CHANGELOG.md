@@ -11,6 +11,10 @@
 
 - Context estimates with no provider usage to anchor on (a fresh session, a model switch, the compaction floor) now add the framing the model's endpoint bills, so Grok 4.7 reads within about 1% of billing after a switch instead of 11% low, and Kimi K3 and Claude read closer too
 
+### Fixed
+
+- The context gauge and `/context` count the system prompt and tools as the model's provider adapter encodes them for the request (identity text, tool-name prefix, per-tool flags, JSON structure) instead of the tools' loose name, description and schema; sessions saved by an older build keep their usage after upgrading
+
 ## [18.16.0] - 2026-11-02
 
 ### Added

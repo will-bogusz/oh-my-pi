@@ -385,6 +385,9 @@ interface ContextUsageMemo {
 	toolSchemaMetadataRevision: number;
 	settingsRevision: number;
 	tokenizerRef: unknown;
+	/** The encoded request prefix depends on the model's adapter and the credential kind. */
+	modelRef: Model | undefined;
+	usesOAuth: boolean;
 	usedTokens: number;
 	contextWindow: number;
 	/** The session reported `percent: null`: usage is unknown, so no percent is shown. */
@@ -2495,6 +2498,9 @@ export class StatusLineComponent<TSession extends StatusLineSession = StatusLine
 		const settingsRevision = this.host.getSessionSettingsRevision(this.session);
 		const tokenizer = this.session.agent?.tokenizer;
 		const skills = this.session.skills;
+		const model = this.session.model;
+		// Tolerates a session without a registry or the method, as the usage segment and `AgentSession.usesOAuth` do.
+		const usesOAuth = model !== undefined && this.session.modelRegistry?.isUsingOAuth?.(model) === true;
 
 		const cache = this.#contextUsageCache;
 		if (
@@ -2510,7 +2516,9 @@ export class StatusLineComponent<TSession extends StatusLineSession = StatusLine
 			cache.toolSchemaMetadataRevision === toolSchemaMetadataRevision &&
 			cache.settingsRevision === settingsRevision &&
 			cache.tokenizerRef === tokenizer &&
-			cache.skillsRef === skills
+			cache.skillsRef === skills &&
+			cache.modelRef === model &&
+			cache.usesOAuth === usesOAuth
 		) {
 			return { usedTokens: cache.usedTokens, contextWindow: cache.contextWindow };
 		}
@@ -2529,6 +2537,8 @@ export class StatusLineComponent<TSession extends StatusLineSession = StatusLine
 			toolSchemaMetadataRevision,
 			settingsRevision,
 			tokenizerRef: tokenizer,
+			modelRef: model,
+			usesOAuth,
 			usedTokens,
 			contextWindow,
 			systemPromptRef: systemPrompt,

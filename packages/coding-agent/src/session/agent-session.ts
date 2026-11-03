@@ -6969,6 +6969,11 @@ export class AgentSession implements SettingsScope {
 		return this.agent.state.systemPrompt;
 	}
 
+	/** Whether this session's credential for `model`'s provider is an OAuth login, which shapes some provider requests. */
+	usesOAuth(model: Model): boolean {
+		return this.modelRegistry.isUsingOAuth?.(model) ?? false;
+	}
+
 	/** Base system prompt blocks the next turn builds on, before any `before_agent_start` override. */
 	get baseSystemPrompt(): string[] {
 		return this.#tools.baseSystemPrompt;
