@@ -12,7 +12,7 @@ In Firefox and Thunderbird on Linux, `setValue()` reported success while the fie
 
 - `linux/ax.rs` `write_text`: after `SetTextContents` answers true, reads the element's whole text (`text_contents`, without zbus's property cache) and passes only on an exact match, judged by `text_readback`.
 - A field that hides its text reads back one repeated mask character (`●`, `•`, `*` …) per character, or per UTF-16 unit as Qt masks. That is decided from what it reads, whatever its role: GTK4 gives a hidden entry without the password purpose a plain text role. Such a field passes only if it then reads back empty after a write of `""` and masks the value after a second write, since old text of the same length shows the same mask.
-- A field that reads back masked, has the password role, or whose role can't be read gets an error that quotes no text.
+- A field that reads back masked, has the password role, or whose role can't be read gets an error quoting no text.
 - `text_readback` and `truncate_chars` move unchanged from `macos/ax.rs` to `desktop/ax.rs` with their four tests, so both backends judge and word it alike.
 
 ## Why
