@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `encodeRequestPrefix()` (`@oh-my-pi/pi-ai/request-prefix`) returns the system texts and per-tool definitions a request to a model carries, built by that provider adapter's own request builders
+
 ## [18.16.0] - 2026-11-02
 
 ### Added

@@ -16,6 +16,7 @@ import type {
 	Model,
 	OpenAICompat,
 	ProviderSessionState,
+	RequestPrefix,
 	ServiceTier,
 	StreamFunction,
 	StreamOptions,
@@ -1588,23 +1589,11 @@ export function buildParams(
 		repairOrphanOutputs: true,
 	});
 
-	const systemPrompts = normalizeSystemPrompts(context.systemPrompt);
-	let systemInstructions: string | undefined;
-	if (systemPrompts.length > 0) {
-		const needsDeveloperRole = policy.messages.systemRole === "developer";
-		if (needsDeveloperRole) {
-			// Reasoning models on known OpenAI-compatible endpoints require the
-			// `developer` role. Send all system prompts inline in `input`.
-			messages.unshift(
-				...systemPrompts.map(systemPrompt => ({ role: "developer" as const, content: systemPrompt })),
-			);
-		} else {
-			// All other endpoints (including third-party /v1/responses proxies) use
-			// the canonical top-level `instructions` field so that proxies that
-			// reject `input[{role:"system"}]` work out of the box.
-			systemInstructions = systemPrompts.join("\n\n");
-		}
-	}
+	const { developer, instructions: systemInstructions } = placeResponsesSystemPrompts(
+		context.systemPrompt,
+		policy.messages.systemRole,
+	);
+	messages.unshift(...developer.map(content => ({ role: "developer" as const, content })));
 
 	const cacheRetention = resolveCacheRetention(options?.cacheRetention);
 	const promptCacheKey = getOpenAIPromptCacheKey(options);
@@ -1920,4 +1909,39 @@ export function convertTools(
 		} as OpenAITool);
 	}
 	return out;
+}
+
+/**
+ * Where `buildParams` sends the system prompts. Reasoning models on known
+ * OpenAI-compatible endpoints require the `developer` role, so each prompt
+ * rides inline in `input`; every other endpoint (including third-party
+ * /v1/responses proxies) gets the canonical top-level `instructions` field, so
+ * proxies that reject `input[{role:"system"}]` work out of the box.
+ */
+function placeResponsesSystemPrompts(
+	systemPrompt: readonly string[] | undefined,
+	systemRole: "system" | "developer",
+): { developer: string[]; instructions?: string } {
+	const systemPrompts = normalizeSystemPrompts(systemPrompt);
+	if (systemPrompts.length === 0 || systemRole === "developer") return { developer: systemPrompts };
+	return { developer: [], instructions: systemPrompts.join("\n\n") };
+}
+
+/** System texts and tool definitions a request to `model` carries, from the builders `buildParams` uses. */
+export function encodeOpenAIResponsesRequestPrefix(
+	model: Model<"openai-responses">,
+	systemPrompt: readonly string[] | undefined,
+	tools: Tool[],
+): RequestPrefix {
+	const policy = resolveOpenAICompatPolicy(model, { endpoint: "responses" });
+	const { developer, instructions } = placeResponsesSystemPrompts(systemPrompt, policy.messages.systemRole);
+	const quarantined = new Set<string>();
+	const wireTools = convertTools(tools, model.compat.supportsStrictMode !== false, model, name =>
+		quarantined.add(name),
+	);
+	const emitted = quarantined.size === 0 ? tools : tools.filter(tool => !quarantined.has(tool.name));
+	return {
+		system: instructions === undefined ? developer : [instructions],
+		tools: wireTools.map((tool, index) => ({ name: emitted[index].name, definition: JSON.stringify(tool) })),
+	};
 }

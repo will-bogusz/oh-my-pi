@@ -15,6 +15,7 @@ import type {
 	FetchImpl,
 	ImageContent,
 	Model,
+	RequestPrefix,
 	ServiceTier,
 	StopReason,
 	StreamOptions,
@@ -406,7 +407,7 @@ export function convertMessages<T extends GoogleApiType>(model: Model<T>, contex
 export function convertTools(
 	tools: Tool[],
 	model: Model<"google-generative-ai" | "google-gemini-cli" | "google-vertex">,
-): { functionDeclarations: Record<string, unknown>[] }[] | undefined {
+): GoogleToolDeclarations {
 	if (tools.length === 0) return undefined;
 
 	/**
@@ -426,6 +427,30 @@ export function convertTools(
 			})),
 		},
 	];
+}
+
+/** The `tools` field of a Gemini request: one entry carrying every function declaration. */
+type GoogleToolDeclarations = { functionDeclarations: Record<string, unknown>[] }[] | undefined;
+
+/**
+ * System texts and tool definitions a request to `model` carries: each system
+ * prompt is one `systemInstruction` part and each tool one function
+ * declaration, which `reshape` adjusts where the route's request builder does.
+ */
+export function encodeGoogleRequestPrefix(
+	model: Model<"google-generative-ai" | "google-gemini-cli" | "google-vertex">,
+	systemPrompt: readonly string[] | undefined,
+	tools: Tool[],
+	reshape: (declarations: GoogleToolDeclarations) => GoogleToolDeclarations = declarations => declarations,
+): RequestPrefix {
+	const declarations = reshape(convertTools(tools, model))?.[0]?.functionDeclarations ?? [];
+	return {
+		system: normalizeSystemPrompts(systemPrompt),
+		tools: declarations.map((declaration, index) => ({
+			name: tools[index].name,
+			definition: JSON.stringify(declaration),
+		})),
+	};
 }
 
 /**

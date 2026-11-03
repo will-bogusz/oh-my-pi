@@ -23,6 +23,7 @@ import type {
 	MessageAttribution,
 	Model,
 	ProviderSessionState,
+	RequestPrefix,
 	ServiceTier,
 	StopReason,
 	StreamFunction,
@@ -2494,23 +2495,11 @@ export function convertMessages(
 		return generateFallbackToolCallId(seed);
 	};
 
-	const systemPrompts = normalizeSystemPrompts(context.systemPrompt);
-	if (systemPrompts.length > 0) {
+	const systemMessages = completionsSystemMessages(context.systemPrompt, compat);
+	if (systemMessages.length > 0) {
 		const useDeveloperRole = model.reasoning && compat.supportsDeveloperRole;
 		const role = useDeveloperRole ? "developer" : "system";
-		// Default to one block per ordered system prompt so the leading prefix
-		// stays byte-identical between turns and the provider's KV cache can
-		// reuse it. Hosts whose chat templates reject follow-up system messages
-		// (Qwen via vLLM, MiniMax, Alibaba Dashscope, Qwen Portal, …) opt out
-		// via `compat.supportsMultipleSystemMessages = false`; in that mode we
-		// coalesce into a single message joined by `\n\n`.
-		if (compat.supportsMultipleSystemMessages) {
-			for (const systemPrompt of systemPrompts) {
-				params.push({ role, content: systemPrompt });
-			}
-		} else {
-			params.push({ role, content: systemPrompts.join("\n\n") });
-		}
+		for (const content of systemMessages) params.push({ role, content });
 	}
 
 	let lastRole: string | null = null;
@@ -3013,6 +3002,44 @@ function convertTools(
 		tools: wireTools,
 		toolStrictMode,
 		strictToolsApplied: wireTools.length > 0 && anyStrictEmitted,
+	};
+}
+
+/**
+ * System message texts in wire order: one per ordered system prompt, so the
+ * leading prefix stays byte-identical between turns and the provider's KV
+ * cache can reuse it. Hosts whose chat templates reject follow-up system
+ * messages (Qwen via vLLM, MiniMax, Alibaba Dashscope, Qwen Portal, …) opt out
+ * via `compat.supportsMultipleSystemMessages = false`; in that mode they are
+ * coalesced into a single message joined by `\n\n`.
+ */
+function completionsSystemMessages(
+	systemPrompt: readonly string[] | undefined,
+	compat: ResolvedOpenAICompat,
+): string[] {
+	const systemPrompts = normalizeSystemPrompts(systemPrompt);
+	if (compat.supportsMultipleSystemMessages || systemPrompts.length === 0) return systemPrompts;
+	return [systemPrompts.join("\n\n")];
+}
+
+/**
+ * System texts and tool definitions a request to `model` carries, from the
+ * builders `buildParams` uses; it drops a tool whose schema the host would
+ * reject.
+ */
+export function encodeOpenAICompletionsRequestPrefix(
+	model: Model<"openai-completions">,
+	systemPrompt: readonly string[] | undefined,
+	tools: Tool[],
+): RequestPrefix {
+	const compat = resolveOpenAICompatForRequest(model, undefined, tools.length > 0).compat as ResolvedOpenAICompat;
+	const wireTools = tools.length > 0 ? convertTools(tools, compat).tools : [];
+	return {
+		system: completionsSystemMessages(systemPrompt, compat),
+		tools: wireTools.map(tool => ({
+			name: tool.type === "function" ? tool.function.name : tool.custom.name,
+			definition: JSON.stringify(tool),
+		})),
 	};
 }
 

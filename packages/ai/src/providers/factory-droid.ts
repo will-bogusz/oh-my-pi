@@ -27,20 +27,24 @@ import type {
 	Context,
 	Model,
 	ModelSpec,
+	RequestPrefix,
 	ServiceTier,
 	StreamFunction,
 	StreamOptions,
+	Tool,
 	ToolCall,
 	ToolChoice,
 } from "../types";
 import { deterministicUuid } from "../utils/deterministic-id";
 import { AssistantMessageEventStream } from "../utils/event-stream";
-import { type AnthropicOptions, shouldStripThinkingHistory } from "./anthropic";
+import { type AnthropicOptions, encodeAnthropicRequestPrefix, shouldStripThinkingHistory } from "./anthropic";
 import { mapStainlessArch, mapStainlessOs } from "./anthropic-headers";
 import { createProviderErrorMessage } from "./error-message";
 import droidIdentity from "./factory-droid/droid-identity.md" with { type: "text" };
-import { streamFactoryDroidGemini } from "./factory-droid/gemini";
+import { encodeFactoryDroidGeminiRequestPrefix, streamFactoryDroidGemini } from "./factory-droid/gemini";
 import { factoryDroidToolNamesByWire, encodeFactoryDroidCompletionsToolName } from "./factory-droid/tool-names";
+import type * as CompletionsProvider from "./openai-completions";
+import type * as ResponsesProvider from "./openai-responses";
 import { streamAnthropic, streamOpenAICompletions, streamOpenAIResponses } from "./register-builtins";
 
 /**
@@ -537,8 +541,7 @@ function streamResponsesWire(a: Attempt, inner: Model<"openai-responses">): Assi
 	const { policy } = a.route;
 	const { effort, disabled, options, sessionUuid } = a;
 	const verbosity = options?.textVerbosity ?? policy.responsesVerbosity;
-	// Native declares every function tool non-strict; OpenAI treats an absent flag as strict.
-	const tools = a.context.tools?.map(tool => ({ ...tool, strict: false }));
+	const tools = a.context.tools && nonStrictTools(a.context.tools);
 	return streamOpenAIResponses(inner, tools ? { ...a.context, tools } : a.context, {
 		...a.forwarded,
 		sessionId: sessionUuid,
@@ -570,6 +573,19 @@ function streamResponsesWire(a: Attempt, inner: Model<"openai-responses">): Assi
 	});
 }
 
+/** Native declares every function tool non-strict; OpenAI treats an absent flag as strict. */
+function nonStrictTools(tools: Tool[]): Tool[] {
+	return tools.map(tool => ({ ...tool, strict: false }));
+}
+
+/** Chat-completions tool-name encoder bound to `inner`'s name limit. */
+function completionsToolNameEncoder(inner: Model<"openai-completions">): (name: string) => string {
+	// The bound `transformMessages` validates replayed names against for this model.
+	const policyMaxLength = resolveCatalogPolicy(inner).toolCallNameMaxLength;
+	const maxLength = typeof policyMaxLength === "number" ? policyMaxLength : 64;
+	return name => encodeFactoryDroidCompletionsToolName(name, maxLength);
+}
+
 /**
  * Chat-completions tool names over the route's bound go out in the CLI's
  * capped form on declarations and replayed calls and results; shorter names go
@@ -594,10 +610,7 @@ function encodeCompletionsToolNames(context: Context, encode: (name: string) => 
 
 function streamCompletionsWire(a: Attempt, inner: Model<"openai-completions">): AssistantMessageEventStream {
 	const { options } = a;
-	// The bound `transformMessages` validates replayed names against for this model.
-	const policyMaxLength = resolveCatalogPolicy(inner).toolCallNameMaxLength;
-	const maxLength = typeof policyMaxLength === "number" ? policyMaxLength : 64;
-	const encode = (name: string) => encodeFactoryDroidCompletionsToolName(name, maxLength);
+	const encode = completionsToolNameEncoder(inner);
 	const toolNamesByWire = factoryDroidToolNamesByWire(a.context.tools, encode);
 	// The selected dialect owns every reasoning field, so the shared encoder gets none.
 	const extraBody = buildCompletionsReasoningBody(a.route.policy, a.effort, a.disabled);
@@ -829,3 +842,51 @@ export const streamFactoryDroid: StreamFunction<"factory-droid-agent"> = (
 
 	return stream;
 };
+
+/**
+ * System texts and tool definitions a request to `model` carries: the Droid
+ * identity sentence leads the system prompt, and the route's wire encodes the
+ * rest as `streamWire` sends it. Resolved without a credential, so the model's
+ * default upstream and host apply.
+ */
+export function encodeFactoryDroidRequestPrefix(
+	model: Model<"factory-droid-agent">,
+	systemPrompt: readonly string[] | undefined,
+	tools: Tool[],
+): RequestPrefix {
+	const registry = resolveFactoryDroidPolicy(model);
+	const wire = registry?.wire ?? "openai-completions";
+	const { inner } = resolveRoute(model, scopeToAccount(model, registry, wire, undefined, ""), wire);
+	const system = [DROID_SYSTEM_PREFIX, ...(systemPrompt ?? [])];
+	switch (wire) {
+		case "google-generate":
+			return encodeFactoryDroidGeminiRequestPrefix(system, tools);
+		case "anthropic-messages":
+			// `streamMessagesWire` sends a non-OAuth request.
+			return encodeAnthropicRequestPrefix(inner as Model<"anthropic-messages">, system, tools, false);
+		case "openai-responses": {
+			// Loaded on first use, like the stream transports.
+			const adapter: typeof ResponsesProvider = require("./openai-responses");
+			return adapter.encodeOpenAIResponsesRequestPrefix(
+				inner as Model<"openai-responses">,
+				system,
+				nonStrictTools(tools),
+			);
+		}
+		case "openai-completions": {
+			const adapter: typeof CompletionsProvider = require("./openai-completions");
+			const encode = completionsToolNameEncoder(inner as Model<"openai-completions">);
+			const sourceNames = factoryDroidToolNamesByWire(tools, encode);
+			const encoded = encodeCompletionsToolNames({ messages: [], tools }, encode).tools ?? [];
+			const prefix = adapter.encodeOpenAICompletionsRequestPrefix(
+				inner as Model<"openai-completions">,
+				system,
+				encoded,
+			);
+			return {
+				system: prefix.system,
+				tools: prefix.tools.map(tool => ({ ...tool, name: sourceNames.get(tool.name) ?? tool.name })),
+			};
+		}
+	}
+}

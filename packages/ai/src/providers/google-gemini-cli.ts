@@ -24,10 +24,12 @@ import type {
 	Context,
 	Model,
 	ProviderSessionState,
+	RequestPrefix,
 	StreamFunction,
 	StreamOptions,
 	TextContent,
 	ThinkingContent,
+	Tool,
 	ToolCall,
 } from "../types";
 import { normalizeSystemPrompts } from "../utils";
@@ -46,6 +48,7 @@ import {
 	convertMessages,
 	convertTools,
 	EMPTY_STREAM_BASE_DELAY_MS,
+	encodeGoogleRequestPrefix,
 	type GoogleThinkingLevel,
 	hasMeaningfulGoogleContent,
 	isThinkingPart,
@@ -1233,6 +1236,16 @@ function normalizeAntigravityTools(
 			};
 		}),
 	}));
+}
+
+/** System texts and tool definitions `buildRequest` puts on a request to `model`. */
+export function encodeGoogleGeminiCliRequestPrefix(
+	model: Model<"google-gemini-cli">,
+	systemPrompt: readonly string[] | undefined,
+	tools: Tool[],
+): RequestPrefix {
+	const isAntigravity = model.provider === "google-antigravity";
+	return encodeGoogleRequestPrefix(model, systemPrompt, tools, isAntigravity ? normalizeAntigravityTools : undefined);
 }
 
 interface AntigravityRequestEnvelope {

@@ -26,6 +26,7 @@ import type {
 	CacheRetention,
 	Context,
 	Model,
+	RequestPrefix,
 	StopReason,
 	StreamFunction,
 	StreamOptions,
@@ -1525,6 +1526,14 @@ function convertToolSpec(tool: Tool): WireToolSpec {
 			description: tool.description || undefined,
 			inputSchema: { json: toolWireSchema(tool) },
 		},
+	};
+}
+
+/** System texts and tool definitions a Converse request carries: one system block per prompt, one `toolSpec` per tool. */
+export function encodeBedrockRequestPrefix(systemPrompt: readonly string[] | undefined, tools: Tool[]): RequestPrefix {
+	return {
+		system: normalizeSystemPrompts(systemPrompt),
+		tools: tools.map(tool => ({ name: tool.name, definition: JSON.stringify(convertToolSpec(tool)) })),
 	};
 }
 

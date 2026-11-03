@@ -5,12 +5,14 @@ import type {
 	AssistantMessage,
 	Context,
 	Model,
+	RequestPrefix,
 	ServiceTier,
 	StreamFunction,
 	StreamOptions,
+	Tool,
 	ToolChoice,
 } from "../types";
-import { resolveCacheRetention } from "../utils";
+import { normalizeSystemPrompts, resolveCacheRetention } from "../utils";
 import { createAbortSourceTracker } from "../utils/abort";
 import { withReplaySafeStreamRetry } from "../utils/empty-completion-retry";
 import { AssistantMessageEventStream } from "../utils/event-stream";
@@ -397,24 +399,7 @@ function buildParams(
 	if (options?.include?.length) params.include = Array.from(new Set(options.include));
 
 	if (context.tools) {
-		const serializedTools: NonNullable<AzureOpenAIResponsesSamplingParams["tools"]> = [];
-		for (const tool of context.tools) {
-			if (tool.native?.type === "computer") {
-				if (model.supportsComputerUse === true) {
-					serializedTools.push({ type: "computer" });
-					continue;
-				}
-				// Fall through: unsupported models get the computer tool as a
-				// plain function tool so function-calling models can drive it.
-			} else if (tool.native !== undefined) continue;
-			serializedTools.push({
-				type: "function",
-				name: tool.name,
-				description: tool.description || "",
-				parameters: sanitizeSchemaForOpenAIResponses(toolWireSchema(tool)),
-				strict: false,
-			});
-		}
+		const serializedTools = convertAzureResponsesTools(context.tools, model).map(entry => entry.wire);
 		if (serializedTools.length > 0) {
 			params.tools = serializedTools;
 			if (options?.toolChoice) {
@@ -448,4 +433,50 @@ function buildParams(
 	applyResponsesReasoningParams(params, model, options);
 
 	return params;
+}
+
+type AzureResponsesTool = NonNullable<AzureOpenAIResponsesSamplingParams["tools"]>[number];
+
+/** Each tool definition the request declares, beside the tool it encodes; native tools other than computer are not sent. */
+function convertAzureResponsesTools(
+	tools: readonly Tool[],
+	model: Model<"azure-openai-responses">,
+): Array<{ tool: Tool; wire: AzureResponsesTool }> {
+	const out: Array<{ tool: Tool; wire: AzureResponsesTool }> = [];
+	for (const tool of tools) {
+		if (tool.native?.type === "computer") {
+			if (model.supportsComputerUse === true) {
+				out.push({ tool, wire: { type: "computer" } });
+				continue;
+			}
+			// Fall through: unsupported models get the computer tool as a
+			// plain function tool so function-calling models can drive it.
+		} else if (tool.native !== undefined) continue;
+		out.push({
+			tool,
+			wire: {
+				type: "function",
+				name: tool.name,
+				description: tool.description || "",
+				parameters: sanitizeSchemaForOpenAIResponses(toolWireSchema(tool)),
+				strict: false,
+			},
+		});
+	}
+	return out;
+}
+
+/** System texts and tool definitions a request to `model` carries; `buildParams` sends each system prompt as an input message. */
+export function encodeAzureOpenAIResponsesRequestPrefix(
+	model: Model<"azure-openai-responses">,
+	systemPrompt: readonly string[] | undefined,
+	tools: Tool[],
+): RequestPrefix {
+	return {
+		system: normalizeSystemPrompts(systemPrompt),
+		tools: convertAzureResponsesTools(tools, model).map(({ tool, wire }) => ({
+			name: tool.name,
+			definition: JSON.stringify(wire),
+		})),
+	};
 }

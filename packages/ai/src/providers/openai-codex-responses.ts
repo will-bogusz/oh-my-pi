@@ -37,6 +37,7 @@ import type {
 	Model,
 	ProviderSessionState,
 	RawSseEvent,
+	RequestPrefix,
 	ServiceTier,
 	StreamFunction,
 	StreamOptions,
@@ -5113,6 +5114,23 @@ export function convertOpenAICodexResponsesTools(
 		});
 	}
 	return payloads;
+}
+
+/**
+ * System texts and tool definitions a request to `model` carries:
+ * `buildTransformedCodexRequestBody` sends the first system prompt as
+ * `instructions` and the rest as developer messages.
+ */
+export function encodeOpenAICodexResponsesRequestPrefix(
+	model: Model<"openai-codex-responses">,
+	systemPrompt: readonly string[] | undefined,
+	tools: Tool[],
+): RequestPrefix {
+	const wireTools = convertOpenAICodexResponsesTools(tools, model);
+	return {
+		system: normalizeSystemPrompts(systemPrompt),
+		tools: wireTools.map((tool, index) => ({ name: tools[index].name, definition: JSON.stringify(tool) })),
+	};
 }
 
 export class CodexWebSocketTransportError extends Error {

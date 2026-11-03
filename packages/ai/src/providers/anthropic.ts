@@ -54,6 +54,7 @@ import type {
 	ProviderSessionState,
 	RawSseEvent,
 	RedactedThinkingContent,
+	RequestPrefix,
 	ServiceTier,
 	SimpleStreamOptions,
 	StopReason,
@@ -6867,6 +6868,36 @@ function convertTools(
 			...(tool.deferLoading ? { defer_loading: true } : {}),
 		};
 	});
+}
+
+/**
+ * System texts and tool definitions a request to `model` carries, from the
+ * builders `buildParams` uses. `isOAuthToken` adds the billing header, the
+ * Claude Code identity block and the tool-name prefix an OAuth credential gets.
+ */
+export function encodeAnthropicRequestPrefix(
+	sourceModel: Model<"anthropic-messages">,
+	systemPrompt: readonly string[] | undefined,
+	tools: Tool[],
+	isOAuthToken: boolean,
+): RequestPrefix {
+	const model = withoutDisabledExperimentalBetas(sourceModel);
+	const system = buildAnthropicSystemBlocks(systemPrompt, {
+		includeClaudeCodeInstruction: isOAuthToken && model.compat.injectClaudeCodeInstruction !== false,
+	});
+	const baseUrl = resolveAnthropicBaseUrl(model) ?? "https://api.anthropic.com";
+	const wireTools = convertTools(
+		tools,
+		isOAuthToken,
+		model.compat.disableStrictTools ?? false,
+		resolveEagerToolInputStreamingSupport(model, baseUrl),
+		model.compat.escapeBuiltinToolNames,
+		getUmansWebSearchHeader(model, model.headers) !== undefined,
+	);
+	return {
+		system: system?.map(block => block.text) ?? [],
+		tools: wireTools.map((tool, index) => ({ name: tools[index].name, definition: JSON.stringify(tool) })),
+	};
 }
 
 function mapStopReason(reason: string): StopReason {

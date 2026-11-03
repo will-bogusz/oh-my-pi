@@ -4,7 +4,16 @@ import type { Effort } from "@oh-my-pi/pi-catalog/effort";
 import { calculateCost } from "@oh-my-pi/pi-catalog/models";
 import { readSseJson } from "@oh-my-pi/pi-utils";
 import * as AIError from "../../error";
-import type { AssistantMessage, Context, Message, Model, StreamOptions, Tool, ToolCall } from "../../types";
+import type {
+	AssistantMessage,
+	Context,
+	Message,
+	Model,
+	RequestPrefix,
+	StreamOptions,
+	Tool,
+	ToolCall,
+} from "../../types";
 import { createAbortSourceTracker } from "../../utils/abort";
 import { AssistantMessageEventStream } from "../../utils/event-stream";
 import {
@@ -256,8 +265,7 @@ function toGeminiContents(
 			if (part.functionCall && !part.thoughtSignature?.trim()) part.thoughtSignature = SKIP_THOUGHT_SIGNATURE;
 		}
 	}
-	// The CLI joins system blocks with a single newline into one part.
-	const system = (context.systemPrompt ?? []).join("\n");
+	const system = joinFactoryGeminiSystemPrompt(context.systemPrompt);
 	return {
 		contents,
 		...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
@@ -275,6 +283,27 @@ export function toGeminiTools(tools: Tool[] | undefined): Array<{ functionDeclar
 			})),
 		},
 	];
+}
+
+/** The CLI joins system blocks with a single newline into one part. */
+function joinFactoryGeminiSystemPrompt(systemPrompt: readonly string[] | undefined): string {
+	return (systemPrompt ?? []).join("\n");
+}
+
+/** System text and tool definitions a Factory Gemini request carries. */
+export function encodeFactoryDroidGeminiRequestPrefix(
+	systemPrompt: readonly string[] | undefined,
+	tools: Tool[],
+): RequestPrefix {
+	const system = joinFactoryGeminiSystemPrompt(systemPrompt);
+	const declarations = toGeminiTools(tools)?.[0]?.functionDeclarations ?? [];
+	return {
+		system: system ? [system] : [],
+		tools: declarations.map((declaration, index) => ({
+			name: tools[index].name,
+			definition: JSON.stringify(declaration),
+		})),
+	};
 }
 
 export interface FactoryDroidGeminiOptions extends StreamOptions {

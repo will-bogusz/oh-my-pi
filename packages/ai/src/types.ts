@@ -1268,6 +1268,13 @@ export interface ContextSnapshot {
 	 * differs rebase the provider anchor instead of inheriting its schemas.
 	 */
 	toolSchemaTokens?: number;
+	/**
+	 * Version of the estimator that produced `nonMessageTokens` and
+	 * `toolSchemaTokens`; absent on snapshots from before it was recorded. A
+	 * snapshot from another version is not comparable with the current
+	 * estimate, so the anchor is rebased onto it instead of charged the difference.
+	 */
+	nonMessageVersion?: number;
 	/** Estimated prompt tokens removed by local history rewrites after this provider snapshot was recorded. */
 	historyRewriteTokensRemoved?: number;
 	/**
@@ -1675,6 +1682,24 @@ export interface Context {
 	tools?: Tool[];
 	/** Definitions of tools the transcript's latest Anthropic request declared but that are no longer in `tools`; only the Anthropic provider reads it. */
 	inactiveTools?: Tool[];
+}
+
+/** One tool definition as a provider adapter serializes it into the request body. */
+export interface RequestPrefixTool {
+	/** Name of the {@link Tool} the definition was encoded from (the wire name may differ). */
+	name: string;
+	/** The wire definition as JSON. */
+	definition: string;
+	/** Why the tool's parameters could not be encoded; the definition then carries only its name and description. */
+	schemaError?: string;
+}
+
+/** The part of a request a provider adapter builds from the system prompt and tools, before any message. */
+export interface RequestPrefix {
+	/** System text in wire order: system blocks, instructions or developer messages, including adapter-added identity text. */
+	system: string[];
+	/** Tool definitions the adapter declares, in wire order; a tool the adapter drops has none. */
+	tools: RequestPrefixTool[];
 }
 
 export type AssistantMessageEvent =
