@@ -61296,17 +61296,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T03:28:25Z",
+  "checked": "2026-11-03T03:58:48Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "wayland-click-pacing": {
-    "since": "2026-11-03T03:28:25Z",
-    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks"
-   },
-   "read-block-pages": {
-    "since": "2026-11-03T02:57:27Z",
-    "title": "fix(coding-agent): stop URL reads returning bot block pages as content"
+   "headless-chrome-pipe": {
+    "since": "2026-11-03T03:58:48Z",
+    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed"
    }
   },
   "conflicts": {},
@@ -61337,7 +61333,9 @@
    17894,
    17895,
    17896,
-   17897
+   17897,
+   17903,
+   17904
   ],
   "post_merge": {
    "16284": {
@@ -62790,6 +62788,26 @@
     "kind": "openable",
     "id": "wayland-click-pacing",
     "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks"
+   },
+   {
+    "at": "2026-11-03T03:58:48Z",
+    "kind": "openable",
+    "id": "headless-chrome-pipe",
+    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed"
+   },
+   {
+    "at": "2026-11-03T03:58:48Z",
+    "kind": "unopenable",
+    "id": "wayland-click-pacing",
+    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
+    "why": "opened as #17903"
+   },
+   {
+    "at": "2026-11-03T03:58:48Z",
+    "kind": "unopenable",
+    "id": "read-block-pages",
+    "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
+    "why": "opened as #17904"
    }
   ]
  },
@@ -64173,12 +64191,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T03:42:36.001733Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-03T03:58:49.383972Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -64214,6 +64232,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T02:18:00Z"
+   },
+   {
+    "id": "wayland-click-pacing",
+    "label": "#17903",
+    "number": 17903,
+    "state": "open",
+    "area": "natives",
+    "priority": "P0",
+    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T03:46:04Z"
    },
    {
     "id": "cli-reference-models-row",
@@ -64386,6 +64421,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T02:16:07Z"
+   },
+   {
+    "id": "read-block-pages",
+    "label": "#17904",
+    "number": 17904,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T03:48:07Z"
    },
    {
     "id": "print-hold",
@@ -64630,23 +64682,6 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
-   },
-   {
-    "id": "wayland-click-pacing",
-    "label": "wayland-click-pacing",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P1",
-    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T03:23:44Z"
    },
    {
     "id": "computer-ui-quiet",
@@ -65049,23 +65084,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T03:38:04Z"
-   },
-   {
-    "id": "read-block-pages",
-    "label": "read-block-pages",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T02:52:49Z"
    },
    {
     "id": "text-reader-usage-shift",
