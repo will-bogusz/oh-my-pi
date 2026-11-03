@@ -63875,11 +63875,18 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T19:46:44Z",
+  "checked": "2026-11-03T20:17:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {
+   "#16223": {
+    "since": "2026-11-03T20:17:45Z",
+    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
+    "files": [
+     "packages/coding-agent/test/tools/computer.test.ts"
+    ]
+   },
    "#16274": {
     "since": "2026-11-03T12:38:09Z",
     "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
@@ -63902,12 +63909,92 @@
     ]
    }
   },
-  "merged_through": "2026-11-03T18:41:34Z",
+  "merged_through": "2026-11-03T20:02:51Z",
   "unreleased": {
    "17496": {
     "title": "feat(coding-agent): show whether the next message reads the prompt cache",
     "merge_commit": "1bceb753ae60ee13900f1893ce58ccbf7658bff2",
     "merged_at": "2026-11-03T18:41:34Z"
+   },
+   "17936": {
+    "title": "fix(natives): match AT-SPI actions by their machine names",
+    "merge_commit": "ad0668e0c0e7ab9049da2d169b5abfd4987cc714",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17932": {
+    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
+    "merge_commit": "eda639e3da576b8a342d433c07d6ca3582a50b86",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17931": {
+    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
+    "merge_commit": "84def6cee1a8d925f5d24a1e0ec14690cae7bc37",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17922": {
+    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
+    "merge_commit": "fdf17cd5eb9aae38ef23e2cc36d8263e2f6d58c9",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17921": {
+    "title": "fix(natives): keep X11 background element typing from raising the element's window",
+    "merge_commit": "8600336d1fb54c841811f6c1e93c7f2923dee18a",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17915": {
+    "title": "fix(natives): refuse Wayland element input before focusing the element",
+    "merge_commit": "0db7fb9aecba2054dae5b31dba5b1c94384a942c",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17913": {
+    "title": "fix(natives): refuse background drags on Windows Tk windows",
+    "merge_commit": "afed71e7b7e888f7932263626d44452908f82502",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17912": {
+    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
+    "merge_commit": "c5787d8d29013938e7f944aed18f8d910a91de7c",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17911": {
+    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
+    "merge_commit": "0df0156efa2dcc8228e1420c8a693064777ce53e",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17910": {
+    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
+    "merge_commit": "75a323fc4658e5f08251525d9261847209a893c4",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17909": {
+    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
+    "merge_commit": "3f4e7799fc471f129000530789fbd3f3f30a772f",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17908": {
+    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
+    "merge_commit": "5808388747b68a6e30bf9b6b02d3393028dfe0f5",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17903": {
+    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
+    "merge_commit": "639583fc0decff903923666fd3f664a092392ba0",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17896": {
+    "title": "fix(coding-agent): find app windows by application id or path",
+    "merge_commit": "6e78cea88642ff754d4bf328833c469af7359929",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17883": {
+    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
+    "merge_commit": "1542c6952def90df2618994e5dc07d8417a041a3",
+    "merged_at": "2026-11-03T20:02:51Z"
+   },
+   "17881": {
+    "title": "docs(coding-agent): restore the --models row in the CLI reference",
+    "merge_commit": "db7a26ad3490d730f25eaeade64c4ff9bb9ed4f9",
+    "merged_at": "2026-11-03T20:02:51Z"
    }
   },
   "ready": [
@@ -63927,28 +64014,12 @@
    17831,
    17861,
    17862,
-   17881,
-   17883,
    17885,
    17893,
    17894,
    17895,
-   17896,
    17897,
-   17903,
    17904,
-   17908,
-   17909,
-   17910,
-   17911,
-   17912,
-   17913,
-   17915,
-   17921,
-   17922,
-   17931,
-   17932,
-   17936,
    17940
   ],
   "post_merge": {
@@ -64058,6 +64129,102 @@
     "title": "fix(browser): stop later input steps after timeout and let relay page waits use the call deadline",
     "merge_commit": "db3c604f7bd59c029f6fa6661b941cf55cb1072f",
     "merged_at": "2026-11-02T14:27:49Z",
+    "findings": []
+   },
+   "17881": {
+    "title": "docs(coding-agent): restore the --models row in the CLI reference",
+    "merge_commit": "db7a26ad3490d730f25eaeade64c4ff9bb9ed4f9",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17883": {
+    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
+    "merge_commit": "1542c6952def90df2618994e5dc07d8417a041a3",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17896": {
+    "title": "fix(coding-agent): find app windows by application id or path",
+    "merge_commit": "6e78cea88642ff754d4bf328833c469af7359929",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17903": {
+    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
+    "merge_commit": "639583fc0decff903923666fd3f664a092392ba0",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17908": {
+    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
+    "merge_commit": "5808388747b68a6e30bf9b6b02d3393028dfe0f5",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17909": {
+    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
+    "merge_commit": "3f4e7799fc471f129000530789fbd3f3f30a772f",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17910": {
+    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
+    "merge_commit": "75a323fc4658e5f08251525d9261847209a893c4",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17911": {
+    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
+    "merge_commit": "0df0156efa2dcc8228e1420c8a693064777ce53e",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17912": {
+    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
+    "merge_commit": "c5787d8d29013938e7f944aed18f8d910a91de7c",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17913": {
+    "title": "fix(natives): refuse background drags on Windows Tk windows",
+    "merge_commit": "afed71e7b7e888f7932263626d44452908f82502",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17915": {
+    "title": "fix(natives): refuse Wayland element input before focusing the element",
+    "merge_commit": "0db7fb9aecba2054dae5b31dba5b1c94384a942c",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17921": {
+    "title": "fix(natives): keep X11 background element typing from raising the element's window",
+    "merge_commit": "8600336d1fb54c841811f6c1e93c7f2923dee18a",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17922": {
+    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
+    "merge_commit": "fdf17cd5eb9aae38ef23e2cc36d8263e2f6d58c9",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17931": {
+    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
+    "merge_commit": "84def6cee1a8d925f5d24a1e0ec14690cae7bc37",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17932": {
+    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
+    "merge_commit": "eda639e3da576b8a342d433c07d6ca3582a50b86",
+    "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "17936": {
+    "title": "fix(natives): match AT-SPI actions by their machine names",
+    "merge_commit": "ad0668e0c0e7ab9049da2d169b5abfd4987cc714",
+    "merged_at": "2026-11-03T20:02:51Z",
     "findings": []
    }
   },
@@ -65596,6 +65763,143 @@
     "title": "feat(coding-agent): show whether the next message reads the prompt cache",
     "merged_by": "H4vC",
     "maintainer_commits": 3
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17936,
+    "title": "fix(natives): match AT-SPI actions by their machine names",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17932,
+    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17931,
+    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17922,
+    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17921,
+    "title": "fix(natives): keep X11 background element typing from raising the element's window",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17915,
+    "title": "fix(natives): refuse Wayland element input before focusing the element",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17913,
+    "title": "fix(natives): refuse background drags on Windows Tk windows",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17912,
+    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17911,
+    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17910,
+    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17909,
+    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17908,
+    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17903,
+    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17896,
+    "title": "fix(coding-agent): find app windows by application id or path",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17883,
+    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "merged",
+    "number": 17881,
+    "title": "docs(coding-agent): restore the --models row in the CLI reference",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-03T20:17:45Z",
+    "kind": "conflict",
+    "label": "#16223",
+    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
+    "files": [
+     "packages/coding-agent/test/tools/computer.test.ts"
+    ]
    }
   ]
  },
