@@ -19,7 +19,7 @@ In Firefox, Chromium, VS Code and LibreOffice on Linux, `press()` refused every 
 
 ## Why
 
-AT-SPI's `GetActions` returns each action's localized name, for screen readers to speak: Firefox fills it with `;;`, Chromium, Electron and LibreOffice's GTK3 build leave it empty, and every toolkit translates it. libatspi, which Orca uses, calls `GetName`, documented as "the non-localized name of the action" (`atspi_action_get_action_name` in at-spi2-core): `press` in all four apps above. An element with no activation action is still refused.
+AT-SPI's `GetActions` returns each action's localized name, for screen readers: Firefox fills it with `;;`, Chromium, Electron and LibreOffice's GTK3 build leave it empty, and every toolkit translates it. libatspi, which Orca uses, calls `GetName`, documented as "the non-localized name of the action" (`atspi_action_get_action_name` in at-spi2-core): `press` in all four apps above. An element with no activation action is still refused.
 
 `GetName` costs one call per action, sent together; `GetActions` has nothing to parse when the name is empty.
 
