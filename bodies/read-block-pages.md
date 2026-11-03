@@ -6,7 +6,7 @@ On `main`, `read https://www.reddit.com/r/LocalLLaMA/comments/1j9qhvi/` returned
 
 | The fetch got | `main` | this PR |
 |---|---|---|
-| A 200 challenge page (Reddit's `js_challenge` form, or Cloudflare's `cf-mitigated: challenge`) | rendered through every fallback; Jina's copy of the block page came back as the page | only the remote readers (Parallel, Firecrawl, Jina) are tried; unless one returns more than a JavaScript gate, `Method: blocked` with the protection and status in the note, empty content |
+| A 200 challenge page (Reddit's `js_challenge` form, or Cloudflare's `cf-mitigated: challenge`) | rendered through every fallback; Jina's copy of the block page came back as the page | only the remote readers (Parallel, Firecrawl, Jina) are tried; unless one returns more than a JavaScript gate, `Method: blocked`, empty content, and a note naming the protection and status and pointing to the `browser` tool |
 | A 401/403/429 challenge or block page (Cloudflare, DataDome, PerimeterX, "blocked by network security") | `failed`, `HTTP 403` | `failed`, plus `Blocked by bot protection (<vendor>)` |
 | A Jina rendering headed `Warning: Target URL returned error`, or a Firecrawl scrape with `metadata.statusCode` ≥ 400 | accepted as the page | rejected like an empty rendering |
 
@@ -31,6 +31,7 @@ Maintenance: if a vendor renames a marker, that wall reads as on `main`; the fix
 - Regression tests in `fetch-http-status.test.ts` and `fetch-jina-stall.test.ts`; the challenge rows, the 403 case and the Firecrawl case fail with the source change reverted.
 - `bun test test/tools/fetch-*.test.ts test/web-scrapers test/tools/web-search-firecrawl.test.ts`: 126 pass; `bun run check:types` clean.
 - Live through `ReadTool`: Reddit post `blocked` (`main`: Jina block text, 3/3); Reddit `.json`, NYT, Bloomberg, Glassdoor `failed` naming network security, DataDome, PerimeterX, Cloudflare; OpenAI, Medium, Zillow, FT, LinkedIn unchanged.
+- The note's `browser` route, checked through omp's own headless browser tool on `main`'s browser code (`browser.open` with `app: { relay: false, tern: false }`, then `tab.text()`): the same Reddit post returns the post and its comments. NYT, a 403 DataDome block, returns an empty page, so failed reads carry no such pointer.
 
 <details><summary>What each test covers</summary>
 
