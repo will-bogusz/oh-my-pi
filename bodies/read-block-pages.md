@@ -31,7 +31,7 @@ Maintenance: if a vendor renames a marker, that wall reads as on `main`; the fix
 - Regression tests in `fetch-http-status.test.ts` and `fetch-jina-stall.test.ts`; the challenge rows, the 403 case and the Firecrawl case fail with the source change reverted.
 - `bun test test/tools/fetch-*.test.ts test/web-scrapers test/tools/web-search-firecrawl.test.ts`: 126 pass; `bun run check:types` clean.
 - Live through `ReadTool`: Reddit post `blocked` (`main`: Jina block text, 3/3); Reddit `.json`, NYT, Bloomberg, Glassdoor `failed` naming network security, DataDome, PerimeterX, Cloudflare; OpenAI, Medium, Zillow, FT, LinkedIn unchanged.
-- The note's `browser` route, checked through omp's own headless browser tool on `main`'s browser code (`browser.open` with `app: { relay: false, tern: false }`, then `tab.text()`): the same Reddit post returns the post and its comments. NYT, a 403 DataDome block, returns an empty page, so failed reads carry no such pointer.
+- The note's `browser` route: omp's own headless browser tool (`main`'s code, `app: { relay: false, tern: false }`) returns this Reddit post and its comments; on NYT's 403 DataDome block it gets an empty page, so failed reads get no pointer.
 
 <details><summary>What each test covers</summary>
 
