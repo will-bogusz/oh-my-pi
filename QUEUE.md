@@ -1,14 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 02:57Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 02:58Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-03 02:20Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 8, stacked 10, held 6, open PRs 26, queued since the last plan 1; merged 210, closed 27
+**Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-03 02:57Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 1, conflict-held 8, stacked 10, held 6, open PRs 26; merged 210, closed 27
 
-## Openable now (0)
+## Openable now (1)
 
-none
+| id | title | area | priority | age | plan | branch |
+|---|---|---|---|---|---|---|
+| read-block-pages | fix(coding-agent): stop URL reads returning bot block pages as content | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-block-pages) |
 
 ## Conflict-held (8)
 
@@ -79,9 +81,3 @@ none
 | [#17896](https://github.com/can1357/oh-my-pi/pull/17896) | windows-app-id | fix(coding-agent): find app windows by application id or path | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/windows-app-id) |
 | [#17895](https://github.com/can1357/oh-my-pi/pull/17895) | role-implicit-landmarks | fix(coding-agent): find named sections and other implicit roles with role/ selectors | browser | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-implicit-landmarks) |
 | [#17893](https://github.com/can1357/oh-my-pi/pull/17893) | relay-downloads | fix(browser): report a relay tab's downloads where Chrome saved them | browser | P1 | 0h | keep; opened over P2 #16908 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-downloads) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| read-block-pages | fix(coding-agent): stop URL reads returning bot block pages as content | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-block-pages) |
