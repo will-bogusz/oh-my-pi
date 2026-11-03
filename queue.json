@@ -59897,6 +59897,24 @@
    "added": "2026-11-02T05:04:52Z",
    "updated": "2026-11-02T05:04:52Z",
    "note": ""
+  },
+  {
+   "id": "cli-reference-models-row",
+   "branch": "will/cli-reference-models-row",
+   "title": "docs(coding-agent): restore the --models row in the CLI reference",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
+   "body": "bodies/cli-reference-models-row.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/cli-reference-models-row",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T00:10:42Z",
+   "updated": "2026-11-03T00:10:42Z",
+   "note": ""
   }
  ],
  "watch": {
