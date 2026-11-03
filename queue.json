@@ -60555,7 +60555,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-implicit-landmarks",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:12:51Z",
-   "updated": "2026-11-03T02:16:08Z",
+   "updated": "2026-11-03T02:16:30Z",
    "note": "",
    "built": [
     {
@@ -60729,7 +60729,8 @@
      "tree": "91b54a3c61655e10eb8e95bc1a11f335eff2bb2f"
     }
    ],
-   "opened": "2026-11-03T02:16:08Z"
+   "opened": "2026-11-03T02:16:08Z",
+   "readied": "2026-11-03T02:16:29Z"
   },
   {
    "id": "token-count-policy",
