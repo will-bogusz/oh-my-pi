@@ -61004,13 +61004,13 @@
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/read-block-pages.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17904,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-block-pages",
    "host": "MacBook-Pro",
    "added": "2026-11-03T02:52:49Z",
-   "updated": "2026-11-03T03:44:21Z",
+   "updated": "2026-11-03T03:48:08Z",
    "note": "",
    "built": [
     {
@@ -61175,7 +61175,8 @@
      "at": "2026-11-03T03:44:18Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-03T03:48:08Z"
   },
   {
    "id": "wayland-click-pacing",
