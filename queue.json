@@ -68129,5 +68129,11 @@
     "created": "2026-11-02T05:04:37Z"
    }
   ]
+ },
+ "opening": {
+  "id": "wayland-consent-deadline",
+  "token": "6a00d55608f743318fe09680c4a9722f",
+  "host": "MacBook-Pro",
+  "at": "2026-11-03T07:42:18Z"
  }
 }
