@@ -66832,8 +66832,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T08:02:56.029433Z",
-  "host": "goliath",
+  "at": "2026-11-03T08:41:51.772252Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 2,
@@ -67493,6 +67493,31 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T00:59:06Z"
+   },
+   {
+    "id": "atspi-unanswered-app",
+    "label": "atspi-unanswered-app",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #17922 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with #17932 in crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#17922",
+     "#17932",
+     "#15282"
+    ],
+    "needs": [],
+    "created": "2026-11-03T08:39:53Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
