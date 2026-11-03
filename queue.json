@@ -68119,12 +68119,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T21:27:52.520758Z",
+  "at": "2026-11-03T22:45:10.924460Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -68143,6 +68143,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:30:16Z"
+   },
+   {
+    "id": "atspi-file-chooser",
+    "label": "#18011",
+    "number": 18011,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T22:39:56Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -68319,6 +68336,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T11:09:07Z"
+   },
+   {
+    "id": "wayland-input-capability",
+    "label": "#18012",
+    "number": 18012,
+    "state": "open",
+    "area": "natives",
+    "priority": "P1",
+    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T22:42:03Z"
    },
    {
     "id": "print-hold",
@@ -68529,6 +68563,23 @@
     "created": "2026-11-03T00:59:06Z"
    },
    {
+    "id": "wayland-ei-text",
+    "label": "#18013",
+    "number": 18013,
+    "state": "open",
+    "area": "natives",
+    "priority": "P2",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T22:44:07Z"
+   },
+   {
     "id": "atspi-unanswered-app",
     "label": "atspi-unanswered-app",
     "number": null,
@@ -68538,14 +68589,20 @@
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
     "action": "wait",
     "reasons": [
+     "conflicts with #18011 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18012 in crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs",
+     "conflicts with #18013 in crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282"
+     "#18011",
+     "#18012",
+     "#15282",
+     "#18013"
     ],
     "needs": [],
     "created": "2026-11-03T08:39:53Z"
@@ -68561,7 +68618,10 @@
     "action": "wait",
     "reasons": [
      "needs atspi-unanswered-app (queued), gtk4-atspi-bounds (queued)",
+     "conflicts with #18011 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18012 in crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18013 in crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "its need atspi-unanswered-app conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "its need gtk4-atspi-bounds conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
@@ -68569,7 +68629,10 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282"
+     "#18011",
+     "#18012",
+     "#15282",
+     "#18013"
     ],
     "needs": [
      "atspi-unanswered-app",
@@ -68599,23 +68662,6 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
-    "id": "wayland-input-capability",
-    "label": "wayland-input-capability",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P1",
-    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T06:05:34Z"
-   },
-   {
     "id": "wayland-pipewire-dlopen",
     "label": "wayland-pipewire-dlopen",
     "number": null,
@@ -68625,13 +68671,15 @@
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "action": "wait",
     "reasons": [
-     "conflicts with wayland-input-capability in crates/pi-natives/src/desktop/linux/wayland/mod.rs, docs/computer-use.md"
+     "conflicts with #18012 in crates/pi-natives/src/desktop/linux/wayland/mod.rs, docs/computer-use.md",
+     "conflicts with #18013 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "wayland-input-capability"
+     "#18012",
+     "#18013"
     ],
     "needs": [],
     "created": "2026-11-03T05:43:31Z"
@@ -69051,40 +69099,6 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
-    "id": "wayland-ei-text",
-    "label": "wayland-ei-text",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P2",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T06:23:33Z"
-   },
-   {
-    "id": "atspi-file-chooser",
-    "label": "atspi-file-chooser",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T05:52:28Z"
-   },
-   {
     "id": "encoded-prefix-count",
     "label": "encoded-prefix-count",
     "number": null,
@@ -69122,16 +69136,16 @@
     "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
     "action": "wait",
     "reasons": [
+     "conflicts with #18011 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #15282 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with atspi-file-chooser in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282",
-     "atspi-file-chooser"
+     "#18011",
+     "#15282"
     ],
     "needs": [],
     "created": "2026-11-03T05:52:19Z"
