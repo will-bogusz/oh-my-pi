@@ -1,6 +1,6 @@
 ## What
 
-The `--models` flag dropped out of the CLI reference when #16297 merged; this puts its row back where the second `--model` row is.
+The `--models` flag dropped out of the CLI reference when #16297 merged, so I put its row back where the second `--model` row ended up.
 
 `docs/cli-reference.md`, *Model selection*: the table listed `--model <id-or-role>` twice and had no `--models <a,b,c>` row. This replaces the duplicate with `main`'s original row, byte for byte as it stood before that merge:
 
