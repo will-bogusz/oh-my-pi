@@ -67806,8 +67806,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T20:46:56.917149Z",
-  "host": "goliath",
+  "at": "2026-11-03T21:27:52.520758Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -68293,10 +68293,8 @@
     "area": "natives",
     "priority": "P1",
     "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -68314,12 +68312,14 @@
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "action": "wait",
     "reasons": [
-     "conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+     "conflicts with wayland-input-capability in crates/pi-natives/src/desktop/linux/wayland/mod.rs, docs/computer-use.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "wayland-input-capability"
+    ],
     "needs": [],
     "created": "2026-11-03T05:43:31Z"
    },
@@ -68745,10 +68745,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/linux/wayland/libei.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -68764,10 +68762,8 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -68814,13 +68810,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #15282 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with atspi-file-chooser in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282"
+     "#15282",
+     "atspi-file-chooser"
     ],
     "needs": [],
     "created": "2026-11-03T05:52:19Z"
