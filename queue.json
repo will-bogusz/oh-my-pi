@@ -62551,6 +62551,11 @@
     "sha": "a7fc1b1d2c9e65dcf9ef79d02e835a467c8574ed",
     "at": "2026-11-03T00:38:45Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "a7fc1b1d2c9e65dcf9ef79d02e835a467c8574ed",
+    "at": "2026-11-03T00:39:50Z",
+    "host": "goliath"
    }
   }
  },
