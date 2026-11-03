@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 02:33Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 02:36Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-03 02:20Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -21,7 +21,7 @@ none
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 3d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 2d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 1h | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
-| wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 0h | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
+| wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 1h | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
 
 ## Stacked (10)
 
