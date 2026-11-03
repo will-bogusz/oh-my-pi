@@ -67788,6 +67788,11 @@
     "sha": "44d113d86ce1bb79dd2efa66dfd3a0f2e892599f",
     "at": "2026-11-03T21:18:38Z",
     "host": "goliath"
+   },
+   "linux": {
+    "sha": "512f25820651e768d22a9e01e534ed680d1eec74",
+    "at": "2026-11-03T21:25:15Z",
+    "host": "goliath"
    }
   },
   "f2956881241f3b5e7c7864de9e31f5dd2da85d07": {
