@@ -60105,6 +60105,24 @@
    ],
    "opened": "2026-11-03T00:46:24Z",
    "readied": "2026-11-03T00:46:52Z"
+  },
+  {
+   "id": "windows-app-id",
+   "branch": "will/windows-app-id",
+   "title": "fix(coding-agent): find app windows by application id or path",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
+   "body": "bodies/windows-app-id.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/windows-app-id",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T01:11:09Z",
+   "updated": "2026-11-03T01:11:09Z",
+   "note": ""
   }
  ],
  "watch": {
