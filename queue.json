@@ -66977,8 +66977,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T09:03:52.962324Z",
-  "host": "goliath",
+  "at": "2026-11-03T09:07:39.236229Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -67685,6 +67685,38 @@
     "created": "2026-11-03T08:39:53Z"
    },
    {
+    "id": "atspi-walk-reads",
+    "label": "atspi-walk-reads",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
+    "action": "wait",
+    "reasons": [
+     "needs atspi-action-names (queued), atspi-unanswered-app (queued), gtk4-atspi-bounds (queued)",
+     "conflicts with #17922 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with #17932 in crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need atspi-unanswered-app conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs",
+     "its need gtk4-atspi-bounds conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#17922",
+     "#17932",
+     "#15282"
+    ],
+    "needs": [
+     "atspi-action-names",
+     "atspi-unanswered-app",
+     "gtk4-atspi-bounds"
+    ],
+    "created": "2026-11-03T09:05:24Z"
+   },
+   {
     "id": "iphone-mirror-scroll-distance",
     "label": "iphone-mirror-scroll-distance",
     "number": null,
@@ -67746,6 +67778,27 @@
     ],
     "needs": [],
     "created": "2026-11-03T05:43:31Z"
+   },
+   {
+    "id": "atspi-setvalue-readback",
+    "label": "atspi-setvalue-readback",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): read back AT-SPI text writes before reporting success",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #15282 in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#15282"
+    ],
+    "needs": [],
+    "created": "2026-11-03T09:07:02Z"
    },
    {
     "id": "ax-find-depth",
