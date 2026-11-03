@@ -22,7 +22,7 @@ Against billed tokens the Factory Gemini Claude rows go from −3.6% to −13.0%
 - **Decision:** count the real per-turn replay. `transformAssistantTurn` is `transformMessages`' per-turn body, extracted unchanged; `replayView(model)` pairs it with the model the request encodes for (Factory's inner wire) and each adapter's own pass (Factory Gemini, completions, Ollama, Devin, Cursor, GitLab Duo). The memo stays per message and reader. `dropsForeignReasoningPayload`, `DIRECT_REPLAY_APIS`, the Factory Gemini helpers and the Tokenizer's own replay rules go.
 - **Rejected:** all of `transformMessages` per count (a full-history walk on every streaming update), and encoding provider payloads (async, credentialed).
 - **Kept:** billing rules that are not wire rules (`thinking-replay-tokens`, Responses reasoning at reported tokens).
-- **Send path:** images to a reader without image input count as the omission note sent instead. Not covered: tool results snapcompact images at send time, decided async per request (76 of 175 journaled ones billed as text).
+- **Send path:** images to a reader without image input count as the omission note sent instead. No send step truncates tool results: tools truncate output when they run, so the stored result is the one sent. Not covered: results snapcompact images at send time, async and decided per request. The largest overcount, a 40.7k-token tail billed about 20k, is five such results (15.8k tokens journaled as saved).
 - #17422 is unchanged: that gateway receives the thinking and does not bill it.
 
 ## Testing
@@ -30,7 +30,7 @@ Against billed tokens the Factory Gemini Claude rows go from −3.6% to −13.0%
 - `tokenizer.test.ts` compares each case with the payload the real encoder builds: a Claude-signed turn read by `factory-droid` `gemini-3.8-flash`, a reader without image input, cold and warm Factory Responses, a partial Factory row. They fail with the source reverted.
 - 4,808 anchored tool-loop pairs from real sessions count identically on both (a same-model tail crosses no replay rule). The 126 switch requests were rebuilt and captured, never sent.
 - Cost on a 5,755-message session: cold 84-308 ms per reader (`main` 102-405), warm 0.11-0.16 ms.
-- `bun check:ts`: lint and types pass; format flags two untouched files, as on `main`. No Rust changed.
+- `bun check`: types and lint pass; oxfmt flags two files unformatted on `main`.
 
 <details><summary>Cost per reader (5,755-message Claude session)</summary>
 
@@ -51,6 +51,6 @@ cd packages/ai && bun test test/transform-messages-*.test.ts test/factory-droid-
 
 ---
 
-- [ ] `bun check` passes
+- [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
