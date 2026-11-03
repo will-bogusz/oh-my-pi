@@ -60365,7 +60365,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/windows-app-id",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:11:09Z",
-   "updated": "2026-11-03T02:18:01Z",
+   "updated": "2026-11-03T02:18:20Z",
    "note": "",
    "built": [
     {
@@ -60539,7 +60539,8 @@
      "tree": "91b54a3c61655e10eb8e95bc1a11f335eff2bb2f"
     }
    ],
-   "opened": "2026-11-03T02:18:01Z"
+   "opened": "2026-11-03T02:18:01Z",
+   "readied": "2026-11-03T02:18:20Z"
   },
   {
    "id": "role-implicit-landmarks",
