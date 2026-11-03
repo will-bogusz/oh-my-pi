@@ -62466,7 +62466,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T00:09:20.646309Z",
+  "at": "2026-11-03T00:10:52.725035Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -62808,6 +62808,23 @@
     ],
     "needs": [],
     "created": "2026-10-19T00:03:17Z"
+   },
+   {
+    "id": "cli-reference-models-row",
+    "label": "cli-reference-models-row",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": "P1",
+    "title": "docs(coding-agent): restore the --models row in the CLI reference",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T00:10:42Z"
    },
    {
     "id": "factory-droid-110-pin",
