@@ -61311,6 +61311,24 @@
    "added": "2026-11-03T04:23:33Z",
    "updated": "2026-11-03T04:23:33Z",
    "note": ""
+  },
+  {
+   "id": "x11-mpx-focus-release",
+   "branch": "will/x11-mpx-focus-release",
+   "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "body": "bodies/x11-mpx-focus-release.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-focus-release",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T04:23:45Z",
+   "updated": "2026-11-03T04:23:45Z",
+   "note": ""
   }
  ],
  "watch": {
