@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 10:37Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 10:42Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-03 10:36Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 15, stacked 12, held 6, open PRs 40; merged 210, closed 27
+**Counts:** openable now 0, conflict-held 15, stacked 12, held 6, open PRs 40, queued since the last plan 1; merged 210, closed 27
 
 ## Openable now (0)
 
@@ -44,7 +44,7 @@ none
 | macos-scroll-direction | fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux | computer | P2 | 3d | iphone-mirror-scroll-distance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-scroll-direction) |
 | gemma-tokenizer | feat(natives,catalog): count Gemini in the Gemma vocabulary | catalog |  | 9h | token-count-policy | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gemma-tokenizer) |
 | encoded-prefix-count | fix(ai,agent,tui,coding-agent): count the system prompt and tools as the provider request encodes them | other |  | 8h | token-count-policy, wire-delta-count | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/encoded-prefix-count) |
-| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 1h | atspi-action-names ([#17936](https://github.com/can1357/oh-my-pi/pull/17936)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
+| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 2h | atspi-action-names ([#17936](https://github.com/can1357/oh-my-pi/pull/17936)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P1 | 1h | atspi-action-names ([#17936](https://github.com/can1357/oh-my-pi/pull/17936)), atspi-unanswered-app, gtk4-atspi-bounds | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
 
 ## Held (6)
@@ -66,7 +66,7 @@ none
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 24d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | computer-ax-lines | feat(natives): show what macOS ax() elements can do | computer | P2 | 23d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ax-lines) |
 | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | print-hold | fix(coding-agent): keep browser calls going when a page calls window.print() | browser | P2 | 21d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-hold) |
-| [#17831](https://github.com/can1357/oh-my-pi/pull/17831) | r2/relay-bg-input-main | fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys | browser | P1 | 19h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-bg-input-main) |
+| [#17831](https://github.com/can1357/oh-my-pi/pull/17831) | r2/relay-bg-input-main | fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys | browser | P1 | 20h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-bg-input-main) |
 | [#16223](https://github.com/can1357/oh-my-pi/pull/16223) | computer-text-drag-select | feat(natives): make a macOS background drag across native text an accessibility selection | computer | P2 | 15d | keep; rebases after #17931 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-text-drag-select) |
 | [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 15d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
 | [#17894](https://github.com/can1357/oh-my-pi/pull/17894) | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
@@ -90,7 +90,7 @@ none
 | [#17893](https://github.com/can1357/oh-my-pi/pull/17893) | relay-downloads | fix(browser): report a relay tab's downloads where Chrome saved them | browser | P1 | 8h | keep; opened over P2 #16908 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-downloads) |
 | [#17904](https://github.com/can1357/oh-my-pi/pull/17904) | read-block-pages | fix(coding-agent): stop URL reads returning bot block pages as content | other | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-block-pages) |
 | [#17903](https://github.com/can1357/oh-my-pi/pull/17903) | wayland-click-pacing | fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks | natives | P0 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-click-pacing) |
-| [#17908](https://github.com/can1357/oh-my-pi/pull/17908) | headless-chrome-pipe | fix(browser): exit a process-local headless Chrome when the process that launched it is killed | browser | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-chrome-pipe) |
+| [#17908](https://github.com/can1357/oh-my-pi/pull/17908) | headless-chrome-pipe | fix(browser): exit a process-local headless Chrome when the process that launched it is killed | browser | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-chrome-pipe) |
 | [#17912](https://github.com/can1357/oh-my-pi/pull/17912) | x11-takeover-keymap-switch | fix(natives): keep X11 takeover keys running when the core keyboard switches source | computer | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keymap-switch) |
 | [#17910](https://github.com/can1357/oh-my-pi/pull/17910) | x11-mpx-focus-release | fix(natives): release the X11 virtual keyboard's focus before takeover activates its window | computer | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-focus-release) |
 | [#17911](https://github.com/can1357/oh-my-pi/pull/17911) | x11-qt-background-keys | fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent | computer | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-qt-background-keys) |
@@ -99,6 +99,12 @@ none
 | [#17915](https://github.com/can1357/oh-my-pi/pull/17915) | wayland-element-input | fix(natives): refuse Wayland element input before focusing the element | natives | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-element-input) |
 | [#17921](https://github.com/can1357/oh-my-pi/pull/17921) | x11-element-focus-steal | fix(natives): keep X11 background element typing from raising the element's window | computer | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-element-focus-steal) |
 | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | wayland-focused-window | fix(natives): name the focused application window on Wayland, not an always-active shell frame | natives | P0 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-focused-window) |
-| [#17931](https://github.com/can1357/oh-my-pi/pull/17931) | apps-open-tilde | fix(coding-agent): open ~ paths from the home folder in computer apps.open | computer | P0 | 2h | keep; opened over P2 #16223 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/apps-open-tilde) |
+| [#17931](https://github.com/can1357/oh-my-pi/pull/17931) | apps-open-tilde | fix(coding-agent): open ~ paths from the home folder in computer apps.open | computer | P0 | 3h | keep; opened over P2 #16223 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/apps-open-tilde) |
 | [#17932](https://github.com/can1357/oh-my-pi/pull/17932) | wayland-consent-deadline | fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends | natives | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-consent-deadline) |
 | [#17936](https://github.com/can1357/oh-my-pi/pull/17936) | atspi-action-names | fix(natives): match AT-SPI actions by their machine names | computer | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-action-names) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
