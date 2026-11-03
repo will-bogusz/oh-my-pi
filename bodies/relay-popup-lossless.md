@@ -16,13 +16,13 @@ Popup trials that lost a key went from 6 of 30 on `main` to 0 of 30 (13 → 0 ty
 
 ## Why
 
-Chrome takes the front for the popup until the relay hands it back a few milliseconds later. Logged routing shows every lost key went to Chrome's process in that gap.
+Chrome takes the front for the popup until the relay hands it back milliseconds later. Logged routing shows every lost key went to Chrome in that gap.
 
 - **The computer tool's key reroute moves them** back to the user's app. The relay finds Chrome as the app holding the other end of the extension's loopback socket.
 - **Set up at omp's input, before Chrome activates and before the relay's front-app read starts its watch**; the popup's hold carries it on and never sets up another. Set up at the hold instead, an omp process's first popup still lost keys: setting up the tap (about 30 ms the first time) outlasted Chrome's activation.
 - **One reroute per burst of input.** A click, a held ⌘/⌃ or an app picked from Spotlight or a launcher is the user choosing Chrome: those keys stay. None is set up while a computer action owns the desktop.
 - **Rejected: background tabs for omp's popups.** Chrome stayed back (20/20), but `window.opener` breaks, which OAuth popups need.
-- **Maintenance:** if the socket lookup (public `libproc`) finds nothing, the relay behaves as `main`.
+- **Maintenance:** if the socket lookup (public `libproc`) finds nothing, the relay acts as `main`.
 
 ## Testing
 
@@ -44,7 +44,7 @@ The relay put the user's app back in front for all 15 popups of every block in b
 - Bridge tests: the opening tab's browser reaches the read and the hold; a stale lookup is ignored. Server test: with the switch at `0` the browser is never looked up (fails with the check removed). Rust: the loopback peer is found, never omp; when a reroute stands in for a new one; a reroute outlives a break in the watch but not a pick seen since.
 - macOS: `cargo test -p pi-natives --lib` (894 pass); clippy and rustfmt on macOS, Linux and Windows; bridge and server tests 100 pass.
 
-Not run: no Accessibility or secure entry on (no tap is made), a physical keyboard, the user clicking into Chrome within the second (the reroute's tests cover it).
+Not run: no Accessibility or secure entry on (no tap is made), a physical keyboard, the user clicking into Chrome within the second (tests cover it).
 
 ---
 
