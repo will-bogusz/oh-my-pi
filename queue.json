@@ -60159,6 +60159,26 @@
    "added": "2026-11-03T01:24:37Z",
    "updated": "2026-11-03T01:24:37Z",
    "note": ""
+  },
+  {
+   "id": "gemma-tokenizer",
+   "branch": "will/gemma-tokenizer",
+   "title": "feat(natives,catalog): count Gemini in the Gemma vocabulary",
+   "area": "catalog",
+   "priority": null,
+   "needs": [
+    "token-count-policy"
+   ],
+   "base": "4448b4f6e9c1035f6c18bd1d5c7c5df3cc309ab0",
+   "body": "bodies/gemma-tokenizer.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gemma-tokenizer",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T01:29:02Z",
+   "updated": "2026-11-03T01:29:02Z",
+   "note": ""
   }
  ],
  "watch": {
