@@ -63376,7 +63376,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-action-names",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:46:34Z",
-   "updated": "2026-11-03T09:25:43Z",
+   "updated": "2026-11-03T09:26:06Z",
    "note": "",
    "built": [
     {
@@ -63550,7 +63550,8 @@
      "tree": "435d8e9d952d2439463b91fc1a7cbda5525651ac"
     }
    ],
-   "opened": "2026-11-03T09:25:43Z"
+   "opened": "2026-11-03T09:25:43Z",
+   "readied": "2026-11-03T09:26:06Z"
   },
   {
    "id": "ax-find-depth",
