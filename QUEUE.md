@@ -1,18 +1,20 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 04:38Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 04:39Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-03 04:26Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 8, stacked 10, held 6, open PRs 29, queued since the last plan 2; merged 210, closed 27
+**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-03 04:36Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 5, conflict-held 8, stacked 10, held 6, open PRs 29; merged 210, closed 27
 
-## Openable now (3)
+## Openable now (5)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | x11-takeover-keymap-switch | fix(natives): keep X11 takeover keys running when the core keyboard switches source | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keymap-switch) |
 | x11-mpx-focus-release | fix(natives): release the X11 virtual keyboard's focus before takeover activates its window | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-focus-release) |
 | x11-qt-background-keys | fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-qt-background-keys) |
+| mirror-takeover-keys | fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held | natives | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/mirror-takeover-keys) |
+| win-silent-drag | fix(natives): refuse background drags on Windows Tk windows | computer |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-silent-drag) |
 
 ## Conflict-held (8)
 
@@ -86,10 +88,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | [#17904](https://github.com/can1357/oh-my-pi/pull/17904) | read-block-pages | fix(coding-agent): stop URL reads returning bot block pages as content | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-block-pages) |
 | [#17903](https://github.com/can1357/oh-my-pi/pull/17903) | wayland-click-pacing | fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks | natives | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-click-pacing) |
 | [#17908](https://github.com/can1357/oh-my-pi/pull/17908) | headless-chrome-pipe | fix(browser): exit a process-local headless Chrome when the process that launched it is killed | browser |  | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-chrome-pipe) |
-
-## Queued since the last plan (2)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| mirror-takeover-keys | fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held | natives | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/mirror-takeover-keys) |
-| win-silent-drag | fix(natives): refuse background drags on Windows Tk windows | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-silent-drag) |

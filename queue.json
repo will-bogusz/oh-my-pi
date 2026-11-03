@@ -64520,7 +64520,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T04:26:16.122858Z",
+  "at": "2026-11-03T04:36:34.698593Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -65013,6 +65013,23 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
+    "id": "mirror-takeover-keys",
+    "label": "mirror-takeover-keys",
+    "number": null,
+    "state": "queued",
+    "area": "natives",
+    "priority": "P1",
+    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T04:33:04Z"
+   },
+   {
     "id": "x11-mpx-focus-release",
     "label": "x11-mpx-focus-release",
     "number": null,
@@ -65485,6 +65502,23 @@
     ],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
+   },
+   {
+    "id": "win-silent-drag",
+    "label": "win-silent-drag",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): refuse background drags on Windows Tk windows",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T04:36:23Z"
    },
    {
     "id": "wire-delta-count",
