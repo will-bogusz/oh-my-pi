@@ -59724,7 +59724,7 @@
    "branch": "will/factory-droid-110-pin",
    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
    "area": "providers",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
    "body": "bodies/factory-droid-110-pin.md",
@@ -59734,7 +59734,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-110-pin",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:32:33Z",
-   "updated": "2026-11-03T01:00:18Z",
+   "updated": "2026-11-03T01:26:06Z",
    "note": "",
    "advanced": "2026-11-03T00:08:05Z",
    "built": [
