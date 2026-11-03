@@ -23,7 +23,7 @@ Against billed tokens the Factory Gemini Claude rows go from −3.6% to −13.0%
 - **Rejected:** all of `transformMessages` per count (a full-history walk on every streaming update), and encoding provider payloads (async, credentialed).
 - **Kept:** billing rules that are not wire rules (`thinking-replay-tokens`, Responses reasoning at reported tokens).
 - **Send path:** images to a reader without image input count as the omission note sent instead. No send step truncates tool results: tools truncate output when they run, so the stored result is the one sent. Not covered: results snapcompact images at send time, async and decided per request. The largest overcount, a 40.7k-token tail billed about 20k, is five such results (15.8k tokens journaled as saved).
-- #17422 is unchanged: that gateway receives the thinking and does not bill it.
+- #17422 is unchanged: that gateway gets the thinking and does not bill it.
 
 ## Testing
 
