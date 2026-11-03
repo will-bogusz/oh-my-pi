@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 04:49Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 04:53Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-03 04:36Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-03 04:50Z on MacBook-Pro; groups below are from it, states from the manifest)
 **Counts:** openable now 5, conflict-held 8, stacked 10, held 6, open PRs 29; merged 210, closed 27
 
 ## Openable now (5)
@@ -87,4 +87,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | [#17893](https://github.com/can1357/oh-my-pi/pull/17893) | relay-downloads | fix(browser): report a relay tab's downloads where Chrome saved them | browser | P1 | 2h | keep; opened over P2 #16908 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-downloads) |
 | [#17904](https://github.com/can1357/oh-my-pi/pull/17904) | read-block-pages | fix(coding-agent): stop URL reads returning bot block pages as content | other | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-block-pages) |
 | [#17903](https://github.com/can1357/oh-my-pi/pull/17903) | wayland-click-pacing | fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks | natives | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-click-pacing) |
-| [#17908](https://github.com/can1357/oh-my-pi/pull/17908) | headless-chrome-pipe | fix(browser): exit a process-local headless Chrome when the process that launched it is killed | browser |  | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-chrome-pipe) |
+| [#17908](https://github.com/can1357/oh-my-pi/pull/17908) | headless-chrome-pipe | fix(browser): exit a process-local headless Chrome when the process that launched it is killed | browser | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-chrome-pipe) |
