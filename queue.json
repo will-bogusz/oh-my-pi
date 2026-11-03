@@ -60123,6 +60123,24 @@
    "added": "2026-11-03T01:11:09Z",
    "updated": "2026-11-03T01:11:09Z",
    "note": ""
+  },
+  {
+   "id": "role-implicit-landmarks",
+   "branch": "will/role-implicit-landmarks",
+   "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
+   "body": "bodies/role-implicit-landmarks.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-implicit-landmarks",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T01:12:51Z",
+   "updated": "2026-11-03T01:12:51Z",
+   "note": ""
   }
  ],
  "watch": {
