@@ -3247,7 +3247,7 @@ mod tests {
 
 	#[test]
 	fn an_element_is_read_in_two_rounds_and_only_on_its_interfaces() {
-		use std::cell::RefCell;
+		use std::sync::Mutex;
 
 		use atspi::zbus::{
 			MessageStream,
@@ -3266,7 +3266,7 @@ mod tests {
 		async fn qt(
 			server: atspi::zbus::Connection,
 			rounds: &[Vec<String>],
-			batches: &RefCell<Vec<Vec<String>>>,
+			batches: &Mutex<Vec<Vec<String>>>,
 		) {
 			let mut stream = MessageStream::from(&server);
 			// After the last round, any call is outside it.
@@ -3351,7 +3351,7 @@ mod tests {
 					}
 				}
 				names.sort();
-				batches.borrow_mut().push(names);
+				batches.lock().unwrap().push(names);
 			}
 		}
 
@@ -3385,7 +3385,7 @@ mod tests {
 			round("/button", &["Get NActions"]),
 			round("/button", &["GetName"]),
 		];
-		let batches = RefCell::new(Vec::new());
+		let batches = Mutex::new(Vec::new());
 
 		let rt = Builder::new_current_thread().enable_all().build().unwrap();
 		let reads = rt.block_on(async {
@@ -3432,6 +3432,6 @@ mod tests {
 			read("textfield", "notes.txt", Some("hello"), &["press"]),
 			read("button", "New", None, &["press"]),
 		]);
-		assert_eq!(batches.into_inner(), expected);
+		assert_eq!(batches.into_inner().unwrap(), expected);
 	}
 }
