@@ -60997,31 +60997,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T01:56:47Z",
+  "checked": "2026-11-03T02:27:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "relay-downloads": {
-    "since": "2026-11-03T01:56:47Z",
-    "title": "fix(browser): report a relay tab's downloads where Chrome saved them"
-   },
-   "relay-popup-lossless": {
-    "since": "2026-11-03T01:56:47Z",
-    "title": "fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS"
-   },
-   "role-implicit-landmarks": {
-    "since": "2026-11-03T01:26:08Z",
-    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors"
-   },
-   "windows-app-id": {
-    "since": "2026-11-03T01:26:08Z",
-    "title": "fix(coding-agent): find app windows by application id or path"
-   },
-   "iphone-mirror-key-gap": {
-    "since": "2026-11-03T00:24:02Z",
-    "title": "perf(natives): type on iPhone Mirroring twice as fast"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-11-02T14:27:50Z",
   "unreleased": {},
@@ -61045,7 +61024,12 @@
    17862,
    17881,
    17883,
-   17885
+   17885,
+   17893,
+   17894,
+   17895,
+   17896,
+   17897
   ],
   "post_merge": {
    "16284": {
@@ -62451,6 +62435,41 @@
     "kind": "openable",
     "id": "relay-popup-lossless",
     "title": "fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS"
+   },
+   {
+    "at": "2026-11-03T02:27:08Z",
+    "kind": "unopenable",
+    "id": "relay-downloads",
+    "title": "fix(browser): report a relay tab's downloads where Chrome saved them",
+    "why": "opened as #17893"
+   },
+   {
+    "at": "2026-11-03T02:27:08Z",
+    "kind": "unopenable",
+    "id": "relay-popup-lossless",
+    "title": "fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS",
+    "why": "opened as #17894"
+   },
+   {
+    "at": "2026-11-03T02:27:08Z",
+    "kind": "unopenable",
+    "id": "role-implicit-landmarks",
+    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors",
+    "why": "opened as #17895"
+   },
+   {
+    "at": "2026-11-03T02:27:08Z",
+    "kind": "unopenable",
+    "id": "windows-app-id",
+    "title": "fix(coding-agent): find app windows by application id or path",
+    "why": "opened as #17896"
+   },
+   {
+    "at": "2026-11-03T02:27:08Z",
+    "kind": "unopenable",
+    "id": "iphone-mirror-key-gap",
+    "title": "perf(natives): type on iPhone Mirroring twice as fast",
+    "why": "opened as #17897"
    }
   ]
  },
