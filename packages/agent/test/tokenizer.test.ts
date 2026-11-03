@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "bun:test";
 import * as path from "node:path";
 import type { Api, AssistantMessage, Model, ProviderSessionState } from "@oh-my-pi/pi-ai";
-import { adoptFactoryReplay } from "@oh-my-pi/pi-ai/providers/factory-droid/gemini";
+import { streamFactoryDroidGemini } from "@oh-my-pi/pi-ai/providers/factory-droid/gemini";
+import type { Part } from "@oh-my-pi/pi-ai/providers/google-types";
 import { convertCodexResponsesMessages } from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
 import { convertMessages } from "@oh-my-pi/pi-ai/providers/openai-completions";
 import { streamOpenAIResponses } from "@oh-my-pi/pi-ai/providers/openai-responses";
@@ -13,7 +14,7 @@ import * as natives from "@oh-my-pi/pi-natives";
 import { Agent } from "../src/agent";
 import type { SessionMessageEntry } from "../src/compaction/entries";
 import { applyShakeRegions, collectShakeRegions, RESCUE_SHAKE_CONFIG } from "../src/compaction/shake";
-import { Tokenizer, tokenizerEncodingForModel } from "../src/tokenizer";
+import { IMAGE_OMITTED_TEXT, Tokenizer, tokenizerEncodingForModel } from "../src/tokenizer";
 import type { AgentMessage } from "../src/types";
 
 afterEach(() => {
@@ -230,6 +231,36 @@ describe("countMessage", () => {
 		expect(textOnly).toBeGreaterThan(0);
 		expect(withImage).toBe(textOnly + inToolResultImageEstimate(tokenizer));
 	});
+
+	// A host replaces the images of a reader whose wire sends none with
+	// IMAGE_OMITTED_TEXT (one per run of adjacent images, as the coding agent's
+	// send path does), so their image price never reaches the request.
+	test("counts the omitted-image text, not the images, for a reader whose wire carries none", () => {
+		const textOnly = getBundledModel("zai", "glm-5.3") as Model;
+		expect(textOnly.input).toEqual(["text"]);
+		const tokenizer = new Tokenizer(textOnly);
+		const content = [{ type: "text", text: TEXT }, IMAGE, IMAGE, { type: "text", text: TEXT }, IMAGE];
+		const sent = tokenizer.countTokens([TEXT, IMAGE_OMITTED_TEXT, TEXT, IMAGE_OMITTED_TEXT]);
+		for (const role of ["user", "toolResult"] as const) {
+			const message = { role, toolCallId: "call-1", toolName: "read", content, isError: false, timestamp: 0 };
+			expect(tokenizer.countMessage(message as unknown as AgentMessage)).toBe(sent);
+		}
+		const archive = { role: "compactionSummary", summary: TEXT, images: [IMAGE, IMAGE], timestamp: 0 };
+		expect(tokenizer.countMessage(archive as unknown as AgentMessage)).toBe(
+			tokenizer.countTokens([TEXT, IMAGE_OMITTED_TEXT]),
+		);
+
+		// Switching to a vision reader recounts the images at their price.
+		const vision = getBundledModel("zai", "glm-4.6v") as Model;
+		const agent = new Agent({ initialState: { model: textOnly, systemPrompt: [], tools: [], messages: [] } });
+		const message = { role: "user", content, timestamp: 0 } as unknown as AgentMessage;
+		expect(agent.tokenizer.countMessage(message)).toBe(sent);
+		expect(agent.tokenizer.countsAlike(vision)).toBe(false);
+		agent.setModel(vision);
+		expect(agent.tokenizer.countMessage(message)).toBe(
+			agent.tokenizer.countTokens([TEXT, TEXT]) + 3 * inToolResultImageEstimate(agent.tokenizer),
+		);
+	});
 });
 
 // Ollama chat drops historical assistant thinking even when the stored turn
@@ -295,7 +326,8 @@ describe("Ollama chat history estimate", () => {
 		expect(agent.tokenizer.countsAlike(replaying)).toBe(false);
 		agent.setModel(replaying);
 		expect(agent.tokenizer.countMessage(turn, floor)).toBeGreaterThan(visibleCount + 1000);
-		expect(agent.tokenizer.countMessage(turn)).toBeGreaterThan(agent.tokenizer.countMessage(turn, floor));
+		// Ollama sends the thinking as plain text; the signature has no field.
+		expect(agent.tokenizer.countMessage(turn)).toBe(agent.tokenizer.countMessage(turn, floor));
 		agent.setModel(model);
 		expect(agent.tokenizer.countMessage(turn, floor)).toBe(visibleCount);
 	});
@@ -596,18 +628,56 @@ describe("countMessage replayed thinking", () => {
 		expect(new Tokenizer(model).countMessage(signedTurn(model, VISIBLE, SIGNATURE))).toBe(VISIBLE_TOKENS + 1000);
 	});
 
-	// The signature is charged exactly when the request encoder keeps it: what
-	// `transformMessages` (after Factory's Gemini adoption pass) leaves on the turn.
-	function keptSignature(model: Model, turn: AssistantMessage): boolean {
-		const history =
-			model.api === "factory-droid-agent"
-				? [adoptFactoryReplay(turn, model as Model<"factory-droid-agent">)]
-				: [turn];
-		return transformMessages(history, model).some(
-			message =>
-				message.role === "assistant" &&
-				message.content.some(block => block.type === "thinking" && block.thinkingSignature === SIGNATURE),
-		);
+	/**
+	 * The text the request for `model` carries for `turn`, as count fragments,
+	 * and whether it keeps the turn's signature: Factory's Gemini generate body
+	 * as `streamFactoryDroidGemini` builds it, otherwise the turn after
+	 * `transformMessages`.
+	 */
+	async function requestCarries(
+		model: Model,
+		turn: AssistantMessage,
+	): Promise<{ fragments: string[]; kept: boolean }> {
+		const fragments: string[] = [];
+		let kept = false;
+		if (model.api === "factory-droid-agent") {
+			const { promise, resolve } = Promise.withResolvers<unknown>();
+			const stream = streamFactoryDroidGemini(
+				model as Model<"factory-droid-agent">,
+				{ messages: [{ role: "user", content: "Question?", timestamp: 0 }, turn] },
+				{
+					baseUrl: "http://factory.invalid/api/llm/g/v1",
+					headers: {},
+					onPayload: payload => {
+						resolve(payload);
+						return undefined;
+					},
+					fetch: (() => Promise.reject(new Error("captured, never sent"))) as unknown as typeof fetch,
+				},
+			);
+			const body = (await promise) as { contents: Array<{ role: string; parts: Part[] }> };
+			for await (const _event of stream) {
+				// Drain the failed attempt.
+			}
+			for (const content of body.contents) {
+				if (content.role !== "model") continue;
+				for (const part of content.parts) {
+					if (part.text !== undefined) fragments.push(part.text);
+					if (part.thoughtSignature === SIGNATURE) kept = true;
+				}
+			}
+			return { fragments, kept };
+		}
+		for (const message of transformMessages([turn], model)) {
+			if (message.role !== "assistant") continue;
+			for (const block of message.content) {
+				if (block.type === "text") fragments.push(block.text);
+				if (block.type !== "thinking") continue;
+				fragments.push(block.thinking);
+				if (block.thinkingSignature === SIGNATURE) kept = true;
+			}
+		}
+		return { fragments, kept };
 	}
 	const gemini = reader("google", "gemini-3-pro-preview");
 	// Factory serves this id on its Gemini generate wire.
@@ -619,11 +689,15 @@ describe("countMessage replayed thinking", () => {
 	} as Model;
 	const glm = getBundledModel("zai", "glm-5.3") as Model;
 	test.each([
-		["a Claude turn to Gemini", gemini, reader("anthropic", "claude-opus-5-5"), false],
+		// Demoted to fenced text, without the signature.
+		["a Claude turn to Gemini", gemini, opus, false],
 		["another Gemini model's turn to Gemini", gemini, reader("google", "gemini-3-flash-preview"), false],
-		["a Claude turn to Factory Gemini", factoryGemini, reader("anthropic", "claude-opus-5-5"), false],
+		// Factory's Gemini wire drops another lineage's thinking outright, text and signature.
+		["a Claude turn to Factory Gemini", factoryGemini, opus, false],
 		["Factory Gemini's own turn", factoryGemini, { ...factoryGemini, api: "google-generative-ai" }, true],
 		["a Gemini CLI turn to Factory Gemini", factoryGemini, { ...gemini, api: "google-gemini-cli" }, true],
+		// Official Anthropic signatures cannot verify on another deployment.
+		["a Claude API turn to a compatible Anthropic endpoint", glm, opus, false],
 		["another GLM's turn to a compatible Anthropic endpoint", glm, getBundledModel("zai", "glm-5.2") as Model, true],
 		[
 			"a MiniMax turn to a compatible Anthropic endpoint",
@@ -631,11 +705,51 @@ describe("countMessage replayed thinking", () => {
 			getBundledModel("minimax", "MiniMax-M3") as Model,
 			true,
 		],
-	] as const)("charges the signature of %s only when the request keeps it", (_case, model, from, kept) => {
+	] as const)("counts %s as the request carries it", async (_case, model, from, kept) => {
 		const turn = signedTurn(from, VISIBLE, SIGNATURE);
-		expect(keptSignature(model, turn)).toBe(kept);
-		expect(new Tokenizer(model).countMessage(turn)).toBe(VISIBLE_TOKENS + (kept ? 1000 : 0));
-		expect(new Tokenizer(model).countMessage(turn, { excludeEncryptedReasoning: true })).toBe(VISIBLE_TOKENS);
+		const wire = await requestCarries(model, turn);
+		expect(wire.kept).toBe(kept);
+		const tokenizer = new Tokenizer(model);
+		const carried = tokenizer.countTokens(wire.fragments);
+		expect(tokenizer.countMessage(turn)).toBe(carried + (kept ? 1000 : 0));
+		expect(tokenizer.countMessage(turn, { excludeEncryptedReasoning: true })).toBe(carried);
+	});
+
+	test("prices a Factory Claude turn on the Anthropic wire Factory replays it to", () => {
+		// Factory routes this id to its Anthropic Messages wire: the inner model,
+		// not the proxy API, decides the replay and its billing.
+		const factoryOpus = { ...opus, api: "factory-droid-agent", provider: "factory-droid" } as Model;
+		const tokenizer = new Tokenizer(factoryOpus);
+		const own = signedTurn({ api: "anthropic-messages", provider: "factory-droid", id: opus.id }, VISIBLE, SIGNATURE);
+		expect(tokenizer.countMessage(own)).toBe(OUTPUT_TOKENS);
+		// A Claude API turn's signature cannot verify on Factory's deployment: visible blocks only.
+		expect(tokenizer.countMessage(signedTurn(opus, VISIBLE, SIGNATURE))).toBe(VISIBLE_TOKENS);
+	});
+
+	test.each([
+		// Cursor replays reasoning only for the target model's own turns.
+		["Cursor", getBundledModel("cursor", "claude-fable-5-1-high") as Model],
+		// GitLab Duo's goal transcript renders text and tool calls only.
+		["GitLab Duo", getBundledModel("gitlab-duo-agent", "claude_sonnet_4_6_vertex") as Model],
+	] as const)("counts only the visible text of another model's turn read by %s", (_case, model) => {
+		expect(model).toBeDefined();
+		const tokenizer = new Tokenizer(model);
+		const turn = signedTurn(opus, "x".repeat(4000), SIGNATURE);
+		expect(tokenizer.countMessage(turn)).toBe(tokenizer.countTokens(["Done."]));
+	});
+
+	test("counts Devin's thinking text and only a native turn's signature", () => {
+		const swe = getBundledModel("devin", "swe-1-6") as Model;
+		const tokenizer = new Tokenizer(swe);
+		const own = signedTurn(swe, VISIBLE, SIGNATURE);
+		own.content = [...own.content, { type: "thinking", thinking: VISIBLE, thinkingSignature: SIGNATURE }];
+		// The prompt's single `signature` field carries the first block's signature.
+		expect(tokenizer.countMessage(own)).toBe(tokenizer.countTokens([VISIBLE, "Done.", VISIBLE]) + 1000);
+		// Another model's turn arrives demoted to text, unsigned.
+		const foreign = tokenizer.countMessage(signedTurn(opus, VISIBLE, SIGNATURE));
+		expect(foreign).toBe(
+			tokenizer.countMessage(signedTurn(opus, VISIBLE, SIGNATURE), { excludeEncryptedReasoning: true }),
+		);
 	});
 });
 

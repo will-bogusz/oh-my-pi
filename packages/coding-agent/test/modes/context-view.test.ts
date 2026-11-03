@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "bun:test";
 import { type } from "@oh-my-pi/omptype";
 import { Agent, type AgentMessage, type AgentTool } from "@oh-my-pi/pi-agent-core";
 import type { AssistantMessage, Model } from "@oh-my-pi/pi-ai";
+import { renderDemotedThinking } from "@oh-my-pi/pi-ai/dialect/demotion";
 import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
 import { Settings } from "../../src/config/settings";
 import { AgentSession } from "../../src/session/agent-session";
@@ -269,9 +270,9 @@ describe("context snapshot assistant reasoning", () => {
 		expect(totalTokens(updated)).toBe(
 			session.agent.tokenizer.countMessage(message) + session.agent.tokenizer.countMessage(next),
 		);
-		expect(category(updated, "assistant-thinking").tokens).toBe(
-			session.agent.tokenizer.countTokens("retained excerpt"),
-		);
+		// No longer the latest turn, the abandoned call's signature is stripped, and
+		// the Claude API drops its own unsigned thinking from the replay.
+		expect(category(updated, "assistant-thinking").tokens).toBe(0);
 		expect(totalTokens(initial)).toBe(1000);
 		expect(JSON.stringify(updated)).not.toContain("private-signature");
 	});
@@ -336,9 +337,13 @@ describe("context snapshot assistant reasoning", () => {
 		expect(totalTokens(data)).toBe(messageTokens);
 		expect(JSON.stringify(data)).not.toMatch(/private-first|private-second|rs_first|rs_second/);
 
-		session.agent.setModel(getBundledModel("openai-codex", "gpt-6-sol")!);
+		const otherModel = getBundledModel("openai-codex", "gpt-6-sol")!;
+		session.agent.setModel(otherModel);
 		const demoted = buildSessionContextView(session);
-		expect(category(demoted, "assistant-thinking").tokens).toBe(session.agent.tokenizer.countTokens(summary));
+		// Another model's request carries the summary demoted to text in its own dialect.
+		expect(category(demoted, "assistant-thinking").tokens).toBe(
+			session.agent.tokenizer.countTokens(renderDemotedThinking(otherModel.id, summary)),
+		);
 	});
 
 	it.each([

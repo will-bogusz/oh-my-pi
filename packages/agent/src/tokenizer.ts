@@ -1,14 +1,8 @@
-import type { AssistantMessage, Model } from "@oh-my-pi/pi-ai";
-import { renderDemotedThinking } from "@oh-my-pi/pi-ai/dialect/demotion";
-import { isFactoryDroidGeminiWire, keepsFactoryGeminiReasoning } from "@oh-my-pi/pi-ai/providers/factory-droid/gemini";
-import { ollamaChatDropsOwnThinking } from "@oh-my-pi/pi-ai/providers/ollama";
-import { completionsDropsOwnThinking, isLiteLLMThinkingSignature } from "@oh-my-pi/pi-ai/providers/openai-completions";
+import type { AssistantMessage, Model, ToolResultMessage, UserMessage } from "@oh-my-pi/pi-ai";
 import { isColdReplayableResponsesTurn } from "@oh-my-pi/pi-ai/providers/openai-shared";
-import {
-	dropsForeignReasoningPayload,
-	isSameModelTurn,
-	shouldDropTruncatedThinkingOnlyAssistant,
-} from "@oh-my-pi/pi-ai/providers/transform-messages";
+import { type ReplayView, replayView } from "@oh-my-pi/pi-ai/providers/replay-view";
+import { shouldDropTruncatedThinkingOnlyAssistant } from "@oh-my-pi/pi-ai/providers/transform-messages";
+import { sendsImageInputOnWire } from "@oh-my-pi/pi-ai/providers/vision-guard";
 import {
 	getOpenAIResponsesHistoryItems,
 	sanitizeOpenAIResponsesAssistantHistoryItemsForReplay,
@@ -43,13 +37,36 @@ export function tokenizerEncodingForModel(model: Pick<Model, "tokenizer"> | null
 	return model?.tokenizer ? NATIVE_ENCODING[model.tokenizer] : null;
 }
 
+/**
+ * What a host sends in place of a run of images to a reader whose wire
+ * carries none; the Tokenizer counts it there instead of the images.
+ */
+export const IMAGE_OMITTED_TEXT = "[image omitted: the active model does not support image input]";
+
 type TokenizerModel = Pick<Model, "tokenizer"> &
-	snapcompact.ShapeTarget & {
-		compat?: Model["compat"];
-		thinking?: Model["thinking"];
-		reasoning?: boolean;
-		requestModelId?: string;
-	};
+	snapcompact.ShapeTarget &
+	Partial<
+		Pick<
+			Model,
+			"compat" | "thinking" | "reasoning" | "requestModelId" | "factoryDroidApiProviders" | "input" | "transport"
+		>
+	>;
+
+/** The reader's replay view; models without an API, provider and id count turns as stored. */
+function readerView(model: TokenizerModel | null | undefined): ReplayView | undefined {
+	if (!model?.api || !model.provider || !model.id) return undefined;
+	return replayView(model as Parameters<typeof replayView>[0]);
+}
+
+/**
+ * Whether the reader's request carries image blocks. Hosts replace the images
+ * of a reader whose wire sends none with {@link IMAGE_OMITTED_TEXT}; a model
+ * without declared modalities is assumed to take them.
+ */
+function readerSendsImages(model: TokenizerModel | null | undefined): boolean {
+	if (!model?.api || !model.input) return true;
+	return sendsImageInputOnWire({ ...model, compat: model.compat ?? {} } as Model);
+}
 
 /** The model an assistant turn's native reasoning (signed thinking, Responses history) is replayed to. */
 interface ReasoningReplayReader {
@@ -58,18 +75,13 @@ interface ReasoningReplayReader {
 	id: string;
 }
 
-function reasoningReplayReader(model: TokenizerModel | null | undefined): ReasoningReplayReader | undefined {
-	if (!model?.api || !model.provider || !model.id) return undefined;
+function reasoningReplayReader(view: ReplayView | undefined): ReasoningReplayReader | undefined {
+	const target = view?.target;
+	if (!target) return undefined;
 	// Filtering targets strip native reasoning items before the request is encoded.
-	const compat = model.compat;
+	const compat = target.compat;
 	if (compat && "filterReasoningHistory" in compat && compat.filterReasoningHistory) return undefined;
-	return { api: model.api, provider: model.provider, id: model.id };
-}
-
-/** Identity of the reader whose replayed reasoning a {@link Tokenizer} counts; equal keys count it alike. */
-export function reasoningReplayKey(model: TokenizerModel | null | undefined): string {
-	const reader = reasoningReplayReader(model);
-	return reader ? `${reader.api}\0${reader.provider}\0${reader.id}` : "";
+	return { api: target.api, provider: target.provider, id: target.id };
 }
 
 /** Request state a {@link Tokenizer} counts for, beyond its model. */
@@ -208,24 +220,27 @@ interface MessageEstimate {
  * Model-aware local token counter. Immutable: the catalog-resolved encoding
  * is fixed at construction, so a cached count can never straddle two
  * encodings. An `Agent` owns one for its active model (swapping the instance
- * when the model's encoding, image or thinking-replay pricing, replay
- * identity or native-history replay state changes); one-shot flows construct
+ * when the model's encoding, image or thinking-replay pricing, replay view
+ * or native-history replay state changes); one-shot flows construct
  * their own for the model that will be billed. Known tokenizer families use
  * exact native counts; other models are counted in o200k_base, which bills
  * unknown readers closer than a bytes/4 guess.
+ *
+ * Assistant turns are counted as the reader's request carries them (pi-ai's
+ * {@link replayView}: `transformMessages` for the model the request encodes
+ * for, plus the encoder's own thinking rules), so the count follows the
+ * encoders instead of mirroring them.
  */
 export class Tokenizer {
 	readonly #encoding: natives.Encoding | null;
 	readonly #frameBilling: snapcompact.FrameBilling;
 	readonly frameBillingKey: string;
+	readonly #view: ReplayView | undefined;
 	readonly #reasoningReader: ReasoningReplayReader | undefined;
-	readonly #dropsOllamaThinking: boolean;
-	readonly #dropsCompletionsThinking: boolean;
 	/** Claude's own API and prefix-bound hosts keep another model's signature from their deployment. */
 	readonly #readsDeploymentSignatures: boolean;
-	/** Factory's Gemini generate wire, whose replay pass keeps only Google-origin reasoning. */
-	readonly #factoryGeminiWire: boolean;
-	readonly reasoningReplayKey: string;
+	/** Whether image blocks reach the reader; otherwise each run of them is one {@link IMAGE_OMITTED_TEXT}. */
+	readonly #sendsImages: boolean;
 	/** How the reader bills replayed signed thinking (catalog `thinking-replay-tokens`). */
 	readonly thinkingReplayTokens: ThinkingReplayTokens;
 	/** Whether the counted request replays native Responses history; see {@link TokenizerOptions}. */
@@ -259,19 +274,14 @@ export class Tokenizer {
 		this.#encoding = tokenizerEncodingForModel(model);
 		this.#frameBilling = snapcompact.frameBilling(model ?? undefined);
 		this.frameBillingKey = snapcompact.frameBillingKey(this.#frameBilling);
-		this.#reasoningReader = reasoningReplayReader(model);
-		this.#dropsOllamaThinking = ollamaChatDropsOwnThinking(model);
-		this.#dropsCompletionsThinking = completionsDropsOwnThinking(model);
-		const compat = model?.compat;
+		this.#view = readerView(model);
+		this.#reasoningReader = reasoningReplayReader(this.#view);
+		const target = this.#view?.target;
 		this.#readsDeploymentSignatures =
-			model?.api === "anthropic-messages" &&
-			((compat !== undefined && "officialEndpoint" in compat && compat.officialEndpoint) ||
-				model.thinking?.prefixBinding === true);
-		this.#factoryGeminiWire =
-			model?.api === "factory-droid-agent" &&
-			model.id !== undefined &&
-			isFactoryDroidGeminiWire({ id: model.id, requestModelId: model.requestModelId });
-		this.reasoningReplayKey = reasoningReplayKey(model);
+			target?.api === "anthropic-messages" &&
+			((target.compat !== undefined && "officialEndpoint" in target.compat && target.compat.officialEndpoint) ||
+				target.thinking?.prefixBinding === true);
+		this.#sendsImages = readerSendsImages(model);
 		this.thinkingReplayTokens = resolveThinkingReplayTokens(model ?? {});
 		this.nativeHistoryReplay = options?.nativeHistoryReplay ?? true;
 	}
@@ -375,18 +385,32 @@ export class Tokenizer {
 	}
 
 	/**
-	 * Whether `message`'s opaque reasoning payload (thinking signatures, redacted
-	 * thinking) may reach this reader: everything except what `transformMessages`
-	 * certainly strips from another model's turn, or what Factory's Gemini wire
-	 * drops from a turn not of Google origin. Without a replay reader (no
-	 * model, or a `filterReasoningHistory` target) every payload is charged,
-	 * which overcounts a filtering reader's foreign turns.
+	 * Text fragments and image tokens of user, developer, custom and tool-result
+	 * content. A reader whose wire carries no images gets one
+	 * {@link IMAGE_OMITTED_TEXT} per run of adjacent images, as hosts send it.
 	 */
-	#receivesReasoningPayload(message: AssistantMessage): boolean {
-		const reader = this.#reasoningReader;
-		if (reader === undefined) return true;
-		if (this.#factoryGeminiWire) return keepsFactoryGeminiReasoning(message);
-		return !dropsForeignReasoningPayload(message, reader);
+	#measureContent(content: UserMessage["content"] | ToolResultMessage["content"], fragments: string[]): number {
+		if (typeof content === "string") {
+			fragments.push(content);
+			return 0;
+		}
+		if (!Array.isArray(content)) return 0;
+		let extra = 0;
+		let omitted = false;
+		for (const block of content) {
+			if (block.type === "text") {
+				if (block.text) fragments.push(block.text);
+				omitted = false;
+			} else if (block.type === "image") {
+				if (this.#sendsImages) {
+					extra += this.imageTokens(base64ImageSize(block.data), block.detail);
+				} else if (!omitted) {
+					fragments.push(IMAGE_OMITTED_TEXT);
+					omitted = true;
+				}
+			}
+		}
+		return extra;
 	}
 
 	/**
@@ -428,85 +452,38 @@ export class Tokenizer {
 				// user -- so they are counted alike. Without the developer case the switch
 				// fell through to `default: return 0`, and the old annotation narrowed the
 				// blocks to text-only, hiding the image charge the toolResult arm applies.
-				const content = message.content;
-				if (typeof content === "string") {
-					fragments.push(content);
-				} else if (Array.isArray(content)) {
-					for (const block of content) {
-						if (block.type === "text" && block.text) {
-							fragments.push(block.text);
-						} else if (block.type === "image") {
-							extra += this.imageTokens(base64ImageSize(block.data), block.detail);
-						}
-					}
-				}
+				extra += this.#measureContent(message.content, fragments);
 				break;
 			}
 			case "assistant": {
+				// The turn as the reader's request carries it; a dropped turn sends nothing.
+				const turn = this.#view ? this.#view.assistantTurn(message, latestTurn) : message;
+				if (!turn) return 0;
 				// Replayed native Responses reasoning is billed as input at the turn's
 				// reported reasoning tokens, not at its ~3x larger ciphertext size, so it
 				// is a token price and counts in both arms. Its thinking signature never
 				// reaches the wire then (the payload items replay instead); a turn whose
 				// backend reported no reasoning tokens keeps the signature as its price.
 				const replayedReasoning = this.#replayedReasoningTokens(message);
-				const ollamaReader = this.#reasoningReader?.api === "ollama-chat" ? this.#reasoningReader : undefined;
-				const ownOllamaTurn = ollamaReader !== undefined && isSameModelTurn(message, ollamaReader);
-				const completionsReader = this.#dropsCompletionsThinking ? this.#reasoningReader : undefined;
-				const ownDroppedCompletionsTurn =
-					completionsReader !== undefined && isSameModelTurn(message, completionsReader);
 				if (typeof replayedReasoning === "number") extra += replayedReasoning;
 				const signaturesPriced = this.thinkingReplayTokens === "signature";
-				// The replay's signature rule (`transformMessages`): an aborted or
-				// errored turn's final block can hold a partial signature, and a turn
-				// whose tool calls ended without a tool-use stop is abandoned, so all
-				// its signatures are stripped. Every other block completed. On the
-				// Anthropic Messages API the latest assistant turn keeps an abandoned
-				// turn's signatures byte-for-byte (Bedrock's Converse replay strips
-				// them too); a per-message count cannot see position, so it follows
-				// the rule for older turns unless the caller says it is the latest
-				// (`countLatestTurn`).
-				const content = message.content;
-				const invalidStop = message.stopReason === "aborted" || message.stopReason === "error";
-				const keepsLatestSignatures = latestTurn && message.api === "anthropic-messages";
-				const abandonedToolUse =
-					!keepsLatestSignatures &&
-					!invalidStop &&
-					message.stopReason !== "toolUse" &&
-					content.some(block => block.type === "toolCall");
-				const untrustedIndex = invalidStop ? content.length - 1 : -1;
 				let signedReasoning = false;
-				for (let index = 0; index < content.length; index++) {
-					const block = content[index];
+				for (const block of turn.content) {
 					if (block.type === "text") {
 						fragments.push(block.text);
 					} else if (block.type === "thinking") {
-						// `transformMessages` drops another model's empty thinking and demotes the
-						// rest to visible text; only the reader's own thinking stays native.
-						if (ollamaReader && !ownOllamaTurn) {
-							if (block.thinking.trim()) fragments.push(renderDemotedThinking(ollamaReader.id, block.thinking));
-							continue;
-						}
-						if (this.#dropsOllamaThinking && ownOllamaTurn) continue;
-						// Chat-completions drops it unless LiteLLM replays it in `thinking_blocks`.
-						if (ownDroppedCompletionsTurn && !isLiteLLMThinkingSignature(block.thinkingSignature)) continue;
 						fragments.push(block.thinking);
 						// Providers charge for the opaque signature/reasoning payload that
 						// rides alongside the thinking text (OpenAI Responses encrypted
-						// reasoning items, Gemini thought signatures) wherever it survives
-						// replay; `transformMessages` strips another model's on most wires.
-						// A reader billing at `output` size (Claude) charges the reasoning,
-						// priced below, not these bytes. The compaction floor excludes it
-						// (its local byte size diverges from provider billing).
-						if (
-							block.thinkingSignature &&
-							!excludeEncryptedReasoning &&
-							signaturesPriced &&
-							typeof replayedReasoning !== "number" &&
-							this.#receivesReasoningPayload(message)
-						) {
+						// reasoning items, Gemini thought signatures) wherever the replay
+						// keeps it. A reader billing at `output` size (Claude) charges the
+						// reasoning, priced below, not these bytes. The compaction floor
+						// excludes it (its local byte size diverges from provider billing).
+						if (!block.thinkingSignature) continue;
+						signedReasoning = true;
+						if (!excludeEncryptedReasoning && signaturesPriced && typeof replayedReasoning !== "number") {
 							fragments.push(block.thinkingSignature);
 						}
-						if (block.thinkingSignature && !abandonedToolUse && index !== untrustedIndex) signedReasoning = true;
 					} else if (block.type === "toolCall") {
 						fragments.push(block.name);
 						fragments.push(stringifyJson(block.arguments) ?? "null");
@@ -515,9 +492,7 @@ export class Tokenizer {
 						// survives replay, as above; excluded from the compaction floor for
 						// the same reason.
 						signedReasoning = true;
-						if (!excludeEncryptedReasoning && signaturesPriced && this.#receivesReasoningPayload(message)) {
-							fragments.push(block.data);
-						}
+						if (!excludeEncryptedReasoning && signaturesPriced) fragments.push(block.data);
 					} else if (block.type === "anthropicServerTool") {
 						// Native Anthropic server-tool call/result replayed verbatim on the
 						// wire (server_tool_use input and opaque result content). The provider
@@ -545,32 +520,33 @@ export class Tokenizer {
 			case "custom":
 			case "hookMessage":
 			case "toolResult": {
-				if (typeof message.content === "string") {
-					fragments.push(message.content);
-				} else {
-					for (const block of message.content) {
-						if (block.type === "text" && block.text) {
-							fragments.push(block.text);
-						} else if (block.type === "image") {
-							extra += this.imageTokens(base64ImageSize(block.data), block.detail);
-						}
-					}
-				}
+				extra += this.#measureContent(message.content, fragments);
 				break;
 			}
 			case "branchSummary":
 			case "compactionSummary": {
 				fragments.push(message.summary);
 				if (message.role === "compactionSummary") {
+					let omitted = false;
+					const frame = (data: string): void => {
+						if (this.#sendsImages) {
+							extra += this.#frameTokens(data);
+						} else if (!omitted) {
+							fragments.push(IMAGE_OMITTED_TEXT);
+							omitted = true;
+						}
+					};
 					if (message.blocks) {
 						for (const block of message.blocks) {
-							if (block.type === "text") fragments.push(block.text);
-							else extra += this.#frameTokens(block.data);
+							if (block.type === "text") {
+								fragments.push(block.text);
+								omitted = false;
+							} else {
+								frame(block.data);
+							}
 						}
 					} else if (message.images) {
-						for (const image of message.images) {
-							extra += this.#frameTokens(image.data);
-						}
+						for (const image of message.images) frame(image.data);
 					}
 				}
 				break;
@@ -612,10 +588,9 @@ export class Tokenizer {
 		return (
 			tokenizerEncodingForModel(model) === this.#encoding &&
 			snapcompact.frameBillingKey(snapcompact.frameBilling(model ?? undefined)) === this.frameBillingKey &&
-			reasoningReplayKey(model) === this.reasoningReplayKey &&
+			readerView(model)?.key === this.#view?.key &&
 			resolveThinkingReplayTokens(model ?? {}) === this.thinkingReplayTokens &&
-			ollamaChatDropsOwnThinking(model) === this.#dropsOllamaThinking &&
-			completionsDropsOwnThinking(model) === this.#dropsCompletionsThinking &&
+			readerSendsImages(model) === this.#sendsImages &&
 			(options?.nativeHistoryReplay ?? true) === this.nativeHistoryReplay
 		);
 	}

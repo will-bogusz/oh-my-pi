@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Removed `dropsForeignReasoningPayload`, `isFactoryDroidGeminiWire` and `keepsFactoryGeminiReasoning`; `replayView(model)` gives each turn as the model's request replays it
+
+### Added
+
+- Added `replayView(model)` (`providers/replay-view`), which returns a stored assistant turn as the model's request carries it, including Factory Droid's inner wire and the Cursor, Devin and GitLab Duo history builders, and `replayAssistantTurn(turn, model, latest)`, one turn through `transformMessages`
+
 ## [18.16.0] - 2026-11-02
 
 ### Added

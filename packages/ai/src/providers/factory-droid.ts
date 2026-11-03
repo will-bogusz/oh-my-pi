@@ -1,4 +1,3 @@
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
 import {
 	type FactoryDroidModelPolicy,
 	factoryDroidRegionalLimits,
@@ -26,7 +25,6 @@ import type {
 	AssistantMessage,
 	Context,
 	Model,
-	ModelSpec,
 	ServiceTier,
 	StreamFunction,
 	StreamOptions,
@@ -40,6 +38,11 @@ import { mapStainlessArch, mapStainlessOs } from "./anthropic-headers";
 import { createProviderErrorMessage } from "./error-message";
 import droidIdentity from "./factory-droid/droid-identity.md" with { type: "text" };
 import { streamFactoryDroidGemini } from "./factory-droid/gemini";
+import {
+	factoryDroidDefaultUpstream,
+	type FactoryDroidSharedWire,
+	factoryDroidInnerRoute,
+} from "./factory-droid/route";
 import { factoryDroidToolNamesByWire, encodeFactoryDroidCompletionsToolName } from "./factory-droid/tool-names";
 import { streamAnthropic, streamOpenAICompletions, streamOpenAIResponses } from "./register-builtins";
 
@@ -101,19 +104,6 @@ export interface FactoryDroidOptions extends StreamOptions {
 	textVerbosity?: "low" | "medium" | "high";
 }
 
-/**
- * Default upstream from the discovered rotation. Routing comes from the KDL
- * registry or the spec itself, never from `model.headers`: the shared model
- * cache strips headers from persisted specs, so header-carried routing would
- * vanish on cached loads, while `factoryDroidApiProviders` survives.
- */
-function defaultUpstream(
-	model: Model<"factory-droid-agent">,
-	registry: FactoryDroidModelPolicy | undefined,
-): string | undefined {
-	return (model.factoryDroidApiProviders ?? registry?.rotation ?? ["fireworks"])[0];
-}
-
 function requireUpstream(upstream: string | undefined): string {
 	if (!upstream) throw new AIError.ConfigurationError("Factory Droid model is unavailable in this account region.");
 	return upstream;
@@ -145,7 +135,7 @@ function scopeToAccount(
 	if (!identity) {
 		return {
 			model,
-			upstream: requireUpstream(defaultUpstream(model, registry)),
+			upstream: requireUpstream(factoryDroidDefaultUpstream(model, registry)),
 			orgId: factoryDroidOrgIdFromToken(token) ?? model.factoryDroidOrgId,
 			baseUrl: model.baseUrl || factoryDroidWireBaseUrl(wire, undefined),
 		};
@@ -157,7 +147,12 @@ function scopeToAccount(
 		model.baseUrl === factoryDroidWireBaseUrl(wire, "eu");
 	const baseUrl = defaultEndpoint ? factoryDroidWireBaseUrl(wire, identity.region) : model.baseUrl;
 	if (!registry) {
-		return { model, upstream: requireUpstream(defaultUpstream(model, registry)), orgId: identity.orgId, baseUrl };
+		return {
+			model,
+			upstream: requireUpstream(factoryDroidDefaultUpstream(model, registry)),
+			orgId: identity.orgId,
+			baseUrl,
+		};
 	}
 
 	const inferenceRegion = resolveFactoryDroidInferenceRegion(identity);
@@ -188,13 +183,11 @@ function scopeToAccount(
 	return { model: scoped, upstream, orgId: identity.orgId, baseUrl };
 }
 
-type SharedWire = Exclude<FactoryDroidWire, "google-generate">;
-
 /** Request dialect plus the shared-transport model for one route. */
 interface ResolvedRoute {
 	policy: RequestPolicy;
 	/** Model rebuilt for the shared transport's API; absent on the native Gemini client. */
-	inner?: Model<SharedWire>;
+	inner?: Model<FactoryDroidSharedWire>;
 	/** Server-side refusal fallback targets resolved for the route's upstream. */
 	serverSideFallbackModels?: readonly string[];
 }
@@ -222,18 +215,11 @@ function resolveRoute(
 	if (wire === "google-generate") {
 		route = { policy: resolveModelPolicy(model, { upstream }).request };
 	} else {
-		const spec = { ...model, api: wire };
-		const resolved = resolveModelPolicy(spec, { upstream });
+		const { policy, inner } = factoryDroidInnerRoute(model, wire, upstream, baseUrl);
 		route = {
-			policy: resolved.request,
-			inner: buildModel({
-				...model,
-				api: wire,
-				baseUrl,
-				compat: resolved.compat,
-				thinking: resolved.thinking,
-			} as ModelSpec<SharedWire>),
-			serverSideFallbackModels: serverSideFallbackModels(spec, { upstream }),
+			policy,
+			inner,
+			serverSideFallbackModels: serverSideFallbackModels({ ...model, api: wire }, { upstream }),
 		};
 	}
 	routes.set(key, route);

@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Removed the `reasoningReplayKey` export; `Tokenizer.countsAlike` compares readers by their request's replay instead
+
+### Fixed
+
+- Context estimates count each earlier turn as the active model's request sends it: Gemini through Factory no longer counts Claude thinking it drops, GLM and Kimi on Anthropic-compatible endpoints no longer count Claude API signatures they never receive, and Factory's Claude and GPT models price their own replayed reasoning like the Claude and OpenAI APIs do
+- Context estimates for a model that cannot read images count the omission note sent in their place instead of each image's full price
+
 ## [18.16.0] - 2026-11-02
 
 ### Changed

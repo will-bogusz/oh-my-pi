@@ -8,6 +8,7 @@ import {
 	type AgentTool,
 	AppendOnlyContextManager,
 	filterProviderReplayMessages,
+	IMAGE_OMITTED_TEXT,
 	resolveTelemetry,
 	type StreamFn,
 	type ThinkingLevel,
@@ -4589,10 +4590,7 @@ async function createAgentSessionScoped(options: CreateAgentSessionOptions): Pro
 			}
 			const activeModel = agent?.state.model ?? model;
 			if (activeModel && !sendsImageInputOnWire(activeModel)) {
-				return replaceLlmImagesWithText(
-					converted,
-					"[image omitted: the active model does not support image input]",
-				);
+				return replaceLlmImagesWithText(converted, IMAGE_OMITTED_TEXT);
 			}
 			return converted;
 		};
