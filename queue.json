@@ -61269,7 +61269,7 @@
    "branch": "will/headless-chrome-pipe",
    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
    "area": "browser",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/headless-chrome-pipe.md",
@@ -61279,7 +61279,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/headless-chrome-pipe",
    "host": "MacBook-Pro",
    "added": "2026-11-03T03:38:04Z",
-   "updated": "2026-11-03T04:38:45Z",
+   "updated": "2026-11-03T04:59:28Z",
    "note": "",
    "built": [
     {
