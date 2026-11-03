@@ -63396,6 +63396,28 @@
    "added": "2026-11-03T08:48:18Z",
    "updated": "2026-11-03T08:48:18Z",
    "note": ""
+  },
+  {
+   "id": "atspi-walk-reads",
+   "branch": "will/atspi-walk-reads",
+   "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [
+    "atspi-action-names",
+    "atspi-unanswered-app",
+    "gtk4-atspi-bounds"
+   ],
+   "base": "9f7d5e5653e3cb4caf7d9afc2302c5cfcdb9287d",
+   "body": "bodies/atspi-walk-reads.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T09:05:24Z",
+   "updated": "2026-11-03T09:05:24Z",
+   "note": ""
   }
  ],
  "watch": {
