@@ -63378,6 +63378,24 @@
    "added": "2026-11-03T08:46:34Z",
    "updated": "2026-11-03T08:48:00Z",
    "note": ""
+  },
+  {
+   "id": "ax-find-depth",
+   "branch": "will/ax-find-depth",
+   "title": "fix(natives): search 64 levels deep in find()",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "body": "bodies/ax-find-depth.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-find-depth",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T08:48:18Z",
+   "updated": "2026-11-03T08:48:18Z",
+   "note": ""
   }
  ],
  "watch": {
