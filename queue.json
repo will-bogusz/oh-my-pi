@@ -60238,10 +60238,18 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T01:26:08Z",
+  "checked": "2026-11-03T01:56:47Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "relay-downloads": {
+    "since": "2026-11-03T01:56:47Z",
+    "title": "fix(browser): report a relay tab's downloads where Chrome saved them"
+   },
+   "relay-popup-lossless": {
+    "since": "2026-11-03T01:56:47Z",
+    "title": "fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS"
+   },
    "role-implicit-landmarks": {
     "since": "2026-11-03T01:26:08Z",
     "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors"
@@ -61672,6 +61680,18 @@
     "id": "factory-droid-110-pin",
     "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
     "why": "opened as #17885"
+   },
+   {
+    "at": "2026-11-03T01:56:47Z",
+    "kind": "openable",
+    "id": "relay-downloads",
+    "title": "fix(browser): report a relay tab's downloads where Chrome saved them"
+   },
+   {
+    "at": "2026-11-03T01:56:47Z",
+    "kind": "openable",
+    "id": "relay-popup-lossless",
+    "title": "fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS"
    }
   ]
  },
@@ -62930,8 +62950,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T01:47:49.328450Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-03T01:56:48.177012Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -63740,6 +63760,34 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "encoded-prefix-count",
+    "label": "encoded-prefix-count",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": null,
+    "title": "fix(ai,agent,tui,coding-agent): count the system prompt and tools as the provider request encodes them",
+    "action": "wait",
+    "reasons": [
+     "needs token-count-policy (queued), wire-delta-count (queued)",
+     "conflicts with #17861 in packages/ai/src/providers/factory-droid/gemini.ts",
+     "conflicts with #17885 in packages/ai/src/providers/factory-droid.ts",
+     "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#17861",
+     "#17885"
+    ],
+    "needs": [
+     "token-count-policy",
+     "wire-delta-count"
+    ],
+    "created": "2026-11-03T01:54:17Z"
    },
    {
     "id": "text-reader-usage-shift",
