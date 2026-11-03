@@ -1301,8 +1301,9 @@ impl AxBackend for AtSpiAx {
 						.await
 						.map_err(DesktopError::ax_failed)?
 					{
-						if let Some(placement) =
-							cache.claim(connection, native.as_deref(), &frame, x, y).await?
+						if let Some(placement) = cache
+							.claim(connection, native.as_deref(), &frame, x, y)
+							.await?
 						{
 							claimed.push((frame, placement));
 						}
@@ -1328,8 +1329,12 @@ impl AxBackend for AtSpiAx {
 			let Some((root, placement)) = root else {
 				return Ok(None);
 			};
-			answered("the application", reply_timeout, Self::descend(connection, root, placement, x, y))
-				.await?
+			answered(
+				"the application",
+				reply_timeout,
+				Self::descend(connection, root, placement, x, y),
+			)
+			.await?
 		}))?
 	}
 
@@ -1987,7 +1992,7 @@ mod tests {
 
 	#[test]
 	fn an_element_is_read_in_two_rounds_and_only_on_its_interfaces() {
-		use std::cell::RefCell;
+		use std::sync::Mutex;
 
 		use atspi::zbus::{
 			MessageStream,
@@ -2006,7 +2011,7 @@ mod tests {
 		async fn qt(
 			server: atspi::zbus::Connection,
 			rounds: &[Vec<String>],
-			batches: &RefCell<Vec<Vec<String>>>,
+			batches: &Mutex<Vec<Vec<String>>>,
 		) {
 			let mut stream = MessageStream::from(&server);
 			// After the last round, any call is outside it.
@@ -2021,8 +2026,7 @@ mod tests {
 						continue;
 					}
 					let header = message.header();
-					let mut name =
-						format!("{} {}", header.path().unwrap(), header.member().unwrap());
+					let mut name = format!("{} {}", header.path().unwrap(), header.member().unwrap());
 					if header.member().unwrap().as_str() == "Get" {
 						let (_, property): (String, String) = message.body().deserialize().unwrap();
 						name = format!("{name} {property}");
@@ -2092,7 +2096,7 @@ mod tests {
 					}
 				}
 				names.sort();
-				batches.borrow_mut().push(names);
+				batches.lock().unwrap().push(names);
 			}
 		}
 
@@ -2126,7 +2130,7 @@ mod tests {
 			round("/button", &["Get NActions"]),
 			round("/button", &["GetName"]),
 		];
-		let batches = RefCell::new(Vec::new());
+		let batches = Mutex::new(Vec::new());
 
 		let rt = Builder::new_current_thread().enable_all().build().unwrap();
 		let reads = rt.block_on(async {
@@ -2173,7 +2177,7 @@ mod tests {
 			read("textfield", "notes.txt", Some("hello"), &["press"]),
 			read("button", "New", None, &["press"]),
 		]);
-		assert_eq!(batches.into_inner(), expected);
+		assert_eq!(batches.into_inner().unwrap(), expected);
 	}
 
 	mod unanswered {
@@ -2207,13 +2211,8 @@ mod tests {
 				let client = ConnectionBuilder::unix_stream(client).p2p().build();
 				tokio::try_join!(serve(server).build(), client).unwrap()
 			});
-			let ax = AtSpiAx {
-				rt,
-				connection,
-				reply_timeout,
-				native: None,
-				frames: FrameCache::default(),
-			};
+			let ax =
+				AtSpiAx { rt, connection, reply_timeout, native: None, frames: FrameCache::default() };
 			(ax, server)
 		}
 
