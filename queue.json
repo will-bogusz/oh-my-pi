@@ -63366,7 +63366,7 @@
    "branch": "will/atspi-action-names",
    "title": "fix(natives): match AT-SPI actions by their machine names",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/atspi-action-names.md",
@@ -63376,7 +63376,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-action-names",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:46:34Z",
-   "updated": "2026-11-03T09:26:06Z",
+   "updated": "2026-11-03T09:34:36Z",
    "note": "",
    "built": [
     {
