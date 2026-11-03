@@ -21190,9 +21190,21 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-lossless",
    "host": "MacBook-Pro",
    "added": "2026-10-19T00:03:17Z",
-   "updated": "2026-11-03T01:42:36Z",
+   "updated": "2026-11-03T02:08:05Z",
    "note": "HOLD (Will, 2026-10-18): waits for Will's OK on the Accessibility dependency 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard).",
-   "advanced": "2026-11-03T00:28:53Z"
+   "advanced": "2026-11-03T00:28:53Z",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "f7ed581c64bf15665b82d2cf5493cb067911686e",
+     "with_code": "ed2fe71c597d7ac137db2b9acfc106efb01305e4",
+     "tip": "6603d8d2456b4a0e8b659464233c25f1a158ce5b",
+     "with_tip": "7f6ab9a05a318e4efab76054a9555435076314d8",
+     "at": "2026-11-03T02:08:04Z",
+     "host": "MacBook-Pro",
+     "tree": "052d0c340427266f00a3ac56e572022b0d8dcb5b"
+    }
+   ]
   },
   {
    "id": "computer-ui-quiet",
@@ -60120,8 +60132,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/windows-app-id",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:11:09Z",
-   "updated": "2026-11-03T01:11:09Z",
-   "note": ""
+   "updated": "2026-11-03T02:08:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "43065412730b28565f392385858444b938e22a17",
+     "with_code": "ed2fe71c597d7ac137db2b9acfc106efb01305e4",
+     "tip": "2a181fa0b2bf71416329f800e89725fbbfcea933",
+     "with_tip": "7f6ab9a05a318e4efab76054a9555435076314d8",
+     "at": "2026-11-03T02:08:04Z",
+     "host": "MacBook-Pro",
+     "tree": "052d0c340427266f00a3ac56e572022b0d8dcb5b"
+    }
+   ]
   },
   {
    "id": "role-implicit-landmarks",
@@ -60138,8 +60162,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-implicit-landmarks",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:12:51Z",
-   "updated": "2026-11-03T01:12:51Z",
-   "note": ""
+   "updated": "2026-11-03T02:08:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "bb2e695ceaaa842b374df67379018f7aa66d260d",
+     "with_code": "ed2fe71c597d7ac137db2b9acfc106efb01305e4",
+     "tip": "7bed262e67bd4ce2a813cd3b9a80bfbfedf41a83",
+     "with_tip": "7f6ab9a05a318e4efab76054a9555435076314d8",
+     "at": "2026-11-03T02:08:04Z",
+     "host": "MacBook-Pro",
+     "tree": "052d0c340427266f00a3ac56e572022b0d8dcb5b"
+    }
+   ]
   },
   {
    "id": "token-count-policy",
