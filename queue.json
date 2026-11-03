@@ -61889,7 +61889,7 @@
    "branch": "will/mirror-takeover-keys",
    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
    "area": "natives",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/mirror-takeover-keys.md",
@@ -61899,7 +61899,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/mirror-takeover-keys",
    "host": "MacBook-Pro",
    "added": "2026-11-03T04:33:04Z",
-   "updated": "2026-11-03T05:05:52Z",
+   "updated": "2026-11-03T05:30:27Z",
    "note": "",
    "built": [
     {
@@ -62031,7 +62031,7 @@
    "branch": "will/win-silent-drag",
    "title": "fix(natives): refuse background drags on Windows Tk windows",
    "area": "computer",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/win-silent-drag.md",
@@ -62041,7 +62041,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-silent-drag",
    "host": "MacBook-Pro",
    "added": "2026-11-03T04:36:23Z",
-   "updated": "2026-11-03T05:15:29Z",
+   "updated": "2026-11-03T05:30:27Z",
    "note": "",
    "built": [
     {
@@ -62173,7 +62173,7 @@
    "branch": "will/wayland-element-input",
    "title": "fix(natives): refuse Wayland element input before focusing the element",
    "area": "natives",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/wayland-element-input.md",
@@ -62183,7 +62183,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-element-input",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:12:35Z",
-   "updated": "2026-11-03T05:25:31Z",
+   "updated": "2026-11-03T05:30:27Z",
    "note": "",
    "built": [
     {

@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 05:25Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 05:30Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 6 of 8 ready events used in the hour before the last plan, 2 left (plan of 2026-11-03 05:16Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -35,7 +35,7 @@ none
 | r2/relay-popup-owned | fix(browser): own popups omp's relay tabs open and keep them behind the user's selection | browser | P2 | 20d | r2/relay-own-only | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-popup-owned) |
 | computer-rich-text | feat(computer): read macOS text as Markdown with value({ format: "markdown" }) | computer | P2 | 20d | computer-ui-quiet, computer-ax-lines ([#15282](https://github.com/can1357/oh-my-pi/pull/15282)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-rich-text) |
 | macos-scroll-direction | fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux | computer | P2 | 3d | iphone-mirror-scroll-distance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-scroll-direction) |
-| gemma-tokenizer | feat(natives,catalog): count Gemini in the Gemma vocabulary | catalog |  | 3h | token-count-policy | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gemma-tokenizer) |
+| gemma-tokenizer | feat(natives,catalog): count Gemini in the Gemma vocabulary | catalog |  | 4h | token-count-policy | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gemma-tokenizer) |
 | encoded-prefix-count | fix(ai,agent,tui,coding-agent): count the system prompt and tools as the provider request encodes them | other |  | 3h | token-count-policy, wire-delta-count | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/encoded-prefix-count) |
 
 ## Held (6)
@@ -86,5 +86,5 @@ none
 | [#17910](https://github.com/can1357/oh-my-pi/pull/17910) | x11-mpx-focus-release | fix(natives): release the X11 virtual keyboard's focus before takeover activates its window | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-focus-release) |
 | [#17911](https://github.com/can1357/oh-my-pi/pull/17911) | x11-qt-background-keys | fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-qt-background-keys) |
 | [#17909](https://github.com/can1357/oh-my-pi/pull/17909) | mirror-takeover-keys | fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held | natives | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/mirror-takeover-keys) |
-| [#17913](https://github.com/can1357/oh-my-pi/pull/17913) | win-silent-drag | fix(natives): refuse background drags on Windows Tk windows | computer |  | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-silent-drag) |
+| [#17913](https://github.com/can1357/oh-my-pi/pull/17913) | win-silent-drag | fix(natives): refuse background drags on Windows Tk windows | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-silent-drag) |
 | [#17915](https://github.com/can1357/oh-my-pi/pull/17915) | wayland-element-input | fix(natives): refuse Wayland element input before focusing the element | natives | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-element-input) |
