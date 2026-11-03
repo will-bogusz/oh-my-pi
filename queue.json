@@ -61350,10 +61350,22 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T03:58:48Z",
+  "checked": "2026-11-03T04:29:20Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "x11-mpx-focus-release": {
+    "since": "2026-11-03T04:29:20Z",
+    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window"
+   },
+   "x11-qt-background-keys": {
+    "since": "2026-11-03T04:29:20Z",
+    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent"
+   },
+   "x11-takeover-keymap-switch": {
+    "since": "2026-11-03T04:29:20Z",
+    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source"
+   },
    "headless-chrome-pipe": {
     "since": "2026-11-03T03:58:48Z",
     "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed"
@@ -62862,6 +62874,24 @@
     "id": "read-block-pages",
     "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
     "why": "opened as #17904"
+   },
+   {
+    "at": "2026-11-03T04:29:20Z",
+    "kind": "openable",
+    "id": "x11-mpx-focus-release",
+    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window"
+   },
+   {
+    "at": "2026-11-03T04:29:20Z",
+    "kind": "openable",
+    "id": "x11-qt-background-keys",
+    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent"
+   },
+   {
+    "at": "2026-11-03T04:29:20Z",
+    "kind": "openable",
+    "id": "x11-takeover-keymap-switch",
+    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source"
    }
   ]
  },
