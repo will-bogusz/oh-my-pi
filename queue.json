@@ -57238,7 +57238,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "256b3211bca7458391866a8bcc9369902664be55",
+   "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
    "body": "bodies/iphone-mirror-key-gap.md",
    "state": "queued",
    "pr": null,
@@ -57246,7 +57246,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-key-gap",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:15:44Z",
-   "updated": "2026-11-03T00:45:21Z",
+   "updated": "2026-11-03T00:48:14Z",
    "note": "",
    "built": [
     {
@@ -57317,7 +57317,7 @@
      "tree": "1c2e904f816765145387f519b84705329a98de9a"
     }
    ],
-   "advanced": "2026-11-02T02:40:57Z",
+   "advanced": "2026-11-03T00:48:14Z",
    "hold": "Main, 2026-11-02: doubled-letter typing unmeasured at 60 ms (pre-open review)"
   },
   {
