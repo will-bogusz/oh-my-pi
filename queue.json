@@ -60549,13 +60549,13 @@
    "needs": [],
    "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
    "body": "bodies/role-implicit-landmarks.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17895,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-implicit-landmarks",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:12:51Z",
-   "updated": "2026-11-03T02:10:39Z",
+   "updated": "2026-11-03T02:16:08Z",
    "note": "",
    "built": [
     {
@@ -60728,7 +60728,8 @@
      "host": "MacBook-Pro",
      "tree": "91b54a3c61655e10eb8e95bc1a11f335eff2bb2f"
     }
-   ]
+   ],
+   "opened": "2026-11-03T02:16:08Z"
   },
   {
    "id": "token-count-policy",
