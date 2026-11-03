@@ -3,8 +3,8 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 01:26Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-03 01:13Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 6, stacked 8, held 7, open PRs 21, queued since the last plan 1; merged 210, closed 27
+**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-03 01:26Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 3, conflict-held 7, stacked 8, held 7, open PRs 21; merged 210, closed 27
 
 ## Openable now (3)
 
@@ -14,7 +14,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | windows-app-id | fix(coding-agent): find app windows by application id or path | computer | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/windows-app-id) |
 | role-implicit-landmarks | fix(coding-agent): find named sections and other implicit roles with role/ selectors | browser | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-implicit-landmarks) |
 
-## Conflict-held (6)
+## Conflict-held (7)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -24,6 +24,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 9d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 3d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 2d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
+| token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 0h | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 
 ## Stacked (8)
 
@@ -75,9 +76,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | [#17773](https://github.com/can1357/oh-my-pi/pull/17773) | visuals-guidance | feat(coding-agent): ask for one designed SVG figure where an answer has shape | other |  | 20h | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/visuals-guidance) |
 | [#17881](https://github.com/can1357/oh-my-pi/pull/17881) | cli-reference-models-row | docs(coding-agent): restore the --models row in the CLI reference | other | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cli-reference-models-row) |
 | [#17883](https://github.com/can1357/oh-my-pi/pull/17883) | snapcompact-legacy-archive-credit | fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-legacy-archive-credit) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |

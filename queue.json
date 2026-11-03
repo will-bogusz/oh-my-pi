@@ -60162,13 +60162,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T00:54:46Z",
+  "checked": "2026-11-03T01:26:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "factory-droid-110-pin": {
-    "since": "2026-11-03T00:24:02Z",
-    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0"
+   "role-implicit-landmarks": {
+    "since": "2026-11-03T01:26:08Z",
+    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors"
+   },
+   "windows-app-id": {
+    "since": "2026-11-03T01:26:08Z",
+    "title": "fix(coding-agent): find app windows by application id or path"
    },
    "iphone-mirror-key-gap": {
     "since": "2026-11-03T00:24:02Z",
@@ -60197,7 +60201,8 @@
    17861,
    17862,
    17881,
-   17883
+   17883,
+   17885
   ],
   "post_merge": {
    "16284": {
@@ -61572,6 +61577,25 @@
     "kind": "openable",
     "id": "iphone-mirror-key-gap",
     "title": "perf(natives): type on iPhone Mirroring twice as fast"
+   },
+   {
+    "at": "2026-11-03T01:26:08Z",
+    "kind": "openable",
+    "id": "role-implicit-landmarks",
+    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors"
+   },
+   {
+    "at": "2026-11-03T01:26:08Z",
+    "kind": "openable",
+    "id": "windows-app-id",
+    "title": "fix(coding-agent): find app windows by application id or path"
+   },
+   {
+    "at": "2026-11-03T01:26:08Z",
+    "kind": "unopenable",
+    "id": "factory-droid-110-pin",
+    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
+    "why": "opened as #17885"
    }
   ]
  },
@@ -62830,12 +62854,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T01:13:44.748162Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-03T01:26:09.251840Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 3,
-   "left": 5
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -63765,6 +63789,27 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "token-count-policy",
+    "label": "token-count-policy",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": null,
+    "title": "feat(catalog,coding-agent): token-count framing policy in KDL",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #17747 in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/test/context-fits-model.test.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#17747"
+    ],
+    "needs": [],
+    "created": "2026-11-03T01:24:37Z"
    }
   ],
   "drafts": [
