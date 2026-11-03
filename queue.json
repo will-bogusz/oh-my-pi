@@ -62335,7 +62335,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-element-focus-steal",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:41:09Z",
-   "updated": "2026-11-03T06:27:03Z",
+   "updated": "2026-11-03T06:27:29Z",
    "note": "",
    "built": [
     {
@@ -62489,7 +62489,8 @@
      "tree": "69c73248b996ad1d6c1f358b8436e9dc45e3a848"
     }
    ],
-   "opened": "2026-11-03T06:27:03Z"
+   "opened": "2026-11-03T06:27:03Z",
+   "readied": "2026-11-03T06:27:29Z"
   },
   {
    "id": "wayland-pipewire-dlopen",
