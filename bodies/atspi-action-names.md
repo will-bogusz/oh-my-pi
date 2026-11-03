@@ -28,7 +28,7 @@ AT-SPI's `GetActions` returns each action's localized name, for screen readers t
 - Live in Fedora 44 KVM guests (GNOME Shell 50.6, Plasma 6.8.2, at-spi2-core 2.60.7) through the real path (`AgentSession` → eval → `computer` prelude → pi-natives), `main`'s addon against this branch's. Firefox and Chromium don't update their accessible text while covered, so their counters were read from a screenshot after raising each window.
 - `actions_match_by_machine_name_not_localized_name` serves elements on a peer-to-peer D-Bus connection that answers like the apps: localized `GetActions` (Firefox `;;`, a German GTK app, Chromium's checkbox, VS Code's toggle), `GetName` with machine names, `GetAll` refused as Qt refuses it, and one element claiming `NActions = i32::MAX`. Each regression fails it: `action_names` reading `GetActions` again (all five expected matches miss), `Self::action` with zbus's property cache (every `NActions` read errors), and the cap removed (the test aborts on allocation).
 - `cargo test -p pi-natives --lib -- desktop::linux`: 59/59. `scripts/rust-check` linux: clean.
-- Not run: `menu.select()` live (no guest app exposes a menu bar OMP's menu walk reaches today), a non-English locale, the full `bun check`.
+- Not run: `menu.select()` live (no guest app has a menu bar OMP's menu walk reaches), a non-English locale, the full `bun check`.
 
 ---
 
