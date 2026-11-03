@@ -32,12 +32,13 @@ Non-goals: droid 1.1.0's new models (separate PR), its stream-deadline header, t
 - droid 1.1.0's own requests, checked without spending Factory credits on Messages, Responses and Chat Completions, carry none of the removed headers; its whoami carries `X-Factory-Whoami-Extended: true`.
 - Live turns from this branch (read two files, reply with their sum), each answering `SUM=4817`: `kimi-k3` on Chat Completions, `minimax-m2.7` and `claude-haiku-4-5-20251001` on Messages, `gpt-6-luna` on Responses.
 - New tests check that no Factory wire sends the removed headers even with a first-event budget set, that only whoami asks for the extended response, and that Azure Foundry gets eager tool streaming. With the source reverted, 6 fail.
-- **Native parity corpus recaptured with droid 1.1.0 (`bun packages/ai/scripts/capture-factory-droid-native.ts --droid <droid 1.1.0>`): ⟪TO FILL IN: parity cases passing / total⟫**
-- `bun test` in `packages/ai` and `packages/catalog` and `bun run check` in both pass.
+- Native parity corpus recaptured with droid 1.1.0 (`bun packages/ai/scripts/capture-factory-droid-native.ts --droid <droid 1.1.0>`): 56 cases, now with Nemotron 3.5 Super, Muse Spark 1.2, Beam 1.0, GPT-6 Sol and Luna Fast, and Opus 5.5 on Anthropic. `factory-droid-native-parity.test.ts`: 57 pass. Muse Spark Open, GPT-6.1 Terra and the Ultra Fast tiers have no case: the capture account cannot run them.
+- The capture now deletes droid's cached feature flags before each case. droid 1.1.0 serves cached flags while it refetches them, so a case's first request was routed to the upstream the previous case had pinned. Two cases recorded that way (`mistral-large-4`, `claude-opus-4-8@azure_anthropic`) and failed parity; after recapture they pass.
+- `bun test`: `packages/ai` 6551 pass, `packages/catalog` 1315 pass. `bun run check:ts` reports format issues only in `packages/tui/src/tui.ts` and `packages/coding-agent/test/interactive-click-focus.test.ts`, which this PR does not touch.
 
 ---
 
-- [x] `bun check` passes
+- [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
 
