@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 11:06Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 11:07Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-03 10:44Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -30,7 +30,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | wayland-input-capability | fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists | natives | P1 | 5h | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-capability) |
 | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 4h | [#17932](https://github.com/can1357/oh-my-pi/pull/17932) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | ax-find-depth | fix(natives): search 64 levels deep in find() | computer | P2 | 2h | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-find-depth) |
-| atspi-setvalue-readback | fix(natives): read back AT-SPI text writes before reporting success | computer | P2 | 1h | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-setvalue-readback) |
+| atspi-setvalue-readback | fix(natives): read back AT-SPI text writes before reporting success | computer | P2 | 2h | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-setvalue-readback) |
 
 ## Stacked (12)
 
