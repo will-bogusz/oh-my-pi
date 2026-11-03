@@ -40,7 +40,7 @@ Gemini had no local tokenizer, so context bars and compaction thresholds counted
 - Speed, 89 bodies: Gemma4 57 MB/s, Claude v5 39 MB/s, o200k 132 MB/s.
 - Full omp estimate on the 20 requests (captured, never sent): median −11.1% → −0.7%; bodies replaying earlier Claude turns still overcount by up to 17% on content the Factory wire drops, outside the vocabulary. 263 anchored Gemini turn pairs: p90 |error| 0.55% → 0.07% of the billed prompt.
 - The new `agent` test of a bundled Gemini row fails on `main`'s catalog and passes here.
-- `cargo test -p pi-natives --lib utok`, catalog, agent, `bun check`.
+- `cargo test -p pi-natives --lib utok`, catalog and agent suites pass. `bun check`: types and lint pass; oxfmt flags two files unformatted on `main`.
 
 ---
 
