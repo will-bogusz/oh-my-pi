@@ -65449,6 +65449,11 @@
     "sha": "5a65a7abea772a21854a759bffa146fc4ad22c52",
     "at": "2026-11-03T05:36:27Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "5a65a7abea772a21854a759bffa146fc4ad22c52",
+    "at": "2026-11-03T05:36:43Z",
+    "host": "goliath"
    }
   }
  },
