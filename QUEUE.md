@@ -1,14 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 10:42Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 10:47Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-03 10:36Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 15, stacked 12, held 6, open PRs 40, queued since the last plan 1; merged 210, closed 27
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-03 10:44Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 1, conflict-held 15, stacked 12, held 6, open PRs 40; merged 210, closed 27
 
-## Openable now (0)
+## Openable now (1)
 
-none
+| id | title | area | priority | age | plan | branch |
+|---|---|---|---|---|---|---|
+| relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
 
 ## Conflict-held (15)
 
@@ -22,7 +24,7 @@ none
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 2d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 9h | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 9h | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
-| wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P1 | 4h | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
+| wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P1 | 5h | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
 | gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 4h | [#17936](https://github.com/can1357/oh-my-pi/pull/17936), [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
 | atspi-file-chooser | fix(natives): read GTK3 file dialogs as AT-SPI windows | computer |  | 4h | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-file-chooser) |
 | wayland-input-capability | fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists | natives | P1 | 4h | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-capability) |
@@ -84,12 +86,12 @@ none
 | [#17861](https://github.com/can1357/oh-my-pi/pull/17861) | factory-droid-gemini-4-argon-110 | feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect | providers | P2 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-gemini-4-argon-110) |
 | [#17773](https://github.com/can1357/oh-my-pi/pull/17773) | visuals-guidance | feat(coding-agent): ask for one designed SVG figure where an answer has shape | other |  | 1d | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/visuals-guidance) |
 | [#17881](https://github.com/can1357/oh-my-pi/pull/17881) | cli-reference-models-row | docs(coding-agent): restore the --models row in the CLI reference | other | P0 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cli-reference-models-row) |
-| [#17883](https://github.com/can1357/oh-my-pi/pull/17883) | snapcompact-legacy-archive-credit | fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced | other | P1 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-legacy-archive-credit) |
+| [#17883](https://github.com/can1357/oh-my-pi/pull/17883) | snapcompact-legacy-archive-credit | fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced | other | P1 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-legacy-archive-credit) |
 | [#17896](https://github.com/can1357/oh-my-pi/pull/17896) | windows-app-id | fix(coding-agent): find app windows by application id or path | computer | P0 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/windows-app-id) |
 | [#17895](https://github.com/can1357/oh-my-pi/pull/17895) | role-implicit-landmarks | fix(coding-agent): find named sections and other implicit roles with role/ selectors | browser | P1 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-implicit-landmarks) |
 | [#17893](https://github.com/can1357/oh-my-pi/pull/17893) | relay-downloads | fix(browser): report a relay tab's downloads where Chrome saved them | browser | P1 | 8h | keep; opened over P2 #16908 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-downloads) |
 | [#17904](https://github.com/can1357/oh-my-pi/pull/17904) | read-block-pages | fix(coding-agent): stop URL reads returning bot block pages as content | other | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-block-pages) |
-| [#17903](https://github.com/can1357/oh-my-pi/pull/17903) | wayland-click-pacing | fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks | natives | P0 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-click-pacing) |
+| [#17903](https://github.com/can1357/oh-my-pi/pull/17903) | wayland-click-pacing | fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks | natives | P0 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-click-pacing) |
 | [#17908](https://github.com/can1357/oh-my-pi/pull/17908) | headless-chrome-pipe | fix(browser): exit a process-local headless Chrome when the process that launched it is killed | browser | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/headless-chrome-pipe) |
 | [#17912](https://github.com/can1357/oh-my-pi/pull/17912) | x11-takeover-keymap-switch | fix(natives): keep X11 takeover keys running when the core keyboard switches source | computer | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keymap-switch) |
 | [#17910](https://github.com/can1357/oh-my-pi/pull/17910) | x11-mpx-focus-release | fix(natives): release the X11 virtual keyboard's focus before takeover activates its window | computer | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-focus-release) |
@@ -100,11 +102,5 @@ none
 | [#17921](https://github.com/can1357/oh-my-pi/pull/17921) | x11-element-focus-steal | fix(natives): keep X11 background element typing from raising the element's window | computer | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-element-focus-steal) |
 | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | wayland-focused-window | fix(natives): name the focused application window on Wayland, not an always-active shell frame | natives | P0 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-focused-window) |
 | [#17931](https://github.com/can1357/oh-my-pi/pull/17931) | apps-open-tilde | fix(coding-agent): open ~ paths from the home folder in computer apps.open | computer | P0 | 3h | keep; opened over P2 #16223 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/apps-open-tilde) |
-| [#17932](https://github.com/can1357/oh-my-pi/pull/17932) | wayland-consent-deadline | fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends | natives | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-consent-deadline) |
+| [#17932](https://github.com/can1357/oh-my-pi/pull/17932) | wayland-consent-deadline | fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends | natives | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-consent-deadline) |
 | [#17936](https://github.com/can1357/oh-my-pi/pull/17936) | atspi-action-names | fix(natives): match AT-SPI actions by their machine names | computer | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-action-names) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
