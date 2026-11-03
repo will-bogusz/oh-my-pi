@@ -141,3 +141,10 @@ class "deepseek" {
 		}
 	}
 }
+
+// Pre-send token counting: DeepSeek V3 through V4 share one vocabulary.
+class "deepseek" {
+	token-count {
+		tokenizer "deepseek-v3"
+	}
+}

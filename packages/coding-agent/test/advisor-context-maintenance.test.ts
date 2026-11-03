@@ -312,6 +312,25 @@ describe("AgentSession advisor context maintenance", () => {
 		expect(JSON.stringify(advisor.state.messages)).not.toContain("small stored advisor message");
 	});
 
+	it("frames the local maintenance floor for the advisor's model line", async () => {
+		const { advisor, advisorMock, settings } = createHarness();
+		// A Grok 4.7 identity: its catalog token-count frames unanchored estimates as 1.053 × local + 1,065.
+		advisor.setModel({ ...advisorMock, id: "grok-4.7", provider: "xai" });
+		const seed: AgentMessage = { role: "user", content: "small stored advisor message", timestamp: 1 };
+		advisor.state.messages.push(seed);
+		const localTokens =
+			advisor.tokenizer.countMessage(seed, { excludeEncryptedReasoning: true }) +
+			advisor.tokenizer.countTokens(advisor.state.systemPrompt) +
+			estimateToolSchemaTokens(advisor.state.tools, advisor.tokenizer);
+		// Under the framed floor, above every local count this update can add.
+		cfgCompactionThresholdTokens.set(settings, localTokens + 500);
+
+		await session.prompt("tiny local-floor update");
+
+		expect(advisorMock.calls).toHaveLength(1);
+		expect(JSON.stringify(advisor.state.messages)).not.toContain("small stored advisor message");
+	});
+
 	it("re-evaluates maintenance after promoting to a model that defers tool schemas", async () => {
 		const promotion = {
 			...createMockModel({

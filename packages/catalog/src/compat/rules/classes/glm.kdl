@@ -122,3 +122,12 @@ class "glm" {
 		}
 	}
 }
+
+// Pre-send token counting: GLM-5.x counts in the embedded GLM-5 vocabulary.
+class "glm" {
+	revision ">=5" {
+		token-count {
+			tokenizer "glm5"
+		}
+	}
+}

@@ -132,3 +132,20 @@ class "kimi" {
 		portable-reasoning #true
 	}
 }
+
+// Pre-send token counting: Kimi K2 through K3 share one vocabulary; Moonshot's
+// token estimate gave K3 and K2 text counts identical to the embedded kimi-k2
+// (3,473 / 2,380 / 589 on three real texts). base: K3 adds 78 tokens of
+// request framing on that endpoint (86 vs 8 for an empty message); with it, the
+// endpoint matched 5 of 5 Factory-billed K3 bodies within 0.1% (2026-11-02).
+class "kimi" {
+	token-count {
+		tokenizer "kimi-k2"
+	}
+	family "k3" {
+		token-count {
+			tokenizer "kimi-k2"
+			base 78
+		}
+	}
+}

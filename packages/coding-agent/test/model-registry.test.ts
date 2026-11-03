@@ -3799,4 +3799,36 @@ describe("ModelRegistry", () => {
 			expect(suppressible.isSelectorSuppressed("google-antigravity/gemini-2.5-pro")).toBe(false);
 		});
 	});
+
+	test("custom models.yml models take the catalog token-count tokenizer unless they set one", () => {
+		const config = providerConfig(
+			"https://gateway.example.com/v1",
+			[
+				{ id: "anthropic/claude-haiku-5-5" },
+				{ id: "claude-opus-4-7" },
+				{ id: "claude-opus-45" },
+				{ id: "moonshotai/kimi-k3" },
+				{ id: "x-ai/grok-4.7" },
+				{ id: "grok-4.20-0309-reasoning" },
+				{ id: "my-house-model" },
+			],
+			"openai-completions",
+		);
+		writeRawModelsJson({
+			"my-gateway": {
+				...config,
+				models: [...config.models, { ...config.models[0], id: "pinned-claude", tokenizer: "claude-v3" }],
+			},
+		});
+		const registry = new ModelRegistry(authStorage, modelsJsonPath);
+		const tokenizer = (id: string) => registry.find("my-gateway", id)?.tokenizer;
+		expect(tokenizer("anthropic/claude-haiku-5-5")).toBe("claude-v5-sonnet");
+		expect(tokenizer("claude-opus-4-7")).toBe("claude-v47");
+		expect(tokenizer("claude-opus-45")).toBe("claude-v5");
+		expect(tokenizer("moonshotai/kimi-k3")).toBe("kimi-k2");
+		expect(tokenizer("x-ai/grok-4.7")).toBe("o200k");
+		expect(tokenizer("grok-4.20-0309-reasoning")).toBeUndefined();
+		expect(tokenizer("my-house-model")).toBeUndefined();
+		expect(tokenizer("pinned-claude")).toBe("claude-v3");
+	});
 });

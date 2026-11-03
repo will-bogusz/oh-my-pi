@@ -8,7 +8,7 @@ import { AgentSession } from "@oh-my-pi/pi-coding-agent/session/agent-session";
 import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
 import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
 import { TempDir } from "@oh-my-pi/pi-utils";
-import { estimateToolSchemaTokens } from "@oh-my-pi/pi-tui/status-line/context-usage";
+import { computeNonMessageTokens, estimateToolSchemaTokens } from "@oh-my-pi/pi-tui/status-line/context-usage";
 
 describe("AgentSession session stats", () => {
 	let authStorage: AuthStorage;
@@ -561,5 +561,82 @@ describe("AgentSession session stats", () => {
 
 		expect(inlineTokens).toBeGreaterThanOrEqual(promptTokens);
 		expect(session.getContextUsage()?.tokens).toBe(inlineTokens - schemaTokens);
+	});
+
+	describe("catalog token-count framing", () => {
+		const tool: AgentTool = {
+			name: "read",
+			label: "Read",
+			description: "Read a file from the workspace.",
+			parameters: type({ path: "string" }),
+			execute: async () => ({ content: [{ type: "text" as const, text: "ok" }] }),
+		};
+		const bundled = (provider: string, id: string): Model => {
+			const found = modelRegistry.find(provider, id);
+			if (!found) throw new Error(`Expected bundled ${provider}/${id}`);
+			return found;
+		};
+		const open = (target: Model, messages: Message[]) => {
+			const sessionManager = SessionManager.inMemory();
+			for (const message of messages) sessionManager.appendMessage(message);
+			const agent = new Agent({ initialState: { model: target, systemPrompt: ["Test"], tools: [tool], messages } });
+			session = new AgentSession({
+				agent,
+				sessionManager,
+				settings: Settings.isolated({ "compaction.enabled": false }),
+				modelRegistry,
+			});
+			return session;
+		};
+		const localEstimate = (current: AgentSession, messages: Message[]) =>
+			computeNonMessageTokens(current, current.agent.tokenizer, current.settings.revision) +
+			current.agent.tokenizer.countMessages(messages);
+		const prompt: Message[] = [{ role: "user", content: "Summarize the open pull requests.", timestamp: 1 }];
+
+		it("frames an unanchored estimate with the model line's KDL constants", async () => {
+			const grok = open(bundled("xai", "grok-4.7"), prompt);
+			const grokLocal = localEstimate(grok, prompt);
+			expect(grok.getContextBreakdown()?.anchored).toBe(false);
+			expect(grok.getContextUsage()?.tokens).toBe(Math.round(1.053 * grokLocal) + 1065);
+			await grok.dispose();
+
+			// base 9 + 286-token tool-use preamble + 9 per tool.
+			const opus = open(bundled("anthropic", "claude-opus-5-5"), prompt);
+			expect(opus.getContextUsage()?.tokens).toBe(localEstimate(opus, prompt) + 9 + 286 + 9);
+			await opus.dispose();
+
+			// Grok 4.20 predates the measured 4.7 line: no framing.
+			const older = open(bundled("xai", "grok-4.20-0309-reasoning"), prompt);
+			expect(older.getContextUsage()?.tokens).toBe(localEstimate(older, prompt));
+		});
+
+		it("leaves an anchored estimate unframed", () => {
+			const target = bundled("xai", "grok-4.7");
+			const promptTokens = 5_000;
+			const tail: Message[] = [{ role: "user", content: "Now open the oldest one.", timestamp: 3 }];
+			const current = open(target, [
+				...prompt,
+				{
+					role: "assistant",
+					content: [{ type: "text", text: "Three are open." }],
+					api: target.api,
+					provider: target.provider,
+					model: target.id,
+					usage: {
+						input: promptTokens,
+						output: 0,
+						cacheRead: 0,
+						cacheWrite: 0,
+						totalTokens: promptTokens,
+						cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+					},
+					stopReason: "stop",
+					timestamp: 2,
+				},
+				...tail,
+			]);
+			expect(current.getContextBreakdown()?.anchored).toBe(true);
+			expect(current.getContextUsage()?.tokens).toBe(promptTokens + current.agent.tokenizer.countMessages(tail));
+		});
 	});
 });

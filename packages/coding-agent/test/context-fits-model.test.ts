@@ -59,14 +59,15 @@ const codexTurn = (text: string, timestamp: number) => responsesTurn(active, tex
  */
 function maintenance(
 	messages: AgentMessage[],
-	options: { usageTokens?: number; providerSessionState?: Map<string, ProviderSessionState> } = {},
+	options: { usageTokens?: number; providerSessionState?: Map<string, ProviderSessionState>; model?: Model } = {},
 ): SessionMaintenance {
-	const agent = new Agent({ initialState: { model: active, systemPrompt: [], tools: [], messages } });
+	const model = options.model ?? active;
+	const agent = new Agent({ initialState: { model, systemPrompt: [], tools: [], messages } });
 	const host = {
 		agent,
 		settings: Settings.isolated({ "compaction.reserveTokens": 200 }),
 		sessionManager: SessionManager.inMemory(),
-		model: () => active,
+		model: () => model,
 		messages: () => agent.state.messages,
 		nonMessageTokenSource: () => ({}),
 		providerSessionState: options.providerSessionState,
@@ -138,5 +139,21 @@ describe("SessionMaintenance.contextFitsModel", () => {
 		const retained: AgentMessage = { role: "user", content: "x".repeat(7_600), timestamp: 0 };
 		const failed = codexTurn("Partial answer.", 1);
 		expect(maintenance([retained, failed]).contextFitsModel(candidate, failed)).toBe(false);
+	});
+
+	it("drops a failed turn before framing, so a scaled model line fits as if the turn were gone", () => {
+		// Grok 4.7 frames estimates as 1.053 × local + 1,065: the retained request
+		// (about 1,070) fits the 1,360-token budget; framing the failed 10,000-token
+		// turn before taking it off would leave about 530 of it charged.
+		const grok: Model = { ...getBundledModel("xai", "grok-4.7"), contextWindow: 1_560 };
+		const retained: AgentMessage = { role: "user", content: "Question?", timestamp: 0 };
+		const failed: AssistantMessage = {
+			...responsesTurn(grok, "x".repeat(40_000), 1),
+			providerPayload: undefined,
+			stopReason: "error",
+		};
+		expect(maintenance([retained, failed], { model: grok }).contextFitsModel(grok, failed)).toBe(true);
+		// Control: the same failed turn kept in the request does not fit.
+		expect(maintenance([retained, failed], { model: grok }).contextFitsModel(grok)).toBe(false);
 	});
 });

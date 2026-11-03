@@ -118,6 +118,7 @@ import type { CompactionEntry, SessionEntry } from "./session-entries";
 import { formatSessionHistoryMarkdown } from "./session-history-format";
 import type { SessionManager } from "./session-manager";
 import { buildSessionMetadata } from "./session-metadata";
+import { frameUnanchoredEstimate } from "./token-framing";
 import type { YieldQueue } from "./yield-queue";
 
 import {
@@ -2425,16 +2426,22 @@ export class SessionAdvisors {
 		// local arm against the promoted model's schema policy.
 		const providerContextTokens = this.#estimateAdvisorContextTokens(advisor) + incomingTokens;
 		const fixedPromptTokens = agent.tokenizer.countTokens(agent.state.systemPrompt);
+		// The local arm is a whole request with no anchor, so it is framed for `model`.
 		const contextTokensFor = (model: Model): number =>
 			compactionContextTokens(
 				providerContextTokens,
-				fixedPromptTokens +
-					estimateContextToolSchemaTokens(agent.state.tools, agent.tokenizer, model, {
-						sourceRevision: this.#host.settings.revision,
-						pruneDescriptions: agent.prunesToolDescriptions(model),
-					}) +
-					storedConversationTokens +
-					incomingTokens,
+				frameUnanchoredEstimate(
+					model,
+					fixedPromptTokens +
+						estimateContextToolSchemaTokens(agent.state.tools, agent.tokenizer, model, {
+							sourceRevision: this.#host.settings.revision,
+							pruneDescriptions: agent.prunesToolDescriptions(model),
+						}) +
+						storedConversationTokens +
+						incomingTokens,
+					messages.length + 1,
+					agent.state.tools,
+				),
 			);
 		const contextTokens = contextTokensFor(advisorModel);
 

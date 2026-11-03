@@ -72,3 +72,12 @@ class "qwen" {
 		}
 	}
 }
+
+// Pre-send token counting: Qwen 3.5+ counts in the embedded Qwen3 vocabulary.
+class "qwen" {
+	revision ">=3.5" {
+		token-count {
+			tokenizer "qwen3"
+		}
+	}
+}

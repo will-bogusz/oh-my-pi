@@ -180,6 +180,106 @@ describe("AgentSession snapcompact no-reduction guard", () => {
 		expect(compactSpy).toHaveBeenCalled();
 	});
 
+	it("rejects an expanding pre-prompt archive on a framed model line (Grok 4.7)", async () => {
+		// Grok 4.7's token-count scale frames the trigger and the pending prompt; the
+		// reduction check must still compare the archive with the history it replaces.
+		authStorage.keys.setRuntime("xai", "test-key");
+		const grok = { ...getBundledModel("xai", "grok-4.7"), contextWindow: 200_000, maxTokens: 64_000 };
+		const grokManager = SessionManager.inMemory();
+		const seed = sessionManager.buildSessionContext().messages;
+		for (const message of seed) grokManager.appendMessage(message as Message);
+		const grokSession = new AgentSession({
+			agent: new Agent({
+				initialState: { model: grok, systemPrompt: ["Test"], tools: [], messages: seed },
+				streamFn: createMockModel({ responses: [{ content: ["Done"] }] }).stream,
+			}),
+			sessionManager: grokManager,
+			settings: Settings.isolated({
+				"compaction.methodOrder": ["snapcompact"],
+				"compaction.autoContinue": false,
+				"compaction.asyncEnabled": false,
+				"compaction.keepRecentTokens": 1,
+			}),
+			modelRegistry,
+		});
+		vi.spyOn(snapcompact, "compact").mockImplementation(async preparation => ({
+			summary: "expanded ".repeat(1_000),
+			shortSummary: "expanded",
+			firstKeptEntryId: preparation.firstKeptEntryId,
+			tokensBefore: preparation.tokensBefore,
+			details: { readFiles: [], modifiedFiles: [] },
+			preserveData: { snapcompact: { frames: [], totalChars: 0, truncatedChars: 0 } },
+		}));
+		const ends: (string | undefined)[] = [];
+		grokSession.subscribe(event => {
+			if (event.type === "auto_compaction_end") ends.push(event.errorMessage);
+		});
+		try {
+			await grokSession.prompt("pending ".repeat(190_000));
+		} finally {
+			await grokSession.dispose();
+		}
+		expect(ends[0]).toContain("would not reduce context");
+	});
+
+	it("judges a snapcompact result's window fit as the framed model line bills it (Grok 4.7)", async () => {
+		// A 7,500-token archive fits the 8,500-token budget locally, but Grok 4.7
+		// bills about 1.053 × 7,500 + 1,065 ≈ 8,960 for it.
+		authStorage.keys.setRuntime("xai", "test-key");
+		const grok = { ...getBundledModel("xai", "grok-4.7"), contextWindow: 10_000, maxTokens: 1_000 };
+		const usage = {
+			input: 40_000,
+			output: 2,
+			cacheRead: 0,
+			cacheWrite: 0,
+			totalTokens: 40_002,
+			cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+		};
+		const seed: Message[] = [
+			{ role: "user", content: "history ".repeat(20_000), timestamp: 1 },
+			{
+				role: "assistant",
+				content: [{ type: "text", text: "old answer" }],
+				api: grok.api,
+				provider: grok.provider,
+				model: grok.id,
+				stopReason: "stop",
+				usage,
+				timestamp: 2,
+			},
+			{ role: "user", content: "new question", timestamp: 3 },
+		];
+		const grokManager = SessionManager.inMemory();
+		for (const message of seed) grokManager.appendMessage(message);
+		const grokSession = new AgentSession({
+			agent: new Agent({ initialState: { model: grok, systemPrompt: ["Test"], tools: [], messages: seed } }),
+			sessionManager: grokManager,
+			settings: Settings.isolated({
+				"compaction.methodOrder": ["snapcompact"],
+				"compaction.reserveTokens": 200,
+				"compaction.keepRecentTokens": 1,
+				"compaction.asyncEnabled": false,
+			}),
+			modelRegistry,
+		});
+		vi.spyOn(snapcompact, "compact").mockImplementation(async preparation => ({
+			summary: "x".repeat(30_000),
+			shortSummary: "archived",
+			firstKeptEntryId: preparation.firstKeptEntryId,
+			tokensBefore: preparation.tokensBefore,
+			details: { readFiles: [], modifiedFiles: [] },
+			preserveData: { snapcompact: { frames: [], totalChars: 0, truncatedChars: 0 } },
+		}));
+		try {
+			expect(String(await rejectionOf(grokSession.compact(undefined, { mode: "snapcompact" })))).toContain(
+				"could not bring the context under the limit",
+			);
+		} finally {
+			await grokSession.dispose();
+		}
+		expect(grokManager.getEntries().some(entry => entry.type === "compaction")).toBe(false);
+	});
+
 	it("rejects non-shrinking remote/soft auto-compactions instead of committing tokensAfter >= tokensBefore", async () => {
 		const customSessionManager = SessionManager.inMemory();
 		const model = modelRegistry.find("anthropic", "claude-haiku-5-5");

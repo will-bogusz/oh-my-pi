@@ -488,6 +488,11 @@ export const AXES: Readonly<Record<string, AxisDef>> = {
 	/** How the model line bills an input image; shape and formulas in `./image-tokenization`. */
 	"image-tokenization": { key: "imageTokenization", set: "catalog", shape: "object" },
 	/**
+	 * Which embedded tokenizer counts the model line's text and the framing its
+	 * endpoint adds around it; fields and the framing formula in `./token-count`.
+	 */
+	"token-count": { key: "tokenCount", set: "catalog", shape: "object" },
+	/**
 	 * Most images one request may carry, documents included where the host
 	 * counts them. Unassigned: unknown host, held to a conservative floor.
 	 */

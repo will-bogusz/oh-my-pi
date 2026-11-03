@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added the `token-count` axis: each model line's embedded tokenizer and the framing its endpoint adds (scale, per-request base, tool-use preamble, per-tool), seeded from measurements for Grok 4.7, Kimi K3 and Claude, with the Claude tool preambles from Anthropic's docs
+
 ## [18.16.0] - 2026-11-02
 
 ### Added

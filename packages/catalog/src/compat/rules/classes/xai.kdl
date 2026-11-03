@@ -75,3 +75,26 @@ class "xai" {
 	web-search-model "grok-4.5"
 	image-model "grok-imagine-image"
 }
+
+// Pre-send token counting. Grok 4's tokenizer is not public, and xAI's
+// tokenize-text endpoint needs credits. On 22 billed Grok 4.7 requests rebuilt
+// from real sessions, billed ≈ 1.053 × o200k + 1,065 (leave-one-out p90 error
+// 2.3%, max 2.7%; o200k alone read −10.6% median); 2026-11-02. Bounded to the
+// measured line and its successors before 4.20, which predates 4.7.
+// residue: the date-stamped Grok 4 id (`grok-4-07-09`, July 2025) parses as
+// revision 4.7.9 and keeps the plain o200k count.
+class "xai" {
+	family "grok" {
+		revision ">=4.7 <4.20" {
+			token-count {
+				tokenizer "o200k"
+				verified #true
+				scale 1.053
+				base 1065
+			}
+		}
+	}
+	models "*grok-4-07-09" {
+		token-count {}
+	}
+}

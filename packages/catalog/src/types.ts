@@ -1483,17 +1483,21 @@ export interface ModelCost extends TokenCost {
  * generations rather than providers: DeepSeek V3 through V4 share
  * `"deepseek-v3"`; Kimi K2 through K3 share `"kimi-k2"`.
  */
-export type ModelTokenizer =
-	| "claude-v3"
-	| "claude-v47"
-	| "claude-v5"
-	| "claude-v5-sonnet"
-	| "qwen3"
-	| "deepseek-v3"
-	| "kimi-k2"
-	| "glm5"
-	| "cl100k"
-	| "o200k";
+export const MODEL_TOKENIZERS = [
+	"claude-v3",
+	"claude-v47",
+	"claude-v5",
+	"claude-v5-sonnet",
+	"qwen3",
+	"deepseek-v3",
+	"kimi-k2",
+	"glm5",
+	"cl100k",
+	"o200k",
+] as const;
+
+/** One of {@link MODEL_TOKENIZERS}. */
+export type ModelTokenizer = (typeof MODEL_TOKENIZERS)[number];
 
 /** One account's discovered entitlements on a model; see {@link Model.accountAccess}. */
 export interface ModelAccountAccess {

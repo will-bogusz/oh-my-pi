@@ -114,6 +114,7 @@ import type { CompactionEntry, SessionEntry } from "./session-entries";
 import type { SessionManager } from "./session-manager";
 import type { ShakeMode, ShakeResult } from "./shake-types";
 import { resolveSpeculationLeadTokens, SPECULATION_LEAD_MIN_TOKENS } from "./speculation-lead";
+import { frameUnanchoredEstimate } from "./token-framing";
 import experimentalContextNotesReminderPrompt from "../prompts/system/experimental-context-notes-reminder.md" with { type: "text" };
 import experimentalContextRolloverPrompt from "../prompts/system/experimental-context-rollover.md" with { type: "text" };
 import lengthStopRetryTemplate from "../prompts/system/length-stop-retry.md" with { type: "text" };
@@ -1497,7 +1498,7 @@ export class SessionMaintenance {
 						});
 						throw snapcompactFailure("snapcompact would not reduce context");
 					}
-					if (projected > budget) {
+					if (this.#frameContextTokens(projected, preparation.recentMessages.length + 1) > budget) {
 						logger.warn("Snapcompact still overflows the window after frame-budget sizing", {
 							model: this.#model?.id,
 						});
@@ -2542,13 +2543,16 @@ export class SessionMaintenance {
 			return false;
 		}
 		if (leafIdx < branch.length - 1 && !nativeAnthropic) {
+			// Pre-prompt pending tokens are framed (runPrePromptCompactionIfNeeded), so they
+			// add to the framed projection for the band and trigger checks.
 			const pendingTokens = Math.max(0, pendingContextTokens ?? 0);
 			const projectedWithPending = projected + pendingTokens;
+			const framedWithPending = this.#frameContextTokens(projected, 1) + pendingTokens;
 			const contextWindow = model.contextWindow ?? 0;
 			if (contextWindow > 0) {
 				const thresholdTokens = resolveThresholdTokens(contextWindow, settings);
 				const recoveryBand = Math.floor(thresholdTokens * COMPACTION_RECOVERY_BAND);
-				if (projectedWithPending > recoveryBand) {
+				if (framedWithPending > recoveryBand) {
 					return false;
 				}
 			}
@@ -2563,7 +2567,7 @@ export class SessionMaintenance {
 			if (
 				triggerContextTokens !== undefined &&
 				triggerContextTokens > 0 &&
-				projectedWithPending >= triggerContextTokens
+				framedWithPending >= triggerContextTokens
 			) {
 				return false;
 			}
@@ -2706,9 +2710,34 @@ export class SessionMaintenance {
 		);
 	}
 
+	/**
+	 * A local whole-request count of `messages` messages framed the way
+	 * `model`'s endpoint bills it (catalog `token-count`): the basis for every
+	 * comparison with the context window, a compaction threshold or target, or a
+	 * provider-reported prompt. Comparisons between local counts (reduction
+	 * checks) stay unframed on both sides.
+	 */
+	#frameContextTokens(localTokens: number, messages: number, model = this.#model): number {
+		return frameUnanchoredEstimate(
+			model,
+			localTokens,
+			messages,
+			this.#host.nonMessageTokenSource().agent?.state?.tools,
+		);
+	}
+
+	/** {@link #estimateStoredContextTokens} of the live messages plus `pendingMessages`, framed for `#model`. */
+	#estimateFramedStoredContextTokens(pendingMessages: AgentMessage[] = []): number {
+		const messages = this.#host.messages();
+		return this.#frameContextTokens(
+			this.#estimateStoredContextTokens(pendingMessages, this.#tokenizer, messages),
+			messages.length + pendingMessages.length,
+		);
+	}
+
 	#estimatePrePromptContextTokens(messages: AgentMessage[], contextWindow: number): number {
 		const breakdown = this.#host.getContextBreakdown({ contextWindow, pendingMessages: messages });
-		const localEstimate = this.#estimateStoredContextTokens(messages);
+		const localEstimate = this.#estimateFramedStoredContextTokens(messages);
 		// Floor by the local estimate: a payload-shrinking before_provider_request
 		// hook deflates the provider-anchored breakdown, which must not suppress
 		// pre-prompt compaction (see #estimateStoredContextTokens).
@@ -2826,11 +2855,14 @@ export class SessionMaintenance {
 			contextWindow,
 			model: `${model.provider}/${model.id}`,
 		});
+		// The trigger is framed, so the pending and prepared shares are too: snapcompact's
+		// reduction baseline subtracts both, and the framing then cancels.
+		const preparedContextTokens = this.#estimateFramedStoredContextTokens();
 		await this.runAutoCompaction("threshold", false, {
 			autoContinue: false,
 			triggerContextTokens: contextTokens,
-			pendingContextTokens: this.#tokenizer.countMessages(messages, { excludeEncryptedReasoning: true }),
-			preparedContextTokens: this.#estimateStoredContextTokens(),
+			pendingContextTokens: Math.max(0, this.#estimateFramedStoredContextTokens(messages) - preparedContextTokens),
+			preparedContextTokens,
 			phase: "pre_turn",
 		});
 	}
@@ -2913,7 +2945,7 @@ export class SessionMaintenance {
 		// a slow message_end listener leave the TUI "generating" with no provider
 		// request or tool running.
 		const billedContextTokens = calculateContextTokens(lastAssistant.usage);
-		const storedContextTokens = this.#estimateStoredContextTokens();
+		const storedContextTokens = this.#estimateFramedStoredContextTokens();
 		const contextTokens = compactionContextTokens(billedContextTokens, storedContextTokens);
 		const persistedDeadEnd = this.#midTurnCompactionDeadEnds.has(activeMessages);
 		if (persistedDeadEnd) {
@@ -3051,7 +3083,7 @@ export class SessionMaintenance {
 			sameModel && !errorIsFromBeforeCompaction && AIError.isPayloadRejection(assistantMessage);
 		const ambiguousPayloadRejection =
 			payloadRejection && AIError.is(assistantMessage.errorId, AIError.Flag.ContextOverflow);
-		const storedTokens = payloadRejection && contextWindow > 0 ? this.#estimateStoredContextTokens() : 0;
+		const storedTokens = payloadRejection && contextWindow > 0 ? this.#estimateFramedStoredContextTokens() : 0;
 		const reportedInputTokens =
 			assistantMessage.usage.input + assistantMessage.usage.cacheRead + assistantMessage.usage.cacheWrite;
 		const trustedPayloadRejection =
@@ -3502,7 +3534,7 @@ export class SessionMaintenance {
 		const assistantUsageContextTokens = assistantPredatesCompaction
 			? 0
 			: calculateContextTokens(assistantMessage.usage);
-		const storedContextTokens = this.#estimateStoredContextTokens();
+		const storedContextTokens = this.#estimateFramedStoredContextTokens();
 		// Pruning frees bytes for the NEXT prompt; it does not change the size of
 		// the prompt the LLM just billed for. Earlier revisions subtracted the
 		// per-turn supersede/prune `tokensSaved` from the threshold input, which
@@ -3916,7 +3948,11 @@ export class SessionMaintenance {
 			this.#tokenizer,
 			this.#host.settings.revision,
 		);
-		const baseTokens = nonMessageTokens + this.#tokenizer.countMessages(preparation.recentMessages);
+		const keptMessages = preparation.recentMessages.length + 1;
+		const baseTokens = this.#frameContextTokens(
+			nonMessageTokens + this.#tokenizer.countMessages(preparation.recentMessages),
+			keptMessages,
+		);
 		const totalBudget = ctxWindow - reserve;
 		// Skip iff there is no headroom whatsoever; a text-only archive costs
 		// far less than the cap reserve below, so any positive residual is
@@ -3951,8 +3987,11 @@ export class SessionMaintenance {
 		// The trigger counts kept turns without opaque reasoning replay bytes and
 		// sees the pending prompt too; the window fit keeps the full count.
 		const fixedTokens =
-			nonMessageTokens +
-			this.#tokenizer.countMessages(preparation.recentMessages, { excludeEncryptedReasoning: true }) +
+			this.#frameContextTokens(
+				nonMessageTokens +
+					this.#tokenizer.countMessages(preparation.recentMessages, { excludeEncryptedReasoning: true }),
+				keptMessages,
+			) +
 			pendingTokens +
 			capReserve;
 		const roomBudget = Math.min(
@@ -4032,8 +4071,10 @@ export class SessionMaintenance {
 				maxFrames = Math.floor((frames * frameByteBudget) / framePayloadBytes);
 			}
 			const projected =
-				this.#projectSnapcompactContextTokens(preparation, result, { excludeEncryptedReasoning: true }) +
-				pendingTokens;
+				this.#frameContextTokens(
+					this.#projectSnapcompactContextTokens(preparation, result, { excludeEncryptedReasoning: true }),
+					preparation.recentMessages.length + 1,
+				) + pendingTokens;
 			if (projected > targetTokens && frames > 1) {
 				const perFrame = this.#snapcompactArchiveFrameTokens(archive) / frames;
 				maxFrames = Math.min(maxFrames, Math.max(1, frames - Math.ceil((projected - targetTokens) / perFrame)));
@@ -4322,7 +4363,7 @@ export class SessionMaintenance {
 		const compactionSettings = this.#compactionSettings;
 		const residualTokens = compactionContextTokens(
 			this.#host.getContextUsage({ contextWindow })?.tokens ?? 0,
-			this.#estimateStoredContextTokens(),
+			this.#estimateFramedStoredContextTokens(),
 		);
 		const thresholdTokens = resolveThresholdTokens(contextWindow, compactionSettings);
 		const recoveryBand = Math.floor(thresholdTokens * COMPACTION_RECOVERY_BAND);
@@ -4369,7 +4410,13 @@ export class SessionMaintenance {
 		// what `model` itself would be sent: another reader drops the active
 		// model's natively replayed reasoning, a cold session drops its own, and
 		// a reader without image input gets each archive as text.
-		const providerExcludedTokens = activeExcludedMessage ? this.#tokenizer.countMessage(activeExcludedMessage) : 0;
+		// The turn comes off at its framed share (the active model's scale on its
+		// count): an unanchored usage estimate is framed; an anchored one is billed,
+		// where the share may overstate the turn, but the local floor still bounds it.
+		const providerExcludedTokens = activeExcludedMessage
+			? this.#frameContextTokens(this.#tokenizer.countMessage(activeExcludedMessage), 1) -
+				this.#frameContextTokens(0, 0)
+			: 0;
 		const tokenizerOptions = {
 			nativeHistoryReplay: openAIResponsesReplaysNativeHistory(model, this.#host.providerSessionState),
 		};
@@ -4390,6 +4437,7 @@ export class SessionMaintenance {
 				tokenizer.replayedReasoningTokens(retained) - this.#tokenizer.replayedReasoningTokens(retained);
 		}
 		const compactionSettings = this.#compactionSettings;
+		const asRead = this.#messagesAsRead(messages, this.#host.sessionManager.getBranchView(), model);
 		const residualTokens = compactionContextTokens(
 			Math.max(
 				0,
@@ -4397,13 +4445,11 @@ export class SessionMaintenance {
 					providerExcludedTokens +
 					replayedReasoningShift,
 			),
-			Math.max(
-				0,
-				this.#estimateStoredContextTokens(
-					[],
-					tokenizer,
-					this.#messagesAsRead(messages, this.#host.sessionManager.getBranchView(), model),
-				) - storedExcludedTokens,
+			// The failed turn comes off before framing: framing scales what is sent.
+			this.#frameContextTokens(
+				Math.max(0, this.#estimateStoredContextTokens([], tokenizer, asRead) - storedExcludedTokens),
+				asRead.length - (activeExcludedMessage ? 1 : 0),
+				model,
 			),
 		);
 		const fitBudget = Math.max(0, contextWindow - resolveBudgetReserveTokens(contextWindow, compactionSettings));
@@ -4550,7 +4596,9 @@ export class SessionMaintenance {
 		const edgeCap = snapcompact.geometry(shape).capacity;
 		const textEdgeTokens = Math.ceil((2 * edgeCap * 1.15) / 4);
 		const SUMMARY_TEMPLATE_TOKENS = 2000;
-		const frameBudget = recoveryBandTokens - baseTokens - keptTailTokens - textEdgeTokens - SUMMARY_TEMPLATE_TOKENS;
+		// The kept tail's message count is not known here; it frames as one message.
+		const keptTokens = this.#frameContextTokens(baseTokens + keptTailTokens, 1);
+		const frameBudget = recoveryBandTokens - keptTokens - textEdgeTokens - SUMMARY_TEMPLATE_TOKENS;
 		const frameCost = snapcompact.plannedFrameTokens(shape);
 		if (frameBudget < frameCost) return 0;
 		// Same hard caps as #computeSnapcompactMaxFrames: a threshold-derived
@@ -5627,6 +5675,10 @@ export class SessionMaintenance {
 									? ctxWindow - effectiveReserveTokens(ctxWindow, effectiveSettings)
 									: Number.POSITIVE_INFINITY;
 							const projected = this.#projectSnapcompactContextTokens(preparation, snapcompactResult);
+							// Window and band checks compare the request as billed: framed, plus the
+							// (already framed) pending prompt. The reduction check below stays local.
+							const keptMessages = preparation.recentMessages.length + 1;
+							const billedProjected = this.#frameContextTokens(projected, keptMessages);
 							// Reduction check in the encrypted-reasoning-excluded domain so opaque
 							// replay signatures cannot inflate the removable baseline (#10716);
 							// `triggerContextTokens` is already an encrypted-excluded stored
@@ -5667,10 +5719,10 @@ export class SessionMaintenance {
 								snapcompactBlocker =
 									"snapcompact would not reduce context; trying the next preferred compaction method.";
 								snapcompactResult = undefined;
-							} else if (projected > budget) {
+							} else if (billedProjected > budget) {
 								logger.warn("Snapcompact still overflows the window after frame-budget sizing", {
 									model: this.#model?.id,
-									projected,
+									projected: billedProjected,
 									budget,
 								});
 								snapcompactBlocker =
@@ -5679,7 +5731,10 @@ export class SessionMaintenance {
 							} else if (
 								!willRetry &&
 								reason !== "idle" &&
-								this.#snapcompactLeavesNoHeadroom(projectedForReduction + pendingTokens, effectiveSettings)
+								this.#snapcompactLeavesNoHeadroom(
+									this.#frameContextTokens(projectedForReduction, keptMessages) + pendingTokens,
+									effectiveSettings,
+								)
 							) {
 								logger.warn("Snapcompact archive leaves no room under the compaction trigger", {
 									model: this.#model?.id,
@@ -5702,7 +5757,7 @@ export class SessionMaintenance {
 												options.excludeMediaMethods === true,
 											),
 									);
-								if (laterMethodUsable || projected + pendingTokens > budget) {
+								if (laterMethodUsable || billedProjected + pendingTokens > budget) {
 									snapcompactBlocker =
 										"snapcompact could not leave room under the compaction trigger; trying the next preferred compaction method.";
 									snapcompactResult = undefined;

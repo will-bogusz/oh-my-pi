@@ -222,3 +222,21 @@ class "openai" {
 		}
 	}
 }
+
+// Pre-send token counting: GPT-5 and later bill text in o200k_base, GPT-3.5
+// and GPT-4 (Turbo) in cl100k_base. GPT-4.1, GPT-4.5, gpt-4o and the o-series
+// are o200k too, the count for a model without a tokenizer.
+class "openai" {
+	revision ">=5" {
+		token-count {
+			tokenizer "o200k"
+		}
+	}
+	family "gpt" {
+		revision ">=3.5 <4.1" {
+			token-count {
+				tokenizer "cl100k"
+			}
+		}
+	}
+}

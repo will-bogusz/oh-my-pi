@@ -5,6 +5,7 @@
  * camelCase field.
  */
 import { AXES, type AxisDef } from "../../src/compat/axes";
+import { tokenCountProblems } from "../../src/compat/token-count";
 import { CompatCompileError, type KdlNodeView, type KdlScalar, malformed } from "./kdl-reader";
 
 /** Axis assignments of one rule block, split by namespace. */
@@ -77,9 +78,17 @@ function axisValue(node: KdlNodeView, axis: AxisDef): unknown {
 				return value;
 			});
 		}
-		case "object":
+		case "object": {
 			if (node.args.length > 0 || !node.children) malformed(node);
-			return objectValue(node.children, axis.verbatimKeys === true);
+			const value = objectValue(node.children, axis.verbatimKeys === true);
+			if (axis.key === "tokenCount") {
+				const problems = tokenCountProblems(value);
+				if (problems.length > 0) {
+					throw new CompatCompileError(node.file, node.line, `token-count ${problems.join("; ")}`);
+				}
+			}
+			return value;
+		}
 	}
 }
 

@@ -109,6 +109,185 @@ class "anthropic" {
 	}
 }
 
+// Pre-send token counting. Tokenizers: Opus 4.7–4.x and 5+ and Sonnet/Fable/
+// Mythos 5+ and Haiku 5.5 read the post-4.7 vocabularies; every count_tokens
+// probe from Opus 4.8 through 5.5, Sonnet 5.5, Fable 5/5.1 and Haiku 5.5 gave
+// counts identical to the embedded claude-v47 / claude-v5 / claude-v5-sonnet
+// on three real texts (5,908 / 3,512 / 967), and Haiku 4.5 matched claude-v3
+// (4,256 / 2,843 / 776); 2026-11-02. Haiku 5.5's counts are exact on
+// claude-v5-sonnet, not an approximation. Lines without a revision
+// (`claude-opus-latest`) and older lines count in claude-v3.
+// tool-preamble: the tool-use system prompt the API adds when a request
+// carries tools (`tool_choice` auto or none), per model line:
+// https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview#pricing
+// base: the empty-message count_tokens framing, 9 on Opus 5.5, Sonnet 5.5,
+// Fable 5.1 and Haiku 5.5, 7 on Opus 5, Fable 5 and Opus 4.8 (probed
+// 2026-11-02; ctok's "+2 offset", https://github.com/sanderland/ctok).
+// per-tool: count_tokens minus local tool JSON on Opus 5.5 with 17 real
+// tools was +448 = the 286-token preamble + ~9 per tool (2026-11-02); set on
+// the lines whose base was probed. Separator-collapsed revisions parse as two
+// digits (`claude-opus-45` → 45), so framing ranges are upper-bounded.
+class "anthropic" {
+	token-count {
+		tokenizer "claude-v3"
+	}
+	family "opus" {
+		revision ">=4.7 <5" {
+			token-count {
+				tokenizer "claude-v47"
+			}
+		}
+		revision ">=5" {
+			token-count {
+				tokenizer "claude-v5"
+			}
+		}
+		revision ">=4 <4.5" {
+			token-count {
+				tokenizer "claude-v3"
+				tool-preamble 313
+			}
+		}
+		revision ">=4.5 <4.6" {
+			token-count {
+				tokenizer "claude-v3"
+				tool-preamble 496
+			}
+		}
+		revision ">=4.6 <4.7" {
+			token-count {
+				tokenizer "claude-v3"
+				tool-preamble 497
+			}
+		}
+		revision ">=4.7 <4.8" priority=1 {
+			token-count {
+				tokenizer "claude-v47"
+				tool-preamble 675
+			}
+		}
+		revision ">=4.8 <4.9" priority=1 {
+			token-count {
+				tokenizer "claude-v47"
+				base 7
+				tool-preamble 290
+				per-tool 9
+			}
+		}
+		revision ">=5 <5.5" priority=1 {
+			token-count {
+				tokenizer "claude-v5"
+				base 7
+				tool-preamble 286
+				per-tool 9
+			}
+		}
+		revision ">=5.5 <6" priority=1 {
+			token-count {
+				tokenizer "claude-v5"
+				base 9
+				tool-preamble 286
+				per-tool 9
+			}
+		}
+	}
+	family "sonnet" {
+		revision ">=5" {
+			token-count {
+				tokenizer "claude-v5-sonnet"
+			}
+		}
+		revision ">=4 <4.5" {
+			token-count {
+				tokenizer "claude-v3"
+				tool-preamble 313
+			}
+		}
+		revision ">=4.5 <4.6" {
+			token-count {
+				tokenizer "claude-v3"
+				tool-preamble 496
+			}
+		}
+		revision ">=4.6 <4.7" {
+			token-count {
+				tokenizer "claude-v3"
+				tool-preamble 497
+			}
+		}
+		revision ">=5 <5.5" priority=1 {
+			token-count {
+				tokenizer "claude-v5-sonnet"
+				tool-preamble 354
+			}
+		}
+		revision ">=5.5 <6" priority=1 {
+			token-count {
+				tokenizer "claude-v5-sonnet"
+				base 9
+				tool-preamble 286
+				per-tool 9
+			}
+		}
+	}
+	// The docs table lists no Fable or Mythos line, so their tool preamble is unset.
+	family "fable" {
+		revision ">=5" {
+			token-count {
+				tokenizer "claude-v5-sonnet"
+			}
+		}
+		revision ">=5 <5.1" priority=1 {
+			token-count {
+				tokenizer "claude-v5-sonnet"
+				base 7
+				per-tool 9
+			}
+		}
+		revision ">=5.1 <5.2" priority=1 {
+			token-count {
+				tokenizer "claude-v5-sonnet"
+				base 9
+				per-tool 9
+			}
+		}
+	}
+	family "mythos" {
+		revision ">=5" {
+			token-count {
+				tokenizer "claude-v5-sonnet"
+			}
+		}
+	}
+	family "haiku" {
+		revision ">=5.5" {
+			token-count {
+				tokenizer "claude-v5-sonnet"
+			}
+		}
+		revision ">=3.5 <3.6" {
+			token-count {
+				tokenizer "claude-v3"
+				tool-preamble 264
+			}
+		}
+		revision ">=4.5 <4.6" {
+			token-count {
+				tokenizer "claude-v3"
+				tool-preamble 496
+			}
+		}
+		revision ">=5.5 <6" priority=1 {
+			token-count {
+				tokenizer "claude-v5-sonnet"
+				base 9
+				tool-preamble 286
+				per-tool 9
+			}
+		}
+	}
+}
+
 class "anthropic" {
 	family "fable" {
 		revision ">=5.1" {

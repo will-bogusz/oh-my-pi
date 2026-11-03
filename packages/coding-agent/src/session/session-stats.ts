@@ -22,6 +22,7 @@ import { getLatestCompactionEntry } from "./session-context";
 import type { SessionEntry } from "./session-entries";
 import type { SessionManager } from "./session-manager";
 import { cfgSkillful } from "./settings";
+import { frameUnanchoredEstimate } from "./token-framing";
 
 /** Non-message accounting recorded with a provider prompt. */
 interface NonMessageSnapshot {
@@ -371,7 +372,12 @@ export class SessionStatsTracker {
 			}
 		}
 		if (!anchored) {
-			usedTokens = current.nonMessageTokens + this.#tokenizer.countMessages(activeMessages) + pendingTokens;
+			usedTokens = frameUnanchoredEstimate(
+				this.#host.model(),
+				current.nonMessageTokens + this.#tokenizer.countMessages(activeMessages) + pendingTokens,
+				activeMessages.length + pendingMessages.length,
+				this.#host.session.agent?.state?.tools,
+			);
 		}
 		return {
 			contextWindow,
@@ -484,7 +490,12 @@ export class SessionStatsTracker {
 		);
 		const messages = this.#host.agent.state.messages;
 		this.setPendingSnapshot({
-			promptTokens: nonMessageTokens + this.#tokenizer.countMessages(messages),
+			promptTokens: frameUnanchoredEstimate(
+				this.#host.model(),
+				nonMessageTokens + this.#tokenizer.countMessages(messages),
+				messages.length,
+				this.#host.session.agent?.state?.tools,
+			),
 			nonMessageTokens,
 			cutoffCount: messages.length,
 		});

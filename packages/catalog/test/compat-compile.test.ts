@@ -143,6 +143,18 @@ describe("compat compiler grammar", () => {
 			compileCascade([{ file: "classes/test.kdl", text: 'class "openai" {\n\tthinking-format "sideways"\n}' }]),
 		).toThrow(/rejects value `sideways`/);
 	});
+	test("token-count payloads are validated against the tokenizer vocabulary and field shapes", () => {
+		const compile = (body: string) =>
+			compileCascade([{ file: "classes/test.kdl", text: `class "xai" {\n\ttoken-count {\n${body}\n\t}\n}` }]);
+		expect(() => compile('\t\ttokenizer "grok-9"')).toThrow(/classes\/test\.kdl:2.*unknown tokenizer `grok-9`/);
+		expect(() => compile("\t\tbase -3")).toThrow(/base must be a non-negative integer/);
+		expect(() => compile("\t\tper-tool 1.5")).toThrow(/perTool must be a non-negative integer/);
+		expect(() => compile("\t\tscale 0")).toThrow(/scale must be a positive number/);
+		expect(() => compile("\t\tper-image 40")).toThrow(/unknown field `perImage`/);
+		expect(compile('\t\ttokenizer "o200k"\n\t\tscale 1.053\n\t\tbase 1065').rules[0]?.catalog).toEqual({
+			tokenCount: { tokenizer: "o200k", scale: 1.053, base: 1065 },
+		});
+	});
 	test("camelCase object-payload keys are rejected; kebab-case compiles to resolved keys", () => {
 		expect(() =>
 			compileCascade([
