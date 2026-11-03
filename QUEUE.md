@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 05:15Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03 05:18Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-03 04:50Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -76,8 +76,8 @@ none
 | [#17773](https://github.com/can1357/oh-my-pi/pull/17773) | visuals-guidance | feat(coding-agent): ask for one designed SVG figure where an answer has shape | other |  | 1d | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/visuals-guidance) |
 | [#17881](https://github.com/can1357/oh-my-pi/pull/17881) | cli-reference-models-row | docs(coding-agent): restore the --models row in the CLI reference | other | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cli-reference-models-row) |
 | [#17883](https://github.com/can1357/oh-my-pi/pull/17883) | snapcompact-legacy-archive-credit | fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced | other | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-legacy-archive-credit) |
-| [#17896](https://github.com/can1357/oh-my-pi/pull/17896) | windows-app-id | fix(coding-agent): find app windows by application id or path | computer | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/windows-app-id) |
-| [#17895](https://github.com/can1357/oh-my-pi/pull/17895) | role-implicit-landmarks | fix(coding-agent): find named sections and other implicit roles with role/ selectors | browser | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-implicit-landmarks) |
+| [#17896](https://github.com/can1357/oh-my-pi/pull/17896) | windows-app-id | fix(coding-agent): find app windows by application id or path | computer | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/windows-app-id) |
+| [#17895](https://github.com/can1357/oh-my-pi/pull/17895) | role-implicit-landmarks | fix(coding-agent): find named sections and other implicit roles with role/ selectors | browser | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-implicit-landmarks) |
 | [#17893](https://github.com/can1357/oh-my-pi/pull/17893) | relay-downloads | fix(browser): report a relay tab's downloads where Chrome saved them | browser | P1 | 3h | keep; opened over P2 #16908 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-downloads) |
 | [#17904](https://github.com/can1357/oh-my-pi/pull/17904) | read-block-pages | fix(coding-agent): stop URL reads returning bot block pages as content | other | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-block-pages) |
 | [#17903](https://github.com/can1357/oh-my-pi/pull/17903) | wayland-click-pacing | fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks | natives | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-click-pacing) |
