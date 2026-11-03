@@ -62744,7 +62744,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T00:48:35.138050Z",
+  "at": "2026-11-03T00:49:05.570086Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -62870,6 +62870,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T14:42:35Z"
+   },
+   {
+    "id": "snapcompact-legacy-archive-credit",
+    "label": "#17883",
+    "number": 17883,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T00:46:22Z"
    },
    {
     "id": "print-hold",
@@ -63057,23 +63074,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T20:14:32Z"
-   },
-   {
-    "id": "snapcompact-legacy-archive-credit",
-    "label": "#17883",
-    "number": 17883,
-    "state": "open",
-    "area": "other",
-    "priority": null,
-    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T00:46:22Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -63266,10 +63266,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-02: doubled-letter typing unmeasured at 60 ms (pre-open review)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -63386,11 +63384,11 @@
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #17883 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
      "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #17883 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
@@ -63398,11 +63396,11 @@
     "paired": [],
     "blocked_by": [
      "#17747",
+     "#17883",
      "#17610",
      "#15128",
      "#15130",
-     "#17496",
-     "#17883"
+     "#17496"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -63605,11 +63603,11 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #17883 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #17883 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -63617,11 +63615,11 @@
     "paired": [],
     "blocked_by": [
      "#17747",
+     "#17883",
      "#17610",
      "#15128",
      "#15130",
-     "#17496",
-     "#17883"
+     "#17496"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
