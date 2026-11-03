@@ -61893,7 +61893,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/mirror-takeover-keys",
    "host": "MacBook-Pro",
    "added": "2026-11-03T04:33:04Z",
-   "updated": "2026-11-03T05:05:30Z",
+   "updated": "2026-11-03T05:05:52Z",
    "note": "",
    "built": [
     {
@@ -62017,7 +62017,8 @@
      "tree": "128d8429f9b7ac9f6762d5d7e00d428374eb9e42"
     }
    ],
-   "opened": "2026-11-03T05:05:30Z"
+   "opened": "2026-11-03T05:05:30Z",
+   "readied": "2026-11-03T05:05:51Z"
   },
   {
    "id": "win-silent-drag",
