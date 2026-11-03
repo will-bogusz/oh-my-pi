@@ -5,6 +5,7 @@
 ### Fixed
 
 - Fixed `press()`, `perform()` and `menu.select()` refusing on Linux in Firefox, Chromium, VS Code and LibreOffice, and in apps under a non-English locale, with "AT-SPI action 'press' is unavailable"; `actions()` now lists the actions' untranslated names (`press`, `click`) instead of empty or translated labels, and `press()` toggles toggle buttons as it does checkboxes
+- Fixed the Linux `computer` tool hanging for the rest of the session, and freezing the app, once a `press()` or `menu.select()` opened a modal dialog in a GTK 3 app such as Audacity: reads of an app that does not answer now fail with `Timeout` after 5 s while screenshots and input keep working
 
 ## [18.16.0] - 2026-11-02
 

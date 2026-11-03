@@ -12,7 +12,7 @@ use crate::desktop::{
 	error::{CoreResult, DesktopError},
 	frame::FrameGeometry,
 	keys::KeyName,
-	linux::ax::{AtSpiAx, AtSpiWindow},
+	linux::ax::{self, AtSpiAx, AtSpiWindow},
 	types::{
 		CaptureCaps, DesktopCapabilities, DesktopDisplay, DesktopWindow, DisplaySelector, Target,
 	},
@@ -129,11 +129,14 @@ pub struct WaylandBackend {
 		not(feature = "wayland-pipewire"),
 		expect(dead_code, reason = "only read by the pipewire capture path")
 	)]
-	display:  DisplaySelector,
-	ax:       Option<AtSpiAx>,
-	ax_error: Option<DesktopError>,
-	input:    Option<libei::Libei>,
-	displays: Vec<DesktopDisplay>,
+	display:    DisplaySelector,
+	ax:         Option<AtSpiAx>,
+	ax_error:   Option<DesktopError>,
+	input:      Option<libei::Libei>,
+	displays:   Vec<DesktopDisplay>,
+	/// Bus names of the applications that did not answer the last window
+	/// listing, whose windows it therefore left out.
+	unanswered: Vec<String>,
 }
 
 impl WaylandBackend {
@@ -145,7 +148,7 @@ impl WaylandBackend {
 			Ok(ax) => (Some(ax), None),
 			Err(err) => (None, Some(err)),
 		};
-		Self { display, ax, ax_error, input: None, displays: Vec::new() }
+		Self { display, ax, ax_error, input: None, displays: Vec::new(), unanswered: Vec::new() }
 	}
 
 	fn window_input_error(target: &Target, kind: &str) -> CoreResult<()> {
@@ -178,8 +181,8 @@ impl WaylandBackend {
 		result
 	}
 
-	fn atspi_windows(&self) -> CoreResult<Vec<AtSpiWindow>> {
-		self
+	fn atspi_windows(&mut self) -> CoreResult<Vec<AtSpiWindow>> {
+		let listed = self
 			.ax
 			.as_ref()
 			.ok_or_else(|| {
@@ -188,7 +191,9 @@ impl WaylandBackend {
 					.clone()
 					.unwrap_or_else(DesktopError::ax_unsupported)
 			})?
-			.windows()
+			.windows()?;
+		self.unanswered = listed.unanswered;
+		Ok(listed.windows)
 	}
 }
 
@@ -270,12 +275,28 @@ impl Backend for WaylandBackend {
 			.collect())
 	}
 
+	fn missing_window(&self, target: &Target) -> Option<DesktopError> {
+		// Window ids are `atspi:{bus name}:{object path}`.
+		let skipped = match target {
+			Target::Window(id) => {
+				let bus = id.strip_prefix("atspi:")?.split_once(":/")?.0;
+				self.unanswered.iter().any(|name| name == bus)
+			},
+			Target::Desktop | Target::Display(_) => !self.unanswered.is_empty(),
+		};
+		skipped.then(ax::not_answering)
+	}
+
 	fn focused_keyboard_window(&mut self) -> CoreResult<DesktopWindow> {
 		let entry = self
 			.atspi_windows()?
 			.into_iter()
 			.find(|entry| entry.window.focused)
-			.ok_or_else(|| DesktopError::invalid_target("no focused Wayland window was found"))?;
+			.ok_or_else(|| {
+				self.missing_window(&Target::Desktop).unwrap_or_else(|| {
+					DesktopError::invalid_target("no focused Wayland window was found")
+				})
+			})?;
 		if !entry.position_known {
 			return Err(DesktopError::invalid_target(
 				"the focused Wayland surface has no known global position; cannot safely target \
@@ -315,7 +336,9 @@ impl Backend for WaylandBackend {
 						.into_iter()
 						.find(|entry| &entry.window.id == id)
 						.ok_or_else(|| {
-							DesktopError::window_not_found(format!("Wayland window {id} not found"))
+							self.missing_window(target).unwrap_or_else(|| {
+								DesktopError::window_not_found(format!("Wayland window {id} not found"))
+							})
 						})?;
 					let (x, y, width, height) = geometry.window_crop(&entry)?;
 					let cropped = image::imageops::crop_imm(&image, x, y, width, height).to_image();
@@ -419,13 +442,46 @@ mod tests {
 
 	fn backend_without_services() -> WaylandBackend {
 		WaylandBackend {
-			display:  DisplaySelector::All,
-			ax:       None,
-			ax_error: None,
-			input:    None,
-			displays: Vec::new(),
+			display:    DisplaySelector::All,
+			ax:         None,
+			ax_error:   None,
+			input:      None,
+			displays:   Vec::new(),
+			unanswered: Vec::new(),
 		}
 	}
+
+	#[test]
+	fn a_window_of_an_application_that_did_not_answer_reports_the_timeout() {
+		use crate::desktop::error::ErrorCode;
+		let code = |backend: &WaylandBackend, target: &str| {
+			backend
+				.missing_window(&Target::parse(target))
+				.map(|error| error.code)
+		};
+		let mut backend = backend_without_services();
+		backend.unanswered = vec![":1.8".to_owned()];
+		assert_eq!(
+			code(&backend, "atspi::1.8:/org/a11y/atspi/accessible/2"),
+			Some(ErrorCode::Timeout)
+		);
+		assert_eq!(code(&backend, "atspi::1.7:/org/a11y/atspi/accessible/2"), None);
+		assert_eq!(
+			backend
+				.missing_window(&Target::Desktop)
+				.map(|error| error.code),
+			Some(ErrorCode::Timeout)
+		);
+		backend.unanswered.clear();
+		assert_eq!(code(&backend, "atspi::1.8:/org/a11y/atspi/accessible/2"), None);
+		assert_eq!(
+			backend
+				.missing_window(&Target::Desktop)
+				.map(|error| error.code),
+			None
+		);
+	}
+
 	fn with_fake_libei(action: impl FnOnce(&mut WaylandBackend)) -> bool {
 		let _guard = LIBEI_ENV_LOCK.lock().expect("lock LIBEI_SOCKET test");
 		let socket = std::env::temp_dir().join(format!("omp-libei-test-{}", std::process::id()));
@@ -593,11 +649,12 @@ mod tests {
 	#[cfg(not(feature = "wayland-pipewire"))]
 	fn capabilities_report_no_capture_without_pipewire_feature() {
 		let mut backend = WaylandBackend {
-			display:  DisplaySelector::All,
-			ax:       None,
-			ax_error: None,
-			input:    None,
-			displays: Vec::new(),
+			display:    DisplaySelector::All,
+			ax:         None,
+			ax_error:   None,
+			input:      None,
+			displays:   Vec::new(),
+			unanswered: Vec::new(),
 		};
 		let caps = backend.capabilities();
 		// Shipped builds compile without wayland-pipewire, so the capture path is
