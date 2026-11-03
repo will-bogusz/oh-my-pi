@@ -292,6 +292,39 @@ describe("branch summarization", () => {
 		expect(messages.some(m => m.role === "toolResult")).toBe(true);
 	});
 
+	// Contract: the transcript carries a turn's thinking even where the
+	// summarizer's own request would drop it from a replay (Factory's Gemini
+	// wire drops Claude thinking), so that thinking still takes up the budget.
+	test("budgets thinking the summarizer's replay would drop but the transcript carries", () => {
+		const gemini = getBundledModel("google", "gemini-3-pro-preview") as Model;
+		const factoryGemini = {
+			...gemini,
+			id: "gemini-3.8-flash",
+			api: "factory-droid-agent",
+			provider: "factory-droid",
+		};
+		const turn: AssistantMessage = {
+			role: "assistant",
+			content: [
+				{ type: "thinking", thinking: "t".repeat(40_000), thinkingSignature: "signature" },
+				{ type: "text", text: "Done." },
+			],
+			api: "anthropic-messages",
+			provider: "anthropic",
+			model: "claude-opus-5-5",
+			usage: ZERO_USAGE,
+			stopReason: "stop",
+			timestamp: 0,
+		};
+		const entries: SessionEntry[] = [
+			{ type: "message", id: "assistant-1", parentId: null, timestamp: new Date(0).toISOString(), message: turn },
+		];
+		const tokenizer = new Tokenizer(factoryGemini as Model);
+		// The summarizer's own replay drops the thinking: the turn costs only its text.
+		expect(tokenizer.countMessage(turn)).toBeLessThan(10);
+		expect(prepareBranchEntries(entries, tokenizer, 1_000).messages).toHaveLength(0);
+	});
+
 	// Contract: the summarizer receives the branch as plain text, so a Codex
 	// turn's native reasoning, charged at its reported tokens when the same model
 	// replays it, never takes up the selection budget.

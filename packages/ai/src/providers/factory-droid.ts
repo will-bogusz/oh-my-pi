@@ -1,3 +1,4 @@
+import { buildModel } from "@oh-my-pi/pi-catalog/build";
 import {
 	type FactoryDroidModelPolicy,
 	factoryDroidRegionalLimits,
@@ -25,6 +26,7 @@ import type {
 	AssistantMessage,
 	Context,
 	Model,
+	ModelSpec,
 	ServiceTier,
 	StreamFunction,
 	StreamOptions,
@@ -41,7 +43,7 @@ import { streamFactoryDroidGemini } from "./factory-droid/gemini";
 import {
 	factoryDroidDefaultUpstream,
 	type FactoryDroidSharedWire,
-	factoryDroidInnerRoute,
+	factoryDroidWireTarget,
 } from "./factory-droid/route";
 import { factoryDroidToolNamesByWire, encodeFactoryDroidCompletionsToolName } from "./factory-droid/tool-names";
 import { streamAnthropic, streamOpenAICompletions, streamOpenAIResponses } from "./register-builtins";
@@ -215,10 +217,10 @@ function resolveRoute(
 	if (wire === "google-generate") {
 		route = { policy: resolveModelPolicy(model, { upstream }).request };
 	} else {
-		const { policy, inner } = factoryDroidInnerRoute(model, wire, upstream, baseUrl);
+		const { policy, target } = factoryDroidWireTarget(model, wire, upstream);
 		route = {
 			policy,
-			inner,
+			inner: buildModel({ ...target, baseUrl } as ModelSpec<FactoryDroidSharedWire>),
 			serverSideFallbackModels: serverSideFallbackModels({ ...model, api: wire }, { upstream }),
 		};
 	}

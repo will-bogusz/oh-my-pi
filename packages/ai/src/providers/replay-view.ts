@@ -7,7 +7,7 @@
 import { resolveFactoryDroidPolicy } from "@oh-my-pi/pi-catalog/compat/factory-droid";
 import type { AssistantMessage, Model } from "../types";
 import { adoptFactoryReplay } from "./factory-droid/gemini";
-import { factoryDroidDefaultUpstream, factoryDroidInnerRoute } from "./factory-droid/route";
+import { factoryDroidDefaultUpstream, factoryDroidWireTarget } from "./factory-droid/route";
 import { ollamaChatDropsOwnThinking } from "./ollama";
 import { completionsDropsOwnThinking, isLiteLLMThinkingSignature } from "./openai-completions";
 import { isSameModelTurn, replayAssistantTurn } from "./transform-messages";
@@ -73,7 +73,23 @@ function buildView(model: Model): ReplayView | undefined {
 		if (model.api !== "factory-droid-agent") return undefined;
 		return factoryDroidView(model as Model<"factory-droid-agent">);
 	}
-	return { target: model, key: viewKey(model), assistantTurn: replay };
+	return viewOf(model, viewKey(model), replay);
+}
+
+/**
+ * A view over `replay`. A persisted turn without its origin (records that
+ * predate provider stamps) is something no replay pass can classify; it
+ * counts as stored.
+ */
+function viewOf(target: Model, key: string, replay: TurnReplay): ReplayView {
+	return {
+		target,
+		key,
+		assistantTurn: (turn, latest) =>
+			typeof turn.provider === "string" && typeof turn.api === "string" && typeof turn.model === "string"
+				? replay(turn, latest)
+				: turn,
+	};
 }
 
 /** The turn replay of a reader that encodes its history itself, without a proxy hop. */
@@ -210,31 +226,29 @@ function factoryDroidView(model: Model<"factory-droid-agent">): ReplayView | und
 	const registry = resolveFactoryDroidPolicy(model);
 	const wire = registry?.wire ?? "openai-completions";
 	if (wire === "google-generate") {
-		return {
-			target: model,
-			key: viewKey(model),
-			assistantTurn: (turn, latest) => {
-				const replayed = replayAssistantTurn(adoptFactoryReplay(turn, model) as AssistantMessage, model, latest);
-				if (!replayed) return undefined;
-				// The generate contents carry text, signed thinking and calls.
-				return withContent(
-					replayed,
-					replayed.content.filter(
-						block =>
-							block.type === "text" ||
-							block.type === "toolCall" ||
-							(block.type === "thinking" && !!block.thinkingSignature),
-					),
-				);
-			},
-		};
+		return viewOf(model, viewKey(model), (turn, latest) => {
+			const replayed = replayAssistantTurn(adoptFactoryReplay(turn, model) as AssistantMessage, model, latest);
+			if (!replayed) return undefined;
+			// The generate contents carry text, signed thinking and calls.
+			return withContent(
+				replayed,
+				replayed.content.filter(
+					block =>
+						block.type === "text" ||
+						block.type === "toolCall" ||
+						(block.type === "thinking" && !!block.thinkingSignature),
+				),
+			);
+		});
 	}
 	const upstream = factoryDroidDefaultUpstream(model, registry);
 	if (upstream === undefined) return undefined;
-	const { inner } = factoryDroidInnerRoute(model, wire, upstream, model.baseUrl);
+	// The inner model's identity, compat and thinking; the transport-only fields
+	// the request adds (limits, host) play no part in replay.
+	const inner = factoryDroidWireTarget(model, wire, upstream).target as Model;
 	const replay = turnReplay(inner);
 	if (replay === undefined) return undefined;
-	return { target: inner, key: viewKey(inner, model), assistantTurn: replay };
+	return viewOf(inner, viewKey(inner, model), replay);
 }
 
 function withContent(turn: AssistantMessage, content: AssistantMessage["content"]): AssistantMessage {

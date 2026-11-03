@@ -6,6 +6,7 @@ import type { Part } from "@oh-my-pi/pi-ai/providers/google-types";
 import { convertCodexResponsesMessages } from "@oh-my-pi/pi-ai/providers/openai-codex-responses";
 import { convertMessages } from "@oh-my-pi/pi-ai/providers/openai-completions";
 import { streamOpenAIResponses } from "@oh-my-pi/pi-ai/providers/openai-responses";
+import { replayView } from "@oh-my-pi/pi-ai/providers/replay-view";
 import { transformMessages } from "@oh-my-pi/pi-ai/providers/transform-messages";
 import { buildModel } from "@oh-my-pi/pi-catalog/build";
 import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
@@ -724,6 +725,11 @@ describe("countMessage replayed thinking", () => {
 		expect(tokenizer.countMessage(own)).toBe(OUTPUT_TOKENS);
 		// A Claude API turn's signature cannot verify on Factory's deployment: visible blocks only.
 		expect(tokenizer.countMessage(signedTurn(opus, VISIBLE, SIGNATURE))).toBe(VISIBLE_TOKENS);
+
+		// A partial row (no name, cost, limits or compat) resolves the same wire.
+		const partial = new Tokenizer({ api: "factory-droid-agent", provider: "factory-droid", id: opus.id });
+		expect(partial.countMessage(own)).toBe(OUTPUT_TOKENS);
+		expect(partial.countsAlike({ api: "factory-droid-agent", provider: "factory-droid", id: opus.id })).toBe(true);
 	});
 
 	test.each([
@@ -948,6 +954,35 @@ describe("replayed Responses reasoning", () => {
 		expect(await observe()).toEqual({ wire: 1, count: warm, floor: warm });
 		for (const state of providerSessionState.values()) state.close();
 		expect(await observe()).toEqual(cold);
+	});
+
+	test("follows the session state of Factory's inner Responses wire", async () => {
+		// Factory replays a GPT model's history over its inner Responses wire, whose
+		// session state (warmed by a response, closed with the session) decides
+		// whether the encrypted reasoning goes back.
+		const openai = bundledModel<"openai-responses">("openai", "gpt-6.1-sol");
+		const factoryGpt = { ...openai, api: "factory-droid-agent", provider: "factory-droid" } as Model;
+		const inner = replayView(factoryGpt)?.target as Model<"openai-responses">;
+		expect(inner.api).toBe("openai-responses");
+		const turn = responsesTurn(inner, history(inner.provider));
+		const visible = (tokenizer: Tokenizer) =>
+			tokenizer.countMessage(responsesTurn(inner, undefined, [{ type: "thinking", thinking: "" }, toolCall]));
+		const providerSessionState = new Map<string, ProviderSessionState>();
+		const agent = new Agent({
+			initialState: { model: factoryGpt, systemPrompt: [], tools: [], messages: [] },
+			providerSessionState,
+		});
+		const observe = async () => ({
+			wire: await responsesWireReasoning(inner, turn, providerSessionState),
+			count: agent.tokenizer.countMessage(turn, floored),
+		});
+		await responsesWireReasoning(inner, turn, providerSessionState);
+		for (const state of providerSessionState.values()) {
+			(state as ProviderSessionState & { nativeHistoryReplayWarmed: boolean }).nativeHistoryReplayWarmed = true;
+		}
+		expect(await observe()).toEqual({ wire: 1, count: visible(agent.tokenizer) + REASONING_TOKENS });
+		for (const state of providerSessionState.values()) state.close();
+		expect(await observe()).toEqual({ wire: 0, count: visible(agent.tokenizer) });
 	});
 });
 

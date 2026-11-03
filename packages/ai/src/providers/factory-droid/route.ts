@@ -1,4 +1,3 @@
-import { buildModel } from "@oh-my-pi/pi-catalog/build";
 import type { FactoryDroidModelPolicy } from "@oh-my-pi/pi-catalog/compat/factory-droid";
 import { resolveModelPolicy } from "@oh-my-pi/pi-catalog/compat/resolve";
 import type { RequestPolicy } from "@oh-my-pi/pi-catalog/compat/types";
@@ -15,32 +14,37 @@ export type FactoryDroidSharedWire = Exclude<FactoryDroidWire, "google-generate"
  * vanish on cached loads, while `factoryDroidApiProviders` survives.
  */
 export function factoryDroidDefaultUpstream(
-	model: Model<"factory-droid-agent">,
+	model: Pick<Model<"factory-droid-agent">, "factoryDroidApiProviders">,
 	registry: FactoryDroidModelPolicy | undefined,
 ): string | undefined {
 	return (model.factoryDroidApiProviders ?? registry?.rotation ?? ["fireworks"])[0];
 }
 
 /**
- * The model Factory's shared transport encodes `model` as on `wire` for
- * `upstream`, with the route's request policy: the same API, compat and
- * thinking the request (and its history replay) runs on.
+ * The API, compat and thinking Factory's shared transport encodes `model` with
+ * on `wire` for `upstream`, plus the route's request policy. The request
+ * builds its inner model from this; history replay reads it as is.
  */
-export function factoryDroidInnerRoute(
-	model: Model<"factory-droid-agent">,
+export function factoryDroidWireTarget<TModel extends Pick<Model, "id" | "provider" | "reasoning">>(
+	model: TModel,
 	wire: FactoryDroidSharedWire,
 	upstream: string,
-	baseUrl: string,
-): { policy: RequestPolicy; inner: Model<FactoryDroidSharedWire> } {
-	const resolved = resolveModelPolicy({ ...model, api: wire }, { upstream });
+): {
+	policy: RequestPolicy;
+	target: Omit<TModel, "api" | "compat" | "thinking"> &
+		Pick<Model<FactoryDroidSharedWire>, "api" | "compat" | "thinking">;
+} {
+	// Policy resolution reads only identity fields; a replay reader may be a partial row.
+	const spec = { ...model, api: wire } as unknown as ModelSpec<FactoryDroidSharedWire>;
+	const resolved = resolveModelPolicy(spec, { upstream });
 	return {
 		policy: resolved.request,
-		inner: buildModel({
+		target: {
 			...model,
 			api: wire,
-			baseUrl,
 			compat: resolved.compat,
 			thinking: resolved.thinking,
-		} as ModelSpec<FactoryDroidSharedWire>),
+			reasoning: model.reasoning || resolved.thinking !== undefined,
+		},
 	};
 }

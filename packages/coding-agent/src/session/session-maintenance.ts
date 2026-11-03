@@ -54,6 +54,7 @@ import {
 	readToolSupersedeKey,
 } from "@oh-my-pi/pi-agent-core/compaction/pruning";
 import type { ProtectedToolMatcher } from "@oh-my-pi/pi-agent-core/compaction/tool-protection";
+import { replaysNativeHistory } from "@oh-my-pi/pi-agent-core/tokenizer";
 import type {
 	AssistantMessage,
 	CodexCompactionContext,
@@ -63,7 +64,6 @@ import type {
 	ProviderSessionState,
 } from "@oh-my-pi/pi-ai";
 import * as AIError from "@oh-my-pi/pi-ai/error";
-import { openAIResponsesReplaysNativeHistory } from "@oh-my-pi/pi-ai/providers/openai-responses-state";
 import { sendsImageInputOnWire } from "@oh-my-pi/pi-ai/providers/vision-guard";
 import { resolvePromptCacheLookback } from "@oh-my-pi/pi-catalog/compat/prompt-cache-lookback";
 import { modelsAreEqual } from "@oh-my-pi/pi-catalog/models";
@@ -4371,7 +4371,7 @@ export class SessionMaintenance {
 		// a reader without image input gets each archive as text.
 		const providerExcludedTokens = activeExcludedMessage ? this.#tokenizer.countMessage(activeExcludedMessage) : 0;
 		const tokenizerOptions = {
-			nativeHistoryReplay: openAIResponsesReplaysNativeHistory(model, this.#host.providerSessionState),
+			nativeHistoryReplay: replaysNativeHistory(model, this.#host.providerSessionState),
 		};
 		const tokenizer = this.#tokenizer.countsAlike(model, tokenizerOptions)
 			? this.#tokenizer

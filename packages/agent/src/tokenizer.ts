@@ -1,4 +1,5 @@
-import type { AssistantMessage, Model, ToolResultMessage, UserMessage } from "@oh-my-pi/pi-ai";
+import type { AssistantMessage, Model, ProviderSessionState, ToolResultMessage, UserMessage } from "@oh-my-pi/pi-ai";
+import { openAIResponsesReplaysNativeHistory } from "@oh-my-pi/pi-ai/providers/openai-responses-state";
 import { isColdReplayableResponsesTurn } from "@oh-my-pi/pi-ai/providers/openai-shared";
 import { type ReplayView, replayView } from "@oh-my-pi/pi-ai/providers/replay-view";
 import { shouldDropTruncatedThinkingOnlyAssistant } from "@oh-my-pi/pi-ai/providers/transform-messages";
@@ -87,12 +88,32 @@ function reasoningReplayReader(view: ReplayView | undefined): ReasoningReplayRea
 /** Request state a {@link Tokenizer} counts for, beyond its model. */
 export interface TokenizerOptions {
 	/**
-	 * Whether the request replays native Responses history (pi-ai's
-	 * `openAIResponsesReplaysNativeHistory`). A cold session rebuilds a turn
-	 * holding encrypted reasoning from its text and tool calls, without the
-	 * reasoning or its signature. Default: true.
+	 * Whether the request replays native Responses history
+	 * ({@link replaysNativeHistory}). A cold session rebuilds a turn holding
+	 * encrypted reasoning from its text and tool calls, without the reasoning
+	 * or its signature. Default: true.
 	 */
 	nativeHistoryReplay?: boolean;
+}
+
+/**
+ * Whether a request for `model` replays native Responses history under
+ * `providerSessionState`: pi-ai's `openAIResponsesReplaysNativeHistory` for the
+ * model the request encodes its history for, so Factory's inner Responses
+ * wire reads its own session state. Pass it as
+ * {@link TokenizerOptions.nativeHistoryReplay}.
+ */
+export function replaysNativeHistory(
+	model: TokenizerModel | null | undefined,
+	providerSessionState: Map<string, ProviderSessionState> | undefined,
+): boolean {
+	const target = readerView(model)?.target ?? model;
+	return openAIResponsesReplaysNativeHistory(
+		target?.api && target.provider
+			? { api: target.api, provider: target.provider, compat: target.compat }
+			: undefined,
+		providerSessionState,
+	);
 }
 
 /**
@@ -121,7 +142,16 @@ export interface MessageCountOptions {
 	 * both arms.
 	 */
 	excludeEncryptedReasoning?: boolean;
+	/**
+	 * Count assistant turns as stored instead of as the reader's request
+	 * replays them: for text that serializes the stored turn (a branch summary's
+	 * transcript), which no replay pass filters. Not memoized.
+	 */
+	asStored?: boolean;
 }
+
+/** Which form of an assistant turn a count reads. */
+type TurnForm = "replayed" | "latest" | "stored";
 
 function byteEstimate(text: string): number {
 	return (Buffer.byteLength(text, "utf-8") + 3) >> 2;
@@ -324,7 +354,8 @@ export class Tokenizer {
 	 */
 	countMessage(message: AgentMessage, options?: MessageCountOptions): number {
 		const floored = options?.excludeEncryptedReasoning === true;
-		if (!isEstimateCacheable(message)) return this.#measureMessage(message, floored, false);
+		if (options?.asStored) return this.#measureMessage(message, floored, "stored");
+		if (!isEstimateCacheable(message)) return this.#measureMessage(message, floored, "replayed");
 		const version = messageEstimateVersion(message);
 		let entry = this.#estimates.get(message);
 		if (entry === undefined || entry.version !== version) {
@@ -333,7 +364,7 @@ export class Tokenizer {
 		}
 		const cached = floored ? entry.floored : entry.default;
 		if (cached !== undefined) return cached;
-		const result = this.#measureMessage(message, floored, false);
+		const result = this.#measureMessage(message, floored, "replayed");
 		if (floored) entry.floored = result;
 		else entry.default = result;
 		return result;
@@ -349,7 +380,7 @@ export class Tokenizer {
 	 * from {@link countMessage} only for that one turn.
 	 */
 	countLatestTurn(message: AgentMessage, options?: MessageCountOptions): number {
-		return this.#measureMessage(message, options?.excludeEncryptedReasoning === true, true);
+		return this.#measureMessage(message, options?.excludeEncryptedReasoning === true, "latest");
 	}
 
 	/** Sum of {@link countMessage} over `messages`. */
@@ -432,7 +463,7 @@ export class Tokenizer {
 		return total;
 	}
 
-	#measureMessage(message: AgentMessage, excludeEncryptedReasoning: boolean, latestTurn: boolean): number {
+	#measureMessage(message: AgentMessage, excludeEncryptedReasoning: boolean, form: TurnForm): number {
 		const fragments: string[] = [];
 		let extra = 0;
 		// Declaration-merged app roles (the coding-agent's bashExecution) are
@@ -457,7 +488,8 @@ export class Tokenizer {
 			}
 			case "assistant": {
 				// The turn as the reader's request carries it; a dropped turn sends nothing.
-				const turn = this.#view ? this.#view.assistantTurn(message, latestTurn) : message;
+				const turn =
+					this.#view && form !== "stored" ? this.#view.assistantTurn(message, form === "latest") : message;
 				if (!turn) return 0;
 				// Replayed native Responses reasoning is billed as input at the turn's
 				// reported reasoning tokens, not at its ~3x larger ciphertext size, so it

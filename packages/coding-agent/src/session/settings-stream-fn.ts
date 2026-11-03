@@ -10,9 +10,13 @@
  * OpenRouter never saw `providers.openrouterVariant`, breaking sticky routing
  * and OpenRouter response-cache hits across advisor calls.
  */
-import { fitOutputTokensToContextWindow, type StreamFn, Tokenizer } from "@oh-my-pi/pi-agent-core";
+import {
+	fitOutputTokensToContextWindow,
+	replaysNativeHistory,
+	type StreamFn,
+	Tokenizer,
+} from "@oh-my-pi/pi-agent-core";
 import { type Model, type SimpleStreamOptions, streamSimple } from "@oh-my-pi/pi-ai";
-import { openAIResponsesReplaysNativeHistory } from "@oh-my-pi/pi-ai/providers/openai-responses-state";
 import { serverSideFallbackModels } from "@oh-my-pi/pi-catalog/compat/server-side-fallback";
 import type { Settings } from "../config/settings";
 import { type AnthropicSlowModeLanes, anthropicSlowModeLanes } from "./anthropic-slow-mode";
@@ -150,7 +154,7 @@ export function createSettingsAwareStreamFn(
 		// fitted as replaying.
 		const nativeHistoryReplay =
 			Object.hasOwn(maxInFlightRequests, model.provider) ||
-			openAIResponsesReplaysNativeHistory(model, streamOptions?.providerSessionState);
+			replaysNativeHistory(model, streamOptions?.providerSessionState);
 		const tokenizerKey = `${model.provider}\0${model.api}\0${model.id}\0${nativeHistoryReplay}`;
 		let tokenizer = tokenizers.get(tokenizerKey);
 		if (!tokenizer) {

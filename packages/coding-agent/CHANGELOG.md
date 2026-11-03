@@ -7,6 +7,10 @@
 - Pinned sessions show a pin beside their title in the status line and the band composer's title, and `/unpin [session id]` unpins a session ([#17848](https://github.com/can1357/oh-my-pi/pull/17848) by [@SuperUserA](https://github.com/SuperUserA))
 - Added a fullscreen extension link browser for picking links already in terminal scrollback: press Alt+O again (or Page Up) while link tags are shown, or Alt+O with no extension link on screen ([#16476](https://github.com/can1357/oh-my-pi/pull/16476) by [@materemias](https://github.com/materemias))
 
+### Fixed
+
+- After a model switch, the status line, compaction checks and `/context` count earlier turns' thinking as the new model's request sends it (demoted to text, dropped, or replayed with its signature), and a Factory GPT model's encrypted reasoning only while its session still replays it
+
 ## [18.16.0] - 2026-11-02
 
 ### Added

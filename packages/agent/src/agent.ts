@@ -23,7 +23,6 @@ import {
 	type ToolResultMessage,
 } from "@oh-my-pi/pi-ai";
 import type { Dialect } from "@oh-my-pi/pi-ai/dialect";
-import { openAIResponsesReplaysNativeHistory } from "@oh-my-pi/pi-ai/providers/openai-responses-state";
 import type { HarmonyAuditEvent } from "@oh-my-pi/pi-ai/utils/harmony-leak";
 import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
 import { logger } from "@oh-my-pi/pi-utils";
@@ -42,7 +41,7 @@ import type { AppendOnlyContextManager } from "./append-only-context";
 import { agentPauseGate } from "./pause";
 import { isProviderRefusalMessage } from "./replay-policy";
 import { SentToolDefinitions } from "./sent-tool-definitions";
-import { Tokenizer } from "./tokenizer";
+import { replaysNativeHistory, Tokenizer } from "./tokenizer";
 import {
 	createAdditionalContextMessage,
 	joinAdditionalContext,
@@ -902,9 +901,7 @@ export class Agent {
 		// The provider warms or closes a session inside a request, so the replay
 		// state is read here rather than only on model switches.
 		const model = this.#state.model;
-		if (
-			openAIResponsesReplaysNativeHistory(model, this.#providerSessionState) !== this.#tokenizer.nativeHistoryReplay
-		) {
+		if (replaysNativeHistory(model, this.#providerSessionState) !== this.#tokenizer.nativeHistoryReplay) {
 			this.#syncTokenizer(model);
 		}
 		return this.#tokenizer;
@@ -912,12 +909,11 @@ export class Agent {
 
 	/**
 	 * Swap the tokenizer only when the encoding, image or thinking-replay
-	 * pricing, replayed-reasoning reader or native-history replay state
-	 * actually changes, so the warm
-	 * per-message memo survives same-pricing model switches.
+	 * pricing, replay view or native-history replay state actually changes,
+	 * so the warm per-message memo survives same-pricing model switches.
 	 */
 	#syncTokenizer(model: Model | null | undefined): void {
-		const options = { nativeHistoryReplay: openAIResponsesReplaysNativeHistory(model, this.#providerSessionState) };
+		const options = { nativeHistoryReplay: replaysNativeHistory(model, this.#providerSessionState) };
 		if (!this.#tokenizer.countsAlike(model, options)) this.#tokenizer = new Tokenizer(model, options);
 	}
 
