@@ -60179,6 +60179,24 @@
    "added": "2026-11-03T01:29:02Z",
    "updated": "2026-11-03T01:29:39Z",
    "note": ""
+  },
+  {
+   "id": "wire-delta-count",
+   "branch": "will/wire-delta-count",
+   "title": "refactor(agent,ai): count the anchored delta from the reader's transformed wire messages",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
+   "body": "bodies/wire-delta-count.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wire-delta-count",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T01:33:54Z",
+   "updated": "2026-11-03T01:33:54Z",
+   "note": ""
   }
  ],
  "watch": {
