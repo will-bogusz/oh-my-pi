@@ -6,6 +6,10 @@
 
 - Added the `token-count` axis: each model line's embedded tokenizer and the framing its endpoint adds (scale, per-request base, tool-use preamble, per-tool), seeded from measurements for Grok 4.7, Kimi K3 and Claude, with the Claude tool preambles from Anthropic's docs
 
+### Fixed
+
+- Fixed Claude ids that drop the version separator (`claude-opus-45`, `claude-sonnet-45`, `claude-haiku-45`) reading as revision 45 instead of 4.5, which counted them in the Claude 5 vocabulary and gave them the 4.7+ adaptive-thinking settings; the taxonomy's new `collapsed-minor` revision flag reads them as their line
+
 ## [18.16.0] - 2026-11-02
 
 ### Added

@@ -78,7 +78,7 @@ A class may contain both forms:
 
 ```kdl
 revision prefix="gemini-"
-revision prefix="claude-" anywhere=#true
+revision prefix="claude-" anywhere=#true collapsed-minor=#true
 revision skip-bare "o1" "o3" "o4"
 ```
 
@@ -86,6 +86,7 @@ revision skip-bare "o1" "o3" "o4"
 - Prefixes are tried in declaration order; the first matching prefix is used.
 - `skip-bare` takes one or more bare names that intentionally carry no revision and overrides extraction.
 - After removing or locating the prefix, extraction starts at the first ASCII digit. It reads at most three unsigned 8-bit numeric components separated by `.` or by `-` followed by a digit. Missing components become zero. Thus `claude-opus-4-6` produces `4.6.0`.
+- `collapsed-minor=#true` reads a first component of exactly two digits with no `.` after it as major and minor, for lines whose ids drop the separator: `claude-opus-45` produces `4.5.0`, `claude-opus-45-20251101` too. Use it only on a class whose majors stay single-digit.
 
 ### Reviewed identity overrides
 

@@ -3824,7 +3824,7 @@ describe("ModelRegistry", () => {
 		const tokenizer = (id: string) => registry.find("my-gateway", id)?.tokenizer;
 		expect(tokenizer("anthropic/claude-haiku-5-5")).toBe("claude-v5-sonnet");
 		expect(tokenizer("claude-opus-4-7")).toBe("claude-v47");
-		expect(tokenizer("claude-opus-45")).toBe("claude-v5");
+		expect(tokenizer("claude-opus-45")).toBe("claude-v3");
 		expect(tokenizer("moonshotai/kimi-k3")).toBe("kimi-k2");
 		expect(tokenizer("x-ai/grok-4.7")).toBe("o200k");
 		expect(tokenizer("grok-4.20-0309-reasoning")).toBeUndefined();

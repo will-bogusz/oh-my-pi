@@ -70,13 +70,14 @@ function parseFamily(node: KdlNodeView): CompiledFamily {
 }
 
 function parseRevisionRule(node: KdlNodeView, cls: CompiledClass): void {
-	validateProps(node, ["prefix", "anywhere"]);
+	validateProps(node, ["prefix", "anywhere", "collapsed-minor"]);
 	if (node.children) malformed(node);
 	const prefix = propString(node, "prefix");
 	if (prefix !== undefined) {
 		if (!prefix || node.args.length > 0) malformed(node);
 		const rule: CompiledClass["revisionPrefixes"][number] = { prefix: prefix.toLowerCase() };
 		if (propBool(node, "anywhere")) rule.anywhere = true;
+		if (propBool(node, "collapsed-minor")) rule.collapsedMinor = true;
 		cls.revisionPrefixes.push(rule);
 		return;
 	}

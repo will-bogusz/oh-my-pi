@@ -67,8 +67,9 @@ describe("resolveModelTokenizer", () => {
 			["cursor", "claude-opus-5-5-fast", "claude-v5"],
 			["kilo", "~anthropic/claude-opus-latest", "claude-v3"],
 			["nanogpt", "anthropic/claude-sonnet-latest", "claude-v3"],
-			// Separator-collapsed revisions parse as two digits (Opus 4.5 → 45).
-			["venice", "claude-opus-45", "claude-v5"],
+			// Separator-collapsed ids read as their line (`claude-opus-45` is Opus 4.5).
+			["venice", "claude-opus-45", "claude-v3"],
+			["venice", "claude-sonnet-45", "claude-v3"],
 			["kimi-code", "k3", "kimi-k2"],
 			["kimi-code", "k3.1-pro", "kimi-k2"],
 			["openrouter", "moonshotai/kimi-k3:batch", "kimi-k2"],
@@ -147,8 +148,8 @@ describe("resolveModelTokenCount", () => {
 			perTool: 9,
 		});
 		expect(bundledTokenCount("anthropic", "claude-opus-4-7")).toEqual({ tokenizer: "claude-v47", toolPreamble: 675 });
-		// Collapsed `claude-opus-45` keeps its vocabulary but takes no 5.x framing.
-		expect(bundledTokenCount("venice", "claude-opus-45")).toEqual({ tokenizer: "claude-v5" });
+		// Collapsed `claude-opus-45` is Opus 4.5: claude-v3 and its line's tool preamble.
+		expect(bundledTokenCount("venice", "claude-opus-45")).toEqual({ tokenizer: "claude-v3", toolPreamble: 496 });
 		expect(bundledTokenCount("kilo", "~anthropic/claude-opus-latest")).toEqual({ tokenizer: "claude-v3" });
 		// Kimi K2 shares K3's vocabulary without the K3 framing.
 		expect(bundledTokenCount("moonshot", "kimi-k2.6")).toEqual({ tokenizer: "kimi-k2" });

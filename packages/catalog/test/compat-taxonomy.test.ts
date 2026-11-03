@@ -11,6 +11,38 @@ describe("classifyModel", () => {
 		});
 	});
 
+	test("anthropic separator-collapsed revisions read as major.minor", () => {
+		const opus45 = { class: "anthropic", family: "opus", revision: "4.5.0" };
+		expect(classifyModel("venice", "claude-opus-45")).toEqual(opus45);
+		expect(classifyModel("anthropic", "claude-opus-45-20251101")).toEqual(opus45);
+		expect(classifyModel("venice", "claude-sonnet-45")).toEqual({
+			class: "anthropic",
+			family: "sonnet",
+			revision: "4.5.0",
+		});
+		expect(classifyModel("openrouter", "claude-haiku-45")).toEqual({
+			class: "anthropic",
+			family: "haiku",
+			revision: "4.5.0",
+		});
+		expect(classifyModel("anthropic", "claude-sonnet-37")).toEqual({
+			class: "anthropic",
+			family: "sonnet",
+			revision: "3.7.0",
+		});
+		// Single-digit and dotted revisions are unchanged.
+		expect(classifyModel("anthropic", "claude-opus-5-5")).toEqual({
+			class: "anthropic",
+			family: "opus",
+			revision: "5.5.0",
+		});
+		expect(classifyModel("anthropic", "claude-3-5-sonnet-20241022")).toEqual({
+			class: "anthropic",
+			family: "sonnet",
+			revision: "3.5.0",
+		});
+	});
+
 	test("namespaced aggregator ids classify by bare name", () => {
 		expect(classifyModel("openrouter", "anthropic/claude-opus-4-6")).toEqual({
 			class: "anthropic",

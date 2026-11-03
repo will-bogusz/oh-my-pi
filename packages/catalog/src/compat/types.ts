@@ -30,6 +30,8 @@ export interface CompiledFamily {
 export interface CompiledRevisionPrefix {
 	prefix: string;
 	anywhere?: boolean;
+	/** A two-digit first component with no separator (`opus-45`) reads as major.minor (`4.5`). */
+	collapsedMinor?: boolean;
 }
 
 interface CompiledIdentityOverrideFields {

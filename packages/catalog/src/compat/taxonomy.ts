@@ -147,7 +147,10 @@ function extractRevision(cls: CompiledClass, bare: string): string | undefined {
 		if (tail === undefined) continue;
 		const digit = tail.search(/[0-9]/);
 		if (digit === -1) return undefined;
-		const revision = parseRevisionPrefix(tail.slice(digit));
+		const digits = tail.slice(digit);
+		// `opus-45` drops the separator of `opus-4-5`: read a lone two-digit lead as major.minor.
+		const collapsed = rule.collapsedMinor ? /^([1-9])([0-9])(?![0-9.])/.exec(digits) : null;
+		const revision = parseRevisionPrefix(collapsed ? `${collapsed[1]}.${collapsed[2]}` : digits);
 		return revision ? formatRevision(revision) : undefined;
 	}
 	return undefined;
