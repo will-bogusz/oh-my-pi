@@ -64290,8 +64290,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T03:58:49.383972Z",
-  "host": "goliath",
+  "at": "2026-11-03T04:24:59.960799Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 2,
@@ -64783,6 +64783,57 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
+    "id": "x11-mpx-focus-release",
+    "label": "x11-mpx-focus-release",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T04:23:45Z"
+   },
+   {
+    "id": "x11-qt-background-keys",
+    "label": "x11-qt-background-keys",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T04:23:54Z"
+   },
+   {
+    "id": "x11-takeover-keymap-switch",
+    "label": "x11-takeover-keymap-switch",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T04:23:33Z"
+   },
+   {
     "id": "computer-ui-quiet",
     "label": "computer-ui-quiet",
     "number": null,
@@ -65069,7 +65120,7 @@
      "conflicts with #17893 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17894 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
