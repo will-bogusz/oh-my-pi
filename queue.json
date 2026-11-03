@@ -63878,10 +63878,23 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T20:46:56Z",
+  "checked": "2026-11-03T21:48:23Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "wayland-input-capability": {
+    "since": "2026-11-03T21:48:23Z",
+    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists"
+   },
+   "wayland-ei-text": {
+    "since": "2026-11-03T21:48:23Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text"
+   },
+   "atspi-file-chooser": {
+    "since": "2026-11-03T21:48:23Z",
+    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows"
+   }
+  },
   "conflicts": {
    "#16274": {
     "since": "2026-11-03T12:38:09Z",
@@ -65896,6 +65909,24 @@
     "files": [
      "packages/coding-agent/test/tools/computer.test.ts"
     ]
+   },
+   {
+    "at": "2026-11-03T21:48:23Z",
+    "kind": "openable",
+    "id": "wayland-input-capability",
+    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists"
+   },
+   {
+    "at": "2026-11-03T21:48:23Z",
+    "kind": "openable",
+    "id": "wayland-ei-text",
+    "title": "feat(natives): type text the wayland layout lacks through libei text"
+   },
+   {
+    "at": "2026-11-03T21:48:23Z",
+    "kind": "openable",
+    "id": "atspi-file-chooser",
+    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows"
    }
   ]
  },
