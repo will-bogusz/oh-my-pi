@@ -63340,6 +63340,24 @@
    ],
    "opened": "2026-11-03T07:44:30Z",
    "readied": "2026-11-03T07:44:54Z"
+  },
+  {
+   "id": "atspi-unanswered-app",
+   "branch": "will/atspi-unanswered-app",
+   "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "body": "bodies/atspi-unanswered-app.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-unanswered-app",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T08:39:53Z",
+   "updated": "2026-11-03T08:39:53Z",
+   "note": ""
   }
  ],
  "watch": {
