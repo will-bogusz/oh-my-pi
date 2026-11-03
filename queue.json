@@ -60357,7 +60357,7 @@
    "branch": "will/windows-app-id",
    "title": "fix(coding-agent): find app windows by application id or path",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
    "body": "bodies/windows-app-id.md",
@@ -60367,7 +60367,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/windows-app-id",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:11:09Z",
-   "updated": "2026-11-03T02:18:20Z",
+   "updated": "2026-11-03T02:20:54Z",
    "note": "",
    "built": [
     {
@@ -60549,7 +60549,7 @@
    "branch": "will/role-implicit-landmarks",
    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "ef3293b64fbcbef7882430859f9685ddf5443ff5",
    "body": "bodies/role-implicit-landmarks.md",
@@ -60559,7 +60559,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-implicit-landmarks",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:12:51Z",
-   "updated": "2026-11-03T02:16:30Z",
+   "updated": "2026-11-03T02:20:54Z",
    "note": "",
    "built": [
     {
