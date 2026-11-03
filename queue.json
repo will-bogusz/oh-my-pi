@@ -61009,7 +61009,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "base": "ff0a986b88c223a0a746ed95cda8ddada236140c",
    "body": "bodies/read-block-pages.md",
    "state": "open",
    "pr": 17904,
@@ -61017,7 +61017,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-block-pages",
    "host": "MacBook-Pro",
    "added": "2026-11-03T02:52:49Z",
-   "updated": "2026-11-03T03:58:46Z",
+   "updated": "2026-11-03T20:15:14Z",
    "note": "",
    "built": [
     {
@@ -61184,7 +61184,8 @@
     }
    ],
    "opened": "2026-11-03T03:48:08Z",
-   "readied": "2026-11-03T03:48:29Z"
+   "readied": "2026-11-03T03:48:29Z",
+   "advanced": "2026-11-03T20:15:14Z"
   },
   {
    "id": "wayland-click-pacing",
