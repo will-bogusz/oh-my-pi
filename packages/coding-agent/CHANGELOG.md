@@ -18,6 +18,7 @@
 - Added `tui.motion` (`full` / `reduced` / `none`, also `--motion` and `PI_MOTION`), one switch over spinners, the thinking pulse, shimmer and the status-line blink/fade for many-pane or reduced-motion use; a `tui.spinnerInterval` you set still wins over the preset ([#14240](https://github.com/can1357/oh-my-pi/pull/14240) by [@mccraigmccraig](https://github.com/mccraigmccraig))
 - Added `tui.spinnerInterval` (also `--spinner-interval` and `PI_SPINNER_INTERVAL`) to slow every spinner, the terminal title included, or pin them static with `0` ([#14240](https://github.com/can1357/oh-my-pi/pull/14240) by [@mccraigmccraig](https://github.com/mccraigmccraig))
 - Added `tui.maxFps` (also `--max-fps` and `PI_MAX_FPS`) to cap how often the TUI repaints; keystroke echo keeps 30 fps ([#14240](https://github.com/can1357/oh-my-pi/pull/14240) by [@mccraigmccraig](https://github.com/mccraigmccraig))
+- Browser `role/` selectors now find named sections and other implicit landmark and structural roles in Chrome and Tern, so scoped snapshots and observations can target them; a `role/` selector with anything after its name filter, such as a chained `>> role/combobox`, is refused instead of matching the outer role ([#17895](https://github.com/can1357/oh-my-pi/pull/17895) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Changed
 
@@ -79,10 +80,6 @@
 ### Fixed
 
 - Browser: a headless Chrome launched in-process by an SDK embedding or a `bun test` run now exits when that process is killed, instead of running on with its temporary profile on Linux and macOS ([#17908](https://github.com/can1357/oh-my-pi/pull/17908) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Fixed
-
-- Browser `role/` selectors now find named sections and other implicit landmark and structural roles in Chrome and Tern, so scoped snapshots and observations can target them ([#17895](https://github.com/can1357/oh-my-pi/pull/17895) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.16.0] - 2026-11-02
 
