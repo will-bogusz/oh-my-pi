@@ -63370,13 +63370,13 @@
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/atspi-action-names.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17936,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-action-names",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:46:34Z",
-   "updated": "2026-11-03T09:23:19Z",
+   "updated": "2026-11-03T09:25:43Z",
    "note": "",
    "built": [
     {
@@ -63549,7 +63549,8 @@
      "host": "MacBook-Pro",
      "tree": "435d8e9d952d2439463b91fc1a7cbda5525651ac"
     }
-   ]
+   ],
+   "opened": "2026-11-03T09:25:43Z"
   },
   {
    "id": "ax-find-depth",
