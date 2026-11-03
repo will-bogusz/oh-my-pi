@@ -61186,13 +61186,13 @@
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/wayland-click-pacing.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17903,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-click-pacing",
    "host": "MacBook-Pro",
    "added": "2026-11-03T03:23:44Z",
-   "updated": "2026-11-03T03:44:14Z",
+   "updated": "2026-11-03T03:46:05Z",
    "note": "",
    "built": [
     {
@@ -61258,7 +61258,8 @@
      "at": "2026-11-03T03:44:14Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-03T03:46:05Z"
   },
   {
    "id": "headless-chrome-pipe",
