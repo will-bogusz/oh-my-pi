@@ -63855,7 +63855,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-03T17:14:14Z",
+  "checked": "2026-11-03T17:44:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -63871,7 +63871,8 @@
     "since": "2026-11-03T12:38:09Z",
     "title": "feat(coding-agent): show whether the next message reads the prompt cache",
     "files": [
-     "packages/agent/src/append-only-context.ts"
+     "packages/agent/src/append-only-context.ts",
+     "packages/coding-agent/src/session/agent-session.ts"
     ]
    },
    "#17747": {
@@ -67443,7 +67444,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T17:14:14.956480Z",
+  "at": "2026-11-03T17:44:44.649014Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -68087,7 +68088,7 @@
     "title": "feat(coding-agent): show whether the next message reads the prompt cache",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/agent/src/append-only-context.ts"
+     "conflicts with main in packages/agent/src/append-only-context.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
