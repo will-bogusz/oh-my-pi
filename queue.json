@@ -65597,8 +65597,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T05:44:55.332895Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-03T05:52:37.863429Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 6,
@@ -66610,6 +66610,23 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
+    "id": "atspi-file-chooser",
+    "label": "atspi-file-chooser",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T05:52:28Z"
+   },
+   {
     "id": "encoded-prefix-count",
     "label": "encoded-prefix-count",
     "number": null,
@@ -66636,6 +66653,27 @@
      "wire-delta-count"
     ],
     "created": "2026-11-03T01:54:17Z"
+   },
+   {
+    "id": "gtk4-atspi-bounds",
+    "label": "gtk4-atspi-bounds",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #15282 in crates/pi-natives/src/desktop/linux/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#15282"
+    ],
+    "needs": [],
+    "created": "2026-11-03T05:52:19Z"
    },
    {
     "id": "text-reader-usage-shift",
