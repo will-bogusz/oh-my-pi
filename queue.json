@@ -65257,12 +65257,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T04:50:31.617330Z",
+  "at": "2026-11-03T05:16:02.718290Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 6,
+   "left": 2
   },
   "rows": [
    {
@@ -65315,6 +65315,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T03:46:04Z"
+   },
+   {
+    "id": "mirror-takeover-keys",
+    "label": "#17909",
+    "number": 17909,
+    "state": "open",
+    "area": "natives",
+    "priority": "P0",
+    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T05:05:30Z"
    },
    {
     "id": "cli-reference-models-row",
@@ -65521,6 +65538,57 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T04:38:17Z"
+   },
+   {
+    "id": "x11-mpx-focus-release",
+    "label": "#17910",
+    "number": 17910,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T05:07:58Z"
+   },
+   {
+    "id": "x11-qt-background-keys",
+    "label": "#17911",
+    "number": 17911,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T05:10:18Z"
+   },
+   {
+    "id": "x11-takeover-keymap-switch",
+    "label": "#17912",
+    "number": 17912,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T05:12:34Z"
    },
    {
     "id": "print-hold",
@@ -65746,6 +65814,23 @@
     "created": "2026-11-03T00:59:06Z"
    },
    {
+    "id": "win-silent-drag",
+    "label": "#17913",
+    "number": 17913,
+    "state": "open",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): refuse background drags on Windows Tk windows",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T05:15:00Z"
+   },
+   {
     "id": "iphone-mirror-scroll-distance",
     "label": "iphone-mirror-scroll-distance",
     "number": null,
@@ -65767,13 +65852,13 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
-    "id": "mirror-takeover-keys",
-    "label": "mirror-takeover-keys",
+    "id": "wayland-element-input",
+    "label": "wayland-element-input",
     "number": null,
     "state": "queued",
     "area": "natives",
     "priority": "P1",
-    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
+    "title": "fix(natives): refuse Wayland element input before focusing the element",
     "action": "open",
     "reasons": [],
     "note": "",
@@ -65781,58 +65866,7 @@
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-11-03T04:33:04Z"
-   },
-   {
-    "id": "x11-mpx-focus-release",
-    "label": "x11-mpx-focus-release",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T04:23:45Z"
-   },
-   {
-    "id": "x11-qt-background-keys",
-    "label": "x11-qt-background-keys",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T04:23:54Z"
-   },
-   {
-    "id": "x11-takeover-keymap-switch",
-    "label": "x11-takeover-keymap-switch",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T04:23:33Z"
+    "created": "2026-11-03T05:12:35Z"
    },
    {
     "id": "computer-ui-quiet",
@@ -66245,23 +66279,6 @@
     ],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
-   },
-   {
-    "id": "win-silent-drag",
-    "label": "win-silent-drag",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): refuse background drags on Windows Tk windows",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T04:36:23Z"
    },
    {
     "id": "wire-delta-count",
