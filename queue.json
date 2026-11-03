@@ -63698,12 +63698,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T01:56:48.177012Z",
-  "host": "goliath",
+  "at": "2026-11-03T02:09:07.481221Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
