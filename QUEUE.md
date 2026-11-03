@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-03 08:42Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 14, stacked 10, held 6, open PRs 39; merged 210, closed 27
+**Counts:** openable now 0, conflict-held 14, stacked 10, held 6, open PRs 39, queued since the last plan 1; merged 210, closed 27
 
 ## Openable now (0)
 
@@ -98,3 +98,9 @@ none
 | [#17922](https://github.com/can1357/oh-my-pi/pull/17922) | wayland-focused-window | fix(natives): name the focused application window on Wayland, not an always-active shell frame | natives | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-focused-window) |
 | [#17931](https://github.com/can1357/oh-my-pi/pull/17931) | apps-open-tilde | fix(coding-agent): open ~ paths from the home folder in computer apps.open | computer | P0 | 1h | keep; opened over P2 #16223 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/apps-open-tilde) |
 | [#17932](https://github.com/can1357/oh-my-pi/pull/17932) | wayland-consent-deadline | fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends | natives | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-consent-deadline) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| atspi-action-names | fix(natives): match AT-SPI actions by their machine names | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-action-names) |
