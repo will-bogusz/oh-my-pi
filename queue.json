@@ -62772,7 +62772,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-gap-round3",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:31:35Z",
-   "updated": "2026-11-03T07:41:50Z",
+   "updated": "2026-11-03T07:42:13Z",
    "note": "",
    "built": [
     {
@@ -62976,7 +62976,8 @@
      "tree": "2577629bfc508b9a57d8d4aecfdc1d5f7ec08d12"
     }
    ],
-   "opened": "2026-11-03T07:41:50Z"
+   "opened": "2026-11-03T07:41:50Z",
+   "readied": "2026-11-03T07:42:13Z"
   },
   {
    "id": "wayland-consent-deadline",
