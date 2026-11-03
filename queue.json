@@ -59981,7 +59981,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-legacy-archive-credit",
    "host": "MacBook-Pro",
    "added": "2026-11-03T00:30:41Z",
-   "updated": "2026-11-03T00:46:24Z",
+   "updated": "2026-11-03T00:46:55Z",
    "note": "",
    "built": [
     {
@@ -60102,7 +60102,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-03T00:46:24Z"
+   "opened": "2026-11-03T00:46:24Z",
+   "readied": "2026-11-03T00:46:52Z"
   }
  ],
  "watch": {
