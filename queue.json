@@ -67444,7 +67444,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T17:44:44.649014Z",
+  "at": "2026-11-03T18:15:29.176954Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -67452,6 +67452,25 @@
    "left": 8
   },
   "rows": [
+   {
+    "id": "cache-marker",
+    "label": "#17496",
+    "number": 17496,
+    "state": "open",
+    "area": "status-line",
+    "priority": "P2",
+    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/agent/src/append-only-context.ts, packages/coding-agent/src/session/agent-session.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T19:41:51Z"
+   },
    {
     "id": "macos-capture-geometry",
     "label": "#17757",
@@ -68079,25 +68098,6 @@
     "created": "2026-10-21T06:07:03Z"
    },
    {
-    "id": "cache-marker",
-    "label": "#17496",
-    "number": 17496,
-    "state": "open",
-    "area": "status-line",
-    "priority": "P2",
-    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/agent/src/append-only-context.ts, packages/coding-agent/src/session/agent-session.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-30T19:41:51Z"
-   },
-   {
     "id": "factory-droid-gemini-4-argon-110",
     "label": "#17861",
     "number": 17861,
@@ -68588,24 +68588,24 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
+     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17883 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
-     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17496",
      "#17747",
      "#17883",
      "#17610",
      "#15128",
-     "#15130",
-     "#17496"
+     "#15130"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -68875,22 +68875,22 @@
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "needs reset-account-optout (queued)",
+     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
-     "conflicts with #17496 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17496",
      "#17747",
      "#17610",
      "#15128",
-     "#15130",
-     "#17496"
+     "#15130"
     ],
     "needs": [
      "#15133"
@@ -68936,24 +68936,24 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
+     "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17883 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #17496 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17496",
      "#17747",
      "#17883",
      "#17610",
      "#15128",
-     "#15130",
-     "#17496"
+     "#15130"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
