@@ -62391,6 +62391,24 @@
    "added": "2026-11-03T05:52:28Z",
    "updated": "2026-11-03T05:52:28Z",
    "note": ""
+  },
+  {
+   "id": "wayland-focused-window",
+   "branch": "will/wayland-focused-window",
+   "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
+   "area": "natives",
+   "priority": "P1",
+   "needs": [],
+   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "body": "bodies/wayland-focused-window.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-focused-window",
+   "host": "MacBook-Pro",
+   "added": "2026-11-03T06:05:22Z",
+   "updated": "2026-11-03T06:05:22Z",
+   "note": ""
   }
  ],
  "watch": {
