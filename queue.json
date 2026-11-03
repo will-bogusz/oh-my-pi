@@ -4866,7 +4866,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-drag-select",
    "host": "MacBook-Pro",
    "added": "2026-10-18T11:18:03Z",
-   "updated": "2026-11-03T00:19:32Z",
+   "updated": "2026-11-03T07:41:50Z",
    "note": "",
    "advanced": "2026-11-03T00:19:32Z",
    "built": [
@@ -4962,7 +4962,10 @@
     }
    ],
    "opened": "2026-10-18T17:39:04Z",
-   "readied": "2026-10-18T17:39:23Z"
+   "readied": "2026-10-18T17:39:23Z",
+   "rebases_after": [
+    17931
+   ]
   },
   {
    "id": "computer-target-sent-back-late",
@@ -62763,13 +62766,13 @@
    "needs": [],
    "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
    "body": "bodies/apps-open-tilde.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 17931,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-gap-round3",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:31:35Z",
-   "updated": "2026-11-03T07:39:33Z",
+   "updated": "2026-11-03T07:41:50Z",
    "note": "",
    "built": [
     {
@@ -62972,7 +62975,8 @@
      "host": "MacBook-Pro",
      "tree": "2577629bfc508b9a57d8d4aecfdc1d5f7ec08d12"
     }
-   ]
+   ],
+   "opened": "2026-11-03T07:41:50Z"
   },
   {
    "id": "wayland-consent-deadline",
