@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-03 03:58Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 8, stacked 10, held 6, open PRs 28, queued since the last plan 1; merged 210, closed 27
+**Counts:** openable now 1, conflict-held 8, stacked 10, held 6, open PRs 28, queued since the last plan 2; merged 210, closed 27
 
 ## Openable now (1)
 
@@ -84,8 +84,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | [#17904](https://github.com/can1357/oh-my-pi/pull/17904) | read-block-pages | fix(coding-agent): stop URL reads returning bot block pages as content | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-block-pages) |
 | [#17903](https://github.com/can1357/oh-my-pi/pull/17903) | wayland-click-pacing | fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks | natives | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-click-pacing) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | x11-takeover-keymap-switch | fix(natives): keep X11 takeover keys running when the core keyboard switches source | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keymap-switch) |
+| x11-mpx-focus-release | fix(natives): release the X11 virtual keyboard's focus before takeover activates its window | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-focus-release) |
