@@ -686,61 +686,132 @@ impl AtSpiAx {
 		Ok(None)
 	}
 
-	/// An element's properties, with its bounds when `bounds` asks for them.
-	fn read_props(&mut self, h: &AxHandle, bounds: WalkBounds) -> CoreResult<AxProps> {
-		let object = Self::object(h).clone();
+	/// An element's properties, with its bounds when `bounds` asks for them,
+	/// and its children when `children` asks.
+	fn read_node(
+		&mut self,
+		h: &AxHandle,
+		bounds: WalkBounds,
+		children: bool,
+	) -> CoreResult<(AxProps, Vec<ObjectRefOwned>)> {
 		let Self { rt, connection, native, frames, reply_timeout } = self;
-		rt.block_on(cancellable(answered("the application", *reply_timeout, async {
-			let proxy = object
-				.as_accessible_proxy(connection)
-				.await
-				.map_err(|err| DesktopError::ax_failed(format!("AT-SPI accessible: {err}")))?;
-			let title = proxy.name().await.ok().filter(|s| !s.is_empty());
-			let description = proxy.description().await.ok().filter(|s| !s.is_empty());
-			let native_role = match proxy.get_role_name().await {
-				Ok(role) => role,
-				Err(_) => proxy
-					.get_localized_role_name()
-					.await
-					.unwrap_or_else(|_| "unknown".to_string()),
-			};
-			let state = proxy.get_state().await.ok();
-			let multiline = state
-				.as_ref()
-				.is_some_and(|states| states.contains(State::MultiLine));
-			let value = text_value(&*connection, &object).await;
-			let bounds = if bounds == WalkBounds::Read {
-				frames
-					.screen_bounds(connection, native.as_deref(), &object)
-					.await
-			} else {
-				None
-			};
-			let actions = match Self::action(connection, &object).await {
-				Ok(action) => action_names(&action).await.unwrap_or_default(),
-				Err(_) => Vec::new(),
-			};
-			let child_count = proxy.child_count().await.unwrap_or(0).max(0) as u32;
-			Ok(AxProps {
-				role: normalize_role_atspi(&native_role, multiline),
-				native_role,
-				title,
-				value,
-				description,
-				enabled: state.is_some_and(state_enabled),
-				focused: state
-					.as_ref()
-					.is_some_and(|states| states.contains(State::Focused)),
+		rt.block_on(cancellable(answered(
+			"the application",
+			*reply_timeout,
+			Self::read_element(
+				connection,
+				frames,
+				native.as_deref(),
+				Self::object(h),
 				bounds,
-				actions,
-				child_count,
-				identity: None,
-				partial: false,
-				label_complete: false,
-				selected: false,
-				role_name: None,
-			})
-		})))??
+				children,
+			),
+		)))?
+	}
+
+	/// [`Self::read_node`] on `bus`: first the fields and interfaces, then
+	/// children and only the interfaces the element implements.
+	async fn read_element(
+		bus: &zbus::Connection,
+		frames: &mut FrameCache,
+		native: Option<&dyn NativeWindows>,
+		object: &ObjectRefOwned,
+		bounds: WalkBounds,
+		children: bool,
+	) -> CoreResult<(AxProps, Vec<ObjectRefOwned>)> {
+		let proxy = object
+			.as_accessible_proxy(bus)
+			.await
+			.map_err(|err| DesktopError::ax_failed(format!("AT-SPI accessible: {err}")))?;
+		let (title, description, role_name, state, interfaces, child_count) = futures::join!(
+			proxy.name(),
+			proxy.description(),
+			proxy.get_role_name(),
+			proxy.get_state(),
+			proxy.get_interfaces(),
+			proxy.child_count(),
+		);
+		let native_role = match role_name {
+			Ok(role) => role,
+			Err(_) => proxy
+				.get_localized_role_name()
+				.await
+				.unwrap_or_else(|_| "unknown".to_string()),
+		};
+		// An element whose interfaces cannot be read is asked on each.
+		let has = |interface| {
+			interfaces
+				.as_ref()
+				.ok()
+				.is_none_or(|interfaces| interfaces.contains(interface))
+		};
+		let (value, bounds, actions, child_refs) = futures::join!(
+			async {
+				if has(atspi::Interface::Text) {
+					text_value(bus, object).await
+				} else {
+					None
+				}
+			},
+			async {
+				if bounds == WalkBounds::Read && has(atspi::Interface::Component) {
+					frames.screen_bounds(bus, native, object).await
+				} else {
+					None
+				}
+			},
+			async {
+				if !has(atspi::Interface::Action) {
+					return Vec::new();
+				}
+				match Self::action(bus, object).await {
+					Ok(action) => action_names(&action).await.unwrap_or_default(),
+					Err(_) => Vec::new(),
+				}
+			},
+			async {
+				if children {
+					proxy
+						.get_children()
+						.await
+						.map_err(|err| DesktopError::ax_failed(format!("AT-SPI children: {err}")))
+				} else {
+					Ok(Vec::new())
+				}
+			},
+		);
+		let child_refs = child_refs?;
+		let child_count = child_count.unwrap_or(0).max(0) as u32;
+		let state = state.ok();
+		let multiline = state
+			.as_ref()
+			.is_some_and(|states| states.contains(State::MultiLine));
+		let props = AxProps {
+			role: normalize_role_atspi(&native_role, multiline),
+			native_role,
+			title: title.ok().filter(|s| !s.is_empty()),
+			value,
+			description: description.ok().filter(|s| !s.is_empty()),
+			enabled: state.is_some_and(state_enabled),
+			focused: state
+				.as_ref()
+				.is_some_and(|states| states.contains(State::Focused)),
+			bounds,
+			actions,
+			child_count,
+			identity: None,
+			partial: false,
+			label_complete: false,
+			selected: false,
+			role_name: None,
+		};
+		Ok((
+			props,
+			child_refs
+				.into_iter()
+				.filter(|child| !child.is_null())
+				.collect(),
+		))
 	}
 
 	/// The deepest element under `root` at screen point (`x`, `y`). A placed
@@ -1214,6 +1285,22 @@ fn action_index<'a>(
 	})
 }
 
+/// The text of an element with the `Text` interface, up to 16,384 characters,
+/// read without zbus's property cache, whose `GetAll` Qt refuses.
+async fn text_value(connection: &zbus::Connection, object: &ObjectRefOwned) -> Option<String> {
+	let text = atspi::proxy::text::TextProxy::builder(connection)
+		.destination(object.name()?.clone())
+		.ok()?
+		.path(object.path().clone())
+		.ok()?
+		.cache_properties(zbus::proxy::CacheProperties::No)
+		.build()
+		.await
+		.ok()?;
+	let count = text.character_count().await.ok()?.min(16_384);
+	text.get_text(0, count).await.ok().filter(|s| !s.is_empty())
+}
+
 /// The most actions read of one element: the count comes from the app.
 const MAX_ACTIONS: i32 = 256;
 
@@ -1341,7 +1428,9 @@ impl AxBackend for AtSpiAx {
 
 	fn props(&mut self, h: &AxHandle) -> CoreResult<AxProps> {
 		self.frames.refresh();
-		self.read_props(h, WalkBounds::Read)
+		self
+			.read_node(h, WalkBounds::Read, false)
+			.map(|(props, _)| props)
 	}
 
 	fn walk_node(
@@ -1349,7 +1438,8 @@ impl AxBackend for AtSpiAx {
 		h: &AxHandle,
 		bounds: WalkBounds,
 	) -> CoreResult<(AxProps, Vec<AxHandle>)> {
-		Ok((self.read_props(h, bounds)?, self.children(h)?))
+		let (props, children) = self.read_node(h, bounds, true)?;
+		Ok((props, children.into_iter().map(AxHandle::AtSpi).collect()))
 	}
 
 	fn children(&mut self, h: &AxHandle) -> CoreResult<Vec<AxHandle>> {
@@ -3153,5 +3243,164 @@ mod tests {
 				Some(ErrorCode::Timeout)
 			);
 		}
+	}
+
+	#[test]
+	fn an_element_is_read_in_two_rounds_and_only_on_its_interfaces() {
+		use std::time::Duration;
+
+		use atspi::zbus::{
+			MessageStream,
+			connection::Builder as ConnectionBuilder,
+			message::Type,
+			zvariant::{OwnedObjectPath, Value},
+		};
+		use futures::StreamExt;
+
+		/// Answers like a Qt app: a Kate text view at `/text` and a button at
+		/// `/button`, with `GetAll` refused as Qt refuses it. Calls wait until
+		/// no new one has come for 100 ms and are answered together; the result
+		/// is each batch's `path member` list.
+		async fn qt(server: atspi::zbus::Connection) -> Vec<Vec<String>> {
+			let mut stream = MessageStream::from(&server);
+			let mut batches = Vec::new();
+			loop {
+				let mut batch = Vec::new();
+				while let Ok(Some(Ok(message))) =
+					tokio::time::timeout(Duration::from_millis(100), stream.next()).await
+				{
+					if message.message_type() == Type::MethodCall {
+						batch.push(message);
+					}
+				}
+				if batch.is_empty() {
+					return batches;
+				}
+				let mut names = Vec::new();
+				for message in batch {
+					let header = message.header();
+					let path = header.path().unwrap().to_string();
+					let member = header.member().unwrap().to_string();
+					let text = path == "/text";
+					match member.as_str() {
+						"Get" => {
+							let (_, property): (String, String) = message.body().deserialize().unwrap();
+							let value = match property.as_str() {
+								"Name" => Value::from(if text { "notes.txt" } else { "New" }),
+								"Description" => Value::from(""),
+								"CharacterCount" => Value::from(5),
+								"NActions" => Value::from(1),
+								_ => Value::from(0),
+							};
+							names.push(format!("{path} Get {property}"));
+							server.reply(&header, &value).await.unwrap();
+							continue;
+						},
+						"GetAll" => server
+							.reply_error(&header, "org.freedesktop.DBus.Error.UnknownInterface", &"")
+							.await
+							.unwrap(),
+						"GetRoleName" => {
+							server
+								.reply(&header, &if text { "text" } else { "push button" })
+								.await
+								.unwrap();
+						},
+						"GetState" => server.reply(&header, &vec![0_u32, 0]).await.unwrap(),
+						"GetInterfaces" => {
+							let interfaces: &[&str] = if text {
+								&["org.a11y.atspi.Accessible", "org.a11y.atspi.Text"]
+							} else {
+								&["org.a11y.atspi.Accessible", "org.a11y.atspi.Action"]
+							};
+							server.reply(&header, &interfaces).await.unwrap();
+						},
+						"GetChildren" => {
+							server
+								.reply(&header, &Vec::<(String, OwnedObjectPath)>::new())
+								.await
+								.unwrap();
+						},
+						"GetText" => {
+							let (start, end): (i32, i32) = message.body().deserialize().unwrap();
+							let text: String = "hello"
+								.chars()
+								.skip(start as usize)
+								.take((end - start) as usize)
+								.collect();
+							server.reply(&header, &text).await.unwrap();
+						},
+						"GetName" => server.reply(&header, &"press").await.unwrap(),
+						_ => server
+							.reply_error(&header, "org.freedesktop.DBus.Error.UnknownMethod", &"")
+							.await
+							.unwrap(),
+					}
+					names.push(format!("{path} {member}"));
+				}
+				names.sort();
+				batches.push(names);
+			}
+		}
+
+		let rt = Builder::new_current_thread().enable_all().build().unwrap();
+		let (reads, batches) = rt.block_on(async {
+			let (client, server) = tokio::net::UnixStream::pair().unwrap();
+			let server = ConnectionBuilder::unix_stream(server)
+				.server(atspi::zbus::Guid::generate())
+				.unwrap()
+				.p2p()
+				.build();
+			let client = ConnectionBuilder::unix_stream(client).p2p().build();
+			let (server, client) = tokio::try_join!(server, client).unwrap();
+			let reads = async {
+				let mut frames = FrameCache::default();
+				let mut reads = Vec::new();
+				for path in ["/text", "/button"] {
+					let (props, _) = AtSpiAx::read_element(
+						&client,
+						&mut frames,
+						None,
+						&object(path),
+						WalkBounds::Read,
+						true,
+					)
+					.await
+					.unwrap();
+					reads.push((props.role, props.title, props.value, props.actions));
+				}
+				drop(client);
+				reads
+			};
+			tokio::join!(reads, qt(server))
+		});
+		assert_eq!(reads, [
+			("textfield".to_owned(), Some("notes.txt".to_owned()), Some("hello".to_owned()), vec![]),
+			("button".to_owned(), Some("New".to_owned()), None, vec!["press".to_owned()]),
+		]);
+		let round = |path: &str, members: &[&str]| {
+			let mut names: Vec<_> = members
+				.iter()
+				.map(|member| format!("{path} {member}"))
+				.collect();
+			names.sort();
+			names
+		};
+		let first = [
+			"Get Name",
+			"Get Description",
+			"GetRoleName",
+			"GetState",
+			"GetInterfaces",
+			"Get ChildCount",
+		];
+		assert_eq!(batches, [
+			round("/text", &first),
+			round("/text", &["Get CharacterCount", "GetChildren"]),
+			round("/text", &["GetText"]),
+			round("/button", &first),
+			round("/button", &["Get NActions", "GetChildren"]),
+			round("/button", &["GetName"]),
+		]);
 	}
 }
