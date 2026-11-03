@@ -63626,7 +63626,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-linux-click-front",
    "host": "MacBook-Pro",
    "added": "2026-11-03T10:42:50Z",
-   "updated": "2026-11-03T11:09:08Z",
+   "updated": "2026-11-03T11:09:33Z",
    "note": "",
    "built": [
     {
@@ -63850,7 +63850,8 @@
      "tree": "8e1ee342e919054486453bdd5e97e8cd51fc5804"
     }
    ],
-   "opened": "2026-11-03T11:09:08Z"
+   "opened": "2026-11-03T11:09:08Z",
+   "readied": "2026-11-03T11:09:32Z"
   }
  ],
  "watch": {
