@@ -101,4 +101,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
-| computer-gap-round3 | fix(coding-agent): open ~ paths from the home folder in computer apps.open | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-gap-round3) |
+| apps-open-tilde | fix(coding-agent): open ~ paths from the home folder in computer apps.open | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/apps-open-tilde) |
