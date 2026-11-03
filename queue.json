@@ -66124,7 +66124,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T06:34:17.898370Z",
+  "at": "2026-11-03T06:53:47.983356Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -66233,6 +66233,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T05:25:08Z"
+   },
+   {
+    "id": "wayland-focused-window",
+    "label": "#17922",
+    "number": 17922,
+    "state": "open",
+    "area": "natives",
+    "priority": "P0",
+    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T06:33:22Z"
    },
    {
     "id": "cli-reference-models-row",
@@ -66507,23 +66524,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T06:27:02Z"
-   },
-   {
-    "id": "wayland-focused-window",
-    "label": "#17922",
-    "number": 17922,
-    "state": "open",
-    "area": "natives",
-    "priority": "P1",
-    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T06:33:22Z"
    },
    {
     "id": "print-hold",
@@ -66983,6 +66983,23 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
+    "id": "wayland-consent-deadline",
+    "label": "wayland-consent-deadline",
+    "number": null,
+    "state": "queued",
+    "area": "natives",
+    "priority": "P2",
+    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T06:48:11Z"
+   },
+   {
     "id": "computer-input-diff-report",
     "label": "computer-input-diff-report",
     "number": null,
@@ -66998,6 +67015,7 @@
      "conflicts with #15282 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with apps-open-tilde in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with wayland-consent-deadline in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
     "note": "",
@@ -67008,7 +67026,8 @@
      "#17921",
      "#15282",
      "#16223",
-     "apps-open-tilde"
+     "apps-open-tilde",
+     "wayland-consent-deadline"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -67215,12 +67234,16 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with wayland-consent-deadline in crates/pi-natives/src/desktop/linux/wayland/libei.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "wayland-consent-deadline"
+    ],
     "needs": [],
     "created": "2026-11-03T06:23:33Z"
    },
