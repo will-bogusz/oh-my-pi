@@ -62562,7 +62562,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/atspi-file-chooser",
    "host": "goliath",
    "added": "2026-11-03T05:52:28Z",
-   "updated": "2026-11-03T22:39:57Z",
+   "updated": "2026-11-03T22:40:23Z",
    "note": "",
    "advanced": "2026-11-03T21:24:47Z",
    "built": [
@@ -62657,7 +62657,8 @@
      "tree": "0451c3dc9f805ef34da3c7306bc67c9cb559fd6d"
     }
    ],
-   "opened": "2026-11-03T22:39:57Z"
+   "opened": "2026-11-03T22:39:57Z",
+   "readied": "2026-11-03T22:40:22Z"
   },
   {
    "id": "wayland-focused-window",
