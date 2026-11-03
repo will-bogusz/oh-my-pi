@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 
 **Opening:** not paused
 **Ready budget:** 6 of 8 ready events used in the hour before the last plan, 2 left (plan of 2026-11-03 05:52Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 9, stacked 10, held 6, open PRs 35, queued since the last plan 1; merged 210, closed 27
+**Counts:** openable now 3, conflict-held 9, stacked 10, held 6, open PRs 35, queued since the last plan 2; merged 210, closed 27
 
 ## Openable now (3)
 
@@ -94,8 +94,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-03
 | [#17913](https://github.com/can1357/oh-my-pi/pull/17913) | win-silent-drag | fix(natives): refuse background drags on Windows Tk windows | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-silent-drag) |
 | [#17915](https://github.com/can1357/oh-my-pi/pull/17915) | wayland-element-input | fix(natives): refuse Wayland element input before focusing the element | natives | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-element-input) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | wayland-focused-window | fix(natives): name the focused application window on Wayland, not an always-active shell frame | natives | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-focused-window) |
+| wayland-input-capability | fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists | natives | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-capability) |
