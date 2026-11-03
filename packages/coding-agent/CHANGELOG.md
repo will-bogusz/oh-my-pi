@@ -80,6 +80,10 @@
 
 - Browser: a headless Chrome launched in-process by an SDK embedding or a `bun test` run now exits when that process is killed, instead of running on with its temporary profile on Linux and macOS ([#17908](https://github.com/can1357/oh-my-pi/pull/17908) by [@will-bogusz](https://github.com/will-bogusz))
 
+### Fixed
+
+- Browser `role/` selectors now find named sections and other implicit landmark and structural roles in Chrome and Tern, so scoped snapshots and observations can target them.
+
 ## [18.16.0] - 2026-11-02
 
 ### Added
