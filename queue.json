@@ -66706,12 +66706,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-03T07:32:18.144957Z",
-  "host": "goliath",
+  "at": "2026-11-03T07:45:50.123069Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -66832,6 +66832,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T06:33:22Z"
+   },
+   {
+    "id": "apps-open-tilde",
+    "label": "#17931",
+    "number": 17931,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
+    "action": "keep",
+    "reasons": [],
+    "note": "opened over P2 #16223",
+    "over": [],
+    "paired": [
+     "#16223"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T07:41:49Z"
    },
    {
     "id": "cli-reference-models-row",
@@ -67161,6 +67180,23 @@
     "created": "2026-10-31T21:57:19Z"
    },
    {
+    "id": "wayland-consent-deadline",
+    "label": "#17932",
+    "number": 17932,
+    "state": "open",
+    "area": "natives",
+    "priority": "P2",
+    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T07:44:29Z"
+   },
+   {
     "id": "iphone-mirror-key-gap",
     "label": "#17897",
     "number": 17897,
@@ -67238,9 +67274,11 @@
     "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "rebases after #17931 merges",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#17931"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-18T17:39:04Z"
@@ -67329,25 +67367,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T00:59:06Z"
-   },
-   {
-    "id": "apps-open-tilde",
-    "label": "apps-open-tilde",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [
-     "#16223"
-    ],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T06:31:35Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -67565,23 +67584,6 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
-    "id": "wayland-consent-deadline",
-    "label": "wayland-consent-deadline",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P2",
-    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T06:48:11Z"
-   },
-   {
     "id": "computer-input-diff-report",
     "label": "computer-input-diff-report",
     "number": null,
@@ -67593,11 +67595,11 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #17896 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #17931 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #17921 in docs/tools/computer.md",
+     "conflicts with #17932 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #15282 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with apps-open-tilde in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with wayland-consent-deadline in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
     "note": "",
@@ -67605,11 +67607,11 @@
     "paired": [],
     "blocked_by": [
      "#17896",
+     "#17931",
      "#17921",
+     "#17932",
      "#15282",
-     "#16223",
-     "apps-open-tilde",
-     "wayland-consent-deadline"
+     "#16223"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -67818,13 +67820,13 @@
     "title": "feat(natives): type text the wayland layout lacks through libei text",
     "action": "wait",
     "reasons": [
-     "conflicts with wayland-consent-deadline in crates/pi-natives/src/desktop/linux/wayland/libei.rs"
+     "conflicts with #17932 in crates/pi-natives/src/desktop/linux/wayland/libei.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "wayland-consent-deadline"
+     "#17932"
     ],
     "needs": [],
     "created": "2026-11-03T06:23:33Z"
