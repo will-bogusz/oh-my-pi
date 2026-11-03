@@ -12,7 +12,7 @@ A sign-in task whose page loads a password-manager-style menu went from 0 of 2 t
 
 **Maintainer decision: the extension gains `scripting` and `<all_urls>`** (Chrome lists "Read and change all your data on all websites"). It uses them only after Chrome refuses an attach or command over another extension's frame, and only in a tab an omp connection claims; `debugger` already reaches any page it attaches to. Existing installs pick it up after `omp browser-relay install` and a reload.
 
-The bridge decides, the extension executes: `RelayBridge#rpc` sets `clearForeignFrames` on `attach`/`send` for claimed tabs, and `pastForeignFrames` then points every foreign `chrome-extension://` iframe in the tab (closed shadow roots included) at an empty `srcdoc` and retries. A worker adopting a relay tab now claims it as it connects (`/cdp?claim=<targetId>`, replacing `OMP.claimTarget` after adoption), because puppeteer's connect already sends the tab commands; a claim also lifts a foreign-frame refusal.
+The bridge decides, the extension executes: `RelayBridge#rpc` sets `clearForeignFrames` on `attach`/`send` for claimed tabs, and `pastForeignFrames` then points every foreign `chrome-extension://` iframe in the tab (closed shadow roots included) at an empty `srcdoc`, hides it (an inline menu sits over the controls below its field, and a blank box would still cover them), and retries. A worker adopting a relay tab now claims it as it connects (`/cdp?claim=<targetId>`), because puppeteer's connect already sends the tab commands; a claim also lifts a foreign-frame refusal. The `OMP.claimTarget` it sends after adoption stays, for a relay or worker of another omp version sharing the machine.
 
 ## Why
 
@@ -35,3 +35,5 @@ Not run: branded Chrome with a signed-in password manager.
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
+
