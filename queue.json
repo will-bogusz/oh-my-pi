@@ -59920,13 +59920,13 @@
    ],
    "base": "09eac7d856f922a362c0158010906807e86ac4ef",
    "body": "bodies/factory-droid-muse-spark-1-3.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17862,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-muse-spark-1-3",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:27:27Z",
-   "updated": "2026-11-04T17:44:16Z",
+   "updated": "2026-11-04T18:41:45Z",
    "note": "",
    "advanced": "2026-11-04T17:44:16Z",
    "built": [
@@ -59968,7 +59968,8 @@
     }
    ],
    "opened": "2026-11-02T20:14:34Z",
-   "readied": "2026-11-02T20:14:56Z"
+   "readied": "2026-11-02T20:14:56Z",
+   "merged_by": "pr"
   },
   {
    "id": "factory-droid-110-pin",
@@ -59979,13 +59980,13 @@
    "needs": [],
    "base": "09eac7d856f922a362c0158010906807e86ac4ef",
    "body": "bodies/factory-droid-110-pin.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17885,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-110-pin",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:32:33Z",
-   "updated": "2026-11-04T17:44:37Z",
+   "updated": "2026-11-04T18:41:45Z",
    "note": "",
    "advanced": "2026-11-04T17:44:37Z",
    "built": [
@@ -60036,7 +60037,8 @@
     }
    ],
    "opened": "2026-11-03T00:59:08Z",
-   "readied": "2026-11-03T01:00:17Z"
+   "readied": "2026-11-03T01:00:17Z",
+   "merged_by": "pr"
   },
   {
    "id": "factory-droid-gemini-4-argon-110",
@@ -60049,13 +60051,13 @@
    ],
    "base": "09eac7d856f922a362c0158010906807e86ac4ef",
    "body": "bodies/factory-droid-gemini-4-argon-110.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17861,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-gemini-4-argon-110",
    "host": "MacBook-Pro",
    "added": "2026-11-02T03:41:15Z",
-   "updated": "2026-11-04T17:43:24Z",
+   "updated": "2026-11-04T18:41:45Z",
    "note": "",
    "advanced": "2026-11-04T17:43:24Z",
    "built": [
@@ -60178,7 +60180,8 @@
     }
    ],
    "opened": "2026-11-02T20:12:51Z",
-   "readied": "2026-11-02T20:13:36Z"
+   "readied": "2026-11-02T20:13:36Z",
+   "merged_by": "pr"
   },
   {
    "id": "visuals-guidance",
@@ -60189,13 +60192,13 @@
    "needs": [],
    "base": null,
    "body": null,
-   "state": "open",
+   "state": "closed",
    "pr": 17773,
    "closed_prs": [],
    "worktree": null,
    "host": "goliath",
    "added": "2026-11-02T05:04:52Z",
-   "updated": "2026-11-02T05:04:52Z",
+   "updated": "2026-11-04T18:41:45Z",
    "note": ""
   },
   {
