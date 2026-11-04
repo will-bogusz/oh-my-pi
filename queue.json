@@ -68491,7 +68491,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-04T20:00:06.735975Z",
+  "at": "2026-11-04T20:06:01.140287Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -69454,6 +69454,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-04T19:59:59Z"
+   },
+   {
+    "id": "anthropic-web-search",
+    "label": "anthropic-web-search",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": null,
+    "title": "fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-04T20:05:54Z"
    },
    {
     "id": "encoded-prefix-count",
