@@ -2,47 +2,46 @@
 
 I wanted the computer tool to type things like `äöü`, `日本` or an emoji on KDE Wayland, where it currently refuses them, so this sends that text through libei's text interface when the compositor offers one and keeps the existing refusal everywhere else.
 
-On KDE Plasma 6.8, `computer.type("Hello äöü ß € ñ 日本 😀")` used to throw `InputFailed: libei cannot type character 'ä' in active XKB group 0`; now the line lands in Kate exactly as typed.
+| Text passed to `type()` | Behavior |
+|---|---|
+| Every character has a key in the active layout | Keystrokes, unchanged |
+| Some character has no key; compositor offers `ei_text` | Commit the whole string as text |
+| Some character has no key; no `ei_text` (GNOME, older KWin) | `InputFailed` before anything is typed |
+| Such text contains line breaks or tabs | Refuse before sending; press Enter or Tab between calls |
 
-> **libei context.** libei is how OMP injects input on Wayland: OMP presses evdev keys that the active keyboard layout turns into characters, so a character with no key cannot be typed. libei 1.6 added `ei_text`, a device that commits a UTF-8 string directly, like an input method. KWin 6.8 offers it; Mutter does not.
-
-| Text passed to `type()` | `main` | This PR |
-|---|---|---|
-| Every character has a key in the active layout | keystrokes | keystrokes, unchanged |
-| Some character has no key, compositor offers `ei_text` (KDE Plasma 6.8) | `InputFailed`, nothing typed | the whole string is committed as text |
-| Some character has no key, no `ei_text` (GNOME, older KWin) | `InputFailed`, nothing typed | same `InputFailed`, which now says no text device was offered |
-| Such text containing `\n` or `\t` | `InputFailed` | `InputFailed` before anything is sent, asking to press Enter or Tab between calls |
-
-Reading order: `plan_typing`, `text_runs` and `Libei::type_text` in `wayland/libei.rs`, then the reis bump in `Cargo.toml`, `Cargo.lock` and `MODULE.bazel.lock`.
+Reading order: `plan_typing`, `text_runs`, then `Libei::type_text` in `wayland/libei.rs`.
 
 ## Why
 
-`ei_text` needs reis 0.7 (from 0.5.0, now `=0.7.1`), which changes two signatures used here (`Seat::bind_capabilities` takes bit flags, the disconnect explanation is optional) and negotiates `ei_device` version 3. Version 3 holds every device until the client sends `ei_device.ready`, and reis does not send it, so the `DeviceAdded` handler does. KWin and Mutter negotiate version 2 today, so nothing changes for them.
+libei normally presses keys from the active keyboard layout; a character with no key cannot be typed. libei 1.6 adds UTF-8 text commits, offered by KWin 6.8 but not Mutter.
 
-Decisions:
-- A string that needs text goes out whole as text, never as keys mixed with text commits. Mixing them scrambled the output every time on KWin: four lines typed that way read `äöüßñ日本😀M1   €    x1`, because the keys pass through KWin's input method and arrive after the commits. One call is one route, and ordering between separate calls held in every try.
-- Line breaks and tabs are refused inside committed text rather than sent: a committed newline never submits a form, a tab never moves focus, and Kate dropped a commit that began with a newline.
+This needs reis `=0.7.1`, replacing `=0.5.0`, with two API adaptations and an explicit `ei_device.ready` for its negotiated device version 3. reis never sends `ready` itself; without it version-3 devices never resume. KWin and Mutter negotiate version 2 today. `MODULE.bazel.lock` also moves zip 7.2.0 → 7.4.0, typed-path 0.12.3 → 0.12.4 and a candle-core reference: `main`'s lock was already stale against its own `Cargo.lock`, and `gen:bazel-lock` writes the faithful output, so those lines are not this change.
 
-Maintenance cost: if Mutter adds `ei_text`, GNOME picks it up with no change here. A compositor that offers a text device but ignores it would swallow the text without an error; OMP cannot detect that over libei.
+One call uses one route: mixing keys and text reordered every mixed line in Kate. Committed newlines do not submit forms, tabs do not move focus, and Kate dropped commits beginning with a newline, so those controls are refused. Runs preserve graphemes unless one exceeds the 254-byte request limit.
+
+A successful text commit proves transport, not application delivery. Read back with observe/AX before relying on it; libei has no client-consumption acknowledgement.
 
 ## Testing
 
-Live on a Fedora 44 KDE Plasma 6.8.2 guest (libei 1.6.0), through the RemoteDesktop portal, typing into Kate and reading the result back from the clipboard:
+Fedora 44, Plasma 6.8.2, libei 1.6.0, through the RemoteDesktop portal:
 
-| Call | `main` | This PR |
-|---|---|---|
-| `type("Hello äöü ß € ñ 日本 😀")` | `InputFailed … 'ä' in active XKB group 0` | `Hello äöü ß € ñ 日本 😀` |
-| `press("enter")`, then `type("zwei ä")` | `InputFailed` | `zwei ä` on a new line |
-| `type("x\ny ä")` | `InputFailed` | `InputFailed`, nothing typed |
+| Target / input | Readback |
+|---|---|
+| Kate: `Hello äöü ß € ñ 日本 😀` | Exact text; main refuses at `ä` |
+| Kate: Enter, then `zwei ä` | Exact text on a new line |
+| Kate: `x\ny ä` | `InputFailed`, nothing typed |
+| Native Wayland Konsole 26.08.2: `äöü ß € ñ 日本 😀` | Exact UTF-8 |
+| XWayland xterm 411: same text | Eight `ESC[45~` sequences, no `€`; spaces survived |
 
-Version 3 handshake: libei's own `eis-demo-server` turns version 3 on. Through `LIBEI_SOCKET`, `type("ab")` failed with `RemoteDesktop portal granted no libei keyboard or pointer devices` before the `ready` call and logged `text utf8 'ab'` with it.
+Konsole and xterm calls both returned success. A process inside each terminal recorded the received bytes, with ASCII markers and Enter confirming the input target; screenshots corroborated the results.
 
-Not run: GNOME. Mutter offers no text device, so it takes the refusal branch the unit test below covers.
+libei's `eis-demo-server` exercised version 3 through `LIBEI_SOCKET`: `type("ab")` failed discovery without `ready`, then logged `text utf8 'ab'` with it.
 
-`cargo test -p pi-natives --features wayland-pipewire --lib desktop::linux::wayland` (Linux): 33 passed; with the text route removed from `plan_typing`, `text_the_active_group_cannot_type_goes_out_whole_as_ei_text` and `ei_text_runs_stay_within_the_utf8_request_limit` fail. `bun scripts/gen-bazel-lock.ts --check` passes.
+Linux: `cargo test -p pi-natives --features wayland-pipewire --lib desktop::linux::wayland` passed 35 tests on the current head. The text-run regression covers combining marks, a ZWJ emoji and a flag crossing byte 254, and an oversized grapheme. Linux, macOS and Windows `rust-check` passed. `bun scripts/gen-bazel-lock.ts --check` passed. GNOME was not run; the no-text-device refusal has unit coverage.
 
 ---
 
 - [ ] `bun check` passes
 - [x] Tested locally
-- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+- [x] CHANGELOG updated with attribution
+
