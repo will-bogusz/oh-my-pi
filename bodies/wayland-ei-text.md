@@ -15,7 +15,7 @@ Reading order: `plan_typing`, `text_runs`, then `Libei::type_text` in `wayland/l
 
 libei normally presses keys from the active keyboard layout; a character with no key cannot be typed. libei 1.6 adds UTF-8 text commits, offered by KWin 6.8 but not Mutter.
 
-This needs reis `=0.7.1`, replacing `=0.5.0`, with two API adaptations and an explicit `ei_device.ready` for its negotiated device version 3. reis never sends `ready` itself; without it version-3 devices never resume. KWin and Mutter negotiate version 2 today. `MODULE.bazel.lock` also moves zip 7.2.0 → 7.4.0, typed-path 0.12.3 → 0.12.4 and a candle-core reference: `main`'s lock was already stale against its own `Cargo.lock`, and `gen:bazel-lock` writes the faithful output, so those lines are not this change.
+This needs reis `=0.7.1`, replacing `=0.5.0`, with two API adaptations and an explicit `ei_device.ready` for its negotiated device version 3. reis never sends `ready` itself; without it version-3 devices never resume. KWin and Mutter negotiate version 2 today.
 
 One call uses one route: mixing keys and text reordered every mixed line in Kate. Committed newlines do not submit forms, tabs do not move focus, and Kate dropped commits beginning with a newline, so those controls are refused. Runs preserve graphemes unless one exceeds the 254-byte request limit.
 
