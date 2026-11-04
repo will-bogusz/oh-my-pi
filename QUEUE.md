@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-04 21:02Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-04 21:03Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-04 20:49Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -43,7 +43,7 @@ none
 | gemma-tokenizer | feat(natives,catalog): count Gemini in the Gemma vocabulary | catalog |  | 1d | token-count-policy | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gemma-tokenizer) |
 | encoded-prefix-count | fix(ai,agent,tui,coding-agent): count the system prompt and tools as the provider request encodes them | other |  | 1d | token-count-policy, wire-delta-count | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/encoded-prefix-count) |
 | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P1 | 1d | atspi-unanswered-app, gtk4-atspi-bounds | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
-| role-selectors-cdp | fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree | browser | P2 | 16h | role-implicit-landmarks ([#17895](https://github.com/can1357/oh-my-pi/pull/17895)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-selectors-cdp) |
+| role-selectors-cdp | fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree | browser | P2 | 17h | role-implicit-landmarks ([#17895](https://github.com/can1357/oh-my-pi/pull/17895)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-selectors-cdp) |
 
 ## Held (6)
 
