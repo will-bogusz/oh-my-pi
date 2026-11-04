@@ -64181,7 +64181,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-04T17:41:08Z",
+  "checked": "2026-11-04T18:11:26Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -64198,13 +64198,6 @@
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "files": [
      "packages/coding-agent/src/sdk.ts"
-    ]
-   },
-   "#17861": {
-    "since": "2026-11-04T13:35:51Z",
-    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
-    "files": [
-     "packages/ai/src/providers/factory-droid/gemini.ts"
     ]
    }
   },
