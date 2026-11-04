@@ -64181,7 +64181,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-04T16:39:21Z",
+  "checked": "2026-11-04T17:10:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -64429,15 +64429,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-28T16:53:50Z",
-    "kind": "conflict",
-    "label": "#16271",
-    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
-    "files": [
-     "packages/coding-agent/src/lsp/tool.ts"
-    ]
-   },
    {
     "at": "2026-10-28T17:24:41Z",
     "kind": "conflict",
