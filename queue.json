@@ -64379,7 +64379,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-web-search",
    "host": "MacBook-Pro",
    "added": "2026-11-04T20:05:54Z",
-   "updated": "2026-11-04T20:19:47Z",
+   "updated": "2026-11-04T20:20:13Z",
    "note": "",
    "built": [
     {
@@ -64538,7 +64538,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-04T20:19:47Z"
+   "opened": "2026-11-04T20:19:47Z",
+   "readied": "2026-11-04T20:20:13Z"
   }
  ],
  "watch": {
