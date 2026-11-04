@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-04 03:05Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-04 03:07Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-04 02:52Z on goliath; groups below are from it, states from the manifest)
@@ -26,7 +26,7 @@ none
 | gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 21h | [#18011](https://github.com/can1357/oh-my-pi/pull/18011), [#15282](https://github.com/can1357/oh-my-pi/pull/15282), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
 | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 18h | [#18011](https://github.com/can1357/oh-my-pi/pull/18011), [#18012](https://github.com/can1357/oh-my-pi/pull/18012), [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#18013](https://github.com/can1357/oh-my-pi/pull/18013), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | ax-find-depth | fix(natives): search 64 levels deep in find() | computer | P2 | 18h | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-find-depth) |
-| atspi-setvalue-readback | fix(natives): read back AT-SPI text writes before reporting success | computer | P2 | 17h | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-setvalue-readback) |
+| atspi-setvalue-readback | fix(natives): read back AT-SPI text writes before reporting success | computer | P2 | 18h | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-setvalue-readback) |
 
 ## Stacked (11)
 
