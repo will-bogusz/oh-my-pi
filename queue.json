@@ -64158,6 +64158,26 @@
    ],
    "opened": "2026-11-03T11:09:08Z",
    "readied": "2026-11-03T11:09:32Z"
+  },
+  {
+   "id": "role-selectors-cdp",
+   "branch": "will/role-selectors-cdp",
+   "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [
+    "role-implicit-landmarks"
+   ],
+   "base": "2172687f1dc23fd3b2027c0493cf4fcc57ed52fc",
+   "body": "bodies/role-selectors-cdp.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-selectors-cdp",
+   "host": "MacBook-Pro",
+   "added": "2026-11-04T04:02:50Z",
+   "updated": "2026-11-04T04:02:50Z",
+   "note": ""
   }
  ],
  "watch": {
