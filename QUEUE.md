@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-04 23:16Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-04 23:46Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-04 22:46Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-04 23:46Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 13, stacked 12, held 6, open PRs 23; merged 232, closed 28
 
 ## Openable now (0)
@@ -16,7 +16,7 @@ none
 |---|---|---|---|---|---|---|
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 17d | [#18124](https://github.com/can1357/oh-my-pi/pull/18124), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 16d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#16223](https://github.com/can1357/oh-my-pi/pull/16223), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
-| compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 14d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
+| compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 15d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 11d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 5d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 4d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
@@ -82,4 +82,4 @@ none
 | [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | [#17940](https://github.com/can1357/oh-my-pi/pull/17940) | relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
 | [#18124](https://github.com/can1357/oh-my-pi/pull/18124) | search-failure-details | feat(coding-agent): record failed web search providers in tool details | web-search | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/search-failure-details) |
-| [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
+| [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
