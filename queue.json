@@ -64369,7 +64369,7 @@
    "branch": "will/anthropic-web-search",
    "title": "fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "7ceb80109236dbe6bbc90e303a14fd7748cc472d",
    "body": "bodies/anthropic-web-search.md",
@@ -64379,7 +64379,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-web-search",
    "host": "MacBook-Pro",
    "added": "2026-11-04T20:05:54Z",
-   "updated": "2026-11-04T20:20:54Z",
+   "updated": "2026-11-04T20:44:04Z",
    "note": "",
    "built": [
     {
