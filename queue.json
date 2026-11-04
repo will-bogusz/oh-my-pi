@@ -68331,8 +68331,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-04T19:43:24.240924Z",
-  "host": "goliath",
+  "at": "2026-11-04T20:00:06.735975Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -69277,6 +69277,23 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "search-failure-details",
+    "label": "search-failure-details",
+    "number": null,
+    "state": "queued",
+    "area": "web-search",
+    "priority": "P2",
+    "title": "feat(coding-agent): record failed web search providers in tool details",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-04T19:59:59Z"
    },
    {
     "id": "encoded-prefix-count",
