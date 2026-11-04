@@ -64373,13 +64373,13 @@
    "needs": [],
    "base": "7ceb80109236dbe6bbc90e303a14fd7748cc472d",
    "body": "bodies/anthropic-web-search.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18125,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-web-search",
    "host": "MacBook-Pro",
    "added": "2026-11-04T20:05:54Z",
-   "updated": "2026-11-04T20:17:57Z",
+   "updated": "2026-11-04T20:19:47Z",
    "note": "",
    "built": [
     {
@@ -64537,7 +64537,8 @@
      "at": "2026-11-04T20:17:56Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-04T20:19:47Z"
   }
  ],
  "watch": {
