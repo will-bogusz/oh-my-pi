@@ -64181,7 +64181,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-04T13:35:51Z",
+  "checked": "2026-11-04T14:36:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -64325,112 +64325,10 @@
    18013
   ],
   "post_merge": {
-   "16284": {
-    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
-    "merge_commit": "7918dc1047d4350f3505b1c5c45d9b51ea123734",
-    "merged_at": "2026-11-02T14:27:50Z",
-    "findings": []
-   },
-   "16309": {
-    "title": "feat(catalog,tui): show Factory Droid credit promotions in the model browser",
-    "merge_commit": "fa0485609f901cd4c735bbc2f3f026341399bdc7",
-    "merged_at": "2026-11-02T14:27:50Z",
-    "findings": []
-   },
-   "16552": {
-    "title": "fix(coding-agent): stop the %pip installer on cancel when /proc cannot be listed",
-    "merge_commit": "619e414164618c2fe297b9406328cab1a24f106e",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "16586": {
-    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
-    "merge_commit": "078c5199ca2b674af2f8e89d68b858b21a05f8a8",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "16595": {
-    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
-    "merge_commit": "584db96bb51267c4fb850469291da2c7fc107087",
-    "merged_at": "2026-11-02T14:27:50Z",
-    "findings": []
-   },
    "17496": {
     "title": "feat(coding-agent): show whether the next message reads the prompt cache",
     "merge_commit": "1bceb753ae60ee13900f1893ce58ccbf7658bff2",
     "merged_at": "2026-11-03T18:41:34Z",
-    "findings": []
-   },
-   "17607": {
-    "title": "fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips",
-    "merge_commit": "aa17c12bacacd257f2c6815345f3def4612aa519",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17622": {
-    "title": "fix(coding-agent): keep each message's date across resume and subagent revival",
-    "merge_commit": "46982b7ddd495b07824607bc1919a001fd6fd0d7",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17742": {
-    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor",
-    "merge_commit": "b01e26e64bd0de1c1d47f1dd50daaa1011cf6b47",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17745": {
-    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
-    "merge_commit": "25f6b894c988de71510d79134fc3ba200d7927b9",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17746": {
-    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
-    "merge_commit": "de5d68d2e2a91a7c120cf40ba4a6556f95b8aaba",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17751": {
-    "title": "fix(browser): keep persist relay tabs open when the session ends",
-    "merge_commit": "58d5039d338047bbb1d2d7d99c23176331d4c7d6",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17755": {
-    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone",
-    "merge_commit": "c3d37bd48b2a1df82d01c6b897c004137665c641",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17766": {
-    "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves",
-    "merge_commit": "9babe8ca57969b0dd11811b8ae2dc3430aedc01d",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17767": {
-    "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
-    "merge_commit": "57d64d95ab26e628d9d4df662b7d84de27dd47df",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17768": {
-    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
-    "merge_commit": "dd04de4c2b8a7ef0445b525232660629b7f89fa8",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17772": {
-    "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback",
-    "merge_commit": "90bc6c35c6527878e436811e79f2a733f5b327cb",
-    "merged_at": "2026-11-02T14:27:49Z",
-    "findings": []
-   },
-   "17778": {
-    "title": "fix(browser): stop later input steps after timeout and let relay page waits use the call deadline",
-    "merge_commit": "db3c604f7bd59c029f6fa6661b941cf55cb1072f",
-    "merged_at": "2026-11-02T14:27:49Z",
     "findings": []
    },
    "17881": {
@@ -68392,7 +68290,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-04T13:35:52.428969Z",
+  "at": "2026-11-04T14:36:59.092802Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
