@@ -58129,7 +58129,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "256b3211bca7458391866a8bcc9369902664be55",
+   "base": "ff0a986b88c223a0a746ed95cda8ddada236140c",
    "body": "bodies/switch-remote-reexpand.md",
    "state": "open",
    "pr": 17747,
@@ -58137,9 +58137,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/switch-remote-reexpand",
    "host": "MacBook-Pro",
    "added": "2026-10-30T22:45:47Z",
-   "updated": "2026-11-02T02:36:22Z",
+   "updated": "2026-11-04T02:24:44Z",
    "note": "Waits for #17490 to merge (code conflict in session-maintenance.ts). After it merges: pr-queue advance switch-remote-reexpand; resolve by keeping #17490's #contextBuildOptions getter and adding model: this.#model to it.",
-   "advanced": "2026-11-02T02:36:22Z",
+   "advanced": "2026-11-04T02:24:44Z",
    "built": [
     {
      "with": "#16274",
