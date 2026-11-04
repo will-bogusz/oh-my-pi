@@ -68676,8 +68676,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-04T20:44:07.685666Z",
-  "host": "goliath",
+  "at": "2026-11-04T20:49:57.501755Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 2,
@@ -68700,23 +68700,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:30:16Z"
-   },
-   {
-    "id": "atspi-file-chooser",
-    "label": "#18011",
-    "number": 18011,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T22:39:56Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -68893,23 +68876,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T11:09:07Z"
-   },
-   {
-    "id": "wayland-input-capability",
-    "label": "#18012",
-    "number": 18012,
-    "state": "open",
-    "area": "natives",
-    "priority": "P1",
-    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T22:42:03Z"
    },
    {
     "id": "print-hold",
@@ -69127,8 +69093,6 @@
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
     "action": "wait",
     "reasons": [
-     "conflicts with #18011 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18012 in crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
@@ -69137,8 +69101,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18011",
-     "#18012",
      "#15282",
      "#18013"
     ],
@@ -69156,8 +69118,6 @@
     "action": "wait",
     "reasons": [
      "needs atspi-unanswered-app (queued), gtk4-atspi-bounds (queued)",
-     "conflicts with #18011 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18012 in crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "its need atspi-unanswered-app conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
@@ -69167,8 +69127,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18011",
-     "#18012",
      "#15282",
      "#18013"
     ],
@@ -69210,15 +69168,13 @@
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "action": "wait",
     "reasons": [
-     "conflicts with #18012 in crates/pi-natives/src/desktop/linux/wayland/mod.rs, docs/computer-use.md",
      "conflicts with #18013 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml",
-     "conflicts with main in MODULE.bazel.lock"
+     "conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/linux/wayland/mod.rs, docs/computer-use.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18012",
      "#18013"
     ],
     "needs": [],
@@ -69694,7 +69650,6 @@
     "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
     "action": "wait",
     "reasons": [
-     "conflicts with #18011 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #15282 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
@@ -69702,7 +69657,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18011",
      "#15282"
     ],
     "needs": [],
