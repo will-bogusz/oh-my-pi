@@ -64544,6 +64544,24 @@
    ],
    "opened": "2026-11-04T20:19:47Z",
    "readied": "2026-11-04T20:20:13Z"
+  },
+  {
+   "id": "sec-edgar-document-urls",
+   "branch": "will/sec-edgar-document-urls",
+   "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
+   "area": "web-scrapers",
+   "priority": "P0",
+   "needs": [],
+   "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
+   "body": "bodies/sec-edgar-document-urls.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/sec-edgar-document-urls",
+   "host": "MacBook-Pro",
+   "added": "2026-11-04T23:59:50Z",
+   "updated": "2026-11-04T23:59:50Z",
+   "note": ""
   }
  ],
  "watch": {
