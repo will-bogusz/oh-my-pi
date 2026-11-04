@@ -68295,7 +68295,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-04T03:54:13.180706Z",
+  "at": "2026-11-04T04:24:57.528034Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -69048,6 +69048,27 @@
      "r2/page-waiting"
     ],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "role-selectors-cdp",
+    "label": "role-selectors-cdp",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
+    "action": "wait",
+    "reasons": [
+     "needs #17895 (open)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "role-implicit-landmarks"
+    ],
+    "created": "2026-11-04T04:02:50Z"
    },
    {
     "id": "computer-input-diff-report",
