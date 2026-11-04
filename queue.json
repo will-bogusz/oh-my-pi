@@ -64181,11 +64181,26 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-04T06:58:41Z",
+  "checked": "2026-11-04T07:29:23Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
-  "conflicts": {},
+  "conflicts": {
+   "#16553": {
+    "since": "2026-11-04T07:29:23Z",
+    "title": "fix(natives): keep a macOS drag from the user's app onto the target the user's pick",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/skylight.rs"
+    ]
+   },
+   "#17747": {
+    "since": "2026-11-04T07:29:23Z",
+    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
+    "files": [
+     "packages/coding-agent/src/sdk.ts"
+    ]
+   }
+  },
   "merged_through": "2026-11-03T20:02:51Z",
   "unreleased": {
    "17496": {
@@ -66219,6 +66234,24 @@
     "id": "atspi-file-chooser",
     "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
     "why": "opened as #18011"
+   },
+   {
+    "at": "2026-11-04T07:29:23Z",
+    "kind": "conflict",
+    "label": "#16553",
+    "title": "fix(natives): keep a macOS drag from the user's app onto the target the user's pick",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/skylight.rs"
+    ]
+   },
+   {
+    "at": "2026-11-04T07:29:23Z",
+    "kind": "conflict",
+    "label": "#17747",
+    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
+    "files": [
+     "packages/coding-agent/src/sdk.ts"
+    ]
    }
   ]
  },
@@ -68343,8 +68376,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-04T07:03:55.755892Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-04T07:29:23.841374Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -68792,10 +68825,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -68816,7 +68847,7 @@
      "conflicts with #18011 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18012 in crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs",
-     "conflicts with #18013 in crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
     ],
     "note": "",
@@ -68845,7 +68876,7 @@
      "conflicts with #18011 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18012 in crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18013 in crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "its need atspi-unanswered-app conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "its need gtk4-atspi-bounds conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
