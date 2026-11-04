@@ -62521,7 +62521,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "ff0a986b88c223a0a746ed95cda8ddada236140c",
+   "base": "035e4f95c314f9aff2f5a779fa335422680f8e36",
    "body": "bodies/wayland-pipewire-dlopen.md",
    "state": "queued",
    "pr": null,
@@ -62529,9 +62529,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-pipewire-dlopen",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:43:31Z",
-   "updated": "2026-11-03T21:26:25Z",
+   "updated": "2026-11-04T21:12:34Z",
    "note": "",
-   "advanced": "2026-11-03T21:26:25Z"
+   "advanced": "2026-11-04T21:12:34Z"
   },
   {
    "id": "gtk4-atspi-bounds",
