@@ -64197,7 +64197,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/search-failure-details",
    "host": "MacBook-Pro",
    "added": "2026-11-04T19:59:59Z",
-   "updated": "2026-11-04T20:14:37Z",
+   "updated": "2026-11-04T20:15:03Z",
    "note": "",
    "built": [
     {
@@ -64361,7 +64361,8 @@
      "tree": "a3d175800978db077e7fe186de11036d82bd9333"
     }
    ],
-   "opened": "2026-11-04T20:14:37Z"
+   "opened": "2026-11-04T20:14:37Z",
+   "readied": "2026-11-04T20:15:03Z"
   },
   {
    "id": "anthropic-web-search",
