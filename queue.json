@@ -64547,7 +64547,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-04T20:44:06Z",
+  "checked": "2026-11-04T21:14:27Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -64567,7 +64567,7 @@
     ]
    }
   },
-  "merged_through": "2026-11-04T18:17:28Z",
+  "merged_through": "2026-11-04T20:46:40Z",
   "unreleased": {
    "17496": {
     "title": "feat(coding-agent): show whether the next message reads the prompt cache",
@@ -64668,6 +64668,16 @@
     "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
     "merge_commit": "d919cd1a2939b20dd1375431f8d2503ce7062a7d",
     "merged_at": "2026-11-04T18:17:28Z"
+   },
+   "18012": {
+    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
+    "merge_commit": "55a0303ec121d9fb72bcfba048e334760798bc57",
+    "merged_at": "2026-11-04T20:46:40Z"
+   },
+   "18011": {
+    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
+    "merge_commit": "664df37279ec76ce5418a2cbbdfcba698067ca82",
+    "merged_at": "2026-11-04T20:46:40Z"
    }
   },
   "ready": [
@@ -64691,8 +64701,6 @@
    17897,
    17904,
    17940,
-   18011,
-   18012,
    18013,
    18124,
    18125
@@ -64816,6 +64824,18 @@
     "title": "fix(natives): match AT-SPI actions by their machine names",
     "merge_commit": "ad0668e0c0e7ab9049da2d169b5abfd4987cc714",
     "merged_at": "2026-11-03T20:02:51Z",
+    "findings": []
+   },
+   "18011": {
+    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
+    "merge_commit": "664df37279ec76ce5418a2cbbdfcba698067ca82",
+    "merged_at": "2026-11-04T20:46:40Z",
+    "findings": []
+   },
+   "18012": {
+    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
+    "merge_commit": "55a0303ec121d9fb72bcfba048e334760798bc57",
+    "merged_at": "2026-11-04T20:46:40Z",
     "findings": []
    }
   },
@@ -66554,6 +66574,22 @@
     "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
     "merged_by": "H4vC",
     "maintainer_commits": 1
+   },
+   {
+    "at": "2026-11-04T21:14:27Z",
+    "kind": "merged",
+    "number": 18012,
+    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-04T21:14:27Z",
+    "kind": "merged",
+    "number": 18011,
+    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  },
@@ -68714,8 +68750,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-04T21:13:32.287156Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-04T21:14:28.069761Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 2,
