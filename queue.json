@@ -68714,7 +68714,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-04T20:49:57.501755Z",
+  "at": "2026-11-04T21:13:32.287156Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -69132,8 +69132,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs",
-     "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+     "conflicts with #18013 in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -69158,7 +69157,6 @@
      "needs atspi-unanswered-app (queued), gtk4-atspi-bounds (queued)",
      "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "its need atspi-unanswered-app conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "its need gtk4-atspi-bounds conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -69206,8 +69204,7 @@
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "action": "wait",
     "reasons": [
-     "conflicts with #18013 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml",
-     "conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/linux/wayland/mod.rs, docs/computer-use.md"
+     "conflicts with #18013 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml"
     ],
     "note": "",
     "over": [],
@@ -69688,8 +69685,7 @@
     "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
     "action": "wait",
     "reasons": [
-     "conflicts with #15282 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #15282 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
