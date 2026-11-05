@@ -67845,7 +67845,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T12:29:22Z",
+  "checked": "2026-11-05T13:31:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68153,102 +68153,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 17351,
-    "title": "feat(catalog): fall back to Factory Droid image models in the image role",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 17349,
-    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 16925,
-    "title": "fix(coding-agent): avoid failed window lookups when starting macOS desktop tasks",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 16918,
-    "title": "feat(coding-agent): start desktop tasks without a documentation read",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 16917,
-    "title": "feat(coding-agent): let tools.approval grant computer foreground control on unattended machines",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 16756,
-    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 16587,
-    "title": "feat(coding-agent): tag each log record with the session that wrote it",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 16579,
-    "title": "fix(ai): stop logging a usage-limit retry the gateway does not make",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 16564,
-    "title": "fix(coding-agent): drop computer screenshots the Factory image budget evicts",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 16297,
-    "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 16271,
-    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-29T13:16:52Z",
-    "kind": "merged",
-    "number": 15124,
-    "title": "fix(ai): rank account policy priority ahead of a missing usage report",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-10-29T15:18:59Z",
     "kind": "conflict",
