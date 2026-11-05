@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 00:46Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 00:48Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 00:42Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 00:47Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 13, conflict-held 13, stacked 12, held 8, open PRs 23; merged 232, closed 28
 
 ## Openable now (13)
@@ -13,7 +13,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | sec-edgar-document-urls | fix(coding-agent): read SEC EDGAR filing documents instead of the company profile | web-scrapers | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sec-edgar-document-urls) |
 | computer-screenshot-saved-frame | fix(coding-agent): say the computer screenshot path holds the scaled frame | computer |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-screenshot-saved-frame) |
 | readthedocs-page-source | fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link | other |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/readthedocs-page-source) |
-| tui-file-bun-be-bun | fix(tui-debug): run file entries with bun under the compiled omp binary | other | P1 | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tui-file-bun-be-bun) |
+| tui-file-bun-be-bun | fix(tui-debug): run file entries with bun under the compiled omp binary | other | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tui-file-bun-be-bun) |
 | ssh-write-new-projection | fix(coding-agent): create new ssh:// files from bounded read output | ssh | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ssh-write-new-projection) |
 | lsp-references-stale-open | fix(lsp): sync open documents edited outside OMP before cross-file queries | other | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-references-stale-open) |
 | find-partial-deadline | fix(find): return the hits verified before find's deadline | other |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/find-partial-deadline) |
