@@ -67845,7 +67845,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T04:51:27Z",
+  "checked": "2026-11-05T05:22:15Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68153,12 +68153,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-29T05:06:49Z",
-    "kind": "openable",
-    "id": "computer-ui-quiet",
-    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
-   },
    {
     "at": "2026-10-29T06:08:10Z",
     "kind": "unopenable",
@@ -72307,12 +72301,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T04:51:27.954605Z",
+  "at": "2026-11-05T05:22:16.202879Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
