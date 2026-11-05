@@ -64560,7 +64560,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/sec-edgar-document-urls",
    "host": "MacBook-Pro",
    "added": "2026-11-04T23:59:50Z",
-   "updated": "2026-11-05T01:21:42Z",
+   "updated": "2026-11-05T01:22:04Z",
    "note": "",
    "built": [
     {
@@ -64814,7 +64814,8 @@
      "tree": "4e0b26da9204135254059d64db46ae75a8ccf9ad"
     }
    ],
-   "opened": "2026-11-05T01:21:42Z"
+   "opened": "2026-11-05T01:21:42Z",
+   "readied": "2026-11-05T01:22:03Z"
   },
   {
    "id": "computer-screenshot-saved-frame",
