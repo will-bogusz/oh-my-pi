@@ -66797,7 +66797,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rustfmt-check-files",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:28:38Z",
-   "updated": "2026-11-05T01:15:34Z",
+   "updated": "2026-11-05T01:15:54Z",
    "note": "",
    "built": [
     {
@@ -66821,7 +66821,8 @@
      "tree": "4e0b26da9204135254059d64db46ae75a8ccf9ad"
     }
    ],
-   "opened": "2026-11-05T01:15:34Z"
+   "opened": "2026-11-05T01:15:34Z",
+   "readied": "2026-11-05T01:15:54Z"
   },
   {
    "id": "diff-binary-files",
