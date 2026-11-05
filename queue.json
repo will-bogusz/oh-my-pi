@@ -65654,13 +65654,13 @@
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/lsp-references-stale-open.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18153,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/lsp-references-stale-open",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:10:55Z",
-   "updated": "2026-11-05T01:13:04Z",
+   "updated": "2026-11-05T01:27:21Z",
    "note": "",
    "built": [
     {
@@ -65913,7 +65913,8 @@
      "host": "goliath",
      "tree": "4e0b26da9204135254059d64db46ae75a8ccf9ad"
     }
-   ]
+   ],
+   "opened": "2026-11-05T01:27:21Z"
   },
   {
    "id": "async-job-notice",
