@@ -67859,7 +67859,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T13:31:08Z",
+  "checked": "2026-11-05T14:32:39Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -67871,6 +67871,13 @@
      "crates/pi-natives/src/desktop/macos/skylight.rs"
     ]
    },
+   "#16611": {
+    "since": "2026-11-05T14:32:39Z",
+    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
+    "files": [
+     "packages/ai/src/providers/openai-shared.ts"
+    ]
+   },
    "#17747": {
     "since": "2026-11-04T07:29:23Z",
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
@@ -67879,7 +67886,7 @@
     ]
    }
   },
-  "merged_through": "2026-11-04T20:46:40Z",
+  "merged_through": "2026-11-05T14:17:02Z",
   "unreleased": {
    "17496": {
     "title": "feat(coding-agent): show whether the next message reads the prompt cache",
@@ -67990,6 +67997,76 @@
     "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
     "merge_commit": "664df37279ec76ce5418a2cbbdfcba698067ca82",
     "merged_at": "2026-11-04T20:46:40Z"
+   },
+   "18166": {
+    "title": "fix(coding-agent,tui): name the command in background job notices",
+    "merge_commit": "5f1ce42312b78173725931deeb67d6f7bedafff0",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18163": {
+    "title": "fix(shell): pass a scheme followed by words to external commands as written",
+    "merge_commit": "711209ee1347d22d5caf6c6a94fd27b6a4edccb1",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18162": {
+    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
+    "merge_commit": "870828285f48529c8025ad4085aff77e34283b39",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18161": {
+    "title": "fix(find): return the hits verified before find's deadline",
+    "merge_commit": "ee0f437d1430404ebca3b84242f76d08e051c914",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18160": {
+    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
+    "merge_commit": "3897a8e9e9f06a5de4160c692935f2e8cc269a2f",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18158": {
+    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
+    "merge_commit": "f1d0b5392fd3a83c02e26bdcf38d71a10efc07d7",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18156": {
+    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
+    "merge_commit": "a4b0e91d77bcdb412bc5c46eec1e3c895c46e26b",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18155": {
+    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
+    "merge_commit": "5a9e2b47c064b5f5652d81f534c621d596c120e5",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18154": {
+    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
+    "merge_commit": "7e19b03956e0d9d8656fc2585d9b25fdde58023b",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18153": {
+    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
+    "merge_commit": "5a7a00413dd4caa1db289f207241e6f9aa0a1407",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18150": {
+    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
+    "merge_commit": "fc05b54d6c760125d740eced9a616957fe9cf4d0",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18148": {
+    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
+    "merge_commit": "e9da5ddafc8f8d7e6dc84643fe8d4638ee251f49",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18147": {
+    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
+    "merge_commit": "1c8d6aee89890b5fc3f48a95a977266d3129c72e",
+    "merged_at": "2026-11-05T14:17:02Z"
+   },
+   "18124": {
+    "title": "feat(coding-agent): record failed web search providers in tool details",
+    "merge_commit": "a2fe1cc4795794d2745ea11ea4ca88477d1e4e3d",
+    "merged_at": "2026-11-05T14:17:02Z"
    }
   },
   "ready": [
@@ -68014,22 +68091,7 @@
    17904,
    17940,
    18013,
-   18124,
    18125,
-   18147,
-   18148,
-   18150,
-   18151,
-   18153,
-   18154,
-   18155,
-   18156,
-   18158,
-   18160,
-   18161,
-   18162,
-   18163,
-   18166,
    18167
   ],
   "post_merge": {
@@ -68163,6 +68225,90 @@
     "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
     "merge_commit": "55a0303ec121d9fb72bcfba048e334760798bc57",
     "merged_at": "2026-11-04T20:46:40Z",
+    "findings": []
+   },
+   "18124": {
+    "title": "feat(coding-agent): record failed web search providers in tool details",
+    "merge_commit": "a2fe1cc4795794d2745ea11ea4ca88477d1e4e3d",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18147": {
+    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
+    "merge_commit": "1c8d6aee89890b5fc3f48a95a977266d3129c72e",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18148": {
+    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
+    "merge_commit": "e9da5ddafc8f8d7e6dc84643fe8d4638ee251f49",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18150": {
+    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
+    "merge_commit": "fc05b54d6c760125d740eced9a616957fe9cf4d0",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18153": {
+    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
+    "merge_commit": "5a7a00413dd4caa1db289f207241e6f9aa0a1407",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18154": {
+    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
+    "merge_commit": "7e19b03956e0d9d8656fc2585d9b25fdde58023b",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18155": {
+    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
+    "merge_commit": "5a9e2b47c064b5f5652d81f534c621d596c120e5",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18156": {
+    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
+    "merge_commit": "a4b0e91d77bcdb412bc5c46eec1e3c895c46e26b",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18158": {
+    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
+    "merge_commit": "f1d0b5392fd3a83c02e26bdcf38d71a10efc07d7",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18160": {
+    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
+    "merge_commit": "3897a8e9e9f06a5de4160c692935f2e8cc269a2f",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18161": {
+    "title": "fix(find): return the hits verified before find's deadline",
+    "merge_commit": "ee0f437d1430404ebca3b84242f76d08e051c914",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18162": {
+    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
+    "merge_commit": "870828285f48529c8025ad4085aff77e34283b39",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18163": {
+    "title": "fix(shell): pass a scheme followed by words to external commands as written",
+    "merge_commit": "711209ee1347d22d5caf6c6a94fd27b6a4edccb1",
+    "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18166": {
+    "title": "fix(coding-agent,tui): name the command in background job notices",
+    "merge_commit": "5f1ce42312b78173725931deeb67d6f7bedafff0",
+    "merged_at": "2026-11-05T14:17:02Z",
     "findings": []
    }
   },
@@ -69861,6 +70007,127 @@
     "id": "shell-url-text-args",
     "title": "fix(shell): pass a scheme followed by words to external commands as written",
     "why": "opened as #18163"
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18166,
+    "title": "fix(coding-agent,tui): name the command in background job notices",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18163,
+    "title": "fix(shell): pass a scheme followed by words to external commands as written",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18162,
+    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18161,
+    "title": "fix(find): return the hits verified before find's deadline",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18160,
+    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18158,
+    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18156,
+    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18155,
+    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18154,
+    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18153,
+    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18150,
+    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18148,
+    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18147,
+    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "merged",
+    "number": 18124,
+    "title": "feat(coding-agent): record failed web search providers in tool details",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-05T14:32:39Z",
+    "kind": "conflict",
+    "label": "#16611",
+    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
+    "files": [
+     "packages/ai/src/providers/openai-shared.ts"
+    ]
    }
   ]
  },
@@ -72083,7 +72350,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T14:01:58.498897Z",
+  "at": "2026-11-05T14:32:40.420174Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -72107,176 +72374,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:30:16Z"
-   },
-   {
-    "id": "rustfmt-check-files",
-    "label": "#18147",
-    "number": 18147,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T01:15:32Z"
-   },
-   {
-    "id": "diff-binary-files",
-    "label": "#18148",
-    "number": 18148,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T01:18:50Z"
-   },
-   {
-    "id": "sec-edgar-document-urls",
-    "label": "#18150",
-    "number": 18150,
-    "state": "open",
-    "area": "web-scrapers",
-    "priority": "P0",
-    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T01:21:41Z"
-   },
-   {
-    "id": "markdown-parse-status",
-    "label": "#18151",
-    "number": 18151,
-    "state": "open",
-    "area": "edit",
-    "priority": "P0",
-    "title": "fix(edit): stopped warning that valid Markdown edits broke the file",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T01:24:30Z"
-   },
-   {
-    "id": "ssh-write-new-projection",
-    "label": "#18154",
-    "number": 18154,
-    "state": "open",
-    "area": "ssh",
-    "priority": "P0",
-    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T01:30:10Z"
-   },
-   {
-    "id": "download-wait-busy",
-    "label": "#18155",
-    "number": 18155,
-    "state": "open",
-    "area": "browser",
-    "priority": "P0",
-    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T01:33:06Z"
-   },
-   {
-    "id": "tui-file-bun-be-bun",
-    "label": "#18156",
-    "number": 18156,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T01:36:00Z"
-   },
-   {
-    "id": "computer-screenshot-saved-frame",
-    "label": "#18158",
-    "number": 18158,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T02:26:36Z"
-   },
-   {
-    "id": "find-partial-deadline",
-    "label": "#18161",
-    "number": 18161,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "fix(find): return the hits verified before find's deadline",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T02:32:20Z"
-   },
-   {
-    "id": "shell-url-text-args",
-    "label": "#18163",
-    "number": 18163,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "fix(shell): pass a scheme followed by words to external commands as written",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T02:37:58Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -72453,74 +72550,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T11:09:07Z"
-   },
-   {
-    "id": "lsp-references-stale-open",
-    "label": "#18153",
-    "number": 18153,
-    "state": "open",
-    "area": "other",
-    "priority": "P1",
-    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T01:27:19Z"
-   },
-   {
-    "id": "open-viewport-attach",
-    "label": "#18160",
-    "number": 18160,
-    "state": "open",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T02:29:21Z"
-   },
-   {
-    "id": "readthedocs-page-source",
-    "label": "#18162",
-    "number": 18162,
-    "state": "open",
-    "area": "other",
-    "priority": "P1",
-    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T02:35:09Z"
-   },
-   {
-    "id": "async-job-notice",
-    "label": "#18166",
-    "number": 18166,
-    "state": "open",
-    "area": "coding-agent",
-    "priority": "P1",
-    "title": "fix(coding-agent,tui): name the command in background job notices",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T04:21:24Z"
    },
    {
     "id": "skill-url-new-skill",
@@ -72702,8 +72731,10 @@
     "area": "catalog",
     "priority": "P2",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/ai/src/providers/openai-shared.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -72727,23 +72758,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T22:44:07Z"
-   },
-   {
-    "id": "search-failure-details",
-    "label": "#18124",
-    "number": 18124,
-    "state": "open",
-    "area": "web-search",
-    "priority": "P2",
-    "title": "feat(coding-agent): record failed web search providers in tool details",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-04T20:14:36Z"
    },
    {
     "id": "atspi-unanswered-app",
@@ -72941,12 +72955,10 @@
     "action": "wait",
     "reasons": [
      "needs #15508 (open), #17831 (open), r2/native-window-report (queued)",
-     "conflicts with #18155 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with #17893 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #17894 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
-     "conflicts with #18160 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/native-window-report conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
@@ -72955,12 +72967,10 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18155",
      "#17893",
      "#17894",
      "#17895",
      "#17940",
-     "#18160",
      "#16908"
     ],
     "needs": [
@@ -72981,12 +72991,10 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with #18155 in docs/tools/browser.md",
      "conflicts with #17893 in docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #17894 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
-     "conflicts with #18160 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
@@ -72994,12 +73002,10 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18155",
      "#17893",
      "#17894",
      "#17895",
      "#17940",
-     "#18160",
      "#16908"
     ],
     "needs": [
@@ -73018,12 +73024,10 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
-     "conflicts with #18155 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with #17893 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #17894 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
-     "conflicts with #18160 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/page-waiting conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -73033,12 +73037,10 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18155",
      "#17893",
      "#17894",
      "#17895",
      "#17940",
-     "#18160",
      "#16908"
     ],
     "needs": [
@@ -73155,15 +73157,12 @@
     "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)",
     "action": "wait",
     "reasons": [
-     "conflicts with #18124 in docs/tools/web_search.md",
      "conflicts with main in docs/tools/web_search.md, packages/catalog/src/discovery/factory-droid.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18124"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-18T20:37:53Z"
    },
@@ -73213,7 +73212,6 @@
      "conflicts with #17893 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17894 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18160 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -73225,7 +73223,6 @@
      "#17893",
      "#17894",
      "#17895",
-     "#18160",
      "#16908"
     ],
     "needs": [
@@ -73244,12 +73241,10 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with #18155 in docs/tools/browser.md",
      "conflicts with #17893 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17894 in docs/tools/browser.md",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
-     "conflicts with #18160 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
@@ -73257,12 +73252,10 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18155",
      "#17893",
      "#17894",
      "#17895",
      "#17940",
-     "#18160",
      "#16908"
     ],
     "needs": [
